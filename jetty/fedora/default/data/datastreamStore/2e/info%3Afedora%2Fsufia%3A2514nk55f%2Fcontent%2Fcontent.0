@@ -1,0 +1,38 @@
+#!/bin/sh
+# Oxygen Startup script
+# (c) 2006 Syncro Soft Ltd.
+
+oldpwd=`pwd`
+
+# Resolve the location of the oxygen installation.
+# This includes resolving any symlinks.
+PRG=$0
+cd "`dirname "$PRG"`"
+PRG=`basename "$PRG"`
+
+while [ -L "$PRG" ]
+do
+	PRG="`readlink "$PRG"`"
+	cd "`dirname "$PRG"`"
+	PRG="`basename "$PRG"`"
+done
+
+OXYGEN_HOME=`dirname "$PRG"`
+
+# Absolutize dir
+cd "${OXYGEN_HOME}"; OXYGEN_HOME=`pwd`
+cd "${oldpwd}"; unset oldpwd
+
+# Classpath
+CP=$OXYGEN_HOME/lib/oxygen.jar:$OXYGEN_HOME/lib/oxygenAuthor.jar:$OXYGEN_HOME/lib/oxygenDeveloper.jar:$OXYGEN_HOME/lib/syncroSVNClient.jar:$OXYGEN_HOME/lib/oxygenXMLDiff.jar:$OXYGEN_HOME/classes:$OXYGEN_HOME
+
+#  The two command line parameters are optional and represent the path of the directory 
+#  displayed in the left side panel of the XML Diff window and the path of the directory 
+#  displayed in the right side panel.
+java -Xdock:name="Diff Directories"\
+ -Xdock:icon="$OXYGEN_HOME/Diff Directories.app/Contents/Resources/DiffDirs.icns"\
+ -Dcom.oxygenxml.app.descriptor=ro.sync.diff.ui.DiffDirectoriesFrameDescriptor\
+ -Xmx512m\
+ -XX:SoftRefLRUPolicyMSPerMB=10\
+ -cp "$CP"\
+ ro.sync.exml.Oxygen "$1" "$2"
