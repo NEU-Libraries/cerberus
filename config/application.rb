@@ -11,6 +11,12 @@ end
 
 module DrsSufiaApp
   class Application < Rails::Application
+    
+    config.generators do |g|
+      g.test_framework :rspec, :spec => true
+    end
+
+
     # Settings in config/environments/* take precedence over those specified here.
     # Application configuration should go into files in config/initializers
     # -- all .rb files in that directory are automatically loaded.
@@ -54,7 +60,11 @@ module DrsSufiaApp
     config.active_record.whitelist_attributes = true
 
     # Enable the asset pipeline
-    config.assets.enabled = true
+    config.assets.enabled = true    
+    # Default SASS Configuration, check out https://github.com/rails/sass-rails for details
+    config.assets.compress = !Rails.env.development?
+
+
 
     # Version of your assets, change this if you want to expire all your assets
     config.assets.version = '1.0'

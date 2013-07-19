@@ -1,3 +1,43 @@
+GIT
+  remote: git://github.com/harai/kaminari.git
+  revision: 384fcb5d11b66a0cc8fad030104bf80f82616355
+  branch: route_prefix_prototype
+  specs:
+    kaminari (0.14.1)
+      actionpack (>= 3.0.0)
+      activesupport (>= 3.0.0)
+
+PATH
+  remote: ~/sufia
+  specs:
+    sufia (2.1.0.beta)
+      blacklight (~> 4.0)
+      blacklight_advanced_search
+      daemons (= 1.1.9)
+      font-awesome-sass-rails (~> 3.0)
+      hydra-batch-edit (~> 1.0)
+      hydra-head (~> 6.3.0)
+      mail_form
+      rails (~> 3.2.13)
+      rails_autolink (~> 1.1.0)
+      rainbow (= 1.1.4)
+      sufia-models (= 2.1.0.beta)
+      yaml_db (= 0.2.3)
+    sufia-models (2.1.0.beta)
+      activerecord-import (= 0.3.0)
+      acts_as_follower (= 0.1.1)
+      devise
+      hydra-head (~> 6.0)
+      mailboxer (= 0.8.0)
+      nest (~> 1.1.1)
+      noid (~> 0.6.6)
+      paperclip (= 3.3.0)
+      rails (~> 3.2.13)
+      resque (~> 1.23.0)
+      resque-pool (= 0.3.0)
+      rmagick
+      zipruby (= 0.3.6)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -14,6 +54,16 @@ GEM
       rack-cache (~> 1.2)
       rack-test (~> 0.6.1)
       sprockets (~> 2.2.1)
+    active-fedora (6.4.3)
+      activesupport (>= 3.0.0)
+      deprecation
+      mediashelf-loggable
+      nom-xml (>= 0.5.1)
+      om (~> 3.0.0)
+      rdf
+      rdf-rdfxml (= 1.0.1)
+      rsolr
+      rubydora (~> 1.6, >= 1.6.5)
     activemodel (3.2.13)
       activesupport (= 3.2.13)
       builder (~> 3.0.0)
@@ -22,14 +72,46 @@ GEM
       activesupport (= 3.2.13)
       arel (~> 3.0.2)
       tzinfo (~> 0.3.29)
+    activerecord-import (0.3.0)
+      activerecord (~> 3.0)
+      activerecord (~> 3.0)
     activeresource (3.2.13)
       activemodel (= 3.2.13)
       activesupport (= 3.2.13)
     activesupport (3.2.13)
       i18n (= 0.6.1)
       multi_json (~> 1.0)
+    acts_as_follower (0.1.1)
+    addressable (2.3.5)
     arel (3.0.2)
+    backports (3.3.3)
+    bcrypt-ruby (3.1.1)
+    blacklight (4.2.2)
+      bootstrap-sass (>= 2.2.0, < 2.4)
+      kaminari (~> 0.13)
+      marc (>= 0.4.3, < 1.1)
+      nokogiri (~> 1.5)
+      rails (>= 3.2.6, < 5)
+      rsolr (~> 1.0.6)
+      sass-rails
+    blacklight_advanced_search (2.0.0)
+      blacklight (~> 4.0)
+      parslet
+      rails (~> 3.0)
+    blankslate (2.1.2.4)
+    block_helpers (0.3.3)
+      activesupport (>= 2.0)
+    bootstrap-sass (2.3.2.0)
+      sass (~> 3.2)
     builder (3.0.4)
+    cancan (1.6.10)
+    carrierwave (0.9.0)
+      activemodel (>= 3.2.0)
+      activesupport (>= 3.2.0)
+      json (>= 1.7)
+    childprocess (0.3.9)
+      ffi (~> 1.0, >= 1.0.11)
+    cocaine (0.4.2)
     coffee-rails (3.2.2)
       coffee-script (>= 2.2.0)
       railties (~> 3.2.0)
@@ -37,25 +119,114 @@ GEM
       coffee-script-source
       execjs
     coffee-script-source (1.6.3)
+    daemons (1.1.9)
+    deprecation (0.0.5)
+      activesupport
+    devise (3.0.0)
+      bcrypt-ruby (~> 3.0)
+      orm_adapter (~> 0.1)
+      railties (>= 3.2.6, < 5)
+      warden (~> 1.2.3)
+    devise-guests (0.3.2)
+      devise
+    diff-lcs (1.2.4)
+    equivalent-xml (0.3.0)
+      nokogiri (>= 1.4.3)
     erubis (2.7.0)
     execjs (1.4.0)
       multi_json (~> 1.0)
+    fastercsv (1.5.5)
+    ffi (1.9.0)
+    font-awesome-sass-rails (3.0.2.2)
+      railties (>= 3.1.1)
+      sass-rails (>= 3.1.1)
+    foreigner (1.4.2)
+      activerecord (>= 3.0.0)
     hike (1.2.3)
+    hooks (0.3.1)
+    hydra-access-controls (6.3.1)
+      active-fedora (~> 6.1)
+      activesupport
+      blacklight (~> 4.0)
+      cancan
+      deprecation
+    hydra-batch-edit (1.0.1)
+      blacklight
+      hydra-collections
+    hydra-collections (1.0.0)
+      blacklight
+      hydra-head
+    hydra-core (6.3.1)
+      active-fedora
+      blacklight (~> 4.0)
+      block_helpers
+      deprecation (>= 0.0.5)
+      hydra-access-controls (= 6.3.1)
+      jettywrapper (>= 1.4.1)
+      rails (>= 3.2.3, < 5)
+    hydra-head (6.3.1)
+      hydra-access-controls (= 6.3.1)
+      hydra-core (= 6.3.1)
+      rails (>= 3.2.6)
     i18n (0.6.1)
+    jettywrapper (1.4.1)
+      activesupport (>= 3.0.0)
+      childprocess
+      i18n
+      logger
+      mediashelf-loggable
     journey (1.0.4)
     jquery-rails (3.0.4)
       railties (>= 3.0, < 5.0)
       thor (>= 0.14, < 2.0)
     json (1.8.0)
+    logger (1.2.8)
     mail (2.5.4)
       mime-types (~> 1.16)
       treetop (~> 1.4.8)
+    mail_form (1.4.1)
+      actionmailer (~> 3.0)
+    mailboxer (0.8.0)
+      carrierwave (>= 0.5.8)
+      foreigner (>= 0.9.1)
+      rails (> 3.0.0)
+    marc (0.5.1)
+    mediashelf-loggable (0.4.9)
     mime-types (1.23)
+    mini_portile (0.5.1)
     multi_json (1.7.7)
+    nest (1.1.2)
+      redis
+    noid (0.6.6)
+      backports
+    nokogiri (1.6.0)
+      mini_portile (~> 0.5.0)
+    nom-xml (0.5.1)
+      activesupport
+      i18n
+      nokogiri
+    om (3.0.2)
+      activemodel
+      activesupport
+      deprecation
+      mediashelf-loggable
+      nokogiri (>= 1.4.2)
+      solrizer (~> 3.1.0)
+    orm_adapter (0.4.0)
+    paperclip (3.3.0)
+      activemodel (>= 3.0.0)
+      activerecord (>= 3.0.0)
+      activesupport (>= 3.0.0)
+      cocaine (~> 0.4.0)
+      mime-types
+    parslet (1.5.0)
+      blankslate (~> 2.0)
     polyglot (0.3.3)
     rack (1.4.5)
     rack-cache (1.2)
       rack (>= 0.4)
+    rack-protection (1.5.0)
+      rack
     rack-ssl (1.3.3)
       rack
     rack-test (0.6.2)
@@ -68,6 +239,8 @@ GEM
       activesupport (= 3.2.13)
       bundler (~> 1.0)
       railties (= 3.2.13)
+    rails_autolink (1.1.0)
+      rails (> 3.1)
     railties (3.2.13)
       actionpack (= 3.2.13)
       activesupport (= 3.2.13)
@@ -75,37 +248,114 @@ GEM
       rake (>= 0.8.7)
       rdoc (~> 3.4)
       thor (>= 0.14.6, < 2.0)
+    rainbow (1.1.4)
     rake (10.1.0)
+    rdf (1.0.7)
+      addressable (>= 2.2)
+    rdf-rdfxml (1.0.1)
+      rdf (>= 1.0)
+      rdf-xsd (>= 1.0)
+    rdf-xsd (1.0.2.1)
+      nokogiri (>= 1.5.0)
+      rdf (>= 0.3.4)
     rdoc (3.12.2)
       json (~> 1.4)
+    redis (3.0.4)
+    redis-namespace (1.3.0)
+      redis (~> 3.0.0)
+    resque (1.23.1)
+      multi_json (~> 1.0)
+      redis-namespace (~> 1.0)
+      sinatra (>= 0.9.2)
+      vegas (~> 0.1.2)
+    resque-pool (0.3.0)
+      rake
+      resque (~> 1.20)
+      trollop (~> 1.16)
+    rest-client (1.6.7)
+      mime-types (>= 1.16)
+    rmagick (2.13.2)
+    rsolr (1.0.9)
+      builder (>= 2.1.2)
+    rspec-core (2.14.3)
+    rspec-expectations (2.14.0)
+      diff-lcs (>= 1.1.3, < 2.0)
+    rspec-mocks (2.14.1)
+    rspec-rails (2.14.0)
+      actionpack (>= 3.0)
+      activesupport (>= 3.0)
+      railties (>= 3.0)
+      rspec-core (~> 2.14.0)
+      rspec-expectations (~> 2.14.0)
+      rspec-mocks (~> 2.14.0)
+    rubydora (1.6.5)
+      activemodel
+      activesupport
+      deprecation
+      equivalent-xml
+      fastercsv
+      hooks (~> 0.3.0)
+      mime-types
+      nokogiri
+      rest-client
     sass (3.2.9)
     sass-rails (3.2.6)
       railties (~> 3.2.0)
       sass (>= 3.1.10)
       tilt (~> 1.3)
+    sinatra (1.4.3)
+      rack (~> 1.4)
+      rack-protection (~> 1.4)
+      tilt (~> 1.3, >= 1.3.4)
+    solrizer (3.1.1)
+      activesupport
+      daemons
+      mediashelf-loggable (~> 0.4.7)
+      nokogiri
+      stomp
+      xml-simple
     sprockets (2.2.2)
       hike (~> 1.2)
       multi_json (~> 1.0)
       rack (~> 1.0)
       tilt (~> 1.1, != 1.3.0)
     sqlite3 (1.3.7)
+    stomp (1.2.10)
     thor (0.18.1)
     tilt (1.4.1)
     treetop (1.4.14)
       polyglot
       polyglot (>= 0.3.1)
+    trollop (1.16.2)
     tzinfo (0.3.37)
     uglifier (2.1.2)
       execjs (>= 0.3.0)
       multi_json (~> 1.0, >= 1.0.2)
+    vegas (0.1.11)
+      rack (>= 1.0.0)
+    warden (1.2.3)
+      rack (>= 1.0)
+    xml-simple (1.1.2)
+    yaml_db (0.2.3)
+    zipruby (0.3.6)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
+  blacklight
+  bootstrap-sass
   coffee-rails (~> 3.2.1)
+  devise
+  devise-guests (~> 0.3)
+  font-awesome-sass-rails
+  hydra-head
+  jettywrapper
   jquery-rails
+  kaminari!
   rails (= 3.2.13)
+  rspec-rails
   sass-rails (~> 3.2.3)
   sqlite3
+  sufia!
   uglifier (>= 1.0.3)

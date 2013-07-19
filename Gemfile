@@ -7,6 +7,13 @@ gem 'rails', '3.2.13'
 
 gem 'sqlite3'
 
+gem 'blacklight'
+gem 'hydra-head'
+gem 'sufia', :path => '~/sufia'
+gem 'kaminari', github: 'harai/kaminari', branch: 'route_prefix_prototype'  # required to handle pagination properly in dashboard. See https://github.com/amatsuda/kaminari/pull/322
+gem 'jettywrapper'
+gem 'font-awesome-sass-rails'
+
 
 # Gems used only for assets and not required
 # in production environments by default.
@@ -22,17 +29,10 @@ end
 
 gem 'jquery-rails'
 
-# To use ActiveModel has_secure_password
-# gem 'bcrypt-ruby', '~> 3.0.0'
-
-# To use Jbuilder templates for JSON
-# gem 'jbuilder'
-
-# Use unicorn as the app server
-# gem 'unicorn'
-
-# Deploy with Capistrano
-# gem 'capistrano'
-
-# To use debugger
-# gem 'debugger'
+gem "devise"
+gem "devise-guests", "~> 0.3"
+gem "bootstrap-sass"
+group :development, :test do
+  gem "rspec-rails"
+  gem "jettywrapper"
+end

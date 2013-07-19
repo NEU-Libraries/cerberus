@@ -1,4 +1,17 @@
 DrsSufiaApp::Application.routes.draw do
+  root :to => "catalog#index"
+
+  Blacklight.add_routes(self)
+  HydraHead.add_routes(self)
+  Hydra::BatchEdit.add_routes(self)
+
+
+  devise_for :users
+  # This must be the very last route in the file because it has a catch all route for 404 errors.
+  # This behavior seems to show up only in production mode.
+  mount Sufia::Engine => '/'
+
+
   # The priority is based upon order of creation:
   # first created -> highest priority.
 
