@@ -16,3 +16,6 @@
 
 # Ignore jetty because it's broken if you don't generate it on your own machine. 
 /jetty 
+
+# Ignore the redis dumpfile. 
+dump.rdb 
