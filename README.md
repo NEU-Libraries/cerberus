@@ -18,6 +18,8 @@ A web application developed using our [fork](http://github.com/nu-lts/sufia) of 
   3.  rails g hydra:jetty 
   4.  rake jetty:config 
 
+3.  If you are running sufia on a server/in any environment where you won't have access to a local copy of Sufia, you'll need to do a quick comment/uncomment swap in the Gemfile.
+
 
 ### Starting Sufia 
 
