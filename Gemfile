@@ -15,6 +15,8 @@ gem 'kaminari', github: 'harai/kaminari', branch: 'route_prefix_prototype'  # re
 gem 'jettywrapper'
 gem 'font-awesome-sass-rails'
 
+gem 'rspec-rails'
+
 # Gems used only for assets and not required
 # in production environments by default.
 group :assets do
