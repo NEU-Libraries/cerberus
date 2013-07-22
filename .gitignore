@@ -5,17 +5,17 @@
 #   git config --global core.excludesfile ~/.gitignore_global
 
 # Ignore bundler config
-/.bundle
+.bundle
 
 # Ignore the default SQLite database.
-/db/*.sqlite3
-
+db/*.sqlite3
+db/migrate
 # Ignore all logfiles and tempfiles.
-/log/*.log
-/tmp
+log/*.log
+tmp
 
-# Ignore jetty because it's broken if you don't generate it on your own machine. 
-/jetty 
+# Ignore jetty because it's broken if you don't generate it on your own machine.
+jetty
 
-# Ignore the redis dumpfile. 
-dump.rdb 
+# Ignore the redis dumpfile.
+dump.rdb
