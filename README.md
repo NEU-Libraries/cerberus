@@ -13,10 +13,10 @@ A web application developed using our [fork](http://github.com/nu-lts/sufia) of 
   6.  A local copy of the nu-lts fork of the [sufia](http://github.com/nu-lts/sufia) gem.  If you do not place it in dir ~/sufia you will need to change the path specified in Gemfile for the development copy of Sufia.     
 
 2.  Execute the following commands from project root.
-  1.  bundle install  
-  2.  rake db:migrate 
-  3.  rails g hydra:jetty 
-  4.  rake jetty:config 
+  1.  `bundle install`
+  2.  `rake db:migrate`
+  3.  `rails g hydra:jetty` 
+  4.  `rake jetty:config`
 
 3.  If you are running sufia on a server/in any environment where you won't have access to a local copy of Sufia, you'll need to do a quick comment/uncomment swap in the Gemfile.
 
@@ -24,7 +24,7 @@ A web application developed using our [fork](http://github.com/nu-lts/sufia) of 
 ### Starting Sufia 
 
 1.  Run the following commands:
-  1.  rake jetty:start 
-  2.  redis-server
-  3.  COUNT=4 QUEUE=* rake environment resque:work
-  4.  rails server 
+  1.  `rake jetty:start`
+  2.  `redis-server`
+  3.  `COUNT=4 QUEUE=* rake environment resque:work`
+  4.  `rails server` 
