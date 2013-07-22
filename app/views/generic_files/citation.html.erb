@@ -14,8 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 %>
 
-<h1>About</h1> 
-<h2>What is <%=t('sufia.product_name') %>?</h2>
-<p>
-Use app/views/static/about.html.erb to override this file.  <%= link_to 'Sample Contact Link', sufia.contact_form_index_path %>
-</p>
+<h4>Citation Formats</h4>
+
+<h4>MLA</h4>
+<%= @generic_file.export_as_mla_citation %>
+<br/><br/>
+
+<h4>APA</h4>
+<%= @generic_file.export_as_apa_citation %>
+<br/><br/>
+
+<h4>Chicago</h4>
+<%= @generic_file.export_as_chicago_citation %>
+<br/><br/>

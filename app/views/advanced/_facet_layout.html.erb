@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 %>
 
-<h1>About</h1> 
-<h2>What is <%=t('sufia.product_name') %>?</h2>
-<p>
-Use app/views/static/about.html.erb to override this file.  <%= link_to 'Sample Contact Link', sufia.contact_form_index_path %>
-</p>
+<div class="facet_item blacklight-<%= facet_field.field.parameterize %>">
+  <h3><%= facet_field.label -%> <span class="adv_facet_selections" style="display:none;"></span></h3>
+
+  <%= yield %>
+</div>
