@@ -14,10 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 %>
 
-<div id="masthead">
+<div class="row">
   <%= render partial: '/logo' %>
   <div class="navbar">
-    <div class="nav-inner">
+    <div class="navbar-inner">
       <div class="container">
         <ul class="nav pull-right">
           <li <%= 'class=active' if params[:controller] == "catalog" and action_name == "index" %>><a href="/" class="top_nav">Home</a></li>
@@ -34,5 +34,5 @@ limitations under the License.
     </div><!-- /.nav-inner -->
   </div><!-- /.navbar -->
   <%= render :partial => 'catalog/search_form' %>
-</div> <!-- /masthead -->
+</div> <!-- /row -->
 
