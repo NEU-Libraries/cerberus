@@ -13,12 +13,14 @@
  *
  */
 
-@import "bootswatch/spacelab/variables";
+
+
+@import "_variables/drs_bootstrap_variables";
 
 @import 'bootstrap';
-@import 'font-awesome';
+
 @import 'bootstrap-responsive';
 
-@import "bootswatch/spacelab/bootswatch";
+@import 'font-awesome';
 
 @import 'blacklight/blacklight';
