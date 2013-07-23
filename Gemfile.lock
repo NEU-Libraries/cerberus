@@ -7,8 +7,10 @@ GIT
       actionpack (>= 3.0.0)
       activesupport (>= 3.0.0)
 
-PATH
-  remote: ~/sufia
+GIT
+  remote: https://github.com/nu-lts/nu-sufia.git
+  revision: 655d92e35742b01cc58613f7d212a3df1264852d
+  branch: develop
   specs:
     sufia (2.1.0.beta)
       blacklight (~> 4.0)
@@ -94,15 +96,18 @@ GEM
       rails (>= 3.2.6, < 5)
       rsolr (~> 1.0.6)
       sass-rails
-    blacklight_advanced_search (2.0.0)
+    blacklight_advanced_search (2.1.0)
       blacklight (~> 4.0)
+      combustion
       parslet
-      rails (~> 3.0)
+      rails
     blankslate (2.1.2.4)
     block_helpers (0.3.3)
       activesupport (>= 2.0)
     bootstrap-sass (2.3.2.1)
       sass (~> 3.2)
+    bootswatch-rails (0.5.0)
+      railties (>= 3.1)
     builder (3.0.4)
     cancan (1.6.10)
     carrierwave (0.9.0)
@@ -119,6 +124,10 @@ GEM
       coffee-script-source
       execjs
     coffee-script-source (1.6.3)
+    combustion (0.5.0)
+      activesupport (>= 3.0.0)
+      railties (>= 3.0.0)
+      thor (>= 0.14.6)
     daemons (1.1.9)
     deprecation (0.0.5)
       activesupport
@@ -150,7 +159,7 @@ GEM
       blacklight (~> 4.0)
       cancan
       deprecation
-    hydra-batch-edit (1.0.1)
+    hydra-batch-edit (1.0.2)
       blacklight
       hydra-collections
     hydra-collections (1.0.0)
@@ -345,6 +354,7 @@ PLATFORMS
 DEPENDENCIES
   blacklight
   bootstrap-sass (~> 2.3.2.1)
+  bootswatch-rails
   coffee-rails (~> 3.2.1)
   devise
   devise-guests (~> 0.3)
