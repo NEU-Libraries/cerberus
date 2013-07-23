@@ -9,5 +9,12 @@
  * compiled file, but it's generally better to create a new file per style scope.
  *
  *= require_self
- *= require sufia
+ *  Sufia gem stylesheets imported here.
+ *
  */
+
+@import 'bootstrap';
+@import 'font-awesome';
+
+@import 'bootstrap-responsive';
+@import 'blacklight/blacklight';
