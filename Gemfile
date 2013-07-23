@@ -14,6 +14,7 @@ gem 'hydra-head'
 gem 'sufia', :git => 'https://github.com/nu-lts/nu-sufia.git', :branch => 'develop'
 gem 'kaminari', github: 'harai/kaminari', branch: 'route_prefix_prototype'  # required to handle pagination properly in dashboard. See https://github.com/amatsuda/kaminari/pull/322
 gem 'jettywrapper'
+#Removing Font Awesome here
 gem 'font-awesome-sass-rails'
 
 gem 'rspec-rails'
@@ -34,6 +35,7 @@ gem 'jquery-rails'
 
 gem "devise"
 gem "devise-guests", "~> 0.3"
+
 gem "bootstrap-sass", "~> 2.3.2.1"
 
 group :development, :test do
