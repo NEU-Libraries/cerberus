@@ -21,39 +21,37 @@ limitations under the License.
   </head>
 
 <body> 
-<div  id="wrapper"> 
-  <div class="container">
-    <div id="page-positioner">
-      <%= render :partial => '/masthead', :formats => [:html] %>
-      <%= render :partial => '/flash_msg' %>
-      <div id="content-wrapper"> 
-        <div>
-          <div class="row">
-                <%= yield %>
+ 
+<div class="container">
+  <div id="page-positioner">
+    <%= render :partial => '/masthead', :formats => [:html] %>
+    <%= render :partial => '/flash_msg' %>
+      <div>
+        <div class="row">
+              <%= yield %>
+        </div>
+        <div class="row">
+          <div class="span6">
+            <%= yield :sidebar %>
+            <!-- End Sidebar-->
           </div>
-          <div class="row">
-            <div class="span6">
-              <%= yield :sidebar %>
-              <!-- End Sidebar-->
+          <div class="span6">
+            <div>
+              <h3>Contribute</h2> 
+              <%= link_to "<i class=\"icon-file\"></i> #{t('sufia.share_button')}".html_safe, sufia.new_generic_file_path, :class => "btn btn-primary", :id => "contribute_link" %>
+              <a href="/terms/">Terms of Use</a>
             </div>
-            <div class="span6">
-              <div>
-                <h3>Contribute</h2> 
-                <%= link_to "<i class=\"icon-file\"></i> #{t('sufia.share_button')}".html_safe, sufia.new_generic_file_path, :class => "btn btn-primary", :id => "contribute_link" %>
-                <a href="/terms/">Terms of Use</a>
-              </div>
-              <div>   
-                <h3>My Latest</h3> 
-                <%= render :partial=>'/catalog/recents', :locals => {:recent_documents=>@recent_user_documents, :display_thumbs=>false, :display_access=>true} %>
-              </div>
-            </div> <!-- /.span6 --> 
-          </div><!-- /.row -->              
-        </div><!-- /#content.row -->
-      </div><!-- /#content-wrapper -->
+            <div>   
+              <h3>My Latest</h3> 
+              <%= render :partial=>'/catalog/recents', :locals => {:recent_documents=>@recent_user_documents, :display_thumbs=>false, :display_access=>true} %>
+            </div>
+          </div> <!-- /.span6 --> 
+        </div><!-- /.row -->              
+      </div><!-- /#content.row -->
     </div><!-- /#page-positioner -->
   </div><!-- /.container -->
-</div><!-- /#wrapper -->
 <%= render partial: '/footer' %>
 <div id="ajax-modal" class="modal hide" tabindex="-1"></div>
+<%= render :partial => '/ga', :formats => [:html] %>
 </body>
 </html>

@@ -19,6 +19,7 @@ limitations under the License.
   <div class="navbar">
     <div class="navbar-inner">
       <div class="container">
+        <%= render :partial => 'catalog/search_form' %>
         <ul class="nav pull-right">
           <li <%= 'class=active' if params[:controller] == "catalog" and action_name == "index" %>><a href="/" class="top_nav">Home</a></li>
           <li <%= 'class=active' if action_name == "about" %>><a href="/about/" class="top_nav">About</a></li>
@@ -33,6 +34,6 @@ limitations under the License.
       </div><!-- /.container -->
     </div><!-- /.nav-inner -->
   </div><!-- /.navbar -->
-  <%= render :partial => 'catalog/search_form' %>
+  
 </div> <!-- /row -->
 
