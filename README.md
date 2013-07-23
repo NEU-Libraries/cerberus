@@ -29,8 +29,8 @@ A web application developed using our [fork](http://github.com/nu-lts/sufia) of 
   3.  `COUNT=4 QUEUE=* rake environment resque:work`
   4.  `rails server` 
 2. or you can add something like this to you `~/.bashrc` file
+  1. `alias sufia="cd ~/{Project} & rake jetty:start & redis-server & COUNT=4 QUEUE=* rake  environment resque:work & rails server"`
 
-    alias sufia="cd ~/{Project} & rake jetty:start & redis-server & COUNT=4 QUEUE=* rake environment resque:work & rails server"
 
 ### Developing Notes
 

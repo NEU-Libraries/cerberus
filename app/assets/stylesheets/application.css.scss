@@ -13,8 +13,12 @@
  *
  */
 
+@import "bootswatch/flatly/variables";
+
 @import 'bootstrap';
 @import 'font-awesome';
-
 @import 'bootstrap-responsive';
+
+@import "bootswatch/flatly/bootswatch";
+
 @import 'blacklight/blacklight';

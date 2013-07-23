@@ -35,6 +35,7 @@ gem 'jquery-rails'
 gem "devise"
 gem "devise-guests", "~> 0.3"
 gem "bootstrap-sass", "~> 2.3.2.1"
+gem "bootswatch-rails"
 group :development, :test do
   gem "rspec-rails"
   gem "jettywrapper"
