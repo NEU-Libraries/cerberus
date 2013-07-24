@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 %>
+<div class="btn-group pull-right">
 <% if user_signed_in? %>
    <%= render :partial => 'users/notify_link' %>
   <a href="<%= sufia.profile_path(current_user) %>" class="btn btn-small " title="click for User Profile"><i class="icon-user">&nbsp;</i><%= current_user.name %></a>
@@ -27,3 +28,4 @@ limitations under the License.
 <% else %>
     <%= link_to raw('<i class="icon-signin"></i> Login'), new_user_session_path, :class => "btn btn-small" %>
 <% end %>
+</div>
