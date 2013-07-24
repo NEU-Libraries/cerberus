@@ -34,4 +34,5 @@ A web application developed using our [fork](http://github.com/nu-lts/sufia) of 
 
 ### Developing Notes
 
+Make sure to use the editorconfig plugin for whatever editor you prefer. [Download a plugin](http://editorconfig.org/#download)
 
