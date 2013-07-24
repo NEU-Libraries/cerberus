@@ -13,27 +13,31 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 %>
-
-<div class="row">
-  <%= render partial: '/logo' %>
+<header class="container">
+  <div class="row">
+    <div class="span6">
+      <%= render partial: '/logo' %>
+    </div><!-- /.span6 -->
+    <div class="span6">
+      <%= render partial: '/user_util_links' %>
+    </div><!-- /.span6 -->
+  </div><!-- /.row -->
+</header><!-- /.container -->
+<div class="container"> 
   <div class="navbar">
     <div class="navbar-inner">
       <div class="container">
         <%= render :partial => 'catalog/search_form' %>
-        <ul class="nav pull-right">
+        <nav>
+          <ul class="nav pull-right">
           <li <%= 'class=active' if params[:controller] == "catalog" and action_name == "index" %>><a href="/" class="top_nav">Home</a></li>
           <li <%= 'class=active' if action_name == "about" %>><a href="/about/" class="top_nav">About</a></li>
           <li <%= 'class=active' if action_name == "help" %>><a href="/help/" class="top_nav">Help</a></li>
-          <li <%= 'class=active' if params[:controller] == "contact_form" %>><a href="<%= sufia.contact_form_index_path %>" class="top_nav">Contact</a></li>
-          <li>
-            <div class="btn-group">
-              <%= render partial: '/user_util_links' %>
-            </div><!-- /.btn-group -->
+          <li <%= 'class=active' if params[:controller] == "contact_form" %>><a href="<%= sufia.contact_form_index_path %>" class="top_nav">Contact</a>
           </li>
-        </ul><!-- /.nav /.pull-right -->
+          </ul><!-- /.nav /.pull-right -->
+        </nav>
       </div><!-- /.container -->
     </div><!-- /.nav-inner -->
   </div><!-- /.navbar -->
-  
-</div> <!-- /row -->
-
+</div><!-- /.container -->

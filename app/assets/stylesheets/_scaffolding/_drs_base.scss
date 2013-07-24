@@ -1,5 +1,9 @@
-.accessible-hidden {
-  position: absolute !important;
-  clip: rect(1px 1px 1px 1px);
-  clip: rect(1px, 1px, 1px, 1px);
+html{
+  background-color: $htmlBackgroundColor;
+}
+body{
+  max-width: 80em;
+  margin: 0 auto;
+  background-color: $bodyBackgroundColor;
+  padding: 0 1em;
 }
