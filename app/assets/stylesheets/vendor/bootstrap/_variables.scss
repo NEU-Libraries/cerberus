@@ -1,140 +1,10 @@
-// //
+//
 // Variables
 // --------------------------------------------------
 
 
 // Global values
 // --------------------------------------------------
-
-// Northeastern Brand Stylesheets
-// --------------------------------------------------
-//// Colors
-//
-// Web Color Pallet
-//
-
-// Red
-// #cc0000 
-// rgb 204 0 0
-$red: #cc0000;
-
-// Black
-// #000000 
-// rgb 0 0 0
-$black: #000000;
-
-
-// Light Black
-// #242424
-// rgb 36 36 36
-$lightBlack: #242424;
-
-// Darkest Gray
-// #333333
-// rgb 51 51 51
-$darkestGray: #333333;
-
-// Darker Gray
-// #4e4e4e
-// rgb 78 78 78
-$darkerGray: #4e4e4e;
-
-
-// Dark Gray
-// #666666
-// rgb 102 102 102
-$darkGray: #666666;
-
-
-// Medium Gray
-// #7d7d7d
-// rgb 125 125 125
-$meidumGray: #7d7d7d;
-
-// Darker Light Gray
-// #c3c3c3
-// rgb 195 195 195
-$darkerLightGray: #c3c3c3;
-
-
-// Light Gray
-// #dedede
-// rgb 222 222 222
-$lightGray: #dedede;
-
-
-// Lighter Gray
-// #eeeeee
-// rgb 238 238 238
-$lighterGray: #eeeeee;
-
-// Lightest Gray
-// #f8f8f8
-// rgb 248 248 248
-$lightestGray: #f8f8f8;
-
-// White
-// #ffffff
-// rgb 256 256 256
-$white: #ffffff;
-
-// Dark Taupe
-// #c4b996
-// rgb 196 185 150
-$darkTaupe: #c4b996;
-
-// Medium Taupe
-// #d1cbb5
-// rgb 209 203 181
-$mediumTaupe: #d1cbb5;
-
-// Light Taupe
-// #e6e3d6
-// rgb 230 227 214
-$lightTaupe: #e6e3d6;
-
-// Lightest Taupe
-// #f2f1ea
-// rgb 242 241 234
-$lightestTaupe: #f2f1ea;
-
-$bodyBackgroundColor: $white;
-$htmlBackgroundColor: #e9e8e5;
-
-
-
-// FLAT UI Color Swatches
-// -------------------------
-
-$turquoise:     #1abc9c;
-$greenSea:     #16a085;
-
-$emerald:      #2ecc71;
-$nephritis:     #27ae60;
-
-$peterRiver:   #3498db;
-$belizeHole:   #2980b9;
-
-$amethyst:      #9b59b6;
-$wisteria:      #8e44ad;
-
-$wetAsphalt:   #34495e;
-$midnightBlue: #2c3e50;
-
-$sunFlower:    #f1c40f;
-$orange:        #f39c12;
-
-$carrot:        #e67e22;
-$pumpkin:       #d35400;
-
-$alizarin:      #e74c3c;
-$pomegranate:   #c0392b;
-
-$clouds:        #ecf0f1;
-$silver:        #bdc3c7;
-
-$concrete:      #95a5a6;
-$asbestos:      #7f8c8d;
 
 
 // Grays
@@ -150,37 +20,37 @@ $white:                 #fff !default;
 
 // Accent colors
 // -------------------------
-$blue:                  $peterRiver;
-$blueDark:              $midnightBlue;
-$green:                 $emerald;
-$red:                   $red; //redundent!
-$yellow:                $sunFlower;
-$orange:                $pumpkin;
+$blue:                  #049cdb !default;
+$blueDark:              #0064cd !default;
+$green:                 #46a546 !default;
+$red:                   #9d261d !default;
+$yellow:                #ffc40d !default;
+$orange:                #f89406 !default;
 $pink:                  #c3325f !default;
-$purple:                $wisteria;
+$purple:                #7a43b6 !default;
 
 
 // Scaffolding
 // -------------------------
-$bodyBackground:        $white;
+$bodyBackground:        $white !default;
 $textColor:             $grayDark !default;
 
 
 // Links
 // -------------------------
-$linkColor:             $red;
+$linkColor:             #08c !default;
 $linkColorHover:        darken($linkColor, 15%) !default;
 
 
 // Typography
 // -------------------------
-$sansFontFamily:        "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
+$sansFontFamily:        "Helvetica Neue", Helvetica, Arial, sans-serif !default;
 $serifFontFamily:       Georgia, "Times New Roman", Times, serif !default;
 $monoFontFamily:        Monaco, Menlo, Consolas, "Courier New", monospace !default;
 
-$baseFontSize:          16px;
-$baseFontFamily:        $sansFontFamily;
-$baseLineHeight:        22px !default;
+$baseFontSize:          14px !default;
+$baseFontFamily:        $sansFontFamily !default;
+$baseLineHeight:        20px !default;
 $altFontFamily:         $serifFontFamily !default;
 
 $headingsFontFamily:    inherit !default; // empty to use BS default, $baseFontFamily
@@ -218,20 +88,20 @@ $btnBackground:                     $white !default;
 $btnBackgroundHighlight:            darken($white, 10%) !default;
 $btnBorder:                         #ccc !default;
 
-$btnPrimaryBackground:              $blue;
-$btnPrimaryBackgroundHighlight:     adjust-hue($btnPrimaryBackground, 20%);
+$btnPrimaryBackground:              $linkColor !default;
+$btnPrimaryBackgroundHighlight:     adjust-hue($btnPrimaryBackground, 20%) !default;
 
-$btnInfoBackground:                 lighten($blueDark, 10%);
-$btnInfoBackgroundHighlight:        adjust-hue($btnInfoBackground, 20%);
+$btnInfoBackground:                 #5bc0de !default;
+$btnInfoBackgroundHighlight:        #2f96b4 !default;
 
-$btnSuccessBackground:              $green;//#62c462 !default;
-$btnSuccessBackgroundHighlight:     adjust-hue($btnSuccessBackground, 20%);
+$btnSuccessBackground:              #62c462 !default;
+$btnSuccessBackgroundHighlight:     #51a351 !default;
 
 $btnWarningBackground:              lighten($orange, 15%) !default;
 $btnWarningBackgroundHighlight:     $orange !default;
 
-$btnDangerBackground:               $alizarin;
-$btnDangerBackgroundHighlight:      adjust-hue($btnDangerBackground, 20%);
+$btnDangerBackground:               #ee5f5b !default;
+$btnDangerBackgroundHighlight:      #bd362f !default;
 
 $btnInverseBackground:              #444 !default;
 $btnInverseBackgroundHighlight:     $grayDarker !default;
