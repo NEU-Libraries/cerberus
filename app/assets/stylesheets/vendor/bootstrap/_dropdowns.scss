@@ -24,7 +24,7 @@
   width: 0;
   height: 0;
   vertical-align: top;
-  border-top:   4px solid $white;
+  border-top:   4px solid $black;
   border-right: 4px solid transparent;
   border-left:  4px solid transparent;
   content: "";
@@ -55,7 +55,7 @@
   *border-right-width: 2px;
   *border-bottom-width: 2px;
   @include border-radius(6px);
-
+  @include box-shadow(0 5px 10px rgba(0,0,0,.2));
   -webkit-background-clip: padding-box;
      -moz-background-clip: padding;
           background-clip: padding-box;
@@ -91,7 +91,7 @@
 .dropdown-submenu:focus > a {
   text-decoration: none;
   color: $dropdownLinkColorHover;
-  background-color: $dropdownLinkBackgroundHover;
+  @include gradient-vertical($dropdownLinkBackgroundHover, darken($dropdownLinkBackgroundHover, 5%));
 }
 
 // Active state
@@ -102,7 +102,7 @@
   color: $dropdownLinkColorActive;
   text-decoration: none;
   outline: 0;
-  background-color: $dropdownLinkBackgroundActive;
+  @include gradient-vertical($dropdownLinkBackgroundActive, darken($dropdownLinkBackgroundActive, 5%));
 }
 
 // Disabled state
@@ -162,7 +162,7 @@
   // Reverse the caret
   .caret {
     border-top: 0;
-    border-bottom: 4px solid $white;
+    border-bottom: 4px solid $black;
     content: "";
   }
   // Different positioning for bottom up menu
