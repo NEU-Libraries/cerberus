@@ -13,9 +13,12 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 %>
-<a id="notify_link"  href="<%= sufia.mailbox_path %>" class="icon-btn btn btn-small" title="click for User Notifications">
+
+<% if @notify_number > 0 %>
+<a id="notify_link"  href="<%= sufia.mailbox_path %>" class=" btn btn-small" title="click for User Notifications">
  <%= render :partial => 'users/notify_number' %>
 </a>  
 <div class='hide'> 
   <%= link_to "notify", sufia.user_notify_path, :remote => true, :id => 'notify_update_link' %>
 </div> 
+<% end %>    
