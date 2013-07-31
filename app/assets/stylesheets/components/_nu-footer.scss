@@ -76,9 +76,9 @@
 .nu-footer-brand{
   @include squish-text();
   @include size(16px, 100%);
-  @include center-block;
   @include single-transition();
   max-width: 175px;
+  display: block;
   background: image-url('brand-footer-image/brand-footer-image.svg') top left no-repeat;
   background-size: contain;
   opacity: 0.6;
