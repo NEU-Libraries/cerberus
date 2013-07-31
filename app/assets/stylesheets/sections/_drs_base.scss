@@ -1,0 +1,21 @@
+*{
+  @include box-sizing(border-box);
+}
+body{
+  background-color: $white;
+  margin: 0 auto;
+
+  > .container{
+    background-color: $white;
+  }
+}
+
+.footer{
+  padding-top: 1.5em;
+  padding-bottom: 1.2em;
+  border-top: 1px solid $footerBorderColor;
+  background-color: $footerBgColor;
+}
+footer{
+
+}
