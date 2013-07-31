@@ -16,8 +16,8 @@ gem 'kaminari', github: 'harai/kaminari', branch: 'route_prefix_prototype'  # re
 
 gem 'jettywrapper'
 
-gem "bootstrap-sass", "~> 2.3.2.1"
-gem 'font-awesome-sass-rails'
+gem 'bootstrap-sass', '~> 2.3.2.1'
+#gem 'font-awesome-sass-rails'
 
 gem 'rspec-rails'
 
