@@ -5,7 +5,7 @@ DrsSufiaApp::Application.routes.draw do
   HydraHead.add_routes(self)
   Hydra::BatchEdit.add_routes(self)
 
-  resources :collections
+  resources :nu_collections
 
   devise_for :users
   # This must be the very last route in the file because it has a catch all route for 404 errors.
