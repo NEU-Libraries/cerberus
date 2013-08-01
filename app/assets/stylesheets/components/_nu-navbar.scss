@@ -1,0 +1,8 @@
+.navbar  .btn-navbar-collpase{
+  @include buttonBackground($btnBackground, $btnBackgroundHighlight, $grayDark, 0 1px 1px rgba(255,255,255,.75));
+  padding: 12px 14px;
+}
+
+.navbar-brand{
+
+}

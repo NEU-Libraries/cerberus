@@ -26,17 +26,27 @@ limitations under the License.
 <div class="container"> 
   <div class="navbar">
     <div class="navbar-inner">
+      
       <div class="container">
-        <%= render :partial => 'catalog/search_form' %>
-        <nav>
-          <ul class="nav pull-right">
-          <li <%= 'class=active' if params[:controller] == "catalog" and action_name == "index" %>><a href="/" class="top_nav">Home</a></li>
-          <li <%= 'class=active' if action_name == "about" %>><a href="/about/" class="top_nav">About</a></li>
-          <li <%= 'class=active' if action_name == "help" %>><a href="/help/" class="top_nav">Help</a></li>
-          <li <%= 'class=active' if params[:controller] == "contact_form" %>><a href="<%= sufia.contact_form_index_path %>" class="top_nav">Contact</a>
-          </li>
-          </ul><!-- /.nav /.pull-right -->
-        </nav>
+        <a href="/" class="top_nav brand drs<%= 'active' if params[:controller] == "catalog" and action_name == "index" %>">DRS</a>
+
+        <a class="btn btn-navbar btn-navbar-collpase btn-inverse" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </a>
+        <div class="nav-collapse collapse">
+          <nav>
+            <ul class="nav pull-left">
+            
+            <li <%= 'class=active' if action_name == "about" %>><a href="/about/" class="top_nav">About</a></li>
+            <li <%= 'class=active' if action_name == "help" %>><a href="/help/" class="top_nav">Help</a></li>
+            <li <%= 'class=active' if params[:controller] == "contact_form" %>><a href="<%= sufia.contact_form_index_path %>" class="top_nav">Contact</a>
+            </li>
+            </ul><!-- /.nav /.pull-right -->
+          </nav>
+          <%= render :partial => 'catalog/search_form' %>
+        </div><!--/.nav-collapse.collapse -->
       </div><!-- /.container -->
     </div><!-- /.nav-inner -->
   </div><!-- /.navbar -->

@@ -176,7 +176,7 @@ $purple:                $wisteria;
 
 //Brand Colors
 //Gives the color bases for each of the
-$brand-primary:         $nu-red;
+$brand-primary:         $turquoise;
 $brand-secondary:       $midnight-blue;
 $brand-default:         $dark-gray;
 $brand-info:            $peter-river;
@@ -197,7 +197,7 @@ $textColor:             $grayDark;
 // Links
 // -------------------------
 $linkColor:             $nu-red;
-$linkColorHover:        darken($linkColor, 5%);
+$linkColorHover:        lighten($linkColor, 10%);
 
 // Typography
 // -------------------------
@@ -229,8 +229,8 @@ $paddingSmall:          2px 12px;  // 26px
 $paddingMini:           1px 8px;   // 24px
 
 $baseBorderRadius:      6px;
-$borderRadiusLarge:     10px;
-$borderRadiusSmall:     3px;
+$borderRadiusLarge:     6px;
+$borderRadiusSmall:     6px;
 
 
 // Tables
@@ -338,7 +338,9 @@ $wellBackground:                  $grayLighter;
 $navbarCollapseWidth:             979px !default;
 $navbarCollapseDesktopWidth:      $navbarCollapseWidth + 1;
 
-$navbarHeight:                    50px;
+$navbarInputHeight:               39px;
+
+$navbarHeight:                    52px;
 $navbarBackgroundHighlight:       $clouds;// !default;
 $navbarBackground:                $navbarBackgroundHighlight;
 $navbarBorder:                    darken($navbarBackground, 5%);
