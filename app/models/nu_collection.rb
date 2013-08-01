@@ -1,4 +1,4 @@
-class Collection < ActiveFedora::Base
+class NuCollection < ActiveFedora::Base
   include Hydra::ModelMixins::RightsMetadata  
 
   has_metadata name: 'oaidc', type: NortheasternDublinCoreDatastream 
