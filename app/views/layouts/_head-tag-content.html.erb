@@ -7,17 +7,13 @@
 <%= stylesheet_link_tag 'application' %>
 <%= yield(:css_head) %>
 
-<%= javascript_include_tag :modernizr %>
+
 
 <!-- controller specific uploader -->
 <%= yield(:js_head) %>
 
-<!-- application js -->
-<%= javascript_include_tag 'application' %>
+<!-- modernizr js -->
+<%= javascript_include_tag 'modernizr/modernizr' %>
 
-<script type="text/javascript">
-  $(function() {
-    <%= yield(:local_js) %>
-  });
-</script>
+
 
