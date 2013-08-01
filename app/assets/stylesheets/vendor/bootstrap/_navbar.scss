@@ -93,7 +93,7 @@
 // -------------------------
 .navbar .btn,
 .navbar .btn-group {
-  @include navbarVerticalAlign(30px); // Vertically center in navbar
+  @include navbarVerticalAlign($navbarInputHeight); // Vertically center in navbar
 }
 .navbar .btn-group .btn,
 .navbar .input-prepend .btn,
@@ -112,7 +112,7 @@
   select,
   .radio,
   .checkbox {
-    @include navbarVerticalAlign(30px); // Vertically center in navbar
+    @include navbarVerticalAlign($navbarInputHeight); // Vertically center in navbar
   }
   input,
   select,
