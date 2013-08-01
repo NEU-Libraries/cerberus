@@ -1,14 +1,22 @@
-<!DOCTYPE html>
+!DOCTYPE html>
 <html>
-<head>
-  <title>DrsSufiaApp</title>
-  <%= stylesheet_link_tag    "application", :media => "all" %>
-  <%= javascript_include_tag "application" %>
-  <%= csrf_meta_tags %>
-</head>
-<body>
-
-<%= yield %>
-
-</body>
+  <head>
+    <%= render :partial => "layouts/head-tag-content"%>
+  </head>
+  <body>    
+    <%= render :partial => '/masthead', :formats => [:html] %>
+    <div class="container">
+      <%= render :partial => '/flash_msg' %>
+    </div>
+    <div class="container">
+    <%= yield :content %>
+    </div><!-- /.container -->
+    <%= render partial: '/footer' %>
+    <!-- Javascript loaded at the end -->
+    <%= render :partial => 'layouts/end-js-scripts'%>
+    <div id="ajax-modal" class="modal hide" tabindex="-1"></div>
+    <%= render :partial => '/ga', :formats => [:html] %>
+    
+  </body>
 </html>
+
