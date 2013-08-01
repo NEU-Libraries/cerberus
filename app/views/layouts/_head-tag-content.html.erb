@@ -12,6 +12,9 @@
 <!-- controller specific uploader -->
 <%= yield(:js_head) %>
 
+<!-- application js -->
+<%= javascript_include_tag 'application' %>
+
 <script type="text/javascript">
   $(function() {
     <%= yield(:local_js) %>
