@@ -74,7 +74,8 @@ module DrsSufiaApp
 
     #Add polyfills in the pipline so that Modernizr can pull in js polyfills
     
-    config.assets.precompile += ['polyfills/respond/respond.min.js','polyfills/placeholder/placeholder.min.js']
+    config.assets.precompile += ['polyfills/placeholder/placeholder.min.js']
+    config.assets.precompile += ['polyfills/respond/respond.min.js']
 
   end
 end
