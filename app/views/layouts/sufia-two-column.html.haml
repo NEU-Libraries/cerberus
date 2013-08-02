@@ -10,9 +10,12 @@
           = render :partial => '/flash_msg'
           #content-wrapper
             #content.row
-              / 110 rows
-              .span110
+              .span17
+                = yield :sidebar
+              / /.span17
+              .span93
                 = yield
+              / /.span93
             / /#content
           / /#content-wrapper
         / /#page-positioner

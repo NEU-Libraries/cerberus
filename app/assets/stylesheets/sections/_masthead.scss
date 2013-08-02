@@ -1,3 +1,17 @@
 .nu-masthead{
-  padding: 2em 0;
+  padding: 1em 0;
+  .brand{
+    @include border-radius(0.5em);
+    @include box-sizing(border-box);
+    @extend .btn;
+    
+    
+    max-width: 250px;
+    background-color: transparent;
+    border: 3px solid transparent;
+    &:hover{
+      background-color: transparent;
+      border: 3px solid $brand-default;
+    }
+  }
 }
