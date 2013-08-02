@@ -1,0 +1,32 @@
+!!!
+%html
+  %head
+    = render :partial => "layouts/head-tag-content"
+  %body
+    = render :partial => '/masthead', :formats => [:html]
+    .container
+      = render :partial => '/flash_msg'
+    .container
+      %div
+        = yield
+      .row
+        .span6
+          = yield :sidebar
+          / / End Sidebar
+        .span6
+          %div
+            %h3
+              Contribute
+              = link_to "<i class=\"icon-file\"></i> #{t('sufia.share_button')}".html_safe, sufia.new_generic_file_path, :class => "btn btn-primary", :id => "contribute_link"
+              %a{:href => "/terms/"} Terms of Use
+          %div
+            %h3 My Latest
+            = render :partial=>'/catalog/recents', :locals => {:recent_documents=>@recent_user_documents, :display_thumbs=>false, :display_access=>true}
+        / /.span6
+      / /.row
+    / /.container
+    = render partial: '/footer'
+    / Javascript loaded at the end
+    = render :partial => 'layouts/end-js-scripts'
+    #ajax-modal.modal.hide{:tabindex => "-1"}
+    = render :partial => '/ga', :formats => [:html]
