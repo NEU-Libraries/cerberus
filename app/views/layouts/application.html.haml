@@ -1,0 +1,15 @@
+%html
+  %head
+    = render :partial => "layouts/head-tag-content"
+  %body
+    = render :partial => '/masthead', :formats => [:html]
+    .container
+      = render :partial => '/flash_msg'
+    .container
+      = yield :content
+    / /.container
+    = render partial: '/footer'
+    / Javascript loaded at the end
+    = render :partial => 'layouts/end-js-scripts'
+    #ajax-modal.modal.hide{:tabindex => "-1"}
+    = render :partial => '/ga', :formats => [:html]
