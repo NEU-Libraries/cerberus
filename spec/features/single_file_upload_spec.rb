@@ -11,13 +11,22 @@ feature "Uploading a single file" do
   end
 
   describe "Navigating to file upload" do 
-    before :all do
+    before do
       visit '/'
       page.click_link('contribute_link') 
     end 
 
     it "Has a properly formed upload screen" do
-      expect(page).to have_content "Upload"  
+      expect(page).to have_content "Upload"
+      expect(page).to have_css('form#fileupload')
+      expect(page).to have_selector('span', text: "Select files...")
+      expect(page).to have_selector('span', text: "Start upload")
+      expect(page).to have_selector('input', 'files[]')
+    end
+
+    it "Can upload a file" do 
+      attach_file "files[]", "#{Rails.root}/spec/fixtures/test_pic.jpeg"
+      #TODO: Verify this actually does something.
     end
   end
 
