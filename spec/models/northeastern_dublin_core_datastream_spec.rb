@@ -8,11 +8,7 @@ describe NortheasternDublinCoreDatastream do
 
   subject { @ndbc } 
 
-  it { should respond_to(:to_xml) } 
-  it { should respond_to(:nu_title) } 
-  it { should respond_to(:nu_description) } 
-  it { should respond_to(:nu_type) } 
-  it { should respond_to(:nu_identifier) } 
+  it { should respond_to(:to_xml) }  
 
   describe "Setting fields" do 
 
@@ -20,23 +16,23 @@ describe NortheasternDublinCoreDatastream do
       @ndbc.nu_title = "My title" 
       @ndbc.nu_description = "My description" 
       @ndbc.nu_type = "My type" 
-      @ndbc.nu_identifer = "My identifier" 
+      @ndbc.nu_identifier = "My identifier" 
     end
 
-    it "Has the assigned nu_description" do 
-      @ndbc.nu_title.should == "My title" 
+    it "Has the assigned nu_description" do
+      @ndbc.nu_title.first.should == "My title" 
     end
 
     it "Has the assigned description" do 
-      @ndbc.nu_description.should == "My description" 
+      @ndbc.nu_description.first.should == "My description" 
     end
 
     it "Has the assigned nu_type" do 
-      @ndbc.nu_type.should == "My type" 
+      @ndbc.nu_type.first.should == "My type" 
     end
 
     it "Has the assigned nu_identifier" do 
-      @ndbc.nu_identifier.should == "My identifier" 
+      @ndbc.nu_identifier.first.should == "My identifier" 
     end
   end
 end
