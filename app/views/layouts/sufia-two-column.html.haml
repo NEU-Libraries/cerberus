@@ -1,27 +1,8 @@
-!!!
-%html
-  %head
-    = render :partial => "layouts/head-tag-content"
-  %body
-    #wrapper
-      .container
-        #page-positioner
-          = render :partial => '/masthead', :formats => [:html]
-          = render :partial => '/flash_msg'
-          #content-wrapper
-            #content.row
-              .span17
-                = yield :sidebar
-              / /.span17
-              .span93
-                = yield
-              / /.span93
-            / /#content
-          / /#content-wrapper
-        / /#page-positioner
-      / /.container
-    / /#wrapper
-    = render partial: '/footer'
-    #ajax-modal.modal.hide{:tabindex => "-1"}
-    = render :partial => 'layouts/end-js-scripts'
-    = render :partial => '/ga', :formats => [:html]
+- content_for :content do
+  .span2
+    = yield :sidebar
+  / /.span2
+  .span10
+    = yield
+  / /.span10
+= render template: "layouts/application"
