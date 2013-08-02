@@ -10,8 +10,8 @@ gem 'sqlite3'
 gem 'blacklight'
 gem 'hydra-head'
 
-#gem 'sufia', :path => '~/neu_sufia'
-gem 'sufia', :git => 'https://github.com/nu-lts/nu-sufia.git', :branch => 'develop'
+gem 'sufia', :path => '~/neu_sufia'
+#gem 'sufia', :git => 'https://github.com/nu-lts/nu-sufia.git', :branch => 'develop'
 gem 'kaminari', github: 'harai/kaminari', branch: 'route_prefix_prototype'  # required to handle pagination properly in dashboard. See https://github.com/amatsuda/kaminari/pull/322
 
 gem 'jettywrapper'
@@ -41,6 +41,7 @@ gem "devise-guests", "~> 0.3"
 
 
 group :development, :test do
+  gem "factory_girl_rails" 
   gem "rspec-rails"
   gem "capybara" 
   gem "jettywrapper"
