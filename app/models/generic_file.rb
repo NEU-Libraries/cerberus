@@ -6,6 +6,6 @@ class GenericFile < ActiveFedora::Base
   has_metadata name: 'crud', type: CrudDatastream
   has_metadata name: 'oaidc', type: NortheasternDublinCoreDatastream 
 
-  delegate_to :oaidc, [:nu_title, :nu_type, :nu_identifier] 
+  delegate_to :oaidc, [:nu_title, :nu_type, :nu_identifier, :nu_description] 
 end 
 

@@ -28,7 +28,7 @@ describe CrudDatastream do
       
       before do 
         @set_crud.add_create_perm('individual', "Stibbons, Ponder")
-        @set_crud.add_create_perm('group', "UU:All") 
+        @set_crud.add_create_perm('managed group', "UU:All") 
       end
 
       it "Has two permissions" do 
@@ -52,7 +52,7 @@ describe CrudDatastream do
       end
 
       it "Has set the correct single permission for the UU body" do 
-        @set_crud.create_root.identity(1).identity_type.first.should == 'group' 
+        @set_crud.create_root.identity(1).identity_type.first.should == 'managed group' 
       end
     end
 
@@ -74,7 +74,7 @@ describe CrudDatastream do
       @removal_crud = CrudDatastream.new()
       @removal_crud.add_create_perm('individual', 'Stibbons, Ponder') 
       @removal_crud.add_create_perm('individual', 'Librarian, The') 
-      @removal_crud.add_read_perm('group', 'UU:Faculty') 
+      @removal_crud.add_read_perm('managed group', 'UU:Faculty') 
       @removal_crud.add_read_perm('individual', 'Vimes, Samuel') 
       @removal_crud.add_update_perm('individual', 'Ridcully, Mustrum') 
       @removal_crud.add_update_perm('individual', 'Stibbons, Ponder') 

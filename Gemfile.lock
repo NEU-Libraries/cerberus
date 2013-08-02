@@ -7,10 +7,8 @@ GIT
       actionpack (>= 3.0.0)
       activesupport (>= 3.0.0)
 
-GIT
-  remote: https://github.com/nu-lts/nu-sufia.git
-  revision: 09f278679c409a7631fb4a1d06d743b3ed643133
-  branch: develop
+PATH
+  remote: ~/neu_sufia
   specs:
     sufia (2.1.0.beta)
       blacklight (~> 4.0)
