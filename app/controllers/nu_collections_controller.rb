@@ -22,4 +22,8 @@ class NuCollectionsController < ApplicationController
       @all_collections = NuCollection.find_all_viewable(current_user) 
     end
   end
+
+  def show  
+    @nu_collection = NuCollection.find(params[:id]) 
+  end
 end

@@ -18,4 +18,20 @@ class NuCollection < ActiveFedora::Base
   def self.find_all_viewable(user) 
     return NuCollection.find(:all) 
   end
+
+  def nu_title_display 
+    self.nu_title.first
+  end
+
+  def nu_description_display 
+    self.nu_description.first 
+  end
+
+  def mods_title_display 
+    self.mods_title.first 
+  end
+
+  def mods_abstract_display 
+    self.mods_abstract.first 
+  end
 end
