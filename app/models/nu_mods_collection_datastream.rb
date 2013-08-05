@@ -3,13 +3,13 @@ class NuModsCollectionDatastream < ActiveFedora::OmDatastream
 
   set_terminology do |t|
     t.root(path: 'mods', 'xmlns:mods' => 'http://www.loc.gov/mods/v3', 'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance', 'xsi:schemaLocation' => 'http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-4.xsd')
-    t.title_info(path: 'titleInfo', namespace_prefix: 'mods'){
-      t.title(path: 'title', namespace_prefix: 'mods') 
+    t.mods_title_info(path: 'titleInfo', namespace_prefix: 'mods'){
+      t.mods_title(path: 'title', namespace_prefix: 'mods') 
     }
-    t.abstract(path: 'abstract', namespace_prefix: 'mods') 
-    t.identifier(path: 'identifier', namespace_prefix: 'mods')
-    t.type_of_resource(path: 'typeOfResource', 'collection' => 'yes', namespace_prefix: 'mods') 
-    t.title(proxy: [:title_info, :title]) 
+    t.mods_abstract(path: 'abstract', namespace_prefix: 'mods') 
+    t.mods_identifier(path: 'identifier', namespace_prefix: 'mods')
+    t.mods_type_of_resource(path: 'typeOfResource', 'collection' => 'yes', namespace_prefix: 'mods') 
+    t.mods_title(proxy: [:mods_title_info, :mods_title]) 
   end
 
   def self.xml_template 
