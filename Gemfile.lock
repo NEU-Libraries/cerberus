@@ -198,6 +198,8 @@ GEM
       railties (>= 3.0, < 5.0)
       thor (>= 0.14, < 2.0)
     json (1.8.0)
+    launchy (2.3.0)
+      addressable (~> 2.3)
     logger (1.2.8)
     mail (2.5.4)
       mime-types (~> 1.16)
@@ -376,6 +378,7 @@ DEPENDENCIES
   jettywrapper
   jquery-rails
   kaminari!
+  launchy
   modernizr-rails
   rails (= 3.2.13)
   rspec-rails
