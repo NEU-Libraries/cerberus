@@ -1,0 +1,12 @@
+= csrf_meta_tag
+%meta{:charset => "utf-8"}/
+%title= h(@page_title || application_name)
+/ application css
+= stylesheet_link_tag 'application'
+= yield(:css_head)
+/ controller specific uploader
+/ [if IE 7]
+  = stylesheet_link_tag 'ie7'
+= yield(:js_head)
+/ modernizr js
+= javascript_include_tag 'modernizr/modernizr'

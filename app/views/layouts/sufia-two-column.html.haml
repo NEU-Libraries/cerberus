@@ -1,0 +1,8 @@
+- content_for :content do
+  .span2
+    = yield :sidebar
+  / /.span2
+  .span10
+    = yield
+  / /.span10
+= render template: "layouts/application"

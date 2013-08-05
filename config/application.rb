@@ -71,5 +71,11 @@ module DrsSufiaApp
 
     # Namespace is now neu 
     config.id_namespace = 'neu' 
+
+    #Add polyfills in the pipline so that Modernizr can pull in js polyfills
+    
+    config.assets.precompile += ['polyfills/placeholder/placeholder.min.js']
+    config.assets.precompile += ['polyfills/respond/respond.min.js']
+
   end
 end

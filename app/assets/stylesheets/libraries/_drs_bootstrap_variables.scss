@@ -10,7 +10,7 @@
 // Global values
 // --------------------------------------------------
 
-
+$FontAwesomePath: "//netdna.bootstrapcdn.com/font-awesome/3.2.1/font";
 
 @import "typography/drs_g_webfont";
 
@@ -156,7 +156,7 @@ $asbestos:      #7f8c8d;
 $black:                 #000;
 $grayDarker:            #222;
 $grayDark:              #333;
-$gray:                  $gray;
+$gray:                  $light-warm-gray;
 $grayLight:             $silver;
 $grayLighter:           $clouds;
 $white:                 $white;
@@ -201,7 +201,7 @@ $linkColorHover:        lighten($linkColor, 10%);
 
 // Typography
 // -------------------------
-$sansFontFamily:        "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
+$sansFontFamily:        "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
 $serifFontFamily:       "New Baskerville ","Baskerville", Georgia, "Times New Roman", Times, serif;
 $monoFontFamily:        Monaco, Menlo, Consolas, "Courier New", monospace !default;
 

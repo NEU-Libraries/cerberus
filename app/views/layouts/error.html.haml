@@ -1,0 +1,34 @@
+%html
+  %head
+    %meta{:charset => "utf-8"}/
+    %title
+      = h(application_name)
+      \: System Error
+    / application css
+    = stylesheet_link_tag 'application'
+    = yield(:css_head)
+    / application js
+    = javascript_include_tag 'application'
+    / controller specific uploader
+    = yield(:js_head)
+    :javascript
+      $(function() {
+        #{yield(:local_js)}
+      });
+        = render :partial => '/ga', :formats => [:html]
+  %body
+    #wrapper
+      .container
+        #page-positioner
+          = render :partial => '/masthead', :formats => [:html]
+          #content-wrapper
+            #content.row
+              / 110 rows
+              .span110
+                = yield
+            / /#content
+          / /#content-wrapper
+        / /#page-positioner
+      / /.container
+    / /#wrapper
+    = render partial: '/footer'
