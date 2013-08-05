@@ -3,27 +3,27 @@ class CrudDatastream < ActiveFedora::OmDatastream
 
   set_terminology do |t| 
     t.root(path: 'crud', 'xmlns:crud' => 'http://repository.neu.edu/schema/crud', 'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance', 'xsi:schemaLocation' => 'http://repository.neu.edu/schema/crud http://repository.neu.edu/schema/crud/crud.xsd') 
-      t.create_space(path: 'create', namespace_prefix: 'crud'){
-        t.identity(path: 'identity', namespace_prefix: 'crud'){
-          t.identity_type(path: { attribute: 'type' }) 
-        }
+    t.create_space(path: 'create', namespace_prefix: 'crud'){
+      t.identity(path: 'identity', namespace_prefix: 'crud'){
+        t.identity_type(path: { attribute: 'type' }) 
       }
-      t.read_space(path: 'read', namespace_prefix: 'crud'){
-        t.identity(path: 'identity', namespace_prefix: 'crud'){
-          t.identity_type(path: { attribute: 'type' })
-        }
+    }
+    t.read_space(path: 'read', namespace_prefix: 'crud'){
+      t.identity(path: 'identity', namespace_prefix: 'crud'){
+        t.identity_type(path: { attribute: 'type' })
       }
-      t.update_space(path: 'update', namespace_prefix: 'crud'){
-        t.identity(path: 'identity', namespace_prefix: 'crud'){
-          t.identity_type(path: { attribute: 'type' })
-        }
+    }
+    t.update_space(path: 'update', namespace_prefix: 'crud'){
+      t.identity(path: 'identity', namespace_prefix: 'crud'){
+        t.identity_type(path: { attribute: 'type' })
       }
-      t.delete_space(path: 'delete', namespace_prefix: 'crud'){
-        t.identity(path: 'identity', namespace_prefix: 'crud'){
-          t.identity_type(path: { attribute: 'type' }) 
-        }
+    }
+    t.delete_space(path: 'delete', namespace_prefix: 'crud'){
+      t.identity(path: 'identity', namespace_prefix: 'crud'){
+        t.identity_type(path: { attribute: 'type' }) 
       }
-    end
+    }
+  end
 
   def self.xml_template
     builder = Nokogiri::XML::Builder.new do |xml| 
