@@ -1,0 +1,15 @@
+<%= form_for :nu_collection, url: nu_collections_path do |f| %>
+  <p>
+    <%= f.label :nu_title %><br>
+    <%= f.text_field :nu_title %>
+  </p>
+ 
+  <p>
+    <%= f.label :nu_description %><br>
+    <%= f.text_area :nu_description %>
+  </p>
+ 
+  <p>
+    <%= f.submit %>
+  </p>
+<% end %>
