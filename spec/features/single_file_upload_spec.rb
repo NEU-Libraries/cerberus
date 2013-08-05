@@ -25,8 +25,8 @@ feature "Uploading a single file" do
     end
 
     it "Can upload a file" do 
-      attach_file "files[]", "#{Rails.root}/spec/fixtures/test_pic.jpeg"
-      #TODO: Verify this actually does something.
+      page.attach_file "files[]", "#{Rails.root}/spec/fixtures/test_pic.jpeg"
+      expect(page).to have_content 'test_pic.jpeg'
     end
   end
 
