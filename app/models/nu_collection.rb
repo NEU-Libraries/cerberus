@@ -14,5 +14,8 @@ class NuCollection < ActiveFedora::Base
   has_many :generic_files, property: :is_part_of 
   has_many :nu_collections, property: :is_part_of 
   # belongs_to :nu_collections, property: #What is?
-  
+
+  def self.find_all_viewable(user) 
+    return NuCollection.find(:all) 
+  end
 end
