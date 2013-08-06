@@ -30,15 +30,15 @@ describe NuCollection do
     end
 
     it "Sets the oaidc title field" do 
-      @collection.datastreams['oaidc'].nu_title.first.should == "Nu Title"  
+      @collection.datastreams['DC'].nu_title.first.should == "Nu Title"  
     end
 
     it "Sets the oaidc description field" do 
-      @collection.datastreams['oaidc'].nu_description.first.should == "My Nu Collection" 
+      @collection.datastreams['DC'].nu_description.first.should == "My Nu Collection" 
     end
 
     it "Sets the oaidc identifier field" do 
-      @collection.datastreams['oaidc'].nu_identifier.first.should == "123456" 
+      @collection.datastreams['DC'].nu_identifier.first.should == "123456" 
     end
 
     it "Sets the mods title field" do 
@@ -71,5 +71,9 @@ describe NuCollection do
         @collection.mods_abstract_display.should == "Mods Abstract" 
       end
     end
+  end
+
+  describe "Embargoes" do 
+    pending "Add embargo functionality for collections" 
   end
 end 
