@@ -20,7 +20,6 @@ class ParanoidRightsDatastream < Hydra::Datastream::RightsMetadata
   end
 
   # Checks whether or not a given user can read (view/download) this collection or file
-  # TODO:  Add group membership checks when Shibboleth stuff comes in
   def can_read?(user) 
     can_read_or_edit?(user, :read) 
   end
