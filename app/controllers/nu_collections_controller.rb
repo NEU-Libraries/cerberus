@@ -20,6 +20,9 @@ class NuCollectionsController < ApplicationController
     @nu_collection.mods_title = params[:nu_collection][:nu_title]
     @nu_collection.mods_identifier = @nu_collection.id
 
+    @nu_collection.depositor = current_user.nuid
+    @nu_collection.rightsMetadata.permissions({person: current_user.nuid}, 'edit') 
+
     @nu_collection.save!
     redirect_to(@nu_collection, :notice => 'Collection was successfully created.')
   end

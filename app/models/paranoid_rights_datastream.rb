@@ -33,11 +33,6 @@ class ParanoidRightsDatastream < Hydra::Datastream::RightsMetadata
   protected
 
   def can_read_or_edit?(user, access_requested)
-
-    if self.under_embargo?
-      return current_user.nuid == self.depositor  
-    end 
-
     if !user.instance_of?(User) # Cover the case where current_user passes in nil, indicating unsigned access
       public_rights = self.permissions({group: 'public'}) 
       return public_rights == 'read' && access_requested == :read 
@@ -76,7 +71,11 @@ class ParanoidRightsDatastream < Hydra::Datastream::RightsMetadata
   end
 
   def group_can_read?(user_groups)
-    permitted_groups = self.groups 
+    permitted_groups = self.groups
+
+    if !user_groups  
+      return false
+    end 
 
     user_groups.each do |user_group| 
       if permitted_groups.include?(user_group)
@@ -88,7 +87,11 @@ class ParanoidRightsDatastream < Hydra::Datastream::RightsMetadata
   end
 
   def group_can_edit?(user_groups) 
-    permitted_groups = self.groups 
+    permitted_groups = self.groups
+
+    if !user_groups
+      return false
+    end 
 
     user_groups.each do |user_group| 
       if permitted_groups.include?(user_group)

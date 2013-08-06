@@ -7,11 +7,13 @@ class NuCollection < ActiveFedora::Base
 
   has_metadata name: 'DC', type: NortheasternDublinCoreDatastream 
   has_metadata name: 'rightsMetadata', type: ParanoidRightsDatastream
+  has_metadata name: 'properties', type: PropertiesDatastream
   has_metadata name: 'mods', type: NuModsCollectionDatastream
   has_metadata name: 'crud', type: CrudDatastream
 
   delegate_to :DC, [:nu_title, :nu_description, :nu_identifier]
-  delegate_to :mods, [:mods_title, :mods_abstract, :mods_identifier] 
+  delegate_to :mods, [:mods_title, :mods_abstract, :mods_identifier]
+  delegate_to :properties, [:depositor]  
 
   has_many :generic_files, property: :is_part_of 
   has_many :nu_collections, property: :is_part_of 
@@ -20,7 +22,7 @@ class NuCollection < ActiveFedora::Base
   #Return all collections that this user can read
   def self.find_all_viewable(user) 
     collections = NuCollection.find(:all)
-    collections.keep_if { |ele| ele.rightsMetadata.can_read?(user) }  
+    collections.keep_if { |ele| !ele.embargo_in_effect?(user) && ele.rightsMetadata.can_read?(user) } 
   end
 
   def nu_title_display 
@@ -37,5 +39,15 @@ class NuCollection < ActiveFedora::Base
 
   def mods_abstract_display 
     self.mods_abstract.first 
+  end
+
+  # Since we need access to the depositor metadata field, we handle this
+  # at this level. 
+  def embargo_in_effect?(user)
+    if self.depositor == user.nuid 
+      return false
+    elsif self.rightsMetadata.under_embargo?
+      return true 
+    end
   end
 end
