@@ -20,4 +20,10 @@ class User < ActiveRecord::Base
   def to_s
     email
   end
+
+  # When we get that Shibboleth stuff sorted we can figure out how to get
+  # this to actually be a user's nuid.  For now it's just their email address 
+  def nuid 
+    email 
+  end
 end
