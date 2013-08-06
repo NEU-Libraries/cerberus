@@ -17,8 +17,10 @@ class NuCollection < ActiveFedora::Base
   has_many :nu_collections, property: :is_part_of 
   # belongs_to :nu_collections, property: #What is?
 
+  #Return all collections that this user can read
   def self.find_all_viewable(user) 
-    return NuCollection.find(:all) 
+    collections = NuCollection.find(:all)
+    collections.keep_if { |ele| ele.rightsMetadata.can_read?(user) }  
   end
 
   def nu_title_display 

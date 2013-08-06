@@ -26,4 +26,7 @@ class User < ActiveRecord::Base
   def nuid 
     email 
   end
+
+  # Currently using group_list attribute as though it will someday contain the grouper information
+  # pulled in from Shibboleth 
 end
