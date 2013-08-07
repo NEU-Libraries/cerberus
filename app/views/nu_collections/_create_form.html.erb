@@ -1,18 +1,36 @@
 <%= form_for :nu_collection, url: nu_collections_path do |f| %>
   <p>
     <%= f.label :nu_title, "Title:" %><br>
-    <%= f.text_field :nu_title %>
+    <%= f.text_field :nu_title, required: true %>
   </p>
  
   <p>
     <%= f.label :nu_description, "Description:" %><br>
-    <%= f.text_area :nu_description %>
+    <%= f.text_area :nu_description, required: true %>
   </p>
 
-  <p>
-    <%= f.label :mods_abstract, "Describe your collection's purpose here:" %><br>
-    <%= f.text_area :mods_abstract %>
-  </p>
+  <h3> Permissions </h3>
+
+  <div class='permission_element'>
+
+    <h4> New Permission Element </h4>
+
+    <%= f.label :identity_type, "Are you trying to add a person or a group?", namespace: '0' %> 
+    <%= f.select :identity_type, [['Group', 'group'], ['Person', 'person']], {}, namespace: '0', name: 'nu_collection[permissions0][identity_type]', required: true %> 
+    <br>
+
+    <%= f.label :identity, "Enter NUID or group name", namespace: '0' %> 
+    <%= f.text_field :identity, namespace: '0', name: 'nu_collection[permissions0][identity]', required: true  %> <br>
+
+    <%= f.label :permission_type, "Should this identity be allowed to read or edit?", namespace: '0' %> 
+    <%= f.select :permission_type, [['Read', 'read'], ['Edit', 'edit']], {}, namespace: '0', required: true, name: 'nu_collection[permissions0][permissions_type]' %> 
+    <br>
+  </div>
+
+  <button type='button' class="btn btn-mini" id="add_another_permission"><i class="icon-plus-sign"></i></button>
+
+  <br>
+  <br>
  
   <p>
     <%= f.submit %>

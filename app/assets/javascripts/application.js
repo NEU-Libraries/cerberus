@@ -13,6 +13,7 @@
 //= require jquery
 //= require jquery_ujs
 //= require sufia
+//= require nu_collections
 // Required by Blacklight
 //= require blacklight/blacklight
 //= require polyfills

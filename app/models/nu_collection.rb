@@ -44,10 +44,18 @@ class NuCollection < ActiveFedora::Base
   # Since we need access to the depositor metadata field, we handle this
   # at this level. 
   def embargo_in_effect?(user)
-    if self.depositor == user.nuid 
-      return false
-    elsif self.rightsMetadata.under_embargo?
-      return true 
+    return self.rightsMetadata.under_embargo? && ! (self.depositor == user.nuid)  
+  end
+
+  # Accepts a hash of the following form:
+  # ex. {'permissions1' => {'identity_type' => val, 'identity' => val, 'permission_type' => val }, 'permissions2' => etc. etc. } 
+  def set_permissions_from_new_form(params)
+    params.each do |perm_hash| 
+      identity_type = perm_hash[1]['identity_type']
+      identity = perm_hash[1]['identity']
+      permission_type = perm_hash[1]['permission_type'] 
+
+      self.rightsMetadata.permissions({identity_type => identity}, permission_type) 
     end
   end
 end

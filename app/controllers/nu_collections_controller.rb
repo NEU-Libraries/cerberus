@@ -12,16 +12,27 @@ class NuCollectionsController < ApplicationController
     #to get a correct pid
     @nu_collection.save!
 
+    # DC stream
     @nu_collection.nu_title = params[:nu_collection][:nu_title]
     @nu_collection.nu_description = params[:nu_collection][:nu_description]
     @nu_collection.nu_identifier = @nu_collection.id
 
-    @nu_collection.mods_abstract = params[:nu_collection][:mods_abstract]
+    # MODS stream
+    @nu_collection.mods_abstract = params[:nu_collection][:nu_description]
     @nu_collection.mods_title = params[:nu_collection][:nu_title]
     @nu_collection.mods_identifier = @nu_collection.id
 
+    # Permission concerns
     @nu_collection.depositor = current_user.nuid
-    @nu_collection.rightsMetadata.permissions({person: current_user.nuid}, 'edit') 
+    @nu_collection.rightsMetadata.permissions({person: current_user.nuid}, 'edit')
+
+    # Extract from the form all keys of form 'permissions#{n}' 
+    # ex. 'permissions1' => { 'identity_type' => 'group', 'identity' => 'public', 'permission_type' => 'read' } 
+    all_perms = params[:nu_collection].select { |key, value| key.include?('permissions') }
+
+    puts "All perms returned #{all_perms}" 
+    @nu_collection.set_permissions_from_new_form(all_perms) 
+
 
     @nu_collection.save!
     redirect_to(@nu_collection, :notice => 'Collection was successfully created.')
