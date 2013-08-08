@@ -24,7 +24,10 @@ class NuModsDatastream < ActiveFedora::OmDatastream
     t.mods_identifier(path: 'identifier', namespace_prefix: 'mods')
     t.mods_type_of_resource(path: 'typeOfResource', namespace_prefix: 'mods'){
       t.mods_is_collection(path: { attribute: 'collection' })
-    } 
+    }
+
+    t.mods_title(proxy: [:mods_title_info, :mods_title])
+    
   end
 
   def self.xml_template 
@@ -44,5 +47,23 @@ class NuModsDatastream < ActiveFedora::OmDatastream
       }
     end
     builder.doc 
+  end
+
+  def add_mods_keyword(keyword)
+    if self.mods_subject.mods_keyword.length == 0 
+      self.mods_subject.mods_keyword = keyword
+    else
+      self.mods_subject.mods_keyword = self.mods_subject.mods_keyword.append(keyword) 
+    end
+  end
+
+  def mass_mods_keywords(array)
+    array.each do |keyword| 
+      if self.mods_subject.mods_keyword.length == 0
+        self.mods_subject.mods_keyword = keyword 
+      else 
+        self.mods_subject.mods_keyword = self.mods_subject.mods_keyword.append(keyword) 
+      end
+    end
   end
 end

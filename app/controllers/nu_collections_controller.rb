@@ -18,9 +18,7 @@ class NuCollectionsController < ApplicationController
     @nu_collection.nu_identifier = @nu_collection.id
 
     # MODS stream
-    @nu_collection.mods_abstract = params[:nu_collection][:nu_description]
-    @nu_collection.mods_title = params[:nu_collection][:nu_title]
-    @nu_collection.mods_identifier = @nu_collection.id
+    @nu_collection.create_mods_stream(params)
 
     # Permission concerns
     @nu_collection.depositor = current_user.nuid

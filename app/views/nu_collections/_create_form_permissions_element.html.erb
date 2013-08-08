@@ -1,0 +1,15 @@
+<div class='permission_element'>
+
+    <h4> New Permission Element </h4>
+
+    <%= f.label :identity_type, "Are you trying to add a person or a group?", namespace: '0' %> 
+    <%= f.select :identity_type, [['Group', 'group'], ['Person', 'person']], {}, namespace: '0', name: 'nu_collection[permissions0][identity_type]', required: true %> 
+    <br>
+
+    <%= f.label :identity, "Enter NUID or group name", namespace: '0' %> 
+    <%= f.text_field :identity, namespace: '0', name: 'nu_collection[permissions0][identity]', required: true  %> <br>
+
+    <%= f.label :permission_type, "Should this identity be allowed to read or edit?", namespace: '0' %> 
+    <%= f.select :permission_type, [['Read', 'read'], ['Edit', 'edit']], {}, namespace: '0', required: true, name: 'nu_collection[permissions0][permission_type]' %> 
+    <br>
+</div>

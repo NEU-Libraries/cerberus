@@ -9,23 +9,31 @@
     <%= f.text_area :nu_description, required: true %>
   </p>
 
+  <h3> Creator </h3>
+
+  <span class='alert'>A complete individual name and/or a corporate creator are required</span>
+
+  <%= f.label :creator_first_name, "Creator's first name:" %>
+  <%= f.text_field :creator_first_name %> <br>
+
+  <%= f.label :creator_last_name, "Creator's last name:" %> 
+  <%= f.text_field :creator_last_name %> <br>
+
+  <%= f.label :creator_corporate, "Enter an organizational name if an organization should be given primary credit for creation of this collection:" %> 
+  <%= f.text_field :creator_corporate %> <br>
+
+  <h3> Keywords </h3> 
+
+  <div class='keyword'> 
+    <%= f.label :keyword, "Add some relevant keywords", namespace: '0' %> 
+    <%= f.text_field :keyword, namespace: '0', name: 'nu_collection[keyword][]'%>
+  </div>
+
+  <button type='button' class='btn btn-mini' id='add_another_keyword'><i class='icon-plus-sign'></i></button> 
+
   <h3> Permissions </h3>
 
-  <div class='permission_element'>
-
-    <h4> New Permission Element </h4>
-
-    <%= f.label :identity_type, "Are you trying to add a person or a group?", namespace: '0' %> 
-    <%= f.select :identity_type, [['Group', 'group'], ['Person', 'person']], {}, namespace: '0', name: 'nu_collection[permissions0][identity_type]', required: true %> 
-    <br>
-
-    <%= f.label :identity, "Enter NUID or group name", namespace: '0' %> 
-    <%= f.text_field :identity, namespace: '0', name: 'nu_collection[permissions0][identity]', required: true  %> <br>
-
-    <%= f.label :permission_type, "Should this identity be allowed to read or edit?", namespace: '0' %> 
-    <%= f.select :permission_type, [['Read', 'read'], ['Edit', 'edit']], {}, namespace: '0', required: true, name: 'nu_collection[permissions0][permissions_type]' %> 
-    <br>
-  </div>
+  <%= render partial: 'create_form_permissions_element', locals: {:f => f} %> 
 
   <button type='button' class="btn btn-mini" id="add_another_permission"><i class="icon-plus-sign"></i></button>
 
