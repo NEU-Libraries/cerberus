@@ -12,8 +12,7 @@ class NuCollection < ActiveFedora::Base
   has_metadata name: 'crud', type: CrudDatastream
 
   delegate_to :DC, [:nu_title, :nu_description, :nu_identifier]
-  delegate_to :mods, [:mods_title, :mods_abstract, :mods_identifier, :mods_subject, :mods_corporate_name,
-                      :mods_personal_name] 
+  delegate_to :mods, [:mods_title, :mods_abstract, :mods_identifier, :mods_subject, :mods_full_corporate_name] 
   delegate_to :properties, [:depositor]  
 
   has_many :generic_files, property: :is_part_of 
@@ -49,12 +48,17 @@ class NuCollection < ActiveFedora::Base
   end
 
   # The params we get passed aren't quite clean enough to leverage the usual Rails form helpers
-  # So we're making Collections responsible for knowing how to construct their own MODS metadata
+  # So we're making Datastreams responsible for knowing how to construct their own MODS metadata
   # from the params passed in on the #new action 
-  def create_mods_stream(params) 
+  def create_mods_stream(params)
+    # Simple assignments, these fields should never have multiple values.
     self.mods_abstract = params[:nu_collection][:nu_description]
     self.mods_title = params[:nu_collection][:nu_title]
     self.mods_identifier = self.id
+    self.mods_full_corporate_name = params[:nu_collection][:creator_corporate]
+
+    # Complicated or validation required assignments 
+    self.mods.assign_creator_personal_name(params[:nu_collection][:creator_first_name], params[:nu_collection][:creator_last_name])
     self.mods.mass_mods_keywords(params[:nu_collection][:keyword])
   end
 

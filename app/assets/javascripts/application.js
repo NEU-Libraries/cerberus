@@ -14,6 +14,7 @@
 //= require jquery_ujs
 //= require sufia
 //= require nu_collections
+//= require bootstrap-datepicker/bootstrap-datepicker
 // Required by Blacklight
 //= require blacklight/blacklight
 //= require polyfills

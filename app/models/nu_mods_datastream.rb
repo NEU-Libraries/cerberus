@@ -27,7 +27,7 @@ class NuModsDatastream < ActiveFedora::OmDatastream
     }
 
     t.mods_title(proxy: [:mods_title_info, :mods_title])
-    
+    t.mods_full_corporate_name(proxy: [:mods_corporate_name, :mods_full_corporate_name]) 
   end
 
   def self.xml_template 
@@ -49,21 +49,18 @@ class NuModsDatastream < ActiveFedora::OmDatastream
     builder.doc 
   end
 
-  def add_mods_keyword(keyword)
-    if self.mods_subject.mods_keyword.length == 0 
-      self.mods_subject.mods_keyword = keyword
-    else
-      self.mods_subject.mods_keyword = self.mods_subject.mods_keyword.append(keyword) 
+  def assign_creator_personal_name(first_name, last_name)
+    if first_name.blank? && last_name.blank?
+      return true 
+    elsif first_name.blank? || last_name.blank? 
+      raise "Must pass both a first and a last name for a personal creator to be complete." 
+    else 
+      self.mods_personal_name.mods_first_name = first_name 
+      self.mods_personal_name.mods_last_name = last_name 
     end
   end
 
   def mass_mods_keywords(array)
-    array.each do |keyword| 
-      if self.mods_subject.mods_keyword.length == 0
-        self.mods_subject.mods_keyword = keyword 
-      else 
-        self.mods_subject.mods_keyword = self.mods_subject.mods_keyword.append(keyword) 
-      end
-    end
+    self.mods_subject.mods_keyword = array
   end
 end

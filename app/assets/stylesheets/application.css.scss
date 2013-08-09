@@ -9,6 +9,7 @@
  * compiled file, but it's generally better to create a new file per style scope.
  *
  *= require_self
+ *= require datepicker/datepicker
  *  Sufia gem stylesheets imported here.
  *
  */
@@ -21,7 +22,6 @@
 @import "vendor/flatly/flatly-variables";
 @import "libraries/drs_bootstrap_variables";
 @import "libraries/mixins";
-
 
 /////////////
 /////////////

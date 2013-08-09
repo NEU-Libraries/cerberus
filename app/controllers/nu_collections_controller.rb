@@ -26,9 +26,7 @@ class NuCollectionsController < ApplicationController
 
     # Extract from the form all keys of form 'permissions#{n}' 
     # ex. 'permissions1' => { 'identity_type' => 'group', 'identity' => 'public', 'permission_type' => 'read' } 
-    all_perms = params[:nu_collection].select { |key, value| key.include?('permissions') }
-
-    puts "All perms returned #{all_perms}" 
+    all_perms = params[:nu_collection].select { |key, value| key.include?('permissions') } 
     @nu_collection.set_permissions_from_new_form(all_perms) 
 
 
