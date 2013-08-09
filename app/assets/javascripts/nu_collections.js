@@ -2,6 +2,14 @@
 $(document).ready(function () {
   'use strict';
 
+  $('#add_another_keyword').click(function () {
+    var cloned = $('div.keyword').first().clone(); 
+
+    cloned.find('input:text').val('');
+
+    $('div.keyword').last().after(cloned);
+  });
+
   $('#add_another_permission').click(function (){
 
     var new_permission = $('.permission_element').last().clone();
