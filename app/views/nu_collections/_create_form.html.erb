@@ -1,12 +1,12 @@
 <%= form_for :nu_collection, url: nu_collections_path do |f| %>
   <p>
     <%= f.label :nu_title, "Title:" %><br>
-    <%= f.text_field :nu_title, required: true %>
+    <%= f.text_field :nu_title, required: true, pattern: ".*\\S.*" %>
   </p>
  
   <p>
     <%= f.label :nu_description, "Description:" %><br>
-    <%= f.text_area :nu_description, required: true %>
+    <%= f.text_area :nu_description, required: true, pattern: ".*\\S.*" %>
   </p>
 
   <p>
@@ -20,10 +20,10 @@
 
   <div class='personal_creator'>
     <%= f.label :creator_first_name, "Creator's first name:" %>
-    <%= f.text_field :creator_first_name, name:'nu_collection[creator_first_name][]' %> <br>
+    <%= f.text_field :creator_first_name, name:'nu_collection[creator_first_name][]', pattern: ".*\\S.*" %> <br>
 
     <%= f.label :creator_last_name, "Creator's last name:" %> 
-    <%= f.text_field :creator_last_name, name: 'nu_collection[creator_last_name][]' %> <br>
+    <%= f.text_field :creator_last_name, name: 'nu_collection[creator_last_name][]', pattern: ".*\\S.*" %> <br>
   </div>
 
   <button type='button' class='btn btn-mini' id='add_another_personal_creator'><i class='icon-plus-sign'></i></button>
@@ -32,7 +32,7 @@
 
   <div class='corporate_creator'> 
     <%= f.label :creator_corporate, "Enter an organizational name if an organization should be given primary credit for creation of this collection:" %> 
-    <%= f.text_field :creator_corporate, name: 'nu_collection[creator_corporate][]' %> <br>
+    <%= f.text_field :creator_corporate, name: 'nu_collection[creator_corporate][]', pattern: ".*\\S.*" %> <br>
   </div>
 
   <button type='button' class='btn btn-mini' id="add_another_corporate_creator"><i class='icon-plus-sign'></i></button> 
@@ -41,7 +41,7 @@
 
   <div class='keyword'> 
     <%= f.label :keyword, "Add some relevant keywords", namespace: '0' %> 
-    <%= f.text_field :keyword, namespace: '0', name: 'nu_collection[keyword][]'%>
+    <%= f.text_field :keyword, namespace: '0', name: 'nu_collection[keyword][]', pattern: ".*\\S.*"%>
   </div>
 
   <button type='button' class='btn btn-mini' id='add_another_keyword'><i class='icon-plus-sign'></i></button> 

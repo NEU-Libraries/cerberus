@@ -7,7 +7,7 @@
     <br>
 
     <%= f.label :identity, "Enter NUID or group name", namespace: '0' %> 
-    <%= f.text_field :identity, namespace: '0', name: 'nu_collection[permissions0][identity]'  %> <br>
+    <%= f.text_field :identity, namespace: '0', name: 'nu_collection[permissions0][identity]', pattern: ".*\\S.*"  %> <br>
 
     <%= f.label :permission_type, "Should this identity be allowed to read or edit?", namespace: '0' %> 
     <%= f.select :permission_type, [['Read', 'read'], ['Edit', 'edit']], {}, namespace: '0', required: true, name: 'nu_collection[permissions0][permission_type]' %> 
