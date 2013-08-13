@@ -12,14 +12,13 @@ class NuCollection < ActiveFedora::Base
   has_metadata name: 'crud', type: CrudDatastream
 
   delegate_to :DC, [:nu_title, :nu_description, :nu_identifier]
-  delegate_to :mods, [:mods_title, :mods_abstract, :mods_identifier, :mods_subject, :mods_full_corporate_name] 
+  delegate_to :mods, [:mods_title, :mods_abstract, :mods_identifier, :mods_subject] 
   delegate_to :properties, [:depositor]  
 
   has_many :generic_files, property: :is_part_of 
   has_many :nu_collections, property: :is_part_of 
-  # belongs_to :nu_collections, property: #What is?
 
-  #Return all collections that this user can read
+  # Return all collections that this user can read
   def self.find_all_viewable(user) 
     collections = NuCollection.find(:all)
     collections.keep_if { |ele| !ele.embargo_in_effect?(user) && ele.rightsMetadata.can_read?(user) } 
@@ -51,20 +50,22 @@ class NuCollection < ActiveFedora::Base
   # So we're making Datastreams responsible for knowing how to construct their own MODS metadata
   # from the params passed in on the #new action 
   def create_mods_stream(params)
-    # Simple assignments, these fields should never have multiple values.
+    # Simple assignments
     self.mods_abstract = params[:nu_collection][:nu_description]
-    self.mods_title = params[:nu_collection][:nu_title]
+    self.mods_title = [params[:nu_collection][:nu_title]]
     self.mods_identifier = self.id
-    self.mods_full_corporate_name = params[:nu_collection][:creator_corporate]
+    self.mods.mods_keyword = params[:nu_collection][:keyword]
+    self.mods.mods_type_of_resource.mods_collection = 'yes' 
 
     # Complicated or validation required assignments 
-    self.mods.assign_creator_personal_name(params[:nu_collection][:creator_first_name], params[:nu_collection][:creator_last_name])
-    self.mods.mass_mods_keywords(params[:nu_collection][:keyword])
+    self.mods.assign_creator_personal_names(params[:nu_collection][:creator_first_name], params[:nu_collection][:creator_last_name])
+    self.mods.assign_corporate_names(params[:nu_collection][:creator_corporate])
   end
 
 
   # Accepts a hash of the following form:
-  # ex. {'permissions1' => {'identity_type' => val, 'identity' => val, 'permission_type' => val }, 'permissions2' => etc. etc. } 
+  # ex. {'permissions1' => {'identity_type' => val, 'identity' => val, 'permission_type' => val }, 'permissions2' => etc. etc. }
+  # Tosses out param sets that are missing an identity.  Which is nice.   
   def set_permissions_from_new_form(params)
     params.each do |perm_hash| 
       identity_type = perm_hash[1]['identity_type']

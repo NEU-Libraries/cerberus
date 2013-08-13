@@ -9,18 +9,33 @@
     <%= f.text_area :nu_description, required: true %>
   </p>
 
-  <h3> Creator </h3>
+  <p>
+    <%= f.label :issuance_date, "Date of Issuance" %><br>
+    <%= f.text_field :issuance_date, class: 'datepicker' %> 
+  </p>
+
+  <h3> Personal Creator </h3>
 
   <span class='alert'>A complete individual name and/or a corporate creator are required</span>
 
-  <%= f.label :creator_first_name, "Creator's first name:" %>
-  <%= f.text_field :creator_first_name %> <br>
+  <div class='personal_creator'>
+    <%= f.label :creator_first_name, "Creator's first name:" %>
+    <%= f.text_field :creator_first_name, name:'nu_collection[creator_first_name][]' %> <br>
 
-  <%= f.label :creator_last_name, "Creator's last name:" %> 
-  <%= f.text_field :creator_last_name %> <br>
+    <%= f.label :creator_last_name, "Creator's last name:" %> 
+    <%= f.text_field :creator_last_name, name: 'nu_collection[creator_last_name][]' %> <br>
+  </div>
 
-  <%= f.label :creator_corporate, "Enter an organizational name if an organization should be given primary credit for creation of this collection:" %> 
-  <%= f.text_field :creator_corporate %> <br>
+  <button type='button' class='btn btn-mini' id='add_another_personal_creator'><i class='icon-plus-sign'></i></button>
+
+  <h3> Corporate Creator </h3> 
+
+  <div class='corporate_creator'> 
+    <%= f.label :creator_corporate, "Enter an organizational name if an organization should be given primary credit for creation of this collection:" %> 
+    <%= f.text_field :creator_corporate, name: 'nu_collection[creator_corporate][]' %> <br>
+  </div>
+
+  <button type='button' class='btn btn-mini' id="add_another_corporate_creator"><i class='icon-plus-sign'></i></button> 
 
   <h3> Keywords </h3> 
 
