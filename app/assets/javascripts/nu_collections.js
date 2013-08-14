@@ -2,6 +2,9 @@
 $(document).ready(function () {
   'use strict';
 
+  //Add a datepicker to the date of issuance field. 
+  $('#nu_collection_issuance_date').datepicker();
+
   //Clones the personal creator field on the 'new' form.
   $('#add_another_personal_creator').click(function() {
     var cloned = $('div.personal_creator').first().clone();
