@@ -1,4 +1,9 @@
 <%= form_for :nu_collection, url: nu_collections_path do |f| %>
+
+  <% if params[:pid].present? %>
+    <%= f.hidden_field :pid, :value => params[:pid] %>
+  <% end %>
+
   <p>
     <%= f.label :nu_title, "Title:" %><br>
     <%= f.text_field :nu_title, required: true %>

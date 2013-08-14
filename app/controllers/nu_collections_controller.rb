@@ -29,6 +29,9 @@ class NuCollectionsController < ApplicationController
     all_perms = params[:nu_collection].select { |key, value| key.include?('permissions') } 
     @nu_collection.set_permissions_from_new_form(all_perms) 
 
+    if params[:nu_collection][:pid].present?
+      @nu_collection.add_relationship("isPartOf", "info:fedora/#{Sufia::Noid.namespaceize(params[:nu_collection][:pid])}")
+    end
 
     @nu_collection.save!
     redirect_to(@nu_collection, :notice => 'Collection was successfully created.')
