@@ -1,0 +1,3 @@
+= form_for(@generic_file, :url => sufia.generic_files_path, :html => {:multipart => true, :id => 'fileupload'}) do |f|
+  .well
+    = render partial: 'generic_files/upload/form_fields'

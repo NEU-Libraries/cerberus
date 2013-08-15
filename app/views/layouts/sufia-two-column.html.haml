@@ -1,8 +1,9 @@
 - content_for :content do
-  .span2
-    = yield :sidebar
-  / /.span2
-  .span10
-    = yield
-  / /.span10
+  .row-fluid
+    .span3
+      = yield :sidebar
+    / /.span2
+    .span9
+      = yield
+    / /.span10
 = render template: "layouts/application"

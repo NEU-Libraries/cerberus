@@ -1,0 +1,3 @@
+/ container for all documents in index view
+#documents.clear
+  = render :partial => 'dashboard/_index_partials/default_group', :locals => {:docs => @response.docs.map { |x| SolrDocument.new(x) }, :facet_value => nil}

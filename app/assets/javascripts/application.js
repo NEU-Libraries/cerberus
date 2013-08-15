@@ -15,4 +15,6 @@
 //= require sufia
 // Required by Blacklight
 //= require blacklight/blacklight
+//= require bootstrap-select/bootstrap-select.min.js
+//= require app
 //= require polyfills
