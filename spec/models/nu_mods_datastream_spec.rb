@@ -14,6 +14,7 @@ describe NuModsDatastream do
       basic_mods.mods_title = "My title" 
       basic_mods.mods_abstract = "This is a test object created for testing" 
       basic_mods.mods_identifier = "neu:123abc" 
+      basic_mods.mods_date_issued = "2013-05-05"
     end
 
     it "Has set the title correctly" do 
@@ -26,6 +27,10 @@ describe NuModsDatastream do
 
     it "Has the identifier set correctly" do 
       basic_mods.mods_identifier(0).first.should == "neu:123abc" 
+    end
+
+    it "Has the mods issuance date set correctly" do 
+      basic_mods.mods_origin_info(0).mods_date_issued.first.should == '2013-05-05' 
     end
   end
 

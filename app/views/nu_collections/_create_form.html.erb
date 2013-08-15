@@ -52,6 +52,13 @@
 
   <button type='button' class="btn btn-mini" id="add_another_permission"><i class="icon-plus-sign"></i></button>
 
+  <h3> Embargo </h3> 
+
+  <span class='alert'> An embargoed item will be visible to only you until the day set below </span> 
+
+  <%= f.label :embargo_date, "Embargo Date:" %> 
+  <%= f.text_field :embargo_date, class: 'embargo_datepicker', required: true %> 
+
   <br>
   <br>
  

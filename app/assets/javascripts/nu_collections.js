@@ -8,6 +8,12 @@ $(document).ready(function () {
     defaultDate: null
   });
 
+  $('input#nu_collection_embargo_date').datepicker({
+    dateFormat: 'yy-mm-dd',
+    defaultDate: + 1,
+    minDate: + 1
+  }); 
+
   //Clones the personal creator field on the 'new' form.
   $('#add_another_personal_creator').click(function() {
     var cloned = $('div.personal_creator').first().clone();

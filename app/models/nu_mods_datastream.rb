@@ -27,7 +27,8 @@ class NuModsDatastream < ActiveFedora::OmDatastream
       t.mods_collection(path: { attribute: 'collection' })
     }
 
-    t.mods_title(proxy: [:mods_title_info, :mods_title]) 
+    t.mods_title(proxy: [:mods_title_info, :mods_title])
+    t.mods_date_issued(proxy: [:mods_origin_info, :mods_date_issued]) 
   end
 
   def self.xml_template 

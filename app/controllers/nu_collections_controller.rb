@@ -2,7 +2,10 @@ class NuCollectionsController < ApplicationController
   def index
   end
 
-  def new    
+  def new
+    if !current_user 
+      redirect_to('/') 
+    end     
   end
 
   def create
@@ -21,6 +24,7 @@ class NuCollectionsController < ApplicationController
     @nu_collection.create_mods_stream(params)
 
     # Permission concerns
+    @nu_collection.rightsMetadata.embargo_release_date = params[:nu_collection][:embargo_date] 
     @nu_collection.depositor = current_user.nuid
     @nu_collection.rightsMetadata.permissions({person: current_user.nuid}, 'edit')
 

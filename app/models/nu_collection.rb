@@ -12,7 +12,7 @@ class NuCollection < ActiveFedora::Base
   has_metadata name: 'crud', type: CrudDatastream
 
   delegate_to :DC, [:nu_title, :nu_description, :nu_identifier]
-  delegate_to :mods, [:mods_title, :mods_abstract, :mods_identifier, :mods_subject] 
+  delegate_to :mods, [:mods_title, :mods_abstract, :mods_identifier, :mods_subject, :mods_date_issued] 
   delegate_to :properties, [:depositor]  
 
   has_many :generic_files, property: :is_part_of 
@@ -54,7 +54,7 @@ class NuCollection < ActiveFedora::Base
     self.mods_abstract = params[:nu_collection][:nu_description]
     self.mods_title = [params[:nu_collection][:nu_title]]
     self.mods_identifier = self.id
-    self.mods.mods_origin_info.mods_date_issued = params[:nu_collection][:issuance_date]
+    self.mods_date_issued = params[:nu_collection][:issuance_date]
     self.mods.mods_keyword = params[:nu_collection][:keyword]
     self.mods.mods_type_of_resource.mods_collection = 'yes' 
 
