@@ -1,0 +1,24 @@
+- @page_title = "More Search Options - #{application_name}"
+- content_for :local_js do
+  $(document).ready(function(){$("form.advanced input:first").focus();});
+.row
+  .span6
+    %h1 More Search Options
+    = render 'advanced_search_form'
+  / /.span6
+  .span6
+    %h2
+      %i.icon-pushpin
+      Search tips
+    %ul#advanced_search_tips
+      %li Select "match all" to require all fields.
+      %li Select "match any" to find at least one field.
+      %li Combine keywords and attributes to find specific items.
+      %li Use quotation marks to search as a phrase.
+      %li Use "+" before a term to make it required. (Otherwise results matching only some of your terms may be included).
+      %li Use "-" before a word or phrase to exclude.
+      %li Use "OR", "AND", and "NOT" to create complex Boolean logic. You can use parentheses in your complex expressions.
+      %li Truncation and wildcards are not supported - word-stemming is done automatically.
+      %li Truncation and wildcards are not supported - word-stemming is done automatically.
+  / /.span6
+/ /.row
