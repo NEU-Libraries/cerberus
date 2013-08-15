@@ -3,7 +3,7 @@ class NuCollection < ActiveFedora::Base
   include Hydra::ModelMixins::CommonMetadata  
   include Hydra::ModelMixins::RightsMetadata  
 
-  attr_accessor :nu_title, :nu_description
+  attr_accessor :nu_title, :nu_description, :issuance_date, :creator_first_name, :creator_last_name, :creator_corporate, :keyword, :identity_type, :identity, :permission_type
 
   has_metadata name: 'DC', type: NortheasternDublinCoreDatastream 
   has_metadata name: 'rightsMetadata', type: ParanoidRightsDatastream
