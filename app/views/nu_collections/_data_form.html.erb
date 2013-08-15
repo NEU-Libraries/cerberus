@@ -1,22 +1,22 @@
-<%= form_for :nu_collection, url: nu_collections_path do |f| %>
+<%= form_for :nu_collection do |f| %>
 
   <% if params[:pid].present? %>
     <%= f.hidden_field :pid, :value => params[:pid] %>
   <% end %>
 
   <p>
-    <%= f.label :nu_title, "Title:" %><br>
-    <%= f.text_field :nu_title, :value => @nu_collection.nu_title[0], required: true, pattern: ".*\\S.*" %>
+    <%= f.label :title, "Title:" %><br>
+    <%= f.text_field :title, :value => @nu_collection.nu_title[0], required: true, pattern: ".*\\S.*" %>
   </p>
  
   <p>
-    <%= f.label :nu_description, "Description:" %><br>
-    <%= f.text_area :nu_description, :value => @nu_collection.nu_description[0], required: true, pattern: ".*\\S.*" %>
+    <%= f.label :description, "Description:" %><br>
+    <%= f.text_area :description, :value => @nu_collection.nu_description[0], required: true, pattern: ".*\\S.*" %>
   </p>
 
   <p>
-    <%= f.label :issuance_date, "Date of Issuance" %><br>
-    <%= f.text_field :issuance_date, :value => @nu_collection.issuance_date[0], class: 'datepicker', required: true %> 
+    <%= f.label :date_of_issue, "Date of Issuance" %><br>
+    <%= f.text_field :date_of_issue, :value => @nu_collection.mods_date_issued[0], class: 'datepicker', required: true %> 
   </p>
 
   <h3> Personal Creator </h3>
@@ -28,7 +28,7 @@
     <%= f.text_field :creator_first_name, name:'nu_collection[creator_first_name][]', pattern: ".*\\S.*" %> <br>
 
     <%= f.label :creator_last_name, "Creator's last name:" %> 
-    <%= f.text_field :creator_last_name, name: 'nu_collection[creator_last_name][]', pattern: ".*\\S.*" %> <br>
+    <%= f.text_field :creator_last_name, value: '', name: 'nu_collection[creator_last_name][]', pattern: ".*\\S.*" %> <br>
   </div>
 
   <button type='button' class='btn btn-mini' id='add_another_personal_creator'><i class='icon-plus-sign'></i></button>
@@ -45,8 +45,8 @@
   <h3> Keywords </h3> 
 
   <div class='keyword'> 
-    <%= f.label :keyword, "Add some relevant keywords", namespace: '0' %> 
-    <%= f.text_field :keyword, namespace: '0', name: 'nu_collection[keyword][]', pattern: ".*\\S.*"%>
+    <%= f.label :keywords, "Add some relevant keywords", namespace: '0' %> 
+    <%= f.text_field :keywords, namespace: '0', name: 'nu_collection[keywords][]', pattern: ".*\\S.*"%>
   </div>
 
   <button type='button' class='btn btn-mini' id='add_another_keyword'><i class='icon-plus-sign'></i></button> 
@@ -61,8 +61,8 @@
 
   <span class='alert'> An embargoed item will be visible to only you until the day set below </span> 
 
-  <%= f.label :embargo_date, "Embargo Date:" %> 
-  <%= f.text_field :embargo_date, class: 'embargo_datepicker', required: true %> 
+  <%= f.label :embargo_release_date, "Embargo Date:" %> 
+  <%= f.text_field :embargo_release_date, class: 'embargo_datepicker', required: true %> 
 
   <br>
   <br>

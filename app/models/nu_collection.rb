@@ -1,9 +1,8 @@
 class NuCollection < ActiveFedora::Base
   include Hydra::ModelMethods
   include Hydra::ModelMixins::CommonMetadata  
-  include Hydra::ModelMixins::RightsMetadata  
-
-  attr_accessor :nu_title, :nu_description, :issuance_date, :creator_first_name, :creator_last_name, :creator_corporate, :keyword, :identity_type, :identity, :permission_type
+  include Hydra::ModelMixins::RightsMetadata
+  include ModsSetterHelpers
 
   has_metadata name: 'DC', type: NortheasternDublinCoreDatastream 
   has_metadata name: 'rightsMetadata', type: ParanoidRightsDatastream
@@ -12,7 +11,7 @@ class NuCollection < ActiveFedora::Base
   has_metadata name: 'crud', type: CrudDatastream
 
   delegate_to :DC, [:nu_title, :nu_description, :nu_identifier]
-  delegate_to :mods, [:mods_title, :mods_abstract, :mods_identifier, :mods_subject, :mods_date_issued] 
+  # delegate_to :mods, [:mods_title, :mods_abstract, :mods_identifier, :mods_subject, :mods_date_issued] 
   delegate_to :properties, [:depositor]  
 
   has_many :generic_files, property: :is_part_of 
@@ -24,20 +23,67 @@ class NuCollection < ActiveFedora::Base
     collections.keep_if { |ele| !ele.embargo_in_effect?(user) && ele.rightsMetadata.can_read?(user) } 
   end
 
-  def nu_title_display 
-    self.nu_title.first
+  def title=(string)
+    self.mods_title = string
+    self.nu_title = string 
   end
 
-  def nu_description_display 
-    self.nu_description.first 
+  def title
+    self.mods_title 
   end
 
-  def mods_title_display 
-    self.mods_title.first 
+  def identifier=(string)
+    self.nu_identifier = string 
+    self.mods_identifier = string 
   end
 
-  def mods_abstract_display 
-    self.mods_abstract.first 
+  def identifier
+    self.mods_identifier 
+  end
+
+  def description=(string)
+    self.nu_description = string 
+    self.mods_abstract = string 
+  end
+
+  def description 
+    self.mods_abstract 
+  end
+
+  def date_of_issue=(string) 
+    self.mods_date_issued = string 
+  end
+
+  def date_of_issue
+    self.mods_date_issued 
+  end
+
+  def keywords=(array_of_strings) 
+    self.mods_keyword = array_of_strings 
+  end
+
+  def keywords 
+    self.mods_keyword 
+  end
+
+  def corporate_creators=(array_of_strings) 
+    self.mods_corporate_creators = array_of_strings
+  end
+
+  def corporate_creators
+    self.mods_corporate_creators 
+  end
+
+  def personal_creators 
+    self.mods_personal_creators 
+  end
+
+  def release_embargo_date=(date) 
+    rightsMetadata.embargo_release_date = date 
+  end
+
+  def release_embargo_date 
+    rightsMetadata.embargo_release_date 
   end
 
   # Since we need access to the depositor metadata field, we handle this
@@ -55,8 +101,9 @@ class NuCollection < ActiveFedora::Base
     self.mods_title = [params[:nu_collection][:nu_title]]
     self.mods_identifier = self.id
     self.mods_date_issued = params[:nu_collection][:issuance_date]
-    self.mods.mods_keyword = params[:nu_collection][:keyword]
-    self.mods.mods_type_of_resource.mods_collection = 'yes' 
+    self.mods_keyword = params[:nu_collection][:keyword]
+    self.mods_collection = 'yes'
+    self.mods_corporate_names = params[:nu_collection][:creator_corporate]  
 
     # Complicated or validation required assignments 
     self.mods.assign_creator_personal_names(params[:nu_collection][:creator_first_name], params[:nu_collection][:creator_last_name])

@@ -54,24 +54,11 @@ class NuModsDatastream < ActiveFedora::OmDatastream
     builder.doc
   end
 
-  def mods_keyword=(ele)
-    if ele.instance_of?(String)
-      if !ele.blank? 
-        self.mods_subject.mods_keyword = ele 
-      end
-    end
-
-    if ele.instance_of?(Array) 
-      ele.select! { |keyword| !keyword.blank? } 
-      self.mods_subject.mods_keyword = ele 
-    end
-  end
-
   # Takes two arrays of equal length and turns them into correctly formatted 
   # mods_personal_name nodes. 
   def assign_creator_personal_names(first_names, last_names)
     if first_names.length != last_names.length 
-      raise "#{first_names.length} received and #{last_names.length} received, which won't do at all." 
+      raise "#{first_names.length} first names received and #{last_names.length} last names received, which won't do at all." 
     end
 
     name_pairs = Hash[first_names.zip(last_names)]
