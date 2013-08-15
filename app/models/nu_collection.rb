@@ -3,5 +3,5 @@ class NuCollection < ActiveFedora::Base
 
   has_metadata name: 'oaidc', type: NortheasternDublinCoreDatastream 
   has_metadata name: 'rightsMetadata', type: ParanoidRightsDatastream
-  # has_metadata name: 'MODS', type: NeuModsDatastream <--Need to implement this datastream type
+  # has_metadata name: 'MODS', type: NuModsDatastream <--Need to implement this datastream type
 end
