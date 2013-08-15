@@ -6,17 +6,17 @@
 
   <p>
     <%= f.label :title, "Title:" %><br>
-    <%= f.text_field :title, :value => @nu_collection.nu_title[0], required: true, pattern: ".*\\S.*" %>
+    <%= f.text_field :title, required: true, pattern: ".*\\S.*" %>
   </p>
  
   <p>
     <%= f.label :description, "Description:" %><br>
-    <%= f.text_area :description, :value => @nu_collection.nu_description[0], required: true, pattern: ".*\\S.*" %>
+    <%= f.text_area :description, required: true, pattern: ".*\\S.*" %>
   </p>
 
   <p>
     <%= f.label :date_of_issue, "Date of Issuance" %><br>
-    <%= f.text_field :date_of_issue, :value => @nu_collection.mods_date_issued[0], class: 'datepicker', required: true %> 
+    <%= f.text_field :date_of_issue, class: 'datepicker', required: true %> 
   </p>
 
   <h3> Personal Creator </h3>
@@ -28,7 +28,7 @@
     <%= f.text_field :creator_first_name, name:'nu_collection[creator_first_name][]', pattern: ".*\\S.*" %> <br>
 
     <%= f.label :creator_last_name, "Creator's last name:" %> 
-    <%= f.text_field :creator_last_name, value: '', name: 'nu_collection[creator_last_name][]', pattern: ".*\\S.*" %> <br>
+    <%= f.text_field :creator_last_name, name: 'nu_collection[creator_last_name][]', pattern: ".*\\S.*" %> <br>
   </div>
 
   <button type='button' class='btn btn-mini' id='add_another_personal_creator'><i class='icon-plus-sign'></i></button>

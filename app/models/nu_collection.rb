@@ -2,7 +2,11 @@ class NuCollection < ActiveFedora::Base
   include Hydra::ModelMethods
   include Hydra::ModelMixins::CommonMetadata  
   include Hydra::ModelMixins::RightsMetadata
+  include ActiveModel::MassAssignmentSecurity
   include ModsSetterHelpers
+
+  attr_accessible :title, :identifier, :description, :date_of_issue, :keywords 
+  attr_accessible :corporate_creators, :embargo_release_date
 
   has_metadata name: 'DC', type: NortheasternDublinCoreDatastream 
   has_metadata name: 'rightsMetadata', type: ParanoidRightsDatastream
@@ -78,11 +82,11 @@ class NuCollection < ActiveFedora::Base
     self.mods_personal_creators 
   end
 
-  def release_embargo_date=(date) 
-    rightsMetadata.embargo_release_date = date 
+  def embargo_release_date=(string) 
+    rightsMetadata.embargo_release_date = string
   end
 
-  def release_embargo_date 
+  def embargo_release_date 
     rightsMetadata.embargo_release_date 
   end
 

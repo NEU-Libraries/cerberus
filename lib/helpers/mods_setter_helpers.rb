@@ -7,7 +7,7 @@ module ModsSetterHelpers
     mods.mods_title_info.mods_title = title 
   end
 
-  def mods_title(title) 
+  def mods_title 
     mods.mods_title_info.mods_title[0]
   end
 
@@ -61,8 +61,11 @@ module ModsSetterHelpers
 
     names = first_names.zip(last_names) 
 
-    names.each do |name, index| 
-      result_array << Hash[first: name[0], last: name[1]] 
+    # NB: When accessing nested arrays of form [[first, second], [first, second]]
+    # that are all of even length, array.each do |first, second| grabs both elements 
+    # out of each nested array in sequence.  Did not know this until I looked it up. 
+    names.each do |first, last| 
+      result_array << Hash[first: first, last: last] 
     end
 
     return result_array 
