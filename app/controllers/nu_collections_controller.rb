@@ -2,7 +2,8 @@ class NuCollectionsController < ApplicationController
   def index
   end
 
-  def new    
+  def new
+    @nu_collection = NuCollection.new    
   end
 
   def create
@@ -46,6 +47,10 @@ class NuCollectionsController < ApplicationController
   end
 
   def show  
+    @nu_collection = NuCollection.find(params[:id]) 
+  end
+
+  def edit
     @nu_collection = NuCollection.find(params[:id]) 
   end
 end

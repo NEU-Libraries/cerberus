@@ -6,17 +6,17 @@
 
   <p>
     <%= f.label :nu_title, "Title:" %><br>
-    <%= f.text_field :nu_title, required: true %>
+    <%= f.text_field :nu_title, :value => @nu_collection.nu_title[0], required: true %>
   </p>
  
   <p>
     <%= f.label :nu_description, "Description:" %><br>
-    <%= f.text_area :nu_description, required: true %>
+    <%= f.text_area :nu_description, :value => @nu_collection.nu_description[0], required: true %>
   </p>
 
   <p>
     <%= f.label :issuance_date, "Date of Issuance" %><br>
-    <%= f.text_field :issuance_date, class: 'datepicker' %> 
+    <%= f.text_field :issuance_date, :value => @nu_collection.issuance_date[0], class: 'datepicker' %> 
   </p>
 
   <h3> Personal Creator </h3>
