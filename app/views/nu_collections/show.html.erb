@@ -1,6 +1,6 @@
 <% if @nu_collection.pid != 'neu:1' %>
   <ul class="breadcrumb">
-    <li><%= link_to @nu_collection.parent_collection.nu_title_display, nu_collections_path + '/' + @nu_collection.parent_collection.pid %> <span class="divider">/</span></li>
+    <li><%= link_to @nu_collection.parent.nu_title_display, nu_collections_path + '/' + @nu_collection.parent.pid %> <span class="divider">/</span></li>
     <li class="active"><%= @nu_collection.nu_title_display %></li>
   </ul>
 <% else %>
