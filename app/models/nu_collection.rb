@@ -3,7 +3,7 @@ class NuCollection < ActiveFedora::Base
   include Hydra::ModelMixins::CommonMetadata  
   include Hydra::ModelMixins::RightsMetadata  
 
-  attr_accessor :nu_title, :nu_description, :issuance_date, :creator_first_name, :creator_last_name, :creator_corporate, :keyword, :identity_type, :identity, :permission_type
+  attr_accessor :nu_title, :nu_description, :issuance_date, :creator_first_name, :embargo_date, :creator_last_name, :creator_corporate, :keyword, :identity_type, :identity, :permission_type
 
   has_metadata name: 'DC', type: NortheasternDublinCoreDatastream 
   has_metadata name: 'rightsMetadata', type: ParanoidRightsDatastream
@@ -38,6 +38,14 @@ class NuCollection < ActiveFedora::Base
 
   def mods_abstract_display 
     self.mods_abstract.first 
+  end
+
+  def parent_collection
+    if self.relationships(:is_part_of).any?
+      NuCollection.find(self.relationships(:is_part_of).first.partition('/').last)
+    else
+      nil
+    end
   end
 
   # Since we need access to the depositor metadata field, we handle this

@@ -37,6 +37,8 @@ class NuCollectionsController < ApplicationController
 
     if params[:nu_collection][:pid].present?
       @nu_collection.add_relationship("isPartOf", "info:fedora/#{Sufia::Noid.namespaceize(params[:nu_collection][:pid])}")
+    elsif @nu_collection.pid != '1'
+      raise "New collections must have a parent."
     end
 
     @nu_collection.save!
