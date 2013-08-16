@@ -3,12 +3,12 @@ $(document).ready(function () {
   'use strict';
 
   //Add a datepicker to the date of issuance field. 
-  $('#nu_collection_issuance_date').datepicker({
+  $('#nu_collection_date_of_issue').datepicker({
     dateFormat: 'yy-mm-dd',
     defaultDate: null
   });
 
-  $('input#nu_collection_embargo_date').datepicker({
+  $('input#nu_collection_embargo_release_date').datepicker({
     dateFormat: 'yy-mm-dd',
     defaultDate: + 1,
     minDate: + 1

@@ -1,0 +1,19 @@
+<% if names.empty? %>
+	<div class='personal_creator'> 
+		<%= f.label :creator_first_name, "Creator's first name:" %> 
+		<%= f.text_field :creator_first_name, value: "", name: 'nu_collection[personal_creators][creator_first_names][]', pattern: ".*\\S.*" %><br> 
+
+		<%= f.label :creator_last_name, "Creator's last name:" %> 
+		<%= f.text_field :creator_last_name, value: "", name: 'nu_collection[personal_creators][creator_last_names][]', pattern: ".*\\S.*" %> 
+	</div>
+<% else %> 
+	<% names.each do |name| %> 
+		<div class='personal_creator'> 
+			<%= f.label :creator_first_name, "Creator's first name:" %> 
+			<%= f.text_field :creator_first_name, value: name[:first], name: 'nu_collection[personal_creators][creator_first_names][]', pattern: ".*\\S.*" %><br> 
+
+			<%= f.label :creator_last_name, "Creator's last name:" %> 
+			<%= f.text_field :creator_last_name, value: name[:last], name: 'nu_collection[personal_creators][creator_last_names][]', pattern: ".*\\S.*" %><br> 
+		</div>
+	<% end %> 
+<% end %> 

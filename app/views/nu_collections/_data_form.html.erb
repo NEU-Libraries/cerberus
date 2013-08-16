@@ -1,4 +1,4 @@
-<%= form_for :nu_collection do |f| %>
+<%= form_for @nu_collection do |f| %>
 
   <% if params[:pid].present? %>
     <%= f.hidden_field :pid, :value => params[:pid] %>
@@ -23,37 +23,24 @@
 
   <span class='alert'>A complete individual name and/or a corporate creator are required</span>
 
-  <div class='personal_creator'>
-    <%= f.label :creator_first_name, "Creator's first name:" %>
-    <%= f.text_field :creator_first_name, name:'nu_collection[creator_first_name][]', pattern: ".*\\S.*" %> <br>
-
-    <%= f.label :creator_last_name, "Creator's last name:" %> 
-    <%= f.text_field :creator_last_name, name: 'nu_collection[creator_last_name][]', pattern: ".*\\S.*" %> <br>
-  </div>
+  <%= render partial: 'data_form_creator_personal_names', locals: {:f => f, :names => @nu_collection.personal_creators }  %> 
 
   <button type='button' class='btn btn-mini' id='add_another_personal_creator'><i class='icon-plus-sign'></i></button>
 
   <h3> Corporate Creator </h3> 
 
-  <div class='corporate_creator'> 
-    <%= f.label :creator_corporate, "Enter an organizational name if an organization should be given primary credit for creation of this collection:" %> 
-    <%= f.text_field :creator_corporate, name: 'nu_collection[creator_corporate][]', pattern: ".*\\S.*" %> <br>
-  </div>
+  <%= render partial: 'data_form_corporate_creators', locals: {:f => f, :corporate_names => @nu_collection.corporate_creators } %>
 
   <button type='button' class='btn btn-mini' id="add_another_corporate_creator"><i class='icon-plus-sign'></i></button> 
 
-  <h3> Keywords </h3> 
+  <h3> Keywords </h3>
 
-  <div class='keyword'> 
-    <%= f.label :keywords, "Add some relevant keywords", namespace: '0' %> 
-    <%= f.text_field :keywords, namespace: '0', name: 'nu_collection[keywords][]', pattern: ".*\\S.*"%>
-  </div>
+  <%= render partial: 'data_form_keywords', locals: {:f => f, :keywords => @nu_collection.keywords } %>  
 
   <button type='button' class='btn btn-mini' id='add_another_keyword'><i class='icon-plus-sign'></i></button> 
 
   <h3> Permissions </h3>
-
-  <%= render partial: 'data_form_permissions_element', locals: {:f => f} %> 
+ 
 
   <button type='button' class="btn btn-mini" id="add_another_permission"><i class="icon-plus-sign"></i></button>
 
@@ -62,7 +49,7 @@
   <span class='alert'> An embargoed item will be visible to only you until the day set below </span> 
 
   <%= f.label :embargo_release_date, "Embargo Date:" %> 
-  <%= f.text_field :embargo_release_date, class: 'embargo_datepicker', required: true %> 
+  <%= f.text_field :embargo_release_date, class: 'embargo_datepicker' %> 
 
   <br>
   <br>

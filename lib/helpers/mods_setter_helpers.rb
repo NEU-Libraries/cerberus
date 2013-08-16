@@ -25,7 +25,7 @@ module ModsSetterHelpers
   end
 
   def mods_keyword
-    mods.mods_subject[0].mods_keyword 
+    mods.mods_subject(0).mods_keyword 
   end
 
   def mods_corporate_creators=(creators) 
@@ -50,6 +50,10 @@ module ModsSetterHelpers
 
   def mods_date_issued
     mods.mods_origin_info(0).mods_date_issued[0] 
+  end
+
+  def set_mods_personal_creators(first_names, last_names) 
+    mods.assign_creator_personal_names(first_names, last_names) 
   end
 
   # Should return [{first: "Will", last: "Jackson"}, {first: "next_first", last: "etc"}]

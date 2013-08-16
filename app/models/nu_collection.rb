@@ -6,7 +6,7 @@ class NuCollection < ActiveFedora::Base
   include ModsSetterHelpers
 
   attr_accessible :title, :identifier, :description, :date_of_issue, :keywords 
-  attr_accessible :corporate_creators, :embargo_release_date
+  attr_accessible :corporate_creators, :personal_creators, :embargo_release_date
 
   has_metadata name: 'DC', type: NortheasternDublinCoreDatastream 
   has_metadata name: 'rightsMetadata', type: ParanoidRightsDatastream
@@ -25,6 +25,10 @@ class NuCollection < ActiveFedora::Base
   def self.find_all_viewable(user) 
     collections = NuCollection.find(:all)
     collections.keep_if { |ele| !ele.embargo_in_effect?(user) && ele.rightsMetadata.can_read?(user) } 
+  end
+
+  def parent=(collection_id) 
+     self.add_relationship("isPartOf", "info:fedora/#{Sufia::Noid.namespaceize(collection_id)}")
   end
 
   def title=(string)
@@ -76,6 +80,13 @@ class NuCollection < ActiveFedora::Base
 
   def corporate_creators
     self.mods_corporate_creators 
+  end
+
+  def personal_creators=(hash)
+    first_names = hash['creator_first_names'] 
+    last_names = hash['creator_last_names']  
+
+    self.set_mods_personal_creators(first_names, last_names) 
   end
 
   def personal_creators 
