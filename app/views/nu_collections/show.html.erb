@@ -12,9 +12,9 @@
 <% end %>
 
 <p class='well'>
-  <% if @nu_collection.mods_abstract_display.empty? %> 
+  <% if @nu_collection.description.empty? %> 
     <span> No abstract has been provided for this Collection. </span>
   <% else %> 
-    <%= @nu_collection.mods_abstract_display %>
+    <%= @nu_collection.description %>
   <% end %> 
 </p>

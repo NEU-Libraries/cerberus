@@ -1,9 +1,14 @@
 class NuCollection < ActiveFedora::Base
   include Hydra::ModelMethods
   include Hydra::ModelMixins::CommonMetadata  
-  include Hydra::ModelMixins::RightsMetadata  
+  include Hydra::ModelMixins::RightsMetadata
+  include ActiveModel::MassAssignmentSecurity
+  include ModsSetterHelpers
 
-  attr_accessor :nu_title, :nu_description, :issuance_date, :creator_first_name, :embargo_date, :creator_last_name, :creator_corporate, :keyword, :identity_type, :identity, :permission_type
+  attr_accessible :title, :description, :date_of_issue, :keywords 
+  attr_accessible :corporate_creators, :personal_creators, :embargo_release_date
+
+  attr_protected :identifier 
 
   has_metadata name: 'DC', type: NortheasternDublinCoreDatastream 
   has_metadata name: 'rightsMetadata', type: ParanoidRightsDatastream
@@ -12,7 +17,7 @@ class NuCollection < ActiveFedora::Base
   has_metadata name: 'crud', type: CrudDatastream
 
   delegate_to :DC, [:nu_title, :nu_description, :nu_identifier]
-  delegate_to :mods, [:mods_title, :mods_abstract, :mods_identifier, :mods_subject, :mods_date_issued] 
+  # delegate_to :mods, [:mods_title, :mods_abstract, :mods_identifier, :mods_subject, :mods_date_issued] 
   delegate_to :properties, [:depositor]  
 
   has_many :generic_files, property: :is_part_of 
@@ -24,28 +29,90 @@ class NuCollection < ActiveFedora::Base
     collections.keep_if { |ele| !ele.embargo_in_effect?(user) && ele.rightsMetadata.can_read?(user) } 
   end
 
-  def nu_title_display 
-    self.nu_title.first
+  def parent=(collection_id) 
+     self.add_relationship("isPartOf", "info:fedora/#{Sufia::Noid.namespaceize(collection_id)}")
   end
 
-  def nu_description_display 
-    self.nu_description.first 
-  end
-
-  def mods_title_display 
-    self.mods_title.first 
-  end
-
-  def mods_abstract_display 
-    self.mods_abstract.first 
-  end
-
-  def parent_collection
+  def parent
     if self.relationships(:is_part_of).any?
       NuCollection.find(self.relationships(:is_part_of).first.partition('/').last)
     else
       nil
     end
+  end
+
+  def title=(string)
+    self.mods_title = string
+    self.nu_title = string 
+  end
+
+  def title
+    self.mods_title 
+  end
+
+  def identifier=(string)
+    self.nu_identifier = string 
+    self.mods_identifier = string 
+  end
+
+  def identifier
+    self.mods_identifier 
+  end
+
+  def description=(string)
+    self.nu_description = string 
+    self.mods_abstract = string 
+  end
+
+  def description 
+    self.mods_abstract 
+  end
+
+  def date_of_issue=(string) 
+    self.mods_date_issued = string 
+  end
+
+  def date_of_issue
+    self.mods_date_issued 
+  end
+
+  def keywords=(array_of_strings) 
+    self.mods_keyword = array_of_strings 
+  end
+
+  def keywords 
+    self.mods_keyword 
+  end
+
+  def corporate_creators=(array_of_strings) 
+    self.mods_corporate_creators = array_of_strings
+  end
+
+  def corporate_creators
+    self.mods_corporate_creators 
+  end
+
+  def personal_creators=(hash)
+    first_names = hash['creator_first_names'] 
+    last_names = hash['creator_last_names']  
+
+    self.set_mods_personal_creators(first_names, last_names) 
+  end
+
+  def personal_creators 
+    self.mods_personal_creators 
+  end
+
+  def embargo_release_date=(string) 
+    self.rightsMetadata.embargo_release_date = string
+  end
+
+  def embargo_release_date 
+    rightsMetadata.embargo_release_date 
+  end
+
+  def permissions=(hash)
+    self.set_permissions_from_new_form(hash) 
   end
 
   # Since we need access to the depositor metadata field, we handle this
@@ -63,8 +130,9 @@ class NuCollection < ActiveFedora::Base
     self.mods_title = [params[:nu_collection][:nu_title]]
     self.mods_identifier = self.id
     self.mods_date_issued = params[:nu_collection][:issuance_date]
-    self.mods.mods_keyword = params[:nu_collection][:keyword]
-    self.mods.mods_type_of_resource.mods_collection = 'yes' 
+    self.mods_keyword = params[:nu_collection][:keyword]
+    self.mods_collection = 'yes'
+    self.mods_corporate_names = params[:nu_collection][:creator_corporate]  
 
     # Complicated or validation required assignments 
     self.mods.assign_creator_personal_names(params[:nu_collection][:creator_first_name], params[:nu_collection][:creator_last_name])
