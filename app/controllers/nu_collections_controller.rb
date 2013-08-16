@@ -14,6 +14,7 @@ class NuCollectionsController < ApplicationController
     @nu_collection = NuCollection.new(params[:nu_collection])  
 
     if @nu_collection.save!
+      @nu_collection.identifier = @nu_collection.pid 
       redirect_to(@nu_collection, notice: "Collection #{@nu_collection.title} was created successfully.") 
     else
       redirect_to(new_nu_collection_url)

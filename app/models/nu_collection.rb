@@ -5,8 +5,10 @@ class NuCollection < ActiveFedora::Base
   include ActiveModel::MassAssignmentSecurity
   include ModsSetterHelpers
 
-  attr_accessible :title, :identifier, :description, :date_of_issue, :keywords 
+  attr_accessible :title, :description, :date_of_issue, :keywords 
   attr_accessible :corporate_creators, :personal_creators, :embargo_release_date
+
+  attr_protected :identifier 
 
   has_metadata name: 'DC', type: NortheasternDublinCoreDatastream 
   has_metadata name: 'rightsMetadata', type: ParanoidRightsDatastream
@@ -20,7 +22,7 @@ class NuCollection < ActiveFedora::Base
 
   has_many :generic_files, property: :is_part_of 
   has_many :nu_collections, property: :is_part_of 
-
+  
   # Return all collections that this user can read
   def self.find_all_viewable(user) 
     collections = NuCollection.find(:all)
@@ -94,11 +96,15 @@ class NuCollection < ActiveFedora::Base
   end
 
   def embargo_release_date=(string) 
-    rightsMetadata.embargo_release_date = string
+    self.rightsMetadata.embargo_release_date = string
   end
 
   def embargo_release_date 
     rightsMetadata.embargo_release_date 
+  end
+
+  def permissions=(hash)
+    self.set_permissions_from_new_form(hash) 
   end
 
   # Since we need access to the depositor metadata field, we handle this

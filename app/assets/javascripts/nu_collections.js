@@ -78,13 +78,13 @@ $(document).ready(function () {
     var new_permission_count = $('.permission').length;
 
     var identity_type_id = new_permission_count + '_nu_collection_identity_type';
-    var identity_type_name = 'nu_collection[permissions' + new_permission_count + '][identity_type]';
+    var identity_type_name = 'nu_collection[permissions][permissions' + new_permission_count + '][identity_type]';
 
     var identity_id = new_permission_count + '_nu_collection_identity';
-    var identity_name = 'nu_collection[permissions' + new_permission_count + '][identity]';
+    var identity_name = 'nu_collection[permissions][permissions' + new_permission_count + '][identity]';
 
     var permission_type_id = new_permission_count + '_nu_collection_permission_type'; 
-    var permission_type_name = 'nu_collection[permissions' + new_permission_count + '][permission_type]';
+    var permission_type_name = 'nu_collection[permissions][permissions' + new_permission_count + '][permission_type]';
 
     var remove_button = "<button type='button' class='remove_permission'>Remove Permission</button>"; 
 

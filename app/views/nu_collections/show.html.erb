@@ -1,13 +1,13 @@
-<h2><%= @nu_collection.nu_title_display %></h2>
+<h2><%= @nu_collection.title %></h2>
 
 <% if flash[:notice] %>
 	<div class="notice"><%= flash[:notice] %></div>
 <% end %>
 
 <p class='well'>
-  <% if @nu_collection.mods_abstract_display.empty? %> 
+  <% if @nu_collection.description.empty? %> 
     <span> No abstract has been provided for this Collection. </span>
   <% else %> 
-    <%= @nu_collection.mods_abstract_display %>
+    <%= @nu_collection.description %>
   <% end %> 
 </p>

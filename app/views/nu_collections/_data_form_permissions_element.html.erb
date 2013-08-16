@@ -1,15 +1,34 @@
-<div class='permission'>
+<% if permissions.empty? %> 
+  <div class='permission'> 
 
-    <h4> New Permission Element </h4>
+    <h4> New Permission Element </h4> 
 
-    <%= f.label :identity_type, "Are you trying to add a person or a group?", namespace: '0' %> 
-    <%= f.select :identity_type, [['Group', 'group'], ['Person', 'person']], {}, namespace: '0', name: 'nu_collection[permissions0][identity_type]', required: true %> 
-    <br>
+    <%= label_tag "nu_collection[permissions][permissions0][identity_type]", "Are you trying to add a person or a group?" %> 
+    <%= select_tag 'nu_collection[permissions][permissions0][identity_type]', options_for_select(['person', 'group']) %>
 
-    <%= f.label :identity, "Enter NUID or group name", namespace: '0' %> 
-    <%= f.text_field :identity, namespace: '0', name: 'nu_collection[permissions0][identity]', pattern: ".*\\S.*"  %> <br>
+    <%= f.label :identity, "Enter NUID or group name" %> 
+    <%= f.text_field :identity, value: "", name: 'nu_collection[permissions][permissions0][identity]', pattern: ".*\\S.*" %> <br>
 
-    <%= f.label :permission_type, "Should this identity be allowed to read or edit?", namespace: '0' %> 
-    <%= f.select :permission_type, [['Read', 'read'], ['Edit', 'edit']], {}, namespace: '0', required: true, name: 'nu_collection[permissions0][permission_type]' %> 
-    <br>
-</div>
+    <%= label_tag "nu_collection[permissions][permissions0][permission_type]", "Should this identity be allowed to read or edit?" %>
+    <%= select_tag 'nu_collection[permissions][permissions0][permission_type]', options_for_select(['read', 'edit']) %>
+  </div>
+<% else %> 
+  <% permissions.each_with_index do |perm, index| %>
+    <% if perm[:name] != current_user.nuid %>  
+      <div class='permission'>
+
+        <h4> New Permission Element </h4>
+
+        <%= label_tag "nu_collection[permissions][permissions#{index}][identity_type]", "Are you trying to add a person or a group?" %> 
+        <%= select_tag "nu_collection[permissions][permissions#{index}][identity_type]", options_for_select(['person', 'group'], perm[:type]) %> 
+
+        <%= f.label :identity, "Enter NUID or group name" %> 
+        <%= f.text_field :identity, value: perm[:name], name: "nu_collection[permissions][permissions#{index}][identity]", pattern: ".*\\S.*"  %> <br>
+
+        <%= label_tag "nu_collection[permissions][permissions#{index}][identity_type]", "Should this identity be allowed to read or edit?" %>
+        <%= select_tag "nu_collections[permissions][permissions#{index}][permission_type]", options_for_select(['read', 'edit'], perm[:access]) %>
+        <br>
+      </div>
+    <% end %> 
+  <% end %> 
+<% end %> 

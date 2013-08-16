@@ -40,7 +40,8 @@
   <button type='button' class='btn btn-mini' id='add_another_keyword'><i class='icon-plus-sign'></i></button> 
 
   <h3> Permissions </h3>
- 
+
+  <%= render partial: 'data_form_permissions_element', locals: {:f => f, :permissions => @nu_collection.permissions } %> 
 
   <button type='button' class="btn btn-mini" id="add_another_permission"><i class="icon-plus-sign"></i></button>
 
