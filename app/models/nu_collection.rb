@@ -5,7 +5,7 @@ class NuCollection < ActiveFedora::Base
   include ActiveModel::MassAssignmentSecurity
   include ModsSetterHelpers
 
-  attr_accessible :title, :description, :date_of_issue, :keywords 
+  attr_accessible :title, :description, :date_of_issue, :keywords, :parent 
   attr_accessible :corporate_creators, :personal_creators, :embargo_release_date
 
   attr_protected :identifier 
@@ -29,8 +29,8 @@ class NuCollection < ActiveFedora::Base
     collections.keep_if { |ele| !ele.embargo_in_effect?(user) && ele.rightsMetadata.can_read?(user) } 
   end
 
-  def parent=(collection_id) 
-     self.add_relationship("isPartOf", "info:fedora/#{Sufia::Noid.namespaceize(collection_id)}")
+  def parent=(collection_id)
+    self.add_relationship("isPartOf", "info:fedora/#{Sufia::Noid.namespaceize(collection_id)}")
   end
 
   def parent

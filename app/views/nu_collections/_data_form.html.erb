@@ -1,7 +1,7 @@
 <%= form_for @nu_collection do |f| %>
 
-  <% if params[:pid].present? %>
-    <%= f.hidden_field :pid, :value => params[:pid] %>
+  <% if params[:parent].present? %>
+    <%= f.hidden_field :parent, :value => params[:parent] %>
   <% end %>
 
   <p>
