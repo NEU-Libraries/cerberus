@@ -145,25 +145,6 @@ class NuCollection < ActiveFedora::Base
     end
   end
 
-  # The params we get passed aren't quite clean enough to leverage the usual Rails form helpers
-  # So we're making Datastreams responsible for knowing how to construct their own MODS metadata
-  # from the params passed in on the #new action 
-  def create_mods_stream(params)
-    # Simple assignments
-    self.mods_abstract = params[:nu_collection][:nu_description]
-    self.mods_title = [params[:nu_collection][:nu_title]]
-    self.mods_identifier = self.id
-    self.mods_date_issued = params[:nu_collection][:issuance_date]
-    self.mods_keyword = params[:nu_collection][:keyword]
-    self.mods_collection = 'yes'
-    self.mods_corporate_names = params[:nu_collection][:creator_corporate]  
-
-    # Complicated or validation required assignments 
-    self.mods.assign_creator_personal_names(params[:nu_collection][:creator_first_name], params[:nu_collection][:creator_last_name])
-    self.mods.assign_corporate_names(params[:nu_collection][:creator_corporate])
-  end
-
-
   # Accepts a hash of the following form:
   # ex. {'permissions1' => {'identity_type' => val, 'identity' => val, 'permission_type' => val }, 'permissions2' => etc. etc. }
   # Tosses out param sets that are missing an identity.  Which is nice.   
