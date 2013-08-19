@@ -20,8 +20,15 @@ class ParanoidRightsDatastream < Hydra::Datastream::RightsMetadata
   end
 
   # Checks whether or not a given user can read (view/download) this collection or file
-  def can_read?(user) 
-    can_read_or_edit?(user, :read) 
+  def can_read?(user)
+    #Allow read access in the case of public read 
+    if self.permissions({group: 'public'}) == 'read' 
+      return true 
+    elsif self.permissions({group: 'registered'}) == 'read' && !user.nil?
+      return true 
+    else 
+      can_read_or_edit?(user, :read)
+    end 
   end
 
   #Checks whether or not a given user can edit this collection or file
@@ -32,14 +39,13 @@ class ParanoidRightsDatastream < Hydra::Datastream::RightsMetadata
   protected
 
   def can_read_or_edit?(user, access_requested)
-    if !user.instance_of?(User) # Cover the case where current_user passes in nil, indicating unsigned access
+    if user.nil? # Cover the case where current_user passes in nil, indicating unsigned access
       public_rights = self.permissions({group: 'public'}) 
       return public_rights == 'read' && access_requested == :read 
     end
 
     # Grab the user's individual permissions 
     uid = user.nuid 
-    rights = self.permissions({person: uid})
 
     # Grab all groups associated with this user
     user_groups = user.group_list 

@@ -5,7 +5,7 @@ class NuCollection < ActiveFedora::Base
   include ActiveModel::MassAssignmentSecurity
   include ModsSetterHelpers
 
-  attr_accessible :title, :description, :date_of_issue, :keywords, :parent 
+  attr_accessible :title, :description, :date_of_issue, :keywords, :parent, :mass_permissions 
   attr_accessible :corporate_creators, :personal_creators, :embargo_release_date
 
   attr_protected :identifier 
@@ -26,7 +26,8 @@ class NuCollection < ActiveFedora::Base
   # Return all collections that this user can read
   def self.find_all_viewable(user) 
     collections = NuCollection.find(:all)
-    collections.keep_if { |ele| !ele.embargo_in_effect?(user) && ele.rightsMetadata.can_read?(user) } 
+    filtered = collections.select { |ele| !ele.embargo_in_effect?(user) && ele.rightsMetadata.can_read?(user) }
+    return filtered 
   end
 
   def parent=(collection_id)
@@ -115,10 +116,33 @@ class NuCollection < ActiveFedora::Base
     self.set_permissions_from_new_form(hash) 
   end
 
+  # Might need to be broken into a RightsMetadata module 
+  def mass_permissions=(value) 
+    if value == 'public' 
+      self.rightsMetadata.permissions({group: 'public'}, 'read') 
+    elsif value == 'registered' 
+      self.rightsMetadata.permissions({group: 'registered'}, 'read') 
+    end
+  end
+
+  def mass_permissions
+    if self.rightsMetadata.permissions({group: 'public'}) == 'read' 
+      return 'public' 
+    elsif self.rightsMetadata.permissions({group: 'registered'}) == 'read' 
+      return 'registered' 
+    else 
+      return 'private' 
+    end
+  end
+
   # Since we need access to the depositor metadata field, we handle this
   # at this level. 
   def embargo_in_effect?(user)
-    return self.rightsMetadata.under_embargo? && ! (self.depositor == user.nuid)  
+    if user.nil?
+      return self.rightsMetadata.under_embargo?
+    else
+      return self.rightsMetadata.under_embargo? && !(self.depositor[0] == user.nuid)
+    end
   end
 
   # The params we get passed aren't quite clean enough to leverage the usual Rails form helpers
