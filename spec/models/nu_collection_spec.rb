@@ -118,7 +118,8 @@ describe NuCollection do
   end
 
   describe "Embargo Checks" do
-    let(:embargoed_collection) { NuCollection.new }  
+    let(:embargoed_collection) { NuCollection.new }
+    let(:no_embargo) { NuCollection.new }   
     let(:bill) { FactoryGirl.create(:bill) } 
     let(:bo) { FactoryGirl.create(:bo) } 
 
@@ -127,16 +128,28 @@ describe NuCollection do
       embargoed_collection.depositor = bill.nuid  
     end
 
-    it "Is embargoed for bo" do 
+    it "Embargoed collection is embargoed for bo" do 
       embargoed_collection.embargo_in_effect?(bo).should be true 
     end
 
-    it "Is not embargoed for the depositor, bill" do 
+    it "Embargoed collection is not embargoed for the depositor, bill" do 
       embargoed_collection.embargo_in_effect?(bill).should be false 
     end
 
-    it "Is embargoed for the general public" do 
+    it "Embargoed collection is embargoed for the general public" do 
       embargoed_collection.embargo_in_effect?(nil).should be true 
+    end
+
+    it "Embargoless collection is not embargoed for bo" do 
+      no_embargo.embargo_in_effect?(bo).should be false 
+    end
+
+    it "Embargoless collection is not embargoed for the depositor, bill" do 
+      no_embargo.embargo_in_effect?(bill).should be false 
+    end
+
+    it "Embargoless collection is not embargoed for the general public" do 
+      no_embargo.embargo_in_effect?(bo).should be false 
     end
   end
 end
