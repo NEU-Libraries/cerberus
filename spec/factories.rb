@@ -1,3 +1,4 @@
+# Users
 FactoryGirl.define do 
   factory :user do 
     sequence(:email) { |n| "person_#{n}@example.com" } 
@@ -23,6 +24,7 @@ FactoryGirl.define do
   end
 end
 
+# Mods Records
 FactoryGirl.define do 
   factory :mods, class: NuModsDatastream do 
     sequence(:mods_title) { |n| "Datastream #{n}" } 
@@ -55,6 +57,74 @@ FactoryGirl.define do
     factory :valid_mods do 
       with_keywords_valid 
       with_corporate_creator_valid 
+    end
+  end
+end
+
+# Collections
+FactoryGirl.define do 
+  factory :collection, class: NuCollection do
+    sequence(:title) { |n| "Collection #{n}" } 
+    parent 'neu:1'
+
+    trait :assigned_identifier do 
+      after(:create) do |collection|
+        collection.identifier = collection.pid 
+      end
+    end
+
+    trait :with_keywords do 
+      keywords ['kw one', 'kw two', 'kw three'] 
+    end
+
+    trait :not_embargoed do 
+      embargo_release_date  { Date.yesterday.to_s } 
+    end
+
+    trait :embargoed do 
+      embargo_release_date { Date.tomorrow.to_s } 
+    end
+
+    trait :issued_yesterday do 
+      date_of_issue { Date.yesterday.to_s } 
+    end
+
+    trait :with_description do 
+      sequence(:description) { |n| "This is collection #{n}." } 
+    end
+
+    trait :with_corporate_creators do 
+      corporate_creators ['Corp One', 'Corp Two', 'Corp Three'] 
+    end
+
+    trait :with_personal_creators do 
+      personal_creators {{ 'creator_first_names' => ["David", "Steven", "Will"], 
+                          'creator_last_names' => ["Cliff", "Bassett", "Jackson"]}}
+    end
+
+    trait :public_read do 
+      mass_permissions 'public'
+    end
+
+    trait :registered_read do 
+      mass_permissions 'registered' 
+    end
+
+    trait :with_two_edit_perms do
+      permissions {{ 'permissions0' => { 'identity_type' => 'person', 'identity' => 'ident one', 'permission_type' => 'edit' }, 
+                    'permissions1' => { 'identity_type' => 'group', 'identity' => 'faculty', 'permission_type' => 'edit' }}}
+    end
+
+    factory :valid_not_embargoed do 
+      with_keywords 
+      not_embargoed 
+      issued_yesterday 
+      with_description 
+      with_corporate_creators 
+      with_personal_creators 
+      public_read 
+      with_two_edit_perms
+      assigned_identifier
     end
   end
 end
