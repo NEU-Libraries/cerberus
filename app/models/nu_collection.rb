@@ -119,9 +119,14 @@ class NuCollection < ActiveFedora::Base
   # Might need to be broken into a RightsMetadata module 
   def mass_permissions=(value) 
     if value == 'public' 
+      self.rightsMetadata.permissions({group: 'registered'}, 'none') 
       self.rightsMetadata.permissions({group: 'public'}, 'read') 
-    elsif value == 'registered' 
+    elsif value == 'registered'
+      self.rightsMetadata.permissions({group: 'public'}, 'none')  
       self.rightsMetadata.permissions({group: 'registered'}, 'read') 
+    elsif value == 'private' 
+      self.rightsMetadata.permissions({group: 'public'}, 'none') 
+      self.rightsMetadata.permissions({group: 'registered'}, 'none') 
     end
   end
 

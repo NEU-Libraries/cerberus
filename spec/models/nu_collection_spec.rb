@@ -87,9 +87,36 @@ describe NuCollection do
       c.mass_permissions.should == 'registered' 
     end
 
+    it "Gets rid of public mass perm when registered is set" do 
+      c.mass_permissions = 'public' 
+      c.mass_permissions.should == 'public' 
+
+      c.mass_permissions = 'registered' 
+      c.mass_permissions.should == 'registered' 
+      c.rightsMetadata.permissions({group: 'public'}).should == 'none' 
+    end
+
+    it "Gets rid of registered mass perm when public is set" do 
+      c.mass_permissions = 'registered' 
+      c.mass_permissions.should == 'registered' 
+
+      c.mass_permissions = 'public' 
+      c.mass_permissions.should == 'public' 
+      c.rightsMetadata.permissions({group: 'registered'}).should == 'none' 
+    end 
+
     it "Sets the 'private' mass permission correctly" do 
       c.mass_permissions = 'private' 
       c.mass_permissions.should == 'private' 
+    end
+
+    it "Blows away prior perms when 'private' is set" do 
+      c.mass_permissions = 'public' 
+      c.mass_permissions.should == 'public' 
+
+      c.mass_permissions = 'private'
+      c.mass_permissions.should == 'private' 
+      c.rightsMetadata.permissions({group: 'public'}).should == 'none'  
     end
   end
 

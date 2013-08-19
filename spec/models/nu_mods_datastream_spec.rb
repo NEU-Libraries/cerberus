@@ -122,12 +122,6 @@ describe NuModsDatastream do
         invalid_mods.mods_personal_name.length.should == 1
         invalid_mods.mods_personal_name(0).should == ["WillJackson"] 
       end
-
-      it "Assigns no keywords" do 
-        pending "Integrate custom setter keywords= into rest of application for this test to be relevant" 
-        invalid_mods.mods_keyword = crap_keywords 
-        invalid_mods.mods_subject.mods_keyword.length.should == 0
-      end
     end
   end
 end
