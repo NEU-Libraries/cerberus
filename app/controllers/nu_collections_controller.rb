@@ -1,18 +1,19 @@
 class NuCollectionsController < ApplicationController
+  before_filter :authenticate_user!, only: [:new, :edit, :create ] 
+
   def index
   end
 
   def new
-    if !current_user 
-      redirect_to('/') 
-    else 
-      @nu_collection = NuCollection.new    
-    end
+    @nu_collection = NuCollection.new    
   end
 
   def create
+    @nu_collection = NuCollection.new(params[:nu_collection])
 
-    @nu_collection = NuCollection.new(params[:nu_collection])       
+    #Assign misc. data
+    @nu_collection.depositor = current_user.nuid 
+    @nu_collection.rightsMetadata.permissions({person: current_user.nuid}, 'edit')        
 
     if @nu_collection.save! #Have to hit Fedora before we have a valid identifier assigned.
       @nu_collection.identifier = @nu_collection.pid 
@@ -30,11 +31,7 @@ class NuCollectionsController < ApplicationController
   end
 
   def index
-    if ! current_user 
-      redirect_to('/') 
-    else 
-      @all_collections = NuCollection.find_all_viewable(current_user) 
-    end
+    @all_collections = NuCollection.find_all_viewable(current_user) 
   end
 
   def show  
