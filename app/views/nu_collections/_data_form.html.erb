@@ -37,7 +37,16 @@
 
   <%= render partial: 'data_form_keywords', locals: {:f => f, :keywords => @nu_collection.keywords } %>  
 
-  <button type='button' class='btn btn-mini' id='add_another_keyword'><i class='icon-plus-sign'></i></button> 
+  <button type='button' class='btn btn-mini' id='add_another_keyword'><i class='icon-plus-sign'></i></button>
+
+  <h3> Mass Permissions </h3> 
+  <p> Setting to 'public' will allow anyone accessing the site to see your collection. </p>
+  <p> Setting to 'registered' will only allow authenticated users to see your collection. </p>
+  <p> Setting to 'private' will only allow users and groups explicated below to see your collection. </p> 
+
+  <%= label_tag 'nu_collection[mass_permissions]', "Choose Mass Permissions:" %>
+  <%= select_tag 'nu_collection[mass_permissions]', options_for_select(['private', 'public', 'registered'], @nu_collection.mass_permissions) %> 
+
 
   <h3> Permissions </h3>
 
