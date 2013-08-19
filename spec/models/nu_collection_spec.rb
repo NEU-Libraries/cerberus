@@ -2,78 +2,141 @@ require 'spec_helper'
 
 describe NuCollection do 
 
-  before do 
-    @collection = NuCollection.new() 
+  let(:collection) { NuCollection.new } 
+
+  subject { collection } 
+
+  it { should respond_to(:title=) } 
+  it { should respond_to(:title) } 
+  it { should respond_to(:parent=) } 
+  it { should respond_to(:parent) } 
+  it { should respond_to(:identifier=) } 
+  it { should respond_to(:identifier) } 
+  it { should respond_to(:description=) }
+  it { should respond_to(:description) }  
+  it { should respond_to(:date_of_issue=) } 
+  it { should respond_to(:date_of_issue) } 
+  it { should respond_to(:keywords=) } 
+  it { should respond_to(:keywords) } 
+  it { should respond_to(:corporate_creators=) } 
+  it { should respond_to(:corporate_creators) } 
+  it { should respond_to(:personal_creators=) } 
+  it { should respond_to(:personal_creators) } 
+  it { should respond_to(:embargo_release_date=) } 
+  it { should respond_to(:embargo_release_date) } 
+  it { should respond_to(:permissions=) } 
+  it { should respond_to(:permissions) } 
+  it { should respond_to(:mass_permissions=) } 
+  it { should respond_to(:mass_permissions) } 
+  it { should respond_to(:embargo_in_effect?) } 
+  it { should respond_to(:set_permissions_from_new_form) }
+
+  describe "Custom setters and getters" do
+    let(:c) { NuCollection.new } 
+
+    it "Sets and fetches the proper title" do 
+      c.title = "My Title" 
+      c.title.should == "My Title" 
+    end
+
+    it "Sets and fetches the proper identifier" do 
+      c.identifier = "neu:whatever" 
+      c.identifier.should == "neu:whatever" 
+    end
+
+    it "Sets and fetches the proper description" do 
+      c.description = "My dope description." 
+      c.description.should == "My dope description." 
+    end
+
+    it "Sets and fetches the proper date of issue" do 
+      c.date_of_issue = Date.yesterday.to_s 
+      c.date_of_issue.should == Date.yesterday.to_s 
+    end
+
+    it "Sets and fetches the proper keyword array" do 
+      c.keywords = ["one", "two", "three"] 
+      c.keywords.should == ["one", "two", "three"] 
+    end
+
+    it "Sets and fetches the proper corporate creators" do 
+      c.corporate_creators = ["c_one", "c_two", "c_three"] 
+      c.corporate_creators.should == ["c_one", "c_two", "c_three"] 
+    end
+
+    it "Sets and fetches the proper personal creators" do 
+      fns = ["Will", "Bill"]
+      lns = ["Jackson", "Backson"]
+
+      c.personal_creators = { 'creator_first_names' => fns, 'creator_last_names' => lns }
+      c.personal_creators.should == [{ first: 'Will', last: 'Jackson' }, { first: 'Bill', last: 'Backson' }] 
+    end
+
+    it "Sets and fetches the proper embargo date" do 
+      c.embargo_release_date = Date.tomorrow.to_s 
+      c.embargo_release_date.should == Date.tomorrow.to_s 
+    end
+
+    it "Sets the 'public' mass permission correctly" do 
+      c.mass_permissions = 'public'
+      c.mass_permissions.should == 'public' 
+    end
+
+    it "Sets the 'registered' mass permission correctly" do 
+      c.mass_permissions = 'registered' 
+      c.mass_permissions.should == 'registered' 
+    end
+
+    it "Sets the 'private' mass permission correctly" do 
+      c.mass_permissions = 'private' 
+      c.mass_permissions.should == 'private' 
+    end
   end
 
-  subject { @collection } 
+  describe "Behavior of Parent setter" do 
+    let(:p_coll) { NuCollection.new }
+    let(:root) { NuCollection.new }
 
-  it { should respond_to(:nu_title) } 
-  it { should respond_to(:nu_description) } 
-  it { should respond_to(:nu_identifier) } 
-  it { should respond_to(:mods_title) } 
-  it { should respond_to(:mods_abstract) } 
-  it { should respond_to(:mods_identifier) }
-  it { should respond_to(:nu_title_display) } 
-  it { should respond_to(:nu_description_display) } 
-  it { should respond_to(:mods_title_display) } 
-  it { should respond_to(:mods_abstract_display) } 
+    before do
+      root.save! 
+      @saved_root = NuCollection.find(root.pid) 
+    end 
 
-  describe "Delegations" do 
+    it "Sets the parent collection, but receives nil" do 
+      p_coll.parent = 'neu:1' 
+      p_coll.parent.should be nil 
+    end
+
+    it "Sets the parent collection, saves, and looks up to get the parent object" do 
+      p_coll.parent = @saved_root.pid 
+      p_coll.parent.should be nil 
+      p_coll.save! 
+
+      saved_coll = NuCollection.find(p_coll.pid) 
+      saved_coll.parent.should == @saved_root  
+    end
+  end
+
+  describe "Embargo Checks" do
+    let(:embargoed_collection) { NuCollection.new }  
+    let(:bill) { FactoryGirl.create(:bill) } 
+    let(:bo) { FactoryGirl.create(:bo) } 
+
     before do 
-      @collection.nu_title = "Nu Title" 
-      @collection.nu_description = "My Nu Collection" 
-      @collection.nu_identifier = "123456" 
-      @collection.mods_title = "Mods Title" 
-      @collection.mods_abstract = "Mods Abstract"
-      @collection.mods_identifier = "Mods Identifier" 
+      embargoed_collection.embargo_release_date = Date.tomorrow
+      embargoed_collection.depositor = bill.nuid  
     end
 
-    it "Sets the oaidc title field" do 
-      @collection.datastreams['DC'].nu_title.first.should == "Nu Title"  
+    it "Is embargoed for bo" do 
+      embargoed_collection.embargo_in_effect?(bo).should be true 
     end
 
-    it "Sets the oaidc description field" do 
-      @collection.datastreams['DC'].nu_description.first.should == "My Nu Collection" 
+    it "Is not embargoed for the depositor, bill" do 
+      embargoed_collection.embargo_in_effect?(bill).should be false 
     end
 
-    it "Sets the oaidc identifier field" do 
-      @collection.datastreams['DC'].nu_identifier.first.should == "123456" 
-    end
-
-    it "Sets the mods title field" do 
-      @collection.datastreams['mods'].mods_title.first.should == "Mods Title" 
-    end
-
-    it "Sets the mods abstract field" do 
-      @collection.datastreams['mods'].mods_abstract.first.should == "Mods Abstract" 
-    end
-
-    it "Sets the mods identifier field" do 
-      @collection.datastreams['mods'].mods_identifier.first.should == "Mods Identifier" 
-    end
-
-    describe "Display methods" do 
-
-      it "Grabs the oaidc title element correctly" do 
-        @collection.nu_title_display.should == "Nu Title" 
-      end
-
-      it "Grabs the oaidc description element correctly" do 
-        @collection.nu_description_display.should == "My Nu Collection" 
-      end
-
-      it "Grabs the mods title element correctly" do 
-        @collection.mods_title_display.should == "Mods Title" 
-      end
-
-      it "Grabs the mods abstract element correctly" do 
-        @collection.mods_abstract_display.should == "Mods Abstract" 
-      end
+    it "Is embargoed for the general public" do 
+      embargoed_collection.embargo_in_effect?(nil).should be true 
     end
   end
-
-  describe "Embargoes" do 
-    pending "Add embargo functionality for collections" 
-  end
-end 
+end
