@@ -249,7 +249,7 @@ input[type="color"],
   padding: 7px 6px;
   border: 2px solid $grayLight;
   text-indent: 1px;
-  color: $brand-default;
+  color: $inputColor;
   @include border-radius(6px);
   @include box-shadow(none);
   @include placeholder($silver);
