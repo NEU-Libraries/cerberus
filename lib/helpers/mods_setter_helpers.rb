@@ -78,4 +78,16 @@ module ModsSetterHelpers
   def mods_collection=(val) 
     mods.mods_type_of_resource.mods_collection = val 
   end
+
+  def mods_collection 
+    mods.mods_type_of_resource.mods_collection(0) 
+  end
+
+  def mods_is_collection? 
+    if mods.mods_type_of_resource.mods_collection == ['yes'] 
+      return true 
+    else
+      return false 
+    end
+  end
 end
