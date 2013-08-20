@@ -126,6 +126,11 @@ FactoryGirl.define do
       with_two_edit_perms
       assigned_identifier
     end
+
+    factory :root_collection do 
+      title "Root Collection"
+      assigned_identifier 
+    end
   end
 end
 
