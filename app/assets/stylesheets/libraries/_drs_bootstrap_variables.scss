@@ -184,7 +184,7 @@ $brand-success:         $emerald;
 $brand-warning:         $sun-flower;
 $brand-danger:          $alizarin;
 $brand-inverse:         $black;
-$brand-subtle:          $silver;
+$brand-subtle:          $clouds;
 
 
 
@@ -418,6 +418,8 @@ $popoverBackground:       #fff !default;
 $popoverArrowWidth:       10px !default;
 $popoverArrowColor:       #fff !default;
 $popoverTitleBackground:  darken($popoverBackground, 3%) !default;
+$popoverTitleColor:   $white;
+
 
 // Special enhancement for popovers
 $popoverArrowOuterWidth:  $popoverArrowWidth + 1 !default;
@@ -483,6 +485,11 @@ $alertLinkColor: lighten($navbarLinkColorActive, 10%);
 
 // Navs
 //-------------------------
+
+// Breadcrumb
+$breadcrumbLinkColor: $midnight-blue;
+$breadcrumbHoverLinkColor: lighten($breadcrumbLinkColor, 10%);
+
 
 // Tabs
 $navTabColor: $midnight-blue;

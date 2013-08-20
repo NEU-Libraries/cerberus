@@ -387,9 +387,25 @@ legend {
 
 .popover {
   color: $white;
-
+  
   .popover-title {
     border-bottom: 2px solid $dropdownDividerBottom;
+    color: $white;
+    font-size: 1.2em;
+    font-family: $sansFontFamily;
+  }
+}
+
+a[rel=popover]{
+  @include single-transition(opacity);
+  opacity: 0.5;
+  color: $brand-default;
+
+  &:hover,
+  &:focus{
+    @include single-transition(opacity);
+    text-decoration: none;
+    opacity: 1;
   }
 }
 
@@ -411,4 +427,10 @@ legend {
 .close {
   text-shadow: none;
 }
+
+[disabled],
+[readonly]{
+  cursor: not-allowed;
+}
+
 
