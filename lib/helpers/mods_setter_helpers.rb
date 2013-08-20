@@ -32,8 +32,12 @@ module ModsSetterHelpers
     mods.assign_corporate_names(creators) 
   end
 
+  # The way Fedora stores these is causing newlines and a bunch of whitespace 
+  # to get shoved into each name.  Hence the extra code in this method. 
   def mods_corporate_creators
-    mods.mods_corporate_name 
+    no_newlines = mods.mods_corporate_name.map { |name| name.delete("\n") }
+    trimmed = no_newlines.map { |name| name.strip }  
+    return trimmed
   end
 
   def mods_identifier=(id)
