@@ -69,8 +69,8 @@ module DrsSufiaApp
     # Version of your assets, change this if you want to expire all your assets
     config.assets.version = '1.0'
 
-    # Namespace is now drs 
-    config.id_namespace = 'drs' 
+    # Namespace is now neu 
+    config.id_namespace = 'neu' 
 
     #Add polyfills in the pipline so that Modernizr can pull in js polyfills
     

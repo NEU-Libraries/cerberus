@@ -290,7 +290,7 @@ $dropdownLinkColor:             darken($asbestos, 20%);//$midnight-blue;
 $dropdownLinkColorHover:        $white;//$dark-gray;
 $dropdownLinkColorActive:       $white;
 
-$dropdownLinkBackgroundActive:  darken($midnight-blue, 10%);
+$dropdownLinkBackgroundActive:  $midnight-blue;
 $dropdownLinkBackgroundHover:   $midnight-blue;//lighten($dropdownLinkBackgroundActive, 5%);
 
 
@@ -479,3 +479,12 @@ $nuMediaListBorderRadius:    3px;
 
 // Alerts
 $alertLinkColor: lighten($navbarLinkColorActive, 10%);
+
+
+// Navs
+//-------------------------
+
+// Tabs
+$navTabColor: $midnight-blue;
+$navTabHoverColor: lighten($navTabColor, 10%);
+$navTabActiveColor: $asbestos;
