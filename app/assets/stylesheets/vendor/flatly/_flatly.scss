@@ -323,7 +323,9 @@ legend {
 
 // DROPDOWNS
 // --------------------------------------------------
-
+.dropdown-menu a{
+  @include single-transition(none);
+}
 
 // ALERTS, LABELS, BADGES
 // --------------------------------------------------
@@ -332,14 +334,18 @@ legend {
   background-color: $brand-warning;
   color: $white;
   text-shadow: none;
-
+ 
   h1, h2, h3, h4, h5, h6 {
     color: $white;
   }
-
+  a{
+    color: inherit;
+    font-weight: bold;
+    text-decoration: underline;
+  }
 }
 .alert-error {
-    background-color: $brand-danger;
+    background-color: lighten($brand-danger,50%);
   }
 
 .alert-success {
@@ -405,6 +411,4 @@ legend {
 .close {
   text-shadow: none;
 }
-
-
 

@@ -1,41 +1,12 @@
 - content_for :content do
-  .hero-unit
-    %h1
-      DRS
-      %small digital repository service
-    %p
-      DRS is a secure repository service enabling the Northeastern community to share its research and scholarly work with a worldwide audience. Faculty, staff, and students can use DRS to collect their work in one location and create a durable and citeable record of their papers, presentations, publications, data sets, or other scholarly creations. Through this service, Northeastern researchers can also comply with grant-funding-agency requirements for sharing and managing research data.
-    .row-fluid
-      .span4  
-        = link_to "<i class=\"icon-file\"></i> #{t('sufia.share_button')}".html_safe, sufia.new_generic_file_path, :class => "btn btn-primary btn-block", :id => "contribute_link"
-      .span4.offset4
-        .btn-group.pull-right
-          %button.btn.btn-block.dropdown-toggle{"data-toggle" => "dropdown"}
-            Collections
-            %span.caret
-          %ul.dropdown-menu
-            %li
-              %a{:href => "#"} Action
-            %li
-              %a{:href => "#"} Another action
-            %li
-              %a{:href => "#"} Something else here
-            %li.divider
-            %li
-              %a{:href => "#"} Separated link
-        %a.btn.btn-link.pull-right{:href => "/terms/"} Terms of Use
   .row
-    .row
-      
-    .span4
-      = yield :sidebar
-      / / End Sidebar
-          
-      / %div
-      /   %h3 My Latest
-      /   = render :partial=>'/catalog/recents', :locals => {:recent_documents=>@recent_user_documents, :display_thumbs=>true, :display_access=>true}
-    .span8
-      = yield
-      
-  
+    - if content_for?(:sidebar)
+      .span4
+        = yield :sidebar
+      .span8
+        = yield
+    - else
+      .span12
+        = yield
+
 = render template: "layouts/application"
