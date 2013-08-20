@@ -15,8 +15,9 @@ class NuCollectionsController < ApplicationController
     @nu_collection.depositor = current_user.nuid 
     @nu_collection.rightsMetadata.permissions({person: current_user.nuid}, 'edit')        
 
-    if @nu_collection.save! #Have to hit Fedora before we have a valid identifier assigned.
-      @nu_collection.identifier = @nu_collection.pid 
+    if @nu_collection.save! # Have to hit Fedora before we have a valid identifier assigned.
+      @nu_collection.identifier = @nu_collection.pid
+      @nu_collection.save! # Save a second time to get the identifier set.  Very far from ideal. 
 
       dumb_lookup = NuCollection.find(@nu_collection.pid)
       if ! dumb_lookup.parent

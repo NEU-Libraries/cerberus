@@ -14,7 +14,7 @@
   </div>
 <% else %> 
   <% permissions.each_with_index do |perm, index| %>
-    <% if perm[:name] != current_user.nuid %>  
+    <% if perm[:name] != current_user.nuid && perm[:name] != 'public' && perm[:name] != 'registered' %>  
       <div class='permission'>
 
         <h4> New Permission Element </h4>
@@ -26,7 +26,7 @@
         <%= f.text_field :identity, value: perm[:name], name: "nu_collection[permissions][permissions#{index}][identity]", pattern: ".*\\S.*"  %> <br>
 
         <%= label_tag "nu_collection[permissions][permissions#{index}][identity_type]", "Should this identity be allowed to read or edit?" %>
-        <%= select_tag "nu_collections[permissions][permissions#{index}][permission_type]", options_for_select(['read', 'edit'], perm[:access]) %>
+        <%= select_tag "nu_collection[permissions][permissions#{index}][permission_type]", options_for_select(['read', 'edit'], perm[:access]) %>
         <br>
       </div>
     <% end %> 
