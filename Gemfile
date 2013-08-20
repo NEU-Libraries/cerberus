@@ -43,6 +43,8 @@ gem "devise-guests", "~> 0.3"
 
 
 group :development, :test do
+  gem 'capybara'
+  gem 'launchy' 
   gem "rspec-rails"
   gem "jettywrapper"
   gem "factory_girl_rails" 
