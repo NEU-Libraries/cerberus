@@ -13,8 +13,7 @@
     <%= select_tag 'nu_collection[permissions][permissions0][permission_type]', options_for_select(['read', 'edit']) %>
   </div>
 <% else %> 
-  <% permissions.each_with_index do |perm, index| %>
-    <% if perm[:name] != current_user.nuid && perm[:name] != 'public' && perm[:name] != 'registered' %>  
+  <% permissions.each_with_index do |perm, index| %> 
       <div class='permission'>
 
         <h4> New Permission Element </h4>
@@ -29,6 +28,5 @@
         <%= select_tag "nu_collection[permissions][permissions#{index}][permission_type]", options_for_select(['read', 'edit'], perm[:access]) %>
         <br>
       </div>
-    <% end %> 
   <% end %> 
 <% end %> 

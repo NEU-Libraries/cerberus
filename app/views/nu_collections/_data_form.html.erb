@@ -50,7 +50,7 @@
 
   <h3> Permissions </h3>
 
-  <%= render partial: 'data_form_permissions_element', locals: {:f => f, :permissions => @nu_collection.permissions } %> 
+  <%= render partial: 'data_form_permissions_element', locals: {:f => f, :permissions => filtered_permissions(@nu_collection) } %> 
 
   <button type='button' class="btn btn-mini" id="add_another_permission"><i class="icon-plus-sign"></i></button>
 
