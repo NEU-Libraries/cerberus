@@ -1,3 +1,5 @@
+require 'spec_helper'
+
 include ApplicationHelper 
 
 def sign_in(user) 

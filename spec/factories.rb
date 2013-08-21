@@ -115,6 +115,11 @@ FactoryGirl.define do
                     'permissions1' => { 'identity_type' => 'group', 'identity' => 'faculty', 'permission_type' => 'edit' }}}
     end
 
+    trait :owned_by_bill do 
+      depositor 'bill@example.com' 
+      permissions {{ 'permissions0' => { 'identity_type' => 'person', 'identity' => 'bill@example.com', 'permission_type' => 'edit' }}}
+    end
+
     factory :valid_not_embargoed do 
       with_keywords 
       not_embargoed 
@@ -125,6 +130,12 @@ FactoryGirl.define do
       public_read 
       with_two_edit_perms
       assigned_identifier
+
+        factory :valid_owned_by_bill do
+          title "Bills Collection"
+          description "Bills new collection" 
+          owned_by_bill
+        end
     end
 
     factory :root_collection do 
