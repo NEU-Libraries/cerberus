@@ -48,7 +48,6 @@ feature "Editing collections" do
 
     # Verify billsfriend@example.com is the only perm loaded for potential edits
     perms.length.should == 1 
-    save_and_open_page
 
     # Verify billsfriend@example.com's permission data loaded correctly 
     first_perm.all('select').first.value.should == 'person' 
