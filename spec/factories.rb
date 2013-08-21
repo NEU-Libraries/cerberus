@@ -111,13 +111,14 @@ FactoryGirl.define do
     end
 
     trait :with_two_edit_perms do
-      permissions {{ 'permissions0' => { 'identity_type' => 'person', 'identity' => 'ident one', 'permission_type' => 'edit' }, 
-                    'permissions1' => { 'identity_type' => 'group', 'identity' => 'faculty', 'permission_type' => 'edit' }}}
+      permissions { { 'permissions0' => { 'identity_type' => 'person', 'identity' => 'ident one', 'permission_type' => 'edit' }, 
+                      'permissions1' => { 'identity_type' => 'group', 'identity' => 'faculty', 'permission_type' => 'edit' } } }
     end
 
     trait :owned_by_bill do 
       depositor 'bill@example.com' 
-      permissions {{ 'permissions0' => { 'identity_type' => 'person', 'identity' => 'bill@example.com', 'permission_type' => 'edit' }}}
+      permissions {{ 'permissions0' => { 'identity_type' => 'person', 'identity' => 'bill@example.com', 'permission_type' => 'edit' },
+                      'permissions1' => {'identity_type' => 'person', 'identity' => 'billsfriend@example.com', 'permission_type' => 'read' }}}
     end
 
     factory :valid_not_embargoed do 

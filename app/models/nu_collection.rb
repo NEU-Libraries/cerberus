@@ -34,6 +34,10 @@ class NuCollection < ActiveFedora::Base
     self.add_relationship("isPartOf", "info:fedora/#{Sufia::Noid.namespaceize(collection_id)}")
   end
 
+  def depositor 
+    return self.properties.depositor.first 
+  end
+
   def parent
     if self.relationships(:is_part_of).any?
       NuCollection.find(self.relationships(:is_part_of).first.partition('/').last)

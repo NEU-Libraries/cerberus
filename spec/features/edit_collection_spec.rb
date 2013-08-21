@@ -12,7 +12,9 @@ feature "Editing collections" do
   let(:creator_firsts) { page.all('input#nu_collection_creator_first_name') } 
   let(:creator_lasts) { page.all('input#nu_collection_creator_last_name') } 
   let(:corporate_creators) { page.all('input#nu_collection_corporate_creators') }
-  let(:keywords) { page.all('input#nu_collection_keywords') }  
+  let(:keywords) { page.all('input#nu_collection_keywords') }
+  let(:perms) { page.all('div.permission') }
+  let(:first_perm) { page.all('div.permission').first }    
 
   scenario "Collection data preloads correctly in edit screen" do 
     sign_in @user 
@@ -42,7 +44,18 @@ feature "Editing collections" do
     keywords.at(1).value.should == "kw two" 
     keywords.at(2).value.should == "kw three" 
 
-    find_field('Choose Mass Permissions:').value.should == 'public'      
+    find_field('Choose Mass Permissions:').value.should == 'public'   
+
+    # Verify billsfriend@example.com is the only perm loaded for potential edits
+    perms.length.should == 1 
+    save_and_open_page
+
+    # Verify billsfriend@example.com's permission data loaded correctly 
+    first_perm.all('select').first.value.should == 'person' 
+    first_perm.find_field('Enter NUID or group name').value.should == 'billsfriend@example.com' 
+    first_perm.all('select').last.value.should == 'read' 
+
+    find_field('Embargo Date:').value.should == Date.yesterday.to_s 
   end
 
   # Objects instantiated in before :all hooks aren't cleaned up by rails transactional behavior.
