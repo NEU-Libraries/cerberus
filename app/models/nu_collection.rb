@@ -21,7 +21,7 @@ class NuCollection < ActiveFedora::Base
   delegate_to :properties, [:depositor]  
 
   has_many :generic_files, property: :is_part_of 
-  has_many :nu_collections, property: :is_part_of 
+  has_many :nu_collections, property: :is_member_of 
 
   # Return all collections that this user can read
   def self.find_all_viewable(user) 
@@ -31,7 +31,7 @@ class NuCollection < ActiveFedora::Base
   end
 
   def parent=(collection_id)
-    self.add_relationship("isPartOf", "info:fedora/#{Sufia::Noid.namespaceize(collection_id)}")
+    self.add_relationship("isMemberOf", "info:fedora/#{Sufia::Noid.namespaceize(collection_id)}")
   end
 
   def depositor 
@@ -39,8 +39,8 @@ class NuCollection < ActiveFedora::Base
   end
 
   def parent
-    if self.relationships(:is_part_of).any?
-      NuCollection.find(self.relationships(:is_part_of).first.partition('/').last)
+    if self.relationships(:is_member_of).any?
+      NuCollection.find(self.relationships(:is_member_of).first.partition('/').last)
     else
       nil
     end
