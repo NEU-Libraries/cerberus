@@ -150,7 +150,7 @@ class NuCollection < ActiveFedora::Base
     if user.nil?
       return self.rightsMetadata.under_embargo?
     else
-      return self.rightsMetadata.under_embargo? && !(self.depositor[0] == user.nuid)
+      return self.rightsMetadata.under_embargo? && !(self.depositor == user.nuid)
     end
   end
 
