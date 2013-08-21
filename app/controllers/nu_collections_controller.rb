@@ -42,4 +42,13 @@ class NuCollectionsController < ApplicationController
   def edit
     @nu_collection = NuCollection.find(params[:id]) 
   end
+
+  def update
+    @nu_collection = NuCollection.find(params[:id])  
+    if @nu_collection.update_attributes(params[:nu_collection]) 
+      redirect_to(@nu_collection, notice: "Collection #{@nu_collection.title} was updated successfully." ) 
+    else
+      redirect_to(@nu_collection, notice: "Collection #{@nu_collection.title} failed to update.")
+    end
+  end
 end
