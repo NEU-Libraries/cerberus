@@ -119,6 +119,7 @@
 }
 // Actual tabs (as links)
 .nav-tabs > li > a {
+  color: $navTabColor;
   padding-top: 8px;
   padding-bottom: 8px;
   line-height: $baseLineHeight;
@@ -127,13 +128,14 @@
   &:hover,
   &:focus {
     border-color: $grayLighter $grayLighter #ddd;
+    color: $navTabHoverColor;
   }
 }
 // Active state, and it's :hover/:focus to override normal :hover/:focus
 .nav-tabs > .active > a,
 .nav-tabs > .active > a:hover,
 .nav-tabs > .active > a:focus {
-  color: $gray;
+  color: $navTabActiveColor;
   background-color: $bodyBackground;
   border: 1px solid #ddd;
   border-bottom-color: transparent;

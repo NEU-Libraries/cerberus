@@ -4,8 +4,10 @@
     = render :partial => "layouts/head-tag-content"
   %body
     = render :partial => '/masthead', :formats => [:html]
+    = render :partial => '/flash_msg'
+    / /.container
     .container
-      = render :partial => '/flash_msg'
+      = yield :page_header
     / /.container
     .container
       = yield :content
@@ -15,3 +17,5 @@
     = render :partial => 'layouts/end-js-scripts'
     #ajax-modal.modal.hide{:tabindex => "-1"}
     = render :partial => '/ga', :formats => [:html]
+    - unless Rails.env.production?
+      = debug params

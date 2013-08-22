@@ -1,0 +1,35 @@
+= hidden_field_tag(:total_upload_size, 0)
+= hidden_field_tag(:relative_path)
+= hidden_field_tag(:batch_id, @batch_noid)
+= hidden_field_tag(:collection_id, @collection_id)
+= hidden_field_tag "file_coming_from", "local"
+= render partial: 'generic_files/upload/tos_checkbox'
+/ The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload
+.fileupload-buttonbar
+  / The fileinput-button span is used to style the file input field as button
+  %span.btn.fileinput-button
+    %i.icon-plus.icon-white
+    %span Select files...
+    %input{:multiple => "", :name => "files[]", :type => "file"}/
+  - ua = request.env['HTTP_USER_AGENT']
+  - if !!(ua =~ /Chrome/)
+    %span.btn.fileinput-button
+      %i.icon-plus.icon-white
+      %span Select folder...
+      %input{:directory => "", :mozdirectory => "", :name => "files[]", :type => "file", :webkitdirectory => ""}/
+  %span#main_upload_start_span.activate-container{"data-title" => t('sufia.upload_tooltip'), "data-toggle" => "tooltip"}
+    %button#main_upload_start.activate-submit.btn.btn-primary.start{:type => "submit"}
+      %i.icon-upload.icon-white
+      %span Start upload
+  %button.btn.cancel{:type => "reset"}
+    %i.icon-ban-circle.icon-white
+    %span Cancel upload
+/ The global progress bar
+.progress.progress-success.progress-striped.active.fade
+  .bar{:style => "width:0%;"}
+/ The loading indicator is shown during image processing
+.fileupload-loading
+%br/
+/ The table listing the files available for upload/download
+%table#file-table.table.table-striped.table-bordered
+  %tbody.files{"data-target" => "#modal-gallery", "data-toggle" => "modal-gallery"}
