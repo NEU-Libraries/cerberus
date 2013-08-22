@@ -198,4 +198,10 @@ describe NuCollection do
       no_embargo.embargo_in_effect?(bo).should be false 
     end
   end
+
+  after :all do 
+    NuCollection.find(:all).each do |coll| 
+      coll.destroy 
+    end  
+  end
 end
