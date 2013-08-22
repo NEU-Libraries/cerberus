@@ -154,6 +154,20 @@ class NuCollection < ActiveFedora::Base
     end
   end
 
+  # Naive implementation for finding all child collections 
+  # TODO: Refactor to use solr once that's in place. 
+  def all_child_collections 
+    b = NuCollection.find(:all) 
+
+    b.keep_if { |collection| collection.parent == self } 
+
+    return b
+  end
+
+  def all_child_files 
+    #TODO: Implement me 
+  end
+
   # Accepts a hash of the following form:
   # ex. {'permissions1' => {'identity_type' => val, 'identity' => val, 'permission_type' => val }, 'permissions2' => etc. etc. }
   # Tosses out param sets that are missing an identity.  Which is nice.   
