@@ -2,32 +2,37 @@
   - if params[:parent].present?
     = f.hidden_field :parent, :value => params[:parent]
   %fieldset
-    %legend Information
-    = f.label :title, "Title"
-    = f.text_field :title, required: true, pattern: ".*\\S.*", class: "input-block-level"
-    = f.label :description, "Description"
+    %legend Required Information
+    .row-fluid
+      .span8
+        = f.label :title, "Title *"
+        = f.text_field :title, required: true, pattern: ".*\\S.*", class: "input-block-level"
+      .span4
+        = f.label :date_of_issue, "Date of Issuance *"
+        = f.text_field :date_of_issue, class: ['datepicker','input-block-level'], required: true
+    = f.label :description, "Description *"
     = f.text_area :description, required: true, pattern: ".*\\S.*", class: "input-block-level", rows: 5
-    = f.label :date_of_issue, "Date of Issuance"
-    = f.text_field :date_of_issue, class: ['datepicker','input-block-level'], required: true
   .row-fluid
     %fieldset.span4
       %legend Personal Creator
       %span.help-text
         A complete individual name and/or a corporate creator are required
       = render partial: 'data_form_creator_personal_names', locals: {:f => f, :names => @nu_collection.personal_creators }
-      %button#add_another_personal_creator.btn.btn-block{:type => "button"}
-        %i.icon-plus-sign.icon-larger
+      %button#add_another_personal_creator.btn.btn-block.btn-success{:type => "button"}
+        %i.icon-plus-sign.icon-large
         Add Personal Creator
     %fieldset.span4
       %legend Corporate Creator
       = render partial: 'data_form_corporate_creators', locals: {:f => f, :corporate_names => @nu_collection.corporate_creators }
-      %button#add_another_corporate_creator.btn{:type => "button"}
-        %i.icon-plus-sign
+      %button#add_another_corporate_creator.btn.btn-success.btn-block{:type => "button"}
+        %i.icon-plus-sign.icon-large
+        Add Corporate Creator
     %fieldset.span4
       %legend Keywords
       = render partial: 'data_form_keywords', locals: {:f => f, :keywords => @nu_collection.keywords }
-      %button#add_another_keyword.btn{:type => "button"}
-        %i.icon-plus-sign
+      %button#add_another_keyword.btn.btn.btn-block.btn-success{:type => "button"}
+        %i.icon-plus-sign.icon-large
+        Add Keyword
   .row-fluid
     %fieldset.span4
       %legend Mass Permissions
@@ -39,7 +44,7 @@
           %li Setting to 'registered' will only allow authenticated users to see your collection.      
           %li Setting to 'private' will only allow users and groups explicated below to see your collection.
     %fieldset.span4
-      %lengend Permissions
+      %legend Permissions
       = render partial: 'data_form_permissions_element', locals: {:f => f, :permissions => filtered_permissions(@nu_collection) }
       %button#add_another_permission.btn{:type => "button"}
         %i.icon-plus-sign
