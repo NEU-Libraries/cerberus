@@ -65,7 +65,6 @@ end
 FactoryGirl.define do 
   factory :collection, class: NuCollection do
     sequence(:title) { |n| "Collection #{n}" } 
-    parent 'neu:1'
 
     trait :assigned_identifier do 
       after(:create) do |collection|
@@ -141,7 +140,7 @@ FactoryGirl.define do
 
     factory :root_collection do 
       title "Root Collection"
-      assigned_identifier 
+      assigned_identifier  
     end
   end
 end

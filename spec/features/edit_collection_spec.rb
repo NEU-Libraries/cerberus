@@ -60,8 +60,11 @@ feature "Editing collections" do
   # Objects instantiated in before :all hooks aren't cleaned up by rails transactional behavior.
   # Fedora objects are generally not rolled back either. 
   after :all do 
-    @root.destroy 
-    @collection.destroy
-    @user.destroy 
+    NuCollection.find(:all).each do |coll| 
+      coll.destroy 
+    end
+    User.all.each do |user| 
+      user.destroy 
+    end 
   end
 end 

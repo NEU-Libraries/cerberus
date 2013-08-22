@@ -1,6 +1,10 @@
 require 'spec_helper' 
 
-feature "Creating a collection" do 
+feature "Creating a collection" do
+  before :all do 
+    @root = FactoryGirl.create(:root_collection) 
+  end
+
   let(:user) { FactoryGirl.create(:user) }
    
 
@@ -13,23 +17,16 @@ feature "Creating a collection" do
   end
 
   describe "Signed Access and Form Creation" do
-    let(:root){ FactoryGirl.create(:root_collection) } 
-
-    before :all do 
-      @root = FactoryGirl.create(:root_collection) 
-      @root_pid = @root.pid 
-    end
-
     scenario "Authenticated Creation and Edit" do
       sign_in user 
-      visit new_nu_collection_path(parent: @root_pid)
+      visit new_nu_collection_path(parent: @root.identifier)
 
       # Because we authenticated we don't get booted out. 
       current_path.should == '/nu_collections/new'
 
       # Verifies that hidden 'parent' parameter is set correctly
       page.all('input#nu_collection_parent').length.should == 1 
-      page.all('input#nu_collection_parent').first.value.should == @root_pid 
+      page.all('input#nu_collection_parent').first.value.should == @root.identifier
 
       # Fill out and submit the Collection creation form. 
       fill_in 'Title:', with: "My Title" 
@@ -58,9 +55,11 @@ feature "Creating a collection" do
       page.should have_selector('li.active')
       page.find('li.active').text.should == "My Title"
     end
+  end
 
-    after :all do 
-      root.destroy  
-    end
+  after :all do 
+    NuCollection.find(:all).each do |coll| 
+      coll.destroy 
+    end  
   end
 end
