@@ -1,0 +1,16 @@
+%ul.breadcrumb 
+	- breadcrumb_to_root(@nu_collection).each do |breadcrumb| 
+		%li= breadcrumb 
+		%span.divider /
+
+%h3= @nu_collection.title 
+
+- if flash[:notice]
+	%div.notice= flash[:notice] 
+
+%h4 "Description" 
+%p.well= @nu_collection.description
+
+= render partial: 'show_collections'
+
+= render partial: 'show_files' 

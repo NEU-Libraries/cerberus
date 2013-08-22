@@ -1,0 +1,13 @@
+<% if corporate_names.empty? %> 
+	<div class='corporate_creator'> 
+		<%= f.label :corporate_creators, "Enter an organization name:" %> 
+		<%= f.text_field :corporate_creators, value: "", name: 'nu_collection[corporate_creators][]' %> 
+	</div>
+<% else %> 
+	<% corporate_names.each do |name| %> 
+		<div class='corporate_creator'> 
+			<%= f.label :corporate_creators, "Enter an organization name:" %> 
+			<%= f.text_field :corporate_creators, value: name.strip, name: 'nu_collection[corporate_creators][]' %> 
+		</div>
+	<% end %> 
+<% end %> 

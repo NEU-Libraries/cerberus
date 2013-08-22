@@ -13,6 +13,8 @@
 //= require jquery
 //= require jquery_ujs
 //= require sufia
+//= require nu_collections
+//= require_tree ../../../vendor/assets/javascripts/jquery-ui
 // Required by Blacklight
 //= require blacklight/blacklight
 //= require polyfills

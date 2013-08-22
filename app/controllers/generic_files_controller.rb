@@ -17,6 +17,13 @@ class GenericFilesController < ApplicationController
   include Sufia::Controller
   include Sufia::FilesControllerBehavior
 
+  # routed to /files/new
+  def new
+    @generic_file = ::GenericFile.new
+    @batch_noid = Sufia::Noid.noidify(Sufia::IdService.mint)
+    @collection_id = params[:parent]      
+  end
+
   protected 
 
   #Allows us to map different params 
@@ -25,4 +32,26 @@ class GenericFilesController < ApplicationController
     generic_file.relative_path = params[:relative_path] if params[:relative_path]  
     generic_file.crud.mass_add_perm('individual', current_user.to_s, [:create, :read, :update, :delete]) 
   end
+
+  def process_file(file)
+    if virus_check(file) == 0 
+      @generic_file = ::GenericFile.new
+      update_metadata_from_upload_screen(@generic_file) 
+      GenericFile.create_metadata(@generic_file, current_user, params[:batch_id], params[:collection_id])
+      Sufia::GenericFile::Actions.create_content(@generic_file, file, file.original_filename, datastream_id, current_user)
+      respond_to do |format|
+        format.html {
+          render :json => [@generic_file.to_jq_upload],
+            :content_type => 'text/html',
+            :layout => false
+        }
+        format.json {
+          render :json => [@generic_file.to_jq_upload]
+        }
+      end
+    else
+      render :json => [{:error => "Error creating generic file."}]
+    end
+  end
+
 end
