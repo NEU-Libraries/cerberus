@@ -144,5 +144,3 @@ FactoryGirl.define do
     end
   end
 end
-
->>>>>>> feature/collections

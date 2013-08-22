@@ -182,5 +182,4 @@ class NuCollection < ActiveFedora::Base
       end 
     end
   end
->>>>>>> feature/collections
 end
