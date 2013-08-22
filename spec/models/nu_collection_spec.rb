@@ -118,6 +118,25 @@ describe NuCollection do
       c.mass_permissions.should == 'private' 
       c.rightsMetadata.permissions({group: 'public'}).should == 'none'  
     end
+
+    it "Sets custom permissions correctly" do 
+      permissions = {'permissions0' => {'identity_type' => 'person', 'identity' => 'Will', 'permission_type' => 'edit'}, 
+                      'permissions1' => {'identity_type' => 'group', 'identity' => 'NU:All', 'permission_type' => 'read'},
+                      'permissions2' => {'identity_type' => 'person', 'identity' => 'Tadd', 'permission_type' => 'read'} }
+      c.permissions = permissions 
+      c.permissions.should =~ [{ type: 'user', access: 'edit', name: 'Will' },
+                               { type: 'group', access: 'read', name: 'NU:All' }, 
+                               { type: 'user', access: 'read', name: 'Tadd'}]
+    end
+
+    it "Doesn't allow permissions set of public or registered groups" do 
+      permissions = {'permissions0' => {'identity_type' => 'group', 'identity' => 'public', 'permission_type' => 'read'},
+                      'permissions1' => {'identity_type' => 'group', 'identity' => 'registered', 'permission_type' => 'read'},
+                      'permissions2' => {'identity_type' => 'group', 'identity' => 'public', 'permission_type' => 'edit'}, 
+                      'permissions3' => {'identity_type' => 'group', 'identity' => 'registered', 'permission_type' => 'edit'} }
+      c.permissions = permissions 
+      c.permissions.should == []
+    end 
   end
 
   describe "Behavior of Parent setter" do 
