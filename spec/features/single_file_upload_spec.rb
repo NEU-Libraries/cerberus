@@ -23,11 +23,6 @@ feature "Uploading a single file" do
       expect(page).to have_selector('span', text: "Start upload")
       expect(page).to have_selector('input', 'files[]')
     end
-
-    it "Can upload a file" do 
-      page.attach_file "files[]", "#{Rails.root}/spec/fixtures/test_pic.jpeg"
-      expect(page).to have_content 'test_pic.jpeg'
-    end
   end
 
   #TODO: Finish post page refactor
