@@ -6,21 +6,21 @@
     .row-fluid
       .span8
         = f.label :title, "Title *"
-        = f.text_field :title, required: true, pattern: ".*\\S.*", class: "input-block-level"
+        = f.text_field :title, required: true, pattern: ".*\\S.*", class: "input-block-level", placeholder: "Univeristy Libraries"
       .span4
         = f.label :date_of_issue, "Date of Issuance *"
-        = f.text_field :date_of_issue, class: ['datepicker','input-block-level'], required: true
+        = f.text_field :date_of_issue, class: ['datepicker','input-block-level'], required: true, placeholder: "YYYY-MM-DD"
     = f.label :description, "Description *"
     = f.text_area :description, required: true, pattern: ".*\\S.*", class: "input-block-level", rows: 5
   .row-fluid
     %fieldset.span4
       %legend Personal Creator
-      %span.help-text
-        A complete individual name and/or a corporate creator are required
       = render partial: 'data_form_creator_personal_names', locals: {:f => f, :names => @nu_collection.personal_creators }
       %button#add_another_personal_creator.btn.btn-block.btn-success{:type => "button"}
         %i.icon-plus-sign.icon-large
         Add Personal Creator
+      %span.help-text
+        A complete individual name and/or a corporate creator are required
     %fieldset.span4
       %legend Corporate Creator
       = render partial: 'data_form_corporate_creators', locals: {:f => f, :corporate_names => @nu_collection.corporate_creators }
@@ -37,7 +37,7 @@
     %fieldset.span4
       %legend Mass Permissions
       \#{label_tag 'nu_collection[mass_permissions]', "Choose Mass Permissions:"}
-      \#{select_tag 'nu_collection[mass_permissions]', options_for_select(['private', 'public', 'registered'], @nu_collection.mass_permissions)}
+      \#{select_tag 'nu_collection[mass_permissions]', options_for_select(['private', 'public', 'registered'], @nu_collection.mass_permissions ), class: "span12"}
       %p.help-block
         %ul
           %li Setting to 'public' will allow anyone accessing the site to see your collection.
