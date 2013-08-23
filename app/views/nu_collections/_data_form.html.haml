@@ -9,7 +9,8 @@
         = f.text_field :title, required: true, pattern: ".*\\S.*", class: "input-block-level", placeholder: "Univeristy Libraries"
       .span4
         = f.label :date_of_issue, "Date of Issuance *"
-        = f.text_field :date_of_issue, class: ['datepicker','input-block-level'], required: true, placeholder: "YYYY-MM-DD"
+        -# = f.text_field :date_of_issue, class: ['datepicker','input-block-level'], required: true, placeholder: "YYYY-MM-DD"
+        \#{ select_date @nu_collection.date_of_issue, prefix: :start_date }
     = f.label :description, "Description *"
     = f.text_area :description, required: true, pattern: ".*\\S.*", class: "input-block-level", rows: 5
   .row-fluid
@@ -46,12 +47,15 @@
     %fieldset.span4
       %legend Permissions
       = render partial: 'data_form_permissions_element', locals: {:f => f, :permissions => filtered_permissions(@nu_collection) }
-      %button#add_another_permission.btn{:type => "button"}
-        %i.icon-plus-sign
+      %button#add_another_permission.btn.btn-success.btn-block{:type => "button"}
+        %i.icon-plus-sign.icon-large
+        Add Permission
     %fieldset.span4
       %legend Embargo
       = f.label :embargo_release_date, "Embargo Date:"
-      = f.text_field :embargo_release_date, class: ['embargo_datepicker']
+      = f.text_field :embargo_release_date, class: ['embargo_datepicker', 'span12']
       %span.help-block
         An embargoed item will be visible to only you until the day set below
-  = f.submit class: ['btn', 'btn-primary', 'btn-large', 'btn-block'], value: 'Submit'
+  .form-actions
+    = f.submit class: ['btn', 'btn-primary', 'btn-large'], value: 'Submit'
+    \#{ select_date Date.today, prefix: :start_date }
