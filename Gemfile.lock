@@ -8,8 +8,8 @@ GIT
       activesupport (>= 3.0.0)
 
 GIT
-  remote: https://github.com/nu-lts/nu-sufia.git
-  revision: 004cc0190e6481a799b7a0325ee943376e2d9ecf
+  remote: git://github.com/nu-lts/nu-sufia.git
+  revision: 892beaa52e20a30b3ada30d7cf7564733d438351
   branch: develop
   specs:
     sufia (3.1.1)
