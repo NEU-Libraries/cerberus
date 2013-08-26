@@ -6,6 +6,7 @@ DrsSufiaApp::Application.routes.draw do
   Hydra::BatchEdit.add_routes(self)
 
   resources :nu_collections
+  get "/files/provide_metadata" => "generic_files#provide_metadata"
 
   devise_for :users
   # This must be the very last route in the file because it has a catch all route for 404 errors.

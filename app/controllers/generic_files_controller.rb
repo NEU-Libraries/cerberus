@@ -17,6 +17,9 @@ class GenericFilesController < ApplicationController
   include Sufia::Controller
   include Sufia::FilesControllerBehavior
 
+  def provide_metadata
+  end
+
   # routed to /files/new
   def new
     @generic_file = ::GenericFile.new
@@ -24,7 +27,11 @@ class GenericFilesController < ApplicationController
     @collection_id = params[:parent]      
   end
 
-  protected 
+  def self.upload_complete_path
+    Rails.application.routes.url_helpers.files_provide_metadata_path
+  end
+
+  protected
 
   #Allows us to map different params 
   def update_metadata_from_upload_screen(generic_file)
@@ -53,5 +60,19 @@ class GenericFilesController < ApplicationController
       render :json => [{:error => "Error creating generic file."}]
     end
   end
+
+  def perform_local_ingest
+      if Sufia.config.enable_local_ingest && current_user.respond_to?(:directory)
+        if ingest_local_file
+          redirect_to GenericFilesController.upload_complete_path
+        else
+          flash[:alert] = "Error importing files from user directory."
+          render :new
+        end
+      else
+        flash[:alert] = "Your account is not configured for importing files from a user-directory on the server."
+        render :new
+      end
+    end
 
 end
