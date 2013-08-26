@@ -18,6 +18,9 @@ class GenericFilesController < ApplicationController
   include Sufia::FilesControllerBehavior
 
   def provide_metadata
+    if !GenericFile.users_in_progress_files(current_user).empty? 
+      raise "woop woop woop" 
+    end
   end
 
   # routed to /files/new
@@ -36,8 +39,7 @@ class GenericFilesController < ApplicationController
   #Allows us to map different params 
   def update_metadata_from_upload_screen(generic_file)
     # Relative path is set by the jquery uploader when uploading a directory
-    generic_file.relative_path = params[:relative_path] if params[:relative_path]  
-    generic_file.crud.mass_add_perm('individual', current_user.to_s, [:create, :read, :update, :delete]) 
+    generic_file.relative_path = params[:relative_path] if params[:relative_path]
   end
 
   def process_file(file)
