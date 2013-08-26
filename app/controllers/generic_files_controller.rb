@@ -18,13 +18,20 @@ class GenericFilesController < ApplicationController
   include Sufia::FilesControllerBehavior
 
   def provide_metadata
-    if !GenericFile.users_in_progress_files(current_user).empty? 
-      raise "woop woop woop" 
-    end
+  end
+
+  def rescue_incomplete_files
   end
 
   # routed to /files/new
   def new
+    in_progress_files = GenericFile.users_in_progress_files(current_user)
+
+    if !in_progress_files.empty? 
+      redirect_to(rescue_incomplete_files_path)
+      @incomplete_files = in_progress_files 
+    end
+
     @generic_file = ::GenericFile.new
     @batch_noid = Sufia::Noid.noidify(Sufia::IdService.mint)
     @collection_id = params[:parent]      

@@ -7,6 +7,7 @@ DrsSufiaApp::Application.routes.draw do
 
   resources :nu_collections
   get "/files/provide_metadata" => "generic_files#provide_metadata"
+  get "/files/rescue_incomplete_files" => "generic_files#rescue_incomplete_files", as: 'rescue_incomplete_files'  
 
   devise_for :users
   # This must be the very last route in the file because it has a catch all route for 404 errors.
