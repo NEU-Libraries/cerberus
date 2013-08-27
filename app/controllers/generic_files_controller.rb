@@ -17,19 +17,40 @@ class GenericFilesController < ApplicationController
   include Sufia::Controller
   include Sufia::FilesControllerBehavior
 
+  # 
+  def destroy_incomplete_files 
+  end
+
   def provide_metadata
   end
 
+  # routed to files/rescue_incomplete_files
+  # page for allowing users to either permanently delete or apply metadata to 
+  # files abandoned without completing step two of the upload process. 
   def rescue_incomplete_files
+    file_titles = []
+
+    request.query_parameters.each do |key, pid| 
+      file_titles << GenericFile.find(pid).title
+    end
+
+    @incomplete_file_titles = file_titles 
   end
 
   # routed to /files/new
   def new
     in_progress_files = GenericFile.users_in_progress_files(current_user)
 
-    if !in_progress_files.empty? 
-      redirect_to(rescue_incomplete_files_path)
-      @incomplete_files = in_progress_files 
+    if !in_progress_files.empty?
+
+      param_hash = {}
+      in_progress_files.each_with_index do |file, index| 
+        param_hash = param_hash.merge({"file#{index}" => file.pid}) 
+      end 
+
+      puts param_hash
+
+      redirect_to rescue_incomplete_files_path(param_hash)
     end
 
     @generic_file = ::GenericFile.new
