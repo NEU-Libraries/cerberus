@@ -10,7 +10,7 @@ DrsSufiaApp::Application.routes.draw do
   get "/files/process_metadata" => "generic_files#process_metadata"
 
   get "/files/rescue_incomplete_files" => "generic_files#rescue_incomplete_files", as: 'rescue_incomplete_files'
-  match "/destroy_incomplete_files" => "generic_files#destroy_incomplete_files", via: 'delete', as: 'destroy_incomplete_files'  
+  match "/incomplete_files" => "generic_files#destroy_incomplete_files", via: 'delete', as: 'destroy_incomplete_files'  
 
 
   devise_for :users

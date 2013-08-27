@@ -17,8 +17,14 @@ class GenericFilesController < ApplicationController
   include Sufia::Controller
   include Sufia::FilesControllerBehavior
 
-  # 
-  def destroy_incomplete_files 
+  skip_before_filter :normalize_identifier, only: [:provide_metadata, :rescue_incomplete_files, :destroy_incomplete_files]
+  skip_load_and_authorize_resource only: [:provide_metadata, :rescue_incomplete_files, :destroy_incomplete_files] 
+  def destroy_incomplete_files
+    GenericFile.users_in_progress_files(current_user).each do |file|
+      file.destroy 
+    end
+
+    redirect_to files_provide_metadata_path 
   end
 
   def provide_metadata
