@@ -7,18 +7,18 @@ class GenericFile < ActiveFedora::Base
 
   delegate_to :DC, [:nu_title, :nu_type, :nu_identifier, :nu_description]
 
-  def self.create_metadata(generic_file, user, batch_id, collection_id)
+  def self.create_metadata(generic_file, user, collection_id)
     generic_file.apply_depositor_metadata(user.user_key)
     generic_file.tag_as_in_progress 
     generic_file.date_uploaded = Date.today
     generic_file.date_modified = Date.today
     generic_file.creator = user.name
 
-    if batch_id
-      generic_file.add_relationship("isPartOf", "info:fedora/#{Sufia::Noid.namespaceize(batch_id)}")
-    else
-      logger.warn "unable to find batch to attach to"
-    end
+    #if batch_id
+      #generic_file.add_relationship("isPartOf", "info:fedora/#{Sufia::Noid.namespaceize(batch_id)}")
+    #else
+      #logger.warn "unable to find batch to attach to"
+    #end
 
     if collection_id
       generic_file.add_relationship("isPartOf", "info:fedora/#{Sufia::Noid.namespaceize(collection_id)}")
