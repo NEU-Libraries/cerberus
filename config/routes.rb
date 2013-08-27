@@ -7,10 +7,12 @@ DrsSufiaApp::Application.routes.draw do
 
   resources :nu_collections
   get "/files/provide_metadata" => "generic_files#provide_metadata"
-  get "/files/process_metadata" => "generic_files#process_metadata"
+  post "/files/process_metadata" => "generic_files#process_metadata"
 
   get "/files/rescue_incomplete_files" => "generic_files#rescue_incomplete_files", as: 'rescue_incomplete_files'
   match "/incomplete_files" => "generic_files#destroy_incomplete_files", via: 'delete', as: 'destroy_incomplete_files'  
+
+
 
 
   devise_for :users
