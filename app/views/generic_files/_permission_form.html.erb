@@ -1,12 +1,12 @@
-<% depositor = gf.depositor || batch.generic_files.first.depositor %>
+<% depositor = gf.depositor %>
 <% public_perm = gf.permissions.map { |perm| perm[:access] if perm[:name] == "public"}.compact.first %>
-<% public_perm = true if params[:controller] == 'batch' %>
+<% public_perm = true %>
 <% registered_perm = gf.permissions.map { |perm| perm[:access] if perm[:name] == "registered"}.compact.first %>
  
 
 <input type="hidden" name="generic_file[permissions][group][public]" value="1" />
 <input type="hidden" name="generic_file[permissions][group][registered]" value="2" />
-<h2><% if params[:controller] == 'batch' %>Bulk <% end %>Permissions <% if params[:controller] == 'batch' %><small>(applied to all files just uploaded)</small><% end %></h2>
+
 <div class="alert hide" id="save_perm_note">Permissions are <strong>not</strong> saved until the &quot;Save&quot; button is pressed at the bottom of the page.</div>
 <div class="alert alert-error hide" id="permissions_error"><a class="close" data-dismiss="alert" href="#">×</a><span id="permissions_error_text"></span></div>
 <div class="well">

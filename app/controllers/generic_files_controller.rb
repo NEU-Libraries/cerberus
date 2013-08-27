@@ -18,9 +18,15 @@ class GenericFilesController < ApplicationController
   include Sufia::FilesControllerBehavior
 
   def provide_metadata
+    @generic_file = GenericFile.new
   end
 
   def rescue_incomplete_files
+  end
+
+  def process_metadata
+    #TODO
+    puts "warble blarble"
   end
 
   # routed to /files/new
@@ -33,7 +39,7 @@ class GenericFilesController < ApplicationController
     end
 
     @generic_file = ::GenericFile.new
-    @batch_noid = Sufia::Noid.noidify(Sufia::IdService.mint)
+    #@batch_noid = Sufia::Noid.noidify(Sufia::IdService.mint)
     @collection_id = params[:parent]      
   end
 
@@ -53,7 +59,8 @@ class GenericFilesController < ApplicationController
     if virus_check(file) == 0 
       @generic_file = ::GenericFile.new
       update_metadata_from_upload_screen(@generic_file) 
-      GenericFile.create_metadata(@generic_file, current_user, params[:batch_id], params[:collection_id])
+      #GenericFile.create_metadata(@generic_file, current_user, params[:batch_id], params[:collection_id])
+      GenericFile.create_metadata(@generic_file, current_user, params[:collection_id])
       Sufia::GenericFile::Actions.create_content(@generic_file, file, file.original_filename, datastream_id, current_user)
       respond_to do |format|
         format.html {
