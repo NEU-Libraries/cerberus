@@ -17,51 +17,17 @@ class MetadataUpdateJob
   end
 
   def run
-    puts "WIGGITY WACK"
-
     user = User.find_by_user_key(self.login)
     @saved = []
     @denied = []
 
-    puts "Crashed yet?"
-    puts GenericFile.find(:all).length
-
-    puts "Getting first file"
-    x = GenericFile.find(:all).first
-    puts x.title
-
-    puts x.datastreams.keys
-    puts x.properties.depositor
-
-    a = GenericFile.find(:all) 
-
-    a.each do |file| 
-      puts file.properties.to_xml 
-    end
-
-    puts x.properties.in_progress?
-
-    puts "Rumble in the Jungle"
-    puts GenericFile.users_in_progress_files(user).length
-
-    if GenericFile.users_in_progress_files(user).nil?
-      puts "Oh no. OH YEAH"
-    end
-
-    puts "You what now?"
-
     GenericFile.users_in_progress_files(user).each do |gf|
       puts "Updating files"
-      puts "Updating file: " + gf.title
+      puts gf.title
       update_file(gf, user)
     end
 
-    puts "Do we get here?"
-    
-    GenericFile.users_in_progress_files(user).each do |gf|
-      puts "Marking file as complete: " + gf.title
-      gf.tag_as_completed
-    end
+    puts "Metadata Job finished."
     
     job_user = User.batchuser()
     
@@ -83,6 +49,7 @@ class MetadataUpdateJob
     gf.nu_title = nu_title[gf.pid] if nu_title[gf.pid] rescue gf.label  
     gf.attributes=file_attributes
     gf.set_visibility(visibility)
+    gf.tag_as_completed
 
     save_tries = 0
     begin
