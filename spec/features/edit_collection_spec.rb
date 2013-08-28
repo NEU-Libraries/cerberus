@@ -17,7 +17,7 @@ feature "Editing collections" do
   let(:first_perm) { page.all('div.permission').first }    
 
   scenario "Collection data preloads correctly in edit screen" do 
-    sign_in @user 
+    features_sign_in @user 
 
     visit edit_nu_collection_path(@collection)
 
