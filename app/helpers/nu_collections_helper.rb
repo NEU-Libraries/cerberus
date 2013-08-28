@@ -34,4 +34,20 @@ module NuCollectionsHelper
   def current_user_can_edit?(collection) 
     return collection.rightsMetadata.can_edit?(current_user)  
   end
+
+  # Render a button for creating a new collection within this collection
+  # if the current user has edit permissions. 
+  def render_create_collection_button(parent) 
+    if current_user_can_edit?(parent) 
+      link_to("Create a child collection off this node", new_nu_collection_path(parent: parent.identifier))  
+    end
+  end
+
+  # Render a button for uploading files within this collection 
+  # if the current user has edit permissions. 
+  def render_upload_files_button(parent) 
+    if current_user_can_edit?(parent) 
+      link_to("Upload files to this collection", Sufia::Engine.routes.url_helpers.new_generic_file_path(parent: parent.identifier)) 
+    end
+  end
 end
