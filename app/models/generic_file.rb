@@ -32,15 +32,22 @@ class GenericFile < ActiveFedora::Base
 
   # Return a list of all in progress files associated with this user
   def self.users_in_progress_files(user)
+    puts "HURF"
     all = GenericFile.find(:all) 
-
+    puts "DURF"
     filtered = all.keep_if { |file| file.in_progress_for_user?(user) } 
-
+    puts "BURF"
     return filtered  
   end
 
-  def in_progress_for_user?(user)  
-    return self.properties.in_progress?  && user.nuid == self.depositor 
+  def in_progress_for_user?(user)
+    puts "IRON MAN"
+    puts user.nuid
+    puts self.depositor
+    puts self.properties.in_progress?
+    puts ""
+
+    return self.properties.in_progress? && user.nuid == self.depositor 
   end
 
   def tag_as_completed 

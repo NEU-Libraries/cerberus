@@ -28,5 +28,9 @@ class User < ActiveRecord::Base
   end
 
   # Currently using group_list attribute as though it will someday contain the grouper information
-  # pulled in from Shibboleth 
+  # pulled in from Shibboleth
+
+  def batchuser
+    User.find("1")
+  end   
 end
