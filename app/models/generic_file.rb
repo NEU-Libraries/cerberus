@@ -3,7 +3,8 @@ class GenericFile < ActiveFedora::Base
   # This can be found in our gem fork at: 
   # sufia-models/lib/models/generic_file.rb  
 
-  has_metadata name: 'DC', type: NortheasternDublinCoreDatastream 
+  has_metadata name: 'DC', type: NortheasternDublinCoreDatastream
+  has_metadata name: 'properties', type: DrsPropertiesDatastream
 
   delegate_to :DC, [:nu_title, :nu_type, :nu_identifier, :nu_description]
 
@@ -51,7 +52,7 @@ class GenericFile < ActiveFedora::Base
   end
 
   def tag_as_completed 
-    self.properties.tag_as_complete 
+    self.properties.tag_as_completed 
   end
 
   def tag_as_in_progress 

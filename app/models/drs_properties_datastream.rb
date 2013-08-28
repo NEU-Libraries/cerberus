@@ -13,7 +13,7 @@
 # limitations under the License.
 
 # properties datastream: catch-all for info that didn't have another home.  Particularly depositor.
-class PropertiesDatastream < ActiveFedora::OmDatastream
+class DrsPropertiesDatastream < ActiveFedora::OmDatastream
   set_terminology do |t|
     t.root(:path=>"fields" ) 
     # This is where we put the user id of the object depositor -- impacts permissions/access controls
