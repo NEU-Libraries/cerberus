@@ -39,4 +39,7 @@ RSpec.configure do |config|
   # the seed, which is printed after each run.
   #     --seed 1234
   config.order = "random"
+
+  # Reconfigure FactoryGirl to look for factories in the spec/factories directory 
+  FactoryGirl.definition_file_paths = [File.expand_path("../factories", __FILE__)]
 end
