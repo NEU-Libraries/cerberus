@@ -5,7 +5,14 @@ DrsSufiaApp::Application.routes.draw do
   HydraHead.add_routes(self)
   Hydra::BatchEdit.add_routes(self)
 
-  resources :nu_collections
+  resources :nu_collections, except: [:index] 
+  get "/nu_collections" => 'nu_collections#show', defaults: { id: "#{Rails.configuration.root_collection_id}" } 
+
+  get "/files/provide_metadata" => "generic_files#provide_metadata"
+  post "/files/process_metadata" => "generic_files#process_metadata"
+
+  get "/files/rescue_incomplete_files" => "generic_files#rescue_incomplete_files", as: 'rescue_incomplete_files'
+  match "/incomplete_files" => "generic_files#destroy_incomplete_files", via: 'delete', as: 'destroy_incomplete_files'  
 
   devise_for :users
   # This must be the very last route in the file because it has a catch all route for 404 errors.

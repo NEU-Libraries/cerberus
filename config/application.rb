@@ -79,5 +79,8 @@ module DrsSufiaApp
     config.assets.precompile += ['polyfills/placeholder/placeholder.min.js']
     config.assets.precompile += ['polyfills/respond/respond.min.js']
 
+    # Set a default root collection. 
+    config.root_collection_id = 'neu:1' 
+
   end
 end

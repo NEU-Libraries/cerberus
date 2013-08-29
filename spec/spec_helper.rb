@@ -71,4 +71,10 @@ RSpec.configure do |config|
       user.destroy 
     end
   end
+
+  # Add Devise test helpers
+  config.include Devise::TestHelpers, :type => :controller
+
+  # Reconfigure FactoryGirl to look for factories in the spec/factories directory 
+  FactoryGirl.definition_file_paths = [File.expand_path("../factories", __FILE__)]
 end
