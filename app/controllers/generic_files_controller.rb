@@ -59,9 +59,7 @@ class GenericFilesController < ApplicationController
       param_hash = {}
       in_progress_files.each_with_index do |file, index| 
         param_hash = param_hash.merge({"file#{index}" => file.pid}) 
-      end 
-
-      puts param_hash
+      end
 
       redirect_to rescue_incomplete_files_path(param_hash)
     end
