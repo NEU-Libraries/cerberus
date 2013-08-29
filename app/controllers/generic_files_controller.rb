@@ -28,7 +28,8 @@ class GenericFilesController < ApplicationController
   end
 
   def provide_metadata
-    @generic_file = GenericFile.new
+    @generic_file = GenericFile.new 
+    @incomplete_files = GenericFile.users_in_progress_files(current_user) 
   end
 
   # routed to files/rescue_incomplete_files
