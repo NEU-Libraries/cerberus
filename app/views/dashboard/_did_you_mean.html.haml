@@ -1,0 +1,10 @@
+- if @response.response[:numFound] <= spell_check_max and @response.spelling.words.size > 0
+  #spell.span4
+    %h4.suggest
+      %i
+        Did you mean to type
+        - @response.spelling.words.each_with_index do |word,index|
+          - if index > 0
+            , or
+          = link_to_query(word)
+        ?

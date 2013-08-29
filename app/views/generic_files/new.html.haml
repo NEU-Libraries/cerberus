@@ -1,0 +1,17 @@
+%h2 Upload
+%ul.nav.nav-tabs
+  %li.active
+    %a{"data-toggle" => "tab", :href => "#local"}
+      %i.icon-desktop
+      My Computer
+  - if Sufia.config.dropbox_api_key
+    %li
+      %a{"data-toggle" => "tab", :href => "#dropbox"}
+        %i.icon-inbox
+        Dropbox
+.tab-content
+  #local.tab-pane.active
+    = render partial: 'multiple_upload'
+  - if Sufia.config.dropbox_api_key
+    #dropbox.tab-pane
+      = render partial: 'dropbox_import'

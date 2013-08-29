@@ -17,4 +17,6 @@
 //= require_tree ../../../vendor/assets/javascripts/jquery-ui
 // Required by Blacklight
 //= require blacklight/blacklight
+//= require bootstrap-select/bootstrap-select.min.js
+//= require app
 //= require polyfills

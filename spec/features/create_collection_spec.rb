@@ -18,7 +18,7 @@ feature "Creating a collection" do
 
   describe "Signed Access and Form Creation" do
     scenario "Authenticated Creation and Edit" do
-      sign_in user 
+      features_sign_in user 
       visit new_nu_collection_path(parent: @root.identifier)
 
       # Because we authenticated we don't get booted out. 

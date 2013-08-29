@@ -1,0 +1,6 @@
+%h3 Rescue Incomplete Files
+
+- if @incomplete_file_titles.empty? 
+  %p You don't appear to have any incomplete files associated with your account.
+- else 
+  = render partial: 'rescue_incomplete_files_request_action', locals: { :file_titles => @incomplete_file_titles }

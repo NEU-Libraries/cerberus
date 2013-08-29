@@ -11,7 +11,7 @@
  *= require_self
  *= require_tree ../../../vendor/assets/stylesheets/jquery-ui
  *  Sufia gem stylesheets imported here.
- *
+ *= require bootstrap-select/bootstrap-select.min.css
  */
 
 

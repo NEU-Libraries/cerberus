@@ -36,3 +36,7 @@ A web application developed using our [fork](http://github.com/nu-lts/sufia) of 
 
 Make sure to use the editorconfig plugin for whatever editor you prefer. [Download a plugin](http://editorconfig.org/#download)
 
+
+Tests run with `$ rspec`
+
+[capybara cheat sheet](https://gist.github.com/zhengjia/428105)

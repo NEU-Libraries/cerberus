@@ -187,7 +187,40 @@
   .btn-mini {
     padding: $paddingMini;
   }
+
 }
+
+
+// Link buttons
+// --------------------------------------------------
+
+// Make a button look and behave like a link
+.btn-link,
+.btn-link:active,
+.btn-link[disabled] {
+  background-color: transparent;
+  background-image: none;
+  @include box-shadow(none);
+}
+.btn-link {
+  border-color: transparent;
+  cursor: pointer;
+  color: $linkColor;
+  @include border-radius(0);
+}
+.btn-link:hover,
+.btn-link:focus {
+  color: $linkColorHover;
+  text-decoration: underline;
+  background-color: transparent;
+}
+.btn-link[disabled]:hover,
+.btn-link[disabled]:focus {
+  color: $grayDark;
+  text-decoration: none;
+}
+
+
 
 // TABLES
 // -----------------------------------------------------
@@ -216,7 +249,7 @@ input[type="color"],
   padding: 7px 6px;
   border: 2px solid $grayLight;
   text-indent: 1px;
-  color: $brand-default;
+  color: $inputColor;
   @include border-radius(6px);
   @include box-shadow(none);
   @include placeholder($silver);
@@ -290,23 +323,29 @@ legend {
 
 // DROPDOWNS
 // --------------------------------------------------
-
+.dropdown-menu a{
+  @include single-transition(none);
+}
 
 // ALERTS, LABELS, BADGES
 // --------------------------------------------------
 
 .alert {
-  background-color: $brand-warning;
+  background-color: $brand-info;
   color: $white;
   text-shadow: none;
-
+ 
   h1, h2, h3, h4, h5, h6 {
     color: $white;
   }
-
+  a{
+    color: inherit;
+    font-weight: bold;
+    text-decoration: underline;
+  }
 }
 .alert-error {
-    background-color: $brand-danger;
+    background-color: lighten($brand-danger,50%);
   }
 
 .alert-success {
@@ -348,9 +387,25 @@ legend {
 
 .popover {
   color: $white;
-
+  
   .popover-title {
     border-bottom: 2px solid $dropdownDividerBottom;
+    color: $white;
+    font-size: 1.2em;
+    font-family: $sansFontFamily;
+  }
+}
+
+a[rel=popover]{
+  @include single-transition(opacity);
+  opacity: 0.5;
+  color: $brand-default;
+
+  &:hover,
+  &:focus{
+    @include single-transition(opacity);
+    text-decoration: none;
+    opacity: 1;
   }
 }
 
@@ -373,5 +428,9 @@ legend {
   text-shadow: none;
 }
 
+[disabled],
+[readonly]{
+  cursor: not-allowed;
+}
 
 
