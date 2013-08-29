@@ -31,10 +31,6 @@ class NuCollectionsController < ApplicationController
     end 
   end
 
-  def index
-    @all_collections = NuCollection.find_all_viewable(current_user) 
-  end
-
   def show  
     @nu_collection = NuCollection.find(params[:id]) 
   end

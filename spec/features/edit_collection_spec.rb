@@ -4,7 +4,6 @@ feature "Editing collections" do
   before :all do 
     @root = FactoryGirl.create(:root_collection)
     @collection = FactoryGirl.create(:valid_owned_by_bill)
-    # @minimal_collection = FactoryGirl.create(:minimal_valid_collection)
     @user = FactoryGirl.create(:bill) 
   end
 

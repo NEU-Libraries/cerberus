@@ -13,4 +13,13 @@
 
 = render partial: 'show_collections'
 
+%p Actions:
+
+= render_create_collection_button(@nu_collection)
+
 = render partial: 'show_files' 
+
+
+%p Actions:
+
+= render_upload_files_button(@nu_collection)

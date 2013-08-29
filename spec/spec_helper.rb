@@ -40,6 +40,38 @@ RSpec.configure do |config|
   #     --seed 1234
   config.order = "random"
 
+  # Cleans everything.  Should figure out how to get Fedora to do this 
+  # automatically. 
+  config.before(:suite) do 
+    GenericFile.find(:all).each do |file| 
+      file.destroy 
+    end
+
+    NuCollection.find(:all).each do |collection| 
+      collection.destroy 
+    end
+
+    User.all.each do |user| 
+      user.destroy 
+    end
+  end
+
+  # Clean everything.  Should figure out how to get Fedora to do this
+  # automatically. 
+  config.after(:suite) do 
+    GenericFile.find(:all).each do |file| 
+      file.destroy 
+    end
+
+    NuCollection.find(:all).each do |collection| 
+      collection.destroy 
+    end
+
+    User.all.each do |user| 
+      user.destroy 
+    end
+  end
+
   # Add Devise test helpers
   config.include Devise::TestHelpers, :type => :controller
 
