@@ -26,11 +26,17 @@ class CompilationsController < ApplicationController
 
   def update
     load_instance
+    if @compilation.update_attributes(params[:compilation])
+      flash[:notice] = "Compilation successfully updated" 
+      redirect_to @compilation 
+    else
+      flash.now.error = "Compilation failed to update" 
+    end 
   end 
 
   def show
     load_instance
-    
+
     if current_user.nuid != @compilation.depositor 
       render_403 
     end
