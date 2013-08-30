@@ -1,0 +1,13 @@
+%h3 Create a new compilation
+
+= form_for @compilation do |f| 
+  
+  = f.label :title 
+  = f.text_field :title, required: true, pattern: ".*\\S.*"
+
+  = f.label :description, "Describe your collection here" 
+  = f.text_area :description, placeholder: 'Note that this is optional'
+
+  %br 
+
+  = f.submit 
