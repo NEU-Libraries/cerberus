@@ -8,7 +8,7 @@ class Compilation < ActiveFedora::Base
   has_metadata name: 'rightsMetadata', type: ParanoidRightsDatastream 
   has_metadata name: 'properties', type: DrsPropertiesDatastream 
 
-  attr_accessible :title, :identifier, :depositor
+  attr_accessible :title, :identifier, :depositor, :description
 
   has_many :entries, class_name: "GenericFile",  property: :has_member 
 
@@ -18,6 +18,14 @@ class Compilation < ActiveFedora::Base
 
   def title 
     self.DC.nu_title.first 
+  end
+
+  def description=(value)
+    self.DC.nu_description = value 
+  end
+
+  def description 
+    self.DC.nu_description.first 
   end
 
   def identifier=(value) 
