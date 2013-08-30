@@ -1,0 +1,8 @@
+%p Files associated with this compilation are: 
+%ul
+  - entries.each do |entry| 
+    %li 
+      %p= entry.title.first
+      = link_to("View #{entry.title.first}", Sufia::Engine.routes.url_helpers.generic_files_path(entry))
+      %span.spacer //
+      = link_to("Remove from compilation", delete_entry_path(id: compilation.pid, entry_id: entry.pid), method: 'delete') 
