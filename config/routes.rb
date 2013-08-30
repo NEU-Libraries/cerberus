@@ -9,6 +9,8 @@ DrsSufiaApp::Application.routes.draw do
   get "/nu_collections" => 'nu_collections#show', defaults: { id: "#{Rails.configuration.root_collection_id}" } 
 
   resources :compilations
+  match "/compilations/:id/:entry_id" => 'compilations#delete_file', via: 'delete', as: 'delete_entry' 
+  match "/compilations/:id/:entry_id" => 'compilations#add_file', via: 'post', as: 'add_entry'
 
   get "/files/provide_metadata" => "generic_files#provide_metadata"
   post "/files/process_metadata" => "generic_files#process_metadata"

@@ -17,12 +17,7 @@ class CompilationsController < ApplicationController
     # Set the depositor and give him edit access on the object 
     @compilation.depositor = current_user.nuid 
 
-    if @compilation.save!
-      flash[:notice] = "Collection created successfully"  
-      redirect_to @compilation 
-    else 
-      flash.now.error = "Collection was not saved successfully" 
-    end   
+    save_or_bust @compilation
   end
 
   def edit
@@ -35,7 +30,7 @@ class CompilationsController < ApplicationController
 
   def show
     load_instance
-
+    
     if current_user.nuid != @compilation.depositor 
       render_403 
     end
@@ -45,7 +40,28 @@ class CompilationsController < ApplicationController
 
   end
 
+  def add_file
+    load_instance 
+    @compilation.add_entry(params[:entry_id]) 
+    save_or_bust @compilation 
+  end
+
+  def delete_file
+    load_instance
+    @compilation.remove_entry(params[:entry_id])  
+    save_or_bust @compilation 
+  end
+
   private
+
+  def save_or_bust(compilation) 
+    if compilation.save! 
+      flash[:notice] = "Compilation successfully updated" 
+      redirect_to compilation 
+    else
+      flash.now.error = "Compilation was not successfully updated" 
+    end
+  end
 
   def load_instance
     @compilation = Compilation.find(params[:id]) 
