@@ -43,7 +43,13 @@ class CompilationsController < ApplicationController
   end
 
   def destroy 
-
+    load_instance 
+    if @compilation.destroy
+      flash[:notice] = "Compilation was successfully destroyed" 
+      redirect_to compilations_path 
+    else
+      flash.now.error = "Compilation #{@compilation.title} was not successfully destroyed" 
+    end 
   end
 
   def add_file
