@@ -37,7 +37,8 @@ class Compilation < ActiveFedora::Base
   end
 
   def depositor=(value) 
-    self.properties.depositor = value 
+    self.properties.depositor = value
+    self.rightsMetadata.permissions({person: value}, 'edit')  
   end
 
   def depositor 
