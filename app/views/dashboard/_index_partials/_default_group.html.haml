@@ -14,4 +14,5 @@
         %th.center Action
   %tbody
     - docs.each_with_index do |document,counter|
-      = render :partial => 'dashboard/_index_partials/list_files', :locals => {:document => document, :counter => counter}
+      - if document.route_key == "genericfile"
+        = render :partial => 'dashboard/_index_partials/list_files', :locals => {:document => document, :counter => counter}
