@@ -1,4 +1,4 @@
-class BookmarkSet < ActiveFedora::Base
+class Compilation < ActiveFedora::Base
   include Hydra::ModelMethods
   include Hydra::ModelMixins::CommonMetadata  
   include Hydra::ModelMixins::RightsMetadata
@@ -10,7 +10,7 @@ class BookmarkSet < ActiveFedora::Base
 
   attr_accessible :title, :identifier, :depositor
 
-  has_many :bookmarks, class_name: "GenericFile",  property: :has_member 
+  has_many :entries, class_name: "GenericFile",  property: :has_member 
 
   def title=(value)
     self.DC.nu_title = value 
@@ -36,7 +36,7 @@ class BookmarkSet < ActiveFedora::Base
     self.properties.depositor.first
   end
 
-  def add_bookmark(value) 
+  def add_entry(value) 
     if value.instance_of?(GenericFile)
       add_relationship(:has_member, value) 
     elsif value.instance_of?(String) 
@@ -47,7 +47,7 @@ class BookmarkSet < ActiveFedora::Base
     end
   end
 
-  def remove_bookmark(value) 
+  def remove_entry(value) 
     if value.instance_of?(GenericFile) 
       remove_relationship(:has_member, value) 
     elsif value.instance_of?(String) 

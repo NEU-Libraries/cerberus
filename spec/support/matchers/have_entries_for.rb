@@ -1,4 +1,4 @@
-RSpec::Matchers.define :have_bookmarks_for do |expected| 
+RSpec::Matchers.define :have_entries_for do |expected| 
   match do |actual|
     actual_sorted = actual.sort
     fedora_result = fedora_array(expected).sort  

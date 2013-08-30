@@ -1,5 +1,5 @@
 FactoryGirl.define do 
-  factory :bookmarks, class: BookmarkSet do 
+  factory :compilation do 
     sequence(:title) { |n| "Bookmark #{n}" } 
 
     trait :identifier do
@@ -16,7 +16,7 @@ FactoryGirl.define do
       end 
     end
 
-    factory :bills_bookmarks do
+    factory :bills_compilation do
       deposited_by_bill  
       identifier 
     end
