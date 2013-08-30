@@ -33,8 +33,12 @@ class CompilationsController < ApplicationController
 
   end 
 
-  def show 
-    @compilation = Compilation.find(params[:id]) 
+  def show
+    @compilation = Compilation.find(params[:id])
+
+    if current_user.nuid != @compilation.depositor 
+      render_403 
+    end
   end
 
   def destroy 

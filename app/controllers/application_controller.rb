@@ -10,4 +10,10 @@ class ApplicationController < ActionController::Base
   layout :search_layout
 
   protect_from_forgery
+
+  def render_403
+    respond_to do |format| 
+      format.html { render :file => "#{Rails.root}/public/403.html", layout: false, status: '403' } 
+    end
+  end
 end
