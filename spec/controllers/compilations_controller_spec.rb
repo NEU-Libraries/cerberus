@@ -2,7 +2,32 @@ require 'spec_helper'
 
 describe CompilationsController do 
   let(:bill) { FactoryGirl.create(:bill) }
-  let(:bo) { FactoryGirl.create(:bo) }  
+  let(:bo) { FactoryGirl.create(:bo) }
+
+  describe "GET #index" do 
+
+    before :each do 
+      sign_in bill 
+
+      ActiveFedora::Base.find(:all).each do |file| 
+        file.destroy 
+      end 
+    end
+
+    it "loads all compilations for the signed in user" do 
+      c = FactoryGirl.create(:bills_compilation) 
+
+      get :index 
+
+      assigns(:compilations).should == [c] 
+    end
+
+    it "renders the index template" do 
+      get :index 
+
+      expect(response).to render_template('compilations/index') 
+    end
+  end 
 
   describe "GET #new" do
 

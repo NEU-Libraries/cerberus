@@ -3,7 +3,7 @@ class CompilationsController < ApplicationController
   before_filter :authenticate_user! 
 
   def index 
-
+    @compilations = Compilation.users_compilations(current_user) 
   end
 
   def new 
@@ -25,16 +25,16 @@ class CompilationsController < ApplicationController
     end   
   end
 
-  def edit 
-
+  def edit
+    load_instance 
   end
 
   def update
-
+    load_instance
   end 
 
   def show
-    @compilation = Compilation.find(params[:id])
+    load_instance
 
     if current_user.nuid != @compilation.depositor 
       render_403 
@@ -45,7 +45,11 @@ class CompilationsController < ApplicationController
 
   end
 
-  private 
+  private
+
+  def load_instance
+    @compilation = Compilation.find(params[:id]) 
+  end
 
   def mint_unique_pid 
     Sufia::Noid.namespaceize(Sufia::IdService.mint)
