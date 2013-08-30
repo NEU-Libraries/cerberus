@@ -20,6 +20,8 @@ describe Compilation do
     end
   end 
 
+  describe ""
+
   describe "Adding bookmarks" do 
     let(:member_entries) { compilation.relationships(:has_member)}
 
@@ -59,5 +61,26 @@ describe Compilation do
 
       compilation.relationships(:has_member).should have_entries_for([file_two.pid]) 
     end
+  end
+
+  describe "Entry retrieval" do 
+
+    it "can return an array of GenericFile objects" do 
+      compilation.add_entry(file) 
+      compilation.add_entry(file_two) 
+
+      gf_array = [file, file_two]
+
+      compilation.entries.should =~ gf_array 
+    end
+
+    it "can return an array of GenericFile PIDS" do
+      compilation.add_entry(file) 
+      compilation.add_entry(file_two) 
+
+      gf_pid_array = [file.pid, file_two.pid] 
+
+      compilation.entry_pids.should =~ gf_pid_array 
+    end 
   end
 end

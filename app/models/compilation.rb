@@ -45,6 +45,20 @@ class Compilation < ActiveFedora::Base
     self.properties.depositor.first
   end
 
+  # Returns the pids of all objects tagged as entries 
+  # in this collection.
+  def entry_pids
+    a = self.relationships(:has_member) 
+    return a.map{ |rels| trim_to_pid(rels) } 
+  end
+
+  # Returns all GenericFile objects tagged as entries 
+  # in this collection. 
+  def entries
+    a = self.relationships(:has_member) 
+    return a.map { |rels| GenericFile.find(trim_to_pid(rels)) } 
+  end
+
   def add_entry(value) 
     if value.instance_of?(GenericFile)
       add_relationship(:has_member, value) 
@@ -64,4 +78,12 @@ class Compilation < ActiveFedora::Base
       remove_relationship(:has_member, object)  
     end
   end
+
+  private 
+
+    # Takes a string of form "info:fedora/neu:abc123" 
+    # and returns just the pid
+    def trim_to_pid(string)
+      return string.split('/').last 
+    end 
 end
