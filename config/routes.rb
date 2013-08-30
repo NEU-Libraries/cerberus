@@ -8,6 +8,8 @@ DrsSufiaApp::Application.routes.draw do
   resources :nu_collections, except: [:index] 
   get "/nu_collections" => 'nu_collections#show', defaults: { id: "#{Rails.configuration.root_collection_id}" } 
 
+  resources :compilations
+
   get "/files/provide_metadata" => "generic_files#provide_metadata"
   post "/files/process_metadata" => "generic_files#process_metadata"
 
