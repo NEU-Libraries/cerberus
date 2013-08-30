@@ -10,7 +10,11 @@ class Compilation < ActiveFedora::Base
 
   attr_accessible :title, :identifier, :depositor, :description
 
-  has_many :entries, class_name: "GenericFile",  property: :has_member 
+  has_many :entries, class_name: "GenericFile",  property: :has_member
+
+  def self.users_compilations(user) 
+    Compilation.find(:all).keep_if { |file| file.depositor == user.nuid } 
+  end 
 
   def title=(value)
     self.DC.nu_title = value 

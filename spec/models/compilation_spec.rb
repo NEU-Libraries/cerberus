@@ -20,8 +20,6 @@ describe Compilation do
     end
   end 
 
-  describe ""
-
   describe "Adding bookmarks" do 
     let(:member_entries) { compilation.relationships(:has_member)}
 
@@ -83,4 +81,13 @@ describe Compilation do
       compilation.entry_pids.should =~ gf_pid_array 
     end 
   end
+
+  describe "User based lookup" do 
+
+    it "returns all compilations associated with the given user" do 
+      a = FactoryGirl.create(:bills_compilation)
+
+      Compilation.users_compilations(bill).length.should == 1 
+    end
+  end 
 end
