@@ -323,6 +323,7 @@ GEM
       mime-types
       nokogiri
       rest-client
+    rubyzip (0.9.9)
     sass (3.2.10)
     sass-rails (3.2.6)
       railties (~> 3.2.0)
@@ -386,6 +387,7 @@ DEPENDENCIES
   launchy
   rails (= 3.2.13)
   rspec-rails
+  rubyzip
   sass-rails (~> 3.2.3)
   sqlite3
   sufia!
