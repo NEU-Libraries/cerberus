@@ -1,49 +1,55 @@
-require 'tmpdir' 
+class ZipCompilationJob
+  include Hydra::PermissionsQuery
+  include Rails.application.routes.url_helpers
 
-class ZipCompilationJob 
+  attr_accessor :title, :comp_pid, :entry_ids
 
   def queue_name 
     :zip_compilation 
   end
 
   def initialize(compilation)
-    @compilation = compilation 
+    self.title = compilation.title  
+    self.comp_pid = compilation.pid 
+    self.entry_ids = compilation.entry_ids 
   end
 
-  def run 
-    # Writes this compilations entry content to a temporary directory, returns the full path to said directory. 
-    content_file_location = write_content_to_temp_dir(compilation)
+  # def initialize(compilation_pid)
+  #   self.compilation = Compilation.find(compilation_pid) 
+  # end
 
-    # Generate the zipfile path 
-    zipfile_name = "#{Rails.root}/tmp/#{compilation.title}_zip_#{Time.now}" 
+  def run
+    puts "Job executing take two"
+    puts self.entry_ids
 
-    # Zips all files at content_file_location 
-    Zip::File.open(zipfile_name, Zip::File::CREATE) do |zipfile| 
-      Dir[File.join(content_file_location, "**", "**")].each do |file| 
-        zipfile.add(file.sub(directory, ''), file) 
+    zipfile_name = safe_zipfile_name
+
+    puts "Zipfile name is #{zipfile_name}"
+
+    Zip::ZipOutputStream::open(safe_zipfile_name) do |io| 
+      self.entry_ids.each do |id|
+        entry = GenericFile.find(id)
+
+        io.put_next_entry("#{self.title}/#{assign_file_extension(entry)}") 
+        io.write entry.content.content 
       end
-    end
+    end 
 
-    return zipfile_name
+    puts "Zipfile path is #{zipfile_name}"  
   end
 
   private 
 
-    # Creates a temporary directory and returns a string containing the path to it. 
-    def write_content_to_temp_dir(compilation) 
-      temporary_directory = FileUtils.mkdir_p("#{Rails.root}/tmp/#{compilation.title}_archive_#{Time.now}")
-
-      compilation.entries.each do |entry| 
-        create_content_file(entry) 
-      end
-
-      return temporary_directory.first 
+    # Need to get FITS sorted out for this to work properly. 
+    def assign_file_extension(entry) 
+      return entry.title.first 
     end
 
-    # Create a file with this entry's content in the given temporary directory.  Tosses out blank files. 
-    def create_content_file(entry, tempdir)
-      if !entry.content.content.nil? 
-        File.open("#{tempdir}/#{entry.title.first}", "w+") { |f| f.write(entry.content) }
-      end 
+    # Generates a temporary directory name devoid of spaces and colons 
+    def safe_zipfile_name
+      safe_title = self.title.gsub(/\s+/, "")
+      timestamp = DateTime.now.strftime("%Y-%m-%d-%M-%s")
+
+      return "#{Rails.root}/tmp/#{safe_title}_archived_#{timestamp}.zip" 
     end
 end
