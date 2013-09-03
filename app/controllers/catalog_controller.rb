@@ -360,12 +360,12 @@ class CatalogController < ApplicationController
 
   protected
 
-  # Limits search results just to GenericFiles
+  # Limits search results just to NuCoreFiles
   # @param solr_parameters the current solr parameters
   # @param user_parameters the current user-subitted parameters
   def exclude_unwanted_models(solr_parameters, user_parameters)
     solr_parameters[:fq] ||= []
-    solr_parameters[:fq] << "#{Solrizer.solr_name("has_model", :symbol)}:\"info:fedora/afmodel:GenericFile\""
+    solr_parameters[:fq] << "#{Solrizer.solr_name("has_model", :symbol)}:\"info:fedora/afmodel:NuCoreFile\""
   end
 
   def depositor 

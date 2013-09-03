@@ -1,0 +1,3 @@
+= form_for(@nu_core_file, :url => nu_core_files_path, :html => {:multipart => true, :id => 'fileupload'}) do |f|
+  .well
+    = render partial: 'nu_core_files/upload/form_fields'

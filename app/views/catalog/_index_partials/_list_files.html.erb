@@ -1,6 +1,6 @@
 <li>
   <h2>
-    <%= link_to document.title_or_label, sufia.generic_file_path(document.noid) %>
+    <%= link_to document.title_or_label, nu_core_file_path(document.noid) %>
     <small>[<%= link_to 'Download', sufia.download_path(document.noid), :target => '_new' %>]</small>
   </h2>
   <table class="table">

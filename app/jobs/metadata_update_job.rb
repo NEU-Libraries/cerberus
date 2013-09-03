@@ -12,7 +12,7 @@ class MetadataUpdateJob
     self.login = login
     self.title = params[:title] 
     self.nu_title = params[:title] 
-    self.file_attributes = params[:generic_file]
+    self.file_attributes = params[:nu_core_file]
     self.visibility = params[:visibility]
   end
 
@@ -21,7 +21,7 @@ class MetadataUpdateJob
     @saved = []
     @denied = []
 
-    GenericFile.users_in_progress_files(user).each do |gf|
+    NuCoreFile.users_in_progress_files(user).each do |gf|
       puts "Updating files"
       puts gf.title
       update_file(gf, user)
@@ -67,7 +67,7 @@ class MetadataUpdateJob
   end
   
   def file_list (files)
-    return files.map {|gf| '<a href="'+Sufia::Engine.routes.url_helpers.generic_files_path+'/'+gf.noid+'">'+gf.to_s+'</a>'}.join(', ')   
+    return files.map {|gf| '<a href="'+nu_core_files_path+'/'+gf.noid+'">'+gf.to_s+'</a>'}.join(', ')   
   end
   
 end

@@ -1,0 +1,22 @@
+- nu_core_file = @nu_core_file unless nu_core_file
+%ol.breadcrumb
+  - include_file = true if include_file.blank?
+  - crumbs = []
+  - crumbs << link_to('Home', root_path)
+  - case request.referer
+    - when /dashboard/
+      - crumbs << link_to('Dashboard', sufia.dashboard_index_path)
+    - when /files/
+      - crumbs << link_to('Back to previous', request.referer)
+    - when /catalog/
+      - crumbs << link_to('Back to search results', request.referer)
+
+  - crumbs << nu_core_file.title.first if include_file
+  - crumbs.each do |crumb|
+    - if crumb == crumbs.last
+      %li.active
+        = crumb
+    - else
+      %li
+        = crumb
+/ /breadcrumbs

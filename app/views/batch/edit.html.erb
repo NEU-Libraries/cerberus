@@ -16,7 +16,7 @@ limitations under the License.
 
 <% content_for :local_js do %>
    if (navigator.userAgent.match("MSIE")){
-      $("#new_generic_file").validate();
+      $("#new_nu_core_file").validate();
    }
 
 
@@ -43,11 +43,11 @@ function confirmExit(){
   You may edit individual files from <%= link_to '<i class="icon-dashboard"></i> my dashboard'.html_safe, sufia.dashboard_index_path %> once
   this step is finished.
 </div>
-<%= form_for([@batch, @generic_file], :url => sufia.batch_generic_files_path, :html => {:multipart => true, :class => 'form-horizontal'}) do |f| %>
+<%= form_for([@batch, @nu_core_file], :url => sufia.batch_nu_core_files_path, :html => {:multipart => true, :class => 'form-horizontal'}) do |f| %>
 
   <%= render :partial => 'metadata', :formats => [:html], :locals => {:f => f} %>
 
-  <%= render :partial => 'generic_files/permission_form', :formats => [:html], :locals => { :gf => @generic_file, :batch=> @batch } %>
+  <%= render :partial => 'nu_core_files/permission_form', :formats => [:html], :locals => { :gf => @nu_core_file, :batch=> @batch } %>
 
   <div class="row form-actions" id="permissions_submit">
           <%= button_tag '<i class="icon-save"></i> Save'.html_safe, :type => 'submit', :class => 'btn-primary btn-large', :onclick => "confirmation_needed = false;", :id => "upload_submit", :name => "update_permission" %>
