@@ -11,6 +11,7 @@ DrsSufiaApp::Application.routes.draw do
   resources :compilations
   match "/compilations/:id/:entry_id" => 'compilations#delete_file', via: 'delete', as: 'delete_entry' 
   match "/compilations/:id/:entry_id" => 'compilations#add_file', via: 'post', as: 'add_entry'
+  match "/compilations/:id/download" => 'compilations#download', via: 'post', as: 'download_zip' 
 
   get "/files/provide_metadata" => "generic_files#provide_metadata"
   post "/files/process_metadata" => "generic_files#process_metadata"
