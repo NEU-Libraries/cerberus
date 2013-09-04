@@ -8,6 +8,8 @@
           <%= link_to "Edit", edit_nu_core_file_path unless @nu_core_file.processing?   %>
           <%= "File is being processed you may edit once it is complete" if @nu_core_file.processing?   %>
       <%end %>
+      &nbsp;|&nbsp;
+      <%= link_to "Add to Compilation", "#" %>  
     </p>
     <p>Export to:
       <%= link_to 'EndNote', nu_core_file_path(@nu_core_file.noid, :format => 'endnote') %>
