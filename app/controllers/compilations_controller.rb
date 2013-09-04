@@ -64,9 +64,23 @@ class CompilationsController < ApplicationController
     save_or_bust @compilation 
   end
 
+  def ping_download
+    load_instance 
+    if download_is_ready?(@compilation.pid) 
+      @is_ready = true 
+    else
+      @is_ready = false 
+    end 
+  end
+
   def show_download 
     load_instance 
     Sufia.queue.push(ZipCompilationJob.new(current_user, @compilation))
+  end
+
+  def download 
+    load_instance
+    download_zipped_comp(@compilation.pid)  
   end
 
   private
@@ -79,6 +93,19 @@ class CompilationsController < ApplicationController
       flash.now.error = "Compilation was not successfully updated" 
     end
   end
+
+  def download_is_ready?(pid)
+    path_to_dl = "#{Rails.root}/tmp/#{pid}" 
+    # check that the directory exists 
+    if File.directory?(path_to_dl)  
+      return !Dir["#{path_to_dl}/*"].empty?
+    end    
+  end
+
+  def download_zipped_comp(pid) 
+    path_to_dl = Dir["#{Rails.root}/tmp/#{pid}/*"].first
+    send_file path_to_dl 
+  end 
 
   def load_instance
     @compilation = Compilation.find(params[:id]) 
