@@ -64,9 +64,9 @@ class CompilationsController < ApplicationController
     save_or_bust @compilation 
   end
 
-  def download 
-    load_instance
-    Sufia.queue.push(ZipCompilationJob.new(@compilation)) 
+  def show_download 
+    load_instance 
+    Sufia.queue.push(ZipCompilationJob.new(current_user, @compilation))
   end
 
   private
