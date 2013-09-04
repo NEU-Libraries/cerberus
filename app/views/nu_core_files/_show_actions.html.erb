@@ -9,7 +9,8 @@
           <%= "File is being processed you may edit once it is complete" if @nu_core_file.processing?   %>
       <%end %>
       &nbsp;|&nbsp;
-      <%= link_to "Add to Compilation", "#", id: "add_to_compilation" %>  
+      <%= link_to "Add to Compilation", compilations_path(file: @nu_core_file.pid), remote: true %>
+      <div id="add_compilation_form" style="display:none"></div> 
     </p>
     <p>Export to:
       <%= link_to 'EndNote', nu_core_file_path(@nu_core_file.noid, :format => 'endnote') %>
