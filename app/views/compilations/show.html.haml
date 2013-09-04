@@ -13,4 +13,4 @@
 %br 
 = link_to("Destroy This Compilation", @compilation, method: 'delete')
 %br 
-= link_to("Download this compilation", download_zip_path(id: @compilation.pid), method: 'post')    
+= link_to("Download this compilation", prepare_download_path(id: @compilation.pid), method: 'get')    
