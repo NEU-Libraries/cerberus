@@ -15,14 +15,8 @@ class NuCoreFile < ActiveFedora::Base
     nu_core_file.date_modified = Date.today
     nu_core_file.creator = user.name
 
-    #if batch_id
-      #nu_core_file.add_relationship("isPartOf", "info:fedora/#{Sufia::Noid.namespaceize(batch_id)}")
-    #else
-      #logger.warn "unable to find batch to attach to"
-    #end
-
     if collection_id
-      nu_core_file.add_relationship("isPartOf", "info:fedora/#{Sufia::Noid.namespaceize(collection_id)}")
+      nu_core_file.add_relationship("isMemberOf", "info:fedora/#{Sufia::Noid.namespaceize(collection_id)}")
     else
       logger.warn "unable to find collection to attach to"
     end
