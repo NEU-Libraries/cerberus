@@ -5,7 +5,7 @@
       = render :partial => 'dashboard/_index_partials/thumbnail_display', :locals => {:document=>recent_document, :height=>60, :width=>45}
   %td
     %h3
-      = link_to truncate(recent_document.title_or_label, :length => 28, :separator => ' '), sufia.generic_file_path(recent_document.noid), :title => recent_document.title_or_label
+      = link_to truncate(recent_document.title_or_label, :length => 28, :separator => ' '), sufia.nu_core_file_path(recent_document.noid), :title => recent_document.title_or_label
       - if display_access
         - if recent_document.registered?
           %span.label.label-info{:title => t('sufia.institution_name')}= t('sufia.institution_name')
@@ -15,6 +15,6 @@
           %span.label.label-important Private
     %p
       = link_to truncate(recent_document.label, :length=>25),                          |
-        sufia.generic_file_path(recent_document.noid), :title => recent_document.label |
+        sufia.nu_core_file_path(recent_document.noid), :title => recent_document.label |
       %br
       = link_to_facet_list(recent_document.tags, 'desc_metadata__tag', 'no keywords specified').html_safe

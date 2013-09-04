@@ -23,13 +23,13 @@ describe Compilation do
   describe "Adding bookmarks" do 
     let(:member_entries) { compilation.relationships(:has_member)}
 
-    it "can be done via saved GenericFile object" do 
+    it "can be done via saved NuCoreFile object" do 
       compilation.add_entry(file) 
 
       member_entries.should have_entries_for([file.pid])  
     end
 
-    it "can be done via the pid of a GenericFile object" do 
+    it "can be done via the pid of a NuCoreFile object" do 
       compilation.add_entry(file.pid) 
 
       member_entries.should have_entries_for([file.pid]) 
@@ -38,7 +38,7 @@ describe Compilation do
 
   describe "Removing bookmarks" do
 
-    it "can be done via saved GenericFile object" do 
+    it "can be done via saved NuCoreFile object" do 
       compilation.add_entry(file)
       compilation.add_entry(file_two) 
 
@@ -49,7 +49,7 @@ describe Compilation do
       compilation.relationships(:has_member).should have_entries_for([file_two.pid]) 
     end
 
-    it "can be done via the pid of a GenericFile object" do 
+    it "can be done via the pid of a NuCoreFile object" do 
       compilation.add_entry(file)
       compilation.add_entry(file_two) 
 
@@ -63,7 +63,7 @@ describe Compilation do
 
   describe "Entry retrieval" do 
 
-    it "can return an array of GenericFile objects" do 
+    it "can return an array of NuCoreFile objects" do 
       compilation.add_entry(file) 
       compilation.add_entry(file_two) 
 
@@ -72,7 +72,7 @@ describe Compilation do
       compilation.entries.should =~ gf_array 
     end
 
-    it "can return an array of GenericFile PIDS" do
+    it "can return an array of NuCoreFile PIDS" do
       compilation.add_entry(file) 
       compilation.add_entry(file_two) 
 

@@ -16,7 +16,7 @@ $("a[rel=popover]").popover({ html: true });
   <% @terms.each do |term| %>
     <% vals =  @show_file.send(term) %>
     <% next if vals.blank? %>    
-    $("#<%='generic_file_'+term.to_s%>").autocomplete({"source":["<%=vals.join(",")%>"]});
+    $("#<%='nu_core_file_'+term.to_s%>").autocomplete({"source":["<%=vals.join(",")%>"]});
 
   <% end %>
 
@@ -97,7 +97,7 @@ $("a[rel=popover]").popover({ html: true });
                           adata = deserialize(req.data.replace(/\+/g," "));
                           for (key in  Object.keys(adata)){ 
                              curKey =   Object.keys(adata)[key] ;                      
-                             if (curKey.slice(0,12) == "generic_file"){
+                             if (curKey.slice(0,12) == "nu_core_file"){
                                 data[curKey] = adata[curKey];
                                 form.push (req.form);
                              }
@@ -173,7 +173,7 @@ $("a[rel=popover]").popover({ html: true });
 <% end %>
 
 
-<%= render :partial => 'generic_files/breadcrumbs', :locals => {:include_file=>false} %>
+<%= render :partial => 'nu_core_files/breadcrumbs', :locals => {:include_file=>false} %>
 <h2 class="non lower">Batch Edit Descriptions &nbsp;&nbsp;&nbsp;<small>Click on labels below to edit file descriptions.</small> </h2>
 <div class="scrollx scrolly fileHeight"> <!-- original values -->
   <h3> <b>Changes will be applied to: (<%=@names.size%> files) </b></h3>
@@ -202,10 +202,10 @@ $("a[rel=popover]").popover({ html: true });
                 <td  width="50%" class="scrolly">
       
                     <div id="collapse_<%=term.to_s%>" class="accordion-body collapse scrolly">
-                      <%= form_for @generic_file, :url=>batch_edits_path, :method=>:put, :remote => true, :html => { :id=>"form_"+term.to_s, :class=>"ajax-form"} do |f| %>
+                      <%= form_for @nu_core_file, :url=>batch_edits_path, :method=>:put, :remote => true, :html => { :id=>"form_"+term.to_s, :class=>"ajax-form"} do |f| %>
                           <%= hidden_field_tag('update_type', 'update') %>
                           <%= hidden_field_tag('key', term.to_s) %>
-                          <%= render :partial => "generic_files/field_form", :locals => { :generic_file => @show_file, :f =>f, :render_req => false, :key => term } %>
+                          <%= render :partial => "nu_core_files/field_form", :locals => { :nu_core_file => @show_file, :f =>f, :render_req => false, :key => term } %>
                         <div class="row">
                            <%= f.submit "Save changes", :class=>'btn btn-primary field-save updates-batches' , :id=>term.to_s+'_save'%>
                            <a class="accordion-toggle btn" data-toggle="collapse" data-parent="#row_<%=term.to_s%>" href="#collapse_<%=term.to_s%>">Cancel </a>
@@ -219,10 +219,10 @@ $("a[rel=popover]").popover({ html: true });
           </tbody></table> <!-- class="verticalheadings"> -->
       </div><!-- /well -->
       <div id="permissions_display" class="tab-pane">
-        <%= form_for @generic_file, :url=>batch_edits_path, :method=>:put, :remote => true, :html => { :id=>"form_permissions", :class=>"ajax-form"} do |f| %>
+        <%= form_for @nu_core_file, :url=>batch_edits_path, :method=>:put, :remote => true, :html => { :id=>"form_permissions", :class=>"ajax-form"} do |f| %>
            <%= hidden_field_tag('update_type', 'update') %>
            <%= hidden_field_tag('key', 'permissions') %>
-           <%= render :partial => "generic_files/permission_form", :locals => { :gf => @show_file } %>
+           <%= render :partial => "nu_core_files/permission_form", :locals => { :gf => @show_file } %>
          <div class="row">
             <%= f.submit "Save changes", :class=>'btn btn-primary updates-batches', :id=>'permissions_save' %>
             <a class="accordion-toggle btn" data-toggle="collapse" data-parent="#row_permissions" href="#collapse_permissions">Cancel </a>

@@ -1,0 +1,51 @@
+- content_for :local_js do
+  if (navigator.userAgent.match("MSIE")){
+  $("form").validate();
+  }
+  initialize_audio();
+  
+  $('input[name=revision]:radio').on('click', function() {
+  $('#save_version_note').fadeIn('slow');
+  });
+  
+  confirmation_needed = false;
+  window.onbeforeunload = confirmExit;
+  function confirmExit(){
+  if(confirmation_needed){
+  \// if you return a string it will be displayed in between "don't navigate away"
+  \// and "click Ok to navigate away or cancel to stay put" in the confirm dialog
+  return "Your metadata has not been saved.";
+  }
+  }
+  \// only valid for perm tab
+  set_access_levels();
+  
+  \// initialize popover helpers
+  $("a[rel=popover]").popover({ html: true });
+= render :partial => 'breadcrumbs'
+%h1.lower
+  Edit #{@nu_core_file}
+.row
+  .span2
+    = render :partial => 'media_display'
+  .span10
+    = link_to "&lt;&lt;Browse view".html_safe, nu_core_file_path
+    %ul.nav.nav-tabs
+      %li#edit_descriptions_link.active
+        %a{"data-toggle" => "tab", :href => "#descriptions_display"}
+          %i.icon-tags
+          Descriptions
+      %li#edit_versioning_link
+        %a{"data-toggle" => "tab", :href => "#versioning_display"}
+          %i.icon-sitemap
+          Versions
+      %li#edit_permissions_link
+        %a{"data-toggle" => "tab", :href => "#permissions_display"}
+          %i.icon-key
+          Permissions
+    .tab-content
+      = render :partial => "descriptions", :locals => { :nu_core_file => @nu_core_file }
+      = render :partial => "permission", :locals => { :gf => @nu_core_file}
+      = render :partial => "versioning", :locals => { :nu_core_file => @nu_core_file }
+  / /.span10
+/ /.row

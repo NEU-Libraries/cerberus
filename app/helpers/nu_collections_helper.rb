@@ -47,7 +47,7 @@ module NuCollectionsHelper
   # if the current user has edit permissions. 
   def render_upload_files_button(parent) 
     if current_user_can_edit?(parent) 
-      link_to("Upload files to this collection", Sufia::Engine.routes.url_helpers.new_generic_file_path(parent: parent.identifier)) 
+      link_to("Upload files to this collection", new_nu_core_file_path(parent: parent.identifier)) 
     end
   end
 end

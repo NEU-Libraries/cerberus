@@ -1,0 +1,46 @@
+<% content_for :local_js do %>
+   if (navigator.userAgent.match("MSIE")){
+      $("#new_nu_core_file").validate();
+   }
+
+
+$('#permissions_display').show();
+
+// initialize popover helpers
+$("a[rel=popover]").popover({ html: true });
+
+confirmation_needed = true;
+window.onbeforeunload = confirmExit;
+function confirmExit(){
+      if(confirmation_needed){ 
+      // if you return a string it will be displayed in between "don't navigate away"
+      // and "click Ok to navigate away or cancel to stay put" in the confirm dialog          
+          $.ajax({
+              url: '<%= destroy_incomplete_files_path %>',
+              type: 'DELETE',
+              success: function(result) {                  
+              }
+          });         
+          return "Your metadata has not been saved, if you leave the process now your uploaded files will be deleted.";
+      }
+ }  
+<% end %>
+
+<h1>Apply Metadata</h1>
+<br />
+<div class="alert">The information you provide for Title will be applied to the corresponding file only; however all other 
+  information you provide will be applied <em>to the entire batch of files</em> you have just deposited into <%= t('sufia.product_name') %>.  
+  You may edit individual files from <%= link_to '<i class="icon-dashboard"></i> my dashboard'.html_safe, sufia.dashboard_index_path %> once
+  this step is finished.
+</div>
+<%= form_for(@nu_core_file, :url => files_process_metadata_path, :html => {:multipart => true, :class => 'form-horizontal'}) do |f| %>
+
+  <%= render :partial => 'metadata', :formats => [:html], :locals => {:f => f} %>
+
+  <%= render :partial => 'permission_form', :formats => [:html], :locals => { :gf => @nu_core_file } %>
+
+  <div class="row form-actions" id="permissions_submit">
+          <%= button_tag '<i class="icon-save"></i> Save'.html_safe, :type => 'submit', :class => 'btn-primary btn-large', :onclick => "confirmation_needed = false;", :id => "upload_submit", :name => "update_permission" %>
+  </div>
+
+<% end %>

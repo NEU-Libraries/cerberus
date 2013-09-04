@@ -10,7 +10,7 @@ class Compilation < ActiveFedora::Base
 
   attr_accessible :title, :identifier, :depositor, :description
 
-  has_many :entries, class_name: "GenericFile",  property: :has_member
+  has_many :entries, class_name: "NuCoreFile",  property: :has_member
 
   def self.users_compilations(user) 
     Compilation.find(:all).keep_if { |file| file.depositor == user.nuid } 
@@ -56,18 +56,18 @@ class Compilation < ActiveFedora::Base
     return a.map{ |rels| trim_to_pid(rels) } 
   end
 
-  # Returns all GenericFile objects tagged as entries 
+  # Returns all NuCoreFile objects tagged as entries 
   # in this collection. 
   def entries
     a = self.relationships(:has_member) 
-    return a.map { |rels| GenericFile.find(trim_to_pid(rels)) } 
+    return a.map { |rels| NuCoreFile.find(trim_to_pid(rels)) } 
   end
 
   def add_entry(value) 
-    if value.instance_of?(GenericFile)
+    if value.instance_of?(NuCoreFile)
       add_relationship(:has_member, value) 
     elsif value.instance_of?(String) 
-      object = GenericFile.find(value) 
+      object = NuCoreFile.find(value) 
       add_relationship(:has_member, object) 
     else
       raise "Add item can only take a string or an instance of a Core object" 
@@ -75,10 +75,10 @@ class Compilation < ActiveFedora::Base
   end
 
   def remove_entry(value) 
-    if value.instance_of?(GenericFile) 
+    if value.instance_of?(NuCoreFile) 
       remove_relationship(:has_member, value) 
     elsif value.instance_of?(String) 
-      object = GenericFile.find(value)
+      object = NuCoreFile.find(value)
       remove_relationship(:has_member, object)  
     end
   end

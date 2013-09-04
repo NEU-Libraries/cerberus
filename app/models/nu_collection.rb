@@ -20,7 +20,7 @@ class NuCollection < ActiveFedora::Base
   # delegate_to :mods, [:mods_title, :mods_abstract, :mods_identifier, :mods_subject, :mods_date_issued] 
   delegate_to :properties, [:depositor]  
 
-  has_many :generic_files, property: :is_part_of 
+  has_many :nu_core_files, property: :is_member_of 
   has_many :nu_collections, property: :is_member_of 
 
   # Return all collections that this user can read
