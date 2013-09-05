@@ -1,9 +1,4 @@
 module NuFile
-  include Hydra::ModelMethods
-  include Hydra::ModelMixins::CommonMetadata  
-  include Hydra::ModelMixins::RightsMetadata
-  include ActiveModel::MassAssignmentSecurity
-
   included do
   	has_metadata name: 'DC', type: NortheasternDublinCoreDatastream 
   	has_metadata name: 'rightsMetadata', type: ParanoidRightsDatastream
