@@ -33,11 +33,18 @@ describe NuCoreFile do
     let(:bo) { FactoryGirl.create(:bo) } 
     let(:bills_collection) { FactoryGirl.create(:valid_owned_by_bill) }
     let(:bills_collection_two) { FactoryGirl.create(:valid_owned_by_bill) } 
-    let(:core) { NuCoreFile.new }
+    let(:core) do 
+      a = NuCoreFile.new(depositor: "bill@example.com")
+      a.rightsMetadata.permissions({person: 'bill@example.com'}, 'edit')
+      return a  
+    end
 
     it "succeeds when the user has edit permissions on the targetted collection" do 
       core.set_parent(bills_collection, bill).should be true 
-      core.parent.should == bills_collection 
+      core.parent.should == bills_collection
+      core.save!
+
+      bills_collection.child_file_ids.include?(core.pid).should be true 
     end
 
     it "fails when the user does not have edit permissions on the targetted collection" do 
@@ -50,6 +57,11 @@ describe NuCoreFile do
 
       core.parent.should == bills_collection_two 
       core.relationships(:is_member_of).length.should == 1
+
+      core.save!
+
+      bills_collection.child_file_ids.include?(core.pid).should be false 
+      bills_collection_two.child_file_ids.include?(core.pid).should be true
     end
   end
 end
