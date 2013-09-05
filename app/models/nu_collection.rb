@@ -173,11 +173,13 @@ class NuCollection < ActiveFedora::Base
     are_files = "has_model_ssim:#{escaped_model}"
     query = "#{all_members} AND #{are_files}"
 
-    puts query
-
     core_files = []
 
-    ActiveFedora::SolrService.query(query, rows: 999).length
+    ActiveFedora::SolrService.query(query, rows: 999).each do |result|
+      core_files << NuCoreFile.find(result["id"])
+    end
+
+    return core_files
   end
 
   # Accepts a hash of the following form:
