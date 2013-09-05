@@ -27,9 +27,11 @@ class NuCoreFile < ActiveFedora::Base
     nu_core_file.save!
   end
 
+  # Safely set the parent of a collection.
   def set_parent(collection, user) 
     if user.can? :edit, collection 
-      self.parent = collection 
+      self.parent = collection
+      return true  
     else 
       raise "User with nuid #{user.email} cannot add items to collection with pid of #{collection.pid}" 
     end
