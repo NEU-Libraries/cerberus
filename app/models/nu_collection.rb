@@ -20,8 +20,9 @@ class NuCollection < ActiveFedora::Base
   # delegate_to :mods, [:mods_title, :mods_abstract, :mods_identifier, :mods_subject, :mods_date_issued] 
   delegate_to :properties, [:depositor]  
 
-  has_many :nu_core_files, property: :is_member_of 
-  has_many :nu_collections, property: :is_member_of 
+  has_many :child_files, property: :is_member_of, :class_name => "NuCoreFile"
+  has_many :child_collections, property: :is_member_of, :class_name => "NuCollection"
+  belongs_to :parent, property: :is_member_of, :class_name => "NuCollection" 
 
   # Return all collections that this user can read
   def self.find_all_viewable(user) 
@@ -30,8 +31,15 @@ class NuCollection < ActiveFedora::Base
     return filtered 
   end
 
+  # Override parent= so that the string passed by the creation form can be used. 
   def parent=(collection_id)
-    self.add_relationship("isMemberOf", "info:fedora/#{Sufia::Noid.namespaceize(collection_id)}")
+    if collection_id.instance_of?(String) 
+      self.add_relationship(:is_member_of, NuCollection.find(collection_id))
+    elsif collection_id.instance_of?(NuCollection)
+      self.add_relationship(:is_member_of, collection_id) 
+    else
+      raise "parent= got passed a #{collection_id.class}, which doesn't work."
+    end
   end
 
   def depositor 
@@ -152,34 +160,6 @@ class NuCollection < ActiveFedora::Base
     else
       return self.rightsMetadata.under_embargo? && !(self.depositor == user.nuid)
     end
-  end
-
-  # Naive implementation for finding all child collections 
-  # TODO: Refactor to use solr once that's in place. 
-  def all_child_collections 
-    b = NuCollection.find(:all) 
-
-    b.keep_if { |collection| collection.parent == self } 
-
-    return b
-  end
-
-  # Return an array of all core objects pointing to this collection as their parent. 
-  def all_child_files
-    escaped_identifier = ActiveFedora::SolrService.escape_uri_for_query("info:fedora/#{self.identifier}") 
-    escaped_model = ActiveFedora::SolrService.escape_uri_for_query('info:fedora/afmodel:NuCoreFile') 
-
-    all_members = "is_member_of_ssim:#{escaped_identifier}"
-    are_files = "has_model_ssim:#{escaped_model}"
-    query = "#{all_members} AND #{are_files}"
-
-    core_files = []
-
-    ActiveFedora::SolrService.query(query, rows: 999).each do |result|
-      core_files << NuCoreFile.find(result["id"])
-    end
-
-    return core_files
   end
 
   # Accepts a hash of the following form:

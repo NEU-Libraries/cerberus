@@ -2,7 +2,7 @@
   %h3 Files 
 
   %ul.child_files
-  - collection.all_child_files.each do |file| 
+  - collection.child_files.each do |file| 
     %li 
       %p= link_to(file.title.first, nu_core_file_path(file)) 
       %span=  link_to "Add to Compilation", compilations_path(file: file.pid), remote: true
