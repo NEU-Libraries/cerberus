@@ -1,6 +1,7 @@
 module NuFile
+  extend ActiveSupport::Concern
   include Hydra::ModelMethods
-  
+
   included do
   	has_metadata name: 'DC', type: NortheasternDublinCoreDatastream 
   	has_metadata name: 'rightsMetadata', type: ParanoidRightsDatastream
