@@ -4,15 +4,15 @@ describe CompilationsController do
   let(:bill) { FactoryGirl.create(:bill) }
   let(:bo) { FactoryGirl.create(:bo) }
 
-  describe "GET #index" do 
+  before :each do 
+    sign_in bill
 
-    before :each do 
-      sign_in bill 
-
-      ActiveFedora::Base.find(:all).each do |file| 
-        file.destroy 
-      end 
+    ActiveFedora::Base.find(:all).each do |file|
+      file.destroy 
     end
+  end
+
+  describe "GET #index" do 
 
     it "loads all compilations for the signed in user" do 
       c = FactoryGirl.create(:bills_compilation) 
@@ -30,10 +30,6 @@ describe CompilationsController do
   end 
 
   describe "GET #new" do
-
-    before :each do 
-      sign_in bill 
-    end
 
     it "instantiates a blank compilation" do
       get :new 
@@ -57,9 +53,6 @@ describe CompilationsController do
   end
 
   describe "POST #create" do 
-    before :each do 
-      sign_in bill 
-    end
 
     it "boots out users who aren't signed in" do 
       sign_out bill 
@@ -91,7 +84,6 @@ describe CompilationsController do
     end
 
     it "renders the template for the depositing owner" do
-      sign_in bill
 
       get :show, id: compilation.pid
 
@@ -99,11 +91,39 @@ describe CompilationsController do
     end
 
     it "renders an error page for users besides the depositor who attempt access" do
+      sign_out bill
       sign_in bo 
 
       get :show, id: compilation.pid 
 
       response.status.should == 403
     end 
+  end
+
+  describe "GET #edit" do 
+    let(:compilation) { FactoryGirl.create(:bills_compilation) } 
+
+    it "Boots out users who aren't signed in" do 
+      sign_out bill 
+
+      get :edit, :id => compilation.pid 
+
+      expect(response).to redirect_to(new_user_session_path) 
+    end
+
+    it "renders an error page for users besides the depositor who attempt access" do 
+      sign_out bill 
+      sign_in bo 
+
+      get :edit, id: compilation.pid 
+
+      response.status.should == 403 
+    end
+
+    it "Shows the edit template to the depositing user" do 
+      get :edit, id: compilation.pid 
+
+      expect(response).to render_template('compilations/edit') 
+    end
   end
 end

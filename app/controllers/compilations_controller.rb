@@ -36,10 +36,6 @@ class CompilationsController < ApplicationController
 
   def show
     load_instance
-
-    if current_user.nuid != @compilation.depositor 
-      render_403 
-    end
   end
 
   def destroy 
@@ -108,9 +104,14 @@ class CompilationsController < ApplicationController
   end 
 
   def load_instance
-    @compilation = Compilation.find(params[:id]) 
-  end
+    @compilation = Compilation.find(params[:id])
 
+    # If this isn't the depositing user render a 403 page. 
+    if current_user.nuid != @compilation.depositor 
+      render_403 
+    end 
+  end
+  
   def mint_unique_pid 
     Sufia::Noid.namespaceize(Sufia::IdService.mint)
   end
