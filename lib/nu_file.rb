@@ -5,8 +5,8 @@ module NuFile
   included do
   	has_metadata name: 'DC', type: NortheasternDublinCoreDatastream 
   	has_metadata name: 'rightsMetadata', type: ParanoidRightsDatastream
-    has_metadata name: 'crud', type: CrudDatastream
-
+    has_file_datastream :name => "content", :type => FileContentDatastream
+    
     belongs_to :nu_core_files, :property => :is_part_of, :class_name => 'NuCoreFile'
 
     delegate_to :DC, [:nu_title, :nu_description, :nu_identifier]
