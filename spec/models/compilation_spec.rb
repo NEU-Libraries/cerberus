@@ -20,7 +20,7 @@ describe Compilation do
     end
   end 
 
-  describe "Adding bookmarks" do 
+  describe "Adding entries" do 
     let(:member_entries) { compilation.relationships(:has_member)}
 
     it "can be done via saved NuCoreFile object" do 
@@ -36,7 +36,7 @@ describe Compilation do
     end
   end
 
-  describe "Removing bookmarks" do
+  describe "Removing entries" do
 
     it "can be done via saved NuCoreFile object" do 
       compilation.add_entry(file)
@@ -78,7 +78,7 @@ describe Compilation do
 
       gf_pid_array = [file.pid, file_two.pid] 
 
-      compilation.entry_pids.should =~ gf_pid_array 
+      compilation.entry_ids.should =~ gf_pid_array 
     end 
   end
 

@@ -51,7 +51,7 @@ class Compilation < ActiveFedora::Base
 
   # Returns the pids of all objects tagged as entries 
   # in this collection.
-  def entry_pids
+  def entry_ids
     a = self.relationships(:has_member) 
     return a.map{ |rels| trim_to_pid(rels) } 
   end
