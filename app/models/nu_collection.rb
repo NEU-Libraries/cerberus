@@ -14,7 +14,6 @@ class NuCollection < ActiveFedora::Base
   has_metadata name: 'rightsMetadata', type: ParanoidRightsDatastream
   has_metadata name: 'properties', type: DrsPropertiesDatastream
   has_metadata name: 'mods', type: NuModsDatastream
-  has_metadata name: 'crud', type: CrudDatastream
 
   delegate_to :DC, [:nu_title, :nu_description, :nu_identifier]
   # delegate_to :mods, [:mods_title, :mods_abstract, :mods_identifier, :mods_subject, :mods_date_issued] 
