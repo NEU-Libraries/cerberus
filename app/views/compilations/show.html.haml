@@ -11,4 +11,6 @@
 
 %span.warning WARNING: Destroying a compilation is not reversible. 
 %br 
-= link_to("Destroy This Compilation", @compilation, method: 'delete')   
+= link_to("Destroy This Compilation", @compilation, method: 'delete')
+%br 
+= link_to("Download this compilation", prepare_download_path(id: @compilation.pid), method: 'get')    

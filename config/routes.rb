@@ -8,9 +8,12 @@ DrsSufiaApp::Application.routes.draw do
   resources :nu_collections, except: [:index] 
   get "/nu_collections" => 'nu_collections#show', defaults: { id: "#{Rails.configuration.root_collection_id}" } 
 
+  get "/compilations/:id/download" => 'compilations#show_download', as: 'prepare_download'
+  get "/compilations/:id/ping" => 'compilations#ping_download', as: 'ping_download'  
+  get "/compilations/:id/trigger_download" => 'compilations#download', as: 'trigger_download'
   resources :compilations
   match "/compilations/:id/:entry_id" => 'compilations#delete_file', via: 'delete', as: 'delete_entry' 
-  match "/compilations/:id/:entry_id" => 'compilations#add_file', via: 'post', as: 'add_entry'
+  match "/compilations/:id/:entry_id" => 'compilations#add_file', via: 'post', as: 'add_entry' 
 
   get "/files/provide_metadata" => "nu_core_files#provide_metadata"
   post "/files/process_metadata" => "nu_core_files#process_metadata"
