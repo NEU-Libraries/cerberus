@@ -1,2 +1,8 @@
-- if current_user_can_read?(@nu_collection) 
+- if current_user_can_read?(collection) 
   %h3 Files 
+
+  %ul.child_files
+  - collection.child_files.each do |file| 
+    %li 
+      %p= link_to(file.title.first, nu_core_file_path(file)) 
+      %span=  link_to "Add to Compilation", compilations_path(file: file.pid), remote: true

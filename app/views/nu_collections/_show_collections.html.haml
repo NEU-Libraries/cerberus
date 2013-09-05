@@ -1,7 +1,7 @@
 - if current_user_can_read?(@nu_collection) 
   %h3 Collections
 
-  - @nu_collection.all_child_collections.each do |collection| 
+  - @nu_collection.child_collections.each do |collection| 
     - if current_user_can_read?(collection) 
       %p= link_to(collection.title, nu_collection_path(collection.identifier))
 

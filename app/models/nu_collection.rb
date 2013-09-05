@@ -20,8 +20,9 @@ class NuCollection < ActiveFedora::Base
   # delegate_to :mods, [:mods_title, :mods_abstract, :mods_identifier, :mods_subject, :mods_date_issued] 
   delegate_to :properties, [:depositor]  
 
-  has_many :nu_core_files, property: :is_member_of 
-  has_many :nu_collections, property: :is_member_of 
+  has_many :child_files, property: :is_member_of, :class_name => "NuCoreFile"
+  has_many :child_collections, property: :is_member_of, :class_name => "NuCollection"
+  belongs_to :parent, property: :is_member_of, :class_name => "NuCollection" 
 
   # Return all collections that this user can read
   def self.find_all_viewable(user) 
@@ -30,8 +31,15 @@ class NuCollection < ActiveFedora::Base
     return filtered 
   end
 
+  # Override parent= so that the string passed by the creation form can be used. 
   def parent=(collection_id)
-    self.add_relationship("isMemberOf", "info:fedora/#{Sufia::Noid.namespaceize(collection_id)}")
+    if collection_id.instance_of?(String) 
+      self.add_relationship(:is_member_of, NuCollection.find(collection_id))
+    elsif collection_id.instance_of?(NuCollection)
+      self.add_relationship(:is_member_of, collection_id) 
+    else
+      raise "parent= got passed a #{collection_id.class}, which doesn't work."
+    end
   end
 
   def depositor 
@@ -152,20 +160,6 @@ class NuCollection < ActiveFedora::Base
     else
       return self.rightsMetadata.under_embargo? && !(self.depositor == user.nuid)
     end
-  end
-
-  # Naive implementation for finding all child collections 
-  # TODO: Refactor to use solr once that's in place. 
-  def all_child_collections 
-    b = NuCollection.find(:all) 
-
-    b.keep_if { |collection| collection.parent == self } 
-
-    return b
-  end
-
-  def all_child_files 
-    #TODO: Implement me 
   end
 
   # Accepts a hash of the following form:
