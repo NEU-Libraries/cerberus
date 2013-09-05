@@ -164,8 +164,20 @@ class NuCollection < ActiveFedora::Base
     return b
   end
 
-  def all_child_files 
-    #TODO: Implement me 
+  # Return an array of all core objects pointing to this collection as their parent. 
+  def all_child_files
+    escaped_identifier = ActiveFedora::SolrService.escape_uri_for_query("info:fedora/#{self.identifier}") 
+    escaped_model = ActiveFedora::SolrService.escape_uri_for_query('info:fedora/afmodel:NuCoreFile') 
+
+    all_members = "is_member_of_ssim:#{escaped_identifier}"
+    are_files = "has_model_ssim:#{escaped_model}"
+    query = "#{all_members} AND #{are_files}"
+
+    puts query
+
+    core_files = []
+
+    ActiveFedora::SolrService.query(query, rows: 999).length
   end
 
   # Accepts a hash of the following form:
