@@ -17,8 +17,10 @@
 
 = render_create_collection_button(@nu_collection)
 
-= render partial: 'show_files' 
+= render partial: 'show_files', locals: { collection: @nu_collection }
 
+
+%div#add_compilation_form{ style: 'display:none' } 
 
 %p Actions:
 

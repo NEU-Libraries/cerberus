@@ -1,0 +1,3 @@
+- if @is_ready
+  :plain
+    $("#display_download_link").html("#{escape_javascript(render(:partial => 'download_link', locals: {id: @compilation.pid}))}")

@@ -149,17 +149,8 @@ describe NuCollection do
     end 
 
     it "Sets the parent collection, but receives nil" do 
-      p_coll.parent = 'neu:1' 
-      p_coll.parent.should be nil 
-    end
-
-    it "Sets the parent collection, saves, and looks up to get the parent object" do 
       p_coll.parent = @saved_root.pid 
-      p_coll.parent.should be nil 
-      p_coll.save! 
-
-      saved_coll = NuCollection.find(p_coll.pid) 
-      saved_coll.parent.should == @saved_root  
+      p_coll.parent.should == @saved_root 
     end
   end
 

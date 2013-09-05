@@ -3,6 +3,6 @@
   - entries.each do |entry| 
     %li 
       %p= entry.title.first
-      = link_to("View #{entry.title.first}", Sufia::Engine.routes.url_helpers.nu_core_files_path(entry))
+      = link_to("View #{entry.title.first}", nu_core_files_path(entry))
       %span.spacer //
       = link_to("Remove from compilation", delete_entry_path(id: compilation.pid, entry_id: entry.pid), method: 'delete') 
