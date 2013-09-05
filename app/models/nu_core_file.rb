@@ -1,7 +1,9 @@
 class NuCoreFile < ActiveFedora::Base
   include Sufia::GenericFile
   # This can be found in our gem fork at: 
-  # sufia-models/lib/models/nu_core_file.rb  
+  # sufia-models/lib/models/nu_core_file.rb
+
+  attr_reader :parent  
 
   has_metadata name: 'DC', type: NortheasternDublinCoreDatastream
   has_metadata name: 'properties', type: DrsPropertiesDatastream
@@ -15,8 +17,8 @@ class NuCoreFile < ActiveFedora::Base
     nu_core_file.date_modified = Date.today
     nu_core_file.creator = user.name
 
-    if collection_id
-      nu_core_file.add_relationship("isMemberOf", "info:fedora/#{Sufia::Noid.namespaceize(collection_id)}")
+    if !collection_id.blank?
+      nu_core_file.set_parent(collection_id, user)
     else
       logger.warn "unable to find collection to attach to"
     end
@@ -30,6 +32,19 @@ class NuCoreFile < ActiveFedora::Base
     all = NuCoreFile.find(:all) 
     filtered = all.keep_if { |file| file.in_progress_for_user?(user) } 
     return filtered  
+  end
+
+  # Sets the parent collection for this Core File. 
+  def set_parent(collection_id, user)
+    if !user.can? :edit, NuCollection.find(collection_id)
+      return false 
+    else
+      self.add_relationship("isMemberOf", "info:fedora/#{Sufia::Noid.namespaceize(collection_id)}") 
+    end
+  end
+
+  def parent
+    self.relationships("isMemberOf") 
   end
 
   def in_progress_for_user?(user)
