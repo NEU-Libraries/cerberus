@@ -1,10 +1,11 @@
 class NuCoreFile < ActiveFedora::Base
   include Sufia::GenericFile
-  # This can be found in our gem fork at: 
-  # sufia-models/lib/models/nu_core_file.rb 
+  include NuModelHelper
+  include ModsSetterHelpers
 
   has_metadata name: 'DC', type: NortheasternDublinCoreDatastream
   has_metadata name: 'properties', type: DrsPropertiesDatastream
+  has_metadata name: 'mods', type: NuModsDatastream
 
   belongs_to :parent, :property => :is_member_of, :class_name => 'NuCollection'
 
