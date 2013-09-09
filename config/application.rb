@@ -9,7 +9,7 @@ if defined?(Bundler)
   # Bundler.require(:default, :assets, Rails.env)
 end
 
-module DrsSufiaApp
+module Drs
   class Application < Rails::Application
     
     config.generators do |g|
@@ -17,7 +17,7 @@ module DrsSufiaApp
     end
 
     config.autoload_paths += %W(#{config.root}/lib/helpers)
-
+    config.autoload_paths += %W(#{config.root}/lib)
 
     # Settings in config/environments/* take precedence over those specified here.
     # Application configuration should go into files in config/initializers
@@ -78,6 +78,9 @@ module DrsSufiaApp
     
     config.assets.precompile += ['polyfills/placeholder/placeholder.min.js']
     config.assets.precompile += ['polyfills/respond/respond.min.js']
+
+    # Set a default root collection. 
+    config.root_collection_id = 'neu:1' 
 
   end
 end

@@ -3,7 +3,7 @@ require 'spec_helper'
 feature "Uploading a single file" do 
   let(:user) { FactoryGirl.create(:user) }
 
-  before { sign_in user }
+  before { features_sign_in user }
   before { visit '/' } 
 
   it "Upload page is accessible from home page" do 
@@ -22,11 +22,6 @@ feature "Uploading a single file" do
       expect(page).to have_selector('span', text: "Select files...")
       expect(page).to have_selector('span', text: "Start upload")
       expect(page).to have_selector('input', 'files[]')
-    end
-
-    it "Can upload a file" do 
-      page.attach_file "files[]", "#{Rails.root}/spec/fixtures/test_pic.jpeg"
-      expect(page).to have_content 'test_pic.jpeg'
     end
   end
 

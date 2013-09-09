@@ -1,6 +1,6 @@
 - noid = document.noid
 %tr{:class => cycle("","zebra"), :id => "document_#{noid}"}
-  - gf = GenericFile.load_instance_from_solr(document.id)
+  - gf = NuCoreFile.load_instance_from_solr(document.id)
   %td{:width => "6%"}
     = batch_edit_select(document)
     \&nbsp;
@@ -15,19 +15,19 @@
     \&nbsp;
     \#{render :partial => 'dashboard/_index_partials/thumbnail_display', :locals => {:document=>document}}
     %span.center
-      = link_to document.title_or_label, sufia.generic_file_path(noid), :id => "src_copy_link#{noid}"
+      = link_to document.title_or_label, nu_core_file_path(noid), :id => "src_copy_link#{noid}"
       %br/
   %td{:width => "17%"}
     = document.date_uploaded
   %td{:align => "center", :width => "5%"}
     - if document.registered?
-      %a{:href => "#{sufia.generic_file_path(noid)}/edit/?tab=permissions", :id => "permission_#{noid}"}
+      %a{:href => "#{nu_core_file_path(noid)}/edit/?tab=permissions", :id => "permission_#{noid}"}
         %span.label.label-info{:title => t('sufia.institution_name')}= t('sufia.institution_name')
     - elsif document.public?
-      %a{:href => "#{sufia.generic_file_path(noid)}/edit/?tab=permissions", :id => "permission_#{noid}"}
+      %a{:href => "#{nu_core_file_path(noid)}/edit/?tab=permissions", :id => "permission_#{noid}"}
         %span.label.label-success{:title => "Open Access"} Open Access
     - else
-      %a{:href => "#{sufia.generic_file_path(noid)}/edit/?tab=permissions", :id => "permission_#{noid}"}
+      %a{:href => "#{nu_core_file_path(noid)}/edit/?tab=permissions", :id => "permission_#{noid}"}
         %span.label.label-important{:title => "Private"} Private
   %td{:width => "23%"}
     .btn-group
@@ -40,11 +40,11 @@
         %li
           = link_to raw('<i class="icon-link over"></i> Single-Use Link to File'), '#', :class => "copypaste itemicon itemcode", :title => "Single-Use Link to File", :id => "copy_link_#{noid}"
         %li
-          = link_to raw('<i class="icon-pencil"></i> Edit File'), sufia.edit_generic_file_path(noid), :class=> 'itemicon itemedit', :title => 'Edit File'
+          = link_to raw('<i class="icon-pencil"></i> Edit File'), edit_nu_core_file_path(noid), :class=> 'itemicon itemedit', :title => 'Edit File'
         %li
           = link_to raw('<i class="icon-download-alt"></i> Download File'), sufia.download_path(noid), :class=> 'itemicon itemdownload', :title => 'Download File', :target => '_new'
         %li
-          = link_to raw('<i class="icon-trash"></i> Delete File'), sufia.generic_file_path(noid), :class=> 'itemicon itemtrash', :title => 'Delete File', :method => :delete, :data => { :confirm => "Deleting a file from #{t('sufia.product_name')} is permanent. Click OK to delete this file from #{t('sufia.product_name')}, or Cancel to cancel this operation"}
+          = link_to raw('<i class="icon-trash"></i> Delete File'), nu_core_file_path(noid), :class=> 'itemicon itemtrash', :title => 'Delete File', :method => :delete, :data => { :confirm => "Deleting a file from #{t('sufia.product_name')} is permanent. Click OK to delete this file from #{t('sufia.product_name')}, or Cancel to cancel this operation"}
         %li
           = display_trophy_link(@user, noid)
 %tr.hide{:id => "detail_#{noid}"}
@@ -54,7 +54,7 @@
       %tr
         %td
           %strong File Name:
-          = link_to document.label, sufia.generic_file_path(noid)
+          = link_to document.label, nu_core_file_path(noid)
         %td
           %strong File Format:
           = document.file_format

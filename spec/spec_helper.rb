@@ -39,4 +39,26 @@ RSpec.configure do |config|
   # the seed, which is printed after each run.
   #     --seed 1234
   config.order = "random"
+
+  # Cleans everything.  Should figure out how to get Fedora to do this 
+  # automatically. 
+  config.before(:suite) do 
+    ActiveFedora::Base.find(:all) do |file| 
+      file.destroy 
+    end
+  end
+
+  # Clean everything.  Should figure out how to get Fedora to do this
+  # automatically. 
+  config.after(:suite) do 
+    ActiveFedora::Base.find(:all) do |file| 
+      file.destroy 
+    end
+  end
+
+  # Add Devise test helpers
+  config.include Devise::TestHelpers, :type => :controller
+
+  # Reconfigure FactoryGirl to look for factories in the spec/factories directory 
+  FactoryGirl.definition_file_paths = [File.expand_path("../factories", __FILE__)]
 end

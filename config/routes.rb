@@ -1,11 +1,33 @@
-DrsSufiaApp::Application.routes.draw do
+Drs::Application.routes.draw do
   root :to => "catalog#index"
 
   Blacklight.add_routes(self)
   HydraHead.add_routes(self)
   Hydra::BatchEdit.add_routes(self)
 
-  resources :nu_collections
+  resources :nu_collections, except: [:index] 
+  get "/nu_collections" => 'nu_collections#show', defaults: { id: "#{Rails.configuration.root_collection_id}" } 
+
+  get "/compilations/:id/download" => 'compilations#show_download', as: 'prepare_download'
+  get "/compilations/:id/ping" => 'compilations#ping_download', as: 'ping_download'  
+  get "/compilations/:id/trigger_download" => 'compilations#download', as: 'trigger_download'
+  resources :compilations
+  match "/compilations/:id/:entry_id" => 'compilations#delete_file', via: 'delete', as: 'delete_entry' 
+  match "/compilations/:id/:entry_id" => 'compilations#add_file', via: 'post', as: 'add_entry' 
+
+  get "/files/provide_metadata" => "nu_core_files#provide_metadata"
+  post "/files/process_metadata" => "nu_core_files#process_metadata"
+
+  get "/files/rescue_incomplete_files" => "nu_core_files#rescue_incomplete_files", as: 'rescue_incomplete_files'
+  match "/incomplete_files" => "nu_core_files#destroy_incomplete_files", via: 'delete', as: 'destroy_incomplete_files'  
+
+  # Generic file routes
+  resources :nu_core_files, :path => :files, :except => :index do
+    member do
+      get 'citation', :as => :citation
+      post 'audit'
+    end
+  end
 
   devise_for :users
   # This must be the very last route in the file because it has a catch all route for 404 errors.

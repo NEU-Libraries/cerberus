@@ -4,7 +4,6 @@ feature "Editing collections" do
   before :all do 
     @root = FactoryGirl.create(:root_collection)
     @collection = FactoryGirl.create(:valid_owned_by_bill)
-    # @minimal_collection = FactoryGirl.create(:minimal_valid_collection)
     @user = FactoryGirl.create(:bill) 
   end
 
@@ -17,7 +16,7 @@ feature "Editing collections" do
   let(:first_perm) { page.all('div.permission').first }    
 
   scenario "Collection data preloads correctly in edit screen" do 
-    sign_in @user 
+    features_sign_in @user 
 
     visit edit_nu_collection_path(@collection)
 

@@ -4,4 +4,4 @@
 
 require File.expand_path('../config/application', __FILE__)
 
-DrsSufiaApp::Application.load_tasks
+Drs::Application.load_tasks

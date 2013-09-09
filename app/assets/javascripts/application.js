@@ -14,6 +14,7 @@
 //= require jquery_ujs
 //= require sufia
 //= require nu_collections
+//= require compilations
 //= require_tree ../../../vendor/assets/javascripts/jquery-ui
 // Required by Blacklight
 //= require blacklight/blacklight
