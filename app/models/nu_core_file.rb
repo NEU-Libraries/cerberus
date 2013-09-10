@@ -1,6 +1,7 @@
 class NuCoreFile < ActiveFedora::Base
   include Sufia::GenericFile
   include Drs::MetadataAssignment
+  include Drs::NuCoreFile::Export
 
   has_metadata name: 'DC', type: NortheasternDublinCoreDatastream
   has_metadata name: 'properties', type: DrsPropertiesDatastream

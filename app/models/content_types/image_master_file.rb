@@ -1,3 +1,3 @@
 class ContentTypes::ImageMasterFile < ActiveFedora::Base
-  include NuFile
+  include Drs::NuFile
 end
