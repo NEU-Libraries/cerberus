@@ -12,8 +12,13 @@ describe "Assignment" do
     end
 
     it "works for objects with DC and MODS datastreams" do 
-      core_file.title = "My Title Two" 
-      core_file.title.should == "My Title Two" 
+      collection.title = "My Title Two" 
+      collection.title.should == "My Title Two" 
+    end
+
+    it "works for objects with DC, MODS, and descMetadata datastreams" do 
+      core_file.title = "My Title Three" 
+      core_file.title.should == "My Title Three" 
     end
   end
 
@@ -27,6 +32,11 @@ describe "Assignment" do
       collection.identifier = "neu:whatever" 
       collection.identifier.should == "neu:whatever" 
     end
+
+    it "works for objects with DC, MODS, and descMetadata datastreams" do 
+      core_file.identifier = "neu:three" 
+      core_file.identifier.should == "neu:three" 
+    end
   end
 
   describe "of description" do 
@@ -36,8 +46,13 @@ describe "Assignment" do
     end
 
     it "works for objects with DC and MODS datastreams" do 
-      core_file.description = "The description two." 
-      core_file.description.should == "The description two." 
+      collection.description = "The description two." 
+      collection.description.should == "The description two." 
+    end
+
+    it "works for objects with DC, MODS, and descMetadata datastreams" do 
+      core_file.description = "The description three" 
+      core_file.description.should == "The description three" 
     end
   end
 
