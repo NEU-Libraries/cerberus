@@ -1,14 +1,16 @@
-%ul.breadcrumb 
-  - breadcrumb_to_root(@nu_collection).each do |breadcrumb| 
-    =breadcrumb 
+- unless @nu_collection.parent.nil?
+  %ul.breadcrumb 
+    - breadcrumb_to_root(@nu_collection).each do |breadcrumb| 
+      =breadcrumb 
 
-%h3= @nu_collection.title 
+%h2.page-header= @nu_collection.title 
 
 - if flash[:notice]
   %div.notice= flash[:notice] 
-
-%h4 "Description" 
-%p.well= @nu_collection.description
+.well
+  %h4 Description
+  %p
+    = @nu_collection.description
 
 = render partial: 'show_collections'
 
