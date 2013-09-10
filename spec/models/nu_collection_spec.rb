@@ -34,91 +34,6 @@ describe NuCollection do
   describe "Custom setters and getters" do
     let(:c) { NuCollection.new } 
 
-    it "Sets and fetches the proper title" do 
-      c.title = "My Title" 
-      c.title.should == "My Title" 
-    end
-
-    it "Sets and fetches the proper identifier" do 
-      c.identifier = "neu:whatever" 
-      c.identifier.should == "neu:whatever" 
-    end
-
-    it "Sets and fetches the proper description" do 
-      c.description = "My dope description." 
-      c.description.should == "My dope description." 
-    end
-
-    it "Sets and fetches the proper date of issue" do 
-      c.date_of_issue = Date.yesterday.to_s 
-      c.date_of_issue.should == Date.yesterday.to_s 
-    end
-
-    it "Sets and fetches the proper keyword array" do 
-      c.keywords = ["one", "two", "three"] 
-      c.keywords.should == ["one", "two", "three"] 
-    end
-
-    it "Sets and fetches the proper corporate creators" do 
-      c.corporate_creators = ["c_one", "c_two", "c_three"] 
-      c.corporate_creators.should == ["c_one", "c_two", "c_three"] 
-    end
-
-    it "Sets and fetches the proper personal creators" do 
-      fns = ["Will", "Bill"]
-      lns = ["Jackson", "Backson"]
-
-      c.personal_creators = { 'creator_first_names' => fns, 'creator_last_names' => lns }
-      c.personal_creators.should == [{ first: 'Will', last: 'Jackson' }, { first: 'Bill', last: 'Backson' }] 
-    end
-
-    it "Sets and fetches the proper embargo date" do 
-      c.embargo_release_date = Date.tomorrow.to_s 
-      c.embargo_release_date.should == Date.tomorrow.to_s 
-    end
-
-    it "Sets the 'public' mass permission correctly" do 
-      c.mass_permissions = 'public'
-      c.mass_permissions.should == 'public' 
-    end
-
-    it "Sets the 'registered' mass permission correctly" do 
-      c.mass_permissions = 'registered' 
-      c.mass_permissions.should == 'registered' 
-    end
-
-    it "Gets rid of public mass perm when registered is set" do 
-      c.mass_permissions = 'public' 
-      c.mass_permissions.should == 'public' 
-
-      c.mass_permissions = 'registered' 
-      c.mass_permissions.should == 'registered' 
-      c.rightsMetadata.permissions({group: 'public'}).should == 'none' 
-    end
-
-    it "Gets rid of registered mass perm when public is set" do 
-      c.mass_permissions = 'registered' 
-      c.mass_permissions.should == 'registered' 
-
-      c.mass_permissions = 'public' 
-      c.mass_permissions.should == 'public' 
-      c.rightsMetadata.permissions({group: 'registered'}).should == 'none' 
-    end 
-
-    it "Sets the 'private' mass permission correctly" do 
-      c.mass_permissions = 'private' 
-      c.mass_permissions.should == 'private' 
-    end
-
-    it "Blows away prior perms when 'private' is set" do 
-      c.mass_permissions = 'public' 
-      c.mass_permissions.should == 'public' 
-
-      c.mass_permissions = 'private'
-      c.mass_permissions.should == 'private' 
-      c.rightsMetadata.permissions({group: 'public'}).should == 'none'  
-    end
-
     it "Sets custom permissions correctly" do 
       permissions = {'permissions0' => {'identity_type' => 'person', 'identity' => 'Will', 'permission_type' => 'edit'}, 
                       'permissions1' => {'identity_type' => 'group', 'identity' => 'NU:All', 'permission_type' => 'read'},
@@ -151,42 +66,6 @@ describe NuCollection do
     it "Sets the parent collection, but receives nil" do 
       p_coll.parent = @saved_root.pid 
       p_coll.parent.should == @saved_root 
-    end
-  end
-
-  describe "Embargo Checks" do
-    let(:embargoed_collection) { NuCollection.new }
-    let(:no_embargo) { NuCollection.new }   
-    let(:bill) { FactoryGirl.create(:bill) } 
-    let(:bo) { FactoryGirl.create(:bo) } 
-
-    before do 
-      embargoed_collection.embargo_release_date = Date.tomorrow
-      embargoed_collection.depositor = bill.nuid  
-    end
-
-    it "Embargoed collection is embargoed for bo" do 
-      embargoed_collection.embargo_in_effect?(bo).should be true 
-    end
-
-    it "Embargoed collection is not embargoed for the depositor, bill" do 
-      embargoed_collection.embargo_in_effect?(bill).should be false 
-    end
-
-    it "Embargoed collection is embargoed for the general public" do 
-      embargoed_collection.embargo_in_effect?(nil).should be true 
-    end
-
-    it "Embargoless collection is not embargoed for bo" do 
-      no_embargo.embargo_in_effect?(bo).should be false 
-    end
-
-    it "Embargoless collection is not embargoed for the depositor, bill" do 
-      no_embargo.embargo_in_effect?(bill).should be false 
-    end
-
-    it "Embargoless collection is not embargoed for the general public" do 
-      no_embargo.embargo_in_effect?(bo).should be false 
     end
   end
 

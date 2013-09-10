@@ -1,12 +1,13 @@
-class NuCollection < ActiveFedora::Base
-  include Hydra::ModelMethods
-  include Hydra::ModelMixins::CommonMetadata  
-  include Hydra::ModelMixins::RightsMetadata
+class NuCollection < ActiveFedora::Base 
   include ActiveModel::MassAssignmentSecurity
+  include Hydra::ModelMixins::RightsMetadata
+  include Drs::Rights::MassPermissions
+  include Drs::Rights::Embargoable
+  include Drs::Rights::InheritedRestrictions
   include Drs::MetadataAssignment
 
-  attr_accessible :title, :description, :date_of_issue, :keywords, :parent, :mass_permissions 
-  attr_accessible :corporate_creators, :personal_creators, :embargo_release_date
+  attr_accessible :title, :description, :date_of_issue, :keywords, :parent 
+  attr_accessible :corporate_creators, :personal_creators
 
   attr_protected :identifier 
 
@@ -45,50 +46,8 @@ class NuCollection < ActiveFedora::Base
     end
   end
 
-  def embargo_release_date=(string) 
-    self.rightsMetadata.embargo_release_date = string
-  end
-
-  def embargo_release_date 
-    rightsMetadata.embargo_release_date 
-  end
-
   def permissions=(hash)
     self.set_permissions_from_new_form(hash) 
-  end
-
-  # Might need to be broken into a RightsMetadata module 
-  def mass_permissions=(value) 
-    if value == 'public' 
-      self.rightsMetadata.permissions({group: 'registered'}, 'none') 
-      self.rightsMetadata.permissions({group: 'public'}, 'read') 
-    elsif value == 'registered'
-      self.rightsMetadata.permissions({group: 'public'}, 'none')  
-      self.rightsMetadata.permissions({group: 'registered'}, 'read') 
-    elsif value == 'private' 
-      self.rightsMetadata.permissions({group: 'public'}, 'none') 
-      self.rightsMetadata.permissions({group: 'registered'}, 'none') 
-    end
-  end
-
-  def mass_permissions
-    if self.rightsMetadata.permissions({group: 'public'}) == 'read' 
-      return 'public' 
-    elsif self.rightsMetadata.permissions({group: 'registered'}) == 'read' 
-      return 'registered' 
-    else 
-      return 'private' 
-    end
-  end
-
-  # Since we need access to the depositor metadata field, we handle this
-  # at this level. 
-  def embargo_in_effect?(user)
-    if user.nil?
-      return self.rightsMetadata.under_embargo?
-    else
-      return self.rightsMetadata.under_embargo? && !(self.depositor == user.nuid)
-    end
   end
 
   # Accepts a hash of the following form:
