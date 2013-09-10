@@ -3,8 +3,7 @@ class NuCollection < ActiveFedora::Base
   include Hydra::ModelMixins::CommonMetadata  
   include Hydra::ModelMixins::RightsMetadata
   include ActiveModel::MassAssignmentSecurity
-  include NuModelHelper
-  include ModsSetterHelpers
+  include Drs::MetadataAssignment
 
   attr_accessible :title, :description, :date_of_issue, :keywords, :parent, :mass_permissions 
   attr_accessible :corporate_creators, :personal_creators, :embargo_release_date
@@ -14,11 +13,7 @@ class NuCollection < ActiveFedora::Base
   has_metadata name: 'DC', type: NortheasternDublinCoreDatastream 
   has_metadata name: 'rightsMetadata', type: ParanoidRightsDatastream
   has_metadata name: 'properties', type: DrsPropertiesDatastream
-  has_metadata name: 'mods', type: NuModsDatastream
-
-  delegate_to :DC, [:nu_title, :nu_description, :nu_identifier]
-  # delegate_to :mods, [:mods_title, :mods_abstract, :mods_identifier, :mods_subject, :mods_date_issued] 
-  delegate_to :properties, [:depositor]  
+  has_metadata name: 'mods', type: NuModsDatastream 
 
   has_many :child_files, property: :is_member_of, :class_name => "NuCoreFile"
   has_many :child_collections, property: :is_member_of, :class_name => "NuCollection"
@@ -40,10 +35,6 @@ class NuCollection < ActiveFedora::Base
     else
       raise "parent= got passed a #{collection_id.class}, which doesn't work."
     end
-  end
-
-  def depositor 
-    return self.properties.depositor.first 
   end
 
   def parent

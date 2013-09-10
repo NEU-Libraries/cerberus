@@ -25,7 +25,8 @@ class NuCoreFilesController < ApplicationController
       file.destroy 
     end
 
-    redirect_to files_provide_metadata_path 
+    flash[:notice] = "Incomplete files destroyed" 
+    redirect_to new_nu_core_file_path
   end
 
   def provide_metadata

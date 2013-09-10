@@ -3,6 +3,7 @@ class Compilation < ActiveFedora::Base
   include Hydra::ModelMixins::CommonMetadata  
   include Hydra::ModelMixins::RightsMetadata
   include ActiveModel::MassAssignmentSecurity
+  include Drs::MetadataAssignment
 
   has_metadata name: 'DC', type: NortheasternDublinCoreDatastream
   has_metadata name: 'rightsMetadata', type: ParanoidRightsDatastream 
@@ -14,39 +15,6 @@ class Compilation < ActiveFedora::Base
 
   def self.users_compilations(user) 
     Compilation.find(:all).keep_if { |file| file.depositor == user.nuid } 
-  end 
-
-  def title=(value)
-    self.DC.nu_title = value 
-  end
-
-  def title 
-    self.DC.nu_title.first 
-  end
-
-  def description=(value)
-    self.DC.nu_description = value 
-  end
-
-  def description 
-    self.DC.nu_description.first 
-  end
-
-  def identifier=(value) 
-    self.DC.nu_identifier = value 
-  end
-
-  def identifier
-    self.DC.nu_identifier.first 
-  end
-
-  def depositor=(value) 
-    self.properties.depositor = value
-    self.rightsMetadata.permissions({person: value}, 'edit')  
-  end
-
-  def depositor 
-    self.properties.depositor.first
   end
 
   # Returns the pids of all objects tagged as entries 
