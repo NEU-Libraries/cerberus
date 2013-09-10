@@ -99,6 +99,42 @@ class NuModsDatastream < ActiveFedora::OmDatastream
     end
   end
 
+  # Custom setters for fields that require some extra sanitization
+
+  # Filters out blank keyword entries 
+  def keywords=(array_of_strings) 
+    array_of_keywords = array_of_strings.select {|kw| !kw.blank? }  
+    self.mods_subject(0).mods_keyword = array_of_keywords
+  end 
+
+  # Eliminates some whitespace that seems to get inserted into these records when they're 
+  # returned. 
+  def corporate_creators
+    no_newlines = self.mods_corporate_name.map { |name| name.delete("\n") }
+    trimmed = no_newlines.map { |name| name.strip }  
+    return trimmed
+  end
+
+  # Formats the otherwise messy return for personal creator information 
+  def personal_creators 
+    result_array = []
+
+    first_names = self.mods_personal_name.mods_first_name 
+    last_names = self.mods_personal_name.mods_last_name 
+
+    names = first_names.zip(last_names) 
+
+    # NB: When accessing nested arrays of form [[first, second], [first, second]]
+    # that are all of even length, array.each do |first, second| grabs both elements 
+    # out of each nested array in sequence.  Did not know this until I looked it up. 
+    names.each do |first, last| 
+      result_array << Hash[first: first, last: last] 
+    end
+
+    return result_array
+  end
+
+
 
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Template files used by NodeHelper to add/remove nodes 

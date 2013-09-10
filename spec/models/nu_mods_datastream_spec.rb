@@ -46,7 +46,7 @@ describe NuModsDatastream do
       let(:last_names) { ["Jack", "Jackson", "Back"] } 
 
       before do 
-        valid_mods.mods_subject.mods_keyword = ["One", "Two", "Three"]
+        valid_mods.keywords = ["One", "Two", "Three"]
         valid_mods.assign_corporate_names(corp_names)
         valid_mods.assign_creator_personal_names(first_names, last_names) 
       end 
@@ -57,7 +57,9 @@ describe NuModsDatastream do
         valid_mods.mods_subject.mods_keyword(2).should == ["Three"] 
       end
 
-      it "Has set all provided corporate names correctly" do 
+      it "Has set all provided corporate names correctly" do
+        valid_mods.corporate_creators.should == ["Corp One", "Corp Two", "Corp Three"] 
+
         valid_mods.mods_corporate_name(0).mods_full_corporate_name.should == ["Corp One"] 
         valid_mods.mods_corporate_name(1).mods_full_corporate_name.should == ["Corp Two"] 
         valid_mods.mods_corporate_name(2).mods_full_corporate_name.should == ["Corp Three"] 
@@ -69,7 +71,10 @@ describe NuModsDatastream do
         valid_mods.mods_corporate_name(2).mods_full_corporate_name.length.should == 1 
       end
 
-      it "Has set all provided name entries correctly" do 
+      it "Has set all provided name entries correctly" do
+        valid_mods.personal_creators.should == [{first: "Will", last: "Jack"}, {first: "William", last: "Jackson"},
+                                                {first: "Bill", last: "Back"}]
+
         valid_mods.mods_personal_name(0).mods_first_name.should == ["Will"]
         valid_mods.mods_personal_name(0).mods_last_name.should == ["Jack"]
 
