@@ -4,6 +4,7 @@ class NuCoreFile < ActiveFedora::Base
   include Drs::Rights::Embargoable 
   include Drs::Rights::InheritedRestrictions
   include Drs::MetadataAssignment
+  include Drs::NuCoreFile::Export
 
   has_metadata name: 'DC', type: NortheasternDublinCoreDatastream
   has_metadata name: 'properties', type: DrsPropertiesDatastream

@@ -11,7 +11,7 @@
     - when /catalog/
       - crumbs << link_to('Back to search results', request.referer)
 
-  - crumbs << nu_core_file.title.first if include_file
+  - crumbs << nu_core_file.title if include_file
   - crumbs.each do |crumb|
     - if crumb == crumbs.last
       %li.active

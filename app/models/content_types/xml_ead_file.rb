@@ -1,3 +1,3 @@
 class ContentTypes::XmlEadFile < ActiveFedora::Base
-  include NuFile
+  include Drs::NuFile
 end
