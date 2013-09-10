@@ -1,4 +1,4 @@
-- unless @nu_collection.parent.nil?
+- if @nu_collection.parent
   %ul.breadcrumb 
     - breadcrumb_to_root(@nu_collection).each do |breadcrumb| 
       =breadcrumb 
@@ -7,10 +7,11 @@
 
 - if flash[:notice]
   %div.notice= flash[:notice] 
-.well
-  %h4 Description
-  %p
-    = @nu_collection.description
+- if @nu_collection.description.length > 0 
+  .well
+    %h4 Description
+    %p
+      = @nu_collection.description
 
 = render partial: 'show_collections'
 
