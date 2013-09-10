@@ -1,7 +1,6 @@
 class NuCoreFile < ActiveFedora::Base
   include Sufia::GenericFile
   include Drs::MetadataAssignment
-  include ModsSetterHelpers
 
   has_metadata name: 'DC', type: NortheasternDublinCoreDatastream
   has_metadata name: 'properties', type: DrsPropertiesDatastream
