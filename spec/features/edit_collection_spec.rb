@@ -21,8 +21,8 @@ feature "Editing collections" do
     visit edit_nu_collection_path(@collection)
 
     #Verify data prefills correctly
-    find_field('Title:').value.should == 'Bills Collection'
-    find_field('Description:').value.should == 'Bills new collection' 
+    find_field('Title *').value.should == 'Bills Collection'
+    find_field('Description *').value.should == 'Bills new collection' 
     find_field('Date of Issuance').value.should == Date.yesterday.to_s 
 
     # Personal creator names 
