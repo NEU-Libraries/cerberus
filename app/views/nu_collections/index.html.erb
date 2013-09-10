@@ -1,9 +1,0 @@
-<h2>Your Collections</h2> 
-
-<% @all_collections.each do |coll| %> 
-
-<div class='collection'>
-<%= link_to coll.title, nu_collections_path + '/' + coll.pid %> 
-</div>
-
-<% end %> 
