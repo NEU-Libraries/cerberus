@@ -17,7 +17,7 @@ $(document).ready(function () {
   //Clones the personal creator field on the 'new' form.
   $('#add_another_personal_creator').click(function() {
     var cloned = $('div.personal_creator').first().clone();
-    var remove_button = "<button type='button' class='remove_personal_creator'>Remove Personal Creator</button>"; 
+    var remove_button = '<button type="button" class="remove_personal_creator btn btn-block btn-danger">Remove Personal Creator</button>'; 
 
     cloned.find('label').text('Additional personal contributor'); 
     cloned.find('input:text').val('');

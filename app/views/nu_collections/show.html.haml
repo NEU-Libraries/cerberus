@@ -1,12 +1,11 @@
 %ul.breadcrumb 
-	- breadcrumb_to_root(@nu_collection).each do |breadcrumb| 
-		%li= breadcrumb 
-		%span.divider /
+  - breadcrumb_to_root(@nu_collection).each do |breadcrumb| 
+    %li= breadcrumb 
 
 %h3= @nu_collection.title 
 
 - if flash[:notice]
-	%div.notice= flash[:notice] 
+  %div.notice= flash[:notice] 
 
 %h4 "Description" 
 %p.well= @nu_collection.description
