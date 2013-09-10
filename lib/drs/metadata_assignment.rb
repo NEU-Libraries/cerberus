@@ -41,10 +41,7 @@ module Drs
     end
 
     def keywords=(array_of_strings) 
-      if_mods_exists_strict do
-        array_of_keywords = array_of_strings.select {|kw| !kw.blank? }  
-        self.mods.mods_subject(0).mods_keyword = array_of_keywords
-      end 
+      if_mods_exists_strict { self.mods.keywords = array_of_strings } 
     end
 
     def keywords
@@ -57,11 +54,7 @@ module Drs
 
     def corporate_creators
       # Eliminates some whitespace that seems to get shoved into these entries.  
-      if_mods_exists_strict do 
-        no_newlines = mods.mods_corporate_name.map { |name| name.delete("\n") }
-        trimmed = no_newlines.map { |name| name.strip }  
-        return trimmed
-      end
+      if_mods_exists_strict { self.mods.corporate_creators } 
     end
 
     def personal_creators=(hash) 
@@ -73,24 +66,7 @@ module Drs
 
     # Should return [{first: "Will", last: "Jackson"}, {first: "next_first", last: "etc"}]
     def personal_creators 
-      if_mods_exists_strict do 
-          
-        result_array = []
-
-        first_names = mods.mods_personal_name.mods_first_name 
-        last_names = mods.mods_personal_name.mods_last_name 
-
-        names = first_names.zip(last_names) 
-
-        # NB: When accessing nested arrays of form [[first, second], [first, second]]
-        # that are all of even length, array.each do |first, second| grabs both elements 
-        # out of each nested array in sequence.  Did not know this until I looked it up. 
-        names.each do |first, last| 
-          result_array << Hash[first: first, last: last] 
-        end
-
-        return result_array 
-      end
+      if_mods_exists_strict { self.mods.personal_creators } 
     end
 
     def depositor=(string) 
@@ -118,10 +94,6 @@ module Drs
 
       def if_DC_exists_strict(&block) 
         verify_datastream_strict('DC', NortheasternDublinCoreDatastream, &block)  
-      end
-
-      def if_properties_exists(&block) 
-        verify_datastream_carefree('properties', DrsPropertiesDatastream, &block) 
       end
 
       def if_properties_exists_strict(&block) 
