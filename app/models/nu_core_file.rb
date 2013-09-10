@@ -1,6 +1,6 @@
 class NuCoreFile < ActiveFedora::Base
   include Sufia::GenericFile
-  include NuModelHelper
+  include Drs::MetadataAssignment
   include ModsSetterHelpers
 
   has_metadata name: 'DC', type: NortheasternDublinCoreDatastream
@@ -8,8 +8,6 @@ class NuCoreFile < ActiveFedora::Base
   has_metadata name: 'mods', type: NuModsDatastream
 
   belongs_to :parent, :property => :is_member_of, :class_name => 'NuCollection'
-
-  delegate_to :DC, [:nu_title, :nu_type, :nu_identifier, :nu_description]
 
   def self.create_metadata(nu_core_file, user, collection_id)
     nu_core_file.apply_depositor_metadata(user.user_key)
