@@ -4,81 +4,91 @@
 
 module Drs
   module MetadataAssignment
+    extend ActiveSupport::Concern
 
-    def title=(string) 
-      if_DC_exists { self.DC.nu_title = string } 
-      if_mods_exists { self.mods.mods_title = string } 
+    included do 
+      def title=(string) 
+        if_DC_exists { self.DC.nu_title = string } 
+        if_mods_exists { self.mods.mods_title = string }
+        if_descMetadata_exists { self.descMetadata.title = string }  
+      end
+
+      def title
+        self.DC.nu_title.first 
+      end
+
+      def identifier=(string) 
+        if_DC_exists { self.DC.nu_identifier = string } 
+        if_mods_exists { self.mods.mods_identifier = string }
+        if_descMetadata_exists { self.descMetadata.identifier = string }  
+      end
+
+      def identifier
+        self.DC.nu_identifier.first 
+      end
+
+      def description=(string) 
+        if_DC_exists { self.DC.nu_description = string } 
+        if_mods_exists { self.mods.mods_abstract = string }
+        if_descMetadata_exists { self.descMetadata.description = string } 
+      end
+
+      def description 
+        self.DC.nu_description.first 
+      end
+
+      def date_of_issue=(string) 
+        if_mods_exists_strict { self.mods.mods_date_issued = string } 
+      end
+
+      def date_of_issue
+        if_mods_exists_strict { self.mods.mods_date_issued.first } 
+      end
+
+      def keywords=(array_of_strings) 
+        if_mods_exists_strict { self.mods.keywords = array_of_strings } 
+      end
+
+      def keywords
+        if_mods_exists_strict { self.mods.mods_subject(0).mods_keyword } 
+      end
+
+      def corporate_creators=(array_of_strings) 
+        if_mods_exists_strict { self.mods.assign_corporate_names(array_of_strings) } 
+      end
+
+      def corporate_creators
+        # Eliminates some whitespace that seems to get shoved into these entries.  
+        if_mods_exists_strict { self.mods.corporate_creators } 
+      end
+
+      def personal_creators=(hash) 
+        first_names = hash['creator_first_names'] 
+        last_names = hash['creator_last_names'] 
+
+        if_mods_exists_strict { self.mods.assign_creator_personal_names(first_names, last_names)  } 
+      end
+
+      # Should return [{first: "Will", last: "Jackson"}, {first: "next_first", last: "etc"}]
+      def personal_creators 
+        if_mods_exists_strict { self.mods.personal_creators } 
+      end
+
+      def depositor=(string) 
+        if_properties_exists_strict { self.properties.depositor = string } 
+        self.rightsMetadata.permissions({person: string}, 'edit') 
+      end
+
+      def depositor
+        if_properties_exists_strict { self.properties.depositor.first } 
+      end
     end
 
-    def title
-      self.DC.nu_title.first 
-    end
+    private
 
-    def identifier=(string) 
-      if_DC_exists { self.DC.nu_identifier = string } 
-      if_mods_exists { self.mods.mods_identifier = string } 
-    end
-
-    def identifier
-      self.DC.nu_identifier.first 
-    end
-
-    def description=(string) 
-      if_DC_exists { self.DC.nu_description = string } 
-      if_mods_exists { self.mods.mods_abstract = string } 
-    end
-
-    def description 
-      self.DC.nu_description.first 
-    end
-
-    def date_of_issue=(string) 
-      if_mods_exists_strict { self.mods.mods_date_issued = string } 
-    end
-
-    def date_of_issue
-      if_mods_exists_strict { self.mods.mods_date_issued.first } 
-    end
-
-    def keywords=(array_of_strings) 
-      if_mods_exists_strict { self.mods.keywords = array_of_strings } 
-    end
-
-    def keywords
-      if_mods_exists_strict { self.mods.mods_subject(0).mods_keyword } 
-    end
-
-    def corporate_creators=(array_of_strings) 
-      if_mods_exists_strict { self.mods.assign_corporate_names(array_of_strings) } 
-    end
-
-    def corporate_creators
-      # Eliminates some whitespace that seems to get shoved into these entries.  
-      if_mods_exists_strict { self.mods.corporate_creators } 
-    end
-
-    def personal_creators=(hash) 
-      first_names = hash['creator_first_names'] 
-      last_names = hash['creator_last_names'] 
-
-      if_mods_exists_strict { self.mods.assign_creator_personal_names(first_names, last_names)  } 
-    end
-
-    # Should return [{first: "Will", last: "Jackson"}, {first: "next_first", last: "etc"}]
-    def personal_creators 
-      if_mods_exists_strict { self.mods.personal_creators } 
-    end
-
-    def depositor=(string) 
-      if_properties_exists_strict { self.properties.depositor = string } 
-      self.rightsMetadata.permissions({person: string}, 'edit') 
-    end
-
-    def depositor
-      if_properties_exists_strict { self.properties.depositor.first } 
-    end
-
-    private 
+      def if_descMetadata_exists(&block) 
+        verify_datastream_carefree('descMetadata', GenericFileRdfDatastream, &block) 
+      end
 
       def if_mods_exists(&block)
         verify_datastream_carefree('mods', NuModsDatastream, &block)
