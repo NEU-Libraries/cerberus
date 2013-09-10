@@ -29,19 +29,19 @@ feature "Creating a collection" do
       page.all('input#nu_collection_parent').first.value.should == @root.identifier
 
       # Fill out and submit the Collection creation form. 
-      fill_in 'Title:', with: "My Title" 
-      fill_in 'Description:', with: "My new collection" 
-      fill_in 'Date of Issuance', with: Date.tomorrow.to_s
-      fill_in "Creator's first name:", with: 'Will' 
-      fill_in "Creator's last name:", with: 'Jackson' 
-      fill_in "Enter an organization name:", with: "NU LTS" 
-      fill_in "Add some relevant keywords", with: "Keyword One" 
+      fill_in 'Title *', with: "My Title" 
+      fill_in 'Description *', with: "My new collection" 
+      fill_in 'Date of Issuance *', with: Date.tomorrow.to_s
+      fill_in "Creator's first name", with: 'Will' 
+      fill_in "Creator's last name", with: 'Jackson' 
+      fill_in "Organziation", with: "NU LTS" 
+      fill_in "Keyword", with: "Keyword One" 
       select 'registered', from: "Choose Mass Permissions:" 
       select 'person', from: "Are you trying to add a person or a group?" 
       fill_in "Enter NUID or group name", with: "Person Edit" 
       select 'edit', from: "Should this identity be allowed to read or edit?" 
       fill_in "Embargo Date:", with: Date.tomorrow.to_s 
-      click_button 'Create Nu collection'  
+      click_button 'Submit'  
 
       # Verify we've hit the right url. 
       current_path.include?('/nu_collections/neu:').should be true
