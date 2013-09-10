@@ -57,7 +57,7 @@ describe NuCoreFilesController do
       NuCoreFile.find(complete_file.pid).should == complete_file 
 
 
-      expect(response).to redirect_to(files_provide_metadata_path) 
+      expect(response).to redirect_to(new_nu_core_file_path) 
     end 
   end
 
