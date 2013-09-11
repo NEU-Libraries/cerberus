@@ -12,6 +12,7 @@
  *= require_tree ../../../vendor/assets/stylesheets/jquery-ui
  *  Sufia gem stylesheets imported here.
  *= require bootstrap-select/bootstrap-select.min.css
+ *= require bootstrap-datepicker/datepicker.css
  */
 
 
@@ -144,17 +145,7 @@
 /////////////
 
 @import "vendor/flatly/flatly";
-
-
-
-
-
-
-
-
-
 @import 'vendor/font-awesome/font-awesome';
-
 @import 'blacklight/blacklight';
 
 @import 'components/components';

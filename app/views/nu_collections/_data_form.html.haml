@@ -9,7 +9,10 @@
         = f.text_field :title, required: true, pattern: ".*\\S.*", class: "input-block-level", placeholder: "Univeristy Libraries"
       .span4
         = f.label :date_of_issue, "Date of Issuance *"
-        = f.text_field :date_of_issue, class: ['datepicker','input-block-level'], required: true, placeholder: "YYYY-MM-DD"
+        #date-issued.input-append.date(data-date-format="yyyy-mm-dd")
+          = f.text_field :date_of_issue, class: ['datepicker','input-block-level'], required: true, placeholder: "YYYY-MM-DD", value: Date.today, readonly: true
+          %span.add-on
+            %i.icon-calendar
     = f.label :description, "Description *"
     = f.text_area :description, required: true, pattern: ".*\\S.*", class: "input-block-level", rows: 5
   .row-fluid
@@ -52,7 +55,7 @@
     %fieldset.span4
       %legend Embargo
       = f.label :embargo_release_date, "Embargo Date:"
-      = f.text_field :embargo_release_date, class: ['embargo_datepicker', 'span12']
+      = f.text_field :embargo_release_date, class: ['embargo_datepicker', 'span12', 'datepicker']
       %span.help-block
         An embargoed item will be visible to only you until the day set below
   .form-actions

@@ -13,11 +13,11 @@
 //= require jquery
 //= require jquery_ujs
 //= require sufia
-//= require nu_collections
-//= require compilations
-//= require_tree ../../../vendor/assets/javascripts/jquery-ui
 // Required by Blacklight
 //= require blacklight/blacklight
 //= require bootstrap-select/bootstrap-select.min.js
+//= require bootstrap-datepicker/js/bootstrap-datepicker.js
 //= require app
 //= require polyfills
+//= require nu_collections
+//= require compilations
