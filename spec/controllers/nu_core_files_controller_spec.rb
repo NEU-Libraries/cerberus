@@ -2,7 +2,8 @@ require 'spec_helper'
 
 describe NuCoreFilesController do 
   let(:bill) { FactoryGirl.create(:bill) } 
-  let(:bo) { FactoryGirl.create(:bo) } 
+  let(:bo) { FactoryGirl.create(:bo) }
+  let(:root) { FactoryGirl.create(:root_collection) } 
 
   describe "GET #new" do 
 
@@ -16,9 +17,9 @@ describe NuCoreFilesController do
     it "goes to the upload page for users with no incomplete files" do 
       sign_in bo
 
-      get :new, {:use_route => "Sufia::Engine" } 
+      get :new, { parent: root.identifier } 
 
-      expect(response).to render_template("nu_core_files/new")  
+      expect(response).to render_template('nu_core_files/new')   
     end
 
     it "goes to the rescue incomplete files page for users with incomplete files" do 
@@ -26,9 +27,17 @@ describe NuCoreFilesController do
 
       a = FactoryGirl.create(:bills_incomplete_file) 
 
-      get :new, {:use_route => "Sufia::Engine" } 
+      get :new, { parent: root.identifier } 
 
       expect(response).to redirect_to(rescue_incomplete_files_path(file0: a.pid))  
+    end
+
+    it "redirects to the home page if no parent is set" do 
+      sign_in bill 
+
+      get :new 
+
+      expect(response).to redirect_to(root_path) 
     end
   end
 

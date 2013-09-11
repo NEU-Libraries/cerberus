@@ -1,5 +1,8 @@
 class NuCoreFile < ActiveFedora::Base
   include Sufia::GenericFile
+  include Drs::Rights::MassPermissions
+  include Drs::Rights::Embargoable 
+  include Drs::Rights::InheritedRestrictions
   include Drs::MetadataAssignment
   include Drs::NuCoreFile::Export
 
