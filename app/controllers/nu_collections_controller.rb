@@ -6,7 +6,6 @@ class NuCollectionsController < ApplicationController
 
   def new
     if !NuCollection.exists?(params[:parent])
-      session[:return_to] ||= request.referer
       flash[:error] = "Collections cannot be created without a parent."
       redirect_to nu_collections_path
     else 
