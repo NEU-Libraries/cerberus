@@ -5,8 +5,6 @@
 
 %h2.page-header= @nu_collection.title 
 
-- if flash[:notice]
-  %div.notice= flash[:notice] 
 - if @nu_collection.description.length > 0 
   .well
     %h4 Description
