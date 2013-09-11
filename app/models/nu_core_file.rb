@@ -54,5 +54,9 @@ class NuCoreFile < ActiveFedora::Base
   def tag_as_in_progress 
     self.properties.tag_as_in_progress 
   end
+
+  def persistent_url
+    "#{Rails.configuration.persistent_hostpath}#{noid}"
+  end  
 end 
 
