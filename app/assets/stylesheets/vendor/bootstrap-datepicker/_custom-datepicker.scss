@@ -105,8 +105,8 @@
   }
   td, th {
     text-align: center;
-    width: 20px;
-    height: 20px;
+    width: 25px;
+    height: 25px;
     -webkit-border-radius: 4px;
     -moz-border-radius: 4px;
     border-radius: 4px;
@@ -391,7 +391,7 @@
       background-color: #006dcc;
       
       background-repeat: repeat-x;
-      border-color: #0044cc #0044cc #002a80;
+      border-color: $brand-primary $brand-primary #002a80;
       border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
       
       color: #fff;
@@ -415,36 +415,36 @@
         }
       }
       &:hover, &.disabled:hover, &:active, &:hover:active {
-        background-color: #0044cc;
+        background-color: $brand-primary;
       }
       &.disabled {
         &:active, &:hover:active {
-          background-color: #0044cc;
+          background-color: $brand-primary;
         }
       }
       &.active, &:hover.active {
-        background-color: #0044cc;
+        background-color: $brand-primary;
       }
       &.disabled {
         &.active, &:hover.active {
-          background-color: #0044cc;
+          background-color: $brand-primary;
         }
-        background-color: #0044cc;
+        background-color: $brand-primary;
       }
       &:hover.disabled {
-        background-color: #0044cc;
+        background-color: $brand-primary;
       }
       &.disabled {
         &.disabled, &:hover.disabled {
-          background-color: #0044cc;
+          background-color: $brand-primary;
         }
       }
       &[disabled], &:hover[disabled] {
-        background-color: #0044cc;
+        background-color: $brand-primary;
       }
       &.disabled {
         &[disabled], &:hover[disabled] {
-          background-color: #0044cc;
+          background-color: $brand-primary;
         }
       }
       &:active, &:hover:active {
@@ -492,7 +492,7 @@
         background-color: #006dcc;
        
         background-repeat: repeat-x;
-        border-color: #0044cc #0044cc #002a80;
+        border-color: $brand-primary $brand-primary #002a80;
         border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
         color: #fff;
         &:hover {
@@ -509,43 +509,43 @@
           
           &:hover {
             background-color: #006dcc;
-            border-color: #0044cc #0044cc #002a80;
+            border-color: $brand-primary $brand-primary #002a80;
             border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
             color: #fff;
             
           }
         }
         &:hover, &.disabled:hover, &:active, &:hover:active {
-          background-color: #0044cc;
+          background-color: $brand-primary;
         }
         &.disabled {
           &:active, &:hover:active {
-            background-color: #0044cc;
+            background-color: $brand-primary;
           }
         }
         &.active, &:hover.active {
-          background-color: #0044cc;
+          background-color: $brand-primary;
         }
         &.disabled {
           &.active, &:hover.active {
-            background-color: #0044cc;
+            background-color: $brand-primary;
           }
-          background-color: #0044cc;
+          background-color: $brand-primary;
         }
         &:hover.disabled {
-          background-color: #0044cc;
+          background-color: $brand-primary;
         }
         &.disabled {
           &.disabled, &:hover.disabled {
-            background-color: #0044cc;
+            background-color: $brand-primary;
           }
         }
         &[disabled], &:hover[disabled] {
-          background-color: #0044cc;
+          background-color: $brand-primary;
         }
         &.disabled {
           &[disabled], &:hover[disabled] {
-            background-color: #0044cc;
+            background-color: $brand-primary;
           }
         }
         &:active, &:hover:active {
@@ -588,44 +588,5 @@
   thead tr:first-child th.cw {
     cursor: default;
     background-color: transparent;
-  }
-}
-
-.input-append.date .add-on i, .input-prepend.date .add-on i {
-  display: block;
-  cursor: pointer;
-  width: 16px;
-  height: 16px;
-}
-
-.input-daterange {
-  input {
-    text-align: center;
-    &:first-child {
-      -webkit-border-radius: 3px 0 0 3px;
-      -moz-border-radius: 3px 0 0 3px;
-      border-radius: 3px 0 0 3px;
-    }
-    &:last-child {
-      -webkit-border-radius: 0 3px 3px 0;
-      -moz-border-radius: 0 3px 3px 0;
-      border-radius: 0 3px 3px 0;
-    }
-  }
-  .add-on {
-    display: inline-block;
-    width: auto;
-    min-width: 16px;
-    height: 18px;
-    padding: 4px 5px;
-    font-weight: normal;
-    line-height: 18px;
-    text-align: center;
-    text-shadow: 0 1px 0 #ffffff;
-    vertical-align: middle;
-    background-color: #eeeeee;
-    border: 1px solid #ccc;
-    margin-left: -5px;
-    margin-right: -5px;
   }
 }
