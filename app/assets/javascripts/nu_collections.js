@@ -2,7 +2,7 @@
 $(document).ready(function () {
   'use strict';
   //Add a datepicker to the date of issuance field. 
-  $('#date-issued').datepicker();
+  $('#date-issued, #embargo-date').datepicker();
 
 
   //Clones the personal creator field on the 'new' form.
