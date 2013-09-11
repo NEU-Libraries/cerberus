@@ -4,8 +4,8 @@ module Drs
       # MIME: 'application/x-endnote-refer'
       def export_as_endnote
         end_note_format = {
-          '%T' => [:title, lambda { |x| x.first }],
-          '%Q' => [:title, lambda { |x| x.drop(1) }],
+          '%T' => [:title],
+          '%Q' => [:title],
           '%A' => [:creator],
           '%C' => [:publication_place],
           '%D' => [:date_created],
