@@ -147,11 +147,11 @@
       }
       &.disabled {
         background-color: #fde19a;
-        border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+        
         color: #000;
         &:hover {
           background-color: #fde19a;
-          border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+          
           color: #000;
         }
       }
@@ -236,27 +236,27 @@
       }
       &.today {
         background-color: #f3d17a;
-        border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+        
         -webkit-border-radius: 0;
         -moz-border-radius: 0;
         border-radius: 0;
         &:hover {
           background-color: #f3d17a;
           
-          border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+          
           -webkit-border-radius: 0;
           -moz-border-radius: 0;
           border-radius: 0;
         }
         &.disabled {
           background-color: #f3d17a;
-          border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+          
           -webkit-border-radius: 0;
           -moz-border-radius: 0;
           border-radius: 0;
           &:hover {
             background-color: #f3d17a;
-            border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+            
             -webkit-border-radius: 0;
             -moz-border-radius: 0;
             border-radius: 0;
@@ -315,25 +315,24 @@
     }
     &.selected {
       background-color: #9e9e9e;
-      border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
-      filter: progid:DXImageTransform.Microsoft.gradient(enabled=false);
+      
       color: #fff;
       text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
       &:hover {
         background-color: #9e9e9e;
        
-        border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+        
        
         color: #fff;
        
       }
       &.disabled {
         background-color: #9e9e9e;
-        border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+        
         color: #fff;
         &:hover {
           background-color: #9e9e9e;
-          border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+          
           color: #fff;
         }
       }
@@ -391,26 +390,26 @@
       background-color: #006dcc;
       
       background-repeat: repeat-x;
-      border-color: $brand-primary $brand-primary #002a80;
-      border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+      
+      
       
       color: #fff;
       &:hover {
         background-color: #006dcc;
-        border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+        
         color: #fff;
       }
       &.disabled {
         background-color: #006dcc;
         
         
-        border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+        
         filter: progid:DXImageTransform.Microsoft.gradient(enabled=false);
         color: #fff;
         text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
         &:hover {
           background-color: #006dcc;
-          border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+          
           color: #fff;
         }
       }
@@ -492,25 +491,25 @@
         background-color: #006dcc;
        
         background-repeat: repeat-x;
-        border-color: $brand-primary $brand-primary #002a80;
-        border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+        
+        
         color: #fff;
         &:hover {
           background-color: #006dcc;
-          border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+          
           color: #fff;
         }
         &.disabled {
           background-color: #006dcc;
 
-          border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+          
           
           color: #fff;
           
           &:hover {
             background-color: #006dcc;
-            border-color: $brand-primary $brand-primary #002a80;
-            border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+            
+            
             color: #fff;
             
           }
@@ -588,5 +587,15 @@
   thead tr:first-child th.cw {
     cursor: default;
     background-color: transparent;
+  }
+}
+
+
+div.date,
+.date input{
+  cursor: pointer;
+  color: $brand-info;
+  i{
+    color: $brand-info;
   }
 }
