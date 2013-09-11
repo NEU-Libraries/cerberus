@@ -30,7 +30,8 @@ class NuCoreFilesController < ApplicationController
   end
 
   def provide_metadata
-    @nu_core_file = NuCoreFile.new 
+    @nu_core_file = NuCoreFile.new
+    @sample_incomplete_file = NuCoreFile.users_in_progress_files(current_user).first 
     @incomplete_files = NuCoreFile.users_in_progress_files(current_user) 
   end
 
@@ -74,7 +75,12 @@ class NuCoreFilesController < ApplicationController
         param_hash = param_hash.merge({"file#{index}" => file.pid}) 
       end
 
-      redirect_to rescue_incomplete_files_path(param_hash)
+      redirect_to rescue_incomplete_files_path(param_hash) and return
+    end
+
+    if !NuCollection.exists?(params[:parent])
+      flash[:error] = "Files must belong to a collection.  Aborting." 
+      redirect_to root_path and return
     end
 
     @nu_core_file = ::NuCoreFile.new

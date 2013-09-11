@@ -5,7 +5,12 @@ class NuCollectionsController < ApplicationController
   end
 
   def new
-    @nu_collection = NuCollection.new    
+    if !NuCollection.exists?(params[:parent])
+      flash[:error] = "Collections cannot be created without a parent."
+      redirect_to nu_collections_path
+    else 
+      @nu_collection = NuCollection.new(parent: params[:parent])
+    end     
   end
 
   def create

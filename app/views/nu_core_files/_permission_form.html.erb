@@ -3,7 +3,7 @@
 <% public_perm = true %>
 <% registered_perm = gf.permissions.map { |perm| perm[:access] if perm[:name] == "registered"}.compact.first %>
  
-
+<p><%= gf.parent %></p>
 <input type="hidden" name="nu_core_file[permissions][group][public]" value="1" />
 <input type="hidden" name="nu_core_file[permissions][group][registered]" value="2" />
 
@@ -58,42 +58,8 @@
   </div>
   <div class="control-group">
     <h3>Visibility - <small>who should have the ability to read and download</small></h3>
-      <div class="controls">
-        <label class="radio">
-          <input type="radio" id="visibility_open" name="visibility" value="open" <% if !public_perm.blank? %> checked="true"<% end %>/> <span class="label label-success">Open Access</span> Visible to the world.
-        </label>
-        <label class="radio">
-          <input type="radio" id="visibility_psu" name="visibility" value="psu" <% if !registered_perm.blank? %> checked="true"<% end %> /><span class="label label-info"><%=t('sufia.institution_name') %></span> Visible to all <%=t('sufia.institution_name') %> users. 
-        </label>
-        <label class="radio">
-          <input type="radio" id="visibility_restricted" name="visibility" value="restricted"<% if registered_perm.blank? and public_perm.blank?%> checked="true"<% end %> /> <span class="label label-important">Private</span> Visible to users/groups specified below, if any. 
-        </label>
-    </div><!-- /.controls -->
+    <%= select_tag 'mass_permissions', options_for_select(@sample_incomplete_file.valid_mass_permissions, gf.mass_permissions) %>
   </div><!-- /.control-group --> 
-  <div class="row">
-      <h3>Share With <small>(optional)</small></h3>
-  </div>
-  <div class="row control-group">
-    <div id="new-user"> 
-      <div class="input-append">
-        <p class="help-block">Enter <%=t('sufia.account_label') %> (one at a time)</p>
-        <%= text_field_tag 'new_user_name_skel', nil, :class => "span29" %><span class="add-on"><%=t('sufia.directory.suffix') %></span>
-        <%= select_tag 'new_user_permission_skel', options_for_select(Sufia.config.permission_levels), :class=> 'span17' %>
-        <button class="btn btn-mini btn-inverse" id="add_new_user_skel"><i class="icon-plus-sign"></i> Add</button>
-        <br /> <span id="directory_user_result"></span> 
-      </div>
-    </div>
-  </div>
-  <div class="row control-group">
-    <div id="new-group" >
-      <div class="input-append">
-        <%= select_tag 'new_group_name_skel', options_for_select(["Select a group"] + groups), :class => 'span38' %>
-        <%= select_tag 'new_group_permission_skel', options_for_select(Sufia.config.permission_levels), :class => 'span17' %>
-        <button class="btn btn-mini btn-inverse" id="add_new_group_skel" ><i class="icon-plus-sign"></i> Add</button>
-        <br /><span id="directory_group_result"></span>
-      </div>
-    </div>
-  </div>
 </div><!-- /.well -->
 <table class="table table-bordered"> 
   <tr> 

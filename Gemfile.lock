@@ -1,5 +1,5 @@
 GIT
-  remote: git://github.com/harai/kaminari.git
+  remote: https://github.com/harai/kaminari.git
   revision: 384fcb5d11b66a0cc8fad030104bf80f82616355
   branch: route_prefix_prototype
   specs:
@@ -8,8 +8,8 @@ GIT
       activesupport (>= 3.0.0)
 
 GIT
-  remote: git://github.com/nu-lts/nu-sufia.git
-  revision: 892beaa52e20a30b3ada30d7cf7564733d438351
+  remote: https://github.com/nu-lts/nu-sufia.git
+  revision: 74fd7a93800086df05b5a662fd61ab0263a34f86
   branch: develop
   specs:
     sufia (3.1.1)
@@ -156,7 +156,7 @@ GEM
     font-awesome-sass-rails (3.0.2.2)
       railties (>= 3.1.1)
       sass-rails (>= 3.1.1)
-    foreigner (1.4.2)
+    foreigner (1.5.0)
       activerecord (>= 3.0.0)
     fssm (0.2.10)
     haml (4.0.3)

@@ -76,7 +76,8 @@ FactoryGirl.define do
 
     factory :root_collection do 
       title "Root Collection"
-      assigned_identifier  
+      assigned_identifier
+      public_read
     end
   end
 end

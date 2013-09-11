@@ -40,7 +40,7 @@
     %fieldset.span4
       %legend Mass Permissions
       \#{label_tag 'nu_collection[mass_permissions]', "Choose Mass Permissions:"}
-      \#{select_tag 'nu_collection[mass_permissions]', options_for_select(['private', 'public', 'registered'], @nu_collection.mass_permissions ), class: "span12"}
+      \#{select_tag 'nu_collection[mass_permissions]', options_for_select(@nu_collection.valid_mass_permissions, @nu_collection.mass_permissions ), class: "span12"}
       %p.help-block
         %ul
           %li Setting to 'public' will allow anyone accessing the site to see your collection.

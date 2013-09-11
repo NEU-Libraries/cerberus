@@ -1,5 +1,8 @@
 class NuCoreFile < ActiveFedora::Base
   include Sufia::GenericFile
+  include Drs::Rights::MassPermissions
+  include Drs::Rights::Embargoable 
+  include Drs::Rights::InheritedRestrictions
   include Drs::MetadataAssignment
   include Drs::NuCoreFile::Export
 
@@ -54,5 +57,9 @@ class NuCoreFile < ActiveFedora::Base
   def tag_as_in_progress 
     self.properties.tag_as_in_progress 
   end
+
+  def persistent_url
+    "#{Rails.configuration.persistent_hostpath}#{noid}"
+  end  
 end 
 
