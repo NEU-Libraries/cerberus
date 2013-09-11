@@ -1,23 +1,14 @@
 //Handles spawning new permission related form elements on the nu_collections/new page.  
 $(document).ready(function () {
   'use strict';
-
   //Add a datepicker to the date of issuance field. 
-  $('#nu_collection_date_of_issue').datepicker({
-    dateFormat: 'yy-mm-dd',
-    defaultDate: null
-  });
+  $('#date-issued, #embargo-date').datepicker();
 
-  $('input#nu_collection_embargo_release_date').datepicker({
-    dateFormat: 'yy-mm-dd',
-    defaultDate: + 1,
-    minDate: + 1
-  }); 
 
   //Clones the personal creator field on the 'new' form.
   $('#add_another_personal_creator').click(function() {
     var cloned = $('div.personal_creator').first().clone();
-    var remove_button = "<button type='button' class='remove_personal_creator'>Remove Personal Creator</button>"; 
+    var remove_button = '<button type="button" class="remove_personal_creator btn btn-block btn-danger">Remove Personal Creator</button>'; 
 
     cloned.find('label').text('Additional personal contributor'); 
     cloned.find('input:text').val('');

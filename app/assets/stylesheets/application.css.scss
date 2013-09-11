@@ -9,7 +9,6 @@
  * compiled file, but it's generally better to create a new file per style scope.
  *
  *= require_self
- *= require_tree ../../../vendor/assets/stylesheets/jquery-ui
  *  Sufia gem stylesheets imported here.
  *= require bootstrap-select/bootstrap-select.min.css
  */
@@ -144,17 +143,8 @@
 /////////////
 
 @import "vendor/flatly/flatly";
-
-
-
-
-
-
-
-
-
 @import 'vendor/font-awesome/font-awesome';
-
+@import 'vendor/bootstrap-datepicker/custom-datepicker';
 @import 'blacklight/blacklight';
 
 @import 'components/components';
