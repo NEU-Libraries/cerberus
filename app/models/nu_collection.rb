@@ -38,14 +38,6 @@ class NuCollection < ActiveFedora::Base
     end
   end
 
-  def parent
-    if self.relationships(:is_member_of).any?
-      NuCollection.find(self.relationships(:is_member_of).first.partition('/').last)
-    else
-      nil
-    end
-  end
-
   def permissions=(hash)
     self.set_permissions_from_new_form(hash) 
   end
