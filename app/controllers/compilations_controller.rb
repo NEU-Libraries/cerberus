@@ -1,6 +1,8 @@
 class CompilationsController < ApplicationController 
 
-  before_filter :authenticate_user! 
+  before_filter :authenticate_user!
+  before_filter :can_edit?, only: [:edit, :update, :destroy, :add_file, :delete_file]
+  before_filter :can_read?, only: [:show, :show_download, :download]  
 
   def index 
     @compilations = Compilation.users_compilations(current_user) 
@@ -105,7 +107,7 @@ class CompilationsController < ApplicationController
 
     # If this isn't the depositing user render a 403 page. 
     if current_user.nuid != @compilation.depositor 
-      render_403 
+      render_403 and return
     end 
   end
 end

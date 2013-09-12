@@ -1,5 +1,8 @@
 class NuCollectionsController < ApplicationController
-  before_filter :authenticate_user!, only: [:new, :edit, :create ] 
+  before_filter :authenticate_user!, only: [:new, :edit, :create ]
+
+  before_filter :can_read?, only: [:show] 
+  before_filter :can_edit?, only: [:edit, :update, :destroy] 
 
   def index
   end
