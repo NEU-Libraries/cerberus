@@ -4,7 +4,7 @@
     = render :partial => "layouts/head-tag-content"
   %body
     = render :partial => '/masthead', :formats => [:html]
-    = render :partial => '/flash_msg'
+    = render :partial => '/flash_msg', :formats => [:html]
     / /.container
     .container
       = yield :page_header
