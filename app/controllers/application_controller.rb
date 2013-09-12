@@ -16,4 +16,8 @@ class ApplicationController < ActionController::Base
       format.html { render :file => "#{Rails.root}/public/403.html", layout: false, status: '403' } 
     end
   end
+
+  def current_user_can_edit_parent?(parent_object)
+    return current_user.can? :edit, parent_object
+  end
 end

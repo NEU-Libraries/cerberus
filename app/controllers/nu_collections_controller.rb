@@ -18,9 +18,11 @@ class NuCollectionsController < ApplicationController
 
     #Assign misc. data
     @nu_collection.depositor = current_user.nuid 
-    @nu_collection.rightsMetadata.permissions({person: current_user.nuid}, 'edit')        
 
-    if @nu_collection.save! # Have to hit Fedora before we have a valid identifier assigned.
+    if !current_user_can_edit_parent?(@nu_collection.parent)
+      flash.now[:error] = "User #{current_user.email} does not have edit objects on assigned parent." 
+      redirect_to(nu_collections_path) and return 
+    elsif @nu_collection.save! # Have to hit Fedora before we have a valid identifier assigned.
       @nu_collection.identifier = @nu_collection.pid
       @nu_collection.save! # Save a second time to get the identifier set.  Very far from ideal. 
 
@@ -32,7 +34,7 @@ class NuCollectionsController < ApplicationController
 
       redirect_to(@nu_collection, notice: "Collection #{@nu_collection.title} was created successfully.") 
     else
-      redirect_to(new_nu_collection_url, notice: "Something went wrong") 
+      redirect_to(new_nu_collection_url(parent: params[:parent]), notice: "Something went wrong") 
     end 
   end
 
