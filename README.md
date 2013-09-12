@@ -42,6 +42,10 @@ Tests run with `$ rspec`
 [capybara cheat sheet](https://gist.github.com/zhengjia/428105)
 
 
+
+
 #### Guard / Livereload
+
+You will also need the chrome livereload extension.
 
 `$ bundle exec guard start -P livereload`
