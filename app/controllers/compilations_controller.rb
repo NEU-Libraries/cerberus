@@ -111,8 +111,4 @@ class CompilationsController < ApplicationController
       render_403 
     end 
   end
-  
-  def mint_unique_pid 
-    Sufia::Noid.namespaceize(Sufia::IdService.mint)
-  end
 end

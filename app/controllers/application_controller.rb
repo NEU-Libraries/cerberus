@@ -16,4 +16,8 @@ class ApplicationController < ActionController::Base
       format.html { render :file => "#{Rails.root}/public/403.html", layout: false, status: '403' } 
     end
   end
+
+  def mint_unique_pid 
+    Sufia::Noid.namespaceize(Sufia::IdService.mint)
+  end
 end

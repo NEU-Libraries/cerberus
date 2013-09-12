@@ -10,20 +10,17 @@ class NuCollectionsController < ApplicationController
       redirect_to nu_collections_path
     else 
       @nu_collection = NuCollection.new(parent: params[:parent])
-    end     
+    end
   end
 
   def create
-    @nu_collection = NuCollection.new(params[:nu_collection])
+    @nu_collection = NuCollection.new(params[:nu_collection].merge(pid: mint_unique_pid))
 
     #Assign misc. data
     @nu_collection.depositor = current_user.nuid 
-    @nu_collection.rightsMetadata.permissions({person: current_user.nuid}, 'edit')        
+    @nu_collection.identifier = @nu_collection.pid       
 
     if @nu_collection.save! # Have to hit Fedora before we have a valid identifier assigned.
-      @nu_collection.identifier = @nu_collection.pid
-      @nu_collection.save! # Save a second time to get the identifier set.  Very far from ideal. 
-
       dumb_lookup = NuCollection.find(@nu_collection.pid)
       if ! dumb_lookup.parent
         @nu_collection.destroy 
