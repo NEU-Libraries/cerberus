@@ -101,7 +101,13 @@ class NuCoreFilesController < ApplicationController
   end
 
   def process_file(file)
-    if virus_check(file) == 0 
+    if virus_check(file) == 0
+
+
+      if !current_user_can_edit_parent?(NuCollection.find(params[:collection_id]))
+        raise "You don't have edit permissions on the specified parent." 
+      end
+
       @nu_core_file = ::NuCoreFile.new
       update_metadata_from_upload_screen(@nu_core_file) 
       #NuCoreFile.create_metadata(@nu_core_file, current_user, params[:batch_id], params[:collection_id])
