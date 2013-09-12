@@ -8,6 +8,21 @@ $(document).ready(function () {
     clearBtn: true
   });
 
+  var addFormFields = function(element, options){
+    this.element = $(element);
+
+    var defaults = {
+      target = this.element.partent().find('div'),
+      titleText = 'Remove Element'
+      removeButton = $('<button type="button" class="btn btn-danger"><i class="icon-remove"></i></button>');
+    };
+    var options = $.extend({}, defaults, options);
+    this.element.click(funtion(){
+      var cloned = target.first().clone();
+    });
+  }
+
+
 
   //Clones the personal creator field on the 'new' form.
   $('#add_another_personal_creator').click(function() {
@@ -20,12 +35,13 @@ $(document).ready(function () {
       var forId = $(this).attr('for') + i;
       $(this).attr('for', forId);
       $(this).next('input:text').attr('id', forId);
+
     });
     
     // cloned.find('input:text').attr('required', 'true'); 
 
     $('div.personal_creator').last().after(cloned);
-    $('div.personal_creator').last().find('input:text').last().after(remove_button);
+    $('div.personal_creator').last().find('input:text').last().removeClass.after(remove_button);
   });
 
   //Removes the personal creator field for this button on the 'new' form. 
