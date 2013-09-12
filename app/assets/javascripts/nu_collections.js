@@ -2,17 +2,27 @@
 $(document).ready(function () {
   'use strict';
   //Add a datepicker to the date of issuance field. 
-  $('#date-issued, #embargo-date').datepicker();
+  $('#date-issued, #embargo-date').datepicker({
+    todayBtn: true,
+    todayHighlight: true,
+    clearBtn: true
+  });
 
 
   //Clones the personal creator field on the 'new' form.
   $('#add_another_personal_creator').click(function() {
     var cloned = $('div.personal_creator').first().clone();
-    var remove_button = '<button type="button" class="remove_personal_creator btn btn-block btn-danger">Remove Personal Creator</button>'; 
-
-    cloned.find('label').text('Additional personal contributor'); 
+    var remove_button = '<button type="button" class="remove_personal_creator btn btn-danger" title="Remove Personal Creator"><i class="icon-remove"></i></button>';  
     cloned.find('input:text').val('');
-    cloned.find('input:text').attr('required', 'true'); 
+    //find the total number of elements.
+    var i= $('div.personal_creator').size() + 1;
+    cloned.find('label').each(function(i){
+      var forId = $(this).attr('for') + i;
+      $(this).attr('for', forId);
+      $(this).next('input:text').attr('id', forId);
+    });
+    
+    // cloned.find('input:text').attr('required', 'true'); 
 
     $('div.personal_creator').last().after(cloned);
     $('div.personal_creator').last().find('input:text').last().after(remove_button);
