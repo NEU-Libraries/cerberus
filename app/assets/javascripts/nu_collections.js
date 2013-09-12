@@ -7,6 +7,9 @@ $(document).ready(function () {
     todayHighlight: true,
     clearBtn: true
   });
+
+
+  
   $.fn.addFormFields = function(options){
     // applying settings for the function.
     var settings = $.extend({
@@ -20,6 +23,7 @@ $(document).ready(function () {
       console.log('must provide target: ' + this);
       return;
     }
+    //adding the click event to handle adding form fields.
     this.click(function(){
       console.log(settings);
       console.log(this);
@@ -31,6 +35,7 @@ $(document).ready(function () {
         $(this).attr('for', forId);
         $(this).next('input').attr('id', forId);
       });
+      settings.target.after($cloned, $removeButton);
     });
   };
 
