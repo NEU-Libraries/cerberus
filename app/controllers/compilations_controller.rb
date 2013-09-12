@@ -11,10 +11,7 @@ class CompilationsController < ApplicationController
   end
 
   def create
-    @compilation = Compilation.new(pid: mint_unique_pid)
-    @compilation.attributes = params[:compilation]
-
-    # Set the depositor and give him edit access on the object 
+    @compilation = Compilation.new(params[:compilation].merge(pid: mint_unique_pid))
     @compilation.depositor = current_user.nuid 
 
     save_or_bust @compilation
