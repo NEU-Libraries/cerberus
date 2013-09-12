@@ -7,42 +7,71 @@ $(document).ready(function () {
     todayHighlight: true,
     clearBtn: true
   });
-
-  var addFormFields = function(element, options){
-    this.element = $(element);
-
-    var defaults = {
-      target = this.element.partent().find('div'),
-      titleText = 'Remove Element'
-      removeButton = $('<button type="button" class="btn btn-danger"><i class="icon-remove"></i></button>');
-    };
-    var options = $.extend({}, defaults, options);
-    this.element.click(funtion(){
-      var cloned = target.first().clone();
-    });
-  }
-
-
-
-  //Clones the personal creator field on the 'new' form.
-  $('#add_another_personal_creator').click(function() {
-    var cloned = $('div.personal_creator').first().clone();
-    var remove_button = '<button type="button" class="remove_personal_creator btn btn-danger" title="Remove Personal Creator"><i class="icon-remove"></i></button>';  
-    cloned.find('input:text').val('');
-    //find the total number of elements.
-    var i= $('div.personal_creator').size() + 1;
-    cloned.find('label').each(function(i){
-      var forId = $(this).attr('for') + i;
-      $(this).attr('for', forId);
-      $(this).next('input:text').attr('id', forId);
-
-    });
+  $.fn.addFormFields = function(options){
+    // applying settings for the function.
+    var settings = $.extend({
+      target: null,
+      titleText: 'Remove Element',
+      removeButton: $('<button type="button" class="btn btn-danger"><i class="icon-remove"></i></button>'),
+     }, options);
     
-    // cloned.find('input:text').attr('required', 'true'); 
+    //adding some effor handling here.
+    if (settings.target == null ){
+      console.log('must provide target: ' + this);
+      return;
+    }
+    this.click(function(){
+      console.log(settings);
+      console.log(this);
+      var i = settings.target.size() + 1;
+      var $cloned = settings.target.first().clone();
+      var $removeButton = settings.removeButton.attr('title', settings.titleText);
+      $cloned.find('label').each(function(i){
+        var forId = $(this).attr('for') + i;
+        $(this).attr('for', forId);
+        $(this).next('input').attr('id', forId);
+      });
+    });
+  };
 
-    $('div.personal_creator').last().after(cloned);
-    $('div.personal_creator').last().find('input:text').last().removeClass.after(remove_button);
+
+  // var addFormFields = function(element, options){
+    
+  //   this.element = $(element);
+
+  //   var defaults = {
+    
+  //   };
+  //   var options = $.extend({}, defaults, options);
+  //   this.element.click(funtion(){
+  //     var cloned = options.target.first().clone();
+  //     var i = options.target.size
+  //   });
+  // }
+
+  $('#add_another_personal_creator').addFormFields({
+    target: $('div.personal_creator'),
   });
+
+  // //Clones the personal creator field on the 'new' form.
+  // $('#add_another_personal_creator').click(function() {
+  //   var cloned = $('div.personal_creator').first().clone();
+  //   var remove_button = '<button type="button" class="remove_personal_creator btn btn-danger" title="Remove Personal Creator"><i class="icon-remove"></i></button>';  
+  //   cloned.find('input:text').val('');
+  //   //find the total number of elements.
+  //   var i= $('div.personal_creator').size() + 1;
+  //   cloned.find('label').each(function(i){
+  //     var forId = $(this).attr('for') + i;
+  //     $(this).attr('for', forId);
+  //     $(this).next('input:text').attr('id', forId);
+
+  //   });
+    
+  //   // cloned.find('input:text').attr('required', 'true'); 
+
+  //   $('div.personal_creator').last().after(cloned);
+  //   $('div.personal_creator').last().find('input:text').last().removeClass.after(remove_button);
+  // });
 
   //Removes the personal creator field for this button on the 'new' form. 
   $('form').on('click', '.remove_personal_creator', function() {
