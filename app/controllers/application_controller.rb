@@ -20,4 +20,8 @@ class ApplicationController < ActionController::Base
   def mint_unique_pid 
     Sufia::Noid.namespaceize(Sufia::IdService.mint)
   end
+
+  def current_user_can_edit_parent?(parent_object)
+    return current_user.can? :edit, parent_object
+  end
 end
