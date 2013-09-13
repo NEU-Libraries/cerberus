@@ -56,10 +56,8 @@ FactoryGirl.define do
                       'permissions1' => {'identity_type' => 'person', 'identity' => 'billsfriend@example.com', 'permission_type' => 'read' }}}
     end
 
-    trait :saved do 
-      after(:create) do |record| 
-        record.save!
-      end
+    trait :is_private do 
+      mass_permissions 'private' 
     end
 
     factory :valid_not_embargoed do 
@@ -77,6 +75,13 @@ FactoryGirl.define do
           title "Bills Collection"
           description "Bills new collection" 
           owned_by_bill
+        end
+
+        factory :bills_private_collection do 
+          title "Bills Secret Collection" 
+          description "Bills Super Secret Collection"
+          is_private 
+          owned_by_bill 
         end
     end
 
