@@ -40,7 +40,7 @@ $(document).ready(function () {
       });
       //add the cloned elements.
       settings.target.after($cloned);
-      $cloned.find('input, select').last().after($removeButton);
+      $cloned.find('input, select').last().after($removeButton.tooltip());
       count++
     });
 
