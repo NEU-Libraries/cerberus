@@ -2,7 +2,7 @@ class CompilationsController < ApplicationController
   include Drs::ControllerHelpers::EditableObjects
 
   before_filter :authenticate_user!
-  before_filter :can_edit_parent?, only: [:new, :create] 
+
   before_filter :can_edit?, only: [:edit, :update, :destroy, :add_file, :delete_file]
   before_filter :can_read?, only: [:show, :show_download, :download]  
 
