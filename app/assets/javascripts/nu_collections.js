@@ -30,12 +30,17 @@ $(document).ready(function () {
       var i = settings.target.size() + 1;
       var $cloned = settings.target.first().clone();
       var $removeButton = settings.removeButton.attr('title', settings.titleText);
+      $removeButton.click(function(){
+        $cloned.remove();
+      })
       $cloned.find('label').each(function(i){
         var forId = $(this).attr('for') + i;
         $(this).attr('for', forId);
         $(this).next('input').attr('id', forId);
       });
-      settings.target.after($cloned, $removeButton);
+      settings.target.after($cloned);
+      $cloned.find('input').last().after($removeButton);
+
     });
   };
 
