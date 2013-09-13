@@ -1,7 +1,7 @@
 class NuCollectionsController < ApplicationController
   include Drs::ControllerHelpers::EditableObjects
 
-  before_filter :authenticate_user!, only: [:new, :edit, :create ]
+  before_filter :authenticate_user!, only: [:new, :edit, :create, :update, :destroy ]
 
   before_filter :can_read?, only: [:show]
   before_filter :can_edit?, only: [:edit, :update, :destroy]
