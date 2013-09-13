@@ -35,6 +35,7 @@ class User < ActiveRecord::Base
 
   private
     def link_to_drs
-      new_employee = Employee.new({ email: self.to_s, nuid => self.nuid })
+      new_employee = Employee.new({ email: self.to_s, nuid: self.nuid })
+      new_employee.save!
     end
 end
