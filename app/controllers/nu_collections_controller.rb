@@ -2,7 +2,7 @@ class NuCollectionsController < ApplicationController
   include Drs::ControllerHelpers::EditableObjects
 
   before_filter :authenticate_user!, only: [:new, :edit, :create ]
-  
+
   before_filter :can_read?, only: [:show]
   before_filter :can_edit?, only: [:edit, :update, :destroy]
 
@@ -22,21 +22,9 @@ class NuCollectionsController < ApplicationController
 
     #Assign misc. data
     @nu_collection.depositor = current_user.nuid 
-    @nu_collection.identifier = @nu_collection.pid       
+    @nu_collection.identifier = @nu_collection.pid
 
-    if !current_user_can_edit_parent?(@nu_collection.parent)
-      flash.now[:error] = "User #{current_user.email} does not have edit objects on assigned parent." 
-      redirect_to(nu_collections_path) and return 
-    elsif @nu_collection.save! # Have to hit Fedora before we have a valid identifier assigned.
-      @nu_collection.identifier = @nu_collection.pid
-      @nu_collection.save! # Save a second time to get the identifier set.  Very far from ideal. 
-
-      dumb_lookup = NuCollection.find(@nu_collection.pid)
-      if ! dumb_lookup.parent
-        @nu_collection.destroy 
-        raise "Created a collection with no parent.  Rolling back" 
-      end
-
+    if @nu_collection.save!
       redirect_to(@nu_collection, notice: "Collection #{@nu_collection.title} was created successfully.") 
     else
       redirect_to(new_nu_collection_url(parent: params[:parent]), notice: "Something went wrong") 
