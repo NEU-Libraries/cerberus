@@ -9,7 +9,7 @@ $(document).ready(function () {
   });
 
 
-  
+  var count = 0;
   $.fn.addFormFields = function(options){
     // applying settings for the function.
     var settings = $.extend({
@@ -23,25 +23,27 @@ $(document).ready(function () {
       console.log('must provide target: ' + this);
       return;
     }
+
     //adding the click event to handle adding form fields.
     this.click(function(){
-      console.log(settings);
-      console.log(this);
-      var i = settings.target.size() + 1;
+
       var $cloned = settings.target.first().clone();
-      var $removeButton = settings.removeButton.attr('title', settings.titleText);
+      var $removeButton = settings.removeButton.clone().attr('title', settings.titleText);
       $removeButton.click(function(){
         $cloned.remove();
-      })
-      $cloned.find('label').each(function(i){
-        var forId = $(this).attr('for') + i;
+      });
+      //label the cloned fields.
+      $cloned.find('label').each(function(){
+        var forId = $(this).attr('for') + count;
         $(this).attr('for', forId);
         $(this).next('input').attr('id', forId);
       });
+      //add the cloned elements.
       settings.target.after($cloned);
       $cloned.find('input').last().after($removeButton);
-
+      count++
     });
+
   };
 
 
