@@ -2,15 +2,17 @@ module Drs
   module ControllerHelpers
     module EditableObjects
 
-      EDITABLE_OBJECTS = [NuCoreFile, NuCollection, Compilation]
+      EDITABLE_OBJECTS = [::NuCoreFile, NuCollection, Compilation]
 
       def can_edit_parent?
-        parent_object = assign_to_model(ActiveFedora::Base.find(params[:parent]), params[:id])
+        if params[:parent].nil?
+          raise NoParentFoundError 
+        end
+
+        parent_object = assign_to_model(params[:parent])
 
         if current_user.nil?
           render_403 
-        elsif parent_object.nil?
-          raise "Passed a pid not pointing at a parent object" 
         elsif current_user.can? :edit, parent_object
           return true
         else
@@ -19,7 +21,7 @@ module Drs
       end
 
       def can_read? 
-        record = assign_to_model(ActiveFedora::Base.find(params[:id]), params[:id]) 
+        record = assign_to_model(params[:id]) 
 
         if current_user.nil?
           public_can_read? record
@@ -31,7 +33,7 @@ module Drs
       end
 
       def can_edit?
-        record = assign_to_model(ActiveFedora::Base.find(params[:id]), params[:id]) 
+        record = assign_to_model(params[:id]) 
 
         if current_user.nil? 
           render_403
@@ -44,7 +46,11 @@ module Drs
 
       private
 
-        def assign_to_model(base_object, id)
+        def assign_to_model(id)
+          if !ActiveFedora::Base.exists?(id) 
+            raise NoParentFoundError
+          end
+          base_object = ActiveFedora::Base.find(id)
           model_name = classname_from_fedora(base_object)
           type_match(model_name, id)
         end
@@ -55,7 +61,7 @@ module Drs
           if editable_strings.include?(string) 
             return string.constantize.find(id) 
           else
-            raise "Attempting to lookup an invalid record.  Aborting." 
+            raise NoParentFoundError 
           end
         end
 
@@ -76,6 +82,12 @@ module Drs
             end 
           end
           render_403
+        end
+
+        class NoParentFoundError < StandardError 
+          def initialize
+            super "No parent set" 
+          end
         end
     end
   end

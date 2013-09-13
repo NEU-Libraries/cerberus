@@ -1,22 +1,20 @@
 class NuCollectionsController < ApplicationController
   include Drs::ControllerHelpers::EditableObjects
-  
-  before_filter :authenticate_user!, only: [:new, :edit, :create ]
 
-   before_filter :can_read?, only: [:show]
-   before_filter :can_edit_parent?, only: [:new, :create] 
-   before_filter :can_edit?, only: [:edit, :update, :destroy] 
+  before_filter :authenticate_user!, only: [:new, :edit, :create ]
+  
+  before_filter :can_read?, only: [:show]
+  before_filter :can_edit?, only: [:edit, :update, :destroy]
+
+  before_filter :can_edit_parent?, only: [:new, :create]
+  rescue_from NoParentFoundError, with: :index_redirect
+
 
   def index
   end
 
   def new
-    if !NuCollection.exists?(params[:parent])
-      flash[:error] = "Collections cannot be created without a parent."
-      redirect_to nu_collections_path
-    else 
-      @nu_collection = NuCollection.new(parent: params[:parent])
-    end
+    @nu_collection = NuCollection.new(parent: params[:parent])
   end
 
   def create
@@ -61,4 +59,11 @@ class NuCollectionsController < ApplicationController
       redirect_to(@nu_collection, notice: "Collection #{@nu_collection.title} failed to update.")
     end
   end
+
+  protected 
+
+    def index_redirect
+      flash[:error] = "Collections cannot be created without a parent" 
+      redirect_to nu_collections_path and return 
+    end
 end
