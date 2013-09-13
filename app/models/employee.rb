@@ -1,9 +1,26 @@
 class Employee < ActiveFedora::Base
   include ActiveModel::MassAssignmentSecurity
 
-  attr_accessor :email, :nuid
+  attr_accessible :nuid, :name
   attr_protected :identifier
 
-  belongs_to :parent, :property => :is_member_of, :class_name => 'Department'
+  has_metadata name: 'details', type: DrsEmployeeDatastream
 
+  belongs_to :parent, :property => :is_member_of, :class_name => 'NuCollection'
+
+  def name=(string)
+    self.details.name = string
+  end
+
+  def name
+    self.details.name
+  end
+
+  def nuid=(string)
+    self.details.nuid = string
+  end
+
+  def nuid
+    self.details.nuid
+  end
 end
