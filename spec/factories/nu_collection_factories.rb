@@ -56,6 +56,12 @@ FactoryGirl.define do
                       'permissions1' => {'identity_type' => 'person', 'identity' => 'billsfriend@example.com', 'permission_type' => 'read' }}}
     end
 
+    trait :saved do 
+      after(:create) do |record| 
+        record.save!
+      end
+    end
+
     factory :valid_not_embargoed do 
       with_keywords 
       not_embargoed 
@@ -78,6 +84,7 @@ FactoryGirl.define do
       title "Root Collection"
       assigned_identifier
       public_read
+      owned_by_bill
     end
   end
 end
