@@ -1,3 +1,11 @@
-- flash.each do |key, msg| 
-  %div{ id: key }
-    %p{:class => key}= msg  
+- flash_types_to_classes = { :notice => 'alert-success', :error => 'alert', :alert => 'alert-error' }
+.container
+  - [:notice, :error, :alert].each do |type|
+    - if flash[type]
+      %div{:class => "alert #{flash_types_to_classes[type] rescue ''} ui-corner-all #{type.to_s}"}
+        %a.close{"data-dismiss" => "alert", :href => "#"} ×
+        - if flash[type].respond_to? :join
+          = flash[type].join("<br/>").html_safe
+        - else
+          = flash[type].html_safe
+      - flash.delete(type)
