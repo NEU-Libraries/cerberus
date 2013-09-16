@@ -9,7 +9,6 @@ module Drs
         parent_id = find_parent(params)
 
         if parent_id.nil?
-          puts "can_edit_parent thinks the parent is nil"
           raise NoParentFoundError 
         end
 

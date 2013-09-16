@@ -67,9 +67,9 @@ describe NuCollectionsController do
 
     it "redirects to the new show page on successful create" do 
       sign_in bill
-      attrs = {title: "Test", description: "test", date_of_issue: Date.today.to_s } 
+      attrs = {title: "Test", description: "test", date_of_issue: Date.today.to_s, parent: bills_collection.id } 
 
-      post :create, {nu_collection: attrs, parent: bills_collection.id } 
+      post :create, {nu_collection: attrs} 
 
       id = assigns(:nu_collection).identifier
       expect(response).to redirect_to(nu_collection_path(id: id))
