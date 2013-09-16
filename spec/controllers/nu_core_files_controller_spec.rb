@@ -14,8 +14,8 @@ describe NuCoreFilesController do
       end
     end
 
-    it "goes to the upload page for users with no incomplete files" do 
-      sign_in bo
+    it "goes to the upload page for users with no incomplete files and edit permissions on the assigned parent" do 
+      sign_in bill
 
       get :new, { parent: root.identifier } 
 
@@ -32,10 +32,26 @@ describe NuCoreFilesController do
       expect(response).to redirect_to(rescue_incomplete_files_path(file0: a.pid))  
     end
 
+    it "403s if authed user has no edit permissions on the parent object" do 
+      sign_in bo 
+
+      get :new, { parent: root.identifier } 
+
+      response.status.should == 403 
+    end
+
     it "redirects to the home page if no parent is set" do 
       sign_in bill 
 
       get :new 
+
+      expect(response).to redirect_to(root_path) 
+    end
+
+    it "redirects to the home page if a bogus parent is set" do 
+      sign_in bill 
+
+      get :new, { parent: "neu:assuredlyIDoNotExist" } 
 
       expect(response).to redirect_to(root_path) 
     end
