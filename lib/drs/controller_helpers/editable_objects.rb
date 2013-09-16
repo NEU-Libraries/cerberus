@@ -47,17 +47,19 @@ module Drs
         end
       end
 
-      def find_parent(hash) 
-        hash.each do |k, v| 
-          if k == 'parent' || k == :parent 
-            return v
-            exit
-          elsif v.is_a? Hash 
-            return find_parent(v) 
+      private
+      
+        def find_parent(hash) 
+          hash.each do |k, v| 
+            if k == 'parent' || k == :parent 
+              return v
+              exit
+            elsif v.is_a? Hash 
+              return find_parent(v) 
+            end
           end
+          return nil 
         end
-        return nil 
-      end
 
         def assign_to_model(id)
           if !ActiveFedora::Base.exists?(id) 
