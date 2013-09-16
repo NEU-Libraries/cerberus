@@ -25,9 +25,11 @@ class NuCollectionsController < ApplicationController
     @nu_collection.identifier = @nu_collection.pid
 
     if @nu_collection.save!
-      redirect_to(@nu_collection, notice: "Collection #{@nu_collection.title} was created successfully.") 
+      flash[:info] = "Collection created successfully."
+      redirect_to nu_collection_path(id: @nu_collection.identifier) and return  
     else
-      redirect_to(new_nu_collection_url(parent: params[:parent]), notice: "Something went wrong") 
+      flash.now[:error] = "Something went wrong"
+      redirect_to new_nu_collection_path(parent: params[:parent]) and return 
     end 
   end
 
