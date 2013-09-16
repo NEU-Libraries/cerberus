@@ -8,6 +8,7 @@ class NuCollectionsController < ApplicationController
 
   before_filter :can_edit_parent?, only: [:new, :create]
   rescue_from NoParentFoundError, with: :index_redirect
+  rescue_from IdNotFoundError, with: :index_redirect_with_bad_id
 
 
   def index
@@ -54,6 +55,11 @@ class NuCollectionsController < ApplicationController
 
     def index_redirect
       flash[:error] = "Collections cannot be created without a parent" 
+      redirect_to nu_collections_path and return 
+    end
+
+    def index_redirect_with_bad_id 
+      flash[:error] = "The id you specified does not seem to exist in Fedora." 
       redirect_to nu_collections_path and return 
     end
 end

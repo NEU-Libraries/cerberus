@@ -61,7 +61,7 @@ module Drs
 
         def assign_to_model(id)
           if !ActiveFedora::Base.exists?(id) 
-            raise NoParentFoundError
+            raise IdNotFoundError.new(id) 
           end
           base_object = ActiveFedora::Base.find(id)
           model_name = classname_from_fedora(base_object)
@@ -100,6 +100,12 @@ module Drs
         class NoParentFoundError < StandardError 
           def initialize
             super "No parent set" 
+          end
+        end
+
+        class IdNotFoundError < StandardError 
+          def initialize(id) 
+            super "No item could be found in Fedora with id: #{id}" 
           end
         end
     end
