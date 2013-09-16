@@ -6,7 +6,8 @@ class User < ActiveRecord::Base
   # Connects this user object to Blacklights Bookmarks. 
   include Blacklight::User
 
-  after_save :link_to_drs
+  after_create :link_to_drs
+  after_destroy :remove_drs_object
 
   # Include default devise modules. Others available are:
   # :token_authenticatable, :confirmable,
@@ -38,5 +39,9 @@ class User < ActiveRecord::Base
       #We'll be getting these details from shib hopefully. Placeholders there for now.
       new_employee = Employee.new({ nuid: self.nuid, name: "Jane Doe" })
       new_employee.save!
+    end
+
+    def remove_drs_object
+      ActiveFedora::SolrService.escape_uri_for_query("active_fedora_model_ssi:Employee AND nuid_tesim:[\"self.nuid\"]", :rows=>999)
     end
 end
