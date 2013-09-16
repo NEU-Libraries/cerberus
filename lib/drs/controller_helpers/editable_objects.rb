@@ -5,11 +5,15 @@ module Drs
       EDITABLE_OBJECTS = [::NuCoreFile, NuCollection, Compilation]
 
       def can_edit_parent?
-        if params[:parent].nil?
+
+        parent_id = find_parent(params)
+
+        if parent_id.nil?
+          puts "can_edit_parent thinks the parent is nil"
           raise NoParentFoundError 
         end
 
-        parent_object = assign_to_model(params[:parent])
+        parent_object = assign_to_model(parent_id)
 
         if current_user.nil?
           render_403 
@@ -44,7 +48,17 @@ module Drs
         end
       end
 
-      private
+      def find_parent(hash) 
+        hash.each do |k, v| 
+          if k == 'parent' || k == :parent 
+            return v
+            exit
+          elsif v.is_a? Hash 
+            return find_parent(v) 
+          end
+        end
+        return nil 
+      end
 
         def assign_to_model(id)
           if !ActiveFedora::Base.exists?(id) 
