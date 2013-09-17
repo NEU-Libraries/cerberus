@@ -1,6 +1,10 @@
-class CompilationsController < ApplicationController 
+class CompilationsController < ApplicationController
+  include Drs::ControllerHelpers::EditableObjects
 
-  before_filter :authenticate_user! 
+  before_filter :authenticate_user!
+
+  before_filter :can_edit?, only: [:edit, :update, :destroy, :add_file, :delete_file]
+  before_filter :can_read?, only: [:show, :show_download, :download]  
 
   def index 
     @compilations = Compilation.users_compilations(current_user) 
@@ -11,10 +15,7 @@ class CompilationsController < ApplicationController
   end
 
   def create
-    @compilation = Compilation.new(pid: mint_unique_pid)
-    @compilation.attributes = params[:compilation]
-
-    # Set the depositor and give him edit access on the object 
+    @compilation = Compilation.new(params[:compilation].merge(pid: mint_unique_pid))
     @compilation.depositor = current_user.nuid 
 
     save_or_bust @compilation
@@ -108,7 +109,7 @@ class CompilationsController < ApplicationController
 
     # If this isn't the depositing user render a 403 page. 
     if current_user.nuid != @compilation.depositor 
-      render_403 
+      render_403 and return
     end 
   end
 end
