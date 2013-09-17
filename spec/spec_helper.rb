@@ -48,9 +48,9 @@ RSpec.configure do |config|
     end
   end
 
-  config.before(:each) do
+  config.after(:each) do
     User.find(:all).each do |u|
-      u.delete
+      u.destroy
     end
   end
 

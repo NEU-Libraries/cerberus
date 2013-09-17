@@ -15,10 +15,16 @@ feature "Editing collections" do
   let(:perms) { page.all('div.permission') }
   let(:first_perm) { page.all('div.permission').first }    
 
+  Capybara.save_and_open_page_path = 'tmp/test_out'
+
   scenario "Collection data preloads correctly in edit screen" do 
     features_sign_in @user 
 
+    save_page
+
     visit edit_nu_collection_path(@collection)
+
+    save_page
 
     #Verify data prefills correctly
     find_field('Title *').value.should == 'Bills Collection'
