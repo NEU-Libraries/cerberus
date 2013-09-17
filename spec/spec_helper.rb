@@ -39,13 +39,7 @@ RSpec.configure do |config|
   # the seed, which is printed after each run.
   #     --seed 1234
   config.order = "random"
-
-  config.after(:each) do
-    User.find(:all).each do |u|
-      u.destroy
-    end
-  end
-
+  
   # Cleans everything.  Should figure out how to get Fedora to do this 
   # automatically. 
   config.before(:suite) do 
