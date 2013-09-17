@@ -123,5 +123,12 @@ describe "Assignment" do
 
       user.can?(:edit, core_file).should be true 
     end
-  end 
+  end
+
+  describe "of personal_folder_type" do 
+    it "succeeds for objects with a properties datastream" do 
+      collection.personal_folder_type = "folder type" 
+      collection.personal_folder_type.should == 'folder type' 
+    end
+  end
 end 

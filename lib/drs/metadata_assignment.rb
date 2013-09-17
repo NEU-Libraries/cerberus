@@ -82,6 +82,14 @@ module Drs
       def depositor
         if_properties_exists_strict { self.properties.depositor.first } 
       end
+
+      def personal_folder_type=(string) 
+        if_properties_exists_strict { self.properties.personal_folder_type = string } 
+      end
+
+      def personal_folder_type
+        if_properties_exists_strict { self.properties.get_personal_folder_type } 
+      end
     end
 
     private
