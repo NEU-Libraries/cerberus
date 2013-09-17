@@ -42,7 +42,8 @@ class User < ActiveRecord::Base
     end
 
     def remove_drs_object
-      queryResult = ActiveFedora::SolrService.query("active_fedora_model_ssi:Employee AND nuid_tesim:[\"#{self.nuid}\"]", :rows=>999)
+      queryString = ActiveFedora::SolrService.escape_uri_for_query("active_fedora_model_ssi:Employee AND nuid_tesim:[\"#{self.nuid}\"]")
+      queryResult = ActiveFedora::SolrService.query(queryString, :rows=>999)
 
       if queryResult.count > 1
         #This shouldn't happen, there should be a one to one relationship
