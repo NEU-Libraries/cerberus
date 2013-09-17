@@ -1,25 +1,24 @@
 require 'spec_helper'
 
-RSpec.configure do |config|
-  config.before(:all) do 
-    Resque.inline = true 
-  end
-end
-
 describe Employee do 
-  
-  let(:employee) do 
+  before(:each) do
+    Resque.inline = true 
     a = FactoryGirl.create(:user) 
-    employee = Employee.find_by_nuid(a.nuid)
-    return employee
+    employee = Employee.find_by_nuid(a.nuid) 
+    @employee = employee
+    Resque.inline = false
   end
 
   describe "Employee creation" do 
-    it "occurs automatically on new user create" do 
+    it "occurs automatically on new user create" do
+      employee = @employee
+
       employee.should_not be nil 
     end 
 
-    it "generates personal folders" do 
+    it "generates personal folders" do
+      employee = @employee
+
       employee.folders.length.should == 6
 
       # This is the root of a user's personal item graph.
@@ -49,7 +48,9 @@ describe Employee do
   end
 
   describe "Employee search" do 
-    it "can be achieved via nuid" do 
+    it "can be achieved via nuid" do
+      employee = @employee
+
       nuid = employee.nuid 
 
       Employee.find_by_nuid(nuid).pid.should == employee.pid 
