@@ -18,7 +18,8 @@ class NuCollection < ActiveFedora::Base
 
   has_many :child_files, property: :is_member_of, :class_name => "NuCoreFile"
   has_many :child_collections, property: :is_member_of, :class_name => "NuCollection"
-  belongs_to :parent, property: :is_member_of, :class_name => "NuCollection" 
+  belongs_to :parent, property: :is_member_of, :class_name => "NuCollection"
+  belongs_to :user_parent, property: :is_member_of, :class_name => "Employee" 
 
   # Return all collections that this user can read
   def self.find_all_viewable(user) 
@@ -29,7 +30,9 @@ class NuCollection < ActiveFedora::Base
 
   # Override parent= so that the string passed by the creation form can be used. 
   def parent=(collection_id)
-    if collection_id.instance_of?(String) 
+    if collection_id.nil? 
+      return true #Controller level validations are used to ensure that end users cannot do this.  
+    elsif collection_id.instance_of?(String) 
       self.add_relationship(:is_member_of, NuCollection.find(collection_id))
     elsif collection_id.instance_of?(NuCollection)
       self.add_relationship(:is_member_of, collection_id) 
