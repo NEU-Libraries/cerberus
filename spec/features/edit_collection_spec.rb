@@ -3,8 +3,8 @@ require 'spec_helper'
 feature "Editing collections" do 
   before :all do 
     @root = FactoryGirl.create(:root_collection)
+    @user = FactoryGirl.create(:bill)
     @collection = FactoryGirl.create(:valid_owned_by_bill)
-    @user = FactoryGirl.create(:bill) 
   end
 
   # Assign reused lookup code to clean up test appearance a bit. 
