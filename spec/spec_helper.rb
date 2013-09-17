@@ -43,7 +43,7 @@ RSpec.configure do |config|
   # Cleans everything.  Should figure out how to get Fedora to do this 
   # automatically. 
   config.before(:suite) do 
-    ActiveFedora::Base.find(:all) do |file| 
+    ActiveFedora::Base.find(:all).each do |file| 
       file.destroy 
     end
   end
