@@ -40,17 +40,17 @@ RSpec.configure do |config|
   #     --seed 1234
   config.order = "random"
 
+  config.after(:each) do
+    User.find(:all).each do |u|
+      u.destroy
+    end
+  end
+
   # Cleans everything.  Should figure out how to get Fedora to do this 
   # automatically. 
   config.before(:suite) do 
     ActiveFedora::Base.find(:all).each do |file| 
       file.destroy 
-    end
-  end
-
-  config.after(:each) do
-    User.find(:all).each do |u|
-      u.destroy
     end
   end
 
