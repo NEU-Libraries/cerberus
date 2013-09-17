@@ -7,7 +7,7 @@ class User < ActiveRecord::Base
   include Blacklight::User
 
   after_create :link_to_drs
-  after_destroy :remove_drs_object
+  before_destroy :remove_drs_object
 
   # Include default devise modules. Others available are:
   # :token_authenticatable, :confirmable,
