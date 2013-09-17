@@ -47,7 +47,7 @@ class User < ActiveRecord::Base
       if queryResult.count > 1
         #This shouldn't happen, there should be a one to one relationship
         logger.warn "Multiple Employee objects for #{self.nuid}: #{error.inspect}"
-      else
+      elsif queryResult == 1
         doc = SolrDocument.new(queryResult.first)
         neuid = doc.id
         employeeRecord = Employee.find(doc.id)
