@@ -9,9 +9,8 @@ class Employee < ActiveFedora::Base
 
   has_metadata name: 'details', type: DrsEmployeeDatastream
 
-  belongs_to :parent, :property => :is_member_of, :class_name => 'NuCollection'
+  belongs_to :parent, :property => :is_member_of, :class_name => 'Department'
   has_many :folders, :property => :is_member_of, :class_name => 'NuCollection' 
-
 
   def self.find_by_nuid(nuid) 
     query_result = ActiveFedora::SolrService.query("active_fedora_model_ssi:Employee AND nuid_tesim:'#{nuid}'", :rows=>999)

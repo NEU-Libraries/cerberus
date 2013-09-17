@@ -7,7 +7,7 @@ class User < ActiveRecord::Base
   include Blacklight::User
 
   after_create :link_to_drs
-  after_destroy :remove_drs_object
+  before_destroy :remove_drs_object
 
   # Include default devise modules. Others available are:
   # :token_authenticatable, :confirmable,
@@ -42,12 +42,12 @@ class User < ActiveRecord::Base
     end
 
     def remove_drs_object
-      queryResult = ActiveFedora::SolrService.query("active_fedora_model_ssi:Employee AND nuid_tesim:[\"self.nuid\"]", :rows=>999)
+      queryResult = ActiveFedora::SolrService.query("active_fedora_model_ssi:Employee AND nuid_tesim:'#{self.nuid}'", :rows=>999)
 
       if queryResult.count > 1
         #This shouldn't happen, there should be a one to one relationship
-        logger.warn "Multiple Employee objects for #{self.nuid}: #{error.inspect}"
-      else
+        logger.warn "Multiple Employee objects for #{self.nuid}"
+      elsif queryResult == 1
         doc = SolrDocument.new(queryResult.first)
         neuid = doc.id
         employeeRecord = Employee.find(doc.id)
