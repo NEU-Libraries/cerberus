@@ -48,6 +48,12 @@ RSpec.configure do |config|
     end
   end
 
+  config.before(:each) do
+    User.find(:all).each do |u|
+      u.delete
+    end
+  end
+
   # Clean everything.  Should figure out how to get Fedora to do this
   # automatically. 
   config.after(:suite) do 
