@@ -4,8 +4,7 @@ describe Employee do
   before(:each) do
     Resque.inline = true 
     a = FactoryGirl.create(:user) 
-    employee = Employee.find_by_nuid(a.nuid) 
-    @employee = employee
+    @employee = Employee.find_by_nuid(a.nuid) 
     Resque.inline = false
   end
 
@@ -48,12 +47,28 @@ describe Employee do
   end
 
   describe "Employee search" do 
-    it "can be achieved via nuid" do
+    it "can find employees via their nuid" do
       employee = @employee
 
       nuid = employee.nuid 
 
       Employee.find_by_nuid(nuid).pid.should == employee.pid 
+    end
+  end
+
+  describe "Employee deletion" do 
+    it "eliminates the employees personal graph" do
+      employee = @employee
+      employee_pid = employee.pid 
+      graph_pids = employee.folders.map { |f| f.pid } 
+
+      employee.destroy
+
+      expect { Employee.find(employee_pid) }.to raise_error ActiveFedora::ObjectNotFoundError 
+
+      graph_pids.each do |pid| 
+        expect { ActiveFedora::Base.find(pid) }.to raise_error ActiveFedora::ObjectNotFoundError 
+      end
     end
   end
 end

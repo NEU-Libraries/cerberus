@@ -5,7 +5,7 @@ class Employee < ActiveFedora::Base
   attr_protected :identifier
 
   after_create :generate_child_folders
-  # before_destroy :purge_personal_graph
+  after_destroy :purge_personal_graph
 
   has_metadata name: 'details', type: DrsEmployeeDatastream
 
@@ -67,4 +67,7 @@ class Employee < ActiveFedora::Base
       Sufia.queue.push(GenerateUserFoldersJob.new(self.id, self.nuid, self.name))  
     end
 
+    def purge_personal_graph
+      self.root_folder.recursive_delete
+    end
 end
