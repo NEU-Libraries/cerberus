@@ -65,6 +65,14 @@ describe NuCollectionsController do
       response.status.should == 403 
     end
 
+    it "redirects to collections root when a user tries to treat a non-personal folder parent like it is a personal folder" do 
+      sign_in bill 
+
+      post :create, { nu_collection: { parent: bills_collection.id, user_parent: bill.nuid } } 
+
+      expect(response).to redirect_to(nu_collections_path)
+    end
+
     it "redirects to the new show page on successful create" do 
       sign_in bill
       attrs = {title: "Test", description: "test", date_of_issue: Date.today.to_s, parent: bills_collection.id } 
@@ -72,6 +80,21 @@ describe NuCollectionsController do
       post :create, {nu_collection: attrs} 
 
       id = assigns(:nu_collection).identifier
+      expect(response).to redirect_to(nu_collection_path(id: id))
+    end
+
+    it "assigns personal folder specific information on successful create" do
+      sign_in bill 
+
+      employee = Employee.create(nuid: "neu:unique", name: "John Doe")  
+      employee_root = NuCollection.create(user_parent: employee.pid, title: "Root", personal_folder_type: "user root")
+      employee_root.rightsMetadata.permissions({person: bill.nuid}, 'edit')
+      employee_root.save!  
+
+      post :create, { nu_collection: { parent: employee_root.pid, user_parent: employee.pid, title: "New" } }
+
+      id = assigns(:nu_collection).identifier 
+      assigns(:nu_collection).personal_folder_type.should == 'miscellany'
       expect(response).to redirect_to(nu_collection_path(id: id))
     end
   end
