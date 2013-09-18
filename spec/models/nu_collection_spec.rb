@@ -4,33 +4,6 @@ describe NuCollection do
 
   let(:collection) { NuCollection.new } 
 
-  subject { collection } 
-
-  it { should respond_to(:title=) } 
-  it { should respond_to(:title) } 
-  it { should respond_to(:parent=) } 
-  it { should respond_to(:parent) } 
-  it { should respond_to(:identifier=) } 
-  it { should respond_to(:identifier) } 
-  it { should respond_to(:description=) }
-  it { should respond_to(:description) }  
-  it { should respond_to(:date_of_issue=) } 
-  it { should respond_to(:date_of_issue) } 
-  it { should respond_to(:keywords=) } 
-  it { should respond_to(:keywords) } 
-  it { should respond_to(:corporate_creators=) } 
-  it { should respond_to(:corporate_creators) } 
-  it { should respond_to(:personal_creators=) } 
-  it { should respond_to(:personal_creators) } 
-  it { should respond_to(:embargo_release_date=) } 
-  it { should respond_to(:embargo_release_date) } 
-  it { should respond_to(:permissions=) } 
-  it { should respond_to(:permissions) } 
-  it { should respond_to(:mass_permissions=) } 
-  it { should respond_to(:mass_permissions) } 
-  it { should respond_to(:embargo_in_effect?) } 
-  it { should respond_to(:set_permissions_from_new_form) }
-
   describe "Custom setters and getters" do
     let(:c) { NuCollection.new } 
 
@@ -68,6 +41,25 @@ describe NuCollection do
       p_coll.parent.should == @saved_root 
     end
   end
+
+  describe "User parent" do 
+    let(:employee) { FactoryGirl.create(:employee) }
+
+    it "can be set via nuid" do 
+      collection.user_parent = employee.nuid 
+      collection.user_parent.pid.should == employee.pid 
+    end
+
+    it "CANNOT be set by pid" do 
+      expect{collection.user_parent = employee.pid}.to raise_error 
+    end
+
+    it "can be set by passing the entire object" do 
+      collection.user_parent = employee 
+      collection.user_parent.pid.should == employee.pid 
+    end
+  end 
+
 
   describe "Recursive delete" do 
     before(:each) do
