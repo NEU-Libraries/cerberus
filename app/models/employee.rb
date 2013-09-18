@@ -42,7 +42,7 @@ class Employee < ActiveFedora::Base
   end
 
   def other_publications 
-    return find_by_folder_type('other publications') 
+    return find_by_folder_type('other publications')
   end
 
   def data_sets 
@@ -62,7 +62,7 @@ class Employee < ActiveFedora::Base
   end
 
   def personal_folders 
-    return self.folders.select { |f| f.personal_folder_type == 'user created' } 
+    return self.folders.select { |f| f.personal_folder_type == 'miscellany' && f.parent == f.root_folder } 
   end
 
   private 
