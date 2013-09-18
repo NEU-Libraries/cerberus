@@ -1,3 +1,7 @@
 %h3 Rendered
 
 %p= "Welcome to your personal repository #{@employee.name}"
+
+%p Explanation of personal repository goes here maybe. 
+
+= render partial: "show_personal_graph", locals: { :folders => @employee.sorted_folders }  

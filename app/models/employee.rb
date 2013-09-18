@@ -57,6 +57,10 @@ class Employee < ActiveFedora::Base
     return find_by_folder_type('learning objects') 
   end
 
+  def sorted_folders 
+    return [root_folder, research_publications, other_publications, data_sets, presentations, learning_objects] 
+  end
+
   private 
 
     def find_by_folder_type(string) 
