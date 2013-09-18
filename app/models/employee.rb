@@ -58,7 +58,11 @@ class Employee < ActiveFedora::Base
   end
 
   def sorted_folders 
-    return [root_folder, research_publications, other_publications, data_sets, presentations, learning_objects] 
+    return [research_publications, other_publications, data_sets, presentations, learning_objects] 
+  end
+
+  def personal_folders 
+    return self.folders.select { |f| f.personal_folder_type == 'user created' } 
   end
 
   private 

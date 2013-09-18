@@ -4,4 +4,4 @@
 
 %p Explanation of personal repository goes here maybe. 
 
-= render partial: "show_personal_graph", locals: { :folders => @employee.sorted_folders }  
+= render partial: "show_personal_graph", locals: { :generated_folders => @employee.sorted_folders, :user_folders => @employee.personal_folders }  
