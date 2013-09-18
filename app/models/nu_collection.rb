@@ -28,6 +28,25 @@ class NuCollection < ActiveFedora::Base
     return filtered 
   end
 
+  # Delete all files/collections for which this item is root 
+  def recursive_delete
+    files = all_descendent_files 
+    collections = all_descendent_collections
+
+    # Need to look it up again before you try to destroy it.
+    # Is mystery. 
+    files.each do |f| 
+      x = NuCoreFile.find(f.pid) 
+      x.destroy 
+    end
+
+    collections.each do |c| 
+      x = NuCollection.find(c.pid) 
+      x.destroy 
+    end
+  end
+
+
   # Override parent= so that the string passed by the creation form can be used. 
   def parent=(collection_id)
     if collection_id.nil? 
@@ -59,4 +78,35 @@ class NuCollection < ActiveFedora::Base
       end 
     end
   end
+
+
+  protected
+
+    # Depth first(ish) traversal of a graph.  
+    def each_depth_first
+      self.child_collections.each do |child|
+        child.each_depth_first do |c|
+          yield c
+        end
+      end
+
+      yield self
+    end
+
+    # Return every descendent collection of this collection
+    def all_descendent_collections
+      result = [] 
+      each_depth_first do |child|
+        result << child 
+      end
+      return result 
+    end
+
+    def all_descendent_files 
+      result = [] 
+      each_depth_first do |child| 
+        result += child.child_files 
+      end
+      return result
+    end
 end
