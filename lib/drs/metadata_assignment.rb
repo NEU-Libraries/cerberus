@@ -90,6 +90,12 @@ module Drs
       def personal_folder_type
         if_properties_exists_strict { self.properties.get_personal_folder_type } 
       end
+
+      def is_personal_folder? 
+        if_properties_exists_strict do 
+          return !self.properties.personal_folder_type.empty? 
+        end
+      end
     end
 
     private
