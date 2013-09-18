@@ -62,7 +62,7 @@ class Employee < ActiveFedora::Base
   end
 
   def personal_folders 
-    return self.folders.select { |f| f.personal_folder_type == 'miscellany' && f.parent == f.root_folder } 
+    return self.folders.select { |f| f.personal_folder_type == 'miscellany' && f.parent.pid == self.root_folder.pid } 
   end
 
   private 

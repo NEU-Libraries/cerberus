@@ -50,11 +50,36 @@ describe Employee do
     it "can find employees via their nuid" do
       employee = @employee
 
-      nuid = employee.nuid 
+      nuid = employee.nuid
 
       Employee.find_by_nuid(nuid).pid.should == employee.pid 
     end
   end
+
+  describe "Personal folders" do
+    before(:each) do
+      @a = NuCollection.create(title: "Off Root", user_parent: @employee, parent: @employee.root_folder, personal_folder_type: 'miscellany')
+      @a.save! 
+      @b = NuCollection.create(title: "Not Off Root", user_parent: @employee, parent: @employee.research_publications, personal_folder_type: 'miscellany')
+      @b.save!  
+    end
+
+    it "can be added by the user" do 
+      employee = Employee.find(@employee.pid) 
+
+      employee.folders.length.should == 8 
+    end
+
+    it "off of root can be found with self.personal_folders" do
+
+      employee = Employee.find(@employee.pid)
+      personal_folders = employee.personal_folders
+
+      personal_folders.length.should == 1
+      personal_folders.first.title.should == "Off Root" 
+    end
+  end
+
 
   describe "Employee deletion" do 
     it "eliminates the employees personal graph" do
