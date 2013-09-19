@@ -25,6 +25,16 @@ class Employee < ActiveFedora::Base
     end
    end
 
+   def self.exists_by_nuid?(nuid) 
+    begin 
+      self.find_by_nuid(nuid)
+      return true  
+    rescue Employee::NoSuchNuidError 
+      return false 
+    end
+  end
+
+
 
   def name=(string)
     self.details.name = string
@@ -85,7 +95,7 @@ class Employee < ActiveFedora::Base
     end
 
     def purge_personal_graph
-      self.root_folder.recursive_delete
+      self.root_folder.recursive_delete if !self.folders.empty?
     end
 
     class NoSuchNuidError < StandardError
