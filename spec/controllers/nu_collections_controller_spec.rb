@@ -86,12 +86,12 @@ describe NuCollectionsController do
     it "assigns personal folder specific information on successful create" do
       sign_in bill 
 
-      employee = Employee.create(nuid: "example@example.com", name: "John Doe")  
+      employee = Employee.create(nuid: "neu:unique", name: "John Doe")  
       employee_root = NuCollection.create(user_parent: employee.pid, title: "Root", personal_folder_type: "user root")
       employee_root.rightsMetadata.permissions({person: bill.nuid}, 'edit')
       employee_root.save!  
 
-      post :create, { nu_collection: { parent: employee_root.pid, user_parent: employee.nuid, title: "New" } }
+      post :create, { nu_collection: { parent: employee_root.pid, user_parent: employee.pid, title: "New" } }
 
       id = assigns(:nu_collection).identifier 
       assigns(:nu_collection).personal_folder_type.should == 'miscellany'

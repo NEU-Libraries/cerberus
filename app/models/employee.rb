@@ -5,7 +5,7 @@ class Employee < ActiveFedora::Base
   attr_protected :identifier
 
   after_create :generate_child_folders
-  before_destroy :purge_personal_graph
+  after_destroy :purge_personal_graph
 
   has_metadata name: 'details', type: DrsEmployeeDatastream
 
@@ -24,6 +24,7 @@ class Employee < ActiveFedora::Base
       Employee.find(query_result.first["id"])
     end
    end
+
 
   def name=(string)
     self.details.name = string
@@ -84,7 +85,7 @@ class Employee < ActiveFedora::Base
     end
 
     def purge_personal_graph
-      self.root_folder.recursive_delete if !self.folders.empty?
+      self.root_folder.recursive_delete
     end
 
     class NoSuchNuidError < StandardError
