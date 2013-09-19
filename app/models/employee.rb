@@ -34,8 +34,6 @@ class Employee < ActiveFedora::Base
     end
   end
 
-
-
   def name=(string)
     self.details.name = string
   end
