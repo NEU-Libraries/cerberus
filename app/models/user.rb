@@ -36,9 +36,10 @@ class User < ActiveRecord::Base
 
   private
     def link_to_drs
-      #We'll be getting these details from shib hopefully. Placeholders there for now.
-      new_employee = Employee.new({ nuid: self.nuid, name: "Jane Doe" })
-      new_employee.save!
+      if !Employee.exists_by_nuid?(self.nuid) 
+        new_employee = Employee.new({ nuid: self.nuid, name: "Jane Doe" }) 
+        new_employee.save!
+      end
     end
 
     def remove_drs_object
