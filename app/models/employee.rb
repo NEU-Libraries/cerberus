@@ -9,7 +9,7 @@ class Employee < ActiveFedora::Base
 
   has_metadata name: 'details', type: DrsEmployeeDatastream
 
-  belongs_to :parent, :property => :is_member_of, :class_name => 'Department'
+  belongs_to :parent, :property => :hasAffiliation, :class_name => 'Department'
   has_many :folders, :property => :is_member_of, :class_name => 'NuCollection' 
 
   def self.find_by_nuid(nuid) 
