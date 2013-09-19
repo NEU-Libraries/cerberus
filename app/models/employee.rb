@@ -12,10 +12,19 @@ class Employee < ActiveFedora::Base
   belongs_to :parent, :property => :is_member_of, :class_name => 'Department'
   has_many :folders, :property => :is_member_of, :class_name => 'NuCollection' 
 
-  def self.find_by_nuid(nuid) 
-    query_result = ActiveFedora::SolrService.query("active_fedora_model_ssi:Employee AND nuid_tesim:'#{nuid}'", :rows=>999)
-    Employee.find(query_result.first["id"])
-  end
+  def self.find_by_nuid(nuid)
+    escaped_param = ActiveFedora::SolrService.escape_uri_for_query(nuid)
+    query_result = ActiveFedora::SolrService.query("active_fedora_model_ssi:Employee AND nuid_tesim:(#{escaped_param})", :rows=>999)
+    if query_result.length == 0 
+      raise NoSuchNuidError.new(nuid)
+    elsif query_result.length > 1 
+      all_pids = query_result.map { |r| r["id"] } 
+      raise MultipleMatchError.new(all_pids, nuid) 
+    else
+      Employee.find(query_result.first["id"])
+    end
+   end
+
 
   def name=(string)
     self.details.name = string
@@ -77,5 +86,22 @@ class Employee < ActiveFedora::Base
 
     def purge_personal_graph
       self.root_folder.recursive_delete
+    end
+
+    class NoSuchNuidError < StandardError
+      attr_accessor :nuid 
+      def initialize(nuid)
+        self.nuid = nuid 
+        super("No Employee object with nuid #{self.nuid} could be found in the graph.") 
+      end
+    end
+
+    class MultipleMatchError < StandardError 
+      attr_accessor :arry, :nuid 
+      def initialize(array_of_pids, nuid) 
+        self.arry = array_of_pids 
+        self.nuid = nuid 
+        super("The following Employees all have nuid = #{self.nuid} (that's bad): #{arry}")
+      end
     end
 end
