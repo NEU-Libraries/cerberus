@@ -37,7 +37,7 @@ class User < ActiveRecord::Base
   private
     def link_to_drs
       #We'll be getting these details from shib hopefully. Placeholders there for now.
-      new_employee = Employee.new({ nuid: self.nuid, name: "Jane Doe" })
+      new_employee = Employee.new({ nuid: self.nuid, name: "Jane Doe", department: "localhost:3000/nu_collections/neu:1" })
       new_employee.save!
     end
 

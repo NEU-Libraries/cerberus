@@ -1,7 +1,7 @@
 class Employee < ActiveFedora::Base
   include ActiveModel::MassAssignmentSecurity
 
-  attr_accessible :nuid, :name
+  attr_accessible :nuid, :name, :department
   attr_protected :identifier
 
   after_create :generate_child_folders
@@ -9,8 +9,12 @@ class Employee < ActiveFedora::Base
 
   has_metadata name: 'details', type: DrsEmployeeDatastream
 
-  belongs_to :parent, :property => :hasAffiliation, :class_name => 'Department'
-  has_many :folders, :property => :is_member_of, :class_name => 'NuCollection' 
+  belongs_to :parent, :property => :has_affiliation, :class_name => 'Department'
+  has_many :folders, :property => :is_member_of, :class_name => 'NuCollection'
+
+  def department=(department_id)
+    self.add_relationship(:has_affiliation, department_id) 
+  end 
 
   def self.find_by_nuid(nuid) 
     query_result = ActiveFedora::SolrService.query("active_fedora_model_ssi:Employee AND nuid_tesim:'#{nuid}'", :rows=>999)
