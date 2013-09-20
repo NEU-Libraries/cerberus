@@ -1,6 +1,9 @@
 FactoryGirl.define do
-  factory :employee do 
-    sequence(:nuid) { |n| "Employee_#{n}@example.com" }
-    sequence(:name) { |n| "#{n} Employee's Name" } 
+  factory :employee do
+
+    before :create do |e| 
+      e.nuid = (Employee.all.length + 1).to_s
+      e.name = (Employee.all.length + 1).to_s
+    end 
   end
 end
