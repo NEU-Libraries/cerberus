@@ -51,5 +51,8 @@ group :development, :test do
   gem "launchy" 
   gem "jettywrapper"
   gem "factory_girl_rails"
+end
+
+group :test do 
   gem "resque_spec" 
 end
