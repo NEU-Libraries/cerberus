@@ -50,5 +50,6 @@ group :development, :test do
   gem "capybara" 
   gem "launchy" 
   gem "jettywrapper"
-  gem "factory_girl_rails" 
+  gem "factory_girl_rails"
+  gem "resque_spec" 
 end
