@@ -1,9 +1,12 @@
 class Employee < ActiveFedora::Base
   include ActiveModel::MassAssignmentSecurity
+  include ActiveModel::Validations
 
   attr_accessible :nuid, :name
-  attr_accessor :building
-  attr_protected :identifier
+  attr_accessor   :building
+  attr_protected  :identifier
+
+  validate :nuid_unique
 
   after_destroy :purge_personal_graph
 
@@ -126,6 +129,12 @@ class Employee < ActiveFedora::Base
 
     def purge_personal_graph
       self.root_folder.recursive_delete if !self.folders.empty?
+    end
+
+    def nuid_unique 
+      if Employee.exists_by_nuid? self.nuid 
+        errors.add(:nuid, "This nuid is already in use") 
+      end
     end
 
     class NoSuchNuidError < StandardError
