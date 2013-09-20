@@ -35,13 +35,13 @@ class NuCollection < ActiveFedora::Base
 
     # Need to look it up again before you try to destroy it.
     # Is mystery. 
-    files.each do |f| 
-      x = NuCoreFile.find(f.pid) 
-      x.destroy 
+    files.each do |f|
+      x = NuCoreFile.find(f.pid) if NuCoreFile.exists?(f.pid) 
+      x.destroy
     end
 
     collections.each do |c| 
-      x = NuCollection.find(c.pid) 
+      x = NuCollection.find(c.pid) if NuCollection.exists?(c.pid) 
       x.destroy 
     end
   end
@@ -89,9 +89,6 @@ class NuCollection < ActiveFedora::Base
       end 
     end
   end
-
-
-  protected
 
     # Depth first(ish) traversal of a graph.  
     def each_depth_first

@@ -1,93 +1,121 @@
 require 'spec_helper'
 
-describe Employee do 
-  before(:each) do
-    Resque.inline = true 
-    a = FactoryGirl.create(:user) 
-    @employee = Employee.find_by_nuid(a.nuid) 
-    Resque.inline = false
+# Conditional application of the Resque.inline command on these tests 
+# makes them surprisingly brittle.  Hence the use of describe block specific models
+# that are manually cleaned out at block conclusion. 
+
+describe Employee do
+
+  # This shouldn't be necessary but it do.  
+  # Note that this kludge doesn't seem to be required on the front end
+  def super_safe_employee_lookup(nuid) 
+    employee = Employee.find_by_nuid(nuid)
+
+    if !employee.folders.length == 6 
+      i = 0
+      while i <= 4
+        sleep 4
+        employee = Employee.find_by_nuid(nuid)
+        if employee.folders.length == 6 
+          return employee
+          exit 
+        end
+      end
+    end
+    return employee
   end
 
-  describe "Employee creation" do 
-    it "occurs automatically on new user create" do
-      employee = @employee
+  describe "creation" do
 
-      employee.should_not be nil 
-    end 
+    before :all do
+      ActiveFedora::Base.all.map { |n| n.destroy } 
+      User.all.map { |x| x.destroy }
+
+      Resque.inline = true
+      a = User.create(email: "creation@examples.com", password: "password1")
+      sleep 5
+      Resque.inline = false
+    end
+
+    after :all do
+      ActiveFedora::Base.all.map { |n| n.destroy } 
+      User.all.map { |x| x.destroy } 
+    end
 
     it "generates personal folders" do
-      employee = @employee
+      creation = super_safe_employee_lookup("creation@examples.com") 
 
-      employee.folders.length.should == 6
+      creation.folders.length.should == 6
 
       # This is the root of a user's personal item graph.
-      employee.root_folder.should be_an_instance_of NuCollection
-      employee.root_folder.personal_folder_type.should == 'user root' 
+      creation.root_folder.should be_an_instance_of NuCollection
+      creation.root_folder.personal_folder_type.should == 'user root' 
 
       # Directory for an employee's research publications.
-      employee.research_publications.should be_an_instance_of NuCollection
-      employee.research_publications.personal_folder_type.should == 'research publications'
+      creation.research_publications.should be_an_instance_of NuCollection
+      creation.research_publications.personal_folder_type.should == 'research publications'
 
       # Other publications an employee might've created.
-      employee.other_publications.should be_an_instance_of NuCollection
-      employee.other_publications.personal_folder_type.should == 'other publications'
+      creation.other_publications.should be_an_instance_of NuCollection
+      creation.other_publications.personal_folder_type.should == 'other publications'
 
       # Data sets for research an employee might've performed.
-      employee.data_sets.should be_an_instance_of NuCollection
-      employee.data_sets.personal_folder_type.should == 'data sets' 
+      creation.data_sets.should be_an_instance_of NuCollection
+      creation.data_sets.personal_folder_type.should == 'data sets' 
 
       # Presentations an employee might've prepared.
-      employee.presentations.should be_an_instance_of NuCollection
-      employee.presentations.personal_folder_type.should == 'presentations'
+      creation.presentations.should be_an_instance_of NuCollection
+      creation.presentations.personal_folder_type.should == 'presentations'
 
       # Teaching aides an employee might've created.
-      employee.learning_objects.should be_an_instance_of NuCollection
-      employee.learning_objects.personal_folder_type.should == 'learning objects' 
+      creation.learning_objects.should be_an_instance_of NuCollection
+      creation.learning_objects.personal_folder_type.should == 'learning objects' 
     end
   end
 
-  describe "Employee search" do 
+  describe "search" do
     it "can find employees via their nuid" do
-      employee = @employee
+      a = Employee.create(nuid: "findme@examples.com")
 
-      nuid = employee.nuid
-
-      Employee.find_by_nuid(nuid).pid.should == employee.pid 
-    end
-  end
-
-  describe "Personal folders" do
-    before(:each) do
-      @a = NuCollection.create(title: "Off Root", user_parent: @employee, parent: @employee.root_folder, personal_folder_type: 'miscellany')
-      @a.save! 
-      @b = NuCollection.create(title: "Not Off Root", user_parent: @employee, parent: @employee.research_publications, personal_folder_type: 'miscellany')
-      @b.save!  
+      Employee.find_by_nuid("findme@examples.com").pid.should == a.pid 
     end
 
-    it "can be added by the user" do 
-      employee = Employee.find(@employee.pid) 
-
-      employee.folders.length.should == 8 
+    it "raises an error if no Employee with the given nuid exists" do 
+      expect { Employee.find_by_nuid("neu:nopenope") }.to raise_error Employee::NoSuchNuidError 
     end
 
-    it "off of root can be found with self.personal_folders" do
+    it "raises an error if multiple Employees with the given nuid exist" do 
+      Employee.create(nuid: "neu:multiples") 
+      Employee.create(nuid: "neu:multiples") 
 
-      employee = Employee.find(@employee.pid)
-      personal_folders = employee.personal_folders
-
-      personal_folders.length.should == 1
-      personal_folders.first.title.should == "Off Root" 
+      expect { Employee.find_by_nuid("neu:multiples") }.to raise_error Employee::MultipleMatchError 
     end
   end
 
 
-  describe "Employee deletion" do 
-    it "eliminates the employees personal graph" do
-      employee = @employee
-      employee_pid = employee.pid 
-      graph_pids = employee.folders.map { |f| f.pid } 
+  describe "deletion" do
+    before :all do
+      puts "executing deletion before hook."
+      ActiveFedora::Base.all.map { |x| x.destroy } 
+      User.all.map { |u| u.destroy } 
+      Resque.inline = true
+      @usr = User.create(email:"deletion@examples.com", password: "password1")
+      sleep 5
+      Resque.inline = false
+    end 
 
-      employee.destroy
+    after :all do 
+      ActiveFedora::Base.all.map { |x| x.destroy } 
+      User.all.map { |u| u.destroy } 
+    end
+
+    it "eliminates the employees personal graph on employee delete" do
+      deletion = super_safe_employee_lookup("deletion@examples.com")  
+
+      employee_pid = deletion.pid 
+      graph_pids = deletion.folders.map { |f| f.pid } 
+
+      @usr.destroy
 
       expect { Employee.find(employee_pid) }.to raise_error ActiveFedora::ObjectNotFoundError 
 
