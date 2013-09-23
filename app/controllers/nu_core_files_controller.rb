@@ -116,7 +116,7 @@ class NuCoreFilesController < ApplicationController
       update_metadata_from_upload_screen(@nu_core_file) 
       #NuCoreFile.create_metadata(@nu_core_file, current_user, params[:batch_id], params[:collection_id])
       NuCoreFile.create_metadata(@nu_core_file, current_user, params[:collection_id])
-      NuFile.create_master_content_object(@nu_core_file, file, datastream_id, current_user)
+      Drs::NuFile.create_master_content_object(@nu_core_file, file, datastream_id, current_user)
       @nu_core_file.record_version_committer(current_user)
       respond_to do |format|
         format.html {
