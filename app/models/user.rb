@@ -6,7 +6,7 @@ class User < ActiveRecord::Base
   # Connects this user object to Blacklights Bookmarks. 
   include Blacklight::User
 
-  after_save :link_to_drs
+  after_create :link_to_drs
   before_destroy :remove_drs_object
 
   # Include default devise modules. Others available are:
@@ -36,9 +36,7 @@ class User < ActiveRecord::Base
 
   private
     def link_to_drs
-      if !Employee.exists_by_nuid?(self.nuid)
-        Sufia.queue.push(EmployeeCreateJob.new(self.nuid))
-      end
+      Sufia.queue.push(EmployeeCreateJob.new(self.nuid))
     end
 
     def remove_drs_object
