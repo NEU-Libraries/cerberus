@@ -16,43 +16,43 @@ class NuCollectionsController < ApplicationController
   end
 
   def new
-    @nu_collection = NuCollection.new(parent: params[:parent])
+    @set = NuCollection.new(parent: params[:parent])
   end
 
   def create
-    @nu_collection = NuCollection.new(params[:nu_collection].merge(pid: mint_unique_pid))
+    @set = NuCollection.new(params[:set].merge(pid: mint_unique_pid))
 
-    if params[:nu_collection][:user_parent].present?
-      @nu_collection.user_parent = Employee.find_by_nuid(params[:nu_collection][:user_parent]) 
-      @nu_collection.personal_folder_type = 'miscellany' 
+    if params[:set][:user_parent].present?
+      @set.user_parent = Employee.find_by_nuid(params[:set][:user_parent]) 
+      @set.personal_folder_type = 'miscellany' 
     end
 
-    @nu_collection.depositor = current_user.nuid 
-    @nu_collection.identifier = @nu_collection.pid
+    @set.depositor = current_user.nuid 
+    @set.identifier = @set.pid
 
-    if @nu_collection.save!
+    if @set.save!
       flash[:info] = "Collection created successfully."
-      redirect_to nu_collection_path(id: @nu_collection.identifier) and return  
+      redirect_to set_path(id: @set.identifier) and return  
     else
       flash.now[:error] = "Something went wrong"
-      redirect_to new_nu_collection_path(parent: params[:parent]) and return 
+      redirect_to new_set_path(parent: params[:parent]) and return 
     end 
   end
 
   def show  
-    @nu_collection = NuCollection.find(params[:id]) 
+    @set = NuCollection.find(params[:id]) 
   end
 
   def edit
-    @nu_collection = NuCollection.find(params[:id]) 
+    @set = NuCollection.find(params[:id]) 
   end
 
   def update
-    @nu_collection = NuCollection.find(params[:id])  
-    if @nu_collection.update_attributes(params[:nu_collection]) 
-      redirect_to(@nu_collection, notice: "Collection #{@nu_collection.title} was updated successfully." ) 
+    @set = NuCollection.find(params[:id])  
+    if @set.update_attributes(params[:set]) 
+      redirect_to(@set, notice: "Collection #{@set.title} was updated successfully." ) 
     else
-      redirect_to(@nu_collection, notice: "Collection #{@nu_collection.title} failed to update.")
+      redirect_to(@set, notice: "Collection #{@set.title} failed to update.")
     end
   end
 
@@ -60,12 +60,12 @@ class NuCollectionsController < ApplicationController
 
     def index_redirect
       flash[:error] = "Collections cannot be created without a parent" 
-      redirect_to nu_collections_path and return 
+      redirect_to sets_path and return 
     end
 
     def index_redirect_with_bad_id 
       flash[:error] = "The id you specified does not seem to exist in Fedora." 
-      redirect_to nu_collections_path and return 
+      redirect_to sets_path and return 
     end
 
     # In cases where a personal folder is being created,
@@ -73,8 +73,8 @@ class NuCollectionsController < ApplicationController
     def parent_is_personal_folder?
       if params[:is_parent_folder].present? 
         parent_id = params[:parent] 
-      elsif params[:nu_collection].present? && params[:nu_collection][:user_parent].present? 
-        parent_id = params[:nu_collection][:parent]
+      elsif params[:set].present? && params[:set][:user_parent].present? 
+        parent_id = params[:set][:parent]
       else 
         return true 
       end
@@ -82,7 +82,7 @@ class NuCollectionsController < ApplicationController
       folder = NuCollection.find(parent_id) 
       if !folder.is_personal_folder? 
         flash[:error] = "You are attempting to create a personal folder off not a personal folder." 
-        redirect_to nu_collections_path and return 
+        redirect_to sets_path and return 
       end
     end
 end
