@@ -64,6 +64,26 @@ describe NuCoreFile do
       bills_collection_two.child_file_ids.include?(core.pid).should be true
     end
   end
+
+  describe "Content files" do 
+    before :each do 
+      @core_file = NuCoreFile.create(depositor: "dummy@example.com") 
+      @img = ImageMasterFile.create(title: "Img", core_record: @core_file) 
+      @pdf = PdfFile.create(title: "Pdf", core_record: @core_file) 
+      @word = MswordFile.create(title: "MsWord", core_record: @core_file)
+      @word_unassociated = MswordFile.create(title: "MsWordTwo")  
+    end
+
+    it "can be found using the .content_objects method" do 
+      result = @core_file.content_objects
+
+      result.length.should == 3
+      result.should include @img 
+      result.should include @pdf 
+      result.should include @word
+      result.should_not include @word_unassociated
+    end
+  end
 end
 
 
