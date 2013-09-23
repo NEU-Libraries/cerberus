@@ -1,3 +1,3 @@
-class ContentTypes::MsexcelFile < ActiveFedora::Base
+class MsexcelFile < ActiveFedora::Base
   include Drs::NuFile
 end
