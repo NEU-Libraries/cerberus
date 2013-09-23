@@ -1,18 +1,18 @@
 - if permissions.empty?
   .permission
-    = label_tag "nu_collection[permissions][permissions0][identity_type]", "Are you trying to add a person or a group?"
-    = select_tag 'nu_collection[permissions][permissions0][identity_type]', options_for_select(['person', 'group']), class: "span12"
+    = label_tag "set[permissions][permissions0][identity_type]", "Are you trying to add a person or a group?"
+    = select_tag 'set[permissions][permissions0][identity_type]', options_for_select(['person', 'group']), class: "span12"
     = f.label :identity, "Enter NUID or group name"
-    = f.text_field :identity, value: "", name: 'nu_collection[permissions][permissions0][identity]', pattern: ".*\\S.*", class: "span12"
-    = label_tag "nu_collection[permissions][permissions0][permission_type]", "Should this identity be allowed to read or edit?"
-    = select_tag 'nu_collection[permissions][permissions0][permission_type]', options_for_select(['read', 'edit']), class: "span12"
+    = f.text_field :identity, value: "", name: 'set[permissions][permissions0][identity]', pattern: ".*\\S.*", class: "span12"
+    = label_tag "set[permissions][permissions0][permission_type]", "Should this identity be allowed to read or edit?"
+    = select_tag 'set[permissions][permissions0][permission_type]', options_for_select(['read', 'edit']), class: "span12"
 - else
   - permissions.each_with_index do |perm, index|
     .permission
-      = label_tag "nu_collection[permissions][permissions#{index}][identity_type]", "Are you trying to add a person or a group?"
-      = select_tag "nu_collection[permissions][permissions#{index}][identity_type]", options_for_select(['person', 'group'], perm[:type]), class: "span12"
+      = label_tag "set[permissions][permissions#{index}][identity_type]", "Are you trying to add a person or a group?"
+      = select_tag "set[permissions][permissions#{index}][identity_type]", options_for_select(['person', 'group'], perm[:type]), class: "span12"
       = f.label :identity, "Enter NUID or group name"
-      = f.text_field :identity, value: perm[:name], name: "nu_collection[permissions][permissions#{index}][identity]", pattern: ".*\\S.*", class: "span12"
-      = label_tag "nu_collection[permissions][permissions#{index}][identity_type]", "Should this identity be allowed to read or edit?"
-      = select_tag "nu_collection[permissions][permissions#{index}][permission_type]", options_for_select(['read', 'edit'], perm[:access]), class: "span12"
+      = f.text_field :identity, value: perm[:name], name: "set[permissions][permissions#{index}][identity]", pattern: ".*\\S.*", class: "span12"
+      = label_tag "set[permissions][permissions#{index}][identity_type]", "Should this identity be allowed to read or edit?"
+      = select_tag "set[permissions][permissions#{index}][permission_type]", options_for_select(['read', 'edit'], perm[:access]), class: "span12"
       
