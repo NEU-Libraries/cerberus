@@ -7,6 +7,7 @@ class NuCollectionsController < ApplicationController
   before_filter :can_edit?, only: [:edit, :update, :destroy]
 
   before_filter :can_edit_parent?, only: [:new, :create]
+  before_filter :parent_is_personal_folder?, only: [:new, :create] 
   rescue_from NoParentFoundError, with: :index_redirect
   rescue_from IdNotFoundError, with: :index_redirect_with_bad_id
 
@@ -21,7 +22,11 @@ class NuCollectionsController < ApplicationController
   def create
     @nu_collection = NuCollection.new(params[:nu_collection].merge(pid: mint_unique_pid))
 
-    #Assign misc. data
+    if params[:nu_collection][:user_parent].present?
+      @nu_collection.user_parent = Employee.find_by_nuid(params[:nu_collection][:user_parent]) 
+      @nu_collection.personal_folder_type = 'miscellany' 
+    end
+
     @nu_collection.depositor = current_user.nuid 
     @nu_collection.identifier = @nu_collection.pid
 
@@ -61,5 +66,23 @@ class NuCollectionsController < ApplicationController
     def index_redirect_with_bad_id 
       flash[:error] = "The id you specified does not seem to exist in Fedora." 
       redirect_to nu_collections_path and return 
+    end
+
+    # In cases where a personal folder is being created,
+    # ensure that the parent is also a personal folder.
+    def parent_is_personal_folder?
+      if params[:is_parent_folder].present? 
+        parent_id = params[:parent] 
+      elsif params[:nu_collection].present? && params[:nu_collection][:user_parent].present? 
+        parent_id = params[:nu_collection][:parent]
+      else 
+        return true 
+      end
+
+      folder = NuCollection.find(parent_id) 
+      if !folder.is_personal_folder? 
+        flash[:error] = "You are attempting to create a personal folder off not a personal folder." 
+        redirect_to nu_collections_path and return 
+      end
     end
 end

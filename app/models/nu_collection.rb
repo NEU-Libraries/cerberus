@@ -7,7 +7,7 @@ class NuCollection < ActiveFedora::Base
   include Drs::MetadataAssignment
 
   attr_accessible :title, :description, :date_of_issue, :keywords, :parent 
-  attr_accessible :corporate_creators, :personal_creators
+  attr_accessible :corporate_creators, :personal_creators, :personal_folder_type
 
   attr_protected :identifier 
 
@@ -35,13 +35,13 @@ class NuCollection < ActiveFedora::Base
 
     # Need to look it up again before you try to destroy it.
     # Is mystery. 
-    files.each do |f| 
-      x = NuCoreFile.find(f.pid) 
-      x.destroy 
+    files.each do |f|
+      x = NuCoreFile.find(f.pid) if NuCoreFile.exists?(f.pid) 
+      x.destroy
     end
 
     collections.each do |c| 
-      x = NuCollection.find(c.pid) 
+      x = NuCollection.find(c.pid) if NuCollection.exists?(c.pid) 
       x.destroy 
     end
   end
@@ -57,6 +57,17 @@ class NuCollection < ActiveFedora::Base
       self.add_relationship(:is_member_of, collection_id) 
     else
       raise "parent= got passed a #{collection_id.class}, which doesn't work."
+    end
+  end
+
+  # Override user_parent= so that the string passed by the creation form can be used. 
+  def user_parent=(employee) 
+    if employee.instance_of?(String) 
+      self.add_relationship(:is_member_of, Employee.find_by_nuid(employee)) 
+    elsif employee.instance_of? Employee 
+      self.add_relationship(:is_member_of, employee) 
+    else
+      raise "user_parent= got passed a #{employee.class}, which doesn't work." 
     end
   end
 
@@ -78,9 +89,6 @@ class NuCollection < ActiveFedora::Base
       end 
     end
   end
-
-
-  protected
 
     # Depth first(ish) traversal of a graph.  
     def each_depth_first

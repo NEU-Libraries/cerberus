@@ -329,6 +329,11 @@ GEM
       rake
       resque (~> 1.20)
       trollop (~> 1.16)
+    resque_spec (0.14.2)
+      resque (>= 1.19.0)
+      rspec-core (>= 2.5.0)
+      rspec-expectations (>= 2.5.0)
+      rspec-mocks (>= 2.5.0)
     rest-client (1.6.7)
       mime-types (>= 1.16)
     rmagick (2.13.2)
@@ -420,6 +425,7 @@ DEPENDENCIES
   kaminari!
   launchy
   rails (= 3.2.13)
+  resque_spec
   rspec-rails
   rubyzip
   sass-rails (~> 3.2.3)

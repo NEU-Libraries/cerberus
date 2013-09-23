@@ -11,10 +11,8 @@ describe EmployeesController do
     end
 
     it "Renders the show page for authenticated users" do 
-      Resque.inline = true 
       user = FactoryGirl.create(:user)
-      employee = Employee.find_by_nuid(user.nuid) 
-      Resque.inline = false 
+      employee = Employee.create(nuid: user.nuid)  
 
       sign_in user 
 

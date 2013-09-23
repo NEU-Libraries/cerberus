@@ -6,7 +6,7 @@ class User < ActiveRecord::Base
   # Connects this user object to Blacklights Bookmarks. 
   include Blacklight::User
 
-  after_create :link_to_drs
+  after_save :link_to_drs
   before_destroy :remove_drs_object
 
   # Include default devise modules. Others available are:
@@ -36,22 +36,15 @@ class User < ActiveRecord::Base
 
   private
     def link_to_drs
-      #We'll be getting these details from shib hopefully. Placeholders there for now.
-      new_employee = Employee.new({ nuid: self.nuid, name: "Jane Doe", department: "localhost:3000/nu_collections/neu:1" })
-      new_employee.save!
+      if !Employee.exists_by_nuid?(self.nuid)
+        Sufia.queue.push(EmployeeCreateJob.new(self.nuid))
+      end
     end
 
     def remove_drs_object
-      queryResult = ActiveFedora::SolrService.query("active_fedora_model_ssi:Employee AND nuid_tesim:'#{self.nuid}'", :rows=>999)
-
-      if queryResult.count > 1
-        #This shouldn't happen, there should be a one to one relationship
-        logger.warn "Multiple Employee objects for #{self.nuid}"
-      elsif queryResult == 1
-        doc = SolrDocument.new(queryResult.first)
-        neuid = doc.id
-        employeeRecord = Employee.find(doc.id)
-        employeeRecord.destroy
+      if Employee.exists_by_nuid?(self.nuid)
+        object = Employee.find_by_nuid(self.nuid)
+        object.destroy
       end
     end
 end

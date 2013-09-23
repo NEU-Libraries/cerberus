@@ -1,10 +1,13 @@
 class Employee < ActiveFedora::Base
   include ActiveModel::MassAssignmentSecurity
+  include ActiveModel::Validations
 
   attr_accessible :nuid, :name, :department
-  attr_protected :identifier
+  attr_accessor   :building
+  attr_protected  :identifier
 
-  after_create :generate_child_folders
+  validate :nuid_unique
+
   after_destroy :purge_personal_graph
 
   has_metadata name: 'details', type: DrsEmployeeDatastream
@@ -17,8 +20,41 @@ class Employee < ActiveFedora::Base
   end 
 
   def self.find_by_nuid(nuid) 
-    query_result = ActiveFedora::SolrService.query("active_fedora_model_ssi:Employee AND nuid_tesim:'#{nuid}'", :rows=>999)
-    Employee.find(query_result.first["id"])
+    escaped_param = ActiveFedora::SolrService.escape_uri_for_query(nuid)
+    query_result = ActiveFedora::SolrService.query("active_fedora_model_ssi:Employee AND nuid_tesim:(#{escaped_param})", :rows=>999)
+    if query_result.length == 0 
+      raise NoSuchNuidError.new(nuid)
+    elsif query_result.length > 1 
+      all_pids = query_result.map { |r| r["id"] } 
+      raise MultipleMatchError.new(all_pids, nuid) 
+    else
+      Employee.safe_employee_lookup(query_result.first["id"]) 
+    end
+   end
+
+   def self.exists_by_nuid?(nuid) 
+    begin 
+      self.find_by_nuid(nuid)
+      return true  
+    rescue Employee::NoSuchNuidError 
+      return false 
+    end
+  end
+
+  def building=(val) 
+    self.employee_is_building if val 
+  end
+
+  def employee_is_building
+    self.details.employee_is_building 
+  end
+
+  def employee_is_complete
+    self.details.employee_is_complete 
+  end
+
+  def is_building?
+    self.details.is_building? 
   end
 
   def name=(string)
@@ -69,17 +105,64 @@ class Employee < ActiveFedora::Base
     return self.folders.select { |f| f.personal_folder_type == 'miscellany' && f.parent.pid == self.root_folder.pid } 
   end
 
-  private 
+  private
+
+    def self.safe_employee_lookup(id, retries=0)
+      lookup = Employee.find(id)
+      if !lookup.is_building?
+        return lookup 
+      elsif retries < 10
+        puts "retry #{retries}"
+        sleep 5
+        safe_employee_lookup(id, retries + 1) 
+      else
+        raise EmployeeWontStopBuildingError.new(self.id)
+      end
+    end
 
     def find_by_folder_type(string) 
       return self.folders.find{ |f| f.personal_folder_type == string } 
     end
 
     def generate_child_folders
-      Sufia.queue.push(GenerateUserFoldersJob.new(self.id, self.nuid, self.name))  
+      fresh_lookup = Employee.find_by_nuid(self.nuid)
+      if fresh_lookup.folders.empty?
+        Sufia.queue.push(GenerateUserFoldersJob.new(self.id, self.nuid, self.name))
+      end  
     end
 
     def purge_personal_graph
-      self.root_folder.recursive_delete
+      self.root_folder.recursive_delete if !self.folders.empty?
+    end
+
+    def nuid_unique 
+      if Employee.exists_by_nuid? self.nuid 
+        errors.add(:nuid, "This nuid is already in use") 
+      end
+    end
+
+    class NoSuchNuidError < StandardError
+      attr_accessor :nuid 
+      def initialize(nuid)
+        self.nuid = nuid 
+        super("No Employee object with nuid #{self.nuid} could be found in the graph.") 
+      end
+    end
+
+    class MultipleMatchError < StandardError 
+      attr_accessor :arry, :nuid 
+      def initialize(array_of_pids, nuid) 
+        self.arry = array_of_pids 
+        self.nuid = nuid 
+        super("The following Employees all have nuid = #{self.nuid} (that's bad): #{arry}")
+      end
+    end
+
+    class EmployeeWontStopBuildingError < StandardError 
+      attr_accessor :nuid 
+      def initialize(nuid) 
+        self.nuid = nuid
+        super("Employee object with nuid #{self.nuid} seems to be stuck in progress.") 
+      end
     end
 end
