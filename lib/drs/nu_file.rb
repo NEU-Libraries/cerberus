@@ -3,13 +3,16 @@ module Drs
     extend ActiveSupport::Concern
     include Hydra::ModelMethods
     include Drs::MetadataAssignment
+    include Sufia::GenericFile::Characterization
 
     included do
       has_metadata name: 'DC', type: NortheasternDublinCoreDatastream 
       has_metadata name: 'rightsMetadata', type: ParanoidRightsDatastream
+      has_metadata name: 'properties', type: DrsPropertiesDatastream
       has_file_datastream :name => "content", :type => FileContentDatastream
       
       belongs_to :nu_core_file, :property => :is_part_of, :class_name => 'NuCoreFile'
+      around_save :characterize_if_changed
     end
 
     def self.create_master_content_object(core_file, file, datastream_id, user)
@@ -21,9 +24,9 @@ module Drs
 
       content_object.add_file(file, datastream_id, file.original_filename) 
       content_object.add_relationship(:is_part_of, core_file)
-      content_object.nu_title = file.original_filename 
-      content_object.nu_identifier = content_object.pid
-      content_object.rightsMetadata.permissions({person: user.nuid}, 'edit')
+      content_object.title = file.original_filename 
+      content_object.identifier = content_object.pid
+      content_object.depositor = user.nuid
 
       begin
         content_object.save!
@@ -35,8 +38,6 @@ module Drs
         sleep 0.01
         retry
       end
-
-      puts "Content object PID is #{content_object.pid}" 
     end
 
     def self.virus_check(file)
@@ -72,11 +73,11 @@ module Drs
           return XmlXsltFile.new(pid: pid)
         elsif mime.raw_sub_type == 'xml'
           return XmlEadFile.new(pid: pid)
-        elsif NuFile.matches_msword?(file_name)
+        elsif Drs::NuFile.matches_msword?(file_name)
           return MsWordFile.new(pid: pid)
-        elsif NuFile.matches_msexcel?(file_name) 
+        elsif Drs::NuFile.matches_msexcel?(file_name) 
           return MsExceltFile.new(pid: pid)
-        elsif NuFile.matches_msppt?(file_name) 
+        elsif Drs::NuFile.matches_msppt?(file_name) 
           return MspowerpointFile.new(pid: pid) 
         else
           raise "#{file.original_filename} cannot be processed." 
