@@ -11,7 +11,7 @@ module Drs
       has_metadata name: 'properties', type: DrsPropertiesDatastream
       has_file_datastream :name => "content", :type => FileContentDatastream
       
-      belongs_to :nu_core_file, :property => :is_part_of, :class_name => 'NuCoreFile'
+      belongs_to :core_record, :property => :is_part_of, :class_name => 'NuCoreFile'
       around_save :characterize_if_changed
     end
 
@@ -23,7 +23,7 @@ module Drs
       content_object = NuFile.instantiate_appropriate_content_object(file)
 
       content_object.add_file(file, datastream_id, file.original_filename) 
-      content_object.add_relationship(:is_part_of, core_file)
+      content_object.core_record = core_file
       content_object.title = file.original_filename 
       content_object.identifier = content_object.pid
       content_object.depositor = user.nuid
