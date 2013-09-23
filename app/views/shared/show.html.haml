@@ -1,0 +1,27 @@
+- if @set.parent
+  %ul.breadcrumb 
+    - breadcrumb_to_root(@set).each do |breadcrumb| 
+      =breadcrumb 
+
+%h2.page-header= @set.title 
+
+- if @set.description.length > 0 
+  .well
+    %h4 Description
+    %p
+      = @set.description
+
+= render partial: 'show_collections'
+
+%p Actions:
+
+= render_create_collection_button(@set)
+
+= render partial: 'show_files', locals: { collection: @set }
+
+
+%div#add_compilation_form{ style: 'display:none' } 
+
+%p Actions:
+
+= render_upload_files_button(@set)
