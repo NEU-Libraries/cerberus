@@ -6,7 +6,7 @@ class Employee < ActiveFedora::Base
   attr_accessor   :building
   attr_protected  :identifier
 
-  validate :nuid_unique
+  validate :nuid_unique, on: :create
 
   after_destroy :purge_personal_graph
 
@@ -33,12 +33,13 @@ class Employee < ActiveFedora::Base
    end
 
    def self.exists_by_nuid?(nuid) 
-    begin 
-      self.find_by_nuid(nuid)
-      return true  
-    rescue Employee::NoSuchNuidError 
-      return false 
+    Employee.all.each do |e| 
+      if e.nuid == nuid 
+        return true 
+      end
     end
+
+    return false 
   end
 
   def building=(val) 
@@ -111,12 +112,12 @@ class Employee < ActiveFedora::Base
       lookup = Employee.find(id)
       if !lookup.is_building?
         return lookup 
-      elsif retries < 10
+      elsif retries < 3
         puts "retry #{retries}"
-        sleep 5
+        sleep 3
         safe_employee_lookup(id, retries + 1) 
       else
-        raise EmployeeWontStopBuildingError.new(self.id)
+        raise EmployeeWontStopBuildingError.new(id)
       end
     end
 
@@ -137,7 +138,7 @@ class Employee < ActiveFedora::Base
 
     def nuid_unique 
       if Employee.exists_by_nuid? self.nuid 
-        errors.add(:nuid, "This nuid is already in use") 
+        errors.add(:nuid, "#{self.nuid} is already in use as an Employee object NUID")   
       end
     end
 
