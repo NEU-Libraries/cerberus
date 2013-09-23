@@ -11,9 +11,9 @@ gem 'blacklight'
 gem 'hydra-head'
 
 #gem 'sufia', :path => '../sufia'
-gem 'sufia', github: 'nu-lts/nu-sufia', :branch => 'develop'
-gem 'kaminari', github: 'harai/kaminari', branch: 'route_prefix_prototype'  # required to handle pagination properly in dashboard. See https://github.com/amatsuda/kaminari/pull/322
-gem 'rubyzip', :require => 'zip/zip' 
+gem 'sufia', :git => 'https://github.com/nu-lts/nu-sufia.git', :branch => 'develop'
+gem 'kaminari', :git => 'https://github.com/harai/kaminari.git', :branch => 'route_prefix_prototype'  # required to handle pagination properly in dashboard. See https://github.com/amatsuda/kaminari/pull/322
+gem 'rubyzip' 
 
 gem 'jettywrapper'
 
@@ -27,8 +27,9 @@ gem 'haml'
 group :assets do
   gem 'sass-rails',   '~> 3.2.3'
   gem 'coffee-rails', '~> 3.2.1'
-  #gem 'modernizr-rails'
+  
   gem 'compass-rails'
+
 
   # See https://github.com/sstephenson/execjs#readme for more supported runtimes
   # gem 'therubyracer', :platforms => :ruby
@@ -44,9 +45,14 @@ gem "devise-guests", "~> 0.3"
 
 
 group :development, :test do
+  gem 'guard-livereload'
   gem "rspec-rails"
   gem "capybara" 
   gem "launchy" 
   gem "jettywrapper"
-  gem "factory_girl_rails" 
+  gem "factory_girl_rails"
+end
+
+group :test do 
+  gem "resque_spec" 
 end

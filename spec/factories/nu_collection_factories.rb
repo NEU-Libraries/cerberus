@@ -56,6 +56,10 @@ FactoryGirl.define do
                       'permissions1' => {'identity_type' => 'person', 'identity' => 'billsfriend@example.com', 'permission_type' => 'read' }}}
     end
 
+    trait :is_private do 
+      mass_permissions 'private' 
+    end
+
     factory :valid_not_embargoed do 
       with_keywords 
       not_embargoed 
@@ -72,11 +76,20 @@ FactoryGirl.define do
           description "Bills new collection" 
           owned_by_bill
         end
+
+        factory :bills_private_collection do 
+          title "Bills Secret Collection" 
+          description "Bills Super Secret Collection"
+          is_private 
+          owned_by_bill 
+        end
     end
 
     factory :root_collection do 
       title "Root Collection"
-      assigned_identifier  
+      assigned_identifier
+      public_read
+      owned_by_bill
     end
   end
 end

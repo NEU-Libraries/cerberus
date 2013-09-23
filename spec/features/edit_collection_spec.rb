@@ -3,8 +3,8 @@ require 'spec_helper'
 feature "Editing collections" do 
   before :all do 
     @root = FactoryGirl.create(:root_collection)
+    @user = FactoryGirl.create(:bill)
     @collection = FactoryGirl.create(:valid_owned_by_bill)
-    @user = FactoryGirl.create(:bill) 
   end
 
   # Assign reused lookup code to clean up test appearance a bit. 
@@ -15,14 +15,20 @@ feature "Editing collections" do
   let(:perms) { page.all('div.permission') }
   let(:first_perm) { page.all('div.permission').first }    
 
+  Capybara.save_and_open_page_path = 'tmp/test_out'
+
   scenario "Collection data preloads correctly in edit screen" do 
     features_sign_in @user 
 
+    save_page
+
     visit edit_nu_collection_path(@collection)
 
+    save_page
+
     #Verify data prefills correctly
-    find_field('Title:').value.should == 'Bills Collection'
-    find_field('Description:').value.should == 'Bills new collection' 
+    find_field('Title *').value.should == 'Bills Collection'
+    find_field('Description *').value.should == 'Bills new collection' 
     find_field('Date of Issuance').value.should == Date.yesterday.to_s 
 
     # Personal creator names 

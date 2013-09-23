@@ -1,28 +1,25 @@
-class NuCollection < ActiveFedora::Base
-  include Hydra::ModelMethods
-  include Hydra::ModelMixins::CommonMetadata  
-  include Hydra::ModelMixins::RightsMetadata
+class NuCollection < ActiveFedora::Base 
   include ActiveModel::MassAssignmentSecurity
-  include NuModelHelper
-  include ModsSetterHelpers
+  include Hydra::ModelMixins::RightsMetadata
+  include Drs::Rights::MassPermissions
+  include Drs::Rights::Embargoable
+  include Drs::Rights::InheritedRestrictions
+  include Drs::MetadataAssignment
 
-  attr_accessible :title, :description, :date_of_issue, :keywords, :parent, :mass_permissions 
-  attr_accessible :corporate_creators, :personal_creators, :embargo_release_date
+  attr_accessible :title, :description, :date_of_issue, :keywords, :parent 
+  attr_accessible :corporate_creators, :personal_creators, :personal_folder_type
 
   attr_protected :identifier 
 
   has_metadata name: 'DC', type: NortheasternDublinCoreDatastream 
   has_metadata name: 'rightsMetadata', type: ParanoidRightsDatastream
   has_metadata name: 'properties', type: DrsPropertiesDatastream
-  has_metadata name: 'mods', type: NuModsDatastream
-
-  delegate_to :DC, [:nu_title, :nu_description, :nu_identifier]
-  # delegate_to :mods, [:mods_title, :mods_abstract, :mods_identifier, :mods_subject, :mods_date_issued] 
-  delegate_to :properties, [:depositor]  
+  has_metadata name: 'mods', type: NuModsDatastream 
 
   has_many :child_files, property: :is_member_of, :class_name => "NuCoreFile"
   has_many :child_collections, property: :is_member_of, :class_name => "NuCollection"
-  belongs_to :parent, property: :is_member_of, :class_name => "NuCollection" 
+  belongs_to :parent, property: :is_member_of, :class_name => "NuCollection"
+  belongs_to :user_parent, property: :is_member_of, :class_name => "Employee" 
 
   # Return all collections that this user can read
   def self.find_all_viewable(user) 
@@ -31,9 +28,30 @@ class NuCollection < ActiveFedora::Base
     return filtered 
   end
 
+  # Delete all files/collections for which this item is root 
+  def recursive_delete
+    files = all_descendent_files 
+    collections = all_descendent_collections
+
+    # Need to look it up again before you try to destroy it.
+    # Is mystery. 
+    files.each do |f|
+      x = NuCoreFile.find(f.pid) if NuCoreFile.exists?(f.pid) 
+      x.destroy
+    end
+
+    collections.each do |c| 
+      x = NuCollection.find(c.pid) if NuCollection.exists?(c.pid) 
+      x.destroy 
+    end
+  end
+
+
   # Override parent= so that the string passed by the creation form can be used. 
   def parent=(collection_id)
-    if collection_id.instance_of?(String) 
+    if collection_id.nil? 
+      return true #Controller level validations are used to ensure that end users cannot do this.  
+    elsif collection_id.instance_of?(String) 
       self.add_relationship(:is_member_of, NuCollection.find(collection_id))
     elsif collection_id.instance_of?(NuCollection)
       self.add_relationship(:is_member_of, collection_id) 
@@ -42,62 +60,19 @@ class NuCollection < ActiveFedora::Base
     end
   end
 
-  def depositor 
-    return self.properties.depositor.first 
-  end
-
-  def parent
-    if self.relationships(:is_member_of).any?
-      NuCollection.find(self.relationships(:is_member_of).first.partition('/').last)
+  # Override user_parent= so that the string passed by the creation form can be used. 
+  def user_parent=(employee) 
+    if employee.instance_of?(String) 
+      self.add_relationship(:is_member_of, Employee.find_by_nuid(employee)) 
+    elsif employee.instance_of? Employee 
+      self.add_relationship(:is_member_of, employee) 
     else
-      nil
+      raise "user_parent= got passed a #{employee.class}, which doesn't work." 
     end
-  end
-
-  def embargo_release_date=(string) 
-    self.rightsMetadata.embargo_release_date = string
-  end
-
-  def embargo_release_date 
-    rightsMetadata.embargo_release_date 
   end
 
   def permissions=(hash)
     self.set_permissions_from_new_form(hash) 
-  end
-
-  # Might need to be broken into a RightsMetadata module 
-  def mass_permissions=(value) 
-    if value == 'public' 
-      self.rightsMetadata.permissions({group: 'registered'}, 'none') 
-      self.rightsMetadata.permissions({group: 'public'}, 'read') 
-    elsif value == 'registered'
-      self.rightsMetadata.permissions({group: 'public'}, 'none')  
-      self.rightsMetadata.permissions({group: 'registered'}, 'read') 
-    elsif value == 'private' 
-      self.rightsMetadata.permissions({group: 'public'}, 'none') 
-      self.rightsMetadata.permissions({group: 'registered'}, 'none') 
-    end
-  end
-
-  def mass_permissions
-    if self.rightsMetadata.permissions({group: 'public'}) == 'read' 
-      return 'public' 
-    elsif self.rightsMetadata.permissions({group: 'registered'}) == 'read' 
-      return 'registered' 
-    else 
-      return 'private' 
-    end
-  end
-
-  # Since we need access to the depositor metadata field, we handle this
-  # at this level. 
-  def embargo_in_effect?(user)
-    if user.nil?
-      return self.rightsMetadata.under_embargo?
-    else
-      return self.rightsMetadata.under_embargo? && !(self.depositor == user.nuid)
-    end
   end
 
   # Accepts a hash of the following form:
@@ -114,4 +89,32 @@ class NuCollection < ActiveFedora::Base
       end 
     end
   end
+
+    # Depth first(ish) traversal of a graph.  
+    def each_depth_first
+      self.child_collections.each do |child|
+        child.each_depth_first do |c|
+          yield c
+        end
+      end
+
+      yield self
+    end
+
+    # Return every descendent collection of this collection
+    def all_descendent_collections
+      result = [] 
+      each_depth_first do |child|
+        result << child 
+      end
+      return result 
+    end
+
+    def all_descendent_files 
+      result = [] 
+      each_depth_first do |child| 
+        result += child.child_files 
+      end
+      return result
+    end
 end

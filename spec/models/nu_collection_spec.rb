@@ -4,120 +4,8 @@ describe NuCollection do
 
   let(:collection) { NuCollection.new } 
 
-  subject { collection } 
-
-  it { should respond_to(:title=) } 
-  it { should respond_to(:title) } 
-  it { should respond_to(:parent=) } 
-  it { should respond_to(:parent) } 
-  it { should respond_to(:identifier=) } 
-  it { should respond_to(:identifier) } 
-  it { should respond_to(:description=) }
-  it { should respond_to(:description) }  
-  it { should respond_to(:date_of_issue=) } 
-  it { should respond_to(:date_of_issue) } 
-  it { should respond_to(:keywords=) } 
-  it { should respond_to(:keywords) } 
-  it { should respond_to(:corporate_creators=) } 
-  it { should respond_to(:corporate_creators) } 
-  it { should respond_to(:personal_creators=) } 
-  it { should respond_to(:personal_creators) } 
-  it { should respond_to(:embargo_release_date=) } 
-  it { should respond_to(:embargo_release_date) } 
-  it { should respond_to(:permissions=) } 
-  it { should respond_to(:permissions) } 
-  it { should respond_to(:mass_permissions=) } 
-  it { should respond_to(:mass_permissions) } 
-  it { should respond_to(:embargo_in_effect?) } 
-  it { should respond_to(:set_permissions_from_new_form) }
-
   describe "Custom setters and getters" do
     let(:c) { NuCollection.new } 
-
-    it "Sets and fetches the proper title" do 
-      c.title = "My Title" 
-      c.title.should == "My Title" 
-    end
-
-    it "Sets and fetches the proper identifier" do 
-      c.identifier = "neu:whatever" 
-      c.identifier.should == "neu:whatever" 
-    end
-
-    it "Sets and fetches the proper description" do 
-      c.description = "My dope description." 
-      c.description.should == "My dope description." 
-    end
-
-    it "Sets and fetches the proper date of issue" do 
-      c.date_of_issue = Date.yesterday.to_s 
-      c.date_of_issue.should == Date.yesterday.to_s 
-    end
-
-    it "Sets and fetches the proper keyword array" do 
-      c.keywords = ["one", "two", "three"] 
-      c.keywords.should == ["one", "two", "three"] 
-    end
-
-    it "Sets and fetches the proper corporate creators" do 
-      c.corporate_creators = ["c_one", "c_two", "c_three"] 
-      c.corporate_creators.should == ["c_one", "c_two", "c_three"] 
-    end
-
-    it "Sets and fetches the proper personal creators" do 
-      fns = ["Will", "Bill"]
-      lns = ["Jackson", "Backson"]
-
-      c.personal_creators = { 'creator_first_names' => fns, 'creator_last_names' => lns }
-      c.personal_creators.should == [{ first: 'Will', last: 'Jackson' }, { first: 'Bill', last: 'Backson' }] 
-    end
-
-    it "Sets and fetches the proper embargo date" do 
-      c.embargo_release_date = Date.tomorrow.to_s 
-      c.embargo_release_date.should == Date.tomorrow.to_s 
-    end
-
-    it "Sets the 'public' mass permission correctly" do 
-      c.mass_permissions = 'public'
-      c.mass_permissions.should == 'public' 
-    end
-
-    it "Sets the 'registered' mass permission correctly" do 
-      c.mass_permissions = 'registered' 
-      c.mass_permissions.should == 'registered' 
-    end
-
-    it "Gets rid of public mass perm when registered is set" do 
-      c.mass_permissions = 'public' 
-      c.mass_permissions.should == 'public' 
-
-      c.mass_permissions = 'registered' 
-      c.mass_permissions.should == 'registered' 
-      c.rightsMetadata.permissions({group: 'public'}).should == 'none' 
-    end
-
-    it "Gets rid of registered mass perm when public is set" do 
-      c.mass_permissions = 'registered' 
-      c.mass_permissions.should == 'registered' 
-
-      c.mass_permissions = 'public' 
-      c.mass_permissions.should == 'public' 
-      c.rightsMetadata.permissions({group: 'registered'}).should == 'none' 
-    end 
-
-    it "Sets the 'private' mass permission correctly" do 
-      c.mass_permissions = 'private' 
-      c.mass_permissions.should == 'private' 
-    end
-
-    it "Blows away prior perms when 'private' is set" do 
-      c.mass_permissions = 'public' 
-      c.mass_permissions.should == 'public' 
-
-      c.mass_permissions = 'private'
-      c.mass_permissions.should == 'private' 
-      c.rightsMetadata.permissions({group: 'public'}).should == 'none'  
-    end
 
     it "Sets custom permissions correctly" do 
       permissions = {'permissions0' => {'identity_type' => 'person', 'identity' => 'Will', 'permission_type' => 'edit'}, 
@@ -154,39 +42,48 @@ describe NuCollection do
     end
   end
 
-  describe "Embargo Checks" do
-    let(:embargoed_collection) { NuCollection.new }
-    let(:no_embargo) { NuCollection.new }   
-    let(:bill) { FactoryGirl.create(:bill) } 
-    let(:bo) { FactoryGirl.create(:bo) } 
+  describe "User parent" do 
+    let(:employee) { FactoryGirl.create(:employee) }
 
-    before do 
-      embargoed_collection.embargo_release_date = Date.tomorrow
-      embargoed_collection.depositor = bill.nuid  
+    it "can be set via nuid" do 
+      collection.user_parent = employee.nuid 
+      collection.user_parent.pid.should == employee.pid 
     end
 
-    it "Embargoed collection is embargoed for bo" do 
-      embargoed_collection.embargo_in_effect?(bo).should be true 
+    it "CANNOT be set by pid" do 
+      expect{collection.user_parent = employee.pid}.to raise_error 
     end
 
-    it "Embargoed collection is not embargoed for the depositor, bill" do 
-      embargoed_collection.embargo_in_effect?(bill).should be false 
+    it "can be set by passing the entire object" do 
+      collection.user_parent = employee 
+      collection.user_parent.pid.should == employee.pid 
+    end
+  end 
+
+
+  describe "Recursive delete" do 
+    before(:each) do
+      ActiveFedora::Base.find(:all).each do |file| 
+        file.destroy 
+      end
+
+      @root = NuCollection.create(title: "Root") 
+      @child_one = NuCollection.create(title: "Child One", parent: @root) 
+      @c1_gf = NuCoreFile.create(title: "Core File One", parent: @child_one, depositor: "nobody@nobody.com") 
+      @c2_gf = NuCoreFile.create(title: "Core File Two", parent: @child_one, depositor: "nobody@nobody.com")  
+      @child_two = NuCollection.create(title: "Child Two", parent: @root) 
+      @grandchild = NuCollection.create(title: "Grandchild", parent: @child_two) 
+      @great_grandchild = NuCollection.create(title: "Great Grandchild", parent: @grandchild) 
+      @gg_gf = NuCoreFile.create(title: "GG CF", parent: @great_grandchild, depositor: "nobody@nobody.com")
+      @pids = [ @root.pid, @child_one.pid, @c1_gf.pid, @c2_gf.pid, @child_two.pid, @grandchild.pid, @great_grandchild.pid,
+                @gg_gf.pid] 
     end
 
-    it "Embargoed collection is embargoed for the general public" do 
-      embargoed_collection.embargo_in_effect?(nil).should be true 
-    end
+    it "deletes the item its called on and all descendent files and collections." do 
+      @root.recursive_delete 
 
-    it "Embargoless collection is not embargoed for bo" do 
-      no_embargo.embargo_in_effect?(bo).should be false 
-    end
-
-    it "Embargoless collection is not embargoed for the depositor, bill" do 
-      no_embargo.embargo_in_effect?(bill).should be false 
-    end
-
-    it "Embargoless collection is not embargoed for the general public" do 
-      no_embargo.embargo_in_effect?(bo).should be false 
+      NuCollection.find(:all).length.should == 0 
+      NuCoreFile.find(:all).length.should == 0 
     end
   end
 

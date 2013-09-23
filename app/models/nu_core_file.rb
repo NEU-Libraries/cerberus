@@ -1,15 +1,16 @@
 class NuCoreFile < ActiveFedora::Base
   include Sufia::GenericFile
-  include NuModelHelper
-  include ModsSetterHelpers
+  include Drs::Rights::MassPermissions
+  include Drs::Rights::Embargoable 
+  include Drs::Rights::InheritedRestrictions
+  include Drs::MetadataAssignment
+  include Drs::NuCoreFile::Export
 
   has_metadata name: 'DC', type: NortheasternDublinCoreDatastream
   has_metadata name: 'properties', type: DrsPropertiesDatastream
   has_metadata name: 'mods', type: NuModsDatastream
 
   belongs_to :parent, :property => :is_member_of, :class_name => 'NuCollection'
-
-  delegate_to :DC, [:nu_title, :nu_type, :nu_identifier, :nu_description]
 
   def self.create_metadata(nu_core_file, user, collection_id)
     nu_core_file.apply_depositor_metadata(user.user_key)
@@ -56,5 +57,9 @@ class NuCoreFile < ActiveFedora::Base
   def tag_as_in_progress 
     self.properties.tag_as_in_progress 
   end
+
+  def persistent_url
+    "#{Rails.configuration.persistent_hostpath}#{noid}"
+  end  
 end 
 

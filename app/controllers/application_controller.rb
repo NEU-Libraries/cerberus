@@ -11,9 +11,11 @@ class ApplicationController < ActionController::Base
 
   protect_from_forgery
 
-  def render_403
-    respond_to do |format| 
-      format.html { render :file => "#{Rails.root}/public/403.html", layout: false, status: '403' } 
-    end
+  def render_403 
+    render :file => "#{Rails.root}/public/403", formats: [:html], layout: false, status: '403' 
+  end
+
+  def mint_unique_pid 
+    Sufia::Noid.namespaceize(Sufia::IdService.mint)
   end
 end

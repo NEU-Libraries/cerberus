@@ -20,7 +20,7 @@ module NuCollectionsHelper
       if breadcrumb.empty? 
         breadcrumb << content_tag(:li, collection.title, class: 'active')  
       end
-      breadcrumb << link_to(collection.parent.title, nu_collection_path(collection.parent.identifier))
+      breadcrumb << content_tag(:li, link_to(collection.parent.title, nu_collection_path(collection.parent.identifier)))
       breadcrumb_to_root(collection.parent, breadcrumb)  
     end
   end

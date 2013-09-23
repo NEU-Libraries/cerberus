@@ -97,6 +97,7 @@ describe CompilationsController do
       get :show, id: compilation.pid 
 
       response.status.should == 403
+      assigns(:compilation).should be nil
     end 
   end
 
@@ -117,13 +118,15 @@ describe CompilationsController do
 
       get :edit, id: compilation.pid 
 
-      response.status.should == 403 
+      response.status.should == 403
+      assigns(:compilation).should be nil  
     end
 
     it "Shows the edit template to the depositing user" do 
       get :edit, id: compilation.pid 
 
-      expect(response).to render_template('compilations/edit') 
+      expect(response).to render_template('compilations/edit')
+      assigns(:compilation).instance_of?(Compilation).should be true
     end
   end
 end
