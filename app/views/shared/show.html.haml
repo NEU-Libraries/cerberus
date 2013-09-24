@@ -11,13 +11,13 @@
     %p
       = @set.description
 
-= render partial: 'show_collections'
+= render partial: 'shared/show_sets'
 
 %p Actions:
 
 = render_create_collection_button(@set)
 
-= render partial: 'show_files', locals: { collection: @set }
+= render partial: 'shared/show_files', locals: { collection: @set }
 
 
 %div#add_compilation_form{ style: 'display:none' } 

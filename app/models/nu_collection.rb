@@ -18,8 +18,10 @@ class NuCollection < ActiveFedora::Base
 
   has_many :child_files, property: :is_member_of, :class_name => "NuCoreFile"
   has_many :child_collections, property: :is_member_of, :class_name => "NuCollection"
+
   belongs_to :parent, property: :is_member_of, :class_name => "NuCollection"
   belongs_to :user_parent, property: :is_member_of, :class_name => "Employee" 
+  belongs_to :department, property: :is_member_of, :class_name => "Department"
 
   # Return all collections that this user can read
   def self.find_all_viewable(user) 

@@ -82,7 +82,7 @@ module Drs
     config.assets.precompile += ['polyfills/respond/respond.min.js']
 
     # Set a default root collection. 
-    config.root_collection_id = 'neu:1' 
+    config.root_department_id = 'neu:1' 
 
   end
 end

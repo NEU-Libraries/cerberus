@@ -1,0 +1,15 @@
+- if current_user_can_read?(@set)
+  - if @set.instance_of?(Department) 
+    %h3 Departments
+
+    - @set.child_departments.each do |department| 
+      - if current_user_can_read?(department) 
+        %p= link_to(department.title, nu_collection_path(department.identifier))
+
+- if current_user_can_read?(@set)
+  - if @set.instance_of?(NuCollection) 
+    %h3 Collections
+
+    - @set.child_collections.each do |collection| 
+      - if current_user_can_read?(collection) 
+        %p= link_to(collection.title, nu_collection_path(collection.identifier))

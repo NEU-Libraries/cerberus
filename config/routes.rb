@@ -6,12 +6,16 @@ Drs::Application.routes.draw do
   Hydra::BatchEdit.add_routes(self)
 
   resources :nu_collections, except: [:index] 
-  get "/nu_collections" => 'nu_collections#show', defaults: { id: "#{Rails.configuration.root_collection_id}" } 
+  get "/nu_collections" => 'departments#show', defaults: { id: "#{Rails.configuration.root_department_id}" } 
 
+  resources :departments, except: [:index]
+  get "/departments" => 'departments#show', defaults: { id: "#{Rails.configuration.root_department_id}" }
+
+  resources :compilations
   get "/compilations/:id/download" => 'compilations#show_download', as: 'prepare_download'
   get "/compilations/:id/ping" => 'compilations#ping_download', as: 'ping_download'  
   get "/compilations/:id/trigger_download" => 'compilations#download', as: 'trigger_download'
-  resources :compilations
+  
   match "/compilations/:id/:entry_id" => 'compilations#delete_file', via: 'delete', as: 'delete_entry' 
   match "/compilations/:id/:entry_id" => 'compilations#add_file', via: 'post', as: 'add_entry' 
 

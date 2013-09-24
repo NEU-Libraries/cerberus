@@ -17,6 +17,7 @@ class NuCollectionsController < ApplicationController
 
   def new
     @set = NuCollection.new(parent: params[:parent])
+    render :template => 'shared/new'
   end
 
   def create
@@ -36,15 +37,19 @@ class NuCollectionsController < ApplicationController
     else
       flash.now[:error] = "Something went wrong"
       redirect_to new_set_path(parent: params[:parent]) and return 
-    end 
+    end
   end
 
   def show  
-    @set = NuCollection.find(params[:id]) 
+    @set = NuCollection.find(params[:id])
+
+    render :template => 'shared/show' 
   end
 
   def edit
-    @set = NuCollection.find(params[:id]) 
+    @set = NuCollection.find(params[:id])
+
+    render :template => 'shared/edit' 
   end
 
   def update
@@ -60,12 +65,12 @@ class NuCollectionsController < ApplicationController
 
     def index_redirect
       flash[:error] = "Collections cannot be created without a parent" 
-      redirect_to sets_path and return 
+      redirect_to nu_collection_path and return 
     end
 
     def index_redirect_with_bad_id 
       flash[:error] = "The id you specified does not seem to exist in Fedora." 
-      redirect_to sets_path and return 
+      redirect_to nu_collection_path and return 
     end
 
     # In cases where a personal folder is being created,
