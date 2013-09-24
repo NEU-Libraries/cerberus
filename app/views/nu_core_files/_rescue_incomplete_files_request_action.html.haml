@@ -3,7 +3,7 @@
 
 %ul#all_files
   - file_titles.each do |title|
-    %li= title.first
+    %li= title || "Unnamed File" 
 
 %p Your choices are as follows:
 %ul#actions 
