@@ -55,6 +55,16 @@ module Drs
         self.DC.subject 
       end
 
+      def assign_DC_creators(firsts, lasts, corporate) 
+        if_DC_exists_strict do 
+          self.DC.assign_creators(firsts, lasts, corporate) 
+        end
+      end
+
+      def DC_creators 
+        if_DC_exists_strict { self.DC.creator } 
+      end
+
       def corporate_creators=(array_of_strings) 
         if_mods_exists_strict { self.mods.assign_corporate_names(array_of_strings) } 
       end

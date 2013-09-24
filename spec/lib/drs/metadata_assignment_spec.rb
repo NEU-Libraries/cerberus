@@ -116,6 +116,18 @@ describe "Metadata" do
       end
     end
 
+    describe "of creators to the DC datastream" do 
+      let(:fns) { ["Will", "James", "John"] } 
+      let(:lns) { ["Jackson", "Bond", "Johnson"] } 
+      let(:cns) { ["Org One", "Org Two"] } 
+
+      it "succeeds for objects with a DC datastream" do 
+        compilation.assign_DC_creators(fns, lns, cns) 
+
+        compilation.DC_creators.should =~ ["Will Jackson", "James Bond", "John Johnson", "Org One", "Org Two" ] 
+      end
+    end
+
     describe "of depositor" do 
       let(:user) { User.new(email: 'example@example.com') } 
 
