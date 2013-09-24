@@ -14,7 +14,7 @@ module Drs
       end
 
       def title
-        self.DC.nu_title.first 
+        self.DC.nu_title.first
       end
 
       def identifier=(string) 
@@ -39,7 +39,8 @@ module Drs
 
       def date_of_issue=(string) 
         if_mods_exists { self.mods.mods_date_issued = string }
-        if_DC_exists   { self.DC.date = string }  
+        if_DC_exists   { self.DC.date = string }
+        if_descMetadata_exists { self.descMetadata.date_created = string }   
       end
 
       def date_of_issue
@@ -53,20 +54,6 @@ module Drs
 
       def keywords
         self.DC.subject 
-      end
-
-      def assign_DC_creators(firsts, lasts, corporate) 
-        if_DC_exists_strict do 
-          self.DC.assign_creators(firsts, lasts, corporate) 
-        end
-      end
-
-      def DC_creators 
-        if_DC_exists_strict { self.DC.creator } 
-      end
-
-      def corporate_creators=(array_of_strings) 
-        if_mods_exists_strict { self.mods.assign_corporate_names(array_of_strings) } 
       end
 
       def creators=(hash) 
