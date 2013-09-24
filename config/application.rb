@@ -18,6 +18,7 @@ module Drs
 
     config.persistent_hostpath = "http://drs.northeastern.edu/files/"
 
+    config.autoload_paths += Dir[ Rails.root.join('app', 'models', '**/') ]
     config.autoload_paths += %W(#{config.root}/lib/helpers)
     config.autoload_paths += %W(#{config.root}/lib)
 

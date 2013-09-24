@@ -1,3 +1,3 @@
-class ContentTypes::ImageLowresFile < ActiveFedora::Base
+class ImageLowresFile < ActiveFedora::Base
   include Drs::NuFile
 end
