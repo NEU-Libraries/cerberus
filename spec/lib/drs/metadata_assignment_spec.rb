@@ -58,25 +58,31 @@ describe "Metadata" do
     end
 
     describe "of date issued" do 
-      it "fails for objects with no MODS stream" do 
-        expect { compilation.date_of_issue = "2012-12-12" }.to raise_error 
+      it "works for objects with only a DC datastream" do 
+        compilation.date_of_issue = Date.today.to_s 
+
+        compilation.date_of_issue.should == Date.today.to_s 
       end
 
-      it "succeeds for objects with a MODS stream" do 
-        collection.date_of_issue = "2012-12-12" 
-        collection.date_of_issue.should == "2012-12-12" 
+      it "works for objects with DC and MODS datastreams" do 
+        collection.date_of_issue = Date.today.to_s 
+
+        collection.date_of_issue.should == Date.today.to_s 
       end
     end
 
     describe "of keywords" do
       let(:keywords) { ["one", "two", "three" ] }
 
-      it "fails for objects with no MODS datastream" do 
-        expect {compilation.keywords = keywords }.to raise_error 
+      it "works for objects with only a DC datastream" do 
+        compilation.keywords = keywords 
+
+        compilation.keywords.should == keywords 
       end
 
-      it "succeeds for objects with a MODS datastream" do 
-        core_file.keywords = keywords 
+      it "succeeds for objects with DC and MODS datastream" do 
+        core_file.keywords = keywords
+
         core_file.keywords.should == keywords 
       end
     end

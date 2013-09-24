@@ -38,19 +38,21 @@ module Drs
       end
 
       def date_of_issue=(string) 
-        if_mods_exists_strict { self.mods.mods_date_issued = string } 
+        if_mods_exists { self.mods.mods_date_issued = string }
+        if_DC_exists   { self.DC.date = string }  
       end
 
       def date_of_issue
-        if_mods_exists_strict { self.mods.mods_date_issued.first } 
+        self.DC.date.first  
       end
 
       def keywords=(array_of_strings) 
-        if_mods_exists_strict { self.mods.keywords = array_of_strings } 
+        if_mods_exists { self.mods.keywords = array_of_strings }
+        if_DC_exists   { self.DC.subject = array_of_strings }
       end
 
       def keywords
-        if_mods_exists_strict { self.mods.mods_subject(0).mods_keyword } 
+        self.DC.subject 
       end
 
       def corporate_creators=(array_of_strings) 
