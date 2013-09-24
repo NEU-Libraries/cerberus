@@ -1,10 +1,20 @@
-class EmployeesController < ApplicationController 
-  before_filter :authenticate_user!
+class DepartmentsController < ApplicationController
+  include Drs::ControllerHelpers::EditableObjects 
+  
+  before_filter :authenticate_user!, only: [:new, :edit, :create, :update, :destroy ]
+  #before_filter :can_read?, only: [:show]
+  #before_filter :can_edit?, only: [:edit, :update, :destroy]
+  #before_filter :can_edit_parent?, only: [:new, :create]
 
-  def show
-  end
+  rescue_from NoParentFoundError, with: :index_redirect
+  rescue_from IdNotFoundError, with: :index_redirect_with_bad_id  
 
   def index
+  end
+
+  def show
+    @set = Department.find(params[:id])
+    render :template => 'shared/show'    
   end
 
   def new

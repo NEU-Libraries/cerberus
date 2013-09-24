@@ -8,6 +8,6 @@ class Department < NuCollection
   belongs_to :parent, property: :is_member_of, :class_name => "Department"
 
   def tag_as_NuCollection
-    self.RELS_EXT.add_relationship("hasModel", "info:fedora/afmodel:NuCollection") 
+    self.add_relationship(:has_model, "info:fedora/afmodel:NuCollection") 
   end
 end

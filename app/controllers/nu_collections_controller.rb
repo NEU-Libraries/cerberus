@@ -11,7 +11,6 @@ class NuCollectionsController < ApplicationController
   rescue_from NoParentFoundError, with: :index_redirect
   rescue_from IdNotFoundError, with: :index_redirect_with_bad_id
 
-
   def index
   end
 
@@ -42,7 +41,6 @@ class NuCollectionsController < ApplicationController
 
   def show  
     @set = NuCollection.find(params[:id])
-
     render :template => 'shared/show' 
   end
 
