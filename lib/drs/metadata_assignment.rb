@@ -38,40 +38,62 @@ module Drs
       end
 
       def date_of_issue=(string) 
-        if_mods_exists_strict { self.mods.mods_date_issued = string } 
+        if_mods_exists { self.mods.mods_date_issued = string }
+        if_DC_exists   { self.DC.date = string }  
       end
 
       def date_of_issue
-        if_mods_exists_strict { self.mods.mods_date_issued.first } 
+        self.DC.date.first  
       end
 
       def keywords=(array_of_strings) 
-        if_mods_exists_strict { self.mods.keywords = array_of_strings } 
+        if_mods_exists { self.mods.keywords = array_of_strings }
+        if_DC_exists   { self.DC.subject = array_of_strings }
       end
 
       def keywords
-        if_mods_exists_strict { self.mods.mods_subject(0).mods_keyword } 
+        self.DC.subject 
+      end
+
+      def assign_DC_creators(firsts, lasts, corporate) 
+        if_DC_exists_strict do 
+          self.DC.assign_creators(firsts, lasts, corporate) 
+        end
+      end
+
+      def DC_creators 
+        if_DC_exists_strict { self.DC.creator } 
       end
 
       def corporate_creators=(array_of_strings) 
         if_mods_exists_strict { self.mods.assign_corporate_names(array_of_strings) } 
       end
 
-      def corporate_creators
-        # Eliminates some whitespace that seems to get shoved into these entries.  
-        if_mods_exists_strict { self.mods.corporate_creators } 
+      def creators=(hash) 
+        fns = hash['first_names'] || []
+        lns = hash['last_names'] || []
+        cns = hash['corporate_names'] || []
+
+        if_mods_exists do 
+          self.mods.assign_creator_personal_names(fns, lns) 
+          self.mods.assign_corporate_names(cns) 
+        end
+
+        if_DC_exists { self.DC.assign_creators(fns, lns, cns) } 
       end
 
-      def personal_creators=(hash) 
-        first_names = hash['creator_first_names'] 
-        last_names = hash['creator_last_names'] 
-
-        if_mods_exists_strict { self.mods.assign_creator_personal_names(first_names, last_names)  } 
+      # Assumes you want a type agnostic dump of all creators and therefore uses the DC record 
+      def creators
+        if_DC_exists_strict { self.DC.creator } 
       end
 
       # Should return [{first: "Will", last: "Jackson"}, {first: "next_first", last: "etc"}]
       def personal_creators 
         if_mods_exists_strict { self.mods.personal_creators } 
+      end
+
+      def corporate_creators  
+        if_mods_exists_strict { self.mods.corporate_creators } 
       end
 
       def depositor=(string) 

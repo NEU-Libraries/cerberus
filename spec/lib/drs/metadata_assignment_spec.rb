@@ -58,55 +58,60 @@ describe "Metadata" do
     end
 
     describe "of date issued" do 
-      it "fails for objects with no MODS stream" do 
-        expect { compilation.date_of_issue = "2012-12-12" }.to raise_error 
+      it "works for objects with only a DC datastream" do 
+        compilation.date_of_issue = Date.today.to_s 
+
+        compilation.date_of_issue.should == Date.today.to_s 
       end
 
-      it "succeeds for objects with a MODS stream" do 
-        collection.date_of_issue = "2012-12-12" 
-        collection.date_of_issue.should == "2012-12-12" 
+      it "works for objects with DC and MODS datastreams" do 
+        collection.date_of_issue = Date.today.to_s 
+
+        collection.date_of_issue.should == Date.today.to_s 
       end
     end
 
     describe "of keywords" do
       let(:keywords) { ["one", "two", "three" ] }
 
-      it "fails for objects with no MODS datastream" do 
-        expect {compilation.keywords = keywords }.to raise_error 
+      it "works for objects with only a DC datastream" do 
+        compilation.keywords = keywords 
+
+        compilation.keywords.should == keywords 
       end
 
-      it "succeeds for objects with a MODS datastream" do 
-        core_file.keywords = keywords 
+      it "succeeds for objects with DC and MODS datastream" do 
+        core_file.keywords = keywords
+
         core_file.keywords.should == keywords 
       end
     end
 
-    describe "of corporate creators" do 
-      let(:cc) { ["cone", "ctwo"] } 
+    describe "of creators" do 
+      let(:fns) { ["Will", "James"] } 
+      let(:lns) { ["Jackson", "Bond"] } 
+      let(:cns) { ["Org One", "Org Two"] }
+      let(:hsh) { { 
+                    'first_names' => fns, 
+                    'last_names'  => lns, 
+                    'corporate_names' => cns 
+                } }
 
-      it "fails for objects with no MODS datastream" do 
-        expect { compilation.corporate_creators = cc }.to raise_error
-      end
+      it "succeeds for objects with only a DC datastream" do
+        compilation.creators = hsh 
 
-      it "succeeds for objects with a MODS datastream" do 
-        collection.corporate_creators = cc 
-        collection.corporate_creators.should == cc 
-      end
-    end
+        compilation.creators.should =~ ["Will Jackson", "James Bond", "Org One", "Org Two"] 
+      end 
 
-    describe "of personal creators" do 
-      let(:assignment_hash) do 
-        { 'creator_first_names' => ["Will", "Bill"], 'creator_last_names' => ["Jackson", "Backson"] }
-      end  
+      it "succeeds for objects with DC and MODS datastreams" do 
+        collection.creators = hsh 
 
-      it "fails for objects with no MODS datastream" do 
-        expect { compilation.personal_creators = assignment_hash }.to raise_error 
-      end
+        # Ensure the DC record set correctly
+        collection.creators.should =~ ["Will Jackson", "James Bond", "Org One", "Org Two"]
 
-      it "succeeds for objects with a MODS datastream" do 
-        result_hash = [{first: "Will", last: "Jackson"}, {first: "Bill", last: "Backson"}]
-        core_file.personal_creators = assignment_hash 
-        core_file.personal_creators.should == result_hash 
+        # Ensure the MODS record set correctly 
+        collection.personal_creators.should =~ [{first: "Will", last: "Jackson"}, {first: "James", last: "Bond"}] 
+        collection.corporate_creators.should =~ ["Org One", "Org Two"] 
       end
     end
 

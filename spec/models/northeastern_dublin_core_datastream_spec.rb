@@ -2,37 +2,28 @@ require 'spec_helper'
 
 describe NortheasternDublinCoreDatastream do 
 
-  before do 
-    @ndbc = NortheasternDublinCoreDatastream.new
-  end
+  let(:dublin_core) { NortheasternDublinCoreDatastream.new }
 
-  subject { @ndbc } 
+  describe "Creator assignment" do 
 
-  it { should respond_to(:to_xml) }  
+    let(:fns) { ["Will", "Bill"] } 
+    let(:lns) { ["Jackson", "Backson"] } 
+    let(:cns) { ["Org One", "Org Two"] } 
 
-  describe "Setting fields" do 
-
-    before do 
-      @ndbc.nu_title = "My title" 
-      @ndbc.nu_description = "My description" 
-      @ndbc.nu_type = "My type" 
-      @ndbc.nu_identifier = "My identifier" 
+    it "disallows mismatched personal name arrays" do 
+      expect { dublin_core.assign_creators([], lns, cns) }.to raise_error 
     end
 
-    it "Has the assigned nu_description" do
-      @ndbc.nu_title.first.should == "My title" 
+    it "merges first and last names" do
+      dublin_core.assign_creators(fns, lns, cns) 
+
+      dublin_core.creator.should =~ ["Will Jackson", "Bill Backson", "Org One", "Org Two"] 
     end
 
-    it "Has the assigned description" do 
-      @ndbc.nu_description.first.should == "My description" 
-    end
+    it "eliminates unneeded elements on update" do 
+      dublin_core.assign_creators([], [], ["Org"])
 
-    it "Has the assigned nu_type" do 
-      @ndbc.nu_type.first.should == "My type" 
-    end
-
-    it "Has the assigned nu_identifier" do 
-      @ndbc.nu_identifier.first.should == "My identifier" 
+      dublin_core.creator.should =~ ["Org"] 
     end
   end
 end
