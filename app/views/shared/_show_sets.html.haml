@@ -4,7 +4,7 @@
 
     - @set.child_departments.each do |department| 
       - if current_user_can_read?(department) 
-        %p= link_to(department.title, nu_collection_path(department.identifier))
+        %p= link_to(department.title, department_path(department.identifier))
 
 - if current_user_can_read?(@set)
   %h3 Collections
