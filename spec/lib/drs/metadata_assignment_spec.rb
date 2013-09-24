@@ -87,44 +87,31 @@ describe "Metadata" do
       end
     end
 
-    describe "of corporate creators" do 
-      let(:cc) { ["cone", "ctwo"] } 
+    describe "of creators" do 
+      let(:fns) { ["Will", "James"] } 
+      let(:lns) { ["Jackson", "Bond"] } 
+      let(:cns) { ["Org One", "Org Two"] }
+      let(:hsh) { { 
+                    'first_names' => fns, 
+                    'last_names'  => lns, 
+                    'corporate_names' => cns 
+                } }
 
-      it "fails for objects with no MODS datastream" do 
-        expect { compilation.corporate_creators = cc }.to raise_error
-      end
+      it "succeeds for objects with only a DC datastream" do
+        compilation.creators = hsh 
 
-      it "succeeds for objects with a MODS datastream" do 
-        collection.corporate_creators = cc 
-        collection.corporate_creators.should == cc 
-      end
-    end
+        compilation.creators.should =~ ["Will Jackson", "James Bond", "Org One", "Org Two"] 
+      end 
 
-    describe "of personal creators" do 
-      let(:assignment_hash) do 
-        { 'creator_first_names' => ["Will", "Bill"], 'creator_last_names' => ["Jackson", "Backson"] }
-      end  
+      it "succeeds for objects with DC and MODS datastreams" do 
+        collection.creators = hsh 
 
-      it "fails for objects with no MODS datastream" do 
-        expect { compilation.personal_creators = assignment_hash }.to raise_error 
-      end
+        # Ensure the DC record set correctly
+        collection.creators.should =~ ["Will Jackson", "James Bond", "Org One", "Org Two"]
 
-      it "succeeds for objects with a MODS datastream" do 
-        result_hash = [{first: "Will", last: "Jackson"}, {first: "Bill", last: "Backson"}]
-        core_file.personal_creators = assignment_hash 
-        core_file.personal_creators.should == result_hash 
-      end
-    end
-
-    describe "of creators to the DC datastream" do 
-      let(:fns) { ["Will", "James", "John"] } 
-      let(:lns) { ["Jackson", "Bond", "Johnson"] } 
-      let(:cns) { ["Org One", "Org Two"] } 
-
-      it "succeeds for objects with a DC datastream" do 
-        compilation.assign_DC_creators(fns, lns, cns) 
-
-        compilation.DC_creators.should =~ ["Will Jackson", "James Bond", "John Johnson", "Org One", "Org Two" ] 
+        # Ensure the MODS record set correctly 
+        collection.personal_creators.should =~ [{first: "Will", last: "Jackson"}, {first: "James", last: "Bond"}] 
+        collection.corporate_creators.should =~ ["Org One", "Org Two"] 
       end
     end
 

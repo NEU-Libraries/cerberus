@@ -21,10 +21,6 @@ class NuCollectionsController < ApplicationController
 
   def create
     @nu_collection = NuCollection.new(params[:nu_collection].merge(pid: mint_unique_pid))
-    @nu_collection.assign_DC_creators(params[:nu_collection][:personal_creators][:creator_first_names],
-                                      params[:nu_collection][:personal_creators][:creator_last_names],
-                                      params[:nu_collection][:corporate_creators])
-
     if params[:nu_collection][:user_parent].present?
       @nu_collection.user_parent = Employee.find_by_nuid(params[:nu_collection][:user_parent]) 
       @nu_collection.personal_folder_type = 'miscellany' 
@@ -52,11 +48,7 @@ class NuCollectionsController < ApplicationController
 
   def update
     @nu_collection = NuCollection.find(params[:id])  
-    if @nu_collection.update_attributes(params[:nu_collection])
-      @nu_collection.assign_DC_creators(params[:nu_collection][:personal_creators][:creator_first_names],
-                                        params[:nu_collection][:personal_creators][:creator_last_names],
-                                        params[:nu_collection][:corporate_creators])
-      @nu_collection.save! 
+    if @nu_collection.update_attributes(params[:nu_collection]) 
       redirect_to(@nu_collection, notice: "Collection #{@nu_collection.title} was updated successfully." ) 
     else
       redirect_to(@nu_collection, notice: "Collection #{@nu_collection.title} failed to update.")
