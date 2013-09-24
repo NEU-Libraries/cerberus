@@ -21,7 +21,6 @@ class NuCollectionsController < ApplicationController
 
   def create
     @nu_collection = NuCollection.new(params[:nu_collection].merge(pid: mint_unique_pid))
-
     if params[:nu_collection][:user_parent].present?
       @nu_collection.user_parent = Employee.find_by_nuid(params[:nu_collection][:user_parent]) 
       @nu_collection.personal_folder_type = 'miscellany' 

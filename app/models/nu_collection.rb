@@ -7,7 +7,7 @@ class NuCollection < ActiveFedora::Base
   include Drs::MetadataAssignment
 
   attr_accessible :title, :description, :date_of_issue, :keywords, :parent 
-  attr_accessible :corporate_creators, :personal_creators, :personal_folder_type
+  attr_accessible :creators, :personal_folder_type
 
   attr_protected :identifier 
 

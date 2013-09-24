@@ -2,16 +2,16 @@
   .personal_creator.row-fluid
     .span6
       = f.label :creator_first_name, "Creator's first name"
-      = f.text_field :creator_first_name, value: "", name: 'nu_collection[personal_creators][creator_first_names][]', pattern: ".*\\S.*", class: 'input-block-level' , placeholder: "Jenny"
+      = f.text_field :creator_first_name, value: "", name: 'nu_collection[creators][first_names][]', pattern: ".*\\S.*", class: 'input-block-level' , placeholder: "Jenny"
     .span6 
       = f.label :creator_last_name, "Creator's last name"
-      = f.text_field :creator_last_name, value: "", name: 'nu_collection[personal_creators][creator_last_names][]', pattern: ".*\\S.*", class: 'input-block-level', placeholder: "Smith"
+      = f.text_field :creator_last_name, value: "", name: 'nu_collection[creators][last_names][]', pattern: ".*\\S.*", class: 'input-block-level', placeholder: "Smith"
 - else
   - names.each do |name|
     .personal_creator.row-fluid
       .span6
         = f.label :creator_first_name, "Creator's first name"
-        = f.text_field :creator_first_name, value: name[:first], name: 'nu_collection[personal_creators][creator_first_names][]', pattern: ".*\\S.*", class: 'input-block-level', placeholder: "Jenny"
+        = f.text_field :creator_first_name, value: name[:first], name: 'nu_collection[creators][first_names][]', pattern: ".*\\S.*", class: 'input-block-level', placeholder: "Jenny"
       .span6
         = f.label :creator_last_name, "Creator's last name"
-        = f.text_field :creator_last_name, value: name[:last], name: 'nu_collection[personal_creators][creator_last_names][]', pattern: ".*\\S.*", class: 'input-block-level', placeholder: "Smith"
+        = f.text_field :creator_last_name, value: name[:last], name: 'nu_collection[creators][last_names][]', pattern: ".*\\S.*", class: 'input-block-level', placeholder: "Smith"
