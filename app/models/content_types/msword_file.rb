@@ -1,3 +1,3 @@
-class ContentTypes::MswordFile < ActiveFedora::Base
+class MswordFile < ActiveFedora::Base
   include Drs::NuFile
 end

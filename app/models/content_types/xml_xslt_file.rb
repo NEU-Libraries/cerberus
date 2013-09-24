@@ -1,3 +1,3 @@
-class ContentTypes::XmlXsltFile < ActiveFedora::Base
+class XmlXsltFile < ActiveFedora::Base
   include Drs::NuFile
 end

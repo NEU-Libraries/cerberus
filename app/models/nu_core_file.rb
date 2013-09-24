@@ -11,6 +11,8 @@ class NuCoreFile < ActiveFedora::Base
   has_metadata name: 'mods', type: NuModsDatastream
 
   belongs_to :parent, :property => :is_member_of, :class_name => 'NuCollection'
+  # call self.content_objects to get a list of all content bearing objects showing this 
+  # as their core record.  
 
   def self.create_metadata(nu_core_file, user, collection_id)
     nu_core_file.apply_depositor_metadata(user.user_key)
@@ -60,6 +62,25 @@ class NuCoreFile < ActiveFedora::Base
 
   def persistent_url
     "#{Rails.configuration.persistent_hostpath}#{noid}"
-  end  
-end 
+  end
 
+  def content_objects
+    all_possible_models = [ "ImageDynamicFile", "ImageHighresFile", "ImageLowresFile",
+                            "ImageMasterFile", "ImageThumbnailFile", "MsexcelFile",
+                            "MspowerpointFile", "MswordFile", "PdfFile", "XmlEadFile",
+                            "XmlXsltFile" ]
+    models_stringified = all_possible_models.inject { |base, str| base + " or #{str}" }
+    models_query = ActiveFedora::SolrService.escape_uri_for_query models_stringified 
+    full_self_id = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/#{self.pid}"
+
+    query_result = ActiveFedora::SolrService.query("active_fedora_model_ssi:(#{models_stringified}) AND is_part_of_ssim:#{full_self_id}", rows: 999)
+
+    return assigned_lookup(query_result)
+  end  
+
+  private 
+
+    def assigned_lookup(solr_query_result)
+      return solr_query_result.map { |r| r["active_fedora_model_ssi"].constantize.find(r["id"]) } 
+    end
+end
