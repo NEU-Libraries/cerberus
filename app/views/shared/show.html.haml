@@ -15,7 +15,8 @@
 
 %p Actions:
 
-= render_create_collection_button(@set)
+- if @set.instance_of?(NuCollection)
+  = render_create_collection_button(@set)
 
 = render partial: 'shared/show_files', locals: { collection: @set }
 
