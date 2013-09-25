@@ -1,6 +1,6 @@
 = form_for @set do |f|
   - if params[:parent].present?
-    = f.hidden_field :parent, :value => params[:parent]
+    = f.hidden_field :parent, name: 'set[parent]', :value => params[:parent]
   - if params[:is_personal_folder].present? 
     = f.hidden_field :user_parent, value: current_user.nuid 
   %fieldset

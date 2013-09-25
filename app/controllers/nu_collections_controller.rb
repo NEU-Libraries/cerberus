@@ -16,6 +16,7 @@ class NuCollectionsController < ApplicationController
 
   def new
     @set = NuCollection.new(parent: params[:parent])
+    puts params.inspect
     render :template => 'shared/new'
   end
 
