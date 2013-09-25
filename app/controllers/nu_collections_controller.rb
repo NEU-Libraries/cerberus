@@ -46,7 +46,6 @@ class NuCollectionsController < ApplicationController
 
   def edit
     @set = NuCollection.find(params[:id])
-
     render :template => 'shared/edit' 
   end
 
