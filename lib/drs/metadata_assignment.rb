@@ -6,7 +6,7 @@ module Drs
   module MetadataAssignment
     extend ActiveSupport::Concern
 
-    included do 
+    included do
       def title=(string) 
         if_DC_exists { self.DC.nu_title = string } 
         if_mods_exists { self.mods.mods_title = string }
@@ -104,6 +104,14 @@ module Drs
         if_descMetadata_exists_strict { self.descMetadata.resource_type } 
       end
 
+      def date_uploaded 
+        if_descMetadata_exists_strict { self.descMetadata.date_uploaded.first } 
+      end
+
+      def date_updated
+        if_descMetadata_exists_strict { self.descMetadata.date_modified.first } 
+      end
+
 
       # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       # TODO: Eliminate once PersonalFolders can be made their own subtype
@@ -125,7 +133,7 @@ module Drs
     end
 
     private
-
+    
       # Rather than pull in descMetadata for the moment, 
       # we define this helper method that turns the first/last/corporate name arrays
       # into a single array of ready to assign creators 
