@@ -3,7 +3,7 @@ module Drs
     extend ActiveSupport::Concern
     include Hydra::ModelMethods
     include Drs::MetadataAssignment
-    include Sufia::GenericFile::Characterization
+    include Drs::NuFile::Characterizable  
 
     included do
       has_metadata name: 'DC', type: NortheasternDublinCoreDatastream 
@@ -12,7 +12,6 @@ module Drs
       has_file_datastream name: "content", type: FileContentDatastream
       
       belongs_to :core_record, property: :is_part_of, class_name: 'NuCoreFile'
-      around_save :characterize_if_changed
     end
 
     def self.create_master_content_object(core_file, file, datastream_id, user)
