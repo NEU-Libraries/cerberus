@@ -10,6 +10,9 @@ class NuCoreFile < ActiveFedora::Base
   has_metadata name: 'properties', type: DrsPropertiesDatastream
   has_metadata name: 'mods', type: NuModsDatastream
 
+  attr_accessible :title, :identifier, :description, :date_of_issue 
+  attr_accessible :keywords, :creators, :depositor, :type
+
   belongs_to :parent, :property => :is_member_of, :class_name => 'NuCollection'
   # call self.content_objects to get a list of all content bearing objects showing this 
   # as their core record.  
