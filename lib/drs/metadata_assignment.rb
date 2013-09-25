@@ -50,6 +50,7 @@ module Drs
       def keywords=(array_of_strings) 
         if_mods_exists { self.mods.keywords = array_of_strings }
         if_DC_exists   { self.DC.subject = array_of_strings }
+        if_descMetadata_exists { self.descMetadata.tag = array_of_strings }
       end
 
       def keywords
@@ -66,6 +67,8 @@ module Drs
           self.mods.assign_corporate_names(cns) 
         end
 
+        if_descMetadata_exists { assign_creator_array(fns, lns, cns) } 
+
         if_DC_exists { self.DC.assign_creators(fns, lns, cns) } 
       end
 
@@ -79,6 +82,7 @@ module Drs
         if_mods_exists_strict { self.mods.personal_creators } 
       end
 
+      # Should return just an array 
       def corporate_creators  
         if_mods_exists_strict { self.mods.corporate_creators } 
       end
@@ -91,6 +95,11 @@ module Drs
       def depositor
         if_properties_exists_strict { self.properties.depositor.first } 
       end
+
+
+      # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      # Todo: Eliminate once PersonalFolders can be made their own subtype
+      # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
       def personal_folder_type=(string) 
         if_properties_exists_strict { self.properties.personal_folder_type = string } 
@@ -108,6 +117,23 @@ module Drs
     end
 
     private
+
+      # Rather than pull in descMetadata for the moment, 
+      # we define this helper method that turns the first/last/corporate name arrays
+      # into a single array of ready to assign creators 
+      def assign_creator_array(fns, lns, cns) 
+        if fns.length != lns.length 
+          raise "passed #{fns.length} first names and #{lns.length} last names." 
+        end
+
+        full_names = []
+        fns.each_with_index do |fn, i| 
+          full_names << "#{fn} #{lns[i]}" 
+        end
+
+        self.descMetadata.creator = full_names + cns 
+      end
+
 
       def if_descMetadata_exists(&block) 
         verify_datastream_carefree('descMetadata', GenericFileRdfDatastream, &block) 

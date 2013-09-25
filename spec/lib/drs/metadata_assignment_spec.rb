@@ -81,9 +81,15 @@ describe "Metadata" do
       end
 
       it "succeeds for objects with DC and MODS datastream" do 
-        core_file.keywords = keywords
+        collection.keywords = keywords
 
-        core_file.keywords.should == keywords 
+        collection.keywords.should == keywords 
+      end
+
+      it "succeeds for objects with DC, MODS, and descMetadata streams" do 
+        core_file.keywords = keywords 
+
+        core_file.keywords.should == core_file.descMetadata.tag 
       end
     end
 
@@ -112,6 +118,13 @@ describe "Metadata" do
         # Ensure the MODS record set correctly 
         collection.personal_creators.should =~ [{first: "Will", last: "Jackson"}, {first: "James", last: "Bond"}] 
         collection.corporate_creators.should =~ ["Org One", "Org Two"] 
+      end
+
+      it "succeeds for objects with DC, MODS, and descMetadata datastreams" do 
+        core_file.creators = hsh 
+
+        # Ensure the descMetadata record sets correctly
+        core_file.creators.should == core_file.descMetadata.creator 
       end
     end
 
