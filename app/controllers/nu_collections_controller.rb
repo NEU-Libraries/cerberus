@@ -32,10 +32,10 @@ class NuCollectionsController < ApplicationController
 
     if @set.save!
       flash[:info] = "Collection created successfully."
-      redirect_to set_path(id: @set.identifier) and return  
+      redirect_to nu_collection_path(id: @set.identifier) and return  
     else
       flash.now[:error] = "Something went wrong"
-      redirect_to new_set_path(parent: params[:parent]) and return 
+      redirect_to new_nu_collection_path(parent: params[:parent]) and return 
     end
   end
 
@@ -62,12 +62,12 @@ class NuCollectionsController < ApplicationController
 
     def index_redirect
       flash[:error] = "Collections cannot be created without a parent" 
-      redirect_to nu_collection_path and return 
+      redirect_to nu_collections_path and return 
     end
 
     def index_redirect_with_bad_id 
       flash[:error] = "The id you specified does not seem to exist in Fedora." 
-      redirect_to nu_collection_path and return 
+      redirect_to nu_collections_path and return 
     end
 
     # In cases where a personal folder is being created,
@@ -84,7 +84,7 @@ class NuCollectionsController < ApplicationController
       folder = NuCollection.find(parent_id) 
       if !folder.is_personal_folder? 
         flash[:error] = "You are attempting to create a personal folder off not a personal folder." 
-        redirect_to sets_path and return 
+        redirect_to nu_collections_path and return 
       end
     end
 end

@@ -32,7 +32,7 @@ describe NuCollectionsController do
 
       get :new, { parent: root.identifier } 
 
-      expect(response).to render_template('nu_collections/new') 
+      expect(response).to render_template('shared/new') 
     end
 
     it "requests signin from unauthenticated users" do 
@@ -68,7 +68,7 @@ describe NuCollectionsController do
     it "redirects to collections root when a user tries to treat a non-personal folder parent like it is a personal folder" do 
       sign_in bill 
 
-      post :create, { nu_collection: { parent: bills_collection.id, user_parent: bill.nuid } } 
+      post :create, { set: { parent: bills_collection.id, user_parent: bill.nuid } } 
 
       expect(response).to redirect_to(nu_collections_path)
     end
@@ -77,9 +77,9 @@ describe NuCollectionsController do
       sign_in bill
       attrs = {title: "Test", description: "test", date_of_issue: Date.today.to_s, parent: bills_collection.id } 
 
-      post :create, {nu_collection: attrs} 
+      post :create, {set: attrs} 
 
-      id = assigns(:nu_collection).identifier
+      id = assigns(:set).identifier
       expect(response).to redirect_to(nu_collection_path(id: id))
     end
 
@@ -91,10 +91,10 @@ describe NuCollectionsController do
       employee_root.rightsMetadata.permissions({person: bill.nuid}, 'edit')
       employee_root.save!  
 
-      post :create, { nu_collection: { parent: employee_root.pid, user_parent: employee.nuid, title: "New" } }
+      post :create, { set: { parent: employee_root.pid, user_parent: employee.nuid, title: "New" } }
 
-      id = assigns(:nu_collection).identifier 
-      assigns(:nu_collection).personal_folder_type.should == 'miscellany'
+      id = assigns(:set).identifier 
+      assigns(:set).personal_folder_type.should == 'miscellany'
       expect(response).to redirect_to(nu_collection_path(id: id))
     end
   end
@@ -120,7 +120,7 @@ describe NuCollectionsController do
 
       get :show, { id: root.identifier } 
 
-      expect(response).to render_template('nu_collections/show') 
+      expect(response).to render_template('shared/show') 
     end
 
     it "renders the show template for users with proper permissions" do 
@@ -128,7 +128,7 @@ describe NuCollectionsController do
 
       get :show, { id: bills_collection.identifier } 
 
-      expect(response).to render_template('nu_collections/show') 
+      expect(response).to render_template('shared/show') 
     end
   end
 
@@ -153,7 +153,7 @@ describe NuCollectionsController do
 
       get :edit, { id: bills_collection.identifier } 
 
-      expect(response).to render_template('nu_collections/edit') 
+      expect(response).to render_template('shared/edit') 
     end
   end
 
@@ -167,7 +167,7 @@ describe NuCollectionsController do
     it "403s when a user without edit access tries to modify a collection" do 
       sign_in bo 
 
-      put :update, { id: bills_collection.identifier, nu_collection: {title: "New Title" } } 
+      put :update, { id: bills_collection.identifier, set: {title: "New Title" } } 
 
       response.status.should == 403 
     end
@@ -175,7 +175,7 @@ describe NuCollectionsController do
     it "does not allow users with read permissions to edit a collection" do 
       sign_in bo 
 
-      put :update ,{ id: root.identifier, :nu_collection => { title: "New Title" } }
+      put :update ,{ id: root.identifier, :set => { title: "New Title" } }
 
       response.status.should == 403 
     end
@@ -183,9 +183,9 @@ describe NuCollectionsController do
     it "succeeds for users with edit permissions on the collection" do 
       sign_in bill 
 
-      put :update, { id: bills_collection.identifier, nu_collection: { title: "nu title" } } 
+      put :update, { id: bills_collection.identifier, set: { title: "nu title" } } 
 
-      assigns(:nu_collection).title.should == "nu title" 
+      assigns(:set).title.should == "nu title" 
       expect(response).to redirect_to(nu_collection_path(id: bills_collection.identifier))
     end 
   end
