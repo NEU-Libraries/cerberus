@@ -23,18 +23,12 @@ class DepartmentsController < ApplicationController
   end
 
   def create
-    @set = NuCollection.new(params[:set].merge(pid: mint_unique_pid))
+    @set = Department.new(params[:set].merge(pid: mint_unique_pid))
 
-    if params[:set][:user_parent].present?
-      @set.user_parent = Employee.find_by_nuid(params[:set][:user_parent]) 
-      @set.personal_folder_type = 'miscellany' 
-    end
-
-    @set.depositor = current_user.nuid 
     @set.identifier = @set.pid
 
     if @set.save!
-      flash[:info] = "Collection created successfully."
+      flash[:info] = "Department created successfully."
       redirect_to set_path(id: @set.identifier) and return  
     else
       flash.now[:error] = "Something went wrong"
