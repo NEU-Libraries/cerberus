@@ -9,9 +9,9 @@ module Drs
       has_metadata name: 'DC', type: NortheasternDublinCoreDatastream 
       has_metadata name: 'rightsMetadata', type: ParanoidRightsDatastream
       has_metadata name: 'properties', type: DrsPropertiesDatastream
-      has_file_datastream :name => "content", :type => FileContentDatastream
+      has_file_datastream name: "content", type: FileContentDatastream
       
-      belongs_to :core_record, :property => :is_part_of, :class_name => 'NuCoreFile'
+      belongs_to :core_record, property: :is_part_of, class_name: 'NuCoreFile'
       around_save :characterize_if_changed
     end
 
