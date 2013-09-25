@@ -96,9 +96,17 @@ module Drs
         if_properties_exists_strict { self.properties.depositor.first } 
       end
 
+      def type=(array)
+        if_descMetadata_exists_strict { self.descMetadata.resource_type = array } 
+      end
+
+      def type
+        if_descMetadata_exists_strict { self.descMetadata.resource_type } 
+      end
+
 
       # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-      # Todo: Eliminate once PersonalFolders can be made their own subtype
+      # TODO: Eliminate once PersonalFolders can be made their own subtype
       # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
       def personal_folder_type=(string) 
@@ -137,6 +145,10 @@ module Drs
 
       def if_descMetadata_exists(&block) 
         verify_datastream_carefree('descMetadata', GenericFileRdfDatastream, &block) 
+      end
+
+      def if_descMetadata_exists_strict(&block) 
+        verify_datastream_strict('descMetadata', GenericFileRdfDatastream, &block) 
       end
 
       def if_mods_exists(&block)

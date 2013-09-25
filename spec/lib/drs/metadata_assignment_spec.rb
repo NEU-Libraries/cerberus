@@ -150,6 +150,13 @@ describe "Metadata" do
         collection.personal_folder_type.should == 'folder type' 
       end
     end
+
+    describe "of type" do 
+      it "succeeds for objects with a descMetadata datastream" do 
+        core_file.type = ["Image", "Part of Book"] 
+        core_file.type.should == core_file.descMetadata.resource_type 
+      end
+    end
   end
 
   describe "predicates" do 
