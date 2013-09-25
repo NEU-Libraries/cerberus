@@ -12,11 +12,11 @@ class NuCollectionsController < ApplicationController
   rescue_from IdNotFoundError, with: :index_redirect_with_bad_id
 
   def index
+    #should be removed?
   end
 
   def new
     @set = NuCollection.new(parent: params[:parent])
-    puts params.inspect
     render :template => 'shared/new'
   end
 
