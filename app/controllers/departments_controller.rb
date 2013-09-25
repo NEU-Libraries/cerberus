@@ -29,10 +29,10 @@ class DepartmentsController < ApplicationController
 
     if @set.save!
       flash[:info] = "Department created successfully."
-      redirect_to set_path(id: @set.identifier) and return  
+      redirect_to department_path(id: @set.identifier) and return  
     else
       flash.now[:error] = "Something went wrong"
-      redirect_to new_set_path(parent: params[:parent]) and return 
+      redirect_to new_department_path(parent: params[:parent]) and return 
     end
   end  
 
