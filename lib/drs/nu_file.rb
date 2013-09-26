@@ -3,7 +3,8 @@ module Drs
     extend ActiveSupport::Concern
     include Hydra::ModelMethods
     include Drs::MetadataAssignment
-    include Drs::NuFile::Characterizable  
+    include Drs::NuFile::Characterizable
+    include Hydra::Derivatives 
 
     included do
       has_metadata name: 'DC', type: NortheasternDublinCoreDatastream 
@@ -22,10 +23,10 @@ module Drs
       content_object = NuFile.instantiate_appropriate_content_object(file)
 
       content_object.add_file(file, datastream_id, file.original_filename) 
-      content_object.core_record = core_file
-      content_object.title = file.original_filename 
-      content_object.identifier = content_object.pid
-      content_object.depositor = user.nuid
+      content_object.core_record =  core_file
+      content_object.title       =  file.original_filename 
+      content_object.identifier  =  content_object.pid
+      content_object.depositor   =  user.nuid
 
       begin
         content_object.save!
