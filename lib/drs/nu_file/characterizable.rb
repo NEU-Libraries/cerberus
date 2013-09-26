@@ -37,7 +37,7 @@ module Drs
       def characterize_if_changed 
         content_changed = self.content.changed? 
         yield 
-        Sufia.queue.push(AtomisticCharacterizationJob.new(self.pid))
+        Sufia.queue.push(AtomisticCharacterizationJob.new(self.pid)) if content_changed
       end
   end
 end
