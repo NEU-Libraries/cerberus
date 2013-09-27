@@ -39,8 +39,8 @@ module NuCollectionsHelper
   # if the current user has edit permissions. 
   def render_create_collection_button(parent)
     if current_user_can_edit?(parent) 
-      if request.original_fullpath == nu_collections_path
-        link_to("Create a child collection off this node", new_nu_collection_path(:parent => Rails.configuration.root_collection_id))
+      if request.original_fullpath == departments_path
+        link_to("Create a child collection off this node", new_nu_collection_path(:parent => Rails.configuration.root_department_id))
       else 
         link_to("Create a child collection off this node", new_nu_collection_path(parent: parent.identifier))
       end  

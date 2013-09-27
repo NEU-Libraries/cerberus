@@ -1,0 +1,9 @@
+- if corporate_names.empty?
+  .corporate_creator
+    = f.label :corporate_creators, "Organization name"
+    = f.text_field :corporate_creators, value: "", name: 'set[corporate_creators][corporate_names][]', class: "input-block-level", placeholder: "Northeastern University"
+- else
+  - corporate_names.each do |name|
+    .corporate_creator
+      = f.label :corporate_creators, "Organziation"
+      = f.text_field :corporate_creators, value: name.strip, name: 'set[corporate_creators][corporate_names][]', class: "input-block-level", placeholder: "Northeastern University"
