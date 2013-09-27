@@ -43,5 +43,26 @@ describe AtomisticCharacterizationJob do
     it "labels the content datastream correctly" do 
       @thumb.content.label.should be_thumby_label_for @image
     end
-  end 
+  end
+
+  describe "on pdfs" do 
+    before :all do 
+      @pdf = FactoryGirl.create(:pdf_file) 
+      @core = @pdf.core_record 
+      AtomisticCharacterizationJob.new(@pdf.pid).run 
+      @thumb = @pdf.core_record.content_objects.find { |e| e.instance_of? ImageThumbnailFile } 
+    end
+
+    after :all do 
+      ActiveFedora::Base.destroy_all 
+    end
+
+    it "labels the content datastream correctly" do 
+      @thumb.content.label.should be_thumby_label_for @pdf 
+    end
+
+    it "assigns content to the content datastream of the thumb" do 
+      @thumb.content.content.should_not be nil 
+    end
+  end
 end

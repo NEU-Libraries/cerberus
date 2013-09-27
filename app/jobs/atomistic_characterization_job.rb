@@ -16,8 +16,7 @@ class AtomisticCharacterizationJob
     self.c_object = ActiveFedora::Base.find(content_pid, cast: true)
 
     c_object.characterize
-
-    puts "Running"
+    
     if is_master?
       thumb = fetch_thumbnail || generate_fresh_thumbnail
       update_thumbnail(thumb)
