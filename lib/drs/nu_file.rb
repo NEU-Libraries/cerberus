@@ -1,12 +1,19 @@
 module Drs
   module NuFile
     extend ActiveSupport::Concern
+    include ActiveModel::MassAssignmentSecurity
     include Hydra::ModelMethods
+    include Hydra::ModelMixins::RightsMetadata
     include Drs::MetadataAssignment
+    include Drs::Rights::MassPermissions
     include Drs::NuFile::Characterizable
     include Hydra::Derivatives 
 
     included do
+      attr_accessible :title, :description, :keywords, :identifier
+      attr_accessible :depositor, :date_of_issue, :core_record 
+      attr_accessible :creators
+
       has_metadata name: 'DC', type: NortheasternDublinCoreDatastream 
       has_metadata name: 'rightsMetadata', type: ParanoidRightsDatastream
       has_metadata name: 'properties', type: DrsPropertiesDatastream
