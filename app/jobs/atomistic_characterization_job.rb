@@ -16,7 +16,7 @@ class AtomisticCharacterizationJob
     self.c_object = ActiveFedora::Base.find(content_pid, cast: true)
 
     c_object.characterize
-    
+
     if is_master?
       thumb = fetch_thumbnail || generate_fresh_thumbnail
       update_thumbnail(thumb)
@@ -34,8 +34,6 @@ class AtomisticCharacterizationJob
         # Assign it to the content datastream in the thumbnail 
         target.add_file(c_object.thumbnail.content, 'content', labelize('png'))
         target.save!
-      else
-        raise "Haven't gotten around to implementing default thumbs"
       end
     end
 
