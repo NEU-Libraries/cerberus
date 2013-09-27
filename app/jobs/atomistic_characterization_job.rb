@@ -43,19 +43,12 @@ class AtomisticCharacterizationJob
     def generate_fresh_thumbnail
       core = NuCoreFile.find(c_object.core_record.pid)
 
-      # i =  ImageThumbnailFile.new(
-      #                               title: thumb_title,
-      #                               depositor: c_object.depositor,
-      #                               core_record: core,
-      #                               keywords: c_object.keywords, 
-      #                               description: "Thumb nail for #{c_object.pid}", 
-      #                             )
       i = ImageThumbnailFile.new
       i.title = thumb_title 
       i.depositor = c_object.depositor 
       i.core_record = core 
       i.keywords = c_object.keywords.flatten
-      i.description = "Thumb nail for #{c_object.pid}" 
+      i.description = "Thumbnail for #{c_object.pid}" 
 
 
       # Copy permissions of the main object to its thumb.
