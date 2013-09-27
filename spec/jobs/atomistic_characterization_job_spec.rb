@@ -37,11 +37,11 @@ describe AtomisticCharacterizationJob do
     end
 
     it "assigns the title correctly" do 
-      @thumb.title.should be_thumby_title_for @image.title 
+      @thumb.title.should == @image.title + " thumbnail" 
     end
 
     it "labels the content datastream correctly" do 
-      @thumb.content.label.should be_thumby_title_for @image.title 
+      @thumb.content.label.should be_thumby_label_for @image
     end
   end 
 end

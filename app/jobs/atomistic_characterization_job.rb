@@ -33,7 +33,7 @@ class AtomisticCharacterizationJob
         c_object.transform_datastream :content, { thumb: { size: '100x100>', datastream: 'thumbnail' } }
 
         # Assign it to the content datastream in the thumbnail 
-        target.add_file(c_object.thumbnail.content, 'content', thumb_title)
+        target.add_file(c_object.thumbnail.content, 'content', labelize('png'))
         target.save!
       else
         raise "Haven't gotten around to implementing default thumbs"
@@ -44,10 +44,10 @@ class AtomisticCharacterizationJob
       core = NuCoreFile.find(c_object.core_record.pid)
 
       i = ImageThumbnailFile.new
-      i.title = thumb_title 
+      i.title = "#{c_object.title} thumbnail" 
       i.depositor = c_object.depositor 
       i.core_record = core 
-      i.keywords = c_object.keywords.flatten
+      i.keywords = c_object.keywords.flatten unless c_object.keywords.nil?
       i.description = "Thumbnail for #{c_object.pid}" 
 
 
@@ -56,22 +56,17 @@ class AtomisticCharacterizationJob
       i.save! ? i : logger.warn("Thumbnail creation failed.")  
     end
 
-    def thumb_title
-      a = c_object.title.split(".")
-
+    def labelize(file_extension) 
+      a = c_object.label.split(".") 
       a[0] = "#{a[0]}_thumb" 
-      return a.join(".") 
+      a[-1] = file_extension
+      return a.join(".")
     end
 
-    # Check if the object is the first uploaded in the most naive 
-    # way possible.  Will need to discuss business logic with 
-    # Pat next meeting.  
+    # Check if the object is the master in a way that doesn't actually check that at all
+    # Should ask Patrick about the business logic that should get used here.   
     def is_master?
       return c_object.instance_of?(ImageMasterFile) || c_object.instance_of?(PdfFile) 
-    end
-
-    def has_thumbnail?
-      c_object.core_record.content_objects.any? { |e| e.instance_of? ImageThumbnailFile } 
     end
 
     def fetch_thumbnail 
