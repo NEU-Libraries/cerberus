@@ -2,8 +2,7 @@ require 'spec_helper'
 
 describe AtomisticCharacterizationJob do
 
-  describe "on images" do 
-
+  describe "on images" do
     before :all do
       @image = FactoryGirl.create(:image_master_file)
       @core = @image.core_record 
@@ -36,7 +35,13 @@ describe AtomisticCharacterizationJob do
     it "assigns content to the content datastream of the thumb" do 
       @thumb.content.content.should_not be nil 
     end
-    
-    pending "write custom matcher for thumby titles"
+
+    it "assigns the title correctly" do 
+      @thumb.title.should be_thumby_title_for @image.title 
+    end
+
+    it "labels the content datastream correctly" do 
+      @thumb.content.label.should be_thumby_title_for @image.title 
+    end
   end 
 end
