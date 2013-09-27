@@ -17,6 +17,10 @@
 
 = render_create_collection_button(@set)
 
+- if @set.instance_of?(Department)
+  %br
+  = render_create_department_button(@set)
+
 = render partial: 'shared/show_files', locals: { collection: @set }
 
 
