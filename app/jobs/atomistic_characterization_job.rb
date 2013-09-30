@@ -10,20 +10,18 @@ class AtomisticCharacterizationJob
     self.content_pid = pid 
   end
 
-  # no_content.add_file(has_content.content.content, "content", "whatever.jpeg")
-
   def run
     self.c_object = ActiveFedora::Base.find(content_pid, cast: true)
 
     c_object.characterize
 
     if is_master?
-      thumb = fetch_thumbnail || generate_fresh_thumbnail
+      thumb = fetch_thumbnail || ImageThumbnailFile.new 
       update_thumbnail(thumb)
     end
   end
 
-  # private
+  private
 
     def update_thumbnail(target)
       if c_object.instance_of?(ImageMasterFile) || c_object.instance_of?(PdfFile)
@@ -33,24 +31,17 @@ class AtomisticCharacterizationJob
 
         # Assign it to the content datastream in the thumbnail 
         target.add_file(c_object.thumbnail.content, 'content', labelize('png'))
-        target.save!
+
+        # Update or instantiate thumbnail attributes 
+        target.title = "#{c_object.title} thumbnail" 
+        target.depositor = c_object.depositor 
+        target.core_record = NuCoreFile.find(c_object.core_record.pid) 
+        target.keywords = c_object.keywords.flatten unless c_object.keywords.nil? 
+        target.description = "Thumbnail for #{c_object.pid}" 
+        target.rightsMetadata.content = c_object.rightsMetadata.content 
+
+        target.save! ? target : logger.warn("Thumbnail creation failed") 
       end
-    end
-
-    def generate_fresh_thumbnail
-      core = NuCoreFile.find(c_object.core_record.pid)
-
-      i = ImageThumbnailFile.new
-      i.title = "#{c_object.title} thumbnail" 
-      i.depositor = c_object.depositor 
-      i.core_record = core 
-      i.keywords = c_object.keywords.flatten unless c_object.keywords.nil?
-      i.description = "Thumbnail for #{c_object.pid}" 
-
-
-      # Copy permissions of the main object to its thumb.
-      i.rightsMetadata.content = c_object.rightsMetadata.content 
-      i.save! ? i : logger.warn("Thumbnail creation failed.")  
     end
 
     def labelize(file_extension) 
