@@ -20,6 +20,12 @@ FactoryGirl.define do
     keywords ["Kay One", "Kay Two"]
   end
 
+  trait :canon do 
+    before :create do |file| 
+      file.canonize 
+    end
+  end
+
   trait :has_jpeg do
     before :create do |imf| 
       file = File.open("#{Rails.root}/spec/fixtures/test_pic.jpeg")
@@ -48,6 +54,7 @@ FactoryGirl.define do
     title "image_master_file.jpeg" 
     dad
     keywords
+    canon
     identifier
     has_jpeg
   end
@@ -62,6 +69,7 @@ FactoryGirl.define do
     title "pdf_file.pdf" 
     dad 
     keywords
+    canon
     identifier
     has_pdf
   end

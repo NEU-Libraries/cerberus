@@ -34,6 +34,7 @@ module Drs
       content_object.title       =  file.original_filename 
       content_object.identifier  =  content_object.pid
       content_object.depositor   =  user.nuid
+      content_object.canonize
 
       begin
         content_object.save!

@@ -144,6 +144,23 @@ describe "Metadata" do
       end
     end
 
+    describe "of canon status" do 
+
+      it "succeeds for objects with a properties datastream" do 
+        compilation.canonize
+
+        compilation.canonical?.should be true 
+      end
+
+      it "allows revocation of canon status as well" do 
+        compilation.canonize
+        compilation.canonical?.should be true 
+
+        compilation.uncanonize 
+        compilation.canonical?.should be false 
+      end
+    end
+
     describe "of personal_folder_type" do 
       it "succeeds for objects with a properties datastream" do 
         collection.personal_folder_type = "folder type" 
@@ -167,5 +184,13 @@ describe "Metadata" do
       collection.personal_folder_type = []
       collection.is_personal_folder?.should be false
     end
+
+    it "allow us check if something is canon" do 
+      compilation.canonize
+      compilation.canonical?.should be true 
+
+      compilation.uncanonize 
+      compilation.canonical?.should be false 
+    end    
   end
 end 
