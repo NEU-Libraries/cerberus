@@ -32,17 +32,24 @@ class AtomisticCharacterizationJob
         # Assign it to the content datastream in the thumbnail 
         target.add_file(c_object.thumbnail.content, 'content', labelize('png'))
 
-        # Update or instantiate thumbnail attributes 
-        target.title = "#{c_object.title} thumbnail" 
-        target.depositor = c_object.depositor 
-        target.core_record = NuCoreFile.find(c_object.core_record.pid) 
-        target.keywords = c_object.keywords.flatten unless c_object.keywords.nil? 
-        target.description = "Thumbnail for #{c_object.pid}" 
-        target.rightsMetadata.content = c_object.rightsMetadata.content 
-
-        target.save! ? target : logger.warn("Thumbnail creation failed") 
+        update_thumbnail_metadata(target)
+      elsif c_object.instance_of?(MsWordFile) 
+        #TODO Implement me
       end
-    end
+    end 
+
+    def update_thumbnail_metadata(thumbnail) 
+      # Update or instantiate thumbnail attributes 
+      thumbnail.title = "#{c_object.title} thumbnail" 
+      thumbnail.depositor = c_object.depositor 
+      thumbnail.core_record = NuCoreFile.find(c_object.core_record.pid) 
+      thumbnail.keywords = c_object.keywords.flatten unless c_object.keywords.nil? 
+      thumbnail.description = "Thumbnail for #{c_object.pid}" 
+      thumbnail.rightsMetadata.content = c_object.rightsMetadata.content
+
+      thumbnail.save! ? thumbnail : logger.warn("Thumbnail creation failed")  
+    end 
+
 
     def labelize(file_extension) 
       a = c_object.label.split(".") 
