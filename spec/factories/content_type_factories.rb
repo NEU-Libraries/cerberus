@@ -28,6 +28,14 @@ FactoryGirl.define do
     end
   end
 
+  trait :has_different_jpeg do 
+    before :create do |imf| 
+      file = File.open("#{Rails.root}/spec/fixtures/test_pic_two.jpeg") 
+
+      imf.add_file(file, "content", "test_pic_two.jpeg") 
+    end
+  end
+
   trait :has_pdf do 
     before :create do |imf| 
       file = File.open("#{Rails.root}/spec/fixtures/test.pdf") 
@@ -42,6 +50,12 @@ FactoryGirl.define do
     keywords
     identifier
     has_jpeg
+  end
+
+  factory :previous_thumbnail_file, class: ImageThumbnailFile do 
+    title "Previous Thumbnail" 
+    identifier
+    has_different_jpeg
   end
 
   factory :pdf_file, class: PdfFile do 
