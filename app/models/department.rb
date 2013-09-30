@@ -1,15 +1,22 @@
-class Department < NuCollection
+class Department < ActiveFedora::Base
+  include ActiveModel::MassAssignmentSecurity
+  include Hydra::ModelMixins::RightsMetadata
+  include Drs::Rights::MassPermissions
+  include Drs::Rights::Embargoable
+  include Drs::Rights::InheritedRestrictions
+  include Drs::MetadataAssignment
 
-  before_create :tag_as_NuCollection
+  has_metadata name: 'DC', type: NortheasternDublinCoreDatastream 
+  has_metadata name: 'rightsMetadata', type: ParanoidRightsDatastream
+  has_metadata name: 'properties', type: DrsPropertiesDatastream
+
+  attr_accessible :title, :description, :parent
+  attr_protected :identifier
 
   has_many :employees, property: :has_affiliation, class_name: "Employee"
-  has_many :child_departments, property: :is_member_of, :class_name => "Department"
+  has_many :child_departments, property: :has_affiliation, :class_name => "Department"
 
-  belongs_to :parent, property: :is_member_of, :class_name => "Department"
-
-  def tag_as_NuCollection
-    self.add_relationship(:has_model, "info:fedora/afmodel:NuCollection") 
-  end
+  belongs_to :parent, property: :has_affiliation, :class_name => "Department"
 
   # Override parent= so that the string passed by the creation form can be used. 
   def parent=(department_id)
@@ -22,5 +29,44 @@ class Department < NuCollection
     else
       raise "parent= got passed a #{department_id.class}, which doesn't work."
     end
-  end  
+  end
+
+  def permissions=(hash)
+    self.set_permissions_from_new_form(hash) 
+  end
+
+  # Accepts a hash of the following form:
+  # ex. {'permissions1' => {'identity_type' => val, 'identity' => val, 'permission_type' => val }, 'permissions2' => etc. etc. }
+  # Tosses out param sets that are missing an identity.  Which is nice.   
+  def set_permissions_from_new_form(params)
+    params.each do |perm_hash| 
+      identity_type = perm_hash[1]['identity_type']
+      identity = perm_hash[1]['identity']
+      permission_type = perm_hash[1]['permission_type'] 
+
+      if identity != 'public' && identity != 'registered' 
+        self.rightsMetadata.permissions({identity_type => identity}, permission_type)
+      end 
+    end
+  end
+
+  # Depth first(ish) traversal of a graph.  
+  def each_depth_first
+    self.child_collections.each do |child|
+      child.each_depth_first do |c|
+        yield c
+      end
+    end
+
+    yield self
+  end
+
+  # Return every descendent collection of this collection
+  def all_descendent_collections
+    result = [] 
+    each_depth_first do |child|
+      result << child 
+    end
+    return result 
+  end    
 end
