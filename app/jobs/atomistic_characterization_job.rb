@@ -50,11 +50,9 @@ class AtomisticCharacterizationJob
       a[-1] = file_extension
       return a.join(".")
     end
-
-    # Check if the object is the master in a way that doesn't actually check that at all
-    # Should ask Patrick about the business logic that should get used here.   
+   
     def is_master?
-      return c_object.instance_of?(ImageMasterFile) || c_object.instance_of?(PdfFile) 
+      return c_object.canonical?
     end
 
     def fetch_thumbnail 

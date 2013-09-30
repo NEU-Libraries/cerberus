@@ -96,6 +96,18 @@ module Drs
         if_properties_exists_strict { self.properties.depositor.first } 
       end
 
+      def canonize
+        if_properties_exists_strict { self.properties.canonize } 
+      end
+
+      def uncanonize 
+        if_properties_exists_strict { self.properties.uncanonize } 
+      end
+
+      def canonical? 
+        if_properties_exists_strict { self.properties.canonical? } 
+      end
+
       def type=(array)
         if_descMetadata_exists_strict { self.descMetadata.resource_type = array } 
       end
