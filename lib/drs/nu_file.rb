@@ -1,18 +1,25 @@
 module Drs
   module NuFile
     extend ActiveSupport::Concern
+    include ActiveModel::MassAssignmentSecurity
     include Hydra::ModelMethods
+    include Hydra::ModelMixins::RightsMetadata
     include Drs::MetadataAssignment
-    include Sufia::GenericFile::Characterization
+    include Drs::Rights::MassPermissions
+    include Drs::NuFile::Characterizable
+    include Hydra::Derivatives 
 
     included do
+      attr_accessible :title, :description, :keywords, :identifier
+      attr_accessible :depositor, :date_of_issue, :core_record 
+      attr_accessible :creators
+
       has_metadata name: 'DC', type: NortheasternDublinCoreDatastream 
       has_metadata name: 'rightsMetadata', type: ParanoidRightsDatastream
       has_metadata name: 'properties', type: DrsPropertiesDatastream
-      has_file_datastream :name => "content", :type => FileContentDatastream
+      has_file_datastream name: "content", type: FileContentDatastream
       
-      belongs_to :core_record, :property => :is_part_of, :class_name => 'NuCoreFile'
-      around_save :characterize_if_changed
+      belongs_to :core_record, property: :is_part_of, class_name: 'NuCoreFile'
     end
 
     def self.create_master_content_object(core_file, file, datastream_id, user)
@@ -23,10 +30,10 @@ module Drs
       content_object = NuFile.instantiate_appropriate_content_object(file)
 
       content_object.add_file(file, datastream_id, file.original_filename) 
-      content_object.core_record = core_file
-      content_object.title = file.original_filename 
-      content_object.identifier = content_object.pid
-      content_object.depositor = user.nuid
+      content_object.core_record =  core_file
+      content_object.title       =  file.original_filename 
+      content_object.identifier  =  content_object.pid
+      content_object.depositor   =  user.nuid
 
       begin
         content_object.save!
