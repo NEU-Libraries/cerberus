@@ -23,6 +23,29 @@ describe DrsPropertiesDatastream do
     end
   end
 
+  describe "Canonization" do 
+    it "allows us to assert that an object is now canonical" do 
+      properties.canonize 
+
+      properties.canonical.should == ['yes'] 
+    end
+
+    it "allows us to check whether this object is canonical" do 
+      properties.canonical?.should be false
+
+      properties.canonize 
+
+      properties.canonical?.should be true 
+    end
+
+    it "allows us to decanonize objects" do 
+      properties.canonize
+      properties.uncanonize 
+
+      properties.canonical?.should be false 
+    end
+  end
+
   describe "Personal folder type" do 
     it "returns an error when called on anything other than a personal folder." do 
       properties.personal_folder_type = [] 
