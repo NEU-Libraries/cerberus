@@ -55,6 +55,11 @@ describe AtomisticCharacterizationJob do
     it "labels the content datastream correctly" do 
       @thumb.content.label.should be_thumby_label_for @master
     end
+
+    it "assigns the identifier correctly" do
+      @thumb.identifier.should_not be_blank 
+      @thumb.identifier.should == @thumb.pid  
+    end
   end    
 
 
@@ -103,6 +108,11 @@ describe AtomisticCharacterizationJob do
 
     it "correctly labels the file" do 
       @pdf.content.label.should == 'test_docx.pdf' 
+    end
+
+    it "assigns identifier for the pdf" do 
+      @pdf.identifier.should_not be_blank 
+      @pdf.identifier.should == @pdf.pid 
     end
 
     it_should_behave_like "a content object that creates a thumbnail"
