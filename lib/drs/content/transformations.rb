@@ -2,12 +2,27 @@ module Drs
   module Content
     module Transformations
 
-      def self.image_to_thumbnail(parent) 
-        image_pdf_to_thumbnail(parent, ImageMasterFile) 
+      # Convenience method that takes an arbitrary parent and updates its thumbnail.
+      def self.update_thumbnail(parent)
+        purge_thumbnail(parent) 
+
+        if parent.instance_of? ImageMasterFile
+          image_to_thumbnail(parent)
+        elsif parent.instance_of? PdfFile 
+          pdf_to_thumbnail(parent) 
+        elsif parent.instance_of? MswordFile 
+          purge_pdf(parent) 
+          word_to_thumbnail(parent) 
+        end
       end
 
-      def self.pdf_to_thumbnail(parent)
-        image_pdf_to_thumbnail(parent, PdfFile)
+
+      def self.image_to_thumbnail(parent, **options)
+        image_pdf_to_thumbnail(parent, ImageMasterFile, options) 
+      end
+
+      def self.pdf_to_thumbnail(parent, **options)
+        image_pdf_to_thumbnail(parent, PdfFile, options)
       end
 
       def self.word_to_pdf(parent)
@@ -15,7 +30,7 @@ module Drs
 
         desc = "PDF generated off of Word document at #{parent.pid}" 
 
-        # Create the child object sans content 
+        # Create the child object sans content
         child = instantiate_with_metadata(parent, "#{parent.title} pdf", desc, PdfFile)
 
         # Create the pdf and add it to the child 
@@ -28,7 +43,19 @@ module Drs
 
       private
 
-        def self.image_pdf_to_thumbnail(parent, klass)
+        def self.purge_thumbnail(parent) 
+          core = parent.core_record 
+          thumb = core.content_objects.find { |c| c.instance_of? ImageThumbnailFile } 
+          thumb.destroy unless thumb.nil? 
+        end
+
+        def self.purge_pdf(parent) 
+          core = parent.core_record 
+          pdf = core.content_objects.find { |p| p.instance_of? PdfFile } 
+          pdf.destroy unless pdf.nil? 
+        end
+
+        def self.image_pdf_to_thumbnail(parent, klass, options)
           assert_parent_is(parent, klass) 
 
           desc = "Thumbnail for #{parent.pid}" 
