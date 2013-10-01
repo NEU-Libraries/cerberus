@@ -3,34 +3,44 @@ module Drs
     module Transformations
 
       def self.image_to_thumbnail(parent) 
-        desc = "Thumbnail for #{parent.pid}"
-
-        assert_parent_is(parent, ImageMasterFile) 
-        child = instantiate_with_metadata(parent, "#{parent.title} thumbnail", desc, ImageThumbnailFile) 
-        parent.transform_datastream :content, { thumb: { size: '100x100>', datastream: 'thumbnail' } }
-        child.add_file(parent.thumbnail.content, 'content', thumbnailify(parent.label)) 
-        child.save! ? child : false
+        image_pdf_to_thumbnail(parent, ImageMasterFile) 
       end
 
       def self.pdf_to_thumbnail(parent)
-        desc = "Thumbnail for #{parent.pid}"
-
-        assert_parent_is(parent, PdfFile) 
-        child = instantiate_with_metadata(parent, "#{parent.title} thumbnail", desc, ImageThumbnailFile) 
-        parent.transform_datastream :content, { thumb: { size: '100x100>', datastream: 'thumbnail' } } 
-        child.add_file(parent.thumbnail.content, 'content', thumbnailify(parent.label)) 
-        child.save! ? child : false 
+        image_pdf_to_thumbnail(parent, PdfFile)
       end
 
-      def self.docx_to_pdf(parent)
-        assert_parent_is(parent, MswordFile) 
-        child = instantiate_with_metadata(parent, "#{parent.title} pdf", PdfFile) 
-        parent.transform_datastream :content, { to_pdf: { format: 'pdf', datastream: 'pdf', datastream: 'thumbnail'} }, processor: 'document'
-        child.add_file(parent.to_pdf.content, 'content', change_file_extension(parent.label, 'pdf'))
+      def self.word_to_pdf(parent)
+        assert_parent_is(parent, MswordFile)
+
+        desc = "PDF generated off of Word document at #{parent.pid}" 
+
+        # Create the child object sans content 
+        child = instantiate_with_metadata(parent, "#{parent.title} pdf", desc, PdfFile)
+
+        # Create the pdf and add it to the child 
+        parent.transform_datastream :content, { to_pdf: { format: 'pdf', datastream: 'pdf'} }, processor: 'document'
+        child.add_file(parent.pdf.content, 'content', change_file_extension(parent.label, 'pdf'))
+
+        # Return the object if it saves successfully and false otherwise
         child.save! ? child : false
       end
 
       private
+
+        def self.image_pdf_to_thumbnail(parent, klass)
+          assert_parent_is(parent, klass) 
+
+          desc = "Thumbnail for #{parent.pid}" 
+
+          child = instantiate_with_metadata(parent, "#{parent.title} thumbnail", desc, ImageThumbnailFile) 
+
+          parent.transform_datastream :content, {thumb: { size: '100x100>', datastream: 'thumbnail' } } 
+          child.add_file(parent.thumbnail.content, 'content', thumbnailify(parent.label))
+
+          child.save! ? child : false 
+        end
+
 
         def self.instantiate_with_metadata(parent, title, desc, klass)
           a = klass.new(pid: Sufia::Noid.namespaceize(Sufia::IdService.mint)) 
