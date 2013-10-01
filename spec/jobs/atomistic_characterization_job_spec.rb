@@ -17,6 +17,14 @@ describe AtomisticCharacterizationJob do
     @thumb.save! 
   end
 
+  def context_for_msword_test 
+    @master = FactoryGirl.create(:docx_file) 
+    @core = @master.core_record 
+    AtomisticCharacterizationJob.new(@master.pid).run 
+    @pdf = @core.content_objects.find { |e| e.instance_of? PdfFile } 
+    @thumb = @core.content_objects.find { |e| e.instance_of? ImageThumbnailFile } 
+  end
+
   shared_examples_for "a content object that creates a thumbnail" do 
     it "builds one and only one thumbnail" do 
       thumbs = @core.content_objects.count { |o| o.instance_of? ImageThumbnailFile }
@@ -60,9 +68,46 @@ describe AtomisticCharacterizationJob do
   describe "on pdfs" do 
     it_should_behave_like "a content object that creates a thumbnail" do 
       before(:all) { context_for_thumbnail_tests(:pdf_file) } 
-      after(:all)  { ActiveFedora::Base.destroy_all } 
+      after(:all)  { ActiveFedora::Base.destroy_all }
     end
   end
+
+  describe "On Msword files" do 
+    before(:all) { context_for_msword_test } 
+    after(:all) { ActiveFedora::Base.destroy_all }
+
+    it "creates one (and only one) pdf file" do 
+      count = @core.content_objects.count { |e| e.instance_of? PdfFile } 
+      count.should be 1 
+    end
+
+    it "titles the PDF file appropriately" do 
+      @pdf.title.should == "#{@master.title} PDF" 
+    end
+
+    it "assigns content to the PDF file" do 
+      @pdf.content.content.should_not be nil 
+    end
+
+    it "assigns the depositor" do 
+      @pdf.depositor.should == @master.depositor 
+    end
+
+    it "has equivalent permissions" do 
+      @pdf.rightsMetadata.content.should == @master.rightsMetadata.content
+    end
+
+    it "assigns all keywords" do 
+      @pdf.keywords.should =~ @master.keywords
+    end
+
+    it "correctly labels the file" do 
+      @pdf.content.label.should == 'test_docx.pdf' 
+    end
+
+    it_should_behave_like "a content object that creates a thumbnail"
+  end
+
 
   describe "with an already extant thumbnail" do 
     before(:all) do 

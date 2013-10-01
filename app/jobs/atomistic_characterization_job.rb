@@ -33,10 +33,31 @@ class AtomisticCharacterizationJob
         target.add_file(c_object.thumbnail.content, 'content', labelize('png'))
 
         update_thumbnail_metadata(target)
-      elsif c_object.instance_of?(MsWordFile) 
-        #TODO Implement me
+      elsif c_object.instance_of?(MswordFile) 
+        c_object.transform_datastream :content, { to_pdf: { format: 'pdf', datastream: 'pdf'} }, processor: 'document'
+        
+        # Generate the PDF file, hop one 
+        pdf = create_pdf_file(c_object.pdf.content)
+
+        pdf.transform_datastream :content, { thumb: { size: '100x100>', datastream: 'thumbnail' } } 
+
+        target.add_file(pdf.thumbnail.content, 'content', labelize('png')) 
+        update_thumbnail_metadata(target)
       end
     end 
+
+    def create_pdf_file(pdf_content)
+      keywords = c_object.keywords.flatten unless c_object.keywords.nil?
+      p = PdfFile.new(title: "#{c_object.title} PDF",
+                         core_record: NuCoreFile.find(c_object.core_record.pid),
+                         depositor: c_object.depositor,
+                         keywords: keywords,
+                         description: c_object.description, 
+                        )
+      p.rightsMetadata.content = c_object.rightsMetadata.content
+      p.add_file(pdf_content, 'content', title_to_pdf) 
+      p.save! ? p : logger.warn("PDF generation failed")   
+    end
 
     def update_thumbnail_metadata(thumbnail) 
       # Update or instantiate thumbnail attributes 
@@ -47,9 +68,14 @@ class AtomisticCharacterizationJob
       thumbnail.description = "Thumbnail for #{c_object.pid}" 
       thumbnail.rightsMetadata.content = c_object.rightsMetadata.content
 
-      thumbnail.save! ? thumbnail : logger.warn("Thumbnail creation failed")  
+      thumbnail.save! ? thumbnail : Rails.logger.warn("Thumbnail creation failed")  
     end 
 
+    def title_to_pdf 
+      a = c_object.label.split(".") 
+      a[-1] = 'pdf' 
+      return a.join(".") 
+    end
 
     def labelize(file_extension) 
       a = c_object.label.split(".") 
