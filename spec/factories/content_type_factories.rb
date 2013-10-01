@@ -50,6 +50,14 @@ FactoryGirl.define do
     end
   end
 
+  trait :has_docx do 
+    before :create do |doc| 
+      file = File.open("#{Rails.root}/spec/fixtures/test_docx.docx") 
+
+      doc.add_file(file, 'content', 'test_docx.docx') 
+    end
+  end
+
   factory :image_master_file, class: ImageMasterFile do
     title "image_master_file.jpeg" 
     dad
@@ -72,6 +80,15 @@ FactoryGirl.define do
     canon
     identifier
     has_pdf
+  end
+
+  factory :docx_file, class: MswordFile do 
+    title "docx_file.docx" 
+    dad
+    keywords
+    canon
+    identifier 
+    has_docx 
   end
 end
 
