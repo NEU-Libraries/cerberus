@@ -12,9 +12,9 @@ describe AtomisticCharacterizationJob do
   def context_for_prethumbed_test(factory_sym) 
     @master = FactoryGirl.create(factory_sym) 
     @core = @master.core_record 
-    @thumb = FactoryGirl.create(:previous_thumbnail_file)
-    @thumb.core_record = NuCoreFile.find(@core.pid) 
-    @thumb.save! 
+    @thumb_alpha = FactoryGirl.create(:previous_thumbnail_file)
+    @thumb_alpha.core_record = NuCoreFile.find(@core.pid) 
+    @thumb_alpha.save! 
   end
 
   def context_for_msword_test 
@@ -87,7 +87,7 @@ describe AtomisticCharacterizationJob do
     end
 
     it "titles the PDF file appropriately" do 
-      @pdf.title.should == "#{@master.title} PDF" 
+      @pdf.title.should == "#{@master.title} pdf" 
     end
 
     it "assigns content to the PDF file" do 
@@ -121,30 +121,34 @@ describe AtomisticCharacterizationJob do
 
   describe "with an already extant thumbnail" do 
     before(:all) do 
-      context_for_prethumbed_test(:image_master_file) 
+      context_for_prethumbed_test(:image_master_file)
       AtomisticCharacterizationJob.new(@master.pid).run
 
       # Refresh all objects after the job messes with them
       @master.reload
       @core.reload
-      @thumb.reload
+      @thumb_omega = @core.content_objects.find { |c| c.instance_of? ImageThumbnailFile }
     end
 
     let(:previous) { FactoryGirl.build(:previous_thumbnail_file) } 
 
-    after(:all) { ActiveFedora::Base.destroy_all } 
+    after(:all) { ActiveFedora::Base.destroy_all }
+
+    it "destroys the first thumbnail" do 
+      ImageThumbnailFile.exists?(@thumb_alpha.pid).should be false 
+    end
 
     it "updates relevant metadata" do 
-      @thumb.title.should == @master.title + " thumbnail" 
-      @thumb.keywords.should =~ @master.keywords  
+      @thumb_omega.title.should == @master.title + " thumbnail" 
+      @thumb_omega.keywords.should =~ @master.keywords  
     end
 
     it "labels the content datastream correctly" do 
-      @thumb.content.label.should be_thumby_label_for @master 
+      @thumb_omega.content.label.should be_thumby_label_for @master 
     end
 
     it "has new content" do 
-      @thumb.content.content.should_not == previous.content.content
+      @thumb_omega.content.content.should_not == previous.content.content
     end
   end
 end
