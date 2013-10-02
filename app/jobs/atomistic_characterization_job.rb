@@ -19,6 +19,4 @@ class AtomisticCharacterizationJob
       Drs::Content::Transformations.update_thumbnail(c_object) 
     end
   end
-
-  private
 end
