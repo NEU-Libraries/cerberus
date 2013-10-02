@@ -109,4 +109,23 @@ describe Drs::Content::Transformations do
       @pdf.content.label.should == "test_docx.pdf" 
     end
   end
+
+  describe "of word documents to thumbnails" do 
+    before :all do 
+      @master = FactoryGirl.create(:docx_file) 
+      @core = @master.core_record 
+      @thumb = Drs::Content::Transformations.word_to_thumbnail(@master) 
+    end
+
+    after(:all) { ActiveFedora::Base.destroy_all }
+    
+    it_should_behave_like "a thumbnail generating transformation"
+
+    # Smoke test PDF generation 
+
+    it "generates an intermediate PDF document" do 
+      count = @core.content_objects.count { |c| c.instance_of? PdfFile } 
+      count.should be 1 
+    end
+  end
 end

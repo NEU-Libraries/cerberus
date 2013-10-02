@@ -41,6 +41,22 @@ module Drs
         child.save! ? child : false
       end
 
+      def self.word_to_thumbnail(parent) 
+        assert_parent_is(parent, MswordFile) 
+
+        desc = "Thumbnail for #{parent.pid}"
+
+        pdf = word_to_pdf(parent) 
+
+        # Generate thumbnail image 
+        pdf.transform_datastream :content, { thumb: {size: '100x100>', datastream: 'thumbnail' } }
+
+        child = instantiate_with_metadata(parent, "#{parent.title} thumbnail", desc, ImageThumbnailFile) 
+        child.add_file(pdf.thumbnail.content, 'content', thumbnailify(parent.label))
+
+        child.save! ? child : false 
+      end
+
       private
 
         def self.purge_thumbnail(parent) 
