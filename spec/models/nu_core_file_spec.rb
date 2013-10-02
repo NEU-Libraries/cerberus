@@ -66,13 +66,16 @@ describe NuCoreFile do
   end
 
   describe "Content files" do 
-    before :each do 
+    before :all do 
       @core_file = NuCoreFile.create(depositor: "dummy@example.com") 
       @img = ImageMasterFile.create(title: "Img", core_record: @core_file) 
       @pdf = PdfFile.create(title: "Pdf", core_record: @core_file) 
       @word = MswordFile.create(title: "MsWord", core_record: @core_file)
       @word_unassociated = MswordFile.create(title: "MsWordTwo")  
     end
+
+    after(:all) { ActiveFedora::Base.destroy_all } 
+
 
     it "can be found using the .content_objects method" do 
       result = @core_file.content_objects
@@ -84,6 +87,37 @@ describe NuCoreFile do
       result.should_not include @word_unassociated
     end
   end
+
+  describe "Canonical object lookup" do
+    let(:core) { NuCoreFile.create(depositor: "dummy@example.com") }
+    after(:all) { ActiveFedora::Base.destroy_all } 
+
+    it "returns false for objects with no canonical object" do
+      core.canonical_object.should be false
+    end 
+
+    it "returns the object for core objects with a canonical object" do 
+      @img = ImageMasterFile.new(title: "Img", core_record: core) 
+      @img.canonize && @img.save! 
+      core.reload
+
+      core.canonical_object.should == @img
+    end
+  end
+
+  describe "Thumbnail lookup" do 
+    let(:core) { NuCoreFile.create(depositor: "dummy@example.com") } 
+    after(:all)  { ActiveFedora::Base.destroy_all } 
+
+    it "returns false for objects with no thumbnail" do 
+      core.thumbnail.should be false 
+    end
+
+    it "returns the object for core objects with a thumbnail" do 
+      @thumb = ImageThumbnailFile.create(title: "thumb", core_record: core)
+      core.thumbnail.should == @thumb
+    end 
+  end 
 end
 
 
