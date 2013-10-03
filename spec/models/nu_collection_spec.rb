@@ -4,33 +4,6 @@ describe NuCollection do
 
   let(:collection) { NuCollection.new } 
 
-  subject { collection } 
-
-  it { should respond_to(:title=) } 
-  it { should respond_to(:title) } 
-  it { should respond_to(:parent=) } 
-  it { should respond_to(:parent) } 
-  it { should respond_to(:identifier=) } 
-  it { should respond_to(:identifier) } 
-  it { should respond_to(:description=) }
-  it { should respond_to(:description) }  
-  it { should respond_to(:date_of_issue=) } 
-  it { should respond_to(:date_of_issue) } 
-  it { should respond_to(:keywords=) } 
-  it { should respond_to(:keywords) } 
-  it { should respond_to(:corporate_creators=) } 
-  it { should respond_to(:corporate_creators) } 
-  it { should respond_to(:personal_creators=) } 
-  it { should respond_to(:personal_creators) } 
-  it { should respond_to(:embargo_release_date=) } 
-  it { should respond_to(:embargo_release_date) } 
-  it { should respond_to(:permissions=) } 
-  it { should respond_to(:permissions) } 
-  it { should respond_to(:mass_permissions=) } 
-  it { should respond_to(:mass_permissions) } 
-  it { should respond_to(:embargo_in_effect?) } 
-  it { should respond_to(:set_permissions_from_new_form) }
-
   describe "Custom setters and getters" do
     let(:c) { NuCollection.new } 
 
@@ -66,6 +39,51 @@ describe NuCollection do
     it "Sets the parent collection, but receives nil" do 
       p_coll.parent = @saved_root.pid 
       p_coll.parent.should == @saved_root 
+    end
+  end
+
+  describe "User parent" do 
+    let(:employee) { FactoryGirl.create(:employee) }
+
+    it "can be set via nuid" do 
+      collection.user_parent = employee.nuid 
+      collection.user_parent.pid.should == employee.pid 
+    end
+
+    it "CANNOT be set by pid" do 
+      expect{collection.user_parent = employee.pid}.to raise_error 
+    end
+
+    it "can be set by passing the entire object" do 
+      collection.user_parent = employee 
+      collection.user_parent.pid.should == employee.pid 
+    end
+  end 
+
+
+  describe "Recursive delete" do 
+    before(:each) do
+      ActiveFedora::Base.find(:all).each do |file| 
+        file.destroy 
+      end
+
+      @root = NuCollection.create(title: "Root") 
+      @child_one = NuCollection.create(title: "Child One", parent: @root) 
+      @c1_gf = NuCoreFile.create(title: "Core File One", parent: @child_one, depositor: "nobody@nobody.com") 
+      @c2_gf = NuCoreFile.create(title: "Core File Two", parent: @child_one, depositor: "nobody@nobody.com")  
+      @child_two = NuCollection.create(title: "Child Two", parent: @root) 
+      @grandchild = NuCollection.create(title: "Grandchild", parent: @child_two) 
+      @great_grandchild = NuCollection.create(title: "Great Grandchild", parent: @grandchild) 
+      @gg_gf = NuCoreFile.create(title: "GG CF", parent: @great_grandchild, depositor: "nobody@nobody.com")
+      @pids = [ @root.pid, @child_one.pid, @c1_gf.pid, @c2_gf.pid, @child_two.pid, @grandchild.pid, @great_grandchild.pid,
+                @gg_gf.pid] 
+    end
+
+    it "deletes the item its called on and all descendent files and collections." do 
+      @root.recursive_delete 
+
+      NuCollection.find(:all).length.should == 0 
+      NuCoreFile.find(:all).length.should == 0 
     end
   end
 

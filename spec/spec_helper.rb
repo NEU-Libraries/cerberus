@@ -39,11 +39,11 @@ RSpec.configure do |config|
   # the seed, which is printed after each run.
   #     --seed 1234
   config.order = "random"
-
+  
   # Cleans everything.  Should figure out how to get Fedora to do this 
   # automatically. 
   config.before(:suite) do 
-    ActiveFedora::Base.find(:all) do |file| 
+    ActiveFedora::Base.find(:all).each do |file| 
       file.destroy 
     end
   end
@@ -51,7 +51,7 @@ RSpec.configure do |config|
   # Clean everything.  Should figure out how to get Fedora to do this
   # automatically. 
   config.after(:suite) do 
-    ActiveFedora::Base.find(:all) do |file| 
+    ActiveFedora::Base.find(:all).each do |file| 
       file.destroy 
     end
   end

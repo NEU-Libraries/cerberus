@@ -12,11 +12,11 @@ describe ParanoidRightsDatastream do
   it { should respond_to(:can_edit?) }
 
   describe "Specific Users and Group Permissions" do
-    let(:user) { FactoryGirl.create(:user) } 
-    let(:bill) { FactoryGirl.create(:bill) } 
-    let(:bo)   { FactoryGirl.create(:bo) } 
-    let(:gone) { FactoryGirl.create(:gone) } 
-    let(:gtwo) { FactoryGirl.create(:gtwo) } 
+    let(:user) { FactoryGirl.build(:user) } 
+    let(:bill) { FactoryGirl.build(:bill) } 
+    let(:bo)   { FactoryGirl.build(:bo) } 
+    let(:gone) { FactoryGirl.build(:gone) } 
+    let(:gtwo) { FactoryGirl.build(:gtwo) } 
 
     before do 
       @rights_ds.update_permissions('group' => { 'group_one' => 'edit', 'group_two' => 'read' }) 

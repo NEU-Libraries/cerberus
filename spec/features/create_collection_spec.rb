@@ -2,10 +2,11 @@ require 'spec_helper'
 
 feature "Creating a collection" do
   before :all do 
-    @root = FactoryGirl.create(:root_collection) 
+    @root = FactoryGirl.create(:root_collection)
   end
 
   let(:user) { FactoryGirl.create(:user) }
+  let(:bill) { FactoryGirl.create(:bill) } 
    
 
   describe "Unsigned Access Protection" do 
@@ -18,7 +19,7 @@ feature "Creating a collection" do
 
   describe "Signed Access and Form Creation" do
     scenario "Authenticated Creation and Edit" do
-      features_sign_in user 
+      features_sign_in bill
       visit new_nu_collection_path(parent: @root.identifier)
 
       # Because we authenticated we don't get booted out. 

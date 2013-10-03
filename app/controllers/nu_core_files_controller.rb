@@ -16,10 +16,15 @@
 class NuCoreFilesController < ApplicationController
   include Sufia::Controller
   include Sufia::FilesControllerBehavior
+  include Drs::ControllerHelpers::EditableObjects
 
   skip_before_filter :normalize_identifier, only: [:provide_metadata, :rescue_incomplete_files, :destroy_incomplete_files, :process_metadata]
   skip_load_and_authorize_resource only: [:provide_metadata, :rescue_incomplete_files, :destroy_incomplete_files, :process_metadata] 
   
+  before_filter :can_edit_parent?, only: [:new]
+  rescue_from IdNotFoundError, with: :no_id_rescue
+  rescue_from NoParentFoundError, with: :no_parent_rescue
+
   def destroy_incomplete_files
     NuCoreFile.users_in_progress_files(current_user).each do |file|
       file.destroy 
@@ -78,11 +83,6 @@ class NuCoreFilesController < ApplicationController
       redirect_to rescue_incomplete_files_path(param_hash) and return
     end
 
-    if !NuCollection.exists?(params[:parent])
-      flash[:error] = "Files must belong to a collection.  Aborting." 
-      redirect_to root_path and return
-    end
-
     @nu_core_file = ::NuCoreFile.new
     #@batch_noid = Sufia::Noid.noidify(Sufia::IdService.mint)
     @collection_id = params[:parent]      
@@ -93,6 +93,16 @@ class NuCoreFilesController < ApplicationController
   end
 
   protected
+
+  def no_id_rescue
+    flash[:error] = "The parent specified for file creation does not appear to exist in the repository" 
+    redirect_to root_path 
+  end
+
+  def no_parent_rescue
+    flash[:error] = "Files must belong to a parent." 
+    redirect_to root_path 
+  end
 
   #Allows us to map different params 
   def update_metadata_from_upload_screen(nu_core_file)
@@ -106,7 +116,8 @@ class NuCoreFilesController < ApplicationController
       update_metadata_from_upload_screen(@nu_core_file) 
       #NuCoreFile.create_metadata(@nu_core_file, current_user, params[:batch_id], params[:collection_id])
       NuCoreFile.create_metadata(@nu_core_file, current_user, params[:collection_id])
-      NuCoreFile::Actions.create_content(@nu_core_file, file, file.original_filename, datastream_id, current_user)
+      Drs::NuFile.create_master_content_object(@nu_core_file, file, datastream_id, current_user)
+      @nu_core_file.record_version_committer(current_user)
       respond_to do |format|
         format.html {
           render :json => [@nu_core_file.to_jq_upload],

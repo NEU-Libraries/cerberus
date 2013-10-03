@@ -1,3 +1,3 @@
-class ContentTypes::PdfFile < ActiveFedora::Base
+class PdfFile < ActiveFedora::Base
   include Drs::NuFile
 end

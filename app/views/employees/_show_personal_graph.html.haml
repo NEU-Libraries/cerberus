@@ -1,0 +1,7 @@
+%h3 System Generated Folders
+- generated_folders.each do |f| 
+  %p= link_to(f.title, nu_collection_path(f.pid))
+
+%h3 User Created Folders
+- user_folders.each do |f| 
+  %p= link_to(f.title, nu_collection_path(f.pid))

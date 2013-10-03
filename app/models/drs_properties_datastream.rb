@@ -21,6 +21,7 @@ class DrsPropertiesDatastream < ActiveFedora::OmDatastream
     t.in_progress path: 'inProgress'
     # This is where we put the relative path of the file if submitted as a folder
     t.relative_path
+    t.personal_folder_type
     t.import_url path: 'importUrl', :index_as=>:symbol
   end
 
@@ -29,6 +30,14 @@ class DrsPropertiesDatastream < ActiveFedora::OmDatastream
       xml.fields
     end
     builder.doc
+  end
+
+  def get_personal_folder_type
+    if self.personal_folder_type.empty? 
+      raise "This isn't a personal folder." 
+    else
+      return self.personal_folder_type.first 
+    end
   end
 
   def in_progress?

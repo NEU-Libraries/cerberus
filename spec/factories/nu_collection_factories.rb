@@ -28,13 +28,12 @@ FactoryGirl.define do
       sequence(:description) { |n| "This is collection #{n}." } 
     end
 
-    trait :with_corporate_creators do 
-      corporate_creators ['Corp One', 'Corp Two', 'Corp Three'] 
-    end
-
-    trait :with_personal_creators do 
-      personal_creators {{ 'creator_first_names' => ["David", "Steven", "Will"], 
-                          'creator_last_names' => ["Cliff", "Bassett", "Jackson"]}}
+    trait :with_creators do 
+      creators { {
+                    'first_names' => ["David", "Steven", "Will"],
+                    'last_names'  => ["Cliff", "Bassett", "Jackson"],
+                    'corporate_names' => ['Corp One', 'Corp Two', 'Corp Three']  
+               } }
     end
 
     trait :public_read do 
@@ -56,13 +55,16 @@ FactoryGirl.define do
                       'permissions1' => {'identity_type' => 'person', 'identity' => 'billsfriend@example.com', 'permission_type' => 'read' }}}
     end
 
+    trait :is_private do 
+      mass_permissions 'private' 
+    end
+
     factory :valid_not_embargoed do 
       with_keywords 
       not_embargoed 
       issued_yesterday 
       with_description 
-      with_corporate_creators 
-      with_personal_creators 
+      with_creators
       public_read 
       with_two_edit_perms
       assigned_identifier
@@ -72,12 +74,20 @@ FactoryGirl.define do
           description "Bills new collection" 
           owned_by_bill
         end
+
+        factory :bills_private_collection do 
+          title "Bills Secret Collection" 
+          description "Bills Super Secret Collection"
+          is_private 
+          owned_by_bill 
+        end
     end
 
     factory :root_collection do 
       title "Root Collection"
       assigned_identifier
       public_read
+      owned_by_bill
     end
   end
 end

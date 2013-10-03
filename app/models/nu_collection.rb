@@ -7,7 +7,7 @@ class NuCollection < ActiveFedora::Base
   include Drs::MetadataAssignment
 
   attr_accessible :title, :description, :date_of_issue, :keywords, :parent 
-  attr_accessible :corporate_creators, :personal_creators
+  attr_accessible :creators, :personal_folder_type
 
   attr_protected :identifier 
 
@@ -18,7 +18,10 @@ class NuCollection < ActiveFedora::Base
 
   has_many :child_files, property: :is_member_of, :class_name => "NuCoreFile"
   has_many :child_collections, property: :is_member_of, :class_name => "NuCollection"
-  belongs_to :parent, property: :is_member_of, :class_name => "NuCollection" 
+
+  belongs_to :parent, property: :is_member_of, :class_name => "NuCollection"
+  belongs_to :user_parent, property: :is_member_of, :class_name => "Employee" 
+  belongs_to :department, property: :is_member_of, :class_name => "Department"
 
   # Return all collections that this user can read
   def self.find_all_viewable(user) 
@@ -27,9 +30,30 @@ class NuCollection < ActiveFedora::Base
     return filtered 
   end
 
+  # Delete all files/collections for which this item is root 
+  def recursive_delete
+    files = all_descendent_files 
+    collections = all_descendent_collections
+
+    # Need to look it up again before you try to destroy it.
+    # Is mystery. 
+    files.each do |f|
+      x = NuCoreFile.find(f.pid) if NuCoreFile.exists?(f.pid) 
+      x.destroy
+    end
+
+    collections.each do |c| 
+      x = NuCollection.find(c.pid) if NuCollection.exists?(c.pid) 
+      x.destroy 
+    end
+  end
+
+
   # Override parent= so that the string passed by the creation form can be used. 
   def parent=(collection_id)
-    if collection_id.instance_of?(String) 
+    if collection_id.nil? 
+      return true #Controller level validations are used to ensure that end users cannot do this.  
+    elsif collection_id.instance_of?(String) 
       self.add_relationship(:is_member_of, NuCollection.find(collection_id))
     elsif collection_id.instance_of?(NuCollection)
       self.add_relationship(:is_member_of, collection_id) 
@@ -38,11 +62,14 @@ class NuCollection < ActiveFedora::Base
     end
   end
 
-  def parent
-    if self.relationships(:is_member_of).any?
-      NuCollection.find(self.relationships(:is_member_of).first.partition('/').last)
+  # Override user_parent= so that the string passed by the creation form can be used. 
+  def user_parent=(employee) 
+    if employee.instance_of?(String) 
+      self.add_relationship(:is_member_of, Employee.find_by_nuid(employee)) 
+    elsif employee.instance_of? Employee 
+      self.add_relationship(:is_member_of, employee) 
     else
-      nil
+      raise "user_parent= got passed a #{employee.class}, which doesn't work." 
     end
   end
 
@@ -64,4 +91,32 @@ class NuCollection < ActiveFedora::Base
       end 
     end
   end
+
+    # Depth first(ish) traversal of a graph.  
+    def each_depth_first
+      self.child_collections.each do |child|
+        child.each_depth_first do |c|
+          yield c
+        end
+      end
+
+      yield self
+    end
+
+    # Return every descendent collection of this collection
+    def all_descendent_collections
+      result = [] 
+      each_depth_first do |child|
+        result << child 
+      end
+      return result 
+    end
+
+    def all_descendent_files 
+      result = [] 
+      each_depth_first do |child| 
+        result += child.child_files 
+      end
+      return result
+    end
 end

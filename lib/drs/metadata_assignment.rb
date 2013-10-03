@@ -6,7 +6,7 @@ module Drs
   module MetadataAssignment
     extend ActiveSupport::Concern
 
-    included do 
+    included do
       def title=(string) 
         if_DC_exists { self.DC.nu_title = string } 
         if_mods_exists { self.mods.mods_title = string }
@@ -14,7 +14,7 @@ module Drs
       end
 
       def title
-        self.DC.nu_title.first 
+        self.DC.nu_title.first
       end
 
       def identifier=(string) 
@@ -38,40 +38,53 @@ module Drs
       end
 
       def date_of_issue=(string) 
-        if_mods_exists_strict { self.mods.mods_date_issued = string } 
+        if_mods_exists { self.mods.mods_date_issued = string }
+        if_DC_exists   { self.DC.date = string }
+        if_descMetadata_exists { self.descMetadata.date_created = string }   
       end
 
       def date_of_issue
-        if_mods_exists_strict { self.mods.mods_date_issued.first } 
+        self.DC.date.first  
       end
 
       def keywords=(array_of_strings) 
-        if_mods_exists_strict { self.mods.keywords = array_of_strings } 
+        if_mods_exists { self.mods.keywords = array_of_strings }
+        if_DC_exists   { self.DC.subject = array_of_strings }
+        if_descMetadata_exists { self.descMetadata.tag = array_of_strings }
       end
 
       def keywords
-        if_mods_exists_strict { self.mods.mods_subject(0).mods_keyword } 
+        self.DC.subject 
       end
 
-      def corporate_creators=(array_of_strings) 
-        if_mods_exists_strict { self.mods.assign_corporate_names(array_of_strings) } 
+      def creators=(hash) 
+        fns = hash['first_names'] || []
+        lns = hash['last_names'] || []
+        cns = hash['corporate_names'] || []
+
+        if_mods_exists do 
+          self.mods.assign_creator_personal_names(fns, lns) 
+          self.mods.assign_corporate_names(cns) 
+        end
+
+        if_descMetadata_exists { assign_creator_array(fns, lns, cns) } 
+
+        if_DC_exists { self.DC.assign_creators(fns, lns, cns) } 
       end
 
-      def corporate_creators
-        # Eliminates some whitespace that seems to get shoved into these entries.  
-        if_mods_exists_strict { self.mods.corporate_creators } 
-      end
-
-      def personal_creators=(hash) 
-        first_names = hash['creator_first_names'] 
-        last_names = hash['creator_last_names'] 
-
-        if_mods_exists_strict { self.mods.assign_creator_personal_names(first_names, last_names)  } 
+      # Assumes you want a type agnostic dump of all creators and therefore uses the DC record 
+      def creators
+        if_DC_exists_strict { self.DC.creator } 
       end
 
       # Should return [{first: "Will", last: "Jackson"}, {first: "next_first", last: "etc"}]
       def personal_creators 
         if_mods_exists_strict { self.mods.personal_creators } 
+      end
+
+      # Should return just an array 
+      def corporate_creators  
+        if_mods_exists_strict { self.mods.corporate_creators } 
       end
 
       def depositor=(string) 
@@ -82,12 +95,68 @@ module Drs
       def depositor
         if_properties_exists_strict { self.properties.depositor.first } 
       end
+
+      def type=(array)
+        if_descMetadata_exists_strict { self.descMetadata.resource_type = array } 
+      end
+
+      def type
+        if_descMetadata_exists_strict { self.descMetadata.resource_type } 
+      end
+
+      def date_uploaded 
+        if_descMetadata_exists_strict { self.descMetadata.date_uploaded.first } 
+      end
+
+      def date_updated
+        if_descMetadata_exists_strict { self.descMetadata.date_modified.first } 
+      end
+
+
+      # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      # TODO: Eliminate once PersonalFolders can be made their own subtype
+      # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+      def personal_folder_type=(string) 
+        if_properties_exists_strict { self.properties.personal_folder_type = string } 
+      end
+
+      def personal_folder_type
+        if_properties_exists_strict { self.properties.get_personal_folder_type } 
+      end
+
+      def is_personal_folder? 
+        if_properties_exists_strict do 
+          return !self.properties.personal_folder_type.empty? 
+        end
+      end
     end
 
     private
+    
+      # Rather than pull in descMetadata for the moment, 
+      # we define this helper method that turns the first/last/corporate name arrays
+      # into a single array of ready to assign creators 
+      def assign_creator_array(fns, lns, cns) 
+        if fns.length != lns.length 
+          raise "passed #{fns.length} first names and #{lns.length} last names." 
+        end
+
+        full_names = []
+        fns.each_with_index do |fn, i| 
+          full_names << "#{fn} #{lns[i]}" 
+        end
+
+        self.descMetadata.creator = full_names + cns 
+      end
+
 
       def if_descMetadata_exists(&block) 
         verify_datastream_carefree('descMetadata', GenericFileRdfDatastream, &block) 
+      end
+
+      def if_descMetadata_exists_strict(&block) 
+        verify_datastream_strict('descMetadata', GenericFileRdfDatastream, &block) 
       end
 
       def if_mods_exists(&block)

@@ -15,13 +15,7 @@ class ZipCompilationJob
     self.entry_ids = compilation.entry_ids 
   end
 
-  # def initialize(compilation_pid)
-  #   self.compilation = Compilation.find(compilation_pid) 
-  # end
-
   def run
-    puts "Job executing take two"
-    puts self.entry_ids
 
     # Removes any stale zip files that might still be sitting around. 
     if File.directory?("#{Rails.root}/tmp/#{self.comp_pid}") 
@@ -32,8 +26,6 @@ class ZipCompilationJob
 
     zipfile_name = safe_zipfile_name
 
-    puts "Zipfile name is #{zipfile_name}"
-
     Zip::ZipOutputStream::open(safe_zipfile_name) do |io| 
       self.entry_ids.each do |id|
         entry = GenericFile.find(id)
@@ -41,9 +33,7 @@ class ZipCompilationJob
         io.put_next_entry("#{self.title}/#{assign_file_extension(entry)}") 
         io.write entry.content.content 
       end
-    end 
-
-    puts "Zipfile path is #{zipfile_name}"  
+    end  
   end
 
   private 
