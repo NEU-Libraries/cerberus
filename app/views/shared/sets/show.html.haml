@@ -11,7 +11,7 @@
     %p
       = @set.description
 
-= render partial: 'shared/show_sets'
+= render partial: 'shared/sets/show_sets'
 
 %p Actions:
 
@@ -21,7 +21,7 @@
   %br
   = render_create_department_button(@set)
 
-= render partial: 'shared/show_files', locals: { collection: @set }
+= render partial: 'shared/sets/show_files', locals: { collection: @set }
 
 
 %div#add_compilation_form{ style: 'display:none' } 
