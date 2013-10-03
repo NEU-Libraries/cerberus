@@ -1,14 +1,13 @@
 class Employee < ActiveFedora::Base
   include ActiveModel::MassAssignmentSecurity
   include ActiveModel::Validations
+  include Drs::Employee::FacultyFolders
 
   attr_accessible :nuid, :name, :department
   attr_accessor   :building
   attr_protected  :identifier
 
   validate :nuid_unique, on: :create
-
-  after_destroy :purge_personal_graph
 
   has_metadata name: 'details', type: DrsEmployeeDatastream
 
@@ -74,38 +73,6 @@ class Employee < ActiveFedora::Base
     self.details.nuid.first
   end
 
-  def root_folder 
-    return find_by_folder_type('user root')  
-  end
-
-  def research_publications 
-    return find_by_folder_type('research publications')  
-  end
-
-  def other_publications 
-    return find_by_folder_type('other publications')
-  end
-
-  def data_sets 
-    return find_by_folder_type('data sets') 
-  end
-
-  def presentations 
-    return find_by_folder_type('presentations') 
-  end
-
-  def learning_objects
-    return find_by_folder_type('learning objects') 
-  end
-
-  def sorted_folders 
-    return [research_publications, other_publications, data_sets, presentations, learning_objects] 
-  end
-
-  def personal_folders 
-    return self.folders.select { |f| f.personal_folder_type == 'miscellany' && f.parent.pid == self.root_folder.pid } 
-  end
-
   private
 
     def self.safe_employee_lookup(id, retries=0)
@@ -121,19 +88,11 @@ class Employee < ActiveFedora::Base
       end
     end
 
-    def find_by_folder_type(string) 
-      return self.folders.find{ |f| f.personal_folder_type == string } 
-    end
-
     def generate_child_folders
       fresh_lookup = Employee.find_by_nuid(self.nuid)
       if fresh_lookup.folders.empty?
         Sufia.queue.push(GenerateUserFoldersJob.new(self.id, self.nuid, self.name))
       end  
-    end
-
-    def purge_personal_graph
-      self.root_folder.recursive_delete if !self.folders.empty?
     end
 
     def nuid_unique 
