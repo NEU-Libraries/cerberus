@@ -24,7 +24,7 @@
   %br
 
 - if @set.instance_of?(NuCollection)
-  = render partial: 'shared/show_files', locals: { collection: @set }
+  = render partial: 'shared/sets/show_files', locals: { collection: @set }
 
 %div#add_compilation_form{ style: 'display:none' } 
 

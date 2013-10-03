@@ -81,7 +81,7 @@ describe DepartmentsController do
 
       get :show, { id: root_dept.identifier } 
 
-      expect(response).to render_template('shared/show') 
+      expect(response).to render_template('shared/sets/show') 
     end
 
     it "renders the show template for users with proper permissions" do 
@@ -89,7 +89,7 @@ describe DepartmentsController do
 
       get :show, { id: root_dept.identifier } 
 
-      expect(response).to render_template('shared/show') 
+      expect(response).to render_template('shared/sets/show') 
     end
   end
 
