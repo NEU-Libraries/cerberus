@@ -1,0 +1,13 @@
+= form_for @department do |f|
+  - if params[:parent].present?
+    = f.hidden_field :parent, name: 'set[parent]', :value => params[:parent] 
+  %fieldset
+    %legend Required Information
+    .row-fluid
+      .span8
+        = f.label :title, "Title *"
+        = f.text_field :title, required: true, pattern: ".*\\S.*", name: 'set[title][]', class: "input-block-level", placeholder: "Univeristy Libraries"
+    = f.label :description, "Description *"
+    = f.text_area :description, required: true, pattern: ".*\\S.*", name: 'set[description][]', class: "input-block-level", rows: 5
+  .form-actions
+    = f.submit class: ['btn', 'btn-primary', 'btn-large'], value: 'Submit'

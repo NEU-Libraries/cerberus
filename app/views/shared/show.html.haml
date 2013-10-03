@@ -20,8 +20,11 @@
 - if @set.instance_of?(Department)
   %br
   = render_create_department_button(@set)
+  %br
+  %br
 
-= render partial: 'shared/show_files', locals: { collection: @set }
+- if @set.instance_of?(NuCollection)
+  = render partial: 'shared/show_files', locals: { collection: @set }
 
 
 %div#add_compilation_form{ style: 'display:none' } 

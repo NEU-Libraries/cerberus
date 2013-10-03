@@ -14,6 +14,7 @@ class Department < ActiveFedora::Base
   attr_protected :identifier
 
   has_many :employees, property: :has_affiliation, class_name: "Employee"
+  has_many :child_collections, property: :is_member_of, :class_name => "NuCollection"
   has_many :child_departments, property: :has_affiliation, :class_name => "Department"
 
   belongs_to :parent, property: :has_affiliation, :class_name => "Department"

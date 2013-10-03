@@ -18,8 +18,8 @@ class DepartmentsController < ApplicationController
   end
 
   def new
-    @set = Department.new(parent: params[:parent])
-    render :template => 'shared/new'
+    @department = Department.new(parent: params[:parent])
+    #render :template => 'shared/new'
   end
 
   def create
@@ -37,8 +37,8 @@ class DepartmentsController < ApplicationController
   end  
 
   def edit
-    @set = Department.find(params[:id])
-    render :template => 'shared/edit'
+    @department = Department.find(params[:id])
+    #render :template => 'shared/edit'
   end
 
   def update
