@@ -17,7 +17,7 @@ class NuCollectionsController < ApplicationController
 
   def new
     @set = NuCollection.new(parent: params[:parent])
-    render :template => 'shared/new'
+    render :template => 'shared/sets/new'
   end
 
   def create
@@ -41,12 +41,12 @@ class NuCollectionsController < ApplicationController
 
   def show  
     @set = NuCollection.find(params[:id])
-    render :template => 'shared/show' 
+    render :template => 'shared/sets/show' 
   end
 
   def edit
     @set = NuCollection.find(params[:id])
-    render :template => 'shared/edit' 
+    render :template => 'shared/sets/edit' 
   end
 
   def update

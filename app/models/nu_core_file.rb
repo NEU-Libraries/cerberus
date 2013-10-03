@@ -79,7 +79,29 @@ class NuCoreFile < ActiveFedora::Base
     query_result = ActiveFedora::SolrService.query("active_fedora_model_ssi:(#{models_stringified}) AND is_part_of_ssim:#{full_self_id}", rows: 999)
 
     return assigned_lookup(query_result)
-  end  
+  end
+
+  # Find the canonical record for this object.
+  # Raise a warning if none or more than one exist.
+  def canonical_object 
+    c = self.content_objects.count { |c| c.canonical? } 
+    if c != 1 
+      Rails.logger.warn "#{pid} is returning #{c} content objects. It should have one."
+    end
+
+    self.content_objects.find { |c| c.canonical? } || false
+  end 
+
+  # Find the ImageThumbnail for this object 
+  # Raise a warning if more than one exists.
+  def thumbnail
+    c = self.content_objects.count { |c| c.instance_of? ImageThumbnailFile }
+    if c > 1
+      Rails.logger.warn "#{self.pid} is returning #{c} thumbnails.  It ought to have one or zero"
+    end
+
+    self.content_objects.find { |c| c.instance_of? ImageThumbnailFile } || false 
+  end
 
   private 
 

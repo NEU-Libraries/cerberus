@@ -22,6 +22,7 @@ class DrsPropertiesDatastream < ActiveFedora::OmDatastream
     # This is where we put the relative path of the file if submitted as a folder
     t.relative_path
     t.personal_folder_type
+    t.canonical
     t.import_url path: 'importUrl', :index_as=>:symbol
   end
 
@@ -50,5 +51,17 @@ class DrsPropertiesDatastream < ActiveFedora::OmDatastream
 
   def tag_as_completed 
     self.in_progress = [] 
+  end
+
+  def canonize
+    self.canonical = 'yes' 
+  end
+
+  def uncanonize
+    self.canonical = '' 
+  end
+
+  def canonical?
+    return self.canonical.first == 'yes' 
   end
 end

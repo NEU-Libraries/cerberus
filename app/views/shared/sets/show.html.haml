@@ -11,7 +11,7 @@
     %p
       = @set.description
 
-= render partial: 'shared/show_sets'
+= render partial: 'shared/sets/show_sets'
 
 %p Actions:
 
@@ -25,7 +25,6 @@
 
 - if @set.instance_of?(NuCollection)
   = render partial: 'shared/show_files', locals: { collection: @set }
-
 
 %div#add_compilation_form{ style: 'display:none' } 
 
