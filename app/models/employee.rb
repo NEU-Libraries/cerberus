@@ -88,13 +88,6 @@ class Employee < ActiveFedora::Base
       end
     end
 
-    def generate_child_folders
-      fresh_lookup = Employee.find_by_nuid(self.nuid)
-      if fresh_lookup.folders.empty?
-        Sufia.queue.push(GenerateUserFoldersJob.new(self.id, self.nuid, self.name))
-      end  
-    end
-
     def nuid_unique 
       if Employee.exists_by_nuid? self.nuid 
         errors.add(:nuid, "#{self.nuid} is already in use as an Employee object NUID")   
