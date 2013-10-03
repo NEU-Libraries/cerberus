@@ -32,7 +32,7 @@ describe NuCollectionsController do
 
       get :new, { parent: root.identifier } 
 
-      expect(response).to render_template('shared/new') 
+      expect(response).to render_template('shared/sets/new') 
     end
 
     it "requests signin from unauthenticated users" do 
@@ -120,7 +120,7 @@ describe NuCollectionsController do
 
       get :show, { id: root.identifier } 
 
-      expect(response).to render_template('shared/show') 
+      expect(response).to render_template('shared/sets/show') 
     end
 
     it "renders the show template for users with proper permissions" do 
@@ -128,7 +128,7 @@ describe NuCollectionsController do
 
       get :show, { id: bills_collection.identifier } 
 
-      expect(response).to render_template('shared/show') 
+      expect(response).to render_template('shared/sets/show') 
     end
   end
 
@@ -153,7 +153,7 @@ describe NuCollectionsController do
 
       get :edit, { id: bills_collection.identifier } 
 
-      expect(response).to render_template('shared/edit') 
+      expect(response).to render_template('shared/sets/edit') 
     end
   end
 

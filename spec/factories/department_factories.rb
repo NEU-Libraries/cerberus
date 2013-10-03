@@ -1,4 +1,5 @@
 FactoryGirl.define do 
+
   factory :department, class: Department do
     sequence(:title) { |n| "Department #{n}" } 
 

@@ -31,7 +31,7 @@ describe DepartmentsController do
 
       get :new, { parent: root_dept.identifier } 
 
-      expect(response).to render_template('shared/new') 
+      expect(response).to render_template('new') 
     end
 
     it "requests signin from unauthenticated users" do 
@@ -81,7 +81,7 @@ describe DepartmentsController do
 
       get :show, { id: root_dept.identifier } 
 
-      expect(response).to render_template('shared/show') 
+      expect(response).to render_template('shared/sets/show') 
     end
 
     it "renders the show template for users with proper permissions" do 
@@ -89,7 +89,7 @@ describe DepartmentsController do
 
       get :show, { id: root_dept.identifier } 
 
-      expect(response).to render_template('shared/show') 
+      expect(response).to render_template('shared/sets/show') 
     end
   end
 
@@ -114,7 +114,7 @@ describe DepartmentsController do
 
       get :edit, { id: root_dept.identifier } 
 
-      expect(response).to render_template('shared/edit') 
+      expect(response).to render_template('edit') 
     end
   end
 
