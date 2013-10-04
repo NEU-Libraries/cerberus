@@ -2,7 +2,8 @@ class DepartmentsController < ApplicationController
   include Drs::ControllerHelpers::EditableObjects 
   
   before_filter :authenticate_user!, only: [:new, :edit, :create, :update, :destroy ]
-  before_filter :can_read?, only: [:show]
+  before_filter :can_read?, only: [:show, :employees, :research_publications, :other_publications,
+                                   :presentations, :data_sets, :learning_objects]
   before_filter :can_edit?, only: [:edit, :update, :destroy]
   before_filter :can_edit_parent?, only: [:new, :create]
 
