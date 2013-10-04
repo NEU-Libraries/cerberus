@@ -24,6 +24,9 @@ class DepartmentsController < ApplicationController
   def create
     @set = Department.new(params[:set].merge(pid: mint_unique_pid))
 
+    @set.mass_permissions = 'public'
+    @set.rightsMetadata.permissions({person: "#{current_user.nuid}"}, 'edit')
+
     @set.identifier = @set.pid
 
     if @set.save!
