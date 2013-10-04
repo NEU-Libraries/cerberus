@@ -25,16 +25,6 @@ module NuCollectionsHelper
     end
   end
 
-  # Determine whether or not the viewing user can read this collection
-  def current_user_can_read?(collection) 
-    return collection.rightsMetadata.can_read?(current_user) 
-  end
-
-  # Determine whether or not the viewing user can edit this collection 
-  def current_user_can_edit?(collection) 
-    return collection.rightsMetadata.can_edit?(current_user)  
-  end
-
   # Render a button for creating a new collection within this collection
   # if the current user has edit permissions. 
   def render_create_collection_button(parent)
