@@ -1,0 +1,5 @@
+%h3= "#{@dept.title}'s Employees" 
+
+%ul 
+  - @dept.employees.each do |e| 
+    %li= "#{e.nuid}"

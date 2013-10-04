@@ -1,0 +1,3 @@
+%h3= "Presentations for #{@dept.title}" 
+
+= render partial: "core_record_query", locals: { records: @dept.presentations } 

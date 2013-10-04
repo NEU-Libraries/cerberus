@@ -48,6 +48,30 @@ class DepartmentsController < ApplicationController
     end    
   end
 
+  def employees 
+    @dept = Department.find(params[:id]) 
+  end
+
+  def research_publications
+    @dept = Department.find(params[:id])
+  end
+
+  def other_publications
+    @dept = Department.find(params[:id]) 
+  end
+
+  def presentations
+    @dept = Department.find(params[:id])
+  end
+
+  def data_sets
+    @dept = Department.find(params[:id]) 
+  end
+
+  def learning_objects 
+    @dept = Department.find(params[:id])
+  end
+
   protected 
 
     def index_redirect

@@ -1,0 +1,6 @@
+- records.each do |record|
+  %div.entry 
+    %p= "#{record.title}" 
+    %p= "#{record.description}" 
+    %p= link_to("View this item", nu_core_file_path(record.pid))
+  %p.strong * * * 
