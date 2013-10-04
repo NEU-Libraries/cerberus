@@ -38,6 +38,7 @@ limitations under the License.
   <div itemscope itemtype="http://schema.org/CreativeWork" class="span68"><!-- class="column second"> -->
     <%= render partial: 'show_actions' %>
     <%= render partial: 'show_descriptions' %>
+    <%= render partial: 'show_derivatives', locals: {contents: @nu_core_file.content_objects} %>
     <%= render partial: 'show_details' %>
     <%= render :partial => 'users/activity_log', :locals => {:events => @events} %>
   </div><!-- /columns second -->
