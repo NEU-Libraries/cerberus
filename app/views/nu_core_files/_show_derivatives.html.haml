@@ -1,0 +1,4 @@
+%h2 Downloads
+- contents.each do |content| 
+  - if current_user_can_read?(content)
+    %p= link_to("Download #{content.title}", sufia.download_path(content.pid, {datastream_id: 'content'})) 
