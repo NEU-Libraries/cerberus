@@ -82,9 +82,9 @@ module Drs
         elsif mime.raw_sub_type == 'xml'
           return XmlEadFile.new(pid: pid)
         elsif Drs::NuFile.matches_msword?(file_name)
-          return MsWordFile.new(pid: pid)
+          return MswordFile.new(pid: pid)
         elsif Drs::NuFile.matches_msexcel?(file_name) 
-          return MsExceltFile.new(pid: pid)
+          return MsexcelFile.new(pid: pid)
         elsif Drs::NuFile.matches_msppt?(file_name) 
           return MspowerpointFile.new(pid: pid) 
         else

@@ -25,7 +25,7 @@ module Drs
           '%W' => 'Northeastern University'
         }
         text = []
-        text << "%0 GenericFile"
+        text << "%0 NuCoreFile"
         end_note_format.each do |endnote_key, mapping|
           if mapping.is_a? String
             values = [mapping]
@@ -62,7 +62,7 @@ module Drs
         }
         field_map.each do |element, kev|
           values = self.send(element)
-          next if values.empty? or values.first.nil?
+          next if values.nil? or values.empty? or values.first.nil?
           if values.is_a? String
             export_text << "rft.#{kev}=#{CGI::escape(values)}"
           else  

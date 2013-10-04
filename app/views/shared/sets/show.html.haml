@@ -28,6 +28,7 @@
 
 %div#add_compilation_form{ style: 'display:none' } 
 
-%p Actions:
+- if @set.instance_of?(NuCollection)
+  %p Actions:
 
-= render_upload_files_button(@set)
+  = render_upload_files_button(@set)
