@@ -105,17 +105,28 @@ class NuCoreFilesController < ApplicationController
   end
 
   #Allows us to map different params 
-  def update_metadata_from_upload_screen(nu_core_file)
+  def update_metadata_from_upload_screen(nu_core_file, user, file, collection_id)
     # Relative path is set by the jquery uploader when uploading a directory
     nu_core_file.relative_path = params[:relative_path] if params[:relative_path]
+
+    # Context derived attributes 
+    nu_core_file.depositor = user.nuid 
+    nu_core_file.tag_as_in_progress 
+    nu_core_file.title = file.original_filename 
+    nu_core_file.date_uploaded = Date.today 
+    nu_core_file.date_modified = Date.today
+    nu_core_file.creator = user.name
+
+    nu_core_file.set_parent(NuCollection.find(collection_id), user) if !collection_id.blank? 
+
+    yield(nu_core_file) if block_given? 
+    nu_core_file.save! 
   end
 
   def process_file(file)
     if virus_check(file) == 0 
       @nu_core_file = ::NuCoreFile.new
-      update_metadata_from_upload_screen(@nu_core_file) 
-      #NuCoreFile.create_metadata(@nu_core_file, current_user, params[:batch_id], params[:collection_id])
-      NuCoreFile.create_metadata(@nu_core_file, current_user, params[:collection_id])
+      update_metadata_from_upload_screen(@nu_core_file, current_user, file, params[:collection_id])
       Drs::NuFile.create_master_content_object(@nu_core_file, file, datastream_id, current_user)
       @nu_core_file.record_version_committer(current_user)
       respond_to do |format|
