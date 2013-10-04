@@ -1,3 +1,5 @@
+- if records.empty?
+  %p= "No uploads of this type seem to exist for this department." 
 - records.each do |record|
   - if current_user_can_read?(record) 
     %div.entry 
