@@ -5,8 +5,8 @@ Drs::Application.routes.draw do
   HydraHead.add_routes(self)
   Hydra::BatchEdit.add_routes(self)
 
-  resources :nu_collections, except: [:index] 
-  get "/nu_collections" => redirect("/departments")
+  resources :nu_collections, :path => 'collections', except: [:index] 
+  get "/collections" => redirect("/departments")
 
   resources :departments, except: [:index]
   get "/departments" => 'departments#show', defaults: { id: "#{Rails.configuration.root_department_id}" }

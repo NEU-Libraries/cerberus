@@ -23,7 +23,7 @@ feature "Creating a collection" do
       visit new_nu_collection_path(parent: @root.identifier)
 
       # Because we authenticated we don't get booted out. 
-      current_path.should == '/nu_collections/new'
+      current_path.should == '/collections/new'
 
       # Verifies that hidden 'parent' parameter is set correctly
       page.all('input#nu_collection_parent').length.should == 1 
@@ -45,7 +45,7 @@ feature "Creating a collection" do
       click_button 'Submit'  
 
       # Verify we've hit the right url. 
-      current_path.include?('/nu_collections/neu:').should be true
+      current_path.include?('/collections/neu:').should be true
 
       # Verify page is displaying the collection description 
       page.should have_content('My new collection')
