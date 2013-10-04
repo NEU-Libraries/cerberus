@@ -15,24 +15,7 @@ class NuCoreFile < ActiveFedora::Base
 
   belongs_to :parent, :property => :is_member_of, :class_name => 'NuCollection'
   # call self.content_objects to get a list of all content bearing objects showing this 
-  # as their core record.  
-
-  def self.create_metadata(nu_core_file, user, collection_id)
-    nu_core_file.apply_depositor_metadata(user.user_key)
-    nu_core_file.tag_as_in_progress 
-    nu_core_file.date_uploaded = Date.today
-    nu_core_file.date_modified = Date.today
-    nu_core_file.creator = user.name
-
-    if !collection_id.blank?
-      nu_core_file.set_parent(NuCollection.find(collection_id), user)
-    else
-      logger.warn "unable to find collection to attach to"
-    end
-
-    yield(nu_core_file) if block_given?
-    nu_core_file.save!
-  end
+  # as their core record.
 
   # Safely set the parent of a collection.
   def set_parent(collection, user) 

@@ -9,7 +9,7 @@
         <div class="control-group">
           <%= f.label :title, "<span class='error'>*</span> Title #{index+1}".html_safe, :class=>"control-label" %> 
           <div class="controls" id="additional_title_clone">
-            <%= f.text_field :title, :name=>"title[#{gen_f.id}][]", :value=>gen_f.label, :required=> true %>  
+            <%= f.text_field :title, :name=>"title[#{gen_f.id}][]", :value=> gen_f.title, :required=> true %>  
             <%= help_icon(:title) %>
           </div>
         </div>
