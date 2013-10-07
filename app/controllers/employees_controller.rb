@@ -1,7 +1,11 @@
 class EmployeesController < ApplicationController 
-  before_filter :authenticate_user!
+  before_filter :authenticate_user!, only: [:personal_graph]
 
   def show
+    @employee = Employee.find(params[:id])  
+  end
+
+  def personal_graph 
     @employee = current_users_employee_id 
   end
 

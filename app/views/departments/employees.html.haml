@@ -4,4 +4,4 @@
   - if @dept.employees.empty? 
     %p No employees attached to this department just yet.  
   - @dept.employees.each do |e| 
-    %li= "#{e.nuid}"
+    %li= link_to("#{e.nuid}", employee_path(e.pid)) 
