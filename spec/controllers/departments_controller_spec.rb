@@ -10,7 +10,7 @@ describe DepartmentsController do
   end
 
   describe "GET #new" do 
-    it "redirects to the index page if no parent is set" do 
+    it "redirects to the index page if no department parent is set" do 
       sign_in bill 
 
       get :new 
@@ -18,32 +18,32 @@ describe DepartmentsController do
       expect(response).to redirect_to(departments_path) 
     end
 
-    it "redirects to the index page if it cannot find the described parent" do 
+    it "redirects to the index page if it cannot find the described department parent" do 
       sign_in bill 
 
-      get :new, {parent: 'neu:adsfasdfasdfasdfasdfa' } 
+      get :new, {department_parent: 'neu:adsfasdfasdfasdfasdfa' } 
 
       expect(response).to redirect_to(departments_path) 
     end
 
-    it "renders the new page when a parent is set" do 
+    it "renders the new page when a department parent is set" do 
       sign_in bill
 
-      get :new, { parent: root_dept.identifier } 
+      get :new, { department_parent: root_dept.identifier } 
 
       expect(response).to render_template('new') 
     end
 
     it "requests signin from unauthenticated users" do 
-      get :new, { parent: root_dept.identifier } 
+      get :new, { department_parent: root_dept.identifier } 
 
       expect(response).to redirect_to(new_user_session_path) 
     end
 
-    it "renders a 403 page for users without edit access to the parent object" do
+    it "renders a 403 page for users without edit access to the department parent object" do
       sign_in bo 
 
-      get :new, {parent: root_dept.identifier}
+      get :new, {department_parent: root_dept.identifier}
 
       response.status.should == 403 
     end
@@ -56,17 +56,17 @@ describe DepartmentsController do
       expect(response).to redirect_to(new_user_session_path) 
     end
 
-    it "403s when users attempt to create with a parent they cannot edit" do
+    it "403s when users attempt to create with a department parent they cannot edit" do
       sign_in bo
 
-      post :create, { parent: root_dept.id } 
+      post :create, { department_parent: root_dept.id } 
 
       response.status.should == 403 
     end
 
     it "redirects to the new show page on successful create" do 
       sign_in bill
-      attrs = {title: "Test", description: "test", parent: root_dept.id } 
+      attrs = {title: "Test", description: "test", department_parent: root_dept.id } 
 
       post :create, {set: attrs} 
 
