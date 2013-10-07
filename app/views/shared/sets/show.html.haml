@@ -1,4 +1,4 @@
-- if @set.parent
+- if @set.parent || @set.department
   %ul.breadcrumb 
     - breadcrumb_to_root(@set).each do |breadcrumb| 
       =breadcrumb 
