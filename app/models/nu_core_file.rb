@@ -53,10 +53,10 @@ class NuCoreFile < ActiveFedora::Base
   end
 
   def content_objects
-    all_possible_models = [ "ImageDynamicFile", "ImageHighresFile", "ImageLowresFile",
+    all_possible_models = [ "ImageSmallFile", "ImageMediumFile", "ImageLargeFile",
                             "ImageMasterFile", "ImageThumbnailFile", "MsexcelFile",
-                            "MspowerpointFile", "MswordFile", "PdfFile", "XmlEadFile",
-                            "XmlXsltFile" ]
+                            "MspowerpointFile", "MswordFile", "PdfFile", "TextFile",
+                            "ZipFile" ]
     models_stringified = all_possible_models.inject { |base, str| base + " or #{str}" }
     models_query = ActiveFedora::SolrService.escape_uri_for_query models_stringified 
     full_self_id = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/#{self.pid}"
