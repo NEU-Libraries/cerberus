@@ -29,7 +29,7 @@ module Drs::NuFile::MasterCreator
     end
   end
 
-  #private
+  private
 
     def self.instantiate_appropriate_content_object(file)
 
