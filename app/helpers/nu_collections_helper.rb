@@ -14,7 +14,7 @@ module NuCollectionsHelper
 
   # Generates an array of link/li tags that should breadcrumb back to the Root Collection  
   def breadcrumb_to_root(set, breadcrumb = [])  
-    if set.parent.nil?
+    if set.parent.nil? && set.department.nil?
       return breadcrumb.reverse
     else
       if breadcrumb.empty? 
@@ -23,7 +23,7 @@ module NuCollectionsHelper
       if set.instance_of?(NuCollection)
         breadcrumb << content_tag(:li, link_to(set.parent.title, nu_collection_path(set.parent.identifier)))
       elsif set.instance_of?(Department)
-        breadcrumb << content_tag(:li, link_to(set.parent.title, nu_collection_path(set.parent.identifier)))
+        breadcrumb << content_tag(:li, link_to(set.parent.title, department_path(set.parent.identifier)))
       end
       breadcrumb_to_root(set.parent, breadcrumb)  
     end

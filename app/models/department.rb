@@ -17,7 +17,7 @@ class Department < ActiveFedora::Base
   has_many :child_collections, property: :is_member_of, :class_name => "NuCollection"
   has_many :child_departments, property: :has_affiliation, :class_name => "Department"
 
-  belongs_to :parent, property: :has_affiliation, :class_name => "Department"
+  belongs_to :department, property: :has_affiliation, :class_name => "Department"
 
   # Override parent= so that the string passed by the creation form can be used. 
   def parent=(department_id)
