@@ -1,0 +1,5 @@
+%h3= "Research publications for #{@dept.title}"
+
+%p= "There are #{@dept.research_publications.length} publications for this department" 
+
+= render partial: "core_record_query", locals: { records: @dept.research_publications } 

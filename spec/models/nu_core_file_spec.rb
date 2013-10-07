@@ -66,7 +66,7 @@ describe NuCoreFile do
   end
 
   describe "Content files" do 
-    before :all do 
+    before :each do 
       @core_file = NuCoreFile.create(depositor: "dummy@example.com") 
       @img = ImageMasterFile.create(title: "Img", core_record: @core_file) 
       @pdf = PdfFile.create(title: "Pdf", core_record: @core_file) 
@@ -76,6 +76,14 @@ describe NuCoreFile do
 
     after(:all) { ActiveFedora::Base.destroy_all } 
 
+
+    it "are destroyed when the core record is destroyed" do 
+      @core_file.destroy
+      ImageMasterFile.exists?(@img.pid).should be false 
+      PdfFile.exists?(@pdf.pid).should be false 
+      MswordFile.exists?(@word.pid).should be false 
+      MswordFile.exists?(@word_unassociated.pid).should be true
+    end
 
     it "can be found using the .content_objects method" do 
       result = @core_file.content_objects

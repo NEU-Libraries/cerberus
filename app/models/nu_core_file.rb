@@ -13,6 +13,8 @@ class NuCoreFile < ActiveFedora::Base
   attr_accessible :title, :identifier, :description, :date_of_issue 
   attr_accessible :keywords, :creators, :depositor, :type
 
+  before_destroy :purge_content_bearing_objects
+
   belongs_to :parent, :property => :is_member_of, :class_name => 'NuCollection'
   # call self.content_objects to get a list of all content bearing objects showing this 
   # as their core record.
@@ -87,6 +89,12 @@ class NuCoreFile < ActiveFedora::Base
   end
 
   private 
+
+    def purge_content_bearing_objects 
+      self.content_objects.each do |e| 
+        e.destroy 
+      end
+    end
 
     def assigned_lookup(solr_query_result)
       return solr_query_result.map { |r| r["active_fedora_model_ssi"].constantize.find(r["id"]) } 

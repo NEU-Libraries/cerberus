@@ -2,7 +2,8 @@ class DepartmentsController < ApplicationController
   include Drs::ControllerHelpers::EditableObjects 
   
   before_filter :authenticate_user!, only: [:new, :edit, :create, :update, :destroy ]
-  before_filter :can_read?, only: [:show]
+  before_filter :can_read?, only: [:show, :employees, :research_publications, :other_publications,
+                                   :presentations, :data_sets, :learning_objects]
   before_filter :can_edit?, only: [:edit, :update, :destroy]
   before_filter :can_edit_parent?, only: [:new, :create]
 
@@ -23,6 +24,9 @@ class DepartmentsController < ApplicationController
 
   def create
     @set = Department.new(params[:set].merge(pid: mint_unique_pid))
+
+    @set.mass_permissions = 'public'
+    @set.rightsMetadata.permissions({person: "#{current_user.nuid}"}, 'edit')
 
     @set.identifier = @set.pid
 
@@ -46,6 +50,30 @@ class DepartmentsController < ApplicationController
     else
       redirect_to(@set, notice: "Department #{@set.title} failed to update.")
     end    
+  end
+
+  def employees 
+    @dept = Department.find(params[:id]) 
+  end
+
+  def research_publications
+    @dept = Department.find(params[:id])
+  end
+
+  def other_publications
+    @dept = Department.find(params[:id]) 
+  end
+
+  def presentations
+    @dept = Department.find(params[:id])
+  end
+
+  def data_sets
+    @dept = Department.find(params[:id]) 
+  end
+
+  def learning_objects 
+    @dept = Department.find(params[:id])
   end
 
   protected 
