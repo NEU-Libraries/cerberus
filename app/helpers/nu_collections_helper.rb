@@ -13,8 +13,8 @@ module NuCollectionsHelper
   end
 
   # Generates an array of link/li tags that should breadcrumb back to the Root Collection  
-  def breadcrumb_to_root(set, breadcrumb = [])  
-    if set.parent.nil? && set.department.nil?
+  def breadcrumb_to_root(set, breadcrumb = [])    
+    if set.nil? || (set.parent.nil? && set.department.nil?)
       return breadcrumb.reverse
     else
       if breadcrumb.empty? 
