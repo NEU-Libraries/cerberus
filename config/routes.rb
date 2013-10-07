@@ -33,7 +33,8 @@ Drs::Application.routes.draw do
   get "/files/rescue_incomplete_files" => "nu_core_files#rescue_incomplete_files", as: 'rescue_incomplete_files'
   match "/incomplete_files" => "nu_core_files#destroy_incomplete_files", via: 'delete', as: 'destroy_incomplete_files'
 
-  get '/my_stuff' => 'employees#show', as: 'personal_graph' 
+  get '/employees/:id' => 'employees#show', as: 'employee'
+  get '/my_stuff' => 'employees#personal_graph', as: 'personal_graph' 
 
   # Generic file routes
   resources :nu_core_files, :path => :files, :except => :index do
