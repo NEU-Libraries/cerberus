@@ -20,9 +20,9 @@ module NuCollectionsHelper
       if breadcrumb.empty? 
         breadcrumb << content_tag(:li, set.title, class: 'active')  
       end
-      if set.instance_of?(NuCollection)
+      if set.department.nil?
         breadcrumb << content_tag(:li, link_to(set.parent.title, nu_collection_path(set.parent.identifier)))
-      elsif set.instance_of?(Department)
+      elsif set.parent.nil?
         breadcrumb << content_tag(:li, link_to(set.department.title, department_path(set.department.identifier)))
       end
       breadcrumb_to_root(set.parent, breadcrumb)  
