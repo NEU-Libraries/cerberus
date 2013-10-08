@@ -1,3 +1,5 @@
+require 'filemagic'
+
 class ContentCreationJob 
 
   attr_accessor :core_file_pid, :file_path, :file_name, :user_id 
@@ -22,22 +24,27 @@ class ContentCreationJob
       content_object = instantiate_appropriate_content_object(file_path, file_name) 
 
 
-      file_contents = File.open(file_path)
-      content_object.add_file(file_contents, 'content', file_name) 
+      # Perform special processing to zip files.  Just drop in other file types.
+      if content_object.instance_of? ZipFile 
+        zip_content(content_object) 
+      else
+        file_contents = File.open(file_path)
+        content_object.add_file(file_contents, 'content', file_name) 
+      end
+
       content_object.core_record =  core_record
       content_object.title       =  file_name
       content_object.identifier  =  content_object.pid
       content_object.depositor   =  user.nuid
       content_object.canonize
 
-      content_object.save!
+      content_object.save! ? content_object : false
     ensure 
-      temp_dir = file_path.chomp(file_name) 
-      FileUtils.rm_rf(temp_dir) 
+      FileUtils.rm(file_path)
     end
   end
 
-  private 
+  private
 
     def instantiate_appropriate_content_object(file_path, file_name)
 
@@ -64,6 +71,24 @@ class ContentCreationJob
         return ZipFile.new(pid: pid) 
       end
     end
+
+    def zip_content(content_object)
+      begin 
+        z = File.basename(file_name, ".*") + ".zip"
+
+        zipfile_name = Rails.root.join("tmp", z).to_s
+
+        Zip::Archive.open(zipfile_name, Zip::CREATE) do |zipfile| 
+          zipfile.add_file(file_path)
+        end
+
+        puts zipfile_name
+        f = File.open(zipfile_name)
+        content_object.add_file(f, "content", File.basename(zipfile_name))
+      ensure 
+        FileUtils.rm(zipfile_name) 
+      end
+    end 
 
     # Takes a string like "image/jpeg ; encoding=binary" 
     # And turns it into the hash {raw_type: 'image', sub_type: 'jpeg', encoding: 'binary'} 
