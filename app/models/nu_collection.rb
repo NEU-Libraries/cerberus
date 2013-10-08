@@ -140,5 +140,6 @@ class NuCollection < ActiveFedora::Base
     def belong_check
       if !self.parent.nil? && !self.department_parent.nil?
         raise "Colelction can't have two parent objects"
+      end
     end
 end
