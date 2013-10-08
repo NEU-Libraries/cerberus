@@ -126,15 +126,10 @@ class NuCoreFilesController < ApplicationController
   def process_file(file)
     if virus_check(file) == 0 
       @nu_core_file = ::NuCoreFile.new
-      puts "Here is your tempfile path:" 
-      puts "#{file.tempfile.path}" 
-
-      puts "#{file.tempfile.path}"
-
+      
       # We move the file contents to a more permanent location so that our ContentCreationJob can access them.
       # An ensure block in that job handles cleanup of this file.
-      tempdir = Rails.root.join("tmp", "#{SecureRandom.hex}")
-      a = FileUtils.mkdir(tempdir.to_s)
+      tempdir = Rails.root.join("tmp")
       new_path = tempdir.join("#{file.original_filename}") 
       FileUtils.mv(file.tempfile.path, new_path.to_s)
 
