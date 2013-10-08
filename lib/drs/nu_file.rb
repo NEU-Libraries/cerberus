@@ -7,7 +7,6 @@ module Drs
     include Drs::MetadataAssignment
     include Drs::Rights::MassPermissions
     include Drs::NuFile::Characterizable
-    include Drs::NuFile::MasterCreator
     include Hydra::Derivatives 
 
     included do
