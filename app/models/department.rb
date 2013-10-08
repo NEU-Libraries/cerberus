@@ -10,25 +10,29 @@ class Department < ActiveFedora::Base
   has_metadata name: 'rightsMetadata', type: ParanoidRightsDatastream
   has_metadata name: 'properties', type: DrsPropertiesDatastream
 
-  attr_accessible :title, :description, :parent
+  attr_accessible :title, :description, :department_parent
   attr_protected :identifier
 
   has_many :employees, property: :has_affiliation, class_name: "Employee"
   has_many :child_collections, property: :is_member_of, :class_name => "NuCollection"
   has_many :child_departments, property: :has_affiliation, :class_name => "Department"
 
-  belongs_to :department, property: :has_affiliation, :class_name => "Department"
+  belongs_to :department_parent, property: :has_affiliation, :class_name => "Department"
+
+  def parent()
+    return nil
+  end
 
   # Override parent= so that the string passed by the creation form can be used. 
-  def parent=(department_id)
+  def department_parent=(department_id)
     if department_id.nil? 
       return true #Controller level validations are used to ensure that end users cannot do this.  
     elsif department_id.instance_of?(String) 
-      self.add_relationship(:is_member_of, Department.find(department_id))
+      self.add_relationship(:has_affiliation, Department.find(department_id))
     elsif department_id.instance_of?(Department)
-      self.add_relationship(:is_member_of, department_id) 
+      self.add_relationship(:has_affiliation, department_id) 
     else
-      raise "parent= got passed a #{department_id.class}, which doesn't work."
+      raise "department_parent= got passed a #{department_id.class}, which doesn't work."
     end
   end
 
