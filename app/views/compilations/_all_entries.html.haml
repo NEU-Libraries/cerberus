@@ -2,7 +2,7 @@
 %ul
   - entries.each do |entry| 
     %li 
-      %p= entry.title.first
-      = link_to("View #{entry.title.first}", nu_core_file_path(entry))
+      %p= entry.title
+      = link_to("View #{entry.title}", nu_core_file_path(entry))
       %span.spacer //
       = link_to("Remove from compilation", delete_entry_path(id: compilation.pid, entry_id: entry.pid), method: 'delete') 
