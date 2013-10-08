@@ -23,6 +23,25 @@ module Drs
         end
       end
 
+      def can_edit_department_parent?
+
+        department_parent_id = find_department_parent(params)
+
+        if department_parent_id.nil?
+          raise NoDepartmentParentFoundError 
+        end
+
+        department_parent_object = assign_to_model(department_parent_id)
+
+        if current_user.nil?
+          render_403 
+        elsif current_user.can? :edit, department_parent_object
+          return true
+        else
+          render_403
+        end
+      end      
+
       def can_read? 
         record = assign_to_model(params[:id]) 
 
@@ -56,6 +75,18 @@ module Drs
               exit
             elsif v.is_a? Hash 
               return find_parent(v) 
+            end
+          end
+          return nil 
+        end
+
+        def find_department_parent(hash) 
+          hash.each do |k, v| 
+            if k == 'department_parent' || k == :department_parent 
+              return v
+              exit
+            elsif v.is_a? Hash 
+              return find_department_parent(v) 
             end
           end
           return nil 
@@ -102,6 +133,12 @@ module Drs
         class NoParentFoundError < StandardError 
           def initialize
             super "No parent set" 
+          end
+        end
+
+        class NoDepartmentParentFoundError < StandardError 
+          def initialize
+            super "No department parent set" 
           end
         end
 

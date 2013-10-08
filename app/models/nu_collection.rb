@@ -6,6 +6,8 @@ class NuCollection < ActiveFedora::Base
   include Drs::Rights::InheritedRestrictions
   include Drs::MetadataAssignment
 
+  before_save :belong_check
+
   attr_accessible :title, :description, :date_of_issue, :keywords, :parent 
   attr_accessible :creators, :personal_folder_type
 
@@ -21,7 +23,7 @@ class NuCollection < ActiveFedora::Base
 
   belongs_to :parent, property: :is_member_of, :class_name => "NuCollection"
   belongs_to :user_parent, property: :is_member_of, :class_name => "Employee" 
-  belongs_to :department, property: :is_member_of, :class_name => "Department"
+  belongs_to :department_parent, property: :is_member_of, :class_name => "Department"
 
   # Return all collections that this user can read
   def self.find_all_viewable(user) 
@@ -62,6 +64,19 @@ class NuCollection < ActiveFedora::Base
     end
   end
 
+  # Override parent= so that the string passed by the creation form can be used. 
+  def department_parent=(department_id)
+    if department_id.nil? 
+      return true #Controller level validations are used to ensure that end users cannot do this.  
+    elsif department_id.instance_of?(String) 
+      self.add_relationship(:is_member_of, Department.find(department_id))
+    elsif department_id.instance_of?(Department)
+      self.add_relationship(:is_member_of, department_id) 
+    else
+      raise "department_parent= got passed a #{department_id.class}, which doesn't work."
+    end
+  end
+
   # Override user_parent= so that the string passed by the creation form can be used. 
   def user_parent=(employee) 
     if employee.instance_of?(String) 
@@ -92,31 +107,39 @@ class NuCollection < ActiveFedora::Base
     end
   end
 
-    # Depth first(ish) traversal of a graph.  
-    def each_depth_first
-      self.child_collections.each do |child|
-        child.each_depth_first do |c|
-          yield c
-        end
+  # Depth first(ish) traversal of a graph.  
+  def each_depth_first
+    self.child_collections.each do |child|
+      child.each_depth_first do |c|
+        yield c
       end
-
-      yield self
     end
 
-    # Return every descendent collection of this collection
-    def all_descendent_collections
-      result = [] 
-      each_depth_first do |child|
-        result << child 
-      end
-      return result 
-    end
+    yield self
+  end
 
-    def all_descendent_files 
-      result = [] 
-      each_depth_first do |child| 
-        result += child.child_files 
+  # Return every descendent collection of this collection
+  def all_descendent_collections
+    result = [] 
+    each_depth_first do |child|
+      result << child 
+    end
+    return result 
+  end
+
+  def all_descendent_files 
+    result = [] 
+    each_depth_first do |child| 
+      result += child.child_files 
+    end
+    return result
+  end
+
+  protected
+
+    def belong_check
+      if !self.parent.nil? && !self.department_parent.nil?
+        raise "Colelction can't have two parent objects"
       end
-      return result
     end
 end

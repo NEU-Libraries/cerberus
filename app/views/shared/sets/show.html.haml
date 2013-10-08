@@ -1,7 +1,7 @@
-- if @set.parent
-  %ul.breadcrumb 
-    - breadcrumb_to_root(@set).each do |breadcrumb| 
-      =breadcrumb 
+
+%ul.breadcrumb 
+  - breadcrumb_to_root(@set).each do |breadcrumb| 
+    =breadcrumb 
 
 %h2.page-header= @set.title 
 
