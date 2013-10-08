@@ -19,6 +19,10 @@ class Department < ActiveFedora::Base
 
   belongs_to :department_parent, property: :has_affiliation, :class_name => "Department"
 
+  def parent()
+    return nil
+  end
+
   # Override parent= so that the string passed by the creation form can be used. 
   def department_parent=(department_id)
     if department_id.nil? 
@@ -28,7 +32,7 @@ class Department < ActiveFedora::Base
     elsif department_id.instance_of?(Department)
       self.add_relationship(:has_affiliation, department_id) 
     else
-      raise "department= got passed a #{department_id.class}, which doesn't work."
+      raise "department_parent= got passed a #{department_id.class}, which doesn't work."
     end
   end
 

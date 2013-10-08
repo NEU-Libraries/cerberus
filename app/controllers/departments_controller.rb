@@ -5,9 +5,9 @@ class DepartmentsController < ApplicationController
   before_filter :can_read?, only: [:show, :employees, :research_publications, :other_publications,
                                    :presentations, :data_sets, :learning_objects]
   before_filter :can_edit?, only: [:edit, :update, :destroy]
-  before_filter :can_edit_parent?, only: [:new, :create]
+  before_filter :can_edit_department_parent?, only: [:new, :create]
 
-  rescue_from NoParentFoundError, with: :index_redirect
+  rescue_from NoDepartmentParentFoundError, with: :index_redirect
   rescue_from IdNotFoundError, with: :index_redirect_with_bad_id  
 
   def index
@@ -19,7 +19,7 @@ class DepartmentsController < ApplicationController
   end
 
   def new
-    @department = Department.new(parent: params[:parent])
+    @department = Department.new(department_parent: params[:department_parent])
   end
 
   def create
@@ -35,7 +35,7 @@ class DepartmentsController < ApplicationController
       redirect_to department_path(id: @set.identifier) and return  
     else
       flash.now[:error] = "Something went wrong"
-      redirect_to new_department_path(parent: params[:parent]) and return 
+      redirect_to new_department_path(department_parent: params[:department_parent]) and return 
     end
   end  
 

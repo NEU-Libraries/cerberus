@@ -62,6 +62,19 @@ class NuCollection < ActiveFedora::Base
     end
   end
 
+  # Override parent= so that the string passed by the creation form can be used. 
+  def department_parent=(department_id)
+    if department_id.nil? 
+      return true #Controller level validations are used to ensure that end users cannot do this.  
+    elsif department_id.instance_of?(String) 
+      self.add_relationship(:is_member_of, Department.find(department_id))
+    elsif department_id.instance_of?(Department)
+      self.add_relationship(:is_member_of, department_id) 
+    else
+      raise "department_parent= got passed a #{department_id.class}, which doesn't work."
+    end
+  end
+
   # Override user_parent= so that the string passed by the creation form can be used. 
   def user_parent=(employee) 
     if employee.instance_of?(String) 
