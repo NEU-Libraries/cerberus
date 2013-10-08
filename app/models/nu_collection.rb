@@ -6,6 +6,8 @@ class NuCollection < ActiveFedora::Base
   include Drs::Rights::InheritedRestrictions
   include Drs::MetadataAssignment
 
+  before_save :belong_check
+
   attr_accessible :title, :description, :date_of_issue, :keywords, :parent 
   attr_accessible :creators, :personal_folder_type
 
@@ -105,31 +107,38 @@ class NuCollection < ActiveFedora::Base
     end
   end
 
-    # Depth first(ish) traversal of a graph.  
-    def each_depth_first
-      self.child_collections.each do |child|
-        child.each_depth_first do |c|
-          yield c
-        end
+  # Depth first(ish) traversal of a graph.  
+  def each_depth_first
+    self.child_collections.each do |child|
+      child.each_depth_first do |c|
+        yield c
       end
-
-      yield self
     end
 
-    # Return every descendent collection of this collection
-    def all_descendent_collections
-      result = [] 
-      each_depth_first do |child|
-        result << child 
-      end
-      return result 
-    end
+    yield self
+  end
 
-    def all_descendent_files 
-      result = [] 
-      each_depth_first do |child| 
-        result += child.child_files 
-      end
-      return result
+  # Return every descendent collection of this collection
+  def all_descendent_collections
+    result = [] 
+    each_depth_first do |child|
+      result << child 
+    end
+    return result 
+  end
+
+  def all_descendent_files 
+    result = [] 
+    each_depth_first do |child| 
+      result += child.child_files 
+    end
+    return result
+  end
+
+  protected
+
+    def belong_check
+      if !self.parent.nil? && !self.department_parent.nil?
+        raise "Colelction can't have two parent objects"
     end
 end
