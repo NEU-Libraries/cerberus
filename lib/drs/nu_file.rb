@@ -7,7 +7,8 @@ module Drs
     include Drs::MetadataAssignment
     include Drs::Rights::MassPermissions
     include Drs::NuFile::Characterizable
-    include Hydra::Derivatives 
+    include Hydra::Derivatives
+    include Drs::Find 
 
     included do
       attr_accessible :title, :description, :keywords, :identifier
