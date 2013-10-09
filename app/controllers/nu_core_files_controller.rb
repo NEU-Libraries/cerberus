@@ -22,8 +22,8 @@ class NuCoreFilesController < ApplicationController
   skip_load_and_authorize_resource only: [:provide_metadata, :rescue_incomplete_files, :destroy_incomplete_files, :process_metadata] 
   
   before_filter :can_edit_parent?, only: [:new]
-  rescue_from IdNotFoundError, with: :no_id_rescue
-  rescue_from NoParentFoundError, with: :no_parent_rescue
+  rescue_from Exceptions::IdNotFoundError, with: :no_id_rescue
+  rescue_from Exceptions::NoParentFoundError, with: :no_parent_rescue
 
   def destroy_incomplete_files
     NuCoreFile.users_in_progress_files(current_user).each do |file|
