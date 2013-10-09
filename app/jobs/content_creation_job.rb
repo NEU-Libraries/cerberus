@@ -57,6 +57,10 @@ class ContentCreationJob
         return ImageMasterFile.new(pid: pid) 
       elsif is_pdf?(fmagic_result)
         return PdfFile.new(pid: pid) 
+      elsif is_audio?(fmagic_result) 
+        return AudioFile.new(pid: pid) 
+      elsif is_video?(fmagic_result)
+        return VideoFile.new(pid: pid) 
       elsif is_msword?(fmagic_result, file_name)
         return MswordFile.new(pid: pid) 
       elsif is_msexcel?(fmagic_result, file_name) 
@@ -107,6 +111,14 @@ class ContentCreationJob
 
     def is_pdf?(fm_hash) 
       return fm_hash[:sub_type] == 'pdf'
+    end
+
+    def is_video?(fm_hash) 
+      return fm_hash[:raw_type] == 'video' 
+    end
+
+    def is_audio?(fm_hash) 
+      return fm_hash[:raw_type] == 'audio' 
     end
 
     def is_msword?(fm_hash, fname)
