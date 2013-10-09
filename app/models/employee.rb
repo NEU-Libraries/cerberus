@@ -94,29 +94,4 @@ class Employee < ActiveFedora::Base
         errors.add(:nuid, "#{self.nuid} is already in use as an Employee object NUID")   
       end
     end
-
-    class NoSuchNuidError < StandardError
-      attr_accessor :nuid 
-      def initialize(nuid)
-        self.nuid = nuid 
-        super("No Employee object with nuid #{self.nuid} could be found in the graph.") 
-      end
-    end
-
-    class MultipleMatchError < StandardError 
-      attr_accessor :arry, :nuid 
-      def initialize(array_of_pids, nuid) 
-        self.arry = array_of_pids 
-        self.nuid = nuid 
-        super("The following Employees all have nuid = #{self.nuid} (that's bad): #{arry}")
-      end
-    end
-
-    class EmployeeWontStopBuildingError < StandardError 
-      attr_accessor :nuid 
-      def initialize(nuid) 
-        self.nuid = nuid
-        super("Employee object with nuid #{self.nuid} seems to be stuck in progress.") 
-      end
-    end
 end

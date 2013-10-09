@@ -16,11 +16,5 @@ module Drs
       end
     end
 
-    class SearchResultTypeError < StandardError 
-      def initialize(pid, objClass, superClass)
-        super "Expected pid of #{pid} to return type #{superClass} but got #{objClass}"
-      end
-    end
-
   end
 end

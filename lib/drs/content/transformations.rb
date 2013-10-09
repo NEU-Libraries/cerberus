@@ -115,12 +115,7 @@ module Drs
             raise ParentMismatchError.new(parent, klass)
           end
         end
-
-        class ParentMismatchError < StandardError 
-          def initialize(parent, klass) 
-            super "Expected parent to be an instance of #{klass}, but it was an instance of #{parent.class}" 
-          end
-        end  
+         
     end
   end
 end

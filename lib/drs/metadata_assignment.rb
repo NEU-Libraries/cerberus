@@ -211,16 +211,5 @@ module Drs
         return self.datastreams.keys.include?(ds_name) && self.datastreams[ds_name].instance_of?(ds_class)
       end
 
-      class DatastreamNotFoundError < StandardError
-        attr_accessor :ds_name, :ds_classname, :object_classname 
-
-        def initialize(ds_name, ds_class, calling_object)
-          self.ds_name = ds_name 
-          self.ds_classname = ds_class.to_s 
-          self.object_classname = calling_object.class.to_s
-
-          super("Datastream with name #{ds_name} of class #{ds_classname} not defined for objects of type #{object_classname}.")  
-        end
-      end
   end
 end

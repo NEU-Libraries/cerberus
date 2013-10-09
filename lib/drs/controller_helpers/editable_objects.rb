@@ -129,24 +129,7 @@ module Drs
           end
           render_403
         end
-
-        class NoParentFoundError < StandardError 
-          def initialize
-            super "No parent set" 
-          end
-        end
-
-        class NoDepartmentParentFoundError < StandardError 
-          def initialize
-            super "No department parent set" 
-          end
-        end
-
-        class IdNotFoundError < StandardError 
-          def initialize(id) 
-            super "No item could be found in Fedora with id: #{id}" 
-          end
-        end
+        
     end
   end
 end

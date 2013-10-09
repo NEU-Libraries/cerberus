@@ -7,9 +7,11 @@ class NuCollectionsController < ApplicationController
   before_filter :can_edit?, only: [:edit, :update, :destroy]
 
   before_filter :can_edit_parent?, only: [:new, :create]
-  before_filter :parent_is_personal_folder?, only: [:new, :create] 
+  before_filter :parent_is_personal_folder?, only: [:new, :create]
+
   rescue_from NoParentFoundError, with: :index_redirect
   rescue_from IdNotFoundError, with: :index_redirect_with_bad_id
+  rescue_from SearchResultTypeError, with: :index_redirect_with_bad_search
 
   def index
     #should be removed?
@@ -68,6 +70,11 @@ class NuCollectionsController < ApplicationController
     def index_redirect_with_bad_id 
       flash[:error] = "The id you specified does not seem to exist in Fedora." 
       redirect_to nu_collections_path and return 
+    end
+
+    def index_redirect_with_bad_search(exception)
+      flash[:error] = exception
+      redirect_to nu_collections_path and return
     end
 
     # In cases where a personal folder is being created,
