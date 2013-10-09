@@ -2,27 +2,31 @@ module Drs
   module Content
     module Transformations
 
-      # Convenience method that takes an arbitrary parent and updates its thumbnail.
-      def self.update_thumbnail(parent)
+      # Generates derivatives based off of (an assumed) canonical object. 
+      # Cleans up old derivatives as part of the creation process.
+      def self.generate_derivatives(parent) 
         purge_thumbnail(parent) 
 
-        if parent.instance_of? ImageMasterFile
-          image_to_thumbnail(parent)
+        if parent.instance_of? ImageMasterFile 
+          image_to_thumbnail(parent) 
         elsif parent.instance_of? PdfFile 
           pdf_to_thumbnail(parent) 
         elsif parent.instance_of? MswordFile 
           purge_pdf(parent) 
           word_to_thumbnail(parent) 
+        elsif parent.instance_of? MsexcelFile
+          Rails.logger.warn "Msexcel file transformations currently unimplemented."
+          # purge_csv(parent) 
+          # excel_to_csv(parent) 
         end
       end
 
-
-      def self.image_to_thumbnail(parent, **options)
-        image_pdf_to_thumbnail(parent, ImageMasterFile, options) 
+      def self.image_to_thumbnail(parent)
+        image_pdf_to_thumbnail(parent, ImageMasterFile) 
       end
 
-      def self.pdf_to_thumbnail(parent, **options)
-        image_pdf_to_thumbnail(parent, PdfFile, options)
+      def self.pdf_to_thumbnail(parent)
+        image_pdf_to_thumbnail(parent, PdfFile)
       end
 
       def self.word_to_pdf(parent)
@@ -39,6 +43,22 @@ module Drs
 
         # Return the object if it saves successfully and false otherwise
         child.save! ? child : false
+      end
+
+
+      def self.excel_to_csv(parent) 
+        assert_parent_is(parent, MsexcelFile) 
+
+        desc = "CSV generated off of excel document at #{parent.pid}" 
+
+        child = instantiate_with_metadata(parent, "#{parent.title} CSV", desc, TextFile) 
+
+        # Create the csv and add it to the child 
+        parent.transform_datastream :content, { excel: { format: 'csv', datastream: 'excel'} }, processor: 'document' 
+        child.add_file(parent.excel.content, 'content', change_file_extension(parent.label, 'csv'))
+
+        # Return the object if it saves successfully and false otherwise 
+        child.save! ? child : falses
       end
 
       def self.word_to_thumbnail(parent) 
@@ -71,7 +91,13 @@ module Drs
           pdf.destroy unless pdf.nil? 
         end
 
-        def self.image_pdf_to_thumbnail(parent, klass, options)
+        def self.purge_csv(parent) 
+          core = parent.core_record 
+          csv = core.content_objects.find { |p| p.instance_of? TextFile }
+          csv.destroy unless csv.nil? 
+        end
+
+        def self.image_pdf_to_thumbnail(parent, klass)
           assert_parent_is(parent, klass) 
 
           desc = "Thumbnail for #{parent.pid}" 
