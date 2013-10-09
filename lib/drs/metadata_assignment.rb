@@ -203,7 +203,7 @@ module Drs
         if datastream_exists?(ds_name, ds_class) 
           action.call 
         else
-          raise DatastreamNotFoundError.new(ds_name, ds_class, self) 
+          raise Exceptions::DatastreamNotFoundError.new(ds_name, ds_class, self) 
         end
       end
 

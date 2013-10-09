@@ -9,7 +9,7 @@ module Drs
         parent_id = find_parent(params)
 
         if parent_id.nil?
-          raise NoParentFoundError 
+          raise Exceptions::NoParentFoundError 
         end
 
         parent_object = assign_to_model(parent_id)
@@ -28,7 +28,7 @@ module Drs
         department_parent_id = find_department_parent(params)
 
         if department_parent_id.nil?
-          raise NoDepartmentParentFoundError 
+          raise Exceptions::NoDepartmentParentFoundError 
         end
 
         department_parent_object = assign_to_model(department_parent_id)
@@ -94,7 +94,7 @@ module Drs
 
         def assign_to_model(id)
           if !ActiveFedora::Base.exists?(id) 
-            raise IdNotFoundError.new(id) 
+            raise Exceptions::IdNotFoundError.new(id) 
           end
           base_object = ActiveFedora::Base.find(id)
           model_name = classname_from_fedora(base_object)
@@ -107,7 +107,7 @@ module Drs
           if editable_strings.include?(string) 
             return string.constantize.find(id) 
           else
-            raise NoParentFoundError 
+            raise Exceptions::NoParentFoundError 
           end
         end
 

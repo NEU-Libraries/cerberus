@@ -112,7 +112,7 @@ module Drs
 
         def self.assert_parent_is(parent, klass) 
           if !parent.instance_of? klass 
-            raise ParentMismatchError.new(parent, klass)
+            raise Exceptions::ParentMismatchError.new(parent, klass)
           end
         end
          

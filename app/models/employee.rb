@@ -23,10 +23,10 @@ class Employee < ActiveFedora::Base
     escaped_param = ActiveFedora::SolrService.escape_uri_for_query(nuid)
     query_result = ActiveFedora::SolrService.query("active_fedora_model_ssi:Employee AND nuid_tesim:(#{escaped_param})", :rows=>999)
     if query_result.length == 0 
-      raise NoSuchNuidError.new(nuid)
+      raise Exceptions::NoSuchNuidError.new(nuid)
     elsif query_result.length > 1 
       all_pids = query_result.map { |r| r["id"] } 
-      raise MultipleMatchError.new(all_pids, nuid) 
+      raise Exceptions::MultipleMatchError.new(all_pids, nuid) 
     else
       Employee.safe_employee_lookup(query_result.first["id"]) 
     end
@@ -85,7 +85,7 @@ class Employee < ActiveFedora::Base
         sleep 3
         safe_employee_lookup(id, retries + 1) 
       else
-        raise EmployeeWontStopBuildingError.new(id)
+        raise Exceptions::EmployeeWontStopBuildingError.new(id)
       end
     end
 
