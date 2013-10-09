@@ -23,10 +23,10 @@ class Employee < ActiveFedora::Base
     escaped_param = ActiveFedora::SolrService.escape_uri_for_query(nuid)
     query_result = ActiveFedora::SolrService.query("active_fedora_model_ssi:Employee AND nuid_tesim:(#{escaped_param})", :rows=>999)
     if query_result.length == 0 
-      raise NoSuchNuidError.new(nuid)
+      raise Exceptions::NoSuchNuidError.new(nuid)
     elsif query_result.length > 1 
       all_pids = query_result.map { |r| r["id"] } 
-      raise MultipleMatchError.new(all_pids, nuid) 
+      raise Exceptions::MultipleMatchError.new(all_pids, nuid) 
     else
       Employee.safe_employee_lookup(query_result.first["id"]) 
     end
@@ -85,38 +85,13 @@ class Employee < ActiveFedora::Base
         sleep 3
         safe_employee_lookup(id, retries + 1) 
       else
-        raise EmployeeWontStopBuildingError.new(id)
+        raise Exceptions::EmployeeWontStopBuildingError.new(id)
       end
     end
 
     def nuid_unique 
       if Employee.exists_by_nuid? self.nuid 
         errors.add(:nuid, "#{self.nuid} is already in use as an Employee object NUID")   
-      end
-    end
-
-    class NoSuchNuidError < StandardError
-      attr_accessor :nuid 
-      def initialize(nuid)
-        self.nuid = nuid 
-        super("No Employee object with nuid #{self.nuid} could be found in the graph.") 
-      end
-    end
-
-    class MultipleMatchError < StandardError 
-      attr_accessor :arry, :nuid 
-      def initialize(array_of_pids, nuid) 
-        self.arry = array_of_pids 
-        self.nuid = nuid 
-        super("The following Employees all have nuid = #{self.nuid} (that's bad): #{arry}")
-      end
-    end
-
-    class EmployeeWontStopBuildingError < StandardError 
-      attr_accessor :nuid 
-      def initialize(nuid) 
-        self.nuid = nuid
-        super("Employee object with nuid #{self.nuid} seems to be stuck in progress.") 
       end
     end
 end

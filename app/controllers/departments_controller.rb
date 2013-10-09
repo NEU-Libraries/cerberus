@@ -7,8 +7,8 @@ class DepartmentsController < ApplicationController
   before_filter :can_edit?, only: [:edit, :update, :destroy]
   before_filter :can_edit_department_parent?, only: [:new, :create]
 
-  rescue_from NoDepartmentParentFoundError, with: :index_redirect
-  rescue_from IdNotFoundError, with: :index_redirect_with_bad_id  
+  rescue_from Exceptions::NoDepartmentParentFoundError, with: :index_redirect
+  rescue_from Exceptions::IdNotFoundError, with: :index_redirect_with_bad_id  
 
   def index
   end
