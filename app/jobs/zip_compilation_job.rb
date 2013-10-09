@@ -26,14 +26,15 @@ class ZipCompilationJob
 
     zipfile_name = safe_zipfile_name
 
-    Zip::ZipOutputStream::open(safe_zipfile_name) do |io| 
-      self.entry_ids.each do |id|
-        entry = GenericFile.find(id)
+    Zip::Archive.open(safe_zipfile_name, Zip::CREATE) do |io| 
+      self.entry_ids.each do |id| 
+        canon_object = NuCoreFile.find(id).canonical_object 
 
-        io.put_next_entry("#{self.title}/#{assign_file_extension(entry)}") 
-        io.write entry.content.content 
+        if canon_object && !canon_object.content.content.nil?
+          io.add_buffer("#{self.title}/#{canon_object.title}", canon_object.content.content)
+        end
       end
-    end  
+    end
   end
 
   private 
