@@ -31,7 +31,7 @@ describe Employee do
     end
 
     it "raises an error if no Employee with the given nuid exists" do 
-      expect { Employee.find_by_nuid("neu:nopenope") }.to raise_error Employee::NoSuchNuidError 
+      expect { Employee.find_by_nuid("neu:nopenope") }.to raise_error Exceptions::NoSuchNuidError 
     end
   end
 end

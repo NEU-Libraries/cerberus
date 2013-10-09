@@ -9,9 +9,9 @@ class NuCollectionsController < ApplicationController
   before_filter :can_edit_parent?, only: [:new, :create]
   before_filter :parent_is_personal_folder?, only: [:new, :create]
 
-  rescue_from NoParentFoundError, with: :index_redirect
-  rescue_from IdNotFoundError, with: :index_redirect_with_bad_id
-  rescue_from SearchResultTypeError, with: :index_redirect_with_bad_search
+  rescue_from Exceptions::NoParentFoundError, with: :index_redirect
+  rescue_from Exceptions::IdNotFoundError, with: :index_redirect_with_bad_id
+  rescue_from Exceptions::SearchResultTypeError, with: :index_redirect_with_bad_search
 
   def index
     #should be removed?
