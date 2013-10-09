@@ -3,11 +3,7 @@ FactoryGirl.define do
     sequence(:title) { |n| "Generic File #{n}" } 
 
     trait :deposited_by_bill do 
-      depositor "bill@example.com" 
-
-      before(:create) do |file| 
-        file.rightsMetadata.permissions({person: "bill@example.com"}, 'edit') 
-      end
+      depositor "bill@example.com"
     end
 
     trait :incomplete do 
