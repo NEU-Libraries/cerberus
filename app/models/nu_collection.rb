@@ -5,6 +5,7 @@ class NuCollection < ActiveFedora::Base
   include Drs::Rights::Embargoable
   include Drs::Rights::InheritedRestrictions
   include Drs::MetadataAssignment
+  include Drs::Find
 
   before_save :belong_check
 

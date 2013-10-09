@@ -5,6 +5,7 @@ class Department < ActiveFedora::Base
   include Drs::Rights::Embargoable
   include Drs::Rights::InheritedRestrictions
   include Drs::MetadataAssignment
+  include Drs::Find
 
   has_metadata name: 'DC', type: NortheasternDublinCoreDatastream 
   has_metadata name: 'rightsMetadata', type: ParanoidRightsDatastream

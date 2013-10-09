@@ -2,6 +2,7 @@ class Employee < ActiveFedora::Base
   include ActiveModel::MassAssignmentSecurity
   include ActiveModel::Validations
   include Drs::Employee::FacultyFolders
+  include Drs::Find
 
   attr_accessible :nuid, :name, :department
   attr_accessor   :building

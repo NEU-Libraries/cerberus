@@ -4,6 +4,7 @@ class Compilation < ActiveFedora::Base
   include Hydra::ModelMixins::RightsMetadata
   include ActiveModel::MassAssignmentSecurity
   include Drs::MetadataAssignment
+  include Drs::Find
 
   has_metadata name: 'DC', type: NortheasternDublinCoreDatastream
   has_metadata name: 'rightsMetadata', type: ParanoidRightsDatastream 
