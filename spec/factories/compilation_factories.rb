@@ -10,10 +10,6 @@ FactoryGirl.define do
 
     trait :deposited_by_bill do 
       depositor "bill@example.com"
-
-      after(:create) do |bookmark| 
-        bookmark.rightsMetadata.permissions({person: "bill@example.com"}, 'edit') 
-      end 
     end
 
     factory :bills_compilation do
