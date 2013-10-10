@@ -3,21 +3,21 @@ require 'spec_helper'
 describe ContentCreationJob do
 
   # Image Formats 
-  let(:jpeg_path) { "#{Rails.root}/spec/fixtures/test_pic.jpeg" }
-  let(:tif_path)  { "#{Rails.root}/spec/fixtures/image.tif" } 
-  let(:gif_path)  { "#{Rails.root}/spec/fixtures/image.gif" } 
-  let(:png_path)  { "#{Rails.root}/spec/fixtures/image.png" } 
+  let(:jpeg_path) { "#{Rails.root}/spec/fixtures/files/test_pic.jpeg" }
+  let(:tif_path)  { "#{Rails.root}/spec/fixtures/files/image.tif" } 
+  let(:gif_path)  { "#{Rails.root}/spec/fixtures/files/image.gif" } 
+  let(:png_path)  { "#{Rails.root}/spec/fixtures/files/image.png" } 
 
   # Pdf Formats  
-  let(:pdf_path)  { "#{Rails.root}/spec/fixtures/test.pdf" }
+  let(:pdf_path)  { "#{Rails.root}/spec/fixtures/files/test.pdf" }
 
   # Word Formats 
-  let(:docx_path) { "#{Rails.root}/spec/fixtures/test_docx.docx" }
-  let(:doc_path)  { "#{Rails.root}/spec/fixtures/word.doc" } 
+  let(:docx_path) { "#{Rails.root}/spec/fixtures/files/test_docx.docx" }
+  let(:doc_path)  { "#{Rails.root}/spec/fixtures/files/word.doc" } 
 
   # Excel Formats 
-  let(:xls_path)  { "#{Rails.root}/spec/fixtures/excel.xls" } 
-  let(:xlsx_path) { "#{Rails.root}/spec/fixtures/excel.xlsx" }
+  let(:xls_path)  { "#{Rails.root}/spec/fixtures/files/excel.xls" } 
+  let(:xlsx_path) { "#{Rails.root}/spec/fixtures/files/excel.xlsx" }
 
   # Note that we are testing a private method with :send here. 
   # Given that correct type selection is the most complex part
@@ -87,7 +87,7 @@ describe ContentCreationJob do
   end
 
   describe "Image creation" do 
-    before(:all) { context("#{Rails.root}/spec/fixtures/test_pic.jpeg") } 
+    before(:all) { context("#{Rails.root}/spec/fixtures/files/test_pic.jpeg") } 
     after(:all)  { clear_context } 
 
     it "labels the content stream correctly" do 
@@ -98,7 +98,7 @@ describe ContentCreationJob do
   end
 
   describe "Zip creation" do 
-    before(:all) { context("#{Rails.root}/spec/fixtures/zip.ott") } 
+    before(:all) { context("#{Rails.root}/spec/fixtures/files/zip.ott") } 
     after(:all)  { clear_context }
 
     it "labels the content stream correctly" do 

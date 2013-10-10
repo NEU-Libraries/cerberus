@@ -26,7 +26,7 @@ FactoryGirl.define do
 
   trait :has_jpeg do
     before :create do |imf| 
-      file = File.open("#{Rails.root}/spec/fixtures/test_pic.jpeg")
+      file = File.open("#{Rails.root}/spec/fixtures/files/test_pic.jpeg")
 
       imf.add_file(file, "content", "test_pic.jpeg") 
     end
@@ -34,7 +34,7 @@ FactoryGirl.define do
 
   trait :has_different_jpeg do 
     before :create do |imf| 
-      file = File.open("#{Rails.root}/spec/fixtures/test_pic_two.jpeg") 
+      file = File.open("#{Rails.root}/spec/fixtures/files/test_pic_two.jpeg") 
 
       imf.add_file(file, "content", "test_pic_two.jpeg") 
     end
@@ -42,7 +42,7 @@ FactoryGirl.define do
 
   trait :has_pdf do 
     before :create do |imf| 
-      file = File.open("#{Rails.root}/spec/fixtures/test.pdf") 
+      file = File.open("#{Rails.root}/spec/fixtures/files/test.pdf") 
 
       imf.add_file(file, "content", "test.pdf") 
     end
@@ -50,7 +50,7 @@ FactoryGirl.define do
 
   trait :has_docx do 
     before :create do |doc| 
-      file = File.open("#{Rails.root}/spec/fixtures/test_docx.docx") 
+      file = File.open("#{Rails.root}/spec/fixtures/files/test_docx.docx") 
 
       doc.add_file(file, 'content', 'test_docx.docx') 
     end
