@@ -1,8 +1,6 @@
 FactoryGirl.define do
 
-  trait :dad do 
-    NuCoreFile.create(depositor: "nosuch@example.com") 
-
+  trait :dad do
     depositor "nosuch@example.com"
     before :create do |imf| 
       imf.core_record = NuCoreFile.create(depositor: "nosuch@example.com") 
@@ -28,7 +26,7 @@ FactoryGirl.define do
 
   trait :has_jpeg do
     before :create do |imf| 
-      file = File.open("#{Rails.root}/spec/fixtures/test_pic.jpeg")
+      file = File.open("#{Rails.root}/spec/fixtures/files/test_pic.jpeg")
 
       imf.add_file(file, "content", "test_pic.jpeg") 
     end
@@ -36,7 +34,7 @@ FactoryGirl.define do
 
   trait :has_different_jpeg do 
     before :create do |imf| 
-      file = File.open("#{Rails.root}/spec/fixtures/test_pic_two.jpeg") 
+      file = File.open("#{Rails.root}/spec/fixtures/files/test_pic_two.jpeg") 
 
       imf.add_file(file, "content", "test_pic_two.jpeg") 
     end
@@ -44,7 +42,7 @@ FactoryGirl.define do
 
   trait :has_pdf do 
     before :create do |imf| 
-      file = File.open("#{Rails.root}/spec/fixtures/test.pdf") 
+      file = File.open("#{Rails.root}/spec/fixtures/files/test.pdf") 
 
       imf.add_file(file, "content", "test.pdf") 
     end
@@ -52,19 +50,32 @@ FactoryGirl.define do
 
   trait :has_docx do 
     before :create do |doc| 
-      file = File.open("#{Rails.root}/spec/fixtures/test_docx.docx") 
+      file = File.open("#{Rails.root}/spec/fixtures/files/test_docx.docx") 
 
       doc.add_file(file, 'content', 'test_docx.docx') 
     end
   end
 
-  factory :image_master_file, class: ImageMasterFile do
-    title "image_master_file.jpeg" 
+  factory :master_file, class: ImageMasterFile do 
     dad
     keywords
     canon
-    identifier
-    has_jpeg
+    identifier 
+
+    factory :image_master_file, class: ImageMasterFile do 
+      title "test_pic.jpeg" 
+      has_jpeg 
+    end
+
+    factory :pdf_file, class: PdfFile do 
+      title "test.pdf" 
+      has_pdf 
+    end
+
+    factory :docx_file, class: MswordFile do
+      title "test_docx.docx" 
+      has_docx
+    end
   end
 
   factory :previous_thumbnail_file, class: ImageThumbnailFile do 
@@ -72,23 +83,4 @@ FactoryGirl.define do
     identifier
     has_different_jpeg
   end
-
-  factory :pdf_file, class: PdfFile do 
-    title "pdf_file.pdf" 
-    dad 
-    keywords
-    canon
-    identifier
-    has_pdf
-  end
-
-  factory :docx_file, class: MswordFile do 
-    title "docx_file.docx" 
-    dad
-    keywords
-    canon
-    identifier 
-    has_docx 
-  end
 end
-

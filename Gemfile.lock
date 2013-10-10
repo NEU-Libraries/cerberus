@@ -350,6 +350,7 @@ GEM
       rspec-core (~> 2.14.0)
       rspec-expectations (~> 2.14.0)
       rspec-mocks (~> 2.14.0)
+    ruby-filemagic (0.4.2)
     rubydora (1.6.5)
       activemodel
       activesupport
@@ -426,6 +427,7 @@ DEPENDENCIES
   rails (= 3.2.13)
   resque_spec
   rspec-rails
+  ruby-filemagic (~> 0.4.2)
   sass-rails (~> 3.2.3)
   sqlite3
   sufia!

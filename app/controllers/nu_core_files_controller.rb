@@ -126,8 +126,16 @@ class NuCoreFilesController < ApplicationController
   def process_file(file)
     if virus_check(file) == 0 
       @nu_core_file = ::NuCoreFile.new
+      
+      # We move the file contents to a more permanent location so that our ContentCreationJob can access them.
+      # An ensure block in that job handles cleanup of this file.
+      tempdir = Rails.root.join("tmp")
+      new_path = tempdir.join("#{file.original_filename}") 
+      FileUtils.mv(file.tempfile.path, new_path.to_s)
+
       update_metadata_from_upload_screen(@nu_core_file, current_user, file, params[:collection_id])
-      Drs::NuFile.create_master_content_object(@nu_core_file, file, datastream_id, current_user)
+      Sufia.queue.push(ContentCreationJob.new(@nu_core_file.pid, new_path.to_s, file.original_filename, current_user.id))
+      #Drs::NuFile.create_master_content_object(@nu_core_file, file, datastream_id, current_user)
       @nu_core_file.record_version_committer(current_user)
       respond_to do |format|
         format.html {
