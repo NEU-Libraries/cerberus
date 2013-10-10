@@ -1,6 +1,6 @@
 FactoryGirl.define do 
   factory :nu_core_file, class: NuCoreFile do 
-    sequence(:title) { |n| "Generic File #{n}" } 
+    sequence(:title) { |n| "Core File #{n}" } 
 
     trait :deposited_by_bill do 
       depositor "bill@example.com"
@@ -15,6 +15,16 @@ FactoryGirl.define do
     trait :complete do 
       before(:create) do |file| 
         file.tag_as_completed 
+      end
+    end
+
+    factory :complete_file do 
+      ignore do 
+        depositor false 
+      end
+
+      after(:build) do |u, evaluator|
+        u.depositor = evaluator.depositor if evaluator.depositor
       end
     end
 
