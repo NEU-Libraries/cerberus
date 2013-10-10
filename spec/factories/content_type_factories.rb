@@ -63,17 +63,17 @@ FactoryGirl.define do
     identifier 
 
     factory :image_master_file, class: ImageMasterFile do 
-      title "image_master_file.jpeg" 
+      title "test_pic.jpeg" 
       has_jpeg 
     end
 
     factory :pdf_file, class: PdfFile do 
-      title "pdf_file.pdf" 
+      title "test.pdf" 
       has_pdf 
     end
 
     factory :docx_file, class: MswordFile do
-      title "docx_file.docx" 
+      title "test_docx.docx" 
       has_docx
     end
   end
