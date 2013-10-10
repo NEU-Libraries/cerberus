@@ -36,6 +36,8 @@ class ContentCreationJob
       content_object.title       =  file_name
       content_object.identifier  =  content_object.pid
       content_object.depositor   =  user.nuid
+      content_object.rightsMetadata.content = core_record.rightsMetadata.content
+      
       content_object.canonize
 
       content_object.save! ? content_object : false
@@ -122,7 +124,7 @@ class ContentCreationJob
     end
 
     def is_msword?(fm_hash, fname)
-      signature = ['zip', 'msword'].include? fm_hash[:sub_type] 
+      signature = ['zip', 'msword', 'octet-stream'].include? fm_hash[:sub_type] 
       file_extension = ['docx', 'doc'].include? fname.split(".").last
       return signature && file_extension 
     end
