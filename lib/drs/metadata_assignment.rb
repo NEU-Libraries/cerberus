@@ -17,6 +17,14 @@ module Drs
         self.DC.nu_title.first
       end
 
+      def dcmi_type=(string) 
+        if_DC_exists_strict { self.DC.nu_type = string } 
+      end
+
+      def dcmi_type 
+        if_DC_exists_strict { self.DC.nu_type.first } 
+      end
+
       def identifier=(string) 
         if_DC_exists { self.DC.nu_identifier = string } 
         if_mods_exists { self.mods.mods_identifier = string }
