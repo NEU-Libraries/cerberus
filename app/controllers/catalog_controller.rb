@@ -162,8 +162,9 @@ class CatalogController < ApplicationController
       title_name = solr_name("desc_metadata__title", :stored_searchable, type: :string)
       label_name = solr_name("desc_metadata__title", :stored_searchable, type: :string)
       contributor_name = solr_name("desc_metadata__contributor", :stored_searchable, type: :string)
+      keywords = solr_name("desc_metadata__tag", :stored_searchable, type: :string) 
       field.solr_parameters = {
-        :qf => "#{title_name} noid_tsi #{label_name} file_format_tesim #{contributor_name}",
+        :qf => "#{title_name} noid_tsi #{label_name} file_format_tesim #{contributor_name} #{keywords}",
         :pf => "#{title_name}"
       }
     end
