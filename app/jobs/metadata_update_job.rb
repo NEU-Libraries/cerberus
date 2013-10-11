@@ -17,17 +17,14 @@ class MetadataUpdateJob
   end
 
   def run
+
     user = User.find_by_user_key(self.login)
     @saved = []
     @denied = []
 
     NuCoreFile.users_in_progress_files(user).each do |gf|
-      puts "Updating files"
-      puts gf.title
       update_file(gf, user)
     end
-
-    puts "Metadata Job finished."
     
     job_user = User.batchuser()
     
