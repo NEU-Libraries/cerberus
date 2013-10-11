@@ -50,7 +50,7 @@
     <div class="control-group">
       <%= f.label :creator, "<span class='error'>*</span> Creator".html_safe, :class=>"control-label" %>
       <div class="controls" id="additional_creator_clone">
-        <%= f.text_field :creator, :name=>"nu_core_file[creators][corporate_names]", :value=>"", :required=> true %>
+        <%= f.text_field :creator, :name=>"nu_core_file[creators][corporate_names][]", :value=>"", :required=> true %>
           <button class="adder btn" name="additional_creator" id="additional_creator_submit">+<span class="accessible-hidden">add another Creator</span></button>
           &nbsp;
           <%= help_icon(:creator) %>
