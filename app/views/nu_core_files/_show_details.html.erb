@@ -17,11 +17,6 @@
             <%= @nu_core_file.date_modified %>
           </td>
         </tr>
-        <tr>
-          <th>Audit Status</th>
-          <%- stat= @nu_core_file.audit_stat(false)  %>
-          <td> <%= (stat == 1 ? 'passing' : (stat == 0 ? 'failing' : stat)) %></td>
-        </tr>
 <% unless @nu_core_file.related_files.empty? %>
   <tr>
           
@@ -37,7 +32,7 @@
           </td>
         </tr>
 <% end %>
-<tr>
+<!--       <tr>          
           <th>Characterization</th>
           <td>
             <%= "not yet characterized" if @nu_core_file.characterization_terms.values.flatten.map(&:empty?).reduce(true) { |sum, value| sum && value } %>
@@ -65,8 +60,8 @@
               <% end %>
             </div>
             <% end %>
-          </td>
-        </tr>
+          </td> 
+        </tr> -->
       </tbody>
     </table> <!-- /verticalheadings -->
 
