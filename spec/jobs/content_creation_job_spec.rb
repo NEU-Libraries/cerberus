@@ -94,6 +94,11 @@ describe ContentCreationJob do
       @master.content.label.should == "test_pic.jpeg" 
     end
 
+    it "updates the core record appropriately" do 
+      @core.reload
+      @core.dcmi_type.should == "image" 
+    end
+
     it_should_behave_like "master creation process" 
   end
 
@@ -103,7 +108,12 @@ describe ContentCreationJob do
 
     it "labels the content stream correctly" do 
       @master.content.label.should == "zip.zip" 
-    end 
+    end
+
+    it "assigns appropriate type to the core record" do 
+      @core.reload
+      @core.dcmi_type.should == "unknown" 
+    end
 
     it_should_behave_like "master creation process" 
   end
