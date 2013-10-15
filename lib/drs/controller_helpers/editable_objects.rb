@@ -7,8 +7,13 @@ module Drs
       def can_edit_parent?
 
         parent_id = find_parent(params)
+        department_parent_id = find_department_parent(params)
 
         if parent_id.nil?
+          parent_id = department_parent_id
+        end
+
+        if parent_id.nil?          
           raise Exceptions::NoParentFoundError 
         end
 
