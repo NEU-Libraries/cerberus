@@ -12,7 +12,8 @@ A web application developed using our [fork](http://github.com/nu-lts/sufia) of 
   5.  Imagemagick
   6.  A local copy of the nu-lts fork of the [sufia](http://github.com/nu-lts/sufia) gem.  If you do not place it in dir ~/sufia you will need to change the path specified in Gemfile for the development copy of Sufia.     
   7.  `yum install file-devel` may be necessary to get the ruby-filemagic gem working on RHEL machines.
-  8.  You will also need to install LibreOffice and get the 'soffice' script onto your path.  On OSX this lives at /Applications/LibreOffice.app/Contents/MacOS/
+  8.  You will also need to install [LibreOffice](www.libreoffice.org/download) and get the 'soffice' script onto your path.  On OSX this lives at `/Applications/LibreOffice.app/Contents/MacOS/`
+    1.  You can create a symbolic link to a directory on your `$PATH` : `ln -s /Applications/LibreOffice.app/Contents/MacOS/soffice ~/bin/soffice`
 
 2.  Execute the following commands from project root.
   1.  `bundle install`
