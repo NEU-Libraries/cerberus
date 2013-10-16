@@ -1,3 +1,25 @@
+def mint_unique_pid 
+  Sufia::Noid.namespaceize(Sufia::IdService.mint)
+end
+
+def create_collection(klass, parentStr, titleStr, user)
+  newPid = mint_unique_pid
+  
+  x = ActiveFedora::Base.find(parentStr, :cast => true)
+
+  if x.class == NuCollection
+    obj = klass.new(parent: parentStr, pid: newPid, identifier: newPid, title: titleStr)
+  elsif x.class == Department
+    obj = klass.new(department_parent: parentStr, pid: newPid, identifier: newPid, title: titleStr)
+  end
+
+  obj.rightsMetadata.permissions({group: 'public'}, 'read')
+  obj.rightsMetadata.permissions({person: "#{user.nuid}"}, 'edit')
+  obj.save!
+
+  return obj
+end
+
 task :reset_data => :environment do
 
   #Stopping jetty and emptying the db
@@ -42,37 +64,18 @@ task :reset_data => :environment do
   rootDept.rightsMetadata.permissions({person: "s.bassett@neu.edu"}, 'edit')
   rootDept.save!
 
-  engDept = Department.new(department_parent: 'neu:1', title: 'English Department')
-  engDept.rightsMetadata.permissions({group: 'public'}, 'read')
-  engDept.rightsMetadata.permissions({person: "#{x.nuid}"}, 'edit')
-  engDept.save!
-
-  sciDept = Department.new(department_parent: 'neu:1', title: 'Science Department')
-  sciDept.rightsMetadata.permissions({group: 'public'}, 'read')    
-  sciDept.rightsMetadata.permissions({person: "#{x.nuid}"}, 'edit')
-  sciDept.save!
-
-  litCol = NuCollection.new(department_parent: "#{engDept.id}", title: 'Literature')
-  litCol.rightsMetadata.permissions({group: 'public'}, 'read')
-  litCol.rightsMetadata.permissions({person: "#{x.nuid}"}, 'edit')
-  litCol.save!
-
-  roCol = NuCollection.new(department_parent: "#{engDept.id}", title: 'Random Objects')
-  roCol.rightsMetadata.permissions({group: 'public'}, 'read')
-  roCol.rightsMetadata.permissions({person: "#{x.nuid}"}, 'edit')
-  roCol.save!
-
-  rusNovCol = NuCollection.new(parent: "#{litCol.id}", title: 'Russian Novels')
-  rusNovCol.rightsMetadata.permissions({group: 'public'}, 'read')
-  rusNovCol.rightsMetadata.permissions({person: "#{x.nuid}"}, 'edit')
-  rusNovCol.save!
+  engDept = create_collection(Department, 'neu:1', 'English Department', x)
+  sciDept = create_collection(Department, 'neu:1', 'Science Department', x)
+  litCol = create_collection(NuCollection, engDept.id, 'Literature', x)
+  roCol = create_collection(NuCollection, engDept.id, 'Random Objects', x)
+  rusNovCol = create_collection(NuCollection, litCol.id, 'Russian Novels', x) 
 
   img = ImageMasterFile.new
   pdf = PdfFile.new
   msWord = MswordFile.new
   
-
-  img.core_record = NuCoreFile.create(depositor: "#{x.nuid}", title: "test_pic")
+  newPid = mint_unique_pid
+  img.core_record = NuCoreFile.create(depositor: "#{x.nuid}", title: "test_pic", pid: newPid, identifier: newPid)
   img.core_record.set_parent(roCol, x)
   img.core_record.save!
 
@@ -80,7 +83,8 @@ task :reset_data => :environment do
   img.add_file(file, "content", "test_pic.jpeg")
   img.save! 
   
-  pdf.core_record = NuCoreFile.create(depositor: "#{x.nuid}", title: "test_pdf")
+  newPid = mint_unique_pid
+  pdf.core_record = NuCoreFile.create(depositor: "#{x.nuid}", title: "test_pdf", pid: newPid, identifier: newPid)
   pdf.core_record.set_parent(roCol, x)
   pdf.core_record.save!
 
@@ -88,7 +92,8 @@ task :reset_data => :environment do
   pdf.add_file(file, "content", "test.pdf")
   pdf.save!
   
-  msWord.core_record = NuCoreFile.create(depositor: "#{x.nuid}", title: "test_word_docx")
+  newPid = mint_unique_pid
+  msWord.core_record = NuCoreFile.create(depositor: "#{x.nuid}", title: "test_word_docx", pid: newPid, identifier: newPid)
   msWord.core_record.set_parent(roCol, x)
   msWord.core_record.save!
   
@@ -96,6 +101,6 @@ task :reset_data => :environment do
   msWord.add_file(file, "content", "test_docx.docx")
   msWord.save!
 
-  puts "Reset to stock object complete."
+  puts "Reset to stock objects complete."
 
 end
