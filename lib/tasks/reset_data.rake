@@ -2,14 +2,14 @@ task :reset_data => :environment do
 
   #Stopping jetty and emptying the db
   
+  Rake::Task["jetty:stop"].reenable
   Rake::Task["jetty:stop"].invoke
-  Rake::Task["jetty:stop"].enable
 
+  Rake::Task["jetty:clean"].reenable
   Rake::Task["jetty:clean"].invoke
-  Rake::Task["jetty:clean"].enable
 
-  Rake::Task["jetty:start"].invoke
-  Rake::Task["jetty:start"].enable    
+  Rake::Task["jetty:start"].reenable
+  Rake::Task["jetty:start"].invoke    
 
   rootDept = Department.new(pid: 'neu:1', identifier: 'neu:1', title: 'Root Department')
   rootDept.rightsMetadata.permissions({group: 'public'}, 'read')
@@ -42,22 +42,22 @@ task :reset_data => :environment do
   rootDept.rightsMetadata.permissions({person: "s.bassett@neu.edu"}, 'edit')
   rootDept.save!
 
-  engDept = Department.new(parent_department: 'neu:1', title: 'English Department')
+  engDept = Department.new(department_parent: 'neu:1', title: 'English Department')
   engDept.rightsMetadata.permissions({group: 'public'}, 'read')
   engDept.rightsMetadata.permissions({person: "#{x.nuid}"}, 'edit')
   engDept.save!
 
-  sciDept = Department.new(parent_department: 'neu:1', title: 'Science Department')
+  sciDept = Department.new(department_parent: 'neu:1', title: 'Science Department')
   sciDept.rightsMetadata.permissions({group: 'public'}, 'read')    
   sciDept.rightsMetadata.permissions({person: "#{x.nuid}"}, 'edit')
   sciDept.save!
 
-  litCol = NuCollection.new(parent_department: "#{engDept.id}", title: 'Literature')
+  litCol = NuCollection.new(department_parent: "#{engDept.id}", title: 'Literature')
   litCol.rightsMetadata.permissions({group: 'public'}, 'read')
   litCol.rightsMetadata.permissions({person: "#{x.nuid}"}, 'edit')
   litCol.save!
 
-  roCol = NuCollection.new(parent_department: "#{engDept.id}", title: 'Random Objects')
+  roCol = NuCollection.new(department_parent: "#{engDept.id}", title: 'Random Objects')
   roCol.rightsMetadata.permissions({group: 'public'}, 'read')
   roCol.rightsMetadata.permissions({person: "#{x.nuid}"}, 'edit')
   roCol.save!
