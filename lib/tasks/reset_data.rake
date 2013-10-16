@@ -1,4 +1,4 @@
-task :reset_data => environment do
+task :reset_data => :environment do
 
   #Stopping jetty and emptying the db
   
