@@ -65,6 +65,37 @@ task :reset_data => :environment do
   rusNovCol = NuCollection.new(parent: "#{litCol.id}", title: 'Russian Novels')
   rusNovCol.rightsMetadata.permissions({group: 'public'}, 'read')
   rusNovCol.rightsMetadata.permissions({person: "#{x.nuid}"}, 'edit')
-  rusNovCol.save!    
+  rusNovCol.save!
+
+  img = ImageMasterFile.new
+  pdf = PdfFile.new
+  msWord = MswordFile.new
+  
+
+  img.core_record = NuCoreFile.create(depositor: "#{x.nuid}", title: "test_pic")
+  img.core_record.set_parent(roCol, x)
+  img.core_record.save!
+
+  file = File.open("#{Rails.root}/spec/fixtures/files/test_pic.jpeg")
+  img.add_file(file, "content", "test_pic.jpeg")
+  img.save! 
+  
+  pdf.core_record = NuCoreFile.create(depositor: "#{x.nuid}", title: "test_pdf")
+  pdf.core_record.set_parent(roCol, x)
+  pdf.core_record.save!
+
+  file = File.open("#{Rails.root}/spec/fixtures/files/test.pdf")
+  pdf.add_file(file, "content", "test.pdf")
+  pdf.save!
+  
+  msWord.core_record = NuCoreFile.create(depositor: "#{x.nuid}", title: "test_word_docx")
+  msWord.core_record.set_parent(roCol, x)
+  msWord.core_record.save!
+  
+  file = File.open("#{Rails.root}/spec/fixtures/files/test_docx.docx")
+  msWord.add_file(file, "content", "test_docx.docx")
+  msWord.save!
+
+  puts "Reset to stock object complete."
 
 end
