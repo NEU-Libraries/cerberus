@@ -36,6 +36,10 @@ task :reset_data => environment do
   x.save!
 
   rootDept.rightsMetadata.permissions({person: "#{x.nuid}"}, 'edit')
+  rootDept.rightsMetadata.permissions({person: "d.cliff@neu.edu"}, 'edit')
+  rootDept.rightsMetadata.permissions({person: "wi.jackson@neu.edu"}, 'edit')
+  rootDept.rightsMetadata.permissions({person: "p.yott@neu.edu"}, 'edit')
+  rootDept.rightsMetadata.permissions({person: "s.bassett@neu.edu"}, 'edit')
   rootDept.save!
 
   engDept = Department.new(parent_department: 'neu:1', title: 'English Department')
@@ -53,10 +57,10 @@ task :reset_data => environment do
   litCol.rightsMetadata.permissions({person: "#{x.nuid}"}, 'edit')
   litCol.save!
 
-  ssCol = NuCollection.new(parent_department: "#{engDept.id}", title: 'Short Stories')
-  ssCol.rightsMetadata.permissions({group: 'public'}, 'read')
-  ssCol.rightsMetadata.permissions({person: "#{x.nuid}"}, 'edit')
-  ssCol.save!
+  roCol = NuCollection.new(parent_department: "#{engDept.id}", title: 'Random Objects')
+  roCol.rightsMetadata.permissions({group: 'public'}, 'read')
+  roCol.rightsMetadata.permissions({person: "#{x.nuid}"}, 'edit')
+  roCol.save!
 
   rusNovCol = NuCollection.new(parent: "#{litCol.id}", title: 'Russian Novels')
   rusNovCol.rightsMetadata.permissions({group: 'public'}, 'read')
