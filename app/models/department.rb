@@ -20,10 +20,6 @@ class Department < ActiveFedora::Base
 
   belongs_to :department_parent, property: :has_affiliation, :class_name => "Department"
 
-  def parent()
-    return nil
-  end
-
   # Override parent= so that the string passed by the creation form can be used. 
   def department_parent=(department_id)
     if department_id.nil? 

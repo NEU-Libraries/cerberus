@@ -19,4 +19,19 @@ module ApplicationHelper
   def current_user_can_edit?(fedora_object) 
     return fedora_object.rightsMetadata.can_edit?(current_user)  
   end
+
+  # Generates an array of link/li tags that should breadcrumb back to the Root Collection  
+  def breadcrumb_to_root(set, breadcrumb = [])    
+    if set.parent.nil?
+      return breadcrumb.reverse
+    else
+      if breadcrumb.empty? 
+        breadcrumb << content_tag(:li, set.title, class: 'active')  
+      end
+      breadcrumb << content_tag(:li, link_to(set.parent.title, set))
+      if set.parent.nil?
+        breadcrumb_to_root(set.parent, breadcrumb)
+      end        
+    end
+  end  
 end
