@@ -5,6 +5,7 @@ class NuCollection < ActiveFedora::Base
   include Drs::Rights::Embargoable
   include Drs::Rights::InheritedRestrictions
   include Drs::MetadataAssignment
+  include Drs::Relationships
   include Drs::Find
 
   before_save :belong_check
@@ -51,31 +52,14 @@ class NuCollection < ActiveFedora::Base
     end
   end
 
-
   # Override parent= so that the string passed by the creation form can be used. 
-  def parent=(collection_id)
-    if collection_id.nil? 
-      return true #Controller level validations are used to ensure that end users cannot do this.  
-    elsif collection_id.instance_of?(String) 
-      self.add_relationship(:is_member_of, NuCollection.find(collection_id))
-    elsif collection_id.instance_of?(NuCollection)
-      self.add_relationship(:is_member_of, collection_id) 
-    else
-      raise "parent= got passed a #{collection_id.class}, which doesn't work."
-    end
+  def parent=(val)
+    assign_by_string(val, :is_member_of, [NuCollection], allow_nil: true)
   end
 
   # Override parent= so that the string passed by the creation form can be used. 
   def department_parent=(department_id)
-    if department_id.nil? 
-      return true #Controller level validations are used to ensure that end users cannot do this.  
-    elsif department_id.instance_of?(String) 
-      self.add_relationship(:is_member_of, Department.find(department_id))
-    elsif department_id.instance_of?(Department)
-      self.add_relationship(:is_member_of, department_id) 
-    else
-      raise "department_parent= got passed a #{department_id.class}, which doesn't work."
-    end
+    assign_by_string(val, :is_member_of, [Department], allow_nil: true) 
   end
 
   # Override user_parent= so that the string passed by the creation form can be used. 
