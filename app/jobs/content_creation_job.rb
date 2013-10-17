@@ -2,18 +2,19 @@ require 'filemagic'
 
 class ContentCreationJob 
 
-  attr_accessor :core_file_pid, :file_path, :file_name, :user_id 
+  attr_accessor :core_file_pid, :file_path, :file_name, :user_id, :delete_file 
   attr_accessor :core_record, :user 
 
   def queue_name 
     :content_creation
   end
 
-  def initialize(core_file, file_path, file_name, user_id) 
+  def initialize(core_file, file_path, file_name, user_id, delete_file=true) 
     self.core_file_pid = core_file 
     self.file_path     = file_path 
     self.file_name     = file_name 
-    self.user_id       = user_id 
+    self.user_id       = user_id
+    self.delete_file   = delete_file 
   end
 
   def run
@@ -42,8 +43,10 @@ class ContentCreationJob
       content_object.canonize
 
       content_object.save! ? content_object : false
-    ensure 
-      FileUtils.rm(file_path)
+    ensure
+      if delete_file        
+        FileUtils.rm(file_path)
+      end
     end
   end
 

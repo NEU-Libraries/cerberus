@@ -1,4 +1,51 @@
+def mint_unique_pid 
+  Sufia::Noid.namespaceize(Sufia::IdService.mint)
+end
+
+def create_collection(klass, parent_str, title_str, user)
+  newPid = mint_unique_pid
+  
+  x = ActiveFedora::Base.find(parent_str, :cast => true)
+
+  if x.class == NuCollection
+    obj = klass.new(parent: parent_str, pid: newPid, identifier: newPid, title: title_str)
+  elsif x.class == Department
+    obj = klass.new(department_parent: parent_str, pid: newPid, identifier: newPid, title: title_str)
+  end
+
+  obj.rightsMetadata.permissions({group: 'public'}, 'read')
+  obj.rightsMetadata.permissions({person: "#{user.nuid}"}, 'edit')
+  obj.save!
+
+  set_edit_permissions(obj)
+
+  return obj
+end 
+
+def create_file(file_name, user, parent)
+  newPid = mint_unique_pid
+
+  core_record = NuCoreFile.new(depositor: "#{user.nuid}", pid: newPid, identifier: newPid, title: file_name)
+  core_record.set_parent(parent, user)
+  core_record.save!
+
+  file_path = "#{Rails.root}/spec/fixtures/files/#{file_name}"
+
+  Sufia.queue.push(ContentCreationJob.new(newPid, file_path, file_name, user.id, false))  
+end
+
+def set_edit_permissions(obj)
+  admin_users = ["drsadmin@neu.edu", "d.cliff@neu.edu", "wi.jackson@neu.edu", "p.yott@neu.edu", "s.bassett@neu.edu"]
+
+  admin_users.each do |email_str|
+    obj.rightsMetadata.permissions({person: email_str}, 'edit')
+    obj.save!
+  end
+end
+
 task :reset_data => :environment do
+
+  #Stopping jetty and emptying the db
   
   Rake::Task["jetty:stop"].reenable
   Rake::Task["jetty:stop"].invoke
@@ -7,62 +54,44 @@ task :reset_data => :environment do
   Rake::Task["jetty:clean"].invoke
 
   Rake::Task["jetty:start"].reenable
-  Rake::Task["jetty:start"].invoke
+  Rake::Task["jetty:start"].invoke    
 
-  rootDepartment = Department.new(pid: 'neu:1', identifier: 'neu:1', title: 'Root Department')
-  rootDepartment.rightsMetadata.permissions({group: 'public'}, 'read') 
+  root_dept = Department.new(pid: 'neu:1', identifier: 'neu:1', title: 'Root Department')
+  root_dept.rightsMetadata.permissions({group: 'public'}, 'read')
 
   begin
-    tries ||= 10
-    rootDepartment.save!
+    tries ||=10
+    root_dept.save!
   rescue Errno::ECONNREFUSED => e
     sleep 10
     puts "Waiting for jetty..."
     retry unless (tries -= 1).zero?
   else
-    puts "Reset db to stock objects"
-  end 
-
-  # Now that jetty is sorted, it's much easier to structure the data
-
-  User.destroy_all
-
-  x = User.find_by_email("drsadmin@neu.edu")
-
-  if !x.nil?
-    x.destroy
+    puts "Connected to Jetty."
   end
 
-  x = User.new({email: 'drsadmin@neu.edu', :password => "drs12345", :password_confirmation => "drs12345"})   
-  x.save!
+  #Now that jetty is definitely started, we can start to cram in our new objects
+  drs_admin_user = User.find_by_email("drsadmin@neu.edu")
 
-  rootDepartment.rightsMetadata.permissions({person: "#{x.nuid}"}, 'edit')
-  rootDepartment.save!
+  if !drs_admin_user.nil?
+    drs_admin_user.destroy
+  end
 
-  engDept = Department.new(department_parent: 'neu:1', title: 'English Department')
-  engDept.rightsMetadata.permissions({group: 'public'}, 'read')
-  engDept.rightsMetadata.permissions({person: "#{x.nuid}"}, 'edit')
-
-  engDept.save!
+  drs_admin_user = User.new({:email => "drsadmin@neu.edu", :password => "drs12345", :password_confirmation => "drs12345"})
+  drs_admin_user.save!
   
-  litColl = NuCollection.new(department_parent: "#{engDept.id}", title: 'Literature')
-  litColl.rightsMetadata.permissions({group: 'public'}, 'read')
-  litColl.rightsMetadata.permissions({person: "#{x.nuid}"}, 'edit')
+  set_edit_permissions(root_dept)
 
-  litColl.save!
+  engDept = create_collection(Department, 'neu:1', 'English Department', drs_admin_user)
+  sciDept = create_collection(Department, 'neu:1', 'Science Department', drs_admin_user)
+  litCol = create_collection(NuCollection, engDept.id, 'Literature', drs_admin_user)
+  roCol = create_collection(NuCollection, engDept.id, 'Random Objects', drs_admin_user)
+  rusNovCol = create_collection(NuCollection, litCol.id, 'Russian Novels', drs_admin_user) 
 
-  sciDept = Department.new(department_parent: 'neu:1', title: 'Science Department')
-  sciDept.rightsMetadata.permissions({group: 'public'}, 'read')
-  sciDept.rightsMetadata.permissions({person: "#{x.nuid}"}, 'edit')
+  create_file("test_docx.docx", drs_admin_user, roCol)
+  create_file("test_pic.jpeg", drs_admin_user, roCol)
+  create_file("test.pdf", drs_admin_user, roCol)
 
-  sciDept.save!
+  puts "Reset to stock objects complete."
 
-  physDept = Department.new(department_parent: "#{sciDept.id}", title: 'Physics Department')
-  physDept.rightsMetadata.permissions({group: 'public'}, 'read')
-  physDept.rightsMetadata.permissions({person: "#{x.nuid}"}, 'edit')
-
-  physDept.save!
-
-  puts "Complete."
-    
 end
