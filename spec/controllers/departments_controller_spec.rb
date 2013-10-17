@@ -21,7 +21,7 @@ describe DepartmentsController do
     it "redirects to the index page if it cannot find the described department parent" do 
       sign_in bill 
 
-      get :new, {department_parent: 'neu:adsfasdfasdfasdfasdfa' } 
+      get :new, {parent: 'neu:adsfasdfasdfasdfasdfa' } 
 
       expect(response).to redirect_to(departments_path) 
     end
@@ -29,13 +29,13 @@ describe DepartmentsController do
     it "renders the new page when a department parent is set" do 
       sign_in bill
 
-      get :new, { department_parent: root_dept.identifier } 
+      get :new, { parent: root_dept.identifier } 
 
       expect(response).to render_template('new') 
     end
 
     it "requests signin from unauthenticated users" do 
-      get :new, { department_parent: root_dept.identifier } 
+      get :new, { parent: root_dept.identifier } 
 
       expect(response).to redirect_to(new_user_session_path) 
     end
@@ -43,7 +43,7 @@ describe DepartmentsController do
     it "renders a 403 page for users without edit access to the department parent object" do
       sign_in bo 
 
-      get :new, {department_parent: root_dept.identifier}
+      get :new, {parent: root_dept.identifier}
 
       response.status.should == 403 
     end
@@ -59,14 +59,14 @@ describe DepartmentsController do
     it "403s when users attempt to create with a department parent they cannot edit" do
       sign_in bo
 
-      post :create, { department_parent: root_dept.id } 
+      post :create, { parent: root_dept.id } 
 
       response.status.should == 403 
     end
 
     it "redirects to the new show page on successful create" do 
       sign_in bill
-      attrs = {title: "Test", description: "test", department_parent: root_dept.id } 
+      attrs = {title: "Test", description: "test", parent: root_dept.id } 
 
       post :create, {set: attrs} 
 

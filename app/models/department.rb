@@ -18,19 +18,25 @@ class Department < ActiveFedora::Base
   has_many :child_collections, property: :is_member_of, :class_name => "NuCollection"
   has_many :child_departments, property: :has_affiliation, :class_name => "Department"
 
-  belongs_to :department_parent, property: :has_affiliation, :class_name => "Department"
+  belongs_to :parent, property: :has_affiliation, :class_name => "Department"
 
   # Override parent= so that the string passed by the creation form can be used. 
-  def department_parent=(department_id)
-    if department_id.nil? 
-      return true #Controller level validations are used to ensure that end users cannot do this.  
-    elsif department_id.instance_of?(String) 
-      self.add_relationship(:has_affiliation, Department.find(department_id))
-    elsif department_id.instance_of?(Department)
-      self.add_relationship(:has_affiliation, department_id) 
-    else
-      raise "department_parent= got passed a #{department_id.class}, which doesn't work."
-    end
+  def parent=(department_id)
+    # if department_id.nil? 
+    #   return true #Controller level validations are used to ensure that end users cannot do this.  
+    # elsif department_id.instance_of?(String) 
+    #   self.add_relationship(:has_affiliation, Department.find(department_id))
+    # elsif department_id.instance_of?(Department)
+    #   self.add_relationship(:has_affiliation, department_id) 
+    # else
+    #   raise "department_parent= got passed a #{department_id.class}, which doesn't work."
+    # end
+
+    # Going to be replaced by Will's module code
+  end
+
+  def parent()
+    # Going to be replaced by Will's module code
   end
 
   def permissions=(hash)
