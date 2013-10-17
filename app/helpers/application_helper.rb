@@ -25,14 +25,12 @@ module ApplicationHelper
     if breadcrumb.empty? 
       breadcrumb << content_tag(:li, set.title, class: 'active')  
     end
-        
+
     if set.parent.nil?
       return breadcrumb.reverse
     else
-      breadcrumb << content_tag(:li, link_to(set.parent.title, set))
-      if set.parent.nil?
-        breadcrumb_to_root(set.parent, breadcrumb)
-      end        
+      breadcrumb << content_tag(:li, link_to(set.parent.title, set.parent))
+      breadcrumb_to_root(set.parent, breadcrumb)
     end
   end  
 end

@@ -58,13 +58,13 @@ class NuCollection < ActiveFedora::Base
 
   # Override parent= so that the string passed by the creation form can be used. 
   def parent=(val)
-    assign_by_string(val, :is_member_of, [NuCollection], allow_nil: true)
+    assign_by_string(val, :is_member_of, [NuCollection, Department], allow_nil: true)
   end
 
   # Override parent= so that the string passed by the creation form can be used. 
-  def department_parent=(department_id)
-    assign_by_string(val, :is_member_of, [Department], allow_nil: true) 
-  end
+  # def department_parent=(department_id)
+  #   assign_by_string(val, :is_member_of, [Department], allow_nil: true) 
+  # end
 
   # Override user_parent= so that the string passed by the creation form can be used. 
   def user_parent=(employee) 

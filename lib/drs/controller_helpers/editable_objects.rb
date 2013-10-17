@@ -7,11 +7,6 @@ module Drs
       def can_edit_parent?
 
         parent_id = find_parent(params)
-        department_parent_id = find_department_parent(params)
-
-        if parent_id.nil?
-          parent_id = department_parent_id
-        end
 
         if parent_id.nil?          
           raise Exceptions::NoParentFoundError 
@@ -26,26 +21,7 @@ module Drs
         else
           render_403
         end
-      end
-
-      def can_edit_department_parent?
-
-        department_parent_id = find_department_parent(params)
-
-        if department_parent_id.nil?
-          raise Exceptions::NoDepartmentParentFoundError 
-        end
-
-        department_parent_object = assign_to_model(department_parent_id)
-
-        if current_user.nil?
-          render_403 
-        elsif current_user.can? :edit, department_parent_object
-          return true
-        else
-          render_403
-        end
-      end      
+      end    
 
       def can_read? 
         record = assign_to_model(params[:id]) 
