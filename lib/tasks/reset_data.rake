@@ -22,21 +22,16 @@ def create_collection(klass, parent_str, title_str, user)
   return obj
 end 
 
-def create_file(klass, file_name, user, parent)
+def create_file(file_name, user, parent)
   newPid = mint_unique_pid
-  obj = klass.new
-  obj.core_record = NuCoreFile.create(depositor: "#{user.nuid}", pid: newPid, identifier: newPid, title: file_name)
-  obj.core_record.set_parent(parent, user)
-  obj.core_record.save!
+
+  core_record = NuCoreFile.new(depositor: "#{user.nuid}", pid: newPid, identifier: newPid, title: file_name)
+  core_record.set_parent(parent, user)
+  core_record.save!
 
   file_path = "#{Rails.root}/spec/fixtures/files/#{file_name}"
-  obj.save!
-
-  set_edit_permissions(obj)
 
   Sufia.queue.push(ContentCreationJob.new(newPid, file_path, file_name, user.id, false))  
-
-  return obj  
 end
 
 def set_edit_permissions(obj)
@@ -93,9 +88,9 @@ task :reset_data => :environment do
   roCol = create_collection(NuCollection, engDept.id, 'Random Objects', drs_admin_user)
   rusNovCol = create_collection(NuCollection, litCol.id, 'Russian Novels', drs_admin_user) 
 
-  msWord = create_file(MswordFile, "test_docx.docx", drs_admin_user, roCol)
-  img = create_file(ImageMasterFile, "test_pic.jpeg", drs_admin_user, roCol)
-  pdf = create_file(PdfFile, "test.pdf", drs_admin_user, roCol)
+  create_file("test_docx.docx", drs_admin_user, roCol)
+  create_file("test_pic.jpeg", drs_admin_user, roCol)
+  create_file("test.pdf", drs_admin_user, roCol)
 
   puts "Reset to stock objects complete."
 
