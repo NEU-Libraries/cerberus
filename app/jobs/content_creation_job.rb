@@ -44,9 +44,8 @@ class ContentCreationJob
 
       content_object.save! ? content_object : false
     ensure
-      if self.delete_file
-        puts "Did we want to delete the file? - #{delete_file}" 
-        #FileUtils.rm(file_path)
+      if delete_file        
+        FileUtils.rm(file_path)
       end
     end
   end
