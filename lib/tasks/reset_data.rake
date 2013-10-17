@@ -25,15 +25,16 @@ end
 def create_file(klass, file_name, user, parent)
   newPid = mint_unique_pid
   obj = klass.new
-  obj.core_record = NuCoreFile.create(depositor: "#{user.nuid}", pid: newPid, identifier: newPid)
+  obj.core_record = NuCoreFile.create(depositor: "#{user.nuid}", pid: newPid, identifier: newPid, title: file_name)
   obj.core_record.set_parent(parent, user)
   obj.core_record.save!
 
-  file = File.open("#{Rails.root}/spec/fixtures/files/#{file_name}")
-  obj.add_file(file, "content", "#{file_name}")
+  file_path = "#{Rails.root}/spec/fixtures/files/#{file_name}"
   obj.save!
 
   set_edit_permissions(obj)
+
+  Sufia.queue.push(ContentCreationJob.new(newPid, file_path, file_name, user.id, false))  
 
   return obj  
 end
