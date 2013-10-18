@@ -8,7 +8,7 @@ class NuCollection < ActiveFedora::Base
   include Drs::Relationships
   include Drs::Find
 
-  # before_save :belong_check
+  validate :belong_check, on: :update
 
   attr_accessible :title, :description, :date_of_issue, :keywords, :parent 
   attr_accessible :creators, :personal_folder_type
@@ -132,8 +132,8 @@ class NuCollection < ActiveFedora::Base
   protected
 
     def belong_check
-      if !self.parent.nil? && !self.department_parent.nil?
-        raise "Collection can't have two parent objects"
+      if !single_lookup(:is_member_of, [Department]).nil? && !single_lookup(:is_member_of, [NuCollection]).nil?
+        errors.add(:identifier, "#{self.identifier} already has a parent relationship")
       end
     end
 end
