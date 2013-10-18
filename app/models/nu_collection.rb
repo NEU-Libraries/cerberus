@@ -52,6 +52,10 @@ class NuCollection < ActiveFedora::Base
     end
   end
 
+  def parent
+    single_lookup(:is_member_of, [NuCollection, Department]) 
+  end
+
   # Override parent= so that the string passed by the creation form can be used. 
   def parent=(val)
     assign_by_string(val, :is_member_of, [NuCollection], allow_nil: true)
