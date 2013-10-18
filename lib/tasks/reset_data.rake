@@ -4,22 +4,15 @@ end
 
 def create_collection(klass, parent_str, title_str, user)
   newPid = mint_unique_pid
-  
-  x = ActiveFedora::Base.find(parent_str, :cast => true)
+  col = klass.new(parent: parent_str, pid: newPid, identifier: newPid, title: title_str)
 
-  if x.class == NuCollection
-    obj = klass.new(parent: parent_str, pid: newPid, identifier: newPid, title: title_str)
-  elsif x.class == Department
-    obj = klass.new(department_parent: parent_str, pid: newPid, identifier: newPid, title: title_str)
-  end
+  col.rightsMetadata.permissions({group: 'public'}, 'read')
+  col.rightsMetadata.permissions({person: "#{user.nuid}"}, 'edit')
+  col.save!
 
-  obj.rightsMetadata.permissions({group: 'public'}, 'read')
-  obj.rightsMetadata.permissions({person: "#{user.nuid}"}, 'edit')
-  obj.save!
+  set_edit_permissions(col)
 
-  set_edit_permissions(obj)
-
-  return obj
+  return col
 end 
 
 def create_file(file_name, user, parent)
@@ -34,12 +27,12 @@ def create_file(file_name, user, parent)
   Sufia.queue.push(ContentCreationJob.new(newPid, file_path, file_name, user.id, false))  
 end
 
-def set_edit_permissions(obj)
+def set_edit_permissions(col)
   admin_users = ["drsadmin@neu.edu", "d.cliff@neu.edu", "wi.jackson@neu.edu", "p.yott@neu.edu", "s.bassett@neu.edu"]
 
   admin_users.each do |email_str|
-    obj.rightsMetadata.permissions({person: email_str}, 'edit')
-    obj.save!
+    col.rightsMetadata.permissions({person: email_str}, 'edit')
+    col.save!
   end
 end
 

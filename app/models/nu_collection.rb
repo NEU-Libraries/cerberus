@@ -8,7 +8,7 @@ class NuCollection < ActiveFedora::Base
   include Drs::Relationships
   include Drs::Find
 
-  before_save :belong_check
+  # before_save :belong_check
 
   attr_accessible :title, :description, :date_of_issue, :keywords, :parent 
   attr_accessible :creators, :personal_folder_type
@@ -60,6 +60,11 @@ class NuCollection < ActiveFedora::Base
   def parent=(val)
     assign_by_string(val, :is_member_of, [NuCollection, Department], allow_nil: true)
   end
+
+  def parent()
+    return single_lookup(:is_member_of, [NuCollection, Department])
+  end
+
 
   # Override parent= so that the string passed by the creation form can be used. 
   # def department_parent=(department_id)
@@ -128,7 +133,7 @@ class NuCollection < ActiveFedora::Base
 
     def belong_check
       if !self.parent.nil? && !self.department_parent.nil?
-        raise "Colelction can't have two parent objects"
+        raise "Collection can't have two parent objects"
       end
     end
 end

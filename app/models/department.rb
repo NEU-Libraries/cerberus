@@ -23,7 +23,7 @@ class Department < ActiveFedora::Base
 
   # Override parent= so that the string passed by the creation form can be used. 
   def parent=(val)
-    assign_by_string(val, :is_member_of, [Department], allow_nil: true)
+    assign_by_string(val, :has_affiliation, [Department], allow_nil: true)
   end
 
   def permissions=(hash)
