@@ -17,7 +17,7 @@ module Drs
           raise Exceptions::NoParentFoundError 
         end
 
-        parent_object = assign_to_model(parent_id)
+        parent_object = lookup(parent_id)
 
         if current_user.nil?
           render_403 
@@ -36,7 +36,7 @@ module Drs
           raise Exceptions::NoDepartmentParentFoundError 
         end
 
-        department_parent_object = assign_to_model(department_parent_id)
+        department_parent_object = lookup(department_parent_id) 
 
         if current_user.nil?
           render_403 
@@ -48,7 +48,7 @@ module Drs
       end      
 
       def can_read? 
-        record = assign_to_model(params[:id]) 
+        record = lookup(params[:id])  
 
         if current_user.nil? 
           record.mass_permissions == 'public' ? true : render_403
@@ -60,7 +60,7 @@ module Drs
       end
 
       def can_edit?
-        record = assign_to_model(params[:id])
+        record = lookup(params[:id]) 
 
         if current_user.nil? 
           render_403
@@ -97,29 +97,12 @@ module Drs
           return nil 
         end
 
-        def assign_to_model(id)
+        def lookup(id) 
           if !ActiveFedora::Base.exists?(id) 
             raise Exceptions::IdNotFoundError.new(id) 
-          end
-          base_object = ActiveFedora::Base.find(id)
-          model_name = classname_from_fedora(base_object)
-          type_match(model_name, id)
-        end
-
-        def type_match(string, id)
-          editable_strings = EDITABLE_OBJECTS.map { |obj| obj.to_s } 
-
-          if editable_strings.include?(string) 
-            return string.constantize.find(id) 
           else
-            raise Exceptions::NoParentFoundError 
+            ActiveFedora::Base.find(id, cast: true) 
           end
-        end
-
-        def classname_from_fedora(base_object) 
-          whole = base_object.relationships(:has_model).first 
-
-          return whole.split("afmodel:").last
         end
         
     end
