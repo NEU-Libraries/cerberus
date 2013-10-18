@@ -28,25 +28,8 @@ module Drs
         end
       end
 
-      def can_edit_department_parent?
-
-        department_parent_id = find_department_parent(params)
-
-        if department_parent_id.nil?
-          raise Exceptions::NoDepartmentParentFoundError 
-        end
-
-        department_parent_object = lookup(department_parent_id) 
-
-        if current_user.nil?
-          render_403 
-        elsif current_user.can? :edit, department_parent_object
-          return true
-        else
-          render_403
-        end
-      end      
-
+      # Checks if the current user can read the fedora record 
+      # returned by a typical resource request.  
       def can_read? 
         record = lookup(params[:id])  
 
@@ -59,6 +42,7 @@ module Drs
         end
       end
 
+      # Same thing as above but with editing.
       def can_edit?
         record = lookup(params[:id]) 
 
@@ -85,7 +69,9 @@ module Drs
           return nil 
         end
 
-        def find_department_parent(hash) 
+        def find_department_parent(hash)
+          hash.symbolize!
+
           hash.each do |k, v| 
             if k == 'department_parent' || k == :department_parent 
               return v
