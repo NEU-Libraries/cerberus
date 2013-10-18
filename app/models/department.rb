@@ -12,7 +12,7 @@ class Department < ActiveFedora::Base
   has_metadata name: 'rightsMetadata', type: ParanoidRightsDatastream
   has_metadata name: 'properties', type: DrsPropertiesDatastream
 
-  attr_accessible :title, :description, :department_parent
+  attr_accessible :title, :description, :parent
   attr_protected :identifier
 
   has_many :employees, property: :has_affiliation, class_name: "Employee"
@@ -23,7 +23,7 @@ class Department < ActiveFedora::Base
 
   # Override parent= so that the string passed by the creation form can be used. 
   def parent=(val)
-    assign_by_string(val, :has_affiliation, [Department], allow_nil: true)
+    unique_assign_by_string(val, :has_affiliation, [Department], allow_nil: true)
   end
 
   def permissions=(hash)
