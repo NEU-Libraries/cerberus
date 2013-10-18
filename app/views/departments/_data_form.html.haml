@@ -1,6 +1,6 @@
 = form_for @department do |f|
-  - if params[:department_parent].present?
-    = f.hidden_field :parent, name: 'set[department_parent]', :value => params[:department_parent] 
+  - if params[:parent].present?
+    = f.hidden_field :parent, name: 'set[parent]', :value => params[:parent] 
   %fieldset
     %legend Required Information
     .row-fluid
