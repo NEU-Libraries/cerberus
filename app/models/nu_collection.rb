@@ -132,7 +132,7 @@ class NuCollection < ActiveFedora::Base
   protected
 
     def belong_check
-      if !single_lookup(:is_member_of, [Department]) && !single_lookup(:is_member_of, [NuCollection])
+      if single_lookup(:is_member_of, [Department]) && single_lookup(:is_member_of, [NuCollection])
         errors.add(:identifier, "#{self.identifier} already has a parent relationship")
       end
     end
