@@ -124,7 +124,7 @@ class NuCollection < ActiveFedora::Base
   def all_descendent_files 
     result = [] 
     each_depth_first do |child| 
-      result += child.child_files 
+      result += child.child_files
     end
     return result
   end
@@ -132,7 +132,7 @@ class NuCollection < ActiveFedora::Base
   protected
 
     def belong_check
-      if !single_lookup(:is_member_of, [Department]).nil? && !single_lookup(:is_member_of, [NuCollection]).nil?
+      if !single_lookup(:is_member_of, [Department]) && !single_lookup(:is_member_of, [NuCollection])
         errors.add(:identifier, "#{self.identifier} already has a parent relationship")
       end
     end
