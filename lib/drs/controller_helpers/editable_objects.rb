@@ -50,8 +50,8 @@ module Drs
       def can_read? 
         record = assign_to_model(params[:id]) 
 
-        if current_user.nil?
-          public_can_read? record
+        if current_user.nil? 
+          record.mass_permissions == 'public' ? true : render_403
         elsif current_user.can? :read, record 
           return true 
         else
@@ -60,7 +60,7 @@ module Drs
       end
 
       def can_edit?
-        record = assign_to_model(params[:id]) 
+        record = assign_to_model(params[:id])
 
         if current_user.nil? 
           render_403
@@ -120,19 +120,6 @@ module Drs
           whole = base_object.relationships(:has_model).first 
 
           return whole.split("afmodel:").last
-        end
-
-        def public_can_read?(record) 
-          record.permissions.each do |perm| 
-            is_group = perm[:type] == 'group' 
-            is_public = perm[:name] == 'public' 
-            is_read = perm[:access] == 'read' 
-
-            if is_group && is_public && is_read
-              return true
-            end 
-          end
-          render_403
         end
         
     end
