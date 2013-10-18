@@ -29,7 +29,12 @@ module ApplicationHelper
     if set.parent.nil?
       return breadcrumb.reverse
     else
-      breadcrumb << content_tag(:li, link_to(set.parent.title, set.parent))
+      # This is a giant kludge, for some reason neu:1 gets an id param tacked on if done the regular way
+      if set.parent.id.eql?('neu:1')
+        breadcrumb << content_tag(:li, link_to(set.parent.title, department_path(set.parent.identifier)))
+      else  
+        breadcrumb << content_tag(:li, link_to(set.parent.title, set.parent))
+      end
       breadcrumb_to_root(set.parent, breadcrumb)
     end
   end  
