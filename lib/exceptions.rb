@@ -60,11 +60,4 @@ module Exceptions
       super "No community parent set" 
     end
   end
-
-  class IdNotFoundError < StandardError 
-    def initialize(id) 
-      super "No item could be found in Fedora with id: #{id}" 
-    end
-  end
-  
 end

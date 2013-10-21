@@ -8,7 +8,7 @@ class CommunitiesController < ApplicationController
   before_filter :can_edit_parent?, only: [:new, :create]
 
   rescue_from Exceptions::NoParentFoundError, with: :index_redirect
-  rescue_from Exceptions::IdNotFoundError, with: :index_redirect_with_bad_id  
+  rescue_from ActiveFedora::ObjectNotFoundError, with: :index_redirect_with_bad_id  
 
   def index
   end

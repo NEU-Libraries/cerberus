@@ -12,7 +12,7 @@ module Drs
           raise Exceptions::NoParentFoundError 
         end
 
-        parent_object = lookup(parent_id)
+        parent_object = ActiveFedora::Base.find(parent_id, cast: true) 
 
         if current_user.nil?
           render_403 
@@ -26,7 +26,7 @@ module Drs
       # Checks if the current user can read the fedora record 
       # returned by a typical resource request.  
       def can_read? 
-        record = lookup(params[:id])  
+        record = ActiveFedora::Base.find(params[:id], cast: true)  
 
         if current_user.nil? 
           record.mass_permissions == 'public' ? true : render_403
@@ -39,7 +39,7 @@ module Drs
 
       # Same thing as above but with editing.
       def can_edit?
-        record = lookup(params[:id]) 
+        record = ActiveFedora::Base.find(params[:id], cast: true) 
 
         if current_user.nil? 
           render_403
@@ -77,15 +77,6 @@ module Drs
           end
           return nil 
         end
-
-        def lookup(id) 
-          if !ActiveFedora::Base.exists?(id) 
-            raise Exceptions::IdNotFoundError.new(id) 
-          else
-            ActiveFedora::Base.find(id, cast: true) 
-          end
-        end
-        
     end
   end
 end
