@@ -80,12 +80,12 @@ class CommunitiesController < ApplicationController
 
     def index_redirect
       flash[:error] = "Communities cannot be created without a parent" 
-      redirect_to communitys_path and return 
+      redirect_to communities_path and return 
     end
 
     def index_redirect_with_bad_id 
       flash[:error] = "The id you specified does not seem to exist in Fedora." 
-      redirect_to communitys_path and return 
+      redirect_to communities_path and return 
     end  
 
 end

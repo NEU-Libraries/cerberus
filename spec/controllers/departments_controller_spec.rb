@@ -15,7 +15,7 @@ describe CommunitiesController do
 
       get :new 
 
-      expect(response).to redirect_to(communitys_path) 
+      expect(response).to redirect_to(communities_path) 
     end
 
     it "redirects to the index page if it cannot find the described community parent" do 
@@ -23,7 +23,7 @@ describe CommunitiesController do
 
       get :new, {parent: 'neu:adsfasdfasdfasdfasdfa' } 
 
-      expect(response).to redirect_to(communitys_path) 
+      expect(response).to redirect_to(communities_path) 
     end
 
     it "renders the new page when a community parent is set" do 
@@ -77,7 +77,7 @@ describe CommunitiesController do
 
   describe "GET #show" do 
 
-    it "renders the show template for unauthed users on public communitys" do 
+    it "renders the show template for unauthed users on public communities" do 
 
       get :show, { id: root_dept.identifier } 
 

@@ -2,7 +2,7 @@
   - if @set.instance_of?(Community) 
     %h3 Communities
 
-    - @set.child_communitys.each do |community| 
+    - @set.child_communities.each do |community| 
       - if current_user_can_read?(community) 
         %p= link_to(community.title, community_path(community.identifier))
 
