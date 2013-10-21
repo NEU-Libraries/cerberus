@@ -2,7 +2,7 @@
   - if params[:parent].present?
     = f.hidden_field :parent, name: 'set[parent]', :value => params[:parent]
   - if params[:is_personal_folder].present? 
-    = f.hidden_field :user_parent, value: current_user.nuid 
+    = f.hidden_field :user_parent, name: 'set[user_parent]', value: current_user.nuid 
   %fieldset
     %legend Required Information
     .row-fluid
