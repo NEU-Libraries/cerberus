@@ -1,4 +1,4 @@
-class Department < ActiveFedora::Base
+class Community < ActiveFedora::Base
   include ActiveModel::MassAssignmentSecurity
   include Hydra::ModelMixins::RightsMetadata
   include Drs::Rights::MassPermissions
@@ -17,13 +17,13 @@ class Department < ActiveFedora::Base
 
   has_many :employees, property: :has_affiliation, class_name: "Employee"
   has_many :child_collections, property: :is_member_of, :class_name => "NuCollection"
-  has_many :child_departments, property: :has_affiliation, :class_name => "Department"
+  has_many :child_communities, property: :has_affiliation, :class_name => "Community"
 
-  belongs_to :parent, property: :has_affiliation, :class_name => "Department"
+  belongs_to :parent, property: :has_affiliation, :class_name => "Community"
 
   # Override parent= so that the string passed by the creation form can be used. 
   def parent=(val)
-    unique_assign_by_string(val, :has_affiliation, [Department], allow_nil: true)
+    unique_assign_by_string(val, :has_affiliation, [Community], allow_nil: true)
   end
 
   def permissions=(hash)

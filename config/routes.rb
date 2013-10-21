@@ -6,18 +6,18 @@ Drs::Application.routes.draw do
   Hydra::BatchEdit.add_routes(self)
 
   resources :nu_collections, :path => 'collections', except: [:index] 
-  get "/collections" => redirect("/departments")
+  get "/collections" => redirect("/communities")
 
-  resources :departments, except: [:index]
-  get "/departments" => 'departments#show', defaults: { id: "#{Rails.configuration.root_department_id}" }
+  resources :communities, except: [:index]
+  get "/communities" => 'communities#show', defaults: { id: "#{Rails.configuration.root_community_id}" }
 
-  # Department Specific queries 
-  get '/departments/:id/employees' => 'departments#employees', as: 'department_employees' 
-  get '/departments/:id/research' => 'departments#research_publications', as: 'department_research' 
-  get '/departments/:id/other' => 'departments#other_publications', as: 'department_other' 
-  get '/departments/:id/presentations' => 'departments#presentations', as: 'department_presentations' 
-  get '/departments/:id/datasets' => 'departments#data_sets', as: 'department_data_sets' 
-  get '/departments/:id/pedagogical' => 'departments#learning_objects', as: 'department_pedagogical'
+  # Community Specific queries 
+  get '/communities/:id/employees' => 'communities#employees', as: 'community_employees' 
+  get '/communities/:id/research' => 'communities#research_publications', as: 'community_research' 
+  get '/communities/:id/other' => 'communities#other_publications', as: 'community_other' 
+  get '/communities/:id/presentations' => 'communities#presentations', as: 'community_presentations' 
+  get '/communities/:id/datasets' => 'communities#data_sets', as: 'community_data_sets' 
+  get '/communities/:id/pedagogical' => 'communities#learning_objects', as: 'community_pedagogical'
 
   resources :compilations
   get "/compilations/:id/download" => 'compilations#show_download', as: 'prepare_download'

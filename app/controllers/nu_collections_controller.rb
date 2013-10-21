@@ -64,17 +64,17 @@ class NuCollectionsController < ApplicationController
 
     def index_redirect
       flash[:error] = "Collections cannot be created without a parent" 
-      redirect_to departments_path and return 
+      redirect_to communities_path and return 
     end
 
     def index_redirect_with_bad_id 
       flash[:error] = "The id you specified does not seem to exist in Fedora." 
-      redirect_to departments_path and return 
+      redirect_to communities_path and return 
     end
 
     def index_redirect_with_bad_search(exception)
       flash[:error] = exception.message
-      redirect_to departments_path and return
+      redirect_to communities_path and return
     end
 
     # In cases where a personal folder is being created,

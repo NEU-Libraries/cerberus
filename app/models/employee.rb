@@ -4,7 +4,7 @@ class Employee < ActiveFedora::Base
   include Drs::Employee::FacultyFolders
   include Drs::Find
 
-  attr_accessible :nuid, :name, :department
+  attr_accessible :nuid, :name, :community
   attr_accessor   :building
   attr_protected  :identifier
 
@@ -12,11 +12,11 @@ class Employee < ActiveFedora::Base
 
   has_metadata name: 'details', type: DrsEmployeeDatastream
 
-  belongs_to :parent, :property => :has_affiliation, :class_name => 'Department'
+  belongs_to :parent, :property => :has_affiliation, :class_name => 'Community'
   has_many :folders, :property => :is_member_of, :class_name => 'NuCollection'
 
-  def department=(department_id)
-    self.add_relationship(:has_affiliation, department_id) 
+  def community=(community_id)
+    self.add_relationship(:has_affiliation, community_id) 
   end 
 
   def self.find_by_nuid(nuid) 
