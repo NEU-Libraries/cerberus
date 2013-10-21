@@ -1,4 +1,4 @@
-class CommunitysController < ApplicationController
+class CommunitiesController < ApplicationController
   include Drs::ControllerHelpers::EditableObjects 
   
   before_filter :authenticate_user!, only: [:new, :edit, :create, :update, :destroy ]
@@ -79,7 +79,7 @@ class CommunitysController < ApplicationController
   protected 
 
     def index_redirect
-      flash[:error] = "Communitys cannot be created without a parent" 
+      flash[:error] = "Communities cannot be created without a parent" 
       redirect_to departments_path and return 
     end
 

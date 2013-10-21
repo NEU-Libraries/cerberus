@@ -1,6 +1,6 @@
 - if current_user_can_read?(@set)
   - if @set.instance_of?(Community) 
-    %h3 Communitys
+    %h3 Communities
 
     - @set.child_departments.each do |department| 
       - if current_user_can_read?(department) 
