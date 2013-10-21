@@ -168,7 +168,7 @@ ActiveRecord::Schema.define(:version => 20130717190853) do
     t.string   "display_name"
     t.string   "address"
     t.string   "admin_area"
-    t.string   "department"
+    t.string   "community"
     t.string   "title"
     t.string   "office"
     t.string   "chat_id"

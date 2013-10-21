@@ -64,15 +64,15 @@ module Drs
           return nil 
         end
 
-        def find_department_parent(hash)
+        def find_community_parent(hash)
           hash.symbolize!
 
           hash.each do |k, v| 
-            if k == 'department_parent' || k == :department_parent 
+            if k == 'community_parent' || k == :community_parent 
               return v
               exit
             elsif v.is_a? Hash 
-              return find_department_parent(v) 
+              return find_community_parent(v) 
             end
           end
           return nil 

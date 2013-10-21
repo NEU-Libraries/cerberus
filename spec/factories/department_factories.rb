@@ -1,11 +1,11 @@
 FactoryGirl.define do 
 
-  factory :department, class: Community do
+  factory :community, class: Community do
     sequence(:title) { |n| "Community #{n}" } 
 
     trait :assigned_identifier do 
-      after(:create) do |department|
-        department.identifier = department.pid 
+      after(:create) do |community|
+        community.identifier = community.pid 
       end
     end
 
@@ -19,7 +19,7 @@ FactoryGirl.define do
                       'permissions1' => {'identity_type' => 'person', 'identity' => 'billsfriend@example.com', 'permission_type' => 'read' }}}
     end
 
-    factory :root_department do 
+    factory :root_community do 
       title "New Community"
       description "Factory created" 
       assigned_identifier

@@ -17,7 +17,7 @@ class AddLdapAttrsToUser < ActiveRecord::Migration
     add_column :users, :display_name, :string
     add_column :users, :address, :string
     add_column :users, :admin_area, :string
-    add_column :users, :department, :string
+    add_column :users, :community, :string
     add_column :users, :title, :string
     add_column :users, :office, :string
     add_column :users, :chat_id, :string
@@ -30,7 +30,7 @@ class AddLdapAttrsToUser < ActiveRecord::Migration
     remove_column :users, :display_name
     remove_column :users, :address
     remove_column :users, :admin_area
-    remove_column :users, :department
+    remove_column :users, :community
     remove_column :users, :title
     remove_column :users, :office
     remove_column :users, :chat_id

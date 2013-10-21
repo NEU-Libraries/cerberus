@@ -19,7 +19,7 @@ class CommunitiesController < ApplicationController
   end
 
   def new
-    @department = Community.new(parent: params[:parent])
+    @community = Community.new(parent: params[:parent])
   end
 
   def create
@@ -32,15 +32,15 @@ class CommunitiesController < ApplicationController
 
     if @set.save!
       flash[:info] = "Community created successfully."
-      redirect_to department_path(id: @set.identifier) and return  
+      redirect_to community_path(id: @set.identifier) and return  
     else
       flash.now[:error] = "Something went wrong"
-      redirect_to new_department_path(parent: params[:parent]) and return 
+      redirect_to new_community_path(parent: params[:parent]) and return 
     end
   end  
 
   def edit
-    @department = Community.find(params[:id])
+    @community = Community.find(params[:id])
   end
 
   def update
@@ -80,12 +80,12 @@ class CommunitiesController < ApplicationController
 
     def index_redirect
       flash[:error] = "Communities cannot be created without a parent" 
-      redirect_to departments_path and return 
+      redirect_to communitys_path and return 
     end
 
     def index_redirect_with_bad_id 
       flash[:error] = "The id you specified does not seem to exist in Fedora." 
-      redirect_to departments_path and return 
+      redirect_to communitys_path and return 
     end  
 
 end

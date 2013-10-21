@@ -57,7 +57,7 @@ module Exceptions
 
   class NoCommunityParentFoundError < StandardError 
     def initialize
-      super "No department parent set" 
+      super "No community parent set" 
     end
   end
 

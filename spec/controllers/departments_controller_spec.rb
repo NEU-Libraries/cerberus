@@ -3,30 +3,30 @@ require 'spec_helper'
 describe CommunitiesController do
   let(:bill)             { FactoryGirl.create(:bill) }
   let(:bo)               { FactoryGirl.create(:bo) } 
-  let(:root_dept)        { FactoryGirl.create(:root_department) }
+  let(:root_dept)        { FactoryGirl.create(:root_community) }
 
   describe "GET #index" do 
     #TODO Implement
   end
 
   describe "GET #new" do 
-    it "redirects to the index page if no department parent is set" do 
+    it "redirects to the index page if no community parent is set" do 
       sign_in bill 
 
       get :new 
 
-      expect(response).to redirect_to(departments_path) 
+      expect(response).to redirect_to(communitys_path) 
     end
 
-    it "redirects to the index page if it cannot find the described department parent" do 
+    it "redirects to the index page if it cannot find the described community parent" do 
       sign_in bill 
 
       get :new, {parent: 'neu:adsfasdfasdfasdfasdfa' } 
 
-      expect(response).to redirect_to(departments_path) 
+      expect(response).to redirect_to(communitys_path) 
     end
 
-    it "renders the new page when a department parent is set" do 
+    it "renders the new page when a community parent is set" do 
       sign_in bill
 
       get :new, { parent: root_dept.identifier } 
@@ -40,7 +40,7 @@ describe CommunitiesController do
       expect(response).to redirect_to(new_user_session_path) 
     end
 
-    it "renders a 403 page for users without edit access to the department parent object" do
+    it "renders a 403 page for users without edit access to the community parent object" do
       sign_in bo 
 
       get :new, {parent: root_dept.identifier}
@@ -56,7 +56,7 @@ describe CommunitiesController do
       expect(response).to redirect_to(new_user_session_path) 
     end
 
-    it "403s when users attempt to create with a department parent they cannot edit" do
+    it "403s when users attempt to create with a community parent they cannot edit" do
       sign_in bo
 
       post :create, { parent: root_dept.id } 
@@ -71,13 +71,13 @@ describe CommunitiesController do
       post :create, {set: attrs} 
 
       id = assigns(:set).identifier
-      expect(response).to redirect_to(department_path(id: id))
+      expect(response).to redirect_to(community_path(id: id))
     end
   end
 
   describe "GET #show" do 
 
-    it "renders the show template for unauthed users on public departments" do 
+    it "renders the show template for unauthed users on public communitys" do 
 
       get :show, { id: root_dept.identifier } 
 
@@ -125,7 +125,7 @@ describe CommunitiesController do
       expect(response).to redirect_to(new_user_session_path) 
     end
 
-    it "403s when a user without edit access tries to modify a department" do 
+    it "403s when a user without edit access tries to modify a community" do 
       sign_in bo 
 
       put :update, { id: root_dept.identifier, set: {title: "New Title" } } 
@@ -133,7 +133,7 @@ describe CommunitiesController do
       response.status.should == 403 
     end
 
-    it "does not allow users with read permissions to edit a department" do 
+    it "does not allow users with read permissions to edit a community" do 
       sign_in bo 
 
       put :update ,{ id: root_dept.identifier, :set => { title: "New Title" } }
@@ -141,13 +141,13 @@ describe CommunitiesController do
       response.status.should == 403 
     end
 
-    it "succeeds for users with edit permissions on the department" do 
+    it "succeeds for users with edit permissions on the community" do 
       sign_in bill 
 
       put :update, { id: root_dept.identifier, set: { title: "nu title" } } 
 
       assigns(:set).title.should == "nu title" 
-      expect(response).to redirect_to(department_path(id: root_dept.identifier))
+      expect(response).to redirect_to(community_path(id: root_dept.identifier))
     end 
   end
 end

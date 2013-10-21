@@ -25,7 +25,7 @@ limitations under the License.
                 <th>Avatar</th> 
                 <th class="sorts"><i id="name" class="<%=params[:sort].blank? ? 'icon-caret-up' : params[:sort]== "name desc" ? 'icon-caret-down' : params[:sort]== "name" ? 'icon-caret-up' : ''%>"/>User Name</th> 
                 <th class="sorts"><i id="login" class="<%=params[:sort]== "login desc" ? 'icon-caret-down' : params[:sort]== "login" ? 'icon-caret-up' : ''%>"/>User Id</th> 
-                <th class="sorts"><i id="department" class="<%=params[:sort]== "department desc" ? 'icon-caret-down' : params[:sort]== "department" ? 'icon-caret-up' : ''%>"/>Community</th>
+                <th class="sorts"><i id="community" class="<%=params[:sort]== "community desc" ? 'icon-caret-down' : params[:sort]== "community" ? 'icon-caret-up' : ''%>"/>Community</th>
                 <th>Files Deposited</th> 
             </tr> 
         </thead> 
@@ -36,7 +36,7 @@ limitations under the License.
                    <td><a href="<%= sufia.profile_path(user) %>" class="btn btn-small " ><%= image_tag user.avatar.url(:thumb), :width => 30 %></a></td> 
                    <td ><a href="<%= sufia.profile_path(user) %>"  ><%= user.name %><a></td> 
                    <td><a href="<%= sufia.profile_path(user) %>"  ><%= user.user_key %><a></td>
-                   <td><%= user.department %> </td> 
+                   <td><%= user.community %> </td> 
                    <td><%= number_of_deposits(user) %> </td>
                 </tr> 
 		          <% end %>

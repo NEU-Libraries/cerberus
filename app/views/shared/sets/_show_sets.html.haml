@@ -2,9 +2,9 @@
   - if @set.instance_of?(Community) 
     %h3 Communities
 
-    - @set.child_departments.each do |department| 
-      - if current_user_can_read?(department) 
-        %p= link_to(department.title, department_path(department.identifier))
+    - @set.child_communitys.each do |community| 
+      - if current_user_can_read?(community) 
+        %p= link_to(community.title, community_path(community.identifier))
 
 - if current_user_can_read?(@set)
   %h3 Collections
