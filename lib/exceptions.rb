@@ -55,7 +55,7 @@ module Exceptions
     end
   end
 
-  class NoDepartmentParentFoundError < StandardError 
+  class NoCommunityParentFoundError < StandardError 
     def initialize
       super "No department parent set" 
     end

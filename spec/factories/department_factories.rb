@@ -1,7 +1,7 @@
 FactoryGirl.define do 
 
-  factory :department, class: Department do
-    sequence(:title) { |n| "Department #{n}" } 
+  factory :department, class: Community do
+    sequence(:title) { |n| "Community #{n}" } 
 
     trait :assigned_identifier do 
       after(:create) do |department|
@@ -20,7 +20,7 @@ FactoryGirl.define do
     end
 
     factory :root_department do 
-      title "New Department"
+      title "New Community"
       description "Factory created" 
       assigned_identifier
       public_read

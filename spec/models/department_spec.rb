@@ -1,5 +1,5 @@
 require 'spec_helper' 
 
-describe Department do 
+describe Community do 
   pending "Write some department specs"
 end

@@ -2,7 +2,7 @@ module Drs
   module ControllerHelpers
     module EditableObjects
 
-      EDITABLE_OBJECTS = [::NuCoreFile, NuCollection, Compilation, Department]
+      EDITABLE_OBJECTS = [::NuCoreFile, NuCollection, Compilation, Community]
 
       def can_edit_parent?
 

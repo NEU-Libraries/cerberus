@@ -49,7 +49,7 @@ task :reset_data => :environment do
   Rake::Task["jetty:start"].reenable
   Rake::Task["jetty:start"].invoke    
 
-  root_dept = Department.new(pid: 'neu:1', identifier: 'neu:1', title: 'Root Department')
+  root_dept = Community.new(pid: 'neu:1', identifier: 'neu:1', title: 'Root Community')
   root_dept.rightsMetadata.permissions({group: 'public'}, 'read')
 
   begin
@@ -75,8 +75,8 @@ task :reset_data => :environment do
   
   set_edit_permissions(root_dept)
 
-  engDept = create_collection(Department, 'neu:1', 'English Department', drs_admin_user)
-  sciDept = create_collection(Department, 'neu:1', 'Science Department', drs_admin_user)
+  engDept = create_collection(Community, 'neu:1', 'English Community', drs_admin_user)
+  sciDept = create_collection(Community, 'neu:1', 'Science Community', drs_admin_user)
   litCol = create_collection(NuCollection, engDept.id, 'Literature', drs_admin_user)
   roCol = create_collection(NuCollection, engDept.id, 'Random Objects', drs_admin_user)
   rusNovCol = create_collection(NuCollection, litCol.id, 'Russian Novels', drs_admin_user) 

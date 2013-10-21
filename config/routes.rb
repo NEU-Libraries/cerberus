@@ -11,7 +11,7 @@ Drs::Application.routes.draw do
   resources :departments, except: [:index]
   get "/departments" => 'departments#show', defaults: { id: "#{Rails.configuration.root_department_id}" }
 
-  # Department Specific queries 
+  # Community Specific queries 
   get '/departments/:id/employees' => 'departments#employees', as: 'department_employees' 
   get '/departments/:id/research' => 'departments#research_publications', as: 'department_research' 
   get '/departments/:id/other' => 'departments#other_publications', as: 'department_other' 

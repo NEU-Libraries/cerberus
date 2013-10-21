@@ -1,4 +1,4 @@
-module DepartmentsHelper
+module CommunitysHelper
 
   # Render a button for creating a new collection within this collection
   # if the current user has edit permissions. 

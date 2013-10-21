@@ -25,7 +25,7 @@ class NuCollection < ActiveFedora::Base
 
   belongs_to :parent, property: :is_member_of, :class_name => "NuCollection"
   belongs_to :user_parent, property: :is_member_of, :class_name => "Employee" 
-  belongs_to :department_parent, property: :is_member_of, :class_name => "Department"
+  belongs_to :department_parent, property: :is_member_of, :class_name => "Community"
 
   # Return all collections that this user can read
   def self.find_all_viewable(user) 
@@ -53,12 +53,12 @@ class NuCollection < ActiveFedora::Base
   end
 
   def parent
-    single_lookup(:is_member_of, [NuCollection, Department]) 
+    single_lookup(:is_member_of, [NuCollection, Community]) 
   end
 
   # Override parent= so that the string passed by the creation form can be used. 
   def parent=(val)
-    unique_assign_by_string(val, :is_member_of, [NuCollection, Department], allow_nil: true)
+    unique_assign_by_string(val, :is_member_of, [NuCollection, Community], allow_nil: true)
   end
 
   # Override user_parent= so that the string passed by the creation form can be used. 
@@ -122,7 +122,7 @@ class NuCollection < ActiveFedora::Base
   protected
 
     def belong_check
-      if single_lookup(:is_member_of, [Department]) && single_lookup(:is_member_of, [NuCollection])
+      if single_lookup(:is_member_of, [Community]) && single_lookup(:is_member_of, [NuCollection])
         errors.add(:identifier, "#{self.identifier} already has a parent relationship")
       end
     end

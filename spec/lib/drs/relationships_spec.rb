@@ -13,15 +13,15 @@ describe Drs::Relationships do
     has_metadata name: 'rightsMetadata', type: ParanoidRightsDatastream
 
     belongs_to :parent, property: :is_member_of, class_name: "RelationshipHelper" 
-    belongs_to :dept, property: :is_member_of, class_name: "Department" 
+    belongs_to :dept, property: :is_member_of, class_name: "Community" 
     belongs_to :employee, property: :is_member_of, class_name: "Employee" 
 
     def parent=(val) 
-      unique_assign_by_string(val, :is_member_of, [RelationshipHelper, Department], allow_nil: true)
+      unique_assign_by_string(val, :is_member_of, [RelationshipHelper, Community], allow_nil: true)
     end
 
     def parent
-      single_lookup(:is_member_of, [RelationshipHelper, Department]) 
+      single_lookup(:is_member_of, [RelationshipHelper, Community]) 
     end
 
     def employee=(val)
