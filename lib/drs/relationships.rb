@@ -11,7 +11,8 @@ module Drs::Relationships
   def unique_assign_by_string(val, relation, valid_types, options = {}) 
     val.instance_of?(String) ? obj = ActiveFedora::Base.find(val, cast: true) : obj = val 
 
-    if options[:allow_nil] && val.nil? 
+    if options[:allow_nil] && val.nil?
+      purge_other_relationships(relation, valid_types) 
       false 
     elsif valid_types.include? obj.class
       purge_other_relationships(relation, valid_types)  
@@ -30,8 +31,8 @@ module Drs::Relationships
 
       all.each do |rel|
         rel_obj = ActiveFedora::Base.find(rel[12..-1], cast: true)  
-        if valid_types.include? rel_obj
-          self.remove_relationship(:relation, rel_obj) 
+        if valid_types.include? rel_obj.class
+          self.remove_relationship(relation, rel_obj) 
         end
       end
     end
