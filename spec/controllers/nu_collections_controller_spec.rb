@@ -130,6 +130,11 @@ describe NuCollectionsController do
 
       expect(response).to render_template('shared/sets/show') 
     end
+
+    it "renders the 404 template for objects that don't exist" do 
+      get :show, { id: "neu:xcvsxcvzc" } 
+      expect(response).to render_template('error/object_404') 
+    end
   end
 
   describe "GET #edit" do 
