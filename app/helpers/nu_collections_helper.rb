@@ -20,6 +20,13 @@ module NuCollectionsHelper
     end
   end
 
+  def render_delete_object_button(obj, delete_text) 
+    if current_user_can_edit?(obj) 
+      confirm_copy = "This destroys the object and all of its descendents.  Are you sure?" 
+      link_to(delete_text, obj, method: :delete, confirm: confirm_copy) 
+    end
+  end
+
   # Render a button for uploading files within this collection
   # if the current user has edit permissions.
   def render_upload_files_button(parent)

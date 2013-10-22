@@ -21,10 +21,12 @@ FactoryGirl.define do
     factory :complete_file do 
       ignore do 
         depositor false 
+        parent false
       end
 
       after(:build) do |u, evaluator|
         u.depositor = evaluator.depositor if evaluator.depositor
+        u.parent = evaluator.parent if evaluator.parent
       end
     end
 

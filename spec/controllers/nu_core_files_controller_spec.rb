@@ -2,8 +2,12 @@ require 'spec_helper'
 
 describe NuCoreFilesController do 
   let(:bill) { FactoryGirl.create(:bill) } 
-  let(:bo) { FactoryGirl.create(:bo) }
-  let(:root) { FactoryGirl.create(:root_collection) } 
+  let(:bo)   { FactoryGirl.create(:bo) }
+  let(:root) { FactoryGirl.create(:root_collection) }
+
+  let(:file) { FactoryGirl.create(:complete_file, 
+                                  depositor: "bill@example.com", 
+                                  parent: root) }
 
   describe "GET #new" do 
 
@@ -62,6 +66,33 @@ describe NuCoreFilesController do
     it "renders the 404 page for objects that do not exist" do 
       get :show, { id: 'neu:adsfasdfa' } 
       expect(response).to render_template('error/object_404') 
+    end
+  end
+
+  describe "DELETE #destroy" do  
+    it "requests authentication for unauthed users" do 
+      delete :destroy, { id: file.pid } 
+      expect(response).to redirect_to(new_user_session_path) 
+    end
+
+    it "403s for users without edit permissions" do 
+      file.mass_permissions = 'public' && file.save! 
+      file_pid = file.pid
+
+      sign_in bo 
+
+      delete :destroy, { id: file.pid }
+      NuCoreFile.exists?(file_pid).should be true 
+      response.status.should == 403 
+    end
+
+    it "successfully removes the item for users with edit permissions" do 
+      sign_in bill 
+      file_pid = file.pid
+
+      delete :destroy, { id: file.pid }
+      expect(response).to be_redirect 
+      NuCoreFile.exists?(file_pid).should be false
     end
   end
 

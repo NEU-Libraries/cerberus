@@ -30,5 +30,6 @@
 
 - if @set.instance_of?(NuCollection)
   %p Actions:
-
-  = render_upload_files_button(@set)
+  %ul 
+    %li= render_delete_object_button(@set, "Delete this collection and all its kids")
+    %li= render_upload_files_button(@set)
