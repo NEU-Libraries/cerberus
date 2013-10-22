@@ -26,7 +26,8 @@ class NuCoreFilesController < ApplicationController
                                           :destroy_incomplete_files, 
                                           :process_metadata, 
                                           :edit,
-                                          :update] 
+                                          :update, 
+                                          :destroy] 
   
   before_filter :can_edit_parent?, only: [:new]
 
