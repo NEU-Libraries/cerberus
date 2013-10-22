@@ -5,21 +5,18 @@ module Drs
       EDITABLE_OBJECTS = [::NuCoreFile, NuCollection, Compilation, Community]
 
       def can_edit_parent?
+        begin 
+          parent_object = find_parent(params)
 
-        parent_id = find_parent(params)
-
-        if parent_id.nil?          
+          if current_user.nil?
+            render_403 
+          elsif current_user.can? :edit, parent_object
+            return true
+          else
+            render_403
+          end
+        rescue ActiveFedora::ObjectNotFoundError 
           raise Exceptions::NoParentFoundError 
-        end
-
-        parent_object = ActiveFedora::Base.find(parent_id, cast: true) 
-
-        if current_user.nil?
-          render_403 
-        elsif current_user.can? :edit, parent_object
-          return true
-        else
-          render_403
         end
       end
 
@@ -55,13 +52,13 @@ module Drs
         def find_parent(hash) 
           hash.each do |k, v| 
             if k == 'parent' || k == :parent 
-              return v
+              return ActiveFedora::Base.find(v, cast: true) 
               exit
             elsif v.is_a? Hash 
               return find_parent(v) 
             end
           end
-          return nil 
+          raise Exceptions::NoParentFoundError 
         end
 
         def find_community_parent(hash)
