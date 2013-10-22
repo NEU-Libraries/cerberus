@@ -10,11 +10,11 @@ class NuCollectionsController < ApplicationController
   before_filter :parent_is_personal_folder?, only: [:new, :create]
 
   rescue_from Exceptions::NoParentFoundError, with: :index_redirect
-  rescue_from Exceptions::IdNotFoundError, with: :index_redirect_with_bad_id
   rescue_from Exceptions::SearchResultTypeError, with: :index_redirect_with_bad_search
 
-  def index
-    #should be removed?
+  rescue_from ActiveFedora::ObjectNotFoundError do 
+    @obj_type = "Collection" 
+    render "error/object_404" 
   end
 
   def new

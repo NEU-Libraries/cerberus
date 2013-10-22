@@ -90,6 +90,20 @@ describe CommunitiesController do
       get :show, { id: root_dept.identifier } 
 
       expect(response).to render_template('shared/sets/show') 
+    end 
+
+    it "renders the 404 template for objects that don't exist" do 
+      sign_in bill 
+
+      get :show, { id: "neu:dfasdfasdfadfs" } 
+
+      expect(response).to render_template('error/object_404') 
+    end
+
+    it "renders the 404 template for unauthed users" do
+      get :show, { id: 'neu:uiuoiuo' } 
+
+      expect(response).to render_template('error/object_404') 
     end
   end
 

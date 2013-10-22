@@ -57,6 +57,14 @@ describe NuCoreFilesController do
     end
   end
 
+  describe "GET #show" do 
+
+    it "renders the 404 page for objects that do not exist" do 
+      get :show, { id: 'neu:adsfasdfa' } 
+      expect(response).to render_template('error/object_404') 
+    end
+  end
+
   describe "DELETE #destroy_incomplete_files" do 
 
     # Ensures no contamination between test runs. 
