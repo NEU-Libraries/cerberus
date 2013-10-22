@@ -1,4 +1,4 @@
-class NuCollectionsController < ApplicationController
+class NuCollectionsController < SetsController
   include Drs::ControllerHelpers::EditableObjects
   include SetHelpers
 

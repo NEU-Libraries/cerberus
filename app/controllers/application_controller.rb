@@ -28,4 +28,16 @@ class ApplicationController < ActionController::Base
   def mint_unique_pid 
     Sufia::Noid.namespaceize(Sufia::IdService.mint)
   end
+
+  helper_method :current_user_can_read?, :current_user_can_edit?
+
+  # Determine whether or not the viewing user can read this object
+  def current_user_can_read?(fedora_object) 
+    return fedora_object.rightsMetadata.can_read?(current_user) 
+  end
+
+  # Determine whether or not the viewing user can edit this object
+  def current_user_can_edit?(fedora_object) 
+    return fedora_object.rightsMetadata.can_edit?(current_user)  
+  end
 end
