@@ -18,10 +18,22 @@ class NuCoreFilesController < ApplicationController
   include Sufia::FilesControllerBehavior
   include Drs::ControllerHelpers::EditableObjects
 
-  skip_before_filter :normalize_identifier, only: [:provide_metadata, :rescue_incomplete_files, :destroy_incomplete_files, :process_metadata]
-  skip_load_and_authorize_resource only: [:provide_metadata, :rescue_incomplete_files, :destroy_incomplete_files, :process_metadata] 
+  before_filter :authenticate_user!, except: [:show]
+
+  skip_before_filter :normalize_identifier # , only: [:provide_metadata, :rescue_incomplete_files, :destroy_incomplete_files, :process_metadata]
+  skip_load_and_authorize_resource only: [:provide_metadata, 
+                                          :rescue_incomplete_files, 
+                                          :destroy_incomplete_files, 
+                                          :process_metadata, 
+                                          :edit,
+                                          :update] 
   
-  before_filter :can_edit_parent?, only: [:new] 
+  before_filter :can_edit_parent?, only: [:new]
+
+  before_filter :can_read?, only: [:show] 
+  before_filter :can_edit?, only: [:edit, :update, :destroy] 
+
+
   rescue_from Exceptions::NoParentFoundError, with: :no_parent_rescue
 
   rescue_from ActiveFedora::ObjectNotFoundError do
@@ -92,13 +104,54 @@ class NuCoreFilesController < ApplicationController
     @collection_id = params[:parent]      
   end
 
+  def edit
+    @nu_core_file = NuCoreFile.find(params[:id])
+
+    @nu_core_file.initialize_fields
+    @groups = current_user.groups
+  end
+
+  def update
+    @nu_core_file = NuCoreFile.find(params[:id]) 
+
+    version_event = false
+
+    if params.has_key?(:revision) and params[:revision] !=  @nu_core_file.content.latest_version.versionID
+      revision = @nu_core_file.content.get_version(params[:revision])
+      @nu_core_file.add_file(revision.content, datastream_id, revision.label)
+      version_event = true
+      Sufia.queue.push(ContentRestoredVersionEventJob.new(@nu_core_file.pid, current_user.user_key, params[:revision]))
+    end
+
+    if params.has_key?(:filedata)
+      file = params[:filedata]
+      return unless virus_check(file) == 0
+      @nu_core_file.add_file(file, datastream_id, file.original_filename)
+      version_event = true
+      Sufia.queue.push(ContentNewVersionEventJob.new(@nu_core_file.pid, current_user.user_key))
+    end
+
+    # only update metadata if there is a generic_file object which is not the case for version updates
+    update_metadata if params[:nu_core_file]
+
+    #always save the file so the new version or metadata gets recorded
+    if @nu_core_file.save
+      # do not trigger an update event if a version event has already been triggered
+      Sufia.queue.push(ContentUpdateEventJob.new(@nu_core_file.pid, current_user.user_key)) unless version_event
+      @nu_core_file.record_version_committer(current_user)
+      redirect_to sufia.edit_generic_file_path(:tab => params[:redirect_tab]), :notice => render_to_string(:partial=>'generic_files/asset_updated_flash', :locals => { :generic_file => @nu_core_file })
+    else
+      render action: 'edit'
+    end
+    end
+
   def destroy
-    @title = NuCoreFile.find(params[:id]).title 
+    @title = NuCoreFile.find(params[:id]).title
 
     if NuCoreFile.find(params[:id]).destroy 
-      redirect_to(sufia.dashboard_index_path, "#{@title} destroyed") 
+      redirect_to(sufia.dashboard_index_path, notice: "#{@title} destroyed") 
     else
-      redirect_to(sufia.dashboard_index_path, "#{@title} wasn't destroyed") 
+      redirect_to(sufia.dashboard_index_path, notice: "#{@title} wasn't destroyed") 
     end
   end
 
@@ -111,6 +164,11 @@ class NuCoreFilesController < ApplicationController
   def no_parent_rescue
     flash[:error] = "Parent not specified or invalid" 
     redirect_to root_path 
+  end
+
+  def update_metadata 
+    @nu_core_file.update_attributes(params[:nu_core_file]) 
+    @nu_core_file.date_modified = DateTime.now.to_s
   end
 
   #Allows us to map different params 
