@@ -1,5 +1,6 @@
 class NuCollectionsController < ApplicationController
   include Drs::ControllerHelpers::EditableObjects
+  include SetHelpers
 
   before_filter :authenticate_user!, only: [:new, :edit, :create, :update, :destroy ]
 
