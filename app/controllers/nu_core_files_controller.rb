@@ -92,6 +92,16 @@ class NuCoreFilesController < ApplicationController
     @collection_id = params[:parent]      
   end
 
+  def destroy
+    @title = NuCoreFile.find(params[:id]).title 
+
+    if NuCoreFile.find(params[:id]).destroy 
+      redirect_to(sufia.dashboard_index_path, "#{@title} destroyed") 
+    else
+      redirect_to(sufia.dashboard_index_path, "#{@title} wasn't destroyed") 
+    end
+  end
+
   def self.upload_complete_path
     Rails.application.routes.url_helpers.files_provide_metadata_path
   end
