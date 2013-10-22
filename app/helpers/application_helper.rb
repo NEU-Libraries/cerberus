@@ -10,16 +10,6 @@ module ApplicationHelper
     end
   end
 
-  # Determine whether or not the viewing user can read this object
-  def current_user_can_read?(fedora_object) 
-    return fedora_object.rightsMetadata.can_read?(current_user) 
-  end
-
-  # Determine whether or not the viewing user can edit this object
-  def current_user_can_edit?(fedora_object) 
-    return fedora_object.rightsMetadata.can_edit?(current_user)  
-  end
-
   # Generates an array of link/li tags that should breadcrumb back to the Root Collection  
   def breadcrumb_to_root(set, breadcrumb = [])    
     if breadcrumb.empty? 
