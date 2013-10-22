@@ -1,5 +1,5 @@
-class CommunitiesController < ApplicationController
-  include Drs::ControllerHelpers::EditableObjects 
+class CommunitiesController < SetsController
+  include Drs::ControllerHelpers::EditableObjects
   
   before_filter :authenticate_user!, only: [:new, :edit, :create, :update, :destroy ]
   before_filter :can_read?, only: [:show, :employees, :research_publications, :other_publications,
