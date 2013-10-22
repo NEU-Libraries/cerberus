@@ -21,9 +21,13 @@ class NuCoreFilesController < ApplicationController
   skip_before_filter :normalize_identifier, only: [:provide_metadata, :rescue_incomplete_files, :destroy_incomplete_files, :process_metadata]
   skip_load_and_authorize_resource only: [:provide_metadata, :rescue_incomplete_files, :destroy_incomplete_files, :process_metadata] 
   
-  before_filter :can_edit_parent?, only: [:new]
-  rescue_from ActiveFedora::ObjectNotFoundError, with: :no_id_rescue
+  before_filter :can_edit_parent?, only: [:new] 
   rescue_from Exceptions::NoParentFoundError, with: :no_parent_rescue
+
+  rescue_from ActiveFedora::ObjectNotFoundError do
+    @obj_type = "Object"
+    render "error/object_404"      
+  end
 
   def destroy_incomplete_files
     NuCoreFile.users_in_progress_files(current_user).each do |file|
@@ -94,13 +98,8 @@ class NuCoreFilesController < ApplicationController
 
   protected
 
-  def no_id_rescue
-    flash[:error] = "The parent specified for file creation does not appear to exist in the repository" 
-    redirect_to root_path 
-  end
-
   def no_parent_rescue
-    flash[:error] = "Files must belong to a parent." 
+    flash[:error] = "Parent not specified or invalid" 
     redirect_to root_path 
   end
 
