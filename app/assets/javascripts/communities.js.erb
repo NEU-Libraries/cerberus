@@ -1,0 +1,5 @@
+  $( "#community_parent" ).autocomplete({
+    source: <%= Community.find(:all).map{|c| "#{c.id}"} %>
+  });
+
+  $( "#community_parent" ).attr('autocomplete', 'on');

@@ -21,3 +21,4 @@
 //= require polyfills
 //= require nu_collections
 //= require compilations
+//= require communities
