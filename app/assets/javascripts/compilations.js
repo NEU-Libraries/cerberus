@@ -1,7 +1,7 @@
 $(document).ready(function () {
   'use strict'; 
 
-  //Poll the show download page for changes every ten seconds. 
+  //Poll the show download page for changes every three seconds. 
   if ($('#display_download_link').length > 0){
     if($('#download_link').length === 0) {
       setInterval(addDownloadLink, 3000); 
