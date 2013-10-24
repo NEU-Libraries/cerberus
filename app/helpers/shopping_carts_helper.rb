@@ -1,7 +1,7 @@
 module ShoppingCartsHelper
   def render_add_to_shopping_cart(pid) 
     link_to("Add to download", 
-             update_cart_path(id: pid, add: true), 
+             update_cart_path(add: pid), 
              :method => 'put', 
              :remote => true)
   end
@@ -9,7 +9,7 @@ module ShoppingCartsHelper
 
   def render_remove_from_shopping_cart(pid) 
     link_to("Remove from download",
-             update_cart_path(id: pid, delete: true),
+             update_cart_path(delete: pid),
              :method => 'put',
              :remote => true) 
   end

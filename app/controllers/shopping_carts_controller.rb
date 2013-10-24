@@ -1,8 +1,9 @@
 class ShoppingCartsController < ApplicationController 
 
   before_filter :authenticate_user!
-  before_filter :session_to_array 
   before_filter :can_dl?, only: [:update]
+  before_filter :session_to_array 
+  
 
   # Show the user the contents of their shopping cart.
   def show 
@@ -11,13 +12,12 @@ class ShoppingCartsController < ApplicationController
 
   # Allow the user to add/remove items from their shopping cart.
   def update 
-    @id = params[:id]
-    @selector_string = ".sc_#{@id}"
-
     if params[:add]
+      @id = params[:add]
       session[:ids] << @id unless session[:ids].include? @id  
     elsif params[:delete]
-      session[:ids] = session[:ids].delete(@id) if session[:ids]
+      @id = params[:delete]
+      session[:ids].delete(@id)
       flash.now[:info] = "Item removed from shopping cart" 
     end
 
@@ -28,7 +28,7 @@ class ShoppingCartsController < ApplicationController
 
   # Purge the contents of the user's shopping cart. 
   def destroy 
-    session[:ids] = nil
+    session[:ids] = []
 
     flash.now[:info] = "Sessions successfully cleared" 
     redirect_to shopping_cart_path
@@ -42,8 +42,8 @@ class ShoppingCartsController < ApplicationController
 
     def can_dl?
       if params[:add]
-        record = ActiveFedora::Base.find(params[:id], cast: true) 
-        render_403 unless current_user_can_read?(record)
+        record = ActiveFedora::Base.find(params[:add], cast: true) 
+        render_403 and return unless current_user_can_read?(record)
       end
     end
 

@@ -17,7 +17,7 @@ describe ShoppingCartsController do
     end
 
     it "handles the empty case" do 
-      session[:ids] = nil 
+      session[:ids] = [] 
       get :show 
 
       assigns(:items).should == []
@@ -29,7 +29,7 @@ describe ShoppingCartsController do
     before { sign_in user}  
 
     it "allows users to add items they have read permissions for" do 
-      xhr :put, :update, { add: true, id: file.pid }
+      xhr :put, :update, { add: file.pid }
 
       session[:ids].should == [file.pid] 
       expect(response).to render_template('update') 
@@ -37,16 +37,16 @@ describe ShoppingCartsController do
 
     it "allows users to remove items from their shopping cart" do
       session[:ids] = [file.pid]
-      xhr :put, :update, { delete: true, id: file.pid }
+      xhr :put, :update, { delete: file.pid }
 
       session[:ids].should be_empty 
       expect(response).to render_template('update') 
     end
 
     it "fails gracefully when trying to remove from an empty cart" do 
-      xhr :put, :update, { delete: true, id: file.pid } 
+      xhr :put, :update, { delete: file.pid } 
 
-      session[:ids].should be_nil
+      session[:ids].should be_empty
       expect(response).to render_template('update')
     end
 
@@ -54,9 +54,9 @@ describe ShoppingCartsController do
       file.mass_permissions = "private" 
       file.save! 
 
-      xhr :put, :update, { add: true, id: file.pid } 
+      xhr :put, :update, { add: file.pid } 
 
-      session[:ids].should be_nil 
+      session[:ids].should be_nil # Never touched by the controller, stays actually nil. 
       response.status.should == 403
     end
   end
@@ -68,7 +68,7 @@ describe ShoppingCartsController do
     it "removes all file pids and redirects to the show page" do 
       delete :destroy 
 
-      session[:ids].should be_nil 
+      session[:ids].should be_empty 
       expect(response).to redirect_to(shopping_cart_path) 
     end 
   end
