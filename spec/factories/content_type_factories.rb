@@ -56,11 +56,16 @@ FactoryGirl.define do
     end
   end
 
+  trait :public_read do 
+    mass_permissions 'public' 
+  end
+
   factory :master_file, class: ImageMasterFile do 
     dad
     keywords
     canon
-    identifier 
+    identifier
+    public_read 
 
     factory :image_master_file, class: ImageMasterFile do 
       title "test_pic.jpeg" 

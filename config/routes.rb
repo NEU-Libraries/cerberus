@@ -36,6 +36,9 @@ Drs::Application.routes.draw do
   get '/employees/:id' => 'employees#show', as: 'employee'
   get '/my_stuff' => 'employees#personal_graph', as: 'personal_graph' 
 
+  resource :shopping_cart, except: [:new, :create, :edit]
+  put '/shopping_cart' => 'shopping_carts#update', as: 'update_cart' 
+
   # Generic file routes
   resources :nu_core_files, :path => :files, :except => :index do
     member do
