@@ -18,7 +18,8 @@ Drs::Application.routes.draw do
   get '/communities/:id/presentations' => 'communities#presentations', as: 'community_presentations' 
   get '/communities/:id/datasets' => 'communities#data_sets', as: 'community_data_sets' 
   get '/communities/:id/pedagogical' => 'communities#learning_objects', as: 'community_pedagogical'
-
+  post '/communities/:id/attach_employee/:employee_id' => 'communities#attach_employee', as: 'attach_employee'
+  
   resources :compilations
   get "/compilations/:id/download" => 'compilations#show_download', as: 'prepare_download'
   get "/compilations/:id/ping" => 'compilations#ping_download', as: 'ping_download'  
@@ -36,8 +37,9 @@ Drs::Application.routes.draw do
   get '/employees/:id' => 'employees#show', as: 'employee'
   get '/my_stuff' => 'employees#personal_graph', as: 'personal_graph'
 
-  get '/admin' => 'admin#admin_panel', as: 'admin_panel' 
-
+  get '/admin' => 'admin#admin_panel', as: 'admin_panel'
+  get '/admin/modify_employee' => 'admin#modify_employee', as: 'modify_employee'
+   
   # Generic file routes
   resources :nu_core_files, :path => :files, :except => :index do
     member do

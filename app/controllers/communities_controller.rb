@@ -57,6 +57,10 @@ class CommunitiesController < SetsController
     end    
   end
 
+  def attach_employee
+    #TODO
+  end
+
   def employees 
     @dept = Community.find(params[:id]) 
   end

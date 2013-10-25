@@ -5,4 +5,8 @@ class AdminController < ApplicationController
     #
   end
 
+  def modify_employee
+    #
+  end
+
 end

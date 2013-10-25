@@ -1,0 +1,13 @@
+= form_tag do
+  /the form action will be done by javascript, as we'll be getting the ids after the dom is made
+  %fieldset
+    %legend Required Information
+    .row-fluid
+      .span8
+        = label :employee, "Employee *"        
+        %input{:id => "employee_autocomplete", :type => "text", :required => "yes"}
+        %p to 
+        = label :parent, "Community *"        
+        %input{:id => "employee_comminity_autocomplete", :type => "text", :required => "yes"}
+  .form-actions
+    = submit_tag "Submit", :class => ['btn', 'btn-primary', 'btn-large']
