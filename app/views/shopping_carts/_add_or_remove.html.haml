@@ -1,6 +1,4 @@
 - if !session['ids'] || !session['ids'].include?(id)
-  - puts "rendering add shopping cart button"
   = render_add_to_shopping_cart(id) 
 - else
-  - puts "rendering remove shopping cart button"
   = render_remove_from_shopping_cart(id)
