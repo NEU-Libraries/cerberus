@@ -11,7 +11,6 @@ $("#admin_employee_autocomplete").autocomplete({
     },
     focus: function( e, ui ) {
       e.preventDefault() // <--- Prevent the value from being inserted.
-      $(this).val(ui.item.label);
     }
 });
 
@@ -26,7 +25,6 @@ $("#admin_community_autocomplete").autocomplete({
     },
     focus: function( e, ui ) {
       e.preventDefault() // <--- Prevent the value from being inserted.
-      $(this).val(ui.item.label);
     }
 });
 
