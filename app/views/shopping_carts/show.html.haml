@@ -1,1 +1,6 @@
 %h3 Items marked for download.
+
+- @items.each do |item| 
+  = render partial: 'datastream_download', locals: { item: item }
+
+= link_to("Download", cart_download_path) 
