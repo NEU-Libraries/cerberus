@@ -1,8 +1,8 @@
 class ShoppingCartsController < ApplicationController 
 
   before_filter :authenticate_user!
-  before_filter :can_dl?, only: [:update]
   before_filter :session_to_array 
+  before_filter :can_dl?, only: [:update]
   
 
   # Show the user the contents of their shopping cart.
@@ -30,7 +30,7 @@ class ShoppingCartsController < ApplicationController
   def destroy 
     session[:ids] = []
 
-    flash.now[:info] = "Sessions successfully cleared" 
+    flash[:info] = "Sessions successfully cleared" 
     redirect_to shopping_cart_path
   end
 
@@ -73,10 +73,18 @@ class ShoppingCartsController < ApplicationController
       session[:ids] ||= [] 
     end
 
+    # Verify the user can add this item to their shopping cart.
+    # And that doing so wouldn't cause them to over the 100 pid 
+    # limit
     def can_dl?
       if params[:add]
         record = ActiveFedora::Base.find(params[:add], cast: true) 
         render_403 and return unless current_user_can_read?(record)
+
+        if session[:ids].length >= 1 
+          flash.now[:error] = "Can't have more than 100 items in your cart" 
+          return
+        end
       end
     end
 

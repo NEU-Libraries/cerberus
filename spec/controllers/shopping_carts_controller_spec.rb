@@ -56,7 +56,7 @@ describe ShoppingCartsController do
 
       xhr :put, :update, { add: file.pid } 
 
-      session[:ids].should be_nil # Never touched by the controller, stays actually nil. 
+      session[:ids].should be_empty 
       response.status.should == 403
     end
   end
