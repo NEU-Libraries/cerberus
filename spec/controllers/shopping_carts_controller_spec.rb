@@ -69,7 +69,7 @@ describe ShoppingCartsController do
       delete :destroy 
 
       session[:ids].should be_empty 
-      expect(response).to redirect_to(shopping_cart_path) 
+      expect(response).to redirect_to(shopping_cart_path)   
     end 
   end
 end

@@ -63,14 +63,14 @@ class ShoppingCartsController < ApplicationController
 
   # Actually trigger a download.
   def fire_download
-    f = File.open "#{Rails.root}/tmp/#{current_user.nuid}/cart/cart.zip" 
-    send_data(f.read, filename: "items.zip")
+    f = "#{Rails.root}/tmp/#{current_user.nuid}/cart/cart.zip" 
+    send_data(f, filename: "downloads.zip")
   end
 
   private
 
     def session_to_array 
-      session[:ids] = [] unless session[:ids].instance_of? Array
+      session[:ids] ||= [] 
     end
 
     def can_dl?

@@ -3,4 +3,6 @@
 - @items.each do |item| 
   = render partial: 'datastream_download', locals: { item: item }
 
-= link_to("Download", cart_download_path) 
+- if @items.length > 0 
+  = link_to("Download", cart_download_path) 
+  = link_to("Destroy", shopping_cart_path, method: 'delete', confirmation: 'This will clear all current items') 
