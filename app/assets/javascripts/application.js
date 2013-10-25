@@ -12,6 +12,7 @@
 
 //= require jquery
 //= require jquery_ujs
+//= require shopping_carts
 //= require sufia
 // Required by Blacklight
 //= require blacklight/blacklight
