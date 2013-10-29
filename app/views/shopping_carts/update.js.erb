@@ -1,2 +1,5 @@
+// Update the counter at the top of the screen
+$('#cart_tracker').replaceWith("<%= j(render partial: 'shopping_carts/tracker') %>")
+
 // Update the link for the content stream that was just added.
 $("<%= j(@selector_string) %>").html("<%= j(render :partial => 'add_or_remove', locals: {:id => @id}) %>");
