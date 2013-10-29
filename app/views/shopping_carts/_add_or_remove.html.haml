@@ -1,4 +1,4 @@
-- if !session['ids'] || !session['ids'].include?(id)
-  = render_add_to_shopping_cart(id) 
+- if !session['ids'] || !session['ids'].include?(id) 
+  = link_to("Add to download", update_cart_path(add: id), :method => 'put',:remote => true) 
 - else
-  = render_remove_from_shopping_cart(id)
+  = link_to("Remove from download", update_cart_path(delete: id), :method => 'put', :remote => true) 
