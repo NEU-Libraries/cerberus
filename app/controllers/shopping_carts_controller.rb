@@ -41,7 +41,10 @@ class ShoppingCartsController < ApplicationController
     dir = "#{Rails.root}/tmp/#{current_user.nuid}/cart"
 
     respond_to do |format|
-      format.html { Sufia.queue.push(CartDownloadJob.new(session[:ids], current_user.nuid)) }
+      format.html do
+        FileUtils.rm_rf(Dir.glob("#{dir}/*")) if File.directory?(dir) 
+        Sufia.queue.push(CartDownloadJob.new(session[:ids], current_user.nuid))
+      end
 
       format.js do
         attempts = 25

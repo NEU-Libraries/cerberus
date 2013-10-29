@@ -11,13 +11,12 @@ class CartDownloadJob
     :cart_download 
   end
 
+  # The directory used to write the zipfile is cleared by the download action
+  # in the shopping_cart controller, which is also the only place where the job is 
+  # currently executed from.  
   def run
     self.user = User.find_by_email(nuid)
     self.path = "#{Rails.root}/tmp/#{nuid}/cart"
-
-    # Clean out any files that already exist in the cart directory 
-    # For this user. 
-    FileUtils.rm_rf(Dir.glob("#{path}/*")) if File.directory?(path) 
 
     FileUtils.mkdir_p("#{Rails.root}/tmp/#{user.nuid}/cart")
     full_path = "#{Rails.root}/tmp/#{user.nuid}/cart/cart.zip" 
