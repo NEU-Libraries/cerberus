@@ -1,0 +1,4 @@
+%h2.page-header Learning Objects
+
+- @content.each do |c| 
+  = render partial: 'content_item', locals: { content: @content }

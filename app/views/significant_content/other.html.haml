@@ -1,0 +1,4 @@
+%h2.page-header Other Publications
+
+- @content.each do |c| 
+  = render partial: 'content_item', locals: { content: @content }
