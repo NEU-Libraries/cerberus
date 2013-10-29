@@ -38,12 +38,12 @@ class ShoppingCartsController < ApplicationController
   # HTML requests bring the user to the download.html page and fire off the zip creation job. 
   # JS requests handle eventually triggering the download once on the download page. 
   def download
-    dir = "#{Rails.root}/tmp/#{current_user.nuid}/cart"
+    dir = "#{Rails.root}/tmp/carts/#{session[:session_id]}/"
 
     respond_to do |format|
       format.html do
         FileUtils.rm_rf(Dir.glob("#{dir}/*")) if File.directory?(dir) 
-        Sufia.queue.push(CartDownloadJob.new(session[:ids], current_user.nuid))
+        Sufia.queue.push(CartDownloadJob.new(session[:session_id], session[:ids], current_user.nuid))
       end
 
       format.js do
@@ -66,7 +66,7 @@ class ShoppingCartsController < ApplicationController
 
   # Actually trigger a download.
   def fire_download
-    f = "#{Rails.root}/tmp/#{current_user.nuid}/cart/cart.zip" 
+    f = "#{Rails.root}/tmp/carts/#{session[:session_id]}/cart.zip" 
     send_file(f)
   end
 
