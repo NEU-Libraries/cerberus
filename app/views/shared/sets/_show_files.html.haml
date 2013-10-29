@@ -4,5 +4,5 @@
   %ul.child_files
   - collection.child_files.each do |file| 
     %li 
-      %p= link_to(file.title, nu_core_file_path(file)) 
+      %p= link_to(file.title, nu_core_file_path(file.pid)) 
       %span=  link_to "Add to Compilation", compilations_path(file: file.pid), remote: true
