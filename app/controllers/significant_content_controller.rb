@@ -23,6 +23,6 @@ class SignificantContentController < ApplicationController
   private 
 
     def fetch_all(content_type) 
-      Department.all.inject([]) { |acc, dept| acc + dept.send(content_type) }
+      Community.all.inject([]) { |acc, dept| acc + dept.send(content_type) }
     end
 end
