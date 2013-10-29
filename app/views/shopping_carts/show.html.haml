@@ -1,0 +1,8 @@
+%h3 Items marked for download.
+
+- @items.each do |item| 
+  = render partial: 'datastream_download', locals: { item: item }
+
+- if @items.length > 0 
+  = link_to("Download", cart_download_path) 
+  = link_to("Destroy", shopping_cart_path, method: 'delete', confirm: 'This will clear all current items') 

@@ -1,0 +1,4 @@
+%p -------
+%h4= item.title
+%ul
+  %li= link_to("Remove from download", update_cart_path(delete: item.id), :method => 'put', :remote => true) 
