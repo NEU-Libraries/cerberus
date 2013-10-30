@@ -2,14 +2,15 @@ class AdminController < ApplicationController
   include Drs::ControllerHelpers::EditableObjects
   
   before_filter :authenticate_user!
-  before_filter :deny_to_visitors
+  before_filter :verify_admin
 
-  def admin_panel
-    #
+  def index 
+
   end
 
-  def modify_employee
-    #
-  end
+  private 
 
+    def verify_admin 
+      redirect_to root_path unless current_user.try "admin" 
+    end
 end
