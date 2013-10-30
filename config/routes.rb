@@ -38,8 +38,8 @@ Drs::Application.routes.draw do
   get '/my_stuff' => 'employees#personal_graph', as: 'personal_graph'
 
   namespace :admin do 
-    resource :employees, except: [:show] 
-    resource :communities, except: [:show]
+    resources :employees, except: [:show] 
+    resources :communities, except: [:show]
   end
 
   get '/admin' => 'admin#index', as: 'admin_panel'
