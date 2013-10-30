@@ -16,7 +16,7 @@ class User < ActiveRecord::Base
          :recoverable, :rememberable, :trackable, :validatable
   # attr_accessible :title, :body
 
-  attr_accessible :password, :password_confirmation, :remember_me, :role
+  attr_accessible :password, :password_confirmation, :remember_me
 
   ROLES = %w[admin employee] 
 
@@ -35,10 +35,6 @@ class User < ActiveRecord::Base
 
   # Currently using group_list attribute as though it will someday contain the grouper information
   # pulled in from Shibboleth
-
-  def admin
-    return self.role.eql? "admin"
-  end
 
   private
     def link_to_drs
