@@ -10,13 +10,4 @@ class AdminController < ApplicationController
     #
   end
 
-  protected
-
-    def deny_to_visitors
-      if !current_user.admin
-        flash[:notice] = "Admin path denied, your role is #{current_user.role}"
-        redirect_to root_path
-      end
-    end
-
 end

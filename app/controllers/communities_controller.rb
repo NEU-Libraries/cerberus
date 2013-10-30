@@ -6,6 +6,7 @@ class CommunitiesController < SetsController
                                    :presentations, :data_sets, :learning_objects]
   before_filter :can_edit?, only: [:edit, :update, :destroy]
   before_filter :can_edit_parent?, only: [:create]
+  before_filter :deny_to_visitors, except: [:show]
 
   rescue_from Exceptions::NoParentFoundError, with: :index_redirect
   rescue_from ActiveFedora::ObjectNotFoundError, with: :index_redirect_with_bad_id
