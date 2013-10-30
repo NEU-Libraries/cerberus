@@ -11,6 +11,6 @@ class AdminController < ApplicationController
   private 
 
     def verify_admin 
-      redirect_to root_path unless current_user.try "admin" 
+      redirect_to root_path unless current_user.admin?
     end
 end

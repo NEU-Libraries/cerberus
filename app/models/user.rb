@@ -36,7 +36,7 @@ class User < ActiveRecord::Base
   # Currently using group_list attribute as though it will someday contain the grouper information
   # pulled in from Shibboleth
 
-  def admin
+  def admin?
     return self.role.eql?('admin')
   end
 
