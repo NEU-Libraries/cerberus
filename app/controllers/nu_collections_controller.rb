@@ -24,9 +24,19 @@ class NuCollectionsController < SetsController
 
   def create
     @set = NuCollection.new(params[:set].merge(pid: mint_unique_pid))
-    if params[:set][:user_parent].present?
-      @set.user_parent = Employee.find_by_nuid(params[:set][:user_parent]) 
-      @set.personal_folder_type = 'miscellany' 
+
+    parent = NuCollection.find(params[:set][:parent])
+
+    # Assign personal folder specific info if parent folder is a 
+    # personal folder. 
+    if parent.is_personal_folder? 
+      @set.user_parent = parent.user_parent 
+
+      if parent.personal_folder_type == 'user root' 
+        @set.personal_folder_type = 'miscellany' 
+      else
+        @set.personal_folder_type = parent.personal_folder_type 
+      end
     end
 
     @set.depositor = current_user.nuid 
