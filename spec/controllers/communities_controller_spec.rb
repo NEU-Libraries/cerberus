@@ -10,21 +10,6 @@ describe CommunitiesController do
   end
 
   describe "GET #new" do 
-    it "redirects to the index page if no community parent is set" do 
-      sign_in bill 
-
-      get :new 
-
-      expect(response).to redirect_to(communities_path) 
-    end
-
-    it "redirects to the index page if it cannot find the described community parent" do 
-      sign_in bill 
-
-      get :new, {parent: 'neu:adsfasdfasdfasdfasdfa' } 
-
-      expect(response).to redirect_to(communities_path) 
-    end
 
     it "renders the new page when a community parent is set" do 
       sign_in bill
@@ -40,13 +25,6 @@ describe CommunitiesController do
       expect(response).to redirect_to(new_user_session_path) 
     end
 
-    it "renders a 403 page for users without edit access to the community parent object" do
-      sign_in bo 
-
-      get :new, {parent: root_dept.identifier}
-
-      response.status.should == 403 
-    end
   end
 
   describe "POST #create" do 
