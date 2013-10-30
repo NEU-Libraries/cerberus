@@ -36,6 +36,10 @@ class User < ActiveRecord::Base
   # Currently using group_list attribute as though it will someday contain the grouper information
   # pulled in from Shibboleth
 
+  def admin
+    return self.role.eql?('admin')
+  end
+
   private
     def link_to_drs
       Sufia.queue.push(EmployeeCreateJob.new(self.nuid))
