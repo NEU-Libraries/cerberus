@@ -1,13 +1,7 @@
 class AdminController < ApplicationController
   before_filter :authenticate_user!
-  before_filter :deny_to_visitors
 
-  def admin_panel
-    #
+  def index 
+
   end
-
-  def modify_employee
-    #
-  end
-
 end

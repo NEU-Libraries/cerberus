@@ -37,7 +37,12 @@ Drs::Application.routes.draw do
   get '/employees/:id' => 'employees#show', as: 'employee'
   get '/my_stuff' => 'employees#personal_graph', as: 'personal_graph'
 
-  get '/admin' => 'admin#admin_panel', as: 'admin_panel'
+  namespace :admin do 
+    resource :employees, except: [:show] 
+    resource :communities, except: [:show]
+  end
+
+  get '/admin' => 'admin#index', as: 'admin_panel'
   get '/admin/modify_employee' => 'admin#modify_employee', as: 'modify_employee'
    
   # Generic file routes
