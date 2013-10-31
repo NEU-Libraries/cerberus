@@ -4,8 +4,9 @@
     %legend Required Information
     .row-fluid
       .span8
-        = f.label :parent, "Parent Community *"        
-        %input{:id => "community_autocomplete", :type => "text"}
+        - if params[:action].eql?('new')
+          = f.label :parent, "Parent Community *"        
+          %input{:id => "community_autocomplete", :type => "text"}
         = f.label :title, "Title *"
         = f.text_field :title, required: true, pattern: ".*\\S.*", name: 'community[title][]', class: "input-block-level", placeholder: "University Libraries"
     = f.label :description, "Description *"
