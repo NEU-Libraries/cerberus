@@ -4,6 +4,7 @@ describe CommunitiesController do
   let(:admin)                 { FactoryGirl.create(:admin) }
   let(:bo)                    { FactoryGirl.create(:bo) } 
   let(:root_community)        { FactoryGirl.create(:root_community) }
+  let(:test_community)        { FactoryGirl.create(:test_community) }
 
   describe "GET #index" do
     it "renders the show template for root_community with no user logged in" do      
@@ -70,7 +71,15 @@ describe CommunitiesController do
       expect(response).to redirect_to(new_user_session_path)
     end
 
-    
+    it "redirects to the show page on successful edit by autherized user" do
+      sign_in admin
+      attrs = {title: "Test title edit", description: "Test edit desc"}
+      post :update, {id: test_community.identifier, community: attrs}
+      expect(response).to redirect_to(community_path(id: test_community.identifier))
+
+      assigns(:community).title.should == "Test title edit"
+      assigns(:community).description.should == "Test edit desc"
+    end
   end
 
   describe "PUTS #update" do

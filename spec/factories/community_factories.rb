@@ -29,8 +29,15 @@ FactoryGirl.define do
       description "Factory created" 
       assigned_identifier
       public_read
-      #owned_by_bill
       owned_by_admin
     end
+
+    factory :test_community do 
+      title "Test Community"
+      description "Factory created, test object" 
+      assigned_identifier
+      public_read
+      owned_by_admin
+    end    
   end
 end
