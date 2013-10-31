@@ -27,8 +27,14 @@ class Admin::EmployeesController < ApplicationController
     end
   end
 
-  def destroy 
+  def destroy
+    nuid = @employee.nuid
 
+    if @employee.destroy 
+      redirect_to admin_employees_path, notice: "Employee #{nuid} removed" 
+    else
+      redirect_to admin_employees_path, notice: "Something went wrong" 
+    end
   end
 
   private 
@@ -38,6 +44,6 @@ class Admin::EmployeesController < ApplicationController
     end
 
     def verify_admin 
-      redirect_to root_path unless current_user.admin? 
+      redirect_to root_path and return unless current_user.admin? 
     end
 end

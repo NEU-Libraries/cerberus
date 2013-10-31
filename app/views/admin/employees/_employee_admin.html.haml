@@ -4,3 +4,4 @@
   .span4 
     = link_to("Edit", edit_admin_employee_path(id: employee.id)) 
   .span4
+    = link_to("Delete", admin_employee_path(id: employee.id), method: 'delete', confirm: "This is irreversible") 

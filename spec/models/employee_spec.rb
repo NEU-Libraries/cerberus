@@ -23,6 +23,30 @@ describe Employee do
     end
   end
 
+  describe "community attachment" do 
+    let(:employee)      { FactoryGirl.create :employee } 
+    let(:community)     { FactoryGirl.create :community } 
+    let(:community_two) { FactoryGirl.create :community}
+
+    it "adds communities" do 
+      employee.add_community(community) 
+      employee.save!
+
+      employee.communities.should == [community] 
+    end
+
+    it "can remove communities" do 
+      employee.add_community(community) 
+      employee.add_community(community_two) 
+      employee.save! 
+
+      employee.remove_community(community) 
+      employee.save!
+
+      employee.communities.should == [community_two] 
+    end
+  end
+
   describe "search" do
     it "can find employees via their nuid" do
       a = Employee.create(nuid: "findme@examples.com")
