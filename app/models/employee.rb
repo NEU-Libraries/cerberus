@@ -15,8 +15,12 @@ class Employee < ActiveFedora::Base
   belongs_to :parent, :property => :has_affiliation, :class_name => 'Community'
   has_many :folders, :property => :is_member_of, :class_name => 'NuCollection'
 
-  def community=(community_id)
-    self.add_relationship(:has_affiliation, community_id) 
+  def add_community(c_id) 
+    self.add_relationship(:has_affiliation, c_id) 
+  end
+
+  def remove_community(c_id) 
+    self.remove_relationship(:has_affiliation, c_id) 
   end 
 
   def self.find_by_nuid(nuid) 
