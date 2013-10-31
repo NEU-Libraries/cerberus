@@ -70,16 +70,6 @@ describe CommunitiesController do
       get :new
       expect(response).to redirect_to(new_user_session_path)
     end
-
-    it "redirects to the show page on successful edit by autherized user" do
-      sign_in admin
-      attrs = {title: "Test title edit", description: "Test edit desc"}
-      post :update, {id: test_community.identifier, community: attrs}
-      expect(response).to redirect_to(community_path(id: test_community.identifier))
-
-      assigns(:community).title.should eq "Test title edit"
-      assigns(:community).description.should eq "Test edit desc"
-    end
   end
 
   describe "PUTS #update" do
@@ -87,6 +77,16 @@ describe CommunitiesController do
       get :new
       expect(response).to redirect_to(new_user_session_path)
     end
+
+    it "redirects to the show page on successful edit by autherized user" do
+      sign_in admin
+      attrs = {title: "Test title edit", description: "Test edit desc"}
+      put :update, {id: test_community.identifier, community: attrs}
+      expect(response).to redirect_to(community_path(id: test_community.identifier))
+
+      assigns(:community).title.should eq "Test title edit"
+      assigns(:community).description.should eq "Test edit desc"
+    end    
   end
 
 end
