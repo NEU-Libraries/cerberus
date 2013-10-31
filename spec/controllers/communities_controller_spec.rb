@@ -77,8 +77,8 @@ describe CommunitiesController do
       post :update, {id: test_community.identifier, community: attrs}
       expect(response).to redirect_to(community_path(id: test_community.identifier))
 
-      assigns(:community).title.should == "Test title edit"
-      assigns(:community).description.should == "Test edit desc"
+      assigns(:community).title.should eq "Test title edit"
+      assigns(:community).description.should eq "Test edit desc"
     end
   end
 
