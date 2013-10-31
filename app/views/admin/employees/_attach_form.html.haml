@@ -1,14 +1,11 @@
-= form_tag modify_employee_path, :id => 'modify_employee' do
+= form_tag admin_employee_path, :method => :put, :id => 'modify_employee' do
   %input{:type=>"hidden", :id => "admin_employee", :name => "admin[employee]"}
-  %input{:type=>"hidden", :id => "admin_community", :name => "admin[comminity]"}
+  %input{:type=>"hidden", :id => "admin_community", :name => "admin[community]"}
   /the form action will be done by javascript, as we'll be getting the ids after the dom is made
   %fieldset
-    %legend Required Information
+    %legend Attach to another Community
     .row-fluid
       .span8
-        = label_tag "admin_employee_autocomplete", "Employee *"        
-        %input{:id => "admin_employee_autocomplete", :type => "text", :required => "yes"}
-        %p to 
         = label_tag "admin_community_autocomplete", "Community *"        
         %input{:id => "admin_community_autocomplete", :type => "text", :required => "yes"}
   .form-actions

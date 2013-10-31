@@ -1,0 +1,10 @@
+
+%h3 User's Current Communities
+
+%ul
+  - employee.communities.each do |c| 
+    .row 
+      .span4
+        %h4= c.title 
+      .span4
+        %span.small Remove action goes here

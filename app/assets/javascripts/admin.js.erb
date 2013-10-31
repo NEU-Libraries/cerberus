@@ -1,9 +1,5 @@
-$("#submit_button").click(function() {
-  $("#modify_employee").attr("action", "/communities/" + $("#admin_community").val() + "/attach_employee/" + $("#admin_employee").val());
-});
-
 $("#admin_employee_autocomplete").autocomplete({
-    source: <%= Employee.find(:all).map{|c| {'label' => c.name, 'value' => c.id}}.to_json %>,
+    source: <%= Employee.find(:all).map{|c| {'label' => c.nuid, 'value' => c.id}}.to_json %>,
     select: function(e, ui) {
         e.preventDefault() // <--- Prevent the value from being inserted.
         $("#admin_employee").val(ui.item.value);
