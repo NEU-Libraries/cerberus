@@ -1,5 +1,6 @@
-= form_for @community do |f|  
-  = f.hidden_field :parent, name: 'community[parent]'
+= form_for @community do |f|
+  - if params[:action].eql?('new')
+    = f.hidden_field :parent, name: 'community[parent]'
   %fieldset
     %legend Required Information
     .row-fluid
