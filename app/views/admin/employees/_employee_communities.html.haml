@@ -5,6 +5,9 @@
   - employee.communities.each do |c| 
     .row 
       .span4
-        %h4= c.title 
-      .span4
-        %span.small Remove action goes here
+        %h4= c.title
+      .span4 
+        =link_to("Remove user from this community", 
+                  admin_employee_path(employee, remove: c.pid), 
+                  remote: true, 
+                  method: 'put') 

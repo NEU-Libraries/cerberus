@@ -1,6 +1,6 @@
-%h2= "Attach #{@employee.nuid} to a Community"
+%h2= "Manage #{@employee.nuid}'s communities" 
 
-.current_communities
+#current_communities
   = render partial: "employee_communities", locals: { employee: @employee } 
 
 = render partial: "attach_form"
