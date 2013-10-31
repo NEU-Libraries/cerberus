@@ -1,7 +1,3 @@
-$("#submit_button").click(function() {
-  $("#modify_employee").attr("action", "edit");
-});
-
 $("#admin_employee_autocomplete").autocomplete({
     source: <%= Employee.find(:all).map{|c| {'label' => c.nuid, 'value' => c.id}}.to_json %>,
     select: function(e, ui) {
