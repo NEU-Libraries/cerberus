@@ -1,6 +1,6 @@
-= form_tag modify_employee_path, :id => 'modify_employee' do
+= form_tag admin_employee_path, :method => :put, :id => 'modify_employee' do
   %input{:type=>"hidden", :id => "admin_employee", :name => "admin[employee]"}
-  %input{:type=>"hidden", :id => "admin_community", :name => "admin[comminity]"}
+  %input{:type=>"hidden", :id => "admin_community", :name => "admin[community]"}
   /the form action will be done by javascript, as we'll be getting the ids after the dom is made
   %fieldset
     %legend Required Information
