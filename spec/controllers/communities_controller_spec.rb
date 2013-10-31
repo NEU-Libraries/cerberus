@@ -46,11 +46,22 @@ describe CommunitiesController do
 
       id = assigns(:community).identifier
       expect(response).to redirect_to(community_path(id: id))
-    end        
+    end
+
+    it "redirects to root_path if the user is not an admin" do
+      sign_in bo
+      get :new
+      expect(response).to redirect_to(root_path)
+    end
   end
 
   describe "GET #show" do 
-    #
+    it "renders the show template for unauthed users on public collections" do 
+
+      get :show, { id: root_community.identifier } 
+
+      expect(response).to render_template('shared/sets/show') 
+    end
   end
 
   describe "GET #edit" do
@@ -58,6 +69,8 @@ describe CommunitiesController do
       get :new
       expect(response).to redirect_to(new_user_session_path)
     end
+
+    
   end
 
   describe "PUTS #update" do
