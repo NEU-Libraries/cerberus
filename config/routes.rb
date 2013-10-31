@@ -8,8 +8,9 @@ Drs::Application.routes.draw do
   resources :nu_collections, :path => 'collections', except: [:index] 
   get "/collections" => redirect("/communities")
 
-  resources :communities, except: [:index]
-  get "/communities" => 'communities#show', defaults: { id: "#{Rails.configuration.root_community_id}" }
+  resources :communities
+  #resources :communities, except: [:index]
+  #get "/communities" => 'communities#show', defaults: { id: "#{Rails.configuration.root_community_id}" }
 
   # Community Specific queries 
   get '/communities/:id/employees' => 'communities#employees', as: 'community_employees' 

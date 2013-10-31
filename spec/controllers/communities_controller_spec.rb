@@ -6,11 +6,10 @@ describe CommunitiesController do
   let(:root_community)        { FactoryGirl.create(:root_community) }
 
   describe "GET #index" do
-    it "renders the show template for root_community" do
-      sign_in admin
+    it "renders the show template for root_community with no user logged in" do      
       get :index
-      response.status.should == 200
-      expect(response).to render_template('shared/sets/show')
+      response.status.should == 302
+      expect(response).to redirect_to(community_path(id: 'neu:1'))
     end  
   end 
 
