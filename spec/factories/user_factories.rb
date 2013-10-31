@@ -6,7 +6,8 @@ FactoryGirl.define do
     after(:build) { |user| user.class.skip_callback(:save, :after, :link_to_drs) } 
 
     factory :admin do 
-      after(:build) { |u| u.role = 'admin' } 
+      after(:build) { |u| u.role = 'admin' }
+      email 'admin@example.com' 
     end
 
     factory :bill do 

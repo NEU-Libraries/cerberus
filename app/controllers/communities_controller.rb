@@ -6,7 +6,7 @@ class CommunitiesController < SetsController
                                    :presentations, :data_sets, :learning_objects]
   before_filter :can_edit?, only: [:edit, :update, :destroy]
   before_filter :can_edit_parent?, only: [:create]
-  before_filter :deny_to_visitors, except: [:show]
+  before_filter :deny_to_visitors, except: [:index, :show]
 
   rescue_from Exceptions::NoParentFoundError, with: :index_redirect
   rescue_from ActiveFedora::ObjectNotFoundError, with: :index_redirect_with_bad_id
@@ -17,6 +17,7 @@ class CommunitiesController < SetsController
   end  
 
   def index
+    redirect_to community_path(id: 'neu:1')
   end
 
   def show
