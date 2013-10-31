@@ -1,5 +1,5 @@
 = form_for @community do |f|  
-  = f.hidden_field :parent, name: 'set[parent]'
+  = f.hidden_field :parent, name: 'community[parent]'
   %fieldset
     %legend Required Information
     .row-fluid
@@ -7,8 +7,8 @@
         = f.label :parent, "Parent Community *"        
         %input{:id => "community_autocomplete", :type => "text"}
         = f.label :title, "Title *"
-        = f.text_field :title, required: true, pattern: ".*\\S.*", name: 'set[title][]', class: "input-block-level", placeholder: "Univeristy Libraries"
+        = f.text_field :title, required: true, pattern: ".*\\S.*", name: 'community[title][]', class: "input-block-level", placeholder: "University Libraries"
     = f.label :description, "Description *"
-    = f.text_area :description, required: true, pattern: ".*\\S.*", name: 'set[description][]', class: "input-block-level", rows: 5
+    = f.text_area :description, required: true, pattern: ".*\\S.*", name: 'community[description][]', class: "input-block-level", rows: 5
   .form-actions
     = f.submit class: ['btn', 'btn-primary', 'btn-large'], value: 'Submit'
