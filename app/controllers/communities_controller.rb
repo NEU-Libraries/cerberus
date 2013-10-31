@@ -30,16 +30,16 @@ class CommunitiesController < SetsController
   end
 
   def create
-    @set = Community.new(params[:set].merge(pid: mint_unique_pid))
+    @community = Community.new(params[:community].merge(pid: mint_unique_pid))
 
-    @set.mass_permissions = 'public'
-    @set.rightsMetadata.permissions({person: "#{current_user.nuid}"}, 'edit')
+    @community.mass_permissions = 'public'
+    @community.rightsMetadata.permissions({person: "#{current_user.nuid}"}, 'edit')
 
-    @set.identifier = @set.pid
+    @community.identifier = @community.pid
 
-    if @set.save!
+    if @community.save!
       flash[:info] = "Community created successfully."
-      redirect_to community_path(id: @set.identifier) and return  
+      redirect_to community_path(id: @community.identifier) and return  
     else
       flash.now[:error] = "Something went wrong"
       redirect_to new_community_path(parent: params[:parent]) and return 
@@ -51,11 +51,11 @@ class CommunitiesController < SetsController
   end
 
   def update
-    @set = Community.find(params[:id])  
-    if @set.update_attributes(params[:set]) 
-      redirect_to(@set, notice: "Community #{@set.title} was updated successfully." ) 
+    @community = Community.find(params[:id])  
+    if @community.update_attributes(params[:community]) 
+      redirect_to(@community, notice: "Community #{@community.title} was updated successfully." ) 
     else
-      redirect_to(@set, notice: "Community #{@set.title} failed to update.")
+      redirect_to(@community, notice: "Community #{@community.title} failed to update.")
     end    
   end
 
