@@ -21,7 +21,17 @@ class Employee < ActiveFedora::Base
 
   def remove_community(c_id) 
     self.remove_relationship(:has_affiliation, c_id) 
-  end 
+  end
+
+  # Return an array of Community Objects 
+  # That this employee is associated with. 
+  def communities
+    result = []
+    self.relationships(:has_affiliation).each do |rel| 
+      result << Community.find(rel[12..-1])
+    end
+    return result
+  end
 
   def self.find_by_nuid(nuid) 
     escaped_param = ActiveFedora::SolrService.escape_uri_for_query(nuid)

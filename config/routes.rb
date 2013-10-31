@@ -39,7 +39,7 @@ Drs::Application.routes.draw do
 
   namespace :admin do 
     # Add/Remove communities from an employee, delete employee
-    resource :employee, only: [:edit, :update, :destroy]
+    resources :employees, only: [:index, :edit, :update, :destroy]
   end
 
   get '/admin' => 'admin#index', as: 'admin_panel'
