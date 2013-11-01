@@ -1,11 +1,10 @@
 class CommunitiesController < SetsController
   include Drs::ControllerHelpers::EditableObjects
   
-  before_filter :authenticate_user!, only: [:new, :edit, :create, :update, :destroy ]
+  before_filter :authenticate_user!, only: [:edit, :update, :destroy ]
   before_filter :can_read?, only: [:show, :employees, :research_publications, :other_publications,
                                    :presentations, :data_sets, :learning_objects]
   before_filter :can_edit?, only: [:edit, :update, :destroy]
-  before_filter :can_edit_parent?, only: [:create]
   before_filter :deny_to_visitors, except: [:index, :show]
 
   rescue_from Exceptions::NoParentFoundError, with: :index_redirect
@@ -24,27 +23,6 @@ class CommunitiesController < SetsController
     @set = Community.find(params[:id])
     render :template => 'shared/sets/show'    
   end
-
-  def new
-    @community = Community.new(parent: params[:parent])
-  end
-
-  def create
-    @community = Community.new(params[:community].merge(pid: mint_unique_pid))
-
-    @community.mass_permissions = 'public'
-    @community.rightsMetadata.permissions({person: "#{current_user.nuid}"}, 'edit')
-
-    @community.identifier = @community.pid
-
-    if @community.save!
-      flash[:info] = "Community created successfully."
-      redirect_to community_path(id: @community.identifier) and return  
-    else
-      flash.now[:error] = "Something went wrong"
-      redirect_to new_community_path(parent: params[:parent]) and return 
-    end
-  end  
 
   def edit
     @community = Community.find(params[:id])
