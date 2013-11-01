@@ -9,6 +9,5 @@
 
     %h3.page-header Employees
 
-    .employees
-      - @community.employees.each do |e| 
-        = render partial: 'admin_community_employee', locals: { employee: e, community: @community }
+    #community_employees
+      = render partial: 'admin_community_employees', locals: { community: @community }
