@@ -1,0 +1,6 @@
+%h2.page-header All Communities
+
+%span.small Search element goes here maybe 
+
+- @communities.each do |community| 
+  = render partial: "admin_community", locals: { community: community } 

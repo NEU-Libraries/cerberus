@@ -15,9 +15,23 @@ class Employee < ActiveFedora::Base
   belongs_to :parent, :property => :has_affiliation, :class_name => 'Community'
   has_many :folders, :property => :is_member_of, :class_name => 'NuCollection'
 
-  def community=(community_id)
-    self.add_relationship(:has_affiliation, community_id) 
-  end 
+  def add_community(c_id) 
+    self.add_relationship(:has_affiliation, c_id) 
+  end
+
+  def remove_community(c_id) 
+    self.remove_relationship(:has_affiliation, c_id) 
+  end
+
+  # Return an array of Community Objects 
+  # That this employee is associated with. 
+  def communities
+    result = []
+    self.relationships(:has_affiliation).each do |rel| 
+      result << Community.find(rel[12..-1])
+    end
+    return result
+  end
 
   def self.find_by_nuid(nuid) 
     escaped_param = ActiveFedora::SolrService.escape_uri_for_query(nuid)

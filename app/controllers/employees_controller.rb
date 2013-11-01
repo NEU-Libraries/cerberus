@@ -9,6 +9,9 @@ class EmployeesController < ApplicationController
     @employee = current_users_employee_id 
   end
 
+  def attach_employee
+  end
+
   private
 
     def current_users_employee_id 

@@ -1,0 +1,7 @@
+%h2.page-header All Employees 
+
+%div.search-elements 
+  %p.small Search bar goes here maybe. 
+
+- @employees.each do |employee| 
+  = render partial: 'employee_admin', locals: { employee: employee } 
