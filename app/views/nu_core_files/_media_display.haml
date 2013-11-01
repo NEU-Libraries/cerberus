@@ -1,8 +1,7 @@
 %figure
   - if @nu_core_file.image?
-    %a{href: sufia.download_path(@nu_core_file), target: "_new", title: "Download the full-sized image"}
-      %img{alt: "Download the full-sized image of #{@nu_core_file.title.first}", src: sufia.download_path(@nu_core_file, {:datastream_id => 'thumbnail'}), width: "338"}>/
-      Download the full-sized image
+    %img{alt: "Download the full-sized image of #{@nu_core_file.title.first}", src: sufia.download_path(@nu_core_file, {:datastream_id => 'thumbnail'}), width: "338"}
+    %a{href: sufia.download_path(@nu_core_file), target: "_new", title: "Download the full-sized image"}Download the full-sized image
   - elsif @nu_core_file.video?
     %video.video-js.vjs-default-skin{controls: "controls", "data-setup" => "{}", preload: "auto"}
       %source{src: sufia.download_path(@nu_core_file, datastream_id: 'webm'), type: "video/webm"}
@@ -20,5 +19,6 @@
   - else
     %a{href: sufia.download_path(@nu_core_file), target: "_new"}
       %img{alt: "No preview available", height: "493", src: "/assets/default.png", width: "338"}/
-  %figcaption
-    =@nu_core_file.description
+  - if @nu_core_file.description.length > 0
+    %figcaption
+      =@nu_core_file.description
