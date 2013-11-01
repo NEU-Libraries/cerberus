@@ -87,4 +87,16 @@ describe Admin::CommunitiesController do
       assigns(:community).description.should eq "Test edit desc"
     end    
   end
+
+  describe "DELETE #destroy" do 
+
+    it "removes the community" do 
+      sign_in admin 
+      pid = test_community.pid
+
+      delete :destroy, { id: pid }
+      expect(response).to redirect_to admin_communities_path
+      Community.exists?(pid).should be false
+    end
+  end
 end
