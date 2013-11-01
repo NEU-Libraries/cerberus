@@ -38,6 +38,7 @@ Drs::Application.routes.draw do
 
   namespace :admin do 
     # Add/Remove communities from an employee, delete employee
+    resources :communities, except: [:show] 
     resources :employees, only: [:index, :edit, :update, :destroy]
   end
 
