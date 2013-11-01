@@ -17,15 +17,15 @@ class Admin::CommunitiesController < AdminController
 
     if @community.save!
       flash[:info] = "Community created successfully."
-      redirect_to admin_community_path(id: @community.identifier) and return  
+      redirect_to admin_communities_path and return  
     else
       flash.now[:error] = "Something went wrong"
-      redirect_to admin_community_path(parent: params[:parent]) and return 
+      redirect_to admin_communities_path and return 
     end
   end
 
   def edit 
-    
+
   end
 
   def update 
