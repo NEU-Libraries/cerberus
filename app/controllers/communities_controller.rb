@@ -1,8 +1,7 @@
 class CommunitiesController < SetsController
   include Drs::ControllerHelpers::EditableObjects
   
-  before_filter :can_read?, only: [:show, :employees, :research_publications, :other_publications,
-                                   :presentations, :data_sets, :learning_objects]
+  before_filter :can_read?, except: [:index] 
 
   rescue_from Exceptions::NoParentFoundError, with: :index_redirect
   rescue_from ActiveFedora::ObjectNotFoundError, with: :index_redirect_with_bad_id
