@@ -1,4 +1,4 @@
-class Admin::EmployeesController < ApplicationController
+class Admin::EmployeesController < AdminController
 
   before_filter :authenticate_user! 
   before_filter :verify_admin
@@ -41,9 +41,5 @@ class Admin::EmployeesController < ApplicationController
 
     def load_employee
       @employee = Employee.find(params[:id]) 
-    end
-
-    def verify_admin 
-      redirect_to root_path and return unless current_user.admin? 
     end
 end
