@@ -74,6 +74,7 @@ task :reset_data => :environment do
   end
 
   drs_admin_user = User.new({:email => "drsadmin@neu.edu", :password => "drs12345", :password_confirmation => "drs12345"})
+  drs_admin_user.role = 'admin'
   drs_admin_user.save!
   
   set_edit_permissions(root_dept)
