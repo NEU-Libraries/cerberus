@@ -14,10 +14,12 @@ class Admin::EmployeesController < AdminController
 
   def update 
 
-    if params[:remove].present? 
+    if params[:remove].present?
+      @community = params[:remove]
       @employee.remove_community(Community.find(params[:remove]))
       @employee.save! 
     else
+      @community = params[:admin][:community]
       @employee.add_community(Community.find(params[:admin][:community]))
       @employee.save!
     end

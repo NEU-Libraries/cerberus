@@ -1,0 +1,13 @@
+%h2.page-header= "Edit #{@community.title}" 
+
+%ul.nav.nav-tabs
+
+.tab-content
+  #local.tab-pane.active
+    = render partial: 'data_form'
+
+
+    %h3.page-header Employees
+
+    #community_employees
+      = render partial: 'admin_community_employees', locals: { community: @community }
