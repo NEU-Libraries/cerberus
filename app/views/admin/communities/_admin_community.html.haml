@@ -1,0 +1,9 @@
+.row
+  .span4
+    %h4= community.title
+  .span4
+    = link_to("Edit", edit_admin_community_path(community)) 
+  .span4
+    = link_to("Destroy", admin_community_path(community), 
+              method: :delete, 
+              confirm: "This action is irreversible") 

@@ -3,6 +3,10 @@ class Admin::CommunitiesController < AdminController
   # Loads @community
   load_resource
 
+  def index 
+    @communities = Community.all
+  end
+
   def new 
 
   end
@@ -36,5 +40,17 @@ class Admin::CommunitiesController < AdminController
       flash[:notice] = "Community #{@community.title} failed to update."
       redirect_to admin_communities_path
     end 
+  end
+
+  def destroy 
+    title = @community.title
+
+    if @community.destroy 
+      flash[:notice] = "Community #{title} destroyed" 
+      redirect_to admin_communities_path
+    else
+      flash[:error] = "Failed to destroy community" 
+      redirect_to admin_communities_path 
+    end
   end
 end
