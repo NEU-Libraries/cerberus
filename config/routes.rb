@@ -8,7 +8,7 @@ Drs::Application.routes.draw do
   resources :nu_collections, :path => 'collections', except: [:index] 
   get "/collections" => redirect("/communities")
 
-  resources :communities
+  resources :communities, only: [:index, :show] 
 
   # Community Specific queries 
   get '/communities/:id/employees' => 'communities#employees', as: 'community_employees' 
