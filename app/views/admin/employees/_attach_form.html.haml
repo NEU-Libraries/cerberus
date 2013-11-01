@@ -1,3 +1,6 @@
+:javascript
+  var communities_for_employee_autocomplete = #{Community.find(:all).map{|c| {'label' => c.title, 'value' => c.id}}.to_json}
+
 = form_tag admin_employee_path, :method => :put, :id => 'modify_employee', :remote => true do
   %input{:type=>"hidden", :id => "admin_community", :name => "admin[community]"}
   /the form action will be done by javascript, as we'll be getting the ids after the dom is made
