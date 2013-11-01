@@ -1,5 +1,5 @@
 $("#community_autocomplete").autocomplete({
-    source: <%= Community.find(:all).map{|c| {'label' => c.title, 'value' => c.id}}.to_json %>,
+    source: communities_for_autocomplete,
     select: function(e, ui) {
         e.preventDefault() // <--- Prevent the value from being inserted.
         $("#community_parent").val(ui.item.value);
