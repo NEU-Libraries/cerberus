@@ -1,11 +1,8 @@
 class CommunitiesController < SetsController
   include Drs::ControllerHelpers::EditableObjects
   
-  before_filter :authenticate_user!, only: [:edit, :update, :destroy ]
   before_filter :can_read?, only: [:show, :employees, :research_publications, :other_publications,
                                    :presentations, :data_sets, :learning_objects]
-  before_filter :can_edit?, only: [:edit, :update, :destroy]
-  before_filter :deny_to_visitors, except: [:index, :show]
 
   rescue_from Exceptions::NoParentFoundError, with: :index_redirect
   rescue_from ActiveFedora::ObjectNotFoundError, with: :index_redirect_with_bad_id
@@ -22,23 +19,6 @@ class CommunitiesController < SetsController
   def show
     @set = Community.find(params[:id])
     render :template => 'shared/sets/show'    
-  end
-
-  def edit
-    @community = Community.find(params[:id])
-  end
-
-  def update
-    @community = Community.find(params[:id])  
-    if @community.update_attributes(params[:community]) 
-      redirect_to(@community, notice: "Community #{@community.title} was updated successfully." ) 
-    else
-      redirect_to(@community, notice: "Community #{@community.title} failed to update.")
-    end    
-  end
-
-  def attach_employee
-    #TODO
   end
 
   def employees 

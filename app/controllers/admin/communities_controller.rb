@@ -1,6 +1,6 @@
 class Admin::CommunitiesController < AdminController
 
-  # Loads @community for each action type
+  # Loads @community
   load_resource
 
   def new 
@@ -17,10 +17,24 @@ class Admin::CommunitiesController < AdminController
 
     if @community.save!
       flash[:info] = "Community created successfully."
-      redirect_to community_path(id: @community.identifier) and return  
+      redirect_to admin_community_path(id: @community.identifier) and return  
     else
       flash.now[:error] = "Something went wrong"
-      redirect_to new_community_path(parent: params[:parent]) and return 
+      redirect_to admin_community_path(parent: params[:parent]) and return 
     end
+  end
+
+  def edit 
+    
+  end
+
+  def update 
+    if @community.update_attributes(params[:community])
+      flash[:notice] =  "Community #{@community.title} was updated successfully."
+      redirect_to admin_communities_path
+    else
+      flash[:notice] = "Community #{@community.title} failed to update."
+      redirect_to admin_communities_path
+    end 
   end
 end
