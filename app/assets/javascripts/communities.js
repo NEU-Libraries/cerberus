@@ -1,14 +1,15 @@
-$("#community_autocomplete").autocomplete({
-    source: communities_for_autocomplete,
-    select: function(e, ui) {
+if ($("#community_autocomplete").length > 0) { 
+  $("#community_autocomplete").autocomplete({
+      source: communities_for_autocomplete,
+      select: function(e, ui) {
+          e.preventDefault() // <--- Prevent the value from being inserted.
+          $("#community_parent").val(ui.item.value);
+          $(this).val(ui.item.label);
+      },
+      focus: function( e, ui ) {
         e.preventDefault() // <--- Prevent the value from being inserted.
-        $("#community_parent").val(ui.item.value);
-        $(this).val(ui.item.label);
-    },
-    focus: function( e, ui ) {
-      e.preventDefault() // <--- Prevent the value from being inserted.
-    }
-});
+      }
+  });
 
-$( "#community_autocomplete" ).attr('autocomplete', 'on');
-
+  $( "#community_autocomplete" ).attr('autocomplete', 'on');
+}
