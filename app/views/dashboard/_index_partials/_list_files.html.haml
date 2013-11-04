@@ -15,7 +15,7 @@
     \&nbsp;
     \#{render :partial => 'dashboard/_index_partials/thumbnail_display', :locals => {:document=>document}}
     %span.center
-      = link_to document.title_or_label, nu_core_file_path(noid), :id => "src_copy_link#{noid}"
+      = link_to document.title_or_label, nu_core_file_path(document.id), :id => "src_copy_link#{noid}"
       %br/
   %td{:width => "17%"}
     = document.date_uploaded
