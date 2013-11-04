@@ -12,10 +12,6 @@
     #community_employees
       = render partial: 'admin_community_employees', locals: { community: @community }
 
-
-%p= params[:controller] 
-%p= params[:action]
-
 :javascript
   var employees_for_autocomplete = #{Employee.all.map{|c| {'label' => c.nuid, 'value' => c.id}}.to_json}
 

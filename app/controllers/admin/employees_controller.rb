@@ -13,15 +13,12 @@ class Admin::EmployeesController < AdminController
   end
 
   def update 
-
-    puts "The controller for this action is #{params[:controller]}"
-    puts "The referrer for this action is #{request.referrer}" 
     if params[:remove].present?
       @community = params[:remove] 
       @employee = Employee.find(params[:id]) 
       @employee.remove_community(Community.find(params[:remove])) 
       @employee.save!
-    elsif request.referrer.include?('admin/communities')
+    elsif request.referer.include?('admin/communities')
       # Handle the case where an update request is being sent from 
       # the admin/community edit page.  This needs some refactoring.
       @community = params[:id]
