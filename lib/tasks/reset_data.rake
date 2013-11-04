@@ -47,7 +47,10 @@ task :reset_data => :environment do
   Rake::Task["jetty:clean"].invoke
 
   Rake::Task["jetty:start"].reenable
-  Rake::Task["jetty:start"].invoke    
+  Rake::Task["jetty:start"].invoke
+
+  Resque.workers.each {|w| w.unregister_worker}
+  sh "COUNT=4 QUEUE=* rake environment resque:work &"
 
   root_dept = Community.new(pid: 'neu:1', identifier: 'neu:1', title: 'Root Community')
   root_dept.rightsMetadata.permissions({group: 'public'}, 'read')
@@ -71,6 +74,7 @@ task :reset_data => :environment do
   end
 
   drs_admin_user = User.new({:email => "drsadmin@neu.edu", :password => "drs12345", :password_confirmation => "drs12345"})
+  drs_admin_user.role = 'admin'
   drs_admin_user.save!
   
   set_edit_permissions(root_dept)
