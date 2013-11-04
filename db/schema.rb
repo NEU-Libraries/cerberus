@@ -143,7 +143,7 @@ ActiveRecord::Schema.define(:version => 20131030142818) do
 
   create_table "trophies", :force => true do |t|
     t.integer  "user_id"
-    t.string   "generic_file_id"
+    t.string   "nu_core_file_id"
     t.datetime "created_at",      :null => false
     t.datetime "updated_at",      :null => false
   end
