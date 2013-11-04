@@ -54,16 +54,35 @@ describe Admin::EmployeesController do
     context "as an admin" do 
       before { sign_in admin } 
 
-      it "adds the specified community to the employee" do 
-        put :update, { id: employee.pid, admin: { community: community.pid } } 
-        assigns(:employee).communities.should == [community] 
+      context "from a community edit page" do 
+        before :each do
+          url = "http://example.com/admin/communities/#{community.pid}/edit"
+          @request.env['HTTP_REFERER'] = url
+        end
+
+        it "allows addition from a community edit page" do
+          put :update, { id: community.pid, admin: { employee: employee.pid } } 
+          assigns(:employee).communities.should == [community] 
+        end
       end
 
-      it "removes the specified community for those sorts of requests" do 
-        employee.add_community(community)
-        put :update, { id: employee.pid, remove: community.pid }
-        assigns(:employee).communities.should == [] 
-      end 
+      context "from an employee edit page" do 
+        before(:each) do 
+          url = "http://example.com/admin/employees/#{employee.pid}/edit" 
+          @request.env['HTTP_REFERER'] = url
+        end
+
+        it "adds the specified community to the employee" do 
+          put :update, { id: employee.pid, admin: { community: community.pid } } 
+          assigns(:employee).communities.should == [community] 
+        end
+
+        it "removes the specified community for those sorts of requests" do 
+          employee.add_community(community)
+          put :update, { id: employee.pid, remove: community.pid }
+          assigns(:employee).communities.should == [] 
+        end 
+      end
     end
 
     context "as a regular user" do 
