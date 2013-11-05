@@ -1,17 +1,18 @@
 require 'spec_helper' 
 
-describe Community do 
-  
-  describe "Behavior of Parent setter" do 
-  end
+describe Community do
 
-  describe "behavior of recursions" do
+  describe "Behavior of recursions" do
     let(:root_community) { Community.new }
-        
+
     before do
+      ActiveFedora::Base.find(:all).each do |file| 
+        file.destroy
+      end
+            
       root_community.save! 
       @root_community = Community.find(root_community.pid) 
-    end
+    end    
 
     it "responds with all descendent collections" do
       @test_collection_a = NuCollection.create(parent: @root_community.pid)
@@ -55,5 +56,23 @@ describe Community do
     end
   end
 
+  describe "Behavior of Parent setter" do
+    let(:root) { Community.new }
+    let(:test_community) { Community.new }
+
+    before do
+      ActiveFedora::Base.find(:all).each do |file| 
+        file.destroy
+      end
+
+      root.save! 
+      @root = Community.find(root.pid)        
+    end 
+
+    it "Sets the parent collection, but receives nil" do 
+      test_community.parent = @root.pid 
+      test_community.parent.should == @root
+    end
+  end
 
 end
