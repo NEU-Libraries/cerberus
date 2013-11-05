@@ -21,14 +21,11 @@ class Community < ActiveFedora::Base
 
   belongs_to :parent, property: :has_affiliation, :class_name => "Community"
 
-  # Override parent= so that the string passed by the creation form can be used. 
-  def parent=(val)
-    unique_assign_by_string(val, :has_affiliation, [Community], allow_nil: true)
-  end
-
   # Depth first(ish) traversal of a graph.  
   def each_depth_first
-    self.child_collections.each do |child|
+    combinedChildren = self.child_collections + self.child_communities
+
+    combinedChildren.each do |child|
       child.each_depth_first do |c|
         yield c
       end
@@ -37,13 +34,9 @@ class Community < ActiveFedora::Base
     yield self
   end
 
-  # Return every descendent collection of this collection
-  def all_descendent_collections
-    result = [] 
-    each_depth_first do |child|
-      result << child 
-    end
-    return result 
+  # Override parent= so that the string passed by the creation form can be used. 
+  def parent=(val)
+    unique_assign_by_string(val, :has_affiliation, [Community], allow_nil: true)
   end
 
   def research_publications 
