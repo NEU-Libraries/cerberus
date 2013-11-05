@@ -21,6 +21,12 @@ gem 'bootstrap-sass', '~> 2.3.2.1'
 
 gem 'haml'
 
+# Deployment
+gem 'capistrano',  '~> 3.0.0'
+gem 'capistrano-rails'
+gem 'rvm1-capistrano3'
+gem 'capistrano-bundler'
+
 # Gems used only for assets and not required
 # in production environments by default.
 group :assets do
