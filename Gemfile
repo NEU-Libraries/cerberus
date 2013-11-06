@@ -21,12 +21,6 @@ gem 'bootstrap-sass', '~> 2.3.2.1'
 
 gem 'haml'
 
-# Deployment
-gem 'capistrano',  '~> 3.0.0'
-gem 'capistrano-rails'
-gem 'rvm1-capistrano3'
-gem 'capistrano-bundler'
-
 # Gems used only for assets and not required
 # in production environments by default.
 group :assets do
@@ -34,7 +28,6 @@ group :assets do
   gem 'coffee-rails', '~> 3.2.1'
   
   gem 'compass-rails'
-
 
   # See https://github.com/sstephenson/execjs#readme for more supported runtimes
   # gem 'therubyracer', :platforms => :ruby
@@ -49,6 +42,13 @@ gem "devise-guests", "~> 0.3"
 gem "ruby-filemagic", "~> 0.4.2"
 
 
+
+group :development do 
+  # Deployment
+  gem 'capistrano',  '~> 3.0.0'
+  gem 'capistrano-rails'
+  gem 'capistrano-bundler'
+end
 
 group :development, :test do
   gem 'guard-livereload'
