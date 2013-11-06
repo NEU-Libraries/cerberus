@@ -31,6 +31,7 @@ namespace :deploy do
   end
 end
 
+after 'deploy:updating', 'bundler:install'
 after 'deploy:updating', 'deploy:migrate'
 after 'deploy:updating', 'deploy:refresh_data'
 after 'deploy:updating', 'deploy:restart' 
