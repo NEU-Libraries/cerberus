@@ -1,7 +1,7 @@
 :javascript
   var communities_for_autocomplete = #{Community.find(:all).map{|c| {'label' => c.title, 'value' => c.id}}.to_json}
 
-= form_for @community do |f|
+= form_for [:admin, @community] do |f|
   - if params[:action].eql?('new')
     = f.hidden_field :parent, name: 'community[parent]'
   %fieldset
