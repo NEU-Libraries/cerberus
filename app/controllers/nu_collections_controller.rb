@@ -25,7 +25,7 @@ class NuCollectionsController < SetsController
   def create
     @set = NuCollection.new(params[:set].merge(pid: mint_unique_pid))
 
-    parent = NuCollection.find(params[:set][:parent])
+    parent = ActiveFedora::Base.find(params[:set][:parent], cast: true)
 
     # Assign personal folder specific info if parent folder is a 
     # personal folder. 
@@ -43,7 +43,7 @@ class NuCollectionsController < SetsController
     @set.identifier = @set.pid
 
     if @set.save!
-      flash[:info] = "Collection created successfully."
+      flash[:notice] = "Collection created successfully."
       redirect_to nu_collection_path(id: @set.identifier) and return  
     else
       flash.now[:error] = "Something went wrong"
