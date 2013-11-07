@@ -21,33 +21,11 @@ class Community < ActiveFedora::Base
 
   belongs_to :parent, property: :has_affiliation, :class_name => "Community"
 
-  # Override parent= so that the string passed by the creation form can be used. 
-  def parent=(val)
-    unique_assign_by_string(val, :has_affiliation, [Community], allow_nil: true)
-  end
-
-  def permissions=(hash)
-    self.set_permissions_from_new_form(hash)
-  end
-
-  # Accepts a hash of the following form:
-  # ex. {'permissions1' => {'identity_type' => val, 'identity' => val, 'permission_type' => val }, 'permissions2' => etc. etc. }
-  # Tosses out param sets that are missing an identity.  Which is nice.   
-  def set_permissions_from_new_form(params)
-    params.each do |perm_hash| 
-      identity_type = perm_hash[1]['identity_type']
-      identity = perm_hash[1]['identity']
-      permission_type = perm_hash[1]['permission_type'] 
-
-      if identity != 'public' && identity != 'registered' 
-        self.rightsMetadata.permissions({identity_type => identity}, permission_type)
-      end 
-    end
-  end
-
   # Depth first(ish) traversal of a graph.  
   def each_depth_first
-    self.child_collections.each do |child|
+    combinedChildren = self.child_collections + self.child_communities
+
+    combinedChildren.each do |child|
       child.each_depth_first do |c|
         yield c
       end
@@ -56,13 +34,9 @@ class Community < ActiveFedora::Base
     yield self
   end
 
-  # Return every descendent collection of this collection
-  def all_descendent_collections
-    result = [] 
-    each_depth_first do |child|
-      result << child 
-    end
-    return result 
+  # Override parent= so that the string passed by the creation form can be used. 
+  def parent=(val)
+    unique_assign_by_string(val, :has_affiliation, [Community], allow_nil: true)
   end
 
   def research_publications 
