@@ -29,7 +29,6 @@ group :assets do
   
   gem 'compass-rails'
 
-
   # See https://github.com/sstephenson/execjs#readme for more supported runtimes
   # gem 'therubyracer', :platforms => :ruby
 
@@ -43,6 +42,14 @@ gem "devise-guests", "~> 0.3"
 gem "ruby-filemagic", "~> 0.4.2"
 
 
+
+group :development do 
+  # Deployment
+  gem 'capistrano',  '~> 3.0.0'
+  gem 'capistrano-rails'
+  gem 'capistrano-bundler'
+  gem 'rvm1-capistrano3', require: false
+end
 
 group :development, :test do
   gem 'guard-livereload'
