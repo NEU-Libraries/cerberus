@@ -15,12 +15,12 @@ FactoryGirl.define do
 
     trait :owned_by_bill do 
       depositor 'bill@example.com' 
-      mass_permissions = 'public'
+      mass_permissions 'public'
     end
 
     trait :owned_by_admin do 
       depositor 'admin@example.com'
-      mass_permissions = 'public'
+      mass_permissions 'public'
     end    
 
     factory :root_community do 
