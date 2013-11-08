@@ -1,0 +1,15 @@
+%h4 File Details
+%dl
+  %dt Depositor
+  %dd{itemprop: "accountablePerson", itemscope: "", itemtype: "http://schema.org/Person"}
+    %span{itemprop: "name"}= link_to_profile @nu_core_file.depositor
+  %dt Date Uploaded
+  %dd{itemprop: "datePublished"}
+    = @nu_core_file.date_uploaded
+  %dt Date Modified
+  %dd{itemprop: "dateModified"}
+    = @nu_core_file.date_modified
+  - unless @nu_core_file.related_files.empty?
+    %dt Related Files
+    - @nu_core_file.related_files.each do |f|
+      %dd= link_to(f.label, nu_core_file_url(f.noid))

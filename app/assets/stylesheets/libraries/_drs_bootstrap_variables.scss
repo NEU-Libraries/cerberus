@@ -210,7 +210,7 @@ $baseFontFamily:        $sansFontFamily;
 $baseLineHeight:        21px;
 $altFontFamily:         $serifFontFamily;
 
-$headingsFontFamily:    $serifFontFamily; // empty to use BS default, $baseFontFamily
+$headingsFontFamily:    $sansFontFamily;//$serifFontFamily; // empty to use BS default, $baseFontFamily
 $headingsFontWeight:    500;//bold;    // instead of browser default, bold
 $headingsColor:         $midnight-blue;//inherit !default; // empty to use BS default, $textColor
 
