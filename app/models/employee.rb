@@ -34,26 +34,18 @@ class Employee < ActiveFedora::Base
   end
 
   def self.find_by_nuid(nuid) 
-    escaped_param = ActiveFedora::SolrService.escape_uri_for_query(nuid)
-    query_result = ActiveFedora::SolrService.query("active_fedora_model_ssi:Employee AND nuid_tesim:(#{escaped_param})", :rows=>999)
-    if query_result.length == 0 
-      raise Exceptions::NoSuchNuidError.new(nuid)
-    elsif query_result.length > 1 
-      all_pids = query_result.map { |r| r["id"] } 
-      raise Exceptions::MultipleMatchError.new(all_pids, nuid) 
+    results = nuid_unique_query(nuid) 
+
+    if results.length == 0 
+      raise Exceptions::NoSuchNuidError.new(nuid) 
     else
-      Employee.safe_employee_lookup(query_result.first["id"]) 
+      Employee.safe_employee_lookup(results.first["id"]) 
     end
-   end
+  end
 
-   def self.exists_by_nuid?(nuid) 
-    Employee.all.each do |e| 
-      if e.nuid == nuid 
-        return true 
-      end
-    end
-
-    return false 
+  def self.exists_by_nuid?(nuid) 
+    results = nuid_unique_query(nuid) 
+    !results.empty? 
   end
 
   def building=(val) 
@@ -100,6 +92,20 @@ class Employee < ActiveFedora::Base
         safe_employee_lookup(id, retries + 1) 
       else
         raise Exceptions::EmployeeWontStopBuildingError.new(id)
+      end
+    end
+
+    # Query Solr for the given nuid.
+    # Raise an error if multiple hits are returned
+    def self.nuid_unique_query(nuid) 
+      escaped_param = ActiveFedora::SolrService.escape_uri_for_query(nuid) 
+      query_result = ActiveFedora::SolrService.query("active_fedora_model_ssi:Employee AND nuid_tesim:(#{escaped_param})", :rows=>999)    
+
+      if query_result.length > 1 
+        all_pids = query_result.map { |r| r["id"] } 
+        raise Exceptions::MultipleMatchError.new(all_pids, nuid) 
+      else
+        return query_result 
       end
     end
 
