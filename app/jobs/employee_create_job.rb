@@ -12,7 +12,14 @@ class EmployeeCreateJob
   def run 
 
     # Spin up an employee marked as building
-    emp = Employee.create(nuid: self.nuid, name: "Jane Doe", building: true)
+    # Make sure the employee doesn't exist before we try that. 
+    # Would implement some sort of Employee.find_or_create but this is the only place 
+    # we'd ever use it. 
+    if Employee.exists_by_nuid?(self.nuid) 
+      emp = Employee.find_by_nuid(self.nuid)   
+    else
+      emp = Employee.create(nuid: self.nuid, name: "Jane Doe", building: true)
+    end
 
     # Generate employee's personal graph
     parent = create_folder("User Root", emp)

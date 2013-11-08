@@ -14,6 +14,14 @@ describe EmployeeCreateJob do
     Employee.all.map { |e| e.destroy } 
   end
 
+  it "doesn't create multiple employees if one already exists" do 
+    pid = Sufia::Noid.namespaceize(Sufia::IdService.mint) 
+    Employee.create(nuid: pid)
+    EmployeeCreateJob.new(pid).run 
+
+    Employee.all.length.should == 1 
+  end
+
   it "creates an Employee with matching nuid and all associated required folders" do 
     nuid = run_job 
 
