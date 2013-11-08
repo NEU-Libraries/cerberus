@@ -1,5 +1,7 @@
 - vals =  Array(nu_core_file[key])
-%dt= get_label(key)
-- vals.each do |v|
-  %dd= v
-    
+-# Only show a definition term for items with field values.
+- if vals.length > 0
+  %dt= get_label(key)
+  - vals.each do |v|
+    %dd= v
+  
