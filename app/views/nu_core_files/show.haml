@@ -1,0 +1,22 @@
+- content_for :js_head do
+  - javascript_include_tag 'https://s7.addthis.com/js/250/addthis_widget.js#pubid=ra-4ff1d986721ebb24'
+  :javascript
+    var addthis_config = {"data_track_addressbar":true};
+- content_for :local_js do
+  initialize_audio();
+= render :partial => 'nu_core_files/breadcrumbs'
+%article
+  %header 
+    %h1.lower.page-header= @nu_core_file
+
+  %section.row
+    .span6
+      = render :partial => 'nu_core_files/media_display'
+    .span6{itemscope: "", itemtype: "http://schema.org/CreativeWork"}
+      = render partial: 'show_actions'
+      = render partial: 'show_descriptions'
+      = render partial: 'show_details'
+      = render partial: 'show_derivatives', locals: {contents: @nu_core_file.content_objects}
+      / = render :partial => 'users/activity_log', :locals => {:events => @events}
+    / / /.span6
+  / / /section.row
