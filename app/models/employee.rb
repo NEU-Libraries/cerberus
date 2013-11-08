@@ -46,14 +46,12 @@ class Employee < ActiveFedora::Base
     end
    end
 
-   def self.exists_by_nuid?(nuid) 
-    Employee.all.each do |e| 
-      if e.nuid == nuid 
-        return true 
-      end
+  def self.exists_by_nuid?(nuid)
+    begin 
+      return true if Employee.find_by_nuid(nuid) 
+    rescue Exceptions::NoSuchNuidError 
+      false 
     end
-
-    return false 
   end
 
   def building=(val) 
