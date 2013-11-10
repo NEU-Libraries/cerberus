@@ -19,3 +19,9 @@ jetty
 
 # Ignore the redis dumpfile.
 dump.rdb
+
+# Mac OSX Finder Junk
+.DS_Store
+
+# Vagrant Box and stuff
+.vagrant
