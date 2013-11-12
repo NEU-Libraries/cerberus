@@ -2,7 +2,7 @@
 
 
 echo "Installing yum packages with sudo"
-sudo yum install -y file-devel mysql wget apache ImageMagick-devel sqlite-devel npm zsh
+sudo yum install -y file-devel mysql wget apache ImageMagick-devel sqlite-devel npm zsh gitflow
 
 
 ### Become root
