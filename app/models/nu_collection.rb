@@ -5,6 +5,7 @@ class NuCollection < ActiveFedora::Base
   include Drs::Rights::Embargoable
   include Drs::Rights::InheritedRestrictions
   include Drs::MetadataAssignment
+  include Drs::InlineThumbnail
   include Drs::Relationships
   include Drs::Find
 
