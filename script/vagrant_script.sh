@@ -1,21 +1,18 @@
 #!/usr/bin/env bash
 
-sudo yum install -y file-devel mysql libreoffice wgt apache ImageMagick-devel sqlite-devel npm
+sudo yum install -y file-devel mysql wget apache ImageMagick-devel sqlite-devel npm zsh
 
-cd ~
+sudo su
 
+cd /opt
 curl -O https://fits.googlecode.com/files/fits-0.6.2.zip
 
 unzip fits-0.6.2.zip
-
 cd fits-0.6.2
-
 chmod +x fits.sh
-
-echo 'PATH=$PATH:$HOME/fits-0.6.2' >> ~/.bashrc 
-echo 'export PATH'
-
-source ~/.bashrc
+echo 'PATH=$PATH:/opt/fits-0.6.2' >> /etc/bashrc 
+echo 'export PATH'  >> /etc/bashrc 
+source /etc/bashrc
 
 
 wget http://download.redis.io/releases/redis-2.6.16.tar.gz
@@ -23,19 +20,27 @@ tar xzf redis-2.6.16.tar.gz
 cd redis-2.6.16
 make
 
-sudo su
+
 echo 'vm.overcommit_memory = 1' >> /etc/sysctl.conf
 sysctl vm.overcommit_memory=1
 
-exit
+echo 'PATH=$PATH:/opt/redis-2.6.16/src' >> /etc/bashrc 
+echo 'export PATH'  >> /etc/bashrc 
+
+wget http://download.documentfoundation.org/libreoffice/stable/4.1.3/rpm/x86_64/LibreOffice_4.1.3_Linux_x86-64_rpm.tar.gz
+tar xzf LibreOffice_4.1.3_Linux_x86-64_rpm.tar.gz
+cd ./LibreOffice_4.1.3_Linux_x86-64_rpm/RPMS
+sudo yum -y localinstall  *.rpm
 
 
-echo 'PATH=$PATH:$HOME/redis-2.6.16/src' >> ~/.bashrc 
-echo 'export PATH'
+echo 'PATH=$PATH:/opt/libreoffice4.1/program' >> /etc/bashrc 
+echo 'export PATH'  >> /etc/bashrc 
+
 
 
 \curl -L https://get.rvm.io | bash -s stable --rails --ruby=2.0.0
 
+source /etc/bashrc
 source ~/.bashrc
 
 cd /vagrant
@@ -43,7 +48,4 @@ cd /vagrant
 gem install bundler
 
 bundle install --verbose
-
-
-
 
