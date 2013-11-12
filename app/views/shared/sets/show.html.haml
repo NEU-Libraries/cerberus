@@ -2,6 +2,8 @@
 %ul.breadcrumb  
   - breadcrumb_to_root(@set).each do |breadcrumb| 
     =breadcrumb
+  = render partial: 'shared/sets/breadcrumb_action_menu'
+
 
 %h2.page-header= @set.title 
 
