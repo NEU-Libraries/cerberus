@@ -22,12 +22,10 @@ namespace :deploy do
     end
   end
 
-  # Some environment configuration bug fixing should make this superfluous.
-  desc "Assets kludge"
+  desc "Precompile"
   task :assets_kludge do 
     on roles(:app), :in => :sequence, :wait => 5 do 
       execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake assets:precompile)" 
-      execute "cd #{release_path} && (rm -rf public/assets)"
     end
   end
 
