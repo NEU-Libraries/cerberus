@@ -1,0 +1,5 @@
+- if !current_user.nil? && ( current_user.can? :edit, @set )
+  #addToSetLinks{style: "display: none;"}
+    %a.btn.btn-mini{href: "/collections/new?department_parent=#{@set.pid}"} New Collection
+    - if @set.instance_of? NuCollection
+      %a.btn.btn-mini{href: "/files/new?parent=#{@set.pid}"} New Collection
