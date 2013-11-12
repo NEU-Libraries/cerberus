@@ -39,6 +39,12 @@ class NuCollectionsController < SetsController
       end
     end
 
+    # Process Thumbnail
+    if params[:nu_collection][:thumbnail] 
+      file = params[:nu_collection][:thumbnail]
+      @set.add_file(file, "thumbnail", file.original_filename)
+    end
+
     @set.depositor = current_user.nuid 
     @set.identifier = @set.pid
 
@@ -62,7 +68,14 @@ class NuCollectionsController < SetsController
   end
 
   def update
-    @set = NuCollection.find(params[:id])  
+    @set = NuCollection.find(params[:id]) 
+
+    # Update the thumbnail 
+    if params[:set][:thumbnail] 
+      file = params[:set][:thumbnail] 
+      @set.add_file(file, "thumbnail", file.original_filename) 
+    end
+
     if @set.update_attributes(params[:set]) 
       redirect_to(@set, notice: "Collection #{@set.title} was updated successfully." ) 
     else
