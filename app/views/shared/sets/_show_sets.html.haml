@@ -1,15 +1,17 @@
-- if current_user_can_read?(@set)
-  - if @set.instance_of?(Community)
-    -if @set.child_communities.count > 0
-      %h3 Communities
+%ul.media-list
+  - if current_user_can_read?(@set)
+    - if @set.instance_of?(Community)
+      -if @set.child_communities.count > 0
+        - @set.child_communities.each do |community| 
+          - if current_user_can_read?(community) 
+            %li.media
+              %i.icon-group.icon-4x.pull-left.icon-border
+              .media-body
+                %h3.media-heading= link_to(community.title, community_path(community.identifier))
+                - if community.description
+                  %p= community.description
 
-      - @set.child_communities.each do |community| 
-        - if current_user_can_read?(community) 
-          %p= link_to(community.title, community_path(community.identifier))
-
-- if current_user_can_read?(@set)
-  %h3 Collections
-
-  - @set.child_collections.each do |collection| 
-    - if current_user_can_read?(collection) 
-      %p= link_to(collection.title, nu_collection_path(collection.identifier))
+  - if current_user_can_read?(@set)
+    - @set.child_collections.each do |collection| 
+      - if current_user_can_read?(collection) 
+        %li= link_to(collection.title, nu_collection_path(collection.identifier))
