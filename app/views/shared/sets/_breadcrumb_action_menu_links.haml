@@ -1,5 +1,5 @@
 - if !current_user.nil? && ( current_user.can? :edit, @set )
   #addToSetLinks{style: "display: none;"}
-    %a.btn.btn-mini{href: "/collections/new?department_parent=#{@set.pid}"} New Collection
+    = render_create_collection_button( @set, "Create Collection", {class: "btn btn-mini"})
     - if @set.instance_of? NuCollection
-      %a.btn.btn-mini{href: "/files/new?parent=#{@set.pid}"} New Collection
+      = render_upload_files_button(@set, "Upload Stuff", {class: "btn btn-mini"})
