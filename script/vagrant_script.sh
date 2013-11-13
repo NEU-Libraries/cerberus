@@ -2,7 +2,9 @@
 
 
 echo "Installing yum packages with sudo"
-sudo yum install -y file-devel mysql wget apache ImageMagick-devel sqlite-devel npm zsh gitflow
+
+sudo yum install -y file-devel mysql wget apache ImageMagick-devel sqlite-devel npm zsh java zlib-devel openssl-devel cpio expat-devel gettext-devel curl-devel perl-ExtUtils-CBuilder perl-ExtUtils-MakeMaker gitflow
+
 
 
 ### Become root
@@ -70,6 +72,8 @@ source /etc/bashrc
 source ~/.bashrc
 
 echo "Installed RVM Ruby and Rails"
+
+sudo su vagrant
 cd /vagrant
 
 
@@ -86,10 +90,11 @@ rake jetty:config
 rake reset_data
 
 
-echo "Install Git and Git Flow"
+echo "Install Git"
 cd /opt
-su
-yum -y install zlib-devel openssl-devel cpio expat-devel gettext-devel curl-devel perl-ExtUtils-CBuilder perl-ExtUtils-MakeMaker
+
+sudo su
+yum -y install 
 
 wget https://github.com/git/git/archive/v1.8.4.3.tar.gz
 tar -xzvf ./v1.8.4.3
@@ -97,7 +102,6 @@ cd git-1.8.4.3/
 make prefix=/usr/local all
 make prefix=/usr/local install
 
-yum -y install git-flow
 
 
 
