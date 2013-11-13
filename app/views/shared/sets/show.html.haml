@@ -17,17 +17,9 @@
 
 = render partial: 'shared/sets/show_sets'
 
-%p Actions:
 
-= render_create_collection_button(@set)
 
 - if @set.instance_of?(NuCollection)
   = render partial: 'shared/sets/show_files', locals: { collection: @set }
 
 %div#add_compilation_form{ style: 'display:none' } 
-
-- if @set.instance_of?(NuCollection)
-  %p Actions:
-  %ul 
-    %li= render_delete_object_button(@set, "Delete this collection and all its kids")
-    %li= render_upload_files_button(@set)

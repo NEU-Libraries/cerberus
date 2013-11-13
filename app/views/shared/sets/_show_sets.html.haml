@@ -1,10 +1,11 @@
 - if current_user_can_read?(@set)
-  - if @set.instance_of?(Community) 
-    %h3 Communities
+  - if @set.instance_of?(Community)
+    -if @set.child_communities.count > 0
+      %h3 Communities
 
-    - @set.child_communities.each do |community| 
-      - if current_user_can_read?(community) 
-        %p= link_to(community.title, community_path(community.identifier))
+      - @set.child_communities.each do |community| 
+        - if current_user_can_read?(community) 
+          %p= link_to(community.title, community_path(community.identifier))
 
 - if current_user_can_read?(@set)
   %h3 Collections
