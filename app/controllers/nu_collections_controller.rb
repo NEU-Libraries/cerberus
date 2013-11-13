@@ -39,6 +39,11 @@ class NuCollectionsController < SetsController
       end
     end
 
+    # Process Thumbnail
+    if params[:thumbnail]
+      InlineThumbnailCreator.new(@set, params[:thumbnail], "thumbnail").create_thumbnail
+    end
+
     @set.depositor = current_user.nuid 
     @set.identifier = @set.pid
 
@@ -62,7 +67,13 @@ class NuCollectionsController < SetsController
   end
 
   def update
-    @set = NuCollection.find(params[:id])  
+    @set = NuCollection.find(params[:id]) 
+
+    # Update the thumbnail 
+    if params[:thumbnail] 
+      InlineThumbnailCreator.new(@set, params[:thumbnail], "thumbnail").create_thumbnail
+    end
+
     if @set.update_attributes(params[:set]) 
       redirect_to(@set, notice: "Collection #{@set.title} was updated successfully." ) 
     else

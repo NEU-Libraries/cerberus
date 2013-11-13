@@ -19,6 +19,10 @@ class Admin::CommunitiesController < AdminController
 
     @community.identifier = @community.pid
 
+    if params[:thumbnail]
+      InlineThumbnailCreator.new(@community, params[:thumbnail], 'thumbnail').create_thumbnail
+    end
+
     if @community.save!
       flash[:info] = "Community created successfully."
       redirect_to admin_communities_path and return  
@@ -32,7 +36,13 @@ class Admin::CommunitiesController < AdminController
 
   end
 
-  def update 
+  def update
+
+    # Update the thumbnail if one is defined 
+    if params[:thumbnail] 
+       InlineThumbnailCreator.new(@community, params[:thumbnail], 'thumbnail').create_thumbnail
+    end
+
     if @community.update_attributes(params[:community])
       flash[:notice] =  "Community #{@community.title} was updated successfully."
       redirect_to admin_communities_path

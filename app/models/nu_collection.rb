@@ -1,6 +1,7 @@
 class NuCollection < ActiveFedora::Base 
   include ActiveModel::MassAssignmentSecurity
   include Hydra::ModelMixins::RightsMetadata
+  include Hydra::ModelMethods
   include Drs::Rights::MassPermissions
   include Drs::Rights::Embargoable
   include Drs::Rights::InheritedRestrictions
@@ -18,7 +19,8 @@ class NuCollection < ActiveFedora::Base
   has_metadata name: 'DC', type: NortheasternDublinCoreDatastream 
   has_metadata name: 'rightsMetadata', type: ParanoidRightsDatastream
   has_metadata name: 'properties', type: DrsPropertiesDatastream
-  has_metadata name: 'mods', type: NuModsDatastream 
+  has_metadata name: 'mods', type: NuModsDatastream
+  has_file_datastream "thumbnail", type: FileContentDatastream 
 
   has_many :child_files, property: :is_member_of, :class_name => "NuCoreFile"
   has_many :child_collections, property: :is_member_of, :class_name => "NuCollection"
