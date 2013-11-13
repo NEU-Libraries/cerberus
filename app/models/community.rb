@@ -1,6 +1,7 @@
 class Community < ActiveFedora::Base
   include ActiveModel::MassAssignmentSecurity
   include Hydra::ModelMixins::RightsMetadata
+  include Hydra::ModelMethods
   include Drs::Rights::MassPermissions
   include Drs::Rights::Embargoable
   include Drs::Rights::InheritedRestrictions

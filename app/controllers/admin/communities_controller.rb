@@ -19,6 +19,16 @@ class Admin::CommunitiesController < AdminController
 
     @community.identifier = @community.pid
 
+    if params[:thumbnail]
+      file = params[:thumbnail] 
+
+      # Scale the image
+      img = Magick::Image.read(file.tempfile.path).first
+      thumb = img.resize_to_fill(175, 175)
+      thumb.write file.tempfile.path 
+      @community.add_file(file, "thumbnail", file.original_filename)
+    end
+
     if @community.save!
       flash[:info] = "Community created successfully."
       redirect_to admin_communities_path and return  
