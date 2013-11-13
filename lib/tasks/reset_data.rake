@@ -2,9 +2,9 @@ def mint_unique_pid
   Sufia::Noid.namespaceize(Sufia::IdService.mint)
 end
 
-def create_collection(klass, parent_str, title_str, user)
+def create_collection(klass, parent_str, title_str, user, description = "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Recusandae, minima, cum sit iste at mollitia voluptatem error perspiciatis excepturi ut voluptatibus placeat esse architecto ea voluptate assumenda repudiandae quod commodi.")
   newPid = mint_unique_pid
-  col = klass.new(parent: parent_str, pid: newPid, identifier: newPid, title: title_str)
+  col = klass.new(parent: parent_str, pid: newPid, identifier: newPid, title: title_str, description: description)
 
   col.rightsMetadata.permissions({group: 'public'}, 'read')
   col.rightsMetadata.permissions({person: "#{user.nuid}"}, 'edit')
