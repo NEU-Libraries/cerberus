@@ -3,7 +3,8 @@
 
 echo "Installing yum packages with sudo"
 
-sudo yum install -y file-devel mysql wget apache ImageMagick-devel sqlite-devel npm zsh java zlib-devel openssl-devel cpio expat-devel gettext-devel curl-devel perl-ExtUtils-CBuilder perl-ExtUtils-MakeMaker gitflow
+sudo yum install -y file-devel mysql wget ImageMagick-devel sqlite-devel npm zsh java zlib-devel openssl-devel cpio expat-devel gettext-devel curl-devel perl-ExtUtils-CBuilder perl-ExtUtils-MakeMaker gitflow
+
 
 
 
@@ -91,10 +92,10 @@ rake reset_data
 
 
 echo "Install Git"
-cd /opt
+
 
 sudo su
-yum -y install 
+cd /opt
 
 wget https://github.com/git/git/archive/v1.8.4.3.tar.gz
 tar -xzvf ./v1.8.4.3
