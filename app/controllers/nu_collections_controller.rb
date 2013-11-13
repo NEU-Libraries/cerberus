@@ -40,9 +40,8 @@ class NuCollectionsController < SetsController
     end
 
     # Process Thumbnail
-    if params[:nu_collection][:thumbnail] 
-      file = params[:nu_collection][:thumbnail]
-      InlineThumbnailCreator.new(@set, file, "thumbnail").create_thumbnail
+    if params[:thumbnail]
+      InlineThumbnailCreator.new(@set, params[:thumbnail], "thumbnail").create_thumbnail
     end
 
     @set.depositor = current_user.nuid 
@@ -71,9 +70,8 @@ class NuCollectionsController < SetsController
     @set = NuCollection.find(params[:id]) 
 
     # Update the thumbnail 
-    if params[:nu_collection][:thumbnail] 
-      file = params[:nu_collection][:thumbnail] 
-      InlineThumbnailCreator.new(@set, file, "thumbnail").create_thumbnail
+    if params[:thumbnail] 
+      InlineThumbnailCreator.new(@set, params[:thumbnail], "thumbnail").create_thumbnail
     end
 
     if @set.update_attributes(params[:set]) 

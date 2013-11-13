@@ -65,6 +65,6 @@
     %fieldset.span4 
       %legend Thumbnail
       = f.label :thumbnail, "Add a thumbnail:" 
-      = f.file_field :thumbnail
+      = f.file_field :thumbnail, name: 'thumbnail'
   .form-actions
     = f.submit class: ['btn', 'btn-primary', 'btn-large'], value: 'Submit'
