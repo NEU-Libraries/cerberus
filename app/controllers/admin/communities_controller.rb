@@ -20,13 +20,7 @@ class Admin::CommunitiesController < AdminController
     @community.identifier = @community.pid
 
     if params[:thumbnail]
-      file = params[:thumbnail] 
-
-      # Scale the image
-      img = Magick::Image.read(file.tempfile.path).first
-      thumb = img.resize_to_fill(175, 175)
-      thumb.write file.tempfile.path 
-      @community.add_file(file, "thumbnail", file.original_filename)
+      InlineThumbnailCreator.new(@community, params[:thumbnail], 'thumbnail').create_thumbnail
     end
 
     if @community.save!
@@ -42,7 +36,13 @@ class Admin::CommunitiesController < AdminController
 
   end
 
-  def update 
+  def update
+
+    # Update the thumbnail if one is defined 
+    if params[:thumbnail] 
+       InlineThumbnailCreator.new(@community, params[:thumbnail], 'thumbnail').create_thumbnail
+    end
+
     if @community.update_attributes(params[:community])
       flash[:notice] =  "Community #{@community.title} was updated successfully."
       redirect_to admin_communities_path
