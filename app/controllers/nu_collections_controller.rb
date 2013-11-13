@@ -1,3 +1,6 @@
+require 'RMagick'
+include Magick
+
 class NuCollectionsController < SetsController
   include Drs::ControllerHelpers::EditableObjects
 
@@ -42,7 +45,13 @@ class NuCollectionsController < SetsController
     # Process Thumbnail
     if params[:nu_collection][:thumbnail] 
       file = params[:nu_collection][:thumbnail]
+
+      # Scale the image
+      img = Magick::Image.read(file.tempfile.path).first
+      thumb = img.resize_to_fill(175, 175)
+      thumb.write file.tempfile.path 
       @set.add_file(file, "thumbnail", file.original_filename)
+      @set.save!
     end
 
     @set.depositor = current_user.nuid 
