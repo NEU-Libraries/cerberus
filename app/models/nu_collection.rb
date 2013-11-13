@@ -6,7 +6,6 @@ class NuCollection < ActiveFedora::Base
   include Drs::Rights::Embargoable
   include Drs::Rights::InheritedRestrictions
   include Drs::MetadataAssignment
-  include Drs::InlineThumbnail
   include Drs::Relationships
   include Drs::Find
 
@@ -20,7 +19,8 @@ class NuCollection < ActiveFedora::Base
   has_metadata name: 'DC', type: NortheasternDublinCoreDatastream 
   has_metadata name: 'rightsMetadata', type: ParanoidRightsDatastream
   has_metadata name: 'properties', type: DrsPropertiesDatastream
-  has_metadata name: 'mods', type: NuModsDatastream 
+  has_metadata name: 'mods', type: NuModsDatastream
+  has_file_datastream "thumbnail", type: FileContentDatastream 
 
   has_many :child_files, property: :is_member_of, :class_name => "NuCoreFile"
   has_many :child_collections, property: :is_member_of, :class_name => "NuCollection"

@@ -5,13 +5,13 @@ class Community < ActiveFedora::Base
   include Drs::Rights::Embargoable
   include Drs::Rights::InheritedRestrictions
   include Drs::MetadataAssignment
-  include Drs::InlineThumbnail
   include Drs::Relationships
   include Drs::Find
 
   has_metadata name: 'DC', type: NortheasternDublinCoreDatastream 
   has_metadata name: 'rightsMetadata', type: ParanoidRightsDatastream
   has_metadata name: 'properties', type: DrsPropertiesDatastream
+  has_file_datastream "thumbnail", type: FileContentDatastream
 
   attr_accessible :title, :description, :parent
   attr_protected :identifier
