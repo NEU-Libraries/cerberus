@@ -14,17 +14,17 @@ module NuCollectionsHelper
 
   # Render a button for uploading files within this collection
   # if the current user has edit permissions.
-  def render_upload_files_button(parent)
+  def render_upload_files_button(parent, text = "Upload files to this collection" , html_options = {} )
     if current_user_can_edit?(parent) && !(request.original_fullpath == nu_collections_path)
-      link_to("Upload files to this collection", new_nu_core_file_path(parent: parent.identifier))
+      link_to( text , new_nu_core_file_path(parent: parent.identifier), html_options )
     end
   end
 
   # Render a button for creating a new collection within this collection
   # if the current user has edit permissions. 
-  def render_create_collection_button(parent)
+  def render_create_collection_button(parent, text = "Create a child collection off this node" , html_options = {} )
     if current_user_can_edit?(parent)
-      link_to("Create a child collection off this node", new_nu_collection_path(parent: parent.identifier))
+      link_to(text, new_nu_collection_path(parent: parent.identifier), html_options)
     end
   end
 

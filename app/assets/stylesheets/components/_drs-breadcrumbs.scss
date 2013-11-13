@@ -1,0 +1,19 @@
+.breadcrumb{
+  .active{
+    color: $textColor;
+    font-weight: 700;
+  }
+  .action{
+    > a{
+      color: $grayLight;
+      &:hover,
+      &:focus{
+        text-decoration: none;
+        color: $textColor;
+      }
+    }
+    &.active > a{
+      color: $textColor;
+    }
+  }
+}
