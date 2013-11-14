@@ -28,7 +28,6 @@
           %a{:href =>"#deleteCollectionModal"}(data-toggle="modal")
             Delete
     =render partial: 'shared/sets/delete_collections_modal'
-= render partial: 'shared/sets/show_sets'
-- if @set.instance_of?(NuCollection)
-  = render partial: 'shared/sets/show_files', locals: { collection: @set }
-  %div#add_compilation_form{ style: 'display:none' } 
+
+=render partial: 'shared/sets/show_sets'
+%div#add_compilation_form{ style: 'display:none' } 

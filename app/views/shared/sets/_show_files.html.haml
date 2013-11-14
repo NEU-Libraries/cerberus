@@ -1,8 +1,23 @@
-- if current_user_can_read?(collection) 
-  %h3 Files 
+- collection.child_files.each do |file|
+  -if current_user_can_read?(file)
+    %li.media
+      %a{:href => nu_core_file_path(file.pid)}
+        %figure.pull-left.media-object
+          - if file.thumbnail.content.content.nil?
+            %img{alt: "", src: sufia.download_path(file.thumbnail, {:datastream_id => 'content'}), width: "338"}
+          - else
+            %i.icon-file.icon-2x.icon-block
+          %figcaption
+            %p
+              %small.muted
+                = !file.dcmi_type.nil? ? file.dcmi_type : "File"
+      .media-body
+        %a{:href => nu_core_file_path(file.pid) }
+          %h4.media-heading
+            = file.title
+        -if file.description
+          %p= file.description 
+        %p
+        = link_to "Add to Compilation", compilations_path(file: file.pid), remote: true
 
-  %ul.child_files
-  - collection.child_files.each do |file| 
-    %li 
-      %p= link_to(file.title, nu_core_file_path(file.pid)) 
-      %span=  link_to "Add to Compilation", compilations_path(file: file.pid), remote: true
+    

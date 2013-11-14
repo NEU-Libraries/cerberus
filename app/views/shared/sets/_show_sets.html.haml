@@ -1,5 +1,5 @@
-%ul.media-list.three-col
-  - if current_user_can_read?(@set)
+- if current_user_can_read?(@set)
+  %ul.media-list.three-col
     - if @set.instance_of?(Community)
       -# Go through and template out the communities individually.
       - @set.child_communities.each do |community| 
@@ -23,8 +23,6 @@
                   =community.title
               - if community.description
                 %p= community.description
-
-  - if current_user_can_read?(@set)
     - @set.child_collections.reverse.each do |collection| 
       - if current_user_can_read?(collection)
         - path = nu_collection_path(collection.identifier) 
@@ -32,7 +30,7 @@
           %a{:href => path }
             %figure.pull-left.media-object
               - if !collection.thumbnail.content.nil?
-                =collection.thumbnail.content
+                =collection.thumbnail.contents
               - else
                 %i.icon-folder-open.icon-2x.icon-block
               %figcaption
@@ -44,4 +42,6 @@
               %h4.media-heading
                 = collection.title
             -if collection.description
-              %p= collection.description 
+              %p= collection.description
+    - if @set.instance_of?(NuCollection)
+      = render partial: 'shared/sets/show_files', locals: { collection: @set }
