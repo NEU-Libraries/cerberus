@@ -17,31 +17,38 @@ class CommunitiesController < SetsController
 
   def show
     @set = Community.find(params[:id])
+    @page_title = @set.title
     render :template => 'shared/sets/show'    
   end
 
   def employees 
     @dept = Community.find(params[:id]) 
+    @page_title = "#{@dept.title} Staff"
   end
 
   def research_publications
     @dept = Community.find(params[:id])
+    @page_title = "#{@dept.title} Research Papers" 
   end
 
   def other_publications
     @dept = Community.find(params[:id]) 
+    @page_title = "#{@dept.title} Papers"
   end
 
   def presentations
     @dept = Community.find(params[:id])
+    @page_title = "#{@dept.title} Presentations" 
   end
 
   def data_sets
     @dept = Community.find(params[:id]) 
+    @page_title = "#{@dept.title} Data Sets" 
   end
 
   def learning_objects 
     @dept = Community.find(params[:id])
+    @page_title = "#{@dept.title} Learning Objects"
   end
 
   protected 
