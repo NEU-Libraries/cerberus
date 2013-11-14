@@ -1,6 +1,6 @@
 = csrf_meta_tag
 %meta{:charset => "utf-8"}/
-%title= h(@page_title || application_name)
+%title= h("#{@page_title} - DRS" || application_name)
 / application css
 = stylesheet_link_tag 'application'
 = yield(:css_head)
