@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+
+<title>module Drs::NuCoreFile::Export - Rails Application Documentation</title>
+
+<link type="text/css" media="screen" href="../../rdoc.css" rel="stylesheet">
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "../../";
+</script>
+
+<script type="text/javascript" charset="utf-8" src="../../js/jquery.js"></script>
+<script type="text/javascript" charset="utf-8" src="../../js/navigation.js"></script>
+<script type="text/javascript" charset="utf-8" src="../../js/search_index.js"></script>
+<script type="text/javascript" charset="utf-8" src="../../js/search.js"></script>
+<script type="text/javascript" charset="utf-8" src="../../js/searcher.js"></script>
+<script type="text/javascript" charset="utf-8" src="../../js/darkfish.js"></script>
+
+
+<body id="top" class="module">
+<nav id="metadata">
+  <nav id="home-section" class="section">
+  <h3 class="section-header">
+    <a href="../../index.html">Home</a>
+    <a href="../../table_of_contents.html#classes">Classes</a>
+    <a href="../../table_of_contents.html#methods">Methods</a>
+  </h3>
+</nav>
+
+
+  <nav id="search-section" class="section project-section" class="initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <h3 class="section-header">
+      <input type="text" name="search" placeholder="Search" id="search-field"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </h3>
+  </form>
+
+  <ul id="search-results" class="initially-hidden"></ul>
+</nav>
+
+
+  <div id="file-metadata">
+    <nav id="file-list-section" class="section">
+  <h3 class="section-header">Defined In</h3>
+  <ul>
+    <li>lib/drs/nu_core_file/export.rb
+  </ul>
+</nav>
+
+    
+  </div>
+
+  <div id="class-metadata">
+    
+    
+    
+    <!-- Method Quickref -->
+<nav id="method-list-section" class="section">
+  <h3 class="section-header">Methods</h3>
+
+  <ul class="link-list">
+    
+    <li><a href="#method-i-export_as_apa_citation">#export_as_apa_citation</a>
+    
+    <li><a href="#method-i-export_as_chicago_citation">#export_as_chicago_citation</a>
+    
+    <li><a href="#method-i-export_as_endnote">#export_as_endnote</a>
+    
+    <li><a href="#method-i-export_as_mla_citation">#export_as_mla_citation</a>
+    
+    <li><a href="#method-i-export_as_openurl_ctx_kev">#export_as_openurl_ctx_kev</a>
+    
+  </ul>
+</nav>
+
+  </div>
+
+  <div id="project-metadata">
+    <nav id="fileindex-section" class="section project-section">
+  <h3 class="section-header">Pages</h3>
+
+  <ul>
+  
+    <li class="file"><a href="../../doc/README_FOR_APP.html">README_FOR_APP</a>
+  
+  </ul>
+</nav>
+
+    <nav id="classindex-section" class="section project-section">
+  <h3 class="section-header">Class and Module Index</h3>
+
+  <ul class="link-list">
+  
+    <li><a href="../../Drs.html">Drs</a>
+  
+    <li><a href="../../Drs/Content.html">Drs::Content</a>
+  
+    <li><a href="../../Drs/Content/Transformations.html">Drs::Content::Transformations</a>
+  
+    <li><a href="../../Drs/ControllerHelpers.html">Drs::ControllerHelpers</a>
+  
+    <li><a href="../../Drs/ControllerHelpers/EditableObjects.html">Drs::ControllerHelpers::EditableObjects</a>
+  
+    <li><a href="../../Drs/Find.html">Drs::Find</a>
+  
+    <li><a href="../../Drs/MetadataAssignment.html">Drs::MetadataAssignment</a>
+  
+    <li><a href="../../Drs/NuCoreFile.html">Drs::NuCoreFile</a>
+  
+    <li><a href="../../Drs/NuCoreFile/Export.html">Drs::NuCoreFile::Export</a>
+  
+    <li><a href="../../Drs/NuFile.html">Drs::NuFile</a>
+  
+    <li><a href="../../Drs/NuFile/Characterizable.html">Drs::NuFile::Characterizable</a>
+  
+    <li><a href="../../Drs/Relationships.html">Drs::Relationships</a>
+  
+    <li><a href="../../Drs/Rights.html">Drs::Rights</a>
+  
+    <li><a href="../../Drs/Rights/Embargoable.html">Drs::Rights::Embargoable</a>
+  
+    <li><a href="../../Drs/Rights/InheritedRestrictions.html">Drs::Rights::InheritedRestrictions</a>
+  
+    <li><a href="../../Drs/Rights/MassPermissions.html">Drs::Rights::MassPermissions</a>
+  
+    <li><a href="../../Exceptions.html">Exceptions</a>
+  
+    <li><a href="../../Exceptions/DatastreamNotFoundError.html">Exceptions::DatastreamNotFoundError</a>
+  
+    <li><a href="../../Exceptions/EmployeeWontStopBuildingError.html">Exceptions::EmployeeWontStopBuildingError</a>
+  
+    <li><a href="../../Exceptions/MultipleMatchError.html">Exceptions::MultipleMatchError</a>
+  
+    <li><a href="../../Exceptions/NoCommunityParentFoundError.html">Exceptions::NoCommunityParentFoundError</a>
+  
+    <li><a href="../../Exceptions/NoParentFoundError.html">Exceptions::NoParentFoundError</a>
+  
+    <li><a href="../../Exceptions/NoSuchNuidError.html">Exceptions::NoSuchNuidError</a>
+  
+    <li><a href="../../Exceptions/ParentMismatchError.html">Exceptions::ParentMismatchError</a>
+  
+    <li><a href="../../Exceptions/SearchResultTypeError.html">Exceptions::SearchResultTypeError</a>
+  
+    <li><a href="../../Admin.html">Admin</a>
+  
+    <li><a href="../../Admin/CommunitiesController.html">Admin::CommunitiesController</a>
+  
+    <li><a href="../../Admin/CommunitiesHelper.html">Admin::CommunitiesHelper</a>
+  
+    <li><a href="../../Admin/EmployeesController.html">Admin::EmployeesController</a>
+  
+    <li><a href="../../Admin/EmployeesHelper.html">Admin::EmployeesHelper</a>
+  
+    <li><a href="../../Employee.html">Employee</a>
+  
+    <li><a href="../../Employee/FacultyFolders.html">Employee::FacultyFolders</a>
+  
+    <li><a href="../../AdminController.html">AdminController</a>
+  
+    <li><a href="../../ApplicationController.html">ApplicationController</a>
+  
+    <li><a href="../../ApplicationHelper.html">ApplicationHelper</a>
+  
+    <li><a href="../../AtomisticCharacterizationJob.html">AtomisticCharacterizationJob</a>
+  
+    <li><a href="../../AudioFile.html">AudioFile</a>
+  
+    <li><a href="../../CartDownloadJob.html">CartDownloadJob</a>
+  
+    <li><a href="../../CatalogController.html">CatalogController</a>
+  
+    <li><a href="../../CommunitiesController.html">CommunitiesController</a>
+  
+    <li><a href="../../Community.html">Community</a>
+  
+    <li><a href="../../Compilation.html">Compilation</a>
+  
+    <li><a href="../../CompilationsController.html">CompilationsController</a>
+  
+    <li><a href="../../ContentCreationJob.html">ContentCreationJob</a>
+  
+    <li><a href="../../DrsEmployeeDatastream.html">DrsEmployeeDatastream</a>
+  
+    <li><a href="../../DrsPropertiesDatastream.html">DrsPropertiesDatastream</a>
+  
+    <li><a href="../../EmployeeCreateJob.html">EmployeeCreateJob</a>
+  
+    <li><a href="../../EmployeesController.html">EmployeesController</a>
+  
+    <li><a href="../../ImageLargeFile.html">ImageLargeFile</a>
+  
+    <li><a href="../../ImageMasterFile.html">ImageMasterFile</a>
+  
+    <li><a href="../../ImageMediumFile.html">ImageMediumFile</a>
+  
+    <li><a href="../../ImageSmallFile.html">ImageSmallFile</a>
+  
+    <li><a href="../../ImageThumbnailFile.html">ImageThumbnailFile</a>
+  
+    <li><a href="../../MetadataUpdateJob.html">MetadataUpdateJob</a>
+  
+    <li><a href="../../MsexcelFile.html">MsexcelFile</a>
+  
+    <li><a href="../../MspowerpointFile.html">MspowerpointFile</a>
+  
+    <li><a href="../../MswordFile.html">MswordFile</a>
+  
+    <li><a href="../../NodeHelper.html">NodeHelper</a>
+  
+    <li><a href="../../NortheasternDublinCoreDatastream.html">NortheasternDublinCoreDatastream</a>
+  
+    <li><a href="../../NuCollection.html">NuCollection</a>
+  
+    <li><a href="../../NuCollectionsController.html">NuCollectionsController</a>
+  
+    <li><a href="../../NuCollectionsHelper.html">NuCollectionsHelper</a>
+  
+    <li><a href="../../NuCoreFile.html">NuCoreFile</a>
+  
+    <li><a href="../../NuCoreFileHelper.html">NuCoreFileHelper</a>
+  
+    <li><a href="../../NuCoreFilesController.html">NuCoreFilesController</a>
+  
+    <li><a href="../../NuModsDatastream.html">NuModsDatastream</a>
+  
+    <li><a href="../../ParanoidRightsDatastream.html">ParanoidRightsDatastream</a>
+  
+    <li><a href="../../PdfFile.html">PdfFile</a>
+  
+    <li><a href="../../SetsController.html">SetsController</a>
+  
+    <li><a href="../../ShoppingCartsController.html">ShoppingCartsController</a>
+  
+    <li><a href="../../ShoppingCartsHelper.html">ShoppingCartsHelper</a>
+  
+    <li><a href="../../SolrDocument.html">SolrDocument</a>
+  
+    <li><a href="../../TextFile.html">TextFile</a>
+  
+    <li><a href="../../User.html">User</a>
+  
+    <li><a href="../../VideoFile.html">VideoFile</a>
+  
+    <li><a href="../../ZipCompilationJob.html">ZipCompilationJob</a>
+  
+    <li><a href="../../ZipFile.html">ZipFile</a>
+  
+  </ul>
+</nav>
+
+  </div>
+</nav>
+
+<div id="documentation">
+  <h1 class="module">module Drs::NuCoreFile::Export</h1>
+
+  <div id="description" class="description">
+    
+  </div><!-- description -->
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+
+    <!-- Methods -->
+    
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section section">
+      <h3 class="section-header">Public Instance Methods</h3>
+
+    
+      <div id="method-i-export_as_apa_citation" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">export_as_apa_citation</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="export_as_apa_citation-source">
+            <pre><span class="ruby-comment"># File lib/drs/nu_core_file/export.rb, line 77</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">export_as_apa_citation</span>
+  <span class="ruby-identifier">text</span> = <span class="ruby-string">&#39;&#39;</span>
+  <span class="ruby-identifier">authors_list</span> = []
+  <span class="ruby-identifier">authors_list_final</span> = []
+
+  <span class="ruby-comment">#setup formatted author list</span>
+  <span class="ruby-identifier">authors</span> = <span class="ruby-identifier">get_author_list</span>
+  <span class="ruby-identifier">authors</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">author</span><span class="ruby-operator">|</span>
+    <span class="ruby-keyword">next</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">author</span>.<span class="ruby-identifier">blank?</span>
+    <span class="ruby-identifier">authors_list</span>.<span class="ruby-identifier">push</span>(<span class="ruby-identifier">abbreviate_name</span>(<span class="ruby-identifier">author</span>))
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">authors_list</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">author</span><span class="ruby-operator">|</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">author</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">authors_list</span>.<span class="ruby-identifier">first</span> <span class="ruby-comment">#first</span>
+      <span class="ruby-identifier">authors_list_final</span>.<span class="ruby-identifier">push</span>(<span class="ruby-identifier">author</span>.<span class="ruby-identifier">strip</span>)
+    <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">author</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">authors_list</span>.<span class="ruby-identifier">last</span> <span class="ruby-comment">#last</span>
+      <span class="ruby-identifier">authors_list_final</span>.<span class="ruby-identifier">push</span>(<span class="ruby-string">&quot;, &amp;amp; &quot;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">author</span>.<span class="ruby-identifier">strip</span>)
+    <span class="ruby-keyword">else</span> <span class="ruby-comment">#all others</span>
+      <span class="ruby-identifier">authors_list_final</span>.<span class="ruby-identifier">push</span>(<span class="ruby-string">&quot;, &quot;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">author</span>.<span class="ruby-identifier">strip</span>)
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">text</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">authors_list_final</span>.<span class="ruby-identifier">join</span>
+  <span class="ruby-keyword">unless</span> <span class="ruby-identifier">text</span>.<span class="ruby-identifier">blank?</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">text</span>[<span class="ruby-value">-1</span>,<span class="ruby-value">1</span>] <span class="ruby-operator">!=</span> <span class="ruby-string">&quot;.&quot;</span>
+      <span class="ruby-identifier">text</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-string">&quot;. &quot;</span>
+    <span class="ruby-keyword">else</span>
+      <span class="ruby-identifier">text</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-string">&quot; &quot;</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-comment"># Get Pub Date</span>
+  <span class="ruby-identifier">text</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-string">&quot;(&quot;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">setup_pub_date</span> <span class="ruby-operator">+</span> <span class="ruby-string">&quot;). &quot;</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">setup_pub_date</span>.<span class="ruby-identifier">nil?</span>
+
+  <span class="ruby-comment"># setup title info</span>
+  <span class="ruby-identifier">title_info</span> = <span class="ruby-identifier">setup_title_info</span>
+  <span class="ruby-identifier">text</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-string">&quot;&lt;i&gt;&quot;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">title_info</span> <span class="ruby-operator">+</span> <span class="ruby-string">&quot;&lt;/i&gt; &quot;</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">title_info</span>.<span class="ruby-identifier">nil?</span>
+
+  <span class="ruby-comment"># Publisher info</span>
+  <span class="ruby-identifier">text</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">setup_pub_info</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">setup_pub_info</span>.<span class="ruby-identifier">nil?</span>
+  <span class="ruby-keyword">unless</span> <span class="ruby-identifier">text</span>.<span class="ruby-identifier">blank?</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">text</span>[<span class="ruby-value">-1</span>,<span class="ruby-value">1</span>] <span class="ruby-operator">!=</span> <span class="ruby-string">&quot;.&quot;</span>
+      <span class="ruby-identifier">text</span> <span class="ruby-operator">+=</span> <span class="ruby-string">&quot;.&quot;</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">text</span>.<span class="ruby-identifier">html_safe</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- export_as_apa_citation-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- export_as_apa_citation-method -->
+
+    
+      <div id="method-i-export_as_chicago_citation" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">export_as_chicago_citation</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="export_as_chicago_citation-source">
+            <pre><span class="ruby-comment"># File lib/drs/nu_core_file/export.rb, line 165</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">export_as_chicago_citation</span>
+  <span class="ruby-identifier">author_text</span> = <span class="ruby-string">&quot;&quot;</span>
+  <span class="ruby-identifier">authors</span> = <span class="ruby-identifier">get_all_authors</span>
+  <span class="ruby-keyword">unless</span> <span class="ruby-identifier">authors</span>.<span class="ruby-identifier">blank?</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">authors</span>.<span class="ruby-identifier">length</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">10</span>
+      <span class="ruby-identifier">authors</span>.<span class="ruby-identifier">each_with_index</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">author</span>, <span class="ruby-identifier">index</span><span class="ruby-operator">|</span>
+        <span class="ruby-keyword">if</span> <span class="ruby-identifier">index</span> <span class="ruby-operator">&lt;</span> <span class="ruby-value">7</span>
+          <span class="ruby-keyword">if</span> <span class="ruby-identifier">index</span> <span class="ruby-operator">==</span> <span class="ruby-value">0</span>
+            <span class="ruby-identifier">author_text</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-node">&quot;#{author}&quot;</span>
+            <span class="ruby-keyword">if</span> <span class="ruby-identifier">author</span>.<span class="ruby-identifier">ends_with?</span>(<span class="ruby-string">&quot;,&quot;</span>)
+              <span class="ruby-identifier">author_text</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-string">&quot; &quot;</span>
+            <span class="ruby-keyword">else</span>
+              <span class="ruby-identifier">author_text</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-string">&quot;, &quot;</span>
+            <span class="ruby-keyword">end</span>
+          <span class="ruby-keyword">else</span>
+            <span class="ruby-identifier">author_text</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-node">&quot;#{name_reverse(author)}, &quot;</span>
+          <span class="ruby-keyword">end</span>
+        <span class="ruby-keyword">end</span>
+      <span class="ruby-keyword">end</span>
+      <span class="ruby-identifier">author_text</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-string">&quot; et al.&quot;</span>
+    <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">authors</span>.<span class="ruby-identifier">length</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">1</span>
+      <span class="ruby-identifier">authors</span>.<span class="ruby-identifier">each_with_index</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">author</span>,<span class="ruby-identifier">index</span><span class="ruby-operator">|</span>
+        <span class="ruby-keyword">if</span> <span class="ruby-identifier">index</span> <span class="ruby-operator">==</span> <span class="ruby-value">0</span>
+          <span class="ruby-identifier">author_text</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-node">&quot;#{author}&quot;</span>
+          <span class="ruby-keyword">if</span> <span class="ruby-identifier">author</span>.<span class="ruby-identifier">ends_with?</span>(<span class="ruby-string">&quot;,&quot;</span>)
+            <span class="ruby-identifier">author_text</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-string">&quot; &quot;</span>
+          <span class="ruby-keyword">else</span>
+            <span class="ruby-identifier">author_text</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-string">&quot;, &quot;</span>
+          <span class="ruby-keyword">end</span>
+        <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">index</span> <span class="ruby-operator">+</span> <span class="ruby-value">1</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">authors</span>.<span class="ruby-identifier">length</span>
+          <span class="ruby-identifier">author_text</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-node">&quot;and #{name_reverse(author)}.&quot;</span>
+        <span class="ruby-keyword">else</span>
+          <span class="ruby-identifier">author_text</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-node">&quot;#{name_reverse(author)}, &quot;</span>
+        <span class="ruby-keyword">end</span>
+      <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">else</span>
+      <span class="ruby-identifier">author_text</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">authors</span>.<span class="ruby-identifier">first</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">title_info</span> = <span class="ruby-string">&quot;&quot;</span>
+  <span class="ruby-identifier">title_info</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">citation_title</span>(<span class="ruby-identifier">clean_end_punctuation</span>(<span class="ruby-constant">CGI</span><span class="ruby-operator">::</span><span class="ruby-identifier">escapeHTML</span>(<span class="ruby-identifier">title</span>.<span class="ruby-identifier">first</span>)).<span class="ruby-identifier">strip</span>) <span class="ruby-keyword">unless</span> <span class="ruby-identifier">title</span>.<span class="ruby-identifier">blank?</span>
+
+  <span class="ruby-identifier">pub_info</span> = <span class="ruby-string">&quot;&quot;</span>
+  <span class="ruby-identifier">place</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">based_near</span>.<span class="ruby-identifier">first</span>
+  <span class="ruby-identifier">publisher</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">publisher</span>.<span class="ruby-identifier">first</span>
+  <span class="ruby-keyword">unless</span> <span class="ruby-identifier">place</span>.<span class="ruby-identifier">blank?</span>
+    <span class="ruby-identifier">place</span> = <span class="ruby-constant">CGI</span><span class="ruby-operator">::</span><span class="ruby-identifier">escapeHTML</span>(<span class="ruby-identifier">place</span>)
+    <span class="ruby-identifier">pub_info</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">place</span>
+    <span class="ruby-identifier">pub_info</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-string">&quot;: &quot;</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">publisher</span>.<span class="ruby-identifier">blank?</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">unless</span> <span class="ruby-identifier">publisher</span>.<span class="ruby-identifier">blank?</span>
+    <span class="ruby-identifier">publisher</span> = <span class="ruby-constant">CGI</span><span class="ruby-operator">::</span><span class="ruby-identifier">escapeHTML</span>(<span class="ruby-identifier">publisher</span>)
+    <span class="ruby-identifier">pub_info</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">publisher</span>
+    <span class="ruby-identifier">pub_info</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-string">&quot;, &quot;</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">setup_pub_date</span>.<span class="ruby-identifier">nil?</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">unless</span> <span class="ruby-identifier">setup_pub_date</span>.<span class="ruby-identifier">nil?</span>
+    <span class="ruby-identifier">pub_info</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">setup_pub_date</span>
+  <span class="ruby-keyword">end</span>
+
+  <span class="ruby-identifier">citation</span> = <span class="ruby-string">&quot;&quot;</span>
+  <span class="ruby-identifier">citation</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-node">&quot;#{author_text} &quot;</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">author_text</span>.<span class="ruby-identifier">blank?</span>
+  <span class="ruby-identifier">citation</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-node">&quot;&lt;i&gt;#{title_info}.&lt;/i&gt; &quot;</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">title_info</span>.<span class="ruby-identifier">blank?</span>
+  <span class="ruby-identifier">citation</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-node">&quot;#{pub_info}.&quot;</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">pub_info</span>.<span class="ruby-identifier">blank?</span>
+  <span class="ruby-identifier">citation</span>.<span class="ruby-identifier">html_safe</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- export_as_chicago_citation-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- export_as_chicago_citation-method -->
+
+    
+      <div id="method-i-export_as_endnote" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">export_as_endnote</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>MIME: &#39;application/x-endnote-refer&#39;</p>
+          
+
+          
+          <div class="method-source-code" id="export_as_endnote-source">
+            <pre><span class="ruby-comment"># File lib/drs/nu_core_file/export.rb, line 5</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">export_as_endnote</span>
+  <span class="ruby-identifier">end_note_format</span> = {
+    <span class="ruby-string">&#39;%T&#39;</span> =<span class="ruby-operator">&gt;</span> [<span class="ruby-value">:title</span>],
+    <span class="ruby-string">&#39;%Q&#39;</span> =<span class="ruby-operator">&gt;</span> [<span class="ruby-value">:title</span>],
+    <span class="ruby-string">&#39;%A&#39;</span> =<span class="ruby-operator">&gt;</span> [<span class="ruby-value">:creator</span>],
+    <span class="ruby-string">&#39;%C&#39;</span> =<span class="ruby-operator">&gt;</span> [<span class="ruby-value">:publication_place</span>],
+    <span class="ruby-string">&#39;%D&#39;</span> =<span class="ruby-operator">&gt;</span> [<span class="ruby-value">:date_created</span>],
+    <span class="ruby-string">&#39;%8&#39;</span> =<span class="ruby-operator">&gt;</span> [<span class="ruby-value">:date_uploaded</span>],
+    <span class="ruby-string">&#39;%E&#39;</span> =<span class="ruby-operator">&gt;</span> [<span class="ruby-value">:contributor</span>],
+    <span class="ruby-string">&#39;%I&#39;</span> =<span class="ruby-operator">&gt;</span> [<span class="ruby-value">:publisher</span>],
+    <span class="ruby-string">&#39;%J&#39;</span> =<span class="ruby-operator">&gt;</span> [<span class="ruby-value">:series_title</span>],
+    <span class="ruby-string">&#39;%@&#39;</span> =<span class="ruby-operator">&gt;</span> [<span class="ruby-value">:isbn</span>],
+    <span class="ruby-string">&#39;%U&#39;</span> =<span class="ruby-operator">&gt;</span> [<span class="ruby-value">:related_url</span>],
+    <span class="ruby-string">&#39;%7&#39;</span> =<span class="ruby-operator">&gt;</span> [<span class="ruby-value">:edition_statement</span>],
+    <span class="ruby-string">&#39;%R&#39;</span> =<span class="ruby-operator">&gt;</span> [<span class="ruby-value">:persistent_url</span>],
+    <span class="ruby-string">&#39;%X&#39;</span> =<span class="ruby-operator">&gt;</span> [<span class="ruby-value">:description</span>],
+    <span class="ruby-string">&#39;%G&#39;</span> =<span class="ruby-operator">&gt;</span> [<span class="ruby-value">:language</span>],
+    <span class="ruby-string">&#39;%[&#39;</span> =<span class="ruby-operator">&gt;</span> [<span class="ruby-value">:date_modified</span>],
+    <span class="ruby-string">&#39;%9&#39;</span> =<span class="ruby-operator">&gt;</span> [<span class="ruby-value">:resource_type</span>],
+    <span class="ruby-string">&#39;%~&#39;</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-constant">Rails</span>.<span class="ruby-identifier">application</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">parent_name</span>,
+    <span class="ruby-string">&#39;%W&#39;</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;Northeastern University&#39;</span>
+  }
+  <span class="ruby-identifier">text</span> = []
+  <span class="ruby-identifier">text</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-string">&quot;%0 NuCoreFile&quot;</span>
+  <span class="ruby-identifier">end_note_format</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">endnote_key</span>, <span class="ruby-identifier">mapping</span><span class="ruby-operator">|</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">mapping</span>.<span class="ruby-identifier">is_a?</span> <span class="ruby-constant">String</span>
+      <span class="ruby-identifier">values</span> = [<span class="ruby-identifier">mapping</span>]
+    <span class="ruby-keyword">else</span>
+      <span class="ruby-identifier">values</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">send</span>(<span class="ruby-identifier">mapping</span>[<span class="ruby-value">0</span>]) <span class="ruby-keyword">if</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">respond_to?</span> <span class="ruby-identifier">mapping</span>[<span class="ruby-value">0</span>]
+      <span class="ruby-identifier">values</span> = <span class="ruby-identifier">mapping</span>[<span class="ruby-value">1</span>].<span class="ruby-identifier">call</span>(<span class="ruby-identifier">values</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">mapping</span>.<span class="ruby-identifier">length</span> <span class="ruby-operator">==</span> <span class="ruby-value">2</span>
+      <span class="ruby-identifier">values</span> = [<span class="ruby-identifier">values</span>] <span class="ruby-keyword">unless</span> <span class="ruby-identifier">values</span>.<span class="ruby-identifier">is_a?</span> <span class="ruby-constant">Array</span>
+    <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">next</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">values</span>.<span class="ruby-identifier">empty?</span> <span class="ruby-keyword">or</span> <span class="ruby-identifier">values</span>.<span class="ruby-identifier">first</span>.<span class="ruby-identifier">nil?</span>
+    <span class="ruby-identifier">spaced_values</span> = <span class="ruby-identifier">values</span>.<span class="ruby-identifier">join</span>(<span class="ruby-string">&quot;; &quot;</span>)
+    <span class="ruby-identifier">text</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-node">&quot;#{endnote_key} #{spaced_values}&quot;</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">return</span> <span class="ruby-identifier">text</span>.<span class="ruby-identifier">join</span>(<span class="ruby-string">&quot;\n&quot;</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- export_as_endnote-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- export_as_endnote-method -->
+
+    
+      <div id="method-i-export_as_mla_citation" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">export_as_mla_citation</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="export_as_mla_citation-source">
+            <pre><span class="ruby-comment"># File lib/drs/nu_core_file/export.rb, line 122</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">export_as_mla_citation</span>
+  <span class="ruby-identifier">text</span> = <span class="ruby-string">&#39;&#39;</span>
+  <span class="ruby-identifier">authors_final</span> = []
+
+  <span class="ruby-comment">#setup formatted author list</span>
+  <span class="ruby-identifier">authors</span> = <span class="ruby-identifier">get_author_list</span>
+
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">authors</span>.<span class="ruby-identifier">length</span> <span class="ruby-operator">&lt;</span> <span class="ruby-value">4</span>
+    <span class="ruby-identifier">authors</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">author</span><span class="ruby-operator">|</span>
+      <span class="ruby-keyword">if</span> <span class="ruby-identifier">author</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">authors</span>.<span class="ruby-identifier">first</span> <span class="ruby-comment">#first</span>
+        <span class="ruby-identifier">authors_final</span>.<span class="ruby-identifier">push</span>(<span class="ruby-identifier">author</span>)
+      <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">author</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">authors</span>.<span class="ruby-identifier">last</span> <span class="ruby-comment">#last</span>
+        <span class="ruby-identifier">authors_final</span>.<span class="ruby-identifier">push</span>(<span class="ruby-string">&quot;, and &quot;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">name_reverse</span>(<span class="ruby-identifier">author</span>) <span class="ruby-operator">+</span> <span class="ruby-string">&quot;.&quot;</span>)
+      <span class="ruby-keyword">else</span> <span class="ruby-comment">#all others</span>
+        <span class="ruby-identifier">authors_final</span>.<span class="ruby-identifier">push</span>(<span class="ruby-string">&quot;, &quot;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">name_reverse</span>(<span class="ruby-identifier">author</span>))
+      <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">end</span>
+    <span class="ruby-identifier">text</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">authors_final</span>.<span class="ruby-identifier">join</span>
+    <span class="ruby-keyword">unless</span> <span class="ruby-identifier">text</span>.<span class="ruby-identifier">blank?</span>
+      <span class="ruby-keyword">if</span> <span class="ruby-identifier">text</span>[<span class="ruby-value">-1</span>,<span class="ruby-value">1</span>] <span class="ruby-operator">!=</span> <span class="ruby-string">&quot;.&quot;</span>
+        <span class="ruby-identifier">text</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-string">&quot;. &quot;</span>
+      <span class="ruby-keyword">else</span>
+        <span class="ruby-identifier">text</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-string">&quot; &quot;</span>
+      <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">else</span>
+    <span class="ruby-identifier">text</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">authors</span>.<span class="ruby-identifier">first</span> <span class="ruby-operator">+</span> <span class="ruby-string">&quot;, et al. &quot;</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-comment"># setup title</span>
+  <span class="ruby-identifier">title_info</span> = <span class="ruby-identifier">setup_title_info</span>
+  <span class="ruby-identifier">text</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-string">&quot;&lt;i&gt;&quot;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">mla_citation_title</span>(<span class="ruby-identifier">title_info</span>) <span class="ruby-operator">+</span> <span class="ruby-string">&quot;&lt;/i&gt; &quot;</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">title</span>.<span class="ruby-identifier">blank?</span>
+
+  <span class="ruby-comment"># Publication</span>
+  <span class="ruby-identifier">text</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">setup_pub_info</span> <span class="ruby-operator">+</span> <span class="ruby-string">&quot;, &quot;</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">setup_pub_info</span>.<span class="ruby-identifier">nil?</span>
+
+  <span class="ruby-comment"># Get Pub Date</span>
+  <span class="ruby-identifier">text</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">setup_pub_date</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">setup_pub_date</span>.<span class="ruby-identifier">nil?</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">text</span>[<span class="ruby-value">-1</span>,<span class="ruby-value">1</span>] <span class="ruby-operator">!=</span> <span class="ruby-string">&quot;.&quot;</span>
+    <span class="ruby-identifier">text</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-string">&quot;.&quot;</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">text</span>.<span class="ruby-identifier">blank?</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">text</span>.<span class="ruby-identifier">html_safe</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- export_as_mla_citation-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- export_as_mla_citation-method -->
+
+    
+      <div id="method-i-export_as_openurl_ctx_kev" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">export_as_openurl_ctx_kev</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>MIME type: &#39;application/x-openurl-ctx-kev&#39;</p>
+          
+
+          
+          <div class="method-source-code" id="export_as_openurl_ctx_kev-source">
+            <pre><span class="ruby-comment"># File lib/drs/nu_core_file/export.rb, line 45</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">export_as_openurl_ctx_kev</span>
+  <span class="ruby-identifier">export_text</span> = []
+  <span class="ruby-identifier">export_text</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-string">&quot;url_ver=Z39.88-2004&amp;ctx_ver=Z39.88-2004&amp;rft_val_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Adc&amp;rfr_id=info%3Asid%2Fblacklight.rubyforge.org%3Agenerator&quot;</span>
+  <span class="ruby-identifier">field_map</span> = {
+    <span class="ruby-value">:title</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;title&#39;</span>,
+    <span class="ruby-value">:creator</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;creator&#39;</span>,
+    <span class="ruby-value">:subject</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;subject&#39;</span>,
+    <span class="ruby-value">:description</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;description&#39;</span>,
+    <span class="ruby-value">:publisher</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;publisher&#39;</span>,
+    <span class="ruby-value">:contributor</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;contributor&#39;</span>,
+    <span class="ruby-value">:date_created</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;date&#39;</span>,
+    <span class="ruby-value">:resource_type</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;format&#39;</span>,
+    <span class="ruby-value">:identifier</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;identifier&#39;</span>,
+    <span class="ruby-value">:language</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;language&#39;</span>,
+    <span class="ruby-value">:tag</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;relation&#39;</span>,
+    <span class="ruby-value">:based_near</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;coverage&#39;</span>,
+    <span class="ruby-value">:rights</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;rights&#39;</span>
+  }
+  <span class="ruby-identifier">field_map</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">element</span>, <span class="ruby-identifier">kev</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">values</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">send</span>(<span class="ruby-identifier">element</span>)
+    <span class="ruby-keyword">next</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">values</span>.<span class="ruby-identifier">nil?</span> <span class="ruby-keyword">or</span> <span class="ruby-identifier">values</span>.<span class="ruby-identifier">empty?</span> <span class="ruby-keyword">or</span> <span class="ruby-identifier">values</span>.<span class="ruby-identifier">first</span>.<span class="ruby-identifier">nil?</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">values</span>.<span class="ruby-identifier">is_a?</span> <span class="ruby-constant">String</span>
+      <span class="ruby-identifier">export_text</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-node">&quot;rft.#{kev}=#{CGI::escape(values)}&quot;</span>
+    <span class="ruby-keyword">else</span>  
+      <span class="ruby-identifier">values</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">value</span><span class="ruby-operator">|</span>
+        <span class="ruby-identifier">export_text</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-node">&quot;rft.#{kev}=#{CGI::escape(value)}&quot;</span>
+      <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">export_text</span>.<span class="ruby-identifier">join</span>(<span class="ruby-string">&#39;&amp;&#39;</span>) <span class="ruby-keyword">unless</span> <span class="ruby-identifier">export_text</span>.<span class="ruby-identifier">blank?</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- export_as_openurl_ctx_kev-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- export_as_openurl_ctx_kev-method -->
+
+    
+    </section><!-- public-instance-method-details -->
+  
+  </section><!-- 5Buntitled-5D -->
+
+</div><!-- documentation -->
+
+
+<footer id="validator-badges">
+  <p><a href="http://validator.w3.org/check/referer">[Validate]</a>
+  <p>Generated by <a href="https://github.com/rdoc/rdoc">RDoc</a> 3.12.2.
+  <p>Generated with the <a href="http://deveiate.org/projects/Darkfish-Rdoc/">Darkfish Rdoc Generator</a> 3.
+</footer>
+

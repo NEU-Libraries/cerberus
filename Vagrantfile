@@ -57,7 +57,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.provider :virtualbox do |vb|
     vb.customize ["modifyvm", :id, "--memory", '4000']
     vb.customize ["modifyvm", :id, "--ioapic", 'on']
-    vb.customize ["modifyvm", :id, "--cpus", '2']
+    vb.customize ["modifyvm", :id, "--cpus", '4']
     vb.customize ["modifyvm", :id, "--natdnsproxy1", "off"]
     vb.customize ["modifyvm", :id, "--natdnshostresolver1", "off"]
 

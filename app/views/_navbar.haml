@@ -1,0 +1,23 @@
+.container
+  %nav.navbar(role="navigation")
+    .navbar-inner
+      %a{class: "top_nav brand drs#{'active' if params[:controller] == "catalog" and action_name == "index"}", href: "/"}
+        DRS
+      %a.btn.btn-navbar.btn-navbar-collpase.btn-inverse{"data-target" => ".nav-collapse", "data-toggle" => "collapse"}
+        %span.icon-bar
+        %span.icon-bar
+        %span.icon-bar
+      .nav-collapse.collapse
+        %ul.nav.pull-left
+          %li{:class => ("active" if action_name == "about")}
+            %a.top_nav{href: "/about/"} About
+          %li{:class => ("active" if action_name == "help")}
+            %a.top_nav{href: "/help/"} Help
+          %li{:class => ("active" if action_name == "contact_form")}
+            %a.top_nav{href: sufia.contact_form_index_path} Contact
+        / /.nav /.pull-right
+        = render :partial => 'catalog/search_form'
+      / /.nav-collapse.collapse
+    / /.nav-inner
+  / /.navbar
+/ /.container
