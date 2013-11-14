@@ -18,6 +18,7 @@ class NuCollectionsController < SetsController
   end
 
   def new
+    @page_title = "New Collection"
     @set = NuCollection.new(parent: params[:parent])
     render :template => 'shared/sets/new'
   end
@@ -58,11 +59,13 @@ class NuCollectionsController < SetsController
 
   def show  
     @set = NuCollection.find(params[:id])
+    @page_title = @set.title
     render :template => 'shared/sets/show' 
   end
 
   def edit
     @set = NuCollection.find(params[:id])
+    @page_title = "Edit #{@set.title}" 
     render :template => 'shared/sets/edit' 
   end
 
