@@ -43,6 +43,7 @@ class ShoppingCartsController < ApplicationController
 
     respond_to do |format|
       format.html do
+        alert_to_removed_objects
         FileUtils.rm_rf(Dir.glob("#{dir}/*")) if File.directory?(dir) 
         Sufia.queue.push(CartDownloadJob.new(session[:session_id], session[:ids], current_user.nuid))
         @page_title = "Download Shopping Cart"
@@ -74,6 +75,26 @@ class ShoppingCartsController < ApplicationController
 
   private
 
+    def alert_to_removed_objects
+      deleted = []
+
+      session[:ids].each do |pid|
+        if !ActiveFedora::Base.exists?(pid) 
+          session[:ids].delete(pid) 
+          deleted << pid
+        end
+      end
+
+      if !deleted.empty? && session[:ids].empty?
+        flash[:error] = "All items associated with this cart have been deleted.  Cancelling Download"
+        redirect_to shopping_cart_path and return
+      else
+        flash.now[:error] = "The following items no longer exist in the" +
+        " repository and have been removed from your cart:" + 
+        " #{deleted.join(', ')}"
+      end
+    end
+
     def session_to_array 
       session[:ids] ||= [] 
     end
@@ -94,9 +115,17 @@ class ShoppingCartsController < ApplicationController
     end
 
     def lookup_from_cookie(arry)
-      if arry 
-        x = arry.map { |p| ActiveFedora::Base.find(p, cast: true) } 
-        return x
+      if arry
+        result = [] 
+
+        # Make sure that we only try to access files that still exist.
+        arry.each do |pid| 
+          if ActiveFedora::Base.exists?(pid) 
+            result << ActiveFedora::Base.find(pid, cast: true) 
+          end
+        end
+
+        return result
       else
         []
       end
