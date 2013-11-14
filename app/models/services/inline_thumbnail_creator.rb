@@ -48,7 +48,7 @@ class InlineThumbnailCreator
 
         generate_thumbnail(path)
 
-        thumbnail = File.open(tmp).read 
+        thumbnail = File.open(tmp, 'rb').read 
 
         set.add_file(thumbnail, dsid, fname)
       ensure 
