@@ -8,6 +8,7 @@ class ShoppingCartsController < ApplicationController
   # Show the user the contents of their shopping cart.
   def show 
     @items = lookup_from_cookie(session[:ids]) 
+    @page_title = "Shopping Cart"
   end
 
   # Allow the user to add/remove items from their shopping cart.
@@ -44,6 +45,7 @@ class ShoppingCartsController < ApplicationController
       format.html do
         FileUtils.rm_rf(Dir.glob("#{dir}/*")) if File.directory?(dir) 
         Sufia.queue.push(CartDownloadJob.new(session[:session_id], session[:ids], current_user.nuid))
+        @page_title = "Download Shopping Cart"
       end
 
       format.js do

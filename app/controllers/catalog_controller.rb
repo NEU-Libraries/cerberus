@@ -40,7 +40,8 @@ class CatalogController < ApplicationController
     super
     recent
     #also grab my recent docs too
-    recent_me    
+    recent_me
+    @page_title = "Home"    
   end
 
   def recent

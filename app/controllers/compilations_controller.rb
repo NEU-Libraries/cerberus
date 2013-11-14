@@ -8,10 +8,12 @@ class CompilationsController < ApplicationController
 
   def index 
     @compilations = Compilation.users_compilations(current_user) 
+    @page_title = "My Compilations"
   end
 
   def new 
     @compilation = Compilation.new
+    @page_title = "New Compilation"
   end
 
   def create
@@ -23,6 +25,7 @@ class CompilationsController < ApplicationController
 
   def edit
     load_instance 
+    @page_title = "Edit #{@compilation.title}" 
   end
 
   def update
@@ -37,6 +40,7 @@ class CompilationsController < ApplicationController
 
   def show
     load_instance
+    @page_title = "#{@compilation.title}"
   end
 
   def destroy 
@@ -73,6 +77,7 @@ class CompilationsController < ApplicationController
   def show_download 
     load_instance 
     Sufia.queue.push(ZipCompilationJob.new(current_user, @compilation))
+    @page_title = "Download #{@compilation.title}"
   end
 
   def download 

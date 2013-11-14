@@ -55,6 +55,7 @@ class NuCoreFilesController < ApplicationController
     @nu_core_file = NuCoreFile.new
     @sample_incomplete_file = NuCoreFile.users_in_progress_files(current_user).first 
     @incomplete_files = NuCoreFile.users_in_progress_files(current_user) 
+    @page_title = "Provide Upload Metadata"
   end
 
   # routed to files/rescue_incomplete_files
@@ -68,6 +69,7 @@ class NuCoreFilesController < ApplicationController
     end
 
     @incomplete_file_titles = file_titles 
+    @page_title = "Rescue abandoned files"
   end
 
   def process_metadata
@@ -81,6 +83,7 @@ class NuCoreFilesController < ApplicationController
     respond_to do |format|
       format.html {
         @events = @nu_core_file.events(100)
+        @page_title = @nu_core_file.title
       }
       format.endnote { render :text => @nu_core_file.export_as_endnote }
     end
@@ -88,6 +91,7 @@ class NuCoreFilesController < ApplicationController
 
   # routed to /files/new
   def new
+    @page_title = "Upload New Files"
     in_progress_files = NuCoreFile.users_in_progress_files(current_user)
 
     if !in_progress_files.empty?
@@ -107,6 +111,7 @@ class NuCoreFilesController < ApplicationController
 
   def edit
     @nu_core_file = NuCoreFile.find(params[:id])
+    @page_title = "Edit #{@nu_core_file.title}" 
 
     @nu_core_file.initialize_fields
     @groups = current_user.groups
