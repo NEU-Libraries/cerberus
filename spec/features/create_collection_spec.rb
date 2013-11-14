@@ -54,7 +54,7 @@ feature "Creating a collection" do
       page.should have_selector(:css, 'ul.breadcrumb')
       page.should have_link('Root Collection')
       page.should have_selector('li.active')
-      page.find('li.active').text.should == "My Title"
+      page.find('ul.breadcrumb > li.active').text.should == "My Title"
     end
   end
 

@@ -9,12 +9,12 @@
         %span.icon-bar
       .nav-collapse.collapse
         %ul.nav.pull-left
-          %li{:class => ("active" if action_name == "about")}
-            %a.top_nav{href: "/about/"} About
-          %li{:class => ("active" if action_name == "help")}
-            %a.top_nav{href: "/help/"} Help
-          %li{:class => ("active" if action_name == "contact_form")}
-            %a.top_nav{href: sufia.contact_form_index_path} Contact
+          %li{:class => ("active" if action_name == "personal_graph")}
+            %a.top_nav{href: personal_graph_path} My Repository
+          %li{:class => ("active" if controller_name == "compilations" && action_name == "index")}
+            %a.top_nav{href: compilations_path} Compilations
+          %li{:class => ("active" if (controller_name == "communities" || controller_name == "nu_collections") && action_name == "show")}
+            %a.top_nav{href: communities_path} Browse
         / /.nav /.pull-right
         = render :partial => 'catalog/search_form'
       / /.nav-collapse.collapse
