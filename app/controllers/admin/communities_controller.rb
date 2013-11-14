@@ -34,7 +34,7 @@ class Admin::CommunitiesController < AdminController
   end
 
   def edit 
-    @page_title = "Administer #{@community}"
+    @page_title = "Administer #{@community.title}"
   end
 
   def update
