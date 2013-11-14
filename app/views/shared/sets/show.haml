@@ -7,7 +7,8 @@
 = render partial: 'shared/sets/breadcrumb_action_menu_links'
 
 
-%h2.page-header= @set.title 
+%h1.page-header{:class => @set.class}
+  = @set.title
 
 - if @set.description.length > 0 
   .well

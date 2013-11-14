@@ -9,7 +9,7 @@
             %a{:href => path }
               %figure.pull-left.media-object
                 -# @todo check for community thumbnails?
-                -# if !community.thumbnail.content.nil?
+                -if !community.thumbnail.content.nil?
                   =commuinty.thumbnail.content
                 - else 
                   %i.icon-group.icon-2x.icon-block
@@ -25,14 +25,16 @@
                 %p= community.description
 
   - if current_user_can_read?(@set)
-    - @set.child_collections.each do |collection| 
+    - @set.child_collections.reverse.each do |collection| 
       - if current_user_can_read?(collection)
         - path = nu_collection_path(collection.identifier) 
         %li.media
           %a{:href => path }
             %figure.pull-left.media-object
-              -# if collection.thumbnail
-              %i.icon-group.icon-2x.icon-block
+              - if !collection.thumbnail.content.nil?
+                =collection.thumbnail.content
+              - else
+                %i.icon-folder-open.icon-2x.icon-block
               %figcaption
                 %p
                   %small.muted
