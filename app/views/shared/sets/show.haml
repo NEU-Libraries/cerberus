@@ -25,7 +25,9 @@
           %a{:href =>  edit_nu_collection_path(@set)}
             Edit
         %li
-          =link_to("Delete", nu_collection_path(@set), method: :delete)
+          %a{:href =>"#deleteCollectionModal"}(data-toggle="modal")
+            Delete
+    =render partial: 'shared/sets/delete_collections_modal'
 = render partial: 'shared/sets/show_sets'
 - if @set.instance_of?(NuCollection)
   = render partial: 'shared/sets/show_files', locals: { collection: @set }

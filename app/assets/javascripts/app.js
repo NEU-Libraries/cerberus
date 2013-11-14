@@ -20,6 +20,9 @@ var drsApp = {
         drsApp.config.$drsBootstrapSelect.selectpicker();
         drsApp.breadCrumbMenu();
     },
+    /**
+     * Provides the breadcrumb popover menu for adding collections or new items to the application.
+     */
     breadCrumbMenu: function(){
         drsApp.config.$addToSetLink.popover({
             html: true,
@@ -29,8 +32,7 @@ var drsApp = {
         }).on('hide', function(event){
           $(this).parent('li').removeClass('active');
         });
-    }
-   
+    },
  
 };
  
