@@ -5,10 +5,11 @@ class Admin::CommunitiesController < AdminController
 
   def index 
     @communities = Community.all
+    @page_title = "Administer Communities"
   end
 
   def new 
-
+    @page_title = "Create New Community"
   end
 
   def create
@@ -33,7 +34,7 @@ class Admin::CommunitiesController < AdminController
   end
 
   def edit 
-
+    @page_title = "Administer #{@community}"
   end
 
   def update
