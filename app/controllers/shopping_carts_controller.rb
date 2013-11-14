@@ -3,6 +3,7 @@ class ShoppingCartsController < ApplicationController
   before_filter :authenticate_user!
   before_filter :session_to_array 
   before_filter :can_dl?, only: [:update]
+  before_filter :check_availability, only: [:show, :download] 
   
 
   # Show the user the contents of their shopping cart.
@@ -74,6 +75,29 @@ class ShoppingCartsController < ApplicationController
 
   private
 
+    # Before critical actions (showing all downloads, actually firing a download)
+    # Filter out pids that might no longer exist in the repository and alert the 
+    # user that this has occurred. 
+    def check_availability 
+      deleted = [] 
+
+      session[:ids].each do |pid| 
+        if !ActiveFedora::Base.exists?(pid) 
+          session[:ids].delete(pid) 
+          deleted << pid 
+        end
+      end
+
+      if !deleted.empty? && session[:ids].empty? 
+        flash[:error] = "All items associated with this cart have been deleted.  Cancelling Download" 
+        redirect_to shopping_cart_path and return 
+      elsif !deleted.empty?
+        flash.now[:error] = "The following items no longer exist in the" +
+        " repository and have been removed from your cart:" + 
+        " #{deleted.join(', ')}"
+      end
+    end
+
     def session_to_array 
       session[:ids] ||= [] 
     end
@@ -86,7 +110,7 @@ class ShoppingCartsController < ApplicationController
         record = ActiveFedora::Base.find(params[:add], cast: true) 
         render_403 and return unless current_user_can_read?(record)
 
-        if session[:ids].length >= 1 
+        if session[:ids].length >= 100
           flash.now[:error] = "Can't have more than 100 items in your cart" 
           return
         end
@@ -94,8 +118,8 @@ class ShoppingCartsController < ApplicationController
     end
 
     def lookup_from_cookie(arry)
-      if arry 
-        x = arry.map { |p| ActiveFedora::Base.find(p, cast: true) } 
+      if arry
+        x = arry.map { |pid| ActiveFedora::Base.find(pid, cast: true) } 
         return x
       else
         []
