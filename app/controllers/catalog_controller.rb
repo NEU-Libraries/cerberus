@@ -41,7 +41,10 @@ class CatalogController < ApplicationController
     recent
     #also grab my recent docs too
     recent_me
-    @page_title = "Home"    
+    unless has_search_parameters?
+      @page_title = "Home"    
+      @root = Community.find(Rails.configuration.root_community_id)
+    end
   end
 
   def recent
