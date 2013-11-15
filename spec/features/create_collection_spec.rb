@@ -2,7 +2,12 @@ require 'spec_helper'
 
 feature "Creating a collection" do
   before :all do 
-    @root = FactoryGirl.create(:root_collection)
+    @root = Community.create(pid: "neu:1")
+    @root.identifier = "neu:1"
+    @root.rightsMetadata.permissions({person: 'bill@example.com'}, 'edit') 
+    @root.mass_permissions = 'public'
+    @root.title = "Root Collection"
+    @root.save!
   end
 
   let(:user) { FactoryGirl.create(:user) }
