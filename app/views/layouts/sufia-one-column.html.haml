@@ -1,8 +1,8 @@
 - content_for :content do
   %main.conatiner(role="main")
-    = yield :content
+    = yield
   //main.container
-  -if :aside
+  -if content_for?(:aside) or content_for?(:sidebar) 
     %aside(role="complimentary")
-      = yield :aside 
+      = content_for?(:aside) ? yield(:aside) : yield(:side_bar)
 = render template: "layouts/application"
