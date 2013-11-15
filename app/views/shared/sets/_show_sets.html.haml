@@ -10,7 +10,7 @@
               %figure.pull-left.media-object
                 -# @todo check for community thumbnails?
                 -if !community.thumbnail.content.nil?
-                  =commuinty.thumbnail.content
+                  %img{src: sufia.download_path(community, datastream_id: 'thumbnail')}
                 - else 
                   %i.icon-group.icon-2x.icon-block
                 %figcaption
@@ -30,7 +30,7 @@
           %a{:href => path }
             %figure.pull-left.media-object
               - if !collection.thumbnail.content.nil?
-                =collection.thumbnail.contents
+                %img{src: sufia.download_path(collection, datastream_id: 'thumbnail') }
               - else
                 %i.icon-folder-open.icon-2x.icon-block
               %figcaption
