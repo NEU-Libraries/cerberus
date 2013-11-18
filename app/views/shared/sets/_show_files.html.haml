@@ -3,7 +3,7 @@
     %li.media
       %a{:href => nu_core_file_path(file.pid)}
         %figure.pull-left.media-object
-          - if !file.thumbnail.content.content.nil?
+          - if file.thumbnail
             %img{alt: (file.description ? file.description : ""), src: sufia.download_path(file.thumbnail, {:datastream_id => 'content'})}
           - else
             %i.icon-file.icon-2x.icon-block
