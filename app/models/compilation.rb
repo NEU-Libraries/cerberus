@@ -52,7 +52,7 @@ class Compilation < ActiveFedora::Base
   end
 
   # Eliminate every entry ID that points to an object that no longer exists
-  # Return the number of dead links removed in this fashion
+  # Return the pid of each entry removed. 
   # Behavior of this method is weirdly flaky in the case where self is held in memory 
   # /while/ the NuCoreFile is deleted. 
   # If you've having problems that appear to be caused by self.relationships(:has_member) 
