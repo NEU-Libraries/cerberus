@@ -17,6 +17,8 @@ class ZipCompilationJob
 
   def run
 
+    user = User.find_by_email(nuid)
+
     # Removes any stale zip files that might still be sitting around. 
     if File.directory?("#{Rails.root}/tmp/#{self.comp_pid}") 
       FileUtils.remove_dir ("#{Rails.root}/tmp/#{self.comp_pid}")
@@ -28,13 +30,15 @@ class ZipCompilationJob
 
     Zip::Archive.open(safe_zipfile_name, Zip::CREATE) do |io| 
       self.entry_ids.each do |id| 
-        canon_object = NuCoreFile.find(id).canonical_object 
-
-        if canon_object && !canon_object.content.content.nil?
-          io.add_buffer("#{self.title}/#{canon_object.title}", canon_object.content.content)
+        NuCoreFile.find(id).content_objects.each do |content| 
+          if user.can?(:read, content) && content.content.content #haha
+            io.add_buffer("#{self.title}/#{content.title}", content.content.content) 
+          end
         end
       end
     end
+
+    return zipfile_name
   end
 
   private 
