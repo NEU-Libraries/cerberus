@@ -1,8 +1,9 @@
 %figure
   - if @nu_core_file.image?
-    %img{alt: "Download the full-sized image of #{@nu_core_file.title.first}", src: sufia.download_path(@nu_core_file, {:datastream_id => 'thumbnail'}), width: "338"}
-    -# Removing this for now %a{href: sufia.download_path(@nu_core_file), target: "_new", title: "Download the full-sized image"}
-      -# Download the full-sized image
+    -if @nu_core_file.thumbnail
+      %img{title: @nu_core_file.title.first, alt: " ",  src: sufia.download_path(@nu_core_file.thumbnail, {datastream_id: 'content'}) }
+    -else
+      %i.icon-picture.icon-4x.icon-border.drs-icon-figure
   - elsif @nu_core_file.video?
     %video.video-js.vjs-default-skin{controls: "controls", "data-setup" => "{}", preload: "auto"}
       %source{src: sufia.download_path(@nu_core_file, datastream_id: 'webm'), type: "video/webm"}
@@ -14,12 +15,15 @@
       %source{src: sufia.download_path(@nu_core_file, datastream_id: 'mp3'), type: "audio/mpeg"}
       Your browser does not support the audio tag.
   - elsif @nu_core_file.pdf?
-    %img{alt: " #{@nu_core_file.title.first}", src: sufia.download_path(@nu_core_file, datastream_id: 'thumbnail'), width: "338"}>/
-    -# %a{href: sufia.download_path(@nu_core_file), target: "_new", title: "Download the full-sized PDF"}Download the full-sized PDF
+    -if @nu_core_file.thumbnail
+      %img{title: @nu_core_file.title.first , alt: " ",  src: sufia.download_path(@nu_core_file.thumbnail, {datastream_id: 'content'}) }
+    -else
+      %i.icon-picture.icon-4x.icon-border.drs-icon-figure
   - else
-    -# %a{href: sufia.download_path(@nu_core_file), target: "_new"}
-    -# %img{alt: " ", height: "493", src: "/assets/default.png", width: "338"}/
-    %i.icon-file.icon-4x.icon-border.drs-icon-figure
+    -if @nu_core_file.thumbnail
+      %img{alt: " ", title: @nu_core_file.title.first , src: sufia.download_path(@nu_core_file.thumbnail, {datastream_id: 'content'})}
+    -else
+      %i.icon-file.icon-4x.icon-border.drs-icon-figure
   - if @nu_core_file.description.length > 0
     %figcaption
       =@nu_core_file.description
