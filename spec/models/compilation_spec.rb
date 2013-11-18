@@ -82,6 +82,25 @@ describe Compilation do
     end 
   end
 
+  describe "Removing dead links" do 
+
+    it "cleans out deleted objects" do 
+      compilation.add_entry(file) 
+      compilation.add_entry(file_two)
+      compilation.save!
+
+      file_pid = file.pid
+      file.delete
+
+      comp_pid = compilation.pid
+      compilation = Compilation.find(comp_pid)
+      compilation.remove_dead_entries.should == [file_pid]
+
+      compilation.entry_ids.should =~ [file_two.pid]
+    end
+  end 
+
+
   describe "User based lookup" do 
 
     it "returns all compilations associated with the given user" do 
