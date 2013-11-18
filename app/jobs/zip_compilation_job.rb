@@ -30,9 +30,11 @@ class ZipCompilationJob
 
     Zip::Archive.open(safe_zipfile_name, Zip::CREATE) do |io| 
       self.entry_ids.each do |id| 
-        NuCoreFile.find(id).content_objects.each do |content| 
-          if user.can?(:read, content) && content.content.content #haha
-            io.add_buffer("#{self.title}/#{content.title}", content.content.content) 
+        if NuCoreFile.exists?(id)
+          NuCoreFile.find(id).content_objects.each do |content| 
+            if user.can?(:read, content) && content.content.content #haha
+              io.add_buffer("#{self.title}/#{content.title}", content.content.content) 
+            end
           end
         end
       end
