@@ -8,9 +8,10 @@
           %li.media
             %a{:href => path }
               %figure.pull-left.media-object
-                -# @todo check for community thumbnails?
-                -if !community.thumbnail.content.nil?
-                  %img{src: sufia.download_path(community, datastream_id: 'thumbnail')}
+                -if community.thumbnail.content
+                  %img{src: sufia.download_path( community, datastream_id: 'thumbnail'), title:  community.title, alt: ""}(aria-labeledby="# community.pid}-title" role="presentation")
+                  
+                  %img{src: sufia.download_path(community, datastream_id: 'thumbnail'), title: community.title, alt: ""}
                 - else 
                   %i.icon-group.icon-2x.icon-block
                 %figcaption
@@ -19,7 +20,7 @@
                       Community
             .media-body
               %a{:href => path }
-                %h4.media-heading
+                %h4.media-heading(id="# community.pid}-title")
                   =community.title
               - if community.description
                 %p= community.description
@@ -29,8 +30,8 @@
         %li.media
           %a{:href => path }
             %figure.pull-left.media-object
-              - if !collection.thumbnail.content.nil?
-                %img{src: sufia.download_path(collection, datastream_id: 'thumbnail') }
+              - if collection.thumbnail.content
+                %img{src: sufia.download_path(collection, datastream_id: 'thumbnail'), title: collection.title, alt: ""}(aria-labeledby="#{collection.pid}-title" role="presentation")
               - else
                 %i.icon-folder-open.icon-2x.icon-block
               %figcaption
@@ -39,7 +40,7 @@
                     Collection
           .media-body
             %a{:href => path }
-              %h4.media-heading
+              %h4.media-heading(id="#{collection.pid}-title")
                 = collection.title
             -if collection.description
               %p= collection.description
