@@ -40,6 +40,7 @@ class CompilationsController < ApplicationController
   end 
 
   def show
+    @bytes = compute_download_size
     @page_title = "#{@compilation.title}"
   end
 
@@ -80,6 +81,20 @@ class CompilationsController < ApplicationController
   end
 
   private
+
+  def compute_download_size 
+    i = 0
+
+    @compilation.entries.each do |entry| 
+      entry.content_objects.each do |content| 
+        if current_user.can? :read, content 
+          i = i + content.content.size 
+        end
+      end
+    end
+
+    i 
+  end
 
   def remove_dead_entries
     dead_entries = @compilation.remove_dead_entries 
