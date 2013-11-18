@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+
+<title>class NortheasternDublinCoreDatastream - Rails Application Documentation</title>
+
+<link type="text/css" media="screen" href="./rdoc.css" rel="stylesheet">
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "./";
+</script>
+
+<script type="text/javascript" charset="utf-8" src="./js/jquery.js"></script>
+<script type="text/javascript" charset="utf-8" src="./js/navigation.js"></script>
+<script type="text/javascript" charset="utf-8" src="./js/search_index.js"></script>
+<script type="text/javascript" charset="utf-8" src="./js/search.js"></script>
+<script type="text/javascript" charset="utf-8" src="./js/searcher.js"></script>
+<script type="text/javascript" charset="utf-8" src="./js/darkfish.js"></script>
+
+
+<body id="top" class="class">
+<nav id="metadata">
+  <nav id="home-section" class="section">
+  <h3 class="section-header">
+    <a href="./index.html">Home</a>
+    <a href="./table_of_contents.html#classes">Classes</a>
+    <a href="./table_of_contents.html#methods">Methods</a>
+  </h3>
+</nav>
+
+
+  <nav id="search-section" class="section project-section" class="initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <h3 class="section-header">
+      <input type="text" name="search" placeholder="Search" id="search-field"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </h3>
+  </form>
+
+  <ul id="search-results" class="initially-hidden"></ul>
+</nav>
+
+
+  <div id="file-metadata">
+    <nav id="file-list-section" class="section">
+  <h3 class="section-header">Defined In</h3>
+  <ul>
+    <li>app/models/northeastern_dublin_core_datastream.rb
+  </ul>
+</nav>
+
+    
+  </div>
+
+  <div id="class-metadata">
+    
+    <nav id="parent-class-section" class="section">
+  <h3 class="section-header">Parent</h3>
+  
+  <p class="link">ActiveFedora::OmDatastream
+  
+</nav>
+
+    <!-- Included Modules -->
+<nav id="includes-section" class="section">
+  <h3 class="section-header">Included Modules</h3>
+
+  <ul class="link-list">
+  
+  
+    <li><span class="include">OM::XML::Document</span>
+  
+  
+  
+    <li><span class="include">ActiveModel::Validations</span>
+  
+  
+  
+    <li><a class="include" href="NodeHelper.html">NodeHelper</a>
+  
+  
+  </ul>
+</nav>
+
+    <!-- Method Quickref -->
+<nav id="method-list-section" class="section">
+  <h3 class="section-header">Methods</h3>
+
+  <ul class="link-list">
+    
+    <li><a href="#method-c-xml_template">::xml_template</a>
+    
+    <li><a href="#method-i-assign_creators">#assign_creators</a>
+    
+    <li><a href="#method-i-construct_personal_names">#construct_personal_names</a>
+    
+  </ul>
+</nav>
+
+  </div>
+
+  <div id="project-metadata">
+    <nav id="fileindex-section" class="section project-section">
+  <h3 class="section-header">Pages</h3>
+
+  <ul>
+  
+    <li class="file"><a href="./doc/README_FOR_APP.html">README_FOR_APP</a>
+  
+  </ul>
+</nav>
+
+    <nav id="classindex-section" class="section project-section">
+  <h3 class="section-header">Class and Module Index</h3>
+
+  <ul class="link-list">
+  
+    <li><a href="./Drs.html">Drs</a>
+  
+    <li><a href="./Drs/Content.html">Drs::Content</a>
+  
+    <li><a href="./Drs/Content/Transformations.html">Drs::Content::Transformations</a>
+  
+    <li><a href="./Drs/ControllerHelpers.html">Drs::ControllerHelpers</a>
+  
+    <li><a href="./Drs/ControllerHelpers/EditableObjects.html">Drs::ControllerHelpers::EditableObjects</a>
+  
+    <li><a href="./Drs/Find.html">Drs::Find</a>
+  
+    <li><a href="./Drs/MetadataAssignment.html">Drs::MetadataAssignment</a>
+  
+    <li><a href="./Drs/NuCoreFile.html">Drs::NuCoreFile</a>
+  
+    <li><a href="./Drs/NuCoreFile/Export.html">Drs::NuCoreFile::Export</a>
+  
+    <li><a href="./Drs/NuFile.html">Drs::NuFile</a>
+  
+    <li><a href="./Drs/NuFile/Characterizable.html">Drs::NuFile::Characterizable</a>
+  
+    <li><a href="./Drs/Relationships.html">Drs::Relationships</a>
+  
+    <li><a href="./Drs/Rights.html">Drs::Rights</a>
+  
+    <li><a href="./Drs/Rights/Embargoable.html">Drs::Rights::Embargoable</a>
+  
+    <li><a href="./Drs/Rights/InheritedRestrictions.html">Drs::Rights::InheritedRestrictions</a>
+  
+    <li><a href="./Drs/Rights/MassPermissions.html">Drs::Rights::MassPermissions</a>
+  
+    <li><a href="./Exceptions.html">Exceptions</a>
+  
+    <li><a href="./Exceptions/DatastreamNotFoundError.html">Exceptions::DatastreamNotFoundError</a>
+  
+    <li><a href="./Exceptions/EmployeeWontStopBuildingError.html">Exceptions::EmployeeWontStopBuildingError</a>
+  
+    <li><a href="./Exceptions/MultipleMatchError.html">Exceptions::MultipleMatchError</a>
+  
+    <li><a href="./Exceptions/NoCommunityParentFoundError.html">Exceptions::NoCommunityParentFoundError</a>
+  
+    <li><a href="./Exceptions/NoParentFoundError.html">Exceptions::NoParentFoundError</a>
+  
+    <li><a href="./Exceptions/NoSuchNuidError.html">Exceptions::NoSuchNuidError</a>
+  
+    <li><a href="./Exceptions/ParentMismatchError.html">Exceptions::ParentMismatchError</a>
+  
+    <li><a href="./Exceptions/SearchResultTypeError.html">Exceptions::SearchResultTypeError</a>
+  
+    <li><a href="./Admin.html">Admin</a>
+  
+    <li><a href="./Admin/CommunitiesController.html">Admin::CommunitiesController</a>
+  
+    <li><a href="./Admin/CommunitiesHelper.html">Admin::CommunitiesHelper</a>
+  
+    <li><a href="./Admin/EmployeesController.html">Admin::EmployeesController</a>
+  
+    <li><a href="./Admin/EmployeesHelper.html">Admin::EmployeesHelper</a>
+  
+    <li><a href="./Employee.html">Employee</a>
+  
+    <li><a href="./Employee/FacultyFolders.html">Employee::FacultyFolders</a>
+  
+    <li><a href="./AdminController.html">AdminController</a>
+  
+    <li><a href="./ApplicationController.html">ApplicationController</a>
+  
+    <li><a href="./ApplicationHelper.html">ApplicationHelper</a>
+  
+    <li><a href="./AtomisticCharacterizationJob.html">AtomisticCharacterizationJob</a>
+  
+    <li><a href="./AudioFile.html">AudioFile</a>
+  
+    <li><a href="./CartDownloadJob.html">CartDownloadJob</a>
+  
+    <li><a href="./CatalogController.html">CatalogController</a>
+  
+    <li><a href="./CommunitiesController.html">CommunitiesController</a>
+  
+    <li><a href="./Community.html">Community</a>
+  
+    <li><a href="./Compilation.html">Compilation</a>
+  
+    <li><a href="./CompilationsController.html">CompilationsController</a>
+  
+    <li><a href="./ContentCreationJob.html">ContentCreationJob</a>
+  
+    <li><a href="./DrsEmployeeDatastream.html">DrsEmployeeDatastream</a>
+  
+    <li><a href="./DrsPropertiesDatastream.html">DrsPropertiesDatastream</a>
+  
+    <li><a href="./EmployeeCreateJob.html">EmployeeCreateJob</a>
+  
+    <li><a href="./EmployeesController.html">EmployeesController</a>
+  
+    <li><a href="./ImageLargeFile.html">ImageLargeFile</a>
+  
+    <li><a href="./ImageMasterFile.html">ImageMasterFile</a>
+  
+    <li><a href="./ImageMediumFile.html">ImageMediumFile</a>
+  
+    <li><a href="./ImageSmallFile.html">ImageSmallFile</a>
+  
+    <li><a href="./ImageThumbnailFile.html">ImageThumbnailFile</a>
+  
+    <li><a href="./MetadataUpdateJob.html">MetadataUpdateJob</a>
+  
+    <li><a href="./MsexcelFile.html">MsexcelFile</a>
+  
+    <li><a href="./MspowerpointFile.html">MspowerpointFile</a>
+  
+    <li><a href="./MswordFile.html">MswordFile</a>
+  
+    <li><a href="./NodeHelper.html">NodeHelper</a>
+  
+    <li><a href="./NortheasternDublinCoreDatastream.html">NortheasternDublinCoreDatastream</a>
+  
+    <li><a href="./NuCollection.html">NuCollection</a>
+  
+    <li><a href="./NuCollectionsController.html">NuCollectionsController</a>
+  
+    <li><a href="./NuCollectionsHelper.html">NuCollectionsHelper</a>
+  
+    <li><a href="./NuCoreFile.html">NuCoreFile</a>
+  
+    <li><a href="./NuCoreFileHelper.html">NuCoreFileHelper</a>
+  
+    <li><a href="./NuCoreFilesController.html">NuCoreFilesController</a>
+  
+    <li><a href="./NuModsDatastream.html">NuModsDatastream</a>
+  
+    <li><a href="./ParanoidRightsDatastream.html">ParanoidRightsDatastream</a>
+  
+    <li><a href="./PdfFile.html">PdfFile</a>
+  
+    <li><a href="./SetsController.html">SetsController</a>
+  
+    <li><a href="./ShoppingCartsController.html">ShoppingCartsController</a>
+  
+    <li><a href="./ShoppingCartsHelper.html">ShoppingCartsHelper</a>
+  
+    <li><a href="./SolrDocument.html">SolrDocument</a>
+  
+    <li><a href="./TextFile.html">TextFile</a>
+  
+    <li><a href="./User.html">User</a>
+  
+    <li><a href="./VideoFile.html">VideoFile</a>
+  
+    <li><a href="./ZipCompilationJob.html">ZipCompilationJob</a>
+  
+    <li><a href="./ZipFile.html">ZipFile</a>
+  
+  </ul>
+</nav>
+
+  </div>
+</nav>
+
+<div id="documentation">
+  <h1 class="class">class NortheasternDublinCoreDatastream</h1>
+
+  <div id="description" class="description">
+    
+  </div><!-- description -->
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+
+    <!-- Methods -->
+    
+     <section id="public-class-5Buntitled-5D-method-details" class="method-section section">
+      <h3 class="section-header">Public Class Methods</h3>
+
+    
+      <div id="method-c-xml_template" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">xml_template</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="xml_template-source">
+            <pre><span class="ruby-comment"># File app/models/northeastern_dublin_core_datastream.rb, line 18</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">xml_template</span>
+  <span class="ruby-identifier">builder</span> = <span class="ruby-constant">Nokogiri</span><span class="ruby-operator">::</span><span class="ruby-constant">XML</span><span class="ruby-operator">::</span><span class="ruby-constant">Builder</span>.<span class="ruby-identifier">new</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">xml</span><span class="ruby-operator">|</span> 
+    <span class="ruby-identifier">xml</span>[<span class="ruby-string">&#39;oai_dc&#39;</span>].<span class="ruby-identifier">dc</span>(<span class="ruby-string">&#39;xmlns:oai_dc&#39;</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;http://www.openarchives.org/OAI/2.0/oai_dc/&#39;</span>, <span class="ruby-string">&#39;xmlns:dc&#39;</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;http://purl.org/dc/elements/1.1/&#39;</span>, <span class="ruby-string">&#39;xmlns:xsi&#39;</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;http://www.w3.org/2001/XMLSchema-instance&#39;</span>, 
+                  <span class="ruby-string">&#39;xsi:schemaLocation&#39;</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd&#39;</span>){
+      <span class="ruby-identifier">xml</span>[<span class="ruby-string">&#39;dc&#39;</span>].<span class="ruby-identifier">title</span>
+      <span class="ruby-identifier">xml</span>[<span class="ruby-string">&#39;dc&#39;</span>].<span class="ruby-identifier">creator</span> 
+      <span class="ruby-identifier">xml</span>[<span class="ruby-string">&#39;dc&#39;</span>].<span class="ruby-identifier">date</span> 
+      <span class="ruby-identifier">xml</span>[<span class="ruby-string">&#39;dc&#39;</span>].<span class="ruby-identifier">description</span>
+      <span class="ruby-identifier">xml</span>[<span class="ruby-string">&#39;dc&#39;</span>].<span class="ruby-identifier">type</span>
+      <span class="ruby-identifier">xml</span>[<span class="ruby-string">&#39;dc&#39;</span>].<span class="ruby-identifier">subject</span>
+      <span class="ruby-identifier">xml</span>[<span class="ruby-string">&#39;dc&#39;</span>].<span class="ruby-identifier">identifier</span>
+    }
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">builder</span>.<span class="ruby-identifier">doc</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- xml_template-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- xml_template-method -->
+
+    
+    </section><!-- public-class-method-details -->
+  
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section section">
+      <h3 class="section-header">Public Instance Methods</h3>
+
+    
+      <div id="method-i-assign_creators" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">assign_creators</span><span
+            class="method-args">(first_names, last_names, corporate_creators)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>With no method of distinguishing between corporate and personal creators,
+we have to collapse assignment of all creators into a single method to
+avoid  unintentional overwrites.  This is not ideal.</p>
+          
+
+          
+          <div class="method-source-code" id="assign_creators-source">
+            <pre><span class="ruby-comment"># File app/models/northeastern_dublin_core_datastream.rb, line 37</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">assign_creators</span>(<span class="ruby-identifier">first_names</span>, <span class="ruby-identifier">last_names</span>, <span class="ruby-identifier">corporate_creators</span>)
+  <span class="ruby-identifier">pns</span> = <span class="ruby-identifier">construct_personal_names</span>(<span class="ruby-identifier">first_names</span>, <span class="ruby-identifier">last_names</span>) 
+
+  <span class="ruby-identifier">all_names</span> = <span class="ruby-identifier">pns</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">corporate_creators</span>
+
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">creator</span> = <span class="ruby-identifier">all_names</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- assign_creators-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- assign_creators-method -->
+
+    
+      <div id="method-i-construct_personal_names" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">construct_personal_names</span><span
+            class="method-args">(first_names, last_names)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Individual contributors/creators will typically be identified by first/last
+name. This method takes two arrays of equal length and creates personal
+names with them.</p>
+          
+
+          
+          <div class="method-source-code" id="construct_personal_names-source">
+            <pre><span class="ruby-comment"># File app/models/northeastern_dublin_core_datastream.rb, line 48</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">construct_personal_names</span>(<span class="ruby-identifier">first_names</span>, <span class="ruby-identifier">last_names</span>)
+
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">first_names</span>.<span class="ruby-identifier">length</span> <span class="ruby-operator">!=</span> <span class="ruby-identifier">last_names</span>.<span class="ruby-identifier">length</span> 
+    <span class="ruby-identifier">raise</span> <span class="ruby-node">&quot;Passed #{first_names.length} first names and #{last_names.length} last names.&quot;</span>
+  <span class="ruby-keyword">end</span>
+
+  <span class="ruby-identifier">full_names</span> = []
+  <span class="ruby-identifier">first_names</span>.<span class="ruby-identifier">each_with_index</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">fn</span>, <span class="ruby-identifier">i</span><span class="ruby-operator">|</span> 
+   <span class="ruby-identifier">full_names</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-node">&quot;#{fn} #{last_names[i]}&quot;</span> 
+  <span class="ruby-keyword">end</span>
+
+  <span class="ruby-keyword">return</span> <span class="ruby-identifier">full_names</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- construct_personal_names-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- construct_personal_names-method -->
+
+    
+    </section><!-- public-instance-method-details -->
+  
+  </section><!-- 5Buntitled-5D -->
+
+</div><!-- documentation -->
+
+
+<footer id="validator-badges">
+  <p><a href="http://validator.w3.org/check/referer">[Validate]</a>
+  <p>Generated by <a href="https://github.com/rdoc/rdoc">RDoc</a> 3.12.2.
+  <p>Generated with the <a href="http://deveiate.org/projects/Darkfish-Rdoc/">Darkfish Rdoc Generator</a> 3.
+</footer>
+

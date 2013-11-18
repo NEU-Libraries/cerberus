@@ -1,9 +1,9 @@
 - content_for :content do
   .row-fluid
-    .span3
-      = yield :sidebar
+    %aside.span3(role="complementary")
+      = content_for?(:aside) ? yield(:aside) : yield(:side_bar)
     / /.span2
-    .span9
+    %main.span9(role="main")
       = yield
     / /.span10
 = render template: "layouts/application"

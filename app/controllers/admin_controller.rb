@@ -5,7 +5,7 @@ class AdminController < ApplicationController
   before_filter :verify_admin
 
   def index 
-
+    @page_title = "Admin Home"
   end
 
   private 

@@ -2,9 +2,9 @@ def mint_unique_pid
   Sufia::Noid.namespaceize(Sufia::IdService.mint)
 end
 
-def create_collection(klass, parent_str, title_str, user)
+def create_collection(klass, parent_str, title_str, user, description = "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Recusandae, minima, cum sit iste at mollitia voluptatem error perspiciatis excepturi ut voluptatibus placeat esse architecto ea voluptate assumenda repudiandae quod commodi.")
   newPid = mint_unique_pid
-  col = klass.new(parent: parent_str, pid: newPid, identifier: newPid, title: title_str)
+  col = klass.new(parent: parent_str, pid: newPid, identifier: newPid, title: title_str, description: description)
 
   col.rightsMetadata.permissions({group: 'public'}, 'read')
   col.rightsMetadata.permissions({person: "#{user.nuid}"}, 'edit')
@@ -52,7 +52,7 @@ task :reset_data => :environment do
   Resque.workers.each {|w| w.unregister_worker}
   sh "COUNT=4 QUEUE=* rake environment resque:work &"
 
-  root_dept = Community.new(pid: 'neu:1', identifier: 'neu:1', title: 'Root Community')
+  root_dept = Community.new(pid: 'neu:1', identifier: 'neu:1', title: 'Northeastern University', description: "Founded in 1898, Northeastern is a global, experiential, research university built on a tradition of engagement with the world, creating a distinctive approach to education and research. The university offers a comprehensive range of undergraduate and graduate programs leading to degrees through the doctorate in nine colleges and schools, and select advanced degrees at graduate campuses in Charlotte, North Carolina, and Seattle.")
   root_dept.rightsMetadata.permissions({group: 'public'}, 'read')
 
   begin
@@ -79,8 +79,8 @@ task :reset_data => :environment do
   
   set_edit_permissions(root_dept)
 
-  engDept = create_collection(Community, 'neu:1', 'English Community', drs_admin_user)
-  sciDept = create_collection(Community, 'neu:1', 'Science Community', drs_admin_user)
+  engDept = create_collection(Community, 'neu:1', 'English Department', drs_admin_user)
+  sciDept = create_collection(Community, 'neu:1', 'Science Department', drs_admin_user)
   litCol = create_collection(NuCollection, engDept.id, 'Literature', drs_admin_user)
   roCol = create_collection(NuCollection, engDept.id, 'Random Objects', drs_admin_user)
   rusNovCol = create_collection(NuCollection, litCol.id, 'Russian Novels', drs_admin_user) 

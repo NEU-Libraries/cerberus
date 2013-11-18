@@ -1,14 +1,47 @@
 - if current_user_can_read?(@set)
-  - if @set.instance_of?(Community) 
-    %h3 Communities
-
-    - @set.child_communities.each do |community| 
-      - if current_user_can_read?(community) 
-        %p= link_to(community.title, community_path(community.identifier))
-
-- if current_user_can_read?(@set)
-  %h3 Collections
-
-  - @set.child_collections.each do |collection| 
-    - if current_user_can_read?(collection) 
-      %p= link_to(collection.title, nu_collection_path(collection.identifier))
+  %ul.media-list.three-col
+    - if @set.instance_of?(Community)
+      -# Go through and template out the communities individually.
+      - @set.child_communities.each do |community| 
+        - if current_user_can_read?(community)
+          - path = community_path(community.identifier) 
+          %li.media
+            %a{:href => path }
+              %figure.pull-left.media-object
+                -# @todo check for community thumbnails?
+                -if !community.thumbnail.content.nil?
+                  %img{src: sufia.download_path(community, datastream_id: 'thumbnail')}
+                - else 
+                  %i.icon-group.icon-2x.icon-block
+                %figcaption
+                  %p
+                    %small.muted
+                      Community
+            .media-body
+              %a{:href => path }
+                %h4.media-heading
+                  =community.title
+              - if community.description
+                %p= community.description
+    - @set.child_collections.reverse.each do |collection| 
+      - if current_user_can_read?(collection)
+        - path = nu_collection_path(collection.identifier) 
+        %li.media
+          %a{:href => path }
+            %figure.pull-left.media-object
+              - if !collection.thumbnail.content.nil?
+                %img{src: sufia.download_path(collection, datastream_id: 'thumbnail') }
+              - else
+                %i.icon-folder-open.icon-2x.icon-block
+              %figcaption
+                %p
+                  %small.muted
+                    Collection
+          .media-body
+            %a{:href => path }
+              %h4.media-heading
+                = collection.title
+            -if collection.description
+              %p= collection.description
+    - if @set.instance_of?(NuCollection)
+      = render partial: 'shared/sets/show_files', locals: { collection: @set }

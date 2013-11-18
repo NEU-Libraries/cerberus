@@ -8,7 +8,6 @@ var drsApp = {
             $drsBootstrapSelect: $( "select.bs-select" ),
             $addToSetLink: $('#addToSet'),
             breadCrumbMenuContent: $('#addToSetLinks').html(),
-            breadCrumbMenuPlacement: 'right'
         };
  
         // allow overriding the default config
@@ -21,18 +20,19 @@ var drsApp = {
         drsApp.config.$drsBootstrapSelect.selectpicker();
         drsApp.breadCrumbMenu();
     },
+    /**
+     * Provides the breadcrumb popover menu for adding collections or new items to the application.
+     */
     breadCrumbMenu: function(){
         drsApp.config.$addToSetLink.popover({
             html: true,
             content: drsApp.config.breadCrumbMenuContent,
-            placement: drsApp.config.breadCrumbMenuPlacement,
         }).on('shown', function(event){
           $(this).parent('li').addClass('active');
         }).on('hide', function(event){
           $(this).parent('li').removeClass('active');
         });
-    }
-   
+    },
  
 };
  

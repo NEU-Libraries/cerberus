@@ -1,6 +1,7 @@
 class Community < ActiveFedora::Base
   include ActiveModel::MassAssignmentSecurity
   include Hydra::ModelMixins::RightsMetadata
+  include Hydra::ModelMethods
   include Drs::Rights::MassPermissions
   include Drs::Rights::Embargoable
   include Drs::Rights::InheritedRestrictions
@@ -11,6 +12,7 @@ class Community < ActiveFedora::Base
   has_metadata name: 'DC', type: NortheasternDublinCoreDatastream 
   has_metadata name: 'rightsMetadata', type: ParanoidRightsDatastream
   has_metadata name: 'properties', type: DrsPropertiesDatastream
+  has_file_datastream "thumbnail", type: FileContentDatastream
 
   attr_accessible :title, :description, :parent
   attr_protected :identifier

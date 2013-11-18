@@ -18,6 +18,7 @@ class NuCollectionsController < SetsController
   end
 
   def new
+    @page_title = "New Collection"
     @set = NuCollection.new(parent: params[:parent])
     render :template => 'shared/sets/new'
   end
@@ -39,6 +40,11 @@ class NuCollectionsController < SetsController
       end
     end
 
+    # Process Thumbnail
+    if params[:thumbnail]
+      InlineThumbnailCreator.new(@set, params[:thumbnail], "thumbnail").create_thumbnail
+    end
+
     @set.depositor = current_user.nuid 
     @set.identifier = @set.pid
 
@@ -53,16 +59,24 @@ class NuCollectionsController < SetsController
 
   def show  
     @set = NuCollection.find(params[:id])
+    @page_title = @set.title
     render :template => 'shared/sets/show' 
   end
 
   def edit
     @set = NuCollection.find(params[:id])
+    @page_title = "Edit #{@set.title}" 
     render :template => 'shared/sets/edit' 
   end
 
   def update
-    @set = NuCollection.find(params[:id])  
+    @set = NuCollection.find(params[:id]) 
+
+    # Update the thumbnail 
+    if params[:thumbnail] 
+      InlineThumbnailCreator.new(@set, params[:thumbnail], "thumbnail").create_thumbnail
+    end
+
     if @set.update_attributes(params[:set]) 
       redirect_to(@set, notice: "Collection #{@set.title} was updated successfully." ) 
     else

@@ -1,0 +1,23 @@
+.container
+  %nav.navbar(role="navigation")
+    .navbar-inner
+      %a{class: "top_nav brand drs#{'active' if params[:controller] == "catalog" and action_name == "index"}", href: "/"}
+        DRS
+      %a.btn.btn-navbar.btn-navbar-collpase.btn-inverse{"data-target" => ".nav-collapse", "data-toggle" => "collapse"}
+        %span.icon-bar
+        %span.icon-bar
+        %span.icon-bar
+      .nav-collapse.collapse
+        %ul.nav.pull-left
+          %li{:class => ("active" if action_name == "personal_graph")}
+            %a.top_nav{href: personal_graph_path} My Repository
+          %li{:class => ("active" if controller_name == "compilations" && action_name == "index")}
+            %a.top_nav{href: compilations_path} Compilations
+          %li{:class => ("active" if (controller_name == "communities" || controller_name == "nu_collections") && action_name == "show")}
+            %a.top_nav{href: communities_path} Browse
+        / /.nav /.pull-right
+        = render :partial => 'catalog/search_form'
+      / /.nav-collapse.collapse
+    / /.nav-inner
+  / /.navbar
+/ /.container

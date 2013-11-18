@@ -15,5 +15,10 @@
         = f.text_field :title, required: true, pattern: ".*\\S.*", name: 'community[title][]', class: "input-block-level", placeholder: "University Libraries"
     = f.label :description, "Description *"
     = f.text_area :description, required: true, pattern: ".*\\S.*", name: 'community[description][]', class: "input-block-level", rows: 5
+    %legend Thumbnail (Optional) 
+    .row-fluid 
+      .span8 
+        = f.label :thumbnail, "Thumbnail" 
+        = f.file_field :thumbnail, name: 'thumbnail'
   .form-actions
     = f.submit class: ['btn', 'btn-primary', 'btn-large'], value: 'Submit'

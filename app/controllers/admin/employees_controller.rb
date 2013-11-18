@@ -6,10 +6,11 @@ class Admin::EmployeesController < AdminController
 
   def index 
     @employees = Employee.all
+    @page_title = "Administer Employees"
   end
 
   def edit 
-
+    @page_title = "Administer #{@employee.nuid}"
   end
 
   def update 

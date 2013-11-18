@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+
+<title>class NuCoreFilesController - Rails Application Documentation</title>
+
+<link type="text/css" media="screen" href="./rdoc.css" rel="stylesheet">
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "./";
+</script>
+
+<script type="text/javascript" charset="utf-8" src="./js/jquery.js"></script>
+<script type="text/javascript" charset="utf-8" src="./js/navigation.js"></script>
+<script type="text/javascript" charset="utf-8" src="./js/search_index.js"></script>
+<script type="text/javascript" charset="utf-8" src="./js/search.js"></script>
+<script type="text/javascript" charset="utf-8" src="./js/searcher.js"></script>
+<script type="text/javascript" charset="utf-8" src="./js/darkfish.js"></script>
+
+
+<body id="top" class="class">
+<nav id="metadata">
+  <nav id="home-section" class="section">
+  <h3 class="section-header">
+    <a href="./index.html">Home</a>
+    <a href="./table_of_contents.html#classes">Classes</a>
+    <a href="./table_of_contents.html#methods">Methods</a>
+  </h3>
+</nav>
+
+
+  <nav id="search-section" class="section project-section" class="initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <h3 class="section-header">
+      <input type="text" name="search" placeholder="Search" id="search-field"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </h3>
+  </form>
+
+  <ul id="search-results" class="initially-hidden"></ul>
+</nav>
+
+
+  <div id="file-metadata">
+    <nav id="file-list-section" class="section">
+  <h3 class="section-header">Defined In</h3>
+  <ul>
+    <li>app/controllers/nu_core_files_controller.rb
+  </ul>
+</nav>
+
+    
+  </div>
+
+  <div id="class-metadata">
+    
+    <nav id="parent-class-section" class="section">
+  <h3 class="section-header">Parent</h3>
+  
+  <p class="link"><a href="ApplicationController.html">ApplicationController</a>
+  
+</nav>
+
+    <!-- Included Modules -->
+<nav id="includes-section" class="section">
+  <h3 class="section-header">Included Modules</h3>
+
+  <ul class="link-list">
+  
+  
+    <li><span class="include">Sufia::Controller</span>
+  
+  
+  
+    <li><span class="include">Sufia::FilesControllerBehavior</span>
+  
+  
+  
+    <li><a class="include" href="Drs/ControllerHelpers/EditableObjects.html">Drs::ControllerHelpers::EditableObjects</a>
+  
+  
+  </ul>
+</nav>
+
+    <!-- Method Quickref -->
+<nav id="method-list-section" class="section">
+  <h3 class="section-header">Methods</h3>
+
+  <ul class="link-list">
+    
+    <li><a href="#method-c-upload_complete_path">::upload_complete_path</a>
+    
+    <li><a href="#method-i-destroy">#destroy</a>
+    
+    <li><a href="#method-i-destroy_incomplete_files">#destroy_incomplete_files</a>
+    
+    <li><a href="#method-i-edit">#edit</a>
+    
+    <li><a href="#method-i-new">#new</a>
+    
+    <li><a href="#method-i-no_parent_rescue">#no_parent_rescue</a>
+    
+    <li><a href="#method-i-perform_local_ingest">#perform_local_ingest</a>
+    
+    <li><a href="#method-i-process_file">#process_file</a>
+    
+    <li><a href="#method-i-process_metadata">#process_metadata</a>
+    
+    <li><a href="#method-i-provide_metadata">#provide_metadata</a>
+    
+    <li><a href="#method-i-rescue_incomplete_files">#rescue_incomplete_files</a>
+    
+    <li><a href="#method-i-show">#show</a>
+    
+    <li><a href="#method-i-update">#update</a>
+    
+    <li><a href="#method-i-update_metadata">#update_metadata</a>
+    
+    <li><a href="#method-i-update_metadata_from_upload_screen">#update_metadata_from_upload_screen</a>
+    
+  </ul>
+</nav>
+
+  </div>
+
+  <div id="project-metadata">
+    <nav id="fileindex-section" class="section project-section">
+  <h3 class="section-header">Pages</h3>
+
+  <ul>
+  
+    <li class="file"><a href="./doc/README_FOR_APP.html">README_FOR_APP</a>
+  
+  </ul>
+</nav>
+
+    <nav id="classindex-section" class="section project-section">
+  <h3 class="section-header">Class and Module Index</h3>
+
+  <ul class="link-list">
+  
+    <li><a href="./Drs.html">Drs</a>
+  
+    <li><a href="./Drs/Content.html">Drs::Content</a>
+  
+    <li><a href="./Drs/Content/Transformations.html">Drs::Content::Transformations</a>
+  
+    <li><a href="./Drs/ControllerHelpers.html">Drs::ControllerHelpers</a>
+  
+    <li><a href="./Drs/ControllerHelpers/EditableObjects.html">Drs::ControllerHelpers::EditableObjects</a>
+  
+    <li><a href="./Drs/Find.html">Drs::Find</a>
+  
+    <li><a href="./Drs/MetadataAssignment.html">Drs::MetadataAssignment</a>
+  
+    <li><a href="./Drs/NuCoreFile.html">Drs::NuCoreFile</a>
+  
+    <li><a href="./Drs/NuCoreFile/Export.html">Drs::NuCoreFile::Export</a>
+  
+    <li><a href="./Drs/NuFile.html">Drs::NuFile</a>
+  
+    <li><a href="./Drs/NuFile/Characterizable.html">Drs::NuFile::Characterizable</a>
+  
+    <li><a href="./Drs/Relationships.html">Drs::Relationships</a>
+  
+    <li><a href="./Drs/Rights.html">Drs::Rights</a>
+  
+    <li><a href="./Drs/Rights/Embargoable.html">Drs::Rights::Embargoable</a>
+  
+    <li><a href="./Drs/Rights/InheritedRestrictions.html">Drs::Rights::InheritedRestrictions</a>
+  
+    <li><a href="./Drs/Rights/MassPermissions.html">Drs::Rights::MassPermissions</a>
+  
+    <li><a href="./Exceptions.html">Exceptions</a>
+  
+    <li><a href="./Exceptions/DatastreamNotFoundError.html">Exceptions::DatastreamNotFoundError</a>
+  
+    <li><a href="./Exceptions/EmployeeWontStopBuildingError.html">Exceptions::EmployeeWontStopBuildingError</a>
+  
+    <li><a href="./Exceptions/MultipleMatchError.html">Exceptions::MultipleMatchError</a>
+  
+    <li><a href="./Exceptions/NoCommunityParentFoundError.html">Exceptions::NoCommunityParentFoundError</a>
+  
+    <li><a href="./Exceptions/NoParentFoundError.html">Exceptions::NoParentFoundError</a>
+  
+    <li><a href="./Exceptions/NoSuchNuidError.html">Exceptions::NoSuchNuidError</a>
+  
+    <li><a href="./Exceptions/ParentMismatchError.html">Exceptions::ParentMismatchError</a>
+  
+    <li><a href="./Exceptions/SearchResultTypeError.html">Exceptions::SearchResultTypeError</a>
+  
+    <li><a href="./Admin.html">Admin</a>
+  
+    <li><a href="./Admin/CommunitiesController.html">Admin::CommunitiesController</a>
+  
+    <li><a href="./Admin/CommunitiesHelper.html">Admin::CommunitiesHelper</a>
+  
+    <li><a href="./Admin/EmployeesController.html">Admin::EmployeesController</a>
+  
+    <li><a href="./Admin/EmployeesHelper.html">Admin::EmployeesHelper</a>
+  
+    <li><a href="./Employee.html">Employee</a>
+  
+    <li><a href="./Employee/FacultyFolders.html">Employee::FacultyFolders</a>
+  
+    <li><a href="./AdminController.html">AdminController</a>
+  
+    <li><a href="./ApplicationController.html">ApplicationController</a>
+  
+    <li><a href="./ApplicationHelper.html">ApplicationHelper</a>
+  
+    <li><a href="./AtomisticCharacterizationJob.html">AtomisticCharacterizationJob</a>
+  
+    <li><a href="./AudioFile.html">AudioFile</a>
+  
+    <li><a href="./CartDownloadJob.html">CartDownloadJob</a>
+  
+    <li><a href="./CatalogController.html">CatalogController</a>
+  
+    <li><a href="./CommunitiesController.html">CommunitiesController</a>
+  
+    <li><a href="./Community.html">Community</a>
+  
+    <li><a href="./Compilation.html">Compilation</a>
+  
+    <li><a href="./CompilationsController.html">CompilationsController</a>
+  
+    <li><a href="./ContentCreationJob.html">ContentCreationJob</a>
+  
+    <li><a href="./DrsEmployeeDatastream.html">DrsEmployeeDatastream</a>
+  
+    <li><a href="./DrsPropertiesDatastream.html">DrsPropertiesDatastream</a>
+  
+    <li><a href="./EmployeeCreateJob.html">EmployeeCreateJob</a>
+  
+    <li><a href="./EmployeesController.html">EmployeesController</a>
+  
+    <li><a href="./ImageLargeFile.html">ImageLargeFile</a>
+  
+    <li><a href="./ImageMasterFile.html">ImageMasterFile</a>
+  
+    <li><a href="./ImageMediumFile.html">ImageMediumFile</a>
+  
+    <li><a href="./ImageSmallFile.html">ImageSmallFile</a>
+  
+    <li><a href="./ImageThumbnailFile.html">ImageThumbnailFile</a>
+  
+    <li><a href="./MetadataUpdateJob.html">MetadataUpdateJob</a>
+  
+    <li><a href="./MsexcelFile.html">MsexcelFile</a>
+  
+    <li><a href="./MspowerpointFile.html">MspowerpointFile</a>
+  
+    <li><a href="./MswordFile.html">MswordFile</a>
+  
+    <li><a href="./NodeHelper.html">NodeHelper</a>
+  
+    <li><a href="./NortheasternDublinCoreDatastream.html">NortheasternDublinCoreDatastream</a>
+  
+    <li><a href="./NuCollection.html">NuCollection</a>
+  
+    <li><a href="./NuCollectionsController.html">NuCollectionsController</a>
+  
+    <li><a href="./NuCollectionsHelper.html">NuCollectionsHelper</a>
+  
+    <li><a href="./NuCoreFile.html">NuCoreFile</a>
+  
+    <li><a href="./NuCoreFileHelper.html">NuCoreFileHelper</a>
+  
+    <li><a href="./NuCoreFilesController.html">NuCoreFilesController</a>
+  
+    <li><a href="./NuModsDatastream.html">NuModsDatastream</a>
+  
+    <li><a href="./ParanoidRightsDatastream.html">ParanoidRightsDatastream</a>
+  
+    <li><a href="./PdfFile.html">PdfFile</a>
+  
+    <li><a href="./SetsController.html">SetsController</a>
+  
+    <li><a href="./ShoppingCartsController.html">ShoppingCartsController</a>
+  
+    <li><a href="./ShoppingCartsHelper.html">ShoppingCartsHelper</a>
+  
+    <li><a href="./SolrDocument.html">SolrDocument</a>
+  
+    <li><a href="./TextFile.html">TextFile</a>
+  
+    <li><a href="./User.html">User</a>
+  
+    <li><a href="./VideoFile.html">VideoFile</a>
+  
+    <li><a href="./ZipCompilationJob.html">ZipCompilationJob</a>
+  
+    <li><a href="./ZipFile.html">ZipFile</a>
+  
+  </ul>
+</nav>
+
+  </div>
+</nav>
+
+<div id="documentation">
+  <h1 class="class">class NuCoreFilesController</h1>
+
+  <div id="description" class="description">
+    
+<p>Copyright © 2012 The Pennsylvania State University</p>
+
+<p>Licensed under the Apache License, Version 2.0 (the “License”); you may not
+use this file except in compliance with the License. You may obtain a copy
+of the License at</p>
+
+<p><a
+href="http://www.apache.org/licenses/LICENSE-2.0">www.apache.org/licenses/LICENSE-2.0</a></p>
+
+<p>Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an “AS IS” BASIS, WITHOUT
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+License for the specific language governing permissions and limitations
+under the License.</p>
+
+  </div><!-- description -->
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+
+    <!-- Methods -->
+    
+     <section id="public-class-5Buntitled-5D-method-details" class="method-section section">
+      <h3 class="section-header">Public Class Methods</h3>
+
+    
+      <div id="method-c-upload_complete_path" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">upload_complete_path</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="upload_complete_path-source">
+            <pre><span class="ruby-comment"># File app/controllers/nu_core_files_controller.rb, line 158</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">upload_complete_path</span>
+  <span class="ruby-constant">Rails</span>.<span class="ruby-identifier">application</span>.<span class="ruby-identifier">routes</span>.<span class="ruby-identifier">url_helpers</span>.<span class="ruby-identifier">files_provide_metadata_path</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- upload_complete_path-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- upload_complete_path-method -->
+
+    
+    </section><!-- public-class-method-details -->
+  
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section section">
+      <h3 class="section-header">Public Instance Methods</h3>
+
+    
+      <div id="method-i-destroy" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">destroy</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="destroy-source">
+            <pre><span class="ruby-comment"># File app/controllers/nu_core_files_controller.rb, line 148</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">destroy</span>
+  <span class="ruby-ivar">@title</span> = <span class="ruby-constant">NuCoreFile</span>.<span class="ruby-identifier">find</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:id</span>]).<span class="ruby-identifier">title</span>
+
+  <span class="ruby-keyword">if</span> <span class="ruby-constant">NuCoreFile</span>.<span class="ruby-identifier">find</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:id</span>]).<span class="ruby-identifier">destroy</span> 
+    <span class="ruby-identifier">redirect_to</span>(<span class="ruby-identifier">sufia</span>.<span class="ruby-identifier">dashboard_index_path</span>, <span class="ruby-identifier">notice</span><span class="ruby-operator">:</span> <span class="ruby-node">&quot;#{@title} destroyed&quot;</span>) 
+  <span class="ruby-keyword">else</span>
+    <span class="ruby-identifier">redirect_to</span>(<span class="ruby-identifier">sufia</span>.<span class="ruby-identifier">dashboard_index_path</span>, <span class="ruby-identifier">notice</span><span class="ruby-operator">:</span> <span class="ruby-node">&quot;#{@title} wasn&#39;t destroyed&quot;</span>) 
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- destroy-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- destroy-method -->
+
+    
+      <div id="method-i-destroy_incomplete_files" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">destroy_incomplete_files</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="destroy_incomplete_files-source">
+            <pre><span class="ruby-comment"># File app/controllers/nu_core_files_controller.rb, line 44</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">destroy_incomplete_files</span>
+  <span class="ruby-constant">NuCoreFile</span>.<span class="ruby-identifier">users_in_progress_files</span>(<span class="ruby-identifier">current_user</span>).<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">file</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">file</span>.<span class="ruby-identifier">destroy</span> 
+  <span class="ruby-keyword">end</span>
+
+  <span class="ruby-identifier">flash</span>[<span class="ruby-value">:notice</span>] = <span class="ruby-string">&quot;Incomplete files destroyed&quot;</span> 
+  <span class="ruby-identifier">redirect_to</span> <span class="ruby-identifier">new_nu_core_file_path</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- destroy_incomplete_files-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- destroy_incomplete_files-method -->
+
+    
+      <div id="method-i-edit" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">edit</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="edit-source">
+            <pre><span class="ruby-comment"># File app/controllers/nu_core_files_controller.rb, line 107</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">edit</span>
+  <span class="ruby-ivar">@nu_core_file</span> = <span class="ruby-constant">NuCoreFile</span>.<span class="ruby-identifier">find</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:id</span>])
+
+  <span class="ruby-ivar">@nu_core_file</span>.<span class="ruby-identifier">initialize_fields</span>
+  <span class="ruby-ivar">@groups</span> = <span class="ruby-identifier">current_user</span>.<span class="ruby-identifier">groups</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- edit-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- edit-method -->
+
+    
+      <div id="method-i-new" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">new</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>routed to /files/new</p>
+          
+
+          
+          <div class="method-source-code" id="new-source">
+            <pre><span class="ruby-comment"># File app/controllers/nu_core_files_controller.rb, line 89</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">new</span>
+  <span class="ruby-identifier">in_progress_files</span> = <span class="ruby-constant">NuCoreFile</span>.<span class="ruby-identifier">users_in_progress_files</span>(<span class="ruby-identifier">current_user</span>)
+
+  <span class="ruby-keyword">if</span> <span class="ruby-operator">!</span><span class="ruby-identifier">in_progress_files</span>.<span class="ruby-identifier">empty?</span>
+
+    <span class="ruby-identifier">param_hash</span> = {}
+    <span class="ruby-identifier">in_progress_files</span>.<span class="ruby-identifier">each_with_index</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">file</span>, <span class="ruby-identifier">index</span><span class="ruby-operator">|</span> 
+      <span class="ruby-identifier">param_hash</span> = <span class="ruby-identifier">param_hash</span>.<span class="ruby-identifier">merge</span>({<span class="ruby-node">&quot;file#{index}&quot;</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">file</span>.<span class="ruby-identifier">pid</span>}) 
+    <span class="ruby-keyword">end</span>
+
+    <span class="ruby-identifier">redirect_to</span> <span class="ruby-identifier">rescue_incomplete_files_path</span>(<span class="ruby-identifier">param_hash</span>) <span class="ruby-keyword">and</span> <span class="ruby-keyword">return</span>
+  <span class="ruby-keyword">end</span>
+
+  <span class="ruby-ivar">@nu_core_file</span> = <span class="ruby-operator">::</span><span class="ruby-constant">NuCoreFile</span>.<span class="ruby-identifier">new</span>
+  <span class="ruby-comment">#@batch_noid = Sufia::Noid.noidify(Sufia::IdService.mint)</span>
+  <span class="ruby-ivar">@collection_id</span> = <span class="ruby-identifier">params</span>[<span class="ruby-value">:parent</span>]      
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- new-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- new-method -->
+
+    
+      <div id="method-i-process_metadata" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">process_metadata</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="process_metadata-source">
+            <pre><span class="ruby-comment"># File app/controllers/nu_core_files_controller.rb, line 72</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">process_metadata</span>
+  <span class="ruby-constant">Sufia</span>.<span class="ruby-identifier">queue</span>.<span class="ruby-identifier">push</span>(<span class="ruby-constant">MetadataUpdateJob</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">current_user</span>.<span class="ruby-identifier">user_key</span>, <span class="ruby-identifier">params</span>))
+  <span class="ruby-identifier">flash</span>[<span class="ruby-value">:notice</span>] = <span class="ruby-string">&#39;Your files are being processed by &#39;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">t</span>(<span class="ruby-string">&#39;sufia.product_name&#39;</span>) <span class="ruby-operator">+</span> <span class="ruby-string">&#39; in the background. The metadata and access controls you specified are being applied. Files will be marked &lt;span class=&quot;label label-important&quot; title=&quot;Private&quot;&gt;Private&lt;/span&gt; until this process is complete (shouldn\t take too long, hang in there!). You may need to refresh your dashboard to see these updates.&#39;</span>
+  <span class="ruby-identifier">redirect_to</span> <span class="ruby-identifier">sufia</span>.<span class="ruby-identifier">dashboard_index_path</span>    
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- process_metadata-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- process_metadata-method -->
+
+    
+      <div id="method-i-provide_metadata" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">provide_metadata</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="provide_metadata-source">
+            <pre><span class="ruby-comment"># File app/controllers/nu_core_files_controller.rb, line 53</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">provide_metadata</span>
+  <span class="ruby-ivar">@nu_core_file</span> = <span class="ruby-constant">NuCoreFile</span>.<span class="ruby-identifier">new</span>
+  <span class="ruby-ivar">@sample_incomplete_file</span> = <span class="ruby-constant">NuCoreFile</span>.<span class="ruby-identifier">users_in_progress_files</span>(<span class="ruby-identifier">current_user</span>).<span class="ruby-identifier">first</span> 
+  <span class="ruby-ivar">@incomplete_files</span> = <span class="ruby-constant">NuCoreFile</span>.<span class="ruby-identifier">users_in_progress_files</span>(<span class="ruby-identifier">current_user</span>) 
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- provide_metadata-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- provide_metadata-method -->
+
+    
+      <div id="method-i-rescue_incomplete_files" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">rescue_incomplete_files</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>routed to files/rescue_incomplete_files page for allowing users to either
+permanently delete or apply metadata to  files abandoned without completing
+step two of the upload process.</p>
+          
+
+          
+          <div class="method-source-code" id="rescue_incomplete_files-source">
+            <pre><span class="ruby-comment"># File app/controllers/nu_core_files_controller.rb, line 62</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">rescue_incomplete_files</span>
+  <span class="ruby-identifier">file_titles</span> = []
+
+  <span class="ruby-identifier">request</span>.<span class="ruby-identifier">query_parameters</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">key</span>, <span class="ruby-identifier">pid</span><span class="ruby-operator">|</span> 
+    <span class="ruby-identifier">file_titles</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-constant">NuCoreFile</span>.<span class="ruby-identifier">find</span>(<span class="ruby-identifier">pid</span>).<span class="ruby-identifier">title</span>
+  <span class="ruby-keyword">end</span>
+
+  <span class="ruby-ivar">@incomplete_file_titles</span> = <span class="ruby-identifier">file_titles</span> 
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- rescue_incomplete_files-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- rescue_incomplete_files-method -->
+
+    
+      <div id="method-i-show" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">show</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>routed to /files/:id</p>
+          
+
+          
+          <div class="method-source-code" id="show-source">
+            <pre><span class="ruby-comment"># File app/controllers/nu_core_files_controller.rb, line 79</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">show</span>
+  <span class="ruby-identifier">respond_to</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">format</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">format</span>.<span class="ruby-identifier">html</span> {
+      <span class="ruby-ivar">@events</span> = <span class="ruby-ivar">@nu_core_file</span>.<span class="ruby-identifier">events</span>(<span class="ruby-value">100</span>)
+    }
+    <span class="ruby-identifier">format</span>.<span class="ruby-identifier">endnote</span> { <span class="ruby-identifier">render</span> <span class="ruby-value">:text</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-ivar">@nu_core_file</span>.<span class="ruby-identifier">export_as_endnote</span> }
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- show-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- show-method -->
+
+    
+      <div id="method-i-update" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">update</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="update-source">
+            <pre><span class="ruby-comment"># File app/controllers/nu_core_files_controller.rb, line 114</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">update</span>
+  <span class="ruby-ivar">@nu_core_file</span> = <span class="ruby-constant">NuCoreFile</span>.<span class="ruby-identifier">find</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:id</span>]) 
+
+  <span class="ruby-identifier">version_event</span> = <span class="ruby-keyword">false</span>
+
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">params</span>.<span class="ruby-identifier">has_key?</span>(<span class="ruby-value">:revision</span>) <span class="ruby-keyword">and</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:revision</span>] <span class="ruby-operator">!=</span>  <span class="ruby-ivar">@nu_core_file</span>.<span class="ruby-identifier">content</span>.<span class="ruby-identifier">latest_version</span>.<span class="ruby-identifier">versionID</span>
+    <span class="ruby-identifier">revision</span> = <span class="ruby-ivar">@nu_core_file</span>.<span class="ruby-identifier">content</span>.<span class="ruby-identifier">get_version</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:revision</span>])
+    <span class="ruby-ivar">@nu_core_file</span>.<span class="ruby-identifier">add_file</span>(<span class="ruby-identifier">revision</span>.<span class="ruby-identifier">content</span>, <span class="ruby-identifier">datastream_id</span>, <span class="ruby-identifier">revision</span>.<span class="ruby-identifier">label</span>)
+    <span class="ruby-identifier">version_event</span> = <span class="ruby-keyword">true</span>
+    <span class="ruby-constant">Sufia</span>.<span class="ruby-identifier">queue</span>.<span class="ruby-identifier">push</span>(<span class="ruby-constant">ContentRestoredVersionEventJob</span>.<span class="ruby-identifier">new</span>(<span class="ruby-ivar">@nu_core_file</span>.<span class="ruby-identifier">pid</span>, <span class="ruby-identifier">current_user</span>.<span class="ruby-identifier">user_key</span>, <span class="ruby-identifier">params</span>[<span class="ruby-value">:revision</span>]))
+  <span class="ruby-keyword">end</span>
+
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">params</span>.<span class="ruby-identifier">has_key?</span>(<span class="ruby-value">:filedata</span>)
+    <span class="ruby-identifier">file</span> = <span class="ruby-identifier">params</span>[<span class="ruby-value">:filedata</span>]
+    <span class="ruby-keyword">return</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">virus_check</span>(<span class="ruby-identifier">file</span>) <span class="ruby-operator">==</span> <span class="ruby-value">0</span>
+    <span class="ruby-ivar">@nu_core_file</span>.<span class="ruby-identifier">add_file</span>(<span class="ruby-identifier">file</span>, <span class="ruby-identifier">datastream_id</span>, <span class="ruby-identifier">file</span>.<span class="ruby-identifier">original_filename</span>)
+    <span class="ruby-identifier">version_event</span> = <span class="ruby-keyword">true</span>
+    <span class="ruby-constant">Sufia</span>.<span class="ruby-identifier">queue</span>.<span class="ruby-identifier">push</span>(<span class="ruby-constant">ContentNewVersionEventJob</span>.<span class="ruby-identifier">new</span>(<span class="ruby-ivar">@nu_core_file</span>.<span class="ruby-identifier">pid</span>, <span class="ruby-identifier">current_user</span>.<span class="ruby-identifier">user_key</span>))
+  <span class="ruby-keyword">end</span>
+
+  <span class="ruby-comment"># only update metadata if there is a generic_file object which is not the case for version updates</span>
+  <span class="ruby-identifier">update_metadata</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:nu_core_file</span>]
+
+  <span class="ruby-comment">#always save the file so the new version or metadata gets recorded</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-ivar">@nu_core_file</span>.<span class="ruby-identifier">save</span>
+    <span class="ruby-comment"># do not trigger an update event if a version event has already been triggered</span>
+    <span class="ruby-constant">Sufia</span>.<span class="ruby-identifier">queue</span>.<span class="ruby-identifier">push</span>(<span class="ruby-constant">ContentUpdateEventJob</span>.<span class="ruby-identifier">new</span>(<span class="ruby-ivar">@nu_core_file</span>.<span class="ruby-identifier">pid</span>, <span class="ruby-identifier">current_user</span>.<span class="ruby-identifier">user_key</span>)) <span class="ruby-keyword">unless</span> <span class="ruby-identifier">version_event</span>
+    <span class="ruby-ivar">@nu_core_file</span>.<span class="ruby-identifier">record_version_committer</span>(<span class="ruby-identifier">current_user</span>)
+    <span class="ruby-identifier">redirect_to</span> <span class="ruby-identifier">sufia</span>.<span class="ruby-identifier">edit_generic_file_path</span>(<span class="ruby-value">:tab</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:redirect_tab</span>]), <span class="ruby-value">:notice</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">render_to_string</span>(<span class="ruby-value">:partial=</span><span class="ruby-operator">&gt;</span><span class="ruby-string">&#39;generic_files/asset_updated_flash&#39;</span>, <span class="ruby-value">:locals</span> =<span class="ruby-operator">&gt;</span> { <span class="ruby-value">:generic_file</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-ivar">@nu_core_file</span> })
+  <span class="ruby-keyword">else</span>
+    <span class="ruby-identifier">render</span> <span class="ruby-identifier">action</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;edit&#39;</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span></pre>
+          </div><!-- update-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- update-method -->
+
+    
+    </section><!-- public-instance-method-details -->
+  
+     <section id="protected-instance-5Buntitled-5D-method-details" class="method-section section">
+      <h3 class="section-header">Protected Instance Methods</h3>
+
+    
+      <div id="method-i-no_parent_rescue" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">no_parent_rescue</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="no_parent_rescue-source">
+            <pre><span class="ruby-comment"># File app/controllers/nu_core_files_controller.rb, line 164</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">no_parent_rescue</span>
+  <span class="ruby-identifier">flash</span>[<span class="ruby-value">:error</span>] = <span class="ruby-string">&quot;Parent not specified or invalid&quot;</span> 
+  <span class="ruby-identifier">redirect_to</span> <span class="ruby-identifier">root_path</span> 
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- no_parent_rescue-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- no_parent_rescue-method -->
+
+    
+      <div id="method-i-perform_local_ingest" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">perform_local_ingest</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="perform_local_ingest-source">
+            <pre><span class="ruby-comment"># File app/controllers/nu_core_files_controller.rb, line 222</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">perform_local_ingest</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-constant">Sufia</span>.<span class="ruby-identifier">config</span>.<span class="ruby-identifier">enable_local_ingest</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">current_user</span>.<span class="ruby-identifier">respond_to?</span>(<span class="ruby-value">:directory</span>)
+      <span class="ruby-keyword">if</span> <span class="ruby-identifier">ingest_local_file</span>
+        <span class="ruby-identifier">redirect_to</span> <span class="ruby-constant">NuCoreFilesController</span>.<span class="ruby-identifier">upload_complete_path</span>
+      <span class="ruby-keyword">else</span>
+        <span class="ruby-identifier">flash</span>[<span class="ruby-value">:alert</span>] = <span class="ruby-string">&quot;Error importing files from user directory.&quot;</span>
+        <span class="ruby-identifier">render</span> <span class="ruby-value">:new</span>
+      <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">else</span>
+      <span class="ruby-identifier">flash</span>[<span class="ruby-value">:alert</span>] = <span class="ruby-string">&quot;Your account is not configured for importing files from a user-directory on the server.&quot;</span>
+      <span class="ruby-identifier">render</span> <span class="ruby-value">:new</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span></pre>
+          </div><!-- perform_local_ingest-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- perform_local_ingest-method -->
+
+    
+      <div id="method-i-process_file" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">process_file</span><span
+            class="method-args">(file)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="process_file-source">
+            <pre><span class="ruby-comment"># File app/controllers/nu_core_files_controller.rb, line 193</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">process_file</span>(<span class="ruby-identifier">file</span>)
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">virus_check</span>(<span class="ruby-identifier">file</span>) <span class="ruby-operator">==</span> <span class="ruby-value">0</span> 
+    <span class="ruby-ivar">@nu_core_file</span> = <span class="ruby-operator">::</span><span class="ruby-constant">NuCoreFile</span>.<span class="ruby-identifier">new</span>
+    
+    <span class="ruby-comment"># We move the file contents to a more permanent location so that our ContentCreationJob can access them.</span>
+    <span class="ruby-comment"># An ensure block in that job handles cleanup of this file.</span>
+    <span class="ruby-identifier">tempdir</span> = <span class="ruby-constant">Rails</span>.<span class="ruby-identifier">root</span>.<span class="ruby-identifier">join</span>(<span class="ruby-string">&quot;tmp&quot;</span>)
+    <span class="ruby-identifier">new_path</span> = <span class="ruby-identifier">tempdir</span>.<span class="ruby-identifier">join</span>(<span class="ruby-node">&quot;#{file.original_filename}&quot;</span>) 
+    <span class="ruby-constant">FileUtils</span>.<span class="ruby-identifier">mv</span>(<span class="ruby-identifier">file</span>.<span class="ruby-identifier">tempfile</span>.<span class="ruby-identifier">path</span>, <span class="ruby-identifier">new_path</span>.<span class="ruby-identifier">to_s</span>)
+
+    <span class="ruby-identifier">update_metadata_from_upload_screen</span>(<span class="ruby-ivar">@nu_core_file</span>, <span class="ruby-identifier">current_user</span>, <span class="ruby-identifier">file</span>, <span class="ruby-identifier">params</span>[<span class="ruby-value">:collection_id</span>])
+    <span class="ruby-constant">Sufia</span>.<span class="ruby-identifier">queue</span>.<span class="ruby-identifier">push</span>(<span class="ruby-constant">ContentCreationJob</span>.<span class="ruby-identifier">new</span>(<span class="ruby-ivar">@nu_core_file</span>.<span class="ruby-identifier">pid</span>, <span class="ruby-identifier">new_path</span>.<span class="ruby-identifier">to_s</span>, <span class="ruby-identifier">file</span>.<span class="ruby-identifier">original_filename</span>, <span class="ruby-identifier">current_user</span>.<span class="ruby-identifier">id</span>))
+    <span class="ruby-comment">#Drs::NuFile.create_master_content_object(@nu_core_file, file, datastream_id, current_user)</span>
+    <span class="ruby-ivar">@nu_core_file</span>.<span class="ruby-identifier">record_version_committer</span>(<span class="ruby-identifier">current_user</span>)
+    <span class="ruby-identifier">respond_to</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">format</span><span class="ruby-operator">|</span>
+      <span class="ruby-identifier">format</span>.<span class="ruby-identifier">html</span> {
+        <span class="ruby-identifier">render</span> <span class="ruby-value">:json</span> =<span class="ruby-operator">&gt;</span> [<span class="ruby-ivar">@nu_core_file</span>.<span class="ruby-identifier">to_jq_upload</span>],
+          <span class="ruby-value">:content_type</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;text/html&#39;</span>,
+          <span class="ruby-value">:layout</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-keyword">false</span>
+      }
+      <span class="ruby-identifier">format</span>.<span class="ruby-identifier">json</span> {
+        <span class="ruby-identifier">render</span> <span class="ruby-value">:json</span> =<span class="ruby-operator">&gt;</span> [<span class="ruby-ivar">@nu_core_file</span>.<span class="ruby-identifier">to_jq_upload</span>]
+      }
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">else</span>
+    <span class="ruby-identifier">render</span> <span class="ruby-value">:json</span> =<span class="ruby-operator">&gt;</span> [{<span class="ruby-value">:error</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&quot;Error creating generic file.&quot;</span>}]
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- process_file-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- process_file-method -->
+
+    
+      <div id="method-i-update_metadata" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">update_metadata</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="update_metadata-source">
+            <pre><span class="ruby-comment"># File app/controllers/nu_core_files_controller.rb, line 169</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">update_metadata</span> 
+  <span class="ruby-ivar">@nu_core_file</span>.<span class="ruby-identifier">update_attributes</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:nu_core_file</span>]) 
+  <span class="ruby-ivar">@nu_core_file</span>.<span class="ruby-identifier">date_modified</span> = <span class="ruby-constant">DateTime</span>.<span class="ruby-identifier">now</span>.<span class="ruby-identifier">to_s</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- update_metadata-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- update_metadata-method -->
+
+    
+      <div id="method-i-update_metadata_from_upload_screen" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">update_metadata_from_upload_screen</span><span
+            class="method-args">(nu_core_file, user, file, collection_id) { |nu_core_file| ... }</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Allows us to map different params</p>
+          
+
+          
+          <div class="method-source-code" id="update_metadata_from_upload_screen-source">
+            <pre><span class="ruby-comment"># File app/controllers/nu_core_files_controller.rb, line 175</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">update_metadata_from_upload_screen</span>(<span class="ruby-identifier">nu_core_file</span>, <span class="ruby-identifier">user</span>, <span class="ruby-identifier">file</span>, <span class="ruby-identifier">collection_id</span>)
+  <span class="ruby-comment"># Relative path is set by the jquery uploader when uploading a directory</span>
+  <span class="ruby-identifier">nu_core_file</span>.<span class="ruby-identifier">relative_path</span> = <span class="ruby-identifier">params</span>[<span class="ruby-value">:relative_path</span>] <span class="ruby-keyword">if</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:relative_path</span>]
+
+  <span class="ruby-comment"># Context derived attributes </span>
+  <span class="ruby-identifier">nu_core_file</span>.<span class="ruby-identifier">depositor</span> = <span class="ruby-identifier">user</span>.<span class="ruby-identifier">nuid</span> 
+  <span class="ruby-identifier">nu_core_file</span>.<span class="ruby-identifier">tag_as_in_progress</span> 
+  <span class="ruby-identifier">nu_core_file</span>.<span class="ruby-identifier">title</span> = <span class="ruby-identifier">file</span>.<span class="ruby-identifier">original_filename</span> 
+  <span class="ruby-identifier">nu_core_file</span>.<span class="ruby-identifier">date_uploaded</span> = <span class="ruby-constant">Date</span>.<span class="ruby-identifier">today</span> 
+  <span class="ruby-identifier">nu_core_file</span>.<span class="ruby-identifier">date_modified</span> = <span class="ruby-constant">Date</span>.<span class="ruby-identifier">today</span>
+  <span class="ruby-identifier">nu_core_file</span>.<span class="ruby-identifier">creator</span> = <span class="ruby-identifier">user</span>.<span class="ruby-identifier">name</span>
+
+  <span class="ruby-identifier">nu_core_file</span>.<span class="ruby-identifier">set_parent</span>(<span class="ruby-constant">NuCollection</span>.<span class="ruby-identifier">find</span>(<span class="ruby-identifier">collection_id</span>), <span class="ruby-identifier">user</span>) <span class="ruby-keyword">if</span> <span class="ruby-operator">!</span><span class="ruby-identifier">collection_id</span>.<span class="ruby-identifier">blank?</span> 
+
+  <span class="ruby-keyword">yield</span>(<span class="ruby-identifier">nu_core_file</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">block_given?</span> 
+  <span class="ruby-identifier">nu_core_file</span>.<span class="ruby-identifier">save!</span> 
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- update_metadata_from_upload_screen-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- update_metadata_from_upload_screen-method -->
+
+    
+    </section><!-- protected-instance-method-details -->
+  
+  </section><!-- 5Buntitled-5D -->
+
+</div><!-- documentation -->
+
+
+<footer id="validator-badges">
+  <p><a href="http://validator.w3.org/check/referer">[Validate]</a>
+  <p>Generated by <a href="https://github.com/rdoc/rdoc">RDoc</a> 3.12.2.
+  <p>Generated with the <a href="http://deveiate.org/projects/Darkfish-Rdoc/">Darkfish Rdoc Generator</a> 3.
+</footer>
+

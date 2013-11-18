@@ -9,11 +9,11 @@
       &:hover,
       &:focus{
         text-decoration: none;
-        color: $textColor;
+        color: $blue;
       }
     }
     &.active > a{
-      color: $textColor;
+      color: $blue;
     }
   }
 }

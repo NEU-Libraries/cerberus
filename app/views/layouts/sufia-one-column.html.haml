@@ -1,5 +1,8 @@
 - content_for :content do
-  .row
-    .span12
-      = yield
+  %main.conatiner(role="main")
+    = yield
+  //main.container
+  -if content_for?(:aside) or content_for?(:sidebar) 
+    %aside(role="complimentary")
+      = content_for?(:aside) ? yield(:aside) : yield(:side_bar)
 = render template: "layouts/application"
