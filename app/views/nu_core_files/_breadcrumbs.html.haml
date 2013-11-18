@@ -1,6 +1,7 @@
 - nu_core_file = @nu_core_file unless nu_core_file
 %ol.breadcrumb
   - include_file = true if include_file.blank?
+  - herpderp = []
   - crumbs = []
   - crumbs << link_to('Home', root_path)
   - case request.referer
@@ -10,6 +11,9 @@
       - crumbs << link_to('Back to previous', request.referer)
     - when /catalog/
       - crumbs << link_to('Back to search results', request.referer)
+    - when /collections/
+      - breadcrumb_to_root(@nu_core_file.parent).each do |breadcrumb| 
+        -herpderp << breadcrumb
 
   - crumbs << nu_core_file.title if include_file
   - crumbs.each do |crumb|
@@ -20,3 +24,6 @@
       %li
         = crumb
 / /breadcrumbs
+
+%br
+  =herpderp
