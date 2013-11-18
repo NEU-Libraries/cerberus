@@ -1,5 +1,8 @@
 = csrf_meta_tag
 %meta{:charset => "utf-8"}/
+%meta(name="viewport" content="width=device-width, initial-scale=1.0")
+%meta{content: "IE=edge", "http-equiv" => "X-UA-Compatible"}
+
 %title= h("#{@page_title} - DRS" || application_name)
 / application css
 = stylesheet_link_tag 'application'
@@ -7,6 +10,7 @@
 / controller specific uploader
 / [if IE 7]
   = stylesheet_link_tag 'ie7'
+
 = yield(:js_head)
 / modernizr js
 = javascript_include_tag 'modernizr/modernizr'
