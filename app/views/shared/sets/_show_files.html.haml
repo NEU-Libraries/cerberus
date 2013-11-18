@@ -3,14 +3,14 @@
     %li.media
       %a{:href => nu_core_file_path(file.pid)}
         %figure.pull-left.media-object
-          - if file.thumbnail.content.content.nil?
-            %img{alt: "", src: sufia.download_path(file.thumbnail, {:datastream_id => 'content'}), width: "338"}
+          - if !file.thumbnail.content.content.nil?
+            %img{alt: (file.description ? file.description : ""), src: sufia.download_path(file.thumbnail, {:datastream_id => 'content'})}
           - else
             %i.icon-file.icon-2x.icon-block
           %figcaption
             %p
               %small.muted
-                = !file.dcmi_type.nil? ? file.dcmi_type : "File"
+                = !file.dcmi_type.nil? ? file.dcmi_type.capitalize : "File"
       .media-body
         %a{:href => nu_core_file_path(file.pid) }
           %h4.media-heading
