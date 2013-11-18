@@ -47,12 +47,31 @@ class Compilation < ActiveFedora::Base
     if value.instance_of?(NuCoreFile) 
       remove_relationship(:has_member, value) 
     elsif value.instance_of?(String) 
-      object = NuCoreFile.find(value)
-      remove_relationship(:has_member, object)  
+      remove_relationship(:has_member, "info:fedora/#{value}")
     end
   end
 
-  private 
+  # Eliminate every entry ID that points to an object that no longer exists
+  # Return the pid of each entry removed. 
+  # Behavior of this method is weirdly flaky in the case where self is held in memory 
+  # /while/ the NuCoreFile is deleted. 
+  # If you've having problems that appear to be caused by self.relationships(:has_member) 
+  # returning "info:fedora/" try reloading the object you're holding before executing this.
+  def remove_dead_entries
+    results = []
+
+    self.entry_ids.each do |entry| 
+      if !ActiveFedora::Base.exists?(entry) 
+        results << entry 
+        remove_entry(entry)
+      end
+    end
+
+    self.save! 
+    return results 
+  end
+
+  private
 
     # Takes a string of form "info:fedora/neu:abc123" 
     # and returns just the pid

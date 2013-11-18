@@ -13,4 +13,6 @@
 %br 
 = link_to("Destroy This Compilation", @compilation, method: 'delete')
 %br 
-= link_to("Download this compilation", prepare_download_path(id: @compilation.pid), method: 'get')    
+- if @compilation.entry_ids.length > 0
+  = link_to("Download this compilation", prepare_download_path(id: @compilation.pid), method: 'get')
+  %span= "(Estimated download size: #{number_to_human_size(@bytes)})"    
