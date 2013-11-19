@@ -29,11 +29,18 @@ namespace :deploy do
     end
   end
 
+  desc "Instantiate the drsadmin user" 
+  task :create_drs_admin do 
+    on roles(:app), :in => :sequence, :wait => 5 do 
+      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake create_drs_admin)" 
+    end
+  end
+
   desc "Resetting data" 
   task :refresh_data do 
     on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake jetty:stop)" 
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake reset_data)"
+      # execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake jetty:stop)" 
+      # execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake reset_data)"
     end
   end
 end
@@ -48,6 +55,7 @@ before 'deploy:refresh_data', 'rvm1:hook'
 # should only fire on actual deployments. 
 after 'deploy:updating', 'bundler:install'
 after 'deploy:updating', 'deploy:migrate'
+after 'deploy:migrate',  'deploy:create_drs_admin'
 after 'deploy:updating', 'deploy:restart' 
 after 'deploy:updating', 'deploy:assets_kludge'
 # after 'deploy:finished', 'deploy:refresh_data'
