@@ -8,8 +8,7 @@ Drs::Application.routes.draw do
   resources :nu_collections, :path => 'collections', except: [:index] 
   get "/collections" => redirect("/communities")
 
-  resources :communities, except: [:index]
-  get "/communities" => 'communities#show', defaults: { id: "#{Rails.configuration.root_community_id}" }
+  resources :communities, only: [:index, :show] 
 
   # Community Specific queries 
   get '/communities/:id/employees' => 'communities#employees', as: 'community_employees' 
@@ -18,7 +17,8 @@ Drs::Application.routes.draw do
   get '/communities/:id/presentations' => 'communities#presentations', as: 'community_presentations' 
   get '/communities/:id/datasets' => 'communities#data_sets', as: 'community_data_sets' 
   get '/communities/:id/pedagogical' => 'communities#learning_objects', as: 'community_pedagogical'
-
+  post '/communities/:id/attach_employee/:employee_id' => 'communities#attach_employee', as: 'attach_employee'
+  
   resources :compilations
   get "/compilations/:id/download" => 'compilations#show_download', as: 'prepare_download'
   get "/compilations/:id/ping" => 'compilations#ping_download', as: 'ping_download'  
@@ -34,7 +34,13 @@ Drs::Application.routes.draw do
   match "/incomplete_files" => "nu_core_files#destroy_incomplete_files", via: 'delete', as: 'destroy_incomplete_files'
 
   get '/employees/:id' => 'employees#show', as: 'employee'
-  get '/my_stuff' => 'employees#personal_graph', as: 'personal_graph' 
+  get '/my_stuff' => 'employees#personal_graph', as: 'personal_graph'
+
+  namespace :admin do 
+    # Add/Remove communities from an employee, delete employee
+    resources :communities, except: [:show] 
+    resources :employees, only: [:index, :edit, :update, :destroy]
+  end
 
   resource :shopping_cart, except: [:new, :create, :edit]
   put '/shopping_cart' => 'shopping_carts#update', as: 'update_cart'
@@ -47,6 +53,9 @@ Drs::Application.routes.draw do
   get '/datasets' => 'significant_content#datasets', as: 'datasets' 
   get '/pedagogical' => 'significant_content#learning_objects', as: 'learning_objects' 
 
+  get '/admin' => 'admin#index', as: 'admin_panel'
+  get '/admin/modify_employee' => 'admin#modify_employee', as: 'modify_employee'
+   
   # Generic file routes
   resources :nu_core_files, :path => :files, :except => :index do
     member do

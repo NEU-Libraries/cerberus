@@ -18,22 +18,38 @@ class NuCollectionsController < SetsController
   end
 
   def new
+    @page_title = "New Collection"
     @set = NuCollection.new(parent: params[:parent])
     render :template => 'shared/sets/new'
   end
 
   def create
     @set = NuCollection.new(params[:set].merge(pid: mint_unique_pid))
-    if params[:set][:user_parent].present?
-      @set.user_parent = Employee.find_by_nuid(params[:set][:user_parent]) 
-      @set.personal_folder_type = 'miscellany' 
+
+    parent = ActiveFedora::Base.find(params[:set][:parent], cast: true)
+
+    # Assign personal folder specific info if parent folder is a 
+    # personal folder. 
+    if parent.is_personal_folder? 
+      @set.user_parent = parent.user_parent 
+
+      if parent.personal_folder_type == 'user root' 
+        @set.personal_folder_type = 'miscellany' 
+      else
+        @set.personal_folder_type = parent.personal_folder_type 
+      end
+    end
+
+    # Process Thumbnail
+    if params[:thumbnail]
+      InlineThumbnailCreator.new(@set, params[:thumbnail], "thumbnail").create_thumbnail
     end
 
     @set.depositor = current_user.nuid 
     @set.identifier = @set.pid
 
     if @set.save!
-      flash[:info] = "Collection created successfully."
+      flash[:notice] = "Collection created successfully."
       redirect_to nu_collection_path(id: @set.identifier) and return  
     else
       flash.now[:error] = "Something went wrong"
@@ -43,16 +59,24 @@ class NuCollectionsController < SetsController
 
   def show  
     @set = NuCollection.find(params[:id])
+    @page_title = @set.title
     render :template => 'shared/sets/show' 
   end
 
   def edit
     @set = NuCollection.find(params[:id])
+    @page_title = "Edit #{@set.title}" 
     render :template => 'shared/sets/edit' 
   end
 
   def update
-    @set = NuCollection.find(params[:id])  
+    @set = NuCollection.find(params[:id]) 
+
+    # Update the thumbnail 
+    if params[:thumbnail] 
+      InlineThumbnailCreator.new(@set, params[:thumbnail], "thumbnail").create_thumbnail
+    end
+
     if @set.update_attributes(params[:set]) 
       redirect_to(@set, notice: "Collection #{@set.title} was updated successfully." ) 
     else

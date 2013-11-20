@@ -7,4 +7,4 @@
 = render partial: "show_personal_graph", locals: { :generated_folders => @employee.sorted_folders, :user_folders => @employee.personal_folders }
 
 %h3 Actions
-= link_to("Create a new personal folder", new_nu_collection_path(parent: @employee.root_folder.pid, is_personal_folder: 'true'))
+= link_to("Create a new personal folder", new_nu_collection_path(parent: @employee.root_folder.pid,))

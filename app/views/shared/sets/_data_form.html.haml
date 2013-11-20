@@ -1,8 +1,6 @@
 = form_for @set do |f|
   - if params[:parent].present?
     = f.hidden_field :parent, name: 'set[parent]', :value => params[:parent]
-  - if params[:is_personal_folder].present? 
-    = f.hidden_field :user_parent, name: 'set[user_parent]', value: current_user.nuid 
   %fieldset
     %legend Required Information
     .row-fluid
@@ -63,5 +61,10 @@
           %i.icon-calendar.icon-large
       %span.help-block
         An embargoed item will be visible to only you until the day set below
+  .row-fluid 
+    %fieldset.span4 
+      %legend Thumbnail
+      = f.label :thumbnail, "Add a thumbnail:" 
+      = f.file_field :thumbnail, name: 'thumbnail'
   .form-actions
     = f.submit class: ['btn', 'btn-primary', 'btn-large'], value: 'Submit'

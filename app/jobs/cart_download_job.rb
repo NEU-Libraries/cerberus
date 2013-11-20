@@ -24,10 +24,12 @@ class CartDownloadJob
 
     Zip::Archive.open(full_path, Zip::CREATE) do |io| 
       pids.each do |pid| 
-        item = ActiveFedora::Base.find(pid, cast: true)
+        if ActiveFedora::Base.exists?(pid) 
+          item = ActiveFedora::Base.find(pid, cast: true) 
 
-        if user.can? :read, item 
-          io.add_buffer("downloads/#{item.content.label}", item.content.content) 
+          if user.can? :read, item 
+            io.add_buffer("downloads/#{item.content.label}", item.content.content) 
+          end
         end
       end
     end

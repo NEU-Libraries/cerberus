@@ -2,6 +2,8 @@
 # edit the fedora.yml file to match the solr URL for active-fedora. 
 development:
   url: http://localhost:8983/solr/development
+staging: 
+  url: http://127.0.0.1:3000/solr/development
 test: &TEST
   url: <%= "http://127.0.0.1:#{ENV['TEST_JETTY_PORT'] || 8983}/solr/test" %>
 cucumber:

@@ -2,7 +2,12 @@ require 'spec_helper'
 
 feature "Creating a collection" do
   before :all do 
-    @root = FactoryGirl.create(:root_collection)
+    @root = Community.create(pid: "neu:1")
+    @root.identifier = "neu:1"
+    @root.rightsMetadata.permissions({person: 'bill@example.com'}, 'edit') 
+    @root.mass_permissions = 'public'
+    @root.title = "Root Collection"
+    @root.save!
   end
 
   let(:user) { FactoryGirl.create(:user) }
@@ -54,7 +59,7 @@ feature "Creating a collection" do
       page.should have_selector(:css, 'ul.breadcrumb')
       page.should have_link('Root Collection')
       page.should have_selector('li.active')
-      page.find('li.active').text.should == "My Title"
+      page.find('ul.breadcrumb > li.active').text.should == "My Title"
     end
   end
 

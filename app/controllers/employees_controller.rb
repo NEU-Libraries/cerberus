@@ -3,10 +3,15 @@ class EmployeesController < ApplicationController
 
   def show
     @employee = Employee.find(params[:id])  
+    @page_title = "#{@employee.nuid}"
   end
 
   def personal_graph 
     @employee = current_users_employee_id 
+    @page_title = "My Stuff"
+  end
+
+  def attach_employee
   end
 
   private

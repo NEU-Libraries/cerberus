@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+
+<title>class DrsPropertiesDatastream - Rails Application Documentation</title>
+
+<link type="text/css" media="screen" href="./rdoc.css" rel="stylesheet">
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "./";
+</script>
+
+<script type="text/javascript" charset="utf-8" src="./js/jquery.js"></script>
+<script type="text/javascript" charset="utf-8" src="./js/navigation.js"></script>
+<script type="text/javascript" charset="utf-8" src="./js/search_index.js"></script>
+<script type="text/javascript" charset="utf-8" src="./js/search.js"></script>
+<script type="text/javascript" charset="utf-8" src="./js/searcher.js"></script>
+<script type="text/javascript" charset="utf-8" src="./js/darkfish.js"></script>
+
+
+<body id="top" class="class">
+<nav id="metadata">
+  <nav id="home-section" class="section">
+  <h3 class="section-header">
+    <a href="./index.html">Home</a>
+    <a href="./table_of_contents.html#classes">Classes</a>
+    <a href="./table_of_contents.html#methods">Methods</a>
+  </h3>
+</nav>
+
+
+  <nav id="search-section" class="section project-section" class="initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <h3 class="section-header">
+      <input type="text" name="search" placeholder="Search" id="search-field"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </h3>
+  </form>
+
+  <ul id="search-results" class="initially-hidden"></ul>
+</nav>
+
+
+  <div id="file-metadata">
+    <nav id="file-list-section" class="section">
+  <h3 class="section-header">Defined In</h3>
+  <ul>
+    <li>app/models/drs_properties_datastream.rb
+  </ul>
+</nav>
+
+    
+  </div>
+
+  <div id="class-metadata">
+    
+    <nav id="parent-class-section" class="section">
+  <h3 class="section-header">Parent</h3>
+  
+  <p class="link">ActiveFedora::OmDatastream
+  
+</nav>
+
+    
+    <!-- Method Quickref -->
+<nav id="method-list-section" class="section">
+  <h3 class="section-header">Methods</h3>
+
+  <ul class="link-list">
+    
+    <li><a href="#method-c-xml_template">::xml_template</a>
+    
+    <li><a href="#method-i-canonical-3F">#canonical?</a>
+    
+    <li><a href="#method-i-canonize">#canonize</a>
+    
+    <li><a href="#method-i-get_personal_folder_type">#get_personal_folder_type</a>
+    
+    <li><a href="#method-i-in_progress-3F">#in_progress?</a>
+    
+    <li><a href="#method-i-tag_as_completed">#tag_as_completed</a>
+    
+    <li><a href="#method-i-tag_as_in_progress">#tag_as_in_progress</a>
+    
+    <li><a href="#method-i-uncanonize">#uncanonize</a>
+    
+  </ul>
+</nav>
+
+  </div>
+
+  <div id="project-metadata">
+    <nav id="fileindex-section" class="section project-section">
+  <h3 class="section-header">Pages</h3>
+
+  <ul>
+  
+    <li class="file"><a href="./doc/README_FOR_APP.html">README_FOR_APP</a>
+  
+  </ul>
+</nav>
+
+    <nav id="classindex-section" class="section project-section">
+  <h3 class="section-header">Class and Module Index</h3>
+
+  <ul class="link-list">
+  
+    <li><a href="./Drs.html">Drs</a>
+  
+    <li><a href="./Drs/Content.html">Drs::Content</a>
+  
+    <li><a href="./Drs/Content/Transformations.html">Drs::Content::Transformations</a>
+  
+    <li><a href="./Drs/ControllerHelpers.html">Drs::ControllerHelpers</a>
+  
+    <li><a href="./Drs/ControllerHelpers/EditableObjects.html">Drs::ControllerHelpers::EditableObjects</a>
+  
+    <li><a href="./Drs/Find.html">Drs::Find</a>
+  
+    <li><a href="./Drs/MetadataAssignment.html">Drs::MetadataAssignment</a>
+  
+    <li><a href="./Drs/NuCoreFile.html">Drs::NuCoreFile</a>
+  
+    <li><a href="./Drs/NuCoreFile/Export.html">Drs::NuCoreFile::Export</a>
+  
+    <li><a href="./Drs/NuFile.html">Drs::NuFile</a>
+  
+    <li><a href="./Drs/NuFile/Characterizable.html">Drs::NuFile::Characterizable</a>
+  
+    <li><a href="./Drs/Relationships.html">Drs::Relationships</a>
+  
+    <li><a href="./Drs/Rights.html">Drs::Rights</a>
+  
+    <li><a href="./Drs/Rights/Embargoable.html">Drs::Rights::Embargoable</a>
+  
+    <li><a href="./Drs/Rights/InheritedRestrictions.html">Drs::Rights::InheritedRestrictions</a>
+  
+    <li><a href="./Drs/Rights/MassPermissions.html">Drs::Rights::MassPermissions</a>
+  
+    <li><a href="./Exceptions.html">Exceptions</a>
+  
+    <li><a href="./Exceptions/DatastreamNotFoundError.html">Exceptions::DatastreamNotFoundError</a>
+  
+    <li><a href="./Exceptions/EmployeeWontStopBuildingError.html">Exceptions::EmployeeWontStopBuildingError</a>
+  
+    <li><a href="./Exceptions/MultipleMatchError.html">Exceptions::MultipleMatchError</a>
+  
+    <li><a href="./Exceptions/NoCommunityParentFoundError.html">Exceptions::NoCommunityParentFoundError</a>
+  
+    <li><a href="./Exceptions/NoParentFoundError.html">Exceptions::NoParentFoundError</a>
+  
+    <li><a href="./Exceptions/NoSuchNuidError.html">Exceptions::NoSuchNuidError</a>
+  
+    <li><a href="./Exceptions/ParentMismatchError.html">Exceptions::ParentMismatchError</a>
+  
+    <li><a href="./Exceptions/SearchResultTypeError.html">Exceptions::SearchResultTypeError</a>
+  
+    <li><a href="./Admin.html">Admin</a>
+  
+    <li><a href="./Admin/CommunitiesController.html">Admin::CommunitiesController</a>
+  
+    <li><a href="./Admin/CommunitiesHelper.html">Admin::CommunitiesHelper</a>
+  
+    <li><a href="./Admin/EmployeesController.html">Admin::EmployeesController</a>
+  
+    <li><a href="./Admin/EmployeesHelper.html">Admin::EmployeesHelper</a>
+  
+    <li><a href="./Employee.html">Employee</a>
+  
+    <li><a href="./Employee/FacultyFolders.html">Employee::FacultyFolders</a>
+  
+    <li><a href="./AdminController.html">AdminController</a>
+  
+    <li><a href="./ApplicationController.html">ApplicationController</a>
+  
+    <li><a href="./ApplicationHelper.html">ApplicationHelper</a>
+  
+    <li><a href="./AtomisticCharacterizationJob.html">AtomisticCharacterizationJob</a>
+  
+    <li><a href="./AudioFile.html">AudioFile</a>
+  
+    <li><a href="./CartDownloadJob.html">CartDownloadJob</a>
+  
+    <li><a href="./CatalogController.html">CatalogController</a>
+  
+    <li><a href="./CommunitiesController.html">CommunitiesController</a>
+  
+    <li><a href="./Community.html">Community</a>
+  
+    <li><a href="./Compilation.html">Compilation</a>
+  
+    <li><a href="./CompilationsController.html">CompilationsController</a>
+  
+    <li><a href="./ContentCreationJob.html">ContentCreationJob</a>
+  
+    <li><a href="./DrsEmployeeDatastream.html">DrsEmployeeDatastream</a>
+  
+    <li><a href="./DrsPropertiesDatastream.html">DrsPropertiesDatastream</a>
+  
+    <li><a href="./EmployeeCreateJob.html">EmployeeCreateJob</a>
+  
+    <li><a href="./EmployeesController.html">EmployeesController</a>
+  
+    <li><a href="./ImageLargeFile.html">ImageLargeFile</a>
+  
+    <li><a href="./ImageMasterFile.html">ImageMasterFile</a>
+  
+    <li><a href="./ImageMediumFile.html">ImageMediumFile</a>
+  
+    <li><a href="./ImageSmallFile.html">ImageSmallFile</a>
+  
+    <li><a href="./ImageThumbnailFile.html">ImageThumbnailFile</a>
+  
+    <li><a href="./MetadataUpdateJob.html">MetadataUpdateJob</a>
+  
+    <li><a href="./MsexcelFile.html">MsexcelFile</a>
+  
+    <li><a href="./MspowerpointFile.html">MspowerpointFile</a>
+  
+    <li><a href="./MswordFile.html">MswordFile</a>
+  
+    <li><a href="./NodeHelper.html">NodeHelper</a>
+  
+    <li><a href="./NortheasternDublinCoreDatastream.html">NortheasternDublinCoreDatastream</a>
+  
+    <li><a href="./NuCollection.html">NuCollection</a>
+  
+    <li><a href="./NuCollectionsController.html">NuCollectionsController</a>
+  
+    <li><a href="./NuCollectionsHelper.html">NuCollectionsHelper</a>
+  
+    <li><a href="./NuCoreFile.html">NuCoreFile</a>
+  
+    <li><a href="./NuCoreFileHelper.html">NuCoreFileHelper</a>
+  
+    <li><a href="./NuCoreFilesController.html">NuCoreFilesController</a>
+  
+    <li><a href="./NuModsDatastream.html">NuModsDatastream</a>
+  
+    <li><a href="./ParanoidRightsDatastream.html">ParanoidRightsDatastream</a>
+  
+    <li><a href="./PdfFile.html">PdfFile</a>
+  
+    <li><a href="./SetsController.html">SetsController</a>
+  
+    <li><a href="./ShoppingCartsController.html">ShoppingCartsController</a>
+  
+    <li><a href="./ShoppingCartsHelper.html">ShoppingCartsHelper</a>
+  
+    <li><a href="./SolrDocument.html">SolrDocument</a>
+  
+    <li><a href="./TextFile.html">TextFile</a>
+  
+    <li><a href="./User.html">User</a>
+  
+    <li><a href="./VideoFile.html">VideoFile</a>
+  
+    <li><a href="./ZipCompilationJob.html">ZipCompilationJob</a>
+  
+    <li><a href="./ZipFile.html">ZipFile</a>
+  
+  </ul>
+</nav>
+
+  </div>
+</nav>
+
+<div id="documentation">
+  <h1 class="class">class DrsPropertiesDatastream</h1>
+
+  <div id="description" class="description">
+    
+<p>properties datastream: catch-all for info that didn&#39;t have another
+home.  Particularly depositor.</p>
+
+  </div><!-- description -->
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+
+    <!-- Methods -->
+    
+     <section id="public-class-5Buntitled-5D-method-details" class="method-section section">
+      <h3 class="section-header">Public Class Methods</h3>
+
+    
+      <div id="method-c-xml_template" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">xml_template</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="xml_template-source">
+            <pre><span class="ruby-comment"># File app/models/drs_properties_datastream.rb, line 29</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">xml_template</span>
+  <span class="ruby-identifier">builder</span> = <span class="ruby-constant">Nokogiri</span><span class="ruby-operator">::</span><span class="ruby-constant">XML</span><span class="ruby-operator">::</span><span class="ruby-constant">Builder</span>.<span class="ruby-identifier">new</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">xml</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">xml</span>.<span class="ruby-identifier">fields</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">builder</span>.<span class="ruby-identifier">doc</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- xml_template-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- xml_template-method -->
+
+    
+    </section><!-- public-class-method-details -->
+  
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section section">
+      <h3 class="section-header">Public Instance Methods</h3>
+
+    
+      <div id="method-i-canonical-3F" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">canonical?</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="canonical-3F-source">
+            <pre><span class="ruby-comment"># File app/models/drs_properties_datastream.rb, line 64</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">canonical?</span>
+  <span class="ruby-keyword">return</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">canonical</span>.<span class="ruby-identifier">first</span> <span class="ruby-operator">==</span> <span class="ruby-string">&#39;yes&#39;</span> 
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- canonical-3F-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- canonical-3F-method -->
+
+    
+      <div id="method-i-canonize" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">canonize</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="canonize-source">
+            <pre><span class="ruby-comment"># File app/models/drs_properties_datastream.rb, line 56</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">canonize</span>
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">canonical</span> = <span class="ruby-string">&#39;yes&#39;</span> 
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- canonize-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- canonize-method -->
+
+    
+      <div id="method-i-get_personal_folder_type" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">get_personal_folder_type</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="get_personal_folder_type-source">
+            <pre><span class="ruby-comment"># File app/models/drs_properties_datastream.rb, line 36</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">get_personal_folder_type</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">personal_folder_type</span>.<span class="ruby-identifier">empty?</span> 
+    <span class="ruby-identifier">raise</span> <span class="ruby-string">&quot;This isn&#39;t a personal folder.&quot;</span> 
+  <span class="ruby-keyword">else</span>
+    <span class="ruby-keyword">return</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">personal_folder_type</span>.<span class="ruby-identifier">first</span> 
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- get_personal_folder_type-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- get_personal_folder_type-method -->
+
+    
+      <div id="method-i-in_progress-3F" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">in_progress?</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="in_progress-3F-source">
+            <pre><span class="ruby-comment"># File app/models/drs_properties_datastream.rb, line 44</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">in_progress?</span>
+  <span class="ruby-keyword">return</span> <span class="ruby-operator">!</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">in_progress</span>.<span class="ruby-identifier">empty?</span> 
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- in_progress-3F-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- in_progress-3F-method -->
+
+    
+      <div id="method-i-tag_as_completed" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">tag_as_completed</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="tag_as_completed-source">
+            <pre><span class="ruby-comment"># File app/models/drs_properties_datastream.rb, line 52</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">tag_as_completed</span> 
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">in_progress</span> = [] 
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- tag_as_completed-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- tag_as_completed-method -->
+
+    
+      <div id="method-i-tag_as_in_progress" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">tag_as_in_progress</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="tag_as_in_progress-source">
+            <pre><span class="ruby-comment"># File app/models/drs_properties_datastream.rb, line 48</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">tag_as_in_progress</span> 
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">in_progress</span> = <span class="ruby-string">&#39;true&#39;</span> 
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- tag_as_in_progress-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- tag_as_in_progress-method -->
+
+    
+      <div id="method-i-uncanonize" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">uncanonize</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="uncanonize-source">
+            <pre><span class="ruby-comment"># File app/models/drs_properties_datastream.rb, line 60</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">uncanonize</span>
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">canonical</span> = <span class="ruby-string">&#39;&#39;</span> 
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- uncanonize-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- uncanonize-method -->
+
+    
+    </section><!-- public-instance-method-details -->
+  
+  </section><!-- 5Buntitled-5D -->
+
+</div><!-- documentation -->
+
+
+<footer id="validator-badges">
+  <p><a href="http://validator.w3.org/check/referer">[Validate]</a>
+  <p>Generated by <a href="https://github.com/rdoc/rdoc">RDoc</a> 3.12.2.
+  <p>Generated with the <a href="http://deveiate.org/projects/Darkfish-Rdoc/">Darkfish Rdoc Generator</a> 3.
+</footer>
+

@@ -2,7 +2,12 @@ require 'spec_helper'
 
 feature "Editing collections" do 
   before :all do 
-    @root = FactoryGirl.create(:root_collection)
+    @root = Community.create(pid: "neu:1")
+    @root.identifier = "neu:1"
+    @root.rightsMetadata.permissions({person: 'bill@example.com'}, 'edit') 
+    @root.mass_permissions = 'public'
+    @root.title = "Root Collection"
+    @root.save!
     @user = FactoryGirl.create(:bill)
     @collection = FactoryGirl.create(:valid_owned_by_bill)
   end

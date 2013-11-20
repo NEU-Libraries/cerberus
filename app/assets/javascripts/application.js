@@ -22,3 +22,6 @@
 //= require polyfills
 //= require nu_collections
 //= require compilations
+//= require communities
+//= require admin
+//= require admin/communities

@@ -4,6 +4,15 @@ module Drs
 
       EDITABLE_OBJECTS = [::NuCoreFile, NuCollection, Compilation, Community]
 
+      def deny_to_visitors
+        if current_user.nil?
+          render_403 
+        elsif !current_user.admin?
+          flash[:notice] = "Admin path denied, your role is #{current_user.role}"
+          redirect_to root_path
+        end
+      end
+
       def can_edit_parent?
         begin 
           parent_object = find_parent(params)

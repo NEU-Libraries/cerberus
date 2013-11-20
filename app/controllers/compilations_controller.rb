@@ -4,14 +4,19 @@ class CompilationsController < ApplicationController
   before_filter :authenticate_user!
 
   before_filter :can_edit?, only: [:edit, :update, :destroy, :add_file, :delete_file]
-  before_filter :can_read?, only: [:show, :show_download, :download]  
+  before_filter :can_read?, only: [:show, :show_download, :download]
+
+  load_resource
+  before_filter :remove_dead_entries, only: [:show, :show_download]
 
   def index 
     @compilations = Compilation.users_compilations(current_user) 
+    @page_title = "My Compilations"
   end
 
   def new 
     @compilation = Compilation.new
+    @page_title = "New Compilation"
   end
 
   def create
@@ -22,11 +27,10 @@ class CompilationsController < ApplicationController
   end
 
   def edit
-    load_instance 
+    @page_title = "Edit #{@compilation.title}" 
   end
 
   def update
-    load_instance
     if @compilation.update_attributes(params[:compilation])
       flash[:notice] = "Compilation successfully updated" 
       redirect_to @compilation 
@@ -36,11 +40,11 @@ class CompilationsController < ApplicationController
   end 
 
   def show
-    load_instance
+    @bytes = compute_download_size
+    @page_title = "#{@compilation.title}"
   end
 
-  def destroy 
-    load_instance 
+  def destroy  
     if @compilation.destroy
       flash[:notice] = "Compilation was successfully destroyed" 
       redirect_to compilations_path 
@@ -50,19 +54,16 @@ class CompilationsController < ApplicationController
   end
 
   def add_file
-    load_instance 
     @compilation.add_entry(params[:entry_id]) 
     save_or_bust @compilation 
   end
 
   def delete_file
-    load_instance
     @compilation.remove_entry(params[:entry_id])  
     save_or_bust @compilation 
   end
 
-  def ping_download
-    load_instance 
+  def ping_download 
     if download_is_ready?(@compilation.pid) 
       @is_ready = true 
     else
@@ -70,17 +71,39 @@ class CompilationsController < ApplicationController
     end 
   end
 
-  def show_download 
-    load_instance 
+  def show_download  
     Sufia.queue.push(ZipCompilationJob.new(current_user, @compilation))
+    @page_title = "Download #{@compilation.title}"
   end
 
   def download 
-    load_instance
     download_zipped_comp(@compilation.pid)  
   end
 
   private
+
+  def compute_download_size 
+    i = 0
+
+    @compilation.entries.each do |entry| 
+      entry.content_objects.each do |content| 
+        if current_user.can? :read, content 
+          i = i + content.content.size 
+        end
+      end
+    end
+
+    i 
+  end
+
+  def remove_dead_entries
+    dead_entries = @compilation.remove_dead_entries 
+
+    if dead_entries.length > 0
+      flash.now[:error] = "The following items no longer exist in the repository and have been removed from your" +
+      " compilation: #{dead_entries.join(', ')}"
+    end
+  end
 
   def save_or_bust(compilation) 
     if compilation.save! 
@@ -102,14 +125,5 @@ class CompilationsController < ApplicationController
   def download_zipped_comp(pid) 
     path_to_dl = Dir["#{Rails.root}/tmp/#{pid}/*"].first
     send_file path_to_dl 
-  end 
-
-  def load_instance
-    @compilation = Compilation.find(params[:id])
-
-    # If this isn't the depositing user render a 403 page. 
-    if current_user.nuid != @compilation.depositor 
-      render_403 and return
-    end 
   end
 end

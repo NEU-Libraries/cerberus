@@ -3,6 +3,7 @@ require 'spec_helper'
 describe CompilationsController do 
   let(:bill) { FactoryGirl.create(:bill) }
   let(:bo) { FactoryGirl.create(:bo) }
+  let(:file) { FactoryGirl.create(:bills_complete_file) } 
 
   before :each do 
     sign_in bill
@@ -98,6 +99,22 @@ describe CompilationsController do
 
       response.status.should == 403
       assigns(:compilation).should be nil
+    end
+
+    context "with deleted files" do 
+      # Operating over a copy of the compilation seems to eliminate 
+      # some strange RELS_EXT behavior that occurs when a file is deleted.
+      before :each do 
+        comp = Compilation.find(compilation.pid)
+        comp.add_entry(file) 
+        comp.save!
+        file.delete
+      end
+
+      it "purges the deleted objects from the compilation before showing it" do 
+        get :show, id: compilation.pid 
+        assigns(:compilation).entry_ids.should == [] 
+      end       
     end 
   end
 

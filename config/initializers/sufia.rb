@@ -75,6 +75,7 @@ Sufia.config do |config|
     
     # Specify the path to the file characterization tool:
     # config.fits_path = "fits.sh"
+    config.fits_path = "/opt/fits-0.6.2/fits.sh"
 
 end
 

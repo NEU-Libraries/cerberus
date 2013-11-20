@@ -16,7 +16,9 @@ class User < ActiveRecord::Base
          :recoverable, :rememberable, :trackable, :validatable
   # attr_accessible :title, :body
 
-  attr_accessible :password, :password_confirmation, :remember_me 
+  attr_accessible :password, :password_confirmation, :remember_me
+
+  ROLES = %w[admin employee] 
 
   # Method added by Blacklight; Blacklight uses #to_s on your
   # user class to get a user-displayable login/identifier for
@@ -33,6 +35,10 @@ class User < ActiveRecord::Base
 
   # Currently using group_list attribute as though it will someday contain the grouper information
   # pulled in from Shibboleth
+
+  def admin?
+    return self.role.eql?('admin')
+  end
 
   private
     def link_to_drs

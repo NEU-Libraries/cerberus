@@ -1,6 +1,7 @@
 class NuCollection < ActiveFedora::Base 
   include ActiveModel::MassAssignmentSecurity
   include Hydra::ModelMixins::RightsMetadata
+  include Hydra::ModelMethods
   include Drs::Rights::MassPermissions
   include Drs::Rights::Embargoable
   include Drs::Rights::InheritedRestrictions
@@ -18,7 +19,8 @@ class NuCollection < ActiveFedora::Base
   has_metadata name: 'DC', type: NortheasternDublinCoreDatastream 
   has_metadata name: 'rightsMetadata', type: ParanoidRightsDatastream
   has_metadata name: 'properties', type: DrsPropertiesDatastream
-  has_metadata name: 'mods', type: NuModsDatastream 
+  has_metadata name: 'mods', type: NuModsDatastream
+  has_file_datastream "thumbnail", type: FileContentDatastream 
 
   has_many :child_files, property: :is_member_of, :class_name => "NuCoreFile"
   has_many :child_collections, property: :is_member_of, :class_name => "NuCollection"
@@ -32,24 +34,6 @@ class NuCollection < ActiveFedora::Base
     collections = NuCollection.find(:all)
     filtered = collections.select { |ele| !ele.embargo_in_effect?(user) && ele.rightsMetadata.can_read?(user) }
     return filtered 
-  end
-
-  # Delete all files/collections for which this item is root 
-  def recursive_delete
-    files = all_descendent_files 
-    collections = all_descendent_collections
-
-    # Need to look it up again before you try to destroy it.
-    # Is mystery. 
-    files.each do |f|
-      x = NuCoreFile.find(f.pid) if NuCoreFile.exists?(f.pid) 
-      x.destroy
-    end
-
-    collections.each do |c| 
-      x = NuCollection.find(c.pid) if NuCollection.exists?(c.pid) 
-      x.destroy 
-    end
   end
 
   def parent
@@ -100,23 +84,6 @@ class NuCollection < ActiveFedora::Base
     end
 
     yield self
-  end
-
-  # Return every descendent collection of this collection
-  def all_descendent_collections
-    result = [] 
-    each_depth_first do |child|
-      result << child 
-    end
-    return result 
-  end
-
-  def all_descendent_files 
-    result = [] 
-    each_depth_first do |child| 
-      result += child.child_files
-    end
-    return result
   end
 
   protected
