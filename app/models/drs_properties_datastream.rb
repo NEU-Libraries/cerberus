@@ -34,11 +34,7 @@ class DrsPropertiesDatastream < ActiveFedora::OmDatastream
   end
 
   def get_personal_folder_type
-    if self.personal_folder_type.empty? 
-      raise "This isn't a personal folder." 
-    else
-      return self.personal_folder_type.first 
-    end
+    return self.personal_folder_type.first unless self.personal_folder_type.empty?
   end
 
   def in_progress?
