@@ -15,6 +15,11 @@
         = f.text_field :title, required: true, pattern: ".*\\S.*", name: 'community[title][]', class: "input-block-level", placeholder: "University Libraries"
     = f.label :description, "Description *"
     = f.text_area :description, required: true, pattern: ".*\\S.*", name: 'community[description][]', class: "input-block-level", rows: 5
+    %legend Permissions
+    .row-fluid
+      .span8
+        = f.label :mass_permissions, "Mass Permissions" 
+        = f.select :mass_permissions, options_for_select(['public', 'private'], @community.mass_permissions)
     %legend Thumbnail (Optional) 
     .row-fluid 
       .span8 

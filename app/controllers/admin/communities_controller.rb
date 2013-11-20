@@ -15,9 +15,7 @@ class Admin::CommunitiesController < AdminController
   def create
     @community = Community.new(params[:community].merge(pid: mint_unique_pid))
 
-    @community.mass_permissions = 'public'
-    @community.rightsMetadata.permissions({person: "#{current_user.nuid}"}, 'edit')
-
+    @community.depositor = current_user.nuid
     @community.identifier = @community.pid
 
     if params[:thumbnail]
