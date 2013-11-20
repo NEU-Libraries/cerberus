@@ -132,11 +132,6 @@ module Drs
         if_descMetadata_exists_strict { self.descMetadata.date_modified.first } 
       end
 
-
-      # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-      # TODO: Eliminate once PersonalFolders can be made their own subtype
-      # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
       def personal_folder_type=(string) 
         if_properties_exists_strict { self.properties.personal_folder_type = string } 
       end
