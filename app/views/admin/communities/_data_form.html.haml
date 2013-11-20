@@ -20,5 +20,9 @@
       .span8 
         = f.label :thumbnail, "Thumbnail" 
         = f.file_field :thumbnail, name: 'thumbnail'
+    .row-fluid 
+      .span8
+        = f.label :theses, "Include Theses and Dissertations Folder" 
+        = f.check_box :theses, name: 'theses'
   .form-actions
     = f.submit class: ['btn', 'btn-primary', 'btn-large'], value: 'Submit'

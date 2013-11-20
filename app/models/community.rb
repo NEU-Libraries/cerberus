@@ -15,6 +15,7 @@ class Community < ActiveFedora::Base
   has_file_datastream "thumbnail", type: FileContentDatastream
 
   attr_accessible :title, :description, :parent
+  attr_accessor :theses
   attr_protected :identifier
 
   has_many :employees, property: :has_affiliation, class_name: "Employee"

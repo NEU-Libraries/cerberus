@@ -25,6 +25,14 @@ class Admin::CommunitiesController < AdminController
     end
 
     if @community.save!
+      if params[:theses] == "1"
+        NuCollection.create(title: "Theses and Dissertations", 
+                            depositor: current_user.nuid,
+                            personal_folder_type: 'theses',
+                            mass_permissions: 'public', 
+                            parent: @community)
+      end
+
       flash[:info] = "Community created successfully."
       redirect_to admin_communities_path and return  
     else
