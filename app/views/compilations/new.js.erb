@@ -1,4 +1,6 @@
-console.log('<%= j render( :partial =>  "data_form", :locals => { compilation: @compilation } ) %>');
+drsApp.compilationsModal( $('<%= j render( :partial =>  "remote_data_form", :locals => { compilation: @compilation } ) %>') );
+//compilationsModal.find('.modal-body').append(newCompilationForm);
+
 
 
   

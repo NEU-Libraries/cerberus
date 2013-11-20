@@ -33,6 +33,20 @@ var drsApp = {
           $(this).parent('li').removeClass('active');
         });
     },
+    compilationsModal: function(e){
+      if( $('#compilationsModal').length > 0){
+        var t = $('#compilationsModal');
+        t.find('.modal-header').html( e.find('.modal-header').html() );
+        t.find('.modal-body').html( e.find('.modal-body').html() );
+
+      }
+      else{
+        $('body').append(e.modal().on('hidden', function(){
+          $(this).remove();
+        }));  
+      }
+      
+    }
  
 };
  

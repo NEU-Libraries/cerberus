@@ -1,6 +1,1 @@
-var compilationsModal = $('<%= j render(partial: 'select_compilation_form') %>');
-$('body').append(compilationsModal.modal().on('hidden', function(){
-  $(this).remove();
-}));
-
-
+drsApp.compilationsModal( $('<%= j render(partial: 'select_compilation_form') %>') );

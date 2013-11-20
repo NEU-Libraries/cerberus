@@ -10,7 +10,7 @@
         = link_to("Add to this compilation", add_entry_path(id: c.pid, entry_id: params[:file]), method: 'post', remote: true)
       -  else 
         %p This file is already in this compilation
-    =link_to "Create New Compilation", {controller: "compilations", action: "new"} , remote: true
+    =link_to( "Create New Compilation", {controller: "compilations", action: "new"} , remote: true, id: "createCompilationLink" )
   .modal-footer
     %button.btn{"data-dismiss" => "modal"} Close
 
