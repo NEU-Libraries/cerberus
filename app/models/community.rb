@@ -42,6 +42,10 @@ class Community < ActiveFedora::Base
     unique_assign_by_string(val, :has_affiliation, [Community], allow_nil: true)
   end
 
+  def theses
+    child_collections.find { |e| e.personal_folder_type == 'theses' }
+  end
+
   def research_publications 
     employee_query(:all_research_publications) 
   end
