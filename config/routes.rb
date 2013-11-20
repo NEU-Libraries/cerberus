@@ -45,7 +45,13 @@ Drs::Application.routes.draw do
   resource :shopping_cart, except: [:new, :create, :edit]
   put '/shopping_cart' => 'shopping_carts#update', as: 'update_cart'
   get '/shopping_cart/download' => 'shopping_carts#download', as: 'cart_download'
-  get '/shopping_cart/fire_download' => 'shopping_carts#fire_download', as: 'fire_download' 
+  get '/shopping_cart/fire_download' => 'shopping_carts#fire_download', as: 'fire_download'
+
+  get '/research' => 'significant_content#research', as: 'research' 
+  get '/other' => 'significant_content#other', as: 'other_publications' 
+  get '/presentations' => 'significant_content#presentations', as: 'presentations' 
+  get '/datasets' => 'significant_content#datasets', as: 'datasets' 
+  get '/pedagogical' => 'significant_content#learning_objects', as: 'learning_objects' 
 
   get '/admin' => 'admin#index', as: 'admin_panel'
   get '/admin/modify_employee' => 'admin#modify_employee', as: 'modify_employee'

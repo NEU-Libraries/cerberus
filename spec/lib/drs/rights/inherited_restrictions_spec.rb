@@ -12,16 +12,7 @@ describe Drs::Rights::InheritedRestrictions do
 
       child.parent = parent 
 
-      child.valid_mass_permissions.should == ['public', 'registered', 'private'] 
-    end
-
-    it "allow registered and private for a parent with perm 'registered'" do 
-      parent.mass_permissions = 'registered'
-      parent.save! 
-
-      child.parent = parent 
-
-      child.valid_mass_permissions.should == ['registered', 'private'] 
+      child.valid_mass_permissions.should == ['public', 'private'] 
     end
 
     it "allow private for a parent set to private" do 
