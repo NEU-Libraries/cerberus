@@ -40,7 +40,6 @@ class CompilationsController < ApplicationController
   end 
 
   def show
-    @bytes = compute_download_size
     @page_title = "#{@compilation.title}"
   end
 
