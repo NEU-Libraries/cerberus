@@ -36,22 +36,19 @@ var drsApp = {
     compilationsModal: function(e){
       if( $('#compilationsModal').length > 0){
         var t = $('#compilationsModal');
-        var $form = e.find('.modal-body').find('form#new_compilation');
-        console.log($form);
         t.find('.modal-header').html( e.find('.modal-header').html() );
         t.find('.modal-body').html( e.find('.modal-body').html() );
-        $form.bind("ajax:success", function(evt, data, status, xhr){
+        console.log($('#new_compilation'));
+        $('#new_compilation').bind("ajax:success", function(evt, data, status, xhr){
           console.log($(this), "Ajax Success");
-        }).bind('click', function(evt, data, status, xhr){
           $(this).parent('#compilationsModal').modal('hide');
-        });;
-
+        });
 
       }
       else{
-        $('body').append(e.modal().on('hidden', function(){
-          $(this).remove();
-        }));  
+        $('body').append(e.modal({
+          replace: true,
+        }));
       }
     }
  
