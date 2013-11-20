@@ -1,9 +1,19 @@
-- @compilations.each do |c| 
-  %div.compilation 
-    %span.title= c.title
-    %br
-    - if !c.entry_ids.include?(params[:file])
-      = link_to("Add to this compilation", add_entry_path(id: c.pid, entry_id: params[:file]), method: 'post', remote: true)
-    -  else 
-      %p This file is already in this compilation 
-    %p -----
+#compilationsModal.modal.hide.fade{"aria-hidden" => "true", "aria-labelledby" => "compilationsModalLabel", role: "dialog", tabindex: "-1"}
+  .modal-header
+    %button.close{"aria-hidden" => "true", "data-dismiss" => "modal", type: "button"} &#215;
+    %h3#compilationsModalLabel Add to compilations
+  .modal-body
+    - @compilations.each do |c| 
+      %span.title= c.title
+      %br
+      - if !c.entry_ids.include?(params[:file])
+        = link_to("Add to this compilation", add_entry_path(id: c.pid, entry_id: params[:file]), method: 'post', remote: true)
+      -  else 
+        %p This file is already in this compilation
+  .modal-footer
+    %button.btn{"data-dismiss" => "modal"} Close
+
+
+
+
+

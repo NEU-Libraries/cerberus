@@ -1,11 +1,6 @@
-$("#add_compilation_form").dialog({
-  autoOpen: true,
-  height: 600,
-  width: 600,
-  modal: true,
-  title: "Select a compilation",
-  buttons: { 
-    Finished: function() { $(this).dialog("close"); }
-  }, 
-  open: function() { $("#add_compilation_form").html("<%= j render(partial: 'select_compilation_form') %>") }
-})
+var compilationsModal = $('<%= j render(partial: 'select_compilation_form') %>');
+$('body').append(compilationsModal.modal().on('hidden', function(){
+  $(this).remove();
+}));
+
+
