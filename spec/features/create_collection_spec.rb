@@ -42,7 +42,7 @@ feature "Creating a collection" do
       fill_in "Creator's last name", with: 'Jackson' 
       fill_in "Organziation", with: "NU LTS" 
       fill_in "Keyword", with: "Keyword One" 
-      select 'registered', from: "Choose Mass Permissions:" 
+      select 'public', from: "Choose Mass Permissions:" 
       select 'person', from: "Are you trying to add a person or a group?" 
       fill_in "Enter NUID or group name", with: "Person Edit" 
       select 'edit', from: "Should this identity be allowed to read or edit?" 
