@@ -34,13 +34,33 @@ var drsApp = {
         });
     },
 
-    addToComplationLink: function(){
-      var $t = $('.add-to-compilation');
-      console.log($t, 'was found');
-      $t.on('ajax:success', function(evt, data, status, xhr){
-        console.log('ajax success');
-        $(this).data('method', 'delete');
-        $(this).text('Added to collection').attr('disabled', 'true').removeClass('btn-success');
+    addToComplationLink: function(e){
+      e.on('ajax:success', function(evt, data, status, xhr){
+        var delta = $(this).data('method');
+        switch(delta){
+          case'post':
+            $(this)
+              .text($(this).text().replace('Add to', 'Remove from'))
+              .data('method', 'delete')
+              .removeClass('btn-success add-to-compilation')
+              .addClass('btn-danger remove-from-compilation');
+          break;
+          case 'delete':
+              $(this)
+              .data('method', 'post')
+              .text($(this).text().replace('Remove from', 'Add to' ))
+              .addClass('btn-success add-to-compilation')
+              .removeClass('btn-danger remove-from-compilation');
+          break;
+          defualt:
+            console.log('ajax successful, but not sure what to do!')
+          break;
+        }
+        
+      }).on('ajax:error', function(evt, data, status, xhr){
+          var error = $('<div class="alert alert-warning"/>');
+          error.append($('<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>')).append($('<strong>Oh no, something went strong!</strong>')).append(xhr);
+          $(this).closest('.modal-body').append(error);
       });
     },
     compilationsModal: function(e){
@@ -51,7 +71,9 @@ var drsApp = {
         console.log($('#new_compilation'));
         $('#new_compilation').bind("ajax:success", function(evt, data, status, xhr){
           console.log($(this), "Ajax Success");
-          $(this).parent('#compilationsModal').modal('hide');
+          $('#compilationsModal').modal().modal('hide');
+
+          //$(this).closest('#compilationsModal').remove();
         });
 
       }
@@ -60,7 +82,7 @@ var drsApp = {
           replace: true,
         }));
       }
-      drsApp.addToComplationLink();
+      drsApp.addToComplationLink($('.btn-compilation'));
     },
     
  

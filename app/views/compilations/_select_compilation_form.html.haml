@@ -1,16 +1,14 @@
 #compilationsModal.modal.hide.fade{"aria-hidden" => "true", "aria-labelledby" => "compilationsModalLabel", role: "dialog", tabindex: "-1"}
   .modal-header
     %button.close{"aria-hidden" => "true", "data-dismiss" => "modal", type: "button"} &#215;
-    %h3#compilationsModalLabel Add #{params[:file]} to your compilations.
+    %h3#compilationsModalLabel Add to your compilations.
   .modal-body
     - @compilations.each do |c| 
       
       - if !c.entry_ids.include?(params[:file])
-        = link_to("Add to #{c.title}", add_entry_path(id: c.pid, entry_id: params[:file]), method: 'post', remote: true, id: "add-to-compilation-#{c.pid}", class: "btn btn-success btn-small add-to-compilation")
+        = link_to("Add to #{c.title}", add_entry_path(id: c.pid, entry_id: params[:file]), method: 'post', remote: true, id: "add-to-compilation-#{c.pid}", class: "btn btn-success btn-small btn-compilation" );
       -  else 
-        %p Already in collection 
-        
-        = link_to("Remove from #{c.title}", add_entry_path(id: c.pid, entry_id: params[:file]), method: 'delete', remote: true, id: "add-to-compilation-#{c.pid}", class: "btn btn-success btn-small add-to-compilation")
+        = link_to("Remove from compilation", delete_entry_path(id: c.pid, entry_id: params[:file]), method: 'delete', remote: true, id: "remove-from-compilation-#{c.pid}", class: "btn btn-danger btn-small btn-compilation");
        
 
     =link_to( "Create New Compilation", {controller: "compilations", action: "new"} , remote: true, id: "createCompilationLink" )
