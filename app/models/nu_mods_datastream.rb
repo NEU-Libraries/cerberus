@@ -58,6 +58,52 @@ class NuModsDatastream < ActiveFedora::OmDatastream
       t.mods_identifier_type(path: { attribute: 'type'})
     }
 
+    t.mods_related_item(path: 'relatedItem', namespace_prefix: 'mods'){
+      t.title_info(path: 'titleInfo', namespace_prefix: 'mods'){
+        t.title(path: 'title', namespace_prefix: 'mods')
+      }
+      t.part(path: 'part', namespace_prefix: 'mods'){
+        t.detail(path: 'detail', namespace_prefix: 'mods'){
+          t.type(path: {attribute: 'type'})
+          t.number(path: 'number', namespace_prefix: 'mods')
+          t.caption(path: 'caption', namespace_prefix: 'mods')
+        }
+        t.extent(path: 'extent', namespace_prefix: 'mods'){
+          t.unit(path: { attribute: 'unit' })
+          t.start(path: 'start', namespace_prefix: 'mods')
+          t.end(path: 'end', namespace_prefix: 'mods')
+        }
+        t.date(path: 'date', namespace_prefix: 'mods'){
+          t.encording(path: { attribute: 'encoding' })
+        }
+      }
+      t.resource_type(path: 'typeOfResource', namespace_prefix: 'mods')
+      t.genre(path: 'genre', namespace_prefix: 'mods'){
+        t.authority(path: { attribute: 'authority' })
+      }
+      t.origin_info(path: 'originInfo', namespace_prefix: 'mods'){
+        t.place(path: 'place', namespace_prefix: 'mods'){
+          t.term(path: 'placeTerm', namespace_prefix: 'mods'){
+            t.type(path: { attribute: 'type' })
+          }
+        }
+        t.publisher(path: 'publisher', namespace_prefix: 'mods')
+        t.issuance(path: 'issuance', namespace_prefix: 'mods')
+        t.frequency(path: 'frequency', namespace_prefix: 'mods'){
+          t.authority(path: { attribute: 'authority'})
+        }
+      }
+      t.physical_description(path: 'physicalDescription', namespace_prefix: 'mods'){
+        t.form(path: 'form', namespace_prefix: 'mods'){
+          t.authority(path: { attribute: 'authority'})
+        }
+        t.digital_origin(path: 'digitalOrigin', namespace_prefix: 'mods')
+      }
+      t.identifier(path: 'identifier', namespace_prefix: 'mods'){
+        t.type(path: { attribute: 'type' })
+      }
+    }
+
     t.mods_title(proxy: [:mods_title_info, :mods_title])
     t.mods_date_issued(proxy: [:mods_origin_info, :mods_date_issued]) 
   end
