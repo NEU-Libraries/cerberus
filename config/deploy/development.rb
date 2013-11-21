@@ -7,7 +7,13 @@
 set :stage, :development
 
 set :deploy_to, '/home/drs/apps/develop/'
-set :branch, 'develop'
+#set :branch, 'develop'
+
+# parses out the current branch you're on. See: http://www.harukizaemon.com/2008/05/deploying-branches-with-capistrano.html
+current_branch = `git branch`.match(/\* (\S+)\s/m)[1]
+
+# use the branch specified as a param, then use the current branch. If all fails use master branch
+set :branch, ENV['branch'] || current_branch || "master" # you can use the 'branch' parameter on deployment to specify the branch you wish to deploy
 
 set :user, 'drs'
 set :rails_env, :staging
@@ -55,7 +61,7 @@ before 'deploy:refresh_data', 'rvm1:hook'
 # should only fire on actual deployments. 
 after 'deploy:updating', 'bundler:install'
 after 'deploy:updating', 'deploy:migrate'
-after 'deploy:migrate',  'deploy:create_drs_admin'
+#after 'deploy:migrate',  'deploy:create_drs_admin'
 after 'deploy:updating', 'deploy:restart' 
 after 'deploy:updating', 'deploy:assets_kludge'
 # after 'deploy:finished', 'deploy:refresh_data'
