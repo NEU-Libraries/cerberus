@@ -27,7 +27,11 @@
         = f.file_field :thumbnail, name: 'thumbnail'
     .row-fluid 
       .span8
-        = f.label :theses, "Include Theses and Dissertations Folder" 
-        = f.check_box :theses, name: 'theses'
+        - if !@community.theses
+          = f.label :theses, "Include Theses and Dissertations Folder" 
+          = f.check_box :theses, name: 'theses', value: 0
+        - else 
+          %span This collection already has a theses and dissertations folder
+
   .form-actions
     = f.submit class: ['btn', 'btn-primary', 'btn-large'], value: 'Submit'
