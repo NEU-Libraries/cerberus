@@ -7,17 +7,26 @@ class NuModsDatastream < ActiveFedora::OmDatastream
     t.mods_title_info(path: 'titleInfo', namespace_prefix: 'mods'){
       t.mods_title(path: 'title', namespace_prefix: 'mods') 
     }
+
     t.mods_abstract(path: 'abstract', namespace_prefix: 'mods')
+
     t.mods_personal_name(path: 'name', namespace_prefix: 'mods', attributes: { type: 'personal' }){
       t.mods_first_name(path: 'namePart', namespace_prefix: 'mods', attributes: { type: 'given' }) 
       t.mods_last_name(path: 'namePart', namespace_prefix: 'mods', attributes: { type: 'family' }) 
     }
+
     t.mods_corporate_name(path: 'name', namespace_prefix: 'mods', attributes: { type: 'corporate' }){
       t.mods_full_corporate_name(path: 'namePart', namespace_prefix: 'mods')  
-    } 
-    t.mods_origin_info(path: 'originInfo', namespace_prefix: 'mods'){
-      t.mods_date_issued(path: 'dateIssued', namespace_prefix: 'mods', attributes: { encoding: 'w3cdtf', keyDate: 'yes' })
     }
+
+    t.mods_origin_info(path: 'originInfo', namespace_prefix: 'mods'){
+      t.mods_publisher(path: 'publisher', namespace_prefix: 'mods')
+      t.mods_copyright(path: 'copyrightDate', namespace_prefix: 'mods', attributes: { encoding: 'w3cdtf' })
+      t.mods_date_issued(path: 'dateIssued', namespace_prefix: 'mods', attributes: { encoding: 'w3cdtf', keyDate: 'yes' })
+      t.mods_date_other(path: 'dateOther', namespace_prefix: 'mods', attributes: { encoding: 'w3cdtf'})
+      t.mods_issuance(path: 'issuance', namespace_prefix: 'mods')
+    }
+
     t.mods_citation(path: 'note', namespace_prefix: 'mods', attributes: { type: 'citation' }) 
     t.mods_subject(path: 'subject', namespace_prefix: 'mods'){
       t.mods_keyword(path: 'topic', namespace_prefix: 'mods') 
