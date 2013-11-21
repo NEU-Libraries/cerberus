@@ -461,6 +461,7 @@ DEPENDENCIES
   jquery-rails
   kaminari!
   launchy
+  omniauth
   omniauth-shibboleth
   rails (= 3.2.13)
   resque_spec
