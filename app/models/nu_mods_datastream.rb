@@ -33,7 +33,15 @@ class NuModsDatastream < ActiveFedora::OmDatastream
       t.mods_issuance(path: 'issuance', namespace_prefix: 'mods')
     }
 
+    t.mods_language(path: 'language', namespace_prefix: 'mods'){
+      t.mods_language_term(path: 'languageTerm', namespace_prefix: 'mods'){
+        t.mods_language_term_type(path: { attribute: 'type'})
+        t.mods_language_authority(path: { attribute: 'authority'})
+      }
+    }
+
     t.mods_citation(path: 'note', namespace_prefix: 'mods', attributes: { type: 'citation' }) 
+
     t.mods_subject(path: 'subject', namespace_prefix: 'mods'){
       t.mods_keyword(path: 'topic', namespace_prefix: 'mods') 
     }
@@ -56,6 +64,9 @@ class NuModsDatastream < ActiveFedora::OmDatastream
         xml.name('type' => 'corporate') 
         xml.originInfo {
           xml.dateIssued('keyDate' => 'yes', 'encoding' => 'w3cdtf') 
+        }
+        xml.language{
+          xml.languageTerm
         }
         xml.note('type' => 'citation') 
         xml.subject
