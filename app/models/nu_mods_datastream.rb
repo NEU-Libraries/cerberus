@@ -47,7 +47,9 @@ class NuModsDatastream < ActiveFedora::OmDatastream
       t.digital_origin(path: 'digitalOrigin')
     }
 
-    t.mods_citation(path: 'note', namespace_prefix: 'mods', attributes: { type: 'citation' }) 
+    t.mods_note(path: 'note', namespace_prefix: 'mods'){
+      t.type(path: { attribute: 'type' })
+    }
 
     t.mods_subject(path: 'subject', namespace_prefix: 'mods'){
       t.mods_keyword(path: 'topic', namespace_prefix: 'mods') 
