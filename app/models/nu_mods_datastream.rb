@@ -19,6 +19,12 @@ class NuModsDatastream < ActiveFedora::OmDatastream
       t.mods_full_corporate_name(path: 'namePart', namespace_prefix: 'mods')  
     }
 
+    t.mods_type_of_resource(path: 'typeOfResource', namespace_prefix: 'mods')
+
+    t.mods_genre(path: 'genre', namespace_prefix: 'mods'){
+      t.mods_genre_authority(path: { attribute: 'authority' })
+    }
+
     t.mods_origin_info(path: 'originInfo', namespace_prefix: 'mods'){
       t.mods_publisher(path: 'publisher', namespace_prefix: 'mods')
       t.mods_copyright(path: 'copyrightDate', namespace_prefix: 'mods', attributes: { encoding: 'w3cdtf' })
@@ -32,9 +38,6 @@ class NuModsDatastream < ActiveFedora::OmDatastream
       t.mods_keyword(path: 'topic', namespace_prefix: 'mods') 
     }
     t.mods_identifier(path: 'identifier', namespace_prefix: 'mods')
-    t.mods_type_of_resource(path: 'typeOfResource', namespace_prefix: 'mods'){
-      t.mods_collection(path: { attribute: 'collection' })
-    }
 
     t.mods_title(proxy: [:mods_title_info, :mods_title])
     t.mods_date_issued(proxy: [:mods_origin_info, :mods_date_issued]) 
