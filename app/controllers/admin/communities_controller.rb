@@ -14,17 +14,16 @@ class Admin::CommunitiesController < AdminController
 
   def create
     @community = Community.new(params[:community].merge(pid: mint_unique_pid))
-
-    @community.mass_permissions = 'public'
-    @community.rightsMetadata.permissions({person: "#{current_user.nuid}"}, 'edit')
-
+    @community.depositor = current_user.nuid
     @community.identifier = @community.pid
 
-    if params[:thumbnail]
-      InlineThumbnailCreator.new(@community, params[:thumbnail], 'thumbnail').create_thumbnail
+    if get_parent_mass_permissions == 'private' && @community.mass_permissions == 'public'
+      flash.now[:error] = "Parent community is set to private, can't have public child." 
+      render :action => 'new' and return
     end
 
     if @community.save!
+      update_theses_and_thumbnail
       flash[:info] = "Community created successfully."
       redirect_to admin_communities_path and return  
     else
@@ -39,10 +38,12 @@ class Admin::CommunitiesController < AdminController
 
   def update
 
-    # Update the thumbnail if one is defined 
-    if params[:thumbnail] 
-       InlineThumbnailCreator.new(@community, params[:thumbnail], 'thumbnail').create_thumbnail
+    if get_parent_mass_permissions == 'private' && @community.mass_permissions == 'public'
+      flash.now[:error] = "Parent community is set to private, can't have public child." 
+      render :action => 'new' and return
     end
+ 
+    update_theses_and_thumbnail      
 
     if @community.update_attributes(params[:community])
       flash[:notice] =  "Community #{@community.title} was updated successfully."
@@ -64,4 +65,30 @@ class Admin::CommunitiesController < AdminController
       redirect_to admin_communities_path 
     end
   end
+
+  private 
+
+    def get_parent_mass_permissions
+      if params[:community][:parent] 
+        return Community.find(params[:community][:parent]).mass_permissions
+      elsif @community.parent  
+        return @community.parent.mass_permissions
+      else # Need this case to handle community @ neu:1
+        return 'public' 
+      end
+    end
+
+    def update_theses_and_thumbnail 
+      if params[:thumbnail] 
+        InlineThumbnailCreator.new(@community, params[:thumbnail], 'thumbnail').create_thumbnail 
+      end
+
+      if params[:theses] == '1' && !@community.theses
+        NuCollection.create(title: "Theses and Dissertations",
+                            depositor: current_user.nuid, 
+                            personal_folder_type: 'theses', 
+                            mass_permissions: @community.mass_permissions, 
+                            parent: @community)
+      end
+    end
 end

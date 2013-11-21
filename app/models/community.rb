@@ -15,6 +15,7 @@ class Community < ActiveFedora::Base
   has_file_datastream "thumbnail", type: FileContentDatastream
 
   attr_accessible :title, :description, :parent
+  attr_accessor :theses
   attr_protected :identifier
 
   has_many :employees, property: :has_affiliation, class_name: "Employee"
@@ -39,6 +40,10 @@ class Community < ActiveFedora::Base
   # Override parent= so that the string passed by the creation form can be used. 
   def parent=(val)
     unique_assign_by_string(val, :has_affiliation, [Community], allow_nil: true)
+  end
+
+  def theses
+    child_collections.find { |e| e.personal_folder_type == 'theses' }
   end
 
   def research_publications 
