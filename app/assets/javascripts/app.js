@@ -68,7 +68,8 @@ var drsApp = {
         var t = $('#compilationsModal');
         t.find('.modal-header').html( e.find('.modal-header').html() );
         t.find('.modal-body').html( e.find('.modal-body').html() );
-        console.log($('#new_compilation'));
+        t.find('.modal-footer').html( e.find('.modal-footer').html() );
+
         $('#new_compilation').bind("ajax:success", function(evt, data, status, xhr){
           console.log($(this), "Ajax Success");
           $('#compilationsModal').modal().modal('hide');
@@ -78,8 +79,9 @@ var drsApp = {
 
       }
       else{
-        $('body').append(e.modal({
-          replace: true,
+        $('#compilationsModal').modal('hide');
+        $('body').append(e.modal().on('hidden',function(){
+            $(this).remove();          
         }));
       }
       drsApp.addToComplationLink($('.btn-compilation'));
