@@ -45,7 +45,9 @@ class NuModsDatastream < ActiveFedora::OmDatastream
     t.mods_subject(path: 'subject', namespace_prefix: 'mods'){
       t.mods_keyword(path: 'topic', namespace_prefix: 'mods') 
     }
-    t.mods_identifier(path: 'identifier', namespace_prefix: 'mods')
+    t.mods_identifier(path: 'identifier', namespace_prefix: 'mods'){
+      t.mods_identifier_type(path: { attribute: 'type'})
+    }
 
     t.mods_title(proxy: [:mods_title_info, :mods_title])
     t.mods_date_issued(proxy: [:mods_origin_info, :mods_date_issued]) 
