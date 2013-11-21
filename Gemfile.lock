@@ -189,6 +189,7 @@ GEM
       multi_json (~> 1.7)
     haml (4.0.3)
       tilt
+    hashie (2.0.5)
     hike (1.2.3)
     hooks (0.3.1)
     http_parser.rb (0.5.3)
@@ -275,6 +276,11 @@ GEM
       mediashelf-loggable
       nokogiri (>= 1.4.2)
       solrizer (~> 3.1.0)
+    omniauth (1.1.4)
+      hashie (>= 1.2, < 3)
+      rack
+    omniauth-shibboleth (1.1.1)
+      omniauth (>= 1.0.0)
     orm_adapter (0.4.0)
     paperclip (3.4.2)
       activemodel (>= 3.0.0)
@@ -455,6 +461,7 @@ DEPENDENCIES
   jquery-rails
   kaminari!
   launchy
+  omniauth-shibboleth
   rails (= 3.2.13)
   resque_spec
   rspec-rails

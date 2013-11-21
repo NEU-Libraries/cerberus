@@ -14,6 +14,8 @@ gem 'hydra-head'
 gem 'sufia', :git => 'https://github.com/nu-lts/nu-sufia.git', :branch => 'develop'
 gem 'kaminari', :git => 'https://github.com/harai/kaminari.git', :branch => 'route_prefix_prototype'  # required to handle pagination properly in dashboard. See https://github.com/amatsuda/kaminari/pull/322
 
+gem 'omniauth-shibboleth'
+
 gem 'jettywrapper'
 
 gem 'bootstrap-sass', '~> 2.3.2.1'
