@@ -33,6 +33,16 @@ var drsApp = {
           $(this).parent('li').removeClass('active');
         });
     },
+
+    addToComplationLink: function(){
+      var $t = $('.add-to-compilation');
+      console.log($t, 'was found');
+      $t.on('ajax:success', function(evt, data, status, xhr){
+        console.log('ajax success');
+        $(this).data('method', 'delete');
+        $(this).text('Added to collection').attr('disabled', 'true').removeClass('btn-success');
+      });
+    },
     compilationsModal: function(e){
       if( $('#compilationsModal').length > 0){
         var t = $('#compilationsModal');
@@ -50,7 +60,9 @@ var drsApp = {
           replace: true,
         }));
       }
-    }
+      drsApp.addToComplationLink();
+    },
+    
  
 };
  
