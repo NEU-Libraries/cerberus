@@ -11,8 +11,16 @@ class NuModsDatastream < ActiveFedora::OmDatastream
     t.mods_abstract(path: 'abstract', namespace_prefix: 'mods')
 
     t.mods_personal_name(path: 'name', namespace_prefix: 'mods', attributes: { type: 'personal' }){
+      t.authority(path: { attribute: 'authority' })
+      t.full_name(path: 'namePart', namespace_prefix: 'mods')
       t.mods_first_name(path: 'namePart', namespace_prefix: 'mods', attributes: { type: 'given' }) 
       t.mods_last_name(path: 'namePart', namespace_prefix: 'mods', attributes: { type: 'family' }) 
+      t.role(namespace_prefix: 'mods'){
+        t.role_term(path: 'roleTerm', namespace_prefix: 'mods'){
+          t.authority(path: { attribute: 'authority'})
+          t.type(path: { attribute: 'type'})
+        }
+      }
     }
 
     t.mods_corporate_name(path: 'name', namespace_prefix: 'mods', attributes: { type: 'corporate' }){
