@@ -40,6 +40,13 @@ class NuModsDatastream < ActiveFedora::OmDatastream
       }
     }
 
+    t.mods_physical_description(path: 'physicalDescription', namespace_prefix: 'mods'){
+      t.form(path: 'form', namespace_prefix: 'mods'){
+        t.authority(path: {attribute: 'authority'})
+      }
+      t.digital_origin(path: 'digitalOrigin')
+    }
+
     t.mods_citation(path: 'note', namespace_prefix: 'mods', attributes: { type: 'citation' }) 
 
     t.mods_subject(path: 'subject', namespace_prefix: 'mods'){
