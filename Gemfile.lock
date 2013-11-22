@@ -456,6 +456,7 @@ DEPENDENCIES
   figaro
   guard-livereload
   haml
+  hashie
   hydra-head
   jettywrapper
   jquery-rails
