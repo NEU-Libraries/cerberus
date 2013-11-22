@@ -47,9 +47,9 @@ describe DrsPropertiesDatastream do
   end
 
   describe "Personal folder type" do 
-    it "returns an error when called on anything other than a personal folder." do 
+    it "returns nil when called on anything other than a personal folder" do 
       properties.personal_folder_type = [] 
-      expect{ properties.get_personal_folder_type }.to raise_error 
+      properties.get_personal_folder_type.should be nil
     end
 
     it "returns the type of the folder when the field is defined" do 

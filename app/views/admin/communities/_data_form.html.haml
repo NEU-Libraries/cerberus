@@ -15,10 +15,23 @@
         = f.text_field :title, required: true, pattern: ".*\\S.*", name: 'community[title][]', class: "input-block-level", placeholder: "University Libraries"
     = f.label :description, "Description *"
     = f.text_area :description, required: true, pattern: ".*\\S.*", name: 'community[description][]', class: "input-block-level", rows: 5
+    %legend Permissions
+    .row-fluid
+      .span8
+        = f.label :mass_permissions, "Mass Permissions" 
+        = f.select :mass_permissions, options_for_select(['public', 'private'], @community.mass_permissions)
     %legend Thumbnail (Optional) 
     .row-fluid 
       .span8 
         = f.label :thumbnail, "Thumbnail" 
         = f.file_field :thumbnail, name: 'thumbnail'
+    .row-fluid 
+      .span8
+        - if !@community.theses
+          = f.label :theses, "Include Theses and Dissertations Folder" 
+          = f.check_box :theses, name: 'theses', value: 0
+        - else 
+          %span This collection already has a theses and dissertations folder
+
   .form-actions
     = f.submit class: ['btn', 'btn-primary', 'btn-large'], value: 'Submit'
