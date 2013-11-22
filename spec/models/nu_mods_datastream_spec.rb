@@ -35,8 +35,6 @@ describe NuModsDatastream do
   end
 
   # Note that factories which create more or less equivalent objects do exist.
-  # But are not used here to avoid obfuscating the tests.  They should prove useful
-  # when we're writing request specs however.  
   describe "Multiple entry setters" do
 
     describe "With valid information" do  
@@ -127,6 +125,68 @@ describe NuModsDatastream do
         invalid_mods.mods_personal_name.length.should == 1
         invalid_mods.mods_personal_name(0).should == ["WillJackson"] 
       end
+    end
+  end
+
+  describe "Solrization" do 
+    let(:mods) { NuModsDatastream.new } 
+    let(:result) { mods.to_solr }
+
+    it "Gives back ssi and tesim fields for the title entry" do 
+      mods.mods_title_info.mods_title = "Test Title" 
+      
+      result["mods_title_ssi"].should == "Test Title"
+      result["mods_title_tesim"].should == ["Test Title"]
+    end
+
+    it "Gives back tesim fields for all role entries" do 
+      mods.mods_note = ["one", "two", "three"]
+
+      result["mods_note_tesim"].should == ["one", "two", "three"]
+    end
+
+    it "Gives back a tesim field for all abstract entries" do 
+      mods.mods_abstract = ["A test", "That tests"] 
+
+      result["mods_abstract_tesim"].should == ["A test", "That tests"]
+    end
+
+    it "creates a tesim field for all identifier entries" do 
+      mods.mods_identifier = ["neu:123", "ISBN 000"]
+
+      result["mods_identifier_tesim"].should == ["neu:123", "ISBN 000"]
+    end
+
+    it "creates tesim, ssim, and faceted fields for all genre entries" do 
+      arry = ["Non-fiction", "Science", "Monkeys"]
+      mods.mods_genre = arry
+
+      result["mods_genre_tesim"].should == arry
+      result["mods_genre_ssim"].should == arry 
+      result["mods_genre_sim"].should == arry 
+    end
+
+    it "creates a tesim field for all publisher entries" do 
+      mods.mods_origin_info = [""]
+      mods.mods_origin_info.mods_publisher = ["WB", "Clearing House"]
+
+      result["mods_origin_info_mods_publisher_tesim"].should == ["WB", "Clearing House"]
+    end
+
+    it "creates a tesim field for all origin place entries" do 
+      mods.mods_origin_info = [""]
+      mods.mods_origin_info.mods_place = "New York City" 
+
+      result["mods_origin_info_mods_place_tesim"].should == ["New York City"]
+    end
+
+    it "creates a tesim field for all role entries" do 
+      mods.mods_personal_name = ["", ""]
+      mods.mods_personal_name(0).mods_role = "Author" 
+      mods.mods_personal_name(1).mods_role = "Editor" 
+
+      puts result
+      result["mods_personal_name_mods_role_tesim"].should == ["Author", "Editor"]
     end
   end
 end

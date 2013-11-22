@@ -2,10 +2,13 @@ class NuModsDatastream < ActiveFedora::OmDatastream
   include OM::XML::Document
   include NodeHelper  
 
+  stored_sortable = Solrizer::Descriptor.new(:string, :stored, :indexed)
+
   set_terminology do |t|
+
     t.root(path: 'mods', 'xmlns:mods' => 'http://www.loc.gov/mods/v3', 'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance', 'xsi:schemaLocation' => 'http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-4.xsd')
     t.mods_title_info(path: 'titleInfo', namespace_prefix: 'mods'){
-      t.mods_title(path: 'title', namespace_prefix: 'mods', index_as: [:searchable, :displayable]) 
+      t.mods_title(path: 'title', namespace_prefix: 'mods', index_as: [:stored_searchable, :stored_sortable]) 
     }
 
     t.mods_abstract(path: 'abstract', namespace_prefix: 'mods', index_as: [:stored_searchable])
@@ -15,8 +18,8 @@ class NuModsDatastream < ActiveFedora::OmDatastream
       t.full_name(path: 'namePart', namespace_prefix: 'mods')
       t.mods_first_name(path: 'namePart', namespace_prefix: 'mods', attributes: { type: 'given' }) 
       t.mods_last_name(path: 'namePart', namespace_prefix: 'mods', attributes: { type: 'family' }) 
-      t.role(namespace_prefix: 'mods'){
-        t.role_term(path: 'roleTerm', namespace_prefix: 'mods'){
+      t.mods_role(namespace_prefix: 'mods', index_as: [:stored_searchable]){
+        t.mods_role_term(path: 'roleTerm', namespace_prefix: 'mods'){
           t.authority(path: { attribute: 'authority'})
           t.type(path: { attribute: 'type'})
         }
@@ -29,12 +32,13 @@ class NuModsDatastream < ActiveFedora::OmDatastream
 
     t.mods_type_of_resource(path: 'typeOfResource', namespace_prefix: 'mods')
 
-    t.mods_genre(path: 'genre', namespace_prefix: 'mods'){
+    t.mods_genre(path: 'genre', namespace_prefix: 'mods', index_as: [:stored_searchable, :symbol, :facetable]){
       t.mods_genre_authority(path: { attribute: 'authority' })
     }
 
     t.mods_origin_info(path: 'originInfo', namespace_prefix: 'mods'){
-      t.mods_publisher(path: 'publisher', namespace_prefix: 'mods')
+      t.mods_publisher(path: 'publisher', namespace_prefix: 'mods', index_as: [:stored_searchable])
+      t.mods_place(path: 'place', namespace_prefix: 'mods', index_as: [:stored_searchable])
       t.mods_copyright(path: 'copyrightDate', namespace_prefix: 'mods', attributes: { encoding: 'w3cdtf' })
       t.mods_date_issued(path: 'dateIssued', namespace_prefix: 'mods', attributes: { encoding: 'w3cdtf', keyDate: 'yes' })
       t.mods_date_other(path: 'dateOther', namespace_prefix: 'mods', attributes: { encoding: 'w3cdtf'})
@@ -98,7 +102,7 @@ class NuModsDatastream < ActiveFedora::OmDatastream
             t.type(path: { attribute: 'type' })
           }
         }
-        t.publisher(path: 'publisher', namespace_prefix: 'mods')
+        t.publisher(path: 'publisher', namespace_prefix: 'mods', index_as: [:stored_searchable])
         t.issuance(path: 'issuance', namespace_prefix: 'mods')
         t.frequency(path: 'frequency', namespace_prefix: 'mods'){
           t.authority(path: { attribute: 'authority'})
