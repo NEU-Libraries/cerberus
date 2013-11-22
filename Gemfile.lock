@@ -385,8 +385,6 @@ GEM
       mime-types
       nokogiri
       rest-client
-    rvm-capistrano (1.5.0)
-      capistrano (>= 2.15.4)
     rvm1-capistrano3 (0.9.0)
       capistrano (~> 3.0)
     sass (3.2.10)
@@ -474,7 +472,6 @@ DEPENDENCIES
   resque_spec
   rspec-rails
   ruby-filemagic (~> 0.4.2)
-  rvm-capistrano
   rvm1-capistrano3
   sass-rails (~> 3.2.3)
   sqlite3
