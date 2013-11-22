@@ -5,10 +5,10 @@ class NuModsDatastream < ActiveFedora::OmDatastream
   set_terminology do |t|
     t.root(path: 'mods', 'xmlns:mods' => 'http://www.loc.gov/mods/v3', 'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance', 'xsi:schemaLocation' => 'http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-4.xsd')
     t.mods_title_info(path: 'titleInfo', namespace_prefix: 'mods'){
-      t.mods_title(path: 'title', namespace_prefix: 'mods') 
+      t.mods_title(path: 'title', namespace_prefix: 'mods', index_as: [:searchable, :displayable]) 
     }
 
-    t.mods_abstract(path: 'abstract', namespace_prefix: 'mods')
+    t.mods_abstract(path: 'abstract', namespace_prefix: 'mods', index_as: [:stored_searchable])
 
     t.mods_personal_name(path: 'name', namespace_prefix: 'mods', attributes: { type: 'personal' }){
       t.authority(path: { attribute: 'authority' })
@@ -55,14 +55,17 @@ class NuModsDatastream < ActiveFedora::OmDatastream
       t.digital_origin(path: 'digitalOrigin')
     }
 
-    t.mods_note(path: 'note', namespace_prefix: 'mods'){
+    t.mods_note(path: 'note', namespace_prefix: 'mods', index_as: [:stored_searchable]){
       t.type(path: { attribute: 'type' })
     }
 
     t.mods_subject(path: 'subject', namespace_prefix: 'mods'){
-      t.mods_keyword(path: 'topic', namespace_prefix: 'mods') 
+      t.mods_keyword(path: 'topic', namespace_prefix: 'mods', index_as: [:stored_searchable])
+      t.mods_keyword_authority(path: 'topic', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable]){
+        t.authority(path: { attribute: 'authority' })
+      } 
     }
-    t.mods_identifier(path: 'identifier', namespace_prefix: 'mods'){
+    t.mods_identifier(path: 'identifier', namespace_prefix: 'mods', index_as: [:stored_searchable]){
       t.mods_identifier_type(path: { attribute: 'type'})
     }
 
