@@ -16,6 +16,7 @@ gem 'kaminari', :git => 'https://github.com/harai/kaminari.git', :branch => 'rou
 
 gem 'omniauth'
 gem 'omniauth-shibboleth'
+gem 'hashie'
 
 gem 'jettywrapper'
 
