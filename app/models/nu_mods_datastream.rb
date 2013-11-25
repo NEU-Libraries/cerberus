@@ -8,7 +8,10 @@ class NuModsDatastream < ActiveFedora::OmDatastream
 
     t.root(path: 'mods', 'xmlns:mods' => 'http://www.loc.gov/mods/v3', 'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance', 'xsi:schemaLocation' => 'http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-4.xsd')
     t.mods_title_info(path: 'titleInfo', namespace_prefix: 'mods'){
-      t.mods_title(path: 'title', namespace_prefix: 'mods', index_as: [:stored_searchable, :stored_sortable]) 
+      t.mods_title(path: 'title', namespace_prefix: 'mods', index_as: [:stored_searchable, stored_sortable]) 
+      t.mods_sub_title(path: 'subTitle', namespace_prefix: 'mods', index_as: [:stored_searchable])
+      t.mods_part_name(path: 'partName', namespace_prefix: 'mods', index_as: [:stored_searchable])
+      t.mods_part_number(path: 'partNumber', namespace_prefix: 'mods', index_as: [:stored_searchable])
     }
 
     t.mods_abstract(path: 'abstract', namespace_prefix: 'mods', index_as: [:stored_searchable])
@@ -32,7 +35,7 @@ class NuModsDatastream < ActiveFedora::OmDatastream
 
     t.mods_type_of_resource(path: 'typeOfResource', namespace_prefix: 'mods')
 
-    t.mods_genre(path: 'genre', namespace_prefix: 'mods', index_as: [:stored_searchable, :symbol, :facetable]){
+    t.mods_genre(path: 'genre', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable, :symbol]){
       t.mods_genre_authority(path: { attribute: 'authority' })
     }
 
@@ -107,7 +110,7 @@ class NuModsDatastream < ActiveFedora::OmDatastream
         t.frequency(path: 'frequency', namespace_prefix: 'mods'){
           t.authority(path: { attribute: 'authority'})
         }
-      }
+       }
       t.physical_description(path: 'physicalDescription', namespace_prefix: 'mods'){
         t.form(path: 'form', namespace_prefix: 'mods'){
           t.authority(path: { attribute: 'authority'})

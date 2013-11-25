@@ -162,8 +162,18 @@ describe NuModsDatastream do
       mods.mods_genre = arry
 
       result["mods_genre_tesim"].should == arry
-      result["mods_genre_ssim"].should == arry 
       result["mods_genre_sim"].should == arry 
+      result["mods_genre_ssim"].should == arry
+    end
+
+    it "creates tesim, ssim, and faceted fields for genre entries in a related item entry" do 
+      arry = ["Non-fiction", "Science", "Monkeys"]
+      mods.mods_related_item = ['']
+      mods.mods_related_item.genre = arry 
+
+      result["mods_genre_tesim"].should == arry 
+      result["mods_genre_sim"].should == arry 
+      result["mods_genre_ssim"].should == arry
     end
 
     it "creates a tesim field for all publisher entries" do 
@@ -180,12 +190,18 @@ describe NuModsDatastream do
       result["mods_origin_info_mods_place_tesim"].should == ["New York City"]
     end
 
+    it "indexes publisher information stored within a related item entry" do 
+      mods.mods_related_item = ['']
+      mods.mods_related_item.origin_info.place = "New York City" 
+
+      result["mods_origin_info_mods_place_tesim"].should == ["New York City"]
+    end
+
     it "creates a tesim field for all role entries" do 
       mods.mods_personal_name = ["", ""]
       mods.mods_personal_name(0).mods_role = "Author" 
       mods.mods_personal_name(1).mods_role = "Editor" 
 
-      puts result
       result["mods_personal_name_mods_role_tesim"].should == ["Author", "Editor"]
     end
   end
