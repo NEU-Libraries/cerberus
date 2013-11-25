@@ -1,5 +1,6 @@
 class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
   def shibboleth
+    puts request.env["omniauth.auth"]
     @user = User.find_for_shib(request.env["omniauth.auth"], current_user)
 
     if @user.persisted?
