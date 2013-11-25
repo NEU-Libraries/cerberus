@@ -17,9 +17,12 @@ class NuModsDatastream < ActiveFedora::OmDatastream
 
     t.mods_abstract(path: 'abstract', namespace_prefix: 'mods', index_as: [:stored_searchable])
 
+    t.mods_name(path: 'name', namespace_prefix: 'mods'){
+      t.mods_full_name(path: 'namePart', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable])
+    }
+
     t.mods_personal_name(path: 'name', namespace_prefix: 'mods', attributes: { type: 'personal' }){
       t.authority(path: { attribute: 'authority' })
-      t.full_name(path: 'namePart', namespace_prefix: 'mods')
       t.mods_first_name(path: 'namePart', namespace_prefix: 'mods', attributes: { type: 'given' }) 
       t.mods_last_name(path: 'namePart', namespace_prefix: 'mods', attributes: { type: 'family' }) 
       t.mods_role(namespace_prefix: 'mods', index_as: [:stored_searchable]){
@@ -31,7 +34,7 @@ class NuModsDatastream < ActiveFedora::OmDatastream
     }
 
     t.mods_corporate_name(path: 'name', namespace_prefix: 'mods', attributes: { type: 'corporate' }){
-      t.mods_full_corporate_name(path: 'namePart', namespace_prefix: 'mods')  
+      t.mods_full_corporate_name(path: 'namePart', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable])  
     }
 
     t.mods_type_of_resource(path: 'typeOfResource', namespace_prefix: 'mods')
@@ -137,7 +140,7 @@ class NuModsDatastream < ActiveFedora::OmDatastream
     # Extract a creation year field
     if self.mods_origin_info.mods_date_issued.any?
       creation_date = self.mods_origin_info.mods_date_issued.first 
-      solr_doc["creation_year_sim"] = [creation_date[/\d{4}/]]
+      solr_doc["mods_creation_year_sim"] = [creation_date[/\d{4}/]]
     end
 
     # Extract special subject/topic fields
@@ -150,6 +153,21 @@ class NuModsDatastream < ActiveFedora::OmDatastream
     end
 
     solr_doc["mods_keyword_sim"] = authorized_keywords 
+
+    #Extract and solrize names divided into first/last parts
+    full_names = []
+
+    (0..self.mods_personal_name.length).each do |i| 
+      fn = self.mods_personal_name(i).mods_first_name 
+      ln = self.mods_personal_name(i).mods_last_name
+
+      if fn.any? && ln.any?
+        full_names << "#{fn.first} #{ln.first}"
+      end
+    end
+
+    solr_doc["mods_personal_creators_tesim"] = full_names
+    solr_doc["mods_personal_creators_sim"] = full_names
 
     #TODO:  Extract dateBegin/dateEnd information ]
     return solr_doc

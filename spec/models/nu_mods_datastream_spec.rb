@@ -208,7 +208,7 @@ describe NuModsDatastream do
     it "creates a creation_year_sim field" do 
       mods.mods_origin_info.mods_date_issued = "2013-01-01"
 
-      result["creation_year_sim"].should == ["2013"]
+      result["mods_creation_year_sim"].should == ["2013"]
     end
 
     it "creates a separate mods_keyword_sim entry for authorized topic entries" do 
@@ -218,6 +218,30 @@ describe NuModsDatastream do
       mods.mods_subject(1).mods_keyword.authority = "ABC" 
 
       result["mods_keyword_sim"].should == ["Two"]
+    end
+
+    it "creates tesim/sim fields for corporate creators" do 
+      mods.assign_corporate_names(["NEU", "BC", "BU"])
+
+      puts result
+      result["mods_corporate_name_mods_full_corporate_name_tesim"].should == ["NEU", "BC", "BU"]
+      result["mods_corporate_name_mods_full_corporate_name_sim"].should == ["NEU", "BC", "BU"]
+    end
+
+    it "creates tesim/sim fields for untyped creators" do 
+      mods.mods_name = ["", "", ""]
+      mods.mods_name(0).mods_full_name = "Will Jackson" 
+      mods.mods_name(2).mods_full_name = "Bill Jackson" 
+
+      result["mods_name_mods_full_name_tesim"].should == ["Will Jackson", "Bill Jackson"] 
+      result["mods_name_mods_full_name_sim"].should == ["Will Jackson", "Bill Jackson"]
+    end
+
+    it "creates tesim/sim fields for personal creators" do 
+      mods.assign_creator_personal_names(["Will", "Jim"], ["Jackson", "Jones"])
+
+      result["mods_personal_creators_sim"].should == ["Will Jackson", "Jim Jones"]
+      result["mods_personal_creators_tesim"].should == ["Will Jackson", "Jim Jones"]
     end
   end
 end
