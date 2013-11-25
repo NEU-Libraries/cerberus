@@ -6,7 +6,7 @@ class User < ActiveRecord::Base
   # Connects this user object to Blacklights Bookmarks. 
   include Blacklight::User
 
-  after_create :link_to_drs
+  #after_create :link_to_drs
   before_destroy :remove_drs_object
 
   # Include default devise modules. Others available are:
@@ -20,18 +20,35 @@ class User < ActiveRecord::Base
 
   ROLES = %w[admin employee] 
 
+  def self.find_for_shib(auth, signed_in_resource=nil)
+    user = User.where(:nuid => auth.info.nuid).first
+    unless user      
+      user = User.create(name:auth.info.name,                           
+                           nuid:auth.info.nuid,
+                           email:auth.uid,
+                           password:Devise.friendly_token[0,20]
+                           )
+      if auth.info.employee == "staff"
+        user.role = 'employee'
+        user.save!
+        Sufia.queue.push(EmployeeCreateJob.new(self.nuid))              
+      end      
+    end
+    user
+  end
+
   # Method added by Blacklight; Blacklight uses #to_s on your
   # user class to get a user-displayable login/identifier for
   # the account. 
   def to_s
-    email
+    name
   end
 
   # When we get that Shibboleth stuff sorted we can figure out how to get
   # this to actually be a user's nuid.  For now it's just their email address 
-  def nuid 
-    email 
-  end
+  # def nuid 
+  #   email 
+  # end
 
   # Currently using group_list attribute as though it will someday contain the grouper information
   # pulled in from Shibboleth
@@ -41,9 +58,9 @@ class User < ActiveRecord::Base
   end
 
   private
-    def link_to_drs
-      Sufia.queue.push(EmployeeCreateJob.new(self.nuid))
-    end
+    # def link_to_drs
+    #   Sufia.queue.push(EmployeeCreateJob.new(self.nuid))
+    # end
 
     def remove_drs_object
       if Employee.exists_by_nuid?(self.nuid)
