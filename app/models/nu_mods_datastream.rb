@@ -3,6 +3,7 @@ class NuModsDatastream < ActiveFedora::OmDatastream
   include NodeHelper  
 
   stored_sortable = Solrizer::Descriptor.new(:string, :stored, :indexed)
+  stored_sortable_date = Solrizer::Descriptor.new(:date, :stored, :indexed)
 
   set_terminology do |t|
 
@@ -44,7 +45,7 @@ class NuModsDatastream < ActiveFedora::OmDatastream
       t.mods_place(path: 'place', namespace_prefix: 'mods', index_as: [:stored_searchable])
       t.mods_copyright(path: 'copyrightDate', namespace_prefix: 'mods', attributes: { encoding: 'w3cdtf' })
       t.mods_date_issued(path: 'dateIssued', namespace_prefix: 'mods', attributes: { encoding: 'w3cdtf', keyDate: 'yes' })
-      t.mods_date_other(path: 'dateOther', namespace_prefix: 'mods', attributes: { encoding: 'w3cdtf'})
+      t.mods_date_other(path: 'dateOther', namespace_prefix: 'mods', index_as: [:stored_searchable], attributes: { encoding: 'w3cdtf'})
       t.mods_issuance(path: 'issuance', namespace_prefix: 'mods')
     }
 
@@ -67,10 +68,9 @@ class NuModsDatastream < ActiveFedora::OmDatastream
     }
 
     t.mods_subject(path: 'subject', namespace_prefix: 'mods'){
-      t.mods_keyword(path: 'topic', namespace_prefix: 'mods', index_as: [:stored_searchable])
-      t.mods_keyword_authority(path: 'topic', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable]){
+      t.mods_keyword(path: 'topic', namespace_prefix: 'mods', index_as: [:stored_searchable]){
         t.authority(path: { attribute: 'authority' })
-      } 
+      }
     }
     t.mods_identifier(path: 'identifier', namespace_prefix: 'mods', index_as: [:stored_searchable]){
       t.mods_identifier_type(path: { attribute: 'type'})
@@ -125,6 +125,36 @@ class NuModsDatastream < ActiveFedora::OmDatastream
     t.mods_title(proxy: [:mods_title_info, :mods_title])
     t.mods_date_issued(proxy: [:mods_origin_info, :mods_date_issued]) 
   end
+
+  # We override to_solr here to add 
+  # 1. A creation_year field. 
+  # 2. A valid date Begin field 
+  # 3. A valid date End field 
+  # 4. Special facetable keywords, e.g. any subject/topic field with an authority attribute
+  def to_solr(solr_doc = Hash.new()) 
+    super(solr_doc) # Run the default solrization behavior 
+
+    # Extract a creation year field
+    if self.mods_origin_info.mods_date_issued.any?
+      creation_date = self.mods_origin_info.mods_date_issued.first 
+      solr_doc["creation_year_sim"] = [creation_date[/\d{4}/]]
+    end
+
+    # Extract special subject/topic fields
+    authorized_keywords = []
+
+    (0..self.mods_subject.length).each do |i|
+      if self.mods_subject(i).mods_keyword.authority.any?
+        authorized_keywords << mods_subject(i).mods_keyword.first
+      end
+    end
+
+    solr_doc["mods_keyword_sim"] = authorized_keywords 
+
+    #TODO:  Extract dateBegin/dateEnd information ]
+    return solr_doc
+  end
+
 
   def self.xml_template 
     builder = Nokogiri::XML::Builder.new do |xml|

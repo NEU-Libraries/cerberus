@@ -204,5 +204,20 @@ describe NuModsDatastream do
 
       result["mods_personal_name_mods_role_tesim"].should == ["Author", "Editor"]
     end
+
+    it "creates a creation_year_sim field" do 
+      mods.mods_origin_info.mods_date_issued = "2013-01-01"
+
+      result["creation_year_sim"].should == ["2013"]
+    end
+
+    it "creates a separate mods_keyword_sim entry for authorized topic entries" do 
+      mods.mods_subject = ["", "", ""]
+      mods.mods_subject(0).mods_keyword = "One" 
+      mods.mods_subject(1).mods_keyword = "Two" 
+      mods.mods_subject(1).mods_keyword.authority = "ABC" 
+
+      result["mods_keyword_sim"].should == ["Two"]
+    end
   end
 end
