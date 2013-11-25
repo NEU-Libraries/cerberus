@@ -6,5 +6,3 @@
   %button#search-submit-header.btn.btn-info{:type => "submit"}
     %i.icon-search
     Go
-  = link_to 'Advanced Search', advanced_path , :class=>"advanced_search" if ! current_page?(advanced_path)
-  = link_to 'Basic Search', :back , :class=>"advanced_search" if current_page?(advanced_path)
