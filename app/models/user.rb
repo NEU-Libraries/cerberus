@@ -28,13 +28,14 @@ class User < ActiveRecord::Base
       user.name = auth.info.name
       user.nuid = auth.info.nuid
 
+      user.save!
+
       if auth.info.employee == "staff"
         user.role = 'employee'
         user.save!
-        Sufia.queue.push(EmployeeCreateJob.new(self.nuid))              
+        Sufia.queue.push(EmployeeCreateJob.new(user.nuid))              
       end
 
-      user.save!      
     end
     user
   end
