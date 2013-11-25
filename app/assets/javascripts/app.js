@@ -86,11 +86,9 @@ var drsApp = {
       });
     },
     compilationsModal: function(e){
-      var $modal = $('#ajax-modal'),
-        header = e.find('.modal-header'),
-        body = e.find('.modal-body'),
-        footer = e.find('.modal-footer');
-      $modal.empty().append(header).append(body).append(footer).modal('show');
+      var $modal = $('#ajax-modal');
+        
+      $modal.empty().append(e).modal('show');
       
       $modal.on('hidden', function(){
         $(this).empty();
