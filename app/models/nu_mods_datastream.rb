@@ -250,7 +250,19 @@ class NuModsDatastream < ActiveFedora::OmDatastream
   # Filters out blank keyword entries 
   def keywords=(array_of_strings) 
     array_of_keywords = array_of_strings.select {|kw| !kw.blank? }  
-    self.mods_subject(0).mods_keyword = array_of_keywords
+    
+    if array_of_keywords.length < self.mods_subject.length 
+      node_count = self.mods_subject.length - array_of_keywords.length 
+      trim_nodes_from_zero(:mods_subject)
+    end
+
+    array_of_keywords.each_with_index do |kw, index| 
+      if self.mods_subject[index].nil? 
+        self.insert_new_node(:mods_subject) 
+      end
+
+      self.mods_subject(index).mods_keyword = kw 
+    end
   end 
 
   # Eliminates some whitespace that seems to get inserted into these records when they're 
@@ -285,6 +297,13 @@ class NuModsDatastream < ActiveFedora::OmDatastream
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Template files used by NodeHelper to add/remove nodes 
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  def self.mods_subject_template 
+    builder = Nokogiri::XML::Builder.new do |xml| 
+      xml.subject
+    end
+    return builder.doc.root
+  end
 
   def self.mods_personal_name_template 
     builder = Nokogiri::XML::Builder.new do |xml| 

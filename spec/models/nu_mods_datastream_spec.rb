@@ -50,9 +50,9 @@ describe NuModsDatastream do
       end 
 
       it "Has set all provided keywords correctly" do 
-        valid_mods.mods_subject.mods_keyword(0).should == ["One"] 
-        valid_mods.mods_subject.mods_keyword(1).should == ["Two"] 
-        valid_mods.mods_subject.mods_keyword(2).should == ["Three"] 
+        valid_mods.mods_subject(0).mods_keyword.should == ["One"] 
+        valid_mods.mods_subject(1).mods_keyword.should == ["Two"] 
+        valid_mods.mods_subject(2).mods_keyword.should == ["Three"] 
       end
 
       it "Has set all provided corporate names correctly" do
@@ -223,7 +223,6 @@ describe NuModsDatastream do
     it "creates tesim/sim fields for corporate creators" do 
       mods.assign_corporate_names(["NEU", "BC", "BU"])
 
-      puts result
       result["mods_corporate_name_mods_full_corporate_name_tesim"].should == ["NEU", "BC", "BU"]
       result["mods_corporate_name_mods_full_corporate_name_sim"].should == ["NEU", "BC", "BU"]
     end
