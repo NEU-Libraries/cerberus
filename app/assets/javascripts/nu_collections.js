@@ -9,42 +9,8 @@ $(document).ready(function () {
   });
 
 
-  var count = 0;
-  $.fn.addFormFields = function(options){
-    // applying settings for the function.
-    var settings = $.extend({
-      target: null,
-      titleText: 'Remove Element',
-      removeButton: $('<button type="button" class="btn btn-danger"><i class="icon-remove"></i></button>'),
-     }, options);
-    
-    //adding some effor handling here.
-    if (settings.target == null ){
-      console.log('must provide target: ' + this);
-      return;
-    }
+  
 
-    //adding the click event to handle adding form fields.
-    this.click(function(){
-
-      var $cloned = settings.target.first().clone();
-      var $removeButton = settings.removeButton.clone().attr('title', settings.titleText);
-      $removeButton.click(function(){
-        $cloned.remove();
-      });
-      //label the cloned fields.
-      $cloned.find('label').each(function(){
-        var forId = $(this).attr('for') + count;
-        $(this).attr('for', forId);
-        $(this).next('input, select').attr('id', forId);
-      });
-      //add the cloned elements.
-      settings.target.after($cloned);
-      $cloned.find('input, select').last().after($removeButton.tooltip());
-      count++
-    });
-
-  };
 
 
   // Adding the form fields behavior to the buttons on the nu collections.
