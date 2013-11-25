@@ -7,64 +7,29 @@
       .span8
         = f.label :title, "Title *"
         = f.text_field :title, required: true, pattern: ".*\\S.*", name: 'set[title][]', class: "input-block-level", placeholder: "Univeristy Libraries"
-      .span4
-        = f.label :date_of_issue, "Date of Issuance *"
-        #date-issued.input-append.date(data-date-format="yyyy-mm-dd")
-          = f.text_field :date_of_issue, class: ['datepicker','input-block-level'], required: true, placeholder: "YYYY-MM-DD"
-          %span.add-on
-            %i.icon-calendar.icon-large
+      .span4 
+        = f.label :thumbnail, "Upload thumbnail" 
+        = f.file_field :thumbnail, name: 'thumbnail'
+        %span.help-block
+          Will be displayed on collection pages. (150px by 150px)
     = f.label :description, "Description *"
     = f.text_area :description, required: true, pattern: ".*\\S.*", name: 'set[description][]', class: "input-block-level", rows: 5
-  .row-fluid
-    %fieldset.span4
-      %legend Personal Creator
-      = render partial: 'shared/sets/data_form_creator_personal_names', locals: {:f => f, :names => @set.personal_creators }
-      %button#add_another_personal_creator.btn.btn-block.btn-success{:type => "button"}
-        %i.icon-plus-sign.icon-large
-        Add Personal Creator
-      %span.help-text
-        A complete individual name and/or a corporate creator are required
-    %fieldset.span4
-      %legend Corporate Creator
-      = render partial: 'shared/sets/data_form_corporate_creators', locals: {:f => f, :corporate_names => @set.corporate_creators }
-      %button#add_another_corporate_creator.btn.btn-success.btn-block{:type => "button"}
-        %i.icon-plus-sign.icon-large
-        Add Corporate Creator
-    %fieldset.span4
-      %legend Keywords
-      = render partial: 'shared/sets/data_form_keywords', locals: {:f => f, :keywords => @set.keywords }
-      %button#add_another_keyword.btn.btn.btn-block.btn-success{:type => "button"}
-        %i.icon-plus-sign.icon-large
-        Add Keyword
-  .row-fluid
-    %fieldset.span4
-      %legend Mass Permissions
-      \#{label_tag 'set[mass_permissions]', "Choose Mass Permissions:"}
-      \#{select_tag 'set[mass_permissions]', options_for_select(@set.valid_mass_permissions, @set.mass_permissions ), class: "span12"}
-      %p.help-block
-        %ul
-          %li Setting to 'public' will allow anyone accessing the site to see your collection.
-          %li Setting to 'registered' will only allow authenticated users to see your collection.      
-          %li Setting to 'private' will only allow users and groups explicated below to see your collection.
-    %fieldset.span4
-      %legend Permissions
-      = render partial: 'shared/sets/data_form_permissions_element', locals: {:f => f, :permissions => filtered_permissions(@set) }
-      %button#add_another_permission.btn.btn-success.btn-block{:type => "button"}
-        %i.icon-plus-sign.icon-large
-        Add Permission
-    %fieldset.span4
-      %legend Embargo
-      = f.label :embargo_release_date, "Embargo Date:"
-      #embargo-date.input-append.date(data-date-format="yyyy-mm-dd")
-        = f.text_field :embargo_release_date, name: 'set[embargo_release_date][]', class: ['embargo_datepicker', 'span12',], placeholder: "YYYY-MM-DD"
-        %span.add-on
-          %i.icon-calendar.icon-large
-      %span.help-block
-        An embargoed item will be visible to only you until the day set below
-  .row-fluid 
-    %fieldset.span4 
-      %legend Thumbnail
-      = f.label :thumbnail, "Add a thumbnail:" 
-      = f.file_field :thumbnail, name: 'thumbnail'
+    .row-fluid
+      %fieldset.span6
+        %legend Mass Permissions
+        = label_tag 'set[mass_permissions]', "Choose Mass Permissions:"
+        = select_tag 'set[mass_permissions]', options_for_select(@set.valid_mass_permissions, @set.mass_permissions) , class: "span12"
+        %p.help-block
+          %ul
+            %li Setting to 'public' will allow anyone accessing the site to see your collection.
+            %li Setting to 'registered' will only allow authenticated users to see your collection.
+            %li Setting to 'private' will only allow users and groups explicated below to see your collection.
+      %fieldset.span6
+        %legend Permissions
+        = render partial: 'shared/sets/data_form_permissions_element', locals: {:f => f, :permissions => filtered_permissions(@set) }
+        %button#add_another_permission.btn.btn-success.btn-block{:type => "button"}
+          %i.icon-plus-sign.icon-large
+          Add Permission    
   .form-actions
-    = f.submit class: ['btn', 'btn-primary', 'btn-large'], value: 'Submit'
+    = f.submit class: ['btn', 'btn-primary'], value: 'Submit'
+    = button_tag "Reset", class: 'btn', type: :reset
