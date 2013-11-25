@@ -53,42 +53,58 @@ var drsApp = {
               .removeClass('btn-danger remove-from-compilation');
           break;
           defualt:
-            console.log('ajax successful, but not sure what to do!')
+            console.log('ajax successful, but not sure what to do!');
           break;
         }
         
       }).on('ajax:error', function(evt, data, status, xhr){
-          var error = $('<div class="alert alert-warning"/>');
-          error.append($('<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>')).append($('<strong>Oh no, something went strong!</strong>')).append(xhr);
-          $(this).closest('.modal-body').append(error);
+        $(this).closest('.modal').modal('hide');
+         $('.breadcrumb').addBsAlert({
+          classes: 'alert alert-danger',
+          strong: 'Error,',
+          text: 'Something went wrong, please reload the page and try again.',
+         });
+
+      });
+    },
+    newCompilationForm: function(){
+      $('#new_compilation').on('ajax:success', function(){
+        $(this).closest('.modal').modal('hide');
+         $('.breadcrumb').addBsAlert({
+          classes: 'alert alert-success',
+          strong: 'Success!',
+          text: 'You created a new compilation!',
+         });
+      }).on('ajax:error', function(evt, data, status, xhr){
+        $(this).closest('.modal').modal('hide');
+         $('.breadcrumb').addBsAlert({
+          classes: 'alert alert-danger',
+          strong: 'Error,',
+          text: 'Something went wrong, please reload the page and try again.',
+         });
+
       });
     },
     compilationsModal: function(e){
-      if( $('#compilationsModal').length > 0){
-        var t = $('#compilationsModal');
-        t.find('.modal-header').html( e.find('.modal-header').html() );
-        t.find('.modal-body').html( e.find('.modal-body').html() );
-        t.find('.modal-footer').html( e.find('.modal-footer').html() );
-
-        $('#new_compilation').bind("ajax:success", function(evt, data, status, xhr){
-          console.log($(this), "Ajax Success");
-          $('#compilationsModal').modal().modal('hide');
-
-          //$(this).closest('#compilationsModal').remove();
-        });
-
-      }
-      else{
-        $('#compilationsModal').modal('hide');
-        $('body').append(e.modal().on('hidden',function(){
-            $(this).remove();          
-        }));
-      }
+      var $modal = $('#ajax-modal'),
+        header = e.find('.modal-header'),
+        body = e.find('.modal-body'),
+        footer = e.find('.modal-footer');
+      $modal.empty().append(header).append(body).append(footer).modal('show');
+      
+      $modal.on('hidden', function(){
+        $(this).empty();
+      });
+      
       drsApp.addToComplationLink($('.btn-compilation'));
+      drsApp.newCompilationForm();
     },
     
  
 };
+
+
+
  
 $( document ).ready( drsApp.init({
     // Config can go here eg: $drsBootstrapSelect: $('select.bs-select'),

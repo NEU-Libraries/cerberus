@@ -18,6 +18,7 @@
 //= require blacklight/blacklight
 //= require bootstrap-select/bootstrap-select.min.js
 //= require bootstrap-datepicker/js/bootstrap-datepicker.js
+//= require plugins
 //= require app
 //= require polyfills
 //= require nu_collections

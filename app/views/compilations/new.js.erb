@@ -1,6 +1,9 @@
-drsApp.compilationsModal( $('<%= j render( :partial =>  "remote_data_form", :locals => { compilation: @compilation } ) %>') );
-//compilationsModal.find('.modal-body').append(newCompilationForm);
+(function($){
+  var partial = $('<%= j render( :partial =>  "remote_data_form", :locals => { compilation: @compilation } ) %>');
+  partial.find('.modal-footer').prepend(partial.find('input[name="commit"'));
+  drsApp.compilationsModal(partial);
 
+}(jQuery));
 
 
   
