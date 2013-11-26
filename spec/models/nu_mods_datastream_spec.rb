@@ -45,9 +45,16 @@ describe NuModsDatastream do
 
       before do 
         valid_mods.keywords = ["One", "Two", "Three"]
+        valid_mods.names = ["Will Jackson", "Northeastern", "Library"]
         valid_mods.assign_corporate_names(corp_names)
         valid_mods.assign_creator_personal_names(first_names, last_names) 
       end 
+
+      it "Has set all unscoped names correctly" do 
+        valid_mods.name(0).name_part.should == ["Will Jackson"]
+        valid_mods.name(1).name_part.should == ["Northeastern"]
+        valid_mods.name(2).name_part.should == ["Library"]
+      end
 
       it "Has set all provided keywords correctly" do 
         valid_mods.subject(0).topic.should == ["One"] 
