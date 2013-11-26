@@ -17,7 +17,7 @@ class NuModsDatastream < ActiveFedora::OmDatastream
 
     t.abstract(path: 'abstract', namespace_prefix: 'mods', index_as: [:stored_searchable])
 
-    t.name(path: 'name', namespace_prefix: 'mods'){
+    t.name(path: 'name', namespace_prefix: 'mods', attributes: { type: :none }){
       t.name_part(path: 'namePart', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable])
     }
 
@@ -200,6 +200,46 @@ class NuModsDatastream < ActiveFedora::OmDatastream
     builder.doc
   end
 
+  # Filters out blank entries, builds nodes as required
+  def names=(x) 
+    x = x.select { |name| !name.blank? }
+
+    if x.length < self.name.length 
+      node_count = self.name.length - x.length 
+      trim_nodes_from_zero(:name, node_count)
+    end
+
+    x.each_with_index do |name, i| 
+      if self.name[i].nil? 
+        self.insert_new_node(:name) 
+      end
+
+      self.name(i).name_part = name 
+    end
+  end
+
+  # Filters out blank keyword entries 
+  def keywords=(array_of_strings) 
+    array_of_keywords = array_of_strings.select {|kw| !kw.blank? }  
+    
+    if array_of_keywords.length < self.subject.length 
+      node_count = self.subject.length - array_of_keywords.length 
+      trim_nodes_from_zero(:subject, node_count)
+    end
+
+    array_of_keywords.each_with_index do |kw, index| 
+      if self.subject[index].nil? 
+        self.insert_new_node(:subject) 
+      end
+
+      self.subject(index).topic = kw 
+    end
+  end
+
+  # The following four methods are probably deprecated, given that we won't be 
+  # collecting corporate/personal names separately from end users, and therefore shouldn't 
+  # have to assign to it/read from it for the purposes of the frontend. 
+
   # Takes two arrays of equal length and turns them into correctly formatted 
   # mods_personal_name nodes. 
   def assign_creator_personal_names(first_names, last_names)
@@ -226,7 +266,7 @@ class NuModsDatastream < ActiveFedora::OmDatastream
     end
   end
 
-  # Takes an array and turns it into correctly formatted mods_corporate_name nodes. 
+  # Takes an array and turns it into correctly formatted mods_corporate_name nodes.
   def assign_corporate_names(cns)
 
     cns.select! { |name| !name.blank? } 
@@ -244,26 +284,6 @@ class NuModsDatastream < ActiveFedora::OmDatastream
       self.corporate_name(index).name_part = c_name 
     end
   end
-
-  # Custom setters for fields that require some extra sanitization
-
-  # Filters out blank keyword entries 
-  def keywords=(array_of_strings) 
-    array_of_keywords = array_of_strings.select {|kw| !kw.blank? }  
-    
-    if array_of_keywords.length < self.subject.length 
-      node_count = self.subject.length - array_of_keywords.length 
-      trim_nodes_from_zero(:subject)
-    end
-
-    array_of_keywords.each_with_index do |kw, index| 
-      if self.subject[index].nil? 
-        self.insert_new_node(:subject) 
-      end
-
-      self.subject(index).topic = kw 
-    end
-  end 
 
   # Eliminates some whitespace that seems to get inserted into these records when they're 
   # returned. 
@@ -297,6 +317,13 @@ class NuModsDatastream < ActiveFedora::OmDatastream
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Template files used by NodeHelper to add/remove nodes 
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  def self.name_template 
+    builder = Nokogiri::XML::Builder.new do |xml| 
+      xml.name 
+    end
+    return builder.doc.root 
+  end
 
   def self.subject_template 
     builder = Nokogiri::XML::Builder.new do |xml| 
