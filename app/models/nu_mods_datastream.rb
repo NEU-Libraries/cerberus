@@ -21,12 +21,12 @@ class NuModsDatastream < ActiveFedora::OmDatastream
       t.name_part(path: 'namePart', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable])
     }
 
-    t.mods_personal_name(path: 'name', namespace_prefix: 'mods', attributes: { type: 'personal' }){
+    t.personal_name(path: 'name', namespace_prefix: 'mods', attributes: { type: 'personal' }){
       t.authority(path: { attribute: 'authority' })
-      t.mods_first_name(path: 'namePart', namespace_prefix: 'mods', attributes: { type: 'given' }) 
-      t.mods_last_name(path: 'namePart', namespace_prefix: 'mods', attributes: { type: 'family' }) 
-      t.mods_role(namespace_prefix: 'mods', index_as: [:stored_searchable]){
-        t.mods_role_term(path: 'roleTerm', namespace_prefix: 'mods'){
+      t.name_part_given(path: 'namePart', namespace_prefix: 'mods', attributes: { type: 'given' }) 
+      t.name_part_family(path: 'namePart', namespace_prefix: 'mods', attributes: { type: 'family' }) 
+      t.role(namespace_prefix: 'mods', index_as: [:stored_searchable]){
+        t.role_term(path: 'roleTerm', namespace_prefix: 'mods'){
           t.authority(path: { attribute: 'authority'})
           t.type(path: { attribute: 'type'})
         }
@@ -157,17 +157,17 @@ class NuModsDatastream < ActiveFedora::OmDatastream
     #Extract and solrize names divided into first/last parts
     full_names = []
 
-    (0..self.mods_personal_name.length).each do |i| 
-      fn = self.mods_personal_name(i).mods_first_name 
-      ln = self.mods_personal_name(i).mods_last_name
+    (0..self.personal_name.length).each do |i| 
+      fn = self.personal_name(i).name_part_given 
+      ln = self.personal_name(i).name_part_family
 
       if fn.any? && ln.any?
         full_names << "#{fn.first} #{ln.first}"
       end
     end
 
-    solr_doc["mods_personal_creators_tesim"] = full_names
-    solr_doc["mods_personal_creators_sim"] = full_names
+    solr_doc["personal_creators_tesim"] = full_names
+    solr_doc["personal_creators_sim"] = full_names
 
     #TODO:  Extract dateBegin/dateEnd information ]
     return solr_doc
@@ -211,18 +211,18 @@ class NuModsDatastream < ActiveFedora::OmDatastream
 
     name_pairs.select! { |first, last| !first.blank? && !last.blank? }   
 
-    if name_pairs.length < self.mods_personal_name.length
-      node_count = self.mods_personal_name.length - name_pairs.length
-      trim_nodes_from_zero(:mods_personal_name, node_count)
+    if name_pairs.length < self.personal_name.length
+      node_count = self.personal_name.length - name_pairs.length
+      trim_nodes_from_zero(:personal_name, node_count)
     end
 
     name_pairs.each_with_index do |(first_name, last_name), index|
-      if self.mods_personal_name[index].nil? 
-        self.insert_new_node(:mods_personal_name) 
+      if self.personal_name[index].nil? 
+        self.insert_new_node(:personal_name) 
       end
 
-      self.mods_personal_name(index).mods_first_name = first_name 
-      self.mods_personal_name(index).mods_last_name = last_name 
+      self.personal_name(index).name_part_given = first_name 
+      self.personal_name(index).name_part_family = last_name
     end
   end
 
@@ -277,8 +277,8 @@ class NuModsDatastream < ActiveFedora::OmDatastream
   def personal_creators 
     result_array = []
 
-    first_names = self.mods_personal_name.mods_first_name 
-    last_names = self.mods_personal_name.mods_last_name 
+    first_names = self.personal_name.name_part_given 
+    last_names = self.personal_name.name_part_family
 
     names = first_names.zip(last_names) 
 
@@ -305,7 +305,7 @@ class NuModsDatastream < ActiveFedora::OmDatastream
     return builder.doc.root
   end
 
-  def self.mods_personal_name_template 
+  def self.personal_name_template 
     builder = Nokogiri::XML::Builder.new do |xml| 
       xml.name('type' => 'personal') 
     end

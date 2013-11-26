@@ -73,25 +73,25 @@ describe NuModsDatastream do
         valid_mods.personal_creators.should == [{first: "Will", last: "Jack"}, {first: "William", last: "Jackson"},
                                                 {first: "Bill", last: "Back"}]
 
-        valid_mods.mods_personal_name(0).mods_first_name.should == ["Will"]
-        valid_mods.mods_personal_name(0).mods_last_name.should == ["Jack"]
+        valid_mods.personal_name(0).name_part_given.should == ["Will"]
+        valid_mods.personal_name(0).name_part_family.should == ["Jack"]
 
-        valid_mods.mods_personal_name(1).mods_first_name.should == ["William"]
-        valid_mods.mods_personal_name(1).mods_last_name.should == ["Jackson"] 
+        valid_mods.personal_name(1).name_part_given.should == ["William"]
+        valid_mods.personal_name(1).name_part_family.should == ["Jackson"] 
 
-        valid_mods.mods_personal_name(2).mods_first_name.should == ["Bill"]
-        valid_mods.mods_personal_name(2).mods_last_name.should == ["Back"]
+        valid_mods.personal_name(2).name_part_given.should == ["Bill"]
+        valid_mods.personal_name(2).name_part_family.should == ["Back"]
       end
 
       it "Hasn't compressed any names into the same parent node" do 
-        valid_mods.mods_personal_name(0).mods_first_name.length.should == 1 
-        valid_mods.mods_personal_name(0).mods_last_name.length.should == 1
+        valid_mods.personal_name(0).name_part_given.length.should == 1 
+        valid_mods.personal_name(0).name_part_family.length.should == 1
 
-        valid_mods.mods_personal_name(1).mods_first_name.length.should == 1
-        valid_mods.mods_personal_name(1).mods_last_name.length.should == 1
+        valid_mods.personal_name(1).name_part_given.length.should == 1
+        valid_mods.personal_name(1).name_part_family.length.should == 1
 
-        valid_mods.mods_personal_name(2).mods_first_name.length.should == 1
-        valid_mods.mods_personal_name(2).mods_last_name.length.should == 1
+        valid_mods.personal_name(2).name_part_given.length.should == 1
+        valid_mods.personal_name(2).name_part_family.length.should == 1
       end
     end
 
@@ -122,8 +122,8 @@ describe NuModsDatastream do
       end
 
       it "Assigns a single first and last name" do 
-        invalid_mods.mods_personal_name.length.should == 1
-        invalid_mods.mods_personal_name(0).should == ["WillJackson"] 
+        invalid_mods.personal_name.length.should == 1
+        invalid_mods.personal_name(0).should == ["WillJackson"] 
       end
     end
   end
@@ -198,11 +198,11 @@ describe NuModsDatastream do
     end
 
     it "creates a tesim field for all role entries" do 
-      mods.mods_personal_name = ["", ""]
-      mods.mods_personal_name(0).mods_role = "Author" 
-      mods.mods_personal_name(1).mods_role = "Editor" 
+      mods.personal_name = ["", ""]
+      mods.personal_name(0).role = "Author" 
+      mods.personal_name(1).role = "Editor" 
 
-      result["mods_personal_name_mods_role_tesim"].should == ["Author", "Editor"]
+      result["personal_name_role_tesim"].should == ["Author", "Editor"]
     end
 
     it "creates a creation_year_sim field" do 
@@ -239,8 +239,8 @@ describe NuModsDatastream do
     it "creates tesim/sim fields for personal creators" do 
       mods.assign_creator_personal_names(["Will", "Jim"], ["Jackson", "Jones"])
 
-      result["mods_personal_creators_sim"].should == ["Will Jackson", "Jim Jones"]
-      result["mods_personal_creators_tesim"].should == ["Will Jackson", "Jim Jones"]
+      result["personal_creators_sim"].should == ["Will Jackson", "Jim Jones"]
+      result["personal_creators_tesim"].should == ["Will Jackson", "Jim Jones"]
     end
   end
 end
