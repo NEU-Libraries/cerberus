@@ -33,8 +33,8 @@ class NuModsDatastream < ActiveFedora::OmDatastream
       }
     }
 
-    t.mods_corporate_name(path: 'name', namespace_prefix: 'mods', attributes: { type: 'corporate' }){
-      t.mods_full_corporate_name(path: 'namePart', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable])  
+    t.corporate_name(path: 'name', namespace_prefix: 'mods', attributes: { type: 'corporate' }){
+      t.name_part(path: 'namePart', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable])  
     }
 
     t.mods_type_of_resource(path: 'typeOfResource', namespace_prefix: 'mods')
@@ -227,21 +227,21 @@ class NuModsDatastream < ActiveFedora::OmDatastream
   end
 
   # Takes an array and turns it into correctly formatted mods_corporate_name nodes. 
-  def assign_corporate_names(corporate_names)
+  def assign_corporate_names(cns)
 
-    corporate_names.select! { |name| !name.blank? } 
+    cns.select! { |name| !name.blank? } 
 
-    if corporate_names.length < self.mods_corporate_name.length 
-      node_count = self.mods_corporate_name.length - corporate_names.length 
-      trim_nodes_from_zero(:mods_corporate_name, node_count) 
+    if cns.length < self.corporate_name.length 
+      node_count = self.corporate_name.length - cns.length 
+      trim_nodes_from_zero(:corporate_name, node_count) 
     end
 
-    corporate_names.each_with_index do |c_name, index|
-      if self.mods_corporate_name[index].nil? 
-        self.insert_new_node(:mods_corporate_name) 
+    cns.each_with_index do |c_name, index|
+      if self.corporate_name[index].nil? 
+        self.insert_new_node(:corporate_name) 
       end
 
-      self.mods_corporate_name(index).mods_full_corporate_name = c_name 
+      self.corporate_name(index).name_part = c_name 
     end
   end
 
@@ -268,7 +268,7 @@ class NuModsDatastream < ActiveFedora::OmDatastream
   # Eliminates some whitespace that seems to get inserted into these records when they're 
   # returned. 
   def corporate_creators
-    no_newlines = self.mods_corporate_name.map { |name| name.delete("\n") }
+    no_newlines = self.corporate_name.map { |name| name.delete("\n") }
     trimmed = no_newlines.map { |name| name.strip }  
     return trimmed
   end
@@ -312,7 +312,7 @@ class NuModsDatastream < ActiveFedora::OmDatastream
     return builder.doc.root 
   end
 
-  def self.mods_corporate_name_template 
+  def self.corporate_name_template 
     builder = Nokogiri::XML::Builder.new do |xml| 
       xml.name('type' => 'corporate') 
     end

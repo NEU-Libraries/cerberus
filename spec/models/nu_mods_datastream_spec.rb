@@ -58,15 +58,15 @@ describe NuModsDatastream do
       it "Has set all provided corporate names correctly" do
         valid_mods.corporate_creators.should == ["Corp One", "Corp Two", "Corp Three"] 
 
-        valid_mods.mods_corporate_name(0).mods_full_corporate_name.should == ["Corp One"] 
-        valid_mods.mods_corporate_name(1).mods_full_corporate_name.should == ["Corp Two"] 
-        valid_mods.mods_corporate_name(2).mods_full_corporate_name.should == ["Corp Three"] 
+        valid_mods.corporate_name(0).name_part.should == ["Corp One"] 
+        valid_mods.corporate_name(1).name_part.should == ["Corp Two"] 
+        valid_mods.corporate_name(2).name_part.should == ["Corp Three"] 
       end
 
       it "Hasn't compressed any corporate names into the same parent node" do 
-        valid_mods.mods_corporate_name(0).mods_full_corporate_name.length.should == 1
-        valid_mods.mods_corporate_name(1).mods_full_corporate_name.length.should == 1
-        valid_mods.mods_corporate_name(2).mods_full_corporate_name.length.should == 1 
+        valid_mods.corporate_name(0).name_part.length.should == 1
+        valid_mods.corporate_name(1).name_part.length.should == 1
+        valid_mods.corporate_name(2).name_part.length.should == 1 
       end
 
       it "Has set all provided name entries correctly" do
@@ -117,8 +117,8 @@ describe NuModsDatastream do
       end
 
       it "Assigns no corporate creators" do 
-        invalid_mods.mods_corporate_name(0).mods_full_corporate_name.should == [] 
-        invalid_mods.mods_corporate_name.length.should == 1 
+        invalid_mods.corporate_name(0).name_part.should == [] 
+        invalid_mods.corporate_name.length.should == 1 
       end
 
       it "Assigns a single first and last name" do 
@@ -223,8 +223,8 @@ describe NuModsDatastream do
     it "creates tesim/sim fields for corporate creators" do 
       mods.assign_corporate_names(["NEU", "BC", "BU"])
 
-      result["mods_corporate_name_mods_full_corporate_name_tesim"].should == ["NEU", "BC", "BU"]
-      result["mods_corporate_name_mods_full_corporate_name_sim"].should == ["NEU", "BC", "BU"]
+      result["corporate_name_name_part_tesim"].should == ["NEU", "BC", "BU"]
+      result["corporate_name_name_part_sim"].should == ["NEU", "BC", "BU"]
     end
 
     it "creates tesim/sim fields for untyped creators" do 
