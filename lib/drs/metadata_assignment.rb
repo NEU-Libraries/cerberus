@@ -56,7 +56,7 @@ module Drs
       end
 
       def keywords=(array_of_strings) 
-        if_mods_exists { self.mods.keywords = array_of_strings }
+        if_mods_exists { self.mods.topics = array_of_strings }
         if_DC_exists   { self.DC.subject = array_of_strings }
         if_descMetadata_exists { self.descMetadata.tag = array_of_strings }
       end

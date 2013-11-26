@@ -5,13 +5,13 @@ FactoryGirl.define do
 
     trait :with_keywords_valid do
       after(:build) do |mods|  
-        mods.keywords = ["Keyword One", "Keyword Two", "Keyword Three"]
+        mods.topics = ["Keyword One", "Keyword Two", "Keyword Three"]
       end
     end
 
     trait :with_invalid_keywords do
       after(:build) do |mods|   
-        mods.keywords = [" ", "", "Keyword Three"]
+        mods.topics = [" ", "", "Keyword Three"]
       end
     end
 

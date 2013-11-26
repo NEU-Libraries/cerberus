@@ -44,7 +44,7 @@ describe NuModsDatastream do
       let(:last_names) { ["Jack", "Jackson", "Back"] } 
 
       before do 
-        valid_mods.keywords = ["One", "Two", "Three"]
+        valid_mods.topics = ["One", "Two", "Three"]
         valid_mods.names = ["Will Jackson", "Northeastern", "Library"]
         valid_mods.assign_corporate_names(corp_names)
         valid_mods.assign_creator_personal_names(first_names, last_names) 
@@ -217,10 +217,10 @@ describe NuModsDatastream do
     end
 
     it "creates a separate mods_keyword_sim entry for authorized topic entries" do 
-      mods.keywords = ["One", "Two", "ABC"]
+      mods.topics = ["One", "Two", "ABC"]
       mods.subject(1).topic.authority = "ISF"
 
-      result["mods_keyword_sim"].should == ["Two"]
+      result["subject_sim"].should == ["Two"]
     end
 
     it "creates tesim/sim fields for corporate creators" do 

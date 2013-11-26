@@ -154,7 +154,7 @@ class NuModsDatastream < ActiveFedora::OmDatastream
       end
     end
 
-    solr_doc["mods_keyword_sim"] = authorized_keywords 
+    solr_doc["subject_sim"] = authorized_keywords 
 
     #Extract and solrize names divided into first/last parts
     full_names = []
@@ -221,7 +221,7 @@ class NuModsDatastream < ActiveFedora::OmDatastream
   end
 
   # Filters out blank keyword entries 
-  def keywords=(array_of_strings) 
+  def topics=(array_of_strings) 
     array_of_keywords = array_of_strings.select {|kw| !kw.blank? }  
     
     if array_of_keywords.length < self.subject.length 
