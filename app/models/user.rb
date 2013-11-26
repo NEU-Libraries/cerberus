@@ -6,7 +6,7 @@ class User < ActiveRecord::Base
   # Connects this user object to Blacklights Bookmarks. 
   include Blacklight::User
 
-  # after_create :link_to_drs
+  after_create :link_to_drs
   before_destroy :remove_drs_object
 
   # Include default devise modules. Others available are:
@@ -16,24 +16,17 @@ class User < ActiveRecord::Base
          :recoverable, :rememberable, :trackable, :validatable, :omniauthable, :omniauth_providers => [:shibboleth]
   # attr_accessible :title, :body
 
-  attr_accessible :password, :password_confirmation, :remember_me
+  attr_accessible :password, :password_confirmation, :remember_me, :full_name, :nuid
 
   ROLES = %w[admin employee] 
 
   def self.find_for_shib(auth, signed_in_resource=nil)    
     user = User.where(:nuid => auth.info.nuid).first
     unless user            
-      user = User.create(email:auth.uid, password:Devise.friendly_token[0,20])
-
-      user.full_name = auth.info.name
-      user.nuid = auth.info.nuid
-
-      user.save!
+      user = User.create(email:auth.uid, password:Devise.friendly_token[0,20], full_name:auth.info.name, nuid:auth.info.nuid)
 
       if auth.info.employee == "staff"
-        user.role = 'employee'
-        user.save!
-        self.link_to_drs        
+        user.role = 'employee'       
       end
 
     end
@@ -44,7 +37,7 @@ class User < ActiveRecord::Base
   # user class to get a user-displayable login/identifier for
   # the account. 
   def to_s
-    self.full_name
+    self.email
   end
 
   def name
@@ -53,9 +46,9 @@ class User < ActiveRecord::Base
 
   # When we get that Shibboleth stuff sorted we can figure out how to get
   # this to actually be a user's nuid.  For now it's just their email address 
-  # def nuid 
-  #   email 
-  # end
+  def nuid 
+    self.nuid 
+  end
 
   # Currently using group_list attribute as though it will someday contain the grouper information
   # pulled in from Shibboleth
@@ -66,7 +59,9 @@ class User < ActiveRecord::Base
 
   private
     def link_to_drs
-      Sufia.queue.push(EmployeeCreateJob.new(self.nuid))
+      if self.role == "employee"
+        Sufia.queue.push(EmployeeCreateJob.new(self.nuid))
+      end
     end
 
     def remove_drs_object
