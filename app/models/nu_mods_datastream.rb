@@ -70,13 +70,13 @@ class NuModsDatastream < ActiveFedora::OmDatastream
       t.type(path: { attribute: 'type' })
     }
 
-    t.mods_subject(path: 'subject', namespace_prefix: 'mods'){
-      t.mods_keyword(path: 'topic', namespace_prefix: 'mods', index_as: [:stored_searchable]){
+    t.subject(path: 'subject', namespace_prefix: 'mods'){
+      t.topic(path: 'topic', namespace_prefix: 'mods', index_as: [:stored_searchable]){
         t.authority(path: { attribute: 'authority' })
       }
     }
-    t.mods_identifier(path: 'identifier', namespace_prefix: 'mods', index_as: [:stored_searchable]){
-      t.mods_identifier_type(path: { attribute: 'type'})
+    t.identifier(path: 'identifier', namespace_prefix: 'mods', index_as: [:stored_searchable]){
+      t.type(path: { attribute: 'type'})
     }
 
     t.mods_related_item(path: 'relatedItem', namespace_prefix: 'mods'){
@@ -146,9 +146,9 @@ class NuModsDatastream < ActiveFedora::OmDatastream
     # Extract special subject/topic fields
     authorized_keywords = []
 
-    (0..self.mods_subject.length).each do |i|
-      if self.mods_subject(i).mods_keyword.authority.any?
-        authorized_keywords << mods_subject(i).mods_keyword.first
+    (0..self.subject.length).each do |i|
+      if self.subject(i).topic.authority.any?
+        authorized_keywords << self.subject(i).topic.first
       end
     end
 
@@ -251,17 +251,17 @@ class NuModsDatastream < ActiveFedora::OmDatastream
   def keywords=(array_of_strings) 
     array_of_keywords = array_of_strings.select {|kw| !kw.blank? }  
     
-    if array_of_keywords.length < self.mods_subject.length 
-      node_count = self.mods_subject.length - array_of_keywords.length 
-      trim_nodes_from_zero(:mods_subject)
+    if array_of_keywords.length < self.subject.length 
+      node_count = self.subject.length - array_of_keywords.length 
+      trim_nodes_from_zero(:subject)
     end
 
     array_of_keywords.each_with_index do |kw, index| 
-      if self.mods_subject[index].nil? 
-        self.insert_new_node(:mods_subject) 
+      if self.subject[index].nil? 
+        self.insert_new_node(:subject) 
       end
 
-      self.mods_subject(index).mods_keyword = kw 
+      self.subject(index).topic = kw 
     end
   end 
 
@@ -298,7 +298,7 @@ class NuModsDatastream < ActiveFedora::OmDatastream
   # Template files used by NodeHelper to add/remove nodes 
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  def self.mods_subject_template 
+  def self.subject_template 
     builder = Nokogiri::XML::Builder.new do |xml| 
       xml.subject
     end

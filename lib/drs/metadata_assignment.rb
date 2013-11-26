@@ -27,7 +27,7 @@ module Drs
 
       def identifier=(string) 
         if_DC_exists { self.DC.nu_identifier = string } 
-        if_mods_exists { self.mods.mods_identifier = string }
+        if_mods_exists { self.mods.identifier = string }
         if_descMetadata_exists { self.descMetadata.identifier = string }  
       end
 

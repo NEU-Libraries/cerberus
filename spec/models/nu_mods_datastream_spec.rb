@@ -13,7 +13,7 @@ describe NuModsDatastream do
     before do 
       basic_mods.title = "My title" 
       basic_mods.abstract = "This is a test object created for testing" 
-      basic_mods.mods_identifier = "neu:123abc" 
+      basic_mods.identifier = "neu:123abc" 
       basic_mods.date_issued = "2013-05-05"
     end
 
@@ -26,7 +26,7 @@ describe NuModsDatastream do
     end
 
     it "Has the identifier set correctly" do 
-      basic_mods.mods_identifier(0).first.should == "neu:123abc" 
+      basic_mods.identifier(0).first.should == "neu:123abc" 
     end
 
     it "Has the mods issuance date set correctly" do 
@@ -50,9 +50,9 @@ describe NuModsDatastream do
       end 
 
       it "Has set all provided keywords correctly" do 
-        valid_mods.mods_subject(0).mods_keyword.should == ["One"] 
-        valid_mods.mods_subject(1).mods_keyword.should == ["Two"] 
-        valid_mods.mods_subject(2).mods_keyword.should == ["Three"] 
+        valid_mods.subject(0).topic.should == ["One"] 
+        valid_mods.subject(1).topic.should == ["Two"] 
+        valid_mods.subject(2).topic.should == ["Three"] 
       end
 
       it "Has set all provided corporate names correctly" do
@@ -107,7 +107,7 @@ describe NuModsDatastream do
       let(:uneven_lasts) { ["Jackson", "Tucker", "Chan"] } 
 
       before do 
-        invalid_mods.mods_subject.mods_keyword = crap_keywords 
+        invalid_mods.subject.topic = crap_keywords 
         invalid_mods.assign_corporate_names(crap_corps)
         invalid_mods.assign_creator_personal_names(crap_first_names, crap_last_names) 
       end
@@ -152,9 +152,9 @@ describe NuModsDatastream do
     end
 
     it "creates a tesim field for all identifier entries" do 
-      mods.mods_identifier = ["neu:123", "ISBN 000"]
+      mods.identifier = ["neu:123", "ISBN 000"]
 
-      result["mods_identifier_tesim"].should == ["neu:123", "ISBN 000"]
+      result["identifier_tesim"].should == ["neu:123", "ISBN 000"]
     end
 
     it "creates tesim, ssim, and faceted fields for all genre entries" do 
@@ -210,10 +210,8 @@ describe NuModsDatastream do
     end
 
     it "creates a separate mods_keyword_sim entry for authorized topic entries" do 
-      mods.mods_subject = ["", "", ""]
-      mods.mods_subject(0).mods_keyword = "One" 
-      mods.mods_subject(1).mods_keyword = "Two" 
-      mods.mods_subject(1).mods_keyword.authority = "ABC" 
+      mods.keywords = ["One", "Two", "ABC"]
+      mods.subject(1).topic.authority = "ISF"
 
       result["mods_keyword_sim"].should == ["Two"]
     end
