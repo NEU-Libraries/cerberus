@@ -228,12 +228,12 @@ describe NuModsDatastream do
     end
 
     it "creates tesim/sim fields for untyped creators" do 
-      mods.mods_name = ["", "", ""]
-      mods.mods_name(0).mods_full_name = "Will Jackson" 
-      mods.mods_name(2).mods_full_name = "Bill Jackson" 
+      mods.name = ["", "", ""]
+      mods.name(0).name_part = "Will Jackson" 
+      mods.name(2).name_part = "Bill Jackson" 
 
-      result["mods_name_mods_full_name_tesim"].should == ["Will Jackson", "Bill Jackson"] 
-      result["mods_name_mods_full_name_sim"].should == ["Will Jackson", "Bill Jackson"]
+      result["name_name_part_tesim"].should == ["Will Jackson", "Bill Jackson"] 
+      result["name_name_part_sim"].should == ["Will Jackson", "Bill Jackson"]
     end
 
     it "creates tesim/sim fields for personal creators" do 
