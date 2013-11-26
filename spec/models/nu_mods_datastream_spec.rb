@@ -140,9 +140,9 @@ describe NuModsDatastream do
     end
 
     it "Gives back tesim fields for all role entries" do 
-      mods.mods_note = ["one", "two", "three"]
+      mods.note = ["one", "two", "three"]
 
-      result["mods_note_tesim"].should == ["one", "two", "three"]
+      result["note_tesim"].should == ["one", "two", "three"]
     end
 
     it "Gives back a tesim field for all abstract entries" do 

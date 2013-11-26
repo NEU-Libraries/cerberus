@@ -52,21 +52,21 @@ class NuModsDatastream < ActiveFedora::OmDatastream
       t.issuance(path: 'issuance', namespace_prefix: 'mods')
     }
 
-    t.mods_language(path: 'language', namespace_prefix: 'mods'){
-      t.mods_language_term(path: 'languageTerm', namespace_prefix: 'mods'){
-        t.mods_language_term_type(path: { attribute: 'type'})
-        t.mods_language_authority(path: { attribute: 'authority'})
+    t.language(path: 'language', namespace_prefix: 'mods'){
+      t.language_term(path: 'languageTerm', namespace_prefix: 'mods'){
+        t.language_term_type(path: { attribute: 'type'})
+        t.language_authority(path: { attribute: 'authority'})
       }
     }
 
-    t.mods_physical_description(path: 'physicalDescription', namespace_prefix: 'mods'){
+    t.physical_description(path: 'physicalDescription', namespace_prefix: 'mods'){
       t.form(path: 'form', namespace_prefix: 'mods'){
         t.authority(path: {attribute: 'authority'})
       }
       t.digital_origin(path: 'digitalOrigin')
     }
 
-    t.mods_note(path: 'note', namespace_prefix: 'mods', index_as: [:stored_searchable]){
+    t.note(path: 'note', namespace_prefix: 'mods', index_as: [:stored_searchable]){
       t.type(path: { attribute: 'type' })
     }
 
