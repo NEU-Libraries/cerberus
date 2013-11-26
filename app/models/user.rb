@@ -23,7 +23,7 @@ class User < ActiveRecord::Base
   def self.find_for_shib(auth, signed_in_resource=nil)    
     user = User.where(:nuid => auth.info.nuid).first
     unless user            
-      user = User.create(email:auth.info.last_name, password:Devise.friendly_token[0,20])
+      user = User.create(email:auth.uid, password:Devise.friendly_token[0,20])
 
       user.full_name = auth.info.name
       user.nuid = auth.info.nuid
@@ -44,6 +44,10 @@ class User < ActiveRecord::Base
   # user class to get a user-displayable login/identifier for
   # the account. 
   def to_s
+    self.full_name
+  end
+
+  def name
     self.full_name
   end
 
