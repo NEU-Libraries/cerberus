@@ -167,8 +167,8 @@ describe NuModsDatastream do
 
     it "creates tesim, ssim, and faceted fields for genre entries in a related item entry" do 
       arry = ["Non-fiction", "Science", "Monkeys"]
-      mods.mods_related_item = ['']
-      mods.mods_related_item.genre = arry 
+      mods.related_item = ['']
+      mods.related_item.genre = arry 
 
       result["genre_tesim"].should == arry 
       result["genre_sim"].should == arry 
@@ -189,8 +189,8 @@ describe NuModsDatastream do
     end
 
     it "indexes publisher information stored within a related item entry" do 
-      mods.mods_related_item = ['']
-      mods.mods_related_item.origin_info.place = "New York City" 
+      mods.related_item = ['']
+      mods.related_item.origin_info.place = "New York City" 
 
       result["origin_info_place_tesim"].should == ["New York City"]
     end

@@ -79,7 +79,7 @@ class NuModsDatastream < ActiveFedora::OmDatastream
       t.type(path: { attribute: 'type'})
     }
 
-    t.mods_related_item(path: 'relatedItem', namespace_prefix: 'mods'){
+    t.related_item(path: 'relatedItem', namespace_prefix: 'mods'){
       t.title_info(path: 'titleInfo', namespace_prefix: 'mods'){
         t.title(path: 'title', namespace_prefix: 'mods')
       }
