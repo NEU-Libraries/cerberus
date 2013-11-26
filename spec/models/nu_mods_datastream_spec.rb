@@ -159,11 +159,10 @@ describe NuModsDatastream do
 
     it "creates tesim, ssim, and faceted fields for all genre entries" do 
       arry = ["Non-fiction", "Science", "Monkeys"]
-      mods.mods_genre = arry
+      mods.genre = arry
 
-      result["mods_genre_tesim"].should == arry
-      result["mods_genre_sim"].should == arry 
-      result["mods_genre_ssim"].should == arry
+      result["genre_tesim"].should == arry
+      result["genre_sim"].should == arry 
     end
 
     it "creates tesim, ssim, and faceted fields for genre entries in a related item entry" do 
@@ -171,9 +170,8 @@ describe NuModsDatastream do
       mods.mods_related_item = ['']
       mods.mods_related_item.genre = arry 
 
-      result["mods_genre_tesim"].should == arry 
-      result["mods_genre_sim"].should == arry 
-      result["mods_genre_ssim"].should == arry
+      result["genre_tesim"].should == arry 
+      result["genre_sim"].should == arry 
     end
 
     it "creates a tesim field for all publisher entries" do 

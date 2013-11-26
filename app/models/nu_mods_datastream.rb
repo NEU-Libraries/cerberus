@@ -37,10 +37,10 @@ class NuModsDatastream < ActiveFedora::OmDatastream
       t.name_part(path: 'namePart', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable])  
     }
 
-    t.mods_type_of_resource(path: 'typeOfResource', namespace_prefix: 'mods')
+    t.type_of_resource(path: 'typeOfResource', namespace_prefix: 'mods')
 
-    t.mods_genre(path: 'genre', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable, :symbol]){
-      t.mods_genre_authority(path: { attribute: 'authority' })
+    t.genre(path: 'genre', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable]){
+      t.authority(path: { attribute: 'authority' })
     }
 
     t.mods_origin_info(path: 'originInfo', namespace_prefix: 'mods'){
