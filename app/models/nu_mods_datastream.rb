@@ -8,11 +8,11 @@ class NuModsDatastream < ActiveFedora::OmDatastream
   set_terminology do |t|
 
     t.root(path: 'mods', 'xmlns:mods' => 'http://www.loc.gov/mods/v3', 'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance', 'xsi:schemaLocation' => 'http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-4.xsd')
-    t.mods_title_info(path: 'titleInfo', namespace_prefix: 'mods'){
-      t.mods_title(path: 'title', namespace_prefix: 'mods', index_as: [:stored_searchable, stored_sortable]) 
-      t.mods_sub_title(path: 'subTitle', namespace_prefix: 'mods', index_as: [:stored_searchable])
-      t.mods_part_name(path: 'partName', namespace_prefix: 'mods', index_as: [:stored_searchable])
-      t.mods_part_number(path: 'partNumber', namespace_prefix: 'mods', index_as: [:stored_searchable])
+    t.title_info(path: 'titleInfo', namespace_prefix: 'mods'){
+      t.title(path: 'title', namespace_prefix: 'mods', index_as: [:stored_searchable, stored_sortable]) 
+      t.sub_title(path: 'subTitle', namespace_prefix: 'mods', index_as: [:stored_searchable])
+      t.part_name(path: 'partName', namespace_prefix: 'mods', index_as: [:stored_searchable])
+      t.part_number(path: 'partNumber', namespace_prefix: 'mods', index_as: [:stored_searchable])
     }
 
     t.mods_abstract(path: 'abstract', namespace_prefix: 'mods', index_as: [:stored_searchable])
@@ -125,7 +125,7 @@ class NuModsDatastream < ActiveFedora::OmDatastream
       }
     }
 
-    t.mods_title(proxy: [:mods_title_info, :mods_title])
+    t.title(proxy: [:title_info, :title])
     t.mods_date_issued(proxy: [:mods_origin_info, :mods_date_issued]) 
   end
 

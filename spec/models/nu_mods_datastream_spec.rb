@@ -11,14 +11,14 @@ describe NuModsDatastream do
 
   describe "Simple setters" do 
     before do 
-      basic_mods.mods_title = "My title" 
+      basic_mods.title = "My title" 
       basic_mods.mods_abstract = "This is a test object created for testing" 
       basic_mods.mods_identifier = "neu:123abc" 
       basic_mods.mods_date_issued = "2013-05-05"
     end
 
     it "Has set the title correctly" do 
-      basic_mods.mods_title_info(0).mods_title.first.should == "My title" 
+      basic_mods.title_info(0).title.first.should == "My title" 
     end
 
     it "Has the abstract set correctly" do 
@@ -133,10 +133,10 @@ describe NuModsDatastream do
     let(:result) { mods.to_solr }
 
     it "Gives back ssi and tesim fields for the title entry" do 
-      mods.mods_title_info.mods_title = "Test Title" 
+      mods.title_info.title = "Test Title" 
       
-      result["mods_title_ssi"].should == "Test Title"
-      result["mods_title_tesim"].should == ["Test Title"]
+      result["title_ssi"].should == "Test Title"
+      result["title_tesim"].should == ["Test Title"]
     end
 
     it "Gives back tesim fields for all role entries" do 

@@ -1,6 +1,6 @@
 FactoryGirl.define do 
   factory :mods, class: NuModsDatastream do 
-    sequence(:mods_title) { |n| "Datastream #{n}" } 
+    sequence(:title) { |n| "Datastream #{n}" } 
     sequence(:mods_identifier) { |n| "neu:#{n}#{n}#{n}" } 
 
     trait :with_keywords_valid do

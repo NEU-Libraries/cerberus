@@ -9,7 +9,7 @@ module Drs
     included do
       def title=(string) 
         if_DC_exists { self.DC.nu_title = string } 
-        if_mods_exists { self.mods.mods_title = string }
+        if_mods_exists { self.mods.title = string }
         if_descMetadata_exists { self.descMetadata.title = string }  
       end
 
