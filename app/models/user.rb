@@ -25,7 +25,7 @@ class User < ActiveRecord::Base
     unless user      
       user = User.create(email:auth.uid, password:Devise.friendly_token[0,20])
       
-      user.name = auth.info.name
+      user.full_name = auth.info.name
       user.nuid = auth.info.nuid
 
       user.save!
@@ -44,7 +44,7 @@ class User < ActiveRecord::Base
   # user class to get a user-displayable login/identifier for
   # the account. 
   def to_s
-    name
+    self.full_name
   end
 
   # When we get that Shibboleth stuff sorted we can figure out how to get
