@@ -18,6 +18,8 @@ gem 'omniauth'
 gem 'omniauth-shibboleth'
 gem 'hashie'
 
+gem 'figaro'
+
 gem 'jettywrapper'
 
 gem 'bootstrap-sass', '~> 2.3.2.1'
