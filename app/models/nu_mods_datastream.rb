@@ -23,6 +23,7 @@ class NuModsDatastream < ActiveFedora::OmDatastream
 
     t.personal_name(path: 'name', namespace_prefix: 'mods', attributes: { type: 'personal' }){
       t.authority(path: { attribute: 'authority' })
+      t.name_part(path: 'namePart', namespace_prefix: 'mods', attributes: { type: :none }, index_as: [:stored_searchable, :facetable])
       t.name_part_given(path: 'namePart', namespace_prefix: 'mods', attributes: { type: 'given' }) 
       t.name_part_family(path: 'namePart', namespace_prefix: 'mods', attributes: { type: 'family' }) 
       t.role(namespace_prefix: 'mods', index_as: [:stored_searchable]){
@@ -74,6 +75,7 @@ class NuModsDatastream < ActiveFedora::OmDatastream
       t.topic(path: 'topic', namespace_prefix: 'mods', index_as: [:stored_searchable]){
         t.authority(path: { attribute: 'authority' })
       }
+      t.scoped_topic(path: 'topic', namespace_prefix: 'mods', attributes: { authority: :any })
     }
     t.identifier(path: 'identifier', namespace_prefix: 'mods', index_as: [:stored_searchable]){
       t.type(path: { attribute: 'type'})
