@@ -1,17 +1,17 @@
 FactoryGirl.define do 
   factory :mods, class: NuModsDatastream do 
-    sequence(:mods_title) { |n| "Datastream #{n}" } 
-    sequence(:mods_identifier) { |n| "neu:#{n}#{n}#{n}" } 
+    sequence(:title) { |n| "Datastream #{n}" } 
+    sequence(:identifier) { |n| "neu:#{n}#{n}#{n}" } 
 
     trait :with_keywords_valid do
       after(:build) do |mods|  
-        mods.mods_subject.mods_keyword = ["Keyword One", "Keyword Two", "Keyword Three"]
+        mods.topics = ["Keyword One", "Keyword Two", "Keyword Three"]
       end
     end
 
     trait :with_invalid_keywords do
       after(:build) do |mods|   
-        mods.mods_subject.mods_keyword = [" ", "", "Keyword Three"]
+        mods.topics = [" ", "", "Keyword Three"]
       end
     end
 
