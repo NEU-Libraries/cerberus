@@ -12,7 +12,7 @@ describe NuModsDatastream do
   describe "Simple setters" do 
     before do 
       basic_mods.title = "My title" 
-      basic_mods.mods_abstract = "This is a test object created for testing" 
+      basic_mods.abstract = "This is a test object created for testing" 
       basic_mods.mods_identifier = "neu:123abc" 
       basic_mods.mods_date_issued = "2013-05-05"
     end
@@ -22,7 +22,7 @@ describe NuModsDatastream do
     end
 
     it "Has the abstract set correctly" do 
-      basic_mods.mods_abstract(0).first.should == "This is a test object created for testing" 
+      basic_mods.abstract(0).first.should == "This is a test object created for testing" 
     end
 
     it "Has the identifier set correctly" do 
@@ -146,9 +146,9 @@ describe NuModsDatastream do
     end
 
     it "Gives back a tesim field for all abstract entries" do 
-      mods.mods_abstract = ["A test", "That tests"] 
+      mods.abstract = ["A test", "That tests"] 
 
-      result["mods_abstract_tesim"].should == ["A test", "That tests"]
+      result["abstract_tesim"].should == ["A test", "That tests"]
     end
 
     it "creates a tesim field for all identifier entries" do 

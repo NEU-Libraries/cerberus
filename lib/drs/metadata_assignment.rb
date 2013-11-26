@@ -37,7 +37,7 @@ module Drs
 
       def description=(string) 
         if_DC_exists { self.DC.nu_description = string } 
-        if_mods_exists { self.mods.mods_abstract = string }
+        if_mods_exists { self.mods.abstract = string }
         if_descMetadata_exists { self.descMetadata.description = string } 
       end
 

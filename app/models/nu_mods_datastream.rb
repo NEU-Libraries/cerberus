@@ -15,7 +15,7 @@ class NuModsDatastream < ActiveFedora::OmDatastream
       t.part_number(path: 'partNumber', namespace_prefix: 'mods', index_as: [:stored_searchable])
     }
 
-    t.mods_abstract(path: 'abstract', namespace_prefix: 'mods', index_as: [:stored_searchable])
+    t.abstract(path: 'abstract', namespace_prefix: 'mods', index_as: [:stored_searchable])
 
     t.mods_name(path: 'name', namespace_prefix: 'mods'){
       t.mods_full_name(path: 'namePart', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable])
