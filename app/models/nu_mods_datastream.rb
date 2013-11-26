@@ -43,13 +43,13 @@ class NuModsDatastream < ActiveFedora::OmDatastream
       t.authority(path: { attribute: 'authority' })
     }
 
-    t.mods_origin_info(path: 'originInfo', namespace_prefix: 'mods'){
-      t.mods_publisher(path: 'publisher', namespace_prefix: 'mods', index_as: [:stored_searchable])
-      t.mods_place(path: 'place', namespace_prefix: 'mods', index_as: [:stored_searchable])
-      t.mods_copyright(path: 'copyrightDate', namespace_prefix: 'mods', attributes: { encoding: 'w3cdtf' })
-      t.mods_date_issued(path: 'dateIssued', namespace_prefix: 'mods', attributes: { encoding: 'w3cdtf', keyDate: 'yes' })
-      t.mods_date_other(path: 'dateOther', namespace_prefix: 'mods', index_as: [:stored_searchable], attributes: { encoding: 'w3cdtf'})
-      t.mods_issuance(path: 'issuance', namespace_prefix: 'mods')
+    t.origin_info(path: 'originInfo', namespace_prefix: 'mods'){
+      t.publisher(path: 'publisher', namespace_prefix: 'mods', index_as: [:stored_searchable])
+      t.place(path: 'place', namespace_prefix: 'mods', index_as: [:stored_searchable])
+      t.copyright(path: 'copyrightDate', namespace_prefix: 'mods', attributes: { encoding: 'w3cdtf' })
+      t.date_issued(path: 'dateIssued', namespace_prefix: 'mods', attributes: { encoding: 'w3cdtf', keyDate: 'yes' })
+      t.date_other(path: 'dateOther', namespace_prefix: 'mods', index_as: [:stored_searchable], attributes: { encoding: 'w3cdtf'})
+      t.issuance(path: 'issuance', namespace_prefix: 'mods')
     }
 
     t.mods_language(path: 'language', namespace_prefix: 'mods'){
@@ -126,7 +126,7 @@ class NuModsDatastream < ActiveFedora::OmDatastream
     }
 
     t.title(proxy: [:title_info, :title])
-    t.mods_date_issued(proxy: [:mods_origin_info, :mods_date_issued]) 
+    t.date_issued(proxy: [:origin_info, :date_issued]) 
   end
 
   # We override to_solr here to add 
@@ -138,9 +138,9 @@ class NuModsDatastream < ActiveFedora::OmDatastream
     super(solr_doc) # Run the default solrization behavior 
 
     # Extract a creation year field
-    if self.mods_origin_info.mods_date_issued.any?
-      creation_date = self.mods_origin_info.mods_date_issued.first 
-      solr_doc["mods_creation_year_sim"] = [creation_date[/\d{4}/]]
+    if self.origin_info.date_issued.any?
+      creation_date = self.origin_info.date_issued.first 
+      solr_doc["creation_year_sim"] = [creation_date[/\d{4}/]]
     end
 
     # Extract special subject/topic fields

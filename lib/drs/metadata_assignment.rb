@@ -46,7 +46,7 @@ module Drs
       end
 
       def date_of_issue=(string) 
-        if_mods_exists { self.mods.mods_date_issued = string }
+        if_mods_exists { self.mods.date_issued = string }
         if_DC_exists   { self.DC.date = string }
         if_descMetadata_exists { self.descMetadata.date_created = string }   
       end

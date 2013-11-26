@@ -14,7 +14,7 @@ describe NuModsDatastream do
       basic_mods.title = "My title" 
       basic_mods.abstract = "This is a test object created for testing" 
       basic_mods.mods_identifier = "neu:123abc" 
-      basic_mods.mods_date_issued = "2013-05-05"
+      basic_mods.date_issued = "2013-05-05"
     end
 
     it "Has set the title correctly" do 
@@ -30,7 +30,7 @@ describe NuModsDatastream do
     end
 
     it "Has the mods issuance date set correctly" do 
-      basic_mods.mods_origin_info(0).mods_date_issued.first.should == '2013-05-05' 
+      basic_mods.origin_info(0).date_issued.first.should == '2013-05-05' 
     end
   end
 
@@ -175,24 +175,24 @@ describe NuModsDatastream do
     end
 
     it "creates a tesim field for all publisher entries" do 
-      mods.mods_origin_info = [""]
-      mods.mods_origin_info.mods_publisher = ["WB", "Clearing House"]
+      mods.origin_info = [""]
+      mods.origin_info.publisher = ["WB", "Clearing House"]
 
-      result["mods_origin_info_mods_publisher_tesim"].should == ["WB", "Clearing House"]
+      result["origin_info_publisher_tesim"].should == ["WB", "Clearing House"]
     end
 
     it "creates a tesim field for all origin place entries" do 
-      mods.mods_origin_info = [""]
-      mods.mods_origin_info.mods_place = "New York City" 
+      mods.origin_info = [""]
+      mods.origin_info.place = "New York City" 
 
-      result["mods_origin_info_mods_place_tesim"].should == ["New York City"]
+      result["origin_info_place_tesim"].should == ["New York City"]
     end
 
     it "indexes publisher information stored within a related item entry" do 
       mods.mods_related_item = ['']
       mods.mods_related_item.origin_info.place = "New York City" 
 
-      result["mods_origin_info_mods_place_tesim"].should == ["New York City"]
+      result["origin_info_place_tesim"].should == ["New York City"]
     end
 
     it "creates a tesim field for all role entries" do 
@@ -204,9 +204,9 @@ describe NuModsDatastream do
     end
 
     it "creates a creation_year_sim field" do 
-      mods.mods_origin_info.mods_date_issued = "2013-01-01"
+      mods.origin_info.date_issued = "2013-01-01"
 
-      result["mods_creation_year_sim"].should == ["2013"]
+      result["creation_year_sim"].should == ["2013"]
     end
 
     it "creates a separate mods_keyword_sim entry for authorized topic entries" do 
