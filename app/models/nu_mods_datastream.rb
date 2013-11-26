@@ -145,6 +145,8 @@ class NuModsDatastream < ActiveFedora::OmDatastream
       solr_doc["creation_year_sim"] = [creation_date[/\d{4}/]]
     end
 
+    solr_doc["title_info_title_ssi"] = self.title_info.title.first
+
     # Extract special subject/topic fields
     authorized_keywords = []
 
