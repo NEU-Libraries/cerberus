@@ -1,5 +1,7 @@
 - compilations.each do |comp| 
-  %li
-    = link_to comp.title, compilation_path(comp)
-    - if comp.description != nil 
-      %p= comp.description 
+  %li.span2
+    %a.thumbnail{:href => compilation_path(comp)}
+      %h4.fit-text
+        =comp.title
+      - if comp.description != nil 
+        %p= comp.description 

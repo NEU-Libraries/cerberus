@@ -1,4 +1,11 @@
 %h1.page-header Your Compilations
+%p.lead
+  Compilations are collections of objects that you can create, share and store.
 - if !@compilations.empty?
-  %ul.all_compilations 
+  %ul.all_compilations.thumbnails 
     = render partial: 'all_compilations', locals: { compilations: @compilations }
+- else
+  .alert.alert-info
+    %strong No compilations available
+    Add create a new compilation today.
+-9 
