@@ -25,3 +25,5 @@ dump.rdb
 
 # Vagrant Box and stuff
 .vagrant
+# Ignore application configuration
+/config/application.yml
