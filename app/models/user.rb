@@ -25,6 +25,7 @@ class User < ActiveRecord::Base
     
     unless user            
       user = User.create(email:auth.uid, password:Devise.friendly_token[0,20], full_name:auth.info.name, nuid:auth.info.nuid)
+      Sufia.queue.push(EmployeeCreateJob.new(auth.info.nuid))
     end
 
     return user
