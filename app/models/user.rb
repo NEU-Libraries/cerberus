@@ -24,13 +24,6 @@ class User < ActiveRecord::Base
     user = User.where(:nuid => auth.info.nuid).first
     unless user            
       user = User.create(email:auth.uid, password:Devise.friendly_token[0,20], full_name:auth.info.name, nuid:auth.info.nuid)
-
-      if auth.info.employee == "staff"
-        user.role = 'employee'
-        user.save!
-        Sufia.queue.push(EmployeeCreateJob.new(auth.info.nuid))       
-      end
-
     end
     user
   end
