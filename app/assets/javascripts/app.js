@@ -107,8 +107,9 @@ var drsApp = {
         Modernizr.load({
           load: "//cdnjs.cloudflare.com/ajax/libs/FitText.js/1.1/jquery.fittext.min.js",
            complete: function () {
-              // if ( !$ ) {
-              //   Modernizr.load('/assets/polyfills/respond/respond.min.js');
+              if ( !$.fitText ) {
+                  Modernizr.load('/assets/polyfills/FitText-js/jquery.fittext.js');
+              }
               drsApp.config.fitTextTarget.fitText();
             }
         }); 

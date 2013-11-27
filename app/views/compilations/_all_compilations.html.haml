@@ -1,8 +1,9 @@
 - compilations.each do |comp| 
   %li.span2
-    %div.thumbnail
+    %div.thumbnail.text-center
       %a{:href => compilation_path(comp) }
         %h5
           =comp.title
       - if comp.description != nil 
-        %p= comp.description 
+        %small
+          = comp.description 

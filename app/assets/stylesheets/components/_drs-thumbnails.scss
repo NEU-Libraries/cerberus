@@ -29,3 +29,17 @@
     margin: 0.125em auto;
   }
 }
+
+
+.all-compilations.thumbnails{
+  .span2 .thumbnail{
+    height: 170px;
+    padding-top: 40px;
+  }
+}
+
+.thumbnail a{
+  @include focus-states{
+    text-decoration: none;
+  }
+}

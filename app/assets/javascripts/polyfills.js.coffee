@@ -1,8 +1,11 @@
 Modernizr.load
   test: Modernizr.input.placeholder
   nope: ['/assets/polyfills/placeholder/placeholder.min.js']
-  complete: -> Placeholders.enable() if Placeholders?
+  complete: -> 
+    Placeholders.enable() if Placeholders?
+
 
 Modernizr.load 
   test: Modernizr.mq('only all')
-  nope: ['/assets/polyfills/respond/respond.min.js']
+  nope: ['//cdnjs.cloudflare.com/ajax/libs/respond.js/1.3.0/respond.min.js']
+  complete: -> Modernizr.load('/assets/polyfills/respond/respond.min.js') if !window.respond? 
