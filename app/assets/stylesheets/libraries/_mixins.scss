@@ -9,3 +9,11 @@
     @media (max-width: 650px)  { @content; }
   }
 }
+
+
+@mixin focus-states{
+  &:focus,
+  &:hover{
+    @content;
+  }
+}

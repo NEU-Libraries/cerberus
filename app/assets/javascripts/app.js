@@ -8,6 +8,7 @@ var drsApp = {
             $drsBootstrapSelect: $( "select.bs-select" ),
             $addToSetLink: $('#addToSet'),
             breadCrumbMenuContent: $('#addToSetLinks').html(),
+            fitTextTarget: $('.fit-text')
         };
  
         // allow overriding the default config
@@ -19,6 +20,7 @@ var drsApp = {
     setup: function() {
         drsApp.config.$drsBootstrapSelect.selectpicker();
         drsApp.breadCrumbMenu();
+        drsApp.handleFitText();
     },
     /**
      * Provides the breadcrumb popover menu for adding collections or new items to the application.
@@ -97,6 +99,24 @@ var drsApp = {
       drsApp.addToComplationLink($('.btn-compilation'));
       drsApp.newCompilationForm();
     },
+    /**
+     * Checks the dom to see if the plugin target is there and then loads it with Modernizr
+     */
+    handleFitText: function(){
+      if (drsApp.config.fitTextTarget.length > 0 && window.Modernizr){
+        Modernizr.load({
+          load: "//cdnjs.cloudflare.com/ajax/libs/FitText.js/1.1/jquery.fittext.min.js",
+           complete: function () {
+              // if ( !$ ) {
+              //   Modernizr.load('/assets/polyfills/respond/respond.min.js');
+              drsApp.config.fitTextTarget.fitText();
+            }
+        }); 
+      }
+
+
+
+    }
     
  
 };

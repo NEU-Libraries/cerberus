@@ -12,7 +12,7 @@
         = link_to raw('<i class="icon-dashboard"></i> My Drs'), personal_graph_path
       %li{:class => ("active" if controller_name == "compilations" && action_name == "index")}
         %a.top_nav{href: compilations_path}
-          %i.icon-briefcase
+          %i.icon-folder-open-alt
           Compilations
       %li.divider
       %li= link_to raw('<i class="icon-signout"></i> log out'), destroy_user_session_path, :id => 'logout_nav_link'

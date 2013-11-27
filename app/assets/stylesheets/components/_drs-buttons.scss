@@ -226,3 +226,13 @@ input[type="submit"].btn {
   color: $grayDark;
   text-decoration: none;
 }
+
+
+
+.thumbnail-btn{
+  @include focus-states{
+    text-decoration: none;
+    
+  }
+
+}
