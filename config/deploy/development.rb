@@ -65,9 +65,9 @@ before 'deploy:refresh_data', 'rvm1:hook'
 
 # These hooks execute in the listed order after the deploy:updating task
 # occurs.  This is the task that handles refreshing the app code, so this 
-# should only fire on actual deployments. 
-after 'deploy:updating', 'deploy:copy_yml_file'
+# should only fire on actual deployments.
 after 'deploy:updating', 'bundler:install'
+after 'deploy:updating', 'deploy:copy_yml_file'
 after 'deploy:updating', 'deploy:migrate'
 #after 'deploy:migrate',  'deploy:create_drs_admin'
 after 'deploy:updating', 'deploy:restart' 
