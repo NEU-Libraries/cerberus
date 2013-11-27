@@ -18,7 +18,7 @@ gem 'omniauth'
 gem 'omniauth-shibboleth'
 gem 'hashie'
 
-gem 'activerecord-mysql2-adapter'
+#gem 'activerecord-mysql2-adapter'
 gem 'figaro'
 
 gem 'jettywrapper'
