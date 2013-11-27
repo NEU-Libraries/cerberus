@@ -49,6 +49,13 @@ namespace :deploy do
       # execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake reset_data)"
     end
   end
+
+  desc "Copy Figaro YAML"
+  task :copy_yml_file do
+    on roles(:app), :in => :sequence, :wait => 5 do
+      execute "cp /home/drs/config/application.yml /home/drs/apps/develop/current/config/"
+    end
+  end
 end
 
 # Load the rvm environment before executing the refresh data hook.
@@ -65,3 +72,4 @@ after 'deploy:updating', 'deploy:migrate'
 after 'deploy:updating', 'deploy:restart' 
 after 'deploy:updating', 'deploy:assets_kludge'
 # after 'deploy:finished', 'deploy:refresh_data'
+after 'deploy:updating', 'deploy:copy_yml_file'
