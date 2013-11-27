@@ -16,14 +16,19 @@ class User < ActiveRecord::Base
          :recoverable, :rememberable, :trackable, :validatable, :omniauthable, :omniauth_providers => [:shibboleth]
   # attr_accessible :title, :body
 
-  attr_accessible :password, :password_confirmation, :remember_me, :full_name, :nuid
+  attr_accessible :password, :password_confirmation, :remember_me
 
   ROLES = %w[admin employee] 
 
   def self.find_for_shib(auth, signed_in_resource=nil)    
     user = User.where(:nuid => auth.info.nuid).first
     unless user            
-      user = User.create(email:auth.uid, password:Devise.friendly_token[0,20], full_name:auth.info.name, nuid:auth.info.nuid)
+      user = User.create(email:auth.uid, password:Devise.friendly_token[0,20])
+
+      user.full_name = auth.info.name
+      user.nuid = auth.info.nuid
+      user.save!
+
     end
     user
   end
