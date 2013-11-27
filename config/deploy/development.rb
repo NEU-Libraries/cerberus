@@ -53,7 +53,7 @@ namespace :deploy do
   desc "Copy Figaro YAML"
   task :copy_yml_file do
     on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cp /home/drs/config/application.yml /home/drs/apps/develop/current/config/"
+      execute "cp /home/drs/config/application.yml #{release_path}/config/"
     end
   end
 end
