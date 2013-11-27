@@ -21,16 +21,16 @@ class User < ActiveRecord::Base
   ROLES = %w[admin employee] 
 
   def self.find_for_shib(auth, signed_in_resource=nil)    
-    user = User.where(:nuid => auth.info.nuid).first
-    unless user            
-      user = User.create(email:auth.uid, password:Devise.friendly_token[0,20])
+    # user = User.where(:nuid => auth.info.nuid).first
+    # unless user            
+    #   user = User.create(email:auth.uid, password:Devise.friendly_token[0,20])
 
-      user.full_name = auth.info.name
-      user.nuid = auth.info.nuid
-      user.save!
+    #   user.full_name = auth.info.name
+    #   user.nuid = auth.info.nuid
+    #   user.save!
 
-    end
-    user
+    # end
+    # user
   end
 
   # Method added by Blacklight; Blacklight uses #to_s on your
