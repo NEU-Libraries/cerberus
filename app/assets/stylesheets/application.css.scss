@@ -147,7 +147,21 @@
 @import 'vendor/bootstrap-datepicker/custom-datepicker';
 @import 'blacklight/blacklight';
 
-@import 'components/components';
+
+
+// Components
+// ----------
+
+@import "components/typography";
+@import "components/links";
+@import "components/nu-lockup";
+@import "components/colors";
+@import "components/nu-footer";
+@import "components/nu-media";
+@import "components/drs-forms";
+@import "components/nu-navbar";
+@import "components/drs-breadcrumbs";
+
 @import 'sections/masthead';
 @import 'sections/drs_base';
 
