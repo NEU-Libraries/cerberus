@@ -1,5 +1,23 @@
 - compilations.each do |comp| 
-  %li
-    = link_to comp.title, compilation_path(comp)
-    - if comp.description != nil 
-      %p= comp.description 
+  %li.span2
+    %div.thumbnail.text-center
+      %a{:href => compilation_path(comp) }
+        %h5
+          =comp.title
+        - if comp.description != nil 
+          %small
+            = comp.description 
+      %nav(role="navigation")
+        .btn-group
+          %a.btn.btn-mini.btn-clear{title: "Download #{comp.title}", href: prepare_download_path(id: comp.pid), method: 'get', data: {toggle: "tooltip" } }
+            %i.icon-download-alt
+            %span.sr-only
+              Download
+          %a.btn.btn-mini.btn-clear{title: "Edit #{comp.title}", href: edit_compilation_path(comp), data: {toggle: "tooltip" } }
+            %i.icon-pencil
+            %span.sr-only
+              Edit
+          %a.btn.btn-mini.btn-clear(title="Delete #{comp.title}"){href: compilation_path(comp), method: "delete",  data: { confirm: 'Are you sure?', toggle: "tooltip" } }
+            %i.icon-remove
+            %span.sr-only
+              Delete

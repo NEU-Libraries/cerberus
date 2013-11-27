@@ -4,35 +4,55 @@
 
 h1 {
   font-size: 48px;
-  font-weight: 900;
 }
 
 h2 {
   font-size: 36px;
-  font-weight: 700;
+ 
 }
 
 h3 {
   font-size: 28px;
-  font-weight: 700;
+ 
 }
 
 h4 {
   font-size: 24px;
-  font-weight: 500;
+ 
 }
 
 h5 {
   font-size: 16px;
-  font-weight: 500;
+ 
 }
 
 h6 {
   font-size: 13px;
-  font-weight: 500;
+ 
   text-transform: none;
 }
 
 p {
   margin-bottom: 1em;
+}
+
+h1, .h1, h2, .h2, h3, .h3, h4, .h4, h5, .h5, h6, .h6{
+  font-weight: 100;
+  letter-spacing: 1px
+}
+
+
+h1 small, h2 small, h3 small, h4 small, h5 small, h6 small {
+  font-weight: 100;
+  color: $blueDark;
+  letter-spacing: 3px;
+  font-style: oblique;
+}
+
+.fix-text{
+  display: inline-block;
+}
+
+.sr-only{
+  @include sr-only;
 }
