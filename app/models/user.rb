@@ -43,9 +43,9 @@ class User < ActiveRecord::Base
 
   # When we get that Shibboleth stuff sorted we can figure out how to get
   # this to actually be a user's nuid.  For now it's just their email address 
-  def nuid 
-    self.nuid 
-  end
+  # def nuid 
+  #   self.nuid 
+  # end
 
   # Currently using group_list attribute as though it will someday contain the grouper information
   # pulled in from Shibboleth
