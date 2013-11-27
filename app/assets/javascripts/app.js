@@ -21,6 +21,7 @@ var drsApp = {
         drsApp.config.$drsBootstrapSelect.selectpicker();
         drsApp.breadCrumbMenu();
         drsApp.handleFitText();
+        drsApp.tooltipSetup();
     },
     /**
      * Provides the breadcrumb popover menu for adding collections or new items to the application.
@@ -116,9 +117,17 @@ var drsApp = {
       }
 
 
-
-    }
+    },
+    /**
+     * Tooltip Setup
+     */
+    tooltipSetup: function(){
+      $('body').tooltip({
+          selector: "a[data-toggle=tooltip]"
+        }); 
+    }    
     
+
  
 };
 
