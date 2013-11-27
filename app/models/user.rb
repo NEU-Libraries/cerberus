@@ -16,7 +16,7 @@ class User < ActiveRecord::Base
          :recoverable, :rememberable, :trackable, :validatable, :omniauthable, :omniauth_providers => [:shibboleth]
   # attr_accessible :title, :body
 
-  attr_accessible :password, :password_confirmation, :remember_me
+  attr_accessible :password, :password_confirmation, :remember_me, :nuid, :full_name
 
   ROLES = %w[admin employee] 
 
@@ -24,7 +24,7 @@ class User < ActiveRecord::Base
     user = User.where(:email => auth.uid).first
     
     unless user            
-      user = User.create(email:auth.uid, password:Devise.friendly_token[0,20])
+      user = User.create(email:auth.uid, password:Devise.friendly_token[0,20], full_name:auth.info.name, nuid:auth.info.nuid)
     end
 
     return user
