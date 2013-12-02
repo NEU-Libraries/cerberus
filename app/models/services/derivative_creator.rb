@@ -15,9 +15,9 @@ class DerivativeCreator
       create_full_thumbnail 
     elsif master.instance_of? PdfFile 
       create_minimum_thumbnail 
-    # elsif master.instance_of? MswordFile 
-    #   pdf = create_pdf_file
-    #   create_minimum_thumbnail(pdf)
+    elsif master.instance_of? MswordFile 
+       pdf = create_pdf_file
+       create_minimum_thumbnail(pdf)
     end
   end
 
@@ -41,9 +41,6 @@ class DerivativeCreator
       create_scaled_progressive_jpeg(thumbnail, master, {width: 680}, 'thumbnail_4_2x')
     end
 
-
-
-
     # Creates a thumbnail with as many datastreams as possible. 
     # Used exclusively for images. 
     def create_full_thumbnail(master = @master)
@@ -59,6 +56,20 @@ class DerivativeCreator
       create_scaled_progressive_jpeg(thumbnail, master, {width: 680}, 'thumbnail_4_2x') 
       create_scaled_progressive_jpeg(thumbnail, master, {width: 970}, 'thumbnail_10')
       create_scaled_progressive_jpeg(thumbnail, master, {width: 1940}, 'thumbnail_10_2x')
+    end
+
+    # Create or update a PDF file. 
+    # Should only be called when Msword Files are uploaded. 
+    def create_pdf_file
+      if self.core.content_objects.find { |e| e.instance_of? PdfFile }
+        pdf = self.core.content_objects.find { |e| e.instance_of? PdfFile } 
+      else
+        pdf = instantiate_with_metadata("#{core.title} pdf", "PDF for #{core.pid}", PdfFile) 
+      end
+
+      master.transform_datastream(:content, { to_pdf: { format: 'pdf', datastream: 'pdf'} }, processor: 'document')
+      pdf.add_file(master.pdf.content, 'content', "#{master.content.label.split('.').first}.pdf") 
+      pdf.save! ? pdf : false
     end
 
     def create_scaled_progressive_jpeg(thumb, master, size, dsid)
