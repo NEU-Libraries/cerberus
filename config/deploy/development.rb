@@ -54,7 +54,13 @@ namespace :deploy do
     on roles(:app), :in => :sequence, :wait => 5 do
       execute "cp /home/drs/.drsrvmrc #{release_path}/.rvmrc"
     end
-  end  
+  end
+
+  desc 'Trust rvmrc file'
+  task :trust_rvmrc do
+    run "rvm rvmrc trust #{release_path}"
+  end
+
 end
 
 # Load the rvm environment before executing the refresh data hook.
@@ -65,6 +71,8 @@ before 'deploy:refresh_data', 'rvm1:hook'
 # These hooks execute in the listed order after the deploy:updating task
 # occurs.  This is the task that handles refreshing the app code, so this 
 # should only fire on actual deployments.
+after 'deploy:updating', 'deploy:copy_rvmrc_file'
+after 'deploy:updating', 'deploy:trust_rvmrc'
 after 'deploy:updating', 'bundler:install'
 after 'deploy:updating', 'deploy:copy_yml_file'
 after 'deploy:updating', 'deploy:migrate'

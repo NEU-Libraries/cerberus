@@ -28,7 +28,7 @@ class NuCoreFile < ActiveFedora::Base
       self.parent = collection
       return true  
     else 
-      raise "User with nuid #{user.email} cannot add items to collection with pid of #{collection.pid}" 
+      raise "User with nuid #{user.nuid} cannot add items to collection with pid of #{collection.pid}" 
     end
   end
 
