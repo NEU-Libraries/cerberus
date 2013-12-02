@@ -13,7 +13,7 @@ set :deploy_to, '/home/drs/apps/develop/'
 current_branch = `git branch`.match(/\* (\S+)\s/m)[1]
 
 # use the branch specified as a param, then use the current branch. If all fails use master branch
-set :branch, ENV['branch'] || current_branch || "master" # you can use the 'branch' parameter on deployment to specify the branch you wish to deploy
+set :branch, ENV['branch'] || current_branch || "develop" # you can use the 'branch' parameter on deployment to specify the branch you wish to deploy
 
 set :user, 'drs'
 set :rails_env, :staging
@@ -35,18 +35,10 @@ namespace :deploy do
     end
   end
 
-  desc "Instantiate the drsadmin user" 
-  task :create_drs_admin do 
-    on roles(:app), :in => :sequence, :wait => 5 do 
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake create_drs_admin)" 
-    end
-  end
-
   desc "Resetting data" 
   task :refresh_data do 
     on roles(:app), :in => :sequence, :wait => 5 do
-      # execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake jetty:stop)" 
-      # execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake reset_data)"
+      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake reset_data)"
     end
   end
 
@@ -56,6 +48,13 @@ namespace :deploy do
       execute "cp /home/drs/config/application.yml #{release_path}/config/"
     end
   end
+
+  desc "Copy rvmrc"
+  task :copy_rvmrc_file do
+    on roles(:app), :in => :sequence, :wait => 5 do
+      execute "cp /home/drs/.drsrvmrc #{release_path}/.rvmrc"
+    end
+  end  
 end
 
 # Load the rvm environment before executing the refresh data hook.
@@ -69,7 +68,6 @@ before 'deploy:refresh_data', 'rvm1:hook'
 after 'deploy:updating', 'bundler:install'
 after 'deploy:updating', 'deploy:copy_yml_file'
 after 'deploy:updating', 'deploy:migrate'
-#after 'deploy:migrate',  'deploy:create_drs_admin'
 after 'deploy:updating', 'deploy:restart' 
 after 'deploy:updating', 'deploy:assets_kludge'
-# after 'deploy:finished', 'deploy:refresh_data'
+after 'deploy:finished', 'deploy:refresh_data'
