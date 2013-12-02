@@ -29,7 +29,7 @@ def create_file(file_name, user, parent)
 end
 
 def set_edit_permissions(obj)
-  admin_users = ["001967405", "001905497", "000513515"]
+  admin_users = ["001967405", "001905497", "000513515", "000000000"]
 
   admin_users.each do |nuid|
     obj.rightsMetadata.permissions({person: nuid}, 'edit')
