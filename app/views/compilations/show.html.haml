@@ -7,15 +7,33 @@
 %p.lead
   = @compilation.description
 
+%nav(role="navigation")
+  %ul.nav.nav-tabs
+    %li.active
+      %a(href="#" data-event="non-link")
+        View Files
+    %li
+      %a{ href: edit_compilation_path(@compilation),  data: {event: "non-link"} }
+        %i.icon-pencil
+        Edit
+    %li
+      %a{ href: @compilation, method: 'delete', title: "Destroy this compilation, this action is non-reversible.", data: { toggle: "tooltip"}}
+        %i.icon-remove
+        Delete
+    %li
+      %a{ href: prepare_download_path(id: @compilation.pid), method: 'get' }
+        Download
+
+
 - if @compilation.entries.empty?
   %p This compilation is currently empty.  Get out there and add some files. 
 - else 
   = render partial: 'all_entries', locals: { compilation: @compilation, entries: @compilation.entries }
 
-%h4 Actions
+
 
 %span.warning WARNING: Destroying a compilation is not reversible. 
-%br 
+
 = link_to("Destroy This Compilation", @compilation, method: 'delete')
 %br 
 - if @compilation.entry_ids.length > 0
