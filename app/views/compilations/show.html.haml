@@ -7,22 +7,8 @@
 %p.lead
   = @compilation.description
 
-%nav(role="navigation")
-  %ul.nav.nav-tabs
-    %li.active
-      %a(href="#" data-event="non-link")
-        View Files
-    %li
-      %a{ href: edit_compilation_path(@compilation),  data: {event: "non-link"} }
-        %i.icon-pencil
-        Edit
-    %li
-      %a{ href: @compilation, method: 'delete', title: "Destroy this compilation, this action is non-reversible.", data: { toggle: "tooltip"}}
-        %i.icon-remove
-        Delete
-    %li
-      %a{ href: prepare_download_path(id: @compilation.pid), method: 'get' }
-        Download
+=render partial: 'compilations_actions_nav.haml'
+
 
 
 - if @compilation.entries.empty?
@@ -31,10 +17,3 @@
   = render partial: 'all_entries', locals: { compilation: @compilation, entries: @compilation.entries }
 
 
-
-%span.warning WARNING: Destroying a compilation is not reversible. 
-
-= link_to("Destroy This Compilation", @compilation, method: 'delete')
-%br 
-- if @compilation.entry_ids.length > 0
-  = link_to("Download this compilation", prepare_download_path(id: @compilation.pid), method: 'get') 
