@@ -4,14 +4,14 @@
       %a(href="#" data-event="non-link")
         View Files
     %li
+      %a{ href: prepare_download_path(id: @compilation.pid ) , method: 'get' }
+        %i.icon-download
+        Download
+    %li
       %a{ href: edit_compilation_path(@compilation),  data: {event: "non-link"} }
         %i.icon-pencil
         Edit
     %li
-      %a{ href: @compilation, method: 'delete', title: "Destroy this compilation, this action is non-reversible.", data: { confirm: "Are you sure you want to delete this compilation?", toggle: "tooltip"}}
+      %a{ href: compilation_path(@compilation), method: 'delete', title: "Destroy this compilation, this action is non-reversible.", data: { confirm: "Are you sure you want to delete this compilation?", toggle: "tooltip"}}
         %i.icon-remove
         Delete
-    %li
-      %a{ href: prepare_download_path(id: @compilation.pid ) , method: 'get' }
-        %i.icon-download
-        Download

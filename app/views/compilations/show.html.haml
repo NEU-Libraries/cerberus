@@ -17,3 +17,10 @@
   = render partial: 'all_entries', locals: { compilation: @compilation, entries: @compilation.entries }
 
 
+
+%span.warning WARNING: Destroying a compilation is not reversible. 
+
+= link_to("Destroy This Compilation", @compilation, method: 'delete')
+%br 
+- if @compilation.entry_ids.length > 0
+  = link_to("Download this compilation", prepare_download_path(id: @compilation.pid), method: 'get') 
