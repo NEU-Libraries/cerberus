@@ -1,6 +1,11 @@
-%h3= @compilation.title
+%h1.page-header.compilation-title
+  = @compilation.title
+  %small
+    %i.icon-folder-open-alt
+    Compilation
 
-%p= @compilation.description
+%p.lead
+  = @compilation.description
 
 - if @compilation.entries.empty?
   %p This compilation is currently empty.  Get out there and add some files. 
