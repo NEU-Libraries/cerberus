@@ -81,13 +81,11 @@ class DerivativeCreator
 
       begin 
         if master.instance_of? PdfFile
-          puts "is pdf" 
           tmp = Tempfile.new(['thumb', '.png'], encoding: 'ascii-8bit') 
         else
           tmp = Tempfile.new('thumb', encoding: 'ascii-8bit')
         end
         tmp.write master.content.content 
-        puts tmp.read
 
         img = Magick::Image.read(tmp.path).first 
         img.format = "JPEG" 
@@ -109,8 +107,6 @@ class DerivativeCreator
     end   
 
     def instantiate_with_metadata(title, desc, klass) 
-      @core.pid 
-      puts @master
       object = klass.new(pid: Sufia::Noid.namespaceize(Sufia::IdService.mint))
       object.title                  = title 
       object.identifier             = object.pid
