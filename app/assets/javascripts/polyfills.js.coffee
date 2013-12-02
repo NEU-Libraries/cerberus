@@ -7,5 +7,4 @@ Modernizr.load
 
 Modernizr.load 
   test: Modernizr.mq('only all')
-  nope: ['//cdnjs.cloudflare.com/ajax/libs/respond.js/1.3.0/respond.min.js']
-  complete: -> Modernizr.load('/assets/polyfills/respond/respond.min.js') if !window.respond? 
+  nope: ['//cdnjs.cloudflare.com/ajax/libs/respond.js/1.3.0/respond.min.js'] 

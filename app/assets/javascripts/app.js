@@ -22,6 +22,7 @@ var drsApp = {
         drsApp.breadCrumbMenu();
         drsApp.handleFitText();
         drsApp.tooltipSetup();
+        drsApp.handleRequiredInputs();
     },
     /**
      * Provides the breadcrumb popover menu for adding collections or new items to the application.
@@ -125,6 +126,19 @@ var drsApp = {
       $('body').tooltip({
           selector: "a[data-toggle=tooltip]"
         }); 
+    },
+
+
+    handleRequiredInputs: function(){
+      var targets = $('*[required="required"]');
+      targets.each(function(index, el) {
+        var id = $(el).attr('id');
+        $('label[for="' + id +'"]').addClass('required-label');
+        $(el).tooltip({
+          title: 'Required',
+          placement: 'right'
+        });
+      });
     }    
     
 

@@ -3,3 +3,12 @@
     padding: 7px 6px;
   }
 }
+
+.required-label{
+  &:after{
+    content: "*";
+    color: $brand-danger;
+    margin-left: 2px;
+    font-size: $fontSizeMini;
+  }
+}
