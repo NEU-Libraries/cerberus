@@ -58,7 +58,9 @@ namespace :deploy do
 
   desc 'Trust rvmrc file'
   task :trust_rvmrc do
-    execute "rvm rvmrc trust #{release_path}"
+    on roles(:app), :in => :sequence, :wait => 5 do
+      execute "rvm rvmrc trust #{release_path}"
+    end
   end
 
 end
