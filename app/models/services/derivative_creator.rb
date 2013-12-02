@@ -35,6 +35,7 @@ class DerivativeCreator
       # Modify the copy of the object we're holding /without/ persisting that change.
       master.transform_datastream(:content, content: { datastream: 'content', size: '680X680>' })
 
+      create_scaled_progressive_jpeg(thumbnail, master, {height: 85, width: 85}, 'thumbnail_1')
       create_scaled_progressive_jpeg(thumbnail, master, {height: 170, width: 170}, 'thumbnail_2') 
       create_scaled_progressive_jpeg(thumbnail, master, {height: 340, width: 340}, 'thumbnail_2_2x') 
       create_scaled_progressive_jpeg(thumbnail, master, {width: 340}, 'thumbnail_4') 
@@ -50,6 +51,7 @@ class DerivativeCreator
         thumbnail = instantiate_with_metadata("#{core.title} thumbnails", "Thumbnails for #{core.pid}", ImageThumbnailFile)
       end
 
+      create_scaled_progressive_jpeg(thumbnail, master, {height: 85, width: 85}, 'thumbnail_1') 
       create_scaled_progressive_jpeg(thumbnail, master, {height: 170, width: 170}, 'thumbnail_2') 
       create_scaled_progressive_jpeg(thumbnail, master, {height: 340, width: 340}, 'thumbnail_2_2x') 
       create_scaled_progressive_jpeg(thumbnail, master, {width: 340}, 'thumbnail_4') 
