@@ -42,6 +42,10 @@ class User < ActiveRecord::Base
     self.full_name
   end
 
+  def user_key
+    self.nuid
+  end
+
   # When we get that Shibboleth stuff sorted we can figure out how to get
   # this to actually be a user's nuid.  For now it's just their email address 
   # def nuid 
