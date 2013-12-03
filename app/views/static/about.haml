@@ -1,11 +1,11 @@
 - int =  rand(2);
 
 - view_mode = int > 0 ? "list" : "grid"
-- view_mode_class = view_mode == "list" ? "drs-list-view" : "drs-grid-view"
+- view_mode_class = view_mode == "list" ? "drs-items-list" : "drs-items-grid"
 - @page_title = "About"
 %h1.page-title
   = view_mode.capitalize + "Mode"
-%ul{class: view_mode_class}
+%ul.drs-items{class: view_mode_class}
   %li
     %article.drs-item(data-pid="neu:212kasdf")
       %figure
