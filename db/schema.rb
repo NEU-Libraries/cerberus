@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20131203201951) do
+ActiveRecord::Schema.define(:version => 20131203203310) do
 
   create_table "bookmarks", :force => true do |t|
     t.integer  "user_id",     :null => false
@@ -156,6 +156,7 @@ ActiveRecord::Schema.define(:version => 20131203201951) do
     t.datetime "created_at",      :null => false
     t.datetime "updated_at",      :null => false
     t.string   "pid"
+    t.boolean  "notified"
   end
 
   add_index "upload_alerts", ["type"], :name => "index_upload_alerts_on_type"
