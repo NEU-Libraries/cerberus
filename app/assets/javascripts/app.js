@@ -130,7 +130,7 @@ var drsApp = {
 
 
     handleRequiredInputs: function(){
-      var targets = $('*[required="required"]');
+      var targets = $('input, textarea, select').filter('[required="required"]');
       var addTooltip = function(e){
         return $(e).tooltip({
           title: 'Required',
@@ -140,7 +140,7 @@ var drsApp = {
       targets.each(function(index, el) {
         var id = $(el).attr('id');
         $('label[for="' + id +'"]').addClass('required-label');
-        $(el).on('focus hover click change', function(){
+        $(el).on('focus hover click change keypress', function(){
           if($(this).val().length > 0 ){
             $(this).tooltip('destroy');
           }else{
