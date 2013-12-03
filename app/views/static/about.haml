@@ -7,7 +7,7 @@
   = view_mode.capitalize + "Mode"
 %ul{class: view_mode_class}
   %li
-    %article
+    %article.drs-item(data-pid="neu:212kasdf")
       %figure
         %a(href="#")
           %img.thumbnail-s2-2x(src="http://placekitten.com/340/340" alt="Kitten Placeholder")
@@ -19,3 +19,26 @@
           %a(href="#")
             Lorem ipsum dolor sit amet
         %h5.drs-item-creator Dr. Suss
+      %main.drs-item-details
+        %dl
+          %dt.drs-item-abstract Abstract
+          %dd
+            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+            tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+            quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+            consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+            cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
+            proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+          %dt.drs-item-deposit-date
+            Date Added
+          %dd
+            %time(date-time="1996-12-19T16:39:57-08:00")
+              August 21, 2001
+          %dt.drs-item-subjects
+            Subjects
+          %dd
+            Cats
+          %dd
+            Kittens
+          %dd
+            Cute
