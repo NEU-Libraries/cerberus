@@ -14,18 +14,17 @@ class DerivativeCreator
     if master.instance_of? ImageMasterFile 
       create_full_thumbnail 
     elsif master.instance_of? PdfFile 
-      create_minimum_thumbnail 
+      create_thumbnail_from_pdf(self.master) 
     elsif master.instance_of? MswordFile 
        pdf = create_pdf_file
-       create_minimum_thumbnail(pdf)
+       create_thumbnail_from_pdf(pdf)
     end
   end
 
   private 
 
-    # Creates a thumbnail with sizes up to 4_2x.  
-    # Used for PDF files
-    def create_minimum_thumbnail(master = @master) 
+    # Creates a thumbnail with sizes up to 4_2x.
+    def create_thumbnail_from_pdf(pdf) 
       if self.core.thumbnail 
         thumbnail = self.core.thumbnail 
       else
@@ -33,13 +32,13 @@ class DerivativeCreator
       end
 
       # Modify the copy of the object we're holding /without/ persisting that change.
-      master.transform_datastream(:content, content: { datastream: 'content', size: '680X680>' })
+      pdf.transform_datastream(:content, content: { datastream: 'content', size: '680x680>' })
 
-      create_scaled_progressive_jpeg(thumbnail, master, {height: 85, width: 85}, 'thumbnail_1')
-      create_scaled_progressive_jpeg(thumbnail, master, {height: 170, width: 170}, 'thumbnail_2') 
-      create_scaled_progressive_jpeg(thumbnail, master, {height: 340, width: 340}, 'thumbnail_2_2x') 
-      create_scaled_progressive_jpeg(thumbnail, master, {width: 340}, 'thumbnail_4') 
-      create_scaled_progressive_jpeg(thumbnail, master, {width: 680}, 'thumbnail_4_2x')
+      create_scaled_progressive_jpeg(thumbnail, pdf, {height: 85, width: 85}, 'thumbnail_1')
+      create_scaled_progressive_jpeg(thumbnail, pdf, {height: 170, width: 170}, 'thumbnail_2') 
+      create_scaled_progressive_jpeg(thumbnail, pdf, {height: 340, width: 340}, 'thumbnail_2_2x') 
+      create_scaled_progressive_jpeg(thumbnail, pdf, {width: 340}, 'thumbnail_4') 
+      create_scaled_progressive_jpeg(thumbnail, pdf, {width: 680}, 'thumbnail_4_2x')
     end
 
     # Creates a thumbnail with as many datastreams as possible. 
@@ -85,9 +84,10 @@ class DerivativeCreator
         else
           tmp = Tempfile.new('thumb', encoding: 'ascii-8bit')
         end
+
         tmp.write master.content.content 
 
-        img = Magick::Image.read(tmp.path).first 
+        img = Magick::Image.from_blob(master.content.content).first 
         img.format = "JPEG" 
         if size[:height] && size[:width]
           scaled_img = img.resize_to_fill(size[:height], size[:width]) 
