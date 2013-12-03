@@ -1,0 +1,21 @@
+- int =  rand(2);
+
+- view_mode = int > 0 ? "list" : "grid"
+- view_mode_class = view_mode == "list" ? "drs-list-view" : "drs-grid-view"
+- @page_title = "About"
+%h1.page-title
+  = view_mode.capitalize + "Mode"
+%ul{class: view_mode_class}
+  %li
+    %article
+      %figure
+        %a(href="#")
+          %img.thumbnail-s2-2x(src="http://placekitten.com/340/340" alt="Kitten Placeholder")
+          %figcaption
+            %p
+              Image
+      %header
+        %h3.drs-item-title 
+          %a(href="#")
+            Lorem ipsum dolor sit amet
+        %h5.drs-item-creator Dr. Suss

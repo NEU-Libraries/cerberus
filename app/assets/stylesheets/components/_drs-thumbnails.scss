@@ -43,3 +43,36 @@
     text-decoration: none;
   }
 }
+
+img{
+  &[class*="thumbnail-"]{
+    display: inline-block;
+    max-width: 100%;
+    height: auto;
+  }
+  &.thumbnail-s1,
+  &.thumbnail-s1-2x{
+    width: 85px;
+    height: 85px;
+  }
+ 
+  &.thumbnail-s2,
+  &.thumbnail-s2-2x{
+    width: 170px;
+    height: 170px;
+  }
+
+  &.thumbnail-s4,
+  &.thumbnail-s4-2x{
+    width: 340px;
+  }
+
+  &.thumbnail-s10,
+  &.thumbnail-s10-2x{
+    width: 970px;
+  }
+
+  &.thumbnail-s10-2x{
+    width: 1940px;
+  }
+}

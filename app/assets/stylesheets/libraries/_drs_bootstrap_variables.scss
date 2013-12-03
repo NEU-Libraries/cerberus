@@ -348,8 +348,8 @@ $navbarBorder:                    darken($navbarBackground, 5%);
 $navbarText:                      $silver;
 $navbarLinkColor:                 $midnight-blue;
 $navbarLinkColorHover:            $peter-river;
-$navbarLinkColorActive:           lighten($navbarLinkColorHover, 5%);
-$navbarLinkBackgroundHover:       darken($navbarBackground, 10%);
+$navbarLinkColorActive:           darken($navbarLinkColorHover, 5%);
+$navbarLinkBackgroundHover:       $navbarBorder;
 $navbarLinkBackgroundActive:      lighten($navbarLinkBackgroundHover, 5%);
 
 $navbarBrandColor:                darken($navbarLinkColor, 20%);
