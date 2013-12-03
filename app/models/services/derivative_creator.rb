@@ -23,13 +23,8 @@ class DerivativeCreator
 
   private 
 
-    # Creates a thumbnail with sizes up to 4_2x.
-    def create_thumbnail_from_pdf(pdf) 
-      if self.core.thumbnail 
-        thumbnail = self.core.thumbnail 
-      else
-        thumbnail = instantiate_with_metadata("#{core.title} thumbnails", "Thumbnails for #{core.pid}", ImageThumbnailFile) 
-      end
+    def create_thumbnail_from_pdf(pdf)
+      thumbnail = find_or_create_thumbnail
 
       # Modify the copy of the object we're holding /without/ persisting that change.
       pdf.transform_datastream(:content, content: { datastream: 'content', size: '680x680>' })
@@ -44,11 +39,7 @@ class DerivativeCreator
     # Creates a thumbnail with as many datastreams as possible. 
     # Used exclusively for images. 
     def create_full_thumbnail(master = @master)
-      if self.core.thumbnail 
-        thumbnail = self.core.thumbnail 
-      else
-        thumbnail = instantiate_with_metadata("#{core.title} thumbnails", "Thumbnails for #{core.pid}", ImageThumbnailFile)
-      end
+      thumbnail = find_or_create_thumbnail
 
       create_scaled_progressive_jpeg(thumbnail, master, {height: 85, width: 85}, 'thumbnail_1') 
       create_scaled_progressive_jpeg(thumbnail, master, {height: 170, width: 170}, 'thumbnail_2') 
@@ -62,10 +53,14 @@ class DerivativeCreator
     # Create or update a PDF file. 
     # Should only be called when Msword Files are uploaded. 
     def create_pdf_file
+      title = "#{core.title} pdf" 
+      desc = "PDF for #{core.pid}"
+
       if self.core.content_objects.find { |e| e.instance_of? PdfFile }
-        pdf = self.core.content_objects.find { |e| e.instance_of? PdfFile } 
+        original = self.core.content_objects.find { |e| e.instance_of? PdfFile }
+        pdf = update_or_create_with_metadata(title, desc, PdfFile, original) 
       else
-        pdf = instantiate_with_metadata("#{core.title} pdf", "PDF for #{core.pid}", PdfFile) 
+        pdf = update_or_create_with_metadata(title, desc, PdfFile) 
       end
 
       master.transform_datastream(:content, { to_pdf: { format: 'pdf', datastream: 'pdf'} }, processor: 'document')
@@ -78,43 +73,45 @@ class DerivativeCreator
         return false 
       end
 
-      begin 
-        if master.instance_of? PdfFile
-          tmp = Tempfile.new(['thumb', '.png'], encoding: 'ascii-8bit') 
-        else
-          tmp = Tempfile.new('thumb', encoding: 'ascii-8bit')
-        end
+      img = Magick::Image.from_blob(master.content.content).first 
+      img.format = "JPEG"
+      img.interlace = Magick::PlaneInterlace 
 
-        tmp.write master.content.content 
-
-        img = Magick::Image.from_blob(master.content.content).first 
-        img.format = "JPEG" 
-        if size[:height] && size[:width]
-          scaled_img = img.resize_to_fill(size[:height], size[:width]) 
-        elsif size[:width] 
-          scaled_img = img.resize_to_fit(size[:width])
-        else 
-          raise "size must be hash containing :height/:width keys or just the :width key" 
-        end
-
-        scaled_img.write(tmp.path) { self.interlace = Magick::PlaneInterlace }
-
-        thumb.add_file(File.open(tmp.path, 'rb').read, dsid, 'test.jpeg') 
-        thumb.save!
-      ensure 
-        tmp.unlink 
+      if size[:height] && size[:width]
+        scaled_img = img.resize_to_fill(size[:height], size[:width]) 
+      elsif size[:width] 
+        scaled_img = img.resize_to_fit(size[:width])
+      else 
+        raise "size must be hash containing :height/:width keys or just the :width key" 
       end
+
+      thumb.add_file(scaled_img.to_blob, dsid, "#{master.content.label.split('.').first}.jpeg") 
+      thumb.save!
     end   
 
-    def instantiate_with_metadata(title, desc, klass) 
-      object = klass.new(pid: Sufia::Noid.namespaceize(Sufia::IdService.mint))
+    def update_or_create_with_metadata(title, desc, klass, object = nil)
+      if object.nil? 
+        object = klass.new(pid: Sufia::Noid.namespaceize(Sufia::IdService.mint))
+      end
+
       object.title                  = title 
       object.identifier             = object.pid
       object.description            = desc
-      object.keywords               = core.keywords  
+      object.keywords               = core.keywords.flatten unless core.keywords.nil?  
       object.depositor              = core.depositor
       object.core_record            = core  
       object.rightsMetadata.content = master.rightsMetadata.content
       object.save! ? object : false
+    end
+
+    def find_or_create_thumbnail 
+      title = "#{core.title} thumbnails" 
+      desc = "Thumbnails for #{core.pid}" 
+
+      if self.core.thumbnail 
+        update_or_create_with_metadata(title, desc, ImageThumbnailFile, self.core.thumbnail)
+      else
+        update_or_create_with_metadata(title, desc, ImageThumbnailFile)
+      end
     end
 end
