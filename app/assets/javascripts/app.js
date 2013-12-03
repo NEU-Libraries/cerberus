@@ -131,13 +131,22 @@ var drsApp = {
 
     handleRequiredInputs: function(){
       var targets = $('*[required="required"]');
-      targets.each(function(index, el) {
-        var id = $(el).attr('id');
-        $('label[for="' + id +'"]').addClass('required-label');
-        $(el).tooltip({
+      var addTooltip = function(e){
+        return $(e).tooltip({
           title: 'Required',
           placement: 'right'
         });
+      }
+      targets.each(function(index, el) {
+        var id = $(el).attr('id');
+        $('label[for="' + id +'"]').addClass('required-label');
+        $(el).on('focus hover click change', function(){
+          if($(this).val().length > 0 ){
+            $(this).tooltip('destroy');
+          }else{
+            addTooltip(this);
+          }
+        })
       });
     }    
     
