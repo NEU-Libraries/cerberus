@@ -1,16 +1,25 @@
-%h3= @compilation.title
+%h1.page-header.compilation-title
+  = @compilation.title
+  %small
+    %i.icon-folder-open-alt
+    Compilation
 
-%p= @compilation.description
+%p.lead
+  = @compilation.description
+
+=render partial: 'compilations_actions_nav.haml'
+
+
 
 - if @compilation.entries.empty?
   %p This compilation is currently empty.  Get out there and add some files. 
 - else 
   = render partial: 'all_entries', locals: { compilation: @compilation, entries: @compilation.entries }
 
-%h4 Actions
+
 
 %span.warning WARNING: Destroying a compilation is not reversible. 
-%br 
+
 = link_to("Destroy This Compilation", @compilation, method: 'delete')
 %br 
 - if @compilation.entry_ids.length > 0

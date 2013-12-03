@@ -1,8 +1,18 @@
-%p Files associated with this compilation are: 
-%ul
+%h3
+  Files
+%ul.media-list
   - entries.each do |entry| 
-    %li 
-      %p= entry.title
-      = link_to("View #{entry.title}", nu_core_file_path(entry))
-      %span.spacer //
-      = link_to("Remove from compilation", delete_entry_path(id: compilation.pid, entry_id: entry.pid), method: 'delete') 
+    %li.media
+      %a.pull-left{href: nu_core_file_path(entry.pid)}
+        %img.media-object(src="http://placekitten.com/85/85" alt="Kitten Placeholder Image")
+      .media
+        %h4.media-heading 
+          %a{href: nu_core_file_path(entry.pid)}
+            = entry.title
+        -if entry.description.length > 0
+          %p
+            =entry.description
+        %a.btn.btn-mini.btn-clear(title="Remove #{entry.title} from #{compilation.title} "){href: delete_entry_path(id: compilation.pid, entry_id: entry.pid), method: "delete",  data: { confirm: 'Are you sure?', toggle: "tooltip" } }
+          %i.icon-remove
+          %span.sr-only
+            Remove #{entry.title} from #{compilation.title}
