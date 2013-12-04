@@ -63,11 +63,11 @@ task :reset_data => :environment do
   
   set_edit_permissions(root_dept)
 
-  engDept = create_collection(Community, 'neu:1', 'English Department', tmp_user)
-  sciDept = create_collection(Community, 'neu:1', 'Science Department', tmp_user)
-  litCol = create_collection(NuCollection, engDept.id, 'Literature', tmp_user)
-  roCol = create_collection(NuCollection, engDept.id, 'Random Objects', tmp_user)
-  rusNovCol = create_collection(NuCollection, litCol.id, 'Russian Novels', tmp_user) 
+  engDept = create_collection(Community, 'neu:1', 'English Department')
+  sciDept = create_collection(Community, 'neu:1', 'Science Department')
+  litCol = create_collection(NuCollection, engDept.id, 'Literature')
+  roCol = create_collection(NuCollection, engDept.id, 'Random Objects')
+  rusNovCol = create_collection(NuCollection, litCol.id, 'Russian Novels') 
 
   create_file("test_docx.docx", tmp_user, roCol)
   create_file("test_pic.jpeg", tmp_user, roCol)
