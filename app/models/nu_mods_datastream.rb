@@ -127,6 +127,19 @@ class NuModsDatastream < ActiveFedora::OmDatastream
       }
     }
 
+    #custom extension for handling significant content. 
+    t.extension(path: 'extension', namespace_prefix: 'mods', attributes: { displayLabel: 'scholarly_object'}){
+      t.scholarly_object(namespace_prefix: nil){
+        t.category(namespace_prefix: nil)
+        t.department(namespace_prefix: nil)
+        t.degree(namespace_prefix: nil)
+        t.course_info(namespace_prefix: nil){
+          t.course_number(namespace_prefix: nil)
+          t.course_title(namespace_prefix: nil)
+        }
+      }
+    }
+
     t.title(proxy: [:title_info, :title])
     t.date_issued(proxy: [:origin_info, :date_issued]) 
   end
