@@ -18,8 +18,8 @@ set :pty, true
 # set :default_env, { path: "/opt/ruby/bin:$PATH" }
 set :keep_releases, 5
  
-require 'whenever/capistrano'
-set :whenever_command, 'bundle exec whenever'
+#require 'whenever/capistrano'
+#set :whenever_command, 'bundle exec whenever'
 
 set :ssh_options, {
    forward_agent: true,
