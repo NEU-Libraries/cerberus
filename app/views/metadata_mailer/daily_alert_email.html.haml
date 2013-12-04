@@ -1,29 +1,14 @@
 %h3 Theses
-%ul
-  - @theses.each do |item| 
-    = render partial: 'alert_item', locals: { item: item } 
+= render partial: 'alert_items', locals: { alerts: @theses } 
 
 %h3 Research Publications
-%ul
-  %tbody{'border' => 1}
-    %tr
-      %th Title 
-      %th Depositor 
-      %th PID 
-      - @research.each do |item| 
-        = render partial: 'alert_item', locals: { item: item } 
+= render partial: 'alert_items', locals: { alerts: @research } 
 
 %h3 Presentations 
-%ul
-  - @presentations.each do |item| 
-    = render partial: 'alert_item', locals: { item: item } 
+= render partial: 'alert_items', locals: { alerts: @presentations} 
 
 %h3 Datasets
-%ul 
-  - @datasets.each do |item| 
-    = render partial: 'alert_item', locals: { item: item } 
+= render partial: 'alert_items', locals: { alerts: @datasets } 
 
 %h3 Learning Objects
-%ul
-  - @learning_objects.each do |item| 
-    = render partial: 'alert_item', locals: { item: item } 
+= render partial: 'alert_items', locals: { alerts: @learning_objects } 
