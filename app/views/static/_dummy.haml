@@ -3,20 +3,22 @@
     %a(href="#")
       %img.thumbnail-s2-2x(src="http://placekitten.com/340/340" alt="Kitten Placeholder")
       %figcaption
-        %p
-          Image
+        Image
   .drs-item-details
     %header
       %h4.drs-item-title 
         %a(href="#")
           Lorem ipsum dolor sit amet
       %h5.drs-item-creator Dr. Suss
-      %dl
+      .row-fluid
+    .drs-item-add-details
+      %dl.drs-item-deposit-date-list
         %dt.drs-item-deposit-date-label
           Date Added
         %dd.drs-item-deposit-date
           %time(date-time="1996-12-19T16:39:57-08:00")
             August 21, 2001
+      %dl.drs-item-subject-list
         %dt.drs-item-subject-label
           Subject(s)
           %dd.drs-item-subject
@@ -28,10 +30,11 @@
           %dd.drs-item-subject
             %a(href="#")
               Cute
+      %dl.drs-item-abstract-list
         %dt.drs-item-abstract-label
-          %a(data-target="drs-item-abstract" href="#")
+          %a( href="#abstract#{i}" data-toggle="collapse" data-parent=".drs-item")
             Abstract
-        %dd.drs-item-abstract.collapse
+        %dd.drs-item-abstract.collapse{id: "abstract#{i}"}
           Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
           tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
           quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
@@ -39,15 +42,15 @@
           cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
           proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
     %menu.btn-group(type="toolbar")
-      %button.btn.btn-clear.btn-mini
+      %button.btn.btn-clear.btn-small
         %i.icon-shopping-cart
         %span.sr-only
           Add to shopping car
-      %button.btn.btn-clear.btn-mini
+      %button.btn.btn-clear.btn-small
         %i.icon-folder-open-alt
         %span.sr-only
           Add to compilation
-      %button.btn.btn-clear.btn-mini
+      %button.btn.btn-clear.btn-small
         %i.icon-download
         %span.sr-only
           Download 

@@ -14,5 +14,5 @@
   .span9
     %h3 Items
     %section.drs-items{class: view_mode_class}
-      - for i in 5 .. rand(50) + 5 do
-        = render "dummy"
+      - for i in 5 .. rand(50) + 5 do 
+        = render partial: "dummy", locals: { i: i} 

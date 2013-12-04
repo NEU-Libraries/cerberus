@@ -17,8 +17,12 @@
       text-align: center;
     }
   }
-
-  
+  menu{
+    padding-left: 0;
+  }
+  dl{
+    margin: 2px 0;
+  }
 
   
 }
@@ -86,6 +90,9 @@
     .drs-item-abstract-label{
       clear: left;
       
+    }
+    menu{
+      float: right;
     }
   }
   &.drs-items-grid{
