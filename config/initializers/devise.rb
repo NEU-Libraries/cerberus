@@ -246,6 +246,6 @@ Devise.setup do |config|
   # config.omniauth_path_prefix = "/my_engine/users/auth"
 
   config.omniauth :shibboleth, {:uid_field => 'eppn',
-                                :info_fields => {:name => 'cn', :last_name => 'sn', :nuid => 'neuEduNUID', :employee => 'unscoped-affiliation'}, :email => 'mail'}
+                                :info_fields => {:name => 'cn', :last_name => 'sn', :nuid => 'neuEduNUID', :employee => 'unscoped-affiliation', :email => 'mail'}
 
 end
