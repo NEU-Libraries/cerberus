@@ -7,9 +7,10 @@ class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
 
     if @user.persisted?
       flash[:notice] = "Successfully signed in with Shibboleth"
-      sign_in_and_redirect @user, :event => :authentication #this will throw if @user is not activated       
+      sign_in @user, :event => :authentication #this will throw if @user is not activated
+      redirect_to root_path       
     else
-      flash[:error] = "YOU SHALL NOT PASS"
+      flash[:error] = "Error with Shibboleth login"
       redirect_to root_path
     end
   end
