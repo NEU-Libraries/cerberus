@@ -18,12 +18,12 @@
   }
 }
 
-@mixin drs-button($baseColor: $linkColor, $activeColor: $linkColorHover, $bg: $bodyBackground){
+@mixin drs-button($baseColor: $linkColor, $activeColor: $linkColorHover, $bg: transparent){
   color: $baseColor;
   background-color: $bg;
   border: 0.125em solid $baseColor;
   &:hover, &:focus, &:active, &.active, &.disabled, &[disabled] {
-    color: $bg;
+    color: $white;
     background-color: $activeColor;
     border-color:  $activeColor
   }
