@@ -1,5 +1,15 @@
 .drs-items{
-  .drs-item{
+  &.drs-items-list{
+    @extend .media-list;
+    .drs-item{
+      @extend .media;
+      figure{
+        @extend .media-object;
+      }
+    }
 
+  }
+  .drs-item{
+    
   }
 }
