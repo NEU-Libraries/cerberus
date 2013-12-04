@@ -14,7 +14,7 @@ Drs::Application.configure do
   config.action_controller.perform_caching = false
 
   # Don't care if the mailer can't send
-  config.action_mailer.raise_delivery_errors = false
+  config.action_mailer.raise_delivery_errors = true
 
   # Print deprecation notices to the Rails logger
   config.active_support.deprecation = :log
@@ -34,4 +34,22 @@ Drs::Application.configure do
 
   # Expands the lines which load the assets
   config.assets.debug = true
+
+
+  # Tell Mailer to use SMTP 
+  config.action_mailer.delivery_method = :smtp
+
+  # Tell Mailer to use localhost:3000 as the default host 
+  config.action_mailer.default_url_options = { :host => "localhost:3000" }
+
+  # Mailer configuration 
+  ActionMailer::Base.smtp_settings = {
+    address: ENV["MAILER_ADDRESS"],
+    port: ENV["MAILER_PORT"],
+    domain: ENV["MAILER_DOMAIN"], 
+    user_name: ENV["MAILER_USERNAME"],
+    password: ENV["MAILER_PASSWORD"], 
+    authentication: ENV["MAILER_AUTHENTICATION"], 
+    enable_starttls_auto: true
+  }
 end

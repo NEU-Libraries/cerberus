@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20131119220315) do
+ActiveRecord::Schema.define(:version => 20131203210300) do
 
   create_table "bookmarks", :force => true do |t|
     t.integer  "user_id",     :null => false
@@ -147,6 +147,19 @@ ActiveRecord::Schema.define(:version => 20131119220315) do
     t.datetime "created_at",      :null => false
     t.datetime "updated_at",      :null => false
   end
+
+  create_table "upload_alerts", :force => true do |t|
+    t.string   "content_type"
+    t.string   "title"
+    t.string   "depositor_name"
+    t.string   "depositor_email"
+    t.datetime "created_at",      :null => false
+    t.datetime "updated_at",      :null => false
+    t.string   "pid"
+    t.boolean  "notified"
+  end
+
+  add_index "upload_alerts", ["content_type"], :name => "index_upload_alerts_on_type"
 
   create_table "users", :force => true do |t|
     t.string   "email",                  :default => "",    :null => false

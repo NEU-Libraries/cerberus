@@ -1,0 +1,14 @@
+%h3 Theses
+= render partial: 'alert_items', locals: { alerts: @theses } 
+
+%h3 Research Publications
+= render partial: 'alert_items', locals: { alerts: @research } 
+
+%h3 Presentations 
+= render partial: 'alert_items', locals: { alerts: @presentations} 
+
+%h3 Datasets
+= render partial: 'alert_items', locals: { alerts: @datasets } 
+
+%h3 Learning Objects
+= render partial: 'alert_items', locals: { alerts: @learning_objects } 
