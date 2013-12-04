@@ -12,7 +12,7 @@ class MetadataMailer < ActionMailer::Base
     @datasets = UploadAlert.withheld_datasets 
     @learning_objects = UploadAlert.withheld_learning_objects
     @presentations = UploadAlert.withheld_presentations
-    mail(to: "William Jackson <wjackson64@gmail.com>", subject: 'Welcome to My Awesome Site')
+    mail(to: "William Jackson <wjackson64@gmail.com>", subject: 'Daily Significant Uploads') 
   end
 
   private 
