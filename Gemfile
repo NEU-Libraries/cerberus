@@ -40,6 +40,7 @@ gem 'jquery-rails'
 gem "devise"
 gem "devise-guests", "~> 0.3"
 gem "ruby-filemagic", "~> 0.4.2"
+gem "figaro"
 
 
 
