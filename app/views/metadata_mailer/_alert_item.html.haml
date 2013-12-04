@@ -1,0 +1,4 @@
+%tr
+  %td= link_to("#{item.title}", controller: 'nu_core_files', action: 'show', id: item.pid, only_path: false)
+  %td= "#{item.depositor_name} (#{item.depositor_email})"
+  %td= "#{item.pid}"
