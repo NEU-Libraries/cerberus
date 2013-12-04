@@ -38,7 +38,7 @@ Drs::Application.configure do
   # Tell Mailer to use SMTP 
   config.action_mailer.delivery_method = :smtp
 
-  # Tell Mailer to use localhost:3000 as the default host 
+  # Tell Mailer to use repositorydev as the default host 
   config.action_mailer.default_url_options = { :host => "repositorydev.neu.edu" }
 
   # Mailer configuration 
