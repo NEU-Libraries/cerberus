@@ -9,6 +9,19 @@
   
 }
 
+.drs-item-details{
+  dl{
+    @include clearfix();
+    dt{
+      float: left;
+      width: 100px;
+
+    }
+    dd{
+      margin-left: 100px;
+    }
+  }
+}
 
 .drs-items{
   
@@ -26,22 +39,17 @@
     }
     .drs-item-details{
       @extend .media-body;
-      dl{
-        dt{
-          float: left;
-          width: 100px;
-
-        }
-        dd{
-          margin-left: 100px;
-        }
-      }
+      
     }
     .drs-item-title{
       @extend .media-heading;
     }
     .drs-item-subject{
       float: left;
+      margin-left: 0!important;
+    }
+    .drs-item-abstract-label{
+      clear: left;
       
     }
   }
