@@ -21,10 +21,10 @@ class User < ActiveRecord::Base
   ROLES = %w[admin employee] 
 
   def self.find_for_shib(auth, signed_in_resource=nil)    
-    user = User.where(:email => auth.uid).first
+    user = User.where(:email => auth.info.email).first
     
     unless user            
-      user = User.create(email:auth.uid, password:Devise.friendly_token[0,20], full_name:auth.info.name, nuid:auth.info.nuid)
+      user = User.create(email:auth.info.email, password:Devise.friendly_token[0,20], full_name:auth.info.name, nuid:auth.info.nuid)
       Sufia.queue.push(EmployeeCreateJob.new(auth.info.nuid))
     end
 
