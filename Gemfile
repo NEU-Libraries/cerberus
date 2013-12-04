@@ -45,7 +45,7 @@ gem "ruby-filemagic", "~> 0.4.2"
 gem "figaro"
 
 # Use whenever for scheduling timed tasks
-gem "whenever" 
+gem "whenever", :require => false
 
 
 
