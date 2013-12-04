@@ -17,8 +17,8 @@
 #   runner "AnotherModel.prune_old_records"
 # end
 
-every 1.day, at: '1:30am' do 
-  runner "MetadataMailer.daily_alert_email" 
+every 1.day, at: '1:30am', roles: [:app] do 
+  runner "MetadataMailer.daily_alert_email.deliver!"
 end
 
 # Learn more: http://github.com/javan/whenever
