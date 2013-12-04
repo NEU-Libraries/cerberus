@@ -40,7 +40,12 @@ gem 'jquery-rails'
 gem "devise"
 gem "devise-guests", "~> 0.3"
 gem "ruby-filemagic", "~> 0.4.2"
+
+# Use figaro for setting configuration information that ought to be kept secret
 gem "figaro"
+
+# Use whenever for scheduling timed tasks
+gem "whenever" 
 
 
 
