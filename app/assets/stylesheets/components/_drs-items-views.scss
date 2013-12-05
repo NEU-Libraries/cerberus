@@ -76,6 +76,9 @@
         float: none;
         display: block;
         margin-bottom: 10px;
+        figcaption{
+          text-align: left;
+        }
       }
         
         
@@ -117,13 +120,30 @@
 
   }
   &.drs-items-grid{
+    @extend .row;
+    
     .drs-item{
+      @extend .span3;
+      @extend [class*="span"];
+      margin-bottom: 20px;
+      @media (min-width: 1200px) {
+        margin-bottom: 30px;
+      }
+
       @include focus-states{
         border-color: $linkColor;
         @include box-shadow(0 1px 4px rgba(0,105,214,.25));
       }
+      > figure img{
+        display: block;
+        margin: 10px auto;
+      }
+    }
+    .drs-item-add-details{
+      @include sr-only;
     }
 
   }
+
 
 }
