@@ -49,7 +49,7 @@ namespace :deploy do
   task :whenever do 
     on roles(:app), :in => :sequence, :wait => 5 do 
       execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec whenever --set environment=staging)"
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec whenever --update-crontab" 
+      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec whenever --update-crontab)" 
     end
   end
 end
@@ -67,4 +67,5 @@ after 'deploy:updating', 'deploy:migrate'
 after 'deploy:migrate',  'deploy:create_drs_admin'
 after 'deploy:updating', 'deploy:restart' 
 after 'deploy:updating', 'deploy:assets_kludge'
+after 'deploy:updating', 'deploy:whenever'
 # after 'deploy:finished', 'deploy:refresh_data'
