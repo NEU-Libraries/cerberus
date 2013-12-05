@@ -32,15 +32,12 @@
               Cute
       %dl.drs-item-abstract-list
         %dt.drs-item-abstract-label
-          %a( href="#abstract#{i}" data-toggle="collapse" data-parent=".drs-item")
-            Abstract
-        %dd.drs-item-abstract.collapse{id: "abstract#{i}"}
-          Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-          tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-          quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-          consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
-          cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
-          proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+          Abstract
+        %dd.drs-item-abstract{id: "abstract#{i}"}
+          %span.ellipsis
+            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+          %a(href="#abstract#{i}" data-toggle="ellipsis")
+            %i.icon-expand-alt
     %menu.btn-group(type="toolbar")
       %button.btn.btn-clear.btn-small
         %i.icon-shopping-cart
