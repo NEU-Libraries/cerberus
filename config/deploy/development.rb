@@ -37,6 +37,13 @@ namespace :deploy do
     end
   end
 
+  desc "Restarting the resque workers"
+  task :restart_workers do 
+    on roles(:app), :in => :sequence, :wait => 5 do 
+      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake resque:restart_workers)" 
+    end
+  end  
+
   desc "Resetting data" 
   task :refresh_data do 
     on roles(:app), :in => :sequence, :wait => 5 do
@@ -79,6 +86,7 @@ before 'deploy:refresh_data', 'rvm1:hook'
 after 'deploy:updating', 'deploy:copy_rvmrc_file' 
 after 'deploy:updating', 'deploy:trust_rvmrc' 
 after 'deploy:updating', 'bundler:install'
+after 'deploy:updating', 'deploy:restart_workers'
 after 'deploy:updating', 'deploy:migrate'
 after 'deploy:migrate',  'deploy:create_drs_admin'
 after 'deploy:updating', 'deploy:restart' 
