@@ -20,6 +20,7 @@
 
 @import "vendor/flatly/flatly-variables";
 @import "libraries/drs_bootstrap_variables";
+@import "vendor/bootstrap/mixins";
 @import "libraries/mixins";
 
 /////////////
@@ -163,6 +164,8 @@
 @import "components/nu-navbar";
 @import "components/drs-breadcrumbs";
 @import "components/drs-thumbnails";
+
+@import "components/drs-items-views";
 
 
 @import 'sections/masthead';

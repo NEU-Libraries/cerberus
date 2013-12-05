@@ -56,3 +56,14 @@ h1 small, h2 small, h3 small, h4 small, h5 small, h6 small {
 .sr-only{
   @include sr-only;
 }
+
+
+.ellipsis{
+  display: block;
+  @include ellipsis();
+  &.in{
+    display: initial;
+    white-space: initial;
+    overflow: auto;
+  }
+}

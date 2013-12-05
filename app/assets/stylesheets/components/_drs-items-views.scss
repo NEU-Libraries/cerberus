@@ -1,0 +1,149 @@
+.drs-item{
+  @include clearfix();
+  display: block;
+  padding: 4px;
+  border-color: $grayLight;
+  border-style: solid;
+  border-width: 1px;
+  @include border-radius($baseBorderRadius);
+  @include transition(all .2s ease-in-out);
+  @include focus-states{
+    cursor: pointer;
+  }
+
+  > figure{
+    margin: 0 0 0 0;
+    figcaption{
+      text-align: center;
+    }
+  }
+  menu{
+    padding-left: 0;
+  }
+  dl{
+    margin: 2px 0;
+  }
+
+  
+}
+
+.drs-item-details{
+  dl{
+    @include clearfix();
+    dt{
+      float: left;
+      width: 100px;
+
+    }
+    dd{
+      margin-left: 100px;
+    }
+  }
+}
+
+.drs-items{
+  
+  //significant layout differences here should be able to toggle these all with a single class
+  &.drs-items-list{
+    @extend .media-list;
+    .drs-item{
+      @extend .media;
+      @include border-radius(0);
+      margin-top: 0;
+      padding-bottom: 8px;
+      padding-top: 8px;
+      border-top-style: none;
+      @include focus-states{
+        background-color: rgb(248, 248, 248);
+        background-color: rgba(248, 248, 248, 0.56);
+
+        
+      }
+      &:first-child{
+        @include border-top-radius($baseBorderRadius);
+        border-top-style: solid;
+      }
+      &:last-child{
+        @include border-bottom-radius($baseBorderRadius);
+      }
+
+      > figure{
+      float: left;
+      margin-right: 15px;
+
+      // Reset float and spacing to stack
+      @media (max-width: 480px){
+        float: none;
+        display: block;
+        margin-bottom: 10px;
+        figcaption{
+          text-align: left;
+        }
+      }
+        
+        
+      }
+
+    }
+    .drs-item-details{
+      @extend .media-body;
+      
+    }
+    .drs-item-title{
+      @extend .media-heading;
+    }
+    .drs-item-subject{
+      float: left;
+      margin-left: 0!important;
+      padding: $paddingMini;
+
+    }
+    .drs-item-abstract-label{
+      clear: left;
+      
+    }
+
+    .drs-item-abstract{
+      @include clearfix();
+      .ellipsis{
+        max-width: 95%;
+        float: left;
+      }
+      .ellipsis-toggle{
+        float: left;
+        clear: right;
+      }
+    }
+    menu{
+      float: right;
+    }
+
+  }
+  &.drs-items-grid{
+    @extend .row;
+    
+    .drs-item{
+      @extend .span3;
+      @extend [class*="span"];
+      margin-bottom: 20px;
+      @media (min-width: 1200px) {
+        margin-bottom: 30px;
+      }
+
+      @include focus-states{
+        border-color: $linkColor;
+        @include box-shadow(0 1px 4px rgba(0,105,214,.25));
+      }
+      > figure img{
+        display: block;
+        margin: 10px auto;
+      }
+    }
+    .drs-item-add-details{
+      @include sr-only;
+    }
+
+  }
+
+
+}

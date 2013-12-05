@@ -1,0 +1,18 @@
+- int =  rand(2);
+
+- view_mode = int > 0 ? "list" : "grid"
+- view_mode = "grid"
+- view_mode_class = view_mode == "list" ? "drs-items-list" : "drs-items-grid"
+
+- @page_title = "About"
+%h1.page-title
+  = view_mode.capitalize + "Mode"
+.row
+  .span3
+    %h3 Controls
+    = render "sidebar"
+  .span9
+    %h3 Items
+    %section.drs-items{class: view_mode_class}
+      - for i in 5 .. rand(50) + 5 do 
+        = render partial: "dummy", locals: { i: i} 

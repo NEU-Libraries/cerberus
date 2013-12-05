@@ -35,8 +35,8 @@ feature "Creating a collection" do
       page.all('input#nu_collection_parent').first.value.should == @root.identifier
 
       # Fill out and submit the Collection creation form. 
-      fill_in 'Title *', with: "My Title" 
-      fill_in 'Description *', with: "My new collection" 
+      fill_in 'Title', with: "My Title" 
+      fill_in 'Description', with: "My new collection" 
       select 'public', from: "Choose Mass Permissions:" 
       select 'person', from: "Are you trying to add a person or a group?" 
       fill_in "Enter NUID or group name", with: "Person Edit" 

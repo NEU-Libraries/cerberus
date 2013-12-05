@@ -23,6 +23,7 @@ var drsApp = {
         drsApp.handleFitText();
         drsApp.tooltipSetup();
         drsApp.handleRequiredInputs();
+        drsApp.ellipsisExpand();
     },
     /**
      * Provides the breadcrumb popover menu for adding collections or new items to the application.
@@ -128,18 +129,61 @@ var drsApp = {
         }); 
     },
 
-
+    /**
+     * Builds interaction to inputs with [required="required"] to make sure that the user fills it out.
+     */
     handleRequiredInputs: function(){
-      var targets = $('*[required="required"]');
-      targets.each(function(index, el) {
-        var id = $(el).attr('id');
-        $('label[for="' + id +'"]').addClass('required-label');
-        $(el).tooltip({
-          title: 'Required',
-          placement: 'right'
+      //Query for inputs textareas and selects with require
+      var targets = $('input, textarea, select').filter('[required="required"]');
+      //Construct the tooltips for inputs that need to be filled still.
+      var addTooltip = function(e){
+        return $(e).tooltip({
+          title: 'Required'
         });
+      }
+      //cycle through each function.
+      targets.each(function(index, el) {
+        
+        var id = $(el).attr('id');
+        //add the required class.
+        $('label[for="' + id +'"]').addClass('required-label');
+        
+        // Check the element to figure out if we still need the tooltip or not.
+        
+        $(el).on('focus hover click change keypress', function(){
+          if($(this).val().length > 0 ){
+            $(this).tooltip('destroy');
+          }else{
+            addTooltip(this);
+          }
+        })
       });
-    }    
+    },
+    
+    ellipsisExpand: function(){
+      var $toggleLink = $('*[data-toggle="ellipsis"]');
+
+      //look for the target and toggle classes on that element.
+      var toggleState = function(event){
+        //stop the event from triggering other reations
+        event.preventDefault();
+        event.stopPropagation();
+        var $target = $(this).attr('href').length > 0 ? $($(this).attr('href')) : $($(this).data('target'));
+        if ($target.length > 0 ){
+          if ( ! $target.hasClass('ellipsis') ){
+            $target = $target.find('.ellipsis');
+          }
+          $target.toggleClass('in');
+          $(this).children('i').toggleClass('icon-expand-alt').toggleClass('icon-collapse-alt');
+        }else{
+          console.log("Invalid target specified for drsApp.ellipsisExpand" , $target);
+        }
+      }
+
+      if ($toggleLink.length > 0){
+        $toggleLink.on('click', toggleState );
+      }
+    }
     
 
  

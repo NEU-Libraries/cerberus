@@ -18,12 +18,12 @@
   }
 }
 
-@mixin drs-button($baseColor: $linkColor, $activeColor: $linkColorHover, $bg: $bodyBackground){
+@mixin drs-button($baseColor: $linkColor, $activeColor: $linkColorHover, $bg: transparent){
   color: $baseColor;
   background-color: $bg;
   border: 0.125em solid $baseColor;
   &:hover, &:focus, &:active, &.active, &.disabled, &[disabled] {
-    color: $bg;
+    color: $white;
     background-color: $activeColor;
     border-color:  $activeColor
   }
@@ -42,4 +42,22 @@
   overflow: hidden;
   clip: rect(0,0,0,0);
   border: 0;
+}
+
+@mixin buttonBackground($startColor, $endColor, $textColor: #fff, $textShadow: 0 -1px 0 rgba(0,0,0,.25)) {
+  
+  
+  background-color: $startColor; 
+  
+
+  // in these cases the gradient won't cover the background, so we override
+  &:hover, &:focus, &:active, &.active, &.disabled, &[disabled] { 
+    background-color: $endColor;
+  }
+
+  // IE 7 + 8 can't handle box-shadow to show active, so we darken a bit ourselves
+  &:active,
+  &.active {
+    background-color: $endColor;
+  }
 }

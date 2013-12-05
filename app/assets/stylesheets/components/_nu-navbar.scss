@@ -3,6 +3,12 @@
   padding: 12px 14px;
 }
 
-.navbar-brand{
-
+.navbar .brand{
+  @include focus-states{
+    color: $navbarLinkColorHover;
+  }
+  &.active{
+   color: $navbarLinkColorActive; 
+  }
 }
+

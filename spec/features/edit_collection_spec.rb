@@ -28,8 +28,8 @@ feature "Editing collections" do
     save_page
 
     #Verify data prefills correctly
-    find_field('Title *').value.should == 'Bills Collection'
-    find_field('Description *').value.should == 'Bills new collection' 
+    find_field('Title').value.should == 'Bills Collection'
+    find_field('Description').value.should == 'Bills new collection' 
 
 
     find_field('Choose Mass Permissions:').value.should == 'public'   
