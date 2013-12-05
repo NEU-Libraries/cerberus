@@ -42,13 +42,20 @@ namespace :deploy do
     on roles(:app), :in => :sequence, :wait => 5 do 
       execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake resque:restart_workers)" 
     end
-  end  
+  end
 
   desc "Resetting data" 
   task :refresh_data do 
     on roles(:app), :in => :sequence, :wait => 5 do
       # execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake jetty:stop)" 
       # execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake reset_data)"
+    end
+  end
+
+  desc "Copy Figaro YAML"
+  task :copy_yml_file do
+    on roles(:app), :in => :sequence, :wait => 5 do
+      execute "cp /home/drs/config/application.yml #{release_path}/config/"
     end
   end
 
@@ -86,6 +93,7 @@ before 'deploy:refresh_data', 'rvm1:hook'
 after 'deploy:updating', 'deploy:copy_rvmrc_file' 
 after 'deploy:updating', 'deploy:trust_rvmrc' 
 after 'deploy:updating', 'bundler:install'
+after 'deploy:updating', 'deploy:copy_yml_file'
 after 'deploy:updating', 'deploy:restart_workers'
 after 'deploy:updating', 'deploy:migrate'
 after 'deploy:migrate',  'deploy:create_drs_admin'
