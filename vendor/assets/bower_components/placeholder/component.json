@@ -1,0 +1,9 @@
+{
+    "name": "placeholder",
+    "description": "implements placeholder attributes in older browsers",
+    "version": "1.0.2",
+    "main": "./js/placeholder.js",
+    "dependencies": {
+        "jquery": "~1.7.0"
+    }
+}

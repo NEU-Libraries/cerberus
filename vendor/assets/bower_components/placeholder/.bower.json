@@ -1,0 +1,19 @@
+{
+  "name": "placeholder",
+  "description": "implements placeholder attributes in older browsers",
+  "version": "1.0.2",
+  "main": "./js/placeholder.js",
+  "dependencies": {
+    "jquery": "~1.7.0"
+  },
+  "homepage": "https://github.com/tylerball/placeholder",
+  "_release": "1.0.2",
+  "_resolution": {
+    "type": "version",
+    "tag": "v1.0.2",
+    "commit": "73cd77ddf76092d3f9ddcb20ed17698dd9cdbf66"
+  },
+  "_source": "git://github.com/tylerball/placeholder.git",
+  "_target": "*",
+  "_originalSource": "placeholder"
+}
