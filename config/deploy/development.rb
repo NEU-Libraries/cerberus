@@ -5,6 +5,7 @@
 # Sorry.
 
 set :stage, :development
+set :whenever_environment, 'staging'
 
 set :deploy_to, '/home/drs/apps/develop/'
 set :branch, 'develop'
@@ -41,6 +42,14 @@ namespace :deploy do
     on roles(:app), :in => :sequence, :wait => 5 do
       # execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake jetty:stop)" 
       # execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake reset_data)"
+    end
+  end
+
+  desc "Setting whenever environment and updating the crontable"
+  task :whenever do 
+    on roles(:app), :in => :sequence, :wait => 5 do 
+      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec whenever --set environment=staging)"
+      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec whenever --update-crontab" 
     end
   end
 end

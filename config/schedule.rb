@@ -17,7 +17,7 @@
 #   runner "AnotherModel.prune_old_records"
 # end
 
-every 1.day, at: '1:30am', roles: [:app] do 
+every 1.day, at: '1:30am'  do 
   runner "MetadataMailer.daily_alert_email.deliver!"
 end
 
