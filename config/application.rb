@@ -80,8 +80,10 @@ module Drs
     #Add polyfills in the pipline so that Modernizr can pull in js polyfills
     
     config.assets.precompile += [
-      "placeholder.js", 
-      "respond.js"
+      "placeholder/js/placeholder.js",
+      "placeholder/dist/placeholder.min.js",
+      "respond/dest/respond.min.js",
+      "respond/dest/respond.src.js"
     ]
       
     
