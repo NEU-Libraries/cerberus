@@ -22,6 +22,8 @@ gem 'bootstrap-sass', '~> 2.3.2.1'
 
 gem 'haml'
 
+gem "bower-rails", "~> 0.5.0"
+
 # Gems used only for assets and not required
 # in production environments by default.
 group :assets do
