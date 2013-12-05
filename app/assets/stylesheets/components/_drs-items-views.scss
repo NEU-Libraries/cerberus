@@ -68,7 +68,15 @@
       }
 
       > figure{
-        @extend .pull-left;
+      float: left;
+      margin-right: 15px;
+
+      // Reset float and spacing to stack
+      @media (max-width: 480px){
+        float: none;
+        display: block;
+        margin-bottom: 10px;
+      }
         
         
       }
@@ -92,10 +100,21 @@
       
     }
 
-  
+    .drs-item-abstract{
+      @include clearfix();
+      .ellipsis{
+        max-width: 95%;
+        float: left;
+      }
+      .ellipsis-toggle{
+        float: left;
+        clear: right;
+      }
+    }
     menu{
       float: right;
     }
+
   }
   &.drs-items-grid{
     .drs-item{
