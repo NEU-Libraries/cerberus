@@ -47,7 +47,8 @@ gem "figaro"
 # Use whenever for scheduling timed tasks
 gem "whenever", :require => false
 
-
+# Add resque-web to the project 
+gem 'resque', :require => 'resque/server'
 
 group :development do 
   # Deployment

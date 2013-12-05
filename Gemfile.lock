@@ -456,6 +456,7 @@ DEPENDENCIES
   kaminari!
   launchy
   rails (= 3.2.13)
+  resque
   resque_spec
   rspec-rails
   ruby-filemagic (~> 0.4.2)

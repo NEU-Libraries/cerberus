@@ -8,7 +8,16 @@ Drs::Application.routes.draw do
   resources :nu_collections, :path => 'collections', except: [:index] 
   get "/collections" => redirect("/communities")
 
-  resources :communities, only: [:index, :show] 
+  resources :communities, only: [:index, :show]
+
+  resque_web_constraint = lambda do |request|
+    current_user = request.env['warden'].user
+    current_user.present? && current_user.respond_to?(:admin?) && current_user.admin?
+  end
+
+  constraints resque_web_constraint do
+    mount Resque::Server, :at => "/resque"
+  end
 
   # Community Specific queries 
   get '/communities/:id/employees' => 'communities#employees', as: 'community_employees' 
