@@ -1,5 +1,4 @@
 set :stage, :staging
-set :whenever_environment, 'staging'
 
 # Simple Role Syntax
 # ==================
