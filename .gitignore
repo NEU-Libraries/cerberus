@@ -27,3 +27,5 @@ dump.rdb
 .vagrant
 # Ignore application configuration
 /config/application.yml
+
+public/assets
