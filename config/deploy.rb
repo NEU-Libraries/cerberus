@@ -5,6 +5,8 @@ set :repo_url, 'git@github.com:nu-lts/drs.git'
 
 # ask :branch, proc { `git rev-parse --abbrev-ref HEAD`.chomp }
 
+set :rvm_ruby_string,  ENV['GEM_HOME'].gsub(/.*\//,"")
+
 set :deploy_via, :copy
 
 # set :format, :pretty
