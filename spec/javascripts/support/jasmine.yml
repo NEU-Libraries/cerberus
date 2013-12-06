@@ -11,6 +11,7 @@
 #   - dist/**/*.js
 #
 src_files:
+  - assets/tests.js
   - assets/application.js
   - assets/app.js
   - assets/jasmine_examples/Song.js

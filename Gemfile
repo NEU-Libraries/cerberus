@@ -68,8 +68,14 @@ group :development, :test do
   gem "launchy" 
   gem "jettywrapper"
   gem "factory_girl_rails", :require => false
+  
   # JS  testing framework.
   gem "jasmine"
+  
+  # jQuery Testing for Rails Apps
+  # @link https://github.com/travisjeffery/jasmine-jquery-rails
+  gem "jasmine-jquery-rails"
+
 end
 
 group :test do 
