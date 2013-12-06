@@ -68,7 +68,7 @@ group :development, :test do
   gem "launchy" 
   gem "jettywrapper"
   gem "factory_girl_rails", :require => false
-  # JS  javascript testing framework.
+  # JS  testing framework.
   gem "jasmine"
 end
 

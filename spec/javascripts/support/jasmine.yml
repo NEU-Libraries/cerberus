@@ -12,7 +12,9 @@
 #
 src_files:
   - assets/application.js
-
+  - assets/app.js
+  - assets/jasmine_examples/Song.js
+  - assets/jasmine_examples/Player.js
 # stylesheets
 #
 # Return an array of stylesheet filepaths relative to src_dir to include before jasmine specs.

@@ -183,8 +183,10 @@ var drsApp = {
       if ($toggleLink.length > 0){
         $toggleLink.on('click', toggleState );
       }
+    },
+    returnTrue: function(){
+      return true;
     }
-    
 
  
 };
