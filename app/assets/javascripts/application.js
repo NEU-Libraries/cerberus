@@ -13,9 +13,10 @@
 //= require jquery
 //= require jquery_ujs
 //= require shopping_carts
+//= require blacklight/blacklight
 //= require sufia
 // Required by Blacklight
-//= require blacklight/blacklight
+
 //= require bootstrap-select/bootstrap-select.js
 //= require bootstrap-datepicker/js/bootstrap-datepicker.js
 //= require bootbox/bootbox.min.js

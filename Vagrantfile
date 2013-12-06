@@ -21,6 +21,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Live Reload runs on this server
   config.vm.network :forwarded_port, guest: 35729, host: 35729
 
+  # Forward the Jasmine interface on this port
+  config.vm.network :forwarded_port, guest: 8888, host: 8888
+
   # Create a private network, which allows host-only access to the machine
   # using a specific IP.
   config.vm.network :private_network, ip: "192.168.1.44"
