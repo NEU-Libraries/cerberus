@@ -245,5 +245,30 @@ describe NuModsDatastream do
       result["personal_creators_sim"].should == ["Will Jackson", "Jim Jones"]
       result["personal_creators_tesim"].should == ["Will Jackson", "Jim Jones"]
     end
+
+    it "creates ssim fields for scholarly_object category" do 
+      mods.category = "Theses" 
+      result["drs_category_ssim"].should == "Theses" 
+    end
+
+    it "creates ssim fields for scholarly_object department" do 
+      mods.department = "English dept" 
+      result["drs_department_ssim"].should == "English dept" 
+    end
+
+    it "creates ssim fields for scholarly_object degree" do 
+      mods.degree = "Masters" 
+      result["drs_degree_ssim"].should == "Masters" 
+    end
+
+    it "creates ssim fields for scholarly_object course number" do 
+      mods.course_number = "MGMT001" 
+      result["drs_course_number_ssim"].should == "MGMT001" 
+    end
+
+    it "creates ssim fields for scholarly_object course title" do 
+      mods.course_title = "Management Class" 
+      result["drs_course_title_ssim"].should == "Management Class" 
+    end
   end
 end

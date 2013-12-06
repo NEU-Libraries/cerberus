@@ -158,11 +158,11 @@ class NuModsDatastream < ActiveFedora::OmDatastream
     super(solr_doc) # Run the default solrization behavior 
 
     # Solrize extension information.
-    solr_doc["drs_category_ssim"] = self.category.first
-    solr_doc["drs_department_ssim"] = self.department.first
-    solr_doc["drs_degree_ssim"] = self.degree.first 
-    solr_doc["drs_course_number_ssim"] = self.course_number.first 
-    solr_doc["drs_course_title_ssim"] = self.course_title.first
+    solr_doc["drs_category_ssim"] = self.category.first if !self.category.first.blank?
+    solr_doc["drs_department_ssim"] = self.department.first if !self.department.first.blank?
+    solr_doc["drs_degree_ssim"] = self.degree.first if !self.degree.first.blank?
+    solr_doc["drs_course_number_ssim"] = self.course_number.first if !self.course_number.first.blank?
+    solr_doc["drs_course_title_ssim"] = self.course_title.first if !self.course_title.first.blank?
 
     # Extract a creation year field
     if self.origin_info.date_issued.any? && !self.origin_info.date_issued.first.blank?
