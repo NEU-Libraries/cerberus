@@ -1,11 +1,13 @@
 'use strict';
-
+/* jshint undef: true, unused: true */
+/*global $:false */
+/*global Modernizr */
 
 var drsApp = {
  
     init: function( settings ) {
         drsApp.config = {
-            $drsBootstrapSelect: $( "select.bs-select" ),
+            $drsBootstrapSelect: $( 'select.bs-select' ),
             $addToSetLink: $('#addToSet'),
             breadCrumbMenuContent: $('#addToSetLinks').html(),
             fitTextTarget: $('.fit-text')
@@ -32,15 +34,15 @@ var drsApp = {
         drsApp.config.$addToSetLink.popover({
             html: true,
             content: drsApp.config.breadCrumbMenuContent,
-        }).on('shown', function(event){
+        }).on('shown', function(){
           $(this).parent('li').addClass('active');
-        }).on('hide', function(event){
+        }).on('hide', function(){
           $(this).parent('li').removeClass('active');
         });
     },
 
     addToComplationLink: function(e){
-      e.on('ajax:success', function(evt, data, status, xhr){
+      e.on('ajax:success', function( ){
         var delta = $(this).data('method');
         switch(delta){
           case'post':
@@ -57,12 +59,12 @@ var drsApp = {
               .addClass('btn-success add-to-compilation')
               .removeClass('btn-danger remove-from-compilation');
           break;
-          defualt:
+          default:
             console.log('ajax successful, but not sure what to do!');
           break;
         }
         
-      }).on('ajax:error', function(evt, data, status, xhr){
+      }).on('ajax:error', function(){
         $(this).closest('.modal').modal('hide');
          $('.breadcrumb').addBsAlert({
           classes: 'alert alert-danger',
@@ -80,7 +82,7 @@ var drsApp = {
           strong: 'Success!',
           text: 'You created a new compilation!',
          });
-      }).on('ajax:error', function(evt, data, status, xhr){
+      }).on('ajax:error', function(){
         $(this).closest('.modal').modal('hide');
          $('.breadcrumb').addBsAlert({
           classes: 'alert alert-danger',
@@ -108,14 +110,14 @@ var drsApp = {
     handleFitText: function(){
       if (drsApp.config.fitTextTarget.length > 0 && window.Modernizr){
         Modernizr.load({
-          load: "//cdnjs.cloudflare.com/ajax/libs/FitText.js/1.1/jquery.fittext.min.js",
+          load: '//cdnjs.cloudflare.com/ajax/libs/FitText.js/1.1/jquery.fittext.min.js',
            complete: function () {
               if ( !$.fitText ) {
                   Modernizr.load('/assets/polyfills/FitText-js/jquery.fittext.js');
               }
               drsApp.config.fitTextTarget.fitText();
             }
-        }); 
+        });
       }
 
 
@@ -125,8 +127,8 @@ var drsApp = {
      */
     tooltipSetup: function(){
       $('body').tooltip({
-          selector: "a[data-toggle=tooltip]"
-        }); 
+          selector: 'a[data-toggle=tooltip]'
+        });
     },
 
     /**
@@ -140,7 +142,7 @@ var drsApp = {
         return $(e).tooltip({
           title: 'Required'
         });
-      }
+      };
       //cycle through each function.
       targets.each(function(index, el) {
         
@@ -156,7 +158,7 @@ var drsApp = {
           }else{
             addTooltip(this);
           }
-        })
+        });
       });
     },
     
@@ -176,9 +178,9 @@ var drsApp = {
           $target.toggleClass('in');
           $(this).children('i').toggleClass('icon-expand-alt').toggleClass('icon-collapse-alt');
         }else{
-          console.log("Invalid target specified for drsApp.ellipsisExpand" , $target);
+          console.log('Invalid target specified for drsApp.ellipsisExpand' , $target);
         }
-      }
+      };
 
       if ($toggleLink.length > 0){
         $toggleLink.on('click', toggleState );
