@@ -60,7 +60,12 @@ describe('The drsApp object', function() {
     });
   });
   
-
+  describe('toggles the view class for drs-items',function(){
+    beforeEach(function(){
+      
+    });
+    it('should change the toggle class ')
+  });
 
 
 });
