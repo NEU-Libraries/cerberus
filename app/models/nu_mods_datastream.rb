@@ -130,18 +130,23 @@ class NuModsDatastream < ActiveFedora::OmDatastream
     #custom extension for handling significant content. 
     t.extension(path: 'extension', namespace_prefix: 'mods', attributes: { displayLabel: 'scholarly_object'}){
       t.scholarly_object(namespace_prefix: nil){
-        t.category(namespace_prefix: nil, index_as: [:symbol, :facetable])
-        t.department(namespace_prefix: nil, index_as: [:symbol, :facetable]) 
-        t.degree(namespace_prefix: nil, index_as: [:symbol, :facetable])
+        t.category(namespace_prefix: nil)
+        t.department(namespace_prefix: nil)
+        t.degree(namespace_prefix: nil)
         t.course_info(namespace_prefix: nil){
-          t.course_number(namespace_prefix: nil, index_as: [:symbol, :facetable])
-          t.course_title(namespace_prefix: nil, index_as: [:symbol, :facetable]) 
+          t.course_number(namespace_prefix: nil)
+          t.course_title(namespace_prefix: nil)
         }
       }
     }
 
     t.title(proxy: [:title_info, :title])
     t.date_issued(proxy: [:origin_info, :date_issued]) 
+    t.category(ref: [:extension, :scholarly_object, :category])
+    t.department(ref: [:extension, :scholarly_object, :department]) 
+    t.degree(ref: [:extension, :scholarly_object, :degree]) 
+    t.course_number(ref: [:extension, :scholarly_object, :course_info, :course_number]) 
+    t.course_title(ref: [:extension, :scholarly_object, :course_info, :course_title]) 
   end
 
   # We override to_solr here to add 
@@ -152,8 +157,15 @@ class NuModsDatastream < ActiveFedora::OmDatastream
   def to_solr(solr_doc = Hash.new()) 
     super(solr_doc) # Run the default solrization behavior 
 
+    # Solrize extension information.
+    solr_doc["drs_category_ssim"] = self.category.first
+    solr_doc["drs_department_ssim"] = self.department.first
+    solr_doc["drs_degree_ssim"] = self.degree.first 
+    solr_doc["drs_course_number_ssim"] = self.course_number.first 
+    solr_doc["drs_course_title_ssim"] = self.course_title.first
+
     # Extract a creation year field
-    if self.origin_info.date_issued.any?
+    if self.origin_info.date_issued.any? && !self.origin_info.date_issued.first.blank?
       creation_date = self.origin_info.date_issued.first 
       solr_doc["creation_year_sim"] = [creation_date[/\d{4}/]]
     end
