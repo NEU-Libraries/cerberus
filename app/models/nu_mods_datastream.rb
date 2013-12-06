@@ -130,12 +130,12 @@ class NuModsDatastream < ActiveFedora::OmDatastream
     #custom extension for handling significant content. 
     t.extension(path: 'extension', namespace_prefix: 'mods', attributes: { displayLabel: 'scholarly_object'}){
       t.scholarly_object(namespace_prefix: nil){
-        t.category(namespace_prefix: nil)
-        t.department(namespace_prefix: nil)
-        t.degree(namespace_prefix: nil)
+        t.category(namespace_prefix: nil, index_as: [:symbol, :facetable])
+        t.department(namespace_prefix: nil, index_as: [:symbol, :facetable]) 
+        t.degree(namespace_prefix: nil, index_as: [:symbol, :facetable])
         t.course_info(namespace_prefix: nil){
-          t.course_number(namespace_prefix: nil)
-          t.course_title(namespace_prefix: nil)
+          t.course_number(namespace_prefix: nil, index_as: [:symbol, :facetable])
+          t.course_title(namespace_prefix: nil, index_as: [:symbol, :facetable]) 
         }
       }
     }
@@ -193,7 +193,7 @@ class NuModsDatastream < ActiveFedora::OmDatastream
 
   def self.xml_template 
     builder = Nokogiri::XML::Builder.new do |xml|
-      xml.mods('xmlns:mods' => 'http://www.loc.gov/mods/v3', 'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
+      xml.mods('xmlns:drs' => 'http://neu', 'xmlns:mods' => 'http://www.loc.gov/mods/v3', 'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
                 'xsi:schemaLocation' => 'http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-4.xsd'){ 
         xml.parent.namespace = xml.parent.namespace_definitions.find { |ns| ns.prefix=="mods" } 
         xml.titleInfo {
@@ -211,7 +211,25 @@ class NuModsDatastream < ActiveFedora::OmDatastream
         xml.note('type' => 'citation') 
         xml.subject
         xml.identifier
-        xml.typeOfResource 
+        xml.typeOfResource
+
+        # We instantiate all of these fields for every MODS record because terminology 
+        # generation/access seems to barf without it. 
+        xml.extension('displayLabel' => 'scholarly_object'){
+          xml.scholarly_object{
+            xml.parent.namespace = nil
+
+            xml.category{ xml.parent.namespace = nil }
+            xml.department{ xml.parent.namespace = nil }
+            xml.degree{ xml.parent.namespace = nil }
+
+            xml.course_info{
+              xml.parent.namespace = nil 
+              xml.course_number{  xml.parent.namespace = nil }
+              xml.course_title{ xml.parent.namespace = nil }
+            }
+          }
+        } 
       }
     end
     builder.doc
