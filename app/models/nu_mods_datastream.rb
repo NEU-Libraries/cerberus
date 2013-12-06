@@ -127,8 +127,26 @@ class NuModsDatastream < ActiveFedora::OmDatastream
       }
     }
 
+    #custom extension for handling significant content. 
+    t.extension(path: 'extension', namespace_prefix: 'mods', attributes: { displayLabel: 'scholarly_object'}){
+      t.scholarly_object(namespace_prefix: nil){
+        t.category(namespace_prefix: nil)
+        t.department(namespace_prefix: nil)
+        t.degree(namespace_prefix: nil)
+        t.course_info(namespace_prefix: nil){
+          t.course_number(namespace_prefix: nil)
+          t.course_title(namespace_prefix: nil)
+        }
+      }
+    }
+
     t.title(proxy: [:title_info, :title])
     t.date_issued(proxy: [:origin_info, :date_issued]) 
+    t.category(ref: [:extension, :scholarly_object, :category])
+    t.department(ref: [:extension, :scholarly_object, :department]) 
+    t.degree(ref: [:extension, :scholarly_object, :degree]) 
+    t.course_number(ref: [:extension, :scholarly_object, :course_info, :course_number]) 
+    t.course_title(ref: [:extension, :scholarly_object, :course_info, :course_title]) 
   end
 
   # We override to_solr here to add 
@@ -139,8 +157,15 @@ class NuModsDatastream < ActiveFedora::OmDatastream
   def to_solr(solr_doc = Hash.new()) 
     super(solr_doc) # Run the default solrization behavior 
 
+    # Solrize extension information.
+    solr_doc["drs_category_ssim"] = self.category.first if !self.category.first.blank?
+    solr_doc["drs_department_ssim"] = self.department.first if !self.department.first.blank?
+    solr_doc["drs_degree_ssim"] = self.degree.first if !self.degree.first.blank?
+    solr_doc["drs_course_number_ssim"] = self.course_number.first if !self.course_number.first.blank?
+    solr_doc["drs_course_title_ssim"] = self.course_title.first if !self.course_title.first.blank?
+
     # Extract a creation year field
-    if self.origin_info.date_issued.any?
+    if self.origin_info.date_issued.any? && !self.origin_info.date_issued.first.blank?
       creation_date = self.origin_info.date_issued.first 
       solr_doc["creation_year_sim"] = [creation_date[/\d{4}/]]
     end
@@ -180,7 +205,7 @@ class NuModsDatastream < ActiveFedora::OmDatastream
 
   def self.xml_template 
     builder = Nokogiri::XML::Builder.new do |xml|
-      xml.mods('xmlns:mods' => 'http://www.loc.gov/mods/v3', 'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
+      xml.mods('xmlns:drs' => 'http://neu', 'xmlns:mods' => 'http://www.loc.gov/mods/v3', 'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
                 'xsi:schemaLocation' => 'http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-4.xsd'){ 
         xml.parent.namespace = xml.parent.namespace_definitions.find { |ns| ns.prefix=="mods" } 
         xml.titleInfo {
@@ -198,7 +223,25 @@ class NuModsDatastream < ActiveFedora::OmDatastream
         xml.note('type' => 'citation') 
         xml.subject
         xml.identifier
-        xml.typeOfResource 
+        xml.typeOfResource
+
+        # We instantiate all of these fields for every MODS record because terminology 
+        # generation/access seems to barf without it. 
+        xml.extension('displayLabel' => 'scholarly_object'){
+          xml.scholarly_object{
+            xml.parent.namespace = nil
+
+            xml.category{ xml.parent.namespace = nil }
+            xml.department{ xml.parent.namespace = nil }
+            xml.degree{ xml.parent.namespace = nil }
+
+            xml.course_info{
+              xml.parent.namespace = nil 
+              xml.course_number{  xml.parent.namespace = nil }
+              xml.course_title{ xml.parent.namespace = nil }
+            }
+          }
+        } 
       }
     end
     builder.doc

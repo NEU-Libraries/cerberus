@@ -20,6 +20,8 @@ class NuCoreFile < ActiveFedora::Base
   # call self.content_objects to get a list of all content bearing objects showing this 
   # as their core record.
 
+  delegate_to :mods, [:category, :department, :degree, :course_number, :course_title] 
+
   delegate_to :descMetadata, [:rights, :resource_type] 
 
   # Safely set the parent of a collection.
