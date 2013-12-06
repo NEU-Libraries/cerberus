@@ -1,5 +1,17 @@
+.btn-group{"data-toggle" => "buttons-radio"}
+  %button.btn.btn-primary{type: "button"} Left
+  %button.btn.btn-primary{type: "button"} Middle
+  %button.btn.btn-primary{type: "button"} Right
+
+
 %ul.nav.nav-list
   %li.nav-header List header
+  %ul.nav.nav-list(data-toggle="buttons-radio")
+    %li.active
+      %a{href: "#"}()
+        Grid
+    %li
+      %a{href: "#"} Library
   %li.active
     %a{href: "#"} Home
   %li
@@ -14,3 +26,4 @@
   %li.divider
   %li
     %a{href: "#"} Help
+  
