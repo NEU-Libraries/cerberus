@@ -28,7 +28,3 @@
 //= require communities
 //= require admin
 //= require admin/communities
-
-
-// = require jasmine_examples/Player.js
-// = require jasmine_examples/Song.js

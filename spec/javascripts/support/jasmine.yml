@@ -13,9 +13,6 @@
 src_files:
   - assets/modernizr/modernizr.js
   - assets/application.js
-  - assets/app.js
-  - assets/jasmine_examples/Song.js
-  - assets/jasmine_examples/Player.js
   - assets/tests.js
 # stylesheets
 #
@@ -29,7 +26,8 @@ src_files:
 #   - stylesheets/*.css
 #
 stylesheets:
-  - stylesheets/**/*.css
+  - assets/**/*.css
+  - assets/application.css
 
 # helpers
 #
