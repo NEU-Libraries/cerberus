@@ -9,8 +9,8 @@ GIT
 
 GIT
   remote: https://github.com/nu-lts/nu-sufia.git
-  revision: 79654c97fbac2b609788b18d442dd9da2a3c4e97
-  branch: develop
+  revision: a0aa93745ba9c17d58fb987fc4d4d5b1e79cf471
+  ref: develop
   specs:
     sufia (3.1.1)
       blacklight (~> 4.0)
