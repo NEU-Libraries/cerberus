@@ -12,8 +12,8 @@ gem 'blacklight'
 gem 'hydra-head'
 
 #gem 'sufia', :path => '../sufia'
-gem 'sufia', :git => 'https://github.com/nu-lts/nu-sufia.git', :ref => 'develop'
-gem 'kaminari', :git => 'https://github.com/harai/kaminari.git', :branch => 'route_prefix_prototype'  # required to handle pagination properly in dashboard. See https://github.com/amatsuda/kaminari/pull/322
+gem 'sufia', :git => 'https://github.com/nu-lts/nu-sufia.git', :ref => 'develop' #Using 'ref' instead of 'branch'. It seems branch doesn't always get the latest code, as one would expect.
+gem 'kaminari', :git => 'https://github.com/harai/kaminari.git', :ref => 'route_prefix_prototype'  # required to handle pagination properly in dashboard. See https://github.com/amatsuda/kaminari/pull/322
 
 gem 'omniauth'
 gem 'omniauth-shibboleth'
@@ -86,5 +86,5 @@ group :development, :test do
 end
 
 group :test do 
-  gem "resque_spec" 
+  gem "resque_spec"
 end
