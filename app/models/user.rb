@@ -16,7 +16,7 @@ class User < ActiveRecord::Base
          :recoverable, :rememberable, :trackable, :validatable
   # attr_accessible :title, :body
 
-  attr_accessible :password, :password_confirmation, :remember_me
+  attr_accessible :password, :password_confirmation, :remember_me, :nuid, :full_name
 
   ROLES = %w[admin employee] 
 
