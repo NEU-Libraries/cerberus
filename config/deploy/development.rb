@@ -30,13 +30,6 @@ namespace :deploy do
     end
   end
 
-  desc "Instantiate the drsadmin user" 
-  task :create_drs_admin do 
-    on roles(:app), :in => :sequence, :wait => 5 do 
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake create_drs_admin)" 
-    end
-  end
-
   desc "Restarting the resque workers"
   task :restart_workers do 
     on roles(:app), :in => :sequence, :wait => 5 do 
@@ -46,9 +39,8 @@ namespace :deploy do
 
   desc "Resetting data" 
   task :refresh_data do 
-    on roles(:app), :in => :sequence, :wait => 5 do
-      # execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake jetty:stop)" 
-      # execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake reset_data)"
+    on roles(:app), :in => :sequence, :wait => 5 do 
+      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake reset_data)"
     end
   end
 
@@ -96,8 +88,7 @@ after 'deploy:updating', 'bundler:install'
 after 'deploy:updating', 'deploy:copy_yml_file'
 after 'deploy:updating', 'deploy:restart_workers'
 after 'deploy:updating', 'deploy:migrate'
-after 'deploy:migrate',  'deploy:create_drs_admin'
 after 'deploy:updating', 'deploy:restart' 
 after 'deploy:updating', 'deploy:assets_kludge'
 after 'deploy:updating', 'deploy:whenever'
-# after 'deploy:finished', 'deploy:refresh_data'
+after 'deploy:finished', 'deploy:refresh_data'

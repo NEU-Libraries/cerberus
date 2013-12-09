@@ -2,12 +2,11 @@ def mint_unique_pid
   Sufia::Noid.namespaceize(Sufia::IdService.mint)
 end
 
-def create_collection(klass, parent_str, title_str, user, description = "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Recusandae, minima, cum sit iste at mollitia voluptatem error perspiciatis excepturi ut voluptatibus placeat esse architecto ea voluptate assumenda repudiandae quod commodi.")
+def create_collection(klass, parent_str, title_str, description = "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Recusandae, minima, cum sit iste at mollitia voluptatem error perspiciatis excepturi ut voluptatibus placeat esse architecto ea voluptate assumenda repudiandae quod commodi.")
   newPid = mint_unique_pid
   col = klass.new(parent: parent_str, pid: newPid, identifier: newPid, title: title_str, description: description)
 
   col.rightsMetadata.permissions({group: 'public'}, 'read')
-  col.rightsMetadata.permissions({person: "#{user.nuid}"}, 'edit')
   col.save!
 
   set_edit_permissions(col)
@@ -22,72 +21,54 @@ def create_file(file_name, user, parent)
   core_record.set_parent(parent, user)
   core_record.save!
 
+  set_edit_permissions(core_record)
+
   file_path = "#{Rails.root}/spec/fixtures/files/#{file_name}"
 
   Sufia.queue.push(ContentCreationJob.new(newPid, file_path, file_name, user.id, false))  
 end
 
-def set_edit_permissions(col)
-  admin_users = ["drsadmin@neu.edu", "d.cliff@neu.edu", "wi.jackson@neu.edu", "p.yott@neu.edu", "s.bassett@neu.edu"]
+def set_edit_permissions(obj)
+  admin_users = ["001967405", "001905497", "000513515", "000000000"]
 
-  admin_users.each do |email_str|
-    col.rightsMetadata.permissions({person: email_str}, 'edit')
-    col.save!
+  admin_users.each do |nuid|
+    obj.rightsMetadata.permissions({person: nuid}, 'edit')
+    obj.save!
   end
 end
 
 task :reset_data => :environment do
 
-  #Stopping jetty and emptying the db
-  
-  Rake::Task["jetty:stop"].reenable
-  Rake::Task["jetty:stop"].invoke
+  ActiveFedora::Base.find(:all).each do |file|
+    file.destroy 
+  end
 
-  Rake::Task["jetty:clean"].reenable
-  Rake::Task["jetty:clean"].invoke
-
-  Rake::Task["jetty:start"].reenable
-  Rake::Task["jetty:start"].invoke
-
-  Resque.workers.each {|w| w.unregister_worker}
-  sh "COUNT=4 QUEUE=* rake environment resque:work &"
+  User.find(:all).each do |user|
+    user.destroy
+  end  
 
   root_dept = Community.new(pid: 'neu:1', identifier: 'neu:1', title: 'Northeastern University', description: "Founded in 1898, Northeastern is a global, experiential, research university built on a tradition of engagement with the world, creating a distinctive approach to education and research. The university offers a comprehensive range of undergraduate and graduate programs leading to degrees through the doctorate in nine colleges and schools, and select advanced degrees at graduate campuses in Charlotte, North Carolina, and Seattle.")
   root_dept.rightsMetadata.permissions({group: 'public'}, 'read')
 
-  begin
-    tries ||=10
-    root_dept.save!
-  rescue Errno::ECONNREFUSED => e
-    sleep 10
-    puts "Waiting for jetty..."
-    retry unless (tries -= 1).zero?
-  else
-    puts "Connected to Jetty."
+  tmp_user = User.find_by_email("drsadmin@neu.edu")
+
+  if !tmp_user.nil?
+    tmp_user.destroy
   end
-
-  #Now that jetty is definitely started, we can start to cram in our new objects
-  drs_admin_user = User.find_by_email("drsadmin@neu.edu")
-
-  if !drs_admin_user.nil?
-    drs_admin_user.destroy
-  end
-
-  drs_admin_user = User.new({:email => "drsadmin@neu.edu", :password => "drs12345", :password_confirmation => "drs12345"})
-  drs_admin_user.role = 'admin'
-  drs_admin_user.save!
+  
+  tmp_user = User.create(email:"drsadmin@neu.edu", :password => "drs12345", :password_confirmation => "drs12345", full_name:"Temp User", nuid:"000000000")
   
   set_edit_permissions(root_dept)
 
-  engDept = create_collection(Community, 'neu:1', 'English Department', drs_admin_user)
-  sciDept = create_collection(Community, 'neu:1', 'Science Department', drs_admin_user)
-  litCol = create_collection(NuCollection, engDept.id, 'Literature', drs_admin_user)
-  roCol = create_collection(NuCollection, engDept.id, 'Random Objects', drs_admin_user)
-  rusNovCol = create_collection(NuCollection, litCol.id, 'Russian Novels', drs_admin_user) 
+  engDept = create_collection(Community, 'neu:1', 'English Department')
+  sciDept = create_collection(Community, 'neu:1', 'Science Department')
+  litCol = create_collection(NuCollection, engDept.id, 'Literature')
+  roCol = create_collection(NuCollection, engDept.id, 'Random Objects')
+  rusNovCol = create_collection(NuCollection, litCol.id, 'Russian Novels') 
 
-  create_file("test_docx.docx", drs_admin_user, roCol)
-  create_file("test_pic.jpeg", drs_admin_user, roCol)
-  create_file("test.pdf", drs_admin_user, roCol)
+  create_file("test_docx.docx", tmp_user, roCol)
+  create_file("test_pic.jpeg", tmp_user, roCol)
+  create_file("test.pdf", tmp_user, roCol)
 
   puts "Reset to stock objects complete."
 
