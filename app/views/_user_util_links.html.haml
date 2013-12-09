@@ -16,5 +16,5 @@
           Compilations
       %li.divider
       %li= link_to raw('<i class="icon-signout"></i> log out'), destroy_user_session_path, :id => 'logout_nav_link'
-  - else
-    = link_to raw('<i class="icon-signin"></i> Login'), user_omniauth_authorize_path(:shibboleth), :class => "btn"
+  - else    
+      = link_to raw('<i class="icon-signin"></i> Login'), new_user_session_path, :class => "btn"      
