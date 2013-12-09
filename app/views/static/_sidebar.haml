@@ -1,6 +1,6 @@
-.btn-group{"data-toggle" => "drs-item-views-radio"}
-  %button.btn.btn-primary{type: "button", class: view_mode == "grid"  ? 'active' : '' } Grid
-  %button.btn.btn-primary{type: "button", "data-target" => "drs-item-list" , class: view_mode == "list"  ? 'active' : ''  } List
+.btn-group{"data-toggle" => "drs-item-views-radio", "data-container" => "#drsDummyItems"}
+  %button.btn.btn-primary{type: "button", "data-target" => "drs-items-grid" , class: view_mode == "grid"  ? 'active' : '' } Grid
+  %button.btn.btn-primary{type: "button", "data-target" => "drs-items-list" , class: view_mode == "list"  ? 'active' : ''  } List
 
 
 %ul.nav.nav-list

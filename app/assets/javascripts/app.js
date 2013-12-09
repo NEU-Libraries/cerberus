@@ -28,7 +28,7 @@ $( document ).ready(function() {
           tooltipSetup();
           handleRequiredInputs();
           ellipsisExpand();
-          drsToggle();
+          drsToggleView();
       },
       /**
        * Provides the breadcrumb popover menu for adding collections or new items to the application.
@@ -188,8 +188,30 @@ $( document ).ready(function() {
         
       };
 
-      drsToggle = function(){
-       $('[data-toggle="drs-item-views-radio"]').button('buttons-radio');
+      var drsToggleView = function(){
+       var handleClick = function(event){
+        event.stopPropagation();
+        var toggleContainer = $(this).closest('*[data-container]');
+        var container = $( toggleContainer.data('container') );
+        var desiredClass = $(this).data('target');
+        if (container.hasClass(desiredClass)){
+          event.preventDefault();
+        }else{
+          toggleContainer.find('a, button').removeClass('active');
+          $(this).addClass('active');
+          console.log(desiredClass);
+          if (desiredClass === 'drs-items-grid' ){
+            container.removeClass('drs-items-list').addClass('drs-items-grid');
+            
+          }else{
+            container.removeClass('drs-items-grid').addClass('drs-items-list');
+
+          }
+        }
+        
+        
+       } 
+       $('[data-toggle="drs-item-views-radio"]').on('click', 'a , button', handleClick);
 
       } 
 
