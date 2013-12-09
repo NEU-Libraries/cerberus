@@ -143,7 +143,7 @@ ActiveRecord::Schema.define(:version => 20131203210300) do
 
   create_table "trophies", :force => true do |t|
     t.integer  "user_id"
-    t.string   "nu_core_file_id"
+    t.string   "generic_file_id"
     t.datetime "created_at",      :null => false
     t.datetime "updated_at",      :null => false
   end
@@ -181,6 +181,7 @@ ActiveRecord::Schema.define(:version => 20131203210300) do
     t.string   "display_name"
     t.string   "address"
     t.string   "admin_area"
+    t.string   "department"
     t.string   "title"
     t.string   "office"
     t.string   "chat_id"
@@ -194,7 +195,6 @@ ActiveRecord::Schema.define(:version => 20131203210300) do
     t.text     "group_list"
     t.datetime "groups_last_update"
     t.string   "role"
-    t.string   "department"
     t.string   "nuid"
     t.string   "full_name"
   end
