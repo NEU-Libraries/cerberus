@@ -10,7 +10,7 @@
 .row
   .span3
     %h3 Controls
-    = render "sidebar"
+    = render  partial: "sidebar",  locals: {view_mode: view_mode}
   .span9
     %h3 Items
     %section.drs-items{class: view_mode_class}
