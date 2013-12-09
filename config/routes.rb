@@ -56,11 +56,14 @@ Drs::Application.routes.draw do
   get '/shopping_cart/download' => 'shopping_carts#download', as: 'cart_download'
   get '/shopping_cart/fire_download' => 'shopping_carts#fire_download', as: 'fire_download'
 
+  # Best bits queries
+  get '/theses' => 'significant_content#theses', as: 'theses'
   get '/research' => 'significant_content#research', as: 'research' 
-  get '/other' => 'significant_content#other', as: 'other_publications' 
-  get '/presentations' => 'significant_content#presentations', as: 'presentations' 
-  get '/datasets' => 'significant_content#datasets', as: 'datasets' 
-  get '/pedagogical' => 'significant_content#learning_objects', as: 'learning_objects' 
+  get '/presentations' => 'significant_content#presentations', as: 'presentations'  
+
+  # Best bit queries that we don't want just yet, kept to keep the home page working 
+  get '/pedagogical' => 'significant_content#research', as: 'learning_objects' 
+  get '/datasets' => 'significant_content#research', as: 'datasets' 
 
   get '/admin' => 'admin#index', as: 'admin_panel'
   get '/admin/modify_employee' => 'admin#modify_employee', as: 'modify_employee'
