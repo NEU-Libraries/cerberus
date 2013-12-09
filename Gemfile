@@ -23,6 +23,8 @@ gem 'hashie'
 gem 'mysql2'
 gem 'figaro'
 
+gem 'rmagick', :require => 'RMagick'
+
 gem 'jettywrapper'
 
 gem 'bootstrap-sass', '~> 2.3.2.1'
