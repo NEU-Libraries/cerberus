@@ -25,7 +25,8 @@ namespace :resque do
   task :stop_workers => :environment do
     pids = Array.new
     Resque.workers.each do |worker|
-      pids.concat(worker.worker_pids)
+      #pids.concat(worker.worker_pids)
+      pids << worker.to_s.split(/:/).second
     end
     if pids.empty?
       puts "No workers to kill"
