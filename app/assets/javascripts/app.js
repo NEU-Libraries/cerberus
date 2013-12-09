@@ -28,6 +28,7 @@ $( document ).ready(function() {
           tooltipSetup();
           handleRequiredInputs();
           ellipsisExpand();
+          drsToggle();
       },
       /**
        * Provides the breadcrumb popover menu for adding collections or new items to the application.
@@ -186,6 +187,11 @@ $( document ).ready(function() {
       $toggleLink.on('click', toggleState );
         
       };
+
+      drsToggle = function(){
+       $('[data-toggle="drs-item-views-radio"]').button('buttons-radio');
+
+      } 
 
       // these are the public API
       return{
