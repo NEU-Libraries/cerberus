@@ -15,6 +15,14 @@ gem 'hydra-head'
 gem 'sufia', :git => 'https://github.com/nu-lts/nu-sufia.git', :branch => 'develop'
 gem 'kaminari', :git => 'https://github.com/harai/kaminari.git', :branch => 'route_prefix_prototype'  # required to handle pagination properly in dashboard. See https://github.com/amatsuda/kaminari/pull/322
 
+gem 'omniauth'
+gem 'omniauth-shibboleth'
+gem 'hashie'
+
+#gem 'activerecord-mysql2-adapter'
+gem 'mysql2'
+gem 'figaro'
+
 gem 'jettywrapper'
 
 gem 'bootstrap-sass', '~> 2.3.2.1'
@@ -43,9 +51,6 @@ gem 'jquery-rails'
 gem "devise"
 gem "devise-guests", "~> 0.3"
 gem "ruby-filemagic", "~> 0.4.2"
-
-# Use figaro for setting configuration information that ought to be kept secret
-gem "figaro"
 
 # Use whenever for scheduling timed tasks
 gem "whenever", :require => false

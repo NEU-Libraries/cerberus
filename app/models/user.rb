@@ -6,32 +6,41 @@ class User < ActiveRecord::Base
   # Connects this user object to Blacklights Bookmarks. 
   include Blacklight::User
 
-  after_create :link_to_drs
+  # after_create :link_to_drs
   before_destroy :remove_drs_object
 
   # Include default devise modules. Others available are:
   # :token_authenticatable, :confirmable,
   # :lockable, :timeoutable and :omniauthable
   devise :database_authenticatable, :registerable,
-         :recoverable, :rememberable, :trackable, :validatable
+         :recoverable, :rememberable, :trackable, :validatable, :omniauthable, :omniauth_providers => [:shibboleth]
   # attr_accessible :title, :body
 
   attr_accessible :password, :password_confirmation, :remember_me, :nuid, :full_name
 
   ROLES = %w[admin employee] 
 
+  def self.find_for_shib(auth, signed_in_resource=nil)    
+    user = User.where(:email => auth.info.email).first
+    
+    unless user            
+      user = User.create(email:auth.info.email, password:Devise.friendly_token[0,20], full_name:auth.info.name, nuid:auth.info.nuid)
+      Sufia.queue.push(EmployeeCreateJob.new(auth.info.nuid))
+    end
+
+    return user
+  end
+
   # Method added by Blacklight; Blacklight uses #to_s on your
   # user class to get a user-displayable login/identifier for
   # the account. 
   def to_s
-    email
+    self.nuid
   end
 
-  # When we get that Shibboleth stuff sorted we can figure out how to get
-  # this to actually be a user's nuid.  For now it's just their email address 
-  # def nuid 
-  #   email 
-  # end
+  def name
+    self.full_name
+  end
 
   def user_key
     self.nuid
@@ -45,14 +54,16 @@ class User < ActiveRecord::Base
   end
 
   private
-    def link_to_drs
-      Sufia.queue.push(EmployeeCreateJob.new(self.nuid))
-    end
+    # def link_to_drs
+    #   Sufia.queue.push(EmployeeCreateJob.new(self.nuid))
+    # end
 
     def remove_drs_object
-      if Employee.exists_by_nuid?(self.nuid)
-        object = Employee.find_by_nuid(self.nuid)
-        object.destroy
+      if !self.nuid.nil?
+        if Employee.exists_by_nuid?(self.nuid)
+          object = Employee.find_by_nuid(self.nuid)
+          object.destroy
+        end
       end
     end
 end

@@ -8,7 +8,13 @@ set :stage, :development
 set :whenever_environment, 'staging'
 
 set :deploy_to, '/home/drs/apps/develop/'
-set :branch, 'develop'
+#set :branch, 'develop'
+
+# parses out the current branch you're on. See: http://www.harukizaemon.com/2008/05/deploying-branches-with-capistrano.html
+current_branch = `git branch`.match(/\* (\S+)\s/m)[1]
+
+# use the branch specified as a param, then use the current branch. If all fails use master branch
+set :branch, ENV['branch'] || current_branch || "develop" # you can use the 'branch' parameter on deployment to specify the branch you wish to deploy
 
 set :user, 'drs'
 set :rails_env, :staging
@@ -35,7 +41,7 @@ namespace :deploy do
     on roles(:app), :in => :sequence, :wait => 5 do 
       execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake resque:restart_workers)" 
     end
-  end
+  end  
 
   desc "Resetting data" 
   task :refresh_data do 
@@ -69,9 +75,34 @@ namespace :deploy do
   desc 'Trust rvmrc file'
   task :trust_rvmrc do
     on roles(:app), :in => :sequence, :wait => 5 do
+<<<<<<< HEAD
+=======
+      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake reset_data)"
+    end
+  end
+
+  desc "Copy Figaro YAML"
+  task :copy_yml_file do
+    on roles(:app), :in => :sequence, :wait => 5 do
+      execute "cp /home/drs/config/application.yml #{release_path}/config/"
+    end
+  end
+
+  desc "Copy rvmrc"
+  task :copy_rvmrc_file do
+    on roles(:app), :in => :sequence, :wait => 5 do
+      execute "cp /home/drs/.drsrvmrc #{release_path}/.rvmrc"
+    end
+  end
+
+  desc 'Trust rvmrc file'
+  task :trust_rvmrc do
+    on roles(:app), :in => :sequence, :wait => 5 do
+>>>>>>> feature/omniauth-shibboleth
       execute "/home/drs/.rvm/bin/rvm rvmrc trust #{release_path}"
     end
   end
+
 end
 
 # Load the rvm environment before executing the refresh data hook.
