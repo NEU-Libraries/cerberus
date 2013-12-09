@@ -62,9 +62,24 @@ describe('The drsApp object', function() {
   
   describe('toggles the view class for drs-items',function(){
     beforeEach(function(){
-      
+      loadFixtures('drsAppToogleView.html');
+      drsApp.init();
     });
-    it('should change the toggle class ')
+    it('should listen for the use to click on the a link or button element and toggle the target containers class based on that', function(){
+      expect($('button[data-target="drs-items-grid"]')).toHaveClass('active');
+      $('button[data-target="drs-items-list"]').trigger('click');
+      expect($('button[data-target="drs-items-list"]')).toHaveClass('active');
+      expect($('#drsDummyItems')).toHaveClass('drs-items-list');
+      expect($('#drsDummyItems')).not.toHaveClass('drs-items-grid');
+
+
+
+      $('button[data-target="drs-items-grid"]').trigger('click');
+      expect($('button[data-target="drs-items-grid"]')).toHaveClass('active');
+      expect($('#drsDummyItems')).toHaveClass('drs-items-grid');
+      expect($('#drsDummyItems')).not.toHaveClass('drs-items-list');
+
+    });
   });
 
 
