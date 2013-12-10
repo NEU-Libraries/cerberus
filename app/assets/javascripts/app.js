@@ -187,9 +187,13 @@ $( document ).ready(function() {
       $toggleLink.on('click', toggleState );
         
       };
-
+      /**
+       * drsToggleView adds an event listener to a div containing two buttons that should toggle a class on an conainter div with drs-items to change their display.
+       * 
+       */
       var drsToggleView = function(){
        var handleClick = function(event){
+        event.preventDefault();
         event.stopPropagation();
         var toggleContainer = $(this).closest('*[data-container]');
         var container = $( toggleContainer.data('container') );
@@ -210,10 +214,11 @@ $( document ).ready(function() {
         }
         
         
-       } 
+       };
        $('[data-toggle="drs-item-views-radio"]').on('click', 'a , button', handleClick);
 
-      } 
+      };
+
 
       // these are the public API
       return{
@@ -222,7 +227,7 @@ $( document ).ready(function() {
         newCompilationForm: newCompilationForm,
         compilationsModal: compilationsModal
 
-      }
+      };
 
    
   })();
