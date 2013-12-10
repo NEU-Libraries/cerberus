@@ -217,8 +217,7 @@ GEM
     hydra-derivatives (0.0.5)
       active-fedora
       activesupport (>= 3.2.13, < 5.0)
-      hydra-file_characterization
-      mini_magick
+      rmagick
     hydra-file_characterization (0.3.1)
       activesupport (>= 3.0.0)
     hydra-head (6.3.3)
