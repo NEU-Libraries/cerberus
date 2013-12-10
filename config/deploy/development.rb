@@ -29,13 +29,6 @@ namespace :deploy do
     end
   end
 
-  desc "Precompile"
-  task :assets_kludge do 
-    on roles(:app), :in => :sequence, :wait => 5 do 
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake assets:precompile)" 
-    end
-  end
-
   desc "Restarting the resque workers"
   task :restart_workers do 
     on roles(:app), :in => :sequence, :wait => 5 do 
@@ -96,6 +89,5 @@ after 'deploy:updating', 'deploy:copy_yml_file'
 after 'deploy:updating', 'deploy:restart_workers'
 after 'deploy:updating', 'deploy:migrate'
 after 'deploy:updating', 'deploy:restart' 
-after 'deploy:updating', 'deploy:assets_kludge'
 after 'deploy:updating', 'deploy:whenever'
 after 'deploy:finished', 'deploy:refresh_data'
