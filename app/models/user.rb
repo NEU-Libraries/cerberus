@@ -6,7 +6,7 @@ class User < ActiveRecord::Base
   # Connects this user object to Blacklights Bookmarks. 
   include Blacklight::User
 
-  # after_create :link_to_drs
+  after_create :link_to_drs
   before_destroy :remove_drs_object
 
   # Include default devise modules. Others available are:
@@ -23,9 +23,11 @@ class User < ActiveRecord::Base
   def self.find_for_shib(auth, signed_in_resource=nil)    
     user = User.where(:email => auth.info.email).first
     
-    unless user            
-      user = User.create(email:auth.info.email, password:Devise.friendly_token[0,20], full_name:auth.info.name, nuid:auth.info.nuid)
-      Sufia.queue.push(EmployeeCreateJob.new(auth.info.nuid))
+    unless user
+      if auth.info.employee == "staff"            
+        user = User.create(email:auth.info.email, password:Devise.friendly_token[0,20], full_name:auth.info.name, nuid:auth.info.nuid, role:'employee')
+      else
+        user = User.create(email:auth.info.email, password:Devise.friendly_token[0,20], full_name:auth.info.name, nuid:auth.info.nuid)
     end
 
     return user
@@ -54,9 +56,11 @@ class User < ActiveRecord::Base
   end
 
   private
-    # def link_to_drs
-    #   Sufia.queue.push(EmployeeCreateJob.new(self.nuid))
-    # end
+    def link_to_drs
+      if self.role == "employee"
+        Sufia.queue.push(EmployeeCreateJob.new(self.nuid))
+      end
+    end
 
     def remove_drs_object
       if !self.nuid.nil?
