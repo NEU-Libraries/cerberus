@@ -28,7 +28,7 @@ $( document ).ready(function() {
           tooltipSetup();
           handleRequiredInputs();
           ellipsisExpand();
-          drsToggleView();
+          // drsToggleView();
       },
       /**
        * Provides the breadcrumb popover menu for adding collections or new items to the application.
@@ -211,12 +211,52 @@ $( document ).ready(function() {
             container.removeClass('drs-items-grid').addClass('drs-items-list');
 
           }
+          updateUserviewPref($(this));
         }
         
         
        };
        $('[data-toggle="drs-item-views-radio"]').on('click', 'a , button', handleClick);
 
+      };
+
+      var gridOrListSwitch = function(dataTarget){
+        switch(dataTarget){
+          case 'drs-items-list':
+            return 'list';
+          case 'drs-items-grid':
+            return 'grid';
+          default:
+            throw 'dataTarget wasn\'t given';
+        }
+
+      };
+      /**
+       * updateUserViewPref
+       * @TODO
+       */
+      var updateUserViewPref = function(element){
+        if(drsApp.config.updateUserviewPrefBoolean){
+          var target = element.data('target');
+        console.log(element, target);
+
+
+        var userId = $('body').data('user') || 5;
+        var queryString = '/users/'+ userId;
+        $.ajax({
+         'url' : queryString,
+         'type': 'put',
+         'data' : {
+          'view_pref': gridOrListSwitch(target)
+          },
+          'complete': function( jqXHR,textStatus){
+            console.log(jqXHR, textStatus);
+          }
+         });
+        }
+        
+
+        
       };
 
 
@@ -234,9 +274,17 @@ $( document ).ready(function() {
   //end drsApp module;
   
   window.drsApp = drsApp;
-  drsApp.init();
+  drsApp.init({
+    updateUserviewPrefBoolean: false,
+  });
 });
  
 
-
+$.ajax({
+  url: '/files/neu:tb09kp69r',
+  dataType: 'json',
+  success: function(jqXHR){
+    console.log(jqXHR);
+  }
+});
 

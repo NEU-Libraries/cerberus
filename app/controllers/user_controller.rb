@@ -7,12 +7,17 @@ class UsersController < ApplicationController
       view_pref  = params[:view_pref]
       
       #make sure it is only one of these strings
-      if view_pref != "grid" || view_pref != "list"
+      unless view_pref != "grid" || view_pref != "list"
+        
         if user_signed_in?
-          @user.update_attribute(:only_one_field, view_pref)
-        else
-          session[:view_pref] = view_pref
+          if @user.view_pref != view_pref
+            @user.update_attribute(:only_one_field, view_pref)
+            @user.save!
+            head :ok
+            respond_with(@user)
+          end
         end
+        
         respond_to do | format |
           format.json
         end
