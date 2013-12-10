@@ -81,7 +81,7 @@ GEM
     acts_as_follower (0.1.1)
     addressable (2.3.5)
     arel (3.0.2)
-    backports (3.3.5)
+    backports (3.3.3)
     bcrypt-ruby (3.1.1)
     blacklight (4.3.0)
       bootstrap-sass (>= 2.2.0, < 2.4)
@@ -126,7 +126,7 @@ GEM
     chunky_png (1.2.8)
     climate_control (0.0.3)
       activesupport (>= 3.0)
-    cocaine (0.5.3)
+    cocaine (0.5.1)
       climate_control (>= 0.0.3, < 1.0)
     coderay (1.0.9)
     coffee-rails (3.2.2)
@@ -174,7 +174,7 @@ GEM
     font-awesome-sass-rails (3.0.2.2)
       railties (>= 3.1.1)
       sass-rails (>= 3.1.1)
-    foreigner (1.6.0)
+    foreigner (1.5.0)
       activerecord (>= 3.0.0)
     formatador (0.2.4)
     fssm (0.2.10)
@@ -200,10 +200,10 @@ GEM
       blacklight (~> 4.0)
       cancan
       deprecation
-    hydra-batch-edit (1.1.1)
+    hydra-batch-edit (1.0.2)
       blacklight
       hydra-collections
-    hydra-collections (1.1.0)
+    hydra-collections (1.0.0)
       blacklight
       hydra-head
     hydra-core (6.3.3)
@@ -214,7 +214,7 @@ GEM
       hydra-access-controls (= 6.3.3)
       jettywrapper (>= 1.4.1)
       rails (>= 3.2.3, < 5)
-    hydra-derivatives (0.0.7)
+    hydra-derivatives (0.0.5)
       active-fedora
       activesupport (>= 3.2.13, < 5.0)
       hydra-file_characterization
@@ -255,8 +255,8 @@ GEM
     mail (2.5.4)
       mime-types (~> 1.16)
       treetop (~> 1.4.8)
-    mail_form (1.5.0)
-      actionmailer (>= 3.2, < 5)
+    mail_form (1.4.1)
+      actionmailer (~> 3.0)
       activemodel (>= 3.2, < 5)
     mailboxer (0.11.0)
       carrierwave (>= 0.5.8)
@@ -327,7 +327,7 @@ GEM
       activesupport (= 3.2.13)
       bundler (~> 1.0)
       railties (= 3.2.13)
-    rails_autolink (1.1.5)
+    rails_autolink (1.1.0)
       rails (> 3.1)
     railties (3.2.13)
       actionpack (= 3.2.13)
