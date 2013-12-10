@@ -6,10 +6,6 @@ class User < ActiveRecord::Base
   # Connects this user object to Blacklights Bookmarks. 
   include Blacklight::User
 
-<<<<<<< HEAD
-=======
-  after_create :link_to_drs
->>>>>>> c5d62e9d2920fedf17a17dc44e0ce411141920f1
   before_destroy :remove_drs_object
 
   # Include default devise modules. Others available are:
@@ -26,19 +22,11 @@ class User < ActiveRecord::Base
   def self.find_for_shib(auth, signed_in_resource=nil)    
     user = User.where(:email => auth.info.email).first
     
-<<<<<<< HEAD
     unless user            
       user = User.create(email:auth.info.email, password:Devise.friendly_token[0,20], full_name:auth.info.name, nuid:auth.info.nuid)
       if(auth.info.employee == "staff")
         Sufia.queue.push(EmployeeCreateJob.new(auth.info.nuid))
       end
-=======
-    unless user
-      if auth.info.employee == "staff"            
-        user = User.create(email:auth.info.email, password:Devise.friendly_token[0,20], full_name:auth.info.name, nuid:auth.info.nuid, role:'employee')
-      else
-        user = User.create(email:auth.info.email, password:Devise.friendly_token[0,20], full_name:auth.info.name, nuid:auth.info.nuid)
->>>>>>> c5d62e9d2920fedf17a17dc44e0ce411141920f1
     end
 
     return user
@@ -67,14 +55,6 @@ class User < ActiveRecord::Base
   end
 
   private
-<<<<<<< HEAD
-=======
-    def link_to_drs
-      if self.role == "employee"
-        Sufia.queue.push(EmployeeCreateJob.new(self.nuid))
-      end
-    end
->>>>>>> c5d62e9d2920fedf17a17dc44e0ce411141920f1
 
     def remove_drs_object
       if !self.nuid.nil?
