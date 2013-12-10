@@ -22,6 +22,6 @@
 //= require bootbox/bootbox.min.js
 //= require plugins
 //= require drsApp
-//  = require polyfills
+
 //= require compilations
 
