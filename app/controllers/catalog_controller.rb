@@ -45,7 +45,6 @@ class CatalogController < ApplicationController
       @page_title = "Home"    
       @root = Community.find(Rails.configuration.root_community_id)
     end
-    puts "response is: #{@response.class}"
   end
 
   def recent
