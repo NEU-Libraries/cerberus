@@ -218,8 +218,6 @@ GEM
       active-fedora
       activesupport (>= 3.2.13, < 5.0)
       rmagick
-    hydra-file_characterization (0.3.1)
-      activesupport (>= 3.0.0)
     hydra-head (6.3.3)
       hydra-access-controls (= 6.3.3)
       hydra-core (= 6.3.3)
@@ -371,6 +369,7 @@ GEM
       rspec-mocks (>= 2.5.0)
     rest-client (1.6.7)
       mime-types (>= 1.16)
+    rmagick (2.13.2)  
     rsolr (1.0.9)
       builder (>= 2.1.2)
     rspec (2.14.1)
