@@ -71,16 +71,29 @@ class CatalogController < ApplicationController
   def theses 
     theses_query = "{!lucene q.op=AND df=#{category_field}}theses"
     (@response, @document_list) = get_search_results(:q => theses_query)
+    render 'index', locals: { facet_list: [creator_field, 
+                                           department_field, 
+                                           creation_year_field, 
+                                           degree_field,
+                                           subject_field] } 
   end
 
   def research
     research_query = "{!lucene q.op=AND df=#{category_field}}research"
     (@response, @document_list) = get_search_results(:q => research_query)  
+    render 'index', locals: { facet_list: [creator_field, 
+                                           creation_year_field, 
+                                           department_field, 
+                                           subject_field] }
   end
 
   def presentations
     presentation_query = "!lucene q.op=AND df=#{category_field}}presentations" 
     (@response, @document_list) = get_search_results(:q => presentation_query) 
+    render 'index', locals: { facet_list: [creator_field,
+                                           creation_year_field, 
+                                           department_field, 
+                                           subject_field] }
   end
 
   def self.uploaded_field
@@ -408,5 +421,25 @@ class CatalogController < ApplicationController
 
   def category_field 
     Solrizer.solr_name('drs_category', :symbol, :type => :string) 
+  end
+
+  def creator_field 
+    Solrizer.solr_name('creator', :facetable, :type => :string) 
+  end
+
+  def department_field 
+    Solrizer.solr_name('drs_department', :symbol, :type => :string) 
+  end
+
+  def creation_year_field 
+    Solrizer.solr_name('creation_year', :facetable, :type => :string) 
+  end
+
+  def degree_field 
+    Solrizer.solr_name('drs_degree', :symbol, :type => :string) 
+  end
+
+  def subject_field 
+    Solrizer.solr_name('subject', :symbol, :type => :string) 
   end
 end
