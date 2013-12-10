@@ -57,7 +57,7 @@ Drs::Application.routes.draw do
   get '/shopping_cart/fire_download' => 'shopping_carts#fire_download', as: 'fire_download'
 
   # Best bits queries
-  get '/theses' => 'significant_content#theses', as: 'theses'
+  get '/theses' => 'catalog#theses', as: 'theses'
   get '/research' => 'significant_content#research', as: 'research' 
   get '/presentations' => 'significant_content#presentations', as: 'presentations'  
 

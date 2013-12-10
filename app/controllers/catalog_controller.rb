@@ -45,6 +45,7 @@ class CatalogController < ApplicationController
       @page_title = "Home"    
       @root = Community.find(Rails.configuration.root_community_id)
     end
+    puts "response is: #{@response.class}"
   end
 
   def recent
@@ -63,6 +64,23 @@ class CatalogController < ApplicationController
       (_, @recent_user_documents) = get_search_results(:q =>filter_mine,
                                         :sort=>sort_field, :rows=>4)
     end
+  end
+
+  # Actions mapping to 'best bit' content types.
+
+  def theses 
+    theses_query = "{!lucene q.op=AND df=#{category_field}}theses"
+    (@response, @document_list) = get_search_results(:q => theses_query)
+  end
+
+  def research
+    research_query = "{!lucene q.op=AND df=#{category_field}}research"
+    (@response, @document_list) = get_search_results(:q => research_query)  
+  end
+
+  def presentations
+    presentation_query = "!lucene q.op=AND df=#{category_field}}presentations" 
+    (@response, @document_list) = get_search_results(:q => presentation_query) 
   end
 
   def self.uploaded_field
@@ -388,5 +406,7 @@ class CatalogController < ApplicationController
     "#{Solrizer.solr_name('system_create', :sortable)} desc"
   end
 
-
+  def category_field 
+    Solrizer.solr_name('drs_category', :symbol, :type => :string) 
+  end
 end
