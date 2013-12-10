@@ -7,7 +7,7 @@ class UsersController < ApplicationController
       view_pref  = params[:view_pref]
       
       #make sure it is only one of these strings
-      if view_pref !== "grid" || view_pref !== "list"
+      if view_pref != "grid" || view_pref != "list"
         if user_signed_in?
           @user.update_attribute(:only_one_field, view_pref)
         else
