@@ -1,0 +1,1710 @@
+diff --git a/Gemfile b/Gemfile
+index cbf3d1f..c9239f8 100644
+--- a/Gemfile
++++ b/Gemfile
+@@ -12,18 +12,8 @@ gem 'blacklight'
+ gem 'hydra-head'
+ 
+ #gem 'sufia', :path => '../sufia'
+-gem 'sufia', :git => 'https://github.com/nu-lts/nu-sufia.git', :ref => 'develop' #Using 'ref' instead of 'branch'. It seems branch doesn't always get the latest code, as one would expect.
+-gem 'kaminari', :git => 'https://github.com/harai/kaminari.git', :ref => 'route_prefix_prototype'  # required to handle pagination properly in dashboard. See https://github.com/amatsuda/kaminari/pull/322
+-
+-gem 'omniauth'
+-gem 'omniauth-shibboleth'
+-gem 'hashie'
+-
+-#gem 'activerecord-mysql2-adapter'
+-gem 'mysql2'
+-gem 'figaro'
+-
+-gem 'rmagick', :require => 'RMagick'
++gem 'sufia', :git => 'https://github.com/nu-lts/nu-sufia.git', :branch => 'develop'
++gem 'kaminari', :git => 'https://github.com/harai/kaminari.git', :branch => 'route_prefix_prototype'  # required to handle pagination properly in dashboard. See https://github.com/amatsuda/kaminari/pull/322
+ 
+ gem 'jettywrapper'
+ 
+@@ -54,6 +44,9 @@ gem "devise"
+ gem "devise-guests", "~> 0.3"
+ gem "ruby-filemagic", "~> 0.4.2"
+ 
++# Use figaro for setting configuration information that ought to be kept secret
++gem "figaro"
++
+ # Use whenever for scheduling timed tasks
+ gem "whenever", :require => false
+ 
+@@ -75,16 +68,8 @@ group :development, :test do
+   gem "launchy" 
+   gem "jettywrapper"
+   gem "factory_girl_rails", :require => false
+-  
+-  # JS  testing framework.
+-  gem "jasmine"
+-  
+-  # jQuery Testing for Rails Apps
+-  # @link https://github.com/travisjeffery/jasmine-jquery-rails
+-  gem "jasmine-jquery-rails"
+-
+ end
+ 
+ group :test do 
+-  gem "resque_spec"
++  gem "resque_spec" 
+ end
+diff --git a/Gemfile.lock b/Gemfile.lock
+index 9f4063a..356c793 100644
+--- a/Gemfile.lock
++++ b/Gemfile.lock
+@@ -1,7 +1,7 @@
+ GIT
+   remote: https://github.com/harai/kaminari.git
+   revision: 384fcb5d11b66a0cc8fad030104bf80f82616355
+-  ref: route_prefix_prototype
++  branch: route_prefix_prototype
+   specs:
+     kaminari (0.14.1)
+       actionpack (>= 3.0.0)
+@@ -9,8 +9,8 @@ GIT
+ 
+ GIT
+   remote: https://github.com/nu-lts/nu-sufia.git
+-  revision: a0aa93745ba9c17d58fb987fc4d4d5b1e79cf471
+-  ref: develop
++  revision: 74fd7a93800086df05b5a662fd61ab0263a34f86
++  branch: develop
+   specs:
+     sufia (3.1.1)
+       blacklight (~> 4.0)
+@@ -81,7 +81,7 @@ GEM
+     acts_as_follower (0.1.1)
+     addressable (2.3.5)
+     arel (3.0.2)
+-    backports (3.3.5)
++    backports (3.3.3)
+     bcrypt-ruby (3.1.1)
+     blacklight (4.3.0)
+       bootstrap-sass (>= 2.2.0, < 2.4)
+@@ -126,7 +126,7 @@ GEM
+     chunky_png (1.2.8)
+     climate_control (0.0.3)
+       activesupport (>= 3.0)
+-    cocaine (0.5.3)
++    cocaine (0.5.1)
+       climate_control (>= 0.0.3, < 1.0)
+     coderay (1.0.9)
+     coffee-rails (3.2.2)
+@@ -174,7 +174,7 @@ GEM
+     font-awesome-sass-rails (3.0.2.2)
+       railties (>= 3.1.1)
+       sass-rails (>= 3.1.1)
+-    foreigner (1.6.0)
++    foreigner (1.5.0)
+       activerecord (>= 3.0.0)
+     formatador (0.2.4)
+     fssm (0.2.10)
+@@ -190,7 +190,6 @@ GEM
+       multi_json (~> 1.7)
+     haml (4.0.3)
+       tilt
+-    hashie (2.0.5)
+     hike (1.2.3)
+     hooks (0.3.1)
+     http_parser.rb (0.5.3)
+@@ -200,10 +199,10 @@ GEM
+       blacklight (~> 4.0)
+       cancan
+       deprecation
+-    hydra-batch-edit (1.1.1)
++    hydra-batch-edit (1.0.2)
+       blacklight
+       hydra-collections
+-    hydra-collections (1.1.0)
++    hydra-collections (1.0.0)
+       blacklight
+       hydra-head
+     hydra-core (6.3.3)
+@@ -214,25 +213,15 @@ GEM
+       hydra-access-controls (= 6.3.3)
+       jettywrapper (>= 1.4.1)
+       rails (>= 3.2.3, < 5)
+-    hydra-derivatives (0.0.7)
++    hydra-derivatives (0.0.5)
+       active-fedora
+       activesupport (>= 3.2.13, < 5.0)
+-      hydra-file_characterization
+-      mini_magick
+-    hydra-file_characterization (0.3.1)
+-      activesupport (>= 3.0.0)
++      rmagick
+     hydra-head (6.3.3)
+       hydra-access-controls (= 6.3.3)
+       hydra-core (= 6.3.3)
+       rails (>= 3.2.6)
+     i18n (0.6.1)
+-    jasmine (1.3.2)
+-      jasmine-core (~> 1.3.1)
+-      rack (~> 1.0)
+-      rspec (>= 1.3.1)
+-      selenium-webdriver (>= 0.1.3)
+-    jasmine-core (1.3.1)
+-    jasmine-jquery-rails (1.5.9)
+     jettywrapper (1.4.1)
+       activesupport (>= 3.0.0)
+       childprocess
+@@ -255,9 +244,8 @@ GEM
+     mail (2.5.4)
+       mime-types (~> 1.16)
+       treetop (~> 1.4.8)
+-    mail_form (1.5.0)
+-      actionmailer (>= 3.2, < 5)
+-      activemodel (>= 3.2, < 5)
++    mail_form (1.4.1)
++      actionmailer (~> 3.0)
+     mailboxer (0.11.0)
+       carrierwave (>= 0.5.8)
+       foreigner (>= 0.9.1)
+@@ -266,8 +254,6 @@ GEM
+     mediashelf-loggable (0.4.9)
+     method_source (0.8.2)
+     mime-types (1.24)
+-    mini_magick (3.7.0)
+-      subexec (~> 0.2.1)
+     mini_portile (0.5.1)
+     multi_json (1.7.9)
+     mysql2 (0.3.14)
+@@ -291,11 +277,6 @@ GEM
+       mediashelf-loggable
+       nokogiri (>= 1.4.2)
+       solrizer (~> 3.1.0)
+-    omniauth (1.1.4)
+-      hashie (>= 1.2, < 3)
+-      rack
+-    omniauth-shibboleth (1.1.1)
+-      omniauth (>= 1.0.0)
+     orm_adapter (0.4.0)
+     paperclip (3.4.2)
+       activemodel (>= 3.0.0)
+@@ -327,7 +308,7 @@ GEM
+       activesupport (= 3.2.13)
+       bundler (~> 1.0)
+       railties (= 3.2.13)
+-    rails_autolink (1.1.5)
++    rails_autolink (1.1.0)
+       rails (> 3.1)
+     railties (3.2.13)
+       actionpack (= 3.2.13)
+@@ -375,10 +356,6 @@ GEM
+     rmagick (2.13.2)
+     rsolr (1.0.9)
+       builder (>= 2.1.2)
+-    rspec (2.14.1)
+-      rspec-core (~> 2.14.0)
+-      rspec-expectations (~> 2.14.0)
+-      rspec-mocks (~> 2.14.0)
+     rspec-core (2.14.5)
+     rspec-expectations (2.14.2)
+       diff-lcs (>= 1.1.3, < 2.0)
+@@ -401,7 +378,6 @@ GEM
+       mime-types
+       nokogiri
+       rest-client
+-    rubyzip (1.1.0)
+     rvm1-capistrano3 (0.9.0)
+       capistrano (~> 3.0)
+     sass (3.2.10)
+@@ -409,11 +385,6 @@ GEM
+       railties (~> 3.2.0)
+       sass (>= 3.1.10)
+       tilt (~> 1.3)
+-    selenium-webdriver (2.38.0)
+-      childprocess (>= 0.2.5)
+-      multi_json (~> 1.0)
+-      rubyzip (~> 1.0)
+-      websocket (~> 1.0.4)
+     sinatra (1.4.3)
+       rack (~> 1.4)
+       rack-protection (~> 1.4)
+@@ -437,7 +408,6 @@ GEM
+       net-ssh
+       term-ansicolor
+     stomp (1.2.14)
+-    subexec (0.2.3)
+     term-ansicolor (1.2.2)
+       tins (~> 0.8)
+     thor (0.18.1)
+@@ -455,7 +425,6 @@ GEM
+       rack (>= 1.0.0)
+     warden (1.2.3)
+       rack (>= 1.0)
+-    websocket (1.0.7)
+     whenever (0.8.4)
+       activesupport (>= 2.3.4)
+       chronic (>= 0.6.3)
+@@ -484,21 +453,15 @@ DEPENDENCIES
+   figaro
+   guard-livereload
+   haml
+-  hashie
+   hydra-head
+-  jasmine
+-  jasmine-jquery-rails
+   jettywrapper
+   jquery-rails
+   kaminari!
+   launchy
+   mysql2
+-  omniauth
+-  omniauth-shibboleth
+   rails (= 3.2.13)
+   resque
+   resque_spec
+-  rmagick
+   rspec-rails
+   ruby-filemagic (~> 0.4.2)
+   rvm1-capistrano3
+diff --git a/Vagrantfile b/Vagrantfile
+index f593f59..5067d42 100644
+--- a/Vagrantfile
++++ b/Vagrantfile
+@@ -21,9 +21,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+   # Live Reload runs on this server
+   config.vm.network :forwarded_port, guest: 35729, host: 35729
+ 
+-  # Forward the Jasmine interface on this port
+-  config.vm.network :forwarded_port, guest: 8888, host: 8888
+-
+   # Create a private network, which allows host-only access to the machine
+   # using a specific IP.
+   config.vm.network :private_network, ip: "192.168.1.44"
+diff --git a/app/assets/javascripts/app.js b/app/assets/javascripts/app.js
+index aab43c7..30d36f2 100644
+--- a/app/assets/javascripts/app.js
++++ b/app/assets/javascripts/app.js
+@@ -1,209 +1,199 @@
+ 'use strict';
+-/* jshint undef: true, unused: true */
+-/*global $:false */
+-/*global Modernizr */
+-
+-
+-$( document ).ready(function() {
+-  var drsApp = (function() {
+-   
+-      var init = function( settings ) {
+-          drsApp.config = {
+-              $drsBootstrapSelect: $( 'select.bs-select' ),
+-              $addToSetLink: $('#addToSet'),
+-              breadCrumbMenuContent: $('#addToSetLinks').html(),
+-              fitTextTarget: $('.fit-text')
+-          };
+-   
+-          // allow overriding the default config
+-          $.extend( drsApp.config, settings );
+-   
+-          setup();
+-      },
+-   
+-      setup = function() {
+-          drsApp.config.$drsBootstrapSelect.selectpicker();
+-          breadCrumbMenu();
+-          handleFitText();
+-          tooltipSetup();
+-          handleRequiredInputs();
+-          ellipsisExpand();
+-      },
+-      /**
+-       * Provides the breadcrumb popover menu for adding collections or new items to the application.
+-       */
+-      breadCrumbMenu = function(){
+-          drsApp.config.$addToSetLink.popover({
+-              html: true,
+-              content: drsApp.config.breadCrumbMenuContent,
+-          }).on('shown', function(){
+-            $(this).parent('li').addClass('active');
+-          }).on('hide', function(){
+-            $(this).parent('li').removeClass('active');
+-          });
+-      },
+-
+-      addToComplationLink =  function(e){
+-        e.on('ajax:success', function( ){
+-          var delta = $(this).data('method');
+-          switch(delta){
+-            case'post':
+-              $(this)
+-                .text($(this).text().replace('Add to', 'Remove from'))
+-                .data('method', 'delete')
+-                .removeClass('btn-success add-to-compilation')
+-                .addClass('btn-danger remove-from-compilation');
+-            break;
+-            case 'delete':
+-                $(this)
+-                .data('method', 'post')
+-                .text($(this).text().replace('Remove from', 'Add to' ))
+-                .addClass('btn-success add-to-compilation')
+-                .removeClass('btn-danger remove-from-compilation');
+-            break;
+-            default:
+-              console.log('ajax successful, but not sure what to do!');
+-            break;
+-          }
+-          
+-        }).on('ajax:error', function(){
+-          $(this).closest('.modal').modal('hide');
+-           $('.breadcrumb').addBsAlert({
+-            classes: 'alert alert-danger',
+-            strong: 'Error,',
+-            text: 'Something went wrong, please reload the page and try again.',
+-           });
+ 
+-        });
+-      },
+-      newCompilationForm =  function(){
+-        $('#new_compilation').on('ajax:success', function(){
+-          $(this).closest('.modal').modal('hide');
+-           $('.breadcrumb').addBsAlert({
+-            classes: 'alert alert-success',
+-            strong: 'Success!',
+-            text: 'You created a new compilation!',
+-           });
+-        }).on('ajax:error', function(){
+-          $(this).closest('.modal').modal('hide');
+-           $('.breadcrumb').addBsAlert({
+-            classes: 'alert alert-danger',
+-            strong: 'Error,',
+-            text: 'Something went wrong, please reload the page and try again.',
+-           });
+ 
++var drsApp = {
++ 
++    init: function( settings ) {
++        drsApp.config = {
++            $drsBootstrapSelect: $( "select.bs-select" ),
++            $addToSetLink: $('#addToSet'),
++            breadCrumbMenuContent: $('#addToSetLinks').html(),
++            fitTextTarget: $('.fit-text')
++        };
++ 
++        // allow overriding the default config
++        $.extend( drsApp.config, settings );
++ 
++        drsApp.setup();
++    },
++ 
++    setup: function() {
++        drsApp.config.$drsBootstrapSelect.selectpicker();
++        drsApp.breadCrumbMenu();
++        drsApp.handleFitText();
++        drsApp.tooltipSetup();
++        drsApp.handleRequiredInputs();
++        drsApp.ellipsisExpand();
++    },
++    /**
++     * Provides the breadcrumb popover menu for adding collections or new items to the application.
++     */
++    breadCrumbMenu: function(){
++        drsApp.config.$addToSetLink.popover({
++            html: true,
++            content: drsApp.config.breadCrumbMenuContent,
++        }).on('shown', function(event){
++          $(this).parent('li').addClass('active');
++        }).on('hide', function(event){
++          $(this).parent('li').removeClass('active');
+         });
+-      },
+-      compilationsModal =  function(e){
+-        var $modal = $('#ajax-modal');
+-          
+-        $modal.empty().append(e).modal('show');
++    },
++
++    addToComplationLink: function(e){
++      e.on('ajax:success', function(evt, data, status, xhr){
++        var delta = $(this).data('method');
++        switch(delta){
++          case'post':
++            $(this)
++              .text($(this).text().replace('Add to', 'Remove from'))
++              .data('method', 'delete')
++              .removeClass('btn-success add-to-compilation')
++              .addClass('btn-danger remove-from-compilation');
++          break;
++          case 'delete':
++              $(this)
++              .data('method', 'post')
++              .text($(this).text().replace('Remove from', 'Add to' ))
++              .addClass('btn-success add-to-compilation')
++              .removeClass('btn-danger remove-from-compilation');
++          break;
++          defualt:
++            console.log('ajax successful, but not sure what to do!');
++          break;
++        }
+         
+-        $modal.on('hidden', function(){
+-          $(this).empty();
+-        });
++      }).on('ajax:error', function(evt, data, status, xhr){
++        $(this).closest('.modal').modal('hide');
++         $('.breadcrumb').addBsAlert({
++          classes: 'alert alert-danger',
++          strong: 'Error,',
++          text: 'Something went wrong, please reload the page and try again.',
++         });
++
++      });
++    },
++    newCompilationForm: function(){
++      $('#new_compilation').on('ajax:success', function(){
++        $(this).closest('.modal').modal('hide');
++         $('.breadcrumb').addBsAlert({
++          classes: 'alert alert-success',
++          strong: 'Success!',
++          text: 'You created a new compilation!',
++         });
++      }).on('ajax:error', function(evt, data, status, xhr){
++        $(this).closest('.modal').modal('hide');
++         $('.breadcrumb').addBsAlert({
++          classes: 'alert alert-danger',
++          strong: 'Error,',
++          text: 'Something went wrong, please reload the page and try again.',
++         });
++
++      });
++    },
++    compilationsModal: function(e){
++      var $modal = $('#ajax-modal');
+         
+-        drsApp.addToComplationLink($('.btn-compilation'));
+-        drsApp.newCompilationForm();
+-      },
+-      /**
+-       * Checks the dom to see if the plugin target is there and then loads it with Modernizr
+-       */
+-      handleFitText = function(){
+-        if (drsApp.config.fitTextTarget.length > 0 && window.Modernizr){
+-          Modernizr.load({
+-            load: '//cdnjs.cloudflare.com/ajax/libs/FitText.js/1.1/jquery.fittext.min.js',
+-             complete: function () {
+-                if ( !$.fitText ) {
+-                    Modernizr.load('/assets/polyfills/FitText-js/jquery.fittext.js');
+-                }
+-                drsApp.config.fitTextTarget.fitText();
++      $modal.empty().append(e).modal('show');
++      
++      $modal.on('hidden', function(){
++        $(this).empty();
++      });
++      
++      drsApp.addToComplationLink($('.btn-compilation'));
++      drsApp.newCompilationForm();
++    },
++    /**
++     * Checks the dom to see if the plugin target is there and then loads it with Modernizr
++     */
++    handleFitText: function(){
++      if (drsApp.config.fitTextTarget.length > 0 && window.Modernizr){
++        Modernizr.load({
++          load: "//cdnjs.cloudflare.com/ajax/libs/FitText.js/1.1/jquery.fittext.min.js",
++           complete: function () {
++              if ( !$.fitText ) {
++                  Modernizr.load('/assets/polyfills/FitText-js/jquery.fittext.js');
+               }
+-          });
+-        }
++              drsApp.config.fitTextTarget.fitText();
++            }
++        }); 
++      }
+ 
+ 
+-      },
+-      /**
+-       * Tooltip Setup
+-       */
+-      tooltipSetup =  function(){
+-        $('body').tooltip({
+-            selector: 'a[data-toggle=tooltip]'
+-          });
+-      },
+-
+-      /**
+-       * Builds interaction to inputs with [required="required"] to make sure that the user fills it out.
+-       */
+-      handleRequiredInputs = function(){
+-        //Query for inputs textareas and selects with require
+-        var targets = $('input, textarea, select').filter('[required="required"]');
+-        //Construct the tooltips for inputs that need to be filled still.
+-        var addTooltip = function(e){
+-          return $(e).tooltip({
+-            title: 'Required'
+-          });
+-        };
+-        //cycle through each function.
+-        targets.each(function(index, el) {
+-          
+-          var id = $(el).attr('id');
+-          //add the required class.
+-          $('label[for="' + id +'"]').addClass('required-label');
+-          
+-          // Check the element to figure out if we still need the tooltip or not.
+-          
+-          $(el).on('focus hover click change keypress', function(){
+-            if($(this).val().length > 0 ){
+-              $(this).tooltip('destroy');
+-            }else{
+-              addTooltip(this);
+-            }
+-          });
++    },
++    /**
++     * Tooltip Setup
++     */
++    tooltipSetup: function(){
++      $('body').tooltip({
++          selector: "a[data-toggle=tooltip]"
++        }); 
++    },
++
++    /**
++     * Builds interaction to inputs with [required="required"] to make sure that the user fills it out.
++     */
++    handleRequiredInputs: function(){
++      //Query for inputs textareas and selects with require
++      var targets = $('input, textarea, select').filter('[required="required"]');
++      //Construct the tooltips for inputs that need to be filled still.
++      var addTooltip = function(e){
++        return $(e).tooltip({
++          title: 'Required'
+         });
+-      },
+-      
+-      ellipsisExpand = function(){
+-        var $toggleLink = $('*[data-toggle="ellipsis"]');
+-
+-        //look for the target and toggle classes on that element.
+-        var toggleState = function(event){
+-          //stop the event from triggering other reations
+-          event.preventDefault();
+-          event.stopPropagation();
+-          var $target = $(this).attr('href').length > 0 ? $($(this).attr('href')) : $($(this).data('target'));
+-          if ($target.length > 0 ){
+-            if ( ! $target.hasClass('ellipsis') ){
+-              $target = $target.find('.ellipsis');
+-            }
+-            $target.toggleClass('in');
+-            $(this).children('i').toggleClass('icon-expand-alt').toggleClass('icon-collapse-alt');
++      }
++      //cycle through each function.
++      targets.each(function(index, el) {
++        
++        var id = $(el).attr('id');
++        //add the required class.
++        $('label[for="' + id +'"]').addClass('required-label');
++        
++        // Check the element to figure out if we still need the tooltip or not.
++        
++        $(el).on('focus hover click change keypress', function(){
++          if($(this).val().length > 0 ){
++            $(this).tooltip('destroy');
+           }else{
+-            console.log('Invalid target specified for drsApp.ellipsisExpand' , $target);
++            addTooltip(this);
+           }
+-        };
+-      $toggleLink.on('click', toggleState );
+-        
+-      };
++        })
++      });
++    },
++    
++    ellipsisExpand: function(){
++      var $toggleLink = $('*[data-toggle="ellipsis"]');
+ 
+-      // these are the public API
+-      return{
+-        init: init,
+-        addToComplationLink: addToComplationLink,
+-        newCompilationForm: newCompilationForm,
+-        compilationsModal: compilationsModal
++      //look for the target and toggle classes on that element.
++      var toggleState = function(event){
++        //stop the event from triggering other reations
++        event.preventDefault();
++        event.stopPropagation();
++        var $target = $(this).attr('href').length > 0 ? $($(this).attr('href')) : $($(this).data('target'));
++        if ($target.length > 0 ){
++          if ( ! $target.hasClass('ellipsis') ){
++            $target = $target.find('.ellipsis');
++          }
++          $target.toggleClass('in');
++          $(this).children('i').toggleClass('icon-expand-alt').toggleClass('icon-collapse-alt');
++        }else{
++          console.log("Invalid target specified for drsApp.ellipsisExpand" , $target);
++        }
++      }
+ 
++      if ($toggleLink.length > 0){
++        $toggleLink.on('click', toggleState );
+       }
++    }
++    
+ 
+-   
+-  })();
+-  //end drsApp module;
+-  
+-  window.drsApp = drsApp;
+-  drsApp.init();
+-});
+  
++};
++
+ 
+ 
++ 
++$( document ).ready( drsApp.init({
++    // Config can go here eg: $drsBootstrapSelect: $('select.bs-select'),
++}) );
++
+ 
+diff --git a/app/assets/javascripts/application.js b/app/assets/javascripts/application.js
+index b826e05..d22e2aa 100644
+--- a/app/assets/javascripts/application.js
++++ b/app/assets/javascripts/application.js
+@@ -13,10 +13,9 @@
+ //= require jquery
+ //= require jquery_ujs
+ //= require shopping_carts
+-//= require blacklight/blacklight
+ //= require sufia
+ // Required by Blacklight
+-
++//= require blacklight/blacklight
+ //= require bootstrap-select/bootstrap-select.js
+ //= require bootstrap-datepicker/js/bootstrap-datepicker.js
+ //= require bootbox/bootbox.min.js
+@@ -27,4 +26,4 @@
+ //= require compilations
+ //= require communities
+ //= require admin
+-//= require admin/communities
+\ No newline at end of file
++//= require admin/communities
+diff --git a/app/assets/javascripts/tests.js b/app/assets/javascripts/tests.js
+deleted file mode 100644
+index fa21d5b..0000000
+--- a/app/assets/javascripts/tests.js
++++ /dev/null
+@@ -1 +0,0 @@
+-//= require jasmine-jquery
+diff --git a/app/controllers/catalog_controller.rb b/app/controllers/catalog_controller.rb
+index be948fc..849dc06 100644
+--- a/app/controllers/catalog_controller.rb
++++ b/app/controllers/catalog_controller.rb
+@@ -93,14 +93,12 @@ class CatalogController < ApplicationController
+ 
+     # solr fields that will be treated as facets by the blacklight application
+     #   The ordering of the field names is the order of the display
+-    config.add_facet_field solr_name("desc_metadata__resource_type", :facetable), :label => "Resource Type", :limit => 5
+-    config.add_facet_field solr_name("desc_metadata__creator", :facetable), :label => "Creator", :limit => 5
+-    config.add_facet_field solr_name("desc_metadata__tag", :facetable), :label => "Keyword", :limit => 5
+-    config.add_facet_field solr_name("desc_metadata__subject", :facetable), :label => "Subject", :limit => 5
+-    config.add_facet_field solr_name("desc_metadata__language", :facetable), :label => "Language", :limit => 5
+-    config.add_facet_field solr_name("desc_metadata__based_near", :facetable), :label => "Location", :limit => 5
+-    config.add_facet_field solr_name("desc_metadata__publisher", :facetable), :label => "Publisher", :limit => 5
+-    config.add_facet_field solr_name("file_format", :facetable), :label => "File Format", :limit => 5
++    config.add_facet_field solr_name("creator", :facetable), label: "Creator", limit: 5
++    config.add_facet_field solr_name("creation_year", :facetable), label: "Year", limit: 5
++    config.add_facet_field solr_name("drs_department", :symbol), label: "Department", limit: 5
++    config.add_facet_field solr_name("drs_degree", :symbol), label: "Degree Level", limit: 5
++    config.add_facet_field solr_name("subject", :facetable), label: "Subject", limit: 5
++    config.add_facet_field solr_name("type", :facetable), label: "Type", limit: 5
+ 
+     # Have BL send all facet field names to Solr, which has been the default
+     # previously. Simply remove these lines if you'd rather use Solr request
+diff --git a/app/controllers/users/omniauth_callbacks_controller.rb b/app/controllers/users/omniauth_callbacks_controller.rb
+deleted file mode 100644
+index 772336f..0000000
+--- a/app/controllers/users/omniauth_callbacks_controller.rb
++++ /dev/null
+@@ -1,17 +0,0 @@
+-class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
+-  def shibboleth
+-    auth = request.env["omniauth.auth"]
+-    puts auth
+-
+-    @user = User.find_for_shib(request.env["omniauth.auth"], current_user)
+-
+-    if @user.persisted?
+-      flash[:notice] = "Successfully signed in with Shibboleth"
+-      sign_in @user, :event => :authentication #this will throw if @user is not activated
+-      redirect_to root_path       
+-    else
+-      flash[:error] = "Error with Shibboleth login"
+-      redirect_to root_path
+-    end
+-  end
+-end
+\ No newline at end of file
+diff --git a/app/models/northeastern_dublin_core_datastream.rb b/app/models/northeastern_dublin_core_datastream.rb
+index b794fbe..f07b23f 100644
+--- a/app/models/northeastern_dublin_core_datastream.rb
++++ b/app/models/northeastern_dublin_core_datastream.rb
+@@ -14,6 +14,14 @@ class NortheasternDublinCoreDatastream < ActiveFedora::OmDatastream
+     t.subject(namespace_prefix: 'dc') 
+   end
+ 
++  def to_solr(solr_doc = Hash.new)
++    super(solr_doc)
++
++    solr_doc["type_sim"] = self.nu_type.first unless self.nu_type.first.blank?
++
++    return solr_doc 
++  end
++
+ 
+   def self.xml_template
+     builder = Nokogiri::XML::Builder.new do |xml| 
+diff --git a/app/models/nu_core_file.rb b/app/models/nu_core_file.rb
+index 3115662..92e69d9 100644
+--- a/app/models/nu_core_file.rb
++++ b/app/models/nu_core_file.rb
+@@ -30,7 +30,7 @@ class NuCoreFile < ActiveFedora::Base
+       self.parent = collection
+       return true  
+     else 
+-      raise "User with nuid #{user.nuid} cannot add items to collection with pid of #{collection.pid}" 
++      raise "User with nuid #{user.email} cannot add items to collection with pid of #{collection.pid}" 
+     end
+   end
+ 
+diff --git a/app/models/nu_mods_datastream.rb b/app/models/nu_mods_datastream.rb
+index aef1301..2bc95be 100644
+--- a/app/models/nu_mods_datastream.rb
++++ b/app/models/nu_mods_datastream.rb
+@@ -198,6 +198,12 @@ class NuModsDatastream < ActiveFedora::OmDatastream
+     solr_doc["personal_creators_tesim"] = full_names
+     solr_doc["personal_creators_sim"] = full_names
+ 
++    # Create an aggregate facet field of all creator information
++    personal_names = solr_doc["personal_creators_sim"] || []
++    corporate_names = solr_doc["corporate_name_name_part_sim"] || [] 
++    names = solr_doc["name_name_part_sim"] || []
++    solr_doc["creator_sim"] = personal_names + corporate_names + names
++
+     #TODO:  Extract dateBegin/dateEnd information ]
+     return solr_doc
+   end
+diff --git a/app/models/user.rb b/app/models/user.rb
+index b2cd54f..f70b72c 100644
+--- a/app/models/user.rb
++++ b/app/models/user.rb
+@@ -6,47 +6,33 @@ class User < ActiveRecord::Base
+   # Connects this user object to Blacklights Bookmarks. 
+   include Blacklight::User
+ 
++  after_create :link_to_drs
+   before_destroy :remove_drs_object
+ 
+   # Include default devise modules. Others available are:
+   # :token_authenticatable, :confirmable,
+   # :lockable, :timeoutable and :omniauthable
+   devise :database_authenticatable, :registerable,
+-         :recoverable, :rememberable, :trackable, :validatable, :omniauthable, :omniauth_providers => [:shibboleth]
++         :recoverable, :rememberable, :trackable, :validatable
+   # attr_accessible :title, :body
+ 
+-  attr_accessible :password, :password_confirmation, :remember_me, :nuid, :full_name
++  attr_accessible :password, :password_confirmation, :remember_me
+ 
+   ROLES = %w[admin employee] 
+ 
+-  def self.find_for_shib(auth, signed_in_resource=nil)    
+-    user = User.where(:email => auth.info.email).first
+-    
+-    unless user            
+-      user = User.create(email:auth.info.email, password:Devise.friendly_token[0,20], full_name:auth.info.name, nuid:auth.info.nuid)
+-      if(auth.info.employee == "staff")
+-        Sufia.queue.push(EmployeeCreateJob.new(auth.info.nuid))
+-      end
+-    end
+-
+-    return user
+-  end
+-
+   # Method added by Blacklight; Blacklight uses #to_s on your
+   # user class to get a user-displayable login/identifier for
+   # the account. 
+   def to_s
+-    self.nuid
++    email
+   end
+ 
+-  def name
+-    self.full_name
++  # When we get that Shibboleth stuff sorted we can figure out how to get
++  # this to actually be a user's nuid.  For now it's just their email address 
++  def nuid 
++    email 
+   end
+ 
+-  def user_key
+-    self.nuid
+-  end  
+-
+   # Currently using group_list attribute as though it will someday contain the grouper information
+   # pulled in from Shibboleth
+ 
+@@ -55,13 +41,14 @@ class User < ActiveRecord::Base
+   end
+ 
+   private
++    def link_to_drs
++      Sufia.queue.push(EmployeeCreateJob.new(self.nuid))
++    end
+ 
+     def remove_drs_object
+-      if !self.nuid.nil?
+-        if Employee.exists_by_nuid?(self.nuid)
+-          object = Employee.find_by_nuid(self.nuid)
+-          object.destroy
+-        end
++      if Employee.exists_by_nuid?(self.nuid)
++        object = Employee.find_by_nuid(self.nuid)
++        object.destroy
+       end
+     end
+ end
+diff --git a/app/views/static/about.haml b/app/views/static/about.haml
+index 79bbcdb..4055c05 100644
+--- a/app/views/static/about.haml
++++ b/app/views/static/about.haml
+@@ -1,7 +1,7 @@
+ - int =  rand(2);
+ 
+ - view_mode = int > 0 ? "list" : "grid"
+-- view_mode = "list"
++- view_mode = "grid"
+ - view_mode_class = view_mode == "list" ? "drs-items-list" : "drs-items-grid"
+ 
+ - @page_title = "About"
+diff --git a/config/deploy.rb b/config/deploy.rb
+index f977770..8d55c1e 100644
+--- a/config/deploy.rb
++++ b/config/deploy.rb
+@@ -1,4 +1,3 @@
+-set :rvm_ruby_string,  ENV['GEM_HOME'].gsub(/.*\//,"")
+ set :application, 'drs'
+ 
+ set :scm, :git
+diff --git a/config/deploy/development.rb b/config/deploy/development.rb
+index c42100f..33ab64f 100644
+--- a/config/deploy/development.rb
++++ b/config/deploy/development.rb
+@@ -8,13 +8,7 @@ set :stage, :development
+ set :whenever_environment, 'staging'
+ 
+ set :deploy_to, '/home/drs/apps/develop/'
+-#set :branch, 'develop'
+-
+-# parses out the current branch you're on. See: http://www.harukizaemon.com/2008/05/deploying-branches-with-capistrano.html
+-current_branch = `git branch`.match(/\* (\S+)\s/m)[1]
+-
+-# use the branch specified as a param, then use the current branch. If all fails use master branch
+-set :branch, ENV['branch'] || current_branch || "develop" # you can use the 'branch' parameter on deployment to specify the branch you wish to deploy
++set :branch, 'develop'
+ 
+ set :user, 'drs'
+ set :rails_env, :staging
+@@ -36,17 +30,25 @@ namespace :deploy do
+     end
+   end
+ 
++  desc "Instantiate the drsadmin user" 
++  task :create_drs_admin do 
++    on roles(:app), :in => :sequence, :wait => 5 do 
++      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake create_drs_admin)" 
++    end
++  end
++
+   desc "Restarting the resque workers"
+   task :restart_workers do 
+     on roles(:app), :in => :sequence, :wait => 5 do 
+       execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake resque:restart_workers)" 
+     end
+-  end  
++  end
+ 
+   desc "Resetting data" 
+   task :refresh_data do 
+-    on roles(:app), :in => :sequence, :wait => 5 do 
+-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake reset_data)"
++    on roles(:app), :in => :sequence, :wait => 5 do
++      # execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake jetty:stop)" 
++      # execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake reset_data)"
+     end
+   end
+ 
+@@ -78,7 +80,6 @@ namespace :deploy do
+       execute "/home/drs/.rvm/bin/rvm rvmrc trust #{release_path}"
+     end
+   end
+-
+ end
+ 
+ # Load the rvm environment before executing the refresh data hook.
+@@ -95,7 +96,8 @@ after 'deploy:updating', 'bundler:install'
+ after 'deploy:updating', 'deploy:copy_yml_file'
+ after 'deploy:updating', 'deploy:restart_workers'
+ after 'deploy:updating', 'deploy:migrate'
++after 'deploy:migrate',  'deploy:create_drs_admin'
+ after 'deploy:updating', 'deploy:restart' 
+ after 'deploy:updating', 'deploy:assets_kludge'
+ after 'deploy:updating', 'deploy:whenever'
+-after 'deploy:finished', 'deploy:refresh_data'
+\ No newline at end of file
++# after 'deploy:finished', 'deploy:refresh_data'
+\ No newline at end of file
+diff --git a/config/initializers/devise.rb b/config/initializers/devise.rb
+index 9e881a0..b8e765d 100644
+--- a/config/initializers/devise.rb
++++ b/config/initializers/devise.rb
+@@ -1,7 +1,6 @@
+ # Use this hook to configure devise mailer, warden hooks and so forth.
+ # Many of these configuration options can be set straight in your model.
+ Devise.setup do |config|
+-
+   # ==> Mailer Configuration
+   # Configure the e-mail address which will be shown in Devise::Mailer,
+   # note that it will be overwritten if you use your own mailer class with default "from" parameter.
+@@ -244,8 +243,4 @@ Devise.setup do |config|
+   # When using omniauth, Devise cannot automatically set Omniauth path,
+   # so you need to do it manually. For the users scope, it would be:
+   # config.omniauth_path_prefix = "/my_engine/users/auth"
+-
+-  config.omniauth :shibboleth, {:uid_field => 'eppn', :info_fields => {:name => 'cn', :last_name => 'sn',
+-                                :nuid => 'neuEduNUID', :employee => 'unscoped-affiliation', :email => 'mail'}}
+-
+ end
+diff --git a/config/initializers/omniauth.rb b/config/initializers/omniauth.rb
+deleted file mode 100644
+index 97508e1..0000000
+--- a/config/initializers/omniauth.rb
++++ /dev/null
+@@ -1,11 +0,0 @@
+-Rails.application.config.middleware.use OmniAuth::Builder do
+-  provider :shibboleth, {
+-    :shib_session_id_field     => "Shib-Session-ID",
+-    :shib_application_id_field => "Shib-Application-ID",
+-    :debug                     => false,
+-    :extra_fields => [
+-      :"unscoped-affiliation",
+-      :entitlement
+-    ]
+-  }
+-end
+diff --git a/config/routes.rb b/config/routes.rb
+index 87a52db..6e1d894 100644
+--- a/config/routes.rb
++++ b/config/routes.rb
+@@ -73,7 +73,7 @@ Drs::Application.routes.draw do
+     end
+   end
+ 
+-  devise_for :users, :controllers => { :omniauth_callbacks => "users/omniauth_callbacks" }
++  devise_for :users
+   # This must be the very last route in the file because it has a catch all route for 404 errors.
+   # This behavior seems to show up only in production mode.
+   mount Sufia::Engine => '/'
+diff --git a/db/migrate/20131125221409_add_nuid_to_users.rb b/db/migrate/20131125221409_add_nuid_to_users.rb
+deleted file mode 100644
+index ce66dbe..0000000
+--- a/db/migrate/20131125221409_add_nuid_to_users.rb
++++ /dev/null
+@@ -1,5 +0,0 @@
+-class AddNuidToUsers < ActiveRecord::Migration
+-  def change
+-    add_column :users, :nuid, :string
+-  end
+-end
+diff --git a/db/migrate/20131125222643_add_name_to_users.rb b/db/migrate/20131125222643_add_name_to_users.rb
+deleted file mode 100644
+index bac750e..0000000
+--- a/db/migrate/20131125222643_add_name_to_users.rb
++++ /dev/null
+@@ -1,5 +0,0 @@
+-class AddNameToUsers < ActiveRecord::Migration
+-  def change
+-    add_column :users, :name, :string
+-  end
+-end
+diff --git a/db/migrate/20131126031957_change_name_to_full_name.rb b/db/migrate/20131126031957_change_name_to_full_name.rb
+deleted file mode 100644
+index 35aa0b2..0000000
+--- a/db/migrate/20131126031957_change_name_to_full_name.rb
++++ /dev/null
+@@ -1,8 +0,0 @@
+-class ChangeNameToFullName < ActiveRecord::Migration
+-  def up
+-    rename_column :users, :name, :full_name
+-  end
+-
+-  def down
+-  end
+-end
+diff --git a/db/schema.rb b/db/schema.rb
+index 5f21e82..da5d0da 100644
+--- a/db/schema.rb
++++ b/db/schema.rb
+@@ -143,7 +143,7 @@ ActiveRecord::Schema.define(:version => 20131203210300) do
+ 
+   create_table "trophies", :force => true do |t|
+     t.integer  "user_id"
+-    t.string   "nu_core_file_id"
++    t.string   "generic_file_id"
+     t.datetime "created_at",      :null => false
+     t.datetime "updated_at",      :null => false
+   end
+@@ -181,6 +181,7 @@ ActiveRecord::Schema.define(:version => 20131203210300) do
+     t.string   "display_name"
+     t.string   "address"
+     t.string   "admin_area"
++    t.string   "department"
+     t.string   "title"
+     t.string   "office"
+     t.string   "chat_id"
+@@ -194,9 +195,6 @@ ActiveRecord::Schema.define(:version => 20131203210300) do
+     t.text     "group_list"
+     t.datetime "groups_last_update"
+     t.string   "role"
+-    t.string   "department"
+-    t.string   "nuid"
+-    t.string   "full_name"
+   end
+ 
+   add_index "users", ["email"], :name => "index_users_on_email", :unique => true
+diff --git a/lib/tasks/create_drs_admin.rake b/lib/tasks/create_drs_admin.rake
+new file mode 100644
+index 0000000..ea27cbc
+--- /dev/null
++++ b/lib/tasks/create_drs_admin.rake
+@@ -0,0 +1,4 @@
++task :create_drs_admin => :environment do 
++  drs_admin_user = User.find_by_email("drsadmin@neu.edu") 
++  User.create(email: "drsadmin@neu.edu", password: "drs12345", password_confirmation: "drs12345") unless drs_admin_user
++end
+\ No newline at end of file
+diff --git a/lib/tasks/reset_data.rake b/lib/tasks/reset_data.rake
+index 0ec3e90..de0e818 100644
+--- a/lib/tasks/reset_data.rake
++++ b/lib/tasks/reset_data.rake
+@@ -2,11 +2,12 @@ def mint_unique_pid
+   Sufia::Noid.namespaceize(Sufia::IdService.mint)
+ end
+ 
+-def create_collection(klass, parent_str, title_str, description = "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Recusandae, minima, cum sit iste at mollitia voluptatem error perspiciatis excepturi ut voluptatibus placeat esse architecto ea voluptate assumenda repudiandae quod commodi.")
++def create_collection(klass, parent_str, title_str, user, description = "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Recusandae, minima, cum sit iste at mollitia voluptatem error perspiciatis excepturi ut voluptatibus placeat esse architecto ea voluptate assumenda repudiandae quod commodi.")
+   newPid = mint_unique_pid
+   col = klass.new(parent: parent_str, pid: newPid, identifier: newPid, title: title_str, description: description)
+ 
+   col.rightsMetadata.permissions({group: 'public'}, 'read')
++  col.rightsMetadata.permissions({person: "#{user.nuid}"}, 'edit')
+   col.save!
+ 
+   set_edit_permissions(col)
+@@ -21,58 +22,72 @@ def create_file(file_name, user, parent)
+   core_record.set_parent(parent, user)
+   core_record.save!
+ 
+-  set_edit_permissions(core_record)
+-
+   file_path = "#{Rails.root}/spec/fixtures/files/#{file_name}"
+ 
+   Sufia.queue.push(ContentCreationJob.new(newPid, file_path, file_name, user.id, false))  
+ end
+ 
+-def set_edit_permissions(obj)
+-  admin_users = ["001967405", "001905497", "000513515", "000000000"]
++def set_edit_permissions(col)
++  admin_users = ["drsadmin@neu.edu", "d.cliff@neu.edu", "wi.jackson@neu.edu", "p.yott@neu.edu", "s.bassett@neu.edu"]
+ 
+-  admin_users.each do |nuid|
+-    obj.rightsMetadata.permissions({person: nuid}, 'edit')
+-    obj.save!
++  admin_users.each do |email_str|
++    col.rightsMetadata.permissions({person: email_str}, 'edit')
++    col.save!
+   end
+ end
+ 
+ task :reset_data => :environment do
+ 
+-  ActiveFedora::Base.find(:all).each do |file|
+-    file.destroy 
+-  end
++  #Stopping jetty and emptying the db
++  
++  Rake::Task["jetty:stop"].reenable
++  Rake::Task["jetty:stop"].invoke
+ 
+-  User.find(:all).each do |user|
+-    user.destroy
+-  end
++  Rake::Task["jetty:clean"].reenable
++  Rake::Task["jetty:clean"].invoke
++
++  Rake::Task["jetty:start"].reenable
++  Rake::Task["jetty:start"].invoke
++
++  Resque.workers.each {|w| w.unregister_worker}
++  sh "COUNT=4 QUEUE=* rake environment resque:work &"
+ 
+   root_dept = Community.new(pid: 'neu:1', identifier: 'neu:1', title: 'Northeastern University', description: "Founded in 1898, Northeastern is a global, experiential, research university built on a tradition of engagement with the world, creating a distinctive approach to education and research. The university offers a comprehensive range of undergraduate and graduate programs leading to degrees through the doctorate in nine colleges and schools, and select advanced degrees at graduate campuses in Charlotte, North Carolina, and Seattle.")
+   root_dept.rightsMetadata.permissions({group: 'public'}, 'read')
+ 
+-  tmp_user = User.find_by_email("drsadmin@neu.edu")
++  begin
++    tries ||=10
++    root_dept.save!
++  rescue Errno::ECONNREFUSED => e
++    sleep 10
++    puts "Waiting for jetty..."
++    retry unless (tries -= 1).zero?
++  else
++    puts "Connected to Jetty."
++  end
++
++  #Now that jetty is definitely started, we can start to cram in our new objects
++  drs_admin_user = User.find_by_email("drsadmin@neu.edu")
+ 
+-  if !tmp_user.nil?
+-    tmp_user.destroy
++  if !drs_admin_user.nil?
++    drs_admin_user.destroy
+   end
+-  
+-  tmp_user = User.create(email:"drsadmin@neu.edu", :password => "drs12345", :password_confirmation => "drs12345", full_name:"Temp User", nuid:"000000000")
+-  tmp_user.role = "admin"
+-  tmp_user.save!
+ 
+-  Sufia.queue.push(EmployeeCreateJob.new(tmp_user.nuid))
++  drs_admin_user = User.new({:email => "drsadmin@neu.edu", :password => "drs12345", :password_confirmation => "drs12345"})
++  drs_admin_user.role = 'admin'
++  drs_admin_user.save!
+   
+   set_edit_permissions(root_dept)
+ 
+-  engDept = create_collection(Community, 'neu:1', 'English Department')
+-  sciDept = create_collection(Community, 'neu:1', 'Science Department')
+-  litCol = create_collection(NuCollection, engDept.id, 'Literature')
+-  roCol = create_collection(NuCollection, engDept.id, 'Random Objects')
+-  rusNovCol = create_collection(NuCollection, litCol.id, 'Russian Novels') 
++  engDept = create_collection(Community, 'neu:1', 'English Department', drs_admin_user)
++  sciDept = create_collection(Community, 'neu:1', 'Science Department', drs_admin_user)
++  litCol = create_collection(NuCollection, engDept.id, 'Literature', drs_admin_user)
++  roCol = create_collection(NuCollection, engDept.id, 'Random Objects', drs_admin_user)
++  rusNovCol = create_collection(NuCollection, litCol.id, 'Russian Novels', drs_admin_user) 
+ 
+-  create_file("test_docx.docx", tmp_user, roCol)
+-  create_file("test_pic.jpeg", tmp_user, roCol)
+-  create_file("test.pdf", tmp_user, roCol)
++  create_file("test_docx.docx", drs_admin_user, roCol)
++  create_file("test_pic.jpeg", drs_admin_user, roCol)
++  create_file("test.pdf", drs_admin_user, roCol)
+ 
+   puts "Reset to stock objects complete."
+ 
+diff --git a/lib/tasks/resque.rake b/lib/tasks/resque.rake
+index d44cffa..09c468a 100644
+--- a/lib/tasks/resque.rake
++++ b/lib/tasks/resque.rake
+@@ -25,7 +25,7 @@ namespace :resque do
+   task :stop_workers => :environment do
+     pids = Array.new
+     Resque.workers.each do |worker|
+-      pids << worker.to_s.split(/:/).second
++      pids.concat(worker.worker_pids)
+     end
+     if pids.empty?
+       puts "No workers to kill"
+diff --git a/spec/javascripts/drsAppSpec.js b/spec/javascripts/drsAppSpec.js
+deleted file mode 100644
+index fa72785..0000000
+--- a/spec/javascripts/drsAppSpec.js
++++ /dev/null
+@@ -1,67 +0,0 @@
+-describe('The drsApp object', function() {
+-  describe('create a show and hide link for longer page excerpts',function(){
+-    
+-    it('should attach a click listener to a[data-toggle] with an [href] target to toggle the ellipsis style by adding the `in` event class, it should toggle the icon-font class from expand to collapse'  , function() {
+-      var fixtures = loadFixtures('drsApp-ellipsis.html');
+-      
+-        drsApp.init();
+-        
+-          var icon = $('i');
+-          var link = $('#abstract5Toggle');
+-          
+-          expect(icon).toHaveClass('icon-expand-alt');
+-          expect(icon).not.toHaveClass('icon-collapse-alt');
+-          
+-          expect($('#abstract5').find('.ellipsis')).not.toHaveClass('in'); 
+-          
+-          $(link).trigger('click');
+-        
+-          expect(icon).toHaveClass('icon-collapse-alt');
+-          expect(icon).not.toHaveClass('icon-expand-alt');
+-          expect($('#abstract5').find('.ellipsis')).toHaveClass('in'); 
+-      
+-      
+-      
+-    });
+-  
+-  });
+-  
+-  describe('creates a breadcrumb menu from the click actions', function(){
+-    var link, addToSetLinks;
+-    beforeEach(function(){
+-      loadFixtures('breadcrumb-menu.html');
+-      drsApp.init();
+-      link = $('#addToSet');
+-      addToSetLinks = $('#addToSetLinks');
+-      return link, addToSetLinks;
+-    });
+-
+-    it('should show the popover menu when the link is clicked', function(){      
+-
+-      expect(addToSetLinks).not.toBeVisible();
+-      expect($('.popover')).not.toExist();
+-
+-      link.trigger('click');
+-
+-      expect(link.closest('li')).toHaveClass('active');
+-      expect($('.popover')).toExist();
+-      expect($('.popover')).toBeVisible();
+-      expect($('.popover')).toContainHtml(addToSetLinks.html());
+-    });
+-    it('should hide the menu when the link is clicked again', function(){
+-      link.trigger('click');
+-
+-      link.on('hide', function(){
+-        expect(link.closest('li')).not.toHaveClass('active');
+-        expect($('.popover')).not.toBeVisible();
+-        expect($('.popover')).toContainHtml(addToSetLinks.html());
+-      });
+-      
+-    });
+-  });
+-  
+-
+-
+-
+-});
+-  
+\ No newline at end of file
+diff --git a/spec/javascripts/fixtures/breadcrumb-menu.html b/spec/javascripts/fixtures/breadcrumb-menu.html
+deleted file mode 100644
+index 9ff24b0..0000000
+--- a/spec/javascripts/fixtures/breadcrumb-menu.html
++++ /dev/null
+@@ -1,237 +0,0 @@
+-
+-
+-    <header class='container nu-masthead' role='banner'>
+-      <div class='row'>
+-        <div class='span6'>
+-          <a alt='Northeastern Univeristy libraries' class='brand' data-toggle='tooltip' href='http://library.northeastern.edu' title='Northeastern Libraries Home Page'>
+-            <img alt="Nu-lib-lockup" src="/assets/nu-lib-lockup/nu-lib-lockup.svg" />
+-          </a>
+-        </div>
+-        <!-- /.span6 -->
+-        <div class='span6'>
+-          <div class='btn-group pull-right'>
+-            <a class='btn' href='/shopping_cart' id='cart_tracker'>
+-              <i class='icon-shopping-cart'></i>
+-              <span class='overlay'>0</span>
+-            </a>
+-            
+-            <a class='btn' href='/users/drsadmin@neu-dot-edu' title='click for User Profile'>
+-              <i class='icon-user'>&nbsp;</i>
+-              drsadmin@neu.edu
+-            </a>
+-            <a class='btn dropdown-toggle' data-toggle='dropdown' href='#'>
+-              <span class='icon-caret-down' title='click for additional menu options'></span>
+-            </a>
+-            <ul class='dropdown-menu'>
+-              <li>
+-                <a href="/my_stuff"><i class="icon-dashboard"></i> My Drs</a>
+-              </li>
+-              <li>
+-                <a class='top_nav' href='/compilations'>
+-                  <i class='icon-folder-open-alt'></i>
+-                  Compilations
+-                </a>
+-              </li>
+-              <li class='divider'></li>
+-              <li><a href="/users/sign_out" id="logout_nav_link"><i class="icon-signout"></i> log out</a></li>
+-            </ul>
+-          </div>
+-        </div>
+-        <!-- /.span6 -->
+-      </div>
+-      <!-- /.row -->
+-    </header>
+-    <!-- /.container -->
+-    <div class='container'>
+-      <nav class='navbar' role='navigation'>
+-        <div class='navbar-inner'>
+-          <a class='top_nav brand drs ' href='/'>
+-            DRS
+-          </a>
+-          <a class='btn btn-navbar btn-navbar-collpase btn-inverse' data-target='.nav-collapse' data-toggle='collapse'>
+-            <span class='icon-bar'></span>
+-            <span class='icon-bar'></span>
+-            <span class='icon-bar'></span>
+-          </a>
+-          <div class='nav-collapse collapse'>
+-            <ul class='nav pull-left'>
+-              <li>
+-                <a class='top_nav' href='/my_stuff'>My Repository</a>
+-              </li>
+-              <li>
+-                <a class='top_nav' href='/compilations'>Compilations</a>
+-              </li>
+-              <li class='active'>
+-                <a class='top_nav' href='/communities'>Browse</a>
+-              </li>
+-            </ul>
+-            <!-- /.nav /.pull-right -->
+-            <form accept-charset="UTF-8" action="/catalog" class="navbar-form pull-right" id="search-form-header" method="get"><div style="margin:0;padding:0;display:inline"><input name="utf8" type="hidden" value="&#x2713;" /></div>
+-              <input name="id" type="hidden" value="neu:tb09kp65n" />
+-              <label class='hide-text'>Search Scholarsphere</label>
+-              <input class="q span3" id="search-field-header" name="q" placeholder="Type keywords in here" type="text" />
+-              <button class='btn btn-info' id='search-submit-header' type='submit'>
+-                <i class='icon-search'></i>
+-                Go
+-              </button>
+-            </form>
+-          </div>
+-          <!-- /.nav-collapse.collapse -->
+-        </div>
+-        <!-- /.nav-inner -->
+-      </nav>
+-      <!-- /.navbar -->
+-    </div>
+-    <!-- /.container -->
+-    <div class='container'>
+-    </div>
+-    <div class='container page_header'>
+-      
+-    </div>
+-    <div class='container'>
+-      <div class='row'>
+-        <div class='span12'>
+-          <ul class='breadcrumb'>
+-            <li><a href="/communities/neu:1">Northeastern University</a></li>
+-            <li><a href="/communities/neu:tb09kp587">English Department</a></li>
+-            <li class="active">Literature</li>
+-            <li class='action'>
+-              <a data-pid='neu:tb09kp65n' href='#' id='addToSet'>
+-                <i class='icon-plus-sign-alt'></i>
+-                Add
+-              </a>
+-            </li>
+-          </ul>
+-          <div id='addToSetLinks' style='display: none;'>
+-            <a href="/collections/new?parent=neu%3Atb09kp65n" class="btn btn-mini">Create Collection</a>
+-            <a href="/files/new?parent=neu%3Atb09kp65n" class="btn btn-mini">Upload Stuff</a>
+-          </div>
+-          <article class='well'>
+-            <h1 class='NuCollection' id='neu:tb09kp65n-title'>
+-              Literature
+-              <small>
+-                Collection
+-              </small>
+-            </h1>
+-            <p>
+-              Lorem ipsum dolor sit amet, consectetur adipisicing elit. Recusandae, minima, cum sit iste at mollitia voluptatem error perspiciatis excepturi ut voluptatibus placeat esse architecto ea voluptate assumenda repudiandae quod commodi.
+-            </p>
+-            <nav class='set-actions'>
+-              <ul class='nav nav-pills'>
+-                <li>
+-                  <a href='/collections/neu:tb09kp65n/edit'>
+-                    Edit
+-                  </a>
+-                </li>
+-                <li>
+-                  <a data-toggle='modal' href='#deleteCollectionModal'>
+-                    Delete
+-                  </a>
+-                </li>
+-              </ul>
+-            </nav>
+-            <div aria-hidden='true' aria-labelledby='delecteCollectionModalLabel' class='modal hide fade' id='deleteCollectionModal' role='dialog' tabindex='-1'>
+-              <div class='modal-header'>
+-                <button aria-hidden='true' class='close' data-dismiss='modal' type='button'>×</button>
+-                <h3 id='delecteCollectionModalLabel'>
+-                  Confirm deleting Literature
+-                </h3>
+-              </div>
+-              <div class='modal-body'>
+-                <p>
+-                  Are you sure you want to delete
+-                  <i>Literature</i>
+-                  and all of the items it contains? We cannot undo this action!
+-                </p>
+-              </div>
+-              <div class='modal-footer'>
+-                <button aria-hidden='true' class='btn' data-dismiss='modal'>Close</button>
+-                <a href="/collections/neu:tb09kp65n" class="btn btn-danger" data-method="delete" rel="nofollow">Delete</a>
+-              </div>
+-            </div>
+-          </article>
+-          <ul class='media-list'>
+-            <li class='media'>
+-              <a href='/collections/neu:tb09kp676'>
+-                <figure class='pull-left media-object'>
+-                  <i class='icon-folder-open icon-2x icon-block'></i>
+-                  <figcaption>
+-                    <p>
+-                      <small class='muted'>
+-                        Collection
+-                      </small>
+-                    </p>
+-                  </figcaption>
+-                </figure>
+-              </a>
+-              <div class='media-body'>
+-                <a href='/collections/neu:tb09kp676'>
+-                  <h4 class='media-heading' id='neu:tb09kp676-title'>
+-                    Russian Novels
+-                  </h4>
+-                </a>
+-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Recusandae, minima, cum sit iste at mollitia voluptatem error perspiciatis excepturi ut voluptatibus placeat esse architecto ea voluptate assumenda repudiandae quod commodi.</p>
+-              </div>
+-            </li>
+-            
+-          </ul>
+-          <div id='add_compilation_form' style='display:none'></div>
+-        </div>
+-      </div>
+-    </div>
+-    <!-- /.container -->
+-    <footer class='footer-nu'>
+-      <div class='container'>
+-        <div class='row-fluid'>
+-          <div class='span3'>
+-            <a alt='Northeastern University' class='nu-footer-brand logo' href='http://www.northeastern.edu'>Northeastern University</a>
+-          </div>
+-          <div class='span6'>
+-            <ul class='footer-nu-nav'>
+-              <li>
+-                <a href='http://myneu.neu.edu/cp/home/displaylogin'>myNEU</a>
+-              </li>
+-              <li>
+-                <a href='https://prod-web.neu.edu/webapp6/employeelookup/public/main.action'>Find Faculty &amp; Staff</a>
+-              </li>
+-              <li>
+-                <a href='http://www.northeastern.edu/neuhome/adminlinks/findaz.html'>Find A-Z</a>
+-              </li>
+-              <li>
+-                <a href='http://www.northeastern.edu/emergency/index.html'>Emergency Information</a>
+-              </li>
+-              <li>
+-                <a href='http://www.northeastern.edu/search/index.html'>Search</a>
+-              </li>
+-            </ul>
+-            <address>
+-              360 Huntington Ave., Boston, Massachusetts 02115 &middot; 617.373.2000 &middot;  TTY 617.373.3768
+-              <br>
+-              &copy; 2013 Northeastern University
+-            </address>
+-          </div>
+-          <div class='span3'>
+-            <ul class='nu-social'>
+-              <li>
+-                <a class='youtube' href='https://www.youtube.com/northeastern'>
+-                  <span class='icon-youtube-sign'></span>
+-                  <span class='hide-text'>Youtube</span>
+-                </a>
+-              </li>
+-              <li>
+-                <a class='twitter' href='http://twitter.com/northeastern'>
+-                  <span class='icon-twitter-sign'></span>
+-                  <span class='hide-text'>Twitter</span>
+-                </a>
+-              </li>
+-              <li>
+-                <a class='facebook' href='http://www.facebook.com/northeastern'>
+-                  <span class='icon-facebook-sign'></span>
+-                  <span class='hide-text'>Facebook</span>
+-                </a>
+-              </li>
+-            </ul>
+-          </div>
+-        </div>
+-      </div>
+-
+diff --git a/spec/javascripts/fixtures/drsApp-ellipsis.html b/spec/javascripts/fixtures/drsApp-ellipsis.html
+deleted file mode 100644
+index 34a098d..0000000
+--- a/spec/javascripts/fixtures/drsApp-ellipsis.html
++++ /dev/null
+@@ -1,10 +0,0 @@
+-
+-<dl>
+-    <dt>Abstract</dt>
+-    <dd class="drs-item-abstract" id="abstract5">
+-        <span class="ellipsis">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</span>
+-        <a data-toggle="ellipsis" href="#abstract5" id="abstract5Toggle">
+-          <i class="icon-expand-alt">Toggle Stuff</i>  
+-        </a>
+-    </dd>
+-</dl>
+diff --git a/spec/javascripts/helpers/.gitkeep b/spec/javascripts/helpers/.gitkeep
+deleted file mode 100644
+index e69de29..0000000
+diff --git a/spec/javascripts/helpers/SpecHelper.js b/spec/javascripts/helpers/SpecHelper.js
+deleted file mode 100644
+index e69de29..0000000
+diff --git a/spec/javascripts/support/jasmine.yml b/spec/javascripts/support/jasmine.yml
+deleted file mode 100644
+index 79e10b7..0000000
+--- a/spec/javascripts/support/jasmine.yml
++++ /dev/null
+@@ -1,78 +0,0 @@
+-# src_files
+-#
+-# Return an array of filepaths relative to src_dir to include before jasmine specs.
+-# Default: []
+-#
+-# EXAMPLE:
+-#
+-# src_files:
+-#   - lib/source1.js
+-#   - lib/source2.js
+-#   - dist/**/*.js
+-#
+-src_files:
+-  - assets/modernizr/modernizr.js
+-  - assets/application.js
+-  - assets/tests.js
+-# stylesheets
+-#
+-# Return an array of stylesheet filepaths relative to src_dir to include before jasmine specs.
+-# Default: []
+-#
+-# EXAMPLE:
+-#
+-# stylesheets:
+-#   - css/style.css
+-#   - stylesheets/*.css
+-#
+-stylesheets:
+-  - assets/**/*.css
+-  - assets/application.css
+-
+-# helpers
+-#
+-# Return an array of filepaths relative to spec_dir to include before jasmine specs.
+-# Default: ["helpers/**/*.js"]
+-#
+-# EXAMPLE:
+-#
+-# helpers:
+-#   - helpers/**/*.js
+-#
+-helpers:
+-  - helpers/**/*.js
+-
+-# spec_files
+-#
+-# Return an array of filepaths relative to spec_dir to include.
+-# Default: ["**/*[sS]pec.js"]
+-#
+-# EXAMPLE:
+-#
+-# spec_files:
+-#   - **/*[sS]pec.js
+-#
+-spec_files:
+-  - '**/*[sS]pec.js'
+-
+-# src_dir
+-#
+-# Source directory path. Your src_files must be returned relative to this path. Will use root if left blank.
+-# Default: project root
+-#
+-# EXAMPLE:
+-#
+-# src_dir: public
+-#
+-src_dir:
+-
+-# spec_dir
+-#
+-# Spec directory path. Your spec_files must be returned relative to this path.
+-# Default: spec/javascripts
+-#
+-# EXAMPLE:
+-#
+-# spec_dir: spec/javascripts
+-#
+-spec_dir: spec/javascripts
+diff --git a/spec/javascripts/support/jasmine_helper.rb b/spec/javascripts/support/jasmine_helper.rb
+deleted file mode 100644
+index 986a4c1..0000000
+--- a/spec/javascripts/support/jasmine_helper.rb
++++ /dev/null
+@@ -1,11 +0,0 @@
+-#Use this file to set/override Jasmine configuration options
+-#You can remove it if you don't need it.
+-#This file is loaded *after* jasmine.yml is interpreted.
+-#
+-#Example: using a different boot file.
+-#Jasmine.configure do |config|
+-#   @config.boot_dir = '/absolute/path/to/boot_dir'
+-#   @config.boot_files = lambda { ['/absolute/path/to/boot_dir/file.js'] }
+-#end
+-#
+-
+diff --git a/spec/models/northeastern_dublin_core_datastream_spec.rb b/spec/models/northeastern_dublin_core_datastream_spec.rb
+index 678ff8a..fc3fe6c 100644
+--- a/spec/models/northeastern_dublin_core_datastream_spec.rb
++++ b/spec/models/northeastern_dublin_core_datastream_spec.rb
+@@ -26,5 +26,15 @@ describe NortheasternDublinCoreDatastream do
+       dublin_core.creator.should =~ ["Org"] 
+     end
+   end
++
++  describe "Solrization" do 
++    let(:result) { dublin_core.to_solr } 
++
++    it "creates a sim field for dcmi type" do 
++      dublin_core.nu_type = "Image" 
++
++      result["type_sim"].should == "Image" 
++    end
++  end
+ end
+ 
+diff --git a/spec/models/nu_mods_datastream_spec.rb b/spec/models/nu_mods_datastream_spec.rb
+index 48cd85a..fee5cd8 100644
+--- a/spec/models/nu_mods_datastream_spec.rb
++++ b/spec/models/nu_mods_datastream_spec.rb
+@@ -246,6 +246,14 @@ describe NuModsDatastream do
+       result["personal_creators_tesim"].should == ["Will Jackson", "Jim Jones"]
+     end
+ 
++    it "creates an aggregate creator tesim field" do 
++      mods.assign_creator_personal_names(["Will"], ["Jackson"]) 
++      mods.assign_corporate_names(["NEU"]) 
++      mods.names = ["ABC DEF", "GHI"]
++
++      result["creator_sim"].should == ["Will Jackson", "NEU", "ABC DEF", "GHI"]
++    end
++
+     it "creates ssim fields for scholarly_object category" do 
+       mods.category = "Theses" 
+       result["drs_category_ssim"].should == "Theses" 
