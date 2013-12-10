@@ -21,10 +21,7 @@
 //= require bootstrap-datepicker/js/bootstrap-datepicker.js
 //= require bootbox/bootbox.min.js
 //= require plugins
-//= require app
+//= require drsApp
 //= require polyfills
-//= require nu_collections
 //= require compilations
-//= require communities
-//= require admin
-//= require admin/communities
+

@@ -22,13 +22,17 @@ $( document ).ready(function() {
       },
    
       setup = function() {
+          nuCollectionsPage();
           drsApp.config.$drsBootstrapSelect.selectpicker();
           breadCrumbMenu();
           handleFitText();
           tooltipSetup();
           handleRequiredInputs();
           ellipsisExpand();
-          // drsToggleView();
+          drsToggleView();
+          handleDrsCommunities();
+          handleDrsAdminCommunities();
+          handleCommunitiesAdminAutoComplete();
       },
       /**
        * Provides the breadcrumb popover menu for adding collections or new items to the application.
@@ -257,6 +261,91 @@ $( document ).ready(function() {
         
 
         
+      };
+      //Handles spawning new permission related form elements on the nu_collections/new page. 
+      var nuCollectionsPage = function(){
+        //Add a datepicker to the date of issuance field. 
+        $('#date-issued, #embargo-date').datepicker({
+          todayBtn: true,
+          todayHighlight: true,
+          clearBtn: true
+        });
+
+        // Adding the form fields behavior to the buttons on the nu collections.
+        $('#add_another_personal_creator').addFormFields({
+          target: $('div.personal_creator'),
+          titleText: "Remove Personal Creator"
+        });
+
+        
+        $('#add_another_corporate_creator').addFormFields({
+          target: $('div.corporate_creator'),
+          titleText: "Remove Corporate Creator",
+        });  
+
+
+        $('#add_another_keyword').addFormFields({
+          target: $('div.keyword'),
+          titleText:  "Remove keyword"
+        });
+        $('#add_another_permission').addFormFields({
+          target: $('div.permission'),
+          titleText: "Remove permission"
+        });
+      };
+      var handleDrsCommunities = function(){
+        if ($("#community_autocomplete").length > 0) { 
+          $("#community_autocomplete").autocomplete({
+              source: communities_for_autocomplete,
+              select: function(e, ui) {
+                  e.preventDefault() // <--- Prevent the value from being inserted.
+                  $("#community_parent").val(ui.item.value);
+                  $(this).val(ui.item.label);
+              },
+              focus: function( e, ui ) {
+                e.preventDefault() // <--- Prevent the value from being inserted.
+              }
+          });
+
+          $( "#community_autocomplete" ).attr('autocomplete', 'on');
+        }
+      };
+
+
+      var handleDrsAdminCommunities = function(){
+        if ($("#admin_community_autocomplete").length > 0) { 
+          $("#admin_community_autocomplete").autocomplete({
+              source: communities_for_employee_autocomplete,
+              select: function(e, ui) {
+                  e.preventDefault() // <--- Prevent the value from being inserted.
+                  $("#admin_community").val(ui.item.value);
+                  $(this).val(ui.item.label);
+              },
+              focus: function( e, ui ) {
+                e.preventDefault() // <--- Prevent the value from being inserted.
+              }
+          });
+
+          $( "#admin_community_autocomplete" ).attr('autocomplete', 'on');
+        }
+      };
+      var handleCommunitiesAdminAutoComplete = function(){
+        if ($("#admin_employee_autocomplete").length > 0) { 
+          $("#admin_employee_autocomplete").autocomplete({
+              source: employees_for_autocomplete,
+              select: function(e, ui) {
+                  e.preventDefault() // <--- Prevent the value from being inserted.
+                  $("#admin_employee").val(ui.item.value);
+                  $(this).val(ui.item.label);
+              },
+              focus: function( e, ui ) {
+                e.preventDefault() // <--- Prevent the value from being inserted.
+              }
+          });
+
+          $( "#admin_employee_autocomplete" ).attr('autocomplete', 'on');
+        }
+
       };
 
 
