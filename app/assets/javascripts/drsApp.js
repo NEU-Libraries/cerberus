@@ -369,11 +369,3 @@ $( document ).ready(function() {
 });
  
 
-$.ajax({
-  url: '/files/neu:tb09kp69r',
-  dataType: 'json',
-  success: function(jqXHR){
-    console.log(jqXHR);
-  }
-});
-
