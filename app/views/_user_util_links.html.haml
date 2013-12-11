@@ -2,7 +2,8 @@
   - if user_signed_in?
     = render :partial => 'shopping_carts/tracker'
     = render :partial => 'users/notify_link'
-    %a.btn{:href => sufia.profile_path(current_user), :title => "click for User Profile"}
+    -# FIX THIS !!!!!!!!!
+    -# %a.btn{:href => sufia.profile_path(current_user), :title => "click for User Profile"}
       %i.icon-user &nbsp;
       = current_user.name
     %a.btn.dropdown-toggle{"data-toggle" => "dropdown", :href => "#"}
