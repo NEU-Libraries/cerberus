@@ -262,6 +262,19 @@ $( document ).ready(function() {
 
         
       };
+
+      var getThumnbnailData = function(img){
+        var thumbnails = $(img).data('thumbnails');
+        if (typeof thumbnails === 'undefined '){
+          throw 'Invalid data for imgs'
+        }else{
+          return thumbnails;
+        }
+      }
+      window.thumbnails = getThumnbnailData($('#drsDummyItems').first('.drs-itme').find('img'), 'foobar');
+
+
+
       //Handles spawning new permission related form elements on the nu_collections/new page. 
       var nuCollectionsPage = function(){
         //Add a datepicker to the date of issuance field. 
