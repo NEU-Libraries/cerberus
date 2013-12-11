@@ -68,7 +68,7 @@ class CatalogController < ApplicationController
   # Actions mapping to 'best bit' content types.
 
   def theses 
-    theses_query = "{!lucene q.op=AND df=#{category_field}}theses"
+    theses_query = "{!lucene q.op=AND df=#{category_field}}\"Theses and Dissertations\""
     (@response, @document_list) = get_search_results(:q => theses_query)
     render 'index', locals: { facet_list: [creator_field, 
                                            department_field, 
@@ -78,7 +78,7 @@ class CatalogController < ApplicationController
   end
 
   def research
-    research_query = "{!lucene q.op=AND df=#{category_field}}research"
+    research_query = "{!lucene q.op=AND df=#{category_field}}\"Research Publications\""
     (@response, @document_list) = get_search_results(:q => research_query)  
     render 'index', locals: { facet_list: [creator_field, 
                                            creation_year_field, 
@@ -87,7 +87,7 @@ class CatalogController < ApplicationController
   end
 
   def presentations
-    presentation_query = "!lucene q.op=AND df=#{category_field}}presentations" 
+    presentation_query = "{!lucene q.op=AND df=#{category_field}}Presentations" 
     (@response, @document_list) = get_search_results(:q => presentation_query) 
     render 'index', locals: { facet_list: [creator_field,
                                            creation_year_field, 
