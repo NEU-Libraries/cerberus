@@ -3,7 +3,7 @@ FactoryGirl.define do
     sequence(:title) { |n| "Core File #{n}" } 
 
     trait :deposited_by_bill do 
-      depositor "bill@example.com"
+      depositor "000000001"
     end
 
     trait :incomplete do 

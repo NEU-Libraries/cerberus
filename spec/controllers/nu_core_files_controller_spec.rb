@@ -6,7 +6,7 @@ describe NuCoreFilesController do
   let(:root) { FactoryGirl.create(:root_collection) }
 
   let(:file) { FactoryGirl.create(:complete_file, 
-                                  depositor: "bill@example.com", 
+                                  depositor: "000000001", 
                                   parent: root) }
 
   describe "GET #new" do 
