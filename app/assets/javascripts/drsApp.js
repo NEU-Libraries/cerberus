@@ -33,6 +33,7 @@ $( document ).ready(function() {
           handleDrsCommunities();
           handleDrsAdminCommunities();
           handleCommunitiesAdminAutoComplete();
+          drsApp.thumbnail.changeSrc('thumbnail-s2');
       },
       /**
        * Provides the breadcrumb popover menu for adding collections or new items to the application.
@@ -84,11 +85,13 @@ $( document ).ready(function() {
       newCompilationForm =  function(){
         $('#new_compilation').on('ajax:success', function(){
           $(this).closest('.modal').modal('hide');
+           
            $('.breadcrumb').addBsAlert({
             classes: 'alert alert-success',
             strong: 'Success!',
             text: 'You created a new compilation!',
            });
+
         }).on('ajax:error', function(){
           $(this).closest('.modal').modal('hide');
            $('.breadcrumb').addBsAlert({
@@ -262,8 +265,7 @@ $( document ).ready(function() {
         }
         
 
-        
-      };
+
       /**
        * Thumbnail Class to handle changing source.
        * @param {DOM element} img image to initiate the the methods on.
@@ -284,15 +286,15 @@ $( document ).ready(function() {
           }
         };
       /**
-       * [changeSrc description]
+       * Method to change the source and classes.
        * @param  {string} classKey target class and for the image source to set.
        * @return {class property} 
        */
       Thumbnail.prototype.changeSrc = function(classKey){
         if ( classKey === this.currentClass ){
-          throw "Current class matches the given classKey";
+          throw new Error('Current class matches the given classKey');
         }else if ( ! classKey in this.thumbnails ) {
-          throw "Invalid class key to change to ";
+          throw new Error('Invalid class key to change to');
         }else{
           this.$img.removeClass(this.currentClass)
             .addClass(classKey).attr('src', this.thumbnails[classKey]);
@@ -300,12 +302,20 @@ $( document ).ready(function() {
         }
       };
 
-      Thumbnail.window = Thumbnail; 
+
+
+
+
+
+
+      
+
       var DrsItem = function(e){
         this.$e = $(e);
         this.active = this.$e.hasClass('active');
         this.$parent = this.$e.data('parent') ||  this.$e.closest('.drs-items');
-        this.thumbail = null;
+        this.$d
+
       }
 
 
@@ -406,7 +416,6 @@ $( document ).ready(function() {
         addToComplationLink: addToComplationLink,
         newCompilationForm: newCompilationForm,
         compilationsModal: compilationsModal
-
       };
 
    

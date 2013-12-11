@@ -100,8 +100,8 @@ describe('The drsApp object', function() {
       expect(thumbnail.$img).toHaveAttr('src', 'http://placekitten.com/970/680');
       expect(thumbnail.currentClass).toBe('thumbnail-s10');
 
-      expect(thumbnail.changeSrc('thumbnail-s10')).toTrow();
-      expect(thumbnail.changeSrc('thumbnail-200')).toTrow();
+            
+      expect(thumbnail.changeSrc('thumbnail-200')).toThrow();
 
     });
 
