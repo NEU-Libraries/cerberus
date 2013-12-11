@@ -4,10 +4,8 @@ class UsersController < ApplicationController
   included do
     layout "sufia-one-column"
     prepend_before_filter :find_user, :except => [:index, :search, :notifications_number]
-    before_filter :authenticate_user!, only: [:edit, :update, :follow, :unfollow]
+    before_filter :authenticate_user!, only: [:edit, :update]
     before_filter :user_is_current_user, only: [:edit, :update]
-
-    before_filter :user_not_current_user, only: [:follow, :unfollow]
   end
 
   def index
@@ -28,6 +26,7 @@ class UsersController < ApplicationController
 
   # Display user profile
   def show
+    @user = User.find_by_nuid(params[:id])
     if @user.respond_to? :profile_events
       @events = @user.profile_events(100) 
     else 
@@ -67,7 +66,7 @@ class UsersController < ApplicationController
   end
 
   def find_user
-    @user = User.from_url_component(params[:id])
+    @user = User.find_by_nuid(params[:id])
     redirect_to root_path, alert: "User '#{params[:id]}' does not exist" if @user.nil?
   end
 
