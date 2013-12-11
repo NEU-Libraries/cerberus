@@ -1,23 +1,34 @@
 require 'spec_helper'
 
 describe CatalogController do 
-  before :all do 
-    @theses  = FactoryGirl.create(:theses) 
-    @theses2 = FactoryGirl.create(:theses) 
-    @theses3 = FactoryGirl.create(:theses)
+  before :all do
+    # Lazy
+    x = Proc.new { |x| FactoryGirl.create(x) } 
+
+    @theses  = x.call(:theses) 
+    @theses2 = x.call(:theses) 
+    @theses3 = x.call(:theses)
     @almost_theses = NuCoreFile.create(mass_permissions: 'public', 
                                        depositor: 'a@a.com', 
                                        category: 'thes')  
 
-    @research  = FactoryGirl.create(:research) 
-    @research2 = FactoryGirl.create(:research) 
-    @research3 = FactoryGirl.create(:research)
+    @research  = x.call(:research) 
+    @research2 = x.call(:research) 
+    @research3 = x.call(:research)
     # Make sure search is only on category key
     @research.title = "Theses" ; @research.save! 
 
-    @presentation  = FactoryGirl.create(:presentation) 
-    @presentation1 = FactoryGirl.create(:presentation) 
-    @presentation2 = FactoryGirl.create(:presentation)   
+    @presentation  = x.call(:presentation) 
+    @presentation1 = x.call(:presentation) 
+    @presentation2 = x.call(:presentation)
+
+    @dataset  = x.call(:dataset) 
+    @dataset1 = x.call(:dataset) 
+    @dataset2 = x.call(:dataset)
+
+    @learning_object =  x.call(:learning_object) 
+    @learning_object1 = x.call(:learning_object) 
+    @learning_object2 = x.call(:learning_object) 
   end
 
   after :all do 
@@ -58,7 +69,17 @@ describe CatalogController do
   end
 
   describe "#GET presentations" do 
-    before(:all) { category_context(:presentations, 3, 'Presentations')}
+    before(:all) { category_context(:presentations, 3, 'Presentations') }
+    it_should_behave_like 'category specific search' 
+  end
+
+  describe "#GET datasets" do 
+    before(:all) { category_context(:datasets, 3, 'Datasets') } 
+    it_should_behave_like 'category specific search' 
+  end
+
+  describe "#GET learning_objects" do 
+    before(:all) { category_context(:learning_objects, 3, "Learning Objects") } 
     it_should_behave_like 'category specific search' 
   end
 end

@@ -66,33 +66,29 @@ class CatalogController < ApplicationController
   end
 
   # Actions mapping to 'best bit' content types.
-
   def theses 
-    theses_query = "{!lucene q.op=AND df=#{category_field}}\"Theses and Dissertations\""
-    (@response, @document_list) = get_search_results(:q => theses_query)
-    render 'index', locals: { facet_list: [creator_field, 
-                                           department_field, 
-                                           creation_year_field, 
-                                           degree_field,
-                                           subject_field] } 
+    x = [creator_field, department_field, creation_year_field, degree_field, subject_field]
+    category_query_action("\"Theses and Dissertations\"", x) 
   end
 
-  def research
-    research_query = "{!lucene q.op=AND df=#{category_field}}\"Research Publications\""
-    (@response, @document_list) = get_search_results(:q => research_query)  
-    render 'index', locals: { facet_list: [creator_field, 
-                                           creation_year_field, 
-                                           department_field, 
-                                           subject_field] }
+  def research 
+    x = [creator_field, creation_year_field, department_field, subject_field] 
+    category_query_action("\"Research Publications\"", x) 
   end
 
-  def presentations
-    presentation_query = "{!lucene q.op=AND df=#{category_field}}Presentations" 
-    (@response, @document_list) = get_search_results(:q => presentation_query) 
-    render 'index', locals: { facet_list: [creator_field,
-                                           creation_year_field, 
-                                           department_field, 
-                                           subject_field] }
+  def presentations 
+    x = [creator_field, creation_year_field, department_field, subject_field]
+    category_query_action("Presentations", x) 
+  end
+
+  def datasets
+    x = [creator_field, creation_year_field, department_field, subject_field] 
+    category_query_action("Datasets", x) 
+  end
+
+  def learning_objects 
+    x = [creator_field, creation_year_field, department_field, subject_field] 
+    category_query_action("\"Learning Objects\"", x) 
   end
 
   def self.uploaded_field
@@ -440,5 +436,11 @@ class CatalogController < ApplicationController
 
   def subject_field 
     Solrizer.solr_name('subject', :symbol, :type => :string) 
+  end
+
+  def category_query_action(category, facet_fields) 
+    query = "{!lucene q.op=AND df=#{category_field}}#{category}"
+    (@response, @document_list) = get_search_results(:q => query) 
+    render 'index', locals: { facet_list: facet_fields } 
   end
 end
