@@ -39,7 +39,7 @@ feature "Editing collections" do
 
     # Verify billsfriend@example.com's permission data loaded correctly 
     first_perm.all('select').first.value.should == 'person' 
-    first_perm.find_field('Enter NUID or group name').value.should == 'billsfriend@example.com' 
+    first_perm.find_field('Enter NUID or group name').value.should == '000000009' 
     first_perm.all('select').last.value.should == 'read' 
 
   end
