@@ -264,17 +264,52 @@ $( document ).ready(function() {
 
         
       };
+      /**
+       * Thumbnail Class to handle changing source.
+       * @param {DOM element} img image to initiate the the methods on.
+       */
+      var Thumbnail = function(img){
+        this.$img  = $(img);
+        this.thumbnails = {};
+        this.currentClass = this.$img.attr('class'),
+        this.getThumnbnailData(); 
+      };
 
-      var getThumnbnailData = function(img){
-        var thumbnails = $(img).data('thumbnails');
-        if (typeof thumbnails === 'undefined '){
-          throw 'Invalid data for imgs'
+      Thumbnail.prototype.getThumnbnailData = function(){
+          var thumbnails = this.$img.data('thumbnails');
+          if (typeof thumbnails === 'undefined '){
+            throw 'Invalid data for imgs';
+          }else{
+            return this.thumbnails = thumbnails;
+          }
+        };
+      /**
+       * [changeSrc description]
+       * @param  {string} classKey target class and for the image source to set.
+       * @return {class property} 
+       */
+      Thumbnail.prototype.changeSrc = function(classKey){
+        if ( classKey === this.currentClass ){
+          throw "Current class matches the given classKey";
+        }else if ( ! classKey in this.thumbnails ) {
+          throw "Invalid class key to change to ";
         }else{
-          return thumbnails;
+          this.$img.removeClass(this.currentClass)
+            .addClass(classKey).attr('src', this.thumbnails[classKey]);
+            this.currentClass = classKey;
         }
-      }
-      window.thumbnails = getThumnbnailData($('#drsDummyItems').first('.drs-itme').find('img'), 'foobar');
+      };
 
+      Thumbnail.window = Thumbnail; 
+      var DrsItem = function(e){
+        this.$e = $(e);
+        this.active = this.$e.hasClass('active');
+        this.$parent = this.$e.data('parent') ||  this.$e.closest('.drs-items');
+        this.thumbail = null;
+      }
+
+
+      
 
 
 
