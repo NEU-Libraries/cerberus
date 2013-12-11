@@ -3,7 +3,7 @@ FactoryGirl.define do
     sequence(:title) { |n| "Core File #{n}" } 
 
     trait :deposited_by_bill do 
-      depositor "bill@example.com"
+      depositor "000000001"
     end
 
     trait :incomplete do 
@@ -15,6 +15,31 @@ FactoryGirl.define do
     trait :complete do 
       before(:create) do |file| 
         file.tag_as_completed 
+      end
+    end
+
+    factory :significant_content do 
+      mass_permissions 'public' 
+      deposited_by_bill 
+
+      factory :theses do
+       category 'Theses and Dissertations'
+      end
+      
+      factory :research do
+       category 'Research Publications' 
+      end
+
+      factory :presentation do 
+        category 'Presentations' 
+      end
+
+      factory :dataset do 
+        category 'Datasets' 
+      end
+
+      factory :learning_object do 
+        category 'Learning Objects'
       end
     end
 

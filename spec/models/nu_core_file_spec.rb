@@ -34,8 +34,8 @@ describe NuCoreFile do
     let(:bills_collection) { FactoryGirl.create(:valid_owned_by_bill) }
     let(:bills_collection_two) { FactoryGirl.create(:valid_owned_by_bill) } 
     let(:core) do 
-      a = NuCoreFile.new(depositor: "bill@example.com")
-      a.rightsMetadata.permissions({person: 'bill@example.com'}, 'edit')
+      a = NuCoreFile.new(depositor: "000000001")
+      a.rightsMetadata.permissions({person: '000000001'}, 'edit')
       return a  
     end
 

@@ -9,7 +9,7 @@ FactoryGirl.define do
     end
 
     trait :deposited_by_bill do 
-      depositor "bill@example.com"
+      depositor "000000001"
     end
 
     factory :bills_compilation do

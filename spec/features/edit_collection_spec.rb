@@ -4,7 +4,7 @@ feature "Editing collections" do
   before :all do 
     @root = Community.create(pid: "neu:1")
     @root.identifier = "neu:1"
-    @root.rightsMetadata.permissions({person: 'bill@example.com'}, 'edit') 
+    @root.rightsMetadata.permissions({person: '000000001'}, 'edit') 
     @root.mass_permissions = 'public'
     @root.title = "Root Collection"
     @root.save!
@@ -39,7 +39,7 @@ feature "Editing collections" do
 
     # Verify billsfriend@example.com's permission data loaded correctly 
     first_perm.all('select').first.value.should == 'person' 
-    first_perm.find_field('Enter NUID or group name').value.should == 'billsfriend@example.com' 
+    first_perm.find_field('Enter NUID or group name').value.should == '000000009' 
     first_perm.all('select').last.value.should == 'read' 
 
   end

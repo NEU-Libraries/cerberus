@@ -198,6 +198,12 @@ class NuModsDatastream < ActiveFedora::OmDatastream
     solr_doc["personal_creators_tesim"] = full_names
     solr_doc["personal_creators_sim"] = full_names
 
+    # Create an aggregate facet field of all creator information
+    personal_names = solr_doc["personal_creators_sim"] || []
+    corporate_names = solr_doc["corporate_name_name_part_sim"] || [] 
+    names = solr_doc["name_name_part_sim"] || []
+    solr_doc["creator_sim"] = personal_names + corporate_names + names
+
     #TODO:  Extract dateBegin/dateEnd information ]
     return solr_doc
   end

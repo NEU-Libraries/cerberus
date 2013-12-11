@@ -50,9 +50,8 @@ FactoryGirl.define do
     end
 
     trait :owned_by_bill do 
-      depositor 'bill@example.com' 
-      permissions {{ 'permissions0' => { 'identity_type' => 'person', 'identity' => 'bill@example.com', 'permission_type' => 'edit' },
-                      'permissions1' => {'identity_type' => 'person', 'identity' => 'billsfriend@example.com', 'permission_type' => 'read' }}}
+      depositor '000000001' 
+      permissions {{'permissions1' => {'identity_type' => 'person', 'identity' => '000000009', 'permission_type' => 'read' }}}
     end
 
     trait :is_private do 

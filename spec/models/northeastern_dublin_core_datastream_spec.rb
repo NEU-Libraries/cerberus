@@ -26,5 +26,15 @@ describe NortheasternDublinCoreDatastream do
       dublin_core.creator.should =~ ["Org"] 
     end
   end
+
+  describe "Solrization" do 
+    let(:result) { dublin_core.to_solr } 
+
+    it "creates a sim field for dcmi type" do 
+      dublin_core.nu_type = "Image" 
+
+      result["type_sim"].should == "Image" 
+    end
+  end
 end
 

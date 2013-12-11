@@ -129,15 +129,15 @@ describe "Metadata" do
     end
 
     describe "of depositor" do 
-      let(:user) { User.new(email: 'example@example.com') } 
+      let(:user) { User.new(email: 'example@example.com', nuid: '000000001') } 
 
       it "succeeds for objects with a properties datastream" do 
-        compilation.depositor = 'example@example.com' 
-        compilation.depositor.should == 'example@example.com' 
+        compilation.depositor = '000000001' 
+        compilation.depositor.should == '000000001' 
       end
 
       it "additionally assigns edit permissions to the depositor" do 
-        core_file.depositor = 'example@example.com'
+        core_file.depositor = '000000001'
         core_file.save! 
 
         user.can?(:edit, core_file).should be true 

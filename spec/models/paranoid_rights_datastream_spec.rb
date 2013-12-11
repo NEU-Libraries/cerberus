@@ -20,7 +20,7 @@ describe ParanoidRightsDatastream do
 
     before do 
       @rights_ds.update_permissions('group' => { 'group_one' => 'edit', 'group_two' => 'read' }) 
-      @rights_ds.update_permissions('person' => { 'bill@example.com' => 'edit', 'bo@example.com' => 'read' })
+      @rights_ds.update_permissions('person' => { '000000001' => 'edit', '000000002' => 'read' })
     end
 
     it "Does not allow user to have any permissions" do 
