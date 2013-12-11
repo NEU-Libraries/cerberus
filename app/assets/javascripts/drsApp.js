@@ -215,7 +215,9 @@ $( document ).ready(function() {
             container.removeClass('drs-items-grid').addClass('drs-items-list');
 
           }
+
           updateUserViewPref($(this));
+
         }
         
         
@@ -263,7 +265,6 @@ $( document ).ready(function() {
         
       };
 
-
       var getThumnbnailData = function(img){
         var thumbnails = $(img).data('thumbnails');
         if (typeof thumbnails === 'undefined '){
@@ -273,6 +274,7 @@ $( document ).ready(function() {
         }
       }
       window.thumbnails = getThumnbnailData($('#drsDummyItems').first('.drs-itme').find('img'), 'foobar');
+
 
 
 
