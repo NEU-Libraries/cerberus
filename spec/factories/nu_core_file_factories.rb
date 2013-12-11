@@ -18,6 +18,31 @@ FactoryGirl.define do
       end
     end
 
+    factory :significant_content do 
+      mass_permissions 'public' 
+      deposited_by_bill 
+
+      factory :theses do
+       category 'Theses and Dissertations'
+      end
+      
+      factory :research do
+       category 'Research Publications' 
+      end
+
+      factory :presentation do 
+        category 'Presentations' 
+      end
+
+      factory :dataset do 
+        category 'Datasets' 
+      end
+
+      factory :learning_object do 
+        category 'Learning Objects'
+      end
+    end
+
     factory :complete_file do 
       ignore do 
         depositor false 

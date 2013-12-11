@@ -14,6 +14,14 @@ class NortheasternDublinCoreDatastream < ActiveFedora::OmDatastream
     t.subject(namespace_prefix: 'dc') 
   end
 
+  def to_solr(solr_doc = Hash.new)
+    super(solr_doc)
+
+    solr_doc["type_sim"] = self.nu_type.first unless self.nu_type.first.blank?
+
+    return solr_doc 
+  end
+
 
   def self.xml_template
     builder = Nokogiri::XML::Builder.new do |xml| 
