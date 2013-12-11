@@ -58,12 +58,10 @@ Drs::Application.routes.draw do
 
   # Best bits queries
   get '/theses' => 'catalog#theses', as: 'theses'
-  get '/research' => 'significant_content#research', as: 'research' 
-  get '/presentations' => 'significant_content#presentations', as: 'presentations'  
-
-  # Best bit queries that we don't want just yet, kept to keep the home page working 
-  get '/pedagogical' => 'significant_content#research', as: 'learning_objects' 
-  get '/datasets' => 'significant_content#research', as: 'datasets' 
+  get '/research' => 'catalog#research', as: 'research' 
+  get '/datasets' => 'catalog#datasets', as: 'datasets'
+  get '/presentations' => 'catalog#presentations', as: 'presentations'  
+  get '/learning_objects' => 'catalog#learning_objects', as: 'learning_objects'
 
   get '/admin' => 'admin#index', as: 'admin_panel'
   get '/admin/modify_employee' => 'admin#modify_employee', as: 'modify_employee'
