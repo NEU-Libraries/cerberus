@@ -87,7 +87,8 @@ class CatalogController < ApplicationController
   end
 
   def learning_objects 
-    x = [creator_field, creation_year_field, department_field, subject_field] 
+    x = [creator_field, creation_year_field, department_field, subject_field,
+         course_number_field, course_title_field, type_field] 
     category_query_action("\"Learning Objects\"", x) 
   end
 
@@ -123,6 +124,8 @@ class CatalogController < ApplicationController
     config.add_facet_field solr_name("creation_year", :facetable), label: "Year", limit: 5
     config.add_facet_field solr_name("drs_department", :symbol), label: "Department", limit: 5
     config.add_facet_field solr_name("drs_degree", :symbol), label: "Degree Level", limit: 5
+    config.add_facet_field solr_name("drs_course_number", :symbol), label: "Course Number", limit: 5
+    config.add_facet_field solr_name("drs_course_title", :symbol), label: "Course Title", limit: 5
     config.add_facet_field solr_name("subject", :facetable), label: "Subject", limit: 5
     config.add_facet_field solr_name("type", :facetable), label: "Type", limit: 5
 
@@ -436,6 +439,18 @@ class CatalogController < ApplicationController
 
   def subject_field 
     Solrizer.solr_name('subject', :symbol, :type => :string) 
+  end
+
+  def course_number_field 
+    Solrizer.solr_name('drs_course_number', :symbol, :type => :string) 
+  end
+
+  def course_title_field 
+    Solrizer.solr_name('drs_course_title', :symbol, :type => :string) 
+  end
+
+  def type_field 
+    Solrizer.solr_name('type', :facetable, :type => :string) 
   end
 
   def category_query_action(category, facet_fields) 
