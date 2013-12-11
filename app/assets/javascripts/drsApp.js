@@ -215,7 +215,7 @@ $( document ).ready(function() {
             container.removeClass('drs-items-grid').addClass('drs-items-list');
 
           }
-          updateUserviewPref($(this));
+          updateUserViewPref($(this));
         }
         
         

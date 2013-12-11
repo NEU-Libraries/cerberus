@@ -1,9 +1,11 @@
 .btn-group{"data-toggle" => "drs-item-views-radio", "data-container" => "#drsDummyItems"}
-  %button.btn.btn-primary{type: "button", "data-target" => "drs-items-grid" , class: view_mode == "grid"  ? 'active' : '' } Grid
-  %button.btn.btn-primary{type: "button", "data-target" => "drs-items-list" , class: view_mode == "list"  ? 'active' : ''  } List
+  / %button.btn.btn-primary{type: "button", "data-target" => "drs-items-grid" , class: view_mode == "grid"  ? 'active' : '' } Grid
+  / %button.btn.btn-primary{type: "button", "data-target" => "drs-items-list" , class: view_mode == "list"  ? 'active' : ''  } List
   
-  = link_to("List", {controller: "users", action: "update"}, method: 'put', remote: true, data: {"target" => "drs-items-list"}, class: "btn btn-primary") 
-  =#link_to("Grid", sufia.profile_path(id: current_user.email, view_pref: 'grid'), method: 'put', remote: 'true', class: 'btn') 
+  =# link_to("List", {controller: "users", action: "update", parameters: {view_pref: 'list'}}, method: 'put', remote: true, data: {"target" => "drs-items-list"}, class: "btn btn-primary") 
+  =# link_to("Grid", , method: 'put', remote: true, data: {"target" => "drs-items-grid"}, class: "btn btn-primary") 
+  = link_to("List", sufia.profile_path(current_user, view_pref: 'list'), method: 'put', remote: 'true',data: {"target" => "drs-items-list"}, class: "btn btn-primary") 
+  = link_to("Grid", sufia.profile_path(current_user, view_pref: 'grid'), method: 'put', remote: 'true',data: {"target" => "drs-items-grid"}, class: "btn btn-primary") 
 
 
 %ul.nav.nav-list
