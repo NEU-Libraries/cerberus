@@ -4,8 +4,8 @@ class UsersController < ApplicationController
   included do
     layout "sufia-one-column"
     prepend_before_filter :find_user, :except => [:index, :search, :notifications_number]
-    before_filter :authenticate_user!, only: [:edit, :update, :follow, :unfollow, :toggle_trophy]
-    before_filter :user_is_current_user, only: [:edit, :update, :toggle_trophy]
+    before_filter :authenticate_user!, only: [:edit, :update, :follow, :unfollow]
+    before_filter :user_is_current_user, only: [:edit, :update]
 
     before_filter :user_not_current_user, only: [:follow, :unfollow]
   end
@@ -33,15 +33,11 @@ class UsersController < ApplicationController
     else 
       @events = []
     end
-    @trophies = @user.trophy_ids
-    @followers = @user.followers
-    @following = @user.all_following
   end
 
   # Display form for users to edit their profile information
   def edit
     @user = current_user
-    @trophies = @user.trophy_ids
   end
 
   # Process changes from profile form
@@ -59,53 +55,9 @@ class UsersController < ApplicationController
       redirect_to sufia.edit_profile_path(@user), alert: @user.errors.full_messages
       return
     end
-    delete_trophy = params.keys.reject{|k,v|k.slice(0,'remove_trophy'.length)!='remove_trophy'}
-    delete_trophy = delete_trophy.map{|v| v.slice('remove_trophy_'.length..-1)}
-    delete_trophy.each do | smash_trophy |
-      Trophy.where(user_id: current_user.id, generic_file_id: smash_trophy).each.map(&:delete)
-    end
     Sufia.queue.push(UserEditProfileEventJob.new(@user.user_key))
     redirect_to sufia.profile_path(@user), notice: "Your profile has been updated"
-  end
-
-  def toggle_trophy    
-     id = params[:file_id]
-     id = "#{Sufia.config.id_namespace}:#{id}" unless id.include?(":")
-     unless current_user.can? :edit, id
-       redirect_to root_path, alert: "You do not have permissions to the file"
-       return false
-     end
-     # TODO  make sure current user has access to file
-     t = Trophy.where(:generic_file_id => params[:file_id], :user_id => current_user.id).first
-     if t.blank? 
-       t = Trophy.create(:generic_file_id => params[:file_id], :user_id => current_user.id)
-       return false unless t.persisted?
-     else
-       t.destroy  
-       #TODO do this better says Mike
-       return false if t.persisted?  
-     end
-     render :json => t
   end 
-
-
-  # Follow a user
-  def follow
-    unless current_user.following?(@user)
-      current_user.follow(@user)
-      Sufia.queue.push(UserFollowEventJob.new(current_user.user_key, @user.user_key))
-    end
-    redirect_to sufia.profile_path(@user), notice: "You are following #{@user.to_s}"
-  end
-
-  # Unfollow a user
-  def unfollow
-    if current_user.following?(@user)
-      current_user.stop_following(@user)
-      Sufia.queue.push(UserUnfollowEventJob.new(current_user.user_key, @user.user_key))
-    end
-    redirect_to sufia.profile_path(@user), notice: "You are no longer following #{@user.to_s}"
-  end
 
   protected
 
