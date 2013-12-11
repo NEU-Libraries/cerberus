@@ -41,6 +41,7 @@ class UsersController < ApplicationController
 
   # Process changes from profile form
   def update
+    @user = current_user
     if params[:user]
       if Rails::VERSION::MAJOR == 3
         @user.update_attributes(params[:user])
