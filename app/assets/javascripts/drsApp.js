@@ -263,6 +263,7 @@ $( document ).ready(function() {
         
       };
 
+
       var getThumnbnailData = function(img){
         var thumbnails = $(img).data('thumbnails');
         if (typeof thumbnails === 'undefined '){
@@ -377,7 +378,7 @@ $( document ).ready(function() {
   
   window.drsApp = drsApp;
   drsApp.init({
-    updateUserviewPrefBoolean: false,
+    updateUserviewPrefBoolean: true,
   });
 });
  
