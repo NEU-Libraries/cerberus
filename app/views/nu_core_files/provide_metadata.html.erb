@@ -35,6 +35,8 @@ function confirmExit(){
 </div>
 <%= form_for(@nu_core_file, :url => files_process_metadata_path, :html => {:multipart => true, :class => 'form-horizontal'}) do |f| %>
 
+  <%= hidden_field_tag(:collection_id, @incomplete_files.first.parent.identifier) %>
+
   <%= render :partial => 'metadata', :formats => [:html], :locals => {:f => f} %>
 
   <%= render :partial => 'permission_form', :formats => [:html], :locals => { :gf => @nu_core_file } %>

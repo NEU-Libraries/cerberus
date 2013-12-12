@@ -1,0 +1,7 @@
+<%= form_tag("/files", method: "post", multipart: true) do %>
+  <%= hidden_field_tag(:collection_id, @collection_id) %>
+  <%= check_box_tag 'terms_of_service' %>
+  <%# This seems to expect it to be an array for reasons other than multiple files...leaving for now%>
+  <%= file_field_tag 'file[]' %>
+  <%= submit_tag "Upload" %>
+<% end %>
