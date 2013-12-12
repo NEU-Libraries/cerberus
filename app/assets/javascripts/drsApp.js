@@ -210,14 +210,17 @@ $( document ).ready(function() {
         if (container.hasClass(desiredClass)){
           event.preventDefault();
         }else{
+          
+          container.find('.drs-item').removeClass('active');
           toggleContainer.find('a, button').removeClass('active');
           $(this).addClass('active');
-          console.log(desiredClass);
+           
           if (desiredClass === 'drs-items-grid' ){
             container.removeClass('drs-items-list').addClass('drs-items-grid');
             
           }else{
             container.removeClass('drs-items-grid').addClass('drs-items-list');
+            
 
           }
 
@@ -370,9 +373,12 @@ $( document ).ready(function() {
         
         $(element).on('click', function( event ){
           var target = $( event.target );
+          
 
-          if ( target.is('a, button, input, select, textarea') ){
+          if ( target.is('a, a*, button, button * , input, input *,  select, select *, textarea') ){
             event.stopPropagation();
+            
+            return;
           }else{
             //find the parent for later use;
             var parent = $( this ).closest( '.drs-items' );
@@ -393,7 +399,9 @@ $( document ).ready(function() {
           
           
         })
-      }
+      };
+
+      var epandedView
 
 
       // these are the public API
