@@ -18,7 +18,7 @@ class MetadataUpdateJob
 
   def run
 
-    user = User.find_by_user_key(self.login)
+    user = User.find_by_nuid(self.login)
     @saved = []
     @denied = []
 

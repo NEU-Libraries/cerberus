@@ -11,7 +11,7 @@
         Dropbox
 .tab-content
   #local.tab-pane.active
-    = render partial: 'multiple_upload'
+    = render partial: 'single_upload'
   - if Sufia.config.dropbox_api_key
     #dropbox.tab-pane
       = render partial: 'dropbox_import'
