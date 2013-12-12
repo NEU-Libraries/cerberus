@@ -172,7 +172,7 @@ class NuCoreFilesController < ApplicationController
       # check error condition No files
       return json_error("Error! No file to save") if !params.has_key?(:file)
 
-      file = params[:file].detect {|f| f.respond_to?(:original_filename) }
+      file = params[:file]
       if !file
         json_error "Error! No file for upload", 'unknown file', :status => :unprocessable_entity
       elsif (empty_file?(file))
