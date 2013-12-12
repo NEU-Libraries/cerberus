@@ -167,6 +167,30 @@ class NuCoreFilesController < ApplicationController
 
   protected
 
+ def create_from_local(params)
+    begin
+      # check error condition No files
+      return json_error("Error! No file to save") if !params.has_key?(:file)
+
+      file = params[:file].detect {|f| f.respond_to?(:original_filename) }
+      if !file
+        json_error "Error! No file for upload", 'unknown file', :status => :unprocessable_entity
+      elsif (empty_file?(file))
+        json_error "Error! Zero Length File!", file.original_filename
+      elsif (!terms_accepted?)
+        json_error "You must accept the terms of service!", file.original_filename
+      else
+        process_file(file)
+      end
+    rescue => error
+      logger.error "GenericFilesController::create rescued #{error.class}\n\t#{error.to_s}\n #{error.backtrace.join("\n")}\n\n"
+      json_error "Error occurred while creating generic file."
+    ensure
+      # remove the tempfile (only if it is a temp file)
+      file.tempfile.delete if file.respond_to?(:tempfile)
+    end
+  end  
+
   def no_parent_rescue
     flash[:error] = "Parent not specified or invalid" 
     redirect_to root_path 
