@@ -170,6 +170,7 @@ class NuModsDatastream < ActiveFedora::OmDatastream
       solr_doc["creation_year_sim"] = [creation_date[/\d{4}/]]
     end
 
+    # Ensure title is set to a title actually associated with this core file.
     solr_doc["title_info_title_ssi"] = self.title_info.title.first
 
     # Extract special subject/topic fields
@@ -202,7 +203,9 @@ class NuModsDatastream < ActiveFedora::OmDatastream
     personal_names = solr_doc["personal_creators_sim"] || []
     corporate_names = solr_doc["corporate_name_name_part_sim"] || [] 
     names = solr_doc["name_name_part_sim"] || []
-    solr_doc["creator_sim"] = personal_names + corporate_names + names
+    all_names = personal_names + corporate_names + names 
+    solr_doc["creator_sim"] = all_names 
+    solr_doc["creator_tesim"] = all_names
 
     #TODO:  Extract dateBegin/dateEnd information ]
     return solr_doc
