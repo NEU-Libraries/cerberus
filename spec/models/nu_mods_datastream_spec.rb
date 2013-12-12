@@ -246,13 +246,21 @@ describe NuModsDatastream do
       result["personal_creators_tesim"].should == ["Will Jackson", "Jim Jones"]
     end
 
-    it "creates an aggregate creator tesim field" do 
+    it "creates an aggregate creator sim field" do 
       mods.assign_creator_personal_names(["Will"], ["Jackson"]) 
       mods.assign_corporate_names(["NEU"]) 
       mods.names = ["ABC DEF", "GHI"]
 
       result["creator_sim"].should == ["Will Jackson", "NEU", "ABC DEF", "GHI"]
     end
+
+    it "creates an aggregate creator tesim field" do 
+      mods.assign_creator_personal_names(["Will"], ["Jackson"]) 
+      mods.assign_corporate_names(["NEU"]) 
+      mods.names = ["ABC DEF", "GHI"]
+
+      result["creator_tesim"].should == ["Will Jackson", "NEU", "ABC DEF", "GHI"]
+    end      
 
     it "creates ssim fields for scholarly_object category" do 
       mods.category = "Theses" 
