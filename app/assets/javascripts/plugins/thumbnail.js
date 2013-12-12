@@ -14,15 +14,16 @@
     // Create the defaults once
     var thumnailPlugin = "thumbnail",
         defaults = {
-            target: $('img[data-thumbnail]')
+            
         };
 
     // The actual plugin constructor
     function Thumbnail( element, options ) {
-        this.element = element;
+        this.$element = $(element);
         var thumbnails = {},
         currentClass = $(this.element).attr('class');
-        this.parent  = null;
+        this.options = $.extend({}, defaults , options);
+        if (this.options.parent) this.$parent = $(this.options.parent);
         this.settings = $.extend( {}, defaults, options) ;
             
         this._defaults = defaults;
@@ -38,15 +39,17 @@
       init: function() {
         this.getThumnbnailData();     
                 
-        this.parent = $(this.element).closest('.drs-item');
-        console.log(this);  
+        this.parent = this.$element.closest('.drs-item');
+        if(this.options.changeSrc){
+          this.changeSrc(this.options.ChangeSrc)
+        } 
           
-          
+        this.$element.css('background', 'red');
       },
 
 
       getThumnbnailData: function(){
-        var thumbnails = $(this.element).data('thumbnails');
+        var thumbnails = this.$element.data('thumbnails');
         if (typeof thumbnails === 'undefined '){
           throw 'Invalid data for imgs';
         }else{
@@ -66,11 +69,12 @@
         }else if ( ! classKey in this.thumbnails ) {
           throw new Error('Invalid class key to change to');
         }else{
-          this.$img.removeClass(this.currentClass)
+          this.$element.removeClass(this.currentClass)
             .addClass(classKey).attr('src', this.thumbnails[classKey]);
             this.currentClass = classKey;
         }
       },
+
 
       
     };
@@ -83,7 +87,14 @@
     $.fn[ thumnailPlugin ] = function ( options ) {
       return this.each(function() {
         if ( !$.data( this, "plugin_" + thumnailPlugin ) ) {
+          var $this   = $(this);
+          var data    = $this.data('drs-thumbnails')
+
+          
           $.data( this, "plugin_" + thumnailPlugin, new Thumbnail( this, options ) );
+          if (typeof options == 'string'){
+            data[options]();
+          } 
         }
       });
     };
