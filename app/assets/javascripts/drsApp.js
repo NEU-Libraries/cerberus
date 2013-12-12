@@ -33,7 +33,6 @@ $( document ).ready(function() {
           handleDrsCommunities();
           handleDrsAdminCommunities();
           handleCommunitiesAdminAutoComplete();
-          drsApp.thumbnail.changeSrc('thumbnail-s2');
       },
       /**
        * Provides the breadcrumb popover menu for adding collections or new items to the application.
@@ -263,18 +262,8 @@ $( document ).ready(function() {
           }
          });
         }
-        
+      };
 
-
-
-
-
-
-
-
-
-
-      
 
       var DrsItem = function(e){
         this.$e = $(e);

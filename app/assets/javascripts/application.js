@@ -21,6 +21,7 @@
 //= require bootstrap-datepicker/js/bootstrap-datepicker.js
 //= require bootbox/bootbox.min.js
 //= require plugins
+//= require plugins/thumbnail
 //= require drsApp
 
 //= require compilations

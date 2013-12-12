@@ -81,33 +81,7 @@ describe('The drsApp object', function() {
 
     });
   });
-  describe('Thumbnails should initialize an object', function(){
-    var image, thumbnail;
-    beforeEach(function(){
-      loadFixtures('drs-thumbnail-class.html'); 
-      drsApp.init();
-      image = $('.drs-item').first().find('img');
-      thumbnail = new Thumbnail(image);
-    });
-    it('Should initialize a new object', function(){
-      expect(thumbnail.thumbnails).toBeDefined();
-    });
-    
-    it('Should change its source when called and throw errors with invalid method calls', function(){
-      expect(thumbnail.$img).toHaveClass('thumbnail-s2-2x');
-      thumbnail.changeSrc('thumbnail-s10');
-      expect(thumbnail.$img).toHaveClass('thumbnail-s10');
-      expect(thumbnail.$img).toHaveAttr('src', 'http://placekitten.com/970/680');
-      expect(thumbnail.currentClass).toBe('thumbnail-s10');
-
-            
-      expect(thumbnail.changeSrc('thumbnail-200')).toThrow();
-
-    });
-
-
-
-  });
+  
 
 
 });
