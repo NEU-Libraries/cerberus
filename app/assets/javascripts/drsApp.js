@@ -367,9 +367,32 @@ $( document ).ready(function() {
 
       };
       var handleDrsItem = function(element){
-        $(element).on('click', function(){
-          $(this).hasClass('active') ? $(this).removeClass('active') :  $(this).addClass('active'); 
-        });
+        
+        $(element).on('click', function( event ){
+          var target = $( event.target );
+
+          if ( target.is('a, button, input, select, textarea') ){
+            event.stopPropagation();
+          }else{
+            //find the parent for later use;
+            var parent = $( this ).closest( '.drs-items' );
+
+            
+
+
+            //remove add the class to the target.
+            if( $(this).hasClass('active') ){
+              parent.find('.drs-item').removeClass('active');
+             
+            }else{
+              parent.find('.drs-item').removeClass('active');
+              $(this).addClass('active');
+            }
+          }
+
+          
+          
+        })
       }
 
 
