@@ -208,18 +208,8 @@ class NuCoreFilesController < ApplicationController
 
       update_metadata_from_upload_screen(@nu_core_file, current_user, file, params[:collection_id])
       Sufia.queue.push(ContentCreationJob.new(@nu_core_file.pid, new_path.to_s, file.original_filename, current_user.id))
-      #Drs::NuFile.create_master_content_object(@nu_core_file, file, datastream_id, current_user)
       @nu_core_file.record_version_committer(current_user)
-      respond_to do |format|
-        format.html {
-          render :json => [@nu_core_file.to_jq_upload],
-            :content_type => 'text/html',
-            :layout => false
-        }
-        format.json {
-          render :json => [@nu_core_file.to_jq_upload]
-        }
-      end
+      redirect_to NuCoreFilesController.upload_complete_path
     else
       render :json => [{:error => "Error creating generic file."}]
     end
