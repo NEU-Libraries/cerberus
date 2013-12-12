@@ -33,6 +33,9 @@ $( document ).ready(function() {
           handleDrsCommunities();
           handleDrsAdminCommunities();
           handleCommunitiesAdminAutoComplete();
+
+
+          handleDrsItem($('.drs-item'));
       },
       /**
        * Provides the breadcrumb popover menu for adding collections or new items to the application.
@@ -363,6 +366,11 @@ $( document ).ready(function() {
         }
 
       };
+      var handleDrsItem = function(element){
+        $(element).on('click', function(){
+          $(this).hasClass('active') ? $(this).removeClass('active') :  $(this).addClass('active'); 
+        });
+      }
 
 
       // these are the public API
