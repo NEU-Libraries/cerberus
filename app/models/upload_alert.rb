@@ -25,9 +25,9 @@ class UploadAlert < ActiveRecord::Base
   end
 
   def self.create_from_core_file(core_file, change_type) 
-    if !([:edit, :create].include? change_type)
+    if !([:update, :create].include? change_type)
       raise %Q(Passed #{change_type.class} #{change_type} to create_from_core_file, 
-               which takes either symbol :edit or :create)
+               which takes either symbol :update or :create)
     end
 
     u = UploadAlert.new 

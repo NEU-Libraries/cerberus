@@ -47,10 +47,10 @@ describe UploadAlert do
     end
 
     context "on core file update" do 
-      before(:each) { create_alert(:edit) } 
+      before(:each) { create_alert(:update) } 
       
       it "has a change type" do 
-        @alert.change_type.should == :edit 
+        @alert.change_type.should == :update
       end
     end
 
