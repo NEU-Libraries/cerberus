@@ -4,24 +4,24 @@ class UploadAlert < ActiveRecord::Base
   attr_accessible :depositor_email, :depositor_name, :title, :content_type
   attr_accessible :pid, :notified, :change_type
 
-  def self.withheld_research_publications
-    unknown_content_query('research publications') 
+  def self.withheld_research_publications(ct = :create)
+    unknown_content_query('Research Publications', ct) 
   end
 
-  def self.withheld_theses
-    unknown_content_query('theses')
+  def self.withheld_theses(ct = :create)
+    unknown_content_query('Theses and Dissertations', ct)
   end
 
-  def self.withheld_datasets
-    unknown_content_query('datasets') 
+  def self.withheld_datasets(ct = :create)
+    unknown_content_query('Datasets', ct) 
   end
 
-  def self.withheld_learning_objects
-    unknown_content_query('learning objects') 
+  def self.withheld_learning_objects(ct = :create)
+    unknown_content_query('Learning Objects', ct) 
   end
 
-  def self.withheld_presentations
-    unknown_content_query('presentations') 
+  def self.withheld_presentations(ct = :create)
+    unknown_content_query('Presentations', ct) 
   end
 
   def self.create_from_core_file(core_file, change_type) 
@@ -47,7 +47,8 @@ class UploadAlert < ActiveRecord::Base
       self.notified = false if self.notified.nil?
     end
 
-    def self.unknown_content_query(content_type)
-      UploadAlert.where('content_type = ? AND notified = ?', content_type, false).find_all
+    def self.unknown_content_query(content_type, change_type)
+      q = 'content_type = ? AND change_type = ? AND notified = ?'
+      UploadAlert.where(q, content_type, change_type, false).find_all
     end 
 end
