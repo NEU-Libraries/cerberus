@@ -62,7 +62,7 @@ class MetadataUpdateJob
         ua.depositor_email = user.email 
         ua.depositor_name  = user.full_name 
         ua.title           = gf.title 
-        ua.type            = upload_type 
+        ua.content_type    = upload_type 
         ua.pid             = gf.pid 
         ua.save! 
       end

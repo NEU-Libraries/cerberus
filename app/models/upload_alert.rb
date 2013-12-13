@@ -1,6 +1,6 @@
 class UploadAlert < ActiveRecord::Base
   after_initialize :not_notified
-  attr_accessible :depositor_email, :depositor_name, :title, :type, :pid, :notified
+  attr_accessible :depositor_email, :depositor_name, :title, :content_type, :pid, :notified
 
   def self.withheld_research_publications
     unknown_content_query('research publications') 
