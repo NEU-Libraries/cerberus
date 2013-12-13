@@ -125,7 +125,7 @@ describe NuCoreFilesController do
     end 
   end
 
-  describe "Get #provide_metadata" do 
+  describe "GET #provide_metadata" do 
 
     # Ensures no contamination between test runs 
     after(:each) do 
