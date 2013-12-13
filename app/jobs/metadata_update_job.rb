@@ -48,9 +48,24 @@ class MetadataUpdateJob
     gf.set_visibility(visibility)
     gf.tag_as_completed
 
+    # If this core record is being uploaded into a 'best bits' bucket, 
+    # we want to add an UploadAlert entry for the sake of the daily metadata
+    # emailing.  Note that all of the actual significant content type metadata
+    # is applied during the file upload process. 
+    upload_type = gf.parent.personal_folder_type  
+
     save_tries = 0
     begin
       gf.save!
+      if upload_type && !(upload_type == 'user root') 
+        ua = UploadAlert.new
+        ua.depositor_email = user.email 
+        ua.depositor_name  = user.full_name 
+        ua.title           = gf.title 
+        ua.type            = upload_type 
+        ua.pid             = gf.pid 
+        ua.save! 
+      end
     rescue RSolr::Error::Http => error
       save_tries += 1
       logger.warn "MetadataUpdateJob caught RSOLR error on #{gf.pid}: #{error.inspect}"
