@@ -75,7 +75,7 @@ class NuCoreFilesController < ApplicationController
   def process_metadata
     Sufia.queue.push(MetadataUpdateJob.new(current_user.user_key, params))
     flash[:notice] = 'Your files are being processed by ' + t('sufia.product_name') + ' in the background. The metadata and access controls you specified are being applied. Files will be marked <span class="label label-important" title="Private">Private</span> until this process is complete (shouldn\'t take too long, hang in there!). You may need to refresh your dashboard to see these updates.'
-    redirect_to sufia.dashboard_index_path    
+    redirect_to nu_collection_path(params[:collection_id])
   end
 
   # routed to /files/:id
@@ -167,6 +167,30 @@ class NuCoreFilesController < ApplicationController
 
   protected
 
+ def create_from_local(params)
+    begin
+      # check error condition No files
+      return json_error("Error! No file to save") if !params.has_key?(:file)
+
+      file = params[:file]
+      if !file
+        json_error "Error! No file for upload", 'unknown file', :status => :unprocessable_entity
+      elsif (empty_file?(file))
+        json_error "Error! Zero Length File!", file.original_filename
+      elsif (!terms_accepted?)
+        json_error "You must accept the terms of service!", file.original_filename
+      else
+        process_file(file)
+      end
+    rescue => error
+      logger.error "NuCoreFilesController::create rescued #{error.class}\n\t#{error.to_s}\n #{error.backtrace.join("\n")}\n\n"
+      json_error "Error occurred while creating generic file."
+    ensure
+      # remove the tempfile (only if it is a temp file)
+      file.tempfile.delete if file.respond_to?(:tempfile)
+    end
+  end  
+
   def no_parent_rescue
     flash[:error] = "Parent not specified or invalid" 
     redirect_to root_path 
@@ -208,18 +232,8 @@ class NuCoreFilesController < ApplicationController
 
       update_metadata_from_upload_screen(@nu_core_file, current_user, file, params[:collection_id])
       Sufia.queue.push(ContentCreationJob.new(@nu_core_file.pid, new_path.to_s, file.original_filename, current_user.id))
-      #Drs::NuFile.create_master_content_object(@nu_core_file, file, datastream_id, current_user)
       @nu_core_file.record_version_committer(current_user)
-      respond_to do |format|
-        format.html {
-          render :json => [@nu_core_file.to_jq_upload],
-            :content_type => 'text/html',
-            :layout => false
-        }
-        format.json {
-          render :json => [@nu_core_file.to_jq_upload]
-        }
-      end
+      redirect_to NuCoreFilesController.upload_complete_path
     else
       render :json => [{:error => "Error creating generic file."}]
     end
