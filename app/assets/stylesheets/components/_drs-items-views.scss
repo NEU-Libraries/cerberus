@@ -71,7 +71,12 @@
       &:last-child{
         @include border-bottom-radius($baseBorderRadius);
       }
+      &.active{
+        margin: 3em 0;
+        @include border-radius($baseBorderRadius);
 
+        
+      }
       > figure{
       float: left;
       margin-right: 15px;
@@ -85,6 +90,7 @@
           text-align: left;
         }
       }
+
         
         
       }

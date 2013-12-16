@@ -389,19 +389,50 @@ $( document ).ready(function() {
             //remove add the class to the target.
             if( $(this).hasClass('active') ){
               parent.find('.drs-item').removeClass('active');
+              pictureActive(parent);
              
             }else{
               parent.find('.drs-item').removeClass('active');
               $(this).addClass('active');
+              pictureActive(parent);
             }
           }
 
           
           
-        })
+        });
       };
 
-      var epandedView
+      var pictureActive = function(element){
+        var $e = $(element);
+        
+        var $picture = $e.find('[data-picture]');
+        var $src = $picture.find('[data-src]');
+        var target = '';
+        var active = '';
+        
+
+
+        $src.each( function(){
+          var $this = $(this)
+           
+          target = $(this).data('active');
+          active = $(this).data('target');
+            
+          console.log($this, target, active);
+          
+          $this.attr({ 
+            'data-media': target,
+            'data-active': active,
+          });
+
+          console.log($this, target, active);
+
+        });
+
+
+        picturefill.apply();
+      };
 
 
       // these are the public API
