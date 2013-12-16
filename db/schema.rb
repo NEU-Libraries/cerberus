@@ -195,9 +195,9 @@ ActiveRecord::Schema.define(:version => 20131210165421) do
     t.text     "group_list"
     t.datetime "groups_last_update"
     t.string   "role"
-    t.string   "view_pref"
     t.string   "nuid"
     t.string   "full_name"
+    t.string   "view_pref"
   end
 
   add_index "users", ["email"], :name => "index_users_on_email", :unique => true
