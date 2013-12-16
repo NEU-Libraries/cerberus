@@ -395,7 +395,20 @@ $( document ).ready(function() {
               $(this).addClass('active');
               
             }
-            pictureActive($(this).find('[data-picture]'));
+            
+            if ( parent.hasClass('drs-items-grid') ){
+              cloneGrid(this, parent);
+              
+              var pic  = parent.find('.jumbotron.drs-item').find('[data-picture]');
+              pictureActive(pic);
+
+
+
+            }else{
+              pictureActive($(this).find('[data-picture]'));
+            }
+              
+           
           }
 
           
@@ -405,22 +418,15 @@ $( document ).ready(function() {
 
       var pictureActive = function(element){
         var $e = $(element);
-        var $parent = $e.parent('.drs-item');
-        var $picture = $e.find('[data-picture]');
         var $src = $e.find('[data-src]');
         
         
-        
-
         $src.each( function( ){
 
           var $this = $(this);
           
           var target = $this.attr('data-active');
           var active = $this.attr('data-media');
-          
-
-            
           
           $this.attr({ 
             'data-media': target,
@@ -432,6 +438,22 @@ $( document ).ready(function() {
 
         picturefill.apply();
       };
+
+      var cloneGrid = function( t, parent){
+        var $t = $(t);
+        
+        $(parent).find('.drs-item.jumbotron').remove();
+        
+        if ( $t.hasClass('active') ){
+          var $clone =  $t.clone();
+          $clone.addClass('jumbotron');
+          $t.after($clone); 
+          
+        }
+           
+      
+        
+      }
 
 
       // these are the public API
