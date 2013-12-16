@@ -415,24 +415,17 @@ $( document ).ready(function() {
         $src.each( function( ){
 
           var $this = $(this);
-          var active, target;  
-
-          if( $this.parent('.drs-item').hasClass('active') ){
-            target = $this.attr('data-active');
-            active = $this.attr('data-media');
-          }else{
-            target = $this.attr('data-active');
-            active = $this.attr('data-media');
-          }
           
+          var target = $this.attr('data-active');
+          var active = $this.attr('data-media');
+          
+
             
           
           $this.attr({ 
             'data-media': target,
             'data-active': active,
           });
-
-          console.log($this, target, active);
 
         });
 
