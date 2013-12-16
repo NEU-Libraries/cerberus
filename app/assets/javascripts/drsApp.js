@@ -389,13 +389,13 @@ $( document ).ready(function() {
             //remove add the class to the target.
             if( $(this).hasClass('active') ){
               parent.find('.drs-item').removeClass('active');
-              pictureActive(parent);
              
             }else{
               parent.find('.drs-item').removeClass('active');
               $(this).addClass('active');
-              pictureActive(parent);
+              
             }
+            pictureActive($(this).find('[data-picture]'));
           }
 
           
@@ -405,21 +405,27 @@ $( document ).ready(function() {
 
       var pictureActive = function(element){
         var $e = $(element);
-        
+        var $parent = $e.parent('.drs-item');
         var $picture = $e.find('[data-picture]');
-        var $src = $picture.find('[data-src]');
-        var target = '';
-        var active = '';
+        var $src = $e.find('[data-src]');
+        
+        
         
 
+        $src.each( function( ){
 
-        $src.each( function(){
-          var $this = $(this)
-           
-          target = $(this).data('active');
-          active = $(this).data('target');
+          var $this = $(this);
+          var active, target;  
+
+          if( $this.parent('.drs-item').hasClass('active') ){
+            target = $this.attr('data-active');
+            active = $this.attr('data-media');
+          }else{
+            target = $this.attr('data-active');
+            active = $this.attr('data-media');
+          }
+          
             
-          console.log($this, target, active);
           
           $this.attr({ 
             'data-media': target,
