@@ -58,8 +58,7 @@ class UsersController < ApplicationController
         if user_signed_in?
           if @user.view_pref != view_pref
             @user.update_attribute(:only_one_field, view_pref)
-
-            head :ok
+            @user.save
 
           end
         end
