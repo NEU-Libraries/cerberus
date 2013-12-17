@@ -18,12 +18,24 @@ class ScaledImageCreator
   end 
  
   def create_scaled_images
-    creation_helper(small, ImageSmallFile, master) if small 
-    creation_helper(med, ImageMediumFile, master) if med 
-    creation_helper(large, ImageLargeFile, master) if large
+    creation_helper(small, ImageSmallFile, master) if small && valid_small?
+    creation_helper(med, ImageMediumFile, master) if med && valid_med? 
+    creation_helper(large, ImageLargeFile, master) if large && valid_large? 
   end
 
   private
+
+    def valid_small? 
+      small <= 0.3 
+    end
+
+    def valid_med? 
+      0.3 <= med && med <= 0.6 
+    end
+
+    def valid_large? 
+      0.6 <= large && large <= 1.0 
+    end
 
     def creation_helper(size, klass, master)
       target = core.content_objects.find { |x| x.instance_of? klass } 
