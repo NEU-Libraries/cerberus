@@ -6,8 +6,9 @@ class ScaledImageCreator
   attr_accessor :small, :med, :large
   attr_accessor :master, :core
 
+  # Size instance vars should be scale factors, e.g. .25 for a derivative 
+  # 25% the size of the original 
   # Pass nil for s/m/l if you do not wish that size of Image derivative
-  # to be created. 
   def initialize(s, m, l, mast)
     @small = s 
     @med = m 
@@ -15,10 +16,7 @@ class ScaledImageCreator
     @master = mast
     @core = self.master.core_record 
   end 
-
-  # This takes three duples [x, y] and the ImageMasterFile being used to 
-  # generate the derivatives.  Pass nil for a duple if you do not wish that 
-  # size to be created.  
+ 
   def create_scaled_images
     creation_helper(small, ImageSmallFile, master) if small 
     creation_helper(med, ImageMediumFile, master) if med 
@@ -27,10 +25,7 @@ class ScaledImageCreator
 
   private
 
-    def creation_helper(size, klass, master) 
-      x = size[0]
-      y = size[1] 
-
+    def creation_helper(size, klass, master)
       target = core.content_objects.find { |x| x.instance_of? klass } 
 
       # If we can't find the derivative, create it. 
@@ -45,7 +40,7 @@ class ScaledImageCreator
       end
 
       img = Magick::Image.from_blob(master.content.content).first 
-      scaled_img = img.resize_to_fill(x, y) 
+      scaled_img = img.resize(size)  
 
       target.add_file(scaled_img.to_blob, 'content', master.content.label) 
       target.save!

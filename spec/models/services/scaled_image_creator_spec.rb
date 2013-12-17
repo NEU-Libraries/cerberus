@@ -32,7 +32,7 @@ describe ScaledImageCreator do
       @master = FactoryGirl.create(:image_master_file)
       @root = @master.core_record 
 
-      ScaledImageCreator.new([50, 50], [100, 100], [130, 130], @master).create_scaled_images 
+      ScaledImageCreator.new(0.3, 0.6, 0.9, @master).create_scaled_images 
     end
 
     after(:all) { @root.destroy } 
