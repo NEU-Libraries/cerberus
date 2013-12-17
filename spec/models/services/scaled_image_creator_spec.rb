@@ -2,42 +2,57 @@ require 'spec_helper'
 
 describe ScaledImageCreator do 
 
-  def find_derivative(klass) 
-    @root.content_objects.find { |x| x.instance_of? klass } 
+  def set_context(klass) 
+    @current = @root.content_objects.find { |x| x.instance_of? klass }
+    @klass = klass 
   end
 
   def count_derivative(klass) 
     @root.content_objects.count { |x| x.instance_of? klass } 
   end
 
-  context "Without preexisting scaled image objects" do 
-    let(:small)  { find_derivative ImageSmallFile } 
-    let(:medium) { find_derivative ImageMediumFile }  
-    let(:large)  { find_derivative ImageLargeFile } 
+  shared_examples_for "image creation" do 
 
+    it "creates a single image file record" do 
+      @current.should_not be nil 
+      count_derivative(@klass).should == 1 
+    end
+
+    it "attaches content to the image record" do 
+      @current.content.content.should_not be_nil 
+    end
+
+    it "attaches the correct label" do 
+      @current.content.label.should == @master.label 
+    end
+  end
+
+  context "Without preexisting scaled image objects," do 
     before :all do 
-      @img = FactoryGirl.create(:image_master_file)
-      @root = @img.core_record 
+      @master = FactoryGirl.create(:image_master_file)
+      @root = @master.core_record 
 
-      #ScaledImageCreator.new([50, 50], [100, 100], [130, 130], @img).create_scaled_images 
+      ScaledImageCreator.new([50, 50], [100, 100], [130, 130], @master).create_scaled_images 
     end
 
     after(:all) { @root.destroy } 
 
-    it "creates a single small image file" do 
-      puts @root.content_objects
-      small.should_not be_nil
-      count_derivative(ImageSmallFile).should == 1 
+    describe "small image creation" do 
+      before(:all) { set_context ImageSmallFile }
+
+      it_should_behave_like "image creation" 
     end
 
-    it "creates a single medium image file" do 
-      medium.should_not be_nil 
-      count_derivative(ImageMediumFile).should == 1
+    describe "medium image creation" do 
+      before(:all) { set_context ImageMediumFile } 
+
+      it_should_behave_like "image creation" 
     end
 
-    it "creates a single large image file" do 
-      large.should_not be_nil 
-      count_derivative(ImageLargeFile).should == 1 
+    describe "large image creation" do 
+      before(:all) { set_context ImageLargeFile } 
+
+      it_should_behave_like "image creation" 
     end
   end
 end

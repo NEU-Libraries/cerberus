@@ -32,21 +32,19 @@ class ScaledImageCreator
       y = size[1] 
 
       target = core.content_objects.find { |x| x.instance_of? klass } 
-      puts "target is #{target}"
 
       # If we can't find the derivative, create it. 
       if !target
-        puts "creating #{klass}" 
-        target = klass.new(pid: Sufia::Noid.namespaceize(Sufia::IdService.mint))
-        target.core_record = core 
+        target = klass.new(pid: Sufia::Noid.namespaceize(Sufia::IdService.mint)) 
         target.description = "Derivative for #{core.pid}" 
         target.rightsMetadata.content = master.rightsMetadata.content
-        target.identifier = target.pid 
+        target.identifier = target.pid
+        target.core_record = NuCoreFile.find(core.pid)  
         target.save!
         target.reload
       end
 
-      img = Magick::Image.from_blob(master.content.content) 
+      img = Magick::Image.from_blob(master.content.content).first 
       scaled_img = img.resize_to_fill(x, y) 
 
       target.add_file(scaled_img.to_blob, 'content', master.content.label) 
