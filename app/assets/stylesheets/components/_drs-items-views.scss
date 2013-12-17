@@ -131,15 +131,15 @@
 
   }
   &.drs-items-grid{
-    // @extend .row;
+    @extend .row;
     
     .drs-item{
-      // // @extend .span3;
-      // // @extend [class*="span"];
-      // margin-bottom: 20px;
-      // @media (min-width: 1200px) {
-      //   margin-bottom: 30px;
-      // }
+      @extend .span3;
+      @extend [class*="span"];
+      margin-bottom: 20px;
+      @media (min-width: 1200px) {
+        margin-bottom: 30px;
+      }
 
       @include focus-states{
         border-color: $linkColor;
