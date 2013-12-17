@@ -149,9 +149,10 @@
         display: block;
         margin: 10px auto;
       }
-      &.jumbotron{
+      &.active{
         width: 100%;
         margin: 4em auto;
+        float: right;
       }
     }
     .drs-item-add-details{

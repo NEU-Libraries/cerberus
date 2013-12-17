@@ -1,0 +1,35 @@
+{
+  "name": "outlayer",
+  "version": "1.1.9",
+  "description": "the brains and guts of a layout library",
+  "main": [
+    "item.js",
+    "outlayer.js"
+  ],
+  "dependencies": {
+    "doc-ready": "desandro/doc-ready#>=1.0.1 <2.0",
+    "eventEmitter": ">=3 <5",
+    "eventie": "eventie#>=1.0.3 <2.0",
+    "get-size": "get-size#>=1.1.4 <2.0",
+    "get-style-property": "desandro/get-style-property",
+    "jquery-bridget": "~1.0",
+    "matches-selector": "desandro/matches-selector#>=0.2.0"
+  },
+  "devDependencies": {
+    "jquery": ">=1.4.3 <2",
+    "qunit": "~1.12.0"
+  },
+  "ignore": [
+    "test/"
+  ],
+  "homepage": "https://github.com/metafizzy/outlayer",
+  "_release": "1.1.9",
+  "_resolution": {
+    "type": "version",
+    "tag": "v1.1.9",
+    "commit": "75906718f408dc14e3fa1516d872f4da3da4daf0"
+  },
+  "_source": "git://github.com/metafizzy/outlayer.git",
+  "_target": ">=1.1.2 <2.0",
+  "_originalSource": "outlayer"
+}

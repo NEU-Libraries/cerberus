@@ -396,17 +396,9 @@ $( document ).ready(function() {
               
             }
             
-            if ( parent.hasClass('drs-items-grid') ){
-              cloneGrid(this, parent);
-              
-              var pic  = parent.find('.jumbotron.drs-item').find('[data-picture]');
-              pictureActive(pic);
 
+            pictureActive($(this).find('[data-picture]'));
 
-
-            }else{
-              pictureActive($(this).find('[data-picture]'));
-            }
               
            
           }
@@ -440,6 +432,8 @@ $( document ).ready(function() {
       };
 
       var cloneGrid = function( t, parent){
+        console.log($('.drs-item').length);
+
         var $t = $(t);
         
         $(parent).find('.drs-item.jumbotron').remove();
@@ -447,7 +441,9 @@ $( document ).ready(function() {
         if ( $t.hasClass('active') ){
           var $clone =  $t.clone();
           $clone.addClass('jumbotron');
-          $t.after($clone); 
+          $t.append($clone); 
+
+
           
         }
            
