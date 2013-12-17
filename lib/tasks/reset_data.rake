@@ -32,6 +32,28 @@ def create_file(file_name, user, parent)
   Sufia.queue.push(ContentCreationJob.new(newPid, file_path, file_name, user.id, false))  
 end
 
+def create_content_file(factory_sym, user, parent) 
+  master = FactoryGirl.create(factory_sym) 
+  core   = master.core_record 
+
+  master.mass_permissions = 'public'
+  master.depositor = user.nuid
+  DerivativeCreator.new(master.pid).generate_derivatives
+  
+  # Add non garbage metadata to core record. 
+  core.parent = ActiveFedora::Base.find(parent.pid, cast: true) 
+  core.title = "#{master.content.label}" 
+  core.description = "Lorem Ipsum Lorem Ipsum Lorem Ipsum" 
+  core.date_of_issue = Date.today.to_s
+  core.depositor = user.nuid 
+  core.mass_permissions = 'public'
+  core.keywords = ["#{master.class}", "content"] 
+  core.mods.subject(0).topic = "a"
+
+  core.save! 
+  master.save! 
+end
+
 def set_edit_permissions(obj)
   admin_users = ["001967405", "001905497", "000513515", "000000000"]
 
@@ -42,6 +64,8 @@ def set_edit_permissions(obj)
 end
 
 task :reset_data => :environment do
+
+  require 'factory_girl_rails' 
 
   ActiveFedora::Base.find(:all).each do |file|
     file.destroy 
@@ -78,6 +102,10 @@ task :reset_data => :environment do
   create_file("test_docx.docx", tmp_user, roCol)
   create_file("test_pic.jpeg", tmp_user, roCol)
   create_file("test.pdf", tmp_user, roCol)
+
+  create_content_file(:image_master_file, tmp_user, litCol) 
+  create_content_file(:pdf_file, tmp_user, litCol) 
+  create_content_file(:docx_file, tmp_user, litCol) 
 
   puts "Reset to stock objects complete."
 
