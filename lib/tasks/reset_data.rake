@@ -18,6 +18,10 @@ def create_file(file_name, user, parent)
   newPid = mint_unique_pid
 
   core_record = NuCoreFile.new(depositor: "#{user.nuid}", pid: newPid, identifier: newPid, title: file_name)
+
+  # Attach some keywords to make objects searchable/facetable on them. 
+  core_record.keywords = ["system", "generated", "Random Object"] 
+  core_record.mods.subject(2).topic.authority = "IMF" 
   core_record.set_parent(parent, user)
   core_record.save!
 
