@@ -119,8 +119,12 @@
 // MEDIA QUERIES
 // ------------------
 
-// Large desktops
-@import "vendor/bootstrap/responsive-1200px-min";
+// // Large desktops
+// @import "vendor/bootstrap/responsive-1200px-min";
+
+@import "layout/responsive-1500px-min";
+
+@import "layout/responsive-1200px-1499px";
 
 // Tablets to regular desktops
 @import "vendor/bootstrap/responsive-768px-979px";

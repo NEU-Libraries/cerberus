@@ -16,15 +16,15 @@
 //= require blacklight/blacklight
 //= require sufia
 // Required by Blacklight
-
+//= require picturefill/picturefill.js
 //= require bootstrap-select/bootstrap-select.js
 //= require bootstrap-datepicker/js/bootstrap-datepicker.js
 //= require bootbox/bootbox.min.js
 //= require plugins
-//= require app
-//= require polyfills
-//= require nu_collections
+
+
+
+//= require drsApp
+
 //= require compilations
-//= require communities
-//= require admin
-//= require admin/communities
+

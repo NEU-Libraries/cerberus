@@ -58,6 +58,7 @@ task :reset_data => :environment do
   
   tmp_user = User.create(email:"drsadmin@neu.edu", :password => "drs12345", :password_confirmation => "drs12345", full_name:"Temp User", nuid:"000000000")
   tmp_user.role = "admin"
+  tmp_user.view_pref = "list"
   tmp_user.save!
 
   Sufia.queue.push(EmployeeCreateJob.new(tmp_user.nuid))

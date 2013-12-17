@@ -1,7 +1,14 @@
-- int =  rand(2);
 
-- view_mode = int > 0 ? "list" : "grid"
-- view_mode = "list"
+- if current_user.nil?
+  - int =  rand(2);
+
+  - view_mode = int > 0 ? "list" : "grid"
+
+- else
+  
+  - view_mode = !current_user.view_pref.nil? ? current_user.view_pref : "grid"
+
+
 - view_mode_class = view_mode == "list" ? "drs-items-list" : "drs-items-grid"
 
 - @page_title = "About"
@@ -10,9 +17,11 @@
 .row
   .span3
     %h3 Controls
-    = render "sidebar"
+    = render  partial: "sidebar",  locals: {view_mode: view_mode}
   .span9
     %h3 Items
-    %section.drs-items{class: view_mode_class}
+    %section.drs-items#drsDummyItems{class: view_mode_class}
       - for i in 5 .. rand(50) + 5 do 
         = render partial: "dummy", locals: { i: i} 
+
+=debug current_user

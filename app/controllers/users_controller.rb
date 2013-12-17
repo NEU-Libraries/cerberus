@@ -49,6 +49,24 @@ class UsersController < ApplicationController
         @user.update_attributes(params.require(:user).permit(*User.permitted_attributes))
       end
     end
+    if params[:view_pref].present?
+      view_pref  = params[:view_pref]
+      
+      #make sure it is only one of these strings
+      unless view_pref != "grid" || view_pref != "list"
+        
+        if user_signed_in?
+          if @user.view_pref != view_pref
+            @user.update_attribute(:only_one_field, view_pref)
+            @user.save
+
+          end
+        end
+      
+      else
+        flash[:error] = "Preference wasn't saved, please try again."
+      end
+    end
     @user.populate_attributes if params[:update_directory]
     @user.avatar = nil if params[:delete_avatar]
     unless @user.save
