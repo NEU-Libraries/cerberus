@@ -419,7 +419,11 @@ $( document ).ready(function() {
         $src.each( function( ){
 
           var $this = $(this);
-          
+          if ( !$this.attr('data-media') ){
+            $this.attr({
+              'data-media' : ' '
+            });
+          }
           var target = $this.attr('data-active');
           var active = $this.attr('data-media');
           
