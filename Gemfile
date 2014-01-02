@@ -58,6 +58,9 @@ gem "whenever", :require => false
 # Add resque-web to the project 
 gem 'resque', :require => 'resque/server'
 
+# This is global because it's needed for some fixture generation. 
+gem "factory_girl_rails", :require => false
+
 group :development do 
   # Deployment
   gem 'capistrano',  '~> 3.0.0'
@@ -72,7 +75,6 @@ group :development, :test do
   gem "capybara" 
   gem "launchy" 
   gem "jettywrapper"
-  gem "factory_girl_rails", :require => false
   
   # JS  testing framework.
   gem "jasmine"

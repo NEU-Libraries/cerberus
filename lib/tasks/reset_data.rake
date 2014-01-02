@@ -18,6 +18,10 @@ def create_file(file_name, user, parent)
   newPid = mint_unique_pid
 
   core_record = NuCoreFile.new(depositor: "#{user.nuid}", pid: newPid, identifier: newPid, title: file_name)
+
+  # Attach some keywords to make objects searchable/facetable on them. 
+  core_record.keywords = ["system", "generated", "Random Object"] 
+  core_record.mods.subject(2).topic.authority = "IMF" 
   core_record.set_parent(parent, user)
   core_record.save!
 
@@ -26,6 +30,28 @@ def create_file(file_name, user, parent)
   file_path = "#{Rails.root}/spec/fixtures/files/#{file_name}"
 
   Sufia.queue.push(ContentCreationJob.new(newPid, file_path, file_name, user.id, false))  
+end
+
+def create_content_file(factory_sym, user, parent) 
+  master = FactoryGirl.create(factory_sym) 
+  core   = master.core_record 
+
+  master.mass_permissions = 'public'
+  master.depositor = user.nuid
+  DerivativeCreator.new(master.pid).generate_derivatives
+  
+  # Add non garbage metadata to core record. 
+  core.parent = ActiveFedora::Base.find(parent.pid, cast: true) 
+  core.title = "#{master.content.label}" 
+  core.description = "Lorem Ipsum Lorem Ipsum Lorem Ipsum" 
+  core.date_of_issue = Date.today.to_s
+  core.depositor = user.nuid 
+  core.mass_permissions = 'public'
+  core.keywords = ["#{master.class}", "content"] 
+  core.mods.subject(0).topic = "a"
+
+  core.save! 
+  master.save! 
 end
 
 def set_edit_permissions(obj)
@@ -38,6 +64,8 @@ def set_edit_permissions(obj)
 end
 
 task :reset_data => :environment do
+
+  require 'factory_girl_rails' 
 
   ActiveFedora::Base.find(:all).each do |file|
     file.destroy 
@@ -74,6 +102,10 @@ task :reset_data => :environment do
   create_file("test_docx.docx", tmp_user, roCol)
   create_file("test_pic.jpeg", tmp_user, roCol)
   create_file("test.pdf", tmp_user, roCol)
+
+  create_content_file(:image_master_file, tmp_user, litCol) 
+  create_content_file(:pdf_file, tmp_user, litCol) 
+  create_content_file(:docx_file, tmp_user, litCol) 
 
   puts "Reset to stock objects complete."
 
