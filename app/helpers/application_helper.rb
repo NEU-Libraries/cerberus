@@ -42,20 +42,29 @@ module ApplicationHelper
       :pid => nil,
       :path => nil,
       :title => nil,
-      :creator => nil,
+      :creators => nil,
       :thumbnails => nil,
       :type => nil,
       :date_added => nil,
       :abstract => nil,
       :download_path => nil
     }
-    if item.instance_of(NuCollection)
+    if item.instance_of?(NuCollection)
+      
+      drs_item[:pid] = item.pid
+      drs_item[:path] = 'collections' + item.pid
+      drs_item[:title] = item.title
       drs_item[:type] = 'Collection'
-    end
-    if item.instance_of(NuCoreFile)
+      drs_item[:creators] = item.creators
+      drs_item[:thumbnails] = item.thumnail ? sufia.download_path(item, datastream_id: 'thumbnail') : false
+      drs_item[:date_added] = item.date_of_issue
+      drs_item[:abstract] = item.description
+      drs_item[:download_path] = false
+    
+    elsif item.instance_of?(NuCoreFile)
       drs_item[:type] = item['meme_type']
-    end
-    if item.instance_of(Community)
+    
+    elsif item.instance_of?(Community)
       drs_item[:type] = 'Community'
     end
     return drs_item

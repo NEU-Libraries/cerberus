@@ -11,7 +11,7 @@
     - @set.child_collections.reverse.each do |collection| 
       - if current_user_can_read?(collection)
         - path = nu_collection_path(collection.identifier) 
-        = debug(collection.inspect)
+        = debug(prepare_drs_item(collection))
         =#render partial: 'shared/sets/drs_item/drs_item', locals: { collection: @item }
     - if @set.instance_of?(NuCollection)
       = render partial: 'shared/sets/show_files', locals: { collection: @set }

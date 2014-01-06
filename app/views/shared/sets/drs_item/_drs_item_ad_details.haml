@@ -1,27 +1,27 @@
 .drs-item-add-details
-  - if item.date_added
+  - if @item.date_added
     %dl.drs-item-deposit-date-list
       %dt.drs-item-deposit-date-label
         Date Added
       %dd.drs-item-deposit-date
         %time{ "date-time" => item.date_added}
-          = item.date_added
-  - if item.subject
+          = @item.date_added
+  - if @item.subject
     %dl.drs-item-subject-list
       %dt.drs-item-subject-label
         Subject(s)
-        - item.subject do |subject|
+        - @item.subject do |subject|
           %dd.drs-item-subject
             %a{ href: subject.href }
               = subject.title
-  - if item.abstract
+  - if @item.abstract
     %dl.drs-item-abstract-list
       %dt.drs-item-abstract-label
         Abstract
       %dd.drs-item-abstract{id: "abstract-#{item.pid}"}
-        %span{class: item.abstract.length > 120 ? 'ellipsis' : ''}
+        %span{class: @item.abstract.length > 120 ? 'ellipsis' : ''}
          = item.abstract
-      - if item.abstract.length > 120
+      - @if @item.abstract.length > 120
         %a(href="#abstract-#{item.pid}" data-toggle="ellipsis")
           %i.icon-expand-alt
           %span.sr-only
