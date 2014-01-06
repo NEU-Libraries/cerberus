@@ -217,13 +217,8 @@ $( document ).ready(function() {
            
           if (desiredClass === 'drs-items-grid' ){
             container.removeClass('drs-items-list').addClass('drs-items-grid');
-            container.masonry({
-              itemSelector: '.drs-item',
-              columnWidth: 250
-            });
           }else{
             container.removeClass('drs-items-grid').addClass('drs-items-list');
-            container.masonry('destroy');
 
           }
 
