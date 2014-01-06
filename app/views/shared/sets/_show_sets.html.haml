@@ -1,5 +1,6 @@
 - if current_user_can_read?(@set)
-  %ul.media-list
+  - view_pref_class = current_user.view_pref == 'list' ? 'drs-items-list' : 'drs-items-grid'
+  %section.drs-items{class: view_pref_class}
     - if @set.instance_of?(Community)
       -# Go through and template out the communities individually.
       - @set.child_communities.each do |community| 

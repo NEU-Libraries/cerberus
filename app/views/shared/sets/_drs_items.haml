@@ -6,4 +6,6 @@
       = render partial: 'shared/sets/drs_item', locals: { community: @set }
   - @set.child_collections.reverse.each do |collection| 
     = render partial: 'shared/sets/drs_item', locals: { collection: @set }
+
+  = render partial: 'shared/sets/show_files', locals: { collection: @set }
   
