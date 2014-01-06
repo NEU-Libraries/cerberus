@@ -52,7 +52,7 @@ module ApplicationHelper
     if item.instance_of?(NuCollection)
       
       drs_item[:pid] = item.pid
-      drs_item[:path] = 'collections' + item.pid
+      drs_item[:path] = '/collections/' + item.pid
       drs_item[:title] = item.title
       drs_item[:type] = 'Collection'
       drs_item[:creators] = item.creators
