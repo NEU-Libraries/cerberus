@@ -73,7 +73,7 @@
           overflow: visible;
         }
         & + .drs-item{
-          @inlcude border-top-radius($baseBorderRadius);
+          @include border-top-radius(8px);
           border-top-style: solid;
         }
       }
