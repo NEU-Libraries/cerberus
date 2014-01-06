@@ -34,5 +34,32 @@ module ApplicationHelper
       breadcrumb << content_tag(:li, link_to(set.parent.title, polymorphic_path(set.parent).split('?')[0]))
       breadcrumb_to_root(set.parent, breadcrumb)
     end
-  end  
+  end
+
+  # Generalizing function to prepare an item to be used in the drs-item view.
+  def prepare_drs_item(item)
+    drs_item = {
+      :pid => nil,
+      :path => nil,
+      :title => nil,
+      :creator => nil,
+      :thumbnails => nil,
+      :type => nil,
+      :date_added => nil,
+      :abstract => nil,
+      :download_path => nil
+    }
+    if item.instance_of(NuCollection)
+      drs_item[:type] = 'Collection'
+    end
+    if item.instance_of(NuCoreFile)
+      drs_item[:type] = item['meme_type']
+    end
+    if item.instance_of(Community)
+      drs_item[:type] = 'Community'
+    end
+    return drs_item
+
+  end
+
 end
