@@ -1,13 +1,6 @@
 %article.drs-item
   = render partial: 'drs_item_figure'
-  .drs-item-details
-    %header
-      %h4.drs-item-title 
-        %a{href: @set.path}
-          = @set.title
-      %h5.drs-item-creator
-        = @set.creator
-      .row-fluid
+  = render partial: 'drs_item_details'
     .drs-item-add-details
       %dl.drs-item-deposit-date-list
         %dt.drs-item-deposit-date-label

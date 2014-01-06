@@ -1,0 +1,36 @@
+.drs-item-add-details
+  %dl.drs-item-deposit-date-list
+    %dt.drs-item-deposit-date-label
+      Date Added
+    %dd.drs-item-deposit-date
+      %time(date-time="1996-12-19T16:39:57-08:00")
+        @set.date_added
+  -render 
+  %dl.drs-item-subject-list
+    %dt.drs-item-subject-label
+      Subject(s)
+      - @set.subject do |subject|
+        %dd.drs-item-subject
+          %a{ href: subject.href }
+            subject.title
+  %dl.drs-item-abstract-list
+    %dt.drs-item-abstract-label
+      Abstract
+    %dd.drs-item-abstract{id: "abstract#{i}"}
+      %span.ellipsis
+        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+      %a(href="#abstract#{i}" data-toggle="ellipsis")
+        %i.icon-expand-alt
+  %menu.btn-group(type="toolbar")
+      %button.btn.btn-clear.btn-small
+        %i.icon-shopping-cart
+        %span.sr-only
+          Add to shopping car
+      %button.btn.btn-clear.btn-small
+        %i.icon-folder-open-alt
+        %span.sr-only
+          Add to compilation
+      %button.btn.btn-clear.btn-small
+        %i.icon-download
+        %span.sr-only
+          Download 
