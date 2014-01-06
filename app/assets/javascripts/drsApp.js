@@ -217,10 +217,8 @@ $( document ).ready(function() {
            
           if (desiredClass === 'drs-items-grid' ){
             container.removeClass('drs-items-list').addClass('drs-items-grid');
-            
           }else{
             container.removeClass('drs-items-grid').addClass('drs-items-list');
-            
 
           }
 
@@ -396,17 +394,9 @@ $( document ).ready(function() {
               
             }
             
-            if ( parent.hasClass('drs-items-grid') ){
-              cloneGrid(this, parent);
-              
-              var pic  = parent.find('.jumbotron.drs-item').find('[data-picture]');
-              pictureActive(pic);
 
+            pictureActive($(this).find('[data-picture]'));
 
-
-            }else{
-              pictureActive($(this).find('[data-picture]'));
-            }
               
            
           }
@@ -424,7 +414,11 @@ $( document ).ready(function() {
         $src.each( function( ){
 
           var $this = $(this);
-          
+          if ( !$this.attr('data-media') ){
+            $this.attr({
+              'data-media' : ' '
+            });
+          }
           var target = $this.attr('data-active');
           var active = $this.attr('data-media');
           
@@ -440,6 +434,8 @@ $( document ).ready(function() {
       };
 
       var cloneGrid = function( t, parent){
+        console.log($('.drs-item').length);
+
         var $t = $(t);
         
         $(parent).find('.drs-item.jumbotron').remove();
@@ -447,13 +443,15 @@ $( document ).ready(function() {
         if ( $t.hasClass('active') ){
           var $clone =  $t.clone();
           $clone.addClass('jumbotron');
-          $t.after($clone); 
+          $t.append($clone); 
+
+
           
         }
            
       
         
-      }
+      };
 
 
       // these are the public API
