@@ -1,5 +1,5 @@
 - if current_user_can_read?(@set)
-  .drs-items.drs-items-list
+  .drs-items.drs-items-grid
     - if @set.instance_of?(Community)
       -# Go through and template out the communities individually.
       - @set.child_communities.each do |community| 
