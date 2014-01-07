@@ -10,16 +10,16 @@
     %dl.drs-item-abstract-list
       %dt.drs-item-abstract-label
         Abstract
-      %dd.drs-item-abstract{id: "abstract-#{item[:pid]}"}
-      - if item[:abstract].length > 120
-        %span.ellipsis
+      %dd.drs-item-abstract{id: "abstract#{item[:pid].delete':'}"}
+        - if item[:abstract].length > 120
+          %span.ellipsis
+            = item[:abstract]
+          %a(href="#abstract#{item[:pid].delete ":"}" data-toggle="ellipsis")
+            %i.icon-expand-alt
+            %span.sr-only
+              Expand / collapse toggle
+        - else
           = item[:abstract]
-        %a(href="#abstract-#{item[:pid]}" data-toggle="ellipsis")
-          %i.icon-expand-alt
-          %span.sr-only
-            Expand / collapse toggle
-      - else
-        = item[:abstract]
   %menu.btn-group(type="toolbar")
     %button.btn.btn-clear.btn-small
       %i.icon-shopping-cart
