@@ -21,10 +21,11 @@
       %i.icon-picture.icon-4x.icon-border.drs-icon-figure
   - else
     -if @nu_core_file.thumbnail
-      %img{alt: " ", title: @nu_core_file.title.first , src: sufia.download_path( @nu_core_file.thumbnail, datastream_id: 'thumbnail_1') }
+      = render partial: 'shared/thumbnails/thumbnail_picture', locals: { nu_core_file: @nu_core_file }
     -else
       %i.icon-file.icon-4x.icon-border.drs-icon-figure
   - if @nu_core_file.description.length > 0
     %figcaption
       =@nu_core_file.description
   =debug( get_file_thumbnails(@nu_core_file) )
+
