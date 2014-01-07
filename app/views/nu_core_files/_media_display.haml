@@ -1,7 +1,7 @@
 %figure
   - if @nu_core_file.image?
     -if @nu_core_file.thumbnail
-      %img{title: @nu_core_file.title.first, alt: " ",  src: sufia.download_path( @nu_core_file.thumbnail, datastream_id: 'thumbnail_1') }
+      = render partial: 'shared/thumbnails/thumbnail_picture'
     -else
       %i.icon-picture.icon-4x.icon-border.drs-icon-figure
   - elsif @nu_core_file.video?
@@ -16,16 +16,15 @@
       Your browser does not support the audio tag.
   - elsif @nu_core_file.pdf?
     -if @nu_core_file.thumbnail
-      %img{title: @nu_core_file.title.first , alt: " ",  src: sufia.download_path(@nu_core_file.thumbnail, {datastream_id: 'content'}) }
+      = render partial: 'shared/thumbnails/thumbnail_picture'
     -else
       %i.icon-picture.icon-4x.icon-border.drs-icon-figure
   - else
     -if @nu_core_file.thumbnail
-      = render partial: 'shared/thumbnails/thumbnail_picture', locals: { nu_core_file: @nu_core_file }
+      = render partial: 'shared/thumbnails/thumbnail_picture'
     -else
       %i.icon-file.icon-4x.icon-border.drs-icon-figure
   - if @nu_core_file.description.length > 0
     %figcaption
       =@nu_core_file.description
-  =debug( get_file_thumbnails(@nu_core_file) )
 

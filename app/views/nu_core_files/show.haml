@@ -4,15 +4,17 @@
     var addthis_config = {"data_track_addressbar":true};
 - content_for :local_js do
   initialize_audio();
+- thumbs = get_file_thumbnails(@nu_core_file)
+- layout_class =  thumbs.has_key?( "thumbnail_10" ) ?  'span12' : 'span6' 
 = render :partial => 'nu_core_files/breadcrumbs'
 %article
   %header 
     %h1.lower.page-header= @nu_core_file
 
   %section.row
-    .span6
+    %div{class: layout_class}
       = render :partial => 'nu_core_files/media_display'
-    .span6{itemscope: "", itemtype: "http://schema.org/CreativeWork"}
+    %div{itemscope: "", itemtype: "http://schema.org/CreativeWork", class:  layout_class }
       = render partial: 'show_actions'
       = render partial: 'show_descriptions'
       = render partial: 'show_details'
