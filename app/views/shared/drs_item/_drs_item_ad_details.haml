@@ -1,0 +1,35 @@
+.drs-item-add-details
+  - if item[:date_added]
+    %dl.drs-item-deposit-date-list
+      %dt.drs-item-deposit-date-label
+        Date Added
+      %dd.drs-item-deposit-date
+        %time{ "date-time" => item[:date_added]}
+          = item[:date_added]
+  - if item[:abstract].length > 0
+    %dl.drs-item-abstract-list
+      %dt.drs-item-abstract-label
+        Abstract
+      %dd.drs-item-abstract{id: "abstract-#{item[:pid]}"}
+      - if item[:abstract].length > 120
+        %span.ellipsis
+          = item[:abstract]
+        %a(href="#abstract-#{item[:pid]}" data-toggle="ellipsis")
+          %i.icon-expand-alt
+          %span.sr-only
+            Expand / collapse toggle
+      - else
+        = item[:abstract]
+  %menu.btn-group(type="toolbar")
+    %button.btn.btn-clear.btn-small
+      %i.icon-shopping-cart
+      %span.sr-only
+        Add to shopping car
+    %button.btn.btn-clear.btn-small
+      %i.icon-folder-open-alt
+      %span.sr-only
+        Add to compilation
+    %button.btn.btn-clear.btn-small
+      %i.icon-download
+      %span.sr-only
+        Download 

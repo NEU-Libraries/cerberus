@@ -37,12 +37,19 @@ module ApplicationHelper
   end
 
   # Keys that might be available for front end thumbnails "thumbnail_1", "thumbnail_2", "thumbnail_2_2x", "thumbnail_4", "thumbnail_4_2x", "thumbnail_10", "thumbnail_10_2x"
-  def get_file_thumbnails(file)
+  def get_file_thumbnails(file, options = {})
     results = Hash.new
     if file.instance_of?(NuCoreFile) and file.thumbnail
       thumb = file.thumbnail
       datastreams = thumb.datastreams
       keys = thumb.datastreams.keys
+      #remove the following keys from the hash to prevent large thumbnails from being generated
+      if options[:remove_thumbs]
+        remove_thumbs = options[:remove_thumbs]
+        remove_thumbs.each do |t|
+          keys.delete(t)  
+        end 
+      end
       keys.each do |key|
         datastream = datastreams[key]
         if key.include? "thumbnail" and datastream.content
@@ -72,11 +79,10 @@ module ApplicationHelper
       drs_item[:title] = item.title
       drs_item[:type] = 'Collection'
       drs_item[:creators] = item.creators
-      drs_item[:thumbnails] = item.thumnail ? sufia.download_path(item, datastream_id: 'thumbnail') : false
+      drs_item[:thumbnails] = nil #item.thumbnail ? sufia.download_path(item, datastream_id: 'thumbnail') : false
       drs_item[:date_added] = item.date_of_issue
       drs_item[:abstract] = item.description
       drs_item[:download_path] = false
-fi
     elsif item.instance_of?(Community)
       drs_item[:pid] = item.pid
       drs_item[:path] = '/communities/' + item.pid
