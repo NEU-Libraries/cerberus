@@ -1,7 +1,7 @@
 %figure
   - if @nu_core_file.image?
     -if @nu_core_file.thumbnail
-      %img{title: @nu_core_file.title.first, alt: " ",  src: sufia.download_path(@nu_core_file.thumbnail.thumbnail_1, {datastream_id: 'content'}) }
+      %img{title: @nu_core_file.title.first, alt: " ",  src: sufia.download_path( @nu_core_file.thumbnail, datastream_id: 'thumbnail_1') }
     -else
       %i.icon-picture.icon-4x.icon-border.drs-icon-figure
   - elsif @nu_core_file.video?
@@ -21,9 +21,10 @@
       %i.icon-picture.icon-4x.icon-border.drs-icon-figure
   - else
     -if @nu_core_file.thumbnail
-      %img{alt: " ", title: @nu_core_file.title.first , src: sufia.download_path(@nu_core_file.thumbnail, {datastream_id: 'content'})}
+      %img{alt: " ", title: @nu_core_file.title.first , src: sufia.download_path( @nu_core_file.thumbnail, datastream_id: 'thumbnail_1') }
     -else
       %i.icon-file.icon-4x.icon-border.drs-icon-figure
   - if @nu_core_file.description.length > 0
     %figcaption
       =@nu_core_file.description
+  =debug( get_file_thumbnails(@nu_core_file) )

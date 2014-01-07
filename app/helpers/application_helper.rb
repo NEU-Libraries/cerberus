@@ -36,6 +36,23 @@ module ApplicationHelper
     end
   end
 
+  # Keys that might be available for front end thumbnails "thumbnail_1", "thumbnail_2", "thumbnail_2_2x", "thumbnail_4", "thumbnail_4_2x", "thumbnail_10", "thumbnail_10_2x"
+  def get_file_thumbnails(file)
+    results = Hash.new
+    if file.instance_of?(NuCoreFile) and file.thumbnail
+      thumb = file.thumbnail
+      datastreams = thumb.datastreams
+      keys = thumb.datastreams.keys
+      keys.each do |key|
+        datastream = datastreams[key]
+        if key.include? "thumbnail" and datastream.content
+          results[key] = sufia.download_path( thumb, datastream_id: key )
+        end
+      end
+    end
+    return results
+  end
+
   # Generalizing function to prepare an item to be used in the drs-item view.
   def prepare_drs_item(item)
     drs_item = {
@@ -59,7 +76,7 @@ module ApplicationHelper
       drs_item[:date_added] = item.date_of_issue
       drs_item[:abstract] = item.description
       drs_item[:download_path] = false
-    
+fi
     elsif item.instance_of?(Community)
       drs_item[:pid] = item.pid
       drs_item[:path] = '/communities/' + item.pid
@@ -70,12 +87,12 @@ module ApplicationHelper
       drs_item[:abstract] = item.description
       drs_item[:download_path] = false
     elsif item.instance_of?(NuCoreFile)
-      drs_item[:type] = item['meme_type']
+      drs_item[:type] = item['mime_type']
       drs_item[:pid] = item.pid
       drs_item[:path] = '/communities/' + item.pid
       drs_item[:title] = item.title
       drs_item[:type] = 'Community'
-      drs_item[:thumbnails] = nil
+      drs_item[:thumbnails] = get_file_thumbnails(item)
       drs_item[:date_added] = nil
       drs_item[:abstract] = item.description
       drs_item[:download_path] = false
