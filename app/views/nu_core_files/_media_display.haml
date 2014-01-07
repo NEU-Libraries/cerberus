@@ -1,7 +1,7 @@
 %figure
   - if @nu_core_file.image?
     -if @nu_core_file.thumbnail
-      = render partial: 'shared/thumbnails/thumbnail_picture'
+      = render partial: 'shared/thumbnails/full_picture'
     -else
       %i.icon-picture.icon-4x.icon-border.drs-icon-figure
   - elsif @nu_core_file.video?
@@ -16,12 +16,12 @@
       Your browser does not support the audio tag.
   - elsif @nu_core_file.pdf?
     -if @nu_core_file.thumbnail
-      = render partial: 'shared/thumbnails/thumbnail_picture'
+      = render partial: 'shared/thumbnails/full_picture'
     -else
       %i.icon-picture.icon-4x.icon-border.drs-icon-figure
   - else
     -if @nu_core_file.thumbnail
-      = render partial: 'shared/thumbnails/thumbnail_picture'
+      = render partial: 'shared/thumbnails/full_picture'
     -else
       %i.icon-file.icon-4x.icon-border.drs-icon-figure
   - if @nu_core_file.description.length > 0

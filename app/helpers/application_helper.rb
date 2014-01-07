@@ -83,7 +83,8 @@ module ApplicationHelper
       drs_item[:date_added] = item.date_of_issue
       drs_item[:abstract] = item.description
       drs_item[:download_path] = false
-    elsif item.instance_of?(Community)
+    end
+    if item.instance_of?(Community)
       drs_item[:pid] = item.pid
       drs_item[:path] = '/communities/' + item.pid
       drs_item[:title] = item.title
@@ -92,13 +93,14 @@ module ApplicationHelper
       drs_item[:date_added] = nil
       drs_item[:abstract] = item.description
       drs_item[:download_path] = false
-    elsif item.instance_of?(NuCoreFile)
+    end
+    if item.instance_of?(NuCoreFile)
       drs_item[:type] = item['mime_type']
       drs_item[:pid] = item.pid
-      drs_item[:path] = '/communities/' + item.pid
+      drs_item[:path] = '/files/' + item.pid
       drs_item[:title] = item.title
-      drs_item[:type] = 'Community'
-      drs_item[:thumbnails] = get_file_thumbnails(item)
+      drs_item[:type] = 'file'
+      drs_item[:thumbnails] = get_file_thumbnails(item, { remove_thumbs: ['thumbnail_4', 'thumbnail_4_2x', 'thumbnail_10', 'thumbnail_10_2x'] })
       drs_item[:date_added] = nil
       drs_item[:abstract] = item.description
       drs_item[:download_path] = false
@@ -109,3 +111,8 @@ module ApplicationHelper
   end
 
 end
+
+
+
+
+

@@ -12,15 +12,6 @@
     - if thumbs['thumbnail_1_2x']
       %span.thumbnail-s1-2x{"data-src" => thumbs['thumbnail_1_2x'] , "data-media" => "(min-device-pixel-ratio: 2.0), ( -webkit-min-device-pixel-ratio: 2.0 ) " } 
     - if thumbs['thumbnail_2']
-      %span.thumbnail-s2{"data-src" => thumbs['thumbnail_2'] , "data-media" => "(min-width: 200px)" }
+      %span.thumbnail-s2{"data-src" => thumbs['thumbnail_2'] , "data-media" => "(min-width: 600px)" }
     - if thumbs['thumbnail_2_2x']
-      %span.thumbnail-s2-2x{"data-src" => thumbs['thumbnail_2_2x'], "data-media" => "(min-width: 200px) and (min-device-pixel-ratio: 2.0), (min-width: 200px) and (-webkit-min-device-pixel-ratio: 2.0)" }
-    - if thumbs['thumbnail_4']
-      %span.thumbnail-s4{"data-src" => thumbs['thumbnail_4'] , "data-media" => "(min-width: 400px)"}
-      
-    - if thumbs['thumbnail_4_2x']
-      %span.thumbnail-s4-2x{"data-src" => thumbs['thumbnail_4_2x'], "data-media" => "(min-width: 400px) and (min-device-pixel-ratio: 2.0), (min-width: 400px) and (-webkit-min-device-pixel-ratio: 2.0)"}
-    - if thumbs['thumbnail_10']
-      %span.thumbnail-s10{"data-src" => thumbs['thumbnail_10'],  "data-media" => "(min-width: 700px)"}
-    - if thumbs['thumbnail_10_2x']
-      %span.thumbnail-s10-2x{"data-src" => thumbs['thumbnail_10_2x'], "data-media" => "(min-width: 700px) and (min-device-pixel-ratio: 2.0), (min-width: 700px) and (-webkit-min-device-pixel-ratio: 2.0)"}
+      %span.thumbnail-s2-2x{"data-src" => thumbs['thumbnail_2_2x'], "data-media" => "(min-width: 600px) and (min-device-pixel-ratio: 2.0), (min-width: 200px) and (-webkit-min-device-pixel-ratio: 2.0)" }
