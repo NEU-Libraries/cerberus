@@ -49,8 +49,7 @@ module ApplicationHelper
       :abstract => nil,
       :download_path => nil
     }
-    if item.instance_of?(NuCollection)
-      
+    if item.instance_of?(NuCollection) 
       drs_item[:pid] = item.pid
       drs_item[:path] = '/collections/' + item.pid
       drs_item[:title] = item.title
@@ -61,11 +60,26 @@ module ApplicationHelper
       drs_item[:abstract] = item.description
       drs_item[:download_path] = false
     
+    elsif item.instance_of?(Community)
+      drs_item[:pid] = item.pid
+      drs_item[:path] = '/communities/' + item.pid
+      drs_item[:title] = item.title
+      drs_item[:type] = 'Community'
+      drs_item[:thumbnails] = nil
+      drs_item[:date_added] = nil
+      drs_item[:abstract] = item.description
+      drs_item[:download_path] = false
     elsif item.instance_of?(NuCoreFile)
       drs_item[:type] = item['meme_type']
-    
-    elsif item.instance_of?(Community)
+      drs_item[:pid] = item.pid
+      drs_item[:path] = '/communities/' + item.pid
+      drs_item[:title] = item.title
       drs_item[:type] = 'Community'
+      drs_item[:thumbnails] = nil
+      drs_item[:date_added] = nil
+      drs_item[:abstract] = item.description
+      drs_item[:download_path] = false
+    
     end
     return drs_item
 

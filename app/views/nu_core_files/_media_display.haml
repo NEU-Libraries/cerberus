@@ -1,7 +1,7 @@
 %figure
   - if @nu_core_file.image?
     -if @nu_core_file.thumbnail
-      %img{title: @nu_core_file.title.first, alt: " ",  src: sufia.download_path(@nu_core_file.thumbnail, {datastream_id: 'content'}) }
+      %img{title: @nu_core_file.title.first, alt: " ",  src: sufia.download_path(@nu_core_file.thumbnail.thumbnail_1, {datastream_id: 'content'}) }
     -else
       %i.icon-picture.icon-4x.icon-border.drs-icon-figure
   - elsif @nu_core_file.video?
