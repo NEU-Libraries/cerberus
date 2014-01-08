@@ -11,4 +11,7 @@ class ImageThumbnailFile < ActiveFedora::Base
   has_file_datastream name: 'thumbnail_4_2x',  type: FileContentDatastream 
   has_file_datastream name: 'thumbnail_10',    type: FileContentDatastream 
   has_file_datastream name: 'thumbnail_10_2x', type: FileContentDatastream
+  def type_label
+    "Thumbnail Image(s)"
+  end
 end

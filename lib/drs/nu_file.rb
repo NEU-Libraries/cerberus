@@ -26,6 +26,11 @@ module Drs
     def self.create_master_content_object(core_file, file, datastream_id, user)
       Drs::NuFile::MasterCreator.create(core_file, file, datastream_id, user)
     end
+    
+    # Provides a string for labeling the UI
+    def type_label
+      self.class.name
+    end
 
     def self.virus_check(file)
       if defined? ClamAV
@@ -34,8 +39,8 @@ module Drs
         stat
       else
         logger.warn "Virus checking disabled for #{file.inspect}"
-        0
       end
     end
   end
 end
+
