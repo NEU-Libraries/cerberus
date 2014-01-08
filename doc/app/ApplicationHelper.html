@@ -66,6 +66,12 @@
     
     <li><a href="#method-i-breadcrumb_to_root">#breadcrumb_to_root</a>
     
+    <li><a href="#method-i-get_file_thumbnails">#get_file_thumbnails</a>
+    
+    <li><a href="#method-i-get_set_class_label">#get_set_class_label</a>
+    
+    <li><a href="#method-i-prepare_drs_item">#prepare_drs_item</a>
+    
     <li><a href="#method-i-thumbnail_for">#thumbnail_for</a>
     
   </ul>
@@ -90,10 +96,6 @@
   <ul class="link-list">
   
     <li><a href="./Drs.html">Drs</a>
-  
-    <li><a href="./Drs/Content.html">Drs::Content</a>
-  
-    <li><a href="./Drs/Content/Transformations.html">Drs::Content::Transformations</a>
   
     <li><a href="./Drs/ControllerHelpers.html">Drs::ControllerHelpers</a>
   
@@ -153,6 +155,10 @@
   
     <li><a href="./Employee/FacultyFolders.html">Employee::FacultyFolders</a>
   
+    <li><a href="./Users.html">Users</a>
+  
+    <li><a href="./Users/OmniauthCallbacksController.html">Users::OmniauthCallbacksController</a>
+  
     <li><a href="./AdminController.html">AdminController</a>
   
     <li><a href="./ApplicationController.html">ApplicationController</a>
@@ -177,6 +183,8 @@
   
     <li><a href="./ContentCreationJob.html">ContentCreationJob</a>
   
+    <li><a href="./DerivativeCreator.html">DerivativeCreator</a>
+  
     <li><a href="./DrsEmployeeDatastream.html">DrsEmployeeDatastream</a>
   
     <li><a href="./DrsPropertiesDatastream.html">DrsPropertiesDatastream</a>
@@ -194,6 +202,10 @@
     <li><a href="./ImageSmallFile.html">ImageSmallFile</a>
   
     <li><a href="./ImageThumbnailFile.html">ImageThumbnailFile</a>
+  
+    <li><a href="./InlineThumbnailCreator.html">InlineThumbnailCreator</a>
+  
+    <li><a href="./MetadataMailer.html">MetadataMailer</a>
   
     <li><a href="./MetadataUpdateJob.html">MetadataUpdateJob</a>
   
@@ -221,9 +233,13 @@
   
     <li><a href="./NuModsDatastream.html">NuModsDatastream</a>
   
+    <li><a href="./Object.html">Object</a>
+  
     <li><a href="./ParanoidRightsDatastream.html">ParanoidRightsDatastream</a>
   
     <li><a href="./PdfFile.html">PdfFile</a>
+  
+    <li><a href="./ScaledImageCreator.html">ScaledImageCreator</a>
   
     <li><a href="./SetsController.html">SetsController</a>
   
@@ -235,7 +251,11 @@
   
     <li><a href="./TextFile.html">TextFile</a>
   
+    <li><a href="./UploadAlert.html">UploadAlert</a>
+  
     <li><a href="./User.html">User</a>
+  
+    <li><a href="./UsersController.html">UsersController</a>
   
     <li><a href="./VideoFile.html">VideoFile</a>
   
@@ -291,7 +311,7 @@ Collection</p>
 
           
           <div class="method-source-code" id="breadcrumb_to_root-source">
-            <pre><span class="ruby-comment"># File app/helpers/application_helper.rb, line 14</span>
+            <pre><span class="ruby-comment"># File app/helpers/application_helper.rb, line 25</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">breadcrumb_to_root</span>(<span class="ruby-identifier">set</span>, <span class="ruby-identifier">breadcrumb</span> = [])    
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">breadcrumb</span>.<span class="ruby-identifier">empty?</span> 
     <span class="ruby-identifier">breadcrumb</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:li</span>, <span class="ruby-identifier">set</span>.<span class="ruby-identifier">title</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;active&#39;</span>)  
@@ -301,11 +321,7 @@ Collection</p>
     <span class="ruby-keyword">return</span> <span class="ruby-identifier">breadcrumb</span>.<span class="ruby-identifier">reverse</span>
   <span class="ruby-keyword">else</span>
     <span class="ruby-comment"># This is a giant kludge, for some reason neu:1 gets an id param tacked on if done the regular way</span>
-    <span class="ruby-keyword">if</span> <span class="ruby-identifier">set</span>.<span class="ruby-identifier">parent</span>.<span class="ruby-identifier">id</span>.<span class="ruby-identifier">eql?</span>(<span class="ruby-string">&#39;neu:1&#39;</span>)
-      <span class="ruby-identifier">breadcrumb</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:li</span>, <span class="ruby-identifier">link_to</span>(<span class="ruby-identifier">set</span>.<span class="ruby-identifier">parent</span>.<span class="ruby-identifier">title</span>, <span class="ruby-identifier">community_path</span>(<span class="ruby-identifier">set</span>.<span class="ruby-identifier">parent</span>.<span class="ruby-identifier">identifier</span>)))
-    <span class="ruby-keyword">else</span>  
-      <span class="ruby-identifier">breadcrumb</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:li</span>, <span class="ruby-identifier">link_to</span>(<span class="ruby-identifier">set</span>.<span class="ruby-identifier">parent</span>.<span class="ruby-identifier">title</span>, <span class="ruby-identifier">set</span>.<span class="ruby-identifier">parent</span>))
-    <span class="ruby-keyword">end</span>
+    <span class="ruby-identifier">breadcrumb</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:li</span>, <span class="ruby-identifier">link_to</span>(<span class="ruby-identifier">set</span>.<span class="ruby-identifier">parent</span>.<span class="ruby-identifier">title</span>, <span class="ruby-identifier">polymorphic_path</span>(<span class="ruby-identifier">set</span>.<span class="ruby-identifier">parent</span>).<span class="ruby-identifier">split</span>(<span class="ruby-string">&#39;?&#39;</span>)[<span class="ruby-value">0</span>]))
     <span class="ruby-identifier">breadcrumb_to_root</span>(<span class="ruby-identifier">set</span>.<span class="ruby-identifier">parent</span>, <span class="ruby-identifier">breadcrumb</span>)
   <span class="ruby-keyword">end</span>
 <span class="ruby-keyword">end</span></pre>
@@ -317,6 +333,169 @@ Collection</p>
 
         
       </div><!-- breadcrumb_to_root-method -->
+
+    
+      <div id="method-i-get_file_thumbnails" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">get_file_thumbnails</span><span
+            class="method-args">(file, options = {})</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Keys that might be available for front end thumbnails “thumbnail_1”,
+“thumbnail_2”, “thumbnail_2_2x”, “thumbnail_4”, “thumbnail_4_2x”,
+“thumbnail_10”, “thumbnail_10_2x”</p>
+          
+
+          
+          <div class="method-source-code" id="get_file_thumbnails-source">
+            <pre><span class="ruby-comment"># File app/helpers/application_helper.rb, line 40</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">get_file_thumbnails</span>(<span class="ruby-identifier">file</span>, <span class="ruby-identifier">options</span> = {})
+  <span class="ruby-identifier">results</span> = <span class="ruby-constant">Hash</span>.<span class="ruby-identifier">new</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">file</span>.<span class="ruby-identifier">instance_of?</span>(<span class="ruby-constant">NuCoreFile</span>) <span class="ruby-keyword">and</span> <span class="ruby-identifier">file</span>.<span class="ruby-identifier">thumbnail</span>
+    <span class="ruby-identifier">thumb</span> = <span class="ruby-identifier">file</span>.<span class="ruby-identifier">thumbnail</span>
+    <span class="ruby-identifier">datastreams</span> = <span class="ruby-identifier">thumb</span>.<span class="ruby-identifier">datastreams</span>
+    <span class="ruby-identifier">keys</span> = <span class="ruby-identifier">thumb</span>.<span class="ruby-identifier">datastreams</span>.<span class="ruby-identifier">keys</span>
+    <span class="ruby-comment">#remove the following keys from the hash to prevent large thumbnails from being generated</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:remove_thumbs</span>]
+      <span class="ruby-identifier">remove_thumbs</span> = <span class="ruby-identifier">options</span>[<span class="ruby-value">:remove_thumbs</span>]
+      <span class="ruby-identifier">remove_thumbs</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">t</span><span class="ruby-operator">|</span>
+        <span class="ruby-identifier">keys</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-identifier">t</span>)  
+      <span class="ruby-keyword">end</span> 
+    <span class="ruby-keyword">end</span>
+    <span class="ruby-identifier">keys</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">key</span><span class="ruby-operator">|</span>
+      <span class="ruby-identifier">datastream</span> = <span class="ruby-identifier">datastreams</span>[<span class="ruby-identifier">key</span>]
+      <span class="ruby-keyword">if</span> <span class="ruby-identifier">key</span>.<span class="ruby-identifier">include?</span> <span class="ruby-string">&quot;thumbnail&quot;</span> <span class="ruby-keyword">and</span> <span class="ruby-identifier">datastream</span>.<span class="ruby-identifier">content</span>
+        <span class="ruby-identifier">results</span>[<span class="ruby-identifier">key</span>] = <span class="ruby-identifier">sufia</span>.<span class="ruby-identifier">download_path</span>( <span class="ruby-identifier">thumb</span>, <span class="ruby-identifier">datastream_id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">key</span> )
+      <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">return</span> <span class="ruby-identifier">results</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- get_file_thumbnails-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- get_file_thumbnails-method -->
+
+    
+      <div id="method-i-get_set_class_label" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">get_set_class_label</span><span
+            class="method-args">(set)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Return a string for NuCollections or Communities, will return the class
+otherwise.</p>
+          
+
+          
+          <div class="method-source-code" id="get_set_class_label-source">
+            <pre><span class="ruby-comment"># File app/helpers/application_helper.rb, line 14</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">get_set_class_label</span>(<span class="ruby-identifier">set</span>)
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">set</span>.<span class="ruby-identifier">instance_of?</span>(<span class="ruby-constant">Community</span>)
+    <span class="ruby-keyword">return</span> <span class="ruby-string">&quot;Community&quot;</span>
+  <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">set</span>.<span class="ruby-identifier">instance_of?</span>(<span class="ruby-constant">NuCollection</span>)
+    <span class="ruby-keyword">return</span> <span class="ruby-string">&quot;Collection&quot;</span>
+  <span class="ruby-keyword">else</span>
+    <span class="ruby-keyword">return</span> <span class="ruby-identifier">set</span>.<span class="ruby-identifier">class</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- get_set_class_label-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- get_set_class_label-method -->
+
+    
+      <div id="method-i-prepare_drs_item" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">prepare_drs_item</span><span
+            class="method-args">(item)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Generalizing function to prepare an item to be used in the drs-item view.</p>
+          
+
+          
+          <div class="method-source-code" id="prepare_drs_item-source">
+            <pre><span class="ruby-comment"># File app/helpers/application_helper.rb, line 64</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">prepare_drs_item</span>(<span class="ruby-identifier">item</span>)
+  <span class="ruby-identifier">drs_item</span> = {
+    <span class="ruby-value">:pid</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-keyword">nil</span>,
+    <span class="ruby-value">:path</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-keyword">nil</span>,
+    <span class="ruby-value">:title</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-keyword">nil</span>,
+    <span class="ruby-value">:creators</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-keyword">nil</span>,
+    <span class="ruby-value">:thumbnails</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-keyword">nil</span>,
+    <span class="ruby-value">:type</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-keyword">nil</span>,
+    <span class="ruby-value">:date_added</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-keyword">nil</span>,
+    <span class="ruby-value">:abstract</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-keyword">nil</span>,
+    <span class="ruby-value">:download_path</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-keyword">nil</span>
+  }
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">item</span>.<span class="ruby-identifier">instance_of?</span>(<span class="ruby-constant">NuCollection</span>) 
+    <span class="ruby-identifier">drs_item</span>[<span class="ruby-value">:pid</span>] = <span class="ruby-identifier">item</span>.<span class="ruby-identifier">pid</span>
+    <span class="ruby-identifier">drs_item</span>[<span class="ruby-value">:path</span>] = <span class="ruby-string">&#39;/collections/&#39;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">item</span>.<span class="ruby-identifier">pid</span>
+    <span class="ruby-identifier">drs_item</span>[<span class="ruby-value">:title</span>] = <span class="ruby-identifier">item</span>.<span class="ruby-identifier">title</span>
+    <span class="ruby-identifier">drs_item</span>[<span class="ruby-value">:type</span>] = <span class="ruby-string">&#39;Collection&#39;</span>
+    <span class="ruby-identifier">drs_item</span>[<span class="ruby-value">:creators</span>] = <span class="ruby-identifier">item</span>.<span class="ruby-identifier">creators</span>
+    <span class="ruby-identifier">drs_item</span>[<span class="ruby-value">:thumbnails</span>] = <span class="ruby-keyword">nil</span> <span class="ruby-comment">#item.thumbnail ? sufia.download_path(item, datastream_id: &#39;thumbnail&#39;) : false</span>
+    <span class="ruby-identifier">drs_item</span>[<span class="ruby-value">:date_added</span>] = <span class="ruby-identifier">item</span>.<span class="ruby-identifier">date_of_issue</span>
+    <span class="ruby-identifier">drs_item</span>[<span class="ruby-value">:abstract</span>] = <span class="ruby-identifier">item</span>.<span class="ruby-identifier">description</span>
+    <span class="ruby-identifier">drs_item</span>[<span class="ruby-value">:download_path</span>] = <span class="ruby-keyword">false</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">item</span>.<span class="ruby-identifier">instance_of?</span>(<span class="ruby-constant">Community</span>)
+    <span class="ruby-identifier">drs_item</span>[<span class="ruby-value">:pid</span>] = <span class="ruby-identifier">item</span>.<span class="ruby-identifier">pid</span>
+    <span class="ruby-identifier">drs_item</span>[<span class="ruby-value">:path</span>] = <span class="ruby-string">&#39;/communities/&#39;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">item</span>.<span class="ruby-identifier">pid</span>
+    <span class="ruby-identifier">drs_item</span>[<span class="ruby-value">:title</span>] = <span class="ruby-identifier">item</span>.<span class="ruby-identifier">title</span>
+    <span class="ruby-identifier">drs_item</span>[<span class="ruby-value">:type</span>] = <span class="ruby-string">&#39;Community&#39;</span>
+    <span class="ruby-identifier">drs_item</span>[<span class="ruby-value">:thumbnails</span>] = <span class="ruby-keyword">nil</span>
+    <span class="ruby-identifier">drs_item</span>[<span class="ruby-value">:date_added</span>] = <span class="ruby-keyword">nil</span>
+    <span class="ruby-identifier">drs_item</span>[<span class="ruby-value">:abstract</span>] = <span class="ruby-identifier">item</span>.<span class="ruby-identifier">description</span>
+    <span class="ruby-identifier">drs_item</span>[<span class="ruby-value">:download_path</span>] = <span class="ruby-keyword">false</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">item</span>.<span class="ruby-identifier">instance_of?</span>(<span class="ruby-constant">NuCoreFile</span>)
+    <span class="ruby-identifier">drs_item</span>[<span class="ruby-value">:type</span>] = <span class="ruby-identifier">item</span>[<span class="ruby-string">&#39;mime_type&#39;</span>]
+    <span class="ruby-identifier">drs_item</span>[<span class="ruby-value">:pid</span>] = <span class="ruby-identifier">item</span>.<span class="ruby-identifier">pid</span>
+    <span class="ruby-identifier">drs_item</span>[<span class="ruby-value">:path</span>] = <span class="ruby-string">&#39;/files/&#39;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">item</span>.<span class="ruby-identifier">pid</span>
+    <span class="ruby-identifier">drs_item</span>[<span class="ruby-value">:title</span>] = <span class="ruby-identifier">item</span>.<span class="ruby-identifier">title</span>
+    <span class="ruby-identifier">drs_item</span>[<span class="ruby-value">:type</span>] = <span class="ruby-string">&#39;file&#39;</span>
+    <span class="ruby-identifier">drs_item</span>[<span class="ruby-value">:thumbnails</span>] = <span class="ruby-identifier">get_file_thumbnails</span>(<span class="ruby-identifier">item</span>, { <span class="ruby-identifier">remove_thumbs</span><span class="ruby-operator">:</span> [<span class="ruby-string">&#39;thumbnail_4&#39;</span>, <span class="ruby-string">&#39;thumbnail_4_2x&#39;</span>, <span class="ruby-string">&#39;thumbnail_10&#39;</span>, <span class="ruby-string">&#39;thumbnail_10_2x&#39;</span>] })
+    <span class="ruby-identifier">drs_item</span>[<span class="ruby-value">:date_added</span>] = <span class="ruby-keyword">nil</span>
+    <span class="ruby-identifier">drs_item</span>[<span class="ruby-value">:abstract</span>] = <span class="ruby-identifier">item</span>.<span class="ruby-identifier">description</span>
+    <span class="ruby-identifier">drs_item</span>[<span class="ruby-value">:download_path</span>] = <span class="ruby-keyword">false</span>
+  
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">return</span> <span class="ruby-identifier">drs_item</span>
+
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- prepare_drs_item-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- prepare_drs_item-method -->
 
     
       <div id="method-i-thumbnail_for" class="method-detail ">

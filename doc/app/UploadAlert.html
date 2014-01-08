@@ -4,7 +4,7 @@
 <head>
 <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
 
-<title>class DrsPropertiesDatastream - Rails Application Documentation</title>
+<title>class UploadAlert - Rails Application Documentation</title>
 
 <link type="text/css" media="screen" href="./rdoc.css" rel="stylesheet">
 
@@ -47,7 +47,7 @@
     <nav id="file-list-section" class="section">
   <h3 class="section-header">Defined In</h3>
   <ul>
-    <li>app/models/drs_properties_datastream.rb
+    <li>app/models/upload_alert.rb
   </ul>
 </nav>
 
@@ -59,7 +59,7 @@
     <nav id="parent-class-section" class="section">
   <h3 class="section-header">Parent</h3>
   
-  <p class="link">ActiveFedora::OmDatastream
+  <p class="link">ActiveRecord::Base
   
 </nav>
 
@@ -70,21 +70,15 @@
 
   <ul class="link-list">
     
-    <li><a href="#method-c-xml_template">::xml_template</a>
+    <li><a href="#method-c-withheld_datasets">::withheld_datasets</a>
     
-    <li><a href="#method-i-canonical-3F">#canonical?</a>
+    <li><a href="#method-c-withheld_learning_objects">::withheld_learning_objects</a>
     
-    <li><a href="#method-i-canonize">#canonize</a>
+    <li><a href="#method-c-withheld_presentations">::withheld_presentations</a>
     
-    <li><a href="#method-i-get_personal_folder_type">#get_personal_folder_type</a>
+    <li><a href="#method-c-withheld_research_publications">::withheld_research_publications</a>
     
-    <li><a href="#method-i-in_progress-3F">#in_progress?</a>
-    
-    <li><a href="#method-i-tag_as_completed">#tag_as_completed</a>
-    
-    <li><a href="#method-i-tag_as_in_progress">#tag_as_in_progress</a>
-    
-    <li><a href="#method-i-uncanonize">#uncanonize</a>
+    <li><a href="#method-c-withheld_theses">::withheld_theses</a>
     
   </ul>
 </nav>
@@ -282,13 +276,10 @@
 </nav>
 
 <div id="documentation">
-  <h1 class="class">class DrsPropertiesDatastream</h1>
+  <h1 class="class">class UploadAlert</h1>
 
   <div id="description" class="description">
     
-<p>properties datastream: catch-all for info that didn&#39;t have another
-home.  Particularly depositor.</p>
-
   </div><!-- description -->
 
   
@@ -309,10 +300,10 @@ home.  Particularly depositor.</p>
       <h3 class="section-header">Public Class Methods</h3>
 
     
-      <div id="method-c-xml_template" class="method-detail ">
+      <div id="method-c-withheld_datasets" class="method-detail ">
         
         <div class="method-heading">
-          <span class="method-name">xml_template</span><span
+          <span class="method-name">withheld_datasets</span><span
             class="method-args">()</span>
           <span class="method-click-advice">click to toggle source</span>
         </div>
@@ -324,241 +315,142 @@ home.  Particularly depositor.</p>
           
 
           
-          <div class="method-source-code" id="xml_template-source">
-            <pre><span class="ruby-comment"># File app/models/drs_properties_datastream.rb, line 29</span>
-<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">xml_template</span>
-  <span class="ruby-identifier">builder</span> = <span class="ruby-constant">Nokogiri</span><span class="ruby-operator">::</span><span class="ruby-constant">XML</span><span class="ruby-operator">::</span><span class="ruby-constant">Builder</span>.<span class="ruby-identifier">new</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">xml</span><span class="ruby-operator">|</span>
-    <span class="ruby-identifier">xml</span>.<span class="ruby-identifier">fields</span>
-  <span class="ruby-keyword">end</span>
-  <span class="ruby-identifier">builder</span>.<span class="ruby-identifier">doc</span>
+          <div class="method-source-code" id="withheld_datasets-source">
+            <pre><span class="ruby-comment"># File app/models/upload_alert.rb, line 13</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">withheld_datasets</span>
+  <span class="ruby-identifier">unknown_content_query</span>(<span class="ruby-string">&#39;datasets&#39;</span>) 
 <span class="ruby-keyword">end</span></pre>
-          </div><!-- xml_template-source -->
+          </div><!-- withheld_datasets-source -->
           
         </div>
 
         
 
         
-      </div><!-- xml_template-method -->
+      </div><!-- withheld_datasets-method -->
+
+    
+      <div id="method-c-withheld_learning_objects" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">withheld_learning_objects</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="withheld_learning_objects-source">
+            <pre><span class="ruby-comment"># File app/models/upload_alert.rb, line 17</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">withheld_learning_objects</span>
+  <span class="ruby-identifier">unknown_content_query</span>(<span class="ruby-string">&#39;learning objects&#39;</span>) 
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- withheld_learning_objects-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- withheld_learning_objects-method -->
+
+    
+      <div id="method-c-withheld_presentations" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">withheld_presentations</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="withheld_presentations-source">
+            <pre><span class="ruby-comment"># File app/models/upload_alert.rb, line 21</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">withheld_presentations</span>
+  <span class="ruby-identifier">unknown_content_query</span>(<span class="ruby-string">&#39;presentations&#39;</span>) 
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- withheld_presentations-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- withheld_presentations-method -->
+
+    
+      <div id="method-c-withheld_research_publications" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">withheld_research_publications</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="withheld_research_publications-source">
+            <pre><span class="ruby-comment"># File app/models/upload_alert.rb, line 5</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">withheld_research_publications</span>
+  <span class="ruby-identifier">unknown_content_query</span>(<span class="ruby-string">&#39;research publications&#39;</span>) 
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- withheld_research_publications-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- withheld_research_publications-method -->
+
+    
+      <div id="method-c-withheld_theses" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">withheld_theses</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="withheld_theses-source">
+            <pre><span class="ruby-comment"># File app/models/upload_alert.rb, line 9</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">withheld_theses</span>
+  <span class="ruby-identifier">unknown_content_query</span>(<span class="ruby-string">&#39;theses&#39;</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- withheld_theses-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- withheld_theses-method -->
 
     
     </section><!-- public-class-method-details -->
-  
-     <section id="public-instance-5Buntitled-5D-method-details" class="method-section section">
-      <h3 class="section-header">Public Instance Methods</h3>
-
-    
-      <div id="method-i-canonical-3F" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">canonical?</span><span
-            class="method-args">()</span>
-          <span class="method-click-advice">click to toggle source</span>
-        </div>
-        
-
-        <div class="method-description">
-          
-          
-          
-
-          
-          <div class="method-source-code" id="canonical-3F-source">
-            <pre><span class="ruby-comment"># File app/models/drs_properties_datastream.rb, line 60</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">canonical?</span>
-  <span class="ruby-keyword">return</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">canonical</span>.<span class="ruby-identifier">first</span> <span class="ruby-operator">==</span> <span class="ruby-string">&#39;yes&#39;</span> 
-<span class="ruby-keyword">end</span></pre>
-          </div><!-- canonical-3F-source -->
-          
-        </div>
-
-        
-
-        
-      </div><!-- canonical-3F-method -->
-
-    
-      <div id="method-i-canonize" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">canonize</span><span
-            class="method-args">()</span>
-          <span class="method-click-advice">click to toggle source</span>
-        </div>
-        
-
-        <div class="method-description">
-          
-          
-          
-
-          
-          <div class="method-source-code" id="canonize-source">
-            <pre><span class="ruby-comment"># File app/models/drs_properties_datastream.rb, line 52</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">canonize</span>
-  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">canonical</span> = <span class="ruby-string">&#39;yes&#39;</span> 
-<span class="ruby-keyword">end</span></pre>
-          </div><!-- canonize-source -->
-          
-        </div>
-
-        
-
-        
-      </div><!-- canonize-method -->
-
-    
-      <div id="method-i-get_personal_folder_type" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">get_personal_folder_type</span><span
-            class="method-args">()</span>
-          <span class="method-click-advice">click to toggle source</span>
-        </div>
-        
-
-        <div class="method-description">
-          
-          
-          
-
-          
-          <div class="method-source-code" id="get_personal_folder_type-source">
-            <pre><span class="ruby-comment"># File app/models/drs_properties_datastream.rb, line 36</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">get_personal_folder_type</span>
-  <span class="ruby-keyword">return</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">personal_folder_type</span>.<span class="ruby-identifier">first</span> <span class="ruby-keyword">unless</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">personal_folder_type</span>.<span class="ruby-identifier">empty?</span>
-<span class="ruby-keyword">end</span></pre>
-          </div><!-- get_personal_folder_type-source -->
-          
-        </div>
-
-        
-
-        
-      </div><!-- get_personal_folder_type-method -->
-
-    
-      <div id="method-i-in_progress-3F" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">in_progress?</span><span
-            class="method-args">()</span>
-          <span class="method-click-advice">click to toggle source</span>
-        </div>
-        
-
-        <div class="method-description">
-          
-          
-          
-
-          
-          <div class="method-source-code" id="in_progress-3F-source">
-            <pre><span class="ruby-comment"># File app/models/drs_properties_datastream.rb, line 40</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">in_progress?</span>
-  <span class="ruby-keyword">return</span> <span class="ruby-operator">!</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">in_progress</span>.<span class="ruby-identifier">empty?</span> 
-<span class="ruby-keyword">end</span></pre>
-          </div><!-- in_progress-3F-source -->
-          
-        </div>
-
-        
-
-        
-      </div><!-- in_progress-3F-method -->
-
-    
-      <div id="method-i-tag_as_completed" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">tag_as_completed</span><span
-            class="method-args">()</span>
-          <span class="method-click-advice">click to toggle source</span>
-        </div>
-        
-
-        <div class="method-description">
-          
-          
-          
-
-          
-          <div class="method-source-code" id="tag_as_completed-source">
-            <pre><span class="ruby-comment"># File app/models/drs_properties_datastream.rb, line 48</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">tag_as_completed</span> 
-  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">in_progress</span> = [] 
-<span class="ruby-keyword">end</span></pre>
-          </div><!-- tag_as_completed-source -->
-          
-        </div>
-
-        
-
-        
-      </div><!-- tag_as_completed-method -->
-
-    
-      <div id="method-i-tag_as_in_progress" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">tag_as_in_progress</span><span
-            class="method-args">()</span>
-          <span class="method-click-advice">click to toggle source</span>
-        </div>
-        
-
-        <div class="method-description">
-          
-          
-          
-
-          
-          <div class="method-source-code" id="tag_as_in_progress-source">
-            <pre><span class="ruby-comment"># File app/models/drs_properties_datastream.rb, line 44</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">tag_as_in_progress</span> 
-  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">in_progress</span> = <span class="ruby-string">&#39;true&#39;</span> 
-<span class="ruby-keyword">end</span></pre>
-          </div><!-- tag_as_in_progress-source -->
-          
-        </div>
-
-        
-
-        
-      </div><!-- tag_as_in_progress-method -->
-
-    
-      <div id="method-i-uncanonize" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">uncanonize</span><span
-            class="method-args">()</span>
-          <span class="method-click-advice">click to toggle source</span>
-        </div>
-        
-
-        <div class="method-description">
-          
-          
-          
-
-          
-          <div class="method-source-code" id="uncanonize-source">
-            <pre><span class="ruby-comment"># File app/models/drs_properties_datastream.rb, line 56</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">uncanonize</span>
-  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">canonical</span> = <span class="ruby-string">&#39;&#39;</span> 
-<span class="ruby-keyword">end</span></pre>
-          </div><!-- uncanonize-source -->
-          
-        </div>
-
-        
-
-        
-      </div><!-- uncanonize-method -->
-
-    
-    </section><!-- public-instance-method-details -->
   
   </section><!-- 5Buntitled-5D -->
 

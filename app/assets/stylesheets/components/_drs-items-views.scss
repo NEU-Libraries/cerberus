@@ -13,9 +13,10 @@
 
   figure{
     text-align: center;
-    margin: 0 0 0 0;
+    margin: 0 0 2em 0;
     figcaption{
       @extend .muted;
+      margin-top: 1em;
     }
     [data-picture]{
       display: inline-block;

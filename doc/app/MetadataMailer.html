@@ -4,7 +4,7 @@
 <head>
 <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
 
-<title>class DrsEmployeeDatastream - Rails Application Documentation</title>
+<title>class MetadataMailer - Rails Application Documentation</title>
 
 <link type="text/css" media="screen" href="./rdoc.css" rel="stylesheet">
 
@@ -47,7 +47,7 @@
     <nav id="file-list-section" class="section">
   <h3 class="section-header">Defined In</h3>
   <ul>
-    <li>app/models/drs_employee_datastream.rb
+    <li>app/mailers/metadata_mailer.rb
   </ul>
 </nav>
 
@@ -59,24 +59,30 @@
     <nav id="parent-class-section" class="section">
   <h3 class="section-header">Parent</h3>
   
-  <p class="link">ActiveFedora::OmDatastream
+  <p class="link">ActionMailer::Base
   
 </nav>
 
-    
+    <!-- Included Modules -->
+<nav id="includes-section" class="section">
+  <h3 class="section-header">Included Modules</h3>
+
+  <ul class="link-list">
+  
+  
+    <li><span class="include">AbstractController::Callbacks</span>
+  
+  
+  </ul>
+</nav>
+
     <!-- Method Quickref -->
 <nav id="method-list-section" class="section">
   <h3 class="section-header">Methods</h3>
 
   <ul class="link-list">
     
-    <li><a href="#method-c-xml_template">::xml_template</a>
-    
-    <li><a href="#method-i-employee_is_building">#employee_is_building</a>
-    
-    <li><a href="#method-i-employee_is_complete">#employee_is_complete</a>
-    
-    <li><a href="#method-i-is_building-3F">#is_building?</a>
+    <li><a href="#method-i-daily_alert_email">#daily_alert_email</a>
     
   </ul>
 </nav>
@@ -274,13 +280,10 @@
 </nav>
 
 <div id="documentation">
-  <h1 class="class">class DrsEmployeeDatastream</h1>
+  <h1 class="class">class MetadataMailer</h1>
 
   <div id="description" class="description">
     
-<p>employee datastream: persistence for nuid and name, allowing us to index
-with solr</p>
-
   </div><!-- description -->
 
   
@@ -297,53 +300,14 @@ with solr</p>
 
     <!-- Methods -->
     
-     <section id="public-class-5Buntitled-5D-method-details" class="method-section section">
-      <h3 class="section-header">Public Class Methods</h3>
-
-    
-      <div id="method-c-xml_template" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">xml_template</span><span
-            class="method-args">()</span>
-          <span class="method-click-advice">click to toggle source</span>
-        </div>
-        
-
-        <div class="method-description">
-          
-          
-          
-
-          
-          <div class="method-source-code" id="xml_template-source">
-            <pre><span class="ruby-comment"># File app/models/drs_employee_datastream.rb, line 22</span>
-<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">xml_template</span>
-  <span class="ruby-identifier">builder</span> = <span class="ruby-constant">Nokogiri</span><span class="ruby-operator">::</span><span class="ruby-constant">XML</span><span class="ruby-operator">::</span><span class="ruby-constant">Builder</span>.<span class="ruby-identifier">new</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">xml</span><span class="ruby-operator">|</span>
-    <span class="ruby-identifier">xml</span>.<span class="ruby-identifier">fields</span>
-  <span class="ruby-keyword">end</span>
-  <span class="ruby-identifier">builder</span>.<span class="ruby-identifier">doc</span>
-<span class="ruby-keyword">end</span></pre>
-          </div><!-- xml_template-source -->
-          
-        </div>
-
-        
-
-        
-      </div><!-- xml_template-method -->
-
-    
-    </section><!-- public-class-method-details -->
-  
      <section id="public-instance-5Buntitled-5D-method-details" class="method-section section">
       <h3 class="section-header">Public Instance Methods</h3>
 
     
-      <div id="method-i-employee_is_building" class="method-detail ">
+      <div id="method-i-daily_alert_email" class="method-detail ">
         
         <div class="method-heading">
-          <span class="method-name">employee_is_building</span><span
+          <span class="method-name">daily_alert_email</span><span
             class="method-args">()</span>
           <span class="method-click-advice">click to toggle source</span>
         </div>
@@ -351,83 +315,28 @@ with solr</p>
 
         <div class="method-description">
           
-          
+          <p>Generate the email</p>
           
 
           
-          <div class="method-source-code" id="employee_is_building-source">
-            <pre><span class="ruby-comment"># File app/models/drs_employee_datastream.rb, line 10</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">employee_is_building</span> 
-  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">status</span> = <span class="ruby-string">&quot;BUILDING&quot;</span> 
+          <div class="method-source-code" id="daily_alert_email-source">
+            <pre><span class="ruby-comment"># File app/mailers/metadata_mailer.rb, line 9</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">daily_alert_email</span>
+  <span class="ruby-ivar">@research</span> = <span class="ruby-constant">UploadAlert</span>.<span class="ruby-identifier">withheld_research_publications</span>
+  <span class="ruby-ivar">@theses</span> = <span class="ruby-constant">UploadAlert</span>.<span class="ruby-identifier">withheld_theses</span> 
+  <span class="ruby-ivar">@datasets</span> = <span class="ruby-constant">UploadAlert</span>.<span class="ruby-identifier">withheld_datasets</span> 
+  <span class="ruby-ivar">@learning_objects</span> = <span class="ruby-constant">UploadAlert</span>.<span class="ruby-identifier">withheld_learning_objects</span>
+  <span class="ruby-ivar">@presentations</span> = <span class="ruby-constant">UploadAlert</span>.<span class="ruby-identifier">withheld_presentations</span>
+  <span class="ruby-identifier">mail</span>(<span class="ruby-identifier">to</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;William Jackson &lt;wjackson64@gmail.com&gt;&quot;</span>, <span class="ruby-identifier">subject</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;Daily Significant Uploads&#39;</span>) 
 <span class="ruby-keyword">end</span></pre>
-          </div><!-- employee_is_building-source -->
+          </div><!-- daily_alert_email-source -->
           
         </div>
 
         
 
         
-      </div><!-- employee_is_building-method -->
-
-    
-      <div id="method-i-employee_is_complete" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">employee_is_complete</span><span
-            class="method-args">()</span>
-          <span class="method-click-advice">click to toggle source</span>
-        </div>
-        
-
-        <div class="method-description">
-          
-          
-          
-
-          
-          <div class="method-source-code" id="employee_is_complete-source">
-            <pre><span class="ruby-comment"># File app/models/drs_employee_datastream.rb, line 14</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">employee_is_complete</span>
-  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">status</span> = <span class="ruby-string">&quot;COMPLETE&quot;</span> 
-<span class="ruby-keyword">end</span></pre>
-          </div><!-- employee_is_complete-source -->
-          
-        </div>
-
-        
-
-        
-      </div><!-- employee_is_complete-method -->
-
-    
-      <div id="method-i-is_building-3F" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">is_building?</span><span
-            class="method-args">()</span>
-          <span class="method-click-advice">click to toggle source</span>
-        </div>
-        
-
-        <div class="method-description">
-          
-          
-          
-
-          
-          <div class="method-source-code" id="is_building-3F-source">
-            <pre><span class="ruby-comment"># File app/models/drs_employee_datastream.rb, line 18</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">is_building?</span>
-  <span class="ruby-keyword">return</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">status</span>.<span class="ruby-identifier">first</span> <span class="ruby-operator">==</span> <span class="ruby-string">&quot;BUILDING&quot;</span> 
-<span class="ruby-keyword">end</span></pre>
-          </div><!-- is_building-3F-source -->
-          
-        </div>
-
-        
-
-        
-      </div><!-- is_building-3F-method -->
+      </div><!-- daily_alert_email-method -->
 
     
     </section><!-- public-instance-method-details -->

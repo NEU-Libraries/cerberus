@@ -90,11 +90,15 @@
 
   <ul class="link-list">
     
+    <li><a href="#method-c-find_for_shib">::find_for_shib</a>
+    
     <li><a href="#method-i-admin-3F">#admin?</a>
     
-    <li><a href="#method-i-nuid">#nuid</a>
+    <li><a href="#method-i-name">#name</a>
     
     <li><a href="#method-i-to_s">#to_s</a>
+    
+    <li><a href="#method-i-user_key">#user_key</a>
     
   </ul>
 </nav>
@@ -118,10 +122,6 @@
   <ul class="link-list">
   
     <li><a href="./Drs.html">Drs</a>
-  
-    <li><a href="./Drs/Content.html">Drs::Content</a>
-  
-    <li><a href="./Drs/Content/Transformations.html">Drs::Content::Transformations</a>
   
     <li><a href="./Drs/ControllerHelpers.html">Drs::ControllerHelpers</a>
   
@@ -181,6 +181,10 @@
   
     <li><a href="./Employee/FacultyFolders.html">Employee::FacultyFolders</a>
   
+    <li><a href="./Users.html">Users</a>
+  
+    <li><a href="./Users/OmniauthCallbacksController.html">Users::OmniauthCallbacksController</a>
+  
     <li><a href="./AdminController.html">AdminController</a>
   
     <li><a href="./ApplicationController.html">ApplicationController</a>
@@ -205,6 +209,8 @@
   
     <li><a href="./ContentCreationJob.html">ContentCreationJob</a>
   
+    <li><a href="./DerivativeCreator.html">DerivativeCreator</a>
+  
     <li><a href="./DrsEmployeeDatastream.html">DrsEmployeeDatastream</a>
   
     <li><a href="./DrsPropertiesDatastream.html">DrsPropertiesDatastream</a>
@@ -222,6 +228,10 @@
     <li><a href="./ImageSmallFile.html">ImageSmallFile</a>
   
     <li><a href="./ImageThumbnailFile.html">ImageThumbnailFile</a>
+  
+    <li><a href="./InlineThumbnailCreator.html">InlineThumbnailCreator</a>
+  
+    <li><a href="./MetadataMailer.html">MetadataMailer</a>
   
     <li><a href="./MetadataUpdateJob.html">MetadataUpdateJob</a>
   
@@ -249,9 +259,13 @@
   
     <li><a href="./NuModsDatastream.html">NuModsDatastream</a>
   
+    <li><a href="./Object.html">Object</a>
+  
     <li><a href="./ParanoidRightsDatastream.html">ParanoidRightsDatastream</a>
   
     <li><a href="./PdfFile.html">PdfFile</a>
+  
+    <li><a href="./ScaledImageCreator.html">ScaledImageCreator</a>
   
     <li><a href="./SetsController.html">SetsController</a>
   
@@ -263,7 +277,11 @@
   
     <li><a href="./TextFile.html">TextFile</a>
   
+    <li><a href="./UploadAlert.html">UploadAlert</a>
+  
     <li><a href="./User.html">User</a>
+  
+    <li><a href="./UsersController.html">UsersController</a>
   
     <li><a href="./VideoFile.html">VideoFile</a>
   
@@ -311,6 +329,51 @@
 
     <!-- Methods -->
     
+     <section id="public-class-5Buntitled-5D-method-details" class="method-section section">
+      <h3 class="section-header">Public Class Methods</h3>
+
+    
+      <div id="method-c-find_for_shib" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">find_for_shib</span><span
+            class="method-args">(auth, signed_in_resource=nil)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="find_for_shib-source">
+            <pre><span class="ruby-comment"># File app/models/user.rb, line 22</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">find_for_shib</span>(<span class="ruby-identifier">auth</span>, <span class="ruby-identifier">signed_in_resource</span>=<span class="ruby-keyword">nil</span>)    
+  <span class="ruby-identifier">user</span> = <span class="ruby-constant">User</span>.<span class="ruby-identifier">where</span>(<span class="ruby-value">:email</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">auth</span>.<span class="ruby-identifier">info</span>.<span class="ruby-identifier">email</span>).<span class="ruby-identifier">first</span>
+  
+  <span class="ruby-keyword">unless</span> <span class="ruby-identifier">user</span>            
+    <span class="ruby-identifier">user</span> = <span class="ruby-constant">User</span>.<span class="ruby-identifier">create</span>(<span class="ruby-identifier">email</span><span class="ruby-value">:auth</span>.<span class="ruby-identifier">info</span>.<span class="ruby-identifier">email</span>, <span class="ruby-identifier">password</span><span class="ruby-value">:Devise</span>.<span class="ruby-identifier">friendly_token</span>[<span class="ruby-value">0</span>,<span class="ruby-value">20</span>], <span class="ruby-identifier">full_name</span><span class="ruby-value">:auth</span>.<span class="ruby-identifier">info</span>.<span class="ruby-identifier">name</span>, <span class="ruby-identifier">nuid</span><span class="ruby-value">:auth</span>.<span class="ruby-identifier">info</span>.<span class="ruby-identifier">nuid</span>)
+    <span class="ruby-keyword">if</span>(<span class="ruby-identifier">auth</span>.<span class="ruby-identifier">info</span>.<span class="ruby-identifier">employee</span> <span class="ruby-operator">==</span> <span class="ruby-string">&quot;staff&quot;</span>)
+      <span class="ruby-constant">Sufia</span>.<span class="ruby-identifier">queue</span>.<span class="ruby-identifier">push</span>(<span class="ruby-constant">EmployeeCreateJob</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">auth</span>.<span class="ruby-identifier">info</span>.<span class="ruby-identifier">nuid</span>))
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+
+  <span class="ruby-keyword">return</span> <span class="ruby-identifier">user</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- find_for_shib-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- find_for_shib-method -->
+
+    
+    </section><!-- public-class-method-details -->
+  
      <section id="public-instance-5Buntitled-5D-method-details" class="method-section section">
       <h3 class="section-header">Public Instance Methods</h3>
 
@@ -332,7 +395,7 @@ grouper information pulled in from Shibboleth</p>
 
           
           <div class="method-source-code" id="admin-3F-source">
-            <pre><span class="ruby-comment"># File app/models/user.rb, line 39</span>
+            <pre><span class="ruby-comment"># File app/models/user.rb, line 53</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">admin?</span>
   <span class="ruby-keyword">return</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">role</span>.<span class="ruby-identifier">eql?</span>(<span class="ruby-string">&#39;admin&#39;</span>)
 <span class="ruby-keyword">end</span></pre>
@@ -346,10 +409,10 @@ grouper information pulled in from Shibboleth</p>
       </div><!-- admin-3F-method -->
 
     
-      <div id="method-i-nuid" class="method-detail ">
+      <div id="method-i-name" class="method-detail ">
         
         <div class="method-heading">
-          <span class="method-name">nuid</span><span
+          <span class="method-name">name</span><span
             class="method-args">()</span>
           <span class="method-click-advice">click to toggle source</span>
         </div>
@@ -357,25 +420,23 @@ grouper information pulled in from Shibboleth</p>
 
         <div class="method-description">
           
-          <p>When we get that Shibboleth stuff sorted we can figure out how to get this
-to actually be a user&#39;s nuid.  For now it&#39;s just their email
-address</p>
+          
           
 
           
-          <div class="method-source-code" id="nuid-source">
-            <pre><span class="ruby-comment"># File app/models/user.rb, line 32</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">nuid</span> 
-  <span class="ruby-identifier">email</span> 
+          <div class="method-source-code" id="name-source">
+            <pre><span class="ruby-comment"># File app/models/user.rb, line 42</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">name</span>
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">full_name</span>
 <span class="ruby-keyword">end</span></pre>
-          </div><!-- nuid-source -->
+          </div><!-- name-source -->
           
         </div>
 
         
 
         
-      </div><!-- nuid-method -->
+      </div><!-- name-method -->
 
     
       <div id="method-i-to_s" class="method-detail ">
@@ -396,9 +457,9 @@ user-displayable login/identifier for the account.</p>
 
           
           <div class="method-source-code" id="to_s-source">
-            <pre><span class="ruby-comment"># File app/models/user.rb, line 26</span>
+            <pre><span class="ruby-comment"># File app/models/user.rb, line 38</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">to_s</span>
-  <span class="ruby-identifier">email</span>
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">nuid</span>
 <span class="ruby-keyword">end</span></pre>
           </div><!-- to_s-source -->
           
@@ -408,6 +469,36 @@ user-displayable login/identifier for the account.</p>
 
         
       </div><!-- to_s-method -->
+
+    
+      <div id="method-i-user_key" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">user_key</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="user_key-source">
+            <pre><span class="ruby-comment"># File app/models/user.rb, line 46</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">user_key</span>
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">nuid</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- user_key-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- user_key-method -->
 
     
     </section><!-- public-instance-method-details -->

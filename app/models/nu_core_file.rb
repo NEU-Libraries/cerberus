@@ -54,7 +54,7 @@ class NuCoreFile < ActiveFedora::Base
   end
 
   def persistent_url
-    "#{Rails.configuration.persistent_hostpath}#{noid}"
+    "#{Rails.configuration.persistent_hostpath}#{pid}"
   end
 
   def content_objects

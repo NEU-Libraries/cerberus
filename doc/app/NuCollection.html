@@ -78,6 +78,10 @@
   
   
   
+    <li><span class="include">Hydra::ModelMethods</span>
+  
+  
+  
     <li><a class="include" href="Drs/Rights/MassPermissions.html">Drs::Rights::MassPermissions</a>
   
   
@@ -149,10 +153,6 @@
   
     <li><a href="./Drs.html">Drs</a>
   
-    <li><a href="./Drs/Content.html">Drs::Content</a>
-  
-    <li><a href="./Drs/Content/Transformations.html">Drs::Content::Transformations</a>
-  
     <li><a href="./Drs/ControllerHelpers.html">Drs::ControllerHelpers</a>
   
     <li><a href="./Drs/ControllerHelpers/EditableObjects.html">Drs::ControllerHelpers::EditableObjects</a>
@@ -211,6 +211,10 @@
   
     <li><a href="./Employee/FacultyFolders.html">Employee::FacultyFolders</a>
   
+    <li><a href="./Users.html">Users</a>
+  
+    <li><a href="./Users/OmniauthCallbacksController.html">Users::OmniauthCallbacksController</a>
+  
     <li><a href="./AdminController.html">AdminController</a>
   
     <li><a href="./ApplicationController.html">ApplicationController</a>
@@ -235,6 +239,8 @@
   
     <li><a href="./ContentCreationJob.html">ContentCreationJob</a>
   
+    <li><a href="./DerivativeCreator.html">DerivativeCreator</a>
+  
     <li><a href="./DrsEmployeeDatastream.html">DrsEmployeeDatastream</a>
   
     <li><a href="./DrsPropertiesDatastream.html">DrsPropertiesDatastream</a>
@@ -252,6 +258,10 @@
     <li><a href="./ImageSmallFile.html">ImageSmallFile</a>
   
     <li><a href="./ImageThumbnailFile.html">ImageThumbnailFile</a>
+  
+    <li><a href="./InlineThumbnailCreator.html">InlineThumbnailCreator</a>
+  
+    <li><a href="./MetadataMailer.html">MetadataMailer</a>
   
     <li><a href="./MetadataUpdateJob.html">MetadataUpdateJob</a>
   
@@ -279,9 +289,13 @@
   
     <li><a href="./NuModsDatastream.html">NuModsDatastream</a>
   
+    <li><a href="./Object.html">Object</a>
+  
     <li><a href="./ParanoidRightsDatastream.html">ParanoidRightsDatastream</a>
   
     <li><a href="./PdfFile.html">PdfFile</a>
+  
+    <li><a href="./ScaledImageCreator.html">ScaledImageCreator</a>
   
     <li><a href="./SetsController.html">SetsController</a>
   
@@ -293,7 +307,11 @@
   
     <li><a href="./TextFile.html">TextFile</a>
   
+    <li><a href="./UploadAlert.html">UploadAlert</a>
+  
     <li><a href="./User.html">User</a>
+  
+    <li><a href="./UsersController.html">UsersController</a>
   
     <li><a href="./VideoFile.html">VideoFile</a>
   
@@ -348,7 +366,7 @@
 
           
           <div class="method-source-code" id="find_all_viewable-source">
-            <pre><span class="ruby-comment"># File app/models/nu_collection.rb, line 31</span>
+            <pre><span class="ruby-comment"># File app/models/nu_collection.rb, line 33</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">find_all_viewable</span>(<span class="ruby-identifier">user</span>) 
   <span class="ruby-identifier">collections</span> = <span class="ruby-constant">NuCollection</span>.<span class="ruby-identifier">find</span>(<span class="ruby-value">:all</span>)
   <span class="ruby-identifier">filtered</span> = <span class="ruby-identifier">collections</span>.<span class="ruby-identifier">select</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">ele</span><span class="ruby-operator">|</span> <span class="ruby-operator">!</span><span class="ruby-identifier">ele</span>.<span class="ruby-identifier">embargo_in_effect?</span>(<span class="ruby-identifier">user</span>) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">ele</span>.<span class="ruby-identifier">rightsMetadata</span>.<span class="ruby-identifier">can_read?</span>(<span class="ruby-identifier">user</span>) }
@@ -386,7 +404,7 @@
 
           
           <div class="method-source-code" id="each_depth_first-source">
-            <pre><span class="ruby-comment"># File app/models/nu_collection.rb, line 77</span>
+            <pre><span class="ruby-comment"># File app/models/nu_collection.rb, line 79</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">each_depth_first</span>
   <span class="ruby-keyword">self</span>.<span class="ruby-identifier">child_collections</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">child</span><span class="ruby-operator">|</span>
     <span class="ruby-identifier">child</span>.<span class="ruby-identifier">each_depth_first</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">c</span><span class="ruby-operator">|</span>
@@ -422,7 +440,7 @@
 
           
           <div class="method-source-code" id="parent-source">
-            <pre><span class="ruby-comment"># File app/models/nu_collection.rb, line 37</span>
+            <pre><span class="ruby-comment"># File app/models/nu_collection.rb, line 39</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">parent</span>
   <span class="ruby-identifier">single_lookup</span>(<span class="ruby-value">:is_member_of</span>, [<span class="ruby-constant">NuCollection</span>, <span class="ruby-constant">Community</span>]) 
 <span class="ruby-keyword">end</span></pre>
@@ -453,7 +471,7 @@ used.</p>
 
           
           <div class="method-source-code" id="parent-3D-source">
-            <pre><span class="ruby-comment"># File app/models/nu_collection.rb, line 42</span>
+            <pre><span class="ruby-comment"># File app/models/nu_collection.rb, line 44</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">parent=</span>(<span class="ruby-identifier">val</span>)
   <span class="ruby-identifier">unique_assign_by_string</span>(<span class="ruby-identifier">val</span>, <span class="ruby-value">:is_member_of</span>, [<span class="ruby-constant">NuCollection</span>, <span class="ruby-constant">Community</span>], <span class="ruby-identifier">allow_nil</span><span class="ruby-operator">:</span> <span class="ruby-keyword">true</span>)
 <span class="ruby-keyword">end</span></pre>
@@ -483,7 +501,7 @@ used.</p>
 
           
           <div class="method-source-code" id="permissions-3D-source">
-            <pre><span class="ruby-comment"># File app/models/nu_collection.rb, line 57</span>
+            <pre><span class="ruby-comment"># File app/models/nu_collection.rb, line 59</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">permissions=</span>(<span class="ruby-identifier">hash</span>)
   <span class="ruby-keyword">self</span>.<span class="ruby-identifier">set_permissions_from_new_form</span>(<span class="ruby-identifier">hash</span>) 
 <span class="ruby-keyword">end</span></pre>
@@ -516,7 +534,7 @@ etc. } Tosses out param sets that are missing an identity.  Which is nice.</p>
 
           
           <div class="method-source-code" id="set_permissions_from_new_form-source">
-            <pre><span class="ruby-comment"># File app/models/nu_collection.rb, line 64</span>
+            <pre><span class="ruby-comment"># File app/models/nu_collection.rb, line 66</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">set_permissions_from_new_form</span>(<span class="ruby-identifier">params</span>)
   <span class="ruby-identifier">params</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">perm_hash</span><span class="ruby-operator">|</span> 
     <span class="ruby-identifier">identity_type</span> = <span class="ruby-identifier">perm_hash</span>[<span class="ruby-value">1</span>][<span class="ruby-string">&#39;identity_type&#39;</span>]
@@ -555,7 +573,7 @@ used.</p>
 
           
           <div class="method-source-code" id="user_parent-3D-source">
-            <pre><span class="ruby-comment"># File app/models/nu_collection.rb, line 47</span>
+            <pre><span class="ruby-comment"># File app/models/nu_collection.rb, line 49</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">user_parent=</span>(<span class="ruby-identifier">employee</span>) 
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">employee</span>.<span class="ruby-identifier">instance_of?</span>(<span class="ruby-constant">String</span>) 
     <span class="ruby-keyword">self</span>.<span class="ruby-identifier">add_relationship</span>(<span class="ruby-value">:is_member_of</span>, <span class="ruby-constant">Employee</span>.<span class="ruby-identifier">find_by_nuid</span>(<span class="ruby-identifier">employee</span>)) 
@@ -597,7 +615,7 @@ used.</p>
 
           
           <div class="method-source-code" id="belong_check-source">
-            <pre><span class="ruby-comment"># File app/models/nu_collection.rb, line 89</span>
+            <pre><span class="ruby-comment"># File app/models/nu_collection.rb, line 91</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">belong_check</span>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">single_lookup</span>(<span class="ruby-value">:is_member_of</span>, [<span class="ruby-constant">Community</span>]) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">single_lookup</span>(<span class="ruby-value">:is_member_of</span>, [<span class="ruby-constant">NuCollection</span>])
     <span class="ruby-identifier">errors</span>.<span class="ruby-identifier">add</span>(<span class="ruby-value">:identifier</span>, <span class="ruby-node">&quot;#{self.identifier} already has a parent relationship&quot;</span>)
