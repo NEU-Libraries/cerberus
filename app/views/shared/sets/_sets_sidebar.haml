@@ -1,0 +1,3 @@
+.btn-group{"data-toggle" => "drs-item-views-radio", "data-container" => ".drs-items"}
+  = link_to("List", sufia.profile_path(current_user, view_pref: 'list'), method: 'put', remote: 'true',data: {"target" => "drs-items-list"}, class: "btn btn-primary") 
+  = link_to("Grid", sufia.profile_path(current_user, view_pref: 'grid'), method: 'put', remote: 'true',data: {"target" => "drs-items-grid"}, class: "btn btn-primary") 

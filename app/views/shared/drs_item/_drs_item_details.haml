@@ -1,0 +1,8 @@
+.drs-item-details
+  %header
+    %h4.drs-item-title 
+      %a{href: item[:path]}
+        = item[:title]
+    %h5.drs-item-creator
+      = item[:creator]
+  = render partial: 'shared/drs_item/drs_item_ad_details', locals: {item: item}

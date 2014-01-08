@@ -1,48 +1,17 @@
 - if current_user_can_read?(@set)
-  %ul.media-list
+  .drs-items.drs-items-grid
     - if @set.instance_of?(Community)
       -# Go through and template out the communities individually.
       - @set.child_communities.each do |community| 
         - if current_user_can_read?(community)
-          - path = community_path(community.identifier) 
-          %li.media
-            %a{:href => path }
-              %figure.pull-left.media-object
-                -if community.thumbnail.content
-                  %img{src: sufia.download_path( community, datastream_id: 'thumbnail'), title:  community.title, alt: ""}(aria-labeledby="# community.pid}-title" role="presentation")
-                  
-                  %img{src: sufia.download_path(community, datastream_id: 'thumbnail'), title: community.title, alt: ""}
-                - else 
-                  %i.icon-group.icon-2x.icon-block
-                %figcaption
-                  %p
-                    %small.muted
-                      Community
-            .media-body
-              %a{:href => path }
-                %h4.media-heading(id="# community.pid}-title")
-                  =community.title
-              - if community.description
-                %p= community.description
+          = render partial: 'shared/drs_item/drs_item' , locals: { item: prepare_drs_item(community) }
+          
     - @set.child_collections.reverse.each do |collection| 
-      - if current_user_can_read?(collection)
-        - path = nu_collection_path(collection.identifier) 
-        %li.media
-          %a{:href => path }
-            %figure.pull-left.media-object
-              - if collection.thumbnail.content
-                %img{src: sufia.download_path(collection, datastream_id: 'thumbnail'), title: collection.title, alt: ""}(aria-labeledby="#{collection.pid}-title" role="presentation")
-              - else
-                %i.icon-folder-open.icon-2x.icon-block
-              %figcaption
-                %p
-                  %small.muted
-                    Collection
-          .media-body
-            %a{:href => path }
-              %h4.media-heading(id="#{collection.pid}-title")
-                = collection.title
-            -if collection.description
-              %p= collection.description
+      - if current_user_can_read?(collection) 
+        = render partial: 'shared/drs_item/drs_item' , locals: { item: prepare_drs_item(collection) }
     - if @set.instance_of?(NuCollection)
-      = render partial: 'shared/sets/show_files', locals: { collection: @set }
+      - @set.child_files.each do |file|
+        = render partial: 'shared/drs_item/drs_item' , locals: { item: prepare_drs_item(file) }
+
+
+  

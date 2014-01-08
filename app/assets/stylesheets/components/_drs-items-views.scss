@@ -12,9 +12,29 @@
   }
 
   > figure{
+
     margin: 0 0 0 0;
     figcaption{
       text-align: center;
+    }
+    img, [class^="icon-"]{
+      padding: 4px;
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border: 1px solid rgba(0,0,0,.2);
+    }
+    [class^="icon-"]{
+      display: block;
+      text-align: center;
+      width: 85px;
+      height: 85px;
+      font-size: 40px;
+      line-height: 2;
+      @media (min-width: 900px) {
+        width: 170px;
+        height: 170px;
+        font-size: 80px;
+      } 
     }
   }
   menu{
@@ -145,9 +165,12 @@
         border-color: $linkColor;
         @include box-shadow(0 1px 4px rgba(0,105,214,.25));
       }
-      > figure img{
-        display: block;
-        margin: 10px auto;
+      > figure{
+
+        img, [class^="icon-"]{
+          display: block;
+          margin: 10px auto;
+        }
       }
       &.active{
         width: 100%;

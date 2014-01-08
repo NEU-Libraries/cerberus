@@ -34,8 +34,10 @@ $( document ).ready(function() {
           handleDrsAdminCommunities();
           handleCommunitiesAdminAutoComplete();
 
-
-          handleDrsItem($('.drs-item'));
+          if($('.drs-items').data('toggle')){
+            handleDrsItem($('.drs-item'));  
+          }
+          
       },
       /**
        * Provides the breadcrumb popover menu for adding collections or new items to the application.
