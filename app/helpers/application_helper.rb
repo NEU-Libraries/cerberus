@@ -96,18 +96,7 @@ module ApplicationHelper
       drs_item[:download_path] = false
     end
     if item.instance_of?(NuCoreFile)
-      
-      #handle arrays for getting a string to work with in the theming layer.
-      if item.type.is_a?(Array)
-        string = item.type.to_sentence
-        if !string.blank?
-          drs_item[:type] = string
-        else
-          drs_item[:type] = item.mime_type.capitalize
-        end
-      else
-        drs_item[:type] = !item.type.blank? ? item.type : nil
-      end
+      drs_item[:type] = item.dcmi_type.capitalize
       drs_item[:pid] = item.pid
       drs_item[:path] = nu_core_file_path(item.pid)
       drs_item[:title] = item.title
@@ -115,7 +104,7 @@ module ApplicationHelper
       drs_item[:date_added] = nil
       drs_item[:abstract] = item.description
       drs_item[:download_path] = false
-    
+      drs_item[:creators] = item.creators
     end
     return drs_item
 
