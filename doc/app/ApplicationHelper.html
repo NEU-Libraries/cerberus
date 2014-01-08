@@ -441,6 +441,7 @@ otherwise.</p>
           <div class="method-source-code" id="prepare_drs_item-source">
             <pre><span class="ruby-comment"># File app/helpers/application_helper.rb, line 64</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">prepare_drs_item</span>(<span class="ruby-identifier">item</span>)
+
   <span class="ruby-identifier">drs_item</span> = {
     <span class="ruby-value">:pid</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-keyword">nil</span>,
     <span class="ruby-value">:path</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-keyword">nil</span>,
@@ -454,7 +455,7 @@ otherwise.</p>
   }
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">item</span>.<span class="ruby-identifier">instance_of?</span>(<span class="ruby-constant">NuCollection</span>) 
     <span class="ruby-identifier">drs_item</span>[<span class="ruby-value">:pid</span>] = <span class="ruby-identifier">item</span>.<span class="ruby-identifier">pid</span>
-    <span class="ruby-identifier">drs_item</span>[<span class="ruby-value">:path</span>] = <span class="ruby-string">&#39;/collections/&#39;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">item</span>.<span class="ruby-identifier">pid</span>
+    <span class="ruby-identifier">drs_item</span>[<span class="ruby-value">:path</span>] = <span class="ruby-identifier">nu_collection_path</span>( <span class="ruby-identifier">item</span>.<span class="ruby-identifier">pid</span> )
     <span class="ruby-identifier">drs_item</span>[<span class="ruby-value">:title</span>] = <span class="ruby-identifier">item</span>.<span class="ruby-identifier">title</span>
     <span class="ruby-identifier">drs_item</span>[<span class="ruby-value">:type</span>] = <span class="ruby-string">&#39;Collection&#39;</span>
     <span class="ruby-identifier">drs_item</span>[<span class="ruby-value">:creators</span>] = <span class="ruby-identifier">item</span>.<span class="ruby-identifier">creators</span>
@@ -465,7 +466,7 @@ otherwise.</p>
   <span class="ruby-keyword">end</span>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">item</span>.<span class="ruby-identifier">instance_of?</span>(<span class="ruby-constant">Community</span>)
     <span class="ruby-identifier">drs_item</span>[<span class="ruby-value">:pid</span>] = <span class="ruby-identifier">item</span>.<span class="ruby-identifier">pid</span>
-    <span class="ruby-identifier">drs_item</span>[<span class="ruby-value">:path</span>] = <span class="ruby-string">&#39;/communities/&#39;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">item</span>.<span class="ruby-identifier">pid</span>
+    <span class="ruby-identifier">drs_item</span>[<span class="ruby-value">:path</span>] = <span class="ruby-identifier">community_path</span>(<span class="ruby-identifier">item</span>.<span class="ruby-identifier">pid</span>)
     <span class="ruby-identifier">drs_item</span>[<span class="ruby-value">:title</span>] = <span class="ruby-identifier">item</span>.<span class="ruby-identifier">title</span>
     <span class="ruby-identifier">drs_item</span>[<span class="ruby-value">:type</span>] = <span class="ruby-string">&#39;Community&#39;</span>
     <span class="ruby-identifier">drs_item</span>[<span class="ruby-value">:thumbnails</span>] = <span class="ruby-keyword">nil</span>
@@ -474,16 +475,15 @@ otherwise.</p>
     <span class="ruby-identifier">drs_item</span>[<span class="ruby-value">:download_path</span>] = <span class="ruby-keyword">false</span>
   <span class="ruby-keyword">end</span>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">item</span>.<span class="ruby-identifier">instance_of?</span>(<span class="ruby-constant">NuCoreFile</span>)
-    <span class="ruby-identifier">drs_item</span>[<span class="ruby-value">:type</span>] = <span class="ruby-identifier">item</span>[<span class="ruby-string">&#39;mime_type&#39;</span>]
+    <span class="ruby-identifier">drs_item</span>[<span class="ruby-value">:type</span>] = <span class="ruby-identifier">item</span>.<span class="ruby-identifier">dcmi_type</span>.<span class="ruby-identifier">capitalize</span>
     <span class="ruby-identifier">drs_item</span>[<span class="ruby-value">:pid</span>] = <span class="ruby-identifier">item</span>.<span class="ruby-identifier">pid</span>
-    <span class="ruby-identifier">drs_item</span>[<span class="ruby-value">:path</span>] = <span class="ruby-string">&#39;/files/&#39;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">item</span>.<span class="ruby-identifier">pid</span>
+    <span class="ruby-identifier">drs_item</span>[<span class="ruby-value">:path</span>] = <span class="ruby-identifier">nu_core_file_path</span>(<span class="ruby-identifier">item</span>.<span class="ruby-identifier">pid</span>)
     <span class="ruby-identifier">drs_item</span>[<span class="ruby-value">:title</span>] = <span class="ruby-identifier">item</span>.<span class="ruby-identifier">title</span>
-    <span class="ruby-identifier">drs_item</span>[<span class="ruby-value">:type</span>] = <span class="ruby-string">&#39;file&#39;</span>
     <span class="ruby-identifier">drs_item</span>[<span class="ruby-value">:thumbnails</span>] = <span class="ruby-identifier">get_file_thumbnails</span>(<span class="ruby-identifier">item</span>, { <span class="ruby-identifier">remove_thumbs</span><span class="ruby-operator">:</span> [<span class="ruby-string">&#39;thumbnail_4&#39;</span>, <span class="ruby-string">&#39;thumbnail_4_2x&#39;</span>, <span class="ruby-string">&#39;thumbnail_10&#39;</span>, <span class="ruby-string">&#39;thumbnail_10_2x&#39;</span>] })
     <span class="ruby-identifier">drs_item</span>[<span class="ruby-value">:date_added</span>] = <span class="ruby-keyword">nil</span>
     <span class="ruby-identifier">drs_item</span>[<span class="ruby-value">:abstract</span>] = <span class="ruby-identifier">item</span>.<span class="ruby-identifier">description</span>
     <span class="ruby-identifier">drs_item</span>[<span class="ruby-value">:download_path</span>] = <span class="ruby-keyword">false</span>
-  
+    <span class="ruby-identifier">drs_item</span>[<span class="ruby-value">:creators</span>] = <span class="ruby-identifier">item</span>.<span class="ruby-identifier">creators</span>
   <span class="ruby-keyword">end</span>
   <span class="ruby-keyword">return</span> <span class="ruby-identifier">drs_item</span>
 

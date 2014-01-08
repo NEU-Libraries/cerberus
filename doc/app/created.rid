@@ -1,4 +1,4 @@
-Wed, 08 Jan 2014 17:41:21 +0000
+Wed, 08 Jan 2014 20:57:28 +0000
 doc/README_FOR_APP	Wed, 08 Jan 2014 16:23:10 +0000
 app/controllers/admin/communities_controller.rb	Wed, 08 Jan 2014 16:23:09 +0000
 app/controllers/admin/employees_controller.rb	Wed, 08 Jan 2014 16:23:09 +0000
@@ -16,7 +16,7 @@ app/controllers/users/omniauth_callbacks_controller.rb	Wed, 08 Jan 2014 16:23:09
 app/controllers/users_controller.rb	Wed, 08 Jan 2014 16:23:09 +0000
 app/helpers/admin/communities_helper.rb	Wed, 08 Jan 2014 16:23:09 +0000
 app/helpers/admin/employees_helper.rb	Wed, 08 Jan 2014 16:23:09 +0000
-app/helpers/application_helper.rb	Wed, 08 Jan 2014 16:23:21 +0000
+app/helpers/application_helper.rb	Wed, 08 Jan 2014 19:05:50 +0000
 app/helpers/nu_collections_helper.rb	Wed, 08 Jan 2014 16:23:09 +0000
 app/helpers/nu_core_file_helper.rb	Wed, 08 Jan 2014 16:23:09 +0000
 app/helpers/shopping_carts_helper.rb	Wed, 08 Jan 2014 16:23:09 +0000
@@ -29,25 +29,25 @@ app/jobs/zip_compilation_job.rb	Wed, 08 Jan 2014 16:23:09 +0000
 app/mailers/metadata_mailer.rb	Wed, 08 Jan 2014 16:23:09 +0000
 app/models/community.rb	Wed, 08 Jan 2014 16:23:09 +0000
 app/models/compilation.rb	Wed, 08 Jan 2014 16:23:09 +0000
-app/models/content_types/audio_file.rb	Wed, 08 Jan 2014 16:23:09 +0000
-app/models/content_types/image_large_file.rb	Wed, 08 Jan 2014 16:23:09 +0000
-app/models/content_types/image_master_file.rb	Wed, 08 Jan 2014 16:23:09 +0000
-app/models/content_types/image_medium_file.rb	Wed, 08 Jan 2014 16:23:09 +0000
-app/models/content_types/image_small_file.rb	Wed, 08 Jan 2014 16:23:09 +0000
-app/models/content_types/image_thumbnail_file.rb	Wed, 08 Jan 2014 16:23:09 +0000
-app/models/content_types/msexcel_file.rb	Wed, 08 Jan 2014 16:23:09 +0000
-app/models/content_types/mspowerpoint_file.rb	Wed, 08 Jan 2014 16:23:09 +0000
-app/models/content_types/msword_file.rb	Wed, 08 Jan 2014 16:23:09 +0000
-app/models/content_types/pdf_file.rb	Wed, 08 Jan 2014 16:23:09 +0000
-app/models/content_types/text_file.rb	Wed, 08 Jan 2014 16:23:09 +0000
-app/models/content_types/video_file.rb	Wed, 08 Jan 2014 16:23:09 +0000
-app/models/content_types/zip_file.rb	Wed, 08 Jan 2014 16:23:09 +0000
+app/models/content_types/audio_file.rb	Wed, 08 Jan 2014 20:28:28 +0000
+app/models/content_types/image_large_file.rb	Wed, 08 Jan 2014 20:32:23 +0000
+app/models/content_types/image_master_file.rb	Wed, 08 Jan 2014 20:32:56 +0000
+app/models/content_types/image_medium_file.rb	Wed, 08 Jan 2014 20:38:01 +0000
+app/models/content_types/image_small_file.rb	Wed, 08 Jan 2014 20:37:36 +0000
+app/models/content_types/image_thumbnail_file.rb	Wed, 08 Jan 2014 20:31:41 +0000
+app/models/content_types/msexcel_file.rb	Wed, 08 Jan 2014 20:36:21 +0000
+app/models/content_types/mspowerpoint_file.rb	Wed, 08 Jan 2014 20:34:33 +0000
+app/models/content_types/msword_file.rb	Wed, 08 Jan 2014 20:33:58 +0000
+app/models/content_types/pdf_file.rb	Wed, 08 Jan 2014 20:24:20 +0000
+app/models/content_types/text_file.rb	Wed, 08 Jan 2014 20:36:49 +0000
+app/models/content_types/video_file.rb	Wed, 08 Jan 2014 20:38:30 +0000
+app/models/content_types/zip_file.rb	Wed, 08 Jan 2014 20:37:13 +0000
 app/models/drs_employee_datastream.rb	Wed, 08 Jan 2014 16:23:09 +0000
 app/models/drs_properties_datastream.rb	Wed, 08 Jan 2014 16:23:09 +0000
 app/models/employee.rb	Wed, 08 Jan 2014 16:23:09 +0000
 app/models/northeastern_dublin_core_datastream.rb	Wed, 08 Jan 2014 16:23:09 +0000
 app/models/nu_collection.rb	Wed, 08 Jan 2014 16:23:09 +0000
-app/models/nu_core_file.rb	Wed, 08 Jan 2014 16:23:09 +0000
+app/models/nu_core_file.rb	Wed, 08 Jan 2014 17:49:11 +0000
 app/models/nu_mods_datastream.rb	Wed, 08 Jan 2014 16:23:09 +0000
 app/models/paranoid_rights_datastream.rb	Wed, 08 Jan 2014 16:23:09 +0000
 app/models/services/derivative_creator.rb	Wed, 08 Jan 2014 16:23:09 +0000
@@ -61,8 +61,8 @@ lib/drs/employee/faculty_folders.rb	Wed, 08 Jan 2014 16:23:10 +0000
 lib/drs/find.rb	Wed, 08 Jan 2014 16:23:10 +0000
 lib/drs/metadata_assignment.rb	Wed, 08 Jan 2014 16:23:10 +0000
 lib/drs/nu_core_file/export.rb	Wed, 08 Jan 2014 16:23:10 +0000
-lib/drs/nu_file.rb	Wed, 08 Jan 2014 16:23:10 +0000
-lib/drs/nu_file/characterizable.rb	Wed, 08 Jan 2014 16:23:10 +0000
+lib/drs/nu_file.rb	Wed, 08 Jan 2014 20:39:38 +0000
+lib/drs/nu_file/characterizable.rb	Wed, 08 Jan 2014 20:06:32 +0000
 lib/drs/relationships.rb	Wed, 08 Jan 2014 16:23:10 +0000
 lib/drs/rights/embargoable.rb	Wed, 08 Jan 2014 16:23:10 +0000
 lib/drs/rights/inherited_restrictions.rb	Wed, 08 Jan 2014 16:23:10 +0000

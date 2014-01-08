@@ -109,6 +109,8 @@
     
     <li><a href="#method-c-virus_check">::virus_check</a>
     
+    <li><a href="#method-i-type_label">#type_label</a>
+    
   </ul>
 </nav>
 
@@ -375,7 +377,7 @@
 
           
           <div class="method-source-code" id="virus_check-source">
-            <pre><span class="ruby-comment"># File lib/drs/nu_file.rb, line 30</span>
+            <pre><span class="ruby-comment"># File lib/drs/nu_file.rb, line 35</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">virus_check</span>(<span class="ruby-identifier">file</span>)
   <span class="ruby-keyword">if</span> <span class="ruby-keyword">defined?</span> <span class="ruby-constant">ClamAV</span>
     <span class="ruby-identifier">stat</span> = <span class="ruby-constant">ClamAV</span>.<span class="ruby-identifier">instance</span>.<span class="ruby-identifier">scanfile</span>(<span class="ruby-identifier">file</span>.<span class="ruby-identifier">path</span>)
@@ -383,7 +385,6 @@
     <span class="ruby-identifier">stat</span>
   <span class="ruby-keyword">else</span>
     <span class="ruby-identifier">logger</span>.<span class="ruby-identifier">warn</span> <span class="ruby-node">&quot;Virus checking disabled for #{file.inspect}&quot;</span>
-    <span class="ruby-value">0</span>
   <span class="ruby-keyword">end</span>
 <span class="ruby-keyword">end</span></pre>
           </div><!-- virus_check-source -->
@@ -397,6 +398,42 @@
 
     
     </section><!-- public-class-method-details -->
+  
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section section">
+      <h3 class="section-header">Public Instance Methods</h3>
+
+    
+      <div id="method-i-type_label" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">type_label</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Provides a string for labeling the UI</p>
+          
+
+          
+          <div class="method-source-code" id="type_label-source">
+            <pre><span class="ruby-comment"># File lib/drs/nu_file.rb, line 31</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">type_label</span>
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">name</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- type_label-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- type_label-method -->
+
+    
+    </section><!-- public-instance-method-details -->
   
   </section><!-- 5Buntitled-5D -->
 
