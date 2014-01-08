@@ -62,6 +62,7 @@ module ApplicationHelper
 
   # Generalizing function to prepare an item to be used in the drs-item view.
   def prepare_drs_item(item)
+
     drs_item = {
       :pid => nil,
       :path => nil,
@@ -75,7 +76,7 @@ module ApplicationHelper
     }
     if item.instance_of?(NuCollection) 
       drs_item[:pid] = item.pid
-      drs_item[:path] = '/collections/' + item.pid
+      drs_item[:path] = nu_collection_path( item.pid )
       drs_item[:title] = item.title
       drs_item[:type] = 'Collection'
       drs_item[:creators] = item.creators
@@ -86,7 +87,7 @@ module ApplicationHelper
     end
     if item.instance_of?(Community)
       drs_item[:pid] = item.pid
-      drs_item[:path] = '/communities/' + item.pid
+      drs_item[:path] = community_path(item.pid)
       drs_item[:title] = item.title
       drs_item[:type] = 'Community'
       drs_item[:thumbnails] = nil
@@ -95,11 +96,21 @@ module ApplicationHelper
       drs_item[:download_path] = false
     end
     if item.instance_of?(NuCoreFile)
-      drs_item[:type] = item['mime_type']
+      
+      #handle arrays for getting a string to work with in the theming layer.
+      if item.type.is_a?(Array)
+        string = item.type.to_sentence
+        if !string.blank?
+          drs_item[:type] = string
+        else
+          drs_item[:type] = item.mime_type.capitalize
+        end
+      else
+        drs_item[:type] = !item.type.blank? ? item.type : nil
+      end
       drs_item[:pid] = item.pid
-      drs_item[:path] = '/files/' + item.pid
+      drs_item[:path] = nu_core_file_path(item.pid)
       drs_item[:title] = item.title
-      drs_item[:type] = 'file'
       drs_item[:thumbnails] = get_file_thumbnails(item, { remove_thumbs: ['thumbnail_4', 'thumbnail_4_2x', 'thumbnail_10', 'thumbnail_10_2x'] })
       drs_item[:date_added] = nil
       drs_item[:abstract] = item.description
