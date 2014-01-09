@@ -11,7 +11,8 @@
         = render partial: 'shared/drs_item/drs_item' , locals: { item: prepare_drs_item(collection) }
     - if @set.instance_of?(NuCollection)
       - @set.child_files.each do |file|
-        = render partial: 'shared/drs_item/drs_item' , locals: { item: prepare_drs_item(file) }
+        - if current_user_can_read?(file)
+          = render partial: 'shared/drs_item/drs_item' , locals: { item: prepare_drs_item(file) }
 
 
   
