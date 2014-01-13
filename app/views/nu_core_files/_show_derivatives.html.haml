@@ -5,7 +5,7 @@
   - if current_user_can_read?(content)
     -if content.class.name != "ImageThumbnailFile"
       %li
-        %a{ href: sufia.download_path(content.pid, {datastream_id: 'content'}), target: '_blank'} 
+        %a.btn.btn-link{ href: sufia.download_path(content.pid, {datastream_id: 'content'}), target: '_blank'} 
           = content.title + ' - ' + content.type_label
         -# %div{:class => "sc_#{content.pid}"}
         
@@ -16,5 +16,5 @@
         -if  datastream[0].start_with?("thumbnail") && !datastream[1].mimeType != ""
           - data = datastream[1]
           %li
-            %a{ href: sufia.download_path(data.pid, {datastream_id: data.dsid }), target: '_blank'} 
+            %a.btn.btn-link{ href: sufia.download_path(data.pid, {datastream_id: data.dsid }), target: '_blank'} 
               = "Thumbnail - (#{data.dsid})" 
