@@ -1,0 +1,12 @@
+- if !session['ids'] || !session['ids'].include?(id) 
+  -# link_to("Add to download", update_cart_path(add: id), :method => 'put',:remote => true) 
+  %a.btn.btn-link{ title: "Add to download", href:  update_cart_path(add: id), data: { :method => 'put', :remote => 'true' } }
+    %i.icon-check-empty
+    %span.sr-only
+      Add to download
+- else
+  -# link_to("Remove from download", update_cart_path(delete: id), :method => 'put', :remote => true) 
+  %a.btn.btn-link{ title: "Remove from download", href:  update_cart_path(delete: id), data: { :method => 'put', :remote => 'true' } }
+    %i.icon-check
+    %span.sr-only
+      Remove from download

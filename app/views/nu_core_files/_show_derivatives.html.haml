@@ -1,8 +1,20 @@
 %h4 Downloads
-- contents.each do |content| 
+%nav.derivatives
+  %ul
+- contents.each do |content|
   - if current_user_can_read?(content)
-    %a{ href: sufia.download_path(content.pid, {datastream_id: 'content'}) } 
-      = content.title + ' - ' + content.type_label
-    %div{:class => "sc_#{content.pid}"}
-      = render partial: 'shopping_carts/add_or_remove', locals: { :id => content.pid }
-    
+    -if content.class.name != "ImageThumbnailFile"
+      %li
+        %a{ href: sufia.download_path(content.pid, {datastream_id: 'content'}), target: '_blank'} 
+          = content.title + ' - ' + content.type_label
+        -# %div{:class => "sc_#{content.pid}"}
+        
+        = render partial: 'shopping_carts/add_or_remove_btn', locals: { :id => content.pid }
+    -else
+      -# TODO Zip the thumbnail contents into a single archive
+      - content.datastreams.each do |datastream|
+        -if  datastream[0].start_with?("thumbnail") && !datastream[1].mimeType != ""
+          - data = datastream[1]
+          %li
+            %a{ href: sufia.download_path(data.pid, {datastream_id: data.dsid }), target: '_blank'} 
+              = "Thumbnail - (#{data.dsid})" 
