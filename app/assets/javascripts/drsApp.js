@@ -33,8 +33,8 @@ $( document ).ready(function() {
           handleDrsCommunities();
           handleDrsAdminCommunities();
           handleCommunitiesAdminAutoComplete();
-
-          if($('.drs-items').data('toggle')){
+          listenAriaCheckbox();
+          if($('.drs-items').data('toggle') == "drs-view"){
             handleDrsItem($('.drs-item'));  
           }
           
@@ -453,6 +453,41 @@ $( document ).ready(function() {
            
       
         
+      };
+      
+      var listenAriaCheckbox = function(){
+        var targets = $('*[aria-role="checkbox"]');
+        
+        if(targets.length > 0 ){
+
+          targets.on('click', function(){
+            toggleAriaCheckbox(this);
+            if ( $(this).data('remote') ){
+                $(this).on('ajax:success', function(){
+                  toggleAriaCheckbox(this);
+                });
+            }else{
+               toggleAriaCheckbox(this);
+            }
+          }); 
+
+        }
+
+      };
+
+      var toggleAriaCheckbox = function(e){
+        var $e = $(e);
+        var checked;
+        try{
+          checked = $e.attr('aria-checked');
+          if( checked || checked === 'true' ){
+            $e.attr( 'aria-checked', 'false' );
+          }else{
+            $e.attr( 'aria-checked', 'true' );
+          }
+        }catch( error ){
+          console.log( error );
+        }
       };
 
 
