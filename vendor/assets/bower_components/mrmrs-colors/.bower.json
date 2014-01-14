@@ -1,0 +1,13 @@
+{
+  "name": "mrmrs-colors",
+  "homepage": "https://github.com/mrmrs/colors",
+  "_release": "ef176f855f",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "ef176f855f1cd9e026d3cefe89e1ecebc9b38307"
+  },
+  "_source": "git://github.com/mrmrs/colors.git",
+  "_target": "*",
+  "_originalSource": "mrmrs-colors"
+}

@@ -22,8 +22,6 @@
 //= require bootbox/bootbox.min.js
 //= require plugins
 
-//= require masonry/masonry.pkgd.min.js
-
 //= require drsApp
 
 //= require compilations

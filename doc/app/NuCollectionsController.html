@@ -125,10 +125,6 @@
   
     <li><a href="./Drs.html">Drs</a>
   
-    <li><a href="./Drs/Content.html">Drs::Content</a>
-  
-    <li><a href="./Drs/Content/Transformations.html">Drs::Content::Transformations</a>
-  
     <li><a href="./Drs/ControllerHelpers.html">Drs::ControllerHelpers</a>
   
     <li><a href="./Drs/ControllerHelpers/EditableObjects.html">Drs::ControllerHelpers::EditableObjects</a>
@@ -187,6 +183,10 @@
   
     <li><a href="./Employee/FacultyFolders.html">Employee::FacultyFolders</a>
   
+    <li><a href="./Users.html">Users</a>
+  
+    <li><a href="./Users/OmniauthCallbacksController.html">Users::OmniauthCallbacksController</a>
+  
     <li><a href="./AdminController.html">AdminController</a>
   
     <li><a href="./ApplicationController.html">ApplicationController</a>
@@ -211,6 +211,8 @@
   
     <li><a href="./ContentCreationJob.html">ContentCreationJob</a>
   
+    <li><a href="./DerivativeCreator.html">DerivativeCreator</a>
+  
     <li><a href="./DrsEmployeeDatastream.html">DrsEmployeeDatastream</a>
   
     <li><a href="./DrsPropertiesDatastream.html">DrsPropertiesDatastream</a>
@@ -228,6 +230,10 @@
     <li><a href="./ImageSmallFile.html">ImageSmallFile</a>
   
     <li><a href="./ImageThumbnailFile.html">ImageThumbnailFile</a>
+  
+    <li><a href="./InlineThumbnailCreator.html">InlineThumbnailCreator</a>
+  
+    <li><a href="./MetadataMailer.html">MetadataMailer</a>
   
     <li><a href="./MetadataUpdateJob.html">MetadataUpdateJob</a>
   
@@ -255,9 +261,13 @@
   
     <li><a href="./NuModsDatastream.html">NuModsDatastream</a>
   
+    <li><a href="./Object.html">Object</a>
+  
     <li><a href="./ParanoidRightsDatastream.html">ParanoidRightsDatastream</a>
   
     <li><a href="./PdfFile.html">PdfFile</a>
+  
+    <li><a href="./ScaledImageCreator.html">ScaledImageCreator</a>
   
     <li><a href="./SetsController.html">SetsController</a>
   
@@ -269,7 +279,11 @@
   
     <li><a href="./TextFile.html">TextFile</a>
   
+    <li><a href="./UploadAlert.html">UploadAlert</a>
+  
     <li><a href="./User.html">User</a>
+  
+    <li><a href="./UsersController.html">UsersController</a>
   
     <li><a href="./VideoFile.html">VideoFile</a>
   
@@ -324,7 +338,7 @@
 
           
           <div class="method-source-code" id="create-source">
-            <pre><span class="ruby-comment"># File app/controllers/nu_collections_controller.rb, line 25</span>
+            <pre><span class="ruby-comment"># File app/controllers/nu_collections_controller.rb, line 26</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">create</span>
   <span class="ruby-ivar">@set</span> = <span class="ruby-constant">NuCollection</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:set</span>].<span class="ruby-identifier">merge</span>(<span class="ruby-identifier">pid</span><span class="ruby-operator">:</span> <span class="ruby-identifier">mint_unique_pid</span>))
 
@@ -340,6 +354,11 @@
     <span class="ruby-keyword">else</span>
       <span class="ruby-ivar">@set</span>.<span class="ruby-identifier">personal_folder_type</span> = <span class="ruby-identifier">parent</span>.<span class="ruby-identifier">personal_folder_type</span> 
     <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+
+  <span class="ruby-comment"># Process Thumbnail</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:thumbnail</span>]
+    <span class="ruby-constant">InlineThumbnailCreator</span>.<span class="ruby-identifier">new</span>(<span class="ruby-ivar">@set</span>, <span class="ruby-identifier">params</span>[<span class="ruby-value">:thumbnail</span>], <span class="ruby-string">&quot;thumbnail&quot;</span>).<span class="ruby-identifier">create_thumbnail</span>
   <span class="ruby-keyword">end</span>
 
   <span class="ruby-ivar">@set</span>.<span class="ruby-identifier">depositor</span> = <span class="ruby-identifier">current_user</span>.<span class="ruby-identifier">nuid</span> 
@@ -379,7 +398,7 @@
 
           
           <div class="method-source-code" id="destroy-source">
-            <pre><span class="ruby-comment"># File app/controllers/nu_collections_controller.rb, line 73</span>
+            <pre><span class="ruby-comment"># File app/controllers/nu_collections_controller.rb, line 87</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">destroy</span> 
   <span class="ruby-ivar">@title</span> = <span class="ruby-constant">NuCollection</span>.<span class="ruby-identifier">find</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:id</span>]).<span class="ruby-identifier">title</span> 
 
@@ -415,9 +434,10 @@
 
           
           <div class="method-source-code" id="edit-source">
-            <pre><span class="ruby-comment"># File app/controllers/nu_collections_controller.rb, line 59</span>
+            <pre><span class="ruby-comment"># File app/controllers/nu_collections_controller.rb, line 66</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">edit</span>
   <span class="ruby-ivar">@set</span> = <span class="ruby-constant">NuCollection</span>.<span class="ruby-identifier">find</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:id</span>])
+  <span class="ruby-ivar">@page_title</span> = <span class="ruby-node">&quot;Edit #{@set.title}&quot;</span> 
   <span class="ruby-identifier">render</span> <span class="ruby-value">:template</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;shared/sets/edit&#39;</span> 
 <span class="ruby-keyword">end</span></pre>
           </div><!-- edit-source -->
@@ -448,6 +468,7 @@
           <div class="method-source-code" id="new-source">
             <pre><span class="ruby-comment"># File app/controllers/nu_collections_controller.rb, line 20</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">new</span>
+  <span class="ruby-ivar">@page_title</span> = <span class="ruby-string">&quot;New Collection&quot;</span>
   <span class="ruby-ivar">@set</span> = <span class="ruby-constant">NuCollection</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">parent</span><span class="ruby-operator">:</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:parent</span>])
   <span class="ruby-identifier">render</span> <span class="ruby-value">:template</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;shared/sets/new&#39;</span>
 <span class="ruby-keyword">end</span></pre>
@@ -477,9 +498,10 @@
 
           
           <div class="method-source-code" id="show-source">
-            <pre><span class="ruby-comment"># File app/controllers/nu_collections_controller.rb, line 54</span>
+            <pre><span class="ruby-comment"># File app/controllers/nu_collections_controller.rb, line 60</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">show</span>  
   <span class="ruby-ivar">@set</span> = <span class="ruby-constant">NuCollection</span>.<span class="ruby-identifier">find</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:id</span>])
+  <span class="ruby-ivar">@page_title</span> = <span class="ruby-ivar">@set</span>.<span class="ruby-identifier">title</span>
   <span class="ruby-identifier">render</span> <span class="ruby-value">:template</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;shared/sets/show&#39;</span> 
 <span class="ruby-keyword">end</span></pre>
           </div><!-- show-source -->
@@ -508,9 +530,15 @@
 
           
           <div class="method-source-code" id="update-source">
-            <pre><span class="ruby-comment"># File app/controllers/nu_collections_controller.rb, line 64</span>
+            <pre><span class="ruby-comment"># File app/controllers/nu_collections_controller.rb, line 72</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">update</span>
-  <span class="ruby-ivar">@set</span> = <span class="ruby-constant">NuCollection</span>.<span class="ruby-identifier">find</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:id</span>])  
+  <span class="ruby-ivar">@set</span> = <span class="ruby-constant">NuCollection</span>.<span class="ruby-identifier">find</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:id</span>]) 
+
+  <span class="ruby-comment"># Update the thumbnail </span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:thumbnail</span>] 
+    <span class="ruby-constant">InlineThumbnailCreator</span>.<span class="ruby-identifier">new</span>(<span class="ruby-ivar">@set</span>, <span class="ruby-identifier">params</span>[<span class="ruby-value">:thumbnail</span>], <span class="ruby-string">&quot;thumbnail&quot;</span>).<span class="ruby-identifier">create_thumbnail</span>
+  <span class="ruby-keyword">end</span>
+
   <span class="ruby-keyword">if</span> <span class="ruby-ivar">@set</span>.<span class="ruby-identifier">update_attributes</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:set</span>]) 
     <span class="ruby-identifier">redirect_to</span>(<span class="ruby-ivar">@set</span>, <span class="ruby-identifier">notice</span><span class="ruby-operator">:</span> <span class="ruby-node">&quot;Collection #{@set.title} was updated successfully.&quot;</span> ) 
   <span class="ruby-keyword">else</span>
@@ -549,7 +577,7 @@
 
           
           <div class="method-source-code" id="index_redirect-source">
-            <pre><span class="ruby-comment"># File app/controllers/nu_collections_controller.rb, line 85</span>
+            <pre><span class="ruby-comment"># File app/controllers/nu_collections_controller.rb, line 99</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">index_redirect</span>
   <span class="ruby-identifier">flash</span>[<span class="ruby-value">:error</span>] = <span class="ruby-string">&quot;Collections cannot be created without a parent&quot;</span> 
   <span class="ruby-identifier">redirect_to</span> <span class="ruby-identifier">communities_path</span> <span class="ruby-keyword">and</span> <span class="ruby-keyword">return</span> 
@@ -580,7 +608,7 @@
 
           
           <div class="method-source-code" id="index_redirect_with_bad_id-source">
-            <pre><span class="ruby-comment"># File app/controllers/nu_collections_controller.rb, line 90</span>
+            <pre><span class="ruby-comment"># File app/controllers/nu_collections_controller.rb, line 104</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">index_redirect_with_bad_id</span> 
   <span class="ruby-identifier">flash</span>[<span class="ruby-value">:error</span>] = <span class="ruby-string">&quot;The id you specified does not seem to exist in Fedora.&quot;</span> 
   <span class="ruby-identifier">redirect_to</span> <span class="ruby-identifier">communities_path</span> <span class="ruby-keyword">and</span> <span class="ruby-keyword">return</span> 
@@ -611,7 +639,7 @@
 
           
           <div class="method-source-code" id="index_redirect_with_bad_search-source">
-            <pre><span class="ruby-comment"># File app/controllers/nu_collections_controller.rb, line 95</span>
+            <pre><span class="ruby-comment"># File app/controllers/nu_collections_controller.rb, line 109</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">index_redirect_with_bad_search</span>(<span class="ruby-identifier">exception</span>)
   <span class="ruby-identifier">flash</span>[<span class="ruby-value">:error</span>] = <span class="ruby-identifier">exception</span>.<span class="ruby-identifier">message</span>
   <span class="ruby-identifier">redirect_to</span> <span class="ruby-identifier">communities_path</span> <span class="ruby-keyword">and</span> <span class="ruby-keyword">return</span>
@@ -643,7 +671,7 @@ is also a personal folder.</p>
 
           
           <div class="method-source-code" id="parent_is_personal_folder-3F-source">
-            <pre><span class="ruby-comment"># File app/controllers/nu_collections_controller.rb, line 102</span>
+            <pre><span class="ruby-comment"># File app/controllers/nu_collections_controller.rb, line 116</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">parent_is_personal_folder?</span>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:is_parent_folder</span>].<span class="ruby-identifier">present?</span> 
     <span class="ruby-identifier">parent_id</span> = <span class="ruby-identifier">params</span>[<span class="ruby-value">:parent</span>] 

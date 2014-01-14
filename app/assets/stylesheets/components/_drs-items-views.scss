@@ -11,17 +11,22 @@
     cursor: pointer;
   }
 
-  > figure{
-
-    margin: 0 0 0 0;
+  figure{
+    text-align: center;
+    margin: 0 0 2em 0;
     figcaption{
-      text-align: center;
+      @extend .muted;
+      margin-top: 1em;
+    }
+    [data-picture]{
+      display: inline-block;
     }
     img, [class^="icon-"]{
       padding: 4px;
       background-color: #fff;
       border: 1px solid #ccc;
       border: 1px solid rgba(0,0,0,.2);
+      text-align: center;
     }
     [class^="icon-"]{
       display: block;
@@ -47,19 +52,6 @@
   
 }
 
-.drs-item-details{
-  dl{
-    @include clearfix();
-    dt{
-      float: left;
-      width: 100px;
-
-    }
-    dd{
-      margin-left: 100px;
-    }
-  }
-}
 
 .drs-items{
   

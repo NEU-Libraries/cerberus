@@ -24,7 +24,7 @@
       = render partial: 'shared/thumbnails/full_picture'
     -else
       %i.icon-file.icon-4x.icon-border.drs-icon-figure
-  - if @nu_core_file.description.length > 0
-    %figcaption
-      =@nu_core_file.description
+
+  %figcaption
+    =@nu_core_file.dcmi_type.capitalize
 

@@ -34,7 +34,8 @@ $( document ).ready(function() {
           handleDrsAdminCommunities();
           handleCommunitiesAdminAutoComplete();
 
-          if($('.drs-items').data('toggle')){
+          toggleShoppingCart($('*[data-shoppingcart]'));
+          if($('.drs-items').data('toggle') == "drs-view"){
             handleDrsItem($('.drs-item'));  
           }
           
@@ -454,6 +455,28 @@ $( document ).ready(function() {
       
         
       };
+
+      /**
+       * Listener function for shopping cart links with a fall back on failure to reload the page.
+       */
+
+      var toggleShoppingCart = function(e){
+        var $e = $(e)
+        if($e.length > 0 ){
+          $e.on('ajax:beforeSend', function(){
+            $(this).attr('data-shoppingcart', 'replace');
+            $(this).tooltip('destroy');
+          }).on('ajax:failure', function(){
+            
+            window.location.reload();
+          }).on('ajax:success', function(){
+            toggleShoppingCart(drsApp.$new);
+            $(this).replaceWith(drsApp.$new);
+            drsApp.$new = null;
+          });
+        }
+      };
+
 
 
       // these are the public API

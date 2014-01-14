@@ -11,6 +11,7 @@
  *= require_self
  *  Sufia gem stylesheets imported here.
  *= require bootstrap-select/bootstrap-select.min.css
+ * 
  */
 
 
@@ -20,8 +21,13 @@
 
 @import "vendor/flatly/flatly-variables";
 @import "libraries/drs_bootstrap_variables";
+
 @import "vendor/bootstrap/mixins";
 @import "libraries/mixins";
+
+@import "../../../vendor/assets/bower_components/mrmrs-colors/sass/variables";
+@import "../../../vendor/assets/bower_components/mrmrs-colors/sass/skins";
+
 
 /////////////
 /////////////
@@ -170,6 +176,7 @@
 @import "components/drs-thumbnails";
 
 @import "components/drs-items-views";
+@import "components/drs-item";
 
 
 @import 'sections/masthead';

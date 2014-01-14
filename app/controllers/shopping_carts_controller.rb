@@ -17,6 +17,7 @@ class ShoppingCartsController < ApplicationController
     if params[:add]
       @id = params[:add]
       session[:ids] << @id unless session[:ids].include? @id  
+      flash.now[:info] = "Item added to shopping cart" 
     elsif params[:delete]
       @id = params[:delete]
       session[:ids].delete(@id)

@@ -112,6 +112,29 @@ describe('The drsApp object', function() {
 
 
   });
+
+  describe( 'toggleShoppingCart method',  function(){
+    var sc = null 
+    beforeEach( function(){
+      loadFixtures('shoppingcart-remove.html');
+      drsApp.init();
+      
+
+    });
+
+    it('listens to objects with data-shoppingcart', function(){
+      sc = $('[data-shoppingcart]');
+      expect( sc ).toExist();
+      sc.trigger('ajax:beforeSend');
+      expect(sc).toHaveAttr('data-shoppingcart', 'replace');
+      
+      $.get( '/spec/javascripts/fixtures/shoppingcart-add.html', function( data ){
+        drsApp.$new = $(data);
+      });
+      // TODO figure out test coverage for the rest.
+    });
+
+  });
   
 
 

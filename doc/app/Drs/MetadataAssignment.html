@@ -143,10 +143,6 @@
   
     <li><a href="../Drs.html">Drs</a>
   
-    <li><a href="../Drs/Content.html">Drs::Content</a>
-  
-    <li><a href="../Drs/Content/Transformations.html">Drs::Content::Transformations</a>
-  
     <li><a href="../Drs/ControllerHelpers.html">Drs::ControllerHelpers</a>
   
     <li><a href="../Drs/ControllerHelpers/EditableObjects.html">Drs::ControllerHelpers::EditableObjects</a>
@@ -205,6 +201,10 @@
   
     <li><a href="../Employee/FacultyFolders.html">Employee::FacultyFolders</a>
   
+    <li><a href="../Users.html">Users</a>
+  
+    <li><a href="../Users/OmniauthCallbacksController.html">Users::OmniauthCallbacksController</a>
+  
     <li><a href="../AdminController.html">AdminController</a>
   
     <li><a href="../ApplicationController.html">ApplicationController</a>
@@ -229,6 +229,8 @@
   
     <li><a href="../ContentCreationJob.html">ContentCreationJob</a>
   
+    <li><a href="../DerivativeCreator.html">DerivativeCreator</a>
+  
     <li><a href="../DrsEmployeeDatastream.html">DrsEmployeeDatastream</a>
   
     <li><a href="../DrsPropertiesDatastream.html">DrsPropertiesDatastream</a>
@@ -246,6 +248,10 @@
     <li><a href="../ImageSmallFile.html">ImageSmallFile</a>
   
     <li><a href="../ImageThumbnailFile.html">ImageThumbnailFile</a>
+  
+    <li><a href="../InlineThumbnailCreator.html">InlineThumbnailCreator</a>
+  
+    <li><a href="../MetadataMailer.html">MetadataMailer</a>
   
     <li><a href="../MetadataUpdateJob.html">MetadataUpdateJob</a>
   
@@ -273,9 +279,13 @@
   
     <li><a href="../NuModsDatastream.html">NuModsDatastream</a>
   
+    <li><a href="../Object.html">Object</a>
+  
     <li><a href="../ParanoidRightsDatastream.html">ParanoidRightsDatastream</a>
   
     <li><a href="../PdfFile.html">PdfFile</a>
+  
+    <li><a href="../ScaledImageCreator.html">ScaledImageCreator</a>
   
     <li><a href="../SetsController.html">SetsController</a>
   
@@ -287,7 +297,11 @@
   
     <li><a href="../TextFile.html">TextFile</a>
   
+    <li><a href="../UploadAlert.html">UploadAlert</a>
+  
     <li><a href="../User.html">User</a>
+  
+    <li><a href="../UsersController.html">UsersController</a>
   
     <li><a href="../VideoFile.html">VideoFile</a>
   
@@ -342,7 +356,7 @@
 
           
           <div class="method-source-code" id="canonical-3F-source">
-            <pre><span class="ruby-comment"># File lib/drs/metadata_assignment.rb, line 115</span>
+            <pre><span class="ruby-comment"># File lib/drs/metadata_assignment.rb, line 116</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">canonical?</span> 
   <span class="ruby-identifier">if_properties_exists_strict</span> { <span class="ruby-keyword">self</span>.<span class="ruby-identifier">properties</span>.<span class="ruby-identifier">canonical?</span> } 
 <span class="ruby-keyword">end</span></pre>
@@ -372,7 +386,7 @@
 
           
           <div class="method-source-code" id="canonize-source">
-            <pre><span class="ruby-comment"># File lib/drs/metadata_assignment.rb, line 107</span>
+            <pre><span class="ruby-comment"># File lib/drs/metadata_assignment.rb, line 108</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">canonize</span>
   <span class="ruby-identifier">if_properties_exists_strict</span> { <span class="ruby-keyword">self</span>.<span class="ruby-identifier">properties</span>.<span class="ruby-identifier">canonize</span> } 
 <span class="ruby-keyword">end</span></pre>
@@ -402,7 +416,7 @@
 
           
           <div class="method-source-code" id="corporate_creators-source">
-            <pre><span class="ruby-comment"># File lib/drs/metadata_assignment.rb, line 94</span>
+            <pre><span class="ruby-comment"># File lib/drs/metadata_assignment.rb, line 95</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">corporate_creators</span>  
   <span class="ruby-identifier">if_mods_exists_strict</span> { <span class="ruby-keyword">self</span>.<span class="ruby-identifier">mods</span>.<span class="ruby-identifier">corporate_creators</span> } 
 <span class="ruby-keyword">end</span></pre>
@@ -433,7 +447,7 @@ the DC record</p>
 
           
           <div class="method-source-code" id="creators-source">
-            <pre><span class="ruby-comment"># File lib/drs/metadata_assignment.rb, line 84</span>
+            <pre><span class="ruby-comment"># File lib/drs/metadata_assignment.rb, line 85</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">creators</span>
   <span class="ruby-identifier">if_DC_exists_strict</span> { <span class="ruby-keyword">self</span>.<span class="ruby-constant">DC</span>.<span class="ruby-identifier">creator</span> } 
 <span class="ruby-keyword">end</span></pre>
@@ -463,7 +477,7 @@ the DC record</p>
 
           
           <div class="method-source-code" id="creators-3D-source">
-            <pre><span class="ruby-comment"># File lib/drs/metadata_assignment.rb, line 68</span>
+            <pre><span class="ruby-comment"># File lib/drs/metadata_assignment.rb, line 69</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">creators=</span>(<span class="ruby-identifier">hash</span>) 
   <span class="ruby-identifier">fns</span> = <span class="ruby-identifier">hash</span>[<span class="ruby-string">&#39;first_names&#39;</span>] <span class="ruby-operator">||</span> []
   <span class="ruby-identifier">lns</span> = <span class="ruby-identifier">hash</span>[<span class="ruby-string">&#39;last_names&#39;</span>] <span class="ruby-operator">||</span> []
@@ -504,7 +518,7 @@ the DC record</p>
 
           
           <div class="method-source-code" id="date_of_issue-source">
-            <pre><span class="ruby-comment"># File lib/drs/metadata_assignment.rb, line 54</span>
+            <pre><span class="ruby-comment"># File lib/drs/metadata_assignment.rb, line 55</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">date_of_issue</span>
   <span class="ruby-keyword">self</span>.<span class="ruby-constant">DC</span>.<span class="ruby-identifier">date</span>.<span class="ruby-identifier">first</span>  
 <span class="ruby-keyword">end</span></pre>
@@ -534,9 +548,9 @@ the DC record</p>
 
           
           <div class="method-source-code" id="date_of_issue-3D-source">
-            <pre><span class="ruby-comment"># File lib/drs/metadata_assignment.rb, line 48</span>
+            <pre><span class="ruby-comment"># File lib/drs/metadata_assignment.rb, line 49</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">date_of_issue=</span>(<span class="ruby-identifier">string</span>) 
-  <span class="ruby-identifier">if_mods_exists</span> { <span class="ruby-keyword">self</span>.<span class="ruby-identifier">mods</span>.<span class="ruby-identifier">mods_date_issued</span> = <span class="ruby-identifier">string</span> }
+  <span class="ruby-identifier">if_mods_exists</span> { <span class="ruby-keyword">self</span>.<span class="ruby-identifier">mods</span>.<span class="ruby-identifier">date_issued</span> = <span class="ruby-identifier">string</span> }
   <span class="ruby-identifier">if_DC_exists</span>   { <span class="ruby-keyword">self</span>.<span class="ruby-constant">DC</span>.<span class="ruby-identifier">date</span> = <span class="ruby-identifier">string</span> }
   <span class="ruby-identifier">if_descMetadata_exists</span> { <span class="ruby-keyword">self</span>.<span class="ruby-identifier">descMetadata</span>.<span class="ruby-identifier">date_created</span> = <span class="ruby-identifier">string</span> }   
 <span class="ruby-keyword">end</span></pre>
@@ -566,7 +580,7 @@ the DC record</p>
 
           
           <div class="method-source-code" id="date_updated-source">
-            <pre><span class="ruby-comment"># File lib/drs/metadata_assignment.rb, line 131</span>
+            <pre><span class="ruby-comment"># File lib/drs/metadata_assignment.rb, line 132</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">date_updated</span>
   <span class="ruby-identifier">if_descMetadata_exists_strict</span> { <span class="ruby-keyword">self</span>.<span class="ruby-identifier">descMetadata</span>.<span class="ruby-identifier">date_modified</span>.<span class="ruby-identifier">first</span> } 
 <span class="ruby-keyword">end</span></pre>
@@ -596,7 +610,7 @@ the DC record</p>
 
           
           <div class="method-source-code" id="date_uploaded-source">
-            <pre><span class="ruby-comment"># File lib/drs/metadata_assignment.rb, line 127</span>
+            <pre><span class="ruby-comment"># File lib/drs/metadata_assignment.rb, line 128</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">date_uploaded</span> 
   <span class="ruby-identifier">if_descMetadata_exists_strict</span> { <span class="ruby-keyword">self</span>.<span class="ruby-identifier">descMetadata</span>.<span class="ruby-identifier">date_uploaded</span>.<span class="ruby-identifier">first</span> } 
 <span class="ruby-keyword">end</span></pre>
@@ -626,9 +640,9 @@ the DC record</p>
 
           
           <div class="method-source-code" id="dcmi_type-source">
-            <pre><span class="ruby-comment"># File lib/drs/metadata_assignment.rb, line 24</span>
+            <pre><span class="ruby-comment"># File lib/drs/metadata_assignment.rb, line 25</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">dcmi_type</span> 
-  <span class="ruby-identifier">if_DC_exists_strict</span> { <span class="ruby-keyword">self</span>.<span class="ruby-constant">DC</span>.<span class="ruby-identifier">nu_type</span>.<span class="ruby-identifier">first</span> } 
+  <span class="ruby-identifier">if_DC_exists</span> { <span class="ruby-keyword">self</span>.<span class="ruby-constant">DC</span>.<span class="ruby-identifier">nu_type</span>.<span class="ruby-identifier">first</span> } 
 <span class="ruby-keyword">end</span></pre>
           </div><!-- dcmi_type-source -->
           
@@ -658,7 +672,8 @@ the DC record</p>
           <div class="method-source-code" id="dcmi_type-3D-source">
             <pre><span class="ruby-comment"># File lib/drs/metadata_assignment.rb, line 20</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">dcmi_type=</span>(<span class="ruby-identifier">string</span>) 
-  <span class="ruby-identifier">if_DC_exists_strict</span> { <span class="ruby-keyword">self</span>.<span class="ruby-constant">DC</span>.<span class="ruby-identifier">nu_type</span> = <span class="ruby-identifier">string</span> } 
+  <span class="ruby-identifier">if_DC_exists</span> { <span class="ruby-keyword">self</span>.<span class="ruby-constant">DC</span>.<span class="ruby-identifier">nu_type</span> = <span class="ruby-identifier">string</span> }
+  <span class="ruby-identifier">if_mods_exists</span> { <span class="ruby-keyword">self</span>.<span class="ruby-identifier">mods</span>.<span class="ruby-identifier">type_of_resource</span> = <span class="ruby-identifier">string</span> }  
 <span class="ruby-keyword">end</span></pre>
           </div><!-- dcmi_type-3D-source -->
           
@@ -686,7 +701,7 @@ the DC record</p>
 
           
           <div class="method-source-code" id="depositor-source">
-            <pre><span class="ruby-comment"># File lib/drs/metadata_assignment.rb, line 103</span>
+            <pre><span class="ruby-comment"># File lib/drs/metadata_assignment.rb, line 104</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">depositor</span>
   <span class="ruby-identifier">if_properties_exists_strict</span> { <span class="ruby-keyword">self</span>.<span class="ruby-identifier">properties</span>.<span class="ruby-identifier">depositor</span>.<span class="ruby-identifier">first</span> } 
 <span class="ruby-keyword">end</span></pre>
@@ -716,7 +731,7 @@ the DC record</p>
 
           
           <div class="method-source-code" id="depositor-3D-source">
-            <pre><span class="ruby-comment"># File lib/drs/metadata_assignment.rb, line 98</span>
+            <pre><span class="ruby-comment"># File lib/drs/metadata_assignment.rb, line 99</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">depositor=</span>(<span class="ruby-identifier">string</span>) 
   <span class="ruby-identifier">if_properties_exists_strict</span> { <span class="ruby-keyword">self</span>.<span class="ruby-identifier">properties</span>.<span class="ruby-identifier">depositor</span> = <span class="ruby-identifier">string</span> } 
   <span class="ruby-keyword">self</span>.<span class="ruby-identifier">rightsMetadata</span>.<span class="ruby-identifier">permissions</span>({<span class="ruby-identifier">person</span><span class="ruby-operator">:</span> <span class="ruby-identifier">string</span>}, <span class="ruby-string">&#39;edit&#39;</span>) 
@@ -747,7 +762,7 @@ the DC record</p>
 
           
           <div class="method-source-code" id="description-source">
-            <pre><span class="ruby-comment"># File lib/drs/metadata_assignment.rb, line 44</span>
+            <pre><span class="ruby-comment"># File lib/drs/metadata_assignment.rb, line 45</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">description</span> 
   <span class="ruby-keyword">self</span>.<span class="ruby-constant">DC</span>.<span class="ruby-identifier">nu_description</span>.<span class="ruby-identifier">first</span> 
 <span class="ruby-keyword">end</span></pre>
@@ -777,10 +792,10 @@ the DC record</p>
 
           
           <div class="method-source-code" id="description-3D-source">
-            <pre><span class="ruby-comment"># File lib/drs/metadata_assignment.rb, line 38</span>
+            <pre><span class="ruby-comment"># File lib/drs/metadata_assignment.rb, line 39</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">description=</span>(<span class="ruby-identifier">string</span>) 
   <span class="ruby-identifier">if_DC_exists</span> { <span class="ruby-keyword">self</span>.<span class="ruby-constant">DC</span>.<span class="ruby-identifier">nu_description</span> = <span class="ruby-identifier">string</span> } 
-  <span class="ruby-identifier">if_mods_exists</span> { <span class="ruby-keyword">self</span>.<span class="ruby-identifier">mods</span>.<span class="ruby-identifier">mods_abstract</span> = <span class="ruby-identifier">string</span> }
+  <span class="ruby-identifier">if_mods_exists</span> { <span class="ruby-keyword">self</span>.<span class="ruby-identifier">mods</span>.<span class="ruby-identifier">abstract</span> = <span class="ruby-identifier">string</span> }
   <span class="ruby-identifier">if_descMetadata_exists</span> { <span class="ruby-keyword">self</span>.<span class="ruby-identifier">descMetadata</span>.<span class="ruby-identifier">description</span> = <span class="ruby-identifier">string</span> } 
 <span class="ruby-keyword">end</span></pre>
           </div><!-- description-3D-source -->
@@ -809,7 +824,7 @@ the DC record</p>
 
           
           <div class="method-source-code" id="identifier-source">
-            <pre><span class="ruby-comment"># File lib/drs/metadata_assignment.rb, line 34</span>
+            <pre><span class="ruby-comment"># File lib/drs/metadata_assignment.rb, line 35</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">identifier</span>
   <span class="ruby-keyword">self</span>.<span class="ruby-constant">DC</span>.<span class="ruby-identifier">nu_identifier</span>.<span class="ruby-identifier">first</span> 
 <span class="ruby-keyword">end</span></pre>
@@ -839,10 +854,10 @@ the DC record</p>
 
           
           <div class="method-source-code" id="identifier-3D-source">
-            <pre><span class="ruby-comment"># File lib/drs/metadata_assignment.rb, line 28</span>
+            <pre><span class="ruby-comment"># File lib/drs/metadata_assignment.rb, line 29</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">identifier=</span>(<span class="ruby-identifier">string</span>) 
   <span class="ruby-identifier">if_DC_exists</span> { <span class="ruby-keyword">self</span>.<span class="ruby-constant">DC</span>.<span class="ruby-identifier">nu_identifier</span> = <span class="ruby-identifier">string</span> } 
-  <span class="ruby-identifier">if_mods_exists</span> { <span class="ruby-keyword">self</span>.<span class="ruby-identifier">mods</span>.<span class="ruby-identifier">mods_identifier</span> = <span class="ruby-identifier">string</span> }
+  <span class="ruby-identifier">if_mods_exists</span> { <span class="ruby-keyword">self</span>.<span class="ruby-identifier">mods</span>.<span class="ruby-identifier">identifier</span> = <span class="ruby-identifier">string</span> }
   <span class="ruby-identifier">if_descMetadata_exists</span> { <span class="ruby-keyword">self</span>.<span class="ruby-identifier">descMetadata</span>.<span class="ruby-identifier">identifier</span> = <span class="ruby-identifier">string</span> }  
 <span class="ruby-keyword">end</span></pre>
           </div><!-- identifier-3D-source -->
@@ -871,7 +886,7 @@ the DC record</p>
 
           
           <div class="method-source-code" id="is_personal_folder-3F-source">
-            <pre><span class="ruby-comment"># File lib/drs/metadata_assignment.rb, line 148</span>
+            <pre><span class="ruby-comment"># File lib/drs/metadata_assignment.rb, line 144</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">is_personal_folder?</span> 
   <span class="ruby-identifier">if_properties_exists_strict</span> <span class="ruby-keyword">do</span> 
     <span class="ruby-keyword">return</span> <span class="ruby-operator">!</span><span class="ruby-keyword">self</span>.<span class="ruby-identifier">properties</span>.<span class="ruby-identifier">personal_folder_type</span>.<span class="ruby-identifier">empty?</span> 
@@ -903,7 +918,7 @@ the DC record</p>
 
           
           <div class="method-source-code" id="keywords-source">
-            <pre><span class="ruby-comment"># File lib/drs/metadata_assignment.rb, line 64</span>
+            <pre><span class="ruby-comment"># File lib/drs/metadata_assignment.rb, line 65</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">keywords</span>
   <span class="ruby-keyword">self</span>.<span class="ruby-constant">DC</span>.<span class="ruby-identifier">subject</span> 
 <span class="ruby-keyword">end</span></pre>
@@ -933,9 +948,9 @@ the DC record</p>
 
           
           <div class="method-source-code" id="keywords-3D-source">
-            <pre><span class="ruby-comment"># File lib/drs/metadata_assignment.rb, line 58</span>
+            <pre><span class="ruby-comment"># File lib/drs/metadata_assignment.rb, line 59</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">keywords=</span>(<span class="ruby-identifier">array_of_strings</span>) 
-  <span class="ruby-identifier">if_mods_exists</span> { <span class="ruby-keyword">self</span>.<span class="ruby-identifier">mods</span>.<span class="ruby-identifier">keywords</span> = <span class="ruby-identifier">array_of_strings</span> }
+  <span class="ruby-identifier">if_mods_exists</span> { <span class="ruby-keyword">self</span>.<span class="ruby-identifier">mods</span>.<span class="ruby-identifier">topics</span> = <span class="ruby-identifier">array_of_strings</span> }
   <span class="ruby-identifier">if_DC_exists</span>   { <span class="ruby-keyword">self</span>.<span class="ruby-constant">DC</span>.<span class="ruby-identifier">subject</span> = <span class="ruby-identifier">array_of_strings</span> }
   <span class="ruby-identifier">if_descMetadata_exists</span> { <span class="ruby-keyword">self</span>.<span class="ruby-identifier">descMetadata</span>.<span class="ruby-identifier">tag</span> = <span class="ruby-identifier">array_of_strings</span> }
 <span class="ruby-keyword">end</span></pre>
@@ -966,7 +981,7 @@ last: “etc”}]</p>
 
           
           <div class="method-source-code" id="personal_creators-source">
-            <pre><span class="ruby-comment"># File lib/drs/metadata_assignment.rb, line 89</span>
+            <pre><span class="ruby-comment"># File lib/drs/metadata_assignment.rb, line 90</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">personal_creators</span> 
   <span class="ruby-identifier">if_mods_exists_strict</span> { <span class="ruby-keyword">self</span>.<span class="ruby-identifier">mods</span>.<span class="ruby-identifier">personal_creators</span> } 
 <span class="ruby-keyword">end</span></pre>
@@ -996,7 +1011,7 @@ last: “etc”}]</p>
 
           
           <div class="method-source-code" id="personal_folder_type-source">
-            <pre><span class="ruby-comment"># File lib/drs/metadata_assignment.rb, line 144</span>
+            <pre><span class="ruby-comment"># File lib/drs/metadata_assignment.rb, line 140</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">personal_folder_type</span>
   <span class="ruby-identifier">if_properties_exists_strict</span> { <span class="ruby-keyword">self</span>.<span class="ruby-identifier">properties</span>.<span class="ruby-identifier">get_personal_folder_type</span> } 
 <span class="ruby-keyword">end</span></pre>
@@ -1021,14 +1036,12 @@ last: “etc”}]</p>
 
         <div class="method-description">
           
-          <p>~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ TODO:
-Eliminate once PersonalFolders can be made their own subtype
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</p>
+          
           
 
           
           <div class="method-source-code" id="personal_folder_type-3D-source">
-            <pre><span class="ruby-comment"># File lib/drs/metadata_assignment.rb, line 140</span>
+            <pre><span class="ruby-comment"># File lib/drs/metadata_assignment.rb, line 136</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">personal_folder_type=</span>(<span class="ruby-identifier">string</span>) 
   <span class="ruby-identifier">if_properties_exists_strict</span> { <span class="ruby-keyword">self</span>.<span class="ruby-identifier">properties</span>.<span class="ruby-identifier">personal_folder_type</span> = <span class="ruby-identifier">string</span> } 
 <span class="ruby-keyword">end</span></pre>
@@ -1091,7 +1104,7 @@ Eliminate once PersonalFolders can be made their own subtype
             <pre><span class="ruby-comment"># File lib/drs/metadata_assignment.rb, line 10</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">title=</span>(<span class="ruby-identifier">string</span>) 
   <span class="ruby-identifier">if_DC_exists</span> { <span class="ruby-keyword">self</span>.<span class="ruby-constant">DC</span>.<span class="ruby-identifier">nu_title</span> = <span class="ruby-identifier">string</span> } 
-  <span class="ruby-identifier">if_mods_exists</span> { <span class="ruby-keyword">self</span>.<span class="ruby-identifier">mods</span>.<span class="ruby-identifier">mods_title</span> = <span class="ruby-identifier">string</span> }
+  <span class="ruby-identifier">if_mods_exists</span> { <span class="ruby-keyword">self</span>.<span class="ruby-identifier">mods</span>.<span class="ruby-identifier">title</span> = <span class="ruby-identifier">string</span> }
   <span class="ruby-identifier">if_descMetadata_exists</span> { <span class="ruby-keyword">self</span>.<span class="ruby-identifier">descMetadata</span>.<span class="ruby-identifier">title</span> = <span class="ruby-identifier">string</span> }  
 <span class="ruby-keyword">end</span></pre>
           </div><!-- title-3D-source -->
@@ -1120,7 +1133,7 @@ Eliminate once PersonalFolders can be made their own subtype
 
           
           <div class="method-source-code" id="type-source">
-            <pre><span class="ruby-comment"># File lib/drs/metadata_assignment.rb, line 123</span>
+            <pre><span class="ruby-comment"># File lib/drs/metadata_assignment.rb, line 124</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">type</span>
   <span class="ruby-identifier">if_descMetadata_exists_strict</span> { <span class="ruby-keyword">self</span>.<span class="ruby-identifier">descMetadata</span>.<span class="ruby-identifier">resource_type</span> } 
 <span class="ruby-keyword">end</span></pre>
@@ -1150,7 +1163,7 @@ Eliminate once PersonalFolders can be made their own subtype
 
           
           <div class="method-source-code" id="type-3D-source">
-            <pre><span class="ruby-comment"># File lib/drs/metadata_assignment.rb, line 119</span>
+            <pre><span class="ruby-comment"># File lib/drs/metadata_assignment.rb, line 120</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">type=</span>(<span class="ruby-identifier">array</span>)
   <span class="ruby-identifier">if_descMetadata_exists_strict</span> { <span class="ruby-keyword">self</span>.<span class="ruby-identifier">descMetadata</span>.<span class="ruby-identifier">resource_type</span> = <span class="ruby-identifier">array</span> } 
 <span class="ruby-keyword">end</span></pre>
@@ -1180,7 +1193,7 @@ Eliminate once PersonalFolders can be made their own subtype
 
           
           <div class="method-source-code" id="uncanonize-source">
-            <pre><span class="ruby-comment"># File lib/drs/metadata_assignment.rb, line 111</span>
+            <pre><span class="ruby-comment"># File lib/drs/metadata_assignment.rb, line 112</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">uncanonize</span> 
   <span class="ruby-identifier">if_properties_exists_strict</span> { <span class="ruby-keyword">self</span>.<span class="ruby-identifier">properties</span>.<span class="ruby-identifier">uncanonize</span> } 
 <span class="ruby-keyword">end</span></pre>

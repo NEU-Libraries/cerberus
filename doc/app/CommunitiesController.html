@@ -125,10 +125,6 @@
   
     <li><a href="./Drs.html">Drs</a>
   
-    <li><a href="./Drs/Content.html">Drs::Content</a>
-  
-    <li><a href="./Drs/Content/Transformations.html">Drs::Content::Transformations</a>
-  
     <li><a href="./Drs/ControllerHelpers.html">Drs::ControllerHelpers</a>
   
     <li><a href="./Drs/ControllerHelpers/EditableObjects.html">Drs::ControllerHelpers::EditableObjects</a>
@@ -187,6 +183,10 @@
   
     <li><a href="./Employee/FacultyFolders.html">Employee::FacultyFolders</a>
   
+    <li><a href="./Users.html">Users</a>
+  
+    <li><a href="./Users/OmniauthCallbacksController.html">Users::OmniauthCallbacksController</a>
+  
     <li><a href="./AdminController.html">AdminController</a>
   
     <li><a href="./ApplicationController.html">ApplicationController</a>
@@ -211,6 +211,8 @@
   
     <li><a href="./ContentCreationJob.html">ContentCreationJob</a>
   
+    <li><a href="./DerivativeCreator.html">DerivativeCreator</a>
+  
     <li><a href="./DrsEmployeeDatastream.html">DrsEmployeeDatastream</a>
   
     <li><a href="./DrsPropertiesDatastream.html">DrsPropertiesDatastream</a>
@@ -228,6 +230,10 @@
     <li><a href="./ImageSmallFile.html">ImageSmallFile</a>
   
     <li><a href="./ImageThumbnailFile.html">ImageThumbnailFile</a>
+  
+    <li><a href="./InlineThumbnailCreator.html">InlineThumbnailCreator</a>
+  
+    <li><a href="./MetadataMailer.html">MetadataMailer</a>
   
     <li><a href="./MetadataUpdateJob.html">MetadataUpdateJob</a>
   
@@ -255,9 +261,13 @@
   
     <li><a href="./NuModsDatastream.html">NuModsDatastream</a>
   
+    <li><a href="./Object.html">Object</a>
+  
     <li><a href="./ParanoidRightsDatastream.html">ParanoidRightsDatastream</a>
   
     <li><a href="./PdfFile.html">PdfFile</a>
+  
+    <li><a href="./ScaledImageCreator.html">ScaledImageCreator</a>
   
     <li><a href="./SetsController.html">SetsController</a>
   
@@ -269,7 +279,11 @@
   
     <li><a href="./TextFile.html">TextFile</a>
   
+    <li><a href="./UploadAlert.html">UploadAlert</a>
+  
     <li><a href="./User.html">User</a>
+  
+    <li><a href="./UsersController.html">UsersController</a>
   
     <li><a href="./VideoFile.html">VideoFile</a>
   
@@ -324,9 +338,10 @@
 
           
           <div class="method-source-code" id="data_sets-source">
-            <pre><span class="ruby-comment"># File app/controllers/communities_controller.rb, line 39</span>
+            <pre><span class="ruby-comment"># File app/controllers/communities_controller.rb, line 44</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">data_sets</span>
   <span class="ruby-ivar">@dept</span> = <span class="ruby-constant">Community</span>.<span class="ruby-identifier">find</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:id</span>]) 
+  <span class="ruby-ivar">@page_title</span> = <span class="ruby-node">&quot;#{@dept.title} Data Sets&quot;</span> 
 <span class="ruby-keyword">end</span></pre>
           </div><!-- data_sets-source -->
           
@@ -354,9 +369,10 @@
 
           
           <div class="method-source-code" id="employees-source">
-            <pre><span class="ruby-comment"># File app/controllers/communities_controller.rb, line 23</span>
+            <pre><span class="ruby-comment"># File app/controllers/communities_controller.rb, line 24</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">employees</span> 
   <span class="ruby-ivar">@dept</span> = <span class="ruby-constant">Community</span>.<span class="ruby-identifier">find</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:id</span>]) 
+  <span class="ruby-ivar">@page_title</span> = <span class="ruby-node">&quot;#{@dept.title} Staff&quot;</span>
 <span class="ruby-keyword">end</span></pre>
           </div><!-- employees-source -->
           
@@ -414,9 +430,10 @@
 
           
           <div class="method-source-code" id="learning_objects-source">
-            <pre><span class="ruby-comment"># File app/controllers/communities_controller.rb, line 43</span>
+            <pre><span class="ruby-comment"># File app/controllers/communities_controller.rb, line 49</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">learning_objects</span> 
   <span class="ruby-ivar">@dept</span> = <span class="ruby-constant">Community</span>.<span class="ruby-identifier">find</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:id</span>])
+  <span class="ruby-ivar">@page_title</span> = <span class="ruby-node">&quot;#{@dept.title} Learning Objects&quot;</span>
 <span class="ruby-keyword">end</span></pre>
           </div><!-- learning_objects-source -->
           
@@ -444,9 +461,10 @@
 
           
           <div class="method-source-code" id="other_publications-source">
-            <pre><span class="ruby-comment"># File app/controllers/communities_controller.rb, line 31</span>
+            <pre><span class="ruby-comment"># File app/controllers/communities_controller.rb, line 34</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">other_publications</span>
   <span class="ruby-ivar">@dept</span> = <span class="ruby-constant">Community</span>.<span class="ruby-identifier">find</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:id</span>]) 
+  <span class="ruby-ivar">@page_title</span> = <span class="ruby-node">&quot;#{@dept.title} Papers&quot;</span>
 <span class="ruby-keyword">end</span></pre>
           </div><!-- other_publications-source -->
           
@@ -474,9 +492,10 @@
 
           
           <div class="method-source-code" id="presentations-source">
-            <pre><span class="ruby-comment"># File app/controllers/communities_controller.rb, line 35</span>
+            <pre><span class="ruby-comment"># File app/controllers/communities_controller.rb, line 39</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">presentations</span>
   <span class="ruby-ivar">@dept</span> = <span class="ruby-constant">Community</span>.<span class="ruby-identifier">find</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:id</span>])
+  <span class="ruby-ivar">@page_title</span> = <span class="ruby-node">&quot;#{@dept.title} Presentations&quot;</span> 
 <span class="ruby-keyword">end</span></pre>
           </div><!-- presentations-source -->
           
@@ -504,9 +523,10 @@
 
           
           <div class="method-source-code" id="research_publications-source">
-            <pre><span class="ruby-comment"># File app/controllers/communities_controller.rb, line 27</span>
+            <pre><span class="ruby-comment"># File app/controllers/communities_controller.rb, line 29</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">research_publications</span>
   <span class="ruby-ivar">@dept</span> = <span class="ruby-constant">Community</span>.<span class="ruby-identifier">find</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:id</span>])
+  <span class="ruby-ivar">@page_title</span> = <span class="ruby-node">&quot;#{@dept.title} Research Papers&quot;</span> 
 <span class="ruby-keyword">end</span></pre>
           </div><!-- research_publications-source -->
           
@@ -537,6 +557,7 @@
             <pre><span class="ruby-comment"># File app/controllers/communities_controller.rb, line 18</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">show</span>
   <span class="ruby-ivar">@set</span> = <span class="ruby-constant">Community</span>.<span class="ruby-identifier">find</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:id</span>])
+  <span class="ruby-ivar">@page_title</span> = <span class="ruby-ivar">@set</span>.<span class="ruby-identifier">title</span>
   <span class="ruby-identifier">render</span> <span class="ruby-value">:template</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;shared/sets/show&#39;</span>    
 <span class="ruby-keyword">end</span></pre>
           </div><!-- show-source -->
@@ -571,7 +592,7 @@
 
           
           <div class="method-source-code" id="index_redirect-source">
-            <pre><span class="ruby-comment"># File app/controllers/communities_controller.rb, line 49</span>
+            <pre><span class="ruby-comment"># File app/controllers/communities_controller.rb, line 56</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">index_redirect</span>
   <span class="ruby-identifier">flash</span>[<span class="ruby-value">:error</span>] = <span class="ruby-string">&quot;Communities cannot be created without a parent&quot;</span> 
   <span class="ruby-identifier">redirect_to</span> <span class="ruby-identifier">communities_path</span> <span class="ruby-keyword">and</span> <span class="ruby-keyword">return</span> 
@@ -602,7 +623,7 @@
 
           
           <div class="method-source-code" id="index_redirect_with_bad_id-source">
-            <pre><span class="ruby-comment"># File app/controllers/communities_controller.rb, line 54</span>
+            <pre><span class="ruby-comment"># File app/controllers/communities_controller.rb, line 61</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">index_redirect_with_bad_id</span> 
   <span class="ruby-identifier">flash</span>[<span class="ruby-value">:error</span>] = <span class="ruby-string">&quot;The id you specified does not seem to exist in Fedora.&quot;</span> 
   <span class="ruby-identifier">redirect_to</span> <span class="ruby-identifier">communities_path</span> <span class="ruby-keyword">and</span> <span class="ruby-keyword">return</span> 
