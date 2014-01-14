@@ -33,7 +33,8 @@ $( document ).ready(function() {
           handleDrsCommunities();
           handleDrsAdminCommunities();
           handleCommunitiesAdminAutoComplete();
-          listenAriaCheckbox();
+
+          toggleShoppingCart($('*[data-shoppingcart]'));
           if($('.drs-items').data('toggle') == "drs-view"){
             handleDrsItem($('.drs-item'));  
           }
@@ -454,41 +455,28 @@ $( document ).ready(function() {
       
         
       };
-      
-      var listenAriaCheckbox = function(){
-        var targets = $('*[aria-role="checkbox"]');
-        
-        if(targets.length > 0 ){
 
-          targets.on('click', function(){
-            toggleAriaCheckbox(this);
-            if ( $(this).data('remote') ){
-                $(this).on('ajax:success', function(){
-                  toggleAriaCheckbox(this);
-                });
-            }else{
-               toggleAriaCheckbox(this);
-            }
-          }); 
+      /**
+       * Listener function for shopping cart links with a fall back on failure to reload the page.
+       */
 
-        }
-
-      };
-
-      var toggleAriaCheckbox = function(e){
-        var $e = $(e);
-        var checked;
-        try{
-          checked = $e.attr('aria-checked');
-          if( checked || checked === 'true' ){
-            $e.attr( 'aria-checked', 'false' );
-          }else{
-            $e.attr( 'aria-checked', 'true' );
-          }
-        }catch( error ){
-          console.log( error );
+      var toggleShoppingCart = function(e){
+        var $e = $(e)
+        if($e.length > 0 ){
+          $e.on('ajax:beforeSend', function(){
+            $(this).attr('data-shoppingcart', 'replace');
+            $(this).tooltip('destroy');
+          }).on('ajax:failure', function(){
+            
+            window.location.reload();
+          }).on('ajax:success', function(){
+            toggleShoppingCart(drsApp.$new);
+            $(this).replaceWith(drsApp.$new);
+            drsApp.$new = null;
+          });
         }
       };
+
 
 
       // these are the public API

@@ -113,52 +113,25 @@ describe('The drsApp object', function() {
 
   });
 
-  describe( 'Should listen for elements with aria-role="checkbox" ' , function(){
-    beforeEach(function(){
-      loadFixtures('aria-checkbox-fixture.html');
+  describe( 'toggleShoppingCart method',  function(){
+    var sc = null 
+    beforeEach( function(){
+      loadFixtures('shoppingcart-remove.html');
       drsApp.init();
-    });
-
-    it( 'should toggle their aria-checked state elements without ajax on' , function(){
-      var $checkbox = $( '#notRemoteCheckbox' );
-      var role, checked;
-      function checkState(){
-        role = $checkbox.attr('aria-role');
-        checked = $checkbox.attr('aria-checked');
-      }
-      checkState();
       
-      expect( role ).toBe( 'checkbox' );
-      expect( checked ).toBe( 'true' );
-      
-      $checkbox.trigger('click');
-      
-      checkState();
-      console.log(checked); 
-      expect( $checkbox.attr('aria-checked') ).toBe( 'false' );
 
     });
-    
-    it( 'listends for ajax:success if  there is a data-remote then toggle the state' , function(){
-      var $checkbox = $( '#remoteCheckbox' );
-      var role, checked;
-      function checkState(){
-        role = $checkbox.attr('aria-role');
-        checked = $checkbox.attr('aria-checked');
-      }
-      checkState();
-      
-      expect( role ).toBe( 'checkbox' );
-      expect( checked ).toBe( 'true' );
-      
-      $checkbox.trigger('click');
-      expect( checked ).toBe( 'true' );
-      $checkbox.trigger('ajax:success');
 
+    it('listens to objects with data-shoppingcart', function(){
+      sc = $('[data-shoppingcart]');
+      expect( sc ).toExist();
+      sc.trigger('ajax:beforeSend');
+      expect(sc).toHaveAttr('data-shoppingcart', 'replace');
       
-      checkState();
-      expect( checked ).toBe( 'false' );
-            
+      $.get( '/spec/javascripts/fixtures/shoppingcart-add.html', function( data ){
+        drsApp.$new = $(data);
+      });
+      // TODO figure out test coverage for the rest.
     });
 
   });
