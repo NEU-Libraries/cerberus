@@ -20,7 +20,7 @@
         = render partial: 'show_descriptions'
         = render partial: 'show_details'
       -if @nu_core_file.content_objects
-        .drs-item-derivatives  
+        %section.drs-item-derivatives  
           = render partial: 'show_derivatives', locals: {contents: @nu_core_file.content_objects}
       / = render :partial => 'users/activity_log', :locals => {:events => @events}
     / / /.span6
