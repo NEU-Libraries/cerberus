@@ -106,6 +106,17 @@ module ApplicationHelper
       drs_item[:download_path] = false
       drs_item[:creators] = item.creators
     end
+    if item.instance_of?(SolrDocument)
+      drs_item[:pid] = item.noid
+      drs_item[:path] = nu_core_file_path( item.id )
+      drs_item[:title] = item.document.title_or_label
+      drs_item[:type] = item.resource_type
+      drs_item[:creators] = item.creator
+      drs_item[:thumbnails] = nil #item.thumbnail ? sufia.download_path(item, datastream_id: 'thumbnail') : false
+      drs_item[:date_added] = item.date_uploaded
+      drs_item[:abstract] = item.description
+      drs_item[:download_path] = sufia.download_path(document.noid)
+    end
     return drs_item
 
   end

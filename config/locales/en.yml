@@ -6,3 +6,5 @@ en:
     product_name:
       full: "digital repository service"
       short: "DRS"
+  blacklight:
+    application_name: "DRS"

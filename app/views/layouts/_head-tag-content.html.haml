@@ -6,6 +6,8 @@
 %title= h("#{@page_title} - DRS" || application_name)
 / application css
 = stylesheet_link_tag 'application'
+- if content_for?(:extra_head_contet)
+  = yield :extra_head_content
 = yield(:css_head)
 / controller specific uploader
 / [if IE 7]
