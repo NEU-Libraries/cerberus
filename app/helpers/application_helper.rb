@@ -106,6 +106,18 @@ module ApplicationHelper
       drs_item[:download_path] = false
       drs_item[:creators] = item.creators
     end
+    if item.instance_of?(SolrDocument)
+      drs_item[:pid] = item.noid
+      drs_item[:path] = nu_core_file_path( item.id )
+      drs_item[:title] = item.title_or_label
+      drs_item[:type] = nil
+      drs_item[:creators] = item.creator
+      file = NuCoreFile.find(item.id)
+      drs_item[:thumbnails] = get_file_thumbnails(file)
+      drs_item[:date_added] = item.date_uploaded
+      drs_item[:abstract] = item.description
+      drs_item[:download_path] = sufia.download_path(item.noid)
+    end
     return drs_item
 
   end

@@ -431,11 +431,22 @@ $popoverArrowOuterColor:  rgba(0,0,0,.25) !default;
 // --------------------------------------------------
 
 
+// Breakpoints
+// --------------------------------------------------
+
+$breakpoint-xxl:   1500px;
+$breakpoint-xl:    1200px;
+$brealpoint-l:     980px;
+$breakpoint-m:     768px;
+$breakpoint-sm:    400px;
+
+//----------------------------------------------------
+
 // Default 940px grid
 // -------------------------
 $gridColumns:             12 !default;
-$gridColumnWidth:         60px !default;
-$gridGutterWidth:         20px !default;
+$gridColumnWidth:         65px;//60px !default;
+$gridGutterWidth:         20px;//20px !default;
 $gridRowWidth:            ($gridColumns * $gridColumnWidth) + ($gridGutterWidth * ($gridColumns - 1)) !default;
 
 

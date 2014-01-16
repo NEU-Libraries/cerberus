@@ -42,6 +42,12 @@
       } 
     }
   }
+  &.active {
+    figure{
+      display: block;
+      float: none;
+    }
+  }
   menu{
     padding-left: 0;
   }
@@ -88,6 +94,9 @@
           @include border-top-radius(8px);
           border-top-style: solid;
         }
+        > figure{
+          float: none;
+        }  
       }
       > figure{
       float: left;
@@ -142,6 +151,7 @@
     }
 
   }
+  // DRS Items in Grid view styles
   &.drs-items-grid{
     @extend .row;
     
@@ -149,8 +159,13 @@
       @extend .span3;
       @extend [class*="span"];
       margin-bottom: 20px;
+      @media (min-width: 800px){
+        height: 220px;  
+      }
+      
       @media (min-width: 1200px) {
         margin-bottom: 30px;
+        height: 335px;
       }
 
       @include focus-states{
@@ -168,6 +183,7 @@
         width: 100%;
         margin: 4em auto;
         float: right;
+        height: auto;
       }
     }
     .drs-item-add-details{

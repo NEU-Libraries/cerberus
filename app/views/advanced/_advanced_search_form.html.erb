@@ -53,7 +53,7 @@ limitations under the License.
   <div class="form-actions"
     <%= label_tag(:sort, "Sort results by") %> 
     <%= select_tag(:sort, options_for_select(sort_fields, h(params[:sort]))) %>
-    <%= hidden_field_tag(:search_field, blacklight_config.advanced_search[:url_key]) %>
+    <%=# hidden_field_tag(:search_field, blacklight_config.advanced_search[:url_key]) %>
     <br />
     <%= submit_tag 'Search', :class=>'btn btn-primary', :id=>'advanced_search' %>
 	  <%= link_to "Start over", {:controller => "advanced", :action => "index"}, :class =>"btn" %>

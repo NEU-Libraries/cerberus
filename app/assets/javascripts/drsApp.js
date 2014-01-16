@@ -35,9 +35,8 @@ $( document ).ready(function() {
           handleCommunitiesAdminAutoComplete();
 
           toggleShoppingCart($('*[data-shoppingcart]'));
-          if($('.drs-items').data('toggle') == "drs-view"){
-            handleDrsItem($('.drs-item'));  
-          }
+          handleDrsItem($('.drs-item[data-drs-item]')); 
+          
           
       },
       /**
@@ -176,7 +175,10 @@ $( document ).ready(function() {
           });
         });
       },
-      
+      /**
+       * Looks for the datatoggle
+       * @return {[type]} [description]
+       */
       ellipsisExpand = function(){
         var $toggleLink = $('*[data-toggle="ellipsis"]');
 
@@ -272,17 +274,6 @@ $( document ).ready(function() {
       };
 
 
-      var DrsItem = function(e){
-        this.$e = $(e);
-        this.active = this.$e.hasClass('active');
-        this.$parent = this.$e.data('parent') ||  this.$e.closest('.drs-items');
-        this.$d
-
-      }
-
-
-      
-
 
 
       //Handles spawning new permission related form elements on the nu_collections/new page. 
@@ -375,18 +366,11 @@ $( document ).ready(function() {
         $(element).on('click', function( event ){
           var target = $( event.target );
           
-
-          if ( target.is('a, a*, button, button * , input, input *,  select, select *, textarea') ){
+          var parent = $( this ).closest( '.drs-items' );
+          if ( target.is('a, a*, button, button * , input, input *,  select, select *, textarea')){
             event.stopPropagation();
             
-            return;
-          }else{
-            //find the parent for later use;
-            var parent = $( this ).closest( '.drs-items' );
-
-            
-
-
+          }else if( parent.data('toggle') === 'drs-view' ){
             //remove add the class to the target.
             if( $(this).hasClass('active') ){
               parent.find('.drs-item').removeClass('active');
@@ -399,12 +383,15 @@ $( document ).ready(function() {
             
 
             pictureActive($(this).find('[data-picture]'));
+          }
+          else if( $(this).data('href').length > 4 ) {
+            window.location.assign( $(this).data('href') );
 
-              
-           
+          }
+          else{
+            console.log( this, 'was clicked' );
           }
 
-          
           
         });
       };

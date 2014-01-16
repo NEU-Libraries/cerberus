@@ -20,7 +20,7 @@
     = render  partial: "sidebar",  locals: {view_mode: view_mode}
   .span9
     %h3 Items
-    %section.drs-items#drsDummyItems{class: view_mode_class}
+    %section.drs-items#drsDummyItems{class: view_mode_class, data: {toggle: "drs-view"}}
       - for i in 5 .. rand(50) + 5 do 
         = render partial: "dummy", locals: { i: i} 
 

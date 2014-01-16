@@ -1,0 +1,26 @@
+- unless defined? thumbs 
+  - thumbs = get_file_thumbnails(@nu_core_file)
+
+
+-if thumbs.length > 0
+  %span{"data-alt" => "", "data-picture" => ""}
+    - if thumbs['thumbnail_1']
+      %span.thumbnail-s1{"data-src" => thumbs['thumbnail_1'] , "data-media" => "(min-width: 0)", "data-active" => "false" }
+        /Fallback content for non-JS browsers. Same img src as the initial, unqualified source element.
+      %noscript
+        %img{alt: " ", src: thumbs['thumbnail_1']}
+    - if thumbs['thumbnail_1_2x']
+      %span.thumbnail-s1-2x{"data-src" => thumbs['thumbnail_1_2x'] , "data-media" => "(min-device-pixel-ratio: 2.0), ( -webkit-min-device-pixel-ratio: 2.0 ) ", "data-active" => "false" } 
+    - if thumbs['thumbnail_2']
+      %span.thumbnail-s2{"data-src" => thumbs['thumbnail_2'] , "data-media" => "(min-width: 600px)", "data-active" => "false" }
+    - if thumbs['thumbnail_2_2x']
+      %span.thumbnail-s2-2x{"data-src" => thumbs['thumbnail_2_2x'], "data-media" => "(min-width: 600px) and (min-device-pixel-ratio: 2.0), (min-width: 600px) and (-webkit-min-device-pixel-ratio: 2.0)" , "data-active" => "false" }
+    - if thumbs['thumbnail_4']
+      %span.thumbnail-s4{"data-src" => thumbs['thumbnail_4'] , "data-media" => "false", "data-active" => "(min-width: 0)"}
+      
+    - if thumbs['thumbnail_4_2x']
+      %span.thumbnail-s4-2x{"data-src" => thumbs['thumbnail_4_2x'], "data-media" => "false" , "data-active" => "(min-width: 400px) and (min-device-pixel-ratio: 2.0), (min-width: 400px) and (-webkit-min-device-pixel-ratio: 2.0)"}
+    - if thumbs['thumbnail_10']
+      %span.thumbnail-s10{"data-src" => thumbs['thumbnail_10'],"data-media" => "false" ,  "data-active" => "(min-width: 700px)"}
+    - if thumbs['thumbnail_10_2x']
+      %span.thumbnail-s10-2x{"data-src" => thumbs['thumbnail_10_2x'], "data-media" => "false" ,  "data-active" => "(min-width: 700px) and (min-device-pixel-ratio: 2.0), (min-width: 700px) and (-webkit-min-device-pixel-ratio: 2.0)"}
