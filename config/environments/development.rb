@@ -52,4 +52,7 @@ Drs::Application.configure do
     authentication: ENV["MAILER_AUTHENTICATION"], 
     enable_starttls_auto: true
   }
+
+  # Development Tracking Code
+  GA.tracker = "UA-4426028-11"
 end
