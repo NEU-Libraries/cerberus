@@ -112,7 +112,8 @@ module ApplicationHelper
       drs_item[:title] = item.title_or_label
       drs_item[:type] = nil
       drs_item[:creators] = item.creator
-      drs_item[:thumbnails] = nil #item.thumbnail ? sufia.download_path(item, datastream_id: 'thumbnail') : false
+      file = NuCoreFile.find(item.id)
+      drs_item[:thumbnails] = get_file_thumbnails(file)
       drs_item[:date_added] = item.date_uploaded
       drs_item[:abstract] = item.description
       drs_item[:download_path] = sufia.download_path(item.noid)
