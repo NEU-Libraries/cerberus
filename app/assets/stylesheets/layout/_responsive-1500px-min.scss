@@ -3,7 +3,7 @@
 // --------------------------------------------------
 
 
-@media (min-width: 1500px) {
+@media (min-width: $breakpoint-xxl) {
 
   // Fixed grid
   @include grid-core($gridColumnWidth1500, $gridGutterWidth1500);

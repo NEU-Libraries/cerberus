@@ -25,6 +25,7 @@
   = render :partial => 'document_list'
   = render 'results_pagination'
   -content_for :side_bar do
+    = render partial: 'shared/sets/sets_sidebar'
     = render :partial => 'did_you_mean'
     = render :partial => 'facet_selected'
     = render_pagination_info @response, :entry_name=>'item'
