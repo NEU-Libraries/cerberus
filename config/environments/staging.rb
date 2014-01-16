@@ -36,7 +36,7 @@ Drs::Application.configure do
   config.serve_static_assets = true
 
   # Expands the lines which load the assets
-  config.assets.debug = true
+  config.assets.debug = false
 
   # Tell Mailer to use SMTP 
   config.action_mailer.delivery_method = :smtp
