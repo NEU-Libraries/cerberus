@@ -42,6 +42,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     vb.customize ["modifyvm", :id, "--natdnshostresolver1", "off"]
 
   end
+  config.vm.provider "vmware_fusion" do |v, override|
+
+  end
 
   config.vm.provision "shell", path: "script/vagrant_script.sh"
   config.vm.synced_folder ".", "/vagrant", nfs: true

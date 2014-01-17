@@ -19,6 +19,3 @@
   / Javascript loaded at the end
   = render :partial => 'layouts/end-js-scripts'
   #ajax-modal.modal.hide{:tabindex => "-1", "aria-labelledby" => "ajaxModalLabel", role: "dialog"}
-  = render :partial => '/ga', :formats => [:html]
-  - unless Rails.env.production?
-    = debug params

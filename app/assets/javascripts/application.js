@@ -26,3 +26,4 @@
 
 //= require compilations
 
+//= require analytics.js
