@@ -54,4 +54,6 @@ Drs::Application.configure do
     authentication: ENV["MAILER_AUTHENTICATION"], 
     enable_starttls_auto: true
   }
+  #Google analytics tracking code
+  GA.tracker = "UA-4426028-12"
 end

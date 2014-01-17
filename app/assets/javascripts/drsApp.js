@@ -35,7 +35,7 @@ $( document ).ready(function() {
           handleCommunitiesAdminAutoComplete();
 
           toggleShoppingCart($('*[data-shoppingcart]'));
-          handleDrsItem($('.drs-item[data-drs-item]')); 
+          handleDrsItem($('.drs-item[data-drsitem]')); 
           
           
       },
@@ -380,16 +380,9 @@ $( document ).ready(function() {
               $(this).addClass('active');
               
             }
-            
-
             pictureActive($(this).find('[data-picture]'));
-          }
-          else if( $(this).data('href').length > 4 ) {
+          }else if( $(this).data('href').length > 4 && !$(this).hasClass('drs-item-full')) {
             window.location.assign( $(this).data('href') );
-
-          }
-          else{
-            console.log( this, 'was clicked' );
           }
 
           

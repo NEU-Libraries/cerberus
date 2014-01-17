@@ -7,7 +7,7 @@
 - thumbs = get_file_thumbnails(@nu_core_file)
 - layout_class =  thumbs.has_key?( "thumbnail_10" ) ?  'span12' : 'span6' 
 = render :partial => 'nu_core_files/breadcrumbs'
-%article{class: ['drs-item', 'drs-item-full', @nu_core_file.type] }
+%article{class: ['drs-item', 'drs-item-full', @nu_core_file.type ],  data: { drsitem: @nu_core_file.pid } }
   %header 
     %h1.lower.page-header= @nu_core_file
 

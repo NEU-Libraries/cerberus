@@ -6,19 +6,7 @@
     - if current_user_can_read?(content)
       -if content.class.name != "ImageThumbnailFile"
         .btn-group
-          %a.btn.btn-mini.btn-clear{ href: sufia.download_path(content.pid, {datastream_id: 'content'}), target: '_blank', title: content.title + ' - ' + content.type_label,  data: {toggle: "tooltip" } } 
+          %a.btn.btn-mini.btn-clear{ href: sufia.download_path(content.pid, {datastream_id: 'content'}), target: '_blank', title: content.title + ' - ' + content.type_label,  data: {toggle: "tooltip", pid: content.pid } } 
             = content.type_label
         
           = render partial: 'shopping_carts/add_or_remove_btn', locals: { :id => content.pid }
-      -else
-        .btn-group
-          %a.btn.btn-mini.btn-clear{ href: sufia.download_path(content.pid, {datastream_id: 'content'}), target: '_blank', title: content.title + ' - ' + content.type_label,  data: {toggle: "tooltip" } }  
-            = content.type_label
-        
-          = render partial: 'shopping_carts/add_or_remove_btn', locals: { :id => content.pid }
-        -# TODO Zip the thumbnail contents into a single archive
-        -# content.datastreams.each do |datastream|
-          -#if  datastream[0].start_with?("thumbnail") && !datastream[1].mimeType != ""
-            -# data = datastream[1]
-            -#%a.btn-mini.btn.btn-clear{ href: sufia.download_path(data.pid, {datastream_id: data.dsid }), target: '_blank'} 
-              -# = "Thumbnail - (#{data.dsid})" 

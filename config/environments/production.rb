@@ -20,6 +20,9 @@ Drs::Application.configure do
   # Generate digests for assets URLs
   config.assets.digest = true
 
+  # Development Tracking Code
+  GA.tracker = "UA-4426028-6"
+
   # Defaults to nil and saved in location specified by config.assets.prefix
   # config.assets.manifest = YOUR_PATH
 
