@@ -1,5 +1,7 @@
 /* global jQuery: false */
 /* jshint strict: true */
+/* global _gaq: false */
+
 
 'use strict';
 
@@ -8,7 +10,7 @@
     
 
     /**
-     * Handles the 
+     * Handles the an jQuery event object.
      * @param  {object}   jQuery Event Object
      * @return {string}   The status of the push.
      */
@@ -30,7 +32,7 @@
      * Extends the simple send event function to get the pid of the item
      */
     var sendDownloadEvent = function ( event ){
-       event.data.label = $(this).closest('.drs-item').data('drsitem'); 
+       event.data.label = $(this).closest('.drs-item').data('drsitem');
        sendEvent( event );
     };
     /**
@@ -38,13 +40,35 @@
      * 
      */
       $('a[href*="/downloads/"]').on( 'click', {
-          category: 'Downloads',
+          category: 'Download',
           action: 'Content Download',
           value: 1,
           nonInteractive: true
-      }, sendDownloadEvent );  
+      }, sendDownloadEvent );
+
     
-        
+    /**
+     * sendPageView for full items
+     * @param  {object} element DOM Target to look for 
+     * @return {boolean}        Sent i
+     */
+    var sendPageView = function ( element ){
+      var $e = $(element),
+      itemPid = '';
+
+      console.log($e);
+      if($e.length > 0 ){
+        itemPid = $e.data('drsitem');
+        console.log(itemPid);
+        var status = _gaq.push(['_trackEvent','View', 'Full Item View', itemPid, 1]);
+        return status;
+      }
+      else{
+        return false;
+      }
+    };
+
+    console.log( sendPageView($('.drs-item-full')) );
        
       
       
