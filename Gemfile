@@ -35,6 +35,9 @@ gem "bower-rails", "~> 0.5.0"
 #Google Analytics integration - 
 gem 'google-analytics-rails'
 
+#Google API Ruby Client
+gem 'google-api-client'
+
 # Gems used only for assets and not required
 # in production environments by default.
 group :assets do

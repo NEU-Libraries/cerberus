@@ -35,7 +35,7 @@ $( document ).ready(function() {
           handleCommunitiesAdminAutoComplete();
 
           toggleShoppingCart($('*[data-shoppingcart]'));
-          handleDrsItem($('.drs-item[data-drs-item]')); 
+          handleDrsItem($('.drs-item[data-drsitem]')); 
           
           
       },
