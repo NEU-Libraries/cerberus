@@ -86,7 +86,17 @@ describe NuCoreFilesController do
       response.status.should == 403 
     end
 
-    it "successfully removes the item for users with edit permissions" do 
+    it "403s for users who aren't the depositor but have edit permissions" do 
+      file.rightsMetadata.permissions({person: '000000002'}, 'edit') 
+      file.save!
+
+      sign_in bo
+
+      delete :destroy, { id: file.pid } 
+      response.status.should == 403
+    end 
+
+    it "successfully removes the item for the depositor" do 
       sign_in bill 
       file_pid = file.pid
 

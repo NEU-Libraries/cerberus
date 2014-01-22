@@ -4,7 +4,8 @@ class NuCollectionsController < SetsController
   before_filter :authenticate_user!, only: [:new, :edit, :create, :update, :destroy ]
 
   before_filter :can_read?, only: [:show]
-  before_filter :can_edit?, only: [:edit, :update, :destroy]
+  before_filter :can_edit?, only: [:edit, :update]
+  before_filter :is_depositor?, only: [:destroy] 
 
   before_filter :can_edit_parent?, only: [:new, :create]
   before_filter :parent_is_personal_folder?, only: [:new, :create]
