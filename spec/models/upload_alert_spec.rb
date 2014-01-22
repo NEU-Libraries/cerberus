@@ -1,6 +1,51 @@
 require 'spec_helper'
 
 describe UploadAlert do
+
+  describe "querying" do 
+    before :all do 
+      FactoryGirl.create_list(:theses_alert, 2) 
+      FactoryGirl.create_list(:theses_update_alert, 2)
+      FactoryGirl.create(:theses_notified_alert) 
+
+      FactoryGirl.create_list(:research_alert, 2) 
+      FactoryGirl.create_list(:research_update_alert, 2) 
+      FactoryGirl.create(:research_notified_alert)
+
+      FactoryGirl.create_list(:presentation_alert, 2) 
+      FactoryGirl.create_list(:presentation_update_alert, 2)
+      FactoryGirl.create(:presentation_notified_alert)
+
+      FactoryGirl.create_list(:dataset_alert, 2) 
+      FactoryGirl.create_list(:dataset_update_alert, 2) 
+      FactoryGirl.create(:dataset_notified_alert)
+
+      FactoryGirl.create_list(:learning_object_alert, 2) 
+      FactoryGirl.create_list(:learning_object_update_alert, 2) 
+      FactoryGirl.create(:learning_object_notified_alert)
+    end
+
+    after(:all) { UploadAlert.destroy_all } 
+
+    shared_examples_for "withheld queries" do 
+      it "return the correct number of results" do 
+        created.length.should == 2
+        updated.length.should == 2
+      end
+
+      it "return the change type asked for" do 
+        created.all? { |x| x.change_type == :create }.should be true 
+        updated.all? { |x| x.change_type == :update }.should be true 
+      end
+    end
+
+    context "for research publications" do 
+      let(:created) { UploadAlert.withheld_research_publications(:create) } 
+      let(:updated) { UploadAlert.withheld_research_publications(:update) } 
+
+      it_should_behave_like "withheld queries" 
+    end
+  end
   
 
   describe "creation from core file" do  
