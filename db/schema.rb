@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20131210165421) do
+ActiveRecord::Schema.define(:version => 20140122160345) do
 
   create_table "bookmarks", :force => true do |t|
     t.integer  "user_id",     :null => false
@@ -143,7 +143,7 @@ ActiveRecord::Schema.define(:version => 20131210165421) do
 
   create_table "trophies", :force => true do |t|
     t.integer  "user_id"
-    t.string   "nu_core_file_id"
+    t.string   "generic_file_id"
     t.datetime "created_at",      :null => false
     t.datetime "updated_at",      :null => false
   end
@@ -157,13 +157,14 @@ ActiveRecord::Schema.define(:version => 20131210165421) do
     t.datetime "updated_at",      :null => false
     t.string   "pid"
     t.boolean  "notified"
+    t.string   "change_type"
   end
 
   add_index "upload_alerts", ["content_type"], :name => "index_upload_alerts_on_type"
 
   create_table "users", :force => true do |t|
-    t.string   "email",                  :default => "",    :null => false
-    t.string   "encrypted_password",     :default => "",    :null => false
+    t.string   "email",                  :default => "",     :null => false
+    t.string   "encrypted_password",     :default => "",     :null => false
     t.string   "reset_password_token"
     t.datetime "reset_password_sent_at"
     t.datetime "remember_created_at"
@@ -172,8 +173,8 @@ ActiveRecord::Schema.define(:version => 20131210165421) do
     t.datetime "last_sign_in_at"
     t.string   "current_sign_in_ip"
     t.string   "last_sign_in_ip"
-    t.datetime "created_at",                                :null => false
-    t.datetime "updated_at",                                :null => false
+    t.datetime "created_at",                                 :null => false
+    t.datetime "updated_at",                                 :null => false
     t.boolean  "guest",                  :default => false
     t.string   "facebook_handle"
     t.string   "twitter_handle"
@@ -181,6 +182,7 @@ ActiveRecord::Schema.define(:version => 20131210165421) do
     t.string   "display_name"
     t.string   "address"
     t.string   "admin_area"
+    t.string   "department"
     t.string   "title"
     t.string   "office"
     t.string   "chat_id"
@@ -194,10 +196,9 @@ ActiveRecord::Schema.define(:version => 20131210165421) do
     t.text     "group_list"
     t.datetime "groups_last_update"
     t.string   "role"
-    t.string   "department"
     t.string   "nuid"
     t.string   "full_name"
-    t.string   "view_pref"
+    t.string   "view_pref",              :default => "list"
   end
 
   add_index "users", ["email"], :name => "index_users_on_email", :unique => true
