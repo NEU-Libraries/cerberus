@@ -51,6 +51,13 @@ class Compilation < ActiveFedora::Base
     end
   end
 
+  # Adds a simple JSON api to use with the JavaScript a bit easier than before
+  # 
+  
+  def as_json(opts = nil)
+    {id: self.identifier, title: self.title, depositor: self.depositor, description:  self.description, entries: self.entry_ids }
+  end
+
   # Eliminate every entry ID that points to an object that no longer exists
   # Return the pid of each entry removed. 
   # Behavior of this method is weirdly flaky in the case where self is held in memory 
