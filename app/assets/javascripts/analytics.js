@@ -5,7 +5,7 @@
 
 'use strict';
 
-(function ($) {
+!(function ($) {
   $( window ).ready(function() {
     
 
@@ -50,7 +50,7 @@
     /**
      * sendPageView for full items
      * @param  {object} element DOM Target to look for 
-     * @return {boolean}        Sent i
+     * @return {boolean}        Sent or not
      */
     var sendPageView = function ( element ){
       var $e = $(element),
@@ -59,7 +59,7 @@
       console.log($e);
       if($e.length > 0 ){
         itemPid = $e.data('drsitem');
-        console.log(itemPid);
+        
         var status = _gaq.push(['_trackEvent','View', 'Full Item View', itemPid, 1]);
         return status;
       }
@@ -67,12 +67,10 @@
         return false;
       }
     };
-
-    console.log( sendPageView($('.drs-item-full')) );
        
       
       
     
 
   });
-})(jQuery);
+})( jQuery );

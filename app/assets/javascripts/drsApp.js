@@ -35,7 +35,8 @@ $( document ).ready(function() {
           handleCommunitiesAdminAutoComplete();
 
           toggleShoppingCart($('*[data-shoppingcart]'));
-          handleDrsItem($('.drs-item[data-drsitem]')); 
+          handleDrsItem($('.drs-item[data-drsitem]:not(.drs-item-full)')); 
+          
           
           
       },
@@ -363,7 +364,7 @@ $( document ).ready(function() {
       };
       var handleDrsItem = function(element){
         
-        $(element).on('click', function( event ){
+        $(element).on('click' ,function( event ){
           var target = $( event.target );
           
           var parent = $( this ).closest( '.drs-items' );
@@ -380,8 +381,12 @@ $( document ).ready(function() {
               $(this).addClass('active');
               
             }
+            
             pictureActive($(this).find('[data-picture]'));
-          }else if( $(this).data('href').length > 4 && !$(this).hasClass('drs-item-full')) {
+
+
+          }else if( $( this ).data( 'href' ).length > 4 && !$(this).hasClass('drs-item-full') ) {
+
             window.location.assign( $(this).data('href') );
           }
 
