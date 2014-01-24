@@ -1,0 +1,6 @@
+- # main container for facets/limits menu
+- facet_list ||= facet_field_names
+%div
+  %h5 Browse By
+  %ul#facet_group.nav.nav-list.slide-list
+    = render_facet_partials(facet_list)

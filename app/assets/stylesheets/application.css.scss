@@ -156,6 +156,9 @@
 @import "vendor/flatly/flatly";
 @import 'vendor/font-awesome/font-awesome';
 @import 'vendor/bootstrap-datepicker/custom-datepicker';
+
+@import "vendor/bootstrap-switch/bootstrap-switch";
+
 @import 'blacklight/blacklight';
 
 
@@ -177,6 +180,7 @@
 
 @import "components/drs-items-views";
 @import "components/drs-item";
+@import "components/drs_facets";
 
 
 @import 'sections/masthead';

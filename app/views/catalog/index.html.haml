@@ -25,10 +25,13 @@
   = render :partial => 'document_list'
   = render 'results_pagination'
   -content_for :side_bar do
+    %h5 View
     = render partial: 'shared/sets/sets_sidebar'
     = render :partial => 'did_you_mean'
     = render :partial => 'facet_selected'
-    %p.drs-pagingation-info
+    %h5 
+      Pagination
+    %p
       = render_pagination_info @response, :entry_name=>'item'
     = render 'sort_and_per_page'
     = render :partial=>'facets', locals: { facet_list: facet_list } 

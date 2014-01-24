@@ -73,6 +73,7 @@ group :development do
   gem 'capistrano-rails'
   gem 'capistrano-bundler'
   gem 'rvm1-capistrano3', require: false
+  gem 'rb-readline'
 end
 
 group :development, :test do
