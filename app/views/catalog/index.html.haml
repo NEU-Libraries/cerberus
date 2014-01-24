@@ -28,6 +28,7 @@
     = render partial: 'shared/sets/sets_sidebar'
     = render :partial => 'did_you_mean'
     = render :partial => 'facet_selected'
-    = render_pagination_info @response, :entry_name=>'item'
+    %p.drs-pagingation-info
+      = render_pagination_info @response, :entry_name=>'item'
     = render 'sort_and_per_page'
     = render :partial=>'facets', locals: { facet_list: facet_list } 
