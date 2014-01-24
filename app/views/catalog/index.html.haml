@@ -10,14 +10,17 @@
   - content_for :sidebar do
     = render :partial=>'facets', locals: { facet_list: facet_list } 
 - else
-  - @page_title =  "Search Results" 
+  - # Better search results here
+  - html_constraints = render_constraints( params )
+  - safe_constraints = strip_tags( html_constraints.sub( "</span>" , " / "  ) )
+  - @page_title =  "Search: '"  + safe_constraints + "'"
   
   -content_for :page_header do
     %h1.page-header
       %i.icon-search
       Search Results
       %small
-        = render_constraints(params)
+        = html_constraints
     
   
   
@@ -25,9 +28,13 @@
   = render :partial => 'document_list'
   = render 'results_pagination'
   -content_for :side_bar do
+    %h5 View
     = render partial: 'shared/sets/sets_sidebar'
     = render :partial => 'did_you_mean'
     = render :partial => 'facet_selected'
-    = render_pagination_info @response, :entry_name=>'item'
+    %h5 
+      Pagination
+    %p
+      = render_pagination_info @response, :entry_name=>'item'
     = render 'sort_and_per_page'
     = render :partial=>'facets', locals: { facet_list: facet_list } 

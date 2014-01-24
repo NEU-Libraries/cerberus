@@ -36,11 +36,18 @@ class CompilationsController < ApplicationController
       redirect_to @compilation 
     else
       flash.now.error = "Compilation failed to update" 
-    end 
+    end
+
   end 
 
   def show
     @page_title = "#{@compilation.title}"
+
+    respond_to do |format|
+      format.html{ render action: "show" }
+      format.json{ render json: @compilation  }
+
+    end 
   end
 
   def destroy  

@@ -1,3 +1,7 @@
-%a#cart_tracker.btn{href: shopping_cart_path}
-  %i.icon-shopping-cart 
+%a#cart_tracker.btn{href: shopping_cart_path, title: "Downloads page"}
+  %span.icon-shopping-cart(aria-hidden = true)
+  %span.sr-only
+    Downloads page,
   %span.overlay= "#{session[:ids] ? session[:ids].length : 0}" 
+  %span.sr-only
+    items selected

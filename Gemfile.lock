@@ -359,6 +359,7 @@ GEM
       ffi (>= 0.5.0)
     rb-kqueue (0.2.0)
       ffi (>= 0.5.0)
+    rb-readline (0.5.1)
     rdf (1.0.7)
       addressable (>= 2.2)
     rdf-rdfxml (1.0.1)
@@ -519,6 +520,7 @@ DEPENDENCIES
   omniauth
   omniauth-shibboleth
   rails (= 3.2.13)
+  rb-readline
   resque
   resque_spec
   rspec-rails
