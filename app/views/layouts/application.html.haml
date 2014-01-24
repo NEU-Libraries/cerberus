@@ -9,12 +9,13 @@
     %body(data-user="-1")
   = render :partial => '/masthead', :formats => [:html]
   = render :partial => '/flash_msg', :formats => [:html]
-  -if :page_header
-    .container.page_header
-      = yield :page_header
-  .container
-    = yield :content
-  / /.container
+  %main(role="main")
+    -if :page_header
+      .container.page_header
+        = yield :page_header
+    .container
+      = yield :content
+    / /.container
   = render partial: '/footer'
   / Javascript loaded at the end
   = render :partial => 'layouts/end-js-scripts'
