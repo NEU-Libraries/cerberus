@@ -41,14 +41,9 @@ class UsersController < ApplicationController
 
   # Process changes from profile form
   def update
+
     @user = current_user
-    if params[:user]
-      if Rails::VERSION::MAJOR == 3
-        @user.update_attributes(params[:user])
-      else
-        @user.update_attributes(params.require(:user).permit(*User.permitted_attributes))
-      end
-    end
+
     if params[:view_pref].present?
       view_pref  = params[:view_pref]
       
@@ -61,19 +56,37 @@ class UsersController < ApplicationController
             @user.save!
           end
         end
-      
+        
       else
         flash[:error] = "Preference wasn't saved, please try again."
       end
     end
+
+    if params[:user]
+      if Rails::VERSION::MAJOR == 3
+        @user.update_attributes(params[:user])
+      else
+        @user.update_attributes(params.require(:user).permit(*User.permitted_attributes))
+      end
+    end
+
     @user.populate_attributes if params[:update_directory]
     @user.avatar = nil if params[:delete_avatar]
+    
     unless @user.save
       redirect_to sufia.edit_profile_path(@user), alert: @user.errors.full_messages
       return
     end
+    
     Sufia.queue.push(UserEditProfileEventJob.new(@user.user_key))
-    redirect_to sufia.profile_path(@user), notice: "Your profile has been updated"
+    
+    respond_to do |format|
+      format.html {  redirect_to sufia.profile_path(@user), notice: "Your profile has been updated" }
+      format.js   { render json: @user.to_json }
+      format.json { render json: @user.to_json }
+    end
+
+   
   end 
 
   protected
