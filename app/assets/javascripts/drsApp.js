@@ -227,14 +227,51 @@ $( document ).ready(function() {
             container.removeClass('drs-items-grid').addClass('drs-items-list');
 
           }
+          if($('body').data('user') > 0 ){
+            updateUserViewPref($(this));  
+          }else{
+            storeData({
 
-          updateUserViewPref($(this));
+            });
+            
+          }
+          
 
         }
         
         
        };
        $('[data-toggle="drs-item-views-radio"]').on('click', 'a , button', handleClick);
+
+      };
+
+      var storeData = function ( data ){
+        var storage = window.localStorage;
+        var storedData;
+        if ( storage.key( 'drsApp' )){
+          storedData = storage.getItem( 'drsApp' );
+          storedData = JSON.parse( storeData );
+          data = $.merge( storedData, data );
+          
+        }
+        storage.setItem( 'drsApp' , JSON.stringify ( data ) );
+      };
+
+      fetchData = function( ){
+
+        var data = {};
+
+
+        if( window.localStorage ){
+          if ( window.localStorage.('dr')){
+            data JSON.parse( window.localStorage.getItem('drsApp') )
+          }
+        }
+
+      };
+      var getData = function ( key ){
+         var storage = window.localStorage;
+         var storedData = JSON.parse( storage.getItem ;
 
       };
 
@@ -254,23 +291,20 @@ $( document ).ready(function() {
        * @TODO
        */
       var updateUserViewPref = function(element){
-        if(drsApp.config.updateUserviewPrefBoolean){
+        if( drsApp.config.updateUserviewPrefBoolean ){
           var target = element.data('target');
-        console.log(element, target);
-
-
-        var userId = $('body').data('user') || 5;
-        var queryString = '/users/'+ userId;
-        $.ajax({
-         'url' : queryString,
-         'type': 'put',
-         'data' : {
-          'view_pref': gridOrListSwitch(target)
-          },
-          'complete': function( jqXHR,textStatus){
-            console.log(jqXHR, textStatus);
-          }
-         });
+          var userId = $('body').data('user') || 5;
+          var queryString = '/users/'+ userId;
+          $.ajax({
+           'url' : queryString,
+           'type': 'post',
+           'data' : {
+            'view_pref': gridOrListSwitch(target)
+            },
+            'complete': function( jqXHR,textStatus){
+              
+            }
+           });
         }
       };
 
@@ -478,7 +512,7 @@ $( document ).ready(function() {
   
   window.drsApp = drsApp;
   drsApp.init({
-    updateUserviewPrefBoolean: true,
+    updateUserviewPrefBoolean: false,
   });
 });
  
