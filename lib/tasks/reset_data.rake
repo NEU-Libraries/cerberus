@@ -14,24 +14,6 @@ def create_collection(klass, parent_str, title_str, description = "Lorem ipsum d
   return col
 end 
 
-def create_file(file_name, user, parent)
-  newPid = mint_unique_pid
-
-  core_record = NuCoreFile.new(depositor: "#{user.nuid}", pid: newPid, identifier: newPid, title: file_name)
-
-  # Attach some keywords to make objects searchable/facetable on them. 
-  core_record.keywords = ["system", "generated", "Random Object"] 
-  core_record.mods.subject(2).topic.authority = "IMF" 
-  core_record.set_parent(parent, user)
-  core_record.save!
-
-  set_edit_permissions(core_record)
-
-  file_path = "#{Rails.root}/spec/fixtures/files/#{file_name}"
-
-  Sufia.queue.push(ContentCreationJob.new(newPid, file_path, file_name, user.id, false))  
-end
-
 def create_content_file(factory_sym, user, parent) 
   master = FactoryGirl.create(factory_sym) 
   core   = master.core_record 
@@ -99,13 +81,9 @@ task :reset_data => :environment do
   roCol = create_collection(NuCollection, engDept.id, 'Random Objects')
   rusNovCol = create_collection(NuCollection, litCol.id, 'Russian Novels') 
 
-  create_file("test_docx.docx", tmp_user, roCol)
-  create_file("test_pic.jpeg", tmp_user, roCol)
-  create_file("test.pdf", tmp_user, roCol)
-
-  create_content_file(:image_master_file, tmp_user, litCol) 
-  create_content_file(:pdf_file, tmp_user, litCol) 
-  create_content_file(:docx_file, tmp_user, litCol) 
+  create_content_file(:image_master_file, tmp_user, roCol) 
+  create_content_file(:pdf_file, tmp_user, roCol) 
+  create_content_file(:docx_file, tmp_user, roCol) 
 
   puts "Reset to stock objects complete."
 
