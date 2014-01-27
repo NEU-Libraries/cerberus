@@ -9,15 +9,18 @@
 //
 // WARNING: THE FIRST BLANK LINE MARKS THE END OF WHAT'S TO BE PROCESSED, ANY BLANK LINE SHOULD
 // GO AFTER THE REQUIRES BELOW.
-//= require picturefill/picturefill.js
+
 //= require jquery
 //= require jquery_ujs
-//= require shopping_carts
+//= require modernizr/modernizr
+//= require webshims/polyfiller
+//= require polyfills
+
+//= require picturefill/picturefill.js
 //= require blacklight/blacklight
 //= require sufia
 // Required by Blacklight
 
-//= require bootstrap-select/bootstrap-select.js
 //= require bootstrap-datepicker/js/bootstrap-datepicker.js
 //= require bootbox/bootbox.min.js
 //= require plugins
@@ -25,5 +28,6 @@
 //= require drsApp
 
 //= require compilations
-
+//= require shopping_carts
 //= require analytics.js
+

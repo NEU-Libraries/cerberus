@@ -15,7 +15,7 @@ class User < ActiveRecord::Base
          :recoverable, :rememberable, :trackable, :validatable, :omniauthable, :omniauth_providers => [:shibboleth]
   # attr_accessible :title, :body
 
-  attr_accessible :password, :password_confirmation, :remember_me, :nuid, :full_name
+  attr_accessible :password, :password_confirmation, :remember_me, :nuid, :full_name, :view_pref
 
   ROLES = %w[admin employee] 
 
