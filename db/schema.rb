@@ -157,6 +157,7 @@ ActiveRecord::Schema.define(:version => 20140122160345) do
     t.datetime "updated_at",      :null => false
     t.string   "pid"
     t.boolean  "notified"
+    t.string   "change_type"
   end
 
   add_index "upload_alerts", ["content_type"], :name => "index_upload_alerts_on_type"
@@ -195,9 +196,9 @@ ActiveRecord::Schema.define(:version => 20140122160345) do
     t.text     "group_list"
     t.datetime "groups_last_update"
     t.string   "role"
-    t.string   "view_pref",              :default => "list"
     t.string   "nuid"
     t.string   "full_name"
+    t.string   "view_pref",              :default => "list"
   end
 
   add_index "users", ["email"], :name => "index_users_on_email", :unique => true
