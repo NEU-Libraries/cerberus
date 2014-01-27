@@ -1,7 +1,18 @@
-%h3 Your download is being prepared.  
+- content_for :page_header do
+  %h1.page-header Your download is being prepared.  
 
-%p Note that for large compilations this can take some time.  A link to download your .zip will be shown when the file is ready.  
+.alert.alert-info
+  %strong Note:
+  large #{ t('drs.compilations.name')}s this can take some time.  A link to download your 
+  %code .zip
+  will be shown when the file is ready.
+  %a.close(data-dismiss="alert" href="#" aria-hidden="true")
+    &times;
 
 %div#display_download_link
+
+.progress.progress-striped.active
+  .bar{style: "width: 100%;"}
+
 
 %div#data{:data => {:comp_id => @compilation.pid}}
