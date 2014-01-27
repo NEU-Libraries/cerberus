@@ -2,6 +2,9 @@
 /* jshint undef: true, unused: true */
 /*global $:false */
 /*global Modernizr */
+/*global ui */
+/*global picturefill */
+
 
 
 $( document ).ready(function() {
@@ -35,9 +38,7 @@ $( document ).ready(function() {
           handleCommunitiesAdminAutoComplete();
 
           toggleShoppingCart($('*[data-shoppingcart]'));
-          handleDrsItem($('.drs-item[data-drsitem]:not(.drs-item-full)')); 
-          
-          
+          handleDrsItem($('.drs-item[data-drsitem]:not(.drs-item-full)'));
           
       },
       /**
@@ -228,11 +229,9 @@ $( document ).ready(function() {
 
           }
           if($('body').data('user') > 0 ){
-            updateUserViewPref($(this));  
+            updateUserViewPref($(this));
           }else{
-            storeData({
-
-            });
+            return null;
             
           }
           
@@ -245,35 +244,35 @@ $( document ).ready(function() {
 
       };
 
-      var storeData = function ( data ){
-        var storage = window.localStorage;
-        var storedData;
-        if ( storage.key( 'drsApp' )){
-          storedData = storage.getItem( 'drsApp' );
-          storedData = JSON.parse( storeData );
-          data = $.merge( storedData, data );
+      // var storeData = function ( data ){
+      //   var storage = window.localStorage;
+      //   var storedData;
+      //   if ( storage.key( 'drsApp' )){
+      //     storedData = storage.getItem( 'drsApp' );
+      //     storedData = JSON.parse( storeData );
+      //     data = $.merge( storedData, data );
           
-        }
-        storage.setItem( 'drsApp' , JSON.stringify ( data ) );
-      };
+      //   }
+      //   storage.setItem( 'drsApp' , JSON.stringify ( data ) );
+      // };
 
-      fetchData = function( ){
+      // fetchData = function( ){
 
-        var data = {};
+      //   var data = {};
 
 
-        if( window.localStorage ){
-          if ( window.localStorage.('dr')){
-            data JSON.parse( window.localStorage.getItem('drsApp') )
-          }
-        }
+      //   if( window.localStorage ){
+      //     if ( window.localStorage.('dr')){
+      //       data JSON.parse( window.localStorage.getItem('drsApp') )
+      //     }
+      //   }
 
-      };
-      var getData = function ( key ){
-         var storage = window.localStorage;
-         var storedData = JSON.parse( storage.getItem ;
+      // };
+      // var getData = function ( key ){
+      //    var storage = window.localStorage;
+      //    var storedData = JSON.parse( storage.getItem ;
 
-      };
+      // };
 
       var gridOrListSwitch = function(dataTarget){
         switch(dataTarget){
@@ -323,76 +322,76 @@ $( document ).ready(function() {
         // Adding the form fields behavior to the buttons on the nu collections.
         $('#add_another_personal_creator').addFormFields({
           target: $('div.personal_creator'),
-          titleText: "Remove Personal Creator"
+          titleText: 'Remove Personal Creator'
         });
 
         
         $('#add_another_corporate_creator').addFormFields({
           target: $('div.corporate_creator'),
-          titleText: "Remove Corporate Creator",
-        });  
+          titleText: 'Remove Corporate Creator',
+        });
 
 
         $('#add_another_keyword').addFormFields({
           target: $('div.keyword'),
-          titleText:  "Remove keyword"
+          titleText:  'Remove keyword'
         });
         $('#add_another_permission').addFormFields({
           target: $('div.permission'),
-          titleText: "Remove permission"
+          titleText: 'Remove permission'
         });
       };
       var handleDrsCommunities = function(){
-        if ($("#community_autocomplete").length > 0) { 
-          $("#community_autocomplete").autocomplete({
+        if ($('#community_autocomplete').length > 0) {
+          $('#community_autocomplete').autocomplete({
               source: communities_for_autocomplete,
               select: function(e, ui) {
-                  e.preventDefault() // <--- Prevent the value from being inserted.
-                  $("#community_parent").val(ui.item.value);
+                  e.preventDefault(); // <--- Prevent the value from being inserted.
+                  $('#community_parent').val(ui.item.value);
                   $(this).val(ui.item.label);
               },
               focus: function( e, ui ) {
-                e.preventDefault() // <--- Prevent the value from being inserted.
+                e.preventDefault(); // <--- Prevent the value from being inserted.
               }
           });
 
-          $( "#community_autocomplete" ).attr('autocomplete', 'on');
+          $( '#community_autocomplete' ).attr('autocomplete', 'on');
         }
       };
 
 
       var handleDrsAdminCommunities = function(){
-        if ($("#admin_community_autocomplete").length > 0) { 
-          $("#admin_community_autocomplete").autocomplete({
+        if ($('#admin_community_autocomplete').length > 0) {
+          $('#admin_community_autocomplete').autocomplete({
               source: communities_for_employee_autocomplete,
               select: function(e, ui) {
-                  e.preventDefault() // <--- Prevent the value from being inserted.
-                  $("#admin_community").val(ui.item.value);
+                  e.preventDefault(); // <--- Prevent the value from being inserted.
+                  $('#admin_community').val(ui.item.value);
                   $(this).val(ui.item.label);
               },
-              focus: function( e, ui ) {
-                e.preventDefault() // <--- Prevent the value from being inserted.
+              focus: function( e ) {
+                e.preventDefault(); // <--- Prevent the value from being inserted.
               }
           });
 
-          $( "#admin_community_autocomplete" ).attr('autocomplete', 'on');
+          $( '#admin_community_autocomplete' ).attr('autocomplete', 'on');
         }
       };
       var handleCommunitiesAdminAutoComplete = function(){
-        if ($("#admin_employee_autocomplete").length > 0) { 
-          $("#admin_employee_autocomplete").autocomplete({
+        if ($('#admin_employee_autocomplete').length > 0) {
+          $('#admin_employee_autocomplete').autocomplete({
               source: employees_for_autocomplete,
               select: function(e, ui) {
-                  e.preventDefault() // <--- Prevent the value from being inserted.
-                  $("#admin_employee").val(ui.item.value);
+                  e.preventDefault(); // <--- Prevent the value from being inserted.
+                  $('#admin_employee').val(ui.item.value);
                   $(this).val(ui.item.label);
               },
-              focus: function( e, ui ) {
-                e.preventDefault() // <--- Prevent the value from being inserted.
+              focus: function( e ) {
+                e.preventDefault();// <--- Prevent the value from being inserted.
               }
           });
 
-          $( "#admin_employee_autocomplete" ).attr('autocomplete', 'on');
+          $( '#admin_employee_autocomplete' ).attr('autocomplete', 'on');
         }
 
       };
@@ -444,7 +443,7 @@ $( document ).ready(function() {
           var target = $this.attr('data-active');
           var active = $this.attr('data-media');
           
-          $this.attr({ 
+          $this.attr({
             'data-media': target,
             'data-active': active,
           });
@@ -465,7 +464,7 @@ $( document ).ready(function() {
         if ( $t.hasClass('active') ){
           var $clone =  $t.clone();
           $clone.addClass('jumbotron');
-          $t.append($clone); 
+          $t.append($clone);
 
 
           
@@ -480,7 +479,7 @@ $( document ).ready(function() {
        */
 
       var toggleShoppingCart = function(e){
-        var $e = $(e)
+        var $e = $(e);
         if($e.length > 0 ){
           $e.on('ajax:beforeSend', function(){
             $(this).attr('data-shoppingcart', 'replace');
