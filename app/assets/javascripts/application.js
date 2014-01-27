@@ -21,7 +21,7 @@
 //= require sufia
 // Required by Blacklight
 
-
+//= require bootstrap-datepicker/js/bootstrap-datepicker.js
 //= require bootbox/bootbox.min.js
 //= require plugins
 
