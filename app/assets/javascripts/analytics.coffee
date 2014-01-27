@@ -51,7 +51,6 @@
     sendPageView = (element) ->
       $e = $(element)
       itemPid = ''
-      console.log $e
       if $e.length > 0
         itemPid = $e.data('drsitem')
         status = _gaq.push([

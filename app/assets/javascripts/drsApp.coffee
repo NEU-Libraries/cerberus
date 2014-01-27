@@ -76,7 +76,8 @@ $(document).ready ->
 
         return
 
-      return
+      return      
+    # Builds and requests the new compilation form for the ajax request
 
     newCompilationForm = ->
       $('#new_compilation').on('ajax:success', ->
@@ -85,8 +86,6 @@ $(document).ready ->
           classes: 'alert alert-success'
           strong: 'Success!'
           text: 'You created a new compilation!'
-
-        return
       ).on 'ajax:error', ->
         $(this).closest('.modal').modal 'hide'
         $('.breadcrumb').addBsAlert
@@ -97,7 +96,9 @@ $(document).ready ->
         return
 
       return
-
+    ###
+    Handles the compilation modal object for the page
+    ###
     compilationsModal = (e) ->
       $modal = $('#ajax-modal')
       $modal.empty().append(e).modal 'show'

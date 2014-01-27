@@ -1,15 +1,15 @@
 true
-# global jQuery: false 
+# global jQuery: false
 
-# jshint strict: true 
+# jshint strict: true
 
-# global _gaq: false 
+# global _gaq: false
 'use strict'
 (($) ->
   $(document).ready ->
     
-    # If we're on the shopping_cart/download page, start polling 
-    # the server. 
+    # If we're on the shopping_cart/download page, start polling
+    # the server.
     poll_server = ->
       console.log 'From poll server, interval id is' + interval_id
       if $('#button_slot').is(':empty')
