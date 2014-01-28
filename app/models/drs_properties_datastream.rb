@@ -18,6 +18,7 @@ class DrsPropertiesDatastream < ActiveFedora::OmDatastream
     t.root(:path=>"fields" ) 
     # This is where we put the user id of the object depositor -- impacts permissions/access controls
     t.depositor :index_as=>[:stored_searchable]
+    t.thumbnail_list :index_as=>[:stored_searchable]
     t.in_progress path: 'inProgress'
     # This is where we put the relative path of the file if submitted as a folder
     t.relative_path
