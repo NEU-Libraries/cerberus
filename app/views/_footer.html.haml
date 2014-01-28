@@ -25,11 +25,12 @@
         %ul.nu-social
           %li
             %a.youtube{:href => "https://www.youtube.com/northeastern"}
-              =render_icon('icon-youtube-sign', {alt_text: "Youtube"})
+              =render partial: 'shared/icon', locals: {class_string: "icon-youtube-sign", alt_text: "Northern University on YouTube" }
           %li
             %a.twitter{:href => "http://twitter.com/northeastern"}
-              =render_icon('icon-twitter-sign', {alt_text: "Twitter"})
+              =render partial: 'shared/icon', locals: {class_string: "icon-twitter-sign", alt_text: "Northern University on Twitter" }
+
           %li
             %a.facebook{:href => "http://www.facebook.com/northeastern"}
-              =render_icon('icon-facebook-sign', {alt_text: "Facebook"})
+              =render partial: 'shared/icon', locals: { class_string: "icon-facebook-sign", alt_text: "Northeastern on Facebook"}
 
