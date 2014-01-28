@@ -16,7 +16,13 @@ class AtomisticCharacterizationJob
     c_object.characterize
 
     if c_object.canonical?
-      DerivativeCreator.new(content_pid).generate_derivatives 
+      thumbnail_list = DerivativeCreator.new(content_pid).generate_derivatives
+      
+      master = ActiveFedora::Base.find(content_pid, cast: true) 
+      core = NuCoreFile.find(master.core_record.pid)
+      core.thumbnail_list = thumbnail_list
+      
+      core.save!
     end
   end
 end

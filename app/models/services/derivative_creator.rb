@@ -21,8 +21,13 @@ class DerivativeCreator
       create_thumbnail_from_pdf(pdf)
     end
 
-    self.core.thumbnail_list = self.thumbnail_list
-    self.core.save!
+    fuckingwork = NuCoreFile.find(@master.core_record.pid)
+    fuckingwork.properties.thumbnail_list = @thumbnail_list
+    fuckingwork.save!
+
+    puts "Goddamnit"
+    puts fuckingwork.properties.thumbnail_list
+    
   end
 
   private 
@@ -92,7 +97,8 @@ class DerivativeCreator
       thumb.add_file(scaled_img.to_blob, dsid, "#{master.content.label.split('.').first}.jpeg") 
       thumb.save!
 
-      thumbnail_list << dsid
+      self.thumbnail_list << dsid
+      #puts thumbnail_list
     end   
 
     def update_or_create_with_metadata(title, desc, klass, object = nil)

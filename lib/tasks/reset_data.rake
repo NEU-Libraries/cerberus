@@ -20,7 +20,7 @@ def create_content_file(factory_sym, user, parent)
 
   master.mass_permissions = 'public'
   master.depositor = user.nuid
-  DerivativeCreator.new(master.pid).generate_derivatives
+  thumbnail_list = DerivativeCreator.new(master.pid).generate_derivatives
   
   # Add non garbage metadata to core record. 
   core.parent = ActiveFedora::Base.find(parent.pid, cast: true) 
@@ -31,6 +31,7 @@ def create_content_file(factory_sym, user, parent)
   core.mass_permissions = 'public'
   core.keywords = ["#{master.class}", "content"] 
   core.mods.subject(0).topic = "a"
+  core.thumbnail_list = thumbnail_list
 
   core.save! 
   master.save! 
