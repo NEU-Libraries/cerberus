@@ -20,7 +20,7 @@ class DerivativeCreator
       pdf = create_pdf_file
       create_thumbnail_from_pdf(pdf)
     end
-    
+    return @thumbnail_list
   end
 
   private 
