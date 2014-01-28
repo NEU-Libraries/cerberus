@@ -118,8 +118,7 @@ module ApplicationHelper
       drs_item[:abstract] = item.description
       drs_item[:download_path] = sufia.download_path(item.noid)
     end
-
-    puts "How many times are we ending up here? - DGC"
+    
     return drs_item
 
   end
