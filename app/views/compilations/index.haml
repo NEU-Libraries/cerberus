@@ -1,4 +1,5 @@
 %h1.page-header
+  = render_icon('icon-th-list')
   My 
   = t('drs.compilations.name').capitalize + 's'
 %p.lead
@@ -13,9 +14,7 @@
         Create a new #{t('drs.compilations.name')} today.
   %li.span2
     %a.thumbnail.thumbnail-btn(href=new_compilation_path)
-      / %i.icon-folder-open-alt.icon-block-1s
-      %span.icon-stack
-        %i.icon-folder-close-alt.midnight-blue.icon-stack-base
-        %i.icon-plus
+      = render_icon('icon-th-list')
+      
       %h5.text-center Create a new #{t('drs.compilations.name')}
 
