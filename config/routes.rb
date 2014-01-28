@@ -51,7 +51,7 @@ Drs::Application.routes.draw do
     resources :employees, only: [:index, :edit, :update, :destroy]
   end
 
-  resource :shopping_cart, :path => "download_queue", :controller => "shopping_cart", except: [:new, :create, :edit]
+  resource :shopping_cart, :path => "download_queue", :controller => "shopping_carts", except: [:new, :create, :edit]
   put '/download_queue' => 'shopping_carts#update', as: 'update_cart'
   get '/download_queue/download' => 'shopping_carts#download', as: 'cart_download'
   get '/download_queue/fire_download' => 'shopping_carts#fire_download', as: 'fire_download'
