@@ -12,7 +12,7 @@ module Drs
       end
 
       def depositor
-        if_properties_exists_strict { self.properties.thumbnail_list.first } 
+        if_properties_exists_strict { self.properties.thumbnail_list } 
       end
 
       def title=(string) 
