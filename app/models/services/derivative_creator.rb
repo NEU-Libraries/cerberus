@@ -3,11 +3,12 @@ include Magick
 
 class DerivativeCreator 
 
-  attr_accessor :core, :master
+  attr_accessor :core, :master, :thumbnail_list
 
   def initialize(master_pid) 
     @master = ActiveFedora::Base.find(master_pid, cast: true) 
-    @core = NuCoreFile.find(@master.core_record.pid) 
+    @core = NuCoreFile.find(@master.core_record.pid)
+    @thumbnail_list = Array.new 
   end
 
   def generate_derivatives
@@ -16,9 +17,11 @@ class DerivativeCreator
     elsif master.instance_of? PdfFile 
       create_thumbnail_from_pdf(self.master) 
     elsif master.instance_of? MswordFile 
-       pdf = create_pdf_file
-       create_thumbnail_from_pdf(pdf)
+      pdf = create_pdf_file
+      create_thumbnail_from_pdf(pdf)
     end
+
+    master.thumbnail_list = thumbnail_list
   end
 
   private 
@@ -87,6 +90,8 @@ class DerivativeCreator
 
       thumb.add_file(scaled_img.to_blob, dsid, "#{master.content.label.split('.').first}.jpeg") 
       thumb.save!
+
+      thumbnail_list << dsid
     end   
 
     def update_or_create_with_metadata(title, desc, klass, object = nil)
