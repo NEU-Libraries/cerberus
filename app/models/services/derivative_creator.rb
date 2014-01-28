@@ -20,13 +20,6 @@ class DerivativeCreator
       pdf = create_pdf_file
       create_thumbnail_from_pdf(pdf)
     end
-
-    fuckingwork = NuCoreFile.find(@master.core_record.pid)
-    fuckingwork.properties.thumbnail_list = @thumbnail_list
-    fuckingwork.save!
-
-    puts "Goddamnit"
-    puts fuckingwork.properties.thumbnail_list
     
   end
 
