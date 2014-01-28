@@ -1,7 +1,7 @@
 - content_for :page_header do
   %h1.page-header
+    =render_icon('icon-download-alt')  
     = t('drs.shoppingcarts.name').titlecase
-
 - if @items.length > 0 
   .drs-items.drs-items-list
   - @items.each do |item| 
