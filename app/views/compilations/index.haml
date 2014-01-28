@@ -7,7 +7,7 @@
   - if !@compilations.empty?
     = render partial: 'all_compilations', locals: { compilations: @compilations }
   - else
-    %li.span12  
+    %li.span12
       .alert.alert-info
         %strong No #{t('drs.compilations.name') + 's'} available!
         Create a new #{t('drs.compilations.name')} today.
