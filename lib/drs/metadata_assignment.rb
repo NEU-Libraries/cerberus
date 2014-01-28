@@ -11,7 +11,7 @@ module Drs
         if_properties_exists_strict { self.properties.thumbnail_list = array_of_strings }         
       end
 
-      def depositor
+      def thumbnail_list
         if_properties_exists_strict { self.properties.thumbnail_list } 
       end
 

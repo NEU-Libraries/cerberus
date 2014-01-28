@@ -22,6 +22,7 @@ class DerivativeCreator
     end
 
     master.thumbnail_list = thumbnail_list
+    master.save!
   end
 
   private 
