@@ -13,3 +13,8 @@ indent_size = 2
 [*.haml]
 indent_style = space
 indent_size = 2
+
+[*.coffee]
+indent_style = space
+indent_size = 2
+trim_tailing = true

@@ -8,8 +8,7 @@
       "bootstrap-select" : "~1.3.5",
       "placeholder" : "*",
       "picturefill" : "~1.2.1",
-      "mrmrs-colors" : "*",
-      "bootstrap-switch" : "~2.0.1"
+      "mrmrs-colors" : "*"
     }
   }
 }

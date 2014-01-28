@@ -38,6 +38,9 @@ gem 'google-analytics-rails'
 #Google API Ruby Client
 gem 'google-api-client'
 
+
+gem 'webshims-rails'
+
 # Gems used only for assets and not required
 # in production environments by default.
 group :assets do
