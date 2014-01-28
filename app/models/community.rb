@@ -66,6 +66,10 @@ class Community < ActiveFedora::Base
     employee_query(:all_learning_objects) 
   end
 
+  def type_label
+    "Community"
+  end
+
   private 
 
     def employee_query(sym) 

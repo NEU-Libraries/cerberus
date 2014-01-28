@@ -1,5 +1,8 @@
-%article.drs-item{data: { href: item[:path],  "drsitem" => item[:pid]}}
+%article.drs-item{data: { href: url_for( item ) ,  "drsitem" => item.pid }}
   = render partial: 'shared/drs_item/drs_item_figure', locals: {item: item}
-  = render partial: 'shared/drs_item/drs_item_details', locals: {item: item}
-  
+  =# render partial: 'shared/drs_item/drs_item_details', locals: {item: item}
+-if false 
+  %article.drs-item{data: { href: item[:path],  "drsitem" => item[:pid]}}
+    = render partial: 'shared/drs_item/drs_item_figure', locals: {item: item}
+    = render partial: 'shared/drs_item/drs_item_details', locals: {item: item}
     
