@@ -28,7 +28,7 @@ Drs::Application.routes.draw do
   get '/communities/:id/pedagogical' => 'communities#learning_objects', as: 'community_pedagogical'
   post '/communities/:id/attach_employee/:employee_id' => 'communities#attach_employee', as: 'attach_employee'
   
-  resources :sets, :controller => "compilations"
+  resources :compilations, :controller => "compilations", :path => "sets"
   get "/sets/:id/download" => 'compilations#show_download', as: 'prepare_download'
   get "/sets/:id/ping" => 'compilations#ping_download', as: 'ping_download'  
   get "/sets/:id/trigger_download" => 'compilations#download', as: 'trigger_download'
@@ -51,7 +51,7 @@ Drs::Application.routes.draw do
     resources :employees, only: [:index, :edit, :update, :destroy]
   end
 
-  resource :download_queue, :controller => "shopping_cart", except: [:new, :create, :edit]
+  resource :dshopping_cart, :path => "download_queue", :controller => "shopping_cart", except: [:new, :create, :edit]
   put '/download_queue' => 'shopping_carts#update', as: 'update_cart'
   get '/download_queue/download' => 'shopping_carts#download', as: 'cart_download'
   get '/download_queue/fire_download' => 'shopping_carts#fire_download', as: 'fire_download'
