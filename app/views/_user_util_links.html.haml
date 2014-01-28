@@ -15,7 +15,7 @@
       %li{:class => ("active" if controller_name == "compilations" && action_name == "index")}
         %a.top_nav{href: compilations_path,  "tab-index" => "-1"}
           %span.icon-folder-open-alt( aria-hidden="true" )
-          Compilations
+          =t('drs.compilations.name').capitalize + 's'
       %li.divider
       %li= link_to raw('<span class="icon-signout" aria-hidden="true" ></span> log out'), destroy_user_session_path, :id => 'logout_nav_link',  "tab-index" => "-1"
   - else
