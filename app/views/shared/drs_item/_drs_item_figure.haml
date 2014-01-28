@@ -1,16 +1,16 @@
-%figure
-  - if item[:thumbnails]
-    -if item[:thumbnails].has_key?('thumbnail_4') #render out the full picture instead of the dinky one
-      =render partial: 'shared/thumbnails/dynamic_picture', locals: { thumbs: item[:thumbnails] }
+%a{href: url_for(item)}
+  %figure
+    - if item.instance_of?(NuCoreFile)
+      - thumbs = get_file_thumbnails(item)
+      -if thumbs.has_key?('thumbnail_4') #render out the full picture instead of the dinky one
+        =render partial: 'shared/thumbnails/dynamic_picture', locals: { thumbs: thumbs }
+      -else
+        =render partial: 'shared/thumbnails/thumbnail_picture', locals: { thumbs: thumbs }
+    - elsif item.instance_of?(NuCollection)
+      = render partial: 'shared/icon', locals: {class_string: 'icon-folder-open'}
+    - elsif item.instance_of?(Community)
+      = render partial: 'shared/icon', locals: {class_string: 'icon-group'}
     -else
-      =render partial: 'shared/thumbnails/thumbnail_picture', locals: { thumbs: item[:thumbnails] }
-    
-  - else
-    - if item[:type] == "Collection"
-      %i.icon-folder-open
-    - if item[:type] == "Community"
-      %i.icon-group
-    - if item[:type] == "file"
-      %i.icon-file
-  %figcaption
-    = item[:type]
+      = render partial: 'shared/icon', locals: {class_string: 'icon-file'}
+    %figcaption
+      = item.type_label

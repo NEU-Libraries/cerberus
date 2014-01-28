@@ -4,15 +4,15 @@
       -# Go through and template out the communities individually.
       - @set.child_communities.each do |community| 
         - if current_user_can_read?(community)
-          = render partial: 'shared/drs_item/drs_item' , locals: { item: prepare_drs_item(community) }
+          = render partial: 'shared/drs_item/drs_item' , locals: { item: community }
           
     - @set.child_collections.reverse.each do |collection| 
       - if current_user_can_read?(collection) 
-        = render partial: 'shared/drs_item/drs_item' , locals: { item: prepare_drs_item(collection) }
+        =# render partial: 'shared/drs_item/drs_item' , locals: { item: prepare_drs_item(collection) }
     - if @set.instance_of?(NuCollection)
       - @set.child_files.each do |file|
         - if current_user_can_read?(file)
-          = render partial: 'shared/drs_item/drs_item' , locals: { item: prepare_drs_item(file) }
+          =# render partial: 'shared/drs_item/drs_item' , locals: { item: prepare_drs_item(file) }
 
 
   
