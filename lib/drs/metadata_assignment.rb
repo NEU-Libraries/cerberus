@@ -7,6 +7,14 @@ module Drs
     extend ActiveSupport::Concern
 
     included do
+      def thumbnail_list=(array_of_strings) 
+        if_properties_exists_strict { self.properties.thumbnail_list = array_of_strings }         
+      end
+
+      def depositor
+        if_properties_exists_strict { self.properties.thumbnail_list.first } 
+      end
+
       def title=(string) 
         if_DC_exists { self.DC.nu_title = string } 
         if_mods_exists { self.mods.title = string }
