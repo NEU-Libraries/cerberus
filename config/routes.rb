@@ -28,13 +28,13 @@ Drs::Application.routes.draw do
   get '/communities/:id/pedagogical' => 'communities#learning_objects', as: 'community_pedagogical'
   post '/communities/:id/attach_employee/:employee_id' => 'communities#attach_employee', as: 'attach_employee'
   
-  resources :compilations
-  get "/compilations/:id/download" => 'compilations#show_download', as: 'prepare_download'
-  get "/compilations/:id/ping" => 'compilations#ping_download', as: 'ping_download'  
-  get "/compilations/:id/trigger_download" => 'compilations#download', as: 'trigger_download'
+  resources :sets, :controller => "compilations"
+  get "/sets/:id/download" => 'compilations#show_download', as: 'prepare_download'
+  get "/sets/:id/ping" => 'compilations#ping_download', as: 'ping_download'  
+  get "/sets/:id/trigger_download" => 'compilations#download', as: 'trigger_download'
   
-  match "/compilations/:id/:entry_id" => 'compilations#delete_file', via: 'delete', as: 'delete_entry' 
-  match "/compilations/:id/:entry_id" => 'compilations#add_file', via: 'post', as: 'add_entry' 
+  match "/sets/:id/:entry_id" => 'compilations#delete_file', via: 'delete', as: 'delete_entry' 
+  match "/sets/:id/:entry_id" => 'compilations#add_file', via: 'post', as: 'add_entry' 
 
   get "/files/provide_metadata" => "nu_core_files#provide_metadata"
   post "/files/process_metadata" => "nu_core_files#process_metadata"
