@@ -18,5 +18,7 @@ en:
     compilations:
       name: set
       lead: Sets are collections of objects that you can create, share and store.
+    shoppingcarts:
+      name: download queue
   blacklight:
     application_name: "DRS"

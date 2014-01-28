@@ -11,12 +11,12 @@ class CompilationsController < ApplicationController
 
   def index 
     @compilations = Compilation.users_compilations(current_user) 
-    @page_title = "My Compilations"
+    @page_title = "My " + t('drs.compilations.name').capitalize + "s"
   end
 
   def new 
     @compilation = Compilation.new
-    @page_title = "New Compilation"
+    @page_title = "New " + t('drs.compilations.name').capitalize
   end
 
   def create
@@ -32,10 +32,10 @@ class CompilationsController < ApplicationController
 
   def update
     if @compilation.update_attributes(params[:compilation])
-      flash[:notice] = "Compilation successfully updated" 
+      flash[:notice] = "#{t('drs.compilations.name').capitalize} successfully updated." 
       redirect_to @compilation 
     else
-      flash.now.error = "Compilation failed to update" 
+      flash.now.error = "#{t('drs.compilations.name').capitalize} failed to update." 
     end
 
   end 
@@ -52,10 +52,10 @@ class CompilationsController < ApplicationController
 
   def destroy  
     if @compilation.destroy
-      flash[:notice] = "Compilation was successfully destroyed" 
+      flash[:notice] = "#{t('drs.compilations.name').capitalize} was successfully destroyed" 
       redirect_to compilations_path 
     else
-      flash.now.error = "Compilation #{@compilation.title} was not successfully destroyed" 
+      flash.now.error = "#{t('drs.compilations.name').capitalize} #{@compilation.title} was not successfully destroyed" 
     end 
   end
 
@@ -93,16 +93,16 @@ class CompilationsController < ApplicationController
 
     if dead_entries.length > 0
       flash.now[:error] = "The following items no longer exist in the repository and have been removed from your" +
-      " compilation: #{dead_entries.join(', ')}"
+      " #{t(drs.compilation.name)}: #{dead_entries.join(', ')}"
     end
   end
 
   def save_or_bust(compilation) 
     if compilation.save! 
-      flash[:notice] = "Compilation successfully updated" 
+      flash[:notice] = "#{t('drs.compilations.name').capitalize} successfully updated" 
       redirect_to compilation 
     else
-      flash.now.error = "Compilation was not successfully updated" 
+      flash.now.error = "#{t('drs.compilations.name').capitalize} was not successfully updated" 
     end
   end
 
