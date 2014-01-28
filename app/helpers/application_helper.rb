@@ -39,7 +39,6 @@ module ApplicationHelper
   # Keys that might be available for front end thumbnails "thumbnail_1", "thumbnail_2", "thumbnail_2_2x", "thumbnail_4", "thumbnail_4_2x", "thumbnail_10", "thumbnail_10_2x"
   def get_file_thumbnails(file, options = {})
     results = Hash.new
-    t1 = Time.now
     if file.instance_of?(NuCoreFile) and file.thumbnail
       thumb = file.thumbnail
       datastreams = thumb.datastreams
@@ -58,9 +57,6 @@ module ApplicationHelper
         end
       end
     end
-    t2 = Time.now
-    delta = t2 - t1
-    puts "TIME TAKEN IN get_file_thumbnails: #{delta}" 
     return results
   end
 
