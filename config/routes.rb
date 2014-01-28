@@ -51,10 +51,10 @@ Drs::Application.routes.draw do
     resources :employees, only: [:index, :edit, :update, :destroy]
   end
 
-  resource :shopping_cart, except: [:new, :create, :edit]
-  put '/shopping_cart' => 'shopping_carts#update', as: 'update_cart'
-  get '/shopping_cart/download' => 'shopping_carts#download', as: 'cart_download'
-  get '/shopping_cart/fire_download' => 'shopping_carts#fire_download', as: 'fire_download'
+  resource :download_queue, :controller => "shopping_cart", except: [:new, :create, :edit]
+  put '/download_queue' => 'shopping_carts#update', as: 'update_cart'
+  get '/download_queue/download' => 'shopping_carts#download', as: 'cart_download'
+  get '/download_queue/fire_download' => 'shopping_carts#fire_download', as: 'fire_download'
 
   # Best bits queries
   get '/theses' => 'catalog#theses', as: 'theses'
