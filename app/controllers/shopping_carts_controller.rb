@@ -9,7 +9,7 @@ class ShoppingCartsController < ApplicationController
   # Show the user the contents of their shopping cart.
   def show 
     @items = lookup_from_cookie(session[:ids]) 
-    @page_title = "Shopping Cart"
+    @page_title = t('drs.shoppingcarts.name').titlecase
   end
 
   # Allow the user to add/remove items from their shopping cart.
@@ -17,11 +17,11 @@ class ShoppingCartsController < ApplicationController
     if params[:add]
       @id = params[:add]
       session[:ids] << @id unless session[:ids].include? @id  
-      flash.now[:info] = "Item added to shopping cart" 
+      flash.now[:info] = "Item added to #{t('drs.shoppingcarts.name')}." 
     elsif params[:delete]
       @id = params[:delete]
       session[:ids].delete(@id)
-      flash.now[:info] = "Item removed from shopping cart" 
+      flash.now[:info] = "Item removed from #{t('drs.shoppingcarts.name')}."
     end
 
     respond_to do |format| 
@@ -47,7 +47,7 @@ class ShoppingCartsController < ApplicationController
       format.html do
         FileUtils.rm_rf(Dir.glob("#{dir}/*")) if File.directory?(dir) 
         Sufia.queue.push(CartDownloadJob.new(session[:session_id], session[:ids], current_user.nuid))
-        @page_title = "Download Shopping Cart"
+        @page_title = "Start Download - #{t('drs.shoppingcarts.name')}"
       end
 
       format.js do

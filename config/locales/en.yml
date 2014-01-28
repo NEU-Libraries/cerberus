@@ -15,6 +15,10 @@ en:
       description:
         short: "The DRS is a secure place to collect your work in one location and create a durable and citable record of research, presentations, publications, data sets, or other scholarly work."
         long: "Materials in the repository are maintained by Northeastern University Libraries for future use, and can be shared worldwide, with just a few people or groups, or kept private. You can also discover and remix materials created by others: for instance, articles and research data, materials from the University Archives and Special Collections, or images and photographs from the Northeastern community. For more information visit our FAQ. For help with uploading, searching, or logging in, visit our User Guides page."
-
+    compilations:
+      name: set
+      lead: Sets are collections of objects that you can create, share and store.
+    shoppingcarts:
+      name: download queue
   blacklight:
     application_name: "DRS"
