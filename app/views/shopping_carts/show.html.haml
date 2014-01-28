@@ -1,6 +1,6 @@
 - content_for :page_header do
   %h1.page-header
-    =render_icon('icon-download-alt')  
+    =render partial: 'shared/icon', locals: {class_string: "icon-download-alt", alt_text:  t('drs.shoppingcarts.name') }
     = t('drs.shoppingcarts.name').titlecase
 - if @items.length > 0 
   .drs-items.drs-items-list

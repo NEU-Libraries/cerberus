@@ -1,5 +1,5 @@
-%h1.page-header.compilation-title
-  = render_icon('icon-th-list')
+%h1.page-header.compilation-titl
+  =render partial: 'shared/icon', locals: {class_string: "icon-th-list"  }
   = @compilation.title
   %small
     = t('drs.compilations.name').capitalize

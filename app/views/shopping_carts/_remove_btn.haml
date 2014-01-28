@@ -1,4 +1,4 @@
 %a.btn.btn-mini.btn-clear{ title: "Remove from " + t('drs.shoppingcarts.name'), href:  update_cart_path(delete: id), data: { :method => 'put', :remote => 'true', toggle: "tooltip" }, "aria-role" => "checkbox", "aria-checked" => "true", "data-shoppingcart" => "remove" }
-  
-  =render_icon( 'icon-check' ,  { alt_text: "Remove from " +  t('drs.shoppingcarts.name') })
-  =render_icon( 'icon-download-alt' )
+  =render partial: 'shared/icon', locals: {class_string: "icon-check", alt_text: "Remove from " +  t('drs.shoppingcarts.name') }
+
+  =render partial: 'shared/icon', locals: {class_string: "icon-download-alt" }

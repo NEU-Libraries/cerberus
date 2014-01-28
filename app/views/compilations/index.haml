@@ -1,5 +1,6 @@
 %h1.page-header
-  = render_icon('icon-th-list')
+  - compilations_icon =render partial: 'shared/icon', locals: {class_string: "icon-th-list"  }
+  = compilations_icon
   My 
   = t('drs.compilations.name').capitalize + 's'
 %p.lead
@@ -14,7 +15,7 @@
         Create a new #{t('drs.compilations.name')} today.
   %li.span2
     %a.thumbnail.thumbnail-btn(href=new_compilation_path)
-      = render_icon('icon-th-list')
+      =compilations_icon
       
       %h5.text-center Create a new #{t('drs.compilations.name')}
 

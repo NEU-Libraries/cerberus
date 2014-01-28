@@ -138,16 +138,6 @@ module ApplicationHelper
     return user_view_pref == "list" ? "drs-items-list" : "drs-items-grid"
   end
 
-
-  def render_icon( class_string , options = {})
-    stub = ''
-    if options[:alt_text]
-      stub += '<span class="sr-only">'+ options[:alt_text] +'</span>'
-    end
-    stub = '<span class="' + class_string + '" aria-hidden="true"></span>' + stub
-    return stub.html_safe
-
-  end
 end
 
 

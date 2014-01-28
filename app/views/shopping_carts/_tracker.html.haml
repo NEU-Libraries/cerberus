@@ -1,5 +1,5 @@
 %a#cart_tracker.btn{href: shopping_cart_path, title: t('drs.shoppingcarts.name').titlecase}
-  =render_icon('icon-download-alt',{alt_text: t('drs.shoppingcarts.name')})
+  =render partial: 'shared/icon', locals: {class_string: "icon-download-alt", alt_text:  t('drs.shoppingcarts.name') }
   %span.overlay= "#{session[:ids] ? session[:ids].length : 0}" 
   %span.sr-only
     items selected
