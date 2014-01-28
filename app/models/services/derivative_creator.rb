@@ -21,8 +21,8 @@ class DerivativeCreator
       create_thumbnail_from_pdf(pdf)
     end
 
-    master.thumbnail_list = thumbnail_list
-    master.save!
+    core.thumbnail_list = thumbnail_list
+    core.save!
   end
 
   private 
