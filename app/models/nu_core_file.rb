@@ -24,6 +24,10 @@ class NuCoreFile < ActiveFedora::Base
 
   delegate_to :descMetadata, [:rights, :resource_type] 
 
+  def to_param
+    self.pid
+  end
+
   # Safely set the parent of a collection.
   def set_parent(collection, user) 
     if user.can? :edit, collection 
