@@ -1,4 +1,5 @@
 .drs-item{
+  position: relative;
   @include clearfix();
   display: block;
   padding: 4px;
@@ -10,7 +11,10 @@
   @include focus-states{
     cursor: pointer;
   }
-
+  > a:hover,
+  > a:focus{
+    text-decoration: none;
+  }
   figure{
     text-align: center;
     margin: 0 0 2em 0;
@@ -49,6 +53,8 @@
     }
   }
   menu{
+    position: relative;
+    bottom: 0;
     padding-left: 0;
   }
   dl{
@@ -94,11 +100,11 @@
           @include border-top-radius(8px);
           border-top-style: solid;
         }
-        > figure{
+        > a{
           float: none;
         }  
       }
-      > figure{
+      > a{
       float: left;
       margin-right: 15px;
 
@@ -172,9 +178,9 @@
         border-color: $linkColor;
         @include box-shadow(0 1px 4px rgba(0,105,214,.25));
       }
-      > figure{
+      > a{
 
-        img, [class^="icon-"]{
+        figure{
           display: block;
           margin: 10px auto;
         }
