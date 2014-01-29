@@ -15,14 +15,14 @@ def create_collection(klass, parent_str, title_str, description = "Lorem ipsum d
 end 
 
 def create_content_file(factory_sym, user, parent) 
-  master = FactoryGirl.create(factory_sym) 
-  core   = master.core_record 
+  master = FactoryGirl.create(factory_sym)  
 
   master.mass_permissions = 'public'
   master.depositor = user.nuid
-  thumbnail_list = DerivativeCreator.new(master.pid).generate_derivatives
+  DerivativeCreator.new(master.pid).generate_derivatives
   
   # Add non garbage metadata to core record. 
+  core = NuCoreFile.find(master.core_record.pid)
   core.parent = ActiveFedora::Base.find(parent.pid, cast: true) 
   core.title = "#{master.content.label}" 
   core.description = "Lorem Ipsum Lorem Ipsum Lorem Ipsum" 
@@ -31,7 +31,6 @@ def create_content_file(factory_sym, user, parent)
   core.mass_permissions = 'public'
   core.keywords = ["#{master.class}", "content"] 
   core.mods.subject(0).topic = "a"
-  core.thumbnail_list = thumbnail_list
 
   core.save! 
   master.save! 
