@@ -1,4 +1,4 @@
-%a{href: url_for(item)}
+%a{href: polymorphic_path(item)}
   %figure
     - if item.instance_of?(NuCoreFile)
       - thumbs = get_file_thumbnails(item)

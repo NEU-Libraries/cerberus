@@ -8,16 +8,14 @@
   border-width: 1px;
   @include border-radius($baseBorderRadius);
   @include transition(all .2s ease-in-out);
-  @include focus-states{
-    cursor: pointer;
-  }
+
   > a:hover,
   > a:focus{
     text-decoration: none;
   }
   figure{
     text-align: center;
-    margin: 0 0 2em 0;
+    margin: 0 0 0.5em 0;
     figcaption{
       @extend .muted;
       margin-top: 1em;
@@ -118,6 +116,7 @@
     }
     .drs-item-details{
       @extend .media-body;
+      margin-bottom: 2.5em;
       
     }
     .drs-item-title{
@@ -172,6 +171,7 @@
       @include focus-states{
         border-color: $linkColor;
         @include box-shadow(0 1px 4px rgba(0,105,214,.25));
+        cusor: pointer;
       }
       > a{
 
