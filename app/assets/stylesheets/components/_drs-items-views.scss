@@ -2,7 +2,7 @@
   position: relative;
   @include clearfix();
   display: block;
-  padding: 4px;
+  padding: 8px;
   border-color: $grayLight;
   border-style: solid;
   border-width: 1px;
@@ -53,8 +53,6 @@
     }
   }
   menu{
-    position: relative;
-    bottom: 0;
     padding-left: 0;
   }
   dl{
@@ -77,11 +75,6 @@
       padding-bottom: 8px;
       padding-top: 8px;
       border-top-style: none;
-      @include focus-states{
-        background-color: rgb(248, 248, 248);
-        background-color: rgba(248, 248, 248, 0.56);
-        
-      }
       &:first-child{
         @include border-top-radius($baseBorderRadius);
         border-top-style: solid;
@@ -153,7 +146,9 @@
       }
     }
     menu{
-      float: right;
+      position: absolute;
+      bottom: 0;
+      right: 8px;
     }
 
   }
