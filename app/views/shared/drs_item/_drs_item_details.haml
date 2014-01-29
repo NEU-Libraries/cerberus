@@ -2,7 +2,10 @@
   %header
     %h4.drs-item-title 
       %a{href: url_for(item)}
-        = item.title.titlecase
-    %h5.drs-item-creator
-      = item.creator
-  =# render partial: 'shared/drs_item/drs_item_ad_details', locals: {item: item}
+        = item.title.titlecase or "Default title"
+    -if defined? item.creators and item.creators.length > 0
+      - item.creators.each do |creator|
+        - if creator.length > 0
+          %h5.drs-item-creator
+            = creator
+  = render partial: 'shared/drs_item/drs_item_ad_details', locals: {item: item}
