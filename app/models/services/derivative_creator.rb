@@ -20,7 +20,10 @@ class DerivativeCreator
       pdf = create_pdf_file
       create_thumbnail_from_pdf(pdf)
     end
-    return @thumbnail_list
+
+    @core.reload
+    @core.thumbnail_list = @thumbnail_list
+    @core.save!
   end
 
   private 
@@ -90,8 +93,7 @@ class DerivativeCreator
       thumb.add_file(scaled_img.to_blob, dsid, "#{master.content.label.split('.').first}.jpeg") 
       thumb.save!
 
-      self.thumbnail_list << dsid
-      #puts thumbnail_list
+      self.thumbnail_list << "/downloads/#{self.core.thumbnail.pid}?datastream_id=#{dsid}"      
     end   
 
     def update_or_create_with_metadata(title, desc, klass, object = nil)
