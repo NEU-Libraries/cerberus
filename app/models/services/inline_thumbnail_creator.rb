@@ -29,6 +29,7 @@ class InlineThumbnailCreator
 
   def create_thumbnail_and_save
     create_thumbnail
+    set.thumbnail_list = ["/downloads/#{self.set.pid}?datastream_id=thumbnail"]
     set.save! 
   end
 
