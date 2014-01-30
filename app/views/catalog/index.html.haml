@@ -7,8 +7,6 @@
 - if !has_search_parameters? && (params[:action] == 'index')
   - content_for :page_header do 
     = render 'home'
-  - content_for :sidebar do
-    = render :partial=>'facets', locals: { facet_list: facet_list } 
 - else
   - # Better search results here
   - html_constraints = render_constraints( params )
@@ -25,7 +23,7 @@
   
   
   = render 'results_pagination'
-  = render :partial => 'document_list'
+  =# render :partial => 'document_list'
   = render 'results_pagination'
   -content_for :side_bar do
     %h5 View

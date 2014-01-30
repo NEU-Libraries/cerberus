@@ -20,5 +20,35 @@ en:
       lead: Sets are collections of objects that you can create, share and store.
     shoppingcarts:
       name: download queue
+    #Siginificant Content labels
+    significant:
+      datasets:
+        name: datasets
+        description: Datasets for the DRS institutional repository.
+        icon: icon-table
+      research:
+        name: research
+        description: Resarch publications for the DRS repository.
+        icon: icon-beaker
+      presentations:
+        name: presentations
+        description: Presentations from faculty and staff of Northeastern.
+        icon: icon-facetime-video
+      learning:
+        name: Learning objects
+        description: Learning materials deposited in the repository.
+        icon: icon-book
+      other_publications:
+        name: Theses and Dissertations
+        description: Other depostied materials
+        icon: icon-magic
+    communities:
+      name: communities
+      description: Departments and other oragnizational groups of Northeastern University.
+      icon: icon-group
+    about:
+      title: About the DRS
+
+
   blacklight:
     application_name: "DRS"
