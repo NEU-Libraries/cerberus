@@ -7,7 +7,7 @@
 = render partial: 'shared/sets/breadcrumb_action_menu_links'
 
 
-%article.well
+%article.well.clearfix
   %h1{:class => @set.class, :id => "#{@set.pid}-title"}
     = @set.title
     %small
