@@ -97,6 +97,23 @@ class NuCoreFile < ActiveFedora::Base
     self.content_objects.find { |c| c.instance_of? ImageThumbnailFile } || false 
   end
 
+  def self.personal_folder_to_category(s) 
+    case s
+    when "theses" 
+      "Theses and Dissertations" 
+    when "research publications" 
+      "Research Publications" 
+    when "data sets" 
+      "Datasets" 
+    when "learning objects" 
+      "Learning Objects" 
+    when "presentations" 
+      "Presentations" 
+    else
+      "" 
+    end
+  end
+
   private 
 
     def purge_content_bearing_objects 

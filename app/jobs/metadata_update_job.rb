@@ -47,10 +47,17 @@ class MetadataUpdateJob
     gf.attributes=file_attributes
     gf.set_visibility(visibility)
     gf.tag_as_completed
-
     save_tries = 0
+
     begin
       gf.save!
+      # If this core record is being uploaded into a 'best bits' bucket, 
+      # we want to add an UploadAlert entry for the sake of the daily metadata
+      # emailing.  Note that all of the actual significant content type metadata
+      # is applied before this is reached.    
+      if !gf.category.first.blank?
+        UploadAlert.create_from_core_file(gf, :create)
+      end
     rescue RSolr::Error::Http => error
       save_tries += 1
       logger.warn "MetadataUpdateJob caught RSOLR error on #{gf.pid}: #{error.inspect}"
