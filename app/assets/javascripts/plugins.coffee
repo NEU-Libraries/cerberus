@@ -29,6 +29,9 @@ true
     #adding the click event to handle adding form fields.
     @click ->
       $cloned = settings.target.first().clone()
+      $cloned.val(  ->
+        return ''
+      )
       $cloned.addClass 'input-append'
       $removeButton = settings.removeButton.clone().attr('title', settings.titleText)
       $removeButton.click ->
