@@ -1,4 +1,5 @@
-= javascript_include_tag 'application'
+
+= analytics_init local: Rails.env.development?
 :javascript
   $(function() {
     #{yield(:local_js)}

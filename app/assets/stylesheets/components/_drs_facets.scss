@@ -1,0 +1,16 @@
+// Facets 
+// ======
+
+.drs-facet-selected{
+  @extend .alert;
+  margin: 5px 0;
+  color: $brand-primary;
+  background: none;
+  border: 1px solid $brand-primary;
+  .close{
+    text-decoration: none;
+
+  }
+
+  
+}

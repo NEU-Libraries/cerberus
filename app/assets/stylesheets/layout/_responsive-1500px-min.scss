@@ -1,0 +1,28 @@
+//
+// Responsive: Large desktop and up
+// --------------------------------------------------
+
+
+@media (min-width: $breakpoint-xxl) {
+
+  // Fixed grid
+  @include grid-core($gridColumnWidth1500, $gridGutterWidth1500);
+
+  // Fluid grid
+  @include grid-fluid($fluidGridColumnWidth1500, $fluidGridGutterWidth1500);
+
+  // Input grid
+  @include grid-input($gridColumnWidth1500, $gridGutterWidth1500);
+
+  // Thumbnails
+  .thumbnails {
+    margin-left: -$gridGutterWidth1200;
+  }
+  .thumbnails > li {
+    margin-left: $gridGutterWidth1200;
+  }
+  .row-fluid .thumbnails {
+    margin-left: 0;
+  }
+
+}

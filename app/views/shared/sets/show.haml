@@ -29,6 +29,9 @@
           %a{:href =>"#deleteCollectionModal"}(data-toggle="modal")
             Delete
     =render partial: 'shared/sets/delete_collections_modal'
-
-=render partial: 'shared/sets/show_sets'
+.row
+  %aside.span3
+    =render partial: 'shared/sets/sets_sidebar'
+  %section.span9
+    =render partial: 'shared/sets/show_sets'
 %div#add_compilation_form{ style: 'display:none' } 

@@ -1,5 +1,5 @@
 - content_for :content do
-  .row-fluid
+  .row
     %aside.span3(role="complementary")
       = content_for?(:aside) ? yield(:aside) : yield(:side_bar)
     / /.span2

@@ -209,6 +209,17 @@ describe NuCollectionsController do
       response.status.should == 403 
     end
 
+    it "403s for users who have edit permissions but are not the depositor" do 
+      # Give edit permissions to bo to prove a point
+      root.rightsMetadata.permissions({person: '000000002'}, 'edit') 
+      root.save! 
+
+      sign_in bo 
+
+      delete :destroy, { id: root.pid } 
+      response.status.should == 403 
+    end
+
     it "destroys root and its descendent collection" do
       sign_in bill
 

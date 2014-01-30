@@ -28,13 +28,13 @@ Drs::Application.routes.draw do
   get '/communities/:id/pedagogical' => 'communities#learning_objects', as: 'community_pedagogical'
   post '/communities/:id/attach_employee/:employee_id' => 'communities#attach_employee', as: 'attach_employee'
   
-  resources :compilations
-  get "/compilations/:id/download" => 'compilations#show_download', as: 'prepare_download'
-  get "/compilations/:id/ping" => 'compilations#ping_download', as: 'ping_download'  
-  get "/compilations/:id/trigger_download" => 'compilations#download', as: 'trigger_download'
+  resources :compilations, :controller => "compilations", :path => "sets"
+  get "/sets/:id/download" => 'compilations#show_download', as: 'prepare_download'
+  get "/sets/:id/ping" => 'compilations#ping_download', as: 'ping_download'  
+  get "/sets/:id/trigger_download" => 'compilations#download', as: 'trigger_download'
   
-  match "/compilations/:id/:entry_id" => 'compilations#delete_file', via: 'delete', as: 'delete_entry' 
-  match "/compilations/:id/:entry_id" => 'compilations#add_file', via: 'post', as: 'add_entry' 
+  match "/sets/:id/:entry_id" => 'compilations#delete_file', via: 'delete', as: 'delete_entry' 
+  match "/sets/:id/:entry_id" => 'compilations#add_file', via: 'post', as: 'add_entry' 
 
   get "/files/provide_metadata" => "nu_core_files#provide_metadata"
   post "/files/process_metadata" => "nu_core_files#process_metadata"
@@ -45,16 +45,16 @@ Drs::Application.routes.draw do
   get '/employees/:id' => 'employees#show', as: 'employee'
   get '/my_stuff' => 'employees#personal_graph', as: 'personal_graph'
 
-  namespace :admin do 
+  namespace :admin do
     # Add/Remove communities from an employee, delete employee
     resources :communities, except: [:show] 
     resources :employees, only: [:index, :edit, :update, :destroy]
   end
 
-  resource :shopping_cart, except: [:new, :create, :edit]
-  put '/shopping_cart' => 'shopping_carts#update', as: 'update_cart'
-  get '/shopping_cart/download' => 'shopping_carts#download', as: 'cart_download'
-  get '/shopping_cart/fire_download' => 'shopping_carts#fire_download', as: 'fire_download'
+  resource :shopping_cart, :path => "download_queue", :controller => "shopping_carts", except: [:new, :create, :edit]
+  put '/download_queue' => 'shopping_carts#update', as: 'update_cart'
+  get '/download_queue/download' => 'shopping_carts#download', as: 'cart_download'
+  get '/download_queue/fire_download' => 'shopping_carts#fire_download', as: 'fire_download'
 
   # Best bits queries
   get '/theses' => 'catalog#theses', as: 'theses'

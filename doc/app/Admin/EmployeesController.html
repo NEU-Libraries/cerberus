@@ -101,10 +101,6 @@
   
     <li><a href="../Drs.html">Drs</a>
   
-    <li><a href="../Drs/Content.html">Drs::Content</a>
-  
-    <li><a href="../Drs/Content/Transformations.html">Drs::Content::Transformations</a>
-  
     <li><a href="../Drs/ControllerHelpers.html">Drs::ControllerHelpers</a>
   
     <li><a href="../Drs/ControllerHelpers/EditableObjects.html">Drs::ControllerHelpers::EditableObjects</a>
@@ -163,6 +159,10 @@
   
     <li><a href="../Employee/FacultyFolders.html">Employee::FacultyFolders</a>
   
+    <li><a href="../Users.html">Users</a>
+  
+    <li><a href="../Users/OmniauthCallbacksController.html">Users::OmniauthCallbacksController</a>
+  
     <li><a href="../AdminController.html">AdminController</a>
   
     <li><a href="../ApplicationController.html">ApplicationController</a>
@@ -187,6 +187,8 @@
   
     <li><a href="../ContentCreationJob.html">ContentCreationJob</a>
   
+    <li><a href="../DerivativeCreator.html">DerivativeCreator</a>
+  
     <li><a href="../DrsEmployeeDatastream.html">DrsEmployeeDatastream</a>
   
     <li><a href="../DrsPropertiesDatastream.html">DrsPropertiesDatastream</a>
@@ -204,6 +206,10 @@
     <li><a href="../ImageSmallFile.html">ImageSmallFile</a>
   
     <li><a href="../ImageThumbnailFile.html">ImageThumbnailFile</a>
+  
+    <li><a href="../InlineThumbnailCreator.html">InlineThumbnailCreator</a>
+  
+    <li><a href="../MetadataMailer.html">MetadataMailer</a>
   
     <li><a href="../MetadataUpdateJob.html">MetadataUpdateJob</a>
   
@@ -231,9 +237,13 @@
   
     <li><a href="../NuModsDatastream.html">NuModsDatastream</a>
   
+    <li><a href="../Object.html">Object</a>
+  
     <li><a href="../ParanoidRightsDatastream.html">ParanoidRightsDatastream</a>
   
     <li><a href="../PdfFile.html">PdfFile</a>
+  
+    <li><a href="../ScaledImageCreator.html">ScaledImageCreator</a>
   
     <li><a href="../SetsController.html">SetsController</a>
   
@@ -245,7 +255,11 @@
   
     <li><a href="../TextFile.html">TextFile</a>
   
+    <li><a href="../UploadAlert.html">UploadAlert</a>
+  
     <li><a href="../User.html">User</a>
+  
+    <li><a href="../UsersController.html">UsersController</a>
   
     <li><a href="../VideoFile.html">VideoFile</a>
   
@@ -300,7 +314,7 @@
 
           
           <div class="method-source-code" id="destroy-source">
-            <pre><span class="ruby-comment"># File app/controllers/admin/employees_controller.rb, line 40</span>
+            <pre><span class="ruby-comment"># File app/controllers/admin/employees_controller.rb, line 41</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">destroy</span>
   <span class="ruby-identifier">nuid</span> = <span class="ruby-ivar">@employee</span>.<span class="ruby-identifier">nuid</span>
 
@@ -336,9 +350,9 @@
 
           
           <div class="method-source-code" id="edit-source">
-            <pre><span class="ruby-comment"># File app/controllers/admin/employees_controller.rb, line 11</span>
+            <pre><span class="ruby-comment"># File app/controllers/admin/employees_controller.rb, line 12</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">edit</span> 
-
+  <span class="ruby-ivar">@page_title</span> = <span class="ruby-node">&quot;Administer #{@employee.nuid}&quot;</span>
 <span class="ruby-keyword">end</span></pre>
           </div><!-- edit-source -->
           
@@ -369,6 +383,7 @@
             <pre><span class="ruby-comment"># File app/controllers/admin/employees_controller.rb, line 7</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">index</span> 
   <span class="ruby-ivar">@employees</span> = <span class="ruby-constant">Employee</span>.<span class="ruby-identifier">all</span>
+  <span class="ruby-ivar">@page_title</span> = <span class="ruby-string">&quot;Administer Employees&quot;</span>
 <span class="ruby-keyword">end</span></pre>
           </div><!-- index-source -->
           
@@ -396,7 +411,7 @@
 
           
           <div class="method-source-code" id="update-source">
-            <pre><span class="ruby-comment"># File app/controllers/admin/employees_controller.rb, line 15</span>
+            <pre><span class="ruby-comment"># File app/controllers/admin/employees_controller.rb, line 16</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">update</span> 
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:remove</span>].<span class="ruby-identifier">present?</span>
     <span class="ruby-ivar">@community</span> = <span class="ruby-identifier">params</span>[<span class="ruby-value">:remove</span>] 

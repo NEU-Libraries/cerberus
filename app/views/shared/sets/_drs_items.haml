@@ -1,0 +1,11 @@
+- if current_user_can_read?(@set)
+%section.drs-items{class: view_mode_class}
+  - if @set.instance_of?(Community)
+    -# Go through and template out the communities individually.
+    - @set.child_communities.each do |community| 
+      = render partial: 'shared/sets/drs_item', locals: { community: @set }
+  - @set.child_collections.reverse.each do |collection| 
+    = render partial: 'shared/sets/drs_item', locals: { collection: @set }
+
+  = render partial: 'shared/sets/show_files', locals: { collection: @set }
+  

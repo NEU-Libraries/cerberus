@@ -147,10 +147,6 @@
   
     <li><a href="./Drs.html">Drs</a>
   
-    <li><a href="./Drs/Content.html">Drs::Content</a>
-  
-    <li><a href="./Drs/Content/Transformations.html">Drs::Content::Transformations</a>
-  
     <li><a href="./Drs/ControllerHelpers.html">Drs::ControllerHelpers</a>
   
     <li><a href="./Drs/ControllerHelpers/EditableObjects.html">Drs::ControllerHelpers::EditableObjects</a>
@@ -209,6 +205,10 @@
   
     <li><a href="./Employee/FacultyFolders.html">Employee::FacultyFolders</a>
   
+    <li><a href="./Users.html">Users</a>
+  
+    <li><a href="./Users/OmniauthCallbacksController.html">Users::OmniauthCallbacksController</a>
+  
     <li><a href="./AdminController.html">AdminController</a>
   
     <li><a href="./ApplicationController.html">ApplicationController</a>
@@ -233,6 +233,8 @@
   
     <li><a href="./ContentCreationJob.html">ContentCreationJob</a>
   
+    <li><a href="./DerivativeCreator.html">DerivativeCreator</a>
+  
     <li><a href="./DrsEmployeeDatastream.html">DrsEmployeeDatastream</a>
   
     <li><a href="./DrsPropertiesDatastream.html">DrsPropertiesDatastream</a>
@@ -250,6 +252,10 @@
     <li><a href="./ImageSmallFile.html">ImageSmallFile</a>
   
     <li><a href="./ImageThumbnailFile.html">ImageThumbnailFile</a>
+  
+    <li><a href="./InlineThumbnailCreator.html">InlineThumbnailCreator</a>
+  
+    <li><a href="./MetadataMailer.html">MetadataMailer</a>
   
     <li><a href="./MetadataUpdateJob.html">MetadataUpdateJob</a>
   
@@ -277,9 +283,13 @@
   
     <li><a href="./NuModsDatastream.html">NuModsDatastream</a>
   
+    <li><a href="./Object.html">Object</a>
+  
     <li><a href="./ParanoidRightsDatastream.html">ParanoidRightsDatastream</a>
   
     <li><a href="./PdfFile.html">PdfFile</a>
+  
+    <li><a href="./ScaledImageCreator.html">ScaledImageCreator</a>
   
     <li><a href="./SetsController.html">SetsController</a>
   
@@ -291,7 +301,11 @@
   
     <li><a href="./TextFile.html">TextFile</a>
   
+    <li><a href="./UploadAlert.html">UploadAlert</a>
+  
     <li><a href="./User.html">User</a>
+  
+    <li><a href="./UsersController.html">UsersController</a>
   
     <li><a href="./VideoFile.html">VideoFile</a>
   
@@ -346,7 +360,7 @@
 
           
           <div class="method-source-code" id="users_in_progress_files-source">
-            <pre><span class="ruby-comment"># File app/models/nu_core_file.rb, line 36</span>
+            <pre><span class="ruby-comment"># File app/models/nu_core_file.rb, line 38</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">users_in_progress_files</span>(<span class="ruby-identifier">user</span>)
   <span class="ruby-identifier">all</span> = <span class="ruby-constant">NuCoreFile</span>.<span class="ruby-identifier">find</span>(<span class="ruby-value">:all</span>) 
   <span class="ruby-identifier">filtered</span> = <span class="ruby-identifier">all</span>.<span class="ruby-identifier">keep_if</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">file</span><span class="ruby-operator">|</span> <span class="ruby-identifier">file</span>.<span class="ruby-identifier">in_progress_for_user?</span>(<span class="ruby-identifier">user</span>) } 
@@ -385,7 +399,7 @@ than one exist.</p>
 
           
           <div class="method-source-code" id="canonical_object-source">
-            <pre><span class="ruby-comment"># File app/models/nu_core_file.rb, line 74</span>
+            <pre><span class="ruby-comment"># File app/models/nu_core_file.rb, line 76</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">canonical_object</span> 
   <span class="ruby-identifier">c</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">content_objects</span>.<span class="ruby-identifier">count</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">c</span><span class="ruby-operator">|</span> <span class="ruby-identifier">c</span>.<span class="ruby-identifier">canonical?</span> } 
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">c</span> <span class="ruby-operator">!=</span> <span class="ruby-value">1</span> 
@@ -420,7 +434,7 @@ than one exist.</p>
 
           
           <div class="method-source-code" id="content_objects-source">
-            <pre><span class="ruby-comment"># File app/models/nu_core_file.rb, line 58</span>
+            <pre><span class="ruby-comment"># File app/models/nu_core_file.rb, line 60</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">content_objects</span>
   <span class="ruby-identifier">all_possible_models</span> = [ <span class="ruby-string">&quot;ImageSmallFile&quot;</span>, <span class="ruby-string">&quot;ImageMediumFile&quot;</span>, <span class="ruby-string">&quot;ImageLargeFile&quot;</span>,
                           <span class="ruby-string">&quot;ImageMasterFile&quot;</span>, <span class="ruby-string">&quot;ImageThumbnailFile&quot;</span>, <span class="ruby-string">&quot;MsexcelFile&quot;</span>,
@@ -460,7 +474,7 @@ than one exist.</p>
 
           
           <div class="method-source-code" id="in_progress_for_user-3F-source">
-            <pre><span class="ruby-comment"># File app/models/nu_core_file.rb, line 42</span>
+            <pre><span class="ruby-comment"># File app/models/nu_core_file.rb, line 44</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">in_progress_for_user?</span>(<span class="ruby-identifier">user</span>)
   <span class="ruby-keyword">return</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">properties</span>.<span class="ruby-identifier">in_progress?</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">user</span>.<span class="ruby-identifier">nuid</span> <span class="ruby-operator">==</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">depositor</span> 
 <span class="ruby-keyword">end</span></pre>
@@ -490,9 +504,9 @@ than one exist.</p>
 
           
           <div class="method-source-code" id="persistent_url-source">
-            <pre><span class="ruby-comment"># File app/models/nu_core_file.rb, line 54</span>
+            <pre><span class="ruby-comment"># File app/models/nu_core_file.rb, line 56</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">persistent_url</span>
-  <span class="ruby-node">&quot;#{Rails.configuration.persistent_hostpath}#{noid}&quot;</span>
+  <span class="ruby-node">&quot;#{Rails.configuration.persistent_hostpath}#{pid}&quot;</span>
 <span class="ruby-keyword">end</span></pre>
           </div><!-- persistent_url-source -->
           
@@ -520,13 +534,13 @@ than one exist.</p>
 
           
           <div class="method-source-code" id="set_parent-source">
-            <pre><span class="ruby-comment"># File app/models/nu_core_file.rb, line 26</span>
+            <pre><span class="ruby-comment"># File app/models/nu_core_file.rb, line 28</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">set_parent</span>(<span class="ruby-identifier">collection</span>, <span class="ruby-identifier">user</span>) 
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">user</span>.<span class="ruby-identifier">can?</span> <span class="ruby-value">:edit</span>, <span class="ruby-identifier">collection</span> 
     <span class="ruby-keyword">self</span>.<span class="ruby-identifier">parent</span> = <span class="ruby-identifier">collection</span>
     <span class="ruby-keyword">return</span> <span class="ruby-keyword">true</span>  
   <span class="ruby-keyword">else</span> 
-    <span class="ruby-identifier">raise</span> <span class="ruby-node">&quot;User with nuid #{user.email} cannot add items to collection with pid of #{collection.pid}&quot;</span> 
+    <span class="ruby-identifier">raise</span> <span class="ruby-node">&quot;User with nuid #{user.nuid} cannot add items to collection with pid of #{collection.pid}&quot;</span> 
   <span class="ruby-keyword">end</span>
 <span class="ruby-keyword">end</span></pre>
           </div><!-- set_parent-source -->
@@ -555,7 +569,7 @@ than one exist.</p>
 
           
           <div class="method-source-code" id="tag_as_completed-source">
-            <pre><span class="ruby-comment"># File app/models/nu_core_file.rb, line 46</span>
+            <pre><span class="ruby-comment"># File app/models/nu_core_file.rb, line 48</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">tag_as_completed</span> 
   <span class="ruby-keyword">self</span>.<span class="ruby-identifier">properties</span>.<span class="ruby-identifier">tag_as_completed</span> 
 <span class="ruby-keyword">end</span></pre>
@@ -585,7 +599,7 @@ than one exist.</p>
 
           
           <div class="method-source-code" id="tag_as_in_progress-source">
-            <pre><span class="ruby-comment"># File app/models/nu_core_file.rb, line 50</span>
+            <pre><span class="ruby-comment"># File app/models/nu_core_file.rb, line 52</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">tag_as_in_progress</span> 
   <span class="ruby-keyword">self</span>.<span class="ruby-identifier">properties</span>.<span class="ruby-identifier">tag_as_in_progress</span> 
 <span class="ruby-keyword">end</span></pre>
@@ -616,7 +630,7 @@ exists.</p>
 
           
           <div class="method-source-code" id="thumbnail-source">
-            <pre><span class="ruby-comment"># File app/models/nu_core_file.rb, line 85</span>
+            <pre><span class="ruby-comment"># File app/models/nu_core_file.rb, line 87</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">thumbnail</span>
   <span class="ruby-identifier">c</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">content_objects</span>.<span class="ruby-identifier">count</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">c</span><span class="ruby-operator">|</span> <span class="ruby-identifier">c</span>.<span class="ruby-identifier">instance_of?</span> <span class="ruby-constant">ImageThumbnailFile</span> }
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">c</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">1</span>

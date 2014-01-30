@@ -11,10 +11,41 @@
     cursor: pointer;
   }
 
-  > figure{
-    margin: 0 0 0 0;
+  figure{
+    text-align: center;
+    margin: 0 0 2em 0;
     figcaption{
+      @extend .muted;
+      margin-top: 1em;
+    }
+    [data-picture]{
+      display: inline-block;
+    }
+    img, [class^="icon-"]{
+      padding: 4px;
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border: 1px solid rgba(0,0,0,.2);
       text-align: center;
+    }
+    [class^="icon-"]{
+      display: block;
+      text-align: center;
+      width: 85px;
+      height: 85px;
+      font-size: 40px;
+      line-height: 2;
+      @media (min-width: 900px) {
+        width: 170px;
+        height: 170px;
+        font-size: 80px;
+      } 
+    }
+  }
+  &.active {
+    figure{
+      display: block;
+      float: none;
     }
   }
   menu{
@@ -27,19 +58,6 @@
   
 }
 
-.drs-item-details{
-  dl{
-    @include clearfix();
-    dt{
-      float: left;
-      width: 100px;
-
-    }
-    dd{
-      margin-left: 100px;
-    }
-  }
-}
 
 .drs-items{
   
@@ -56,7 +74,6 @@
       @include focus-states{
         background-color: rgb(248, 248, 248);
         background-color: rgba(248, 248, 248, 0.56);
-
         
       }
       &:first-child{
@@ -66,7 +83,21 @@
       &:last-child{
         @include border-bottom-radius($baseBorderRadius);
       }
-
+      &.active{
+        @include border-radius($baseBorderRadius);
+        margin: 3em 0;
+        border-top-style: solid;
+        .drs-item-details{
+          overflow: visible;
+        }
+        & + .drs-item{
+          @include border-top-radius(8px);
+          border-top-style: solid;
+        }
+        > figure{
+          float: none;
+        }  
+      }
       > figure{
       float: left;
       margin-right: 15px;
@@ -80,6 +111,7 @@
           text-align: left;
         }
       }
+
         
         
       }
@@ -119,6 +151,7 @@
     }
 
   }
+  // DRS Items in Grid view styles
   &.drs-items-grid{
     @extend .row;
     
@@ -126,17 +159,31 @@
       @extend .span3;
       @extend [class*="span"];
       margin-bottom: 20px;
+      @media (min-width: 800px){
+        height: 220px;  
+      }
+      
       @media (min-width: 1200px) {
         margin-bottom: 30px;
+        height: 335px;
       }
 
       @include focus-states{
         border-color: $linkColor;
         @include box-shadow(0 1px 4px rgba(0,105,214,.25));
       }
-      > figure img{
-        display: block;
-        margin: 10px auto;
+      > figure{
+
+        img, [class^="icon-"]{
+          display: block;
+          margin: 10px auto;
+        }
+      }
+      &.active{
+        width: 100%;
+        margin: 4em auto;
+        float: right;
+        height: auto;
       }
     }
     .drs-item-add-details{

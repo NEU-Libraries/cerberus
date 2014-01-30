@@ -1,0 +1,5 @@
+%article.drs-item{data: { href: item[:path],  "drsitem" => item[:pid]}}
+  = render partial: 'shared/drs_item/drs_item_figure', locals: {item: item}
+  = render partial: 'shared/drs_item/drs_item_details', locals: {item: item}
+  
+    

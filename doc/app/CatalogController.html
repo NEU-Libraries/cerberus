@@ -94,6 +94,24 @@
     
     <li><a href="#method-c-uploaded_field">::uploaded_field</a>
     
+    <li><a href="#method-i-category_field">#category_field</a>
+    
+    <li><a href="#method-i-category_query_action">#category_query_action</a>
+    
+    <li><a href="#method-i-course_number_field">#course_number_field</a>
+    
+    <li><a href="#method-i-course_title_field">#course_title_field</a>
+    
+    <li><a href="#method-i-creation_year_field">#creation_year_field</a>
+    
+    <li><a href="#method-i-creator_field">#creator_field</a>
+    
+    <li><a href="#method-i-datasets">#datasets</a>
+    
+    <li><a href="#method-i-degree_field">#degree_field</a>
+    
+    <li><a href="#method-i-department_field">#department_field</a>
+    
     <li><a href="#method-i-depositor">#depositor</a>
     
     <li><a href="#method-i-exclude_unwanted_models">#exclude_unwanted_models</a>
@@ -104,11 +122,23 @@
     
     <li><a href="#method-i-index">#index</a>
     
+    <li><a href="#method-i-learning_objects">#learning_objects</a>
+    
+    <li><a href="#method-i-presentations">#presentations</a>
+    
     <li><a href="#method-i-recent">#recent</a>
     
     <li><a href="#method-i-recent_me">#recent_me</a>
     
+    <li><a href="#method-i-research">#research</a>
+    
     <li><a href="#method-i-sort_field">#sort_field</a>
+    
+    <li><a href="#method-i-subject_field">#subject_field</a>
+    
+    <li><a href="#method-i-theses">#theses</a>
+    
+    <li><a href="#method-i-type_field">#type_field</a>
     
   </ul>
 </nav>
@@ -132,10 +162,6 @@
   <ul class="link-list">
   
     <li><a href="./Drs.html">Drs</a>
-  
-    <li><a href="./Drs/Content.html">Drs::Content</a>
-  
-    <li><a href="./Drs/Content/Transformations.html">Drs::Content::Transformations</a>
   
     <li><a href="./Drs/ControllerHelpers.html">Drs::ControllerHelpers</a>
   
@@ -195,6 +221,10 @@
   
     <li><a href="./Employee/FacultyFolders.html">Employee::FacultyFolders</a>
   
+    <li><a href="./Users.html">Users</a>
+  
+    <li><a href="./Users/OmniauthCallbacksController.html">Users::OmniauthCallbacksController</a>
+  
     <li><a href="./AdminController.html">AdminController</a>
   
     <li><a href="./ApplicationController.html">ApplicationController</a>
@@ -219,6 +249,8 @@
   
     <li><a href="./ContentCreationJob.html">ContentCreationJob</a>
   
+    <li><a href="./DerivativeCreator.html">DerivativeCreator</a>
+  
     <li><a href="./DrsEmployeeDatastream.html">DrsEmployeeDatastream</a>
   
     <li><a href="./DrsPropertiesDatastream.html">DrsPropertiesDatastream</a>
@@ -236,6 +268,10 @@
     <li><a href="./ImageSmallFile.html">ImageSmallFile</a>
   
     <li><a href="./ImageThumbnailFile.html">ImageThumbnailFile</a>
+  
+    <li><a href="./InlineThumbnailCreator.html">InlineThumbnailCreator</a>
+  
+    <li><a href="./MetadataMailer.html">MetadataMailer</a>
   
     <li><a href="./MetadataUpdateJob.html">MetadataUpdateJob</a>
   
@@ -263,9 +299,13 @@
   
     <li><a href="./NuModsDatastream.html">NuModsDatastream</a>
   
+    <li><a href="./Object.html">Object</a>
+  
     <li><a href="./ParanoidRightsDatastream.html">ParanoidRightsDatastream</a>
   
     <li><a href="./PdfFile.html">PdfFile</a>
+  
+    <li><a href="./ScaledImageCreator.html">ScaledImageCreator</a>
   
     <li><a href="./SetsController.html">SetsController</a>
   
@@ -277,7 +317,11 @@
   
     <li><a href="./TextFile.html">TextFile</a>
   
+    <li><a href="./UploadAlert.html">UploadAlert</a>
+  
     <li><a href="./User.html">User</a>
+  
+    <li><a href="./UsersController.html">UsersController</a>
   
     <li><a href="./VideoFile.html">VideoFile</a>
   
@@ -332,7 +376,7 @@
 
           
           <div class="method-source-code" id="modified_field-source">
-            <pre><span class="ruby-comment"># File app/controllers/catalog_controller.rb, line 68</span>
+            <pre><span class="ruby-comment"># File app/controllers/catalog_controller.rb, line 99</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">modified_field</span>
   <span class="ruby-identifier">solr_name</span>(<span class="ruby-string">&#39;desc_metadata__date_modified&#39;</span>, <span class="ruby-value">:stored_sortable</span>, <span class="ruby-identifier">type</span><span class="ruby-operator">:</span> <span class="ruby-value">:date</span>)
 <span class="ruby-keyword">end</span></pre>
@@ -362,7 +406,7 @@
 
           
           <div class="method-source-code" id="uploaded_field-source">
-            <pre><span class="ruby-comment"># File app/controllers/catalog_controller.rb, line 63</span>
+            <pre><span class="ruby-comment"># File app/controllers/catalog_controller.rb, line 94</span>
   <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">uploaded_field</span>
 <span class="ruby-comment">#  system_create_dtsi</span>
     <span class="ruby-identifier">solr_name</span>(<span class="ruby-string">&#39;desc_metadata__date_uploaded&#39;</span>, <span class="ruby-value">:stored_sortable</span>, <span class="ruby-identifier">type</span><span class="ruby-operator">:</span> <span class="ruby-value">:date</span>)
@@ -381,6 +425,37 @@
   
      <section id="public-instance-5Buntitled-5D-method-details" class="method-section section">
       <h3 class="section-header">Public Instance Methods</h3>
+
+    
+      <div id="method-i-datasets" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">datasets</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="datasets-source">
+            <pre><span class="ruby-comment"># File app/controllers/catalog_controller.rb, line 83</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">datasets</span>
+  <span class="ruby-identifier">x</span> = [<span class="ruby-identifier">creator_field</span>, <span class="ruby-identifier">creation_year_field</span>, <span class="ruby-identifier">department_field</span>, <span class="ruby-identifier">subject_field</span>] 
+  <span class="ruby-identifier">category_query_action</span>(<span class="ruby-string">&quot;Datasets&quot;</span>, <span class="ruby-identifier">x</span>) 
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- datasets-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- datasets-method -->
 
     
       <div id="method-i-index" class="method-detail ">
@@ -404,7 +479,11 @@
   <span class="ruby-keyword">super</span>
   <span class="ruby-identifier">recent</span>
   <span class="ruby-comment">#also grab my recent docs too</span>
-  <span class="ruby-identifier">recent_me</span>    
+  <span class="ruby-identifier">recent_me</span>
+  <span class="ruby-keyword">unless</span> <span class="ruby-identifier">has_search_parameters?</span>
+    <span class="ruby-ivar">@page_title</span> = <span class="ruby-string">&quot;Home&quot;</span>    
+    <span class="ruby-ivar">@root</span> = <span class="ruby-constant">Community</span>.<span class="ruby-identifier">find</span>(<span class="ruby-constant">Rails</span>.<span class="ruby-identifier">configuration</span>.<span class="ruby-identifier">root_community_id</span>)
+  <span class="ruby-keyword">end</span>
 <span class="ruby-keyword">end</span></pre>
           </div><!-- index-source -->
           
@@ -414,6 +493,69 @@
 
         
       </div><!-- index-method -->
+
+    
+      <div id="method-i-learning_objects" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">learning_objects</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="learning_objects-source">
+            <pre><span class="ruby-comment"># File app/controllers/catalog_controller.rb, line 88</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">learning_objects</span> 
+  <span class="ruby-identifier">x</span> = [<span class="ruby-identifier">creator_field</span>, <span class="ruby-identifier">creation_year_field</span>, <span class="ruby-identifier">department_field</span>, <span class="ruby-identifier">subject_field</span>,
+       <span class="ruby-identifier">course_number_field</span>, <span class="ruby-identifier">course_title_field</span>, <span class="ruby-identifier">type_field</span>] 
+  <span class="ruby-identifier">category_query_action</span>(<span class="ruby-string">&quot;\&quot;Learning Objects\&quot;&quot;</span>, <span class="ruby-identifier">x</span>) 
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- learning_objects-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- learning_objects-method -->
+
+    
+      <div id="method-i-presentations" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">presentations</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="presentations-source">
+            <pre><span class="ruby-comment"># File app/controllers/catalog_controller.rb, line 78</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">presentations</span> 
+  <span class="ruby-identifier">x</span> = [<span class="ruby-identifier">creator_field</span>, <span class="ruby-identifier">creation_year_field</span>, <span class="ruby-identifier">department_field</span>, <span class="ruby-identifier">subject_field</span>]
+  <span class="ruby-identifier">category_query_action</span>(<span class="ruby-string">&quot;Presentations&quot;</span>, <span class="ruby-identifier">x</span>) 
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- presentations-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- presentations-method -->
 
     
       <div id="method-i-recent" class="method-detail ">
@@ -432,7 +574,7 @@
 
           
           <div class="method-source-code" id="recent-source">
-            <pre><span class="ruby-comment"># File app/controllers/catalog_controller.rb, line 45</span>
+            <pre><span class="ruby-comment"># File app/controllers/catalog_controller.rb, line 49</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">recent</span>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">user_signed_in?</span>
     <span class="ruby-comment"># grab other people&#39;s documents</span>
@@ -469,7 +611,7 @@
 
           
           <div class="method-source-code" id="recent_me-source">
-            <pre><span class="ruby-comment"># File app/controllers/catalog_controller.rb, line 56</span>
+            <pre><span class="ruby-comment"># File app/controllers/catalog_controller.rb, line 60</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">recent_me</span>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">user_signed_in?</span>
     (<span class="ruby-identifier">_</span>, <span class="ruby-ivar">@recent_user_documents</span>) = <span class="ruby-identifier">get_search_results</span>(<span class="ruby-value">:q</span> =<span class="ruby-operator">&gt;</span><span class="ruby-identifier">filter_mine</span>,
@@ -486,10 +628,314 @@
       </div><!-- recent_me-method -->
 
     
+      <div id="method-i-research" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">research</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="research-source">
+            <pre><span class="ruby-comment"># File app/controllers/catalog_controller.rb, line 73</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">research</span> 
+  <span class="ruby-identifier">x</span> = [<span class="ruby-identifier">creator_field</span>, <span class="ruby-identifier">creation_year_field</span>, <span class="ruby-identifier">department_field</span>, <span class="ruby-identifier">subject_field</span>] 
+  <span class="ruby-identifier">category_query_action</span>(<span class="ruby-string">&quot;\&quot;Research Publications\&quot;&quot;</span>, <span class="ruby-identifier">x</span>) 
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- research-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- research-method -->
+
+    
+      <div id="method-i-theses" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">theses</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Actions mapping to &#39;best bit&#39; content types.</p>
+          
+
+          
+          <div class="method-source-code" id="theses-source">
+            <pre><span class="ruby-comment"># File app/controllers/catalog_controller.rb, line 68</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">theses</span> 
+  <span class="ruby-identifier">x</span> = [<span class="ruby-identifier">creator_field</span>, <span class="ruby-identifier">department_field</span>, <span class="ruby-identifier">creation_year_field</span>, <span class="ruby-identifier">degree_field</span>, <span class="ruby-identifier">subject_field</span>]
+  <span class="ruby-identifier">category_query_action</span>(<span class="ruby-string">&quot;\&quot;Theses and Dissertations\&quot;&quot;</span>, <span class="ruby-identifier">x</span>) 
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- theses-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- theses-method -->
+
+    
     </section><!-- public-instance-method-details -->
   
      <section id="protected-instance-5Buntitled-5D-method-details" class="method-section section">
       <h3 class="section-header">Protected Instance Methods</h3>
+
+    
+      <div id="method-i-category_field" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">category_field</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="category_field-source">
+            <pre><span class="ruby-comment"># File app/controllers/catalog_controller.rb, line 425</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">category_field</span> 
+  <span class="ruby-constant">Solrizer</span>.<span class="ruby-identifier">solr_name</span>(<span class="ruby-string">&#39;drs_category&#39;</span>, <span class="ruby-value">:symbol</span>, <span class="ruby-value">:type</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:string</span>) 
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- category_field-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- category_field-method -->
+
+    
+      <div id="method-i-category_query_action" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">category_query_action</span><span
+            class="method-args">(category, facet_fields)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="category_query_action-source">
+            <pre><span class="ruby-comment"># File app/controllers/catalog_controller.rb, line 461</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">category_query_action</span>(<span class="ruby-identifier">category</span>, <span class="ruby-identifier">facet_fields</span>) 
+  <span class="ruby-identifier">query</span> = <span class="ruby-node">&quot;{!lucene q.op=AND df=#{category_field}}#{category}&quot;</span>
+  (<span class="ruby-ivar">@response</span>, <span class="ruby-ivar">@document_list</span>) = <span class="ruby-identifier">get_search_results</span>(<span class="ruby-value">:q</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">query</span>) 
+  <span class="ruby-identifier">render</span> <span class="ruby-string">&#39;index&#39;</span>, <span class="ruby-identifier">locals</span><span class="ruby-operator">:</span> { <span class="ruby-identifier">facet_list</span><span class="ruby-operator">:</span> <span class="ruby-identifier">facet_fields</span> } 
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- category_query_action-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- category_query_action-method -->
+
+    
+      <div id="method-i-course_number_field" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">course_number_field</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="course_number_field-source">
+            <pre><span class="ruby-comment"># File app/controllers/catalog_controller.rb, line 449</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">course_number_field</span> 
+  <span class="ruby-constant">Solrizer</span>.<span class="ruby-identifier">solr_name</span>(<span class="ruby-string">&#39;drs_course_number&#39;</span>, <span class="ruby-value">:symbol</span>, <span class="ruby-value">:type</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:string</span>) 
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- course_number_field-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- course_number_field-method -->
+
+    
+      <div id="method-i-course_title_field" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">course_title_field</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="course_title_field-source">
+            <pre><span class="ruby-comment"># File app/controllers/catalog_controller.rb, line 453</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">course_title_field</span> 
+  <span class="ruby-constant">Solrizer</span>.<span class="ruby-identifier">solr_name</span>(<span class="ruby-string">&#39;drs_course_title&#39;</span>, <span class="ruby-value">:symbol</span>, <span class="ruby-value">:type</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:string</span>) 
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- course_title_field-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- course_title_field-method -->
+
+    
+      <div id="method-i-creation_year_field" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">creation_year_field</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="creation_year_field-source">
+            <pre><span class="ruby-comment"># File app/controllers/catalog_controller.rb, line 437</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">creation_year_field</span> 
+  <span class="ruby-constant">Solrizer</span>.<span class="ruby-identifier">solr_name</span>(<span class="ruby-string">&#39;creation_year&#39;</span>, <span class="ruby-value">:facetable</span>, <span class="ruby-value">:type</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:string</span>) 
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- creation_year_field-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- creation_year_field-method -->
+
+    
+      <div id="method-i-creator_field" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">creator_field</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="creator_field-source">
+            <pre><span class="ruby-comment"># File app/controllers/catalog_controller.rb, line 429</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">creator_field</span> 
+  <span class="ruby-constant">Solrizer</span>.<span class="ruby-identifier">solr_name</span>(<span class="ruby-string">&#39;creator&#39;</span>, <span class="ruby-value">:facetable</span>, <span class="ruby-value">:type</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:string</span>) 
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- creator_field-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- creator_field-method -->
+
+    
+      <div id="method-i-degree_field" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">degree_field</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="degree_field-source">
+            <pre><span class="ruby-comment"># File app/controllers/catalog_controller.rb, line 441</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">degree_field</span> 
+  <span class="ruby-constant">Solrizer</span>.<span class="ruby-identifier">solr_name</span>(<span class="ruby-string">&#39;drs_degree&#39;</span>, <span class="ruby-value">:symbol</span>, <span class="ruby-value">:type</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:string</span>) 
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- degree_field-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- degree_field-method -->
+
+    
+      <div id="method-i-department_field" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">department_field</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="department_field-source">
+            <pre><span class="ruby-comment"># File app/controllers/catalog_controller.rb, line 433</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">department_field</span> 
+  <span class="ruby-constant">Solrizer</span>.<span class="ruby-identifier">solr_name</span>(<span class="ruby-string">&#39;drs_department&#39;</span>, <span class="ruby-value">:symbol</span>, <span class="ruby-value">:type</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:string</span>) 
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- department_field-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- department_field-method -->
 
     
       <div id="method-i-depositor" class="method-detail ">
@@ -508,7 +954,7 @@
 
           
           <div class="method-source-code" id="depositor-source">
-            <pre><span class="ruby-comment"># File app/controllers/catalog_controller.rb, line 371</span>
+            <pre><span class="ruby-comment"># File app/controllers/catalog_controller.rb, line 408</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">depositor</span> 
   <span class="ruby-comment">#Hydra.config[:permissions][:owner] maybe it should match this config variable, but it doesn&#39;t.</span>
   <span class="ruby-constant">Solrizer</span>.<span class="ruby-identifier">solr_name</span>(<span class="ruby-string">&#39;depositor&#39;</span>, <span class="ruby-value">:stored_searchable</span>, <span class="ruby-identifier">type</span><span class="ruby-operator">:</span> <span class="ruby-value">:string</span>)
@@ -541,7 +987,7 @@ parameters</p>
 
           
           <div class="method-source-code" id="exclude_unwanted_models-source">
-            <pre><span class="ruby-comment"># File app/controllers/catalog_controller.rb, line 366</span>
+            <pre><span class="ruby-comment"># File app/controllers/catalog_controller.rb, line 403</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">exclude_unwanted_models</span>(<span class="ruby-identifier">solr_parameters</span>, <span class="ruby-identifier">user_parameters</span>)
   <span class="ruby-identifier">solr_parameters</span>[<span class="ruby-value">:fq</span>] <span class="ruby-operator">||=</span> []
   <span class="ruby-identifier">solr_parameters</span>[<span class="ruby-value">:fq</span>] <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-node">&quot;#{Solrizer.solr_name(&quot;has_model&quot;, :symbol)}:\&quot;info:fedora/afmodel:NuCoreFile\&quot;&quot;</span>
@@ -572,7 +1018,7 @@ parameters</p>
 
           
           <div class="method-source-code" id="filter_mine-source">
-            <pre><span class="ruby-comment"># File app/controllers/catalog_controller.rb, line 380</span>
+            <pre><span class="ruby-comment"># File app/controllers/catalog_controller.rb, line 417</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">filter_mine</span> 
   <span class="ruby-node">&quot;{!lucene q.op=AND df=#{depositor}}#{current_user.user_key}&quot;</span>
 <span class="ruby-keyword">end</span></pre>
@@ -602,7 +1048,7 @@ parameters</p>
 
           
           <div class="method-source-code" id="filter_not_mine-source">
-            <pre><span class="ruby-comment"># File app/controllers/catalog_controller.rb, line 376</span>
+            <pre><span class="ruby-comment"># File app/controllers/catalog_controller.rb, line 413</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">filter_not_mine</span> 
   <span class="ruby-node">&quot;{!lucene q.op=AND df=#{depositor}}-#{current_user.user_key}&quot;</span>
 <span class="ruby-keyword">end</span></pre>
@@ -632,7 +1078,7 @@ parameters</p>
 
           
           <div class="method-source-code" id="sort_field-source">
-            <pre><span class="ruby-comment"># File app/controllers/catalog_controller.rb, line 384</span>
+            <pre><span class="ruby-comment"># File app/controllers/catalog_controller.rb, line 421</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">sort_field</span>
   <span class="ruby-node">&quot;#{Solrizer.solr_name(&#39;system_create&#39;, :sortable)} desc&quot;</span>
 <span class="ruby-keyword">end</span></pre>
@@ -644,6 +1090,66 @@ parameters</p>
 
         
       </div><!-- sort_field-method -->
+
+    
+      <div id="method-i-subject_field" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">subject_field</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="subject_field-source">
+            <pre><span class="ruby-comment"># File app/controllers/catalog_controller.rb, line 445</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">subject_field</span> 
+  <span class="ruby-constant">Solrizer</span>.<span class="ruby-identifier">solr_name</span>(<span class="ruby-string">&#39;subject&#39;</span>, <span class="ruby-value">:symbol</span>, <span class="ruby-value">:type</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:string</span>) 
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- subject_field-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- subject_field-method -->
+
+    
+      <div id="method-i-type_field" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">type_field</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="type_field-source">
+            <pre><span class="ruby-comment"># File app/controllers/catalog_controller.rb, line 457</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">type_field</span> 
+  <span class="ruby-constant">Solrizer</span>.<span class="ruby-identifier">solr_name</span>(<span class="ruby-string">&#39;type&#39;</span>, <span class="ruby-value">:facetable</span>, <span class="ruby-value">:type</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:string</span>) 
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- type_field-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- type_field-method -->
 
     
     </section><!-- protected-instance-method-details -->

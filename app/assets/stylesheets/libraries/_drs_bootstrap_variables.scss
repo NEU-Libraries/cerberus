@@ -391,19 +391,19 @@ $heroUnitLeadColor:               inherit !default;
 // Form states and alerts
 // -------------------------
 $warningText:             $brand-warning;
-$warningBackground:       desaturate(lighten($warningText, 45%), 30%);
+$warningBackground:       $brand-warning;
 $warningBorder:           transparent;
 
 $errorText:               $brand-danger;
-$errorBackground:         desaturate(lighten($errorText, 45%), 30%);
+$errorBackground:         $errorText;
 $errorBorder:             transparent;
 
 $successText:             $brand-success;
-$successBackground:       desaturate(lighten($successText, 45%), 30%);
+$successBackground:       $successText;
 $successBorder:           transparent;
 
 $infoText:                $brand-info;
-$infoBackground:          desaturate(lighten($infoText, 45%), 30%);
+$infoBackground:          $infoText;
 $infoBorder:              transparent;
 
 
@@ -431,17 +431,39 @@ $popoverArrowOuterColor:  rgba(0,0,0,.25) !default;
 // --------------------------------------------------
 
 
+// Breakpoints
+// --------------------------------------------------
+
+$breakpoint-xxl:   1500px;
+$breakpoint-xl:    1200px;
+$brealpoint-l:     980px;
+$breakpoint-m:     768px;
+$breakpoint-sm:    400px;
+
+//----------------------------------------------------
+
 // Default 940px grid
 // -------------------------
 $gridColumns:             12 !default;
-$gridColumnWidth:         60px !default;
-$gridGutterWidth:         20px !default;
+$gridColumnWidth:         65px;//60px !default;
+$gridGutterWidth:         20px;//20px !default;
 $gridRowWidth:            ($gridColumns * $gridColumnWidth) + ($gridGutterWidth * ($gridColumns - 1)) !default;
 
-// 1200px min
+
+
+// 1500px min
+$gridColumnWidth1500:     85px !default;
+$gridGutterWidth1500:     40px !default;
+$gridRowWidth1500:        ($gridColumns * $gridColumnWidth1500) + ($gridGutterWidth1500 * ($gridColumns - 1)) !default;
+
+
+// 1200px-1499px
 $gridColumnWidth1200:     70px !default;
 $gridGutterWidth1200:     30px !default;
 $gridRowWidth1200:        ($gridColumns * $gridColumnWidth1200) + ($gridGutterWidth1200 * ($gridColumns - 1)) !default;
+
+
+
 
 // 768px-979px
 $gridColumnWidth768:      42px !default;
@@ -454,7 +476,11 @@ $gridRowWidth768:         ($gridColumns * $gridColumnWidth768) + ($gridGutterWid
 $fluidGridColumnWidth:    percentage($gridColumnWidth/$gridRowWidth) !default;
 $fluidGridGutterWidth:    percentage($gridGutterWidth/$gridRowWidth) !default;
 
-// 1200px min
+// 1500px-min
+$fluidGridColumnWidth1500:     percentage($gridColumnWidth1500/$gridRowWidth1500) !default;
+$fluidGridGutterWidth1500:     percentage($gridGutterWidth1500/$gridRowWidth1500) !default;
+
+// 1200px-1499px
 $fluidGridColumnWidth1200:     percentage($gridColumnWidth1200/$gridRowWidth1200) !default;
 $fluidGridGutterWidth1200:     percentage($gridGutterWidth1200/$gridRowWidth1200) !default;
 

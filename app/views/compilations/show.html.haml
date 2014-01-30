@@ -1,8 +1,8 @@
-%h1.page-header.compilation-title
+%h1.page-header.compilation-titl
+  =render partial: 'shared/icon', locals: {class_string: "icon-th-list"  }
   = @compilation.title
   %small
-    %i.icon-folder-open-alt
-    Compilation
+    = t('drs.compilations.name').capitalize
 
 %p.lead
   = @compilation.description
@@ -12,15 +12,15 @@
 
 
 - if @compilation.entries.empty?
-  %p This compilation is currently empty.  Get out there and add some files. 
+  %p This #{t('drs.compilations.name')} is currently empty.  Get out there and add some files. 
 - else 
   = render partial: 'all_entries', locals: { compilation: @compilation, entries: @compilation.entries }
 
 
 
-%span.warning WARNING: Destroying a compilation is not reversible. 
+%span.warning WARNING: Destroying a #{t('drs.compilations.name')} is not reversible. 
 
-= link_to("Destroy This Compilation", @compilation, method: 'delete')
+= link_to("Destroy This #{t('drs.compilations.name')}", @compilation, method: 'delete')
 %br 
 - if @compilation.entry_ids.length > 0
-  = link_to("Download this compilation", prepare_download_path(id: @compilation.pid), method: 'get') 
+  = link_to("Download this #{t('drs.compilations.name')}", prepare_download_path(id: @compilation.pid), method: 'get') 

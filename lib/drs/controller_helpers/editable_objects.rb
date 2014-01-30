@@ -56,6 +56,16 @@ module Drs
         end
       end
 
+      def is_depositor? 
+        record = ActiveFedora::Base.find(params[:id], cast: true) 
+
+        if !current_user.nil? && current_user.nuid == record.depositor 
+          return true 
+        else
+          render_403 
+        end
+      end
+
       private
       
         def find_parent(hash) 

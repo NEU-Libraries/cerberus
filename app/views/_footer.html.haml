@@ -1,8 +1,10 @@
-%footer.footer-nu
+%footer.footer-nu(role="contentinfo")
   .container
     .row-fluid
       .span3
-        %a.nu-footer-brand.logo{:alt => "Northeastern University", :href => "http://www.northeastern.edu"} Northeastern University
+        %a.nu-footer-brand.logo{:alt => "Northeastern University", :href => "http://www.northeastern.edu"}
+          %span.sr-only
+            Northeastern University
       .span6
         %ul.footer-nu-nav
           %li
@@ -23,13 +25,12 @@
         %ul.nu-social
           %li
             %a.youtube{:href => "https://www.youtube.com/northeastern"}
-              %span.icon-youtube-sign
-              %span.hide-text Youtube
+              =render partial: 'shared/icon', locals: {class_string: "icon-youtube-sign", alt_text: "Northern University on YouTube" }
           %li
             %a.twitter{:href => "http://twitter.com/northeastern"}
-              %span.icon-twitter-sign
-              %span.hide-text Twitter
+              =render partial: 'shared/icon', locals: {class_string: "icon-twitter-sign", alt_text: "Northern University on Twitter" }
+
           %li
             %a.facebook{:href => "http://www.facebook.com/northeastern"}
-              %span.icon-facebook-sign
-              %span.hide-text Facebook
+              =render partial: 'shared/icon', locals: { class_string: "icon-facebook-sign", alt_text: "Northeastern on Facebook"}
+

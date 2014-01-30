@@ -6,7 +6,7 @@
       %li
         \#{link_to "Edit", edit_nu_core_file_path unless @nu_core_file.processing?}#{"File is being processed you may edit once it is complete" if @nu_core_file.processing?}
     %li
-      \#{link_to "Add to Compilation", compilations_path(file: @nu_core_file.pid), remote: true}
+      =link_to "Add to " + t('drs.compilations.name'), compilations_path(file: @nu_core_file.pid), remote: true
     %li.dropdown
       %a.dropdown-toggle(href="#" data-toggle="dropdown")
         Export to

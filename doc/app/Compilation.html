@@ -110,6 +110,8 @@
     
     <li><a href="#method-i-entry_ids">#entry_ids</a>
     
+    <li><a href="#method-i-remove_dead_entries">#remove_dead_entries</a>
+    
     <li><a href="#method-i-remove_entry">#remove_entry</a>
     
   </ul>
@@ -134,10 +136,6 @@
   <ul class="link-list">
   
     <li><a href="./Drs.html">Drs</a>
-  
-    <li><a href="./Drs/Content.html">Drs::Content</a>
-  
-    <li><a href="./Drs/Content/Transformations.html">Drs::Content::Transformations</a>
   
     <li><a href="./Drs/ControllerHelpers.html">Drs::ControllerHelpers</a>
   
@@ -197,6 +195,10 @@
   
     <li><a href="./Employee/FacultyFolders.html">Employee::FacultyFolders</a>
   
+    <li><a href="./Users.html">Users</a>
+  
+    <li><a href="./Users/OmniauthCallbacksController.html">Users::OmniauthCallbacksController</a>
+  
     <li><a href="./AdminController.html">AdminController</a>
   
     <li><a href="./ApplicationController.html">ApplicationController</a>
@@ -221,6 +223,8 @@
   
     <li><a href="./ContentCreationJob.html">ContentCreationJob</a>
   
+    <li><a href="./DerivativeCreator.html">DerivativeCreator</a>
+  
     <li><a href="./DrsEmployeeDatastream.html">DrsEmployeeDatastream</a>
   
     <li><a href="./DrsPropertiesDatastream.html">DrsPropertiesDatastream</a>
@@ -238,6 +242,10 @@
     <li><a href="./ImageSmallFile.html">ImageSmallFile</a>
   
     <li><a href="./ImageThumbnailFile.html">ImageThumbnailFile</a>
+  
+    <li><a href="./InlineThumbnailCreator.html">InlineThumbnailCreator</a>
+  
+    <li><a href="./MetadataMailer.html">MetadataMailer</a>
   
     <li><a href="./MetadataUpdateJob.html">MetadataUpdateJob</a>
   
@@ -265,9 +273,13 @@
   
     <li><a href="./NuModsDatastream.html">NuModsDatastream</a>
   
+    <li><a href="./Object.html">Object</a>
+  
     <li><a href="./ParanoidRightsDatastream.html">ParanoidRightsDatastream</a>
   
     <li><a href="./PdfFile.html">PdfFile</a>
+  
+    <li><a href="./ScaledImageCreator.html">ScaledImageCreator</a>
   
     <li><a href="./SetsController.html">SetsController</a>
   
@@ -279,7 +291,11 @@
   
     <li><a href="./TextFile.html">TextFile</a>
   
+    <li><a href="./UploadAlert.html">UploadAlert</a>
+  
     <li><a href="./User.html">User</a>
+  
+    <li><a href="./UsersController.html">UsersController</a>
   
     <li><a href="./VideoFile.html">VideoFile</a>
   
@@ -454,6 +470,52 @@ entries  in this collection.</p>
       </div><!-- entry_ids-method -->
 
     
+      <div id="method-i-remove_dead_entries" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">remove_dead_entries</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Eliminate every entry ID that points to an object that no longer exists
+Return the pid of each entry removed.  Behavior of this method is weirdly
+flaky in the case where self is held in memory  /while/ the <a
+href="NuCoreFile.html">NuCoreFile</a> is deleted.  If you&#39;ve having
+problems that appear to be caused by self.relationships(:has_member) 
+returning “info:fedora/” try reloading the object you&#39;re holding before
+executing this.</p>
+          
+
+          
+          <div class="method-source-code" id="remove_dead_entries-source">
+            <pre><span class="ruby-comment"># File app/models/compilation.rb, line 60</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">remove_dead_entries</span>
+  <span class="ruby-identifier">results</span> = []
+
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">entry_ids</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">entry</span><span class="ruby-operator">|</span> 
+    <span class="ruby-keyword">if</span> <span class="ruby-operator">!</span><span class="ruby-constant">ActiveFedora</span><span class="ruby-operator">::</span><span class="ruby-constant">Base</span>.<span class="ruby-identifier">exists?</span>(<span class="ruby-identifier">entry</span>) 
+      <span class="ruby-identifier">results</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">entry</span> 
+      <span class="ruby-identifier">remove_entry</span>(<span class="ruby-identifier">entry</span>)
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">save!</span> 
+  <span class="ruby-keyword">return</span> <span class="ruby-identifier">results</span> 
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- remove_dead_entries-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- remove_dead_entries-method -->
+
+    
       <div id="method-i-remove_entry" class="method-detail ">
         
         <div class="method-heading">
@@ -475,8 +537,7 @@ entries  in this collection.</p>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">value</span>.<span class="ruby-identifier">instance_of?</span>(<span class="ruby-constant">NuCoreFile</span>) 
     <span class="ruby-identifier">remove_relationship</span>(<span class="ruby-value">:has_member</span>, <span class="ruby-identifier">value</span>) 
   <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">value</span>.<span class="ruby-identifier">instance_of?</span>(<span class="ruby-constant">String</span>) 
-    <span class="ruby-identifier">object</span> = <span class="ruby-constant">NuCoreFile</span>.<span class="ruby-identifier">find</span>(<span class="ruby-identifier">value</span>)
-    <span class="ruby-identifier">remove_relationship</span>(<span class="ruby-value">:has_member</span>, <span class="ruby-identifier">object</span>)  
+    <span class="ruby-identifier">remove_relationship</span>(<span class="ruby-value">:has_member</span>, <span class="ruby-node">&quot;info:fedora/#{value}&quot;</span>)
   <span class="ruby-keyword">end</span>
 <span class="ruby-keyword">end</span></pre>
           </div><!-- remove_entry-source -->

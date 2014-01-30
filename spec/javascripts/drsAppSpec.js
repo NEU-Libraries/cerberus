@@ -60,7 +60,82 @@ describe('The drsApp object', function() {
     });
   });
   
+  describe('toggles the view class for drs-items',function(){
+    beforeEach(function(){
+      loadFixtures('drsAppToogleView.html');
+      drsApp.init();
+    });
+    it('should listen for the use to click on the a link or button element and toggle the target containers class based on that and make sure that all items are not active', function(){
+      expect($('button[data-target="drs-items-grid"]')).toHaveClass('active');
+      $('button[data-target="drs-items-list"]').trigger('click');
+      expect($('button[data-target="drs-items-list"]')).toHaveClass('active');
+      expect($('#drsDummyItems')).toHaveClass('drs-items-list');
+      expect($('#drsDummyItems')).not.toHaveClass('drs-items-grid');
 
+
+      var item =  $('.drs-item').first();
+      item.addClass('active');
+      $('button[data-target="drs-items-grid"]').trigger('click');
+      expect($('button[data-target="drs-items-grid"]')).toHaveClass('active');
+      expect(item).not.toHaveClass('active');
+      expect($('#drsDummyItems')).toHaveClass('drs-items-grid');
+      expect($('#drsDummyItems')).not.toHaveClass('drs-items-list');
+
+    });
+  });
+  describe( 'should listen for the user to click an item and show the user a bigger reveal' , function() { 
+    beforeEach(function(){
+      loadFixtures('drsAppToogleView.html');
+      drsApp.init();
+    });
+    it('should listen for a click to happen on the item and simply toggle the active class on it or any other items in the container.', function(){
+
+      expect($('#drsItem1')).not.toHaveClass('active');
+      expect($('.drs-item')).not.toHaveClass('active');
+      
+      $('#drsItem1').trigger('click');
+      
+      expect($('#drsItem1')).toHaveClass('active');
+
+
+      $('#drsItem1').trigger('click');
+      
+      expect($('#drsItem1')).not.toHaveClass('active');
+      var anotherItem = $('#drsItem1').next('.drs-item');
+      
+      anotherItem.trigger('click');
+
+      expect( $('#drsItem1') ).not.toHaveClass('active'); 
+      expect( anotherItem ).toHaveClass('active');
+
+    });
+
+
+  });
+
+  describe( 'toggleShoppingCart method',  function(){
+    var sc = null 
+    beforeEach( function(){
+      loadFixtures('shoppingcart-remove.html');
+      drsApp.init();
+      
+
+    });
+
+    it('listens to objects with data-shoppingcart', function(){
+      sc = $('[data-shoppingcart]');
+      expect( sc ).toExist();
+      sc.trigger('ajax:beforeSend');
+      expect(sc).toHaveAttr('data-shoppingcart', 'replace');
+      
+      $.get( '/spec/javascripts/fixtures/shoppingcart-add.html', function( data ){
+        drsApp.$new = $(data);
+      });
+      // TODO figure out test coverage for the rest.
+    });
+
+  });
+  
 
 
 });

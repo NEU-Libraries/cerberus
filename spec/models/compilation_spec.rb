@@ -100,7 +100,25 @@ describe Compilation do
     end
   end 
 
+  describe "Represents the compilation attributes as JSON" do
+    it "responds to_json in the model" do
 
+      compilation.add_entry(file)
+      compilation.add_entry(file_two)
+      compilation_json = compilation.to_json
+      
+      parsed = JSON.parse(compilation_json);
+      parsed.length.should > 0;
+
+      parsed["title"].should == compilation.title
+      parsed["entries"][0].should == compilation.entries[0].pid
+      parsed["entries"][1].should == compilation.entries[1].pid
+
+
+
+
+    end
+  end
   describe "User based lookup" do 
 
     it "returns all compilations associated with the given user" do 

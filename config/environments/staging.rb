@@ -30,13 +30,13 @@ Drs::Application.configure do
   config.active_record.auto_explain_threshold_in_seconds = 0.5
 
   # Do not compress assets
-  config.assets.compress = false
+  config.assets.compress = true
 
   # Do not serve static assets
-  config.serve_static_assets = false
+  config.serve_static_assets = true
 
   # Expands the lines which load the assets
-  config.assets.debug = true
+  config.assets.debug = false
 
   # Tell Mailer to use SMTP 
   config.action_mailer.delivery_method = :smtp
@@ -54,4 +54,6 @@ Drs::Application.configure do
     authentication: ENV["MAILER_AUTHENTICATION"], 
     enable_starttls_auto: true
   }
+  #Google analytics tracking code
+  GA.tracker = "UA-4426028-12"
 end

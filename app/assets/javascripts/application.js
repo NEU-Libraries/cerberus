@@ -12,19 +12,22 @@
 
 //= require jquery
 //= require jquery_ujs
-//= require shopping_carts
+//= require modernizr/modernizr
+//= require webshims/polyfiller
+//= require polyfills
+
+//= require picturefill/picturefill.js
 //= require blacklight/blacklight
 //= require sufia
 // Required by Blacklight
 
-//= require bootstrap-select/bootstrap-select.js
 //= require bootstrap-datepicker/js/bootstrap-datepicker.js
 //= require bootbox/bootbox.min.js
 //= require plugins
-//= require app
-//= require polyfills
-//= require nu_collections
+
+//= require drsApp
+
 //= require compilations
-//= require communities
-//= require admin
-//= require admin/communities
+//= require shopping_carts
+//= require analytics.js
+

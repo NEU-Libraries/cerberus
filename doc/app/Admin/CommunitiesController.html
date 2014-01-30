@@ -105,10 +105,6 @@
   
     <li><a href="../Drs.html">Drs</a>
   
-    <li><a href="../Drs/Content.html">Drs::Content</a>
-  
-    <li><a href="../Drs/Content/Transformations.html">Drs::Content::Transformations</a>
-  
     <li><a href="../Drs/ControllerHelpers.html">Drs::ControllerHelpers</a>
   
     <li><a href="../Drs/ControllerHelpers/EditableObjects.html">Drs::ControllerHelpers::EditableObjects</a>
@@ -167,6 +163,10 @@
   
     <li><a href="../Employee/FacultyFolders.html">Employee::FacultyFolders</a>
   
+    <li><a href="../Users.html">Users</a>
+  
+    <li><a href="../Users/OmniauthCallbacksController.html">Users::OmniauthCallbacksController</a>
+  
     <li><a href="../AdminController.html">AdminController</a>
   
     <li><a href="../ApplicationController.html">ApplicationController</a>
@@ -191,6 +191,8 @@
   
     <li><a href="../ContentCreationJob.html">ContentCreationJob</a>
   
+    <li><a href="../DerivativeCreator.html">DerivativeCreator</a>
+  
     <li><a href="../DrsEmployeeDatastream.html">DrsEmployeeDatastream</a>
   
     <li><a href="../DrsPropertiesDatastream.html">DrsPropertiesDatastream</a>
@@ -208,6 +210,10 @@
     <li><a href="../ImageSmallFile.html">ImageSmallFile</a>
   
     <li><a href="../ImageThumbnailFile.html">ImageThumbnailFile</a>
+  
+    <li><a href="../InlineThumbnailCreator.html">InlineThumbnailCreator</a>
+  
+    <li><a href="../MetadataMailer.html">MetadataMailer</a>
   
     <li><a href="../MetadataUpdateJob.html">MetadataUpdateJob</a>
   
@@ -235,9 +241,13 @@
   
     <li><a href="../NuModsDatastream.html">NuModsDatastream</a>
   
+    <li><a href="../Object.html">Object</a>
+  
     <li><a href="../ParanoidRightsDatastream.html">ParanoidRightsDatastream</a>
   
     <li><a href="../PdfFile.html">PdfFile</a>
+  
+    <li><a href="../ScaledImageCreator.html">ScaledImageCreator</a>
   
     <li><a href="../SetsController.html">SetsController</a>
   
@@ -249,7 +259,11 @@
   
     <li><a href="../TextFile.html">TextFile</a>
   
+    <li><a href="../UploadAlert.html">UploadAlert</a>
+  
     <li><a href="../User.html">User</a>
+  
+    <li><a href="../UsersController.html">UsersController</a>
   
     <li><a href="../VideoFile.html">VideoFile</a>
   
@@ -304,16 +318,19 @@
 
           
           <div class="method-source-code" id="create-source">
-            <pre><span class="ruby-comment"># File app/controllers/admin/communities_controller.rb, line 14</span>
+            <pre><span class="ruby-comment"># File app/controllers/admin/communities_controller.rb, line 15</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">create</span>
   <span class="ruby-ivar">@community</span> = <span class="ruby-constant">Community</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:community</span>].<span class="ruby-identifier">merge</span>(<span class="ruby-identifier">pid</span><span class="ruby-operator">:</span> <span class="ruby-identifier">mint_unique_pid</span>))
-
-  <span class="ruby-ivar">@community</span>.<span class="ruby-identifier">mass_permissions</span> = <span class="ruby-string">&#39;public&#39;</span>
-  <span class="ruby-ivar">@community</span>.<span class="ruby-identifier">rightsMetadata</span>.<span class="ruby-identifier">permissions</span>({<span class="ruby-identifier">person</span><span class="ruby-operator">:</span> <span class="ruby-node">&quot;#{current_user.nuid}&quot;</span>}, <span class="ruby-string">&#39;edit&#39;</span>)
-
+  <span class="ruby-ivar">@community</span>.<span class="ruby-identifier">depositor</span> = <span class="ruby-identifier">current_user</span>.<span class="ruby-identifier">nuid</span>
   <span class="ruby-ivar">@community</span>.<span class="ruby-identifier">identifier</span> = <span class="ruby-ivar">@community</span>.<span class="ruby-identifier">pid</span>
 
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">get_parent_mass_permissions</span> <span class="ruby-operator">==</span> <span class="ruby-string">&#39;private&#39;</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-ivar">@community</span>.<span class="ruby-identifier">mass_permissions</span> <span class="ruby-operator">==</span> <span class="ruby-string">&#39;public&#39;</span>
+    <span class="ruby-identifier">flash</span>.<span class="ruby-identifier">now</span>[<span class="ruby-value">:error</span>] = <span class="ruby-string">&quot;Parent community is set to private, can&#39;t have public child.&quot;</span> 
+    <span class="ruby-identifier">render</span> <span class="ruby-value">:action</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;new&#39;</span> <span class="ruby-keyword">and</span> <span class="ruby-keyword">return</span>
+  <span class="ruby-keyword">end</span>
+
   <span class="ruby-keyword">if</span> <span class="ruby-ivar">@community</span>.<span class="ruby-identifier">save!</span>
+    <span class="ruby-identifier">update_theses_and_thumbnail</span>
     <span class="ruby-identifier">flash</span>[<span class="ruby-value">:info</span>] = <span class="ruby-string">&quot;Community created successfully.&quot;</span>
     <span class="ruby-identifier">redirect_to</span> <span class="ruby-identifier">admin_communities_path</span> <span class="ruby-keyword">and</span> <span class="ruby-keyword">return</span>  
   <span class="ruby-keyword">else</span>
@@ -347,7 +364,7 @@
 
           
           <div class="method-source-code" id="destroy-source">
-            <pre><span class="ruby-comment"># File app/controllers/admin/communities_controller.rb, line 45</span>
+            <pre><span class="ruby-comment"># File app/controllers/admin/communities_controller.rb, line 57</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">destroy</span> 
   <span class="ruby-identifier">title</span> = <span class="ruby-ivar">@community</span>.<span class="ruby-identifier">title</span>
 
@@ -385,9 +402,9 @@
 
           
           <div class="method-source-code" id="edit-source">
-            <pre><span class="ruby-comment"># File app/controllers/admin/communities_controller.rb, line 31</span>
+            <pre><span class="ruby-comment"># File app/controllers/admin/communities_controller.rb, line 35</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">edit</span> 
-
+  <span class="ruby-ivar">@page_title</span> = <span class="ruby-node">&quot;Administer #{@community.title}&quot;</span>
 <span class="ruby-keyword">end</span></pre>
           </div><!-- edit-source -->
           
@@ -418,6 +435,7 @@
             <pre><span class="ruby-comment"># File app/controllers/admin/communities_controller.rb, line 6</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">index</span> 
   <span class="ruby-ivar">@communities</span> = <span class="ruby-constant">Community</span>.<span class="ruby-identifier">all</span>
+  <span class="ruby-ivar">@page_title</span> = <span class="ruby-string">&quot;Administer Communities&quot;</span>
 <span class="ruby-keyword">end</span></pre>
           </div><!-- index-source -->
           
@@ -445,9 +463,9 @@
 
           
           <div class="method-source-code" id="new-source">
-            <pre><span class="ruby-comment"># File app/controllers/admin/communities_controller.rb, line 10</span>
+            <pre><span class="ruby-comment"># File app/controllers/admin/communities_controller.rb, line 11</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">new</span> 
-
+  <span class="ruby-ivar">@page_title</span> = <span class="ruby-string">&quot;Create New Community&quot;</span>
 <span class="ruby-keyword">end</span></pre>
           </div><!-- new-source -->
           
@@ -475,8 +493,16 @@
 
           
           <div class="method-source-code" id="update-source">
-            <pre><span class="ruby-comment"># File app/controllers/admin/communities_controller.rb, line 35</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">update</span> 
+            <pre><span class="ruby-comment"># File app/controllers/admin/communities_controller.rb, line 39</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">update</span>
+
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">get_parent_mass_permissions</span> <span class="ruby-operator">==</span> <span class="ruby-string">&#39;private&#39;</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-ivar">@community</span>.<span class="ruby-identifier">mass_permissions</span> <span class="ruby-operator">==</span> <span class="ruby-string">&#39;public&#39;</span>
+    <span class="ruby-identifier">flash</span>.<span class="ruby-identifier">now</span>[<span class="ruby-value">:error</span>] = <span class="ruby-string">&quot;Parent community is set to private, can&#39;t have public child.&quot;</span> 
+    <span class="ruby-identifier">render</span> <span class="ruby-value">:action</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;new&#39;</span> <span class="ruby-keyword">and</span> <span class="ruby-keyword">return</span>
+  <span class="ruby-keyword">end</span>
+ 
+  <span class="ruby-identifier">update_theses_and_thumbnail</span>      
+
   <span class="ruby-keyword">if</span> <span class="ruby-ivar">@community</span>.<span class="ruby-identifier">update_attributes</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:community</span>])
     <span class="ruby-identifier">flash</span>[<span class="ruby-value">:notice</span>] =  <span class="ruby-node">&quot;Community #{@community.title} was updated successfully.&quot;</span>
     <span class="ruby-identifier">redirect_to</span> <span class="ruby-identifier">admin_communities_path</span>

@@ -129,10 +129,6 @@
   
     <li><a href="./Drs.html">Drs</a>
   
-    <li><a href="./Drs/Content.html">Drs::Content</a>
-  
-    <li><a href="./Drs/Content/Transformations.html">Drs::Content::Transformations</a>
-  
     <li><a href="./Drs/ControllerHelpers.html">Drs::ControllerHelpers</a>
   
     <li><a href="./Drs/ControllerHelpers/EditableObjects.html">Drs::ControllerHelpers::EditableObjects</a>
@@ -191,6 +187,10 @@
   
     <li><a href="./Employee/FacultyFolders.html">Employee::FacultyFolders</a>
   
+    <li><a href="./Users.html">Users</a>
+  
+    <li><a href="./Users/OmniauthCallbacksController.html">Users::OmniauthCallbacksController</a>
+  
     <li><a href="./AdminController.html">AdminController</a>
   
     <li><a href="./ApplicationController.html">ApplicationController</a>
@@ -215,6 +215,8 @@
   
     <li><a href="./ContentCreationJob.html">ContentCreationJob</a>
   
+    <li><a href="./DerivativeCreator.html">DerivativeCreator</a>
+  
     <li><a href="./DrsEmployeeDatastream.html">DrsEmployeeDatastream</a>
   
     <li><a href="./DrsPropertiesDatastream.html">DrsPropertiesDatastream</a>
@@ -232,6 +234,10 @@
     <li><a href="./ImageSmallFile.html">ImageSmallFile</a>
   
     <li><a href="./ImageThumbnailFile.html">ImageThumbnailFile</a>
+  
+    <li><a href="./InlineThumbnailCreator.html">InlineThumbnailCreator</a>
+  
+    <li><a href="./MetadataMailer.html">MetadataMailer</a>
   
     <li><a href="./MetadataUpdateJob.html">MetadataUpdateJob</a>
   
@@ -259,9 +265,13 @@
   
     <li><a href="./NuModsDatastream.html">NuModsDatastream</a>
   
+    <li><a href="./Object.html">Object</a>
+  
     <li><a href="./ParanoidRightsDatastream.html">ParanoidRightsDatastream</a>
   
     <li><a href="./PdfFile.html">PdfFile</a>
+  
+    <li><a href="./ScaledImageCreator.html">ScaledImageCreator</a>
   
     <li><a href="./SetsController.html">SetsController</a>
   
@@ -273,7 +283,11 @@
   
     <li><a href="./TextFile.html">TextFile</a>
   
+    <li><a href="./UploadAlert.html">UploadAlert</a>
+  
     <li><a href="./User.html">User</a>
+  
+    <li><a href="./UsersController.html">UsersController</a>
   
     <li><a href="./VideoFile.html">VideoFile</a>
   
@@ -328,9 +342,8 @@
 
           
           <div class="method-source-code" id="add_file-source">
-            <pre><span class="ruby-comment"># File app/controllers/compilations_controller.rb, line 52</span>
+            <pre><span class="ruby-comment"># File app/controllers/compilations_controller.rb, line 55</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">add_file</span>
-  <span class="ruby-identifier">load_instance</span> 
   <span class="ruby-ivar">@compilation</span>.<span class="ruby-identifier">add_entry</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:entry_id</span>]) 
   <span class="ruby-identifier">save_or_bust</span> <span class="ruby-ivar">@compilation</span> 
 <span class="ruby-keyword">end</span></pre>
@@ -360,7 +373,7 @@
 
           
           <div class="method-source-code" id="create-source">
-            <pre><span class="ruby-comment"># File app/controllers/compilations_controller.rb, line 17</span>
+            <pre><span class="ruby-comment"># File app/controllers/compilations_controller.rb, line 22</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">create</span>
   <span class="ruby-ivar">@compilation</span> = <span class="ruby-constant">Compilation</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:compilation</span>].<span class="ruby-identifier">merge</span>(<span class="ruby-identifier">pid</span><span class="ruby-operator">:</span> <span class="ruby-identifier">mint_unique_pid</span>))
   <span class="ruby-ivar">@compilation</span>.<span class="ruby-identifier">depositor</span> = <span class="ruby-identifier">current_user</span>.<span class="ruby-identifier">nuid</span> 
@@ -393,9 +406,8 @@
 
           
           <div class="method-source-code" id="delete_file-source">
-            <pre><span class="ruby-comment"># File app/controllers/compilations_controller.rb, line 58</span>
+            <pre><span class="ruby-comment"># File app/controllers/compilations_controller.rb, line 60</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">delete_file</span>
-  <span class="ruby-identifier">load_instance</span>
   <span class="ruby-ivar">@compilation</span>.<span class="ruby-identifier">remove_entry</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:entry_id</span>])  
   <span class="ruby-identifier">save_or_bust</span> <span class="ruby-ivar">@compilation</span> 
 <span class="ruby-keyword">end</span></pre>
@@ -425,9 +437,8 @@
 
           
           <div class="method-source-code" id="destroy-source">
-            <pre><span class="ruby-comment"># File app/controllers/compilations_controller.rb, line 42</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">destroy</span> 
-  <span class="ruby-identifier">load_instance</span> 
+            <pre><span class="ruby-comment"># File app/controllers/compilations_controller.rb, line 46</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">destroy</span>  
   <span class="ruby-keyword">if</span> <span class="ruby-ivar">@compilation</span>.<span class="ruby-identifier">destroy</span>
     <span class="ruby-identifier">flash</span>[<span class="ruby-value">:notice</span>] = <span class="ruby-string">&quot;Compilation was successfully destroyed&quot;</span> 
     <span class="ruby-identifier">redirect_to</span> <span class="ruby-identifier">compilations_path</span> 
@@ -463,7 +474,6 @@
           <div class="method-source-code" id="download-source">
             <pre><span class="ruby-comment"># File app/controllers/compilations_controller.rb, line 78</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">download</span> 
-  <span class="ruby-identifier">load_instance</span>
   <span class="ruby-identifier">download_zipped_comp</span>(<span class="ruby-ivar">@compilation</span>.<span class="ruby-identifier">pid</span>)  
 <span class="ruby-keyword">end</span></pre>
           </div><!-- download-source -->
@@ -492,9 +502,9 @@
 
           
           <div class="method-source-code" id="edit-source">
-            <pre><span class="ruby-comment"># File app/controllers/compilations_controller.rb, line 24</span>
+            <pre><span class="ruby-comment"># File app/controllers/compilations_controller.rb, line 29</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">edit</span>
-  <span class="ruby-identifier">load_instance</span> 
+  <span class="ruby-ivar">@page_title</span> = <span class="ruby-node">&quot;Edit #{@compilation.title}&quot;</span> 
 <span class="ruby-keyword">end</span></pre>
           </div><!-- edit-source -->
           
@@ -522,9 +532,10 @@
 
           
           <div class="method-source-code" id="index-source">
-            <pre><span class="ruby-comment"># File app/controllers/compilations_controller.rb, line 9</span>
+            <pre><span class="ruby-comment"># File app/controllers/compilations_controller.rb, line 12</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">index</span> 
   <span class="ruby-ivar">@compilations</span> = <span class="ruby-constant">Compilation</span>.<span class="ruby-identifier">users_compilations</span>(<span class="ruby-identifier">current_user</span>) 
+  <span class="ruby-ivar">@page_title</span> = <span class="ruby-string">&quot;My Compilations&quot;</span>
 <span class="ruby-keyword">end</span></pre>
           </div><!-- index-source -->
           
@@ -552,9 +563,10 @@
 
           
           <div class="method-source-code" id="new-source">
-            <pre><span class="ruby-comment"># File app/controllers/compilations_controller.rb, line 13</span>
+            <pre><span class="ruby-comment"># File app/controllers/compilations_controller.rb, line 17</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">new</span> 
   <span class="ruby-ivar">@compilation</span> = <span class="ruby-constant">Compilation</span>.<span class="ruby-identifier">new</span>
+  <span class="ruby-ivar">@page_title</span> = <span class="ruby-string">&quot;New Compilation&quot;</span>
 <span class="ruby-keyword">end</span></pre>
           </div><!-- new-source -->
           
@@ -582,9 +594,8 @@
 
           
           <div class="method-source-code" id="ping_download-source">
-            <pre><span class="ruby-comment"># File app/controllers/compilations_controller.rb, line 64</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">ping_download</span>
-  <span class="ruby-identifier">load_instance</span> 
+            <pre><span class="ruby-comment"># File app/controllers/compilations_controller.rb, line 65</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">ping_download</span> 
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">download_is_ready?</span>(<span class="ruby-ivar">@compilation</span>.<span class="ruby-identifier">pid</span>) 
     <span class="ruby-ivar">@is_ready</span> = <span class="ruby-keyword">true</span> 
   <span class="ruby-keyword">else</span>
@@ -617,9 +628,9 @@
 
           
           <div class="method-source-code" id="show-source">
-            <pre><span class="ruby-comment"># File app/controllers/compilations_controller.rb, line 38</span>
+            <pre><span class="ruby-comment"># File app/controllers/compilations_controller.rb, line 42</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">show</span>
-  <span class="ruby-identifier">load_instance</span>
+  <span class="ruby-ivar">@page_title</span> = <span class="ruby-node">&quot;#{@compilation.title}&quot;</span>
 <span class="ruby-keyword">end</span></pre>
           </div><!-- show-source -->
           
@@ -648,9 +659,9 @@
           
           <div class="method-source-code" id="show_download-source">
             <pre><span class="ruby-comment"># File app/controllers/compilations_controller.rb, line 73</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">show_download</span> 
-  <span class="ruby-identifier">load_instance</span> 
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">show_download</span>  
   <span class="ruby-constant">Sufia</span>.<span class="ruby-identifier">queue</span>.<span class="ruby-identifier">push</span>(<span class="ruby-constant">ZipCompilationJob</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">current_user</span>, <span class="ruby-ivar">@compilation</span>))
+  <span class="ruby-ivar">@page_title</span> = <span class="ruby-node">&quot;Download #{@compilation.title}&quot;</span>
 <span class="ruby-keyword">end</span></pre>
           </div><!-- show_download-source -->
           
@@ -678,9 +689,8 @@
 
           
           <div class="method-source-code" id="update-source">
-            <pre><span class="ruby-comment"># File app/controllers/compilations_controller.rb, line 28</span>
+            <pre><span class="ruby-comment"># File app/controllers/compilations_controller.rb, line 33</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">update</span>
-  <span class="ruby-identifier">load_instance</span>
   <span class="ruby-keyword">if</span> <span class="ruby-ivar">@compilation</span>.<span class="ruby-identifier">update_attributes</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:compilation</span>])
     <span class="ruby-identifier">flash</span>[<span class="ruby-value">:notice</span>] = <span class="ruby-string">&quot;Compilation successfully updated&quot;</span> 
     <span class="ruby-identifier">redirect_to</span> <span class="ruby-ivar">@compilation</span> 

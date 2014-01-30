@@ -86,9 +86,13 @@
 
   <ul class="link-list">
     
-    <li><a href="#method-c-mods_corporate_name_template">::mods_corporate_name_template</a>
+    <li><a href="#method-c-corporate_name_template">::corporate_name_template</a>
     
-    <li><a href="#method-c-mods_personal_name_template">::mods_personal_name_template</a>
+    <li><a href="#method-c-name_template">::name_template</a>
+    
+    <li><a href="#method-c-personal_name_template">::personal_name_template</a>
+    
+    <li><a href="#method-c-subject_template">::subject_template</a>
     
     <li><a href="#method-c-xml_template">::xml_template</a>
     
@@ -98,9 +102,13 @@
     
     <li><a href="#method-i-corporate_creators">#corporate_creators</a>
     
-    <li><a href="#method-i-keywords-3D">#keywords=</a>
+    <li><a href="#method-i-names-3D">#names=</a>
     
     <li><a href="#method-i-personal_creators">#personal_creators</a>
+    
+    <li><a href="#method-i-to_solr">#to_solr</a>
+    
+    <li><a href="#method-i-topics-3D">#topics=</a>
     
   </ul>
 </nav>
@@ -124,10 +132,6 @@
   <ul class="link-list">
   
     <li><a href="./Drs.html">Drs</a>
-  
-    <li><a href="./Drs/Content.html">Drs::Content</a>
-  
-    <li><a href="./Drs/Content/Transformations.html">Drs::Content::Transformations</a>
   
     <li><a href="./Drs/ControllerHelpers.html">Drs::ControllerHelpers</a>
   
@@ -187,6 +191,10 @@
   
     <li><a href="./Employee/FacultyFolders.html">Employee::FacultyFolders</a>
   
+    <li><a href="./Users.html">Users</a>
+  
+    <li><a href="./Users/OmniauthCallbacksController.html">Users::OmniauthCallbacksController</a>
+  
     <li><a href="./AdminController.html">AdminController</a>
   
     <li><a href="./ApplicationController.html">ApplicationController</a>
@@ -211,6 +219,8 @@
   
     <li><a href="./ContentCreationJob.html">ContentCreationJob</a>
   
+    <li><a href="./DerivativeCreator.html">DerivativeCreator</a>
+  
     <li><a href="./DrsEmployeeDatastream.html">DrsEmployeeDatastream</a>
   
     <li><a href="./DrsPropertiesDatastream.html">DrsPropertiesDatastream</a>
@@ -228,6 +238,10 @@
     <li><a href="./ImageSmallFile.html">ImageSmallFile</a>
   
     <li><a href="./ImageThumbnailFile.html">ImageThumbnailFile</a>
+  
+    <li><a href="./InlineThumbnailCreator.html">InlineThumbnailCreator</a>
+  
+    <li><a href="./MetadataMailer.html">MetadataMailer</a>
   
     <li><a href="./MetadataUpdateJob.html">MetadataUpdateJob</a>
   
@@ -255,9 +269,13 @@
   
     <li><a href="./NuModsDatastream.html">NuModsDatastream</a>
   
+    <li><a href="./Object.html">Object</a>
+  
     <li><a href="./ParanoidRightsDatastream.html">ParanoidRightsDatastream</a>
   
     <li><a href="./PdfFile.html">PdfFile</a>
+  
+    <li><a href="./ScaledImageCreator.html">ScaledImageCreator</a>
   
     <li><a href="./SetsController.html">SetsController</a>
   
@@ -269,7 +287,11 @@
   
     <li><a href="./TextFile.html">TextFile</a>
   
+    <li><a href="./UploadAlert.html">UploadAlert</a>
+  
     <li><a href="./User.html">User</a>
+  
+    <li><a href="./UsersController.html">UsersController</a>
   
     <li><a href="./VideoFile.html">VideoFile</a>
   
@@ -308,10 +330,10 @@
       <h3 class="section-header">Public Class Methods</h3>
 
     
-      <div id="method-c-mods_corporate_name_template" class="method-detail ">
+      <div id="method-c-corporate_name_template" class="method-detail ">
         
         <div class="method-heading">
-          <span class="method-name">mods_corporate_name_template</span><span
+          <span class="method-name">corporate_name_template</span><span
             class="method-args">()</span>
           <span class="method-click-advice">click to toggle source</span>
         </div>
@@ -323,28 +345,28 @@
           
 
           
-          <div class="method-source-code" id="mods_corporate_name_template-source">
-            <pre><span class="ruby-comment"># File app/models/nu_mods_datastream.rb, line 150</span>
-<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">mods_corporate_name_template</span> 
+          <div class="method-source-code" id="corporate_name_template-source">
+            <pre><span class="ruby-comment"># File app/models/nu_mods_datastream.rb, line 398</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">corporate_name_template</span> 
   <span class="ruby-identifier">builder</span> = <span class="ruby-constant">Nokogiri</span><span class="ruby-operator">::</span><span class="ruby-constant">XML</span><span class="ruby-operator">::</span><span class="ruby-constant">Builder</span>.<span class="ruby-identifier">new</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">xml</span><span class="ruby-operator">|</span> 
     <span class="ruby-identifier">xml</span>.<span class="ruby-identifier">name</span>(<span class="ruby-string">&#39;type&#39;</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;corporate&#39;</span>) 
   <span class="ruby-keyword">end</span>
   <span class="ruby-keyword">return</span> <span class="ruby-identifier">builder</span>.<span class="ruby-identifier">doc</span>.<span class="ruby-identifier">root</span> 
 <span class="ruby-keyword">end</span></pre>
-          </div><!-- mods_corporate_name_template-source -->
+          </div><!-- corporate_name_template-source -->
           
         </div>
 
         
 
         
-      </div><!-- mods_corporate_name_template-method -->
+      </div><!-- corporate_name_template-method -->
 
     
-      <div id="method-c-mods_personal_name_template" class="method-detail ">
+      <div id="method-c-name_template" class="method-detail ">
         
         <div class="method-heading">
-          <span class="method-name">mods_personal_name_template</span><span
+          <span class="method-name">name_template</span><span
             class="method-args">()</span>
           <span class="method-click-advice">click to toggle source</span>
         </div>
@@ -358,22 +380,88 @@ by <a href="NodeHelper.html">NodeHelper</a> to add/remove nodes
           
 
           
-          <div class="method-source-code" id="mods_personal_name_template-source">
-            <pre><span class="ruby-comment"># File app/models/nu_mods_datastream.rb, line 143</span>
-<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">mods_personal_name_template</span> 
+          <div class="method-source-code" id="name_template-source">
+            <pre><span class="ruby-comment"># File app/models/nu_mods_datastream.rb, line 377</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">name_template</span> 
   <span class="ruby-identifier">builder</span> = <span class="ruby-constant">Nokogiri</span><span class="ruby-operator">::</span><span class="ruby-constant">XML</span><span class="ruby-operator">::</span><span class="ruby-constant">Builder</span>.<span class="ruby-identifier">new</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">xml</span><span class="ruby-operator">|</span> 
-    <span class="ruby-identifier">xml</span>.<span class="ruby-identifier">name</span>(<span class="ruby-string">&#39;type&#39;</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;personal&#39;</span>) 
+    <span class="ruby-identifier">xml</span>.<span class="ruby-identifier">name</span> 
   <span class="ruby-keyword">end</span>
   <span class="ruby-keyword">return</span> <span class="ruby-identifier">builder</span>.<span class="ruby-identifier">doc</span>.<span class="ruby-identifier">root</span> 
 <span class="ruby-keyword">end</span></pre>
-          </div><!-- mods_personal_name_template-source -->
+          </div><!-- name_template-source -->
           
         </div>
 
         
 
         
-      </div><!-- mods_personal_name_template-method -->
+      </div><!-- name_template-method -->
+
+    
+      <div id="method-c-personal_name_template" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">personal_name_template</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="personal_name_template-source">
+            <pre><span class="ruby-comment"># File app/models/nu_mods_datastream.rb, line 391</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">personal_name_template</span> 
+  <span class="ruby-identifier">builder</span> = <span class="ruby-constant">Nokogiri</span><span class="ruby-operator">::</span><span class="ruby-constant">XML</span><span class="ruby-operator">::</span><span class="ruby-constant">Builder</span>.<span class="ruby-identifier">new</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">xml</span><span class="ruby-operator">|</span> 
+    <span class="ruby-identifier">xml</span>.<span class="ruby-identifier">name</span>(<span class="ruby-string">&#39;type&#39;</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;personal&#39;</span>) 
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">return</span> <span class="ruby-identifier">builder</span>.<span class="ruby-identifier">doc</span>.<span class="ruby-identifier">root</span> 
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- personal_name_template-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- personal_name_template-method -->
+
+    
+      <div id="method-c-subject_template" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">subject_template</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="subject_template-source">
+            <pre><span class="ruby-comment"># File app/models/nu_mods_datastream.rb, line 384</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">subject_template</span> 
+  <span class="ruby-identifier">builder</span> = <span class="ruby-constant">Nokogiri</span><span class="ruby-operator">::</span><span class="ruby-constant">XML</span><span class="ruby-operator">::</span><span class="ruby-constant">Builder</span>.<span class="ruby-identifier">new</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">xml</span><span class="ruby-operator">|</span> 
+    <span class="ruby-identifier">xml</span>.<span class="ruby-identifier">subject</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">return</span> <span class="ruby-identifier">builder</span>.<span class="ruby-identifier">doc</span>.<span class="ruby-identifier">root</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- subject_template-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- subject_template-method -->
 
     
       <div id="method-c-xml_template" class="method-detail ">
@@ -392,10 +480,10 @@ by <a href="NodeHelper.html">NodeHelper</a> to add/remove nodes
 
           
           <div class="method-source-code" id="xml_template-source">
-            <pre><span class="ruby-comment"># File app/models/nu_mods_datastream.rb, line 34</span>
+            <pre><span class="ruby-comment"># File app/models/nu_mods_datastream.rb, line 215</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">xml_template</span> 
   <span class="ruby-identifier">builder</span> = <span class="ruby-constant">Nokogiri</span><span class="ruby-operator">::</span><span class="ruby-constant">XML</span><span class="ruby-operator">::</span><span class="ruby-constant">Builder</span>.<span class="ruby-identifier">new</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">xml</span><span class="ruby-operator">|</span>
-    <span class="ruby-identifier">xml</span>.<span class="ruby-identifier">mods</span>(<span class="ruby-string">&#39;xmlns:mods&#39;</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;http://www.loc.gov/mods/v3&#39;</span>, <span class="ruby-string">&#39;xmlns:xsi&#39;</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;http://www.w3.org/2001/XMLSchema-instance&#39;</span>,
+    <span class="ruby-identifier">xml</span>.<span class="ruby-identifier">mods</span>(<span class="ruby-string">&#39;xmlns:drs&#39;</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;http://neu&#39;</span>, <span class="ruby-string">&#39;xmlns:mods&#39;</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;http://www.loc.gov/mods/v3&#39;</span>, <span class="ruby-string">&#39;xmlns:xsi&#39;</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;http://www.w3.org/2001/XMLSchema-instance&#39;</span>,
               <span class="ruby-string">&#39;xsi:schemaLocation&#39;</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-4.xsd&#39;</span>){ 
       <span class="ruby-identifier">xml</span>.<span class="ruby-identifier">parent</span>.<span class="ruby-identifier">namespace</span> = <span class="ruby-identifier">xml</span>.<span class="ruby-identifier">parent</span>.<span class="ruby-identifier">namespace_definitions</span>.<span class="ruby-identifier">find</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">ns</span><span class="ruby-operator">|</span> <span class="ruby-identifier">ns</span>.<span class="ruby-identifier">prefix</span><span class="ruby-operator">==</span><span class="ruby-string">&quot;mods&quot;</span> } 
       <span class="ruby-identifier">xml</span>.<span class="ruby-identifier">titleInfo</span> {
@@ -407,10 +495,31 @@ by <a href="NodeHelper.html">NodeHelper</a> to add/remove nodes
       <span class="ruby-identifier">xml</span>.<span class="ruby-identifier">originInfo</span> {
         <span class="ruby-identifier">xml</span>.<span class="ruby-identifier">dateIssued</span>(<span class="ruby-string">&#39;keyDate&#39;</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;yes&#39;</span>, <span class="ruby-string">&#39;encoding&#39;</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;w3cdtf&#39;</span>) 
       }
+      <span class="ruby-identifier">xml</span>.<span class="ruby-identifier">language</span>{
+        <span class="ruby-identifier">xml</span>.<span class="ruby-identifier">languageTerm</span>
+      }
       <span class="ruby-identifier">xml</span>.<span class="ruby-identifier">note</span>(<span class="ruby-string">&#39;type&#39;</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;citation&#39;</span>) 
       <span class="ruby-identifier">xml</span>.<span class="ruby-identifier">subject</span>
       <span class="ruby-identifier">xml</span>.<span class="ruby-identifier">identifier</span>
-      <span class="ruby-identifier">xml</span>.<span class="ruby-identifier">typeOfResource</span> 
+      <span class="ruby-identifier">xml</span>.<span class="ruby-identifier">typeOfResource</span>
+
+      <span class="ruby-comment"># We instantiate all of these fields for every MODS record because terminology </span>
+      <span class="ruby-comment"># generation/access seems to barf without it. </span>
+      <span class="ruby-identifier">xml</span>.<span class="ruby-identifier">extension</span>(<span class="ruby-string">&#39;displayLabel&#39;</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;scholarly_object&#39;</span>){
+        <span class="ruby-identifier">xml</span>.<span class="ruby-identifier">scholarly_object</span>{
+          <span class="ruby-identifier">xml</span>.<span class="ruby-identifier">parent</span>.<span class="ruby-identifier">namespace</span> = <span class="ruby-keyword">nil</span>
+
+          <span class="ruby-identifier">xml</span>.<span class="ruby-identifier">category</span>{ <span class="ruby-identifier">xml</span>.<span class="ruby-identifier">parent</span>.<span class="ruby-identifier">namespace</span> = <span class="ruby-keyword">nil</span> }
+          <span class="ruby-identifier">xml</span>.<span class="ruby-identifier">department</span>{ <span class="ruby-identifier">xml</span>.<span class="ruby-identifier">parent</span>.<span class="ruby-identifier">namespace</span> = <span class="ruby-keyword">nil</span> }
+          <span class="ruby-identifier">xml</span>.<span class="ruby-identifier">degree</span>{ <span class="ruby-identifier">xml</span>.<span class="ruby-identifier">parent</span>.<span class="ruby-identifier">namespace</span> = <span class="ruby-keyword">nil</span> }
+
+          <span class="ruby-identifier">xml</span>.<span class="ruby-identifier">course_info</span>{
+            <span class="ruby-identifier">xml</span>.<span class="ruby-identifier">parent</span>.<span class="ruby-identifier">namespace</span> = <span class="ruby-keyword">nil</span> 
+            <span class="ruby-identifier">xml</span>.<span class="ruby-identifier">course_number</span>{  <span class="ruby-identifier">xml</span>.<span class="ruby-identifier">parent</span>.<span class="ruby-identifier">namespace</span> = <span class="ruby-keyword">nil</span> }
+            <span class="ruby-identifier">xml</span>.<span class="ruby-identifier">course_title</span>{ <span class="ruby-identifier">xml</span>.<span class="ruby-identifier">parent</span>.<span class="ruby-identifier">namespace</span> = <span class="ruby-keyword">nil</span> }
+          }
+        }
+      } 
     }
   <span class="ruby-keyword">end</span>
   <span class="ruby-identifier">builder</span>.<span class="ruby-identifier">doc</span>
@@ -435,7 +544,7 @@ by <a href="NodeHelper.html">NodeHelper</a> to add/remove nodes
         
         <div class="method-heading">
           <span class="method-name">assign_corporate_names</span><span
-            class="method-args">(corporate_names)</span>
+            class="method-args">(cns)</span>
           <span class="method-click-advice">click to toggle source</span>
         </div>
         
@@ -448,22 +557,22 @@ nodes.</p>
 
           
           <div class="method-source-code" id="assign_corporate_names-source">
-            <pre><span class="ruby-comment"># File app/models/nu_mods_datastream.rb, line 84</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">assign_corporate_names</span>(<span class="ruby-identifier">corporate_names</span>)
+            <pre><span class="ruby-comment"># File app/models/nu_mods_datastream.rb, line 326</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">assign_corporate_names</span>(<span class="ruby-identifier">cns</span>)
 
-  <span class="ruby-identifier">corporate_names</span>.<span class="ruby-identifier">select!</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">name</span><span class="ruby-operator">|</span> <span class="ruby-operator">!</span><span class="ruby-identifier">name</span>.<span class="ruby-identifier">blank?</span> } 
+  <span class="ruby-identifier">cns</span>.<span class="ruby-identifier">select!</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">name</span><span class="ruby-operator">|</span> <span class="ruby-operator">!</span><span class="ruby-identifier">name</span>.<span class="ruby-identifier">blank?</span> } 
 
-  <span class="ruby-keyword">if</span> <span class="ruby-identifier">corporate_names</span>.<span class="ruby-identifier">length</span> <span class="ruby-operator">&lt;</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">mods_corporate_name</span>.<span class="ruby-identifier">length</span> 
-    <span class="ruby-identifier">node_count</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">mods_corporate_name</span>.<span class="ruby-identifier">length</span> <span class="ruby-operator">-</span> <span class="ruby-identifier">corporate_names</span>.<span class="ruby-identifier">length</span> 
-    <span class="ruby-identifier">trim_nodes_from_zero</span>(<span class="ruby-value">:mods_corporate_name</span>, <span class="ruby-identifier">node_count</span>) 
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">cns</span>.<span class="ruby-identifier">length</span> <span class="ruby-operator">&lt;</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">corporate_name</span>.<span class="ruby-identifier">length</span> 
+    <span class="ruby-identifier">node_count</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">corporate_name</span>.<span class="ruby-identifier">length</span> <span class="ruby-operator">-</span> <span class="ruby-identifier">cns</span>.<span class="ruby-identifier">length</span> 
+    <span class="ruby-identifier">trim_nodes_from_zero</span>(<span class="ruby-value">:corporate_name</span>, <span class="ruby-identifier">node_count</span>) 
   <span class="ruby-keyword">end</span>
 
-  <span class="ruby-identifier">corporate_names</span>.<span class="ruby-identifier">each_with_index</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">c_name</span>, <span class="ruby-identifier">index</span><span class="ruby-operator">|</span>
-    <span class="ruby-keyword">if</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">mods_corporate_name</span>[<span class="ruby-identifier">index</span>].<span class="ruby-identifier">nil?</span> 
-      <span class="ruby-keyword">self</span>.<span class="ruby-identifier">insert_new_node</span>(<span class="ruby-value">:mods_corporate_name</span>) 
+  <span class="ruby-identifier">cns</span>.<span class="ruby-identifier">each_with_index</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">c_name</span>, <span class="ruby-identifier">index</span><span class="ruby-operator">|</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">corporate_name</span>[<span class="ruby-identifier">index</span>].<span class="ruby-identifier">nil?</span> 
+      <span class="ruby-keyword">self</span>.<span class="ruby-identifier">insert_new_node</span>(<span class="ruby-value">:corporate_name</span>) 
     <span class="ruby-keyword">end</span>
 
-    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">mods_corporate_name</span>(<span class="ruby-identifier">index</span>).<span class="ruby-identifier">mods_full_corporate_name</span> = <span class="ruby-identifier">c_name</span> 
+    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">corporate_name</span>(<span class="ruby-identifier">index</span>).<span class="ruby-identifier">name_part</span> = <span class="ruby-identifier">c_name</span> 
   <span class="ruby-keyword">end</span>
 <span class="ruby-keyword">end</span></pre>
           </div><!-- assign_corporate_names-source -->
@@ -493,7 +602,7 @@ mods_personal_name nodes.</p>
 
           
           <div class="method-source-code" id="assign_creator_personal_names-source">
-            <pre><span class="ruby-comment"># File app/models/nu_mods_datastream.rb, line 59</span>
+            <pre><span class="ruby-comment"># File app/models/nu_mods_datastream.rb, line 301</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">assign_creator_personal_names</span>(<span class="ruby-identifier">first_names</span>, <span class="ruby-identifier">last_names</span>)
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">first_names</span>.<span class="ruby-identifier">length</span> <span class="ruby-operator">!=</span> <span class="ruby-identifier">last_names</span>.<span class="ruby-identifier">length</span> 
     <span class="ruby-identifier">raise</span> <span class="ruby-node">&quot;#{first_names.length} first names received and #{last_names.length} last names received, which won&#39;t do at all.&quot;</span> 
@@ -503,18 +612,18 @@ mods_personal_name nodes.</p>
 
   <span class="ruby-identifier">name_pairs</span>.<span class="ruby-identifier">select!</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">first</span>, <span class="ruby-identifier">last</span><span class="ruby-operator">|</span> <span class="ruby-operator">!</span><span class="ruby-identifier">first</span>.<span class="ruby-identifier">blank?</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-operator">!</span><span class="ruby-identifier">last</span>.<span class="ruby-identifier">blank?</span> }   
 
-  <span class="ruby-keyword">if</span> <span class="ruby-identifier">name_pairs</span>.<span class="ruby-identifier">length</span> <span class="ruby-operator">&lt;</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">mods_personal_name</span>.<span class="ruby-identifier">length</span>
-    <span class="ruby-identifier">node_count</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">mods_personal_name</span>.<span class="ruby-identifier">length</span> <span class="ruby-operator">-</span> <span class="ruby-identifier">name_pairs</span>.<span class="ruby-identifier">length</span>
-    <span class="ruby-identifier">trim_nodes_from_zero</span>(<span class="ruby-value">:mods_personal_name</span>, <span class="ruby-identifier">node_count</span>)
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">name_pairs</span>.<span class="ruby-identifier">length</span> <span class="ruby-operator">&lt;</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">personal_name</span>.<span class="ruby-identifier">length</span>
+    <span class="ruby-identifier">node_count</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">personal_name</span>.<span class="ruby-identifier">length</span> <span class="ruby-operator">-</span> <span class="ruby-identifier">name_pairs</span>.<span class="ruby-identifier">length</span>
+    <span class="ruby-identifier">trim_nodes_from_zero</span>(<span class="ruby-value">:personal_name</span>, <span class="ruby-identifier">node_count</span>)
   <span class="ruby-keyword">end</span>
 
   <span class="ruby-identifier">name_pairs</span>.<span class="ruby-identifier">each_with_index</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span>(<span class="ruby-identifier">first_name</span>, <span class="ruby-identifier">last_name</span>), <span class="ruby-identifier">index</span><span class="ruby-operator">|</span>
-    <span class="ruby-keyword">if</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">mods_personal_name</span>[<span class="ruby-identifier">index</span>].<span class="ruby-identifier">nil?</span> 
-      <span class="ruby-keyword">self</span>.<span class="ruby-identifier">insert_new_node</span>(<span class="ruby-value">:mods_personal_name</span>) 
+    <span class="ruby-keyword">if</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">personal_name</span>[<span class="ruby-identifier">index</span>].<span class="ruby-identifier">nil?</span> 
+      <span class="ruby-keyword">self</span>.<span class="ruby-identifier">insert_new_node</span>(<span class="ruby-value">:personal_name</span>) 
     <span class="ruby-keyword">end</span>
 
-    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">mods_personal_name</span>(<span class="ruby-identifier">index</span>).<span class="ruby-identifier">mods_first_name</span> = <span class="ruby-identifier">first_name</span> 
-    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">mods_personal_name</span>(<span class="ruby-identifier">index</span>).<span class="ruby-identifier">mods_last_name</span> = <span class="ruby-identifier">last_name</span> 
+    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">personal_name</span>(<span class="ruby-identifier">index</span>).<span class="ruby-identifier">name_part_given</span> = <span class="ruby-identifier">first_name</span> 
+    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">personal_name</span>(<span class="ruby-identifier">index</span>).<span class="ruby-identifier">name_part_family</span> = <span class="ruby-identifier">last_name</span>
   <span class="ruby-keyword">end</span>
 <span class="ruby-keyword">end</span></pre>
           </div><!-- assign_creator_personal_names-source -->
@@ -544,9 +653,9 @@ when they&#39;re  returned.</p>
 
           
           <div class="method-source-code" id="corporate_creators-source">
-            <pre><span class="ruby-comment"># File app/models/nu_mods_datastream.rb, line 112</span>
+            <pre><span class="ruby-comment"># File app/models/nu_mods_datastream.rb, line 346</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">corporate_creators</span>
-  <span class="ruby-identifier">no_newlines</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">mods_corporate_name</span>.<span class="ruby-identifier">map</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">name</span><span class="ruby-operator">|</span> <span class="ruby-identifier">name</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-string">&quot;\n&quot;</span>) }
+  <span class="ruby-identifier">no_newlines</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">corporate_name</span>.<span class="ruby-identifier">map</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">name</span><span class="ruby-operator">|</span> <span class="ruby-identifier">name</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-string">&quot;\n&quot;</span>) }
   <span class="ruby-identifier">trimmed</span> = <span class="ruby-identifier">no_newlines</span>.<span class="ruby-identifier">map</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">name</span><span class="ruby-operator">|</span> <span class="ruby-identifier">name</span>.<span class="ruby-identifier">strip</span> }  
   <span class="ruby-keyword">return</span> <span class="ruby-identifier">trimmed</span>
 <span class="ruby-keyword">end</span></pre>
@@ -560,35 +669,47 @@ when they&#39;re  returned.</p>
       </div><!-- corporate_creators-method -->
 
     
-      <div id="method-i-keywords-3D" class="method-detail ">
+      <div id="method-i-names-3D" class="method-detail ">
         
         <div class="method-heading">
-          <span class="method-name">keywords=</span><span
-            class="method-args">(array_of_strings)</span>
+          <span class="method-name">names=</span><span
+            class="method-args">(x)</span>
           <span class="method-click-advice">click to toggle source</span>
         </div>
         
 
         <div class="method-description">
           
-          <p>Filters out blank keyword entries</p>
+          <p>Filters out blank entries, builds nodes as required</p>
           
 
           
-          <div class="method-source-code" id="keywords-3D-source">
-            <pre><span class="ruby-comment"># File app/models/nu_mods_datastream.rb, line 105</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">keywords=</span>(<span class="ruby-identifier">array_of_strings</span>) 
-  <span class="ruby-identifier">array_of_keywords</span> = <span class="ruby-identifier">array_of_strings</span>.<span class="ruby-identifier">select</span> {<span class="ruby-operator">|</span><span class="ruby-identifier">kw</span><span class="ruby-operator">|</span> <span class="ruby-operator">!</span><span class="ruby-identifier">kw</span>.<span class="ruby-identifier">blank?</span> }  
-  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">mods_subject</span>(<span class="ruby-value">0</span>).<span class="ruby-identifier">mods_keyword</span> = <span class="ruby-identifier">array_of_keywords</span>
+          <div class="method-source-code" id="names-3D-source">
+            <pre><span class="ruby-comment"># File app/models/nu_mods_datastream.rb, line 260</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">names=</span>(<span class="ruby-identifier">x</span>) 
+  <span class="ruby-identifier">x</span> = <span class="ruby-identifier">x</span>.<span class="ruby-identifier">select</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">name</span><span class="ruby-operator">|</span> <span class="ruby-operator">!</span><span class="ruby-identifier">name</span>.<span class="ruby-identifier">blank?</span> }
+
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">x</span>.<span class="ruby-identifier">length</span> <span class="ruby-operator">&lt;</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">name</span>.<span class="ruby-identifier">length</span> 
+    <span class="ruby-identifier">node_count</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">name</span>.<span class="ruby-identifier">length</span> <span class="ruby-operator">-</span> <span class="ruby-identifier">x</span>.<span class="ruby-identifier">length</span> 
+    <span class="ruby-identifier">trim_nodes_from_zero</span>(<span class="ruby-value">:name</span>, <span class="ruby-identifier">node_count</span>)
+  <span class="ruby-keyword">end</span>
+
+  <span class="ruby-identifier">x</span>.<span class="ruby-identifier">each_with_index</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">name</span>, <span class="ruby-identifier">i</span><span class="ruby-operator">|</span> 
+    <span class="ruby-keyword">if</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">name</span>[<span class="ruby-identifier">i</span>].<span class="ruby-identifier">nil?</span> 
+      <span class="ruby-keyword">self</span>.<span class="ruby-identifier">insert_new_node</span>(<span class="ruby-value">:name</span>) 
+    <span class="ruby-keyword">end</span>
+
+    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">name</span>(<span class="ruby-identifier">i</span>).<span class="ruby-identifier">name_part</span> = <span class="ruby-identifier">name</span> 
+  <span class="ruby-keyword">end</span>
 <span class="ruby-keyword">end</span></pre>
-          </div><!-- keywords-3D-source -->
+          </div><!-- names-3D-source -->
           
         </div>
 
         
 
         
-      </div><!-- keywords-3D-method -->
+      </div><!-- names-3D-method -->
 
     
       <div id="method-i-personal_creators" class="method-detail ">
@@ -607,12 +728,12 @@ when they&#39;re  returned.</p>
 
           
           <div class="method-source-code" id="personal_creators-source">
-            <pre><span class="ruby-comment"># File app/models/nu_mods_datastream.rb, line 119</span>
+            <pre><span class="ruby-comment"># File app/models/nu_mods_datastream.rb, line 353</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">personal_creators</span> 
   <span class="ruby-identifier">result_array</span> = []
 
-  <span class="ruby-identifier">first_names</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">mods_personal_name</span>.<span class="ruby-identifier">mods_first_name</span> 
-  <span class="ruby-identifier">last_names</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">mods_personal_name</span>.<span class="ruby-identifier">mods_last_name</span> 
+  <span class="ruby-identifier">first_names</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">personal_name</span>.<span class="ruby-identifier">name_part_given</span> 
+  <span class="ruby-identifier">last_names</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">personal_name</span>.<span class="ruby-identifier">name_part_family</span>
 
   <span class="ruby-identifier">names</span> = <span class="ruby-identifier">first_names</span>.<span class="ruby-identifier">zip</span>(<span class="ruby-identifier">last_names</span>) 
 
@@ -633,6 +754,143 @@ when they&#39;re  returned.</p>
 
         
       </div><!-- personal_creators-method -->
+
+    
+      <div id="method-i-to_solr" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">to_solr</span><span
+            class="method-args">(solr_doc = Hash.new())</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>We override <a href="NuModsDatastream.html#method-i-to_solr">#to_solr</a>
+here to add</p>
+<ol><li>
+<p>A creation_year field.</p>
+</li><li>
+<p>A valid date Begin field</p>
+</li><li>
+<p>A valid date End field</p>
+</li><li>
+<p>Special facetable keywords, e.g. any subject/topic field with an authority
+attribute</p>
+</li></ol>
+          
+
+          
+          <div class="method-source-code" id="to_solr-source">
+            <pre><span class="ruby-comment"># File app/models/nu_mods_datastream.rb, line 157</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">to_solr</span>(<span class="ruby-identifier">solr_doc</span> = <span class="ruby-constant">Hash</span>.<span class="ruby-identifier">new</span>()) 
+  <span class="ruby-keyword">super</span>(<span class="ruby-identifier">solr_doc</span>) <span class="ruby-comment"># Run the default solrization behavior </span>
+
+  <span class="ruby-comment"># Solrize extension information.</span>
+  <span class="ruby-identifier">solr_doc</span>[<span class="ruby-string">&quot;drs_category_ssim&quot;</span>] = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">category</span>.<span class="ruby-identifier">first</span> <span class="ruby-keyword">if</span> <span class="ruby-operator">!</span><span class="ruby-keyword">self</span>.<span class="ruby-identifier">category</span>.<span class="ruby-identifier">first</span>.<span class="ruby-identifier">blank?</span>
+  <span class="ruby-identifier">solr_doc</span>[<span class="ruby-string">&quot;drs_department_ssim&quot;</span>] = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">department</span>.<span class="ruby-identifier">first</span> <span class="ruby-keyword">if</span> <span class="ruby-operator">!</span><span class="ruby-keyword">self</span>.<span class="ruby-identifier">department</span>.<span class="ruby-identifier">first</span>.<span class="ruby-identifier">blank?</span>
+  <span class="ruby-identifier">solr_doc</span>[<span class="ruby-string">&quot;drs_degree_ssim&quot;</span>] = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">degree</span>.<span class="ruby-identifier">first</span> <span class="ruby-keyword">if</span> <span class="ruby-operator">!</span><span class="ruby-keyword">self</span>.<span class="ruby-identifier">degree</span>.<span class="ruby-identifier">first</span>.<span class="ruby-identifier">blank?</span>
+  <span class="ruby-identifier">solr_doc</span>[<span class="ruby-string">&quot;drs_course_number_ssim&quot;</span>] = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">course_number</span>.<span class="ruby-identifier">first</span> <span class="ruby-keyword">if</span> <span class="ruby-operator">!</span><span class="ruby-keyword">self</span>.<span class="ruby-identifier">course_number</span>.<span class="ruby-identifier">first</span>.<span class="ruby-identifier">blank?</span>
+  <span class="ruby-identifier">solr_doc</span>[<span class="ruby-string">&quot;drs_course_title_ssim&quot;</span>] = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">course_title</span>.<span class="ruby-identifier">first</span> <span class="ruby-keyword">if</span> <span class="ruby-operator">!</span><span class="ruby-keyword">self</span>.<span class="ruby-identifier">course_title</span>.<span class="ruby-identifier">first</span>.<span class="ruby-identifier">blank?</span>
+
+  <span class="ruby-comment"># Extract a creation year field</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">origin_info</span>.<span class="ruby-identifier">date_issued</span>.<span class="ruby-identifier">any?</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-operator">!</span><span class="ruby-keyword">self</span>.<span class="ruby-identifier">origin_info</span>.<span class="ruby-identifier">date_issued</span>.<span class="ruby-identifier">first</span>.<span class="ruby-identifier">blank?</span>
+    <span class="ruby-identifier">creation_date</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">origin_info</span>.<span class="ruby-identifier">date_issued</span>.<span class="ruby-identifier">first</span> 
+    <span class="ruby-identifier">solr_doc</span>[<span class="ruby-string">&quot;creation_year_sim&quot;</span>] = [<span class="ruby-identifier">creation_date</span>[<span class="ruby-regexp">/\d{4}/</span>]]
+  <span class="ruby-keyword">end</span>
+
+  <span class="ruby-comment"># Ensure title is set to a title actually associated with this core file.</span>
+  <span class="ruby-identifier">solr_doc</span>[<span class="ruby-string">&quot;title_info_title_ssi&quot;</span>] = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">title_info</span>.<span class="ruby-identifier">title</span>.<span class="ruby-identifier">first</span>
+
+  <span class="ruby-comment"># Extract special subject/topic fields</span>
+  <span class="ruby-identifier">authorized_keywords</span> = []
+
+  (<span class="ruby-value">0</span><span class="ruby-operator">..</span><span class="ruby-keyword">self</span>.<span class="ruby-identifier">subject</span>.<span class="ruby-identifier">length</span>).<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">i</span><span class="ruby-operator">|</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">subject</span>(<span class="ruby-identifier">i</span>).<span class="ruby-identifier">topic</span>.<span class="ruby-identifier">authority</span>.<span class="ruby-identifier">any?</span>
+      <span class="ruby-identifier">authorized_keywords</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">subject</span>(<span class="ruby-identifier">i</span>).<span class="ruby-identifier">topic</span>.<span class="ruby-identifier">first</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+
+  <span class="ruby-identifier">solr_doc</span>[<span class="ruby-string">&quot;subject_sim&quot;</span>] = <span class="ruby-identifier">authorized_keywords</span> 
+
+  <span class="ruby-comment">#Extract and solrize names divided into first/last parts</span>
+  <span class="ruby-identifier">full_names</span> = []
+
+  (<span class="ruby-value">0</span><span class="ruby-operator">..</span><span class="ruby-keyword">self</span>.<span class="ruby-identifier">personal_name</span>.<span class="ruby-identifier">length</span>).<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">i</span><span class="ruby-operator">|</span> 
+    <span class="ruby-identifier">fn</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">personal_name</span>(<span class="ruby-identifier">i</span>).<span class="ruby-identifier">name_part_given</span> 
+    <span class="ruby-identifier">ln</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">personal_name</span>(<span class="ruby-identifier">i</span>).<span class="ruby-identifier">name_part_family</span>
+
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">fn</span>.<span class="ruby-identifier">any?</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">ln</span>.<span class="ruby-identifier">any?</span>
+      <span class="ruby-identifier">full_names</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-node">&quot;#{fn.first} #{ln.first}&quot;</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+
+  <span class="ruby-identifier">solr_doc</span>[<span class="ruby-string">&quot;personal_creators_tesim&quot;</span>] = <span class="ruby-identifier">full_names</span>
+  <span class="ruby-identifier">solr_doc</span>[<span class="ruby-string">&quot;personal_creators_sim&quot;</span>] = <span class="ruby-identifier">full_names</span>
+
+  <span class="ruby-comment"># Create an aggregate facet field of all creator information</span>
+  <span class="ruby-identifier">personal_names</span> = <span class="ruby-identifier">solr_doc</span>[<span class="ruby-string">&quot;personal_creators_sim&quot;</span>] <span class="ruby-operator">||</span> []
+  <span class="ruby-identifier">corporate_names</span> = <span class="ruby-identifier">solr_doc</span>[<span class="ruby-string">&quot;corporate_name_name_part_sim&quot;</span>] <span class="ruby-operator">||</span> [] 
+  <span class="ruby-identifier">names</span> = <span class="ruby-identifier">solr_doc</span>[<span class="ruby-string">&quot;name_name_part_sim&quot;</span>] <span class="ruby-operator">||</span> []
+  <span class="ruby-identifier">all_names</span> = <span class="ruby-identifier">personal_names</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">corporate_names</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">names</span> 
+  <span class="ruby-identifier">solr_doc</span>[<span class="ruby-string">&quot;creator_sim&quot;</span>] = <span class="ruby-identifier">all_names</span> 
+  <span class="ruby-identifier">solr_doc</span>[<span class="ruby-string">&quot;creator_tesim&quot;</span>] = <span class="ruby-identifier">all_names</span>
+
+  <span class="ruby-comment">#TODO:  Extract dateBegin/dateEnd information ]</span>
+  <span class="ruby-keyword">return</span> <span class="ruby-identifier">solr_doc</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- to_solr-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- to_solr-method -->
+
+    
+      <div id="method-i-topics-3D" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">topics=</span><span
+            class="method-args">(array_of_strings)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Filters out blank keyword entries</p>
+          
+
+          
+          <div class="method-source-code" id="topics-3D-source">
+            <pre><span class="ruby-comment"># File app/models/nu_mods_datastream.rb, line 278</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">topics=</span>(<span class="ruby-identifier">array_of_strings</span>) 
+  <span class="ruby-identifier">array_of_keywords</span> = <span class="ruby-identifier">array_of_strings</span>.<span class="ruby-identifier">select</span> {<span class="ruby-operator">|</span><span class="ruby-identifier">kw</span><span class="ruby-operator">|</span> <span class="ruby-operator">!</span><span class="ruby-identifier">kw</span>.<span class="ruby-identifier">blank?</span> }  
+  
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">array_of_keywords</span>.<span class="ruby-identifier">length</span> <span class="ruby-operator">&lt;</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">subject</span>.<span class="ruby-identifier">length</span> 
+    <span class="ruby-identifier">node_count</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">subject</span>.<span class="ruby-identifier">length</span> <span class="ruby-operator">-</span> <span class="ruby-identifier">array_of_keywords</span>.<span class="ruby-identifier">length</span> 
+    <span class="ruby-identifier">trim_nodes_from_zero</span>(<span class="ruby-value">:subject</span>, <span class="ruby-identifier">node_count</span>)
+  <span class="ruby-keyword">end</span>
+
+  <span class="ruby-identifier">array_of_keywords</span>.<span class="ruby-identifier">each_with_index</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">kw</span>, <span class="ruby-identifier">index</span><span class="ruby-operator">|</span> 
+    <span class="ruby-keyword">if</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">subject</span>[<span class="ruby-identifier">index</span>].<span class="ruby-identifier">nil?</span> 
+      <span class="ruby-keyword">self</span>.<span class="ruby-identifier">insert_new_node</span>(<span class="ruby-value">:subject</span>) 
+    <span class="ruby-keyword">end</span>
+
+    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">subject</span>(<span class="ruby-identifier">index</span>).<span class="ruby-identifier">topic</span> = <span class="ruby-identifier">kw</span> 
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- topics-3D-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- topics-3D-method -->
 
     
     </section><!-- public-instance-method-details -->

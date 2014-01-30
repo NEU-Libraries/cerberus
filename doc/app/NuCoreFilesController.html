@@ -92,6 +92,8 @@
     
     <li><a href="#method-c-upload_complete_path">::upload_complete_path</a>
     
+    <li><a href="#method-i-create_from_local">#create_from_local</a>
+    
     <li><a href="#method-i-destroy">#destroy</a>
     
     <li><a href="#method-i-destroy_incomplete_files">#destroy_incomplete_files</a>
@@ -142,10 +144,6 @@
   <ul class="link-list">
   
     <li><a href="./Drs.html">Drs</a>
-  
-    <li><a href="./Drs/Content.html">Drs::Content</a>
-  
-    <li><a href="./Drs/Content/Transformations.html">Drs::Content::Transformations</a>
   
     <li><a href="./Drs/ControllerHelpers.html">Drs::ControllerHelpers</a>
   
@@ -205,6 +203,10 @@
   
     <li><a href="./Employee/FacultyFolders.html">Employee::FacultyFolders</a>
   
+    <li><a href="./Users.html">Users</a>
+  
+    <li><a href="./Users/OmniauthCallbacksController.html">Users::OmniauthCallbacksController</a>
+  
     <li><a href="./AdminController.html">AdminController</a>
   
     <li><a href="./ApplicationController.html">ApplicationController</a>
@@ -229,6 +231,8 @@
   
     <li><a href="./ContentCreationJob.html">ContentCreationJob</a>
   
+    <li><a href="./DerivativeCreator.html">DerivativeCreator</a>
+  
     <li><a href="./DrsEmployeeDatastream.html">DrsEmployeeDatastream</a>
   
     <li><a href="./DrsPropertiesDatastream.html">DrsPropertiesDatastream</a>
@@ -246,6 +250,10 @@
     <li><a href="./ImageSmallFile.html">ImageSmallFile</a>
   
     <li><a href="./ImageThumbnailFile.html">ImageThumbnailFile</a>
+  
+    <li><a href="./InlineThumbnailCreator.html">InlineThumbnailCreator</a>
+  
+    <li><a href="./MetadataMailer.html">MetadataMailer</a>
   
     <li><a href="./MetadataUpdateJob.html">MetadataUpdateJob</a>
   
@@ -273,9 +281,13 @@
   
     <li><a href="./NuModsDatastream.html">NuModsDatastream</a>
   
+    <li><a href="./Object.html">Object</a>
+  
     <li><a href="./ParanoidRightsDatastream.html">ParanoidRightsDatastream</a>
   
     <li><a href="./PdfFile.html">PdfFile</a>
+  
+    <li><a href="./ScaledImageCreator.html">ScaledImageCreator</a>
   
     <li><a href="./SetsController.html">SetsController</a>
   
@@ -287,7 +299,11 @@
   
     <li><a href="./TextFile.html">TextFile</a>
   
+    <li><a href="./UploadAlert.html">UploadAlert</a>
+  
     <li><a href="./User.html">User</a>
+  
+    <li><a href="./UsersController.html">UsersController</a>
   
     <li><a href="./VideoFile.html">VideoFile</a>
   
@@ -357,7 +373,7 @@ under the License.</p>
 
           
           <div class="method-source-code" id="upload_complete_path-source">
-            <pre><span class="ruby-comment"># File app/controllers/nu_core_files_controller.rb, line 158</span>
+            <pre><span class="ruby-comment"># File app/controllers/nu_core_files_controller.rb, line 163</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">upload_complete_path</span>
   <span class="ruby-constant">Rails</span>.<span class="ruby-identifier">application</span>.<span class="ruby-identifier">routes</span>.<span class="ruby-identifier">url_helpers</span>.<span class="ruby-identifier">files_provide_metadata_path</span>
 <span class="ruby-keyword">end</span></pre>
@@ -393,7 +409,7 @@ under the License.</p>
 
           
           <div class="method-source-code" id="destroy-source">
-            <pre><span class="ruby-comment"># File app/controllers/nu_core_files_controller.rb, line 148</span>
+            <pre><span class="ruby-comment"># File app/controllers/nu_core_files_controller.rb, line 153</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">destroy</span>
   <span class="ruby-ivar">@title</span> = <span class="ruby-constant">NuCoreFile</span>.<span class="ruby-identifier">find</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:id</span>]).<span class="ruby-identifier">title</span>
 
@@ -464,9 +480,10 @@ under the License.</p>
 
           
           <div class="method-source-code" id="edit-source">
-            <pre><span class="ruby-comment"># File app/controllers/nu_core_files_controller.rb, line 107</span>
+            <pre><span class="ruby-comment"># File app/controllers/nu_core_files_controller.rb, line 111</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">edit</span>
   <span class="ruby-ivar">@nu_core_file</span> = <span class="ruby-constant">NuCoreFile</span>.<span class="ruby-identifier">find</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:id</span>])
+  <span class="ruby-ivar">@page_title</span> = <span class="ruby-node">&quot;Edit #{@nu_core_file.title}&quot;</span> 
 
   <span class="ruby-ivar">@nu_core_file</span>.<span class="ruby-identifier">initialize_fields</span>
   <span class="ruby-ivar">@groups</span> = <span class="ruby-identifier">current_user</span>.<span class="ruby-identifier">groups</span>
@@ -497,8 +514,9 @@ under the License.</p>
 
           
           <div class="method-source-code" id="new-source">
-            <pre><span class="ruby-comment"># File app/controllers/nu_core_files_controller.rb, line 89</span>
+            <pre><span class="ruby-comment"># File app/controllers/nu_core_files_controller.rb, line 92</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">new</span>
+  <span class="ruby-ivar">@page_title</span> = <span class="ruby-string">&quot;Upload New Files&quot;</span>
   <span class="ruby-identifier">in_progress_files</span> = <span class="ruby-constant">NuCoreFile</span>.<span class="ruby-identifier">users_in_progress_files</span>(<span class="ruby-identifier">current_user</span>)
 
   <span class="ruby-keyword">if</span> <span class="ruby-operator">!</span><span class="ruby-identifier">in_progress_files</span>.<span class="ruby-identifier">empty?</span>
@@ -541,11 +559,11 @@ under the License.</p>
 
           
           <div class="method-source-code" id="process_metadata-source">
-            <pre><span class="ruby-comment"># File app/controllers/nu_core_files_controller.rb, line 72</span>
+            <pre><span class="ruby-comment"># File app/controllers/nu_core_files_controller.rb, line 74</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">process_metadata</span>
   <span class="ruby-constant">Sufia</span>.<span class="ruby-identifier">queue</span>.<span class="ruby-identifier">push</span>(<span class="ruby-constant">MetadataUpdateJob</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">current_user</span>.<span class="ruby-identifier">user_key</span>, <span class="ruby-identifier">params</span>))
   <span class="ruby-identifier">flash</span>[<span class="ruby-value">:notice</span>] = <span class="ruby-string">&#39;Your files are being processed by &#39;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">t</span>(<span class="ruby-string">&#39;sufia.product_name&#39;</span>) <span class="ruby-operator">+</span> <span class="ruby-string">&#39; in the background. The metadata and access controls you specified are being applied. Files will be marked &lt;span class=&quot;label label-important&quot; title=&quot;Private&quot;&gt;Private&lt;/span&gt; until this process is complete (shouldn\t take too long, hang in there!). You may need to refresh your dashboard to see these updates.&#39;</span>
-  <span class="ruby-identifier">redirect_to</span> <span class="ruby-identifier">sufia</span>.<span class="ruby-identifier">dashboard_index_path</span>    
+  <span class="ruby-identifier">redirect_to</span> <span class="ruby-identifier">nu_collection_path</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:collection_id</span>])
 <span class="ruby-keyword">end</span></pre>
           </div><!-- process_metadata-source -->
           
@@ -578,6 +596,7 @@ under the License.</p>
   <span class="ruby-ivar">@nu_core_file</span> = <span class="ruby-constant">NuCoreFile</span>.<span class="ruby-identifier">new</span>
   <span class="ruby-ivar">@sample_incomplete_file</span> = <span class="ruby-constant">NuCoreFile</span>.<span class="ruby-identifier">users_in_progress_files</span>(<span class="ruby-identifier">current_user</span>).<span class="ruby-identifier">first</span> 
   <span class="ruby-ivar">@incomplete_files</span> = <span class="ruby-constant">NuCoreFile</span>.<span class="ruby-identifier">users_in_progress_files</span>(<span class="ruby-identifier">current_user</span>) 
+  <span class="ruby-ivar">@page_title</span> = <span class="ruby-string">&quot;Provide Upload Metadata&quot;</span>
 <span class="ruby-keyword">end</span></pre>
           </div><!-- provide_metadata-source -->
           
@@ -607,7 +626,7 @@ step two of the upload process.</p>
 
           
           <div class="method-source-code" id="rescue_incomplete_files-source">
-            <pre><span class="ruby-comment"># File app/controllers/nu_core_files_controller.rb, line 62</span>
+            <pre><span class="ruby-comment"># File app/controllers/nu_core_files_controller.rb, line 63</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">rescue_incomplete_files</span>
   <span class="ruby-identifier">file_titles</span> = []
 
@@ -616,6 +635,7 @@ step two of the upload process.</p>
   <span class="ruby-keyword">end</span>
 
   <span class="ruby-ivar">@incomplete_file_titles</span> = <span class="ruby-identifier">file_titles</span> 
+  <span class="ruby-ivar">@page_title</span> = <span class="ruby-string">&quot;Rescue abandoned files&quot;</span>
 <span class="ruby-keyword">end</span></pre>
           </div><!-- rescue_incomplete_files-source -->
           
@@ -643,11 +663,12 @@ step two of the upload process.</p>
 
           
           <div class="method-source-code" id="show-source">
-            <pre><span class="ruby-comment"># File app/controllers/nu_core_files_controller.rb, line 79</span>
+            <pre><span class="ruby-comment"># File app/controllers/nu_core_files_controller.rb, line 81</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">show</span>
   <span class="ruby-identifier">respond_to</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">format</span><span class="ruby-operator">|</span>
     <span class="ruby-identifier">format</span>.<span class="ruby-identifier">html</span> {
       <span class="ruby-ivar">@events</span> = <span class="ruby-ivar">@nu_core_file</span>.<span class="ruby-identifier">events</span>(<span class="ruby-value">100</span>)
+      <span class="ruby-ivar">@page_title</span> = <span class="ruby-ivar">@nu_core_file</span>.<span class="ruby-identifier">title</span>
     }
     <span class="ruby-identifier">format</span>.<span class="ruby-identifier">endnote</span> { <span class="ruby-identifier">render</span> <span class="ruby-value">:text</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-ivar">@nu_core_file</span>.<span class="ruby-identifier">export_as_endnote</span> }
   <span class="ruby-keyword">end</span>
@@ -678,7 +699,7 @@ step two of the upload process.</p>
 
           
           <div class="method-source-code" id="update-source">
-            <pre><span class="ruby-comment"># File app/controllers/nu_core_files_controller.rb, line 114</span>
+            <pre><span class="ruby-comment"># File app/controllers/nu_core_files_controller.rb, line 119</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">update</span>
   <span class="ruby-ivar">@nu_core_file</span> = <span class="ruby-constant">NuCoreFile</span>.<span class="ruby-identifier">find</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:id</span>]) 
 
@@ -728,6 +749,56 @@ step two of the upload process.</p>
       <h3 class="section-header">Protected Instance Methods</h3>
 
     
+      <div id="method-i-create_from_local" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">create_from_local</span><span
+            class="method-args">(params)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="create_from_local-source">
+            <pre><span class="ruby-comment"># File app/controllers/nu_core_files_controller.rb, line 169</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">create_from_local</span>(<span class="ruby-identifier">params</span>)
+   <span class="ruby-keyword">begin</span>
+     <span class="ruby-comment"># check error condition No files</span>
+     <span class="ruby-keyword">return</span> <span class="ruby-identifier">json_error</span>(<span class="ruby-string">&quot;Error! No file to save&quot;</span>) <span class="ruby-keyword">if</span> <span class="ruby-operator">!</span><span class="ruby-identifier">params</span>.<span class="ruby-identifier">has_key?</span>(<span class="ruby-value">:file</span>)
+
+     <span class="ruby-identifier">file</span> = <span class="ruby-identifier">params</span>[<span class="ruby-value">:file</span>]
+     <span class="ruby-keyword">if</span> <span class="ruby-operator">!</span><span class="ruby-identifier">file</span>
+       <span class="ruby-identifier">json_error</span> <span class="ruby-string">&quot;Error! No file for upload&quot;</span>, <span class="ruby-string">&#39;unknown file&#39;</span>, <span class="ruby-value">:status</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:unprocessable_entity</span>
+     <span class="ruby-keyword">elsif</span> (<span class="ruby-identifier">empty_file?</span>(<span class="ruby-identifier">file</span>))
+       <span class="ruby-identifier">json_error</span> <span class="ruby-string">&quot;Error! Zero Length File!&quot;</span>, <span class="ruby-identifier">file</span>.<span class="ruby-identifier">original_filename</span>
+     <span class="ruby-keyword">elsif</span> (<span class="ruby-operator">!</span><span class="ruby-identifier">terms_accepted?</span>)
+       <span class="ruby-identifier">json_error</span> <span class="ruby-string">&quot;You must accept the terms of service!&quot;</span>, <span class="ruby-identifier">file</span>.<span class="ruby-identifier">original_filename</span>
+     <span class="ruby-keyword">else</span>
+       <span class="ruby-identifier">process_file</span>(<span class="ruby-identifier">file</span>)
+     <span class="ruby-keyword">end</span>
+   <span class="ruby-keyword">rescue</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">error</span>
+     <span class="ruby-identifier">logger</span>.<span class="ruby-identifier">error</span> <span class="ruby-node">&quot;NuCoreFilesController::create rescued #{error.class}\n\t#{error.to_s}\n #{error.backtrace.join(&quot;\n&quot;)}\n\n&quot;</span>
+     <span class="ruby-identifier">json_error</span> <span class="ruby-string">&quot;Error occurred while creating generic file.&quot;</span>
+   <span class="ruby-keyword">ensure</span>
+     <span class="ruby-comment"># remove the tempfile (only if it is a temp file)</span>
+     <span class="ruby-identifier">file</span>.<span class="ruby-identifier">tempfile</span>.<span class="ruby-identifier">delete</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">file</span>.<span class="ruby-identifier">respond_to?</span>(<span class="ruby-value">:tempfile</span>)
+   <span class="ruby-keyword">end</span>
+ <span class="ruby-keyword">end</span></pre>
+          </div><!-- create_from_local-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- create_from_local-method -->
+
+    
       <div id="method-i-no_parent_rescue" class="method-detail ">
         
         <div class="method-heading">
@@ -744,7 +815,7 @@ step two of the upload process.</p>
 
           
           <div class="method-source-code" id="no_parent_rescue-source">
-            <pre><span class="ruby-comment"># File app/controllers/nu_core_files_controller.rb, line 164</span>
+            <pre><span class="ruby-comment"># File app/controllers/nu_core_files_controller.rb, line 193</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">no_parent_rescue</span>
   <span class="ruby-identifier">flash</span>[<span class="ruby-value">:error</span>] = <span class="ruby-string">&quot;Parent not specified or invalid&quot;</span> 
   <span class="ruby-identifier">redirect_to</span> <span class="ruby-identifier">root_path</span> 
@@ -775,7 +846,7 @@ step two of the upload process.</p>
 
           
           <div class="method-source-code" id="perform_local_ingest-source">
-            <pre><span class="ruby-comment"># File app/controllers/nu_core_files_controller.rb, line 222</span>
+            <pre><span class="ruby-comment"># File app/controllers/nu_core_files_controller.rb, line 241</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">perform_local_ingest</span>
     <span class="ruby-keyword">if</span> <span class="ruby-constant">Sufia</span>.<span class="ruby-identifier">config</span>.<span class="ruby-identifier">enable_local_ingest</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">current_user</span>.<span class="ruby-identifier">respond_to?</span>(<span class="ruby-value">:directory</span>)
       <span class="ruby-keyword">if</span> <span class="ruby-identifier">ingest_local_file</span>
@@ -815,7 +886,7 @@ step two of the upload process.</p>
 
           
           <div class="method-source-code" id="process_file-source">
-            <pre><span class="ruby-comment"># File app/controllers/nu_core_files_controller.rb, line 193</span>
+            <pre><span class="ruby-comment"># File app/controllers/nu_core_files_controller.rb, line 222</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">process_file</span>(<span class="ruby-identifier">file</span>)
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">virus_check</span>(<span class="ruby-identifier">file</span>) <span class="ruby-operator">==</span> <span class="ruby-value">0</span> 
     <span class="ruby-ivar">@nu_core_file</span> = <span class="ruby-operator">::</span><span class="ruby-constant">NuCoreFile</span>.<span class="ruby-identifier">new</span>
@@ -828,18 +899,8 @@ step two of the upload process.</p>
 
     <span class="ruby-identifier">update_metadata_from_upload_screen</span>(<span class="ruby-ivar">@nu_core_file</span>, <span class="ruby-identifier">current_user</span>, <span class="ruby-identifier">file</span>, <span class="ruby-identifier">params</span>[<span class="ruby-value">:collection_id</span>])
     <span class="ruby-constant">Sufia</span>.<span class="ruby-identifier">queue</span>.<span class="ruby-identifier">push</span>(<span class="ruby-constant">ContentCreationJob</span>.<span class="ruby-identifier">new</span>(<span class="ruby-ivar">@nu_core_file</span>.<span class="ruby-identifier">pid</span>, <span class="ruby-identifier">new_path</span>.<span class="ruby-identifier">to_s</span>, <span class="ruby-identifier">file</span>.<span class="ruby-identifier">original_filename</span>, <span class="ruby-identifier">current_user</span>.<span class="ruby-identifier">id</span>))
-    <span class="ruby-comment">#Drs::NuFile.create_master_content_object(@nu_core_file, file, datastream_id, current_user)</span>
     <span class="ruby-ivar">@nu_core_file</span>.<span class="ruby-identifier">record_version_committer</span>(<span class="ruby-identifier">current_user</span>)
-    <span class="ruby-identifier">respond_to</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">format</span><span class="ruby-operator">|</span>
-      <span class="ruby-identifier">format</span>.<span class="ruby-identifier">html</span> {
-        <span class="ruby-identifier">render</span> <span class="ruby-value">:json</span> =<span class="ruby-operator">&gt;</span> [<span class="ruby-ivar">@nu_core_file</span>.<span class="ruby-identifier">to_jq_upload</span>],
-          <span class="ruby-value">:content_type</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;text/html&#39;</span>,
-          <span class="ruby-value">:layout</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-keyword">false</span>
-      }
-      <span class="ruby-identifier">format</span>.<span class="ruby-identifier">json</span> {
-        <span class="ruby-identifier">render</span> <span class="ruby-value">:json</span> =<span class="ruby-operator">&gt;</span> [<span class="ruby-ivar">@nu_core_file</span>.<span class="ruby-identifier">to_jq_upload</span>]
-      }
-    <span class="ruby-keyword">end</span>
+    <span class="ruby-identifier">redirect_to</span> <span class="ruby-constant">NuCoreFilesController</span>.<span class="ruby-identifier">upload_complete_path</span>
   <span class="ruby-keyword">else</span>
     <span class="ruby-identifier">render</span> <span class="ruby-value">:json</span> =<span class="ruby-operator">&gt;</span> [{<span class="ruby-value">:error</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&quot;Error creating generic file.&quot;</span>}]
   <span class="ruby-keyword">end</span>
@@ -870,7 +931,7 @@ step two of the upload process.</p>
 
           
           <div class="method-source-code" id="update_metadata-source">
-            <pre><span class="ruby-comment"># File app/controllers/nu_core_files_controller.rb, line 169</span>
+            <pre><span class="ruby-comment"># File app/controllers/nu_core_files_controller.rb, line 198</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">update_metadata</span> 
   <span class="ruby-ivar">@nu_core_file</span>.<span class="ruby-identifier">update_attributes</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:nu_core_file</span>]) 
   <span class="ruby-ivar">@nu_core_file</span>.<span class="ruby-identifier">date_modified</span> = <span class="ruby-constant">DateTime</span>.<span class="ruby-identifier">now</span>.<span class="ruby-identifier">to_s</span>
@@ -901,7 +962,7 @@ step two of the upload process.</p>
 
           
           <div class="method-source-code" id="update_metadata_from_upload_screen-source">
-            <pre><span class="ruby-comment"># File app/controllers/nu_core_files_controller.rb, line 175</span>
+            <pre><span class="ruby-comment"># File app/controllers/nu_core_files_controller.rb, line 204</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">update_metadata_from_upload_screen</span>(<span class="ruby-identifier">nu_core_file</span>, <span class="ruby-identifier">user</span>, <span class="ruby-identifier">file</span>, <span class="ruby-identifier">collection_id</span>)
   <span class="ruby-comment"># Relative path is set by the jquery uploader when uploading a directory</span>
   <span class="ruby-identifier">nu_core_file</span>.<span class="ruby-identifier">relative_path</span> = <span class="ruby-identifier">params</span>[<span class="ruby-value">:relative_path</span>] <span class="ruby-keyword">if</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:relative_path</span>]

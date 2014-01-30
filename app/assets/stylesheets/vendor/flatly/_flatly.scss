@@ -333,7 +333,7 @@ legend {
   
   color: $white;
   text-shadow: none;
-  background-color: $brand-warning;
+  
   h1, h2, h3, h4, h5, h6 {
     color: $white;
   }
@@ -342,6 +342,10 @@ legend {
     font-weight: bold;
     text-decoration: underline;
   }
+}
+
+.alert-warning{
+  background-color: $brand-warning;
 }
 .alert-error {
     background-color: $brand-danger;

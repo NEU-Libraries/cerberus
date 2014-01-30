@@ -16,7 +16,7 @@ class AtomisticCharacterizationJob
     c_object.characterize
 
     if c_object.canonical?
-      DerivativeCreator.new(content_pid).generate_derivatives 
+      DerivativeCreator.new(content_pid).generate_derivatives            
     end
   end
 end

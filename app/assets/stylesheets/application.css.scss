@@ -11,6 +11,7 @@
  *= require_self
  *  Sufia gem stylesheets imported here.
  *= require bootstrap-select/bootstrap-select.min.css
+ * 
  */
 
 
@@ -20,8 +21,13 @@
 
 @import "vendor/flatly/flatly-variables";
 @import "libraries/drs_bootstrap_variables";
+
 @import "vendor/bootstrap/mixins";
 @import "libraries/mixins";
+
+@import "../../../vendor/assets/bower_components/mrmrs-colors/sass/variables";
+@import "../../../vendor/assets/bower_components/mrmrs-colors/sass/skins";
+
 
 /////////////
 /////////////
@@ -119,8 +125,12 @@
 // MEDIA QUERIES
 // ------------------
 
-// Large desktops
-@import "vendor/bootstrap/responsive-1200px-min";
+// // Large desktops
+// @import "vendor/bootstrap/responsive-1200px-min";
+
+@import "layout/responsive-1500px-min";
+
+@import "layout/responsive-1200px-1499px";
 
 // Tablets to regular desktops
 @import "vendor/bootstrap/responsive-768px-979px";
@@ -146,6 +156,7 @@
 @import "vendor/flatly/flatly";
 @import 'vendor/font-awesome/font-awesome';
 @import 'vendor/bootstrap-datepicker/custom-datepicker';
+
 @import 'blacklight/blacklight';
 
 
@@ -166,6 +177,8 @@
 @import "components/drs-thumbnails";
 
 @import "components/drs-items-views";
+@import "components/drs-item";
+@import "components/drs_facets";
 
 
 @import 'sections/masthead';
