@@ -13,36 +13,60 @@
     = t('drs.homepage.description.long')
   %a.btn.btn-link.pull-right{:href => "/terms/"} Terms of Use
 %h2 Featured Content
-.row-fluid    
+.row   
   .span3
     %h3
-      Research
-      %i.icon-beaker
+      =t('drs.significant.research.name').capitalize
+      =render partial: 'shared/icon', locals: { class_string: t('drs.significant.research.icon') }
     %p
-      Lorem ipsum dolor sit amet, consectetur adipisicing elit. Necessitatibus, repellat quia fuga iure modi nisi quasi aspernatur aliquam officia unde cupiditate doloremque.
+      =t('drs.significant.research.description')
+
     %a.btn.btn-primary.btn-block(href=research_path)
-      Explore Research Publications
+      Explore #{ t('drs.significant.research.name').capitalize }
   .span3
     %h3
-      Presentations
-      %i.icon-facetime-video
+      =t('drs.significant.presentations.name').capitalize
+      =render partial: 'shared/icon', locals: { class_string: t('drs.significant.presentations.icon') }
     %p
-      Lorem ipsum dolor sit amet, consectetur adipisicing elit. Necessitatibus, repellat quia fuga iure modi nisi quasi aspernatur aliquam officia unde cupiditate doloremque.
+      =t('drs.significant.presentations.description')
+
     %a.btn.btn-primary.btn-block(href=presentations_path)
-      Explore Presenations
+      Explore #{ t('drs.significant.presentations.name').capitalize }
   .span3
     %h3
-      Learning Objects
-      %i.icon-book
+      =t('drs.significant.learning.name').capitalize
+      =render partial: 'shared/icon', locals: { class_string: t('drs.significant.learning.icon') }
     %p
-      Lorem ipsum dolor sit amet, consectetur adipisicing elit. Necessitatibus, repellat quia fuga iure modi nisi quasi aspernatur aliquam officia unde cupiditate doloremque.
+      =t('drs.significant.learning.description')
+
     %a.btn.btn-primary.btn-block(href=learning_objects_path)
-      Explore Learning Objects
+      Explore #{ t('drs.significant.learning.name').capitalize }
   .span3
     %h3
-      Datasets
-      %i.icon-table
+      =t('drs.significant.datasets.name').capitalize
+      =render partial: 'shared/icon', locals: { class_string: t('drs.significant.datasets.icon') }
     %p
-      Lorem ipsum dolor sit amet, consectetur adipisicing elit. Necessitatibus, repellat quia fuga iure modi nisi quasi aspernatur aliquam officia unde cupiditate doloremque.
+      =t('drs.significant.datasets.description')
+
     %a.btn.btn-primary.btn-block(href=datasets_path)
-      Explore Datasets
+      Explore #{ t('drs.significant.datasets.name').capitalize }
+.row
+  .span3
+    %h3
+      =t('drs.significant.other_publications.name').capitalize
+      =render partial: 'shared/icon', locals: { class_string: t('drs.significant.other_publications.icon') }
+    %p
+      =t('drs.significant.other_publications.description')
+    -# TODO Fix this path
+    %a.btn.btn-primary.btn-block( href="broken" )
+      Explore #{ t('drs.significant.other_publications.name').capitalize }
+
+  .span3
+    %h3
+      =t('drs.significant.communities.name').capitalize
+      =render partial: 'shared/icon', locals: { class_string: t('drs.significant.communities.icon') }
+    %p
+      =t('drs.significant.communities.description')
+
+    %a.btn.btn-primary.btn-block(href=communities_path)
+      Explore #{ t('drs.significant.communities.name').capitalize }
