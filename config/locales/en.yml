@@ -45,6 +45,9 @@ en:
     communities:
       name: communities
       description: Departments and other oragnizational groups of Northeastern University.
+      icon: icon-group
+    about:
+      title: About the DRS
 
 
   blacklight:

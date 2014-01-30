@@ -1,27 +1,5 @@
-
-- if current_user.nil?
-  - int =  rand(2);
-
-  - view_mode = int > 0 ? "list" : "grid"
-
-- else
-  
-  - view_mode = !current_user.view_pref.nil? ? current_user.view_pref : "grid"
-
-
-- view_mode_class = view_mode == "list" ? "drs-items-list" : "drs-items-grid"
-
-- @page_title = "About"
-%h1.page-title
-  = view_mode.capitalize + "Mode"
-.row
-  .span3
-    %h3 Controls
-    = render  partial: "sidebar",  locals: {view_mode: view_mode}
-  .span9
-    %h3 Items
-    %section.drs-items#drsDummyItems{class: view_mode_class, data: {toggle: "drs-view"}}
-      - for i in 5 .. rand(50) + 5 do 
-        = render partial: "dummy", locals: { i: i} 
-
-=debug current_user
+- content_for :page_header do
+  %h1.page-header
+    = t('drs.about.title')
+  %p
+    The DRS is a secure place to collect your work in one location and create a durable and citable record of research, presentations, publications, data sets, or other scholarly work. Materials in the repository are maintained by Northeastern University Libraries for future use, and can be shared worldwide, with just a few people or groups, or kept private. You can also discover and remix materials created by others: for instance, articles and research data, materials from the University Archives and Special Collections, or images and photographs from the Northeastern community. For more information visit our FAQ. For help with uploading, searching, or logging in, visit our User Guides page.
