@@ -1,11 +1,11 @@
 %a{href: polymorphic_path(item)}
   %figure
-    - if item.instance_of?(NuCoreFile)
-      - thumbs = get_file_thumbnails(item)
-      -if thumbs.has_key?('thumbnail_4') #render out the full picture instead of the dinky one
-        =render partial: 'shared/thumbnails/dynamic_picture', locals: { thumbs: thumbs }
+    - if item.instance_of?(NuCoreFile) or item.instance_of?( SolrDocument )
+      = debug item.thumbnail_list
+      - if defined? dynamic_picture
+        =render partial: 'shared/thumbnails/dynamic_picture', locals: { thumbs: item.thumbnail_list }
       -else
-        =render partial: 'shared/thumbnails/thumbnail_picture', locals: { thumbs: thumbs }
+        =render partial: 'shared/thumbnails/thumbnail_picture', locals: { thumbs: item.thumbnail_list }
     - elsif item.instance_of?(NuCollection)
       = render partial: 'shared/icon', locals: {class_string: 'icon-folder-open'}
     - elsif item.instance_of?(Community)
@@ -13,4 +13,5 @@
     -else
       = render partial: 'shared/icon', locals: {class_string: 'icon-file'}
     %figcaption
-      = item.type_label
+      - unless item.instance_of?( SolrDocument )
+        = item.type_label

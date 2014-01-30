@@ -1,4 +1,12 @@
-
-%article.drs-item{data: { href: polymorphic_path( item ) ,  "drsitem" => item.pid }}
-  = render partial: 'shared/drs_item/drs_item_figure', locals: {item: item}
-  = render partial: 'shared/drs_item/drs_item_details', locals: {item: item}
+-if item.instance_of?( SolrDocument )
+  = debug item
+  -if true#false #debug
+    %article.drs-item{data: { href: polymorphic_path( item ) , "drsitem" => item.id  }}
+      = render partial: 'shared/drs_item/drs_item_figure', locals: {item: item}
+      -if false #debug
+        
+        = render partial: 'shared/drs_item/drs_item_details', locals: {item: item}
+-else
+  %article.drs-item{data: { href: polymorphic_path( item ) ,  "drsitem" => item.pid  }}
+    = render partial: 'shared/drs_item/drs_item_figure', locals: {item: item}
+    = render partial: 'shared/drs_item/drs_item_details', locals: {item: item}

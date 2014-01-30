@@ -21,12 +21,6 @@
       Search Results
       %small
         = html_constraints
-    
-  
-  
-  = render 'results_pagination'
-  = render :partial => 'document_list'
-  = render 'results_pagination'
   -content_for :side_bar do
     %h5 View
     = render partial: 'shared/sets/sets_sidebar'
@@ -37,4 +31,9 @@
     %p
       = render_pagination_info @response, :entry_name=>'item'
     = render 'sort_and_per_page'
-    = render :partial=>'facets', locals: { facet_list: facet_list } 
+    = render :partial=>'facets', locals: { facet_list: facet_list }
+
+  -# Render the results in the main section of the page.
+  = render 'results_pagination'
+  = render :partial => 'document_list'
+  = render 'results_pagination'
