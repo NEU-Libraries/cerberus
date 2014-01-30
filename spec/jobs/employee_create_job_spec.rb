@@ -6,7 +6,7 @@ describe EmployeeCreateJob do
   # Guarantees uniqueness, even if using system noids as nuid's is a little weird. 
   let(:run_job) do
     pid = Sufia::Noid.namespaceize(Sufia::IdService.mint)  
-    EmployeeCreateJob.new(pid).run 
+    EmployeeCreateJob.new(pid, "Joe Blow").run 
     return pid 
   end
 
@@ -17,7 +17,7 @@ describe EmployeeCreateJob do
   it "doesn't create multiple employees if one already exists" do 
     pid = Sufia::Noid.namespaceize(Sufia::IdService.mint) 
     Employee.create(nuid: pid)
-    EmployeeCreateJob.new(pid).run 
+    EmployeeCreateJob.new(pid, "Frank Buckets").run 
 
     Employee.all.length.should == 1 
   end

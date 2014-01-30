@@ -1,8 +1,9 @@
 class EmployeeCreateJob 
-  attr_accessor :nuid
+  attr_accessor :nuid, :name
 
-  def initialize(nuid)
-    self.nuid = nuid 
+  def initialize(nuid, name)
+    self.nuid = nuid
+    self.name = name 
   end
 
   def queue_name 
@@ -18,7 +19,7 @@ class EmployeeCreateJob
     if Employee.exists_by_nuid?(self.nuid) 
       emp = Employee.find_by_nuid(self.nuid)   
     else
-      emp = Employee.create(nuid: self.nuid, name: "Jane Doe", building: true)
+      emp = Employee.create(nuid: self.nuid, name: self.name, building: true)
     end
 
     # Generate employee's personal graph
