@@ -28,20 +28,48 @@ describe UploadAlert do
     after(:all) { UploadAlert.destroy_all } 
 
     shared_examples_for "withheld queries" do 
-      it "return the correct number of results" do 
-        created.length.should == 2
-        updated.length.should == 2
+      it "return the correct number of results" do
+        created.size.should == 2
+        updated.size.should == 2
       end
 
-      it "return the change type asked for" do 
-        created.all? { |x| x.change_type == :create }.should be true 
-        updated.all? { |x| x.change_type == :update }.should be true 
+      it "return the change type asked for" do
+        created.all? { |x| x.change_type == "create" }.should be true 
+        updated.all? { |x| x.change_type == "update" }.should be true 
       end
     end
 
     context "for research publications" do 
       let(:created) { UploadAlert.withheld_research_publications(:create) } 
       let(:updated) { UploadAlert.withheld_research_publications(:update) } 
+
+      it_should_behave_like "withheld queries" 
+    end
+
+    context "for theses alerts" do 
+      let(:created) { UploadAlert.withheld_theses(:create) } 
+      let(:updated) { UploadAlert.withheld_theses(:update) } 
+
+      it_should_behave_like "withheld queries"
+    end
+
+    context "for presentation alerts" do 
+      let(:created) { UploadAlert.withheld_presentations(:create) } 
+      let(:updated) { UploadAlert.withheld_presentations(:update) } 
+
+      it_should_behave_like "withheld queries" 
+    end
+
+    context "for dataset alerts" do 
+      let(:created) { UploadAlert.withheld_datasets(:create) } 
+      let(:updated) { UploadAlert.withheld_datasets(:update) } 
+
+      it_should_behave_like "withheld queries" 
+    end
+
+    context "for learning object alerts" do 
+      let(:created) { UploadAlert.withheld_learning_objects(:create) } 
+      let(:updated) { UploadAlert.withheld_learning_objects(:update) } 
 
       it_should_behave_like "withheld queries" 
     end
