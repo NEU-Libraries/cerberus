@@ -29,7 +29,6 @@ class InlineThumbnailCreator
 
   def create_thumbnail_and_save
     create_thumbnail
-    set.reload
     set.thumbnail_list = ["/downloads/#{self.set.pid}?datastream_id=thumbnail"]
     set.save! 
   end
@@ -52,7 +51,7 @@ class InlineThumbnailCreator
 
         thumbnail = File.open(tmp, 'rb').read 
 
-        set.add_file(thumbnail, dsid, fname)
+        set.add_file(thumbnail, dsid, fname)        
       ensure 
         tmp.unlink
       end
@@ -66,7 +65,7 @@ class InlineThumbnailCreator
 
       thumbnail = file 
 
-      set.add_file(thumbnail, dsid, fname) 
+      set.add_file(thumbnail, dsid, fname)       
     end
 
     # Modify this if changes in the actual thumbnail dimensions/ppi/whatever

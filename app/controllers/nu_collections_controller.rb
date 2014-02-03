@@ -43,7 +43,7 @@ class NuCollectionsController < SetsController
 
     # Process Thumbnail
     if params[:thumbnail]
-      InlineThumbnailCreator.new(@set, params[:thumbnail], "thumbnail").create_thumbnail
+      InlineThumbnailCreator.new(@set, params[:thumbnail], "thumbnail").create_thumbnail_and_save
     end
 
     @set.depositor = current_user.nuid 
@@ -75,10 +75,10 @@ class NuCollectionsController < SetsController
 
     # Update the thumbnail 
     if params[:thumbnail] 
-      InlineThumbnailCreator.new(@set, params[:thumbnail], "thumbnail").create_thumbnail
+      InlineThumbnailCreator.new(@set, params[:thumbnail], "thumbnail").create_thumbnail_and_save     
     end
 
-    if @set.update_attributes(params[:set]) 
+    if @set.update_attributes(params[:set])
       redirect_to(@set, notice: "Collection #{@set.title} was updated successfully." ) 
     else
       redirect_to(@set, notice: "Collection #{@set.title} failed to update.")
