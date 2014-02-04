@@ -40,12 +40,12 @@ en:
         icon: icon-book
       other_publications:
         name: Theses and Dissertations
-        description: Other depostied materials
+        description: Other deposited materials.
         icon: icon-magic
-    communities:
-      name: communities
-      description: Departments and other oragnizational groups of Northeastern University.
-      icon: icon-group
+      communities:
+        name: communities
+        description: Departments and other organizational groups of Northeastern University.
+        icon: icon-group
     about:
       title: About the DRS
 
