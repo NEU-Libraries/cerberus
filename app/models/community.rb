@@ -65,6 +65,11 @@ class Community < ActiveFedora::Base
   def learning_objects 
     employee_query(:all_learning_objects) 
   end
+  
+  # Simple human readable label for objects.
+  def type_label
+    "Community"
+  end
 
   private 
 

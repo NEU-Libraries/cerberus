@@ -368,6 +368,7 @@ $(document).ready ->
         parent = $(this).closest('.drs-items')
         if target.is('a, a*, button, button * , input, input *,  select, select *, textarea')
           event.stopPropagation()
+        #Change the action to only fire on the items-grid
         else if parent.data('toggle') is 'drs-view'
           
           #remove add the class to the target.
@@ -377,7 +378,8 @@ $(document).ready ->
             parent.find('.drs-item').removeClass 'active'
             $(this).addClass 'active'
           pictureActive $(this).find('[data-picture]')
-        else window.location.assign $(this).data('href')  if $(this).data('href').length > 4 and not $(this).hasClass('drs-item-full')
+        else if parent.hasClass('drs-items-grid')
+          window.location.assign $(this).data('href')  if $(this).data('href').length > 4 and not $(this).hasClass('drs-item-full')
         return
 
       return

@@ -1,19 +1,21 @@
 .drs-item{
+  position: relative;
   @include clearfix();
   display: block;
-  padding: 4px;
+  padding: 8px;
   border-color: $grayLight;
   border-style: solid;
   border-width: 1px;
   @include border-radius($baseBorderRadius);
   @include transition(all .2s ease-in-out);
-  @include focus-states{
-    cursor: pointer;
-  }
 
+  > a:hover,
+  > a:focus{
+    text-decoration: none;
+  }
   figure{
     text-align: center;
-    margin: 0 0 2em 0;
+    margin: 0 0 0.5em 0;
     figcaption{
       @extend .muted;
       margin-top: 1em;
@@ -71,11 +73,6 @@
       padding-bottom: 8px;
       padding-top: 8px;
       border-top-style: none;
-      @include focus-states{
-        background-color: rgb(248, 248, 248);
-        background-color: rgba(248, 248, 248, 0.56);
-        
-      }
       &:first-child{
         @include border-top-radius($baseBorderRadius);
         border-top-style: solid;
@@ -94,11 +91,11 @@
           @include border-top-radius(8px);
           border-top-style: solid;
         }
-        > figure{
+        > a{
           float: none;
         }  
       }
-      > figure{
+      > a{
       float: left;
       margin-right: 15px;
 
@@ -119,6 +116,7 @@
     }
     .drs-item-details{
       @extend .media-body;
+      margin-bottom: 2.5em;
       
     }
     .drs-item-title{
@@ -147,7 +145,9 @@
       }
     }
     menu{
-      float: right;
+      position: absolute;
+      bottom: 0;
+      right: 8px;
     }
 
   }
@@ -158,6 +158,7 @@
     .drs-item{
       @extend .span3;
       @extend [class*="span"];
+      text-align: center;
       margin-bottom: 20px;
       @media (min-width: 800px){
         height: 220px;  
@@ -171,10 +172,11 @@
       @include focus-states{
         border-color: $linkColor;
         @include box-shadow(0 1px 4px rgba(0,105,214,.25));
+        cusor: pointer;
       }
-      > figure{
+      > a{
 
-        img, [class^="icon-"]{
+        figure{
           display: block;
           margin: 10px auto;
         }
@@ -186,8 +188,13 @@
         height: auto;
       }
     }
-    .drs-item-add-details{
+    .drs-item-add-details dl{
       @include sr-only;
+      margin: 0 0 0 0;
+      padding: 0 0 0 0;
+    }
+    menu{
+      margin-bottom: 0;
     }
 
   }

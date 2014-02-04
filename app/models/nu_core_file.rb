@@ -114,6 +114,10 @@ class NuCoreFile < ActiveFedora::Base
     end
   end
 
+  def type_label
+    "File"
+  end
+
   private 
 
     def purge_content_bearing_objects 

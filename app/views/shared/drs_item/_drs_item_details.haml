@@ -1,8 +1,11 @@
 .drs-item-details
   %header
     %h4.drs-item-title 
-      %a{href: item[:path]}
-        = item[:title]
-    %h5.drs-item-creator
-      = item[:creator]
+      %a{href: polymorphic_path(item)}
+        = item.title.titlecase or "Default title"
+    -if defined? item.creators and item.creators.length > 0
+      - item.creators.each do |creator|
+        - if creator.length > 0
+          %h5.drs-item-creator
+            = creator
   = render partial: 'shared/drs_item/drs_item_ad_details', locals: {item: item}

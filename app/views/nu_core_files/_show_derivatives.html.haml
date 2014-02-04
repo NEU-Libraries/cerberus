@@ -6,7 +6,5 @@
     - if current_user_can_read?(content)
       -if content.class.name != "ImageThumbnailFile"
         .btn-group
-          %a.btn.btn-mini.btn-clear{ href: sufia.download_path(content.pid, {datastream_id: 'content'}), target: '_blank', title: content.title + ' - ' + content.type_label,  data: {toggle: "tooltip", pid: content.pid } } 
-            = content.type_label
-        
+          = render partial: 'nu_core_files/derivative_button', locals: {content: content }
           = render partial: 'shopping_carts/add_or_remove_btn', locals: { :id => content.pid }
