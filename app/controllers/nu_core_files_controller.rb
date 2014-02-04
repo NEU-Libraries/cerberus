@@ -143,6 +143,9 @@ class NuCoreFilesController < ApplicationController
 
     #always save the file so the new version or metadata gets recorded
     if @nu_core_file.save
+      if params[:nu_core_file] && !@nu_core_file.category.first.blank?
+        UploadAlert.create_from_core_file(@nu_core_file, :update)
+      end
       # do not trigger an update event if a version event has already been triggered
       Sufia.queue.push(ContentUpdateEventJob.new(@nu_core_file.pid, current_user.user_key)) unless version_event
       @nu_core_file.record_version_committer(current_user)
@@ -198,8 +201,8 @@ class NuCoreFilesController < ApplicationController
   end
 
   def update_metadata 
-    @nu_core_file.update_attributes(params[:nu_core_file]) 
     @nu_core_file.date_modified = DateTime.now.to_s
+    @nu_core_file.update_attributes(params[:nu_core_file]) 
   end
 
   #Allows us to map different params 
@@ -215,7 +218,16 @@ class NuCoreFilesController < ApplicationController
     nu_core_file.date_modified = Date.today
     nu_core_file.creator = user.name
 
-    nu_core_file.set_parent(NuCollection.find(collection_id), user) if !collection_id.blank? 
+    
+    collection = !collection_id.blank? ? NuCollection.find(collection_id) : nil
+    nu_core_file.set_parent(collection, user) if collection
+
+    # Significant content tagging
+    pf_type = collection.personal_folder_type 
+
+    if pf_type 
+      nu_core_file.category = NuCoreFile.personal_folder_to_category(pf_type) 
+    end 
 
     yield(nu_core_file) if block_given? 
     nu_core_file.save! 

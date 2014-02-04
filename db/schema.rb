@@ -157,6 +157,7 @@ ActiveRecord::Schema.define(:version => 20140127163602) do
     t.datetime "updated_at",      :null => false
     t.string   "pid"
     t.boolean  "notified"
+    t.string   "change_type"
   end
 
   add_index "upload_alerts", ["content_type"], :name => "index_upload_alerts_on_type"
