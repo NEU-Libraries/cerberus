@@ -10,10 +10,6 @@
         
         =render partial: 'shared/thumbnails/thumbnail_picture', locals: { thumbs: item.thumbnail_list }
     
-    - elsif item.instance_of?( SolrDocument )
-
-      - thumbs = item[:fields_thumbnail_list_tesim] #this is where the differences get ugly
-      = debug thumbs
     - elsif ( item.instance_of?(NuCollection) or item.instance_of?( Community )  ) and  item.thumbnail_list.length > 0
       -# Now lets see if communities and collections have a thumbnail associated to it, if so render out the thumbnail 
       
