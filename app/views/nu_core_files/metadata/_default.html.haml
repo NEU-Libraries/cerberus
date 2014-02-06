@@ -1,0 +1,32 @@
+%fieldset
+
+  = f.label :title, "Title", class: "required-label"
+  = f.text_field :title, required: true, pattern: ".*\\S.*", name: 'nu_core_file[title][]', class: "input-block-level", placeholder: "Univeristy Libraries"
+  .row-fluid
+    .span6
+      = f.label :title, "Creator", class: "required-label"
+      = f.text_field :title, required: true, pattern: ".*\\S.*", name: 'nu_core_file[creator][]', class: "input-block-level", placeholder: "Univeristy Libraries"
+    .span6
+      = f.label :title, "Date", class: "required-label"
+      = f.text_field :title, required: true, pattern: ".*\\S.*", name: 'nu_core_file[date][]', class: "input-block-level", placeholder: "Univeristy Libraries"      
+  = f.label :description, "Description", class: "required-label"
+  = f.text_area :description, required: true, pattern: ".*\\S.*", name: 'nu_core_file[description][]', class: "input-block-level", rows: 5
+  .row-fluid
+    %fieldset.span6
+      %legend Mass Permissions
+      = label_tag 'nu_core_file[mass_permissions]', "Choose Mass Permissions:"
+      / = select_tag 'set[mass_permissions]', options_for_select(@set.valid_mass_permissions, @set.mass_permissions) , class: "span12"
+      %p.help-block
+        %ul
+          %li Setting to 'public' will allow anyone accessing the site to see your collection.
+          %li Setting to 'registered' will only allow authenticated users to see your collection.
+          %li Setting to 'private' will only allow users and groups explicated below to see your collection.
+    %fieldset.span6
+      %legend Permissions
+      / = render partial: 'shared/sets/data_form_permissions_element', locals: {:f => f, :permissions => filtered_permissions(@set) }
+      %button#add_another_permission.btn.btn-success.btn-block{:type => "button"}
+        %i.icon-plus-sign.icon-large
+        Add Permission    
+.form-actions
+  = f.submit class: ['btn', 'btn-primary'], value: 'Submit'
+  = button_tag "Reset", class: 'btn', type: :reset
