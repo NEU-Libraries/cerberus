@@ -1,8 +1,13 @@
-%h3 My Stuff
+-content_for :page_header do
+  %h1.page-header
+    = render partial: "shared/icon", locals: {class_string: t('drs.personal_graph.icon')}
+    = t('drs.personal_graph.title')
+    %small
+      = @employee.name
 
-%p= "Welcome to your personal repository #{@employee.name}"
+%p.lead
+  = t('drs.personal_graph.description')
 
-%p Explanation of personal repository goes here maybe. 
 
 = render partial: "show_personal_graph", locals: { :generated_folders => @employee.sorted_folders, :user_folders => @employee.personal_folders }
 
