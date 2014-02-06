@@ -21,5 +21,5 @@
         Create a new folder.
         %button.close{"data-dismiss" => "alert", type: "button"} &#215;
 
-    = link_to("Create a new personal folder", new_nu_collection_path(parent: @employee.root_folder.pid,), class: ["btn", "btn-clear", "btn-block", "btn-large"] )
+    = link_to("Create a #{t('drs.personal_graph.user_created_folders').downcase}", new_nu_collection_path(parent: @employee.root_folder.pid,), class: ["btn", "btn-clear", "btn-block", ] )
   //.span6
