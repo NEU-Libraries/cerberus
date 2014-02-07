@@ -1,2 +1,2 @@
 <% # container for all documents in index view -%>
-    <%= render :partial => 'catalog/_index_partials/default_group', :locals => {:docs => @response.docs.map { |x| NuCoreFile.find(x[:id]) }, :facet_name => nil, :facet_value => nil} %>
+    <%= render :partial => 'catalog/_index_partials/default_group', :locals => {:docs => @response.docs.map { |x| ActiveFedora::Base.find(x[:id], :cast => true) }, :facet_name => nil, :facet_value => nil} %>
