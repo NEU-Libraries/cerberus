@@ -11,15 +11,15 @@
     %a.btn.btn-clear.btn-mini.pull-right{:href => "/terms/"} Terms of service
 %article
   %h2.page-header Featured Content
-  %section.row   
-    .span4
+  %section.row
+    .span4.height4
       %h3
         =t('drs.significant.research.name').capitalize
         =render partial: 'shared/icon', locals: { class_string: t('drs.significant.research.icon') }
       %p
         =t('drs.significant.research.description')
 
-      %a.btn.btn-primary.btn-block(href=research_path)
+      %a.btn.btn-clear.btn-block(href=research_path)
         Explore #{ t('drs.significant.research.name').capitalize }
     .span4
       %h3
@@ -28,7 +28,7 @@
       %p
         =t('drs.significant.presentations.description')
 
-      %a.btn.btn-primary.btn-block(href=presentations_path)
+      %a.btn.btn-clear.btn-block(href=presentations_path)
         Explore #{ t('drs.significant.presentations.name').capitalize }
     .span4
       %h3
@@ -37,10 +37,8 @@
       %p
         =t('drs.significant.learning.description')
 
-      %a.btn.btn-primary.btn-block(href=learning_objects_path)
+      %a.btn.btn-clear.btn-block(href=learning_objects_path)
         Explore #{ t('drs.significant.learning.name').capitalize }
-    //.row
-  %section.row
     .span4
       %h3
         =t('drs.significant.datasets.name').capitalize
@@ -48,7 +46,7 @@
       %p
         =t('drs.significant.datasets.description')
 
-      %a.btn.btn-primary.btn-block(href=datasets_path)
+      %a.btn.btn-clear.btn-block(href=datasets_path)
         Explore #{ t('drs.significant.datasets.name').capitalize }
     .span4
       %h3
@@ -57,7 +55,7 @@
       %p
         =t('drs.significant.other_publications.description')
       -# TODO Fix this path
-      %a.btn.btn-primary.btn-block( href="broken" )
+      %a.btn.btn-clear.btn-block( href="broken" )
         Explore #{ t('drs.significant.other_publications.name').capitalize }
 
     .span4
@@ -67,5 +65,5 @@
       %p
         =t('drs.significant.communities.description')
 
-      %a.btn.btn-primary.btn-block(href=communities_path)
+      %a.btn.btn-clear.btn-block(href=communities_path)
         Explore #{ t('drs.significant.communities.name').capitalize }

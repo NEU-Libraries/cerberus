@@ -1,0 +1,44 @@
+//
+// Equal height for grid sizing.
+// --------------------------------------------------
+
+
+[class*="height"]{
+  height: auto;
+  margin-bottom: 20px;
+}
+@media (min-width: $breakpoint-m) and (max-width: ($breakpoint-l - 1px)) {
+  // height to match the normal grid system
+  @include grid-core-span-x-height($gridColumns, $gridColumnWidth768, $gridGutterWidth768);
+}
+
+
+@media ( min-width: $breakpoint-l ) and ( max-width: ($breakpoint-xl -1px )){
+ @include grid-core-span-x-height($gridColumns, $gridColumnWidth, $gridGutterWidth); 
+}
+
+@media ( min-width: $breakpoint-xl ) and ( max-width: ($breakpoint-xxl - 1px )) {
+ @include grid-core-span-x-height($gridColumns, $gridColumnWidth1200, $gridGutterWidth1200); 
+}
+
+
+
+@media ( min-width: $breakpoint-xxl ) {
+ @include grid-core-span-x-height($gridColumns, $gridColumnWidth1500, $gridGutterWidth1500); 
+}
+
+.scroll-x{
+  overflow-x: scroll;
+}
+
+.scroll-y{
+  overflow-y: scholl;
+}
+
+.hidden-x{
+  overflow-x: hidden;
+}
+
+.hidden-y{
+  overflow-y: hidden;
+}
