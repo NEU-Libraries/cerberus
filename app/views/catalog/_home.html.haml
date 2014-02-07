@@ -1,72 +1,71 @@
 .hero-unit
   %h1
+    =render partial: "shared/icon", locals: {class_string: t('drs.product_icon') }
     #{t('drs.product_name.short')}
     %small
       #{t('drs.product_name.full')}
-  %p
+  %p.lead
     = t ('drs.homepage.description.short')
-    %button.btn.btn-link{data: { toggle: "collapse", target: "#homePageLongDescription"} }
-      =raw "&hellip;"
-      %span.sr-only
-        Expand description text toggle
-  %p.collapse#homePageLongDescription
+  %p
     = t('drs.homepage.description.long')
-  %a.btn.btn-link.pull-right{:href => "/terms/"} Terms of Use
-%h2 Featured Content
-.row   
-  .span3
-    %h3
-      =t('drs.significant.research.name').capitalize
-      =render partial: 'shared/icon', locals: { class_string: t('drs.significant.research.icon') }
-    %p
-      =t('drs.significant.research.description')
+    %a.btn.btn-clear.btn-mini.pull-right{:href => "/terms/"} Terms of service
+%article
+  %h2.page-header Featured Content
+  %section.row   
+    .span4
+      %h3
+        =t('drs.significant.research.name').capitalize
+        =render partial: 'shared/icon', locals: { class_string: t('drs.significant.research.icon') }
+      %p
+        =t('drs.significant.research.description')
 
-    %a.btn.btn-primary.btn-block(href=research_path)
-      Explore #{ t('drs.significant.research.name').capitalize }
-  .span3
-    %h3
-      =t('drs.significant.presentations.name').capitalize
-      =render partial: 'shared/icon', locals: { class_string: t('drs.significant.presentations.icon') }
-    %p
-      =t('drs.significant.presentations.description')
+      %a.btn.btn-primary.btn-block(href=research_path)
+        Explore #{ t('drs.significant.research.name').capitalize }
+    .span4
+      %h3
+        =t('drs.significant.presentations.name').capitalize
+        =render partial: 'shared/icon', locals: { class_string: t('drs.significant.presentations.icon') }
+      %p
+        =t('drs.significant.presentations.description')
 
-    %a.btn.btn-primary.btn-block(href=presentations_path)
-      Explore #{ t('drs.significant.presentations.name').capitalize }
-  .span3
-    %h3
-      =t('drs.significant.learning.name').capitalize
-      =render partial: 'shared/icon', locals: { class_string: t('drs.significant.learning.icon') }
-    %p
-      =t('drs.significant.learning.description')
+      %a.btn.btn-primary.btn-block(href=presentations_path)
+        Explore #{ t('drs.significant.presentations.name').capitalize }
+    .span4
+      %h3
+        =t('drs.significant.learning.name').capitalize
+        =render partial: 'shared/icon', locals: { class_string: t('drs.significant.learning.icon') }
+      %p
+        =t('drs.significant.learning.description')
 
-    %a.btn.btn-primary.btn-block(href=learning_objects_path)
-      Explore #{ t('drs.significant.learning.name').capitalize }
-  .span3
-    %h3
-      =t('drs.significant.datasets.name').capitalize
-      =render partial: 'shared/icon', locals: { class_string: t('drs.significant.datasets.icon') }
-    %p
-      =t('drs.significant.datasets.description')
+      %a.btn.btn-primary.btn-block(href=learning_objects_path)
+        Explore #{ t('drs.significant.learning.name').capitalize }
+    //.row
+  %section.row
+    .span4
+      %h3
+        =t('drs.significant.datasets.name').capitalize
+        =render partial: 'shared/icon', locals: { class_string: t('drs.significant.datasets.icon') }
+      %p
+        =t('drs.significant.datasets.description')
 
-    %a.btn.btn-primary.btn-block(href=datasets_path)
-      Explore #{ t('drs.significant.datasets.name').capitalize }
-.row
-  .span3
-    %h3
-      =t('drs.significant.other_publications.name').capitalize
-      =render partial: 'shared/icon', locals: { class_string: t('drs.significant.other_publications.icon') }
-    %p
-      =t('drs.significant.other_publications.description')
-    -# TODO Fix this path
-    %a.btn.btn-primary.btn-block( href="broken" )
-      Explore #{ t('drs.significant.other_publications.name').capitalize }
+      %a.btn.btn-primary.btn-block(href=datasets_path)
+        Explore #{ t('drs.significant.datasets.name').capitalize }
+    .span4
+      %h3
+        =t('drs.significant.other_publications.name').capitalize
+        =render partial: 'shared/icon', locals: { class_string: t('drs.significant.other_publications.icon') }
+      %p
+        =t('drs.significant.other_publications.description')
+      -# TODO Fix this path
+      %a.btn.btn-primary.btn-block( href="broken" )
+        Explore #{ t('drs.significant.other_publications.name').capitalize }
 
-  .span3
-    %h3
-      =t('drs.significant.communities.name').capitalize
-      =render partial: 'shared/icon', locals: { class_string: t('drs.significant.communities.icon') }
-    %p
-      =t('drs.significant.communities.description')
+    .span4
+      %h3
+        =t('drs.significant.communities.name').capitalize
+        =render partial: 'shared/icon', locals: { class_string: t('drs.significant.communities.icon') }
+      %p
+        =t('drs.significant.communities.description')
 
-    %a.btn.btn-primary.btn-block(href=communities_path)
-      Explore #{ t('drs.significant.communities.name').capitalize }
+      %a.btn.btn-primary.btn-block(href=communities_path)
+        Explore #{ t('drs.significant.communities.name').capitalize }

@@ -4,6 +4,10 @@
 
 h1 {
   font-size: 48px;
+  .hero-unit &{
+    margin-bottom: 15px;
+    color: $brand-info;
+  }
 }
 
 h2 {

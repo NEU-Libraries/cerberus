@@ -6,6 +6,7 @@ en:
     product_name:
       full: "digital repository service"
       short: "DRS"
+    product_icon: icon-archive
     search:
       form:
         q:
