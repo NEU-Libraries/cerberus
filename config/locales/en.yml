@@ -6,6 +6,7 @@ en:
     product_name:
       full: "digital repository service"
       short: "DRS"
+    product_icon: icon-archive
     search:
       form:
         q:
@@ -39,12 +40,12 @@ en:
         description: Learning materials deposited in the repository.
         icon: icon-book
       other_publications:
-        name: Theses and Dissertations
+        name: Theses & Dissertations
         description: Other deposited materials.
         icon: icon-magic
       communities:
         name: communities
-        description: Departments and other organizational groups of Northeastern University.
+        description: Departments and other organizational groups.
         icon: icon-group
     about:
       title: About the DRS
