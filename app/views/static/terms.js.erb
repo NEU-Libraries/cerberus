@@ -1,0 +1,12 @@
+var terms = '<%= j( render partial: 'terms_of_use' )%>';
+
+console.log( terms );
+
+
+
+drsApp.initModal({
+  'header': 'Terms of Service Agreement',
+  'body' : terms
+  'footer' : false
+  'show' : true
+});
