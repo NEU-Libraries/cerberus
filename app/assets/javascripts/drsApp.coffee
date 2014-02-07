@@ -38,6 +38,7 @@ $(document).ready ->
       handleCommunitiesAdminAutoComplete()
       toggleShoppingCart $('*[data-shoppingcart]')
       handleDrsItem $('.drs-item[data-drsitem]:not(.drs-item-full)')
+      singleUploadTermsOfService()
       return
 
     
@@ -433,12 +434,43 @@ $(document).ready ->
 
       return
 
+    ###
+    Enable the the submit and form submit on the upload field only after the user agrees to the terms of service
+    ###
+
+    singleUploadTermsOfService = ->
+      if $('#singleFileUploadForm').length > 0
+        $()
+
+
+    ###
+    Show model using the #ajax-modal on created at the bottom of every page.
+    ###
+    initModal = ( heading = "Modal", body ="Hello World", footer = false,  show = true ) ->
+      t = $('#ajax-modal')
+      t.find('#ajax-modal-heading').text(heading)
+      t.find('#ajax-modal-body').html(body)
+      if footer
+        t.find('#ajax-modal-footer').html(footer)
+      else
+        t.find('#ajax-modal-footer').hide()
+      t.modal({
+        'show' : show
+        })
+      clear = ->
+        t.find('#ajax-modal-heading').text('')
+        t.find('#ajax-modal-body').html('')
+        t.find('#ajax-modal-footer').html('').css('display', 'block')
+        t.off('hidden')
+      t.on('hidden', clear)
+
     
     # these are the public API
     init: init
     addToComplationLink: addToComplationLink
     newCompilationForm: newCompilationForm
     compilationsModal: compilationsModal
+    initModal: initModal
   )()
   
   #end drsApp module;
