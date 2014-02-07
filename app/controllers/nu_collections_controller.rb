@@ -32,8 +32,7 @@ class NuCollectionsController < SetsController
     # Assign personal folder specific info if parent folder is a 
     # personal folder. 
     if parent.is_personal_folder? 
-      @set.user_parent = parent.user_parent 
-
+      @set.user_parent = parent.user_parent.nuid
       if parent.personal_folder_type == 'user root' 
         @set.personal_folder_type = 'miscellany' 
       else
