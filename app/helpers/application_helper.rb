@@ -54,8 +54,3 @@ module ApplicationHelper
   end
 
 end
-
-
-
-
-

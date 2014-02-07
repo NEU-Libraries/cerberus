@@ -1,7 +1,25 @@
-%h3 System Generated Folders
-- generated_folders.each do |f| 
-  %p= link_to(f.title, nu_collection_path(f.pid))
+%section.row
+  %article.span6
+    %h3
+      = t('drs.personal_graph.sytem_generated_folders')
+    -if generated_folders.length > 0
+      %section{class: ["drs-items-list", "drs-items"] }
+        - generated_folders.each do |f| 
+          =render partial: "shared/drs_item/drs_item", locals: { item: f }
+  //.span6
+  %article.span6
+    %h3
+      = t('drs.personal_graph.user_created_folders')
+    -if user_folders.length > 0
+      %section{class: ["drs-items-list", "drs-items"] }
+        - user_folders.each do |f| 
+          =render partial: "shared/drs_item/drs_item", locals: { item: f }
+    -else
+      .alert.alert-info
+        %strong
+          No folders to show.
+        Create a new folder.
+        %button.close{"data-dismiss" => "alert", type: "button"} &#215;
 
-%h3 User Created Folders
-- user_folders.each do |f| 
-  %p= link_to(f.title, nu_collection_path(f.pid))
+    = link_to("Create a #{t('drs.personal_graph.user_created_folders').downcase}", new_nu_collection_path(parent: @employee.root_folder.pid,), class: ["btn", "btn-clear", "btn-block", ] )
+  //.span6

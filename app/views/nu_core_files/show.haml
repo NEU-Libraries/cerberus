@@ -10,7 +10,7 @@
 = render :partial => 'nu_core_files/breadcrumbs'
 %article{class: ['drs-item', 'drs-item-full', @nu_core_file.type ],  data: { drsitem: @nu_core_file.pid } }
   %header 
-    %h1.lower.page-header= @nu_core_file
+    %h1.page-header= @nu_core_file
 
   %section.row
     %div{class: layout_class}

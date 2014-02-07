@@ -48,7 +48,11 @@ en:
         icon: icon-group
     about:
       title: About the DRS
-
-
+    personal_graph:
+      title: My DRS
+      description: My content will be shown here. System generated content and more.
+      icon: icon-dashboard
+      system_generated_folders: System Generated Folders
+      user_created_folders: User Created Folders
   blacklight:
     application_name: "DRS"
