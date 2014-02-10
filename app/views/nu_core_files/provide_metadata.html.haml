@@ -22,8 +22,6 @@
 
   / We need to account for the different file types here to extend the metdata screen
 
-  = render :partial => 'permission_form', :formats => [:html], :locals => { :gf => @nu_core_file }
-
   .form-actions
     = f.submit class: ['btn', 'btn-primary'], :onclick => "confirmation_needed = false;", value: 'Submit'
     = button_tag "Reset", class: 'btn', type: :reset
