@@ -47,6 +47,10 @@ en:
         name: communities
         description: Departments and other organizational groups.
         icon: icon-group
+      employees:
+        name: employees
+        description: Employees and staff at Northeastern
+        icon: icon-user
     about:
       title: About the DRS
 
