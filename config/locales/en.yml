@@ -47,6 +47,10 @@ en:
         name: Communities
         description: Browse NU departments and groups by name.
         icon: icon-group
+      employees:
+        name: employees
+        description: Employees and staff at Northeastern
+        icon: icon-user
     about:
       title: About the DRS
     personal_graph:
