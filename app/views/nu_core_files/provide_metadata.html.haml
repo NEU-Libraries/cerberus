@@ -1,0 +1,29 @@
+- content_for :local_js do
+  if (navigator.userAgent.match("MSIE")){$("#new_nu_core_file").validate();}
+
+  $('#permissions_display').show();
+
+  / initialize popover helpers
+  $("a[rel=popover]").popover({ html: true });
+
+  / this needs to be cleaned up. Illegal nesting in haml forces a horrible giant single line.
+  / This is a step in the right direction though.
+  confirmation_needed = true;
+  window.onbeforeunload = confirmExit;
+  function confirmExit(){if(confirmation_needed){$.ajax({url: '<%= destroy_incomplete_files_path %>', type: 'DELETE', success: function(result) {}}); return "Your metadata has not been saved, if you leave the process now your uploaded files will be deleted.";}}
+
+%h1 Apply Metadata
+%br
+= form_for(@nu_core_file, :url => files_process_metadata_path, :html => {:multipart => true, :class => 'form-horizontal'}) do |f|
+
+  = hidden_field_tag(:collection_id, @incomplete_files.first.parent.identifier)
+
+  = render :partial => 'nu_core_files/metadata/default', :formats => [:html], :locals => {:f => f}
+
+  / We need to account for the different file types here to extend the metdata screen
+
+  = render :partial => 'permission_form', :formats => [:html], :locals => { :gf => @nu_core_file }
+
+  .form-actions
+    = f.submit class: ['btn', 'btn-primary'], :onclick => "confirmation_needed = false;", value: 'Submit'
+    = button_tag "Reset", class: 'btn', type: :reset
