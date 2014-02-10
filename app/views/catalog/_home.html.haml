@@ -5,9 +5,9 @@
     %small
       #{t('drs.product_name.full')}
   %p.lead
-    = t ('drs.homepage.description.short')
+    = t ('drs.homepage.description.short').html_safe
   %p
-    = t('drs.homepage.description.long')
+    = t('drs.homepage.description.long').html_safe
     %a.btn.btn-clear.btn-mini.pull-right{:href => "/terms/"} Terms of service
 %article
   %h2.page-header Featured Content
