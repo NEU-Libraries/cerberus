@@ -2,7 +2,10 @@
   .row-fluid
     .span8
       = f.label :title, "Title", class: "required-label"
-      = f.text_field :title, required: true, pattern: ".*\\S.*", name: 'nu_core_file[title][]', class: "input-block-level", placeholder: "US Congressman poses with a supporter"
+      - if !@incomplete_file.nil?
+        = f.text_field :title, required: true, pattern: ".*\\S.*", name: 'nu_core_file[title][]', class: "input-block-level", placeholder: "US Congressman poses with a supporter", value: @incomplete_file.title
+      - else
+        = f.text_field :title, required: true, pattern: ".*\\S.*", name: 'nu_core_file[title][]', class: "input-block-level", placeholder: "US Congressman poses with a supporter"              
     .span4
       = f.label :date_of_issue, "Date of Issuance *"
       #date-issued.input-append.date(data-date-format="yyyy-mm-dd")
