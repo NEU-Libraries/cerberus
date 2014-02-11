@@ -16,7 +16,7 @@
 %br
 = form_for(@nu_core_file, :url => files_process_metadata_path, :html => {:multipart => true, :class => 'form-horizontal'}) do |f|
 
-  = hidden_field_tag(:collection_id, @incomplete_files.first.parent.identifier)
+  = hidden_field_tag(:collection_id, @nu_core_file.parent.identifier)
 
   = render :partial => 'nu_core_files/metadata/default', :formats => [:html], :locals => {:f => f}
 

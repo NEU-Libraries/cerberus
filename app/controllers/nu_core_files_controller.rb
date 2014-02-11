@@ -53,9 +53,15 @@ class NuCoreFilesController < ApplicationController
   end
 
   def provide_metadata
-    @nu_core_file = NuCoreFile.new
-    @sample_incomplete_file = NuCoreFile.users_in_progress_files(current_user).first 
-    @incomplete_files = NuCoreFile.users_in_progress_files(current_user) 
+    # Feeding through an incomplete file if there is one
+    @nu_core_file = NuCoreFile.users_in_progress_files(current_user).first || NuCoreFile.new
+    
+    # With the move to single file upload, incomplete files (plural) is a misnomer.
+    # but worthwhile to keep if we reimplement batch uploads. In the meantime only
+    # NuCoreFile.users_in_progress_files(x).first should ever occur (not more than one at a time).
+
+    # @sample_incomplete_file = NuCoreFile.users_in_progress_files(current_user).first 
+    # @incomplete_files = NuCoreFile.users_in_progress_files(current_user) 
     @page_title = "Provide Upload Metadata"
   end
 
@@ -65,7 +71,7 @@ class NuCoreFilesController < ApplicationController
   def rescue_incomplete_files
     file_titles = []
 
-    request.query_parameters.each do |key, pid| 
+    request.query_parameters.each do |key, pid|
       file_titles << NuCoreFile.find(pid).title
     end
 
@@ -74,6 +80,8 @@ class NuCoreFilesController < ApplicationController
   end
 
   def process_metadata
+    puts "HERPY DERP"
+    puts params[:collection_id]
     Sufia.queue.push(MetadataUpdateJob.new(current_user.user_key, params))
     @nu_core_file = NuCoreFile.users_in_progress_files(current_user).first
     update_metadata if params[:nu_core_file]

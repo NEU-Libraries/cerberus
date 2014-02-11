@@ -12,7 +12,7 @@
   .row-fluid
     .span6
       %legend Personal Creator
-      = render partial: 'nu_core_files/metadata/data_form_creator_personal_names', locals: {:f => f, :names => @sample_incomplete_file.personal_creators }
+      = render partial: 'nu_core_files/metadata/data_form_creator_personal_names', locals: {:f => f, :names => @nu_core_file.personal_creators }
       %button#add_another_personal_creator.btn.btn-block.btn-success{:type => "button"}
         %i.icon-plus-sign.icon-large
         Add Personal Creator
@@ -20,7 +20,7 @@
         A complete individual name and/or a corporate creator are required
     .span6
       %legend Corporate Creator
-      = render partial: 'nu_core_files/metadata/data_form_corporate_creators', locals: {:f => f, :corporate_names => @sample_incomplete_file.corporate_creators }
+      = render partial: 'nu_core_files/metadata/data_form_corporate_creators', locals: {:f => f, :corporate_names => @nu_core_file.corporate_creators }
       %button#add_another_corporate_creator.btn.btn-success.btn-block{:type => "button"}
         %i.icon-plus-sign.icon-large
         Add Corporate Creator
@@ -31,7 +31,7 @@
     .span6
       %legend Mass Permissions
       = label_tag 'nu_core_file[mass_permissions]', "Choose Mass Permissions:"
-      = select_tag 'nu_core_file[mass_permissions]', options_for_select(@sample_incomplete_file.valid_mass_permissions, @sample_incomplete_file.mass_permissions) , class: "span6"
+      = select_tag 'nu_core_file[mass_permissions]', options_for_select(@nu_core_file.valid_mass_permissions, @nu_core_file.mass_permissions) , class: "span6"
       %p.help-block
         %ul
           %li Setting to 'public' will allow anyone accessing the site to see your collection.          
@@ -39,13 +39,13 @@
   .row-fluid
     .span6
       %legend Keyword(s)
-      = render partial: 'shared/sets/data_form_keywords', locals: {:f => f, :array_type => "nu_core_file", :keywords => @sample_incomplete_file.keywords }
+      = render partial: 'shared/sets/data_form_keywords', locals: {:f => f, :array_type => "nu_core_file", :keywords => @nu_core_file.keywords }
       %button#add_another_keyword.btn.btn.btn-block.btn-success{:type => "button"}
         %i.icon-plus-sign.icon-large
         Add Keyword    
     .span6
       %legend Permissions
-      = render partial: 'shared/sets/data_form_permissions_element', locals: {:f => f, :array_type => "nu_core_file", :permissions => filtered_permissions(@sample_incomplete_file) }
+      = render partial: 'shared/sets/data_form_permissions_element', locals: {:f => f, :array_type => "nu_core_file", :permissions => filtered_permissions(@nu_core_file) }
       %button#add_another_permission.btn.btn-success.btn-block{:type => "button"}
         %i.icon-plus-sign.icon-large
         Add Permission
