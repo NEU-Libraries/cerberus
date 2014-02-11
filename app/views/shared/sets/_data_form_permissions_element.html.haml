@@ -5,7 +5,7 @@
     = f.label :identity, "Enter NUID or group name"
     = f.text_field :identity, value: "", name: "#{array_type}[permissions][permissions0][identity]", pattern: ".*\\S.*", class: "span12"
     = label_tag "#{array_type}[permissions][permissions0][permission_type]", "Should this identity be allowed to read or edit?"
-    = select_tag '#{array_type}[permissions][permissions0][permission_type]', options_for_select(['read', 'edit']), class: "span12"
+    = select_tag "#{array_type}[permissions][permissions0][permission_type]", options_for_select(['read', 'edit']), class: "span12"
 - else
   - permissions.each_with_index do |perm, index|
     .permission
