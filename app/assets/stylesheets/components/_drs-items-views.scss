@@ -44,12 +44,7 @@
       } 
     }
   }
-  &.active {
-    figure{
-      display: block;
-      float: none;
-    }
-  }
+
   menu{
     padding-left: 0;
   }
@@ -80,21 +75,7 @@
       &:last-child{
         @include border-bottom-radius($baseBorderRadius);
       }
-      &.active{
-        @include border-radius($baseBorderRadius);
-        margin: 3em 0;
-        border-top-style: solid;
-        .drs-item-details{
-          overflow: visible;
-        }
-        & + .drs-item{
-          @include border-top-radius(8px);
-          border-top-style: solid;
-        }
-        > a{
-          float: none;
-        }  
-      }
+
       > a{
       float: left;
       margin-right: 15px;
@@ -158,21 +139,14 @@
     .drs-item{
       @extend .span3;
       @extend [class*="span"];
+      // @extend .height3;
+      // @extend .scroll-x;
+      // @extend .hidden-y;
       text-align: center;
-      margin-bottom: 20px;
-      @media (min-width: 800px){
-        height: 220px;  
-      }
-      
-      @media (min-width: 1200px) {
-        margin-bottom: 30px;
-        height: 335px;
-      }
 
       @include focus-states{
         border-color: $linkColor;
         @include box-shadow(0 1px 4px rgba(0,105,214,.25));
-        cusor: pointer;
       }
       > a{
 
@@ -181,12 +155,7 @@
           margin: 10px auto;
         }
       }
-      &.active{
-        width: 100%;
-        margin: 4em auto;
-        float: right;
-        height: auto;
-      }
+
     }
     .drs-item-add-details dl{
       @include sr-only;

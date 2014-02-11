@@ -3,11 +3,11 @@ true
 
 # jshint undef: true, unused: true 
 
-#global $:false 
+# global $:false 
 
-#global Modernizr 
+# global Modernizr 
 
-#global ui 
+# global ui 
 
 #global picturefill 
 $(document).ready ->
@@ -37,7 +37,7 @@ $(document).ready ->
       handleDrsAdminCommunities()
       handleCommunitiesAdminAutoComplete()
       toggleShoppingCart $('*[data-shoppingcart]')
-      handleDrsItem $('.drs-item[data-drsitem]:not(.drs-item-full)')
+      singleUploadTermsOfService()
       return
 
     
@@ -223,34 +223,7 @@ $(document).ready ->
       return
 
     
-    # var storeData = function ( data ){
-    #   var storage = window.localStorage;
-    #   var storedData;
-    #   if ( storage.key( 'drsApp' )){
-    #     storedData = storage.getItem( 'drsApp' );
-    #     storedData = JSON.parse( storeData );
-    #     data = $.merge( storedData, data );
-    
-    #   }
-    #   storage.setItem( 'drsApp' , JSON.stringify ( data ) );
-    # };
-    
-    # fetchData = function( ){
-    
-    #   var data = {};
-    
-    #   if( window.localStorage ){
-    #     if ( window.localStorage.('dr')){
-    #       data JSON.parse( window.localStorage.getItem('drsApp') )
-    #     }
-    #   }
-    
-    # };
-    # var getData = function ( key ){
-    #    var storage = window.localStorage;
-    #    var storedData = JSON.parse( storage.getItem ;
-    
-    # };
+
     gridOrListSwitch = (dataTarget) ->
       switch dataTarget
         when 'drs-items-list'
@@ -362,54 +335,6 @@ $(document).ready ->
         $('#admin_employee_autocomplete').attr 'autocomplete', 'on'
       return
 
-    handleDrsItem = (element) ->
-      $(element).on 'click', (event) ->
-        target = $(event.target)
-        parent = $(this).closest('.drs-items')
-        if target.is('a, a*, button, button * , input, input *,  select, select *, textarea')
-          event.stopPropagation()
-        #Change the action to only fire on the items-grid
-        else if parent.data('toggle') is 'drs-view'
-          
-          #remove add the class to the target.
-          if $(this).hasClass('active')
-            parent.find('.drs-item').removeClass 'active'
-          else
-            parent.find('.drs-item').removeClass 'active'
-            $(this).addClass 'active'
-          pictureActive $(this).find('[data-picture]')
-        else if parent.hasClass('drs-items-grid')
-          window.location.assign $(this).data('href')  if $(this).data('href').length > 4 and not $(this).hasClass('drs-item-full')
-        return
-
-      return
-
-    pictureActive = (element) ->
-      $e = $(element)
-      $src = $e.find('[data-src]')
-      $src.each ->
-        $this = $(this)
-        $this.attr 'data-media': ' '  unless $this.attr('data-media')
-        target = $this.attr('data-active')
-        active = $this.attr('data-media')
-        $this.attr
-          'data-media': target
-          'data-active': active
-
-        return
-
-      picturefill.apply()
-      return
-
-    cloneGrid = (t, parent) ->
-      console.log $('.drs-item').length
-      $t = $(t)
-      $(parent).find('.drs-item.jumbotron').remove()
-      if $t.hasClass('active')
-        $clone = $t.clone()
-        $clone.addClass 'jumbotron'
-        $t.append $clone
-      return
 
     
     ###
@@ -433,12 +358,43 @@ $(document).ready ->
 
       return
 
+    ###
+    Enable the the submit and form submit on the upload field only after the user agrees to the terms of service
+    ###
+
+    singleUploadTermsOfService = ->
+      if $('#singleFileUploadForm').length > 0
+        $()
+
+
+    ###
+    Show model using the #ajax-modal on created at the bottom of every page.
+    ###
+    initModal = ( heading = "Modal", body ="Hello World", footer = false,  show = true ) ->
+      t = $('#ajax-modal')
+      t.find('#ajax-modal-heading').text(heading)
+      t.find('#ajax-modal-body').html(body)
+      if footer
+        t.find('#ajax-modal-footer').html(footer)
+      else
+        t.find('#ajax-modal-footer').hide()
+      t.modal({
+        'show' : show
+        })
+      clear = ->
+        t.find('#ajax-modal-heading').text('')
+        t.find('#ajax-modal-body').html('')
+        t.find('#ajax-modal-footer').html('').css('display', 'block')
+        t.off('hidden')
+      t.on('hidden', clear)
+
     
     # these are the public API
     init: init
     addToComplationLink: addToComplationLink
     newCompilationForm: newCompilationForm
     compilationsModal: compilationsModal
+    initModal: initModal
   )()
   
   #end drsApp module;

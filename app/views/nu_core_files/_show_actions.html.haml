@@ -7,29 +7,7 @@
         \#{link_to "Edit", edit_nu_core_file_path unless @nu_core_file.processing?}#{"File is being processed you may edit once it is complete" if @nu_core_file.processing?}
     %li
       =link_to "Add to " + t('drs.compilations.name'), compilations_path(file: @nu_core_file.pid), remote: true
-    %li.dropdown
-      %a.dropdown-toggle(href="#" data-toggle="dropdown")
-        Export to
-        %b.caret 
-      %ul.dropdown-menu
-        %li
-          \#{link_to 'EndNote', nu_core_file_path(@nu_core_file.noid, :format => 'endnote')}
-        %li
-          \#{link_to 'Zotero', sufia.static_path('zotero'), {:id => 'zoteroLink', :name =>    'zotero', :class => 'lightboxLink'}}
-        %li
-          \#{link_to 'Mendeley', sufia.static_path('mendeley'), {:id => 'mendeleyLink', :name =>    'mendeley', :class => 'lightboxLink'}}
-  / Disabling RefWorks export due to stakeholder deprioritization
-  / &nbsp;|&nbsp;
-  / Disabling Email This and SMS This links due to lack of use cases
-/ AddThis Button BEGIN
-.addthis_toolbox.addthis_default_style
-  %a.addthis_button_preferred_1
-  %a.addthis_button_preferred_2
-  %a.addthis_button_preferred_3
-  %a.addthis_button_preferred_4
-  %a.addthis_button_compact
-  %a.addthis_counter.addthis_bubble_style
-/ AddThis Button END
-/ COinS hook for Zotero
+    -# Moved menu to new partial = render partial: "export_dropdown_menu" 
+
 %span.Z3988{title: @nu_core_file.export_as_openurl_ctx_kev}
 #add_compilation_form{style: "display:none"}

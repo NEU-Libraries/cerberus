@@ -159,6 +159,11 @@
 
 @import 'blacklight/blacklight';
 
+// Still in progress but would use a version of the grid mixins to provide
+// similar heights for their grid span so span4 height4 on an element would
+// it a responsive same height object.
+// Still needs work though
+// @import 'layout/height';
 
 
 // Components
