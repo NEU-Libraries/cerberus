@@ -37,7 +37,6 @@ $(document).ready ->
       handleDrsAdminCommunities()
       handleCommunitiesAdminAutoComplete()
       toggleShoppingCart $('*[data-shoppingcart]')
-      handleDrsItem $('.drs-item[data-drsitem]:not(.drs-item-full)')
       singleUploadTermsOfService()
       return
 
