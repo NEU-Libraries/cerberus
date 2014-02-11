@@ -364,7 +364,7 @@ $(document).ready ->
 
     singleUploadTermsOfService = ->
       if $('#singleFileUploadForm').length > 0
-        $()
+        $(a)
 
 
     ###
@@ -386,7 +386,12 @@ $(document).ready ->
         t.find('#ajax-modal-body').html('')
         t.find('#ajax-modal-footer').html('').css('display', 'block')
         t.off('hidden')
+      reloadWindow = ->
+        window.location.reload
+      listenForAjax =  ->
+        $(@).on('ajax:complete', reloadWindow )
       t.on('hidden', clear)
+      t.on('click', 'a[data-remote]', listenForAjax )
 
     
     # these are the public API

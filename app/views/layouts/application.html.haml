@@ -21,7 +21,7 @@
   = render :partial => 'layouts/end-js-scripts'
   #ajax-modal.modal.hide{:tabindex => "-1", "aria-labelledby" => "ajaxModalLabel", role: "dialog"}
     %header#ajax-modal-header.modal-header
+      %button.close{"aria-hidden" => "true", "data-dismiss" => "modal", type: "button"} &#215;
       %h3#ajax-modal-heading
-      %button.close{"aria-hidden" => "true", "data-dismiss" => "#ajax-modal", type: "button"} &#215;
     .modal-body#ajax-modal-body
     .modal-footer#ajax-modal-footer
