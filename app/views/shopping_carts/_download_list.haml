@@ -1,0 +1,10 @@
+- if @items.length > 0 
+  .drs-items.drs-items-list
+  - @items.each do |item| 
+    = render partial: 'datastream_download', locals: { item: item }
+-else
+  .alert.alert-info
+    %button.close{"aria-hidden" => "true", "data-dismiss" => "alert", type: "button"} &#215;
+    %strong Empty,
+    You can add more files, and they will appear here.
+

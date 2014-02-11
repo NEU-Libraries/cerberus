@@ -10,6 +10,10 @@ class ShoppingCartsController < ApplicationController
   def show 
     @items = lookup_from_cookie(session[:ids]) 
     @page_title = t('drs.shoppingcarts.name').titlecase
+    respond_to do |format| 
+      format.js 
+      format.html
+    end
   end
 
   # Allow the user to add/remove items from their shopping cart.

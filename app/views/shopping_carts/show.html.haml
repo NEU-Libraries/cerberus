@@ -1,11 +1,7 @@
 - content_for :page_header do
   %h1.page-header
-    =render partial: 'shared/icon', locals: {class_string: "icon-download-alt", alt_text:  t('drs.shoppingcarts.name') }
+    =render partial: 'shared/icon', locals: {class_string: "icon-download-alt" }
     = t('drs.shoppingcarts.name').titlecase
-- if @items.length > 0 
-  .drs-items.drs-items-list
-  - @items.each do |item| 
-    = render partial: 'datastream_download', locals: { item: item }
-
-  = link_to("Download", cart_download_path) 
-  = link_to("Destroy", shopping_cart_path, method: 'delete', confirm: 'This will clear all current items') 
+= render partial: "download_list"
+= render partial: "actions"
+  
