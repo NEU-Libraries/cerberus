@@ -40,12 +40,12 @@ en:
         description: Materials used to support teaching and learning.
         icon: icon-book
       other_publications:
-        name: Theses and Dissertations
-        description: NU theses and dissertations (2008-).
+        name: Theses & Dissertations
+        description: Other deposited materials.
         icon: icon-magic
       communities:
-        name: Communities
-        description: Browse NU departments and groups by name.
+        name: communities
+        description: Departments and other organizational groups.
         icon: icon-group
       employees:
         name: employees
