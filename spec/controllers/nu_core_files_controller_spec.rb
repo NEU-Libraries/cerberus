@@ -62,10 +62,31 @@ describe NuCoreFilesController do
   end
 
   describe "GET #show" do 
-
     it "renders the 404 page for objects that do not exist" do 
       get :show, { id: 'neu:adsfasdfa' } 
-      expect(response).to render_template('error/object_404') 
+      expect(response).to render_template('error/object_404')
+
+      DrsImpression.count.should == 0
+    end
+
+    it "renders the show page for valid, authenticated requests" do 
+      sign_in bill 
+
+      get :show, { id: file.pid } 
+      expect(response).to render_template('nu_core_files/show')
+
+      DrsImpression.count.should == 1
+      file.impression_count.should == 1
+    end
+
+    it "only writes a single impression on multiple hits" do 
+      sign_in bill 
+
+      get :show, { id: file.pid } 
+      get :show, { id: file.pid } 
+
+      DrsImpression.count.should == 1 
+      file.impression_count.should == 1 
     end
   end
 
