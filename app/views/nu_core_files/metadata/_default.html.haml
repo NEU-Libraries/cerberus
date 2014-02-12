@@ -1,52 +1,57 @@
-%fieldset
-  .row-fluid
-    .span8
-      = f.label :title, "Title", class: "required-label"
-      - if !@incomplete_file.nil?
-        = f.text_field :title, required: true, pattern: ".*\\S.*", name: 'nu_core_file[title][]', class: "input-block-level", placeholder: "US Congressman poses with a supporter", value: @incomplete_file.title
-      - else
-        = f.text_field :title, required: true, pattern: ".*\\S.*", name: 'nu_core_file[title][]', class: "input-block-level", placeholder: "US Congressman poses with a supporter"              
-    .span4
-      = f.label :date_of_issue, "Date of Issuance *"
-      #date-issued.input-append.date(data-date-format="yyyy-mm-dd")
-        = f.text_field :date_of_issue, class: ['datepicker','input-block-level'], required: true, placeholder: "YYYY-MM-DD"
-        %span.add-on
-          %i.icon-calendar.icon-large
-  .row-fluid
-    .span6
-      = render partial: 'nu_core_files/metadata/data_form_creator_personal_names', locals: {:f => f, :names => @nu_core_file.personal_creators }
-      %button#add_another_personal_creator.btn.btn-block.btn-success{:type => "button"}
-        %i.icon-plus-sign.icon-large
-        Add Personal Creator
-      %span.help-text
-        A complete individual name and/or a corporate creator are required
-    .span6
-      = render partial: 'nu_core_files/metadata/data_form_corporate_creators', locals: {:f => f, :corporate_names => @nu_core_file.corporate_creators }
-      %button#add_another_corporate_creator.btn.btn-success.btn-block{:type => "button"}
-        %i.icon-plus-sign.icon-large
-        Add Corporate Creator
-  .row-fluid
-    .span6
-      = f.label :description, "Description", class: "required-label"
-      = f.text_area :description, required: true, pattern: ".*\\S.*", name: 'nu_core_file[description][]', class: "input-block-level", rows: 5
-    .span6
-      %legend Mass Permissions
-      = label_tag 'nu_core_file[mass_permissions]', "Choose Mass Permissions:"
-      = select_tag 'nu_core_file[mass_permissions]', options_for_select(@nu_core_file.valid_mass_permissions, @nu_core_file.mass_permissions) , class: "span6"
-      %p.help-block
-        %ul
-          %li Setting to 'public' will allow anyone accessing the site to see your collection.          
-          %li Setting to 'private' will only allow users and groups explicated below to see your collection.      
-  .row-fluid
-    .span6
-      %legend Keyword(s)
-      = render partial: 'shared/sets/data_form_keywords', locals: {:f => f, :array_type => "nu_core_file", :keywords => @nu_core_file.keywords }
-      %button#add_another_keyword.btn.btn.btn-block.btn-success{:type => "button"}
-        %i.icon-plus-sign.icon-large
-        Add Keyword    
-    .span6
-      %legend Permissions
-      = render partial: 'shared/sets/data_form_permissions_element', locals: {:f => f, :array_type => "nu_core_file", :permissions => filtered_permissions(@nu_core_file) }
-      %button#add_another_permission.btn.btn-success.btn-block{:type => "button"}
-        %i.icon-plus-sign.icon-large
-        Add Permission
+
+%fieldset.row-fluid
+  .span8
+    = f.label :title, "Title", class: "required-label"
+    - if !@incomplete_file.nil?
+      = f.text_field :title, required: true, pattern: ".*\\S.*", name: 'nu_core_file[title][]', class: "input-block-level", placeholder: "US Congressman poses with a supporter", value: @incomplete_file.title
+    - else
+      = f.text_field :title, required: true, pattern: ".*\\S.*", name: 'nu_core_file[title][]', class: "input-block-level", placeholder: "US Congressman poses with a supporter"              
+  .span4
+    = f.label :date_of_issue, "Date of Issuance", class: "required-label"
+    #date-issued.input-append.date(data-date-format="yyyy-mm-dd")
+      = f.text_field :date_of_issue, class: ['datepicker','input-block-level'], required: true, placeholder: "YYYY-MM-DD"
+      %span.add-on
+        %i.icon-calendar.icon-large
+%fieldset.row-fluid
+  .span6
+    = render partial: 'nu_core_files/metadata/data_form_creator_personal_names', locals: {:f => f, :names => @nu_core_file.personal_creators }
+    %button#add_another_personal_creator.btn.btn-block.btn-success{:type => "button"}
+      %i.icon-plus-sign.icon-large
+      Add Personal Creator
+    %span.help-text
+      A complete individual name and/or a corporate creator are required
+  .span6
+    = render partial: 'nu_core_files/metadata/data_form_corporate_creators', locals: {:f => f, :corporate_names => @nu_core_file.corporate_creators }
+    %button#add_another_corporate_creator.btn.btn-success.btn-block{:type => "button"}
+      %i.icon-plus-sign.icon-large
+      Add Corporate Creator
+
+.row-fluid
+  
+  %fieldset.span6
+    %legend Description
+    = f.label :description, "Description", class: "required-label"
+    = f.text_area :description, required: true, pattern: ".*\\S.*", name: 'nu_core_file[description][]', class: "input-block-level", rows: 5
+  %fieldset.span6
+    %legend Keyword(s)
+    = render partial: 'shared/sets/data_form_keywords', locals: {:f => f, :array_type => "nu_core_file", :keywords => @nu_core_file.keywords }
+    %button#add_another_keyword.btn.btn.btn-block.btn-success{:type => "button"}
+      %i.icon-plus-sign.icon-large
+      Add Keyword    
+    
+.row-fluid
+  %fieldset.span6
+    %legend Mass Permissions
+    = label_tag 'nu_core_file[mass_permissions]', "Choose Mass Permissions:"
+    = select_tag 'nu_core_file[mass_permissions]', options_for_select(@nu_core_file.valid_mass_permissions, @nu_core_file.mass_permissions) , class: "span6"
+    %p.help-block
+      %ul
+        %li Setting to 'public' will allow anyone accessing the site to see your collection.          
+        %li Setting to 'private' will only allow users and groups explicated below to see your collection.    
+  
+  %fieldset.span6
+    %legend Permissions
+    = render partial: 'shared/sets/data_form_permissions_element', locals: {:f => f, :array_type => "nu_core_file", :permissions => filtered_permissions(@nu_core_file) }
+    %button#add_another_permission.btn.btn-success.btn-block{:type => "button"}
+      %i.icon-plus-sign.icon-large
+      Add Permission

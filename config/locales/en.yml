@@ -54,5 +54,9 @@ en:
       icon: icon-dashboard
       system_generated_folders: System Generated Folders
       user_created_folders: User Created Folders
+    metadata:
+      icon: 'icon-pencil'
+      edit_page_title: 'Provide Metadata'
+      edit_subtitle: 'Provide information about your contributed file'
   blacklight:
     application_name: "DRS"
