@@ -122,8 +122,9 @@ class NuCoreFilesController < ApplicationController
     @nu_core_file = NuCoreFile.find(params[:id])
     @page_title = "Edit #{@nu_core_file.title}" 
 
-    @nu_core_file.initialize_fields
-    @groups = current_user.groups
+    #@nu_core_file.initialize_fields
+    #@groups = current_user.groups
+
   end
 
   def update
@@ -171,10 +172,6 @@ class NuCoreFilesController < ApplicationController
     else
       redirect_to(sufia.dashboard_index_path, notice: "#{@title} wasn't destroyed") 
     end
-  end
-
-  def self.upload_complete_path
-    Rails.application.routes.url_helpers.files_provide_metadata_path
   end
 
   protected
@@ -253,7 +250,7 @@ class NuCoreFilesController < ApplicationController
       update_metadata_from_upload_screen(@nu_core_file, current_user, file, params[:collection_id])
       Sufia.queue.push(ContentCreationJob.new(@nu_core_file.pid, new_path.to_s, file.original_filename, current_user.id))
       @nu_core_file.record_version_committer(current_user)
-      redirect_to NuCoreFilesController.upload_complete_path
+      redirect_to files_provide_metadata_path
     else
       render :json => [{:error => "Error creating generic file."}]
     end
@@ -262,7 +259,7 @@ class NuCoreFilesController < ApplicationController
   def perform_local_ingest
       if Sufia.config.enable_local_ingest && current_user.respond_to?(:directory)
         if ingest_local_file
-          redirect_to NuCoreFilesController.upload_complete_path
+          redirect_to files_provide_metadata_path
         else
           flash[:alert] = "Error importing files from user directory."
           render :new
