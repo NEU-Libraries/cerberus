@@ -124,10 +124,10 @@ class NuCoreFilesController < ApplicationController
 
     #@nu_core_file.initialize_fields
     #@groups = current_user.groups
-
   end
 
   def update
+    # Holy hell, do we need to relook at this whole section.... - DGC
     @nu_core_file = NuCoreFile.find(params[:id]) 
 
     version_event = false
@@ -147,7 +147,7 @@ class NuCoreFilesController < ApplicationController
       Sufia.queue.push(ContentNewVersionEventJob.new(@nu_core_file.pid, current_user.user_key))
     end
 
-    # only update metadata if there is a generic_file object which is not the case for version updates
+    # only update metadata if there is a nu_core_file object which is not the case for version updates
     update_metadata if params[:nu_core_file]
 
     #always save the file so the new version or metadata gets recorded
@@ -158,11 +158,13 @@ class NuCoreFilesController < ApplicationController
       # do not trigger an update event if a version event has already been triggered
       Sufia.queue.push(ContentUpdateEventJob.new(@nu_core_file.pid, current_user.user_key)) unless version_event
       @nu_core_file.record_version_committer(current_user)
-      redirect_to sufia.edit_generic_file_path(:tab => params[:redirect_tab]), :notice => render_to_string(:partial=>'generic_files/asset_updated_flash', :locals => { :generic_file => @nu_core_file })
+      #redirect_to sufia.edit_generic_file_path(:tab => params[:redirect_tab]), :notice => render_to_string(:partial=>'generic_files/asset_updated_flash', :locals => { :generic_file => @nu_core_file })
     else
-      render action: 'edit'
+      #render action: 'edit'
     end
-    end
+
+    redirect_to(@nu_core_file)
+  end
 
   def destroy
     @title = NuCoreFile.find(params[:id]).title
