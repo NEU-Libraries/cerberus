@@ -76,7 +76,7 @@ describe NuCoreFilesController do
       expect(response).to render_template('nu_core_files/show')
 
       DrsImpression.count.should == 1
-      file.impression_count.should == 1
+      file.impression_views.should == 1
     end
 
     it "only writes a single impression on multiple hits" do 
@@ -86,7 +86,7 @@ describe NuCoreFilesController do
       get :show, { id: file.pid } 
 
       DrsImpression.count.should == 1 
-      file.impression_count.should == 1 
+      file.impression_views.should == 1 
     end
   end
 

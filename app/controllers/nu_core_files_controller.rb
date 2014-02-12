@@ -36,7 +36,7 @@ class NuCoreFilesController < ApplicationController
   before_filter :can_edit?, only: [:edit, :update]
   before_filter :is_depositor?, only: [:destroy] 
 
-  after_filter :view_logger, only: [:show]
+  after_filter :log_view, only: [:show]
 
   rescue_from Exceptions::NoParentFoundError, with: :no_parent_rescue
 
