@@ -1,9 +1,9 @@
 - if keywords.empty?
   .keyword
-    = f.label :keywords, "Keyword"
-    = f.text_field :keywords, value: "", name: 'set[keywords][]', pattern: ".*\\S.*", class: 'input-block-level', placeholder: "Science"
+    = f.label :keywords, "Keyword", class: "required-label"
+    = f.text_field :keywords, required: true, value: "", name: "#{array_type}[keywords][]", pattern: ".*\\S.*", class: 'input-block-level', placeholder: "Science"
 - else
   - keywords.each do |keyword|
     .keyword
-      = f.label :keywords, "Keyword"
-      = f.text_field :keywords, value: keyword, name: 'set[keywords][]', pattern: ".*\\S.*",class: 'input-block-level', placeholder: "Science"
+      = f.label :keywords, "Keyword", class: "required-label"
+      = f.text_field :keywords, value: keyword, name: "#{array_type}[keywords][]", pattern: ".*\\S.*",class: 'input-block-level', placeholder: "Science"

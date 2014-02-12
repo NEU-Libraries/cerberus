@@ -5,6 +5,7 @@ class NuCollection < ActiveFedora::Base
   include Drs::Rights::MassPermissions
   include Drs::Rights::Embargoable
   include Drs::Rights::InheritedRestrictions
+  include Drs::Rights::PermissionsAssignmentHelper
   include Drs::MetadataAssignment
   include Drs::Relationships
   include Drs::Find
@@ -53,25 +54,6 @@ class NuCollection < ActiveFedora::Base
       self.add_relationship(:is_member_of, employee) 
     else
       raise "user_parent= got passed a #{employee.class}, which doesn't work." 
-    end
-  end
-
-  def permissions=(hash)
-    self.set_permissions_from_new_form(hash) 
-  end
-
-  # Accepts a hash of the following form:
-  # ex. {'permissions1' => {'identity_type' => val, 'identity' => val, 'permission_type' => val }, 'permissions2' => etc. etc. }
-  # Tosses out param sets that are missing an identity.  Which is nice.   
-  def set_permissions_from_new_form(params)
-    params.each do |perm_hash| 
-      identity_type = perm_hash[1]['identity_type']
-      identity = perm_hash[1]['identity']
-      permission_type = perm_hash[1]['permission_type'] 
-
-      if identity != 'public' && identity != 'registered' 
-        self.rightsMetadata.permissions({identity_type => identity}, permission_type)
-      end 
     end
   end
 
