@@ -48,13 +48,43 @@ true
 
       
       #add the cloned elements.
-      settings.target.after $cloned
+      $( @ ).before $cloned
       lastInput = $cloned.find('input, select').last()
       lastInput.after $removeButton.tooltip()
       count++
       return
 
     return
+  $.fn.deleteFields = (options) ->
+    
+    $e = $(@)
 
-  return
+    settings = $.extend(
+      'target' : $e.data('target') || null 
+      'confirm' : $e.data('confirm') || false
+    , options
+    )
+
+    if settings.target? then throw 'No target provided'
+      
+    $target = $( settings.target )
+
+    destroy = ( target ) ->
+      $e.off('click')
+
+      target.remove()
+      $e.remove()
+    confirmOrDesctroy = (e) ->
+      if e.data.confrim is true
+        confirmation = confrim('Are you sure you want to delete this field')
+      else
+        confirmation = true
+      if confirmation
+        destroy( e.data.target )
+    init = ( $e ) -> 
+      $e.on('click', settings, confirmOrDesctroy(e) )
+
+  $('*[data-delete]').deleteFields(
+    confirm: true
+  )
 ) jQuery
