@@ -4,10 +4,10 @@
   }
   .close{
     @include text-shadow( 0 1px  0 darken( $clouds, 10% ));
-    color: $clouds;
+    color: $brand-info;
 
     @include focus-states{
-      color: darken( $clouds, 10% );
+      color: darken( $brand-info, 10% );
     }
   }
 }

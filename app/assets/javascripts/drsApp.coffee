@@ -387,11 +387,18 @@ $(document).ready ->
         t.find('#ajax-modal-footer').html('').css('display', 'block')
         t.off('hidden')
       reloadWindow = ->
-        window.location.reload
-      listenForAjax =  ->
-        $(@).on('ajax:complete', reloadWindow )
+        window.location.reload()
+      listenForAjax = ( element ) ->
+        $( element ).on('ajax:complete', reloadWindow )
+      
+      # We shouldn't need to do this but there isn't a great way of updating the DOM and keeping the data in sync with the app.
+      hanldleRemoteLinks = ->
+        remoteLinks = t.find( 'a[data-remote]' )
+        listenForAjax link for link in remoteLinks
+      hanldleRemoteLinks()
       t.on('hidden', clear)
-      t.on('click', 'a[data-remote]', listenForAjax )
+      
+      
 
     
     # these are the public API
