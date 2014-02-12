@@ -14,7 +14,6 @@
           %i.icon-calendar.icon-large
   .row-fluid
     .span6
-      %legend Personal Creator
       = render partial: 'nu_core_files/metadata/data_form_creator_personal_names', locals: {:f => f, :names => @nu_core_file.personal_creators }
       %button#add_another_personal_creator.btn.btn-block.btn-success{:type => "button"}
         %i.icon-plus-sign.icon-large
@@ -22,14 +21,13 @@
       %span.help-text
         A complete individual name and/or a corporate creator are required
     .span6
-      %legend Corporate Creator
       = render partial: 'nu_core_files/metadata/data_form_corporate_creators', locals: {:f => f, :corporate_names => @nu_core_file.corporate_creators }
       %button#add_another_corporate_creator.btn.btn-success.btn-block{:type => "button"}
         %i.icon-plus-sign.icon-large
         Add Corporate Creator
   .row-fluid
-    .span6        
-      %legend Description
+    .span6
+      = f.label :description, "Description", class: "required-label"
       = f.text_area :description, required: true, pattern: ".*\\S.*", name: 'nu_core_file[description][]', class: "input-block-level", rows: 5
     .span6
       %legend Mass Permissions
