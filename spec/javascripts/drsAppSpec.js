@@ -135,7 +135,25 @@ describe('The drsApp object', function() {
     });
 
   });
-  
+  describe('removeFormFields adds listeners to elements with data-remove and then removes them from the dom.', function(){
+    beforeEach( function(){
+      loadFixtures('form-fields.html');
+      drsApp.init();
+    });
+    it('Adds listeners to objects with', function(){
+      var button = $('*[data-delete]');
+      var target = button.closest( button.data('target') );
+      expect(button).toExist();
+      expect( target ).toExist();
+      console.log( target.length );
+      expect( target.length ).toEqual(1);
+
+      button.trigger('click');
+      expect(button).not.toExist();
+      expect( target ).not.toExist();
+
+    });
+  });
 
 
 });

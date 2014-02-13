@@ -38,6 +38,7 @@ $(document).ready ->
       handleCommunitiesAdminAutoComplete()
       toggleShoppingCart $('*[data-shoppingcart]')
       handleDrsItem $('.drs-item[data-drsitem]:not(.drs-item-full)')
+      removeFormFields()
       return
 
     
@@ -433,7 +434,28 @@ $(document).ready ->
 
       return
 
+
+    # Handle remove form field buttons click
+    #
     
+    removeFormFields = ( ) ->
+      els = $('*[data-remove]');
+
+      for el in els when el.data('target')?
+        el.on( 'click', (e) ->
+          e.preventDefault()
+          toRemove = []
+          remove = el.data('target')
+          remove = el.closest( remove ) or $( target )
+          if remove? then throw 'Must provide a valid target to remove'
+
+          toRemove.push($(remove))
+          toRemove.push($(@))
+          console.log toRemove
+          $(toRemove).off().remove()
+        )
+
+
     # these are the public API
     init: init
     addToComplationLink: addToComplationLink
@@ -445,4 +467,3 @@ $(document).ready ->
   window.drsApp = drsApp
   drsApp.init updateUserviewPrefBoolean: false
   return
-
