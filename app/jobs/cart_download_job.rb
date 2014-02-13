@@ -29,6 +29,9 @@ class CartDownloadJob
 
           if user.can? :read, item 
             io.add_buffer("downloads/#{item.content.label}", item.content.content) 
+
+            # Record the download 
+            DrsImpression.create(pid: pid, session_id: sess_id, action: 'download') 
           end
         end
       end
