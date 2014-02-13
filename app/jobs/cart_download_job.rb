@@ -16,7 +16,7 @@ class CartDownloadJob
   # in the shopping_cart controller, which is also the only place where the job is 
   # currently executed from.  
   def run
-    self.user = User.find_by_email(nuid)
+    self.user = User.find_by_nuid(nuid)
     self.path = "#{Rails.root}/tmp/carts/#{sess_id}"
 
     FileUtils.mkdir_p path

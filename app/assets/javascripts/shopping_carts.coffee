@@ -14,7 +14,7 @@ true
       console.log 'From poll server, interval id is' + interval_id
       if $('#button_slot').is(':empty')
         console.log 'Rendering get script call'
-        $.getScript '/shopping_cart/download.js'
+        $.getScript '/download_queue/download.js'
       else
         console.log 'Cleaning interval id ' + interval_id + ' out.'
         clearInterval interval_id
