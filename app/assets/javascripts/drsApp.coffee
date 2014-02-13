@@ -17,9 +17,9 @@ $(document).ready ->
         $addToSetLink: $('#addToSet')
         breadCrumbMenuContent: $('#addToSetLinks').html()
         fitTextTarget: $('.fit-text')
-        removeFormFields: 
+        removeFormFields:
           listener : false
-      
+
       # allow overriding the default config
       $.extend drsApp.config, settings
       setup()
@@ -41,9 +41,9 @@ $(document).ready ->
       removeFormFields()
       return
 
-    
+
     ###
-    Provides the breadcrumb popover menu for adding collections 
+    Provides the breadcrumb popover menu for adding collections
     or new items to the application.
     ###
     breadCrumbMenu = ->
@@ -78,7 +78,7 @@ $(document).ready ->
 
         return
 
-      return      
+      return
     # Builds and requests the new compilation form for the ajax request
 
     newCompilationForm = ->
@@ -112,7 +112,7 @@ $(document).ready ->
       drsApp.newCompilationForm()
       return
 
-    
+
     ###
     Checks the dom to see if the plugin target is there and then loads it with Modernizr
     ###
@@ -127,7 +127,7 @@ $(document).ready ->
 
       return
 
-    
+
     ###
     Tooltip Setup
     ###
@@ -135,27 +135,27 @@ $(document).ready ->
       $('body').tooltip selector: 'a[data-toggle=tooltip]'
       return
 
-    
+
     ###
     Builds interaction to inputs with [required="required"] to make sure that the user fills it out.
     ###
     handleRequiredInputs = ->
-      
+
       #Query for inputs textareas and selects with require
       targets = $('input, textarea, select').filter('[required="required"]')
-      
+
       #Construct the tooltips for inputs that need to be filled still.
       addTooltip = (e) ->
         $(e).tooltip title: 'Required'
 
-      
+
       #cycle through each function.
       targets.each (index, el) ->
         id = $(el).attr('id')
-        
+
         #add the required class.
         $('label[for="' + id + '"]').addClass 'required-label'
-        
+
         # Check the element to figure out if we still need the tooltip or not.
         $(el).on 'focus hover click change keypress', ->
           if $(this).val().length > 0
@@ -168,17 +168,17 @@ $(document).ready ->
 
       return
 
-    
+
     ###
     Looks for the datatoggle
     @return {[type]} [description]
     ###
     ellipsisExpand = ->
       $toggleLink = $('*[data-toggle="ellipsis"]')
-      
+
       #look for the target and toggle classes on that element.
       toggleState = (event) ->
-        
+
         #stop the event from triggering other reations
         event.preventDefault()
         event.stopPropagation()
@@ -194,7 +194,7 @@ $(document).ready ->
       $toggleLink.on 'click', toggleState
       return
 
-    
+
     ###
     drsToggleView adds an event listener to a div containing two buttons that should toggle a class on an conainter div with drs-items to change their display.
     ###
@@ -225,7 +225,7 @@ $(document).ready ->
       return
 
     # Utility Function for what to switch to
-    # 
+    #
     gridOrListSwitch = (dataTarget) ->
       switch dataTarget
         when 'drs-items-list'
@@ -236,7 +236,7 @@ $(document).ready ->
           throw new DrsAppError 'dataTarget wasn\'t given', dataTarget
       return
 
-    
+
     ###
     updateUserViewPref
     @TODO
@@ -256,17 +256,17 @@ $(document).ready ->
 
       return
 
-    
-    #Handles spawning new permission related form elements on the nu_collections/new page. 
+
+    #Handles spawning new permission related form elements on the nu_collections/new page.
     nuCollectionsPage = ->
-      
-      #Add a datepicker to the date of issuance field. 
+
+      #Add a datepicker to the date of issuance field.
       $('#date-issued, #embargo-date').datepicker
         todayBtn: true
         todayHighlight: true
         clearBtn: true
 
-      
+
       # Adding the form fields behavior to the buttons on the nu collections.
       $('#add_another_personal_creator').addFormFields
         target: $('div.personal_creator')
@@ -345,7 +345,7 @@ $(document).ready ->
           event.stopPropagation()
         #Change the action to only fire on the items-grid
         else if parent.data('toggle') is 'drs-view'
-          
+
           #remove add the class to the target.
           if $(this).hasClass('active')
             parent.find('.drs-item').removeClass 'active'
@@ -386,7 +386,7 @@ $(document).ready ->
         $t.append $clone
       return
 
-    
+
     ###
     Listener function for shopping cart links with a fall back on failure to reload the page.
     ###
@@ -410,31 +410,31 @@ $(document).ready ->
 
 
     # Handle remove form field buttons click
-    # 
+    #
     #  <div class="control-group" id="controlGroup1">
     #    <label for="">email</label>
     #    <input type="email" id="email-field">
     #    <button type="button" data-delete data-target=".control-group">Delete Field</button>
     #  </div>
     #  This markup will cause the removal of the contain div, so you would need to place the element
-    #  with the markup in a container element, or 
-    # 
-    # 
-  
-    
+    #  with the markup in a container element, or
+    #
+    #
+
+
     removeFormFields = ( ) ->
-      
-      handleClick = (e) -> 
+
+      handleClick = (e) ->
           $el = $(@)
           e.preventDefault()
           removeSelector = $el.data('target') or $el.attr('href')
-          
+
           # This is vague to allow class selectors of containing divs
           $remove = $el.closest( removeSelector ).first()
 
           #if this remove variable is still null then let's make sure it is specific to only one item
           if not $remove?
-            $remove = if  $( removeSelector ).length == 1 then $( removeSelector ) else null 
+            $remove = if  $( removeSelector ).length == 1 then $( removeSelector ) else null
 
 
 
@@ -442,30 +442,30 @@ $(document).ready ->
             # make sure to remove the element itself
             $el.remove()
             $remove.empty().remove()
-            
-            
+
+
           else
             throw new DrsAppError "Couldn't find specific target or parent element to remove." , removeSelector
-      if drsApp.config.removeFormFields.listener 
+      if drsApp.config.removeFormFields.listener
         $('*[data-delete ]').on('click', handleClick )
       else
         $('body').on('click', '*[data-delete]' , handleClick )
-    
+
 
     DrsAppError = ( message = 'Error:', value = null ) ->
       @.message = message
       @.value = value
       @.toString = ->
-        message + '.  Value:' + value 
-        
+        message + '.  Value:' + value
+
     # these are the public API
-    
+
     init: init
     addToComplationLink: addToComplationLink
     newCompilationForm: newCompilationForm
     compilationsModal: compilationsModal
   )()
-  
+
   #end drsApp module;
   window.drsApp = drsApp
   drsApp.init updateUserviewPrefBoolean: false

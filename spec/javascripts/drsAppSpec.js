@@ -1,31 +1,31 @@
 describe('The drsApp object', function() {
   describe('create a show and hide link for longer page excerpts',function(){
-    
+
     it('should attach a click listener to a[data-toggle] with an [href] target to toggle the ellipsis style by adding the `in` event class, it should toggle the icon-font class from expand to collapse'  , function() {
       var fixtures = loadFixtures('drsApp-ellipsis.html');
-      
+
         drsApp.init();
-        
+
           var icon = $('i');
           var link = $('#abstract5Toggle');
-          
+
           expect(icon).toHaveClass('icon-expand-alt');
           expect(icon).not.toHaveClass('icon-collapse-alt');
-          
-          expect($('#abstract5').find('.ellipsis')).not.toHaveClass('in'); 
-          
+
+          expect($('#abstract5').find('.ellipsis')).not.toHaveClass('in');
+
           $(link).trigger('click');
-        
+
           expect(icon).toHaveClass('icon-collapse-alt');
           expect(icon).not.toHaveClass('icon-expand-alt');
-          expect($('#abstract5').find('.ellipsis')).toHaveClass('in'); 
-      
-      
-      
+          expect($('#abstract5').find('.ellipsis')).toHaveClass('in');
+
+
+
     });
-  
+
   });
-  
+
   describe('creates a breadcrumb menu from the click actions', function(){
     var link, addToSetLinks;
     beforeEach(function(){
@@ -36,7 +36,7 @@ describe('The drsApp object', function() {
       return link, addToSetLinks;
     });
 
-    it('should show the popover menu when the link is clicked', function(){      
+    it('should show the popover menu when the link is clicked', function(){
 
       expect(addToSetLinks).not.toBeVisible();
       expect($('.popover')).not.toExist();
@@ -56,10 +56,10 @@ describe('The drsApp object', function() {
         expect($('.popover')).not.toBeVisible();
         expect($('.popover')).toContainHtml(addToSetLinks.html());
       });
-      
+
     });
   });
-  
+
   describe('toggles the view class for drs-items',function(){
     beforeEach(function(){
       loadFixtures('drsAppToogleView.html');
@@ -83,7 +83,7 @@ describe('The drsApp object', function() {
 
     });
   });
-  describe( 'should listen for the user to click an item and show the user a bigger reveal' , function() { 
+  describe( 'should listen for the user to click an item and show the user a bigger reveal' , function() {
     beforeEach(function(){
       loadFixtures('drsAppToogleView.html');
       drsApp.init();
@@ -92,20 +92,20 @@ describe('The drsApp object', function() {
 
       expect($('#drsItem1')).not.toHaveClass('active');
       expect($('.drs-item')).not.toHaveClass('active');
-      
+
       $('#drsItem1').trigger('click');
-      
+
       expect($('#drsItem1')).toHaveClass('active');
 
 
       $('#drsItem1').trigger('click');
-      
+
       expect($('#drsItem1')).not.toHaveClass('active');
       var anotherItem = $('#drsItem1').next('.drs-item');
-      
+
       anotherItem.trigger('click');
 
-      expect( $('#drsItem1') ).not.toHaveClass('active'); 
+      expect( $('#drsItem1') ).not.toHaveClass('active');
       expect( anotherItem ).toHaveClass('active');
 
     });
@@ -114,11 +114,11 @@ describe('The drsApp object', function() {
   });
 
   describe( 'toggleShoppingCart method',  function(){
-    var sc = null 
+    var sc = null
     beforeEach( function(){
       loadFixtures('shoppingcart-remove.html');
       drsApp.init();
-      
+
 
     });
 
@@ -127,7 +127,7 @@ describe('The drsApp object', function() {
       expect( sc ).toExist();
       sc.trigger('ajax:beforeSend');
       expect(sc).toHaveAttr('data-shoppingcart', 'replace');
-      
+
       $.get( '/spec/javascripts/fixtures/shoppingcart-add.html', function( data ){
         drsApp.$new = $(data);
       });
@@ -142,7 +142,7 @@ describe('The drsApp object', function() {
         removeFormFields: {
           listener: true
         }
-            
+
       });
     });
     it(' adds listeners to elements with data-remove and then removes them from the dom.', function(){
@@ -150,16 +150,16 @@ describe('The drsApp object', function() {
       var target = button.closest( button.data('target') );
       expect(button).toExist();
       expect( target ).toExist();
-      
+
       expect( target.length ).toEqual(1);
 
-      
+
       $( button ).trigger('click');
-      
+
 
 
       expect( $('#controlGroup1') ).not.toExist()
-      
+
 
     });
     it('can remove specific targets and itself if a unique selector is given', function(){
@@ -176,4 +176,3 @@ describe('The drsApp object', function() {
 
 
 });
-  
