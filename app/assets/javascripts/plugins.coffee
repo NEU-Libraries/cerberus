@@ -18,7 +18,7 @@ true
     settings = $.extend(
       target: null
       titleText: 'Remove Element'
-      removeButton: $('<button type="button" class="btn btn-danger"><i class="icon-remove"></i></button>')
+      removeButton: $('<button type="button" class="btn btn-danger" data-target=".input-append" data-delete ><span class="icon-remove"></span><span class="sr-only">Remove fields</span></button>')
     , options)
     
     #adding some error handling here.
@@ -34,10 +34,7 @@ true
       )
       $cloned.addClass 'input-append'
       $removeButton = settings.removeButton.clone().attr('title', settings.titleText)
-      $removeButton.click ->
-        $cloned.remove()
-        return
-
+      
       
       #label the cloned fields.
       $cloned.find('label').each ->
@@ -55,36 +52,4 @@ true
       return
 
     return
-  $.fn.deleteFields = (options) ->
-    
-    $e = $(@)
-
-    settings = $.extend(
-      'target' : $e.data('target') || null 
-      'confirm' : $e.data('confirm') || false
-    , options
-    )
-
-    if settings.target? then throw 'No target provided'
-      
-    $target = $( settings.target )
-
-    destroy = ( target ) ->
-      $e.off('click')
-
-      target.remove()
-      $e.remove()
-    confirmOrDesctroy = (e) ->
-      if e.data.confrim is true
-        confirmation = confrim('Are you sure you want to delete this field')
-      else
-        confirmation = true
-      if confirmation
-        destroy( e.data.target )
-    init = ( $e ) -> 
-      $e.on('click', settings, confirmOrDesctroy(e) )
-
-  $('*[data-delete]').deleteFields(
-    confirm: true
-  )
 ) jQuery

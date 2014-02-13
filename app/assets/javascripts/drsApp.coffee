@@ -18,7 +18,8 @@ $(document).ready ->
         $addToSetLink: $('#addToSet')
         breadCrumbMenuContent: $('#addToSetLinks').html()
         fitTextTarget: $('.fit-text')
-
+        removeFormFields: 
+          listener : false
       
       # allow overriding the default config
       $.extend drsApp.config, settings
@@ -439,23 +440,22 @@ $(document).ready ->
     #
     
     removeFormFields = ( ) ->
-      els = $('*[data-remove]');
-
-      for el in els when el.data('target')?
-        el.on( 'click', (e) ->
+      
+      handleClick = (e) -> 
+          $el = $(@)
           e.preventDefault()
-          toRemove = []
-          remove = el.data('target')
-          remove = el.closest( remove ) or $( target )
-          if remove? then throw 'Must provide a valid target to remove'
+          removeSelector = $el.data('target') or $el.attr('href')
+          
+          # This is vague to allow
+          $remove = $el.closest( removeSelector ).first()
+          $remove.empty().remove()
+      if drsApp.config.removeFormFields.listener 
+        $('*[data-delete ]').on('click', handleClick )
+      else
+        $('body').on('click', '*[data-delete]' , handleClick )
 
-          toRemove.push($(remove))
-          toRemove.push($(@))
-          console.log toRemove
-          $(toRemove).off().remove()
-        )
-
-
+      
+        
     # these are the public API
     init: init
     addToComplationLink: addToComplationLink
