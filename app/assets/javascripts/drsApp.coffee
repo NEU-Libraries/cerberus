@@ -427,23 +427,21 @@ $(document).ready ->
       handleClick = (e) ->
           $el = $(@)
           e.preventDefault()
-          removeSelector = $el.data('target') or $el.attr('href')
+          removeSelector = $el.data('target')
+          unless removeSelector?
+             removeSelector = $el.attr('href')
 
           # This is vague to allow class selectors of containing divs
           $remove = $el.closest( removeSelector ).first()
 
           #if this remove variable is still null then let's make sure it is specific to only one item
-          if not $remove?
-            $remove = if  $( removeSelector ).length == 1 then $( removeSelector ) else null
-
-
+          if $remove.length == 0
+            $remove = if  $( removeSelector ).length is 1 then $( removeSelector ) else null
 
           if $remove?
             # make sure to remove the element itself
             $el.remove()
             $remove.empty().remove()
-
-
           else
             throw new DrsAppError "Couldn't find specific target or parent element to remove." , removeSelector
       if drsApp.config.removeFormFields.listener
@@ -468,5 +466,6 @@ $(document).ready ->
 
   #end drsApp module;
   window.drsApp = drsApp
-  drsApp.init updateUserviewPrefBoolean: false
-  return
+  drsApp.init(
+    updateUserviewPrefBoolean: false
+  )
