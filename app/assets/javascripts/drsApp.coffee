@@ -1,15 +1,14 @@
-true
 'use strict'
 
-# jshint undef: true, unused: true 
+# jshint undef: true, unused: true
 
-#global $:false 
+#global $:false
 
-#global Modernizr 
+#global Modernizr
 
-#global ui 
+#global ui
 
-#global picturefill 
+#global picturefill
 $(document).ready ->
   drsApp = (->
     init = (settings) ->
@@ -44,7 +43,8 @@ $(document).ready ->
 
     
     ###
-    Provides the breadcrumb popover menu for adding collections or new items to the application.
+    Provides the breadcrumb popover menu for adding collections 
+    or new items to the application.
     ###
     breadCrumbMenu = ->
       drsApp.config.$addToSetLink.popover(
@@ -224,35 +224,8 @@ $(document).ready ->
       $('[data-toggle="drs-item-views-radio"]').on 'click', 'a , button', handleClick
       return
 
-    
-    # var storeData = function ( data ){
-    #   var storage = window.localStorage;
-    #   var storedData;
-    #   if ( storage.key( 'drsApp' )){
-    #     storedData = storage.getItem( 'drsApp' );
-    #     storedData = JSON.parse( storeData );
-    #     data = $.merge( storedData, data );
-    
-    #   }
-    #   storage.setItem( 'drsApp' , JSON.stringify ( data ) );
-    # };
-    
-    # fetchData = function( ){
-    
-    #   var data = {};
-    
-    #   if( window.localStorage ){
-    #     if ( window.localStorage.('dr')){
-    #       data JSON.parse( window.localStorage.getItem('drsApp') )
-    #     }
-    #   }
-    
-    # };
-    # var getData = function ( key ){
-    #    var storage = window.localStorage;
-    #    var storedData = JSON.parse( storage.getItem ;
-    
-    # };
+    # Utility Function for what to switch to
+    # 
     gridOrListSwitch = (dataTarget) ->
       switch dataTarget
         when 'drs-items-list'
@@ -260,7 +233,7 @@ $(document).ready ->
         when 'drs-items-grid'
           'grid'
         else
-          throw 'dataTarget wasn\'t given'
+          throw new DrsAppError 'dataTarget wasn\'t given', dataTarget
       return
 
     
@@ -460,7 +433,7 @@ $(document).ready ->
           $remove = $el.closest( removeSelector ).first()
 
           #if this remove variable is still null then let's make sure it is specific to only one item
-          $remove is null
+          if not $remove?
             $remove = if  $( removeSelector ).length == 1 then $( removeSelector ) else null 
 
 
@@ -472,15 +445,21 @@ $(document).ready ->
             
             
           else
-            throw "Couldn't find target parent to remove."
+            throw new DrsAppError "Couldn't find specific target or parent element to remove." , removeSelector
       if drsApp.config.removeFormFields.listener 
         $('*[data-delete ]').on('click', handleClick )
       else
         $('body').on('click', '*[data-delete]' , handleClick )
+    
 
-      
+    DrsAppError = ( message = 'Error:', value = null ) ->
+      @.message = message
+      @.value = value
+      @.toString = ->
+        message + '.  Value:' + value 
         
     # these are the public API
+    
     init: init
     addToComplationLink: addToComplationLink
     newCompilationForm: newCompilationForm

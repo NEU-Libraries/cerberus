@@ -163,7 +163,13 @@ describe('The drsApp object', function() {
 
     });
     it('can remove specific targets and itself if a unique selector is given', function(){
-      var $link = $('')
+      var $link = $('#controlGroup2deleteLink');
+      var $targetDiv = $('#controlGroup2');
+      expect($link).toExist();
+      expect($targetDiv).toExist();
+      $link.trigger('click');
+      expect($('#controlGroup2deleteLink') ).not.toExist();
+      expect($('#controlGroup2') ).not.toExist();
 
     });
   });
