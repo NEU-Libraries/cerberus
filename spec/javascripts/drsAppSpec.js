@@ -162,6 +162,10 @@ describe('The drsApp object', function() {
       
 
     });
+    it('can remove specific targets and itself if a unique selector is given', function(){
+      var $link = $('')
+
+    });
   });
 
 

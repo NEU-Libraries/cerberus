@@ -437,7 +437,17 @@ $(document).ready ->
 
 
     # Handle remove form field buttons click
-    #
+    # 
+    #  <div class="control-group" id="controlGroup1">
+    #    <label for="">email</label>
+    #    <input type="email" id="email-field">
+    #    <button type="button" data-delete data-target=".control-group">Delete Field</button>
+    #  </div>
+    #  This markup will cause the removal of the contain div, so you would need to place the element
+    #  with the markup in a container element, or 
+    # 
+    # 
+  
     
     removeFormFields = ( ) ->
       
@@ -446,9 +456,23 @@ $(document).ready ->
           e.preventDefault()
           removeSelector = $el.data('target') or $el.attr('href')
           
-          # This is vague to allow
+          # This is vague to allow class selectors of containing divs
           $remove = $el.closest( removeSelector ).first()
-          $remove.empty().remove()
+
+          #if this remove variable is still null then let's make sure it is specific to only one item
+          $remove is null
+            $remove = if  $( removeSelector ).length == 1 then $( removeSelector ) else null 
+
+
+
+          if $remove?
+            # make sure to remove the element itself
+            $el.remove()
+            $remove.empty().remove()
+            
+            
+          else
+            throw "Couldn't find target parent to remove."
       if drsApp.config.removeFormFields.listener 
         $('*[data-delete ]').on('click', handleClick )
       else
