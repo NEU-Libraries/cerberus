@@ -417,9 +417,8 @@ $(document).ready ->
     #    <button type="button" data-delete data-target=".control-group">Delete Field</button>
     #  </div>
     #  This markup will cause the removal of the contain div, so you would need to place the element
-    #  with the markup in a container element, or
-    #
-    #
+    #  with the markup in a container element, or the function is smart enough to find a specific jQuery selector and delete that selector and itself.
+    #  General yet specific 
 
 
     removeFormFields = ( ) ->
