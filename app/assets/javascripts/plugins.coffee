@@ -18,7 +18,7 @@ true
     settings = $.extend(
       target: null
       titleText: 'Remove Element'
-      removeButton: $('<button type="button" class="btn btn-danger"><i class="icon-remove"></i></button>')
+      removeButton: $('<button type="button" class="btn btn-danger" data-target=".input-append" data-delete ><span class="icon-remove"></span><span class="sr-only">Remove fields</span></button>')
     , options)
     
     #adding some error handling here.
@@ -34,10 +34,7 @@ true
       )
       $cloned.addClass 'input-append'
       $removeButton = settings.removeButton.clone().attr('title', settings.titleText)
-      $removeButton.click ->
-        $cloned.remove()
-        return
-
+      
       
       #label the cloned fields.
       $cloned.find('label').each ->
@@ -48,13 +45,11 @@ true
 
       
       #add the cloned elements.
-      settings.target.after $cloned
+      $( @ ).before $cloned
       lastInput = $cloned.find('input, select').last()
       lastInput.after $removeButton.tooltip()
       count++
       return
 
     return
-
-  return
 ) jQuery
