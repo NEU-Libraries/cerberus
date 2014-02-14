@@ -225,13 +225,10 @@ $(document).ready ->
       $('[data-toggle="drs-item-views-radio"]').on 'click', 'a , button', handleClick
       return
 
-<<<<<<< HEAD
 
-
-=======
     # Utility Function for what to switch to
     #
->>>>>>> develop
+
     gridOrListSwitch = (dataTarget) ->
       switch dataTarget
         when 'drs-items-list'
