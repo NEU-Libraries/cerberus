@@ -145,6 +145,6 @@ describe('The drsApp object', function() {
 
     });
   });
-
+  describe('initModal public method', '');
 
 });

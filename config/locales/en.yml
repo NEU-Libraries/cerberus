@@ -40,7 +40,7 @@ en:
         description: Materials used to support teaching and learning
         icon: icon-book
       other_publications:
-        name: Theses and Dissertations
+        name: Theses & Dissertations
         description: NU theses and dissertations (2008 - )
         icon: icon-magic
       communities:
