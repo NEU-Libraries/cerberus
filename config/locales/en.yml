@@ -2,10 +2,11 @@
 # See https://github.com/svenfuchs/rails-i18n/tree/master/rails%2Flocale for starting points.
 
 en:
-  drs: 
+  drs:
     product_name:
       full: "digital repository service"
       short: "DRS"
+    product_icon: icon-archive
     search:
       form:
         q:
@@ -39,13 +40,17 @@ en:
         description: Materials used to support teaching and learning
         icon: icon-book
       other_publications:
-        name: Theses and Dissertations
+        name: Theses & Dissertations
         description: NU theses and dissertations (2008 - )
         icon: icon-magic
       communities:
         name: Communities
         description: Browse NU departments and groups by name
         icon: icon-group
+      employees:
+        name: employees
+        description: Employees and staff at Northeastern
+        icon: icon-user
     about:
       title: About the DRS
     personal_graph:

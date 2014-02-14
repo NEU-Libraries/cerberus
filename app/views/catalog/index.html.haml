@@ -5,14 +5,14 @@
   \//$.ui.dialog.prototype.options["height"]=window.innerHeight  *0.75
 
 - if !has_search_parameters? && (params[:action] == 'index')
-  - content_for :page_header do 
+  - content_for :page_header do
     = render 'home'
 - else
   - # Better search results here
   - html_constraints = render_constraints( params )
   - safe_constraints = strip_tags( html_constraints.sub( "</span>" , " / "  ) )
   - @page_title =  "Search: '"  + safe_constraints + "'"
-  
+
   -content_for :page_header do
     %h1.page-header
       %i.icon-search
@@ -20,17 +20,23 @@
       %small
         = html_constraints
   -content_for :side_bar do
-    %h5 View
-    = render partial: 'shared/sets/sets_sidebar'
-    = render :partial => 'did_you_mean'
-    = render :partial => 'facet_selected'
-    %h5 
-      Pagination
-    %p
-      = render_pagination_info @response, :entry_name=>'item'
-    = render 'sort_and_per_page'
-    = render :partial=>'facets', locals: { facet_list: facet_list }
+    .pane.results-view
+      = render partial: 'shared/sets/sets_sidebar'
+    .pane.facets
+      %h4 Refine My Results
+      = render :partial => 'facet_selected'
 
+      = render :partial=>'facets', locals: { facet_list: facet_list }
+    .pane.pagination-info
+      %h4
+        Pagination
+      %p
+        = render_pagination_info @response, :entry_name=>'item'
+      = render 'sort_and_per_page'
+
+
+  -# Main content
+  = render :partial => 'did_you_mean'
   -# Render the results in the main section of the page.
   = render 'results_pagination'
   = render :partial => 'document_list'

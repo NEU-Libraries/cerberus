@@ -1,4 +1,4 @@
-
-%h4= item.title
 %ul
-  %li= link_to("Remove from  #{t('drs.shoppingcarts.name')}", update_cart_path(delete: item.id), :method => 'put', :remote => true) 
+  %li
+    = item.title
+    = link_to("X" , update_cart_path(delete: item.id), :method => 'put', :remote => true, title: "Remove from  #{t('drs.shoppingcarts.name')}", data: {toggle: "tooltip"}, class: "close") 

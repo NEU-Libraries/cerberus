@@ -1,17 +1,12 @@
-%h2 Upload
-%ul.nav.nav-tabs
-  %li.active
-    %a{"data-toggle" => "tab", :href => "#local"}
-      %i.icon-desktop
-      My Computer
-  - if Sufia.config.dropbox_api_key
-    %li
-      %a{"data-toggle" => "tab", :href => "#dropbox"}
-        %i.icon-inbox
-        Dropbox
-.tab-content
-  #local.tab-pane.active
-    = render partial: 'single_upload'
-  - if Sufia.config.dropbox_api_key
-    #dropbox.tab-pane
-      = render partial: 'dropbox_import'
+-# Single file upload form
+-content_for :page_header do
+  %h1.page-header 
+    Upload#{ params[:parent] ? " to "+ params[:parent] : ''}
+-# Only have local at this point so will comment out the extra code.
+=# render partial: 'new_source_tabs'
+-# .tab-content
+-#local.tab-pane.active
+= render partial: 'single_upload'
+-# if Sufia.config.dropbox_api_key
+-# #dropbox.tab-pane
+-# = render partial: 'dropbox_import'

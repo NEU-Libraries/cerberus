@@ -2,13 +2,13 @@
   button.close{
     display: block;
   }
-}
+  .close{
+    @include text-shadow( 0 1px  0 darken( $clouds, 10% ));
+    color: $brand-info;
 
-.close{
-  @include text-shadow( 0 1px  0 darken( $clouds, 10% ));
-  color: $clouds;
-
-  @include focus-states{
-    color: darken( $clouds, 10% );
+    @include focus-states{
+      color: darken( $brand-info, 10% );
+    }
   }
 }
+

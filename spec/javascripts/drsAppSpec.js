@@ -83,35 +83,6 @@ describe('The drsApp object', function() {
 
     });
   });
-  describe( 'should listen for the user to click an item and show the user a bigger reveal' , function() {
-    beforeEach(function(){
-      loadFixtures('drsAppToogleView.html');
-      drsApp.init();
-    });
-    it('should listen for a click to happen on the item and simply toggle the active class on it or any other items in the container.', function(){
-
-      expect($('#drsItem1')).not.toHaveClass('active');
-      expect($('.drs-item')).not.toHaveClass('active');
-
-      $('#drsItem1').trigger('click');
-
-      expect($('#drsItem1')).toHaveClass('active');
-
-
-      $('#drsItem1').trigger('click');
-
-      expect($('#drsItem1')).not.toHaveClass('active');
-      var anotherItem = $('#drsItem1').next('.drs-item');
-
-      anotherItem.trigger('click');
-
-      expect( $('#drsItem1') ).not.toHaveClass('active');
-      expect( anotherItem ).toHaveClass('active');
-
-    });
-
-
-  });
 
   describe( 'toggleShoppingCart method',  function(){
     var sc = null
@@ -135,6 +106,7 @@ describe('The drsApp object', function() {
     });
 
   });
+
   describe('removeFormFields', function(){
     beforeEach( function(){
       loadFixtures('form-fields.html');
@@ -173,6 +145,6 @@ describe('The drsApp object', function() {
 
     });
   });
-
+  describe('initModal public method', '');
 
 });

@@ -61,3 +61,16 @@
     background-color: $endColor;
   }
 }
+
+
+@mixin grid-core-span-height($columns, $gridColumnWidth, $gridGutterWidth) {
+  height: ($gridColumnWidth * $columns) + ($gridGutterWidth * ($columns - 1));
+  margin-bottom: $gridGutterWidth;
+}
+
+
+@mixin grid-core-span-x-height($gridColumns, $gridColumnWidth, $gridGutterWidth) {
+  @for $i from 1 through $gridColumns {
+    .height#{$i} { @include grid-core-span-height($i, $gridColumnWidth, $gridGutterWidth); }
+  }
+}
