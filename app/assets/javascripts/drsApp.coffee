@@ -20,6 +20,8 @@ $(document).ready ->
         fitTextTarget: $('.fit-text')
         removeFormFields:
           listener : false
+        uploadFormId: '#singleFileUploadForm'
+        termsOfServiceCheckbox: '#terms_of_service'
 
       # allow overriding the default config
       $.extend drsApp.config, settings
@@ -368,8 +370,19 @@ $(document).ready ->
     ###
 
     singleUploadTermsOfService = ->
-      if $('#singleFileUploadForm').length > 0
-        $(a)
+
+      $form = $( drsApp.config.uploadFormId )
+
+
+      if $form.length > 0
+
+        checkbox = $( drsApp.config.termsOfServiceCheckbox )
+
+        $form.on( 'change' , checkbox , enableForm )
+
+        enableForm = (e) ->
+          console.log e
+
 
 
     ###
@@ -452,6 +465,10 @@ $(document).ready ->
       @.value = value
       @.toString = ->
         message + '.  Value:' + value
+
+
+
+
 
     # these are the public API
 
