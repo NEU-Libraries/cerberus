@@ -444,6 +444,9 @@ $(document).ready ->
         $('body').on('click', '*[data-delete]' , handleClick )
 
 
+
+
+    ##DrsAppError Class for debugging
     DrsAppError = ( message = 'Error:', value = null ) ->
       @.message = message
       @.value = value
