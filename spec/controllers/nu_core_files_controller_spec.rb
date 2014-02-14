@@ -144,16 +144,18 @@ describe NuCoreFilesController do
       end
     end
 
+    # This can be brought down to just one, given we've moved away from batch upload at this point
     it "loads all of the users current incomplete files" do 
       sign_in bill 
 
       file_one = FactoryGirl.create(:bills_incomplete_file) 
-      file_two = FactoryGirl.create(:bills_incomplete_file)
+      # file_two = FactoryGirl.create(:bills_incomplete_file)
       complete_file = FactoryGirl.create(:bills_complete_file) 
 
       get :provide_metadata 
 
-      assigns(:incomplete_files).should =~ [file_one, file_two] 
+      # assigns(:incomplete_files).should =~ [file_one, file_two] 
+      assigns(:incomplete_file).should == file_one
 
       expect(response).to render_template('nu_core_files/provide_metadata') 
     end

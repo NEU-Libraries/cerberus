@@ -3,6 +3,7 @@ class NuCoreFile < ActiveFedora::Base
   include Drs::Rights::MassPermissions
   include Drs::Rights::Embargoable 
   include Drs::Rights::InheritedRestrictions
+  include Drs::Rights::PermissionsAssignmentHelper
   include Drs::MetadataAssignment
   include Drs::NuCoreFile::Export
   include Drs::Find

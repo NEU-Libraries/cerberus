@@ -84,7 +84,6 @@ describe('The drsApp object', function() {
     });
   });
 
-
   describe( 'toggleShoppingCart method',  function(){
     var sc = null
     beforeEach( function(){
@@ -108,6 +107,44 @@ describe('The drsApp object', function() {
 
   });
 
+  describe('removeFormFields', function(){
+    beforeEach( function(){
+      loadFixtures('form-fields.html');
+      drsApp.init({
+        removeFormFields: {
+          listener: true
+        }
+
+      });
+    });
+    it(' adds listeners to elements with data-remove and then removes them from the dom.', function(){
+      var button = $('*[data-delete]');
+      var target = button.closest( button.data('target') );
+      expect(button).toExist();
+      expect( target ).toExist();
+
+      expect( target.length ).toEqual(1);
+
+
+      $( button ).trigger('click');
+
+
+
+      expect( $('#controlGroup1') ).not.toExist()
+
+
+    });
+    it('can remove specific targets and itself if a unique selector is given', function(){
+      var $link = $('#controlGroup2deleteLink');
+      var $targetDiv = $('#controlGroup2');
+      expect($link).toExist();
+      expect($targetDiv).toExist();
+      $link.trigger('click');
+      expect($('#controlGroup2deleteLink') ).not.toExist();
+      expect($('#controlGroup2') ).not.toExist();
+
+    });
+  });
 
 
 });

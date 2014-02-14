@@ -53,9 +53,15 @@ class NuCoreFilesController < ApplicationController
   end
 
   def provide_metadata
+    # Feeding through an incomplete file if there is one
     @nu_core_file = NuCoreFile.new
-    @sample_incomplete_file = NuCoreFile.users_in_progress_files(current_user).first 
-    @incomplete_files = NuCoreFile.users_in_progress_files(current_user) 
+    @incomplete_file = NuCoreFile.users_in_progress_files(current_user).first
+    # With the move to single file upload, incomplete files (plural) is a misnomer.
+    # but worthwhile to keep if we reimplement batch uploads. In the meantime only
+    # NuCoreFile.users_in_progress_files(x).first should ever occur (not more than one at a time).
+
+    # @sample_incomplete_file = NuCoreFile.users_in_progress_files(current_user).first 
+    # @incomplete_files = NuCoreFile.users_in_progress_files(current_user) 
     @page_title = "Provide Upload Metadata"
   end
 
@@ -65,7 +71,7 @@ class NuCoreFilesController < ApplicationController
   def rescue_incomplete_files
     file_titles = []
 
-    request.query_parameters.each do |key, pid| 
+    request.query_parameters.each do |key, pid|
       file_titles << NuCoreFile.find(pid).title
     end
 
@@ -75,6 +81,8 @@ class NuCoreFilesController < ApplicationController
 
   def process_metadata
     Sufia.queue.push(MetadataUpdateJob.new(current_user.user_key, params))
+    @nu_core_file = NuCoreFile.users_in_progress_files(current_user).first
+    update_metadata if params[:nu_core_file]
     flash[:notice] = 'Your files are being processed by ' + t('sufia.product_name') + ' in the background. The metadata and access controls you specified are being applied. Files will be marked <span class="label label-important" title="Private">Private</span> until this process is complete (shouldn\'t take too long, hang in there!). You may need to refresh your dashboard to see these updates.'
     redirect_to nu_collection_path(params[:collection_id])
   end
@@ -114,11 +122,12 @@ class NuCoreFilesController < ApplicationController
     @nu_core_file = NuCoreFile.find(params[:id])
     @page_title = "Edit #{@nu_core_file.title}" 
 
-    @nu_core_file.initialize_fields
-    @groups = current_user.groups
+    #@nu_core_file.initialize_fields
+    #@groups = current_user.groups
   end
 
   def update
+    # Holy hell, do we need to relook at this whole section.... - DGC
     @nu_core_file = NuCoreFile.find(params[:id]) 
 
     version_event = false
@@ -138,7 +147,7 @@ class NuCoreFilesController < ApplicationController
       Sufia.queue.push(ContentNewVersionEventJob.new(@nu_core_file.pid, current_user.user_key))
     end
 
-    # only update metadata if there is a generic_file object which is not the case for version updates
+    # only update metadata if there is a nu_core_file object which is not the case for version updates
     update_metadata if params[:nu_core_file]
 
     #always save the file so the new version or metadata gets recorded
@@ -149,11 +158,13 @@ class NuCoreFilesController < ApplicationController
       # do not trigger an update event if a version event has already been triggered
       Sufia.queue.push(ContentUpdateEventJob.new(@nu_core_file.pid, current_user.user_key)) unless version_event
       @nu_core_file.record_version_committer(current_user)
-      redirect_to sufia.edit_generic_file_path(:tab => params[:redirect_tab]), :notice => render_to_string(:partial=>'generic_files/asset_updated_flash', :locals => { :generic_file => @nu_core_file })
+      #redirect_to sufia.edit_generic_file_path(:tab => params[:redirect_tab]), :notice => render_to_string(:partial=>'generic_files/asset_updated_flash', :locals => { :generic_file => @nu_core_file })
     else
-      render action: 'edit'
+      #render action: 'edit'
     end
-    end
+
+    redirect_to(@nu_core_file)
+  end
 
   def destroy
     @title = NuCoreFile.find(params[:id]).title
@@ -163,10 +174,6 @@ class NuCoreFilesController < ApplicationController
     else
       redirect_to(sufia.dashboard_index_path, notice: "#{@title} wasn't destroyed") 
     end
-  end
-
-  def self.upload_complete_path
-    Rails.application.routes.url_helpers.files_provide_metadata_path
   end
 
   protected
@@ -217,7 +224,6 @@ class NuCoreFilesController < ApplicationController
     nu_core_file.date_uploaded = Date.today 
     nu_core_file.date_modified = Date.today
     nu_core_file.creator = user.name
-
     
     collection = !collection_id.blank? ? NuCollection.find(collection_id) : nil
     nu_core_file.set_parent(collection, user) if collection
@@ -246,7 +252,7 @@ class NuCoreFilesController < ApplicationController
       update_metadata_from_upload_screen(@nu_core_file, current_user, file, params[:collection_id])
       Sufia.queue.push(ContentCreationJob.new(@nu_core_file.pid, new_path.to_s, file.original_filename, current_user.id))
       @nu_core_file.record_version_committer(current_user)
-      redirect_to NuCoreFilesController.upload_complete_path
+      redirect_to files_provide_metadata_path
     else
       render :json => [{:error => "Error creating generic file."}]
     end
@@ -255,7 +261,7 @@ class NuCoreFilesController < ApplicationController
   def perform_local_ingest
       if Sufia.config.enable_local_ingest && current_user.respond_to?(:directory)
         if ingest_local_file
-          redirect_to NuCoreFilesController.upload_complete_path
+          redirect_to files_provide_metadata_path
         else
           flash[:alert] = "Error importing files from user directory."
           render :new
