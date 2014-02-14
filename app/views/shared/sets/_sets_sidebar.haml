@@ -9,7 +9,7 @@
     = link_to( grid_view_text.html_safe , sufia.profile_path(current_user, view_pref: 'grid'), method: 'put', remote: 'true',data: {"target" => "drs-items-grid"}, class: "btn btn-clear" + ( current_user.view_pref == 'grid' ? 'active' : '' ))
   - else
     %a{ data: {"target" => "drs-items-list"}, class: "btn btn-clear" }
-      List
+      = list_view_text
     %a{ data: {"target" => "drs-items-grid"}, class: "btn btn-clear" }
-      Grid
+      = grid_view_text
 
