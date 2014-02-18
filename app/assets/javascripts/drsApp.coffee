@@ -484,3 +484,8 @@ $(document).ready ->
   drsApp.init(
     updateUserviewPrefBoolean: false
   )
+
+
+$('#terms_of_service').on('click change', (e)->
+  console.log @, e
+)

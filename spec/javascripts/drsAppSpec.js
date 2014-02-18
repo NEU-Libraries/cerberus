@@ -145,6 +145,9 @@ describe('The drsApp object', function() {
 
     });
   });
-  describe('initModal public method', '');
+  describe('singleUploadTermsOfService method,' function(){
+    it(' will validate that the user has agreed and selected the terms of service', function(){
 
+    });
+  });
 });

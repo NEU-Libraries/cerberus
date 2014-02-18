@@ -5,12 +5,12 @@
       %legend
         1. Terms of Service Agreement
       %span.help-block
-        Please read and accept the 
+        Please read and accept the
         %a{href: "/terms" , data: { remote: true} }
           terms of use
       %label.checkbox{ for: "terms_of_service" }
         I have read and accept the terms of service.
-        = check_box_tag 'terms_of_service', 'agree_to_terms_of_service', false, required: true, "aria-required" => true
+        = check_box_tag 'terms_of_service'
     %filedset.span6
       %legend
         2. File Upload
