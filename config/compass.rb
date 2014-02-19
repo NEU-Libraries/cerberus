@@ -3,3 +3,5 @@ project_type = :rails
 
 
 images_dir= "app/assets/images"
+
+require 'scut'

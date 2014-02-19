@@ -15,8 +15,9 @@
   }
   // Labels the item
   figcaption{
-    @extend .muted;
-    margin-top: 0.25em;
+
+    @include scut-relative( n n 2em n);
+
   }
   figure{
     text-align: center;
@@ -96,9 +97,6 @@
 
     }
 
-    figcaption{
-      margin-top: 0.25em;
-    }
     .drs-item-details{
       @extend .media-body;
       margin-bottom: 2.5em;
@@ -143,9 +141,15 @@
     .drs-item{
       @extend .span3;
       @extend [class*="span"];
-      // @extend .height3;
-      // @extend .scroll-x;
-      // @extend .hidden-y;
+      @include scut-ratio-box;
+      > *{
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+
+      @extend .scroll-x;
+      @extend .hidden-y;
       text-align: center;
 
       @include focus-states{

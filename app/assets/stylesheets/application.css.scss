@@ -11,12 +11,13 @@
  *= require_self
  *  Sufia gem stylesheets imported here.
  *= require bootstrap-select/bootstrap-select.min.css
- * 
+ *
  */
 
 
 
 @import "compass";
+@import "scut";
 @import "libraries/compass_variables";
 
 @import "vendor/flatly/flatly-variables";
