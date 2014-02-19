@@ -13,13 +13,15 @@
   > a:focus{
     text-decoration: none;
   }
+  // Labels the item
+  figcaption{
+    @extend .muted;
+    margin-top: 0.25em;
+  }
   figure{
     text-align: center;
     margin: 0 0 0.5em 0;
-    figcaption{
-      @extend .muted;
-      margin-top: 1em;
-    }
+
     [data-picture]{
       display: inline-block;
     }
@@ -41,7 +43,7 @@
         width: 170px;
         height: 170px;
         font-size: 80px;
-      } 
+      }
     }
   }
 
@@ -52,12 +54,12 @@
     margin: 2px 0;
   }
 
-  
+
 }
 
 
 .drs-items{
-  
+
   //significant layout differences here should be able to toggle these all with a single class
   &.drs-items-list{
     @extend .media-list;
@@ -77,28 +79,30 @@
       }
 
       > a{
-      float: left;
-      margin-right: 15px;
+        float: left;
+        margin-right: 15px;
 
-      // Reset float and spacing to stack
-      @media (max-width: 480px){
-        float: none;
-        display: block;
-        margin-bottom: 10px;
-        figcaption{
-          text-align: left;
+        // Reset float and spacing to stack
+        @media (max-width: 480px){
+          float: none;
+          display: block;
+          margin-bottom: 10px;
+          figcaption{
+            text-align: left;
+          }
         }
+
       }
 
-        
-        
-      }
+    }
 
+    figcaption{
+      margin-top: 0.25em;
     }
     .drs-item-details{
       @extend .media-body;
       margin-bottom: 2.5em;
-      
+
     }
     .drs-item-title{
       @extend .media-heading;
@@ -111,7 +115,7 @@
     }
     .drs-item-abstract-label{
       clear: left;
-      
+
     }
 
     .drs-item-abstract{
@@ -135,7 +139,7 @@
   // DRS Items in Grid view styles
   &.drs-items-grid{
     @extend .row;
-    
+
     .drs-item{
       @extend .span3;
       @extend [class*="span"];
@@ -169,4 +173,8 @@
   }
 
 
+}
+
+.drs-item-creator{
+  display: inline-block;
 }
