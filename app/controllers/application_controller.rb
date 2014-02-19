@@ -42,4 +42,24 @@ class ApplicationController < ActionController::Base
   def current_user_can_edit?(fedora_object) 
     return fedora_object.rightsMetadata.can_edit?(current_user)  
   end
+
+  # Some useful helpers for seeing the filters defined on given controllers
+  # Taken from: http://scottwb.com/blog/2012/02/16/enumerate-rails-3-controller-filters/ 
+  def self.filters(kind = nil)
+    all_filters = _process_action_callbacks
+    all_filters = all_filters.select{|f| f.kind == kind} if kind
+    all_filters.map(&:filter)
+  end
+
+  def self.before_filters
+    filters(:before)
+  end
+
+  def self.after_filters
+    filters(:after)
+  end
+
+  def self.around_filters
+    filters(:around)
+  end
 end

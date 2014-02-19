@@ -9,6 +9,7 @@ module Drs
     include Drs::NuFile::Characterizable
     include Hydra::Derivatives
     include Drs::Find 
+    include Drs::ImpressionCount
 
     included do
       attr_accessible :title, :description, :keywords, :identifier

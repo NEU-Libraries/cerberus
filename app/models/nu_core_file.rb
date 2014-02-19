@@ -7,6 +7,7 @@ class NuCoreFile < ActiveFedora::Base
   include Drs::MetadataAssignment
   include Drs::NuCoreFile::Export
   include Drs::Find
+  include Drs::ImpressionCount
 
   has_metadata name: 'DC', type: NortheasternDublinCoreDatastream
   has_metadata name: 'properties', type: DrsPropertiesDatastream
