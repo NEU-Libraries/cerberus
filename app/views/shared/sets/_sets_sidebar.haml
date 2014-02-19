@@ -1,7 +1,7 @@
-- list_view_text =  render partial: "shared/icon" , locals: { class_string: "icon-th" }
+- list_view_text =  render partial: "shared/icon" , locals: { class_string: "icon-list" }
 - list_view_text += "List View"
 
-- grid_view_text = render partial: "shared/icon" , locals: {class_string: "icon-list" }
+- grid_view_text = render partial: "shared/icon" , locals: {class_string: "icon-th" }
 - grid_view_text += "Grid View"
 .btn-group{"data-toggle" => "drs-item-views-radio", "data-container" => ".drs-items"}
   - if current_user
