@@ -1,5 +1,5 @@
 # Automate deployment to our local dev machine.
-# This somewhat deceptively requires the use of an environment called 'staging' 
+# This somewhat deceptively requires the use of an environment called 'staging'
 # Which is really just develop with the caveat that jetty runs on port 3000.
 
 # Sorry.
@@ -21,31 +21,31 @@ set :rails_env, :staging
 
 server 'drs@repositorydev.neu.edu', user: 'drs', roles: %w{web app db}
 
-namespace :deploy do 
+namespace :deploy do
   desc "Restarting application"
-  task :restart do 
-    on roles(:app), :in => :sequence, :wait => 5 do 
+  task :restart do
+    on roles(:app), :in => :sequence, :wait => 5 do
       sudo "service httpd restart"
     end
   end
 
   desc "Precompile"
-  task :assets_kludge do 
-    on roles(:app), :in => :sequence, :wait => 5 do 
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake assets:precompile)" 
+  task :assets_kludge do
+    on roles(:app), :in => :sequence, :wait => 5 do
+      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake assets:precompile)"
     end
   end
 
   desc "Restarting the resque workers"
-  task :restart_workers do 
-    on roles(:app), :in => :sequence, :wait => 5 do 
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake resque:restart_workers)" 
+  task :restart_workers do
+    on roles(:app), :in => :sequence, :wait => 5 do
+      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake resque:restart_workers)"
     end
-  end  
+  end
 
-  desc "Resetting data" 
-  task :refresh_data do 
-    on roles(:app), :in => :sequence, :wait => 5 do 
+  desc "Resetting data"
+  task :refresh_data do
+    on roles(:app), :in => :sequence, :wait => 5 do
       execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake reset_data)"
     end
   end
@@ -58,10 +58,10 @@ namespace :deploy do
   end
 
   desc "Setting whenever environment and updating the crontable"
-  task :whenever do 
-    on roles(:app), :in => :sequence, :wait => 5 do 
+  task :whenever do
+    on roles(:app), :in => :sequence, :wait => 5 do
       execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec whenever --set environment=staging)"
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec whenever --update-crontab)" 
+      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec whenever --update-crontab)"
     end
   end
 
@@ -79,23 +79,31 @@ namespace :deploy do
     end
   end
 
+  desc 'Start solrizerd'
+  task :start_solrizerd do
+    on roles(:app), :in => :sequence, :wait => 5 do
+      execute "bundle exec solrizerd restart --hydra_home #{release_path} -p 61616"
+    end
+  end
+
 end
 
 # Load the rvm environment before executing the refresh data hook.
-# This will be necessary for any hook that needs access to ruby. 
-# Note the use of the rvm-auto shell in the task definition. 
-before 'deploy:refresh_data', 'rvm1:hook' 
+# This will be necessary for any hook that needs access to ruby.
+# Note the use of the rvm-auto shell in the task definition.
+before 'deploy:refresh_data', 'rvm1:hook'
 
 # These hooks execute in the listed order after the deploy:updating task
-# occurs.  This is the task that handles refreshing the app code, so this 
-# should only fire on actual deployments. 
-after 'deploy:updating', 'deploy:copy_rvmrc_file' 
-after 'deploy:updating', 'deploy:trust_rvmrc' 
+# occurs.  This is the task that handles refreshing the app code, so this
+# should only fire on actual deployments.
+after 'deploy:updating', 'deploy:copy_rvmrc_file'
+after 'deploy:updating', 'deploy:trust_rvmrc'
 after 'deploy:updating', 'bundler:install'
 after 'deploy:updating', 'deploy:copy_yml_file'
 after 'deploy:updating', 'deploy:restart_workers'
 after 'deploy:updating', 'deploy:migrate'
-after 'deploy:updating', 'deploy:restart' 
+after 'deploy:updating', 'deploy:restart'
 after 'deploy:updating', 'deploy:whenever'
 after 'deploy:updating', 'deploy:assets_kludge'
 after 'deploy:finished', 'deploy:refresh_data'
+after 'deploy:finished', 'deploy:start_solrizerd'
