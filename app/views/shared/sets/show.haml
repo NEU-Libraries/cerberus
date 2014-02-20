@@ -31,10 +31,10 @@
 .row
   - if current_user
     - current_user.view_pref
-    %aside.drs-sidebar{class: current_user.view_pref == 'grid' ? 'span12' : "span3" }
-      =render partial: 'shared/sets/sets_sidebar'
     %section{class: current_user.view_pref == 'grid' ? 'span12' : "span9" }
       =render partial: 'shared/sets/show_sets'
+    %aside.drs-sidebar{class: current_user.view_pref == 'grid' ? 'span12' : "span3" }
+      =render partial: 'shared/sets/sets_sidebar'
   - else
     %aside.span3
       =render partial: 'shared/sets/sets_sidebar'

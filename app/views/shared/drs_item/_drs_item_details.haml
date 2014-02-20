@@ -4,7 +4,7 @@
       %a{href: polymorphic_path(item)}
         = item.title or "Default title"
     -if defined? item.creators and item.creators.length > 0
-      .div-creators
+      .drs-item-creators
         - item.creators.each_with_index do | creator, i |
           - if i < 2 and creator.length > 0
             %h5.drs-item-creator

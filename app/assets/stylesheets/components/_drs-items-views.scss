@@ -16,7 +16,7 @@
   // Labels the item
   figcaption{
     @include scut-relative( n n 2em n);
-    margin-bottom: 1.7em;
+    margin-bottom: - 2em;
   }
   figure{
     text-align: center;
@@ -165,6 +165,8 @@
     }
     menu{
       margin-bottom: 0;
+      overflow-x: scroll;
+      max-height: 28px;
     }
 
   }
@@ -181,8 +183,16 @@
   .drs-item-title{
     margin-top: 0;
   }
+  .drs-item-creators{
+    @include sr-only();
+  }
 }
 
 .drs-sidebar{
   margin-bottom: 1em;
+  &.span12{
+    > div{
+      display: inline-block;
+    }
+  }
 }

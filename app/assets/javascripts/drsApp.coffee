@@ -212,10 +212,10 @@ $(document).ready ->
         container = $( toggleContainer.data('container') )
 
         # Find the nearest span element to toggle
-        sidebar = toggleContainer.parent( '*[class*="span"]' )
+        sidebar = toggleContainer.closest( '.drs-sidebar' )
 
         # Again for the other element
-        containerParent = container.parent( '*[class*="span"]' )
+        containerParent = container.closest( '*[class*="span"]' )
 
         desiredClass = $(this).data('target')
 
