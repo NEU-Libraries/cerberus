@@ -2,9 +2,4 @@
 %h4 Downloads
 
 .btn-toolbar
-  - contents.each do |content|
-    - if current_user_can_read?(content)
-      -if content.class.name != "ImageThumbnailFile"
-        .btn-group
-          = render partial: 'nu_core_files/derivative_button', locals: {content: content }
-          = render partial: 'shopping_carts/add_or_remove_btn', locals: { :id => content.pid }
+  = render partial: 'derivative_btn_group', locals: {contents: @nu_core_file.content_objects}
