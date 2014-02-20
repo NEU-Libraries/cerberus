@@ -59,7 +59,7 @@
 
 
 .drs-items{
-
+  margin-bottom: 1em;
   //significant layout differences here should be able to toggle these all with a single class
   &.drs-items-list{
     @extend .media-list;
@@ -181,7 +181,7 @@
 
 .drs-items-grid{
   @media (max-width: $breakpoint-l){
-    font-size: 0.9em;
+    font-size: 80%;
   }
 
   .drs-item-title{
@@ -201,5 +201,12 @@
     > div{
       display: inline-block;
     }
+  }
+}
+
+.drs-items-grid{
+  [data-picture] img{
+    max-height: 200px;
+    width: auto;
   }
 }

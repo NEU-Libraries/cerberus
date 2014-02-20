@@ -390,15 +390,17 @@ $(document).ready ->
 
       $form = $( drsApp.config.uploadFormId )
 
+      enableForm = ( e ) ->
+       console.log e
+
 
       if $form.length > 0
 
         checkbox = $( drsApp.config.termsOfServiceCheckbox )
 
-        $form.on( 'change' , checkbox , enableForm )
-
-        enableForm = (e) ->
-          console.log e
+        $form.on( 'change' ,
+          checkbox: checkbox
+        ,enableForm( e ) )
 
 
 
