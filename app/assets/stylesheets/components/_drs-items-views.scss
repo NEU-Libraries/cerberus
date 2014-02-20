@@ -141,8 +141,8 @@
       @extend .span3;
       @extend [class*="span"];
       @extend .height3;
-      @extend .scroll-x;
-      @extend .hidden-y;
+      @extend .hidden-x;
+      @extend .scroll-y;
       text-align: center;
 
       @include focus-states{
@@ -207,6 +207,12 @@
     .drs-item-creator{
       @extend h6;
 
+    }
+  }
+
+  .drs-item{
+    @media( max-width: $breakpoint-m ){
+      margin-bottom: 20px;
     }
   }
 
