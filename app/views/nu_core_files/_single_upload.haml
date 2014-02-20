@@ -8,13 +8,13 @@
         Please read and accept the
         %a{href: "/terms" , data: { remote: true} }
           terms of use
-      %label.checkbox{ for: "terms_of_service" }
+      %label.checkbox.required-label{ for: "terms_of_service" }
         I have read and accept the terms of service.
-        = check_box_tag 'terms_of_service'
+        = check_box_tag 'terms_of_service', 1, nil, data: { activate:  "activate-submit" }
     %filedset.span6
       %legend
         2. File Upload
-      = label_tag "file", "File to upload"
+      = label_tag "file", "File to upload", class: "required-label"
       = file_field_tag 'file', required: true, "aria-required" => true
   .form-actions
-    = submit_tag "Upload", disabled: "true", class: 'btn btn-large btn-primary'
+    = submit_tag "Upload", disabled: "true", class: 'btn btn-large btn-primary activate-submit'

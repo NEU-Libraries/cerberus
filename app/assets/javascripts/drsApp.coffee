@@ -20,8 +20,7 @@ $(document).ready ->
         fitTextTarget: $('.fit-text')
         removeFormFields:
           listener : false
-        uploadFormId: '#singleFileUploadForm'
-        termsOfServiceCheckbox: '#terms_of_service'
+
 
       # allow overriding the default config
       $.extend drsApp.config, settings
@@ -40,7 +39,6 @@ $(document).ready ->
       handleDrsAdminCommunities()
       handleCommunitiesAdminAutoComplete()
       toggleShoppingCart $('*[data-shoppingcart]')
-      singleUploadTermsOfService()
       removeFormFields()
       return
 
@@ -380,28 +378,6 @@ $(document).ready ->
           return
 
       return
-
-
-    ###
-    Enable the the submit and form submit on the upload field only after the user agrees to the terms of service
-    ###
-
-    singleUploadTermsOfService = ->
-
-      $form = $( drsApp.config.uploadFormId )
-
-      enableForm = ( e ) ->
-       console.log e
-
-
-      if $form.length > 0
-
-        checkbox = $( drsApp.config.termsOfServiceCheckbox )
-
-        $form.on( 'change' ,
-          checkbox: checkbox
-        ,enableForm( e ) )
-
 
 
     ###
