@@ -19,7 +19,13 @@
       Search Results
       %small
         = html_constraints
-  -content_for :side_bar do
+  - if current_user
+    - drs_items_class = current_user.view_pref == "list" ? "span9" : "span12"
+    - sidebar_class = current_user.view_pref == "list" ? "span3" : "span12"
+  - else
+    - sidebar_class = "span3"
+    - drs_items_class = "span9"
+  %aside{ class: sidebar_class }
     .pane.results-view
       = render partial: 'shared/sets/sets_sidebar'
     .pane.facets
@@ -34,10 +40,10 @@
         = render_pagination_info @response, :entry_name=>'item'
       = render 'sort_and_per_page'
 
-
-  -# Main content
-  = render :partial => 'did_you_mean'
-  -# Render the results in the main section of the page.
-  = render 'results_pagination'
-  = render :partial => 'document_list'
-  = render 'results_pagination'
+  %section{ class: drs_items_class }
+    -# Main content
+    = render :partial => 'did_you_mean'
+    -# Render the results in the main section of the page.
+    = render 'results_pagination'
+    = render :partial => 'document_list'
+    = render 'results_pagination'
