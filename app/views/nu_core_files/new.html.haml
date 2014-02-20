@@ -1,7 +1,12 @@
 -# Single file upload form
+
 -content_for :page_header do
-  %h1.page-header 
-    Upload#{ params[:parent] ? " to "+ params[:parent] : ''}
+  - collection_title = NuCollection.find( params[:parent] ).title
+  %h1.page-header
+    Upload File to
+    - if collection_title
+      %i
+        = collection_title
 -# Only have local at this point so will comment out the extra code.
 =# render partial: 'new_source_tabs'
 -# .tab-content

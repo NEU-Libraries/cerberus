@@ -45,13 +45,13 @@
 }
 
 @mixin buttonBackground($startColor, $endColor, $textColor: #fff, $textShadow: 0 -1px 0 rgba(0,0,0,.25)) {
-  
-  
-  background-color: $startColor; 
-  
+
+
+  background-color: $startColor;
+
 
   // in these cases the gradient won't cover the background, so we override
-  &:hover, &:focus, &:active, &.active, &.disabled, &[disabled] { 
+  &:hover, &:focus, &:active, &.active, &.disabled, &[disabled] {
     background-color: $endColor;
   }
 
@@ -74,3 +74,6 @@
     .height#{$i} { @include grid-core-span-height($i, $gridColumnWidth, $gridGutterWidth); }
   }
 }
+
+
+

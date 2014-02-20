@@ -1,5 +1,5 @@
 %ul.breadcrumb
-  - breadcrumb_to_root(@set).each do |breadcrumb| 
+  - breadcrumb_to_root(@set).each do |breadcrumb|
     =breadcrumb
   = render partial: 'shared/sets/breadcrumb_action_menu'
 -# Had to break off the partial into two files to make sure the popover div renders outside of the list.
@@ -13,7 +13,7 @@
       = get_set_class_label(@set)
   - if @set.thumbnail.content
     %img{src: sufia.download_path(@set, datastream_id: 'thumbnail'), title: @set.title, alt: "", class: ['img-rounded', 'pull-left']}(aria-labeledby="#{@set.pid}-title" role="presentation")
-  - if @set.description.length > 0 
+  - if @set.description.length > 0
     %p
       = @set.description
 
@@ -29,8 +29,16 @@
             Delete
     =render partial: 'shared/sets/delete_collections_modal'
 .row
-  %aside.span3
-    =render partial: 'shared/sets/sets_sidebar'
-  %section.span9
-    =render partial: 'shared/sets/show_sets'
-%div#add_compilation_form{ style: 'display:none' } 
+  - if current_user
+    - current_user.view_pref
+    %section{class: current_user.view_pref == 'grid' ? 'span12' : "span9" }
+      =render partial: 'shared/sets/show_sets'
+    %aside.drs-sidebar{class: current_user.view_pref == 'grid' ? 'span12' : "span3" }
+      =render partial: 'shared/sets/sets_sidebar'
+  - else
+    %aside.span3
+      =render partial: 'shared/sets/sets_sidebar'
+    %section.span9
+      =render partial: 'shared/sets/show_sets'
+
+%div#add_compilation_form{ style: 'display:none' }

@@ -21,6 +21,7 @@ $(document).ready ->
         removeFormFields:
           listener : false
 
+
       # allow overriding the default config
       $.extend drsApp.config, settings
       setup()
@@ -38,7 +39,6 @@ $(document).ready ->
       handleDrsAdminCommunities()
       handleCommunitiesAdminAutoComplete()
       toggleShoppingCart $('*[data-shoppingcart]')
-      singleUploadTermsOfService()
       removeFormFields()
       return
 
@@ -200,30 +200,47 @@ $(document).ready ->
     drsToggleView adds an event listener to a div containing two buttons that should toggle a class on an conainter div with drs-items to change their display.
     ###
     drsToggleView = ->
+      # event handler for the click event
       handleClick = (event) ->
         event.preventDefault()
         event.stopPropagation()
+
         toggleContainer = $(this).closest('*[data-container]')
-        container = $(toggleContainer.data('container'))
+
+        container = $( toggleContainer.data('container') )
+
+        # Find the nearest span element to toggle
+        sidebar = toggleContainer.closest( '.drs-sidebar' )
+
+        # Again for the other element
+        containerParent = container.closest( '*[class*="span"]' )
+
         desiredClass = $(this).data('target')
+
         if container.hasClass(desiredClass)
           event.preventDefault()
         else
-          container.find('.drs-item').removeClass 'active'
+
           toggleContainer.find('a, button').removeClass 'active'
           $(this).addClass 'active'
           if desiredClass is 'drs-items-grid'
             container.removeClass('drs-items-list').addClass 'drs-items-grid'
+            sidebar.removeClass('span3')
+            sidebar.addClass('span12')
+            containerParent.removeClass('span9')
+            containerParent.addClass('span12');
           else
             container.removeClass('drs-items-grid').addClass 'drs-items-list'
-          if $('body').data('user') > 0
-            updateUserViewPref $(this)
-          else
-            null
+            sidebar.removeClass('span12')
+            sidebar.addClass('span3')
+            containerParent.removeClass('span12');
+            containerParent.addClass('span9')
         return
 
+
+
       $('[data-toggle="drs-item-views-radio"]').on 'click', 'a , button', handleClick
-      return
+
 
 
     # Utility Function for what to switch to
@@ -364,15 +381,6 @@ $(document).ready ->
 
 
     ###
-    Enable the the submit and form submit on the upload field only after the user agrees to the terms of service
-    ###
-
-    singleUploadTermsOfService = ->
-      if $('#singleFileUploadForm').length > 0
-        $(a)
-
-
-    ###
     Show model using the #ajax-modal on created at the bottom of every page.
     ###
     initModal = ( heading = "Modal", body ="Hello World", footer = false,  show = true ) ->
@@ -453,6 +461,10 @@ $(document).ready ->
       @.toString = ->
         message + '.  Value:' + value
 
+
+
+
+
     # these are the public API
 
     init: init
@@ -467,3 +479,8 @@ $(document).ready ->
   drsApp.init(
     updateUserviewPrefBoolean: false
   )
+
+
+$('#terms_of_service').on('click change', (e)->
+  console.log @, e
+)

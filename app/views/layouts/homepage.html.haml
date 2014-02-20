@@ -1,12 +1,4 @@
 - content_for :content do
-  .row
-    - if content_for?(:sidebar)
-      .span4
-        = yield :sidebar
-      .span8
-        = yield
-    - else
-      .span12
-        = yield
+  = yield
 
 = render template: "layouts/application"
