@@ -165,12 +165,7 @@
     }
     menu{
       margin: 0 0 0 0;
-      overflow-x: scroll;
       max-height: 28px;
-      position: absolute;
-      left: auto;
-      right: auto;
-      bottom: 0;
     }
 
   }
@@ -184,12 +179,16 @@
 
 
 .drs-items-grid{
-  @media (max-width: $breakpoint-l){
-    font-size: 80%;
-  }
 
   .drs-item-title{
-    margin-top: 0;
+    display: inline-block;
+    line-height: 30px;
+    max-width: 100%;
+    @include text-overflow();
+  }
+  .drs-item-title
+  , .drs-item-creator{
+    margin: 4px 0 6px 0;
   }
   .drs-item-creators{
     @media (max-width: $breakpoint-xl){
@@ -197,9 +196,20 @@
     }
 
   }
-  .btn-toolbar{
-    @include scut-relative(a a 1em n);
+  @media( max-width: $breakpoint-xxl ){
+    .drs-item-title,
+    .drs-item-creator{
+      magrin: 2px 0;
+    }
+    .drs-item-title{
+      @extend h5;
+    }
+    .drs-item-creator{
+      @extend h6;
+
+    }
   }
+
 }
 
 .drs-sidebar{
@@ -213,5 +223,7 @@
 
 
 .drs-item .label{
-  backgroup-color: rgba(189, 195, 199, 0.6);
+  background-color: rgba(189, 195, 199, 0.6);
+  font-size: 0.8em;
+  padding: 2px 4px;
 }
