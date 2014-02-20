@@ -281,7 +281,7 @@ $inputColor:                    $headingsColor;
 
 // Dropdowns
 // -------------------------
-$dropdownBackground:            $white; 
+$dropdownBackground:            $white;
 $dropdownBorder:                darken($dropdownBackground, 15%);
 $dropdownDividerTop:            darken($dropdownBorder, 15%);
 $dropdownDividerBottom:         $dropdownDividerTop;
@@ -521,3 +521,4 @@ $breadcrumbHoverLinkColor: lighten($breadcrumbLinkColor, 10%);
 $navTabColor: $midnight-blue;
 $navTabHoverColor: lighten($navTabColor, 10%);
 $navTabActiveColor: $asbestos;
+

@@ -180,11 +180,18 @@
 
 
 .drs-items-grid{
+  @media (max-width: $breakpoint-l){
+    font-size: 0.9em;
+  }
+
   .drs-item-title{
     margin-top: 0;
   }
   .drs-item-creators{
-    @include sr-only();
+    @media (max-width: $breakpoint-xl){
+      @include sr-only();
+    }
+
   }
 }
 
