@@ -164,9 +164,13 @@
       padding: 0 0 0 0;
     }
     menu{
-      margin-bottom: 0;
+      margin: 0 0 0 0;
       overflow-x: scroll;
       max-height: 28px;
+      position: absolute;
+      left: auto;
+      right: auto;
+      bottom: 0;
     }
 
   }
@@ -193,6 +197,9 @@
     }
 
   }
+  .btn-toolbar{
+    @include scut-relative(a a 1em n);
+  }
 }
 
 .drs-sidebar{
@@ -204,9 +211,7 @@
   }
 }
 
-.drs-items-grid{
-  [data-picture] img{
-    max-height: 200px;
-    width: auto;
-  }
+
+.drs-item .label{
+  backgroup-color: rgba(189, 195, 199, 0.6);
 }
