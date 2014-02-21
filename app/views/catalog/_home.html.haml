@@ -9,71 +9,50 @@
   %p
     = t('drs.homepage.description.long').html_safe
     %a.btn.btn-clear.btn-mini.pull-right{:href => "/terms/"} Terms of service
-%article
-  %h2.page-header Featured Content
-  %section.row
-    .span4
-      %h3
-        =t('drs.significant.research.name').capitalize
-        =render partial: 'shared/icon', locals: { class_string: t('drs.significant.research.icon') }
-      %p
-        =t('drs.significant.research.description')
+%section.row
+  .span3.featured-content
+    %h3 Featured Content
 
-      %a.btn.btn-clear.btn-block(href=research_path)
-        Explore #{ t('drs.significant.research.name').capitalize }
-    .span4
-      %h3
-        =t('drs.significant.presentations.name').capitalize
-        =render partial: 'shared/icon', locals: { class_string: t('drs.significant.presentations.icon') }
-      %p
-        =t('drs.significant.presentations.description')
+    %a.btn.btn-clear.btn-block(href=research_path)
+      =render partial: 'shared/icon', locals: { class_string: t('drs.significant.research.icon') }
+      #{ t('drs.significant.research.name').capitalize }
 
-      %a.btn.btn-clear.btn-block(href=presentations_path)
-        Explore #{ t('drs.significant.presentations.name').capitalize }
-    .span4
-      %h3
-        =t('drs.significant.learning.name').capitalize
-        =render partial: 'shared/icon', locals: { class_string: t('drs.significant.learning.icon') }
-      %p
-        =t('drs.significant.learning.description')
+    %a.btn.btn-clear.btn-block(href=presentations_path)
+      =render partial: 'shared/icon', locals: { class_string: t('drs.significant.presentations.icon') }
+      #{ t('drs.significant.presentations.name').capitalize }
 
-      %a.btn.btn-clear.btn-block(href=learning_objects_path)
-        Explore #{ t('drs.significant.learning.name').capitalize }
-  %section.row
-    .span3
-      %h3
-        =t('drs.significant.datasets.name').capitalize
-        =render partial: 'shared/icon', locals: { class_string: t('drs.significant.datasets.icon') }
-      %p
-        =t('drs.significant.datasets.description')
+    %a.btn.btn-clear.btn-block(href=learning_objects_path)
+      =render partial: 'shared/icon', locals: { class_string: t('drs.significant.learning.icon') }
+      #{ t('drs.significant.learning.name').capitalize }
 
-      %a.btn.btn-clear.btn-block(href=datasets_path)
-        Explore #{ t('drs.significant.datasets.name').capitalize }
-    .span3
-      %h3
-        =t('drs.significant.other_publications.name').capitalize
-        =render partial: 'shared/icon', locals: { class_string: t('drs.significant.other_publications.icon') }
-      %p
-        =t('drs.significant.other_publications.description')
-      -# TODO Fix this path
-      %a.btn.btn-clear.btn-block( href="broken" )
-        Explore #{ t('drs.significant.other_publications.name').capitalize }
+    %a.btn.btn-clear.btn-block(href=datasets_path)
+      =render partial: 'shared/icon', locals: { class_string: t('drs.significant.datasets.icon') }
+      #{ t('drs.significant.datasets.name').capitalize }
 
-    .span3
-      %h3
-        =t('drs.significant.communities.name').capitalize
-        =render partial: 'shared/icon', locals: { class_string: t('drs.significant.communities.icon') }
-      %p
-        =t('drs.significant.communities.description')
+    %a.btn.btn-clear.btn-block( href="broken" )
+      =render partial: 'shared/icon', locals: { class_string: t('drs.significant.other_publications.icon') }
+      #{ t('drs.significant.other_publications.name').capitalize }
 
-      %a.btn.btn-clear.btn-block(href=communities_path)
-        Explore #{ t('drs.significant.communities.name').capitalize }
-    .span3
-      %h3
-        =t('drs.significant.employees.name').capitalize
-        =render partial: 'shared/icon', locals: { class_string: t('drs.significant.employees.icon') }
-      %p
-        =t('drs.significant.employees.description')
-      -# Need to find a canned query for this
-      %a.btn.btn-clear.btn-block(href="#employees_path")
-        Explore #{ t('drs.significant.employees.name').capitalize }
+
+    %a.btn.btn-clear.btn-block(href=communities_path)
+      =render partial: 'shared/icon', locals: { class_string: t('drs.significant.communities.icon') }
+      #{ t('drs.significant.communities.name').capitalize }
+
+    -# Need to find a canned query for this
+    %a.btn.btn-clear.btn-block(href="#employees_path")
+      =render partial: 'shared/icon', locals: { class_string: t('drs.significant.employees.icon') }
+      #{ t('drs.significant.employees.name').capitalize }
+  .span9
+    %h3 Recently Added Items
+    - if @recent_documents.length > 0
+      %ul.drs-items.drs-items-list
+        -  @recent_documents.each do | item |
+          = render partial: 'shared/drs-item/drs-item', locals: {item: item }
+    - else
+      .alert.alert-info
+        %button.close{"data-dismiss" => "alert", type: "button", "aria-hidden" => true }
+          &times;
+        %strong
+          No recent documents found.
+        Please check back soon.
+
