@@ -74,10 +74,8 @@ describe('The drsApp object', function() {
 
 
       var item =  $('.drs-item').first();
-      item.addClass('active');
       $('button[data-target="drs-items-grid"]').trigger('click');
       expect($('button[data-target="drs-items-grid"]')).toHaveClass('active');
-      expect(item).not.toHaveClass('active');
       expect($('#drsDummyItems')).toHaveClass('drs-items-grid');
       expect($('#drsDummyItems')).not.toHaveClass('drs-items-list');
 
