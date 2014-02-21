@@ -5,11 +5,16 @@
   -# Add the data signed-in to tell app.js what to do on toggle click.
   - if user_signed_in?
     %body{"data-user" => current_user.id}
-  - else 
+  - else
     %body(data-user="-1")
+  %nav.skip-links
+    %a.show-on-focus(href="#main-content")
+      Skip to main content
+    %a.show-on-focus(href="#navigation")
+      Skip to navigation
   = render :partial => '/masthead', :formats => [:html]
   = render :partial => '/flash_msg', :formats => [:html]
-  %main(role="main")
+  %main( id="main-content" role="main" )
     -if :page_header
       .container.page_header
         = yield :page_header

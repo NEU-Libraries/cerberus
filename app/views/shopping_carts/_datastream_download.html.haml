@@ -1,4 +1,40 @@
-%ul
-  %li
-    = item.title
-    = link_to("X" , update_cart_path(delete: item.id), :method => 'put', :remote => true, title: "Remove from  #{t('drs.shoppingcarts.name')}", data: {toggle: "tooltip"}, class: "close") 
+%article.drs-item{ data: {  "drsitem" => item.pid  } }
+  = render partial: 'shared/drs_item/drs_item_figure_no_link', locals: {item: item}
+  .drs-item-details
+    %header
+      %h4.drs-item-title
+        = item.title
+    .addtional-details
+      .drs-item-add-details
+        - if defined? item.date_of_issue and item.date_of_issue.length > 0
+          %dl.drs-item-date-of-issue-list
+            %dt.drs-item-date-of-issue-label
+              Date of Issue
+            %dd.drs-item-date-of-issue
+              %time{ "date-time" => item.date_of_issue }
+                = item.date_of_issue.to_date.to_formatted_s(:long_ordinal)
+        - if defined? item.create_date and item.create_date.length > 0
+          %dl.drs-item-date-of-issue-list
+            %dt.drs-item-date-of-issue-label
+              Creation Date
+            %dd.drs-item-date-of-issue
+              %time{ "date-time" => item.create_date }
+                = item.create_date.to_date.to_formatted_s(:long_ordinal)
+        - if defined? item.description and item.description.length > 0
+          %dl.drs-item-abstract-list
+            %dt.drs-item-abstract-label
+              Abstract
+            %dd.drs-item-abstract{id: "abstract#{item.pid.delete':'}"}
+              - if item.description.length > 120
+                %span.ellipsis
+                  = item.description
+                %a(href="#abstract#{item.pid.delete ":"}" data-toggle="ellipsis")
+                  %i.icon-expand-alt
+                  %span.sr-only
+                    Expand / collapse toggle
+              - else
+                = item.description
+
+      %menu.btn-toolbar(type="toolbar")
+        = link_to("remove" , update_cart_path(delete: item.id), title: "Remove from  #{t('drs.shoppingcarts.name')}", data: {toggle: "tooltip"}, confirm: true, class: "btn btn-danger")
+

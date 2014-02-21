@@ -13,7 +13,7 @@
   .span3.featured-content
     %h3 Featured Content
 
-    %a.btn.btn-clear.btn-block(href=research_path)
+    %a.btn.btn-clear.btn-block(href=research_path){data: {toggle: "tooltip"}, title: t('drs.significant.research.description') }
       =render partial: 'shared/icon', locals: { class_string: t('drs.significant.research.icon') }
       #{ t('drs.significant.research.name').capitalize }
 
@@ -21,33 +21,36 @@
       =render partial: 'shared/icon', locals: { class_string: t('drs.significant.presentations.icon') }
       #{ t('drs.significant.presentations.name').capitalize }
 
-    %a.btn.btn-clear.btn-block(href=learning_objects_path)
+    %a.btn.btn-clear.btn-block(href=learning_objects_path){data: {toggle: "tooltip"}, title: t('drs.significant.employees.description') }
       =render partial: 'shared/icon', locals: { class_string: t('drs.significant.learning.icon') }
       #{ t('drs.significant.learning.name').capitalize }
 
-    %a.btn.btn-clear.btn-block(href=datasets_path)
+    %a.btn.btn-clear.btn-block(href=datasets_path){data: {toggle: "tooltip"}, title: t('drs.significant.employees.description') }
       =render partial: 'shared/icon', locals: { class_string: t('drs.significant.datasets.icon') }
       #{ t('drs.significant.datasets.name').capitalize }
 
-    %a.btn.btn-clear.btn-block( href="broken" )
+    %a.btn.btn-clear.btn-block( href="broken" ){data: {toggle: "tooltip"}, title: t('drs.significant.employees.description') }
       =render partial: 'shared/icon', locals: { class_string: t('drs.significant.other_publications.icon') }
       #{ t('drs.significant.other_publications.name').capitalize }
 
 
-    %a.btn.btn-clear.btn-block(href=communities_path)
+    %a.btn.btn-clear.btn-block(href=communities_path){data: {toggle: "tooltip"}, title: t('drs.significant.employees.description') }
       =render partial: 'shared/icon', locals: { class_string: t('drs.significant.communities.icon') }
       #{ t('drs.significant.communities.name').capitalize }
 
     -# Need to find a canned query for this
-    %a.btn.btn-clear.btn-block(href="#employees_path")
+    %a.btn.btn-clear.btn-block(href="#employees_path"){data: {toggle: "tooltip"}, title: t('drs.significant.employees.description') }
       =render partial: 'shared/icon', locals: { class_string: t('drs.significant.employees.icon') }
       #{ t('drs.significant.employees.name').capitalize }
   .span9
     %h3 Recently Added Items
     - if @recent_documents.length > 0
       %ul.drs-items.drs-items-list
+        -# @TODO Fix the recent docs query.
         -  @recent_documents.each do | item |
           = render partial: 'shared/drs-item/drs-item', locals: {item: item }
+      %a.btn.btn-clear.btn-primary{href: "path-to-recent docs" }
+        See more recently added items.
     - else
       .alert.alert-info
         %button.close{"data-dismiss" => "alert", type: "button", "aria-hidden" => true }
@@ -55,4 +58,5 @@
         %strong
           No recent documents found.
         Please check back soon.
+
 

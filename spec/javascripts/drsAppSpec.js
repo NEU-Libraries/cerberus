@@ -145,9 +145,5 @@ describe('The drsApp object', function() {
 
     });
   });
-  describe('singleUploadTermsOfService method,' function(){
-    it(' will validate that the user has agreed and selected the terms of service', function(){
 
-    });
-  });
 });
