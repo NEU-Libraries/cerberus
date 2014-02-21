@@ -106,4 +106,5 @@ after 'deploy:updating', 'deploy:restart'
 after 'deploy:updating', 'deploy:whenever'
 after 'deploy:updating', 'deploy:assets_kludge'
 after 'deploy:finished', 'deploy:refresh_data'
-after 'deploy:finished', 'deploy:start_solrizerd'
+# Will uncomment once the infrastructure is up and going
+#after 'deploy:finished', 'deploy:start_solrizerd'
