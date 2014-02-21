@@ -74,10 +74,8 @@ describe('The drsApp object', function() {
 
 
       var item =  $('.drs-item').first();
-      item.addClass('active');
       $('button[data-target="drs-items-grid"]').trigger('click');
       expect($('button[data-target="drs-items-grid"]')).toHaveClass('active');
-      expect(item).not.toHaveClass('active');
       expect($('#drsDummyItems')).toHaveClass('drs-items-grid');
       expect($('#drsDummyItems')).not.toHaveClass('drs-items-list');
 
@@ -145,9 +143,5 @@ describe('The drsApp object', function() {
 
     });
   });
-  describe('singleUploadTermsOfService method,' function(){
-    it(' will validate that the user has agreed and selected the terms of service', function(){
 
-    });
-  });
 });

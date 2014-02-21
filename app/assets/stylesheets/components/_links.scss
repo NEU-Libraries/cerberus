@@ -17,3 +17,13 @@ h6{
     }
   }
 }
+
+// Show on focus
+.show-on-focus{
+  @include sr-only();
+  @include focus-states(){
+
+    position: static;
+
+  }
+}
