@@ -15,7 +15,7 @@ $(document).ready ->
     init = (settings) ->
       drsApp.config =
         $drsBootstrapSelect: $('select.bs-select')
-        $addToSetLink: $('#addToSet')
+        $addToSetLink: $('*[data-add-to-set]')
         breadCrumbMenuContent: $('#addToSetLinks').html()
         fitTextTarget: $('.fit-text')
         removeFormFields:
@@ -48,15 +48,23 @@ $(document).ready ->
     or new items to the application.
     ###
     breadCrumbMenu = ->
-      drsApp.config.$addToSetLink.popover(
+      $link = drsApp.config.$addToSetLink
+      $link.popover(
         html: true
         content: drsApp.config.breadCrumbMenuContent
-      ).on('shown', ->
-        $(this).parent('li').addClass 'active'
-        return
-      ).on 'hide', ->
-        $(this).parent('li').removeClass 'active'
-        return
+      )
+
+      $link.on('click', 'a', (e) ->
+        e.preventDefault()
+
+      )
+      if ( $link.parent('breadcrumb').length > 0 )
+        $link.on('shown', ->
+          $(this).parent('li').addClass 'active'
+          return
+        ).on 'hide', ->
+          $(this).parent('li').removeClass 'active'
+          return
 
       return
 

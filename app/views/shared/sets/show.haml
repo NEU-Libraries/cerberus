@@ -8,11 +8,19 @@
 
 %article.well.clearfix
   %h1{:class => @set.class, :id => "#{@set.pid}-title"}
+    - if @set.instance_of? ( NuCollection ) # and doesn't have a thumbnail to render
+
+      = render partial: 'shared/icon', locals: { class_string: 'icon-folder-open' }
+
+    - elsif @set.instance_of?( Community )
+
+      = render partial: 'shared/icon', locals: { class_string: 'icon-group' }
+
     = @set.title
     %small
       = get_set_class_label(@set)
   - if @set.thumbnail.content
-    %img{src: sufia.download_path(@set, datastream_id: 'thumbnail'), title: @set.title, alt: "", class: ['img-rounded', 'pull-left']}(aria-labeledby="#{@set.pid}-title" role="presentation")
+    %img{src: sufia.download_path(@set, datastream_id: 'thumbnail'), title: @set.title, alt: "", class: ['img-polorid', 'pull-left']}(aria-labeledby="#{@set.pid}-title" role="presentation")
   - if @set.description.length > 0
     %p
       = @set.description
@@ -31,13 +39,17 @@
 .row
   - if current_user
     - current_user.view_pref
-    %section{class: current_user.view_pref == 'grid' ? 'span12' : "span9" }
-      =render partial: 'shared/sets/show_sets'
     %aside.drs-sidebar{class: current_user.view_pref == 'grid' ? 'span12' : "span3" }
       =render partial: 'shared/sets/sets_sidebar'
+      =render partial: 'shared/sets/bottom_action_menu'
+
+    %section{class: current_user.view_pref == 'grid' ? 'span12' : "span9" }
+      =render partial: 'shared/sets/show_sets'
   - else
     %aside.span3
       =render partial: 'shared/sets/sets_sidebar'
+      =render partial: 'shared/sets/bottom_action_menu'
+
     %section.span9
       =render partial: 'shared/sets/show_sets'
 
