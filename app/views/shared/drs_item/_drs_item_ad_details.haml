@@ -28,7 +28,6 @@
         - else
           = item.description
   - if item.instance_of?(NuCoreFile)
-
     %menu.btn-toolbar(type="toolbar")
 
       = render partial: 'nu_core_files/derivative_btn_group', locals: {contents: item.content_objects}

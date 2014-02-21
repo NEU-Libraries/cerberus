@@ -1,7 +1,8 @@
-- if @items.length > 0 
-  .drs-items.drs-items-list
-  - @items.each do |item| 
-    = render partial: 'datastream_download', locals: { item: item }
+- if @items.length > 0
+  %section.drs-items.drs-items-list
+    - @items.each do |item|
+      = render partial: 'datastream_download', locals: { item: item}
+
 -else
   .alert.alert-info
     %button.close{"aria-hidden" => "true", "data-dismiss" => "alert", type: "button"} &#215;

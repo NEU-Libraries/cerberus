@@ -1,5 +1,5 @@
 .container
-  %nav.navbar(role="navigation")
+  %nav.navbar#navigation(role="navigation")
     .navbar-inner
       %a{class: "top_nav brand drs #{'active' if params[:controller] == "catalog" and action_name == "index"}", href: "/"}
         DRS
