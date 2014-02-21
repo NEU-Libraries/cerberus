@@ -33,7 +33,7 @@
       text-align: center;
     }
     [class^="icon-"]{
-      display: block;
+      display: inline-block;
       text-align: center;
       width: 85px;
       height: 85px;
@@ -185,6 +185,9 @@
     line-height: 30px;
     max-width: 100%;
     @include text-overflow();
+    @media (max-width: $breakpoint-xl){
+      font-size: 18px;
+    }
   }
   .drs-item-title
   , .drs-item-creator{

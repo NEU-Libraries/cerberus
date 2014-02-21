@@ -26,16 +26,7 @@
     - sidebar_class = "span3"
     - drs_items_class = "span9"
   %main.row( role="main" )
-
-
-    %section{ class: drs_items_class }
-      -# Main content
-      = render :partial => 'did_you_mean'
-      -# Render the results in the main section of the page.
-      = render 'results_pagination'
-      = render :partial => 'document_list'
-      = render 'results_pagination'
-    %aside.drs-sidebar{ class: sidebar_class }
+    %aside.drs-sidebar.well{ class: sidebar_class }
       .pane.facets
         %h4 Refine My Results
         = render :partial => 'facet_selected'
@@ -50,3 +41,13 @@
         %p
           = render_pagination_info @response, :entry_name=>'item'
         = render 'sort_and_per_page'
+
+
+    %section{ class: drs_items_class }
+      -# Main content
+      = render :partial => 'did_you_mean'
+      -# Render the results in the main section of the page.
+      = render 'results_pagination'
+      = render :partial => 'document_list'
+      = render 'results_pagination'
+

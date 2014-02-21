@@ -1,32 +1,32 @@
--# used in the download list for the shopping carts feature
-%a(href="#" data-toggle="tooltip"){ title: item.title }
-  %figure.pull-left
+-# used in the download list for the shopping carts feature needed an `a` for the styles to work correctly
 
-    - if item.instance_of?( NuCoreFile )
-      - if defined? dynamic_picture #pass in a local variable if we want to have the images be able to go all the way to the 10 width size on active state.
-        = render partial: 'shared/thumbnails/dynamic_picture', locals: { thumbs: item.thumbnail_list }
+%figure.pull-left
 
-      -else # default behavior
+  - if item.instance_of?( NuCoreFile )
+    - if defined? dynamic_picture #pass in a local variable if we want to have the images be able to go all the way to the 10 width size on active state.
+      = render partial: 'shared/thumbnails/dynamic_picture', locals: { thumbs: item.thumbnail_list }
 
-        =render partial: 'shared/thumbnails/thumbnail_picture', locals: { thumbs: item.thumbnail_list }
+    -else # default behavior
 
-    - elsif ( item.instance_of?(NuCollection) or item.instance_of?( Community )  ) and  item.thumbnail_list.length > 0
-      -# Now lets see if communities and collections have a thumbnail associated to it, if so render out the thumbnail
+      =render partial: 'shared/thumbnails/thumbnail_picture', locals: { thumbs: item.thumbnail_list }
 
-      = image_tag item.thumbnail_list[0], alt: '', role: 'presentation'
+  - elsif ( item.instance_of?(NuCollection) or item.instance_of?( Community )  ) and  item.thumbnail_list.length > 0
+    -# Now lets see if communities and collections have a thumbnail associated to it, if so render out the thumbnail
 
-    - elsif item.instance_of? ( NuCollection ) # and doesn't have a thumbnail to render
+    = image_tag item.thumbnail_list[0], alt: '', role: 'presentation'
 
-      = render partial: 'shared/icon', locals: { class_string: 'icon-folder-open' }
+  - elsif item.instance_of? ( NuCollection ) # and doesn't have a thumbnail to render
 
-    - elsif item.instance_of?( Community )
+    = render partial: 'shared/icon', locals: { class_string: 'icon-folder-open' }
 
-      = render partial: 'shared/icon', locals: { class_string: 'icon-group' }
+  - elsif item.instance_of?( Community )
 
-    -else #the most generic option
+    = render partial: 'shared/icon', locals: { class_string: 'icon-group' }
 
-      = render partial: 'shared/icon', locals: { class_string: 'icon-file' }
-    -if item.type_label
-      %figcaption
-        %span.label.small
-          = item.type_label
+  -else #the most generic option
+
+    = render partial: 'shared/icon', locals: { class_string: 'icon-file' }
+  -if item.type_label
+    %figcaption
+      %span.label.small
+        = item.type_label
