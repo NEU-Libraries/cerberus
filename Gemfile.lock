@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/NEU-Libraries/solrizer.git
-  revision: 4d84bae857ef197b474f2b90c626b80350199b6a
+  revision: 0fbc32c1942266695a88af4f55dda624231eb5a9
   ref: master
   specs:
     solrizer (3.1.1)
