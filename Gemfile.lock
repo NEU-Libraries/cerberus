@@ -1,4 +1,17 @@
 GIT
+  remote: https://github.com/NEU-Libraries/solrizer.git
+  revision: 4d84bae857ef197b474f2b90c626b80350199b6a
+  ref: master
+  specs:
+    solrizer (3.1.1)
+      activesupport
+      daemons
+      mediashelf-loggable (~> 0.4.7)
+      nokogiri
+      stomp
+      xml-simple
+
+GIT
   remote: https://github.com/harai/kaminari.git
   revision: 384fcb5d11b66a0cc8fad030104bf80f82616355
   ref: route_prefix_prototype
@@ -37,19 +50,6 @@ GIT
       resque (~> 1.23.0)
       resque-pool (= 0.3.0)
       zipruby (= 0.3.6)
-
-GIT
-  remote: https://github.com/projecthydra/solrizer.git
-  revision: bc71cfdf523a950cc658c5c65719dfc4e303c8b8
-  ref: master
-  specs:
-    solrizer (3.1.1)
-      activesupport
-      daemons
-      mediashelf-loggable (~> 0.4.7)
-      nokogiri
-      stomp
-      xml-simple
 
 GEM
   remote: https://rubygems.org/
