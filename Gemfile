@@ -11,7 +11,7 @@ gem 'sqlite3'
 gem 'blacklight'
 gem 'hydra-head'
 
-gem 'solrizer', :git => 'https://github.com/projecthydra/solrizer.git', :ref => 'master'
+gem 'solrizer', :git => 'https://github.com/NEU-Libraries/solrizer.git', :ref => 'master'
 
 gem 'sufia', :git => 'https://github.com/nu-lts/nu-sufia.git', :ref => 'develop' #Using 'ref' instead of 'branch'. It seems branch doesn't always get the latest code, as one would expect.
 gem 'kaminari', :git => 'https://github.com/harai/kaminari.git', :ref => 'route_prefix_prototype'  # required to handle pagination properly in dashboard. See https://github.com/amatsuda/kaminari/pull/322
