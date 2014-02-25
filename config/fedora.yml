@@ -9,7 +9,7 @@ test: &TEST
 staging:
   user: fedoraAdmin
   password: <%= ENV["FEDORA_PASSWD"] %>
-  url: http://nb4676.neu.edu:80/fedora
+  url: http://nb4676.neu.edu:8080/fedora
 production:
   user: fedoraAdmin
   password: fedoraAdmin
