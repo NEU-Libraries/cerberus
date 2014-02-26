@@ -67,26 +67,31 @@ class CatalogController < ApplicationController
 
   # Actions mapping to 'best bit' content types.
   def theses
+    @search_type = I18n.t "drs.significant.theses.name"
     x = [creator_field, department_field, creation_year_field, degree_field, subject_field]
     category_query_action("\"Theses and Dissertations\"", x)
   end
 
   def research
+    @search_type = I18n.t "drs.significant.research.name"
     x = [creator_field, creation_year_field, department_field, subject_field]
     category_query_action("\"Research Publications\"", x)
   end
 
   def presentations
+    @search_type = I18n.t "drs.significant.presentations.name"
     x = [creator_field, creation_year_field, department_field, subject_field]
     category_query_action("Presentations", x)
   end
 
   def datasets
+    @search_type = I18n.t "drs.significant.datasets.name"
     x = [creator_field, creation_year_field, department_field, subject_field]
     category_query_action("Datasets", x)
   end
 
   def learning_objects
+    @search_type = I18n.t "drs.significant.learning.name"
     x = [creator_field, creation_year_field, department_field, subject_field,
          course_number_field, course_title_field, type_field]
     category_query_action("\"Learning Objects\"", x)

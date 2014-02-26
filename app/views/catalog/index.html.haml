@@ -16,7 +16,7 @@
   -content_for :page_header do
     %h1.page-header
       %i.icon-search
-      Search Results
+      = @search_type || "Search Results"
       %small
         = html_constraints
   - if current_user
