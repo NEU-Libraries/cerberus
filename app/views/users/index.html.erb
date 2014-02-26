@@ -19,31 +19,29 @@ limitations under the License.
 <h1><%= t('sufia.product_name') %> Users</h1>
 </div>
 <div id="Data">
-    <table class="table table-striped"> 
-        <thead> 
-            <tr> 
-                <th>Avatar</th> 
-                <th class="sorts"><i id="name" class="<%=params[:sort].blank? ? 'icon-caret-up' : params[:sort]== "name desc" ? 'icon-caret-down' : params[:sort]== "name" ? 'icon-caret-up' : ''%>"/>User Name</th> 
-                <th class="sorts"><i id="login" class="<%=params[:sort]== "login desc" ? 'icon-caret-down' : params[:sort]== "login" ? 'icon-caret-up' : ''%>"/>User Id</th> 
-                <th class="sorts"><i id="community" class="<%=params[:sort]== "community desc" ? 'icon-caret-down' : params[:sort]== "community" ? 'icon-caret-up' : ''%>"/>Community</th>
-                <th>Files Deposited</th> 
-            </tr> 
-        </thead> 
-        <tbody> 
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Avatar</th>
+                <th class="sorts"><i id="name" class="<%=params[:sort].blank? ? 'icon-caret-up' : params[:sort]== "name desc" ? 'icon-caret-down' : params[:sort]== "name" ? 'icon-caret-up' : ''%>"/>User Name</th>
+                <th class="sorts"><i id="login" class="<%=params[:sort]== "login desc" ? 'icon-caret-down' : params[:sort]== "login" ? 'icon-caret-up' : ''%>"/>User Id</th>
+                <th>Files Deposited</th>
+            </tr>
+        </thead>
+        <tbody>
             <% @users.each do |user| %>
-		          <% if user.name !=  "batchuser@example.com" && user.name != "audituser@example.com" %> 
-                <tr class="<%= cycle("","zebra") %>"> 
-                   <td><a href="<%= sufia.profile_path(user) %>" class="btn btn-small " ><%= image_tag user.avatar.url(:thumb), :width => 30 %></a></td> 
-                   <td ><a href="<%= sufia.profile_path(user) %>"  ><%= user.name %><a></td> 
+		          <% if user.name !=  "batchuser@example.com" && user.name != "audituser@example.com" %>
+                <tr class="<%= cycle("","zebra") %>">
+                   <td><a href="<%= sufia.profile_path(user) %>" class="btn btn-small " ><%= image_tag user.avatar.url(:thumb), :width => 30 %></a></td>
+                   <td ><a href="<%= sufia.profile_path(user) %>"  ><%= user.name %><a></td>
                    <td><a href="<%= sufia.profile_path(user) %>"  ><%= user.user_key %><a></td>
-                   <td><%= user.community %> </td> 
                    <td><%= number_of_deposits(user) %> </td>
-                </tr> 
+                </tr>
 		          <% end %>
-             <% end %> 
-        </tbody> 
-    </table> 
+             <% end %>
+        </tbody>
+    </table>
     <div class="pager">
       <%= paginate @users,  :theme => 'blacklight'%>
     </div>
-</div> 
+</div>
