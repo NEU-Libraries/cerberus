@@ -17,24 +17,24 @@
       =render partial: 'shared/icon', locals: { class_string: t('drs.significant.research.icon') }
       #{ t('drs.significant.research.name').capitalize }
 
-    %a.btn.btn-clear.btn-block(href=presentations_path)
+    %a.btn.btn-clear.btn-block(href=presentations_path){data: {toggle: "tooltip"}, title: t('drs.significant.presentations.description')}
       =render partial: 'shared/icon', locals: { class_string: t('drs.significant.presentations.icon') }
       #{ t('drs.significant.presentations.name').capitalize }
 
-    %a.btn.btn-clear.btn-block(href=learning_objects_path){data: {toggle: "tooltip"}, title: t('drs.significant.employees.description') }
+    %a.btn.btn-clear.btn-block(href=learning_objects_path){data: {toggle: "tooltip"}, title: t('drs.significant.learning.description') }
       =render partial: 'shared/icon', locals: { class_string: t('drs.significant.learning.icon') }
       #{ t('drs.significant.learning.name').capitalize }
 
-    %a.btn.btn-clear.btn-block(href=datasets_path){data: {toggle: "tooltip"}, title: t('drs.significant.employees.description') }
+    %a.btn.btn-clear.btn-block(href=datasets_path){data: {toggle: "tooltip"}, title: t('drs.significant.datasets.description') }
       =render partial: 'shared/icon', locals: { class_string: t('drs.significant.datasets.icon') }
       #{ t('drs.significant.datasets.name').capitalize }
 
-    %a.btn.btn-clear.btn-block( href="broken" ){data: {toggle: "tooltip"}, title: t('drs.significant.employees.description') }
-      =render partial: 'shared/icon', locals: { class_string: t('drs.significant.other_publications.icon') }
-      #{ t('drs.significant.other_publications.name').capitalize }
+    %a.btn.btn-clear.btn-block(href=theses_path){data: {toggle: "tooltip"}, title: t('drs.significant.theses.description') }
+      =render partial: 'shared/icon', locals: { class_string: t('drs.significant.theses.icon') }
+      #{ t('drs.significant.theses.name').capitalize }
 
 
-    %a.btn.btn-clear.btn-block(href=communities_path){data: {toggle: "tooltip"}, title: t('drs.significant.employees.description') }
+    %a.btn.btn-clear.btn-block(href=communities_path){data: {toggle: "tooltip"}, title: t('drs.significant.communities.description') }
       =render partial: 'shared/icon', locals: { class_string: t('drs.significant.communities.icon') }
       #{ t('drs.significant.communities.name').capitalize }
 

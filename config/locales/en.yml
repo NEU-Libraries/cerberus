@@ -39,7 +39,7 @@ en:
         name: Learning Objects
         description: Materials used to support teaching and learning
         icon: icon-book
-      other_publications:
+      theses:
         name: Theses & Dissertations
         description: NU theses and dissertations (2008 - )
         icon: icon-magic
