@@ -37,5 +37,5 @@
                 = item.description
 
       %menu.btn-toolbar(type="toolbar")
-        = link_to("remove" , update_cart_path(delete: item.id), title: "Remove from  #{t('drs.shoppingcarts.name')}", data: {toggle: "tooltip"}, confirm: "Are you sure you want to remove #{item.title} from your #{t('drs.shoppingcarts.name')}", class: "btn btn-danger btn-small")
+        = link_to("remove" , update_cart_path(delete: item.id), title: "Remove from  #{t('drs.shoppingcarts.name')}", method: :put, data: {toggle: "tooltip"}, confirm: "Are you sure you want to remove #{item.title} from your #{t('drs.shoppingcarts.name')}", class: "btn btn-danger btn-small")
 
