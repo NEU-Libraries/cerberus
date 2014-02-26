@@ -15,7 +15,8 @@ en:
     homepage:
       description:
         short: "The DRS is a secure place to collect your work in one location and create a durable and citable record of research, presentations, publications, data sets, or other scholarly work."
-        long: "Materials in the repository are maintained by Northeastern University Libraries for future use, and can be shared worldwide, with just a few people or groups, or kept private. You can also discover and remix materials created by others: for instance, articles and research data, materials from the <a href=\"http://library.northeastern.edu/archives-special-collections\">University Archives and Special Collections</a>, or images and photographs from the Northeastern community. For more information visit our FAQ. For help with uploading, searching, or logging in, visit our User Guides page."
+        long: "Materials in the repository are maintained by Northeastern University Libraries for future use, and can be shared worldwide, with just a few people or groups, or kept private. You can also discover and remix materials created by others: for instance, articles and research data, materials from the <a href=\"http://library.northeastern.edu/archives-special-collections\" target=\"_blank\">University Archives and Special Collections</a>, or images and photographs from the Northeastern community. For more information visit our FAQ. For help with uploading, searching, or logging in, visit our User Guides page."
+      browse label: "Explore"
     compilations:
       name: set
       lead: Sets are collections of objects that you can create, share and store.
@@ -25,31 +26,31 @@ en:
     significant:
       datasets:
         name: Datasets
-        description: High value collections of data
+        description: High value datasets, such as statistical datasets and research datasets
         icon: icon-table
       research:
         name: Research
-        description: NU faculty research publications
+        description: Faculty research, including articles, preprints, and offprints
         icon: icon-beaker
       presentations:
         name: Presentations
-        description: NU faculty presentations
+        description: Faculty presentations from various conferences and meetings
         icon: icon-facetime-video
       learning:
         name: Learning Objects
-        description: Materials used to support teaching and learning
+        description: Materials used to support teaching and learning, such as syllabi and activities
         icon: icon-book
       theses:
         name: Theses & Dissertations
-        description: NU theses and dissertations (2008 - )
+        description: NU’s master's theses and doctoral dissertations from 2008 to the present
         icon: icon-magic
       communities:
         name: Communities
-        description: Browse NU departments and groups by name
+        description: Browse Northeastern departments and groups by name
         icon: icon-group
       employees:
         name: employees
-        description: Employees and staff at Northeastern
+        description: Browse Northeastern faculty by name
         icon: icon-user
     about:
       title: About the DRS
