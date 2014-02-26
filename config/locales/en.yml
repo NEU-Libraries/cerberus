@@ -22,7 +22,7 @@ en:
       lead: Sets are collections of objects that you can create, share and store.
     shoppingcarts:
       name: download queue
-    #Siginificant Content labels
+    #Significant Content labels
     significant:
       datasets:
         name: Datasets
