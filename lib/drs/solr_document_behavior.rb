@@ -89,8 +89,8 @@ module Drs
     end
 
     def description
-      # TODO - expand this so that it can be abstract as well
-      Array(self[Solrizer.solr_name('desc_metadata__description')]).first
+      #Array(self[Solrizer.solr_name('desc_metadata__description')]).first
+      Array(self[Solrizer.solr_name("abstract")]).first
     end
 
     def label
