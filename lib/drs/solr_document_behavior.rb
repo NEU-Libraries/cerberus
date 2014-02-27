@@ -20,8 +20,7 @@ module Drs
     end
 
     def pid
-      #TODO
-      return ""
+      Array(self[Solrizer.solr_name("id")]).first
     end
 
     def date_of_issue
@@ -45,8 +44,7 @@ module Drs
     end
 
     def thumbnail_list
-      #TODO
-      return Array.new
+      Array(self[Solrizer.solr_name("thumbnail_list")])
     end
 
     ##
@@ -86,7 +84,8 @@ module Drs
     end
 
     def title
-      Array(self[Solrizer.solr_name('desc_metadata__title')]).first
+      #Array(self[Solrizer.solr_name('desc_metadata__title')]).first
+      Array(self[Solrizer.solr_name("title")]).first
     end
 
     def description
