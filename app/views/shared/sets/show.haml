@@ -44,15 +44,15 @@
       =render partial: 'shared/sets/bottom_action_menu'
 
     %section{class: current_user.view_pref == 'grid' ? 'span12' : "span9" }
-      =render partial: 'shared/sets/show_sets'
+      / =render partial: 'shared/sets/show_sets'
+      =render :partial => 'catalog/document_list'
   - else
     %aside.span3
       =render partial: 'shared/sets/sets_sidebar'
       =render partial: 'shared/sets/bottom_action_menu'
 
     %section.span9
-      =render partial: 'shared/sets/show_sets'
+      / =render partial: 'shared/sets/show_sets'
+      =render :partial => 'catalog/document_list'
 
 %div#add_compilation_form{ style: 'display:none' }
-
-= render :partial => 'catalog/document_list'
