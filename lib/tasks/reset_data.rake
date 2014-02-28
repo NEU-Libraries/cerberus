@@ -24,6 +24,7 @@ def create_content_file(factory_sym, user, parent)
   # Add non garbage metadata to core record.
   core = NuCoreFile.find(master.core_record.pid)
   core.parent = ActiveFedora::Base.find(parent.pid, cast: true)
+  core.properties.parent_id = parent.pid
   core.title = "#{master.content.label}"
   core.description = "Lorem Ipsum Lorem Ipsum Lorem Ipsum"
   core.date_of_issue = Date.today.to_s

@@ -42,6 +42,7 @@ class Community < ActiveFedora::Base
   # Override parent= so that the string passed by the creation form can be used.
   def parent=(val)
     unique_assign_by_string(val, :has_affiliation, [Community], allow_nil: true)
+    self.properties.parent_id = val.pid
   end
 
   def theses

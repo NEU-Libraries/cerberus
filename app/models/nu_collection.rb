@@ -1,4 +1,4 @@
-class NuCollection < ActiveFedora::Base 
+class NuCollection < ActiveFedora::Base
   include ActiveModel::MassAssignmentSecurity
   include Hydra::ModelMixins::RightsMetadata
   include Hydra::ModelMethods
@@ -12,52 +12,53 @@ class NuCollection < ActiveFedora::Base
 
   validate :belong_check, on: :update
 
-  attr_accessible :title, :description, :date_of_issue, :keywords, :parent 
+  attr_accessible :title, :description, :date_of_issue, :keywords, :parent
   attr_accessible :creators, :personal_folder_type
 
-  attr_protected :identifier 
+  attr_protected :identifier
 
-  has_metadata name: 'DC', type: NortheasternDublinCoreDatastream 
+  has_metadata name: 'DC', type: NortheasternDublinCoreDatastream
   has_metadata name: 'rightsMetadata', type: ParanoidRightsDatastream
   has_metadata name: 'properties', type: DrsPropertiesDatastream
   has_metadata name: 'mods', type: NuModsDatastream
-  has_file_datastream "thumbnail", type: FileContentDatastream 
+  has_file_datastream "thumbnail", type: FileContentDatastream
 
   has_many :child_files, property: :is_member_of, :class_name => "NuCoreFile"
   has_many :child_collections, property: :is_member_of, :class_name => "NuCollection"
 
   belongs_to :parent, property: :is_member_of, :class_name => "NuCollection"
-  belongs_to :user_parent, property: :is_member_of, :class_name => "Employee" 
+  belongs_to :user_parent, property: :is_member_of, :class_name => "Employee"
   belongs_to :community_parent, property: :is_member_of, :class_name => "Community"
 
   # Return all collections that this user can read
-  def self.find_all_viewable(user) 
+  def self.find_all_viewable(user)
     collections = NuCollection.find(:all)
     filtered = collections.select { |ele| !ele.embargo_in_effect?(user) && ele.rightsMetadata.can_read?(user) }
-    return filtered 
+    return filtered
   end
 
   def parent
-    single_lookup(:is_member_of, [NuCollection, Community]) 
+    single_lookup(:is_member_of, [NuCollection, Community])
   end
 
-  # Override parent= so that the string passed by the creation form can be used. 
+  # Override parent= so that the string passed by the creation form can be used.
   def parent=(val)
     unique_assign_by_string(val, :is_member_of, [NuCollection, Community], allow_nil: true)
+    self.properties.parent_id = val.pid
   end
 
-  # Override user_parent= so that the string passed by the creation form can be used. 
-  def user_parent=(employee) 
-    if employee.instance_of?(String) 
-      self.add_relationship(:is_member_of, Employee.find_by_nuid(employee)) 
-    elsif employee.instance_of? Employee 
-      self.add_relationship(:is_member_of, employee) 
+  # Override user_parent= so that the string passed by the creation form can be used.
+  def user_parent=(employee)
+    if employee.instance_of?(String)
+      self.add_relationship(:is_member_of, Employee.find_by_nuid(employee))
+    elsif employee.instance_of? Employee
+      self.add_relationship(:is_member_of, employee)
     else
-      raise "user_parent= got passed a #{employee.class}, which doesn't work." 
+      raise "user_parent= got passed a #{employee.class}, which doesn't work."
     end
   end
 
-  # Depth first(ish) traversal of a graph.  
+  # Depth first(ish) traversal of a graph.
   def each_depth_first
     self.child_collections.each do |child|
       child.each_depth_first do |c|
