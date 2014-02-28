@@ -15,7 +15,7 @@ module Drs
         return obj
       end
 
-      def self.find_children(filter = "none")
+      def find_children(filter = "none")
         # Search SOLR for all objects that have this object set as its Parent in the
         # properties datastream.
 
