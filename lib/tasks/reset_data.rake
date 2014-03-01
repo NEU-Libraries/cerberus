@@ -88,6 +88,9 @@ task :reset_data => :environment do
   create_content_file(:pdf_file, tmp_user, roCol)
   create_content_file(:docx_file, tmp_user, roCol)
 
+  Rake::Task["solr:reindex"].reenable
+  Rake::Task["solr:reindex"].invoke
+
   puts "Reset to stock objects complete."
 
 end
