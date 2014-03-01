@@ -25,12 +25,12 @@ module Drs
 
     def date_of_issue
       #TODO
-      return ""
+      return "1/1/1"
     end
 
     def create_date
       #TODO
-      return ""
+      return "1/1/1"
     end
 
     def creators
@@ -40,11 +40,19 @@ module Drs
 
     def type_label
       #TODO
-      return ""
+      return "changeMe"
     end
 
     def thumbnail_list
-      Array(self[Solrizer.solr_name("thumbnail_list")])
+      Array(self[Solrizer.solr_name("thumbnail_list", :stored_searchable)])
+    end
+
+    def klass
+      Array(self[Solrizer.solr_name("active_fedora_model", :stored_sortable)]).first
+    end
+
+    def parent
+      Array(self[Solrizer.solr_name("parent_id", :stored_searchable)]).first
     end
 
     ##
@@ -85,12 +93,12 @@ module Drs
 
     def title
       #Array(self[Solrizer.solr_name('desc_metadata__title')]).first
-      Array(self[Solrizer.solr_name("title")]).first
+      Array(self[Solrizer.solr_name("title", :stored_sortable)]).first
     end
 
     def description
       #Array(self[Solrizer.solr_name('desc_metadata__description')]).first
-      Array(self[Solrizer.solr_name("abstract")]).first
+      Array(self[Solrizer.solr_name("abstract", :stored_searchable)]).first
     end
 
     def label

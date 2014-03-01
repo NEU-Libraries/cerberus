@@ -19,7 +19,7 @@ class CommunitiesController < SetsController
 
   before_filter :can_read?, except: [:index]
 
-  self.solr_search_params_logic += [:show_children_only]
+  #self.solr_search_params_logic += [:show_children_only]
 
   rescue_from Exceptions::NoParentFoundError, with: :index_redirect
   rescue_from ActiveFedora::ObjectNotFoundError, with: :index_redirect_with_bad_id
@@ -34,13 +34,17 @@ class CommunitiesController < SetsController
   end
 
   def show
-    @set = Community.find(params[:id])
-    #@page_title = @set.title
-    #render :template => 'shared/sets/show'
-
+    @set_id = params[:id]
+    self.solr_search_params_logic += [:find_object]
     (@response, @document_list) = get_search_results
+    @set = SolrDocument.new(@response.docs.first)
+    @page_title = @set.title
+
+    self.solr_search_params_logic.delete(:find_object)
+    self.solr_search_params_logic += [:show_children_only]
+    (@response, @document_list) = get_search_results
+
     render :template => 'shared/sets/show'
-    #render 'index', locals: { facet_list: Array.new }
   end
 
   def employees
@@ -87,7 +91,11 @@ class CommunitiesController < SetsController
 
     def show_children_only(solr_parameters, user_parameters)
       solr_parameters[:fq] ||= []
-      solr_parameters[:fq] << "#{Solrizer.solr_name("parent_id", :stored_searchable)}:\"#{@set.pid}\""
+      solr_parameters[:fq] << "#{Solrizer.solr_name("parent_id", :stored_searchable)}:\"#{@set_id}\""
     end
 
+    def find_object(solr_parameters, user_parameters)
+      solr_parameters[:fq] ||= []
+      solr_parameters[:fq] << "id:\"#{@set_id}\""
+    end
 end
