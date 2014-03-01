@@ -1,7 +1,5 @@
 require 'blacklight/catalog'
 require 'blacklight_advanced_search'
-
-# bl_advanced_search 1.2.4 is doing unitialized constant on these because we're calling ParseBasicQ directly
 require 'parslet'
 require 'parsing_nesting/tree'
 
@@ -18,8 +16,6 @@ class CommunitiesController < SetsController
   include BlacklightAdvancedSearch::Controller
 
   before_filter :can_read?, except: [:index]
-
-  #self.solr_search_params_logic += [:show_children_only]
 
   rescue_from Exceptions::NoParentFoundError, with: :index_redirect
   rescue_from ActiveFedora::ObjectNotFoundError, with: :index_redirect_with_bad_id
