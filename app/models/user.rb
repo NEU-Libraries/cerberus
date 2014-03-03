@@ -1,9 +1,9 @@
 class User < ActiveRecord::Base
-  # Connects this user object to Sufia behaviors. 
+  # Connects this user object to Sufia behaviors.
   include Sufia::User
-  # Connects this user object to Hydra behaviors. 
+  # Connects this user object to Hydra behaviors.
   include Hydra::User
-  # Connects this user object to Blacklights Bookmarks. 
+  # Connects this user object to Blacklights Bookmarks.
   include Blacklight::User
 
   before_destroy :remove_drs_object
@@ -17,12 +17,12 @@ class User < ActiveRecord::Base
 
   attr_accessible :password, :password_confirmation, :remember_me, :nuid, :full_name, :view_pref
 
-  ROLES = %w[admin employee] 
+  ROLES = %w[admin employee]
 
-  def self.find_for_shib(auth, signed_in_resource=nil)    
+  def self.find_for_shib(auth, signed_in_resource=nil)
     user = User.where(:email => auth.info.email).first
-    
-    unless user            
+
+    unless user
       user = User.create(email:auth.info.email, password:Devise.friendly_token[0,20], full_name:auth.info.name, nuid:auth.info.nuid)
       if(auth.info.employee == "staff")
         Sufia.queue.push(EmployeeCreateJob.new(auth.info.nuid, auth.info.name))
@@ -34,9 +34,9 @@ class User < ActiveRecord::Base
 
   # Method added by Blacklight; Blacklight uses #to_s on your
   # user class to get a user-displayable login/identifier for
-  # the account. 
+  # the account.
   def to_s
-    self.nuid
+    self.email
   end
 
   def name
@@ -45,7 +45,7 @@ class User < ActiveRecord::Base
 
   def user_key
     self.nuid
-  end  
+  end
 
   # Currently using group_list attribute as though it will someday contain the grouper information
   # pulled in from Shibboleth

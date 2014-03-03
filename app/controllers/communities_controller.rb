@@ -15,7 +15,10 @@ class CommunitiesController < SetsController
   include BlacklightAdvancedSearch::ParseBasicQ
   include BlacklightAdvancedSearch::Controller
 
-  before_filter :can_read?, except: [:index]
+  # We can do better by using SOLR check instead of Fedora
+  before_filter :can_read?, except: [:index, :show]
+  before_filter :enforce_show_permissions, :only=>:show
+  CatalogController.solr_search_params_logic += [:add_access_controls_to_solr_params]
 
   rescue_from Exceptions::NoParentFoundError, with: :index_redirect
   rescue_from ActiveFedora::ObjectNotFoundError, with: :index_redirect_with_bad_id

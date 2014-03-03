@@ -17,7 +17,11 @@ class NuCollectionsController < SetsController
 
   before_filter :authenticate_user!, only: [:new, :edit, :create, :update, :destroy ]
 
-  before_filter :can_read?, only: [:show]
+  # We can do better by using SOLR check instead of Fedora
+  #before_filter :can_read?, only: [:show]
+  before_filter :enforce_show_permissions, :only=>:show
+  CatalogController.solr_search_params_logic += [:add_access_controls_to_solr_params]
+
   before_filter :can_edit?, only: [:edit, :update]
   before_filter :is_depositor?, only: [:destroy]
 
