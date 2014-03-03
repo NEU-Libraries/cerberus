@@ -50,6 +50,14 @@ class User < ActiveRecord::Base
     return self.role.eql?('admin')
   end
 
+  def user_key
+    self.nuid
+  end
+
+  def self.find_by_user_key(key)
+    self.send("find_by_nuid".to_sym, key)
+  end
+
   private
 
     def remove_drs_object

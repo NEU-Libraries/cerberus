@@ -20,7 +20,6 @@ class NuCollectionsController < SetsController
   # We can do better by using SOLR check instead of Fedora
   #before_filter :can_read?, only: [:show]
   before_filter :enforce_show_permissions, :only=>:show
-  before_filter :enforce_viewing_context_for_show_requests, :only=>:show
   self.solr_search_params_logic += [:add_access_controls_to_solr_params]
 
   before_filter :can_edit?, only: [:edit, :update]
