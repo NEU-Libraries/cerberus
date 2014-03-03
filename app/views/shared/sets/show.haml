@@ -1,9 +1,9 @@
 %ul.breadcrumb
   - breadcrumb_to_root(@set).each do |breadcrumb|
     =breadcrumb
-/   = render partial: 'shared/sets/breadcrumb_action_menu'
-/ -# Had to break off the partial into two files to make sure the popover div renders outside of the list.
-/ = render partial: 'shared/sets/breadcrumb_action_menu_links'
+  = render partial: 'shared/sets/breadcrumb_action_menu'
+-# Had to break off the partial into two files to make sure the popover div renders outside of the list.
+= render partial: 'shared/sets/breadcrumb_action_menu_links'
 
 
 %article.well.clearfix
@@ -28,18 +28,16 @@
     %p
       = @set.description
 
-
-  / TODO - fix user can edit check for SolrDocument
-  / -if @set.klass?(NuCollection) && current_user_can_edit?(@set)
-  /   %nav.set-actions
-  /     %ul.nav.nav-pills
-  /       %li
-  /         %a{:href =>  edit_nu_collection_path(@set)}
-  /           Edit
-  /       %li
-  /         %a{:href =>"#deleteCollectionModal"}(data-toggle="modal")
-  /           Delete
-  /   =render partial: 'shared/sets/delete_collections_modal'
+  -if @set.klass == "NuCollection" && (current_user.can? :edit, @set.pid)
+    %nav.set-actions
+      %ul.nav.nav-pills
+        %li
+          %a{:href =>  edit_nu_collection_path(@set)}
+            Edit
+        %li
+          %a{:href =>"#deleteCollectionModal"}(data-toggle="modal")
+            Delete
+    =render partial: 'shared/sets/delete_collections_modal'
 .row
   - if current_user
     - current_user.view_pref
@@ -48,7 +46,6 @@
       =render partial: 'shared/sets/bottom_action_menu'
 
     %section{class: current_user.view_pref == 'grid' ? 'span12' : "span9" }
-      / =render partial: 'shared/sets/show_sets'
       =render :partial => 'catalog/document_list'
   - else
     %aside.span3
@@ -56,7 +53,6 @@
       =render partial: 'shared/sets/bottom_action_menu'
 
     %section.span9
-      / =render partial: 'shared/sets/show_sets'
       =render :partial => 'catalog/document_list'
 
 %div#add_compilation_form{ style: 'display:none' }
