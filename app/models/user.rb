@@ -43,10 +43,6 @@ class User < ActiveRecord::Base
     self.full_name
   end
 
-  def user_key
-    self.nuid
-  end
-
   # Currently using group_list attribute as though it will someday contain the grouper information
   # pulled in from Shibboleth
 
