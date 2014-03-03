@@ -31,9 +31,8 @@ class ApplicationController < ActionController::Base
     Sufia::Noid.namespaceize(Sufia::IdService.mint)
   end
 
-  helper_method :current_user_can_read?, :current_user_can_edit?
-
   # Why do we have these when current_user.can? is available??
+  # helper_method :current_user_can_read?, :current_user_can_edit?
 
   # # Determine whether or not the viewing user can read this object
   # def current_user_can_read?(fedora_object)
