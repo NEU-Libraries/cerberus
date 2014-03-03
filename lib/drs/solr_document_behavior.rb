@@ -20,7 +20,7 @@ module Drs
     end
 
     def pid
-      Array(self[Solrizer.solr_name("id")]).first
+      Array(self[:id]).first
     end
 
     def date_of_issue
