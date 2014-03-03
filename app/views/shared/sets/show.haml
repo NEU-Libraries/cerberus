@@ -28,16 +28,17 @@
     %p
       = @set.description
 
-  -if @set.klass == "NuCollection" && (current_user.can? :edit, @set.pid)
-    %nav.set-actions
-      %ul.nav.nav-pills
-        %li
-          %a{:href =>  edit_nu_collection_path(@set)}
-            Edit
-        %li
-          %a{:href =>"#deleteCollectionModal"}(data-toggle="modal")
-            Delete
-    =render partial: 'shared/sets/delete_collections_modal'
+  - if current_user
+    -if @set.klass == "NuCollection" && (current_user.can? :edit, @set.pid)
+      %nav.set-actions
+        %ul.nav.nav-pills
+          %li
+            %a{:href =>  edit_nu_collection_path(@set)}
+              Edit
+          %li
+            %a{:href =>"#deleteCollectionModal"}(data-toggle="modal")
+              Delete
+      =render partial: 'shared/sets/delete_collections_modal'
 .row
   - if current_user
     - current_user.view_pref
