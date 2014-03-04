@@ -39,8 +39,7 @@ module Drs
     end
 
     def type_label
-      #TODO
-      t("drs.#{self.klass}.name")
+      I18n.t("drs.#{self.klass}.name")
     end
 
     def thumbnail_list
