@@ -15,7 +15,6 @@ en:
     homepage:
       description:
         short: "The DRS is a secure place to collect your work in one location and create a durable and citable record of research, presentations, publications, data sets, or other scholarly work."
-        long: "Materials in the repository are maintained by Northeastern University Libraries for future use, and can be shared worldwide, with just a few people or groups, or kept private. You can also discover and remix materials created by others: for instance, articles and research data, materials from the <a href=\"http://library.northeastern.edu/archives-special-collections\" target=\"_blank\">University Archives and Special Collections</a>, or images and photographs from the Northeastern community. For more information visit our FAQ. For help with uploading, searching, or logging in, visit our User Guides page."
       browse label: "Explore"
     compilations:
       name: set
@@ -64,63 +63,51 @@ en:
       icon: 'icon-pencil'
       edit_page_title: 'Provide Metadata'
       edit_subtitle: 'Provide information about your contributed file'
-    file display labels:
-      audio_file.rb: Audio File
-      audio_mp3: MP3 Audio
-      image_dynamic: Dynamic Image
-      image_highres: High Resolution Image
-      image_large_file.rb: Large Image
-      image_lowres: Low Resolution Image
-      image_master: Master Image
-      image_master_file.rb: Master Image
-      image_medium_file.rb: Medium Image
-      image_poster: Poster Image
-      image_small_file.rb: Small Image
-      image_thumbnail: Thumbnail Image
-      image_thumbnail_file.rb: Thumbnail Image
-      msexcel: Spreadsheet
-      msexcel_file.rb: Spreadsheet
-      mspowerpoint: Presentation
-      mspowerpoint_file.rb: Presentation
-      msword: Document
-      msword_file.rb: Document
-      pdf: PDF
-      pdf_file.rb: PDF
-      text_file.rb: Document
-      video_file.rb: Video File
-      video_mov: MOV Video
-      video_mp4: MP4 Video
-      xml_ead: Finding Aid (EAD)
-      xml_xslt: Stylesheet
-      zip_file.rb: Zip File
-    full metadata record display labels:
-      Title
-      Alternate Title
-      Creator
-      Creation Date
-      Embargo Date
-      Description
-      Table of Contents
-      Language
-      Journal Frequency
-      Format
-      Type
-      Genre
-      Digital Origin
-      Publisher
-      Usage Information
-      Series
-      Physical Location
-      Subjects
-      Keyword(s)
-      Journal Title
-      Journal Date
-      Journal Volume
-      Journal Issue
-      Journal Pagination
-      Notes
-      URL
-      Upload Date
-      Uploader Name
+    display_labels:
+      AudioFile: Audio File
+      ImageLargeFile: Large Image
+      ImageMasterFile: Master Image
+      ImageMediumFile: Medium Image
+      ImageSmallFile: Small Image
+      ImageThumbnailFile: Thumbnail Image
+      MsexcelFile: Spreadsheet
+      MspowerpointFile: Presentation
+      MswordFile: Document
+      PdfFile: PDF
+      TextFile: Document
+      VideoFile: Video File
+      ZipFile: Zip File
+      Community: Community
+      NuCollection: Collection
+      NuCoreFile: File
+    # full_metadata_record_display_labels:
+    #   Title
+    #   Alternate Title
+    #   Creator
+    #   Creation Date
+    #   Embargo Date
+    #   Description
+    #   Table of Contents
+    #   Language
+    #   Journal Frequency
+    #   Format
+    #   Type
+    #   Genre
+    #   Digital Origin
+    #   Publisher
+    #   Usage Information
+    #   Series
+    #   Physical Location
+    #   Subjects
+    #   Keyword(s)
+    #   Journal Title
+    #   Journal Date
+    #   Journal Volume
+    #   Journal Issue
+    #   Journal Pagination
+    #   Notes
+    #   URL
+    #   Upload Date
+    #   Uploader Name
   blacklight:
     application_name: "DRS"

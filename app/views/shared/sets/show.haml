@@ -18,11 +18,8 @@
 
     = @set.title
     %small
-      / This needs to be fixed also - TODO
-      / = get_set_class_label(@set)
-  / - if @set.thumbnail.content
+      = @set.type_label
   - if !@set.thumbnail_list.empty?
-    / %img{src: sufia.download_path(@set, datastream_id: 'thumbnail'), title: @set.title, alt: "", class: ['img-polorid', 'pull-left']}(aria-labeledby="#{@set.pid}-title" role="presentation")
     %img{src: @set.thumbnail_list.first, title: @set.title, alt: "", class: ['img-polorid', 'pull-left']}(aria-labeledby="#{@set.pid}-title" role="presentation")
   - if @set.description.length > 0
     %p

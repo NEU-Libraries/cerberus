@@ -40,7 +40,7 @@ module Drs
 
     def type_label
       #TODO
-      return "changeMe"
+      t("drs.#{self.klass}.name")
     end
 
     def thumbnail_list
