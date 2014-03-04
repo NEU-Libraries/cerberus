@@ -39,7 +39,10 @@ module Drs
     end
 
     def type_label
-      I18n.t("drs.display_labels.#{Array(self[Solrizer.solr_name("active_fedora_model", :stored_sortable)]).first}")
+      if self.klass == "NuCoreFile"
+        return I18n.t("drs.display_labels.#{self.canonical_object.klass}")
+      end
+      I18n.t("drs.display_labels.#{self.klass}")
     end
 
     def thumbnail_list
@@ -52,6 +55,28 @@ module Drs
 
     def parent
       Array(self[Solrizer.solr_name("parent_id", :stored_searchable)]).first
+    end
+
+    def content_objects(canonical = false)
+      all_possible_models = [ "ImageSmallFile", "ImageMediumFile", "ImageLargeFile",
+                              "ImageMasterFile", "ImageThumbnailFile", "MsexcelFile",
+                              "MspowerpointFile", "MswordFile", "PdfFile", "TextFile",
+                              "ZipFile", "AudioFile", "VideoFile" ]
+      models_stringified = all_possible_models.inject { |base, str| base + " or #{str}" }
+      models_query = ActiveFedora::SolrService.escape_uri_for_query models_stringified
+      full_self_id = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/#{self.pid}"
+
+      if canonical
+        query_result = ActiveFedora::SolrService.query("active_fedora_model_ssi:(#{self.tags.first}) AND is_part_of_ssim:#{full_self_id}", rows: 999)
+      else
+        query_result = ActiveFedora::SolrService.query("active_fedora_model_ssi:(#{models_stringified}) AND is_part_of_ssim:#{full_self_id}", rows: 999)
+      end
+
+      docs = query_result.map { |x| SolrDocument.new(x) }
+    end
+
+    def canonical_object
+      self.content_objects(true).first
     end
 
     ##

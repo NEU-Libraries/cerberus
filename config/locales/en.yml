@@ -67,7 +67,7 @@ en:
     display_labels:
       AudioFile: Audio File
       ImageLargeFile: Large Image
-      ImageMasterFile: Master Image
+      ImageMasterFile: Image
       ImageMediumFile: Medium Image
       ImageSmallFile: Small Image
       ImageThumbnailFile: Thumbnail Image
