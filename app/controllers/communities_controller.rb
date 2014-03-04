@@ -16,7 +16,7 @@ class CommunitiesController < SetsController
   include BlacklightAdvancedSearch::Controller
 
   # We can do better by using SOLR check instead of Fedora
-  # before_filter :can_read?, except: [:index, :show]
+  before_filter :can_read?, except: [:index, :show]
   before_filter :enforce_show_permissions, :only=>:show
   self.solr_search_params_logic += [:add_access_controls_to_solr_params]
 

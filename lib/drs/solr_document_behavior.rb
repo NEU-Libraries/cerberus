@@ -39,7 +39,7 @@ module Drs
     end
 
     def type_label
-      I18n.t("drs.#{self.klass}.name")
+      I18n.t("drs.display_labels.#{Array(self[Solrizer.solr_name("active_fedora_model", :stored_sortable)]).first}")
     end
 
     def thumbnail_list
