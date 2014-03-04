@@ -1,9 +1,9 @@
 - if records.empty?
-  %p= "No uploads of this type seem to exist for this community." 
+  %p= "No uploads of this type seem to exist for this community."
 - records.each do |record|
-  - if current_user_can_read?(record) 
-    %div.entry 
-      %p= "#{record.title}" 
-      %p= "#{record.description}" 
+  - if (current_user.can? :read, record)
+    %div.entry
+      %p= "#{record.title}"
+      %p= "#{record.description}"
       %p= link_to("View this item", nu_core_file_path(record.pid))
-    %p.strong * * * 
+    %p.strong * * *
