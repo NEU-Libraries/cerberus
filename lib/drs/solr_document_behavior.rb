@@ -40,7 +40,7 @@ module Drs
 
     def type_label
       if self.klass == "NuCoreFile"
-        return I18n.t("drs.display_labels.#{self.canonical_object.klass}")
+        return I18n.t("drs.display_labels.#{self.canonical_object.klass}.name")
       end
       I18n.t("drs.display_labels.#{self.klass}.name")
     end

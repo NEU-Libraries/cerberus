@@ -67,6 +67,7 @@ en:
     display_labels:
       AudioFile:
         name: Audio File
+        icon:
       ImageLargeFile:
         name: Large Image
         icon:
@@ -103,9 +104,12 @@ en:
       ZipFile:
         name: Zip File
         icon:
-      Community: Community
-      NuCollection: Collection
-      NuCoreFile: File
+      Community:
+        name: Community
+      NuCollection:
+        name: Collection
+      NuCoreFile:
+        name: File
     # full_metadata_record_display_labels:
     #   Title
     #   Alternate Title
