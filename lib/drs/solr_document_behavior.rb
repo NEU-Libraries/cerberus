@@ -42,7 +42,7 @@ module Drs
       if self.klass == "NuCoreFile"
         return I18n.t("drs.display_labels.#{self.canonical_object.klass}")
       end
-      I18n.t("drs.display_labels.#{self.klass}")
+      I18n.t("drs.display_labels.#{self.klass}.name")
     end
 
     def thumbnail_list

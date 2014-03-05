@@ -65,19 +65,44 @@ en:
       edit_page_title: 'Provide Metadata'
       edit_subtitle: 'Provide information about your contributed file'
     display_labels:
-      AudioFile: Audio File
-      ImageLargeFile: Large Image
-      ImageMasterFile: Image
-      ImageMediumFile: Medium Image
-      ImageSmallFile: Small Image
-      ImageThumbnailFile: Thumbnail Image
-      MsexcelFile: Spreadsheet
-      MspowerpointFile: Presentation
-      MswordFile: Document
-      PdfFile: PDF
-      TextFile: Document
-      VideoFile: Video File
-      ZipFile: Zip File
+      AudioFile:
+        name: Audio File
+      ImageLargeFile:
+        name: Large Image
+        icon:
+      ImageMasterFile:
+        name: Image
+        icon:
+      ImageMediumFile:
+        name: Medium Image
+        icon:
+      ImageSmallFile:
+        name: Small Image
+        icon:
+      ImageThumbnailFile:
+        name: Thumbnail Image
+        icon:
+      MsexcelFile:
+        name: Spreadsheet
+        icon:
+      MspowerpointFile:
+        name: Presentation
+        icon:
+      MswordFile:
+        name: Document
+        icon:
+      PdfFile:
+        name: PDF
+        icon:
+      TextFile:
+        name: Document
+        icon:
+      VideoFile:
+        name: Video File
+        icon:
+      ZipFile:
+        name: Zip File
+        icon:
       Community: Community
       NuCollection: Collection
       NuCoreFile: File
