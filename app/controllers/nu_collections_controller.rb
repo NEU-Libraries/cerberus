@@ -31,9 +31,14 @@ class NuCollectionsController < SetsController
   rescue_from Exceptions::NoParentFoundError, with: :index_redirect
   rescue_from Exceptions::SearchResultTypeError, with: :index_redirect_with_bad_search
 
-  rescue_from ActiveFedora::ObjectNotFoundError do
-    @obj_type = "Collection"
+  rescue_from Blacklight::Exceptions::InvalidSolrID, ActiveFedora::ObjectNotFoundError do |exception|
+    @obj_type = "Community"
     render "error/object_404"
+  end
+
+  rescue_from Hydra::AccessDenied, CanCan::AccessDenied do |exception|
+    flash[:error] = exception.message
+    render_403 and return
   end
 
   def new
