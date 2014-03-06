@@ -29,7 +29,7 @@ en:
         description: High value datasets, such as statistical datasets and research datasets
         icon: icon-table
       research:
-        name: Research
+        name: Research Publications
         description: Faculty research, including articles, preprints, and offprints
         icon: icon-beaker
       presentations:
@@ -49,7 +49,7 @@ en:
         description: Browse Northeastern departments and groups by name
         icon: icon-group
       employees:
-        name: employees
+        name: Faculty
         description: Browse Northeastern faculty by name
         icon: icon-user
     about:
