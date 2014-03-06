@@ -21,11 +21,15 @@ class CommunitiesController < SetsController
   self.solr_search_params_logic += [:add_access_controls_to_solr_params]
 
   rescue_from Exceptions::NoParentFoundError, with: :index_redirect
-  rescue_from ActiveFedora::ObjectNotFoundError, with: :index_redirect_with_bad_id
 
-  rescue_from ActiveFedora::ObjectNotFoundError do
+  rescue_from Blacklight::Exceptions::InvalidSolrID, ActiveFedora::ObjectNotFoundError do |exception|
     @obj_type = "Community"
     render "error/object_404"
+  end
+
+  rescue_from Hydra::AccessDenied, CanCan::AccessDenied do |exception|
+    flash[:error] = exception.message
+    redirect_to communities_path and return
   end
 
   def index
@@ -37,6 +41,7 @@ class CommunitiesController < SetsController
     self.solr_search_params_logic += [:find_object]
     (@response, @document_list) = get_search_results
     @set = SolrDocument.new(@response.docs.first)
+
     @page_title = @set.title
 
     self.solr_search_params_logic.delete(:find_object)
@@ -80,11 +85,6 @@ class CommunitiesController < SetsController
 
     def index_redirect
       flash[:error] = "Communities cannot be created without a parent"
-      redirect_to communities_path and return
-    end
-
-    def index_redirect_with_bad_id
-      flash[:error] = "The id you specified does not seem to exist in Fedora."
       redirect_to communities_path and return
     end
 
