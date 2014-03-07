@@ -24,6 +24,7 @@ def create_content_file(factory_sym, user, parent)
   # Add non garbage metadata to core record.
   core = NuCoreFile.find(master.core_record.pid)
   core.parent = ActiveFedora::Base.find(parent.pid, cast: true)
+  core.properties.parent_id = parent.pid
   core.title = "#{master.content.label}"
   core.description = "Lorem Ipsum Lorem Ipsum Lorem Ipsum"
   core.date_of_issue = Date.today.to_s
@@ -86,6 +87,9 @@ task :reset_data => :environment do
   create_content_file(:image_master_file, tmp_user, roCol)
   create_content_file(:pdf_file, tmp_user, roCol)
   create_content_file(:docx_file, tmp_user, roCol)
+
+  Rake::Task["solr:reindex"].reenable
+  Rake::Task["solr:reindex"].invoke
 
   puts "Reset to stock objects complete."
 

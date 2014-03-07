@@ -1,36 +1,36 @@
 require 'filemagic'
 
-class ContentCreationJob 
+class ContentCreationJob
 
-  attr_accessor :core_file_pid, :file_path, :file_name, :user_id, :delete_file 
-  attr_accessor :core_record, :user 
+  attr_accessor :core_file_pid, :file_path, :file_name, :user_id, :delete_file
+  attr_accessor :core_record, :user
 
-  def queue_name 
+  def queue_name
     :content_creation
   end
 
-  def initialize(core_file, file_path, file_name, user_id, delete_file=true) 
-    self.core_file_pid = core_file 
-    self.file_path     = file_path 
-    self.file_name     = file_name 
+  def initialize(core_file, file_path, file_name, user_id, delete_file=true)
+    self.core_file_pid = core_file
+    self.file_path     = file_path
+    self.file_name     = file_name
     self.user_id       = user_id
-    self.delete_file   = delete_file 
+    self.delete_file   = delete_file
   end
 
   def run
-    begin  
-      self.user = User.find(user_id) 
-      self.core_record = NuCoreFile.find(core_file_pid) 
+    begin
+      self.user = User.find(user_id)
+      self.core_record = NuCoreFile.find(core_file_pid)
 
       content_object = instantiate_appropriate_content_object(file_path, file_name)
-      assign_dcmi_type(content_object) 
+      assign_dcmi_type(content_object)
 
       # Zip files that need zippin'.  Just drop in other file types.
-      if content_object.instance_of? ZipFile 
-        zip_content(content_object) 
+      if content_object.instance_of? ZipFile
+        zip_content(content_object)
       else
         file_contents = File.open(file_path)
-        content_object.add_file(file_contents, 'content', file_name) 
+        content_object.add_file(file_contents, 'content', file_name)
       end
 
       # Assign relevant metadata
@@ -39,12 +39,12 @@ class ContentCreationJob
       content_object.identifier  =  content_object.pid
       content_object.depositor   =  user.nuid
       content_object.rightsMetadata.content = core_record.rightsMetadata.content
-      
+
       content_object.canonize
 
       content_object.save! ? content_object : false
     ensure
-      if delete_file        
+      if delete_file
         FileUtils.rm(file_path)
       end
     end
@@ -54,29 +54,29 @@ class ContentCreationJob
 
     def instantiate_appropriate_content_object(file_path, file_name)
 
-      fmagic = FileMagic.new(FileMagic::MAGIC_MIME).file(file_path) 
+      fmagic = FileMagic.new(FileMagic::MAGIC_MIME).file(file_path)
       fmagic_result = hash_fmagic(fmagic)
 
-      pid = Sufia::Noid.namespaceize(Sufia::IdService.mint) 
+      pid = Sufia::Noid.namespaceize(Sufia::IdService.mint)
 
-      if is_image?(fmagic_result) 
-        return ImageMasterFile.new(pid: pid) 
+      if is_image?(fmagic_result)
+        return ImageMasterFile.new(pid: pid)
       elsif is_pdf?(fmagic_result)
-        return PdfFile.new(pid: pid) 
-      elsif is_audio?(fmagic_result) 
-        return AudioFile.new(pid: pid) 
+        return PdfFile.new(pid: pid)
+      elsif is_audio?(fmagic_result)
+        return AudioFile.new(pid: pid)
       elsif is_video?(fmagic_result)
-        return VideoFile.new(pid: pid) 
+        return VideoFile.new(pid: pid)
       elsif is_msword?(fmagic_result, file_name)
-        return MswordFile.new(pid: pid) 
-      elsif is_msexcel?(fmagic_result, file_name) 
-        return MsexcelFile.new(pid: pid) 
-      elsif is_msppt?(fmagic_result, file_name) 
-        return MspowerpointFile.new(pid: pid) 
+        return MswordFile.new(pid: pid)
+      elsif is_msexcel?(fmagic_result, file_name)
+        return MsexcelFile.new(pid: pid)
+      elsif is_msppt?(fmagic_result, file_name)
+        return MspowerpointFile.new(pid: pid)
       elsif is_texty?(fmagic_result)
-        return TextFile.new(pid: pid) 
-      else 
-        return ZipFile.new(pid: pid) 
+        return TextFile.new(pid: pid)
+      else
+        return ZipFile.new(pid: pid)
       end
     end
 
@@ -87,84 +87,84 @@ class ContentCreationJob
         zipfile_name = Rails.root.join("tmp", z).to_s
 
         # Load our content into said zipfile.
-        Zip::Archive.open(zipfile_name, Zip::CREATE) do |zipfile| 
+        Zip::Archive.open(zipfile_name, Zip::CREATE) do |zipfile|
           zipfile.add_file(file_path)
         end
 
         # Add zipfile to the ZipFile object
         f = File.open(zipfile_name)
         content_object.add_file(f, "content", File.basename(zipfile_name))
-      ensure 
-        FileUtils.rm(zipfile_name) 
+      ensure
+        FileUtils.rm(zipfile_name)
       end
     end
 
     # Tag core with a DCMI noun based on the sort of content object created.
-    def assign_dcmi_type(content_object) 
-      if [ImageMasterFile, VideoFile].include? content_object.class 
-        core_record.dcmi_type = "image" 
-      elsif [TextFile, PdfFile, MswordFile].include? content_object.class 
+    def assign_dcmi_type(content_object)
+      if [ImageMasterFile, VideoFile].include? content_object.class
+        core_record.dcmi_type = "image"
+      elsif [TextFile, PdfFile, MswordFile].include? content_object.class
         core_record.dcmi_type = "text"
-      elsif content_object.is_a? AudioFile 
-        core_record.dcmi_type = "audio" 
-      elsif content_object.is_a? MsexcelFile 
+      elsif content_object.is_a? AudioFile
+        core_record.dcmi_type = "audio"
+      elsif content_object.is_a? MsexcelFile
         core_record.dcmi_type = "dataset"
-      elsif content_object.is_a? MspowerpointFile 
+      elsif content_object.is_a? MspowerpointFile
         core_record.dcmi_type = "interactive resource"
-      elsif content_object.is_a? ZipFile 
-        core_record.dcmi_type = "unknown"  
+      elsif content_object.is_a? ZipFile
+        core_record.dcmi_type = "unknown"
       end
 
       core_record.save! ? core_record : Rails.logger.warn("Failed to update #{core_record.pid}'s dcmi type")
     end
 
-    # Takes a string like "image/jpeg ; encoding=binary", generated by FileMagic. 
-    # And turns it into the hash {raw_type: 'image', sub_type: 'jpeg', encoding: 'binary'} 
+    # Takes a string like "image/jpeg ; encoding=binary", generated by FileMagic.
+    # And turns it into the hash {raw_type: 'image', sub_type: 'jpeg', encoding: 'binary'}
     def hash_fmagic(fmagic_string)
-      ary = fmagic_string.split(";") 
+      ary = fmagic_string.split(";")
 
-      result = {} 
+      result = {}
       result[:raw_type] = ary.first.split("/").first.strip
       result[:sub_type] = ary.first.split("/").last.strip
       result[:encoding] = ary.last.split("=").last.strip
       return result
     end
 
-    def is_image?(fm_hash) 
-      return fm_hash[:raw_type] == 'image' 
+    def is_image?(fm_hash)
+      return fm_hash[:raw_type] == 'image'
     end
 
-    def is_pdf?(fm_hash) 
+    def is_pdf?(fm_hash)
       return fm_hash[:sub_type] == 'pdf'
     end
 
-    def is_video?(fm_hash) 
-      return fm_hash[:raw_type] == 'video' 
+    def is_video?(fm_hash)
+      return fm_hash[:raw_type] == 'video'
     end
 
-    def is_audio?(fm_hash) 
-      return fm_hash[:raw_type] == 'audio' 
+    def is_audio?(fm_hash)
+      return fm_hash[:raw_type] == 'audio'
     end
 
     def is_msword?(fm_hash, fname)
-      signature = ['zip', 'msword', 'octet-stream'].include? fm_hash[:sub_type] 
+      signature = ['zip', 'msword', 'octet-stream', 'vnd.openxmlformats-officedocument.wordprocessingml.document'].include? fm_hash[:sub_type]
       file_extension = ['docx', 'doc'].include? fname.split(".").last
-      return signature && file_extension 
+      return signature && file_extension
     end
 
     def is_msexcel?(fm_hash, fname)
       signature = ['zip', 'vnd.ms-office'].include? fm_hash[:sub_type]
-      file_extension = ['xls', 'xlsx', 'xlw'].include? fname.split(".").last 
+      file_extension = ['xls', 'xlsx', 'xlw'].include? fname.split(".").last
       return signature && file_extension
     end
 
     def is_msppt?(fm_hash, fname)
-      signature = ['zip', 'vnd.ms-powerpoint'].include? fm_hash[:sub_type] 
-      file_extension = ['ppt', 'pptx', 'pps', 'ppsx'].include? fname.split(".").last 
+      signature = ['zip', 'vnd.ms-powerpoint'].include? fm_hash[:sub_type]
+      file_extension = ['ppt', 'pptx', 'pps', 'ppsx'].include? fname.split(".").last
       return signature && file_extension
     end
 
-    def is_texty?(fm_hash) 
-      return fm_hash[:raw_type] == 'text' 
+    def is_texty?(fm_hash)
+      return fm_hash[:raw_type] == 'text'
     end
 end

@@ -2,7 +2,7 @@
 
 %figure.pull-left
 
-  - if item.instance_of?( NuCoreFile )
+  - if item.klass == "NuCoreFile"
     - if defined? dynamic_picture #pass in a local variable if we want to have the images be able to go all the way to the 10 width size on active state.
       = render partial: 'shared/thumbnails/dynamic_picture', locals: { thumbs: item.thumbnail_list }
 
@@ -10,16 +10,16 @@
 
       =render partial: 'shared/thumbnails/thumbnail_picture', locals: { thumbs: item.thumbnail_list }
 
-  - elsif ( item.instance_of?(NuCollection) or item.instance_of?( Community )  ) and  item.thumbnail_list.length > 0
+  - elsif ( item.klass == "NuCollection" or item.klass == "Community"  ) and  item.thumbnail_list.length > 0
     -# Now lets see if communities and collections have a thumbnail associated to it, if so render out the thumbnail
 
     = image_tag item.thumbnail_list[0], alt: '', role: 'presentation'
 
-  - elsif item.instance_of? ( NuCollection ) # and doesn't have a thumbnail to render
+  - elsif item.klass == "NuCollection" # and doesn't have a thumbnail to render
 
     = render partial: 'shared/icon', locals: { class_string: 'icon-folder-open' }
 
-  - elsif item.instance_of?( Community )
+  - elsif item.klass == "Community"
 
     = render partial: 'shared/icon', locals: { class_string: 'icon-group' }
 

@@ -5,11 +5,11 @@
 - content_for :local_js do
   initialize_audio();
 - thumbs = @nu_core_file.thumbnail_list
-- layout_class =  thumbs.length > 5 ?  'span12' : 'span6' 
+- layout_class =  thumbs.length > 5 ?  'span12' : 'span6'
 
 = render :partial => 'nu_core_files/breadcrumbs'
 %article{class: ['drs-item', 'drs-item-full', @nu_core_file.type ],  data: { drsitem: @nu_core_file.pid } }
-  %header 
+  %header
     %h1.page-header= @nu_core_file
 
   %section.row
@@ -21,7 +21,7 @@
         = render partial: 'show_descriptions'
         = render partial: 'show_details'
       -if @nu_core_file.content_objects
-        %section.drs-item-derivatives  
+        %section.drs-item-derivatives
           = render partial: 'show_derivatives', locals: {contents: @nu_core_file.content_objects}
       / = render :partial => 'users/activity_log', :locals => {:events => @events}
     / / /.span6

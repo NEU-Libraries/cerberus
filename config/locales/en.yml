@@ -64,63 +64,80 @@ en:
       icon: 'icon-pencil'
       edit_page_title: 'Provide Metadata'
       edit_subtitle: 'Provide information about your contributed file'
-    file display labels:
-      audio_file.rb: Audio File
-      audio_mp3: MP3 Audio
-      image_dynamic: Dynamic Image
-      image_highres: High Resolution Image
-      image_large_file.rb: Large Image
-      image_lowres: Low Resolution Image
-      image_master: Master Image
-      image_master_file.rb: Master Image
-      image_medium_file.rb: Medium Image
-      image_poster: Poster Image
-      image_small_file.rb: Small Image
-      image_thumbnail: Thumbnail Image
-      image_thumbnail_file.rb: Thumbnail Image
-      msexcel: Spreadsheet
-      msexcel_file.rb: Spreadsheet
-      mspowerpoint: Presentation
-      mspowerpoint_file.rb: Presentation
-      msword: Document
-      msword_file.rb: Document
-      pdf: PDF
-      pdf_file.rb: PDF
-      text_file.rb: Document
-      video_file.rb: Video File
-      video_mov: MOV Video
-      video_mp4: MP4 Video
-      xml_ead: Finding Aid (EAD)
-      xml_xslt: Stylesheet
-      zip_file.rb: Zip File
-    full metadata record display labels:
-      Title
-      Alternate Title
-      Creator
-      Creation Date
-      Embargo Date
-      Description
-      Table of Contents
-      Language
-      Journal Frequency
-      Format
-      Type
-      Genre
-      Digital Origin
-      Publisher
-      Usage Information
-      Series
-      Physical Location
-      Subjects
-      Keyword(s)
-      Journal Title
-      Journal Date
-      Journal Volume
-      Journal Issue
-      Journal Pagination
-      Notes
-      URL
-      Upload Date
-      Uploader Name
+    display_labels:
+      AudioFile:
+        name: Audio File
+        icon:
+      ImageLargeFile:
+        name: Large Image
+        icon:
+      ImageMasterFile:
+        name: Image
+        icon:
+      ImageMediumFile:
+        name: Medium Image
+        icon:
+      ImageSmallFile:
+        name: Small Image
+        icon:
+      ImageThumbnailFile:
+        name: Thumbnail Image
+        icon:
+      MsexcelFile:
+        name: Spreadsheet
+        icon:
+      MspowerpointFile:
+        name: Presentation
+        icon:
+      MswordFile:
+        name: Document
+        icon:
+      PdfFile:
+        name: PDF
+        icon:
+      TextFile:
+        name: Document
+        icon:
+      VideoFile:
+        name: Video File
+        icon:
+      ZipFile:
+        name: Zip File
+        icon:
+      Community:
+        name: Community
+      NuCollection:
+        name: Collection
+      NuCoreFile:
+        name: File
+    # full_metadata_record_display_labels:
+    #   Title
+    #   Alternate Title
+    #   Creator
+    #   Creation Date
+    #   Embargo Date
+    #   Description
+    #   Table of Contents
+    #   Language
+    #   Journal Frequency
+    #   Format
+    #   Type
+    #   Genre
+    #   Digital Origin
+    #   Publisher
+    #   Usage Information
+    #   Series
+    #   Physical Location
+    #   Subjects
+    #   Keyword(s)
+    #   Journal Title
+    #   Journal Date
+    #   Journal Volume
+    #   Journal Issue
+    #   Journal Pagination
+    #   Notes
+    #   URL
+    #   Upload Date
+    #   Uploader Name
   blacklight:
     application_name: "DRS"
