@@ -24,18 +24,16 @@ module Drs
     end
 
     def date_of_issue
-      #TODO
-      return "1/1/1"
+      #TODO - this is broken in metadata assignment
+      Array(self[Solrizer.solr_name("desc_metadata__date_created")]).first
     end
 
     def create_date
-      #TODO
-      return "1/1/1"
+      Array(self[Solrizer.solr_name("desc_metadata__date_created")]).first
     end
 
     def creators
-      #TODO
-      return Array.new
+      Array(self[Solrizer.solr_name("desc_metadata__creator")])
     end
 
     def type_label
