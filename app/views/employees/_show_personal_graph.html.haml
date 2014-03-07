@@ -4,16 +4,18 @@
       = t('drs.personal_graph.sytem_generated_folders')
     -if generated_folders.length > 0
       %section{class: ["drs-items-list", "drs-items"] }
-        - generated_folders.each do |f| 
-          =render partial: "shared/drs_item/drs_item", locals: { item: f }
+        - generated_folders.each do |f|
+          / =render partial: "shared/drs_item/drs_item", locals: { item: f }
+          =render partial: "shared/drs_item/drs_item", locals: { item: SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{f.pid}\"").first) }
   //.span6
   %article.span6
     %h3
       = t('drs.personal_graph.user_created_folders')
     -if user_folders.length > 0
       %section{class: ["drs-items-list", "drs-items"] }
-        - user_folders.each do |f| 
-          =render partial: "shared/drs_item/drs_item", locals: { item: f }
+        - user_folders.each do |f|
+          / =render partial: "shared/drs_item/drs_item", locals: { item: f }
+          =render partial: "shared/drs_item/drs_item", locals: { item: SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{f.pid}\"").first) }
     -else
       .alert.alert-info
         %strong
