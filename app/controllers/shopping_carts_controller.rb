@@ -114,7 +114,7 @@ class ShoppingCartsController < ApplicationController
     def can_dl?
       if params[:add]
         record = ActiveFedora::Base.find(params[:add], cast: true)
-        render_403 and return unless current_user_can_read?(record)
+        render_403 and return unless (current_user.can? :read, record)
 
         if session[:ids].length >= 100
           flash.now[:error] = "Can't have more than 100 items in your cart"

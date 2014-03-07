@@ -27,12 +27,8 @@
               Expand / collapse toggle
         - else
           = item.description
-  - if item.instance_of?(NuCoreFile)
-    / Would provided a nice way to expand the list in the collapse.
-    -# %button{type: "button", class: ['btn', 'btn-clear', 'btn-small'], data: {toggle: 'show' , target: "menu[type='toolbar']"} }
-    -#  = render(partial: 'shared/icon', locals: { class_string: 'icon-expand' })
+  - if item.klass == "NuCoreFile"
     %menu.btn-toolbar(type="toolbar")
-
       = render partial: 'nu_core_files/derivative_btn_group', locals: {contents: item.content_objects}
       - icon = render partial: 'shared/icon',  locals: { class_string: "icon-th-list", alt_text: "Add to " + t('drs.compilations.name')}
       =link_to icon.html_safe , compilations_path(file: item.pid), remote: true, title:  "Add to " + t('drs.compilations.name'), data: {toggle: "tooltip"}, class: 'btn btn-mini btn-clear'

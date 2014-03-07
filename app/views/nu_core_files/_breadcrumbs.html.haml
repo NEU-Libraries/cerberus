@@ -24,5 +24,5 @@
           = crumb
 - else
   %ul.breadcrumb
-    - breadcrumb_to_root(@nu_core_file).each do |breadcrumb| 
+    - breadcrumb_to_root(SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{@nu_core_file.pid}\"").first)).each do |breadcrumb|
       =breadcrumb

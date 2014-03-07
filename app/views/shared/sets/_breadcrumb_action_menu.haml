@@ -1,4 +1,4 @@
-- if !current_user.nil? && ( current_user.can? :edit, @set )
+- if !current_user.nil? && ( current_user.can? :edit, @set.pid )
   %li.action
     %a#addToSet(data-pid="#{@set.pid}" href="#" data-add-to-set="1")
       %i.icon-plus-sign-alt

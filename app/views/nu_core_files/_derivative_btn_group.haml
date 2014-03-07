@@ -1,5 +1,5 @@
 - contents.each do |content|
-  - if current_user_can_read?(content)
+  - if (!current_user.nil? && (current_user.can? :read, content)) || content.public?
     -if content.class.name != "ImageThumbnailFile"
       .btn-group
         = render partial: 'nu_core_files/derivative_button', locals: {content: content }

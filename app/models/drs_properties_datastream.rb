@@ -15,8 +15,9 @@
 # properties datastream: catch-all for info that didn't have another home.  Particularly depositor.
 class DrsPropertiesDatastream < ActiveFedora::OmDatastream
   set_terminology do |t|
-    t.root(:path=>"fields" ) 
+    t.root(:path=>"fields" )
     # This is where we put the user id of the object depositor -- impacts permissions/access controls
+    t.parent_id :index_as=>[:stored_searchable]
     t.depositor :index_as=>[:stored_searchable]
     t.thumbnail_list :index_as=>[:stored_searchable]
     t.in_progress path: 'inProgress'
@@ -39,26 +40,26 @@ class DrsPropertiesDatastream < ActiveFedora::OmDatastream
   end
 
   def in_progress?
-    return ! self.in_progress.empty? 
+    return ! self.in_progress.empty?
   end
 
-  def tag_as_in_progress 
-    self.in_progress = 'true' 
+  def tag_as_in_progress
+    self.in_progress = 'true'
   end
 
-  def tag_as_completed 
-    self.in_progress = [] 
+  def tag_as_completed
+    self.in_progress = []
   end
 
   def canonize
-    self.canonical = 'yes' 
+    self.canonical = 'yes'
   end
 
   def uncanonize
-    self.canonical = '' 
+    self.canonical = ''
   end
 
   def canonical?
-    return self.canonical.first == 'yes' 
+    return self.canonical.first == 'yes'
   end
 end
