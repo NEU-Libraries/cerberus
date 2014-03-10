@@ -22,19 +22,19 @@ class NuCoreFilesController < ApplicationController
   before_filter :authenticate_user!, except: [:show]
 
   skip_before_filter :normalize_identifier # , only: [:provide_metadata, :rescue_incomplete_files, :destroy_incomplete_files, :process_metadata]
-  skip_load_and_authorize_resource only: [:provide_metadata, 
-                                          :rescue_incomplete_files, 
-                                          :destroy_incomplete_files, 
-                                          :process_metadata, 
+  skip_load_and_authorize_resource only: [:provide_metadata,
+                                          :rescue_incomplete_files,
+                                          :destroy_incomplete_files,
+                                          :process_metadata,
                                           :edit,
-                                          :update, 
-                                          :destroy] 
-  
+                                          :update,
+                                          :destroy]
+
   before_filter :can_edit_parent?, only: [:new]
 
-  before_filter :can_read?, only: [:show] 
+  before_filter :can_read?, only: [:show]
   before_filter :can_edit?, only: [:edit, :update]
-  before_filter :is_depositor?, only: [:destroy] 
+  before_filter :is_depositor?, only: [:destroy]
 
   after_filter :log_view, only: [:show]
 
@@ -42,15 +42,15 @@ class NuCoreFilesController < ApplicationController
 
   rescue_from ActiveFedora::ObjectNotFoundError do
     @obj_type = "Object"
-    render "error/object_404"      
+    render "error/object_404"
   end
 
   def destroy_incomplete_files
     NuCoreFile.users_in_progress_files(current_user).each do |file|
-      file.destroy 
+      file.destroy
     end
 
-    flash[:notice] = "Incomplete files destroyed" 
+    flash[:notice] = "Incomplete files destroyed"
     redirect_to new_nu_core_file_path
   end
 
@@ -62,14 +62,14 @@ class NuCoreFilesController < ApplicationController
     # but worthwhile to keep if we reimplement batch uploads. In the meantime only
     # NuCoreFile.users_in_progress_files(x).first should ever occur (not more than one at a time).
 
-    # @sample_incomplete_file = NuCoreFile.users_in_progress_files(current_user).first 
-    # @incomplete_files = NuCoreFile.users_in_progress_files(current_user) 
+    # @sample_incomplete_file = NuCoreFile.users_in_progress_files(current_user).first
+    # @incomplete_files = NuCoreFile.users_in_progress_files(current_user)
     @page_title = "Provide Upload Metadata"
   end
 
   # routed to files/rescue_incomplete_files
-  # page for allowing users to either permanently delete or apply metadata to 
-  # files abandoned without completing step two of the upload process. 
+  # page for allowing users to either permanently delete or apply metadata to
+  # files abandoned without completing step two of the upload process.
   def rescue_incomplete_files
     file_titles = []
 
@@ -77,7 +77,7 @@ class NuCoreFilesController < ApplicationController
       file_titles << NuCoreFile.find(pid).title
     end
 
-    @incomplete_file_titles = file_titles 
+    @incomplete_file_titles = file_titles
     @page_title = "Rescue abandoned files"
   end
 
@@ -86,7 +86,8 @@ class NuCoreFilesController < ApplicationController
     @nu_core_file = NuCoreFile.users_in_progress_files(current_user).first
     update_metadata if params[:nu_core_file]
     flash[:notice] = 'Your files are being processed by ' + t('sufia.product_name') + ' in the background. The metadata and access controls you specified are being applied. Files will be marked <span class="label label-important" title="Private">Private</span> until this process is complete (shouldn\'t take too long, hang in there!). You may need to refresh your dashboard to see these updates.'
-    redirect_to nu_collection_path(params[:collection_id])
+    #redirect_to nu_collection_path(params[:collection_id])
+    redirect_to nu_core_file_path(@nu_core_file.pid)
   end
 
   # routed to /files/:id
@@ -108,8 +109,8 @@ class NuCoreFilesController < ApplicationController
     if !in_progress_files.empty?
 
       param_hash = {}
-      in_progress_files.each_with_index do |file, index| 
-        param_hash = param_hash.merge({"file#{index}" => file.pid}) 
+      in_progress_files.each_with_index do |file, index|
+        param_hash = param_hash.merge({"file#{index}" => file.pid})
       end
 
       redirect_to rescue_incomplete_files_path(param_hash) and return
@@ -117,12 +118,12 @@ class NuCoreFilesController < ApplicationController
 
     @nu_core_file = ::NuCoreFile.new
     #@batch_noid = Sufia::Noid.noidify(Sufia::IdService.mint)
-    @collection_id = params[:parent]      
+    @collection_id = params[:parent]
   end
 
   def edit
     @nu_core_file = NuCoreFile.find(params[:id])
-    @page_title = "Edit #{@nu_core_file.title}" 
+    @page_title = "Edit #{@nu_core_file.title}"
 
     #@nu_core_file.initialize_fields
     #@groups = current_user.groups
@@ -130,7 +131,7 @@ class NuCoreFilesController < ApplicationController
 
   def update
     # Holy hell, do we need to relook at this whole section.... - DGC
-    @nu_core_file = NuCoreFile.find(params[:id]) 
+    @nu_core_file = NuCoreFile.find(params[:id])
 
     version_event = false
 
@@ -171,10 +172,10 @@ class NuCoreFilesController < ApplicationController
   def destroy
     @title = NuCoreFile.find(params[:id]).title
 
-    if NuCoreFile.find(params[:id]).destroy 
-      redirect_to(sufia.dashboard_index_path, notice: "#{@title} destroyed") 
+    if NuCoreFile.find(params[:id]).destroy
+      redirect_to(sufia.dashboard_index_path, notice: "#{@title} destroyed")
     else
-      redirect_to(sufia.dashboard_index_path, notice: "#{@title} wasn't destroyed") 
+      redirect_to(sufia.dashboard_index_path, notice: "#{@title} wasn't destroyed")
     end
   end
 
@@ -202,53 +203,53 @@ class NuCoreFilesController < ApplicationController
       # remove the tempfile (only if it is a temp file)
       file.tempfile.delete if file.respond_to?(:tempfile)
     end
-  end  
+  end
 
   def no_parent_rescue
-    flash[:error] = "Parent not specified or invalid" 
-    redirect_to root_path 
+    flash[:error] = "Parent not specified or invalid"
+    redirect_to root_path
   end
 
-  def update_metadata 
+  def update_metadata
     @nu_core_file.date_modified = DateTime.now.to_s
-    @nu_core_file.update_attributes(params[:nu_core_file]) 
+    @nu_core_file.update_attributes(params[:nu_core_file])
   end
 
-  #Allows us to map different params 
+  #Allows us to map different params
   def update_metadata_from_upload_screen(nu_core_file, user, file, collection_id)
     # Relative path is set by the jquery uploader when uploading a directory
     nu_core_file.relative_path = params[:relative_path] if params[:relative_path]
 
-    # Context derived attributes 
-    nu_core_file.depositor = user.nuid 
-    nu_core_file.tag_as_in_progress 
-    nu_core_file.title = file.original_filename 
-    nu_core_file.date_uploaded = Date.today 
+    # Context derived attributes
+    nu_core_file.depositor = user.nuid
+    nu_core_file.tag_as_in_progress
+    nu_core_file.title = file.original_filename
+    nu_core_file.date_uploaded = Date.today
     nu_core_file.date_modified = Date.today
     nu_core_file.creator = user.name
-    
+
     collection = !collection_id.blank? ? NuCollection.find(collection_id) : nil
     nu_core_file.set_parent(collection, user) if collection
 
     # Significant content tagging
-    pf_type = collection.personal_folder_type 
+    pf_type = collection.personal_folder_type
 
-    if pf_type 
-      nu_core_file.category = NuCoreFile.personal_folder_to_category(pf_type) 
-    end 
+    if pf_type
+      nu_core_file.category = NuCoreFile.personal_folder_to_category(pf_type)
+    end
 
-    yield(nu_core_file) if block_given? 
-    nu_core_file.save! 
+    yield(nu_core_file) if block_given?
+    nu_core_file.save!
   end
 
   def process_file(file)
-    if virus_check(file) == 0 
+    if virus_check(file) == 0
       @nu_core_file = ::NuCoreFile.new
-      
+
       # We move the file contents to a more permanent location so that our ContentCreationJob can access them.
       # An ensure block in that job handles cleanup of this file.
       tempdir = Rails.root.join("tmp")
-      new_path = tempdir.join("#{file.original_filename}") 
+      new_path = tempdir.join("#{file.original_filename}")
       FileUtils.mv(file.tempfile.path, new_path.to_s)
 
       update_metadata_from_upload_screen(@nu_core_file, current_user, file, params[:collection_id])

@@ -65,7 +65,7 @@ module Drs
       full_self_id = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/#{self.pid}"
 
       if canonical
-        query_result = ActiveFedora::SolrService.query("active_fedora_model_ssi:(#{self.tags.first}) AND is_part_of_ssim:#{full_self_id}", rows: 999)
+        query_result = ActiveFedora::SolrService.query("canonical_tesim:yes AND is_part_of_ssim:#{full_self_id}", rows: 999)
       else
         query_result = ActiveFedora::SolrService.query("active_fedora_model_ssi:(#{models_stringified}) AND is_part_of_ssim:#{full_self_id}", rows: 999)
       end
