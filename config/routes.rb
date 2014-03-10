@@ -5,7 +5,7 @@ Drs::Application.routes.draw do
   HydraHead.add_routes(self)
   Hydra::BatchEdit.add_routes(self)
 
-  resources :nu_collections, :path => 'collections', except: [:index] 
+  resources :nu_collections, :path => 'collections', except: [:index]
   get "/collections" => redirect("/communities")
 
   resources :communities, only: [:index, :show]
@@ -19,22 +19,22 @@ Drs::Application.routes.draw do
     mount Resque::Server, :at => "/resque"
   end
 
-  # Community Specific queries 
-  get '/communities/:id/employees' => 'communities#employees', as: 'community_employees' 
-  get '/communities/:id/research' => 'communities#research_publications', as: 'community_research' 
-  get '/communities/:id/other' => 'communities#other_publications', as: 'community_other' 
-  get '/communities/:id/presentations' => 'communities#presentations', as: 'community_presentations' 
-  get '/communities/:id/datasets' => 'communities#data_sets', as: 'community_data_sets' 
+  # Community Specific queries
+  get '/communities/:id/employees' => 'communities#employees', as: 'community_employees'
+  get '/communities/:id/research' => 'communities#research_publications', as: 'community_research'
+  get '/communities/:id/other' => 'communities#other_publications', as: 'community_other'
+  get '/communities/:id/presentations' => 'communities#presentations', as: 'community_presentations'
+  get '/communities/:id/datasets' => 'communities#data_sets', as: 'community_data_sets'
   get '/communities/:id/pedagogical' => 'communities#learning_objects', as: 'community_pedagogical'
   post '/communities/:id/attach_employee/:employee_id' => 'communities#attach_employee', as: 'attach_employee'
-  
+
   resources :compilations, :controller => "compilations", :path => "sets"
   get "/sets/:id/download" => 'compilations#show_download', as: 'prepare_download'
-  get "/sets/:id/ping" => 'compilations#ping_download', as: 'ping_download'  
+  get "/sets/:id/ping" => 'compilations#ping_download', as: 'ping_download'
   get "/sets/:id/trigger_download" => 'compilations#download', as: 'trigger_download'
-  
-  match "/sets/:id/:entry_id" => 'compilations#delete_file', via: 'delete', as: 'delete_entry' 
-  match "/sets/:id/:entry_id" => 'compilations#add_file', via: 'post', as: 'add_entry' 
+
+  match "/sets/:id/:entry_id" => 'compilations#delete_file', via: 'delete', as: 'delete_entry'
+  match "/sets/:id/:entry_id" => 'compilations#add_file', via: 'post', as: 'add_entry'
 
   get "/files/provide_metadata" => "nu_core_files#provide_metadata"
   post "/files/process_metadata" => "nu_core_files#process_metadata"
@@ -47,7 +47,7 @@ Drs::Application.routes.draw do
 
   namespace :admin do
     # Add/Remove communities from an employee, delete employee
-    resources :communities, except: [:show] 
+    resources :communities, except: [:show]
     resources :employees, only: [:index, :edit, :update, :destroy]
   end
 
@@ -58,14 +58,17 @@ Drs::Application.routes.draw do
 
   # Best bits queries
   get '/theses' => 'catalog#theses', as: 'theses'
-  get '/research' => 'catalog#research', as: 'research' 
+  get '/research' => 'catalog#research', as: 'research'
   get '/datasets' => 'catalog#datasets', as: 'datasets'
-  get '/presentations' => 'catalog#presentations', as: 'presentations'  
+  get '/presentations' => 'catalog#presentations', as: 'presentations'
   get '/learning_objects' => 'catalog#learning_objects', as: 'learning_objects'
 
   get '/admin' => 'admin#index', as: 'admin_panel'
   get '/admin/modify_employee' => 'admin#modify_employee', as: 'modify_employee'
-   
+
+  #fixing sufia's bad route
+  match 'notifications/:uid/delete' => 'mailbox#delete', as: :mailbox_delete, via: [:delete]
+
   # Generic file routes
   resources :nu_core_files, :path => :files, :except => :index do
     member do
