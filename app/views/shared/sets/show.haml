@@ -41,14 +41,13 @@
     - current_user.view_pref
     %aside.drs-sidebar{class: current_user.view_pref == 'grid' ? 'span12' : "span3" }
       =render partial: 'shared/sets/sets_sidebar'
-      =render partial: 'shared/sets/bottom_action_menu'
 
     %section{class: current_user.view_pref == 'grid' ? 'span12' : "span9" }
       =render :partial => 'catalog/document_list'
+      =render partial: 'shared/sets/bottom_action_menu'
   - else
     %aside.span3
       =render partial: 'shared/sets/sets_sidebar'
-      =render partial: 'shared/sets/bottom_action_menu'
 
     %section.span9
       =render :partial => 'catalog/document_list'
