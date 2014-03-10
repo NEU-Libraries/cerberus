@@ -20,11 +20,11 @@ class DrsPropertiesDatastream < ActiveFedora::OmDatastream
     t.parent_id :index_as=>[:stored_searchable]
     t.depositor :index_as=>[:stored_searchable]
     t.thumbnail_list :index_as=>[:stored_searchable]
+    t.canonical  :index_as=>[:stored_searchable]
     t.in_progress path: 'inProgress'
     # This is where we put the relative path of the file if submitted as a folder
     t.relative_path
     t.personal_folder_type
-    t.canonical
     t.import_url path: 'importUrl', :index_as=>:symbol
   end
 
