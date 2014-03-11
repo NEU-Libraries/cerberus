@@ -15,7 +15,6 @@
 
 class NuCoreFilesController < ApplicationController
   include Sufia::Controller
-  include Sufia::FilesControllerBehavior
   include Drs::ControllerHelpers::EditableObjects
   include Drs::ControllerHelpers::ViewLogger
 
@@ -85,20 +84,14 @@ class NuCoreFilesController < ApplicationController
     Sufia.queue.push(MetadataUpdateJob.new(current_user.user_key, params))
     @nu_core_file = NuCoreFile.users_in_progress_files(current_user).first
     update_metadata if params[:nu_core_file]
-    flash[:notice] = 'Your files are being processed by ' + t('sufia.product_name') + ' in the background. The metadata and access controls you specified are being applied. Files will be marked <span class="label label-important" title="Private">Private</span> until this process is complete (shouldn\'t take too long, hang in there!). You may need to refresh your dashboard to see these updates.'
-    #redirect_to nu_collection_path(params[:collection_id])
+    flash[:notice] = 'Your files are being processed by ' + t('sufia.product_name') + ' in the background. The metadata and access controls you specified are being applied. Files will be marked <span class="label label-important" title="Private">Private</span> until this process is complete (shouldn\'t take too long, hang in there!).'
     redirect_to nu_core_file_path(@nu_core_file.pid)
   end
 
   # routed to /files/:id
   def show
-    respond_to do |format|
-      format.html {
-        @events = @nu_core_file.events(100)
-        @page_title = @nu_core_file.title
-      }
-      format.endnote { render :text => @nu_core_file.export_as_endnote }
-    end
+    @nu_core_file = NuCoreFile.find(params[:id])
+    @page_title = @nu_core_file.title
   end
 
   # routed to /files/new
@@ -117,20 +110,15 @@ class NuCoreFilesController < ApplicationController
     end
 
     @nu_core_file = ::NuCoreFile.new
-    #@batch_noid = Sufia::Noid.noidify(Sufia::IdService.mint)
     @collection_id = params[:parent]
   end
 
   def edit
     @nu_core_file = NuCoreFile.find(params[:id])
     @page_title = "Edit #{@nu_core_file.title}"
-
-    #@nu_core_file.initialize_fields
-    #@groups = current_user.groups
   end
 
   def update
-    # Holy hell, do we need to relook at this whole section.... - DGC
     @nu_core_file = NuCoreFile.find(params[:id])
 
     version_event = false
@@ -161,9 +149,6 @@ class NuCoreFilesController < ApplicationController
       # do not trigger an update event if a version event has already been triggered
       Sufia.queue.push(ContentUpdateEventJob.new(@nu_core_file.pid, current_user.user_key)) unless version_event
       @nu_core_file.record_version_committer(current_user)
-      #redirect_to sufia.edit_generic_file_path(:tab => params[:redirect_tab]), :notice => render_to_string(:partial=>'generic_files/asset_updated_flash', :locals => { :generic_file => @nu_core_file })
-    else
-      #render action: 'edit'
     end
 
     redirect_to(@nu_core_file)
@@ -181,98 +166,90 @@ class NuCoreFilesController < ApplicationController
 
   protected
 
- def create_from_local(params)
-    begin
-      # check error condition No files
-      return json_error("Error! No file to save") if !params.has_key?(:file)
+   def create_from_local(params)
+      begin
+        # check error condition No files
+        return json_error("Error! No file to save") if !params.has_key?(:file)
 
-      file = params[:file]
-      if !file
-        json_error "Error! No file for upload", 'unknown file', :status => :unprocessable_entity
-      elsif (empty_file?(file))
-        json_error "Error! Zero Length File!", file.original_filename
-      elsif (!terms_accepted?)
-        json_error "You must accept the terms of service!", file.original_filename
-      else
-        process_file(file)
-      end
-    rescue => error
-      logger.error "NuCoreFilesController::create rescued #{error.class}\n\t#{error.to_s}\n #{error.backtrace.join("\n")}\n\n"
-      json_error "Error occurred while creating generic file."
-    ensure
-      # remove the tempfile (only if it is a temp file)
-      file.tempfile.delete if file.respond_to?(:tempfile)
-    end
-  end
-
-  def no_parent_rescue
-    flash[:error] = "Parent not specified or invalid"
-    redirect_to root_path
-  end
-
-  def update_metadata
-    @nu_core_file.date_modified = DateTime.now.to_s
-    @nu_core_file.update_attributes(params[:nu_core_file])
-  end
-
-  #Allows us to map different params
-  def update_metadata_from_upload_screen(nu_core_file, user, file, collection_id)
-    # Relative path is set by the jquery uploader when uploading a directory
-    nu_core_file.relative_path = params[:relative_path] if params[:relative_path]
-
-    # Context derived attributes
-    nu_core_file.depositor = user.nuid
-    nu_core_file.tag_as_in_progress
-    nu_core_file.title = file.original_filename
-    nu_core_file.date_uploaded = Date.today
-    nu_core_file.date_modified = Date.today
-    nu_core_file.creator = user.name
-
-    collection = !collection_id.blank? ? NuCollection.find(collection_id) : nil
-    nu_core_file.set_parent(collection, user) if collection
-
-    # Significant content tagging
-    pf_type = collection.personal_folder_type
-
-    if pf_type
-      nu_core_file.category = NuCoreFile.personal_folder_to_category(pf_type)
-    end
-
-    yield(nu_core_file) if block_given?
-    nu_core_file.save!
-  end
-
-  def process_file(file)
-    if virus_check(file) == 0
-      @nu_core_file = ::NuCoreFile.new
-
-      # We move the file contents to a more permanent location so that our ContentCreationJob can access them.
-      # An ensure block in that job handles cleanup of this file.
-      tempdir = Rails.root.join("tmp")
-      new_path = tempdir.join("#{file.original_filename}")
-      FileUtils.mv(file.tempfile.path, new_path.to_s)
-
-      update_metadata_from_upload_screen(@nu_core_file, current_user, file, params[:collection_id])
-      Sufia.queue.push(ContentCreationJob.new(@nu_core_file.pid, new_path.to_s, file.original_filename, current_user.id))
-      @nu_core_file.record_version_committer(current_user)
-      redirect_to files_provide_metadata_path
-    else
-      render :json => [{:error => "Error creating generic file."}]
-    end
-  end
-
-  def perform_local_ingest
-      if Sufia.config.enable_local_ingest && current_user.respond_to?(:directory)
-        if ingest_local_file
-          redirect_to files_provide_metadata_path
+        file = params[:file]
+        if !file
+          json_error "Error! No file for upload", 'unknown file', :status => :unprocessable_entity
+        elsif (empty_file?(file))
+          json_error "Error! Zero Length File!", file.original_filename
+        elsif (!terms_accepted?)
+          json_error "You must accept the terms of service!", file.original_filename
         else
-          flash[:alert] = "Error importing files from user directory."
-          render :new
+          process_file(file)
         end
-      else
-        flash[:alert] = "Your account is not configured for importing files from a user-directory on the server."
-        render :new
+      rescue => error
+        logger.error "NuCoreFilesController::create rescued #{error.class}\n\t#{error.to_s}\n #{error.backtrace.join("\n")}\n\n"
+        json_error "Error occurred while creating generic file."
+      ensure
+        # remove the tempfile (only if it is a temp file)
+        file.tempfile.delete if file.respond_to?(:tempfile)
       end
+    end
+
+    def no_parent_rescue
+      flash[:error] = "Parent not specified or invalid"
+      redirect_to root_path
+    end
+
+    def update_metadata
+      @nu_core_file.date_modified = DateTime.now.to_s
+      @nu_core_file.update_attributes(params[:nu_core_file])
+    end
+
+    #Allows us to map different params
+    def update_metadata_from_upload_screen(nu_core_file, user, file, collection_id)
+      # Relative path is set by the jquery uploader when uploading a directory
+      nu_core_file.relative_path = params[:relative_path] if params[:relative_path]
+
+      # Context derived attributes
+      nu_core_file.depositor = user.nuid
+      nu_core_file.tag_as_in_progress
+      nu_core_file.title = file.original_filename
+      nu_core_file.date_uploaded = Date.today
+      nu_core_file.date_modified = Date.today
+      nu_core_file.creator = user.name
+
+      collection = !collection_id.blank? ? NuCollection.find(collection_id) : nil
+      nu_core_file.set_parent(collection, user) if collection
+
+      # Significant content tagging
+      pf_type = collection.personal_folder_type
+
+      if pf_type
+        nu_core_file.category = NuCoreFile.personal_folder_to_category(pf_type)
+      end
+
+      yield(nu_core_file) if block_given?
+      nu_core_file.save!
+    end
+
+    def process_file(file)
+      if virus_check(file) == 0
+        @nu_core_file = ::NuCoreFile.new
+
+        # We move the file contents to a more permanent location so that our ContentCreationJob can access them.
+        # An ensure block in that job handles cleanup of this file.
+        tempdir = Rails.root.join("tmp")
+        new_path = tempdir.join("#{file.original_filename}")
+        FileUtils.mv(file.tempfile.path, new_path.to_s)
+
+        update_metadata_from_upload_screen(@nu_core_file, current_user, file, params[:collection_id])
+        Sufia.queue.push(ContentCreationJob.new(@nu_core_file.pid, new_path.to_s, file.original_filename, current_user.id))
+        @nu_core_file.record_version_committer(current_user)
+        redirect_to files_provide_metadata_path
+      else
+        render :json => [{:error => "Error creating file."}]
+      end
+    end
+
+    def virus_check( file)
+      stat = Sufia::GenericFile::Actions.virus_check(file)
+      flash[:error] = "Virus checking did not pass for #{File.basename(file.path)} status = #{stat}" unless stat == 0
+      stat
     end
 
 end
