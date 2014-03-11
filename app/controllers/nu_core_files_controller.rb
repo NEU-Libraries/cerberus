@@ -94,6 +94,30 @@ class NuCoreFilesController < ApplicationController
     @page_title = @nu_core_file.title
   end
 
+  def create
+    begin
+      # check error condition No files
+      return json_error("Error! No file to save") if !params.has_key?(:file)
+
+      file = params[:file]
+      if !file
+        json_error "Error! No file for upload", 'unknown file', :status => :unprocessable_entity
+      elsif (empty_file?(file))
+        json_error "Error! Zero Length File!", file.original_filename
+      elsif (!terms_accepted?)
+        json_error "You must accept the terms of service!", file.original_filename
+      else
+        process_file(file)
+      end
+    rescue => error
+      logger.error "NuCoreFilesController::create rescued #{error.class}\n\t#{error.to_s}\n #{error.backtrace.join("\n")}\n\n"
+      json_error "Error occurred while creating generic file."
+    ensure
+      # remove the tempfile (only if it is a temp file)
+      file.tempfile.delete if file.respond_to?(:tempfile)
+    end
+  end
+
   # routed to /files/new
   def new
     @page_title = "Upload New Files"
@@ -166,28 +190,10 @@ class NuCoreFilesController < ApplicationController
 
   protected
 
-   def create_from_local(params)
-      begin
-        # check error condition No files
-        return json_error("Error! No file to save") if !params.has_key?(:file)
-
-        file = params[:file]
-        if !file
-          json_error "Error! No file for upload", 'unknown file', :status => :unprocessable_entity
-        elsif (empty_file?(file))
-          json_error "Error! Zero Length File!", file.original_filename
-        elsif (!terms_accepted?)
-          json_error "You must accept the terms of service!", file.original_filename
-        else
-          process_file(file)
-        end
-      rescue => error
-        logger.error "NuCoreFilesController::create rescued #{error.class}\n\t#{error.to_s}\n #{error.backtrace.join("\n")}\n\n"
-        json_error "Error occurred while creating generic file."
-      ensure
-        # remove the tempfile (only if it is a temp file)
-        file.tempfile.delete if file.respond_to?(:tempfile)
-      end
+    def json_error(error, name=nil, additional_arguments={})
+      args = {:error => error}
+      args[:name] = name if name
+      render additional_arguments.merge({:json => [args]})
     end
 
     def no_parent_rescue
@@ -250,6 +256,19 @@ class NuCoreFilesController < ApplicationController
       stat = Sufia::GenericFile::Actions.virus_check(file)
       flash[:error] = "Virus checking did not pass for #{File.basename(file.path)} status = #{stat}" unless stat == 0
       stat
+    end
+
+    def empty_file?(file)
+      (file.respond_to?(:tempfile) && file.tempfile.size == 0) || (file.respond_to?(:size) && file.size == 0)
+    end
+
+    # The name of the datastream where we store the file data
+    def datastream_id
+      'content'
+    end
+
+    def terms_accepted?
+      params[:terms_of_service] == '1'
     end
 
 end
