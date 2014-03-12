@@ -3,7 +3,6 @@ module Drs
     extend ActiveSupport::Concern
     include ActiveModel::MassAssignmentSecurity
     include Hydra::ModelMethods
-    include Hydra::ModelMixins::RightsMetadata
     include Drs::MetadataAssignment
     include Drs::Rights::MassPermissions
     include Drs::NuFile::Characterizable
