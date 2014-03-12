@@ -121,6 +121,13 @@ class NuCoreFile < ActiveFedora::Base
     "File"
   end
 
+  def update_derivative_metadata
+    self.content_objects.each do |e|
+      e.rightsMetadata.content = self.rightsMetadata.content
+      e.save!
+    end
+  end
+
   private
 
     def purge_content_bearing_objects
