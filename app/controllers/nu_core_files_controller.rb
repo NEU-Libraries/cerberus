@@ -84,6 +84,10 @@ class NuCoreFilesController < ApplicationController
     Sufia.queue.push(MetadataUpdateJob.new(current_user.user_key, params))
     @nu_core_file = NuCoreFile.users_in_progress_files(current_user).first
     update_metadata if params[:nu_core_file]
+
+    @nu_core_file = NuCoreFile.find(@nu_core_file.pid)
+    Sufia.queue.push(ContentCreationJob.new(@nu_core_file.pid, @nu_core_file.tmp_path, @nu_core_file.original_filename, current_user.id))
+
     flash[:notice] = 'Your files are being processed by ' + t('sufia.product_name') + ' in the background. The metadata and access controls you specified are being applied. Files will be marked <span class="label label-important" title="Private">Private</span> until this process is complete (shouldn\'t take too long, hang in there!).'
     redirect_to nu_core_file_path(@nu_core_file.pid)
   end
@@ -207,7 +211,7 @@ class NuCoreFilesController < ApplicationController
     end
 
     #Allows us to map different params
-    def update_metadata_from_upload_screen(nu_core_file, user, file, collection_id)
+    def update_metadata_from_upload_screen(nu_core_file, user, file, collection_id, tmp_path)
       # Relative path is set by the jquery uploader when uploading a directory
       nu_core_file.relative_path = params[:relative_path] if params[:relative_path]
 
@@ -218,6 +222,8 @@ class NuCoreFilesController < ApplicationController
       nu_core_file.date_uploaded = Date.today
       nu_core_file.date_modified = Date.today
       nu_core_file.creator = user.name
+      nu_core_file.tmp_path = tmp_path
+      nu_core_file.original_filename = file.original_filename
 
       collection = !collection_id.blank? ? NuCollection.find(collection_id) : nil
       nu_core_file.set_parent(collection, user) if collection
@@ -243,8 +249,7 @@ class NuCoreFilesController < ApplicationController
         new_path = tempdir.join("#{file.original_filename}")
         FileUtils.mv(file.tempfile.path, new_path.to_s)
 
-        update_metadata_from_upload_screen(@nu_core_file, current_user, file, params[:collection_id])
-        Sufia.queue.push(ContentCreationJob.new(@nu_core_file.pid, new_path.to_s, file.original_filename, current_user.id))
+        update_metadata_from_upload_screen(@nu_core_file, current_user, file, params[:collection_id], new_path.to_s)
         @nu_core_file.record_version_committer(current_user)
         redirect_to files_provide_metadata_path
       else
