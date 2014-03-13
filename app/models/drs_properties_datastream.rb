@@ -26,6 +26,9 @@ class DrsPropertiesDatastream < ActiveFedora::OmDatastream
     t.relative_path
     t.personal_folder_type
     t.import_url path: 'importUrl', :index_as=>:symbol
+    # Moving ContentCreationJob later, need to store these for that to work
+    t.tmp_path
+    t.original_filename
   end
 
   def self.xml_template
