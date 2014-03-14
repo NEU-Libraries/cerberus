@@ -20,12 +20,13 @@ sudo yum install sqlite-devel-3.6.20-1.el6.x86_64 --assumeyes
 sudo yum install ghostscript-8.70-19.el6.x86_64 --assumeyes
 sudo yum install ImageMagick-devel-6.5.4.7-7.el6_5.x86_64 --assumeyes
 sudo yum install redis-2.4.10-1.el6.x86_64 --assumeyes
-sudo yum install libreoffice-core-4.0.4.2-9.el6.x86_64 --assumeyes
+sudo yum install libreoffice-headless-4.0.4.2-9.el6.x86_64 --assumeyes
 sudo yum install unzip-6.0-1.el6.x86_64 --assumeyes
 sudo yum install git-1.7.1-3.el6_4.1.x86_64 --assumeyes
 sudo yum install zsh-4.3.10-7.el6.x86_64 --assumeyes
 sudo yum install mysql-devel-5.1.73-3.el6_5.x86_64 --assumeyes
 sudo yum install nodejs --assumeyes
+sudo yum install htop --assumeyes
 
 echo "Installing FITS"
 cd /home/vagrant
