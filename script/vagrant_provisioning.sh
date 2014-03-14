@@ -50,7 +50,7 @@ rake jetty:config
 rake reset_data
 rake db:test:prepare
 touch /home/vagrant/drs/.git/hooks/pre-push
-echo 'rake smoke_test' >> .git/hooks/pre-push
+echo 'rake smoke_test' >> /home/vagrant/drs/.git/hooks/pre-push
 
 echo "Installing Oh-My-Zsh"
 
