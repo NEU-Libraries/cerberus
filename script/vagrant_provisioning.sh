@@ -1,13 +1,15 @@
 #!/usr/bin/env bash
 
 echo "Adding EPEL repository"
-sudo wget http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
+wget http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
 
 echo "Adding REMI repository"
-sudo wget http://rpms.famillecollet.com/enterprise/remi-release-6.rpm
+wget http://rpms.famillecollet.com/enterprise/remi-release-6.rpm
 
 echo "Enabling EPEL and REMI repositories"
 sudo rpm -Uvh remi-release-6*.rpm epel-release-6*.rpm
+rm /home/vagrant/epel-release-6-8.noarch.rpm
+rm /home/vagrant/remi-release-6.rpm
 
 echo "Installing package dependencies"
 
@@ -26,12 +28,12 @@ echo "Installing FITS"
 cd /home/vagrant
 curl -O https://fits.googlecode.com/files/fits-0.6.2.zip
 unzip fits-0.6.2.zip
-chmod +x fits-0.6.2/fits.sh
-sudo mv fits-0.6.2 /opt/fits-0.6.2
+chmod +x /home/vagrant/fits-0.6.2/fits.sh
+sudo mv /home/vagrant/fits-0.6.2 /opt/fits-0.6.2
 
-echo 'PATH=$PATH:/opt/fits-0.6.2' >> ~/.bashrc
-echo 'export PATH'  >> ~/.bashrc
-source /etc/bashrc
+echo 'PATH=$PATH:/opt/fits-0.6.2' >> /home/vagrant/.bashrc
+echo 'export PATH'  >> /home/vagrant/.bashrc
+source /home/vagrant/.bashrc
 
 echo "Installing RVM"
 
@@ -47,7 +49,7 @@ rails g hydra:jetty
 rake jetty:config
 rake reset_data
 rake db:test:prepare
-touch .git/hooks/pre-push
+touch /home/vagrant/drs/.git/hooks/pre-push
 echo 'rake smoke_test' >> .git/hooks/pre-push
 
 echo "Installing Oh-My-Zsh"
