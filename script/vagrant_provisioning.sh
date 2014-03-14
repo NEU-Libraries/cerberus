@@ -23,7 +23,7 @@ sudo yum install zsh-4.3.10-7.el6.x86_64 --assumeyes
 
 echo "Installing FITS"
 
-cd ~
+cd /home/vagrant
 curl -O https://fits.googlecode.com/files/fits-0.6.2.zip
 unzip fits-0.6.2.zip
 chmod +x fits-0.6.2/fits.sh
@@ -39,7 +39,7 @@ echo "Installing RVM"
 
 echo "Setting up DRS"
 
-cd drs
+cd /home/vagrant/drs
 gem install bundler
 bundle install
 rake db:migrate
@@ -52,6 +52,6 @@ echo 'rake smoke_test' >> .git/hooks/pre-push
 
 echo "Installing Oh-My-Zsh"
 
-cd ~
+cd /home/vagrant
 \curl -L http://install.ohmyz.sh | sh
 sudo chsh -s /bin/zsh vagrant
