@@ -29,8 +29,8 @@ unzip fits-0.6.2.zip
 chmod +x fits-0.6.2/fits.sh
 sudo mv fits-0.6.2 /opt/fits-0.6.2
 
-echo 'PATH=$PATH:/opt/fits-0.6.2' >> ~/.bashrc 
-echo 'export PATH'  >> ~/.bashrc 
+echo 'PATH=$PATH:/opt/fits-0.6.2' >> ~/.bashrc
+echo 'export PATH'  >> ~/.bashrc
 source /etc/bashrc
 
 echo "Installing RVM"
@@ -39,6 +39,7 @@ echo "Installing RVM"
 
 echo "Setting up DRS"
 
+cd drs
 gem install bundler
 bundle install
 rake db:migrate

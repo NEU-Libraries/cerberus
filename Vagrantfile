@@ -46,5 +46,5 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.provision "shell", path: "script/vagrant_provisioning.sh"
 
   # Share the current directory to /vagrant on the virtual machine
-  config.vm.synced_folder "." , "/vagrant", nfs: true
+  config.vm.synced_folder "." , "/home/vagrant/drs", nfs: true
 end
