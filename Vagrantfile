@@ -30,7 +30,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   # Optimizations for vmware_fusion machines
   config.vm.provider "vmware_fusion" do |vm|
-    vm.customize ['modifyvm', :id, '--memory', '3072', '--cpus', '4',]
+    vm.customize ['modifyvm', :id, '--memory', '3072', '--cpus', '4', '--natdnsproxy1', 'off', '--natdnshostresolver1', 'off', '--ioapic', 'on']
   end
 
   # Some optimization configurations kept in if someone needs to run Virtualbox
