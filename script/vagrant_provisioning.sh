@@ -42,6 +42,9 @@ cd /home/vagrant
 source /home/vagrant/.profile
 rvm pkg install libyaml
 rvm install ruby-2.0.0-p451
+rvm use ruby-2.0.0-p451
+source /home/vagrant/.rvm/scripts/rvm
+/bin/bash --login
 
 echo "Setting up DRS"
 
@@ -51,7 +54,6 @@ bundle install
 rake db:migrate
 rails g hydra:jetty
 rake jetty:config
-rake reset_data
 rake db:test:prepare
 touch /home/vagrant/drs/.git/hooks/pre-push
 echo 'rake smoke_test' >> /home/vagrant/drs/.git/hooks/pre-push
