@@ -31,6 +31,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Optimizations for vmware_fusion machines
   config.vm.provider "vmware_fusion" do |vm|
     vm.customize ['modifyvm', :id, '--memory', '3072', '--cpus', '4', '--natdnsproxy1', 'off', '--natdnshostresolver1', 'off', '--ioapic', 'on']
+    vm.vmx["memsize"] = "3072"
+    vm.vmx["numvcpus"] = "4"
   end
 
   # Some optimization configurations kept in if someone needs to run Virtualbox
@@ -47,4 +49,5 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   # Share the current directory to /vagrant on the virtual machine
   config.vm.synced_folder "." , "/home/vagrant/drs", nfs: true
+  config.vm.network "private_network", ip: "192.168.50.4"
 end
