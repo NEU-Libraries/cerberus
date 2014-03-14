@@ -52,5 +52,6 @@ echo 'rake smoke_test' >> .git/hooks/pre-push
 
 echo "Installing Oh-My-Zsh"
 
+cd ~
 \curl -L http://install.ohmyz.sh | sh
 sudo chsh -s /bin/zsh vagrant
