@@ -20,10 +20,9 @@ class ContentCreationJob
       self.user = User.find(user_id)
       self.core_record = NuCoreFile.find(core_file_pid)
 
-      pid = Sufia::Noid.namespaceize(Sufia::IdService.mint)
-
       #content_object = instantiate_appropriate_content_object(file_path, file_name)
-      content_object = core_record.canonical_class.constantize.new(pid)
+      klass = core_record.canonical_class.constantize
+      content_object = klass.new(pid: Sufia::Noid.namespaceize(Sufia::IdService.mint))
 
       assign_dcmi_type(content_object)
 
