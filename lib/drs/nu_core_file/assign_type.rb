@@ -29,7 +29,6 @@ module Drs
         end
 
         assign_dcmi_type(result)
-        return result
       end
 
       private
