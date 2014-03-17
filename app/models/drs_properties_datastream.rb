@@ -29,6 +29,7 @@ class DrsPropertiesDatastream < ActiveFedora::OmDatastream
     # Moving ContentCreationJob later, need to store these for that to work
     t.tmp_path
     t.original_filename
+    t.canonical_class
   end
 
   def self.xml_template

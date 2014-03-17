@@ -1,5 +1,3 @@
-require 'filemagic'
-
 class ContentCreationJob
 
   attr_accessor :core_file_pid, :file_path, :file_name, :user_id, :delete_file
@@ -21,6 +19,8 @@ class ContentCreationJob
     begin
       self.user = User.find(user_id)
       self.core_record = NuCoreFile.find(core_file_pid)
+
+      pid = Sufia::Noid.namespaceize(Sufia::IdService.mint)
 
       content_object = instantiate_appropriate_content_object(file_path, file_name)
       assign_dcmi_type(content_object)
