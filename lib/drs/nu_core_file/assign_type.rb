@@ -28,24 +28,24 @@ module Drs
           self.canonical_class = "ZipFile"
         end
 
-        assign_dcmi_type(result)
+        assign_dcmi_type
       end
 
       private
 
         # Tag core with a DCMI noun based on the sort of content object created.
-        def assign_dcmi_type(content_object)
-          if [ImageMasterFile, VideoFile].include? content_object.class
+        def assign_dcmi_type
+          if [ImageMasterFile, VideoFile].include? self.canonical_class.constantize
             self.dcmi_type = "image"
-          elsif [TextFile, PdfFile, MswordFile].include? content_object.class
+          elsif [TextFile, PdfFile, MswordFile].include? self.canonical_class.constantize
             self.dcmi_type = "text"
-          elsif content_object.is_a? AudioFile
+          elsif self.canonical_class.constantize.is_a? AudioFile
             self.dcmi_type = "audio"
-          elsif content_object.is_a? MsexcelFile
+          elsif self.canonical_class.constantize.is_a? MsexcelFile
             self.dcmi_type = "dataset"
-          elsif content_object.is_a? MspowerpointFile
+          elsif self.canonical_class.constantize.is_a? MspowerpointFile
             self.dcmi_type = "interactive resource"
-          elsif content_object.is_a? ZipFile
+          elsif self.canonical_class.constantize.is_a? ZipFile
             self.dcmi_type = "unknown"
           end
 
