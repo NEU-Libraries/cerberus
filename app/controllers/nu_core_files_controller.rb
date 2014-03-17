@@ -249,6 +249,8 @@ class NuCoreFilesController < ApplicationController
         new_path = tempdir.join("#{file.original_filename}")
         FileUtils.mv(file.tempfile.path, new_path.to_s)
 
+        @nu_core_file.
+
         update_metadata_from_upload_screen(@nu_core_file, current_user, file, params[:collection_id], new_path.to_s)
         @nu_core_file.record_version_committer(current_user)
         redirect_to files_provide_metadata_path

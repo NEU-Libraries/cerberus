@@ -1,3 +1,5 @@
+require 'filemagic'
+
 module Drs
   module NuCoreFile
     module AssignType
@@ -6,28 +8,24 @@ module Drs
         fmagic = FileMagic.new(FileMagic::MAGIC_MIME).file(file_path)
         fmagic_result = hash_fmagic(fmagic)
 
-        pid = Sufia::Noid.namespaceize(Sufia::IdService.mint)
-
-        result = ::NuCoreFile.new
-
         if is_image?(fmagic_result)
-          result = ImageMasterFile.new(pid: pid)
+          self.canonical_class = "ImageMasterFile"
         elsif is_pdf?(fmagic_result)
-          result = PdfFile.new(pid: pid)
+          self.canonical_class = "PdfFile"
         elsif is_audio?(fmagic_result)
-          result = AudioFile.new(pid: pid)
+          self.canonical_class = "AudioFile"
         elsif is_video?(fmagic_result)
-          result = VideoFile.new(pid: pid)
+          self.canonical_class = "VideoFile"
         elsif is_msword?(fmagic_result, file_name)
-          result = MswordFile.new(pid: pid)
+          self.canonical_class = "MswordFile"
         elsif is_msexcel?(fmagic_result, file_name)
-          result = MsexcelFile.new(pid: pid)
+          self.canonical_class = "MsexcelFile"
         elsif is_msppt?(fmagic_result, file_name)
-          result = MspowerpointFile.new(pid: pid)
+          self.canonical_class = "MspowerpointFile"
         elsif is_texty?(fmagic_result)
-          result = TextFile.new(pid: pid)
+          self.canonical_class = "TextFile"
         else
-          result = ZipFile.new(pid: pid)
+          self.canonical_class = "ZipFile"
         end
 
         assign_dcmi_type(result)
