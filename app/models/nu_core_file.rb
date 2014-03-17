@@ -6,6 +6,7 @@ class NuCoreFile < ActiveFedora::Base
   include Drs::Rights::PermissionsAssignmentHelper
   include Drs::MetadataAssignment
   include Drs::NuCoreFile::Export
+  include Drs::NuCoreFile::AssignType
   include Drs::Find
   include Drs::ImpressionCount
 
