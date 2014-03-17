@@ -1,0 +1,3 @@
+class AssignTypeJob
+
+end
