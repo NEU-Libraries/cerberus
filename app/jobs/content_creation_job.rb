@@ -20,11 +20,8 @@ class ContentCreationJob
       self.user = User.find(user_id)
       self.core_record = NuCoreFile.find(core_file_pid)
 
-      #content_object = instantiate_appropriate_content_object(file_path, file_name)
       klass = core_record.canonical_class.constantize
       content_object = klass.new(pid: Sufia::Noid.namespaceize(Sufia::IdService.mint))
-
-      assign_dcmi_type(content_object)
 
       # Zip files that need zippin'.  Just drop in other file types.
       if content_object.instance_of? ZipFile
