@@ -22,7 +22,9 @@ class ContentCreationJob
 
       pid = Sufia::Noid.namespaceize(Sufia::IdService.mint)
 
-      content_object = instantiate_appropriate_content_object(file_path, file_name)
+      #content_object = instantiate_appropriate_content_object(file_path, file_name)
+      content_object = core_record.canonical_class.constantize.new(pid)
+
       assign_dcmi_type(content_object)
 
       # Zip files that need zippin'.  Just drop in other file types.

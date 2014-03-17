@@ -225,6 +225,8 @@ class NuCoreFilesController < ApplicationController
       nu_core_file.tmp_path = tmp_path
       nu_core_file.original_filename = file.original_filename
 
+      nu_core_file.instantiate_appropriate_content_object(tmp_path, file.original_filename)
+
       collection = !collection_id.blank? ? NuCollection.find(collection_id) : nil
       nu_core_file.set_parent(collection, user) if collection
 
@@ -248,8 +250,6 @@ class NuCoreFilesController < ApplicationController
         tempdir = Rails.root.join("tmp")
         new_path = tempdir.join("#{file.original_filename}")
         FileUtils.mv(file.tempfile.path, new_path.to_s)
-
-        @nu_core_file.
 
         update_metadata_from_upload_screen(@nu_core_file, current_user, file, params[:collection_id], new_path.to_s)
         @nu_core_file.record_version_committer(current_user)
