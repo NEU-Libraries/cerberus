@@ -36,6 +36,10 @@ module Drs
       self.rightsMetadata.permissions({group: 'public'}, 'read')
     end
 
+    def klass
+      self.class.name
+    end
+
     def self.virus_check(file)
       if defined? ClamAV
         stat = ClamAV.instance.scanfile(file.path)
