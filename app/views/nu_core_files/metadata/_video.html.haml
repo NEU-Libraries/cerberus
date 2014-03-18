@@ -1,8 +1,7 @@
-  .personal_creator.row-fluid
-    .span6
-      %h2 Video Metadata
-    .span6
-      = f.label :thumbnail, "Upload thumbnail"
-      = f.file_field :thumbnail, name: 'thumbnail'
-      %span.help-block
-        Will be displayed on file page. (150px by 150px)
+.video_metadata.row-fluid
+  .span4
+    %legend Video Thumbnail
+  .span8
+    = f.file_field :thumbnail, name: 'thumbnail'
+    %span.help-block
+      Will be displayed on file page. (150px by 150px)
