@@ -28,6 +28,9 @@ sudo yum install mysql-devel-5.1.73-3.el6_5.x86_64 --assumeyes
 sudo yum install nodejs --assumeyes
 sudo yum install htop --assumeyes
 
+echo "Making redis auto-start"
+sudo chkconfig redis on
+
 echo "Installing FITS"
 cd /home/vagrant
 curl -O https://fits.googlecode.com/files/fits-0.6.2.zip
