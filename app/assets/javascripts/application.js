@@ -30,4 +30,5 @@
 //= require compilations
 //= require shopping_carts
 //= require analytics.js
+//= require bootstrap-slider
 

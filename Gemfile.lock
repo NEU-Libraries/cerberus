@@ -116,6 +116,8 @@ GEM
       activesupport (>= 2.0)
     bootstrap-sass (2.3.2.1)
       sass (~> 3.2)
+    bootstrap-slider-rails (1.9.0)
+      railties (>= 3.2, < 5.0)
     bower-rails (0.5.0)
     builder (3.0.4)
     cancan (1.6.10)
@@ -503,6 +505,7 @@ PLATFORMS
 DEPENDENCIES
   blacklight
   bootstrap-sass (~> 2.3.2.1)
+  bootstrap-slider-rails
   bower-rails (~> 0.5.0)
   capistrano (~> 3.0.0)
   capistrano-bundler
