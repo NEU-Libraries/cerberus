@@ -1,11 +1,14 @@
-
+- if @incomplete_file.canonical_class == "VideoFile"
+  %fieldset.row-fluid
+    .span12
+      = render partial: 'nu_core_files/metadata/video', locals: {:f => f}
 %fieldset.row-fluid
   .span8
     = f.label :title, "Title", class: "required-label"
     - if !@incomplete_file.nil?
       = f.text_field :title, required: true, pattern: ".*\\S.*", name: 'nu_core_file[title][]', class: "input-block-level", placeholder: "US Congressman poses with a supporter", value: @incomplete_file.title
     - else
-      = f.text_field :title, required: true, pattern: ".*\\S.*", name: 'nu_core_file[title][]', class: "input-block-level", placeholder: "US Congressman poses with a supporter"              
+      = f.text_field :title, required: true, pattern: ".*\\S.*", name: 'nu_core_file[title][]', class: "input-block-level", placeholder: "US Congressman poses with a supporter"
   .span4
     = f.label :date_of_issue, "Date of Issuance", class: "required-label"
     #date-issued.input-append.date(data-date-format="yyyy-mm-dd")
@@ -27,7 +30,7 @@
       Add Corporate Creator
 
 .row-fluid
-  
+
   %fieldset.span6
     %legend Description
     = f.label :description, "Description", class: "required-label"
@@ -37,8 +40,8 @@
     = render partial: 'shared/sets/data_form_keywords', locals: {:f => f, :array_type => "nu_core_file", :keywords => @nu_core_file.keywords }
     %button#add_another_keyword.btn.btn.btn-block.btn-success{:type => "button"}
       %i.icon-plus-sign.icon-large
-      Add Keyword    
-    
+      Add Keyword
+
 .row-fluid
   %fieldset.span6
     %legend Mass Permissions
@@ -46,9 +49,9 @@
     = select_tag 'nu_core_file[mass_permissions]', options_for_select(@nu_core_file.valid_mass_permissions, @nu_core_file.mass_permissions) , class: "span6"
     %p.help-block
       %ul
-        %li Setting to 'public' will allow anyone accessing the site to see your collection.          
-        %li Setting to 'private' will only allow users and groups explicated below to see your collection.    
-  
+        %li Setting to 'public' will allow anyone accessing the site to see your collection.
+        %li Setting to 'private' will only allow users and groups explicated below to see your collection.
+
   %fieldset.span6
     %legend Permissions
     = render partial: 'shared/sets/data_form_permissions_element', locals: {:f => f, :array_type => "nu_core_file", :permissions => filtered_permissions(@nu_core_file) }
