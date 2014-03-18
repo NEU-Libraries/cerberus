@@ -1,8 +1,21 @@
 .row-fluid
   .span12
-    %legend Image Sizes
-.image_metadata.row-fluid
-  .span4
-  .span4
-  .span4
-
+    %legend Image Derivatives
+.image_metadata.row-fluid{style: "margin-bottom: 10px;"}
+  .span3
+    = f.label :description, "Select the sizes required", class: "required-label"
+    %small
+      The master image's longest edge is 500px
+  .span3
+    = f.label :thumbnail, "Small Image"
+    %input.slider.small{"data-slider-min" => "0", "data-slider-max" => "450", "data-slider-step" => "1", "data-slider-value" => "[0,450]", title: "Small Image", type: "input"}
+  .span3
+    = f.label :thumbnail, "Medium Image"
+    %input.slider.medium{"data-slider-min" => "0", "data-slider-max" => "450", "data-slider-step" => "1", "data-slider-value" => "[0,450]", title: "Medium Image", type: "input"}
+  .span3
+    = f.label :thumbnail, "Large Image"
+    %input.slider.large{"data-slider-min" => "0", "data-slider-max" => "450", "data-slider-step" => "1", "data-slider-value" => "[0,450]", title: "Large Image", type: "input"}
+:javascript
+  $("input.slider.small").slider();
+  $("input.slider.medium").slider();
+  $("input.slider.large").slider();
