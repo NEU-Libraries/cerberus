@@ -1,7 +1,9 @@
 - if @incomplete_file.canonical_class == "VideoFile"
   %fieldset.row-fluid
-    .span12
-      = render partial: 'nu_core_files/metadata/video', locals: {:f => f}
+    = render partial: 'nu_core_files/metadata/video', locals: {:f => f}
+- if @incomplete_file.canonical_class == "ImageMasterFile"
+  %fieldset.row-fluid
+    = render partial: 'nu_core_files/metadata/image', locals: {:f => f}
 %fieldset.row-fluid
   .span8
     = f.label :title, "Title", class: "required-label"
