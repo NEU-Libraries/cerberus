@@ -8,15 +8,15 @@
   .span12
     %legend Basic Information
 %fieldset.row-fluid
-  .span8
+  .span6
     = f.label :title, "Title", class: "required-label"
     - if !@incomplete_file.nil?
       = f.text_field :title, required: true, pattern: ".*\\S.*", name: 'nu_core_file[title][]', class: "input-block-level", placeholder: "US Congressman poses with a supporter", value: @incomplete_file.title
     - else
       = f.text_field :title, required: true, pattern: ".*\\S.*", name: 'nu_core_file[title][]', class: "input-block-level", placeholder: "US Congressman poses with a supporter"
-  .span4
+  .span6
     = f.label :date_of_issue, "Date of Issuance", class: "required-label"
-    #date-issued.input-append.date(data-date-format="yyyy-mm-dd")
+    #date-issued.input-block-level.input-append.date(data-date-format="yyyy-mm-dd")
       = f.text_field :date_of_issue, class: ['datepicker','input-block-level'], required: true, placeholder: "YYYY-MM-DD"
       %span.add-on
         %i.icon-calendar.icon-large
