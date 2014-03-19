@@ -68,6 +68,7 @@ rake db:migrate
 rails g hydra:jetty
 rake jetty:config
 rake db:test:prepare
+rm -f /home/vagrant/drs/.git/hooks/pre-push
 touch /home/vagrant/drs/.git/hooks/pre-push
 echo '#!/bin/sh' >> /home/vagrant/drs/.git/hooks/pre-push
 echo 'rake smoke_test' >> /home/vagrant/drs/.git/hooks/pre-push
