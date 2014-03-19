@@ -62,6 +62,7 @@ Drs::Application.routes.draw do
   get '/datasets' => 'catalog#datasets', as: 'datasets'
   get '/presentations' => 'catalog#presentations', as: 'presentations'
   get '/learning_objects' => 'catalog#learning_objects', as: 'learning_objects'
+  get '/employees' => 'catalog#employees', as: 'employees'
 
   get '/admin' => 'admin#index', as: 'admin_panel'
   get '/admin/modify_employee' => 'admin#modify_employee', as: 'modify_employee'
