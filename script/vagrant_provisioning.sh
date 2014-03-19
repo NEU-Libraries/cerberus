@@ -22,11 +22,19 @@ sudo yum install ImageMagick-devel-6.5.4.7-7.el6_5.x86_64 --assumeyes
 sudo yum install redis-2.4.10-1.el6.x86_64 --assumeyes
 sudo yum install libreoffice-headless-4.0.4.2-9.el6.x86_64 --assumeyes
 sudo yum install unzip-6.0-1.el6.x86_64 --assumeyes
-sudo yum install git-1.7.1-3.el6_4.1.x86_64 --assumeyes
 sudo yum install zsh-4.3.10-7.el6.x86_64 --assumeyes
 sudo yum install mysql-devel-5.1.73-3.el6_5.x86_64 --assumeyes
 sudo yum install nodejs --assumeyes
 sudo yum install htop --assumeyes
+
+echo "Installing Git"
+wget https://www.kernel.org/pub/software/scm/git/git-1.8.2.3.tar.gz
+tar xzvf git-1.8.2.3.tar.gz
+cd git-1.8.2.3
+make prefix=/usr/local all
+sudo make prefix=/usr/local install
+cd /home/vagrant
+rm git-1.8.2.3.tar.gz
 
 echo "Making redis auto-start"
 sudo chkconfig redis on
