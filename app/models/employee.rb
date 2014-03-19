@@ -10,7 +10,6 @@ class Employee < ActiveFedora::Base
   attr_protected  :identifier
 
   validate :nuid_unique, on: :create
-  before_create :make_public
 
   has_metadata name: 'details', type: DrsEmployeeDatastream
   has_metadata name: 'rightsMetadata', type: ParanoidRightsDatastream
@@ -116,9 +115,5 @@ class Employee < ActiveFedora::Base
       if Employee.exists_by_nuid? self.nuid
         errors.add(:nuid, "#{self.nuid} is already in use as an Employee object NUID")
       end
-    end
-
-    def make_public
-      self.mass_permissions = 'public'
     end
 end
