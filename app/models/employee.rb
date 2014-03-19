@@ -10,7 +10,7 @@ class Employee < ActiveFedora::Base
   attr_protected  :identifier
 
   validate :nuid_unique, on: :create
-  after_create :make_public
+  before_create :make_public
 
   has_metadata name: 'details', type: DrsEmployeeDatastream
   has_metadata name: 'rightsMetadata', type: ParanoidRightsDatastream
@@ -120,6 +120,5 @@ class Employee < ActiveFedora::Base
 
     def make_public
       self.mass_permissions = 'public'
-      self.save!
     end
 end
