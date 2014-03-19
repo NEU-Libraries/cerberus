@@ -65,6 +65,9 @@ en:
       edit_page_title: 'Provide Metadata'
       edit_subtitle: 'Provide information about your contributed file'
     display_labels:
+      Employee:
+        name: Faculty
+        icon:
       AudioFile:
         name: Audio File
         icon:
