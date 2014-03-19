@@ -26,15 +26,17 @@ sudo yum install zsh-4.3.10-7.el6.x86_64 --assumeyes
 sudo yum install mysql-devel-5.1.73-3.el6_5.x86_64 --assumeyes
 sudo yum install nodejs --assumeyes
 sudo yum install htop --assumeyes
+sudo yum install gcc gettext-devel expat-devel curl-devel zlib-devel openssl-devel perl-ExtUtils-CBuilder perl-ExtUtils-MakeMaker --assumeyes
 
 echo "Installing Git"
 wget https://www.kernel.org/pub/software/scm/git/git-1.8.2.3.tar.gz
 tar xzvf git-1.8.2.3.tar.gz
-cd git-1.8.2.3
+cd /home/vagrant/git-1.8.2.3
 make prefix=/usr/local all
 sudo make prefix=/usr/local install
 cd /home/vagrant
 rm git-1.8.2.3.tar.gz
+rm -rf /home/vagrant/git-1.8.2.3
 
 echo "Making redis auto-start"
 sudo chkconfig redis on
