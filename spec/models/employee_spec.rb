@@ -100,4 +100,13 @@ describe Employee do
       end
     end
   end
+
+  describe "permissions" do
+    let(:employee) { Employee.create(nuid: '111') }
+
+    it "are set to public automatically upon create" do
+      employee.save! ; employee.reload
+      employee.mass_permissions = 'public'
+    end
+  end
 end
