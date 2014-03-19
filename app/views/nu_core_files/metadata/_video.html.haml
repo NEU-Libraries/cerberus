@@ -1,7 +1,11 @@
-.video_metadata.row-fluid
-  .span4
-    %legend Video Thumbnail
-  .span8
+.row-fluid
+  .span12
+    %legend Video Metadata
+.video_metadata
+  .span6
+    = f.label :description, "Thumbnail", class: "required-label"
+    %small Choose an image for the video file
+  .span6
     = f.file_field :thumbnail, name: 'thumbnail', required: true
     %span.help-block
       Will be displayed on file page. (150px by 150px)
