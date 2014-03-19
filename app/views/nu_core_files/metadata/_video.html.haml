@@ -2,6 +2,6 @@
   .span4
     %legend Video Thumbnail
   .span8
-    = f.file_field :thumbnail, name: 'thumbnail'
+    = f.file_field :thumbnail, name: 'thumbnail', required: true
     %span.help-block
       Will be displayed on file page. (150px by 150px)

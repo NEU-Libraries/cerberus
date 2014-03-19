@@ -4,6 +4,9 @@
 - if @incomplete_file.canonical_class == "ImageMasterFile"
   %fieldset.row-fluid
     = render partial: 'nu_core_files/metadata/image', locals: {:f => f}
+- if @incomplete_file.category.first == "Learning Objects"
+  %fieldset.row-fluid
+    = render partial: 'nu_core_files/metadata/learning_object', locals: {:f => f}
 .row-fluid
   .span12
     %legend Basic Information
