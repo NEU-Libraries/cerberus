@@ -10,7 +10,7 @@ class DrsEmployeeDatastream < ActiveFedora::OmDatastream
   def to_solr(solr_doc = Hash.new)
     super(solr_doc)
 
-    solr_doc["employee_name_ssim"] = self.name.first if self.name.first
+    solr_doc["employee_name_tesim"] = self.name.first if self.name.first
     solr_doc["employee_nuid_ssim"] = self.nuid.first if self.nuid.first
 
     return solr_doc

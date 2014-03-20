@@ -66,18 +66,18 @@ describe Employee do
     context "with no employee name set" do
 
       it "doesn't raise an exception" do
-        expect { employee.to_solr }.should_not raise_error
+        expect { employee.to_solr }.not_to raise_error
       end
 
       it "assigns it a nil value" do
-        solr["employee_name_ssim"].should be nil
+        solr["employee_name_tesim"].should be nil
       end
     end
 
     context "with no employee nuid set" do
 
       it "doesn't raise an exception" do
-        expect { employee.to_solr }.should_not raise_error
+        expect { employee.to_solr }.not_to raise_error
       end
 
       it "assigns it a nil value" do
@@ -92,7 +92,7 @@ describe Employee do
       end
 
       it "sets the name" do
-        solr["employee_name_ssim"].should == "Will"
+        solr["employee_name_tesim"].should == "Will"
       end
 
       it "sets the nuid" do
