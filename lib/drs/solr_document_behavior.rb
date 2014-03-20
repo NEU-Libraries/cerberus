@@ -116,7 +116,7 @@ module Drs
     def title
       #Array(self[Solrizer.solr_name('desc_metadata__title')]).first
       if self.klass == "Employee"
-        Array(self[Solrizer.solr_name("employee_name", :stored_searchable, type: :symbol)]).first
+        Array(self[Solrizer.solr_name("employee_name", :stored_searchable, type: :text)]).first
       else
         Array(self[Solrizer.solr_name("title", :stored_sortable)]).first
       end

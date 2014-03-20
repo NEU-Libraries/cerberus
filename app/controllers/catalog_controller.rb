@@ -212,10 +212,11 @@ class CatalogController < ApplicationController
       publisher = "origin_info_publisher_tesim"
       place = "origin_info_place_tesim"
       identifier = "identifier_tesim"
+      emp_name = "employee_name_tesim"
       emp_nuid = "employee_nuid_ssim"
 
       field.solr_parameters = {
-        qf: "#{title} #{abstract} #{genre} #{topic} #{creators} #{publisher} #{place} #{identifier} #{emp_nuid}",
+        qf: "#{title} #{abstract} #{genre} #{topic} #{creators} #{publisher} #{place} #{identifier} #{emp_name} #{emp_nuid}",
         pf: "#{title}",
       }
     end
