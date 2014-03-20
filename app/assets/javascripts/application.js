@@ -31,4 +31,5 @@
 //= require shopping_carts
 //= require analytics.js
 //= require bootstrap-slider
+//= require jquery_validate/jquery.validate.min.js
 
