@@ -168,4 +168,6 @@ class NuCollectionsController < SetsController
 
     def find_object(solr_parameters, user_parameters)
       solr_parameters[:fq] ||= []
-      solr_parameters[:fq] << 
+      solr_parameters[:fq] << "id:\"#{@set_id}\""
+    end
+end
