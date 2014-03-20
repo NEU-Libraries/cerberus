@@ -39,7 +39,7 @@
       #{ t('drs.significant.communities.name').capitalize }
 
     -# Need to find a canned query for this
-    %a.btn.btn-clear.btn-block(href="#employees_path"){data: {toggle: "tooltip"}, title: t('drs.significant.employees.description') }
+    %a.btn.btn-clear.btn-block(href=employees_path){data: {toggle: "tooltip"}, title: t('drs.significant.employees.description') }
       =render partial: 'shared/icon', locals: { class_string: t('drs.significant.employees.icon') }
       #{ t('drs.significant.employees.name').capitalize }
   .span9

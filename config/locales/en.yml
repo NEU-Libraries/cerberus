@@ -67,6 +67,9 @@ en:
     etd_description:
       default: Theses and dissertations for
     display_labels:
+      Employee:
+        name: Faculty
+        icon:
       AudioFile:
         name: Audio File
         icon:
