@@ -64,6 +64,8 @@ en:
       icon: 'icon-pencil'
       edit_page_title: 'Provide Metadata'
       edit_subtitle: 'Provide information about your contributed file'
+    etd_description:
+      default: Theses and dissertations for
     display_labels:
       AudioFile:
         name: Audio File
