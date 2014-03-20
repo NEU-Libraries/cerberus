@@ -54,7 +54,8 @@ class NuCollectionsController < SetsController
 
     # Assign personal folder specific info if parent folder is a
     # personal folder.
-    if parent.is_personal_folder? && parent.personal_folder_type != "theses"
+    # This is a kludge for #302
+    if !(parent.personal_folder_type == "theses") && parent.is_personal_folder?
       @set.user_parent = parent.user_parent.nuid
       if parent.personal_folder_type == 'user root'
         @set.personal_folder_type = 'miscellany'
@@ -167,6 +168,4 @@ class NuCollectionsController < SetsController
 
     def find_object(solr_parameters, user_parameters)
       solr_parameters[:fq] ||= []
-      solr_parameters[:fq] << "id:\"#{@set_id}\""
-    end
-end
+      solr_parameters[:fq] << 
