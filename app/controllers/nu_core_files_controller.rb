@@ -227,6 +227,14 @@ class NuCoreFilesController < ApplicationController
 
       nu_core_file.instantiate_appropriate_content_object(tmp_path, file.original_filename)
 
+      # If the content_object created is an ImageMasterFile, we want to read the image and store as session vars
+      # the length of its longest side.  This is used to calculate the dimensions to allow for the small/med/large
+      # sliders on the Provide Metadata page.
+      if nu_core_file.canonical_class = "ImageMasterFile"
+        session[:slider_max] = nil # Ensure we aren't using data from a prior upload
+        session[:slider_max] = SliderMaxCalculator.compute(tmp_path)
+      end
+
       collection = !collection_id.blank? ? NuCollection.find(collection_id) : nil
       nu_core_file.set_parent(collection, user) if collection
 
