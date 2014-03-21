@@ -67,3 +67,18 @@
       $("#large_image_value").val(slideEvt.value);
       enforceSizes();
     });
+
+    $("#small_image_value").change(function() {
+      $("input.slider.small").slider('setValue', parseInt($("#small_image_value").val()));
+      enforceSizes();
+    });
+
+    $("#medium_image_value").change(function() {
+      $("input.slider.medium").slider('setValue', parseInt($("#medium_image_value").val()));
+      enforceSizes();
+    });
+
+    $("#large_image_value").change(function() {
+      $("input.slider.large").slider('setValue', parseInt($("#large_image_value").val()));
+      enforceSizes();
+    });
