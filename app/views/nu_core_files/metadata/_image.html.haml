@@ -14,71 +14,12 @@
     .span3
       = f.label :small_image_value, "Small Image"
       %input.slider.small{:id => "small_slider", "data-slider-min" => "0", "data-slider-max" => session[:slider_max], "data-slider-step" => "1", title: "Small Image", type: "input"}
-      = text_field_tag 'small_image_value', '0', class: "inline-block"
+      = text_field_tag 'nu_core_file[image_sizes][small_image]', '0', class: "inline-block"
     .span3
       = f.label :medium_image_value, "Medium Image"
       %input.slider.medium{:id => "medium_slider", "data-slider-min" => "0", "data-slider-max" => session[:slider_max], "data-slider-step" => "1", title: "Medium Image", type: "input"}
-      = text_field_tag 'medium_image_value', '0', class: "inline-block"
+      = text_field_tag 'nu_core_file[image_sizes][medium_image]', '0', class: "inline-block"
     .span3
       = f.label :large_image_value, "Large Image"
       %input.slider.large{:id => "large_slider", "data-slider-min" => "0", "data-slider-max" => session[:slider_max], "data-slider-step" => "1", title: "Large Image", type: "input"}
-      = text_field_tag 'large_image_value', '0', class: "inline-block"
-  :javascript
-    $("input.slider.small").slider();
-    $("input.slider.medium").slider();
-    $("input.slider.large").slider();
-
-    function enforceSizes()
-    {
-      if($("input.slider.small").slider('getValue') > $("input.slider.medium").slider('getValue'))
-      {
-        $("input.slider.medium").slider('setValue', $("input.slider.small").slider('getValue') + 1)
-        $("#medium_image_value").val($("input.slider.small").slider('getValue') + 1);
-      }
-      if($("input.slider.small").slider('getValue') > $("input.slider.large").slider('getValue'))
-      {
-        $("input.slider.large").slider('setValue', $("input.slider.small").slider('getValue') + 2)
-        $("#large_image_value").val($("input.slider.small").slider('getValue') + 2);
-      }
-
-      if($("input.slider.medium").slider('getValue') < $("input.slider.small").slider('getValue'))
-      {
-        $("input.slider.small").slider('setValue', $("input.slider.medium").slider('getValue') - 1)
-        $("#small_image_value").val($("input.slider.medium").slider('getValue') - 1);
-      }
-      if($("input.slider.medium").slider('getValue') > $("input.slider.large").slider('getValue'))
-      {
-        $("input.slider.large").slider('setValue', $("input.slider.medium").slider('getValue') + 1)
-        $("#large_image_value").val($("input.slider.medium").slider('getValue') + 1);
-      }
-    }
-
-    $("input#small_slider").on('slide', function(slideEvt) {
-      $("#small_image_value").val(slideEvt.value);
-      enforceSizes();
-    });
-
-    $("input#medium_slider").on('slide', function(slideEvt) {
-      $("#medium_image_value").val(slideEvt.value);
-      enforceSizes();
-    });
-
-    $("input#large_slider").on('slide', function(slideEvt) {
-      $("#large_image_value").val(slideEvt.value);
-      enforceSizes();
-    });
-
-    $("#small_image_value").change(function() {
-      $("input.slider.small").slider('setValue', parseInt($("#small_image_value").val()));
-      enforceSizes();
-    });
-
-    $("#medium_image_value").change(function() {
-      $("input.slider.medium").slider('setValue', parseInt($("#medium_image_value").val()));
-      enforceSizes();
-    });
-
-    $("#large_image_value").change(function() {
-      $("input.slider.large").slider('setValue', parseInt($("#large_image_value").val()));
-      enforceSizes();
-    });
+      = text_field_tag 'nu_core_file[image_sizes][large_image]', '0', class: "inline-block"
