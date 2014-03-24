@@ -83,7 +83,17 @@ class NuCoreFilesController < ApplicationController
   def process_metadata
     Sufia.queue.push(MetadataUpdateJob.new(current_user.user_key, params))
     @nu_core_file = NuCoreFile.users_in_progress_files(current_user).first
+
     update_metadata if params[:nu_core_file]
+
+    if params[:nu_core_file][:image_sizes]
+      max = session[:slider_max]
+      s = max / params[:small_image_size]
+      m = max / params[:medium_image_size]
+      l = max / params[:large_image_size]
+
+      # ScaledImageCreator.new(s, m, l, @master).create_scaled_images
+    end
 
     @nu_core_file = NuCoreFile.find(@nu_core_file.pid)
     Sufia.queue.push(ContentCreationJob.new(@nu_core_file.pid, @nu_core_file.tmp_path, @nu_core_file.original_filename, current_user.id))
