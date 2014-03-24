@@ -356,7 +356,7 @@
       var offset = this.component ? this.component.parent().offset() : this.element.offset();
       var height = this.component ? this.component.outerHeight(true) : this.element.outerHeight(true);
       this.picker.css({
-        top: offset.top + height + 15,
+        top: offset.top + height,
         left: offset.left,
         zIndex: zIndex
       });
