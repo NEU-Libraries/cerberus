@@ -373,41 +373,41 @@ $(document).ready ->
     enforceSizes = ->
       if $("input.slider.small").slider("getValue") > $("input.slider.medium").slider("getValue")
         $("input.slider.medium").slider "setValue", $("input.slider.small").slider("getValue") + 1
-        $("#nu_core_file_image_sizes_medium_image").val $("input.slider.small").slider("getValue") + 1
+        $("#medium_image_size").val $("input.slider.small").slider("getValue") + 1
       if $("input.slider.small").slider("getValue") > $("input.slider.large").slider("getValue")
         $("input.slider.large").slider "setValue", $("input.slider.small").slider("getValue") + 2
-        $("#nu_core_file_image_sizes_large_image").val $("input.slider.small").slider("getValue") + 2
+        $("#large_image_size").val $("input.slider.small").slider("getValue") + 2
       if $("input.slider.medium").slider("getValue") < $("input.slider.small").slider("getValue")
         $("input.slider.small").slider "setValue", $("input.slider.medium").slider("getValue") - 1
-        $("#nu_core_file_image_sizes_small_image").val $("input.slider.medium").slider("getValue") - 1
+        $("#small_image_size").val $("input.slider.medium").slider("getValue") - 1
       if $("input.slider.medium").slider("getValue") > $("input.slider.large").slider("getValue")
         $("input.slider.large").slider "setValue", $("input.slider.medium").slider("getValue") + 1
-        $("#nu_core_file_image_sizes_large_image").val $("input.slider.medium").slider("getValue") + 1
+        $("#large_image_size").val $("input.slider.medium").slider("getValue") + 1
     $("input.slider.small").slider()
     $("input.slider.medium").slider()
     $("input.slider.large").slider()
     $("input#small_slider").on "slide", (slideEvt) ->
-      $("#nu_core_file_image_sizes_small_image").val slideEvt.value
+      $("#small_image_size").val slideEvt.value
       enforceSizes()
 
     $("input#medium_slider").on "slide", (slideEvt) ->
-      $("#nu_core_file_image_sizes_medium_image").val slideEvt.value
+      $("#medium_image_size").val slideEvt.value
       enforceSizes()
 
     $("input#large_slider").on "slide", (slideEvt) ->
-      $("#nu_core_file_image_sizes_large_image").val slideEvt.value
+      $("#large_image_size").val slideEvt.value
       enforceSizes()
 
     $("#small_image_value").change ->
-      $("input.slider.small").slider "setValue", parseInt($("#nu_core_file_image_sizes_small_image").val())
+      $("input.slider.small").slider "setValue", parseInt($("#small_image_size").val())
       enforceSizes()
 
     $("#medium_image_value").change ->
-      $("input.slider.medium").slider "setValue", parseInt($("#nu_core_file_image_sizes_medium_image").val())
+      $("input.slider.medium").slider "setValue", parseInt($("#medium_image_size").val())
       enforceSizes()
 
     $("#large_image_value").change ->
-      $("input.slider.large").slider "setValue", parseInt($("#nu_core_file_image_sizes_large_image").val())
+      $("input.slider.large").slider "setValue", parseInt($("#large_image_size").val())
       enforceSizes()
 
 
