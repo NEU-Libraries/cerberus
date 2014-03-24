@@ -7,12 +7,16 @@ class ContentCreationJob
     :content_creation
   end
 
-  def initialize(core_file, file_path, file_name, user_id, delete_file=true)
+  def initialize(core_file, file_path, file_name, user_id, small_size=nil, medium_size=nil, large_size=nil, delete_file=true)
     self.core_file_pid = core_file
     self.file_path     = file_path
     self.file_name     = file_name
     self.user_id       = user_id
     self.delete_file   = delete_file
+
+    self.small_size    = small_size
+    self.medium_size   = medium_size
+    self.large_size    = large_size
   end
 
   def run
@@ -26,6 +30,8 @@ class ContentCreationJob
       # Zip files that need zippin'.  Just drop in other file types.
       if content_object.instance_of? ZipFile
         zip_content(content_object)
+      elsif content_object.instance_of? ImageMasterFile
+        ScaledImageCreator.new(s, m, l, content_object).create_scaled_images
       else
         file_contents = File.open(file_path)
         content_object.add_file(file_contents, 'content', file_name)

@@ -86,17 +86,18 @@ class NuCoreFilesController < ApplicationController
 
     update_metadata if params[:nu_core_file]
 
-    if params[:nu_core_file][:image_sizes]
-      max = session[:slider_max]
+    max = session[:slider_max]
+
+    @nu_core_file = NuCoreFile.find(@nu_core_file.pid)
+
+    if !max.nil?
       s = max / params[:small_image_size]
       m = max / params[:medium_image_size]
       l = max / params[:large_image_size]
-
-      # ScaledImageCreator.new(s, m, l, @master).create_scaled_images
+      Sufia.queue.push(ContentCreationJob.new(@nu_core_file.pid, @nu_core_file.tmp_path, @nu_core_file.original_filename, current_user.id, s, m, l))
+    else
+      Sufia.queue.push(ContentCreationJob.new(@nu_core_file.pid, @nu_core_file.tmp_path, @nu_core_file.original_filename, current_user.id))
     end
-
-    @nu_core_file = NuCoreFile.find(@nu_core_file.pid)
-    Sufia.queue.push(ContentCreationJob.new(@nu_core_file.pid, @nu_core_file.tmp_path, @nu_core_file.original_filename, current_user.id))
 
     flash[:notice] = 'Your files are being processed by ' + t('sufia.product_name') + ' in the background. The metadata and access controls you specified are being applied. Files will be marked <span class="label label-important" title="Private">Private</span> until this process is complete (shouldn\'t take too long, hang in there!).'
     redirect_to nu_core_file_path(@nu_core_file.pid)
