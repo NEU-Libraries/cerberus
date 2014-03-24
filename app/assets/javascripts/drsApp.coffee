@@ -289,7 +289,8 @@ $(document).ready ->
     nuCollectionsPage = ->
 
       #Add a datepicker to the date of issuance field.
-      $('#date-issued, #embargo-date').datepicker
+      #$('#date-issued, #embargo-date').datepicker
+      $('.datepicker, #embargo-date').datepicker
         todayBtn: true
         todayHighlight: true
         clearBtn: true
