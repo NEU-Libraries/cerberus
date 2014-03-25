@@ -40,6 +40,54 @@ $(document).ready ->
       handleCommunitiesAdminAutoComplete()
       toggleShoppingCart $('*[data-shoppingcart]')
       removeFormFields()
+      imageMetadataPartial()
+      enforceSizes()
+      return
+
+    enforceSizes = ->
+      if $("input.slider.small").slider("getValue") > $("input.slider.medium").slider("getValue")
+        $("input.slider.medium").slider "setValue", $("input.slider.small").slider("getValue") + 1
+        $("#medium_image_value").val $("input.slider.small").slider("getValue") + 1
+      if $("input.slider.small").slider("getValue") > $("input.slider.large").slider("getValue")
+        $("input.slider.large").slider "setValue", $("input.slider.small").slider("getValue") + 2
+        $("#large_image_value").val $("input.slider.small").slider("getValue") + 2
+      if $("input.slider.medium").slider("getValue") < $("input.slider.small").slider("getValue")
+        $("input.slider.small").slider "setValue", $("input.slider.medium").slider("getValue") - 1
+        $("#small_image_value").val $("input.slider.medium").slider("getValue") - 1
+      if $("input.slider.medium").slider("getValue") > $("input.slider.large").slider("getValue")
+        $("input.slider.large").slider "setValue", $("input.slider.medium").slider("getValue") + 1
+        $("#large_image_value").val $("input.slider.medium").slider("getValue") + 1
+      return
+
+    imageMetadataPartial = ->
+      if $('input.slider.small').length > 0
+        $("input.slider.small").slider()
+        $("input.slider.medium").slider()
+        $("input.slider.large").slider()
+        $("input#small_slider").on "slide", (slideEvt) ->
+          $("#small_image_value").val slideEvt.value
+          enforceSizes()
+
+        $("input#medium_slider").on "slide", (slideEvt) ->
+          $("#medium_image_value").val slideEvt.value
+          enforceSizes()
+
+        $("input#large_slider").on "slide", (slideEvt) ->
+          $("#large_image_value").val slideEvt.value
+          enforceSizes()
+
+        $("#small_image_value").change ->
+          $("input.slider.small").slider "setValue", parseInt($("#small_image_value").val())
+          enforceSizes()
+
+        $("#medium_image_value").change ->
+          $("input.slider.medium").slider "setValue", parseInt($("#medium_image_value").val())
+          enforceSizes()
+
+        $("#large_image_value").change ->
+          $("input.slider.large").slider "setValue", parseInt($("#large_image_value").val())
+          enforceSizes()
+
       return
 
 
@@ -365,51 +413,6 @@ $(document).ready ->
 
         $('#admin_employee_autocomplete').attr 'autocomplete', 'on'
       return
-
-    ###
-    Slider javascript to enforce small < medium < large
-    ###
-
-    enforceSizes = ->
-      if $("input.slider.small").slider("getValue") > $("input.slider.medium").slider("getValue")
-        $("input.slider.medium").slider "setValue", $("input.slider.small").slider("getValue") + 1
-        $("#medium_image_size").val $("input.slider.small").slider("getValue") + 1
-      if $("input.slider.small").slider("getValue") > $("input.slider.large").slider("getValue")
-        $("input.slider.large").slider "setValue", $("input.slider.small").slider("getValue") + 2
-        $("#large_image_size").val $("input.slider.small").slider("getValue") + 2
-      if $("input.slider.medium").slider("getValue") < $("input.slider.small").slider("getValue")
-        $("input.slider.small").slider "setValue", $("input.slider.medium").slider("getValue") - 1
-        $("#small_image_size").val $("input.slider.medium").slider("getValue") - 1
-      if $("input.slider.medium").slider("getValue") > $("input.slider.large").slider("getValue")
-        $("input.slider.large").slider "setValue", $("input.slider.medium").slider("getValue") + 1
-        $("#large_image_size").val $("input.slider.medium").slider("getValue") + 1
-    $("input.slider.small").slider()
-    $("input.slider.medium").slider()
-    $("input.slider.large").slider()
-    $("input#small_slider").on "slide", (slideEvt) ->
-      $("#small_image_size").val slideEvt.value
-      enforceSizes()
-
-    $("input#medium_slider").on "slide", (slideEvt) ->
-      $("#medium_image_size").val slideEvt.value
-      enforceSizes()
-
-    $("input#large_slider").on "slide", (slideEvt) ->
-      $("#large_image_size").val slideEvt.value
-      enforceSizes()
-
-    $("#small_image_value").change ->
-      $("input.slider.small").slider "setValue", parseInt($("#small_image_size").val())
-      enforceSizes()
-
-    $("#medium_image_value").change ->
-      $("input.slider.medium").slider "setValue", parseInt($("#medium_image_size").val())
-      enforceSizes()
-
-    $("#large_image_value").change ->
-      $("input.slider.large").slider "setValue", parseInt($("#large_image_size").val())
-      enforceSizes()
-
 
     ###
     Listener function for shopping cart links with a fall back on failure to reload the page.
