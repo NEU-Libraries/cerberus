@@ -81,3 +81,11 @@ echo "Installing Oh-My-Zsh"
 cd /home/vagrant
 \curl -L http://install.ohmyz.sh | sh
 sudo chsh -s /bin/zsh vagrant
+
+echo "Setting timezone for vm so embargo doesn't get confused"
+cd /home/vagrant
+sudo rm -f /etc/sysconfig/clock
+touch clock
+echo "ZONE=\"America/New York\"" >> clock
+sudo mv clock /etc/sysconfig
+sudo tzdata-update
