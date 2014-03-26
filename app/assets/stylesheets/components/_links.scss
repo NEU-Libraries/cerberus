@@ -1,21 +1,9 @@
-a{
-  @include single-transition(color, 0.25s);
+h1 a, .h1 a, h2 a, .h2 a, h3 a, .h3 a, h4 a, .h4 a, h5 a, .h5 a, h6 a, .h6 a{
+  font-weight: 500;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6{
-  a{
-    color: $headingsColor;
-    text-decoration: underline;
-    &:hover,
-    &:focus{
-      color: lighten($headingsColor, 10%)
-    }
-  }
+a{
+  @include single-transition(color, 0.25s);
 }
 
 // Show on focus

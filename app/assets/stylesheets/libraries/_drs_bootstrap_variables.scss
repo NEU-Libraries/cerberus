@@ -205,9 +205,9 @@ $sansFontFamily:        "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-se
 $serifFontFamily:       "New Baskerville ","Baskerville", Georgia, "Times New Roman", Times, serif;
 $monoFontFamily:        Monaco, Menlo, Consolas, "Courier New", monospace !default;
 
-$baseFontSize:          15px;
+$baseFontSize:          14px;
 $baseFontFamily:        $sansFontFamily;
-$baseLineHeight:        21px;
+$baseLineHeight:        20px;
 $altFontFamily:         $serifFontFamily;
 
 $headingsFontFamily:    $sansFontFamily;//$serifFontFamily; // empty to use BS default, $baseFontFamily
