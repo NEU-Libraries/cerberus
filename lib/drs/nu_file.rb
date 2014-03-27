@@ -9,6 +9,7 @@ module Drs
     include Hydra::Derivatives
     include Drs::Find
     include Drs::ImpressionCount
+    include Hydra::ModelMixins::RightsMetadata
 
     included do
       attr_accessible :title, :description, :keywords, :identifier
