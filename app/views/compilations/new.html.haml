@@ -1,4 +1,4 @@
-%h1.page-header Create a new compilation
+%h1.page-header= "Create a new #{t('drs.compilations.name').capitalize}"
 .row
   .span8.offset2
-    = render partial: "data_form", locals: { compilation: @compilation } 
+    = render partial: "data_form", locals: { compilation: @compilation }
