@@ -23,7 +23,7 @@ class EmployeeCreateJob
     end
 
     # Generate employee's personal graph
-    parent = create_folder("User Root", emp)
+    parent = create_folder(self.name, emp)
     create_folder("Research Publications", emp, parent)
     create_folder("Other Publications", emp, parent)
     create_folder("Presentations", emp, parent)
@@ -38,13 +38,22 @@ class EmployeeCreateJob
   private
 
     def create_folder(title, employee, parent = nil)
+
+      if title == employee.name
+        pft = "user root"
+        desc = "#{self.name}'s root folder"
+      else
+        pft = "#{title.downcase}"
+        desc = "#{title} for #{employee.name}"
+      end
+
       attrs = {
                 title: title,
                 depositor: self.nuid,
                 parent: parent,
                 user_parent: employee,
-                description: "#{title} for #{employee.name}",
-                personal_folder_type: "#{title.downcase}",
+                description: desc,
+                personal_folder_type: pft,
                 mass_permissions: 'private',
               }
 
