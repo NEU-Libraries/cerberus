@@ -11,7 +11,7 @@
   - # Better search results here
   - html_constraints = render_constraints( params )
   - safe_constraints = strip_tags( html_constraints.sub( "</span>" , " / "  ) )
-  - @page_title =  "Search: '"  + safe_constraints + "'"
+  - @page_title = @search_type || "Search: '"  + safe_constraints + "'"
 
   -content_for :page_header do
     %h1.page-header
