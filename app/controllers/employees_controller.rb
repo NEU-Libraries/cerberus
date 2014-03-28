@@ -3,6 +3,13 @@ class EmployeesController < ApplicationController
 
   def show
     @employee = Employee.find(params[:id])
+
+    if !current_user.nil?
+      if current_user.nuid == employee.nuid
+        return redirect_to personal_graph_path
+      end
+    end
+
     @page_title = "#{@employee.nuid}"
   end
 
