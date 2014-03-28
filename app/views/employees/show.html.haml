@@ -1,5 +1,5 @@
-- content_for :page_header do 
+- content_for :page_header do
   %h1.page-header
-    = "#{@employee.name}" 
+    = "#{@employee.name}"
 
-= render partial: "show_personal_graph", locals: { :generated_folders => @employee.sorted_folders, :user_folders => @employee.personal_folders }
+= render partial: "show_personal_graph", locals: { :generated_folders => @employee.sorted_folders, :user_folders => @employee.personal_folders, :editable => false }
