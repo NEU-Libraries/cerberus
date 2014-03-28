@@ -36,7 +36,7 @@
   position: relative;
   @include border-radius(0);
 }
-.btn-group > .btn + .btn {
+.btn-group > .btn {
   margin-left: -1px;
 }
 .btn-group > .btn,
