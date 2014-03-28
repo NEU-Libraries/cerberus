@@ -24,6 +24,9 @@ class EmployeeCreateJob
 
     # Generate employee's personal graph
     parent = create_folder(self.name, emp)
+    parent.mass_permissions = 'public'
+    parent.save!
+
     create_folder("Research Publications", emp, parent)
     create_folder("Other Publications", emp, parent)
     create_folder("Presentations", emp, parent)
