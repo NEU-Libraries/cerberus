@@ -1,4 +1,12 @@
 .drs-item-add-details
+  -if defined? item.creators and item.creators.length > 0
+    %dl.drs-item-creators
+      - item.creators.each_with_index do | creator, i |
+        - if i < 2 and creator.length > 0
+          %h5.drs-item-creator
+            = creator
+      - if item.creators.length > 3
+        &hellip;
   - if !item.date_of_issue.nil? and item.date_of_issue.length > 0
     %dl.drs-item-date-of-issue-list
       %dt.drs-item-date-of-issue-label
