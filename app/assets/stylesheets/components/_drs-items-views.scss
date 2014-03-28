@@ -202,7 +202,7 @@
   @media( max-width: $breakpoint-xxl ){
     .drs-item-title,
     .drs-item-creator{
-      magrin: 2px 0;
+      margin: 2px 0;
     }
     .drs-item-title{
       @extend h5;
