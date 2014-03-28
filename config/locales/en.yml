@@ -63,8 +63,8 @@ en:
       title: My DRS
       description: My content will be shown here. System generated content and more.
       icon: icon-dashboard
-      system_generated_folders: System Generated Folders
-      user_created_folders: User Created Folders
+      system_generated_folders: Smart Collections
+      user_created_folders: User Created Collections
     metadata:
       icon: 'icon-pencil'
       edit_page_title: 'Provide Metadata'
