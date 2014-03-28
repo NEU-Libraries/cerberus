@@ -23,6 +23,14 @@ module Drs
       Array(self[:id]).first
     end
 
+    def personal_folder_type
+      Array(self[Solrizer.solr_name("personal_folder_type", :stored_searchable)]).first
+    end
+
+    def is_member_of
+      Array(self[Solrizer.solr_name("is_member_of", :symbol)]).first
+    end
+
     def date_of_issue
       #TODO - this is broken in metadata assignment
       Array(self[Solrizer.solr_name("desc_metadata__date_created")]).first

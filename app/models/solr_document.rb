@@ -2,7 +2,6 @@
 class SolrDocument
   # Adds Sufia behaviors to the SolrDocument.
   include Drs::SolrDocumentBehavior
-
   include Blacklight::Solr::Document
 
   # self.unique_key = 'id'
@@ -32,4 +31,13 @@ class SolrDocument
                          :language => "language_facet",
                          :format => "format"
                          )
+
+  def pf_belongs_to_user?(user)
+    is_member_of = self.is_member_of
+    cruft, slash, pid = is_member_of.rpartition('/')
+
+    employee = Employee.find(pid)
+    user.nuid == employee.nuid
+  end
+
 end
