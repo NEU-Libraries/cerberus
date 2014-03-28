@@ -26,7 +26,7 @@ class MetadataUpdateJob
       update_file(gf, user)
     end
 
-    job_user = User.batchuser()
+    job_user = User.find_by_email('batchuser@example.com')
 
     message = 'The file(s) '+ file_list(@saved)+ " have been saved." unless @saved.empty?
     job_user.send_message(user, message, 'Metadata upload complete') unless @saved.empty?
