@@ -1,4 +1,4 @@
-.navbar  .btn-navbar-collpase{
+.navbar  .btn-navbar-collapse{
   @include buttonBackground($btnBackground, $btnBackgroundHighlight, $grayDark, 0 1px 1px rgba(255,255,255,.75));
   background-image: none;
   text-shadow: none;
@@ -13,7 +13,7 @@
     color: $navbarLinkColorHover;
   }
   &.active{
-   color: $navbarLinkColorActive; 
+   color: $navbarLinkColorActive;
   }
 }
 
