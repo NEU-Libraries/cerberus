@@ -49,20 +49,22 @@ class CatalogController < ApplicationController
   end
 
   def recent
-    if user_signed_in?
-      # grab other people's documents
-      (_, @recent_documents) = get_search_results(:q =>filter_not_mine,
-                                        :sort=>sort_field, :rows=>4)
-    else
-      # grab any documents we do not know who you are
-      (_, @recent_documents) = get_search_results(:q =>'', :sort=>sort_field, :rows=>4)
-    end
+    self.solr_search_params_logic += [:exclude_unwanted_models]
+    (_, @recent_documents) = get_search_results(:q =>'', :sort=>sort_field, :rows=>3)
+    # if user_signed_in?
+    #   # grab other people's documents
+    #   (_, @recent_documents) = get_search_results(:q =>filter_not_mine,
+    #                                     :sort=>sort_field, :rows=>3)
+    # else
+    #   # grab any documents we do not know who you are
+    #   (_, @recent_documents) = get_search_results(:q =>'', :sort=>sort_field, :rows=>3)
+    # end
   end
 
   def recent_me
     if user_signed_in?
       (_, @recent_user_documents) = get_search_results(:q =>filter_mine,
-                                        :sort=>sort_field, :rows=>4)
+                                        :sort=>sort_field, :rows=>3)
     end
   end
 
@@ -413,6 +415,14 @@ class CatalogController < ApplicationController
 
   protected
 
+  # Limits search results just to NuCoreFiles
+  # @param solr_parameters the current solr parameters
+  # @param user_parameters the current user-subitted parameters
+  def exclude_unwanted_models(solr_parameters, user_parameters)
+    solr_parameters[:fq] ||= []
+    solr_parameters[:fq] << "#{Solrizer.solr_name("has_model", :symbol)}:\"info:fedora/afmodel:NuCoreFile\""
+  end
+
   def depositor
     #Hydra.config[:permissions][:owner] maybe it should match this config variable, but it doesn't.
     Solrizer.solr_name('depositor', :stored_searchable, type: :string)
@@ -471,9 +481,6 @@ class CatalogController < ApplicationController
     (@response, @document_list) = get_search_results(:q => query)
     render 'index', locals: { facet_list: facet_fields }
   end
-
-  #can I override the sufia method
-  #https://github.com/nu-lts/sufia/blob/master/lib/sufia/controller.rb#L60
 
   def search_layout
     "homepage"
