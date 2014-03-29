@@ -160,6 +160,7 @@ GEM
     compass-rails (1.0.3)
       compass (>= 0.12.2, < 0.14)
     daemons (1.1.9)
+    date_time_precision (0.7.0)
     deprecation (0.0.5)
       activesupport
     devise (3.0.3)
@@ -510,6 +511,7 @@ DEPENDENCIES
   capybara
   coffee-rails (~> 3.2.1)
   compass-rails
+  date_time_precision
   devise
   devise-guests (~> 0.3)
   factory_girl_rails

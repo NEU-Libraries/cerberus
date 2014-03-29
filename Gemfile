@@ -26,6 +26,7 @@ gem 'bootstrap-sass', '~> 2.3.2.1'
 
 gem 'haml'
 
+gem 'date_time_precision'
 
 # See Bower Front-End Package Management http://bower.io Documentation
 gem "bower-rails", "~> 0.5.0"

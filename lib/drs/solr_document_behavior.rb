@@ -1,20 +1,18 @@
-# Copyright © 2012 The Pennsylvania State University
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+require 'date_time_precision'
+require 'date_time_precision/format/string'
 
-# -*- encoding : utf-8 -*-
 module Drs
   module SolrDocumentBehavior
+
+    def process_date(date_string)
+      if(date_string.split("-")).length > 2
+        return date_string.to_date.to_formatted_s(:long_ordinal)
+      else
+        date_array =  date_string.split("-")
+        return Date.new(date_array.first.to_i, date_array.second.to_i).to_s(:long)
+      end
+    end
+
     def title_or_label
       title || label
     end
@@ -33,11 +31,11 @@ module Drs
 
     def date_of_issue
       #TODO - this is broken in metadata assignment
-      Array(self[Solrizer.solr_name("desc_metadata__date_created")]).first
+      process_date(Array(self[Solrizer.solr_name("desc_metadata__date_created")]).first)
     end
 
     def create_date
-      Array(self[Solrizer.solr_name("desc_metadata__date_created")]).first
+      process_date(Array(self[Solrizer.solr_name("desc_metadata__date_created")]).first)
     end
 
     def creators
