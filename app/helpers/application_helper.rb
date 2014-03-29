@@ -39,7 +39,7 @@ module ApplicationHelper
       end
       user_view_pref = session[:view_pref]
     end
-    return user_view_pref == "list" ? "drs-items-list" : "drs-items-grid"
+    return user_view_pref == "list" ? "drs-items-grid" : "drs-items-list"
   end
 
 end
