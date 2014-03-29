@@ -2,8 +2,8 @@
 %fieldset.row-fluid
   .span8
     = f.label :title, "Title", class: "required-label"
-    - if !@nu_core_file.nil?
-      = f.text_field :title, required: true, pattern: ".*\\S.*", name: 'nu_core_file[title][]', class: "input-block-level", placeholder: "US Congressman poses with a supporter", value: @nu_core_file.title
+    - if !@title.nil?
+      = f.text_field :title, required: true, pattern: ".*\\S.*", name: 'nu_core_file[title][]', class: "input-block-level", placeholder: "US Congressman poses with a supporter", value: @title.split(".")[0]
     - else
       = f.text_field :title, required: true, pattern: ".*\\S.*", name: 'nu_core_file[title][]', class: "input-block-level", placeholder: "US Congressman poses with a supporter"
   .span4
