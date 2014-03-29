@@ -58,9 +58,8 @@ class NuCoreFilesController < ApplicationController
     @nu_core_file = NuCoreFile.new
     @incomplete_file = NuCoreFile.users_in_progress_files(current_user).first
 
-    if !@incomplete_file.nil?
-      @nu_core_file = @incomplete_file
-    end
+    @title = @incomplete_file.title
+
     # With the move to single file upload, incomplete files (plural) is a misnomer.
     # but worthwhile to keep if we reimplement batch uploads. In the meantime only
     # NuCoreFile.users_in_progress_files(x).first should ever occur (not more than one at a time).
