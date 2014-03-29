@@ -84,8 +84,6 @@ sudo chsh -s /bin/zsh vagrant
 
 echo "Setting timezone for vm so embargo doesn't get confused"
 cd /home/vagrant
-sudo rm -f /etc/sysconfig/clock
-touch clock
-echo "ZONE=\"America/New York\"" >> clock
-sudo mv clock /etc/sysconfig
+sudo rm -f /etc/localtime
+sudo ln -s /usr/share/zoneinfo/US/Eastern /etc/localtime
 sudo tzdata-update
