@@ -10,7 +10,7 @@
   / This is a step in the right direction though.
   confirmation_needed = true;
   window.onbeforeunload = confirmExit;
-  function confirmExit(){if(confirmation_needed){$.ajax({url: '<%= destroy_incomplete_files_path %>', type: 'DELETE', success: function(result) {}}); return "Your metadata has not been saved, if you leave the process now your uploaded files will be deleted.";}}
+  function confirmExit(){if(confirmation_needed){$.ajax({url: '#{destroy_incomplete_files_path}', type: 'DELETE', success: function(result) {}}); return "Your metadata has not been saved, if you leave the process now your uploaded files will be deleted.";}}
 
 - content_for :page_header do
   %h1.page-header
