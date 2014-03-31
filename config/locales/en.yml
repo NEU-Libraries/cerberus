@@ -46,7 +46,7 @@ en:
         description: Materials used to support teaching and learning, such as syllabi and activities
         icon: icon-book
       theses:
-        name: Theses & Dissertations
+        name: Theses and Dissertations
         description: NU’s master's theses and doctoral dissertations from 2008 to the present
         icon: icon-magic
       communities:
