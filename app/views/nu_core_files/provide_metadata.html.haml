@@ -23,7 +23,7 @@
 
   = hidden_field_tag(:collection_id, @incomplete_file.parent.identifier)
 
-  = render :partial => 'nu_core_files/metadata/default', :formats => [:html], :locals => {:f => f}
+  = render :partial => 'nu_core_files/metadata/default', :formats => [:html], :locals => {:f => f, :new_object => true}
 
   / We need to account for the different file types here to extend the metdata screen
 
