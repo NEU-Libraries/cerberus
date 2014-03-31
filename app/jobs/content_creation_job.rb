@@ -1,6 +1,6 @@
 class ContentCreationJob
 
-  attr_accessor :core_file_pid, :file_path, :file_name, :user_id, :delete_file
+  attr_accessor :core_file_pid, :file_path, :file_name, :user_id, :delete_file, :small_size, :medium_size, :large_size
   attr_accessor :core_record, :user
 
   def queue_name
@@ -30,8 +30,6 @@ class ContentCreationJob
       # Zip files that need zippin'.  Just drop in other file types.
       if content_object.instance_of? ZipFile
         zip_content(content_object)
-      elsif content_object.instance_of? ImageMasterFile
-        ScaledImageCreator.new(s, m, l, content_object).create_scaled_images
       else
         file_contents = File.open(file_path)
         content_object.add_file(file_contents, 'content', file_name)
@@ -47,6 +45,10 @@ class ContentCreationJob
       content_object.canonize
 
       content_object.save! ? content_object : false
+
+      if content_object.instance_of? ImageMasterFile
+        ScaledImageCreator.new(small_size, medium_size, large_size, content_object).create_scaled_images
+      end
     ensure
       if delete_file
         FileUtils.rm(file_path)
