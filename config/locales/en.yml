@@ -2,6 +2,11 @@
 # See https://github.com/svenfuchs/rails-i18n/tree/master/rails%2Flocale for starting points.
 
 en:
+  helpers:
+    submit:
+      compilation:
+        create: "Create Set"
+        update: "Update Set"
   drs:
     product_name:
       full: "digital repository service"
@@ -43,7 +48,7 @@ en:
         description: Materials used to support teaching and learning, such as syllabi and activities
         icon: icon-book
       theses:
-        name: Theses & Dissertations
+        name: Theses and Dissertations
         description: NU’s master's theses and doctoral dissertations from 2008 to the present
         icon: icon-magic
       communities:
@@ -60,8 +65,8 @@ en:
       title: My DRS
       description: My content will be shown here. System generated content and more.
       icon: icon-dashboard
-      system_generated_folders: System Generated Folders
-      user_created_folders: User Created Folders
+      system_generated_folders: Smart Collections
+      user_created_folders: User Created Collections
     metadata:
       icon: 'icon-pencil'
       edit_page_title: 'Provide Metadata'
@@ -69,6 +74,9 @@ en:
     etd_description:
       default: Theses and dissertations for
     display_labels:
+      Employee:
+        name: Faculty
+        icon:
       AudioFile:
         name: Audio File
         icon:

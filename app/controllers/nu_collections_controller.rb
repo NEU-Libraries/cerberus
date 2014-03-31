@@ -54,7 +54,8 @@ class NuCollectionsController < SetsController
 
     # Assign personal folder specific info if parent folder is a
     # personal folder.
-    if parent.is_personal_folder?
+    # This is a kludge for #302
+    if !(parent.personal_folder_type == "theses") && parent.is_personal_folder?
       @set.user_parent = parent.user_parent.nuid
       if parent.personal_folder_type == 'user root'
         @set.personal_folder_type = 'miscellany'
@@ -82,10 +83,15 @@ class NuCollectionsController < SetsController
 
   def show
     @set_id = params[:id]
+
     self.solr_search_params_logic += [:find_object]
     (@response, @document_list) = get_search_results
     @set = SolrDocument.new(@response.docs.first)
     @page_title = @set.title
+
+    if !@set.personal_folder_type.nil? && @set.personal_folder_type == 'user root' && @set.pf_belongs_to_user?(current_user)
+      return redirect_to personal_graph_path
+    end
 
     self.solr_search_params_logic.delete(:find_object)
     self.solr_search_params_logic += [:show_children_only]

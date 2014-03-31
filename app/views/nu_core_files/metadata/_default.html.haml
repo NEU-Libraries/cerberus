@@ -13,8 +13,8 @@
 %fieldset.row-fluid
   .span6
     = f.label :title, "Title", class: "required-label"
-    - if !@incomplete_file.nil?
-      = f.text_field :title, required: true, pattern: ".*\\S.*", name: 'nu_core_file[title][]', class: "input-block-level", placeholder: "US Congressman poses with a supporter", value: @incomplete_file.title
+    - if !@title.nil?
+      = f.text_field :title, required: true, pattern: ".*\\S.*", name: 'nu_core_file[title][]', class: "input-block-level", placeholder: "US Congressman poses with a supporter", value: @title.split(".")[0]
     - else
       = f.text_field :title, required: true, pattern: ".*\\S.*", name: 'nu_core_file[title][]', class: "input-block-level", placeholder: "US Congressman poses with a supporter"
   .span6
@@ -54,7 +54,7 @@
   %fieldset.span6
     %legend Mass Permissions
     = label_tag 'nu_core_file[mass_permissions]', "Choose Mass Permissions:"
-    = select_tag 'nu_core_file[mass_permissions]', options_for_select(@nu_core_file.valid_mass_permissions, @nu_core_file.mass_permissions) , class: "span6"
+    = select_tag 'nu_core_file[mass_permissions]', options_for_select(@nu_core_file.valid_mass_permissions, 'public') , class: "span6"
     %p.help-block
       %ul
         %li Setting to 'public' will allow anyone accessing the site to see your collection.
