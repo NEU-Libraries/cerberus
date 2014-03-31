@@ -94,9 +94,10 @@ class NuCoreFilesController < ApplicationController
     @nu_core_file = NuCoreFile.find(@nu_core_file.pid)
 
     if !max.nil?
-      s = max / params[:small_image_size]
-      m = max / params[:medium_image_size]
-      l = max / params[:large_image_size]
+      s = params[:small_image_size].to_f / max.to_f
+      m = params[:medium_image_size].to_f / max.to_f
+      l = params[:large_image_size].to_f / max.to_f
+
       Sufia.queue.push(ContentCreationJob.new(@nu_core_file.pid, @nu_core_file.tmp_path, @nu_core_file.original_filename, current_user.id, s, m, l))
     else
       Sufia.queue.push(ContentCreationJob.new(@nu_core_file.pid, @nu_core_file.tmp_path, @nu_core_file.original_filename, current_user.id))

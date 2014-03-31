@@ -47,16 +47,16 @@ $(document).ready ->
     enforceSizes = ->
       if $("input.slider.small").slider("getValue") > $("input.slider.medium").slider("getValue")
         $("input.slider.medium").slider "setValue", $("input.slider.small").slider("getValue") + 1
-        $("#medium_image_value").val $("input.slider.small").slider("getValue") + 1
+        $("#medium_image_size").val $("input.slider.small").slider("getValue") + 1
       if $("input.slider.small").slider("getValue") > $("input.slider.large").slider("getValue")
         $("input.slider.large").slider "setValue", $("input.slider.small").slider("getValue") + 2
-        $("#large_image_value").val $("input.slider.small").slider("getValue") + 2
+        $("#large_image_size").val $("input.slider.small").slider("getValue") + 2
       if $("input.slider.medium").slider("getValue") < $("input.slider.small").slider("getValue")
         $("input.slider.small").slider "setValue", $("input.slider.medium").slider("getValue") - 1
-        $("#small_image_value").val $("input.slider.medium").slider("getValue") - 1
+        $("#small_image_size").val $("input.slider.medium").slider("getValue") - 1
       if $("input.slider.medium").slider("getValue") > $("input.slider.large").slider("getValue")
         $("input.slider.large").slider "setValue", $("input.slider.medium").slider("getValue") + 1
-        $("#large_image_value").val $("input.slider.medium").slider("getValue") + 1
+        $("#large_image_size").val $("input.slider.medium").slider("getValue") + 1
       return
 
     imageMetadataPartial = ->
@@ -65,27 +65,27 @@ $(document).ready ->
         $("input.slider.medium").slider()
         $("input.slider.large").slider()
         $("input#small_slider").on "slide", (slideEvt) ->
-          $("#small_image_value").val slideEvt.value
+          $("#small_image_size").val slideEvt.value
           enforceSizes()
 
         $("input#medium_slider").on "slide", (slideEvt) ->
-          $("#medium_image_value").val slideEvt.value
+          $("#medium_image_size").val slideEvt.value
           enforceSizes()
 
         $("input#large_slider").on "slide", (slideEvt) ->
-          $("#large_image_value").val slideEvt.value
+          $("#large_image_size").val slideEvt.value
           enforceSizes()
 
-        $("#small_image_value").change ->
-          $("input.slider.small").slider "setValue", parseInt($("#small_image_value").val())
+        $("#small_image_size").change ->
+          $("input.slider.small").slider "setValue", parseInt($("#small_image_size").val())
           enforceSizes()
 
-        $("#medium_image_value").change ->
-          $("input.slider.medium").slider "setValue", parseInt($("#medium_image_value").val())
+        $("#medium_image_size").change ->
+          $("input.slider.medium").slider "setValue", parseInt($("#medium_image_size").val())
           enforceSizes()
 
-        $("#large_image_value").change ->
-          $("input.slider.large").slider "setValue", parseInt($("#large_image_value").val())
+        $("#large_image_size").change ->
+          $("input.slider.large").slider "setValue", parseInt($("#large_image_size").val())
           enforceSizes()
 
       return
