@@ -43,7 +43,7 @@ Drs::Application.routes.draw do
   match "/incomplete_files" => "nu_core_files#destroy_incomplete_files", via: 'delete', as: 'destroy_incomplete_files'
 
   get '/employees/:id' => 'employees#show', as: 'employee'
-  get '/my_stuff' => 'employees#personal_graph', as: 'personal_graph'
+  get '/my_drs' => 'employees#personal_graph', as: 'personal_graph'
 
   namespace :admin do
     # Add/Remove communities from an employee, delete employee
@@ -62,6 +62,7 @@ Drs::Application.routes.draw do
   get '/datasets' => 'catalog#datasets', as: 'datasets'
   get '/presentations' => 'catalog#presentations', as: 'presentations'
   get '/learning_objects' => 'catalog#learning_objects', as: 'learning_objects'
+  get '/employees' => 'catalog#employees', as: 'employees'
 
   get '/admin' => 'admin#index', as: 'admin_panel'
   get '/admin/modify_employee' => 'admin#modify_employee', as: 'modify_employee'

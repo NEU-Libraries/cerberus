@@ -6,8 +6,8 @@
       .span8
         = f.label :title, "Title", class: "required-label"
         = f.text_field :title, required: true, pattern: ".*\\S.*", name: 'set[title][]', class: "input-block-level", placeholder: "Univeristy Libraries"
-      .span4 
-        = f.label :thumbnail, "Upload thumbnail" 
+      .span4
+        = f.label :thumbnail, "Upload thumbnail"
         = f.file_field :thumbnail, name: 'thumbnail'
         %span.help-block
           Will be displayed on collection pages. (150px by 150px)
@@ -17,7 +17,7 @@
       %fieldset.span6
         %legend Mass Permissions
         = label_tag 'set[mass_permissions]', "Choose Mass Permissions:"
-        = select_tag 'set[mass_permissions]', options_for_select(@set.valid_mass_permissions, @set.mass_permissions) , class: "span12"
+        = select_tag 'set[mass_permissions]', options_for_select(@set.valid_mass_permissions, 'public') , class: "span12"
         %p.help-block
           %ul
             %li Setting to 'public' will allow anyone accessing the site to see your collection.
@@ -27,7 +27,7 @@
         = render partial: 'shared/sets/data_form_permissions_element', locals: {:f => f, :array_type => "set", :permissions => filtered_permissions(@set) }
         %button#add_another_permission.btn.btn-success.btn-block{:type => "button"}
           %i.icon-plus-sign.icon-large
-          Add Permission    
+          Add Permission
   .form-actions
     = f.submit class: ['btn', 'btn-primary'], value: 'Submit'
     = button_tag "Reset", class: 'btn', type: :reset

@@ -32,6 +32,7 @@ class CatalogController < ApplicationController
   # This applies appropriate access controls to all solr queries
   CatalogController.solr_search_params_logic += [:add_access_controls_to_solr_params]
   # This filters out objects that you want to exclude from search results, like FileAssets
+  # Kept as an example of how to do this
   #CatalogController.solr_search_params_logic += [:exclude_unwanted_models]
 
   skip_before_filter :default_html_head
@@ -48,20 +49,22 @@ class CatalogController < ApplicationController
   end
 
   def recent
-    if user_signed_in?
-      # grab other people's documents
-      (_, @recent_documents) = get_search_results(:q =>filter_not_mine,
-                                        :sort=>sort_field, :rows=>4)
-    else
-      # grab any documents we do not know who you are
-      (_, @recent_documents) = get_search_results(:q =>'', :sort=>sort_field, :rows=>4)
-    end
+    self.solr_search_params_logic += [:exclude_unwanted_models]
+    (_, @recent_documents) = get_search_results(:q =>'', :sort=>sort_field, :rows=>3)
+    # if user_signed_in?
+    #   # grab other people's documents
+    #   (_, @recent_documents) = get_search_results(:q =>filter_not_mine,
+    #                                     :sort=>sort_field, :rows=>3)
+    # else
+    #   # grab any documents we do not know who you are
+    #   (_, @recent_documents) = get_search_results(:q =>'', :sort=>sort_field, :rows=>3)
+    # end
   end
 
   def recent_me
     if user_signed_in?
       (_, @recent_user_documents) = get_search_results(:q =>filter_mine,
-                                        :sort=>sort_field, :rows=>4)
+                                        :sort=>sort_field, :rows=>3)
     end
   end
 
@@ -95,6 +98,13 @@ class CatalogController < ApplicationController
     x = [creator_field, creation_year_field, department_field, subject_field,
          course_number_field, course_title_field, type_field]
     category_query_action("\"Learning Objects\"", x)
+  end
+
+  def employees
+    @search_type = I18n.t "drs.significant.employees.name"
+    query = "{!lucene q.op=AND df=active_fedora_model_ssi}Employee"
+    (@response, @document_list) = get_search_results(:q => query)
+    render 'index', locals: { facet_list: [] }
   end
 
   def self.uploaded_field
@@ -204,9 +214,11 @@ class CatalogController < ApplicationController
       publisher = "origin_info_publisher_tesim"
       place = "origin_info_place_tesim"
       identifier = "identifier_tesim"
+      emp_name = "employee_name_tesim"
+      emp_nuid = "employee_nuid_ssim"
 
       field.solr_parameters = {
-        qf: "#{title} #{abstract} #{genre} #{topic} #{creators} #{publisher} #{place} #{identifier}",
+        qf: "#{title} #{abstract} #{genre} #{topic} #{creators} #{publisher} #{place} #{identifier} #{emp_name} #{emp_nuid}",
         pf: "#{title}",
       }
     end
@@ -469,9 +481,6 @@ class CatalogController < ApplicationController
     (@response, @document_list) = get_search_results(:q => query)
     render 'index', locals: { facet_list: facet_fields }
   end
-
-  #can I override the sufia method
-  #https://github.com/nu-lts/sufia/blob/master/lib/sufia/controller.rb#L60
 
   def search_layout
     "homepage"

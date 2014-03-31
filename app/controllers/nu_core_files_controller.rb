@@ -50,13 +50,16 @@ class NuCoreFilesController < ApplicationController
     end
 
     flash[:notice] = "Incomplete files destroyed"
-    redirect_to new_nu_core_file_path
+    redirect_to root_path
   end
 
   def provide_metadata
     # Feeding through an incomplete file if there is one
     @nu_core_file = NuCoreFile.new
     @incomplete_file = NuCoreFile.users_in_progress_files(current_user).first
+
+    @title = @incomplete_file.title
+
     # With the move to single file upload, incomplete files (plural) is a misnomer.
     # but worthwhile to keep if we reimplement batch uploads. In the meantime only
     # NuCoreFile.users_in_progress_files(x).first should ever occur (not more than one at a time).

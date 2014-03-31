@@ -3,37 +3,21 @@
 
 
 h1 {
-  font-size: 48px;
   .hero-unit &{
     margin-bottom: 15px;
     color: $brand-info;
   }
 }
 
-h2 {
-  font-size: 36px;
- 
+article h1 {
+  [class^="icon-"]:before,
+  [class*=" icon-"]:before {
+    padding-right: 5px;
+  }
 }
 
-h3 {
-  font-size: 28px;
- 
-}
-
-h4 {
-  font-size: 24px;
- 
-}
-
-h5 {
-  font-size: 16px;
- 
-}
-
-h6 {
-  font-size: 13px;
- 
-  text-transform: none;
+article h1 {
+  margin-bottom: 20px;
 }
 
 p {
@@ -42,7 +26,6 @@ p {
 
 h1, .h1, h2, .h2, h3, .h3, h4, .h4, h5, .h5, h6, .h6{
   font-weight: 100;
-  letter-spacing: 1px
 }
 
 
@@ -51,6 +34,7 @@ h1 small, h2 small, h3 small, h4 small, h5 small, h6 small {
   color: $blueDark;
   letter-spacing: 3px;
   font-style: oblique;
+  padding-left:5px;
 }
 
 .fix-text{
