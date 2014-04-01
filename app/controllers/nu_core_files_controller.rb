@@ -93,12 +93,22 @@ class NuCoreFilesController < ApplicationController
 
     @nu_core_file = NuCoreFile.find(@nu_core_file.pid)
 
-    if !max.nil?
+    # Process Thumbnail
+    if params[:poster]
+      file = params[:poster]
+      # We move the file contents to a more permanent location so that our ContentCreationJob can access them.
+      # An ensure block in that job handles cleanup of this file.
+      tempdir = Rails.root.join("tmp")
+      poster_path = tempdir.join("#{file.original_filename}")
+      FileUtils.mv(file.tempfile.path, poster_path.to_s)
+
+      Sufia.queue.push(ContentCreationJob.new(@nu_core_file.pid, @nu_core_file.tmp_path, @nu_core_file.original_filename, current_user.id, poster_path.to_s))
+    elsif !max.nil?
       s = params[:small_image_size].to_f / max.to_f
       m = params[:medium_image_size].to_f / max.to_f
       l = params[:large_image_size].to_f / max.to_f
 
-      Sufia.queue.push(ContentCreationJob.new(@nu_core_file.pid, @nu_core_file.tmp_path, @nu_core_file.original_filename, current_user.id, s, m, l))
+      Sufia.queue.push(ContentCreationJob.new(@nu_core_file.pid, @nu_core_file.tmp_path, @nu_core_file.original_filename, current_user.id, nil, s, m, l))
     else
       Sufia.queue.push(ContentCreationJob.new(@nu_core_file.pid, @nu_core_file.tmp_path, @nu_core_file.original_filename, current_user.id))
     end

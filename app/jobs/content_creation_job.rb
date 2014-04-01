@@ -1,18 +1,20 @@
 class ContentCreationJob
 
-  attr_accessor :core_file_pid, :file_path, :file_name, :user_id, :delete_file, :small_size, :medium_size, :large_size
+  attr_accessor :core_file_pid, :file_path, :file_name, :user_id, :delete_file, :poster_path, :small_size, :medium_size, :large_size
   attr_accessor :core_record, :user
 
   def queue_name
     :content_creation
   end
 
-  def initialize(core_file, file_path, file_name, user_id, small_size=nil, medium_size=nil, large_size=nil, delete_file=true)
+  def initialize(core_file, file_path, file_name, user_id, poster_path=nil, small_size=nil, medium_size=nil, large_size=nil, delete_file=true)
     self.core_file_pid = core_file
     self.file_path     = file_path
     self.file_name     = file_name
     self.user_id       = user_id
     self.delete_file   = delete_file
+
+    self.poster_path = poster_path
 
     self.small_size    = small_size
     self.medium_size   = medium_size
@@ -48,6 +50,10 @@ class ContentCreationJob
 
       if content_object.instance_of? ImageMasterFile
         ScaledImageCreator.new(small_size, medium_size, large_size, content_object).create_scaled_images
+      end
+
+      if content_object.instance_of? VideoFile
+        InlineThumbnailCreator.new(content_object, poster_path, "poster").create_thumbnail_and_save
       end
     ensure
       if delete_file
