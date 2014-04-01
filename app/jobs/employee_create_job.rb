@@ -24,9 +24,6 @@ class EmployeeCreateJob
 
     # Generate employee's personal graph
     parent = create_folder(self.name, emp)
-    parent.mass_permissions = 'public'
-    parent.save!
-
     create_folder("Research Publications", emp, parent)
     create_folder("Other Publications", emp, parent)
     create_folder("Presentations", emp, parent)
@@ -57,7 +54,7 @@ class EmployeeCreateJob
                 user_parent: employee,
                 description: desc,
                 personal_folder_type: pft,
-                mass_permissions: 'private',
+                mass_permissions: 'public',
               }
 
       folder = NuCollection.new(attrs)
