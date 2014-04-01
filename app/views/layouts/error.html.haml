@@ -1,34 +1,35 @@
 %html
   %head
-    %meta{:charset => "utf-8"}/
     %title
       = h(application_name)
       \: System Error
-    / application css
-    = stylesheet_link_tag 'application'
-    = yield(:css_head)
-    / application js
-    = javascript_include_tag 'application'
-    / controller specific uploader
-    = yield(:js_head)
-    :javascript
-      $(function() {
-        #{yield(:local_js)}
-      });
-        = render :partial => '/ga', :formats => [:html]
-  %body
-    #wrapper
-      .container
-        #page-positioner
-          = render :partial => '/masthead', :formats => [:html]
-          #content-wrapper
-            #content.row
-              / 110 rows
-              .span110
-                = yield
-            / /#content
-          / /#content-wrapper
-        / /#page-positioner
-      / /.container
-    / /#wrapper
-    = render partial: '/footer'
+    = render :partial => "layouts/head-tag-content"
+  -# Add the data signed-in to tell app.js what to do on toggle click.
+  - if user_signed_in?
+    %body{"data-user" => current_user.id}
+  - else
+    %body(data-user="-1")
+  %nav.skip-links
+    %a.show-on-focus(href="#main-content")
+      Skip to main content
+    %a.show-on-focus(href="#navigation")
+      Skip to navigation
+  = render :partial => '/masthead', :formats => [:html]
+  = render :partial => '/flash_msg', :formats => [:html]
+  %main( id="main-content" role="main" )
+    -if :page_header
+      .container.page_header
+        = yield :page_header
+    .container
+      = yield :content
+    / /.container
+  = render partial: '/footer'
+  / Javascript loaded at the end
+  = render :partial => 'layouts/end-js-scripts'
+  #ajax-modal.modal.hide{:tabindex => "-1", "aria-labelledby" => "ajaxModalLabel", role: "dialog"}
+    %header#ajax-modal-header.modal-header
+      %button.close{"aria-hidden" => "true", "data-dismiss" => "modal", type: "button"} &#215;
+      %h3#ajax-modal-heading
+    .modal-body#ajax-modal-body
+    .modal-footer#ajax-modal-footer
+
