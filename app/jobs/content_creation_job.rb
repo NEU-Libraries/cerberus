@@ -52,9 +52,11 @@ class ContentCreationJob
 
       content_object.save! ? content_object : false
 
-      if content_object.instance_of? ImageMasterFile
+      if (content_object.instance_of? ImageMasterFile) && (!small_size.nil?) && (!medium_size.nil?) && (!large_size.nil?)
         ScaledImageCreator.new(small_size, medium_size, large_size, content_object).create_scaled_images
       end
+
+      return content_object
     ensure
       if delete_file
         FileUtils.rm(file_path)

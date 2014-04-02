@@ -39,13 +39,13 @@ module Drs
             self.dcmi_type = "image"
           elsif [TextFile, PdfFile, MswordFile].include? self.canonical_class.constantize
             self.dcmi_type = "text"
-          elsif self.canonical_class.constantize.is_a? AudioFile
+          elsif self.canonical_class.constantize == AudioFile
             self.dcmi_type = "audio"
-          elsif self.canonical_class.constantize.is_a? MsexcelFile
+          elsif self.canonical_class.constantize == MsexcelFile
             self.dcmi_type = "dataset"
-          elsif self.canonical_class.constantize.is_a? MspowerpointFile
+          elsif self.canonical_class.constantize == MspowerpointFile
             self.dcmi_type = "interactive resource"
-          elsif self.canonical_class.constantize.is_a? ZipFile
+          elsif self.canonical_class.constantize == ZipFile
             self.dcmi_type = "unknown"
           end
 
