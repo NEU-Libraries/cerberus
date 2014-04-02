@@ -29,6 +29,10 @@ class ContentCreationJob
       klass = core_record.canonical_class.constantize
       content_object = klass.new(pid: Sufia::Noid.namespaceize(Sufia::IdService.mint))
 
+      if content_object.instance_of? VideoFile
+        InlineThumbnailCreator.new(content_object, poster_path, "poster").create_thumbnail_and_save
+      end
+
       # Zip files that need zippin'.  Just drop in other file types.
       if content_object.instance_of? ZipFile
         zip_content(content_object)
@@ -50,10 +54,6 @@ class ContentCreationJob
 
       if content_object.instance_of? ImageMasterFile
         ScaledImageCreator.new(small_size, medium_size, large_size, content_object).create_scaled_images
-      end
-
-      if content_object.instance_of? VideoFile
-        InlineThumbnailCreator.new(content_object, poster_path, "poster").create_thumbnail_and_save
       end
     ensure
       if delete_file
