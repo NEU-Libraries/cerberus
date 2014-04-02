@@ -32,7 +32,7 @@ class ZipCompilationJob
       self.entry_ids.each do |id|
         if NuCoreFile.exists?(id)
           NuCoreFile.find(id).content_objects.each do |content|
-            if user.can?(:read, content) && content.content.content #haha
+            if user.can?(:read, content) && content.content.content && ( !content.class == ImageThumbnailFile)
               io.add_buffer("#{self.title}/#{content.title}", content.content.content)
             end
           end
@@ -44,11 +44,6 @@ class ZipCompilationJob
   end
 
   private
-
-    # Need to get FITS sorted out for this to work properly.
-    def assign_file_extension(entry)
-      return entry.title.first
-    end
 
     # Generates a temporary directory name devoid of spaces and colons
     def safe_zipfile_name
