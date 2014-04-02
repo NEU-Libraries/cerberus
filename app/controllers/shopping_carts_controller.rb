@@ -43,7 +43,7 @@ class ShoppingCartsController < ApplicationController
   end
 
   # Zip and serve the user's added items.
-  # HTML requests bring the user to the download.html page and fire off the zip creation job.
+  # HTML requests bring the user to the download.html page and fire off the cart download job.
   # JS requests handle eventually triggering the download once on the download page.
   def download
     dir = "#{Rails.root}/tmp/carts/#{session[:session_id]}/"
