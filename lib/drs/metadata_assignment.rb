@@ -7,6 +7,14 @@ module Drs
     extend ActiveSupport::Concern
 
     included do
+      def canonical_class=(string)
+        if_properties_exists_strict { self.properties.canonical_class = string }
+      end
+
+      def canonical_class
+        if_properties_exists_strict { self.properties.canonical_class.first }
+      end
+
       def tmp_path=(string)
         if_properties_exists_strict { self.properties.tmp_path = string }
       end
