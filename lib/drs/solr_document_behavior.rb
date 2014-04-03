@@ -14,7 +14,7 @@ module Drs
             date = Date.new(date_array.first.to_i, date_array.second.to_i).to_s(:long)
             return date
           rescue
-            Rails.logger.warn "Invalid date - Error #{$!}"
+            Rails.logger.warn "Invalid date - #{self.pid} Error #{$!}"
           ensure
             return nil
           end
