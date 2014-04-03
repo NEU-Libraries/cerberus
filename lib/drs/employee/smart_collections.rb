@@ -54,7 +54,7 @@ module Drs::Employee::SmartCollections
   end
 
   def personal_collections
-    self.smart_collections.select { |f| (f.smart_collection_type == 'miscellany') && (f.parent.pid == self.root_folder.pid) }
+    self.smart_collections.select { |f| (f.smart_collection_type == 'miscellany') && (f.parent.pid == self.user_root_collection.pid) }
   end
 
   private
@@ -63,7 +63,7 @@ module Drs::Employee::SmartCollections
       if root
         return self.smart_collections.find{ |f| f.smart_collection_type == string }
       else
-        return self.smart_collections.find{ |f| (f.smart_collection_type == string) && (f.parent.pid == self.root_folder.pid) }
+        return self.smart_collections.find{ |f| (f.smart_collection_type == string) && (f.parent.pid == self.user_root_collection.pid) }
       end
     end
 

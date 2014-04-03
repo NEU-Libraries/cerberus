@@ -25,5 +25,5 @@
         %button.close{"data-dismiss" => "alert", type: "button"} &#215;
 
     -if editable
-      = link_to("Create a new collection", new_nu_collection_path(parent: @employee.root_folder.pid,), class: ["btn", "btn-clear", "btn-block", ] )
+      = link_to("Create a new collection", new_nu_collection_path(parent: @employee.user_root_collection.pid,), class: ["btn", "btn-clear", "btn-block", ] )
   //.span6

@@ -36,8 +36,8 @@ describe EmployeeCreateJob do
     employee.smart_collections.length.should == 6
 
     # All required smart_collections were spun up
-    employee.root_folder.should be_an_instance_of NuCollection
-    user.can?(:edit, employee.root_folder).should be true
+    employee.user_root_collection.should be_an_instance_of NuCollection
+    user.can?(:edit, employee.user_root_collection).should be true
 
     employee.research_publications.should be_an_instance_of NuCollection
     user.can?(:edit, employee.research_publications).should be true
