@@ -54,17 +54,19 @@ module Drs::Employee::SmartCollections
   end
 
   def personal_collections
-    self.smart_collections.select { |f| (f.smart_collection_type == 'miscellany') && (f.parent.pid == self.user_root_collection.pid) }
+    c_array = self.smart_collections.select { |f| (f.smart_collection_type == 'miscellany') && (f.parent.pid == self.user_root_collection.pid) }
+    return c_array.map{ |x| SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{x.pid}\"").first) }
   end
 
   private
 
     def find_by_smart_collection_type(string, root = false)
-      return self.smart_collections.find{ |f|
+      collection = self.smart_collections.find{ |f|
         (f.smart_collection_type == string) &&
         (!f.parent.nil?) &&
         (f.parent.pid == self.user_root_collection.pid)
       }
+      solrCollection = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{collection.pid}\"").first)
     end
 
     def purge_personal_graph
