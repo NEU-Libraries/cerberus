@@ -1,4 +1,4 @@
-module Drs::Employee::Facultysmart_collections
+module Drs::Employee::SmartCollections
   extend ActiveSupport::Concern
 
   included do

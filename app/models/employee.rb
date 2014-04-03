@@ -1,7 +1,7 @@
 class Employee < ActiveFedora::Base
   include ActiveModel::MassAssignmentSecurity
   include ActiveModel::Validations
-  include Drs::Employee::Facultysmart_collections
+  include Drs::Employee::SmartCollections
   include Drs::Find
   include Drs::Rights::MassPermissions
 
