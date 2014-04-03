@@ -73,7 +73,7 @@ class CommunitiesController < SetsController
 
   def data_sets
     @dept = Community.find(params[:id])
-    @page_title = "#{@dept.title} Data Sets"
+    @page_title = "#{@dept.title} Datasets"
   end
 
   def learning_objects

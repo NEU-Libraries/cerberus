@@ -27,7 +27,7 @@ class EmployeeCreateJob
     create_folder("Research Publications", emp, parent)
     create_folder("Other Publications", emp, parent)
     create_folder("Presentations", emp, parent)
-    create_folder("Data Sets", emp, parent)
+    create_folder("Datasets", emp, parent)
     create_folder("Learning Objects", emp, parent)
 
     # Tag the employee as completed and resave to Fedora.
