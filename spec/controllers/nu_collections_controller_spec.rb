@@ -65,7 +65,7 @@ describe NuCollectionsController do
       response.status.should == 403
     end
 
-    it "redirects to collections root when a user tries to treat a non-personal folder parent like it is a personal folder" do
+    it "redirects to collections root when a user tries to treat a non-personal collection parent like it is a personal collection" do
       sign_in bill
 
       post :create, { set: { parent: bills_collection.id, user_parent: bill.nuid } }
@@ -83,7 +83,7 @@ describe NuCollectionsController do
       expect(response).to redirect_to(nu_collection_path(id: id))
     end
 
-    it "assigns personal folder specific information on successful create" do
+    it "assigns personal collection specific information on successful create" do
       sign_in bill
 
       employee = Employee.create(nuid: "neu:unique", name: "John Doe")

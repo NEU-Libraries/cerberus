@@ -46,13 +46,13 @@ describe DrsPropertiesDatastream do
     end
   end
 
-  describe "Personal folder type" do
-    it "returns nil when called on anything other than a personal folder" do
+  describe "Personal collection type" do
+    it "returns nil when called on anything other than a personal collection" do
       properties.smart_collection_type = []
       properties.get_smart_collection_type.should be nil
     end
 
-    it "returns the type of the folder when the field is defined" do
+    it "returns the type of the personal collection when the field is defined" do
       properties.smart_collection_type = "User Root"
       properties.get_smart_collection_type.should == "User Root"
     end
