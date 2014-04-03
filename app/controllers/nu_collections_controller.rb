@@ -60,7 +60,7 @@ class NuCollectionsController < SetsController
         @set.user_parent = parent.user_parent.nuid
       end
 
-      if parent.smart_collection_type == 'user root'
+      if parent.smart_collection_type == 'User Root'
         @set.smart_collection_type = 'miscellany'
       else
         @set.smart_collection_type = parent.smart_collection_type
@@ -93,7 +93,7 @@ class NuCollectionsController < SetsController
     @set = SolrDocument.new(@response.docs.first)
     @page_title = @set.title
 
-    if !@set.smart_collection_type.nil? && @set.smart_collection_type == 'user root' && @set.pf_belongs_to_user?(current_user)
+    if !@set.smart_collection_type.nil? && @set.smart_collection_type == 'User Root' && @set.pf_belongs_to_user?(current_user)
       return redirect_to personal_graph_path
     end
 
