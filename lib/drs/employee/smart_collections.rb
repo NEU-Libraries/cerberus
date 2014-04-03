@@ -62,7 +62,7 @@ module Drs::Employee::SmartCollections
     def find_by_smart_collection_type(string, root = false)
       return self.smart_collections.find{ |f|
         (f.smart_collection_type == string) &&
-        (!f.user_root_collection.nil?) &&
+        (!f.parent.nil?) &&
         (f.parent.pid == self.user_root_collection.pid)
       }
     end
