@@ -6,7 +6,7 @@ module Drs::Employee::SmartCollections
   end
 
   def user_root_collection
-    find_by_smart_collection_type('User Root', true)
+    return self.smart_collections.find{ |f| f.smart_collection_type == 'User Root' }
   end
 
   def research_publications_collection
@@ -60,11 +60,11 @@ module Drs::Employee::SmartCollections
   private
 
     def find_by_smart_collection_type(string, root = false)
-      if root
-        return self.smart_collections.find{ |f| f.smart_collection_type == string }
-      else
-        return self.smart_collections.find{ |f| (f.smart_collection_type == string) && (f.parent.pid == self.user_root_collection.pid) }
-      end
+      return self.smart_collections.find{ |f|
+        (f.smart_collection_type == string) &&
+        (!f.user_root_collection.nil?) &&
+        (f.parent.pid == self.user_root_collection.pid)
+      }
     end
 
     def purge_personal_graph
