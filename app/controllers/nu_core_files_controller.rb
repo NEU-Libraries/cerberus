@@ -264,10 +264,10 @@ class NuCoreFilesController < ApplicationController
       nu_core_file.set_parent(collection, user) if collection
 
       # Significant content tagging
-      pf_type = collection.personal_folder_type
+      sc_type = collection.smart_collection_type
 
-      if pf_type
-        nu_core_file.category = NuCoreFile.personal_folder_to_category(pf_type)
+      if !sc_type.nil? && sc_type != ""
+        nu_core_file.category = sc_type
       end
 
       yield(nu_core_file) if block_given?

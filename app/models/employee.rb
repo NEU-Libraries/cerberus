@@ -1,7 +1,7 @@
 class Employee < ActiveFedora::Base
   include ActiveModel::MassAssignmentSecurity
   include ActiveModel::Validations
-  include Drs::Employee::FacultyFolders
+  include Drs::Employee::SmartCollections
   include Drs::Find
   include Drs::Rights::MassPermissions
 
@@ -15,7 +15,7 @@ class Employee < ActiveFedora::Base
   has_metadata name: 'rightsMetadata', type: ParanoidRightsDatastream
 
   belongs_to :parent, :property => :has_affiliation, :class_name => 'Community'
-  has_many :folders, :property => :is_member_of, :class_name => 'NuCollection'
+  has_many :smart_collections, :property => :is_member_of, :class_name => 'NuCollection'
 
   def add_community(c_id)
     self.add_relationship(:has_affiliation, c_id)

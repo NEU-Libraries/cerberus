@@ -21,7 +21,7 @@ en:
       image_slider_error: "Something went wrong, cannot access info necessary for scaled derivative creation.  Please abandon upload and try again.  If the problem persists contact an administrator."
     homepage:
       description:
-        short: "The DRS is a secure place to collect your work in one location and create a durable and citable record of research, presentations, publications, data sets, or other scholarly work."
+        short: "The DRS is a secure place to collect your work in one location and create a durable and citable record of research, presentations, publications, Datasets, or other scholarly work."
         long: "Materials in the repository are maintained by Northeastern University Libraries for future use, and can be shared worldwide, with just a few people or groups, or kept private. You can also discover and remix materials created by others: for instance, articles and research data, materials from the <a href=\"http://library.northeastern.edu/archives-special-collections\" target=\"_blank\">University Archives and Special Collections</a>, or images and photographs from the Northeastern community. For more information visit our FAQ. For help with uploading, searching, or logging in, visit our User Guides page."
       browse label: "Explore"
     compilations:
@@ -63,10 +63,10 @@ en:
       title: About the DRS
     personal_graph:
       title: My DRS
-      description: My content will be shown here. System generated content and more.
+      description: Files placed in Smart Collections will be viewable from your Community.
       icon: icon-dashboard
-      system_generated_folders: Smart Collections
-      user_created_folders: User Created Collections
+      system_generated_smart_collections: Smart Collections
+      personal_collections: User Created Collections
     metadata:
       icon: 'icon-pencil'
       edit_page_title: 'Provide Metadata'

@@ -26,7 +26,6 @@ class NuCollectionsController < SetsController
   before_filter :is_depositor?, only: [:destroy]
 
   before_filter :can_edit_parent?, only: [:new, :create]
-  before_filter :parent_is_personal_folder?, only: [:new, :create]
 
   rescue_from Exceptions::NoParentFoundError, with: :index_redirect
   rescue_from Exceptions::SearchResultTypeError, with: :index_redirect_with_bad_search
@@ -52,16 +51,20 @@ class NuCollectionsController < SetsController
 
     parent = ActiveFedora::Base.find(params[:set][:parent], cast: true)
 
-    # Assign personal folder specific info if parent folder is a
-    # personal folder.
-    # This is a kludge for #302
-    if !(parent.personal_folder_type == "theses") && parent.is_personal_folder?
-      @set.user_parent = parent.user_parent.nuid
-      if parent.personal_folder_type == 'user root'
-        @set.personal_folder_type = 'miscellany'
-      else
-        @set.personal_folder_type = parent.personal_folder_type
+    # Assign personal collection specific info if parent collection is a
+    # smart collection.
+    if parent.is_smart_collection?
+
+      if !(parent.smart_collection_type == "theses")
+        @set.user_parent = parent.user_parent.nuid
       end
+
+      if parent.smart_collection_type == 'User Root'
+        @set.smart_collection_type = 'miscellany'
+      else
+        @set.smart_collection_type = parent.smart_collection_type
+      end
+
     end
 
     # Process Thumbnail
@@ -89,7 +92,7 @@ class NuCollectionsController < SetsController
     @set = SolrDocument.new(@response.docs.first)
     @page_title = @set.title
 
-    if !@set.personal_folder_type.nil? && @set.personal_folder_type == 'user root' && @set.pf_belongs_to_user?(current_user)
+    if !@set.smart_collection_type.nil? && @set.smart_collection_type == 'User Root' && @set.pf_belongs_to_user?(current_user)
       return redirect_to personal_graph_path
     end
 
@@ -146,24 +149,6 @@ class NuCollectionsController < SetsController
     def index_redirect_with_bad_search(exception)
       flash[:error] = exception.message
       redirect_to communities_path and return
-    end
-
-    # In cases where a personal folder is being created,
-    # ensure that the parent is also a personal folder.
-    def parent_is_personal_folder?
-      if params[:is_parent_folder].present?
-        parent_id = params[:parent]
-      elsif params[:set].present? && params[:set][:user_parent].present?
-        parent_id = params[:set][:parent]
-      else
-        return true
-      end
-
-      folder = NuCollection.find(parent_id)
-      if !folder.is_personal_folder?
-        flash[:error] = "You are attempting to create a personal folder off not a personal folder."
-        redirect_to nu_collections_path and return
-      end
     end
 
     def show_children_only(solr_parameters, user_parameters)
