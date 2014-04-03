@@ -9,8 +9,15 @@ module Drs
         if(date_string.split("-")).length > 2
           return date_string.to_date.to_formatted_s(:long_ordinal)
         else
-          date_array =  date_string.split("-")
-          return Date.new(date_array.first.to_i, date_array.second.to_i).to_s(:long)
+          begin
+            date_array =  date_string.split("-")
+            date = Date.new(date_array.first.to_i, date_array.second.to_i).to_s(:long)
+            return date
+          rescue
+            Rails.logger.warn "Invalid date - Error #{$!}"
+          ensure
+            return nil
+          end
         end
       else
         return nil
