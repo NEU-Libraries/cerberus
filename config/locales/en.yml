@@ -17,6 +17,8 @@ en:
         q:
           label: "Search"
           placeholder: "Search Keywords"
+    provide_metadata_page:
+      image_slider_error: "Something went wrong, cannot access info necessary for scaled derivative creation.  Please abandon upload and try again.  If the problem persists contact an administrator."
     homepage:
       description:
         short: "The DRS is a secure place to collect your work in one location and create a durable and citable record of research, presentations, publications, data sets, or other scholarly work."

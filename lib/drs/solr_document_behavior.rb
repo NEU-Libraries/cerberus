@@ -5,14 +5,21 @@ module Drs
   module SolrDocumentBehavior
 
     def process_date(date_string)
-      if !date_string.nil?
-        if(date_string.split("-")).length > 2
-          return date_string.to_date.to_formatted_s(:long_ordinal)
+      begin
+        if !date_string.nil? && (date_string != "")
+          if(date_string.split("-")).length > 2
+            return date_string.to_date.to_formatted_s(:long_ordinal)
+          else
+            date_array = date_string.split("-")
+            date = Date.new(date_array.first.to_i, date_array.second.to_i).to_s(:long)
+            return date
+          end
         else
-          date_array =  date_string.split("-")
-          return Date.new(date_array.first.to_i, date_array.second.to_i).to_s(:long)
+          return nil
         end
-      else
+      rescue
+        Rails.logger.warn "Invalid date - #{self.pid} Error #{$!}"
+      ensure
         return nil
       end
     end
