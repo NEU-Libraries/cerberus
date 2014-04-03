@@ -63,7 +63,7 @@ en:
       title: About the DRS
     personal_graph:
       title: My DRS
-      description: My content will be shown here. System generated content and more.
+      description: Files placed in Smart Collections will be viewable from your Community.
       icon: icon-dashboard
       system_generated_smart_collections: Smart Collections
       personal_collections: User Created Collections
