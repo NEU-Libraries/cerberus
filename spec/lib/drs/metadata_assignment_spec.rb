@@ -163,8 +163,8 @@ describe "Metadata" do
 
     describe "of smart_collection_type" do
       it "succeeds for objects with a properties datastream" do
-        collection.smart_collection_type = "folder type"
-        collection.smart_collection_type.should == 'folder type'
+        collection.smart_collection_type = "personal collection type"
+        collection.smart_collection_type.should == 'personal collection type'
       end
     end
 

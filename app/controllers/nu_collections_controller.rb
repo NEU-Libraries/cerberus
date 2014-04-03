@@ -26,7 +26,7 @@ class NuCollectionsController < SetsController
   before_filter :is_depositor?, only: [:destroy]
 
   before_filter :can_edit_parent?, only: [:new, :create]
-  before_filter :parent_is_smart_collection?, only: [:new, :create]
+  before_filter :parent_is_personal_collection?, only: [:new, :create]
 
   rescue_from Exceptions::NoParentFoundError, with: :index_redirect
   rescue_from Exceptions::SearchResultTypeError, with: :index_redirect_with_bad_search
@@ -52,7 +52,7 @@ class NuCollectionsController < SetsController
 
     parent = ActiveFedora::Base.find(params[:set][:parent], cast: true)
 
-    # Assign personal folder specific info if parent folder is a
+    # Assign personal collection specific info if parent collection is a
     # smart collection.
     if parent.is_smart_collection?
 
@@ -152,20 +152,18 @@ class NuCollectionsController < SetsController
       redirect_to communities_path and return
     end
 
-    # In cases where a personal folder is being created,
-    # ensure that the parent is also a personal folder.
-    def parent_is_smart_collection?
-      if params[:is_parent_folder].present?
-        parent_id = params[:parent]
-      elsif params[:set].present? && params[:set][:user_parent].present?
+    # In cases where a personal collection is being created,
+    # ensure that the parent is also a personal collection.
+    def parent_is_personal_collection?
+      if params[:set].present? && params[:set][:user_parent].present?
         parent_id = params[:set][:parent]
       else
         return true
       end
 
-      folder = NuCollection.find(parent_id)
-      if !folder.is_smart_collection?
-        flash[:error] = "You are attempting to create a personal folder off not a personal folder."
+      collection = NuCollection.find(parent_id)
+      if !collection.is_personal_folder?
+        flash[:error] = "You are attempting to create a personal collection off a collection which is not a personal collection."
         redirect_to nu_collections_path and return
       end
     end
