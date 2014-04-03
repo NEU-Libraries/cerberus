@@ -54,13 +54,13 @@ module Drs::Employee::FacultyFolders
   end
 
   def personal_folders
-    self.folders.select { |f| f.personal_folder_type == 'miscellany' && f.parent.pid == self.root_folder.pid }
+    self.folders.select { |f| (f.personal_folder_type == 'miscellany') && (f.parent.pid == self.root_folder.pid) }
   end
 
   private
 
     def find_by_folder_type(string)
-      return self.folders.find{ |f| f.personal_folder_type == string && f.parent.pid == self.root_folder.pid }
+      return self.folders.find{ |f| f.personal_folder_type == string }
     end
 
     def purge_personal_graph
