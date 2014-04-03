@@ -41,22 +41,25 @@ $(document).ready ->
       toggleShoppingCart $('*[data-shoppingcart]')
       removeFormFields()
       imageMetadataPartial()
-      enforceSizes()
       return
 
     enforceSizes = ->
       if $("input.slider.small").slider("getValue") > $("input.slider.medium").slider("getValue")
         $("input.slider.medium").slider "setValue", $("input.slider.small").slider("getValue") + 1
         $("#medium_image_size").val $("input.slider.small").slider("getValue") + 1
+        return
       if $("input.slider.small").slider("getValue") > $("input.slider.large").slider("getValue")
         $("input.slider.large").slider "setValue", $("input.slider.small").slider("getValue") + 2
         $("#large_image_size").val $("input.slider.small").slider("getValue") + 2
+        return
       if $("input.slider.medium").slider("getValue") < $("input.slider.small").slider("getValue")
         $("input.slider.small").slider "setValue", $("input.slider.medium").slider("getValue") - 1
         $("#small_image_size").val $("input.slider.medium").slider("getValue") - 1
+        return
       if $("input.slider.medium").slider("getValue") > $("input.slider.large").slider("getValue")
         $("input.slider.large").slider "setValue", $("input.slider.medium").slider("getValue") + 1
         $("#large_image_size").val $("input.slider.medium").slider("getValue") + 1
+        return
       return
 
     imageMetadataPartial = ->
@@ -67,26 +70,32 @@ $(document).ready ->
         $("input#small_slider").on "slide", (slideEvt) ->
           $("#small_image_size").val slideEvt.value
           enforceSizes()
+          return
 
         $("input#medium_slider").on "slide", (slideEvt) ->
           $("#medium_image_size").val slideEvt.value
           enforceSizes()
+          return
 
         $("input#large_slider").on "slide", (slideEvt) ->
           $("#large_image_size").val slideEvt.value
           enforceSizes()
+          return
 
         $("#small_image_size").change ->
           $("input.slider.small").slider "setValue", parseInt($("#small_image_size").val())
           enforceSizes()
+          return
 
         $("#medium_image_size").change ->
           $("input.slider.medium").slider "setValue", parseInt($("#medium_image_size").val())
           enforceSizes()
+          return
 
         $("#large_image_size").change ->
           $("input.slider.large").slider "setValue", parseInt($("#large_image_size").val())
           enforceSizes()
+          return
 
       return
 
