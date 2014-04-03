@@ -18,7 +18,7 @@ module Drs::Employee::SmartCollections
   end
 
   def other_publications_collection
-    find_by_smart_collection_type('other publications')
+    find_by_smart_collection_type('Other Publications')
   end
 
   def all_other_publications
@@ -26,7 +26,7 @@ module Drs::Employee::SmartCollections
   end
 
   def data_sets_collection
-    find_by_smart_collection_type('data sets')
+    find_by_smart_collection_type('Datasets')
   end
 
   def all_data_sets
