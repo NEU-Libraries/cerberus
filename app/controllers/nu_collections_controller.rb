@@ -26,7 +26,6 @@ class NuCollectionsController < SetsController
   before_filter :is_depositor?, only: [:destroy]
 
   before_filter :can_edit_parent?, only: [:new, :create]
-  before_filter :parent_is_personal_collection?, only: [:new, :create]
 
   rescue_from Exceptions::NoParentFoundError, with: :index_redirect
   rescue_from Exceptions::SearchResultTypeError, with: :index_redirect_with_bad_search
@@ -150,22 +149,6 @@ class NuCollectionsController < SetsController
     def index_redirect_with_bad_search(exception)
       flash[:error] = exception.message
       redirect_to communities_path and return
-    end
-
-    # In cases where a personal collection is being created,
-    # ensure that the parent is also a personal collection.
-    def parent_is_personal_collection?
-      if params[:set].present? && params[:set][:user_parent].present?
-        parent_id = params[:set][:parent]
-      else
-        return true
-      end
-
-      collection = NuCollection.find(parent_id)
-      if !collection.is_personal_folder?
-        flash[:error] = "You are attempting to create a personal collection off a collection which is not a personal collection."
-        redirect_to nu_collections_path and return
-      end
     end
 
     def show_children_only(solr_parameters, user_parameters)
