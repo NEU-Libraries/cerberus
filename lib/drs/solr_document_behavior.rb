@@ -5,7 +5,7 @@ module Drs
   module SolrDocumentBehavior
 
     def process_date(date_string)
-      if !date_string.nil?
+      if !date_string.nil? && (date_string != "")
         if(date_string.split("-")).length > 2
           return date_string.to_date.to_formatted_s(:long_ordinal)
         else
