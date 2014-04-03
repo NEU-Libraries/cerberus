@@ -44,7 +44,7 @@ namespace :deploy do
   end
 
   desc "Resetting data"
-  task :refresh_data do
+  task :refset_data do
     on roles(:app), :in => :sequence, :wait => 5 do
       execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake reset_data)"
     end
@@ -105,5 +105,6 @@ after 'deploy:updating', 'deploy:migrate'
 after 'deploy:updating', 'deploy:restart'
 after 'deploy:updating', 'deploy:whenever'
 after 'deploy:updating', 'deploy:assets_kludge'
-#after 'deploy:finished', 'deploy:refresh_data'
+after 'deploy:finished', 'deploy:reset_data'
+after 'deploy:finished', 'solr:reindex'
 after 'deploy:finished', 'deploy:start_solrizerd'
