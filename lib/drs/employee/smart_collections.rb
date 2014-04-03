@@ -10,7 +10,7 @@ module Drs::Employee::SmartCollections
   end
 
   def research_publications_collection
-    find_by_smart_collection_type('research publications')
+    find_by_smart_collection_type('Research Publications')
   end
 
   def all_research_publications
@@ -34,7 +34,7 @@ module Drs::Employee::SmartCollections
   end
 
   def presentations_collection
-    find_by_smart_collection_type('presentations')
+    find_by_smart_collection_type('Presentations')
   end
 
   def all_presentations
@@ -42,7 +42,7 @@ module Drs::Employee::SmartCollections
   end
 
   def learning_objects_collection
-    find_by_smart_collection_type('learning objects')
+    find_by_smart_collection_type('Learning Objects')
   end
 
   def all_learning_objects
