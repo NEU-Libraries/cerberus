@@ -69,7 +69,7 @@ class EmployeeCreateJob
       rescue RSolr::Error::Http => error
         puts "Save failed"
         saves += 1
-        logger.warn "GenerateUserFoldersJob caught RSOLR error on creation of #{nuid}'s #{title} folder: #{error.inspect}"
+        logger.warn "GenerateUsersmart_collectionsJob caught RSOLR error on creation of #{nuid}'s #{title} folder: #{error.inspect}"
         raise error if saves >= 3
         sleep 0.01
         retry
