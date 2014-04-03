@@ -53,8 +53,8 @@ describe DrsPropertiesDatastream do
     end
 
     it "returns the type of the folder when the field is defined" do
-      properties.smart_collection_type = "user root"
-      properties.get_smart_collection_type.should == "user root"
+      properties.smart_collection_type = "User Root"
+      properties.get_smart_collection_type.should == "User Root"
     end
   end
 end
