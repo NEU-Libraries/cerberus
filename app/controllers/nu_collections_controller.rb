@@ -55,7 +55,7 @@ class NuCollectionsController < SetsController
     # smart collection.
     if parent.is_smart_collection?
 
-      if !(parent.smart_collection_type == "theses")
+      if !(parent.smart_collection_type == "Theses and Dissertations")
         @set.user_parent = parent.user_parent.nuid
       end
 
