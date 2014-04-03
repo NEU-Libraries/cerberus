@@ -40,10 +40,10 @@ class EmployeeCreateJob
     def create_folder(title, employee, parent = nil)
 
       if title == employee.name
-        pft = "user root"
+        smart_collection_type = "user root"
         desc = "#{self.name}'s root folder"
       else
-        pft = "#{title.downcase}"
+        smart_collection_type = "#{title}"
         desc = "#{title} for #{employee.name}"
       end
 
@@ -53,7 +53,7 @@ class EmployeeCreateJob
                 parent: parent,
                 user_parent: employee,
                 description: desc,
-                personal_folder_type: pft,
+                smart_collection_type: smart_collection_type,
                 mass_permissions: 'public',
               }
 

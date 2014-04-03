@@ -13,7 +13,7 @@ class NuCollection < ActiveFedora::Base
   validate :belong_check, on: :update
 
   attr_accessible :title, :description, :date_of_issue, :keywords, :parent
-  attr_accessible :creators, :personal_folder_type
+  attr_accessible :creators, :smart_collection_type
 
   attr_protected :identifier
 

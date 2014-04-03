@@ -53,17 +53,17 @@ module Drs::Employee::FacultyFolders
     [research_publications_folder, other_publications_folder, data_sets_folder, presentations_folder, learning_objects_folder]
   end
 
-  def personal_folders
-    self.folders.select { |f| (f.personal_folder_type == 'miscellany') && (f.parent.pid == self.root_folder.pid) }
+  def smart_collections
+    self.folders.select { |f| (f.smart_collection_type == 'miscellany') && (f.parent.pid == self.root_folder.pid) }
   end
 
   private
 
     def find_by_folder_type(string, root = false)
       if root
-        return self.folders.find{ |f| f.personal_folder_type == string }
+        return self.folders.find{ |f| f.smart_collection_type == string }
       else
-        return self.folders.find{ |f| (f.personal_folder_type == string) && (f.parent.pid == self.root_folder.pid) }
+        return self.folders.find{ |f| (f.smart_collection_type == string) && (f.parent.pid == self.root_folder.pid) }
       end
     end
 
