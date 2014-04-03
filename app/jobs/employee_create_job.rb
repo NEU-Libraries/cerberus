@@ -23,12 +23,12 @@ class EmployeeCreateJob
     end
 
     # Generate employee's personal graph
-    parent = create_folder(self.name, emp)
-    create_folder("Research Publications", emp, parent)
-    create_folder("Other Publications", emp, parent)
-    create_folder("Presentations", emp, parent)
-    create_folder("Data Sets", emp, parent)
-    create_folder("Learning Objects", emp, parent)
+    parent = create_personal_collection(self.name, emp)
+    create_personal_collection("Research Publications", emp, parent)
+    create_personal_collection("Other Publications", emp, parent)
+    create_personal_collection("Presentations", emp, parent)
+    create_personal_collection("Datasets", emp, parent)
+    create_personal_collection("Learning Objects", emp, parent)
 
     # Tag the employee as completed and resave to Fedora.
     emp.employee_is_complete
@@ -37,13 +37,13 @@ class EmployeeCreateJob
 
   private
 
-    def create_folder(title, employee, parent = nil)
+    def create_personal_collection(title, employee, parent = nil)
 
       if title == employee.name
-        pft = "user root"
-        desc = "#{self.name}'s root folder"
+        smart_collection_type = "User Root"
+        desc = "#{self.name}'s root collection"
       else
-        pft = "#{title.downcase}"
+        smart_collection_type = "#{title}"
         desc = "#{title} for #{employee.name}"
       end
 
@@ -53,23 +53,23 @@ class EmployeeCreateJob
                 parent: parent,
                 user_parent: employee,
                 description: desc,
-                personal_folder_type: pft,
+                smart_collection_type: smart_collection_type,
                 mass_permissions: 'public',
               }
 
-      folder = NuCollection.new(attrs)
+      personal_collection = NuCollection.new(attrs)
 
       saves = 0
 
-      #Attempt to save the newly created folder
+      #Attempt to save the newly created collection
       begin
-        if folder.save!
-          return folder
+        if personal_collection.save!
+          return personal_collection
         end
       rescue RSolr::Error::Http => error
         puts "Save failed"
         saves += 1
-        logger.warn "GenerateUserFoldersJob caught RSOLR error on creation of #{nuid}'s #{title} folder: #{error.inspect}"
+        logger.warn "GenerateUsersmart_collectionsJob caught RSOLR error on creation of #{nuid}'s #{title} personal_collection: #{error.inspect}"
         raise error if saves >= 3
         sleep 0.01
         retry

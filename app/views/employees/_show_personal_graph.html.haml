@@ -1,29 +1,29 @@
 %section.row
   %article.span6
     %h3
-      = t('drs.personal_graph.system_generated_folders')
-    -if generated_folders.length > 0
+      = t('drs.personal_graph.system_generated_smart_collections')
+    -if generated_smart_collections.length > 0
       %section{class: ["drs-items-list", "drs-items"] }
-        - generated_folders.each do |f|
-          / =render partial: "shared/drs_item/drs_item", locals: { item: f }
-          =render partial: "shared/drs_item/drs_item", locals: { item: SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{f.pid}\"").first) }
+        - generated_smart_collections.each do |f|
+          =render partial: "shared/drs_item/drs_item", locals: { item: f }
+          / =render partial: "shared/drs_item/drs_item", locals: { item: SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{f.pid}\"").first) }
   //.span6
   %article.span6
     %h3
-      = t('drs.personal_graph.user_created_folders')
-    -if user_folders.length > 0
+      = t('drs.personal_graph.personal_collections')
+    -if user_smart_collections.length > 0
       %section{class: ["drs-items-list", "drs-items"] }
-        - user_folders.each do |f|
-          / =render partial: "shared/drs_item/drs_item", locals: { item: f }
-          =render partial: "shared/drs_item/drs_item", locals: { item: SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{f.pid}\"").first) }
+        - user_smart_collections.each do |f|
+          =render partial: "shared/drs_item/drs_item", locals: { item: f }
+          / =render partial: "shared/drs_item/drs_item", locals: { item: SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{f.pid}\"").first) }
     -else
       .alert.alert-info
         %strong
-          No folders to show.
+          No smart_collections to show.
           -if editable
             Create a new collection.
         %button.close{"data-dismiss" => "alert", type: "button"} &#215;
 
     -if editable
-      = link_to("Create a new collection", new_nu_collection_path(parent: @employee.root_folder.pid,), class: ["btn", "btn-clear", "btn-block", ] )
+      = link_to("Create a new collection", new_nu_collection_path(parent: @employee.user_root_collection.pid,), class: ["btn", "btn-clear", "btn-block", ] )
   //.span6
