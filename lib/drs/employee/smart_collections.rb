@@ -6,7 +6,7 @@ module Drs::Employee::SmartCollections
   end
 
   def user_root_collection
-    find_by_smart_collection_type('user root', true)
+    find_by_smart_collection_type('User Root', true)
   end
 
   def research_publications_collection
