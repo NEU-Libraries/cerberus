@@ -15,6 +15,7 @@
 //= require modernizr/modernizr
 //= require webshims/polyfiller
 //= require polyfills
+//= require bootstrap-slider
 
 //= require picturefill/picturefill.js
 //= require blacklight/blacklight
@@ -30,4 +31,5 @@
 //= require compilations
 //= require shopping_carts
 //= require analytics.js
+//= require jquery_validate/jquery.validate.min.js
 

@@ -1,15 +1,27 @@
-
+- if new_object
+  - if @incomplete_file.canonical_class == "VideoFile"
+    %fieldset.row-fluid
+      = render partial: 'nu_core_files/metadata/video', locals: {:f => f}
+  - if @incomplete_file.canonical_class == "ImageMasterFile"
+    %fieldset.row-fluid
+      = render partial: 'nu_core_files/metadata/image', locals: {:f => f}
+  - if @incomplete_file.category.first == "Learning Objects"
+    %fieldset.row-fluid
+      = render partial: 'nu_core_files/metadata/learning_object', locals: {:f => f}
+.row-fluid
+  .span12
+    %legend Basic Information
 %fieldset.row-fluid
-  .span8
+  .span6
     = f.label :title, "Title", class: "required-label"
     - if !@title.nil?
       = f.text_field :title, required: true, pattern: ".*\\S.*", name: 'nu_core_file[title][]', class: "input-block-level", placeholder: "US Congressman poses with a supporter", value: @title.split(".")[0]
     - else
       = f.text_field :title, required: true, pattern: ".*\\S.*", name: 'nu_core_file[title][]', class: "input-block-level", placeholder: "US Congressman poses with a supporter"
-  .span4
+  .span6
     = f.label :date_of_issue, "Date of Issuance", class: "required-label"
-    #date-issued.input-append.date(data-date-format="yyyy-mm-dd")
-      = f.text_field :date_of_issue, class: ['datepicker','input-block-level'], required: true, placeholder: "YYYY-MM-DD"
+    #date-issued.input-block-level.input-append.date
+      = f.text_field :date_of_issue, class: ['datepicker','input-block-level'], required: true, placeholder: "YYYY-MM-DD", 'data-date-format' => "yyyy-mm-dd"
       %span.add-on
         %i.icon-calendar.icon-large
 %fieldset.row-fluid

@@ -86,10 +86,32 @@ class NuCoreFilesController < ApplicationController
   def process_metadata
     Sufia.queue.push(MetadataUpdateJob.new(current_user.user_key, params))
     @nu_core_file = NuCoreFile.users_in_progress_files(current_user).first
+
     update_metadata if params[:nu_core_file]
 
+    max = session[:slider_max]
+
     @nu_core_file = NuCoreFile.find(@nu_core_file.pid)
-    Sufia.queue.push(ContentCreationJob.new(@nu_core_file.pid, @nu_core_file.tmp_path, @nu_core_file.original_filename, current_user.id))
+
+    # Process Thumbnail
+    if params[:poster]
+      file = params[:poster]
+      # We move the file contents to a more permanent location so that our ContentCreationJob can access them.
+      # An ensure block in that job handles cleanup of this file.
+      tempdir = Rails.root.join("tmp")
+      poster_path = tempdir.join("#{file.original_filename}")
+      FileUtils.mv(file.tempfile.path, poster_path.to_s)
+
+      Sufia.queue.push(ContentCreationJob.new(@nu_core_file.pid, @nu_core_file.tmp_path, @nu_core_file.original_filename, current_user.id, poster_path.to_s))
+    elsif !max.nil?
+      s = params[:small_image_size].to_f / max.to_f
+      m = params[:medium_image_size].to_f / max.to_f
+      l = params[:large_image_size].to_f / max.to_f
+
+      Sufia.queue.push(ContentCreationJob.new(@nu_core_file.pid, @nu_core_file.tmp_path, @nu_core_file.original_filename, current_user.id, nil, s, m, l))
+    else
+      Sufia.queue.push(ContentCreationJob.new(@nu_core_file.pid, @nu_core_file.tmp_path, @nu_core_file.original_filename, current_user.id))
+    end
 
     flash[:notice] = 'Your files are being processed by ' + t('sufia.product_name') + ' in the background. The metadata and access controls you specified are being applied. Files will be marked <span class="label label-important" title="Private">Private</span> until this process is complete (shouldn\'t take too long, hang in there!).'
     redirect_to nu_core_file_path(@nu_core_file.pid)
@@ -227,6 +249,16 @@ class NuCoreFilesController < ApplicationController
       nu_core_file.creator = user.name
       nu_core_file.tmp_path = tmp_path
       nu_core_file.original_filename = file.original_filename
+
+      nu_core_file.instantiate_appropriate_content_object(tmp_path, file.original_filename)
+
+      # If the content_object created is an ImageMasterFile, we want to read the image and store as session vars
+      # the length of its longest side.  This is used to calculate the dimensions to allow for the small/med/large
+      # sliders on the Provide Metadata page.
+      if nu_core_file.canonical_class == "ImageMasterFile"
+        session[:slider_max] = nil # Ensure we aren't using data from a prior upload
+        session[:slider_max] = SliderMaxCalculator.compute(tmp_path)
+      end
 
       collection = !collection_id.blank? ? NuCollection.find(collection_id) : nil
       nu_core_file.set_parent(collection, user) if collection
