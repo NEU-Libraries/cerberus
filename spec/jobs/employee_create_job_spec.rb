@@ -1,41 +1,41 @@
-require 'spec_helper' 
+require 'spec_helper'
 
 
-describe EmployeeCreateJob do 
+describe EmployeeCreateJob do
 
-  # Guarantees uniqueness, even if using system noids as nuid's is a little weird. 
+  # Guarantees uniqueness, even if using system noids as nuid's is a little weird.
   let(:run_job) do
-    pid = Sufia::Noid.namespaceize(Sufia::IdService.mint)  
-    EmployeeCreateJob.new(pid, "Joe Blow").run 
-    return pid 
+    pid = Sufia::Noid.namespaceize(Sufia::IdService.mint)
+    EmployeeCreateJob.new(pid, "Joe Blow").run
+    return pid
   end
 
-  before(:each) do 
-    Employee.all.map { |e| e.destroy } 
+  before(:each) do
+    Employee.all.map { |e| e.destroy }
   end
 
-  it "doesn't create multiple employees if one already exists" do 
-    pid = Sufia::Noid.namespaceize(Sufia::IdService.mint) 
+  it "doesn't create multiple employees if one already exists" do
+    pid = Sufia::Noid.namespaceize(Sufia::IdService.mint)
     Employee.create(nuid: pid)
-    EmployeeCreateJob.new(pid, "Frank Buckets").run 
+    EmployeeCreateJob.new(pid, "Frank Buckets").run
 
-    Employee.all.length.should == 1 
+    Employee.all.length.should == 1
   end
 
-  it "creates an Employee with matching nuid and all associated required folders" do 
-    nuid = run_job 
+  it "creates an Employee with matching nuid and all associated required smart_collections" do
+    nuid = run_job
 
     # Verify the Employee exists
     Employee.exists_by_nuid?(nuid).should be true
-    user = User.create(email: nuid, nuid: nuid) 
+    user = User.create(email: nuid, nuid: nuid)
 
     # Lookup the employee
-    employee = Employee.find_by_nuid(nuid) 
+    employee = Employee.find_by_nuid(nuid)
 
-    # Employee has six required folders
-    employee.folders.length.should == 6 
+    # Employee has six required smart_collections
+    employee.smart_collections.length.should == 6
 
-    # All required folders were spun up
+    # All required smart_collections were spun up
     employee.root_folder.should be_an_instance_of NuCollection
     user.can?(:edit, employee.root_folder).should be true
 
@@ -54,10 +54,10 @@ describe EmployeeCreateJob do
     employee.learning_objects.should be_an_instance_of NuCollection
     user.can?(:edit, employee.learning_objects).should be true
 
-    # Employee is tagged as complete 
+    # Employee is tagged as complete
     employee.is_building?.should be false
 
-    # Only one employee is created 
-    Employee.all.length.should == 1  
+    # Only one employee is created
+    Employee.all.length.should == 1
   end
 end

@@ -2,4 +2,4 @@
   %h1.page-header
     = "#{@employee.name}"
 
-= render partial: "show_personal_graph", locals: { :generated_folders => @employee.sorted_folders, :user_folders => @employee.smart_collections, :editable => false }
+= render partial: "show_personal_graph", locals: { :generated_smart_collections => @employee.sorted_smart_collections, :user_smart_collections => @employee.personal_collections, :editable => false }

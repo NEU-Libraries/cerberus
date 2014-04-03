@@ -1,15 +1,15 @@
-module Drs::Employee::FacultyFolders
+module Drs::Employee::Facultysmart_collections
   extend ActiveSupport::Concern
 
   included do
     after_destroy :purge_personal_graph
   end
 
-  def root_folder
+  def user_root_collection
     find_by_folder_type('user root', true)
   end
 
-  def research_publications_folder
+  def research_publications_collection
     find_by_folder_type('research publications')
   end
 
@@ -17,7 +17,7 @@ module Drs::Employee::FacultyFolders
     research_publications.all_descendent_files
   end
 
-  def other_publications_folder
+  def other_publications_collection
     find_by_folder_type('other publications')
   end
 
@@ -25,7 +25,7 @@ module Drs::Employee::FacultyFolders
     other_publications.all_descendent_files
   end
 
-  def data_sets_folder
+  def data_sets_collection
     find_by_folder_type('data sets')
   end
 
@@ -33,7 +33,7 @@ module Drs::Employee::FacultyFolders
     data_sets.all_descendent_files
   end
 
-  def presentations_folder
+  def presentations_collection
     find_by_folder_type('presentations')
   end
 
@@ -41,7 +41,7 @@ module Drs::Employee::FacultyFolders
     presentations.all_descendent_files
   end
 
-  def learning_objects_folder
+  def learning_objects_collection
     find_by_folder_type('learning objects')
   end
 
@@ -49,25 +49,25 @@ module Drs::Employee::FacultyFolders
     learning_objects.all_descendent_files
   end
 
-  def sorted_folders
+  def sorted_smart_collections
     [research_publications_folder, other_publications_folder, data_sets_folder, presentations_folder, learning_objects_folder]
   end
 
-  def smart_collections
-    self.folders.select { |f| (f.smart_collection_type == 'miscellany') && (f.parent.pid == self.root_folder.pid) }
+  def personal_collections
+    self.smart_collections.select { |f| (f.smart_collection_type == 'miscellany') && (f.parent.pid == self.root_folder.pid) }
   end
 
   private
 
-    def find_by_folder_type(string, root = false)
+    def find_by_smart_collection_type(string, root = false)
       if root
-        return self.folders.find{ |f| f.smart_collection_type == string }
+        return self.smart_collections.find{ |f| f.smart_collection_type == string }
       else
-        return self.folders.find{ |f| (f.smart_collection_type == string) && (f.parent.pid == self.root_folder.pid) }
+        return self.smart_collections.find{ |f| (f.smart_collection_type == string) && (f.parent.pid == self.root_folder.pid) }
       end
     end
 
     def purge_personal_graph
-      self.root_folder.recursive_delete if !self.folders.empty?
+      self.user_root_collection.recursive_delete if !self.smart_collections.empty?
     end
 end
