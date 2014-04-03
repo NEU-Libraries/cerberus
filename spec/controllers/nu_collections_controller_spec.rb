@@ -87,7 +87,7 @@ describe NuCollectionsController do
       sign_in bill
 
       employee = Employee.create(nuid: "neu:unique", name: "John Doe")
-      employee_root = NuCollection.create(user_parent: employee.nuid, title: "Root", smart_collection_type: "user root")
+      employee_root = NuCollection.create(user_parent: employee.nuid, title: "Root", smart_collection_type: "User Root")
       employee_root.rightsMetadata.permissions({person: bill.nuid}, 'edit')
       employee_root.save!
 
