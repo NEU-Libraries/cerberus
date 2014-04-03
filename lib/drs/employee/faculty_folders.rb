@@ -9,7 +9,7 @@ module Drs::Employee::FacultyFolders
     find_by_folder_type('user root', true)
   end
 
-  def research_publications
+  def research_publications_folder
     find_by_folder_type('research publications')
   end
 
@@ -17,7 +17,7 @@ module Drs::Employee::FacultyFolders
     research_publications.all_descendent_files
   end
 
-  def other_publications
+  def other_publications_folder
     find_by_folder_type('other publications')
   end
 
@@ -25,7 +25,7 @@ module Drs::Employee::FacultyFolders
     other_publications.all_descendent_files
   end
 
-  def data_sets
+  def data_sets_folder
     find_by_folder_type('data sets')
   end
 
@@ -33,7 +33,7 @@ module Drs::Employee::FacultyFolders
     data_sets.all_descendent_files
   end
 
-  def presentations
+  def presentations_folder
     find_by_folder_type('presentations')
   end
 
@@ -41,7 +41,7 @@ module Drs::Employee::FacultyFolders
     presentations.all_descendent_files
   end
 
-  def learning_objects
+  def learning_objects_folder
     find_by_folder_type('learning objects')
   end
 
@@ -50,7 +50,7 @@ module Drs::Employee::FacultyFolders
   end
 
   def sorted_folders
-    [research_publications, other_publications, data_sets, presentations, learning_objects]
+    [research_publications_folder, other_publications_folder, data_sets_folder, presentations_folder, learning_objects_folder]
   end
 
   def personal_folders
