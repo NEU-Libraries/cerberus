@@ -6,7 +6,7 @@ module Drs::Employee::FacultyFolders
   end
 
   def root_folder
-    find_by_folder_type('user root')
+    find_by_folder_type('user root', true)
   end
 
   def research_publications
@@ -59,8 +59,12 @@ module Drs::Employee::FacultyFolders
 
   private
 
-    def find_by_folder_type(string)
-      return self.folders.find{ |f| f.personal_folder_type == string }
+    def find_by_folder_type(string, root = false)
+      if root
+        return self.folders.find{ |f| f.personal_folder_type == string }
+      else
+        return self.folders.find{ |f| (f.personal_folder_type == string) && (f.parent.pid == self.root_folder.pid) }
+      end
     end
 
     def purge_personal_graph
