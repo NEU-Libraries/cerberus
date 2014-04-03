@@ -18,13 +18,14 @@ class ZipCompilationJob
   def run
 
     user = User.find_by_nuid(nuid)
+    dir = Rails.root.join("tmp", self.comp_pid)
 
     # Removes any stale zip files that might still be sitting around.
-    if File.directory?("#{Rails.root}/tmp/#{self.comp_pid}")
-      FileUtils.remove_dir ("#{Rails.root}/tmp/#{self.comp_pid}")
+    if File.directory? dir
+      FileUtils.remove_dir dir
     end
 
-    FileUtils.mkdir_p ("#{Rails.root}/tmp/#{self.comp_pid}")
+    FileUtils.mkdir_p dir
 
     zipfile_name = safe_zipfile_name
 
@@ -32,7 +33,7 @@ class ZipCompilationJob
       self.entry_ids.each do |id|
         if NuCoreFile.exists?(id)
           NuCoreFile.find(id).content_objects.each do |content|
-            if user.can?(:read, content) && content.content.content #haha
+            if user.can?(:read, content) && content.content.content && content.class != ImageThumbnailFile
               io.add_buffer("#{self.title}/#{content.title}", content.content.content)
             end
           end
@@ -44,11 +45,6 @@ class ZipCompilationJob
   end
 
   private
-
-    # Need to get FITS sorted out for this to work properly.
-    def assign_file_extension(entry)
-      return entry.title.first
-    end
 
     # Generates a temporary directory name devoid of spaces and colons
     def safe_zipfile_name
