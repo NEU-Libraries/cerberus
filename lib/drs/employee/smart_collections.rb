@@ -6,11 +6,11 @@ module Drs::Employee::SmartCollections
   end
 
   def user_root_collection
-    find_by_folder_type('user root', true)
+    find_by_smart_collection_type('user root', true)
   end
 
   def research_publications_collection
-    find_by_folder_type('research publications')
+    find_by_smart_collection_type('research publications')
   end
 
   def all_research_publications
@@ -18,7 +18,7 @@ module Drs::Employee::SmartCollections
   end
 
   def other_publications_collection
-    find_by_folder_type('other publications')
+    find_by_smart_collection_type('other publications')
   end
 
   def all_other_publications
@@ -26,7 +26,7 @@ module Drs::Employee::SmartCollections
   end
 
   def data_sets_collection
-    find_by_folder_type('data sets')
+    find_by_smart_collection_type('data sets')
   end
 
   def all_data_sets
@@ -34,7 +34,7 @@ module Drs::Employee::SmartCollections
   end
 
   def presentations_collection
-    find_by_folder_type('presentations')
+    find_by_smart_collection_type('presentations')
   end
 
   def all_presentations
@@ -42,7 +42,7 @@ module Drs::Employee::SmartCollections
   end
 
   def learning_objects_collection
-    find_by_folder_type('learning objects')
+    find_by_smart_collection_type('learning objects')
   end
 
   def all_learning_objects
@@ -50,7 +50,7 @@ module Drs::Employee::SmartCollections
   end
 
   def sorted_smart_collections
-    [research_publications_folder, other_publications_folder, data_sets_folder, presentations_folder, learning_objects_folder]
+    [research_publications_collection, other_publications_collection, data_sets_collection, presentations_collection, learning_objects_collection]
   end
 
   def personal_collections
