@@ -8,5 +8,4 @@
 %p.lead
   = t('drs.personal_graph.description')
 
-
 = render partial: "show_personal_graph", locals: { :generated_smart_collections => @employee.sorted_smart_collections, :user_smart_collections => @employee.personal_collections, :editable => true }

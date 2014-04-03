@@ -5,8 +5,8 @@
     -if generated_smart_collections.length > 0
       %section{class: ["drs-items-list", "drs-items"] }
         - generated_smart_collections.each do |f|
-          / =render partial: "shared/drs_item/drs_item", locals: { item: f }
-          =render partial: "shared/drs_item/drs_item", locals: { item: SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{f.pid}\"").first) }
+          =render partial: "shared/drs_item/drs_item", locals: { item: f }
+          / =render partial: "shared/drs_item/drs_item", locals: { item: SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{f.pid}\"").first) }
   //.span6
   %article.span6
     %h3
@@ -14,8 +14,8 @@
     -if user_smart_collections.length > 0
       %section{class: ["drs-items-list", "drs-items"] }
         - user_smart_collections.each do |f|
-          / =render partial: "shared/drs_item/drs_item", locals: { item: f }
-          =render partial: "shared/drs_item/drs_item", locals: { item: SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{f.pid}\"").first) }
+          =render partial: "shared/drs_item/drs_item", locals: { item: f }
+          / =render partial: "shared/drs_item/drs_item", locals: { item: SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{f.pid}\"").first) }
     -else
       .alert.alert-info
         %strong
