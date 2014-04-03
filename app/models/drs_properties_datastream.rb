@@ -24,7 +24,7 @@ class DrsPropertiesDatastream < ActiveFedora::OmDatastream
     t.in_progress path: 'inProgress'
     # This is where we put the relative path of the file if submitted as a folder
     t.relative_path
-    t.personal_folder_type :index_as=>[:stored_searchable]
+    t.smart_collection_type :index_as=>[:stored_searchable]
     t.import_url path: 'importUrl', :index_as=>:symbol
     # Moving ContentCreationJob later, need to store these for that to work
     t.tmp_path
@@ -39,8 +39,8 @@ class DrsPropertiesDatastream < ActiveFedora::OmDatastream
     builder.doc
   end
 
-  def get_personal_folder_type
-    return self.personal_folder_type.first unless self.personal_folder_type.empty?
+  def get_smart_collection_type
+    return self.smart_collection_type.first unless self.smart_collection_type.empty?
   end
 
   def in_progress?

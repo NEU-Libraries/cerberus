@@ -46,7 +46,7 @@ class Community < ActiveFedora::Base
   end
 
   def theses
-    child_collections.find { |e| e.personal_folder_type == 'theses' }
+    child_collections.find { |e| e.smart_collection_type == 'theses' }
   end
 
   def research_publications

@@ -88,7 +88,7 @@ class Admin::CommunitiesController < AdminController
         NuCollection.create(title: "Theses and Dissertations",
                             description: "#{etdDesc} #{@community.title}",
                             depositor: current_user.nuid,
-                            personal_folder_type: 'theses',
+                            smart_collection_type: 'Theses and Dissertations',
                             mass_permissions: @community.mass_permissions,
                             parent: @community)
       end

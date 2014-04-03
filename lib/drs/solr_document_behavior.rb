@@ -32,8 +32,8 @@ module Drs
       Array(self[:id]).first
     end
 
-    def personal_folder_type
-      Array(self[Solrizer.solr_name("personal_folder_type", :stored_searchable)]).first
+    def smart_collection_type
+      Array(self[Solrizer.solr_name("smart_collection_type", :stored_searchable)]).first
     end
 
     def is_member_of
