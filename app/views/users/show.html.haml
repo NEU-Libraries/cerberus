@@ -1,0 +1,15 @@
+-content_for :page_header do
+  %h1.page-header
+    Dashboard
+    %small
+      = @user.name
+
+%p.lead
+  List of all files and activity
+
+%section.row
+  %article.span6
+    %h3
+      Recent Activity
+      =render partial: "users/activity_log", locals: { :events => @events }
+
