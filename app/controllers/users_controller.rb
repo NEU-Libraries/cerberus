@@ -48,6 +48,7 @@ class UsersController < ApplicationController
       @events = []
     end
     if user_signed_in? && current_user.nuid == @user.nuid
+      self.solr_search_params_logic += [:exclude_unwanted_models]
       (_, @recent_user_documents) = get_search_results(:q =>filter_mine,
                                         :sort=>sort_field, :rows=>3)
     end
@@ -109,6 +110,11 @@ class UsersController < ApplicationController
   end
 
   protected
+
+  def exclude_unwanted_models(solr_parameters, user_parameters)
+    solr_parameters[:fq] ||= []
+    solr_parameters[:fq] << "#{Solrizer.solr_name("has_model", :symbol)}:\"info:fedora/afmodel:NuCoreFile\""
+  end
 
   def depositor
     #Hydra.config[:permissions][:owner] maybe it should match this config variable, but it doesn't.
