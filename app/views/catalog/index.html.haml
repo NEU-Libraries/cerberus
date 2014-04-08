@@ -28,7 +28,7 @@
   %main.row( role="main" )
     %aside.drs-sidebar{ class: sidebar_class }
       .pane.facets
-        = render :partial => 'facet_selected'
+        / = render :partial => 'facet_selected'
 
         = render :partial=>'facets', locals: { facet_list: facet_list }
       .pane.results-view

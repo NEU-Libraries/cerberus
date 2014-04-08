@@ -14,7 +14,10 @@
 }
 
 .appliedFilter{
-  padding: 5px 20px;
+  padding: 5px 45px 5px 20px;
+  &:first-of-type{
+    margin-left:10px;
+  }
 }
 
 .appliedFilter .filterName {
