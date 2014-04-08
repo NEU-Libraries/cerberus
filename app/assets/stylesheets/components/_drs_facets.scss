@@ -13,6 +13,20 @@
   }
 }
 
+.appliedFilter{
+  padding: 5px 20px;
+}
+
+.appliedFilter .filterName {
+  background: none;
+  padding: 0px;
+  &:after{
+    content: ">";
+    margin-left: 10px;
+    font-size: 0.8em;
+  }
+}
+
 #facets
 {
   div.facet_limit {
