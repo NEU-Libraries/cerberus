@@ -26,9 +26,8 @@
     - sidebar_class = "span3"
     - drs_items_class = "span9"
   %main.row( role="main" )
-    %aside.drs-sidebar.well{ class: sidebar_class }
+    %aside.drs-sidebar{ class: sidebar_class }
       .pane.facets
-        %h4 Refine My Results
         = render :partial => 'facet_selected'
 
         = render :partial=>'facets', locals: { facet_list: facet_list }
