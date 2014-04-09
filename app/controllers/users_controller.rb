@@ -14,14 +14,9 @@ class UsersController < ApplicationController
   include BlacklightAdvancedSearch::ParseBasicQ
   include BlacklightAdvancedSearch::Controller
 
-  extend ActiveSupport::Concern
-
-  included do
-    # layout "sufia-one-column"
-    prepend_before_filter :find_user, :except => [:index, :search, :notifications_number]
-    before_filter :authenticate_user!, only: [:edit, :update]
-    before_filter :user_is_current_user, only: [:edit, :update]
-  end
+  prepend_before_filter :find_user, :except => [:index, :search, :notifications_number]
+  before_filter :authenticate_user!, only: [:edit, :update]
+  before_filter :user_is_current_user, only: [:edit, :update]
 
   def index
     sort_val = get_sort
