@@ -97,8 +97,8 @@ class UsersController < ApplicationController
 
     respond_to do |format|
       format.html {  redirect_to sufia.profile_path(@user), notice: "Your profile has been updated" }
-      format.js   { render json: @user.to_json }
       format.json { render json: @user.to_json }
+      format.js
     end
 
 

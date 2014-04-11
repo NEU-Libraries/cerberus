@@ -267,8 +267,8 @@ $(document).ready ->
     drsToggleView = ->
       # event handler for the click event
       handleClick = (event) ->
-        event.preventDefault()
-        event.stopPropagation()
+        # event.preventDefault()
+        # event.stopPropagation()
 
         toggleContainer = $(this).closest('*[data-container]')
 
