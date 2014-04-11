@@ -123,10 +123,10 @@ class ShoppingCartsController < ApplicationController
       end
     end
 
-    def lookup_from_cookie(arry)
-      if arry
-        x = arry.map { |pid| ActiveFedora::Base.find(pid, cast: true) }
-        return x
+    def lookup_from_cookie(cookie_array)
+      if cookie_array
+        x = cookie_array.map { |pid| ActiveFedora::Base.find(pid, cast: true) rescue nil}
+        return x - [nil]
       else
         []
       end
