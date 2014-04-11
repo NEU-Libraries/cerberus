@@ -62,11 +62,23 @@ class CompilationsController < ApplicationController
   def add_file
     @compilation.add_entry(params[:entry_id])
     save_or_bust @compilation
+
+    respond_to do |format|
+      format.html { render :nothing => true }
+      format.json { render :nothing => true }
+      format.js { render :nothing => true }
+    end
   end
 
   def delete_file
     @compilation.remove_entry(params[:entry_id])
     save_or_bust @compilation
+
+    respond_to do |format|
+      format.html { render :nothing => true }
+      format.json { render :nothing => true }
+      format.js { render :nothing => true }
+    end
   end
 
   def ping_download
@@ -113,7 +125,7 @@ class CompilationsController < ApplicationController
   def save_or_bust(compilation)
     if compilation.save!
       flash[:notice] = "#{t('drs.compilations.name').capitalize} successfully updated"
-      redirect_to compilation
+      # redirect_to compilation
     else
       flash.now.error = "#{t('drs.compilations.name').capitalize} was not successfully updated"
     end
