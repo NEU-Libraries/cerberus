@@ -153,7 +153,7 @@ $(document).ready ->
         $('.breadcrumb').addBsAlert
           classes: 'alert alert-success'
           strong: 'Success!'
-          text: 'You created a new compilation!'
+          text: 'You created a new set!'
       ).on 'ajax:error', ->
         $(this).closest('.modal').modal 'hide'
         $('.breadcrumb').addBsAlert
