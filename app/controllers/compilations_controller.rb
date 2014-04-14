@@ -24,6 +24,7 @@ class CompilationsController < ApplicationController
     @compilation.depositor = current_user.nuid
 
     save_or_bust @compilation
+    redirect_to @compilation
   end
 
   def edit
@@ -125,7 +126,6 @@ class CompilationsController < ApplicationController
   def save_or_bust(compilation)
     if compilation.save!
       flash[:notice] = "#{t('drs.compilations.name').capitalize} successfully updated"
-      # redirect_to compilation
     else
       flash.now.error = "#{t('drs.compilations.name').capitalize} was not successfully updated"
     end
