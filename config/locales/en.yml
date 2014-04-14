@@ -42,15 +42,15 @@ en:
       presentations:
         name: Presentations
         description: Faculty presentations from various conferences and meetings
-        icon: icon-facetime-video
+        icon: icon-quote-right
       learning:
         name: Learning Objects
         description: Materials used to support teaching and learning, such as syllabi and activities
-        icon: icon-book
+        icon: icon-pencil
       theses:
         name: Theses and Dissertations
         description: NU’s master's theses and doctoral dissertations from 2008 to the present
-        icon: icon-magic
+        icon: icon-book
       communities:
         name: Communities
         description: Browse Northeastern departments and groups by name
