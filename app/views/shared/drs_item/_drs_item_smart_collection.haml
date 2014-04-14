@@ -1,5 +1,5 @@
-%article.drs-item{data: { href: smart_path }}
-  %a{ href: smart_path }
+%article.drs-item{data: { href: smart_collection_path }}
+  %a{ href: smart_collection_path }
     %figure
       = render partial: 'shared/icon', locals: { class_string: smart_collection_icon }
       %figcaption
@@ -8,5 +8,5 @@
   .drs-item-details
     %header
       %h4.drs-item-title
-        %a{href: smart_path}
+        %a{href: smart_collection_path}
           = smart_collection_title
