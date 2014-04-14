@@ -1,0 +1,12 @@
+%article.drs-item{data: { href: smart_path }}
+  %a{ href: smart_path }
+    %figure
+      = render partial: 'shared/icon', locals: { class_string: smart_collection_icon }
+      %figcaption
+        %span.label.small
+          = "Featured Content"
+  .drs-item-details
+    %header
+      %h4.drs-item-title
+        %a{href: smart_path}
+          = smart_collection_title
