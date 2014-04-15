@@ -43,8 +43,10 @@
       =render partial: 'shared/sets/sets_sidebar'
 
     %section{class: current_user.view_pref == 'grid' ? 'span12' : "span9" }
-      %ul.drs-items.drs-items-grid
-        =render :partial => 'shared/drs_item/drs_item_smart_collection', locals: { smart_collection_path: 'www.google.com', smart_collection_icon: 'icon-folder-open', smart_collection_title: 'Burgers' }
+      -if !@smart_collections.nil? && @smart_collections.length > 0
+        - @smart_collections.each do |smart_collection|
+          %ul.drs-items.drs-items-grid
+            =render :partial => 'shared/drs_item/drs_item_smart_collection', locals: { smart_collection_path: 'www.google.com', smart_collection_icon: 'icon-folder-open', smart_collection_title: 'Burgers' }
       =render :partial => 'catalog/document_list'
       =render partial: 'shared/sets/bottom_action_menu'
   - else
