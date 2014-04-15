@@ -4,6 +4,20 @@ require 'date_time_precision/format/string'
 module Drs
   module SolrDocumentBehavior
 
+    def each_depth_first
+      full_self_id = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/#{self.pid}"
+      combinedChildren = ActiveFedora::SolrService.query("has_affiliation_ssim:#{full_self_id} OR is_member_of_ssim:#{full_self_id}")
+
+      combinedChildren.each do |child|
+        doc = SolrDocument.new(child)
+        doc.each_depth_first do |c|
+          yield c
+        end
+      end
+
+      yield self
+    end
+
     def process_date(date_string)
       begin
         if !date_string.nil? && (date_string != "")
@@ -38,6 +52,10 @@ module Drs
 
     def is_member_of
       Array(self[Solrizer.solr_name("is_member_of", :symbol)]).first
+    end
+
+    def has_affiliation
+      Array(self[Solrizer.solr_name("has_affiliation", :symbol)]).first
     end
 
     def date_of_issue
