@@ -82,6 +82,7 @@ class Community < ActiveFedora::Base
     elsif self.other_publications.length > 0
       smart_collection_list << "other"
     end
+    return smart_collection_list
   end
 
 

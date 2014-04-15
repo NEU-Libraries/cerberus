@@ -38,6 +38,7 @@ class CommunitiesController < SetsController
 
   def show
     @set_id = params[:id]
+
     self.solr_search_params_logic += [:find_object]
     (@response, @document_list) = get_search_results
     @set = SolrDocument.new(@response.docs.first)
@@ -47,6 +48,10 @@ class CommunitiesController < SetsController
     self.solr_search_params_logic.delete(:find_object)
     self.solr_search_params_logic += [:show_children_only]
     (@response, @document_list) = get_search_results
+
+    # Worth trying to do smart collections entirely with Solr?... TODO
+    @community = Community.find(params[:id])
+    @smart_collections = @community.smart_collections
 
     render :template => 'shared/sets/show'
   end

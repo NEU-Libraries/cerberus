@@ -14,7 +14,7 @@ module Drs::Employee::SmartCollections
   end
 
   def all_research_publications
-    research_publications.all_descendent_files
+    research_publications_collection.all_descendent_files
   end
 
   def other_publications_collection
@@ -22,7 +22,7 @@ module Drs::Employee::SmartCollections
   end
 
   def all_other_publications
-    other_publications.all_descendent_files
+    other_publications_collection.all_descendent_files
   end
 
   def data_sets_collection
@@ -30,7 +30,7 @@ module Drs::Employee::SmartCollections
   end
 
   def all_data_sets
-    data_sets.all_descendent_files
+    data_sets_collection.all_descendent_files
   end
 
   def presentations_collection
@@ -38,7 +38,7 @@ module Drs::Employee::SmartCollections
   end
 
   def all_presentations
-    presentations.all_descendent_files
+    presentations_collection.all_descendent_files
   end
 
   def learning_objects_collection
@@ -46,7 +46,7 @@ module Drs::Employee::SmartCollections
   end
 
   def all_learning_objects
-    learning_objects.all_descendent_files
+    learning_objects_collection.all_descendent_files
   end
 
   def sorted_smart_collections
@@ -66,7 +66,7 @@ module Drs::Employee::SmartCollections
         (!f.parent.nil?) &&
         (f.parent.pid == self.user_root_collection.pid)
       }
-      solrCollection = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{collection.pid}\"").first)
+      # solrCollection = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{collection.pid}\"").first)
     end
 
     def purge_personal_graph
