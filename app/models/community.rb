@@ -69,6 +69,22 @@ class Community < ActiveFedora::Base
     employee_query(:all_learning_objects)
   end
 
+  def smart_collections
+    smart_collection_list ||= []
+    if self.research_publications.length > 0
+      smart_collection_list << "research"
+    elsif self.data_sets.length > 0
+      smart_collection_list << "datasets"
+    elsif self.presentations.length > 0
+      smart_collection_list << "presentations"
+    elsif self.learning_objects.length > 0
+      smart_collection_list << "learning"
+    elsif self.other_publications.length > 0
+      smart_collection_list << "other"
+    end
+  end
+
+
   # Simple human readable label for objects.
   def type_label
     "Community"
