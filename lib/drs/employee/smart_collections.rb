@@ -13,40 +13,20 @@ module Drs::Employee::SmartCollections
     find_by_smart_collection_type('Research Publications')
   end
 
-  def all_research_publications
-    research_publications_collection.all_descendent_files
-  end
-
   def other_publications_collection
     find_by_smart_collection_type('Other Publications')
-  end
-
-  def all_other_publications
-    other_publications_collection.all_descendent_files
   end
 
   def data_sets_collection
     find_by_smart_collection_type('Datasets')
   end
 
-  def all_data_sets
-    data_sets_collection.all_descendent_files
-  end
-
   def presentations_collection
     find_by_smart_collection_type('Presentations')
   end
 
-  def all_presentations
-    presentations_collection.all_descendent_files
-  end
-
   def learning_objects_collection
     find_by_smart_collection_type('Learning Objects')
-  end
-
-  def all_learning_objects
-    learning_objects_collection.all_descendent_files
   end
 
   def sorted_smart_collections
