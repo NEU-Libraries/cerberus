@@ -4,6 +4,30 @@ require 'date_time_precision/format/string'
 module Drs
   module SolrDocumentBehavior
 
+    def all_descendent_files
+      result = []
+      each_depth_first do |child|
+        if(child.klass == "NuCollection")
+          result += child.child_files
+        end
+      end
+      return result
+    end
+
+    def child_files
+      full_self_id = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/#{self.pid}"
+      core_file_model = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:NuCoreFile"
+      children_query_result = ActiveFedora::SolrService.query("is_member_of_ssim:#{full_self_id} AND has_model_ssim:#{core_file_model}")
+      children_query_result.map { |x| SolrDocument.new(x) }
+    end
+
+    def combined_set_children
+      full_self_id = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/#{self.pid}"
+      core_file_model = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:NuCoreFile"
+      combined_children_query_result = ActiveFedora::SolrService.query("has_affiliation_ssim:#{full_self_id} OR is_member_of_ssim:#{full_self_id} NOT has_model_ssim:#{core_file_model}")
+      combined_children_query_result.map { |x| SolrDocument.new(x) }
+    end
+
     def each_depth_first
       self.combined_set_children.each do |child|
         child.each_depth_first do |c|
@@ -12,13 +36,6 @@ module Drs
       end
 
       yield self
-    end
-
-    def combined_set_children
-      full_self_id = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/#{self.pid}"
-      core_file_model = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:NuCoreFile"
-      combined_children_query_result = ActiveFedora::SolrService.query("has_affiliation_ssim:#{full_self_id} OR is_member_of_ssim:#{full_self_id} NOT has_model_ssim:#{core_file_model}")
-      combined_children_query_result.map { |x| SolrDocument.new(x) }
     end
 
     def process_date(date_string)

@@ -66,7 +66,7 @@ module Drs::Employee::SmartCollections
         (!f.parent.nil?) &&
         (f.parent.pid == self.user_root_collection.pid)
       }
-      # solrCollection = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{collection.pid}\"").first)
+      solrCollection = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{collection.pid}\"").first)
     end
 
     def purge_personal_graph
