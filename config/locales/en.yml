@@ -67,8 +67,12 @@ en:
         icon: icon-group
       employees:
         name: Faculty
-        description: Browse Northeastern faculty by name
+        description: Browse faculty by name
         icon: icon-user
+      other:
+        name: Other Publications
+        description: Community relevant documents
+        icon: icon-folder-open
     about:
       title: About the DRS
     personal_graph:

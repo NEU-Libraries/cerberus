@@ -3,6 +3,7 @@ require 'date_time_precision/format/string'
 
 module Drs
   module SolrDocumentBehavior
+    include Drs::SolrQueries
 
     def process_date(date_string)
       begin
@@ -40,6 +41,10 @@ module Drs
       Array(self[Solrizer.solr_name("is_member_of", :symbol)]).first
     end
 
+    def has_affiliation
+      Array(self[Solrizer.solr_name("has_affiliation", :symbol)]).first
+    end
+
     def date_of_issue
       #TODO - this is broken in metadata assignment
       process_date(Array(self[Solrizer.solr_name("desc_metadata__date_created")]).first)
@@ -70,28 +75,6 @@ module Drs
 
     def parent
       Array(self[Solrizer.solr_name("parent_id", :stored_searchable)]).first
-    end
-
-    def content_objects(canonical = false)
-      all_possible_models = [ "ImageSmallFile", "ImageMediumFile", "ImageLargeFile",
-                              "ImageMasterFile", "ImageThumbnailFile", "MsexcelFile",
-                              "MspowerpointFile", "MswordFile", "PdfFile", "TextFile",
-                              "ZipFile", "AudioFile", "VideoFile" ]
-      models_stringified = all_possible_models.inject { |base, str| base + " or #{str}" }
-      models_query = ActiveFedora::SolrService.escape_uri_for_query models_stringified
-      full_self_id = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/#{self.pid}"
-
-      if canonical
-        query_result = ActiveFedora::SolrService.query("canonical_tesim:yes AND is_part_of_ssim:#{full_self_id}", rows: 999)
-      else
-        query_result = ActiveFedora::SolrService.query("active_fedora_model_ssi:(#{models_stringified}) AND is_part_of_ssim:#{full_self_id}", rows: 999)
-      end
-
-      docs = query_result.map { |x| SolrDocument.new(x) }
-    end
-
-    def canonical_object
-      self.content_objects(true).first
     end
 
     ##

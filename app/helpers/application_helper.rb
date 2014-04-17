@@ -25,6 +25,21 @@ module ApplicationHelper
     end
   end
 
+  # Generates an array of link/li tags that should breadcrumb back to the Root Collection from a Smart Collection
+  def smart_collection_breadcrumb(set, breadcrumb = [])
+    if breadcrumb.empty?
+      breadcrumb << content_tag(:li, link_to(set.title, polymorphic_path(set)))
+    end
+
+    if set.parent.nil?
+      return breadcrumb.reverse
+    else
+      parent = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{set.parent}\"").first)
+      breadcrumb << content_tag(:li, link_to(parent.title, polymorphic_path(parent)))
+      breadcrumb_to_root(parent, breadcrumb)
+    end
+  end
+
   # Helper method to either the preference of user or session variable for a guest
   def drs_view_class
     if current_user
