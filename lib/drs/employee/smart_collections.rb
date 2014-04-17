@@ -17,7 +17,7 @@ module Drs::Employee::SmartCollections
     find_by_smart_collection_type('Other Publications')
   end
 
-  def data_sets_collection
+  def datasets_collection
     find_by_smart_collection_type('Datasets')
   end
 
@@ -30,7 +30,7 @@ module Drs::Employee::SmartCollections
   end
 
   def sorted_smart_collections
-    [research_publications_collection, other_publications_collection, data_sets_collection, presentations_collection, learning_objects_collection]
+    [research_publications_collection, other_publications_collection, datasets_collection, presentations_collection, learning_objects_collection]
   end
 
   def personal_collections

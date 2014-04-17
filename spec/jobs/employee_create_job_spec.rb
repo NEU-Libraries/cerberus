@@ -45,8 +45,8 @@ describe EmployeeCreateJob do
     employee.other_publications.should be_an_instance_of NuCollection
     user.can?(:edit, employee.other_publications).should be true
 
-    employee.data_sets.should be_an_instance_of NuCollection
-    user.can?(:edit, employee.data_sets).should be true
+    employee.datasets.should be_an_instance_of NuCollection
+    user.can?(:edit, employee.datasets).should be true
 
     employee.presentations.should be_an_instance_of NuCollection
     user.can?(:edit, employee.presentations).should be true
