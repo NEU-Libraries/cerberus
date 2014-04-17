@@ -7,8 +7,9 @@
   %h1{:class => @set.klass, :id => "#{@set.pid}-title"}
     = render partial: 'shared/icon', locals: { class_string: t("drs.significant.#{smart_collection}.icon") }
     = t("drs.significant.#{smart_collection}.name")
-    %small
-      Featured Content
+    - if smart_collection != "employees"
+      %small
+        Featured Content
   %p
     = t("drs.significant.#{smart_collection}.description")
 

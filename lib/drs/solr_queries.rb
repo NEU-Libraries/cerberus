@@ -106,7 +106,7 @@ module Drs
       find_all_files_by_type("Other Publications")
     end
 
-    def data_sets
+    def datasets
       find_all_files_by_type("Datasets")
     end
 
@@ -131,6 +131,11 @@ module Drs
       elsif self.other_publications.length > 0
         smart_collection_list << "other"
       end
+
+      if smart_collection_list.length > 0
+        smart_collection_list << "employees"
+      end
+
       return smart_collection_list
     end
 
