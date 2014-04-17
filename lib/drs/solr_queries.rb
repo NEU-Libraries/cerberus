@@ -122,7 +122,7 @@ module Drs
       smart_collection_list ||= []
       if self.research_publications.length > 0
         smart_collection_list << "research"
-      elsif self.data_sets.length > 0
+      elsif self.datasets.length > 0
         smart_collection_list << "datasets"
       elsif self.presentations.length > 0
         smart_collection_list << "presentations"
