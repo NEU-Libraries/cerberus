@@ -71,6 +71,8 @@ class CommunitiesController < SetsController
 
     @page_title = "#{@set.title} #{t('drs.significant.research.name')}"
 
+    @smart_docs = @set.research_publications
+
     render 'smart_collection', locals: { smart_collection: 'research' }
   end
 
