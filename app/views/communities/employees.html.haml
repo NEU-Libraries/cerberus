@@ -1,7 +1,0 @@
-%h3= "#{@dept.title}'s Employees" 
-
-%ul
-  - if @dept.employees.empty? 
-    %p No employees attached to this community just yet.  
-  - @dept.employees.each do |e| 
-    %li= link_to("#{e.nuid}", employee_path(e.pid)) 

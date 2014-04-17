@@ -10,3 +10,17 @@
       %h4.drs-item-title
         %a{href: smart_collection_path}
           = smart_collection_title
+    .drs-item-add-details
+      %dl.drs-item-abstract-list
+        %dt.drs-item-abstract-label
+          Abstract
+        %dd.drs-item-abstract
+          - if smart_collection_description.length > 120
+            %span.ellipsis
+              = smart_collection_description
+            %a(href="#abstract#{item.pid.delete ":"}" data-toggle="ellipsis")
+              %i.icon-expand-alt
+              %span.sr-only
+                Expand / collapse toggle
+          - else
+            = smart_collection_description
