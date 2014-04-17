@@ -165,17 +165,17 @@ module Drs
         if_descMetadata_exists_strict { self.descMetadata.date_modified.first }
       end
 
-      def personal_folder_type=(string)
-        if_properties_exists_strict { self.properties.personal_folder_type = string }
+      def smart_collection_type=(string)
+        if_properties_exists_strict { self.properties.smart_collection_type = string }
       end
 
-      def personal_folder_type
-        if_properties_exists_strict { self.properties.get_personal_folder_type }
+      def smart_collection_type
+        if_properties_exists_strict { self.properties.get_smart_collection_type }
       end
 
-      def is_personal_folder?
+      def is_smart_collection?
         if_properties_exists_strict do
-          return !self.properties.personal_folder_type.empty?
+          return !self.properties.smart_collection_type.empty?
         end
       end
     end
