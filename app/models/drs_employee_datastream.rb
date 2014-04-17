@@ -3,6 +3,7 @@ class DrsEmployeeDatastream < ActiveFedora::OmDatastream
   set_terminology do |t|
     t.root(:path=>"fields" )
     t.nuid :index_as=>[:stored_searchable]
+    t.community_name :index_as => [:symbol]
     t.name
     t.status
   end

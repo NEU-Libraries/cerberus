@@ -11,6 +11,8 @@ class Employee < ActiveFedora::Base
 
   validate :nuid_unique, on: :create
 
+  before_save :add_community_names
+
   has_metadata name: 'details', type: DrsEmployeeDatastream
   has_metadata name: 'rightsMetadata', type: ParanoidRightsDatastream
 
@@ -83,6 +85,11 @@ class Employee < ActiveFedora::Base
   end
 
   private
+
+    def add_community_names
+      community_names = self.communities.map { |x| x.title }
+      details.community_name = community_names
+    end
 
     def self.safe_employee_lookup(id, retries=0)
       lookup = Employee.find(id)
