@@ -61,6 +61,9 @@ class CommunitiesController < SetsController
     @set = SolrDocument.new(@response.docs.first)
 
     @page_title = "#{@set.title} #{t('drs.significant.employees.name')}"
+
+    @smart_docs = @set.find_employees
+    render 'smart_collection', locals: { smart_collection: 'employees' }
   end
 
   def research_publications
@@ -72,7 +75,6 @@ class CommunitiesController < SetsController
     @page_title = "#{@set.title} #{t('drs.significant.research.name')}"
 
     @smart_docs = @set.research_publications
-
     render 'smart_collection', locals: { smart_collection: 'research' }
   end
 
@@ -83,6 +85,9 @@ class CommunitiesController < SetsController
     @set = SolrDocument.new(@response.docs.first)
 
     @page_title = "#{@set.title} #{t('drs.significant.other.name')}"
+
+    @smart_docs = @set.other_publications
+    render 'smart_collection', locals: { smart_collection: 'other' }
   end
 
   def presentations
@@ -92,6 +97,9 @@ class CommunitiesController < SetsController
     @set = SolrDocument.new(@response.docs.first)
 
     @page_title = "#{@set.title} #{t('drs.significant.presentations.name')}"
+
+    @smart_docs = @set.presentations
+    render 'smart_collection', locals: { smart_collection: 'presentations' }
   end
 
   def datasets
@@ -101,6 +109,9 @@ class CommunitiesController < SetsController
     @set = SolrDocument.new(@response.docs.first)
 
     @page_title = "#{@set.title} #{t('drs.significant.datasets.name')}"
+
+    @smart_docs = @set.datasets
+    render 'smart_collection', locals: { smart_collection: 'datasets' }
   end
 
   def learning_objects
@@ -110,6 +121,9 @@ class CommunitiesController < SetsController
     @set = SolrDocument.new(@response.docs.first)
 
     @page_title = "#{@set.title} #{t('drs.significant.learning.name')}"
+
+    @smart_docs = @set.learning_objects
+    render 'smart_collection', locals: { smart_collection: 'learning' }
   end
 
   protected

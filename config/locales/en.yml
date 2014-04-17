@@ -57,7 +57,7 @@ en:
         icon: icon-group
       employees:
         name: Faculty
-        description: Browse Northeastern faculty by name
+        description: Browse faculty by name
         icon: icon-user
       other:
         name: Other Publications
