@@ -15,4 +15,7 @@
       = f.text_field :identity, value: perm[:name], name: "#{array_type}[permissions][permissions#{index}][identity]", pattern: ".*\\S.*", class: "span12"
       = label_tag "#{array_type}[permissions][permissions#{index}][identity_type]", "Should this identity be allowed to read or edit?"
       = select_tag "#{array_type}[permissions][permissions#{index}][permission_type]", options_for_select(['read', 'edit'], perm[:access]), class: "span12"
-      
+      - unless index == 0
+        %button.btn.btn-danger{"data-delete" => "", "data-remove" => "true", "data-target" => ".permission", title: "Remove permission", type: "button"}
+          = render partial: 'shared/icon' , locals: { class_string: 'icon-remove', alt_text: "Remove Field" }
+

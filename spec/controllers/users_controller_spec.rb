@@ -1,10 +1,8 @@
 require 'spec_helper'
 
-
 describe UsersController do
+  let(:bill) { FactoryGirl.create(:bill) }
 
-  let(:bill)        { FactoryGirl.create(:bill) }
-  let(:sue)         { FactoryGirl.create(:bill)}
   describe "#update" do
     it "should update the users view_pref if logged in" do
       sign_in bill
