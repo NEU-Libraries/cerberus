@@ -68,45 +68,6 @@ class CatalogController < ApplicationController
     end
   end
 
-  # Actions mapping to 'best bit' content types.
-  def theses
-    @search_type = I18n.t "drs.significant.theses.name"
-    x = [creator_field, department_field, creation_year_field, degree_field, subject_field]
-    category_query_action("\"Theses and Dissertations\"", x)
-  end
-
-  def research
-    @search_type = I18n.t "drs.significant.research.name"
-    x = [creator_field, creation_year_field, department_field, subject_field]
-    category_query_action("\"Research Publications\"", x)
-  end
-
-  def presentations
-    @search_type = I18n.t "drs.significant.presentations.name"
-    x = [creator_field, creation_year_field, department_field, subject_field]
-    category_query_action("Presentations", x)
-  end
-
-  def datasets
-    @search_type = I18n.t "drs.significant.datasets.name"
-    x = [creator_field, creation_year_field, department_field, subject_field]
-    category_query_action("Datasets", x)
-  end
-
-  def learning_objects
-    @search_type = I18n.t "drs.significant.learning.name"
-    x = [creator_field, creation_year_field, department_field, subject_field,
-         course_number_field, course_title_field, type_field]
-    category_query_action("\"Learning Objects\"", x)
-  end
-
-  def employees
-    @search_type = I18n.t "drs.significant.employees.name"
-    query = "{!lucene q.op=AND df=active_fedora_model_ssi}Employee"
-    (@response, @document_list) = get_search_results(:q => query)
-    render 'index', locals: { facet_list: [community_name_field] }
-  end
-
   def self.uploaded_field
 #  system_create_dtsi
     solr_name('desc_metadata__date_uploaded', :stored_sortable, type: :date)
@@ -439,52 +400,6 @@ class CatalogController < ApplicationController
 
   def sort_field
     "#{Solrizer.solr_name('system_create', :sortable)} desc"
-  end
-
-  def category_field
-    Solrizer.solr_name('drs_category', :symbol, :type => :string)
-  end
-
-  def creator_field
-    Solrizer.solr_name('creator', :facetable, :type => :string)
-  end
-
-  def department_field
-    Solrizer.solr_name('drs_department', :symbol, :type => :string)
-  end
-
-  def creation_year_field
-    Solrizer.solr_name('creation_year', :facetable, :type => :string)
-  end
-
-  def degree_field
-    Solrizer.solr_name('drs_degree', :symbol, :type => :string)
-  end
-
-  def subject_field
-    Solrizer.solr_name('subject', :symbol, :type => :string)
-  end
-
-  def course_number_field
-    Solrizer.solr_name('drs_course_number', :symbol, :type => :string)
-  end
-
-  def course_title_field
-    Solrizer.solr_name('drs_course_title', :symbol, :type => :string)
-  end
-
-  def type_field
-    Solrizer.solr_name('type', :facetable, :type => :string)
-  end
-
-  def community_name_field
-    Solrizer.solr_name('community_name', :symbol)
-  end
-
-  def category_query_action(category, facet_fields)
-    query = "{!lucene q.op=AND df=#{category_field}}#{category}"
-    (@response, @document_list) = get_search_results(:q => query)
-    render 'index', locals: { facet_list: facet_fields }
   end
 
   def search_layout
