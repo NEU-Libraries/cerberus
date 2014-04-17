@@ -1,11 +1,12 @@
 class CartDownloadJob
 
-  attr_accessor :sess_id, :pids, :nuid, :user, :path
+  attr_accessor :sess_id, :pids, :nuid, :user, :path, :ip_address
 
-  def initialize(sess_id, pids, nuid)
+  def initialize(sess_id, pids, nuid, ip_addr)
     self.sess_id = sess_id
     self.pids = pids
     self.nuid = nuid
+    self.ip_address = ip_addr
   end
 
   def queue_name
@@ -31,7 +32,8 @@ class CartDownloadJob
             io.add_buffer("downloads/#{item.content.label}", item.content.content)
 
             # Record the download
-            DrsImpression.create(pid: pid, session_id: sess_id, action: 'download')
+            DrsImpression.create(pid: pid, session_id: sess_id, action: 'download',
+                                  ip_address: ip_address)
           end
         end
       end
