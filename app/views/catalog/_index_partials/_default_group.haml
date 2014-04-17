@@ -1,7 +1,11 @@
 - page_info = paginate_params(@response)
 %ul.drs-items{start: 1+((page_info.current_page-1)*page_info.limit_value), data: {toggle: "drs-view"}, class: drs_view_class()}
-  -if !@smart_collections.nil? && @smart_collections.length > 0 && page_info.current_page == 1
-    - @smart_collections.each do |smart_collection|
-      =render :partial => 'shared/drs_item/drs_item_smart_collection', locals: { smart_collection_path: 'www.google.com', smart_collection_icon: t("drs.significant.#{smart_collection}.icon"), smart_collection_title: t("drs.significant.#{smart_collection}.name"), smart_collection_description: t("drs.significant.#{smart_collection}.description") }
-  - docs.each_with_index do |document,counter|
-    = render partial: 'shared/drs_item/drs_item' , locals: { item: document }
+  -if !@smart_docs.nil?
+    - @smart_docs.each do |document|
+      = render partial: 'shared/drs_item/drs_item' , locals: { item: document.first }
+  -else
+    -if !@smart_collections.nil? && @smart_collections.length > 0 && page_info.current_page == 1
+      - @smart_collections.each do |smart_collection|
+        =render :partial => 'shared/drs_item/drs_item_smart_collection', locals: { smart_collection_path: 'www.google.com', smart_collection_icon: t("drs.significant.#{smart_collection}.icon"), smart_collection_title: t("drs.significant.#{smart_collection}.name"), smart_collection_description: t("drs.significant.#{smart_collection}.description") }
+    - docs.each_with_index do |document,counter|
+      = render partial: 'shared/drs_item/drs_item' , locals: { item: document }
