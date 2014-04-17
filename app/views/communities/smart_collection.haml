@@ -1,6 +1,7 @@
 %ul.breadcrumb
-  - breadcrumb_to_root(@set).each do |breadcrumb|
+  - smart_collection_breadcrumb(@set).each do |breadcrumb|
     =breadcrumb
+  = content_tag(:li, t("drs.significant.#{smart_collection}.name"), class: 'active')
 
 %article.well.clearfix
   %h1{:class => @set.klass, :id => "#{@set.pid}-title"}
