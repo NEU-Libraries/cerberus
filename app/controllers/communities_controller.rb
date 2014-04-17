@@ -38,6 +38,7 @@ class CommunitiesController < SetsController
 
   def show
     @set_id = params[:id]
+
     self.solr_search_params_logic += [:find_object]
     (@response, @document_list) = get_search_results
     @set = SolrDocument.new(@response.docs.first)
@@ -48,37 +49,81 @@ class CommunitiesController < SetsController
     self.solr_search_params_logic += [:show_children_only]
     (@response, @document_list) = get_search_results
 
+    @smart_collections = @set.smart_collections
+
     render :template => 'shared/sets/show'
   end
 
   def employees
-    @dept = Community.find(params[:id])
-    @page_title = "#{@dept.title} Staff"
+    @set_id = params[:id]
+    self.solr_search_params_logic += [:find_object]
+    (@response, @document_list) = get_search_results
+    @set = SolrDocument.new(@response.docs.first)
+
+    @page_title = "#{@set.title} #{t('drs.significant.employees.name')}"
+
+    @smart_docs = @set.find_employees
+    render 'smart_collection', locals: { smart_collection: 'employees' }
   end
 
   def research_publications
-    @dept = Community.find(params[:id])
-    @page_title = "#{@dept.title} Research Papers"
+    @set_id = params[:id]
+    self.solr_search_params_logic += [:find_object]
+    (@response, @document_list) = get_search_results
+    @set = SolrDocument.new(@response.docs.first)
+
+    @page_title = "#{@set.title} #{t('drs.significant.research.name')}"
+
+    @smart_docs = @set.research_publications
+    render 'smart_collection', locals: { smart_collection: 'research' }
   end
 
   def other_publications
-    @dept = Community.find(params[:id])
-    @page_title = "#{@dept.title} Papers"
+    @set_id = params[:id]
+    self.solr_search_params_logic += [:find_object]
+    (@response, @document_list) = get_search_results
+    @set = SolrDocument.new(@response.docs.first)
+
+    @page_title = "#{@set.title} #{t('drs.significant.other.name')}"
+
+    @smart_docs = @set.other_publications
+    render 'smart_collection', locals: { smart_collection: 'other' }
   end
 
   def presentations
-    @dept = Community.find(params[:id])
-    @page_title = "#{@dept.title} Presentations"
+    @set_id = params[:id]
+    self.solr_search_params_logic += [:find_object]
+    (@response, @document_list) = get_search_results
+    @set = SolrDocument.new(@response.docs.first)
+
+    @page_title = "#{@set.title} #{t('drs.significant.presentations.name')}"
+
+    @smart_docs = @set.presentations
+    render 'smart_collection', locals: { smart_collection: 'presentations' }
   end
 
-  def data_sets
-    @dept = Community.find(params[:id])
-    @page_title = "#{@dept.title} Datasets"
+  def datasets
+    @set_id = params[:id]
+    self.solr_search_params_logic += [:find_object]
+    (@response, @document_list) = get_search_results
+    @set = SolrDocument.new(@response.docs.first)
+
+    @page_title = "#{@set.title} #{t('drs.significant.datasets.name')}"
+
+    @smart_docs = @set.datasets
+    render 'smart_collection', locals: { smart_collection: 'datasets' }
   end
 
   def learning_objects
-    @dept = Community.find(params[:id])
-    @page_title = "#{@dept.title} Learning Objects"
+    @set_id = params[:id]
+    self.solr_search_params_logic += [:find_object]
+    (@response, @document_list) = get_search_results
+    @set = SolrDocument.new(@response.docs.first)
+
+    @page_title = "#{@set.title} #{t('drs.significant.learning.name')}"
+
+    @smart_docs = @set.learning_objects
+    render 'smart_collection', locals: { smart_collection: 'learning' }
   end
 
   protected

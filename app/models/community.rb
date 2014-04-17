@@ -45,38 +45,9 @@ class Community < ActiveFedora::Base
     self.properties.parent_id = val
   end
 
-  def theses
-    child_collections.find { |e| e.smart_collection_type == 'Theses and Dissertations' }
-  end
-
-  def research_publications
-    employee_query(:all_research_publications)
-  end
-
-  def other_publications
-    employee_query(:all_other_publications)
-  end
-
-  def data_sets
-    employee_query(:all_data_sets)
-  end
-
-  def presentations
-    employee_query(:all_presentations)
-  end
-
-  def learning_objects
-    employee_query(:all_learning_objects)
-  end
-
   # Simple human readable label for objects.
   def type_label
     "Community"
   end
 
-  private
-
-    def employee_query(sym)
-      self.employees.inject([]) { |b, emp| b + emp.public_send(sym) }
-    end
 end
