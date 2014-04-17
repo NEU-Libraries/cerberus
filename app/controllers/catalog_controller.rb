@@ -104,7 +104,7 @@ class CatalogController < ApplicationController
     @search_type = I18n.t "drs.significant.employees.name"
     query = "{!lucene q.op=AND df=active_fedora_model_ssi}Employee"
     (@response, @document_list) = get_search_results(:q => query)
-    render 'index', locals: { facet_list: [] }
+    render 'index', locals: { facet_list: [community_name_field] }
   end
 
   def self.uploaded_field
@@ -143,6 +143,7 @@ class CatalogController < ApplicationController
     config.add_facet_field solr_name("drs_course_title", :symbol), label: "Course Title", limit: 5
     config.add_facet_field solr_name("subject", :facetable), label: "Subject", limit: 5
     config.add_facet_field solr_name("type", :facetable), label: "Type", limit: 5
+    config.add_facet_field solr_name("community_name", :symbol), label: "Community", limit: 5
 
     # Have BL send all facet field names to Solr, which has been the default
     # previously. Simply remove these lines if you'd rather use Solr request
@@ -474,6 +475,10 @@ class CatalogController < ApplicationController
 
   def type_field
     Solrizer.solr_name('type', :facetable, :type => :string)
+  end
+
+  def community_name_field
+    Solrizer.solr_name('community_name', :symbol)
   end
 
   def category_query_action(category, facet_fields)

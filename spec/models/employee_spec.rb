@@ -35,7 +35,7 @@ describe Employee do
       employee.communities.should == [community]
     end
 
-    it "can remove communities" do
+    it "removes communities" do
       employee.add_community(community)
       employee.add_community(community_two)
       employee.save!
@@ -44,6 +44,16 @@ describe Employee do
       employee.save!
 
       employee.communities.should == [community_two]
+    end
+
+    it "writes community names to the details datastream on save" do
+      employee.add_community(community)
+      employee.add_community(community_two)
+
+      employee.save!
+      expected_array = [community.title, community_two.title]
+
+      employee.details.community_name.should == expected_array
     end
   end
 
@@ -97,6 +107,16 @@ describe Employee do
 
       it "sets the nuid" do
         solr["employee_nuid_ssim"].should == "000111222"
+      end
+    end
+
+    context "of community name field" do
+      before(:each) do
+        employee.details.community_name = ["English", "Math"]
+      end
+
+      it "sets the community name" do
+        solr["community_name_ssim"].should == ["English", "Math"]
       end
     end
   end
