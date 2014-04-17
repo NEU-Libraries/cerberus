@@ -89,7 +89,7 @@ module Drs
       doc_list ||= []
       cols = find_smart_collections_by_type(type_str)
       cols.each do |c|
-        doc_list << c.first.all_descendent_files
+        doc_list.concat c.first.all_descendent_files
       end
       return doc_list
     end
