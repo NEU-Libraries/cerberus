@@ -11,7 +11,7 @@
       %span.icon-caret-down( aria-hidden="true" )
     %ul.dropdown-menu(role="menu")
       %li{:class => ("active" if action_name == "personal_graph")}
-        = link_to raw('<span class="icon-dashboard" aria-hidden="true" ></span> My Drs'), personal_graph_path, "tab-index" => "-1"
+        = link_to raw('<span class="icon-dashboard" aria-hidden="true" ></span> My DRS'), personal_graph_path, "tab-index" => "-1"
       %li{:class => ("active" if controller_name == "compilations" && action_name == "index")}
         %a.top_nav{href: compilations_path,  "tab-index" => "-1"}
           %span.icon-folder-open-alt( aria-hidden="true" )
