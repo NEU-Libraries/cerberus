@@ -37,6 +37,8 @@ class CommunitiesController < SetsController
   end
 
   def show
+    @smart_collections = nil
+
     @set_id = params[:id]
 
     self.solr_search_params_logic += [:find_object]
