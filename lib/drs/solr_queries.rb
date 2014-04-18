@@ -120,15 +120,20 @@ module Drs
 
     def smart_collections
       smart_collection_list ||= []
+
       if self.research_publications.length > 0
         smart_collection_list << "research"
-      elsif self.datasets.length > 0
+      end
+      if self.datasets.length > 0
         smart_collection_list << "datasets"
-      elsif self.presentations.length > 0
+      end
+      if self.presentations.length > 0
         smart_collection_list << "presentations"
-      elsif self.learning_objects.length > 0
+      end
+      if self.learning_objects.length > 0
         smart_collection_list << "learning"
-      elsif self.other_publications.length > 0
+      end
+      if self.other_publications.length > 0
         smart_collection_list << "other"
       end
 
