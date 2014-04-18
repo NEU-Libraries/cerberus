@@ -40,8 +40,8 @@ module Drs
       end
 
       def title=(string)
-        if_DC_exists { self.DC.nu_title = string }
         if_mods_exists { self.mods.title = string }
+        if_DC_exists { self.DC.nu_title = string }
         if_descMetadata_exists { self.descMetadata.title = string }
       end
 
@@ -50,8 +50,8 @@ module Drs
       end
 
       def dcmi_type=(string)
-        if_DC_exists { self.DC.nu_type = string }
         if_mods_exists { self.mods.type_of_resource = string }
+        if_DC_exists { self.DC.nu_type = string }
       end
 
       def dcmi_type
@@ -59,8 +59,8 @@ module Drs
       end
 
       def identifier=(string)
-        if_DC_exists { self.DC.nu_identifier = string }
         if_mods_exists { self.mods.identifier = string }
+        if_DC_exists { self.DC.nu_identifier = string }
         if_descMetadata_exists { self.descMetadata.identifier = string }
       end
 
@@ -69,8 +69,8 @@ module Drs
       end
 
       def description=(string)
-        if_DC_exists { self.DC.nu_description = string }
         if_mods_exists { self.mods.abstract = string }
+        if_DC_exists { self.DC.nu_description = string }
         if_descMetadata_exists { self.descMetadata.description = string }
       end
 
