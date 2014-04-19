@@ -95,7 +95,7 @@ module Drs
       end
 
       def keywords
-        self.mods.topics
+        self.DC.subject
       end
 
       def creators=(hash)
