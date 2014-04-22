@@ -3,15 +3,3 @@
 = select_year(0, {start_year: Time.zone.now.year, end_year: 1850, prompt: 'Year'}, {id: 'doiYear', class: 'span4', required: true})
 = select_month(0, {prompt: 'Month'}, {id: 'doiMonth', class: 'span4'})
 = select_day(0, {prompt: 'Day'}, {id: 'doiDay', class: 'span4'})
-
-:javascript
-  $().dateSelectBoxes($('#doiMonth'),$('#doiDay'),$('#doiYear'), true);
-  $("#doiDay").change(function(){
-    $("#nu_core_file_date_of_issue").val($('#doiYear').val() + "-" + $('#doiMonth').val() + "-" + $('#doiDay').val());
-  });
-  $("#doiMonth").change(function(){
-    $("#nu_core_file_date_of_issue").val($('#doiYear').val() + "-" + $('#doiMonth').val() + "-" + $('#doiDay').val());
-  });
-  $("#doiYear").change(function(){
-    $("#nu_core_file_date_of_issue").val($('#doiYear').val() + "-" + $('#doiMonth').val() + "-" + $('#doiDay').val());
-  });

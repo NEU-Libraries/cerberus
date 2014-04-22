@@ -41,7 +41,30 @@ $(document).ready ->
       toggleShoppingCart $('*[data-shoppingcart]')
       removeFormFields()
       imageMetadataPartial()
+      dateOfIssuePartial()
       return
+
+    dateOfIssuePartial = ->
+      if $('#nu_core_file_date_of_issue').length > 0
+        $().dateSelectBoxes($('#doiMonth'),$('#doiDay'),$('#doiYear'), true);
+        return
+
+      $("#doiDay").change ->
+        combineDateOfIssue()
+        return
+
+      $("#doiMonth").change ->
+        combineDateOfIssue()
+        return
+
+      $("#doiYear").change ->
+        combineDateOfIssue()
+        return
+
+    combineDateOfIssue = ->
+      $("#nu_core_file_date_of_issue").val $("#doiYear").val() + "-" + $("#doiMonth").val() + "-" + $("#doiDay").val()
+      return
+
 
     enforceSizes = ->
       if $("input.slider.small").slider("getValue") > $("input.slider.medium").slider("getValue")
