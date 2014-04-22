@@ -46,8 +46,7 @@ $(document).ready ->
 
     dateOfIssuePartial = ->
       if $('#nu_core_file_date_of_issue').length > 0
-        $().dateSelectBoxes($('#doiMonth'),$('#doiDay'),$('#doiYear'), true);
-        return
+        $().dateSelectBoxes $("#doiMonth"), $("#doiDay"), $("#doiYear"), true
 
       $("#doiDay").change ->
         combineDateOfIssue()
@@ -60,6 +59,8 @@ $(document).ready ->
       $("#doiYear").change ->
         combineDateOfIssue()
         return
+
+      return
 
     combineDateOfIssue = ->
       $("#nu_core_file_date_of_issue").val $("#doiYear").val() + "-" + $("#doiMonth").val() + "-" + $("#doiDay").val()
