@@ -33,3 +33,5 @@
 //= require analytics.js
 //= require jquery_validate/jquery.validate.min.js
 
+//= require dateSelectBoxes.pack.js
+
