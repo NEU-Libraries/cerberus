@@ -41,7 +41,47 @@ $(document).ready ->
       toggleShoppingCart $('*[data-shoppingcart]')
       removeFormFields()
       imageMetadataPartial()
+      dateOfIssuePartial()
       return
+
+    dateOfIssuePartial = ->
+      if $('#nu_core_file_date_of_issue').length > 0
+        $().dateSelectBoxes $("#doiMonth"), $("#doiDay"), $("#doiYear"), true
+        $("#doiYear").val $("#nu_core_file_date_of_issue").val().split("-")[0]
+        $("#doiMonth").val $("#nu_core_file_date_of_issue").val().split("-")[1]
+        $("#doiDay").val $("#nu_core_file_date_of_issue").val().split("-")[2]
+
+      if $("#doiMonth").val() == ""
+        $("#doiDay").val $("#doiDay option:first").val()
+        $("#doiDay").prop("disabled", true)
+      else
+        $("#doiDay").prop("disabled", false)
+
+      $("#doiDay").change ->
+        combineDateOfIssue()
+        return
+
+      $("#doiMonth").change ->
+        if $("#doiMonth").val() == ""
+          $("#doiDay").val $("#doiDay option:first").val()
+          $("#doiDay").prop("disabled", true)
+        else
+          $("#doiDay").prop("disabled", false)
+
+        combineDateOfIssue()
+        return
+
+      $("#doiYear").change ->
+        combineDateOfIssue()
+        return
+
+      return
+
+    combineDateOfIssue = ->
+      $("#nu_core_file_date_of_issue").val $("#doiYear").val() + "-" + $("#doiMonth").val() + "-" + $("#doiDay").val()
+      $("#nu_core_file_date_of_issue").val $("#nu_core_file_date_of_issue").val().replace(/-+$/, "")
+      return
+
 
     enforceSizes = ->
       if $("input.slider.small").slider("getValue") > $("input.slider.medium").slider("getValue")

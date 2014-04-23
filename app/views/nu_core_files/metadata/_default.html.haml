@@ -19,11 +19,7 @@
     - else
       = f.text_field :title, required: true, pattern: ".*\\S.*", name: 'nu_core_file[title][]', class: "input-block-level", placeholder: "US Congressman poses with a supporter"
   .span6
-    = f.label :date_of_issue, "Date of Issuance", class: "required-label"
-    #date-issued.input-block-level.input-append.date
-      = f.text_field :date_of_issue, class: ['datepicker','input-block-level'], required: true, placeholder: "YYYY-MM-DD", 'data-date-format' => "yyyy-mm-dd"
-      %span.add-on
-        %i.icon-calendar.icon-large
+    = render partial: 'nu_core_files/metadata/data_form_date', locals: {:f => f}
 %fieldset.row-fluid
   .span6
     = render partial: 'nu_core_files/metadata/data_form_creator_personal_names', locals: {:f => f, :names => @nu_core_file.personal_creators }
