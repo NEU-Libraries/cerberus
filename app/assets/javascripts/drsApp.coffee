@@ -84,22 +84,34 @@ $(document).ready ->
 
 
     enforceSizes = ->
+      if parseInt($("#small_image_size").val()) >= parseInt($("input.slider.small").attr("data-slider-max"))
+        $("#small_image_size").val parseInt($("input.slider.small").attr("data-slider-max")) - 2
+        $("input.slider.small").slider "setValue", parseInt($("input.slider.small").attr("data-slider-max")) - 2
+
+      if parseInt($("#medium_image_size").val()) >= parseInt($("input.slider.medium").attr("data-slider-max"))
+        $("#medium_image_size").val parseInt($("input.slider.medium").attr("data-slider-max")) - 1
+        $("input.slider.medium").slider "setValue", parseInt($("input.slider.medium").attr("data-slider-max")) - 1
+
+      if parseInt($("#large_image_size").val()) > parseInt($("input.slider.large").attr("data-slider-max"))
+        $("#large_image_size").val parseInt($("input.slider.large").attr("data-slider-max"))
+        $("input.slider.large").slider "setValue", parseInt($("input.slider.large").attr("data-slider-max"))
+
       if $("input.slider.small").slider("getValue") > $("input.slider.medium").slider("getValue")
         $("input.slider.medium").slider "setValue", $("input.slider.small").slider("getValue") + 1
         $("#medium_image_size").val $("input.slider.small").slider("getValue") + 1
-        return
-      if $("input.slider.small").slider("getValue") > $("input.slider.large").slider("getValue")
-        $("input.slider.large").slider "setValue", $("input.slider.small").slider("getValue") + 2
-        $("#large_image_size").val $("input.slider.small").slider("getValue") + 2
-        return
+
       if $("input.slider.medium").slider("getValue") < $("input.slider.small").slider("getValue")
         $("input.slider.small").slider "setValue", $("input.slider.medium").slider("getValue") - 1
         $("#small_image_size").val $("input.slider.medium").slider("getValue") - 1
-        return
+
       if $("input.slider.medium").slider("getValue") > $("input.slider.large").slider("getValue")
         $("input.slider.large").slider "setValue", $("input.slider.medium").slider("getValue") + 1
         $("#large_image_size").val $("input.slider.medium").slider("getValue") + 1
-        return
+
+      if $("input.slider.large").slider("getValue") < $("input.slider.medium").slider("getValue")
+        $("input.slider.medium").slider "setValue", $("input.slider.large").slider("getValue") - 1
+        $("#medium_image_size").val $("input.slider.large").slider("getValue") - 1
+
       return
 
     imageMetadataPartial = ->
