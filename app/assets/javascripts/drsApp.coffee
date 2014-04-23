@@ -48,8 +48,8 @@ $(document).ready ->
       if $('#nu_core_file_date_of_issue').length > 0
         $().dateSelectBoxes $("#doiMonth"), $("#doiDay"), $("#doiYear"), true
         $("#doiYear").val $("#nu_core_file_date_of_issue").val().split("-")[0]
-        $("#doiMonth").val $("#nu_core_file_date_of_issue").val().split("-")[1]
-        $("#doiDay").val $("#nu_core_file_date_of_issue").val().split("-")[2]
+        $("#doiMonth").val $("#nu_core_file_date_of_issue").val().split("-")[1].replace(/^0*/, "");
+        $("#doiDay").val $("#nu_core_file_date_of_issue").val().split("-")[2].replace(/^0*/, "");
 
       if $("#doiMonth").val() == ""
         $("#doiDay").val $("#doiDay option:first").val()
