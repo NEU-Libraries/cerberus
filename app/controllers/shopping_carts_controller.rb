@@ -5,14 +5,30 @@ class ShoppingCartsController < ApplicationController
   before_filter :can_dl?, only: [:update]
   before_filter :check_availability, only: [:show, :download]
 
+  # Here be solr access boilerplate
+  include Blacklight::Catalog
+  include Blacklight::Configurable # comply with BL 3.7
+  include ActionView::Helpers::DateHelper
+  # This is needed as of BL 3.7
+  self.copy_blacklight_config_from(CatalogController)
+  include BlacklightAdvancedSearch::ParseBasicQ
+  include BlacklightAdvancedSearch::Controller
 
-  # Show the user the contents of their shopping cart.
+
   def show
-    @items = lookup_from_cookie(session[:ids])
-    @page_title = t('drs.shoppingcarts.name').titlecase
-    respond_to do |format|
-      format.js
-      format.html
+    if !session[:ids].empty?
+      self.solr_search_params_logic += [:find_all_objects_from_cookie]
+      (@response, @document_list) = get_search_results
+      @items = @response.docs
+
+      self.solr_search_params_logic.delete(:find_all_objects_from_cookie)
+
+      self.solr_search_params_logic += [:find_all_objects_from_core_ids]
+      (@response, @document_list) = get_search_results
+      @item_core_records = @response.docs
+    else
+      @items = []
+      @item_core_records = []
     end
   end
 
@@ -123,12 +139,22 @@ class ShoppingCartsController < ApplicationController
       end
     end
 
-    def lookup_from_cookie(cookie_array)
-      if cookie_array
-        x = cookie_array.map { |pid| ActiveFedora::Base.find(pid, cast: true) rescue nil}
-        return x - [nil]
-      else
-        []
-      end
+    def find_all_objects_from_core_ids(solr_parameters, user_parameters)
+      core_ids = @items.map { |x| x["is_part_of_ssim"].first }
+      core_ids.map! { |x| x.split("/").last }
+
+      id_to_query = core_ids.map { |x| "id:\"#{x}\"" }
+      filter_query = id_to_query.join(" OR ")
+
+      solr_parameters[:fq] ||= []
+      solr_parameters[:fq] << filter_query
+    end
+
+    def find_all_objects_from_cookie(solr_parameters, user_parameters)
+      id_to_query = session[:ids].map { |x| "id:\"#{x}\"" }
+      filter_query = id_to_query.join(" OR ")
+
+      solr_parameters[:fq] ||= []
+      solr_parameters[:fq] << filter_query
     end
 end
