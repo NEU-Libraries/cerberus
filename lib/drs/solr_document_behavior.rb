@@ -24,11 +24,12 @@ module Drs
         else
           return nil
         end
-      rescue
+      rescue => error
+        Rails.logger.warn error.backtrace
         Rails.logger.warn "Invalid date - #{self.pid} Error #{$!}"
-      ensure
-        return nil
       end
+
+      return nil
     end
 
     def title_or_label
@@ -53,7 +54,8 @@ module Drs
 
     def date_of_issue
       #TODO - this is broken in metadata assignment
-      process_date(Array(self[Solrizer.solr_name("desc_metadata__date_created")]).first)
+      # process_date(Array(self[Solrizer.solr_name("desc_metadata__date_created")]).first)
+      Array(self[Solrizer.solr_name("desc_metadata__date_created")]).first
     end
 
     def create_date
