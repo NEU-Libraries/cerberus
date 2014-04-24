@@ -17,6 +17,7 @@ describe ShoppingCartsController do
       pdf.core_record.save!
 
       session[:ids] = [file.pid, pdf.pid]
+
       get :show
 
       assigns(:items).length.should == 2
@@ -27,7 +28,8 @@ describe ShoppingCartsController do
       # Ensure that both arrays have been sorted correctly,
       # Pairing each item with its core record by index position
       assigns(:items).each_with_index do |item, i|
-        item["is_part_of_ssim"].should == cores.fetch(i)["id"]
+        item_parent_id = item["is_part_of_ssim"].first.split("/").last
+        item_parent_id == cores.fetch(i)["id"]
       end
 
       expect(response).to render_template('shopping_carts/show')
