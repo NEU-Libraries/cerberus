@@ -27,9 +27,11 @@ class ShoppingCartsController < ApplicationController
       (@response, @document_list) = get_search_results
       @item_core_records = @response.docs
 
-      # Sort @items and @item_core_records so they can be assumed to have parity
-      @items.sort_by { |hsh| hsh["is_part_of_ssim"] }
-      @item_core_records.sort_by { |hsh| hsh["id"] }
+      # Sort @items and @item_core_records so that it can be assumed that
+      # @item_core_records.fetch(i) gets the core record specifically for
+      # @items.fetch(i)
+      @items.sort_by! { |hsh| hsh["is_part_of_ssim"] }
+      @item_core_records.sort_by! { |hsh| hsh["id"] }
     else
       @items = []
       @item_core_records = []
