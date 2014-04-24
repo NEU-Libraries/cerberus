@@ -47,15 +47,24 @@ $(document).ready ->
     dateOfIssuePartial = ->
       if $('#nu_core_file_date_of_issue').length > 0
         $().dateSelectBoxes $("#doiMonth"), $("#doiDay"), $("#doiYear"), true
-        $("#doiYear").val $("#nu_core_file_date_of_issue").val().split("-")[0]
-        $("#doiMonth").val $("#nu_core_file_date_of_issue").val().split("-")[1].replace(/^0*/, "");
-        $("#doiDay").val $("#nu_core_file_date_of_issue").val().split("-")[2].replace(/^0*/, "");
 
-      if $("#doiMonth").val() == ""
-        $("#doiDay").val $("#doiDay option:first").val()
-        $("#doiDay").prop("disabled", true)
-      else
-        $("#doiDay").prop("disabled", false)
+        try
+          $("#doiYear").val $("#nu_core_file_date_of_issue").val().split("-")[0]
+        catch error
+
+        try
+          $("#doiMonth").val $("#nu_core_file_date_of_issue").val().split("-")[1].replace(/^0*/, "")
+        catch error
+
+        try
+          $("#doiDay").val $("#nu_core_file_date_of_issue").val().split("-")[2].replace(/^0*/, "")
+        catch error
+
+        if $("#doiMonth").val() == ""
+          $("#doiDay").val $("#doiDay option:first").val()
+          $("#doiDay").prop("disabled", true)
+        else
+          $("#doiDay").prop("disabled", false)
 
       $("#doiDay").change ->
         combineDateOfIssue()
