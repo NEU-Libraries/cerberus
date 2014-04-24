@@ -21,6 +21,15 @@ describe ShoppingCartsController do
 
       assigns(:items).length.should == 2
       assigns(:item_core_records).length.should == 2
+
+      cores = assigns(:item_core_records)
+
+      # Ensure that both arrays have been sorted correctly,
+      # Pairing each item with its core record by index position
+      assigns(:items).each_with_index do |item, i|
+        item["is_part_of_ssim"].should == cores.fetch(i)["id"]
+      end
+
       expect(response).to render_template('shopping_carts/show')
     end
 
@@ -79,5 +88,9 @@ describe ShoppingCartsController do
       session[:ids].should be_empty
       expect(response).to redirect_to(shopping_cart_path)
     end
+  end
+
+  after(:all) do
+    ActiveFedora::Base.destroy_all
   end
 end
