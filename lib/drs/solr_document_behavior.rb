@@ -192,5 +192,14 @@ module Drs
       # audio/mpeg is the mime type that fits 0.6.0 returns for an mp3 file.
       ['audio/mp3', 'audio/mpeg', 'audio/x-wave', 'audio/x-wav', 'audio/ogg'].include? self.mime_type
     end
+
+    # Content objects store file data in a datastream called 'content'
+    # This method encapsulates reaching into the SolrDocument created from a
+    # content object and fetching its filename.  Which is a surprisingly
+    # involved process
+    def get_content_label
+      hsh = JSON.parse(get "object_profile_ssm")
+      return hsh["datastreams"]["content"]["dsLabel"]
+    end
   end
 end
