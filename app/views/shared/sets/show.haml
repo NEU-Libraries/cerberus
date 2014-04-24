@@ -21,7 +21,7 @@
       = @set.type_label
   - if !@set.thumbnail_list.empty?
     %img{src: @set.thumbnail_list.first, title: @set.title, alt: "", class: ['img-polorid', 'pull-left']}(aria-labeledby="#{@set.pid}-title" role="presentation")
-  - if @set.description.length > 0
+  - if !@set.description.blank?
     %p
       = @set.description
 

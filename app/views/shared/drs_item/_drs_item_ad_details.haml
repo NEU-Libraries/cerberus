@@ -7,21 +7,21 @@
             = creator
       - if item.creators.length > 3
         &hellip;
-  - if !item.date_of_issue.nil? and item.date_of_issue.length > 0
+  - if !item.date_of_issue.blank?
     %dl.drs-item-date-of-issue-list
       %dt.drs-item-date-of-issue-label
         Date of Issue
       %dd.drs-item-date-of-issue
         %time{ "date-time" => item.date_of_issue }
           = item.date_of_issue
-  - if !item.create_date.nil? and item.create_date.length > 0
+  - if !item.create_date.blank?
     %dl.drs-item-date-of-issue-list
       %dt.drs-item-date-of-issue-label
         Creation Date
       %dd.drs-item-date-of-issue
         %time{ "date-time" => item.create_date }
           = item.create_date
-  - if !item.description.nil? and item.description.length > 0
+  - if !item.description.blank?
     %dl.drs-item-abstract-list
       %dt.drs-item-abstract-label
         Abstract
