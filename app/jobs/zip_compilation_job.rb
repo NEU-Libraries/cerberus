@@ -34,7 +34,7 @@ class ZipCompilationJob
         if NuCoreFile.exists?(id)
           NuCoreFile.find(id).content_objects.each do |content|
             if user.can?(:read, content) && content.content.content && content.class != ImageThumbnailFile
-              io.add_buffer("#{self.title}/#{content.title}", content.content.content)
+              io.add_buffer("#{self.title}/#{content.label}", content.content.content)
             end
           end
         end
