@@ -50,6 +50,8 @@ module Drs::Employee::SmartCollections
     end
 
     def purge_personal_graph
-      self.user_root_collection.recursive_delete if !self.smart_collections.empty?
+      if !self.user_root_collection.nil?
+        self.user_root_collection.recursive_delete if !self.smart_collections.empty?
+      end
     end
 end
