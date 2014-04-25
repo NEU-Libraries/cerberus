@@ -39,20 +39,20 @@ describe EmployeeCreateJob do
     employee.user_root_collection.should be_an_instance_of NuCollection
     user.can?(:edit, employee.user_root_collection).should be true
 
-    employee.research_publications.should be_an_instance_of NuCollection
-    user.can?(:edit, employee.research_publications).should be true
+    employee.research_publications_collection.should be_an_instance_of SolrDocument
+    user.can?(:edit, employee.research_publications_collection).should be true
 
-    employee.other_publications.should be_an_instance_of NuCollection
-    user.can?(:edit, employee.other_publications).should be true
+    employee.other_publications_collection.should be_an_instance_of SolrDocument
+    user.can?(:edit, employee.other_publications_collection).should be true
 
-    employee.datasets.should be_an_instance_of NuCollection
-    user.can?(:edit, employee.datasets).should be true
+    employee.datasets_collection.should be_an_instance_of SolrDocument
+    user.can?(:edit, employee.datasets_collection).should be true
 
-    employee.presentations.should be_an_instance_of NuCollection
-    user.can?(:edit, employee.presentations).should be true
+    employee.presentations_collection.should be_an_instance_of SolrDocument
+    user.can?(:edit, employee.presentations_collection).should be true
 
-    employee.learning_objects.should be_an_instance_of NuCollection
-    user.can?(:edit, employee.learning_objects).should be true
+    employee.learning_objects_collection.should be_an_instance_of SolrDocument
+    user.can?(:edit, employee.learning_objects_collection).should be true
 
     # Employee is tagged as complete
     employee.is_building?.should be false
