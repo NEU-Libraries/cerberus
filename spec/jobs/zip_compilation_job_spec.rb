@@ -42,7 +42,7 @@ describe ZipCompilationJob do
     it "creates a zipfile with the right files in it" do
       Zip::Archive.open(archive) do |ar|
         t = @compilation.title
-        coll = ["#{t}/#{@image.label}", "#{t}/#{@pdf.label}"]
+        coll = ["#{t}/#{@image.title}", "#{t}/#{@pdf.title}"]
         [ar.get_name(0), ar.get_name(1)].should =~ coll
       end
     end

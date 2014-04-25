@@ -46,7 +46,8 @@ module Drs
       end
 
       def title
-        self.mods.title.first
+        if_mods_exists { return self.mods.title.first }
+        self.DC.nu_title.first
       end
 
       def dcmi_type=(string)
@@ -55,7 +56,8 @@ module Drs
       end
 
       def dcmi_type
-        self.mods.type_of_resource.first
+        if_mods_exists { return self.mods.type_of_resource.first }
+        return self.DC.nu_type.first
       end
 
       def identifier=(string)
@@ -65,7 +67,8 @@ module Drs
       end
 
       def identifier
-        self.mods.identifier.first
+        if_mods_exists { self.mods.identifier.first }
+        self.DC.nu_identifier.first
       end
 
       def description=(string)
@@ -75,7 +78,8 @@ module Drs
       end
 
       def description
-        self.mods.abstract.first
+        if_mods_exists { return self.mods.abstract.first }
+        self.DC.nu_description.first
       end
 
       def date_of_issue=(string)
@@ -85,7 +89,8 @@ module Drs
       end
 
       def date_of_issue
-        self.mods.date_issued.first
+        if_mods_exists { self.mods.date_issued.first }
+        self.DC.date.first
       end
 
       def keywords=(array_of_strings)
