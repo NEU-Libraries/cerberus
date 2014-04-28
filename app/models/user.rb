@@ -20,7 +20,7 @@ class User < ActiveRecord::Base
   ROLES = %w[admin employee]
 
   def groups
-    return self.group_list ? self.group_list.split(";").each { |g| g.gsub! ':', '\:' } : []
+    return self.group_list ? self.group_list.split(";") : []
   end
 
   def self.find_for_shib(auth, signed_in_resource=nil)
