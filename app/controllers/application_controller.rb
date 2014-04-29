@@ -3,6 +3,8 @@ class ApplicationController < ActionController::Base
    include Blacklight::Controller
   # Adds Sufia behaviors into the application controller
   include Sufia::Controller
+  # Solr Escape group values
+  include Drs::ControllerHelpers::SolrEscapeGroups
 
   # Please be sure to impelement current_user and user_session. Blacklight depends on
   # these methods in order to perform user specific actions.
