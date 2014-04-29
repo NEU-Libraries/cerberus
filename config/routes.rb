@@ -25,7 +25,7 @@ Drs::Application.routes.draw do
   get '/communities/:id/other' => 'communities#other_publications', as: 'community_other'
   get '/communities/:id/presentations' => 'communities#presentations', as: 'community_presentations'
   get '/communities/:id/datasets' => 'communities#datasets', as: 'community_datasets'
-  get '/communities/:id/pedagogical' => 'communities#learning_objects', as: 'community_pedagogical'
+  get '/communities/:id/learning' => 'communities#learning_objects', as: 'community_learning_objects'
   post '/communities/:id/attach_employee/:employee_id' => 'communities#attach_employee', as: 'attach_employee'
 
   resources :compilations, :controller => "compilations", :path => "sets"
