@@ -44,17 +44,17 @@ module ApplicationHelper
   def drs_view_class
     if current_user
       if !current_user.view_pref
-        current_user.view_pref == 'list'
+        current_user.view_pref == 'grid'
         current_user.save!
       end
       user_view_pref = current_user.view_pref
     else
       if !session[:view_pref]
-        session[:view_pref] == 'list'
+        session[:view_pref] == 'grid'
       end
       user_view_pref = session[:view_pref]
     end
-    return user_view_pref == "list" ? "drs-items-list" : "drs-items-grid"
+    return user_view_pref == "grid" ? "drs-items-grid" : "drs-items-list"
   end
 
 end
