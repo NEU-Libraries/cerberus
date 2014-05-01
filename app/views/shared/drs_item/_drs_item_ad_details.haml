@@ -1,8 +1,8 @@
 .drs-item-add-details
-  -if defined? item.creators and item.creators.length > 0
+  -if !item.creators.blank?
     %dl.drs-item-creators
       - item.creators.each_with_index do | creator, i |
-        - if i < 2 and creator.length > 0
+        - if i < 2 and !creator.blank?
           %h5.drs-item-creator
             = creator
       - if item.creators.length > 3
