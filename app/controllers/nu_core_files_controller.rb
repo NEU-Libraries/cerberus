@@ -249,6 +249,7 @@ class NuCoreFilesController < ApplicationController
       nu_core_file.creator = user.name
       nu_core_file.tmp_path = tmp_path
       nu_core_file.original_filename = file.original_filename
+      nu_core_file.label = file.original_filename
 
       nu_core_file.instantiate_appropriate_content_object(tmp_path, file.original_filename)
 
