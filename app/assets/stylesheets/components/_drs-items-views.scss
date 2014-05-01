@@ -20,7 +20,7 @@
   }
   figure{
     text-align: center;
-    margin: 0 0 0.5em 0;
+    // margin: 0 0 0.5em 0;
 
     [data-picture]{
       display: inline-block;
@@ -77,6 +77,9 @@
       &:last-child{
         @include border-bottom-radius($baseBorderRadius);
       }
+      figure{
+        display: none;
+      }
 
       > a{
         float: left;
@@ -98,8 +101,8 @@
 
     .drs-item-details{
       @extend .media-body;
-      margin-bottom: 2.5em;
-
+      // margin-bottom: 2.5em;
+      margin-left: 1em;
     }
     .drs-item-title{
       @extend .media-heading;
@@ -153,7 +156,7 @@
 
         figure{
           display: block;
-          margin: 0 auto 5px auto;
+          // margin: 0 auto 5px auto;
         }
       }
 
@@ -182,7 +185,8 @@
 
   .drs-item-title{
     display: inline-block;
-    line-height: 30px;
+    // line-height: 30px;
+    line-height: 25px;
     max-width: 100%;
     @include text-overflow();
     @media (max-width: $breakpoint-xl){
@@ -202,7 +206,8 @@
   @media( max-width: $breakpoint-xxl ){
     .drs-item-title,
     .drs-item-creator{
-      margin: 2px 0;
+      // margin: 2px 0;
+      margin: 0;
     }
     .drs-item-title{
       @extend h5;
