@@ -356,12 +356,18 @@ $(document).ready ->
             sidebar.addClass('span12')
             containerParent.removeClass('span9')
             containerParent.addClass('span12');
+            $('.pane.facets').addClass('span3')
+            $('.pane.pagination-info').addClass('span6')
+            $('.pane.results-view').addClass('span3')
           else
             container.removeClass('drs-items-grid').addClass 'drs-items-list'
             sidebar.removeClass('span12')
             sidebar.addClass('span3')
             containerParent.removeClass('span12');
             containerParent.addClass('span9')
+            $('.pane.facets').removeClass('span3')
+            $('.pane.pagination-info').removeClass('span6')
+            $('.pane.results-view').removeClass('span3')
         return
 
 
