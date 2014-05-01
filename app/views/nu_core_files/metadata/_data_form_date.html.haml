@@ -1,5 +1,5 @@
 = f.label :date_of_issue, "Date of Issuance", class: "required-label"
 = f.hidden_field :date_of_issue
-= select_year(0, {start_year: Time.zone.now.year, end_year: 1850, prompt: 'Year'}, {id: 'doiYear', class: 'span4', required: true})
+= select_year(0, {start_year: Time.zone.now.year, end_year: 1850, prompt: 'Year'}, {id: 'doiYear', class: 'span4'})
 = select_month(0, {prompt: 'Month'}, {id: 'doiMonth', class: 'span4'})
 = select_day(0, {prompt: 'Day'}, {id: 'doiDay', class: 'span4'})
