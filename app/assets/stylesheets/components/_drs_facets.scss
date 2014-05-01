@@ -1,6 +1,10 @@
 // Facets
 // ======
 
+.pane.facets{
+  margin-left: 0;
+}
+
 .drs-facet-selected{
   @extend .alert;
   margin: 5px 0;
