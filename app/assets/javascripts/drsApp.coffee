@@ -87,8 +87,9 @@ $(document).ready ->
       return
 
     combineDateOfIssue = ->
-      $("#nu_core_file_date_of_issue").val $("#doiYear").val() + "-" + $("#doiMonth").val() + "-" + $("#doiDay").val()
+      $("#nu_core_file_date_of_issue").val $("#doiYear").val() + "-" + String("0" + $("#doiMonth").val()).slice(-2) + "-" + String("0" + $("#doiDay").val()).slice(-2)
       $("#nu_core_file_date_of_issue").val $("#nu_core_file_date_of_issue").val().replace(/-+$/, "")
+      $("#nu_core_file_date_of_issue").val $("#nu_core_file_date_of_issue").val().replace(/-[0]$/, "").replace(/-[0]$/, "")
       return
 
 
