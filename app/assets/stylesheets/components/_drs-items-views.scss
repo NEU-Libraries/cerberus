@@ -78,7 +78,9 @@
         @include border-bottom-radius($baseBorderRadius);
       }
       figure{
-        display: none;
+        // display: none;
+        // margin: 0 1em;
+        margin: 0 1em 8px 1em;
       }
 
       > a{

@@ -1,9 +1,9 @@
 .thumbnail-btn{
   @include focus-states{
     text-decoration: none;
-    
+
   }
-  h4{ 
+  h4{
     color: inherit;
   }
   .icon-stack{
@@ -70,4 +70,15 @@
 .thumbnail-s10 img,
 .thumbnail-s10-2x img{
   width: 970px;
+}
+
+.drs-items-list .drs-item [class*="thumbnail-"] img{
+  width: 85px;
+  height: 85px;
+}
+
+.drs-items-list .drs-item figure [class*="icon-"]{
+  width: 85px;
+  height: 85px;
+  font-size: 30px;
 }
