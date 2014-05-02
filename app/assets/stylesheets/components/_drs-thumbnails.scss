@@ -72,13 +72,15 @@
   width: 970px;
 }
 
-// .drs-items-list .drs-item [class*="thumbnail-"] img{
-//   width: 85px;
-//   height: 85px;
-// }
+.drs-items-list .drs-item [class*="thumbnail-"] img{
+  width: 85px;
+  height: 85px;
+}
 
-// .drs-items-list .drs-item figure [class*="icon-"]{
-//   width: 85px;
-//   height: 85px;
-//   font-size: 30px;
-// }
+.drs-items-grid .drs-item figure [class*="icon-"]{
+  @media (min-width: 900px){
+    width: 170px;
+    height: 170px;
+    font-size: 80px;
+  }
+}

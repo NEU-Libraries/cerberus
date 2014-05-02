@@ -20,11 +20,11 @@
       %small
         = html_constraints
   - if current_user
-    - @drs_items_class = current_user.view_pref == "list" ? "span9" : "span12"
-    - @sidebar_class = current_user.view_pref == "list" ? "span3" : "span12"
+    - drs_items_class = current_user.view_pref == "list" ? "span9" : "span12"
+    - sidebar_class = current_user.view_pref == "list" ? "span3" : "span12"
   - else
-    - @sidebar_class = "span3"
-    - @drs_items_class = "span9"
+    - sidebar_class = "span3"
+    - drs_items_class = "span9"
   %main.row( role="main" )
     %aside.drs-sidebar{ class: sidebar_class }
       .pane.facets
@@ -43,7 +43,7 @@
 
 
 
-    %section{ class: @drs_items_class }
+    %section{ class: drs_items_class }
       -# Main content
       = render :partial => 'did_you_mean'
       -# Render the results in the main section of the page.
