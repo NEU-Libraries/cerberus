@@ -43,13 +43,17 @@
       =render partial: 'shared/sets/sets_sidebar'
 
     %section{class: current_user.view_pref == 'grid' ? 'span12' : "span9" }
+      = render 'catalog/results_pagination'
       =render :partial => 'catalog/document_list'
+      = render 'catalog/results_pagination'
       =render partial: 'shared/sets/bottom_action_menu'
   - else
     %aside.drs-sidebar.span3
       =render partial: 'shared/sets/sets_sidebar'
 
     %section.span9
+      = render 'catalog/results_pagination'
       =render :partial => 'catalog/document_list'
+      = render 'catalog/results_pagination'
 
 %div#add_compilation_form{ style: 'display:none' }
