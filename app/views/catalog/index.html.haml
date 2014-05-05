@@ -29,9 +29,11 @@
     - drs_items_class = "span9"
   %main.row( role="main" )
     %aside.drs-sidebar{ class: sidebar_class }
+      .pane.results-view{ class: pane_small_class }
+        %h4.sr-only View layout preferences
+        = render partial: 'shared/sets/sets_sidebar'
       .pane.facets{ class: pane_small_class }
         / = render :partial => 'facet_selected'
-
         = render :partial=>'facets', locals: { facet_list: facet_list }
       .pane.pagination-info{ class: pane_large_class }
         / %h4
@@ -39,11 +41,6 @@
         / %p
         /   = render_pagination_info @response, :entry_name=>'item'
         = render 'sort_and_per_page'
-      .pane.results-view{ class: pane_small_class }
-        %h4.sr-only View layout preferences
-        = render partial: 'shared/sets/sets_sidebar'
-
-
 
     %section{ class: drs_items_class }
       -# Main content
