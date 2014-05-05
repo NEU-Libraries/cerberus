@@ -226,3 +226,18 @@ ul.facet_extended_list
 .facet_pagination {
   @extend .clearfix;
 }
+
+span.count{
+  float: right;
+  margin-top: 3px;
+  margin-right: 10px;
+}
+
+a.facet_select{
+  float: left;
+}
+
+.dropdown-submenu .dropdown-menu > li > a:hover,
+.dropdown-submenu.dropdown-menu > li > a:focus {
+  text-decoration: underline;
+}
