@@ -227,6 +227,8 @@ ul.facet_extended_list
   @extend .clearfix;
 }
 
+// DGC - Kludge to make grid/list work better
+
 span.count{
   float: right;
   margin-top: 3px;
@@ -240,4 +242,9 @@ a.facet_select{
 .dropdown-submenu .dropdown-menu > li > a:hover,
 .dropdown-submenu.dropdown-menu > li > a:focus {
   text-decoration: underline;
+}
+
+.nav .dropdown-toggle .caret {
+  float: right;
+  margin-top: 8px;
 }
