@@ -1,8 +1,10 @@
 // Facets
 // ======
 
-.pane.facets{
+// .pane.facets{
+.pane.results-view{
   margin-left: 0;
+  margin-bottom: 15px;
 }
 
 .drs-facet-selected{
@@ -225,4 +227,41 @@ ul.facet_extended_list
 
 .facet_pagination {
   @extend .clearfix;
+}
+
+// DGC - Kludge to make grid/list work better
+
+span.count{
+  float: right;
+  margin-top: 3px;
+  margin-right: 10px;
+}
+
+a.facet_select{
+  float: left;
+}
+
+.dropdown-submenu .dropdown-menu > li > a:hover,
+.dropdown-submenu.dropdown-menu > li > a:focus {
+  text-decoration: underline;
+}
+
+.nav .dropdown-toggle .caret {
+  float: right;
+  margin-top: 8px;
+}
+
+.sorting select {
+  margin: 5px;
+}
+
+.dropdown-menu span.selected{
+  display: block;
+  padding: 3px 20px;
+  clear: both;
+  font-weight: normal;
+  line-height: 20px;
+  span{
+    margin-top: 0;
+  }
 }
