@@ -254,3 +254,14 @@ a.facet_select{
 .sorting select {
   margin: 5px;
 }
+
+.dropdown-menu span.selected{
+  display: block;
+  padding: 3px 20px;
+  clear: both;
+  font-weight: normal;
+  line-height: 20px;
+  span{
+    margin-top: 0;
+  }
+}
