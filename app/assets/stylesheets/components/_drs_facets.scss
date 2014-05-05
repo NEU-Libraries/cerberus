@@ -1,8 +1,10 @@
 // Facets
 // ======
 
-.pane.facets{
+// .pane.facets{
+.pane.results-view{
   margin-left: 0;
+  margin-bottom: 15px;
 }
 
 .drs-facet-selected{
@@ -247,4 +249,8 @@ a.facet_select{
 .nav .dropdown-toggle .caret {
   float: right;
   margin-top: 8px;
+}
+
+.sorting select {
+  margin: 5px;
 }
