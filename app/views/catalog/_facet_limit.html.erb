@@ -2,7 +2,9 @@
       Blacklight::Solr::FacetPaginator.new(display_facet.items,
         :limit => facet_limit_for(solr_field))
       %>
-<ul class="dropdown-menu"  role="menu" aria-labelledby="drop1">
+<li class="dropdown-submenu">
+  <a tabindex="-1" href="#"><%=facet_field.label%></a>
+  <ul class="dropdown-menu">
   <% paginator.items.each do |item| -%>
 <li>
     <% if facet_in_params?( solr_field, item.value ) %>
@@ -16,4 +18,5 @@
   <% if(paginator.has_next?)  %>
     <li class="more_facets_link"><%= link_to 'more ' + facet_field.label.pluralize + '»', params.merge(:id => solr_field, :action=>"facet"), :class => "more_facets_link" %></li>
   <% end %>
-</ul> <!-- /slide-list -->
+  </ul>
+</li>

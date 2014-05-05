@@ -1,13 +1,8 @@
-<!-- <div class="facet_limit blacklight-<%= facet_field.field.parameterize %>"> -->
-<div>
-  <!-- <h5><%= facet_field.label -%> <i class="icon-chevron"></i></h5> -->
-  <ul class="nav" role="navigation">
-    <li class="dropdown">
-      <a id="drop1" href="#" role="button" class="dropdown-toggle" data-toggle="dropdown">
-        <%=facet_field.label%>
-        <b class="caret"></b>
-      </a>
+<li class="dropdown">
+  <a id="drop1" href="#" role="button" class="dropdown-toggle" data-toggle="dropdown">Limit your search<b class="caret"></b></a>
+  <ul class="dropdown-menu" role="menu" aria-labelledby="drop1">
+    <li>
       <%= yield %>
     </li>
   </ul>
-</div>
+</li>
