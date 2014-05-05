@@ -41,13 +41,10 @@ class CommunitiesController < SetsController
 
     @set_id = params[:id]
 
-    self.solr_search_params_logic += [:find_object]
-    (@response, @document_list) = get_search_results
-    @set = SolrDocument.new(@response.docs.first)
+    @set = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first)
 
     @page_title = @set.title
 
-    self.solr_search_params_logic.delete(:find_object)
     self.solr_search_params_logic += [:show_children_only]
     (@response, @document_list) = get_search_results
 
@@ -58,9 +55,8 @@ class CommunitiesController < SetsController
 
   def employees
     @set_id = params[:id]
-    self.solr_search_params_logic += [:find_object]
-    (@response, @document_list) = get_search_results
-    @set = SolrDocument.new(@response.docs.first)
+
+    @set = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first)
 
     @page_title = "#{@set.title} #{t('drs.significant.employees.name')}"
 
@@ -70,9 +66,8 @@ class CommunitiesController < SetsController
 
   def research_publications
     @set_id = params[:id]
-    self.solr_search_params_logic += [:find_object]
-    (@response, @document_list) = get_search_results
-    @set = SolrDocument.new(@response.docs.first)
+
+    @set = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first)
 
     @page_title = "#{@set.title} #{t('drs.significant.research.name')}"
 
@@ -82,9 +77,8 @@ class CommunitiesController < SetsController
 
   def other_publications
     @set_id = params[:id]
-    self.solr_search_params_logic += [:find_object]
-    (@response, @document_list) = get_search_results
-    @set = SolrDocument.new(@response.docs.first)
+
+    @set = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first)
 
     @page_title = "#{@set.title} #{t('drs.significant.other.name')}"
 
@@ -94,9 +88,8 @@ class CommunitiesController < SetsController
 
   def presentations
     @set_id = params[:id]
-    self.solr_search_params_logic += [:find_object]
-    (@response, @document_list) = get_search_results
-    @set = SolrDocument.new(@response.docs.first)
+
+    @set = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first)
 
     @page_title = "#{@set.title} #{t('drs.significant.presentations.name')}"
 
@@ -106,9 +99,8 @@ class CommunitiesController < SetsController
 
   def datasets
     @set_id = params[:id]
-    self.solr_search_params_logic += [:find_object]
-    (@response, @document_list) = get_search_results
-    @set = SolrDocument.new(@response.docs.first)
+
+    @set = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first)
 
     @page_title = "#{@set.title} #{t('drs.significant.datasets.name')}"
 
@@ -118,9 +110,8 @@ class CommunitiesController < SetsController
 
   def learning_objects
     @set_id = params[:id]
-    self.solr_search_params_logic += [:find_object]
-    (@response, @document_list) = get_search_results
-    @set = SolrDocument.new(@response.docs.first)
+
+    @set = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first)
 
     @page_title = "#{@set.title} #{t('drs.significant.learning.name')}"
 
@@ -138,10 +129,5 @@ class CommunitiesController < SetsController
     def show_children_only(solr_parameters, user_parameters)
       solr_parameters[:fq] ||= []
       solr_parameters[:fq] << "#{Solrizer.solr_name("parent_id", :stored_searchable)}:\"#{@set_id}\""
-    end
-
-    def find_object(solr_parameters, user_parameters)
-      solr_parameters[:fq] ||= []
-      solr_parameters[:fq] << "id:\"#{@set_id}\""
     end
 end
