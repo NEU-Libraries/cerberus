@@ -2,7 +2,8 @@
   %header
     %h4.drs-item-title
       %a{href: polymorphic_path(item)}
-        = item.title or "Default title"
+        / = item.title or "Default title"
+        = kramdown_parse(item.title) or "Default title"
     -if defined? cart_remove_link
       = cart_remove_link
   = render partial: 'shared/drs_item/drs_item_ad_details', locals: {item: item}

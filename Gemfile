@@ -30,6 +30,8 @@ gem 'bootstrap-slider-rails'
 
 gem 'date_time_precision'
 
+gem 'kramdown'
+gem 'sanitize'
 
 # See Bower Front-End Package Management http://bower.io Documentation
 gem "bower-rails", "~> 0.5.0"
