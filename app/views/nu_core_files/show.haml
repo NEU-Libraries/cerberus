@@ -11,7 +11,7 @@
 %article{class: ['drs-item', 'drs-item-full', @nu_core_file.type ],  data: { drsitem: @nu_core_file.pid } }
   %header
     / %h1.page-header= @nu_core_file
-    %h1.page-header= Kramdown::Document.new(@nu_core_file.title).to_html.html_safe
+    %h1.page-header= kramdown_parse(@nu_core_file.title)
 
   %section.row
     %div{class: layout_class}
