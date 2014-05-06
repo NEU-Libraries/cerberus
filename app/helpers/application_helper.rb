@@ -3,6 +3,7 @@ module ApplicationHelper
   # Only things with theoretically near universal potential use should go here.
 
   def kramdown_parse(input_str)
+    return "" unless input_str
     return Sanitize.clean(Kramdown::Document.new(input_str).to_html, :elements => ['sup', 'sub']).html_safe
   end
 
