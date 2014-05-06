@@ -87,16 +87,14 @@ class NuCollectionsController < SetsController
   def show
     @set_id = params[:id]
 
-    self.solr_search_params_logic += [:find_object]
-    (@response, @document_list) = get_search_results
-    @set = SolrDocument.new(@response.docs.first)
+    @set = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first)
+
     @page_title = @set.title
 
     if !@set.smart_collection_type.nil? && @set.smart_collection_type == 'User Root' && @set.pf_belongs_to_user?(current_user)
       return redirect_to personal_graph_path
     end
 
-    self.solr_search_params_logic.delete(:find_object)
     self.solr_search_params_logic += [:show_children_only]
     (@response, @document_list) = get_search_results
 
@@ -156,8 +154,4 @@ class NuCollectionsController < SetsController
       solr_parameters[:fq] << "#{Solrizer.solr_name("parent_id", :stored_searchable)}:\"#{@set_id}\""
     end
 
-    def find_object(solr_parameters, user_parameters)
-      solr_parameters[:fq] ||= []
-      solr_parameters[:fq] << "id:\"#{@set_id}\""
-    end
 end
