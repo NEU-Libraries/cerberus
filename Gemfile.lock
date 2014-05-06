@@ -438,6 +438,8 @@ GEM
     rubyzip (1.1.0)
     rvm1-capistrano3 (0.9.0)
       capistrano (~> 3.0)
+    sanitize (2.1.0)
+      nokogiri (>= 1.4.4)
     sass (3.2.10)
     sass-rails (3.2.6)
       railties (~> 3.2.0)
@@ -543,6 +545,7 @@ DEPENDENCIES
   rspec-rails
   ruby-filemagic (~> 0.4.2)
   rvm1-capistrano3
+  sanitize
   sass-rails (~> 3.2.3)
   scut
   solrizer!
