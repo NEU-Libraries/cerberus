@@ -4,7 +4,7 @@
       - item.creators.each_with_index do | creator, i |
         - if i < 2 and !creator.blank?
           %h5.drs-item-creator
-            = creator
+            = kramdown_parse(creator)
       - if item.creators.length > 3
         &hellip;
   - if !item.date_of_issue.blank?
@@ -28,13 +28,13 @@
       %dd.drs-item-abstract{id: "abstract#{item.pid.delete':'}"}
         - if item.description.length > 120
           %span.ellipsis
-            = item.description
+            = kramdown_parse(item.description)
           %a(href="#abstract#{item.pid.delete ":"}" data-toggle="ellipsis")
             %i.icon-expand-alt
             %span.sr-only
               Expand / collapse toggle
         - else
-          = item.description
+          = kramdown_parse(item.description)
   - if item.klass == "NuCoreFile"
     %menu.btn-toolbar(type="toolbar")
       = render partial: 'nu_core_files/derivative_btn_group', locals: {contents: item.content_objects}
