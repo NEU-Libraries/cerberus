@@ -1,7 +1,0 @@
-%li.expandable_new.grey
-  - id = facet_field.label.sub(" ","_")+"_db"
-  %a.accordion-toggle.grey{"data-parent" => "#facet_group", "data-target" => "#collapse_#{id}", "data-toggle" => "collapse"}
-    = facet_field.label
-    %i.icon-chevron-right.grey
-  .accordion-body.collapse{:id => "collapse_#{id}"}
-    = yield

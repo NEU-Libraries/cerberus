@@ -1,6 +1,0 @@
-    <div class="hide" id="more_descriptions">
-      <% (@nu_core_file.terms_for_editing - [:title, :creator, :rights, :tag, :resource_type]).each do |term| %>
-        <%= render :partial => "nu_core_files/field_form", :locals => { :nu_core_file => @nu_core_file, :f =>f, :render_req => false, :key => term } %>
-      <% end %>
-    </div> <!-- /more_descriptions -->
-
