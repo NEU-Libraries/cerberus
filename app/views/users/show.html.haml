@@ -11,10 +11,11 @@
   %article.span6
     %h3
       Files
-    -if @recent_user_documents.length > 0
-      %section{class: ["drs-items-list", "drs-items"] }
-        - @recent_user_documents.each do |f|
-          =render partial: "shared/drs_item/drs_item", locals: { item: f }
+    -if !@recent_user_documents.blank?
+      -if @recent_user_documents.length > 0
+        %section{class: ["drs-items-list", "drs-items"] }
+          - @recent_user_documents.each do |f|
+            =render partial: "shared/drs_item/drs_item", locals: { item: f }
   %article.span6
     %h3
       Recent Activity
