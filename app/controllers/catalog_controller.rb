@@ -77,6 +77,9 @@ class CatalogController < ApplicationController
     solr_name('desc_metadata__date_modified', :stored_sortable, type: :date)
   end
 
+  def self.title_field
+    solr_name('title_info_title', :stored_sortable, type: :string)
+  end
 
   configure_blacklight do |config|
     ## Default parameters to send to solr for all search-like requests. See also SolrHelper#solr_search_params
@@ -364,6 +367,7 @@ class CatalogController < ApplicationController
     # whether the sort is ascending or descending (it must be asc or desc
     # except in the relevancy case).
     # label is key, solr field is value
+    config.add_sort_field "#{title_field} asc", :label => "title \u25BC"
     config.add_sort_field "score desc, #{uploaded_field} desc", :label => "relevance \u25BC"
     config.add_sort_field "#{uploaded_field} desc", :label => "date uploaded \u25BC"
     config.add_sort_field "#{uploaded_field} asc", :label => "date uploaded \u25B2"
