@@ -502,6 +502,7 @@ DEPENDENCIES
   guard-livereload
   haml
   hashie
+  hydra-derivatives (~> 0.0.5)
   hydra-head
   jasmine
   jasmine-jquery-rails
@@ -513,6 +514,7 @@ DEPENDENCIES
   mysql2
   omniauth
   omniauth-shibboleth
+  paperclip (~> 3.4.0)
   rails (= 3.2.13)
   rb-readline
   resque
