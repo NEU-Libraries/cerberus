@@ -211,9 +211,9 @@ class NuCoreFilesController < ApplicationController
     @title = NuCoreFile.find(params[:id]).title
 
     if NuCoreFile.find(params[:id]).destroy
-      redirect_to(sufia.dashboard_index_path, notice: "#{@title} destroyed")
+      redirect_to(root_path, notice: "#{@title} destroyed")
     else
-      redirect_to(sufia.dashboard_index_path, notice: "#{@title} wasn't destroyed")
+      redirect_to(root_path, notice: "#{@title} wasn't destroyed")
     end
   end
 
