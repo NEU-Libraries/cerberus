@@ -52,6 +52,10 @@ gem 'rmagick', '~> 2.13.2'
 
 gem 'zipruby', '~> 0.3.6'
 
+gem 'hydra-derivatives', '~> 0.0.5'
+
+gem 'paperclip', '~> 3.4.0'
+
 # Gems used only for assets and not required
 # in production environments by default.
 group :assets do
