@@ -1,5 +1,5 @@
 - if @notify_number > 0
-  %a#notify_link.btn{href: sufia.mailbox_path, title: "click for User Notifications"}
+  %a#notify_link.btn{href: mailbox_path, title: "click for User Notifications"}
     = render :partial => 'users/notify_number'
   .hide
-    = link_to "notify", sufia.user_notify_path, :remote => true, :id => 'notify_update_link'
+    = link_to "notify", user_notify_path, :remote => true, :id => 'notify_update_link'
