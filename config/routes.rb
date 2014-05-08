@@ -62,8 +62,6 @@ Drs::Application.routes.draw do
   #fixing sufia's bad route
   match 'notifications/:uid/delete' => 'mailbox#delete', as: :mailbox_delete, via: [:delete]
 
-  resources :users, only: [:index, :show, :edit, :update], as: :profiles
-
   # Generic file routes
   resources :nu_core_files, :path => :files, :except => :index do
     member do
@@ -73,6 +71,12 @@ Drs::Application.routes.draw do
   end
 
   devise_for :users, :controllers => { :omniauth_callbacks => "users/omniauth_callbacks" }
+
+  # SUFIA
+  resources :users, only: [:index, :show, :edit, :update], as: :profiles
+  # Downloads controller route
+  resources :downloads, :only => "show"
+
   # This must be the very last route in the file because it has a catch all route for 404 errors.
   # This behavior seems to show up only in production mode.
   # mount Sufia::Engine => '/'
