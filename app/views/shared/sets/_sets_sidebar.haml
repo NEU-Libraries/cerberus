@@ -5,8 +5,8 @@
 - grid_view_text += "Grid View"
 .btn-group{"data-toggle" => "drs-item-views-radio", "data-container" => ".drs-items" }
   - if current_user
-    = link_to( list_view_text.html_safe , sufia.profile_path(current_user, view_pref: 'list'), method: 'put', remote: 'true',data: {"target" => "drs-items-list"}, class: "btn btn-clear " + ( current_user.view_pref == 'list' ? 'active' : '' ))
-    = link_to( grid_view_text.html_safe , sufia.profile_path(current_user, view_pref: 'grid'), method: 'put', remote: 'true',data: {"target" => "drs-items-grid"}, class: "btn btn-clear " + ( current_user.view_pref == 'grid' ? 'active' : '' ))
+    = link_to( list_view_text.html_safe , profile_path(current_user, view_pref: 'list'), method: 'put', remote: 'true',data: {"target" => "drs-items-list"}, class: "btn btn-clear " + ( current_user.view_pref == 'list' ? 'active' : '' ))
+    = link_to( grid_view_text.html_safe , profile_path(current_user, view_pref: 'grid'), method: 'put', remote: 'true',data: {"target" => "drs-items-grid"}, class: "btn btn-clear " + ( current_user.view_pref == 'grid' ? 'active' : '' ))
   - else
     %a{ data: {"target" => "drs-items-list"}, class: "btn btn-clear" }
       = list_view_text
