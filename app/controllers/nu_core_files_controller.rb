@@ -84,7 +84,7 @@ class NuCoreFilesController < ApplicationController
   end
 
   def process_metadata
-    Sufia.queue.push(MetadataUpdateJob.new(current_user.user_key, params))
+    MetadataUpdateJob.new(current_user.user_key, params)
     @nu_core_file = NuCoreFile.users_in_progress_files(current_user).first
 
     update_metadata if params[:nu_core_file]
@@ -102,15 +102,15 @@ class NuCoreFilesController < ApplicationController
       poster_path = tempdir.join("#{file.original_filename}")
       FileUtils.mv(file.tempfile.path, poster_path.to_s)
 
-      Sufia.queue.push(ContentCreationJob.new(@nu_core_file.pid, @nu_core_file.tmp_path, @nu_core_file.original_filename, current_user.id, poster_path.to_s))
+      ContentCreationJob.new(@nu_core_file.pid, @nu_core_file.tmp_path, @nu_core_file.original_filename, current_user.id, poster_path.to_s)
     elsif !max.nil?
       s = params[:small_image_size].to_f / max.to_f
       m = params[:medium_image_size].to_f / max.to_f
       l = params[:large_image_size].to_f / max.to_f
 
-      Sufia.queue.push(ContentCreationJob.new(@nu_core_file.pid, @nu_core_file.tmp_path, @nu_core_file.original_filename, current_user.id, nil, s, m, l))
+      ContentCreationJob.new(@nu_core_file.pid, @nu_core_file.tmp_path, @nu_core_file.original_filename, current_user.id, nil, s, m, l)
     else
-      Sufia.queue.push(ContentCreationJob.new(@nu_core_file.pid, @nu_core_file.tmp_path, @nu_core_file.original_filename, current_user.id))
+      ContentCreationJob.new(@nu_core_file.pid, @nu_core_file.tmp_path, @nu_core_file.original_filename, current_user.id)
     end
 
     flash[:notice] = 'Your files are being processed by ' + t('sufia.product_name') + ' in the background. The metadata and access controls you specified are being applied. Files will be marked <span class="label label-important" title="Private">Private</span> until this process is complete (shouldn\'t take too long, hang in there!).'
@@ -180,7 +180,7 @@ class NuCoreFilesController < ApplicationController
       revision = @nu_core_file.content.get_version(params[:revision])
       @nu_core_file.add_file(revision.content, datastream_id, revision.label)
       version_event = true
-      Sufia.queue.push(ContentRestoredVersionEventJob.new(@nu_core_file.pid, current_user.user_key, params[:revision]))
+      ContentRestoredVersionEventJob.new(@nu_core_file.pid, current_user.user_key, params[:revision])
     end
 
     if params.has_key?(:filedata)
@@ -188,7 +188,7 @@ class NuCoreFilesController < ApplicationController
       return unless virus_check(file) == 0
       @nu_core_file.add_file(file, datastream_id, file.original_filename)
       version_event = true
-      Sufia.queue.push(ContentNewVersionEventJob.new(@nu_core_file.pid, current_user.user_key))
+      ContentNewVersionEventJob.new(@nu_core_file.pid, current_user.user_key)
     end
 
     # only update metadata if there is a nu_core_file object which is not the case for version updates
@@ -200,7 +200,7 @@ class NuCoreFilesController < ApplicationController
         UploadAlert.create_from_core_file(@nu_core_file, :update)
       end
       # do not trigger an update event if a version event has already been triggered
-      Sufia.queue.push(ContentUpdateEventJob.new(@nu_core_file.pid, current_user.user_key)) unless version_event
+      ContentUpdateEventJob.new(@nu_core_file.pid, current_user.user_key) unless version_event
       @nu_core_file.record_version_committer(current_user)
     end
 
