@@ -93,8 +93,6 @@ class UsersController < ApplicationController
       return
     end
 
-    Sufia.queue.push(UserEditProfileEventJob.new(@user.user_key))
-
     respond_to do |format|
       format.html {  redirect_to sufia.profile_path(@user), notice: "Your profile has been updated" }
       format.json { render json: @user.to_json }
