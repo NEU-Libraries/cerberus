@@ -1,7 +1,7 @@
-- if thumbnail.instance_of? ImageThumbnailFile 
+- if thumbnail.instance_of? ImageThumbnailFile
 	%figure
-		%img{src: sufia.download_path(thumbnail.pid, {datastream_id: 'content'}) }
+		%img{src: download_path(thumbnail.pid, {datastream_id: 'content'}) }
 		%figcaption= thumbnail.description
 - else
 	%div
-		%i{ class: thumbnail } 
+		%i{ class: thumbnail }

@@ -76,6 +76,12 @@ Drs::Application.routes.draw do
   resources :users, only: [:index, :show, :edit, :update], as: :profiles
   # Downloads controller route
   resources :downloads, :only => "show"
+  # "Notifications" route for catalog index view
+  get "users/notifications_number" => "users#notifications_number", :as => :user_notify
+  # Messages
+  get 'notifications' => 'mailbox#index', :as => :mailbox
+  match 'notifications/delete_all' => 'mailbox#delete_all', as: :mailbox_delete_all, via: [:get, :post]
+  match 'notifications/:uid/delete' => 'mailbox#delete', as: :mailbox_delete, via: [:get, :post]
 
   # This must be the very last route in the file because it has a catch all route for 404 errors.
   # This behavior seems to show up only in production mode.
