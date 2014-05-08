@@ -62,6 +62,8 @@ Drs::Application.routes.draw do
   #fixing sufia's bad route
   match 'notifications/:uid/delete' => 'mailbox#delete', as: :mailbox_delete, via: [:delete]
 
+  resources :users, only: [:index, :show, :edit, :update], as: :profiles
+
   # Generic file routes
   resources :nu_core_files, :path => :files, :except => :index do
     member do
