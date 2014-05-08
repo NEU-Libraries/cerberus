@@ -2,7 +2,7 @@
 %dl
   %dt Depositor
   %dd{itemprop: "accountablePerson", itemscope: "", itemtype: "http://schema.org/Person"}
-    %span{itemprop: "name"}= link_to_profile @nu_core_file.depositor
+    / %span{itemprop: "name"}= link_to_profile @nu_core_file.depositor
   %dt Date Uploaded
   %dd{itemprop: "datePublished"}
     = @nu_core_file.date_uploaded
