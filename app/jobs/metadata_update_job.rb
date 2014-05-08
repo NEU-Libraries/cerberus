@@ -66,7 +66,7 @@ class MetadataUpdateJob
       sleep 0.01
       retry
     end #
-    Sufia.queue.push(ContentUpdateEventJob.new(gf.pid, login))
+    ContentUpdateEventJob.new(gf.pid, login)
     @saved << gf
   end
 
