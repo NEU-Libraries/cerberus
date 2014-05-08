@@ -3,7 +3,7 @@ Drs::Application.routes.draw do
 
   Blacklight.add_routes(self)
   HydraHead.add_routes(self)
-  Hydra::BatchEdit.add_routes(self)
+  # Hydra::BatchEdit.add_routes(self)
 
   resources :nu_collections, :path => 'collections', except: [:index]
   get "/collections" => redirect("/communities")
@@ -73,7 +73,7 @@ Drs::Application.routes.draw do
   devise_for :users, :controllers => { :omniauth_callbacks => "users/omniauth_callbacks" }
   # This must be the very last route in the file because it has a catch all route for 404 errors.
   # This behavior seems to show up only in production mode.
-  mount Sufia::Engine => '/'
+  # mount Sufia::Engine => '/'
 
 
   # The priority is based upon order of creation:
