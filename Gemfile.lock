@@ -530,3 +530,4 @@ DEPENDENCIES
   uglifier (>= 1.0.3)
   webshims-rails
   whenever
+  zipruby (~> 0.3.6)
