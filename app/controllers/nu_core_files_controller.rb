@@ -231,7 +231,7 @@ class NuCoreFilesController < ApplicationController
     end
 
     def update_metadata
-      @nu_core_file.date_modified = DateTime.now.to_s
+      # @nu_core_file.date_modified = DateTime.now.to_s
       @nu_core_file.update_attributes(params[:nu_core_file])
     end
 
@@ -244,9 +244,9 @@ class NuCoreFilesController < ApplicationController
       nu_core_file.depositor = user.nuid
       nu_core_file.tag_as_in_progress
       nu_core_file.title = file.original_filename
-      nu_core_file.date_uploaded = Date.today
-      nu_core_file.date_modified = Date.today
-      nu_core_file.creator = user.name
+      # nu_core_file.date_uploaded = Date.today
+      # nu_core_file.date_modified = Date.today
+      # nu_core_file.creator = user.name
       nu_core_file.tmp_path = tmp_path
       nu_core_file.original_filename = file.original_filename
       nu_core_file.label = file.original_filename
@@ -286,7 +286,7 @@ class NuCoreFilesController < ApplicationController
         FileUtils.mv(file.tempfile.path, new_path.to_s)
 
         update_metadata_from_upload_screen(@nu_core_file, current_user, file, params[:collection_id], new_path.to_s)
-        @nu_core_file.record_version_committer(current_user)
+        # @nu_core_file.record_version_committer(current_user)
         redirect_to files_provide_metadata_path
       else
         render :json => [{:error => "Error creating file."}]
