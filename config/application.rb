@@ -87,5 +87,7 @@ module Drs
     # Set a default root collection.
     config.root_community_id = 'neu:1'
 
+    ::Queue = Drs::Resque::Queue.new('drs')
+
   end
 end
