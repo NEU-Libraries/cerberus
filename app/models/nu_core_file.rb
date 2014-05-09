@@ -32,6 +32,22 @@ class NuCoreFile < ActiveFedora::Base
 
   delegate_to :descMetadata, [:rights, :resource_type]
 
+  def pdf?
+    self.class.pdf_mime_types.include? self.mime_type
+  end
+
+  def image?
+    self.class.image_mime_types.include? self.mime_type
+  end
+
+  def video?
+    self.class.video_mime_types.include? self.mime_type
+  end
+
+  def audio?
+    self.class.audio_mime_types.include? self.mime_type
+  end
+
   def to_param
     self.pid
   end
