@@ -4,10 +4,10 @@
       %a(href="#view-description") View
     - if can? :edit, @nu_core_file
       %li
-        \#{link_to "Edit", edit_nu_core_file_path unless @nu_core_file.processing?}#{"File is being processed you may edit once it is complete" if @nu_core_file.processing?}
+        / \#{link_to "Edit", edit_nu_core_file_path unless @nu_core_file.processing?}#{"File is being processed you may edit once it is complete" if @nu_core_file.processing?}
     %li
       =link_to "Add to " + t('drs.compilations.name'), compilations_path(file: @nu_core_file.pid), remote: true
-    -# Moved menu to new partial = render partial: "export_dropdown_menu" 
+    -# Moved menu to new partial = render partial: "export_dropdown_menu"
 
-%span.Z3988{title: @nu_core_file.export_as_openurl_ctx_kev}
-#add_compilation_form{style: "display:none"}
+/ %span.Z3988{title: @nu_core_file.export_as_openurl_ctx_kev}
+/ #add_compilation_form{style: "display:none"}
