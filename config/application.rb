@@ -90,5 +90,10 @@ module Drs
     config.noid_template = '.reeddeeddk'
     config.minter_statefile = '/tmp/minter-state'
 
+    config.fits_path = "/opt/fits-0.6.2/fits.sh"
+
+    config.ffmpeg_path = 'ffmpeg'
+    config.enable_ffmpeg = false
+    config.temp_file_base = nil
   end
 end
