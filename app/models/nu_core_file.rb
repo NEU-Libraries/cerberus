@@ -14,6 +14,7 @@ class NuCoreFile < ActiveFedora::Base
   has_metadata name: 'DC', type: NortheasternDublinCoreDatastream
   has_metadata name: 'properties', type: DrsPropertiesDatastream
   has_metadata name: 'mods', type: NuModsDatastream
+  has_metadata :name => "descMetadata", :type => GenericFileRdfDatastream
 
   attr_accessible :title, :identifier, :description, :date_of_issue
   attr_accessible :keywords, :creators, :depositor, :type
