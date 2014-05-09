@@ -17,10 +17,10 @@
     %div{class: layout_class}
       = render :partial => 'nu_core_files/media_display'
     %div{itemscope: "", itemtype: "http://schema.org/CreativeWork", class:  [ layout_class, 'drs-item-details'] }
-      = render partial: 'show_actions'
+      / = render partial: 'show_actions'
       .drs-item-add-details
-        = render partial: 'show_descriptions'
-        = render partial: 'show_details'
+        / = render partial: 'show_descriptions'
+        / = render partial: 'show_details'
       -if @nu_core_file.content_objects
         %section.drs-item-derivatives
           = render partial: 'show_derivatives', locals: {contents: @nu_core_file.content_objects}
