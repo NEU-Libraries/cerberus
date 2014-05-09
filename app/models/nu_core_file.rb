@@ -8,12 +8,14 @@ class NuCoreFile < ActiveFedora::Base
   include Drs::NuCoreFile::MimeTypes
   include Drs::NuCoreFile::Permissions
   include Drs::NuCoreFile::AccessibleAttributes
+  include Drs::NuCoreFile::Characterization
+  include Drs::NuCoreFile::Export
+  include Drs::NuCoreFile::AssignType
+
   include Drs::Rights::MassPermissions
   include Drs::Rights::Embargoable
   include Drs::Rights::InheritedRestrictions
   include Drs::Rights::PermissionsAssignmentHelper
-  include Drs::NuCoreFile::Export
-  include Drs::NuCoreFile::AssignType
 
   has_metadata name: 'DC', type: NortheasternDublinCoreDatastream
   has_metadata name: 'properties', type: DrsPropertiesDatastream
