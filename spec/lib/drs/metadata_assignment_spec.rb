@@ -129,7 +129,7 @@ describe "Metadata" do
     end
 
     describe "of depositor" do
-      let(:user) { User.new(email: 'example@example.com', nuid: '000000001') }
+      let(:user) { User.new(nuid: '000000001') }
 
       it "succeeds for objects with a properties datastream" do
         compilation.depositor = '000000001'
