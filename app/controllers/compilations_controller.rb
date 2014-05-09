@@ -104,7 +104,7 @@ class CompilationsController < ApplicationController
   end
 
   def show_download
-    ZipCompilationJob.new(current_user, @compilation)
+    Sufia.queue.push(ZipCompilationJob.new(current_user, @compilation))
     @page_title = "Download #{@compilation.title}"
   end
 
