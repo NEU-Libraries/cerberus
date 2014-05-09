@@ -4,12 +4,12 @@ module Drs
   module IdService
 
     def self.noid_template
-      Sufia.config.noid_template
+      Drs::Application.config.noid_template
     end
 
     @minter = ::Noid::Minter.new(:template => noid_template)
     @pid = $$
-    @namespace = Sufia.config.id_namespace
+    @namespace = Drs::Application.config.id_namespace
     @semaphore = Mutex.new
     def self.valid?(identifier)
       # remove the fedora namespace since it's not part of the noid
@@ -29,7 +29,7 @@ module Drs
 
     def self.next_id
       pid = ''
-      File.open(Sufia.config.minter_statefile, File::RDWR|File::CREAT, 0644) do |f|
+      File.open(Drs::Application.config.minter_statefile, File::RDWR|File::CREAT, 0644) do |f|
         f.flock(File::LOCK_EX)
         yaml = YAML::load(f.read)
         yaml = {:template => noid_template} unless yaml

@@ -87,5 +87,8 @@ module Drs
     # Set a default root collection.
     config.root_community_id = 'neu:1'
 
+    config.noid_template = '.reeddeeddk'
+    config.minter_statefile = '/tmp/minter-state'
+
   end
 end
