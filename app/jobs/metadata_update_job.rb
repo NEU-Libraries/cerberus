@@ -6,14 +6,13 @@ class MetadataUpdateJob
     :metadata_update
   end
 
-  attr_accessor :login, :title, :nu_title, :file_attributes, :visibility
+  attr_accessor :login, :title, :nu_title, :file_attributes
 
   def initialize(login, params)
     self.login = login
     self.title = params[:title]
     self.nu_title = params[:title]
     self.file_attributes = params[:nu_core_file]
-    self.visibility = params[:visibility]
   end
 
   def run
@@ -45,7 +44,6 @@ class MetadataUpdateJob
     gf.title = title[gf.pid] if title[gf.pid] rescue gf.label
     gf.nu_title = nu_title[gf.pid] if nu_title[gf.pid] rescue gf.label
     gf.attributes=file_attributes
-    gf.set_visibility(visibility)
     gf.tag_as_completed
     save_tries = 0
 
