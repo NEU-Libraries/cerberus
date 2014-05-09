@@ -21,7 +21,7 @@ if defined?(PhusionPassenger)
       config = YAML::load(ERB.new(IO.read(File.join(Rails.root, 'config', 'redis.yml'))).result)[Rails.env].with_indifferent_access
 
       # The important two lines
-      $redis.client.disconnect if $redis 
+      $redis.client.disconnect if $redis
       $redis = Redis.new(host: config[:host], port: config[:port], thread_safe: true) rescue nil
       Resque.redis.client.reconnect if Resque.redis
     end
@@ -43,3 +43,5 @@ Nest.class_eval do
     self.class.new("#{self}:#{key.to_param}", @redis)
   end
 end
+
+Drs::Application::Queue = Drs::Resque::Queue.new('drs')
