@@ -50,6 +50,8 @@ task :reset_data => :environment do
 
   require 'factory_girl_rails'
 
+  Hydra::Derivatives.fits_path = Drs::Application.config.fits_path
+
   ActiveFedora::Base.find(:all).each do |file|
     file.destroy
   end
