@@ -12,26 +12,31 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-module Sufia
-  module DownloadsControllerBehavior
-    extend ActiveSupport::Concern
-    include Hydra::Controller::DownloadBehavior
-
-    included do
-      # module mixes in normalize_identifier method
-      include Drs::Noid
-
-      # moved check into the routine so we can handle the user with no access
-      prepend_before_filter :normalize_identifier
+module Drs
+  module Noid
+    def Noid.noidify(identifier)
+      identifier.split(":").last
     end
 
-    def datastream_name
-      if datastream.dsid == self.class.default_content_dsid
-        params[:filename] || asset.label
+    def Noid.namespaceize(identifier)
+      if identifier.start_with?(Noid.namespace)
+        identifier
       else
-        params[:datastream_id]
+        "#{Noid.namespace}:#{identifier}"
       end
     end
 
+    def noid
+      Noid.noidify(self.pid)
+    end
+
+    def normalize_identifier
+      params[:id] = Noid.namespaceize(params[:id])
+    end
+
+    protected
+    def Noid.namespace
+      Rails.configuration.id_namespace
+    end
   end
 end

@@ -11,7 +11,7 @@ end
 
 module Drs
   class Application < Rails::Application
-    
+
     config.generators do |g|
       g.test_framework :rspec, :spec => true
     end
@@ -65,33 +65,27 @@ module Drs
     config.active_record.whitelist_attributes = true
 
     # Enable the asset pipeline
-    config.assets.enabled = true    
+    config.assets.enabled = true
     # Default SASS Configuration, check out https://github.com/rails/sass-rails for details
     config.assets.compress = !Rails.env.development?
-
-
 
     # Version of your assets, change this if you want to expire all your assets
     config.assets.version = '1.0'
 
-    # Namespace is now neu 
-    config.id_namespace = 'neu' 
+    # Namespace is now neu
+    config.id_namespace = 'neu'
 
     #Add polyfills in the pipline so that Modernizr can pull in js polyfills
-    
+
     config.assets.precompile += [
       "placeholder/js/placeholder.js",
       "placeholder/dist/placeholder.min.js",
       "respond/dest/respond.min.js",
       "respond/dest/respond.src.js"
     ]
-      
-    
 
-    
-
-    # Set a default root collection. 
-    config.root_community_id = 'neu:1' 
+    # Set a default root collection.
+    config.root_community_id = 'neu:1'
 
   end
 end
