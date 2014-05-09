@@ -8,8 +8,8 @@ module Drs
       extend ActiveSupport::Concern
 
       # Required Sufia code
-      include Sufia::GenericFile::MimeTypes
-      include Sufia::GenericFile::Characterization
+      include Drs::NuCoreFile::MimeTypes
+      include Drs::NuCoreFile::Characterization
 
       included do
         around_save :characterize_if_changed
@@ -43,7 +43,7 @@ module Drs
       def characterize_if_changed
         content_changed = self.content.changed?
         yield
-        Sufia.queue.push(AtomisticCharacterizationJob.new(self.pid)) if content_changed
+        Drs::Application::Queue.push(AtomisticCharacterizationJob.new(self.pid)) if content_changed
       end
   end
 end
