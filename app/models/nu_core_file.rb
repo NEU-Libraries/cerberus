@@ -5,6 +5,7 @@ class NuCoreFile < ActiveFedora::Base
   include Drs::Find
   include Drs::ImpressionCount
 
+  include Drs::NuCoreFile::Actions
   include Drs::NuCoreFile::MimeTypes
   include Drs::NuCoreFile::Permissions
   include Drs::NuCoreFile::AccessibleAttributes
