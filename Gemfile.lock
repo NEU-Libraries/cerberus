@@ -66,6 +66,7 @@ GEM
       addressable (>= 2.3.1)
       extlib (>= 0.9.15)
       multi_json (>= 1.0.0)
+    backports (3.6.0)
     bcrypt-ruby (3.1.1)
     blacklight (4.3.0)
       bootstrap-sass (>= 2.2.0, < 2.4)
@@ -270,6 +271,8 @@ GEM
     net-scp (1.1.2)
       net-ssh (>= 2.6.5)
     net-ssh (2.7.0)
+    noid (0.6.6)
+      backports
     nokogiri (1.6.0)
       mini_portile (~> 0.5.0)
     nom-xml (0.5.1)
@@ -496,6 +499,7 @@ DEPENDENCIES
   mailboxer (~> 0.11.0)
   mysql2
   nest (~> 1.1.1)
+  noid (~> 0.6.6)
   omniauth
   omniauth-shibboleth
   paperclip (~> 3.4.0)

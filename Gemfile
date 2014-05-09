@@ -62,6 +62,8 @@ gem 'mailboxer', '~> 0.11.0'
 
 gem 'nest', '~> 1.1.1'
 
+gem 'noid', '~> 0.6.6'
+
 # Gems used only for assets and not required
 # in production environments by default.
 group :assets do
