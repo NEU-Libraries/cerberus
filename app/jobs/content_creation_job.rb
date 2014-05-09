@@ -27,7 +27,7 @@ class ContentCreationJob
       self.core_record = NuCoreFile.find(core_file_pid)
 
       klass = core_record.canonical_class.constantize
-      content_object = klass.new(pid: Sufia::Noid.namespaceize(Sufia::IdService.mint))
+      content_object = klass.new(pid: Drs::Noid.namespaceize(Sufia::IdService.mint))
 
       if content_object.instance_of? VideoFile
         InlineThumbnailCreator.new(content_object, poster_path, "poster").create_thumbnail_and_save

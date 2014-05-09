@@ -125,7 +125,7 @@ class DerivativeCreator
 
     def update_or_create_with_metadata(title, desc, klass, object = nil)
       if object.nil?
-        object = klass.new(pid: Sufia::Noid.namespaceize(Sufia::IdService.mint))
+        object = klass.new(pid: Drs::Noid.namespaceize(Sufia::IdService.mint))
       end
 
       object.title                  = title

@@ -30,7 +30,7 @@ class ApplicationController < ActionController::Base
   end
 
   def mint_unique_pid
-    Sufia::Noid.namespaceize(Sufia::IdService.mint)
+    Drs::Noid.namespaceize(Sufia::IdService.mint)
   end
 
   # Why do we have these when current_user.can? is available??
