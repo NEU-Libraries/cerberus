@@ -74,7 +74,7 @@ task :reset_data => :environment do
   tmp_user.view_pref = "list"
   tmp_user.save!
 
-  EmployeeCreateJob.new(tmp_user.nuid, tmp_user.full_name)
+  Sufia.queue.push(EmployeeCreateJob.new(tmp_user.nuid, tmp_user.full_name))
 
   set_edit_permissions(root_dept)
 
