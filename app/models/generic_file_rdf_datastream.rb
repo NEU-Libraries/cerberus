@@ -70,6 +70,6 @@ class GenericFileRdfDatastream < ActiveFedora::NtriplesRDFDatastream
     LocalAuthority.register_vocabulary(self, "language", "lexvo_languages")
     LocalAuthority.register_vocabulary(self, "tag", "lc_genres")
   rescue
-    puts "tables for vocabularies missing"
+    # puts "tables for vocabularies missing"
   end
 end
