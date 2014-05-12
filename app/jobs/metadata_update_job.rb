@@ -25,7 +25,8 @@ class MetadataUpdateJob
       update_file(gf, user)
     end
 
-    job_user = User.find_by_email('batchuser@example.com') || User.create(email:"batchuser@example.com", password: Devise.friendly_token[0,20], full_name:"Batch User", nuid:"000000001")
+    # Still a little kludgey...
+    job_user = User.find_by_nuid('000000001') || User.create(password: Devise.friendly_token[0,20], full_name:"Batch User", nuid:"000000001")
 
     message = 'The file(s) '+ file_list(@saved)+ " have been saved." unless @saved.empty?
     job_user.send_message(user, message, 'Metadata upload complete') unless @saved.empty?
