@@ -17,7 +17,6 @@ class EventJob
   include ActionView::Helpers
   include ActionView::Helpers::DateHelper
   include Hydra::AccessControlsEnforcement
-  include SufiaHelper
 
   def queue_name
     :event
