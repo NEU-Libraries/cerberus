@@ -27,7 +27,7 @@ describe EmployeeCreateJob do
 
     # Verify the Employee exists
     Employee.exists_by_nuid?(nuid).should be true
-    user = User.create(email: nuid, nuid: nuid)
+    user = User.create(nuid: nuid)
 
     # Lookup the employee
     employee = Employee.find_by_nuid(nuid)
