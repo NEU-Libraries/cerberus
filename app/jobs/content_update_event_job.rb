@@ -13,7 +13,6 @@
 # limitations under the License.
 
 class ContentUpdateEventJob < EventJob
-  include UsersHelper
   def run
     gf = NuCoreFile.find(generic_file_id)
     action = "User #{link_to_profile depositor_id} has updated #{link_to gf.title.first, nu_core_file_path(gf.noid)}"

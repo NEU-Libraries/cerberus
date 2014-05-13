@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-module Sufia::Controller
+module Drs::Controller
   extend ActiveSupport::Concern
 
-  included do 
+  included do
     # Adds Hydra behaviors into the application controller
     include Hydra::Controller::ControllerBehavior
 
@@ -51,30 +51,15 @@ module Sufia::Controller
     @notify_number=0
     @batches=[]
     return if action_name == "index" && controller_name == "mailbox"
-    if user_signed_in? 
+    if user_signed_in?
       @notify_number= current_user.mailbox.inbox(:unread => true).count
       @batches=current_user.mailbox.inbox.map {|msg| msg.last_message.body[/<span class="batchid ui-helper-hidden">(.*)<\/span>The file(.*)/,1]}.select{|val| !val.blank?}
     end
   end
-  
-  def search_layout
-    if has_search_parameters? 
-      "sufia-two-column"
-    else
-      "homepage"
-    end
-  end
-  
-  # This repeats has_search_parameters? method from Blacklight::CatalogHelperBehavior 
+
+  # This repeats has_search_parameters? method from Blacklight::CatalogHelperBehavior
   def has_search_parameters?
     !params[:q].blank? or !params[:f].blank? or !params[:search_field].blank?
-  end
-
-  protected
-
-  ### Hook which is overridden in Sufia::Ldap::Controller
-  def has_access?
-    true
   end
 
 end

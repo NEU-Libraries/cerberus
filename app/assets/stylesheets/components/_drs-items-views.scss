@@ -149,7 +149,7 @@
       @extend [class*="span"];
       @extend .height3;
       @extend .hidden-x;
-      @extend .scroll-y;
+      @extend .hidden-y;
       text-align: center;
 
       @include focus-states{
