@@ -9,6 +9,8 @@ class ApplicationController < ActionController::Base
   # Please be sure to impelement current_user and user_session. Blacklight depends on
   # these methods in order to perform user specific actions.
 
+  layout "homepage"
+
   protect_from_forgery
 
   # Allows us to redirect to the current page on signin, instead of always back to root.
