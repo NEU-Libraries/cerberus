@@ -12,29 +12,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+module Drs
+  module DownloadsControllerBehavior
+    extend ActiveSupport::Concern
+    include Hydra::Controller::DownloadBehavior
 
-module UsersHelper
+    included do
+      # module mixes in normalize_identifier method
+      include Drs::Noid
 
-  def display_user_name(recent_document)
-    return "no display name" unless recent_document.depositor
-    return User.find_by_user_key(recent_document.depositor).name rescue recent_document.depositor
-  end
-
-  def number_of_deposits(user)
-    ActiveFedora::SolrService.query("#{Solrizer.solr_name('depositor', :stored_searchable, :type => :string)}:#{user.user_key}").count
-  end
-
-  def link_to_profile(login)
-    user = User.find_by_user_key(login)
-    return login if user.nil?
-
-    text = if user.respond_to? :name
-      user.name
-    else
-      login
+      # moved check into the routine so we can handle the user with no access
+      prepend_before_filter :normalize_identifier
     end
 
-    link_to text, profile_path(user)
-  end
+    def datastream_name
+      if datastream.dsid == self.class.default_content_dsid
+        params[:filename] || asset.label
+      else
+        params[:datastream_id]
+      end
+    end
 
+  end
 end

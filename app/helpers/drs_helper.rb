@@ -1,4 +1,26 @@
-module FacetsHelper
+module DrsHelper
+
+  def display_user_name(recent_document)
+    return "no display name" unless recent_document.depositor
+    return User.find_by_user_key(recent_document.depositor).name rescue recent_document.depositor
+  end
+
+  def number_of_deposits(user)
+    ActiveFedora::SolrService.query("#{Solrizer.solr_name('depositor', :stored_searchable, :type => :string)}:#{user.user_key}").count
+  end
+
+  def link_to_profile(login)
+    user = User.find_by_user_key(login)
+    return login if user.nil?
+
+    text = if user.respond_to? :name
+      user.name
+    else
+      login
+    end
+
+    link_to text, profile_path(user)
+  end
 
   def link_to_facet(field, field_string)
     link_to(field, add_facet_params(field_string, field).merge!({"controller" => "catalog", :action=> "index"}))

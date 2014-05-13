@@ -14,7 +14,7 @@
 # limitations under the License.
 
 class NuCoreFilesController < ApplicationController
-  include Sufia::Controller
+  include Drs::Controller
   include Drs::ControllerHelpers::EditableObjects
   include Drs::ControllerHelpers::ViewLogger
 
