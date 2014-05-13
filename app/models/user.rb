@@ -29,7 +29,8 @@ class User < ActiveRecord::Base
     user = User.where(:email => auth.info.email).first
 
     unless user
-      user = User.create(email:auth.info.email, password:Devise.friendly_token[0,20], full_name:auth.info.name, nuid:auth.info.nuid)
+      user = User.create(password:Devise.friendly_token[0,20], full_name:auth.info.name, nuid:auth.info.nuid)
+      user.email = auth.info.email
       if(auth.info.employee == "staff")
         EmployeeCreateJob.new(auth.info.nuid, auth.info.name)
       end

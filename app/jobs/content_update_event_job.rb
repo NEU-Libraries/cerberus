@@ -25,8 +25,8 @@ class ContentUpdateEventJob < EventJob
     # Log the event to the GF's stream
     gf.log_event(event)
     # Fan out the event to all followers who have access
-    depositor.followers.select { |user| user.can? :read, gf }.each do |follower|
-      follower.log_event(event)
-    end
+    # depositor.followers.select { |user| user.can? :read, gf }.each do |follower|
+    #   follower.log_event(event)
+    # end
   end
 end
