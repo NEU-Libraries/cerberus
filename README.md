@@ -1,6 +1,6 @@
 ### DRS Application 
 
-A web application derived from the [Sufia](http://github.com/projecthydra/sufia) gem from the folks over at Project Hydra.  Information about dependencies/installation can be found in either location if the provided instructions fail you.    
+A web application derived from the [Sufia](http://github.com/projecthydra/sufia) gem provided by Project Hydra.    
 
 ### First Time Setup 
 
