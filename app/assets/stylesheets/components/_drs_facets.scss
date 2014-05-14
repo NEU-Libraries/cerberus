@@ -46,13 +46,12 @@
     margin-left: 14px;
   }
 
-  li
-    {
-      list-style:none;
-      margin-right:1em;
-      padding-bottom:0.3em;
-      padding-right: 50px;
-      clear: right;
+  li {
+    list-style:none;
+    margin-right:1em;
+    padding-bottom:0.3em;
+    padding-right: 50px;
+    clear: right;
 
     a.remove
     {
@@ -77,6 +76,10 @@
       text-align:right;
       float:right;
       margin-right: -35px;
+    }
+
+    &:after{
+      content:"\00A0";
     }
   }
 
