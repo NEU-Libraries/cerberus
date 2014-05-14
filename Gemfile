@@ -1,49 +1,47 @@
 source 'https://rubygems.org'
 
 gem 'rails', '3.2.13'
-
-# Bundle edge Rails instead:
-# gem 'rails', :git => 'git://github.com/rails/rails.git'
-
 gem 'mysql2' # Used in staging environment.
 gem 'sqlite3'
-
 gem 'blacklight'
+gem 'blacklight_advanced_search', '~> 2.1.0'
 gem 'hydra-head'
-
 gem 'solrizer', :git => 'https://github.com/NEU-Libraries/solrizer.git', :ref => 'master'
-
-gem 'sufia', :git => 'https://github.com/nu-lts/nu-sufia.git', :ref => 'develop' #Using 'ref' instead of 'branch'. It seems branch doesn't always get the latest code, as one would expect.
 gem 'kaminari', :git => 'https://github.com/harai/kaminari.git', :ref => 'route_prefix_prototype'  # required to handle pagination properly in dashboard. See https://github.com/amatsuda/kaminari/pull/322
-
 gem 'omniauth'
 gem 'omniauth-shibboleth'
 gem 'hashie'
-
 gem 'figaro'
-
 gem 'bootstrap-sass', '~> 2.3.2.1'
-
-gem 'haml'
-
 gem 'bootstrap-slider-rails'
-
+gem 'haml'
 gem 'date_time_precision'
-
 gem 'kramdown'
 gem 'sanitize'
-
 # See Bower Front-End Package Management http://bower.io Documentation
 gem "bower-rails", "~> 0.5.0"
-
 #Google Analytics integration -
 gem 'google-analytics-rails'
-
 #Google API Ruby Client
 gem 'google-api-client'
-
-
 gem 'webshims-rails'
+gem 'rmagick', '~> 2.13.2'
+gem 'zipruby', '~> 0.3.6'
+gem 'hydra-derivatives', '~> 0.0.5'
+gem 'resque-pool', '0.3.0'
+gem 'mailboxer', '~> 0.11.0'
+gem 'nest', '~> 1.1.1'
+gem 'noid', '~> 0.6.6'
+gem 'jquery-rails'
+gem "devise"
+gem "devise-guests", "~> 0.3"
+gem "ruby-filemagic", "~> 0.4.2"
+# Use whenever for scheduling timed tasks
+gem "whenever", :require => false
+# Add resque-web to the project
+gem 'resque', :require => 'resque/server'
+# This is global because it's needed for some fixture generation.
+gem "factory_girl_rails", :require => false
 
 # Gems used only for assets and not required
 # in production environments by default.
@@ -52,27 +50,8 @@ group :assets do
   gem 'coffee-rails', '~> 3.2.1'
   gem 'scut'
   gem 'compass-rails'
-
-  # See https://github.com/sstephenson/execjs#readme for more supported runtimes
-  # gem 'therubyracer', :platforms => :ruby
-
   gem 'uglifier', '>= 1.0.3'
 end
-
-gem 'jquery-rails'
-
-gem "devise"
-gem "devise-guests", "~> 0.3"
-gem "ruby-filemagic", "~> 0.4.2"
-
-# Use whenever for scheduling timed tasks
-gem "whenever", :require => false
-
-# Add resque-web to the project
-gem 'resque', :require => 'resque/server'
-
-# This is global because it's needed for some fixture generation.
-gem "factory_girl_rails", :require => false
 
 group :development do
   # Deployment
@@ -89,14 +68,11 @@ group :development, :test do
   gem "capybara"
   gem "launchy"
   gem "jettywrapper"
-
   # JS  testing framework.
   gem "jasmine"
-
   # jQuery Testing for Rails Apps
   # @link https://github.com/travisjeffery/jasmine-jquery-rails
   gem "jasmine-jquery-rails"
-
 end
 
 group :test do

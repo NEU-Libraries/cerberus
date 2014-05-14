@@ -7,8 +7,6 @@
     - crumbs = []
     - crumbs << link_to('Home', root_path)
     - case request.referer
-      - when /dashboard/
-        - crumbs << link_to('Dashboard', sufia.dashboard_index_path)
       - when /files/
         - crumbs << link_to('Back to previous', request.referer)
       - when /catalog/

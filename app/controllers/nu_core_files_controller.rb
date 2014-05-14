@@ -14,7 +14,7 @@
 # limitations under the License.
 
 class NuCoreFilesController < ApplicationController
-  include Sufia::Controller
+  include Drs::Controller
   include Drs::ControllerHelpers::EditableObjects
   include Drs::ControllerHelpers::ViewLogger
 
@@ -84,7 +84,7 @@ class NuCoreFilesController < ApplicationController
   end
 
   def process_metadata
-    Sufia.queue.push(MetadataUpdateJob.new(current_user.user_key, params))
+    Drs::Application::Queue.push(MetadataUpdateJob.new(current_user.user_key, params))
     @nu_core_file = NuCoreFile.users_in_progress_files(current_user).first
 
     update_metadata if params[:nu_core_file]
@@ -102,15 +102,15 @@ class NuCoreFilesController < ApplicationController
       poster_path = tempdir.join("#{file.original_filename}")
       FileUtils.mv(file.tempfile.path, poster_path.to_s)
 
-      Sufia.queue.push(ContentCreationJob.new(@nu_core_file.pid, @nu_core_file.tmp_path, @nu_core_file.original_filename, current_user.id, poster_path.to_s))
+      Drs::Application::Queue.push(ContentCreationJob.new(@nu_core_file.pid, @nu_core_file.tmp_path, @nu_core_file.original_filename, current_user.id, poster_path.to_s))
     elsif !max.nil?
       s = params[:small_image_size].to_f / max.to_f
       m = params[:medium_image_size].to_f / max.to_f
       l = params[:large_image_size].to_f / max.to_f
 
-      Sufia.queue.push(ContentCreationJob.new(@nu_core_file.pid, @nu_core_file.tmp_path, @nu_core_file.original_filename, current_user.id, nil, s, m, l))
+      Drs::Application::Queue.push(ContentCreationJob.new(@nu_core_file.pid, @nu_core_file.tmp_path, @nu_core_file.original_filename, current_user.id, nil, s, m, l))
     else
-      Sufia.queue.push(ContentCreationJob.new(@nu_core_file.pid, @nu_core_file.tmp_path, @nu_core_file.original_filename, current_user.id))
+      Drs::Application::Queue.push(ContentCreationJob.new(@nu_core_file.pid, @nu_core_file.tmp_path, @nu_core_file.original_filename, current_user.id))
     end
 
     flash[:notice] = 'Your files are being processed by ' + t('sufia.product_name') + ' in the background. The metadata and access controls you specified are being applied. Files will be marked <span class="label label-important" title="Private">Private</span> until this process is complete (shouldn\'t take too long, hang in there!).'
@@ -180,7 +180,7 @@ class NuCoreFilesController < ApplicationController
       revision = @nu_core_file.content.get_version(params[:revision])
       @nu_core_file.add_file(revision.content, datastream_id, revision.label)
       version_event = true
-      Sufia.queue.push(ContentRestoredVersionEventJob.new(@nu_core_file.pid, current_user.user_key, params[:revision]))
+      Drs::Application::Queue.push(ContentRestoredVersionEventJob.new(@nu_core_file.pid, current_user.user_key, params[:revision]))
     end
 
     if params.has_key?(:filedata)
@@ -188,7 +188,7 @@ class NuCoreFilesController < ApplicationController
       return unless virus_check(file) == 0
       @nu_core_file.add_file(file, datastream_id, file.original_filename)
       version_event = true
-      Sufia.queue.push(ContentNewVersionEventJob.new(@nu_core_file.pid, current_user.user_key))
+      Drs::Application::Queue.push(ContentNewVersionEventJob.new(@nu_core_file.pid, current_user.user_key))
     end
 
     # only update metadata if there is a nu_core_file object which is not the case for version updates
@@ -200,7 +200,7 @@ class NuCoreFilesController < ApplicationController
         UploadAlert.create_from_core_file(@nu_core_file, :update)
       end
       # do not trigger an update event if a version event has already been triggered
-      Sufia.queue.push(ContentUpdateEventJob.new(@nu_core_file.pid, current_user.user_key)) unless version_event
+      Drs::Application::Queue.push(ContentUpdateEventJob.new(@nu_core_file.pid, current_user.user_key)) unless version_event
       @nu_core_file.record_version_committer(current_user)
     end
 
@@ -211,9 +211,9 @@ class NuCoreFilesController < ApplicationController
     @title = NuCoreFile.find(params[:id]).title
 
     if NuCoreFile.find(params[:id]).destroy
-      redirect_to(sufia.dashboard_index_path, notice: "#{@title} destroyed")
+      redirect_to(root_path, notice: "#{@title} destroyed")
     else
-      redirect_to(sufia.dashboard_index_path, notice: "#{@title} wasn't destroyed")
+      redirect_to(root_path, notice: "#{@title} wasn't destroyed")
     end
   end
 
@@ -231,7 +231,7 @@ class NuCoreFilesController < ApplicationController
     end
 
     def update_metadata
-      @nu_core_file.date_modified = DateTime.now.to_s
+      # @nu_core_file.date_modified = DateTime.now.to_s
       @nu_core_file.update_attributes(params[:nu_core_file])
     end
 
@@ -244,9 +244,9 @@ class NuCoreFilesController < ApplicationController
       nu_core_file.depositor = user.nuid
       nu_core_file.tag_as_in_progress
       nu_core_file.title = file.original_filename
-      nu_core_file.date_uploaded = Date.today
-      nu_core_file.date_modified = Date.today
-      nu_core_file.creator = user.name
+      # nu_core_file.date_uploaded = Date.today
+      # nu_core_file.date_modified = Date.today
+      # nu_core_file.creator = user.name
       nu_core_file.tmp_path = tmp_path
       nu_core_file.original_filename = file.original_filename
       nu_core_file.label = file.original_filename
@@ -286,7 +286,7 @@ class NuCoreFilesController < ApplicationController
         FileUtils.mv(file.tempfile.path, new_path.to_s)
 
         update_metadata_from_upload_screen(@nu_core_file, current_user, file, params[:collection_id], new_path.to_s)
-        @nu_core_file.record_version_committer(current_user)
+        # @nu_core_file.record_version_committer(current_user)
         redirect_to files_provide_metadata_path
       else
         render :json => [{:error => "Error creating file."}]
@@ -294,7 +294,7 @@ class NuCoreFilesController < ApplicationController
     end
 
     def virus_check( file)
-      stat = Sufia::GenericFile::Actions.virus_check(file)
+      stat = Drs::NuCoreFile::Actions.virus_check(file)
       flash[:error] = "Virus checking did not pass for #{File.basename(file.path)} status = #{stat}" unless stat == 0
       stat
     end

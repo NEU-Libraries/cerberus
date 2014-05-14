@@ -19,7 +19,7 @@
 
 //= require picturefill/picturefill.js
 //= require blacklight/blacklight
-//= require sufia
+//= require sufia.js
 // Required by Blacklight
 
 //= require bootstrap-datepicker/js/bootstrap-datepicker.js

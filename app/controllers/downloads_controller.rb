@@ -1,6 +1,6 @@
-class DownloadsController < ApplicationController 
-  include Sufia::DownloadsControllerBehavior
-  include Drs::ControllerHelpers::ViewLogger 
+class DownloadsController < ApplicationController
+  include Drs::DownloadsControllerBehavior
+  include Drs::ControllerHelpers::ViewLogger
 
   after_filter :log_download, only: [:show]
 end

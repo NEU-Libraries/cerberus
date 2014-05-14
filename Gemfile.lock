@@ -20,37 +20,6 @@ GIT
       actionpack (>= 3.0.0)
       activesupport (>= 3.0.0)
 
-GIT
-  remote: https://github.com/nu-lts/nu-sufia.git
-  revision: a0aa93745ba9c17d58fb987fc4d4d5b1e79cf471
-  ref: develop
-  specs:
-    sufia (3.1.1)
-      blacklight (~> 4.0)
-      blacklight_advanced_search (~> 2.1.0)
-      daemons (= 1.1.9)
-      font-awesome-sass-rails (~> 3.0)
-      hydra-batch-edit (~> 1.0)
-      mail_form
-      rails_autolink (~> 1.1.0)
-      rainbow (= 1.1.4)
-      sufia-models (= 3.1.1)
-      yaml_db (= 0.2.3)
-    sufia-models (3.1.1)
-      active-fedora (~> 6.4.0)
-      activeresource
-      acts_as_follower (= 0.1.1)
-      hydra-derivatives (~> 0.0.5)
-      hydra-head (~> 6.3.0)
-      mailboxer (~> 0.11.0)
-      nest (~> 1.1.1)
-      noid (~> 0.6.6)
-      paperclip (~> 3.4.0)
-      rails (>= 3.2.13, < 5.0)
-      resque (~> 1.23.0)
-      resque-pool (= 0.3.0)
-      zipruby (= 0.3.6)
-
 GEM
   remote: https://rubygems.org/
   specs:
@@ -91,14 +60,13 @@ GEM
     activesupport (3.2.13)
       i18n (= 0.6.1)
       multi_json (~> 1.0)
-    acts_as_follower (0.1.1)
     addressable (2.3.5)
     arel (3.0.2)
     autoparse (0.3.3)
       addressable (>= 2.3.1)
       extlib (>= 0.9.15)
       multi_json (>= 1.0.0)
-    backports (3.3.3)
+    backports (3.6.0)
     bcrypt-ruby (3.1.1)
     blacklight (4.3.0)
       bootstrap-sass (>= 2.2.0, < 2.4)
@@ -135,18 +103,15 @@ GEM
       rack (>= 1.0.0)
       rack-test (>= 0.5.4)
       xpath (~> 2.0)
-    carrierwave (0.9.0)
+    carrierwave (0.10.0)
       activemodel (>= 3.2.0)
       activesupport (>= 3.2.0)
       json (>= 1.7)
+      mime-types (>= 1.16)
     childprocess (0.3.9)
       ffi (~> 1.0, >= 1.0.11)
     chronic (0.10.2)
     chunky_png (1.2.8)
-    climate_control (0.0.3)
-      activesupport (>= 3.0)
-    cocaine (0.5.1)
-      climate_control (>= 0.0.3, < 1.0)
     coderay (1.0.9)
     coffee-rails (3.2.2)
       coffee-script (>= 2.2.0)
@@ -194,10 +159,7 @@ GEM
     figaro (0.7.0)
       bundler (~> 1.0)
       rails (>= 3, < 5)
-    font-awesome-sass-rails (3.0.2.2)
-      railties (>= 3.1.1)
-      sass-rails (>= 3.1.1)
-    foreigner (1.5.0)
+    foreigner (1.6.1)
       activerecord (>= 3.0.0)
     formatador (0.2.4)
     fssm (0.2.10)
@@ -234,12 +196,6 @@ GEM
       blacklight (~> 4.0)
       cancan
       deprecation
-    hydra-batch-edit (1.0.2)
-      blacklight
-      hydra-collections
-    hydra-collections (1.0.0)
-      blacklight
-      hydra-head
     hydra-core (6.3.3)
       active-fedora
       blacklight (~> 4.0)
@@ -248,10 +204,13 @@ GEM
       hydra-access-controls (= 6.3.3)
       jettywrapper (>= 1.4.1)
       rails (>= 3.2.3, < 5)
-    hydra-derivatives (0.0.5)
+    hydra-derivatives (0.0.8)
       active-fedora
       activesupport (>= 3.2.13, < 5.0)
-      rmagick
+      hydra-file_characterization
+      mini_magick
+    hydra-file_characterization (0.3.1)
+      activesupport (>= 3.0.0)
     hydra-head (6.3.3)
       hydra-access-controls (= 6.3.3)
       hydra-core (= 6.3.3)
@@ -289,9 +248,6 @@ GEM
     mail (2.5.4)
       mime-types (~> 1.16)
       treetop (~> 1.4.8)
-    mail_form (1.4.1)
-      actionmailer (~> 3.0)
-      activemodel (>= 3.2, < 5)
     mailboxer (0.11.0)
       carrierwave (>= 0.5.8)
       foreigner (>= 0.9.1)
@@ -300,6 +256,8 @@ GEM
     mediashelf-loggable (0.4.9)
     method_source (0.8.2)
     mime-types (1.24)
+    mini_magick (3.7.0)
+      subexec (~> 0.2.1)
     mini_portile (0.5.1)
     multi_json (1.7.9)
     multipart-post (1.2.0)
@@ -330,12 +288,6 @@ GEM
     omniauth-shibboleth (1.1.1)
       omniauth (>= 1.0.0)
     orm_adapter (0.4.0)
-    paperclip (3.4.2)
-      activemodel (>= 3.0.0)
-      activerecord (>= 3.0.0)
-      activesupport (>= 3.0.0)
-      cocaine (~> 0.5.0)
-      mime-types
     parslet (1.5.0)
       blankslate (~> 2.0)
     polyglot (0.3.3)
@@ -360,8 +312,6 @@ GEM
       activesupport (= 3.2.13)
       bundler (~> 1.0)
       railties (= 3.2.13)
-    rails_autolink (1.1.0)
-      rails (> 3.1)
     railties (3.2.13)
       actionpack (= 3.2.13)
       activesupport (= 3.2.13)
@@ -369,7 +319,6 @@ GEM
       rake (>= 0.8.7)
       rdoc (~> 3.4)
       thor (>= 0.14.6, < 2.0)
-    rainbow (1.1.4)
     rake (10.1.0)
     rb-fsevent (0.9.3)
     rb-inotify (0.9.1)
@@ -473,6 +422,7 @@ GEM
       net-ssh
       term-ansicolor
     stomp (1.3.2)
+    subexec (0.2.3)
     term-ansicolor (1.2.2)
       tins (~> 0.8)
     thor (0.18.1)
@@ -500,7 +450,6 @@ GEM
     xml-simple (1.1.3)
     xpath (2.0.0)
       nokogiri (~> 1.3)
-    yaml_db (0.2.3)
     zipruby (0.3.6)
 
 PLATFORMS
@@ -508,6 +457,7 @@ PLATFORMS
 
 DEPENDENCIES
   blacklight
+  blacklight_advanced_search (~> 2.1.0)
   bootstrap-sass (~> 2.3.2.1)
   bootstrap-slider-rails
   bower-rails (~> 0.5.0)
@@ -527,6 +477,7 @@ DEPENDENCIES
   guard-livereload
   haml
   hashie
+  hydra-derivatives (~> 0.0.5)
   hydra-head
   jasmine
   jasmine-jquery-rails
@@ -535,13 +486,18 @@ DEPENDENCIES
   kaminari!
   kramdown
   launchy
+  mailboxer (~> 0.11.0)
   mysql2
+  nest (~> 1.1.1)
+  noid (~> 0.6.6)
   omniauth
   omniauth-shibboleth
   rails (= 3.2.13)
   rb-readline
   resque
+  resque-pool (= 0.3.0)
   resque_spec
+  rmagick (~> 2.13.2)
   rspec-rails
   ruby-filemagic (~> 0.4.2)
   rvm1-capistrano3
@@ -550,7 +506,7 @@ DEPENDENCIES
   scut
   solrizer!
   sqlite3
-  sufia!
   uglifier (>= 1.0.3)
   webshims-rails
   whenever
+  zipruby (~> 0.3.6)

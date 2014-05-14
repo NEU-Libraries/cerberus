@@ -92,13 +92,19 @@ class DerivativeCreator
         return false
       end
 
-      img = nil
+      blob = nil
 
       if !poster
-        img = Magick::Image.from_blob(master.content.content).first
+        blob = master.content.content
       else
-        img = Magick::Image.from_blob(master.poster.content).first
+        blob = master.poster.content
       end
+
+      if master.content.content.instance_of? (StringIO)
+        blob = blob.string
+      end
+
+      img = Magick::Image.from_blob(blob).first
 
       img.format = "JPEG"
       img.interlace = Magick::PlaneInterlace
@@ -119,7 +125,7 @@ class DerivativeCreator
 
     def update_or_create_with_metadata(title, desc, klass, object = nil)
       if object.nil?
-        object = klass.new(pid: Sufia::Noid.namespaceize(Sufia::IdService.mint))
+        object = klass.new(pid: Drs::Noid.namespaceize(Drs::IdService.mint))
       end
 
       object.title                  = title
