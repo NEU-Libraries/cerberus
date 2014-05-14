@@ -77,10 +77,6 @@
       float:right;
       margin-right: -35px;
     }
-
-    a:after{
-      content:"\00A0";
-    }
   }
 
   span.selected
@@ -235,10 +231,9 @@ ul.facet_extended_list
 // DGC - Kludge to make grid/list work better
 
 span.count{
-  position: absolute;
   float: right;
   margin-top: 3px;
-  right: 10px;
+  margin-right: 10px;
 }
 
 a.facet_select{
