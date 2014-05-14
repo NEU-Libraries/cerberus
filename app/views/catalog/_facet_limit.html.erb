@@ -7,11 +7,13 @@
   <ul class="dropdown-menu">
   <% paginator.items.each do |item| -%>
 <li>
+  <div style="display:inline-block; width: 100%;">
     <% if facet_in_params?( solr_field, item.value ) %>
         <%= render_selected_facet_value(solr_field, item).split("(").join('(<small>').split(")").join("</small>)").html_safe %>
       <% else %>
         <%= render_facet_value(solr_field, item).split("(").join('(<small>').split(")").join("</small>)").html_safe %>
     <% end -%>
+  </div>
 </li>
   <% end %>
 
