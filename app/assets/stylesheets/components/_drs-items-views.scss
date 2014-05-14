@@ -125,7 +125,7 @@
     .drs-item-abstract{
       @include clearfix();
       .ellipsis{
-        max-width: 95%;
+        max-width: 80%;
         float: left;
       }
       .ellipsis-toggle{
