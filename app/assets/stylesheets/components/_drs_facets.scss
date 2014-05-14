@@ -232,12 +232,12 @@ ul.facet_extended_list
 
 span.count{
   float: right;
-  margin-top: 3px;
   margin-right: 10px;
 }
 
 a.facet_select{
   float: left;
+  padding-left: 10px;
 }
 
 .dropdown-menu>li>a {
@@ -290,4 +290,8 @@ div > ul > li > ul.dropdown-menu:after {
   border-bottom: 6px solid #ffffff;
   border-left: 6px solid transparent;
   content: '';
+}
+
+.dropdown-submenu:hover > .dropdown-menu {
+  padding-bottom: 0
 }
