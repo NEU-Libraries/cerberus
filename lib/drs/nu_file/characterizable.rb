@@ -4,14 +4,14 @@
 
 module Drs
   module NuFile
-    module Characterizable 
-      extend ActiveSupport::Concern 
-        
-      # Required Sufia code 
-      include Sufia::GenericFile::MimeTypes
-      include Sufia::GenericFile::Characterization
+    module Characterizable
+      extend ActiveSupport::Concern
 
-      included do 
+      # Required Sufia code
+      include Drs::NuCoreFile::MimeTypes
+      include Drs::NuCoreFile::Characterization
+
+      included do
         around_save :characterize_if_changed
       end
 
@@ -38,12 +38,12 @@ module Drs
       end
     end
 
-    private 
+    private
 
-      def characterize_if_changed 
-        content_changed = self.content.changed? 
-        yield 
-        Sufia.queue.push(AtomisticCharacterizationJob.new(self.pid)) if content_changed
+      def characterize_if_changed
+        content_changed = self.content.changed?
+        yield
+        Drs::Application::Queue.push(AtomisticCharacterizationJob.new(self.pid)) if content_changed
       end
   end
 end

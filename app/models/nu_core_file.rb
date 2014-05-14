@@ -1,18 +1,27 @@
 class NuCoreFile < ActiveFedora::Base
-  include Sufia::GenericFile
+  include Drs::ModelMethods
+  include Drs::Noid
+  include Drs::MetadataAssignment
+  include Drs::Find
+  include Drs::ImpressionCount
+
+  include Drs::NuCoreFile::Actions
+  include Drs::NuCoreFile::MimeTypes
+  include Drs::NuCoreFile::Permissions
+  include Drs::NuCoreFile::AccessibleAttributes
+  include Drs::NuCoreFile::Characterization
+  include Drs::NuCoreFile::Export
+  include Drs::NuCoreFile::AssignType
+
   include Drs::Rights::MassPermissions
   include Drs::Rights::Embargoable
   include Drs::Rights::InheritedRestrictions
   include Drs::Rights::PermissionsAssignmentHelper
-  include Drs::MetadataAssignment
-  include Drs::NuCoreFile::Export
-  include Drs::NuCoreFile::AssignType
-  include Drs::Find
-  include Drs::ImpressionCount
 
   has_metadata name: 'DC', type: NortheasternDublinCoreDatastream
   has_metadata name: 'properties', type: DrsPropertiesDatastream
   has_metadata name: 'mods', type: NuModsDatastream
+  has_metadata :name => "descMetadata", :type => GenericFileRdfDatastream
 
   attr_accessible :title, :identifier, :description, :date_of_issue
   attr_accessible :keywords, :creators, :depositor, :type
@@ -26,6 +35,22 @@ class NuCoreFile < ActiveFedora::Base
   delegate_to :mods, [:category, :department, :degree, :course_number, :course_title]
 
   delegate_to :descMetadata, [:rights, :resource_type]
+
+  def pdf?
+    self.class.pdf_mime_types.include? self.mime_type
+  end
+
+  def image?
+    self.class.image_mime_types.include? self.mime_type
+  end
+
+  def video?
+    self.class.video_mime_types.include? self.mime_type
+  end
+
+  def audio?
+    self.class.audio_mime_types.include? self.mime_type
+  end
 
   def to_param
     self.pid

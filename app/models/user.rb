@@ -1,10 +1,9 @@
 class User < ActiveRecord::Base
-  # Connects this user object to Sufia behaviors.
-  include Sufia::User
   # Connects this user object to Hydra behaviors.
   include Hydra::User
   # Connects this user object to Blacklights Bookmarks.
   include Blacklight::User
+  include Mailboxer::Models::Messageable
 
   before_destroy :remove_drs_object
 
@@ -16,6 +15,9 @@ class User < ActiveRecord::Base
   # attr_accessible :title, :body
 
   attr_accessible :password, :password_confirmation, :remember_me, :nuid, :full_name, :view_pref
+  delegate :can?, :cannot?, :to => :ability
+
+  acts_as_messageable
 
   ROLES = %w[admin employee]
 
@@ -27,13 +29,18 @@ class User < ActiveRecord::Base
     user = User.where(:email => auth.info.email).first
 
     unless user
-      user = User.create(email:auth.info.email, password:Devise.friendly_token[0,20], full_name:auth.info.name, nuid:auth.info.nuid)
+      user = User.create(password:Devise.friendly_token[0,20], full_name:auth.info.name, nuid:auth.info.nuid)
+      user.email = auth.info.email
       if(auth.info.employee == "staff")
-        Sufia.queue.push(EmployeeCreateJob.new(auth.info.nuid, auth.info.name))
+        EmployeeCreateJob.new(auth.info.nuid, auth.info.name)
       end
     end
 
     return user
+  end
+
+  def ability
+    @ability ||= Ability.new(self)
   end
 
   # Method added by Blacklight; Blacklight uses #to_s on your

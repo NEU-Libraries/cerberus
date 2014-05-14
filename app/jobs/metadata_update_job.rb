@@ -6,14 +6,13 @@ class MetadataUpdateJob
     :metadata_update
   end
 
-  attr_accessor :login, :title, :nu_title, :file_attributes, :visibility
+  attr_accessor :login, :title, :nu_title, :file_attributes
 
   def initialize(login, params)
     self.login = login
     self.title = params[:title]
     self.nu_title = params[:title]
     self.file_attributes = params[:nu_core_file]
-    self.visibility = params[:visibility]
   end
 
   def run
@@ -26,7 +25,8 @@ class MetadataUpdateJob
       update_file(gf, user)
     end
 
-    job_user = User.find_by_email('batchuser@example.com') || User.create(email:"batchuser@example.com", password: Devise.friendly_token[0,20], full_name:"Batch User", nuid:"000000001")
+    # Still a little kludgey...
+    job_user = User.find_by_nuid('000000001') || User.create(password: Devise.friendly_token[0,20], full_name:"Batch User", nuid:"000000001")
 
     message = 'The file(s) '+ file_list(@saved)+ " have been saved." unless @saved.empty?
     job_user.send_message(user, message, 'Metadata upload complete') unless @saved.empty?
@@ -45,7 +45,6 @@ class MetadataUpdateJob
     gf.title = title[gf.pid] if title[gf.pid] rescue gf.label
     gf.nu_title = nu_title[gf.pid] if nu_title[gf.pid] rescue gf.label
     gf.attributes=file_attributes
-    gf.set_visibility(visibility)
     gf.tag_as_completed
     save_tries = 0
 
@@ -66,7 +65,7 @@ class MetadataUpdateJob
       sleep 0.01
       retry
     end #
-    Sufia.queue.push(ContentUpdateEventJob.new(gf.pid, login))
+    Drs::Application::Queue.push(ContentUpdateEventJob.new(gf.pid, login))
     @saved << gf
   end
 

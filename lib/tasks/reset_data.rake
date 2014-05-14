@@ -1,5 +1,5 @@
 def mint_unique_pid
-  Sufia::Noid.namespaceize(Sufia::IdService.mint)
+  Drs::Noid.namespaceize(Drs::IdService.mint)
 end
 
 def create_collection(klass, parent_str, title_str, description = "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Recusandae, minima, cum sit iste at mollitia voluptatem error perspiciatis excepturi ut voluptatibus placeat esse architecto ea voluptate assumenda repudiandae quod commodi.")
@@ -50,6 +50,8 @@ task :reset_data => :environment do
 
   require 'factory_girl_rails'
 
+  Hydra::Derivatives.fits_path = Drs::Application.config.fits_path
+
   ActiveFedora::Base.find(:all).each do |file|
     file.destroy
   end
@@ -69,12 +71,13 @@ task :reset_data => :environment do
     tmp_user.destroy
   end
 
-  tmp_user = User.create(email:"drsadmin@neu.edu", :password => "drs12345", :password_confirmation => "drs12345", full_name:"Temp User", nuid:"000000000")
+  tmp_user = User.create(:password => "drs12345", :password_confirmation => "drs12345", full_name:"Temp User", nuid:"000000000")
+  tmp_user.email = "drsadmin@neu.edu"
   tmp_user.role = "admin"
   tmp_user.view_pref = "list"
   tmp_user.save!
 
-  Sufia.queue.push(EmployeeCreateJob.new(tmp_user.nuid, tmp_user.full_name))
+  Drs::Application::Queue.push(EmployeeCreateJob.new(tmp_user.nuid, tmp_user.full_name))
 
   set_edit_permissions(root_dept)
 
