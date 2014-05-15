@@ -40,7 +40,7 @@ module DrsHelper
       render_array_facet_value(facet_solr_field, item, options)
     end
     path = url_for(add_facet_params_and_redirect(facet_solr_field, item.value).merge(:only_path=>true))
-    (link_to_unless(options[:suppress_link], facet_display_value(facet_solr_field, item), path, :class=>"facet_select") + " " + render_facet_count(item.hits)).html_safe
+    (link_to_unless(options[:suppress_link], facet_display_value(facet_solr_field, item), path, :class=>"facet_select") + " " + render_facet_count(item.hits))
   end
 
 end
