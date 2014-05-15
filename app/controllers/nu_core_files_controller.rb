@@ -187,7 +187,7 @@ class NuCoreFilesController < ApplicationController
       end
       # do not trigger an update event if a version event has already been triggered
       Drs::Application::Queue.push(ContentUpdateEventJob.new(@nu_core_file.pid, current_user.user_key)) unless version_event
-      @nu_core_file.record_version_committer(current_user)
+      # @nu_core_file.record_version_committer(current_user)
     end
 
     redirect_to(@nu_core_file)
