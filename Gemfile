@@ -61,6 +61,8 @@ group :development do
   gem 'capistrano-bundler'
   gem 'rvm1-capistrano3', require: false
   gem 'rb-readline'
+  # Monitoring
+  gem 'newrelic_rpm'
 end
 
 group :development, :test do
