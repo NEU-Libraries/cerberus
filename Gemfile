@@ -42,6 +42,7 @@ gem "whenever", :require => false
 gem 'resque', :require => 'resque/server'
 # This is global because it's needed for some fixture generation.
 gem "factory_girl_rails", :require => false
+gem 'mods_display'
 
 # Gems used only for assets and not required
 # in production environments by default.
