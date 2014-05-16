@@ -43,6 +43,8 @@ gem 'resque', :require => 'resque/server'
 # This is global because it's needed for some fixture generation.
 gem "factory_girl_rails", :require => false
 gem 'mods_display'
+# Monitoring
+gem 'newrelic_rpm'
 
 # Gems used only for assets and not required
 # in production environments by default.
@@ -61,8 +63,6 @@ group :development do
   gem 'capistrano-bundler'
   gem 'rvm1-capistrano3', require: false
   gem 'rb-readline'
-  # Monitoring
-  gem 'newrelic_rpm'
 end
 
 group :development, :test do
