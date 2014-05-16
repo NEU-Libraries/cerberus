@@ -1,16 +1,17 @@
 class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
   def shibboleth
     auth = request.env["omniauth.auth"]
-    puts auth
+    logger.info "Shibboleth debug - #{auth.inspect}"
 
     @user = User.find_for_shib(request.env["omniauth.auth"], current_user)
 
     if @user.persisted?
       flash[:notice] = "Successfully signed in with Shibboleth"
       sign_in @user, :event => :authentication #this will throw if @user is not activated
-      redirect_to root_path       
+      redirect_to root_path
     else
       flash[:error] = "Error with Shibboleth login"
+      sign_in @user, :event => :authentication #this will throw if @user is not activated
       redirect_to root_path
     end
   end
