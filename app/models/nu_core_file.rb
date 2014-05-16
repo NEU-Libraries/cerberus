@@ -18,6 +18,8 @@ class NuCoreFile < ActiveFedora::Base
   include Drs::Rights::InheritedRestrictions
   include Drs::Rights::PermissionsAssignmentHelper
 
+  include ModsDisplay::ModelExtension
+
   has_metadata name: 'DC', type: NortheasternDublinCoreDatastream
   has_metadata name: 'properties', type: DrsPropertiesDatastream
   has_metadata name: 'mods', type: NuModsDatastream
@@ -35,6 +37,10 @@ class NuCoreFile < ActiveFedora::Base
   delegate_to :mods, [:category, :department, :degree, :course_number, :course_title]
 
   delegate_to :descMetadata, [:rights, :resource_type]
+
+  mods_xml_source do |model|
+    model.mods.to_xml
+  end
 
   def pdf?
     self.class.pdf_mime_types.include? self.mime_type
