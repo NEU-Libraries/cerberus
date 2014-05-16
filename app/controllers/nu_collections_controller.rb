@@ -75,10 +75,12 @@ class NuCollectionsController < SetsController
     @set.depositor = current_user.nuid
     @set.identifier = @set.pid
 
-    if @set.save!
+    begin
+      @set.save!
       flash[:notice] = "Collection created successfully."
       redirect_to nu_collection_path(id: @set.identifier) and return
-    else
+    rescue => error
+      logger.error "NuCollectionsController::create rescued #{error.class}\n\t#{error.to_s}\n #{error.backtrace.join("\n")}\n\n"
       flash.now[:error] = "Something went wrong"
       redirect_to new_nu_collection_path(parent: params[:parent]) and return
     end
