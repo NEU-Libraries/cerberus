@@ -1,8 +1,12 @@
+require 'stanford-mods'
+
 # -*- coding: utf-8 -*-
 class NuCoreFilesController < ApplicationController
   include Drs::Controller
   include Drs::ControllerHelpers::EditableObjects
   include Drs::ControllerHelpers::ViewLogger
+
+  include ModsDisplay::ControllerExtension
 
   before_filter :authenticate_user!, except: [:show]
 
