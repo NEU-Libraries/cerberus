@@ -36,6 +36,8 @@ class User < ActiveRecord::Base
       end
     end
 
+    user.save!
+
     return user
   end
 
