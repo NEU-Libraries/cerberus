@@ -1,7 +1,6 @@
 class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
   def shibboleth
     auth = request.env["omniauth.auth"]
-    puts auth
 
     @user = User.find_for_shib(request.env["omniauth.auth"], current_user)
 
@@ -11,7 +10,6 @@ class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
       redirect_to root_path
     else
       flash[:error] = "Error with Shibboleth login"
-      logger.error "SHIB ERROR - #{error.class}\n\t#{error.to_s}\n #{error.backtrace.join("\n")}\n\n"
       logger.info "Shibboleth error - #{auth.inspect} #{@user.inspect}"
       redirect_to root_path
     end
