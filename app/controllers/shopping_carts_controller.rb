@@ -73,7 +73,7 @@ class ShoppingCartsController < ApplicationController
     respond_to do |format|
       format.html do
         FileUtils.rm_rf(Dir.glob("#{dir}/*")) if File.directory?(dir)
-        CartDownloadJob.new(session[:session_id], session[:ids], current_user.nuid, request.remote_ip)
+        Drs::Application::Queue.push(CartDownloadJob.new(session[:session_id], session[:ids], current_user.nuid, request.remote_ip))
         @page_title = "Start Download - #{t('drs.shoppingcarts.name')}"
       end
 
