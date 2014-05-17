@@ -32,7 +32,7 @@ class User < ActiveRecord::Base
       user = User.create(password:Devise.friendly_token[0,20], full_name:auth.info.name, nuid:auth.info.nuid)
       user.email = auth.info.email
       if(auth.info.employee == "staff")
-        EmployeeCreateJob.new(auth.info.nuid, auth.info.name)
+        Drs::Application::Queue.push(EmployeeCreateJob.new(auth.info.nuid, auth.info.name))
       end
     end
 
