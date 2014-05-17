@@ -39,7 +39,8 @@ namespace :deploy do
   desc "Restarting the resque workers"
   task :restart_workers do
     on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . kill -TERM $(cat /home/drs/config/resque-pool.pid))"
+      # execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . kill -TERM $(cat /home/drs/config/resque-pool.pid))"
+      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake resque:stop_workers)"
       execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rm -f /home/drs/config/resque-pool.pid)"
       execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . resque-pool --daemon -p /home/drs/config/resque-pool.pid)"
     end

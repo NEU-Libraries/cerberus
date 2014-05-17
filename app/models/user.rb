@@ -26,7 +26,6 @@ class User < ActiveRecord::Base
   end
 
   def self.find_for_shib(auth, signed_in_resource=nil)
-    logger.info "Searching for user - #{auth.info.nuid} #{auth.info.name} #{auth.info.email}"
     user = User.where(:email => auth.info.email).first
 
     unless user
@@ -35,7 +34,6 @@ class User < ActiveRecord::Base
       user.save!
 
       if(auth.info.employee == "staff")
-        logger.info "Creating employee - #{auth.info.nuid} #{auth.info.name}"
         Drs::Application::Queue.push(EmployeeCreateJob.new(auth.info.nuid, auth.info.name))
       end
     end
