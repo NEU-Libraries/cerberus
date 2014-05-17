@@ -26,17 +26,19 @@ class User < ActiveRecord::Base
   end
 
   def self.find_for_shib(auth, signed_in_resource=nil)
+    logger.info "Searching for user - #{auth.info.nuid} #{auth.info.name} #{auth.info.email}"
     user = User.where(:email => auth.info.email).first
 
     unless user
       user = User.create(password:Devise.friendly_token[0,20], full_name:auth.info.name, nuid:auth.info.nuid)
       user.email = auth.info.email
+      user.save!
+
       if(auth.info.employee == "staff")
+        logger.info "Creating employee - #{auth.info.nuid} #{auth.info.name}"
         Drs::Application::Queue.push(EmployeeCreateJob.new(auth.info.nuid, auth.info.name))
       end
     end
-
-    user.save!
 
     return user
   end
