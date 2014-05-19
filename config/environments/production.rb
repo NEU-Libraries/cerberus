@@ -70,4 +70,16 @@ Drs::Application.configure do
 
   config.lograge.enabled = true
   config.log_level = :warn
+
+  config.action_mailer.delivery_method = :sendmail
+  config.action_mailer.perform_deliveries = true
+  config.action_mailer.raise_delivery_errors = true
+
+  config.middleware.use ExceptionNotification::Rack,
+    :email => {
+      :email_prefix => "[DRS] ",
+      :sender_address => %{"notifier" <notifier@repositorydev.neu.edu>},
+      :exception_recipients => %w{d.cliff@neu.edu}
+    }
+
 end

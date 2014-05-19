@@ -43,6 +43,7 @@ gem 'mods_display'
 gem 'newrelic_rpm'
 gem 'lograge'
 gem 'exception_notification'
+gem 'parseconfig'
 
 # Gems used only for assets and not required
 # in production environments by default.
