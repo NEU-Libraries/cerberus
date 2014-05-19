@@ -41,6 +41,11 @@ class User < ActiveRecord::Base
     return user
   end
 
+  def employee_id
+    @employee = Employee.find_by_nuid(self.nuid)
+    return @employee.identifier
+  end
+
   def ability
     @ability ||= Ability.new(self)
   end

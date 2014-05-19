@@ -94,7 +94,6 @@ class UsersController < ApplicationController
     end
 
     respond_to do |format|
-      format.html {  redirect_to profile_path(@user), notice: "Your profile has been updated" }
       format.json { render json: @user.to_json }
       format.js
     end
@@ -133,11 +132,11 @@ class UsersController < ApplicationController
   end
 
   def user_is_current_user
-    redirect_to profile_path(@user), alert: "Permission denied: cannot access this page." unless @user == current_user
+    redirect_to profile_path(@user.employee_id), alert: "Permission denied: cannot access this page." unless @user == current_user
   end
 
   def user_not_current_user
-    redirect_to profile_path(@user), alert: "You cannot follow or unfollow yourself" if @user == current_user
+    redirect_to profile_path(@user.employee_id), alert: "You cannot follow or unfollow yourself" if @user == current_user
   end
 
   def get_sort

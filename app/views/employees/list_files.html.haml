@@ -1,0 +1,19 @@
+%article.well.clearfix
+  %h1 All Files
+
+.row
+  - if current_user
+    - current_user.view_pref
+    %aside.drs-sidebar{class: current_user.view_pref == 'grid' ? 'span12' : "span3" }
+      =render partial: 'shared/sets/sets_sidebar'
+
+    %section{class: current_user.view_pref == 'grid' ? 'span12' : "span9" }
+      - @files.each do |f|
+        =render partial: "shared/drs_item/drs_item", locals: { item: f }
+  - else
+    %aside.drs-sidebar.span3
+      =render partial: 'shared/sets/sets_sidebar'
+
+    %section.span9
+      - @files.each do |f|
+        =render partial: "shared/drs_item/drs_item", locals: { item: f }
