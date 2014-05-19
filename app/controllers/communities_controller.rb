@@ -123,8 +123,9 @@ class CommunitiesController < SetsController
 
   protected
 
-    def index_redirect
+    def index_redirect(exception)
       flash[:error] = "Communities cannot be created without a parent"
+      ExceptionNotifier.notify_exception(exception)
       redirect_to communities_path and return
     end
 
