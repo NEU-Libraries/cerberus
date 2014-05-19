@@ -69,4 +69,5 @@ Drs::Application.configure do
   # config.active_record.auto_explain_threshold_in_seconds = 0.5
 
   config.lograge.enabled = true
+  config.log_level = :warn
 end
