@@ -38,22 +38,25 @@ Drs::Application.configure do
   # Expands the lines which load the assets
   config.assets.debug = false
 
-  # Tell Mailer to use SMTP 
+  # Tell Mailer to use SMTP
   config.action_mailer.delivery_method = :smtp
 
-  # Tell Mailer to use repositorydev as the default host 
+  # Tell Mailer to use repositorydev as the default host
   config.action_mailer.default_url_options = { :host => "repositorydev.neu.edu" }
 
-  # Mailer configuration 
+  # Mailer configuration
   ActionMailer::Base.smtp_settings = {
     address: ENV["MAILER_ADDRESS"],
     port: ENV["MAILER_PORT"],
-    domain: ENV["MAILER_DOMAIN"], 
+    domain: ENV["MAILER_DOMAIN"],
     user_name: ENV["MAILER_USERNAME"],
-    password: ENV["MAILER_PASSWORD"], 
-    authentication: ENV["MAILER_AUTHENTICATION"], 
+    password: ENV["MAILER_PASSWORD"],
+    authentication: ENV["MAILER_AUTHENTICATION"],
     enable_starttls_auto: true
   }
+
+  config.lograge.enabled = true
+
   #Google analytics tracking code
-  GA.tracker = "UA-4426028-12"
+  #GA.tracker = "UA-4426028-12"
 end
