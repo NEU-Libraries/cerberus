@@ -64,6 +64,13 @@ module Drs
       query_result.map { |x| SolrDocument.new(x) }
     end
 
+    def user_root_collection
+      if self.klass == "Employee"
+        nu_collection_model = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:NuCollection"
+        return root_collection_result = ActiveFedora::SolrService.query("is_member_of_ssim:#{self.full_self_id} AND has_model_ssim:#{nu_collection_model}")
+      end
+    end
+
     def find_user_root_collections
       doc_list ||= []
       employee_list = find_employees
