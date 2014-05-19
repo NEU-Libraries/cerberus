@@ -131,7 +131,8 @@ class NuCoreFilesController < ApplicationController
       end
     rescue => error
       logger.error "NuCoreFilesController::create rescued #{error.class}\n\t#{error.to_s}\n #{error.backtrace.join("\n")}\n\n"
-      json_error "Error occurred while creating generic file."
+      ExceptionNotifier.notify_exception(error)
+      json_error "Error occurred while creating core file."
     ensure
       # remove the tempfile (only if it is a temp file)
       file.tempfile.delete if file.respond_to?(:tempfile)

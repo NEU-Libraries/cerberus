@@ -84,6 +84,7 @@ class NuCollectionsController < SetsController
     rescue => error
       logger.error "NuCollectionsController::create rescued #{error.class}\n\t#{error.to_s}\n #{error.backtrace.join("\n")}\n\n"
       flash.now[:error] = "Something went wrong"
+      ExceptionNotifier.notify_exception(error)
       redirect_to new_nu_collection_path(parent: params[:parent]) and return
     end
   end

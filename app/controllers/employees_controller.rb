@@ -26,8 +26,9 @@ class EmployeesController < ApplicationController
     def current_users_employee_id
       begin
         return Employee.find_by_nuid(current_user.nuid)
-      rescue ActiveFedora::ObjectNotFoundError
+      rescue ActiveFedora::ObjectNotFoundError => exception
         flash[:error] = "You have not been granted personal directories"
+        ExceptionNotifier.notify_exception(exception)
         redirect_to root_path
       end
     end
