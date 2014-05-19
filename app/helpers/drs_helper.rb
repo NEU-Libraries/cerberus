@@ -19,7 +19,7 @@ module DrsHelper
       login
     end
 
-    link_to text, profile_path(user.employee_id)
+    link_to text, employee_path(user.employee_id)
   end
 
   def link_to_facet(field, field_string)

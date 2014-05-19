@@ -67,7 +67,8 @@ module Drs
     def user_root_collection
       if self.klass == "Employee"
         nu_collection_model = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:NuCollection"
-        return root_collection_result = ActiveFedora::SolrService.query("is_member_of_ssim:#{self.full_self_id} AND has_model_ssim:#{nu_collection_model}")
+        root_collection_result = ActiveFedora::SolrService.query("is_member_of_ssim:#{self.full_self_id} AND has_model_ssim:#{nu_collection_model}")
+        return SolrDocument.new(root_collection_result.first)
       end
     end
 

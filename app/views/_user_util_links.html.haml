@@ -2,7 +2,7 @@
   - if user_signed_in?
     = render :partial => 'shopping_carts/tracker'
     = render :partial => 'users/notify_link'
-    %a.btn{:href => profile_path(current_user.employee_id), :title => "click for User Profile"}
+    %a.btn{:href => employee_files_path(current_user.employee_id), :title => "click for User Profile"}
       %span.icon-user( aria-hidden="true" )
       %span.sr-only
         User page
