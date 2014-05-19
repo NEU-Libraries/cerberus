@@ -42,7 +42,7 @@ Drs::Application.routes.draw do
   get "/files/rescue_incomplete_files" => "nu_core_files#rescue_incomplete_files", as: 'rescue_incomplete_files'
   match "/incomplete_files" => "nu_core_files#destroy_incomplete_files", via: 'delete', as: 'destroy_incomplete_files'
 
-  resources :users, only: [:update], as: :view_prefs
+  put '/item_display' => 'users#update', as: 'view_pref'
 
   get '/employees/:id' => 'employees#show', as: 'employee'
   get '/employees/:id/files' => 'employees#list_files', as: 'employee_files'
