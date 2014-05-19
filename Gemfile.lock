@@ -283,6 +283,7 @@ GEM
     omniauth-shibboleth (1.1.1)
       omniauth (>= 1.0.0)
     orm_adapter (0.4.0)
+    parseconfig (1.0.4)
     parslet (1.5.0)
       blankslate (~> 2.0)
     polyglot (0.3.3)
@@ -485,6 +486,7 @@ DEPENDENCIES
   noid (~> 0.6.6)
   omniauth
   omniauth-shibboleth
+  parseconfig
   rails (= 3.2.13)
   rb-readline
   resque
