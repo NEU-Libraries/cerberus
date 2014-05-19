@@ -14,9 +14,7 @@ class UsersController < ApplicationController
   include BlacklightAdvancedSearch::ParseBasicQ
   include BlacklightAdvancedSearch::Controller
 
-  prepend_before_filter :find_user, :except => [:index, :search, :notifications_number]
-  before_filter :authenticate_user!, only: [:edit, :update]
-  before_filter :user_is_current_user, only: [:edit, :update]
+  prepend_before_filter :find_user, :except => [:index, :search, :notifications_number, :update]
 
   def index
     sort_val = get_sort
@@ -47,11 +45,6 @@ class UsersController < ApplicationController
       (_, @recent_user_documents) = get_search_results(:q =>filter_mine,
                                         :sort=>sort_field, :rows=>3)
     end
-  end
-
-  # Display form for users to edit their profile information
-  def edit
-    @user = current_user
   end
 
   # Process changes from profile form
@@ -94,9 +87,8 @@ class UsersController < ApplicationController
     # end
 
     respond_to do |format|
-      format.html { render :nothing => true }
-      format.json { render :nothing => true }
-      format.js { render :nothing => true }
+      format.html
+      format.js
     end
 
   end
@@ -127,16 +119,8 @@ class UsersController < ApplicationController
   end
 
   def find_user
-    @user = User.find_by_nuid(params[:id])
+    @user = User.find(params[:id])
     redirect_to root_path, alert: "User '#{params[:id]}' does not exist" if @user.nil?
-  end
-
-  def user_is_current_user
-    redirect_to profile_path(@user.employee_id), alert: "Permission denied: cannot access this page." unless @user == current_user
-  end
-
-  def user_not_current_user
-    redirect_to profile_path(@user.employee_id), alert: "You cannot follow or unfollow yourself" if @user == current_user
   end
 
   def get_sort
