@@ -56,6 +56,7 @@ Drs::Application.configure do
   }
 
   config.lograge.enabled = true
+  config.log_level = :warn
 
   #Google analytics tracking code
   #GA.tracker = "UA-4426028-12"

@@ -54,4 +54,5 @@ Drs::Application.configure do
   }
 
   config.lograge.enabled = true
+  config.log_level = :info
 end
