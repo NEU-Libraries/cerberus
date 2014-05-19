@@ -64,7 +64,7 @@ Drs::Application.configure do
 
   config.middleware.use ExceptionNotification::Rack,
     :email => {
-      :email_prefix => "[DRS] ",
+      :email_prefix => "[DRS Staging] ",
       :sender_address => %{"notifier" <notifier@repositorydev.neu.edu>},
       :exception_recipients => %w{d.cliff@neu.edu}
     }
