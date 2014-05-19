@@ -43,7 +43,9 @@ class User < ActiveRecord::Base
 
   def employee_id
     @employee = Employee.find_by_nuid(self.nuid)
-    return @employee.pid
+    if !@employee.nil?
+      return @employee.pid
+    end
   end
 
   def ability
