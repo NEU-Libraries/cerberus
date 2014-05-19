@@ -84,6 +84,10 @@ module Drs
       Array(self[Solrizer.solr_name("parent_id", :stored_searchable)]).first
     end
 
+    def employee_name
+      Array(self[Solrizer.solr_name("employee_name", :stored_searchable)]).first
+    end
+
     ##
     # Give our SolrDocument an ActiveModel::Naming appropriate route_key
     def route_key
