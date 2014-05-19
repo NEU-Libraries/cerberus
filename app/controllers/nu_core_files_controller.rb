@@ -29,8 +29,9 @@ class NuCoreFilesController < ApplicationController
 
   rescue_from Exceptions::NoParentFoundError, with: :no_parent_rescue
 
-  rescue_from ActiveFedora::ObjectNotFoundError do
+  rescue_from ActiveFedora::ObjectNotFoundError do |exception|
     @obj_type = "Object"
+    ExceptionNotifier.notify_exception(exception)
     render "error/object_404"
   end
 
@@ -130,7 +131,8 @@ class NuCoreFilesController < ApplicationController
       end
     rescue => error
       logger.error "NuCoreFilesController::create rescued #{error.class}\n\t#{error.to_s}\n #{error.backtrace.join("\n")}\n\n"
-      json_error "Error occurred while creating generic file."
+      ExceptionNotifier.notify_exception(error)
+      json_error "Error occurred while creating core file."
     ensure
       # remove the tempfile (only if it is a temp file)
       file.tempfile.delete if file.respond_to?(:tempfile)
@@ -215,8 +217,9 @@ class NuCoreFilesController < ApplicationController
       render additional_arguments.merge({:json => [args]})
     end
 
-    def no_parent_rescue
+    def no_parent_rescue(exception)
       flash[:error] = "Parent not specified or invalid"
+      ExceptionNotifier.notify_exception(exception)
       redirect_to root_path
     end
 

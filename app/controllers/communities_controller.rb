@@ -24,12 +24,14 @@ class CommunitiesController < SetsController
 
   rescue_from Blacklight::Exceptions::InvalidSolrID, ActiveFedora::ObjectNotFoundError do |exception|
     @obj_type = "Community"
+    ExceptionNotifier.notify_exception(exception)
     render "error/object_404"
   end
 
   rescue_from Hydra::AccessDenied, CanCan::AccessDenied do |exception|
     flash[:error] = exception.message
-    redirect_to communities_path and return
+    ExceptionNotifier.notify_exception(exception)
+    redirect_to root_path and return
   end
 
   def index
@@ -121,8 +123,9 @@ class CommunitiesController < SetsController
 
   protected
 
-    def index_redirect
+    def index_redirect(exception)
       flash[:error] = "Communities cannot be created without a parent"
+      ExceptionNotifier.notify_exception(exception)
       redirect_to communities_path and return
     end
 

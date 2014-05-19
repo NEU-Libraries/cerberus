@@ -36,23 +36,38 @@ Drs::Application.configure do
   config.assets.debug = true
 
 
-  # Tell Mailer to use SMTP 
+  # Tell Mailer to use SMTP
   config.action_mailer.delivery_method = :smtp
 
-  # Tell Mailer to use localhost:3000 as the default host 
+  # Tell Mailer to use localhost:3000 as the default host
   config.action_mailer.default_url_options = { :host => "localhost:3000" }
 
-  # Mailer configuration 
+  # Mailer configuration
   ActionMailer::Base.smtp_settings = {
     address: ENV["MAILER_ADDRESS"],
     port: ENV["MAILER_PORT"],
-    domain: ENV["MAILER_DOMAIN"], 
+    domain: ENV["MAILER_DOMAIN"],
     user_name: ENV["MAILER_USERNAME"],
-    password: ENV["MAILER_PASSWORD"], 
-    authentication: ENV["MAILER_AUTHENTICATION"], 
+    password: ENV["MAILER_PASSWORD"],
+    authentication: ENV["MAILER_AUTHENTICATION"],
     enable_starttls_auto: true
   }
 
-  # Development Tracking Code
-  GA.tracker = "UA-4426028-11"
+  config.lograge.enabled = true
+  config.log_level = :info
+
+  config.action_mailer.delivery_method = :sendmail
+  config.action_mailer.perform_deliveries = true
+  config.action_mailer.raise_delivery_errors = true
+
+  git_config = ParseConfig.new('/home/vagrant/.gitconfig')
+
+  config.middleware.use ExceptionNotification::Rack,
+    :email => {
+      :email_prefix => "[DRS Dev] ",
+      :sender_address => %{"notifier" <notifier@repositorydev.neu.edu>},
+      :exception_recipients => git_config['user']['email']
+    }
+
+
 end

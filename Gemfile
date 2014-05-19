@@ -20,10 +20,6 @@ gem 'kramdown'
 gem 'sanitize'
 # See Bower Front-End Package Management http://bower.io Documentation
 gem "bower-rails", "~> 0.5.0"
-#Google Analytics integration -
-gem 'google-analytics-rails'
-#Google API Ruby Client
-gem 'google-api-client'
 gem 'webshims-rails'
 gem 'rmagick', '~> 2.13.2'
 gem 'zipruby', '~> 0.3.6'
@@ -45,6 +41,9 @@ gem "factory_girl_rails", :require => false
 gem 'mods_display'
 # Monitoring
 gem 'newrelic_rpm'
+gem 'lograge'
+gem 'exception_notification'
+gem 'parseconfig'
 
 # Gems used only for assets and not required
 # in production environments by default.

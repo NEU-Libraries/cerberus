@@ -110,8 +110,9 @@ module Drs
       return unless field.present?
       begin
         Date.parse(field).to_formatted_s(:standard)
-      rescue
+      rescue => exception
         logger.info "Unable to parse date: #{field.first.inspect} for #{self['id']}"
+        ExceptionNotifier.notify_exception(exception)
       end
     end
 
