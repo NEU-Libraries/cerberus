@@ -46,6 +46,8 @@ class User < ActiveRecord::Base
     if !@employee.nil?
       return @employee.pid
     end
+    # To prevent a nil error in user_util_links until I have a better solution
+    return 'neu:0'
   end
 
   def ability
@@ -83,9 +85,4 @@ class User < ActiveRecord::Base
     def remove_drs_object
       if !self.nuid.nil?
         if Employee.exists_by_nuid?(self.nuid)
-          object = Employee.find_by_nuid(self.nuid)
-          object.destroy
-        end
-      end
-    end
-end
+          object = Employee.find
