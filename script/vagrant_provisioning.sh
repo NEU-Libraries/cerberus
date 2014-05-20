@@ -56,8 +56,8 @@ cd /home/vagrant
 \curl -sSL https://get.rvm.io | bash
 source /home/vagrant/.profile
 rvm pkg install libyaml
-rvm install ruby-2.0.0-p451
-rvm use ruby-2.0.0-p451
+rvm install ruby-2.0.0-p481
+rvm use ruby-2.0.0-p481
 source /home/vagrant/.rvm/scripts/rvm
 
 echo "Setting up DRS"
