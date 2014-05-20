@@ -2,12 +2,11 @@
   - if user_signed_in?
     = render :partial => 'shopping_carts/tracker'
     = render :partial => 'users/notify_link'
-    - if !current_user.employee_id.blank?
-      %a.btn{:href => employee_files_path(current_user.employee_id), :title => "click for User Profile"}
-        %span.icon-user( aria-hidden="true" )
-        %span.sr-only
-          User page
-        = current_user.name
+    %a.btn{:href => "employee_files_path(current_user.employee_id)", :title => "click for User Profile"}
+      %span.icon-user( aria-hidden="true" )
+      %span.sr-only
+        User page
+      = current_user.name
     %button.btn.dropdown-toggle{"data-toggle" => "dropdown",  "aria-label" => "Toggle user menu dropdown menu", :title => "click for additional menu options"}
       %span.icon-caret-down( aria-hidden="true" )
     %ul.dropdown-menu(role="menu")
