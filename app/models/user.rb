@@ -85,4 +85,9 @@ class User < ActiveRecord::Base
     def remove_drs_object
       if !self.nuid.nil?
         if Employee.exists_by_nuid?(self.nuid)
-          object = Employee.find
+          object = Employee.find_by_nuid(self.nuid)
+          object.destroy
+        end
+      end
+    end
+end
