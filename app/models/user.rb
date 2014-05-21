@@ -43,7 +43,7 @@ class User < ActiveRecord::Base
 
   def employee_pid
     if !self.employee_id.blank?
-      return self.employee_pid
+      return self.employee_id
     end
 
     @employee = Employee.find_by_nuid(self.nuid)
