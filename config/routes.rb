@@ -42,7 +42,10 @@ Drs::Application.routes.draw do
   get "/files/rescue_incomplete_files" => "nu_core_files#rescue_incomplete_files", as: 'rescue_incomplete_files'
   match "/incomplete_files" => "nu_core_files#destroy_incomplete_files", via: 'delete', as: 'destroy_incomplete_files'
 
+  put '/item_display' => 'users#update', as: 'view_pref'
+
   get '/employees/:id' => 'employees#show', as: 'employee'
+  get '/employees/:id/files' => 'employees#list_files', as: 'employee_files'
   get '/my_drs' => 'employees#personal_graph', as: 'personal_graph'
 
   namespace :admin do
@@ -73,7 +76,6 @@ Drs::Application.routes.draw do
   devise_for :users, :controllers => { :omniauth_callbacks => "users/omniauth_callbacks" }
 
   # SUFIA
-  resources :users, only: [:index, :show, :edit, :update], as: :profiles
   # Downloads controller route
   resources :downloads, :only => "show"
   # "Notifications" route for catalog index view
