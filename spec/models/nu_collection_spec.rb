@@ -43,6 +43,10 @@ describe NuCollection do
   end
 
   describe "User parent" do
+    before do
+      Employee.destroy_all
+    end
+
     let(:employee) { FactoryGirl.create(:employee) }
 
     it "can be set via nuid" do
