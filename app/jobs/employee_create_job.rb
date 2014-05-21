@@ -33,6 +33,10 @@ class EmployeeCreateJob
     # Tag the employee as completed and resave to Fedora.
     emp.employee_is_complete
     emp.save!
+
+    u = User.find_by_nuid(self.nuid)
+    u.employee_id = emp.pid
+    u.save!
   end
 
   private
