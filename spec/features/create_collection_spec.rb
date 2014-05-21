@@ -9,6 +9,7 @@ feature "Creating a collection" do
     @root.mass_permissions = 'public'
     @root.title = "Root Collection"
     @root.save!
+    Employee.destroy_all
     @employee = FactoryGirl.create(:employee)
   end
 
