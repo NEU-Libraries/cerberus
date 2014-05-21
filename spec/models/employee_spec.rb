@@ -120,4 +120,8 @@ describe Employee do
       end
     end
   end
+
+  after :all do
+    Employee.destroy_all
+  end
 end

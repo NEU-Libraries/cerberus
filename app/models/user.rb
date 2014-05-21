@@ -41,6 +41,15 @@ class User < ActiveRecord::Base
     return user
   end
 
+  def employee_id
+    @employee = Employee.find_by_nuid(self.nuid)
+    if !@employee.nil?
+      return @employee.pid
+    end
+    # To prevent a nil error in user_util_links until I have a better solution
+    return 'neu:0'
+  end
+
   def ability
     @ability ||= Ability.new(self)
   end
