@@ -43,6 +43,7 @@ describe NuCollection do
   end
 
   describe "User parent" do
+    let(:employee) { FactoryGirl.create(:employee) }
 
     it "can be set via nuid" do
       collection.user_parent = employee.nuid
