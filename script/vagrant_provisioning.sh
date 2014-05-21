@@ -60,6 +60,10 @@ rvm install ruby-2.0.0-p481
 rvm use ruby-2.0.0-p481
 source /home/vagrant/.rvm/scripts/rvm
 
+echo "Temporary github credentials"
+git config --global user.name "Change Me"
+git config --global user.email "change@me.com"
+
 echo "Setting up DRS"
 cd /home/vagrant/drs
 gem install bundler
@@ -84,6 +88,5 @@ sudo chsh -s /bin/zsh vagrant
 
 echo "Setting timezone for vm so embargo doesn't get confused"
 cd /home/vagrant
-sudo rm -f /etc/localtime
-sudo ln -s /usr/share/zoneinfo/US/Eastern /etc/localtime
-sudo tzdata-update
+echo 'export TZ=America/New_York' >> /home/vagrant/.zshrc
+echo 'export TZ=America/New_York' >> /home/vagrant/.bashrc
