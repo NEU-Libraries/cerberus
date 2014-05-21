@@ -111,6 +111,7 @@ class NuCoreFilesController < ApplicationController
   # routed to /files/:id
   def show
     @nu_core_file = @set = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first)
+    @mods = render_mods_display(NuCoreFile.find(params[:id]))
     @thumbs = @nu_core_file.thumbnail_list
     @page_title = @nu_core_file.title
   end
