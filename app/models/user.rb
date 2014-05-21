@@ -14,7 +14,7 @@ class User < ActiveRecord::Base
          :recoverable, :rememberable, :trackable, :validatable, :omniauthable, :omniauth_providers => [:shibboleth]
   # attr_accessible :title, :body
 
-  attr_accessible :password, :password_confirmation, :remember_me, :nuid, :full_name, :view_pref
+  attr_accessible :password, :password_confirmation, :remember_me, :nuid, :full_name, :view_pref, :employee_id
   delegate :can?, :cannot?, :to => :ability
 
   acts_as_messageable
@@ -41,13 +41,15 @@ class User < ActiveRecord::Base
     return user
   end
 
-  def employee_id
+  def employee_pid
+    if !self.employee_id.blank?
+      return self.employee_pid
+    end
+
     @employee = Employee.find_by_nuid(self.nuid)
     if !@employee.nil?
       return @employee.pid
     end
-    # To prevent a nil error in user_util_links until I have a better solution
-    return 'neu:0'
   end
 
   def ability
