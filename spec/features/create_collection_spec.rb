@@ -1,6 +1,7 @@
 require 'spec_helper'
 
 feature "Creating a collection" do
+
   before :all do
     @root = Community.create(pid: "neu:1")
     @root.identifier = "neu:1"
@@ -8,11 +9,11 @@ feature "Creating a collection" do
     @root.mass_permissions = 'public'
     @root.title = "Root Collection"
     @root.save!
+    @employee = FactoryGirl.create(:employee)
   end
 
   let(:user) { FactoryGirl.create(:user) }
   let(:bill) { FactoryGirl.create(:bill) }
-  let(:employee) { FactoryGirl.create :employee }
 
   describe "Unsigned Access Protection" do
 
