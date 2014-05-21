@@ -1,6 +1,6 @@
 %figure
   - if @nu_core_file.image?
-    -if @nu_core_file.thumbnail
+    -if @thumbs.length > 0
       = render partial: 'shared/thumbnails/full_picture'
     -else
       %i.icon-picture.icon-4x.icon-border.drs-icon-figure
@@ -15,12 +15,12 @@
       %source{src: download_path(@nu_core_file, datastream_id: 'mp3'), type: "audio/mpeg"}
       Your browser does not support the audio tag.
   - elsif @nu_core_file.pdf?
-    -if @nu_core_file.thumbnail
+    -if @thumbs.length > 0
       = render partial: 'shared/thumbnails/full_picture'
     -else
       %i.icon-picture.icon-4x.icon-border.drs-icon-figure
   - else
-    -if @nu_core_file.thumbnail
+    -if @thumbs.length > 0
       = render partial: 'shared/thumbnails/full_picture'
     -else
       %i.icon-file.icon-4x.icon-border.drs-icon-figure

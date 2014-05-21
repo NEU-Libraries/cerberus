@@ -1,7 +1,7 @@
-- layout_class =  thumbs.length > 5 ?  'span12' : 'span6'
+- layout_class =  'span6'
 
 = render :partial => 'nu_core_files/breadcrumbs'
-%article{class: ['drs-item', 'drs-item-full', @nu_core_file.type ],  data: { drsitem: @nu_core_file.pid } }
+%article{class: ['drs-item', 'drs-item-full'],  data: { drsitem: @nu_core_file.pid } }
   %header
     / %h1.page-header= @nu_core_file
     %h1.page-header= kramdown_parse(@nu_core_file.title)
@@ -14,7 +14,7 @@
       .drs-item-add-details
         / = render partial: 'show_descriptions'
         / = render partial: 'show_details'
-        = render_mods_display(@nu_core_file).to_html.html_safe
+        / = render_mods_display(@nu_core_file).to_html.html_safe
       -if @nu_core_file.content_objects
         %section.drs-item-derivatives
           = render partial: 'show_derivatives', locals: {contents: @nu_core_file.content_objects}
