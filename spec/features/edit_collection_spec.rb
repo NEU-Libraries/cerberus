@@ -10,6 +10,7 @@ feature "Editing collections" do
     @root.save!
     @user = FactoryGirl.create(:bill)
     @collection = FactoryGirl.create(:valid_owned_by_bill)
+    Employee.destroy_all
     @employee = FactoryGirl.create(:employee)
   end
 
