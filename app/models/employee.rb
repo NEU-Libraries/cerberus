@@ -42,7 +42,10 @@ class Employee < ActiveFedora::Base
 
     if results.length != 0
       Employee.safe_employee_lookup(results.first["id"])
+    else
+      raise Exceptions::NoSuchNuidError.new(nuid)
     end
+
   end
 
   def self.exists_by_nuid?(nuid)

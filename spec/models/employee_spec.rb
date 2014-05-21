@@ -63,6 +63,10 @@ describe Employee do
 
       Employee.find_by_nuid("findme@examples.com").pid.should == a.pid
     end
+
+    it "raises an error if no Employee with the given nuid exists" do
+      expect { Employee.find_by_nuid("neu:nopenope") }.to raise_error Exceptions::NoSuchNuidError
+    end
   end
 
   describe "solrization" do
