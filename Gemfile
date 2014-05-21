@@ -39,11 +39,11 @@ gem 'resque', :require => 'resque/server'
 # This is global because it's needed for some fixture generation.
 gem "factory_girl_rails", :require => false
 gem 'mods_display'
+gem 'parseconfig'
+gem 'nokogiri', '~> 1.6.2.1'
 # Monitoring
-gem 'newrelic_rpm'
 gem 'lograge'
 gem 'exception_notification'
-gem 'parseconfig'
 
 # Gems used only for assets and not required
 # in production environments by default.
