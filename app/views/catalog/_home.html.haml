@@ -46,6 +46,7 @@
     - if @recent_documents.length > 0
       %section{class: ["drs-items-grid", "drs-items"] }
         - @recent_documents.each do |f|
+          - @thumbs = f.thumbnail_list
           =render partial: "shared/drs_item/drs_item", locals: { item: f }
     - else
       .alert.alert-info
