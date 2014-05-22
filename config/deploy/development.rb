@@ -47,14 +47,14 @@ namespace :deploy do
   end
 
   desc "Clearing cache"
-  task :reset_data do
+  task :clear_cache do
     on roles(:app), :in => :sequence, :wait => 5 do
       execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake cache:clear)"
     end
   end
 
   desc "Resetting data"
-  task :clear_cache do
+  task :reset_data do
     on roles(:app), :in => :sequence, :wait => 5 do
       execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake reset_data)"
     end
@@ -102,6 +102,7 @@ end
 # This will be necessary for any hook that needs access to ruby.
 # Note the use of the rvm-auto shell in the task definition.
 before 'deploy:reset_data', 'rvm1:hook'
+before 'deploy:assets_kludge', 'deploy:clear_cache'
 
 # These hooks execute in the listed order after the deploy:updating task
 # occurs.  This is the task that handles refreshing the app code, so this
@@ -115,7 +116,6 @@ after 'deploy:updating', 'deploy:migrate'
 after 'deploy:updating', 'deploy:whenever'
 after 'deploy:updating', 'deploy:assets_kludge'
 after 'deploy:updating', 'deploy:restart'
-after 'deploy:finished', 'deploy:clear_cache'
 #after 'deploy:finished', 'deploy:reset_data'
 after 'deploy:finished', 'deploy:start_solrizerd'
 
