@@ -332,8 +332,24 @@ GEM
     rdoc (3.12.2)
       json (~> 1.4)
     redis (3.0.4)
+    redis-actionpack (3.2.4)
+      actionpack (~> 3.2.0)
+      redis-rack (~> 1.4.4)
+      redis-store (~> 1.1.4)
+    redis-activesupport (3.2.5)
+      activesupport (~> 3.2.0)
+      redis-store (~> 1.1.0)
     redis-namespace (1.3.1)
       redis (~> 3.0.0)
+    redis-rack (1.4.4)
+      rack (~> 1.4.0)
+      redis-store (~> 1.1.4)
+    redis-rails (3.2.4)
+      redis-actionpack (~> 3.2.4)
+      redis-activesupport (~> 3.2.4)
+      redis-store (~> 1.1.4)
+    redis-store (1.1.4)
+      redis (>= 2.2)
     resque (1.23.1)
       multi_json (~> 1.0)
       redis-namespace (~> 1.0)
@@ -488,6 +504,7 @@ DEPENDENCIES
   parseconfig
   rails (= 3.2.13)
   rb-readline
+  redis-rails
   resque
   resque-pool (= 0.3.0)
   resque_spec
