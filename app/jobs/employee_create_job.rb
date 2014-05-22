@@ -35,8 +35,10 @@ class EmployeeCreateJob
     emp.save!
 
     u = User.find_by_nuid(self.nuid)
-    u.employee_id = emp.pid
-    u.save!
+    if !u.nil?
+      u.employee_id = emp.pid
+      u.save!
+    end
   end
 
   private
