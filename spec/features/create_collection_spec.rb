@@ -3,16 +3,21 @@ require 'spec_helper'
 feature "Creating a collection" do
 
   before :all do
+    User.all.each do |user|
+      user.destroy
+    end
+
+    Employee.destroy_all
+
     @root = Community.create(pid: "neu:1")
     @root.identifier = "neu:1"
     @root.rightsMetadata.permissions({person: '000000001'}, 'edit')
     @root.mass_permissions = 'public'
     @root.title = "Root Collection"
     @root.save!
-    Employee.destroy_all
-    @employee = FactoryGirl.create(:employee)
   end
 
+  let(:employee)   { FactoryGirl.create(:employee) }
   let(:user) { FactoryGirl.create(:user) }
   let(:bill) { FactoryGirl.create(:bill) }
 

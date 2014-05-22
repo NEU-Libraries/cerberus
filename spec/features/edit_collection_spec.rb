@@ -2,6 +2,7 @@ require 'spec_helper'
 
 feature "Editing collections" do
   before :all do
+    Employee.destroy_all
     @root = Community.create(pid: "neu:1")
     @root.identifier = "neu:1"
     @root.rightsMetadata.permissions({person: '000000001'}, 'edit')
@@ -10,10 +11,9 @@ feature "Editing collections" do
     @root.save!
     @user = FactoryGirl.create(:bill)
     @collection = FactoryGirl.create(:valid_owned_by_bill)
-    Employee.destroy_all
-    @employee = FactoryGirl.create(:employee)
   end
 
+  let(:employee)   { FactoryGirl.create(:employee) }
   # Assign reused lookup code to clean up test appearance a bit.
   let(:perms) { page.all('div.permission') }
   let(:first_perm) { page.all('div.permission').first }
