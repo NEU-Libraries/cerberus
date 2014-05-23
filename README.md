@@ -25,7 +25,7 @@ A web application derived from the [Sufia](http://github.com/projecthydra/sufia)
 1.  Run the following commands:
   1.  `rake jetty:start`
   2.  `redis-server`
-  3.  `COUNT=4 QUEUE=* rake environment resque:work`
+  3.  `COUNT=4 QUEUE=* rake environment resque:workers`
   4.  `rails server` 
 
 
