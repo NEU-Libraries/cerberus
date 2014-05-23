@@ -26,12 +26,6 @@ class CatalogController < ApplicationController
   def index
     super
     recent
-    #also grab my recent docs too
-    recent_me
-    unless has_search_parameters?
-      @page_title = "Home"
-      @root = Community.find(Rails.configuration.root_community_id)
-    end
   end
 
   def recent
