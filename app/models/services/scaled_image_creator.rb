@@ -46,7 +46,9 @@ class ScaledImageCreator
       end
 
       img = Magick::Image.from_blob(master.content.content).first
+      img.format = "JPEG"
       scaled_img = img.resize(size)
+
 
       target.add_file(scaled_img.to_blob, 'content', master.content.label)
       target.save!
