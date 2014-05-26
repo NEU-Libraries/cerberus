@@ -32,6 +32,10 @@ module Drs
       return nil
     end
 
+    def non_sort
+      Array(self[Solrizer.solr_name("title_info_non_sort", :stored_searchable)]).first
+    end
+
     def title_or_label
       title || label
     end

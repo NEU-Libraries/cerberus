@@ -50,6 +50,14 @@ module Drs
         self.DC.nu_title.first
       end
 
+      def non_sort=(string)
+        if_mods_exists { self.mods.title_info.non_sort = string }
+      end
+
+      def non_sort
+        if_mods_exists { return self.mods.title_info.non_sort.first }
+      end
+
       def dcmi_type=(string)
         if_mods_exists { self.mods.type_of_resource = string }
         if_DC_exists { self.DC.nu_type = string }

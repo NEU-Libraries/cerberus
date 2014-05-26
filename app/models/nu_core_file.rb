@@ -25,7 +25,7 @@ class NuCoreFile < ActiveFedora::Base
   has_metadata name: 'mods', type: NuModsDatastream
   has_metadata :name => "descMetadata", :type => GenericFileRdfDatastream
 
-  attr_accessible :title, :identifier, :description, :date_of_issue
+  attr_accessible :title, :non_sort, :identifier, :description, :date_of_issue
   attr_accessible :keywords, :creators, :depositor, :type
 
   before_destroy :purge_content_bearing_objects
