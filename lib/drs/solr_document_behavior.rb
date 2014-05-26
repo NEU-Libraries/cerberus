@@ -32,6 +32,10 @@ module Drs
       return nil
     end
 
+    def updated_at
+      Array(self["system_modified_dtsi"]).first
+    end
+
     def non_sort
       Array(self[Solrizer.solr_name("title_info_non_sort", :stored_searchable)]).first
     end
