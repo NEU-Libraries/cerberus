@@ -16,7 +16,7 @@
 
       = render partial: 'shared/icon', locals: { class_string: 'icon-group' }
 
-    = @set.title
+    = kramdown_parse(@set.title)
     %small
       = @set.type_label
   - if !@set.thumbnail_list.empty?
