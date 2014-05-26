@@ -112,9 +112,9 @@ class NuCoreFilesController < ApplicationController
   def show
     @nu_core_file = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first)
 
-    Rails.cache.fetch("/mods/#{@nu_core_file.pid}-#{@nu_core_file.updated_at}", :expires_in => 12.hours) do
-      @mods = render_mods_display(NuCoreFile.find(params[:id])).to_html
-    end
+    @mods = Rails.cache.fetch("/mods/#{@nu_core_file.pid}-#{@nu_core_file.updated_at}", :expires_in => 12.hours) do
+              render_mods_display(NuCoreFile.find(params[:id])).to_html
+            end
 
     @thumbs = @nu_core_file.thumbnail_list
     @page_title = @nu_core_file.title
