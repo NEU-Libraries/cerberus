@@ -42,7 +42,13 @@ $(document).ready ->
       removeFormFields()
       imageMetadataPartial()
       dateOfIssuePartial()
+      addStartsWith()
       return
+
+    addStartsWith = ->
+      unless typeof String::startsWith is "function"
+        String::startsWith = (str) ->
+          @slice(0, str.length) is str
 
     dateOfIssuePartial = ->
       if $('#nu_core_file_date_of_issue').length > 0
