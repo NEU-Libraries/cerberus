@@ -19,7 +19,7 @@
       .drs-item-add-details
         / = render partial: 'show_descriptions'
         / = render partial: 'show_details'
-        = @mods.html_safe
+        = @mods
       -if @nu_core_file.content_objects
         %section.drs-item-derivatives
           = render partial: 'show_derivatives', locals: {contents: @nu_core_file.content_objects}
