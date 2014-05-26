@@ -1,10 +1,15 @@
 - layout_class =  'span6'
 
-= render :partial => 'nu_core_files/breadcrumbs'
+%ul.breadcrumb
+  - breadcrumb_to_root(@nu_core_file).each do |breadcrumb|
+    =breadcrumb
+
 %article{class: ['drs-item', 'drs-item-full'],  data: { drsitem: @nu_core_file.pid } }
   %header
     / %h1.page-header= @nu_core_file
-    %h1.page-header= kramdown_parse(@nu_core_file.title)
+    %h1.page-header
+      = "#{@nu_core_file.non_sort} "
+      = kramdown_parse(@nu_core_file.title)
 
   %section.row
     %div{class: layout_class}
