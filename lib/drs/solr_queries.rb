@@ -19,7 +19,7 @@ module Drs
 
     def combined_set_children
       core_file_model = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:NuCoreFile"
-      combined_children_query_result = ActiveFedora::SolrService.query("has_affiliation_ssim:#{self.full_self_id} OR is_member_of_ssim:#{full_self_id} NOT has_model_ssim:#{core_file_model}")
+      combined_children_query_result = ActiveFedora::SolrService.query("has_affiliation_ssim:#{self.full_self_id} OR is_member_of_ssim:#{self.full_self_id} NOT has_model_ssim:#{core_file_model}")
       combined_children_query_result.map { |x| SolrDocument.new(x) }
     end
 
@@ -62,14 +62,6 @@ module Drs
       employee_model = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:Employee"
       query_result = ActiveFedora::SolrService.query("has_affiliation_ssim:\"#{self.full_self_id}\" AND has_model_ssim:\"#{employee_model}\"")
       query_result.map { |x| SolrDocument.new(x) }
-    end
-
-    def user_root_collection
-      if self.klass == "Employee"
-        nu_collection_model = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:NuCollection"
-        root_collection_result = ActiveFedora::SolrService.query("is_member_of_ssim:#{self.full_self_id} AND has_model_ssim:#{nu_collection_model}")
-        return SolrDocument.new(root_collection_result.first)
-      end
     end
 
     def find_user_root_collections
@@ -150,6 +142,46 @@ module Drs
       end
 
       return smart_collection_list
+    end
+
+    def user_root_collection
+      if self.klass == "Employee"
+        nu_collection_model = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:NuCollection"
+        root_collection_result = ActiveFedora::SolrService.query("is_member_of_ssim:#{self.full_self_id} AND has_model_ssim:#{nu_collection_model} AND smart_collection_type_tesim:\"User Root\"")
+        return SolrDocument.new(root_collection_result.first)
+      end
+    end
+
+    def user_smart_collections
+      if self.klass == "Employee"
+        smart_collection_list = []
+
+        urc = self.user_root_collection
+        csc = urc.combined_set_children
+
+        csc.each do |set|
+          if !set.smart_collection_type.nil?
+            smart_collection_list << set
+          end
+        end
+        return smart_collection_list
+      end
+    end
+
+    def user_personal_collections
+      if self.klass == "Employee"
+        personal_collection_list = []
+
+        urc = self.user_root_collection
+        csc = urc.combined_set_children
+
+        csc.each do |set|
+          if set.smart_collection_type.nil?
+            personal_collection_list << set
+          end
+        end
+        return personal_collection_list
+      end
     end
 
   end
