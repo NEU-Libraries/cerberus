@@ -32,7 +32,12 @@ module Drs
       # Checks if the current user can read the fedora record
       # returned by a typical resource request.
       def can_read?
-        record = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first)
+        begin
+          record = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first)
+        rescue NoMethodError
+          render "error/object_404" and return
+          # render_404(ActiveFedora::ObjectNotFoundError.new) and return
+        end
 
         if current_user.nil?
           record.public? ? true : render_403

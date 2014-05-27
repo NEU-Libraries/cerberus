@@ -38,21 +38,6 @@ describe EmployeeCreateJob do
     employee.user_root_collection.should be_an_instance_of NuCollection
     bill.can?(:edit, employee.user_root_collection).should be true
 
-    employee.research_publications_collection.should be_an_instance_of SolrDocument
-    bill.can?(:edit, employee.research_publications_collection).should be true
-
-    employee.other_publications_collection.should be_an_instance_of SolrDocument
-    bill.can?(:edit, employee.other_publications_collection).should be true
-
-    employee.datasets_collection.should be_an_instance_of SolrDocument
-    bill.can?(:edit, employee.datasets_collection).should be true
-
-    employee.presentations_collection.should be_an_instance_of SolrDocument
-    bill.can?(:edit, employee.presentations_collection).should be true
-
-    employee.learning_objects_collection.should be_an_instance_of SolrDocument
-    bill.can?(:edit, employee.learning_objects_collection).should be true
-
     # Employee is tagged as complete
     employee.is_building?.should be false
 
