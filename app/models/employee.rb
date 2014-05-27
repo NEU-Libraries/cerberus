@@ -114,7 +114,7 @@ class Employee < ActiveFedora::Base
         all_pids = query_result.map { |r| r["id"] }
         raise Exceptions::MultipleMatchError.new(all_pids, nuid)
       elsif query_result.length == 0 && retries < 3
-        sleep 3
+        sleep 1
         nuid_unique_query(nuid, retries + 1)
       else
         return query_result
