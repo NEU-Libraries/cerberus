@@ -106,16 +106,13 @@ class Employee < ActiveFedora::Base
 
     # Query Solr for the given nuid.
     # Raise an error if multiple hits are returned
-    def self.nuid_unique_query(nuid, retries=0)
+    def self.nuid_unique_query(nuid)
       escaped_param = ActiveFedora::SolrService.escape_uri_for_query(nuid)
       query_result = ActiveFedora::SolrService.query("active_fedora_model_ssi:Employee AND nuid_tesim:(#{escaped_param})", :rows=>999)
 
       if query_result.length > 1
         all_pids = query_result.map { |r| r["id"] }
         raise Exceptions::MultipleMatchError.new(all_pids, nuid)
-      elsif query_result.length == 0 && retries < 3
-        sleep 1
-        nuid_unique_query(nuid, retries + 1)
       else
         return query_result
       end
