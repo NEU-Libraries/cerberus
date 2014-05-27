@@ -32,6 +32,10 @@ module Drs
       return nil
     end
 
+    def nuid
+      Array(self[Solrizer.solr_name("nuid", :stored_searchable)]).first
+    end
+
     def updated_at
       Array(self["system_modified_dtsi"]).first
     end

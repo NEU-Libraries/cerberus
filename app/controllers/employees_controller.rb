@@ -14,10 +14,10 @@ class EmployeesController < ApplicationController
   include BlacklightAdvancedSearch::ParseBasicQ
   include BlacklightAdvancedSearch::Controller
 
-  before_filter :authenticate_user!, only: [:personal_graph]
+  before_filter :authenticate_user!, only: [:personal_graph, :personal_files]
 
   def show
-    @employee = Employee.find(params[:id])
+    @employee = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first)
 
     if !current_user.nil?
       if current_user.nuid == @employee.nuid
@@ -29,10 +29,8 @@ class EmployeesController < ApplicationController
   end
 
   def list_files
-    @employee = Employee.find(params[:id])
-    @nuid = @employee.nuid
-
     @employee = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first)
+    @nuid = @employee.nuid
 
     self.solr_search_params_logic += [:exclude_unwanted_models]
     self.solr_search_params_logic += [:find_employees_files]
@@ -41,8 +39,19 @@ class EmployeesController < ApplicationController
   end
 
   def personal_graph
-    @employee = current_users_employee_id
+    @employee = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{current_user.employee_pid}\"").first)
     @page_title = "My DRS"
+  end
+
+  def personal_files
+    @employee = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{current_user.employee_pid}\"").first)
+    @nuid = @employee.nuid
+
+    self.solr_search_params_logic += [:exclude_unwanted_models]
+    self.solr_search_params_logic += [:find_employees_files]
+
+    (@response, @document_list) = get_search_results
+    render :template => 'employees/list_files'
   end
 
   def attach_employee
@@ -58,15 +67,5 @@ class EmployeesController < ApplicationController
     def exclude_unwanted_models(solr_parameters, user_parameters)
       solr_parameters[:fq] ||= []
       solr_parameters[:fq] << "#{Solrizer.solr_name("has_model", :symbol)}:\"info:fedora/afmodel:NuCoreFile\""
-    end
-
-    def current_users_employee_id
-      begin
-        return Employee.find_by_nuid(current_user.nuid)
-      rescue ActiveFedora::ObjectNotFoundError => exception
-        flash[:error] = "You have not been granted personal directories"
-        ExceptionNotifier.notify_exception(exception)
-        redirect_to root_path
-      end
     end
 end
