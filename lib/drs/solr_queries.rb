@@ -160,7 +160,7 @@ module Drs
         csc = urc.combined_set_children
 
         csc.each do |set|
-          if !set.smart_collection_type.nil?
+          if !set.smart_collection_type.nil? && set.smart_collection_type != "miscellany"
             smart_collection_list << set
           end
         end
@@ -176,7 +176,7 @@ module Drs
         csc = urc.combined_set_children
 
         csc.each do |set|
-          if set.smart_collection_type.nil?
+          if set.smart_collection_type == "miscellany"
             personal_collection_list << set
           end
         end
