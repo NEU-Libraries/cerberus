@@ -32,7 +32,7 @@ class NuCoreFilesController < ApplicationController
   rescue_from ActiveFedora::ObjectNotFoundError do |exception|
     @obj_type = "Object"
     ExceptionNotifier.notify_exception(exception)
-    render "error/object_404"
+    render_404(ActiveFedora::ObjectNotFoundError.new) and return
   end
 
   def destroy_incomplete_files

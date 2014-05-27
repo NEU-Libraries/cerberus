@@ -33,7 +33,7 @@ class NuCollectionsController < SetsController
   rescue_from Blacklight::Exceptions::InvalidSolrID, ActiveFedora::ObjectNotFoundError do |exception|
     @obj_type = "Community"
     ExceptionNotifier.notify_exception(exception)
-    render "error/object_404"
+    render_404(ActiveFedora::ObjectNotFoundError.new) and return
   end
 
   rescue_from Hydra::AccessDenied, CanCan::AccessDenied do |exception|
