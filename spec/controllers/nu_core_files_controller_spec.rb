@@ -64,7 +64,7 @@ describe NuCoreFilesController do
   describe "GET #show" do 
     it "renders the 404 page for objects that do not exist" do 
       get :show, { id: 'neu:adsfasdfa' } 
-      expect(response).to render_template('error/object_404')
+      expect(response).to render_template('error/404')
 
       DrsImpression.count.should == 0
     end

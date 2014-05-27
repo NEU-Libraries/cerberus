@@ -125,7 +125,7 @@ describe NuCollectionsController do
 
     it "renders the 404 template for objects that don't exist" do
       get :show, { id: "neu:xcvsxcvzc" }
-      expect(response).to render_template('error/object_404')
+      expect(response).to render_template('error/404')
     end
   end
 
