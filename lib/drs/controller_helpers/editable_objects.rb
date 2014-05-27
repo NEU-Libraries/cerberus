@@ -35,8 +35,7 @@ module Drs
         begin
           record = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first)
         rescue NoMethodError
-          render "error/object_404" and return
-          # render_404(ActiveFedora::ObjectNotFoundError.new) and return
+          render_404(ActiveFedora::ObjectNotFoundError.new) and return
         end
 
         if current_user.nil?
