@@ -39,14 +39,12 @@ class EmployeesController < ApplicationController
   end
 
   def personal_graph
-    e_pid = current_user.employee_pid
-    @employee = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{e_pid}\"").first)
+    @employee = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{current_user.employee_pid}\"").first)
     @page_title = "My DRS"
   end
 
   def personal_files
-    e_pid = current_user.employee_pid
-    @employee = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{e_pid}\"").first)
+    @employee = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{current_user.employee_pid}\"").first)
     @nuid = @employee.nuid
 
     self.solr_search_params_logic += [:exclude_unwanted_models]
