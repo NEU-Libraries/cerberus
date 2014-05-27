@@ -1,5 +1,5 @@
 - content_for :page_header do
   %h1.page-header
-    = "#{@employee.name}"
+    = "#{@employee.employee_name}"
 
-= render partial: "show_personal_graph", locals: { :generated_smart_collections => @employee.sorted_smart_collections, :user_smart_collections => @employee.personal_collections, :editable => false }
+= render partial: "show_personal_graph", locals: { :generated_smart_collections => @employee.user_smart_collections, :user_smart_collections => @employee.user_personal_collections, :editable => false }
