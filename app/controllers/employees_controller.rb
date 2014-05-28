@@ -39,12 +39,12 @@ class EmployeesController < ApplicationController
   end
 
   def personal_graph
-    @employee = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{current_user.employee_pid}\"").first)
+    fetch_employee
     @page_title = "My DRS"
   end
 
   def personal_files
-    @employee = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{current_user.employee_pid}\"").first)
+    fetch_employee
     @nuid = @employee.nuid
 
     self.solr_search_params_logic += [:exclude_unwanted_models]
@@ -58,6 +58,21 @@ class EmployeesController < ApplicationController
   end
 
   private
+
+    def fetch_employee(retries=0)
+      begin
+        e_pid = current_user.employee_pid
+      rescue Exceptions::NoSuchNuidError
+        if retries < 3
+          sleep 1
+          fetch_employee(retries + 1)
+        else
+          raise Exceptions::NoSuchNuidError.new(curren_user.nuid)
+        end
+      end
+
+      @employee = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{current_user.employee_pid}\"").first)
+    end
 
     def find_employees_files(solr_parameters, user_parameters)
       solr_parameters[:fq] ||= []
