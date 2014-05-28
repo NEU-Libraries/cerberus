@@ -38,8 +38,35 @@ class NuCoreFile < ActiveFedora::Base
 
   delegate_to :descMetadata, [:rights, :resource_type]
 
+  # The following two modifications are to account for the fact that
+  # we're getting names unparsed in "lastName, firstName" from Fedora
+  # on batch load. This parses that into seperate fields to match our
+  # input form.
+
   mods_xml_source do |model|
-    model.mods.to_xml
+    x = Nokogiri::XML(model.mods.to_xml)
+    x.xpath('//mods:namePart')[0].remove
+    x.to_xml
+  end
+
+  def to_solr(solr_doc = Hash.new())
+
+    (0..self.mods.personal_name.length).each do |i|
+      fn = self.mods.personal_name(i).name_part_given
+      ln = self.mods.personal_name(i).name_part_family
+      full_name = self.mods.personal_name(i).name_part
+
+      if !full_name.blank? && !(fn.any? && ln.any?)
+        name_array = Namae.parse full_name.first
+        name_obj = name_array[0]
+        self.mods.personal_name(i).name_part_given = name_obj.given
+        self.mods.personal_name(i).name_part_family = name_obj.family
+        self.save!
+      end
+    end
+
+    super(solr_doc)
+    return solr_doc
   end
 
   def pdf?

@@ -2,10 +2,13 @@
   -if !item.creators.blank?
     %dl.drs-item-creators
       - item.creators.each_with_index do | creator, i |
-        - if i < 2 and !creator.blank?
-          %h5.drs-item-creator
-            = kramdown_parse(creator)
-      - if item.creators.length > 3
+        %h5.drs-item-creator
+          - if i < 2 and !creator.blank?
+            - if i == 0 && item.creators.length > 1
+              = "#{kramdown_parse(creator)},"
+            -else
+              = kramdown_parse(creator)
+      - if item.creators.length > 2
         &hellip;
   - if !item.description.blank?
     %dl.drs-item-abstract-list
