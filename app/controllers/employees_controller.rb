@@ -67,7 +67,7 @@ class EmployeesController < ApplicationController
           sleep 1
           fetch_employee(retries + 1)
         else
-          raise Exceptions::NoSuchNuidError.new(curren_user.nuid)
+          raise Exceptions::NoSuchNuidError.new(current_user.nuid)
         end
       end
 
