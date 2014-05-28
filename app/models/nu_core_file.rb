@@ -42,6 +42,27 @@ class NuCoreFile < ActiveFedora::Base
     model.mods.to_xml
   end
 
+  def to_solr(solr_doc = Hash.new())
+
+    (0..self.mods.personal_name.length).each do |i|
+      fn = self.mods.personal_name(i).name_part_given
+      ln = self.mods.personal_name(i).name_part_family
+      full_name = self.mods.personal_name(i).name_part
+
+      if !full_name.blank? && !(fn.any? && ln.any?)
+        name_array = Namae.parse full_name.first
+        name_obj = name_array[0]
+        self.mods.personal_name(i).name_part_given = name_obj.given
+        self.mods.personal_name(i).name_part_family = name_obj.family
+        self.mods.personal_name(i).name_part = nil
+        self.save!
+      end
+    end
+
+    super(solr_doc)
+    return solr_doc
+  end
+
   def pdf?
     self.class.pdf_mime_types.include? self.mime_type
   end

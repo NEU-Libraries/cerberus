@@ -191,18 +191,6 @@ class NuModsDatastream < ActiveFedora::OmDatastream
     (0..self.personal_name.length).each do |i|
       fn = self.personal_name(i).name_part_given
       ln = self.personal_name(i).name_part_family
-      full_name = self.personal_name(i).name_part
-
-      if !full_name.blank? && !(fn.any? && ln.any?)
-        name_array = Namae.parse full_name
-        name_obj = name_array[0]
-        self.personal_name(i).name_part_given = name_obj.given
-        self.personal_name(i).name_part_family = name_obj.family
-        self.personal_name(i).name_part = ""
-      end
-
-      fn = self.personal_name(i).name_part_given
-      ln = self.personal_name(i).name_part_family
 
       if fn.any? && ln.any?
         full_names << "#{fn.first} #{ln.first}"
