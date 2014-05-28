@@ -74,7 +74,8 @@ module Drs
     end
 
     def creators
-      Array(self[Solrizer.solr_name("desc_metadata__creator")])
+      # Array(self[Solrizer.solr_name("desc_metadata__creator")])
+      Array(self[Solrizer.solr_name("personal_creators")])
     end
 
     def type_label
