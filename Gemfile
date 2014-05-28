@@ -42,6 +42,7 @@ gem "factory_girl_rails", :require => false
 gem 'mods_display'
 gem 'parseconfig'
 gem 'nokogiri', '~> 1.6.2.1'
+gem 'namae'
 # Monitoring
 gem 'lograge'
 gem 'exception_notification'
