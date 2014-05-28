@@ -47,13 +47,9 @@ class User < ActiveRecord::Base
       return self.employee_id
     end
 
-    begin
-      @employee = Employee.find_by_nuid(self.nuid)
-      if !@employee.nil?
-        return @employee.pid
-      end
-    rescue Exceptions::NoSuchNuidError
-      return nil
+    @employee = Employee.find_by_nuid(self.nuid)
+    if !@employee.nil?
+      return @employee.pid
     end
   end
 
