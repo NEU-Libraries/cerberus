@@ -1,5 +1,5 @@
-rails_env   = ENV['RAILS_ENV'] or raise "RAILS_ENV not set"
-rails_root  = ENV['RAILS_ROOT'] or raise "RAILS_ROOT not set"
+rails_env   = ENV['RAILS_ENV']  || "development"
+rails_root  = ENV['RAILS_ROOT'] || "/home/vagrant/drs"
 num_workers = 4
 
 num_workers.times do |num|
@@ -9,8 +9,8 @@ num_workers.times do |num|
     w.group    = 'resque'
     w.interval = 30.seconds
     w.pid_file = "#{rails_root}/tmp/pids/#{w.name}.pid"
-    w.env      = {"QUEUE"=>"*", "RAILS_ENV"=>rails_env, 'PIDFILE' => w.pid_file}
-    w.start    = "bundle exec rake environment resque:work &"
+    w.env      = {"QUEUE"=>"*", "RAILS_ENV"=>rails_env}
+    w.start    = "rake -f #{rails_root}/Rakefile environment resque:work"
 
     # restart if memory gets too high
     w.transition(:up, :restart) do |on|

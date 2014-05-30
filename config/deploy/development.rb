@@ -27,7 +27,7 @@ namespace :god do
   end
 
   def god_command
-    "cd #{current_path}; bundle exec god"
+    "cd #{release_path}; bundle exec god"
   end
 
   desc "Stop god"
@@ -40,7 +40,7 @@ namespace :god do
   desc "Start god"
   task :start do
     config_file = "#{current_path}/config/resque.god"
-    environment = { :RAILS_ENV => rails_env, :RAILS_ROOT => current_path }
+    environment = { :RAILS_ENV => rails_env, :RAILS_ROOT => release_path }
     run "#{god_command} -c #{config_file}", :env => environment
   end
 end
