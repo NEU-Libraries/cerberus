@@ -54,7 +54,7 @@ class NuCoreFile < ActiveFedora::Base
       ln = self.mods.personal_name(i).name_part_family
       full_name = self.mods.personal_name(i).name_part
 
-      if !full_name.blank? && !(fn.any? && ln.any?)
+      if !full_name.blank? && full_name.first.length > 0
         name_array = Namae.parse full_name.first
         name_obj = name_array[0]
         self.mods.personal_name(i).name_part_given = name_obj.given
