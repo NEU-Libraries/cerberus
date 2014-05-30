@@ -39,7 +39,7 @@ gem "whenever", :require => false
 gem 'resque', :require => 'resque/server'
 # This is global because it's needed for some fixture generation.
 gem "factory_girl_rails", :require => false
-gem 'mods_display'
+gem 'mods_display', :git => 'https://github.com/NEU-Libraries/mods_display.git', :ref => '14a809d26574a00a68d6640102a45642161e53e4'
 gem 'parseconfig'
 gem 'nokogiri', '~> 1.6.2.1'
 gem 'namae'
