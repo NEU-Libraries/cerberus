@@ -247,9 +247,6 @@ class NuCoreFilesController < ApplicationController
       nu_core_file.depositor = user.nuid
       nu_core_file.tag_as_in_progress
       nu_core_file.title = file.original_filename
-      # nu_core_file.date_uploaded = Date.today
-      # nu_core_file.date_modified = Date.today
-      # nu_core_file.creator = user.name
       nu_core_file.tmp_path = tmp_path
       nu_core_file.original_filename = file.original_filename
       nu_core_file.label = file.original_filename
