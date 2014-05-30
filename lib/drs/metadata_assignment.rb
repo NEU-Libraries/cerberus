@@ -42,12 +42,11 @@ module Drs
       def title=(string)
         if_mods_exists { self.mods.title = string }
         if_DC_exists { self.DC.nu_title = string }
-        if_descMetadata_exists { self.descMetadata.title = string }
       end
 
       def title
         if_mods_exists { return self.mods.title.first }
-        self.DC.nu_title.first
+        if_DC_exists { return self.DC.nu_title.first }
       end
 
       def non_sort=(string)
@@ -64,51 +63,47 @@ module Drs
       end
 
       def dcmi_type
-        if_mods_exists { return self.mods.type_of_resource.first }
-        return self.DC.nu_type.first
+        if_mods_exists { self.mods.type_of_resource.first }
       end
 
       def identifier=(string)
         if_mods_exists { self.mods.identifier = string }
         if_DC_exists { self.DC.nu_identifier = string }
-        if_descMetadata_exists { self.descMetadata.identifier = string }
       end
 
       def identifier
-        if_mods_exists { self.mods.identifier.first }
-        self.DC.nu_identifier.first
+        if_mods_exists { return self.mods.identifier.first }
+        if_DC_exists { return self.DC.nu_identifier.first }
       end
 
       def description=(string)
         if_mods_exists { self.mods.abstract = string }
         if_DC_exists { self.DC.nu_description = string }
-        if_descMetadata_exists { self.descMetadata.description = string }
       end
 
       def description
         if_mods_exists { return self.mods.abstract.first }
-        self.DC.nu_description.first
+        if_DC_exists { return self.DC.nu_description.first }
       end
 
       def date_of_issue=(string)
         if_mods_exists { self.mods.date_issued = string }
         if_DC_exists   { self.DC.date = string }
-        if_descMetadata_exists { self.descMetadata.date_created = string }
       end
 
       def date_of_issue
-        if_mods_exists { self.mods.date_issued.first }
-        self.DC.date.first
+        if_mods_exists { return self.mods.date_issued.first }
+        if_DC_exists   { return self.DC.date.first }
       end
 
       def keywords=(array_of_strings)
         if_mods_exists { self.mods.topics = array_of_strings }
         if_DC_exists   { self.DC.subject = array_of_strings }
-        if_descMetadata_exists { self.descMetadata.tag = array_of_strings }
       end
 
       def keywords
-        self.DC.subject
+        if_mods_exists { return self.mods.subject }
+        if_DC_exists   { return self.DC.subject }
       end
 
       def creators=(hash)
@@ -120,8 +115,6 @@ module Drs
           self.mods.assign_creator_personal_names(fns, lns)
           self.mods.assign_corporate_names(cns)
         end
-
-        if_descMetadata_exists { assign_creator_array(fns, lns, cns) }
 
         if_DC_exists { self.DC.assign_creators(fns, lns, cns) }
       end
@@ -162,22 +155,6 @@ module Drs
         if_properties_exists_strict { self.properties.canonical? }
       end
 
-      def type=(array)
-        if_descMetadata_exists_strict { self.descMetadata.resource_type = array }
-      end
-
-      def type
-        if_descMetadata_exists_strict { self.descMetadata.resource_type }
-      end
-
-      def date_uploaded
-        if_descMetadata_exists_strict { self.descMetadata.date_uploaded.first }
-      end
-
-      def date_updated
-        if_descMetadata_exists_strict { self.descMetadata.date_modified.first }
-      end
-
       def smart_collection_type=(string)
         if_properties_exists_strict { self.properties.smart_collection_type = string }
       end
@@ -194,31 +171,6 @@ module Drs
     end
 
     private
-
-      # Rather than pull in descMetadata for the moment,
-      # we define this helper method that turns the first/last/corporate name arrays
-      # into a single array of ready to assign creators
-      def assign_creator_array(fns, lns, cns)
-        if fns.length != lns.length
-          raise "passed #{fns.length} first names and #{lns.length} last names."
-        end
-
-        full_names = []
-        fns.each_with_index do |fn, i|
-          full_names << "#{fn} #{lns[i]}"
-        end
-
-        self.descMetadata.creator = full_names + cns
-      end
-
-
-      def if_descMetadata_exists(&block)
-        verify_datastream_carefree('descMetadata', GenericFileRdfDatastream, &block)
-      end
-
-      def if_descMetadata_exists_strict(&block)
-        verify_datastream_strict('descMetadata', GenericFileRdfDatastream, &block)
-      end
 
       def if_mods_exists(&block)
         verify_datastream_carefree('mods', NuModsDatastream, &block)

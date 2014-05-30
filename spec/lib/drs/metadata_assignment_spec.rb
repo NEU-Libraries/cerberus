@@ -50,11 +50,6 @@ describe "Metadata" do
         collection.description = "The description two."
         collection.description.should == "The description two."
       end
-
-      it "works for objects with DC, MODS, and descMetadata datastreams" do
-        core_file.description = "The description three"
-        core_file.description.should == "The description three"
-      end
     end
 
     describe "of date issued" do
@@ -85,12 +80,6 @@ describe "Metadata" do
 
         collection.keywords.should == keywords
       end
-
-      it "succeeds for objects with DC, MODS, and descMetadata streams" do
-        core_file.keywords = keywords
-
-        core_file.keywords.should == core_file.descMetadata.tag
-      end
     end
 
     describe "of creators" do
@@ -118,13 +107,6 @@ describe "Metadata" do
         # Ensure the MODS record set correctly
         collection.personal_creators.should =~ [{first: "Will", last: "Jackson"}, {first: "James", last: "Bond"}]
         collection.corporate_creators.should =~ ["Org One", "Org Two"]
-      end
-
-      it "succeeds for objects with DC, MODS, and descMetadata datastreams" do
-        core_file.creators = hsh
-
-        # Ensure the descMetadata record sets correctly
-        core_file.creators.should == core_file.descMetadata.creator
       end
     end
 
@@ -165,13 +147,6 @@ describe "Metadata" do
       it "succeeds for objects with a properties datastream" do
         collection.smart_collection_type = "personal collection type"
         collection.smart_collection_type.should == 'personal collection type'
-      end
-    end
-
-    describe "of type" do
-      it "succeeds for objects with a descMetadata datastream" do
-        core_file.type = ["Image", "Part of Book"]
-        core_file.type.should == core_file.descMetadata.resource_type
       end
     end
   end
