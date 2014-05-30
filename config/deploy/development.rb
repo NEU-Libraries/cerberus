@@ -21,6 +21,30 @@ set :rails_env, :staging
 
 server 'drs@repositorydev.neu.edu', user: 'drs', roles: %w{web app db}
 
+namespace :god do
+  def god_is_running
+    !capture("#{god_command} status >/dev/null 2>/dev/null || echo 'not running'").start_with?('not running')
+  end
+
+  def god_command
+    "cd #{current_path}; bundle exec god"
+  end
+
+  desc "Stop god"
+  task :terminate_if_running do
+    if god_is_running
+      run "#{god_command} terminate"
+    end
+  end
+
+  desc "Start god"
+  task :start do
+    config_file = "#{current_path}/config/resque.god"
+    environment = { :RAILS_ENV => rails_env, :RAILS_ROOT => current_path }
+    run "#{god_command} -c #{config_file}", :env => environment
+  end
+end
+
 namespace :deploy do
   desc "Restarting application"
   task :restart do
@@ -33,16 +57,6 @@ namespace :deploy do
   task :assets_kludge do
     on roles(:app), :in => :sequence, :wait => 5 do
       execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake assets:precompile)"
-    end
-  end
-
-  desc "Restarting the resque workers"
-  task :restart_workers do
-    on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . kill -TERM $(cat /home/drs/config/resque-pool.pid))"
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake resque:stop_workers)"
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rm -f /home/drs/config/resque-pool.pid)"
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . resque-pool --daemon -p /home/drs/config/resque-pool.pid)"
     end
   end
 
@@ -98,6 +112,9 @@ namespace :deploy do
 
 end
 
+before "deploy:update", "god:terminate_if_running"
+after "deploy:update", "god:start"
+
 # Load the rvm environment before executing the refresh data hook.
 # This will be necessary for any hook that needs access to ruby.
 # Note the use of the rvm-auto shell in the task definition.
@@ -111,7 +128,6 @@ after 'deploy:updating', 'deploy:copy_rvmrc_file'
 after 'deploy:updating', 'deploy:trust_rvmrc'
 after 'deploy:updating', 'bundler:install'
 after 'deploy:updating', 'deploy:copy_yml_file'
-after 'deploy:updating', 'deploy:restart_workers'
 after 'deploy:updating', 'deploy:migrate'
 after 'deploy:updating', 'deploy:whenever'
 after 'deploy:updating', 'deploy:assets_kludge'

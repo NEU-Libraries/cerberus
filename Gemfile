@@ -25,7 +25,7 @@ gem 'webshims-rails'
 gem 'rmagick', '~> 2.13.2'
 gem 'zipruby', '~> 0.3.6'
 gem 'hydra-derivatives', '~> 0.0.5'
-gem 'resque-pool', '0.3.0'
+# gem 'resque-pool', '0.3.0'
 gem 'mailboxer', '~> 0.11.0'
 gem 'nest', '~> 1.1.1'
 gem 'noid', '~> 0.6.6'
@@ -48,6 +48,7 @@ gem 'lograge'
 gem 'exception_notification'
 # Resque req
 gem 'multi_json', '~> 1.7.9'
+gem 'god'
 
 # Gems used only for assets and not required
 # in production environments by default.
