@@ -42,7 +42,7 @@ namespace :deploy do
       execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . kill -TERM $(cat /home/drs/config/resque-pool.pid))"
       execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake resque:stop_workers)"
       execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rm -f /home/drs/config/resque-pool.pid)"
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . resque-pool --daemon -p /home/drs/config/resque-pool.pid)"
+      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . resque-pool --daemon -p /home/drs/config/resque-pool.pid --environment staging)"
     end
   end
 
