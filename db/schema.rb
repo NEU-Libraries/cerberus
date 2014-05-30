@@ -150,13 +150,6 @@ ActiveRecord::Schema.define(:version => 20140521192509) do
 
   add_index "subject_local_authority_entries", ["lowerLabel"], :name => "entries_by_lower_label"
 
-  create_table "trophies", :force => true do |t|
-    t.integer  "user_id"
-    t.string   "generic_file_id"
-    t.datetime "created_at",      :null => false
-    t.datetime "updated_at",      :null => false
-  end
-
   create_table "upload_alerts", :force => true do |t|
     t.string   "content_type"
     t.string   "title"
@@ -197,10 +190,6 @@ ActiveRecord::Schema.define(:version => 20140521192509) do
     t.string   "website"
     t.string   "affiliation"
     t.string   "telephone"
-    t.string   "avatar_file_name"
-    t.string   "avatar_content_type"
-    t.integer  "avatar_file_size"
-    t.datetime "avatar_updated_at"
     t.text     "group_list"
     t.datetime "groups_last_update"
     t.string   "role"
