@@ -23,7 +23,6 @@ class NuCoreFile < ActiveFedora::Base
   has_metadata name: 'DC', type: NortheasternDublinCoreDatastream
   has_metadata name: 'properties', type: DrsPropertiesDatastream
   has_metadata name: 'mods', type: NuModsDatastream
-  has_metadata :name => "descMetadata", :type => GenericFileRdfDatastream
 
   attr_accessible :title, :non_sort, :identifier, :description, :date_of_issue
   attr_accessible :keywords, :creators, :depositor, :type
@@ -35,8 +34,6 @@ class NuCoreFile < ActiveFedora::Base
   # as their core record.
 
   delegate_to :mods, [:category, :department, :degree, :course_number, :course_title]
-
-  delegate_to :descMetadata, [:rights, :resource_type]
 
   # The following two modifications are to account for the fact that
   # we're getting names unparsed in "lastName, firstName" from Fedora

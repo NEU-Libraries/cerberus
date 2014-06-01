@@ -46,6 +46,8 @@ gem 'namae'
 # Monitoring
 gem 'lograge'
 gem 'exception_notification'
+# Resque req
+gem 'multi_json', '~> 1.7.9'
 
 # Gems used only for assets and not required
 # in production environments by default.

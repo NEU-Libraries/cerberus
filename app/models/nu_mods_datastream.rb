@@ -49,7 +49,7 @@ class NuModsDatastream < ActiveFedora::OmDatastream
       t.publisher(path: 'publisher', namespace_prefix: 'mods', index_as: [:stored_searchable])
       t.place(path: 'place', namespace_prefix: 'mods', index_as: [:stored_searchable])
       t.copyright(path: 'copyrightDate', namespace_prefix: 'mods', attributes: { encoding: 'w3cdtf' })
-      t.date_issued(path: 'dateIssued', namespace_prefix: 'mods', attributes: { encoding: 'w3cdtf', keyDate: 'yes' })
+      t.date_issued(path: 'dateIssued', namespace_prefix: 'mods', index_as: [:symbol], attributes: { encoding: 'w3cdtf', keyDate: 'yes' })
       t.date_other(path: 'dateOther', namespace_prefix: 'mods', index_as: [:stored_searchable], attributes: { encoding: 'w3cdtf'})
       t.issuance(path: 'issuance', namespace_prefix: 'mods')
     }
@@ -169,6 +169,7 @@ class NuModsDatastream < ActiveFedora::OmDatastream
     if self.origin_info.date_issued.any? && !self.origin_info.date_issued.first.blank?
       creation_date = self.origin_info.date_issued.first
       solr_doc["creation_year_sim"] = [creation_date[/\d{4}/]]
+      solr_doc["date_issued_ssim"] = [creation_date]
     end
 
     # Ensure title is set to a title actually associated with this core file.
