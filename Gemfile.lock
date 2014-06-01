@@ -502,6 +502,7 @@ DEPENDENCIES
   lograge
   mailboxer (~> 0.11.0)
   mods_display!
+  multi_json (~> 1.7.9)
   mysql2
   namae
   nest (~> 1.1.1)

@@ -65,17 +65,15 @@ module Drs
     end
 
     def date_of_issue
-      #TODO - this is broken in metadata assignment
-      process_date(Array(self[Solrizer.solr_name("desc_metadata__date_created")]).first)
+      process_date(Array(self[Solrizer.solr_name("date_issued", :symbol)]).first)
     end
 
     def create_date
-      process_date(Array(self[Solrizer.solr_name("desc_metadata__date_created")]).first)
+      process_date(Array(self[Solrizer.solr_name("system_create_dtsi")]).first)
     end
 
     def creators
-      # Array(self[Solrizer.solr_name("desc_metadata__creator")])
-      Array(self[Solrizer.solr_name("personal_creators")])
+      Array(self[Solrizer.solr_name("creator", :facetable)])
     end
 
     def type_label
@@ -122,17 +120,6 @@ module Drs
       self[Solrizer.solr_name('noid', Sufia::GenericFile.noid_indexer)]
     end
 
-    def date_uploaded
-      field = self[Solrizer.solr_name("desc_metadata__date_uploaded", :stored_sortable, type: :date)]
-      return unless field.present?
-      begin
-        Date.parse(field).to_formatted_s(:standard)
-      rescue => exception
-        logger.info "Unable to parse date: #{field.first.inspect} for #{self['id']}"
-        ExceptionNotifier.notify_exception(exception)
-      end
-    end
-
     def depositor(default = '')
       val = Array(self[Solrizer.solr_name("depositor")]).first
       val.present? ? val : default
@@ -140,7 +127,6 @@ module Drs
 
     def title
       title_str = ""
-      #Array(self[Solrizer.solr_name('desc_metadata__title')]).first
       if self.klass == "Employee"
         title_str = Array(self[Solrizer.solr_name("employee_name", :stored_searchable, type: :text)]).first
       else
@@ -149,7 +135,6 @@ module Drs
     end
 
     def description
-      #Array(self[Solrizer.solr_name('desc_metadata__description')]).first
       Array(self[Solrizer.solr_name("abstract", :stored_searchable)]).first
     end
 
@@ -159,14 +144,6 @@ module Drs
 
     def file_format
        Array(self[Solrizer.solr_name('file_format')]).first
-    end
-
-    def creator
-      Array(self[Solrizer.solr_name("desc_metadata__creator")]).first
-    end
-
-    def tags
-      Array(self[Solrizer.solr_name("desc_metadata__tag")])
     end
 
     def mime_type
