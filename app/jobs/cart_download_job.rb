@@ -33,7 +33,7 @@ class CartDownloadJob
 
             # Record the download
             opts = "pid = ? AND session_id = ? AND status = 'INCOMPLETE' AND action = 'download'"
-            DrsImpression.update_all("status = COMPLETE", [opts, pid, sess_id])
+            DrsImpression.update_all("status = 'COMPLETE'", [opts, pid, sess_id])
           end
         end
       end
