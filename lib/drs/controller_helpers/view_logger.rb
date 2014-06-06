@@ -8,7 +8,12 @@ module Drs::ControllerHelpers::ViewLogger
 
     session = request.session_options[:id]
     ip = request.remote_ip
-    ref = request.referrer
+
+    if request.referrer.blank?
+      ref = "direct"
+    else
+      ref = request.referrer
+    end
 
     DrsImpression.create(pid: id, session_id: session, action: action, ip_address: ip,
                           referrer: ref, status: status)
