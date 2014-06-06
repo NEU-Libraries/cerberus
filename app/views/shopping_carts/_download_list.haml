@@ -1,6 +1,7 @@
 - if @items.length > 0
   %section.drs-items.drs-items-list
     - @item_core_records.each_with_index do |item, i|
+      - @thumbs = item.thumbnail_list
       - metadata = SolrDocument.new(item)
       - content  = SolrDocument.new(@items.fetch i)
       // Pass this a metadata_object (the core record) and the content object
