@@ -25,8 +25,6 @@ class NuCoreFilesController < ApplicationController
   before_filter :can_edit?, only: [:edit, :update]
   before_filter :is_depositor?, only: [:destroy]
 
-  after_filter :log_view, only: [:show]
-
   rescue_from Exceptions::NoParentFoundError, with: :no_parent_rescue
 
   rescue_from ActiveFedora::ObjectNotFoundError do |exception|
@@ -116,6 +114,8 @@ class NuCoreFilesController < ApplicationController
 
     @thumbs = @nu_core_file.thumbnail_list
     @page_title = @nu_core_file.title
+
+    log_action("view", "COMPLETE")
   end
 
   def create
