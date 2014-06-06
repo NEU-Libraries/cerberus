@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140521192509) do
+ActiveRecord::Schema.define(:version => 20140606154333) do
 
   create_table "bookmarks", :force => true do |t|
     t.integer  "user_id",     :null => false
@@ -61,6 +61,8 @@ ActiveRecord::Schema.define(:version => 20140521192509) do
     t.string "session_id"
     t.string "action"
     t.string "ip_address"
+    t.string "referrer"
+    t.string "status"
   end
 
   add_index "drs_impressions", ["pid"], :name => "index_drs_impressions_on_pid"

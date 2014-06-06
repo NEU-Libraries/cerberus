@@ -1,5 +1,5 @@
 class DrsImpression < ActiveRecord::Base
-  attr_accessible :pid, :session_id, :action, :ip_address
+  attr_accessible :pid, :session_id, :action, :ip_address, :referrer, :status
 
   # Ensure that all required fields are present
   validates :pid, :session_id, :action, :ip_address, presence: true
