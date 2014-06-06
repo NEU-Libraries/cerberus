@@ -32,8 +32,8 @@ class CartDownloadJob
             io.add_buffer("downloads/#{item.content.label}", item.content.content)
 
             # Record the download
-            DrsImpression.create(pid: pid, session_id: sess_id, action: 'download',
-                                  ip_address: ip_address)
+            opts = "pid = ? AND session_id = ? AND status = 'INCOMPLETE' AND action = 'download'"
+            DrsImpression.update_all("status = COMPLETE", [opts, pid, sess_id])
           end
         end
       end
