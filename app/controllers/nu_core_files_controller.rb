@@ -29,7 +29,7 @@ class NuCoreFilesController < ApplicationController
 
   rescue_from ActiveFedora::ObjectNotFoundError do |exception|
     @obj_type = "Object"
-    ExceptionNotifier.notify_exception(exception)
+    email_handled_exception(exception)
     render_404(ActiveFedora::ObjectNotFoundError.new) and return
   end
 
@@ -135,7 +135,7 @@ class NuCoreFilesController < ApplicationController
       end
     rescue => exception
       logger.error "NuCoreFilesController::create rescued #{exception.class}\n\t#{exception.to_s}\n #{exception.backtrace.join("\n")}\n\n"
-      ExceptionNotifier.notify_exception(exception)
+      email_handled_exception(exception)
       json_error "Error occurred while creating core file."
     ensure
       # remove the tempfile (only if it is a temp file)
@@ -229,7 +229,7 @@ class NuCoreFilesController < ApplicationController
 
     def no_parent_rescue(exception)
       flash[:error] = "Parent not specified or invalid"
-      ExceptionNotifier.notify_exception(exception)
+      email_handled_exception(exception)
       redirect_to root_path
     end
 
