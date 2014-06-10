@@ -32,13 +32,13 @@ class NuCollectionsController < SetsController
 
   rescue_from Blacklight::Exceptions::InvalidSolrID, ActiveFedora::ObjectNotFoundError do |exception|
     @obj_type = "Community"
-    ExceptionNotifier.notify_exception(exception)
+    email_handled_exception(exception)
     render_404(ActiveFedora::ObjectNotFoundError.new) and return
   end
 
   rescue_from Hydra::AccessDenied, CanCan::AccessDenied do |exception|
     flash[:error] = exception.message
-    ExceptionNotifier.notify_exception(exception)
+    email_handled_exception(exception)
     render_403 and return
   end
 
@@ -84,7 +84,7 @@ class NuCollectionsController < SetsController
     rescue => exception
       logger.error "NuCollectionsController::create rescued #{exception.class}\n\t#{exception.to_s}\n #{exception.backtrace.join("\n")}\n\n"
       flash.now[:error] = "Something went wrong"
-      ExceptionNotifier.notify_exception(exception)
+      email_handled_exception(exception)
       redirect_to new_nu_collection_path(parent: params[:parent]) and return
     end
   end
@@ -141,13 +141,13 @@ class NuCollectionsController < SetsController
 
     def index_redirect(exception)
       flash[:error] = "Collections cannot be created without a parent"
-      ExceptionNotifier.notify_exception(exception)
+      email_handled_exception(exception)
       redirect_to communities_path and return
     end
 
     def index_redirect_with_bad_search(exception)
       flash[:error] = exception.message
-      ExceptionNotifier.notify_exception(exception)
+      email_handled_exception(exception)
       redirect_to communities_path and return
     end
 
