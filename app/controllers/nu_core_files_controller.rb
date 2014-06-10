@@ -133,9 +133,9 @@ class NuCoreFilesController < ApplicationController
       else
         process_file(file)
       end
-    rescue => error
-      logger.error "NuCoreFilesController::create rescued #{error.class}\n\t#{error.to_s}\n #{error.backtrace.join("\n")}\n\n"
-      ExceptionNotifier.notify_exception(error)
+    rescue => exception
+      logger.error "NuCoreFilesController::create rescued #{exception.class}\n\t#{exception.to_s}\n #{exception.backtrace.join("\n")}\n\n"
+      ExceptionNotifier.notify_exception(exception)
       json_error "Error occurred while creating core file."
     ensure
       # remove the tempfile (only if it is a temp file)
