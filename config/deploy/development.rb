@@ -39,10 +39,11 @@ namespace :deploy do
   desc "Restarting the resque workers"
   task :restart_workers do
     on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec kill -TERM $(cat /home/drs/config/resque-pool.pid))", raise_on_non_zero_exit: false
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec rake resque:stop_workers)", raise_on_non_zero_exit: false
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rm -f /home/drs/config/resque-pool.pid)", raise_on_non_zero_exit: false
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec resque-pool --daemon -p /home/drs/config/resque-pool.pid)"
+      # execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec kill -TERM $(cat /home/drs/config/resque-pool.pid))", raise_on_non_zero_exit: false
+      # execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec rake resque:stop_workers)", raise_on_non_zero_exit: false
+      # execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rm -f /home/drs/config/resque-pool.pid)", raise_on_non_zero_exit: false
+      # execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec resque-pool --daemon -p /home/drs/config/resque-pool.pid)"
+      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake resque:restart_workers)"
     end
   end
 
@@ -101,8 +102,11 @@ end
 # Load the rvm environment before executing the refresh data hook.
 # This will be necessary for any hook that needs access to ruby.
 # Note the use of the rvm-auto shell in the task definition.
-before 'deploy:reset_data', 'rvm1:hook'
+
+# before 'deploy:reset_data', 'rvm1:hook'
+
 before 'deploy:restart_workers', 'rvm1:hook'
+
 before 'deploy:assets_kludge', 'deploy:clear_cache'
 
 # These hooks execute in the listed order after the deploy:updating task
