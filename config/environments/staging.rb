@@ -17,7 +17,8 @@ Drs::Application.configure do
   config.action_mailer.raise_delivery_errors = false
 
   # Print deprecation notices to the Rails logger
-  config.active_support.deprecation = :log
+  # config.active_support.deprecation = :log
+  config.active_support.deprecation.silenced = true
 
   # Only use best-standards-support built into browsers
   config.action_dispatch.best_standards_support = :builtin
@@ -65,6 +66,7 @@ Drs::Application.configure do
   config.action_mailer.raise_delivery_errors = true
 
   config.middleware.use ExceptionNotification::Rack,
+    :ignore_crawlers => %w{Googlebot bingbot},
     :email => {
       :email_prefix => "[DRS Staging] ",
       :sender_address => %{"notifier" <notifier@repositorydev.neu.edu>},

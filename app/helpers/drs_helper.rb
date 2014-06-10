@@ -35,7 +35,7 @@ module DrsHelper
   # Override to remove the label class (easier integration with bootstrap)
   # and handles arrays
   def render_facet_value(facet_solr_field, item, options ={})
-    logger.warn "display value #{ facet_display_value(facet_solr_field, item)}"
+    # logger.warn "display value #{ facet_display_value(facet_solr_field, item)}"
     if item.is_a? Array
       render_array_facet_value(facet_solr_field, item, options)
     end

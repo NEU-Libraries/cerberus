@@ -81,10 +81,10 @@ class NuCollectionsController < SetsController
       @set.save!
       flash[:notice] = "Collection created successfully."
       redirect_to nu_collection_path(id: @set.identifier) and return
-    rescue => error
-      logger.error "NuCollectionsController::create rescued #{error.class}\n\t#{error.to_s}\n #{error.backtrace.join("\n")}\n\n"
+    rescue => exception
+      logger.error "NuCollectionsController::create rescued #{exception.class}\n\t#{exception.to_s}\n #{exception.backtrace.join("\n")}\n\n"
       flash.now[:error] = "Something went wrong"
-      ExceptionNotifier.notify_exception(error)
+      ExceptionNotifier.notify_exception(exception)
       redirect_to new_nu_collection_path(parent: params[:parent]) and return
     end
   end

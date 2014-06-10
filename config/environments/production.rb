@@ -63,7 +63,8 @@ Drs::Application.configure do
   config.i18n.fallbacks = true
 
   # Send deprecation notices to registered listeners
-  config.active_support.deprecation = :notify
+  # config.active_support.deprecation = :notify
+  config.active_support.deprecation.silenced = true
 
   # Log the query plan for queries taking more than this (works
   # with SQLite, MySQL, and PostgreSQL)
@@ -77,6 +78,7 @@ Drs::Application.configure do
   config.action_mailer.raise_delivery_errors = true
 
   config.middleware.use ExceptionNotification::Rack,
+    :ignore_crawlers => %w{Googlebot bingbot},
     :email => {
       :email_prefix => "[DRS Production] ",
       :sender_address => %{"notifier" <notifier@repositorydev.neu.edu>},
