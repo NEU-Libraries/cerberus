@@ -14,6 +14,8 @@ class ShoppingCartsController < ApplicationController
   include BlacklightAdvancedSearch::ParseBasicQ
   include BlacklightAdvancedSearch::Controller
 
+  include Drs::ControllerHelpers::ViewLogger
+
 
   def show
     if !session[:ids].empty?
@@ -44,10 +46,13 @@ class ShoppingCartsController < ApplicationController
       @id = params[:add]
       session[:ids] << @id unless session[:ids].include? @id
       flash.now[:info] = "Item added to #{t('drs.shoppingcarts.name')}."
+      log_action("download", "INCOMPLETE", @id)
     elsif params[:delete]
       @id = params[:delete]
       session[:ids].delete(@id)
       flash.now[:info] = "Item removed from #{t('drs.shoppingcarts.name')}."
+      DrsImpression.destroy_all(pid: @id, action: "download", status: "INCOMPLETE",
+                            session_id: request.session_options[:id])
     end
 
     respond_to do |format|
@@ -58,6 +63,10 @@ class ShoppingCartsController < ApplicationController
 
   # Purge the contents of the user's shopping cart.
   def destroy
+    DrsImpression.destroy_all(pid: session[:ids],
+                              action: "download",
+                              status: "INCOMPLETE",
+                              session_id: request.session_options[:id])
     session[:ids] = []
 
     flash[:info] = "Sessions successfully cleared"
