@@ -2,6 +2,11 @@ module ApplicationHelper
 
   # Only things with theoretically near universal potential use should go here.
 
+  def email_handled_exception(exception)
+    name = current_user.name || ""
+    ExceptionNotifier.notify_exception(exception, :env => request.env, :data => {:user => "#{name}"})
+  end
+
   def kramdown_parse(input_str)
     return "" unless input_str
     output_str = Sanitize.clean(Kramdown::Document.new(input_str).to_html, :elements => ['sup', 'sub'])

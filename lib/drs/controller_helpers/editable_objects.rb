@@ -75,8 +75,13 @@ module Drs
         def find_parent(hash)
           hash.each do |k, v|
             if k == 'parent' || k == :parent
-              return ActiveFedora::Base.find(v, cast: true)
-              exit
+              # return ActiveFedora::Base.find(v, cast: true)
+              # exit
+              begin
+                return SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{v}\"").first)
+              rescue NoMethodError
+                render_404(ActiveFedora::ObjectNotFoundError.new) and return
+              end
             elsif v.is_a? Hash
               return find_parent(v)
             end
