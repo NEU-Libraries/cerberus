@@ -1,10 +1,5 @@
 module DrsHelper
 
-  def email_handled_exception(exception)
-    name = current_user.name || ""
-    ExceptionNotifier.notify_exception(exception, :env => request.env, :data => {:user => "#{name}"})
-  end
-
   def display_user_name(recent_document)
     return "no display name" unless recent_document.depositor
     return User.find_by_user_key(recent_document.depositor).name rescue recent_document.depositor
