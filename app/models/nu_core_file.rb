@@ -106,7 +106,7 @@ class NuCoreFile < ActiveFedora::Base
     # filtered = all.keep_if { |file| file.in_progress_for_user?(user) }
     # return filtered
     f_query = ActiveFedora::SolrService.query("depositor_tesim:\"#{user.nuid}\" AND in_progress_tesim:true")
-    return f_query.map { |x| SolrDocument.new(x) }
+    return f_query.map { |x| NuCoreFile.find(x.pid) }
   end
 
   def in_progress_for_user?(user)
