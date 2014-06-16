@@ -13,6 +13,11 @@ class ApplicationController < ActionController::Base
 
   protect_from_forgery
 
+  def email_handled_exception(exception)
+    name = current_user.name || ""
+    ExceptionNotifier.notify_exception(exception, :env => request.env, :data => {:user => "#{name}"})
+  end
+
   # Allows us to redirect to the current page on signin, instead of always back to root.
   def after_sign_in_path_for(resource)
     sign_in_url = url_for(:action => 'new', :controller => 'sessions', :only_path => false, :protocol => 'http')
