@@ -14,7 +14,12 @@ class ApplicationController < ActionController::Base
   protect_from_forgery
 
   def email_handled_exception(exception)
-    name = current_user.name || ""
+    if !current_user.nil?
+      name = current_user.name
+    else
+      name = "Not Logged In"
+    end
+
     ExceptionNotifier.notify_exception(exception, :env => request.env, :data => {:user => "#{name}"})
   end
 
