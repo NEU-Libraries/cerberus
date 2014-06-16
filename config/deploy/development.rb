@@ -97,6 +97,13 @@ namespace :deploy do
     end
   end
 
+  desc 'Flush Redis'
+  task :flush_redis do
+    on roles(:app), :in => :sequence, :wait => 5 do
+      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . redis-cli FLUSHALL)"
+    end
+  end
+
 end
 
 # Load the rvm environment before executing the refresh data hook.
@@ -122,4 +129,5 @@ after 'deploy:updating', 'deploy:restart'
 # after 'deploy:updating', 'deploy:restart_workers'
 # after 'deploy:finished', 'deploy:reset_data'
 after 'deploy:finished', 'deploy:start_solrizerd'
+after 'deploy:finished', 'deploy:flush_redis'
 
