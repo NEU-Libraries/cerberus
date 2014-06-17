@@ -124,7 +124,7 @@ before 'deploy:assets_kludge', 'deploy:clear_cache'
 # These hooks execute in the listed order after the deploy:updating task
 # occurs.  This is the task that handles refreshing the app code, so this
 # should only fire on actual deployments.
-befoe 'deploy:starting', 'deploy:stop_httpd'
+before 'deploy:starting', 'deploy:stop_httpd'
 
 after 'deploy:updating', 'deploy:copy_rvmrc_file'
 after 'deploy:updating', 'deploy:trust_rvmrc'
