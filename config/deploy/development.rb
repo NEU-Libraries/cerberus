@@ -23,9 +23,16 @@ server 'drs@repositorydev.neu.edu', user: 'drs', roles: %w{web app db}
 
 namespace :deploy do
   desc "Restarting application"
-  task :restart do
+  task :start_httpd do
     on roles(:app), :in => :sequence, :wait => 5 do
-      sudo "service httpd restart"
+      sudo "service httpd start"
+    end
+  end
+
+  desc "Restarting application"
+  task :stop_httpd do
+    on roles(:app), :in => :sequence, :wait => 5 do
+      sudo "service httpd stop"
     end
   end
 
@@ -117,6 +124,8 @@ before 'deploy:assets_kludge', 'deploy:clear_cache'
 # These hooks execute in the listed order after the deploy:updating task
 # occurs.  This is the task that handles refreshing the app code, so this
 # should only fire on actual deployments.
+befoe 'deploy:starting', 'deploy:stop_httpd'
+
 after 'deploy:updating', 'deploy:copy_rvmrc_file'
 after 'deploy:updating', 'deploy:trust_rvmrc'
 after 'deploy:updating', 'bundler:install'
@@ -124,9 +133,10 @@ after 'deploy:updating', 'deploy:copy_yml_file'
 after 'deploy:updating', 'deploy:migrate'
 after 'deploy:updating', 'deploy:whenever'
 after 'deploy:updating', 'deploy:assets_kludge'
+
 # after 'deploy:finished', 'deploy:reset_data'
 after 'deploy:finished', 'deploy:start_solrizerd'
 after 'deploy:finished', 'deploy:flush_redis'
-after 'deploy:finished', 'deploy:restart'
+after 'deploy:finished', 'deploy:start_httpd'
 after 'deploy:finished', 'deploy:restart_workers'
 
