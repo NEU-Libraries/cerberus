@@ -1,6 +1,6 @@
 class ImageLargeFile < ActiveFedora::Base
   include Drs::NuFile
   def type_label
-    "Large Image File"
+    "large"
   end
 end
