@@ -29,7 +29,7 @@ class CartDownloadJob
           item = ActiveFedora::Base.find(pid, cast: true)
 
           if user.can? :read, item
-            io.add_buffer("downloads/#{item.content.label}", item.content.content)
+            io.add_buffer("downloads/#{pid.split(":").last}-#{item.type_label}-#{item.content.label}", item.content.content)
 
             # Record the download
             opts = "pid = ? AND session_id = ? AND status = 'INCOMPLETE' AND action = 'download'"
