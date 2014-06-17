@@ -53,7 +53,10 @@
   %fieldset.span6
     %legend Mass Permissions
     = label_tag 'nu_core_file[mass_permissions]', "Choose Mass Permissions:"
-    = select_tag 'nu_core_file[mass_permissions]', options_for_select(@incomplete_file.valid_mass_permissions, 'public') , class: "span6"
+    - if !@incomplete_file.nil? #not editing
+      = select_tag 'nu_core_file[mass_permissions]', options_for_select(@incomplete_file.valid_mass_permissions, 'public') , class: "span6"
+    - else #editing
+      = select_tag 'nu_core_file[mass_permissions]', options_for_select(@nu_core_file.valid_mass_permissions, 'public') , class: "span6"
     %p.help-block
       %ul
         %li Setting to 'public' will allow anyone accessing the site to see your collection.

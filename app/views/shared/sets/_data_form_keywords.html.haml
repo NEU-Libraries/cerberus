@@ -6,4 +6,4 @@
   - keywords.each do |keyword|
     .keyword
       = f.label :keywords, "Keyword", class: "required-label"
-      = f.text_field :keywords, value: keyword, name: "#{array_type}[keywords][]", pattern: ".*\\S.*",class: 'input-block-level', placeholder: "Science"
+      = f.text_field :keywords, value: keyword.strip, name: "#{array_type}[keywords][]", pattern: ".*\\S.*",class: 'input-block-level', placeholder: "Science"
