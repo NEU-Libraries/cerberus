@@ -77,16 +77,12 @@ class ShoppingCartsController < ApplicationController
   # HTML requests bring the user to the download.html page and fire off the cart download job.
   # JS requests handle eventually triggering the download once on the download page.
   def download
-    # kludge to handle empty sessions that have been occuring
-    # code from - http://www.gani.com.au/2013/08/force-session-creation-in-rails/
-    session[:foo] = 'bar'
-
-    dir = "#{Rails.root}/tmp/carts/#{session[:session_id]}/"
+    dir = "#{Rails.root}/tmp/carts/#{request.session_options[:id]}/"
 
     respond_to do |format|
       format.html do
         FileUtils.rm_rf(Dir.glob("#{dir}/*")) if File.directory?(dir)
-        Drs::Application::Queue.push(CartDownloadJob.new(session[:session_id], session[:ids], current_user.nuid, request.remote_ip))
+        Drs::Application::Queue.push(CartDownloadJob.new(request.session_options[:id], session[:ids], current_user.nuid, request.remote_ip))
         @page_title = "Start Download - #{t('drs.shoppingcarts.name')}"
       end
 
