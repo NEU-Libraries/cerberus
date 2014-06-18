@@ -49,9 +49,15 @@ module Drs
 
       # Same thing as above but with editing.
       def can_edit?
-        record = ActiveFedora::Base.find(params[:id], cast: true)
+        begin
+          record = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first)
+        rescue NoMethodError
+          render_404(ActiveFedora::ObjectNotFoundError.new) and return
+        end
 
         if current_user.nil?
+          render_403
+        elsif !record.smart_collection_type.nil? && record.smart_collection_type != "miscellany"
           render_403
         elsif current_user.can? :edit, record
           return true
