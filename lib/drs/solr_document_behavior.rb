@@ -9,7 +9,7 @@ module Drs
       begin
         if !date_string.nil? && (date_string != "")
           if(date_string.split("-")).length > 2
-            return date_string.to_date.to_formatted_s(:long_ordinal)
+            return date_string.to_date.to_formatted_s(:long)
           else
             date_array = date_string.split("-") - ["null"]
 
