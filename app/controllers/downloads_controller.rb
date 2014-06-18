@@ -14,7 +14,11 @@ class DownloadsController < ApplicationController
 
   rescue_from ActiveFedora::ObjectNotFoundError do |exception|
     @obj_type = "Object"
-    email_handled_exception(exception)
+
+    if !current_user.nil?
+      email_handled_exception(exception)
+    end
+
     render_404(ActiveFedora::ObjectNotFoundError.new) and return
   end
 end
