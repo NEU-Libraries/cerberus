@@ -79,7 +79,7 @@ class ShoppingCartsController < ApplicationController
   def download
     # kludge to handle empty sessions that have been occuring
     # code from - http://www.gani.com.au/2013/08/force-session-creation-in-rails/
-    session[:foo] = bar
+    session[:foo] = 'bar'
 
     dir = "#{Rails.root}/tmp/carts/#{session[:session_id]}/"
 
