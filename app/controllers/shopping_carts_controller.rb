@@ -106,7 +106,7 @@ class ShoppingCartsController < ApplicationController
 
   # Actually trigger a download.
   def fire_download
-    f = "#{Rails.root}/tmp/carts/#{session[:session_id]}/drs_queue.zip"
+    f = "#{Rails.root}/tmp/carts/#{request.session_options[:id]}/drs_queue.zip"
     send_file(f)
   end
 
