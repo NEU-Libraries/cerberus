@@ -166,11 +166,15 @@ class NuModsDatastream < ActiveFedora::OmDatastream
     solr_doc["drs_course_title_ssim"] = self.course_title.first if !self.course_title.first.blank?
 
     # Extract a creation year field
-    if self.origin_info.date_issued.any? && !self.origin_info.date_issued.first.blank?
-      creation_date = self.origin_info.date_issued.first
+    if self.origin_info.copyright.any? && !self.origin_info.copyright.first.blank?
+      creation_date = self.origin_info.copyright.first
       solr_doc["creation_year_sim"] = [creation_date[/\d{4}/]]
       # solr_doc["date_issued_ssim"] = [creation_date]
+    elsif self.origin_info.date_issued.any? && !self.origin_info.date_issued.first.blank?
+      creation_date = self.origin_info.date_issued.first
+      solr_doc["creation_year_sim"] = [creation_date[/\d{4}/]]
     end
+
 
     # Ensure title is set to a title actually associated with this core file.
     solr_doc["title_info_title_ssi"] = self.title_info.title.first

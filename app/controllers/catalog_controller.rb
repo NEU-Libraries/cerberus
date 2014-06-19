@@ -80,7 +80,7 @@ class CatalogController < ApplicationController
     # solr fields that will be treated as facets by the blacklight application
     #   The ordering of the field names is the order of the display
     # copyright
-    config.add_facet_field solr_name("origin_info_copyright", :facetable), label: "Copyright", limit: 5
+    # config.add_facet_field solr_name("origin_info_copyright", :facetable), label: "Copyright", limit: 5
     config.add_facet_field solr_name("creator", :facetable), label: "Creator", limit: 5
     config.add_facet_field solr_name("creation_year", :facetable), label: "Year", limit: 5
     config.add_facet_field solr_name("drs_department", :symbol), label: "Department", limit: 5
