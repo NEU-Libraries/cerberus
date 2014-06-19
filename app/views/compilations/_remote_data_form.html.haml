@@ -9,6 +9,7 @@
 
     = f.label :description
     = f.text_area :description, placeholder: 'Note that this is optional', class: 'input-block-level'
+    = hidden_field_tag(:entry_id, params[:entry_id])
   .modal-footer
     = f.submit class: "btn btn-primary"
     %button.btn{"data-dismiss" => "modal"} Close

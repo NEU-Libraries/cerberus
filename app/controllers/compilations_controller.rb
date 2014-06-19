@@ -21,6 +21,14 @@ class CompilationsController < ApplicationController
 
   def create
     @compilation = Compilation.new(params[:compilation].merge(pid: mint_unique_pid))
+
+    puts "DGC DEBUG -- COMPILATION CREATE"
+    puts params.inspect
+
+    if !params[:entry_id].blank?
+      @compilation.add_entry(params[:entry_id])
+    end
+
     @compilation.depositor = current_user.nuid
 
     save_or_bust @compilation
