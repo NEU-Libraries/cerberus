@@ -1,4 +1,4 @@
--if @thumbs.length > 0
+-if !@thumbs.nil? && @thumbs.length > 0
   %span{"data-alt" => "", "data-picture" => ""}
     %span.thumbnail-s1{"data-src" => @thumbs[0] , "data-media" => "(min-width: 0)" }
       /Fallback content for non-JS browsers. Same img src as the initial, unqualified source element.
