@@ -71,6 +71,12 @@ class User < ActiveRecord::Base
   # Currently using group_list attribute as though it will someday contain the grouper information
   # pulled in from Shibboleth
 
+  # Standin method until it's determined how proxy rights will actually
+  # be calculated.
+  def can_proxy?
+    return admin?
+  end
+
   def admin?
     return self.role.eql?('admin')
   end

@@ -45,7 +45,15 @@ class NuCoreFilesController < ApplicationController
   def provide_metadata
     # Feeding through an incomplete file if there is one
     @nu_core_file = NuCoreFile.new
-    @incomplete_file = NuCoreFile.users_in_progress_files(current_user).first
+
+    if should_proxy?
+      user = User.find_by_nuid(params[:proxy])
+    else
+      user = current_user
+    end
+
+    @incomplete_file = NuCoreFile.users_in_progress_files(user).first
+
 
     @title = @incomplete_file.title
 
@@ -73,8 +81,14 @@ class NuCoreFilesController < ApplicationController
   end
 
   def process_metadata
-    Drs::Application::Queue.push(MetadataUpdateJob.new(current_user.user_key, params))
-    @nu_core_file = NuCoreFile.users_in_progress_files(current_user).first
+    if should_proxy?
+      user = User.find_by_nuid(params[:proxy])
+    else
+      user = current_user
+    end
+
+    Drs::Application::Queue.push(MetadataUpdateJob.new(user.user_key, params))
+    @nu_core_file = NuCoreFile.users_in_progress_files(user).first
 
     update_metadata if params[:nu_core_file]
 
@@ -97,9 +111,9 @@ class NuCoreFilesController < ApplicationController
       m = params[:medium_image_size].to_f / max.to_f
       l = params[:large_image_size].to_f / max.to_f
 
-      Drs::Application::Queue.push(ContentCreationJob.new(@nu_core_file.pid, @nu_core_file.tmp_path, @nu_core_file.original_filename, current_user.id, nil, s, m, l))
+      Drs::Application::Queue.push(ContentCreationJob.new(@nu_core_file.pid, @nu_core_file.tmp_path, @nu_core_file.original_filename, user.id, nil, s, m, l))
     else
-      Drs::Application::Queue.push(ContentCreationJob.new(@nu_core_file.pid, @nu_core_file.tmp_path, @nu_core_file.original_filename, current_user.id))
+      Drs::Application::Queue.push(ContentCreationJob.new(@nu_core_file.pid, @nu_core_file.tmp_path, @nu_core_file.original_filename, user.id))
     end
 
     flash[:notice] = 'Your files are being processed by ' + t('sufia.product_name') + ' in the background. The metadata and access controls you specified are being applied. Files will be marked <span class="label label-important" title="Private">Private</span> until this process is complete (shouldn\'t take too long, hang in there!).'
@@ -130,6 +144,9 @@ class NuCoreFilesController < ApplicationController
         json_error "Error! Zero Length File!", file.original_filename
       elsif (!terms_accepted?)
         json_error "You must accept the terms of service!", file.original_filename
+      elsif (!params[:proxy].blank? && !(Employee.exists_by_nuid? params[:proxy]))
+        flash[:alert] = "The NUID you entered, #{params[:proxy]}, doesn't exist in the system"
+        redirect_to new_nu_core_file_path( {parent: params[:collection_id]} )
       else
         process_file(file)
       end
@@ -239,12 +256,17 @@ class NuCoreFilesController < ApplicationController
     end
 
     #Allows us to map different params
-    def update_metadata_from_upload_screen(nu_core_file, user, file, collection_id, tmp_path)
+    def update_metadata_from_upload_screen(nu_core_file, user, file, collection_id, tmp_path, proxy)
       # Relative path is set by the jquery uploader when uploading a directory
       nu_core_file.relative_path = params[:relative_path] if params[:relative_path]
 
+      if !proxy.blank? && current_user.can_proxy?
+        nu_core_file.depositor = proxy
+      else
+        nu_core_file.depositor = user.nuid
+      end
+
       # Context derived attributes
-      nu_core_file.depositor = user.nuid
       nu_core_file.tag_as_in_progress
       nu_core_file.title = file.original_filename
       nu_core_file.tmp_path = tmp_path
@@ -285,9 +307,9 @@ class NuCoreFilesController < ApplicationController
         new_path = tempdir.join("#{file.original_filename}")
         FileUtils.mv(file.tempfile.path, new_path.to_s)
 
-        update_metadata_from_upload_screen(@nu_core_file, current_user, file, params[:collection_id], new_path.to_s)
+        update_metadata_from_upload_screen(@nu_core_file, current_user, file, params[:collection_id], new_path.to_s, params[:proxy])
         # @nu_core_file.record_version_committer(current_user)
-        redirect_to files_provide_metadata_path
+        redirect_to files_provide_metadata_path({proxy: params[:proxy]})
       else
         render :json => [{:error => "Error creating file."}]
       end
@@ -312,4 +334,8 @@ class NuCoreFilesController < ApplicationController
       params[:terms_of_service] == '1'
     end
 
+    def should_proxy?
+      exists = Employee.exists_by_nuid?(params[:proxy])
+      !params[:proxy].blank? && current_user.can_proxy? && exists
+    end
 end
