@@ -173,17 +173,17 @@ $(document).ready ->
           enforceSizes()
           return
 
-        $("#small_image_size").bind "change paste keyup", ->
+        $("#small_image_size").bind "focus blur", ->
           $("input.slider.small").slider "setValue", parseInt($("#small_image_size").val())
           enforceSizes()
           return
 
-        $("#medium_image_size").bind "change paste keyup", ->
+        $("#medium_image_size").bind "focus blur", ->
           $("input.slider.medium").slider "setValue", parseInt($("#medium_image_size").val())
           enforceSizes()
           return
 
-        $("#large_image_size").bind "change paste keyup", ->
+        $("#large_image_size").bind "focus blur", ->
           $("input.slider.large").slider "setValue", parseInt($("#large_image_size").val())
           enforceSizes()
           return
