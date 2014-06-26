@@ -13,13 +13,13 @@
         The master image's longest edge is #{session[:slider_max]} pixels
     .span3
       = f.label :small_image_value, "Small Image"
-      %input.slider.small{:id => "small_slider", "data-slider-min" => "0", "data-slider-max" => session[:slider_max], "data-slider-step" => "1", title: "Small Image", type: "input"}
+      %input.slider.small{:id => "small_slider", "data-slider-enabled" => "false", "data-slider-min" => "0", "data-slider-max" => session[:slider_max], "data-slider-step" => "1", title: "Small Image", type: "input"}
       = text_field_tag 'small_image_size', '0', class: "inline-block"
     .span3
       = f.label :medium_image_value, "Medium Image"
-      %input.slider.medium{:id => "medium_slider", "data-slider-min" => "0", "data-slider-max" => session[:slider_max], "data-slider-step" => "1", title: "Medium Image", type: "input"}
+      %input.slider.medium{:id => "medium_slider", "data-slider-enabled" => "false", "data-slider-min" => "0", "data-slider-max" => session[:slider_max], "data-slider-step" => "1", title: "Medium Image", type: "input"}
       = text_field_tag 'medium_image_size', '0', class: "inline-block"
     .span3
       = f.label :large_image_value, "Large Image"
-      %input.slider.large{:id => "large_slider", "data-slider-min" => "0", "data-slider-max" => session[:slider_max], "data-slider-step" => "1", title: "Large Image", type: "input"}
+      %input.slider.large{:id => "large_slider", "data-slider-enabled" => "false", "data-slider-min" => "0", "data-slider-max" => session[:slider_max], "data-slider-step" => "1", title: "Large Image", type: "input"}
       = text_field_tag 'large_image_size', '0', class: "inline-block"
