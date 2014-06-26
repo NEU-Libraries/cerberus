@@ -28,7 +28,31 @@ class ScaledImageCreator
   private
 
     def valid_dimensions?
-      small < med && med < large && large < 1.0
+      valid = true
+
+      if !small.nil? && !med.nil?
+        if small > med
+          valid = false
+        end
+      elsif !small.nil? && !large.nil?
+        if small > large
+          valid = false
+        end
+      end
+
+      if !med.nil? && !large.nil?
+        if med > large
+          valid = false
+        end
+      end
+
+      if !large.nil?
+        if large > 1.0
+          valid = false
+        end
+      end
+
+      return valid
     end
 
     def creation_helper(size, klass, master)
