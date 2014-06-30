@@ -125,7 +125,7 @@ en:
         name: Large Image
         icon:
       ImageMasterFile:
-        name: Image
+        name: Master Image
         icon:
       ImageMediumFile:
         name: Medium Image
