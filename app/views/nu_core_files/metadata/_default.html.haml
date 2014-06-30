@@ -28,8 +28,6 @@
     %button#add_another_personal_creator.btn.btn-block.btn-success{:type => "button"}
       %i.icon-plus-sign.icon-large
       Add Personal Creator
-    %span.help-text
-      A complete individual name and/or a corporate creator are required
   .span6
     = render partial: 'nu_core_files/metadata/data_form_corporate_creators', locals: {:f => f, :corporate_names => @nu_core_file.corporate_creators }
     %button#add_another_corporate_creator.btn.btn-success.btn-block{:type => "button"}
@@ -40,8 +38,8 @@
 
   %fieldset.span6
     %legend Description
-    = f.label :description, "Description", class: "required-label"
-    = f.text_area :description, required: true, pattern: ".*\\S.*", name: 'nu_core_file[description][]', class: "input-block-level", rows: 5
+    = f.label :description, "Description"
+    = f.text_area :description, pattern: ".*\\S.*", name: 'nu_core_file[description][]', class: "input-block-level", rows: 5
   %fieldset.span6
     %legend Keyword(s)
     = render partial: 'shared/sets/data_form_keywords', locals: {:f => f, :array_type => "nu_core_file", :keywords => @nu_core_file.keywords }
