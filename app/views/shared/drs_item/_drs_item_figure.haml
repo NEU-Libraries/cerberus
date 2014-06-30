@@ -37,4 +37,7 @@
     -if item.type_label
       %figcaption
         %span.label.small
-          = item.type_label
+          - if item.type_label == "Master Image"
+            = "Image"
+          - else
+            = item.type_label
