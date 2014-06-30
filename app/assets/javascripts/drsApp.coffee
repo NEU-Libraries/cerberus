@@ -135,19 +135,19 @@ $(document).ready ->
         $("#large_image_size").val parseInt($("input.slider.large").attr("data-slider-max"))
         $("input.slider.large").slider "setValue", parseInt($("input.slider.large").attr("data-slider-max"))
 
-      if $("input.slider.small").slider("getValue") > $("input.slider.medium").slider("getValue")
+      if $("input.slider.small").slider("getValue") > $("input.slider.medium").slider("getValue") and not $("#medium_image_size").prop("disabled")
         $("input.slider.medium").slider "setValue", $("input.slider.small").slider("getValue") + 1
         $("#medium_image_size").val $("input.slider.small").slider("getValue") + 1
 
-      if $("input.slider.medium").slider("getValue") < $("input.slider.small").slider("getValue")
+      if $("input.slider.medium").slider("getValue") < $("input.slider.small").slider("getValue") and not $("#small_image_size").prop("disabled")
         $("input.slider.small").slider "setValue", $("input.slider.medium").slider("getValue") - 1
         $("#small_image_size").val $("input.slider.medium").slider("getValue") - 1
 
-      if $("input.slider.medium").slider("getValue") > $("input.slider.large").slider("getValue")
+      if $("input.slider.medium").slider("getValue") > $("input.slider.large").slider("getValue") and not $("#large_image_size").prop("disabled")
         $("input.slider.large").slider "setValue", $("input.slider.medium").slider("getValue") + 1
         $("#large_image_size").val $("input.slider.medium").slider("getValue") + 1
 
-      if $("input.slider.large").slider("getValue") < $("input.slider.medium").slider("getValue")
+      if $("input.slider.large").slider("getValue") < $("input.slider.medium").slider("getValue") and not $("#medium_image_size").prop("disabled")
         $("input.slider.medium").slider "setValue", $("input.slider.large").slider("getValue") - 1
         $("#medium_image_size").val $("input.slider.large").slider("getValue") - 1
 
@@ -186,6 +186,27 @@ $(document).ready ->
         $("#large_image_size").bind "focus blur", ->
           $("input.slider.large").slider "setValue", parseInt($("#large_image_size").val())
           enforceSizes()
+          return
+
+        $("#small_image_checkbox").on "click", ->
+          (if $("#small_image_size").prop("disabled") then $("input.slider.small").slider("enable") else $("input.slider.small").slider("disable"))
+          $("#small_image_size").prop "disabled", (_, val) ->
+            not val
+          if $("#small_image_size").prop("disabled") then $("#small_image_size").val 0 ; $("input.slider.small").slider "setValue", 0
+          return
+
+        $("#medium_image_checkbox").on "click", ->
+          (if $("#medium_image_size").prop("disabled") then $("input.slider.medium").slider("enable") else $("input.slider.medium").slider("disable"))
+          $("#medium_image_size").prop "disabled", (_, val) ->
+            not val
+          if $("#medium_image_size").prop("disabled") then $("#medium_image_size").val 0 ; $("input.slider.medium").slider "setValue", 0
+          return
+
+        $("#large_image_checkbox").on "click", ->
+          (if $("#large_image_size").prop("disabled") then $("input.slider.large").slider("enable") else $("input.slider.large").slider("disable"))
+          $("#large_image_size").prop "disabled", (_, val) ->
+            not val
+          if $("#large_image_size").prop("disabled") then $("#large_image_size").val 0 ; $("input.slider.large").slider "setValue", 0
           return
 
       return
