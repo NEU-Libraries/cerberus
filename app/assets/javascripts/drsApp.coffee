@@ -43,6 +43,7 @@ $(document).ready ->
       imageMetadataPartial()
       dateOfIssuePartial()
       titlePartial()
+      parseTitle()
       return
 
     parseTitle = ->
@@ -135,21 +136,25 @@ $(document).ready ->
         $("#large_image_size").val parseInt($("input.slider.large").attr("data-slider-max"))
         $("input.slider.large").slider "setValue", parseInt($("input.slider.large").attr("data-slider-max"))
 
-      if $("input.slider.small").slider("getValue") > $("input.slider.medium").slider("getValue") and not $("#medium_image_size").prop("disabled")
-        $("input.slider.medium").slider "setValue", $("input.slider.small").slider("getValue") + 1
-        $("#medium_image_size").val $("input.slider.small").slider("getValue") + 1
+      if $("input.slider.small").slider("getValue") > $("input.slider.medium").slider("getValue")
+        if not $("#small_image_size").prop("disabled") and not $("#medium_image_size").prop("disabled")
+          $("input.slider.medium").slider "setValue", $("input.slider.small").slider("getValue") + 1
+          $("#medium_image_size").val $("input.slider.small").slider("getValue") + 1
 
-      if $("input.slider.medium").slider("getValue") < $("input.slider.small").slider("getValue") and not $("#small_image_size").prop("disabled")
-        $("input.slider.small").slider "setValue", $("input.slider.medium").slider("getValue") - 1
-        $("#small_image_size").val $("input.slider.medium").slider("getValue") - 1
+      if $("input.slider.medium").slider("getValue") < $("input.slider.small").slider("getValue")
+        if not $("#small_image_size").prop("disabled") and not $("#medium_image_size").prop("disabled")
+          $("input.slider.small").slider "setValue", $("input.slider.medium").slider("getValue") - 1
+          $("#small_image_size").val $("input.slider.medium").slider("getValue") - 1
 
-      if $("input.slider.medium").slider("getValue") > $("input.slider.large").slider("getValue") and not $("#large_image_size").prop("disabled")
-        $("input.slider.large").slider "setValue", $("input.slider.medium").slider("getValue") + 1
-        $("#large_image_size").val $("input.slider.medium").slider("getValue") + 1
+      if $("input.slider.medium").slider("getValue") > $("input.slider.large").slider("getValue")
+        if not $("#large_image_size").prop("disabled") and not $("#medium_image_size").prop("disabled")
+          $("input.slider.large").slider "setValue", $("input.slider.medium").slider("getValue") + 1
+          $("#large_image_size").val $("input.slider.medium").slider("getValue") + 1
 
-      if $("input.slider.large").slider("getValue") < $("input.slider.medium").slider("getValue") and not $("#medium_image_size").prop("disabled")
-        $("input.slider.medium").slider "setValue", $("input.slider.large").slider("getValue") - 1
-        $("#medium_image_size").val $("input.slider.large").slider("getValue") - 1
+      if $("input.slider.large").slider("getValue") < $("input.slider.medium").slider("getValue")
+        if not $("#large_image_size").prop("disabled") and not $("#medium_image_size").prop("disabled")
+          $("input.slider.medium").slider "setValue", $("input.slider.large").slider("getValue") - 1
+          $("#medium_image_size").val $("input.slider.large").slider("getValue") - 1
 
       return
 
@@ -193,6 +198,7 @@ $(document).ready ->
           $("#small_image_size").prop "disabled", (_, val) ->
             not val
           if $("#small_image_size").prop("disabled") then $("#small_image_size").val 0 ; $("input.slider.small").slider "setValue", 0
+          enforceSizes()
           return
 
         $("#medium_image_checkbox").on "click", ->
@@ -200,6 +206,7 @@ $(document).ready ->
           $("#medium_image_size").prop "disabled", (_, val) ->
             not val
           if $("#medium_image_size").prop("disabled") then $("#medium_image_size").val 0 ; $("input.slider.medium").slider "setValue", 0
+          enforceSizes()
           return
 
         $("#large_image_checkbox").on "click", ->
@@ -207,6 +214,7 @@ $(document).ready ->
           $("#large_image_size").prop "disabled", (_, val) ->
             not val
           if $("#large_image_size").prop("disabled") then $("#large_image_size").val 0 ; $("input.slider.large").slider "setValue", 0
+          enforceSizes()
           return
 
       return
