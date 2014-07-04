@@ -9,6 +9,6 @@
       - @smart_collections.each do |smart_collection|
         =render :partial => 'shared/drs_item/drs_item_smart_collection', locals: { smart_collection: smart_collection }
     - if !docs.nil?
-    - docs.each_with_index do |document,counter|
-      - @thumbs = document.thumbnail_list
-      = render partial: 'shared/drs_item/drs_item' , locals: { item: document }
+      - docs.each_with_index do |document,counter|
+        - @thumbs = document.thumbnail_list
+        = render partial: 'shared/drs_item/drs_item' , locals: { item: document }
