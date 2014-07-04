@@ -20,13 +20,13 @@
       =render partial: 'shared/sets/sets_sidebar'
 
     %section{class: current_user.view_pref == 'grid' ? 'span12' : "span9" }
-      =render :partial => 'catalog/document_list'
+      =render :partial => 'catalog/_index_partials/default_group'
       =render partial: 'shared/sets/bottom_action_menu'
   - else
     %aside.span3
       =render partial: 'shared/sets/sets_sidebar'
 
     %section.span9
-      =render :partial => 'catalog/document_list'
+      =render :partial => 'catalog/_index_partials/default_group'
 
 %div#add_compilation_form{ style: 'display:none' }
