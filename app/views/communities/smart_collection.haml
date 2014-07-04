@@ -20,13 +20,21 @@
       =render partial: 'shared/sets/sets_sidebar'
 
     %section{class: current_user.view_pref == 'grid' ? 'span12' : "span9" }
-      =render :partial => 'catalog/_index_partials/default_group'
+      %section{class: drs_view_class() }
+        -if !@smart_docs.nil?
+          - @smart_docs.each do |document|
+            - @thumbs = document.thumbnail_list
+            = render partial: 'shared/drs_item/drs_item' , locals: { item: document }
       =render partial: 'shared/sets/bottom_action_menu'
   - else
     %aside.span3
       =render partial: 'shared/sets/sets_sidebar'
 
     %section.span9
-      =render :partial => 'catalog/_index_partials/default_group'
+      %section{class: drs_view_class() }
+        -if !@smart_docs.nil?
+          - @smart_docs.each do |document|
+            - @thumbs = document.thumbnail_list
+            = render partial: 'shared/drs_item/drs_item' , locals: { item: document }
 
 %div#add_compilation_form{ style: 'display:none' }
