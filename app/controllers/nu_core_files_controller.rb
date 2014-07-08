@@ -108,7 +108,7 @@ class NuCoreFilesController < ApplicationController
 
   # routed to /files/:id
   def show
-    @nu_core_file = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first)
+    @nu_core_file = fetch_solr_document
 
     @mods = fetch_mods
 
