@@ -25,7 +25,7 @@ class EmployeesController < ApplicationController
       end
     end
 
-    @page_title = "#{@employee.nuid}"
+    @page_title = "#{@employee.employee_name}"
   end
 
   def list_files
@@ -36,6 +36,8 @@ class EmployeesController < ApplicationController
     self.solr_search_params_logic += [:find_employees_files]
 
     (@response, @document_list) = get_search_results
+
+    @page_title = "#{@employee.employee_name}'s Files"
   end
 
   def personal_graph
@@ -51,6 +53,9 @@ class EmployeesController < ApplicationController
     self.solr_search_params_logic += [:find_employees_files]
 
     (@response, @document_list) = get_search_results
+
+    @page_title = "My Files"
+
     render :template => 'employees/list_files'
   end
 
