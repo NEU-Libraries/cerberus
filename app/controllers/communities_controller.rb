@@ -18,6 +18,7 @@ class CommunitiesController < SetsController
   # We can do better by using SOLR check instead of Fedora
   before_filter :can_read?, except: [:index, :show]
   before_filter :enforce_show_permissions, :only=>:show
+  before_filter :get_set, except: [:index]
   self.solr_search_params_logic += [:add_access_controls_to_solr_params]
 
   rescue_from Exceptions::NoParentFoundError, with: :index_redirect
@@ -41,10 +42,6 @@ class CommunitiesController < SetsController
   def show
     @smart_collections = nil
 
-    @set_id = params[:id]
-
-    @set = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first)
-
     @page_title = @set.title
 
     self.solr_search_params_logic += [:show_children_only]
@@ -56,10 +53,6 @@ class CommunitiesController < SetsController
   end
 
   def employees
-    @set_id = params[:id]
-
-    @set = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first)
-
     @page_title = "#{@set.title} #{t('drs.significant.employees.name')}"
 
     @smart_docs = @set.find_employees
@@ -67,10 +60,6 @@ class CommunitiesController < SetsController
   end
 
   def research_publications
-    @set_id = params[:id]
-
-    @set = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first)
-
     @page_title = "#{@set.title} #{t('drs.significant.research.name')}"
 
     @smart_docs = @set.research_publications
@@ -78,10 +67,6 @@ class CommunitiesController < SetsController
   end
 
   def other_publications
-    @set_id = params[:id]
-
-    @set = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first)
-
     @page_title = "#{@set.title} #{t('drs.significant.other.name')}"
 
     @smart_docs = @set.other_publications
@@ -89,10 +74,6 @@ class CommunitiesController < SetsController
   end
 
   def presentations
-    @set_id = params[:id]
-
-    @set = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first)
-
     @page_title = "#{@set.title} #{t('drs.significant.presentations.name')}"
 
     @smart_docs = @set.presentations
@@ -100,10 +81,6 @@ class CommunitiesController < SetsController
   end
 
   def datasets
-    @set_id = params[:id]
-
-    @set = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first)
-
     @page_title = "#{@set.title} #{t('drs.significant.datasets.name')}"
 
     @smart_docs = @set.datasets
@@ -111,10 +88,6 @@ class CommunitiesController < SetsController
   end
 
   def learning_objects
-    @set_id = params[:id]
-
-    @set = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first)
-
     @page_title = "#{@set.title} #{t('drs.significant.learning.name')}"
 
     @smart_docs = @set.learning_objects
@@ -122,6 +95,10 @@ class CommunitiesController < SetsController
   end
 
   protected
+
+    def get_set
+      @set = fetch_solr_document
+    end
 
     def index_redirect(exception)
       flash[:error] = "Communities cannot be created without a parent"
@@ -131,6 +108,6 @@ class CommunitiesController < SetsController
 
     def show_children_only(solr_parameters, user_parameters)
       solr_parameters[:fq] ||= []
-      solr_parameters[:fq] << "#{Solrizer.solr_name("parent_id", :stored_searchable)}:\"#{@set_id}\""
+      solr_parameters[:fq] << "#{Solrizer.solr_name("parent_id", :stored_searchable)}:\"#{params[:id]}\""
     end
 end
