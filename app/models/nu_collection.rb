@@ -76,6 +76,10 @@ class NuCollection < ActiveFedora::Base
     yield self
   end
 
+  def empty?
+    ActiveFedora::SolrService.query("parent_id_tesim:\"#{self.id}\"").empty?
+  end
+
   # Simple human readable label for objects.
   def type_label
     "Collection"
