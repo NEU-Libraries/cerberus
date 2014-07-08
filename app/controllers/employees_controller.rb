@@ -15,22 +15,20 @@ class EmployeesController < ApplicationController
   include BlacklightAdvancedSearch::Controller
 
   before_filter :authenticate_user!, only: [:personal_graph, :personal_files]
+  before_filter :get_employee, only: [:show, :list_files]
 
   def show
-    @employee = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first)
-
-    if !current_user.nil?
-      if current_user.nuid == @employee.nuid
-        return redirect_to personal_graph_path
-      end
+    if user_examining_self?
+      return redirect_to personal_graph_path
     end
 
     @page_title = "#{@employee.employee_name}"
   end
 
   def list_files
-    @employee = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first)
-    @nuid = @employee.nuid
+    if user_examining_self?
+      return redirect_to personal_files_path
+    end
 
     self.solr_search_params_logic += [:exclude_unwanted_models]
     self.solr_search_params_logic += [:find_employees_files]
@@ -47,7 +45,6 @@ class EmployeesController < ApplicationController
 
   def personal_files
     fetch_employee
-    @nuid = @employee.nuid
 
     self.solr_search_params_logic += [:exclude_unwanted_models]
     self.solr_search_params_logic += [:find_employees_files]
@@ -63,6 +60,14 @@ class EmployeesController < ApplicationController
   end
 
   private
+
+    def user_examining_self?
+      return !current_user.nil? && (current_user.nuid == @employee.nuid)
+    end
+
+    def get_employee
+      @employee = fetch_solr_document
+    end
 
     def fetch_employee(retries=0)
       begin
@@ -81,7 +86,7 @@ class EmployeesController < ApplicationController
 
     def find_employees_files(solr_parameters, user_parameters)
       solr_parameters[:fq] ||= []
-      solr_parameters[:fq] << "#{Solrizer.solr_name("depositor", :stored_searchable)}:\"#{@nuid}\""
+      solr_parameters[:fq] << "#{Solrizer.solr_name("depositor", :stored_searchable)}:\"#{@employee.nuid}\""
     end
 
     def exclude_unwanted_models(solr_parameters, user_parameters)
