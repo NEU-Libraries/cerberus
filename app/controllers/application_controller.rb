@@ -47,10 +47,10 @@ class ApplicationController < ActionController::Base
     options = options.with_indifferent_access
 
     fetch = Proc.new do |x|
-      solr_doc = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{x}\"").first)
-      raise ActiveFedora::ObjectNotFoundError if solr_doc.nil?
+      q = ActiveFedora::SolrService.query("id:\"#{x}\"").first
+      raise ActiveFedora::ObjectNotFoundError if q.nil?
 
-      return solr_doc
+      return SolrDocument.new(q)
     end
 
     if options[:id]

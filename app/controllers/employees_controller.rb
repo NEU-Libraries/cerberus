@@ -17,6 +17,12 @@ class EmployeesController < ApplicationController
   before_filter :authenticate_user!, only: [:personal_graph, :personal_files]
   before_filter :get_employee, only: [:show, :list_files]
 
+  rescue_from ActiveFedora::ObjectNotFoundError do |exception|
+    @obj_type = "Faculty Member"
+    email_handled_exception(exception)
+    render_404(ActiveFedora::ObjectNotFoundError.new) and return
+  end
+
   def show
     if user_examining_self?
       return redirect_to personal_graph_path
