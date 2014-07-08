@@ -90,9 +90,7 @@ class NuCollectionsController < SetsController
   end
 
   def show
-    @set_id = params[:id]
-
-    @set = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first)
+    @set = fetch_solr_document
 
     @page_title = @set.title
 
@@ -153,7 +151,7 @@ class NuCollectionsController < SetsController
 
     def show_children_only(solr_parameters, user_parameters)
       solr_parameters[:fq] ||= []
-      solr_parameters[:fq] << "#{Solrizer.solr_name("parent_id", :stored_searchable)}:\"#{@set_id}\""
+      solr_parameters[:fq] << "#{Solrizer.solr_name("parent_id", :stored_searchable)}:\"#{params[:id]}\""
     end
 
 end
