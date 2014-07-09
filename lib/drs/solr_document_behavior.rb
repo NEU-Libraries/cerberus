@@ -197,5 +197,11 @@ module Drs
       hsh = JSON.parse(get "object_profile_ssm")
       return hsh["datastreams"]["content"]["dsLabel"]
     end
+
+    def is_empty_collection?
+      return false if self.klass != "NuCollection"
+
+      ActiveFedora::SolrService.query("parent_id_tesim:\"#{self.pid}\"").empty?
+    end
   end
 end
