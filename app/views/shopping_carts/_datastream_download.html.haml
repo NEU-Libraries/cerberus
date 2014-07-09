@@ -1,6 +1,6 @@
 %article.drs-item{ data: {  "drsitem" => content.pid  } }
 
-  = render partial: 'shared/drs_item/drs_item_figure_no_link', locals: {item: metadata}
+  = render partial: 'shared/drs_item/drs_item_figure_no_link', locals: {item: metadata, item_class: content.klass}
   .drs-item-details
     %header
       %h4.drs-item-title
