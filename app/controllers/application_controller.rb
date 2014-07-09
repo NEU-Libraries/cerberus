@@ -43,6 +43,23 @@ class ApplicationController < ActionController::Base
     Drs::Noid.namespaceize(Drs::IdService.mint)
   end
 
+  def fetch_solr_document(options = {})
+    options = options.with_indifferent_access
+
+    fetch = Proc.new do |x|
+      q = ActiveFedora::SolrService.query("id:\"#{x}\"").first
+      raise ActiveFedora::ObjectNotFoundError if q.nil?
+
+      return SolrDocument.new(q)
+    end
+
+    if options[:id]
+      fetch.call(options[:id])
+    else
+      fetch.call(params[:id])
+    end
+  end
+
   # Why do we have these when current_user.can? is available??
   # helper_method :current_user_can_read?, :current_user_can_edit?
 
