@@ -1,4 +1,8 @@
 -# used in the download list for the shopping carts feature needed an `a` for the styles to work correctly
+-# In spite of existing in a shared view directory this template is not particularly
+-# reusable due to the presumed existence of the kludgy/strange "item_class" variable
+-# which addresses a bug where w.out it everything in the download list claims it's content
+-# type is the content type of its own canonical object.
 
 %figure.pull-left
 
@@ -26,7 +30,6 @@
   -else #the most generic option
 
     = render partial: 'shared/icon', locals: { class_string: 'icon-file' }
-  -if item.type_label
-    %figcaption
-      %span.label.small
-        = item.type_label
+  %figcaption
+    %span.label.small
+      = t("drs.display_labels.#{item_class}.name")
