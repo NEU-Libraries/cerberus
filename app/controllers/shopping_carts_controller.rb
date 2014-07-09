@@ -25,15 +25,15 @@ class ShoppingCartsController < ApplicationController
 
       self.solr_search_params_logic.delete(:find_all_objects_from_cookie)
 
-      self.solr_search_params_logic += [:find_all_objects_from_core_ids]
-      (@response, @document_list) = get_search_results
-      @item_core_records = @response.docs
+      @item_core_records = []
 
-      # Sort @items and @item_core_records so that it can be assumed that
-      # @item_core_records.fetch(i) gets the core record specifically for
-      # @items.fetch(i)
-      @items.sort_by! { |hsh| hsh["is_part_of_ssim"] }
-      @item_core_records.sort_by! { |hsh| hsh["id"] }
+      @items.each do |item|
+        id = item["is_part_of_ssim"].first[12..-1]
+        @item_core_records << fetch_solr_document(id: id)
+      end
+
+      # Ensure that @items consists of solr documents before being passed.
+      @items.map! { |i| SolrDocument.new i }
     else
       @items = []
       @item_core_records = []
