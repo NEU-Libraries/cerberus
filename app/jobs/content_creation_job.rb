@@ -7,7 +7,7 @@ class ContentCreationJob
     :content_creation
   end
 
-  def initialize(core_file, file_path, file_name, user_id, poster_path=0, small_size=0, medium_size=0, large_size=nil, delete_file=true)
+  def initialize(core_file, file_path, file_name, user_id, poster_path=0, small_size=0, medium_size=0, large_size=0, delete_file=true)
     self.core_file_pid = core_file
     self.file_path     = file_path
     self.file_name     = file_name
