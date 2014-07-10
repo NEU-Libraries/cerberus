@@ -37,7 +37,7 @@ class SolrDocument
     cruft, slash, pid = is_member_of.rpartition('/')
 
     employee = Employee.find(pid)
-    user.nuid == employee.nuid
-  end
 
+    user ? user.nuid == employee.nuid : false
+  end
 end
