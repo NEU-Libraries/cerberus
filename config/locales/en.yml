@@ -16,7 +16,7 @@ en:
       form:
         q:
           label: "Search"
-          placeholder: "Search Keywords"
+          placeholder: "Search the DRS"
     provide_metadata_page:
       image_slider_error: "Something went wrong, cannot access info necessary for scaled derivative creation.  Please abandon upload and try again.  If the problem persists contact an administrator."
     homepage:
