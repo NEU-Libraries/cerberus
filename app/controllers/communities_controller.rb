@@ -3,7 +3,7 @@ require 'blacklight_advanced_search'
 require 'parslet'
 require 'parsing_nesting/tree'
 
-class CommunitiesController < SetsController
+class CommunitiesController < ApplicationController
   include Drs::ControllerHelpers::EditableObjects
 
   include Blacklight::Catalog
