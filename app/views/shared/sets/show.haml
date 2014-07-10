@@ -17,6 +17,7 @@
       = render partial: 'shared/icon', locals: { class_string: 'icon-group' }
 
     = kramdown_parse(@set.title)
+    = render partial: 'catalog/search_form', locals: { scope: @set.pid }
     %small
       = @set.type_label
   - if !@set.thumbnail_list.empty?
