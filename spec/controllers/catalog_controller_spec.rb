@@ -1,88 +1,57 @@
 require 'spec_helper'
 
 describe CatalogController do
-  before :all do
-    # Lazy
-    x = Proc.new { |x| FactoryGirl.create(x) }
+  describe "GET #index" do
+    describe "scoped queries" do
+      before :all do
+        @root = FactoryGirl.create(:root_collection)
+        @col1 = FactoryGirl.create(:valid_not_embargoed)
+        @col2 = FactoryGirl.create(:valid_not_embargoed)
+        @col3 = FactoryGirl.create(:valid_not_embargoed)
+        @col4 = FactoryGirl.create(:valid_not_embargoed)
+        @col5 = FactoryGirl.create(:valid_not_embargoed)
 
-    @theses  = x.call(:theses)
-    @theses2 = x.call(:theses)
-    @theses3 = x.call(:theses)
-    @almost_theses = NuCoreFile.create(mass_permissions: 'public',
-                                       depositor: 'a@a.com',
-                                       category: 'thes')
+        @core1 = FactoryGirl.create(:bills_complete_file)
+        @core2 = FactoryGirl.create(:bills_complete_file)
+        @core3 = FactoryGirl.create(:bills_complete_file)
 
-    @research  = x.call(:research)
-    @research2 = x.call(:research)
-    @research3 = x.call(:research)
-    # Make sure search is only on category key
-    @research.title = "Theses" ; @research.save!
+        # Descendent objects of @col1
+        @col1.parent = @root.pid
+        @col2.parent = @col1.pid
+        @col3.parent = @col1.pid
+        @col4.parent = @col3.pid
+        @col4.title = "Find me"
 
-    @presentation  = x.call(:presentation)
-    @presentation1 = x.call(:presentation)
-    @presentation2 = x.call(:presentation)
+        @core1.mass_permissions = "public"
+        @core1.title = "Find me"
+        @core1.parent = @col4
 
-    @dataset  = x.call(:dataset)
-    @dataset1 = x.call(:dataset)
-    @dataset2 = x.call(:dataset)
+        # Items that shouldn't show up
+        @core2.title = "Find me"
+        @core2.mass_permissions = "public"
+        @core2.parent = @col5
 
-    @learning_object =  x.call(:learning_object)
-    @learning_object1 = x.call(:learning_object)
-    @learning_object2 = x.call(:learning_object)
-  end
+        @core3.title = "Find me"
+        @core3.mass_permissions = "private" # shouldn't show for unauthed user
+        @core3.parent = @col2
 
-  after :all do
-    @theses.destroy ; @theses2.destroy ; @theses3.destroy
-    @research.destroy ; @research2.destroy ; @research3.destroy
-  end
+        [@col1, @col2, @col3, @col4, @col5, @core1, @core2, @core3].map { |x| x.save! }
+      end
 
-  def category_context(action, count, category)
-    @action = action
-    @count = count
-    @category = category
-  end
 
-  shared_examples_for "category specific search" do
-    let(:response) { assigns(:response)['response'] }
-    before(:each)  { get @action }
+      it "return only accessible records in the right graph subsection" do
+        get :index, {id: @col1.pid, scope: @col1.pid, q: "Find me"}
 
-    it "returns the correct number of results" do
-      response['numFound'].should == @count
-    end
+        # Finds only the public file in the queried subset of the graph
+        doc_list = assigns[:document_list]
+        doc_list.length.should == 2
+        doc_list.map { |x| x.pid}.should =~ [@core1.pid, @col4.pid]
+      end
 
-    it "returns docs of appropriate category" do
-      cat = 'drs_category_ssim'
-      response['docs'][0][cat].should == [@category]
-      response['docs'][1][cat].should == [@category]
-      response['docs'][2][cat].should == [@category]
+      after :all do
+        NuCollection.destroy_all
+        NuCoreFile.destroy_all
+      end
     end
   end
-
-  # We no longer use these actions, and do a direct search instead.
-  # These actions were causing faceting to fail...
-
-  # describe "#GET theses" do
-  #   before(:all) { category_context(:theses, 3, 'Theses and Dissertations') }
-  #   it_should_behave_like 'category specific search'
-  # end
-
-  # describe "#GET research" do
-  #   before(:all) { category_context(:research, 3, 'Research Publications') }
-  #   it_should_behave_like 'category specific search'
-  # end
-
-  # describe "#GET presentations" do
-  #   before(:all) { category_context(:presentations, 3, 'Presentations') }
-  #   it_should_behave_like 'category specific search'
-  # end
-
-  # describe "#GET datasets" do
-  #   before(:all) { category_context(:datasets, 3, 'Datasets') }
-  #   it_should_behave_like 'category specific search'
-  # end
-
-  # describe "#GET learning_objects" do
-  #   before(:all) { category_context(:learning_objects, 3, "Learning Objects") }
-  #   it_should_behave_like 'category specific search'
-  # end
 end
