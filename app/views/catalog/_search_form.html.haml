@@ -14,7 +14,8 @@
   = search_as_hidden_fields(:omit_keys => [:q, :search_field, :qt, :page]).html_safe
   %label.sr-only(for="searchFieldHeader")
     = t('drs.search.form.q.label')
-  = text_field_tag :q, q, :class => "q span3", :id => "searchFieldHeader", :placeholder => t('drs.search.form.q.placeholder')
-  %button#search-submit-header.btn.btn-info{:type => "submit"}
-    %span.icon-search( aria-hidden="true")
-    Search
+  = text_field_tag :q, q, :class => "q span3", :id => "searchFieldHeader", :placeholder => (defined? scope) ? t('drs.search.form.q.scoped_placeholder') : t('drs.search.form.q.placeholder')
+  - if !(defined? scope)
+    %button#search-submit-header.btn.btn-info{:type => "submit"}
+      %span.icon-search( aria-hidden="true")
+      Search
