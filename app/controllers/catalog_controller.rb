@@ -24,6 +24,13 @@ class CatalogController < ApplicationController
   skip_before_filter :default_html_head
 
   def index
+    # Before executing the actual search (by calling super)
+    # We check if scoped filtering needs to be added to the query
+
+    if params["scope"]
+      self.solr_search_params_logic += [:limit_to_scope]
+    end
+
     super
     recent
   end
@@ -352,5 +359,37 @@ class CatalogController < ApplicationController
 
   def search_layout
     "homepage"
+  end
+
+  def limit_to_scope(solr_parameters, user_parameters)
+    doc = fetch_solr_document(id: params[:scope])
+    descendents = doc.combined_set_descendents
+
+    # Limit query to items that are set descendents
+    ids = descendents.map do |set|
+      set = "id:\"#{set.pid}\""
+    end
+
+    ids_query = ids.join(" OR ")
+
+    # Limit query to items that are files off set descendents
+    files = descendents.map do |set|
+      set = "is_member_of_ssim:\"info:fedora/#{set.pid}\""
+    end
+
+    # Ensure that files that are direct children of the scope collection
+    # are found.  This does nothing but is also harmless in the case where
+    # we're scoped to a Community.
+    files << "is_member_of_ssim:\"info:fedora/#{params[:scope]}\""
+    files_query = files.join(" OR ")
+
+    if !files_query.empty? && !ids_query.empty?
+      fq = "#{files_query} OR #{ids_query}"
+    else
+      fq = "#{files_query} #{ids_query}"
+    end
+
+    solr_parameters[:fq] ||= []
+    solr_parameters[:fq] << fq
   end
 end
