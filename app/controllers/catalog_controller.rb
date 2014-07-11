@@ -27,7 +27,9 @@ class CatalogController < ApplicationController
     # Before executing the actual search (by calling super)
     # We check if scoped filtering needs to be added to the query
 
-    if params["scope"]
+    if params["scope"] && params["smart_search"]
+      #TODO
+    elsif params["scope"]
       self.solr_search_params_logic += [:limit_to_scope]
     end
 
