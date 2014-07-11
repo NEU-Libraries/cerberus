@@ -23,6 +23,14 @@ module Drs
       combined_children_query_result.map { |x| SolrDocument.new(x) }
     end
 
+    def combined_set_descendents
+      descendents = self.combined_set_children
+      descendents.each do |set|
+        descendents.concat set.combined_set_children
+      end
+      return descendents
+    end
+
     def each_depth_first
       self.combined_set_children.each do |child|
         child.each_depth_first do |c|
