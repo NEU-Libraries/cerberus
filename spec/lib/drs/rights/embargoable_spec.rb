@@ -20,27 +20,27 @@ describe Drs::Rights::Embargoable do
     end
 
     it "blocks access for users who aren't the depositor" do
-      embargoed_collection.embargo_in_effect?(bo).should be true
+      embargoed_collection.under_embargo?(bo).should be true
     end
 
     it "doesn't block access for the depositor " do
-      embargoed_collection.embargo_in_effect?(bill).should be false
+      embargoed_collection.under_embargo?(bill).should be false
     end
 
     it "blocks access for non-authenticated (public) users" do
-      embargoed_collection.embargo_in_effect?(nil).should be true
+      embargoed_collection.under_embargo?(nil).should be true
     end
 
     it "doesn't block access to non-embargoed items" do
-      no_embargo.embargo_in_effect?(bo).should be false
+      no_embargo.under_embargo?(bo).should be false
     end
 
     it "doesn't block access to non-embargoed items for the depositor" do
-      no_embargo.embargo_in_effect?(bill).should be false
+      no_embargo.under_embargo?(bill).should be false
     end
 
     it "doesn't block access to non-embargoed items for the general public" do
-      no_embargo.embargo_in_effect?(nil).should be false
+      no_embargo.under_embargo?(nil).should be false
     end
   end
 end
