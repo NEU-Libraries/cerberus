@@ -30,13 +30,6 @@ class NuCollection < ActiveFedora::Base
   belongs_to :user_parent, property: :is_member_of, :class_name => "Employee"
   belongs_to :community_parent, property: :is_member_of, :class_name => "Community"
 
-  # Return all collections that this user can read
-  def self.find_all_viewable(user)
-    collections = NuCollection.find(:all)
-    filtered = collections.select { |ele| !ele.embargo_in_effect?(user) && ele.rightsMetadata.can_read?(user) }
-    return filtered
-  end
-
   def parent
     single_lookup(:is_member_of, [NuCollection, Community])
   end
