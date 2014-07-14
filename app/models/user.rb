@@ -25,6 +25,22 @@ class User < ActiveRecord::Base
     return self.group_list ? self.group_list.split(";") : []
   end
 
+  def repo_staff?
+    return self.groups.include? "northeastern:drs:repository:staff"
+  end
+
+  def proxy_staff?
+    return self.groups.include? "northeastern:drs:repository:proxystaff"
+  end
+
+  def faculty?
+    return self.groups.include? "northeastern:drs:faculty"
+  end
+
+  def staff?
+    return self.groups.include? "northeastern:drs:staff"
+  end
+
   def self.find_for_shib(auth, signed_in_resource=nil)
     user = User.where(:email => auth.info.email).first
 

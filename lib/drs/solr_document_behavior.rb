@@ -203,5 +203,35 @@ module Drs
 
       ActiveFedora::SolrService.query("parent_id_tesim:\"#{self.pid}\"").empty?
     end
+
+    # Fetch the current item's embargo release date
+    def embargo_release_date(opts = {})
+      opts = opts.with_indifferent_access
+
+      result = Array(self["embargo_release_date_dtsi"]).first
+
+      if opts[:formatted] && result
+        return DateTime.parse(result).strftime("%B %-d, %Y")
+      else
+        return result
+      end
+    end
+
+    # Check if the current object is under embargo
+    def under_embargo?(user)
+      e = embargo_release_date
+      return false if e.blank?
+
+      now = DateTime.now
+      e = DateTime.parse e
+
+      if !user
+        return now < e
+      else
+        is_not_depositor = !(user.nuid == self.depositor)
+        is_not_staff     = !(user.repo_staff?)
+        return (now < e) && is_not_depositor && is_not_staff
+      end
+    end
   end
 end
