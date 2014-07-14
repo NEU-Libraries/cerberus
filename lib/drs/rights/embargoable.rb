@@ -21,8 +21,8 @@ module Drs
           if user.nil?
             return self.rightsMetadata.under_embargo?
           else
-            is_not_depositor = !self.depositor == user.nuid
-            is_not_repo_staff = !user.repo_staff?
+            is_not_depositor  = !(self.depositor == user.nuid)
+            is_not_repo_staff = !(user.repo_staff?)
             return self.rightsMetadata.under_embargo? && is_not_depositor && is_not_repo_staff
           end
         end
