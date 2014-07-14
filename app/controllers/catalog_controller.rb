@@ -364,6 +364,10 @@ class CatalogController < ApplicationController
   end
 
   def limit_to_scope(solr_parameters, user_parameters)
+    # Do not bother constructing filter query if user is searching
+    # from the graph root.
+    return true if params[:scope] == Rails.application.config.root_community_id
+
     doc = fetch_solr_document(id: params[:scope])
     descendents = doc.combined_set_descendents
 
