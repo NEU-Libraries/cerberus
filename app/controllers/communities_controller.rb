@@ -62,35 +62,35 @@ class CommunitiesController < ApplicationController
   def research_publications
     @page_title = "#{@set.title} #{t('drs.significant.research.name')}"
 
-    @smart_docs = @set.research_publications
+    @smart_docs = safe_get_smart_docs(@set.research_publications)
     render 'smart_collection', locals: { smart_collection: 'research' }
   end
 
   def other_publications
     @page_title = "#{@set.title} #{t('drs.significant.other.name')}"
 
-    @smart_docs = @set.other_publications
+    @smart_docs = safe_get_smart_docs(@set.other_publications)
     render 'smart_collection', locals: { smart_collection: 'other' }
   end
 
   def presentations
     @page_title = "#{@set.title} #{t('drs.significant.presentations.name')}"
 
-    @smart_docs = @set.presentations
+    @smart_docs = safe_get_smart_docs(@set.presentations)
     render 'smart_collection', locals: { smart_collection: 'presentations' }
   end
 
   def datasets
     @page_title = "#{@set.title} #{t('drs.significant.datasets.name')}"
 
-    @smart_docs = @set.datasets
+    @smart_docs = safe_get_smart_docs(@set.datasets)
     render 'smart_collection', locals: { smart_collection: 'datasets' }
   end
 
   def learning_objects
     @page_title = "#{@set.title} #{t('drs.significant.learning.name')}"
 
-    @smart_docs = @set.learning_objects
+    @smart_docs = safe_get_smart_docs(@set.learning_objects)
     render 'smart_collection', locals: { smart_collection: 'learning' }
   end
 
@@ -109,5 +109,16 @@ class CommunitiesController < ApplicationController
     def show_children_only(solr_parameters, user_parameters)
       solr_parameters[:fq] ||= []
       solr_parameters[:fq] << "#{Solrizer.solr_name("parent_id", :stored_searchable)}:\"#{params[:id]}\""
+    end
+
+    # Ensures that only current_user readable items are returned
+    def safe_get_smart_docs(docs)
+      if !current_user
+        docs.select! { |doc| doc.public? }
+      else
+        docs.select! { |doc| current_user.can?(:read, doc) }
+      end
+
+      return docs
     end
 end
