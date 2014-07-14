@@ -368,28 +368,17 @@ class CatalogController < ApplicationController
     descendents = doc.combined_set_descendents
 
     # Limit query to items that are set descendents
-    ids = descendents.map do |set|
-      set = "id:\"#{set.pid}\""
+    # or files off set descendents
+    query = descendents.map do |set|
+      p = set.pid
+      set = "id:\"#{p}\" OR is_member_of_ssim:\"info:fedora/#{p}\""
     end
 
-    ids_query = ids.join(" OR ")
+    # Ensure files directly on scoping collection are added in
+    # as well
+    query << "is_member_of_ssim:\"info:fedora/#{params[:scope]}\""
 
-    # Limit query to items that are files off set descendents
-    files = descendents.map do |set|
-      set = "is_member_of_ssim:\"info:fedora/#{set.pid}\""
-    end
-
-    # Ensure that files that are direct children of the scope collection
-    # are found.  This does nothing but is also harmless in the case where
-    # we're scoped to a Community.
-    files << "is_member_of_ssim:\"info:fedora/#{params[:scope]}\""
-    files_query = files.join(" OR ")
-
-    if !files_query.empty? && !ids_query.empty?
-      fq = "#{files_query} OR #{ids_query}"
-    else
-      fq = "#{files_query} #{ids_query}"
-    end
+    fq = query.join(" OR ")
 
     solr_parameters[:fq] ||= []
     solr_parameters[:fq] << fq
