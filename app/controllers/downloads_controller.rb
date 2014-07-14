@@ -2,6 +2,8 @@ class DownloadsController < ApplicationController
   include Drs::DownloadsControllerBehavior
   include Drs::ControllerHelpers::ViewLogger
 
+  before_filter :ensure_not_embargoed, :only => :show
+
   # Ensure that only downloads of content datastreams are triggering this.
   # Without this check displaying thumbnails and video poster images will also
   # trigger downloads.  This assumes that significant, actually downloadable
@@ -21,4 +23,14 @@ class DownloadsController < ApplicationController
 
     render_404(ActiveFedora::ObjectNotFoundError.new) and return
   end
+
+  private
+    def ensure_not_embargoed
+      i = ActiveFedora::Base.find(params[:id], cast: true)
+      core = SolrDocument.new(i.core_record.to_solr)
+
+      if core.under_embargo?(current_user)
+        raise ActiveFedora::ObjectNotFoundError
+      end
+    end
 end
