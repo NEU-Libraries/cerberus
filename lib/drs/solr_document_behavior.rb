@@ -233,5 +233,14 @@ module Drs
         return (now < e) && is_not_depositor && is_not_staff
       end
     end
+
+    def is_content_object?
+      return Array(self["is_part_of_ssim"]).any?
+    end
+
+    def get_core_record
+      id = Array(self["is_part_of_ssim"]).first.split("/").last
+      return SolrDocument.new ActiveFedora::SolrService.query("id:\"#{id}\"").first
+    end
   end
 end
