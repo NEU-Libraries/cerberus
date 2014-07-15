@@ -52,8 +52,9 @@ describe ZipCompilationJob do
         end
 
         coll = ["#{t}/#{ugly_from_fine.call(@image)}",
-                "#{t}/#{ugly_from_fine.call(@pdf)}"]
-        [ar.get_name(0), ar.get_name(1)].should =~ coll
+                "#{t}/#{ugly_from_fine.call(@pdf)}",
+                "#{t}/.compilation"]
+        [ar.get_name(0), ar.get_name(1), ar.get_name(2)].should =~ coll
       end
     end
   end
