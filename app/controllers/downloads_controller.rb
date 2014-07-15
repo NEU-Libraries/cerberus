@@ -28,6 +28,9 @@ class DownloadsController < ApplicationController
     def ensure_not_embargoed
       dl = fetch_solr_document
 
+      # Should always show thumbnails no matter what
+      return true if dl.klass == "ImageThumbnailFile"
+
       if dl.is_content_object?
         core = dl.get_core_record
         raise ActiveFedora::ObjectNotFoundError if core.under_embargo?(current_user)
