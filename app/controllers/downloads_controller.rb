@@ -26,11 +26,13 @@ class DownloadsController < ApplicationController
 
   private
     def ensure_not_embargoed
-      i = ActiveFedora::Base.find(params[:id], cast: true)
-      core = SolrDocument.new(i.core_record.to_solr)
+      dl = fetch_solr_document
 
-      if core.under_embargo?(current_user)
-        raise ActiveFedora::ObjectNotFoundError
+      if dl.is_content_object?
+        core = dl.get_core_record
+        raise ActiveFedora::ObjectNotFoundError if core.under_embargo?(current_user)
+      else
+        raise ActiveFedora::ObjectNotFoundError if dl.under_embargo?(current_user)
       end
     end
 end
