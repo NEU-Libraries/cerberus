@@ -20,7 +20,7 @@ module ApplicationHelper
   # Generates an array of link/li tags that should breadcrumb back to the Root Collection
   def breadcrumb_to_root(set, breadcrumb = [])
     if breadcrumb.empty?
-      title_str = "#{set.non_sort} #{kramdown_parse(set.title)}"
+      title_str = CGI::unescapeHTML "#{set.non_sort} #{kramdown_parse(set.title)}"
       breadcrumb << content_tag(:li, title_str, class: 'active')
     end
 
