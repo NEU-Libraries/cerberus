@@ -87,19 +87,7 @@ class ShoppingCartsController < ApplicationController
       end
 
       format.js do
-        attempts = 25
-
-        until attempts == 0 do
-          sleep(2)
-
-          if !Dir[dir].empty?
-            render("download")
-            break
-          else
-            attempts -= 1
-          end
-        end
-        return
+        render("download") if !(Dir[dir].empty?)
       end
     end
   end

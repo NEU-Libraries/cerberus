@@ -46,8 +46,23 @@ $(document).ready ->
       titlePartial()
       multiModalToggle()
       triggerCompilationDownload()
+      triggerCartDownload()
       parseTitle()
       return
+
+    triggerCartDownload = ->
+      x =
+        download_interval_id: false
+        addDownloadLink: ->
+          if $('#button_slot').is(':empty')
+            $.getScript '/download_queue/download.js'
+          else
+            clearInterval(x.download_interval_id)
+          return
+
+      if $('#sc_download_page').length > 0
+        if $('#button_slot').is(':empty')
+          x.download_interval_id = setInterval(x.addDownloadLink(), 3000)
 
     triggerCompilationDownload = ->
       x =
