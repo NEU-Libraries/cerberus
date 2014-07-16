@@ -34,9 +34,9 @@
             %a{:href =>  edit_nu_collection_path(@set)}
               Edit
           %li
-            %a{:href =>"#deleteCollectionModal"}(data-toggle="modal")
+            %a{:href =>"#deleteItemModal"}(data-toggle="modal")
               Delete
-      =render partial: 'shared/sets/delete_collections_modal'
+      =render partial: 'shared/sets/delete_item_modal', locals: { item: @set }
 .row
   - if current_user
     - current_user.view_pref
