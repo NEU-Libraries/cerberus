@@ -17,8 +17,7 @@
             %i.icon-pencil
             %span.sr-only
               Edit
-          %a.btn.btn-mini.btn-clear(data-toggle="modal"){href: "#deleteItemModal", title: "Delete #{comp.title}"}
+          %a.btn.btn-mini.btn-clear.multi-modal{href: "#deleteItemModal", title: "Delete #{comp.title}", data: { toggle: "modal", title: "#{comp.title}", delete_path: "#{polymorphic_path(comp)}"}}
             %i.icon-remove
             %span.sr-only
               Delete
-  = render partial: 'shared/sets/delete_item_modal', locals: { item: comp }
