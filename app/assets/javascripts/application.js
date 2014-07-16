@@ -28,8 +28,6 @@
 
 //= require drsApp
 
-//= require compilations
-//= require shopping_carts
 //= require jquery_validate/jquery.validate.min.js
 
 //= require dateSelectBoxes.pack.js
