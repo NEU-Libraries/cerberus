@@ -89,21 +89,8 @@ class CompilationsController < ApplicationController
 
   def ping_download
     respond_to do |format|
-
       format.js do
-        attempts = 25
-
-        until attempts == 0 do
-          sleep(2)
-
-          if download_is_ready?(@compilation.pid)
-            render("ping_download")
-            break
-          else
-            attempts -= 1
-          end
-        end
-        return
+        render("ping_download") if (download_is_ready?(@compilation.pid))
       end
     end
   end
