@@ -12,6 +12,7 @@
         %i.icon-pencil
         Edit
     %li
-      %a{ href: compilation_path(@compilation), title: "Destroy this #{t('drs.compilations.name')}, this action is non-reversible.", data: { method: 'delete', confirm: "Are you sure you want to delete this #{t('drs.compilations.name')}?", toggle: "tooltip"}}
+      %a{ href: "#deleteCollectionModal", title: "Destroy this #{t('drs.compilations.name')}", data: {toggle: 'modal'} }
         %i.icon-remove
         Delete
+
