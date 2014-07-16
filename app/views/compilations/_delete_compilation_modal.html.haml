@@ -1,0 +1,13 @@
+#deleteCollectionModal.modal.hide.fade{"aria-hidden" => "true", "aria-labelledby" => "delecteCollectionModalLabel", role: "dialog", tabindex: "-1"}
+  .modal-header
+    %button.close{"aria-hidden" => "true", "data-dismiss" => "modal", type: "button"} ×
+    %h3#delecteCollectionModalLabel
+      Confirm deleting #{comp.title}
+  .modal-body
+    %p
+      Are you sure you want to delete
+      %i=comp.title
+      and all of the items it contains? We cannot undo this action!
+  .modal-footer
+    %button.btn{"aria-hidden" => "true", "data-dismiss" => "modal"} Close
+    =link_to("Delete", compilation_path(comp), method: :delete, class: "btn btn-danger")
