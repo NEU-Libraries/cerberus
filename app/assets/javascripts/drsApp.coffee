@@ -99,26 +99,27 @@ $(document).ready ->
 
     parseTitle = ->
 
-      nonSort = ''
-      fullTitle = $('#full_title').val().toLowerCase()
+      if $("#full_title").length > 0
+        nonSort = ''
+        fullTitle = $('#full_title').val().toLowerCase()
 
-      if fullTitle.indexOf('the ') is 0
-        shortTitle = fullTitle.split("the ")[1]
-        nonSort = "The"
-      else if fullTitle.indexOf('an ') is 0
-        shortTitle = fullTitle.split("an ")[1]
-        nonSort = "An"
-      else if fullTitle.indexOf('a ') is 0
-        shortTitle = fullTitle.split("a ")[1]
-        nonSort = "A"
+        if fullTitle.indexOf('the ') is 0
+          shortTitle = fullTitle.split("the ")[1]
+          nonSort = "The"
+        else if fullTitle.indexOf('an ') is 0
+          shortTitle = fullTitle.split("an ")[1]
+          nonSort = "An"
+        else if fullTitle.indexOf('a ') is 0
+          shortTitle = fullTitle.split("a ")[1]
+          nonSort = "A"
 
-      if nonSort != ''
-        $("#nu_core_file_non_sort").val nonSort
-        $("#nu_core_file_title").val shortTitle
-      else
-        $("#nu_core_file_non_sort").val ""
-        $("#nu_core_file_title").val $("#full_title").val().trim()
-      return
+        if nonSort != ''
+          $("#nu_core_file_non_sort").val nonSort
+          $("#nu_core_file_title").val shortTitle
+        else
+          $("#nu_core_file_non_sort").val ""
+          $("#nu_core_file_title").val $("#full_title").val().trim()
+        return
 
     titlePartial = ->
       $("#full_title").bind "change paste keyup", ->
