@@ -11,6 +11,7 @@
 
 #global picturefill
 $(document).ready ->
+
   drsApp = (->
     init = (settings) ->
       drsApp.config =
@@ -43,8 +44,26 @@ $(document).ready ->
       imageMetadataPartial()
       dateOfIssuePartial()
       titlePartial()
+      multiModalToggle()
       parseTitle()
       return
+
+    # On pages that should have multiple item deletion modals,
+    # this method is called on click to modify the one such modal
+    # rendered on that page
+    multiModalToggle = ->
+      $('.multi-modal').click ->
+        title = $(this).data('title')
+        path  = $(this).data('delete-path')
+
+        header_str = "Confirm deleting #{title}"
+        str = "Are you sure you want to delete #{title} and all of the items it
+               contains?  We cannot undo this action!"
+
+        $('#deleteItemModalLabel').text(header_str)
+        $('.modal-body p').text(str)
+        $('.modal-footer a').attr("href", path)
+        return
 
     parseTitle = ->
 
