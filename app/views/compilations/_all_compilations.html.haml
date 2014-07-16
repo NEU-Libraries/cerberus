@@ -1,12 +1,12 @@
-- compilations.each do |comp| 
+- compilations.each do |comp|
   %li.span2
     %div.thumbnail.text-center
       %a{:href => compilation_path(comp) }
         %h5
           =comp.title
-        - if comp.description != nil 
+        - if comp.description != nil
           %small
-            = comp.description 
+            = comp.description
       %nav(role="navigation")
         .btn-group
           %a.btn.btn-mini.btn-clear{title: "Download #{comp.title}", href: prepare_download_path(id: comp.pid), method: 'get', data: {toggle: "tooltip" } }
@@ -17,7 +17,8 @@
             %i.icon-pencil
             %span.sr-only
               Edit
-          %a.btn.btn-mini.btn-clear(title="Delete #{comp.title}"){href: compilation_path(comp), method: "delete",  data: { confirm: 'Are you sure?', toggle: "tooltip" } }
+          %a.btn.btn-mini.btn-clear(data-toggle="modal"){href: "#deleteCollectionModal", title: "Delete #{comp.title}"}
             %i.icon-remove
             %span.sr-only
               Delete
+  = render partial: 'delete_compilation_modal', locals: { comp: comp }
