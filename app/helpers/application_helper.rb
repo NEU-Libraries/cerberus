@@ -9,6 +9,14 @@ module ApplicationHelper
     return output_str.html_safe
   end
 
+  def title_string(page_title)
+    if page_title.blank?
+      return "DRS"
+    else
+      kramdown_parse("#{page_title} - DRS")
+    end
+  end
+
   def thumbnail_for(core_record)
     if core_record.thumbnail
       return core_record.thumbnail

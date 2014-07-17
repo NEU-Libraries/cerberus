@@ -3,7 +3,7 @@
 %meta(name="viewport" content="width=device-width, initial-scale=1.0")
 %meta{content: "IE=edge", "http-equiv" => "X-UA-Compatible"}
 
-%title= h("#{@page_title} - DRS" || application_name)
+%title= h(title_string(@page_title))
 / application css
 = stylesheet_link_tag 'application'
 - if content_for?(:extra_head_contet)
