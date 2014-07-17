@@ -62,6 +62,28 @@ module Drs
       docs = query_result.map { |x| SolrDocument.new(x) }
     end
 
+    # Imposes an arbitrary but aesthetically pleasing order on returned images
+    def content_objects_sorted
+      co = content_objects
+
+      sorter_proc = Proc.new do |klasses, arry|
+        klasses.each do |klass|
+          puts "ko is #{co}"
+          arry << co.find { |x| x.klass == klass }
+        end
+
+        arry.keep_if { |x| x.class == SolrDocument }
+        return arry
+      end
+
+      if co.any? { |x| x.klass == "ImageMasterFile" }
+        a = ["ImageSmallFile", "ImageMediumFile", "ImageLargeFile", "ImageMasterFile"]
+        sorter_proc.call(a, [])
+      else
+        return co
+      end
+    end
+
     def full_self_id
       full_self_id = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/#{self.pid}"
     end
