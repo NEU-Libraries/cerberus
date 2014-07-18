@@ -195,6 +195,14 @@ class NuCoreFilesController < ApplicationController
       if params[:nu_core_file] && !@nu_core_file.category.first.blank?
         UploadAlert.create_from_core_file(@nu_core_file, :update)
       end
+
+      # If this change updated metadata, propagate the change outwards to
+      # all content objects
+      if params[:nu_core_file]
+        q = Drs::Application::Queue
+        q.push(PropagateCoreMetadataChangeJob.new(@nu_core_file.pid))
+      end
+
       # do not trigger an update event if a version event has already been triggered
       Drs::Application::Queue.push(ContentUpdateEventJob.new(@nu_core_file.pid, current_user.user_key)) unless version_event
       # @nu_core_file.record_version_committer(current_user)
