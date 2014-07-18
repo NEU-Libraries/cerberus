@@ -122,6 +122,13 @@ class NuCoreFile < ActiveFedora::Base
     self.properties.tag_as_in_progress
   end
 
+  def propagate_metadata_changes!
+    content_objects.each do |content|
+      content.rightsMetadata.content = self.rightsMetadata.content
+      content.save!
+    end
+  end
+
   def persistent_url
     "#{Rails.configuration.persistent_hostpath}#{pid}"
   end
