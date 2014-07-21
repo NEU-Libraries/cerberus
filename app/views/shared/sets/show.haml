@@ -1,3 +1,5 @@
+- facet_list ||= facet_field_names
+
 %ul.breadcrumb
   - breadcrumb_to_root(@set).each do |breadcrumb|
     =breadcrumb
@@ -37,24 +39,31 @@
             %a{:href =>"#deleteItemModal"}(data-toggle="modal")
               Delete
       =render partial: 'shared/sets/delete_item_modal', locals: { item: @set }
-.row
-  - if current_user
-    - current_user.view_pref
-    %aside.drs-sidebar{class: current_user.view_pref == 'grid' ? 'span12' : "span3" }
-      =render partial: 'shared/sets/sets_sidebar'
 
-    %section{class: current_user.view_pref == 'grid' ? 'span12' : "span9" }
-      = render 'catalog/results_pagination'
-      =render :partial => 'catalog/document_list'
-      = render 'catalog/results_pagination'
-      =render partial: 'shared/sets/bottom_action_menu'
-  - else
-    %aside.drs-sidebar.span3
-      =render partial: 'shared/sets/sets_sidebar'
+- if current_user
+  - drs_items_class = current_user.view_pref == "list" ? "span9" : "span12"
+  - sidebar_class = current_user.view_pref == "list" ? "span3" : "span12"
+  - pane_small_class = current_user.view_pref == "list" ? "" : "span3"
+  - pane_large_class = current_user.view_pref == "list" ? "" : "span6"
+- else
+  - sidebar_class = "span3"
+  - drs_items_class = "span9"
+%main.row( role="main" )
+  %aside.drs-sidebar{ class: sidebar_class }
+    .pane.results-view{ class: pane_small_class }
+      %h4.sr-only View layout preferences
+      = render partial: 'shared/sets/sets_sidebar'
+    .pane.facets{ class: pane_small_class }
+      = render :partial=>'catalog/facets', locals: { facet_list: facet_list }
+    .pane.pagination-info{ class: pane_large_class }
+      = render 'catalog/sort_and_per_page'
 
-    %section.span9
-      = render 'catalog/results_pagination'
-      =render :partial => 'catalog/document_list'
-      = render 'catalog/results_pagination'
+  %section{ class: drs_items_class }
+    -# Main content
+    = render :partial => 'catalog/did_you_mean'
+    -# Render the results in the main section of the page.
+    = render 'catalog/results_pagination'
+    = render :partial => 'catalog/document_list'
+    = render 'catalog/results_pagination'
 
 %div#add_compilation_form{ style: 'display:none' }
