@@ -5,7 +5,7 @@
     =breadcrumb
 
 - if @nu_core_file.embargo_date_in_effect?
-  %span.red= "This item is under embargo and its content will be available for download and viewing on #{@nu_core_file.embargo_release_date(formatted: true)}"
+  %span.embargo-alert= "This item is under embargo and its content will be available for download and viewing on #{@nu_core_file.embargo_release_date(formatted: true)}"
 
 %article{class: ['drs-item', 'drs-item-full'],  data: { drsitem: @nu_core_file.pid } }
   %header
