@@ -24,18 +24,12 @@ class NuCollection < ActiveFedora::Base
   has_file_datastream "thumbnail", type: FileContentDatastream
 
   has_many :child_files, property: :is_member_of, :class_name => "NuCoreFile"
+  has_many :stepchild_files, property: :is_also_member_of, :class_name => "NuCoreFile"
   has_many :child_collections, property: :is_member_of, :class_name => "NuCollection"
 
   belongs_to :parent, property: :is_member_of, :class_name => "NuCollection"
   belongs_to :user_parent, property: :is_member_of, :class_name => "Employee"
   belongs_to :community_parent, property: :is_member_of, :class_name => "Community"
-
-  # Return all collections that this user can read
-  def self.find_all_viewable(user)
-    collections = NuCollection.find(:all)
-    filtered = collections.select { |ele| !ele.embargo_in_effect?(user) && ele.rightsMetadata.can_read?(user) }
-    return filtered
-  end
 
   def parent
     single_lookup(:is_member_of, [NuCollection, Community])

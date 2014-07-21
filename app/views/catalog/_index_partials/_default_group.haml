@@ -8,6 +8,7 @@
     -if !@smart_collections.nil? && @smart_collections.length > 0 && page_info.current_page == 1
       - @smart_collections.each do |smart_collection|
         =render :partial => 'shared/drs_item/drs_item_smart_collection', locals: { smart_collection: smart_collection }
-    - docs.each_with_index do |document,counter|
-      - @thumbs = document.thumbnail_list
-      = render partial: 'shared/drs_item/drs_item' , locals: { item: document }
+    - if !docs.nil?
+      - docs.each_with_index do |document,counter|
+        - @thumbs = document.thumbnail_list
+        = render partial: 'shared/drs_item/drs_item' , locals: { item: document }

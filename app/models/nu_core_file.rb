@@ -35,6 +35,51 @@ class NuCoreFile < ActiveFedora::Base
 
   delegate_to :mods, [:category, :department, :degree, :course_number, :course_title]
 
+  has_many :other_parents,
+            :property => :is_also_member_of,
+            :class_name => "NuCollection"
+  has_many :codebooks,
+            :property => :is_codebook_for,
+            :class_name => 'NuCoreFile'
+  has_many :datasets,
+            :property => :is_dataset_for,
+            :class_name => 'NuCoreFile'
+  has_many :figures,
+            :property => :is_figure_for,
+            :class_name => 'NuCoreFile'
+  has_many :instructional_materials,
+            :property => :is_instructional_material_for,
+            :class_name => 'NuCoreFile'
+  has_many :supplemental_materials,
+            :property => :is_supplemental_material_for,
+            :class_name => 'NuCoreFile'
+  has_many :transcriptions,
+            :property => :is_transcription_of,
+            :class_name => 'NuCoreFile'
+
+  has_and_belongs_to_many :also_member_of,
+                            :property => :is_also_member_of,
+                            :class_name => 'NuCollection'
+  has_and_belongs_to_many :codebook_for,
+                            :property => :is_codebook_for,
+                            :class_name => 'NuCoreFile'
+  has_and_belongs_to_many :dataset_for,
+                            :property => :is_dataset_for,
+                            :class_name => 'NuCoreFile'
+  has_and_belongs_to_many :figure_for,
+                            :property => :is_figure_for,
+                            :class_name => 'NuCoreFile'
+  has_and_belongs_to_many :instructional_material_for,
+                            :property => :is_instructional_material_for,
+                            :class_name => 'NuCoreFile'
+  has_and_belongs_to_many :supplemental_material_for,
+                            :property => :is_supplemental_material_for,
+                            :class_name => 'NuCoreFile'
+  has_and_belongs_to_many :transcription_of,
+                            :property => :is_transcription_of,
+                            :class_name => 'NuCoreFile'
+
+
   # The following two modifications are to account for the fact that
   # we're getting names unparsed in "lastName, firstName" from Fedora
   # on batch load. This parses that into seperate fields to match our
@@ -120,6 +165,13 @@ class NuCoreFile < ActiveFedora::Base
 
   def tag_as_in_progress
     self.properties.tag_as_in_progress
+  end
+
+  def propagate_metadata_changes!
+    content_objects.each do |content|
+      content.rightsMetadata.content = self.rightsMetadata.content
+      content.save!
+    end
   end
 
   def persistent_url

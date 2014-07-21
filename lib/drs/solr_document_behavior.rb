@@ -197,5 +197,91 @@ module Drs
       hsh = JSON.parse(get "object_profile_ssm")
       return hsh["datastreams"]["content"]["dsLabel"]
     end
+
+    def is_empty_collection?
+      return false if self.klass != "NuCollection"
+
+      ActiveFedora::SolrService.query("parent_id_tesim:\"#{self.pid}\"").empty?
+    end
+
+    def codebook_for
+      is_material_for_helper("is_codebook_for_ssim")
+    end
+
+    def dataset_for
+      is_material_for_helper("is_dataset_for_ssim")
+    end
+
+    def figure_for
+      is_material_for_helper("is_figure_for_ssim")
+    end
+
+    def instructional_material_for
+      is_material_for_helper("is_instructional_material_for_ssim")
+    end
+
+    def supplemental_material_for
+      is_material_for_helper("is_supplemental_material_for_ssim")
+    end
+
+    def transcription_of
+      is_material_for_helper("is_transcription_of_ssim")
+    end
+
+    def is_material_for_helper(relation)
+      all = self[relation] || []
+      all.map { |x| SolrDocument.new x }
+    end
+
+    # Fetch the current item's embargo release date
+    def embargo_release_date(opts = {})
+      opts = opts.with_indifferent_access
+
+      result = Array(self["embargo_release_date_dtsi"]).first
+
+      if opts[:formatted] && result
+        return DateTime.parse(result).strftime("%B %-d, %Y")
+      else
+        return result
+      end
+    end
+
+    # Check if the current object is under embargo
+    # disregarding the status of the current user
+    def embargo_date_in_effect?
+      e = embargo_release_date
+      return false if e.blank?
+
+      now = DateTime.now
+      e = DateTime.parse e
+
+      return now < e
+    end
+
+    # Check if the current object is under embargo
+    def under_embargo?(user)
+      e = embargo_release_date
+      return false if e.blank?
+
+      now = DateTime.now
+      e = DateTime.parse e
+
+      if !user
+        return now < e
+      else
+        is_not_depositor = !(user.nuid == self.depositor)
+        is_not_staff     = !(user.repo_staff?)
+        return (now < e) && is_not_depositor && is_not_staff
+      end
+    end
+
+    def is_content_object?
+      return Array(self["is_part_of_ssim"]).any?
+    end
+
+    def get_core_record
+      id = Array(self["is_part_of_ssim"]).first.split("/").last
+      return SolrDocument.new ActiveFedora::SolrService.query("id:\"#{id}\"").first
+    end
   end
 end

@@ -116,13 +116,13 @@ class NuCoreFilesController < ApplicationController
       Drs::Application::Queue.push(ContentCreationJob.new(@nu_core_file.pid, @nu_core_file.tmp_path, @nu_core_file.original_filename, user.id))
     end
 
-    flash[:notice] = 'Your files are being processed by ' + t('sufia.product_name') + ' in the background. The metadata and access controls you specified are being applied. Files will be marked <span class="label label-important" title="Private">Private</span> until this process is complete (shouldn\'t take too long, hang in there!).'
+    flash[:notice] = 'Your files are being processed by ' + t('drs.product_name.short') + ' in the background. The metadata and access controls you specified are being applied. Files will be marked <span class="label label-important" title="Private">Private</span> until this process is complete (shouldn\'t take too long, hang in there!).'
     redirect_to nu_core_file_path(@nu_core_file.pid)
   end
 
   # routed to /files/:id
   def show
-    @nu_core_file = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first)
+    @nu_core_file = fetch_solr_document
 
     @mods = fetch_mods
 
@@ -212,6 +212,14 @@ class NuCoreFilesController < ApplicationController
       if params[:nu_core_file] && !@nu_core_file.category.first.blank?
         UploadAlert.create_from_core_file(@nu_core_file, :update)
       end
+
+      # If this change updated metadata, propagate the change outwards to
+      # all content objects
+      if params[:nu_core_file]
+        q = Drs::Application::Queue
+        q.push(PropagateCoreMetadataChangeJob.new(@nu_core_file.pid))
+      end
+
       # do not trigger an update event if a version event has already been triggered
       Drs::Application::Queue.push(ContentUpdateEventJob.new(@nu_core_file.pid, current_user.user_key)) unless version_event
       # @nu_core_file.record_version_committer(current_user)

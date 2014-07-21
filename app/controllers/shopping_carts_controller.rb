@@ -4,6 +4,7 @@ class ShoppingCartsController < ApplicationController
   before_filter :session_to_array
   before_filter :can_dl?, only: [:update]
   before_filter :check_availability, only: [:show, :download]
+  before_filter :ensure_any_readable, only: [:download]
 
   # Here be solr access boilerplate
   include Blacklight::Catalog
@@ -25,15 +26,15 @@ class ShoppingCartsController < ApplicationController
 
       self.solr_search_params_logic.delete(:find_all_objects_from_cookie)
 
-      self.solr_search_params_logic += [:find_all_objects_from_core_ids]
-      (@response, @document_list) = get_search_results
-      @item_core_records = @response.docs
+      @item_core_records = []
 
-      # Sort @items and @item_core_records so that it can be assumed that
-      # @item_core_records.fetch(i) gets the core record specifically for
-      # @items.fetch(i)
-      @items.sort_by! { |hsh| hsh["is_part_of_ssim"] }
-      @item_core_records.sort_by! { |hsh| hsh["id"] }
+      @items.each do |item|
+        id = item["is_part_of_ssim"].first[12..-1]
+        @item_core_records << fetch_solr_document(id: id)
+      end
+
+      # Ensure that @items consists of solr documents before being passed.
+      @items.map! { |i| SolrDocument.new i }
     else
       @items = []
       @item_core_records = []
@@ -87,19 +88,7 @@ class ShoppingCartsController < ApplicationController
       end
 
       format.js do
-        attempts = 25
-
-        until attempts == 0 do
-          sleep(2)
-
-          if !Dir[dir].empty?
-            render("download")
-            break
-          else
-            attempts -= 1
-          end
-        end
-        return
+        render("download") if !(Dir[dir].empty?)
       end
     end
   end
@@ -133,6 +122,25 @@ class ShoppingCartsController < ApplicationController
         " repository and have been removed from your cart:" +
         " #{deleted.join(', ')}"
       end
+    end
+
+    def ensure_any_readable
+      if session[:ids].empty?
+        flash[:error] = "You cannot download an empty shopping cart"
+        redirect_to shopping_cart_path and return
+      end
+
+      a = []
+      session[:ids].each do |id|
+        a << fetch_solr_document(id: id)
+      end
+
+      c = current_user
+      unless (a.any? { |x| c ? c.can?(:read, x) : x.mass_permissions == 'public' })
+        flash[:error] = "You cannot read any item in your shopping cart.  Aborting."
+        redirect_to shopping_cart_path and return
+      end
+
     end
 
     def session_to_array

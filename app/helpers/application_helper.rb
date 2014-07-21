@@ -9,6 +9,14 @@ module ApplicationHelper
     return output_str.html_safe
   end
 
+  def title_string(page_title)
+    if page_title.blank?
+      return "DRS"
+    else
+      kramdown_parse("#{page_title} - DRS")
+    end
+  end
+
   def thumbnail_for(core_record)
     if core_record.thumbnail
       return core_record.thumbnail
@@ -20,7 +28,7 @@ module ApplicationHelper
   # Generates an array of link/li tags that should breadcrumb back to the Root Collection
   def breadcrumb_to_root(set, breadcrumb = [])
     if breadcrumb.empty?
-      title_str = "#{set.non_sort} #{kramdown_parse(set.title)}"
+      title_str = CGI::unescapeHTML "#{set.non_sort} #{kramdown_parse(set.title)}"
       breadcrumb << content_tag(:li, title_str, class: 'active')
     end
 

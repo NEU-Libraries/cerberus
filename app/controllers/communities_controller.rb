@@ -3,7 +3,7 @@ require 'blacklight_advanced_search'
 require 'parslet'
 require 'parsing_nesting/tree'
 
-class CommunitiesController < SetsController
+class CommunitiesController < ApplicationController
   include Drs::ControllerHelpers::EditableObjects
 
   include Blacklight::Catalog
@@ -18,6 +18,7 @@ class CommunitiesController < SetsController
   # We can do better by using SOLR check instead of Fedora
   before_filter :can_read?, except: [:index, :show]
   before_filter :enforce_show_permissions, :only=>:show
+  before_filter :get_set, except: [:index]
   self.solr_search_params_logic += [:add_access_controls_to_solr_params]
 
   rescue_from Exceptions::NoParentFoundError, with: :index_redirect
@@ -41,10 +42,6 @@ class CommunitiesController < SetsController
   def show
     @smart_collections = nil
 
-    @set_id = params[:id]
-
-    @set = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first)
-
     @page_title = @set.title
 
     self.solr_search_params_logic += [:show_children_only]
@@ -56,10 +53,6 @@ class CommunitiesController < SetsController
   end
 
   def employees
-    @set_id = params[:id]
-
-    @set = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first)
-
     @page_title = "#{@set.title} #{t('drs.significant.employees.name')}"
 
     @smart_docs = @set.find_employees
@@ -67,61 +60,46 @@ class CommunitiesController < SetsController
   end
 
   def research_publications
-    @set_id = params[:id]
-
-    @set = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first)
-
     @page_title = "#{@set.title} #{t('drs.significant.research.name')}"
 
-    @smart_docs = @set.research_publications
+    @smart_docs = safe_get_smart_docs(@set.research_publications)
+
     render 'smart_collection', locals: { smart_collection: 'research' }
   end
 
   def other_publications
-    @set_id = params[:id]
-
-    @set = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first)
-
     @page_title = "#{@set.title} #{t('drs.significant.other.name')}"
 
-    @smart_docs = @set.other_publications
+    @smart_docs = safe_get_smart_docs(@set.other_publications)
     render 'smart_collection', locals: { smart_collection: 'other' }
   end
 
   def presentations
-    @set_id = params[:id]
-
-    @set = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first)
-
     @page_title = "#{@set.title} #{t('drs.significant.presentations.name')}"
 
-    @smart_docs = @set.presentations
+    @smart_docs = safe_get_smart_docs(@set.presentations)
     render 'smart_collection', locals: { smart_collection: 'presentations' }
   end
 
   def datasets
-    @set_id = params[:id]
-
-    @set = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first)
-
     @page_title = "#{@set.title} #{t('drs.significant.datasets.name')}"
 
-    @smart_docs = @set.datasets
+    @smart_docs = safe_get_smart_docs(@set.datasets)
     render 'smart_collection', locals: { smart_collection: 'datasets' }
   end
 
   def learning_objects
-    @set_id = params[:id]
-
-    @set = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first)
-
     @page_title = "#{@set.title} #{t('drs.significant.learning.name')}"
 
-    @smart_docs = @set.learning_objects
+    @smart_docs = safe_get_smart_docs(@set.learning_objects)
     render 'smart_collection', locals: { smart_collection: 'learning' }
   end
 
   protected
+
+    def get_set
+      @set = fetch_solr_document
+    end
 
     def index_redirect(exception)
       flash[:error] = "Communities cannot be created without a parent"
@@ -131,6 +109,20 @@ class CommunitiesController < SetsController
 
     def show_children_only(solr_parameters, user_parameters)
       solr_parameters[:fq] ||= []
-      solr_parameters[:fq] << "#{Solrizer.solr_name("parent_id", :stored_searchable)}:\"#{@set_id}\""
+      solr_parameters[:fq] << "#{Solrizer.solr_name("parent_id", :stored_searchable)}:\"#{params[:id]}\""
+    end
+
+    # Ensures that only current_user readable items are returned
+    def safe_get_smart_docs(docs)
+      if !current_user
+        docs.select! { |doc| doc.public? }
+      else
+        docs.select! { |doc| current_user.can?(:read, doc) }
+      end
+
+      ids = docs.map {|x| x.id}
+      @response = get_solr_response_for_field_values('id', ids, {}).first
+
+      return docs
     end
 end

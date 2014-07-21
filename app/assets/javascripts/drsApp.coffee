@@ -11,6 +11,7 @@
 
 #global picturefill
 $(document).ready ->
+
   drsApp = (->
     init = (settings) ->
       drsApp.config =
@@ -43,30 +44,82 @@ $(document).ready ->
       imageMetadataPartial()
       dateOfIssuePartial()
       titlePartial()
+      multiModalToggle()
+      triggerCompilationDownload()
+      triggerCartDownload()
+      parseTitle()
       return
+
+    triggerCartDownload = ->
+      x =
+        download_interval_id: false
+        addDownloadLink: ->
+          if $('#button_slot').is(':empty')
+            $.getScript '/download_queue/download.js'
+          else
+            clearInterval(x.download_interval_id)
+          return
+
+      if $('#sc_download_page').length > 0
+        if $('#button_slot').is(':empty')
+          x.download_interval_id = setInterval(x.addDownloadLink(), 3000)
+
+    triggerCompilationDownload = ->
+      x =
+        download_interval_id: false,
+        addDownloadLink: ->
+          if $('#display_download_link').is(':empty')
+            comp_id = $('#data').attr('data-comp-id')
+            $.getScript "/sets/#{comp_id}/ping.js"
+          else
+            clearInterval(x.download_interval_id)
+          return
+
+      if $('#display_download_link').length > 0
+        if $('#display_download_link').is(':empty')
+          x.download_interval_id = setInterval(x.addDownloadLink(), 3000)
+
+
+    # On pages that should have multiple item deletion modals,
+    # this method is called on click to modify the one such modal
+    # rendered on that page
+    multiModalToggle = ->
+      $('.multi-modal').click ->
+        title = $(this).data('title')
+        path  = $(this).data('delete-path')
+
+        header_str = "Confirm deleting #{title}"
+        str = "Are you sure you want to delete #{title} and all of the items it
+               contains?  We cannot undo this action!"
+
+        $('#deleteItemModalLabel').text(header_str)
+        $('.modal-body p').text(str)
+        $('.modal-footer a').attr("href", path)
+        return
 
     parseTitle = ->
 
-      nonSort = ''
-      fullTitle = $('#full_title').val().toLowerCase()
+      if $("#full_title").length > 0
+        nonSort = ''
+        fullTitle = $('#full_title').val().toLowerCase()
 
-      if fullTitle.indexOf('the ') is 0
-        shortTitle = fullTitle.split("the ")[1]
-        nonSort = "The"
-      else if fullTitle.indexOf('an ') is 0
-        shortTitle = fullTitle.split("an ")[1]
-        nonSort = "An"
-      else if fullTitle.indexOf('a ') is 0
-        shortTitle = fullTitle.split("a ")[1]
-        nonSort = "A"
+        if fullTitle.indexOf('the ') is 0
+          shortTitle = fullTitle.split("the ")[1]
+          nonSort = "The"
+        else if fullTitle.indexOf('an ') is 0
+          shortTitle = fullTitle.split("an ")[1]
+          nonSort = "An"
+        else if fullTitle.indexOf('a ') is 0
+          shortTitle = fullTitle.split("a ")[1]
+          nonSort = "A"
 
-      if nonSort != ''
-        $("#nu_core_file_non_sort").val nonSort
-        $("#nu_core_file_title").val shortTitle
-      else
-        $("#nu_core_file_non_sort").val ""
-        $("#nu_core_file_title").val $("#full_title").val().trim()
-      return
+        if nonSort != ''
+          $("#nu_core_file_non_sort").val nonSort
+          $("#nu_core_file_title").val shortTitle
+        else
+          $("#nu_core_file_non_sort").val ""
+          $("#nu_core_file_title").val $("#full_title").val().trim()
+        return
 
     titlePartial = ->
       $("#full_title").bind "change paste keyup", ->
@@ -136,20 +189,24 @@ $(document).ready ->
         $("input.slider.large").slider "setValue", parseInt($("input.slider.large").attr("data-slider-max"))
 
       if $("input.slider.small").slider("getValue") > $("input.slider.medium").slider("getValue")
-        $("input.slider.medium").slider "setValue", $("input.slider.small").slider("getValue") + 1
-        $("#medium_image_size").val $("input.slider.small").slider("getValue") + 1
+        if not $("#small_image_size").prop("disabled") and not $("#medium_image_size").prop("disabled")
+          $("input.slider.medium").slider "setValue", $("input.slider.small").slider("getValue") + 1
+          $("#medium_image_size").val $("input.slider.small").slider("getValue") + 1
 
       if $("input.slider.medium").slider("getValue") < $("input.slider.small").slider("getValue")
-        $("input.slider.small").slider "setValue", $("input.slider.medium").slider("getValue") - 1
-        $("#small_image_size").val $("input.slider.medium").slider("getValue") - 1
+        if not $("#small_image_size").prop("disabled") and not $("#medium_image_size").prop("disabled")
+          $("input.slider.small").slider "setValue", $("input.slider.medium").slider("getValue") - 1
+          $("#small_image_size").val $("input.slider.medium").slider("getValue") - 1
 
       if $("input.slider.medium").slider("getValue") > $("input.slider.large").slider("getValue")
-        $("input.slider.large").slider "setValue", $("input.slider.medium").slider("getValue") + 1
-        $("#large_image_size").val $("input.slider.medium").slider("getValue") + 1
+        if not $("#large_image_size").prop("disabled") and not $("#medium_image_size").prop("disabled")
+          $("input.slider.large").slider "setValue", $("input.slider.medium").slider("getValue") + 1
+          $("#large_image_size").val $("input.slider.medium").slider("getValue") + 1
 
       if $("input.slider.large").slider("getValue") < $("input.slider.medium").slider("getValue")
-        $("input.slider.medium").slider "setValue", $("input.slider.large").slider("getValue") - 1
-        $("#medium_image_size").val $("input.slider.large").slider("getValue") - 1
+        if not $("#large_image_size").prop("disabled") and not $("#medium_image_size").prop("disabled")
+          $("input.slider.medium").slider "setValue", $("input.slider.large").slider("getValue") - 1
+          $("#medium_image_size").val $("input.slider.large").slider("getValue") - 1
 
       return
 
@@ -173,18 +230,42 @@ $(document).ready ->
           enforceSizes()
           return
 
-        $("#small_image_size").change ->
+        $("#small_image_size").bind "focus blur", ->
           $("input.slider.small").slider "setValue", parseInt($("#small_image_size").val())
           enforceSizes()
           return
 
-        $("#medium_image_size").change ->
+        $("#medium_image_size").bind "focus blur", ->
           $("input.slider.medium").slider "setValue", parseInt($("#medium_image_size").val())
           enforceSizes()
           return
 
-        $("#large_image_size").change ->
+        $("#large_image_size").bind "focus blur", ->
           $("input.slider.large").slider "setValue", parseInt($("#large_image_size").val())
+          enforceSizes()
+          return
+
+        $("#small_image_checkbox").on "click", ->
+          (if $("#small_image_size").prop("disabled") then $("input.slider.small").slider("enable") else $("input.slider.small").slider("disable"))
+          $("#small_image_size").prop "disabled", (_, val) ->
+            not val
+          if $("#small_image_size").prop("disabled") then $("#small_image_size").val 0 ; $("input.slider.small").slider "setValue", 0
+          enforceSizes()
+          return
+
+        $("#medium_image_checkbox").on "click", ->
+          (if $("#medium_image_size").prop("disabled") then $("input.slider.medium").slider("enable") else $("input.slider.medium").slider("disable"))
+          $("#medium_image_size").prop "disabled", (_, val) ->
+            not val
+          if $("#medium_image_size").prop("disabled") then $("#medium_image_size").val 0 ; $("input.slider.medium").slider "setValue", 0
+          enforceSizes()
+          return
+
+        $("#large_image_checkbox").on "click", ->
+          (if $("#large_image_size").prop("disabled") then $("input.slider.large").slider("enable") else $("input.slider.large").slider("disable"))
+          $("#large_image_size").prop "disabled", (_, val) ->
+            not val
+          if $("#large_image_size").prop("disabled") then $("#large_image_size").val 0 ; $("input.slider.large").slider "setValue", 0
           enforceSizes()
           return
 
