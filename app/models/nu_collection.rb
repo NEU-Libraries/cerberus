@@ -24,6 +24,7 @@ class NuCollection < ActiveFedora::Base
   has_file_datastream "thumbnail", type: FileContentDatastream
 
   has_many :child_files, property: :is_member_of, :class_name => "NuCoreFile"
+  has_many :stepchild_files, property: :is_also_member_of, :class_name => "NuCoreFile"
   has_many :child_collections, property: :is_member_of, :class_name => "NuCollection"
 
   belongs_to :parent, property: :is_member_of, :class_name => "NuCollection"
