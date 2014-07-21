@@ -47,7 +47,7 @@ class NuCoreFilesController < ApplicationController
     @nu_core_file = NuCoreFile.new
 
     if should_proxy?
-      user = User.find_by_nuid(params[:proxy])
+      user = Employee.find_by_nuid(params[:proxy])
     else
       user = current_user
     end
@@ -82,7 +82,7 @@ class NuCoreFilesController < ApplicationController
 
   def process_metadata
     if should_proxy?
-      user = User.find_by_nuid(params[:proxy])
+      user = Employee.find_by_nuid(params[:proxy])
     else
       user = current_user
     end
@@ -268,8 +268,9 @@ class NuCoreFilesController < ApplicationController
       # Relative path is set by the jquery uploader when uploading a directory
       nu_core_file.relative_path = params[:relative_path] if params[:relative_path]
 
-      if !proxy.blank? && current_user.can_proxy?
+      if !proxy.blank? && current_user.proxy_staff?
         nu_core_file.depositor = proxy
+        nu_core_file.rightsMetadata.permissions({edit: 'person'}, "#{current_user.nuid}")
       else
         nu_core_file.depositor = user.nuid
       end
@@ -344,6 +345,6 @@ class NuCoreFilesController < ApplicationController
 
     def should_proxy?
       exists = Employee.exists_by_nuid?(params[:proxy])
-      !params[:proxy].blank? && current_user.can_proxy? && exists
+      !params[:proxy].blank? && current_user.proxy_staff? && exists
     end
 end
