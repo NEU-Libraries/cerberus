@@ -28,6 +28,11 @@ h1, .h1, h2, .h2, h3, .h3, h4, .h4, h5, .h5, h6, .h6{
   font-weight: 100;
 }
 
+.embargo-alert{
+  font-weight: 100;
+  color: $red;
+}
+
 
 h1 small, h2 small, h3 small, h4 small, h5 small, h6 small {
   font-weight: 100;
