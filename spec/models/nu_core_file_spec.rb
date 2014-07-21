@@ -142,6 +142,103 @@ describe NuCoreFile do
       core.thumbnail.should == @thumb
     end
   end
+
+  describe "Custom relationships" do
+    before :all do
+      @one   = FactoryGirl.create(:bills_complete_file)
+      @two   = FactoryGirl.create(:bills_complete_file)
+      @three = FactoryGirl.create(:bills_complete_file)
+      @four  = FactoryGirl.create(:root_collection)
+    end
+
+    def save_all
+      @one.save! ; @two.save! ; @three.save!
+    end
+
+    it "can assign additional parents" do
+      @one.also_member_of = [@four]
+      @one.save!
+
+      @one.also_member_of.should =~ [@four]
+      @one.rels_ext.content.should include("<drs:isAlsoMemberOf")
+    end
+
+    it "can assign and find codebooks" do
+      @one.codebook_for = [@three]
+      @two.codebook_for = [@three]
+
+      save_all
+
+      @one.codebook_for.should =~ [@three]
+      @one.rels_ext.content.should include("<drs:isCodebookFor")
+
+      @three.codebook_ids.should =~ [@one.pid, @two.pid]
+    end
+
+    it "can assign and find datasets" do
+      @one.dataset_for = [@three]
+      @two.dataset_for = [@three]
+
+      save_all
+
+      @one.dataset_for.should =~ [@three]
+      @one.rels_ext.content.should include ("<drs:isDatasetFor")
+
+      @three.dataset_ids.should =~ [@one.pid, @two.pid]
+    end
+
+    it "can assign and find figures" do
+      @one.figure_for = [@three]
+      @two.figure_for = [@three]
+
+      save_all
+
+      @one.figure_for.should =~ [@three]
+      @one.rels_ext.content.should include ("<drs:isFigureFor")
+
+      @three.figure_ids.should =~ [@one.pid, @two.pid]
+    end
+
+    it "can assign and find instructional materials" do
+      @one.instructional_material_for = [@three]
+      @two.instructional_material_for = [@three]
+
+      save_all
+
+      @one.instructional_material_for.should =~ [@three]
+      @one.rels_ext.content.should include("<drs:isInstructionalMaterialFor")
+
+      @three.instructional_material_ids.should =~ [@one.pid, @two.pid]
+    end
+
+    it "can assign and find supplemental materials" do
+      @one.supplemental_material_for = [@three]
+      @two.supplemental_material_for = [@three]
+
+      save_all
+
+      @one.supplemental_material_for.should =~ [@three]
+      @one.rels_ext.content.should include("<drs:isSupplementalMaterialFor")
+
+      @three.supplemental_material_ids.should =~ [@one.pid, @two.pid]
+    end
+
+    it "can assign and find transcriptions" do
+      @one.transcription_of = [@three]
+      @two.transcription_of = [@three]
+
+      save_all
+
+      @one.transcription_of.should =~ [@three]
+      @one.rels_ext.content.should include("<drs:isTranscriptionOf")
+
+      @three.transcription_ids.should =~ [@one.pid, @two.pid]
+    end
+
+    after :all do
+      @one.destroy ; @two.destroy ; @three.destroy ; @four.destroy
+    end
+  end
 end
 
 

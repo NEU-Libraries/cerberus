@@ -30,7 +30,6 @@ class ZipCompilationJob
     zipfile_name = safe_zipfile_name
 
     Zip::Archive.open(safe_zipfile_name, Zip::CREATE) do |io|
-      io.add_buffer("#{self.title}/.compilation", "~")
       self.entry_ids.each do |id|
         if NuCoreFile.exists?(id) && !(NuCoreFile.find(id).under_embargo?(User.find_by_nuid(nuid)))
           NuCoreFile.find(id).content_objects.each do |content|
