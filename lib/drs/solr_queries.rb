@@ -13,14 +13,22 @@ module Drs
 
     def child_files
       core_file_model = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:NuCoreFile"
-      children_query_result = ActiveFedora::SolrService.query("is_member_of_ssim:#{self.full_self_id} AND has_model_ssim:#{core_file_model}")
+      children_query_result = ActiveFedora::SolrService.query("is_member_of_ssim:#{self.full_self_id} AND has_model_ssim:#{core_file_model}", rows: 999)
       children_query_result.map { |x| SolrDocument.new(x) }
     end
 
     def combined_set_children
       core_file_model = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:NuCoreFile"
-      combined_children_query_result = ActiveFedora::SolrService.query("has_affiliation_ssim:#{self.full_self_id} OR is_member_of_ssim:#{self.full_self_id} NOT has_model_ssim:#{core_file_model}")
+      combined_children_query_result = ActiveFedora::SolrService.query("has_affiliation_ssim:#{self.full_self_id} OR is_member_of_ssim:#{self.full_self_id} NOT has_model_ssim:#{core_file_model}", rows: 999)
       combined_children_query_result.map { |x| SolrDocument.new(x) }
+    end
+
+    def combined_set_descendents
+      descendents = self.combined_set_children
+      descendents.each do |set|
+        descendents.concat set.combined_set_children
+      end
+      return descendents
     end
 
     def each_depth_first
@@ -54,13 +62,35 @@ module Drs
       docs = query_result.map { |x| SolrDocument.new(x) }
     end
 
+    # Imposes an arbitrary but aesthetically pleasing order on returned images
+    def content_objects_sorted
+      co = content_objects
+
+      sorter_proc = Proc.new do |klasses, arry|
+        klasses.each do |klass|
+          puts "ko is #{co}"
+          arry << co.find { |x| x.klass == klass }
+        end
+
+        arry.keep_if { |x| x.class == SolrDocument }
+        return arry
+      end
+
+      if co.any? { |x| x.klass == "ImageMasterFile" }
+        a = ["ImageSmallFile", "ImageMediumFile", "ImageLargeFile", "ImageMasterFile"]
+        sorter_proc.call(a, [])
+      else
+        return co
+      end
+    end
+
     def full_self_id
       full_self_id = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/#{self.pid}"
     end
 
     def find_employees
       employee_model = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:Employee"
-      query_result = ActiveFedora::SolrService.query("has_affiliation_ssim:\"#{self.full_self_id}\" AND has_model_ssim:\"#{employee_model}\"")
+      query_result = ActiveFedora::SolrService.query("has_affiliation_ssim:\"#{self.full_self_id}\" AND has_model_ssim:\"#{employee_model}\"", rows: 999)
       query_result.map { |x| SolrDocument.new(x) }
     end
 
@@ -69,7 +99,7 @@ module Drs
       employee_list = find_employees
       employee_list.each do |e|
         full_employee_id = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/#{e.pid}"
-        query_result = ActiveFedora::SolrService.query("is_member_of_ssim:\"#{full_employee_id}\" AND smart_collection_type_tesim:\"User Root\"")
+        query_result = ActiveFedora::SolrService.query("is_member_of_ssim:\"#{full_employee_id}\" AND smart_collection_type_tesim:\"User Root\"", rows: 999)
         doc_list << query_result.map { |x| SolrDocument.new(x) }
       end
       return doc_list
@@ -79,7 +109,7 @@ module Drs
       doc_list ||= []
       user_root_list = find_user_root_collections
       user_root_list.each do |r|
-        query_result = ActiveFedora::SolrService.query("parent_id_tesim:\"#{r.first.pid}\" AND smart_collection_type_tesim:\"#{type_str}\"")
+        query_result = ActiveFedora::SolrService.query("parent_id_tesim:\"#{r.first.pid}\" AND smart_collection_type_tesim:\"#{type_str}\"", rows: 999)
         doc_list << query_result.map { |x| SolrDocument.new(x) }
       end
       return doc_list
@@ -184,5 +214,34 @@ module Drs
       end
     end
 
+    def codebooks
+      return associated_files_by_type("is_codebook_for_ssim")
+    end
+
+    def datasets
+      return associated_files_by_type("is_dataset_for_ssim")
+    end
+
+    def figures
+      return associated_files_by_type("is_figure_for_ssim")
+    end
+
+    def instructional_materials
+      return associated_files_by_type("is_instructional_material_for_ssim")
+    end
+
+    def supplemental_materials
+      return associated_files_by_type("is_supplemental_material_for_ssim")
+    end
+
+    def transcriptions
+      return associated_files_by_type("is_transcription_of_ssim")
+    end
+
+    def associated_files_by_type(relation)
+      str = "info:fedora/#{self.pid}"
+      r = ActiveFedora::SolrService.query("#{relation}:\"#{str}\"", :rows => 999)
+      r.map { |x| SolrDocument.new(x) }
+    end
   end
 end

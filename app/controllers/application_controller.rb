@@ -12,6 +12,7 @@ class ApplicationController < ActionController::Base
   layout "homepage"
 
   protect_from_forgery
+  before_filter :store_location
 
   def email_handled_exception(exception)
     if !current_user.nil?
@@ -23,24 +24,46 @@ class ApplicationController < ActionController::Base
     ExceptionNotifier.notify_exception(exception, :env => request.env, :data => {:user => "#{name}"})
   end
 
-  # Allows us to redirect to the current page on signin, instead of always back to root.
-  def after_sign_in_path_for(resource)
-    sign_in_url = url_for(:action => 'new', :controller => 'sessions', :only_path => false, :protocol => 'http')
-    if params[:controller] = 'sessions' && params[:action] == 'new' || params[:action] == 'create'
-      root_path
-    elsif request.referer == sign_in_url
-      super
-    else
-      stored_location_for(resource) || request.referer || root_path
-    end
-  end
-
   def render_403
     render :file => "#{Rails.root}/public/403", formats: [:html], layout: false, status: '403'
   end
 
   def mint_unique_pid
     Drs::Noid.namespaceize(Drs::IdService.mint)
+  end
+
+  def fetch_solr_document(options = {})
+    options = options.with_indifferent_access
+
+    fetch = Proc.new do |x|
+      q = ActiveFedora::SolrService.query("id:\"#{x}\"").first
+      raise ActiveFedora::ObjectNotFoundError if q.nil?
+
+      return SolrDocument.new(q)
+    end
+
+    if options[:id]
+      fetch.call(options[:id])
+    else
+      fetch.call(params[:id])
+    end
+  end
+
+  def store_location
+    # store last url - this is needed for post-login redirect to whatever the user last visited.
+    return unless request.get?
+    if (request.path != "/users/sign_in" &&
+        request.path != "/users/sign_up" &&
+        request.path != "/users/password/new" &&
+        request.path != "/users/sign_out" &&
+        !(request.path.include? "/downloads/") &&
+        !request.xhr?) # don't store ajax calls
+      session[:previous_url] = request.fullpath
+    end
+  end
+
+  def after_sign_in_path_for(resource)
+    session[:previous_url] || root_path
   end
 
   # Why do we have these when current_user.can? is available??

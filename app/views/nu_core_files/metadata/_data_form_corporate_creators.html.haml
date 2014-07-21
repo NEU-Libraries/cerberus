@@ -4,9 +4,13 @@
     = f.text_field :corporate_creators, value: "", name: 'nu_core_file[creators][corporate_names][]', class: "input-block-level", placeholder: "Northeastern University"
 - else
   - corporate_names.each_with_index do | name, i |
-    .corporate_creator
-      = f.label :corporate_creators, "Organziation"
-      = f.text_field :corporate_creators, value: name.strip, name: 'nu_core_file[creators][corporate_names][]', class: "input-block-level", placeholder: "Northeastern University"
-      - unless i == 0
+    - if i == 0
+      .corporate_creator
+        = f.label :corporate_creators, "Organization"
+        = f.text_field :corporate_creators, value: name.strip, name: 'nu_core_file[creators][corporate_names][]', class: "input-block-level", placeholder: "Northeastern University"
+    - else
+      .corporate_creator.input-append{ :style => "display:block;"}
+        = f.label :corporate_creators, "Organization"
+        = f.text_field :corporate_creators, value: name.strip, name: 'nu_core_file[creators][corporate_names][]', class: "input-block-level span11", placeholder: "Northeastern University"
         %button.btn.btn-danger{"data-delete" => "", "data-remove" => "true", "data-target" => ".corporate_creator", title: "Remove permission", type: "button"}
           = render partial: 'shared/icon' , locals: { class_string: 'icon-remove', alt_text: "Remove Field" }

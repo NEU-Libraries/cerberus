@@ -6,7 +6,7 @@ module DrsHelper
   end
 
   def number_of_deposits(user)
-    ActiveFedora::SolrService.query("#{Solrizer.solr_name('depositor', :stored_searchable, :type => :string)}:#{user.user_key}").count
+    ActiveFedora::SolrService.query("#{Solrizer.solr_name('depositor', :stored_searchable, :type => :string)}:#{user.user_key}", rows: 999).count
   end
 
   def link_to_profile(login)

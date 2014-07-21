@@ -110,6 +110,13 @@ namespace :deploy do
     end
   end
 
+  desc 'Copy htaccess'
+  task :copy_htaccess do
+    on roles(:app), :in => :sequence, :wait => 5 do
+      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . cp /home/drs/config/.htaccess .)"
+    end
+  end
+
 end
 
 # Load the rvm environment before executing the refresh data hook.
@@ -133,6 +140,7 @@ after 'deploy:updating', 'deploy:copy_yml_file'
 after 'deploy:updating', 'deploy:migrate'
 after 'deploy:updating', 'deploy:whenever'
 after 'deploy:updating', 'deploy:assets_kludge'
+after 'deploy:updating', 'deploy:copy_htaccess'
 
 # after 'deploy:finished', 'deploy:reset_data'
 after 'deploy:finished', 'deploy:start_solrizerd'

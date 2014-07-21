@@ -42,8 +42,19 @@ describe ZipCompilationJob do
     it "creates a zipfile with the right files in it" do
       Zip::Archive.open(archive) do |ar|
         t = @compilation.title
-        coll = ["#{t}/#{@image.title}", "#{t}/#{@pdf.title}"]
-        [ar.get_name(0), ar.get_name(1)].should =~ coll
+
+        ugly_from_fine = Proc.new do |x|
+          id    = x.core_record.pid.split(":").last
+          lbl   = x.type_label
+          fname = x.title
+          ext   = File.extname(x.content.label) || ""
+          "#{id}-#{lbl}-#{fname}"
+        end
+
+        coll = ["#{t}/#{ugly_from_fine.call(@image)}",
+                "#{t}/#{ugly_from_fine.call(@pdf)}",
+                "#{t}/.compilation"]
+        [ar.get_name(0), ar.get_name(1), ar.get_name(2)].should =~ coll
       end
     end
   end

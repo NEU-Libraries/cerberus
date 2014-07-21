@@ -4,6 +4,9 @@
   - breadcrumb_to_root(@nu_core_file).each do |breadcrumb|
     =breadcrumb
 
+- if @nu_core_file.embargo_date_in_effect?
+  %span.embargo-alert= "This item is under embargo and its content will be available for download and viewing on #{@nu_core_file.embargo_release_date(formatted: true)}"
+
 %article{class: ['drs-item', 'drs-item-full'],  data: { drsitem: @nu_core_file.pid } }
   %header
     / %h1.page-header= @nu_core_file

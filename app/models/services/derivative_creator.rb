@@ -92,8 +92,6 @@ class DerivativeCreator
         return false
       end
 
-      blob = nil
-
       if !poster
         blob = master.content.content
       else
@@ -106,18 +104,23 @@ class DerivativeCreator
 
       img = Magick::Image.from_blob(blob).first
 
-      img.format = "JPEG"
-      img.interlace = Magick::PlaneInterlace
-
       if size[:height] && size[:width]
-        scaled_img = img.resize_to_fill(size[:height], size[:width])
+        scaled_img = img.resize_to_fit(size[:height], size[:width])
+        fill = Magick::Image.new(size[:height], size[:width])
       elsif size[:width]
         scaled_img = img.resize_to_fit(size[:width])
+        fill = Magick::Image.new(size[:width], size[:width])
       else
-        raise "size must be hash containing :height/:width keys or just the :width key"
+        raise "Size must be hash containing :height/:width or :width keys"
       end
 
-      thumb.add_file(scaled_img.to_blob, dsid, "#{master.content.label.split('.').first}.jpeg")
+      fill = fill.matte_floodfill(1, 1)
+
+      fill.composite!(scaled_img, Magick::CenterGravity, Magick::OverCompositeOp)
+      fill.format = "JPEG"
+      fill.interlace = Magick::PlaneInterlace
+
+      thumb.add_file(fill.to_blob, dsid, "#{master.content.label.split('.').first}.jpeg")
       thumb.save!
 
       self.thumbnail_list << "/downloads/#{self.core.thumbnail.pid}?datastream_id=#{dsid}"
