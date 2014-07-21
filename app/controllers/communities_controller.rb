@@ -120,7 +120,7 @@ class CommunitiesController < ApplicationController
         docs.select! { |doc| current_user.can?(:read, doc) }
       end
 
-      ids = @smart_docs.map {|x| x.id}
+      ids = docs.map {|x| x.id}
       @response = get_solr_response_for_field_values('id', ids, {}).first
 
       return docs
