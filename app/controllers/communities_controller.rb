@@ -63,8 +63,6 @@ class CommunitiesController < ApplicationController
     @page_title = "#{@set.title} #{t('drs.significant.research.name')}"
 
     @smart_docs = safe_get_smart_docs(@set.research_publications)
-    ids = @smart_docs.map {|x| x.id}
-    @response = get_solr_response_for_field_values('id', ids, {}).first
 
     render 'smart_collection', locals: { smart_collection: 'research' }
   end
@@ -121,6 +119,9 @@ class CommunitiesController < ApplicationController
       else
         docs.select! { |doc| current_user.can?(:read, doc) }
       end
+
+      ids = @smart_docs.map {|x| x.id}
+      @response = get_solr_response_for_field_values('id', ids, {}).first
 
       return docs
     end
