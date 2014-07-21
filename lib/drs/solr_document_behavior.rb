@@ -204,6 +204,35 @@ module Drs
       ActiveFedora::SolrService.query("parent_id_tesim:\"#{self.pid}\"").empty?
     end
 
+    def codebook_for
+      is_material_for_helper("is_codebook_for_ssim")
+    end
+
+    def dataset_for
+      is_material_for_helper("is_dataset_for_ssim")
+    end
+
+    def figure_for
+      is_material_for_helper("is_figure_for_ssim")
+    end
+
+    def instructional_material_for
+      is_material_for_helper("is_instructional_material_for_ssim")
+    end
+
+    def supplemental_material_for
+      is_material_for_helper("is_supplemental_material_for_ssim")
+    end
+
+    def transcription_of
+      is_material_for_helper("is_transcription_of_ssim")
+    end
+
+    def is_material_for_helper(relation)
+      all = self[relation] || []
+      all.map { |x| SolrDocument.new x }
+    end
+
     # Fetch the current item's embargo release date
     def embargo_release_date(opts = {})
       opts = opts.with_indifferent_access
