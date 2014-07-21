@@ -214,5 +214,34 @@ module Drs
       end
     end
 
+    def codebooks
+      return associated_files_by_type("is_codebook_for_ssim")
+    end
+
+    def datasets
+      return associated_files_by_type("is_dataset_for_ssim")
+    end
+
+    def figures
+      return associated_files_by_type("is_figure_for_ssim")
+    end
+
+    def instructional_materials
+      return associated_files_by_type("is_instructional_material_for_ssim")
+    end
+
+    def supplemental_materials
+      return associated_files_by_type("is_supplemental_material_for_ssim")
+    end
+
+    def transcriptions
+      return associated_files_by_type("is_transcription_of_ssim")
+    end
+
+    def associated_files_by_type(relation)
+      str = "info:fedora/#{self.pid}"
+      r = ActiveFedora::SolrService.query("#{relation}:\"#{str}\"", :rows => 999)
+      r.map { |x| SolrDocument.new(x) }
+    end
   end
 end
