@@ -4,6 +4,7 @@ class ShoppingCartsController < ApplicationController
   before_filter :session_to_array
   before_filter :can_dl?, only: [:update]
   before_filter :check_availability, only: [:show, :download]
+  before_filter :ensure_any_readable, only: [:download]
 
   # Here be solr access boilerplate
   include Blacklight::Catalog
@@ -121,6 +122,25 @@ class ShoppingCartsController < ApplicationController
         " repository and have been removed from your cart:" +
         " #{deleted.join(', ')}"
       end
+    end
+
+    def ensure_any_readable
+      if session[:ids].empty?
+        flash[:error] = "You cannot download an empty shopping cart"
+        redirect_to shopping_cart_path and return
+      end
+
+      a = []
+      session[:ids].each do |id|
+        a << fetch_solr_document(id: id)
+      end
+
+      c = current_user
+      unless (a.any? { |x| c ? c.can?(:read, x) : x.mass_permissions == 'public' })
+        flash[:error] = "You cannot read any item in your shopping cart.  Aborting."
+        redirect_to shopping_cart_path and return
+      end
+
     end
 
     def session_to_array
