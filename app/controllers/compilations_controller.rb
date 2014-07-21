@@ -8,6 +8,7 @@ class CompilationsController < ApplicationController
 
   load_resource
   before_filter :remove_dead_entries, only: [:show, :show_download]
+  before_filter :ensure_any_readable, only: [:show_download]
 
   def index
     @compilations = Compilation.users_compilations(current_user)
@@ -106,6 +107,29 @@ class CompilationsController < ApplicationController
   end
 
   private
+
+  def ensure_any_readable
+    if @compilation.entries.empty?
+      flash[:error] = "You cannot download an empty set."
+      redirect_to @compilation and return
+    end
+
+    a = []
+    @compilation.entries.each do |x|
+      a << fetch_solr_document(id: x)
+    end
+
+    content = []
+
+    a.each do |x|
+      content = content + x.content_objects
+    end
+
+    unless (content.any? { |x| current_user.can? :read, x })
+      flash[:error] = "There are no content objects in this set that you have read permissions on.  Aborting."
+      redirect_to(@compilation) and return
+    end
+  end
 
   def remove_dead_entries
     dead_entries = @compilation.remove_dead_entries
