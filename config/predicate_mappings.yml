@@ -1,20 +1,22 @@
 # The default namespace maps to the default namespace for generating rels_ext from solr
 :default_namespace: info:fedora/fedora-system:def/relations-external#
 
-# namespace mappings--- 
+:predicate_namespaces:
+  drs: http://repository.neu.edu/ns/relations#
+# namespace mappings---
 # you can add specific mappings for your institution by providing the following:
 #   namespace_uri:
 #     :relationship_symbol: relationship_identifier
-# 
+#
 # For example, if you have the following element in your rels_ext:
-#  
+#
 #  <oai:itemID>oai:example.edu:changeme:500</oai:itemID>
-# 
+#
 # With the last two lines of this file uncommented, the relationships hash of your object will include:
 #   :oai_item_id => ["info:fedora/oai:example.edu:changeme:500"]
 #
 :predicate_mapping:
-  info:fedora/fedora-system:def/relations-external#: 
+  info:fedora/fedora-system:def/relations-external#:
     :conforms_to: conformsTo
     :has_annotation: hasAnnotation
     :has_collection_member: hasCollectionMember
@@ -45,9 +47,16 @@
     :is_deployment_of: isDeploymentOf
     :has_service: hasService
     :has_model: hasModel
-  http://www.openarchives.org/OAI/2.0/: 
+  http://www.openarchives.org/OAI/2.0/:
     :oai_item_id: itemID
   http://projecthydra.org/ns/relations#:
     :is_governed_by: isGovernedBy
   http://repository.neu.edu/ns/relations#:
     :has_affiliation: hasAffiliation
+    :is_also_member_of: isAlsoMemberOf
+    :is_codebook_for: isCodebookFor
+    :is_dataset_for: isDatasetFor
+    :is_figure_for: isFigureFor
+    :is_instructional_material_for: isInstructionalMaterialFor
+    :is_supplemental_material_for: isSupplementalMaterialFor
+    :is_transcription_of: isTranscriptionOf
