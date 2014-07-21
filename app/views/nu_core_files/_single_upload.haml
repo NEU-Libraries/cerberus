@@ -16,7 +16,7 @@
         2. File Upload
       = label_tag "file", "File to upload", class: "required-label"
       = file_field_tag 'file', required: true, "aria-required" => true
-    - if current_user.can_proxy?
+    - if current_user.proxy_staff?
       %fieldset.span4
         %legend
           3. Proxy
