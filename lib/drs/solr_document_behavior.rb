@@ -218,6 +218,18 @@ module Drs
     end
 
     # Check if the current object is under embargo
+    # disregarding the status of the current user
+    def embargo_date_in_effect?
+      e = embargo_release_date
+      return false if e.blank?
+
+      now = DateTime.now
+      e = DateTime.parse e
+
+      return now < e
+    end
+
+    # Check if the current object is under embargo
     def under_embargo?(user)
       e = embargo_release_date
       return false if e.blank?
