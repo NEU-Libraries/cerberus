@@ -39,8 +39,8 @@
         %time{ "date-time" => item.create_date }
           = item.create_date
   - if item.klass == "NuCoreFile"
-    - if item.under_embargo?(current_user)
-      %span.red= "Item embargoed.  Contents available #{item.embargo_release_date(formatted: true)}"
+    - if item.embargo_date_in_effect?
+      %span.embargo-alert.red= "Item embargoed.  Contents available #{item.embargo_release_date(formatted: true)}"
     %menu.btn-toolbar(type="toolbar")
       -# Ensure that we only show download buttons if item isn't embargoed
       -# Indicate item is embargoed otherwise.
