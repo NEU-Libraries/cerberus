@@ -8,6 +8,5 @@
 
   .form-actions
     = f.submit class: ['btn', 'btn-primary'], :onclick => "confirmation_needed = false;", value: 'Submit'
-    %a.btn.btn-warning{href: nu_core_file_path(@nu_core_file) }
-      Cancel
+    = link_to("Cancel", nu_core_file_path(@nu_core_file), class: ['btn', 'btn-warning'], confirm: "About to cancel edit, this will not apply changes to the core record.")
 
