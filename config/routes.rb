@@ -67,7 +67,7 @@ Drs::Application.routes.draw do
   match 'notifications/:uid/delete' => 'mailbox#delete', as: :mailbox_delete, via: [:delete]
 
   # Generic file routes
-  resources :nu_core_files, :path => :files, :except => :index do
+  resources :nu_core_files, :path => :files, :except => [:index, :destroy] do
     member do
       get 'citation', :as => :citation
       post 'audit'
