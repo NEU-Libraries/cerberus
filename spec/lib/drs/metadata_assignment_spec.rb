@@ -126,6 +126,22 @@ describe "Metadata" do
       end
     end
 
+    describe "of proxy uploader" do
+      let(:proxier) { User.new(nuid: '000333222') }
+
+      it "succeeds for objects with a properties datastream" do
+        compilation.proxy_uploader = '000333222'
+        compilation.proxy_uploader.should == '000333222'
+      end
+
+      it "additional assigns edit permissions to the proxy uploader" do
+        core_file.proxy_uploader = '000333222'
+        core_file.save!
+
+        proxier.can?(:edit, core_file).should be true
+      end
+    end
+
     describe "of canon status" do
 
       it "succeeds for objects with a properties datastream" do
