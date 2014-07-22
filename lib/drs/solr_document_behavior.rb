@@ -125,6 +125,16 @@ module Drs
       val.present? ? val : default
     end
 
+    def proxy_uploader(default = '')
+      val = Array(self["proxy_uploader_tesim"]).first
+      val.present? ? val : default
+    end
+
+    def true_depositor
+      return proxy_uploader if ( !proxy_uploader.blank? )
+      return depositor
+    end
+
     def title
       title_str = ""
       if self.klass == "Employee"

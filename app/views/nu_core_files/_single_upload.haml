@@ -1,7 +1,7 @@
 = form_tag("/files", method: "post", multipart: true, id: "singleFileUploadForm") do
   = hidden_field_tag(:collection_id, @collection_id)
   .row
-    %fieldset.span6
+    %fieldset.span4
       %legend
         1. Terms of Service Agreement
       %span.help-block
@@ -11,10 +11,16 @@
       %label.checkbox.required-label{ for: "terms_of_service" }
         I have read and accept the terms of service.
         = check_box_tag 'terms_of_service', 1, nil, data: { activate:  "activate-submit" }
-    %filedset.span6
+    %filedset.span4
       %legend
         2. File Upload
       = label_tag "file", "File to upload", class: "required-label"
       = file_field_tag 'file', required: true, "aria-required" => true
+    - if current_user.proxy_staff?
+      %fieldset.span4
+        %legend
+          3. Proxy
+        = label_tag 'proxy', "User to proxy as", class: "required-label"
+        = text_field_tag 'proxy'
   .form-actions
     = submit_tag "Upload", disabled: "true", class: 'btn btn-large btn-primary activate-submit'

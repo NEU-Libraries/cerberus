@@ -5,6 +5,7 @@ class DrsPropertiesDatastream < ActiveFedora::OmDatastream
     # This is where we put the user id of the object depositor -- impacts permissions/access controls
     t.parent_id :index_as=>[:stored_searchable]
     t.depositor :index_as=>[:stored_searchable]
+    t.proxy_uploader :index_as=>[:stored_searchable]
     t.thumbnail_list :index_as=>[:stored_searchable]
     t.canonical  :index_as=>[:stored_searchable]
     t.in_progress path: 'inProgress', :index_as=>[:stored_searchable]
