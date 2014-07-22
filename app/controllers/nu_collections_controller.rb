@@ -125,16 +125,6 @@ class NuCollectionsController < ApplicationController
     end
   end
 
-  def destroy
-    @title = NuCollection.find(params[:id]).title
-
-    if NuCollection.find(params[:id]).recursive_delete
-      redirect_to(communities_path, notice: "#{@title} and its descendents destroyed")
-    else
-      redirect_to(communities_path, notice: "Something went wrong. #{@title} persists")
-    end
-  end
-
   protected
 
     def index_redirect(exception)

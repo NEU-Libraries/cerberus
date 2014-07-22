@@ -186,42 +186,4 @@ describe NuCollectionsController do
       expect(response).to redirect_to(nu_collection_path(id: bills_collection.identifier))
     end
   end
-
-  describe "DELETE #destroy" do
-
-    it "requests authentication from unauthed users" do
-      delete :destroy, { id: root.pid }
-      expect(response).to redirect_to(new_user_session_path)
-    end
-
-    it "403s for users without permissions" do
-      sign_in bo
-
-      delete :destroy, { id: root.pid }
-      response.status.should == 403
-    end
-
-    it "403s for users who have edit permissions but are not the depositor" do
-      # Give edit permissions to bo to prove a point
-      root.rightsMetadata.permissions({person: '000000002'}, 'edit')
-      root.save!
-
-      sign_in bo
-
-      delete :destroy, { id: root.pid }
-      response.status.should == 403
-    end
-
-    it "destroys root and its descendent collection" do
-      sign_in bill
-
-      root_pid = root.pid
-      child_pid = bills_collection.pid
-
-      delete :destroy, { id: root_pid }
-      expect(response).to redirect_to(communities_path)
-      NuCollection.exists?(root_pid).should be false
-      NuCollection.exists?(root_pid).should be false
-    end
-  end
 end
