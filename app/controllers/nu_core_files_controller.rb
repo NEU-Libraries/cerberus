@@ -34,7 +34,7 @@ class NuCoreFilesController < ApplicationController
   end
 
   def destroy_incomplete_files
-    NuCoreFile.users_in_progress_files(current_user).each do |file|
+    NuCoreFile.employees_in_progress_files(current_user).each do |file|
       file.destroy
     end
 
@@ -52,17 +52,17 @@ class NuCoreFilesController < ApplicationController
       user = current_user
     end
 
-    @incomplete_file = NuCoreFile.users_in_progress_files(user).first
+    @incomplete_file = NuCoreFile.employees_in_progress_files(user).first
 
 
     @title = @incomplete_file.title
 
     # With the move to single file upload, incomplete files (plural) is a misnomer.
     # but worthwhile to keep if we reimplement batch uploads. In the meantime only
-    # NuCoreFile.users_in_progress_files(x).first should ever occur (not more than one at a time).
+    # NuCoreFile.employees_in_progress_files(x).first should ever occur (not more than one at a time).
 
-    # @sample_incomplete_file = NuCoreFile.users_in_progress_files(current_user).first
-    # @incomplete_files = NuCoreFile.users_in_progress_files(current_user)
+    # @sample_incomplete_file = NuCoreFile.employees_in_progress_files(current_user).first
+    # @incomplete_files = NuCoreFile.employees_in_progress_files(current_user)
     @page_title = "Provide Upload Metadata"
   end
 
@@ -87,8 +87,8 @@ class NuCoreFilesController < ApplicationController
       user = current_user
     end
 
-    Drs::Application::Queue.push(MetadataUpdateJob.new(user.user_key, params))
-    @nu_core_file = NuCoreFile.users_in_progress_files(user).first
+    Drs::Application::Queue.push(MetadataUpdateJob.new(user.nuid, params))
+    @nu_core_file = NuCoreFile.employees_in_progress_files(user).first
 
     update_metadata if params[:nu_core_file]
 
@@ -163,7 +163,7 @@ class NuCoreFilesController < ApplicationController
   # routed to /files/new
   def new
     @page_title = "Upload New Files"
-    in_progress_files = NuCoreFile.users_in_progress_files(current_user)
+    in_progress_files = NuCoreFile.employees_in_progress_files(current_user)
 
     if !in_progress_files.empty?
 
@@ -270,7 +270,7 @@ class NuCoreFilesController < ApplicationController
 
       if !proxy.blank? && current_user.proxy_staff?
         nu_core_file.depositor = proxy
-        nu_core_file.rightsMetadata.permissions({edit: 'person'}, "#{current_user.nuid}")
+        nu_core_file.rightsMetadata.permissions({person: "#{current_user.nuid}"}, "edit")
       else
         nu_core_file.depositor = user.nuid
       end

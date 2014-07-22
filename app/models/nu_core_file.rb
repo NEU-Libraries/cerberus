@@ -143,14 +143,14 @@ class NuCoreFile < ActiveFedora::Base
     end
   end
 
-  # Return a list of all in progress files associated with this user
-  def self.users_in_progress_files(user)
+  # Return a list of all in progress files associated with this employee
+  def self.employees_in_progress_files(employee)
     # TODO - remove in_progress_for_user, deprecated...
 
     # all = NuCoreFile.find(:all)
     # filtered = all.keep_if { |file| file.in_progress_for_user?(user) }
     # return filtered
-    f_query = ActiveFedora::SolrService.query("depositor_tesim:\"#{user.nuid}\" AND in_progress_tesim:true")
+    f_query = ActiveFedora::SolrService.query("depositor_tesim:\"#{employee.nuid}\" AND in_progress_tesim:true")
     solr_list = f_query.map { |x| SolrDocument.new(x) }
     return solr_list.map { |x| NuCoreFile.find(x.pid) }
   end
