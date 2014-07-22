@@ -26,7 +26,7 @@
     %img{src: @set.thumbnail_list.first, title: @set.title, alt: "", class: ['img-polorid', 'pull-left']}(aria-labeledby="#{@set.pid}-title" role="presentation")
   - if !@set.description.blank?
     %p
-      = @set.description
+      = kramdown_parse(@set.description)
 
   - if current_user
     -if @set.klass == "NuCollection" && (current_user.can? :edit, @set.pid) && (@set.smart_collection_type.nil? || @set.smart_collection_type == "miscellany")
