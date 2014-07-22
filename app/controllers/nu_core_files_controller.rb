@@ -230,16 +230,6 @@ class NuCoreFilesController < ApplicationController
     redirect_to(@nu_core_file)
   end
 
-  def destroy
-    @title = NuCoreFile.find(params[:id]).title
-
-    if NuCoreFile.find(params[:id]).destroy
-      redirect_to(root_path, notice: "#{@title} destroyed")
-    else
-      redirect_to(root_path, notice: "#{@title} wasn't destroyed")
-    end
-  end
-
   protected
 
     def fetch_mods
