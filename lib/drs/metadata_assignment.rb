@@ -143,6 +143,21 @@ module Drs
         if_properties_exists_strict { self.properties.depositor.first }
       end
 
+      def proxy_uploader=(string)
+        if_properties_exists_strict { self.properties.proxy_uploader = string }
+        self.rightsMetadata.permissions({person: string}, 'edit')
+      end
+
+      def proxy_uploader
+        if_properties_exists_strict { self.properties.proxy_uploader.first }
+      end
+
+      # Use this when you need to get the person who should actually be
+      # contacted about things w.r.t the file in question.
+      def true_depositor
+        proxy_uploader || depositor
+      end
+
       def canonize
         if_properties_exists_strict { self.properties.canonize }
       end

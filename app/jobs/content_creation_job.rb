@@ -1,17 +1,16 @@
 class ContentCreationJob
 
-  attr_accessor :core_file_pid, :file_path, :file_name, :user_id, :delete_file, :poster_path, :small_size, :medium_size, :large_size
-  attr_accessor :core_record, :user
+  attr_accessor :core_file_pid, :file_path, :file_name, :delete_file, :poster_path, :small_size, :medium_size, :large_size
+  attr_accessor :core_record, :employee
 
   def queue_name
     :content_creation
   end
 
-  def initialize(core_file, file_path, file_name, user_id, poster_path=0, small_size=0, medium_size=0, large_size=0, delete_file=true)
+  def initialize(core_file, file_path, file_name, poster_path=0, small_size=0, medium_size=0, large_size=0, delete_file=true)
     self.core_file_pid = core_file
     self.file_path     = file_path
     self.file_name     = file_name
-    self.user_id       = user_id
     self.delete_file   = delete_file
 
     self.poster_path = poster_path
@@ -23,7 +22,6 @@ class ContentCreationJob
 
   def run
     begin
-      self.user = User.find(user_id)
       self.core_record = NuCoreFile.find(core_file_pid)
 
       klass = core_record.canonical_class.constantize
@@ -42,10 +40,11 @@ class ContentCreationJob
       end
 
       # Assign relevant metadata
-      content_object.core_record =  core_record
-      content_object.title       =  file_name
-      content_object.identifier  =  content_object.pid
-      content_object.depositor   =  user.nuid
+      content_object.core_record    = core_record
+      content_object.title          = file_name
+      content_object.identifier     = content_object.pid
+      content_object.depositor      = core_record.depositor
+      content_object.proxy_uploader = core_record.proxy_uploader
       content_object.rightsMetadata.content = core_record.rightsMetadata.content
 
       content_object.canonize
