@@ -8,5 +8,6 @@
 
   .form-actions
     = f.submit class: ['btn', 'btn-primary'], :onclick => "confirmation_needed = false;", value: 'Submit'
-    = button_tag "Reset", class: 'btn', type: :reset
+    %a.btn.btn-warning{href: nu_core_file_path(@nu_core_file) }
+      Cancel
 
