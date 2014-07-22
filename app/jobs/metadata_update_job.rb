@@ -17,31 +17,29 @@ class MetadataUpdateJob
 
   def run
 
-    user = User.find_by_nuid(self.login)
+    employee = Employee.find_by_nuid(self.login)
     @saved = []
     @denied = []
 
-    NuCoreFile.users_in_progress_files(user).each do |gf|
-      update_file(gf, user)
+    NuCoreFile.employees_in_progress_files(employee).each do |gf|
+      update_file(gf, employee)
     end
 
     # Still a little kludgey...
     job_user = User.find_by_nuid('000000001') || User.create(password: Devise.friendly_token[0,20], full_name:"Batch User", nuid:"000000001")
 
     message = 'The file(s) '+ file_list(@saved)+ " have been saved." unless @saved.empty?
-    job_user.send_message(user, message, 'Metadata upload complete') unless @saved.empty?
 
-    message = 'The file(s) '+ file_list(@denied)+" could not be updated.  You do not have sufficient privileges to edit it." unless @denied.empty?
-    job_user.send_message(user, message, 'Metadata upload permission denied') unless @denied.empty?
+    if User.exists_by_nuid?(login)
+      actual_user = User.find_by_nuid(login)
+      job_user.send_message(actual_user, message, 'Metadata upload complete') unless @saved.empty?
+
+      message = 'The file(s) '+ file_list(@denied)+" could not be updated.  You do not have sufficient privileges to edit it." unless @denied.empty?
+      job_user.send_message(actual_user, message, 'Metadata upload permission denied') unless @denied.empty?
+    end
   end
 
   def update_file(gf, user)
-    unless user.can? :edit, gf
-      logger.error "User #{user.user_key} DENIED access to #{gf.pid}!"
-      @denied << gf
-      return
-    end
-
     gf.title = title[gf.pid] if title[gf.pid] rescue gf.label
     gf.nu_title = nu_title[gf.pid] if nu_title[gf.pid] rescue gf.label
     gf.attributes=file_attributes
@@ -55,7 +53,7 @@ class MetadataUpdateJob
       # emailing.  Note that all of the actual significant content type metadata
       # is applied before this is reached.
       if !gf.category.first.blank?
-        UploadAlert.create_from_core_file(gf, :create)
+        #UploadAlert.create_from_core_file(gf, :create)
       end
     rescue RSolr::Error::Http => error
       save_tries += 1
