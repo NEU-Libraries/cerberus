@@ -34,7 +34,7 @@ class NuCoreFilesController < ApplicationController
   end
 
   def destroy_incomplete_files
-    NuCoreFile.in_progress_files_for_nuid(current_user).each do |file|
+    NuCoreFile.in_progress_files_for_nuid(current_user.nuid).each do |file|
       file.destroy
     end
 
@@ -336,7 +336,8 @@ class NuCoreFilesController < ApplicationController
     end
 
     def should_proxy?
-      exists = Employee.exists_by_nuid?(params[:proxy])
-      !params[:proxy].blank? && current_user.proxy_staff? && exists
+      if ( !params[:proxy].blank?)
+        current_user.proxy_staff? && Employee.exists_by_nuid(params[:proxy])
+      end
     end
 end

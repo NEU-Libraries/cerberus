@@ -90,43 +90,6 @@ describe NuCoreFilesController do
     end
   end
 
-  describe "DELETE #destroy" do
-    it "requests authentication for unauthed users" do
-      delete :destroy, { id: file.pid }
-      expect(response).to redirect_to(new_user_session_path)
-    end
-
-    it "403s for users without edit permissions" do
-      file.mass_permissions = 'public' && file.save!
-      file_pid = file.pid
-
-      sign_in bo
-
-      delete :destroy, { id: file.pid }
-      NuCoreFile.exists?(file_pid).should be true
-      response.status.should == 403
-    end
-
-    it "403s for users who aren't the depositor but have edit permissions" do
-      file.rightsMetadata.permissions({person: '000000002'}, 'edit')
-      file.save!
-
-      sign_in bo
-
-      delete :destroy, { id: file.pid }
-      response.status.should == 403
-    end
-
-    it "successfully removes the item for the depositor" do
-      sign_in bill
-      file_pid = file.pid
-
-      delete :destroy, { id: file.pid }
-      expect(response).to be_redirect
-      NuCoreFile.exists?(file_pid).should be false
-    end
-  end
-
   describe "DELETE #destroy_incomplete_files" do
 
     # Ensures no contamination between test runs.
@@ -145,7 +108,7 @@ describe NuCoreFilesController do
       delete :destroy_incomplete_files
 
       # Check that the files just created were deleted
-      bills_incomplete_files = NuCoreFile.users_in_progress_files(bill)
+      bills_incomplete_files = NuCoreFile.in_progress_files_for_nuid(bill.nuid)
       bills_incomplete_files.length.should == 0
 
       # Check that bills complete file was not deleted
