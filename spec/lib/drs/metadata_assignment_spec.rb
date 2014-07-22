@@ -135,6 +135,7 @@ describe "Metadata" do
       end
 
       it "additional assigns edit permissions to the proxy uploader" do
+        core_file.depositor      = '000000001'
         core_file.proxy_uploader = '000333222'
         core_file.save!
 
