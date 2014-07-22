@@ -6,42 +6,36 @@ class MetadataUpdateJob
     :metadata_update
   end
 
-  attr_accessor :login, :title, :nu_title, :file_attributes
+  attr_accessor :depositor_nuid, :title, :nu_title, :file_attributes, :uploader_nuid
 
-  def initialize(login, params)
-    self.login = login
+  def initialize(nuid, params, proxier_nuid=nil)
+    self.depositor_nuid = nuid
     self.title = params[:title]
     self.nu_title = params[:title]
     self.file_attributes = params[:nu_core_file]
+    self.uploader_nuid = proxier_nuid
   end
 
   def run
-
-    user = User.find_by_nuid(self.login)
     @saved = []
     @denied = []
 
-    NuCoreFile.users_in_progress_files(user).each do |gf|
-      update_file(gf, user)
+    NuCoreFile.in_progress_files_for_nuid(depositor_nuid).each do |gf|
+      update_file(gf)
     end
 
     # Still a little kludgey...
+    msgd = (uploader_nuid ? User.find_by_nuid(uploader_nuid) : User.find_by_nuid(depositor_nuid))
     job_user = User.find_by_nuid('000000001') || User.create(password: Devise.friendly_token[0,20], full_name:"Batch User", nuid:"000000001")
 
     message = 'The file(s) '+ file_list(@saved)+ " have been saved." unless @saved.empty?
-    job_user.send_message(user, message, 'Metadata upload complete') unless @saved.empty?
+    job_user.send_message(msgd, message, 'Metadata upload complete') unless @saved.empty?
 
     message = 'The file(s) '+ file_list(@denied)+" could not be updated.  You do not have sufficient privileges to edit it." unless @denied.empty?
-    job_user.send_message(user, message, 'Metadata upload permission denied') unless @denied.empty?
+    job_user.send_message(msgd, message, 'Metadata upload permission denied') unless @denied.empty?
   end
 
-  def update_file(gf, user)
-    unless user.can? :edit, gf
-      logger.error "User #{user.user_key} DENIED access to #{gf.pid}!"
-      @denied << gf
-      return
-    end
-
+  def update_file(gf)
     gf.title = title[gf.pid] if title[gf.pid] rescue gf.label
     gf.nu_title = nu_title[gf.pid] if nu_title[gf.pid] rescue gf.label
     gf.attributes=file_attributes
@@ -65,7 +59,7 @@ class MetadataUpdateJob
       sleep 0.01
       retry
     end #
-    Drs::Application::Queue.push(ContentUpdateEventJob.new(gf.pid, login))
+    Drs::Application::Queue.push(ContentUpdateEventJob.new(gf.pid, gf.true_depositor))
     @saved << gf
   end
 
