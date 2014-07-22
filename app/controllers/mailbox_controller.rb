@@ -7,15 +7,15 @@ class MailboxController < ApplicationController
       current_user.mark_as_read @messages
     else
       @messages =[]
-    end 
+    end
   end
 
-  def delete_all     
+  def delete_all
      current_user.mailbox.inbox.each do |msg|
         delete_message(msg)
      end
      empty_trash(current_user)
-     redirect_to sufia.mailbox_path
+     redirect_to mailbox_path
   end
 
   def delete
@@ -25,19 +25,19 @@ class MailboxController < ApplicationController
          delete_message(msg)
          empty_trash(msg.participants[0])
       end
-   else 
+   else
       flash[:alert] = "You do not have privileges to delete the notification..."
    end
-   redirect_to sufia.mailbox_path
+   redirect_to mailbox_path
   end
 
-private 
+private
 
   def delete_message (msg)
       msg.move_to_trash(msg.participants[0])
       msg.move_to_trash(msg.participants[1])
   end
-  
+
   def empty_trash (user)
     user.mailbox.trash.each { |conv| conv.messages.each {|notify| notify.receipts.each { |receipt| receipt.delete}; notify.delete}; conv.delete}
   end
