@@ -23,7 +23,7 @@ class NuCoreFilesController < ApplicationController
 
   before_filter :can_read?, only: [:show]
   before_filter :can_edit?, only: [:edit, :update]
-  before_filter :is_depositor?, only: [:destroy]
+  before_filter :complete?, only: [:edit, :update]
 
   rescue_from Exceptions::NoParentFoundError, with: :no_parent_rescue
 
@@ -231,6 +231,14 @@ class NuCoreFilesController < ApplicationController
   end
 
   protected
+
+    def complete?
+      core = NuCoreFile.find(params[:id])
+      if core.properties.in_progress?
+        flash[:error] = "Item will be available for edit/update when it has finished building."
+        redirect_to core and return
+      end
+    end
 
     def fetch_mods
       Rails.cache.fetch("/mods/#{@nu_core_file.pid}-#{@nu_core_file.updated_at}", :expires_in => 12.hours) do
