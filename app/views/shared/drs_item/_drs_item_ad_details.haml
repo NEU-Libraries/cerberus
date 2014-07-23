@@ -44,10 +44,10 @@
         %span.embargo-alert= "Item embargoed."
         %dl{"style" => "display:inline;"}
           %span.embargo-alert= "Contents available #{item.embargo_release_date(formatted: true)}"
-    %a#viewItemDownloads.btn.btn-mini.btn-clear(data-pid="#{item.pid}" href="#")
-      %i.icon-plus-sign-alt
-      Associated Files
     %menu.btn-toolbar(type="toolbar")
+      %a#viewItemDownloads.btn.btn-mini.btn-clear(data-pid="#{item.pid}" href="#")
+        Associated Files
+        %i.icon-plus-sign-alt
       #itemDownloadLinks{style: "display: none;"}
         -# Ensure that we only show download buttons if item isn't embargoed
         -# Indicate item is embargoed otherwise.
