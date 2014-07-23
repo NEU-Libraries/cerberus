@@ -21,6 +21,8 @@ class CatalogController < ApplicationController
   # Kept as an example of how to do this
   #CatalogController.solr_search_params_logic += [:exclude_unwanted_models]
 
+  CatalogController.solr_search_params_logic += [:no_incomplete_records]
+
   skip_before_filter :default_html_head
 
   def index
@@ -434,6 +436,13 @@ class CatalogController < ApplicationController
 
     query = categories.map { |x| "drs_category_ssim:\"#{x}\""}
     query = query.join(" OR ")
+
+    solr_parameters[:fq] ||= []
+    solr_parameters[:fq] << query
+  end
+
+  def no_incomplete_records(solr_parameters, user_parameters)
+    query = "-in_progress_tesim:true"
 
     solr_parameters[:fq] ||= []
     solr_parameters[:fq] << query
