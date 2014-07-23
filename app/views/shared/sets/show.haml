@@ -23,9 +23,9 @@
     %small
       = @set.type_label
   - if !@set.thumbnail_list.empty?
-    %img{src: @set.thumbnail_list.first, title: @set.title, alt: "", class: ['img-polorid', 'pull-left']}(aria-labeledby="#{@set.pid}-title" role="presentation")
+    %img{src: @set.thumbnail_list.first, title: @set.title, alt: "", class: ['img-polorid', 'pull-left', 'well-padded-thumb']}(aria-labeledby="#{@set.pid}-title" role="presentation")
   - if !@set.description.blank?
-    %p
+    %p.set-description
       = kramdown_parse(@set.description)
 
   - if current_user
