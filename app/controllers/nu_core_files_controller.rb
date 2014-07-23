@@ -345,7 +345,7 @@ class NuCoreFilesController < ApplicationController
 
     def should_proxy?
       if ( !params[:proxy].blank?)
-        current_user.proxy_staff? && Employee.exists_by_nuid(params[:proxy])
+        current_user.proxy_staff? && Employee.exists_by_nuid?(params[:proxy])
       end
     end
 end

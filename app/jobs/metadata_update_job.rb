@@ -39,7 +39,6 @@ class MetadataUpdateJob
     gf.title = title[gf.pid] if title[gf.pid] rescue gf.label
     gf.nu_title = nu_title[gf.pid] if nu_title[gf.pid] rescue gf.label
     gf.attributes=file_attributes
-    gf.tag_as_completed
     save_tries = 0
 
     begin
