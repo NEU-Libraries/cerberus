@@ -171,6 +171,7 @@
       padding: 0 0 0 0;
     }
     menu{
+      display: inline-block;
       margin: 0 0 0 0;
       max-height: 28px;
     }
@@ -244,4 +245,8 @@
   background-color: rgba(189, 195, 199, 0.6);
   font-size: 0.8em;
   padding: 2px 4px;
+}
+
+#viewItemDownloads{
+  margin-top: 1px;
 }
