@@ -44,7 +44,7 @@
         %span.embargo-alert= "Item embargoed."
         %dl{"style" => "display:inline;"}
           %span.embargo-alert= "Contents available #{item.embargo_release_date(formatted: true)}"
-    %a#viewItemDownloads(data-pid="#{item.pid}" href="#")
+    %a#viewItemDownloads.btn.btn-mini.btn-clear(data-pid="#{item.pid}" href="#")
       %i.icon-plus-sign-alt
       Associated Files
     %menu.btn-toolbar(type="toolbar")
