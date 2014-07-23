@@ -247,9 +247,9 @@
   padding: 2px 4px;
 }
 
-#viewItemDownloads{
+a[id*='viewItemDownloads-']{
   margin-right: 5px;
-  .icon-plus-sign-alt{
+  .icon-caret-down{
     padding-left: 5px;
   }
 }
