@@ -19,7 +19,7 @@
     .row-fluid
       .span8
         = f.label :mass_permissions, "Mass Permissions"
-        = f.select :mass_permissions, options_for_select(['public', 'private'], @community.mass_permissions)
+        = f.select :mass_permissions, options_for_select(['public', 'private'], 'public')
     %legend Thumbnail (Optional)
     .row-fluid
       .span8
