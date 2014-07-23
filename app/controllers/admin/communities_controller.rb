@@ -1,10 +1,5 @@
 class Admin::CommunitiesController < AdminController
 
-  # Community is private by default, so we
-  # override the created resource from load_resource
-  # to make a public one for the 'new' screen
-  before_filter :create_new_community, only: [:new]
-
   # Loads @community
   load_resource
 
@@ -72,11 +67,6 @@ class Admin::CommunitiesController < AdminController
   end
 
   private
-
-    def create_new_community
-      @community = Community.new
-      @community.mass_permissions = 'public'
-    end
 
     def get_parent_mass_permissions
       if params[:community][:parent]
