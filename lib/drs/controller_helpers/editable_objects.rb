@@ -86,7 +86,7 @@ module Drs
               begin
                 return SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{v}\"").first)
               rescue NoMethodError
-                render_404(ActiveFedora::ObjectNotFoundError.new) and return
+                raise Exceptions::NoParentFoundError
               end
             elsif v.is_a? Hash
               return find_parent(v)
