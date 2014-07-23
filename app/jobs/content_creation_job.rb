@@ -48,6 +48,7 @@ class ContentCreationJob
       content_object.rightsMetadata.content = core_record.rightsMetadata.content
 
       content_object.canonize
+      content_object.characterize
 
       content_object.save! ? content_object : false
 
@@ -55,6 +56,14 @@ class ContentCreationJob
          ScaledImageCreator.new(small_size, medium_size, large_size, content_object).create_scaled_images
       end
 
+      DerivativeCreator.new(content_object.pid).generate_derivatives
+
+      # Derivative creator modifies the core record and these changes are
+      # overriden if we save this open copy of the core record without
+      # reloading it first
+      core_record.reload
+      core_record.tag_as_completed
+      core_record.save!
       return content_object
     ensure
       if delete_file

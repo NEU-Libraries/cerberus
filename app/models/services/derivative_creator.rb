@@ -136,6 +136,7 @@ class DerivativeCreator
       object.description            = desc
       object.keywords               = core.keywords.flatten unless core.keywords.nil?
       object.depositor              = core.depositor
+      object.proxy_uploader         = core.proxy_uploader
       object.core_record            = core
       object.rightsMetadata.content = master.rightsMetadata.content
       object.save! ? object : false
