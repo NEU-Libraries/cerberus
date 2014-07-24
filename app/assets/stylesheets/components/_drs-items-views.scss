@@ -148,8 +148,8 @@
       @extend .span3;
       @extend [class*="span"];
       @extend .height3;
-      @extend .hidden-x;
-      @extend .hidden-y;
+      // @extend .hidden-x;
+      // @extend .hidden-y;
       text-align: center;
 
       @include focus-states{

@@ -2,6 +2,23 @@
   @include drs-button;
 }
 
+.popover-content a.btn.btn-mini.btn-white{
+  @include drs-button;
+  background-color: $white;
+  color: #3498db;
+  &:hover, &:focus, &:active, &.active, &.disabled, &[disabled] {
+    background-color: $linkColor;
+  }
+}
+
+.drs-item-add-details .btn-toolbar .popover{
+  background-color: #ecf0f1;
+}
+
+.drs-item-add-details .btn-toolbar .popover .arrow:after{
+  border-bottom-color: #ecf0f1;
+}
+
 .btn-add{
   float: right;
 }
