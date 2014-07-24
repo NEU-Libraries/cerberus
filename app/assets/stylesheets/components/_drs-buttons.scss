@@ -29,22 +29,16 @@
   margin-top: 5px;
 }
 
-.drs-item-add-details .btn-toolbar .popover{
-  background-color: #ecf0f1;
-}
-
-.drs-item-add-details .btn-toolbar .popover .arrow:after{
-  border-bottom-color: #ecf0f1;
-}
-
-.drs-item-add-details .btn-toolbar .popover .popover-content a.btn.btn-mini.btn-white{
-  @include drs-button;
-  background-color: $white;
-  color: #3498db;
-  &:hover, &:focus, &:active, &.active, &.disabled, &[disabled] {
-    background-color: $linkColor;
+.drs-item-add-details .btn-toolbar .btn-group{
+  .btn{
+    outline: 0;
   }
-  :hover{
-    color: $white;
+  .dropdown-menu{
+    min-width: 110px;
+    padding: 5px;
+  }
+  a[aria-role*='checkbox']{
+    min-width: 45px;
   }
 }
+
