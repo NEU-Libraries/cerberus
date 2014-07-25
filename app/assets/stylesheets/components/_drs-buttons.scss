@@ -34,6 +34,7 @@
     outline: 0;
   }
   .dropdown-menu{
+    z-index: 1000;
     min-width: 110px;
     padding: 5px;
     .btn-group{
