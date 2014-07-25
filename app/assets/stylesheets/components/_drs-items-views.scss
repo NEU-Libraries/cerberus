@@ -180,7 +180,7 @@
       max-height: 28px;
     }
 
-    article:nth-of-type(4n+0){
+    article:nth-last-of-type(4n+1){
       .drs-item-add-details .btn-toolbar .btn-group .dropdown-menu{
         right: 0;
         left: auto;
