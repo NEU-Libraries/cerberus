@@ -36,6 +36,9 @@
   .dropdown-menu{
     min-width: 110px;
     padding: 5px;
+    .btn-group{
+      display: block;
+    }
   }
   a[aria-role*='checkbox']{
     min-width: 45px;
