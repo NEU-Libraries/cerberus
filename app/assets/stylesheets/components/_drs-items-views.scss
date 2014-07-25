@@ -105,6 +105,12 @@
         display: none;
       }
 
+      .drs-item-add-details{
+        .list-view-spacer{
+          height: 35px;
+        }
+      }
+
     }
 
     .drs-item-details{
@@ -170,6 +176,11 @@
 
     }
     .drs-item-add-details dl{
+      @include sr-only;
+      margin: 0 0 0 0;
+      padding: 0 0 0 0;
+    }
+    .list-buttons{
       @include sr-only;
       margin: 0 0 0 0;
       padding: 0 0 0 0;
