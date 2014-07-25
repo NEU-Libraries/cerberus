@@ -28,3 +28,17 @@
 .featured-content .btn-block {
   margin-top: 5px;
 }
+
+.drs-item-add-details .btn-toolbar .btn-group{
+  .btn{
+    outline: 0;
+  }
+  .dropdown-menu{
+    min-width: 110px;
+    padding: 5px;
+  }
+  a[aria-role*='checkbox']{
+    min-width: 45px;
+  }
+}
+

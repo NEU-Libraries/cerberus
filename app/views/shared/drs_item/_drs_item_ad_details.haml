@@ -1,3 +1,4 @@
+- noid = (item.pid).split(":").last
 .drs-item-add-details
   -if !item.creators.blank?
     %dl.drs-item-creators
@@ -24,6 +25,7 @@
               Expand / collapse toggle
         - else
           = kramdown_parse(item.description)
+      = render partial: 'nu_core_files/derivative_btn_group', locals: {contents: item.content_objects_sorted, link_list: true, item: item}
   - if !item.date_of_issue.blank?
     %dl.drs-item-date-of-issue-list
       %dt.drs-item-date-of-issue-label
@@ -45,10 +47,14 @@
         %dl{"style" => "display:inline;"}
           %span.embargo-alert= "Contents available #{item.embargo_release_date(formatted: true)}"
     %menu.btn-toolbar(type="toolbar")
-      -# Ensure that we only show download buttons if item isn't embargoed
-      -# Indicate item is embargoed otherwise.
-      - if !item.under_embargo?(current_user)
-        = render partial: 'nu_core_files/derivative_btn_group', locals: {contents: item.content_objects_sorted}
-      - if current_user # the general public can't add items to sets
-        - icon = render partial: 'shared/icon',  locals: { class_string: "icon-briefcase", alt_text: "Add to " + t('drs.compilations.name')}
-        =link_to icon.html_safe , compilations_path(file: item.pid), remote: true, title:  "Add to " + t('drs.compilations.name'), data: {toggle: "tooltip"}, class: 'btn btn-mini btn-clear'
+      .btn-group
+        %a.btn.btn-mini.btn-clear{id: "viewItemDownloads-#{noid}"}(data-pid="#{noid}" href="#" data-toggle="dropdown")
+          Associated Files
+          %i.icon-caret-down
+        -# Ensure that we only show download buttons if item isn't embargoed
+        -# Indicate item is embargoed otherwise.
+        - if !item.under_embargo?(current_user)
+          = render partial: 'nu_core_files/derivative_btn_group', locals: {contents: item.content_objects_sorted}
+        - if current_user # the general public can't add items to sets
+          - icon = render partial: 'shared/icon',  locals: { class_string: "icon-briefcase", alt_text: "Add to " + t('drs.compilations.name')}
+          =link_to icon.html_safe , compilations_path(file: item.pid), remote: true, title:  "Add to " + t('drs.compilations.name'), data: {toggle: "tooltip"}, class: 'btn btn-mini btn-clear'

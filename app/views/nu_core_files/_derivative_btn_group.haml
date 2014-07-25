@@ -1,6 +1,21 @@
-- contents.each do |content|
-  - if (!current_user.nil? && (current_user.can? :read, content)) || content.public?
-    -if content.klass != "ImageThumbnailFile"
-      .btn-group
-        = render partial: 'nu_core_files/derivative_button', locals: {content: content }
-        = render partial: 'shopping_carts/add_or_remove_btn', locals: { :id => content.pid }
+- link_list ||= false
+- if link_list == true
+  .pull-right
+    - contents.each do |content|
+      - if (!current_user.nil? && (current_user.can? :read, content)) || content.public?
+        -if content.klass != "ImageThumbnailFile"
+          .btn-group
+            = render partial: 'nu_core_files/derivative_button', locals: {content: content }
+            = render partial: 'shopping_carts/add_or_remove_btn', locals: { :id => content.pid }
+    - if item.klass == "NuCoreFile"
+      - if current_user # the general public can't add items to sets
+        - icon = render partial: 'shared/icon',  locals: { class_string: "icon-briefcase", alt_text: "Add to " + t('drs.compilations.name')}
+        =link_to icon.html_safe , compilations_path(file: item.pid), remote: true, title:  "Add to " + t('drs.compilations.name'), data: {toggle: "tooltip"}, class: 'btn btn-mini btn-clear'
+- else
+  %ul.dropdown-menu
+    - contents.each do |content|
+      - if (!current_user.nil? && (current_user.can? :read, content)) || content.public?
+        -if content.klass != "ImageThumbnailFile"
+          .btn-group
+            = render partial: 'nu_core_files/derivative_button', locals: {content: content }
+            = render partial: 'shopping_carts/add_or_remove_btn', locals: { :id => content.pid }
