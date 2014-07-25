@@ -25,7 +25,7 @@
               Expand / collapse toggle
         - else
           = kramdown_parse(item.description)
-      = render partial: 'nu_core_files/derivative_btn_group', locals: {contents: item.content_objects_sorted, link_list: true}
+      = render partial: 'nu_core_files/derivative_btn_group', locals: {contents: item.content_objects_sorted, link_list: true, item: item}
   - if !item.date_of_issue.blank?
     %dl.drs-item-date-of-issue-list
       %dt.drs-item-date-of-issue-label
