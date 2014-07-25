@@ -18,5 +18,6 @@
       =compilations_icon
 
       %h5.text-center Create a new #{t('drs.compilations.name')}
-= render partial: 'shared/sets/delete_item_modal', locals: { item: @compilations.first }
+- if @compilations.any?
+  = render partial: 'shared/sets/delete_item_modal', locals: { item: @compilations.first }
 
