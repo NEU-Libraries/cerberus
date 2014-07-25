@@ -22,13 +22,13 @@
 
 // Optional: Group multiple button groups together for a toolbar
 .btn-toolbar {
-  font-size: 0; // Hack to remove whitespace that results from using inline-block
+  // font-size: 0; // Hack to remove whitespace that results from using inline-block
   margin-top: $baseLineHeight / 2;
   margin-bottom: $baseLineHeight / 2;
   > .btn + .btn,
   > .btn-group + .btn,
   > .btn + .btn-group {
-    margin-left: 5px;
+    // margin-left: 5px;
   }
 }
 
