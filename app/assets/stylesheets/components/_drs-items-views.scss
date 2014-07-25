@@ -179,22 +179,6 @@
       margin: 0 0 0 0;
       max-height: 28px;
     }
-
-    article:nth-of-type(4n+0){
-      .drs-item-add-details .btn-toolbar .btn-group .dropdown-menu{
-        right: 0;
-        left: auto;
-      }
-    }
-
-    &.front-page-dropdown{
-      article:nth-of-type(3){
-        .drs-item-add-details .btn-toolbar .btn-group .dropdown-menu{
-          right: 0;
-          left: auto;
-        }
-      }
-    }
   }
 
 

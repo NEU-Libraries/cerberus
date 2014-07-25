@@ -62,7 +62,7 @@
 
 
 .dropdown-menu {
-  z-index: 2000;
+  /*z-index: 2000;*/
 }
 
 .bootstrap-select.show-menu-arrow.open > .btn {
