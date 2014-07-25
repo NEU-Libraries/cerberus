@@ -14,11 +14,14 @@
   @include ie7-restore-left-whitespace();
 }
 
-// Space out series of button groups
-.btn-group + .btn-group {
-  // margin-left: 5px;
-  margin-top: 5px;
+.dropdown-menu{
+  // Space out series of button groups
+  .btn-group + .btn-group {
+    // margin-left: 5px;
+    margin-top: 5px;
+  }
 }
+
 
 // Optional: Group multiple button groups together for a toolbar
 .btn-toolbar {
