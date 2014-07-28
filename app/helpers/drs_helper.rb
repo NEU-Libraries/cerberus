@@ -39,8 +39,24 @@ module DrsHelper
     if item.is_a? Array
       render_array_facet_value(facet_solr_field, item, options)
     end
-    path = url_for(add_facet_params_and_redirect(facet_solr_field, item.value).merge(:only_path=>true))
-    (link_to_unless(options[:suppress_link], facet_display_value(facet_solr_field, item), path, :class=>"facet_select") + " " + render_facet_count(item.hits)).html_safe
+
+    # Better path, includes the id
+    # path = url_for(add_facet_params_and_redirect(facet_solr_field, item.value).merge(:only_path=>true))
+    path = params.merge(add_facet_params_and_redirect(facet_solr_field, item.value)['f'])
+
+    # Epic kludge to satisfy 433
+    potential_name = Namae.parse item.value
+    name_obj = potential_name[0]
+
+    if !name_obj.nil? && !name_obj.given.blank? && !name_obj.family.blank?
+      puts "DGCDGCDGC - herpderp: #{path}"
+      puts add_facet_params_and_redirect(facet_solr_field, item.value)
+      puts params[:id]
+      # puts params
+      return (link_to_unless(options[:suppress_link], "#{name_obj.family}, #{name_obj.given}", path, :class=>"facet_select") + " " + render_facet_count(item.hits)).html_safe
+    else
+      return (link_to_unless(options[:suppress_link], facet_display_value(facet_solr_field, item), path, :class=>"facet_select") + " " + render_facet_count(item.hits)).html_safe
+    end
   end
 
 end
