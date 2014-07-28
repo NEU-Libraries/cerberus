@@ -109,9 +109,12 @@ class ShoppingCartsController < ApplicationController
 
       session[:ids].each do |pid|
         if !ActiveFedora::Base.exists?(pid)
-          session[:ids].delete(pid)
           deleted << pid
         end
+      end
+
+      deleted.each do |pid|
+        session[:ids].delete(pid)
       end
 
       if !deleted.empty? && session[:ids].empty?
