@@ -42,17 +42,13 @@ module DrsHelper
 
     # Better path, includes the id
     # path = url_for(add_facet_params_and_redirect(facet_solr_field, item.value).merge(:only_path=>true))
-    path = params.merge(add_facet_params_and_redirect(facet_solr_field, item.value)['f'])
+    path = params.merge(add_facet_params(facet_solr_field, item.value))
 
     # Epic kludge to satisfy 433
     potential_name = Namae.parse item.value
     name_obj = potential_name[0]
 
     if !name_obj.nil? && !name_obj.given.blank? && !name_obj.family.blank?
-      puts "DGCDGCDGC - herpderp: #{path}"
-      puts add_facet_params_and_redirect(facet_solr_field, item.value)
-      puts params[:id]
-      # puts params
       return (link_to_unless(options[:suppress_link], "#{name_obj.family}, #{name_obj.given}", path, :class=>"facet_select") + " " + render_facet_count(item.hits)).html_safe
     else
       return (link_to_unless(options[:suppress_link], facet_display_value(facet_solr_field, item), path, :class=>"facet_select") + " " + render_facet_count(item.hits)).html_safe
