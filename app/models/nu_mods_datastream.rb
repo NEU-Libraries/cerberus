@@ -1,6 +1,7 @@
 class NuModsDatastream < ActiveFedora::OmDatastream
   include OM::XML::Document
   include NodeHelper
+  include ApplicationHelper
 
   stored_sortable = Solrizer::Descriptor.new(:string, :stored, :indexed)
   stored_sortable_date = Solrizer::Descriptor.new(:date, :stored, :indexed)
@@ -175,9 +176,14 @@ class NuModsDatastream < ActiveFedora::OmDatastream
       solr_doc["creation_year_sim"] = [creation_date[/\d{4}/]]
     end
 
-
     # Ensure title is set to a title actually associated with this core file.
     solr_doc["title_info_title_ssi"] = self.title_info.title.first
+
+    # Kramdown parse for search purposes - #439
+    solr_doc["title_ssi"] = kramdown_parse(self.title_info.title.first)
+
+    # Kramdown parse for search purposes - #439
+    solr_doc["abstract_tesim"] = kramdown_parse(self.abstract.first)
 
     # Extract special subject/topic fields
     authorized_keywords = []
@@ -198,7 +204,8 @@ class NuModsDatastream < ActiveFedora::OmDatastream
       ln = self.personal_name(i).name_part_family
 
       if fn.any? && ln.any?
-        full_names << "#{ln.first}, #{fn.first}"
+        # Kramdown parse for search purposes - #439
+        full_names << kramdown_parse("#{ln.first}, #{fn.first}")
       end
     end
 
