@@ -103,7 +103,14 @@ class NuCoreFile < ActiveFedora::Base
           self.mods.personal_name(i).name_part_given = name_obj.given
           self.mods.personal_name(i).name_part_family = name_obj.family
           self.mods.personal_name(i).name_part = ""
-          self.save!
+
+          # Pat introduced records with missing or bad depositor information
+          # this ensures it doesn't crash a solr re-index
+          begin
+            self.save!
+          rescue ActiveFedora::RecordInvalid => exception
+            ExceptionNotifier.notify_exception(exception, :env => request.env, :data => {:id => "#{self.pid}"})
+          end
         end
       end
     end
