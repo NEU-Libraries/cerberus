@@ -198,7 +198,7 @@ class NuModsDatastream < ActiveFedora::OmDatastream
       ln = self.personal_name(i).name_part_family
 
       if fn.any? && ln.any?
-        full_names << "#{fn.first} #{ln.first}"
+        full_names << "#{ln.first}, #{fn.first}"
       end
     end
 
