@@ -109,7 +109,7 @@ class NuCoreFile < ActiveFedora::Base
           begin
             self.save!
           rescue ActiveFedora::RecordInvalid => exception
-            ExceptionNotifier.notify_exception(exception, :env => request.env, :data => {:id => "#{self.pid}"})
+            ExceptionNotifier.notify_exception(exception, :data => {:id => "#{self.pid}"})
           end
         end
       end
