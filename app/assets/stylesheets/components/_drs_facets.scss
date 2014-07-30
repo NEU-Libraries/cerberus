@@ -1,0 +1,293 @@
+// Facets
+// ======
+
+// .pane.facets{
+.pane.results-view{
+  margin-left: 0;
+  margin-bottom: 15px;
+}
+
+.drs-facet-selected{
+  @extend .alert;
+  margin: 5px 0;
+  color: $brand-primary;
+  background: none;
+  border: 1px solid $brand-primary;
+  .close{
+    text-decoration: none;
+
+  }
+}
+
+.appliedFilter{
+  padding: 5px 45px 5px 20px;
+  &:first-of-type{
+    margin-left:10px;
+  }
+}
+
+.appliedFilter .filterName {
+  background: none;
+  padding: 0px;
+  &:after{
+    content: ">";
+    margin-left: 10px;
+    font-size: 0.8em;
+  }
+}
+
+#facets
+{
+  div.facet_limit {
+    clear: both;
+  }
+  ul {
+    padding-top:0.5em;
+    margin-left: 14px;
+  }
+
+  li {
+    list-style:none;
+    margin-right:1em;
+    padding-bottom:0.3em;
+    padding-right: 50px;
+    clear: right;
+
+    a.remove
+    {
+      color:#666;
+      margin-left: 0px;
+      padding: 3px 5px;
+    }
+
+    a:hover
+    {
+      // background-color:#eee;
+      background-color: inherit;
+    }
+
+    .count {
+      text-align:right;
+      float:right;
+      margin-right: -50px;
+    }
+
+    &.more_facets_link {
+      text-align:right;
+      float:right;
+      margin-right: -35px;
+    }
+  }
+
+  span.selected
+  {
+    color:green;
+  }
+
+  ul,h5 +div
+  {
+    // padding-bottom:1em;
+    padding-bottom: 0;
+  }
+}
+
+.facet_extended_list
+{
+  .sort_options
+  {
+    text-align:right;
+  }
+
+
+  .prev_next_links
+  {
+    float:left;
+  }
+
+}
+
+ul.facet_extended_list
+{
+  clear:both;
+  margin:1.5em 0;
+
+  li
+  {
+    list-style:none;
+    margin:0.5em 0;
+  }
+
+   .count {
+     float:right;
+   }
+}
+
+
+/* Sidenav
+-------------------------------------------------- */
+
+.sidenav {
+  margin-bottom:1em;
+  padding: 0;
+  background-color: transparent;
+  border: 1px solid $navbarBorder;
+  -webkit-border-radius: 6px;
+     -moz-border-radius: 6px;
+          border-radius: 6px;
+  -webkit-box-shadow: 0 1px 4px rgba(0,0,0,.065);
+     -moz-box-shadow: 0 1px 4px rgba(0,0,0,.065);
+          box-shadow: 0 1px 4px rgba(0,0,0,.065);
+
+  h5, h4 {
+    display: block;
+    *width: 190px;
+    margin: 0 0 -1px;
+    padding: 8px 14px;
+  }
+  h5 {
+    border-top: 1px solid $navbarBorder;
+  }
+
+  .facet_limit:last-child > h5 {
+
+    &.twiddle-open {
+      @include border-bottom-radius(0px);
+    }
+
+    @include border-bottom-radius(6px);
+    }
+
+}
+
+
+#facets .btn-navbar {
+// Navbar button for toggling navbar items in responsive layouts
+// These definitions need to come after '.navbar .btn'
+  display: none;
+  float: right;
+  padding: 7px 10px;
+  margin-left: 5px;
+  margin-right: 5px;
+  @include buttonBackground(darken($navbarBackgroundHighlight, 5%), darken($navbarBackground, 5%));
+  @include box-shadow(#{inset 0 1px 0 rgba(255,255,255,.1), 0 1px 0 rgba(255,255,255,.075)});
+& .icon-bar {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background-color: #f5f5f5;
+  @include border-radius(1px);
+  @include box-shadow(0 1px 0 rgba(0,0,0,.25));
+}
+& .icon-bar + .icon-bar {
+  margin-top: 3px;
+}
+
+}
+
+.facets-collapse {
+  h5 {
+    cursor: pointer;
+  }
+  /* Chevrons */
+  .icon-chevron {
+    float: right;
+    margin-top: 2px;
+    margin-right: -6px;
+    opacity: .25;
+  }
+
+  .facet_limit h5:hover {
+    // background-color: darken($bodyBackground, 10%);
+    background-color: inherit;
+  }
+
+  .icon-chevron {
+    @extend .icon-chevron-right;
+    opacity: .5;
+  }
+
+  .twiddle-open .icon-chevron {
+    @extend .icon-chevron-down;
+    opacity: 1;
+    padding-right:2px;
+  }
+
+  /* hide the chevron when js isn't supported */
+  .no-js & .icon-chevron {
+    @extend .icon-chevron-down;
+    padding-right:2px;
+  }
+
+  h5:hover .icon-chevron,
+  .twiddle-open .icon-chevron {
+    opacity: 1;
+  }
+}
+
+.facet_pagination {
+  @extend .clearfix;
+}
+
+// DGC - Kludge to make grid/list work better
+
+span.count{
+  position: absolute;
+  right: 10px;
+}
+
+a.facet_select{
+  padding-left: 10px;
+  padding-right: 20px;
+}
+
+.dropdown-menu>li>a {
+  padding: 3px 30px 3px 20px;
+}
+
+.dropdown-submenu .dropdown-menu > li > a:hover,
+.dropdown-submenu.dropdown-menu > li > a:focus {
+  text-decoration: underline;
+}
+
+.nav .dropdown-toggle .caret {
+  float: right;
+  margin-top: 8px;
+}
+
+.sorting select {
+  margin: 5px;
+}
+
+.dropdown-menu span.selected{
+  display: block;
+  padding: 3px 20px;
+  clear: both;
+  font-weight: normal;
+  line-height: 20px;
+  span{
+    margin-top: 0;
+  }
+}
+
+div > ul > li > ul.dropdown-menu:before {
+  position: absolute;
+  top: -7px;
+  left: 9px;
+  display: inline-block;
+  border-right: 7px solid transparent;
+  border-bottom: 7px solid #ccc;
+  border-left: 7px solid transparent;
+  border-bottom-color: rgba(0, 0, 0, 0.2);
+  content: '';
+}
+
+div > ul > li > ul.dropdown-menu:after {
+  position: absolute;
+  top: -6px;
+  left: 10px;
+  display: inline-block;
+  border-right: 6px solid transparent;
+  border-bottom: 6px solid #ffffff;
+  border-left: 6px solid transparent;
+  content: '';
+}

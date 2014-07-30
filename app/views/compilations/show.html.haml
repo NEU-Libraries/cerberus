@@ -1,0 +1,18 @@
+%h1.page-header.compilation-titl
+  =render partial: 'shared/icon', locals: {class_string: "icon-th-list"  }
+  = @compilation.title
+  %small
+    = t('drs.compilations.name').capitalize
+
+%p.lead
+  = @compilation.description
+
+=render partial: 'compilations_actions_nav.haml'
+=render partial: 'shared/sets/delete_item_modal', locals: {item: @compilation }
+
+
+
+- if @compilation.entries.empty?
+  %p This #{t('drs.compilations.name')} is currently empty.  Get out there and add some files.
+- else
+  = render partial: 'all_entries', locals: { compilation: @compilation, entries: @compilation.entries }

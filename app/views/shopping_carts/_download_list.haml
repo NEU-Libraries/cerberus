@@ -1,0 +1,13 @@
+- if @items.length > 0
+  %section.drs-items.drs-items-list
+    - @item_core_records.each_with_index do |item, i|
+      - @thumbs = item.thumbnail_list
+      // Pass this a metadata_object (the core record) and the content object
+      = render partial: 'datastream_download', locals: { metadata: item, content: @items.fetch(i) }
+
+-else
+  .alert.alert-info
+    %button.close{"aria-hidden" => "true", "data-dismiss" => "alert", type: "button"} &#215;
+    %strong Empty,
+    You can add more files, and they will appear here.
+

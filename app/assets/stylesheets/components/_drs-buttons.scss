@@ -1,0 +1,60 @@
+.btn-clear{
+  @include drs-button;
+}
+
+.btn-add{
+  float: right;
+}
+
+.navbar .btn-navbar-collapse{
+
+}
+
+.results-view a.btn.btn-clear {
+  padding: 8px 27px;
+}
+
+.popover-content a.btn.btn-mini {
+  color: #333;
+  :hover{
+    color: #333;
+  }
+}
+
+.btn-block {
+  margin-top: 0
+}
+
+.featured-content .btn-block {
+  margin-top: 5px;
+}
+
+.drs-item-add-details .btn-toolbar .btn-group{
+  .btn{
+    outline: 0;
+  }
+  .dropdown-menu{
+    z-index: 1000;
+    min-width: 110px;
+    padding: 5px;
+    .btn-group{
+      display: block;
+    }
+  }
+  a[aria-role*='checkbox']{
+    min-width: 45px;
+  }
+
+  a[id*='viewItemDownloads-']{
+    -webkit-border-top-right-radius: 6px;
+    -moz-border-radius-topright: 6px;
+    border-top-right-radius: 6px;
+    -webkit-border-bottom-right-radius: 6px;
+    -moz-border-radius-bottomright: 6px;
+    border-bottom-right-radius: 6px;
+    // margin-right: 5px;
+    .icon-caret-down{
+      padding-left: 5px;
+    }
+  }
+}

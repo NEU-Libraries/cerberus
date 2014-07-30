@@ -1,0 +1,9 @@
+// If we're on an admin employee edit page, rerender their list of communities
+if ($("#current_communities").length > 0) {
+  $("#current_communities").html("<%= j(render partial: 'employee_communities', locals: {employee: @employee}) %>");  
+}
+
+// If we're on an admin community edit page, rerender the list of employees
+if ($("#community_employees").length > 0) {
+  $("#community_employees").html("<%= j(render partial: 'admin/communities/admin_community_employees', locals: {community: Community.find(@community)}) %>");
+}

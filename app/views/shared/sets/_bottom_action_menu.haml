@@ -1,0 +1,4 @@
+- if !current_user.nil? && ( current_user.can? :edit, @set )
+  %button(data-add-to-set="1"data-pid="#{@set.pid}" type="button" class="btn btn-clear btn-add" data-placement="left")
+    %i.icon-plus-sign-alt
+    Add

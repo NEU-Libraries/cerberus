@@ -1,0 +1,64 @@
+- noid = (item.pid).split(":").last
+.drs-item-add-details
+  -if !item.creators.blank?
+    %dl.drs-item-creators
+      - item.creators.each_with_index do | creator, i |
+        %h5.drs-item-creator
+          - if i < 2 and !creator.blank?
+            - if i == 0 && item.creators.length > 1
+              = "#{kramdown_parse(creator)},"
+            -else
+              = kramdown_parse(creator)
+      - if item.creators.length > 2
+        &hellip;
+  - if !item.description.blank?
+    %dl.drs-item-abstract-list
+      %dt.drs-item-abstract-label
+        Abstract
+      %dd.drs-item-abstract{id: "abstract#{item.pid.delete':'}"}
+        - if item.description.length > 120
+          %span.ellipsis
+            = kramdown_parse(item.description)
+          %a(href="#abstract#{item.pid.delete ":"}" data-toggle="ellipsis")
+            %i.icon-expand-alt
+            %span.sr-only
+              Expand / collapse toggle
+        - else
+          = kramdown_parse(item.description)
+  - else
+    .list-view-spacer
+  - if !item.under_embargo?(current_user)
+    .list-buttons
+      = render partial: 'nu_core_files/derivative_btn_group', locals: {contents: item.content_objects_sorted, list_view: true, item: item, alignment: "pull-right"}
+  - if !item.date_of_issue.blank?
+    %dl.drs-item-date-of-issue-list
+      %dt.drs-item-date-of-issue-label
+        Date of Issue
+      %dd.drs-item-date-of-issue
+        %time{ "date-time" => item.date_of_issue }
+          = item.date_of_issue
+  - if !item.create_date.blank?
+    %dl.drs-item-date-of-issue-list
+      %dt.drs-item-date-of-issue-label
+        Creation Date
+      %dd.drs-item-date-of-issue
+        %time{ "date-time" => item.create_date }
+          = item.create_date
+  - if item.klass == "NuCoreFile"
+    - if item.embargo_date_in_effect?
+      %dt
+        %span.embargo-alert= "Item embargoed."
+        %dl{"style" => "display:inline;"}
+          %span.embargo-alert= "Contents available #{item.embargo_release_date(formatted: true)}"
+    %menu.btn-toolbar(type="toolbar")
+      .btn-group
+        %a.btn.btn-mini.btn-clear{id: "viewItemDownloads-#{noid}"}(data-pid="#{noid}" href="#" data-toggle="dropdown")
+          Associated Files
+          %i.icon-caret-down
+        -# Ensure that we only show download buttons if item isn't embargoed
+        -# Indicate item is embargoed otherwise.
+        - if !item.under_embargo?(current_user)
+          = render partial: 'nu_core_files/derivative_btn_group', locals: {contents: item.content_objects_sorted, grid_view: true}
+      - if current_user # the general public can't add items to sets
+        - icon = render partial: 'shared/icon',  locals: { class_string: "icon-briefcase", alt_text: "Add to " + t('drs.compilations.name')}
+        =link_to icon.html_safe , compilations_path(file: item.pid), remote: true, title:  "Add to " + t('drs.compilations.name'), data: {toggle: "tooltip"}, class: 'btn btn-mini btn-clear'

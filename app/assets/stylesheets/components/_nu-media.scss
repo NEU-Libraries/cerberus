@@ -1,0 +1,61 @@
+.nu-media-list{
+  @extend .media-list;
+  @include single-transition();
+  > li{
+    @extend .media;
+    margin-top: 0;
+    border: 1px solid $nuMediaListBorderColor;
+    border-bottom: none;
+    &:first-child,
+    &:last-child{
+      @include border-radius($nuMediaListBorderRadius);
+    }
+    &:last-child{
+      border-bottom: 1px solid $nuMediaListBorderColor;
+    }
+    article{
+      @extend .media-body;
+      padding: 1em;
+
+    }
+    header{
+      @extend .media-heading;
+    }
+  }
+  figure{
+    @extend .thumbnail;
+    @include breakpoint(papa-bear){
+      width: 25%;
+    }
+    @include breakpoint(mama-bear){
+      width: 50%;
+    }
+    @include breakpoint(baby-bear){
+      width: 100%;
+      margin: 1em 0;
+    }
+    width: 100%;
+    border: 1px solid #ededed;
+    padding: 0.5em;
+    margin: 0 0 1em 1em;
+    img{
+      @include center-block();
+    }
+  }
+  figcaption{
+    color: lighten($textColor, 20%);
+    font-size: 0.85em;
+    line-height: 1.25em;
+    margin: 0.5em 0 0 0;
+  }
+}
+
+.nu-media-grid{
+
+}
+
+
+
+figure{
+  // margin: 0;
+}

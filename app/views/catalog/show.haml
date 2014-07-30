@@ -1,0 +1,26 @@
+- doc_title = document_show_html_title.blank? ? @document[:id] : document_show_html_title.first
+- @page_title = "#{doc_title} - #{application_name}"
+
+#showHead
+  #showUtils
+    %span.back_to_cat= link_back_to_catalog :label=>'← Return to search results'
+    - if @previous_document || @next_document
+      #previousNextDocument
+        %span.previous= link_to_previous_document(@previous_document)
+        - if session[:search][:counter].to_i > 0
+          %span.result-num
+            = session[:search][:counter].to_i
+            of #{format_num(session[:search][:total])}
+        - if @previous_document || @next_document
+          %span.next= link_to_next_document(@next_document)
+    - if editor? && controller.action_name != "delete"
+      %span.edit-browse
+        = edit_and_browse_links
+#document{class: "#{controller.action_name == "edit" ? "document_edit" : "document_show"} #{"combined_document_view" if session[:scripts]}"}
+  %div{id: format_pid(@document[:id])}
+    = "<h1>Add Your Work</h1>".html_safe if controller.action_name == "edit"
+    .document
+      = render_document_partial @document, params["action"]
+- if controller.action_name == "edit"
+  .delete-asset
+    = button_to("Delete This Item", {:action => :destroy, :controller => :assets, :id => @document_fedora.pid}, :confirm => 'Are you sure?', :method => :delete )

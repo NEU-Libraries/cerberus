@@ -1,0 +1,27 @@
+%article.drs-item{data: { href: "#{request.original_url}/#{smart_collection}" }}
+  %a{ href: "#{request.original_url}/#{smart_collection}" }
+    %figure
+      = render partial: 'shared/icon', locals: { class_string: t("drs.significant.#{smart_collection}.icon") }
+      -if smart_collection != "employees"
+        %figcaption
+          %span.label.small
+            = "Featured"
+  .drs-item-details
+    %header
+      %h4.drs-item-title
+        %a{href: "#{request.original_url}/#{smart_collection}"}
+          = t("drs.significant.#{smart_collection}.name")
+    .drs-item-add-details
+      %dl.drs-item-abstract-list
+        %dt.drs-item-abstract-label
+          Abstract
+        %dd.drs-item-abstract
+          - if t("drs.significant.#{smart_collection}.description").length > 120
+            %span.ellipsis
+              = t("drs.significant.#{smart_collection}.description")
+            %a(href="#abstract#{item.pid.delete ":"}" data-toggle="ellipsis")
+              %i.icon-expand-alt
+              %span.sr-only
+                Expand / collapse toggle
+          - else
+            = t("drs.significant.#{smart_collection}.description")

@@ -1,0 +1,11 @@
+(function($){
+  var partial = $('<%= j render( :partial =>  "remote_data_form", :locals => { compilation: @compilation } ) %>');
+
+  drsApp.compilationsModal(partial);
+  
+}(jQuery));
+
+
+  
+
+  

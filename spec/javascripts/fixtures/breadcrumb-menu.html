@@ -1,0 +1,237 @@
+
+
+    <header class='container nu-masthead' role='banner'>
+      <div class='row'>
+        <div class='span6'>
+          <a alt='Northeastern Univeristy libraries' class='brand' data-toggle='tooltip' href='http://library.northeastern.edu' title='Northeastern Libraries Home Page'>
+            <img alt="Nu-lib-lockup" src="/assets/nu-lib-lockup/nu-lib-lockup.svg" />
+          </a>
+        </div>
+        <!-- /.span6 -->
+        <div class='span6'>
+          <div class='btn-group pull-right'>
+            <a class='btn' href='/shopping_cart' id='cart_tracker'>
+              <i class='icon-shopping-cart'></i>
+              <span class='overlay'>0</span>
+            </a>
+            
+            <a class='btn' href='/users/drsadmin@neu-dot-edu' title='click for User Profile'>
+              <i class='icon-user'>&nbsp;</i>
+              drsadmin@neu.edu
+            </a>
+            <a class='btn dropdown-toggle' data-toggle='dropdown' href='#'>
+              <span class='icon-caret-down' title='click for additional menu options'></span>
+            </a>
+            <ul class='dropdown-menu'>
+              <li>
+                <a href="/my_stuff"><i class="icon-dashboard"></i> My Drs</a>
+              </li>
+              <li>
+                <a class='top_nav' href='/compilations'>
+                  <i class='icon-folder-open-alt'></i>
+                  Compilations
+                </a>
+              </li>
+              <li class='divider'></li>
+              <li><a href="/users/sign_out" id="logout_nav_link"><i class="icon-signout"></i> log out</a></li>
+            </ul>
+          </div>
+        </div>
+        <!-- /.span6 -->
+      </div>
+      <!-- /.row -->
+    </header>
+    <!-- /.container -->
+    <div class='container'>
+      <nav class='navbar' role='navigation'>
+        <div class='navbar-inner'>
+          <a class='top_nav brand drs ' href='/'>
+            DRS
+          </a>
+          <a class='btn btn-navbar btn-navbar-collpase btn-inverse' data-target='.nav-collapse' data-toggle='collapse'>
+            <span class='icon-bar'></span>
+            <span class='icon-bar'></span>
+            <span class='icon-bar'></span>
+          </a>
+          <div class='nav-collapse collapse'>
+            <ul class='nav pull-left'>
+              <li>
+                <a class='top_nav' href='/my_stuff'>My Repository</a>
+              </li>
+              <li>
+                <a class='top_nav' href='/compilations'>Compilations</a>
+              </li>
+              <li class='active'>
+                <a class='top_nav' href='/communities'>Browse</a>
+              </li>
+            </ul>
+            <!-- /.nav /.pull-right -->
+            <form accept-charset="UTF-8" action="/catalog" class="navbar-form pull-right" id="search-form-header" method="get"><div style="margin:0;padding:0;display:inline"><input name="utf8" type="hidden" value="&#x2713;" /></div>
+              <input name="id" type="hidden" value="neu:tb09kp65n" />
+              <label class='hide-text'>Search Scholarsphere</label>
+              <input class="q span3" id="search-field-header" name="q" placeholder="Type keywords in here" type="text" />
+              <button class='btn btn-info' id='search-submit-header' type='submit'>
+                <i class='icon-search'></i>
+                Go
+              </button>
+            </form>
+          </div>
+          <!-- /.nav-collapse.collapse -->
+        </div>
+        <!-- /.nav-inner -->
+      </nav>
+      <!-- /.navbar -->
+    </div>
+    <!-- /.container -->
+    <div class='container'>
+    </div>
+    <div class='container page_header'>
+      
+    </div>
+    <div class='container'>
+      <div class='row'>
+        <div class='span12'>
+          <ul class='breadcrumb'>
+            <li><a href="/communities/neu:1">Northeastern University</a></li>
+            <li><a href="/communities/neu:tb09kp587">English Department</a></li>
+            <li class="active">Literature</li>
+            <li class='action'>
+              <a data-pid='neu:tb09kp65n' href='#' id='addToSet'>
+                <i class='icon-plus-sign-alt'></i>
+                Add
+              </a>
+            </li>
+          </ul>
+          <div id='addToSetLinks' style='display: none;'>
+            <a href="/collections/new?parent=neu%3Atb09kp65n" class="btn btn-mini">Create Collection</a>
+            <a href="/files/new?parent=neu%3Atb09kp65n" class="btn btn-mini">Upload Stuff</a>
+          </div>
+          <article class='well'>
+            <h1 class='NuCollection' id='neu:tb09kp65n-title'>
+              Literature
+              <small>
+                Collection
+              </small>
+            </h1>
+            <p>
+              Lorem ipsum dolor sit amet, consectetur adipisicing elit. Recusandae, minima, cum sit iste at mollitia voluptatem error perspiciatis excepturi ut voluptatibus placeat esse architecto ea voluptate assumenda repudiandae quod commodi.
+            </p>
+            <nav class='set-actions'>
+              <ul class='nav nav-pills'>
+                <li>
+                  <a href='/collections/neu:tb09kp65n/edit'>
+                    Edit
+                  </a>
+                </li>
+                <li>
+                  <a data-toggle='modal' href='#deleteCollectionModal'>
+                    Delete
+                  </a>
+                </li>
+              </ul>
+            </nav>
+            <div aria-hidden='true' aria-labelledby='delecteCollectionModalLabel' class='modal hide fade' id='deleteCollectionModal' role='dialog' tabindex='-1'>
+              <div class='modal-header'>
+                <button aria-hidden='true' class='close' data-dismiss='modal' type='button'>×</button>
+                <h3 id='delecteCollectionModalLabel'>
+                  Confirm deleting Literature
+                </h3>
+              </div>
+              <div class='modal-body'>
+                <p>
+                  Are you sure you want to delete
+                  <i>Literature</i>
+                  and all of the items it contains? We cannot undo this action!
+                </p>
+              </div>
+              <div class='modal-footer'>
+                <button aria-hidden='true' class='btn' data-dismiss='modal'>Close</button>
+                <a href="/collections/neu:tb09kp65n" class="btn btn-danger" data-method="delete" rel="nofollow">Delete</a>
+              </div>
+            </div>
+          </article>
+          <ul class='media-list'>
+            <li class='media'>
+              <a href='/collections/neu:tb09kp676'>
+                <figure class='pull-left media-object'>
+                  <i class='icon-folder-open icon-2x icon-block'></i>
+                  <figcaption>
+                    <p>
+                      <small class='muted'>
+                        Collection
+                      </small>
+                    </p>
+                  </figcaption>
+                </figure>
+              </a>
+              <div class='media-body'>
+                <a href='/collections/neu:tb09kp676'>
+                  <h4 class='media-heading' id='neu:tb09kp676-title'>
+                    Russian Novels
+                  </h4>
+                </a>
+                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Recusandae, minima, cum sit iste at mollitia voluptatem error perspiciatis excepturi ut voluptatibus placeat esse architecto ea voluptate assumenda repudiandae quod commodi.</p>
+              </div>
+            </li>
+            
+          </ul>
+          <div id='add_compilation_form' style='display:none'></div>
+        </div>
+      </div>
+    </div>
+    <!-- /.container -->
+    <footer class='footer-nu'>
+      <div class='container'>
+        <div class='row-fluid'>
+          <div class='span3'>
+            <a alt='Northeastern University' class='nu-footer-brand logo' href='http://www.northeastern.edu'>Northeastern University</a>
+          </div>
+          <div class='span6'>
+            <ul class='footer-nu-nav'>
+              <li>
+                <a href='http://myneu.neu.edu/cp/home/displaylogin'>myNEU</a>
+              </li>
+              <li>
+                <a href='https://prod-web.neu.edu/webapp6/employeelookup/public/main.action'>Find Faculty &amp; Staff</a>
+              </li>
+              <li>
+                <a href='http://www.northeastern.edu/neuhome/adminlinks/findaz.html'>Find A-Z</a>
+              </li>
+              <li>
+                <a href='http://www.northeastern.edu/emergency/index.html'>Emergency Information</a>
+              </li>
+              <li>
+                <a href='http://www.northeastern.edu/search/index.html'>Search</a>
+              </li>
+            </ul>
+            <address>
+              360 Huntington Ave., Boston, Massachusetts 02115 &middot; 617.373.2000 &middot;  TTY 617.373.3768
+              <br>
+              &copy; 2013 Northeastern University
+            </address>
+          </div>
+          <div class='span3'>
+            <ul class='nu-social'>
+              <li>
+                <a class='youtube' href='https://www.youtube.com/northeastern'>
+                  <span class='icon-youtube-sign'></span>
+                  <span class='hide-text'>Youtube</span>
+                </a>
+              </li>
+              <li>
+                <a class='twitter' href='http://twitter.com/northeastern'>
+                  <span class='icon-twitter-sign'></span>
+                  <span class='hide-text'>Twitter</span>
+                </a>
+              </li>
+              <li>
+                <a class='facebook' href='http://www.facebook.com/northeastern'>
+                  <span class='icon-facebook-sign'></span>
+                  <span class='hide-text'>Facebook</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+

@@ -1,0 +1,12 @@
+%p= "The following #{file_titles.length} files never made it to stage two of upload.  You may now rescue these files by tagging them with the appropriate metadata, or you may choose to delete them.  Note that simply backing out of/exiting this page will NOT delete these files, and that until you either complete or delete them you will not be allowed to upload new material."
+%p The incompletes had the following file names: 
+
+%ul#all_files
+  - file_titles.each do |title|
+    %li= title || "Unnamed File" 
+
+%p Your choices are as follows:
+%ul#actions 
+  %li= link_to "Complete these objects.", files_provide_metadata_path
+  %li= link_to "Purge these objects", destroy_incomplete_files_path, method: 'delete' 
+  %li= link_to "Go back to home and think about it more", root_path

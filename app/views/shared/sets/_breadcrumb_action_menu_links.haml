@@ -1,0 +1,5 @@
+- if !current_user.nil? && ( current_user.can? :edit, @set.pid )
+  #addToSetLinks{style: "display: none;"}
+    = render_create_collection_button( @set, "Create Collection", {class: "btn btn-mini"})
+    - if @set.klass == "NuCollection"
+      = render_upload_files_button(@set, "Upload File", {class: "btn btn-mini"})

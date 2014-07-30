@@ -1,0 +1,12 @@
+*{
+  @include box-sizing(border-box);
+}
+body{
+  background-color: $white;
+  margin: 0 auto;
+  padding-top: 0;
+  > .container{
+    background-color: $white;
+  }
+}
+
