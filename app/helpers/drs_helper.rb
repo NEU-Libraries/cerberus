@@ -40,9 +40,14 @@ module DrsHelper
       render_array_facet_value(facet_solr_field, item, options)
     end
 
-    # Better path, includes the id
-    # path = url_for(add_facet_params_and_redirect(facet_solr_field, item.value).merge(:only_path=>true))
-    path = params.merge(add_facet_params(facet_solr_field, item.value))
+    path = ""
+
+    if params[:action] == "facet"
+      path = url_for(add_facet_params_and_redirect(facet_solr_field, item.value).merge(:only_path=>true))
+    else
+      # Better path, includes the id
+      path = params.merge(add_facet_params(facet_solr_field, item.value))
+    end
 
     return (link_to_unless(options[:suppress_link], facet_display_value(facet_solr_field, item), path, :class=>"facet_select") + " " + render_facet_count(item.hits)).html_safe
   end
