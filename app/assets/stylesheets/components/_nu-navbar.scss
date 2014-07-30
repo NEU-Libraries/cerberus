@@ -1,0 +1,19 @@
+.navbar  .btn-navbar-collapse{
+  @include buttonBackground($btnBackground, $btnBackgroundHighlight, $grayDark, 0 1px 1px rgba(255,255,255,.75));
+  background-image: none;
+  text-shadow: none;
+  padding: 12px 14px;
+  .icon-bar{
+    @include box-shadow(none);
+  }
+}
+
+.navbar .brand{
+  @include focus-states{
+    color: $navbarLinkColorHover;
+  }
+  &.active{
+   color: $navbarLinkColorActive;
+  }
+}
+

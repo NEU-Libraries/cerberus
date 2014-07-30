@@ -1,0 +1,524 @@
+// //
+// Variables
+// --------------------------------------------------
+
+
+
+
+
+
+// Global values
+// --------------------------------------------------
+
+$FontAwesomePath: "//netdna.bootstrapcdn.com/font-awesome/3.2.1/font";
+
+@import "typography/drs_g_webfont";
+
+
+// Northeastern Brand Stylesheets
+// --------------------------------------------------
+//// Colors
+//
+// Web Color Pallet
+//
+
+// Red
+// #cc0000
+// rgb 204 0 0
+$nu-red: #cc0000;
+
+
+// Black
+// #000000
+// rgb 0 0 0
+$black: #000000;
+
+
+// Light Black
+// #242424
+// rgb 36 36 36
+$light-black: #242424;
+
+// Darkest Gray
+// #333333
+// rgb 51 51 51
+$darkest-gray: #333333;
+
+// Darker Gray
+// #4e4e4e
+// rgb 78 78 78
+$darker-gray: #4e4e4e;
+
+
+// Dark Gray
+// #666666
+// rgb 102 102 102
+$dark-gray: #666666;
+
+
+// Medium Gray
+// #7d7d7d
+// rgb 125 125 125
+$medium-gray: #7d7d7d;
+
+// Darker Light Gray
+// #c3c3c3
+// rgb 195 195 195
+$darker-light-gray: #c3c3c3;
+
+
+// Light Gray
+// #dedede
+// rgb 222 222 222
+$light-gray: #dedede;
+
+
+// Lighter Gray
+// #eeeeee
+// rgb 238 238 238
+$lighter-gray: #eeeeee;
+
+// Lightest Gray
+// #f8f8f8
+// rgb 248 248 248
+$lightest-gray: #f8f8f8;
+
+
+// White
+// #ffffff
+// rgb 256 256 256
+$white: #ffffff;
+
+// Dark Taupe
+// #c4b996
+// rgb 196 185 150
+$dark-taupe: #c4b996;
+
+// Medium Taupe
+// #d1cbb5
+// rgb 209 203 181
+$medium-taupe: #d1cbb5;
+
+// Light Taupe
+// #e6e3d6
+// rgb 230 227 214
+$light-taupe: #e6e3d6;
+
+// Lightest Taupe
+// #f2f1ea
+// rgb 242 241 234
+$lightest-taupe: #f2f1ea;
+
+$light-warm-gray: #e9e8e5;
+$bodyBackgroundColor: $light-warm-gray;
+
+
+$footerBorderColor: #e5e5e5;
+$footerBgColor: #f5f5f5;
+
+
+// FLAT UI Color Swatches
+// -------------------------
+
+$turquoise:     #1abc9c;
+$green-sea:     #16a085;
+
+$emerald:       #2ecc71;
+$nephritis:     #27ae60;
+
+$peter-river:   #3498db;
+$belize-hole:   #2980b9;
+
+$amethyst:      #9b59b6;
+$wisteria:      #8e44ad;
+
+$wet-asphalt:   #34495e;
+$midnight-blue: #2c3e50;
+
+$sun-flower:    #f1c40f;
+$orange:        #f39c12;
+
+$carrot:        #e67e22;
+$pumpkin:       #d35400;
+
+$alizarin:      #e74c3c;
+$pomegranate:   #c0392b;
+
+$clouds:        #ecf0f1;
+$silver:        #bdc3c7;
+
+$concrete:      #95a5a6;
+$asbestos:      #7f8c8d;
+
+
+// Grays
+// -------------------------
+$black:                 #000;
+$grayDarker:            #222;
+$grayDark:              #333;
+$gray:                  $light-warm-gray;
+$grayLight:             $silver;
+$grayLighter:           $clouds;
+$white:                 $white;
+
+
+// Accent colors
+// -------------------------
+$blue:                  $peter-river;
+$blueDark:              $midnight-blue;
+$green:                 $emerald;
+$red:                   $alizarin; //redundent!
+$yellow:                $carrot;
+$orange:                $pumpkin;
+$pink:                  #c3325f;
+$purple:                $wisteria;
+
+
+//Brand Colors
+//Gives the color bases for each of the
+$brand-primary:         $peter-river;
+$brand-secondary:       $turquoise;
+$brand-default:         $silver;
+$brand-info:            $midnight-blue;
+$brand-success:         $emerald;
+$brand-warning:         $sun-flower;
+$brand-danger:          $alizarin;
+$brand-inverse:         $black;
+$brand-subtle:          $clouds;
+
+
+
+// Scaffolding
+// -------------------------
+$bodyBackground:        $white;
+$textColor:             $grayDark;
+
+
+// Links
+// -------------------------
+$linkColor:             $blue;//$nu-red;
+$linkColorHover:        lighten($linkColor, 10%);
+
+// Typography
+// -------------------------
+$sansFontFamily:        "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+$serifFontFamily:       "New Baskerville ","Baskerville", Georgia, "Times New Roman", Times, serif;
+$monoFontFamily:        Monaco, Menlo, Consolas, "Courier New", monospace !default;
+
+$baseFontSize:          14px;
+$baseFontFamily:        $sansFontFamily;
+$baseLineHeight:        20px;
+$altFontFamily:         $serifFontFamily;
+
+$headingsFontFamily:    $sansFontFamily;//$serifFontFamily; // empty to use BS default, $baseFontFamily
+$headingsFontWeight:    500;//bold;    // instead of browser default, bold
+$headingsColor:         $midnight-blue;//inherit !default; // empty to use BS default, $textColor
+
+
+
+// Component sizing
+// -------------------------
+// Based on 14px font-size and 20px line-height
+
+$fontSizeLarge:         $baseFontSize * 1.30 ; // ~18px
+$fontSizeSmall:         $baseFontSize * 0.9; // ~12px
+$fontSizeMini:          $baseFontSize * 0.75; // ~11px
+
+$paddingLarge:          18px 36px;  // 44px
+$paddingSmall:          2px 12px;  // 26px
+$paddingMini:           1px 8px;   // 24px
+
+$baseBorderRadius:      6px;
+$borderRadiusLarge:     6px;
+$borderRadiusSmall:     6px;
+
+
+// Tables
+// -------------------------
+$tableBackground:                   transparent !default; // overall background-color
+$tableBackgroundAccent:             #f9f9f9 !default; // for striping
+$tableBackgroundHover:              #f5f5f5 !default; // for hover
+$tableBorder:                       #ddd !default; // table and cell border
+
+// Buttons
+// -------------------------
+$btnBackground:                     $brand-default;
+$btnBackgroundHighlight:            lighten($btnBackground, 10%);
+$btnBorder:                         $light-gray;
+$btn-text-color:                    $white;
+
+$btn-padding:                       4px 7px;
+
+
+$btnPrimaryBackground:              $brand-primary;
+$btnPrimaryBackgroundHighlight:     lighten($btnPrimaryBackground, 10%);
+
+$btnInfoBackground:                 $brand-info;
+$btnInfoBackgroundHighlight:        lighten($btnInfoBackground, 10%);
+
+$btnSuccessBackground:              $brand-success;//#62c462 !default;
+$btnSuccessBackgroundHighlight:     lighten($btnSuccessBackground, 10%);
+
+$btnWarningBackground:              $brand-warning;
+$btnWarningBackgroundHighlight:     lighten($btnWarningBackground, 10%);
+
+$btnDangerBackground:               $brand-danger;
+$btnDangerBackgroundHighlight:      lighten($btnDangerBackground, 10%);
+
+$btnInverseBackground:              $brand-inverse;
+$btnInverseBackgroundHighlight:     $btnInverseBackground;
+
+
+// Forms
+// -------------------------
+$inputBackground:               $white;
+$inputBorder:                   $concrete;
+$inputBorderRadius:             $baseBorderRadius;
+$inputDisabledBackground:       $grayLight;
+$formActionsBackground:         #f5f5f5;
+$inputHeight:                   $baseLineHeight + 10px; // base line-height + 8px vertical padding + 2px top/bottom border
+$inputColor:                    $headingsColor;
+
+// Dropdowns
+// -------------------------
+$dropdownBackground:            $white;
+$dropdownBorder:                darken($dropdownBackground, 15%);
+$dropdownDividerTop:            darken($dropdownBorder, 15%);
+$dropdownDividerBottom:         $dropdownDividerTop;
+
+$dropdownLinkColor:             $linkColor;//$peter-river;//darken($asbestos, 20%);//$midnight-blue;
+$dropdownLinkColorHover:        $linkColorHover;//darken($asbestos, 20%);//$dark-gray;
+$dropdownLinkColorActive:       $dark-gray;
+
+$dropdownLinkBackgroundActive:  $white;
+$dropdownLinkBackgroundHover:   $white;//lighten($dropdownLinkBackgroundActive, 5%);
+
+
+
+// COMPONENT VARIABLES
+// --------------------------------------------------
+
+
+// Z-index master list
+// -------------------------
+// Used for a bird's eye view of components dependent on the z-axis
+// Try to avoid customizing these :)
+$zindexDropdown:          1000 !default;
+$zindexPopover:           1010 !default;
+$zindexTooltip:           1030 !default;
+$zindexFixedNavbar:       1030 !default;
+$zindexModalBackdrop:     1040 !default;
+$zindexModal:             1050 !default;
+
+
+
+
+// Input placeholder text color
+// -------------------------
+$placeholderText:         $grayLight;
+
+
+// Hr border color
+// -------------------------
+$hrBorder:                $grayLighter;
+
+
+// Horizontal forms & lists
+// -------------------------
+$horizontalComponentOffset:       180px;
+
+
+// Wells
+// -------------------------
+$wellBackground:                  $grayLighter;
+
+
+// Navbar
+// -------------------------
+$navbarCollapseWidth:             979px !default;
+$navbarCollapseDesktopWidth:      $navbarCollapseWidth + 1;
+
+$navbarInputHeight:               39px;
+
+$navbarHeight:                    52px;
+$navbarBackgroundHighlight:       $clouds;// !default;
+$navbarBackground:                $navbarBackgroundHighlight;
+$navbarBorder:                    darken($navbarBackground, 5%);
+
+$navbarText:                      $silver;
+$navbarLinkColor:                 $midnight-blue;
+$navbarLinkColorHover:            $peter-river;
+$navbarLinkColorActive:           darken($navbarLinkColorHover, 5%);
+$navbarLinkBackgroundHover:       $navbarBorder;
+$navbarLinkBackgroundActive:      lighten($navbarLinkBackgroundHover, 5%);
+
+$navbarBrandColor:                darken($navbarLinkColor, 20%);
+
+// Inverted navbar
+$navbarInverseBackground:                $midnight-blue;
+$navbarInverseBackgroundHighlight:       $navbarInverseBackground;
+$navbarInverseBorder:                    darken($navbarInverseBackground, 5%);
+
+$navbarInverseText:                      $clouds;
+$navbarInverseLinkColor:                 $clouds;
+$navbarInverseLinkColorHover:            lighten($navbarInverseLinkColor, 10%);
+$navbarInverseLinkColorActive:           $white;
+$navbarInverseLinkBackgroundHover:       $turquoise;
+$navbarInverseLinkBackgroundActive:      $navbarInverseBackground !default;
+
+$navbarInverseSearchBackground:          lighten($navbarInverseBackground, 25%) !default;
+$navbarInverseSearchBackgroundFocus:     $white ;
+$navbarInverseSearchBorder:              $navbarInverseBackground ;
+$navbarInverseSearchPlaceholderColor:    #ccc ;
+
+$navbarInverseBrandColor:                $navbarInverseLinkColor;
+
+
+// Pagination
+// -------------------------
+$paginationBackground:                #fff !default;
+$paginationBorder:                    #ddd !default;
+$paginationActiveBackground:          #f5f5f5 !default;
+
+
+// Hero unit
+// -------------------------
+$heroUnitBackground:              $grayLighter !default;
+$heroUnitHeadingColor:            inherit !default;
+$heroUnitLeadColor:               inherit !default;
+
+
+// Form states and alerts
+// -------------------------
+$warningText:             $brand-warning;
+$warningBackground:       $brand-warning;
+$warningBorder:           transparent;
+
+$errorText:               $brand-danger;
+$errorBackground:         $errorText;
+$errorBorder:             transparent;
+
+$successText:             $brand-success;
+$successBackground:       $successText;
+$successBorder:           transparent;
+
+$infoText:                $brand-info;
+$infoBackground:          $infoText;
+$infoBorder:              transparent;
+
+
+// Tooltips and popovers
+// -------------------------
+$tooltipColor:            $white;
+$tooltipBackground:       $midnight-blue;
+$tooltipArrowWidth:       7px;
+$tooltipArrowColor:       $tooltipBackground;
+
+$popoverBackground:       #fff !default;
+$popoverArrowWidth:       10px !default;
+$popoverArrowColor:       #fff !default;
+$popoverTitleBackground:  darken($popoverBackground, 3%) !default;
+$popoverTitleColor:   $white;
+
+
+// Special enhancement for popovers
+$popoverArrowOuterWidth:  $popoverArrowWidth + 1 !default;
+$popoverArrowOuterColor:  rgba(0,0,0,.25) !default;
+
+
+
+// GRID
+// --------------------------------------------------
+
+
+// Breakpoints
+// --------------------------------------------------
+
+$breakpoint-xxl:   1500px;
+$breakpoint-xl:    1200px;
+$breakpoint-l:     980px;
+$breakpoint-m:     768px;
+$breakpoint-sm:    400px;
+
+//----------------------------------------------------
+
+// Default 940px grid
+// -------------------------
+$gridColumns:             12 !default;
+$gridColumnWidth:         65px;//60px !default;
+$gridGutterWidth:         20px;//20px !default;
+$gridRowWidth:            ($gridColumns * $gridColumnWidth) + ($gridGutterWidth * ($gridColumns - 1)) !default;
+
+
+
+// 1500px min
+$gridColumnWidth1500:     85px !default;
+$gridGutterWidth1500:     40px !default;
+$gridRowWidth1500:        ($gridColumns * $gridColumnWidth1500) + ($gridGutterWidth1500 * ($gridColumns - 1)) !default;
+
+
+// 1200px-1499px
+$gridColumnWidth1200:     70px !default;
+$gridGutterWidth1200:     30px !default;
+$gridRowWidth1200:        ($gridColumns * $gridColumnWidth1200) + ($gridGutterWidth1200 * ($gridColumns - 1)) !default;
+
+
+
+
+// 768px-979px
+$gridColumnWidth768:      42px !default;
+$gridGutterWidth768:      20px !default;
+$gridRowWidth768:         ($gridColumns * $gridColumnWidth768) + ($gridGutterWidth768 * ($gridColumns - 1)) !default;
+
+
+// Fluid grid
+// -------------------------
+$fluidGridColumnWidth:    percentage($gridColumnWidth/$gridRowWidth) !default;
+$fluidGridGutterWidth:    percentage($gridGutterWidth/$gridRowWidth) !default;
+
+// 1500px-min
+$fluidGridColumnWidth1500:     percentage($gridColumnWidth1500/$gridRowWidth1500) !default;
+$fluidGridGutterWidth1500:     percentage($gridGutterWidth1500/$gridRowWidth1500) !default;
+
+// 1200px-1499px
+$fluidGridColumnWidth1200:     percentage($gridColumnWidth1200/$gridRowWidth1200) !default;
+$fluidGridGutterWidth1200:     percentage($gridGutterWidth1200/$gridRowWidth1200) !default;
+
+// 768px-979px
+$fluidGridColumnWidth768:      percentage($gridColumnWidth768/$gridRowWidth768) !default;
+$fluidGridGutterWidth768:      percentage($gridGutterWidth768/$gridRowWidth768) !default;
+
+
+// Social Icon Colors
+// ------------------------
+
+$twitterIconColor:          #4099FF;
+$facebookIconColor:         #3B5998;
+$youtubeIconColor:          #FF3333;
+
+
+
+// NU Media List
+//-------------------------
+
+$nuMediaListBorderColor:    $clouds;
+$nuMediaListBorderRadius:    3px;
+
+
+// Alerts
+$alertLinkColor: lighten($navbarLinkColorActive, 10%);
+
+
+// Navs
+//-------------------------
+
+// Breadcrumb
+$breadcrumbLinkColor: $midnight-blue;
+$breadcrumbHoverLinkColor: lighten($breadcrumbLinkColor, 10%);
+
+
+// Tabs
+$navTabColor: $midnight-blue;
+$navTabHoverColor: lighten($navTabColor, 10%);
+$navTabActiveColor: $asbestos;
+

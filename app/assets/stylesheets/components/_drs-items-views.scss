@@ -1,0 +1,262 @@
+.drs-item{
+  position: relative;
+  @include clearfix();
+  display: block;
+  padding: 8px;
+  border-color: $grayLight;
+  border-style: solid;
+  border-width: 1px;
+  @include border-radius($baseBorderRadius);
+  @include transition(all .2s ease-in-out);
+
+  > a:hover,
+  > a:focus{
+    text-decoration: none;
+  }
+  // Labels the item
+  figcaption{
+    @include scut-relative( n n 2em n);
+    margin-bottom: - 2em;
+  }
+  figure{
+    text-align: center;
+    // margin: 0 0 0.5em 0;
+
+    [data-picture]{
+      display: inline-block;
+    }
+    img, [class^="icon-"]{
+      padding: 4px;
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border: 1px solid rgba(0,0,0,.2);
+      text-align: center;
+    }
+    [class^="icon-"]{
+      display: inline-block;
+      text-align: center;
+      // width: 85px;
+      // height: 85px;
+      width: 68px;
+      height: 68px;
+      font-size: 25px;
+      line-height: 2;
+      // @media (min-width: 900px) {
+      //   width: 170px;
+      //   height: 170px;
+      //   font-size: 80px;
+      // }
+    }
+  }
+
+  menu{
+    padding-left: 0;
+  }
+  dl{
+    margin: 2px 0;
+  }
+
+
+}
+
+
+.drs-items{
+  margin-bottom: 1em;
+  //significant layout differences here should be able to toggle these all with a single class
+  &.drs-items-list{
+    @extend .media-list;
+    .drs-item{
+      @extend .media;
+      @include border-radius(0);
+      margin-top: 0;
+      padding-bottom: 8px;
+      padding-top: 8px;
+      border-top-style: none;
+      &:first-child{
+        @include border-top-radius($baseBorderRadius);
+        border-top-style: solid;
+      }
+      &:last-child{
+        @include border-bottom-radius($baseBorderRadius);
+      }
+      figure{
+        // display: none;
+        // margin: 0 1em;
+        margin: 0 1em 8px 1em;
+      }
+
+      > a{
+        float: left;
+        margin-right: 15px;
+
+        // Reset float and spacing to stack
+        @media (max-width: 480px){
+          float: none;
+          display: block;
+          margin-bottom: 10px;
+          figcaption{
+            text-align: left;
+          }
+        }
+
+      }
+
+      .drs-item-add-details .btn-toolbar{
+        display: none;
+      }
+
+      .drs-item-add-details{
+        .list-view-spacer{
+          height: 35px;
+        }
+      }
+
+    }
+
+    .drs-item-details{
+      @extend .media-body;
+      // margin-bottom: 2.5em;
+      margin-left: 1em;
+    }
+    .drs-item-title{
+      @extend .media-heading;
+    }
+    .drs-item-subject{
+      float: left;
+      margin-left: 0!important;
+      padding: $paddingMini;
+
+    }
+    .drs-item-abstract-label{
+      clear: left;
+
+    }
+
+    .drs-item-abstract{
+      @include clearfix();
+      .ellipsis{
+        max-width: 80%;
+        float: left;
+      }
+      .ellipsis-toggle{
+        float: left;
+        clear: right;
+      }
+    }
+    menu{
+      position: absolute;
+      bottom: 0;
+      right: 8px;
+    }
+
+  }
+  // DRS Items in Grid view styles
+  &.drs-items-grid{
+    @extend .row;
+
+    .drs-item{
+      @extend .span3;
+      @extend [class*="span"];
+      @extend .height3;
+      // @extend .hidden-x;
+      // @extend .hidden-y;
+      text-align: center;
+
+      @include focus-states{
+        border-color: $linkColor;
+        @include box-shadow(0 1px 4px rgba(0,105,214,.25));
+      }
+      > a{
+
+        figure{
+          display: block;
+          // margin: 0 auto 5px auto;
+        }
+      }
+
+    }
+    .drs-item-add-details dl{
+      @include sr-only;
+      margin: 0 0 0 0;
+      padding: 0 0 0 0;
+    }
+    .list-buttons{
+      @include sr-only;
+      margin: 0 0 0 0;
+      padding: 0 0 0 0;
+    }
+    menu{
+      display: inline-block;
+      margin: 0 0 0 0;
+      max-height: 28px;
+    }
+  }
+
+
+}
+
+.drs-item-creator{
+  display: inline-block;
+}
+
+
+.drs-items-grid{
+
+  .drs-item-title{
+    display: inline-block;
+    // line-height: 30px;
+    line-height: 25px;
+    max-width: 100%;
+    @include text-overflow();
+    @media (max-width: $breakpoint-xl){
+      font-size: 18px;
+    }
+  }
+  .drs-item-title
+  , .drs-item-creator{
+    margin: 4px 0 6px 0;
+  }
+  .drs-item-creators{
+    @media (max-width: $breakpoint-xl){
+      @include sr-only();
+    }
+
+  }
+  @media( max-width: $breakpoint-xxl ){
+    .drs-item-title,
+    .drs-item-creator{
+      // margin: 2px 0;
+      margin: 0;
+    }
+    .drs-item-title{
+      @extend h5;
+    }
+    .drs-item-creator{
+      @extend h6;
+
+    }
+  }
+
+  .drs-item{
+    @media( max-width: $breakpoint-m ){
+      margin-bottom: 20px;
+    }
+  }
+
+}
+
+.drs-sidebar{
+  margin-bottom: 1em;
+  &.span12{
+    > div{
+      display: inline-block;
+    }
+  }
+}
+
+
+.drs-item .label{
+  background-color: rgba(189, 195, 199, 0.6);
+  font-size: 0.8em;
+  padding: 2px 4px;
+}

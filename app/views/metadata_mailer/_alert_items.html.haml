@@ -1,0 +1,10 @@
+%tbody{border: 1}
+  %tr
+    %th Title 
+    %th Depositor 
+    %th PID 
+  - alerts.each do |alert| 
+    %tr
+      %td= link_to("#{alert.title}", controller: 'nu_core_files', action: 'show', id: alert.pid, only_path: false)
+      %td= "#{alert.depositor_name} (#{alert.depositor_email})"
+      %td= "#{alert.pid}"

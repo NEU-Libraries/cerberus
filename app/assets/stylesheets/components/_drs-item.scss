@@ -1,0 +1,10 @@
+.drs-item-full{
+  border-style: none;
+  padding: 0 0 0 0;
+  @include focus-states(){
+    cursor: auto;
+  }
+  figure{
+    
+  }
+}

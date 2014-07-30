@@ -1,0 +1,33 @@
+.input-append{
+  .add-on{
+    padding: 7px 6px;
+  }
+}
+
+.required-label{
+  &:after{
+    content: "*";
+    color: $brand-danger;
+    margin-left: 2px;
+    font-size: $fontSizeMini;
+  }
+}
+
+.modal form.new_compilation{
+  margin-bottom: 0;
+}
+
+fieldset{
+  margin-bottom: 10px;
+}
+
+legend{
+  margin-bottom: 11px;
+}
+
+.span3{
+  .image-checkbox{
+    vertical-align: baseline;
+    margin-left: 10px;
+  }
+}

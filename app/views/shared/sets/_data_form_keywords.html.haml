@@ -1,0 +1,16 @@
+- if keywords.empty?
+  .keyword
+    = f.label :keywords, "Keyword", class: "required-label"
+    = f.text_field :keywords, required: true, value: "", name: "#{array_type}[keywords][]", pattern: ".*\\S.*", class: 'input-block-level', placeholder: "Science"
+- else
+  - keywords.each_with_index do |keyword, i|
+    - if i == 0
+      .keyword
+        = f.label :keywords, "Keyword", class: "required-label"
+        = f.text_field :keywords, value: keyword.strip, name: "#{array_type}[keywords][]", pattern: ".*\\S.*",class: 'input-block-level', placeholder: "Science"
+    - else
+      .keyword.to-remove.input-append{style: "display : block;"}
+        = f.label :keywords, "Keyword"
+        = f.text_field :keywords, value: keyword.strip, name: "#{array_type}[keywords][]", pattern: ".*\\S.*", class: 'input-block-level span11', placeholder: "Science"
+        %button.btn.btn-danger{"data-delete" => "", "data-remove" => "true", "data-target" => ".to-remove", title: "Remove keyword", type: "button" }
+          = render partial: 'shared/icon', locals: { class_string: 'icon-remove', alt_text: "Remove field" }

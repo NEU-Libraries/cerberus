@@ -1,0 +1,35 @@
+-# used in the download list for the shopping carts feature needed an `a` for the styles to work correctly
+-# In spite of existing in a shared view directory this template is not particularly
+-# reusable due to the presumed existence of the kludgy/strange "item_class" variable
+-# which addresses a bug where w.out it everything in the download list claims it's content
+-# type is the content type of its own canonical object.
+
+%figure.pull-left
+
+  - if item.klass == "NuCoreFile"
+    - if defined? dynamic_picture #pass in a local variable if we want to have the images be able to go all the way to the 10 width size on active state.
+      = render partial: 'shared/thumbnails/dynamic_picture', locals: { thumbs: item.thumbnail_list }
+
+    -else # default behavior
+
+      =render partial: 'shared/thumbnails/thumbnail_picture', locals: { thumbs: item.thumbnail_list }
+
+  - elsif ( item.klass == "NuCollection" or item.klass == "Community"  ) and  item.thumbnail_list.length > 0
+    -# Now lets see if communities and collections have a thumbnail associated to it, if so render out the thumbnail
+
+    = image_tag item.thumbnail_list[0], alt: '', role: 'presentation'
+
+  - elsif item.klass == "NuCollection" # and doesn't have a thumbnail to render
+
+    = render partial: 'shared/icon', locals: { class_string: 'icon-folder-open' }
+
+  - elsif item.klass == "Community"
+
+    = render partial: 'shared/icon', locals: { class_string: 'icon-group' }
+
+  -else #the most generic option
+
+    = render partial: 'shared/icon', locals: { class_string: 'icon-file' }
+  %figcaption
+    %span.label.small
+      = t("drs.display_labels.#{item_class}.name")

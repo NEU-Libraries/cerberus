@@ -1,0 +1,62 @@
+// TYPOGRAPHY
+// --------------------------------------------------
+
+
+h1 {
+  .hero-unit &{
+    margin-bottom: 15px;
+    color: $brand-info;
+  }
+}
+
+article h1 {
+  [class^="icon-"]:before,
+  [class*=" icon-"]:before {
+    padding-right: 5px;
+  }
+}
+
+article h1 {
+  margin-bottom: 20px;
+}
+
+p {
+  margin-bottom: 1em;
+}
+
+h1, .h1, h2, .h2, h3, .h3, h4, .h4, h5, .h5, h6, .h6{
+  font-weight: 100;
+}
+
+.embargo-alert{
+  font-weight: 100;
+  color: $red;
+}
+
+
+h1 small, h2 small, h3 small, h4 small, h5 small, h6 small {
+  font-weight: 100;
+  color: $blueDark;
+  letter-spacing: 3px;
+  font-style: oblique;
+  padding-left:5px;
+}
+
+.fix-text{
+  display: inline-block;
+}
+
+.sr-only{
+  @include sr-only;
+}
+
+
+.ellipsis{
+  display: block;
+  @include ellipsis();
+  &.in{
+    display: initial;
+    white-space: initial;
+    overflow: auto;
+  }
+}

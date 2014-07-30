@@ -1,0 +1,5 @@
+// Update the counter at the top of the screen
+$('#cart_tracker').replaceWith("<%= j(render partial: 'shopping_carts/tracker') %>")
+
+// Setting the new property to be handled by the app module to replace it with
+drsApp.$new = $("<%= j(render :partial => 'add_or_remove_btn', locals: {:id => @id}) %>");

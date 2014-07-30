@@ -1,0 +1,10 @@
+- content_for :page_header do
+  %h1.page-header
+    =render partial: 'shared/icon', locals: {class_string: "icon-download-alt" }
+    = t('drs.shoppingcarts.name').titlecase
+    %small
+      = @items.length
+.row
+  .span8.offset2
+    = render partial: "download_list"
+    = render partial: "actions"

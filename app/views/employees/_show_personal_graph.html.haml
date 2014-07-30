@@ -1,0 +1,33 @@
+%section.row
+  %article.span6
+    %h3
+      = t('drs.personal_graph.system_generated_smart_collections')
+    -if generated_smart_collections.length > 0
+      %section{class: ["drs-items-list", "drs-items"] }
+        - generated_smart_collections.each do |f|
+          - if !f.is_empty_collection? || (current_user && current_user.nuid == @employee.nuid)
+            - @thumbs = f.thumbnail_list
+            =render partial: "shared/drs_item/drs_item", locals: { item: f }
+          / =render partial: "shared/drs_item/drs_item", locals: { item: SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{f.pid}\"").first) }
+  //.span6
+  %article.span6
+    %h3
+      = t('drs.personal_graph.personal_collections')
+    -if user_smart_collections.length > 0
+      %section{class: ["drs-items-list", "drs-items"] }
+        - user_smart_collections.each do |f|
+          - if !f.is_empty_collection? || (current_user && @current_user.nuid == @employee.nuid)
+            - @thumbs = f.thumbnail_list
+            =render partial: "shared/drs_item/drs_item", locals: { item: f }
+          / =render partial: "shared/drs_item/drs_item", locals: { item: SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{f.pid}\"").first) }
+    -else
+      .alert.alert-info
+        %strong
+          No user collections to show.
+          -if editable
+            Create a new collection.
+        %button.close{"data-dismiss" => "alert", type: "button"} &#215;
+
+    -if editable
+      = link_to("Create a new collection", new_nu_collection_path(parent: @employee.user_root_collection.pid,), class: ["btn", "btn-clear", "btn-block", ] )
+  //.span6

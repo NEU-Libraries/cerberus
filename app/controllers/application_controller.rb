@@ -1,0 +1,101 @@
+class ApplicationController < ActionController::Base
+  # Adds a few additional behaviors into the application controller
+  include Blacklight::Controller
+  # Adds Drs behaviors into the application controller
+  include Drs::Controller
+  # Solr Escape group values
+  include Drs::ControllerHelpers::SolrEscapeGroups
+
+  # Please be sure to impelement current_user and user_session. Blacklight depends on
+  # these methods in order to perform user specific actions.
+
+  layout "homepage"
+
+  protect_from_forgery
+  before_filter :store_location
+
+  def email_handled_exception(exception)
+    if !current_user.nil?
+      name = current_user.name
+    else
+      name = "Not Logged In"
+    end
+
+    ExceptionNotifier.notify_exception(exception, :env => request.env, :data => {:user => "#{name}"})
+  end
+
+  def render_403
+    render :file => "#{Rails.root}/public/403", formats: [:html], layout: false, status: '403'
+  end
+
+  def mint_unique_pid
+    Drs::Noid.namespaceize(Drs::IdService.mint)
+  end
+
+  def fetch_solr_document(options = {})
+    options = options.with_indifferent_access
+
+    fetch = Proc.new do |x|
+      q = ActiveFedora::SolrService.query("id:\"#{x}\"").first
+      raise ActiveFedora::ObjectNotFoundError if q.nil?
+
+      return SolrDocument.new(q)
+    end
+
+    if options[:id]
+      fetch.call(options[:id])
+    else
+      fetch.call(params[:id])
+    end
+  end
+
+  def store_location
+    # store last url - this is needed for post-login redirect to whatever the user last visited.
+    return unless request.get?
+    if (request.path != "/users/sign_in" &&
+        request.path != "/users/sign_up" &&
+        request.path != "/users/password/new" &&
+        request.path != "/users/sign_out" &&
+        !(request.path.include? "/downloads/") &&
+        !request.xhr?) # don't store ajax calls
+      session[:previous_url] = request.fullpath
+    end
+  end
+
+  def after_sign_in_path_for(resource)
+    session[:previous_url] || root_path
+  end
+
+  # Why do we have these when current_user.can? is available??
+  # helper_method :current_user_can_read?, :current_user_can_edit?
+
+  # # Determine whether or not the viewing user can read this object
+  # def current_user_can_read?(fedora_object)
+  #   return fedora_object.rightsMetadata.can_read?(current_user)
+  # end
+
+  # # Determine whether or not the viewing user can edit this object
+  # def current_user_can_edit?(fedora_object)
+  #   return fedora_object.rightsMetadata.can_edit?(current_user)
+  # end
+
+  # Some useful helpers for seeing the filters defined on given controllers
+  # Taken from: http://scottwb.com/blog/2012/02/16/enumerate-rails-3-controller-filters/
+  def self.filters(kind = nil)
+    all_filters = _process_action_callbacks
+    all_filters = all_filters.select{|f| f.kind == kind} if kind
+    all_filters.map(&:filter)
+  end
+
+  def self.before_filters
+    filters(:before)
+  end
+
+  def self.after_filters
+    filters(:after)
+  end
+
+  def self.around_filters
+    filters(:around)
+  end
+end

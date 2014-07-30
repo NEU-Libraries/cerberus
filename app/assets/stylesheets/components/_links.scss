@@ -1,0 +1,24 @@
+h1 a, .h1 a, h2 a, .h2 a, h3 a, .h3 a, h4 a, .h4 a, h5 a, .h5 a, h6 a, .h6 a{
+  font-weight: 500;
+}
+
+a{
+  @include single-transition(color, 0.25s);
+}
+
+// Show on focus
+.show-on-focus{
+  @include sr-only();
+  @include focus-states(){
+
+    position: static;
+
+  }
+}
+
+.set-actions{
+  .nav-pills{
+    margin: 0px;
+    float: right;
+  }
+}

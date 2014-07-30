@@ -1,0 +1,237 @@
+# Sample localization file for English. Add more files in this directory for other locales.
+# See https://github.com/svenfuchs/rails-i18n/tree/master/rails%2Flocale for starting points.
+
+en:
+  helpers:
+    submit:
+      compilation:
+        create: "Create Set"
+        update: "Update Set"
+  drs:
+    product_name:
+      full: "digital repository service"
+      short: "DRS"
+    product_icon: icon-archive
+    search:
+      form:
+        q:
+          label: "Search"
+          scoped_placeholder: "Search this collection"
+          placeholder: "Search the DRS"
+    provide_metadata_page:
+      image_slider_error: "Something went wrong, cannot access info necessary for scaled derivative creation.  Please abandon upload and try again.  If the problem persists contact an administrator."
+    homepage:
+      description:
+        short: "The DRS is a secure place where Northeastern’s colleges, departments, and faculty can store and share their scholarly work."
+        long: "Materials in the repository are maintained by Northeastern University Libraries for future use, and can be shared worldwide, with just a few people or groups, or kept private. You can also discover and remix materials created by others: for instance, articles and research data, materials from the <a href=\"http://library.northeastern.edu/archives-special-collections\" target=\"_blank\">University Archives and Special Collections</a>, or images and photographs from the Northeastern community. For more information visit our FAQ. For help with uploading, searching, or logging in, visit our User Guides page."
+        terms link text: "Terms of Participation"
+      browse label: "Explore"
+    compilations:
+      name: set
+      lead: "Sets are collections of files curated by you. Create as many sets as you need and add your own DRS files or files contributed to the DRS by others. You can add files directly to a Set from the search results page, or as you browse collections and communities. Unlike your Download Queue, Sets are sustainable and won't disappear unless you delete the Set yourself. For more information on using Sets, visit our User Guides page."
+      created_message: "Your set was created successfully."
+      updated_message: "Your set was updated successfully."
+      add_to_set_popup: "Add to your sets:"
+      download_message: "Please wait a moment while your download is being prepared. If your set is large, this process may take some time."
+      delete_warning: "Deleting a set cannot be undone. Items in the set will not be deleted."
+      destroy_link: "Delete this set"
+    shoppingcarts:
+      name: download queue
+      lead: "Your Download Queue is a temporary list of files to be downloaded and saved locally as a .zip file. Files added to your Download Queue will remain in the queue until you logout or close your browser. If you want to save a file and come back to it later, add it to a Set, which is a permanent list you can maintain over time. For more information on using your Download Queue, visit our User Guides page."
+      destroy_button: "Clear Queue"
+      download_message: "Please wait a moment while your download is being prepared. If your Download Queue is large, this process may take some time."
+    #Significant Content labels
+    significant:
+      datasets:
+        name: Datasets
+        description: High value datasets, such as statistical datasets and research datasets
+        icon: icon-table
+      research:
+        name: Research Publications
+        description: Faculty research, including articles, preprints, and offprints
+        icon: icon-beaker
+      presentations:
+        name: Presentations
+        description: Faculty presentations from various conferences and meetings
+        icon: icon-quote-right
+      learning:
+        name: Learning Objects
+        description: Materials used to support teaching and learning, such as syllabi and activities
+        icon: icon-pencil
+      theses:
+        name: Theses and Dissertations
+        description: NU’s master's theses and doctoral dissertations from 2008 to the present
+        icon: icon-book
+      communities:
+        name: Communities
+        description: Browse Northeastern departments and groups by name
+        icon: icon-group
+      employees:
+        name: Faculty
+        description: Browse faculty by name
+        icon: icon-user
+      other:
+        name: Other Publications
+        description: Community relevant documents
+        icon: icon-folder-open
+    about:
+      title: About the DRS
+    personal_graph:
+      title: My DRS
+      description: "Smart Collections are for specific scholarly works that you would like to share as part of your Northeastern community. Files uploaded to these collections will be browsable from your department or University group page. For more information on using Smart Collections, visit our User Guides page."
+      icon: icon-dashboard
+      system_generated_smart_collections: Smart Collections
+      personal_collections: User Created Collections
+    upload_file:
+      terms:
+        heading: "Terms of Participation"
+        description: "Please read and accept the Terms of Participation."
+        checkbox: "I have read and I accept the Terms of Participation."
+    metadata:
+      icon: 'icon-pencil'
+      edit_page_title: 'Provide Metadata'
+      edit_subtitle: 'Please supply some metadata to help others discover your work'
+      content sensitive uploads:
+        images: "Select sizes for the small, medium, and large versions of your image"
+      date: "Date Issued"
+      creators:
+        creator_note: "At least one personal or corporate creator is required."
+        corporate: "Corporate Creator"
+      permissions:
+        mass_permissions:
+          note2: "Selecting 'private' will allow users and groups defined in the Granular Permission section to see your file."
+        granular_permissions:
+          heading: "Granular Permissions"
+          read_edit: "Should this person or group be allowed to edit metadata for this file?"
+    user_notifications:
+      message: "[title] has been saved."
+    dashboard:
+      description: "Below is a list of your DRS files, as well as a list of your recent activity. Visit the My DRS page to view your collections."
+      recent_activity:
+        heading: "Your Recent Activity"
+    collections:
+      created_message: "Your collection was created successfully."
+      updated_message: "Your collection was updated successfully."
+      confirm_delete: "Are you sure you want to delete [collection name] and all of the items it contains? Deleting a collection and its items cannot be undone."
+    etd_description:
+      default: Theses and dissertations for
+    display_labels:
+      Employee:
+        name: Faculty
+        icon:
+      AudioFile:
+        name: Audio File
+        icon:
+      ImageLargeFile:
+        name: Large Image
+        icon:
+      ImageMasterFile:
+        name: Master Image
+        icon:
+      ImageMediumFile:
+        name: Medium Image
+        icon:
+      ImageSmallFile:
+        name: Small Image
+        icon:
+      ImageThumbnailFile:
+        name: Thumbnail Image
+        icon:
+      MsexcelFile:
+        name: Spreadsheet
+        icon:
+      MspowerpointFile:
+        name: Presentation
+        icon:
+      MswordFile:
+        name: Document
+        icon:
+      PdfFile:
+        name: PDF
+        icon:
+      TextFile:
+        name: Document
+        icon:
+      VideoFile:
+        name: Video File
+        icon:
+      ZipFile:
+        name: Zip File
+        icon:
+      Community:
+        name: Community
+      NuCollection:
+        name: Collection
+      NuCoreFile:
+        name: File
+    full_metadata:
+      processing note: "The metadata details and access controls you specified are being processed in the background. Your file will be marked as 'Private' until this brief process is complete."
+    # full_display_labels:
+    #   abbreviated_title: "Abbreviated title:"
+    #   abstract: "Abstract/Description:"
+    #   access_condition: "Access condition:"
+    #   alternative_title: "Alternative Title:"
+    #   author_creator: "Creator:"
+    #   bibliography: "Bibliography:"
+    #   biographical_historical: "Biographical/Historical:"
+    #   citation_reference: "Citation/Reference:"
+    #   collection: "Collection:"
+    #   contact: "Contact:"
+    #   contributor: "Contributor:"
+    #   copyright: "Copyright:"
+    #   copyright_date: "Copyright date:"
+    #   creation_production_credits: "Creation/Production credits:"
+    #   date_captured: "Date captured:"
+    #   date_created: "Date created:"
+    #   date_modified: "Date modified:"
+    #   date_sequential_designation: "Date/Sequential designation:"
+    #   date_valid: "Date valid:"
+    #   digital_origin: "Digital origin:"
+    #   doi: "DOI:"
+    #   format: "Format:"
+    #   frequency: "Frequency:"
+    #   genre: "Genre:"
+    #   handle: "Permanent URL:"
+    #   identifier: "Identifier:"
+    #   imprint: "Imprint:"
+    #   isbn: "ISBN:"
+    #   ismn: "ISMN:"
+    #   isrc: "ISRC:"
+    #   issn: "ISSN:"
+    #   issuance: "Issuance:"
+    #   issue_number: "Issue number:"
+    #   language: "Language:"
+    #   lccn: "LCCN:"
+    #   license: "License:"
+    #   location: "Location:"
+    #   map_data: "Map data:"
+    #   matrix_number: "Matrix number:"
+    #   music_plate: "Music plate:"
+    #   music_publisher: "Music publisher:"
+    #   note: "Notes:"
+    #   oclc: "OCLC:"
+    #   physical_description: "Physical description:"
+    #   place: "Place:"
+    #   preferred_citation: "Preferred citation:"
+    #   publications: "Publications:"
+    #   publisher: "Publisher:"
+    #   referenced_by: "Referenced by:"
+    #   references: "References:"
+    #   related_item: "Related item:"
+    #   repository: "Repository:"
+    #   restriction_on_access: "Restriction on access:"
+    #   sici: "SICI:"
+    #   statement_of_responsibility: "Statement of responsibility:"
+    #   stock_number: "Stock number:"
+    #   subject: "Subjects and keywords:"
+    #   table_of_contents: "Table of contents:"
+    #   target_audience: "Target audience:"
+    #   title: "Title:"
+    #   translated_title: "Translated title:"
+    #   type_of_resource: "Type of resource:"
+    #   uniform_title: "Uniform title:"
+    #   upc: "UPC:"
+    #   use_and_reproduction: "Use and reproduction:"
+    #   videorecording_identifier: "Videorecording identifier:"
+  blacklight:
+    application_name: "DRS"

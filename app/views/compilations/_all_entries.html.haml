@@ -1,0 +1,19 @@
+%h3
+  Files
+%ul.media-list
+  - entries.each do |entry|
+    %li.media
+      %a.pull-left{href: nu_core_file_path(entry.pid)}
+        - @thumbs = entry.thumbnail_list
+        = render partial: 'shared/thumbnails/thumbnail_picture', locals: {thumbs: entry.thumbnail_list}
+      .media
+        %h4.media-heading
+          %a{href: nu_core_file_path(entry.pid)}
+            = entry.title
+        -if !entry.description.blank?
+          %p
+            =entry.description
+        %a.btn.btn-mini.btn-clear(title="Remove #{entry.title} from #{compilation.title} "){href: delete_entry_path(id: compilation.pid, entry_id: entry.pid), method: "delete",  data: { confirm: 'Are you sure?', toggle: "tooltip" } }
+          %i.icon-remove
+          %span.sr-only
+            Remove #{entry.title} from #{compilation.title}

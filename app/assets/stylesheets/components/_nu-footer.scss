@@ -1,0 +1,95 @@
+.footer-nu{
+  margin-top: 2em;
+  padding-top: 1em;
+  font-family: $serifFontFamily;
+  background-color: $footerBgColor;
+  border-top: 0.1em solid $footerBorderColor;
+  color: $medium-gray;
+  address {
+    font-size: 0.9em;
+    line-height: 1.2em;
+  }
+}
+
+//nav list of footer links at the bottom of every page
+
+.footer-nu-nav{
+  @include clearfix();
+  margin: 0 0 0.75em 0;
+  > li{
+    display: block;
+    float: left;
+    list-style: none;
+    margin-right: 7px;
+
+    //add a single middle dot seperator
+    &:after{
+        content: "\20\00b7";
+        font-size: 1em;
+        font-weight: 800;
+    }//except for the last
+    &:last-of-type:after{
+      content: "";
+    }
+    > a{
+      padding: 0.5em 0;
+      color: $medium-gray;
+      @include single-transition();
+      &:hover,
+      &:focus{
+        color: $textColor;
+        @include single-transition();
+      }
+    }
+  }
+}
+.nu-social{
+  margin: 0 0 0.75em 0;
+  > li{
+    float: right;
+    display: block;
+    > a{
+      @include single-transition(opacity);
+      padding: 0.25em;
+      font-size: 1.3em;
+      opacity: 0.5;
+      &:hover,
+      &:focus{
+        @include single-transition(opacity);
+        text-decoration: none;
+        opacity: 1;
+      }
+    }
+  }
+  .twitter{
+    color: $twitterIconColor;
+  }
+  .facebook{
+    color: $facebookIconColor;
+  }
+  .youtube{
+    color: $youtubeIconColor;
+  }
+}
+
+
+.nu-footer-brand{
+  @include squish-text();
+  @include size(16px, 100%);
+  @include single-transition();
+  max-width: 175px;
+  display: block;
+  background: image-url('brand-footer-image/brand-footer-image.svg') top left no-repeat;
+  background-size: contain;
+  opacity: 0.6;
+  position: relative;
+  top: 3px;
+  &:hover,
+  &:focus{
+    @include single-transition();
+    opacity: 1;
+  }
+  .no-svg &{
+    background: image-url('brand-footer-image/brand-footer-image.png') top left no-repeat;
+  }
+}

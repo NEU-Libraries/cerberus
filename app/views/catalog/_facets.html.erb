@@ -1,0 +1,14 @@
+<% # main container for facets/limits menu -%>
+<% if has_facet_values?  %>
+<div>
+  <ul class="nav" role="navigation">
+    <li class="dropdown sidenav">
+      <a id="drop1" href="#" role="button" class="dropdown-toggle" data-toggle="dropdown"><h4>Limit your search<b class="caret"></b></h4></a>
+      <ul class="dropdown-menu" role="menu" aria-labelledby="drop1">
+        <%= render_facet_partials facet_field_names, :partial => 'catalog/facet_limit', :layout => 'catalog/facet_layout' %>
+      </ul>
+    </li>
+  </ul>
+</div>
+<% end %>
+

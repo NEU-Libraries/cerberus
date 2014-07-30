@@ -1,0 +1,102 @@
+.thumbnail-btn{
+  @include focus-states{
+    text-decoration: none;
+
+  }
+  h4{
+    color: inherit;
+  }
+  .icon-stack{
+    display: block;
+    width: 2em;
+    height: 2em;
+    margin: 0.125em auto;
+    font-size: 1.5em;
+    i:last-child{
+      margin-top: 2px;
+      font-size: 0.8em;
+    }
+  }
+}
+
+
+.icon-block-1s{
+  &:before{
+    display: block;
+    width: 78px;
+    height: 78px;
+    font-size: 78px;
+    margin: 0.125em auto;
+  }
+}
+
+
+.all-compilations.thumbnails{
+  .span2 .thumbnail{
+    height: 170px;
+    padding-top: 40px;
+  }
+}
+
+.thumbnail a{
+  @include focus-states{
+    text-decoration: none;
+  }
+}
+
+
+[class*="thumbnail-"] img{
+  display: inline-block;
+  max-width: 100%;
+  height: auto;
+}
+.thumbnail-s1 img,
+.thumbnail-s1-2x img{
+  width: 85px;
+  // height: 85px;
+}
+
+.thumbnail-s2 img,
+.thumbnail-s2-2x img{
+  width: 170px;
+  // height: 170px;
+}
+
+.thumbnail-s4 img,
+.thumbnail-s4-2x img{
+  width: 340px;
+}
+
+.thumbnail-s10 img,
+.thumbnail-s10-2x img{
+  width: 970px;
+}
+
+.drs-items-list .drs-item [class*="thumbnail-"] img{
+  width: 85px;
+  // height: 85px;
+}
+
+.drs-items-list .drs-item figure [class*="icon-"]{
+  @media (min-width: 0){
+    width: 85px;
+    height: 85px;
+    font-size: 35px;
+  }
+}
+
+.drs-items-grid .drs-item figure [class*="icon-"]{
+  @media (min-width: 981px){
+    width: 135px;
+    height: 135px;
+    font-size: 60px;
+  }
+}
+
+.drs-items-grid .drs-item figure [class*="icon-"]{
+  @media (min-width: 1201px){
+    width: 170px;
+    height: 170px;
+    font-size: 80px;
+  }
+}

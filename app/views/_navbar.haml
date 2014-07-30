@@ -1,0 +1,19 @@
+.container
+  %nav.navbar#navigation(role="navigation")
+    .navbar-inner
+      %a{class: "top_nav brand drs #{'active' if params[:controller] == "catalog" and action_name == "index"}", href: "/"}
+        DRS
+        %span.sr-only
+          Homepage
+      %button.btn.btn-navbar.btn-navbar-collapse.btn-inverse{"data-target" => ".nav-collapse", "data-toggle" => "collapse", name: "Menu Toggle", type: "button", value: "Menu Toggle"}
+        %span.icon-bar
+        %span.icon-bar
+        %span.icon-bar
+        %span#navButtonLabel.sr-only
+          Menu Toggle
+      .nav-collapse.collapse
+        = render :partial => 'catalog/search_form'
+      / /.nav-collapse.collapse
+    / /.nav-inner
+  / /.navbar
+/ /.container

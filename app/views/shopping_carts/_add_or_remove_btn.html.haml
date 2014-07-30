@@ -1,0 +1,4 @@
+- if !session['ids'] || !session['ids'].include?(id) 
+  =render partial: 'shopping_carts/add_btn', locals: {id: id }
+- else
+  =render partial: 'shopping_carts/remove_btn', locals: {id: id}

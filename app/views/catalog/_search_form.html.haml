@@ -1,0 +1,21 @@
+- q = params[:controller] == 'dashboard' ? nil : params[:q]
+= form_tag catalog_index_path, :method => :get, :id => "search-form-header" , :class => "navbar-form pull-right", role: "search" do
+  -# If this has been rendered as a scoped search pass the
+  -# pid of the scoping collection for use building a limited query
+  - if defined? scope
+    = hidden_field_tag "scope", "#{scope}"
+
+  -# If this has been rendered as a scoped search off a Community level
+  -# smart collection *also* pass the sort of special content object
+  -# being sought after
+  - if defined? smart_search
+    = hidden_field_tag "smart_search", "#{smart_search}"
+
+  = search_as_hidden_fields(:omit_keys => [:q, :search_field, :qt, :page]).html_safe
+  %label.sr-only(for="searchFieldHeader")
+    = t('drs.search.form.q.label')
+  = text_field_tag :q, q, :class => "q span3", :id => "searchFieldHeader", :placeholder => (defined? scope) ? t('drs.search.form.q.scoped_placeholder') : t('drs.search.form.q.placeholder')
+  - if !(defined? scope)
+    %button#search-submit-header.btn.btn-info{:type => "submit"}
+      %span.icon-search( aria-hidden="true")
+      Search

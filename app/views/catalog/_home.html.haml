@@ -1,0 +1,59 @@
+.hero-unit
+  %h1
+    =render partial: "shared/icon", locals: {class_string: t('drs.product_icon') }
+    #{t('drs.product_name.short')}
+    %small
+      #{t('drs.product_name.full')}
+  %p.lead
+    = t ('drs.homepage.description.short').html_safe
+  %p
+    = t('drs.homepage.description.long').html_safe
+    %a.btn.btn-clear.btn-mini.pull-right{:href => "/terms/"} Terms of service
+%section.row
+  .span3.featured-content
+    %h3 Featured Content
+
+    %a.btn.btn-clear.btn-block(href='catalog?f[drs_category_ssim][]=#{t('drs.significant.theses.name')}'){data: {toggle: "tooltip"}, title: t('drs.significant.theses.description') }
+      =render partial: 'shared/icon', locals: { class_string: t('drs.significant.theses.icon') }
+      #{ t('drs.significant.theses.name') }
+
+    %a.btn.btn-clear.btn-block(href='catalog?f[drs_category_ssim][]=#{t('drs.significant.research.name')}'){data: {toggle: "tooltip"}, title: t('drs.significant.research.description') }
+      =render partial: 'shared/icon', locals: { class_string: t('drs.significant.research.icon') }
+      #{ t('drs.significant.research.name') }
+
+    %a.btn.btn-clear.btn-block(href='catalog?f[drs_category_ssim][]=#{t('drs.significant.presentations.name')}'){data: {toggle: "tooltip"}, title: t('drs.significant.presentations.description')}
+      =render partial: 'shared/icon', locals: { class_string: t('drs.significant.presentations.icon') }
+      #{ t('drs.significant.presentations.name') }
+
+    %a.btn.btn-clear.btn-block(href='catalog?f[drs_category_ssim][]=#{t('drs.significant.learning.name')}'){data: {toggle: "tooltip"}, title: t('drs.significant.learning.description') }
+      =render partial: 'shared/icon', locals: { class_string: t('drs.significant.learning.icon') }
+      #{ t('drs.significant.learning.name') }
+
+    %a.btn.btn-clear.btn-block(href='catalog?f[drs_category_ssim][]=#{t('drs.significant.datasets.name')}'){data: {toggle: "tooltip"}, title: t('drs.significant.datasets.description') }
+      =render partial: 'shared/icon', locals: { class_string: t('drs.significant.datasets.icon') }
+      #{ t('drs.significant.datasets.name') }
+
+    %a.btn.btn-clear.btn-block(href=communities_path){data: {toggle: "tooltip"}, title: t('drs.significant.communities.description') }
+      =render partial: 'shared/icon', locals: { class_string: t('drs.significant.communities.icon') }
+      #{ t('drs.significant.communities.name').capitalize }
+
+    -# Need to find a canned query for this
+    %a.btn.btn-clear.btn-block(href='catalog?f[active_fedora_model_ssi][]=Employee'){data: {toggle: "tooltip"}, title: t('drs.significant.employees.description') }
+      =render partial: 'shared/icon', locals: { class_string: t('drs.significant.employees.icon') }
+      #{ t('drs.significant.employees.name').capitalize }
+  .span9
+    %h3 Recently Added Items
+    - if @recent_documents.length > 0
+      %section{class: ["drs-items-grid", "drs-items", "front-page-dropdown"] }
+        - @recent_documents.each do |f|
+          - @thumbs = f.thumbnail_list
+          =render partial: "shared/drs_item/drs_item", locals: { item: f }
+    - else
+      .alert.alert-info
+        %button.close{"data-dismiss" => "alert", type: "button", "aria-hidden" => true }
+          &times;
+        %strong
+          No recent documents found.
+        Please check back soon.
+
+

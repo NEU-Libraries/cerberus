@@ -1,0 +1,52 @@
+- facet_list ||= facet_field_names
+
+- content_for :local_js do
+  \// setting a fixed height so that the dialog does not hop around when you get to the last small page
+  \//$.ui.dialog.prototype.options["height"]=window.innerHeight  *0.75
+
+- if !has_search_parameters? && (params[:action] == 'index')
+  - content_for :page_header do
+    = render 'home'
+- else
+  - # Better search results here
+  - html_constraints = render_constraints( params )
+  - safe_constraints = strip_tags( html_constraints.sub( "</span>" , ""  ) )
+  - @page_title = @search_type || "Search: '#{safe_constraints}'"
+
+  -content_for :page_header do
+    %h1.page-header
+      %i.icon-search
+      = @search_type || "Search Results"
+      %small
+        = html_constraints
+  - if current_user
+    - drs_items_class = current_user.view_pref == "list" ? "span9" : "span12"
+    - sidebar_class = current_user.view_pref == "list" ? "span3" : "span12"
+    - pane_small_class = current_user.view_pref == "list" ? "" : "span3"
+    - pane_large_class = current_user.view_pref == "list" ? "" : "span6"
+  - else
+    - sidebar_class = "span3"
+    - drs_items_class = "span9"
+  %main.row( role="main" )
+    %aside.drs-sidebar{ class: sidebar_class }
+      .pane.results-view{ class: pane_small_class }
+        %h4.sr-only View layout preferences
+        = render partial: 'shared/sets/sets_sidebar'
+      .pane.facets{ class: pane_small_class }
+        / = render :partial => 'facet_selected'
+        = render :partial=>'facets', locals: { facet_list: facet_list }
+      .pane.pagination-info{ class: pane_large_class }
+        / %h4
+        /   Pagination
+        / %p
+        /   = render_pagination_info @response, :entry_name=>'item'
+        = render 'sort_and_per_page'
+
+    %section{ class: drs_items_class }
+      -# Main content
+      = render :partial => 'did_you_mean'
+      -# Render the results in the main section of the page.
+      = render 'results_pagination'
+      = render :partial => 'document_list'
+      = render 'results_pagination'
+

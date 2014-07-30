@@ -1,0 +1,28 @@
+- if session[:slider_max].blank?
+  .row-fluid
+    .span12
+      %span.alert= I18n.t("drs.provide_metadata_page.image_slider_error")
+- else
+  .row-fluid
+    .span12
+      %legend Image Derivatives
+  .image_metadata.row-fluid{style: "margin-bottom: 10px;"}
+    .span3
+      = f.label :description, "Select the sizes required"
+      %small
+        The master image's longest edge is #{session[:slider_max]} pixels
+    .span3
+      = f.label :small_image_value, "Small Image", style: "display: inline;"
+      = check_box_tag 'small_image_checkbox', 'yes', false, class: "image-checkbox"
+      %input.slider.small{:id => "small_slider", "data-slider-enabled" => "false", "data-slider-tooltip" => "hide", "data-slider-min" => "0", "data-slider-max" => session[:slider_max], "data-slider-step" => "1", title: "Small Image", type: "input"}
+      = text_field_tag 'small_image_size', '0', class: "inline-block", disabled: true
+    .span3
+      = f.label :medium_image_value, "Medium Image", style: "display: inline;"
+      = check_box_tag 'medium_image_checkbox', 'yes', false, class: "image-checkbox"
+      %input.slider.medium{:id => "medium_slider", "data-slider-enabled" => "false", "data-slider-tooltip" => "hide", "data-slider-min" => "0", "data-slider-max" => session[:slider_max], "data-slider-step" => "1", title: "Medium Image", type: "input"}
+      = text_field_tag 'medium_image_size', '0', class: "inline-block", disabled: true
+    .span3
+      = f.label :large_image_value, "Large Image", style: "display: inline;"
+      = check_box_tag 'large_image_checkbox', 'yes', false, class: "image-checkbox"
+      %input.slider.large{:id => "large_slider", "data-slider-enabled" => "false", "data-slider-tooltip" => "hide", "data-slider-min" => "0", "data-slider-max" => session[:slider_max], "data-slider-step" => "1", title: "Large Image", type: "input"}
+      = text_field_tag 'large_image_size', '0', class: "inline-block", disabled: true

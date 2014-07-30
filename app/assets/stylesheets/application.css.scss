@@ -1,0 +1,197 @@
+/*
+ * This is a manifest file that'll be compiled into application.css, which will include all the files
+ * listed below.
+ *
+ * Any CSS and SCSS file within this directory, lib/assets/stylesheets, vendor/assets/stylesheets,
+ * or vendor/assets/stylesheets of plugins, if any, can be referenced here using a relative path.
+ *
+ * You're free to add application-wide styles to this file and they'll appear at the top of the
+ * compiled file, but it's generally better to create a new file per style scope.
+ *
+ *= require_self
+ *  Sufia gem stylesheets imported here.
+ *= require bootstrap-select/bootstrap-select.min.css
+ *= require fugue-sprite/fugue-sprite.css
+ *= require bootstrap-slider
+ *
+ */
+
+
+
+@import "compass";
+@import "scut";
+@import "libraries/compass_variables";
+
+@import "vendor/flatly/flatly-variables";
+@import "libraries/drs_bootstrap_variables";
+
+@import "vendor/bootstrap/mixins";
+@import "libraries/mixins";
+
+@import "../../../vendor/assets/bower_components/mrmrs-colors/sass/variables";
+@import "../../../vendor/assets/bower_components/mrmrs-colors/sass/skins";
+
+
+/////////////
+/////////////
+
+/*!
+ * Bootstrap v2.3.2
+ *
+ * Copyright 2012 Twitter, Inc
+ * Licensed under the Apache License v2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Designed and built with all the love in the world @twitter by @mdo and @fat.
+ */
+
+// Core variables and mixins
+//@import "vendor/bootstrap/variables"; // Modify this for custom colors, font-sizes, etc
+@import "vendor/bootstrap/mixins";
+
+// CSS Reset
+@import "vendor/bootstrap/reset";
+
+// Grid system and page structure
+@import "vendor/bootstrap/scaffolding";
+@import "vendor/bootstrap/grid";
+@import "vendor/bootstrap/layouts";
+
+// Base CSS
+@import "vendor/bootstrap/type";
+@import "vendor/bootstrap/code";
+@import "vendor/bootstrap/forms";
+@import "vendor/bootstrap/tables";
+
+// Components: common
+//@import "vendor/bootstrap/sprites";
+@import "vendor/bootstrap/dropdowns";
+@import "vendor/bootstrap/wells";
+@import "vendor/bootstrap/component-animations";
+@import "vendor/bootstrap/close";
+
+// Components: Buttons & Alerts
+@import "vendor/bootstrap/buttons";
+@import "vendor/bootstrap/button-groups";
+@import "vendor/bootstrap/alerts"; // Note: alerts share common CSS with buttons and thus have styles in buttons
+
+// Components: Nav
+@import "vendor/bootstrap/navs";
+@import "vendor/bootstrap/navbar";
+@import "vendor/bootstrap/breadcrumbs";
+@import "vendor/bootstrap/pagination";
+@import "vendor/bootstrap/pager";
+
+// Components: Popovers
+@import "vendor/bootstrap/modals";
+@import "vendor/bootstrap/tooltip";
+@import "vendor/bootstrap/popovers";
+
+// Components: Misc
+@import "vendor/bootstrap/thumbnails";
+@import "vendor/bootstrap/media";
+@import "vendor/bootstrap/labels-badges";
+@import "vendor/bootstrap/progress-bars";
+@import "vendor/bootstrap/accordion";
+@import "vendor/bootstrap/carousel";
+@import "vendor/bootstrap/hero-unit";
+
+// Utility classes
+@import "vendor/bootstrap/utilities"; // Has to be last to override when necessary
+
+/////////////
+/////////////
+/////////////   End Bootstrap
+/////////////
+/////////////
+
+
+// Responsive
+// For phone and tablet devices
+// -------------------------------------------------------------
+
+
+// REPEAT VARIABLES & MIXINS
+// -------------------------
+// Required since we compile the responsive stuff separately
+
+//@import "bootstrap/variables"; // Modify this for custom colors, font-sizes, etc
+//@import "bootstrap/mixins";
+
+
+// RESPONSIVE CLASSES
+// ------------------
+
+@import "vendor/bootstrap/responsive-utilities";
+
+
+// MEDIA QUERIES
+// ------------------
+
+// // Large desktops
+// @import "vendor/bootstrap/responsive-1200px-min";
+
+@import "layout/responsive-1500px-min";
+
+@import "layout/responsive-1200px-1499px";
+
+// Tablets to regular desktops
+@import "vendor/bootstrap/responsive-768px-979px";
+
+// Phones to portrait tablets and narrow desktops
+@import "vendor/bootstrap/responsive-767px-max";
+
+
+// RESPONSIVE NAVBAR
+// ------------------
+
+// From 979px and below, show a button to toggle navbar contents
+@import "vendor/bootstrap/responsive-navbar";
+
+
+
+/////////////
+/////////////
+/////////////   End Bootstrap-Responsive
+/////////////
+/////////////
+
+@import "vendor/flatly/flatly";
+@import 'vendor/font-awesome/font-awesome';
+@import 'vendor/bootstrap-datepicker/custom-datepicker';
+
+@import 'blacklight/blacklight';
+
+// Still in progress but would use a version of the grid mixins to provide
+// similar heights for their grid span so span4 height4 on an element would
+// it a responsive same height object.
+// Still needs work though
+@import 'layout/height';
+
+
+// Components
+// ----------
+
+@import "components/typography";
+@import "components/links";
+@import "components/drs-buttons";
+@import "components/nu-lockup";
+@import "components/colors";
+@import "components/nu-footer";
+@import "components/nu-media";
+@import "components/drs-forms";
+@import "components/nu-navbar";
+@import "components/drs-breadcrumbs";
+@import "components/drs-thumbnails";
+
+@import "components/drs-items-views";
+@import "components/drs-item";
+@import "components/drs_facets";
+@import "components/drs-alerts";
+@import "components/drs-pagination";
+
+@import 'sections/masthead';
+@import 'sections/drs_base';
+@import 'sections/set_well';
+
+
