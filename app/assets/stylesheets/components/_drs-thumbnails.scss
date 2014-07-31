@@ -50,26 +50,20 @@
   max-width: 100%;
   height: auto;
 }
-.thumbnail-s1 img,
-.thumbnail-s1-2x img{
+.thumbnail-s1 img{
   width: 85px;
   // height: 85px;
 }
 
 .thumbnail-s2 img,
-.thumbnail-s2-2x img{
+.thumbnail-s3 img{
   width: 170px;
   // height: 170px;
 }
 
 .thumbnail-s4 img,
-.thumbnail-s4-2x img{
-  width: 340px;
-}
-
-.thumbnail-s10 img,
-.thumbnail-s10-2x img{
-  width: 970px;
+.thumbnail-s5 img{
+  width: 500px;
 }
 
 .drs-items-list .drs-item [class*="thumbnail-"] img{
