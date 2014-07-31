@@ -254,9 +254,11 @@
   }
 }
 
-
 .drs-item .label{
   background-color: rgba(189, 195, 199, 0.6);
   font-size: 0.8em;
   padding: 2px 4px;
+  &.embargoed{
+    background-color: #ff4136;
+  }
 }
