@@ -48,7 +48,7 @@
     - if item.embargo_date_in_effect?
       %dt
         %dl{"style" => "display:inline;"}
-          %span.embargo-alert= "Contents available #{item.embargo_release_date(formatted: true)}"
+          %span.embargo-alert.pull-right= "Contents available #{item.embargo_release_date(formatted: true)}"
     -# Ensure that we only show download buttons if item isn't embargoed
     -# Indicate item is embargoed otherwise.
     - if !item.under_embargo?(current_user)
