@@ -24,10 +24,6 @@ module Drs
       belongs_to :core_record, property: :is_part_of, class_name: 'NuCoreFile'
     end
 
-    def self.create_master_content_object(core_file, file, datastream_id, user)
-      Drs::NuFile::MasterCreator.create(core_file, file, datastream_id, user)
-    end
-
     # Provides a string for labeling the UI
     def type_label
       self.class.name
