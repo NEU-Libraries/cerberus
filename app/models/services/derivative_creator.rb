@@ -36,8 +36,8 @@ class DerivativeCreator
       create_scaled_progressive_jpeg(thumbnail, master, {height: 85, width: 85}, 'thumbnail_1', true)
       create_scaled_progressive_jpeg(thumbnail, master, {height: 170, width: 170}, 'thumbnail_2', true)
       create_scaled_progressive_jpeg(thumbnail, master, {height: 340, width: 340}, 'thumbnail_3', true)
-      create_scaled_progressive_jpeg(thumbnail, master, {width: 500}, 'thumbnail_4', true)
-      create_scaled_progressive_jpeg(thumbnail, master, {width: 1000}, 'thumbnail_5', true)
+      create_scaled_progressive_jpeg(thumbnail, master, {width: 480}, 'thumbnail_4', true)
+      create_scaled_progressive_jpeg(thumbnail, master, {width: 960}, 'thumbnail_5', true)
     end
 
     def create_thumbnail_from_pdf(pdf)
@@ -49,8 +49,8 @@ class DerivativeCreator
       create_scaled_progressive_jpeg(thumbnail, pdf, {height: 85, width: 85}, 'thumbnail_1')
       create_scaled_progressive_jpeg(thumbnail, pdf, {height: 170, width: 170}, 'thumbnail_2')
       create_scaled_progressive_jpeg(thumbnail, pdf, {height: 340, width: 340}, 'thumbnail_3')
-      create_scaled_progressive_jpeg(thumbnail, pdf, {width: 500}, 'thumbnail_4')
-      create_scaled_progressive_jpeg(thumbnail, pdf, {width: 1000}, 'thumbnail_5')
+      create_scaled_progressive_jpeg(thumbnail, pdf, {width: 480}, 'thumbnail_4')
+      create_scaled_progressive_jpeg(thumbnail, pdf, {width: 960}, 'thumbnail_5')
     end
 
     # Creates a thumbnail with as many datastreams as possible.
@@ -61,8 +61,8 @@ class DerivativeCreator
       create_scaled_progressive_jpeg(thumbnail, master, {height: 85, width: 85}, 'thumbnail_1')
       create_scaled_progressive_jpeg(thumbnail, master, {height: 170, width: 170}, 'thumbnail_2')
       create_scaled_progressive_jpeg(thumbnail, master, {height: 340, width: 340}, 'thumbnail_3')
-      create_scaled_progressive_jpeg(thumbnail, master, {width: 500}, 'thumbnail_4')
-      create_scaled_progressive_jpeg(thumbnail, master, {width: 1000}, 'thumbnail_5')
+      create_scaled_progressive_jpeg(thumbnail, master, {width: 480}, 'thumbnail_4')
+      create_scaled_progressive_jpeg(thumbnail, master, {width: 960}, 'thumbnail_5')
     end
 
     # Create or update a PDF file.
