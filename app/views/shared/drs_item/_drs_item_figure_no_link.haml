@@ -7,6 +7,7 @@
 %figure.pull-left
 
   - if item.klass == "NuCoreFile"
+
     =render partial: 'shared/thumbnails/thumbnail_picture', locals: { thumbs: item.thumbnail_list }
 
   - elsif ( item.klass == "NuCollection" or item.klass == "Community"  ) and  item.thumbnail_list.length > 0
