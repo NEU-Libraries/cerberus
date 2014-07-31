@@ -103,20 +103,18 @@ class DerivativeCreator
       if size[:height] && size[:width]
         scaled_img = img.resize_to_fit(size[:height], size[:width])
         fill = Magick::Image.new(size[:height], size[:width])
+        fill = fill.matte_floodfill(1, 1)
+        end_img = fill.composite!(scaled_img, Magick::CenterGravity, Magick::OverCompositeOp)
       elsif size[:width]
-        scaled_img = img.resize_to_fit(size[:width])
-        fill = Magick::Image.new(size[:width], size[:width])
+        end_img = img.resize_to_fit(size[:width])
       else
         raise "Size must be hash containing :height/:width or :width keys"
       end
 
-      fill = fill.matte_floodfill(1, 1)
+      end_img.format = "JPEG"
+      end_img.interlace = Magick::PlaneInterlace
 
-      fill.composite!(scaled_img, Magick::CenterGravity, Magick::OverCompositeOp)
-      fill.format = "JPEG"
-      fill.interlace = Magick::PlaneInterlace
-
-      thumb.add_file(fill.to_blob, dsid, "#{master.content.label.split('.').first}.jpeg")
+      thumb.add_file(end_img.to_blob, dsid, "#{master.content.label.split('.').first}.jpeg")
       thumb.save!
 
       self.thumbnail_list << "/downloads/#{self.core.thumbnail.pid}?datastream_id=#{dsid}"
