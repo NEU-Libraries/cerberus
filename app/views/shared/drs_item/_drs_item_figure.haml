@@ -3,12 +3,8 @@
   %figure
 
     - if item.klass == "NuCoreFile"
-      - if defined? dynamic_picture #pass in a local variable if we want to have the images be able to go all the way to the 10 width size on active state.
-        = render partial: 'shared/thumbnails/dynamic_picture', locals: { thumbs: item.thumbnail_list }
 
-      -elsif item.thumbnail_list.length > 0
-
-        =render partial: 'shared/thumbnails/thumbnail_picture', locals: { thumbs: item.thumbnail_list }
+      =render partial: 'shared/thumbnails/thumbnail_picture', locals: { thumbs: item.thumbnail_list }
 
       -else # default behavior
 
