@@ -58,6 +58,9 @@
 .thumbnail-s2 img,
 .thumbnail-s3 img{
   width: 170px;
+  @media (max-width: 1199px) and (min-width: 980px){
+    width: 135px;
+  }
   // height: 170px;
 }
 
@@ -80,7 +83,7 @@
 }
 
 .drs-items-grid .drs-item figure [class*="icon-"]{
-  @media (min-width: 981px){
+  @media (min-width: 980px){
     width: 135px;
     height: 135px;
     font-size: 60px;

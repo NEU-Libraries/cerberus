@@ -36,17 +36,10 @@
     [class^="icon-"]{
       display: inline-block;
       text-align: center;
-      // width: 85px;
-      // height: 85px;
-      width: 68px;
-      height: 68px;
-      font-size: 25px;
+      width: 85px;
+      height: 85px;
+      font-size: 30px;
       line-height: 2;
-      // @media (min-width: 900px) {
-      //   width: 170px;
-      //   height: 170px;
-      //   font-size: 80px;
-      // }
     }
   }
 
@@ -172,9 +165,15 @@
         figure{
           display: block;
           // margin: 0 auto 5px auto;
+          @media (min-width: 1500px){
+            padding-top: 10%;
+          }
         }
       }
 
+    }
+    .drs-item-details{
+      margin-top: 15px;
     }
     .drs-item-add-details dl{
       @include sr-only;
@@ -215,7 +214,7 @@
   }
   .drs-item-title
   , .drs-item-creator{
-    margin: 4px 0 6px 0;
+    // margin: 4px 0 6px 0;
   }
   .drs-item-creators{
     @media (max-width: $breakpoint-xl){
