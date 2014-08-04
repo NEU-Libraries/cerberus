@@ -164,6 +164,8 @@ en:
         name: Collection
       NuCoreFile:
         name: File
+      Compilation:
+        name: Set
     full_metadata:
       processing note: "The metadata details and access controls you specified are being processed in the background. Your file will be marked as 'Private' until this brief process is complete."
     # full_display_labels:
