@@ -32,7 +32,7 @@ class ContentCreationJob
       end
 
       # If the file is of type with text, see if we can get solr to do a full text index
-      if content_object.instance_of.in?([TextFile, MswordFile, PdfFile])
+      if core_record.canonical_class.in?(['TextFile', 'MswordFile', 'PdfFile'])
         content_object.extract_content
       end
 
