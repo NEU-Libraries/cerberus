@@ -91,6 +91,8 @@ class NuCoreFile < ActiveFedora::Base
 
   def to_solr(solr_doc = Hash.new())
 
+    solr_doc['all_text_timv'] = full_text.content
+
     (0..self.mods.personal_name.length).each do |i|
       fn = self.mods.personal_name(i).name_part_given
       ln = self.mods.personal_name(i).name_part_family
