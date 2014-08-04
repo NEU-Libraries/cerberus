@@ -31,6 +31,11 @@ class ContentCreationJob
         InlineThumbnailCreator.new(content_object, poster_path, "poster").create_thumbnail_and_save
       end
 
+      # If the file is of type with text, see if we can get solr to do a full text index
+      if content_object.instance_of.in?([TextFile, MswordFile, PdfFile])
+        content_object.extract_content
+      end
+
       # Zip files that need zippin'.  Just drop in other file types.
       if content_object.instance_of? ZipFile
         zip_content(content_object)
