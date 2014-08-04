@@ -292,11 +292,6 @@ class NuCoreFilesController < ApplicationController
         session[:slider_max] = SliderMaxCalculator.compute(tmp_path)
       end
 
-      # If the file is of type with text, see if we can get solr to do a full text index
-      if nu_core_file.canonical_class.in?(['TextFile', 'MswordFile', 'PdfFile'])
-        nu_core_file.extract_content
-      end
-
       collection = !collection_id.blank? ? NuCollection.find(collection_id) : nil
       nu_core_file.set_parent(collection, current_user) if collection
 

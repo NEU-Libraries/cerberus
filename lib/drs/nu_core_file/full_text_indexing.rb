@@ -23,11 +23,11 @@ module Drs
         logger.error("Error extracting content from #{self.pid}: #{e.inspect}")
       end
 
-      def to_solr(solr_doc = Hash.new())
-        solr_doc['all_text_timv'] = full_text.content
-        super(solr_doc)
-        return solr_doc
-      end
+      # def to_solr(solr_doc = Hash.new())
+      #   solr_doc['all_text_timv'] = full_text.content
+      #   super(solr_doc)
+      #   return solr_doc
+      # end
 
     end
   end
