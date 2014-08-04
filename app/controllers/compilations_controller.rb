@@ -116,7 +116,7 @@ class CompilationsController < ApplicationController
 
     a = []
     @compilation.entries.each do |x|
-      a << fetch_solr_document(id: x)
+      a << fetch_solr_document(id: x.pid)
     end
 
     content = []
