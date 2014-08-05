@@ -37,6 +37,12 @@
               Edit
       =render partial: 'shared/sets/delete_item_modal', locals: { item: @set }
 
+- if render_constraints(params) != ""
+  %h1.page-header
+    %i.icon-search
+    %small
+      = render_constraints(params)
+
 - if current_user
   - drs_items_class = current_user.view_pref == "list" ? "span9" : "span12"
   - sidebar_class = current_user.view_pref == "list" ? "span3" : "span12"
