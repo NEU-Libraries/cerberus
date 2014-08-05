@@ -32,6 +32,9 @@
     = f.submit class: ['btn', 'btn-primary'], value: 'Submit'
     - if params[:action] == "edit"
       / Only specifying collection here, because community is behind /admin and has it's own partial
-      = link_to("Cancel", nu_collection_path(@set), class: ['btn', 'btn-warning'], confirm: "About to cancel edit, this will not apply changes to the collection.")
+      %a{ href: "#cancelEditModal", :class => ["btn", "btn-warning"], data: { toggle: "modal" } }
+        Cancel
     -else
       = button_tag "Reset", class: 'btn', type: :reset
+
+= render partial: 'shared/cancel_edit_modal', locals: { item: @set }
