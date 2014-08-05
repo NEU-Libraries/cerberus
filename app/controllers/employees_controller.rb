@@ -24,6 +24,21 @@ class EmployeesController < ApplicationController
   end
 
   def show
+    @system_collections = @employee.user_smart_collections
+    @user_collections   = @employee.user_personal_collections
+
+    read_proc = Proc.new do |r|
+      current_user ? current_user.can?(:read,r) : r.public?
+    end
+
+    @system_collections.keep_if do |x|
+      read_proc.call(x)
+    end
+
+    @user_collections.keep_if do |x|
+      read_proc.call(x)
+    end
+
     if user_examining_self?
       return redirect_to personal_graph_path
     end
@@ -36,6 +51,7 @@ class EmployeesController < ApplicationController
       return redirect_to personal_files_path
     end
 
+    self.solr_search_params_logic += [:add_access_controls_to_solr_params]
     self.solr_search_params_logic += [:exclude_unwanted_models]
     self.solr_search_params_logic += [:find_employees_files]
 
