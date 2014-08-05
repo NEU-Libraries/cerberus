@@ -8,3 +8,7 @@
   .span8.offset2
     = render partial: "download_list"
     = render partial: "actions"
+
+- if @items.any?
+  = render partial: 'remove_from_cart_modal', locals: { item: @items.first }
+  = render partial: 'empty_cart_modal'
