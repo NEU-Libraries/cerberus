@@ -39,8 +39,15 @@ module DrsHelper
     if item.is_a? Array
       render_array_facet_value(facet_solr_field, item, options)
     end
-    path = url_for(add_facet_params_and_redirect(facet_solr_field, item.value).merge(:only_path=>true))
-    (link_to_unless(options[:suppress_link], facet_display_value(facet_solr_field, item), path, :class=>"facet_select") + " " + render_facet_count(item.hits)).html_safe
+
+    # Better path, includes the id
+    path = params.merge(add_facet_params(facet_solr_field, item.value))
+
+    if params[:action] == "facet"
+      path = path.merge(Rails.application.routes.recognize_path(request.referrer))
+    end
+
+    return (link_to_unless(options[:suppress_link], facet_display_value(facet_solr_field, item), path, :class=>"facet_select") + " " + render_facet_count(item.hits)).html_safe
   end
 
 end

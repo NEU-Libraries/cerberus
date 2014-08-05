@@ -3,10 +3,8 @@
   %figure
 
     - if item.klass == "NuCoreFile"
-      - if defined? dynamic_picture #pass in a local variable if we want to have the images be able to go all the way to the 10 width size on active state.
-        = render partial: 'shared/thumbnails/dynamic_picture', locals: { thumbs: item.thumbnail_list }
 
-      -elsif item.thumbnail_list.length > 0
+      -if item.thumbnail_list.length > 0
 
         =render partial: 'shared/thumbnails/thumbnail_picture', locals: { thumbs: item.thumbnail_list }
 
@@ -36,8 +34,12 @@
       = render partial: 'shared/icon', locals: { class_string: 'icon-file' }
     -if item.type_label
       %figcaption
-        %span.label.small
-          - if item.type_label == "Master Image"
-            = "Image"
-          - else
-            = item.type_label
+        - if item.klass == "NuCoreFile" && item.embargo_date_in_effect?
+          %span.label.small.embargoed
+            = "Embargoed"
+        - else
+          %span.label.small
+            - if item.type_label == "Master Image"
+              = "Image"
+            - else
+              = item.type_label

@@ -35,24 +35,22 @@ class DerivativeCreator
 
       create_scaled_progressive_jpeg(thumbnail, master, {height: 85, width: 85}, 'thumbnail_1', true)
       create_scaled_progressive_jpeg(thumbnail, master, {height: 170, width: 170}, 'thumbnail_2', true)
-      create_scaled_progressive_jpeg(thumbnail, master, {height: 340, width: 340}, 'thumbnail_2_2x', true)
-      create_scaled_progressive_jpeg(thumbnail, master, {width: 340}, 'thumbnail_4', true)
-      create_scaled_progressive_jpeg(thumbnail, master, {width: 680}, 'thumbnail_4_2x', true)
-      create_scaled_progressive_jpeg(thumbnail, master, {width: 970}, 'thumbnail_10', true)
-      create_scaled_progressive_jpeg(thumbnail, master, {width: 1940}, 'thumbnail_10_2x', true)
+      create_scaled_progressive_jpeg(thumbnail, master, {height: 340, width: 340}, 'thumbnail_3', true)
+      create_scaled_progressive_jpeg(thumbnail, master, {width: 500}, 'thumbnail_4', true)
+      create_scaled_progressive_jpeg(thumbnail, master, {width: 1000}, 'thumbnail_5', true)
     end
 
     def create_thumbnail_from_pdf(pdf)
       thumbnail = find_or_create_thumbnail
 
       # Modify the copy of the object we're holding /without/ persisting that change.
-      pdf.transform_datastream(:content, content: { datastream: 'content', size: '680x680>' })
+      pdf.transform_datastream(:content, content: { datastream: 'content', size: '1000x1000>' })
 
       create_scaled_progressive_jpeg(thumbnail, pdf, {height: 85, width: 85}, 'thumbnail_1')
       create_scaled_progressive_jpeg(thumbnail, pdf, {height: 170, width: 170}, 'thumbnail_2')
-      create_scaled_progressive_jpeg(thumbnail, pdf, {height: 340, width: 340}, 'thumbnail_2_2x')
-      create_scaled_progressive_jpeg(thumbnail, pdf, {width: 340}, 'thumbnail_4')
-      create_scaled_progressive_jpeg(thumbnail, pdf, {width: 680}, 'thumbnail_4_2x')
+      create_scaled_progressive_jpeg(thumbnail, pdf, {height: 340, width: 340}, 'thumbnail_3')
+      create_scaled_progressive_jpeg(thumbnail, pdf, {width: 500}, 'thumbnail_4')
+      create_scaled_progressive_jpeg(thumbnail, pdf, {width: 1000}, 'thumbnail_5')
     end
 
     # Creates a thumbnail with as many datastreams as possible.
@@ -62,11 +60,9 @@ class DerivativeCreator
 
       create_scaled_progressive_jpeg(thumbnail, master, {height: 85, width: 85}, 'thumbnail_1')
       create_scaled_progressive_jpeg(thumbnail, master, {height: 170, width: 170}, 'thumbnail_2')
-      create_scaled_progressive_jpeg(thumbnail, master, {height: 340, width: 340}, 'thumbnail_2_2x')
-      create_scaled_progressive_jpeg(thumbnail, master, {width: 340}, 'thumbnail_4')
-      create_scaled_progressive_jpeg(thumbnail, master, {width: 680}, 'thumbnail_4_2x')
-      create_scaled_progressive_jpeg(thumbnail, master, {width: 970}, 'thumbnail_10')
-      create_scaled_progressive_jpeg(thumbnail, master, {width: 1940}, 'thumbnail_10_2x')
+      create_scaled_progressive_jpeg(thumbnail, master, {height: 340, width: 340}, 'thumbnail_3')
+      create_scaled_progressive_jpeg(thumbnail, master, {width: 500}, 'thumbnail_4')
+      create_scaled_progressive_jpeg(thumbnail, master, {width: 1000}, 'thumbnail_5')
     end
 
     # Create or update a PDF file.
@@ -107,20 +103,18 @@ class DerivativeCreator
       if size[:height] && size[:width]
         scaled_img = img.resize_to_fit(size[:height], size[:width])
         fill = Magick::Image.new(size[:height], size[:width])
+        fill = fill.matte_floodfill(1, 1)
+        end_img = fill.composite!(scaled_img, Magick::CenterGravity, Magick::OverCompositeOp)
       elsif size[:width]
-        scaled_img = img.resize_to_fit(size[:width])
-        fill = Magick::Image.new(size[:width], size[:width])
+        end_img = img.resize_to_fit(size[:width])
       else
         raise "Size must be hash containing :height/:width or :width keys"
       end
 
-      fill = fill.matte_floodfill(1, 1)
+      end_img.format = "JPEG"
+      end_img.interlace = Magick::PlaneInterlace
 
-      fill.composite!(scaled_img, Magick::CenterGravity, Magick::OverCompositeOp)
-      fill.format = "JPEG"
-      fill.interlace = Magick::PlaneInterlace
-
-      thumb.add_file(fill.to_blob, dsid, "#{master.content.label.split('.').first}.jpeg")
+      thumb.add_file(end_img.to_blob, dsid, "#{master.content.label.split('.').first}.jpeg")
       thumb.save!
 
       self.thumbnail_list << "/downloads/#{self.core.thumbnail.pid}?datastream_id=#{dsid}"
