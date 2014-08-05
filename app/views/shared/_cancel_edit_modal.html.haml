@@ -1,0 +1,10 @@
+#cancelEditModal.modal.hide.fade{"aria-hidden" => "true", "aria-labelledby" => "cancelEditModalLabel", role: "dialog", taxindex: "-1"}
+  .modal-header
+    %button.close{"aria-hidden" => "true", "data-dismiss" => "modal", type: "button"} x
+    %h3#cancelEditModalLabel
+      Confirm cancelling edit on #{item.title}
+  .modal-body
+    %p= "Are you sure you want to cancel your changes?"
+  .modal-footer
+    %button.btn{"aria-hidden" => "true", "data-dismiss" => "modal"} Close
+    =link_to("Cancel Changes", polymorphic_path(item), class: 'btn btn-danger')
