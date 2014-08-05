@@ -1,3 +1,4 @@
 - if @items.length > 0
-  = link_to("Download", cart_download_path, class: "btn btn-success") 
-  = link_to("Destroy", shopping_cart_path, method: 'delete', confirm: 'This will clear all current items', class: "btn btn-danger") 
+  = link_to("Download", cart_download_path, class: "btn btn-success")
+  %a{ href: "#emptyCartModal", data: { toggle: "modal" }, :class => "btn btn-danger" }
+    Destroy
