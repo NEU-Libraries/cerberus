@@ -44,6 +44,7 @@ $(document).ready ->
       imageMetadataPartial()
       dateOfIssuePartial()
       titlePartial()
+      removeFromCartToggle()
       multiModalToggle()
       triggerCompilationDownload()
       triggerCartDownload()
@@ -79,6 +80,14 @@ $(document).ready ->
         if $('#display_download_link').is(':empty')
           x.download_interval_id = setInterval(x.addDownloadLink(), 3000)
 
+
+    removeFromCartToggle = ->
+      $('.cart-multi-modal').click ->
+
+        path  = $(this).data('delete-path')
+
+        $('.modal-footer a').attr("href", path)
+        return
 
     # On pages that should have multiple item deletion modals,
     # this method is called on click to modify the one such modal

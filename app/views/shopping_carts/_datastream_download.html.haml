@@ -31,5 +31,6 @@
                 = metadata.description
 
       %menu.btn-toolbar(type="toolbar")
-        = link_to("remove" , update_cart_path(delete: content.pid), title: "Remove from  #{t('drs.shoppingcarts.name')}", method: :put, data: {toggle: "tooltip"}, confirm: "Are you sure you want to remove #{content.get_content_label} from your #{t('drs.shoppingcarts.name')}", class: "btn btn-danger btn-small")
+        %a{ href: "#removeFromCartModal", title: "Remove from #{t('drs.shoppingcarts.name')}", data: { toggle: "modal", delete_path: shopping_cart_path(delete: content.pid)}, :class => ["btn", "btn-danger", "btn-small", "cart-multi-modal"] }
+          remove
 
