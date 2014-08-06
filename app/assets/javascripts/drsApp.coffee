@@ -578,16 +578,18 @@ $(document).ready ->
 
     handleDrsAdminCommunities = ->
       if $('#admin_community_autocomplete').length > 0
-        console.log "Handling drs admin communities"
         $('#admin_community_autocomplete').autocomplete
           source: communities_for_employee_autocomplete
           select: (e, ui) ->
+            e.preventDefault()
             $('#admin_community').val ui.item.value
             $(this).val ui.item.label
             return
 
-          focus: (e) ->
+          focus: (e, ui) ->
             e.preventDefault() # <--- Prevent the value from being inserted.
+            $("#admin_community").val ui.item.value
+            $("#admin_community_autocomplete").val ui.item.label
             return
 
         $('#admin_community_autocomplete').attr 'autocomplete', 'on'
@@ -608,7 +610,7 @@ $(document).ready ->
             e.preventDefault()
             $("#admin_employee").val ui.item.value
             $("#admin_employee_autocomplete").val ui.item.label
-            $("#admin_employee_name").text "Employee to be added #{ui.item.name}"
+            $("#admin_employee_name").text "Employee to be added: #{ui.item.name}"
             return
 
         $('#admin_employee_autocomplete').attr 'autocomplete', 'on'
