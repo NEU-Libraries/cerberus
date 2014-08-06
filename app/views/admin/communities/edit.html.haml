@@ -13,7 +13,6 @@
       = render partial: 'admin_community_employees', locals: { community: @community }
 
 :javascript
-  // var employees_for_autocomplete = #{Employee.all.map{|c| {'label' => c.name, 'value' => c.id, 'name' => c.name}}.to_json}
   var employees_for_autocomplete = #{Employee.all.map do |e|
       {
         'label' => e.nuid,
