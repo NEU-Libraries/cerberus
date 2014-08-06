@@ -564,13 +564,13 @@ $(document).ready ->
         $('#community_autocomplete').autocomplete
           source: communities_for_autocomplete
           select: (e, ui) ->
-            e.preventDefault() # <--- Prevent the value from being inserted.
+            e.preventDefault()
             $('#community_parent').val ui.item.value
             $(this).val ui.item.label
             return
 
           focus: (e, ui) ->
-            e.preventDefault() # <--- Prevent the value from being inserted.
+            e.preventDefault()
             return
 
         $('#community_autocomplete').attr 'autocomplete', 'on'
@@ -587,7 +587,7 @@ $(document).ready ->
             return
 
           focus: (e, ui) ->
-            e.preventDefault() # <--- Prevent the value from being inserted.
+            e.preventDefault()
             $("#admin_community").val ui.item.value
             $("#admin_community_autocomplete").val ui.item.label
             return
