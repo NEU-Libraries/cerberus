@@ -31,3 +31,11 @@ legend{
     margin-left: 10px;
   }
 }
+
+.ui-autocomplete{
+  @extend .dropdown-menu;
+}
+
+.ui-state-focus{
+  background-color: $light-gray;
+}

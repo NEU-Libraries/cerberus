@@ -564,13 +564,13 @@ $(document).ready ->
         $('#community_autocomplete').autocomplete
           source: communities_for_autocomplete
           select: (e, ui) ->
-            e.preventDefault() # <--- Prevent the value from being inserted.
+            e.preventDefault()
             $('#community_parent').val ui.item.value
             $(this).val ui.item.label
             return
 
           focus: (e, ui) ->
-            e.preventDefault() # <--- Prevent the value from being inserted.
+            e.preventDefault()
             return
 
         $('#community_autocomplete').attr 'autocomplete', 'on'
@@ -581,13 +581,15 @@ $(document).ready ->
         $('#admin_community_autocomplete').autocomplete
           source: communities_for_employee_autocomplete
           select: (e, ui) ->
-            e.preventDefault() # <--- Prevent the value from being inserted.
+            e.preventDefault()
             $('#admin_community').val ui.item.value
             $(this).val ui.item.label
             return
 
-          focus: (e) ->
-            e.preventDefault() # <--- Prevent the value from being inserted.
+          focus: (e, ui) ->
+            e.preventDefault()
+            $("#admin_community").val ui.item.value
+            $("#admin_community_autocomplete").val ui.item.label
             return
 
         $('#admin_community_autocomplete').attr 'autocomplete', 'on'
@@ -600,11 +602,15 @@ $(document).ready ->
           select: (e, ui) ->
             e.preventDefault() # <--- Prevent the value from being inserted.
             $('#admin_employee').val ui.item.value
-            $(this).val ui.item.label
+            $('#admin_employee_autocomplete').val ui.item.label
+            $('#admin_employee_name').text "Employee to be added: #{ui.item.name}"
             return
 
-          focus: (e) ->
-            e.preventDefault() # <--- Prevent the value from being inserted.
+          focus: (e, ui) ->
+            e.preventDefault()
+            $("#admin_employee").val ui.item.value
+            $("#admin_employee_autocomplete").val ui.item.label
+            $("#admin_employee_name").text "Employee to be added: #{ui.item.name}"
             return
 
         $('#admin_employee_autocomplete').attr 'autocomplete', 'on'
