@@ -71,9 +71,11 @@ class CompilationsController < ApplicationController
     save_or_bust @compilation
 
     respond_to do |format|
-      format.html { render :nothing => true }
+      format.html do
+        redirect_to compilation_path(@compilation)
+      end
       format.json { render :nothing => true }
-      format.js { render :nothing => true }
+      format.js   { render :nothing => true }
     end
   end
 
@@ -82,9 +84,11 @@ class CompilationsController < ApplicationController
     save_or_bust @compilation
 
     respond_to do |format|
-      format.html { render :nothing => true }
+      format.html do
+        redirect_to compilation_path(@compilation)
+      end
       format.json { render :nothing => true }
-      format.js { render :nothing => true }
+      format.js   { render :nothing => true }
     end
   end
 
