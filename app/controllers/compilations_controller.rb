@@ -71,9 +71,7 @@ class CompilationsController < ApplicationController
     save_or_bust @compilation
 
     respond_to do |format|
-      format.html do
-        redirect_to compilation_path(@compilation)
-      end
+      format.html { redirect_to @compilation }
       format.json { render :nothing => true }
       format.js   { render :nothing => true }
     end
@@ -84,9 +82,7 @@ class CompilationsController < ApplicationController
     save_or_bust @compilation
 
     respond_to do |format|
-      format.html do
-        redirect_to compilation_path(@compilation)
-      end
+      format.html { redirect_to @compilation }
       format.json { render :nothing => true }
       format.js   { render :nothing => true }
     end
