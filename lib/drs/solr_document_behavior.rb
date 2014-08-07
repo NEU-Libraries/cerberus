@@ -72,6 +72,11 @@ module Drs
       process_date(Array(self[Solrizer.solr_name("system_create_dtsi")]).first)
     end
 
+    def create_date_time
+      x = Array(self["system_create_dtsi"]).first
+      DateTime.parse x
+    end
+
     def creators
       Array(self[Solrizer.solr_name("creator", :facetable)])
     end
