@@ -13,7 +13,7 @@
         -if !entry.description.blank?
           %p
             =entry.description
-        %a.btn.btn-mini.btn-clear(title="Remove #{entry.title} from #{compilation.title} "){href: delete_entry_path(id: compilation.pid, entry_id: entry.pid), method: "delete",  data: { confirm: 'Are you sure?', toggle: "tooltip" } }
+        %a.btn.btn-mini.btn-clear(title="Remove #{entry.title} from #{compilation.title} "){href: delete_entry_path(id: compilation.pid, entry_id: entry.pid),  data: {method: "delete", confirm: 'Are you sure?', toggle: "tooltip" } }
           %i.icon-remove
           %span.sr-only
             Remove #{entry.title} from #{compilation.title}
