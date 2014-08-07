@@ -47,9 +47,10 @@ describe NuCoreFile do
         abandoned.save!
 
         # Note that this doesn't work very well, and that
-        # the requirement of a five hour jump is being imposed by
+        # the requirement of a one day jump is being imposed by
         # an inability to escape Timezone hell.  Can't seem to get
-        # offsets to be interpretted correctly by Timecop.
+        # offsets to be interpretted correctly by Timecop.  Also
+        # other things aren't working.
         Timecop.freeze(DateTime.now + 1) do
           expected = [SolrDocument.new(@abandoned.to_solr).pid]
           result   = NuCoreFile.abandoned_for_nuid(nuid).map { |x| x.pid }
