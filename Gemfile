@@ -79,6 +79,7 @@ group :development, :test do
   # jQuery Testing for Rails Apps
   # @link https://github.com/travisjeffery/jasmine-jquery-rails
   gem "jasmine-jquery-rails"
+  gem "timecop"
 end
 
 group :test do
