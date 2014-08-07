@@ -1,4 +1,4 @@
-%h2.page-header= "Edit #{@community.title}" 
+%h2.page-header= "Edit #{@community.title}"
 
 %ul.nav.nav-tabs
 
@@ -13,7 +13,17 @@
       = render partial: 'admin_community_employees', locals: { community: @community }
 
 :javascript
-  var employees_for_autocomplete = #{Employee.all.map{|c| {'label' => c.nuid, 'value' => c.id}}.to_json}
+  var employees_for_autocomplete = #{Employee.all.map do |e|
+      {
+        'label' => e.nuid,
+        'value' => e.id,
+        'name'  => e.name
+      }
+    end.to_json}
+
+  $('#admin_employee_autocomplete').autocomplete({
+    source: employees_for_autocomplete
+  });
 
 = form_tag admin_employee_path, :method => :put, :id => 'modify_employee', :remote => true do
   %input{:type=>"hidden", :id => "admin_employee", :name => "admin[employee]"}
@@ -22,7 +32,9 @@
     %legend Add Employee to Community
     .row-fluid
       .span8
-        = label_tag "admin_employee_autocomplete", "Employee *"        
+        = label_tag "admin_employee_autocomplete", "Employee *"
+        %div
+          %span#admin_employee_name
         %input{:id => "admin_employee_autocomplete", :type => "text", :required => "yes"}
   .form-actions
     = submit_tag "Submit", :class => ['btn', 'btn-primary', 'btn-large'], :id => "submit_button"
