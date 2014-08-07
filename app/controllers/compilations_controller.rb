@@ -3,7 +3,7 @@ class CompilationsController < ApplicationController
 
   before_filter :authenticate_user!
 
-  before_filter :can_edit?, only: [:edit, :update, :destroy, :add_file, :delete_file]
+  before_filter :can_edit?, only: [:edit, :update, :destroy, :add_entry, :delete_entry]
   before_filter :can_read?, only: [:show, :show_download, :download]
 
   load_resource
@@ -66,7 +66,7 @@ class CompilationsController < ApplicationController
     end
   end
 
-  def add_file
+  def add_entry
     @compilation.add_entry(params[:entry_id])
     save_or_bust @compilation
 
@@ -77,7 +77,7 @@ class CompilationsController < ApplicationController
     end
   end
 
-  def delete_file
+  def delete_entry
     @compilation.remove_entry(params[:entry_id])
     save_or_bust @compilation
 

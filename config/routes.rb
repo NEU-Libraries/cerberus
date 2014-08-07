@@ -33,8 +33,8 @@ Drs::Application.routes.draw do
   get "/sets/:id/ping" => 'compilations#ping_download', as: 'ping_download'
   get "/sets/:id/trigger_download" => 'compilations#download', as: 'trigger_download'
 
-  match "/sets/:id/:entry_id" => 'compilations#delete_file', via: 'delete', as: 'delete_entry'
-  match "/sets/:id/:entry_id" => 'compilations#add_file', via: 'post', as: 'add_entry'
+  match "/sets/:id/:entry_id" => 'compilations#delete_entry', via: 'delete', as: 'delete_entry'
+  match "/sets/:id/:entry_id" => 'compilations#add_entry', via: 'post', as: 'add_entry'
 
   get "/files/provide_metadata" => "nu_core_files#provide_metadata"
   post "/files/process_metadata" => "nu_core_files#process_metadata"
