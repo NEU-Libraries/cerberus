@@ -55,7 +55,7 @@
       %menu.btn-toolbar(type="toolbar")
         .btn-group
           %a.btn.btn-mini.btn-clear{id: "viewItemDownloads-#{noid}"}(data-pid="#{noid}" href="#" data-toggle="dropdown")
-            Associated Files
+            Downloads
             %i.icon-caret-down
           = render partial: 'nu_core_files/derivative_btn_group', locals: {contents: item.content_objects_sorted, grid_view: true}
         - if current_user # the general public can't add items to sets
