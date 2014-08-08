@@ -169,7 +169,7 @@ class NuCoreFile < ActiveFedora::Base
 
     docs.keep_if do |doc|
       create_date     = doc.create_date_time
-      (now - 30.minutes) > create_date
+      (now - 2.minutes) > create_date
     end
   end
 

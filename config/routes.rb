@@ -36,11 +36,11 @@ Drs::Application.routes.draw do
   match "/sets/:id/:entry_id" => 'compilations#delete_entry', via: 'delete', as: 'delete_entry'
   match "/sets/:id/:entry_id" => 'compilations#add_entry', via: 'post', as: 'add_entry'
 
-  get "/files/provide_metadata" => "nu_core_files#provide_metadata"
-  post "/files/process_metadata" => "nu_core_files#process_metadata"
+  get "/files/:id/provide_metadata" => "nu_core_files#provide_metadata", as: "files_provide_metadata"
+  post "/files/:id/process_metadata" => "nu_core_files#process_metadata", as: "files_process_metadata"
 
-  get "/files/rescue_incomplete_files" => "nu_core_files#rescue_incomplete_files", as: 'rescue_incomplete_files'
-  match "/incomplete_files" => "nu_core_files#destroy_incomplete_files", via: 'delete', as: 'destroy_incomplete_files'
+  get "/files/rescue_incomplete_file" => "nu_core_files#rescue_incomplete_file", as: 'rescue_incomplete_file'
+  match "/incomplete_file/:id" => "nu_core_files#destroy_incomplete_file", via: 'delete', as: 'destroy_incomplete_file'
 
   put '/item_display' => 'users#update', as: 'view_pref'
 
