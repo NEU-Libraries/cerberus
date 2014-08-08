@@ -72,6 +72,11 @@ module Drs
       process_date(Array(self[Solrizer.solr_name("system_create_dtsi")]).first)
     end
 
+    def create_date_time
+      x = Array(self["system_create_dtsi"]).first
+      DateTime.parse x
+    end
+
     def creators
       Array(self[Solrizer.solr_name("creator", :facetable)])
     end
@@ -292,6 +297,11 @@ module Drs
     def get_core_record
       id = Array(self["is_part_of_ssim"]).first.split("/").last
       return SolrDocument.new ActiveFedora::SolrService.query("id:\"#{id}\"").first
+    end
+
+    # Check if the current file is in progress
+    def in_progress?
+      return Array(self["in_progress_tesim"]).first == "true"
     end
   end
 end
