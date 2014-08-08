@@ -163,7 +163,14 @@ class NuCoreFile < ActiveFedora::Base
 
   # Returns an array of all abandoned files for this given depositor nuid
   def self.abandoned_for_nuid(nuid)
-    f_query = ActiveFedora::SolrService.query("depositor_tesim:\"#{nuid}\" AND in_progress_tesim:true")
+    as = ActiveFedora::SolrService
+
+    nuid = "\"#{nuid}\""
+    depositor = "depositor_tesim:#{nuid}"
+    proxy_uploader = "proxy_uploader_tesim:#{nuid}"
+
+    true_depositor_query = "(#{depositor} OR #{proxy_uploader})"
+    f_query = as.query("#{true_depositor_query} AND in_progress_tesim:true")
     docs    = f_query.map { |x| SolrDocument.new (x) }
     now     = DateTime.now
 
