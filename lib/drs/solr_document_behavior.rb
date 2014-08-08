@@ -298,5 +298,10 @@ module Drs
       id = Array(self["is_part_of_ssim"]).first.split("/").last
       return SolrDocument.new ActiveFedora::SolrService.query("id:\"#{id}\"").first
     end
+
+    # Check if the current file is in progress
+    def in_progress?
+      return Array(self["in_progress_tesim"]).first == "true"
+    end
   end
 end
