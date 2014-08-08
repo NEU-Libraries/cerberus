@@ -10,10 +10,10 @@ class NuCoreFilesController < ApplicationController
 
   before_filter :authenticate_user!, except: [:show]
 
-  skip_before_filter :normalize_identifier # , only: [:provide_metadata, :rescue_incomplete_files, :destroy_incomplete_files, :process_metadata]
+  skip_before_filter :normalize_identifier
   skip_load_and_authorize_resource only: [:provide_metadata,
-                                          :rescue_incomplete_files,
-                                          :destroy_incomplete_files,
+                                          :rescue_incomplete_file,
+                                          :destroy_incomplete_file,
                                           :process_metadata,
                                           :edit,
                                           :update,
@@ -22,7 +22,7 @@ class NuCoreFilesController < ApplicationController
   before_filter :can_edit_parent?, only: [:new]
 
   before_filter :can_read?, only: [:show]
-  before_filter :can_edit?, only: [:edit, :update]
+  before_filter :can_edit?, only: [:edit, :update, :destroy_incomplete_file]
   before_filter :complete?, only: [:edit, :update]
 
   rescue_from Exceptions::NoParentFoundError, with: :no_parent_rescue
@@ -33,18 +33,22 @@ class NuCoreFilesController < ApplicationController
     render_404(ActiveFedora::ObjectNotFoundError.new) and return
   end
 
-  def destroy_incomplete_files
-    NuCoreFile.in_progress_files_for_nuid(current_user.nuid).each do |file|
-      file.destroy
-    end
+  def destroy_incomplete_file
+    @nu_core_file = fetch_solr_document
 
-    flash[:notice] = "Incomplete files destroyed"
-    redirect_to root_path
+    if @nu_core_file.in_progress? && (@nu_core_file.klass == "NuCoreFile")
+      @nu_core_file = NuCoreFile.find(@nu_core_file.pid)
+      @nu_core_file.destroy
+      flash[:notice] = "Incomplete file destroyed"
+      redirect_to(root_path) and return
+    else
+      flash[:alert] = "File not destroyed"
+      redirect_to(root_path) and return
+    end
   end
 
   def provide_metadata
-    # Feeding through an incomplete file if there is one
-    @nu_core_file = NuCoreFile.new
+    @nu_core_file = NuCoreFile.find(params[:id])
 
     if should_proxy?
       nuid = params[:proxy]
@@ -52,10 +56,7 @@ class NuCoreFilesController < ApplicationController
       nuid = current_user.nuid
     end
 
-    @incomplete_file = NuCoreFile.in_progress_files_for_nuid(nuid).first
-
-
-    @title = @incomplete_file.title
+    @title = @nu_core_file.title
 
     # With the move to single file upload, incomplete files (plural) is a misnomer.
     # but worthwhile to keep if we reimplement batch uploads. In the meantime only
@@ -69,14 +70,14 @@ class NuCoreFilesController < ApplicationController
   # routed to files/rescue_incomplete_files
   # page for allowing users to either permanently delete or apply metadata to
   # files abandoned without completing step two of the upload process.
-  def rescue_incomplete_files
-    file_titles = []
-
-    request.query_parameters.each do |key, pid|
-      file_titles << NuCoreFile.find(pid).title
+  def rescue_incomplete_file
+    if params["abandoned"]
+      @incomplete = fetch_solr_document(id: params["abandoned"])
+    else
+      file = NuCoreFile.abandoned_for_nuid(current_user.nuid).first
+      @incomplete = file
     end
 
-    @incomplete_file_titles = file_titles
     @page_title = "Rescue abandoned files"
   end
 
@@ -165,16 +166,13 @@ class NuCoreFilesController < ApplicationController
   # routed to /files/new
   def new
     @page_title = "Upload New Files"
-    in_progress_files = NuCoreFile.in_progress_files_for_nuid(current_user.nuid)
 
-    if !in_progress_files.empty?
+    abandoned_files = NuCoreFile.abandoned_for_nuid(current_user.nuid)
 
-      param_hash = {}
-      in_progress_files.each_with_index do |file, index|
-        param_hash = param_hash.merge({"file#{index}" => file.pid})
-      end
-
-      redirect_to rescue_incomplete_files_path(param_hash) and return
+    if abandoned_files.any?
+      file = abandoned_files.first
+      redirect_to rescue_incomplete_file_path("abandoned" => file.pid)
+      return
     end
 
     @nu_core_file = ::NuCoreFile.new
@@ -304,6 +302,7 @@ class NuCoreFilesController < ApplicationController
 
       yield(nu_core_file) if block_given?
       nu_core_file.save!
+      return nu_core_file
     end
 
     def process_file(file)
@@ -316,9 +315,8 @@ class NuCoreFilesController < ApplicationController
         new_path = tempdir.join("#{file.original_filename}")
         FileUtils.mv(file.tempfile.path, new_path.to_s)
 
-        update_metadata_from_upload_screen(@nu_core_file, file, params[:collection_id], new_path.to_s, params[:proxy])
-        # @nu_core_file.record_version_committer(current_user)
-        redirect_to files_provide_metadata_path({proxy: params[:proxy]})
+        file = update_metadata_from_upload_screen(@nu_core_file, file, params[:collection_id], new_path.to_s, params[:proxy])
+        redirect_to files_provide_metadata_path(file.pid, {proxy: params[:proxy]})
       else
         render :json => [{:error => "Error creating file."}]
       end
