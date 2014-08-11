@@ -9,6 +9,10 @@
 
     = f.label :description
     = f.text_area :description, placeholder: 'Note that this is optional', class: 'input-block-level'
+
+    = f.label  :mass_permissions
+    = f.select :mass_permissions, options_for_select(["public", "private"], compilation.mass_permissions)
+
     = hidden_field_tag(:entry_id, params[:entry_id])
   .modal-footer
     = f.submit class: "btn btn-primary"

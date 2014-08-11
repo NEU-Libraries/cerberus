@@ -64,11 +64,15 @@ describe CompilationsController do
     end
 
     it "creates a new compilation on successful post" do
-      attrs = { 'title' => 'My collection', 'description' => 'A collection' }
+      attrs = { 'title' => 'My collection',
+                'description' => 'A collection',
+                'mass_permissions' => 'public' }
 
       post :create, :compilation => attrs
 
-      assigns(:compilation).title.should == "My collection"
+      expect(assigns(:compilation).title).to eq "My collection"
+      expect(assigns(:compilation).mass_permissions).to eq "public"
+
       expect(response).to redirect_to(compilation_path(id: assigns(:compilation).pid))
     end
   end
