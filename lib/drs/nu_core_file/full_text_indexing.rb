@@ -18,17 +18,12 @@ module Drs
         raise "URL '#{uri}' returned code #{resp.code}" unless resp.code == "200"
         self.content.content.rewind if self.content.content.respond_to?(:rewind)
         extracted_text = JSON.parse(resp.body)[''].rstrip
-        full_text.content = extracted_text if extracted_text.present?
+        self.full_text.content = extracted_text if extracted_text.present?
+        self.save!
       rescue => e
         logger.error("Error extracting content from #{self.pid}: #{e.inspect}")
         ExceptionNotifier.notify_exception(e, :data => {:id => "#{self.pid}"})
       end
-
-      # def to_solr(solr_doc = Hash.new())
-      #   solr_doc['all_text_timv'] = full_text.content
-      #   super(solr_doc)
-      #   return solr_doc
-      # end
 
     end
   end
