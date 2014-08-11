@@ -28,10 +28,19 @@ class Compilation < ActiveFedora::Base
   end
 
   # Returns all NuCoreFile objects tagged as entries
-  # in this collection.
+  # in this collection as SolrDocument objects.
   def entries
-    a = self.relationships(:has_member)
-    return a.map { |rels| NuCoreFile.find(trim_to_pid(rels)) }
+    if entry_ids.any?
+      query = ""
+      query = self.entry_ids.map! { |id| "\"#{id}\""}.join(" OR ")
+      query = "id:(#{query})"
+
+      results = ActiveFedora::SolrService.query(query, rows: 999)
+
+      results.map { |result| SolrDocument.new result }
+    else
+      []
+    end
   end
 
   def add_entry(value)
