@@ -5,6 +5,7 @@ class Compilation < ActiveFedora::Base
   include ActiveModel::MassAssignmentSecurity
   include Drs::MetadataAssignment
   include Drs::Find
+  include Drs::Rights::MassPermissions
 
   has_metadata name: 'DC', type: NortheasternDublinCoreDatastream
   has_metadata name: 'mods', type: NuModsDatastream
@@ -56,7 +57,12 @@ class Compilation < ActiveFedora::Base
   #
 
   def as_json(opts = nil)
-    {id: self.identifier, title: self.title, depositor: self.depositor, description:  self.description, entries: self.entry_ids }
+    { id: self.identifier,
+      title: self.title,
+      depositor: self.depositor,
+      description:  self.description,
+      entries: self.entry_ids,
+      mass_permissions: self.mass_permissions }
   end
 
   # Eliminate every entry ID that points to an object that no longer exists
