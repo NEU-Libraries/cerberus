@@ -62,22 +62,21 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  helper_method :current_user_can?
+
+  def current_user_can?(perm_level, record)
+    if current_user
+      current_user.can? perm_level, record
+    elsif perm_level != :read
+      false
+    else
+      record.read_groups.include? 'public'
+    end
+  end
+
   def after_sign_in_path_for(resource)
     session[:previous_url] || root_path
   end
-
-  # Why do we have these when current_user.can? is available??
-  # helper_method :current_user_can_read?, :current_user_can_edit?
-
-  # # Determine whether or not the viewing user can read this object
-  # def current_user_can_read?(fedora_object)
-  #   return fedora_object.rightsMetadata.can_read?(current_user)
-  # end
-
-  # # Determine whether or not the viewing user can edit this object
-  # def current_user_can_edit?(fedora_object)
-  #   return fedora_object.rightsMetadata.can_edit?(current_user)
-  # end
 
   # Some useful helpers for seeing the filters defined on given controllers
   # Taken from: http://scottwb.com/blog/2012/02/16/enumerate-rails-3-controller-filters/
