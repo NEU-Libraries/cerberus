@@ -62,6 +62,10 @@ class Compilation < ActiveFedora::Base
     end
   end
 
+  def permission_groups
+    self.permissions.keep_if { |x| x[:type] == "group" }
+  end
+
   # Adds a simple JSON api to use with the JavaScript a bit easier than before
   #
 

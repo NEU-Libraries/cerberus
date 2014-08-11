@@ -49,6 +49,8 @@ $(document).ready ->
       triggerCompilationDownload()
       triggerCartDownload()
       parseTitle()
+      handleGroupPermissionAdd()
+      handleGroupPermissionRemoval()
       return
 
     triggerCartDownload = ->
@@ -709,6 +711,21 @@ $(document).ready ->
       else
         $('body').on('click', '*[data-delete]' , handleClick )
 
+    handleGroupPermissionAdd = ->
+      $("#addAnotherGroup").click ->
+        html = $(".group").last().clone()
+        $("#addAnotherGroup").before(html)
+        $(".group").last().find("select").val("read")
+        $(".group").last().find("input").val("")
+      return
+
+    handleGroupPermissionRemoval = ->
+      $(".removeGroupButton").click ->
+        val = $(this).parent().children("#groups_name_").val()
+        x   = $("#groups_permissionless_groups").val()
+        y   = x + " ; #{val}"
+        $("#groups_permissionless_groups").val(y)
+        return
 
 
 

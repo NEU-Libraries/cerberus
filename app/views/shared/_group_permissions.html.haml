@@ -1,0 +1,14 @@
+.groups
+  = hidden_field_tag "groups[permissionless_groups]"
+  - if valid_perms.length == 1
+    = hidden_field_tag "groups[permission_type]", valid_perms.first.to_s
+
+  - if groups.any?
+    - groups.each do |group|
+      = render partial: 'shared/group_permission', locals: { valid_perms: valid_perms, group: group }
+  - else
+    = render partial: "shared/group_permission", locals: { valid_perms: valid_perms, group: {} }
+
+  %button#addAnotherGroup.btn.btn-info{type: "button"}
+    Add Another Group
+
