@@ -115,6 +115,12 @@ class NuCoreFile < ActiveFedora::Base
       end
     end
 
+    if self.canonical_object
+      if self.canonical_object.datastreams.keys.include?("full_text")
+        solr_doc['all_text_timv'] = self.canonical_object.datastreams["full_text"].content
+      end
+    end
+
     super(solr_doc)
     return solr_doc
   end
