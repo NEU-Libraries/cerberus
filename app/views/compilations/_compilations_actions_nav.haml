@@ -4,9 +4,10 @@
       %a(href="#" data-event="non-link")
         View Files
     - if entries.any?
-      %a{ href: prepare_download_path(id: @compilation.pid ) , method: 'get' }
-        %i.icon-download
-        Download
+      %li
+        %a{ href: prepare_download_path(id: @compilation.pid ) , method: 'get' }
+          %i.icon-download
+          Download
     - if current_user_can? :edit, @compilation
       %li
         %a{ href: edit_compilation_path(@compilation),  data: {event: "non-link"} }
