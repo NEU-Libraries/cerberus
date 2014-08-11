@@ -7,12 +7,14 @@
       %a{ href: prepare_download_path(id: @compilation.pid ) , method: 'get' }
         %i.icon-download
         Download
-    %li
-      %a{ href: edit_compilation_path(@compilation),  data: {event: "non-link"} }
-        %i.icon-pencil
-        Edit
-    %li
-      %a{ href: "#deleteItemModal", title: "Destroy this #{t('drs.compilations.name')}", data: {toggle: 'modal'} }
-        %i.icon-remove
-        Delete
+    - if current_user_can? :edit, @compilation
+      %li
+        %a{ href: edit_compilation_path(@compilation),  data: {event: "non-link"} }
+          %i.icon-pencil
+          Edit
+    - if current_user && current_user.nuid == @compilation.depositor
+      %li
+        %a{ href: "#deleteItemModal", title: "Destroy this #{t('drs.compilations.name')}", data: {toggle: 'modal'} }
+          %i.icon-remove
+          Delete
 
