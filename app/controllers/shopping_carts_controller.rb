@@ -96,7 +96,20 @@ class ShoppingCartsController < ApplicationController
   # Actually trigger a download.
   def fire_download
     f = "#{Rails.root}/tmp/carts/#{request.session_options[:id]}/drs_queue.zip"
-    send_file(f)
+    retries = 0
+
+    while retries < 3 do
+      if !File.file?(f)
+        sleep 1
+        retries +=1
+      end
+    end
+
+    begin
+      send_file(f)
+    rescue ActionController::MissingFile => exception
+      ExceptionNotifier.notify_exception(exception, :data => {:file_path => "#{f}"})
+    end
   end
 
   private
