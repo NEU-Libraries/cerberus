@@ -7,7 +7,7 @@
 %p.lead
   = @compilation.description
 
-=render partial: 'compilations_actions_nav.haml'
+=render partial: 'compilations_actions_nav.haml', locals: {entries: @entries }
 =render partial: 'shared/sets/delete_item_modal', locals: {item: @compilation }
 
 

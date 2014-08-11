@@ -3,7 +3,7 @@
     %li.active
       %a(href="#" data-event="non-link")
         View Files
-    %li
+    - if entries.any?
       %a{ href: prepare_download_path(id: @compilation.pid ) , method: 'get' }
         %i.icon-download
         Download
