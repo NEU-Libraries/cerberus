@@ -41,10 +41,10 @@ describe NuCoreFile do
 
     it "returns an array of SolrDocuments" do
       begin
-        abandoned           = NuCoreFile.new
-        abandoned.depositor = nuid
-        abandoned.tag_as_in_progress
-        abandoned.save!
+        @abandoned           = NuCoreFile.new
+        @abandoned.depositor = nuid
+        @abandoned.tag_as_in_progress
+        @abandoned.save!
 
         # Note that this doesn't work very well, and that
         # the requirement of a one day jump is being imposed by
@@ -57,7 +57,7 @@ describe NuCoreFile do
           expect(result).to match_array expected
         end
       ensure
-        abandoned.destroy
+        @abandoned.destroy
       end
     end
   end
