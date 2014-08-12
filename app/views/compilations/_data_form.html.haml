@@ -11,7 +11,7 @@
 
   %h4 Read Permissions For Groups
 
-  = render partial: "shared/group_permissions", locals: {form: f, item: @compilation, valid_perms: [:read, :edit], groups: @compilation.permission_groups }
+  = render partial: "shared/group_permissions", locals: {form: f, item: @compilation, valid_perms: [:read], groups: @compilation.permission_groups }
 
   .form-actions
     = f.submit class: "btn btn-primary"
