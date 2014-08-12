@@ -1,10 +1,11 @@
 class Compilation < ActiveFedora::Base
   include Hydra::ModelMethods
-  include Hydra::ModelMixins::CommonMetadata
   include Hydra::ModelMixins::RightsMetadata
   include ActiveModel::MassAssignmentSecurity
   include Drs::MetadataAssignment
   include Drs::Find
+  include Drs::Rights::MassPermissions
+  include Drs::Rights::PermissionGroups
 
   has_metadata name: 'DC', type: NortheasternDublinCoreDatastream
   has_metadata name: 'mods', type: NuModsDatastream
@@ -27,10 +28,19 @@ class Compilation < ActiveFedora::Base
   end
 
   # Returns all NuCoreFile objects tagged as entries
-  # in this collection.
+  # in this collection as SolrDocument objects.
   def entries
-    a = self.relationships(:has_member)
-    return a.map { |rels| NuCoreFile.find(trim_to_pid(rels)) }
+    if entry_ids.any?
+      query = ""
+      query = self.entry_ids.map! { |id| "\"#{id}\""}.join(" OR ")
+      query = "id:(#{query})"
+
+      results = ActiveFedora::SolrService.query(query, rows: 999)
+
+      results.map { |result| SolrDocument.new result }
+    else
+      []
+    end
   end
 
   def add_entry(value)
@@ -53,10 +63,13 @@ class Compilation < ActiveFedora::Base
   end
 
   # Adds a simple JSON api to use with the JavaScript a bit easier than before
-  #
-
   def as_json(opts = nil)
-    {id: self.identifier, title: self.title, depositor: self.depositor, description:  self.description, entries: self.entry_ids }
+    { id: self.identifier,
+      title: self.title,
+      depositor: self.depositor,
+      description:  self.description,
+      entries: self.entry_ids,
+      mass_permissions: self.mass_permissions }
   end
 
   # Eliminate every entry ID that points to an object that no longer exists

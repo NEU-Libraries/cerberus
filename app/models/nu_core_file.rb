@@ -1,4 +1,6 @@
 class NuCoreFile < ActiveFedora::Base
+  include ActiveModel::MassAssignmentSecurity
+
   include Drs::ModelMethods
   include Drs::Noid
   include Drs::MetadataAssignment
@@ -8,7 +10,6 @@ class NuCoreFile < ActiveFedora::Base
   include Drs::NuCoreFile::Actions
   include Drs::NuCoreFile::MimeTypes
   include Drs::NuCoreFile::Permissions
-  include Drs::NuCoreFile::AccessibleAttributes
   include Drs::NuCoreFile::Characterization
   include Drs::NuCoreFile::Export
   include Drs::NuCoreFile::AssignType

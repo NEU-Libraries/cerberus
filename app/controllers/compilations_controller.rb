@@ -1,12 +1,13 @@
 class CompilationsController < ApplicationController
   include Drs::ControllerHelpers::EditableObjects
 
-  before_filter :authenticate_user!
+  before_filter :authenticate_user!, except: [:show, :show_download, :download]
 
   before_filter :can_edit?, only: [:edit, :update, :destroy, :add_entry, :delete_entry]
   before_filter :can_read?, only: [:show, :show_download, :download]
 
   load_resource
+  before_filter :get_readable_entries, only: [:show]
   before_filter :remove_dead_entries, only: [:show, :show_download]
   before_filter :ensure_any_readable, only: [:show_download]
 
@@ -28,7 +29,7 @@ class CompilationsController < ApplicationController
     end
 
     @compilation.depositor = current_user.nuid
-
+    @compilation = GroupPermissionsSetter.set_permissions(@compilation, params[:groups])
     save_or_bust @compilation
     redirect_to @compilation
   end
@@ -38,13 +39,14 @@ class CompilationsController < ApplicationController
   end
 
   def update
+    @compilation = GroupPermissionsSetter.set_permissions(@compilation, params[:groups])
+
     if @compilation.update_attributes(params[:compilation])
       flash[:notice] = "#{t('drs.compilations.name').capitalize} successfully updated."
       redirect_to @compilation
     else
       flash.now.error = "#{t('drs.compilations.name').capitalize} failed to update."
     end
-
   end
 
   def show
@@ -53,7 +55,6 @@ class CompilationsController < ApplicationController
     respond_to do |format|
       format.html{ render action: "show" }
       format.json{ render json: @compilation  }
-
     end
   end
 
@@ -108,25 +109,28 @@ class CompilationsController < ApplicationController
 
   private
 
+  def get_readable_entries
+    @entries = @compilation.entries.keep_if { |x| current_user_can? :read, x }
+  end
+
   def ensure_any_readable
-    if @compilation.entries.empty?
-      flash[:error] = "You cannot download an empty set."
+    entries = get_readable_entries
+    error   = "You cannot download a set with no readable content"
+
+    if entries.empty?
+      flash[:error] = error
       redirect_to @compilation and return
     end
 
-    a = []
-    @compilation.entries.each do |x|
-      a << fetch_solr_document(id: x.pid)
-    end
-
     content = []
-
-    a.each do |x|
-      content = content + x.content_objects
+    entries.each do |entry|
+      content = content + entry.content_objects
     end
 
-    unless (content.any? { |x| current_user.can? :read, x })
-      flash[:error] = "There are no content objects in this set that you have read permissions on.  Aborting."
+    content.keep_if { |c| c.klass != "ImageThumbnailFile" }
+
+    unless (content.any? { |x| current_user_can? :read, x })
+      flash[:error] = error
       redirect_to(@compilation) and return
     end
   end
