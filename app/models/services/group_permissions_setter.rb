@@ -50,7 +50,7 @@ class GroupPermissionsSetter
     end
 
     names.each_with_index do |name, i|
-      if !(RESERVED_GROUPS.include? name)
+      if !(RESERVED_GROUPS.include? name) && name.present?
         access_type ||= access[i]
         perm          = {name: name, access: access_type, type: "group"}
         object.permissions = [perm]

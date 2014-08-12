@@ -11,6 +11,13 @@ describe GroupPermissionsSetter do
     expect(obj.read_groups).not_to include "public"
   end
 
+  it "filters out whitespace entries" do
+    group_hsh = { access: ["read", "read"], name: ["", "two"] }
+    g   = GroupPermissionsSetter.new(compilation, group_hsh)
+    obj = g.set_permissions
+    expect(obj.read_groups).not_to include ""
+  end
+
   it "cannot be used to remove the 'public' group" do
     group_hsh = { permissionless_groups: "public" }
     g = GroupPermissionsSetter.new(compilation, group_hsh)
