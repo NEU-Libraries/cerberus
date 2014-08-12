@@ -29,7 +29,7 @@ class CompilationsController < ApplicationController
     end
 
     @compilation.depositor = current_user.nuid
-
+    @compilation = GroupPermissionsSetter.set_permissions(@compilation, params[:groups])
     save_or_bust @compilation
     redirect_to @compilation
   end
@@ -39,13 +39,14 @@ class CompilationsController < ApplicationController
   end
 
   def update
+    @compilation = GroupPermissionsSetter.set_permissions(@compilation, params[:groups])
+
     if @compilation.update_attributes(params[:compilation])
       flash[:notice] = "#{t('drs.compilations.name').capitalize} successfully updated."
       redirect_to @compilation
     else
       flash.now.error = "#{t('drs.compilations.name').capitalize} failed to update."
     end
-
   end
 
   def show
