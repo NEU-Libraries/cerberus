@@ -1,4 +1,4 @@
-.groups
+.groups{:class => (valid_perms.length <= 1 ? "read-only" : nil )}
   = hidden_field_tag "groups[permissionless_groups]"
   - if valid_perms.length == 1
     = hidden_field_tag "groups[permission_type]", valid_perms.first.to_s

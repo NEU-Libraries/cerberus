@@ -49,6 +49,7 @@ $(document).ready ->
       triggerCompilationDownload()
       triggerCartDownload()
       parseTitle()
+      groupPermissionDisplayWhenPrivate()
       handleGroupPermissionAdd()
       handleGroupPermissionRemoval()
       return
@@ -710,6 +711,29 @@ $(document).ready ->
         $('*[data-delete ]').on('click', handleClick )
       else
         $('body').on('click', '*[data-delete]' , handleClick )
+
+    # When we have a group permission panel that only allows
+    # setting read permissions, e.g. on the compilations page,
+    # we should only show that panel when the item is set to
+    # private to avoid confusion
+    groupPermissionDisplayWhenPrivate = ->
+      if $(".groups.read-only")
+        console.log "init"
+        groups = $(".groups.read-only").last()
+        ele    = $("select[name $= '[mass_permissions]']").last()
+
+        if ele.val() == "public"
+          groups.addClass("hidden")
+        else if ele.val() == "private"
+          groups.removeClass("hidden")
+
+        ele.change ->
+          if ele.val() == "public"
+            groups.addClass("hidden")
+          else if ele.val() == "private"
+            groups.removeClass("hidden")
+        return
+
 
     handleGroupPermissionAdd = ->
       $("#addAnotherGroup").click ->
