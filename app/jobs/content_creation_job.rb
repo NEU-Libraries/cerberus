@@ -52,6 +52,11 @@ class ContentCreationJob
 
       content_object.save! ? content_object : false
 
+      # If the file is of type with text, see if we can get solr to do a full text index
+      if core_record.canonical_class.in?(['TextFile', 'MswordFile', 'PdfFile'])
+        content_object.extract_content
+      end
+
       if (content_object.instance_of? ImageMasterFile)
          ScaledImageCreator.new(small_size, medium_size, large_size, content_object).create_scaled_images
       end
