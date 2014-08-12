@@ -13,6 +13,6 @@
 
 
 - if @compilation.entries.empty?
-  %p This #{t('drs.compilations.name')} is currently empty.  Get out there and add some files.
+  %p This #{t('drs.compilations.name')} is currently empty.
 - else
   = render partial: 'all_entries', locals: { compilation: @compilation, entries: @entries }
