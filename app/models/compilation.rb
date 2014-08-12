@@ -1,11 +1,11 @@
 class Compilation < ActiveFedora::Base
   include Hydra::ModelMethods
-  include Hydra::ModelMixins::CommonMetadata
   include Hydra::ModelMixins::RightsMetadata
   include ActiveModel::MassAssignmentSecurity
   include Drs::MetadataAssignment
   include Drs::Find
   include Drs::Rights::MassPermissions
+  include Drs::Rights::PermissionGroups
 
   has_metadata name: 'DC', type: NortheasternDublinCoreDatastream
   has_metadata name: 'mods', type: NuModsDatastream
@@ -62,13 +62,7 @@ class Compilation < ActiveFedora::Base
     end
   end
 
-  def permission_groups
-    self.permissions.keep_if { |x| x[:type] == "group" }
-  end
-
   # Adds a simple JSON api to use with the JavaScript a bit easier than before
-  #
-
   def as_json(opts = nil)
     { id: self.identifier,
       title: self.title,
