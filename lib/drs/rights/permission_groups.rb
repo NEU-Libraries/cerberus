@@ -5,7 +5,10 @@ module Drs::Rights::PermissionGroups
 
   def permission_groups
     self.permissions.keep_if do |x|
-      x[:type] == 'group' && !(RESERVED_GROUPS.include? x[:name])
+      is_group     = x[:type] == 'group'
+      not_reserved = !(RESERVED_GROUPS.include? x[:name])
+      not_blank    = x[:name].present?
+      is_group && not_reserved && not_blank
     end
   end
 end
