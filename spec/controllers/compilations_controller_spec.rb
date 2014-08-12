@@ -60,7 +60,7 @@ describe CompilationsController do
 
       post :create
 
-      expect(response).to redirect_to(new_user_session_path)
+      expect(response).to redirect_to new_user_session_path
     end
 
     it "creates a new compilation on successful post" do
@@ -68,7 +68,7 @@ describe CompilationsController do
                 'description' => 'A collection',
                 'mass_permissions' => 'public' }
 
-      post :create, :compilation => attrs
+      post :create, :compilation => attrs, :groups => {}
 
       expect(assigns(:compilation).title).to eq "My collection"
       expect(assigns(:compilation).mass_permissions).to eq "public"
@@ -85,7 +85,7 @@ describe CompilationsController do
 
       get :show, :id => compilation.pid
 
-      expect(response).to redirect_to(new_user_session_path)
+      expect(response.status).to eq 403
     end
 
     it "renders the template for the depositing owner" do
