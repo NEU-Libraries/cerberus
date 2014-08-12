@@ -715,6 +715,7 @@ $(document).ready ->
       $("#addAnotherGroup").click ->
         html = $(".group").last().clone()
         $("#addAnotherGroup").before(html)
+        $(".group").last().removeClass("hidden")
         $(".group").last().find("select").val("read")
         $(".group").last().find("input").val("")
       return

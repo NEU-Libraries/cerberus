@@ -1,7 +1,8 @@
 - group[:access] ||= "read"
 - group[:name]   ||= ""
+- hidden         ||= false
 
-.row.group
+%div{class: ["row", "group", hidden ? "hidden" : nil] }
   - if valid_perms.length > 1
     .span2
       = label_tag  "groups[access][]", "Access Type:"
