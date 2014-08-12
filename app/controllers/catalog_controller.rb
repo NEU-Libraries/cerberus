@@ -137,9 +137,10 @@ class CatalogController < ApplicationController
       identifier = "identifier_tesim"
       emp_name = "employee_name_tesim"
       emp_nuid = "employee_nuid_ssim"
+      full_text = "all_text_timv"
 
       field.solr_parameters = {
-        qf: "#{title} #{abstract} #{genre} #{topic} #{creators} #{publisher} #{place} #{identifier} #{emp_name} #{emp_nuid}",
+        qf: "#{title} #{abstract} #{genre} #{topic} #{creators} #{publisher} #{place} #{identifier} #{emp_name} #{emp_nuid} #{full_text}",
         pf: "#{title}",
       }
     end
