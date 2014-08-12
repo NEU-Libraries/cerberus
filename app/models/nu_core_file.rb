@@ -117,6 +117,14 @@ class NuCoreFile < ActiveFedora::Base
 
     super(solr_doc)
 
+    #Accounting for Pat's files coming in through the Fedora-direct harvest
+    # If the file is of type with text, see if we can get solr to do a full text index
+    if self.canonical_class.in?(['TextFile', 'MswordFile', 'PdfFile'])
+      if !self.canonical_object.datastreams.keys.include?("full_text")
+        self.canonical_object.extract_content
+      end
+    end
+
     if self.canonical_object
       if self.canonical_object.datastreams.keys.include?("full_text")
         solr_doc['all_text_timv'] = self.canonical_object.datastreams["full_text"].content
