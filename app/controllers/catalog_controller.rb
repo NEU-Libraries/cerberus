@@ -23,6 +23,9 @@ class CatalogController < ApplicationController
 
   CatalogController.solr_search_params_logic += [:no_incomplete_records]
 
+  # While compilations can be public we don't want them to be discoverable
+  CatalogController.solr_search_params_logic += [:exclude_compilations]
+
   skip_before_filter :default_html_head
 
   def index
@@ -344,6 +347,11 @@ class CatalogController < ApplicationController
   def exclude_unwanted_models(solr_parameters, user_parameters)
     solr_parameters[:fq] ||= []
     solr_parameters[:fq] << "#{Solrizer.solr_name("has_model", :symbol)}:\"info:fedora/afmodel:NuCoreFile\""
+  end
+
+  def exclude_compilations(solr_parameters, user_parameters)
+    solr_parameters[:fq] ||= []
+    solr_parameters[:fq] << "-active_fedora_model_ssi:\"Compilation\""
   end
 
   def depositor
