@@ -10,8 +10,19 @@ class GroupPermissionsSetter
                      "northeastern:drs:repository:proxystaff",
                      "public"]
 
+  def self.set_permissions!(object, params)
+    g = GroupPermissionsSetter.new(object, params)
+    g.set_permissions!
+  end
+
+  def self.set_permissions(object, params)
+    g = GroupPermissionsSetter.new(object, params)
+    g.set_permissions
+  end
+
   def set_permissions
-    groups = self.groups.with_indifferent_access
+    groups      = self.groups.with_indifferent_access
+    access_type = nil
 
     if groups["permission_type"]
       access_type = groups["permission_type"]
@@ -34,7 +45,7 @@ class GroupPermissionsSetter
     access = groups["access"] || []
     names  = groups["name"]   || []
 
-    if names.length != access.length
+    if (names.length != access.length) && !(access_type)
       raise Exceptions::AccessNameMismatchError.new(access.length, names.length)
     end
 
