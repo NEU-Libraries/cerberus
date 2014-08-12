@@ -6,8 +6,8 @@
     .span2
       = label_tag  "groups[access][]", "Access Type:"
       = select_tag "groups[access][]", options_for_select(valid_perms, group[:access])
-  .span2
+  .span3{style: "display : block;" }
     = label_tag "groups[name][]", "Group Name:"
-    = text_field_tag "groups[name][]", group[:name]
-    %button.btn.btn-danger.removeGroupButton{type: "button", "data-delete" => "", "data-remove" => "true", "data-target" => ".group", title: "Remove group", type: "button"}
+    = text_field_tag "groups[name][]", group[:name], :class => "input-block-level span2"
+    %button.btn.btn-danger.removeGroupButton{type: "button", "data-delete" => "", "data-remove" => "true", "data-target" => ".group", title: "Remove all permissions for this group", type: "button"}
       = render partial: "shared/icon", locals: { class_string: "icon-remove", alt_text: "Remove field" }
