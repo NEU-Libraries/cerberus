@@ -31,9 +31,10 @@ describe NuCoreFilesController do
 
       a = FactoryGirl.create(:bills_incomplete_file)
 
-      get :new, { parent: root.identifier }
-
-      expect(response).to redirect_to(rescue_incomplete_files_path(file0: a.pid))
+      Timecop.travel(7.hours) do
+        get :new, { parent: root.identifier }
+        expect(response).to redirect_to(rescue_incomplete_file_path(abandoned: a.pid))
+      end
     end
 
     it "403s if authed user has no edit permissions on the parent object" do
@@ -99,17 +100,19 @@ describe NuCoreFilesController do
       end
     end
 
-    it "removes every incomplete file associated with the signed in user" do
+    it "removes an incomplete file associated with the signed in user" do
       sign_in bill
 
       incomplete_files = FactoryGirl.create_list(:bills_incomplete_file, 3)
       complete_file = FactoryGirl.create(:bills_complete_file)
 
-      delete :destroy_incomplete_files
+      Timecop.travel(7.hours) do
+        delete :destroy_incomplete_file, id: incomplete_files.first.pid
+      end
 
       # Check that the files just created were deleted
       bills_incomplete_files = NuCoreFile.in_progress_files_for_nuid(bill.nuid)
-      bills_incomplete_files.length.should == 0
+      bills_incomplete_files.length.should == 2
 
       # Check that bills complete file was not deleted
       NuCoreFile.find(complete_file.pid).should == complete_file
@@ -132,14 +135,11 @@ describe NuCoreFilesController do
     it "loads all of the users current incomplete files" do
       sign_in bill
 
-      file_one = FactoryGirl.create(:bills_incomplete_file)
-      # file_two = FactoryGirl.create(:bills_incomplete_file)
-      complete_file = FactoryGirl.create(:bills_complete_file)
+      file_one = FactoryGirl.create(:bills_complete_file)
 
-      get :provide_metadata
+      get :provide_metadata, id: file_one.pid
 
-      # assigns(:incomplete_files).should =~ [file_one, file_two]
-      assigns(:incomplete_file).should == file_one
+      assigns(:nu_core_file).should == file_one
 
       expect(response).to render_template('nu_core_files/provide_metadata')
     end
