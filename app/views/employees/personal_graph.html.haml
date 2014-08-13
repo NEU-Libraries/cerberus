@@ -4,6 +4,12 @@
     = t('drs.personal_graph.title')
     %small
       = @employee.employee_name
+    %nav{role: "navigation", class: ["pull-right"]}
+      %ul.nav.nav-tabs
+        %li
+          %a{ href: employee_files_path(@employee) }
+            %i.icon-file
+            My files
 
 %p.lead
   = t('drs.personal_graph.description')
