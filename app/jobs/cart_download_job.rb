@@ -27,7 +27,7 @@ class CartDownloadJob
       pids.each do |pid|
         if ActiveFedora::Base.exists?(pid)
           item = ActiveFedora::Base.find(pid, cast: true)
-          download_label = I18n.t("drs.display_labels.#{content.klass}.download_label")
+          download_label = I18n.t("drs.display_labels.#{content.klass}.download")
           if user.can? :read, item
             io.add_buffer("downloads/#{pid.split(":").last}-#{download_label}#{File.extname(content.original_filename || "")}", item.content.content)
 

@@ -122,42 +122,55 @@ en:
       AudioFile:
         name: Audio File
         short: Audio
+        download: audio
       ImageLargeFile:
         name: Large Image
         short: Image
+        download: highres
       ImageMasterFile:
         name: Master Image
         short: Image
+        download: master
       ImageMediumFile:
         name: Medium Image
         short: Image
+        download: medres
       ImageSmallFile:
         name: Small Image
         short: Image
+        download: lowres
       ImageThumbnailFile:
         name: Thumbnail Image
         short: Thumbnail
+        download: thumb
       MsexcelFile:
         name: Spreadsheet
         short: Dataset
+        download: excel
       MspowerpointFile:
         name: PowerPoint
         short: Presentation
+        download: powerpoint
       MswordFile:
         name: Word Document
         short: Document
+        download: word_doc
       PdfFile:
         name: PDF
         short: Document
+        download: pdf
       TextFile:
         name: Text Document
         short: Document
+        download: text
       VideoFile:
         name: Video File
         short: Video
+        download: video
       ZipFile:
         name: Zip File
         short: Zip
+        download: zipped
       Community:
         name: Community
         short: Community
