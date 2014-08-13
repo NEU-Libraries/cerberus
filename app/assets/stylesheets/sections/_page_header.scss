@@ -1,0 +1,30 @@
+.page-header{
+  //Style nav-tab usage in page headers
+  nav {
+    display: inline;
+    float: right;
+    ul.nav-tabs{
+      border-bottom: none;
+      a{
+        display: inline;
+        font-size: 17px;
+        font-weight: 100;
+        padding-bottom: 21px;
+      }
+      a:hover{
+        border-bottom:none;
+      }
+      a:last-child{
+        margin-right: 0px;
+      }
+    }
+  }
+
+  // Ensure that this pulls to the left and then stacks vertically
+  // on tiny screens.  Ugly otherwise.
+  @media (max-width: 600px){
+    nav {
+      float: none;
+    }
+  }
+}

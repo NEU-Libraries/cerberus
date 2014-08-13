@@ -2,7 +2,7 @@
   - if user_signed_in?
     = render :partial => 'shopping_carts/tracker'
     = render :partial => 'users/notify_link'
-    %a.btn{:href => personal_files_path, :title => "click for User Profile"}
+    %a.btn{:href => personal_graph_path, :title => "click for My DRS"}
       %span.icon-user( aria-hidden="true" )
       %span.sr-only
         User page
@@ -10,8 +10,8 @@
     %button.btn.dropdown-toggle{"data-toggle" => "dropdown",  "aria-label" => "Toggle user menu dropdown menu", :title => "click for additional menu options"}
       %span.icon-caret-down( aria-hidden="true" )
     %ul.dropdown-menu(role="menu")
-      %li{:class => ("active" if action_name == "personal_graph")}
-        = link_to raw('<span class="icon-dashboard" aria-hidden="true" ></span> My DRS'), personal_graph_path, "tab-index" => "-1"
+      %li{:class => ("active" if action_name == "personal_files")}
+        = link_to raw('<span class="icon-file" aria-hidden="true" ></span> My Files'), personal_files_path, "tab-index" => "-1"
       %li{:class => ("active" if controller_name == "compilations" && action_name == "index")}
         %a.top_nav{href: compilations_path,  "tab-index" => "-1"}
           %span.icon-folder-open-alt( aria-hidden="true" )
