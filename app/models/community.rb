@@ -45,9 +45,4 @@ class Community < ActiveFedora::Base
     self.properties.parent_id = val
   end
 
-  # Simple human readable label for objects.
-  def type_label
-    "Community"
-  end
-
 end

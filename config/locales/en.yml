@@ -117,55 +117,59 @@ en:
       default: Theses and dissertations for
     display_labels:
       Employee:
-        name: Faculty
-        icon:
+        name: Faculty and Staff
+        short: Person
       AudioFile:
         name: Audio File
-        icon:
+        short: Audio
       ImageLargeFile:
         name: Large Image
-        icon:
+        short: Image
       ImageMasterFile:
         name: Master Image
-        icon:
+        short: Image
       ImageMediumFile:
         name: Medium Image
-        icon:
+        short: Image
       ImageSmallFile:
         name: Small Image
-        icon:
+        short: Image
       ImageThumbnailFile:
         name: Thumbnail Image
-        icon:
+        short: Thumbnail
       MsexcelFile:
         name: Spreadsheet
-        icon:
+        short: Dataset
       MspowerpointFile:
-        name: Presentation
-        icon:
+        name: PowerPoint
+        short: Presentation
       MswordFile:
-        name: Document
-        icon:
+        name: Word Document
+        short: Document
       PdfFile:
         name: PDF
-        icon:
+        short: Document
       TextFile:
-        name: Document
-        icon:
+        name: Text Document
+        short: Document
       VideoFile:
         name: Video File
-        icon:
+        short: Video
       ZipFile:
         name: Zip File
-        icon:
+        short: Zip
       Community:
         name: Community
+        short: Community
       NuCollection:
         name: Collection
+        short: Collection
       NuCoreFile:
         name: File
+        short: File
       Compilation:
         name: Set
+        short: Set
     full_metadata:
       processing note: "The metadata details and access controls you specified are being processed in the background. Your file will be marked as 'Private' until this brief process is complete."
   blacklight:
