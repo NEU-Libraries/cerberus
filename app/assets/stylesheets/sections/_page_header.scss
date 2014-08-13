@@ -1,6 +1,8 @@
 .page-header{
-  //Style nav-tab usage
+  //Style nav-tab usage in page headers
   nav {
+    display: inline;
+    float: right;
     ul.nav-tabs{
       border-bottom: none;
       a{
@@ -14,6 +16,18 @@
       }
       a:last-child{
         margin-right: 0px;
+      }
+    }
+  }
+  // Ensure that this pulls to the left and then stacks vertically
+  // on tiny screens.  Ugly otherwise.
+  @media (max-width: 500px){
+    nav {
+      float: none;
+      ul.nav-tabs{
+        a{
+          display: block;
+        }
       }
     }
   }
