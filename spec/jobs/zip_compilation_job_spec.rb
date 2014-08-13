@@ -45,7 +45,8 @@ describe ZipCompilationJob do
 
         ugly_from_fine = Proc.new do |x|
           id    = x.core_record.pid.split(":").last
-          lbl   = x.type_label
+          # lbl   = x.type_label
+          lbl   = I18n.t("drs.display_labels.#{x.klass}.short")
           fname = x.title
           ext   = File.extname(x.content.label) || ""
           "#{id}-#{lbl}-#{fname}"
