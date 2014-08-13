@@ -117,55 +117,72 @@ en:
       default: Theses and dissertations for
     display_labels:
       Employee:
-        name: Faculty
-        icon:
+        name: Faculty and Staff
+        short: Person
       AudioFile:
         name: Audio File
-        icon:
+        short: Audio
+        download: audio
       ImageLargeFile:
         name: Large Image
-        icon:
+        short: Image
+        download: highres
       ImageMasterFile:
         name: Master Image
-        icon:
+        short: Image
+        download: master
       ImageMediumFile:
         name: Medium Image
-        icon:
+        short: Image
+        download: medres
       ImageSmallFile:
         name: Small Image
-        icon:
+        short: Image
+        download: lowres
       ImageThumbnailFile:
         name: Thumbnail Image
-        icon:
+        short: Thumbnail
+        download: thumb
       MsexcelFile:
         name: Spreadsheet
-        icon:
+        short: Dataset
+        download: excel
       MspowerpointFile:
-        name: Presentation
-        icon:
+        name: PowerPoint
+        short: Presentation
+        download: powerpoint
       MswordFile:
-        name: Document
-        icon:
+        name: Word Document
+        short: Document
+        download: word_doc
       PdfFile:
         name: PDF
-        icon:
+        short: Document
+        download: pdf
       TextFile:
-        name: Document
-        icon:
+        name: Text Document
+        short: Document
+        download: text
       VideoFile:
         name: Video File
-        icon:
+        short: Video
+        download: video
       ZipFile:
         name: Zip File
-        icon:
+        short: Zip
+        download: zipped
       Community:
         name: Community
+        short: Community
       NuCollection:
         name: Collection
+        short: Collection
       NuCoreFile:
         name: File
+        short: File
       Compilation:
         name: Set
+        short: Set
     full_metadata:
       processing note: "The metadata details and access controls you specified are being processed in the background. Your file will be marked as 'Private' until this brief process is complete."
   blacklight:
