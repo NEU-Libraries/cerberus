@@ -34,8 +34,8 @@ class ZipCompilationJob
         if NuCoreFile.exists?(id) && !(NuCoreFile.find(id).under_embargo?(User.find_by_nuid(nuid)))
           NuCoreFile.find(id).content_objects.each do |content|
             if user.can?(:read, content) && content.content.content && content.class != ImageThumbnailFile
-              type_label = I18n.t("drs.display_labels.#{content.klass}.short")
-              io.add_buffer("#{self.title}/#{id.split(":").last}-#{type_label}-#{content.title}#{File.extname(content.original_filename || "")}", content.content.content)
+              download_label = I18n.t("drs.display_labels.#{content.klass}.download_label")
+              io.add_buffer("#{self.title}/#{id.split(":").last}-#{download_label}#{File.extname(content.original_filename || "")}", content.content.content)
             end
           end
         end
