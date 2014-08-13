@@ -23,7 +23,4 @@
             = "Embargoed"
         - else
           %span.label.small
-            - if item.type_label == "Master Image"
-              = "Image"
-            - else
-              = item.type_label
+            = item.type_label
