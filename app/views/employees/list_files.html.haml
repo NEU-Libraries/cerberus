@@ -1,8 +1,18 @@
 - content_for :page_header do
   %h1.page-header
-    = "#{@employee.employee_name}"
+    ="#{@employee.employee_name}"
     %small
       All Files
+    %nav{role: "navigation", class: "pull-right"}
+      %ul.nav.nav-tabs
+        %li
+          %a{ href: employee_path(@employee) }
+            %i.icon-user
+            - if current_user && current_user.nuid == @employee.nuid
+              My collections
+            - else
+              ="#{@employee.employee_name}'s collections"
+
 
 .row
   - if current_user
