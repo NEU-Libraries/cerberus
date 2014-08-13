@@ -83,9 +83,9 @@ module Drs
 
     def type_label
       if self.klass == "NuCoreFile" && !self.canonical_object.nil?
-        return I18n.t("drs.display_labels.#{self.canonical_object.klass}.name")
+        return I18n.t("drs.display_labels.#{self.canonical_object.klass}.short")
       end
-      I18n.t("drs.display_labels.#{self.klass}.name")
+      I18n.t("drs.display_labels.#{self.klass}.short")
     end
 
     def thumbnail_list
