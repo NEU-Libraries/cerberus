@@ -19,16 +19,12 @@
       }
     }
   }
+
   // Ensure that this pulls to the left and then stacks vertically
   // on tiny screens.  Ugly otherwise.
-  @media (max-width: 500px){
+  @media (max-width: 600px){
     nav {
       float: none;
-      ul.nav-tabs{
-        a{
-          display: block;
-        }
-      }
     }
   }
 }
