@@ -1,0 +1,20 @@
+.page-header{
+  //Style nav-tab usage
+  nav {
+    ul.nav-tabs{
+      border-bottom: none;
+      a{
+        display: inline;
+        font-size: 17px;
+        font-weight: 100;
+        padding-bottom: 21px;
+      }
+      a:hover{
+        border-bottom:none;
+      }
+      a:last-child{
+        margin-right: 0px;
+      }
+    }
+  }
+}
