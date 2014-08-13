@@ -24,11 +24,6 @@ module Drs
       belongs_to :core_record, property: :is_part_of, class_name: 'NuCoreFile'
     end
 
-    # Provides a string for labeling the UI
-    def type_label
-      self.class.name
-    end
-
     def public?
       self.rightsMetadata.permissions({group: 'public'}, 'read')
     end
