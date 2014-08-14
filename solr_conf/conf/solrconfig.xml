@@ -43,6 +43,7 @@
           title_tesim
           author_tesim
           subject_tesim
+          all_text_timv
         </str>
         <str name="pf">
           all_text_timv^10
