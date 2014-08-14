@@ -26,14 +26,15 @@
         - else
           = kramdown_parse(item.description)
 
-  - if @response['highlighting'][item.pid].key? 'all_text_timv'
-    %dl.drs-item-highlight-list
-      %dt.drs-item-highlight-label
-        Full Text Match
-      %dd.well.drs-item-highlight
-        = "... "
-        = @response['highlighting'][item.pid]['all_text_timv'].first.html_safe
-        = "... "
+  - if !@response.nil?
+    - if @response['highlighting'][item.pid].key? 'all_text_timv'
+      %dl.drs-item-highlight-list
+        %dt.drs-item-highlight-label
+          Full Text Match
+        %dd.well.drs-item-highlight
+          = "... "
+          = @response['highlighting'][item.pid]['all_text_timv'].first.html_safe
+          = "... "
   - if !@response['highlighting'][item.pid].key?('all_text_timv') && item.description.blank?
     .list-view-spacer
   - if !item.under_embargo?(current_user)
