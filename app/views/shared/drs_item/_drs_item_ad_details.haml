@@ -25,6 +25,14 @@
               Expand / collapse toggle
         - else
           = kramdown_parse(item.description)
+
+  - if !@response.nil?
+    %dl.drs-item-highlight-list
+      %dt.drs-item-highlight-label
+        Matching Results
+      %dd.drs-item-highlight
+        - if @response['highlighting'][item.pid].key? 'all_text_timv'
+          = @response['highlighting'][item.pid]['all_text_timv'].first.html_safe
   - else
     .list-view-spacer
   - if !item.under_embargo?(current_user)
