@@ -26,7 +26,7 @@
         - else
           = kramdown_parse(item.description)
 
-  - if !@response.nil?
+  - if !@response.nil? && !@response['highlighting'].nil? && !@response['highlighting'][item.pid].nil?
     - if @response['highlighting'][item.pid].key? 'all_text_timv'
       %dl.drs-item-highlight-list
         %dt.drs-item-highlight-label
