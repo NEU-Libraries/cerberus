@@ -89,7 +89,11 @@ class ShoppingCartsController < ApplicationController
       end
 
       format.js do
-        render("download") if File.file?(f)
+        if File.file?(f)
+          render("download")
+        else
+          render :nothing => true
+        end
       end
     end
   end
@@ -97,7 +101,6 @@ class ShoppingCartsController < ApplicationController
   # Actually trigger a download.
   def fire_download
     f = "#{Rails.root}/tmp/carts/#{request.session_options[:id]}/drs_queue.zip"
-    retries = 0
 
     send_file(f)
   end
