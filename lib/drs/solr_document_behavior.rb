@@ -85,6 +85,10 @@ module Drs
       if self.klass == "NuCoreFile" && !self.canonical_object.nil?
         return I18n.t("drs.display_labels.#{self.canonical_object.klass}.short")
       end
+      I18n.t("drs.display_labels.#{self.klass}.short")
+    end
+
+    def derivative_label
       I18n.t("drs.display_labels.#{self.klass}.name")
     end
 
