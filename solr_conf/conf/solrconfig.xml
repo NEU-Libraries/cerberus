@@ -71,6 +71,7 @@
        </str>
 
        <str name="hl">on</str>
+       <int name="hl.maxAnalyzedChars">-1</int>
 
        <str name="hl.fl">
          all_text_timv
