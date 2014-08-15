@@ -50,8 +50,7 @@ class ZipCompilationJob
     # Generates a temporary directory name devoid of spaces and colons
     def safe_zipfile_name
       safe_title = self.title.gsub(/\s+/, "")
-      timestamp = DateTime.now.strftime("%Y-%m-%d-%M-%s")
-
-      return "#{Rails.root}/tmp/#{self.comp_pid}/#{safe_title}_archived_#{timestamp}.zip"
+      safe_title = safe_title.gsub(":", "_")
+      return "#{Rails.root}/tmp/#{self.comp_pid}/#{safe_title}.zip"
     end
 end
