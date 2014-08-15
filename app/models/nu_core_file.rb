@@ -248,10 +248,6 @@ class NuCoreFile < ActiveFedora::Base
     self.content_objects.find { |c| c.instance_of? ImageThumbnailFile } || false
   end
 
-  def type_label
-    "File"
-  end
-
   private
 
     def purge_content_bearing_objects

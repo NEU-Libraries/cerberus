@@ -70,11 +70,6 @@ class NuCollection < ActiveFedora::Base
     yield self
   end
 
-  # Simple human readable label for objects.
-  def type_label
-    "Collection"
-  end
-
   protected
 
     def belong_check

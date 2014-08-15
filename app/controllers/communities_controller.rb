@@ -55,7 +55,7 @@ class CommunitiesController < ApplicationController
   def employees
     @page_title = "#{@set.title} #{t('drs.significant.employees.name')}"
 
-    @smart_docs = @set.find_employees
+    @smart_docs = safe_get_smart_docs(@set.find_employees)
     render 'smart_collection', locals: { smart_collection: 'employees' }
   end
 
