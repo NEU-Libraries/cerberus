@@ -92,7 +92,11 @@ class CompilationsController < ApplicationController
   def ping_download
     respond_to do |format|
       format.js do
-        render("ping_download") if (download_is_ready?(@compilation.pid))
+        if File.file?(safe_zipfile_name)
+          render("ping_download")
+        else
+          render :nothing => true
+        end
       end
     end
   end
@@ -151,11 +155,11 @@ class CompilationsController < ApplicationController
     end
   end
 
-  def download_is_ready?(pid)
-    path_to_dl = "#{Rails.root}/tmp/#{pid}"
-    # check that the directory exists
-    if File.directory?(path_to_dl)
-      return !Dir["#{path_to_dl}/*"].empty?
-    end
+  private
+
+  def safe_zipfile_name
+    safe_title = @compilation.title.gsub(/\s+/, "")
+    safe_title = safe_title.gsub(":", "_")
+    return "#{Rails.root}/tmp/#{@compilation.pid}/#{safe_title}.zip"
   end
 end

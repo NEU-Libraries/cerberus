@@ -81,7 +81,7 @@ $(document).ready ->
 
       if $('#display_download_link').length > 0
         if $('#display_download_link').is(':empty')
-          x.download_interval_id = setInterval(x.addDownloadLink(), 3000)
+          x.download_interval_id = setInterval(x.addDownloadLink, 3000)
 
 
     removeFromCartToggle = ->
