@@ -103,6 +103,19 @@
         .list-view-spacer{
           height: 35px;
         }
+        .drs-item-highlight-list{
+          .drs-item-highlight{
+            font-size: small;
+            padding: 10px;
+            margin-left: 0px;
+            margin-bottom: 8px;
+            em{
+              color: $blue;
+              font-style: normal;
+              font-weight: bold;
+            }
+          }
+        }
       }
 
     }

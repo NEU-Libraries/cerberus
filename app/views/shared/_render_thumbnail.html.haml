@@ -1,7 +1,0 @@
-- if thumbnail.instance_of? ImageThumbnailFile
-	%figure
-		%img{src: download_path(thumbnail.pid, {datastream_id: 'content'}) }
-		%figcaption= thumbnail.description
-- else
-	%div
-		%i{ class: thumbnail }

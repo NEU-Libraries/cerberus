@@ -79,6 +79,7 @@ class ShoppingCartsController < ApplicationController
   # JS requests handle eventually triggering the download once on the download page.
   def download
     dir = "#{Rails.root}/tmp/carts/#{request.session_options[:id]}/"
+    f = "#{Rails.root}/tmp/carts/#{request.session_options[:id]}/drs_queue.zip"
 
     respond_to do |format|
       format.html do
@@ -88,7 +89,7 @@ class ShoppingCartsController < ApplicationController
       end
 
       format.js do
-        render("download") if !(Dir[dir].empty?)
+        render("download") if File.file?(f)
       end
     end
   end
@@ -98,18 +99,7 @@ class ShoppingCartsController < ApplicationController
     f = "#{Rails.root}/tmp/carts/#{request.session_options[:id]}/drs_queue.zip"
     retries = 0
 
-    while retries < 3 do
-      if !File.file?(f)
-        sleep 1
-        retries +=1
-      end
-    end
-
-    begin
-      send_file(f)
-    rescue ActionController::MissingFile => exception
-      ExceptionNotifier.notify_exception(exception, :data => {:file_path => "#{f}"})
-    end
+    send_file(f)
   end
 
   private
