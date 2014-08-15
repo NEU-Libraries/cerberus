@@ -66,7 +66,7 @@ $(document).ready ->
 
       if $('#sc_download_page').length > 0
         if $('#button_slot').is(':empty')
-          x.download_interval_id = setInterval(x.addDownloadLink(), 3000)
+          x.download_interval_id = setInterval(x.addDownloadLink, 3000)
 
     triggerCompilationDownload = ->
       x =
