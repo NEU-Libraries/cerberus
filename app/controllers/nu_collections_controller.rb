@@ -94,8 +94,9 @@ class NuCollectionsController < ApplicationController
 
     @page_title = @set.title
 
-    if !@set.smart_collection_type.nil? && @set.smart_collection_type == 'User Root' && @set.pf_belongs_to_user?(current_user)
-      return redirect_to personal_graph_path
+    if !@set.smart_collection_type.nil? && @set.smart_collection_type == 'User Root'
+      #redirect to employee view
+      return redirect_to employee_path((Employee.find_by_nuid(@set.depositor)).pid)
     end
 
     self.solr_search_params_logic += [:show_children_only]
