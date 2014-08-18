@@ -43,14 +43,10 @@
     %small
       = render_constraints(params)
 
-- if current_user
-  - drs_items_class = drs_view_class == "list" ? "span9" : "span12"
-  - sidebar_class = drs_view_class == "list" ? "span3" : "span12"
-  - pane_small_class = drs_view_class == "list" ? "" : "span3"
-  - pane_large_class = drs_view_class == "list" ? "" : "span6"
-- else
-  - sidebar_class = "span3"
-  - drs_items_class = "span9"
+- drs_items_class = drs_view_class == "list" ? "span9" : "span12"
+- sidebar_class = drs_view_class == "list" ? "span3" : "span12"
+- pane_small_class = drs_view_class == "list" ? "" : "span3"
+- pane_large_class = drs_view_class == "list" ? "" : "span6"
 %main.row( role="main" )
   %aside.drs-sidebar{ class: sidebar_class }
     .pane.results-view{ class: pane_small_class }
