@@ -7,3 +7,4 @@
   = link_to( list_view_text.html_safe , view_pref_path(view_pref: 'list'), method: 'put', remote: 'true',data: {"target" => "drs-items-list"}, class: "btn btn-clear " + ( drs_view_class == 'list' ? 'active' : '' ))
   = link_to( grid_view_text.html_safe , view_pref_path(view_pref: 'grid'), method: 'put', remote: 'true',data: {"target" => "drs-items-grid"}, class: "btn btn-clear " + ( drs_view_class == 'grid' ? 'active' : '' ))
 
+= debug session
