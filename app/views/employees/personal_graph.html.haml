@@ -14,4 +14,4 @@
 %p.lead
   = t('drs.personal_graph.description')
 
-= render partial: "smart_and_user_collections", locals: { :generated_smart_collections => @employee.user_smart_collections, :user_smart_collections => @employee.user_personal_collections, :editable => true }
+= render partial: "smart_and_user_collections", locals: { :smart_collections => @employee.user_smart_collections, :user_collections => @employee.user_personal_collections, :editable => true }

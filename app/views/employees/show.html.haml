@@ -8,4 +8,4 @@
             %i.icon-file
             ="#{@employee.employee_name}'s files"
 
-= render partial: "smart_and_user_collections", locals: { :generated_smart_collections => @system_collections, :user_smart_collections => @user_collections, :editable => false }
+= render partial: "smart_and_user_collections", locals: { :smart_collections => @system_collections, :user_collections => @user_collections, :editable => false }
