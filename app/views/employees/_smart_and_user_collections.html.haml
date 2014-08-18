@@ -26,7 +26,7 @@
           - if !f.is_empty_collection? || (current_user && @current_user.nuid == @employee.nuid)
             - @thumbs = f.thumbnail_list
             =render partial: "shared/drs_item/drs_item", locals: { item: f }
-    -else
+    -if user_collections.length == 0
       .alert.alert-info
         %strong
           No user collections to show.
