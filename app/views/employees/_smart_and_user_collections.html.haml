@@ -9,6 +9,11 @@
           - if !f.is_empty_collection? || (current_user && current_user.nuid == @employee.nuid)
             - @thumbs = f.thumbnail_list
             =render partial: "shared/drs_item/drs_item", locals: { item: f }
+    -else
+      .alert.alert-info
+        %strong
+          No scholarly works for this person at this time.
+        %button.close{"data-dismiss" => "alert", type: "button"} &#215;
   %article.span6
     %h3
       = t('drs.personal_graph.personal_collections')
