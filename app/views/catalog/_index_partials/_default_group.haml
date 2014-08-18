@@ -1,5 +1,5 @@
 - page_info = paginate_params(@response)
-%ul.drs-items{start: 1+((page_info.current_page-1)*page_info.limit_value), data: {toggle: "drs-view"}, class: drs_view_class()}
+%ul.drs-items{start: 1+((page_info.current_page-1)*page_info.limit_value), data: {toggle: "drs-view"}, class: drs_view_class}
   -if !@smart_docs.nil?
     - @smart_docs.each do |document|
       - @thumbs = document.thumbnail_list

@@ -60,13 +60,13 @@ module ApplicationHelper
   def drs_view_class
     if current_user
       if !current_user.view_pref
-        current_user.view_pref == 'grid'
+        current_user.view_pref = 'list'
         current_user.save!
       end
       user_view_pref = current_user.view_pref
     else
       if !session[:view_pref]
-        session[:view_pref] == 'grid'
+        session[:view_pref] = 'list'
       end
       user_view_pref = session[:view_pref]
     end
