@@ -58,12 +58,6 @@ class NuCoreFilesController < ApplicationController
 
     @title = @nu_core_file.title
 
-    # With the move to single file upload, incomplete files (plural) is a misnomer.
-    # but worthwhile to keep if we reimplement batch uploads. In the meantime only
-    # NuCoreFile.in_progress_files_for_nuid(x).first should ever occur (not more than one at a time).
-
-    # @sample_incomplete_file = NuCoreFile.in_progress_files_for_nuid(current_user.nuid).first
-    # @incomplete_files = NuCoreFile.in_progress_files_for_nuid(current_user.nuid)
     @page_title = "Provide Upload Metadata"
   end
 
@@ -90,14 +84,12 @@ class NuCoreFilesController < ApplicationController
       proxy_nuid     = nil
     end
 
+    @nu_core_file = NuCoreFile.find(params[:id])
+
     Drs::Application::Queue.push(MetadataUpdateJob.new(depositor_nuid, params, proxy_nuid))
-    @nu_core_file = NuCoreFile.in_progress_files_for_nuid(depositor_nuid).first
 
     update_metadata if params[:nu_core_file]
-
     max = session[:slider_max]
-
-    @nu_core_file = NuCoreFile.find(@nu_core_file.pid)
 
     # Process Thumbnail
     if params[:poster]
@@ -119,7 +111,7 @@ class NuCoreFilesController < ApplicationController
       Drs::Application::Queue.push(ContentCreationJob.new(@nu_core_file.pid, @nu_core_file.tmp_path, @nu_core_file.original_filename))
     end
 
-    flash[:notice] = 'Your files are being processed by ' + t('drs.product_name.short') + ' in the background. The metadata and access controls you specified are being applied. Files will be marked <span class="label label-important" title="Private">Private</span> until this process is complete (shouldn\'t take too long, hang in there!).'
+    flash[:notice] = 'Your files are being processed by ' + t('drs.product_name.short') + ' in the background. The metadata and access controls you specified are being applied. Files will be marked <span class="label label-important" title="Private">In Progress</span> until this process is complete (shouldn\'t take too long, hang in there!).'
     redirect_to nu_core_file_path(@nu_core_file.pid)
   end
 
@@ -300,7 +292,6 @@ class NuCoreFilesController < ApplicationController
         nu_core_file.category = sc_type
       end
 
-      yield(nu_core_file) if block_given?
       nu_core_file.save!
       return nu_core_file
     end
@@ -315,8 +306,8 @@ class NuCoreFilesController < ApplicationController
         new_path = tempdir.join("#{file.original_filename}")
         FileUtils.mv(file.tempfile.path, new_path.to_s)
 
-        file = update_metadata_from_upload_screen(@nu_core_file, file, params[:collection_id], new_path.to_s, params[:proxy])
-        redirect_to files_provide_metadata_path(file.pid, {proxy: params[:proxy]})
+        update_metadata_from_upload_screen(@nu_core_file, file, params[:collection_id], new_path.to_s, params[:proxy])
+        redirect_to files_provide_metadata_path(@nu_core_file.pid, {proxy: params[:proxy]})
       else
         render :json => [{:error => "Error creating file."}]
       end

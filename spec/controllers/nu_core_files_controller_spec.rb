@@ -111,7 +111,7 @@ describe NuCoreFilesController do
       end
 
       # Check that the files just created were deleted
-      bills_incomplete_files = NuCoreFile.in_progress_files_for_nuid(bill.nuid)
+      bills_incomplete_files = NuCoreFile.abandoned_for_nuid(bill.nuid)
       bills_incomplete_files.length.should == 2
 
       # Check that bills complete file was not deleted
