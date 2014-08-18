@@ -300,7 +300,6 @@ class NuCoreFilesController < ApplicationController
         nu_core_file.category = sc_type
       end
 
-      yield(nu_core_file) if block_given?
       nu_core_file.save!
       return nu_core_file
     end
