@@ -2,9 +2,9 @@
   %article.span6
     %h3
       = t('drs.personal_graph.system_generated_smart_collections')
-    -if generated_smart_collections.length > 0
+    -if smart_collections.length > 0
       %section{class: ["drs-items-list", "drs-items"] }
-        - generated_smart_collections.each do |f|
+        - smart_collections.each do |f|
           - # Don't show empty smart collections unless they're the current user's
           - if !f.is_empty_collection? || (current_user && current_user.nuid == @employee.nuid)
             - @thumbs = f.thumbnail_list
@@ -12,9 +12,9 @@
   %article.span6
     %h3
       = t('drs.personal_graph.personal_collections')
-    -if user_smart_collections.length > 0
+    -if user_collections.length > 0
       %section{class: ["drs-items-list", "drs-items"] }
-        - user_smart_collections.each do |f|
+        - user_collections.each do |f|
           - # Don't show empty smart collections unless they're the current user's
           - if !f.is_empty_collection? || (current_user && @current_user.nuid == @employee.nuid)
             - @thumbs = f.thumbnail_list
