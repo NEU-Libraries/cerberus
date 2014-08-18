@@ -80,6 +80,7 @@ class DerivativeCreator
 
       master.transform_datastream(:content, { to_pdf: { format: 'pdf', datastream: 'pdf'} }, processor: 'document')
       pdf.add_file(master.pdf.content, 'content', "#{master.content.label.split('.').first}.pdf")
+      pdf.original_filename = "#{master.content.label.split('.').first}.pdf"
       pdf.save! ? pdf : false
     end
 
