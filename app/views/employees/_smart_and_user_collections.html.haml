@@ -20,12 +20,12 @@
     %h3
       = t('drs.personal_graph.personal_collections')
     %section{class: ["drs-items-list", "drs-items"] }
-    -if user_collections.length > 0
-      - user_collections.each do |f|
-        - # Don't show empty smart collections unless they're the current user's
-        - if !f.is_empty_collection? || (current_user && @current_user.nuid == @employee.nuid)
-          - @thumbs = f.thumbnail_list
-          =render partial: "shared/drs_item/drs_item", locals: { item: f }
+      -if user_collections.length > 0
+        - user_collections.each do |f|
+          - # Don't show empty smart collections unless they're the current user's
+          - if !f.is_empty_collection? || (current_user && @current_user.nuid == @employee.nuid)
+            - @thumbs = f.thumbnail_list
+            =render partial: "shared/drs_item/drs_item", locals: { item: f }
     -else
       .alert.alert-info
         %strong
