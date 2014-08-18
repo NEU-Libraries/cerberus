@@ -314,8 +314,8 @@ class NuCoreFilesController < ApplicationController
         new_path = tempdir.join("#{file.original_filename}")
         FileUtils.mv(file.tempfile.path, new_path.to_s)
 
-        file = update_metadata_from_upload_screen(@nu_core_file, file, params[:collection_id], new_path.to_s, params[:proxy])
-        redirect_to files_provide_metadata_path(file.pid, {proxy: params[:proxy]})
+        update_metadata_from_upload_screen(@nu_core_file, file, params[:collection_id], new_path.to_s, params[:proxy])
+        redirect_to files_provide_metadata_path(@nu_core_file.pid, {proxy: params[:proxy]})
       else
         render :json => [{:error => "Error creating file."}]
       end
