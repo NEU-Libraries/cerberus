@@ -27,6 +27,10 @@ class EmployeesController < ApplicationController
     @system_collections = @employee.user_smart_collections
     @user_collections   = @employee.user_personal_collections
 
+    puts "DGC DEBUG 1"
+    puts @user_collections.length
+    puts @system_collections
+
     read_proc = Proc.new do |r|
       current_user ? current_user.can?(:read,r) : r.public?
     end
@@ -35,9 +39,17 @@ class EmployeesController < ApplicationController
       read_proc.call(x)
     end
 
+    puts "DGC DEBUG 2"
+    puts @user_collections.length
+    puts @system_collections
+
     @user_collections.keep_if do |x|
       read_proc.call(x)
     end
+
+    puts "DGC DEBUG 3"
+    puts @user_collections.length
+    puts @system_collections
 
     if user_examining_self?
       return redirect_to personal_graph_path
