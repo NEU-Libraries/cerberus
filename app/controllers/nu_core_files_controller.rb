@@ -58,12 +58,6 @@ class NuCoreFilesController < ApplicationController
 
     @title = @nu_core_file.title
 
-    # With the move to single file upload, incomplete files (plural) is a misnomer.
-    # but worthwhile to keep if we reimplement batch uploads. In the meantime only
-    # NuCoreFile.in_progress_files_for_nuid(x).first should ever occur (not more than one at a time).
-
-    # @sample_incomplete_file = NuCoreFile.in_progress_files_for_nuid(current_user.nuid).first
-    # @incomplete_files = NuCoreFile.in_progress_files_for_nuid(current_user.nuid)
     @page_title = "Provide Upload Metadata"
   end
 
