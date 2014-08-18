@@ -56,7 +56,6 @@ module ApplicationHelper
     end
   end
 
-  # Helper method to either the preference of user or session variable for a guest
   def drs_view_class
     if current_user
       if !current_user.view_pref
