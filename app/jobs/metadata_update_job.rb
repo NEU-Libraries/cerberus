@@ -20,9 +20,8 @@ class MetadataUpdateJob
     @saved = []
     @denied = []
 
-    NuCoreFile.in_progress_files_for_nuid(depositor_nuid).each do |gf|
-      update_file(gf)
-    end
+    # No batches, we shouldn't be calling
+    # update_file(gf)
 
     # Still a little kludgey...
     msgd = (uploader_nuid ? User.find_by_nuid(uploader_nuid) : User.find_by_nuid(depositor_nuid))
