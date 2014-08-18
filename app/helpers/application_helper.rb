@@ -56,21 +56,20 @@ module ApplicationHelper
     end
   end
 
-  # Helper method to either the preference of user or session variable for a guest
   def drs_view_class
     if current_user
       if !current_user.view_pref
-        current_user.view_pref == 'grid'
+        current_user.view_pref = 'list'
         current_user.save!
       end
       user_view_pref = current_user.view_pref
     else
       if !session[:view_pref]
-        session[:view_pref] == 'grid'
+        session[:view_pref] = 'list'
       end
       user_view_pref = session[:view_pref]
     end
-    return user_view_pref == "grid" ? "drs-items-grid" : "drs-items-list"
+    return user_view_pref
   end
 
 end

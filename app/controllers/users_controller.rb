@@ -16,6 +16,8 @@ class UsersController < ApplicationController
             @user.view_pref = view_pref
             @user.save!
           end
+        else
+          session[:view_pref] = view_pref
         end
 
       else
