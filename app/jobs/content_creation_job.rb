@@ -47,6 +47,8 @@ class ContentCreationJob
       content_object.proxy_uploader = core_record.proxy_uploader
       content_object.rightsMetadata.content = core_record.rightsMetadata.content
 
+      content_object.original_filename = core_record.original_filename
+
       content_object.canonize
       content_object.characterize
 

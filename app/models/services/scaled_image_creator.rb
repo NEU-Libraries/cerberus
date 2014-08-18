@@ -79,6 +79,7 @@ class ScaledImageCreator
         fname = "#{fname.chomp(File.extname(fname))}.jpg"
 
         target.add_file(scaled_img.to_blob, 'content', fname)
+        target.original_filename = fname
         target.save!
       end
     end
