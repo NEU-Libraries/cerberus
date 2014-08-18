@@ -163,13 +163,6 @@ class NuCoreFile < ActiveFedora::Base
     end
   end
 
-  # Return a list of all in progress files associated with this nuid
-  def self.in_progress_files_for_nuid(nuid)
-    f_query = ActiveFedora::SolrService.query("depositor_tesim:\"#{nuid}\" AND in_progress_tesim:true")
-    solr_list = f_query.map { |x| SolrDocument.new(x) }
-    return solr_list.map { |x| NuCoreFile.find(x.pid) }
-  end
-
   def in_progress_for_user?(user)
     return self.properties.in_progress? && user.nuid == self.depositor
   end
