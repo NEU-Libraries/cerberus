@@ -12,16 +12,17 @@ class DerivativeCreator
   end
 
   def generate_derivatives
+
     if master.instance_of? MswordFile
       pdf = create_pdf_file
       pdf.transform_datastream(:content, content: { datastream: 'content', size: '1000x1000>' })
-      # create_thumbnail_from_pdf(pdf)
+      @blob = pdf.content.content
+    else
+      @blob = self.master.content.content
     end
 
-    blob = self.master.content.content
-
     if self.master.content.content.instance_of? (StringIO)
-      blob = blob.string
+      @blob = blob.string
     end
 
     create_all_thumbnail_sizes
@@ -60,13 +61,13 @@ class DerivativeCreator
       pdf.save! ? pdf : false
     end
 
-    def create_scaled_progressive_jpeg(size, dsid, poster = false)
+    def create_scaled_progressive_jpeg(size, dsid)
       thumb = find_or_create_thumbnail
       if (master.is_a? ImageMasterFile) && !(master.width.first.to_i >= size[:width])
         return false
       end
 
-      img = Magick::Image.from_blob(blob).first
+      img = Magick::Image.from_blob(self.blob).first
 
       if size[:height] && size[:width]
         scaled_img = img.resize_to_fit(size[:height], size[:width])
