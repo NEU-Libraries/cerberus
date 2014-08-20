@@ -3,7 +3,7 @@ include Magick
 
 class DerivativeCreator
 
-  attr_accessor :core, :master, :thumbnail_list
+  attr_accessor :core, :master, :thumbnail_list, :blob
 
   def initialize(master_pid)
     @master = ActiveFedora::Base.find(master_pid, cast: true)
@@ -12,17 +12,13 @@ class DerivativeCreator
   end
 
   def generate_derivatives
-    if master.instance_of? ImageMasterFile
-      create_full_thumbnail
-    elsif master.instance_of? PdfFile
-      # create_thumbnail_from_pdf(self.master)
-      create_full_thumbnail
-    elsif master.instance_of? MswordFile
+    if master.instance_of? MswordFile
       pdf = create_pdf_file
       pdf.transform_datastream(:content, content: { datastream: 'content', size: '1000x1000>' })
       # create_thumbnail_from_pdf(pdf)
-      create_full_thumbnail
     end
+
+    create_full_thumbnail
 
     @core.reload
     @core.thumbnail_list = @thumbnail_list
