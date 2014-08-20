@@ -18,7 +18,13 @@ class DerivativeCreator
       # create_thumbnail_from_pdf(pdf)
     end
 
-    create_full_thumbnail
+    blob = self.master.content.content
+
+    if self.master.content.content.instance_of? (StringIO)
+      blob = blob.string
+    end
+
+    create_all_thumbnail_sizes
 
     @core.reload
     @core.thumbnail_list = @thumbnail_list
@@ -27,9 +33,7 @@ class DerivativeCreator
 
   private
 
-    # Creates a thumbnail with as many datastreams as possible.
-    # Used exclusively for images.
-    def create_full_thumbnail
+    def create_all_thumbnail_sizes
       create_scaled_progressive_jpeg({height: 85, width: 85}, 'thumbnail_1')
       create_scaled_progressive_jpeg({height: 170, width: 170}, 'thumbnail_2')
       create_scaled_progressive_jpeg({height: 340, width: 340}, 'thumbnail_3')
@@ -60,16 +64,6 @@ class DerivativeCreator
       thumb = find_or_create_thumbnail
       if (master.is_a? ImageMasterFile) && !(master.width.first.to_i >= size[:width])
         return false
-      end
-
-      if !poster
-        blob = self.master.content.content
-      else
-        blob = self.master.poster.content
-      end
-
-      if self.master.content.content.instance_of? (StringIO)
-        blob = blob.string
       end
 
       img = Magick::Image.from_blob(blob).first
