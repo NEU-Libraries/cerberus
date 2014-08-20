@@ -3,7 +3,7 @@ include Magick
 
 class DerivativeCreator
 
-  attr_accessor :core, :master, :thumbnail_list, :blob
+  attr_accessor :core, :master
 
   def initialize(master_pid)
     @master = ActiveFedora::Base.find(master_pid, cast: true)
@@ -13,33 +13,36 @@ class DerivativeCreator
 
   def generate_derivatives
 
+    blob = nil
+
     if master.instance_of? MswordFile
       pdf = create_pdf_file
       pdf.transform_datastream(:content, content: { datastream: 'content', size: '1000x1000>' })
-      @blob = pdf.content.content
+      blob = pdf.content.content
     else
-      @blob = self.master.content.content
+      blob = self.master.content.content
     end
 
     if self.master.content.content.instance_of? (StringIO)
-      @blob = blob.string
+      blob = blob.string
     end
 
-    create_all_thumbnail_sizes
+    create_all_thumbnail_sizes(blob, @core.thumbnail_list)
 
     @core.reload
-    @core.thumbnail_list = @thumbnail_list
     @core.save!
   end
 
   private
 
-    def create_all_thumbnail_sizes
-      create_scaled_progressive_jpeg({height: 85, width: 85}, 'thumbnail_1')
-      create_scaled_progressive_jpeg({height: 170, width: 170}, 'thumbnail_2')
-      create_scaled_progressive_jpeg({height: 340, width: 340}, 'thumbnail_3')
-      create_scaled_progressive_jpeg({width: 500}, 'thumbnail_4')
-      create_scaled_progressive_jpeg({width: 1000}, 'thumbnail_5')
+    def create_all_thumbnail_sizes(blob, thumbnail_list)
+      thumb = find_or_create_thumbnail
+
+      create_scaled_progressive_jpeg(thumb, blob, thumbnail_list, {height: 85, width: 85}, 'thumbnail_1')
+      create_scaled_progressive_jpeg(thumb, blob, thumbnail_list, {height: 170, width: 170}, 'thumbnail_2')
+      create_scaled_progressive_jpeg(thumb, blob, thumbnail_list, {height: 340, width: 340}, 'thumbnail_3')
+      create_scaled_progressive_jpeg(thumb, blob, thumbnail_list, {width: 500}, 'thumbnail_4')
+      create_scaled_progressive_jpeg(thumb, blob, thumbnail_list, {width: 1000}, 'thumbnail_5')
     end
 
     # Create or update a PDF file.
@@ -61,13 +64,13 @@ class DerivativeCreator
       pdf.save! ? pdf : false
     end
 
-    def create_scaled_progressive_jpeg(size, dsid)
-      thumb = find_or_create_thumbnail
+    def create_scaled_progressive_jpeg(thumb, blob, thumbnail_list, size, dsid)
+
       if (master.is_a? ImageMasterFile) && !(master.width.first.to_i >= size[:width])
         return false
       end
 
-      img = Magick::Image.from_blob(self.blob).first
+      img = Magick::Image.from_blob(blob).first
 
       if size[:height] && size[:width]
         scaled_img = img.resize_to_fit(size[:height], size[:width])
@@ -86,7 +89,7 @@ class DerivativeCreator
       thumb.add_file(end_img.to_blob, dsid, "#{self.master.content.label.split('.').first}.jpeg")
       thumb.save!
 
-      self.thumbnail_list << "/downloads/#{self.core.thumbnail.pid}?datastream_id=#{dsid}"
+      thumbnail_list << "/downloads/#{self.core.thumbnail.pid}?datastream_id=#{dsid}"
     end
 
     def update_or_create_with_metadata(title, desc, klass, object = nil)
