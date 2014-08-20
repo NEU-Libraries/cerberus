@@ -15,12 +15,13 @@ class DerivativeCreator
     if master.instance_of? ImageMasterFile
       create_full_thumbnail
     elsif master.instance_of? PdfFile
-      create_thumbnail_from_pdf(self.master)
+      # create_thumbnail_from_pdf(self.master)
+      create_full_thumbnail
     elsif master.instance_of? MswordFile
       pdf = create_pdf_file
-      create_thumbnail_from_pdf(pdf)
-    elsif master.instance_of? VideoFile
-      create_thumbnail_from_poster
+      pdf.transform_datastream(:content, content: { datastream: 'content', size: '1000x1000>' })
+      # create_thumbnail_from_pdf(pdf)
+      create_full_thumbnail
     end
 
     @core.reload
@@ -30,39 +31,14 @@ class DerivativeCreator
 
   private
 
-    def create_thumbnail_from_poster
-      thumbnail = find_or_create_thumbnail
-
-      create_scaled_progressive_jpeg(thumbnail, master, {height: 85, width: 85}, 'thumbnail_1', true)
-      create_scaled_progressive_jpeg(thumbnail, master, {height: 170, width: 170}, 'thumbnail_2', true)
-      create_scaled_progressive_jpeg(thumbnail, master, {height: 340, width: 340}, 'thumbnail_3', true)
-      create_scaled_progressive_jpeg(thumbnail, master, {width: 500}, 'thumbnail_4', true)
-      create_scaled_progressive_jpeg(thumbnail, master, {width: 1000}, 'thumbnail_5', true)
-    end
-
-    def create_thumbnail_from_pdf(pdf)
-      thumbnail = find_or_create_thumbnail
-
-      # Modify the copy of the object we're holding /without/ persisting that change.
-      pdf.transform_datastream(:content, content: { datastream: 'content', size: '1000x1000>' })
-
-      create_scaled_progressive_jpeg(thumbnail, pdf, {height: 85, width: 85}, 'thumbnail_1')
-      create_scaled_progressive_jpeg(thumbnail, pdf, {height: 170, width: 170}, 'thumbnail_2')
-      create_scaled_progressive_jpeg(thumbnail, pdf, {height: 340, width: 340}, 'thumbnail_3')
-      create_scaled_progressive_jpeg(thumbnail, pdf, {width: 500}, 'thumbnail_4')
-      create_scaled_progressive_jpeg(thumbnail, pdf, {width: 1000}, 'thumbnail_5')
-    end
-
     # Creates a thumbnail with as many datastreams as possible.
     # Used exclusively for images.
-    def create_full_thumbnail(master = @master)
-      thumbnail = find_or_create_thumbnail
-
-      create_scaled_progressive_jpeg(thumbnail, master, {height: 85, width: 85}, 'thumbnail_1')
-      create_scaled_progressive_jpeg(thumbnail, master, {height: 170, width: 170}, 'thumbnail_2')
-      create_scaled_progressive_jpeg(thumbnail, master, {height: 340, width: 340}, 'thumbnail_3')
-      create_scaled_progressive_jpeg(thumbnail, master, {width: 500}, 'thumbnail_4')
-      create_scaled_progressive_jpeg(thumbnail, master, {width: 1000}, 'thumbnail_5')
+    def create_full_thumbnail
+      create_scaled_progressive_jpeg({height: 85, width: 85}, 'thumbnail_1')
+      create_scaled_progressive_jpeg({height: 170, width: 170}, 'thumbnail_2')
+      create_scaled_progressive_jpeg({height: 340, width: 340}, 'thumbnail_3')
+      create_scaled_progressive_jpeg({width: 500}, 'thumbnail_4')
+      create_scaled_progressive_jpeg({width: 1000}, 'thumbnail_5')
     end
 
     # Create or update a PDF file.
@@ -84,18 +60,19 @@ class DerivativeCreator
       pdf.save! ? pdf : false
     end
 
-    def create_scaled_progressive_jpeg(thumb, master, size, dsid, poster = false)
+    def create_scaled_progressive_jpeg(size, dsid, poster = false)
+      thumb = find_or_create_thumbnail
       if (master.is_a? ImageMasterFile) && !(master.width.first.to_i >= size[:width])
         return false
       end
 
       if !poster
-        blob = master.content.content
+        blob = self.master.content.content
       else
-        blob = master.poster.content
+        blob = self.master.poster.content
       end
 
-      if master.content.content.instance_of? (StringIO)
+      if self.master.content.content.instance_of? (StringIO)
         blob = blob.string
       end
 
@@ -115,7 +92,7 @@ class DerivativeCreator
       end_img.format = "JPEG"
       end_img.interlace = Magick::PlaneInterlace
 
-      thumb.add_file(end_img.to_blob, dsid, "#{master.content.label.split('.').first}.jpeg")
+      thumb.add_file(end_img.to_blob, dsid, "#{self.master.content.label.split('.').first}.jpeg")
       thumb.save!
 
       self.thumbnail_list << "/downloads/#{self.core.thumbnail.pid}?datastream_id=#{dsid}"
