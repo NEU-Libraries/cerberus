@@ -22,7 +22,9 @@ class NuCollection < ActiveFedora::Base
   has_metadata name: 'properties', type: DrsPropertiesDatastream
   has_metadata name: 'mods', type: NuModsDatastream
 
-  has_file_datastream "thumbnail", type: FileContentDatastream
+  has_file_datastream "thumbnail_1", type: FileContentDatastream
+  has_file_datastream "thumbnail_2", type: FileContentDatastream
+  has_file_datastream "thumbnail_3", type: FileContentDatastream
 
   has_many :child_files, property: :is_member_of, :class_name => "NuCoreFile"
   has_many :stepchild_files, property: :is_also_member_of, :class_name => "NuCoreFile"
