@@ -22,7 +22,7 @@ class SetThumbnailCreationJob
     blob = File.open(@file_path)
 
     if !(blob.instance_of? (StringIO)) && !(blob.instance_of? ActionDispatch::Http::UploadedFile)
-      raise "Invalid type of #{file.class} passed to create_thumbnail." +
+      raise "Invalid type of #{blob.class} passed to create_thumbnail." +
             "  Must be string or UploadedFile object."
     end
 
