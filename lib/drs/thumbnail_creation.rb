@@ -24,7 +24,7 @@ module Drs::ThumbnailCreation
     end_img.format = "JPEG"
     end_img.interlace = Magick::PlaneInterlace
 
-    thumb.add_file(end_img.to_blob, dsid, "#{self.master.content.label.split('.').first}.jpeg")
+    thumb.add_file(end_img.to_blob, dsid, "#{dsid}.jpeg")
     thumb.save!
 
     thumbnail_list << "/downloads/#{self.core.thumbnail.pid}?datastream_id=#{dsid}"
