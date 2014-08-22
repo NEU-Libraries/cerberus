@@ -4,6 +4,7 @@ require 'parslet'
 require 'parsing_nesting/tree'
 
 class NuCollectionsController < ApplicationController
+  include Drs::TempFileStorage
   include Drs::ControllerHelpers::EditableObjects
 
   include Blacklight::Catalog

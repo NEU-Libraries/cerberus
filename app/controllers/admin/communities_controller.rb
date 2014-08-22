@@ -1,4 +1,5 @@
 class Admin::CommunitiesController < AdminController
+  include Drs::TempFileStorage
 
   # Loads @community
   load_resource
