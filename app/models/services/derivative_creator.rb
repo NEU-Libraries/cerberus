@@ -7,7 +7,6 @@ class DerivativeCreator
   def initialize(master_pid)
     @master = ActiveFedora::Base.find(master_pid, cast: true)
     @core = NuCoreFile.find(@master.core_record.pid)
-    @thumbnail_list = Array.new
   end
 
   def generate_derivatives
@@ -23,9 +22,6 @@ class DerivativeCreator
     end
 
     create_all_thumbnail_sizes(blob, @core.thumbnail_list)
-
-    @core.reload
-    @core.save!
   end
 
   private
@@ -38,6 +34,12 @@ class DerivativeCreator
       create_scaled_progressive_jpeg(thumb, blob, {height: 340, width: 340}, 'thumbnail_3')
       create_scaled_progressive_jpeg(thumb, blob, {width: 500}, 'thumbnail_4')
       create_scaled_progressive_jpeg(thumb, blob, {width: 1000}, 'thumbnail_5')
+
+      for i in 1..5 do
+        @core.thumbnail_list << "/downloads/#{self.core.thumbnail.pid}?datastream_id=thumbnail_#{i}"
+      end
+
+      @core.save!
     end
 
     # Create or update a PDF file.
