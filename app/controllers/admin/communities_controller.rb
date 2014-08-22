@@ -80,7 +80,7 @@ class Admin::CommunitiesController < AdminController
 
     def update_theses_and_thumbnail
       if params[:thumbnail]
-        # InlineThumbnailCreator.new(@community, params[:thumbnail], 'thumbnail').create_thumbnail_and_save
+        Drs::Application::Queue.push(SetThumbnailCreationJob.new(@set, params[:thumbnail]))
       end
 
       if params[:theses] == '1' && !@community.theses

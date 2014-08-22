@@ -71,7 +71,7 @@ class NuCollectionsController < ApplicationController
 
     # Process Thumbnail
     if params[:thumbnail]
-      # InlineThumbnailCreator.new(@set, params[:thumbnail], "thumbnail").create_thumbnail_and_save
+      Drs::Application::Queue.push(SetThumbnailCreationJob.new(@set, params[:thumbnail]))
     end
 
     @set.depositor = current_user.nuid
@@ -116,7 +116,7 @@ class NuCollectionsController < ApplicationController
 
     # Update the thumbnail
     if params[:thumbnail]
-      # InlineThumbnailCreator.new(@set, params[:thumbnail], "thumbnail").create_thumbnail_and_save
+      Drs::Application::Queue.push(SetThumbnailCreationJob.new(@set, params[:thumbnail]))
     end
 
     if @set.update_attributes(params[:set])
