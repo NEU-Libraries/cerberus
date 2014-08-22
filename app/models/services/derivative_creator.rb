@@ -1,5 +1,3 @@
-require 'RMagick'
-include Magick
 include Drs::ThumbnailCreation
 
 class DerivativeCreator

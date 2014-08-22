@@ -1,5 +1,4 @@
-require 'RMagick'
-include Magick
+include Drs::ThumbnailCreation
 
 # Responsible for generating inline thumbnails, which are used on
 # community and collection objects.  Actual thumbnail creation for
@@ -73,13 +72,5 @@ class SetThumbnailCreationJob
       thumbnail = file
 
       set.add_file(thumbnail, dsid, fname)
-    end
-
-    # Modify this if changes in the actual thumbnail dimensions/ppi/whatever
-    # are required in the future.
-    def generate_thumbnail(path)
-      img = Magick::Image.read(path).first
-      thumb = img.resize_to_fill(175, 175)
-      thumb.write path
     end
 end
