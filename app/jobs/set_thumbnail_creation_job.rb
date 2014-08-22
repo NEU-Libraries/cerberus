@@ -34,4 +34,9 @@ class SetThumbnailCreationJob
       thumbnail_list << "/downloads/#{set_pid}?datastream_id=thumbnail_#{i}"
     end
 
-    
+    set.thumbnail_list = thumbnail_list
+
+    set.save!
+  end
+
+end
