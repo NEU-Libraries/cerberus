@@ -2,7 +2,7 @@ require 'RMagick'
 include Magick
 
 module Drs::ThumbnailCreation
-  def create_scaled_progressive_jpeg(thumb, blob, thumbnail_list, size, dsid)
+  def create_scaled_progressive_jpeg(thumb, blob, size, dsid)
 
     # if (master.is_a? ImageMasterFile) && !(master.width.first.to_i >= size[:width])
     #   return false
@@ -31,6 +31,6 @@ module Drs::ThumbnailCreation
     thumb.add_file(end_img.to_blob, dsid, "#{dsid}.jpeg")
     thumb.save!
 
-    thumbnail_list << "/downloads/#{self.core.thumbnail.pid}?datastream_id=#{dsid}"
+    # thumbnail_list << "/downloads/#{self.core.thumbnail.pid}?datastream_id=#{dsid}"
   end
 end
