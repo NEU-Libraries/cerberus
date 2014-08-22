@@ -2,11 +2,13 @@ require 'RMagick'
 include Magick
 
 module Drs::ThumbnailCreation
-  def create_scaled_progressive_jpeg(thumb, blob, size, dsid)
+  def create_scaled_progressive_jpeg(item_pid, blob, size, dsid)
 
     # if (master.is_a? ImageMasterFile) && !(master.width.first.to_i >= size[:width])
     #   return false
     # end
+
+    item = ActiveFedora::Base.find(item_pid, cast: true)
 
     if blob.instance_of? (StringIO)
       blob = blob.string
@@ -28,7 +30,7 @@ module Drs::ThumbnailCreation
     end_img.format = "JPEG"
     end_img.interlace = Magick::PlaneInterlace
 
-    thumb.add_file(end_img.to_blob, dsid, "#{dsid}.jpeg")
-    thumb.save!
+    item.add_file(end_img.to_blob, dsid, "#{dsid}.jpeg")
+    item.save!
   end
 end
