@@ -3,6 +3,7 @@ require 'stanford-mods'
 # -*- coding: utf-8 -*-
 class NuCoreFilesController < ApplicationController
   include Drs::Controller
+  include Drs::TempFileStorage
   include Drs::ControllerHelpers::EditableObjects
   include Drs::ControllerHelpers::ViewLogger
 
@@ -94,13 +95,9 @@ class NuCoreFilesController < ApplicationController
     # Process Thumbnail
     if params[:poster]
       file = params[:poster]
-      # We move the file contents to a more permanent location so that our ContentCreationJob can access them.
-      # An ensure block in that job handles cleanup of this file.
-      tempdir = Rails.root.join("tmp")
-      poster_path = tempdir.join("#{file.original_filename}")
-      FileUtils.mv(file.tempfile.path, poster_path.to_s)
+      new_path = move_file_to_tmp(file)
 
-      Drs::Application::Queue.push(ContentCreationJob.new(@nu_core_file.pid, @nu_core_file.tmp_path, @nu_core_file.original_filename, poster_path.to_s))
+      Drs::Application::Queue.push(ContentCreationJob.new(@nu_core_file.pid, @nu_core_file.tmp_path, @nu_core_file.original_filename, new_path))
     elsif !max.nil?
       s = params[:small_image_size].to_f / max.to_f
       m = params[:medium_image_size].to_f / max.to_f
@@ -300,13 +297,9 @@ class NuCoreFilesController < ApplicationController
       if virus_check(file) == 0
         @nu_core_file = ::NuCoreFile.new
 
-        # We move the file contents to a more permanent location so that our ContentCreationJob can access them.
-        # An ensure block in that job handles cleanup of this file.
-        tempdir = Rails.root.join("tmp")
-        new_path = tempdir.join("#{file.original_filename}")
-        FileUtils.mv(file.tempfile.path, new_path.to_s)
+        new_path = move_file_to_tmp(file)
 
-        update_metadata_from_upload_screen(@nu_core_file, file, params[:collection_id], new_path.to_s, params[:proxy])
+        update_metadata_from_upload_screen(@nu_core_file, file, params[:collection_id], new_path, params[:proxy])
         redirect_to files_provide_metadata_path(@nu_core_file.pid, {proxy: params[:proxy]})
       else
         render :json => [{:error => "Error creating file."}]
