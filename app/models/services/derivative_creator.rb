@@ -33,11 +33,11 @@ class DerivativeCreator
     def create_all_thumbnail_sizes(blob, thumbnail_list)
       thumb = find_or_create_thumbnail
 
-      create_scaled_progressive_jpeg(thumb, blob, thumbnail_list, {height: 85, width: 85}, 'thumbnail_1')
-      create_scaled_progressive_jpeg(thumb, blob, thumbnail_list, {height: 170, width: 170}, 'thumbnail_2')
-      create_scaled_progressive_jpeg(thumb, blob, thumbnail_list, {height: 340, width: 340}, 'thumbnail_3')
-      create_scaled_progressive_jpeg(thumb, blob, thumbnail_list, {width: 500}, 'thumbnail_4')
-      create_scaled_progressive_jpeg(thumb, blob, thumbnail_list, {width: 1000}, 'thumbnail_5')
+      create_scaled_progressive_jpeg(thumb, blob, {height: 85, width: 85}, 'thumbnail_1')
+      create_scaled_progressive_jpeg(thumb, blob, {height: 170, width: 170}, 'thumbnail_2')
+      create_scaled_progressive_jpeg(thumb, blob, {height: 340, width: 340}, 'thumbnail_3')
+      create_scaled_progressive_jpeg(thumb, blob, {width: 500}, 'thumbnail_4')
+      create_scaled_progressive_jpeg(thumb, blob, {width: 1000}, 'thumbnail_5')
     end
 
     # Create or update a PDF file.
