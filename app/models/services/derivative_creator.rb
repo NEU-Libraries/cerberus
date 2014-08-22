@@ -22,10 +22,6 @@ class DerivativeCreator
       blob = self.master.content.content
     end
 
-    if self.master.content.content.instance_of? (StringIO)
-      blob = blob.string
-    end
-
     create_all_thumbnail_sizes(blob, @core.thumbnail_list)
 
     @core.reload
