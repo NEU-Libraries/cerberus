@@ -28,13 +28,13 @@ class DerivativeCreator
 
     def create_all_thumbnail_sizes(blob, thumbnail_list)
       # TODO: this needs to pass the pid instead...
-      thumb = find_or_create_thumbnail
+      thumb_pid = find_or_create_thumbnail
 
-      create_scaled_progressive_jpeg(thumb, blob, {height: 85, width: 85}, 'thumbnail_1')
-      create_scaled_progressive_jpeg(thumb, blob, {height: 170, width: 170}, 'thumbnail_2')
-      create_scaled_progressive_jpeg(thumb, blob, {height: 340, width: 340}, 'thumbnail_3')
-      create_scaled_progressive_jpeg(thumb, blob, {width: 500}, 'thumbnail_4')
-      create_scaled_progressive_jpeg(thumb, blob, {width: 1000}, 'thumbnail_5')
+      create_scaled_progressive_jpeg(thumb_pid, blob, {height: 85, width: 85}, 'thumbnail_1')
+      create_scaled_progressive_jpeg(thumb_pid, blob, {height: 170, width: 170}, 'thumbnail_2')
+      create_scaled_progressive_jpeg(thumb_pid, blob, {height: 340, width: 340}, 'thumbnail_3')
+      create_scaled_progressive_jpeg(thumb_pid, blob, {width: 500}, 'thumbnail_4')
+      create_scaled_progressive_jpeg(thumb_pid, blob, {width: 1000}, 'thumbnail_5')
 
       for i in 1..5 do
         @core.thumbnail_list << "/downloads/#{self.core.thumbnail.pid}?datastream_id=thumbnail_#{i}"
@@ -75,7 +75,9 @@ class DerivativeCreator
       object.proxy_uploader         = core.proxy_uploader
       object.core_record            = core
       object.rightsMetadata.content = master.rightsMetadata.content
-      object.save! ? object : false
+      object.save!
+
+      return object.pid
     end
 
     def find_or_create_thumbnail
