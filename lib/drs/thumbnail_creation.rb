@@ -30,7 +30,5 @@ module Drs::ThumbnailCreation
 
     thumb.add_file(end_img.to_blob, dsid, "#{dsid}.jpeg")
     thumb.save!
-
-    # thumbnail_list << "/downloads/#{self.core.thumbnail.pid}?datastream_id=#{dsid}"
   end
 end

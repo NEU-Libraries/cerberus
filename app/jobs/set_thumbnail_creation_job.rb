@@ -26,8 +26,12 @@ class SetThumbnailCreationJob
     create_scaled_progressive_jpeg(set, blob.read, {height: 170, width: 170}, 'thumbnail_2')
     create_scaled_progressive_jpeg(set, blob.read, {height: 340, width: 340}, 'thumbnail_3')
 
-    @set.reload
-    @set.save!
+    for i in 1..3 do
+      set.thumbnail_list << "/downloads/#{set_pid}?datastream_id=thumbnail_#{i}"
+    end
+
+    set.reload
+    set.save!
   end
 
 end
