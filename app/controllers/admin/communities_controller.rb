@@ -80,7 +80,9 @@ class Admin::CommunitiesController < AdminController
 
     def update_theses_and_thumbnail
       if params[:thumbnail]
-        Drs::Application::Queue.push(SetThumbnailCreationJob.new(@set, params[:thumbnail]))
+        file = params[:thumbnail]
+        new_path = move_file_to_tmp(file)
+        Drs::Application::Queue.push(SetThumbnailCreationJob.new(@set, new_path))
       end
 
       if params[:theses] == '1' && !@community.theses
