@@ -9,8 +9,8 @@ class SetThumbnailCreationJob
   # Takes as arguments an ActiveFedora object.
   # An HTTP Uploaded File object or a full string path to a file.
   # And the desired datastream ID
-  def initialize(set, file_path)
-    @set = set
+  def initialize(set_pid, file_path)
+    @set = ActiveFedora::Base.find(set_pid, cast: true)
     @file_path = file_path
   end
 
