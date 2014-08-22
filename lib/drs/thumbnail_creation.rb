@@ -8,6 +8,10 @@ module Drs::ThumbnailCreation
     #   return false
     # end
 
+    if blob.instance_of? (StringIO)
+      blob = blob.string
+    end
+
     img = Magick::Image.from_blob(blob).first
 
     if size[:height] && size[:width]

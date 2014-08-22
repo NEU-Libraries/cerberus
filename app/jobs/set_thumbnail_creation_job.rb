@@ -19,9 +19,7 @@ class SetThumbnailCreationJob
   end
 
   def run
-    if file.instance_of? (StringIO)
-      blob = blob.string
-    elsif !file.instance_of? ActionDispatch::Http::UploadedFile
+    if !file.instance_of? (StringIO) || !file.instance_of? ActionDispatch::Http::UploadedFile
       raise "Invalid type of #{file.class} passed to create_thumbnail." +
             "  Must be string or UploadedFile object."
     end
