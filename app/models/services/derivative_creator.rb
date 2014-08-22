@@ -27,6 +27,7 @@ class DerivativeCreator
   private
 
     def create_all_thumbnail_sizes(blob, thumbnail_list)
+      # TODO: this needs to pass the pid instead...
       thumb = find_or_create_thumbnail
 
       create_scaled_progressive_jpeg(thumb, blob, {height: 85, width: 85}, 'thumbnail_1')
