@@ -19,19 +19,19 @@ class SetThumbnailCreationJob
   end
 
   def run
+    thumbnail_list = []
+
     set = ActiveFedora::Base.find(@set_pid, cast: true)
     blob = File.open(@file_path).read
 
-    create_scaled_progressive_jpeg(set, blob, {height: 85, width: 85}, 'thumbnail_1')
-    create_scaled_progressive_jpeg(set, blob, {height: 170, width: 170}, 'thumbnail_2')
-    create_scaled_progressive_jpeg(set, blob, {height: 340, width: 340}, 'thumbnail_3')
-
-    for i in 1..3 do
-      set.thumbnail_list << "/downloads/#{set_pid}?datastream_id=thumbnail_#{i}"
-    end
+    create_scaled_progressive_jpeg(@set_pid, blob, {height: 85, width: 85}, 'thumbnail_1')
+    create_scaled_progressive_jpeg(@set_pid, blob, {height: 170, width: 170}, 'thumbnail_2')
+    create_scaled_progressive_jpeg(@set_pid, blob, {height: 340, width: 340}, 'thumbnail_3')
 
     set.reload
-    set.save!
-  end
 
-end
+    for i in 1..3 do
+      thumbnail_list << "/downloads/#{set_pid}?datastream_id=thumbnail_#{i}"
+    end
+
+    
