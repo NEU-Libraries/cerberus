@@ -4,15 +4,14 @@ include Drs::ThumbnailCreation
 # community and collection objects.  Actual thumbnail creation for
 # content objects is handled elsewhere.
 class SetThumbnailCreationJob
-  attr_accessor :set, :file, :dsid
+  attr_accessor :set, :blob
 
   # Takes as arguments an ActiveFedora object.
   # An HTTP Uploaded File object or a full string path to a file.
   # And the desired datastream ID
-  def initialize(set, file, dsid)
+  def initialize(set, blob)
     @set = set
-    @file = file
-    @dsid = dsid
+    @blob = blob
   end
 
   def queue_name
@@ -20,57 +19,16 @@ class SetThumbnailCreationJob
   end
 
   def run
-  end
-
-  def create_thumbnail
-    if file.instance_of? String
-      process_string
-    elsif file.instance_of? ActionDispatch::Http::UploadedFile
-      process_uploaded_file
-    else
+    if file.instance_of? (StringIO)
+      blob = blob.string
+    elsif !file.instance_of? ActionDispatch::Http::UploadedFile
       raise "Invalid type of #{file.class} passed to create_thumbnail." +
             "  Must be string or UploadedFile object."
     end
+
+    create_scaled_progressive_jpeg(@set, blob, @set.thumbnail_list, {height: 85, width: 85}, 'thumbnail_1')
+    create_scaled_progressive_jpeg(@set, blob, @set.thumbnail_list, {height: 170, width: 170}, 'thumbnail_2')
+    create_scaled_progressive_jpeg(@set, blob, @set.thumbnail_list, {height: 340, width: 340}, 'thumbnail_3')
   end
 
-  def create_thumbnail_and_save
-    create_thumbnail
-    set.thumbnail_list = ["/downloads/#{self.set.pid}?datastream_id=thumbnail"]
-    set.save!
-  end
-
-  private
-
-    # Creates a Tempfile with the content at the specified
-    # path and modifies it to create a scaled thumbnail.
-    # Avoids overwriting fixture data, which will usually be
-    # what string paths are pointing at.
-    def process_string
-      begin
-        fname = File.basename(file)
-
-        tmp = Tempfile.new("inline_thumb")
-        tmp.write File.open(file).read
-        path = tmp.path
-
-        generate_thumbnail(path)
-
-        thumbnail = File.open(tmp, 'rb').read
-
-        set.add_file(thumbnail, dsid, fname)
-      ensure
-        tmp.unlink
-      end
-    end
-
-    def process_uploaded_file
-      path = file.tempfile.path
-      fname = file.original_filename
-
-      generate_thumbnail(path)
-
-      thumbnail = file
-
-      set.add_file(thumbnail, dsid, fname)
-    end
 end
