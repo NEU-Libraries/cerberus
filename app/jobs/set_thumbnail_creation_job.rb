@@ -21,11 +21,6 @@ class SetThumbnailCreationJob
   def run
     blob = File.open(@file_path)
 
-    if !(blob.instance_of? (StringIO)) && !(blob.instance_of? ActionDispatch::Http::UploadedFile)
-      raise "Invalid type of #{blob.class} passed to create_thumbnail." +
-            "  Must be string or UploadedFile object."
-    end
-
     create_scaled_progressive_jpeg(@set, blob, @set.thumbnail_list, {height: 85, width: 85}, 'thumbnail_1')
     create_scaled_progressive_jpeg(@set, blob, @set.thumbnail_list, {height: 170, width: 170}, 'thumbnail_2')
     create_scaled_progressive_jpeg(@set, blob, @set.thumbnail_list, {height: 340, width: 340}, 'thumbnail_3')
