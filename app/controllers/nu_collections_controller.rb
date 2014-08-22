@@ -71,7 +71,7 @@ class NuCollectionsController < ApplicationController
 
     # Process Thumbnail
     if params[:thumbnail]
-      InlineThumbnailCreator.new(@set, params[:thumbnail], "thumbnail").create_thumbnail_and_save
+      # InlineThumbnailCreator.new(@set, params[:thumbnail], "thumbnail").create_thumbnail_and_save
     end
 
     @set.depositor = current_user.nuid
@@ -116,7 +116,7 @@ class NuCollectionsController < ApplicationController
 
     # Update the thumbnail
     if params[:thumbnail]
-      InlineThumbnailCreator.new(@set, params[:thumbnail], "thumbnail").create_thumbnail_and_save
+      # InlineThumbnailCreator.new(@set, params[:thumbnail], "thumbnail").create_thumbnail_and_save
     end
 
     if @set.update_attributes(params[:set])
