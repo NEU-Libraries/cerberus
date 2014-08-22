@@ -1,3 +1,6 @@
+require 'RMagick'
+include Magick
+
 module Drs::ThumbnailCreation
   def create_scaled_progressive_jpeg(thumb, blob, thumbnail_list, size, dsid)
 
