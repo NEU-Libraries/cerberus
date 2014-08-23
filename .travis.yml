@@ -6,7 +6,6 @@ before_install:
 rvm:
   - 2.1
 before_script:
-  #
 cache: bundler
 script: "bundle exec rake ci:build"
 notifications:

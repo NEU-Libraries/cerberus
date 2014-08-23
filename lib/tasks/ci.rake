@@ -1,6 +1,6 @@
 namespace :ci do
   desc "Prepare for CI build"
-  task :prepare => ['db:test:prepare', 'jetty:clean', 'jetty:config'] do
+  task :prepare => ['db:migrate', 'db:test:prepare', 'jetty:clean', 'jetty:config'] do
   end
 
   desc "CI build"
