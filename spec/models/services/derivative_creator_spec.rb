@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe DerivativeCreator do
+describe DerivativeCreator, unless: $in_travis do
 
   def titled_core_record(core_record, title)
     core_record.title = title
