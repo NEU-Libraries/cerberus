@@ -152,10 +152,10 @@ describe NuModsDatastream do
       result["note_tesim"].should == ["one", "two", "three"]
     end
 
-    it "Gives back a tesim field for all abstract entries" do
-      mods.abstract = ["A test", "That tests"]
+    it "Gives back a tesim field for abstract" do
+      mods.abstract = ["A test"]
 
-      result["abstract_tesim"].should == ["A test", "That tests"]
+      result["abstract_tesim"].should == "A test"
     end
 
     it "creates a tesim field for all identifier entries" do
@@ -242,8 +242,8 @@ describe NuModsDatastream do
     it "creates tesim/sim fields for personal creators" do
       mods.assign_creator_personal_names(["Will", "Jim"], ["Jackson", "Jones"])
 
-      result["personal_creators_sim"].should == ["Will Jackson", "Jim Jones"]
-      result["personal_creators_tesim"].should == ["Will Jackson", "Jim Jones"]
+      result["personal_creators_sim"].should == ["Jackson, Will", "Jones, Jim"]
+      result["personal_creators_tesim"].should == ["Jackson, Will", "Jones, Jim"]
     end
 
     it "creates an aggregate creator sim field" do
@@ -251,7 +251,7 @@ describe NuModsDatastream do
       mods.assign_corporate_names(["NEU"])
       mods.names = ["ABC DEF", "GHI"]
 
-      result["creator_sim"].should == ["Will Jackson", "NEU", "ABC DEF", "GHI"]
+      result["creator_sim"].should == ["Jackson, Will", "NEU", "ABC DEF", "GHI"]
     end
 
     it "creates an aggregate creator tesim field" do
@@ -259,7 +259,7 @@ describe NuModsDatastream do
       mods.assign_corporate_names(["NEU"])
       mods.names = ["ABC DEF", "GHI"]
 
-      result["creator_tesim"].should == ["Will Jackson", "NEU", "ABC DEF", "GHI"]
+      result["creator_tesim"].should == ["Jackson, Will", "NEU", "ABC DEF", "GHI"]
     end
 
     it "creates ssim fields for scholarly_object category" do

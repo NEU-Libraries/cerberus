@@ -103,19 +103,19 @@ describe ContentCreationJob do
     it_should_behave_like "master creation process"
   end
 
-  describe "Zip creation" do
-    before(:all) { context("#{Rails.root}/spec/fixtures/files/zip.ott") }
-    after(:all)  { clear_context }
+  # describe "Zip creation" do
+  #   before(:all) { context("#{Rails.root}/spec/fixtures/files/zip.ott") }
+  #   after(:all)  { clear_context }
 
-    it "labels the content stream correctly" do
-      @master.content.label.should == "zip.zip"
-    end
+  #   it "labels the content stream correctly" do
+  #     @master.content.label.should == "zip.zip"
+  #   end
 
-    it "assigns appropriate type to the core record" do
-      @core.reload
-      @core.dcmi_type.should == "unknown"
-    end
+  #   it "assigns appropriate type to the core record" do
+  #     @core.reload
+  #     @core.dcmi_type.should == "unknown"
+  #   end
 
-    it_should_behave_like "master creation process"
-  end
+  #   it_should_behave_like "master creation process"
+  # end
 end

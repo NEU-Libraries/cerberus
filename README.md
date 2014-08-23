@@ -43,3 +43,7 @@ Tests run with `$ rspec`
 You will also need the chrome livereload extension.
 
 `$ bundle exec guard start -P livereload`
+
+#### Travis-CI
+
+Attempting implementation
