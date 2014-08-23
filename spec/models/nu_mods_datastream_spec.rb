@@ -155,7 +155,7 @@ describe NuModsDatastream do
     it "Gives back a tesim field for abstract" do
       mods.abstract = ["A test"]
 
-      result["abstract_tesim"].should == ["A test"]
+      result["abstract_tesim"].should == "A test"
     end
 
     it "creates a tesim field for all identifier entries" do
