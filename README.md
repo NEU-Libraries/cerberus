@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/NEU-Libraries/drs.svg?branch=develop)](https://travis-ci.org/NEU-Libraries/drs)
+
 ### DRS Application 
 
 A web application derived from the [Sufia](http://github.com/projecthydra/sufia) gem provided by Project Hydra.    
@@ -43,7 +45,3 @@ Tests run with `$ rspec`
 You will also need the chrome livereload extension.
 
 `$ bundle exec guard start -P livereload`
-
-#### Travis-CI
-
-Attempting implementation
