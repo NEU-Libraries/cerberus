@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe ContentCreationJob do
+describe ContentCreationJob, unless: $in_travis do
 
   # Image Formats
   let(:jpeg_path) { "#{Rails.root}/spec/fixtures/files/test_pic.jpeg" }

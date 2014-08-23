@@ -9,7 +9,10 @@ describe DerivativeCreator do
 
   def context(factory_sym, core_title)
     @master = FactoryGirl.create(factory_sym)
-    @master.characterize
+
+    if !$in_travis
+      @master.characterize
+    end
 
     @core = titled_core_record(@master.core_record, core_title)
     DerivativeCreator.new(@master.pid).generate_derivatives
