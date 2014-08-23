@@ -6,7 +6,7 @@ before_install:
 rvm:
   - 2.1
 before_script:
-  - "cp config/log4r.yml.sample config/log4r.yml"
+  #
 cache: bundler
 script: "bundle exec rake ci:build"
 notifications:
