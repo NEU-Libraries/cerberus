@@ -1,0 +1,12 @@
+language: ruby
+before_install:
+  - sudo apt-get update -qq
+rvm:
+  - 2.1
+before_script:
+  - "cp config/log4r.yml.sample config/log4r.yml"
+cache: bundler
+script: "bundle exec rake ci:build"
+notifications:
+  email:
+    - d.cliff@neu.edu
