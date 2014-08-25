@@ -1,5 +1,4 @@
 {
-  "vendor": {
     "name": "bower-rails generated vendor assets",
     "dependencies": {
       "respond" : "~1.4.1",
@@ -10,5 +9,4 @@
       "picturefill" : "~1.2.1",
       "mrmrs-colors" : "*"
     }
-  }
 }
