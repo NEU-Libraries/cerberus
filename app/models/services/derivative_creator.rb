@@ -51,10 +51,12 @@ class DerivativeCreator
 
       if self.core.content_objects.find { |e| e.instance_of? PdfFile }
         original = self.core.content_objects.find { |e| e.instance_of? PdfFile }
-        pdf = update_or_create_with_metadata(title, desc, PdfFile, original)
+        pdf_pid = update_or_create_with_metadata(title, desc, PdfFile, original)
       else
-        pdf = update_or_create_with_metadata(title, desc, PdfFile)
+        pdf_pid = update_or_create_with_metadata(title, desc, PdfFile)
       end
+
+      pdf = ActiveFedora::Base.find("#{pdf_pid}", cast: true)
 
       master.transform_datastream(:content, { to_pdf: { format: 'pdf', datastream: 'pdf'} }, processor: 'document')
       pdf.add_file(master.pdf.content, 'content', "#{master.content.label.split('.').first}.pdf")
