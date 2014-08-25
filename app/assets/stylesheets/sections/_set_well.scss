@@ -1,3 +1,32 @@
 .well-padded-thumb{
   margin-right: 1em;
+  padding: 4px;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border: 1px solid rgba(0,0,0,.2);
+  text-align: center;
+}
+
+.set-description{
+  overflow: hidden;
+  margin-top: 10px;
+}
+
+.inline-headings{
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    display: inline;
+  }
+  [class^="icon-"]:before,
+  [class*=" icon-"]:before {
+    vertical-align: 2px;
+    margin-left: 5px;
+  }
+  small{
+    vertical-align: middle;
+  }
 }
