@@ -1,13 +1,9 @@
 %a{ href: polymorphic_path( item ) }
   %figure
-    - if item.klass == "NuCoreFile"
-      -if item.thumbnail_list.length > 0
-        =render partial: 'shared/thumbnails/thumbnail_picture', locals: { thumbs: item.thumbnail_list }
-      -else # default behavior
-        =render partial: 'shared/icon', locals: { class_string: 'icon-file' }
-    - elsif ( item.klass == "NuCollection" or item.klass == "Community"  ) and  item.thumbnail_list.length > 0
-      -# Now lets see if communities and collections have a thumbnail associated to it, if so render out the thumbnail
-      = image_tag item.thumbnail_list[0], alt: '', role: 'presentation'
+    - if item.thumbnail_list.length > 0
+      =render partial: 'shared/thumbnails/thumbnail_picture', locals: { thumbs: item.thumbnail_list }
+    - elsif item.klass == "NuCoreFile"
+      =render partial: 'shared/icon', locals: { class_string: 'icon-file' }
     - elsif item.klass == "NuCollection" # and doesn't have a thumbnail to render
       = render partial: 'shared/icon', locals: { class_string: 'icon-folder-open' }
     - elsif item.klass == "Community"
