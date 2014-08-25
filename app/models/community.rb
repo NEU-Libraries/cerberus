@@ -14,7 +14,9 @@ class Community < ActiveFedora::Base
   has_metadata name: 'rightsMetadata', type: ParanoidRightsDatastream
   has_metadata name: 'properties', type: DrsPropertiesDatastream
 
-  has_file_datastream "thumbnail", type: FileContentDatastream
+  has_file_datastream "thumbnail_1", type: FileContentDatastream
+  has_file_datastream "thumbnail_2", type: FileContentDatastream
+  has_file_datastream "thumbnail_3", type: FileContentDatastream
 
   attr_accessible :title, :description, :parent
   attr_accessor :theses

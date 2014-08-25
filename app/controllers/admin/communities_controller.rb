@@ -1,4 +1,5 @@
 class Admin::CommunitiesController < AdminController
+  include Drs::TempFileStorage
 
   # Loads @community
   load_resource
@@ -80,7 +81,9 @@ class Admin::CommunitiesController < AdminController
 
     def update_theses_and_thumbnail
       if params[:thumbnail]
-        InlineThumbnailCreator.new(@community, params[:thumbnail], 'thumbnail').create_thumbnail_and_save
+        file = params[:thumbnail]
+        new_path = move_file_to_tmp(file)
+        Drs::Application::Queue.push(SetThumbnailCreationJob.new(@community.pid, new_path))
       end
 
       if params[:theses] == '1' && !@community.theses

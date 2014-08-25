@@ -4,6 +4,7 @@ require 'parslet'
 require 'parsing_nesting/tree'
 
 class NuCollectionsController < ApplicationController
+  include Drs::TempFileStorage
   include Drs::ControllerHelpers::EditableObjects
 
   include Blacklight::Catalog
@@ -71,7 +72,9 @@ class NuCollectionsController < ApplicationController
 
     # Process Thumbnail
     if params[:thumbnail]
-      InlineThumbnailCreator.new(@set, params[:thumbnail], "thumbnail").create_thumbnail_and_save
+      file = params[:thumbnail]
+      new_path = move_file_to_tmp(file)
+      Drs::Application::Queue.push(SetThumbnailCreationJob.new(@set.pid, new_path))
     end
 
     @set.depositor = current_user.nuid
@@ -116,7 +119,9 @@ class NuCollectionsController < ApplicationController
 
     # Update the thumbnail
     if params[:thumbnail]
-      InlineThumbnailCreator.new(@set, params[:thumbnail], "thumbnail").create_thumbnail_and_save
+      file = params[:thumbnail]
+      new_path = move_file_to_tmp(file)
+      Drs::Application::Queue.push(SetThumbnailCreationJob.new(@set.pid, new_path))
     end
 
     if @set.update_attributes(params[:set])

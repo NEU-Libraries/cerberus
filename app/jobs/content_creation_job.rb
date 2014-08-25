@@ -27,9 +27,10 @@ class ContentCreationJob
       klass = core_record.canonical_class.constantize
       content_object = klass.new(pid: Drs::Noid.namespaceize(Drs::IdService.mint))
 
-      if content_object.instance_of? VideoFile
-        InlineThumbnailCreator.new(content_object, poster_path, "poster").create_thumbnail_and_save
-      end
+      # TODO: re-do video poster creation...
+      # if content_object.instance_of? VideoFile
+      #   InlineThumbnailCreator.new(content_object, poster_path, "poster").create_thumbnail_and_save
+      # end
 
       # Zip files that need zippin'.  Just drop in other file types.
       if content_object.instance_of? ZipFile
