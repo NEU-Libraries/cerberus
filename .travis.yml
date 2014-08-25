@@ -12,5 +12,15 @@ before_script:
 cache: bundler
 script: "bundle exec rake ci:build"
 notifications:
+  irc:
+    use_notice: true
+    skip_join: true
+    channels:
+      - "chat.freenode.net##neu-lts"
   email:
     - d.cliff@neu.edu
+# whitelist
+branches:
+  only:
+    - master
+    - develop
