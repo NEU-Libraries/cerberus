@@ -1,51 +1,51 @@
-FactoryGirl.define do 
-  factory :nu_core_file, class: NuCoreFile do 
-    sequence(:title) { |n| "Core File #{n}" } 
+FactoryGirl.define do
+  factory :core_file, class: CoreFile do
+    sequence(:title) { |n| "Core File #{n}" }
 
-    trait :deposited_by_bill do 
+    trait :deposited_by_bill do
       depositor "000000001"
     end
 
-    trait :incomplete do 
-      before(:create) do |file| 
-        file.tag_as_in_progress 
+    trait :incomplete do
+      before(:create) do |file|
+        file.tag_as_in_progress
       end
     end
 
-    trait :complete do 
-      before(:create) do |file| 
-        file.tag_as_completed 
+    trait :complete do
+      before(:create) do |file|
+        file.tag_as_completed
       end
     end
 
-    factory :significant_content do 
-      mass_permissions 'public' 
-      deposited_by_bill 
+    factory :significant_content do
+      mass_permissions 'public'
+      deposited_by_bill
 
       factory :theses do
        category 'Theses and Dissertations'
       end
-      
+
       factory :research do
-       category 'Research Publications' 
+       category 'Research Publications'
       end
 
-      factory :presentation do 
-        category 'Presentations' 
+      factory :presentation do
+        category 'Presentations'
       end
 
-      factory :dataset do 
-        category 'Datasets' 
+      factory :dataset do
+        category 'Datasets'
       end
 
-      factory :learning_object do 
+      factory :learning_object do
         category 'Learning Objects'
       end
     end
 
-    factory :complete_file do 
-      ignore do 
-        depositor false 
+    factory :complete_file do
+      ignore do
+        depositor false
         parent false
       end
 
@@ -55,14 +55,14 @@ FactoryGirl.define do
       end
     end
 
-    factory :bills_complete_file do 
+    factory :bills_complete_file do
       deposited_by_bill
-      complete 
+      complete
     end
 
-    factory :bills_incomplete_file do 
-      deposited_by_bill 
-      incomplete 
+    factory :bills_incomplete_file do
+      deposited_by_bill
+      incomplete
     end
   end
 end

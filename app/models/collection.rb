@@ -26,8 +26,8 @@ class Collection < ActiveFedora::Base
   has_file_datastream "thumbnail_2", type: FileContentDatastream
   has_file_datastream "thumbnail_3", type: FileContentDatastream
 
-  has_many :child_files, property: :is_member_of, :class_name => "NuCoreFile"
-  has_many :stepchild_files, property: :is_also_member_of, :class_name => "NuCoreFile"
+  has_many :child_files, property: :is_member_of, :class_name => "CoreFile"
+  has_many :stepchild_files, property: :is_also_member_of, :class_name => "CoreFile"
   has_many :child_collections, property: :is_member_of, :class_name => "Collection"
 
   belongs_to :parent, property: :is_member_of, :class_name => "Collection"

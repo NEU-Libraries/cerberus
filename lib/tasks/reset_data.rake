@@ -22,7 +22,7 @@ def create_content_file(factory_sym, user, parent)
   DerivativeCreator.new(master.pid).generate_derivatives
 
   # Add non garbage metadata to core record.
-  core = NuCoreFile.find(master.core_record.pid)
+  core = CoreFile.find(master.core_record.pid)
   core.parent = ActiveFedora::Base.find(parent.pid, cast: true)
   core.properties.parent_id = parent.pid
   core.title = "#{master.content.label}"

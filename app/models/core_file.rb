@@ -1,4 +1,4 @@
-class NuCoreFile < ActiveFedora::Base
+class CoreFile < ActiveFedora::Base
   include ActiveModel::MassAssignmentSecurity
 
   include Drs::ModelMethods
@@ -7,12 +7,12 @@ class NuCoreFile < ActiveFedora::Base
   include Drs::Find
   include Drs::ImpressionCount
 
-  include Drs::NuCoreFile::Actions
-  include Drs::NuCoreFile::MimeTypes
-  include Drs::NuCoreFile::Permissions
-  include Drs::NuCoreFile::Characterization
-  include Drs::NuCoreFile::Export
-  include Drs::NuCoreFile::AssignType
+  include Drs::CoreFile::Actions
+  include Drs::CoreFile::MimeTypes
+  include Drs::CoreFile::Permissions
+  include Drs::CoreFile::Characterization
+  include Drs::CoreFile::Export
+  include Drs::CoreFile::AssignType
 
   include Drs::Rights::MassPermissions
   include Drs::Rights::Embargoable
@@ -41,44 +41,44 @@ class NuCoreFile < ActiveFedora::Base
             :class_name => "Collection"
   has_many :codebooks,
             :property => :is_codebook_for,
-            :class_name => 'NuCoreFile'
+            :class_name => 'CoreFile'
   has_many :datasets,
             :property => :is_dataset_for,
-            :class_name => 'NuCoreFile'
+            :class_name => 'CoreFile'
   has_many :figures,
             :property => :is_figure_for,
-            :class_name => 'NuCoreFile'
+            :class_name => 'CoreFile'
   has_many :instructional_materials,
             :property => :is_instructional_material_for,
-            :class_name => 'NuCoreFile'
+            :class_name => 'CoreFile'
   has_many :supplemental_materials,
             :property => :is_supplemental_material_for,
-            :class_name => 'NuCoreFile'
+            :class_name => 'CoreFile'
   has_many :transcriptions,
             :property => :is_transcription_of,
-            :class_name => 'NuCoreFile'
+            :class_name => 'CoreFile'
 
   has_and_belongs_to_many :also_member_of,
                             :property => :is_also_member_of,
                             :class_name => 'Collection'
   has_and_belongs_to_many :codebook_for,
                             :property => :is_codebook_for,
-                            :class_name => 'NuCoreFile'
+                            :class_name => 'CoreFile'
   has_and_belongs_to_many :dataset_for,
                             :property => :is_dataset_for,
-                            :class_name => 'NuCoreFile'
+                            :class_name => 'CoreFile'
   has_and_belongs_to_many :figure_for,
                             :property => :is_figure_for,
-                            :class_name => 'NuCoreFile'
+                            :class_name => 'CoreFile'
   has_and_belongs_to_many :instructional_material_for,
                             :property => :is_instructional_material_for,
-                            :class_name => 'NuCoreFile'
+                            :class_name => 'CoreFile'
   has_and_belongs_to_many :supplemental_material_for,
                             :property => :is_supplemental_material_for,
-                            :class_name => 'NuCoreFile'
+                            :class_name => 'CoreFile'
   has_and_belongs_to_many :transcription_of,
                             :property => :is_transcription_of,
-                            :class_name => 'NuCoreFile'
+                            :class_name => 'CoreFile'
 
 
   # The following two modifications are to account for the fact that
