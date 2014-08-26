@@ -16,7 +16,7 @@ module Drs
       attr_accessible :depositor, :date_of_issue, :core_record
       attr_accessible :creators
 
-      has_metadata name: 'DC', type: NortheasternDublinCoreDatastream
+      has_metadata name: 'DC', type: DublinCoreDatastream
       has_metadata name: 'rightsMetadata', type: ParanoidRightsDatastream
       has_metadata name: 'properties', type: PropertiesDatastream
       has_file_datastream name: "content", type: FileContentDatastream
