@@ -87,7 +87,7 @@ class CoreFilesController < ApplicationController
 
     @core_file = CoreFile.find(params[:id])
 
-    Drs::Application::Queue.push(MetadataUpdateJob.new(depositor_nuid, params, proxy_nuid))
+    Cerberus::Application::Queue.push(MetadataUpdateJob.new(depositor_nuid, params, proxy_nuid))
 
     update_metadata if params[:core_file]
     max = session[:slider_max]
@@ -97,15 +97,15 @@ class CoreFilesController < ApplicationController
       file = params[:poster]
       new_path = move_file_to_tmp(file)
 
-      Drs::Application::Queue.push(ContentCreationJob.new(@core_file.pid, @core_file.tmp_path, @core_file.original_filename, new_path))
+      Cerberus::Application::Queue.push(ContentCreationJob.new(@core_file.pid, @core_file.tmp_path, @core_file.original_filename, new_path))
     elsif !max.nil?
       s = params[:small_image_size].to_f / max.to_f
       m = params[:medium_image_size].to_f / max.to_f
       l = params[:large_image_size].to_f / max.to_f
 
-      Drs::Application::Queue.push(ContentCreationJob.new(@core_file.pid, @core_file.tmp_path, @core_file.original_filename, nil, s, m, l))
+      Cerberus::Application::Queue.push(ContentCreationJob.new(@core_file.pid, @core_file.tmp_path, @core_file.original_filename, nil, s, m, l))
     else
-      Drs::Application::Queue.push(ContentCreationJob.new(@core_file.pid, @core_file.tmp_path, @core_file.original_filename))
+      Cerberus::Application::Queue.push(ContentCreationJob.new(@core_file.pid, @core_file.tmp_path, @core_file.original_filename))
     end
 
     flash[:notice] = 'Your files are being processed by ' + t('drs.product_name.short') + ' in the background. The metadata and access controls you specified are being applied. Files will be marked <span class="label label-important" title="Private">In Progress</span> until this process is complete (shouldn\'t take too long, hang in there!).'
@@ -182,7 +182,7 @@ class CoreFilesController < ApplicationController
       revision = @core_file.content.get_version(params[:revision])
       @core_file.add_file(revision.content, datastream_id, revision.label)
       version_event = true
-      Drs::Application::Queue.push(ContentRestoredVersionEventJob.new(@core_file.pid, current_user.user_key, params[:revision]))
+      Cerberus::Application::Queue.push(ContentRestoredVersionEventJob.new(@core_file.pid, current_user.user_key, params[:revision]))
     end
 
     if params.has_key?(:filedata)
@@ -190,7 +190,7 @@ class CoreFilesController < ApplicationController
       return unless virus_check(file) == 0
       @core_file.add_file(file, datastream_id, file.original_filename)
       version_event = true
-      Drs::Application::Queue.push(ContentNewVersionEventJob.new(@core_file.pid, current_user.user_key))
+      Cerberus::Application::Queue.push(ContentNewVersionEventJob.new(@core_file.pid, current_user.user_key))
     end
 
     # only update metadata if there is a core_file object which is not the case for version updates
@@ -205,12 +205,12 @@ class CoreFilesController < ApplicationController
       # If this change updated metadata, propagate the change outwards to
       # all content objects
       if params[:core_file]
-        q = Drs::Application::Queue
+        q = Cerberus::Application::Queue
         q.push(PropagateCoreMetadataChangeJob.new(@core_file.pid))
       end
 
       # do not trigger an update event if a version event has already been triggered
-      Drs::Application::Queue.push(ContentUpdateEventJob.new(@core_file.pid, current_user.user_key)) unless version_event
+      Cerberus::Application::Queue.push(ContentUpdateEventJob.new(@core_file.pid, current_user.user_key)) unless version_event
       # @core_file.record_version_committer(current_user)
     end
 

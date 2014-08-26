@@ -28,7 +28,7 @@ module Drs
         content_changed = self.content.changed?
         yield
         #logger.debug "DOING CHARACTERIZE ON #{self.pid}"
-        Drs::Application::Queue.push(CharacterizeJob.new(self.pid)) if content_changed
+        Cerberus::Application::Queue.push(CharacterizeJob.new(self.pid)) if content_changed
       end
 
       ## Extract the metadata from the content datastream and record it in the characterization datastream
