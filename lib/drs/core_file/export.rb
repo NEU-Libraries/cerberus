@@ -1,5 +1,5 @@
 module Drs
-  module NuCoreFile
+  module CoreFile
     module Export
       # MIME: 'application/x-endnote-refer'
       def export_as_endnote
@@ -25,7 +25,7 @@ module Drs
           '%W' => 'Northeastern University'
         }
         text = []
-        text << "%0 NuCoreFile"
+        text << "%0 CoreFile"
         end_note_format.each do |endnote_key, mapping|
           if mapping.is_a? String
             values = [mapping]
@@ -65,7 +65,7 @@ module Drs
           next if values.nil? or values.empty? or values.first.nil?
           if values.is_a? String
             export_text << "rft.#{kev}=#{CGI::escape(values)}"
-          else  
+          else
             values.each do |value|
               export_text << "rft.#{kev}=#{CGI::escape(value)}"
             end

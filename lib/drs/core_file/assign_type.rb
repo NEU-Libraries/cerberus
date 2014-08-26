@@ -1,7 +1,7 @@
 require 'filemagic'
 
 module Drs
-  module NuCoreFile
+  module CoreFile
     module AssignType
 
       def instantiate_appropriate_content_object(file_path, file_name)

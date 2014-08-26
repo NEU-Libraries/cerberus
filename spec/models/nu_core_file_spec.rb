@@ -1,11 +1,11 @@
 require 'spec_helper'
 
-describe NuCoreFile do
+describe CoreFile do
 
   describe "In progress state" do
     let(:bill) { FactoryGirl.create(:bill) }
     let(:bo) { FactoryGirl.create(:bo) }
-    let(:gf) { NuCoreFile.new }
+    let(:gf) { CoreFile.new }
 
     it "is false if the current user is not the depositor" do
       gf.depositor = bill.nuid
@@ -31,17 +31,17 @@ describe NuCoreFile do
   describe "Abandoned file lookup" do
     let(:bill) { FactoryGirl.create(:bill) }
     let(:nuid) { bill.nuid }
-    let(:gf)   { NuCoreFile.new }
+    let(:gf)   { CoreFile.new }
 
     it "returns the empty array if no abandoned files exist" do
       gf.depositor = nuid
       gf.save!
-      expect(NuCoreFile.abandoned_for_nuid(nuid)).to eq []
+      expect(CoreFile.abandoned_for_nuid(nuid)).to eq []
     end
 
     it "returns an array of SolrDocuments" do
       begin
-        @abandoned           = NuCoreFile.new
+        @abandoned           = CoreFile.new
         @abandoned.depositor = nuid
         @abandoned.tag_as_in_progress
         @abandoned.save!
@@ -53,7 +53,7 @@ describe NuCoreFile do
         # other things aren't working.
         Timecop.freeze(DateTime.now + 1) do
           expected = [SolrDocument.new(@abandoned.to_solr).pid]
-          result   = NuCoreFile.abandoned_for_nuid(nuid).map { |x| x.pid }
+          result   = CoreFile.abandoned_for_nuid(nuid).map { |x| x.pid }
           expect(result).to match_array expected
         end
       ensure
@@ -68,7 +68,7 @@ describe NuCoreFile do
     let(:bills_collection) { FactoryGirl.create(:valid_owned_by_bill) }
     let(:bills_collection_two) { FactoryGirl.create(:valid_owned_by_bill) }
     let(:core) do
-      a = NuCoreFile.new(depositor: "000000001")
+      a = CoreFile.new(depositor: "000000001")
       a.rightsMetadata.permissions({person: '000000001'}, 'edit')
       return a
     end
@@ -101,7 +101,7 @@ describe NuCoreFile do
 
   describe "Content files" do
     before :each do
-      @core_file = NuCoreFile.create(depositor: "dummy@example.com")
+      @core_file = CoreFile.create(depositor: "dummy@example.com")
       @img = ImageMasterFile.create(title: "Img", core_record: @core_file)
       @pdf = PdfFile.create(title: "Pdf", core_record: @core_file)
       @word = MswordFile.create(title: "MsWord", core_record: @core_file)
@@ -147,7 +147,7 @@ describe NuCoreFile do
   end
 
   describe "Canonical object lookup" do
-    let(:core) { NuCoreFile.create(depositor: "dummy@example.com") }
+    let(:core) { CoreFile.create(depositor: "dummy@example.com") }
     after(:all) { ActiveFedora::Base.destroy_all }
 
     it "returns false for objects with no canonical object" do
@@ -164,7 +164,7 @@ describe NuCoreFile do
   end
 
   describe "Thumbnail lookup" do
-    let(:core) { NuCoreFile.create(depositor: "dummy@example.com") }
+    let(:core) { CoreFile.create(depositor: "dummy@example.com") }
     after(:all)  { ActiveFedora::Base.destroy_all }
 
     it "returns false for objects with no thumbnail" do

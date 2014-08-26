@@ -1,7 +1,7 @@
 class ContentUpdateEventJob < EventJob
   def run
-    gf = NuCoreFile.find(generic_file_id)
-    action = "User #{link_to_profile depositor_id} has updated #{link_to gf.title.first, nu_core_file_path(gf.noid)}"
+    gf = CoreFile.find(generic_file_id)
+    action = "User #{link_to_profile depositor_id} has updated #{link_to gf.title.first, core_file_path(gf.noid)}"
     timestamp = Time.now.to_i
     depositor = User.find_by_user_key(depositor_id)
     # Create the event

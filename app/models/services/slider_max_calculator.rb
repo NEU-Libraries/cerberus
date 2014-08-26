@@ -1,4 +1,4 @@
-# This service object is used by the NuCoreFilesController to compute the maximum
+# This service object is used by the CoreFilesController to compute the maximum
 # size allowable for small/medium/large objects.
 require 'RMagick'
 include Magick

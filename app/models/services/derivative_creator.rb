@@ -6,7 +6,7 @@ class DerivativeCreator
 
   def initialize(master_pid)
     @master = ActiveFedora::Base.find(master_pid, cast: true)
-    @core = NuCoreFile.find(@master.core_record.pid)
+    @core = CoreFile.find(@master.core_record.pid)
   end
 
   def generate_derivatives

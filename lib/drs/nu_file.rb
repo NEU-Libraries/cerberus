@@ -21,7 +21,7 @@ module Drs
       has_metadata name: 'properties', type: DrsPropertiesDatastream
       has_file_datastream name: "content", type: FileContentDatastream
 
-      belongs_to :core_record, property: :is_part_of, class_name: 'NuCoreFile'
+      belongs_to :core_record, property: :is_part_of, class_name: 'CoreFile'
     end
 
     def public?

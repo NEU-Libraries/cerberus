@@ -61,7 +61,7 @@ describe ZipCompilationJob do
 
   after(:all) do
     User.destroy_all
-    NuCoreFile.all.map { |x| x.destroy }
+    CoreFile.all.map { |x| x.destroy }
     Compilation.all.map { |c| c.destroy }
 
     if File.directory? Rails.root.join("tmp", @compilation.pid)

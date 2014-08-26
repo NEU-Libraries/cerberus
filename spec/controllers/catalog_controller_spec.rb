@@ -50,7 +50,7 @@ describe CatalogController do
 
       after :all do
         Collection.destroy_all
-        NuCoreFile.destroy_all
+        CoreFile.destroy_all
       end
     end
   end

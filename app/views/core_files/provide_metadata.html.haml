@@ -1,5 +1,5 @@
 - content_for :local_js do
-  if (navigator.userAgent.match("MSIE")){$("#new_nu_core_file").validate();}
+  if (navigator.userAgent.match("MSIE")){$("#new_core_file").validate();}
 
   $('#permissions_display').show();
 
@@ -19,12 +19,12 @@
     %small
       = t('drs.metadata.edit_subtitle')
 
-= form_for(@nu_core_file, :url => files_process_metadata_path, method: 'post', :html => {:multipart => true}) do |f|
+= form_for(@core_file, :url => files_process_metadata_path, method: 'post', :html => {:multipart => true}) do |f|
 
-  = hidden_field_tag(:collection_id, @nu_core_file.parent.identifier)
+  = hidden_field_tag(:collection_id, @core_file.parent.identifier)
   = hidden_field_tag(:proxy, params[:proxy])
 
-  = render :partial => 'nu_core_files/metadata/default', :formats => [:html], :locals => {:f => f, :new_object => true}
+  = render :partial => 'core_files/metadata/default', :formats => [:html], :locals => {:f => f, :new_object => true}
 
   / We need to account for the different file types here to extend the metdata screen
 

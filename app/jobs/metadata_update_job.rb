@@ -12,7 +12,7 @@ class MetadataUpdateJob
     self.depositor_nuid = nuid
     self.title = params[:title]
     self.nu_title = params[:title]
-    self.file_attributes = params[:nu_core_file]
+    self.file_attributes = params[:core_file]
     self.uploader_nuid = proxier_nuid
   end
 
@@ -62,7 +62,7 @@ class MetadataUpdateJob
   end
 
   def file_list (files)
-    return files.map {|gf| '<a href="'+nu_core_files_path+'/'+gf.pid+'">'+gf.to_s+'</a>'}.join(', ')
+    return files.map {|gf| '<a href="'+core_files_path+'/'+gf.pid+'">'+gf.to_s+'</a>'}.join(', ')
   end
 
 end

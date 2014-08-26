@@ -6,7 +6,7 @@ class PropagateCoreMetadataChangeJob
   end
 
   def run
-    core_record = NuCoreFile.find(core)
+    core_record = CoreFile.find(core)
     core_record.propagate_metadata_changes!
   end
 end
