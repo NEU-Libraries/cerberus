@@ -1,3 +1,3 @@
 class ImageMediumFile < ActiveFedora::Base
-  include Drs::NuFile
+  include Drs::ContentFile
 end

@@ -1,11 +1,11 @@
 module Drs
-  module NuFile
+  module ContentFile
     extend ActiveSupport::Concern
     include ActiveModel::MassAssignmentSecurity
     include Hydra::ModelMethods
     include Drs::MetadataAssignment
     include Drs::Rights::MassPermissions
-    include Drs::NuFile::Characterizable
+    include Drs::ContentFile::Characterizable
     include Hydra::Derivatives
     include Drs::Find
     include Drs::ImpressionCount
