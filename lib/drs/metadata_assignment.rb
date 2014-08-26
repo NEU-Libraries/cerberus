@@ -196,11 +196,11 @@ module Drs
       end
 
       def if_DC_exists(&block)
-        verify_datastream_carefree('DC', NortheasternDublinCoreDatastream, &block)
+        verify_datastream_carefree('DC', DublinCoreDatastream, &block)
       end
 
       def if_DC_exists_strict(&block)
-        verify_datastream_strict('DC', NortheasternDublinCoreDatastream, &block)
+        verify_datastream_strict('DC', DublinCoreDatastream, &block)
       end
 
       def if_properties_exists_strict(&block)

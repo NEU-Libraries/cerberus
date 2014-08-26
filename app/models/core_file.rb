@@ -21,7 +21,7 @@ class CoreFile < ActiveFedora::Base
 
   include ModsDisplay::ModelExtension
 
-  has_metadata name: 'DC', type: NortheasternDublinCoreDatastream
+  has_metadata name: 'DC', type: DublinCoreDatastream
   has_metadata name: 'properties', type: PropertiesDatastream
   has_metadata name: 'mods', type: NuModsDatastream
 
