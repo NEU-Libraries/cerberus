@@ -15,7 +15,7 @@ module Drs::ControllerHelpers::ViewLogger
       ref = request.referrer
     end
 
-    DrsImpression.create(pid: id, session_id: session, action: action, ip_address: ip,
+    Impression.create(pid: id, session_id: session, action: action, ip_address: ip,
                           referrer: ref, status: status)
   end
 end

@@ -52,7 +52,7 @@ class ShoppingCartsController < ApplicationController
       @id = params[:delete]
       session[:ids].delete(@id)
       flash.now[:info] = "Item removed from #{t('drs.shoppingcarts.name')}."
-      DrsImpression.destroy_all(pid: @id, action: "download", status: "INCOMPLETE",
+      Impression.destroy_all(pid: @id, action: "download", status: "INCOMPLETE",
                             session_id: request.session_options[:id])
     end
 
@@ -64,7 +64,7 @@ class ShoppingCartsController < ApplicationController
 
   # Purge the contents of the user's shopping cart.
   def destroy
-    DrsImpression.destroy_all(pid: session[:ids],
+    Impression.destroy_all(pid: session[:ids],
                               action: "download",
                               status: "INCOMPLETE",
                               session_id: request.session_options[:id])
