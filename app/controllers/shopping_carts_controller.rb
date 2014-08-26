@@ -15,7 +15,7 @@ class ShoppingCartsController < ApplicationController
   include BlacklightAdvancedSearch::ParseBasicQ
   include BlacklightAdvancedSearch::Controller
 
-  include Drs::ControllerHelpers::ViewLogger
+  include Cerberus::ControllerHelpers::ViewLogger
 
 
   def show

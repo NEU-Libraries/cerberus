@@ -1,4 +1,4 @@
-include Drs::ThumbnailCreation
+include Cerberus::ThumbnailCreation
 
 # Responsible for generating inline thumbnails, which are used on
 # community and collection objects.  Actual thumbnail creation for

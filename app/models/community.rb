@@ -2,12 +2,12 @@ class Community < ActiveFedora::Base
   include ActiveModel::MassAssignmentSecurity
   include Hydra::ModelMixins::RightsMetadata
   include Hydra::ModelMethods
-  include Drs::Rights::MassPermissions
-  include Drs::Rights::Embargoable
-  include Drs::Rights::InheritedRestrictions
-  include Drs::MetadataAssignment
-  include Drs::Relationships
-  include Drs::Find
+  include Cerberus::Rights::MassPermissions
+  include Cerberus::Rights::Embargoable
+  include Cerberus::Rights::InheritedRestrictions
+  include Cerberus::MetadataAssignment
+  include Cerberus::Relationships
+  include Cerberus::Find
 
   has_metadata name: 'DC', type: DublinCoreDatastream
   has_metadata name: 'mods', type: ModsDatastream

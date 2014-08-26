@@ -1,4 +1,4 @@
 class TextFile < ActiveFedora::Base
-  include Drs::ContentFile
-  include Drs::CoreFile::FullTextIndexing
+  include Cerberus::ContentFile
+  include Cerberus::CoreFile::FullTextIndexing
 end

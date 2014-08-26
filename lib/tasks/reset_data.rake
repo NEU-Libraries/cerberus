@@ -1,5 +1,5 @@
 def mint_unique_pid
-  Drs::Noid.namespaceize(Drs::IdService.mint)
+  Cerberus::Noid.namespaceize(Cerberus::IdService.mint)
 end
 
 def create_collection(klass, parent_str, title_str, description = "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Recusandae, minima, cum sit iste at mollitia voluptatem error perspiciatis excepturi ut voluptatibus placeat esse architecto ea voluptate assumenda repudiandae quod commodi.")

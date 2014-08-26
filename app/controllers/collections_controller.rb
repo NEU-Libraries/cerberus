@@ -4,8 +4,8 @@ require 'parslet'
 require 'parsing_nesting/tree'
 
 class CollectionsController < ApplicationController
-  include Drs::TempFileStorage
-  include Drs::ControllerHelpers::EditableObjects
+  include Cerberus::TempFileStorage
+  include Cerberus::ControllerHelpers::EditableObjects
 
   include Blacklight::Catalog
   include Blacklight::Configurable # comply with BL 3.7

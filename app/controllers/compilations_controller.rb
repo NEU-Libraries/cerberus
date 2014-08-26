@@ -1,5 +1,5 @@
 class CompilationsController < ApplicationController
-  include Drs::ControllerHelpers::EditableObjects
+  include Cerberus::ControllerHelpers::EditableObjects
 
   before_filter :authenticate_user!, except: [:show, :show_download, :download]
 

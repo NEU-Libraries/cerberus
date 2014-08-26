@@ -2,10 +2,10 @@ require 'stanford-mods'
 
 # -*- coding: utf-8 -*-
 class CoreFilesController < ApplicationController
-  include Drs::Controller
-  include Drs::TempFileStorage
-  include Drs::ControllerHelpers::EditableObjects
-  include Drs::ControllerHelpers::ViewLogger
+  include Cerberus::Controller
+  include Cerberus::TempFileStorage
+  include Cerberus::ControllerHelpers::EditableObjects
+  include Cerberus::ControllerHelpers::ViewLogger
 
   include ModsDisplay::ControllerExtension
 
@@ -307,7 +307,7 @@ class CoreFilesController < ApplicationController
     end
 
     def virus_check( file)
-      stat = Drs::CoreFile::Actions.virus_check(file)
+      stat = Cerberus::CoreFile::Actions.virus_check(file)
       flash[:error] = "Virus checking did not pass for #{File.basename(file.path)} status = #{stat}" unless stat == 0
       stat
     end

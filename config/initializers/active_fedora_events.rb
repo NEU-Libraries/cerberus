@@ -1,7 +1,7 @@
 module ActiveFedora
   class UnsavedDigitalObject
     def assign_pid
-      @pid ||= Drs::IdService.mint
+      @pid ||= Cerberus::IdService.mint
     end
   end
 

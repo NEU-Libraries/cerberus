@@ -2,10 +2,10 @@ class Compilation < ActiveFedora::Base
   include Hydra::ModelMethods
   include Hydra::ModelMixins::RightsMetadata
   include ActiveModel::MassAssignmentSecurity
-  include Drs::MetadataAssignment
-  include Drs::Find
-  include Drs::Rights::MassPermissions
-  include Drs::Rights::PermissionGroups
+  include Cerberus::MetadataAssignment
+  include Cerberus::Find
+  include Cerberus::Rights::MassPermissions
+  include Cerberus::Rights::PermissionGroups
 
   has_metadata name: 'DC', type: DublinCoreDatastream
   has_metadata name: 'mods', type: ModsDatastream

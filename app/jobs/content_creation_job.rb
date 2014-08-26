@@ -25,7 +25,7 @@ class ContentCreationJob
       self.core_record = CoreFile.find(core_file_pid)
 
       klass = core_record.canonical_class.constantize
-      content_object = klass.new(pid: Drs::Noid.namespaceize(Drs::IdService.mint))
+      content_object = klass.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
 
       # TODO: re-do video poster creation...
       # if content_object.instance_of? VideoFile

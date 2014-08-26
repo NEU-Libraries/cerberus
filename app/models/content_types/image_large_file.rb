@@ -1,3 +1,3 @@
 class ImageLargeFile < ActiveFedora::Base
-  include Drs::ContentFile
+  include Cerberus::ContentFile
 end
