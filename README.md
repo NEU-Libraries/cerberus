@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/NEU-Libraries/drs.svg?branch=develop)](https://travis-ci.org/NEU-Libraries/drs)
+[![Build Status](https://travis-ci.org/NEU-Libraries/drs.cerberus?branch=develop)](https://travis-ci.org/NEU-Libraries/cerberus)
 
 ### DRS Application 
 
