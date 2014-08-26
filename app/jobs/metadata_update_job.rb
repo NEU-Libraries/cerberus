@@ -57,7 +57,7 @@ class MetadataUpdateJob
       sleep 0.01
       retry
     end #
-    Drs::Application::Queue.push(ContentUpdateEventJob.new(gf.pid, gf.true_depositor))
+    Cerberus::Application::Queue.push(ContentUpdateEventJob.new(gf.pid, gf.true_depositor))
     @saved << gf
   end
 

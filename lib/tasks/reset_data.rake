@@ -50,7 +50,7 @@ task :reset_data => :environment do
 
   require 'factory_girl_rails'
 
-  Hydra::Derivatives.fits_path = Drs::Application.config.fits_path
+  Hydra::Derivatives.fits_path = Cerberus::Application.config.fits_path
 
   ActiveFedora::Base.find(:all).each do |file|
     file.destroy
@@ -77,7 +77,7 @@ task :reset_data => :environment do
   tmp_user.view_pref = "list"
   tmp_user.save!
 
-  Drs::Application::Queue.push(EmployeeCreateJob.new(tmp_user.nuid, tmp_user.full_name))
+  Cerberus::Application::Queue.push(EmployeeCreateJob.new(tmp_user.nuid, tmp_user.full_name))
 
   set_edit_permissions(root_dept)
 
