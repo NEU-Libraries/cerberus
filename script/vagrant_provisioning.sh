@@ -64,19 +64,19 @@ echo "Temporary github credentials"
 git config --global user.name "Change Me"
 git config --global user.email "change@me.com"
 
-echo "Setting up DRS"
-cd /home/vagrant/drs
+echo "Setting up Cerberus"
+cd /home/vagrant/cerberus
 gem install bundler
 bundle install
 rake db:migrate
 rails g hydra:jetty
 rake jetty:config
 rake db:test:prepare
-rm -f /home/vagrant/drs/.git/hooks/pre-push
-touch /home/vagrant/drs/.git/hooks/pre-push
-echo '#!/bin/sh' >> /home/vagrant/drs/.git/hooks/pre-push
-echo 'rake smoke_test' >> /home/vagrant/drs/.git/hooks/pre-push
-chmod +x /home/vagrant/drs/.git/hooks/pre-push
+rm -f /home/vagrant/cerberus/.git/hooks/pre-push
+touch /home/vagrant/cerberus/.git/hooks/pre-push
+echo '#!/bin/sh' >> /home/vagrant/cerberus/.git/hooks/pre-push
+echo 'rake smoke_test' >> /home/vagrant/cerberus/.git/hooks/pre-push
+chmod +x /home/vagrant/cerberus/.git/hooks/pre-push
 
 echo "Starting Redis"
 sudo service redis start
