@@ -61,7 +61,7 @@ class ScaledImageCreator
 
         # If we can't find the derivative, create it.
         if !target
-          target = klass.new(pid: Drs::Noid.namespaceize(Drs::IdService.mint))
+          target = klass.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
           target.description = "Derivative for #{core.pid}"
           target.rightsMetadata.content = master.rightsMetadata.content
           target.identifier = target.pid

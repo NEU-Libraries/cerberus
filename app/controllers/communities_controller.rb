@@ -4,7 +4,7 @@ require 'parslet'
 require 'parsing_nesting/tree'
 
 class CommunitiesController < ApplicationController
-  include Drs::ControllerHelpers::EditableObjects
+  include Cerberus::ControllerHelpers::EditableObjects
 
   include Blacklight::Catalog
   include Blacklight::Configurable # comply with BL 3.7

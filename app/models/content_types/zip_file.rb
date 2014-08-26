@@ -1,3 +1,3 @@
 class ZipFile < ActiveFedora::Base
-  include Drs::ContentFile
+  include Cerberus::ContentFile
 end

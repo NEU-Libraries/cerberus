@@ -1,9 +1,9 @@
 class Employee < ActiveFedora::Base
   include ActiveModel::MassAssignmentSecurity
   include ActiveModel::Validations
-  include Drs::Employee::SmartCollections
-  include Drs::Find
-  include Drs::Rights::MassPermissions
+  include Cerberus::Employee::SmartCollections
+  include Cerberus::Find
+  include Cerberus::Rights::MassPermissions
 
   attr_accessible :nuid, :name, :community
   attr_accessor   :building

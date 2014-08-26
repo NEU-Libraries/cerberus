@@ -1,5 +1,5 @@
 class Admin::CommunitiesController < AdminController
-  include Drs::TempFileStorage
+  include Cerberus::TempFileStorage
 
   # Loads @community
   load_resource

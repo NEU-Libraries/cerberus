@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe "ImpressionCount" do
   class ImpTest
-    include Drs::ImpressionCount
+    include Cerberus::ImpressionCount
     attr_accessor :pid
 
     def initialize(pid)

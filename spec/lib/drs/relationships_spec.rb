@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Drs::Relationships do
+describe Cerberus::Relationships do
 
   before :all do
     Employee.destroy_all
@@ -13,7 +13,7 @@ describe Drs::Relationships do
 
   # Helper class implementing the module.
   class RelationshipHelper < ActiveFedora::Base
-    include Drs::Relationships
+    include Cerberus::Relationships
 
     has_metadata name: 'rightsMetadata', type: ParanoidRightsDatastream
 

@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Drs::Rights::MassPermissions do
+describe Cerberus::Rights::MassPermissions do
   let(:core_file) { CoreFile.new }
 
   describe "Setting to public" do

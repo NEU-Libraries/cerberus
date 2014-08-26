@@ -2,13 +2,13 @@ class Collection < ActiveFedora::Base
   include ActiveModel::MassAssignmentSecurity
   include Hydra::ModelMixins::RightsMetadata
   include Hydra::ModelMethods
-  include Drs::Rights::MassPermissions
-  include Drs::Rights::Embargoable
-  include Drs::Rights::InheritedRestrictions
-  include Drs::Rights::PermissionsAssignmentHelper
-  include Drs::MetadataAssignment
-  include Drs::Relationships
-  include Drs::Find
+  include Cerberus::Rights::MassPermissions
+  include Cerberus::Rights::Embargoable
+  include Cerberus::Rights::InheritedRestrictions
+  include Cerberus::Rights::PermissionsAssignmentHelper
+  include Cerberus::MetadataAssignment
+  include Cerberus::Relationships
+  include Cerberus::Find
 
   validate :belong_check, on: :update
 

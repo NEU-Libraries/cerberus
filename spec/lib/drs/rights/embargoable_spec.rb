@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Drs::Rights::Embargoable do
+describe Cerberus::Rights::Embargoable do
   before :all do
     User.all.each do |user|
       user.destroy

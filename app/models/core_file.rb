@@ -1,23 +1,23 @@
 class CoreFile < ActiveFedora::Base
   include ActiveModel::MassAssignmentSecurity
 
-  include Drs::ModelMethods
-  include Drs::Noid
-  include Drs::MetadataAssignment
-  include Drs::Find
-  include Drs::ImpressionCount
+  include Cerberus::ModelMethods
+  include Cerberus::Noid
+  include Cerberus::MetadataAssignment
+  include Cerberus::Find
+  include Cerberus::ImpressionCount
 
-  include Drs::CoreFile::Actions
-  include Drs::CoreFile::MimeTypes
-  include Drs::CoreFile::Permissions
-  include Drs::CoreFile::Characterization
-  include Drs::CoreFile::Export
-  include Drs::CoreFile::AssignType
+  include Cerberus::CoreFile::Actions
+  include Cerberus::CoreFile::MimeTypes
+  include Cerberus::CoreFile::Permissions
+  include Cerberus::CoreFile::Characterization
+  include Cerberus::CoreFile::Export
+  include Cerberus::CoreFile::AssignType
 
-  include Drs::Rights::MassPermissions
-  include Drs::Rights::Embargoable
-  include Drs::Rights::InheritedRestrictions
-  include Drs::Rights::PermissionsAssignmentHelper
+  include Cerberus::Rights::MassPermissions
+  include Cerberus::Rights::Embargoable
+  include Cerberus::Rights::InheritedRestrictions
+  include Cerberus::Rights::PermissionsAssignmentHelper
 
   include ModsDisplay::ModelExtension
 

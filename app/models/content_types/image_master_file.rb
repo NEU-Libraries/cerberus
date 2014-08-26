@@ -1,3 +1,3 @@
 class ImageMasterFile < ActiveFedora::Base
-  include Drs::ContentFile
+  include Cerberus::ContentFile
 end
