@@ -1,4 +1,4 @@
-module CoreFileHelper
+module CoreFilesHelper
 	def help_icon(key)
 		link_to '#', id: "core_file_#{key.to_s}_help", rel: 'popover',
 		  'data-content' => metadata_help(key),
