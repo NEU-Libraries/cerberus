@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe NuModsDatastream do
+describe ModsDatastream do
   let(:basic_mods) { FactoryGirl.build(:mods) }
 
   subject { basic_mods }
@@ -38,7 +38,7 @@ describe NuModsDatastream do
   describe "Multiple entry setters" do
 
     describe "With valid information" do
-      let(:valid_mods) { NuModsDatastream.new }
+      let(:valid_mods) { ModsDatastream.new }
       let(:corp_names) { ["Corp One", "Corp Two", "Corp Three"] }
       let(:first_names) { ["Will", "William", "Bill"] }
       let(:last_names) { ["Jack", "Jackson", "Back"] }
@@ -103,13 +103,13 @@ describe NuModsDatastream do
     end
 
     describe "With invalid information" do
-      let(:invalid_mods) { NuModsDatastream.new }
+      let(:invalid_mods) { ModsDatastream.new }
       let(:crap_keywords) { ["", " ", ""] }
       let(:crap_corps) { ["", " ", ""] }
       let(:crap_first_names) { ["", " ", "Will", "", " "] }
       let(:crap_last_names) { [" ", "", "Jackson", "", " "] }
 
-      let(:uneven_mods) { NuModsDatastream.new }
+      let(:uneven_mods) { ModsDatastream.new }
       let(:uneven_firsts) { ["Will", "Chris"] }
       let(:uneven_lasts) { ["Jackson", "Tucker", "Chan"] }
 
@@ -136,7 +136,7 @@ describe NuModsDatastream do
   end
 
   describe "Solrization" do
-    let(:mods) { NuModsDatastream.new }
+    let(:mods) { ModsDatastream.new }
     let(:result) { mods.to_solr }
 
     it "Gives back ssi and tesim fields for the title entry" do

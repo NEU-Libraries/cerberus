@@ -1,4 +1,4 @@
-class NuModsDatastream < ActiveFedora::OmDatastream
+class ModsDatastream < ActiveFedora::OmDatastream
   include OM::XML::Document
   include NodeHelper
   include ApplicationHelper

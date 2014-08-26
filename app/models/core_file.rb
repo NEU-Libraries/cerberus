@@ -23,7 +23,7 @@ class CoreFile < ActiveFedora::Base
 
   has_metadata name: 'DC', type: DublinCoreDatastream
   has_metadata name: 'properties', type: PropertiesDatastream
-  has_metadata name: 'mods', type: NuModsDatastream
+  has_metadata name: 'mods', type: ModsDatastream
 
   attr_accessible :title, :non_sort, :identifier, :description, :date_of_issue
   attr_accessible :keywords, :creators, :depositor, :type

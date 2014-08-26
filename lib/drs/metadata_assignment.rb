@@ -188,11 +188,11 @@ module Drs
     private
 
       def if_mods_exists(&block)
-        verify_datastream_carefree('mods', NuModsDatastream, &block)
+        verify_datastream_carefree('mods', ModsDatastream, &block)
       end
 
       def if_mods_exists_strict(&block)
-        verify_datastream_strict('mods', NuModsDatastream, &block)
+        verify_datastream_strict('mods', ModsDatastream, &block)
       end
 
       def if_DC_exists(&block)
