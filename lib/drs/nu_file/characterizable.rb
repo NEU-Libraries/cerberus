@@ -8,8 +8,8 @@ module Drs
       extend ActiveSupport::Concern
 
       # Required Sufia code
-      include Drs::NuCoreFile::MimeTypes
-      include Drs::NuCoreFile::Characterization
+      include Drs::CoreFile::MimeTypes
+      include Drs::CoreFile::Characterization
 
       included do
         around_save :characterize_if_changed

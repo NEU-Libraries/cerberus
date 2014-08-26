@@ -1,4 +1,4 @@
-module Drs::NuCoreFile::Permissions
+module Drs::CoreFile::Permissions
   extend ActiveSupport::Concern
   include Hydra::ModelMixins::RightsMetadata
 

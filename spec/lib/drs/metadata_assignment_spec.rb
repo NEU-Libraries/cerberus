@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe "Metadata" do
   let(:compilation) { Compilation.new }
-  let(:core_file) { NuCoreFile.new }
+  let(:core_file) { CoreFile.new }
   let(:collection) { NuCollection.new }
 
   describe "assignment" do

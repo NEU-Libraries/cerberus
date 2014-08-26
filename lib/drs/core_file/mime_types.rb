@@ -1,5 +1,5 @@
 module Drs
-  module NuCoreFile
+  module CoreFile
     module MimeTypes
       extend ActiveSupport::Concern
 

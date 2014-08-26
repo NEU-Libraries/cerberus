@@ -1,7 +1,7 @@
 require 'stanford-mods'
 
 # -*- coding: utf-8 -*-
-class NuCoreFilesController < ApplicationController
+class CoreFilesController < ApplicationController
   include Drs::Controller
   include Drs::TempFileStorage
   include Drs::ControllerHelpers::EditableObjects
@@ -35,11 +35,11 @@ class NuCoreFilesController < ApplicationController
   end
 
   def destroy_incomplete_file
-    @nu_core_file = fetch_solr_document
+    @core_file = fetch_solr_document
 
-    if @nu_core_file.in_progress? && (@nu_core_file.klass == "NuCoreFile")
-      @nu_core_file = NuCoreFile.find(@nu_core_file.pid)
-      @nu_core_file.destroy
+    if @core_file.in_progress? && (@core_file.klass == "CoreFile")
+      @core_file = CoreFile.find(@core_file.pid)
+      @core_file.destroy
       flash[:notice] = "Incomplete file destroyed"
       redirect_to(root_path) and return
     else
@@ -49,7 +49,7 @@ class NuCoreFilesController < ApplicationController
   end
 
   def provide_metadata
-    @nu_core_file = NuCoreFile.find(params[:id])
+    @core_file = CoreFile.find(params[:id])
 
     if should_proxy?
       nuid = params[:proxy]
@@ -57,7 +57,7 @@ class NuCoreFilesController < ApplicationController
       nuid = current_user.nuid
     end
 
-    @title = @nu_core_file.title
+    @title = @core_file.title
 
     @page_title = "Provide Upload Metadata"
   end
@@ -69,7 +69,7 @@ class NuCoreFilesController < ApplicationController
     if params["abandoned"]
       @incomplete = fetch_solr_document(id: params["abandoned"])
     else
-      file = NuCoreFile.abandoned_for_nuid(current_user.nuid).first
+      file = CoreFile.abandoned_for_nuid(current_user.nuid).first
       @incomplete = file
     end
 
@@ -85,11 +85,11 @@ class NuCoreFilesController < ApplicationController
       proxy_nuid     = nil
     end
 
-    @nu_core_file = NuCoreFile.find(params[:id])
+    @core_file = CoreFile.find(params[:id])
 
     Drs::Application::Queue.push(MetadataUpdateJob.new(depositor_nuid, params, proxy_nuid))
 
-    update_metadata if params[:nu_core_file]
+    update_metadata if params[:core_file]
     max = session[:slider_max]
 
     # Process Thumbnail
@@ -97,29 +97,29 @@ class NuCoreFilesController < ApplicationController
       file = params[:poster]
       new_path = move_file_to_tmp(file)
 
-      Drs::Application::Queue.push(ContentCreationJob.new(@nu_core_file.pid, @nu_core_file.tmp_path, @nu_core_file.original_filename, new_path))
+      Drs::Application::Queue.push(ContentCreationJob.new(@core_file.pid, @core_file.tmp_path, @core_file.original_filename, new_path))
     elsif !max.nil?
       s = params[:small_image_size].to_f / max.to_f
       m = params[:medium_image_size].to_f / max.to_f
       l = params[:large_image_size].to_f / max.to_f
 
-      Drs::Application::Queue.push(ContentCreationJob.new(@nu_core_file.pid, @nu_core_file.tmp_path, @nu_core_file.original_filename, nil, s, m, l))
+      Drs::Application::Queue.push(ContentCreationJob.new(@core_file.pid, @core_file.tmp_path, @core_file.original_filename, nil, s, m, l))
     else
-      Drs::Application::Queue.push(ContentCreationJob.new(@nu_core_file.pid, @nu_core_file.tmp_path, @nu_core_file.original_filename))
+      Drs::Application::Queue.push(ContentCreationJob.new(@core_file.pid, @core_file.tmp_path, @core_file.original_filename))
     end
 
     flash[:notice] = 'Your files are being processed by ' + t('drs.product_name.short') + ' in the background. The metadata and access controls you specified are being applied. Files will be marked <span class="label label-important" title="Private">In Progress</span> until this process is complete (shouldn\'t take too long, hang in there!).'
-    redirect_to nu_core_file_path(@nu_core_file.pid)
+    redirect_to core_file_path(@core_file.pid)
   end
 
   # routed to /files/:id
   def show
-    @nu_core_file = fetch_solr_document
+    @core_file = fetch_solr_document
 
     @mods = fetch_mods
 
-    @thumbs = @nu_core_file.thumbnail_list
-    @page_title = @nu_core_file.title
+    @thumbs = @core_file.thumbnail_list
+    @page_title = @core_file.title
 
     log_action("view", "COMPLETE")
   end
@@ -138,12 +138,12 @@ class NuCoreFilesController < ApplicationController
         json_error "You must accept the terms of service!", file.original_filename
       elsif (!params[:proxy].blank? && !(Employee.exists_by_nuid? params[:proxy]))
         flash[:alert] = "The NUID you entered, #{params[:proxy]}, doesn't exist in the system"
-        redirect_to new_nu_core_file_path( {parent: params[:collection_id]} )
+        redirect_to new_core_file_path( {parent: params[:collection_id]} )
       else
         process_file(file)
       end
     rescue => exception
-      logger.error "NuCoreFilesController::create rescued #{exception.class}\n\t#{exception.to_s}\n #{exception.backtrace.join("\n")}\n\n"
+      logger.error "CoreFilesController::create rescued #{exception.class}\n\t#{exception.to_s}\n #{exception.backtrace.join("\n")}\n\n"
       email_handled_exception(exception)
       json_error "Error occurred while creating core file."
     ensure
@@ -156,7 +156,7 @@ class NuCoreFilesController < ApplicationController
   def new
     @page_title = "Upload New Files"
 
-    abandoned_files = NuCoreFile.abandoned_for_nuid(current_user.nuid)
+    abandoned_files = CoreFile.abandoned_for_nuid(current_user.nuid)
 
     if abandoned_files.any?
       file = abandoned_files.first
@@ -164,63 +164,63 @@ class NuCoreFilesController < ApplicationController
       return
     end
 
-    @nu_core_file = ::NuCoreFile.new
+    @core_file = ::CoreFile.new
     @collection_id = params[:parent]
   end
 
   def edit
-    @nu_core_file = NuCoreFile.find(params[:id])
-    @page_title = "Edit #{@nu_core_file.title}"
+    @core_file = CoreFile.find(params[:id])
+    @page_title = "Edit #{@core_file.title}"
   end
 
   def update
-    @nu_core_file = NuCoreFile.find(params[:id])
+    @core_file = CoreFile.find(params[:id])
 
     version_event = false
 
-    if params.has_key?(:revision) and params[:revision] !=  @nu_core_file.content.latest_version.versionID
-      revision = @nu_core_file.content.get_version(params[:revision])
-      @nu_core_file.add_file(revision.content, datastream_id, revision.label)
+    if params.has_key?(:revision) and params[:revision] !=  @core_file.content.latest_version.versionID
+      revision = @core_file.content.get_version(params[:revision])
+      @core_file.add_file(revision.content, datastream_id, revision.label)
       version_event = true
-      Drs::Application::Queue.push(ContentRestoredVersionEventJob.new(@nu_core_file.pid, current_user.user_key, params[:revision]))
+      Drs::Application::Queue.push(ContentRestoredVersionEventJob.new(@core_file.pid, current_user.user_key, params[:revision]))
     end
 
     if params.has_key?(:filedata)
       file = params[:filedata]
       return unless virus_check(file) == 0
-      @nu_core_file.add_file(file, datastream_id, file.original_filename)
+      @core_file.add_file(file, datastream_id, file.original_filename)
       version_event = true
-      Drs::Application::Queue.push(ContentNewVersionEventJob.new(@nu_core_file.pid, current_user.user_key))
+      Drs::Application::Queue.push(ContentNewVersionEventJob.new(@core_file.pid, current_user.user_key))
     end
 
-    # only update metadata if there is a nu_core_file object which is not the case for version updates
-    update_metadata if params[:nu_core_file]
+    # only update metadata if there is a core_file object which is not the case for version updates
+    update_metadata if params[:core_file]
 
     #always save the file so the new version or metadata gets recorded
-    if @nu_core_file.save
-      if params[:nu_core_file] && !@nu_core_file.category.first.blank?
-        UploadAlert.create_from_core_file(@nu_core_file, :update)
+    if @core_file.save
+      if params[:core_file] && !@core_file.category.first.blank?
+        UploadAlert.create_from_core_file(@core_file, :update)
       end
 
       # If this change updated metadata, propagate the change outwards to
       # all content objects
-      if params[:nu_core_file]
+      if params[:core_file]
         q = Drs::Application::Queue
-        q.push(PropagateCoreMetadataChangeJob.new(@nu_core_file.pid))
+        q.push(PropagateCoreMetadataChangeJob.new(@core_file.pid))
       end
 
       # do not trigger an update event if a version event has already been triggered
-      Drs::Application::Queue.push(ContentUpdateEventJob.new(@nu_core_file.pid, current_user.user_key)) unless version_event
-      # @nu_core_file.record_version_committer(current_user)
+      Drs::Application::Queue.push(ContentUpdateEventJob.new(@core_file.pid, current_user.user_key)) unless version_event
+      # @core_file.record_version_committer(current_user)
     end
 
-    redirect_to(@nu_core_file)
+    redirect_to(@core_file)
   end
 
   protected
 
     def complete?
-      core = NuCoreFile.find(params[:id])
+      core = CoreFile.find(params[:id])
       if core.properties.in_progress?
         flash[:error] = "Item will be available for edit/update when it has finished building."
         redirect_to core and return
@@ -228,8 +228,8 @@ class NuCoreFilesController < ApplicationController
     end
 
     def fetch_mods
-      Rails.cache.fetch("/mods/#{@nu_core_file.pid}-#{@nu_core_file.updated_at}", :expires_in => 12.hours) do
-        render_mods_display(NuCoreFile.find(@nu_core_file.pid)).to_html.html_safe
+      Rails.cache.fetch("/mods/#{@core_file.pid}-#{@core_file.updated_at}", :expires_in => 12.hours) do
+        render_mods_display(CoreFile.find(@core_file.pid)).to_html.html_safe
       end
     end
 
@@ -246,68 +246,68 @@ class NuCoreFilesController < ApplicationController
     end
 
     def update_metadata
-      # @nu_core_file.date_modified = DateTime.now.to_s
-      @nu_core_file.update_attributes(params[:nu_core_file])
+      # @core_file.date_modified = DateTime.now.to_s
+      @core_file.update_attributes(params[:core_file])
     end
 
     #Allows us to map different params
-    def update_metadata_from_upload_screen(nu_core_file, file, collection_id, tmp_path, proxy)
+    def update_metadata_from_upload_screen(core_file, file, collection_id, tmp_path, proxy)
       # Relative path is set by the jquery uploader when uploading a directory
-      nu_core_file.relative_path = params[:relative_path] if params[:relative_path]
+      core_file.relative_path = params[:relative_path] if params[:relative_path]
 
       if !proxy.blank? && current_user.proxy_staff?
-        nu_core_file.depositor = proxy
-        nu_core_file.proxy_uploader = current_user.nuid
+        core_file.depositor = proxy
+        core_file.proxy_uploader = current_user.nuid
       else
-        nu_core_file.depositor = current_user.nuid
+        core_file.depositor = current_user.nuid
       end
 
       # Context derived attributes
-      nu_core_file.tag_as_in_progress
-      nu_core_file.title = file.original_filename
-      nu_core_file.tmp_path = tmp_path
-      nu_core_file.original_filename = file.original_filename
-      nu_core_file.label = file.original_filename
+      core_file.tag_as_in_progress
+      core_file.title = file.original_filename
+      core_file.tmp_path = tmp_path
+      core_file.original_filename = file.original_filename
+      core_file.label = file.original_filename
 
-      nu_core_file.instantiate_appropriate_content_object(tmp_path, file.original_filename)
+      core_file.instantiate_appropriate_content_object(tmp_path, file.original_filename)
 
       # If the content_object created is an ImageMasterFile, we want to read the image and store as session vars
       # the length of its longest side.  This is used to calculate the dimensions to allow for the small/med/large
       # sliders on the Provide Metadata page.
-      if nu_core_file.canonical_class == "ImageMasterFile"
+      if core_file.canonical_class == "ImageMasterFile"
         session[:slider_max] = nil # Ensure we aren't using data from a prior upload
         session[:slider_max] = SliderMaxCalculator.compute(tmp_path)
       end
 
       collection = !collection_id.blank? ? NuCollection.find(collection_id) : nil
-      nu_core_file.set_parent(collection, current_user) if collection
+      core_file.set_parent(collection, current_user) if collection
 
       # Significant content tagging
       sc_type = collection.smart_collection_type
 
       if !sc_type.nil? && sc_type != ""
-        nu_core_file.category = sc_type
+        core_file.category = sc_type
       end
 
-      nu_core_file.save!
-      return nu_core_file
+      core_file.save!
+      return core_file
     end
 
     def process_file(file)
       if virus_check(file) == 0
-        @nu_core_file = ::NuCoreFile.new
+        @core_file = ::CoreFile.new
 
         new_path = move_file_to_tmp(file)
 
-        update_metadata_from_upload_screen(@nu_core_file, file, params[:collection_id], new_path, params[:proxy])
-        redirect_to files_provide_metadata_path(@nu_core_file.pid, {proxy: params[:proxy]})
+        update_metadata_from_upload_screen(@core_file, file, params[:collection_id], new_path, params[:proxy])
+        redirect_to files_provide_metadata_path(@core_file.pid, {proxy: params[:proxy]})
       else
         render :json => [{:error => "Error creating file."}]
       end
     end
 
     def virus_check( file)
-      stat = Drs::NuCoreFile::Actions.virus_check(file)
+      stat = Drs::CoreFile::Actions.virus_check(file)
       flash[:error] = "Virus checking did not pass for #{File.basename(file.path)} status = #{stat}" unless stat == 0
       stat
     end

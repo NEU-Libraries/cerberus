@@ -1,5 +1,5 @@
 module Drs
-  module NuCoreFile
+  module CoreFile
   # Actions are decoupled from controller logic so that they may be called from a controller or a background job.
     module Actions
       def self.virus_check(file)

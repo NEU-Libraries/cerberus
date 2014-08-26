@@ -126,11 +126,11 @@ $(document).ready ->
           nonSort = "A"
 
         if nonSort != ''
-          $("#nu_core_file_non_sort").val nonSort
-          $("#nu_core_file_title").val shortTitle
+          $("#core_file_non_sort").val nonSort
+          $("#core_file_title").val shortTitle
         else
-          $("#nu_core_file_non_sort").val ""
-          $("#nu_core_file_title").val $("#full_title").val().trim()
+          $("#core_file_non_sort").val ""
+          $("#core_file_title").val $("#full_title").val().trim()
         return
 
     titlePartial = ->
@@ -139,19 +139,19 @@ $(document).ready ->
       return
 
     dateOfIssuePartial = ->
-      if $('#nu_core_file_date_of_issue').length > 0
+      if $('#core_file_date_of_issue').length > 0
         $().dateSelectBoxes $("#doiMonth"), $("#doiDay"), $("#doiYear"), true
 
         try
-          $("#doiYear").val $("#nu_core_file_date_of_issue").val().split("-")[0]
+          $("#doiYear").val $("#core_file_date_of_issue").val().split("-")[0]
         catch error
 
         try
-          $("#doiMonth").val $("#nu_core_file_date_of_issue").val().split("-")[1].replace(/^0*/, "")
+          $("#doiMonth").val $("#core_file_date_of_issue").val().split("-")[1].replace(/^0*/, "")
         catch error
 
         try
-          $("#doiDay").val $("#nu_core_file_date_of_issue").val().split("-")[2].replace(/^0*/, "")
+          $("#doiDay").val $("#core_file_date_of_issue").val().split("-")[2].replace(/^0*/, "")
         catch error
 
         if $("#doiMonth").val() == ""
@@ -181,9 +181,9 @@ $(document).ready ->
       return
 
     combineDateOfIssue = ->
-      $("#nu_core_file_date_of_issue").val $("#doiYear").val() + "-" + String("0" + $("#doiMonth").val()).slice(-2) + "-" + String("0" + $("#doiDay").val()).slice(-2)
-      $("#nu_core_file_date_of_issue").val $("#nu_core_file_date_of_issue").val().replace(/-+$/, "")
-      $("#nu_core_file_date_of_issue").val $("#nu_core_file_date_of_issue").val().replace(/-[0]$/, "").replace(/-[0]$/, "")
+      $("#core_file_date_of_issue").val $("#doiYear").val() + "-" + String("0" + $("#doiMonth").val()).slice(-2) + "-" + String("0" + $("#doiDay").val()).slice(-2)
+      $("#core_file_date_of_issue").val $("#core_file_date_of_issue").val().replace(/-+$/, "")
+      $("#core_file_date_of_issue").val $("#core_file_date_of_issue").val().replace(/-[0]$/, "").replace(/-[0]$/, "")
       return
 
 

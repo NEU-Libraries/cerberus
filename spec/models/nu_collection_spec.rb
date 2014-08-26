@@ -73,12 +73,12 @@ describe NuCollection do
 
       @root = NuCollection.create(title: "Root")
       @child_one = NuCollection.create(title: "Child One", parent: @root)
-      @c1_gf = NuCoreFile.create(title: "Core File One", parent: @child_one, depositor: "nobody@nobody.com")
-      @c2_gf = NuCoreFile.create(title: "Core File Two", parent: @child_one, depositor: "nobody@nobody.com")
+      @c1_gf = CoreFile.create(title: "Core File One", parent: @child_one, depositor: "nobody@nobody.com")
+      @c2_gf = CoreFile.create(title: "Core File Two", parent: @child_one, depositor: "nobody@nobody.com")
       @child_two = NuCollection.create(title: "Child Two", parent: @root)
       @grandchild = NuCollection.create(title: "Grandchild", parent: @child_two)
       @great_grandchild = NuCollection.create(title: "Great Grandchild", parent: @grandchild)
-      @gg_gf = NuCoreFile.create(title: "GG CF", parent: @great_grandchild, depositor: "nobody@nobody.com")
+      @gg_gf = CoreFile.create(title: "GG CF", parent: @great_grandchild, depositor: "nobody@nobody.com")
       @pids = [ @root.pid, @child_one.pid, @c1_gf.pid, @c2_gf.pid, @child_two.pid, @grandchild.pid, @great_grandchild.pid,
                 @gg_gf.pid]
     end
@@ -87,7 +87,7 @@ describe NuCollection do
       @root.recursive_delete
 
       NuCollection.find(:all).length.should == 0
-      NuCoreFile.find(:all).length.should == 0
+      CoreFile.find(:all).length.should == 0
     end
   end
 

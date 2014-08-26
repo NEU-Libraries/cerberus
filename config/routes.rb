@@ -36,11 +36,11 @@ Drs::Application.routes.draw do
   match "/sets/:id/:entry_id" => 'compilations#delete_entry', via: 'delete', as: 'delete_entry'
   match "/sets/:id/:entry_id" => 'compilations#add_entry', via: 'post', as: 'add_entry'
 
-  get "/files/:id/provide_metadata" => "nu_core_files#provide_metadata", as: "files_provide_metadata"
-  post "/files/:id/process_metadata" => "nu_core_files#process_metadata", as: "files_process_metadata"
+  get "/files/:id/provide_metadata" => "core_files#provide_metadata", as: "files_provide_metadata"
+  post "/files/:id/process_metadata" => "core_files#process_metadata", as: "files_process_metadata"
 
-  get "/files/rescue_incomplete_file" => "nu_core_files#rescue_incomplete_file", as: 'rescue_incomplete_file'
-  match "/incomplete_file/:id" => "nu_core_files#destroy_incomplete_file", via: 'delete', as: 'destroy_incomplete_file'
+  get "/files/rescue_incomplete_file" => "core_files#rescue_incomplete_file", as: 'rescue_incomplete_file'
+  match "/incomplete_file/:id" => "core_files#destroy_incomplete_file", via: 'delete', as: 'destroy_incomplete_file'
 
   put '/item_display' => 'users#update', as: 'view_pref'
 
@@ -67,7 +67,7 @@ Drs::Application.routes.draw do
   match 'notifications/:uid/delete' => 'mailbox#delete', as: :mailbox_delete, via: [:delete]
 
   # Generic file routes
-  resources :nu_core_files, :path => :files, :except => [:index, :destroy] do
+  resources :core_files, :path => :files, :except => [:index, :destroy] do
     member do
       get 'citation', :as => :citation
       post 'audit'

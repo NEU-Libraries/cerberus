@@ -2,7 +2,7 @@ module Drs
   module ControllerHelpers
     module EditableObjects
 
-      EDITABLE_OBJECTS = [::NuCoreFile, NuCollection, Compilation, Community]
+      EDITABLE_OBJECTS = [::CoreFile, NuCollection, Compilation, Community]
 
       def deny_to_visitors
         if current_user.nil?
