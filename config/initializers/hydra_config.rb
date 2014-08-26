@@ -27,7 +27,7 @@ if Hydra.respond_to?(:configure)
   end
 end
 
-Hydra::Derivatives.ffmpeg_path    = Drs::Application.config.ffmpeg_path
-Hydra::Derivatives.temp_file_base = Drs::Application.config.temp_file_base
-Hydra::Derivatives.fits_path      = Drs::Application.config.fits_path
-Hydra::Derivatives.enable_ffmpeg  = Drs::Application.config.enable_ffmpeg
+Hydra::Derivatives.ffmpeg_path    = Cerberus::Application.config.ffmpeg_path
+Hydra::Derivatives.temp_file_base = Cerberus::Application.config.temp_file_base
+Hydra::Derivatives.fits_path      = Cerberus::Application.config.fits_path
+Hydra::Derivatives.enable_ffmpeg  = Cerberus::Application.config.enable_ffmpeg

@@ -50,7 +50,7 @@ class User < ActiveRecord::Base
       user.save!
 
       if(auth.info.employee == "staff")
-        Drs::Application::Queue.push(EmployeeCreateJob.new(auth.info.nuid, auth.info.name))
+        Cerberus::Application::Queue.push(EmployeeCreateJob.new(auth.info.nuid, auth.info.name))
       end
     end
 
