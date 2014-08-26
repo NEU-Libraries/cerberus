@@ -17,7 +17,7 @@ class Employee < ActiveFedora::Base
   has_metadata name: 'rightsMetadata', type: ParanoidRightsDatastream
 
   belongs_to :parent, :property => :has_affiliation, :class_name => 'Community'
-  has_many :smart_collections, :property => :is_member_of, :class_name => 'NuCollection'
+  has_many :smart_collections, :property => :is_member_of, :class_name => 'Collection'
 
   def add_community(c_id)
     self.add_relationship(:has_affiliation, c_id)

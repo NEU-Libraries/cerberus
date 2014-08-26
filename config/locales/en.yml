@@ -174,7 +174,7 @@ en:
       Community:
         name: Community
         short: Community
-      NuCollection:
+      Collection:
         name: Collection
         short: Collection
       NuCoreFile:

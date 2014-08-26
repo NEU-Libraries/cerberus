@@ -1,5 +1,5 @@
 FactoryGirl.define do 
-  factory :collection, class: NuCollection do
+  factory :collection, class: Collection do
     sequence(:title) { |n| "Collection #{n}" } 
 
     trait :assigned_identifier do 

@@ -1,4 +1,4 @@
-module NuCollectionsHelper
+module CollectionsHelper
 
   # Removes the following from the permissions list
   # - The depositing user, who cannot have their edit privileges revoked through the frontend
@@ -15,7 +15,7 @@ module NuCollectionsHelper
   # Render a button for uploading files within this collection
   # if the current user has edit permissions.
   def render_upload_files_button(parent, text = "Upload files to this collection" , html_options = {} )
-    if (current_user.can? :edit, parent.pid ) && !(request.original_fullpath == nu_collections_path)
+    if (current_user.can? :edit, parent.pid ) && !(request.original_fullpath == collections_path)
       link_to( text , new_nu_core_file_path(parent: parent.pid), html_options )
     end
   end
@@ -24,7 +24,7 @@ module NuCollectionsHelper
   # if the current user has edit permissions.
   def render_create_collection_button(parent, text = "Create a child collection off this node" , html_options = {} )
     if (current_user.can? :edit, parent.pid )
-      link_to(text, new_nu_collection_path(parent: parent.pid), html_options)
+      link_to(text, new_collection_path(parent: parent.pid), html_options)
     end
   end
 

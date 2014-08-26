@@ -1,4 +1,4 @@
-class NuCollection < ActiveFedora::Base
+class Collection < ActiveFedora::Base
   include ActiveModel::MassAssignmentSecurity
   include Hydra::ModelMixins::RightsMetadata
   include Hydra::ModelMethods
@@ -28,19 +28,19 @@ class NuCollection < ActiveFedora::Base
 
   has_many :child_files, property: :is_member_of, :class_name => "NuCoreFile"
   has_many :stepchild_files, property: :is_also_member_of, :class_name => "NuCoreFile"
-  has_many :child_collections, property: :is_member_of, :class_name => "NuCollection"
+  has_many :child_collections, property: :is_member_of, :class_name => "Collection"
 
-  belongs_to :parent, property: :is_member_of, :class_name => "NuCollection"
+  belongs_to :parent, property: :is_member_of, :class_name => "Collection"
   belongs_to :user_parent, property: :is_member_of, :class_name => "Employee"
   belongs_to :community_parent, property: :is_member_of, :class_name => "Community"
 
   def parent
-    single_lookup(:is_member_of, [NuCollection, Community])
+    single_lookup(:is_member_of, [Collection, Community])
   end
 
   # Override parent= so that the string passed by the creation form can be used.
   def parent=(val)
-    unique_assign_by_string(val, :is_member_of, [NuCollection, Community], allow_nil: true)
+    unique_assign_by_string(val, :is_member_of, [Collection, Community], allow_nil: true)
 
     if !val.nil?
       if val.instance_of? String
@@ -76,7 +76,7 @@ class NuCollection < ActiveFedora::Base
   protected
 
     def belong_check
-      if single_lookup(:is_member_of, [Community]) && single_lookup(:is_member_of, [NuCollection])
+      if single_lookup(:is_member_of, [Community]) && single_lookup(:is_member_of, [Collection])
         errors.add(:identifier, "#{self.identifier} already has a parent relationship")
       end
     end

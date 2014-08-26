@@ -3,7 +3,7 @@ require 'blacklight_advanced_search'
 require 'parslet'
 require 'parsing_nesting/tree'
 
-class NuCollectionsController < ApplicationController
+class CollectionsController < ApplicationController
   include Drs::TempFileStorage
   include Drs::ControllerHelpers::EditableObjects
 
@@ -45,12 +45,12 @@ class NuCollectionsController < ApplicationController
 
   def new
     @page_title = "New Collection"
-    @set = NuCollection.new(parent: params[:parent])
+    @set = Collection.new(parent: params[:parent])
     render :template => 'shared/sets/new'
   end
 
   def create
-    @set = NuCollection.new(params[:set].merge(pid: mint_unique_pid))
+    @set = Collection.new(params[:set].merge(pid: mint_unique_pid))
 
     parent = ActiveFedora::Base.find(params[:set][:parent], cast: true)
 
@@ -83,12 +83,12 @@ class NuCollectionsController < ApplicationController
     begin
       @set.save!
       flash[:notice] = "Collection created successfully."
-      redirect_to nu_collection_path(id: @set.identifier) and return
+      redirect_to collection_path(id: @set.identifier) and return
     rescue => exception
-      logger.error "NuCollectionsController::create rescued #{exception.class}\n\t#{exception.to_s}\n #{exception.backtrace.join("\n")}\n\n"
+      logger.error "CollectionsController::create rescued #{exception.class}\n\t#{exception.to_s}\n #{exception.backtrace.join("\n")}\n\n"
       flash.now[:error] = "Something went wrong"
       email_handled_exception(exception)
-      redirect_to new_nu_collection_path(parent: params[:parent]) and return
+      redirect_to new_collection_path(parent: params[:parent]) and return
     end
   end
 
@@ -109,13 +109,13 @@ class NuCollectionsController < ApplicationController
   end
 
   def edit
-    @set = NuCollection.find(params[:id])
+    @set = Collection.find(params[:id])
     @page_title = "Edit #{@set.title}"
     render :template => 'shared/sets/edit'
   end
 
   def update
-    @set = NuCollection.find(params[:id])
+    @set = Collection.find(params[:id])
 
     # Update the thumbnail
     if params[:thumbnail]

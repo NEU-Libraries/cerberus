@@ -25,7 +25,7 @@ module Drs::Relationships
   def all_descendent_collections
     result = [] 
     self.each_depth_first do |child|
-      if child.instance_of?(NuCollection) && !(child.eql?(self))
+      if child.instance_of?(Collection) && !(child.eql?(self))
         result << child 
       end
     end
@@ -46,7 +46,7 @@ module Drs::Relationships
   def all_descendent_files 
     result = [] 
     each_depth_first do |child|
-      if(child.instance_of?(NuCollection))
+      if(child.instance_of?(Collection))
         result += child.child_files
       end
     end
@@ -67,7 +67,7 @@ module Drs::Relationships
     end
 
     collections.each do |c| 
-      x = NuCollection.find(c.pid) if NuCollection.exists?(c.pid) 
+      x = Collection.find(c.pid) if Collection.exists?(c.pid) 
       x.destroy 
     end
 

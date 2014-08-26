@@ -23,7 +23,7 @@ class Community < ActiveFedora::Base
   attr_protected :identifier
 
   has_many :employees, property: :has_affiliation, class_name: "Employee"
-  has_many :child_collections, property: :is_member_of, :class_name => "NuCollection"
+  has_many :child_collections, property: :is_member_of, :class_name => "Collection"
   has_many :child_communities, property: :has_affiliation, :class_name => "Community"
 
   belongs_to :parent, property: :has_affiliation, :class_name => "Community"

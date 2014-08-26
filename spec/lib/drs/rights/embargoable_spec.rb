@@ -7,8 +7,8 @@ describe Drs::Rights::Embargoable do
     end
   end
 
-  let(:embargoed_collection) { NuCollection.new }
-  let(:no_embargo) { NuCollection.new }
+  let(:embargoed_collection) { Collection.new }
+  let(:no_embargo) { Collection.new }
   let(:bill) { FactoryGirl.create(:bill) }
   let(:bo) { FactoryGirl.create(:bo) }
 
