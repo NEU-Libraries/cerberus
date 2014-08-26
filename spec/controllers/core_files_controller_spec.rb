@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe NuCoreFilesController do
+describe CoreFilesController do
   let(:bill) { FactoryGirl.create(:bill) }
   let(:bo)   { FactoryGirl.create(:bo) }
   let(:root) { FactoryGirl.create(:root_collection) }
@@ -13,7 +13,7 @@ describe NuCoreFilesController do
 
     # Ensures no contamination between test runs.
     after(:each) do
-      a = NuCoreFile.find(:all).each do |file|
+      a = CoreFile.find(:all).each do |file|
         file.destroy
       end
     end
@@ -23,7 +23,7 @@ describe NuCoreFilesController do
 
       get :new, { parent: root.identifier }
 
-      expect(response).to render_template('nu_core_files/new')
+      expect(response).to render_template('core_files/new')
     end
 
     it "goes to the rescue incomplete files page for users with incomplete files" do
@@ -74,7 +74,7 @@ describe NuCoreFilesController do
       sign_in bill
 
       get :show, { id: file.pid }
-      expect(response).to render_template('nu_core_files/show')
+      expect(response).to render_template('core_files/show')
 
       DrsImpression.count.should == 1
       file.impression_views.should == 1
@@ -95,7 +95,7 @@ describe NuCoreFilesController do
 
     # Ensures no contamination between test runs.
     after(:each) do
-      a = NuCoreFile.find(:all).each do |file|
+      a = CoreFile.find(:all).each do |file|
         file.destroy
       end
     end
@@ -111,11 +111,11 @@ describe NuCoreFilesController do
       end
 
       # Check that the files just created were deleted
-      # bills_incomplete_files = NuCoreFile.abandoned_for_nuid(bill.nuid)
+      # bills_incomplete_files = CoreFile.abandoned_for_nuid(bill.nuid)
       # bills_incomplete_files.length.should == 2
 
       # Check that bills complete file was not deleted
-      NuCoreFile.find(complete_file.pid).should == complete_file
+      CoreFile.find(complete_file.pid).should == complete_file
 
 
       expect(response).to redirect_to(root_path)
@@ -126,7 +126,7 @@ describe NuCoreFilesController do
 
     # Ensures no contamination between test runs
     after(:each) do
-      a = NuCoreFile.find(:all).each do |file|
+      a = CoreFile.find(:all).each do |file|
         file.destroy
       end
     end
@@ -139,9 +139,9 @@ describe NuCoreFilesController do
 
       get :provide_metadata, id: file_one.pid
 
-      assigns(:nu_core_file).should == file_one
+      assigns(:core_file).should == file_one
 
-      expect(response).to render_template('nu_core_files/provide_metadata')
+      expect(response).to render_template('core_files/provide_metadata')
     end
   end
 end

@@ -16,7 +16,7 @@ module NuCollectionsHelper
   # if the current user has edit permissions.
   def render_upload_files_button(parent, text = "Upload files to this collection" , html_options = {} )
     if (current_user.can? :edit, parent.pid ) && !(request.original_fullpath == nu_collections_path)
-      link_to( text , new_nu_core_file_path(parent: parent.pid), html_options )
+      link_to( text , new_core_file_path(parent: parent.pid), html_options )
     end
   end
 

@@ -14,7 +14,7 @@ class Compilation < ActiveFedora::Base
 
   attr_accessible :title, :identifier, :depositor, :description
 
-  has_many :entries, class_name: "NuCoreFile",  property: :has_member
+  has_many :entries, class_name: "CoreFile",  property: :has_member
 
   def self.users_compilations(user)
     Compilation.find(:all).keep_if { |file| file.depositor == user.nuid }
@@ -27,7 +27,7 @@ class Compilation < ActiveFedora::Base
     return a.map{ |rels| trim_to_pid(rels) }
   end
 
-  # Returns all NuCoreFile objects tagged as entries
+  # Returns all CoreFile objects tagged as entries
   # in this collection as SolrDocument objects.
   def entries
     if entry_ids.any?
@@ -44,10 +44,10 @@ class Compilation < ActiveFedora::Base
   end
 
   def add_entry(value)
-    if value.instance_of?(NuCoreFile)
+    if value.instance_of?(CoreFile)
       add_relationship(:has_member, value)
     elsif value.instance_of?(String)
-      object = NuCoreFile.find(value)
+      object = CoreFile.find(value)
       add_relationship(:has_member, object)
     else
       raise "Add item can only take a string or an instance of a Core object"
@@ -55,7 +55,7 @@ class Compilation < ActiveFedora::Base
   end
 
   def remove_entry(value)
-    if value.instance_of?(NuCoreFile)
+    if value.instance_of?(CoreFile)
       remove_relationship(:has_member, value)
     elsif value.instance_of?(String)
       remove_relationship(:has_member, "info:fedora/#{value}")
@@ -75,7 +75,7 @@ class Compilation < ActiveFedora::Base
   # Eliminate every entry ID that points to an object that no longer exists
   # Return the pid of each entry removed.
   # Behavior of this method is weirdly flaky in the case where self is held in memory
-  # /while/ the NuCoreFile is deleted.
+  # /while/ the CoreFile is deleted.
   # If you've having problems that appear to be caused by self.relationships(:has_member)
   # returning "info:fedora/" try reloading the object you're holding before executing this.
   def remove_dead_entries

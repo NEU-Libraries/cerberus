@@ -1,8 +1,8 @@
 %h1 Edit Metadata
 %br
-= form_for(@nu_core_file, :url => nu_core_file_path, :html => {:multipart => true }) do |f|
+= form_for(@core_file, :url => core_file_path, :html => {:multipart => true }) do |f|
 
-  = render :partial => 'nu_core_files/metadata/default', :formats => [:html], :locals => {:f => f, :new_object => false}
+  = render :partial => 'core_files/metadata/default', :formats => [:html], :locals => {:f => f, :new_object => false}
 
   / We need to account for the different file types here to extend the metdata screen
 
@@ -11,5 +11,5 @@
     %a{ href: "#cancelEditModal", :class => ['btn', 'btn-warning'], data: {toggle: "modal"} }
       Cancel
 
-= render partial: "shared/cancel_edit_modal", locals: { item: @nu_core_file }
+= render partial: "shared/cancel_edit_modal", locals: { item: @core_file }
 

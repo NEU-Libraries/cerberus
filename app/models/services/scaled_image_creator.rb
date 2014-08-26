@@ -65,7 +65,7 @@ class ScaledImageCreator
           target.description = "Derivative for #{core.pid}"
           target.rightsMetadata.content = master.rightsMetadata.content
           target.identifier = target.pid
-          target.core_record = NuCoreFile.find(core.pid)
+          target.core_record = CoreFile.find(core.pid)
           target.save!
           target.reload
         end

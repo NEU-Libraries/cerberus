@@ -177,7 +177,7 @@ en:
       NuCollection:
         name: Collection
         short: Collection
-      NuCoreFile:
+      CoreFile:
         name: File
         short: File
       Compilation:
