@@ -4,7 +4,7 @@ describe DerivativeCreator, unless: $in_travis do
 
   def titled_core_record(core_record, title)
     core_record.title = title
-    core_record.save! ? NuCoreFile.find(core_record.pid) : nil
+    core_record.save! ? CoreFile.find(core_record.pid) : nil
   end
 
   def context(factory_sym, core_title)

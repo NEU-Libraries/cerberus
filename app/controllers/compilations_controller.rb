@@ -1,5 +1,5 @@
 class CompilationsController < ApplicationController
-  include Drs::ControllerHelpers::EditableObjects
+  include Cerberus::ControllerHelpers::EditableObjects
 
   before_filter :authenticate_user!, except: [:show, :show_download, :download]
 
@@ -111,7 +111,7 @@ class CompilationsController < ApplicationController
   end
 
   def show_download
-    Drs::Application::Queue.push(ZipCompilationJob.new(current_user, @compilation))
+    Cerberus::Application::Queue.push(ZipCompilationJob.new(current_user, @compilation))
     @page_title = "Download #{@compilation.title}"
   end
 

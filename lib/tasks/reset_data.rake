@@ -1,5 +1,5 @@
 def mint_unique_pid
-  Drs::Noid.namespaceize(Drs::IdService.mint)
+  Cerberus::Noid.namespaceize(Cerberus::IdService.mint)
 end
 
 def create_collection(klass, parent_str, title_str, description = "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Recusandae, minima, cum sit iste at mollitia voluptatem error perspiciatis excepturi ut voluptatibus placeat esse architecto ea voluptate assumenda repudiandae quod commodi.")
@@ -22,7 +22,7 @@ def create_content_file(factory_sym, user, parent)
   DerivativeCreator.new(master.pid).generate_derivatives
 
   # Add non garbage metadata to core record.
-  core = NuCoreFile.find(master.core_record.pid)
+  core = CoreFile.find(master.core_record.pid)
   core.parent = ActiveFedora::Base.find(parent.pid, cast: true)
   core.properties.parent_id = parent.pid
   core.title = "#{master.content.label}"
@@ -50,7 +50,7 @@ task :reset_data => :environment do
 
   require 'factory_girl_rails'
 
-  Hydra::Derivatives.fits_path = Drs::Application.config.fits_path
+  Hydra::Derivatives.fits_path = Cerberus::Application.config.fits_path
 
   ActiveFedora::Base.find(:all).each do |file|
     file.destroy
@@ -77,15 +77,15 @@ task :reset_data => :environment do
   tmp_user.view_pref = "list"
   tmp_user.save!
 
-  Drs::Application::Queue.push(EmployeeCreateJob.new(tmp_user.nuid, tmp_user.full_name))
+  Cerberus::Application::Queue.push(EmployeeCreateJob.new(tmp_user.nuid, tmp_user.full_name))
 
   set_edit_permissions(root_dept)
 
   engDept = create_collection(Community, 'neu:1', 'English Department')
   sciDept = create_collection(Community, 'neu:1', 'Science Department')
-  litCol = create_collection(NuCollection, engDept.id, 'Literature')
-  roCol = create_collection(NuCollection, engDept.id, 'Random Objects')
-  rusNovCol = create_collection(NuCollection, litCol.id, 'Russian Novels')
+  litCol = create_collection(Collection, engDept.id, 'Literature')
+  roCol = create_collection(Collection, engDept.id, 'Random Objects')
+  rusNovCol = create_collection(Collection, litCol.id, 'Russian Novels')
 
   create_content_file(:image_master_file, tmp_user, roCol)
   create_content_file(:pdf_file, tmp_user, roCol)

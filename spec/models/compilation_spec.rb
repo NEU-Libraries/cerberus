@@ -23,13 +23,13 @@ describe Compilation do
   describe "Adding entries" do
     let(:member_entries) { compilation.relationships(:has_member)}
 
-    it "can be done via saved NuCoreFile object" do
+    it "can be done via saved CoreFile object" do
       compilation.add_entry(file)
 
       member_entries.should have_entries_for([file.pid])
     end
 
-    it "can be done via the pid of a NuCoreFile object" do
+    it "can be done via the pid of a CoreFile object" do
       compilation.add_entry(file.pid)
 
       member_entries.should have_entries_for([file.pid])
@@ -38,7 +38,7 @@ describe Compilation do
 
   describe "Removing entries" do
 
-    it "can be done via saved NuCoreFile object" do
+    it "can be done via saved CoreFile object" do
       compilation.add_entry(file)
       compilation.add_entry(file_two)
 
@@ -49,7 +49,7 @@ describe Compilation do
       compilation.relationships(:has_member).should have_entries_for([file_two.pid])
     end
 
-    it "can be done via the pid of a NuCoreFile object" do
+    it "can be done via the pid of a CoreFile object" do
       compilation.add_entry(file)
       compilation.add_entry(file_two)
 
@@ -81,7 +81,7 @@ describe Compilation do
       expect(result.all? { |x| x.class == SolrDocument}).to be true
     end
 
-    it "can return an array of NuCoreFile PIDS" do
+    it "can return an array of CoreFile PIDS" do
       compilation.add_entry(file)
       compilation.add_entry(file_two)
 

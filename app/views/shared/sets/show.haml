@@ -12,7 +12,7 @@
   %h1{:class => @set.klass, :id => "#{@set.pid}-title",}
     = kramdown_parse(@set.title)
   %h3
-    - if @set.klass == "NuCollection" # and doesn't have a thumbnail to render
+    - if @set.klass == "Collection" # and doesn't have a thumbnail to render
       = render partial: 'shared/icon', locals: { class_string: 'icon-folder-open' }
     - elsif @set.klass == "Community"
       = render partial: 'shared/icon', locals: { class_string: 'icon-group' }
@@ -27,11 +27,11 @@
       = kramdown_parse(@set.description)
 
   - if current_user
-    -if @set.klass == "NuCollection" && (current_user.can? :edit, @set.pid) && (@set.smart_collection_type.nil? || @set.smart_collection_type == "miscellany")
+    -if @set.klass == "Collection" && (current_user.can? :edit, @set.pid) && (@set.smart_collection_type.nil? || @set.smart_collection_type == "miscellany")
       %nav.set-actions
         %ul.nav.nav-pills
           %li
-            %a{:href =>  edit_nu_collection_path(@set)}
+            %a{:href =>  edit_collection_path(@set)}
               Edit
       =render partial: 'shared/sets/delete_item_modal', locals: { item: @set }
 

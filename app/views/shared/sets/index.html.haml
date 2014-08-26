@@ -1,4 +1,4 @@
 %h2 Your Collections
 - @all_collections.each do |coll|
   .collection
-    = link_to coll.title, nu_collections_path + '/' + coll.pid
+    = link_to coll.title, collections_path + '/' + coll.pid

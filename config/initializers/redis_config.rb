@@ -30,4 +30,4 @@ Nest.class_eval do
   end
 end
 
-Drs::Application::Queue = Drs::Resque::Queue.new('drs')
+Cerberus::Application::Queue = Cerberus::Resque::Queue.new('drs')

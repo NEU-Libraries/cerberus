@@ -2,17 +2,17 @@ class Community < ActiveFedora::Base
   include ActiveModel::MassAssignmentSecurity
   include Hydra::ModelMixins::RightsMetadata
   include Hydra::ModelMethods
-  include Drs::Rights::MassPermissions
-  include Drs::Rights::Embargoable
-  include Drs::Rights::InheritedRestrictions
-  include Drs::MetadataAssignment
-  include Drs::Relationships
-  include Drs::Find
+  include Cerberus::Rights::MassPermissions
+  include Cerberus::Rights::Embargoable
+  include Cerberus::Rights::InheritedRestrictions
+  include Cerberus::MetadataAssignment
+  include Cerberus::Relationships
+  include Cerberus::Find
 
-  has_metadata name: 'DC', type: NortheasternDublinCoreDatastream
-  has_metadata name: 'mods', type: NuModsDatastream
+  has_metadata name: 'DC', type: DublinCoreDatastream
+  has_metadata name: 'mods', type: ModsDatastream
   has_metadata name: 'rightsMetadata', type: ParanoidRightsDatastream
-  has_metadata name: 'properties', type: DrsPropertiesDatastream
+  has_metadata name: 'properties', type: PropertiesDatastream
 
   has_file_datastream "thumbnail_1", type: FileContentDatastream
   has_file_datastream "thumbnail_2", type: FileContentDatastream
@@ -23,7 +23,7 @@ class Community < ActiveFedora::Base
   attr_protected :identifier
 
   has_many :employees, property: :has_affiliation, class_name: "Employee"
-  has_many :child_collections, property: :is_member_of, :class_name => "NuCollection"
+  has_many :child_collections, property: :is_member_of, :class_name => "Collection"
   has_many :child_communities, property: :has_affiliation, :class_name => "Community"
 
   belongs_to :parent, property: :has_affiliation, :class_name => "Community"

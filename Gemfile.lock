@@ -8,6 +8,15 @@ GIT
       stanford-mods
 
 GIT
+  remote: https://github.com/harai/kaminari.git
+  revision: 384fcb5d11b66a0cc8fad030104bf80f82616355
+  ref: route_prefix_prototype
+  specs:
+    kaminari (0.14.1)
+      actionpack (>= 3.0.0)
+      activesupport (>= 3.0.0)
+
+GIT
   remote: https://github.com/NEU-Libraries/solrizer.git
   revision: 7bb6c05910075335e34c3d5e60b5e2fd52893584
   ref: 7bb6c05910075335e34c3d5e60b5e2fd52893584
@@ -19,15 +28,6 @@ GIT
       nokogiri
       stomp
       xml-simple
-
-GIT
-  remote: https://github.com/harai/kaminari.git
-  revision: 384fcb5d11b66a0cc8fad030104bf80f82616355
-  ref: route_prefix_prototype
-  specs:
-    kaminari (0.14.1)
-      actionpack (>= 3.0.0)
-      activesupport (>= 3.0.0)
 
 GEM
   remote: https://rubygems.org/
