@@ -7,7 +7,7 @@ class Compilation < ActiveFedora::Base
   include Drs::Rights::MassPermissions
   include Drs::Rights::PermissionGroups
 
-  has_metadata name: 'DC', type: NortheasternDublinCoreDatastream
+  has_metadata name: 'DC', type: DublinCoreDatastream
   has_metadata name: 'mods', type: NuModsDatastream
   has_metadata name: 'rightsMetadata', type: ParanoidRightsDatastream
   has_metadata name: 'properties', type: PropertiesDatastream
