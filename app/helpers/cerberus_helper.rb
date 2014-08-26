@@ -1,4 +1,4 @@
-module DrsHelper
+module CerberusHelper
 
   def display_user_name(recent_document)
     return "no display name" unless recent_document.depositor
