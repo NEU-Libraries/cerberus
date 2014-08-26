@@ -204,7 +204,7 @@ module Drs
       end
 
       def if_properties_exists_strict(&block)
-        verify_datastream_carefree('properties', DrsPropertiesDatastream, &block)
+        verify_datastream_carefree('properties', PropertiesDatastream, &block)
       end
 
       def verify_datastream_carefree(ds_name, ds_class, &action)

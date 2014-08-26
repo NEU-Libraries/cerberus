@@ -10,7 +10,7 @@ class Compilation < ActiveFedora::Base
   has_metadata name: 'DC', type: NortheasternDublinCoreDatastream
   has_metadata name: 'mods', type: NuModsDatastream
   has_metadata name: 'rightsMetadata', type: ParanoidRightsDatastream
-  has_metadata name: 'properties', type: DrsPropertiesDatastream
+  has_metadata name: 'properties', type: PropertiesDatastream
 
   attr_accessible :title, :identifier, :depositor, :description
 
