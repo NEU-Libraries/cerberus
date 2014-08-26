@@ -63,7 +63,7 @@ class EmployeeCreateJob
                 mass_permissions: 'public',
               }
 
-      personal_collection = NuCollection.new(attrs)
+      personal_collection = Collection.new(attrs)
 
       saves = 0
 

@@ -15,13 +15,13 @@ describe Community do
     end    
 
     it "responds with all descendent collections" do
-      @test_collection_a = NuCollection.create(parent: @root_community.pid)
-      @test_collection_b = NuCollection.create(parent: @root_community.pid)
-      @test_collection_c = NuCollection.create(parent: @root_community.pid)
+      @test_collection_a = Collection.create(parent: @root_community.pid)
+      @test_collection_b = Collection.create(parent: @root_community.pid)
+      @test_collection_c = Collection.create(parent: @root_community.pid)
 
-      @test_collection_x = NuCollection.create(parent: @test_collection_a.pid)
-      @test_collection_y = NuCollection.create(parent: @test_collection_a.pid)
-      @test_collection_z = NuCollection.create(parent: @test_collection_c.pid)
+      @test_collection_x = Collection.create(parent: @test_collection_a.pid)
+      @test_collection_y = Collection.create(parent: @test_collection_a.pid)
+      @test_collection_z = Collection.create(parent: @test_collection_c.pid)
 
 
       root_community.all_descendent_collections.count.should == 6
@@ -51,7 +51,7 @@ describe Community do
       @root_community.recursive_delete
 
       Community.find(:all).length.should == 0
-      NuCollection.find(:all).length.should == 0 
+      Collection.find(:all).length.should == 0 
       NuCoreFile.find(:all).length.should == 0      
     end
   end

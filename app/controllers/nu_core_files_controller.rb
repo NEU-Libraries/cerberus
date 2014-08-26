@@ -279,7 +279,7 @@ class NuCoreFilesController < ApplicationController
         session[:slider_max] = SliderMaxCalculator.compute(tmp_path)
       end
 
-      collection = !collection_id.blank? ? NuCollection.find(collection_id) : nil
+      collection = !collection_id.blank? ? Collection.find(collection_id) : nil
       nu_core_file.set_parent(collection, current_user) if collection
 
       # Significant content tagging

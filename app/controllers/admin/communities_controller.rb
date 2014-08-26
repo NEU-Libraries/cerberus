@@ -88,7 +88,7 @@ class Admin::CommunitiesController < AdminController
 
       if params[:theses] == '1' && !@community.theses
         etdDesc = I18n.t "drs.etd_description.default"
-        NuCollection.create(title: "Theses and Dissertations",
+        Collection.create(title: "Theses and Dissertations",
                             description: "#{etdDesc} #{@community.title}",
                             depositor: current_user.nuid,
                             smart_collection_type: 'Theses and Dissertations',

@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe NuCollectionsController do
+describe CollectionsController do
   let(:bill)             { FactoryGirl.create(:bill) }
   let(:bo)               { FactoryGirl.create(:bo) }
   let(:root)             { FactoryGirl.create(:root_collection) }
@@ -72,14 +72,14 @@ describe NuCollectionsController do
       post :create, {set: attrs}
 
       id = assigns(:set).identifier
-      expect(response).to redirect_to(nu_collection_path(id: id))
+      expect(response).to redirect_to(collection_path(id: id))
     end
 
     it "assigns personal collection specific information on successful create" do
       sign_in bill
 
       employee = Employee.create(nuid: "neu:unique", name: "John Doe")
-      employee_root = NuCollection.create(user_parent: employee.nuid, title: "Root", smart_collection_type: "User Root")
+      employee_root = Collection.create(user_parent: employee.nuid, title: "Root", smart_collection_type: "User Root")
       employee_root.rightsMetadata.permissions({person: bill.nuid}, 'edit')
       employee_root.save!
 
@@ -87,7 +87,7 @@ describe NuCollectionsController do
 
       id = assigns(:set).identifier
       assigns(:set).smart_collection_type.should == 'miscellany'
-      expect(response).to redirect_to(nu_collection_path(id: id))
+      expect(response).to redirect_to(collection_path(id: id))
     end
   end
 
@@ -183,7 +183,7 @@ describe NuCollectionsController do
       put :update, { id: bills_collection.identifier, set: { title: "nu title" } }
 
       assigns(:set).title.should == "nu title"
-      expect(response).to redirect_to(nu_collection_path(id: bills_collection.identifier))
+      expect(response).to redirect_to(collection_path(id: bills_collection.identifier))
     end
   end
 end

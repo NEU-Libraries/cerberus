@@ -49,7 +49,7 @@ describe CatalogController do
       end
 
       after :all do
-        NuCollection.destroy_all
+        Collection.destroy_all
         NuCoreFile.destroy_all
       end
     end

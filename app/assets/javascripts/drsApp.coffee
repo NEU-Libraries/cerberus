@@ -29,7 +29,7 @@ $(document).ready ->
       return
 
     setup = ->
-      nuCollectionsPage()
+      CollectionsPage()
       breadCrumbMenu()
       handleFitText()
       tooltipSetup()
@@ -532,8 +532,8 @@ $(document).ready ->
       return
 
 
-    #Handles spawning new permission related form elements on the nu_collections/new page.
-    nuCollectionsPage = ->
+    #Handles spawning new permission related form elements on the collections/new page.
+    CollectionsPage = ->
 
       #Add a datepicker to the date of issuance field.
       #$('#date-issued, #embargo-date').datepicker

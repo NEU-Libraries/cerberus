@@ -5,7 +5,7 @@ Drs::Application.routes.draw do
   HydraHead.add_routes(self)
   # Hydra::BatchEdit.add_routes(self)
 
-  resources :nu_collections, :path => 'collections', except: [:index, :destroy]
+  resources :collections, :path => 'collections', except: [:index, :destroy]
   get "/collections" => redirect("/communities")
 
   resources :communities, only: [:index, :show]

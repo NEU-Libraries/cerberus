@@ -25,7 +25,7 @@ feature "Editing collections" do
 
     save_page
 
-    visit edit_nu_collection_path(@collection)
+    visit edit_collection_path(@collection)
 
     save_page
 
@@ -49,7 +49,7 @@ feature "Editing collections" do
   # Objects instantiated in before :all hooks aren't cleaned up by rails transactional behavior.
   # Fedora objects are generally not rolled back either.
   after :all do
-    NuCollection.find(:all).each do |coll|
+    Collection.find(:all).each do |coll|
       coll.destroy
     end
     User.all.each do |user|

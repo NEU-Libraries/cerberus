@@ -1,11 +1,11 @@
 require 'spec_helper'
 
-describe NuCollection do
+describe Collection do
 
-  let(:collection) { NuCollection.new }
+  let(:collection) { Collection.new }
 
   describe "Custom setters and getters" do
-    let(:c) { NuCollection.new }
+    let(:c) { Collection.new }
 
     it "Sets custom permissions correctly" do
       permissions = {'permissions0' => {'identity_type' => 'person', 'identity' => 'Will', 'permission_type' => 'edit'},
@@ -28,12 +28,12 @@ describe NuCollection do
   end
 
   describe "Behavior of Parent setter" do
-    let(:p_coll) { NuCollection.new }
-    let(:root) { NuCollection.new }
+    let(:p_coll) { Collection.new }
+    let(:root) { Collection.new }
 
     before do
       root.save!
-      @saved_root = NuCollection.find(root.pid)
+      @saved_root = Collection.find(root.pid)
     end
 
     it "Sets the parent collection, but receives nil" do
@@ -71,13 +71,13 @@ describe NuCollection do
         file.destroy
       end
 
-      @root = NuCollection.create(title: "Root")
-      @child_one = NuCollection.create(title: "Child One", parent: @root)
+      @root = Collection.create(title: "Root")
+      @child_one = Collection.create(title: "Child One", parent: @root)
       @c1_gf = NuCoreFile.create(title: "Core File One", parent: @child_one, depositor: "nobody@nobody.com")
       @c2_gf = NuCoreFile.create(title: "Core File Two", parent: @child_one, depositor: "nobody@nobody.com")
-      @child_two = NuCollection.create(title: "Child Two", parent: @root)
-      @grandchild = NuCollection.create(title: "Grandchild", parent: @child_two)
-      @great_grandchild = NuCollection.create(title: "Great Grandchild", parent: @grandchild)
+      @child_two = Collection.create(title: "Child Two", parent: @root)
+      @grandchild = Collection.create(title: "Grandchild", parent: @child_two)
+      @great_grandchild = Collection.create(title: "Great Grandchild", parent: @grandchild)
       @gg_gf = NuCoreFile.create(title: "GG CF", parent: @great_grandchild, depositor: "nobody@nobody.com")
       @pids = [ @root.pid, @child_one.pid, @c1_gf.pid, @c2_gf.pid, @child_two.pid, @grandchild.pid, @great_grandchild.pid,
                 @gg_gf.pid]
@@ -86,13 +86,13 @@ describe NuCollection do
     it "deletes the item its called on and all descendent files and collections." do
       @root.recursive_delete
 
-      NuCollection.find(:all).length.should == 0
+      Collection.find(:all).length.should == 0
       NuCoreFile.find(:all).length.should == 0
     end
   end
 
   after :all do
-    NuCollection.find(:all).each do |coll|
+    Collection.find(:all).each do |coll|
       coll.destroy
     end
   end

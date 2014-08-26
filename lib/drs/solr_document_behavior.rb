@@ -218,7 +218,7 @@ module Drs
     end
 
     def is_empty_collection?
-      return false if self.klass != "NuCollection"
+      return false if self.klass != "Collection"
 
       ActiveFedora::SolrService.query("parent_id_tesim:\"#{self.pid}\"").empty?
     end

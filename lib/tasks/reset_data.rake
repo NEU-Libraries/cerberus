@@ -83,9 +83,9 @@ task :reset_data => :environment do
 
   engDept = create_collection(Community, 'neu:1', 'English Department')
   sciDept = create_collection(Community, 'neu:1', 'Science Department')
-  litCol = create_collection(NuCollection, engDept.id, 'Literature')
-  roCol = create_collection(NuCollection, engDept.id, 'Random Objects')
-  rusNovCol = create_collection(NuCollection, litCol.id, 'Russian Novels')
+  litCol = create_collection(Collection, engDept.id, 'Literature')
+  roCol = create_collection(Collection, engDept.id, 'Random Objects')
+  rusNovCol = create_collection(Collection, litCol.id, 'Russian Novels')
 
   create_content_file(:image_master_file, tmp_user, roCol)
   create_content_file(:pdf_file, tmp_user, roCol)

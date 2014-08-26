@@ -30,7 +30,7 @@ class NuCoreFile < ActiveFedora::Base
 
   before_destroy :purge_content_bearing_objects
 
-  belongs_to :parent, :property => :is_member_of, :class_name => 'NuCollection'
+  belongs_to :parent, :property => :is_member_of, :class_name => 'Collection'
   # call self.content_objects to get a list of all content bearing objects showing this
   # as their core record.
 
@@ -38,7 +38,7 @@ class NuCoreFile < ActiveFedora::Base
 
   has_many :other_parents,
             :property => :is_also_member_of,
-            :class_name => "NuCollection"
+            :class_name => "Collection"
   has_many :codebooks,
             :property => :is_codebook_for,
             :class_name => 'NuCoreFile'
@@ -60,7 +60,7 @@ class NuCoreFile < ActiveFedora::Base
 
   has_and_belongs_to_many :also_member_of,
                             :property => :is_also_member_of,
-                            :class_name => 'NuCollection'
+                            :class_name => 'Collection'
   has_and_belongs_to_many :codebook_for,
                             :property => :is_codebook_for,
                             :class_name => 'NuCoreFile'
