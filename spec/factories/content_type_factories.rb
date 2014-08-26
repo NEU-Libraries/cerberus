@@ -3,7 +3,7 @@
   trait :dad do
     depositor "nosuch@example.com"
     before :create do |imf|
-      imf.core_record = NuCoreFile.create(mass_permissions: 'public', depositor: "nosuch@example.com")
+      imf.core_record = CoreFile.create(mass_permissions: 'public', depositor: "nosuch@example.com")
     end
   end
 

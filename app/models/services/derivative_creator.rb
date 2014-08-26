@@ -1,4 +1,4 @@
-include Drs::ThumbnailCreation
+include Cerberus::ThumbnailCreation
 
 class DerivativeCreator
 
@@ -6,7 +6,7 @@ class DerivativeCreator
 
   def initialize(master_pid)
     @master = ActiveFedora::Base.find(master_pid, cast: true)
-    @core = NuCoreFile.find(@master.core_record.pid)
+    @core = CoreFile.find(@master.core_record.pid)
   end
 
   def generate_derivatives
@@ -66,7 +66,7 @@ class DerivativeCreator
 
     def update_or_create_with_metadata(title, desc, klass, object = nil)
       if object.nil?
-        object = klass.new(pid: Drs::Noid.namespaceize(Drs::IdService.mint))
+        object = klass.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
       end
 
       object.title                  = title

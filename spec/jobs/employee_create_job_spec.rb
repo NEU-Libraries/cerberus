@@ -35,7 +35,7 @@ describe EmployeeCreateJob do
     employee.smart_collections.length.should == 6
 
     # All required smart_collections were spun up
-    employee.user_root_collection.should be_an_instance_of NuCollection
+    employee.user_root_collection.should be_an_instance_of Collection
     bill.can?(:edit, employee.user_root_collection).should be true
 
     # Employee is tagged as complete

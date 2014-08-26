@@ -2,9 +2,9 @@ class ApplicationController < ActionController::Base
   # Adds a few additional behaviors into the application controller
   include Blacklight::Controller
   # Adds Drs behaviors into the application controller
-  include Drs::Controller
+  include Cerberus::Controller
   # Solr Escape group values
-  include Drs::ControllerHelpers::SolrEscapeGroups
+  include Cerberus::ControllerHelpers::SolrEscapeGroups
 
   # Please be sure to impelement current_user and user_session. Blacklight depends on
   # these methods in order to perform user specific actions.
@@ -29,7 +29,7 @@ class ApplicationController < ActionController::Base
   end
 
   def mint_unique_pid
-    Drs::Noid.namespaceize(Drs::IdService.mint)
+    Cerberus::Noid.namespaceize(Cerberus::IdService.mint)
   end
 
   def fetch_solr_document(options = {})

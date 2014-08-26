@@ -1,5 +1,5 @@
 class ImageThumbnailFile < ActiveFedora::Base
-  include Drs::NuFile
+  include Cerberus::ContentFile
 
   has_file_datastream name: 'thumbnail_1',     type: FileContentDatastream
   has_file_datastream name: 'thumbnail_2',     type: FileContentDatastream

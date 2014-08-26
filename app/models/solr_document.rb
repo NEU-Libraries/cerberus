@@ -1,7 +1,7 @@
 # -*- encoding : utf-8 -*-
 class SolrDocument
   # Adds Sufia behaviors to the SolrDocument.
-  include Drs::SolrDocumentBehavior
+  include Cerberus::SolrDocumentBehavior
   include Blacklight::Solr::Document
 
   # self.unique_key = 'id'

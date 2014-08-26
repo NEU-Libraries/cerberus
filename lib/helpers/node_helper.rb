@@ -4,7 +4,7 @@ module NodeHelper
 
   # Inserts a new node that is a direct child of root into the document underneath an identical sibling if one exists.
   # Assumes that the datastream calling this method will implement a method of the form #{terminology_element_name}_template.
-  # e.g. insert_new_node(:mods_personal_name) called on the NuModsDatastream inserts a new node corresponding to t.mods_personal_name
+  # e.g. insert_new_node(:mods_personal_name) called on the ModsDatastream inserts a new node corresponding to t.mods_personal_name
   # given that the method mods_personal_name_template exists and returns a Nokogiri Document.  
   def insert_new_node(term)
     node = self.class.send("#{term.to_s}_template")
