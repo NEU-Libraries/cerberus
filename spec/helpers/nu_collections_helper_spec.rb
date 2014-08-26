@@ -30,7 +30,10 @@ describe NuCollectionsHelper do
   end
 
   describe "#render_create_collection_button" do
-    true
+    it "returns a link to the new collection path if the permissions are correct" do
+      helper.stub(:current_user) { bill }
+      expect(helper.render_upload_files_button(parent)).to eq "<a href=\"/files/new?parent=neu%3A#{(parent.pid).split(":").last}\">Upload files to this collection</a>"
+    end
   end
 
   describe "#render_delete_object_button" do
