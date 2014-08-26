@@ -1,5 +1,5 @@
 # employee datastream: persistence for nuid and name, allowing us to index with solr
-class DrsEmployeeDatastream < ActiveFedora::OmDatastream
+class EmployeeDatastream < ActiveFedora::OmDatastream
   set_terminology do |t|
     t.root(:path=>"fields" )
     t.nuid :index_as=>[:stored_searchable]

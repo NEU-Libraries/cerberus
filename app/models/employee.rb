@@ -13,7 +13,7 @@ class Employee < ActiveFedora::Base
 
   before_save :add_community_names
 
-  has_metadata name: 'details', type: DrsEmployeeDatastream
+  has_metadata name: 'details', type: EmployeeDatastream
   has_metadata name: 'rightsMetadata', type: ParanoidRightsDatastream
 
   belongs_to :parent, :property => :has_affiliation, :class_name => 'Community'
