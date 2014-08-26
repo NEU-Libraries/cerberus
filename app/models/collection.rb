@@ -20,7 +20,7 @@ class Collection < ActiveFedora::Base
   has_metadata name: 'DC', type: DublinCoreDatastream
   has_metadata name: 'rightsMetadata', type: ParanoidRightsDatastream
   has_metadata name: 'properties', type: PropertiesDatastream
-  has_metadata name: 'mods', type: NuModsDatastream
+  has_metadata name: 'mods', type: ModsDatastream
 
   has_file_datastream "thumbnail_1", type: FileContentDatastream
   has_file_datastream "thumbnail_2", type: FileContentDatastream

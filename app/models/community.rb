@@ -10,7 +10,7 @@ class Community < ActiveFedora::Base
   include Drs::Find
 
   has_metadata name: 'DC', type: DublinCoreDatastream
-  has_metadata name: 'mods', type: NuModsDatastream
+  has_metadata name: 'mods', type: ModsDatastream
   has_metadata name: 'rightsMetadata', type: ParanoidRightsDatastream
   has_metadata name: 'properties', type: PropertiesDatastream
 
