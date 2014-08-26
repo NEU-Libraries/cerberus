@@ -1,4 +1,4 @@
 class VideoFile < ActiveFedora::Base
-  include Drs::NuFile
+  include Drs::ContentFile
   has_file_datastream name: 'poster', type: FileContentDatastream
 end

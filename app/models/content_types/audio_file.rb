@@ -1,3 +1,3 @@
 class AudioFile < ActiveFedora::Base
-  include Drs::NuFile
+  include Drs::ContentFile
 end

@@ -1,3 +1,3 @@
 class ImageLargeFile < ActiveFedora::Base
-  include Drs::NuFile
+  include Drs::ContentFile
 end

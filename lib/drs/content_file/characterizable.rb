@@ -3,7 +3,7 @@
 # This encapsulates that.
 
 module Drs
-  module NuFile
+  module ContentFile
     module Characterizable
       extend ActiveSupport::Concern
 
