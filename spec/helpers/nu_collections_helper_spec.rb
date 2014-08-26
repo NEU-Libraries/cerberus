@@ -19,7 +19,10 @@ describe NuCollectionsHelper do
   end
 
   describe "#filtered_permissions" do
-    true
+    it "filters depositor and group level permission for 'public' groups out" do
+      # no bill - 000000001 - and no public
+      expect(helper.filtered_permissions(parent)).to eq [{:type=>"user", :access=>"read", :name=>"000000009"}]
+    end
   end
 
   describe "#render_upload_files_button" do
