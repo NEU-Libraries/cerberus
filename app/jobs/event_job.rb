@@ -3,7 +3,7 @@ class EventJob
   include ActionView::Helpers
   include ActionView::Helpers::DateHelper
   include Hydra::AccessControlsEnforcement
-  include DrsHelper
+  include CerberusHelper
 
   def queue_name
     :event
