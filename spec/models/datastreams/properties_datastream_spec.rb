@@ -1,8 +1,8 @@
 require 'spec_helper'
 
-describe DrsPropertiesDatastream do
+describe PropertiesDatastream do
 
-  let(:properties) { DrsPropertiesDatastream.new }
+  let(:properties) { PropertiesDatastream.new }
 
   describe "In progress state" do
     it "is false on initialization" do
