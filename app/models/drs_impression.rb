@@ -1,4 +1,4 @@
-class DrsImpression < ActiveRecord::Base
+class Impression < ActiveRecord::Base
   attr_accessible :pid, :session_id, :action, :ip_address, :referrer, :status
 
   # Ensure that all required fields are present
