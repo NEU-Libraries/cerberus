@@ -1,5 +1,5 @@
 FactoryGirl.define do 
-  factory :mods, class: NuModsDatastream do 
+  factory :mods, class: ModsDatastream do 
     sequence(:title) { |n| "Datastream #{n}" } 
     sequence(:identifier) { |n| "neu:#{n}#{n}#{n}" } 
 

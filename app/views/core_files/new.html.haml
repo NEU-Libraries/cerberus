@@ -1,0 +1,12 @@
+-# Single file upload form
+
+-content_for :page_header do
+  - collection_title = Collection.find( params[:parent] ).title
+  %h1.page-header
+    Upload File to
+    - if collection_title
+      %i
+        = collection_title
+
+= render partial: 'single_upload'
+

@@ -1,0 +1,33 @@
+- content_for :local_js do
+  if (navigator.userAgent.match("MSIE")){$("#new_core_file").validate();}
+
+  $('#permissions_display').show();
+
+  / initialize popover helpers
+  $("a[rel=popover]").popover({ html: true });
+
+  / this needs to be cleaned up. Illegal nesting in haml forces a horrible giant single line.
+  / This is a step in the right direction though.
+  confirmation_needed = true;
+  window.onbeforeunload = confirmExit;
+  function confirmExit(){if(confirmation_needed){$.ajax({url: '#{destroy_incomplete_file_path(params['id'])}', type: 'DELETE', success: function(result) {}}); return "Your metadata has not been saved, if you leave the process now your uploaded files will be deleted.";}}
+
+- content_for :page_header do
+  %h1.page-header
+    = render partial: 'shared/icon', locals: {class_string: t('drs.metadata.icon') }
+    = t('drs.metadata.edit_page_title')
+    %small
+      = t('drs.metadata.edit_subtitle')
+
+= form_for(@core_file, :url => files_process_metadata_path, method: 'post', :html => {:multipart => true}) do |f|
+
+  = hidden_field_tag(:collection_id, @core_file.parent.identifier)
+  = hidden_field_tag(:proxy, params[:proxy])
+
+  = render :partial => 'core_files/metadata/default', :formats => [:html], :locals => {:f => f, :new_object => true}
+
+  / We need to account for the different file types here to extend the metdata screen
+
+  .form-actions
+    = f.submit class: ['btn', 'btn-primary'], :onclick => "confirmation_needed = false;", value: 'Submit'
+    = button_tag "Reset", class: 'btn', type: :reset

@@ -1,3 +1,3 @@
 class MsexcelFile < ActiveFedora::Base
-  include Drs::NuFile
+  include Cerberus::ContentFile
 end

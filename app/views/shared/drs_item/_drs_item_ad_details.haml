@@ -38,7 +38,7 @@
     .list-view-spacer
   - if !item.under_embargo?(current_user)
     .list-buttons
-      = render partial: 'nu_core_files/derivative_btn_group', locals: {contents: item.content_objects_sorted, list_view: true, item: item, alignment: "pull-right"}
+      = render partial: 'core_files/derivative_btn_group', locals: {contents: item.content_objects_sorted, list_view: true, item: item, alignment: "pull-right"}
   - if !item.date_of_issue.blank?
     %dl.drs-item-date-of-issue-list
       %dt.drs-item-date-of-issue-label
@@ -53,7 +53,7 @@
       %dd.drs-item-date-of-issue
         %time{ "date-time" => item.create_date }
           = item.create_date
-  - if item.klass == "NuCoreFile"
+  - if item.klass == "CoreFile"
     - if item.embargo_date_in_effect?
       %dt
         %dl{"style" => "display:inline;"}
@@ -66,7 +66,7 @@
           %a.btn.btn-mini.btn-clear{id: "viewItemDownloads-#{noid}"}(data-pid="#{noid}" href="#" data-toggle="dropdown")
             Downloads
             %i.icon-caret-down
-          = render partial: 'nu_core_files/derivative_btn_group', locals: {contents: item.content_objects_sorted, grid_view: true}
+          = render partial: 'core_files/derivative_btn_group', locals: {contents: item.content_objects_sorted, grid_view: true}
         - if current_user # the general public can't add items to sets
           - icon = render partial: 'shared/icon',  locals: { class_string: "icon-briefcase", alt_text: "Add to " + t('drs.compilations.name')}
           =link_to icon.html_safe , compilations_path(file: item.pid), remote: true, title:  "Add to " + t('drs.compilations.name'), data: {toggle: "tooltip"}, class: 'btn btn-mini btn-clear'

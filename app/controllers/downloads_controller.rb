@@ -1,6 +1,6 @@
 class DownloadsController < ApplicationController
-  include Drs::DownloadsControllerBehavior
-  include Drs::ControllerHelpers::ViewLogger
+  include Cerberus::DownloadsControllerBehavior
+  include Cerberus::ControllerHelpers::ViewLogger
 
   before_filter :ensure_not_embargoed, :only => :show
 

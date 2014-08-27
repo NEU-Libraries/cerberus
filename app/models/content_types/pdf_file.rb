@@ -1,4 +1,4 @@
 class PdfFile < ActiveFedora::Base
-  include Drs::NuFile
-  include Drs::NuCoreFile::FullTextIndexing
+  include Cerberus::ContentFile
+  include Cerberus::CoreFile::FullTextIndexing
 end
