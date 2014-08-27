@@ -6,7 +6,6 @@ class CoreFile < ActiveFedora::Base
   include Cerberus::Find
   include Cerberus::ImpressionCount
 
-  include Cerberus::CoreFile::Actions
   include Cerberus::CoreFile::MimeTypes
   include Cerberus::CoreFile::Permissions
   include Cerberus::CoreFile::Characterization
