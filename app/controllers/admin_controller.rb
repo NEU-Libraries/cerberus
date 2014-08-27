@@ -1,5 +1,5 @@
 class AdminController < ApplicationController
-  include Drs::ControllerHelpers::EditableObjects
+  include Cerberus::ControllerHelpers::EditableObjects
   
   before_filter :authenticate_user!
   before_filter :verify_admin

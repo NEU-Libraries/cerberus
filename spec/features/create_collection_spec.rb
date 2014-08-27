@@ -24,7 +24,7 @@ feature "Creating a collection" do
   describe "Unsigned Access Protection" do
 
     it "Redirects unsigned users to the signin page" do
-      visit new_nu_collection_path
+      visit new_collection_path
       current_path.should == '/users/sign_in'
     end
   end
@@ -32,14 +32,14 @@ feature "Creating a collection" do
   describe "Signed Access and Form Creation" do
     scenario "Authenticated Creation and Edit" do
       features_sign_in bill
-      visit new_nu_collection_path(parent: @root.identifier)
+      visit new_collection_path(parent: @root.identifier)
 
       # Because we authenticated we don't get booted out.
       current_path.should == '/collections/new'
 
       # Verifies that hidden 'parent' parameter is set correctly
-      page.all('input#nu_collection_parent').length.should == 1
-      page.all('input#nu_collection_parent').first.value.should == @root.identifier
+      page.all('input#collection_parent').length.should == 1
+      page.all('input#collection_parent').first.value.should == @root.identifier
 
       # Fill out and submit the Collection creation form.
       fill_in 'Title', with: "My Title"
@@ -65,7 +65,7 @@ feature "Creating a collection" do
   end
 
   after :all do
-    NuCollection.find(:all).each do |coll|
+    Collection.find(:all).each do |coll|
       coll.destroy
     end
   end

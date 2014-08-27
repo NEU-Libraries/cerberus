@@ -1,9 +1,9 @@
 class Employee < ActiveFedora::Base
   include ActiveModel::MassAssignmentSecurity
   include ActiveModel::Validations
-  include Drs::Employee::SmartCollections
-  include Drs::Find
-  include Drs::Rights::MassPermissions
+  include Cerberus::Employee::SmartCollections
+  include Cerberus::Find
+  include Cerberus::Rights::MassPermissions
 
   attr_accessible :nuid, :name, :community
   attr_accessor   :building
@@ -13,11 +13,11 @@ class Employee < ActiveFedora::Base
 
   before_save :add_community_names
 
-  has_metadata name: 'details', type: DrsEmployeeDatastream
+  has_metadata name: 'details', type: EmployeeDatastream
   has_metadata name: 'rightsMetadata', type: ParanoidRightsDatastream
 
   belongs_to :parent, :property => :has_affiliation, :class_name => 'Community'
-  has_many :smart_collections, :property => :is_member_of, :class_name => 'NuCollection'
+  has_many :smart_collections, :property => :is_member_of, :class_name => 'Collection'
 
   def add_community(c_id)
     self.add_relationship(:has_affiliation, c_id)

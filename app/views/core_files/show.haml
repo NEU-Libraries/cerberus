@@ -1,0 +1,31 @@
+- layout_class =  'span6'
+
+%ul.breadcrumb
+  - breadcrumb_to_root(@core_file).each do |breadcrumb|
+    =breadcrumb
+
+- if @core_file.embargo_date_in_effect?
+  %span.embargo-alert= "This item is under embargo and its content will be available for download and viewing on #{@core_file.embargo_release_date(formatted: true)}"
+
+%article{class: ['drs-item', 'drs-item-full'],  data: { drsitem: @core_file.pid } }
+  %header
+    / %h1.page-header= @core_file
+    %h1.page-header
+      = "#{@core_file.non_sort} "
+      = kramdown_parse(@core_file.title)
+
+  %section.row
+    %div{class: layout_class}
+      = render :partial => 'core_files/media_display'
+    %div{itemscope: "", itemtype: "http://schema.org/CreativeWork", class:  [ layout_class, 'drs-item-details'] }
+      / = render partial: 'show_actions'
+      .drs-item-add-details
+        / = render partial: 'show_descriptions'
+        / = render partial: 'show_details'
+        = @mods
+      -if @core_file.content_objects
+        %section.drs-item-derivatives
+          = render partial: 'show_derivatives', locals: {contents: @core_file.content_objects}
+      / = render :partial => 'users/activity_log', :locals => {:events => @events}
+    / / /.span6
+  / / /section.row

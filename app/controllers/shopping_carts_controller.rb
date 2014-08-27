@@ -15,7 +15,7 @@ class ShoppingCartsController < ApplicationController
   include BlacklightAdvancedSearch::ParseBasicQ
   include BlacklightAdvancedSearch::Controller
 
-  include Drs::ControllerHelpers::ViewLogger
+  include Cerberus::ControllerHelpers::ViewLogger
 
 
   def show
@@ -52,7 +52,7 @@ class ShoppingCartsController < ApplicationController
       @id = params[:delete]
       session[:ids].delete(@id)
       flash.now[:info] = "Item removed from #{t('drs.shoppingcarts.name')}."
-      DrsImpression.destroy_all(pid: @id, action: "download", status: "INCOMPLETE",
+      Impression.destroy_all(pid: @id, action: "download", status: "INCOMPLETE",
                             session_id: request.session_options[:id])
     end
 
@@ -64,7 +64,7 @@ class ShoppingCartsController < ApplicationController
 
   # Purge the contents of the user's shopping cart.
   def destroy
-    DrsImpression.destroy_all(pid: session[:ids],
+    Impression.destroy_all(pid: session[:ids],
                               action: "download",
                               status: "INCOMPLETE",
                               session_id: request.session_options[:id])
@@ -84,7 +84,7 @@ class ShoppingCartsController < ApplicationController
     respond_to do |format|
       format.html do
         FileUtils.rm_rf(Dir.glob("#{dir}/*")) if File.directory?(dir)
-        Drs::Application::Queue.push(CartDownloadJob.new(request.session_options[:id], session[:ids], current_user.nuid, request.remote_ip))
+        Cerberus::Application::Queue.push(CartDownloadJob.new(request.session_options[:id], session[:ids], current_user.nuid, request.remote_ip))
         @page_title = "Start Download - #{t('drs.shoppingcarts.name')}"
       end
 
