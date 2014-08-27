@@ -53,7 +53,7 @@ source /home/vagrant/.bashrc
 
 echo "Installing RVM"
 cd /home/vagrant
-\curl -sSL https://get.rvm.io | bash
+\curl -sSL https://get.rvm.io | bash -s stable
 source /home/vagrant/.profile
 rvm pkg install libyaml
 rvm install ruby-2.0.0-p481
