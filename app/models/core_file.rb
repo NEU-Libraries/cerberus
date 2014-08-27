@@ -2,7 +2,6 @@ class CoreFile < ActiveFedora::Base
   include ActiveModel::MassAssignmentSecurity
 
   include Cerberus::ModelMethods
-  include Cerberus::Noid
   include Cerberus::MetadataAssignment
   include Cerberus::Find
   include Cerberus::ImpressionCount
