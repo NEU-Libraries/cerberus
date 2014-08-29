@@ -29,3 +29,6 @@ dump.rdb
 /config/application.yml
 
 public/assets
+
+# Ignore coveralls.io generated folder
+coverage
