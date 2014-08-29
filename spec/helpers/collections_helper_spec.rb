@@ -10,7 +10,7 @@ require 'spec_helper'
 #     end
 #   end
 # end
-describe NuCollectionsHelper do
+describe CollectionsHelper do
   let(:bill) { FactoryGirl.create(:bill) }
   let(:parent) { FactoryGirl.create(:valid_owned_by_bill) }
 
