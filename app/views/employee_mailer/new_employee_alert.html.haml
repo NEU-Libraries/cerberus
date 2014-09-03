@@ -1,0 +1,12 @@
+%h3 New Employee Alert
+
+%p A new employee has signed into Cerberus for the first time.  Their attributes are
+as follows:
+%ul
+  %li= "Name: #{@name}"
+  %li= "Nuid: #{@nuid}"
+  %li= "PID: #{@pid}"
+
+- if @pid
+  %p= "A link to their account can be found #{link_to 'here', employee_url(@pid)}".html_safe
+  %p= "And a link to administrative functions for this employee can be found #{link_to 'here', admin_employee_url(@pid)}".html_safe
