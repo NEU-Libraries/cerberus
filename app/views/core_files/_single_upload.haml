@@ -20,7 +20,9 @@
       %fieldset.span4
         %legend
           3. Proxy
-        = label_tag 'proxy', "User to proxy as", class: "required-label"
-        = text_field_tag 'proxy'
+        = label_tag 'upload_type', 'Upload as myself (I will be the depositor)'
+        = radio_button_tag 'upload_type', 'personal', false, required: true
+        = label_tag 'upload_type', 'Upload as proxy (collection owner will be depositor)'
+        = radio_button_tag 'upload_type', 'proxy', false
   .form-actions
     = submit_tag "Upload", disabled: "true", class: 'btn btn-large btn-primary activate-submit'
