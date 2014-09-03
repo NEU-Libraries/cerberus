@@ -21,14 +21,15 @@ class DerivativeCreator
       blob = self.master.content.content
     end
 
-    create_all_thumbnail_sizes(blob, @core.thumbnail_list)
+    create_all_thumbnail_sizes(blob)
   end
 
   private
 
-    def create_all_thumbnail_sizes(blob, thumbnail_list)
-      # TODO: this needs to pass the pid instead...
+    def create_all_thumbnail_sizes(blob)
       thumb_pid = find_or_create_thumbnail
+
+      thumbnail_list = []
 
       create_scaled_progressive_jpeg(thumb_pid, blob, {height: 85, width: 85}, 'thumbnail_1')
       create_scaled_progressive_jpeg(thumb_pid, blob, {height: 170, width: 170}, 'thumbnail_2')
@@ -37,9 +38,10 @@ class DerivativeCreator
       create_scaled_progressive_jpeg(thumb_pid, blob, {width: 1000}, 'thumbnail_5')
 
       for i in 1..5 do
-        @core.thumbnail_list << "/downloads/#{self.core.thumbnail.pid}?datastream_id=thumbnail_#{i}"
+        thumbnail_list << "/downloads/#{self.core.thumbnail.pid}?datastream_id=thumbnail_#{i}"
       end
 
+      @core.thumbnail_list = thumbnail_list
       @core.save!
     end
 
