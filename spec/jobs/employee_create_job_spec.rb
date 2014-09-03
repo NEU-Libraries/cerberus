@@ -43,5 +43,14 @@ describe EmployeeCreateJob do
 
     # Only one employee is created
     Employee.all.length.should == 1
+
+    # Run the job again to make sure collections aren't recreated
+    run_job
+
+    # Look up employee again to ensure fresh state
+    employee = Employee.find_by_nuid(nuid)
+
+    # Verify that there are still only six smart collections
+    expect(employee.smart_collections.length).to eq 6
   end
 end

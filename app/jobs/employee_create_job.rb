@@ -1,5 +1,5 @@
 class EmployeeCreateJob
-  attr_accessor :nuid, :name
+  attr_accessor :nuid, :name, :preexisting_smart_collection_titles
 
   def initialize(nuid, name)
     self.nuid = nuid
@@ -22,7 +22,9 @@ class EmployeeCreateJob
       emp = Employee.create(nuid: self.nuid, name: self.name, building: true, mass_permissions: 'public')
     end
 
-    # Generate employee's personal graph
+    titles = emp.smart_collections.map { |x| x.title }
+    self.preexisting_smart_collection_titles = titles
+
     parent = create_personal_collection(self.name, emp)
     create_personal_collection("Research Publications", emp, parent)
     create_personal_collection("Other Publications", emp, parent)
@@ -42,43 +44,41 @@ class EmployeeCreateJob
   end
 
   private
-
     def create_personal_collection(title, employee, parent = nil)
-
-      if title == employee.name
-        smart_collection_type = "User Root"
-        desc = "#{self.name}'s root collection"
-      else
-        smart_collection_type = "#{title}"
-        desc = "#{title} for #{employee.name}"
-      end
-
-      attrs = {
-                title: title,
-                depositor: self.nuid,
-                parent: parent,
-                user_parent: employee,
-                description: desc,
-                smart_collection_type: smart_collection_type,
-                mass_permissions: 'public',
-              }
-
-      personal_collection = Collection.new(attrs)
-
-      saves = 0
-
-      #Attempt to save the newly created collection
-      begin
-        if personal_collection.save!
-          return personal_collection
+      unless preexisting_smart_collection_titles.include?(title)
+        if title == employee.name
+          smart_collection_type = "User Root"
+          desc = "#{self.name}'s root collection"
+        else
+          smart_collection_type = "#{title}"
+          desc = "#{title} for #{employee.name}"
         end
-      rescue RSolr::Error::Http => error
-        puts "Save failed"
-        saves += 1
-        logger.warn "GenerateUsersmart_collectionsJob caught RSOLR error on creation of #{nuid}'s #{title} personal_collection: #{error.inspect}"
-        raise error if saves >= 3
-        sleep 0.01
-        retry
+
+        attrs = {
+                  title: title,
+                  depositor: self.nuid,
+                  parent: parent,
+                  user_parent: employee,
+                  description: desc,
+                  smart_collection_type: smart_collection_type,
+                  mass_permissions: 'public',
+                }
+
+        personal_collection = Collection.new(attrs)
+
+        saves = 0
+
+        # Attempt to save the newly created collection
+        begin
+          return personal_collection if personal_collection.save!
+        rescue RSolr::Error::Http => error
+          puts "Save failed"
+          saves += 1
+          logger.warn "EmployeeCreateJob caught RSOLR error on creation of #{nuid}'s #{title} personal_collection: #{error.inspect}"
+          raise error if saves >= 3
+          sleep 0.01
+          retry
+        end
       end
     end
 end
