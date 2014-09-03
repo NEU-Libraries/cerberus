@@ -19,30 +19,30 @@ describe EmployeeCreateJob do
     Employee.create(nuid: bo.nuid)
     EmployeeCreateJob.new(bo.nuid, "Frank Buckets").run
 
-    Employee.all.length.should == 1
+    expect(Employee.all.length).to eq 1
   end
 
   it "creates an Employee with matching nuid and all associated required smart_collections" do
     nuid = run_job
 
     # Verify the Employee exists
-    Employee.exists_by_nuid?(nuid).should be true
+    expect(Employee.exists_by_nuid? nuid).to be true
 
     # Lookup the employee
     employee = Employee.find_by_nuid(nuid)
 
     # Employee has six required smart_collections
-    employee.smart_collections.length.should == 6
+    expect(employee.smart_collections.length).to eq 6
 
     # All required smart_collections were spun up
-    employee.user_root_collection.should be_an_instance_of Collection
-    bill.can?(:edit, employee.user_root_collection).should be true
+    expect(employee.user_root_collection.class).to eq Collection
+    expect(bill.can?(:edit, employee.user_root_collection)).to be true
 
     # Employee is tagged as complete
-    employee.is_building?.should be false
+    expect(employee.is_building?).to be false
 
     # Only one employee is created
-    Employee.all.length.should == 1
+    expect(Employee.all.length).to eq 1
 
     # Run the job again to make sure collections aren't recreated
     run_job
