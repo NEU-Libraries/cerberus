@@ -11,7 +11,6 @@ class EmployeeCreateJob
   end
 
   def run
-
     # Spin up an employee marked as building
     # Make sure the employee doesn't exist before we try that.
     # Would implement some sort of Employee.find_or_create but this is the only place
@@ -41,6 +40,14 @@ class EmployeeCreateJob
       u.employee_id = emp.pid
       u.save!
     end
+
+
+    ensure
+      # As long as emp has been initialized to an Employee object
+      # and has been persisted to Fedora we need to send this email
+      if (emp.instance_of? Employee) && emp.persisted?
+        EmployeeMailer.new_employee_alert(emp).deliver!
+      end
   end
 
   private
