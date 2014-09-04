@@ -51,12 +51,6 @@ class CoreFilesController < ApplicationController
   def provide_metadata
     @core_file = CoreFile.find(params[:id])
 
-    if should_proxy?
-      nuid = params[:proxy]
-    else
-      nuid = current_user.nuid
-    end
-
     @title = @core_file.title
 
     @page_title = "Provide Upload Metadata"
@@ -77,15 +71,15 @@ class CoreFilesController < ApplicationController
   end
 
   def process_metadata
-    if should_proxy?
-      depositor_nuid = params[:proxy]
+    @core_file = CoreFile.find(params[:id])
+
+    if @core_file.proxy_uploader.present?
+      depositor_nuid = @core_file.proxy_uploader
       proxy_nuid     = current_user.nuid
     else
       depositor_nuid = current_user.nuid
       proxy_nuid     = nil
     end
-
-    @core_file = CoreFile.find(params[:id])
 
     Cerberus::Application::Queue.push(MetadataUpdateJob.new(depositor_nuid, params, proxy_nuid))
 
@@ -136,9 +130,6 @@ class CoreFilesController < ApplicationController
         json_error "Error! Zero Length File!", file.original_filename
       elsif (!terms_accepted?)
         json_error "You must accept the terms of service!", file.original_filename
-      elsif (!params[:proxy].blank? && !(Employee.exists_by_nuid? params[:proxy]))
-        flash[:alert] = "The NUID you entered, #{params[:proxy]}, doesn't exist in the system"
-        redirect_to new_core_file_path( {parent: params[:collection_id]} )
       else
         process_file(file)
       end
@@ -297,7 +288,7 @@ class CoreFilesController < ApplicationController
         new_path = move_file_to_tmp(file)
 
         update_metadata_from_upload_screen(@core_file, file, params[:collection_id], new_path, params[:upload_type])
-        redirect_to files_provide_metadata_path(@core_file.pid, {proxy: params[:proxy]})
+        redirect_to files_provide_metadata_path(@core_file.pid)
       else
         render :json => [{:error => "Error creating file."}]
       end
@@ -320,11 +311,5 @@ class CoreFilesController < ApplicationController
 
     def terms_accepted?
       params[:terms_of_service] == '1'
-    end
-
-    def should_proxy?
-      if ( !params[:proxy].blank?)
-        current_user.proxy_staff? && Employee.exists_by_nuid?(params[:proxy])
-      end
     end
 end
