@@ -29,6 +29,24 @@ module Cerberus
         end
       end
 
+      def can_edit_parent_or_proxy_upload?
+        begin
+          parent_object = find_parent(params)
+
+          if current_user.nil?
+            render_403
+          elsif current_user.can? :edit, parent_object
+            return true
+          elsif current_user.proxy_staff?
+            return true
+          else
+            render_403
+          end
+        rescue ActiveFedora::ObjectNotFoundError
+          raise Exceptions::NoParentFoundError
+        end
+      end
+
       # Checks if the current user can read the fedora record
       # returned by a typical resource request.
       def can_read?
@@ -80,9 +98,9 @@ module Cerberus
 
         def find_parent(hash)
           hash.each do |k, v|
-            if k == 'parent' || k == :parent
-              # return ActiveFedora::Base.find(v, cast: true)
-              # exit
+            parent  = ((k == :parent) || (k == "parent"))
+            coll_id = ((k == :collection_id) || (k == "collection_id"))
+            if parent || coll_id
               begin
                 return SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{v}\"").first)
               rescue NoMethodError
