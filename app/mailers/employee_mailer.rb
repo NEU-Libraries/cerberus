@@ -15,7 +15,8 @@ class EmployeeMailer < ActionMailer::Base
       if ["staging", "production"].include? Rails.env
         "sj.sweeney@neu.edu"
       else
-        "wjackson64@gmail.com"
+        git_config = ParseConfig.new('/home/vagrant/.gitconfig')
+        git_config['user']['email']
       end
     end
 end
