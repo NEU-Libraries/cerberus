@@ -125,11 +125,14 @@ class CoreFilesController < ApplicationController
 
       file = params[:file]
       if !file
-        json_error "Error! No file for upload", 'unknown file', :status => :unprocessable_entity
+        flash[:error] = "Error! No file for upload"
+        redirect_to(:back) and return
       elsif (empty_file?(file))
-        json_error "Error! Zero Length File!", file.original_filename
+        flash[:error] = "Error! Zero Length File!"
+        redirect_to(:back) and return
       elsif (!terms_accepted?)
-        json_error "You must accept the terms of service!", file.original_filename
+        flash[:error] = "You must accept the terms of service!"
+        redirect_to(:back) and return
       elsif current_user.proxy_staff? && params[:upload_type].nil?
         flash[:error] = "You must select whether this is a proxy or personal upload"
         redirect_to(:back) and return
