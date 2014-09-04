@@ -20,7 +20,7 @@ class CoreFilesController < ApplicationController
                                           :update,
                                           :destroy]
 
-  before_filter :can_edit_parent?, only: [:new]
+  before_filter :can_edit_parent_or_proxy_upload?, only: [:new, :create]
 
   before_filter :can_read?, only: [:show]
   before_filter :can_edit?, only: [:edit, :update, :destroy_incomplete_file]
