@@ -20,7 +20,7 @@ class CoreFilesController < ApplicationController
                                           :update,
                                           :destroy]
 
-  before_filter :can_edit_parent?, only: [:new]
+  before_filter :can_edit_parent_or_proxy_upload?, only: [:new, :create]
 
   before_filter :can_read?, only: [:show]
   before_filter :can_edit?, only: [:edit, :update, :destroy_incomplete_file]
@@ -51,12 +51,6 @@ class CoreFilesController < ApplicationController
   def provide_metadata
     @core_file = CoreFile.find(params[:id])
 
-    if should_proxy?
-      nuid = params[:proxy]
-    else
-      nuid = current_user.nuid
-    end
-
     @title = @core_file.title
 
     @page_title = "Provide Upload Metadata"
@@ -77,15 +71,15 @@ class CoreFilesController < ApplicationController
   end
 
   def process_metadata
-    if should_proxy?
-      depositor_nuid = params[:proxy]
+    @core_file = CoreFile.find(params[:id])
+
+    if @core_file.proxy_uploader.present?
+      depositor_nuid = @core_file.proxy_uploader
       proxy_nuid     = current_user.nuid
     else
       depositor_nuid = current_user.nuid
       proxy_nuid     = nil
     end
-
-    @core_file = CoreFile.find(params[:id])
 
     Cerberus::Application::Queue.push(MetadataUpdateJob.new(depositor_nuid, params, proxy_nuid))
 
@@ -131,14 +125,17 @@ class CoreFilesController < ApplicationController
 
       file = params[:file]
       if !file
-        json_error "Error! No file for upload", 'unknown file', :status => :unprocessable_entity
+        flash[:error] = "Error! No file for upload"
+        redirect_to(:back) and return
       elsif (empty_file?(file))
-        json_error "Error! Zero Length File!", file.original_filename
+        flash[:error] = "Error! Zero Length File!"
+        redirect_to(:back) and return
       elsif (!terms_accepted?)
-        json_error "You must accept the terms of service!", file.original_filename
-      elsif (!params[:proxy].blank? && !(Employee.exists_by_nuid? params[:proxy]))
-        flash[:alert] = "The NUID you entered, #{params[:proxy]}, doesn't exist in the system"
-        redirect_to new_core_file_path( {parent: params[:collection_id]} )
+        flash[:error] = "You must accept the terms of service!"
+        redirect_to(:back) and return
+      elsif current_user.proxy_staff? && params[:upload_type].nil?
+        flash[:error] = "You must select whether this is a proxy or personal upload"
+        redirect_to(:back) and return
       else
         process_file(file)
       end
@@ -252,13 +249,10 @@ class CoreFilesController < ApplicationController
 
     #Allows us to map different params
     def update_metadata_from_upload_screen(core_file, file, collection_id, tmp_path, proxy)
-      # Relative path is set by the jquery uploader when uploading a directory
-      core_file.relative_path = params[:relative_path] if params[:relative_path]
-
-      if !proxy.blank? && current_user.proxy_staff?
-        core_file.depositor = proxy
+      if current_user.proxy_staff? && proxy == "proxy"
+        core_file.depositor = Collection.find(collection_id).depositor
         core_file.proxy_uploader = current_user.nuid
-      else
+      elsif current_user.proxy_staff? && proxy == "personal"
         core_file.depositor = current_user.nuid
       end
 
@@ -299,15 +293,15 @@ class CoreFilesController < ApplicationController
 
         new_path = move_file_to_tmp(file)
 
-        update_metadata_from_upload_screen(@core_file, file, params[:collection_id], new_path, params[:proxy])
-        redirect_to files_provide_metadata_path(@core_file.pid, {proxy: params[:proxy]})
+        update_metadata_from_upload_screen(@core_file, file, params[:collection_id], new_path, params[:upload_type])
+        redirect_to files_provide_metadata_path(@core_file.pid)
       else
         render :json => [{:error => "Error creating file."}]
       end
     end
 
     def virus_check( file)
-      stat = Cerberus::CoreFile::Actions.virus_check(file)
+      stat = Cerberus::ContentFile.virus_check(file)
       flash[:error] = "Virus checking did not pass for #{File.basename(file.path)} status = #{stat}" unless stat == 0
       stat
     end
@@ -323,11 +317,5 @@ class CoreFilesController < ApplicationController
 
     def terms_accepted?
       params[:terms_of_service] == '1'
-    end
-
-    def should_proxy?
-      if ( !params[:proxy].blank?)
-        current_user.proxy_staff? && Employee.exists_by_nuid?(params[:proxy])
-      end
     end
 end
