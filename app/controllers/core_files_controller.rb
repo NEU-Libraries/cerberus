@@ -130,6 +130,9 @@ class CoreFilesController < ApplicationController
         json_error "Error! Zero Length File!", file.original_filename
       elsif (!terms_accepted?)
         json_error "You must accept the terms of service!", file.original_filename
+      elsif current_user.proxy_staff? && params[:upload_type].nil?
+        flash[:error] = "You must select whether this is a proxy or personal upload"
+        redirect_to(:back) and return
       else
         process_file(file)
       end
