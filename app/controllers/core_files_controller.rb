@@ -252,13 +252,10 @@ class CoreFilesController < ApplicationController
 
     #Allows us to map different params
     def update_metadata_from_upload_screen(core_file, file, collection_id, tmp_path, proxy)
-      # Relative path is set by the jquery uploader when uploading a directory
-      core_file.relative_path = params[:relative_path] if params[:relative_path]
-
-      if !proxy.blank? && current_user.proxy_staff?
-        core_file.depositor = proxy
+      if current_user.proxy_staff? && proxy == "proxy"
+        core_file.depositor = Collection.find(collection_id).depositor
         core_file.proxy_uploader = current_user.nuid
-      else
+      elsif current_user.proxy_staff? && proxy == "personal"
         core_file.depositor = current_user.nuid
       end
 
@@ -299,7 +296,7 @@ class CoreFilesController < ApplicationController
 
         new_path = move_file_to_tmp(file)
 
-        update_metadata_from_upload_screen(@core_file, file, params[:collection_id], new_path, params[:proxy])
+        update_metadata_from_upload_screen(@core_file, file, params[:collection_id], new_path, params[:upload_type])
         redirect_to files_provide_metadata_path(@core_file.pid, {proxy: params[:proxy]})
       else
         render :json => [{:error => "Error creating file."}]
@@ -307,7 +304,7 @@ class CoreFilesController < ApplicationController
     end
 
     def virus_check( file)
-      stat = Cerberus::CoreFile::Actions.virus_check(file)
+      stat = Cerberus::ContentFile.virus_check(file)
       flash[:error] = "Virus checking did not pass for #{File.basename(file.path)} status = #{stat}" unless stat == 0
       stat
     end
