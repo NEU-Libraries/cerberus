@@ -134,12 +134,12 @@ describe "Metadata" do
         compilation.proxy_uploader.should == '000333222'
       end
 
-      it "additional assigns edit permissions to the proxy uploader" do
+      it "doesn't assign edit permissions to the proxy uploader" do
         core_file.depositor      = '000000001'
         core_file.proxy_uploader = '000333222'
         core_file.save!
 
-        proxier.can?(:edit, core_file).should be true
+        proxier.can?(:edit, core_file).should be false
       end
     end
 

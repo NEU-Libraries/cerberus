@@ -15,7 +15,7 @@ module CollectionsHelper
   # Render a button for uploading files within this collection
   # if the current user has edit permissions.
   def render_upload_files_button(parent, text = "Upload files to this collection" , html_options = {} )
-    if (current_user.can? :edit, parent.pid ) && !(request.original_fullpath == collections_path)
+    if (current_user.can?(:edit, parent.pid) || current_user.proxy_staff? ) && !(request.original_fullpath == collections_path)
       link_to( text , new_core_file_path(parent: parent.pid), html_options )
     end
   end
@@ -23,7 +23,7 @@ module CollectionsHelper
   # Render a button for creating a new collection within this collection
   # if the current user has edit permissions.
   def render_create_collection_button(parent, text = "Create a child collection off this node" , html_options = {} )
-    if (current_user.can? :edit, parent.pid )
+    if (current_user.can?(:edit, parent.pid) || current_user.proxy_staff? )
       link_to(text, new_collection_path(parent: parent.pid), html_options)
     end
   end

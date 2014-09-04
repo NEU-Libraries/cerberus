@@ -39,6 +39,7 @@ module Cerberus
         stat
       else
         logger.warn "Virus checking disabled for #{file.inspect}"
+        0
       end
     end
   end

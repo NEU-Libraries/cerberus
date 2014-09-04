@@ -152,7 +152,7 @@ class CoreFile < ActiveFedora::Base
 
   # Safely set the parent of a collection.
   def set_parent(collection, user)
-    if user.can? :edit, collection
+    if user.can?(:edit, collection) || user.proxy_staff?
       self.parent = collection
       self.properties.parent_id = collection.pid
       return true

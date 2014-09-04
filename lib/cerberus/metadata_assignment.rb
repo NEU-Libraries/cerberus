@@ -145,7 +145,7 @@ module Cerberus
 
       def proxy_uploader=(string)
         if_properties_exists_strict { self.properties.proxy_uploader = string }
-        self.rightsMetadata.permissions({person: string}, 'edit')
+        #self.rightsMetadata.permissions({person: string}, 'edit')
       end
 
       def proxy_uploader
