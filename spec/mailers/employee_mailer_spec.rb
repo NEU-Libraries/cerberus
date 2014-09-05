@@ -1,7 +1,12 @@
 require "spec_helper"
 
 describe EmployeeMailer do
-  before(:all) { @employee = FactoryGirl.create(:employee) }
+
+  before :all do
+    Employee.destroy_all
+    @employee = FactoryGirl.create(:employee)
+  end
+
   describe "New employee alerts" do
     it "sends the emails to bogus test email in the test environment" do
       msg = EmployeeMailer.new_employee_alert(@employee).deliver
