@@ -35,7 +35,7 @@ class ZipCompilationJob
           CoreFile.find(id).content_objects.each do |content|
             if user.can?(:read, content) && content.content.content && content.class != ImageThumbnailFile
               download_label = I18n.t("drs.display_labels.#{content.klass}.download")
-              io.add_buffer("#{self.title}/#{id.split(":").last}-#{download_label}#{File.extname(content.original_filename || "")}", content.content.content)
+              io.add_buffer("#{self.title}/neu_#{id.split(":").last}-#{download_label}#{Rack::Mime::MIME_TYPES.invert[content.mime_type]}", content.content.content)
             end
           end
         end
