@@ -38,8 +38,11 @@ class CatalogController < ApplicationController
       self.solr_search_params_logic += [:limit_to_scope]
     end
 
-    super
-    recent
+    if params.length == 2
+      recent
+    else
+      super
+    end
   end
 
   def recent
