@@ -58,7 +58,7 @@ Cerberus::Application.configure do
   }
 
   config.lograge.enabled = true
-  config.log_level = :info
+  config.log_level = :debug
 
   config.action_mailer.delivery_method = :sendmail
   config.action_mailer.perform_deliveries = true
