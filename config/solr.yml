@@ -3,7 +3,7 @@
 development:
   url: http://localhost:8983/solr/development
 staging:
-  url: http://127.0.0.1:3000/solr/development
+  url: http://solr.lib.neu.edu/solr/development
   #url: http://libtomcat.neu.edu:8080/solr/rails
 test: &TEST
   url: <%= "http://127.0.0.1:#{ENV['TEST_JETTY_PORT'] || 8983}/solr/test" %>
