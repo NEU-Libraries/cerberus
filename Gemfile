@@ -51,6 +51,8 @@ gem 'multi_json', '~> 1.7.9'
 # Test coverage service
 gem 'coveralls', require: false
 
+gem "ruby-prof"
+
 # Gems used only for assets and not required
 # in production environments by default.
 group :assets do
