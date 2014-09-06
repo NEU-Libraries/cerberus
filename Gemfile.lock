@@ -399,6 +399,7 @@ GEM
       rspec-expectations (~> 2.14.0)
       rspec-mocks (~> 2.14.0)
     ruby-filemagic (0.4.2)
+    ruby-prof (0.15.1)
     rubydora (1.6.5)
       activemodel
       activesupport
@@ -534,6 +535,7 @@ DEPENDENCIES
   rmagick (~> 2.13.2)
   rspec-rails
   ruby-filemagic (~> 0.4.2)
+  ruby-prof
   rvm1-capistrano3
   sanitize
   sass-rails (~> 3.2.3)
