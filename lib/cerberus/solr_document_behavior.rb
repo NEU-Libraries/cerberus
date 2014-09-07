@@ -83,8 +83,8 @@ module Cerberus
     end
 
     def type_label
-      if self.klass == "CoreFile" && !self.canonical_object.nil?
-        return I18n.t("drs.display_labels.#{self.canonical_object.klass}.short")
+      if self.klass == "CoreFile" && !self.canonical_class.nil?
+        return I18n.t("drs.display_labels.#{self.canonical_class}.short")
       end
       I18n.t("drs.display_labels.#{self.klass}.short")
     end
@@ -114,6 +114,10 @@ module Cerberus
 
     def klass
       Array(self[Solrizer.solr_name("active_fedora_model", :stored_sortable)]).first
+    end
+
+    def canonical_class
+      Array(self[Solrizer.solr_name("canonical_class", :stored_searchable)]).first
     end
 
     def parent
