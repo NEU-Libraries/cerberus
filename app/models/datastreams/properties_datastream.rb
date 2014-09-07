@@ -16,7 +16,7 @@ class PropertiesDatastream < ActiveFedora::OmDatastream
     # Moving ContentCreationJob later, need to store these for that to work
     t.tmp_path
     t.original_filename
-    t.canonical_class
+    t.canonical_class :index_as=>[:stored_searchable]
   end
 
   def self.xml_template
