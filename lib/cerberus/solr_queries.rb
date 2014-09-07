@@ -42,10 +42,11 @@ module Cerberus
     end
 
     def canonical_object
-      self.content_objects(true).first
+      query_result = ActiveFedora::SolrService.query("canonical_tesim:yes AND is_part_of_ssim:#{self.full_self_id}")
+      docs = query_result.map { |x| SolrDocument.new(x) }
     end
 
-    def content_objects(canonical = false)
+    def content_objects
       all_possible_models = [ "ImageSmallFile", "ImageMediumFile", "ImageLargeFile",
                               "ImageMasterFile", "ImageThumbnailFile", "MsexcelFile",
                               "MspowerpointFile", "MswordFile", "PdfFile", "TextFile",
@@ -53,11 +54,7 @@ module Cerberus
       models_stringified = all_possible_models.inject { |base, str| base + " or #{str}" }
       models_query = ActiveFedora::SolrService.escape_uri_for_query models_stringified
 
-      if canonical
-        query_result = ActiveFedora::SolrService.query("canonical_tesim:yes AND is_part_of_ssim:#{self.full_self_id}", rows: 999)
-      else
-        query_result = ActiveFedora::SolrService.query("active_fedora_model_ssi:(#{models_stringified}) AND is_part_of_ssim:#{self.full_self_id}", rows: 999)
-      end
+      query_result = ActiveFedora::SolrService.query("active_fedora_model_ssi:(#{models_stringified}) AND is_part_of_ssim:#{self.full_self_id}")
 
       docs = query_result.map { |x| SolrDocument.new(x) }
     end
