@@ -1,5 +1,6 @@
 require 'date_time_precision'
 require 'date_time_precision/format/string'
+include Rails.application.routes.url_helpers
 
 module Cerberus
   module SolrDocumentBehavior
@@ -138,6 +139,11 @@ module Cerberus
       m = ActiveFedora::Base.load_instance_from_solr(id, self)
       return self if m.class == ActiveFedora::Base
       m
+    end
+
+    def path
+      x = (self.klass.constantize).new(:pid => self.pid)
+      return "#{polymorphic_path(x)}/#{self.pid}"
     end
 
     def noid
