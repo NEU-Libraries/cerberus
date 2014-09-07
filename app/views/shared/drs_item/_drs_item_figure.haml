@@ -1,4 +1,4 @@
-%a{ href: polymorphic_path( item ) }
+%a{ href: "/#{item.klass.pluralize}/#{item.pid}" }
   %figure
     - if item.thumbnail_list.length > 0
       =render partial: 'shared/thumbnails/thumbnail_picture', locals: { thumbs: item.thumbnail_list }
