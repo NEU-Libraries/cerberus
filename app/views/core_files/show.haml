@@ -23,9 +23,9 @@
         / = render partial: 'show_descriptions'
         / = render partial: 'show_details'
         = @mods
-      -if @core_file.content_objects
+      -if @content_objects
         %section.drs-item-derivatives
-          = render partial: 'show_derivatives', locals: {contents: @core_file.content_objects}
+          = render partial: 'show_derivatives', locals: {contents: @content_objects}
       / = render :partial => 'users/activity_log', :locals => {:events => @events}
     / / /.span6
   / / /section.row

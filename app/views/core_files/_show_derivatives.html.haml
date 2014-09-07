@@ -3,6 +3,6 @@
 
 - if !(@core_file.under_embargo?(current_user))
   .btn-toolbar
-    = render partial: 'derivative_btn_group', locals: {contents: @core_file.content_objects, list_view: true, item: @core_file}
+    = render partial: 'derivative_btn_group', locals: {contents: @content_objects, list_view: true, item: @core_file}
 - else
   %span= "Downloads available #{@core_file.embargo_release_date(formatted: true)}"
