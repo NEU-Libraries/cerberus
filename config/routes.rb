@@ -44,7 +44,9 @@ Cerberus::Application.routes.draw do
 
   put '/item_display' => 'users#update', as: 'view_pref'
 
-  get '/employees/:id' => 'employees#show', as: 'employee', :path => "employees"
+  # get '/employees/:id' => 'employees#show', as: 'employee'
+  resources :employees, only: [:show]
+
   get '/employees/:id/files' => 'employees#list_files', as: 'employee_files'
   get '/my_drs' => 'employees#personal_graph', as: 'personal_graph'
   get '/my_files' => 'employees#personal_files', as: 'personal_files'
