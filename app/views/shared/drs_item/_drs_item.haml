@@ -1,4 +1,7 @@
-- @content_objects = item.content_objects_sorted
+- if item.klass == "CoreFile"
+  - @content_objects = cached_content_objects(item)
+- else
+  - @content_objects = []
 %article.drs-item{data: { href: item.path,  "drsitem" => item.pid  }}
   = render partial: 'shared/drs_item/drs_item_figure', locals: {item: item}
   = render partial: 'shared/drs_item/drs_item_details', locals: {item: item}

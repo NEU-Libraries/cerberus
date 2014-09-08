@@ -2,6 +2,12 @@ module ApplicationHelper
 
   # Only things with theoretically near universal potential use should go here.
 
+  def cached_content_objects(core_file)
+    Rails.cache.fetch("/content_objects/#{core_file.pid}-#{core_file.updated_at}", :expires_in => 12.hours) do
+      core_file.content_objects_sorted
+    end
+  end
+
   def kramdown_parse(input_str)
     return "" unless input_str
     output_str = Sanitize.clean(Kramdown::Document.new(input_str).to_html, :elements => ['sup', 'sub'])
