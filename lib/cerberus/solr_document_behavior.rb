@@ -145,6 +145,11 @@ module Cerberus
       m
     end
 
+    def path
+      # url_for and polymorphic_path are slow given we know the class and pid
+      send("#{self.klass.underscore}_path", self.pid)
+    end
+
     def noid
       self[Solrizer.solr_name('noid', Sufia::GenericFile.noid_indexer)]
     end
