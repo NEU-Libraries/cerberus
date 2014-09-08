@@ -145,6 +145,11 @@ module Cerberus
       m
     end
 
+    def path
+      x = (self.klass.constantize).new(:pid => self.pid)
+      return "#{polymorphic_path(x)}/#{self.pid}"
+    end
+
     def noid
       self[Solrizer.solr_name('noid', Sufia::GenericFile.noid_indexer)]
     end
