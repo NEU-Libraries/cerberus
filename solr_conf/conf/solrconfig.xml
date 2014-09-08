@@ -77,8 +77,6 @@
          all_text_timv
        </str>
 
-       <str name="debugQuery">true</str>
-
        <str name="facet">true</str>
        <str name="facet.mincount">1</str>
        <str name="facet.limit">10</str>
