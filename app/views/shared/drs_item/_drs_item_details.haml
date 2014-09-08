@@ -1,7 +1,7 @@
 .drs-item-details
   %header
     %h4.drs-item-title
-      %a{href: item.path}
+      %a{href: polymorphic_path(item)}
         / = item.title or "Default title"
         = "#{item.non_sort} "
         = kramdown_parse(item.title) or "Default title"
