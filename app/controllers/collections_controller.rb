@@ -99,7 +99,7 @@ class CollectionsController < ApplicationController
 
     if !@set.smart_collection_type.nil? && @set.smart_collection_type == 'User Root'
       #redirect to employee view
-      return redirect_to employees_path((Employee.find_by_nuid(@set.depositor)).pid)
+      return redirect_to employee_path((Employee.find_by_nuid(@set.depositor)).pid)
     end
 
     self.solr_search_params_logic += [:show_children_only]

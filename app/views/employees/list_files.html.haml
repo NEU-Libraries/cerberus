@@ -6,7 +6,7 @@
     %nav{role: "navigation", class: "pull-right"}
       %ul.nav.nav-tabs
         %li
-          %a{ href: employees_path(@employee) }
+          %a{ href: employee_path(@employee) }
             %i.icon-user
             - if current_user && current_user.nuid == @employee.nuid
               My collections

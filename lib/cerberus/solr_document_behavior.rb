@@ -146,8 +146,7 @@ module Cerberus
     end
 
     def path
-      x = (self.klass.constantize).new(:pid => self.pid)
-      return "#{polymorphic_path(x)}/#{self.pid}"
+      polymorphic_path(self.to_model)
     end
 
     def noid
