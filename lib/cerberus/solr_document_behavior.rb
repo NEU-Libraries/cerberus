@@ -145,10 +145,6 @@ module Cerberus
       m
     end
 
-    def path
-      polymorphic_path(self.to_model)
-    end
-
     def noid
       self[Solrizer.solr_name('noid', Sufia::GenericFile.noid_indexer)]
     end
