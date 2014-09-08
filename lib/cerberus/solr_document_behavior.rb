@@ -146,8 +146,8 @@ module Cerberus
     end
 
     def path
-      x = (self.klass.constantize).new(:pid => self.pid)
-      return "#{polymorphic_path(x)}/#{self.pid}"
+      # url_for and polymorphic_path are slow given we know the class and pid
+      send("#{self.klass.underscore}_path", self.pid)
     end
 
     def noid
