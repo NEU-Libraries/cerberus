@@ -57,12 +57,8 @@ $(document).ready ->
 
     asyncPicturefill = ->
       $("span[class^=\"thumbnail-\"]").bind "DOMSubtreeModified", ->
-        $x = $(this)
-        setTimeout (->
-          $x.parent().parent().children("span[class^=\"icon-\"]").hide()
-          $x.parent().show()
-          return
-        ), 100
+        $(this).parent().parent().children("span[class^=\"icon-\"]").hide()
+        $(this).parent().show()
         return
 
       return
