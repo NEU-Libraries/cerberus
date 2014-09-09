@@ -1,6 +1,10 @@
-<% if paginate_params(@response).num_pages > 1 %>
+<% page_params = paginate_params(@response) %>
+<% if page_params.num_pages > 1 %>
     <div class="pager">
-      <%= paginate_rsolr_response @response%>
+      <%= paginate_rsolr_response(@response)%>
+      <span class="pull-right">
+        Displaying <%= page_params.start %> to <%=page_params.end %> of <%=page_params.total_count%>
+      </span>
       <div class="clearfix"></div>
     </div><!-- /pager -->
 <% end %>
