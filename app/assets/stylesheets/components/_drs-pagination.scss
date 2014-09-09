@@ -1,12 +1,23 @@
 .pager {
   margin: 0 0 10px 0;
-}
-
-.pagination {
-  margin: 0;
+  .pagination {
+    margin: 0;
+    text-align: left;
+    float: left;
+  }
 }
 
 .pager .prev>a,
 .pager .prev>span{
-  float:left
+  padding-left: 15px;
+}
+
+.pager .last>a,
+.pager .last>span{
+  padding-left: 15px;
+}
+
+.pager .next>a,
+.pager .next>span{
+  float: none;
 }
