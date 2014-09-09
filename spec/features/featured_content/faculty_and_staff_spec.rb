@@ -67,6 +67,18 @@ feature "Faculty and staff featured content" do
     # working
     expect(page).to have_css "aside.drs-sidebar"
     expect(page).to have_css "div.pagination-info.pane"
+    expect(page).to have_css "div.pagination-info.pane select[name='sort']"
+
+    # Sorting currently does nothing to Employees, so once that works
+    # determine what sort order of employees will be and add tests for
+    # sorting employees
+
+    # Verify clicking an employee brings you to the show action for that
+    # employee.  Do not verify things about the functioning of the employee#show
+    # action.  Best in a separate test
+    expected_path = employee_path(@employee_1.pid)
+    find("h4.drs-item-title a[href='#{expected_path}']").click
+    expect(current_path).to eq expected_path
   end
 
   after(:all) do
