@@ -62,7 +62,7 @@ $(document).ready ->
           $x.parent().parent().children("span[class^=\"icon-\"]").hide()
           $x.parent().show()
           return
-        ), 200
+        ), 100
         return
 
       return
