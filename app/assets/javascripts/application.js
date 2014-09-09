@@ -17,7 +17,6 @@
 //= require polyfills
 //= require bootstrap-slider
 
-//= require picturefill/picturefill.js
 //= require blacklight/blacklight
 //= require sufia.js
 // Required by Blacklight

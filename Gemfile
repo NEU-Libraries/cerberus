@@ -52,6 +52,7 @@ gem 'multi_json', '~> 1.7.9'
 gem 'coveralls', require: false
 
 gem "ruby-prof"
+gem 'picturefill'
 
 # Gems used only for assets and not required
 # in production environments by default.
