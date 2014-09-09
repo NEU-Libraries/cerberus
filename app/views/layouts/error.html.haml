@@ -4,7 +4,7 @@
     %title
       = h(application_name)
       \: System Error
-    = render :partial => "layouts/head-tag-content"
+    = render :partial => "layouts/head_tag_content"
   -# Add the data signed-in to tell app.js what to do on toggle click.
   - if user_signed_in?
     %body{"data-user" => current_user.id}
@@ -26,7 +26,7 @@
     / /.container
   = render partial: '/footer'
   / Javascript loaded at the end
-  = render :partial => 'layouts/end-js-scripts'
+  = render :partial => 'layouts/end_js_scripts'
   #ajax-modal.modal.hide{:tabindex => "-1", "aria-labelledby" => "ajaxModalLabel", role: "dialog"}
     %header#ajax-modal-header.modal-header
       %button.close{"aria-hidden" => "true", "data-dismiss" => "modal", type: "button"} &#215;
