@@ -1,6 +1,9 @@
 %a{ href: item.path }
   %figure
-    - if item.klass == "CoreFile"
+    - if @thumbs.length > 0
+      =render partial: 'shared/spacer'
+      =render partial: 'shared/thumbnails/thumbnail_picture', locals: { thumbs: @thumbs }
+    - elsif item.klass == "CoreFile"
       =render partial: 'shared/icon', locals: { class_string: 'icon-file' }
     - elsif item.klass == "Collection" # and doesn't have a thumbnail to render
       = render partial: 'shared/icon', locals: { class_string: 'icon-folder-open' }
@@ -10,9 +13,6 @@
       = render partial: 'shared/icon', locals: { class_string: 'icon-user' }
     -else #the most generic option
       = render partial: 'shared/icon', locals: { class_string: 'icon-file' }
-
-    - if @thumbs.length > 0
-      =render partial: 'shared/thumbnails/thumbnail_picture', locals: { thumbs: @thumbs }
 
     -if item.type_label
       %figcaption
