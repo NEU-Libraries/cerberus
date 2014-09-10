@@ -1,6 +1,6 @@
 .btn-group.pull-right
+  = render :partial => 'shopping_carts/tracker'
   - if user_signed_in?
-    = render :partial => 'shopping_carts/tracker'
     = render :partial => 'users/notify_link'
     %a.btn{:href => personal_graph_path, :title => "click for My DRS"}
       %span.icon-user( aria-hidden="true" )
