@@ -53,6 +53,16 @@ $(document).ready ->
       handleGroupPermissionAdd()
       handleGroupPermissionRemoval()
       asyncPicturefill()
+      picturefillCatchAll()
+      return
+
+    picturefillCatchAll = ->
+      if $("span[class^=\"thumbnail-\"]").children("img").length > 0
+        $("span[class^=\"thumbnail-\"]").each ->
+          $(this).parent().parent().children("span[class^=\"icon-\"]").hide()
+          $(this).parent().show()
+          return
+
       return
 
     asyncPicturefill = ->
