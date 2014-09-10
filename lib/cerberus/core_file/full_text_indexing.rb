@@ -22,7 +22,6 @@ module Cerberus
         self.save!
       rescue => e
         logger.error("Error extracting content from #{self.pid}: #{e.inspect}")
-        ExceptionNotifier.notify_exception(e, :data => {:id => "#{self.pid}"})
       end
 
     end
