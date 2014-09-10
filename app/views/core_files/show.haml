@@ -23,6 +23,7 @@
         / = render partial: 'show_descriptions'
         / = render partial: 'show_details'
         = @mods
+      - @content_objects = cached_content_objects(@core_file)
       -if @content_objects
         %section.drs-item-derivatives
           = render partial: 'show_derivatives', locals: {contents: @content_objects}
