@@ -52,29 +52,6 @@ $(document).ready ->
       groupPermissionDisplayWhenPrivate()
       handleGroupPermissionAdd()
       handleGroupPermissionRemoval()
-      asyncPicturefill()
-      picturefillCatchAll()
-      return
-
-    picturefillCatchAll = ->
-      if $("span[class^=\"thumbnail-\"]").children("img").length > 0
-        $("span[class^=\"thumbnail-\"]").each ->
-          $(this).parent().parent().children("span[class^=\"icon-\"]").hide()
-          $(this).parent().show()
-          return
-
-      return
-
-    asyncPicturefill = ->
-      $("span[class^=\"thumbnail-\"]").bind "DOMSubtreeModified", ->
-        $x = $(this)
-        setTimeout (->
-          $x.parent().parent().children("span[class^=\"icon-\"]").hide()
-          $x.parent().show()
-          return
-        ), 100
-        return
-
       return
 
     triggerCartDownload = ->
