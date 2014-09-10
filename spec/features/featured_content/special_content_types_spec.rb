@@ -42,6 +42,11 @@ feature "Special content:" do
       # Verify that clicking it leads to the expected place
       expect(current_path).to eq "/catalog"
 
+      # Verify that the query string is as expected
+      query = URI.parse(current_url).query
+      expected_query = "f[drs_category_ssim][]=#{category_name.sub(' ', '+')}"
+      expect(query).to eq expected_query
+
       # Verify that a single item shows up
       items = page.all("article.drs-item")
       expect(items.length).to eq 1
