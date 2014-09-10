@@ -5,6 +5,7 @@ feature "Special content:" do
     ResqueSpec.inline = true
     # Set up an employee who has contributed one of everything
     # All contributions public except for his presentation.
+    puts "running setup"
     @contributor = FactoryGirl.create(:sequenced_employee)
     EmployeeCreateJob.new(@contributor.nuid, @contributor.name).run
 
@@ -21,71 +22,40 @@ feature "Special content:" do
 
         name = type.singularize.underscore.sub(" ", "_")
 
-        # private presentation
-        if type == "Presentations"
-          file.mass_permissions = "private"
-        end
-
         file.save!
 
         instance_variable_set("@#{name}", file)
       end
     end
+  end
 
-    # Set up a different employee who has contributed one presentation
-    @lesser_contrib = FactoryGirl.create(:sequenced_employee)
-    EmployeeCreateJob.new(@lesser_contrib.nuid, @lesser_contrib.name).run
+  shared_examples_for "a special content page" do |category_name|
+    scenario "visiting page" do
+      content_name = category_name.singularize.underscore.sub(" ", "_")
+      content_item = instance_variable_get("@#{content_name}")
 
-    p = @lesser_contrib.smart_collections.find do |f|
-      f.smart_collection_type = "Presentations"
+      visit root_path
+
+      expect(page).to have_content category_name
+      find("a.btn-block", :text => category_name).click
+
+      # Verify that clicking it leads to the expected place
+      expect(current_path).to eq "/catalog"
+
+      # Verify that a single item shows up
+      items = page.all("article.drs-item")
+      expect(items.length).to eq 1
+
+      # Verify that the item created, when clicked, leads to where we'd expect
+      items.first.find("h4 a").click
+      expect(current_path).to eq core_file_path(content_item.pid)
     end
-
-    @presentation2 = FactoryGirl.create(:docx_file).core_record
-    @presentation2.category  = p.smart_collection_type
-    @presentation2.title     = "Public Presentation"
-    @presentation2.depositor = @lesser_contrib.nuid
-    @presentation2.parent    = p
-    @presentation2.save!
   end
 
-  scenario "viewing research publications" do
-    visit root_path
+  it_should_behave_like "a special content page", "Research Publications"
+  it_should_behave_like "a special content page", "Presentations"
+  it_should_behave_like "a special content page", "Learning Objects"
+  it_should_behave_like "a special content page", "Datasets"
 
-    # Verify research publications link exists
-    expect(page).to have_content "Research Publications"
-    find("a", :text => "Research Publications").click
-
-    # Verify that clicking it leads to the expected place
-    expect(current_path).to eq "/catalog"
-
-    # Verify that a single item shows up
-    research = page.all("article.drs-item")
-    expect(research.length).to eq 1
-    research.first.find("h4 a").click
-    expect(current_path).to eq core_file_path(@research_publication.pid)
-  end
-
-  scenario "viewing presentations" do
-    visit root_path
-
-    expect(page).to have_content "Presentations"
-    find("a", :text => "Presentations").click
-
-    # Verify that clicking it leads to the expected place
-    expect(current_path).to eq "/catalog"
-
-    # Verify that a single item shows up
-    presentations = page.all("article.drs-item")
-    expect(presentations.length).to eq 1
-
-    # Verify that that single item is /not/ the private presentation
-    # that our more prolific employee created.
-    presentations.first.find("h4 a").click
-    expect(current_path).to eq core_file_path(@presentation2.pid)
-  end
-
-  after(:all) do
-    @contributor.destroy
-    @lesser_contrib.destroy
-  end
+  after(:all) { @contributor.destroy }
 end
