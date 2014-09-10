@@ -34,6 +34,12 @@ class Collection < ActiveFedora::Base
   belongs_to :user_parent, property: :is_member_of, :class_name => "Employee"
   belongs_to :community_parent, property: :is_member_of, :class_name => "Community"
 
+  def to_solr(solr_doc = Hash.new())
+    super(solr_doc)
+    solr_doc["type_sim"] = I18n.t("drs.display_labels.#{item_class}.name")
+    return solr_doc
+  end
+
   def parent
     single_lookup(:is_member_of, [Collection, Community])
   end

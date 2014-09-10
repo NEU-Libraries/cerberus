@@ -19,6 +19,12 @@ class Employee < ActiveFedora::Base
   belongs_to :parent, :property => :has_affiliation, :class_name => 'Community'
   has_many :smart_collections, :property => :is_member_of, :class_name => 'Collection'
 
+  def to_solr(solr_doc = Hash.new())
+    super(solr_doc)
+    solr_doc["type_sim"] = I18n.t("drs.display_labels.#{item_class}.name")
+    return solr_doc
+  end
+
   def add_community(c_id)
     self.add_relationship(:has_affiliation, c_id)
   end

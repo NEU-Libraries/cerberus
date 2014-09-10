@@ -28,6 +28,12 @@ class Community < ActiveFedora::Base
 
   belongs_to :parent, property: :has_affiliation, :class_name => "Community"
 
+  def to_solr(solr_doc = Hash.new())
+    super(solr_doc)
+    solr_doc["type_sim"] = I18n.t("drs.display_labels.#{item_class}.name")
+    return solr_doc
+  end
+
   # Depth first(ish) traversal of a graph.
   def each_depth_first
     combinedChildren = self.child_collections + self.child_communities
