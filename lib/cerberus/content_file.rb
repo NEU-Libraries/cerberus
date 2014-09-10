@@ -25,7 +25,7 @@ module Cerberus
     end
 
     def public?
-      self.rightsMetadata.permissions({group: 'public'}, 'read')
+      self.mass_permissions == "public"
     end
 
     def klass
