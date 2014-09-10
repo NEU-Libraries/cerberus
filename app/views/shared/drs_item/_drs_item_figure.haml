@@ -1,7 +1,6 @@
 %a{ href: item.path }
   %figure
     - if @thumbs.length > 0
-      =render partial: 'shared/spacer'
       =render partial: 'shared/thumbnails/thumbnail_picture', locals: { thumbs: @thumbs }
     - elsif item.klass == "CoreFile"
       =render partial: 'shared/icon', locals: { class_string: 'icon-file' }
