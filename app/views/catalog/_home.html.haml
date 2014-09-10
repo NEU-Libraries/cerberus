@@ -13,23 +13,28 @@
   .span3.featured-content
     %h3 Featured Content
 
-    %a.btn.btn-clear.btn-block(href='catalog?f[drs_category_ssim][]=#{t('drs.significant.theses.name')}'){data: {toggle: "tooltip"}, title: t('drs.significant.theses.description') }
+    - theses_href = URI.escape "catalog?f[drs_category_ssim][]=#{t('drs.significant.theses.name')}"
+    %a.btn.btn-clear.btn-block(href="#{theses_href}"){data: {toggle: "tooltip"}, title: t('drs.significant.theses.description') }
       =render partial: 'shared/icon', locals: { class_string: t('drs.significant.theses.icon') }
       #{ t('drs.significant.theses.name') }
 
-    %a.btn.btn-clear.btn-block(href='catalog?f[drs_category_ssim][]=#{t('drs.significant.research.name')}'){data: {toggle: "tooltip"}, title: t('drs.significant.research.description') }
+    - research_href = URI.escape "catalog?f[drs_category_ssim][]=#{t('drs.significant.research.name')}"
+    %a.btn.btn-clear.btn-block(href="#{research_href}"){data: {toggle: "tooltip"}, title: t('drs.significant.research.description') }
       =render partial: 'shared/icon', locals: { class_string: t('drs.significant.research.icon') }
       #{ t('drs.significant.research.name') }
 
-    %a.btn.btn-clear.btn-block(href='catalog?f[drs_category_ssim][]=#{t('drs.significant.presentations.name')}'){data: {toggle: "tooltip"}, title: t('drs.significant.presentations.description')}
+    - presentation_href = URI.escape "catalog?f[drs_category_ssim][]=#{t('drs.significant.presentations.name')}"
+    %a.btn.btn-clear.btn-block(href="#{presentation_href}"){data: {toggle: "tooltip"}, title: t('drs.significant.presentations.description')}
       =render partial: 'shared/icon', locals: { class_string: t('drs.significant.presentations.icon') }
       #{ t('drs.significant.presentations.name') }
 
-    %a.btn.btn-clear.btn-block(href='catalog?f[drs_category_ssim][]=#{t('drs.significant.learning.name')}'){data: {toggle: "tooltip"}, title: t('drs.significant.learning.description') }
+    - learning_href = URI.escape "catalog?f[drs_category_ssim][]=#{t('drs.significant.learning.name')}"
+    %a.btn.btn-clear.btn-block(href="#{learning_href}"){data: {toggle: "tooltip"}, title: t('drs.significant.learning.description') }
       =render partial: 'shared/icon', locals: { class_string: t('drs.significant.learning.icon') }
       #{ t('drs.significant.learning.name') }
 
-    %a.btn.btn-clear.btn-block(href='catalog?f[drs_category_ssim][]=#{t('drs.significant.datasets.name')}'){data: {toggle: "tooltip"}, title: t('drs.significant.datasets.description') }
+    - datasets_href = URI.escape "catalog?f[drs_category_ssim][]=#{t('drs.significant.datasets.name')}"
+    %a.btn.btn-clear.btn-block(href="#{datasets_href}"){data: {toggle: "tooltip"}, title: t('drs.significant.datasets.description') }
       =render partial: 'shared/icon', locals: { class_string: t('drs.significant.datasets.icon') }
       #{ t('drs.significant.datasets.name') }
 
