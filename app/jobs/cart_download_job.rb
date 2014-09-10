@@ -17,7 +17,7 @@ class CartDownloadJob
   # in the shopping_cart controller, which is also the only place where the job is
   # currently executed from.
   def run
-    self.user = User.find_by_nuid(nuid)
+    self.user = !nuid.blank? ? User.find_by_nuid(nuid) : nil
     self.path = "#{Rails.root}/tmp/carts/#{sess_id}"
 
     FileUtils.mkdir_p path
@@ -28,7 +28,7 @@ class CartDownloadJob
         if ActiveFedora::Base.exists?(pid)
           item = ActiveFedora::Base.find(pid, cast: true)
           download_label = I18n.t("drs.display_labels.#{item.klass}.download")
-          if user.can? :read, item
+          if item.public? || user.can?(:read, item)
             io.add_buffer("downloads/neu_#{pid.split(":").last}-#{download_label}#{Rack::Mime::MIME_TYPES.invert[item.characterization.mime_type.first]}", item.content.content)
 
             # Record the download
