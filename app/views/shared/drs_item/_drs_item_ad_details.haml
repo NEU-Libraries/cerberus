@@ -19,7 +19,7 @@
         - if item.description.length > 120
           %span.ellipsis
             = kramdown_parse(item.description)
-          %a(href="#abstract#{item.pid.delete ":"}" data-toggle="ellipsis")
+          %a(href="#abstract#{item.pid.delete ":"}" data-toggle="ellipsis" style="vertical-align: super;")
             %i.icon-expand-alt
             %span.sr-only
               Expand / collapse toggle
