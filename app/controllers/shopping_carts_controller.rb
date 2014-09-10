@@ -1,6 +1,5 @@
 class ShoppingCartsController < ApplicationController
 
-  before_filter :authenticate_user!
   before_filter :session_to_array
   before_filter :can_dl?, only: [:update]
   before_filter :check_availability, only: [:show, :download]
@@ -84,7 +83,7 @@ class ShoppingCartsController < ApplicationController
     respond_to do |format|
       format.html do
         FileUtils.rm_rf(Dir.glob("#{dir}/*")) if File.directory?(dir)
-        Cerberus::Application::Queue.push(CartDownloadJob.new(request.session_options[:id], session[:ids], current_user.nuid, request.remote_ip))
+        Cerberus::Application::Queue.push(CartDownloadJob.new(request.session_options[:id], session[:ids], !current_user.nil? ? current_user.nuid : "", request.remote_ip))
         @page_title = "Start Download - #{t('drs.shoppingcarts.name')}"
       end
 
@@ -145,7 +144,7 @@ class ShoppingCartsController < ApplicationController
       end
 
       c = current_user
-      unless (a.any? { |x| c ? c.can?(:read, x) : x.mass_permissions == 'public' })
+      unless (a.any? { |x| !c.nil? ? c.can?(:read, x) : x.public? })
         flash[:error] = "You cannot read any item in your shopping cart.  Aborting."
         redirect_to shopping_cart_path and return
       end
@@ -162,7 +161,9 @@ class ShoppingCartsController < ApplicationController
     def can_dl?
       if params[:add]
         record = ActiveFedora::Base.find(params[:add], cast: true)
-        render_403 and return unless (current_user.can? :read, record)
+        if !record.public?
+          render_403 and return unless (current_user.can? :read, record)
+        end
 
         if session[:ids].length >= 100
           flash.now[:error] = "Can't have more than 100 items in your cart"
