@@ -38,7 +38,7 @@
       #{ t('drs.featured_content.communities.name') }
 
     -# Need to find a canned query for this
-    %a.btn.btn-clear.btn-block(href='catalog?f[active_fedora_model_ssi][]=Employee'){data: {toggle: "tooltip"}, title: t('drs.featured_content.employees.description') }
+    %a.btn.btn-clear.btn-block{href: catalog_faculty_and_staff_path, data: {toggle: "tooltip"}, title: t('drs.featured_content.employees.description') }
       =render partial: 'shared/icon', locals: { class_string: t('drs.featured_content.employees.icon') }
       #{ t('drs.featured_content.employees.name') }
   .span9
