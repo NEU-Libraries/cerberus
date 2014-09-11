@@ -53,14 +53,14 @@ class CommunitiesController < ApplicationController
   end
 
   def employees
-    @page_title = "#{@set.title} #{t('drs.significant.employees.name')}"
+    @page_title = "#{@set.title} #{t('drs.featured_content.employees.name')}"
 
     @smart_docs = safe_get_smart_docs(@set.find_employees)
     render 'smart_collection', locals: { smart_collection: 'employees' }
   end
 
   def research_publications
-    @page_title = "#{@set.title} #{t('drs.significant.research.name')}"
+    @page_title = "#{@set.title} #{t('drs.featured_content.research.name')}"
 
     @smart_docs = safe_get_smart_docs(@set.research_publications)
 
@@ -68,28 +68,28 @@ class CommunitiesController < ApplicationController
   end
 
   def other_publications
-    @page_title = "#{@set.title} #{t('drs.significant.other.name')}"
+    @page_title = "#{@set.title} #{t('drs.featured_content.other.name')}"
 
     @smart_docs = safe_get_smart_docs(@set.other_publications)
     render 'smart_collection', locals: { smart_collection: 'other' }
   end
 
   def presentations
-    @page_title = "#{@set.title} #{t('drs.significant.presentations.name')}"
+    @page_title = "#{@set.title} #{t('drs.featured_content.presentations.name')}"
 
     @smart_docs = safe_get_smart_docs(@set.presentations)
     render 'smart_collection', locals: { smart_collection: 'presentations' }
   end
 
   def datasets
-    @page_title = "#{@set.title} #{t('drs.significant.datasets.name')}"
+    @page_title = "#{@set.title} #{t('drs.featured_content.datasets.name')}"
 
     @smart_docs = safe_get_smart_docs(@set.datasets)
     render 'smart_collection', locals: { smart_collection: 'datasets' }
   end
 
   def learning_objects
-    @page_title = "#{@set.title} #{t('drs.significant.learning.name')}"
+    @page_title = "#{@set.title} #{t('drs.featured_content.learning.name')}"
 
     @smart_docs = safe_get_smart_docs(@set.learning_objects)
     render 'smart_collection', locals: { smart_collection: 'learning' }

@@ -44,7 +44,7 @@ class MetadataUpdateJob
       gf.save!
       # If this core record is being uploaded into a 'best bits' bucket,
       # we want to add an UploadAlert entry for the sake of the daily metadata
-      # emailing.  Note that all of the actual significant content type metadata
+      # emailing.  Note that all of the actual featured content type metadata
       # is applied before this is reached.
       if !gf.category.first.blank?
         UploadAlert.create_from_core_file(gf, :create)

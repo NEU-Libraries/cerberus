@@ -129,7 +129,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
       }
     }
 
-    #custom extension for handling significant content.
+    #custom extension for handling featured content.
     t.extension(path: 'extension', namespace_prefix: 'mods', attributes: { displayLabel: 'scholarly_object'}){
       t.scholarly_object(namespace_prefix: nil){
         t.category(namespace_prefix: nil)
