@@ -48,7 +48,7 @@ class CatalogController < ApplicationController
 
   def recent
     self.solr_search_params_logic += [:exclude_unwanted_models]
-    self.solr_search_params_logic += [:significant_content_only]
+    self.solr_search_params_logic += [:featured_content_only]
     (_, @recent_documents) = get_search_results(:q =>'', :sort=>"#{Solrizer.solr_name('system_create', :stored_sortable, type: :date)} desc", :rows=>3)
     # if user_signed_in?
     #   # grab other people's documents
@@ -471,7 +471,7 @@ class CatalogController < ApplicationController
     solr_parameters[:fq] << fq
   end
 
-  def significant_content_only(solr_parameters, user_parameters)
+  def featured_content_only(solr_parameters, user_parameters)
     categories = ["Theses and Dissertations", "Research Publications",
                   "Other Publications", "Presentations", "Datasets",
                   "Learning Objects"]
