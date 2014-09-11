@@ -41,7 +41,7 @@ en:
       destroy_button: "Clear Queue"
       download_message: "Please wait a moment while your download is being prepared. If your Download Queue is large, this process may take some time."
     #Featured Content labels
-    featured:
+    featured_content:
       datasets:
         name: Datasets
         description: High value datasets, such as statistical datasets and research datasets
