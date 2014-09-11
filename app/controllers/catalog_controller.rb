@@ -516,9 +516,7 @@ class CatalogController < ApplicationController
   end
 
   def full_text_search(solr_parameters, user_parameters)
-    solr_parameters[:qf] << "all_text_timv"
-
-    solr_parameters[:hl] ||= []
-    solr_parameters[:hl] << "true"
+    solr_parameters[:qf] << " all_text_timv"
+    solr_parameters[:hl] = "true"
   end
 end
