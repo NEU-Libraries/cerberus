@@ -41,6 +41,7 @@ class CatalogController < ApplicationController
     if params.length == 2
       recent
     else
+      self.solr_search_params_logic += [:full_text_search]
       super
     end
   end
@@ -64,6 +65,36 @@ class CatalogController < ApplicationController
       (_, @recent_user_documents) = get_search_results(:q =>filter_mine,
                                         :sort=>"#{Solrizer.solr_name('system_create', :stored_sortable, type: :date)} desc", :rows=>3)
     end
+  end
+
+  def research
+    self.solr_search_params_logic += [:research_filter]
+    (@response, @document_list) = get_search_results
+    render :template => 'catalog/index'
+  end
+
+  def presentations
+    self.solr_search_params_logic += [:presentations_filter]
+    (@response, @document_list) = get_search_results
+    render :template => 'catalog/index'
+  end
+
+  def datasets
+    self.solr_search_params_logic += [:datasets_filter]
+    (@response, @document_list) = get_search_results
+    render :template => 'catalog/index'
+  end
+
+  def faculty_and_staff
+    self.solr_search_params_logic += [:faculty_and_staff_filter]
+    (@response, @document_list) = get_search_results
+    render :template => 'catalog/index'
+  end
+
+  def theses_and_dissertations
+    self.solr_search_params_logic += [:theses_and_dissertations_filter]
+    (@response, @document_list) = get_search_results
+    render :template => 'catalog/index'
   end
 
   def self.uploaded_field
@@ -143,10 +174,9 @@ class CatalogController < ApplicationController
       identifier = "identifier_tesim"
       emp_name = "employee_name_tesim"
       emp_nuid = "employee_nuid_ssim"
-      full_text = "all_text_timv"
 
       field.solr_parameters = {
-        qf: "#{title} #{abstract} #{genre} #{topic} #{creators} #{publisher} #{place} #{identifier} #{emp_name} #{emp_nuid} #{full_text}",
+        qf: "#{title} #{abstract} #{genre} #{topic} #{creators} #{publisher} #{place} #{identifier} #{emp_name} #{emp_nuid}",
         pf: "#{title}",
       }
     end
@@ -453,10 +483,45 @@ class CatalogController < ApplicationController
     solr_parameters[:fq] << query
   end
 
+  def research_filter(solr_parameters, user_parameters)
+    query = "drs_category_ssim:\"Research Publications\""
+    solr_parameters[:fq] ||= []
+    solr_parameters[:fq] << query
+  end
+
+  def presentations_filter(solr_parameters, user_parameters)
+    query = "drs_category_ssim:\"Presentations\""
+    solr_parameters[:fq] ||= []
+    solr_parameters[:fq] << query
+  end
+
+  def datasets_filter(solr_parameters, user_parameters)
+    query = "drs_category_ssim:\"Datasets\""
+    solr_parameters[:fq] ||= []
+    solr_parameters[:fq] << query
+  end
+
+  def faculty_and_staff_filter(solr_parameters, user_parameters)
+    query = "drs_category_ssim:\"Employee\""
+    solr_parameters[:fq] ||= []
+    solr_parameters[:fq] << query
+  end
+
+  def theses_and_dissertations_filter(solr_parameters, user_parameters)
+    query = "drs_category_ssim:\"Theses and Dissertations\""
+    solr_parameters[:fq] ||= []
+    solr_parameters[:fq] << query
+  end
+
   def no_incomplete_records(solr_parameters, user_parameters)
     query = "-in_progress_tesim:true"
 
     solr_parameters[:fq] ||= []
     solr_parameters[:fq] << query
+  end
+
+  def full_text_search(solr_parameters, user_parameters)
+    solr_parameters[:qf] << " all_text_timv"
+    solr_parameters[:hl] = "true"
   end
 end

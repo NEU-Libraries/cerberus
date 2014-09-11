@@ -13,27 +13,27 @@
   .span3.featured-content
     %h3 Featured Content
 
-    %a.btn.btn-clear.btn-block(href='catalog?f[drs_category_ssim][]=#{t('drs.significant.theses.name')}'){data: {toggle: "tooltip"}, title: t('drs.significant.theses.description') }
+    %a.btn.btn-clear.btn-block{href: catalog_theses_and_dissertations_path, data: {toggle: "tooltip"}, title: t('drs.significant.theses.description') }
       =render partial: 'shared/icon', locals: { class_string: t('drs.significant.theses.icon') }
       #{ t('drs.significant.theses.name') }
 
-    %a.btn.btn-clear.btn-block(href='catalog?f[drs_category_ssim][]=#{t('drs.significant.research.name')}'){data: {toggle: "tooltip"}, title: t('drs.significant.research.description') }
+    %a.btn.btn-clear.btn-block{href: catalog_research_path, data: {toggle: "tooltip"}, title: t('drs.significant.research.description') }
       =render partial: 'shared/icon', locals: { class_string: t('drs.significant.research.icon') }
       #{ t('drs.significant.research.name') }
 
-    %a.btn.btn-clear.btn-block(href='catalog?f[drs_category_ssim][]=#{t('drs.significant.presentations.name')}'){data: {toggle: "tooltip"}, title: t('drs.significant.presentations.description')}
+    %a.btn.btn-clear.btn-block{href: catalog_presentations_path, data: {toggle: "tooltip"}, title: t('drs.significant.presentations.description')}
       =render partial: 'shared/icon', locals: { class_string: t('drs.significant.presentations.icon') }
       #{ t('drs.significant.presentations.name') }
 
-    %a.btn.btn-clear.btn-block(href='catalog?f[drs_category_ssim][]=#{t('drs.significant.learning.name')}'){data: {toggle: "tooltip"}, title: t('drs.significant.learning.description') }
-      =render partial: 'shared/icon', locals: { class_string: t('drs.significant.learning.icon') }
-      #{ t('drs.significant.learning.name') }
+    / %a.btn.btn-clear.btn-block{href: catalog_learning_objects_path, data: {toggle: "tooltip"}, title: t('drs.significant.learning.description') }
+    /   =render partial: 'shared/icon', locals: { class_string: t('drs.significant.learning.icon') }
+    /   #{ t('drs.significant.learning.name') }
 
-    %a.btn.btn-clear.btn-block(href='catalog?f[drs_category_ssim][]=#{t('drs.significant.datasets.name')}'){data: {toggle: "tooltip"}, title: t('drs.significant.datasets.description') }
+    %a.btn.btn-clear.btn-block{href: catalog_datasets_path, data: {toggle: "tooltip"}, title: t('drs.significant.datasets.description') }
       =render partial: 'shared/icon', locals: { class_string: t('drs.significant.datasets.icon') }
       #{ t('drs.significant.datasets.name') }
 
-    %a.btn.btn-clear.btn-block(href=communities_path){data: {toggle: "tooltip"}, title: t('drs.significant.communities.description') }
+    %a.btn.btn-clear.btn-block{href: communities_path, data: {toggle: "tooltip"}, title: t('drs.significant.communities.description') }
       =render partial: 'shared/icon', locals: { class_string: t('drs.significant.communities.icon') }
       #{ t('drs.significant.communities.name') }
 
