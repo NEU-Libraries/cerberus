@@ -70,31 +70,31 @@ class CatalogController < ApplicationController
   def research
     self.solr_search_params_logic += [:research_filter]
     (@response, @document_list) = get_search_results
-    render :template => 'communities/smart_collection'
+    render 'smart_collection', locals: { smart_collection: 'research' }
   end
 
   def presentations
     self.solr_search_params_logic += [:presentations_filter]
     (@response, @document_list) = get_search_results
-    render :template => 'catalog/index'
+    render 'smart_collection', locals: { smart_collection: 'presentations' }
   end
 
   def datasets
     self.solr_search_params_logic += [:datasets_filter]
     (@response, @document_list) = get_search_results
-    render :template => 'catalog/index'
+    render 'smart_collection', locals: { smart_collection: 'datasets' }
   end
 
   def faculty_and_staff
     self.solr_search_params_logic += [:faculty_and_staff_filter]
     (@response, @document_list) = get_search_results
-    render :template => 'catalog/index'
+    render 'smart_collection', locals: { smart_collection: 'employees' }
   end
 
   def theses_and_dissertations
     self.solr_search_params_logic += [:theses_and_dissertations_filter]
     (@response, @document_list) = get_search_results
-    render :template => 'catalog/index'
+    render 'smart_collection', locals: { smart_collection: 'theses' }
   end
 
   def self.uploaded_field
