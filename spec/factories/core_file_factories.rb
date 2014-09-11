@@ -18,7 +18,7 @@ FactoryGirl.define do
       end
     end
 
-    factory :significant_content do
+    factory :featured_content do
       mass_permissions 'public'
       deposited_by_bill
 
