@@ -69,27 +69,32 @@ class CatalogController < ApplicationController
 
   def research
     self.solr_search_params_logic += [:research_filter]
-    (_, @document_list) = get_search_results
+    (@response, @document_list) = get_search_results
+    render :template => 'catalog/index'
   end
 
   def presentations
     self.solr_search_params_logic += [:presentations_filter]
-    (_, @document_list) = get_search_results
+    (@response, @document_list) = get_search_results
+    render :template => 'catalog/index'
   end
 
   def datasets
     self.solr_search_params_logic += [:datasets_filter]
-    (_, @document_list) = get_search_results
+    (@response, @document_list) = get_search_results
+    render :template => 'catalog/index'
   end
 
   def faculty_and_staff
     self.solr_search_params_logic += [:faculty_and_staff_filter]
-    (_, @document_list) = get_search_results
+    (@response, @document_list) = get_search_results
+    render :template => 'catalog/index'
   end
 
   def theses_and_dissertations
     self.solr_search_params_logic += [:theses_and_dissertations_filter]
-    (_, @document_list) = get_search_results
+    (@response, @document_list) = get_search_results
+    render :template => 'catalog/index'
   end
 
   def self.uploaded_field
@@ -479,31 +484,31 @@ class CatalogController < ApplicationController
   end
 
   def research_filter(solr_parameters, user_parameters)
-    query == "drs_category_ssim:\"Research Publications\""
+    query = "drs_category_ssim:\"Research Publications\""
     solr_parameters[:fq] ||= []
     solr_parameters[:fq] << query
   end
 
   def presentations_filter(solr_parameters, user_parameters)
-    query == "drs_category_ssim:\"Presentations\""
+    query = "drs_category_ssim:\"Presentations\""
     solr_parameters[:fq] ||= []
     solr_parameters[:fq] << query
   end
 
   def datasets_filter(solr_parameters, user_parameters)
-    query == "drs_category_ssim:\"Datasets\""
+    query = "drs_category_ssim:\"Datasets\""
     solr_parameters[:fq] ||= []
     solr_parameters[:fq] << query
   end
 
   def faculty_and_staff_filter(solr_parameters, user_parameters)
-    query == "drs_category_ssim:\"Employee\""
+    query = "drs_category_ssim:\"Employee\""
     solr_parameters[:fq] ||= []
     solr_parameters[:fq] << query
   end
 
   def theses_and_dissertations_filter(solr_parameters, user_parameters)
-    query == "drs_category_ssim:\"Theses and Dissertations\""
+    query = "drs_category_ssim:\"Theses and Dissertations\""
     solr_parameters[:fq] ||= []
     solr_parameters[:fq] << query
   end

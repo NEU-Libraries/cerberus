@@ -13,11 +13,11 @@
   .span3.featured-content
     %h3 Featured Content
 
-    %a.btn.btn-clear.btn-block(href='catalog?f[drs_category_ssim][]=#{t('drs.significant.theses.name')}'){data: {toggle: "tooltip"}, title: t('drs.significant.theses.description') }
+    %a.btn.btn-clear.btn-block{href: catalog_theses_and_dissertations_path, data: {toggle: "tooltip"}, title: t('drs.significant.theses.description') }
       =render partial: 'shared/icon', locals: { class_string: t('drs.significant.theses.icon') }
       #{ t('drs.significant.theses.name') }
 
-    %a.btn.btn-clear.btn-block(href='catalog?f[drs_category_ssim][]=#{t('drs.significant.research.name')}'){data: {toggle: "tooltip"}, title: t('drs.significant.research.description') }
+    %a.btn.btn-clear.btn-block{href: catalog_research_path, data: {toggle: "tooltip"}, title: t('drs.significant.research.description') }
       =render partial: 'shared/icon', locals: { class_string: t('drs.significant.research.icon') }
       #{ t('drs.significant.research.name') }
 
