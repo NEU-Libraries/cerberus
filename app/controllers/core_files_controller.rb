@@ -276,7 +276,7 @@ class CoreFilesController < ApplicationController
       collection = !collection_id.blank? ? Collection.find(collection_id) : nil
       core_file.set_parent(collection, current_user) if collection
 
-      # Significant content tagging
+      # Featured Content tagging
       sc_type = collection.smart_collection_type
 
       if !sc_type.nil? && sc_type != ""
