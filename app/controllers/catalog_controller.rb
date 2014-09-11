@@ -70,7 +70,7 @@ class CatalogController < ApplicationController
   def research
     self.solr_search_params_logic += [:research_filter]
     (@response, @document_list) = get_search_results
-    render :template => 'catalog/index'
+    render :template => 'communities/smart_collection'
   end
 
   def presentations
