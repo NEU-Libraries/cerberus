@@ -19,10 +19,16 @@ Cerberus::Application.routes.draw do
     mount Resque::Server, :at => "/resque"
   end
 
+  # Featured Content
+  get '/theses_and_dissertations' => 'catalog#theses_and_dissertations', as: 'theses_and_dissertations'
+  get '/research' => 'catalog#research', as: 'catalog_research'
+  get '/presentations' => 'catalog#presentations', as: 'catalog_presentations'
+  get '/datasets' => 'catalog#datasets', as: 'catalog_datasets'
+  get '/faculty_and_staff' => 'catalog#faculty_and_staff', as: 'catalog_faculty_and_staff'
+
   # Community Specific queries
   get '/communities/:id/employees' => 'communities#employees', as: 'community_employees'
   get '/communities/:id/research' => 'communities#research_publications', as: 'community_research'
-  get '/communities/:id/other' => 'communities#other_publications', as: 'community_other'
   get '/communities/:id/presentations' => 'communities#presentations', as: 'community_presentations'
   get '/communities/:id/datasets' => 'communities#datasets', as: 'community_datasets'
   get '/communities/:id/learning' => 'communities#learning_objects', as: 'community_learning_objects'
