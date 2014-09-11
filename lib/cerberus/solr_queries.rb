@@ -157,9 +157,9 @@ module Cerberus
       if self.presentations.length > 0
         smart_collection_list << "presentations"
       end
-      if self.learning_objects.length > 0
-        smart_collection_list << "learning"
-      end
+      # if self.learning_objects.length > 0
+      #   smart_collection_list << "learning"
+      # end
       if self.other_publications.length > 0
         smart_collection_list << "other"
       end
