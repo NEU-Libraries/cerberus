@@ -252,7 +252,7 @@ class CoreFilesController < ApplicationController
       if current_user.proxy_staff? && proxy == "proxy"
         core_file.depositor = Collection.find(collection_id).depositor
         core_file.proxy_uploader = current_user.nuid
-      elsif current_user.proxy_staff? && proxy == "personal"
+      else
         core_file.depositor = current_user.nuid
       end
 
