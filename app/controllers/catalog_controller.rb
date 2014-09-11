@@ -66,6 +66,31 @@ class CatalogController < ApplicationController
     end
   end
 
+  def research
+    self.solr_search_params_logic += [:research_filter]
+    (_, @document_list) = get_search_results
+  end
+
+  def presentations
+    self.solr_search_params_logic += [:presentations_filter]
+    (_, @document_list) = get_search_results
+  end
+
+  def datasets
+    self.solr_search_params_logic += [:datasets_filter]
+    (_, @document_list) = get_search_results
+  end
+
+  def faculty_and_staff
+    self.solr_search_params_logic += [:faculty_and_staff_filter]
+    (_, @document_list) = get_search_results
+  end
+
+  def theses_and_dissertations
+    self.solr_search_params_logic += [:theses_and_dissertations_filter]
+    (_, @document_list) = get_search_results
+  end
+
   def self.uploaded_field
 #  system_create_dtsi
     solr_name('desc_metadata__date_uploaded', :stored_sortable, type: :date)
@@ -449,6 +474,36 @@ class CatalogController < ApplicationController
     query = categories.map { |x| "drs_category_ssim:\"#{x}\""}
     query = query.join(" OR ")
 
+    solr_parameters[:fq] ||= []
+    solr_parameters[:fq] << query
+  end
+
+  def research_filter(solr_parameters, user_parameters)
+    query == "drs_category_ssim:\"Research Publications\""
+    solr_parameters[:fq] ||= []
+    solr_parameters[:fq] << query
+  end
+
+  def presentations_filter(solr_parameters, user_parameters)
+    query == "drs_category_ssim:\"Presentations\""
+    solr_parameters[:fq] ||= []
+    solr_parameters[:fq] << query
+  end
+
+  def datasets_filter(solr_parameters, user_parameters)
+    query == "drs_category_ssim:\"Datasets\""
+    solr_parameters[:fq] ||= []
+    solr_parameters[:fq] << query
+  end
+
+  def faculty_and_staff_filter(solr_parameters, user_parameters)
+    query == "drs_category_ssim:\"Employee\""
+    solr_parameters[:fq] ||= []
+    solr_parameters[:fq] << query
+  end
+
+  def theses_and_dissertations_filter(solr_parameters, user_parameters)
+    query == "drs_category_ssim:\"Theses and Dissertations\""
     solr_parameters[:fq] ||= []
     solr_parameters[:fq] << query
   end
