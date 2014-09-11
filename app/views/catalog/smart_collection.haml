@@ -5,7 +5,7 @@
     - if smart_collection != "employees"
       %small
         Featured Content
-    = render partial: 'catalog/search_form', locals: {scope: "neu:1", smart_search: smart_collection }
+    = render partial: 'catalog/search_form', locals: {scope: "neu:1", smart_search: t("drs.featured_content.#{smart_collection}.name") }
   %p
     = t("drs.featured_content.#{smart_collection}.description")
 

@@ -9,7 +9,7 @@
   -# smart collection *also* pass the sort of special content object
   -# being sought after
   - if defined? smart_search
-    = hidden_field_tag "smart_search", "#{smart_search}"
+    = hidden_field_tag "f[drs_category_ssim][]", "#{smart_search}"
 
   = search_as_hidden_fields(:omit_keys => [:q, :search_field, :qt, :page]).html_safe
   %label.sr-only(for="searchFieldHeader")
