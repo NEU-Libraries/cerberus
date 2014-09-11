@@ -9,7 +9,7 @@
   -# smart collection *also* pass the sort of special content object
   -# being sought after
   - if defined? smart_search
-    - if smart_search == "employees"
+    - if smart_search == "Faculty and Staff"
       = hidden_field_tag "f[active_fedora_model_ssi][]", "#{smart_search}"
     - else
       = hidden_field_tag "f[drs_category_ssim][]", "#{smart_search}"
