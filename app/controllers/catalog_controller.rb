@@ -479,7 +479,7 @@ class CatalogController < ApplicationController
   end
 
   def faculty_and_staff_filter(solr_parameters, user_parameters)
-    query = "drs_category_ssim:\"Employee\""
+    query = "active_fedora_model_ssi:\"Employee\""
     solr_parameters[:fq] ||= []
     solr_parameters[:fq] << query
   end
