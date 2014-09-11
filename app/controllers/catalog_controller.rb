@@ -38,7 +38,7 @@ class CatalogController < ApplicationController
       self.solr_search_params_logic += [:limit_to_scope]
     end
 
-    if params.length == 2
+    if !has_search_parameters?
       recent
     else
       self.solr_search_params_logic += [:full_text_search]
