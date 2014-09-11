@@ -434,41 +434,18 @@ class CatalogController < ApplicationController
   end
 
   def limit_to_smart_search_scope(solr_parameters, user_parameters)
-    doc = fetch_solr_document(id: params[:scope])
-    descendents = doc.combined_set_descendents
+    if params[:scope] != "neu:1"
+      doc = fetch_solr_document(id: params[:scope])
+      descendents = doc.combined_set_descendents
 
-    case params["smart_search"]
-    when "employees"
-      filter_klass = "Employee"
-    when "research"
-      filter_klass = "Research Publications"
-    when "other"
-      filter_klass = "Other Publications"
-    when "presentations"
-      filter_klass = "Presentations"
-    when "datasets"
-      filter_klass = "Datasets"
-    when "learning"
-      filter_klass = "Learning Objects"
-    else
-      raise "received #{params["smart_search"]} as smart search scope"
-    end
-
-    if filter_klass == "Employee"
-      descendents = descendents.select { |x| x.klass == "Employee" }
-      query = descendents.map do |set|
-        set = "id:\"#{set.pid}\""
-      end
-    else
-      descendents = descendents.select { |x| x.smart_collection_type == filter_klass }
       query = descendents.map do |set|
         set = "id:\"#{set.pid}\" OR is_member_of_ssim:\"info:fedora/#{set.pid}\""
       end
-    end
 
-    fq = query.join(" OR ")
-    solr_parameters[:fq] ||= []
-    solr_parameters[:fq] << fq
+      fq = query.join(" OR ")
+      solr_parameters[:fq] ||= []
+      solr_parameters[:fq] << fq
+    end
   end
 
   def featured_content_only(solr_parameters, user_parameters)
