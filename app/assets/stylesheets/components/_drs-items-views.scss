@@ -179,7 +179,10 @@
         figure{
           display: block;
           // margin: 0 auto 5px auto;
-          @media (min-width: 1500px){
+          @media (min-width: $breakpoint-l) and (max-width: ($breakpoint-xxl - 1px)){
+            padding-top: 5%;
+          }
+          @media (min-width: $breakpoint-xxl){
             padding-top: 10%;
           }
         }
