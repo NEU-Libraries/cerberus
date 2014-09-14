@@ -75,7 +75,9 @@ class ContentCreationJob
       return content_object
     ensure
       if delete_file
-        FileUtils.rm(file_path)
+        if File.exists?(file_path)
+          FileUtils.rm(file_path)
+        end
       end
     end
   end
