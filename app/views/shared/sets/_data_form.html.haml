@@ -11,8 +11,8 @@
         = f.file_field :thumbnail, name: 'thumbnail'
         %span.help-block
           Will be displayed on collection pages. (150px by 150px)
-    = f.label :description, "Description", class: "required-label"
-    = f.text_area :description, required: true, pattern: ".*\\S.*", name: 'set[description][]', class: "input-block-level", rows: 5
+    = f.label :description, "Description"
+    = f.text_area :description, pattern: ".*\\S.*", name: 'set[description][]', class: "input-block-level", rows: 5
     .row-fluid
       %fieldset.span6
         %legend Mass Permissions
