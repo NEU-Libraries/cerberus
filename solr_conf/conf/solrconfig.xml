@@ -23,6 +23,7 @@
          will be overridden by parameters in the request
       -->
      <lst name="defaults">
+       <str name="q.op">AND</str>
        <str name="defType">edismax</str>
        <str name="echoParams">explicit</str>
        <str name="q.alt">*:*</str>
