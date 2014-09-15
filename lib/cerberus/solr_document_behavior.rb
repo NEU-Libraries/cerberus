@@ -95,6 +95,21 @@ module Cerberus
 
     def thumbnail_list
       thumbs = Array(self[Solrizer.solr_name("thumbnail_list", :stored_searchable)])
+
+      # check pid to see if it has been indexed in solr yet, if not, return []
+      if thumbs.length > 0
+        thumb_url = thumbs.first
+        pid = /neu\:[a-zA-Z0-9]*/.match(thumb_url).to_s
+        thumb = ActiveFedora::SolrService.query("id:\"#{pid}\"").first
+        if thumb.nil?
+          return []
+        else
+          return thumbs
+        end
+      end
+
+      # Safety return
+      return []
     end
 
     def klass
