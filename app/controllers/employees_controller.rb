@@ -73,7 +73,7 @@ class EmployeesController < ApplicationController
 
     (@response, @document_list) = get_search_results
 
-    @page_title = "My Files"
+    @page_title = "My Deposits"
 
     render :template => 'employees/list_files'
   end
