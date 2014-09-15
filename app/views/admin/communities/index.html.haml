@@ -2,9 +2,7 @@
 
 .row
   .span4
-    =link_to("Create new community", new_admin_community_path) 
+    =link_to("Create new community", new_admin_community_path)
 
-%span.small Search element goes here maybe 
-
-- @communities.each do |community| 
-  = render partial: "admin_community", locals: { community: community } 
+- @communities.each do |community|
+  = render partial: "admin_community", locals: { community: community }
