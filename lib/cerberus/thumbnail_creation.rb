@@ -16,25 +16,25 @@ module Cerberus::ThumbnailCreation
 
     begin
       img = Magick::Image.from_blob(blob).first
+
+      if size[:height] && size[:width]
+        scaled_img = img.resize_to_fit(size[:height], size[:width])
+        fill = Magick::Image.new(size[:height], size[:width])
+        fill = fill.matte_floodfill(1, 1)
+        end_img = fill.composite!(scaled_img, Magick::CenterGravity, Magick::OverCompositeOp)
+      elsif size[:width]
+        end_img = img.resize_to_fit(size[:width])
+      else
+        raise "Size must be hash containing :height/:width or :width keys"
+      end
+
+      end_img.format = "JPEG"
+      end_img.interlace = Magick::PlaneInterlace
+
+      item.add_file(end_img.to_blob, dsid, "#{dsid}.jpeg")
+      item.save!
     rescue Magick::ImageMagickError => exception
       logger.warn "Unable to make thumbnail with #{item_pid}: #{exception.inspect}"
     end
-
-    if size[:height] && size[:width]
-      scaled_img = img.resize_to_fit(size[:height], size[:width])
-      fill = Magick::Image.new(size[:height], size[:width])
-      fill = fill.matte_floodfill(1, 1)
-      end_img = fill.composite!(scaled_img, Magick::CenterGravity, Magick::OverCompositeOp)
-    elsif size[:width]
-      end_img = img.resize_to_fit(size[:width])
-    else
-      raise "Size must be hash containing :height/:width or :width keys"
-    end
-
-    end_img.format = "JPEG"
-    end_img.interlace = Magick::PlaneInterlace
-
-    item.add_file(end_img.to_blob, dsid, "#{dsid}.jpeg")
-    item.save!
   end
 end
