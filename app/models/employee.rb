@@ -21,7 +21,7 @@ class Employee < ActiveFedora::Base
 
   def to_solr(solr_doc = Hash.new())
     super(solr_doc)
-    solr_doc["#{Solrizer.solr_name("title_info_title", :stored_sortable)}"] = self.employee_name
+    solr_doc["#{Solrizer.solr_name("title_info_title", :stored_sortable)}"] = self.name
     solr_doc["type_sim"] = I18n.t("drs.display_labels.#{self.class}.name")
     return solr_doc
   end
