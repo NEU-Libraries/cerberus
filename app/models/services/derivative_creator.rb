@@ -13,7 +13,7 @@ class DerivativeCreator
 
     blob = nil
 
-    if master.instance_of? MswordFile
+    if master.instance_of?(MswordFile)
       pdf = create_pdf_file
       pdf.transform_datastream(:content, content: { datastream: 'content', size: '1000x1000>' })
       blob = pdf.content.content

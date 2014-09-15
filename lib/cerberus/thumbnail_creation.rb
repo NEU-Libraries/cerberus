@@ -14,7 +14,11 @@ module Cerberus::ThumbnailCreation
       blob = blob.string
     end
 
-    img = Magick::Image.from_blob(blob).first
+    begin
+      img = Magick::Image.from_blob(blob).first
+    rescue Magick::ImageMagickError => exception
+      logger.warn "Unable to make thumbnail with #{item_pid}: #{exception.inspect}"
+    end
 
     if size[:height] && size[:width]
       scaled_img = img.resize_to_fit(size[:height], size[:width])
