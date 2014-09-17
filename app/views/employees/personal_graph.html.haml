@@ -3,7 +3,7 @@
     = render partial: "shared/icon", locals: {class_string: t('drs.personal_graph.icon')}
     = t('drs.personal_graph.title')
     %small
-      = @employee.employee_name
+      = @employee.pretty_employee_name
     %nav{role: "navigation", class: ["pull-right"]}
       %ul.nav.nav-tabs
         %li

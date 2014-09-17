@@ -57,7 +57,7 @@ class EmployeesController < ApplicationController
 
     (@response, @document_list) = get_search_results
 
-    @page_title = "#{@employee.employee_name}'s Files"
+    @page_title = "#{@employee.pretty_employee_name}'s Files"
   end
 
   def personal_graph
