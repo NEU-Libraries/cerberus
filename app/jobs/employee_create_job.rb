@@ -58,7 +58,7 @@ class EmployeeCreateJob
           desc = "#{self.name}'s root collection"
         else
           smart_collection_type = "#{title}"
-          desc = "#{title} for #{employee.name}"
+          desc = "#{title} deposited by, or on behalf of, #{employee.name}"
         end
 
         attrs = {
