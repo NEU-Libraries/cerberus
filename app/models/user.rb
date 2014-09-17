@@ -45,7 +45,11 @@ class User < ActiveRecord::Base
     user = User.where(:email => auth.info.email).first
 
     unless user
-      user = User.create(password:Devise.friendly_token[0,20], full_name:auth.info.name, nuid:auth.info.nuid)
+      name_array = Namae.parse auth.info.name
+      name_obj = name_array[0]
+      emp_name = "#{name_obj.family}, #{name_obj.given}"
+
+      user = User.create(password:Devise.friendly_token[0,20], full_name:emp_name, nuid:auth.info.nuid)
       user.email = auth.info.email
       user.save!
 
