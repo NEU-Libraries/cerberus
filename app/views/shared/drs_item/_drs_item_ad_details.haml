@@ -53,22 +53,21 @@
       %dd.drs-item-date-of-issue
         %time{ "date-time" => item.create_date }
           = item.create_date
-  - if item.klass == "CoreFile"
-    - if item.embargo_date_in_effect?
-      %dt
-        %dl{"style" => "display:inline;"}
-          %span.embargo-alert.pull-right= "Contents available #{item.embargo_release_date(formatted: true)}"
-    -# Ensure that we only show download buttons if item isn't embargoed
-    -# Indicate item is embargoed otherwise.
-    - if !item.under_embargo?(current_user)
-      %menu.btn-toolbar(type="toolbar")
-        .btn-group
-          %a.btn.btn-mini.btn-clear{id: "viewItemDownloads-#{noid}"}(data-pid="#{noid}" href="#" data-toggle="dropdown")
-            Downloads
-            %i.icon-caret-down
-          = render partial: 'core_files/derivative_btn_group', locals: {contents: @content_objects, grid_view: true, item: item}
-        - if current_user # the general public can't add items to sets
-          - icon = render partial: 'shared/icon',  locals: { class_string: "icon-briefcase", alt_text: "Add to " + t('drs.compilations.name')}
-          =link_to icon.html_safe , compilations_path(file: item.pid), remote: true, title:  "Add to " + t('drs.compilations.name'), data: {toggle: "tooltip"}, class: 'btn btn-mini btn-clear'
-          - icon = render partial: 'shared/icon',  locals: { class_string: "icon-comments-alt", alt_text: "Add to " + t('drs.compilations.name')}
-          =link_to icon.html_safe , "http://library.northeastern.edu/get-help/tech-support/report-a-problem?resource=#{item.title} - #{item.pid} (#{request.original_url})", :target => "_blank", title:  "Report a problem", data: {toggle: "tooltip"}, class: 'btn btn-mini btn-clear'
+  - if item.embargo_date_in_effect?
+    %dt
+      %dl{"style" => "display:inline;"}
+        %span.embargo-alert.pull-right= "Contents available #{item.embargo_release_date(formatted: true)}"
+  -# Ensure that we only show download buttons if item isn't embargoed
+  -# Indicate item is embargoed otherwise.
+  %menu.btn-toolbar(type="toolbar")
+    - if !item.under_embargo?(current_user) && item.klass == "CoreFile"
+      .btn-group
+        %a.btn.btn-mini.btn-clear{id: "viewItemDownloads-#{noid}"}(data-pid="#{noid}" href="#" data-toggle="dropdown")
+          Downloads
+          %i.icon-caret-down
+        = render partial: 'core_files/derivative_btn_group', locals: {contents: @content_objects, grid_view: true, item: item}
+    - if current_user # the general public can't add items to sets
+      - icon = render partial: 'shared/icon',  locals: { class_string: "icon-briefcase", alt_text: "Add to " + t('drs.compilations.name')}
+      =link_to icon.html_safe , compilations_path(file: item.pid), remote: true, title:  "Add to " + t('drs.compilations.name'), data: {toggle: "tooltip"}, class: 'btn btn-mini btn-clear'
+    - icon = render partial: 'shared/icon',  locals: { class_string: "icon-comments-alt", alt_text: "Add to " + t('drs.compilations.name')}
+    =link_to icon.html_safe , "http://library.northeastern.edu/get-help/tech-support/report-a-problem?resource=#{item.title} - #{item.pid} (#{request.original_url})", :target => "_blank", title:  "Report a problem", data: {toggle: "tooltip"}, class: 'btn btn-mini btn-clear'
