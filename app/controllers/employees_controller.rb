@@ -43,7 +43,7 @@ class EmployeesController < ApplicationController
       return redirect_to personal_graph_path
     end
 
-    @page_title = "#{@employee.employee_name}"
+    @page_title = "#{@employee.pretty_employee_name}"
   end
 
   def list_files
