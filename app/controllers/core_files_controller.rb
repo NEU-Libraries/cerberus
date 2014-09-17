@@ -102,7 +102,6 @@ class CoreFilesController < ApplicationController
       Cerberus::Application::Queue.push(ContentCreationJob.new(@core_file.pid, @core_file.tmp_path, @core_file.original_filename))
     end
 
-    flash[:notice] = 'Your files are being processed by ' + t('drs.product_name.short') + ' in the background. The metadata and access controls you specified are being applied. Files will be marked <span class="label label-important" title="Private">In Progress</span> until this process is complete (shouldn\'t take too long, hang in there!).'
     redirect_to core_file_path(@core_file.pid)
   end
 
@@ -116,6 +115,10 @@ class CoreFilesController < ApplicationController
     @page_title = @core_file.title
 
     log_action("view", "COMPLETE")
+
+    if @core_file.in_progress?
+      flash[:notice] = 'Your files are being processed by ' + t('drs.product_name.short') + ' in the background. The metadata and access controls you specified are being applied. Files will be marked <span class="label label-warning" title="Updating">Updating</span> until this process is complete (shouldn\'t take too long, hang in there!).'
+    end
   end
 
   def create
