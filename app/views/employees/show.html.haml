@@ -1,11 +1,11 @@
 - content_for :page_header do
   %h1.page-header
-    = "#{@employee.employee_name}"
+    = "#{@employee.pretty_employee_name}"
     %nav{role: "navigation", class: ["pull-right"]}
       %ul.nav.nav-tabs
         %li
           %a{ href: employee_files_path(@employee) }
             %i.icon-file
-            ="#{@employee.employee_name}'s files"
+            ="#{@employee.pretty_employee_name}'s files"
 
 = render partial: "smart_and_user_collections", locals: { :smart_collections => @system_collections, :user_collections => @user_collections, :editable => false }

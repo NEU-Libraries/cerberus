@@ -1,6 +1,6 @@
 - content_for :page_header do
   %h1.page-header
-    ="#{@employee.employee_name}"
+    ="#{@employee.pretty_employee_name}"
     %small
       All Files
     %nav{role: "navigation", class: "pull-right"}
@@ -11,7 +11,7 @@
             - if current_user && current_user.nuid == @employee.nuid
               My collections
             - else
-              ="#{@employee.employee_name}'s collections"
+              ="#{@employee.pretty_employee_name}'s collections"
 
 
 .row
