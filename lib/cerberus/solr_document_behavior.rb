@@ -128,6 +128,17 @@ module Cerberus
       Array(self[Solrizer.solr_name("employee_name", :stored_searchable)]).first
     end
 
+    def pretty_employee_name
+      if !self.employee_name.blank?
+        name_array = Namae.parse self.full_name
+        name_obj = name_array[0]
+        return "#{name_obj.given} #{name_obj.family}"
+      end
+
+      # safety return
+      return ""
+    end
+
     ##
     # Give our SolrDocument an ActiveModel::Naming appropriate route_key
     def route_key

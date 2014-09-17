@@ -89,9 +89,14 @@ class User < ActiveRecord::Base
   end
 
   def pretty_name
-    name_array = Namae.parse self.full_name
-    name_obj = name_array[0]
-    return "#{name_obj.given} #{name_obj.family}"
+    if !self.full_name.blank?
+      name_array = Namae.parse self.full_name
+      name_obj = name_array[0]
+      return "#{name_obj.given} #{name_obj.family}"
+    end
+
+    # safety return
+    return ""
   end
 
   def admin?
