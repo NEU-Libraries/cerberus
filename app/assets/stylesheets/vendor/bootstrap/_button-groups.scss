@@ -34,6 +34,17 @@
   }
 }
 
+.list-buttons {
+  font-size: 0; // Hack to remove whitespace that results from using inline-block
+  > div > .btn,
+  > div > .btn-group, {
+    margin-right: 4px;
+  }
+  > div > .btn-group{
+    margin-top: 1px;
+  }
+}
+
 // Float them, remove border radius, then re-add to first and last elements
 .btn-group > .btn {
   position: relative;
