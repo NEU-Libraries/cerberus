@@ -6,7 +6,7 @@
       %span.icon-user( aria-hidden="true" )
       %span.sr-only
         User page
-      = current_user.name
+      = current_user.pretty_name
     %button.btn.dropdown-toggle{"data-toggle" => "dropdown",  "aria-label" => "Toggle user menu dropdown menu", :title => "click for additional menu options"}
       %span.icon-caret-down( aria-hidden="true" )
     %ul.dropdown-menu(role="menu")
