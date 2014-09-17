@@ -88,6 +88,12 @@ class User < ActiveRecord::Base
     self.full_name
   end
 
+  def pretty_name
+    name_array = Namae.parse self.full_name
+    name_obj = name_array[0]
+    return "#{name_obj.given} #{name_obj.family}"
+  end
+
   def admin?
     return self.role.eql?('admin')
   end
