@@ -26,6 +26,17 @@ class Employee < ActiveFedora::Base
     return solr_doc
   end
 
+  def pretty_employee_name
+    if !self.name.blank?
+      name_array = Namae.parse self.name
+      name_obj = name_array[0]
+      return "#{name_obj.given} #{name_obj.family}"
+    end
+
+    # safety return
+    return ""
+  end
+
   def add_community(c_id)
     self.add_relationship(:has_affiliation, c_id)
   end
