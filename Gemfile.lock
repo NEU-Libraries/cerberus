@@ -9,8 +9,8 @@ GIT
 
 GIT
   remote: https://github.com/NEU-Libraries/solrizer.git
-  revision: 7bb6c05910075335e34c3d5e60b5e2fd52893584
-  ref: 7bb6c05910075335e34c3d5e60b5e2fd52893584
+  revision: 873b2372bfc48a80ad25b3284aed300252853158
+  ref: 873b2372bfc48a80ad25b3284aed300252853158
   specs:
     solrizer (3.1.1)
       activesupport
@@ -450,7 +450,7 @@ GEM
       term-ansicolor
     stanford-mods (1.0.2)
       mods
-    stomp (1.3.2)
+    stomp (1.3.3)
     subexec (0.2.3)
     term-ansicolor (1.2.2)
       tins (~> 0.8)
@@ -476,7 +476,7 @@ GEM
     whenever (0.8.4)
       activesupport (>= 2.3.4)
       chronic (>= 0.6.3)
-    xml-simple (1.1.3)
+    xml-simple (1.1.4)
     xpath (2.0.0)
       nokogiri (~> 1.3)
     zipruby (0.3.6)
