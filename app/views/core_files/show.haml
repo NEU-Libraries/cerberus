@@ -18,15 +18,10 @@
     %div{class: layout_class}
       = render :partial => 'core_files/media_display'
     %div{itemscope: "", itemtype: "http://schema.org/CreativeWork", class:  [ layout_class, 'drs-item-details'] }
-      / = render partial: 'show_actions'
+      = render partial: 'actions_nav'
       .drs-item-add-details
-        / = render partial: 'show_descriptions'
-        / = render partial: 'show_details'
         = @mods
       - @content_objects = cached_content_objects(@core_file)
       -if @content_objects
         %section.drs-item-derivatives
           = render partial: 'show_derivatives', locals: {contents: @content_objects}
-      / = render :partial => 'users/activity_log', :locals => {:events => @events}
-    / / /.span6
-  / / /section.row

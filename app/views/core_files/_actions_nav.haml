@@ -1,0 +1,10 @@
+%nav(role="navigation")
+  %ul.nav.nav-tabs
+    %li.active
+      %a(href="#" data-event="non-link")
+        Metadata
+    - if current_user_can? :edit, @core_file
+      %li
+        %a{ href: edit_core_file_path(@core_file),  data: {event: "non-link"} }
+          %i.icon-pencil
+          Edit
