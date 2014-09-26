@@ -29,14 +29,6 @@ class CatalogController < ApplicationController
   skip_before_filter :default_html_head
 
   def index
-    # Before executing the actual search (by calling super)
-    # We check if scoped filtering needs to be added to the query
-
-    if params["scope"] && params["smart_search"]
-      self.solr_search_params_logic += [:limit_to_smart_search_scope]
-    elsif params["scope"]
-      self.solr_search_params_logic += [:limit_to_scope]
-    end
 
     if !has_search_parameters?
       recent
@@ -406,46 +398,6 @@ class CatalogController < ApplicationController
 
   def search_layout
     "homepage"
-  end
-
-  def limit_to_scope(solr_parameters, user_parameters)
-    # Do not bother constructing filter query if user is searching
-    # from the graph root.
-    return true if params[:scope] == Rails.application.config.root_community_id
-
-    doc = fetch_solr_document(id: params[:scope])
-    descendents = doc.combined_set_descendents
-
-    # Limit query to items that are set descendents
-    # or files off set descendents
-    query = descendents.map do |set|
-      p = set.pid
-      set = "id:\"#{p}\" OR is_member_of_ssim:\"info:fedora/#{p}\""
-    end
-
-    # Ensure files directly on scoping collection are added in
-    # as well
-    query << "is_member_of_ssim:\"info:fedora/#{params[:scope]}\""
-
-    fq = query.join(" OR ")
-
-    solr_parameters[:fq] ||= []
-    solr_parameters[:fq] << fq
-  end
-
-  def limit_to_smart_search_scope(solr_parameters, user_parameters)
-    if params[:scope] != "neu:1"
-      doc = fetch_solr_document(id: params[:scope])
-      descendents = doc.combined_set_descendents
-
-      query = descendents.map do |set|
-        set = "id:\"#{set.pid}\" OR is_member_of_ssim:\"info:fedora/#{set.pid}\""
-      end
-
-      fq = query.join(" OR ")
-      solr_parameters[:fq] ||= []
-      solr_parameters[:fq] << fq
-    end
   end
 
   def featured_content_only(solr_parameters, user_parameters)

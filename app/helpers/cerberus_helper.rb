@@ -50,4 +50,23 @@ module CerberusHelper
     return (link_to_unless(options[:suppress_link], facet_display_value(facet_solr_field, item), path, :class=>"facet_select") + " " + render_facet_count(item.hits)).html_safe
   end
 
+  def render_constraints_query(localized_params = params)
+    # So simple don't need a view template, we can just do it here.
+    if (!localized_params[:q].blank?)
+      label =
+        if (localized_params[:search_field].blank? || (default_search_field && localized_params[:search_field] == default_search_field[:key] ) )
+          nil
+        else
+          label_for_search_field(localized_params[:search_field])
+        end
+
+      render_constraint_element(label,
+            localized_params[:q],
+            :classes => ["query"],
+            :remove => url_for(localized_params.merge(:q=>nil)))
+    else
+      "".html_safe
+    end
+  end
+
 end

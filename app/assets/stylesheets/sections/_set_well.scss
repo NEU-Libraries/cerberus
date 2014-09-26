@@ -13,6 +13,9 @@
 }
 
 .inline-headings{
+  h1{
+    margin-right: 5px;
+  }
   h1,
   h2,
   h3,
@@ -21,12 +24,11 @@
   h6 {
     display: inline;
   }
-  [class^="icon-"]:before,
-  [class*=" icon-"]:before {
-    vertical-align: 2px;
-    margin-left: 5px;
-  }
   small{
     vertical-align: middle;
   }
+}
+
+.navbar-form .btn{
+  margin-top: 6.5px;
 }
