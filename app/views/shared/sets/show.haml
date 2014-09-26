@@ -16,7 +16,7 @@
       = render partial: 'shared/icon', locals: { class_string: 'icon-folder-open' }
     - elsif @set.klass == "Community"
       = render partial: 'shared/icon', locals: { class_string: 'icon-group' }
-    = render partial: 'catalog/search_form', locals: { scope: @set.pid }
+    = render partial: 'catalog/search_form', locals: { scope: "true", scoped_placeholder: "Search this #{@set.type_label.downcase}" }
   %h1
     %small
       = @set.type_label
