@@ -187,7 +187,8 @@ module Cerberus
         csc = urc.combined_set_children
 
         csc.each do |set|
-          if !set.smart_collection_type.nil? && set.smart_collection_type != "miscellany"
+          # Temporary, until we get Learning Objects sorted out
+          if !set.smart_collection_type.nil? && set.smart_collection_type != "miscellany" && set.smart_collection_type != "Learning Objects"
             smart_collection_list << set
           end
         end
