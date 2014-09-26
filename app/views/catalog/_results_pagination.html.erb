@@ -1,10 +1,11 @@
 <% page_params = paginate_params(@response) %>
-<% if page_params.num_pages > 1 %>
-    <div class="pager">
-      <%= paginate_rsolr_response(@response)%>
-      <span class="pull-left">
-        Displaying <%= page_params.start %> to <%=page_params.end %> of <%=page_params.total_count%>
-      </span>
-      <div class="clearfix"></div>
-    </div><!-- /pager -->
-<% end %>
+
+<div class="pager">
+  <% if page_params.num_pages > 1 %>
+    <%= paginate_rsolr_response(@response)%>
+  <% end %>
+  <span class="pull-left">
+    Displaying <%= page_params.start %> to <%=page_params.end %> of <%=page_params.total_count%>
+  </span>
+  <div class="clearfix"></div>
+</div><!-- /pager -->
