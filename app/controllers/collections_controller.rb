@@ -102,7 +102,12 @@ class CollectionsController < ApplicationController
       return redirect_to employee_path((Employee.find_by_nuid(@set.depositor)).pid)
     end
 
-    self.solr_search_params_logic += [:show_children_only]
+    if !params[:q].nil?
+      self.solr_search_params_logic += [:limit_to_scope]
+    else
+      self.solr_search_params_logic += [:show_children_only]
+    end
+
     (@response, @document_list) = get_search_results
 
     render :template => 'shared/sets/show'
@@ -148,6 +153,26 @@ class CollectionsController < ApplicationController
     def show_children_only(solr_parameters, user_parameters)
       solr_parameters[:fq] ||= []
       solr_parameters[:fq] << "#{Solrizer.solr_name("parent_id", :stored_searchable)}:\"#{params[:id]}\""
+    end
+
+    def limit_to_scope(solr_parameters, user_parameters)
+      descendents = @set.combined_set_descendents
+
+      # Limit query to items that are set descendents
+      # or files off set descendents
+      query = descendents.map do |set|
+        p = set.pid
+        set = "id:\"#{p}\" OR is_member_of_ssim:\"info:fedora/#{p}\""
+      end
+
+      # Ensure files directly on scoping collection are added in
+      # as well
+      query << "is_member_of_ssim:\"info:fedora/#{@set.pid}\""
+
+      fq = query.join(" OR ")
+
+      solr_parameters[:fq] ||= []
+      solr_parameters[:fq] << fq
     end
 
 end
