@@ -25,6 +25,13 @@
   margin-top: 0
 }
 
+.featured-content{
+  [class^="icon-"]:before,
+  [class*=" icon-"]:before {
+    padding-right: 10px;
+  }
+}
+
 .featured-content .btn-block {
   margin-top: 5px;
 }
