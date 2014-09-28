@@ -1,11 +1,13 @@
-%article.well.clearfix
+%article.well.clearfix.inline-headings
   %h1
-    = render partial: 'shared/icon', locals: { class_string: t("drs.featured_content.#{smart_collection}.icon") }
     = t("drs.featured_content.#{smart_collection}.name")
+  %h3
+    = render partial: 'shared/icon', locals: { class_string: t("drs.featured_content.#{smart_collection}.icon") }
+    = render partial: 'catalog/search_form', locals: {scope: "true", scoped_placeholder: "Search this featured content" }
+  %h1
     - if smart_collection != "employees"
       %small
         Featured Content
-    = render partial: 'catalog/search_form', locals: {scope: "true", scoped_placeholder: "Search this featured content" }
   %p
     = t("drs.featured_content.#{smart_collection}.description")
 
