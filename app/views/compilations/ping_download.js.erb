@@ -1,2 +1,4 @@
-$('#display_download_link').html("<%= j(link_to('Download', trigger_download_path(@compilation))) %>");
 $('.progress').hide();
+$('#display_download_link').html("Download ready.")
+window.location.href="<%=trigger_download_path(@compilation)%>"
+

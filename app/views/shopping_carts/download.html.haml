@@ -1,3 +1,17 @@
-%p#sc_download_page Your download will start momentarily.
+- content_for :page_header do
+  %h1.page-header Your download is being prepared.
 
-#button_slot 
+.alert.alert-info
+  %strong Note:
+  Large files can take some time.  Your
+  %code .zip
+  will start downloading when the file is ready.
+  %a.close(data-dismiss="alert" href="#" aria-hidden="true")
+    &times;
+
+.progress.progress-striped.active
+  .bar{style: "width: 100%;"}
+
+#button_slot
+
+%p#sc_download_page
