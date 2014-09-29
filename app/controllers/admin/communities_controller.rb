@@ -5,7 +5,9 @@ class Admin::CommunitiesController < AdminController
   load_resource
 
   def index
-    @communities = Community.all
+    community_model = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:Community"
+    query_result = ActiveFedora::SolrService.query("has_model_ssim:\"#{community_model}\"")
+    @communities = query_result.map { |x| SolrDocument.new(x) }
     @page_title = "Administer Communities"
   end
 
