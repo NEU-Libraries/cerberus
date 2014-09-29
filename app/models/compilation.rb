@@ -35,7 +35,7 @@ class Compilation < ActiveFedora::Base
       query = self.entry_ids.map! { |id| "\"#{id}\""}.join(" OR ")
       query = "id:(#{query})"
 
-      results = ActiveFedora::SolrService.query(query, rows: 999)
+      results = ActiveFedora::SolrService.query(query)
 
       results.map { |result| SolrDocument.new result }
     else

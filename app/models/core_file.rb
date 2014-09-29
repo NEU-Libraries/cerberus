@@ -212,7 +212,7 @@ class CoreFile < ActiveFedora::Base
     models_query = ActiveFedora::SolrService.escape_uri_for_query models_stringified
     full_self_id = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/#{self.pid}"
 
-    query_result = ActiveFedora::SolrService.query("active_fedora_model_ssi:(#{models_stringified}) AND is_part_of_ssim:#{full_self_id}", rows: 999)
+    query_result = ActiveFedora::SolrService.query("active_fedora_model_ssi:(#{models_stringified}) AND is_part_of_ssim:#{full_self_id}")
 
     return assigned_lookup(query_result)
   end
