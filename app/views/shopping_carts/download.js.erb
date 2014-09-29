@@ -1,1 +1,4 @@
-$('#button_slot').html("<%= j(link_to('Download', fire_download_path)) %>")
+$('.progress').hide();
+$('#button_slot').html("Download ready.")
+window.location.href="<%=fire_download_path%>"
+
