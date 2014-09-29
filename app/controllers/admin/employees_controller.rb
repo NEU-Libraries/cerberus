@@ -6,7 +6,7 @@ class Admin::EmployeesController < AdminController
 
   def index
     employee_model = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:Employee"
-    query_result = ActiveFedora::SolrService.query("has_model_ssim:\"#{employee_model}\"", rows: 999)
+    query_result = ActiveFedora::SolrService.query("has_model_ssim:\"#{employee_model}\"")
     @employees = query_result.map { |x| SolrDocument.new(x) }
     @page_title = "Administer Employees"
   end
