@@ -238,7 +238,7 @@ module Cerberus
 
     def associated_files_by_type(relation)
       str = "info:fedora/#{self.pid}"
-      r = ActiveFedora::SolrService.query("#{relation}:\"#{str}\"", :rows => 999)
+      r = ActiveFedora::SolrService.query("#{relation}:\"#{str}\"")
       r.map { |x| SolrDocument.new(x) }
     end
   end
