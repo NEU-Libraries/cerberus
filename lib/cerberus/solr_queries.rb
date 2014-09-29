@@ -13,13 +13,13 @@ module Cerberus
 
     def child_files
       core_file_model = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:CoreFile"
-      children_query_result = ActiveFedora::SolrService.query("is_member_of_ssim:#{self.full_self_id} AND has_model_ssim:#{core_file_model}", rows: 999)
+      children_query_result = ActiveFedora::SolrService.query("is_member_of_ssim:#{self.full_self_id} AND has_model_ssim:#{core_file_model}")
       children_query_result.map { |x| SolrDocument.new(x) }
     end
 
     def combined_set_children
       core_file_model = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:CoreFile"
-      combined_children_query_result = ActiveFedora::SolrService.query("has_affiliation_ssim:#{self.full_self_id} OR is_member_of_ssim:#{self.full_self_id} NOT has_model_ssim:#{core_file_model}", rows: 999)
+      combined_children_query_result = ActiveFedora::SolrService.query("has_affiliation_ssim:#{self.full_self_id} OR is_member_of_ssim:#{self.full_self_id} NOT has_model_ssim:#{core_file_model}")
       combined_children_query_result.map { |x| SolrDocument.new(x) }
     end
 
@@ -87,7 +87,7 @@ module Cerberus
 
     def find_employees
       employee_model = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:Employee"
-      query_result = ActiveFedora::SolrService.query("has_affiliation_ssim:\"#{self.full_self_id}\" AND has_model_ssim:\"#{employee_model}\"", rows: 999)
+      query_result = ActiveFedora::SolrService.query("has_affiliation_ssim:\"#{self.full_self_id}\" AND has_model_ssim:\"#{employee_model}\"")
       query_result.map { |x| SolrDocument.new(x) }
     end
 
@@ -96,7 +96,7 @@ module Cerberus
       employee_list = find_employees
       employee_list.each do |e|
         full_employee_id = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/#{e.pid}"
-        query_result = ActiveFedora::SolrService.query("is_member_of_ssim:\"#{full_employee_id}\" AND smart_collection_type_tesim:\"User Root\"", rows: 999)
+        query_result = ActiveFedora::SolrService.query("is_member_of_ssim:\"#{full_employee_id}\" AND smart_collection_type_tesim:\"User Root\"")
         doc_list << query_result.map { |x| SolrDocument.new(x) }
       end
       return doc_list
@@ -106,7 +106,7 @@ module Cerberus
       doc_list ||= []
       user_root_list = find_user_root_collections
       user_root_list.each do |r|
-        query_result = ActiveFedora::SolrService.query("parent_id_tesim:\"#{r.first.pid}\" AND smart_collection_type_tesim:\"#{type_str}\"", rows: 999)
+        query_result = ActiveFedora::SolrService.query("parent_id_tesim:\"#{r.first.pid}\" AND smart_collection_type_tesim:\"#{type_str}\"")
         doc_list << query_result.map { |x| SolrDocument.new(x) }
       end
       return doc_list
