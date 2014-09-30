@@ -223,14 +223,14 @@ class CoreFile < ActiveFedora::Base
   # Find the canonical record for this object.
   # Raise a warning if none or more than one exist.
   def canonical_object
-    con_objs = self.content_objects
-
-    c = con_objs.count { |c| c.canonical? }
-    if c != 1
+    c = ActiveFedora::SolrService.query("canonical_tesim:yes AND is_part_of_ssim:#{self.full_self_id}").first
+    if c.nil?
       Rails.logger.warn "#{pid} is returning #{c} content objects. It should have one."
+      return false
     end
 
-    con_objs.find { |c| c.canonical? } || false
+    doc = SolrDocument.new(c)
+    ActiveFedora::Base.find(doc.pid, cast: true)
   end
 
   # Find the ImageThumbnail for this object
