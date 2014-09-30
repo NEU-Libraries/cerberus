@@ -16,12 +16,26 @@ class ResolrizeJob
     #   ActiveFedora::Base.reindex_everything
     # end
 
+    # #{Rails.root}
+    # log/solrizer.log
+
+    logger = Logger.new("#{Rails.root}/log/resolrize-job.log")
+
     conn = ActiveFedora::RubydoraConnection.new(ActiveFedora.config.credentials).connection
     rsolr_conn = ActiveFedora::SolrService.instance.conn
 
     conn.search(nil) do |object|
-      rsolr_conn.add(ActiveFedora::Base.find(object.pid, :cast=>true).to_solr)
-      rsolr_conn.commit
+      begin
+        pid = object.pid
+        rsolr_conn.add(ActiveFedora::Base.find(pid, :cast=>true).to_solr)
+        rsolr_conn.commit
+        logger.info "#{Time.now} - Processed \nPID: #{pid}"
+      rescue Exception => error
+        logger.warn "#{Time.now} - Error processing \nPID: #{pid}"
+        logger.warn "#{Time.now} - #{$!.inspect}"
+        logger.warn "#{Time.now} - #{$!}"
+        logger.warn "#{Time.now} - #{$@}"
+      end
     end
   end
 end
