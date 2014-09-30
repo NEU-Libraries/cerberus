@@ -119,11 +119,13 @@ class CoreFile < ActiveFedora::Base
     #Accounting for Pat's files coming in through the Fedora-direct harvest
     # If the file is of type with text, see if we can get solr to do a full text index
     if self.canonical_class.in?(['TextFile', 'MswordFile', 'PdfFile'])
-      if self.canonical_object && self.canonical_object.datastreams.keys.include?("full_text")
-        if self.canonical_object.full_text.content.nil?
-          self.canonical_object.extract_content
+      con_obj = self.canonical_object
+      if con_obj != false && con_obj.datastreams.keys.include?("full_text")
+        if con_obj.full_text.content.nil?
+          con_obj.extract_content
         end
-        solr_doc['all_text_timv'] = self.canonical_object.datastreams["full_text"].content
+        con_obj.reload
+        solr_doc['all_text_timv'] = con_obj.datastreams["full_text"].content
       end
     end
 
@@ -208,9 +210,10 @@ class CoreFile < ActiveFedora::Base
                             "ImageMasterFile", "ImageThumbnailFile", "MsexcelFile",
                             "MspowerpointFile", "MswordFile", "PdfFile", "TextFile",
                             "ZipFile", "AudioFile", "VideoFile" ]
+
     models_stringified = all_possible_models.inject { |base, str| base + " or #{str}" }
-    models_query = ActiveFedora::SolrService.escape_uri_for_query models_stringified
-    full_self_id = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/#{self.pid}"
+    models_query = RSolr.escape(models_stringified)
+    full_self_id = RSolr.escape("info:fedora/#{self.pid}")
 
     query_result = ActiveFedora::SolrService.query("active_fedora_model_ssi:(#{models_stringified}) AND is_part_of_ssim:#{full_self_id}")
 
@@ -220,12 +223,14 @@ class CoreFile < ActiveFedora::Base
   # Find the canonical record for this object.
   # Raise a warning if none or more than one exist.
   def canonical_object
-    c = self.content_objects.count { |c| c.canonical? }
+    con_objs = self.content_objects
+
+    c = con_objs.count { |c| c.canonical? }
     if c != 1
       Rails.logger.warn "#{pid} is returning #{c} content objects. It should have one."
     end
 
-    self.content_objects.find { |c| c.canonical? } || false
+    con_objs.find { |c| c.canonical? } || false
   end
 
   # Find the ImageThumbnail for this object
