@@ -1,7 +1,7 @@
 GIT
   remote: https://github.com/NEU-Libraries/mods_display.git
-  revision: 291ed601fb511ea2a9dbedf30e4f303d766d5a61
-  ref: 291ed601fb511ea2a9dbedf30e4f303d766d5a61
+  revision: 25203911f88e813b85db3b45fb82358b36c059c4
+  ref: 25203911f88e813b85db3b45fb82358b36c059c4
   specs:
     mods_display (0.3.3)
       i18n
@@ -448,7 +448,7 @@ GEM
       net-scp
       net-ssh
       term-ansicolor
-    stanford-mods (1.0.2)
+    stanford-mods (1.0.3)
       mods
     stomp (1.3.3)
     subexec (0.2.3)
