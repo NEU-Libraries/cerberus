@@ -16,10 +16,11 @@ class ResolrizeJob
     #   ActiveFedora::Base.reindex_everything
     # end
 
+    conn = ActiveFedora::RubydoraConnection.new(ActiveFedora.config.credentials).connection
     rsolr_conn = ActiveFedora::SolrService.instance.conn
 
-    ActiveFedora::Base.find(:all).each do |obj|
-      rsolr_conn.add(obj.to_solr)
+    conn.search(nil) do |object|
+      rsolr_conn.add(ActiveFedora::Base.find(object.pid, :cast=>true).to_solr)
       rsolr_conn.commit
     end
   end
