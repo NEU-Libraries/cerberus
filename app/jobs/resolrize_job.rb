@@ -29,9 +29,9 @@ class ResolrizeJob
         pid = object.pid
         rsolr_conn.add(ActiveFedora::Base.find(pid, :cast=>true).to_solr)
         rsolr_conn.commit
-        logger.info "#{Time.now} - Processed \nPID: #{pid}"
+        logger.info "#{Time.now} - Processed PID: #{pid}"
       rescue Exception => error
-        logger.warn "#{Time.now} - Error processing \nPID: #{pid}"
+        logger.warn "#{Time.now} - Error processing PID: #{pid}"
         logger.warn "#{Time.now} - #{$!.inspect}"
         logger.warn "#{Time.now} - #{$!}"
         logger.warn "#{Time.now} - #{$@}"
