@@ -15,5 +15,12 @@ class ResolrizeJob
     # else
     #   ActiveFedora::Base.reindex_everything
     # end
+
+    rsolr_conn = ActiveFedora::SolrService.instance.conn
+
+    ActiveFedora::Base.find(:all).each do |obj|
+      rsolr_conn.add(obj.to_solr)
+      rsolr_conn.commit
+    end
   end
 end
