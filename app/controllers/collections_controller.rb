@@ -16,6 +16,8 @@ class CollectionsController < ApplicationController
   include BlacklightAdvancedSearch::ParseBasicQ
   include BlacklightAdvancedSearch::Controller
 
+  include Blacklight::SolrHelper
+
   before_filter :authenticate_user!, only: [:new, :edit, :create, :update, :destroy ]
 
   # We can do better by using SOLR check instead of Fedora
@@ -41,6 +43,20 @@ class CollectionsController < ApplicationController
     flash[:error] = exception.message
     email_handled_exception(exception)
     render_403 and return
+  end
+
+  def facet
+    @set = fetch_solr_document
+    self.solr_search_params_logic += [:limit_to_scope]
+    @pagination = get_facet_pagination(params[:solr_field], params)
+
+    respond_to do |format|
+      # Draw the facet selector for users who have javascript disabled:
+      format.html { render :template => 'catalog/facet' }
+
+      # Draw the partial for the "more" facet modal window:
+      format.js { render :template => 'catalog/facet', :layout => false }
+    end
   end
 
   def new
