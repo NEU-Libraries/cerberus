@@ -16,8 +16,6 @@ class CollectionsController < ApplicationController
   include BlacklightAdvancedSearch::ParseBasicQ
   include BlacklightAdvancedSearch::Controller
 
-  include Blacklight::SolrHelper
-
   before_filter :authenticate_user!, only: [:new, :edit, :create, :update, :destroy ]
 
   # We can do better by using SOLR check instead of Fedora
