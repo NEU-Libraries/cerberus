@@ -2,6 +2,14 @@
   <p><%= link_back_to_catalog %></p>
 <% end %>
 
+<%#Param cleaning for nicer urls%>
+<% if params[:solr_field].present? %>
+  <% params.delete :solr_field %>
+<% end %>
+<% if params[:_].present? %>
+  <% params.delete :_ %>
+<% end %>
+
 <div class="facet_pagination top">
   <%= render :partial=>'catalog/facet_pagination' %>
 </div>
@@ -20,7 +28,7 @@
             <%= render_selected_facet_value(params[:id], item) %>
           <% else %>
             <%= render_facet_value(params[:id], item) %>
-          <% end -%>
+          <% end %>
         </li>
       <% end %>
     </ul>
