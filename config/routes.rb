@@ -55,6 +55,10 @@ Cerberus::Application.routes.draw do
   get '/my_drs' => 'employees#personal_graph', as: 'personal_graph'
   get '/my_files' => 'employees#personal_files', as: 'personal_files'
 
+  # Facets for communities and collections
+  get "/communities/:id/facet/:solr_field" => 'communities#facet', as: 'community_facet'
+  get "/collections/:id/facet/:solr_field" => 'collections#facet', as: 'collection_facet'
+
   namespace :admin do
     # Add/Remove communities from an employee, delete employee
     resources :communities, except: [:show]

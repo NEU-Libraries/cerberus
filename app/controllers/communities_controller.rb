@@ -39,6 +39,10 @@ class CommunitiesController < ApplicationController
     redirect_to community_path(id: 'neu:1')
   end
 
+  def facet
+    # TODO
+  end
+
   def show
     @smart_collections = nil
 
