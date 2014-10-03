@@ -49,6 +49,7 @@ class CommunitiesController < ApplicationController
         self.solr_search_params_logic += [:limit_to_scope]
       end
     else
+      self.solr_search_params_logic += [:disable_highlighting]
       self.solr_search_params_logic += [:show_children_only]
     end
 
@@ -151,5 +152,9 @@ class CommunitiesController < ApplicationController
       @response = get_solr_response_for_field_values('id', ids, {}).first
 
       return docs
+    end
+
+    def disable_highlighting(solr_parameters, user_parameters)
+      solr_parameters[:hl] = "false"
     end
 end
