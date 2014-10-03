@@ -105,6 +105,7 @@ class CollectionsController < ApplicationController
     if !params[:q].nil?
       self.solr_search_params_logic += [:limit_to_scope]
     else
+      self.solr_search_params_logic += [:disable_highlighting]
       self.solr_search_params_logic += [:show_children_only]
     end
 
@@ -173,6 +174,10 @@ class CollectionsController < ApplicationController
 
       solr_parameters[:fq] ||= []
       solr_parameters[:fq] << fq
+    end
+
+    def disable_highlighting(solr_parameters, user_parameters)
+      solr_parameters[:hl] = "false"
     end
 
 end

@@ -31,9 +31,9 @@ class CatalogController < ApplicationController
   def index
 
     if !has_search_parameters?
+      self.solr_search_params_logic += [:disable_highlighting]
       recent
     else
-      self.solr_search_params_logic += [:full_text_search]
       super
     end
   end
@@ -166,9 +166,10 @@ class CatalogController < ApplicationController
       identifier = "identifier_tesim"
       emp_name = "employee_name_tesim"
       emp_nuid = "employee_nuid_ssim"
+      all_text = "all_text_timv"
 
       field.solr_parameters = {
-        qf: "#{title} #{abstract} #{genre} #{topic} #{creators} #{publisher} #{place} #{identifier} #{emp_name} #{emp_nuid}",
+        qf: "#{title} #{abstract} #{genre} #{topic} #{creators} #{publisher} #{place} #{identifier} #{emp_name} #{emp_nuid} #{all_text}",
         pf: "#{title}",
       }
     end
@@ -449,9 +450,7 @@ class CatalogController < ApplicationController
     solr_parameters[:fq] << query
   end
 
-  def full_text_search(solr_parameters, user_parameters)
-    solr_parameters[:qf] ||= []
-    solr_parameters[:qf] << " all_text_timv"
-    solr_parameters[:hl] = "true"
+  def disable_highlighting(solr_parameters, user_parameters)
+    solr_parameters[:hl] = "false"
   end
 end
