@@ -2,24 +2,30 @@ module Cerberus::ModsExtensions::NIEC
   extend ActiveSupport::Concern
 
   included do
-    def self.niec_proxy(keys = [])
-      return [:niec_extension, :niec].push(*keys)
-    end
 
-    def self.niec_full_name_proxy(keys = [])
-      return [:niec_extension, :niec, :niec_name, :niec_full_name].push(*keys)
-    end
+    def self.nattr(keys, name=nil)
+      if name
+        getter_name = :"#{name}"
+        setter_name = :"#{name}="
+      else
+        getter_name = :"#{keys.last}"
+        setter_name = :"#{keys.last}="
+      end
 
-    def self.niec_speaker_proxy(keys = [])
-      return [:niec_extension, :niec, :niec_name, :niec_speaker_information].push(*keys)
-    end
+      define_method(getter_name) do
+        keys.inject(self, &:send)
+      end
 
-    def self.niec_publisher_proxy(keys = [])
-      return [:niec_extension, :niec, :niec_origin, :niec_publication_information].push(*keys)
-    end
-
-    def self.niec_distributor_proxy(keys = [])
-      return [:niec_extension, :niec, :niec_origin, :niec_distribution_information].push(*keys)
+      define_method(setter_name) do |value|
+        last = keys.length - 1
+        keys.each_with_index.inject(self) do |chain,(key, i)|
+          if i != last
+            chain.send(:"#{key}")
+          else
+            chain.send(:"#{key}=", value)
+          end
+        end
+      end
     end
 
     def self.ndh(pth, hsh={})
@@ -59,7 +65,10 @@ module Cerberus::ModsExtensions::NIEC
           }
           t.niec_language_information(ndh "languageInformation"){
             t.niec_signed_language(ndh "signedLanguage"){
-              t.niec_language(ndh "language")
+              t.niec_language(ndh "language"){
+                t.authority(path: { attribute: "authority" })
+                t.type(path: { attribute: "type" })
+              }
               t.niec_sign_pace(ndh "signPace")
               t.niec_fingerspelling_extent(ndh "fingerspellingExtent")
               t.niec_fingerspelling_pace(ndh "fingerspellingPace")
@@ -69,112 +78,62 @@ module Cerberus::ModsExtensions::NIEC
               t.niec_use_of_space_extent(ndh "useOfSpaceExtent")
               t.niec_how_space_used(ndh "howSpaceUsed")
             }
+            t.niec_spoken_language(ndh "spokenLanguage"){
+              t.niec_language(ndh "language"){
+                t.authority(path: { attribute: "authority" })
+                t.type(path: { attribute: "type" })
+              }
+              t.niec_speech_pace(ndh "speechPace")
+              t.niec_lends_itself_to_fingerspelling(ndh "lendsItselfToFingerspelling")
+              t.niec_lends_itself_to_classifiers(ndh "lendsItselfToClassifiers")
+              t.niec_lends_itself_to_numbers(ndh "lendsItselfToNumbers")
+              t.niec_lends_itself_to_use_of_space(ndh "lendsItselfToUseOfSpace")
+            }
           }
+          t.niec_content_description(ndh "contentDescription"){
+            t.niec_text_type(ndh "textType")
+            t.niec_register(ndh "register")
+            t.niec_approach(ndh "approach")
+            t.niec_captions(ndh "captions")
+            t.niec_conversation_type(ndh "conversationType")
+            t.niec_audience(ndh "audience")
+            t.niec_genre(ndh("genre", {attributes: { authority: "aat"}}))
+            t.niec_subject(ndh "subject"){
+              t.niec_topic(ndh("topic", {attributes: { authority: "lcsh"}}))
+            }
+            t.niec_duration(ndh "duration")
+            t.niec_overview(ndh "overview")
+          }
+          t.niec_transcript(ndh "transcript")
+          t.niec_series(ndh "series")
+          t.niec_comment(ndh "comment")
+          t.niec_description(ndh "description")
+          t.niec_rights_statement(ndh "rightsStatement")
         }
       }
-
-      t.niec_identifier(proxy: niec_proxy([:niec_identifier]))
-      t.niec_identifier_type(proxy: niec_proxy([:niec_identifier, :type]))
-
-      t.niec_title(proxy: niec_proxy([:niec_title]))
-
-      t.niec_full_name(proxy: niec_full_name_proxy)
-      t.niec_full_name_authority(proxy: niec_full_name_proxy([:authority]))
-      t.niec_full_name_type(proxy: niec_full_name_proxy([:type]))
-
-      t.niec_role(proxy: niec_proxy([:niec_name, :niec_role]))
-
-      t.niec_gender(proxy: niec_speaker_proxy([:niec_gender]))
-      t.niec_age(proxy: niec_speaker_proxy([:niec_age]))
-      t.niec_race(proxy: niec_speaker_proxy([:niec_race]))
-
-      t.niec_publisher_name(proxy: niec_publisher_proxy([:niec_publisher_name]))
-      t.niec_publication_date(proxy:niec_publisher_proxy([:niec_publication_date]))
-
-      t.niec_distributor_name(proxy: niec_distributor_proxy([:niec_distributor_name]))
-      t.niec_distribution_date(proxy: niec_distributor_proxy([:niec_distribution_date]))
-
-      t.niec_date_created(proxy: niec_proxy([:niec_origin, :niec_date_created]))
-      t.niec_date_issued(proxy: niec_proxy([:niec_origin, :niec_date_issued]))
     end
+
+    nattr [:niec_extension, :niec, :niec_identifier]
+    nattr [:niec_extension, :niec, :niec_identifier, :type], :niec_identifier_type
+    nattr [:niec_extension, :niec, :niec_comment]
+    nattr [:niec_extension, :niec, :niec_title]
+    nattr [:niec_extension, :niec, :niec_name, :niec_full_name]
+    nattr [:niec_extension, :niec, :niec_name, :niec_full_name, :type], :niec_full_name_type
+    nattr [:niec_extension, :niec, :niec_name, :niec_full_name, :authority], :niec_full_name_authority
+    nattr [:niec_extension, :niec, :niec_name, :niec_role]
+    nattr [:niec_extension, :niec, :niec_name, :niec_speaker_information, :niec_gender]
+    nattr [:niec_extension, :niec, :niec_name, :niec_speaker_information, :niec_age]
+    nattr [:niec_extension, :niec, :niec_name, :niec_speaker_information, :niec_race]
+    nattr [:niec_extension, :niec, :niec_origin, :niec_publication_information, :niec_publisher_name]
+    nattr [:niec_extension, :niec, :niec_origin, :niec_publication_information, :niec_publication_date]
+    nattr [:niec_extension, :niec, :niec_origin, :niec_distribution_information, :niec_distributor_name]
+    nattr [:niec_extension, :niec, :niec_origin, :niec_distribution_information, :niec_distribution_date]
+    nattr [:niec_extension, :niec, :niec_origin, :niec_date_created]
+    nattr [:niec_extension, :niec, :niec_origin, :niec_date_issued]
+
 
     private_class_method :ndh, :niec_proxy, :niec_full_name_proxy
     private_class_method :niec_speaker_proxy, :niec_publisher_proxy
     private_class_method :niec_distributor_proxy
-  end
-
-  # Q: Why not use the proxies defined above to do assignment?
-  # A: Unless the xml_template explicitly defines empty nodes with the
-  # appropriate nesting for every proxied element, the proxy assignment
-  # writes the element as a direct child of the tree root.
-
-  def niec_identifier=(val)
-    path_to_niec.niec_identifier = val
-  end
-
-  def niec_identifier_type=(val)
-    path_to_niec.niec_identifier.type = val
-  end
-
-  def niec_title=(val)
-    path_to_niec.niec_title = val
-  end
-
-  def niec_full_name=(val)
-    path_to_niec.niec_name.niec_full_name = val
-  end
-
-  def niec_full_name_authority=(val)
-    path_to_niec.niec_name.niec_full_name.authority = val
-  end
-
-  def niec_full_name_type=(val)
-    path_to_niec.niec_name.niec_full_name.type = val
-  end
-
-  def niec_role=(val)
-    path_to_niec.niec_name.niec_role = val
-  end
-
-  def niec_gender=(val)
-    path_to_niec.niec_name.niec_speaker_information.niec_gender = val
-  end
-
-  def niec_age=(val)
-    path_to_niec.niec_name.niec_speaker_information.niec_age = val
-  end
-
-  def niec_race=(val)
-    path_to_niec.niec_name.niec_speaker_information.niec_race = val
-  end
-
-  def niec_publisher_name=(val)
-    path_to_niec.niec_origin.niec_publication_information.niec_publisher_name = val
-  end
-
-  def niec_publication_date=(val)
-    path_to_niec.niec_origin.niec_publication_information.niec_publication_date = val
-  end
-
-  def niec_distributor_name=(val)
-    path_to_niec.niec_origin.niec_distribution_information.niec_distributor_name = val
-  end
-
-  def niec_distribution_date=(val)
-    path_to_niec.niec_origin.niec_distribution_information.niec_distribution_date = val
-  end
-
-  def niec_date_created=(val)
-    path_to_niec.niec_origin.niec_date_created = val
-  end
-
-  def niec_date_issued=(val)
-    path_to_niec.niec_origin.niec_date_issued = val
-  end
-
-  private
-
-  def path_to_niec
-    self.niec_extension.niec
   end
 end
