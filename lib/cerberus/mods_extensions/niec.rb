@@ -27,7 +27,7 @@ module Cerberus::ModsExtensions::NIEC
     end
 
     extend_terminology do |t|
-      t.niec_extension(ndh "extension", attributes: { displayLabel: :none}){
+      t.niec_extension(path: "extension", namespace_prefix: "mods"){
         t.niec(ndh "niec"){
           t.niec_identifier(ndh "identifier"){
             t.type(path: { attribute: 'type'})
