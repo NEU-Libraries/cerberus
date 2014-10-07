@@ -73,6 +73,36 @@ describe Cerberus::ModsExtensions::NIEC do
     expect(ds.niec_race).to eq ["Asian"]
   end
 
+  it "can set the niec publisher name field" do
+    ds.niec_publisher_name = "Smith Print"
+    expect(ds.niec_publisher_name).to eq ["Smith Print"]
+  end
+
+  it "can set the niec publication date field" do
+    ds.niec_publication_date = "7/7/2007"
+    expect(ds.niec_publication_date).to eq ["7/7/2007"]
+  end
+
+  it "can set the niec distributor name field" do
+    ds.niec_distributor_name = "Smith Print"
+    expect(ds.niec_distributor_name).to eq ["Smith Print"]
+  end
+
+  it "can set the niec distribution date field" do
+    ds.niec_distribution_date = "8/8/2008"
+    expect(ds.niec_distribution_date).to eq ["8/8/2008"]
+  end
+
+  it "can set the niec date created field" do
+    ds.niec_date_created = "9/9/2009"
+    expect(ds.niec_date_created).to eq ["9/9/2009"]
+  end
+
+  it "can set the niec date issued field" do
+    ds.niec_date_issued = "10/10/2010"
+    expect(ds.niec_date_issued).to eq ["10/10/2010"]
+  end
+
   describe "Solrization" do
 
   end
