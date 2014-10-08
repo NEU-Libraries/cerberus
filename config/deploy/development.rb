@@ -77,8 +77,8 @@ namespace :deploy do
   desc "Setting whenever environment and updating the crontable"
   task :whenever do
     on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec whenever --set environment=staging)"
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec whenever --update-crontab)"
+      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec whenever --set environment=staging -c)"
+      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec whenever --set environment=staging -w)"
     end
   end
 
