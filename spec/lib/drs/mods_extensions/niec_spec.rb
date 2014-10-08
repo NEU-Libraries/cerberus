@@ -74,10 +74,5 @@ describe Cerberus::ModsExtensions::NIEC do
       ds.niec_fingerspelling_extent = "Extensive"
       expect(solr_response["niec_fingerspelling_extent_ssim"]).to eq ["Extensive"]
     end
-
-    it "knows how to write date types" do
-      ds.niec_date_created = "2010-10-10"
-      expect(solr_response["niec_date_created_dtsim"]).to eq ["2010-10-10"]
-    end
   end
 end

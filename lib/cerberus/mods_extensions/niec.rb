@@ -174,21 +174,13 @@ module Cerberus::ModsExtensions::NIEC
                                   :niec_publisher_name),
                                   :index_as => :stored_searchable
     niec_attr path_to_origin.push(:niec_publication_information,
-                                  :niec_publication_date),
-                                  :index_as => :stored_searchable,
-                                  :type => :date
+                                  :niec_publication_date)
     niec_attr path_to_origin.push(:niec_distribution_information,
                                   :niec_distributor_name)
     niec_attr path_to_origin.push(:niec_distribution_information,
-                                  :niec_distribution_date),
-                                  :index_as => :stored_searchable,
-                                  :type => :date
-    niec_attr path_to_origin.push(:niec_date_created),
-                                  :index_as => :stored_searchable,
-                                  :type => :date
-    niec_attr path_to_origin.push(:niec_date_issued),
-                                  :index_as => :stored_searchable,
-                                  :type => :date
+                                  :niec_distribution_date)
+    niec_attr path_to_origin.push(:niec_date_created)
+    niec_attr path_to_origin.push(:niec_date_issued)
 
     #niec:languageInformation elements
     niec_attr path_to_signed_language.push(:niec_language),
