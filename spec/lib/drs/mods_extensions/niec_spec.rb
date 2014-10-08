@@ -22,88 +22,62 @@ describe Cerberus::ModsExtensions::NIEC do
 
   let(:ds) { NiecTester.new }
 
-  it "can set the niec title field" do
-    ds.niec_title = "Sample NIEC Document"
-    expect(ds.niec_title).to eq ["Sample NIEC Document"]
+  # Exhaustive testing of what amount to basic setters/getters
+  # seems like a waste of time - test just enough to verify that
+  # each of the array definition helpers dtrt
+
+  it "can write to the niec:niec space" do
+    ds.niec_comment = "This is okay"
+    expect(ds.niec_comment).to eq ["This is okay"]
   end
 
-  it "can set the niec identifier field" do
-    ds.niec_identifier = "hdl:123"
-    expect(ds.niec_identifier).to eq ["hdl:123"]
+  it "can write to the niec:name space" do
+    ds.niec_full_name = "William Jackson"
+    ds.niec_role      = "Developer"
+
+    expect(ds.niec_full_name).to eq ["William Jackson"]
+    expect(ds.niec_role).to eq ["Developer"]
   end
 
-  it "can set the 'type' attribute on niec identifiers" do
-    ds.niec_identifier = "hdl:123"
-    ds.niec_identifier_type = "hdl"
-    expect(ds.niec_identifier_type).to eq ["hdl"]
-  end
-
-  it "can set the niec fullName field" do
-    ds.niec_full_name = "Will Jackson"
-    expect(ds.niec_full_name).to eq ["Will Jackson"]
-  end
-
-  it "can set the 'authority' attribute on fullNames" do
-    ds.niec_full_name_authority = "local"
-    expect(ds.niec_full_name_authority).to eq ["local"]
-  end
-
-  it "can set the 'type' attribute on fullNames" do
-    ds.niec_full_name_type = "personal"
-    expect(ds.niec_full_name_type).to eq ["personal"]
-  end
-
-  it "can set the niec role field" do
-    ds.niec_role = "Author"
-    expect(ds.niec_role).to eq ["Author"]
-  end
-
-  it "can set the niec gender field" do
-    ds.niec_gender = "Male"
-    expect(ds.niec_gender).to eq ["Male"]
-  end
-
-  it "can set the niec age field" do
-    ds.niec_age = "Baby"
-    expect(ds.niec_age).to eq ["Baby"]
-  end
-
-  it "can set the niec race field" do
-    ds.niec_race = "Asian"
-    expect(ds.niec_race).to eq ["Asian"]
-  end
-
-  it "can set the niec publisher name field" do
+  it "can write to the niec:origin space" do
     ds.niec_publisher_name = "Smith Print"
     expect(ds.niec_publisher_name).to eq ["Smith Print"]
   end
 
-  it "can set the niec publication date field" do
-    ds.niec_publication_date = "7/7/2007"
-    expect(ds.niec_publication_date).to eq ["7/7/2007"]
+  it "can write to the niec:language space" do
+    ds.niec_signed_language = "ASL"
+    ds.niec_spoken_language = "English"
+
+    expect(ds.niec_signed_language).to eq ["ASL"]
+    expect(ds.niec_spoken_language).to eq ["English"]
   end
 
-  it "can set the niec distributor name field" do
-    ds.niec_distributor_name = "Smith Print"
-    expect(ds.niec_distributor_name).to eq ["Smith Print"]
-  end
-
-  it "can set the niec distribution date field" do
-    ds.niec_distribution_date = "8/8/2008"
-    expect(ds.niec_distribution_date).to eq ["8/8/2008"]
-  end
-
-  it "can set the niec date created field" do
-    ds.niec_date_created = "9/9/2009"
-    expect(ds.niec_date_created).to eq ["9/9/2009"]
-  end
-
-  it "can set the niec date issued field" do
-    ds.niec_date_issued = "10/10/2010"
-    expect(ds.niec_date_issued).to eq ["10/10/2010"]
+  it "can write to the niec:contentDescription space" do
+    ds.niec_genre = "Mystery"
+    expect(ds.niec_genre).to eq ["Mystery"]
   end
 
   describe "Solrization" do
+    let(:solr_response) { ds.generate_niec_solr_hash }
 
+    it "returns an empty hash with no values" do
+      expect(solr_response).to be_empty
+    end
+
+    it "knows how to write text types" do
+      str = "This is a test comment."
+      ds.niec_comment = str
+      expect(solr_response["niec_comment_tesim"]).to eq [str]
+    end
+
+    it "knows how to write string types" do
+      ds.niec_fingerspelling_extent = "Extensive"
+      expect(solr_response["niec_fingerspelling_extent_ssim"]).to eq ["Extensive"]
+    end
+
+    it "knows how to write date types" do
+      ds.niec_date_created = "2010-10-10"
+      expect(solr_response["niec_date_created_dtsim"]).to eq ["2010-10-10"]
+    end
   end
 end
