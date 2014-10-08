@@ -227,6 +227,8 @@ class ModsDatastream < ActiveFedora::OmDatastream
     solr_doc["creator_sim"] = all_names
     solr_doc["creator_tesim"] = all_names
 
+    solr_doc = self.generate_niec_solr_hash(solr_doc)
+
     #TODO:  Extract dateBegin/dateEnd information ]
     return solr_doc
   end
