@@ -43,7 +43,10 @@ class User < ActiveRecord::Base
 
   def self.find_for_shib(auth, signed_in_resource=nil)
     user = User.where(:email => auth.info.email).first
-    user.group_list = auth.info.grouper
+
+    if !auth.info.grouper.nil?
+      user.group_list = auth.info.grouper
+    end
 
     unless user
       name_array = Namae.parse auth.info.name
