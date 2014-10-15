@@ -44,10 +44,6 @@ class User < ActiveRecord::Base
   def self.find_for_shib(auth, signed_in_resource=nil)
     user = User.where(:email => auth.info.email).first
 
-    if !auth.info.grouper.nil?
-      user.group_list = auth.info.grouper
-    end
-
     unless user
       name_array = Namae.parse auth.info.name
       name_obj = name_array[0]
@@ -60,6 +56,10 @@ class User < ActiveRecord::Base
       if(auth.info.employee == "staff")
         Cerberus::Application::Queue.push(EmployeeCreateJob.new(auth.info.nuid, emp_name))
       end
+    end
+
+    if !auth.info.grouper.nil?
+      user.group_list = auth.info.grouper
     end
 
     return user
