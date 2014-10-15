@@ -60,6 +60,7 @@ class User < ActiveRecord::Base
 
     if !auth.info.grouper.nil?
       user.group_list = auth.info.grouper
+      user.save!
     end
 
     return user
