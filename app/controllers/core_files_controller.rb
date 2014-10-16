@@ -38,9 +38,6 @@ class CoreFilesController < ApplicationController
     access_condition do
       display!
     end
-    abstract do
-      delimiter "<br/>"
-    end
   end
 
   def destroy_incomplete_file
