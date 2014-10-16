@@ -39,7 +39,7 @@ class CoreFilesController < ApplicationController
       display!
     end
     subject do
-      delimiter "--"
+      delimiter " -- "
     end
   end
 
