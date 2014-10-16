@@ -34,6 +34,15 @@ class CoreFilesController < ApplicationController
     render_404(ActiveFedora::ObjectNotFoundError.new) and return
   end
 
+  configure_mods_display do
+    access_condition do
+      display!
+    end
+    abstract do
+      delimiter "<br/>"
+    end
+  end
+
   def destroy_incomplete_file
     @core_file = fetch_solr_document
 
