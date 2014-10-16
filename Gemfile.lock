@@ -1,7 +1,7 @@
 GIT
   remote: https://github.com/NEU-Libraries/mods_display.git
-  revision: 25203911f88e813b85db3b45fb82358b36c059c4
-  ref: 25203911f88e813b85db3b45fb82358b36c059c4
+  revision: c02cd058e204bcc2eb0a1e480f55f1f6007b879e
+  ref: c02cd058e204bcc2eb0a1e480f55f1f6007b879e
   specs:
     mods_display (0.3.3)
       i18n
