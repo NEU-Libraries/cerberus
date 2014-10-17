@@ -82,9 +82,9 @@ class User < ActiveRecord::Base
     end
 
     if(auth.info.employee == "faculty")
-      add_group("northeastern:drs:faculty")
+      user.add_group("northeastern:drs:faculty")
     elsif(auth.info.employee == "staff")
-      add_group("northeastern:drs:staff")
+      user.add_group("northeastern:drs:staff")
     end
 
     return user
