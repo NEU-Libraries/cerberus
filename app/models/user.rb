@@ -53,7 +53,7 @@ class User < ActiveRecord::Base
       user.email = auth.info.email
       user.save!
 
-      if(auth.info.employee == "staff")
+      if(auth.info.employee == "faculty")
         Cerberus::Application::Queue.push(EmployeeCreateJob.new(auth.info.nuid, emp_name))
       end
     end
