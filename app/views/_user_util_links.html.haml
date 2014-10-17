@@ -19,4 +19,7 @@
       %li.divider
       %li= link_to raw('<span class="icon-signout" aria-hidden="true" ></span> log out'), destroy_user_session_path, :id => 'logout_nav_link',  "tab-index" => "-1"
   - else
-    = link_to raw('<span class="icon-signin" aria-hidden="true" ></span> Login'), new_user_session_path, :class => "btn"
+    - if Rails.env.staging? || Rails.env.production?
+      = link_to raw('<span class="icon-signin" aria-hidden="true" ></span> Login'), "users/auth/shibboleth", :class => "btn"
+    - else
+      = link_to raw('<span class="icon-signin" aria-hidden="true" ></span> Login'), new_user_session_path, :class => "btn"
