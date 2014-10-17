@@ -16,13 +16,30 @@ class User < ActiveRecord::Base
 
   attr_accessible :password, :email, :password_confirmation, :remember_me, :nuid, :full_name, :view_pref, :employee_id
   delegate :can?, :cannot?, :to => :ability
+  serialize(:group_list, Array)
 
   acts_as_messageable
 
   ROLES = %w[admin employee]
 
   def groups
-    return self.group_list ? self.group_list.split(";") : []
+    return !self.group_list.blank? ? self.group_list : []
+  end
+
+  def add_group(group)
+    gl = self.group_list.blank? ? [] : self.group_list
+    gl << group
+    self.group_list = gl
+    self.save!
+  end
+
+  def delete_group(group)
+    if !self.group_list.blank?
+      gl = self.group_list
+      gl.delete(group)
+      self.group_list = gl
+      self.save!
+    end
   end
 
   def repo_staff?
@@ -59,8 +76,15 @@ class User < ActiveRecord::Base
     end
 
     if !auth.info.grouper.nil?
-      user.group_list = auth.info.grouper
+      user.group_list = (auth.info.grouper).split(";")
+      user.group_list = user.group_list.uniq
       user.save!
+    end
+
+    if(auth.info.employee == "faculty")
+      self.add_group("northeastern:drs:faculty")
+    elsif(auth.info.employee == "staff")
+      self.add_group("northeastern:drs:staff")
     end
 
     return user
