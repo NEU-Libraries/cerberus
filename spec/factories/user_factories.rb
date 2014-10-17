@@ -18,7 +18,7 @@ FactoryGirl.define do
     end
 
     factory :proxier do
-      group_list "northeastern:drs:repository:proxystaff;"
+      group_list ["northeastern:drs:repository:proxystaff"]
     end
 
     factory :bo do
