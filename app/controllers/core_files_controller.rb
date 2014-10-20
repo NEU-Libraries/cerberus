@@ -41,6 +41,9 @@ class CoreFilesController < ApplicationController
     subject do
       delimiter " -- "
     end
+    identifier do
+      ignore!
+    end
   end
 
   def destroy_incomplete_file
