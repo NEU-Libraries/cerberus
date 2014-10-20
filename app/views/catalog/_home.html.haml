@@ -3,12 +3,14 @@
     =render partial: "shared/icon", locals: {class_string: t('drs.product_icon') }
     #{t('drs.product_name.short')}
     %small
-      #{t('drs.product_name.full')}
+      #{t('drs.product_name.full').titleize}
   %p.lead
     = t ('drs.homepage.description.short').html_safe
   %p
     = t('drs.homepage.description.long').html_safe
-    %a.btn.btn-clear.btn-mini.pull-right{:href => "/terms/"} Terms of service
+    %br
+    %br
+    %a.btn.btn-mini.pull-right{:href => "/terms/", :style => "margin:5px 0;"} Terms of service
 %section.row
   .span3.featured-content
     %h3 Featured Content
