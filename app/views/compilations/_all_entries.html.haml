@@ -1,7 +1,8 @@
 %h3
   Files
 %ul.media-list
-  - entries.each do |entry|
+  - entries.each_with_index do |entry, i|
+    = render partial: 'remove_modal', locals: { entry: entry, entry_id: i, compilation: compilation }
     %li.media
       %a.pull-left{href: core_file_path(entry.pid)}
         - @thumbs = entry.thumbnail_list
@@ -14,7 +15,7 @@
           %p
             =entry.description
         - if current_user_can? :edit, @compilation
-          %a.btn.btn-mini.btn-clear(title="Remove #{entry.title} from #{compilation.title} "){href: delete_entry_path(id: compilation.pid, entry_id: entry.pid), data: { confirm: 'Are you sure?', toggle: "tooltip", method: :delete } }
+          %a.btn.btn-mini.btn-clear{ href: "#removeFromCompilationModal#{i}", data: { toggle: "modal" } }
             %i.icon-remove
             %span.sr-only
               Remove #{entry.title} from #{compilation.title}
