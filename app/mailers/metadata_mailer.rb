@@ -1,7 +1,7 @@
 class MetadataMailer < ActionMailer::Base
   include AbstractController::Callbacks
 
-  default from: "drstestmailer@gmail.com"
+  default from: "notifier@repository.lib.neu.edu"
   after_filter :tag_as_notified
 
 
@@ -22,7 +22,29 @@ class MetadataMailer < ActionMailer::Base
     @presentations_new       = UploadAlert.withheld_presentations(:create)
     @presentations_update    = UploadAlert.withheld_presentations(:update)
 
-    mail(to: "William Jackson <wjackson64@gmail.com>", subject: 'Daily Featured Content Uploads')
+    count = 0
+    count += @research_new.count
+    count += @research_update.count
+
+    count += @theses_new.count
+    count += @theses_update.count
+
+    count += @datasets_new.count
+    count += @datasets_update.count
+
+    count += @learning_objects_new.count
+    count += @learning_objects_update.count
+
+    count += @presentations_new.count
+    count += @presentations_update.count
+
+    if ["staging", "production"].include? Rails.env
+      mail(to: "Sarah Sweeney <sj.sweeney@neu.edu>", subject: "Daily Featured Content Uploads and Updates - #{count} items")
+    else
+      git_config = ParseConfig.new('/home/vagrant/.gitconfig')
+      address = git_config['user']['email']
+      mail(to: "Developer <#{address}>", subject: "Daily Featured Content Uploads and Updates - #{count} items")
+    end
   end
 
   private
