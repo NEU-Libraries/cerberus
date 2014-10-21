@@ -5,7 +5,7 @@
     %h3#removeFromCartModalLabel
       Confirm removal from #{t('drs.shoppingcarts.name')}
   .modal-body
-    %p= "Are you sure you want to remove this item from your #{t('drs.shoppingcarts.name')}"
+    %p= "Are you sure you want to remove this item from your #{t('drs.shoppingcarts.name')}?"
   .modal-footer
     %button.btn{"aria-hidden" => "true", "data-dismiss" => "modal" } Close
     =link_to("Remove Item", shopping_cart_path(delete: item.pid), method: 'put', class: 'btn btn-danger')
