@@ -1,0 +1,10 @@
+.modal.hide.fade{"aria-hidden" => "true", "aria-labelledby" => "removeFromCompilationModalLabel", role: "dialog", tabindex: "-1", id: "removeFromCompilationModal#{entry_id}" }
+  .modal-header
+    %button.close{"aria-hidden" => "true", "data-dismiss" => "modal", type: "button"} x
+    %h3#removeFromCompilationModalLabel
+      Confirm removal of #{entry.title} from #{compilation.title}
+  .modal-body
+    %p= "Are you sure you want to remove this item from your #{t('drs.compilations.name')}?"
+  .modal-footer
+    %button.btn{"aria-hidden" => "true", "data-dismiss" => "modal" } Close
+    =link_to("Remove Item", delete_entry_path(id: compilation.pid, entry_id: entry.pid), method: 'delete', class: 'btn btn-danger')
