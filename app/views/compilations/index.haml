@@ -15,9 +15,10 @@
         Create a new #{t('drs.compilations.name')} today.
   %li.span2
     %a.thumbnail.thumbnail-btn(href=new_compilation_path)
-      =compilations_icon
-
-      %h5.text-center Create a new #{t('drs.compilations.name')}
+      %br
+      %h5.text-center
+        =compilations_icon
+        Create a new #{t('drs.compilations.name')}
 - if @compilations.any?
   = render partial: 'shared/sets/delete_item_modal', locals: { item: @compilations.first }
 
