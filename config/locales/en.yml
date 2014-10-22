@@ -19,16 +19,16 @@ en:
           scoped_placeholder: "Search this collection"
           placeholder: "Search the DRS"
     provide_metadata_page:
-      image_slider_error: "Something went wrong, cannot access info necessary for scaled derivative creation.  Please abandon upload and try again.  If the problem persists contact an administrator."
+      image_slider_error: "Something went wrong and we are unable to process your image. Please try again. If the problem persists, please use the Library's <a href=\"http://library.northeastern.edu/get-help/tech-support/report-a-problem\" target=\"_blank\">Report a Problem</a> form."
     homepage:
       description:
-        short: "The DRS is a secure place where Northeastern’s colleges, departments, and faculty can store and share their scholarly work."
-        long: "Materials in the repository are maintained by Northeastern University Libraries for future use, and can be shared worldwide, with just a few people or groups, or kept private. You can also discover and remix materials created by others: for instance, articles and research data, materials from the <a href=\"http://library.northeastern.edu/archives-special-collections\" target=\"_blank\">University Archives and Special Collections</a>, or images and photographs from the Northeastern community. For more information visit our FAQ. For help with uploading, searching, or logging in, visit our User Guides page."
+        short: "The Digital Repository Service is a secure repository system, designed to store and share scholarly, administrative, and archival materials from the Northeastern University community."
+        long: "Anyone is welcome to use the DRS to discover publicly available content. Members of the Northeastern community are encouraged to sign in to access additional content that may not be publicly available. For more information about the DRS, or for help getting started, visit the Digital Scholarship Group's <a href=\"http://dsg.neu.edu/resources/drs\" target=\"_blank\">DRS resource page</a>."
         terms link text: "Terms of Participation"
       browse label: "Explore"
     compilations:
       name: set
-      lead: "Sets are collections of files curated by you. Create as many sets as you need and add your own DRS files or files contributed to the DRS by others. You can add files directly to a Set from the search results page, or as you browse collections and communities. Unlike your Download Queue, Sets are sustainable and won't disappear unless you delete the Set yourself. For more information on using Sets, visit our User Guides page."
+      lead: "Sets are curated compilations of DRS files. You may create as many Sets as you need, and you may add any DRS file to your Sets. Sets are sustainable and won't disappear unless you delete the Set yourself."
       created_message: "Your set was created successfully."
       updated_message: "Your set was updated successfully."
       add_to_set_popup: "Add to your sets:"
@@ -37,7 +37,7 @@ en:
       destroy_link: "Delete this set"
     shoppingcarts:
       name: download queue
-      lead: "Your Download Queue is a temporary list of files to be downloaded and saved locally as a .zip file. Files added to your Download Queue will remain in the queue until you logout or close your browser. If you want to save a file and come back to it later, add it to a Set, which is a permanent list you can maintain over time. For more information on using your Download Queue, visit our User Guides page."
+      lead: "Your Download Queue is like a shopping cart. Files added to your Download Queue will remain in the queue until you sign out. If you want to save a file and come back to it later, add it to a Set."
       destroy_button: "Clear Queue"
       download_message: "Please wait a moment while your download is being prepared. If your Download Queue is large, this process may take some time."
     #Featured Content labels
@@ -67,7 +67,7 @@ en:
         description: Browse Northeastern departments and groups by name
         icon: icon-group
       employees:
-        name: Faculty and Staff
+        name: Faculty
         description: Browse faculty by name
         icon: icon-user
       other:
@@ -78,7 +78,7 @@ en:
       title: About the DRS
     personal_graph:
       title: My DRS
-      description: "Smart Collections are for specific scholarly works that you would like to share as part of your Northeastern community. Files uploaded to these collections will be browsable from your department or University group page. For more information on using Smart Collections, visit our User Guides page."
+      description: "Smart Collections are designed to help you share your scholarly work with the Northeastern University community. The files you deposit in a Smart Collection will be discoverable from your collections, from your community’s collections, and from the Featured Content section on the DRS homepage."
       icon: icon-dashboard
       system_generated_smart_collections: Smart Collections
       personal_collections: User Created Collections
@@ -90,13 +90,13 @@ en:
     metadata:
       icon: 'icon-pencil'
       edit_page_title: 'Provide Metadata'
-      edit_subtitle: 'Please supply some metadata to help others discover your work'
+      edit_subtitle: 'Please supply some details about your file.'
       content sensitive uploads:
         images: "Select sizes for the small, medium, and large versions of your image"
       date: "Date Issued"
       creators:
-        creator_note: "At least one personal or corporate creator is required."
-        corporate: "Corporate Creator"
+        creator_note: "At least one personal or institutional creator name is required."
+        corporate: "Institutional Creator"
       permissions:
         mass_permissions:
           note2: "Selecting 'private' will allow users and groups defined in the Granular Permission section to see your file."
@@ -117,7 +117,7 @@ en:
       default: Theses and dissertations for
     display_labels:
       Employee:
-        name: Faculty and Staff
+        name: Faculty
         short: Person
       AudioFile:
         name: Audio File
