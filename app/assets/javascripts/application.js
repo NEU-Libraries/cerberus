@@ -22,6 +22,7 @@
 // Required by Blacklight
 
 //= require bootstrap-datepicker/js/bootstrap-datepicker.js
+//= require bootstrap-select/bootstrap-select.js
 //= require bootbox/bootbox.min.js
 //= require plugins
 

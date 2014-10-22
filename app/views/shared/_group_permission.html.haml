@@ -2,13 +2,16 @@
 - group[:name]   ||= ""
 - hidden         ||= false
 
-%fieldset{class: ["row-fluid", hidden ? "hidden" : nil] }
-  - if valid_perms.length > 1
-    .span2
-      = label_tag  "groups[access][]", "Access Type:"
-      = select_tag "groups[access][]", options_for_select(valid_perms, group[:access])
-  .span6.input-append{style: "display : block;" }
-    = label_tag "groups[name][]", "Group Name:"
-    = text_field_tag "groups[name][]", group[:name], :class => "input-block-level span11"
-    %button.btn.btn-danger.removeGroupButton{type: "button", "data-delete" => "", "data-remove" => "true", "data-target" => ".group", title: "Remove all permissions for this group", type: "button"}
-      = render partial: "shared/icon", locals: { class_string: "icon-remove", alt_text: "Remove field" }
+%fieldset{class: ["row-fluid", "group", hidden ? "hidden" : nil] }
+  .span6
+    .input-append.span11
+      = label_tag "groups[name][]", "Group Name:"
+      / = text_field_tag "groups[name][]", group[:name], :class => "input-block-level"
+      = select_tag "groups[name][]", options_for_select(valid_perms, group[:access]), :class => "span11"
+      %button.btn.btn-danger.removeGroupButton{type: "button", "data-delete" => "", "data-remove" => "true", "data-target" => ".group", title: "Remove all permissions for this group", type: "button"}
+        = render partial: "shared/icon", locals: { class_string: "icon-remove", alt_text: "Remove field" }
+    %div
+      / - if valid_perms.length > 1
+      - if true
+        = label_tag  "groups[access][]", "Access Type:"
+        = select_tag "groups[access][]", options_for_select(valid_perms, group[:access]), :class => "input-block-level span12"

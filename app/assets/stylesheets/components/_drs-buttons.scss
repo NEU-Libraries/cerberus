@@ -2,6 +2,26 @@
   @include drs-button;
 }
 
+.btn{
+  .caret {
+    border-top: 4px solid;
+  }
+}
+
+.selectpicker{
+  padding: 7px 6px;
+  color: #333;
+  background-color: #fff;
+  border: 2px solid;
+  border-color: #ccc;
+}
+
+.btn-group{
+  .dropdown-toggle{
+    outline: none;
+  }
+}
+
 .btn-add{
   float: right;
 }
