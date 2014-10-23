@@ -55,10 +55,17 @@ true
       $( @ ).before $cloned
       lastInput = $cloned.find('input, select').last()
 
+      lastInput.removeClass (index, css) ->
+        (css.match(/(^|\s)span\S+/g) or []).join " "
+
       if lastInputParentDiv.length != 0 then lastInput.addClass 'span10'
       else lastInput.addClass 'span11'
 
       lastInput.after $removeButton.tooltip()
+
+      if lastInput.is( "select" ) then lastInput.addClass 'selectpicker'
+      if lastInput.is( "select" ) then lastInput.selectpicker()
+
       count++
       return
 
