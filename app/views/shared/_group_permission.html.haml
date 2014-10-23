@@ -2,13 +2,13 @@
 - group[:name]   ||= ""
 - hidden         ||= false
 
-%fieldset{class: ["group", "span6", hidden ? "hidden" : nil] }
-  %div
+%fieldset{class: ["group", "row-fluid", hidden ? "hidden" : nil] }
+  %div.span6
     / - if valid_perms.length > 1
     - if true
       = label_tag  "groups[access][]", "Access Type:"
       = select_tag "groups[access][]", options_for_select(valid_perms, group[:access]), :class => "input-block-level span12"
-  .input-append{:style => "display: block;"}
+  .input-append.span6{:style => "display: block;"}
     = label_tag "groups[name][]", "Group Name:"
     / = text_field_tag "groups[name][]", group[:name], :class => "input-block-level"
     = select_tag "groups[name][]", options_for_select(valid_perms, group[:access]), :class => "input-block-level span11"
