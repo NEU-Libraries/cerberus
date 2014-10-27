@@ -18,7 +18,7 @@ module Cerberus
 
           # add groups
           form_groups.each_with_index do |group, i|
-            if group != 'public' && group != 'registered'
+            if group != 'public' && group != 'registered' && !group.blank?
               self.rightsMetadata.permissions({group: group}, params["permission_type"][i])
             end
           end
