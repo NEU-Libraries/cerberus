@@ -14,7 +14,7 @@ true
   $.fn.addFormFields = (options) ->
 
     # applying settings for the function.
-    count = 0
+    count = 1
     settings = $.extend(
       target: null
       titleText: 'Remove Element'
@@ -58,7 +58,8 @@ true
       lastInput.removeClass (index, css) ->
         (css.match(/(^|\s)span\S+/g) or []).join " "
 
-      if lastInputParentDiv.length != 0 then lastInput.addClass 'span10'
+      # if lastInputParentDiv.length != 0 then lastInput.addClass 'span10'
+      if lastInputParentDiv.hasClass('span6') then lastInput.addClass 'span10'
       else lastInput.addClass 'span11'
 
       lastInput.after $removeButton.tooltip()

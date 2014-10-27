@@ -545,19 +545,19 @@ $(document).ready ->
 
       # Adding the form fields behavior to the buttons on the nu collections.
       $('#add_another_personal_creator').addFormFields
-        target: $('div.personal_creator')
+        target: $('div.personal_creator:not(.to-remove)')
         titleText: 'Remove Personal Creator'
 
       $('#add_another_corporate_creator').addFormFields
-        target: $('div.corporate_creator')
+        target: $('div.corporate_creator:not(.to-remove)')
         titleText: 'Remove Corporate Creator'
 
       $('#add_another_keyword').addFormFields
-        target: $('div.keyword')
+        target: $('div.keyword:not(.to-remove)')
         titleText: 'Remove keyword'
 
       $('#add_another_permission').addFormFields
-        target: $('div.permission')
+        target: $('div.permission:not(.to-remove)')
         titleText: 'Remove permission'
 
       return

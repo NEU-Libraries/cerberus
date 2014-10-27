@@ -1,21 +1,17 @@
-- if permissions.empty?
-  .permission
-    = label_tag "#{array_type}[permissions][permissions0][identity_type]", "Are you trying to add a person or a group?"
-    = select_tag "#{array_type}[permissions][permissions0][identity_type]", options_for_select(['person', 'group']), class: "span12"
-    = f.label :identity, "Enter NUID or group name"
-    = f.text_field :identity, value: "", name: "#{array_type}[permissions][permissions0][identity]", pattern: ".*\\S.*", class: "span12"
-    = label_tag "#{array_type}[permissions][permissions0][permission_type]", "Should this identity be allowed to read or edit?"
-    = select_tag "#{array_type}[permissions][permissions0][permission_type]", options_for_select(['read', 'edit']), class: "span12"
-- else
+- if !permissions.empty?
   - permissions.each_with_index do |perm, index|
-    .permission
-      = label_tag "#{array_type}[permissions][permissions#{index}][identity_type]", "Are you trying to add a person or a group?"
-      = select_tag "#{array_type}[permissions][permissions#{index}][identity_type]", options_for_select(['person', 'group'], perm[:type]), class: "span12"
-      = f.label :identity, "Enter NUID or group name"
-      = f.text_field :identity, value: perm[:name], name: "#{array_type}[permissions][permissions#{index}][identity]", pattern: ".*\\S.*", class: "span12"
-      = label_tag "#{array_type}[permissions][permissions#{index}][identity_type]", "Should this identity be allowed to read or edit?"
-      = select_tag "#{array_type}[permissions][permissions#{index}][permission_type]", options_for_select(['read', 'edit'], perm[:access]), class: "span12"
-      - unless index == 0
+    .permission.to-remove
+      = f.text_field :identity, value: perm[:name], name: "#{array_type}[permissions][identity][]", pattern: ".*\\S.*", class: "span12", disabled: true
+      = label_tag "#{array_type}[permissions][identity_type][]", "Should this identity be allowed to read or edit?"
+      %div.input-append{:style => "display: block;"}
+        = select_tag "#{array_type}[permissions][permission_type][]", options_for_select(['read', 'edit'], perm[:access]), class: "span11 selectpicker"
         %button.btn.btn-danger{"data-delete" => "", "data-remove" => "true", "data-target" => ".permission", title: "Remove permission", type: "button"}
           = render partial: 'shared/icon' , locals: { class_string: 'icon-remove', alt_text: "Remove Field" }
 
+.permission
+  = f.label :identity, "Select Group"
+  / = f.text_field :identity, value: "", name: "#{array_type}[permissions][permissions0][identity]", pattern: ".*\\S.*", class: "span12"
+  = select_tag "#{array_type}[permissions][identity][]", options_for_select(current_user.groups.unshift("")), class: "span12"
+  = label_tag "#{array_type}[permissions][permission_type][]", "Should this identity be allowed to read or edit?"
+  %div{:style => "display: block;"}
+    = select_tag "#{array_type}[permissions][permission_type][]", options_for_select(['read', 'edit']), class: "span12"
