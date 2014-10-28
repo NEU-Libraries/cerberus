@@ -135,6 +135,7 @@ module Cerberus
       end
 
       def depositor=(string)
+        # we need to remove the existing depositor permissions...
         if_properties_exists_strict { self.properties.depositor = string }
         self.rightsMetadata.permissions({person: string}, 'edit')
       end

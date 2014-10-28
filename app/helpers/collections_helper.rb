@@ -7,7 +7,7 @@ module CollectionsHelper
     perms = collection.permissions
     depositor = collection.depositor
 
-    perms.select! { |coll| coll[:name] != depositor && coll[:name] != 'public' && coll[:name] != 'registered' && coll[:name] != '' }
+    perms.select! { |coll| coll[:name] != depositor && coll[:name] != 'public' && coll[:name] != 'registered' && coll[:name] != '' && coll[:type] != 'user' }
 
     return perms
   end
