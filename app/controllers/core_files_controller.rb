@@ -258,8 +258,28 @@ class CoreFilesController < ApplicationController
     end
 
     def update_metadata
-      # @core_file.date_modified = DateTime.now.to_s
-      @core_file.update_attributes(params[:core_file])
+      valid_permissions = true
+
+      # screen permissions for correct groups...
+      existing_groups = @core_file.rightsMetadata.groups.keys - ["public"]
+      user_groups = current_user.groups
+
+      valid_groups = existing_groups.zip(user_groups).flatten.compact
+
+      form_groups = params[:core_file]["permissions"]["identity"]
+
+      form_groups.each do |group|
+        if !valid_groups.include?(group)
+          valid_permissions = false
+        end
+      end
+
+      if valid_permissions
+        @core_file.update_attributes(params[:core_file])
+      else
+        # someone has manually tampered with the form to circumvent group permissions...
+        email_handled_exception(Exceptions::GroupPermissionsError.new(valid_groups, form_groups, current_user.name))
+      end
     end
 
     #Allows us to map different params
