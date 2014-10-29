@@ -267,9 +267,16 @@ class CoreFilesController < ApplicationController
       valid_groups = existing_groups.concat(user_groups)
 
       form_groups = params[:core_file]["permissions"]["identity"]
+      permission_vals = params[:core_file]["permissions"]["permission_type"]
 
       form_groups.each do |group|
         if !valid_groups.include?(group)
+          valid_permissions = false
+        end
+      end
+
+      permission_vals.each do |perm|
+        if !["read","edit"].include?(perm)
           valid_permissions = false
         end
       end
