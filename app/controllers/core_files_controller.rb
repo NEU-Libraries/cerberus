@@ -264,7 +264,7 @@ class CoreFilesController < ApplicationController
       existing_groups = @core_file.rightsMetadata.groups.keys - ["public"]
       user_groups = current_user.groups
 
-      valid_groups = existing_groups.zip(user_groups).flatten.compact
+      valid_groups = existing_groups.concat(user_groups)
 
       form_groups = params[:core_file]["permissions"]["identity"]
 

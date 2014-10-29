@@ -1,9 +1,6 @@
 module Cerberus
   module Rights
     module PermissionsAssignmentHelper
-      # Accepts a hash of the following form:
-      # ex. {'permissions1' => {'identity_type' => val, 'identity' => val, 'permission_type' => val }, 'permissions2' => etc. etc. }
-      # Tosses out param sets that are missing an identity.  Which is nice.
       def permissions=(params)
         # Coming from the create/edit metadata form...
         if params.has_key?("identity") && params.has_key?("permission_type") && !params.has_key?("identity_type")
@@ -16,13 +13,22 @@ module Cerberus
             self.rightsMetadata.permissions({group: group}, 'none')
           end
 
+          # sort so that edit goes last, being the stronger permission over read
+          zipped_groups = params["identity"].zip(params["permission_type"])
+          sorted_groups = zipped_groups.sort_by{|k,v| v == "read" ? 0 : 1}
+
           # add groups
-          form_groups.each_with_index do |group, i|
-            if group != 'public' && group != 'registered' && !group.blank?
-              self.rightsMetadata.permissions({group: group}, params["permission_type"][i])
+          # form_groups.each_with_index do |group, i|
+          sorted_groups.each do |group, edit_perm|
+            # check that the end user hasn't tried to surreptitiously edited the form to none
+            if group != 'public' && group != 'registered' && !group.blank? && edit_perm != "none"
+              self.rightsMetadata.permissions({group: group}, edit_perm)
             end
           end
         else
+          # Accepts a hash of the following form:
+          # ex. {'permissions1' => {'identity_type' => val, 'identity' => val, 'permission_type' => val }, 'permissions2' => etc. etc. }
+          # Tosses out param sets that are missing an identity.  Which is nice.
           params.each do |perm_hash|
             identity_type = perm_hash[1]['identity_type']
             identity = perm_hash[1]['identity']
