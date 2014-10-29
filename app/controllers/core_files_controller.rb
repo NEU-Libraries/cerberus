@@ -285,7 +285,7 @@ class CoreFilesController < ApplicationController
         @core_file.update_attributes(params[:core_file])
       else
         # someone has manually tampered with the form to circumvent group permissions...
-        email_handled_exception(Exceptions::GroupPermissionsError.new(valid_groups, form_groups, current_user.name))
+        email_handled_exception(Exceptions::GroupPermissionsError.new(permission_vals, valid_groups, form_groups, current_user.name))
       end
     end
 
