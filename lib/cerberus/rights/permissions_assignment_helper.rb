@@ -34,7 +34,7 @@ module Cerberus
             identity = perm_hash[1]['identity']
             permission_type = perm_hash[1]['permission_type']
 
-            if identity != 'public' && identity != 'registered'
+            if identity != 'public' && identity != 'registered' && permission_type != "none"
               self.rightsMetadata.permissions({identity_type => identity}, permission_type)
             end
           end
