@@ -6,6 +6,7 @@ class CoreFilesController < ApplicationController
   include Cerberus::TempFileStorage
   include Cerberus::ControllerHelpers::EditableObjects
   include Cerberus::ControllerHelpers::ViewLogger
+  include Cerberus::ControllerHelpers::PermissionsCheck
 
   include ModsDisplay::ControllerExtension
 
@@ -26,7 +27,10 @@ class CoreFilesController < ApplicationController
   before_filter :can_edit?, only: [:edit, :update, :destroy_incomplete_file]
   before_filter :complete?, only: [:edit, :update]
 
+  before_filter :valid_form_permissions?, only: [:process_metadata, :update]
+
   rescue_from Exceptions::NoParentFoundError, with: :no_parent_rescue
+  rescue_from Exceptions::GroupPermissionsError, with: :group_permission_rescue
 
   rescue_from ActiveFedora::ObjectNotFoundError do |exception|
     @obj_type = "Object"
@@ -257,35 +261,15 @@ class CoreFilesController < ApplicationController
       redirect_to root_path
     end
 
+    def group_permission_rescue(exception)
+      flash[:error] = "Invalid form values"
+      email_handled_exception(exception)
+      redirect_to root_path
+    end
+
     def update_metadata
-      valid_permissions = true
-
-      # screen permissions for correct groups...
-      existing_groups = @core_file.rightsMetadata.groups.keys - ["public"]
-      user_groups = current_user.groups
-
-      valid_groups = existing_groups.concat(user_groups)
-
-      form_groups = params[:core_file]["permissions"]["identity"]
-      permission_vals = params[:core_file]["permissions"]["permission_type"]
-
-      form_groups.each do |group|
-        if !valid_groups.include?(group)
-          valid_permissions = false
-        end
-      end
-
-      permission_vals.each do |perm|
-        if !["read","edit"].include?(perm)
-          valid_permissions = false
-        end
-      end
-
-      if valid_permissions
-        @core_file.update_attributes(params[:core_file])
-      else
-        # someone has manually tampered with the form to circumvent group permissions...
-        email_handled_exception(Exceptions::GroupPermissionsError.new(permission_vals, valid_groups, form_groups, current_user.name))
+      if @core_file.update_attributes(params[:core_file])
+        flash[:notice] =  "#{@core_file.title} was updated successfully."
       end
     end
 

@@ -3,7 +3,7 @@ module Exceptions
   class GroupPermissionsError < StandardError
     attr_accessor :valid_groups, :supplied_groups, :user_name, :permissions
     def initialize(permissions, valid_groups, supplied_groups, user_name)
-      super("It appears someone has tried to manually change/insert groups into the metadata form. Valid groups are #{valid_groups}, user supplied groups are #{supplied_groups}. Permissions supplied were #{permissions}. The offending user was #{user_name}")
+      super("It appears someone has tried to manually change the metadata form. Valid groups are #{valid_groups}, user supplied groups are #{supplied_groups}. Permissions supplied were #{permissions}. The offending user was #{user_name}")
     end
   end
 
