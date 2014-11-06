@@ -33,10 +33,6 @@ class CompilationsController < ApplicationController
     @compilation.depositor = current_user.nuid
     @compilation.mass_permissions = params[:mass_permissions]
 
-    if params[:groups]
-      @compilation = GroupPermissionsSetter.set_permissions(@compilation, params[:groups])
-    end
-
     save_or_bust @compilation
     redirect_to @compilation
   end
@@ -47,10 +43,6 @@ class CompilationsController < ApplicationController
 
   def update
     @compilation.mass_permissions = params[:mass_permissions]
-
-    if params[:groups]
-      @compilation = GroupPermissionsSetter.set_permissions(@compilation, params[:groups])
-    end
 
     if @compilation.update_attributes(params[:compilation])
       flash[:notice] = "#{t('drs.compilations.name').capitalize} successfully updated."

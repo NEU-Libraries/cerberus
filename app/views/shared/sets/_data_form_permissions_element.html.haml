@@ -13,7 +13,7 @@
     = f.label :identity, "Select Group"
     = select_tag "#{array_type}[permissions][identity][]", options_for_select(current_user.groups.unshift("")), class: "span12"
     %div{:style => "display: block;"}
-      = f.text_field :identity, value: "read", name: "#{array_type}[permissions][permission_type][]", pattern: ".*\\S.*", class: "span12", readonly: true
+      = text_field_tag "#{array_type}[permissions][permission_type][]", "read", class: "span12", readonly: true
 - else
   .permission
     = f.label :identity, "Select Group"

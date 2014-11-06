@@ -16,14 +16,16 @@ module Cerberus
         existing_groups = record.rightsMetadata.groups.keys - ["public"]
         user_groups = current_user.groups
 
-        valid_groups = existing_groups.concat(user_groups)
+        valid_groups = existing_groups.concat(user_groups).uniq
 
         form_groups = params[record.class.name.underscore.to_sym]["permissions"]["identity"]
         permission_vals = params[record.class.name.underscore.to_sym]["permissions"]["permission_type"]
 
         form_groups.each do |group|
-          if !valid_groups.include?(group)
-            valid_permissions = false
+          if !group.blank?
+            if !valid_groups.include?(group)
+              valid_permissions = false
+            end
           end
         end
 
@@ -37,6 +39,7 @@ module Cerberus
           raise Exceptions::GroupPermissionsError.new(permission_vals, valid_groups, form_groups, current_user.name)
         end
         return valid_permissions
+
       end
     end
   end

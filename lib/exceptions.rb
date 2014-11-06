@@ -67,15 +67,4 @@ module Exceptions
       super "No community parent set"
     end
   end
-
-  class AccessNameMismatchError < StandardError
-    attr_accessor :access_l, :names_l
-
-    def initialize(access_length, names_length)
-      self.access_l = access_length
-      self.names_l  = names_length
-
-      super "GroupPermissionsSetter object attempted to run permissions set with #{access_l} access permissions specified and #{names_l} group names specified.  Mismatch not allowed"
-    end
-  end
 end
