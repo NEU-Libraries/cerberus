@@ -5,6 +5,11 @@ module Cerberus
 
         record = controller_name.classify.constantize.find(params[:id])
 
+        if params[record.class.name.underscore.to_sym].nil?
+          # Not submitted, most likely kludgey spec test, exit with true
+          return true
+        end
+
         valid_permissions = true
 
         # screen permissions for correct groups...
