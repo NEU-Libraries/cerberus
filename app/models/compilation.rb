@@ -5,7 +5,7 @@ class Compilation < ActiveFedora::Base
   include Cerberus::MetadataAssignment
   include Cerberus::Find
   include Cerberus::Rights::MassPermissions
-  include Cerberus::Rights::PermissionGroups
+  include Cerberus::Rights::PermissionsAssignmentHelper
 
   has_metadata name: 'DC', type: DublinCoreDatastream
   has_metadata name: 'mods', type: ModsDatastream
