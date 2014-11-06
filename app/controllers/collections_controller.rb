@@ -28,6 +28,8 @@ class CollectionsController < ApplicationController
 
   before_filter :can_edit_parent?, only: [:new, :create]
 
+  before_filter :valid_form_permissions?, only: [:update]
+
   rescue_from Exceptions::NoParentFoundError, with: :index_redirect
   rescue_from Exceptions::SearchResultTypeError, with: :index_redirect_with_bad_search
 
