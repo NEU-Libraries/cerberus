@@ -8,10 +8,16 @@
         %button.btn.btn-danger{"data-delete" => "", "data-remove" => "true", "data-target" => ".permission", title: "Remove permission", type: "button"}
           = render partial: 'shared/icon' , locals: { class_string: 'icon-remove', alt_text: "Remove Field" }
 
-.permission
-  = f.label :identity, "Select Group"
-  / = f.text_field :identity, value: "", name: "#{array_type}[permissions][permissions0][identity]", pattern: ".*\\S.*", class: "span12"
-  = select_tag "#{array_type}[permissions][identity][]", options_for_select(current_user.groups.unshift("")), class: "span12"
-  = label_tag "#{array_type}[permissions][permission_type][]", "Should this identity be allowed to read or edit?"
-  %div{:style => "display: block;"}
-    = select_tag "#{array_type}[permissions][permission_type][]", options_for_select(['read', 'edit']), class: "span12"
+- if (defined? read_only)
+  .permission
+    = f.label :identity, "Select Group"
+    = select_tag "#{array_type}[permissions][identity][]", options_for_select(current_user.groups.unshift("")), class: "span12"
+    %div{:style => "display: block;"}
+      = f.text_field :identity, value: "read", name: "#{array_type}[permissions][permission_type][]", pattern: ".*\\S.*", class: "span12", readonly: true
+- else
+  .permission
+    = f.label :identity, "Select Group"
+    = select_tag "#{array_type}[permissions][identity][]", options_for_select(current_user.groups.unshift("")), class: "span12"
+    = label_tag "#{array_type}[permissions][permission_type][]", "Should this identity be allowed to read or edit?"
+    %div{:style => "display: block;"}
+      = select_tag "#{array_type}[permissions][permission_type][]", options_for_select(['read', 'edit']), class: "span12"
