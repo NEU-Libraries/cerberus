@@ -45,8 +45,8 @@ feature "Creating a collection" do
       fill_in 'Title', with: "My Title"
       fill_in 'Description', with: "My new collection"
       select 'public', from: "Choose Mass Permissions:"
-      select 'person', from: "Are you trying to add a person or a group?"
-      fill_in "Enter NUID or group name", with: "Person Edit"
+      # fill_in "Enter NUID or group name", with: "Person Edit"
+      # leaving this blank for now, "bill" doesn't have a group to choose I don't think
       select 'edit', from: "Should this identity be allowed to read or edit?"
       click_button 'Submit'
 
