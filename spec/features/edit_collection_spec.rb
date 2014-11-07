@@ -39,10 +39,11 @@ feature "Editing collections" do
     # Verify billsfriend@example.com is the only perm loaded for potential edits
     perms.length.should == 1
 
+    # TODO - refactor this spec. We no longer do person permissions on the form, only groups
     # Verify billsfriend@example.com's permission data loaded correctly
-    first_perm.all('select').first.value.should == 'person'
-    first_perm.find_field('Enter NUID or group name').value.should == '000000009'
-    first_perm.all('select').last.value.should == 'read'
+    # first_perm.all('select').first.value.should == 'person'
+    # first_perm.find_field('Enter NUID or group name').value.should == '000000009'
+    # first_perm.all('select').last.value.should == 'read'
 
   end
 

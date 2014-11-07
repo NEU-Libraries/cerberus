@@ -286,8 +286,8 @@ $dropdownBorder:                darken($dropdownBackground, 15%);
 $dropdownDividerTop:            darken($dropdownBorder, 15%);
 $dropdownDividerBottom:         $dropdownDividerTop;
 
-$dropdownLinkColor:             $linkColor;//$peter-river;//darken($asbestos, 20%);//$midnight-blue;
-$dropdownLinkColorHover:        $linkColorHover;//darken($asbestos, 20%);//$dark-gray;
+$dropdownLinkColor:             darken($asbestos, 20%);//$linkColor;//$peter-river;//darken($asbestos, 20%);//$midnight-blue;
+$dropdownLinkColorHover:        $linkColor;//$linkColorHover;//darken($asbestos, 20%);//$dark-gray;
 $dropdownLinkColorActive:       $dark-gray;
 
 $dropdownLinkBackgroundActive:  $white;

@@ -14,7 +14,7 @@ class ApplicationController < ActionController::Base
   protect_from_forgery
   before_filter :store_location
 
-  around_filter :profile
+  # around_filter :profile
 
   def profile
     if params[:profile] && result = RubyProf.profile { yield }
