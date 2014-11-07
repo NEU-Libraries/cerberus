@@ -9,9 +9,16 @@
   = f.label :mass_permissions, "Permissions"
   = f.select :mass_permissions, options_for_select(["public", "private"], @compilation.mass_permissions)
 
-  %h4 Read Permissions For Groups
+  / %h4 Read Permissions For Groups
 
-  = render partial: "shared/group_permissions", locals: {form: f, item: @compilation, valid_perms: [:read], groups: @compilation.permission_groups }
+  / = render partial: "shared/group_permissions", locals: {form: f, item: @compilation, valid_perms: [:read], groups: @compilation.permission_groups }
+
+  .row-fluid
+    %legend Permissions
+    = render partial: 'shared/sets/data_form_permissions_element', locals: {:read_only => "true", :f => f, :array_type => "compilation", :permissions => filtered_permissions(@compilation) }
+    %button#add_another_permission.btn.btn-success.btn-block{:type => "button"}
+      %i.icon-plus-sign.icon-large
+      Add Permission
 
   .form-actions
     = f.submit class: "btn btn-primary"

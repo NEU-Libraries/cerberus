@@ -1,5 +1,6 @@
 class CompilationsController < ApplicationController
   include Cerberus::ControllerHelpers::EditableObjects
+  include Cerberus::ControllerHelpers::PermissionsCheck
 
   before_filter :authenticate_user!, except: [:show, :show_download, :download]
 
@@ -10,6 +11,7 @@ class CompilationsController < ApplicationController
   before_filter :get_readable_entries, only: [:show]
   before_filter :remove_dead_entries, only: [:show, :show_download]
   before_filter :ensure_any_readable, only: [:show_download]
+  before_filter :valid_form_permissions?, only: [:update]
 
   def index
     @compilations = Compilation.users_compilations(current_user)
@@ -31,10 +33,6 @@ class CompilationsController < ApplicationController
     @compilation.depositor = current_user.nuid
     @compilation.mass_permissions = params[:mass_permissions]
 
-    if params[:groups]
-      @compilation = GroupPermissionsSetter.set_permissions(@compilation, params[:groups])
-    end
-
     save_or_bust @compilation
     redirect_to @compilation
   end
@@ -45,10 +43,6 @@ class CompilationsController < ApplicationController
 
   def update
     @compilation.mass_permissions = params[:mass_permissions]
-
-    if params[:groups]
-      @compilation = GroupPermissionsSetter.set_permissions(@compilation, params[:groups])
-    end
 
     if @compilation.update_attributes(params[:compilation])
       flash[:notice] = "#{t('drs.compilations.name').capitalize} successfully updated."

@@ -6,6 +6,7 @@ class CoreFilesController < ApplicationController
   include Cerberus::TempFileStorage
   include Cerberus::ControllerHelpers::EditableObjects
   include Cerberus::ControllerHelpers::ViewLogger
+  include Cerberus::ControllerHelpers::PermissionsCheck
 
   include ModsDisplay::ControllerExtension
 
@@ -26,7 +27,10 @@ class CoreFilesController < ApplicationController
   before_filter :can_edit?, only: [:edit, :update, :destroy_incomplete_file]
   before_filter :complete?, only: [:edit, :update]
 
+  before_filter :valid_form_permissions?, only: [:process_metadata, :update]
+
   rescue_from Exceptions::NoParentFoundError, with: :no_parent_rescue
+  rescue_from Exceptions::GroupPermissionsError, with: :group_permission_rescue
 
   rescue_from ActiveFedora::ObjectNotFoundError do |exception|
     @obj_type = "Object"
@@ -257,9 +261,16 @@ class CoreFilesController < ApplicationController
       redirect_to root_path
     end
 
+    def group_permission_rescue(exception)
+      flash[:error] = "Invalid form values"
+      email_handled_exception(exception)
+      redirect_to root_path
+    end
+
     def update_metadata
-      # @core_file.date_modified = DateTime.now.to_s
-      @core_file.update_attributes(params[:core_file])
+      if @core_file.update_attributes(params[:core_file])
+        flash[:notice] =  "#{@core_file.title} was updated successfully."
+      end
     end
 
     #Allows us to map different params

@@ -6,6 +6,7 @@ require 'parsing_nesting/tree'
 class CollectionsController < ApplicationController
   include Cerberus::TempFileStorage
   include Cerberus::ControllerHelpers::EditableObjects
+  include Cerberus::ControllerHelpers::PermissionsCheck
 
   include Blacklight::Catalog
   include Blacklight::Configurable # comply with BL 3.7
@@ -27,6 +28,8 @@ class CollectionsController < ApplicationController
   before_filter :is_depositor?, only: [:destroy]
 
   before_filter :can_edit_parent?, only: [:new, :create]
+
+  before_filter :valid_form_permissions?, only: [:update]
 
   rescue_from Exceptions::NoParentFoundError, with: :index_redirect
   rescue_from Exceptions::SearchResultTypeError, with: :index_redirect_with_bad_search

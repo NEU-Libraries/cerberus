@@ -1,5 +1,12 @@
 module Exceptions
 
+  class GroupPermissionsError < StandardError
+    attr_accessor :valid_groups, :supplied_groups, :user_name, :permissions
+    def initialize(permissions, valid_groups, supplied_groups, user_name)
+      super("It appears someone has tried to manually change the metadata form. Valid groups are #{valid_groups}, user supplied groups are #{supplied_groups}. Permissions supplied were #{permissions}. The offending user was #{user_name}")
+    end
+  end
+
   class NoSuchNuidError < StandardError
     attr_accessor :nuid
     def initialize(nuid)
@@ -58,17 +65,6 @@ module Exceptions
   class NoCommunityParentFoundError < StandardError
     def initialize
       super "No community parent set"
-    end
-  end
-
-  class AccessNameMismatchError < StandardError
-    attr_accessor :access_l, :names_l
-
-    def initialize(access_length, names_length)
-      self.access_l = access_length
-      self.names_l  = names_length
-
-      super "GroupPermissionsSetter object attempted to run permissions set with #{access_l} access permissions specified and #{names_l} group names specified.  Mismatch not allowed"
     end
   end
 end
