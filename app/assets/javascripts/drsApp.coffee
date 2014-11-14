@@ -628,14 +628,18 @@ $(document).ready ->
         $e.on('ajax:beforeSend', ->
           $(this).attr 'data-shoppingcart', 'replace'
           $(this).tooltip 'destroy'
+          drsApp.$itemUrl = $(this).attr "href"
           return
         ).on('ajax:failure', ->
           window.location.reload()
           return
         ).on 'ajax:success', ->
           toggleShoppingCart drsApp.$new
-          $(this).replaceWith drsApp.$new
+          items = $("[href='" + drsApp.$itemUrl + "']")
+          items.replaceWith drsApp.$new
+          drsApp.$itemUrl = null
           drsApp.$new = null
+          items = null
           return
 
       return
