@@ -101,6 +101,10 @@ class CatalogController < ApplicationController
     solr_name('title_info_title', :stored_sortable, type: :string)
   end
 
+  def self.creator_field
+    solr_name('creator', :stored_sortable, type: :string)
+  end
+
   configure_blacklight do |config|
     ## Default parameters to send to solr for all search-like requests. See also SolrHelper#solr_search_params
     config.default_solr_params = {
@@ -204,6 +208,8 @@ class CatalogController < ApplicationController
     # except in the relevancy case).
     # label is key, solr field is value
     config.add_sort_field "#{title_field} asc", :label => "title \u25BC"
+    config.add_sort_field "#{creator_field} asc", :label => "creator \u25B2"
+    config.add_sort_field "#{creator_field} desc", :label => "creator \u25BC"
     config.add_sort_field "score desc, #{uploaded_field} desc", :label => "relevance \u25BC"
     config.add_sort_field "#{uploaded_field} desc", :label => "date uploaded \u25BC"
     config.add_sort_field "#{uploaded_field} asc", :label => "date uploaded \u25B2"

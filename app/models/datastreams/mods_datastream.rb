@@ -220,6 +220,9 @@ class ModsDatastream < ActiveFedora::OmDatastream
     solr_doc["creator_sim"] = all_names
     solr_doc["creator_tesim"] = all_names
 
+    # Creating sortable creator field
+    solr_doc["creator_ssi"] = all_names.first
+
     #TODO:  Extract dateBegin/dateEnd information ]
     return solr_doc
   end
