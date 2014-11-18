@@ -90,12 +90,11 @@ class CatalogController < ApplicationController
   end
 
   def self.uploaded_field
-#  system_create_dtsi
-    solr_name('desc_metadata__date_uploaded', :stored_sortable, type: :date)
+    solr_name('system_create', :stored_sortable, type: :date)
   end
 
   def self.modified_field
-    solr_name('desc_metadata__date_modified', :stored_sortable, type: :date)
+    solr_name('system_modified', :stored_sortable, type: :date)
   end
 
   def self.title_field
