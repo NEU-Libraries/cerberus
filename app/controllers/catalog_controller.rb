@@ -93,7 +93,7 @@ class CatalogController < ApplicationController
     solr_name('system_create', :stored_sortable, type: :date)
   end
 
-  def self.modified_field
+  def self.created_field
     solr_name('system_modified', :stored_sortable, type: :date)
   end
 
@@ -213,8 +213,8 @@ class CatalogController < ApplicationController
     config.add_sort_field "score desc, #{uploaded_field} desc", :label => "relevance \u25BC"
     config.add_sort_field "#{uploaded_field} desc", :label => "date uploaded \u25BC"
     config.add_sort_field "#{uploaded_field} asc", :label => "date uploaded \u25B2"
-    config.add_sort_field "#{modified_field} desc", :label => "date modified \u25BC"
-    config.add_sort_field "#{modified_field} asc", :label => "date modified \u25B2"
+    config.add_sort_field "#{created_field} desc", :label => "date created \u25BC"
+    config.add_sort_field "#{created_field} asc", :label => "date created \u25B2"
 
     # If there are more than this many search results, no spelling ("did you
     # mean") suggestion is offered.

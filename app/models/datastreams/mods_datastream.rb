@@ -144,7 +144,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
     }
 
     t.title(proxy: [:title_info, :title])
-    t.date_issued(proxy: [:origin_info, :date_issued])
+    t.date(proxy: [:origin_info, :date_created])
     t.category(ref: [:extension, :scholarly_object, :category])
     t.department(ref: [:extension, :scholarly_object, :department])
     t.degree(ref: [:extension, :scholarly_object, :degree])
@@ -182,6 +182,9 @@ class ModsDatastream < ActiveFedora::OmDatastream
 
     # Kramdown parse for search purposes - #439
     solr_doc["title_ssi"] = kramdown_parse(self.title_info.title.first)
+
+    # Sortable for date
+    solr_doc["date_ssi"] = self.date.first
 
     # Kramdown parse for search purposes - #439
     solr_doc["abstract_tesim"] = kramdown_parse(self.abstract.first)
@@ -271,6 +274,26 @@ class ModsDatastream < ActiveFedora::OmDatastream
       }
     end
     builder.doc
+  end
+
+  # Consolidating all date options for the edit form
+  def date
+    if self.origin_info.date_created.any? && !self.origin_info.date_created.first.blank?
+      return self.origin_info.date_created.first
+    elsif self.origin_info.copyright.any? && !self.origin_info.copyright.first.blank?
+      return self.origin_info.copyright.first
+    elsif self.origin_info.date_issued.any? && !self.origin_info.date_issued.first.blank?
+      return self.origin_info.date_issued.first
+    elsif self.origin_info.date_other.any? && !self.origin_info.date_other.first.blank?
+      return self.origin_info.date_other.first
+    end
+
+    # safety return
+    return ""
+  end
+
+  def date=(date_val)
+    self.origin_info.date_created = date_val
   end
 
   # Filters out blank entries, builds nodes as required
