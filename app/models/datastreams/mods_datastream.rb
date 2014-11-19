@@ -144,7 +144,6 @@ class ModsDatastream < ActiveFedora::OmDatastream
     }
 
     t.title(proxy: [:title_info, :title])
-    t.date(proxy: [:origin_info, :date_created])
     t.category(ref: [:extension, :scholarly_object, :category])
     t.department(ref: [:extension, :scholarly_object, :department])
     t.degree(ref: [:extension, :scholarly_object, :degree])
