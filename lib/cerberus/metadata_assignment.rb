@@ -86,13 +86,13 @@ module Cerberus
         if_DC_exists { return self.DC.nu_description.first }
       end
 
-      def date_of_issue=(string)
-        if_mods_exists { self.mods.date_issued = string }
+      def date=(string)
+        if_mods_exists { self.mods.date = string }
         if_DC_exists   { self.DC.date = string }
       end
 
-      def date_of_issue
-        if_mods_exists { return self.mods.date_issued.first }
+      def date
+        if_mods_exists { return self.mods.date }
         if_DC_exists   { return self.DC.date.first }
       end
 
