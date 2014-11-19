@@ -241,7 +241,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
         xml.name('type' => 'personal')
         xml.name('type' => 'corporate')
         xml.originInfo {
-          xml.dateIssued('keyDate' => 'yes', 'encoding' => 'w3cdtf')
+          xml.dateCreated('keyDate' => 'yes', 'encoding' => 'w3cdtf')
         }
         xml.language{
           xml.languageTerm
