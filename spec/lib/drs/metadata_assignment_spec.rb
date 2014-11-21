@@ -54,15 +54,15 @@ describe "Metadata" do
 
     describe "of date issued" do
       it "works for objects with only a DC datastream" do
-        compilation.date_of_issue = Date.today.to_s
+        compilation.date = Date.today.to_s
 
-        compilation.date_of_issue.should == Date.today.to_s
+        compilation.date.should == Date.today.to_s
       end
 
       it "works for objects with DC and MODS datastreams" do
-        collection.date_of_issue = Date.today.to_s
+        collection.date = Date.today.to_s
 
-        collection.date_of_issue.should == Date.today.to_s
+        collection.date.should == Date.today.to_s
       end
     end
 

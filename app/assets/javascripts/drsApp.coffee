@@ -42,7 +42,7 @@ $(document).ready ->
       toggleShoppingCart $('*[data-shoppingcart]')
       removeFormFields()
       imageMetadataPartial()
-      dateOfIssuePartial()
+      datePartial()
       titlePartial()
       removeFromCartToggle()
       multiModalToggle()
@@ -138,20 +138,20 @@ $(document).ready ->
         parseTitle()
       return
 
-    dateOfIssuePartial = ->
-      if $('#core_file_date_of_issue').length > 0
+    datePartial = ->
+      if $('#core_file_date').length > 0
         $().dateSelectBoxes $("#doiMonth"), $("#doiDay"), $("#doiYear"), true
 
         try
-          $("#doiYear").val $("#core_file_date_of_issue").val().split("-")[0]
+          $("#doiYear").val $("#core_file_date").val().split("-")[0]
         catch error
 
         try
-          $("#doiMonth").val $("#core_file_date_of_issue").val().split("-")[1].replace(/^0*/, "")
+          $("#doiMonth").val $("#core_file_date").val().split("-")[1].replace(/^0*/, "")
         catch error
 
         try
-          $("#doiDay").val $("#core_file_date_of_issue").val().split("-")[2].replace(/^0*/, "")
+          $("#doiDay").val $("#core_file_date").val().split("-")[2].replace(/^0*/, "")
         catch error
 
         if $("#doiMonth").val() == ""
@@ -161,7 +161,7 @@ $(document).ready ->
           $("#doiDay").prop("disabled", false)
 
       $("#doiDay").change ->
-        combineDateOfIssue()
+        combineDate()
         return
 
       $("#doiMonth").change ->
@@ -171,19 +171,19 @@ $(document).ready ->
         else
           $("#doiDay").prop("disabled", false)
 
-        combineDateOfIssue()
+        combineDate()
         return
 
       $("#doiYear").change ->
-        combineDateOfIssue()
+        combineDate()
         return
 
       return
 
-    combineDateOfIssue = ->
-      $("#core_file_date_of_issue").val $("#doiYear").val() + "-" + String("0" + $("#doiMonth").val()).slice(-2) + "-" + String("0" + $("#doiDay").val()).slice(-2)
-      $("#core_file_date_of_issue").val $("#core_file_date_of_issue").val().replace(/-+$/, "")
-      $("#core_file_date_of_issue").val $("#core_file_date_of_issue").val().replace(/-[0]$/, "").replace(/-[0]$/, "")
+    combineDate = ->
+      $("#core_file_date").val $("#doiYear").val() + "-" + String("0" + $("#doiMonth").val()).slice(-2) + "-" + String("0" + $("#doiDay").val()).slice(-2)
+      $("#core_file_date").val $("#core_file_date").val().replace(/-+$/, "")
+      $("#core_file_date").val $("#core_file_date").val().replace(/-[0]$/, "").replace(/-[0]$/, "")
       return
 
 

@@ -49,7 +49,8 @@ class ModsDatastream < ActiveFedora::OmDatastream
     t.origin_info(path: 'originInfo', namespace_prefix: 'mods'){
       t.publisher(path: 'publisher', namespace_prefix: 'mods', index_as: [:stored_searchable])
       t.place(path: 'place', namespace_prefix: 'mods', index_as: [:stored_searchable])
-      t.copyright(path: 'copyrightDate', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable], attributes: { encoding: 'w3cdtf', keyDate: 'yes' })
+      t.date_created(path: 'dateCreated', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable], attributes: { encoding: 'w3cdtf', keyDate: 'yes' })
+      t.copyright(path: 'copyrightDate', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable], attributes: { encoding: 'w3cdtf' })
       t.date_issued(path: 'dateIssued', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable], attributes: { encoding: 'w3cdtf' })
       t.date_other(path: 'dateOther', namespace_prefix: 'mods', index_as: [:stored_searchable], attributes: { encoding: 'w3cdtf'})
       t.issuance(path: 'issuance', namespace_prefix: 'mods')
@@ -143,7 +144,6 @@ class ModsDatastream < ActiveFedora::OmDatastream
     }
 
     t.title(proxy: [:title_info, :title])
-    t.date_issued(proxy: [:origin_info, :date_issued])
     t.category(ref: [:extension, :scholarly_object, :category])
     t.department(ref: [:extension, :scholarly_object, :department])
     t.degree(ref: [:extension, :scholarly_object, :degree])
@@ -167,7 +167,10 @@ class ModsDatastream < ActiveFedora::OmDatastream
     solr_doc["drs_course_title_ssim"] = self.course_title.first if !self.course_title.first.blank?
 
     # Extract a creation year field
-    if self.origin_info.copyright.any? && !self.origin_info.copyright.first.blank?
+    if self.origin_info.date_created.any? && !self.origin_info.date_created.first.blank?
+      creation_date = self.origin_info.date_created.first
+      solr_doc["creation_year_sim"] = [creation_date[/\d{4}/]]
+    elsif self.origin_info.copyright.any? && !self.origin_info.copyright.first.blank?
       creation_date = self.origin_info.copyright.first
       solr_doc["creation_year_sim"] = [creation_date[/\d{4}/]]
       # solr_doc["date_issued_ssim"] = [creation_date]
@@ -181,6 +184,9 @@ class ModsDatastream < ActiveFedora::OmDatastream
 
     # Kramdown parse for search purposes - #439
     solr_doc["title_ssi"] = kramdown_parse(self.title_info.title.first)
+
+    # Sortable for date
+    solr_doc["date_ssi"] = self.date.first
 
     # Kramdown parse for search purposes - #439
     solr_doc["abstract_tesim"] = kramdown_parse(self.abstract.first)
@@ -220,6 +226,9 @@ class ModsDatastream < ActiveFedora::OmDatastream
     solr_doc["creator_sim"] = all_names
     solr_doc["creator_tesim"] = all_names
 
+    # Creating sortable creator field
+    solr_doc["creator_ssi"] = all_names.first
+
     #TODO:  Extract dateBegin/dateEnd information ]
     return solr_doc
   end
@@ -237,7 +246,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
         xml.name('type' => 'personal')
         xml.name('type' => 'corporate')
         xml.originInfo {
-          xml.dateIssued('keyDate' => 'yes', 'encoding' => 'w3cdtf')
+          xml.dateCreated('keyDate' => 'yes', 'encoding' => 'w3cdtf')
         }
         xml.language{
           xml.languageTerm
@@ -267,6 +276,26 @@ class ModsDatastream < ActiveFedora::OmDatastream
       }
     end
     builder.doc
+  end
+
+  # Consolidating all date options for the edit form
+  def date
+    if self.origin_info.date_created.any? && !self.origin_info.date_created.first.blank?
+      return self.origin_info.date_created.first
+    elsif self.origin_info.copyright.any? && !self.origin_info.copyright.first.blank?
+      return self.origin_info.copyright.first
+    elsif self.origin_info.date_issued.any? && !self.origin_info.date_issued.first.blank?
+      return self.origin_info.date_issued.first
+    elsif self.origin_info.date_other.any? && !self.origin_info.date_other.first.blank?
+      return self.origin_info.date_other.first
+    end
+
+    # safety return
+    return ""
+  end
+
+  def date=(date_val)
+    self.origin_info.date_created = date_val
   end
 
   # Filters out blank entries, builds nodes as required

@@ -20,6 +20,7 @@ def create_content_file(factory_sym, user, parent)
   master.mass_permissions = 'public'
   master.depositor = user.nuid
   DerivativeCreator.new(master.pid).generate_derivatives
+  master.save!
 
   # Add non garbage metadata to core record.
   core = CoreFile.find(master.core_record.pid)
@@ -27,14 +28,13 @@ def create_content_file(factory_sym, user, parent)
   core.properties.parent_id = parent.pid
   core.title = "#{master.content.label}"
   core.description = "Lorem Ipsum Lorem Ipsum Lorem Ipsum"
-  core.date_of_issue = Date.today.to_s
+  core.date = Date.today.to_s
   core.depositor = user.nuid
   core.mass_permissions = 'public'
   core.keywords = ["#{master.class}", "content"]
   core.mods.subject(0).topic = "a"
 
   core.save!
-  master.save!
 end
 
 def set_edit_permissions(obj)
@@ -91,8 +91,8 @@ task :reset_data => :environment do
   create_content_file(:pdf_file, tmp_user, roCol)
   create_content_file(:docx_file, tmp_user, roCol)
 
-  Rake::Task["solr:reindex"].reenable
-  Rake::Task["solr:reindex"].invoke
+  # Rake::Task["solr:reindex"].reenable
+  # Rake::Task["solr:reindex"].invoke
 
   puts "Reset to stock objects complete."
 

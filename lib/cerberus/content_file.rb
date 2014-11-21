@@ -13,7 +13,7 @@ module Cerberus
 
     included do
       attr_accessible :title, :description, :keywords, :identifier
-      attr_accessible :depositor, :date_of_issue, :core_record
+      attr_accessible :depositor, :date, :core_record
       attr_accessible :creators
 
       has_metadata name: 'DC', type: DublinCoreDatastream

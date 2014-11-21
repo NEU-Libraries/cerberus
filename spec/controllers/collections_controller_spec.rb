@@ -67,7 +67,7 @@ describe CollectionsController do
 
     it "redirects to the new show page on successful create" do
       sign_in bill
-      attrs = {title: "Test", description: "test", date_of_issue: Date.today.to_s, parent: bills_collection.id }
+      attrs = {title: "Test", description: "test", date: Date.today.to_s, parent: bills_collection.id }
 
       post :create, {set: attrs}
 

@@ -14,7 +14,7 @@ describe ModsDatastream do
       basic_mods.title = "My title"
       basic_mods.abstract = "This is a test object created for testing"
       basic_mods.identifier = "neu:123abc"
-      basic_mods.date_issued = "2013-05-05"
+      basic_mods.date = "2013-05-05"
     end
 
     it "Has set the title correctly" do
@@ -30,7 +30,7 @@ describe ModsDatastream do
     end
 
     it "Has the mods issuance date set correctly" do
-      basic_mods.origin_info(0).date_issued.first.should == '2013-05-05'
+      basic_mods.origin_info(0).date_created.first.should == '2013-05-05'
     end
   end
 
@@ -211,7 +211,7 @@ describe ModsDatastream do
     end
 
     it "creates a creation_year_sim field" do
-      mods.origin_info.date_issued = "2013-01-01"
+      mods.origin_info.date_created = "2013-01-01"
 
       result["creation_year_sim"].should == ["2013"]
     end
