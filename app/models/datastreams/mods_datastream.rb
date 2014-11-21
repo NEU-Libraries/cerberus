@@ -167,7 +167,10 @@ class ModsDatastream < ActiveFedora::OmDatastream
     solr_doc["drs_course_title_ssim"] = self.course_title.first if !self.course_title.first.blank?
 
     # Extract a creation year field
-    if self.origin_info.copyright.any? && !self.origin_info.copyright.first.blank?
+    if self.origin_info.date_created.any? && !self.origin_info.date_created.first.blank?
+      creation_date = self.origin_info.date_created.first
+      solr_doc["creation_year_sim"] = [creation_date[/\d{4}/]]
+    elsif self.origin_info.copyright.any? && !self.origin_info.copyright.first.blank?
       creation_date = self.origin_info.copyright.first
       solr_doc["creation_year_sim"] = [creation_date[/\d{4}/]]
       # solr_doc["date_issued_ssim"] = [creation_date]
