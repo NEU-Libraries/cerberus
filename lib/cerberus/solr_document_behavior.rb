@@ -65,8 +65,8 @@ module Cerberus
       Array(self[Solrizer.solr_name("has_affiliation", :symbol)]).first
     end
 
-    def date_of_issue
-      process_date(Array(self[Solrizer.solr_name("date_issued", :symbol)]).first)
+    def date
+      process_date(Array(self[Solrizer.solr_name("date", :symbol)]).first)
     end
 
     def create_date

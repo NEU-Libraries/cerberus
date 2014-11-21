@@ -39,20 +39,13 @@
   - if !item.under_embargo?(current_user)
     .list-buttons
       = render partial: 'core_files/derivative_btn_group', locals: {contents: @content_objects, list_view: true, item: item, alignment: "pull-right"}
-  - if !item.date_of_issue.blank?
-    %dl.drs-item-date-of-issue-list
-      %dt.drs-item-date-of-issue-label
-        Date of Issue
-      %dd.drs-item-date-of-issue
-        %time{ "date-time" => item.date_of_issue }
-          = item.date_of_issue
-  - if !item.create_date.blank?
-    %dl.drs-item-date-of-issue-list
-      %dt.drs-item-date-of-issue-label
-        Creation Date
-      %dd.drs-item-date-of-issue
-        %time{ "date-time" => item.create_date }
-          = item.create_date
+  - if !item.date.blank?
+    %dl.drs-item-date-list
+      %dt.drs-item-date-label
+        Date Created
+      %dd.drs-item-date
+        %time{ "date-time" => item.date }
+          = item.date
   - if item.embargo_date_in_effect?
     %dt
       %dl{"style" => "display:inline;"}
