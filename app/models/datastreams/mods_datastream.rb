@@ -239,7 +239,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
       xml.mods('xmlns:drs' => 'https://repository.neu.edu/spec/v1', 'xmlns:mods' => 'http://www.loc.gov/mods/v3', 'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
                 'xsi:schemaLocation' => 'http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-4.xsd'){
         xml.parent.namespace = xml.parent.namespace_definitions.find { |ns| ns.prefix=="mods" }
-        xml.titleInfo {
+        xml.titleInfo("usage" => "primary") {
           xml.title
         }
         xml.abstract
