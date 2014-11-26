@@ -9,8 +9,8 @@ GIT
 
 GIT
   remote: https://github.com/NEU-Libraries/solrizer.git
-  revision: 80fd19649204816ec968ad3e9ebb7fc3a492b071
-  ref: 80fd19649204816ec968ad3e9ebb7fc3a492b071
+  revision: d0297fe8709899b354bebf1cd7ec6106a1d41470
+  ref: d0297fe8709899b354bebf1cd7ec6106a1d41470
   specs:
     solrizer (3.1.1)
       activesupport
