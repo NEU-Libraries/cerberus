@@ -363,11 +363,13 @@ class ModsDatastream < ActiveFedora::OmDatastream
 
       self.personal_name(index).name_part_given = first_name
       self.personal_name(index).name_part_family = last_name
+    end
 
-      if index == 0
-        # Set usage attribute to primary
-        self.personal_name(index).usage = "primary"
-      end
+    # Set usage attribute to primary
+    self.personal_name(0).usage = "primary"
+    if !self.corporate_name(0).first.blank?
+      # Set usage attribute to blank
+      self.corporate_name(0).usage = ""
     end
   end
 
