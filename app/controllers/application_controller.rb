@@ -46,6 +46,16 @@ class ApplicationController < ActionController::Base
     Cerberus::Noid.namespaceize(Cerberus::IdService.mint)
   end
 
+  def reset_page_parameter
+    # This a kludge to avoid monkey patching for https://github.com/NEU-Libraries/cerberus/issues/611
+    # REMOVE THIS when updating Blacklight
+    # relevant pull/issue - https://github.com/projectblacklight/blacklight/pull/528
+    # relevant patch - https://github.com/projectblacklight/blacklight/commit/aa5a40d170c6568da42881ea9279c8abbfbbb031#diff-1948ff0d97b888dc61ae381aec62dfa5
+    if params[:per_page]
+      params[:page] = "1"
+    end
+  end
+
   def fetch_solr_document(options = {})
     options = options.with_indifferent_access
 

@@ -19,6 +19,8 @@ class CommunitiesController < ApplicationController
   before_filter :can_read?, except: [:index, :show]
   before_filter :enforce_show_permissions, :only=>:show
   before_filter :get_set, except: [:index]
+  before_filter :reset_page_parameter
+
   self.solr_search_params_logic += [:add_access_controls_to_solr_params]
 
   rescue_from Exceptions::NoParentFoundError, with: :index_redirect
