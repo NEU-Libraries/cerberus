@@ -24,6 +24,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
     }
 
     t.personal_name(path: 'name', namespace_prefix: 'mods', attributes: { type: 'personal' }){
+      t.usage(path: { attribute: "usage" })
       t.authority(path: { attribute: 'authority' })
       t.name_part(path: 'namePart', namespace_prefix: 'mods', attributes: { type: :none }, index_as: [:stored_searchable, :facetable])
       t.name_part_given(path: 'namePart', namespace_prefix: 'mods', attributes: { type: 'given' })
@@ -37,6 +38,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
     }
 
     t.corporate_name(path: 'name', namespace_prefix: 'mods', attributes: { type: 'corporate' }){
+      t.usage(path: { attribute: "usage" })
       t.name_part(path: 'namePart', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable])
     }
 
