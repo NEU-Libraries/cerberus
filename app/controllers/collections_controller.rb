@@ -100,6 +100,9 @@ class CollectionsController < ApplicationController
     @set.depositor = current_user.nuid
     @set.identifier = @set.pid
 
+    # Add drs staff to permissions for #608
+    @set.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, "edit")
+
     begin
       @set.save!
       flash[:notice] = "Collection created successfully."

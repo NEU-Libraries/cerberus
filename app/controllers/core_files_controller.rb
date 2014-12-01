@@ -118,6 +118,9 @@ class CoreFilesController < ApplicationController
       Cerberus::Application::Queue.push(ContentCreationJob.new(@core_file.pid, @core_file.tmp_path, @core_file.original_filename))
     end
 
+    # Add drs staff to permissions for #608
+    @core_file.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, "edit")
+
     redirect_to core_file_path(@core_file.pid)
   end
 

@@ -25,6 +25,9 @@ class Admin::CommunitiesController < AdminController
       render :action => 'new' and return
     end
 
+    # Add drs staff to permissions for #608
+    @community.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, "edit")
+
     if @community.save!
       update_theses_and_thumbnail
       flash[:info] = "Community created successfully."
