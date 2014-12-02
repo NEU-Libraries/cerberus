@@ -18,6 +18,10 @@ module Cerberus::Controller
     @groups ||= user_signed_in? ? current_user.groups : []
   end
 
+  def render_403
+    render :template => '/error/403', :layout => "error", :formats => [:html], :status => 403
+  end
+
   def render_404(exception)
     logger.error("Rendering 404 page due to exception: #{exception.inspect} - #{exception.backtrace if exception.respond_to? :backtrace}")
     render :template => '/error/404', :layout => "error", :formats => [:html], :status => 404

@@ -59,7 +59,7 @@ class CoreFilesController < ApplicationController
       flash[:notice] = "Incomplete file destroyed"
       redirect_to(root_path) and return
     else
-      flash[:alert] = "File not destroyed"
+      flash[:error] = "File not destroyed"
       redirect_to(root_path) and return
     end
   end
