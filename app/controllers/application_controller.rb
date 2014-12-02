@@ -38,10 +38,6 @@ class ApplicationController < ActionController::Base
     ExceptionNotifier.notify_exception(exception, :env => request.env, :data => {:user => "#{name}"})
   end
 
-  def render_403
-    render :file => "#{Rails.root}/public/403", formats: [:html], layout: false, status: '403'
-  end
-
   def mint_unique_pid
     Cerberus::Noid.namespaceize(Cerberus::IdService.mint)
   end
