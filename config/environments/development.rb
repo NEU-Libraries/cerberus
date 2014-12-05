@@ -65,12 +65,13 @@ Cerberus::Application.configure do
   config.action_mailer.raise_delivery_errors = true
 
   git_config = ParseConfig.new('/home/vagrant/.gitconfig')
+  user_to_email = git_config['user']['email'] || "changeme@email.com"
 
   config.middleware.use ExceptionNotification::Rack,
     :email => {
       :email_prefix => "[DRS Dev] ",
       :sender_address => %{"notifier" <notifier@repositorydev.neu.edu>},
-      :exception_recipients => git_config['user']['email']
+      :exception_recipients => "#{user_to_email}"
     }
 
 
