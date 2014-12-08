@@ -11,7 +11,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   # Every Vagrant virtual environment requires a box to build off of.
   # This will have to be downloaded. We're making our own images now.
-  config.vm.box = "cbrs"
+  config.vm.box = "chef/centos-6.5"
 
   # Forward default rails development server port
   config.vm.network :forwarded_port, guest: 3000, host: 3000
@@ -39,11 +39,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Some optimization configurations kept in if someone needs to run Virtualbox
   # TODO: Figure out which of these are worth carrying over to the vmware config
   config.vm.provider :virtualbox do |vb|
-    vb.customize ["modifyvm", :id, "--memory", '5734']
+    vb.customize ["modifyvm", :id, "--memory", '3072']
     vb.customize ["modifyvm", :id, "--ioapic", 'on']
-    vb.customize ["modifyvm", :id, "--cpus", '6']
-    vb.customize ["modifyvm", :id, "--natdnsproxy1", "off"]
-    vb.customize ["modifyvm", :id, "--natdnshostresolver1", "off"]
+    vb.customize ["modifyvm", :id, "--cpus", '4']
+    vb.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
+    vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
   end
 
   config.vm.provision "shell", path: "script/vagrant_provisioning.sh", privileged: false
