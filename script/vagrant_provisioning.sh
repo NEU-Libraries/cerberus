@@ -67,6 +67,7 @@ cd /home/vagrant/cerberus
 gem install bundler
 bundle install --retry 5
 rake db:migrate
+rm -rf /home/vagrant/cerberus/jetty
 rails g hydra:jetty
 rake jetty:config
 rake db:test:prepare
