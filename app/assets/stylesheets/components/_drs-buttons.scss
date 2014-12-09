@@ -85,3 +85,28 @@
     }
   }
 }
+.drs-sidebar .btn-group {
+  .btn {
+    &:first-child {
+    @include border-top-right-radius(0);
+    }
+    &:last-child {
+    @include border-bottom-left-radius(0);
+    }
+  }
+  @media(min-width:$breakpoint-m) and (max-width:$breakpoint-xl) {
+    white-space: normal;
+    .btn {
+      width:100%;
+      &:first-child {
+        @include border-top-right-radius($baseBorderRadius);
+        @include border-bottom-left-radius(0);
+      }
+      &:last-child {
+        @include border-top-right-radius(0);
+        @include border-bottom-left-radius($baseBorderRadius);
+        margin-left:0px;
+      }
+    }
+  }
+}
