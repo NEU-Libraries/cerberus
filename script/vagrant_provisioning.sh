@@ -8,14 +8,30 @@ sudo sed -i -e 's/^enabled=0/enabled=1/' /etc/yum.repos.d/CentOS-Vault.repo
 sudo sed -i -e 's,^ACTIVE_CONSOLES=.*$,ACTIVE_CONSOLES=/dev/tty1,' /etc/sysconfig/init
 
 echo "Installing package dependencies"
-sudo yum install ghostscript-8.70-19.el6.x86_64 --assumeyes
-sudo yum install ImageMagick-devel-6.5.4.7-7.el6_5.x86_64 --assumeyes
+# This is complete garbage. Yum is garbage. I hate both yum, and libreoffice.
+# The shared library libswdlo.so that we need is in libreoffice-writer-4.0.4.2-9, but yum
+# wants it from the updated package of ure and opensymbol, so you get in a circle of hell if you try
+# to just install libreoffice-headless-4.0.4.2-9.
+
+# Installing from the bottom up, in the most ass backwards way imaginable, allows
+# for the correct version to prevail.
+
+# The reason we need 4.0.4.2-9 is that the version after this silently fails when
+# converting objects (which hydra-derivatives is trying to do). There are many bug
+# reports for this issue, but no fixes that I can find that work reliably.
+sudo yum install libreoffice-opensymbol-fonts-4.0.4.2-9.el6.x86_64 --assumeyes
+sudo yum install libreoffice-ure-4.0.4.2-9.el6.x86_64 --assumeyes
+sudo yum install libreoffice-writer-4.0.4.2-9.el6.x86_64 --assumeyes
+sudo yum install libreoffice-headless-4.0.4.2-9.el6.x86_64 --assumeyes
+
 sudo yum install java-1.6.0-openjdk java-1.6.0-openjdk-devel --assumeyes
+sudo yum install ghostscript --assumeyes
+sudo yum install ImageMagick-devel --assumeyes
+sudo yum install libreoffice-headless --assumeyes
 sudo yum install file-devel --assumeyes
 sudo yum install file-libs --assumeyes
 sudo yum install sqlite-devel --assumeyes
 sudo yum install redis --assumeyes
-sudo yum install libreoffice-headless --assumeyes
 sudo yum install unzip --assumeyes
 sudo yum install zsh --assumeyes
 sudo yum install mysql-devel --assumeyes
