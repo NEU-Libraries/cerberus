@@ -11,7 +11,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   # Every Vagrant virtual environment requires a box to build off of.
   # This will have to be downloaded. We're making our own images now.
-  config.vm.box = "chef/centos-6.5"
+  config.vm.box = "chef/centos-6.6"
 
   # Forward default rails development server port
   config.vm.network :forwarded_port, guest: 3000, host: 3000
