@@ -445,7 +445,7 @@ $breakpoint-sm:    400px;
 // Default 940px grid
 // -------------------------
 $gridColumns:             12 !default;
-$gridColumnWidth:         65px;//60px !default;
+$gridColumnWidth:         60px;//60px !default;
 $gridGutterWidth:         20px;//20px !default;
 $gridRowWidth:            ($gridColumns * $gridColumnWidth) + ($gridGutterWidth * ($gridColumns - 1)) !default;
 
