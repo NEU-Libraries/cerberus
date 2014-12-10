@@ -37,7 +37,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
       }
     }
 
-    t.corporate_name(path: 'name', namespace_prefix: 'mods', attributes: { type: 'corporate' }){
+    t.corporate_name(path: 'mods/mods:name', namespace_prefix: 'mods', attributes: { type: 'corporate' }){
       t.usage(path: { attribute: "usage" })
       t.name_part(path: 'namePart', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable])
     }
