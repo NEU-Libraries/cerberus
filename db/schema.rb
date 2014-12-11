@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140826192823) do
+ActiveRecord::Schema.define(:version => 20141211205041) do
 
   create_table "bookmarks", :force => true do |t|
     t.integer  "user_id",     :null => false
@@ -157,11 +157,13 @@ ActiveRecord::Schema.define(:version => 20140826192823) do
     t.string   "title"
     t.string   "depositor_name"
     t.string   "depositor_email"
-    t.datetime "created_at",      :null => false
-    t.datetime "updated_at",      :null => false
+    t.datetime "created_at",       :null => false
+    t.datetime "updated_at",       :null => false
     t.string   "pid"
     t.boolean  "notified"
     t.string   "change_type"
+    t.string   "collection_pid"
+    t.string   "collection_title"
   end
 
   add_index "upload_alerts", ["content_type"], :name => "index_upload_alerts_on_type"
