@@ -2,7 +2,7 @@ class UploadAlert < ActiveRecord::Base
   after_initialize :not_notified
 
   attr_accessible :depositor_email, :depositor_name, :title, :content_type
-  attr_accessible :pid, :notified, :change_type
+  attr_accessible :pid, :notified, :change_type, :collection
 
   def self.withheld_research_publications(ct = :create)
     unknown_content_query('Research Publications', ct)
@@ -33,12 +33,14 @@ class UploadAlert < ActiveRecord::Base
     u = UploadAlert.new
     user = User.find_by_nuid(core_file.true_depositor)
 
-    u.depositor_email = user.email
-    u.depositor_name  = user.full_name
-    u.title           = core_file.title
-    u.content_type    = core_file.category.first
-    u.pid             = core_file.pid
-    u.change_type     = change_type
+    u.depositor_email   = user.email
+    u.depositor_name    = user.full_name
+    u.title             = core_file.title
+    u.content_type      = core_file.category.first
+    u.pid               = core_file.pid
+    u.change_type       = change_type
+    u.collection_pid    = core_file.parent.pid
+    u.collection_title  = core_file.parent.title
     u.save! ? u : false
   end
 
