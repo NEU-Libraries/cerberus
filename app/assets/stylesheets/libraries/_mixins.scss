@@ -64,7 +64,7 @@
 
 
 @mixin grid-core-span-height($columns, $gridColumnWidth, $gridGutterWidth) {
-  height: ($gridColumnWidth * $columns) + ($gridGutterWidth * ($columns - 1));
+  min-height: ($gridColumnWidth * $columns) + ($gridGutterWidth * ($columns - 1));
   margin-bottom: $gridGutterWidth;
 }
 
