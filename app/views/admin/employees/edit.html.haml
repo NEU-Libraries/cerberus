@@ -1,4 +1,4 @@
-%h2= "Manage #{employee.pretty_employee_name}'s Account (#{@employee.nuid})"
+%h2= "Manage #{@employee.pretty_employee_name}'s Account (#{@employee.nuid})"
 
 #current_communities
   = render partial: "employee_communities", locals: { employee: @employee }
