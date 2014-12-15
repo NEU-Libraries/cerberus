@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-feature "Special content:" do
+feature "Special content:", unless: $in_travis do
   before(:all) do
     ResqueSpec.inline = true
     # Set up an employee who has contributed one of everything
@@ -29,7 +29,7 @@ feature "Special content:" do
     end
   end
 
-  shared_examples_for "a special content page" do |category_name|
+  shared_examples_for "a special content page", unless: $in_travis do |category_name|
     scenario "visiting page" do
       content_name = category_name.singularize.underscore.sub(" ", "_")
       content_item = instance_variable_get("@#{content_name}")
