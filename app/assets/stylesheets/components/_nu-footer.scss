@@ -5,6 +5,11 @@
   background-color: $footerBgColor;
   border-top: 0.1em solid $footerBorderColor;
   color: $medium-gray;
+  @media (max-width:$breakpoint-m) {
+    margin-left: -20px;
+    margin-right: -20px;
+    padding-left: 20px;
+  }
   address {
     font-size: 0.9em;
     line-height: 1.2em;
