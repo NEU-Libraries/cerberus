@@ -1,0 +1,74 @@
+<!-->This is a sample MODS record with a fully descriptive NIEC record  <-->
+
+<mods:mods xmlns:mods="http://www.loc.gov/mods/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-4.xsd">
+  <mods:extension>
+    <niec:niec xmlns:niec="http://repository.neu.edu/schema/niec" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://repository.neu.edu/schema/niec http://repository.neu.edu/schema/niec/niec.xsd">
+      <niec:title>Deaf Education- Turning the Tide</niec:title>
+      <niec:title type="alternative">Deaf Education</niec:title>
+      <niec:identifier type="vimeo">80228443</niec:identifier>
+      <niec:description>The presenter summarizes her new book, &quot;Deaf Education: Turning the Tide,&quot;
+        released in February 2014. She discusses major themes that appeared in the focus
+        groups of her research, such as &quot;friendships: from the outside looking in,&quot; identity,
+        and &quot;interpreters: best friend or worst enemy?&quot;</niec:description>
+      <niec:name>
+        <niec:fullName type="personal">Oliva, Gina</niec:fullName>
+        <niec:role authority="marcrelator">Presenter</niec:role>
+        <niec:speakerInformation>
+          <niec:age>Adult</niec:age>
+          <niec:race>Hispanic or Latino</niec:race>
+          <niec:gender>Female</niec:gender>
+        </niec:speakerInformation>
+      </niec:name>
+      <niec:name>
+        <niec:fullName type="higher ed.">Union County College</niec:fullName>
+        <niec:role authority="marcrelator">Director</niec:role>
+      </niec:name>
+      <niec:origin>
+        <niec:dateCreated>2014-09-26</niec:dateCreated>
+        <niec:dateIssued>2014-09-26</niec:dateIssued>
+        <niec:distributionInformation>
+          <niec:distributionDate>2014</niec:distributionDate>
+          <niec:distributorName>NIEC</niec:distributorName>
+        </niec:distributionInformation>
+        <niec:publicationInformation>
+          <niec:publicationDate>2014</niec:publicationDate>
+          <niec:publisherName>NIEC</niec:publisherName>
+        </niec:publicationInformation>
+      </niec:origin>
+      <niec:languageInformation>
+        <niec:signedLanguage>
+          <niec:language authority="local" type="text">ASL</niec:language>
+          <niec:signPace>Slow</niec:signPace>
+          <niec:fingerspellingExtent>Minimal</niec:fingerspellingExtent>
+          <niec:fingerspellingPace>Slow</niec:fingerspellingPace>
+          <niec:numbersExtent>Minimal</niec:numbersExtent>
+          <niec:numbersPace>Fast</niec:numbersPace>
+          <niec:classifiersExtent>Minimal</niec:classifiersExtent>
+          <niec:useOfSpaceExtent>Moderate</niec:useOfSpaceExtent>
+          <niec:howSpaceUsed>Comparative</niec:howSpaceUsed>
+        </niec:signedLanguage>
+        <niec:spokenLanguage>
+          <niec:language authority="iso639-2b" type="text">English</niec:language>
+          <niec:speechPace>Fast</niec:speechPace>
+          <niec:lendsItselfToFingerspelling>Extensive</niec:lendsItselfToFingerspelling>
+          <niec:lendsItselfToClassifiers>Extensive</niec:lendsItselfToClassifiers>
+          <niec:lendsItselfToNumbers>Extensive</niec:lendsItselfToNumbers>
+          <niec:lendsItselfToUseOfSpace>Extensive</niec:lendsItselfToUseOfSpace>
+        </niec:spokenLanguage>
+      </niec:languageInformation>
+      <niec:contentDescription>
+        <niec:textType>Expository</niec:textType>
+        <niec:register>Formal</niec:register>
+        <niec:captions>None</niec:captions>
+        <niec:conversationType>Monologic</niec:conversationType>
+        <niec:audience>Student</niec:audience>
+        <niec:duration>00:20:48</niec:duration>
+      </niec:contentDescription>
+      <niec:transcript>Unavailable</niec:transcript>
+      <niec:series>Terp Talks</niec:series>
+      <niec:comment>This resource would be good for novice interpreting students. She signs
+        slowly and clearly. Due to the use of English and ASL at the same time, with the volume
+        off, it could also be used to practice transliteration.</niec:comment>
+    </niec:niec>
+  </mods:extension>
+</mods:mods>

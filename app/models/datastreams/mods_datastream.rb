@@ -8,7 +8,12 @@ class ModsDatastream < ActiveFedora::OmDatastream
 
   set_terminology do |t|
 
-    t.root(path: 'mods', 'xmlns:drs' => 'https://repository.neu.edu/spec/v1', 'xmlns:mods' => 'http://www.loc.gov/mods/v3', 'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance', 'xsi:schemaLocation' => 'http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-4.xsd')
+    t.root(path: 'mods',
+           'xmlns:drs' => 'https://repository.neu.edu/spec/v1',
+           'xmlns:mods' => 'http://www.loc.gov/mods/v3',
+           'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
+           'xsi:schemaLocation' => 'http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-4.xsd',
+           'xmlns:niec' => 'http://repository.neu.edu/schema/niec')
     t.title_info(path: 'titleInfo', namespace_prefix: 'mods'){
       t.title(path: 'title', namespace_prefix: 'mods', index_as: [:stored_searchable, stored_sortable])
       t.non_sort(path: 'nonSort', namespace_prefix: 'mods', index_as: [:stored_searchable])
@@ -153,6 +158,8 @@ class ModsDatastream < ActiveFedora::OmDatastream
     t.course_title(ref: [:extension, :scholarly_object, :course_info, :course_title])
   end
 
+  include Cerberus::ModsExtensions::NIEC
+
   # We override to_solr here to add
   # 1. A creation_year field.
   # 2. A valid date Begin field
@@ -231,6 +238,8 @@ class ModsDatastream < ActiveFedora::OmDatastream
     # Creating sortable creator field
     solr_doc["creator_ssi"] = all_names.first
 
+    solr_doc = self.generate_niec_solr_hash(solr_doc)
+
     #TODO:  Extract dateBegin/dateEnd information ]
     return solr_doc
   end
@@ -239,7 +248,8 @@ class ModsDatastream < ActiveFedora::OmDatastream
   def self.xml_template
     builder = Nokogiri::XML::Builder.new do |xml|
       xml.mods('xmlns:drs' => 'https://repository.neu.edu/spec/v1', 'xmlns:mods' => 'http://www.loc.gov/mods/v3', 'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
-                'xsi:schemaLocation' => 'http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-4.xsd'){
+                'xsi:schemaLocation' => 'http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-4.xsd',
+                'xmlns:niec' => 'http://repository.neu.edu/schema/niec'){
         xml.parent.namespace = xml.parent.namespace_definitions.find { |ns| ns.prefix=="mods" }
         xml.titleInfo("usage" => "primary") {
           xml.title
@@ -274,6 +284,9 @@ class ModsDatastream < ActiveFedora::OmDatastream
               xml.course_title{ xml.parent.namespace = nil }
             }
           }
+        }
+        xml["mods"].extension{
+          xml["niec"].niec
         }
       }
     end
