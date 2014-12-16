@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/NEU-Libraries/cerberus.svg?branch=develop)](https://travis-ci.org/NEU-Libraries/cerberus)
-[![Coverage Status](http://img.shields.io/coveralls/NEU-Libraries/cerberus/develop.svg)](https://coveralls.io/r/NEU-Libraries/cerberus?branch=develop)
+[![Coverage Status](http://img.shields.io/coveralls/NEU-Libraries/cerberus/develop.svg?style=flat)](https://coveralls.io/r/NEU-Libraries/cerberus?branch=develop)
 
 ### DRS Application
 
