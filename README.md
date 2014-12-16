@@ -8,41 +8,19 @@ A web application derived from the [Sufia](http://github.com/projecthydra/sufia)
 ### First Time Setup
 
 1.  Ensure that you have the following installed.
-  1.  SQLite
-  2.  Redis
-  3.  Ruby with RVM or some other version management solution.
-  4.  [FITS](http://code.google.com/p/fits/downloads/list).  Unzip this and place it somewhere on your path.
-  5.  Imagemagick
-  6.  `yum install file-devel` may be necessary to get the ruby-filemagic gem working on RHEL machines.
-  7.  You will also need to install [LibreOffice](www.libreoffice.org/download) and get the 'soffice' script onto your path.  On OSX this lives at `/Applications/LibreOffice.app/Contents/MacOS/`
+  1.  Vagrant 1.6.5 - https://www.vagrantup.com/
+  2.  VirtualBox 4.3.18 - https://www.virtualbox.org/
 
-2.  Execute the following commands from project root.
-  1.  `bundle install`
-  2.  `rake db:migrate`
-  3.  `rails g hydra:jetty`
-  4.  `rake jetty:config`
+2.  Clone this repository
+3.  Run the command ```vagrant up``` - this will instantiate the virtual machine, and provision the required cerberus software
+4.  Once the above command has finished, ssh into you're instance with ```vagrant ssh```
+5.  Enter the cerberus directory with ```cd ~/cerberus```
+6.  Configure your relevant github information; etc. ```git config user.name "Jane Doe"``` ```git config --global user.email "jdoe@email.edu"```
 
 
 ### Starting the DRS
 
-1.  Run the following commands:
+1.  Run the following commands from within the cerberus directory after ssh'ing into the instance:
   1.  `rake jetty:start`
-  2.  `redis-server`
-  3.  `COUNT=4 QUEUE=* rake environment resque:workers`
-  4.  `rails server`
-
-
-### Developing Notes
-
-Make sure to use the editorconfig plugin for whatever editor you prefer. [Download a plugin](http://editorconfig.org/#download)
-
-
-Tests run with `$ rspec`
-
-[capybara cheat sheet](https://gist.github.com/zhengjia/428105)
-
-#### Guard / Livereload
-
-You will also need the chrome livereload extension.
-
-`$ bundle exec guard start -P livereload`
+  2.  `QUEUE=* rake environment resque:work` - this is a foreground command, you'll need a terminal tab dedicated to it
+  3.  `rails server` - this is a foreground command, you'll need a terminal tab dedicated to it
