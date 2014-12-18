@@ -32,6 +32,7 @@ GIT
 GEM
   remote: https://rubygems.org/
   specs:
+    ace-rails-ap (3.0.2)
     actionmailer (3.2.13)
       actionpack (= 3.2.13)
       mail (~> 2.5.3)
@@ -485,6 +486,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  ace-rails-ap
   blacklight
   blacklight_advanced_search (~> 2.1.0)
   bootstrap-sass (~> 2.3.2.1)

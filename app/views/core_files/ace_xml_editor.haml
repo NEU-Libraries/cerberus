@@ -1,0 +1,29 @@
+%header
+  %h1.page-header
+    Edit raw XML for
+    =@core_file.title
+
+.span6
+  %h3 XML
+  #editor.well
+    = @core_file.mods.to_xml
+
+.drs-item-details.span5
+  %h3 MODS HTML
+  = @mods_html
+
+:javascript
+  // This is a hack, need to trim to due haml pretty printing
+  str = $("#editor").text();
+  $("#editor").text(str.trim());
+
+  // Setting up the editor
+  var editor = ace.edit("editor");
+  editor.setTheme("ace/theme/eclipse");
+  editor.getSession().setMode("ace/mode/xml");
+  editor.setOptions({
+    maxLines: Infinity,
+    minLines: 20,
+    useSoftTabs: true,
+    showInvisibles: true
+  });

@@ -48,6 +48,8 @@ Cerberus::Application.routes.draw do
   get "/files/rescue_incomplete_file" => "core_files#rescue_incomplete_file", as: 'rescue_incomplete_file'
   match "/incomplete_file/:id" => "core_files#destroy_incomplete_file", via: 'delete', as: 'destroy_incomplete_file'
 
+  get "/files/:id/edit/xml" => "core_files#edit_xml", as: "files_edit_xml"
+
   put '/item_display' => 'users#update', as: 'view_pref'
 
   get '/employees/:id' => 'employees#show', as: 'employee'

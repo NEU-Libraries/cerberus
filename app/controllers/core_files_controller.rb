@@ -192,6 +192,13 @@ class CoreFilesController < ApplicationController
     @page_title = "Edit #{@core_file.title}"
   end
 
+  def edit_xml
+    @core_file = CoreFile.find(params[:id])
+    @page_title = "Edit #{@core_file.title}'s xml"
+    @mods_html = render_mods_display(CoreFile.find(@core_file.pid)).to_html.html_safe
+    render :template => 'core_files/ace_xml_editor'
+  end
+
   def update
     @core_file = CoreFile.find(params[:id])
 
