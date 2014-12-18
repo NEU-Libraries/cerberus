@@ -12,6 +12,16 @@
   %h3 MODS HTML
   = @mods_html
 
+.span12
+  .well
+    %a{ href: "#cancelEditModal", :class => ['btn', 'btn-warning'], data: {toggle: "modal"} }
+      Cancel
+    .pull-right
+      %a{ href: "#validateMods", :class => ['btn', 'btn-primary'], data: {toggle: "modal"} }
+        Validate + Preview
+      %a{ href: "#submit", :class => ['btn', 'btn-success'], data: {toggle: "modal"} }
+        Save
+
 :javascript
   // This is a hack, need to trim to due haml pretty printing
   str = $("#editor").text();
