@@ -204,13 +204,23 @@ class CoreFilesController < ApplicationController
     puts params.inspect
     @result = xml_valid?(params[:raw_xml].first)
 
-    if @result.kind_of?(Array)
+    if !@result[:errors].blank?
       # Formatting error array for template
-      error_list = ""
-      @result.each do |entry|
+      error_list = "<h4 class='xml-error'>Invalid XML provided</h4></br> "
+      @result[:errors].each do |entry|
         error_list = error_list.concat("#{entry.class.to_s}: #{entry} </br></br> ")
       end
       @result = error_list
+    elsif !params[:commit].blank? && params[:commit] == "Save"
+      if !@result[:mods_html].blank?
+        # Valid, and ready to save
+        @core_file = CoreFile.find(params[:id])
+        @core_file.mods.content = params[:raw_xml].first
+        @core_file.save!
+        render js: "window.location = '#{core_file_path(@core_file.pid)}'" and return
+      end
+    else
+      @result = @result[:mods_html]
     end
 
     respond_to do |format|
