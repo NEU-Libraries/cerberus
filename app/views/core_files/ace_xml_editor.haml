@@ -3,24 +3,25 @@
     Edit raw XML for
     =@core_file.title
 
-.span6
-  %h3 XML
-  #editor.well
-    = @core_file.mods.to_xml
+= form_tag files_validate_xml_path, :method => :put, :id => "raw_xml_form", :remote => true do
+  = hidden_field_tag( "raw_xml[]", "")
 
-.drs-item-details.span5
-  %h3 MODS HTML
-  = @mods_html
+  .span6
+    %h3 XML
+    #editor.well
+      = @core_file.mods.to_xml
 
-.span12
-  .well
-    %a{ href: "#cancelEditModal", :class => ['btn', 'btn-warning'], data: {toggle: "modal"} }
-      Cancel
-    .pull-right
-      %a{ href: "#validateMods", :class => ['btn', 'btn-primary'], data: {toggle: "modal"} }
-        Validate + Preview
-      %a{ href: "#submit", :class => ['btn', 'btn-success'], data: {toggle: "modal"} }
-        Save
+  .drs-item-details.span5
+    %h3 MODS HTML
+    #mods{ style: 'position:relative;' }
+      = @mods_html
+
+  .span12
+    .well
+      = submit_tag "Validate + Preview", :class => ['btn', 'btn-primary'], :id => "validate_button"
+      = submit_tag "Save", :class => ['btn', 'btn-success'], :id => "save_button"
+      %a{ href: "#cancelEditModal", :class => ['btn', 'btn-warning'], data: {toggle: "modal"} }
+        Cancel
 
 :javascript
   // This is a hack, need to trim to due haml pretty printing
@@ -36,4 +37,13 @@
     minLines: 20,
     useSoftTabs: true,
     showInvisibles: true
+  });
+
+  $(function() {
+    $('#raw_xml_form').submit(function() {
+      $("#raw_xml_").val(editor.getSession().getValue());
+      $('#mods').html("");
+      spinner = enable_spinner('mods');
+      return true;
+    });
   });
