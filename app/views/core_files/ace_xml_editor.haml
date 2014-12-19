@@ -3,7 +3,7 @@
     Edit raw XML for
     =@core_file.title
 
-= form_tag files_validate_xml_path, :method => :put, :id => "raw_xml_form", :remote => true do
+= form_tag core_file_validate_xml_path, :method => :put, :id => "raw_xml_form", :remote => true do
   = hidden_field_tag( "raw_xml[]", "")
 
   .span6
@@ -22,6 +22,8 @@
       = submit_tag "Save", :class => ['btn', 'btn-success'], :id => "save_button"
       %a{ href: "#cancelEditModal", :class => ['btn', 'btn-warning'], data: {toggle: "modal"} }
         Cancel
+
+= render partial: "shared/cancel_edit_modal", locals: { item: @core_file }
 
 :javascript
   // This is a hack, need to trim to due haml pretty printing
