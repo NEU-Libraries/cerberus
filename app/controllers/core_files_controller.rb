@@ -30,6 +30,8 @@ class CoreFilesController < ApplicationController
 
   before_filter :valid_form_permissions?, only: [:process_metadata, :update]
 
+  before_filter :verify_staff_or_beta, only: [:edit_xml]
+
   rescue_from Exceptions::NoParentFoundError, with: :no_parent_rescue
   rescue_from Exceptions::GroupPermissionsError, with: :group_permission_rescue
 
@@ -383,4 +385,13 @@ class CoreFilesController < ApplicationController
     def terms_accepted?
       params[:terms_of_service] == '1'
     end
+
+    private
+
+      def verify_staff_or_beta
+        if !(current_user.repo_staff? || current_user.beta?)
+          flash[:error] = "You do not have privileges to use that feature"
+          redirect_to root_path
+        end
+      end
 end
