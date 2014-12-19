@@ -58,6 +58,10 @@ class User < ActiveRecord::Base
     return self.groups.include? "northeastern:drs:staff"
   end
 
+  def beta?
+    return self.groups.include? "northeastern:drs:repository:beta_users"
+  end
+
   def self.find_for_shib(auth, signed_in_resource=nil)
     user = User.where(:email => auth.info.email).first
 
