@@ -201,21 +201,17 @@ class CoreFilesController < ApplicationController
   end
 
   def validate_xml
+    puts params.inspect
     @result = xml_valid?(params[:raw_xml].first)
 
     if @result.kind_of?(Array)
       # Formatting error array for template
       error_list = ""
       @result.each do |entry|
-        puts "ERROR INSPECT"
-        puts entry.inspect
         error_list = error_list.concat("#{entry.class.to_s}: #{entry} </br></br> ")
       end
       @result = error_list
     end
-
-    puts "DGCDEBUG"
-    puts @result.inspect
 
     respond_to do |format|
       format.js

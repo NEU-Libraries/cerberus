@@ -5,12 +5,14 @@ module XmlValidator
 
   def xml_valid?(xml_str)
     # Never trust the user
-    errors = []
+    results = Hash.new
+    results[:errors] = []
+
     # Nokogiri xml validation, catch errors
     doc = Nokogiri::XML(xml_str)
     if doc.errors != []
-      errors = doc.errors
-      return errors
+      results[:errors] = doc.errors
+      return results
     end
 
     # Dummy corefile for testing
@@ -21,39 +23,38 @@ module XmlValidator
     begin
       CoreFilesController.new.render_mods_display(doc).to_html
     rescue Exception => error
-      errors << error
+      results[:errors] << error
     end
 
-    if errors != []
-      return errors
+    if results[:errors] != []
+      return results
     end
 
     # Does it have a title?
     if doc.title == nil
-      # this needs to be an error, not a string
-      errors << "No valid title in xml"
-      return errors
+      results[:errors] << Exceptions::MissingMetadata.new("title")
+      return results
     end
 
     # Does it have at least one keyword?
     if doc.keywords == []
-      # this needs to be an error, not a string
-      errors << "No valid keywords in xml"
-      return errors
+      results[:errors] << Exceptions::MissingMetadata.new("keywords")
+      return results
     end
 
     # Can we solrize the core_file if we use this xml?
     begin
       doc.to_solr
     rescue Exception => error
-      errors << error
+      results[:errors] << error
     end
 
-    if errors != []
-      return errors
+    if results[:errors] != []
+      return results
     end
 
     # If we've gotten this far, we should be able to return mods_display html
-    return CoreFilesController.new.render_mods_display(doc).to_html
+    results[:mods_html] = CoreFilesController.new.render_mods_display(doc).to_html
+    return results
   end
 end

@@ -67,4 +67,10 @@ module Exceptions
       super "No community parent set"
     end
   end
+
+  class MissingMetadata < StandardError
+    def initialize(required_data)
+      super "No valid #{required_data} in xml"
+    end
+  end
 end
