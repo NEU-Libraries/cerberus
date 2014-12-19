@@ -30,12 +30,14 @@ module XmlValidator
 
     # Does it have a title?
     if doc.title == nil
+      # this needs to be an error, not a string
       errors << "No valid title in xml"
       return errors
     end
 
     # Does it have at least one keyword?
     if doc.keywords == []
+      # this needs to be an error, not a string
       errors << "No valid keywords in xml"
       return errors
     end

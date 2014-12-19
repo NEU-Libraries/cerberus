@@ -16,3 +16,7 @@
 = yield(:js_head)
 
 = javascript_include_tag 'application'
+
+:javascript
+  var spinner;
+  function enable_spinner (div) { var target = document.getElementById(div); var spinner = new Spinner({top: '25px', left: '25px'}).spin(target); return spinner;};

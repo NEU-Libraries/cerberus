@@ -35,3 +35,5 @@
 //= require ace/ace
 //= require ace/worker-html
 //= require ace/theme-eclipse
+
+//= require spin.js

@@ -200,8 +200,26 @@ class CoreFilesController < ApplicationController
     render :template => 'core_files/ace_xml_editor'
   end
 
-  def check_xml
-    return xml_valid?(params[:raw_xml])
+  def validate_xml
+    @result = xml_valid?(params[:raw_xml].first)
+
+    if @result.kind_of?(Array)
+      # Formatting error array for template
+      error_list = ""
+      @result.each do |entry|
+        puts "ERROR INSPECT"
+        puts entry.inspect
+        error_list = error_list.concat("#{entry.class.to_s}: #{entry} </br></br> ")
+      end
+      @result = error_list
+    end
+
+    puts "DGCDEBUG"
+    puts @result.inspect
+
+    respond_to do |format|
+      format.js
+    end
   end
 
   def update
