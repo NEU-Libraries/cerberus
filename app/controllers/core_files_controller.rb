@@ -9,6 +9,7 @@ class CoreFilesController < ApplicationController
   include Cerberus::ControllerHelpers::PermissionsCheck
 
   include ModsDisplay::ControllerExtension
+  include XmlValidator
 
   before_filter :authenticate_user!, except: [:show]
 
@@ -28,6 +29,8 @@ class CoreFilesController < ApplicationController
   before_filter :complete?, only: [:edit, :update]
 
   before_filter :valid_form_permissions?, only: [:process_metadata, :update]
+
+  before_filter :verify_staff_or_beta, only: [:edit_xml]
 
   rescue_from Exceptions::NoParentFoundError, with: :no_parent_rescue
   rescue_from Exceptions::GroupPermissionsError, with: :group_permission_rescue
@@ -192,6 +195,41 @@ class CoreFilesController < ApplicationController
     @page_title = "Edit #{@core_file.title}"
   end
 
+  def edit_xml
+    @core_file = CoreFile.find(params[:id])
+    @page_title = "Edit #{@core_file.title}'s xml"
+    @mods_html = render_mods_display(CoreFile.find(@core_file.pid)).to_html.html_safe
+    render :template => 'core_files/ace_xml_editor'
+  end
+
+  def validate_xml
+    puts params.inspect
+    @result = xml_valid?(params[:raw_xml].first)
+
+    if !@result[:errors].blank?
+      # Formatting error array for template
+      error_list = "<h4 class='xml-error'>Invalid XML provided</h4></br> "
+      @result[:errors].each do |entry|
+        error_list = error_list.concat("#{entry.class.to_s}: #{entry} </br></br> ")
+      end
+      @result = error_list
+    elsif !params[:commit].blank? && params[:commit] == "Save"
+      if !@result[:mods_html].blank?
+        # Valid, and ready to save
+        @core_file = CoreFile.find(params[:id])
+        @core_file.mods.content = params[:raw_xml].first
+        @core_file.save!
+        render js: "window.location = '#{core_file_path(@core_file.pid)}'" and return
+      end
+    else
+      @result = @result[:mods_html]
+    end
+
+    respond_to do |format|
+      format.js
+    end
+  end
+
   def update
     @core_file = CoreFile.find(params[:id])
 
@@ -347,4 +385,13 @@ class CoreFilesController < ApplicationController
     def terms_accepted?
       params[:terms_of_service] == '1'
     end
+
+    private
+
+      def verify_staff_or_beta
+        if !(current_user.repo_staff? || current_user.beta?)
+          flash[:error] = "You do not have privileges to use that feature"
+          redirect_to root_path
+        end
+      end
 end

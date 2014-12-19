@@ -1,0 +1,51 @@
+%header
+  %h1.page-header
+    Edit raw XML for
+    =@core_file.title
+
+= form_tag core_file_validate_xml_path, :method => :put, :id => "raw_xml_form", :remote => true do
+  = hidden_field_tag( "raw_xml[]", "")
+
+  .span6
+    %h3 XML
+    #editor.well
+      = @core_file.mods.to_xml
+
+  .drs-item-details.span5
+    %h3 MODS HTML
+    #mods{ style: 'position:relative;min-height:320px;' }
+      = @mods_html
+
+  .span12
+    .well
+      = submit_tag "Validate + Preview", :class => ['btn', 'btn-primary'], :id => "validate_button"
+      = submit_tag "Save", :class => ['btn', 'btn-success'], :id => "save_button"
+      %a{ href: "#cancelEditModal", :class => ['btn', 'btn-warning'], data: {toggle: "modal"} }
+        Cancel
+
+= render partial: "shared/cancel_edit_modal", locals: { item: @core_file }
+
+:javascript
+  // This is a hack, need to trim to due haml pretty printing
+  str = $("#editor").text();
+  $("#editor").text(str.trim());
+
+  // Setting up the editor
+  var editor = ace.edit("editor");
+  editor.setTheme("ace/theme/eclipse");
+  editor.getSession().setMode("ace/mode/xml");
+  editor.setOptions({
+    maxLines: Infinity,
+    minLines: 20,
+    useSoftTabs: true,
+    showInvisibles: true
+  });
+
+  $(function() {
+    $('#raw_xml_form').submit(function() {
+      $("#raw_xml_").val(editor.getSession().getValue());
+      $('#mods').html("");
+      spinner = enable_spinner('mods');
+      return true;
+    });
+  });
