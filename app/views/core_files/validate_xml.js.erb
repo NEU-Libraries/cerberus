@@ -1,2 +1,2 @@
 spinner.stop();
-$('#mods').html("<%=@result.html_safe%>");
+$('#mods').html("<%= escape_javascript(@result.html_safe) %>");

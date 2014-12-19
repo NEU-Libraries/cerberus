@@ -203,7 +203,6 @@ class CoreFilesController < ApplicationController
   end
 
   def validate_xml
-    puts params.inspect
     @result = xml_valid?(params[:raw_xml].first)
 
     if !@result[:errors].blank?
