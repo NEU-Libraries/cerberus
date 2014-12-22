@@ -6,8 +6,8 @@ class CoreFileHtmlValidationJob
   def run
     logger = Logger.new("#{Rails.root}/log/core_file_html_validation.log")
 
-    community_model = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:CoreFile"
-    query_result = ActiveFedora::SolrService.query("has_model_ssim:\"#{community_model}\"", :fl => "id", :rows => 999999999)
+    core_file_model = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:CoreFile"
+    query_result = ActiveFedora::SolrService.query("has_model_ssim:\"#{core_file_model}\"", :fl => "id", :rows => 999999999)
 
     logger.info "#{Time.now} - Starting core file audit."
 
