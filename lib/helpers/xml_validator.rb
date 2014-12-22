@@ -19,13 +19,6 @@ module XmlValidator
     doc = CoreFile.new
     doc.mods.content = xml_str
 
-    # Try rendering html with mods display, catch errors
-    begin
-      CoreFilesController.new.render_mods_display(doc).to_html
-    rescue Exception => error
-      results[:errors] << error
-    end
-
     if results[:errors] != []
       return results
     end
@@ -53,8 +46,15 @@ module XmlValidator
       return results
     end
 
-    # If we've gotten this far, we should be able to return mods_display html
-    results[:mods_html] = CoreFilesController.new.render_mods_display(doc).to_html
+    results[:mods_html] = nil
+
+    # Try rendering html with mods display, catch errors
+    begin
+      results[:mods_html] = CoreFilesController.new.render_mods_display(doc).to_html
+    rescue Exception => error
+      results[:errors] << error
+    end
+
     return results
   end
 end
