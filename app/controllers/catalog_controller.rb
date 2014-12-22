@@ -41,6 +41,10 @@ class CatalogController < ApplicationController
   def recent
     self.solr_search_params_logic += [:exclude_unwanted_models]
     self.solr_search_params_logic += [:no_personal_items]
+
+    # Due to errors or poor metadata in Fedora, we need to check for title
+    self.solr_search_params_logic += [:well_formed_items]
+
     (_, @recent_documents) = get_search_results(:q =>'', :sort=>"#{Solrizer.solr_name('system_create', :stored_sortable, type: :date)} desc", :rows=>999)
     # if user_signed_in?
     #   # grab other people's documents
@@ -260,6 +264,11 @@ class CatalogController < ApplicationController
   def no_personal_items(solr_parameters, user_parameters)
     solr_parameters[:fq] ||= []
     solr_parameters[:fq] << "-#{Solrizer.solr_name("drs_category", :symbol)}:\"miscellany\""
+  end
+
+  def well_formed_items(solr_parameters, user_parameters)
+    solr_parameters[:fq] ||= []
+    solr_parameters[:fq] << "#{Solrizer.solr_name('title_info_title', :stored_sortable, type: :string)}:\[\* TO \*\]"
   end
 
   def research_filter(solr_parameters, user_parameters)
