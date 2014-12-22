@@ -1,4 +1,8 @@
 - content_for :page_header do
   %h1.page-header
     Terms of Use
-=render partial: 'terms_of_use'
+.span8
+  The full document can be found in the repository at this link -
+  %a{:href => 'https://repository.lib.neu.edu/files/neu:5m60qz91w'}https://repository.lib.neu.edu/files/neu:5m60qz91w
+  %hr
+  =render partial: 'terms_of_use'
