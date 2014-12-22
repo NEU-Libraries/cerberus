@@ -40,7 +40,7 @@ class CatalogController < ApplicationController
 
   def recent
     self.solr_search_params_logic += [:exclude_unwanted_models]
-    self.solr_search_params_logic += [:featured_content_only]
+    self.solr_search_params_logic += [:no_personal_items]
     (_, @recent_documents) = get_search_results(:q =>'', :sort=>"#{Solrizer.solr_name('system_create', :stored_sortable, type: :date)} desc", :rows=>999)
     # if user_signed_in?
     #   # grab other people's documents
@@ -257,16 +257,9 @@ class CatalogController < ApplicationController
     "homepage"
   end
 
-  def featured_content_only(solr_parameters, user_parameters)
-    categories = ["Theses and Dissertations", "Research Publications",
-                  "Other Publications", "Presentations", "Datasets",
-                  "Learning Objects"]
-
-    query = categories.map { |x| "drs_category_ssim:\"#{x}\""}
-    query = query.join(" OR ")
-
+  def no_personal_items(solr_parameters, user_parameters)
     solr_parameters[:fq] ||= []
-    solr_parameters[:fq] << query
+    solr_parameters[:fq] << "-#{Solrizer.solr_name("drs_category", :symbol)}:\"miscellany\""
   end
 
   def research_filter(solr_parameters, user_parameters)
