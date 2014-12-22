@@ -30,7 +30,7 @@ class CoreFilesController < ApplicationController
 
   before_filter :valid_form_permissions?, only: [:process_metadata, :update]
 
-  before_filter :verify_staff_or_beta, only: [:edit_xml]
+  before_filter :verify_staff_or_beta, only: [:validate_xml, :edit_xml]
 
   rescue_from Exceptions::NoParentFoundError, with: :no_parent_rescue
   rescue_from Exceptions::GroupPermissionsError, with: :group_permission_rescue
