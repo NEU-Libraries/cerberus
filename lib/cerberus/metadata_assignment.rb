@@ -102,7 +102,7 @@ module Cerberus
       end
 
       def keywords
-        if_mods_exists { return self.mods.subject }
+        if_mods_exists { return self.mods.subject.topic }
         if_DC_exists   { return self.DC.subject }
       end
 
