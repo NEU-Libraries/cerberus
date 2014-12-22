@@ -41,7 +41,7 @@ class CatalogController < ApplicationController
   def recent
     self.solr_search_params_logic += [:exclude_unwanted_models]
     self.solr_search_params_logic += [:featured_content_only]
-    (_, @recent_documents) = get_search_results(:q =>'', :sort=>"#{Solrizer.solr_name('system_create', :stored_sortable, type: :date)} desc", :rows=>3)
+    (_, @recent_documents) = get_search_results(:q =>'', :sort=>"#{Solrizer.solr_name('system_create', :stored_sortable, type: :date)} desc", :rows=>999)
     # if user_signed_in?
     #   # grab other people's documents
     #   (_, @recent_documents) = get_search_results(:q =>filter_not_mine,
