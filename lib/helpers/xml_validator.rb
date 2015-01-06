@@ -15,6 +15,24 @@ module XmlValidator
       return results
     end
 
+    # Nokogiri schema validation
+    begin
+      schemata_by_ns = Hash[ doc.root.attributes['schemaLocation'].value.scan(/(\S+)\s+(\S+)/) ]
+      schemata_by_ns.each do |ns,xsd_uri|
+        xsd = Nokogiri::XML.Schema(Net::HTTP.get(URI.parse(xsd_uri)))
+        xsd.validate(doc).each do |error|
+          results[:errors] << error
+        end
+      end
+    rescue NoMethodError
+      # Rescue NoMethodError - this will occur if there is no schemaLocation provided
+      results[:errors] << Exceptions::MissingMetadata.new("schemaLocation")
+    end
+
+    if results[:errors] != []
+      return results
+    end
+
     # Dummy corefile for testing
     doc = CoreFile.new
     doc.mods.content = xml_str
