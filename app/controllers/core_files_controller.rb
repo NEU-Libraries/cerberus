@@ -216,6 +216,19 @@ class CoreFilesController < ApplicationController
       if !@result[:mods_html].blank?
         # Valid, and ready to save
         @core_file = CoreFile.find(params[:id])
+
+        # Email the metadata changes
+        new_doc = Nokogiri::XML(params[:raw_xml].first)
+        old_doc = Nokogiri::XML(@core_file.mods.content)
+
+        new_tmp_file = "#{Rails.root}/tmp/new#{Time.now.to_f}.xml"
+        old_tmp_file = "#{Rails.root}/tmp/old#{Time.now.to_f}.xml"
+
+        File.open(new_tmp_file, 'w') {|f| f.write("#{new_doc.to_s}") }
+        File.open(old_tmp_file, 'w') {|f| f.write("#{old_doc.to_s}") }
+
+        XmlMailer.xml_edited_alert(@core_file, current_user, new_tmp_file, old_tmp_file).deliver!
+
         @core_file.mods.content = params[:raw_xml].first
         @core_file.save!
         render js: "window.location = '#{core_file_path(@core_file.pid)}'" and return

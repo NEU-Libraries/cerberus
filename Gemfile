@@ -43,6 +43,7 @@ gem "factory_girl_rails", :require => false
 gem 'mods_display', :git => 'https://github.com/NEU-Libraries/mods_display.git', :ref => 'af03004e2d31cac406a25364b28d2379d5b4e448'
 gem 'parseconfig'
 gem 'nokogiri', '~> 1.6.2.1'
+gem 'nokogiri-diff'
 gem 'namae'
 # Monitoring
 gem 'lograge'
