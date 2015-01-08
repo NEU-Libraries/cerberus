@@ -13,13 +13,6 @@ Cerberus::Application.configure do
   config.consider_all_requests_local       = true
   config.action_controller.perform_caching = false
 
-  # Don't care if the mailer can't send
-  config.action_mailer.raise_delivery_errors = true
-
-  # Use localhost:3000 to build urls when sending test
-  # development emails
-  config.action_mailer.default_url_options = { :host => "localhost:3000" }
-
   # Print deprecation notices to the Rails logger
   config.active_support.deprecation = :log
 
@@ -39,10 +32,6 @@ Cerberus::Application.configure do
   # Expands the lines which load the assets
   config.assets.debug = true
 
-
-  # Tell Mailer to use SMTP
-  config.action_mailer.delivery_method = :smtp
-
   # Tell Mailer to use localhost:3000 as the default host
   config.action_mailer.default_url_options = { :host => "localhost:3000" }
 
@@ -60,7 +49,8 @@ Cerberus::Application.configure do
   config.lograge.enabled = true
   # config.log_level = :info
 
-  config.action_mailer.delivery_method = :sendmail
+  # config.action_mailer.delivery_method = :sendmail
+  config.action_mailer.delivery_method = :smtp
   config.action_mailer.perform_deliveries = true
   config.action_mailer.raise_delivery_errors = true
 

@@ -6,14 +6,11 @@ class XmlMailer < ActionMailer::Base
     @email = user.email || "No email set.  Uh oh!"
     @pid  = core_file.pid  || "No pid set.  Uh oh!"
 
-    # mail.attachments['new.xml'] = File.read(new_tmp_file)
-    # mail.attachments['old.xml'] = File.read(old_tmp_file)
-
-    # puts "About to mail #{user.pretty_name} #{user.email} #{core_file.pid} #{old_tmp_file} #{new_tmp_file} - DGCDEBUG"
+    mail.attachments['new.xml'] = File.read(new_tmp_file)
+    mail.attachments['old.xml'] = File.read(old_tmp_file)
 
     mail(to: pick_receiver,
-         subject: "[cerberus] XML Edited for #{core_file.title} - #{core_file.pid}",
-         content_type: "text/html")
+         subject: "[cerberus] XML Edited for #{core_file.title} - #{core_file.pid}")
   end
 
   private
