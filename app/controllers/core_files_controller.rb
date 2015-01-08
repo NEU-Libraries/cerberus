@@ -231,6 +231,10 @@ class CoreFilesController < ApplicationController
 
         @core_file.mods.content = params[:raw_xml].first
         @core_file.save!
+
+        FileUtils.rm(new_tmp_file)
+        FileUtils.rm(old_tmp_file)
+
         render js: "window.location = '#{core_file_path(@core_file.pid)}'" and return
       end
     else
