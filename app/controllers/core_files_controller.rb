@@ -217,6 +217,9 @@ class CoreFilesController < ApplicationController
         # Valid, and ready to save
         @core_file = CoreFile.find(params[:id])
 
+        # Invalidate cache
+        Rails.cache.delete("/mods/#{@core_file.pid}-#{@core_file.modified_date}")
+
         # Email the metadata changes
         new_doc = Nokogiri::XML(params[:raw_xml].first)
         old_doc = Nokogiri::XML(@core_file.mods.content)
@@ -231,6 +234,7 @@ class CoreFilesController < ApplicationController
 
         @core_file.mods.content = params[:raw_xml].first
         @core_file.save!
+        @core_file.match_dc_to_mods
 
         FileUtils.rm(new_tmp_file)
         FileUtils.rm(old_tmp_file)
