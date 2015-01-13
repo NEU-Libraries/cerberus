@@ -7,6 +7,7 @@ module Cerberus
     extend ActiveSupport::Concern
 
     included do
+
       def canonical_class=(string)
         if_properties_exists_strict { self.properties.canonical_class = string }
       end

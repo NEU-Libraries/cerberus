@@ -245,6 +245,23 @@ class CoreFile < ActiveFedora::Base
     self.content_objects.find { |c| c.instance_of? ImageThumbnailFile } || false
   end
 
+  def match_dc_to_mods
+    # Strange little method, called after xml editor is used
+    # so we can propogate MODS direct changes to DC via
+    # MetadataAssignment logic that already exists
+    self.DC.nu_title = self.mods.title.first
+    self.DC.date = self.mods.date
+    # Kludge to avoid nested array quirk
+    self.DC.subject = nil
+    self.DC.subject = self.mods.subject.topic
+    fns = self.personal_creators.map{ |item| item[:first] }
+    lns = self.personal_creators.map{ |item| item[:last] }
+    cns = self.corporate_creators
+    self.DC.creator = nil
+    self.DC.assign_creators(fns, lns, cns)
+    self.save!
+  end
+
   private
 
     def purge_content_bearing_objects
