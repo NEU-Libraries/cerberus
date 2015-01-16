@@ -26,7 +26,7 @@
       <% elsif controller_name == "collections" %>
         <%= link_to('more ' + facet_field.label.pluralize + '»', collection_facet_path(:id => params[:id], :solr_field => solr_field), :class => "more_facets_link") %>
       <% else %>
-        <%= link_to('more ' + facet_field.label.pluralize + '»', catalog_facet_path(solr_field), :class => "more_facets_link") %>
+        <%= link_to('more ' + facet_field.label.pluralize + '»', catalog_facet_path(solr_field), :class => "more_facets_link", :smart_collection => action_name) %>
       <% end %>
     </li>
   <% end %>
