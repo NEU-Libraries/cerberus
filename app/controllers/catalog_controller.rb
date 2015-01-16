@@ -40,7 +40,7 @@ class CatalogController < ApplicationController
 
   def facet
     # Put in logic handling the smart collections
-    if params[:smart_collection]
+    if params[:smart_collection] && params[:smart_collection] != "index"
       filter_name = params[:smart_collection].to_s << "_filter"
       self.solr_search_params_logic += [filter_name.to_sym]
       (_, @document_list) = get_search_results
