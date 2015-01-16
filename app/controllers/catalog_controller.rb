@@ -45,6 +45,12 @@ class CatalogController < ApplicationController
       self.solr_search_params_logic += [filter_name.to_sym]
       (_, @document_list) = get_search_results
       @pagination = get_facet_pagination(params[:id], params)
+      respond_to do |format|
+        # Draw the facet selector for users who have javascript disabled:
+        format.html { render :template => 'catalog/facet' }
+        # Draw the partial for the "more" facet modal window:
+        format.js { render :template => 'catalog/facet', :layout => false }
+      end
     else
       super
     end
