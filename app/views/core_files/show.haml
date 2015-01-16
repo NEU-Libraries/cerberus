@@ -2,7 +2,7 @@
 
 %ul.breadcrumb
   - breadcrumb_to_root(@core_file).each do |breadcrumb|
-    =breadcrumb.html_safe
+    =breadcrumb
 
 - if @core_file.embargo_date_in_effect?
   %span.embargo-alert= "This item is under embargo and its content will be available for download and viewing on #{@core_file.embargo_release_date(formatted: true)}"
