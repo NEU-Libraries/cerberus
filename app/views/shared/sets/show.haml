@@ -2,7 +2,7 @@
 
 %ul.breadcrumb
   - breadcrumb_to_root(@set).each do |breadcrumb|
-    =breadcrumb
+    =breadcrumb.html_safe
   = render partial: 'shared/sets/breadcrumb_action_menu'
 -# Had to break off the partial into two files to make sure the popover div renders outside of the list.
 = render partial: 'shared/sets/breadcrumb_action_menu_links'
