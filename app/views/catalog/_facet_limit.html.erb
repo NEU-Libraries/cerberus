@@ -19,8 +19,7 @@
 </li>
   <% end %>
 
-  <% if(true)  %>
-  <!-- paginator.has_next? -->
+  <% if(paginator.has_next?)  %>
     <li class="more_facets_link">
       <% if controller_name == "communities" %>
         <%= link_to('more ' + facet_field.label.pluralize + '»', community_facet_path(:id => params[:id], :solr_field => solr_field), :class => "more_facets_link") %>
