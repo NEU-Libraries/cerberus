@@ -189,7 +189,12 @@ class ModsDatastream < ActiveFedora::OmDatastream
     end
 
     # Ensure title is set to a title actually associated with this core file.
-    solr_doc["title_info_title_ssi"] = self.title_info.title.first
+    # Over and over and around we go, patching up this junk forever and ever
+    solr_doc["title_info_title_ssi"] = kramdown_parse(self.title_info.title.first)
+    solr_doc["title_info_title_tesim"] = kramdown_parse(self.title_info.title.first)
+    solr_doc["title_info_0_title_ssi"] = kramdown_parse(self.title_info.title.first)
+    solr_doc["title_info_0_title_tesim"] = kramdown_parse(self.title_info.title.first)
+    solr_doc["title_tesim"] = kramdown_parse(self.title_info.title.first)
 
     # Kramdown parse for search purposes - #439
     solr_doc["title_ssi"] = kramdown_parse(self.title_info.title.first)
