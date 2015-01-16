@@ -35,14 +35,14 @@ module ApplicationHelper
   def breadcrumb_to_root(set, breadcrumb = [])
     if breadcrumb.empty?
       title_str = CGI::unescapeHTML "#{set.non_sort} #{kramdown_parse(set.title)}"
-      breadcrumb << content_tag(:li, title_str, class: 'active')
+      breadcrumb << content_tag(:li, title_str.html_safe, class: 'active')
     end
 
     if set.parent.nil?
       return breadcrumb.reverse
     else
       parent = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{set.parent}\"").first)
-      breadcrumb << content_tag(:li, link_to(kramdown_parse(parent.title), polymorphic_path(parent)))
+      breadcrumb << content_tag(:li, link_to(kramdown_parse(parent.title).html_safe, polymorphic_path(parent)))
       breadcrumb_to_root(parent, breadcrumb)
     end
   end
