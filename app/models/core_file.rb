@@ -11,6 +11,7 @@ class CoreFile < ActiveFedora::Base
   include Cerberus::CoreFile::Characterization
   include Cerberus::CoreFile::Export
   include Cerberus::CoreFile::AssignType
+  include Cerberus::CoreFile::Validation
 
   include Cerberus::Rights::MassPermissions
   include Cerberus::Rights::Embargoable
