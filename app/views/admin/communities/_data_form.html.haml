@@ -5,33 +5,41 @@
   - if params[:action].eql?('new')
     = f.hidden_field :parent, name: 'community[parent]'
   %fieldset
-    %legend Required Information
-    .row-fluid
-      .span8
-        - if params[:action].eql?('new')
-          = f.label :parent, "Parent Community *"
-          %input{:id => "community_autocomplete", :type => "text"}
-        = f.label :title, "Title *"
-        = f.text_field :title, required: true, pattern: ".*\\S.*", name: 'community[title][]', class: "input-block-level", placeholder: "University Libraries"
-    = f.label :description, "Description"
-    = f.text_area :description, name: 'community[description][]', class: "input-block-level", rows: 5
+    %legend
+    %fieldset
+      .row-fluid
+        .span8
+          - if params[:action].eql?('new')
+            = f.label :parent, "Parent Community", class: "control-label required-label"
+            %input{:id => "community_autocomplete", :type => "text", :required => true}
+          = f.label :title, "Title", class: "control-label"
+          = f.text_field :title, required: true, pattern: ".*\\S.*", name: 'community[title][]', class: "input-block-level", placeholder: "University Libraries"
+      = f.label :description, "Description"
+      = f.text_area :description, name: 'community[description][]', class: "input-block-level", rows: 5
+    %hr
     %legend Permissions
-    .row-fluid
-      .span8
-        = f.label :mass_permissions, "Mass Permissions"
-        = f.select :mass_permissions, options_for_select(['public', 'private'], 'public')
+    %fieldset
+      .row-fluid
+        .span8
+          = f.label :mass_permissions, "Mass Permissions"
+          = f.select :mass_permissions, options_for_select(['public', 'private'], @community.mass_permissions)
+    %hr
     %legend Thumbnail (Optional)
-    .row-fluid
-      .span8
-        = f.label :thumbnail, "Thumbnail"
-        = f.file_field :thumbnail, name: 'thumbnail'
-    .row-fluid
-      .span8
-        - if !@community.theses
-          = f.label :theses, "Include Theses and Dissertations Folder"
-          = f.check_box :theses, name: 'theses', value: 0
-        - else
-          %span This collection already has a theses and dissertations folder
-
+    %fieldset
+      .row-fluid
+        .span8
+          = f.label :thumbnail, "Thumbnail"
+          = f.file_field :thumbnail, name: 'thumbnail'
+    %hr
+    %legend Theses and Dissertations
+      .row-fluid
+        .span8
+          - if !@community.theses
+            .checkbox
+              = f.label :theses, "Include Theses and Dissertations Folder", class: "checkbox inline"
+              = f.check_box :theses, name: 'theses', value: 0
+          - else
+            %span This collection already has a theses and dissertations folder
+    %hr
   .form-actions
     = f.submit class: ['btn', 'btn-primary', 'btn-large'], value: 'Submit'
