@@ -1,6 +1,16 @@
+%ul.breadcrumb
+  %li
+    = link_to 'Admin Panel', '/admin'
+  %li
+    = link_to 'Manage Employees', '/admin/employees'
+  %li
+    = link_to "Manage #{@employee.pretty_employee_name}'s Account", {:action => "edit"}
+    
 %h2= "Manage #{@employee.pretty_employee_name}'s Account (#{@employee.nuid})"
 
 #current_communities
   = render partial: "employee_communities", locals: { employee: @employee }
+
+%hr
 
 = render partial: "attach_form"
