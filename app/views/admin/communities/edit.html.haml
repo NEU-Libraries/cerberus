@@ -1,4 +1,12 @@
-%h2.page-header= "Edit #{@community.title}"
+%ul.breadcrumb
+  %li
+    = link_to 'Admin Panel', '/admin'
+  %li
+    = link_to 'Manage Communitities', '/admin/communities'
+  %li.active
+    = link_to 'Edit ' "#{@community.title}".html_safe, {:action => "edit"}
+
+%h2.page-header= "Edit #{@community.title}".html_safe
 
 %ul.nav.nav-tabs
 
