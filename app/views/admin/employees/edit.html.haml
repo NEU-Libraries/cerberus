@@ -3,9 +3,9 @@
     = link_to 'Admin Panel', '/admin'
   %li
     = link_to 'Manage Employees', '/admin/employees'
-  %li
+  %li.active
     = link_to "Manage #{@employee.pretty_employee_name}'s Account", {:action => "edit"}
-    
+
 %h2= "Manage #{@employee.pretty_employee_name}'s Account (#{@employee.nuid})"
 
 #current_communities
