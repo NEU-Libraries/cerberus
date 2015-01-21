@@ -52,6 +52,8 @@ $(document).ready ->
       groupPermissionDisplayWhenPrivate()
       handleGroupPermissionAdd()
       handleGroupPermissionRemoval()
+      doSelectSubmit()
+
       return
 
     triggerCartDownload = ->
@@ -137,6 +139,17 @@ $(document).ready ->
       $("#full_title").bind "change paste keyup", ->
         parseTitle()
       return
+
+    doSelectSubmit = ->
+      $(doSelectSubmit.selector).each ->
+        select = $(this)
+        select.bind "change", ->
+          select.closest("form").submit()
+          false
+        return
+      return
+
+    doSelectSubmit.selector = "form select#sort, form select#per_page"
 
     datePartial = ->
       if $('#core_file_date').length > 0
