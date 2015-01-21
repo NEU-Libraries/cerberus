@@ -22,7 +22,7 @@
     :javascript
       var employees_for_autocomplete = #{Employee.all.map do |e|
           {
-            'label' => e.nuid,
+            'label' => e.name,
             'value' => e.id,
             'name'  => e.name
           }
