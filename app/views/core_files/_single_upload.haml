@@ -25,4 +25,4 @@
         = label_tag 'upload_type', 'Upload as proxy (collection owner will be depositor)'
         = radio_button_tag 'upload_type', 'proxy', false
   .form-actions
-    = submit_tag "Upload", disabled: "true", class: 'btn btn-large btn-primary activate-submit'
+    = submit_tag "Upload", disabled: "true", class: 'btn btn-large btn-primary activate-submit', data: { disable_with: "Please wait..."}

@@ -5,7 +5,7 @@
     .row-fluid
       .span8
         = f.label :title, "Title", class: "required-label"
-        = f.text_field :title, required: true, pattern: ".*\\S.*", name: 'set[title][]', class: "input-block-level", placeholder: "Univeristy Libraries"
+        = f.text_field :title, required: true, pattern: ".*\\S.*", name: 'set[title][]', class: "input-block-level", placeholder: "University Libraries"
       .span4
         = f.label :thumbnail, "Upload thumbnail"
         = f.file_field :thumbnail, name: 'thumbnail'
@@ -29,7 +29,7 @@
           %i.icon-plus-sign.icon-large
           Add Permission
   .form-actions
-    = f.submit class: ['btn', 'btn-primary'], value: 'Submit'
+    = f.submit class: ['btn', 'btn-primary'], value: 'Submit', data: { disable_with: "Please wait..."}
     - if params[:action] == "edit"
       / Only specifying collection here, because community is behind /admin and has it's own partial
       %a{ href: "#cancelEditModal", :class => ["btn", "btn-warning"], data: { toggle: "modal" } }
