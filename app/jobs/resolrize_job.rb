@@ -34,16 +34,18 @@ class ResolrizeJob
       begin
         pid = object.pid
         obj = ActiveFedora::Base.find(pid, :cast=>true)
-        result = obj.healthy?
-        if result == true
-          rsolr_conn.add(obj.to_solr)
-          rsolr_conn.commit
-          logger.info "#{Time.now} - Processed PID: #{pid}"
-        else
-          # we have some errors on validation
-          result[:errors].each do |e|
-            errors_for_pid = Logger.new("#{Rails.root}/log/#{job_id}/#{pid}.log")
-            errors_for_pid.warn(e)
+        if obj.is_a?(CoreFile)
+          result = obj.healthy?
+          if result == true
+            rsolr_conn.add(obj.to_solr)
+            rsolr_conn.commit
+            logger.info "#{Time.now} - Processed PID: #{pid}"
+          else
+            # we have some errors on validation
+            result[:errors].each do |e|
+              errors_for_pid = Logger.new("#{Rails.root}/log/#{job_id}/#{pid}.log")
+              errors_for_pid.warn(e)
+            end
           end
         end
       rescue Exception => error
