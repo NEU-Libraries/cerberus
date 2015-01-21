@@ -305,7 +305,8 @@ $(document).ready ->
       $link = drsApp.config.$addToSetLink
       $link.popover(
         html: true
-        content: drsApp.config.breadCrumbMenuContent
+        content: drsApp.config.breadCrumbMenuContent,
+        trigger: 'focus'
       )
 
       $link.on('click', 'a', (e) ->
