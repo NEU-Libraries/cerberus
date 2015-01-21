@@ -1,6 +1,6 @@
 %tr
   %td
-    .large= community.title
+    .large= community.title.html_safe
   %td
     = link_to("Edit", edit_admin_community_path(community), 
     		class: "btn btn-small btn-warning") 
