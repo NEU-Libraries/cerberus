@@ -35,6 +35,8 @@ class ResolrizeJob
         pid = object.pid
         obj = ActiveFedora::Base.find(pid, :cast=>true)
         if obj.is_a?(CoreFile)
+          # Delete it's old solr record
+          ActiveFedora::SolrService.instance.conn.delete_by_id("#{pid}", params: {'softCommit' => true})
           result = obj.healthy?
           if result == true
             rsolr_conn.add(obj.to_solr)
