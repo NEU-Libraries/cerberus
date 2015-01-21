@@ -6,6 +6,8 @@
 = form_tag core_file_validate_xml_path, :method => :put, :id => "raw_xml_form", :remote => true do
   = hidden_field_tag( "raw_xml[]", "")
 
+  .alert.alert-warning This is just a preview. Click "Save" to apply your changes.
+
   .span6
     %h3 XML
     #editor.well
