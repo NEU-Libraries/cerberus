@@ -231,13 +231,26 @@ ul.facet_extended_list
 // DGC - Kludge to make grid/list work better
 
 span.count{
-  position: absolute;
-  right: 10px;
+  display: table-cell;
+  vertical-align: top;
+  text-align: right;
+  padding-right:7px;
 }
 
 a.facet_select{
-  padding-left: 10px;
-  padding-right: 20px;
+  padding-right: 1em;
+  display: table-cell;
+  text-indent: -6px;
+  padding-left: 15px;
+  -ms-word-break: break-all;
+  word-break: break-all;
+  word-break: break-word;
+  -webkit-hyphens: auto;
+  -moz-hyphens: auto;
+  -ms-hyphens: auto;
+  hyphens: auto;
+  padding-bottom: 6px;
+  text-align: left;
 }
 
 .dropdown-menu>li>a {
