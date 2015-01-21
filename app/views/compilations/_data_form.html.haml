@@ -21,5 +21,5 @@
       Add Permission
 
   .form-actions
-    = f.submit class: "btn btn-primary"
+    = f.submit class: "btn btn-primary", data: { disable_with: "Please wait..."} 
     = link_to "Cancel", compilations_path, class: "btn"

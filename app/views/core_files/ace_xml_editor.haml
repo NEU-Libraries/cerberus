@@ -21,7 +21,7 @@
   .span12
     .well
       = submit_tag "Validate + Preview", :class => ['btn', 'btn-primary'], :id => "validate_button"
-      = submit_tag "Save", :class => ['btn', 'btn-success'], :id => "save_button"
+      = submit_tag "Save", :class => ['btn', 'btn-success'], :id => "save_button", data: { disable_with: "Please wait..."}
       %a{ href: "#cancelEditModal", :class => ['btn', 'btn-warning'], data: {toggle: "modal"} }
         Cancel
 
