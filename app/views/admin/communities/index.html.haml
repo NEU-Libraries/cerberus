@@ -1,8 +1,16 @@
+%ul.breadcrumb
+  %li
+    = link_to 'Admin Panel', '/admin'
+  %li.active
+  	= link_to 'Manage Communities', '/admin/communities'
+
 %h2.page-header All Communities
 
 .row
   .span4
-    =link_to("Create new community", new_admin_community_path)
+    =link_to("Create new community", new_admin_community_path, class: "btn btn-success")
+%br
 
-- @communities.each do |community|
-  = render partial: "admin_community", locals: { community: community }
+%table.table.table-striped
+  - @communities.each do |community|
+    = render partial: "admin_community", locals: { community: community }
