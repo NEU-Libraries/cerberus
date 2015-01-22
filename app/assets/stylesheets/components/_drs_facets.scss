@@ -234,7 +234,7 @@ span.count{
   display: table-cell;
   vertical-align: top;
   text-align: right;
-  padding-right:7px;
+  padding-right:10px;
 }
 
 a.facet_select{
@@ -251,6 +251,15 @@ a.facet_select{
   hyphens: auto;
   padding-bottom: 6px;
   text-align: left;
+}
+
+
+.facet_values {
+  display:table;
+  width:100%;
+}
+.facet_values > .facet_value {
+  display:table-row;
 }
 
 .dropdown-menu>li>a {
