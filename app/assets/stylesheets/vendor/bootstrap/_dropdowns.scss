@@ -187,7 +187,7 @@
   margin-left: -1px;
   @include border-radius(0 6px 6px 6px);
 }
-.dropdown-submenu:hover > .dropdown-menu {
+.dropdown-submenu:hover > .dropdown-menu, .dropdown-submenu.open > .dropdown-menu {
   display: block;
 }
 
