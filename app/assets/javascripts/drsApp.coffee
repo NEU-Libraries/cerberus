@@ -53,6 +53,7 @@ $(document).ready ->
       handleGroupPermissionAdd()
       handleGroupPermissionRemoval()
       doSelectSubmit()
+      submenuMobileFix()
 
       return
 
@@ -150,6 +151,19 @@ $(document).ready ->
       return
 
     doSelectSubmit.selector = "form select#sort, form select#per_page"
+
+    # This is a fix for the submenus on mobile
+    submenuMobileFix = ->
+      $(".dropdown-submenu").on "click", (e) ->
+        e.stopPropagation()
+        $(this).siblings(".dropdown-submenu").removeClass('open')
+        $(this).toggleClass('open')
+        return
+      $('.dropdown').mouseleave ->
+        $(this).find(".dropdown-submenu").each ->
+          $(this).removeClass('open')
+        return
+      return
 
     datePartial = ->
       if $('#core_file_date').length > 0
