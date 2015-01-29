@@ -43,6 +43,8 @@ class CatalogController < ApplicationController
     if params[:smart_collection]
       filter_name = params[:smart_collection].to_s << "_filter"
       self.solr_search_params_logic += [filter_name.to_sym]
+      # Fixes #641 by scrubbing this param once we're done with it
+      params.delete[:smart_collection]
       (_, @document_list) = get_search_results
       @pagination = get_facet_pagination(params[:id], params)
       respond_to do |format|
