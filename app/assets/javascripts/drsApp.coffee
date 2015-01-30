@@ -52,6 +52,9 @@ $(document).ready ->
       groupPermissionDisplayWhenPrivate()
       handleGroupPermissionAdd()
       handleGroupPermissionRemoval()
+      doSelectSubmit()
+      submenuMobileFix()
+
       return
 
     triggerCartDownload = ->
@@ -136,6 +139,30 @@ $(document).ready ->
     titlePartial = ->
       $("#full_title").bind "change paste keyup", ->
         parseTitle()
+      return
+
+    doSelectSubmit = ->
+      $(doSelectSubmit.selector).each ->
+        select = $(this)
+        select.bind "change", ->
+          select.closest("form").submit()
+          false
+        return
+      return
+
+    doSelectSubmit.selector = "form select#sort, form select#per_page"
+
+    # This is a fix for the submenus on mobile
+    submenuMobileFix = ->
+      $(".dropdown-submenu").on "click", (e) ->
+        e.stopPropagation()
+        $(this).siblings(".dropdown-submenu").removeClass('open')
+        $(this).toggleClass('open')
+        return
+      $('.dropdown').mouseleave ->
+        $(this).find(".dropdown-submenu").each ->
+          $(this).removeClass('open')
+        return
       return
 
     datePartial = ->
@@ -292,7 +319,8 @@ $(document).ready ->
       $link = drsApp.config.$addToSetLink
       $link.popover(
         html: true
-        content: drsApp.config.breadCrumbMenuContent
+        content: drsApp.config.breadCrumbMenuContent,
+        trigger: 'focus'
       )
 
       $link.on('click', 'a', (e) ->

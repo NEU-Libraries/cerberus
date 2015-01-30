@@ -29,5 +29,5 @@
   / We need to account for the different file types here to extend the metdata screen
 
   .form-actions
-    = f.submit class: ['btn', 'btn-primary'], :onclick => "confirmation_needed = false;", value: 'Submit'
+    = f.submit class: ['btn', 'btn-primary'], :onclick => "confirmation_needed = false;", value: 'Submit', data: { disable_with: "Please wait..."}
     = button_tag "Reset", class: 'btn', type: :reset

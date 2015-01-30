@@ -56,6 +56,48 @@ module Exceptions
     end
   end
 
+  class SolrizationError < StandardError
+    def initialize
+      super "Unable to create solr doc"
+    end
+  end  
+
+  class InvalidMassPermissionsError < StandardError
+    def initialize
+      super "Invalid mass permissions set"
+    end
+  end
+
+  class NoMassPermissionsError < StandardError
+    def initialize
+      super "No mass permissions set"
+    end
+  end
+
+  class NoCanonicalClassFoundError < StandardError
+    def initialize
+      super "No canonical class set"
+    end
+  end
+
+  class NoCanonicalObjectFoundError < StandardError
+    def initialize
+      super "No canonical object set"
+    end
+  end
+
+  class NoDepositorFoundError < StandardError
+    def initialize
+      super "No depositor set"
+    end
+  end
+
+  class InvalidDepositorPermissionsError < StandardError
+    def initialize
+      super "The depositor can't edit this object"
+    end
+  end
+
   class NoParentFoundError < StandardError
     def initialize
       super "No parent set"
