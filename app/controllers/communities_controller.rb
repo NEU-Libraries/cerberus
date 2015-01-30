@@ -19,7 +19,6 @@ class CommunitiesController < ApplicationController
   before_filter :can_read?, except: [:index, :show]
   before_filter :enforce_show_permissions, :only=>:show
   before_filter :get_set, except: [:index]
-  before_filter :reset_page_parameter
 
   self.solr_search_params_logic += [:add_access_controls_to_solr_params]
 
@@ -82,14 +81,14 @@ class CommunitiesController < ApplicationController
   def employees
     @page_title = "#{@set.title} #{t('drs.featured_content.employees.name')}"
 
-    @smart_docs = safe_get_smart_docs(@set.find_employees)
+    safe_get_smart_docs(@set.find_employees)
     render 'smart_collection', locals: { smart_collection: 'employees' }
   end
 
   def research_publications
     @page_title = "#{@set.title} #{t('drs.featured_content.research.name')}"
 
-    @smart_docs = safe_get_smart_docs(@set.research_publications)
+    safe_get_smart_docs(@set.research_publications)
 
     render 'smart_collection', locals: { smart_collection: 'research' }
   end
@@ -97,28 +96,28 @@ class CommunitiesController < ApplicationController
   def other_publications
     @page_title = "#{@set.title} #{t('drs.featured_content.other.name')}"
 
-    @smart_docs = safe_get_smart_docs(@set.other_publications)
+    safe_get_smart_docs(@set.other_publications)
     render 'smart_collection', locals: { smart_collection: 'other' }
   end
 
   def presentations
     @page_title = "#{@set.title} #{t('drs.featured_content.presentations.name')}"
 
-    @smart_docs = safe_get_smart_docs(@set.presentations)
+    safe_get_smart_docs(@set.presentations)
     render 'smart_collection', locals: { smart_collection: 'presentations' }
   end
 
   def datasets
     @page_title = "#{@set.title} #{t('drs.featured_content.datasets.name')}"
 
-    @smart_docs = safe_get_smart_docs(@set.datasets)
+    safe_get_smart_docs(@set.datasets)
     render 'smart_collection', locals: { smart_collection: 'datasets' }
   end
 
   def learning_objects
     @page_title = "#{@set.title} #{t('drs.featured_content.learning.name')}"
 
-    @smart_docs = safe_get_smart_docs(@set.learning_objects)
+    safe_get_smart_docs(@set.learning_objects)
     render 'smart_collection', locals: { smart_collection: 'learning' }
   end
 
@@ -159,6 +158,17 @@ class CommunitiesController < ApplicationController
       solr_parameters[:fq] << fq
     end
 
+    def limit_to_pids(solr_parameters, user_parameters)
+      query = @ids.map do |pid|
+        "id:\"#{pid}\""
+      end
+
+      fq = query.join(" OR ")
+
+      solr_parameters[:fq] ||= []
+      solr_parameters[:fq] << fq
+    end
+
     # Ensures that only current_user readable items are returned
     def safe_get_smart_docs(docs)
       if !current_user
@@ -167,10 +177,15 @@ class CommunitiesController < ApplicationController
         docs.select! { |doc| current_user.can?(:read, doc) }
       end
 
-      ids = docs.map {|x| x.id}
-      @response = get_solr_response_for_field_values('id', ids, {}).first
+      @ids = docs.map {|x| x.id}
 
-      return docs
+      # if q or f, change to emulate limit_to_scope
+      if !params[:q].nil? || !params[:f].nil?
+        self.solr_search_params_logic += [:limit_to_pids]
+        (@response, @document_list) = get_search_results
+      else
+        (@response, @document_list) = get_solr_response_for_field_values('id', @ids, {}).first
+      end
     end
 
     def disable_highlighting(solr_parameters, user_parameters)
