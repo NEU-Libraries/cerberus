@@ -154,22 +154,16 @@ $(document).ready ->
 
     # This is a fix for the submenus on mobile
     submenuMobileFix = ->
-      if Modernizr.touch
-        $(".dropdown-submenu").on "click", (e) ->
-          e.stopPropagation()
-          $(this).siblings(".dropdown-submenu").removeClass('open')
-          $(this).toggleClass('open')
-          child = $(this).children('.dropdown-menu')
-          if $(this).hasClass('open')
-            child.css('display', 'block')
-          else
-            child.css('display', 'none')
-          return
-        $('.dropdown-menu').mouseleave ->
-          $(this).find(".dropdown-submenu").each ->
-            $(this).removeClass('open')
-          return
+      $(".dropdown-submenu").on "click", (e) ->
+        e.stopPropagation()
+        $(this).siblings(".dropdown-submenu").removeClass('open')
+        $(this).toggleClass('open')
         return
+      $('.dropdown-menu').focusout ->
+        $(this).find(".dropdown-submenu").each ->
+          $(this).removeClass('open')
+        return
+      return
 
     datePartial = ->
       if $('#core_file_date').length > 0
