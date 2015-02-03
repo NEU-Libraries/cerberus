@@ -230,7 +230,7 @@ ul.facet_extended_list
 
 // DGC - Kludge to make grid/list work better
 
-span.count{
+.facet_value > span.count{
   display: table-cell;
   vertical-align: top;
   text-align: right;
@@ -247,6 +247,9 @@ span.count{
   white-space:nowrap;
 }
 
+.selected .count {
+  float:right;
+}
 
 .facet_values {
   display:table;
