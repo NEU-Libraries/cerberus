@@ -3,7 +3,7 @@
         :limit => facet_limit_for(solr_field))
       %>
 <li class="dropdown-submenu">
-  <a tabindex="-1" href="#"><%=facet_field.label%></a>
+  <a tabindex="-1"><%=facet_field.label%></a>
   <ul class="dropdown-menu">
   <% paginator.items.each do |item| -%>
 <li>
