@@ -2,24 +2,21 @@ module Api
   module V1
     class HandlesController < ApplicationController
 
+      include HandleHelper
+
       def create_handle
         providedUrl = params[:url]
-        if HandleGenerator::handle_exists?(providedUrl)
-          handle = HandleGenerator::get_handle(providedUrl)
+        if handle_exists?(providedUrl)
+          handle = retrieve_handle(providedUrl)
         else
-          handle = HandleGenerator::make_handle(providedUrl)
+          handle = make_handle(providedUrl)
         end
         render :json => [{:handle => "#{handle}"}]
       end
 
       def get_handle
-        puts "DGCDEBUG"
         providedUrl = params[:url]
-        puts providedUrl
-        puts "DGCDEBUG2"
-        handle = HandleGenerator::get_handle(providedUrl)
-        puts handle
-        puts "DGCDEBUG3"
+        handle = retrieve_handle(providedUrl)
         render :json => [{:handle => "#{handle}"}]
       end
     end

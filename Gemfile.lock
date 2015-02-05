@@ -385,6 +385,7 @@ GEM
       rspec-mocks (>= 2.5.0)
     rest-client (1.6.7)
       mime-types (>= 1.16)
+    retries (0.0.5)
     rmagick (2.13.2)
     rsolr (1.0.9)
       builder (>= 2.1.2)
@@ -541,6 +542,7 @@ DEPENDENCIES
   resque
   resque-pool (= 0.3.0)
   resque_spec
+  retries
   rmagick (~> 2.13.2)
   rspec-rails
   ruby-filemagic (~> 0.4.2)
