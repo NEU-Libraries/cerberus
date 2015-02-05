@@ -16,6 +16,14 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
+-- Current Database: `handles`
+--
+
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `handles` /*!40100 DEFAULT CHARACTER SET latin1 */;
+
+USE `handles`;
+
+--
 -- Table structure for table `deleted_handles`
 --
 
@@ -71,7 +79,7 @@ CREATE TABLE `handles` (
 
 LOCK TABLES `handles` WRITE;
 /*!40000 ALTER TABLE `handles` DISABLE KEYS */;
-INSERT INTO `handles` VALUES ('2047/D00000000',0,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+INSERT INTO `handles` VALUES ('2047/D00000001',0,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 /*!40000 ALTER TABLE `handles` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -164,7 +172,7 @@ CREATE TABLE `transactions` (
   `URL` varchar(50) NOT NULL,
   `date` date NOT NULL,
   PRIMARY KEY (`trans_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -173,6 +181,7 @@ CREATE TABLE `transactions` (
 
 LOCK TABLES `transactions` WRITE;
 /*!40000 ALTER TABLE `transactions` DISABLE KEYS */;
+INSERT INTO `transactions` VALUES (1,'CREATE',22,'2047/D1','https://repository.library.northeastern.edu/files/','2015-02-05');
 /*!40000 ALTER TABLE `transactions` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -185,4 +194,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2015-01-14 20:13:15
+-- Dump completed on 2015-02-05 11:20:15
