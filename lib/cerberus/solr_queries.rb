@@ -65,7 +65,6 @@ module Cerberus
 
       sorter_proc = Proc.new do |klasses, arry|
         klasses.each do |klass|
-          puts "ko is #{co}"
           arry << co.find { |x| x.klass == klass }
         end
 
