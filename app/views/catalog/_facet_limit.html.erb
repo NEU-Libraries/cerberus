@@ -6,7 +6,7 @@
   <a tabindex="-1"><%=facet_field.label%></a>
   <ul class="dropdown-menu">
   <!-- Fixes #647 - Bit of a kludge - FacetPaginator doesn't seem to care about :sort... -->
-  <% facet_field.label == "Year" ? paginator.items.sort_by!{|x| x.value.to_i} : %>
+  <% if facet_field.label == "Year" then paginator.items.sort_by!{|x| x.value.to_i} end %>
   <% paginator.items.each do |item| -%>
     <li>
       <div class="facet_values">
