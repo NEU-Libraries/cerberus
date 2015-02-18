@@ -9,11 +9,10 @@ describe HandleHelper do
     :password => "#{ENV["HANDLE_TEST_PASSWORD"]}",
     :database => "#{ENV["HANDLE_TEST_DATABASE"]}")
 
-  it "retrieves handle" do
-  end
-
   it "makes a handle" do
     make_handle(bills_file.persistent_url, client).should == "http://hdl.handle.net/2047/D10000001"
+    handle_exists?(bills_file.persistent_url, client).should == true
+    retrieve_handle(bills_file.persistent_url, client).should == "http://hdl.handle.net/2047/D10000001"
   end
 
   after :all do
