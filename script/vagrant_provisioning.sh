@@ -35,6 +35,7 @@ sudo yum install redis --assumeyes
 sudo yum install unzip --assumeyes
 sudo yum install zsh --assumeyes
 sudo yum install mysql-devel --assumeyes
+sudo yum install mysql-server --assumeyes
 sudo yum install nodejs --assumeyes
 sudo yum install htop --assumeyes
 sudo yum install gcc gettext-devel expat-devel curl-devel zlib-devel openssl-devel perl-ExtUtils-CBuilder perl-ExtUtils-MakeMaker --assumeyes
