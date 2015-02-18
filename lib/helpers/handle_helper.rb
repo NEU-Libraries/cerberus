@@ -1,7 +1,7 @@
 module HandleHelper
 
   def make_handle(url, client = nil)
-    client ||= Mysql2::Client.new(:host => "#{ENV["HANDLE_HOST"]}", :username => "#{ENV["HANDLE_USERNAME"]}", :password => "#{ENV["HANDLE_PASSWORD"]}", :database => "#{ENV["HANDLE_DATABASE"]}")
+    client || client = Mysql2::Client.new(:host => "#{ENV["HANDLE_HOST"]}", :username => "#{ENV["HANDLE_USERNAME"]}", :password => "#{ENV["HANDLE_PASSWORD"]}", :database => "#{ENV["HANDLE_DATABASE"]}")
 
     handler = Proc.new do |exception, attempt_number, total_delay|
       logger.warn "Handler saw a #{exception.class}; retry attempt #{attempt_number}; #{total_delay} seconds have passed."
@@ -29,9 +29,8 @@ module HandleHelper
     end
   end
 
-  def handle_exists?(url)
-    client = Mysql2::Client.new(:host => "#{ENV["HANDLE_HOST"]}", :username => "#{ENV["HANDLE_USERNAME"]}", :password => "#{ENV["HANDLE_PASSWORD"]}", :database => "#{ENV["HANDLE_DATABASE"]}")
-
+  def handle_exists?(url, client = nil)
+    client || client = Mysql2::Client.new(:host => "#{ENV["HANDLE_HOST"]}", :username => "#{ENV["HANDLE_USERNAME"]}", :password => "#{ENV["HANDLE_PASSWORD"]}", :database => "#{ENV["HANDLE_DATABASE"]}")
     mysql_response = client.query("select data from handles WHERE type = 'URL' and data = '#{url}';")
     if mysql_response.count == 0
       return false
@@ -40,15 +39,7 @@ module HandleHelper
     return true
   end
 
-  def retrieve_handle(url)
-    client = Mysql2::Client.new(:host => "#{ENV["HANDLE_HOST"]}", :username => "#{ENV["HANDLE_USERNAME"]}", :password => "#{ENV["HANDLE_PASSWORD"]}", :database => "#{ENV["HANDLE_DATABASE"]}")
-    if handle_exists?(url)
-      mysql_response = client.query("select handle from handles WHERE type = 'URL' and data = '#{url}';")
-      handle = mysql_response.first.first[1]
-      return "http://hdl.handle.net/#{handle}"
-    else
-      return nil
-    end
-  end
-
-end
+  def retrieve_handle(url, client = nil)
+    client || client = Mysql2::Client.new(:host => "#{ENV["HANDLE_HOST"]}", :username => "#{ENV["HANDLE_USERNAME"]}", :password => "#{ENV["HANDLE_PASSWORD"]}", :database => "#{ENV["HANDLE_DATABASE"]}")
+    if handle_exists?(url, client)
+      mysql_response = client.query
