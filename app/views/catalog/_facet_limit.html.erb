@@ -5,18 +5,20 @@
 <li class="dropdown-submenu">
   <a tabindex="-1"><%=facet_field.label%></a>
   <ul class="dropdown-menu">
+  <!-- Fixes #647 - Bit of a kludge - FacetPaginator doesn't seem to care about :sort... -->
+  <% facet_field.label == "Year" ? paginator.items.sort_by!{|x| x.value.to_i} %>
   <% paginator.items.each do |item| -%>
-<li>
-  <div class="facet_values">
-    <div class="facet_value">
-      <% if facet_in_params?( solr_field, item.value ) %>
-          <%= render_selected_facet_value(solr_field, item).split("(").join('(<small>').split(")").join("</small>)").html_safe %>
-        <% else %>
-          <%= render_facet_value(solr_field, item).split("(").join('(<small>').split(")").join("</small>)").html_safe %>
-      <% end -%>
-    </div>
-  </div>
-</li>
+    <li>
+      <div class="facet_values">
+        <div class="facet_value">
+          <% if facet_in_params?( solr_field, item.value ) %>
+              <%= render_selected_facet_value(solr_field, item).split("(").join('(<small>').split(")").join("</small>)").html_safe %>
+            <% else %>
+              <%= render_facet_value(solr_field, item).split("(").join('(<small>').split(")").join("</small>)").html_safe %>
+          <% end -%>
+        </div>
+      </div>
+    </li>
   <% end %>
 
   <% if(paginator.has_next?)  %>
