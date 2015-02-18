@@ -1,13 +1,19 @@
 require "spec_helper"
+include HandleHelper
 
 describe HandleHelper do
+  let(:bills_file) { FactoryGirl.create(:bills_complete_file) }
+  `mysql -u "#{ENV["HANDLE_TEST_USERNAME"]}" < "#{Rails.root}"/spec/fixtures/files/handlesTEST.sql`
+  client = Mysql2::Client.new(:host => "#{ENV["HANDLE_TEST_HOST"]}",
+    :username => "#{ENV["HANDLE_TEST_USERNAME"]}",
+    :password => "#{ENV["HANDLE_TEST_PASSWORD"]}",
+    :database => "#{ENV["HANDLE_TEST_DATABASE"]}")
 
-  before :all do
-    sh "mysql -u #{ENV["HANDLE_TEST_USERNAME"]} -p#{ENV["HANDLE_TEST_PASSWORD"]} < #{Rails.root}/spec/fixtures/files/handlesTEST.sql"
-    client = Mysql2::Client.new(:host => "#{ENV["HANDLE_TEST_HOST"]}",
-      :username => "#{ENV["HANDLE_TEST_USERNAME"]}",
-      :password => "#{ENV["HANDLE_TEST_PASSWORD"]}",
-      :database => "#{ENV["HANDLE_TEST_DATABASE"]}")
+  it "retrieves handle" do
+  end
+
+  it "makes a handle" do
+    make_handle(bills_file.persistent_url, client).should == "http://hdl.handle.net/2047/D10000001"
   end
 
   after :all do
