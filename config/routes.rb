@@ -68,6 +68,14 @@ Cerberus::Application.routes.draw do
     resources :employees, only: [:index, :edit, :update, :destroy]
   end
 
+  namespace :api, defaults: {format: 'json'} do
+    namespace :v1 do
+      # handles
+      get "/handles/get_handle/*url" => "handles#get_handle", as: "get_handle", :defaults => { :format => 'json' }, :url => /.*/
+      post "/handles/create_handle/*url" => "handles#create_handle", as: "create_handle", :defaults => { :format => 'json' }, :url => /.*/
+    end
+  end
+
   resource :shopping_cart, :path => "download_queue", :controller => "shopping_carts", except: [:new, :create, :edit]
   put '/download_queue' => 'shopping_carts#update', as: 'update_cart'
   get '/download_queue/download' => 'shopping_carts#download', as: 'cart_download'
