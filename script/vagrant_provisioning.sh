@@ -94,6 +94,9 @@ echo '#!/bin/sh' >> /home/vagrant/cerberus/.git/hooks/pre-push
 echo 'rake smoke_test' >> /home/vagrant/cerberus/.git/hooks/pre-push
 chmod +x /home/vagrant/cerberus/.git/hooks/pre-push
 
+echo "Setting up faux handles"
+mysql -u root < /home/vagrant/cerberus/spec/fixtures/files/handlesMIN.sql
+
 echo "Installing Oh-My-Zsh"
 cd /home/vagrant
 \curl -Lk http://install.ohmyz.sh | sh

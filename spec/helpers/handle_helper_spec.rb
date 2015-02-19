@@ -1,7 +1,7 @@
 require "spec_helper"
 include HandleHelper
 
-describe HandleHelper do
+describe HandleHelper, unless: $in_travis do
   let(:bills_file) { FactoryGirl.create(:bills_complete_file) }
   `mysql -u "#{ENV["HANDLE_TEST_USERNAME"]}" < "#{Rails.root}"/spec/fixtures/files/handlesTEST.sql`
   client = Mysql2::Client.new(:host => "#{ENV["HANDLE_TEST_HOST"]}",
