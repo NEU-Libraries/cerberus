@@ -50,7 +50,7 @@ class CoreFilesController < ApplicationController
       delimiter " -- "
     end
     identifier do
-      # ignore!
+      ignore!
     end
   end
 
