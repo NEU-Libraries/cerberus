@@ -40,6 +40,7 @@ module Cerberus
             self.mods_type = "moving image"
           elsif self.canonical_class.constantize == ImageMasterFile
             self.dc_type = "image"
+            self.mods_type = "still image"
           elsif [TextFile, PdfFile, MswordFile].include? self.canonical_class.constantize
             self.dc_type = "text"
             self.mods_type = "text"
