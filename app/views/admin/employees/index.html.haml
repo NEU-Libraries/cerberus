@@ -7,5 +7,7 @@
 %h2.page-header All Employees
 
 %table.table.table-striped
+  = render 'catalog/results_pagination'
   - @employees.each do |employee|
     = render partial: 'employee_admin', locals: { employee: employee }
+  = render 'catalog/results_pagination'    
