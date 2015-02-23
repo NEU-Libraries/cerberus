@@ -10,6 +10,7 @@ class CoreFilesController < ApplicationController
 
   include ModsDisplay::ControllerExtension
   include XmlValidator
+  include HandleHelper
 
   before_filter :authenticate_user!, except: [:show]
 
@@ -369,6 +370,9 @@ class CoreFilesController < ApplicationController
       if !sc_type.nil? && sc_type != ""
         core_file.category = sc_type
       end
+
+      # Create a handle
+      core_file.identifier = make_handle(core_file.persistent_url)
 
       core_file.save!
       return core_file

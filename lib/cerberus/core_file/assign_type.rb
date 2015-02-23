@@ -28,25 +28,34 @@ module Cerberus
           self.canonical_class = "ZipFile"
         end
 
-        assign_dcmi_type
+        assign_obj_type
       end
 
       private
 
         # Tag core with a DCMI noun based on the sort of content object created.
-        def assign_dcmi_type
-          if [ImageMasterFile, VideoFile].include? self.canonical_class.constantize
-            self.dcmi_type = "image"
+        def assign_obj_type
+          if self.canonical_class.constantize == VideoFile
+            self.dc_type = "image"
+            self.mods_type = "moving image"
+          elsif self.canonical_class.constantize == ImageMasterFile
+            self.dc_type = "image"
+            self.mods_type = "still image"
           elsif [TextFile, PdfFile, MswordFile].include? self.canonical_class.constantize
-            self.dcmi_type = "text"
+            self.dc_type = "text"
+            self.mods_type = "text"
           elsif self.canonical_class.constantize == AudioFile
-            self.dcmi_type = "audio"
+            self.dc_type = "audio"
+            self.mods_type = "sound recording"
           elsif self.canonical_class.constantize == MsexcelFile
-            self.dcmi_type = "dataset"
+            self.dc_type = "dataset"
+            self.mods_type = "software, multimedia"
           elsif self.canonical_class.constantize == MspowerpointFile
-            self.dcmi_type = "interactive resource"
+            self.dc_type = "interactive resource"
+            self.mods_type = "software, multimedia"
           elsif self.canonical_class.constantize == ZipFile
-            self.dcmi_type = "unknown"
+            self.dc_type = "collection"
+            self.mods_type = "software, multimedia"
           end
 
           self.save! ? self : Rails.logger.warn("Failed to update #{self.pid}'s dcmi type")

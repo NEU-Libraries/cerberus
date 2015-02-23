@@ -1,3 +1,6 @@
+require "#{Rails.root}/lib/helpers/handle_helper"
+include HandleHelper
+
 def mint_unique_pid
   Cerberus::Noid.namespaceize(Cerberus::IdService.mint)
 end
@@ -33,6 +36,7 @@ def create_content_file(factory_sym, user, parent)
   core.mass_permissions = 'public'
   core.keywords = ["#{master.class}", "content"]
   core.mods.subject(0).topic = "a"
+  core.identifier = make_handle(core.persistent_url)
 
   core.save!
 end

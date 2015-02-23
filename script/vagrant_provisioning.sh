@@ -35,6 +35,7 @@ sudo yum install redis --assumeyes
 sudo yum install unzip --assumeyes
 sudo yum install zsh --assumeyes
 sudo yum install mysql-devel --assumeyes
+sudo yum install mysql-server --assumeyes
 sudo yum install nodejs --assumeyes
 sudo yum install htop --assumeyes
 sudo yum install gcc gettext-devel expat-devel curl-devel zlib-devel openssl-devel perl-ExtUtils-CBuilder perl-ExtUtils-MakeMaker --assumeyes
@@ -92,6 +93,9 @@ touch /home/vagrant/cerberus/.git/hooks/pre-push
 echo '#!/bin/sh' >> /home/vagrant/cerberus/.git/hooks/pre-push
 echo 'rake smoke_test' >> /home/vagrant/cerberus/.git/hooks/pre-push
 chmod +x /home/vagrant/cerberus/.git/hooks/pre-push
+
+echo "Setting up faux handles"
+mysql -u root < /home/vagrant/cerberus/spec/fixtures/files/handlesMIN.sql
 
 echo "Installing Oh-My-Zsh"
 cd /home/vagrant

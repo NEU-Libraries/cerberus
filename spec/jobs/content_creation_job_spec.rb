@@ -97,7 +97,7 @@ describe ContentCreationJob, unless: $in_travis do
 
     it "updates the core record appropriately" do
       @core.reload
-      @core.dcmi_type.should == "image"
+      @core.obj_type.should == "still image"
     end
 
     it_should_behave_like "master creation process"

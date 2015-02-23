@@ -270,7 +270,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
         }
         xml.note('type' => 'citation')
         xml.subject
-        xml.identifier
+        xml.identifier('type' => 'uri')
         xml.typeOfResource
 
         # We instantiate all of these fields for every MODS record because terminology
