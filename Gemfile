@@ -3,6 +3,7 @@ source 'https://rubygems.org'
 gem 'rails', '3.2.13'
 gem 'redis-rails'
 gem 'mysql2' # Used in staging environment.
+gem 'retries'
 gem 'sqlite3'
 gem 'blacklight'
 gem 'blacklight_advanced_search', '~> 2.1.0'

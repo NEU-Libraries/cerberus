@@ -230,29 +230,26 @@ ul.facet_extended_list
 
 // DGC - Kludge to make grid/list work better
 
-span.count{
+.facet_value > span.count{
   display: table-cell;
   vertical-align: top;
   text-align: right;
   padding-right:10px;
 }
 
-a.facet_select{
+.facet_select{
   padding-right: 1em;
   display: table-cell;
   text-indent: -6px;
   padding-left: 15px;
-  -ms-word-break: break-all;
-  word-break: break-all;
-  word-break: break-word;
-  -webkit-hyphens: auto;
-  -moz-hyphens: auto;
-  -ms-hyphens: auto;
-  hyphens: auto;
   padding-bottom: 6px;
   text-align: left;
+  white-space:nowrap;
 }
 
+.selected .count {
+  float:right;
+}
 
 .facet_values {
   display:table;
@@ -281,14 +278,7 @@ a.facet_select{
 }
 
 .dropdown-menu span.selected{
-  display: block;
-  padding: 3px 20px;
-  clear: both;
-  font-weight: normal;
-  line-height: 20px;
-  span{
-    margin-top: 0;
-  }
+  @extend .facet_select;
 }
 
 div > ul > li > ul.dropdown-menu:before {
@@ -312,4 +302,25 @@ div > ul > li > ul.dropdown-menu:after {
   border-bottom: 6px solid #ffffff;
   border-left: 6px solid transparent;
   content: '';
+}
+
+//facets on mobile
+@media(max-width:$breakpoint-m) {
+  .facet_select {
+    white-space: normal;
+  }
+  .dropdown-menu {
+    width:100%;
+  }
+  .dropdown-submenu > .dropdown-menu {
+    top:100%;
+    left:0;
+    margin:2px 0 0;
+  }
+  .dropdown-submenu > a:after {    
+    border-width:0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid;
+  }
 }

@@ -1,5 +1,5 @@
-%article.drs-item{data: { href: "#{request.original_url}/#{smart_collection}" }}
-  %a{ href: "#{request.original_url}/#{smart_collection}" }
+%article.drs-item{data: { href: self.send("community_#{smart_collection}_path", params[:id]) }}
+  %a{ href: self.send("community_#{smart_collection}_path", params[:id])}
     %figure
       = render partial: 'shared/icon', locals: { class_string: t("drs.featured_content.#{smart_collection}.icon") }
       -if smart_collection != "employees"
@@ -9,7 +9,7 @@
   .drs-item-details
     %header
       %h4.drs-item-title
-        %a{href: "#{request.original_url}/#{smart_collection}"}
+        %a{ href: self.send("community_#{smart_collection}_path", params[:id])}
           = t("drs.featured_content.#{smart_collection}.name")
     .drs-item-add-details
       %dl.drs-item-abstract-list
@@ -19,7 +19,7 @@
           - if t("drs.featured_content.#{smart_collection}.description").length > 120
             %span.ellipsis
               = t("drs.featured_content.#{smart_collection}.description")
-            %a(href="#abstract#{item.pid.delete ":"}" data-toggle="ellipsis")
+            %a(href="#abstract#{params[:id].delete ":"}" data-toggle="ellipsis")
               %i.icon-expand-alt
               %span.sr-only
                 Expand / collapse toggle

@@ -58,12 +58,15 @@ module Cerberus
         if_mods_exists { return self.mods.title_info.non_sort.first }
       end
 
-      def dcmi_type=(string)
-        if_mods_exists { self.mods.type_of_resource = string }
+      def dc_type=(string)
         if_DC_exists { self.DC.nu_type = string }
       end
 
-      def dcmi_type
+      def mods_type=(string)
+        if_mods_exists { self.mods.type_of_resource = string }
+      end
+
+      def obj_type
         if_mods_exists { self.mods.type_of_resource.first }
       end
 

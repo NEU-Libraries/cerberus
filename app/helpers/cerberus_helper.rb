@@ -47,6 +47,10 @@ module CerberusHelper
       path = path.merge(Rails.application.routes.recognize_path(request.referrer))
     end
 
+    if !options[:extended_list].blank?
+      return (render_facet_count(item.hits)+ " " + link_to_unless(options[:suppress_link], facet_display_value(facet_solr_field, item), path, :class=>"facet_select")).html_safe
+    end
+    
     return (link_to_unless(options[:suppress_link], facet_display_value(facet_solr_field, item), path, :class=>"facet_select") + " " + render_facet_count(item.hits)).html_safe
   end
 
