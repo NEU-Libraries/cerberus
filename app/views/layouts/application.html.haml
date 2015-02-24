@@ -7,20 +7,21 @@
     %body{"data-user" => current_user.id}
   - else
     %body(data-user="-1")
-  %nav.skip-links
-    %a.show-on-focus(href="#main-content")
-      Skip to main content
-    %a.show-on-focus(href="#navigation")
-      Skip to navigation
-  = render :partial => '/masthead', :formats => [:html]
-  = render :partial => '/flash_msg', :formats => [:html]
-  %main( id="main-content" role="main" )
-    -if :page_header
-      .container.page_header
-        = yield :page_header
-    .container
-      = yield :content
-    / /.container
+  .wrap
+    %nav.skip-links
+      %a.show-on-focus(href="#main-content")
+        Skip to main content
+      %a.show-on-focus(href="#navigation")
+        Skip to navigation
+    = render :partial => '/masthead', :formats => [:html]
+    = render :partial => '/flash_msg', :formats => [:html]
+    %main( id="main-content" role="main" )
+      -if :page_header
+        .container.page_header
+          = yield :page_header
+      .container
+        = yield :content
+      / /.container
   = render partial: '/footer'
   / Javascript loaded at the end
   = render :partial => 'layouts/end_js_scripts'
