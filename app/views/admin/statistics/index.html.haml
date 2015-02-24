@@ -2,34 +2,67 @@
   %li
     = link_to 'Admin Panel', '/admin'
   %li.active
-    = link_to 'Stats Page', '/admin/stats'
+    = link_to 'Stats Page', '/admin/statistics'
 
 %h2.page-header Stats Page
 
-Communities:
-= @community_count
-
-Collections:
-= @collection_count
-
-Core Files:
-= @core_file_count
-
-Image Files:
-= @image_count
-PDF Files:
-= @pdf_count
-Word Files:
-= @word_count
-Audio Files:
-= @audio_count
-Excel Files:
-= @excel_count
-Powerpoint Files:
-= @ppt_count
-Text Files:
-= @text_count
-Video Files:
-= @video_count
-Zip Files:
-= @zip_count
+.row
+  .span5
+    %table.table.table-striped.table-bordered
+      %tr
+        %td
+          .large Communities
+        %td
+          .large
+            = @community_count
+      %tr
+        %td
+          .large Collections
+        %td
+          .large
+            = @collection_count
+      %tr
+        %td
+          .large Core Files
+        %td
+          .large
+            = @core_file_count
+  .span5.pull-right
+    %h4 File Types
+    %table.table.table-striped
+      %tr
+        %td Image Files
+        %td
+          = @image_count
+      %tr
+        %td PDF Files
+        %td
+          = @pdf_count
+      %tr
+        %td Word Files
+        %td
+          = @word_count
+      %tr
+        %td Audio Files
+        %td
+          = @audio_count
+      %tr
+        %td Excel Files
+        %td
+          = @excel_count
+      %tr
+        %td Powerpoint Files
+        %td
+          = @ppt_count
+      %tr
+        %td Text Files
+        %td
+          = @text_count
+      %tr
+        %td Video Files
+        %td
+          = @video_count
+      %tr
+        %td Zip Files
+        %td
+          = @zip_count
