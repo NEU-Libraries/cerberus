@@ -1,0 +1,16 @@
+%ul.breadcrumb
+  %li
+    = link_to 'Admin Panel', '/admin'
+  %li.active
+    = link_to 'Stats Page', '/admin/stats'
+
+%h2.page-header Stats Page
+
+Communities:
+= @community_count
+
+Collections:
+= @collection_count
+
+Core Files:
+= @core_file_count
