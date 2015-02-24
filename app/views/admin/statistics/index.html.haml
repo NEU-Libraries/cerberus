@@ -31,39 +31,9 @@
   .span5.pull-right
     %h4 File Types
     %table.table.table-striped
-      %tr
-        %td Image Files
-        %td
-          = @image_count
-      %tr
-        %td PDF Files
-        %td
-          = @pdf_count
-      %tr
-        %td Word Files
-        %td
-          = @word_count
-      %tr
-        %td Audio Files
-        %td
-          = @audio_count
-      %tr
-        %td Excel Files
-        %td
-          = @excel_count
-      %tr
-        %td Powerpoint Files
-        %td
-          = @ppt_count
-      %tr
-        %td Text Files
-        %td
-          = @text_count
-      %tr
-        %td Video Files
-        %td
-          = @video_count
-      %tr
-        %td Zip Files
-        %td
-          = @zip_count
+      - @content_type_counts.each do |type, value|
+        %tr
+          %td
+            = type
+          %td
+            = value

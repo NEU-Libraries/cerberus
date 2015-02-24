@@ -9,18 +9,7 @@ class Admin::StatisticsController < ApplicationController
     @collection_count = get_count_for_model_type("info:fedora/afmodel:Collection")
     @core_file_count = get_count_for_model_type("info:fedora/afmodel:CoreFile")
 
-    # content type counts
-    @audio_count = get_count_for_content_obj("info:fedora/afmodel:AudioFile")
-    # Not including derivatives
-    @image_count = get_count_for_content_obj("info:fedora/afmodel:ImageMasterFile")
-    @excel_count = get_count_for_content_obj("info:fedora/afmodel:MsexcelFile")
-    @ppt_count = get_count_for_content_obj("info:fedora/afmodel:MspowerpointFile")
-    @word_count = get_count_for_content_obj("info:fedora/afmodel:MswordFile")
-    # This will include word derivatives...will look into a way to solve that...
-    @pdf_count = get_count_for_content_obj("info:fedora/afmodel:PdfFile")
-    @text_count = get_count_for_content_obj("info:fedora/afmodel:TextFile")
-    @video_count = get_count_for_content_obj("info:fedora/afmodel:VideoFile")
-    @zip_count = get_count_for_content_obj("info:fedora/afmodel:ZipFile")
+    @content_type_counts = sort_content_type_counts
   end
 
   private
@@ -41,6 +30,23 @@ class Admin::StatisticsController < ApplicationController
       # only finding canonical objects to avoid derivatives
       query_result = ActiveFedora::SolrService.query("has_model_ssim:\"#{model_type}\" AND canonical_tesim:[* TO *]")
       return query_result.length
+    end
+
+    def sort_content_type_counts
+      h = Hash.new()
+      h["Audio Files"] = get_count_for_content_obj("info:fedora/afmodel:AudioFile")
+      #not including derivatives
+      h["Image Files"] = get_count_for_content_obj("info:fedora/afmodel:ImageMasterFile")
+      h["Excel Files"] = get_count_for_content_obj("info:fedora/afmodel:MsexcelFile")
+      h["Powerpoint Files"] = get_count_for_content_obj("info:fedora/afmodel:MspowerpointFile")
+      h["Word Files"] = get_count_for_content_obj("info:fedora/afmodel:MswordFile")
+      # This will include word derivatives...will look into a way to solve that...
+      h["PDF Files"] = get_count_for_content_obj("info:fedora/afmodel:PdfFile")
+      h["Text Files"] = get_count_for_content_obj("info:fedora/afmodel:TextFile")
+      h["Video Files"] = get_count_for_content_obj("info:fedora/afmodel:VideoFile")
+      h["Zip Files"] = get_count_for_content_obj("info:fedora/afmodel:ZipFile")
+
+      h.sort_by { |type, value| value }.reverse!
     end
 
 end
