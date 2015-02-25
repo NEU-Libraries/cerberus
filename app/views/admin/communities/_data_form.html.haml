@@ -25,6 +25,8 @@
           = f.select :mass_permissions, options_for_select(['public', 'private'], @community.mass_permissions)
     %hr
     %legend Thumbnail (Optional)
+    - if !@community.properties.thumbnail_list[0].blank?
+      = @community.properties.thumbnail_list[0]
     %fieldset
       .row-fluid
         .span8
