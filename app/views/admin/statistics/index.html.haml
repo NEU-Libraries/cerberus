@@ -24,10 +24,16 @@
             = @collection_count
       %tr
         %td
-          .large Core Files
+          .large Public Core Files
         %td
           .large
-            = @core_file_count
+            = @public_core_file_count
+      %tr
+        %td
+          .large Private Core Files
+        %td
+          .large
+            = @private_core_file_count
       %tr
         %td
           .large Employees
@@ -39,7 +45,7 @@
           .large Users
         %td
           .large
-            = @user_count            
+            = @user_count
   .span5.pull-right
     %h4 File Types
     %table.table.table-striped
