@@ -1,9 +1,10 @@
 -community.employees.each do |employee| 
   .row 
     .span4
-      %h4= employee.nuid
+      .large= "#{employee.pretty_employee_name} (#{employee.nuid})"
     .span4
-      =link_to("Remove user from this community", 
+      =link_to("Remove", 
                 admin_employee_path(employee, remove: community.pid), 
                 remote: true, 
-                method: 'put')
+                method: 'put',
+                class: "btn btn-small btn-danger")

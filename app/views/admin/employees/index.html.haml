@@ -1,4 +1,15 @@
+%ul.breadcrumb
+  %li
+    = link_to 'Admin Panel', '/admin'
+  %li.active
+    = link_to 'Manage Employees', '/admin/employees'
+
 %h2.page-header All Employees
 
-- @employees.each do |employee|
-  = render partial: 'employee_admin', locals: { employee: employee }
+= render 'catalog/results_pagination'
+
+%table.table.table-striped
+  - @employees.each do |employee|
+    = render partial: 'employee_admin', locals: { employee: employee }
+    
+= render 'catalog/results_pagination'

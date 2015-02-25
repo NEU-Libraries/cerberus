@@ -1,13 +1,29 @@
+require 'blacklight/catalog'
+require 'blacklight_advanced_search'
+require 'parslet'
+require 'parsing_nesting/tree'
+
 class Admin::EmployeesController < AdminController
+
+  include Blacklight::Catalog
+  include Blacklight::Configurable # comply with BL 3.7
+  include ActionView::Helpers::DateHelper
+  # This is needed as of BL 3.7
+  self.copy_blacklight_config_from(CatalogController)
+
+  include BlacklightAdvancedSearch::ParseBasicQ
+  include BlacklightAdvancedSearch::Controller
 
   before_filter :authenticate_user!
   before_filter :verify_admin
   before_filter :load_employee, except: [:index, :update]
 
   def index
-    employee_model = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:Employee"
-    query_result = ActiveFedora::SolrService.query("has_model_ssim:\"#{employee_model}\"")
-    @employees = query_result.map { |x| SolrDocument.new(x) }
+    # employee_model = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:Employee"
+    # query_result = ActiveFedora::SolrService.query("has_model_ssim:\"#{employee_model}\"")
+    # @employees = query_result.map { |x| SolrDocument.new(x) }
+    self.solr_search_params_logic += [:limit_to_employees]
+    (@response, @employees) = get_search_results
     @page_title = "Administer Employees"
   end
 
@@ -54,5 +70,11 @@ class Admin::EmployeesController < AdminController
 
     def load_employee
       @employee = Employee.find(params[:id])
+    end
+
+    def limit_to_employees(solr_parameters, user_parameters)
+      employee_model = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:Employee"
+      solr_parameters[:fq] ||= []
+      solr_parameters[:fq] << "has_model_ssim:\"#{employee_model}\""
     end
 end

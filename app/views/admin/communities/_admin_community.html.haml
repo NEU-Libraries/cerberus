@@ -1,9 +1,11 @@
-.row
-  .span4
-    %h4= community.title
-  .span4
-    = link_to("Edit", edit_admin_community_path(community)) 
-  .span4
+%tr
+  %td
+    .large= community.title.html_safe
+  %td
+    = link_to("Edit", edit_admin_community_path(community), 
+    		class: "btn btn-small btn-warning") 
+  %td
     = link_to("Destroy", admin_community_path(community), 
               method: :delete, 
-              confirm: "This action is irreversible") 
+              confirm: "This action is irreversible", 
+              class: "btn btn-small btn-danger") 

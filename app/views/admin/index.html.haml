@@ -1,6 +1,10 @@
 %h2 Administrative Panel
-
-%h3 Actions
-= link_to("Manage Communities", admin_communities_path)
 %br
-= link_to("Manage Employees", admin_employees_path)
+
+= link_to("Manage Communities", admin_communities_path, class: "btn btn-lg btn-primary")
+%br
+%br
+= link_to("Manage Employees", admin_employees_path, class: "btn btn-lg btn-primary")
+%br
+%br
+= link_to("Statistics", '/admin/statistics', class: "btn btn-lg btn-info")
