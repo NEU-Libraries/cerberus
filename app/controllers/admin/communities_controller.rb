@@ -1,13 +1,29 @@
+require 'blacklight/catalog'
+require 'blacklight_advanced_search'
+require 'parslet'
+require 'parsing_nesting/tree'
+
 class Admin::CommunitiesController < AdminController
+  include Blacklight::Catalog
+  include Blacklight::Configurable # comply with BL 3.7
+  include ActionView::Helpers::DateHelper
+  # This is needed as of BL 3.7
+  self.copy_blacklight_config_from(CatalogController)
+
+  include BlacklightAdvancedSearch::ParseBasicQ
+  include BlacklightAdvancedSearch::Controller
+
   include Cerberus::TempFileStorage
 
   # Loads @community
   load_resource
 
   def index
-    community_model = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:Community"
-    query_result = ActiveFedora::SolrService.query("has_model_ssim:\"#{community_model}\"", :rows => 999)
-    @communities = query_result.map { |x| SolrDocument.new(x) }
+    # community_model = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:Community"
+    # query_result = ActiveFedora::SolrService.query("has_model_ssim:\"#{community_model}\"", :rows => 999)
+    # @communities = query_result.map { |x| SolrDocument.new(x) }
+    self.solr_search_params_logic += [:limit_to_communities]
+    (@response, @communities) = get_search_results
     @page_title = "Administer Communities"
   end
 
@@ -91,7 +107,7 @@ class Admin::CommunitiesController < AdminController
         Cerberus::Application::Queue.push(SetThumbnailCreationJob.new(@community.pid, new_path))
       end
 
-      if params[:theses] == '1' && !@community.theses
+      if params[:theses] && !@community.has_theses?
         etdDesc = I18n.t "drs.etd_description.default"
         Collection.create(title: "Theses and Dissertations",
                             description: "#{etdDesc} #{@community.title}",
@@ -100,5 +116,11 @@ class Admin::CommunitiesController < AdminController
                             mass_permissions: @community.mass_permissions,
                             parent: @community)
       end
+    end
+
+    def limit_to_communities(solr_parameters, user_parameters)
+      community_model = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:Community"
+      solr_parameters[:fq] ||= []
+      solr_parameters[:fq] << "has_model_ssim:\"#{community_model}\""
     end
 end

@@ -1,40 +1,62 @@
-%h2.page-header= "Edit #{@community.title}"
+%ul.breadcrumb
+  %li
+    = link_to 'Admin Panel', '/admin'
+  %li
+    = link_to 'Manage Communitities', '/admin/communities'
+  %li.active
+    = link_to 'Edit ' "#{@community.title}".html_safe, {:action => "edit"}
+
+%h2.page-header= "Edit #{@community.title}".html_safe
 
 %ul.nav.nav-tabs
+  %li.active 
+    = link_to 'Edit Department', '#local'
+  %li 
+    = link_to 'Edit Employees', '#employee'
 
 .tab-content
   #local.tab-pane.active
     = render partial: 'data_form'
 
+  #employee.tab-pane
+    :javascript
+      var employees_for_autocomplete = #{Employee.all.map do |e|
+          {
+            'label' => e.name,
+            'value' => e.id,
+            'name'  => e.name
+          }
+        end.to_json}
+      $('#admin_employee_autocomplete').autocomplete({
+        source: employees_for_autocomplete
+      });
+      $('.nav-tabs a').click(function (e) {
+        e.preventDefault();
+        $(this).tab('show');
+      });
+      var url = document.location.toString();
+      if (url.match('#')) {
+          $('.nav-tabs a[href=#'+url.split('#')[1]+']').tab('show') ;
+      } 
 
-    %h3.page-header Employees
+    = form_tag admin_employee_path, :method => :put, :id => 'modify_employee', :remote => true do
+      %input{:type=>"hidden", :id => "admin_employee", :name => "admin[employee]"}
+      /the form action will be done by javascript, as we'll be getting the ids after the dom is made
+      %fieldset
+        %legend Add Employee to Community
+        .row-fluid
+          .span8
+            = label_tag "admin_employee_autocomplete", "Employee"
+            %div
+              %span#admin_employee_name
+            %input{:id => "admin_employee_autocomplete", :type => "text", :required => "yes", :placeholder => "Eg. Billy Bob"}
+      .form-actions
+        = submit_tag "Submit", :class => ['btn', 'btn-primary', 'btn-large'], :id => "submit_button"
+
+
+    %h3.page-header Current Employees
 
     #community_employees
       = render partial: 'admin_community_employees', locals: { community: @community }
 
-:javascript
-  var employees_for_autocomplete = #{Employee.all.map do |e|
-      {
-        'label' => e.nuid,
-        'value' => e.id,
-        'name'  => e.name
-      }
-    end.to_json}
 
-  $('#admin_employee_autocomplete').autocomplete({
-    source: employees_for_autocomplete
-  });
-
-= form_tag admin_employee_path, :method => :put, :id => 'modify_employee', :remote => true do
-  %input{:type=>"hidden", :id => "admin_employee", :name => "admin[employee]"}
-  /the form action will be done by javascript, as we'll be getting the ids after the dom is made
-  %fieldset
-    %legend Add Employee to Community
-    .row-fluid
-      .span8
-        = label_tag "admin_employee_autocomplete", "Employee *"
-        %div
-          %span#admin_employee_name
-        %input{:id => "admin_employee_autocomplete", :type => "text", :required => "yes"}
-  .form-actions
-    = submit_tag "Submit", :class => ['btn', 'btn-primary', 'btn-large'], :id => "submit_button"
