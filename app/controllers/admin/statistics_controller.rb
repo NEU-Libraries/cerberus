@@ -9,6 +9,7 @@ class Admin::StatisticsController < ApplicationController
     @collection_count = get_count_for_model_type("info:fedora/afmodel:Collection")
     @core_file_count = get_count_for_model_type("info:fedora/afmodel:CoreFile")
     @employee_file_count = get_count_for_model_type("info:fedora/afmodel:Employee")
+    @user_count = User.find(:all).length
 
     @content_type_counts = sort_content_type_counts
   end
