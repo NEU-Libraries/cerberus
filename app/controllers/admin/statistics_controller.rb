@@ -20,6 +20,12 @@ class Admin::StatisticsController < ApplicationController
       redirect_to root_path unless current_user.admin?
     end
 
+    def get_public_files
+    end
+
+    def get_private_files
+    end
+
     def get_count_for_model_type(model_string)
       model_type = ActiveFedora::SolrService.escape_uri_for_query "#{model_string}"
       # ignoring smart collections, so they don't inflate collection count
