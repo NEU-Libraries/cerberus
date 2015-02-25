@@ -23,43 +23,40 @@ class Admin::StatisticsController < ApplicationController
 
     def get_count_for_public_files
       model_type = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:CoreFile"
-      query_result = ActiveFedora::SolrService.query("has_model_ssim:\"#{model_type}\" AND read_access_group_ssim:(public)", :rows => 10000000)
+      query_result = ActiveFedora::SolrService.query("has_model_ssim:\"#{model_type}\" AND read_access_group_ssim:(public)", :rows => 1000000)
       return query_result.length
     end
 
     def get_count_for_private_files
       model_type = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:CoreFile"
-      query_result = ActiveFedora::SolrService.query("has_model_ssim:\"#{model_type}\" AND -read_access_group_ssim:(public)", :rows => 10000000)
+      query_result = ActiveFedora::SolrService.query("has_model_ssim:\"#{model_type}\" AND -read_access_group_ssim:(public)", :rows => 1000000)
       return query_result.length
     end
 
     def get_count_for_model_type(model_string)
       model_type = ActiveFedora::SolrService.escape_uri_for_query "#{model_string}"
       # ignoring smart collections, so they don't inflate collection count
-      query_result = ActiveFedora::SolrService.query("has_model_ssim:\"#{model_type}\"  -smart_collection_type_tesim:[* TO *]", :rows => 10000000)
+      query_result = ActiveFedora::SolrService.query("has_model_ssim:\"#{model_type}\"  -smart_collection_type_tesim:[* TO *]", :rows => 1000000)
       return query_result.length
     end
 
     def get_count_for_content_obj(model_string)
-      model_type = ActiveFedora::SolrService.escape_uri_for_query "#{model_string}"
       # only finding canonical objects to avoid derivatives
-      query_result = ActiveFedora::SolrService.query("has_model_ssim:\"#{model_type}\" AND canonical_tesim:[* TO *]", :rows => 10000000)
+      query_result = ActiveFedora::SolrService.query("canonical_class_tesim:\"#{model_string}\"", :rows => 1000000)
       return query_result.length
     end
 
     def sort_content_type_counts
       h = Hash.new()
-      h["Audio Files"] = get_count_for_content_obj("info:fedora/afmodel:AudioFile")
-      #not including derivatives
-      h["Image Files"] = get_count_for_content_obj("info:fedora/afmodel:ImageMasterFile")
-      h["Excel Files"] = get_count_for_content_obj("info:fedora/afmodel:MsexcelFile")
-      h["Powerpoint Files"] = get_count_for_content_obj("info:fedora/afmodel:MspowerpointFile")
-      h["Word Files"] = get_count_for_content_obj("info:fedora/afmodel:MswordFile")
-      # This will include word derivatives...will look into a way to solve that...
-      h["PDF Files"] = get_count_for_content_obj("info:fedora/afmodel:PdfFile")
-      h["Text Files"] = get_count_for_content_obj("info:fedora/afmodel:TextFile")
-      h["Video Files"] = get_count_for_content_obj("info:fedora/afmodel:VideoFile")
-      h["Zip Files"] = get_count_for_content_obj("info:fedora/afmodel:ZipFile")
+      h["Audio Files"] = get_count_for_content_obj("AudioFile")
+      h["Image Files"] = get_count_for_content_obj("ImageMasterFile")
+      h["Excel Files"] = get_count_for_content_obj("MsexcelFile")
+      h["Powerpoint Files"] = get_count_for_content_obj("MspowerpointFile")
+      h["Word Files"] = get_count_for_content_obj("MswordFile")
+      h["PDF Files"] = get_count_for_content_obj("PdfFile")
+      h["Text Files"] = get_count_for_content_obj("TextFile")
+      h["Video Files"] = get_count_for_content_obj("VideoFile")
+      h["Zip Files"] = get_count_for_content_obj("ZipFile")
 
       h.sort_by { |type, value| value }.reverse!
     end
