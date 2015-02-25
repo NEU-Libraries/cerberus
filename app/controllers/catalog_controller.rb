@@ -81,6 +81,12 @@ class CatalogController < ApplicationController
     end
   end
 
+  def communities
+    self.solr_search_params_logic += [:communities_filter]
+    (@response, @document_list) = get_search_results
+    render 'smart_collection', locals: { smart_collection: 'communities' }
+  end
+
   def research
     self.solr_search_params_logic += [:research_filter]
     (@response, @document_list) = get_search_results
@@ -287,6 +293,13 @@ class CatalogController < ApplicationController
   def well_formed_items(solr_parameters, user_parameters)
     solr_parameters[:fq] ||= []
     solr_parameters[:fq] << "#{Solrizer.solr_name('title_info_title', :stored_sortable, type: :string)}:\[\* TO \*\]"
+  end
+
+  def communities_filter(solr_parameters, user_parameters)
+    model_type = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:Community"
+    query = "has_model_ssim:\"#{model_type}\""
+    solr_parameters[:fq] ||= []
+    solr_parameters[:fq] << query
   end
 
   def research_filter(solr_parameters, user_parameters)
