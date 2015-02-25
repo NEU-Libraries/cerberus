@@ -35,7 +35,7 @@
       =render partial: 'shared/icon', locals: { class_string: t('drs.featured_content.datasets.icon') }
       #{ t('drs.featured_content.datasets.name') }
 
-    %a.btn.btn-clear.btn-block{href: communities_path, data: {toggle: "tooltip"}, title: t('drs.featured_content.communities.description') }
+    %a.btn.btn-clear.btn-block{href: catalog_communities_path, data: {toggle: "tooltip"}, title: t('drs.featured_content.communities.description') }
       =render partial: 'shared/icon', locals: { class_string: t('drs.featured_content.communities.icon') }
       #{ t('drs.featured_content.communities.name') }
 
@@ -57,5 +57,3 @@
         %strong
           No recent documents found.
         Please check back soon.
-
-

@@ -16,7 +16,7 @@ describe CollectionsController do
 
       get :new
 
-      expect(response).to redirect_to(communities_path)
+      expect(response).to redirect_to(root_path)
     end
 
     it "redirects to the index page if it cannot find the described parent" do
@@ -24,7 +24,7 @@ describe CollectionsController do
 
       get :new, {parent: 'neu:adsfasdfasdfasdfasdfa' }
 
-      expect(response).to redirect_to(communities_path)
+      expect(response).to redirect_to(root_path)
     end
 
     it "renders the new page when a parent is set" do
