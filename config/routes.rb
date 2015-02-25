@@ -67,7 +67,7 @@ Cerberus::Application.routes.draw do
     # Add/Remove communities from an employee, delete employee
     resources :communities, except: [:show]
     resources :employees, only: [:index, :edit, :update, :destroy]
-    # resources :statistics, only: [:index]
+    resources :statistics, only: [:index]
   end
 
   namespace :api, defaults: {format: 'json'} do

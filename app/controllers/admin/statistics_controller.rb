@@ -23,27 +23,24 @@ class Admin::StatisticsController < ApplicationController
 
     def get_count_for_public_files
       model_type = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:CoreFile"
-      query_result = ActiveFedora::SolrService.query("has_model_ssim:\"#{model_type}\" AND read_access_group_ssim:(public)", :rows => 1000000)
-      return query_result.length
+      return ActiveFedora::SolrService.count("has_model_ssim:\"#{model_type}\" AND read_access_group_ssim:(public)")
     end
 
     def get_count_for_private_files
       model_type = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:CoreFile"
-      query_result = ActiveFedora::SolrService.query("has_model_ssim:\"#{model_type}\" AND -read_access_group_ssim:(public)", :rows => 1000000)
+      return ActiveFedora::SolrService.count("has_model_ssim:\"#{model_type}\" AND -read_access_group_ssim:(public)")
       return query_result.length
     end
 
     def get_count_for_model_type(model_string)
       model_type = ActiveFedora::SolrService.escape_uri_for_query "#{model_string}"
       # ignoring smart collections, so they don't inflate collection count
-      query_result = ActiveFedora::SolrService.query("has_model_ssim:\"#{model_type}\"  -smart_collection_type_tesim:[* TO *]", :rows => 1000000)
-      return query_result.length
+      return ActiveFedora::SolrService.count("has_model_ssim:\"#{model_type}\"  -smart_collection_type_tesim:[* TO *]")
     end
 
     def get_count_for_content_obj(model_string)
       # only finding canonical objects to avoid derivatives
-      query_result = ActiveFedora::SolrService.query("canonical_class_tesim:\"#{model_string}\"", :rows => 1000000)
-      return query_result.length
+      return ActiveFedora::SolrService.count("canonical_class_tesim:\"#{model_string}\"")
     end
 
     def sort_content_type_counts
