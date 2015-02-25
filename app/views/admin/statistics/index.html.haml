@@ -48,8 +48,7 @@
           .large
             = @user_count
   .span5.pull-right
-    %h4 File Types
-    %table.table.table-striped
+    %table.table.table-striped.table-bordered
       - @content_type_counts.each do |type, value|
         %tr
           %td
