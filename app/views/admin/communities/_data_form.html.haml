@@ -25,6 +25,8 @@
           = f.select :mass_permissions, options_for_select(['public', 'private'], @community.mass_permissions)
     %hr
     %legend Thumbnail (Optional)
+    - if !@community.properties.thumbnail_list[0].blank?
+      = @community.properties.thumbnail_list[0]
     %fieldset
       .row-fluid
         .span8
@@ -35,10 +37,10 @@
     %fieldset
       .row-fluid
         .span8
-          - if !@community.theses
+          - if !@community.has_theses?
             .checkbox
-              = f.label :theses, "Include Theses and Dissertations Folder", class: "checkbox inline"
-              = f.check_box :theses, name: 'theses', value: 0
+              = label_tag :theses, "Include Theses and Dissertations Folder", class: "checkbox inline"
+              = check_box_tag :theses
           - else
             %span This collection already has a theses and dissertations folder
     %hr

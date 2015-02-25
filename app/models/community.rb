@@ -18,8 +18,7 @@ class Community < ActiveFedora::Base
   has_file_datastream "thumbnail_2", type: FileContentDatastream
   has_file_datastream "thumbnail_3", type: FileContentDatastream
 
-  attr_accessible :title, :description, :parent
-  attr_accessor :theses
+  attr_accessible :title, :description, :parent  
   attr_protected :identifier
 
   has_many :employees, property: :has_affiliation, class_name: "Employee"
@@ -27,6 +26,11 @@ class Community < ActiveFedora::Base
   has_many :child_communities, property: :has_affiliation, :class_name => "Community"
 
   belongs_to :parent, property: :has_affiliation, :class_name => "Community"
+
+  def has_theses?
+    query_result = ActiveFedora::SolrService.query("smart_collection_type_tesim:\"Theses and Dissertations\"  AND parent_id_tesim:\"#{self.pid}\"")
+    return query_result.length > 0
+  end
 
   def to_solr(solr_doc = Hash.new())
     super(solr_doc)
