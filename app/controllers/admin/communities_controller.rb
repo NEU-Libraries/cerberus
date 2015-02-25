@@ -107,7 +107,7 @@ class Admin::CommunitiesController < AdminController
         Cerberus::Application::Queue.push(SetThumbnailCreationJob.new(@community.pid, new_path))
       end
 
-      if params[:theses] == '1' && !@community.theses
+      if params[:theses] && !@community.has_theses?
         etdDesc = I18n.t "drs.etd_description.default"
         Collection.create(title: "Theses and Dissertations",
                             description: "#{etdDesc} #{@community.title}",
