@@ -1,19 +1,28 @@
 .footer-nu{
-  margin-top: 2em;
   padding-top: 1em;
   font-family: $serifFontFamily;
   background-color: $footerBgColor;
   border-top: 0.1em solid $footerBorderColor;
   color: $medium-gray;
+  clear:both;
+  height:100px;
+  @media (max-width:$breakpoint-l) {
+    height:130px;
+  }
   @media (max-width:$breakpoint-m) {
     margin-left: -20px;
     margin-right: -20px;
     padding-left: 20px;
+    height: 160px;
+  }
+  @media (max-width:$breakpoint-sm) {
+    height:190px;
   }
   address {
     font-size: 0.9em;
     line-height: 1.2em;
   }
+
 }
 
 //nav list of footer links at the bottom of every page
@@ -74,6 +83,9 @@
   }
   .youtube{
     color: $youtubeIconColor;
+  }
+  @media(max-width:$breakpoint-m) {
+    float:left;
   }
 }
 

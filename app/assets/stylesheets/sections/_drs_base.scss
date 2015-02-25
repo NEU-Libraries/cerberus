@@ -1,12 +1,46 @@
 *{
   @include box-sizing(border-box);
 }
+html, body {
+  height: 100%;
+}
 body{
   background-color: $white;
-  margin: 0 auto;
   padding-top: 0;
   > .container{
     background-color: $white;
   }
+  .wrap {
+    min-height: 100%;
+    height: auto !important;
+    height: 100%;
+    margin: 0 auto -100px;
+  }
+  main {
+    padding-bottom:140px;
+  }
+  @media (max-width:$breakpoint-l) {
+      .wrap {
+        margin: 0 auto -130px;
+      }
+      main {
+        padding-bottom:170px;
+      }
+  }
+  @media (max-width:$breakpoint-m) {
+      .wrap {
+        margin: 0 auto -160px;
+      }
+      main {
+        padding-bottom:200px;
+      }
+  }
+  @media (max-width:$breakpoint-sm) {
+    .wrap {
+      margin: 0 auto -190px;
+    }
+    main {
+      padding-bottom:230px;
+    }
+  }
 }
-
