@@ -36,10 +36,6 @@ class CommunitiesController < ApplicationController
     redirect_to root_path and return
   end
 
-  def index
-    redirect_to community_path(id: 'neu:1')
-  end
-
   def facet
     @set = fetch_solr_document
     self.solr_search_params_logic += [:limit_to_scope]
