@@ -9,8 +9,8 @@ GIT
 
 GIT
   remote: https://github.com/NEU-Libraries/solrizer.git
-  revision: 86ac06b5447e6763943f78cceaf1d86c4f5e4ea5
-  ref: 86ac06b5447e6763943f78cceaf1d86c4f5e4ea5
+  revision: a304059e4bc85bbe22fc765d5e2a7ccf38ea1602
+  ref: a304059e4bc85bbe22fc765d5e2a7ccf38ea1602
   specs:
     solrizer (3.1.1)
       activesupport
@@ -455,7 +455,7 @@ GEM
       term-ansicolor
     stanford-mods (1.0.3)
       mods
-    stomp (1.3.3)
+    stomp (1.3.4)
     subexec (0.2.3)
     tdiff (0.3.3)
     term-ansicolor (1.2.2)
