@@ -163,13 +163,13 @@ class CollectionsController < ApplicationController
     def index_redirect(exception)
       flash[:error] = "Collections cannot be created without a parent"
       email_handled_exception(exception)
-      redirect_to communities_path and return
+      redirect_to root_path and return
     end
 
     def index_redirect_with_bad_search(exception)
       flash[:error] = exception.message
       email_handled_exception(exception)
-      redirect_to communities_path and return
+      redirect_to root_path and return
     end
 
     def show_children_only(solr_parameters, user_parameters)
