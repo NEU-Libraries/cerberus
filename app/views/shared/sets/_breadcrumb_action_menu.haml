@@ -1,5 +1,5 @@
 - if !current_user.nil? && ( current_user.can?(:edit, @set.pid) || current_user.proxy_staff? )
   %li.action
-    %a#addToSet(data-pid="#{@set.pid}" href="#" data-add-to-set="1")
+    %a#addToSet(data-pid="#{@set.pid}" href="javascript:;" data-add-to-set="1" data-toggle="popover")
       %i.icon-plus-sign-alt
       Add

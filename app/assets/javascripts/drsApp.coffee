@@ -167,7 +167,7 @@ $(document).ready ->
         $(this).removeClass('open')
         $(this).children('.dropdown-menu').attr('style', '')
       return
-      
+
 
     datePartial = ->
       if $('#core_file_date').length > 0
@@ -324,13 +324,12 @@ $(document).ready ->
       $link.popover(
         html: true
         content: drsApp.config.breadCrumbMenuContent,
-        trigger: 'focus'
+      )
+      $(document).on('click', (event) ->
+        if (!$(event.target).closest($link).length)
+          $link.popover('hide')
       )
 
-      $link.on('click', 'a', (e) ->
-        e.preventDefault()
-
-      )
       if ( $link.parent('breadcrumb').length > 0 )
         $link.on('shown', ->
           $(this).parent('li').addClass 'active'
