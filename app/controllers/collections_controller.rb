@@ -48,8 +48,6 @@ class CollectionsController < ApplicationController
     @set = fetch_solr_document
     self.solr_search_params_logic += [:limit_to_scope]
 
-    # Kludge because of blacklights assumptions
-    params[:id] = params[:solr_field]
     @pagination = get_facet_pagination(params[:solr_field], params)
 
     respond_to do |format|
