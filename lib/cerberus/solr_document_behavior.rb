@@ -244,6 +244,10 @@ module Cerberus
       ['audio/mp3', 'audio/mpeg', 'audio/x-wave', 'audio/x-wav', 'audio/ogg'].include? self.mime_type
     end
 
+    def zip?
+      ['application/zip'].include? self.mime_type
+    end
+
     # Content objects store file data in a datastream called 'content'
     # This method encapsulates reaching into the SolrDocument created from a
     # content object and fetching its filename.  Which is a surprisingly
