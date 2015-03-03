@@ -59,5 +59,6 @@
           Downloads
           %i.icon-caret-down
         = render partial: 'core_files/derivative_btn_group', locals: {contents: @content_objects, grid_view: true, item: item}
-    - icon = render partial: 'shared/icon',  locals: { class_string: "icon-comments-alt", alt_text: "Add to " + t('drs.compilations.name')}
-    =link_to icon.html_safe , "http://library.northeastern.edu/get-help/tech-support/report-a-problem?resource=#{item.title} - #{item.pid} (#{CGI::escape(request.original_url)})", :target => "_blank", title:  "Report a problem", data: {toggle: "tooltip"}, class: 'btn btn-mini btn-clear'
+    .btn-group
+      - icon = render partial: 'shared/icon',  locals: { class_string: "icon-comments-alt", alt_text: "Add to " + t('drs.compilations.name')}
+      =link_to icon.html_safe , "http://library.northeastern.edu/get-help/tech-support/report-a-problem?resource=#{item.title} - #{item.pid} (#{CGI::escape(request.original_url)})", :target => "_blank", title:  "Report a problem", data: {toggle: "tooltip"}, class: 'btn btn-mini btn-clear'
