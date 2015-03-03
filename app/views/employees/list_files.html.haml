@@ -12,6 +12,10 @@
               My collections
             - else
               ="#{@employee.pretty_employee_name}'s collections"
+        %li
+          %a{ href: employee_communities_path(@employee) }
+            %i.icon-group
+            My Communities
 
 
 .row
