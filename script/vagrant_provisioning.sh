@@ -45,6 +45,10 @@ echo "Making redis auto-start"
 sudo chkconfig redis on
 sudo service redis start
 
+echo "Making mysql auto-start"
+sudo chkconfig mysqld on
+sudo service mysqld start
+
 echo "Setting timezone for vm so embargo doesn't get confused"
 echo 'export TZ=America/New_York' >> /home/vagrant/.zshrc
 echo 'export TZ=America/New_York' >> /home/vagrant/.bashrc
