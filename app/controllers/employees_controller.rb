@@ -82,6 +82,7 @@ class EmployeesController < ApplicationController
   end
 
   def my_communities
+    fetch_employee
     @page_title = "My Communities"
     render :template => 'employees/my_communities'
   end
