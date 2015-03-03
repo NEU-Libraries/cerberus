@@ -1,0 +1,24 @@
+- content_for :page_header do
+  %h1.page-header
+    ="#{@employee.pretty_employee_name}"
+    %small
+      Communities
+    %nav{role: "navigation", class: "pull-right"}
+      %ul.nav.nav-tabs
+        %li
+          %a{ href: employee_path(@employee) }
+            %i.icon-user
+            - if current_user && current_user.nuid == @employee.nuid
+              My collections
+            - else
+              ="#{@employee.pretty_employee_name}'s collections"
+          %a{ href: employee_files_path(@employee) }
+            %i.icon-file
+            My Deposits
+
+%table.table.table-striped.table-bordered
+  - @employee.communities.each do |c|
+    - c = Community.find(c)
+    %tr
+      %td
+        =link_to(c.title, "/communities/#{c.pid}")
