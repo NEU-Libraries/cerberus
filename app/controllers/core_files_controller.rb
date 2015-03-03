@@ -124,6 +124,7 @@ class CoreFilesController < ApplicationController
 
     # Add drs staff to permissions for #608
     @core_file.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, "edit")
+    @core_file.save!
 
     redirect_to core_file_path(@core_file.pid)
   end
