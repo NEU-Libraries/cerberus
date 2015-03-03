@@ -81,6 +81,11 @@ class EmployeesController < ApplicationController
   def attach_employee
   end
 
+  def my_communities
+    @page_title = "My Communities"
+    render :template => 'employees/my_communities'
+  end
+
   private
 
     def user_examining_self?
