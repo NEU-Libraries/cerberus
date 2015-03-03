@@ -106,6 +106,12 @@
   z-index: 2;
 }
 
+//this is for the situation when a button is the only button in a button group and has a tooltip- the tooltip was acting as another child, so we had to specify only-of-type instead of only-child
+.btn-group > .btn:only-of-type, .btn-group > .btn:only-of-type:hover, btn-group > .btn:only-of-type:focus, btn-group > .btn:only-of-type:active, btn-group > .btn:only-of-type.active {
+  @include border-top-right-radius($borderRadiusLarge);
+  @include border-bottom-right-radius($borderRadiusLarge);
+}
+
 // On active and open, don't show outline
 .btn-group .dropdown-toggle:active,
 .btn-group.open .dropdown-toggle {
