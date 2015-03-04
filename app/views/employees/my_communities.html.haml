@@ -2,7 +2,7 @@
   %h1.page-header
     ="#{@employee.pretty_employee_name}"
     %small
-      All Files
+      Communities
     %nav{role: "navigation", class: "pull-right"}
       %ul.nav.nav-tabs
         %li
@@ -12,28 +12,35 @@
               My collections
             - else
               ="#{@employee.pretty_employee_name}'s collections"
-        %li
-          %a{ href: my_communities_path }
-            %i.icon-group
-            My Communities
-
+          %a{ href: employee_files_path(@employee) }
+            %i.icon-file
+            My Deposits
 
 .row
   - if current_user
     - current_user.view_pref
+    - drs_view_class = "drs-items-#{current_user.view_pref}"
     %aside.drs-sidebar{class: current_user.view_pref == 'grid' ? 'span12' : "span3" }
       =render partial: 'shared/sets/sets_sidebar'
 
     %section{class: current_user.view_pref == 'grid' ? 'span12' : "span9" }
-      = render 'catalog/results_pagination'
-      =render :partial => 'catalog/document_list'
-      = render 'catalog/results_pagination'
+      %ul.drs-items{class: drs_view_class }
+        - @communities.each do |c|
+          - c = Community.find(c)
+          - c = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{c.pid}\"").first)
+          - c.pid
+          - @thumbs = c.thumbnail_list
+          = render partial: 'shared/drs_item/drs_item' , locals: { item: c }
       =render partial: 'shared/sets/bottom_action_menu'
   - else
     %aside.drs-sidebar.span3
       =render partial: 'shared/sets/sets_sidebar'
 
     %section.span9
-      = render 'catalog/results_pagination'
-      =render :partial => 'catalog/document_list'
-      = render 'catalog/results_pagination'
+      %ul.drs-items{class: "drs-items-list" }
+        - @communities.each do |c|
+          - c = Community.find(c)
+          - c = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{c.pid}\"").first)
+          - c.pid
+          - @thumbs = c.thumbnail_list
+          = render partial: 'shared/drs_item/drs_item' , locals: { item: c }

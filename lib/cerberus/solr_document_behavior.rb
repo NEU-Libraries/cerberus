@@ -343,5 +343,9 @@ module Cerberus
     def in_progress?
       return Array(self["in_progress_tesim"]).first == "true"
     end
+
+    def communities
+      Array(self[Solrizer.solr_name("has_affiliation", :symbol)])
+    end
   end
 end
