@@ -83,6 +83,8 @@ class EmployeesController < ApplicationController
 
   def my_communities
     fetch_employee
+    @communities = @employee.communities
+    @communities.sort_by!{|c| Community.find(c).title}
     @page_title = "My Communities"
     render :template => 'employees/my_communities'
   end
