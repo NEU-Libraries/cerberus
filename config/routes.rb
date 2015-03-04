@@ -56,9 +56,9 @@ Cerberus::Application.routes.draw do
 
   get '/employees/:id' => 'employees#show', as: 'employee'
   get '/employees/:id/files' => 'employees#list_files', as: 'employee_files'
-  get '/employees/:id/communities' => 'employees#my_communities', as: 'employee_communities'
   get '/my_drs' => 'employees#personal_graph', as: 'personal_graph'
   get '/my_files' => 'employees#personal_files', as: 'personal_files'
+  get '/my_communities' => 'employees#my_communities'
 
   # Facets for communities and collections
   get "/communities/:id/facet/:solr_field" => 'communities#facet', as: 'community_facet'
