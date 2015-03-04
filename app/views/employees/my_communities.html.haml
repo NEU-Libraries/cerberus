@@ -17,9 +17,7 @@
             My Deposits
 
 %table.table.table-striped.table-bordered
-  - communities = @employee.communities
-  - communities.sort_by!{|c| Community.find(c).title}
-  - communities.each do |c|
+  - @communities.each do |c|
     - c = Community.find(c)
     %tr
       %td
