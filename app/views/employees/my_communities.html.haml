@@ -19,11 +19,12 @@
 .row
   - if current_user
     - current_user.view_pref
+    - drs_view_class = "drs-items-#{current_user.view_pref}"
     %aside.drs-sidebar{class: current_user.view_pref == 'grid' ? 'span12' : "span3" }
       =render partial: 'shared/sets/sets_sidebar'
 
     %section{class: current_user.view_pref == 'grid' ? 'span12' : "span9" }
-      %ul{class: ["drs-items-list", "drs-items"] }
+      %ul.drs-items{class: drs_view_class }
         - @communities.each do |c|
           - c = Community.find(c)
           - c = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{c.pid}\"").first)
@@ -36,7 +37,7 @@
       =render partial: 'shared/sets/sets_sidebar'
 
     %section.span9
-      %ul{class: ["drs-items-list", "drs-items"] }
+      %ul.drs-items{class: "drs-items-list" }
         - @communities.each do |c|
           - c = Community.find(c)
           - c = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{c.pid}\"").first)
