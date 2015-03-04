@@ -17,8 +17,10 @@
             My Deposits
 
 %table.table.table-striped.table-bordered
-  - @employee.communities.each do |c|
+  - communities = @employee.communities
+  - communities.sort_by!{|c| Community.find(c).title}
+  - communities.each do |c|
     - c = Community.find(c)
     %tr
       %td
-        =link_to(c.title, "/communities/#{c.pid}")
+        =link_to(c.title.html_safe, community_path(c))
