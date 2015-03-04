@@ -16,9 +16,30 @@
             %i.icon-file
             My Deposits
 
-%table.table.table-striped.table-bordered
-  - @communities.each do |c|
-    - c = Community.find(c)
-    %tr
-      %td
-        =link_to(c.title.html_safe, community_path(c))
+.row
+  - if current_user
+    - current_user.view_pref
+    %aside.drs-sidebar{class: current_user.view_pref == 'grid' ? 'span12' : "span3" }
+      =render partial: 'shared/sets/sets_sidebar'
+
+    %section{class: current_user.view_pref == 'grid' ? 'span12' : "span9" }
+      %ul{class: ["drs-items-list", "drs-items"] }
+        - @communities.each do |c|
+          - c = Community.find(c)
+          - c = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{c.pid}\"").first)
+          - c.pid
+          - @thumbs = c.thumbnail_list
+          = render partial: 'shared/drs_item/drs_item' , locals: { item: c }
+      =render partial: 'shared/sets/bottom_action_menu'
+  - else
+    %aside.drs-sidebar.span3
+      =render partial: 'shared/sets/sets_sidebar'
+
+    %section.span9
+      %ul{class: ["drs-items-list", "drs-items"] }
+        - @communities.each do |c|
+          - c = Community.find(c)
+          - c = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{c.pid}\"").first)
+          - c.pid
+          - @thumbs = c.thumbnail_list
+          = render partial: 'shared/drs_item/drs_item' , locals: { item: c }
