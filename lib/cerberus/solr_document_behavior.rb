@@ -139,6 +139,17 @@ module Cerberus
       return ""
     end
 
+    def employee_first_name
+      if !self.employee_name.blank?
+        name_array = Namae.parse self.employee_name
+        name_obj = name_array[0]
+        return "#{name_obj.given}"
+      end
+
+      # safety return
+      return ""
+    end
+
     ##
     # Give our SolrDocument an ActiveModel::Naming appropriate route_key
     def route_key
