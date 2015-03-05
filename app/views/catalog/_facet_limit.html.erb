@@ -24,13 +24,13 @@
   <% if(paginator.has_next?)  %>
     <li class="more_facets_link">
       <% if controller_name == "communities" %>
-        <%= link_to('more ' + facet_field.label.pluralize + '»', community_facet_path(:id => params[:id], :solr_field => solr_field), :class => "more_facets_link") %>
+        <%= link_to('more ' + facet_field.label.pluralize + '»', community_facet_path(:id => params[:id], :solr_field => solr_field, :params => params), :class => "more_facets_link") %>
       <% elsif controller_name == "collections" %>
-        <%= link_to('more ' + facet_field.label.pluralize + '»', collection_facet_path(:id => params[:id], :solr_field => solr_field), :class => "more_facets_link") %>
+        <%= link_to('more ' + facet_field.label.pluralize + '»', collection_facet_path(:id => params[:id], :solr_field => solr_field, :params => params), :class => "more_facets_link") %>
       <% elsif action_name != "index" %>
-        <%= link_to('more ' + facet_field.label.pluralize + '»', catalog_facet_path(solr_field, :smart_collection => action_name), :class => "more_facets_link") %>
+        <%= link_to('more ' + facet_field.label.pluralize + '»', catalog_facet_path(solr_field, :smart_collection => action_name, :params => params), :class => "more_facets_link") %>
       <% else %>
-        <%= link_to('more ' + facet_field.label.pluralize + '»', catalog_facet_path(solr_field), :class => "more_facets_link") %>
+        <%= link_to('more ' + facet_field.label.pluralize + '»', catalog_facet_path(solr_field, :params => params), :class => "more_facets_link") %>
       <% end %>
     </li>
   <% end %>
