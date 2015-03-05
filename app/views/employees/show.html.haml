@@ -6,6 +6,11 @@
         %li
           %a{ href: employee_files_path(@employee) }
             %i.icon-file
-            ="#{@employee.pretty_employee_name}'s files"
+            ="#{@employee.employee_first_name}'s files"
+        %li
+          %a{ href: employee_communities_path(@employee) }
+            %i.icon-group
+            ="#{@employee.employee_first_name}'s communities"
+
 
 = render partial: "smart_and_user_collections", locals: { :smart_collections => @system_collections, :user_collections => @user_collections, :editable => false }

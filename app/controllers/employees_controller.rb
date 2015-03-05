@@ -83,10 +83,20 @@ class EmployeesController < ApplicationController
 
   def my_communities
     fetch_employee
+    @page_title = "My Communities"
     @communities = @employee.communities
     @communities.sort_by!{|c| Community.find(c).title}
-    @page_title = "My Communities"
-    render :template => 'employees/my_communities'
+    render :template => 'employees/communities'
+  end
+
+  def communities
+    get_employee
+    if user_examining_self?
+      return redirect_to my_communities_path
+    end
+    @communities = @employee.communities
+    @communities.sort_by!{|c| Community.find(c).title}
+    @page_title = "#{@employee.pretty_employee_name}'s Communities"
   end
 
   private
