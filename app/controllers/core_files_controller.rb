@@ -429,8 +429,8 @@ class CoreFilesController < ApplicationController
     end
 
     def title_and_keyword?
-      if !params[:title].blank? && !params[:keywords].blank?
-        if !params[:title].first.blank? && !params[:keywords].first.blank?
+      if !(params[:core_file][:title].blank?) && !(params[:core_file][:keywords].blank?)
+        if !(params[:core_file][:title].first.blank?) && !(params[:core_file][:keywords].first.blank?)
           return true
         end
       end
