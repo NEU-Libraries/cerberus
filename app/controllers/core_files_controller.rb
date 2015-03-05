@@ -93,6 +93,12 @@ class CoreFilesController < ApplicationController
   def process_metadata
     @core_file = CoreFile.find(params[:id])
 
+    # if no title or keyword, send them back. Only God knows what they did to the form...
+    # fix for #671
+    if !title_and_keyword?
+      redirect_to files_provide_metadata_path(@core_file.pid) and return
+    end
+
     if @core_file.proxy_uploader.present?
       depositor_nuid = @core_file.proxy_uploader
       proxy_nuid     = current_user.nuid
@@ -260,6 +266,12 @@ class CoreFilesController < ApplicationController
   def update
     @core_file = CoreFile.find(params[:id])
 
+    # if no title or keyword, send them back. Only God knows what they did to the form...
+    # fix for #671
+    if !title_and_keyword?
+      redirect_to edit_core_file_path(@core_file.pid) and return
+    end
+
     version_event = false
 
     if params.has_key?(:revision) and params[:revision] !=  @core_file.content.latest_version.versionID
@@ -414,6 +426,18 @@ class CoreFilesController < ApplicationController
 
     def terms_accepted?
       params[:terms_of_service] == '1'
+    end
+
+    def title_and_keyword?
+      if !params[:title].blank? && !params[:keywords].blank?
+        if !params[:title].first.blank? && !params[:keywords].first.blank?
+          return true
+        end
+      end
+
+      # failure case
+      flash[:error] = "A title and at least one keyword are required"
+      return false
     end
 
     private
