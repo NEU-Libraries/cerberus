@@ -36,25 +36,25 @@ module Cerberus
         # Tag core with a DCMI noun based on the sort of content object created.
         def assign_obj_type
           if self.canonical_class.constantize == VideoFile
-            self.dc_type = "image"
+            self.dc_type = "Moving Image"
             self.mods_type = "moving image"
           elsif self.canonical_class.constantize == ImageMasterFile
-            self.dc_type = "image"
+            self.dc_type = "Image"
             self.mods_type = "still image"
           elsif [TextFile, PdfFile, MswordFile].include? self.canonical_class.constantize
-            self.dc_type = "text"
+            self.dc_type = "Text"
             self.mods_type = "text"
           elsif self.canonical_class.constantize == AudioFile
-            self.dc_type = "audio"
+            self.dc_type = "Audio"
             self.mods_type = "sound recording"
           elsif self.canonical_class.constantize == MsexcelFile
-            self.dc_type = "dataset"
+            self.dc_type = "Dataset"
             self.mods_type = "software, multimedia"
           elsif self.canonical_class.constantize == MspowerpointFile
-            self.dc_type = "interactive resource"
+            self.dc_type = "Interactive Resource"
             self.mods_type = "software, multimedia"
           elsif self.canonical_class.constantize == ZipFile
-            self.dc_type = "collection"
+            self.dc_type = "Collection"
             self.mods_type = "software, multimedia"
           end
 
