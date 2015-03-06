@@ -2,10 +2,6 @@
   <p><%= link_back_to_catalog %></p>
 <% end %>
 
-<%#Param cleaning for nicer urls%>
-<% if params[:solr_field].present? %>
-  <% params.delete :solr_field %>
-<% end %>
 <% if params[:_].present? %>
   <% params.delete :_ %>
 <% end %>
@@ -16,7 +12,7 @@
 
 <div class="modal-header">
   <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-  <h3><%= facet_field_labels[params[:id]] %></h3>
+  <h3><%= facet_field_labels[params[:solr_field]] %></h3>
 </div>
 <div class="modal-body">
   <div class="facet_extended_list">
@@ -24,10 +20,10 @@
     <ul class="facet_extended_list">
       <% @pagination.items.each do |item| %>
         <li>
-          <% if facet_in_params?( params[:id], item.value ) %>
-            <%= render_selected_facet_value(params[:id], item, :extended_list => true) %>
+          <% if facet_in_params?( params[:solr_field], item.value ) %>
+            <%= render_selected_facet_value(params[:solr_field], item, :extended_list => true) %>
           <% else %>
-            <%= render_facet_value(params[:id], item, :extended_list => true) %>
+            <%= render_facet_value(params[:solr_field], item, :extended_list => true) %>
           <% end %>
         </li>
       <% end %>

@@ -1,5 +1,5 @@
 class EmployeeMailer < ActionMailer::Base
-  default from: "notifier@repository.lib.neu.edu"
+  default from: "notifier@repository.library.northeastern.edu"
 
   def new_employee_alert(employee)
     @name = employee.name || "No name set.  Uh oh!"

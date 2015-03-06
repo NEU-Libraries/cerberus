@@ -5,7 +5,7 @@
 VAGRANTFILE_API_VERSION = "2"
 
 # Sets vmware fusion as the default provider
-VAGRANT_DEFAULT_PROVIDER = "vmware_fusion"
+VAGRANT_DEFAULT_PROVIDER = "virtualbox"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 

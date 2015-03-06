@@ -10,6 +10,10 @@
           %a{ href: employee_files_path(@employee) }
             %i.icon-file
             My Deposits
+        %li
+          %a{ href: employee_communities_path(@employee) }
+            %i.icon-group
+            My Communities
 
 %p.lead
   = t('drs.personal_graph.description')

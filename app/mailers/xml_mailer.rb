@@ -1,5 +1,5 @@
 class XmlMailer < ActionMailer::Base
-  default from: "notifier@repository.lib.neu.edu"
+  default from: "notifier@repository.library.northeastern.edu"
 
   def xml_edited_alert(core_file, user, new_tmp_file, old_tmp_file)
     @name = user.pretty_name || "No name set.  Uh oh!"

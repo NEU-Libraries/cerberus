@@ -1,7 +1,7 @@
 class MetadataMailer < ActionMailer::Base
   include AbstractController::Callbacks
 
-  default from: "notifier@repository.lib.neu.edu"
+  default from: "notifier@repository.library.northeastern.edu"
   after_filter :tag_as_notified
 
 
@@ -39,7 +39,7 @@ class MetadataMailer < ActionMailer::Base
     count += @presentations_update.count
 
     if ["staging", "production"].include? Rails.env
-      mail(to: "Sarah Sweeney <sj.sweeney@neu.edu>", subject: "Daily Featured Content Uploads and Updates - #{count} items")
+      mail(to: "Metadata Mailing List <Library-DRS-Metadata@neu.edu>", subject: "Daily Featured Content Uploads and Updates - #{count} items")
     elsif "test" == Rails.env
       mail(to: "Test <test@test.com>", subject: "Daily Featured Content Uploads and Updates - #{count} items")
     else

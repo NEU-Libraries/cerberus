@@ -93,6 +93,12 @@ class CoreFilesController < ApplicationController
   def process_metadata
     @core_file = CoreFile.find(params[:id])
 
+    # if no title or keyword, send them back. Only God knows what they did to the form...
+    # fix for #671
+    if !title_and_keyword?
+      redirect_to files_provide_metadata_path(@core_file.pid) and return
+    end
+
     if @core_file.proxy_uploader.present?
       depositor_nuid = @core_file.proxy_uploader
       proxy_nuid     = current_user.nuid
@@ -124,6 +130,12 @@ class CoreFilesController < ApplicationController
 
     # Add drs staff to permissions for #608
     @core_file.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, "edit")
+
+    if @core_file.save!
+      if params[:core_file] && !@core_file.category.first.blank?
+        UploadAlert.create_from_core_file(@core_file, :create)
+      end
+    end
 
     redirect_to core_file_path(@core_file.pid)
   end
@@ -253,6 +265,12 @@ class CoreFilesController < ApplicationController
 
   def update
     @core_file = CoreFile.find(params[:id])
+
+    # if no title or keyword, send them back. Only God knows what they did to the form...
+    # fix for #671
+    if !title_and_keyword?
+      redirect_to edit_core_file_path(@core_file.pid) and return
+    end
 
     version_event = false
 
@@ -408,6 +426,18 @@ class CoreFilesController < ApplicationController
 
     def terms_accepted?
       params[:terms_of_service] == '1'
+    end
+
+    def title_and_keyword?
+      if !(params[:core_file][:title].blank?) && !(params[:core_file][:keywords].blank?)
+        if !(params[:core_file][:title].first.blank?) && !(params[:core_file][:keywords].first.blank?)
+          return true
+        end
+      end
+
+      # failure case
+      flash[:error] = "A title and at least one keyword are required"
+      return false
     end
 
     private

@@ -30,6 +30,11 @@ class CatalogController < ApplicationController
 
   def index
 
+    if !params[:q].nil?
+      # Fixes #667 - we remove single characters. They're a pretty terrible idea with a strict AND
+      params[:q].gsub!(/(^| ).( |$)/, ' ')
+    end
+
     if !has_search_parameters?
       self.solr_search_params_logic += [:disable_highlighting]
       recent
@@ -39,6 +44,8 @@ class CatalogController < ApplicationController
   end
 
   def facet
+    # Kludgey kludge kludge
+    params[:solr_field] = params[:id]
     # Put in logic handling the smart collections
     if params[:smart_collection]
       filter_name = "#{params[:smart_collection].to_s}_filter"
@@ -257,6 +264,7 @@ class CatalogController < ApplicationController
   def exclude_unwanted_models(solr_parameters, user_parameters)
     solr_parameters[:fq] ||= []
     solr_parameters[:fq] << "#{Solrizer.solr_name("has_model", :symbol)}:\"info:fedora/afmodel:CoreFile\""
+    solr_parameters[:fq] << "-#{Solrizer.solr_name("is_supplemental_material_for", :symbol)}:[* TO *]"
   end
 
   def exclude_compilations(solr_parameters, user_parameters)

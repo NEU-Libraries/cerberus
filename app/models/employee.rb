@@ -36,6 +36,17 @@ class Employee < ActiveFedora::Base
     # safety return
     return ""
   end
+  
+  def employee_first_name
+    if !self.employee_name.blank?
+      name_array = Namae.parse self.employee_name
+      name_obj = name_array[0]
+      return "#{name_obj.given}"
+    end
+
+    # safety return
+    return ""
+  end
 
   def add_community(c_id)
     self.add_relationship(:has_affiliation, c_id)

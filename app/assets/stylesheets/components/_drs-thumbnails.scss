@@ -65,7 +65,10 @@
   }
 }
 
-.thumbnail-s4 img,
+.thumbnail-s4 img {
+  width:460px;
+}
+
 .thumbnail-s5 img{
   width: 500px;
 }
