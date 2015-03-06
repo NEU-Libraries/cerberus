@@ -87,7 +87,8 @@ class ContentCreationJob
     def zip_content(content_object)
       begin
         # Create the name for the zipfile.
-        z = File.basename(file_name, ".*") + ".zip"
+        # This prevents the zip upload issue in #664 
+        z = File.basename(Time.now.to_i.to_s, ".*") + ".zip"
         zipfile_name = Rails.root.join("tmp", z).to_s
 
         # Load our content into said zipfile.
