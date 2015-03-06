@@ -34,7 +34,13 @@ class ContentCreationJob
 
       # Zip files that need zippin'.  Just drop in other file types.
       if content_object.instance_of? ZipFile
-        zip_content(content_object)
+        # Is it literally a zipfile? or did it just fail to be the other types...
+        if File.extname(file_path) == ".zip"
+          file_contents = File.open(file_path)
+          content_object.add_file(file_contents, 'content', file_name)          
+        else
+          zip_content(content_object)
+        end
       else
         file_contents = File.open(file_path)
         content_object.add_file(file_contents, 'content', file_name)
@@ -87,7 +93,7 @@ class ContentCreationJob
     def zip_content(content_object)
       begin
         # Create the name for the zipfile.
-        # This prevents the zip upload issue in #664 
+        # This prevents the zip upload issue in #664
         z = File.basename(Time.now.to_i.to_s, ".*") + ".zip"
         zipfile_name = Rails.root.join("tmp", z).to_s
 
