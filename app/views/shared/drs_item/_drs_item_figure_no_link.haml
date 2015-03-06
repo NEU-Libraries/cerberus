@@ -6,7 +6,10 @@
 
 %figure.pull-left
   - if item.klass == "CoreFile"
-    =render partial: 'shared/thumbnails/thumbnail_picture', locals: { thumbs: @thumbs }
+    - if item.type_label == "Zip"
+      = render partial: 'shared/icon', locals: { class_string: 'icon-zip' }
+    - else
+      =render partial: 'shared/thumbnails/thumbnail_picture', locals: { thumbs: @thumbs }
   - elsif ( item.klass == "Collection" or item.klass == "Community"  ) and  @thumbs.length > 0
     -# Now lets see if communities and collections have a thumbnail associated to it, if so render out the thumbnail
     = image_tag @thumbs[0], alt: '', role: 'presentation'
