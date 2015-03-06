@@ -30,6 +30,11 @@ class CatalogController < ApplicationController
 
   def index
 
+    if !params[:q].nil?
+      # Fixes #667 - we remove single characters. They're a pretty terrible idea with a strict AND
+      params[:q].gsub!(/(^| ).( |$)/, ' ')
+    end
+
     if !has_search_parameters?
       self.solr_search_params_logic += [:disable_highlighting]
       recent
