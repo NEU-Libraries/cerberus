@@ -10,7 +10,8 @@
 // Global values
 // --------------------------------------------------
 
-$FontAwesomePath: "//netdna.bootstrapcdn.com/font-awesome/3.2.1/font";
+//$FontAwesomePath: "//netdna.bootstrapcdn.com/font-awesome/3.2.1/font";
+$FontAwesomePath: "//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/fonts";
 
 @import "typography/drs_g_webfont";
 
@@ -521,4 +522,3 @@ $breadcrumbHoverLinkColor: lighten($breadcrumbLinkColor, 10%);
 $navTabColor: $midnight-blue;
 $navTabHoverColor: lighten($navTabColor, 10%);
 $navTabActiveColor: $asbestos;
-

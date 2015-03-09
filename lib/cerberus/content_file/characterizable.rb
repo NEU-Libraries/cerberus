@@ -31,6 +31,10 @@ module Cerberus
         self.class.audio_mime_types.include? self.mime_type
       end
 
+      def zip?
+        self.class.zip_mime_types.include? self.mime_type
+      end
+
       def characterize
         self.characterization.ng_xml = self.content.extract_metadata
         self.filename = self.label

@@ -19,9 +19,13 @@
       = render partial: 'shared/thumbnails/full_picture'
     -else
       %i.icon-picture.icon-4x.icon-border.drs-icon-figure
+  - elsif @core_file.zip?
+    -if @thumbs.length > 0
+      = render partial: 'shared/thumbnails/full_picture'
+    -else
+      %i.icon-zip.icon-4x.icon-border.drs-icon-figure
   - else
     -if @thumbs.length > 0
       = render partial: 'shared/thumbnails/full_picture'
     -else
       %i.icon-file.icon-4x.icon-border.drs-icon-figure
-

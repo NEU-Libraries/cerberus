@@ -21,6 +21,11 @@ module Cerberus
           # audio/mpeg is the mime type that fits 0.6.0 returns for an mp3 file.
           ['audio/mp3', 'audio/mpeg', 'audio/wav', 'audio/x-wave', 'audio/x-wav', 'audio/ogg']
         end
+
+        def zip_mime_types
+          ['application/zip']
+        end
+
       end
     end
   end
