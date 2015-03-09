@@ -238,25 +238,23 @@ module Cerberus
 
 
     def pdf?
-      ['application/pdf'].include? self.mime_type
+      self.canonical_class == "PdfFile"
     end
 
     def image?
-      ['image/png','image/jpeg', 'image/jpg', 'image/jp2', 'image/bmp', 'image/gif'].include? self.mime_type
+      self.canonical_class == "ImageMasterFile"
     end
 
     def video?
-      ['video/mpeg', 'video/mp4', 'video/webm', 'video/x-msvideo', 'video/avi', 'video/quicktime', 'application/mxf'].include? self.mime_type
+      self.canonical_class == "VideoFile"
     end
 
     def audio?
-      # audio/x-wave is the mime type that fits 0.6.0 returns for a wav file.
-      # audio/mpeg is the mime type that fits 0.6.0 returns for an mp3 file.
-      ['audio/mp3', 'audio/mpeg', 'audio/x-wave', 'audio/x-wav', 'audio/ogg'].include? self.mime_type
+      self.canonical_class == "AudioFile"
     end
 
     def zip?
-      ['application/zip'].include? self.mime_type
+      self.canonical_class == "ZipFile"
     end
 
     # Content objects store file data in a datastream called 'content'
