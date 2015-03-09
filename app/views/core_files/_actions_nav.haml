@@ -1,8 +1,11 @@
 %nav(role="navigation")
   %ul.nav.nav-tabs
     %li.active
-      %a(href="#" data-event="non-link")
+      %a(href="#metadata" data-event="non-link")
         Metadata
+    - if !@core_file.supplemental_materials.blank? || !@core_file.supplemental_material_for.blank?
+      %li
+        = link_to 'Associated Files', '#supplemental-files'
     - if current_user_can? :edit, @core_file
       %li
         %a{ href: edit_core_file_path(@core_file),  data: {event: "non-link"} }
