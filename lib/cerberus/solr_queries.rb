@@ -11,12 +11,6 @@ module Cerberus
       return result
     end
 
-    def supplemental_materials
-      # solr query for items that have the correct rels_ext connection to this core file
-      children_query_result = ActiveFedora::SolrService.query("is_supplemental_material_for_ssim:#{self.full_self_id}")
-      children_query_result.map { |x| SolrDocument.new(x) }
-    end
-
     def child_files
       core_file_model = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:CoreFile"
       children_query_result = ActiveFedora::SolrService.query("is_member_of_ssim:#{self.full_self_id} AND has_model_ssim:#{core_file_model}")
@@ -242,7 +236,7 @@ module Cerberus
     end
 
     def associated_files_by_type(relation)
-      str = "info:fedora/#{self.pid}"
+      str = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/#{self.pid}"
       r = ActiveFedora::SolrService.query("#{relation}:\"#{str}\"")
       r.map { |x| SolrDocument.new(x) }
     end
