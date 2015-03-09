@@ -19,7 +19,7 @@ set :branch, ENV['branch'] || current_branch || "develop" # you can use the 'bra
 set :user, 'drs'
 set :rails_env, :staging
 
-server 'drs@repositorydev.neu.edu', user: 'drs', roles: %w{web app db}
+server 'drs@repository.library.northeastern.edu', user: 'drs', roles: %w{web app db}
 
 namespace :deploy do
   desc "Restarting application"
@@ -139,4 +139,3 @@ after 'deploy:finished', 'deploy:start_solrizerd'
 after 'deploy:finished', 'deploy:flush_redis'
 after 'deploy:finished', 'deploy:start_httpd'
 after 'deploy:finished', 'deploy:restart_workers'
-
