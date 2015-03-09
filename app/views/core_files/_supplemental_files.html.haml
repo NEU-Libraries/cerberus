@@ -1,0 +1,9 @@
+%div
+  - @core_file.supplemental_materials.each do |s|
+    %h5
+      %a{ href: core_file_path(s.pid) }
+        = s.title
+  - @core_file.supplemental_material_for.each do |s|
+    %h5
+      %a{ href: core_file_path(s.pid) }
+        = s.title
