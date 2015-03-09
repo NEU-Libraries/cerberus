@@ -153,6 +153,10 @@ class CoreFile < ActiveFedora::Base
     self.pid
   end
 
+  def zip?
+    self.class.zip_mime_types.include? self.mime_type
+  end
+
   # Safely set the parent of a collection.
   def set_parent(collection, user)
     if user.can?(:edit, collection) || user.proxy_staff?
