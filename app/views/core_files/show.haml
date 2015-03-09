@@ -29,7 +29,7 @@
             var url = document.location.toString();
             if (url.match('#')) {
                 $('.nav-tabs a[href=#'+url.split('#')[1]+']').tab('show') ;
-            } 
+            }
 
           .drs-item-add-details
             = @mods
@@ -38,4 +38,4 @@
             %section.drs-item-derivatives
               = render partial: 'show_derivatives', locals: {contents: @content_objects}
         #supplemental-files.tab-pane
-          = render partial: "additional_files"
+          = render partial: "supplemental_files"
