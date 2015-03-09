@@ -19,9 +19,23 @@
       = render :partial => 'core_files/media_display'
     %div{itemscope: "", itemtype: "http://schema.org/CreativeWork", class:  [ layout_class, 'drs-item-details'] }
       = render partial: 'actions_nav'
-      .drs-item-add-details
-        = @mods
-      - @content_objects = cached_content_objects(@core_file)
-      -if @content_objects
-        %section.drs-item-derivatives
-          = render partial: 'show_derivatives', locals: {contents: @content_objects}
+      .tab-content
+        #metadata.tab-pane.active
+          :javascript
+            $('.nav-tabs a').click(function (e) {
+              e.preventDefault();
+              $(this).tab('show');
+            });
+            var url = document.location.toString();
+            if (url.match('#')) {
+                $('.nav-tabs a[href=#'+url.split('#')[1]+']').tab('show') ;
+            } 
+
+          .drs-item-add-details
+            = @mods
+          - @content_objects = cached_content_objects(@core_file)
+          -if @content_objects
+            %section.drs-item-derivatives
+              = render partial: 'show_derivatives', locals: {contents: @content_objects}
+        #supplemental-files.tab-pane
+          = render partial: "additional_files"
