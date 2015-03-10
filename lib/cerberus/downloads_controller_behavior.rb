@@ -13,7 +13,9 @@ module Cerberus
 
     def datastream_name
       if datastream.dsid == self.class.default_content_dsid
-        params[:filename] || asset.label
+        # params[:filename] || asset.label
+        # Fix for #680
+        "neu_#{asset.pid.split(":").last}#{Rack::Mime::MIME_TYPES.invert[asset.characterization.mime_type.first]}"
       else
         params[:datastream_id]
       end
