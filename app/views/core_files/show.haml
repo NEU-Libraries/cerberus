@@ -24,7 +24,11 @@
           :javascript
             $('.nav-tabs a').click(function (e) {
               e.preventDefault();
-              $(this).tab('show');
+              if ($(this).data("event") == "external") {
+                window.open($(this).attr('href'), "_self")
+              } else {
+                $(this).tab('show');
+              }
             });
             var url = document.location.toString();
             if (url.match('#')) {
