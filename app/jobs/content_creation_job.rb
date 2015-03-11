@@ -7,7 +7,7 @@ class ContentCreationJob
     :content_creation
   end
 
-  def initialize(core_file, file_path, file_name, poster_path=0, small_size=0, medium_size=0, large_size=0, delete_file=true)
+  def initialize(core_file, file_path, file_name, poster_path=nil, small_size=0, medium_size=0, large_size=0, delete_file=true)
     self.core_file_pid = core_file
     self.file_path     = file_path
     self.file_name     = file_name
@@ -27,17 +27,20 @@ class ContentCreationJob
       klass = core_record.canonical_class.constantize
       content_object = klass.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
 
-      # TODO: re-do video poster creation...
-      # if content_object.instance_of? VideoFile
-      #   InlineThumbnailCreator.new(content_object, poster_path, "poster").create_thumbnail_and_save
-      # end
+      if !poster_path.blank? # Video or Audio posters
+        poster_object = ImageMasterFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint), core_record: core_record)
+        poster_contents = File.open(poster_path)
+        poster_object.add_file(poster_contents, 'content', "poster#{File.extname(poster_path)}")
+        poster_object.save!
+        DerivativeCreator.new(poster_object.pid).generate_derivatives
+      end
 
       # Zip files that need zippin'.  Just drop in other file types.
       if content_object.instance_of? ZipFile
         # Is it literally a zipfile? or did it just fail to be the other types...
         if File.extname(file_path) == ".zip"
           file_contents = File.open(file_path)
-          content_object.add_file(file_contents, 'content', file_name)          
+          content_object.add_file(file_contents, 'content', file_name)
         else
           zip_content(content_object)
         end

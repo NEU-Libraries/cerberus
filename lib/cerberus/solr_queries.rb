@@ -69,7 +69,8 @@ module Cerberus
         end
 
         arry.keep_if { |x| x.class == SolrDocument }
-        return arry
+        result_array = arry + co
+        return result_array.uniq
       end
 
       if co.any? { |x| x.klass == "ImageMasterFile" }

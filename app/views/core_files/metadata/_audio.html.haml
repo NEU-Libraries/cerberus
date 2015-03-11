@@ -1,0 +1,11 @@
+.row-fluid
+  .span12
+    %legend Audio Metadata
+.video_metadata
+  .span6
+    = f.label :description, "Thumbnail"
+    %small Choose an image for the audio file
+  .span6
+    = f.file_field :poster, name: 'poster'
+    %span.help-block
+      This image will be displayed on the file page.
