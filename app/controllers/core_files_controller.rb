@@ -115,9 +115,8 @@ class CoreFilesController < ApplicationController
     # Process Thumbnail
     if params[:poster]
       file = params[:poster]
-      new_path = move_file_to_tmp(file)
-
-      Cerberus::Application::Queue.push(ContentCreationJob.new(@core_file.pid, @core_file.tmp_path, @core_file.original_filename, new_path))
+      poster_path = move_file_to_tmp(file)
+      Cerberus::Application::Queue.push(ContentCreationJob.new(@core_file.pid, @core_file.tmp_path, @core_file.original_filename, poster_path))
     elsif !max.nil?
       s = params[:small_image_size].to_f / max.to_f
       m = params[:medium_image_size].to_f / max.to_f
