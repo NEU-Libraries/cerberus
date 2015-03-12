@@ -8,10 +8,14 @@
       - if @thumbs.length > 0
         - poster = @thumbs[0]
       - if content.mime_type == 'video/mp4'
+        - type = form = 'MP4'
+        - provider = 'video'
+      - elsif content.mime_type == 'video/quicktime'
         - type = 'MP4'
         - provider = 'video'
+        - form = 'MOV'
       - elsif content.mime_type == 'audio/mpeg'
-        - type = 'MP3'
+        - type = form = 'MP3'
         - provider = 'sound'
       #player
         :javascript
@@ -20,8 +24,8 @@
           jwplayer("player").setup({
           sources:
           [
-          { file: "rtmp://libwowza.neu.edu:1935/vod/_definst_/#{type}:datastreamStore/fedoraData/datastreamStore/#{dir}/info%3Afedora%2F#{encoded}%2F#{type}%2F#{type}.0", type:"#{type}"},
-          { file: "http://libwowza.neu.edu:1935/vod/_definst_/datastreamStore/fedoraData/datastreamStore/#{dir}/#{type}:" + encodeURIComponent("info%3Afedora%2F#{encoded}%2F#{type}%2F#{type}.0") + "/playlist.m3u8", type:"#{type}"}
+          { file: "rtmp://libwowza.neu.edu:1935/vod/_definst_/#{type}:datastreamStore/fedoraData/datastreamStore/#{dir}/info%3Afedora%2F#{encoded}%2F#{form}%2F#{form}.0"},
+          { file: "http://libwowza.neu.edu:1935/vod/_definst_/datastreamStore/fedoraData/datastreamStore/#{dir}/#{type}:" + encodeURIComponent("info%3Afedora%2F#{encoded}%2F#{form}%2F#{form}.0") + "/playlist.m3u8", type:"#{type}"}
           ],
           image: "#{poster}",
           provider: "#{provider}",
