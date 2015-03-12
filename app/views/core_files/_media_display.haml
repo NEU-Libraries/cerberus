@@ -5,17 +5,9 @@
     -else
       %i.icon-picture.icon-4x.icon-border.drs-icon-figure
   - elsif @core_file.video?
-    -if @thumbs.length > 0
-      = render partial: 'shared/thumbnails/full_picture'
-    -else
-      %i.icon-file.icon-4x.icon-border.drs-icon-figure
-    -# TODO: with wowza
+    = render partial: 'audio_video'
   - elsif @core_file.audio?
-    -if @thumbs.length > 0
-      = render partial: 'shared/thumbnails/full_picture'
-    -else
-      %i.icon-file.icon-4x.icon-border.drs-icon-figure
-    -# TODO: with wowza
+    = render partial: 'audio_video'
   - elsif @core_file.pdf?
     -if @thumbs.length > 0
       = render partial: 'shared/thumbnails/full_picture'
