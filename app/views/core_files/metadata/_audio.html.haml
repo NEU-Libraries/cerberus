@@ -3,9 +3,9 @@
     %legend Audio Metadata
 .video_metadata
   .span6
-    = f.label :description, "Thumbnail"
+    = f.label :description, "Thumbnail", class: "required-label"
     %small Choose an image for the audio file
   .span6
-    = f.file_field :poster, name: 'poster'
+    = f.file_field :poster, name: 'poster', required: true
     %span.help-block
       This image will be displayed on the file page.
