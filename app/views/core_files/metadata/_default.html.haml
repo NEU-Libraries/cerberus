@@ -2,6 +2,9 @@
   - if @core_file.canonical_class == "VideoFile"
     %fieldset.row-fluid
       = render partial: 'core_files/metadata/video', locals: {:f => f}
+  - if @core_file.canonical_class == "AudioFile"
+    %fieldset.row-fluid
+      = render partial: 'core_files/metadata/audio', locals: {:f => f}      
   - if @core_file.canonical_class == "ImageMasterFile"
     %fieldset.row-fluid
       = render partial: 'core_files/metadata/image', locals: {:f => f}

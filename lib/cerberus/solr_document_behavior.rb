@@ -1,5 +1,6 @@
 require 'date_time_precision'
 require 'date_time_precision/format/string'
+require 'digest/md5'
 include Rails.application.routes.url_helpers
 
 module Cerberus
@@ -360,6 +361,15 @@ module Cerberus
 
     def communities
       Array(self[Solrizer.solr_name("has_affiliation", :symbol)])
+    end
+
+    def pid_hash
+      string = "info:fedora/#{self.pid}/content/content.0"
+      Digest::MD5.hexdigest(string)
+    end
+
+    def encode
+      self.pid.gsub(':','%3A')
     end
   end
 end
