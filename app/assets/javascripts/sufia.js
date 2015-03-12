@@ -30,7 +30,6 @@ limitations under the License.
 //= require bootstrap-popover
 //= require bootstrap-tab
 
-//= require jwplayer/jwplayer.js
 //= require jquery.validate
 //= require swfobject
 //= require ZeroClipboard.min
