@@ -38,3 +38,5 @@
 //= require ace/mode-xml
 
 //= require spin.js
+
+//= require jwplayer/jwplayer.js
