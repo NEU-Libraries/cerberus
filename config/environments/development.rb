@@ -64,7 +64,7 @@ Cerberus::Application.configure do
   config.middleware.use ExceptionNotification::Rack,
     :email => {
       :email_prefix => "[DRS Dev] ",
-      :sender_address => %{"notifier" <notifier@repositorydev.neu.edu>},
+      :sender_address => %{"notifier" <notifier@repository.library.northeastern.edu>},
       :exception_recipients => "#{user_to_email}"
     }
 
