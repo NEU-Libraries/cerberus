@@ -15,8 +15,9 @@
       = kramdown_parse(@core_file.title)
 
   %section.row
+    - @content_objects = cached_content_objects(@core_file)
     %div{class: layout_class}
-      = render :partial => 'core_files/media_display'
+      = render :partial => 'core_files/media_display', locals: {contents: @content_objects}
     %div{itemscope: "", itemtype: "http://schema.org/CreativeWork", class:  [ layout_class, 'drs-item-details'] }
       = render partial: 'actions_nav'
       .tab-content
@@ -37,7 +38,6 @@
 
           .drs-item-add-details
             = @mods
-          - @content_objects = cached_content_objects(@core_file)
           -if @content_objects
             %section.drs-item-derivatives
               = render partial: 'show_derivatives', locals: {contents: @content_objects}
