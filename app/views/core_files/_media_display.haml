@@ -5,9 +5,9 @@
     -else
       %i.icon-picture.icon-4x.icon-border.drs-icon-figure
   - elsif @core_file.video?
-    = render partial: 'audio_video'
+    = render partial: 'audio_video', locals: {contents: @content_objects}
   - elsif @core_file.audio?
-    = render partial: 'audio_video'
+    = render partial: 'audio_video', locals: {contents: @content_objects}
   - elsif @core_file.pdf?
     -if @thumbs.length > 0
       = render partial: 'shared/thumbnails/full_picture'
