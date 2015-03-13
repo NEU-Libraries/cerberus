@@ -1,3 +1,5 @@
+.alert.alert-warning.alert-video.hidden
+  = "There was an error playing this file. Please try on a different device, verify Flash is enabled, or download the file."
 - if @thumbs.length > 0
   - poster = @thumbs[3]
   .replace_thumbs.hidden
@@ -41,7 +43,7 @@
     html5player: "/assets/jwplayer/jwplayer.html5.js"
     })
     var errorMessage = function() {
-      $(".replace_thumbs").before("<div class='alert alert-warning'>There was an error playing this file. Please try on a different device or download the file.</div>")
+      $(".alert-video").removeClass("hidden")
       $(".replace_thumbs").removeClass("hidden")
       $("#player, #player_wrapper").hide()
     }
@@ -49,7 +51,7 @@
     jwplayer().onSetupError(errorMessage);
     jwplayer().onBuffer(function() {
       theTimeout = setTimeout(function() {
-        $(".replace_thumbs").before("<div class='alert alert-warning'>There was an error playing this file. Please try on a different device or download the file.</div>")
+        $(".alert-video").removeClass("hidden")
         $(".replace_thumbs").removeClass("hidden")
         $("#player, #player_wrapper").hide()
       }, 5000)
@@ -67,4 +69,7 @@
     })
     $(".replace_thumbs").click(function() {
       jwplayer().play()
+    })
+    jwplayer().onComplete(function() {
+      window.location = window.location.href
     })
