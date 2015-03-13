@@ -12,7 +12,7 @@ staging:
   url: http://nb4676.neu.edu:8080/fedora
 production:
   user: fedoraAdmin
-  password: fedoraAdmin
-  url: http://your.production.server:8080/fedora
+  password: <%= ENV["FEDORA_PASSWD"] %>
+  url: http://nb4676.neu.edu:8080/fedora
 cucumber:
   <<: *TEST
