@@ -1,141 +1,42 @@
-# Automate deployment to our local dev machine.
-# This somewhat deceptively requires the use of an environment called 'staging'
-# Which is really just develop with the caveat that jetty runs on port 3000.
-
-# Sorry.
-
 set :stage, :development
-set :whenever_environment, 'staging'
 
-set :deploy_to, '/home/drs/apps/develop/'
-#set :branch, 'develop'
+# Simple Role Syntax
+# ==================
+# Supports bulk-adding hosts to roles, the primary
+# server in each group is considered to be the first
+# unless any hosts have the primary property set.
+role :app, %w{deploy@example.com}
+role :web, %w{deploy@example.com}
+role :db,  %w{deploy@example.com}
 
-# parses out the current branch you're on. See: http://www.harukizaemon.com/2008/05/deploying-branches-with-capistrano.html
-current_branch = `git branch`.match(/\* (\S+)\s/m)[1]
+# Extended Server Syntax
+# ======================
+# This can be used to drop a more detailed server
+# definition into the server list. The second argument
+# something that quacks like a hash can be used to set
+# extended properties on the server.
+server 'example.com', user: 'deploy', roles: %w{web app}, my_property: :my_value
 
-# use the branch specified as a param, then use the current branch. If all fails use master branch
-set :branch, ENV['branch'] || current_branch || "develop" # you can use the 'branch' parameter on deployment to specify the branch you wish to deploy
+# you can set custom ssh options
+# it's possible to pass any option but you need to keep in mind that net/ssh understand limited list of options
+# you can see them in [net/ssh documentation](http://net-ssh.github.io/net-ssh/classes/Net/SSH.html#method-c-start)
+# set it globally
+#  set :ssh_options, {
+#    keys: %w(/home/rlisowski/.ssh/id_rsa),
+#    forward_agent: false,
+#    auth_methods: %w(password)
+#  }
+# and/or per server
+# server 'example.com',
+#   user: 'user_name',
+#   roles: %w{web app},
+#   ssh_options: {
+#     user: 'user_name', # overrides user setting above
+#     keys: %w(/home/user_name/.ssh/id_rsa),
+#     forward_agent: false,
+#     auth_methods: %w(publickey password)
+#     # password: 'please use keys'
+#   }
+# setting per server overrides global ssh_options
 
-set :user, 'drs'
-set :rails_env, :staging
-
-server 'drs@repository.library.northeastern.edu', user: 'drs', roles: %w{web app db}
-
-namespace :deploy do
-  desc "Restarting application"
-  task :start_httpd do
-    on roles(:app), :in => :sequence, :wait => 5 do
-      sudo "service httpd start"
-    end
-  end
-
-  desc "Restarting application"
-  task :stop_httpd do
-    on roles(:app), :in => :sequence, :wait => 5 do
-      sudo "service httpd stop"
-    end
-  end
-
-  desc "Precompile"
-  task :assets_kludge do
-    on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake assets:precompile)"
-    end
-  end
-
-  desc "Restarting the resque workers"
-  task :restart_workers do
-    on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec kill -TERM $(cat /home/drs/config/resque-pool.pid))", raise_on_non_zero_exit: false
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . kill $(ps aux | grep -i resque | awk '{print $2}'))", raise_on_non_zero_exit: false
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rm -f /home/drs/config/resque-pool.pid)", raise_on_non_zero_exit: false
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec resque-pool --daemon -p /home/drs/config/resque-pool.pid)"
-    end
-  end
-
-  desc "Clearing cache"
-  task :clear_cache do
-    on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake cache:clear)"
-    end
-  end
-
-  desc "Resetting data"
-  task :reset_data do
-    on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake reset_data)"
-    end
-  end
-
-  desc "Copy Figaro YAML"
-  task :copy_yml_file do
-    on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cp /home/drs/config/application.yml #{release_path}/config/"
-    end
-  end
-
-  desc "Setting whenever environment and updating the crontable"
-  task :whenever do
-    on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec whenever --set environment=staging -c)"
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec whenever --set environment=staging -w)"
-    end
-  end
-
-  desc "Copy rvmrc"
-  task :copy_rvmrc_file do
-    on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cp /home/drs/.drsrvmrc #{release_path}/.rvmrc"
-    end
-  end
-
-  desc 'Trust rvmrc file'
-  task :trust_rvmrc do
-    on roles(:app), :in => :sequence, :wait => 5 do
-      execute "/home/drs/.rvm/bin/rvm rvmrc trust #{release_path}"
-    end
-  end
-
-  desc 'Start solrizerd'
-  task :start_solrizerd do
-    on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec solrizerd restart --hydra_home #{release_path} -p 61616 -o nb4676.neu.edu -d /topic/fedora.apim.update -s http://solr.lib.neu.edu:8080/solr)"
-    end
-  end
-
-  desc 'Flush Redis'
-  task :flush_redis do
-    on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . redis-cli FLUSHALL)"
-    end
-  end
-
-end
-
-# Load the rvm environment before executing the refresh data hook.
-# This will be necessary for any hook that needs access to ruby.
-# Note the use of the rvm-auto shell in the task definition.
-
-# before 'deploy:reset_data', 'rvm1:hook'
-before 'deploy:restart_workers', 'rvm1:hook'
-
-before 'deploy:assets_kludge', 'deploy:clear_cache'
-
-# These hooks execute in the listed order after the deploy:updating task
-# occurs.  This is the task that handles refreshing the app code, so this
-# should only fire on actual deployments.
-before 'deploy:starting', 'deploy:stop_httpd'
-
-after 'deploy:updating', 'deploy:copy_rvmrc_file'
-after 'deploy:updating', 'deploy:trust_rvmrc'
-after 'deploy:updating', 'bundler:install'
-after 'deploy:updating', 'deploy:copy_yml_file'
-after 'deploy:updating', 'deploy:migrate'
-after 'deploy:updating', 'deploy:whenever'
-after 'deploy:updating', 'deploy:assets_kludge'
-
-# after 'deploy:finished', 'deploy:reset_data'
-after 'deploy:finished', 'deploy:start_solrizerd'
-after 'deploy:finished', 'deploy:flush_redis'
-after 'deploy:finished', 'deploy:start_httpd'
-after 'deploy:finished', 'deploy:restart_workers'
+# fetch(:default_env).merge!(rails_env: :staging)
