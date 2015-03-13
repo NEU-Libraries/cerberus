@@ -7,7 +7,7 @@ set :deploy_to, '/home/drs/apps/develop/'
 current_branch = `git branch`.match(/\* (\S+)\s/m)[1]
 
 # use the branch specified as a param, then use the current branch. If all fails use master branch
-set :branch, ENV['branch'] || current_branch || "master" # you can use the 'branch' parameter on deployment to specify the branch you wish to deploy
+set :branch, ENV['branch'] || current_branch || "develop" # you can use the 'branch' parameter on deployment to specify the branch you wish to deploy
 
 set :user, 'drs'
 set :rails_env, :production
@@ -50,13 +50,6 @@ namespace :deploy do
   task :clear_cache do
     on roles(:app), :in => :sequence, :wait => 5 do
       execute "cd #{release_path} && (RAILS_ENV=production /tmp/drs/rvm-auto.sh . rake cache:clear)"
-    end
-  end
-
-  desc "Resetting data"
-  task :reset_data do
-    on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd #{release_path} && (RAILS_ENV=production /tmp/drs/rvm-auto.sh . rake reset_data)"
     end
   end
 
@@ -109,7 +102,6 @@ end
 # This will be necessary for any hook that needs access to ruby.
 # Note the use of the rvm-auto shell in the task definition.
 
-# before 'deploy:reset_data', 'rvm1:hook'
 before 'deploy:restart_workers', 'rvm1:hook'
 
 before 'deploy:assets_kludge', 'deploy:clear_cache'
@@ -127,7 +119,6 @@ after 'deploy:updating', 'deploy:migrate'
 after 'deploy:updating', 'deploy:whenever'
 after 'deploy:updating', 'deploy:assets_kludge'
 
-# after 'deploy:finished', 'deploy:reset_data'
 after 'deploy:finished', 'deploy:start_solrizerd'
 after 'deploy:finished', 'deploy:flush_redis'
 after 'deploy:finished', 'deploy:start_httpd'
