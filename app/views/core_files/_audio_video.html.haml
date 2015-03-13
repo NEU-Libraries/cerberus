@@ -20,6 +20,10 @@
     jwplayer.key="gi5wgpwDtAXG4xdj1uuW/NyMsECyiATOBxEO7A=="
   :javascript
     var provider = "#{provider}"
+    var primary = "flash"
+    if (typeof swfobject == 'undefined' || swfobject.getFlashPlayerVersion().major == 0) {
+      primary == "html5"
+    }
     jwplayer("player").setup({
     sources:
     [
@@ -30,7 +34,7 @@
     provider: "#{provider}",
     fallback: "true",
     androidhls: "true",
-    primary: "flash",
+    primary: primary,
     width: "100%",
     height: 400,
     flashplayer: "/assets/jwplayer/jwplayer.flash.swf",
