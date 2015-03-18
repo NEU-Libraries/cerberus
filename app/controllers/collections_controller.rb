@@ -33,7 +33,7 @@ class CollectionsController < ApplicationController
   rescue_from Exceptions::SearchResultTypeError, with: :index_redirect_with_bad_search
 
   rescue_from Blacklight::Exceptions::InvalidSolrID, ActiveFedora::ObjectNotFoundError do |exception|
-    @obj_type = "Community"
+    @obj_type = "Collection"
     email_handled_exception(exception)
     render_404(ActiveFedora::ObjectNotFoundError.new) and return
   end
