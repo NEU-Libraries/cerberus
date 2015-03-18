@@ -17,7 +17,7 @@
       %fieldset.span6
         %legend Mass Permissions
         = label_tag 'set[mass_permissions]', "Choose Mass Permissions:"
-        = select_tag 'set[mass_permissions]', options_for_select(@set.valid_mass_permissions, 'public') , class: "span12"
+        = select_tag 'set[mass_permissions]', options_for_select(@set.valid_mass_permissions, @set.mass_permissions) , class: "span12"
         %p.help-block
           %ul
             %li Setting to 'public' will allow anyone accessing the site to see your collection.
