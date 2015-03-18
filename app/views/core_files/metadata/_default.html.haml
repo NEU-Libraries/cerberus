@@ -4,7 +4,7 @@
       = render partial: 'core_files/metadata/video', locals: {:f => f}
   - if @core_file.canonical_class == "AudioFile"
     %fieldset.row-fluid
-      = render partial: 'core_files/metadata/audio', locals: {:f => f}      
+      = render partial: 'core_files/metadata/audio', locals: {:f => f}
   - if @core_file.canonical_class == "ImageMasterFile"
     %fieldset.row-fluid
       = render partial: 'core_files/metadata/image', locals: {:f => f}
@@ -49,14 +49,13 @@
     %button#add_another_keyword.btn.btn.btn-block.btn-success{:type => "button"}
       %i.icon-plus-sign.icon-large
       Add Keyword
-
 .row-fluid
   %fieldset.span6
     %legend Mass Permissions
     = label_tag 'core_file[mass_permissions]', "Choose Mass Permissions:"
-    - if !@core_file.nil? #not editing
-      = select_tag 'core_file[mass_permissions]', options_for_select(@core_file.valid_mass_permissions, 'public') , class: "span6"
-    - else #editing
+    - if params[:action] == "edit"
+      = select_tag 'core_file[mass_permissions]', options_for_select(@core_file.valid_mass_permissions, @core_file.mass_permissions) , class: "span6"
+    - else
       = select_tag 'core_file[mass_permissions]', options_for_select(@core_file.valid_mass_permissions, 'public') , class: "span6"
     %p.help-block
       %ul
