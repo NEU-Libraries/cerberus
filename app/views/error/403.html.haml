@@ -1,6 +1,11 @@
 -if !current_user.nil?
   %p.red
     You have insufficient permissions to access this page.
+  %p
+    You might be interested in
+    %a{:href => "mailto:Library-Repository-Team@neu.edu"} contacting the DRS staff
+    , or
+    %a{:href => "http://library.northeastern.edu/get-help/tech-support/report-a-problem?resource=#{CGI::escape(request.original_url)}", :target => "_blank"} reporting the problem.
 -else
   %p
     You're not currently logged in. Doing so may grant you access to this object.
