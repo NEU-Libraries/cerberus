@@ -9,7 +9,10 @@
   - url = "'#{params[:error]}'"
 - else
   - url = "pid '#{params[:id]}'"
-%h3= "The #{obj_type} you requested at #{url} was not found in the system."
+%h3
+  %i.icon-warning-sign.icon-2x
+  The #{obj_type} you requested at #{url} was not found in the system.
+%br
 %p
   It either never existed or has been deleted.
 %p
@@ -17,4 +20,5 @@
   %a{:href => "mailto:Library-Repository-Team@neu.edu"} contacting the DRS staff
   , or
   %a{:href => "http://library.northeastern.edu/get-help/tech-support/report-a-problem?resource=#{CGI::escape(url)} (#{CGI::escape(request.original_url)})", :target => "_blank"} reporting the problem.
-%a.btn.btn-info.btn-lg{:href => "/"} DRS Home
+%br
+%a.btn.btn-lg{:href => "/"} DRS Home
