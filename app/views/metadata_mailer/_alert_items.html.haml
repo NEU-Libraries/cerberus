@@ -1,12 +1,11 @@
 %tbody{border: 1}
-  %tr
-    %th Collection
-    %th Title
-    %th Depositor
-    %th PID
   - alerts.each do |alert|
     %tr
-      %td= link_to("#{alert.collection_title}", controller: 'collections', action: 'show', id: alert.collection_pid, only_path: false)
-      %td= link_to("#{alert.title}", controller: 'core_files', action: 'show', id: alert.pid, only_path: false)
-      %td= "#{alert.depositor_name} (#{alert.depositor_email})"
-      %td= "#{alert.pid}"
+      %td= link_to("Collection: #{alert.collection_title}", controller: 'collections', action: 'show', id: alert.collection_pid, only_path: false)
+    %tr
+      %td= link_to("Title: #{alert.title}", controller: 'core_files', action: 'show', id: alert.pid, only_path: false)
+    %tr
+      %td= "Depositor: #{alert.depositor_name} (#{alert.depositor_email})"
+    %tr
+      %td= "PID: #{alert.pid}"
+    %tr
