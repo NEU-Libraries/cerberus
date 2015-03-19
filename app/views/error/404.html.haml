@@ -1,3 +1,24 @@
-%p= "The #{@obj_type} you requested at pid '#{params[:id]}' was not found in the system."
+- if @obj_type.blank?
+  - if params[:controller] == 'core_files'
+    - obj_type = 'file'
+  - else
+    - obj_type = 'page'
+- else
+  - obj_type = @obj_type
+- if params[:id].blank?
+  - url = "'#{params[:error]}'"
+- else
+  - url = "pid '#{params[:id]}'"
+%h3
+  %i.icon-warning-sign.icon-2x
+  The #{obj_type} you requested at #{url} was not found in the system.
+%br
 %p
   It either never existed or has been deleted.
+%p
+  You might be interested in
+  %a{:href => "mailto:Library-Repository-Team@neu.edu"} contacting the DRS staff
+  , or
+  %a{:href => "http://library.northeastern.edu/get-help/tech-support/report-a-problem?resource=#{CGI::escape(url)} (#{CGI::escape(request.original_url)})", :target => "_blank"} reporting the problem.
+%br
+%a.btn.btn-lg{:href => "/"} DRS Home

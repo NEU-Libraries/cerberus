@@ -1,3 +1,5 @@
+.alert.alert-warning.alert-video.hidden
+  = "There was an error playing this file. Please try on a different device, verify Flash is enabled, or download the file."
 - if @thumbs.length > 0
   - poster = @thumbs[3]
   .replace_thumbs.hidden
@@ -20,6 +22,10 @@
     jwplayer.key="gi5wgpwDtAXG4xdj1uuW/NyMsECyiATOBxEO7A=="
   :javascript
     var provider = "#{provider}"
+    var primary = "flash"
+    if (typeof swfobject == 'undefined' || swfobject.getFlashPlayerVersion().major == 0) {
+      primary == "html5"
+    }
     jwplayer("player").setup({
     sources:
     [
@@ -30,13 +36,14 @@
     provider: "#{provider}",
     fallback: "true",
     androidhls: "true",
-    primary: "flash",
+    primary: primary,
     width: "100%",
     height: 400,
-    flashplayer: "/assets/jwplayer/jwplayer.flash.swf"
+    flashplayer: "/assets/jwplayer/jwplayer.flash.swf",
+    html5player: "/assets/jwplayer/jwplayer.html5.js"
     })
     var errorMessage = function() {
-      $(".replace_thumbs").before("<div class='alert alert-warning'>There was an error playing this file. Please try on a different device or download the file.</div>")
+      $(".alert-video").removeClass("hidden")
       $(".replace_thumbs").removeClass("hidden")
       $("#player, #player_wrapper").hide()
     }
@@ -44,7 +51,7 @@
     jwplayer().onSetupError(errorMessage);
     jwplayer().onBuffer(function() {
       theTimeout = setTimeout(function() {
-        $(".replace_thumbs").before("<div class='alert alert-warning'>There was an error playing this file. Please try on a different device or download the file.</div>")
+        $(".alert-video").removeClass("hidden")
         $(".replace_thumbs").removeClass("hidden")
         $("#player, #player_wrapper").hide()
       }, 5000)
@@ -62,4 +69,7 @@
     })
     $(".replace_thumbs").click(function() {
       jwplayer().play()
+    })
+    jwplayer().onComplete(function() {
+      window.location = window.location.href
     })
