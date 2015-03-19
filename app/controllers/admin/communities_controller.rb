@@ -46,7 +46,7 @@ class Admin::CommunitiesController < AdminController
 
     if @community.save!
       update_theses_and_thumbnail
-      flash[:info] = "Community created successfully."
+      flash[:notice] = "Community created successfully."
       redirect_to admin_communities_path and return
     else
       flash.now[:error] = "Something went wrong"

@@ -45,12 +45,12 @@ class ShoppingCartsController < ApplicationController
     if params[:add]
       @id = params[:add]
       session[:ids] << @id unless session[:ids].include? @id
-      flash.now[:info] = "Item added to #{t('drs.shoppingcarts.name')}."
+      flash.now[:notice] = "Item added to #{t('drs.shoppingcarts.name')}."
       log_action("download", "INCOMPLETE", @id)
     elsif params[:delete]
       @id = params[:delete]
       session[:ids].delete(@id)
-      flash.now[:info] = "Item removed from #{t('drs.shoppingcarts.name')}."
+      flash.now[:notice] = "Item removed from #{t('drs.shoppingcarts.name')}."
       Impression.destroy_all(pid: @id, action: "download", status: "INCOMPLETE",
                             session_id: request.session_options[:id])
     end
@@ -69,7 +69,7 @@ class ShoppingCartsController < ApplicationController
                               session_id: request.session_options[:id])
     session[:ids] = []
 
-    flash[:info] = "Sessions successfully cleared"
+    flash[:notice] = "Sessions successfully cleared"
     redirect_to shopping_cart_path
   end
 

@@ -70,6 +70,11 @@ class CoreFilesController < ApplicationController
 
   def provide_metadata
     @core_file = CoreFile.find(params[:id])
+    @collection = @core_file.parent
+
+    if !@collection.smart_collection_type.blank?
+      flash[:notice] = "Note: You are depositing this file in a Smart Collection. Library staff will review permissions and enhance metadata as needed."
+    end
 
     @title = @core_file.title
 
