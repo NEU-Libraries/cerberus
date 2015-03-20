@@ -62,8 +62,11 @@ RUN \curl -Lk http://install.ohmyz.sh | sh
 # Setting timezone for vm so embargo doesn't get confused
 RUN echo 'export TZ=America/New_York' >> /home/drs/.zshrc
 RUN echo 'export TZ=America/New_York' >> /home/drs/.bashrc
-RUN echo 'alias install_cerberus="/home/vagrant/cerberus/script/cerberus_setup.sh"' >> /home/drs/.zshrc
 
 # Moving FITS
 USER root
 RUN mv /home/drs/fits-0.6.2 /opt/fits-0.6.2
+
+# Installing Cerberus
+USER drs
+CMD ["/home/vagrant/cerberus/script/cerberus_setup.sh"]
