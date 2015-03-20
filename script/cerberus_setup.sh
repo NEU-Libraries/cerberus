@@ -1,0 +1,13 @@
+#!/bin/bash
+cd /home/drs/cerberus && (gem install bundler)
+cd /home/drs/cerberus && (bundle install --retry 5)
+cd /home/drs/cerberus && (rake db:migrate)
+cd /home/drs/cerberus && (rm -rf /home/drs/cerberus/jetty)
+cd /home/drs/cerberus && (rails g hydra:jetty)
+cd /home/drs/cerberus && (rake jetty:config)
+cd /home/drs/cerberus && (rake db:test:prepare)
+cd /home/drs/cerberus && (rm -f /home/drs/cerberus/.git/hooks/pre-push)
+cd /home/drs/cerberus && (touch /home/drs/cerberus/.git/hooks/pre-push)
+cd /home/drs/cerberus && (echo '#!/bin/sh' >> /home/drs/cerberus/.git/hooks/pre-push)
+cd /home/drs/cerberus && (echo 'rake smoke_test' >> /home/drs/cerberus/.git/hooks/pre-push)
+cd /home/drs/cerberus && (chmod +x /home/drs/cerberus/.git/hooks/pre-push)
