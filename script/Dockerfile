@@ -69,4 +69,4 @@ RUN mv /home/drs/fits-0.6.2 /opt/fits-0.6.2
 
 # Installing Cerberus
 USER drs
-CMD ["/home/vagrant/cerberus/script/cerberus_setup.sh"]
+CMD ["/home/drs/cerberus/script/cerberus_setup.sh"]
