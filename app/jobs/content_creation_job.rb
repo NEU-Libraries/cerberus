@@ -31,6 +31,7 @@ class ContentCreationJob
         poster_object = ImageMasterFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint), core_record: core_record)
         poster_contents = File.open(poster_path)
         poster_object.add_file(poster_contents, 'content', "poster#{File.extname(poster_path)}")
+        poster_object.rightsMetadata.content = core_record.rightsMetadata.content
         poster_object.save!
         DerivativeCreator.new(poster_object.pid).generate_derivatives
       end
