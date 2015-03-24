@@ -24,6 +24,12 @@ class DownloadsController < ApplicationController
     render_404(ActiveFedora::ObjectNotFoundError.new) and return
   end
 
+  rescue_from Hydra::AccessDenied, CanCan::AccessDenied do |exception|
+    flash[:error] = exception.message
+    email_handled_exception(exception)
+    render_403 and return
+  end  
+
   private
     def ensure_not_embargoed
       dl = fetch_solr_document

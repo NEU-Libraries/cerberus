@@ -3,12 +3,6 @@ module Cerberus
     extend ActiveSupport::Concern
     include Hydra::Controller::DownloadBehavior
 
-    rescue_from Hydra::AccessDenied, CanCan::AccessDenied do |exception|
-      flash[:error] = exception.message
-      email_handled_exception(exception)
-      render_403 and return
-    end
-
     included do
       # module mixes in normalize_identifier method
       include Cerberus::Noid
