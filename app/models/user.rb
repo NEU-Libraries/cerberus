@@ -91,6 +91,8 @@ class User < ActiveRecord::Base
       user.add_group("northeastern:drs:staff")
     end
 
+    user.add_group("northeastern:drs:all")
+
     return user
   end
 
