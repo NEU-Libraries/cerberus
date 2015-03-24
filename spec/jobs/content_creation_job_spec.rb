@@ -57,7 +57,7 @@ describe ContentCreationJob, unless: $in_travis do
     FileUtils.cp(o_path, "#{Rails.root}/tmp/#{@fn}")
     @path = "#{Rails.root}/tmp/#{@fn}"
     @core.instantiate_appropriate_content_object(@path, @fn)
-    @master = ContentCreationJob.new(@core.pid, @path, @fn,  @user.id).run
+    @master = ContentCreationJob.new(@core.pid, @path, @fn).run
   end
 
   def clear_context
