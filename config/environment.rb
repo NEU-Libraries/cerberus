@@ -7,5 +7,5 @@ Cerberus::Application.initialize!
 Haml::Template.options[:ugly] = true
 
 if Rails.env.production?
-  ENV['TMPDIR'] = "/var/tmp"
+  ENV['TMPDIR'] = "/tmp/DRStmp"
 end
