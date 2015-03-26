@@ -30,11 +30,18 @@
   }
 }
 
-
 .all-compilations.thumbnails{
+  h5 {
+    font-weight:normal;
+  }
   .span2 .thumbnail{
-    height: 170px;
+    min-height: 170px;
     padding-top: 40px;
+  }
+  .thumbnail:hover, .thumvnail:focus {
+    border-color: $linkColor;
+    @include box-shadow(0 1px 4px rgba(0,105,214,.25));
+    cursor: pointer;
   }
 }
 
