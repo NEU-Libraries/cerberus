@@ -2,6 +2,16 @@ module ApplicationHelper
 
   # Only things with theoretically near universal potential use should go here.
 
+  def solr_query(query_string)
+    # By default, SolrService.query only returns 10 rows
+    # You can specify more rows than you need, but not just to return all results
+    # This is a small helper method that combines SolrService's count and query to
+    # get back all results, without guessing at an upper limit
+    row_count = ActiveFedora::SolrService.count(query_string)
+    query_result = ActiveFedora::SolrService.query(query_string, :rows => row_count)
+    return query_result.map { |x| SolrDocument.new(x) }
+  end
+
   def cached_content_objects(core_file)
     Rails.cache.fetch("/content_objects/#{core_file.pid}-#{core_file.updated_at}", :expires_in => 12.hours) do
       core_file.content_objects_sorted
