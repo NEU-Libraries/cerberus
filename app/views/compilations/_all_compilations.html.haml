@@ -1,13 +1,10 @@
 - compilations.sort_by!{|comp| comp.title}
 - compilations.each do |comp|
   %li.span2
-    %div.thumbnail.text-center
+    %div.thumbnail.thumbnail-btn.text-center{data: {href: compilation_path(comp)}}
       %a{:href => compilation_path(comp) }
         %h5
           =comp.title
-        - if comp.description != nil
-          %small
-            = comp.description
       %nav(role="navigation")
         .btn-group
           %a.btn.btn-mini.btn-clear{title: "Download #{comp.title}", href: prepare_download_path(id: comp.pid), method: 'get', data: {toggle: "tooltip" } }
