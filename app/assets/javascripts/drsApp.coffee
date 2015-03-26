@@ -54,6 +54,7 @@ $(document).ready ->
       handleGroupPermissionRemoval()
       doSelectSubmit()
       submenuMobileFix()
+      handleSetButtons()
 
       return
 
@@ -790,7 +791,11 @@ $(document).ready ->
         $("#groups_permissionless_groups").val(y)
         return
 
-
+    handleSetButtons = ->
+      $(".all-compilations .thumbnail").click ->
+        href = $(this).data("href");
+        window.location = href;
+        return
 
     ##DrsAppError Class for debugging
     DrsAppError = ( message = 'Error:', value = null ) ->
