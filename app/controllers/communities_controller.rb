@@ -81,43 +81,36 @@ class CommunitiesController < ApplicationController
 
   def employees
     @page_title = "#{@set.title} #{t('drs.featured_content.employees.name')}"
-    self.solr_search_params_logic += [:show_employees_only]
-    (@response, @document_list) = get_search_results
+    safe_get_smart_docs(@set.find_employees)
     render 'smart_collection', locals: { smart_collection: 'employees' }
   end
 
   def research_publications
     @page_title = "#{@set.title} #{t('drs.featured_content.research.name')}"
-
     safe_get_smart_docs(@set.research_publications)
-
     render 'smart_collection', locals: { smart_collection: 'research' }
   end
 
   def other_publications
     @page_title = "#{@set.title} #{t('drs.featured_content.other.name')}"
-
     safe_get_smart_docs(@set.other_publications)
     render 'smart_collection', locals: { smart_collection: 'other' }
   end
 
   def presentations
     @page_title = "#{@set.title} #{t('drs.featured_content.presentations.name')}"
-
     safe_get_smart_docs(@set.presentations)
     render 'smart_collection', locals: { smart_collection: 'presentations' }
   end
 
   def datasets
     @page_title = "#{@set.title} #{t('drs.featured_content.datasets.name')}"
-
     safe_get_smart_docs(@set.datasets)
     render 'smart_collection', locals: { smart_collection: 'datasets' }
   end
 
   def learning_objects
     @page_title = "#{@set.title} #{t('drs.featured_content.learning.name')}"
-
     safe_get_smart_docs(@set.learning_objects)
     render 'smart_collection', locals: { smart_collection: 'learning' }
   end
@@ -132,11 +125,6 @@ class CommunitiesController < ApplicationController
       flash[:error] = "Communities cannot be created without a parent"
       email_handled_exception(exception)
       redirect_to root_path and return
-    end
-
-    def show_employees_only(solr_parameters, user_parameters)
-      solr_parameters[:fq] ||= []
-      solr_parameters[:fq] << "has_affiliation_ssim:\"info:fedora/#{@set.pid}\" AND has_model_ssim:\"info:fedora/afmodel:Employee\""
     end
 
     def show_children_only(solr_parameters, user_parameters)
