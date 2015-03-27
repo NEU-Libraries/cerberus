@@ -12,10 +12,17 @@
 %br
 %br
 
-= render 'catalog/results_pagination'
+= form_tag admin_communities_path, :method => 'get', :id => 'filterList' do
+  = text_field_tag :search, params[:search]
+  = submit_tag "Search", :name => nil
+
+//= render 'catalog/results_pagination'
 
 %table.table.table-striped
-  - @communities.each do |community|
-    = render partial: "admin_community", locals: { community: community }
+  :javascript
+    $(".table").html("#{escape_javascript(render partial: 'admin_community', locals: { items: @communities } )}");
+    $("#search").keyup(function() {
+      $("#filterList").submit();
+    });
 
-= render 'catalog/results_pagination'
+//= render 'catalog/results_pagination'
