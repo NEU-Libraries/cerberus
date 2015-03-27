@@ -9,7 +9,7 @@
           User page
         = current_user.pretty_name
     - else
-      %a.btn{:href => "#"}
+      %a.btn.disabled{:href => "#"}
         %span.icon-user( aria-hidden="true" )
         = current_user.pretty_name
     %button.btn.dropdown-toggle{"data-toggle" => "dropdown",  "aria-label" => "Toggle user menu dropdown menu", :title => "click for additional menu options"}
