@@ -20,7 +20,6 @@
 
 %table.table.table-striped
   :javascript
-    $(".table").html("#{escape_javascript(render partial: 'admin_community', locals: { items: @communities } )}");
     $("#search").keyup(function() {
       $("#filterList").submit();
     });
