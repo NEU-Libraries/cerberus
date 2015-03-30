@@ -25,6 +25,10 @@ class Admin::CommunitiesController < AdminController
     self.solr_search_params_logic += [:limit_to_communities]
     self.solr_search_params_logic += [:keyword_search]
     (@response, @communities) = get_search_results
+    respond_to do |format|
+      format.html {}
+      format.js   {}
+    end
     @page_title = "Administer Communities"
   end
 
