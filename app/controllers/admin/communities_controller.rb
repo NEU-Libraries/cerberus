@@ -17,6 +17,7 @@ class Admin::CommunitiesController < AdminController
 
   # Loads @community
   load_resource
+  before_filter :not_neu?, only: [:edit, :update, :destroy]
 
   def index
     # community_model = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:Community"
@@ -122,5 +123,13 @@ class Admin::CommunitiesController < AdminController
       community_model = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:Community"
       solr_parameters[:fq] ||= []
       solr_parameters[:fq] << "has_model_ssim:\"#{community_model}\""
+    end
+
+    def not_neu?
+      if @community.pid != 'neu:1'
+        return true
+      else
+        render_403
+      end
     end
 end
