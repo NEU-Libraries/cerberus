@@ -1,11 +1,16 @@
-%h3 New Employee Alert
+!!!
+%html
+  %head
+    %meta{:content => "text/html; charset=UTF-8", "http-equiv" => "Content-Type"}/
+  %body
+    %h3 New Employee Alert
 
-%p A new employee has signed into Cerberus for the first time.  Their attributes are
-as follows:
-%ul
-  %li= "Name: #{@name}"
-  %li= "PID: #{@pid}"
+    %p A new employee has signed into Cerberus for the first time.  Their attributes are
+    as follows:
+    %ul
+      %li= "Name: #{@name}"
+      %li= "PID: #{@pid}"
 
-- if @pid
-  %p= "A link to their account can be found #{link_to 'here', employee_url(@pid)}".html_safe
-  %p= "And a link to administrative functions for this employee can be found #{link_to 'here', edit_admin_employee_url(@pid)}".html_safe
+    - if @pid
+      %p= "A link to their account can be found #{link_to 'here', employee_url(@pid)}".html_safe
+      %p= "And a link to administrative functions for this employee can be found #{link_to 'here', edit_admin_employee_url(@pid)}".html_safe
