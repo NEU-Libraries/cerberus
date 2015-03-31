@@ -317,6 +317,10 @@ class CoreFilesController < ApplicationController
     redirect_to(@core_file)
   end
 
+  def log_stream
+    log_action("stream", "COMPLETE")
+  end
+
   protected
 
     def complete?
