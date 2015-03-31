@@ -10,6 +10,7 @@ class Admin::StatisticsController < ApplicationController
     @employee_file_count = get_count_for_model_type("info:fedora/afmodel:Employee")
     @public_core_file_count = get_count_for_public_files
     @private_core_file_count = get_count_for_private_files
+    @core_file_count = get_count_for_core_files
     @user_count = User.find(:all).length
 
     @content_type_counts = sort_content_type_counts
@@ -29,6 +30,12 @@ class Admin::StatisticsController < ApplicationController
     def get_count_for_private_files
       model_type = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:CoreFile"
       return ActiveFedora::SolrService.count("has_model_ssim:\"#{model_type}\" AND -read_access_group_ssim:(public)")
+      return query_result.length
+    end
+
+    def get_count_for_core_files
+      model_type = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:CoreFile"
+      return ActiveFedora::SolrService.count("has_model_ssim:\"#{model_type}\"")
       return query_result.length
     end
 
