@@ -73,6 +73,13 @@ describe UploadAlert do
 
       it_should_behave_like "withheld queries"
     end
+
+    context "for other publications alerts" do
+      let(:created) { UploadAlert.withheld_other_pubs(:create) }
+      let(:updated) { UploadAlert.withheld_other_pubs(:update) }
+
+      it_should_behave_like "withheld queries"
+    end
   end
 
 
