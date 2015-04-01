@@ -1,7 +1,14 @@
-%tr
-  %td
-    .large= "#{employee.employee_name} (#{employee.nuid})"
-  %td
-    = link_to("Edit", edit_admin_employee_path(id: employee.id), class: "btn btn-small btn-warning")
-  %td
-    = link_to("Delete", admin_employee_path(id: employee.id), method: 'delete', confirm: "This action is irreversible", class: "btn btn-small btn-danger")
+.employees
+  = render 'catalog/results_pagination'
+
+  %table.table.table-striped
+    - @employees.each do |employee|
+      %tr
+        %td
+          .large= "#{employee.employee_name} (#{employee.nuid})"
+        %td
+          = link_to("Edit", edit_admin_employee_path(employee), class: "btn btn-small btn-warning")
+        %td
+          = link_to("Destroy", admin_employee_path(employee), method: :delete, confirm: "This action is irreversible", class: "btn btn-small btn-danger")
+
+  = render 'catalog/results_pagination'

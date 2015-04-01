@@ -72,6 +72,7 @@ Cerberus::Application.routes.draw do
     resources :employees, only: [:index, :edit, :update, :destroy]
     resources :statistics, only: [:index]
     get "/communities/filter_list" => 'communities#filter_list', as: 'communities_filter_list'
+    get "/employees/filter_list" => "employees#filter_list", as: 'employees_filter_list'
   end
 
   namespace :api, defaults: {format: 'json'} do
