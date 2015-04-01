@@ -12,16 +12,14 @@
 %br
 %br
 
-= form_tag admin_communities_path, :method => 'get', :id => 'filterList' do
+= form_tag filter_list_path, :method => 'get', :class => 'form-inline', :remote => true do
   = text_field_tag :search, params[:search]
-  = submit_tag "Search", :name => nil
+  = submit_tag "Search", :name => nil, :class => "btn btn-info"
 
-//= render 'catalog/results_pagination'
+= render partial: "admin_community", locals: { communities: @communities }
 
-%table.table.table-striped
-  :javascript
-    $("#search").keyup(function() {
-      $("#filterList").submit();
-    });
-
-//= render 'catalog/results_pagination'
+:javascript
+  $("#search").keyup(function() {
+    var search = $("#search").val();
+    $.getScript('/admin/communities/filter_list?search=' + search);
+  });

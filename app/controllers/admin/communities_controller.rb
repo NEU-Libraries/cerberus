@@ -19,17 +19,18 @@ class Admin::CommunitiesController < AdminController
   load_resource
 
   def index
-    # community_model = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:Community"
-    # query_result = ActiveFedora::SolrService.query("has_model_ssim:\"#{community_model}\"", :rows => 999)
-    # @communities = query_result.map { |x| SolrDocument.new(x) }
     self.solr_search_params_logic += [:limit_to_communities]
+    (@response, @communities) = get_search_results
+    @page_title = "Administer Communities"
+  end
+
+  def filter_list
     self.solr_search_params_logic += [:keyword_search]
+    self.solr_search_params_logic += [:limit_to_communities]
     (@response, @communities) = get_search_results
     respond_to do |format|
-      format.html {}
-      format.js   {}
+      format.js
     end
-    @page_title = "Administer Communities"
   end
 
   def new
