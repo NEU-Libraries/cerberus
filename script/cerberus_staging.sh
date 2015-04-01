@@ -16,6 +16,8 @@ RETVAL=0
 case "$1" in
     start)
       echo -n "Starting cerberus: "
+      su - $USER -c "sudo service mysqld start"
+      su - $USER -c "sudo service redis start"
       su - $USER -c "cd $RAILS_ROOT && RAILS_ENV=$ENV rake jetty:start"
       su - $USER -c "cd $RAILS_ROOT && RAILS_ENV=$ENV rails server -d"
       echo
@@ -23,6 +25,8 @@ case "$1" in
   ;;
     stop)
       echo -n "Stopping cerberus: "
+      su - $USER -c "sudo service mysqld stop"
+      su - $USER -c "sudo service redis stop"
       su - $USER -c "cd $RAILS_ROOT && RAILS_ENV=$ENV rake jetty:stop"
       su - $USER -c "cd $RAILS_ROOT && RAILS_ENV=$ENV kill -9 $(cat tmp/pids/server.pid)"
       echo
