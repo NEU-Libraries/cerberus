@@ -23,17 +23,31 @@ RUN yum install git --assumeyes
 RUN yum install tar --assumeyes
 RUN yum install libreoffice-writer-4.0.4.2-9.el6.x86_64 --assumeyes
 RUN yum install libreoffice-headless-4.0.4.2-9.el6.x86_64 --assumeyes
+RUN yum install sudo --assumeyes
+RUN yum install python-setuptools --assumeyes
+RUN easy_install supervisor
 
-# Enabling redis
-RUN chkconfig redis on
-RUN service redis start
-
-# Enabling mysql
-RUN chkconfig mysqld on
-RUN service mysqld start
+# Init mysql
+RUN /usr/bin/mysql_install_db
 
 # Updating sudoers
-RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+RUN echo 'drs ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+RUN sed -i "s/^.*requiretty/#Defaults requiretty/" /etc/sudoers
+
+# Updating supervisord config
+RUN echo_supervisord_conf > /etc/supervisord.conf
+RUN sed -i "s/^nodaemon.*/nodaemon=true/" /etc/supervisord.conf
+
+RUN echo '[program:mysqld]' >> /etc/supervisord.conf
+RUN echo 'command=/usr/bin/pidproxy /var/run/mysqld/mysqld.pid /usr/bin/mysqld_safe' >> /etc/supervisord.conf
+
+RUN echo '[program:redis]' >> /etc/supervisord.conf
+RUN echo 'command=/usr/bin/pidproxy /var/run/redis/redis.pid /usr/sbin/redis-server /etc/redis.conf' >> /etc/supervisord.conf
+
+#RUN echo '[program:rails]' >> /etc/supervisord.conf
+#RUN echo 'command=/home/drs/.rvm/gems/ruby-2.0.0-p643/bin/rails server -d' >> /etc/supervisord.conf
+#RUN echo 'user=drs' >> /etc/supervisord.conf
+#RUN echo 'directory=/home/drs/cerberus' >> /etc/supervisord.conf
 
 # Making drs user
 RUN useradd -ms /bin/zsh drs
@@ -64,25 +78,27 @@ RUN echo 'export TZ=America/New_York' >> /home/drs/.zshrc
 RUN echo 'export TZ=America/New_York' >> /home/drs/.bashrc
 RUN echo 'source /home/drs/.profile' >> /home/drs/.zshrc
 
-# Pulling down from git
-RUN git clone https://github.com/NEU-Libraries/cerberus.git /home/drs/cerberus
-
-# Kludge for occasional bad zip dl
-RUN wget -P /home/drs/cerberus/tmp http://librarystaff.neu.edu/DRSzip/new-solr-schema.zip
-
 # Moving FITS
 USER root
 RUN mv /home/drs/fits-0.6.2 /opt/fits-0.6.2
 
-# Copy scripts to init.d
-RUN cp /home/drs/cerberus/script/cerberus_development.sh /etc/init.d/development
-RUN chmod a+x /etc/init.d/development
-RUN cp /home/drs/cerberus/script/cerberus_staging.sh /etc/init.d/staging
-RUN chmod a+x /etc/init.d/staging
+# Adding from src
+USER root
+ADD / cerberus/
+RUN chown -R drs:drs cerberus/
+
+# Kludge for https://github.com/projecthydra/jettywrapper/issues/15
+USER drs
+RUN rm -rf /home/drs/cerberus/tmp/new-solr-schema.zip
+RUN mkdir -p /home/drs/cerberus/tmp \
+  && curl -L http://librarystaff.neu.edu/DRSzip/new-solr-schema.zip -o /home/drs/cerberus/tmp/new-solr-schema.zip \
+  && unzip /home/drs/cerberus/tmp/new-solr-schema.zip -d /home/drs/cerberus \
+  && mv /home/drs/cerberus/hydra-jetty-new-solr-schema /home/drs/cerberus/jetty
 
 # Installing Cerberus
 USER drs
 RUN /bin/zsh -l -c "/home/drs/cerberus/script/cerberus_setup.sh"
 
-# Change work dir
-WORKDIR /home/drs/cerberus
+# Run mysql, redis, and rails
+USER root
+CMD ["/usr/bin/supervisord"]
