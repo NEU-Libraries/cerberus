@@ -6,10 +6,15 @@
 
 %h2.page-header All Employees
 
-= render 'catalog/results_pagination'
+= form_tag admin_employees_filter_list_path, :method => 'get', :class => 'form-inline', :remote => true do
+  = text_field_tag :search, params[:search]
+  //note that this is case sensitive right now
+  = submit_tag "Search", :name => nil, :class => "btn btn-info"
 
-%table.table.table-striped
-  - @employees.each do |employee|
-    = render partial: 'employee_admin', locals: { employee: employee }
-    
-= render 'catalog/results_pagination'
+= render partial: "employee_admin", locals: { employees: @employees }
+
+:javascript
+  $("#search").keyup(function() {
+    var search = $("#search").val();
+    $.getScript('/admin/employees/filter_list?search=' + search);
+  });
