@@ -66,13 +66,12 @@ Cerberus::Application.routes.draw do
   get "/communities/:id/facet/:solr_field" => 'communities#facet', as: 'community_facet'
   get "/collections/:id/facet/:solr_field" => 'collections#facet', as: 'collection_facet'
 
-  get "/admin/communities/filter_list" => 'admin/communities#filter_list', as: 'filter_list'
-
   namespace :admin do
     # Add/Remove communities from an employee, delete employee
     resources :communities, except: [:show]
     resources :employees, only: [:index, :edit, :update, :destroy]
     resources :statistics, only: [:index]
+    get "/communities/filter_list" => 'communities#filter_list', as: 'communities_filter_list'
   end
 
   namespace :api, defaults: {format: 'json'} do
