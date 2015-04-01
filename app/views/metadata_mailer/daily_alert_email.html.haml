@@ -1,29 +1,35 @@
-%h3 New Theses
-= render partial: 'alert_items', locals: { alerts: @theses_new }
+!!!
+%html
+  %head
+    %meta{:content => "text/html; charset=UTF-8", "http-equiv" => "Content-Type"}/
+  %body
 
-%h3 Updated Theses
-= render partial: 'alert_items', locals: { alerts: @theses_update } 
+    %h3 New Theses
+    = render partial: 'alert_items', locals: { alerts: @theses_new }
 
-%h3 New Research Publications
-= render partial: 'alert_items', locals: { alerts: @research_new }
+    %h3 Updated Theses
+    = render partial: 'alert_items', locals: { alerts: @theses_update }
 
-%h3 Updated Research Publications 
-= render partial: 'alert_items', locals: { alerts: @research_update }  
+    %h3 New Research Publications
+    = render partial: 'alert_items', locals: { alerts: @research_new }
 
-%h3 New Presentations 
-= render partial: 'alert_items', locals: { alerts: @presentations_new } 
+    %h3 Updated Research Publications
+    = render partial: 'alert_items', locals: { alerts: @research_update }
 
-%h3 Updated Presentations 
-= render partial: 'alert_items', locals: { alerts: @presentations_update }  
+    %h3 New Presentations
+    = render partial: 'alert_items', locals: { alerts: @presentations_new }
 
-%h3 New Datasets
-= render partial: 'alert_items', locals: { alerts: @datasets_new }
+    %h3 Updated Presentations
+    = render partial: 'alert_items', locals: { alerts: @presentations_update }
 
-%h3 Updated Datasets 
-= render partial: 'alert_items', locals: { alerts: @datasets_update }  
+    %h3 New Datasets
+    = render partial: 'alert_items', locals: { alerts: @datasets_new }
 
-%h3 New Learning Objects
-= render partial: 'alert_items', locals: { alerts: @learning_objects_new }
+    %h3 Updated Datasets
+    = render partial: 'alert_items', locals: { alerts: @datasets_update }
 
-%h3 Updated Learning Objects 
-= render partial: 'alert_items', locals: { alerts: @learning_objects_update }  
+    %h3 New Other Publications
+    = render partial: 'alert_items', locals: { alerts: @other_pubs_new}
+
+    %h3 Updated Other Publications
+    = render partial: 'alert_items', locals: { alerts: @other_pubs_update}

@@ -10,7 +10,8 @@ class XmlMailer < ActionMailer::Base
     mail.attachments['old.xml'] = File.read(old_tmp_file)
 
     mail(to: pick_receiver,
-         subject: "[cerberus] XML Edited for #{core_file.title} - #{core_file.pid}")
+         subject: "[cerberus] XML Edited for #{core_file.title} - #{core_file.pid}",
+         content_type: "text/html")
   end
 
   private

@@ -24,16 +24,10 @@
             = @collection_count
       %tr
         %td
-          .large Public Core Files
+          .large Core Files
         %td
           .large
-            = @public_core_file_count
-      %tr
-        %td
-          .large Private Core Files
-        %td
-          .large
-            = @private_core_file_count
+            = @core_file_count
       %tr
         %td
           .large
@@ -47,6 +41,17 @@
         %td
           .large
             = @user_count
+    %table.table.table-striped.table-bordered
+      %tr
+        %td
+          Public Core Files
+        %td
+          = @public_core_file_count
+      %tr
+        %td
+          Private Core Files
+        %td
+          = @private_core_file_count
   .span5.pull-right
     %table.table.table-striped.table-bordered
       - @content_type_counts.each do |type, value|
