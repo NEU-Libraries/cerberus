@@ -24,6 +24,10 @@ class UploadAlert < ActiveRecord::Base
     unknown_content_query('Presentations', ct)
   end
 
+  def self.withheld_other_pubs(ct = :create)
+    unknown_content_query('Other Publications', ct)
+  end
+
   def self.create_from_core_file(core_file, change_type)
     if !([:update, :create].include? change_type)
       raise %Q(Passed #{change_type.class} #{change_type} to create_from_core_file,

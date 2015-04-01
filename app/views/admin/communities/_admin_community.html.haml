@@ -7,8 +7,12 @@
         %td
           .large= community.title.html_safe
         %td
-          = link_to("Edit", edit_admin_community_path(community), class: "btn btn-small btn-warning")
+          = link_to("Edit", edit_admin_community_path(community),
+          class: "btn btn-small btn-warning")
         %td
-          = link_to("Destroy", admin_community_path(community), method: :delete, confirm: "This action is irreversible", class: "btn btn-small btn-danger")
+          = link_to("Delete", admin_community_path(community),
+          method: :delete,
+          confirm: "This action is irreversible",
+          class: "btn btn-small btn-danger")
 
   = render 'catalog/results_pagination'

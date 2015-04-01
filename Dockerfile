@@ -44,10 +44,10 @@ WORKDIR /home/drs
 
 # Installing RVM
 RUN gpg2 --keyserver hkp://keys.gnupg.net --recv-keys D39DC0E3
-RUN \curl -sSL https://get.rvm.io | bash -s stable
+RUN /bin/bash -l -c "curl -sSL https://get.rvm.io | bash -s stable"
 RUN /bin/bash -l -c "rvm pkg install libyaml"
-RUN /bin/bash -l -c "rvm install ruby-2.0.0-p598"
-RUN /bin/bash -l -c "rvm use ruby-2.0.0-p598"
+RUN /bin/bash -l -c "rvm install ruby-2.0.0-p643"
+RUN /bin/bash -l -c "rvm use ruby-2.0.0-p643"
 
 # Installing FITS
 RUN curl -O https://fits.googlecode.com/files/fits-0.6.2.zip
@@ -62,11 +62,27 @@ RUN \curl -Lk http://install.ohmyz.sh | sh
 # Setting timezone for vm so embargo doesn't get confused
 RUN echo 'export TZ=America/New_York' >> /home/drs/.zshrc
 RUN echo 'export TZ=America/New_York' >> /home/drs/.bashrc
+RUN echo 'source /home/drs/.profile' >> /home/drs/.zshrc
+
+# Pulling down from git
+RUN git clone https://github.com/NEU-Libraries/cerberus.git /home/drs/cerberus
+
+# Kludge for occasional bad zip dl
+RUN wget -P /home/drs/cerberus/tmp http://librarystaff.neu.edu/DRSzip/new-solr-schema.zip
 
 # Moving FITS
 USER root
 RUN mv /home/drs/fits-0.6.2 /opt/fits-0.6.2
 
+# Copy scripts to init.d
+RUN cp /home/drs/cerberus/script/cerberus_development.sh /etc/init.d/development
+RUN chmod a+x /etc/init.d/development
+RUN cp /home/drs/cerberus/script/cerberus_staging.sh /etc/init.d/staging
+RUN chmod a+x /etc/init.d/staging
+
 # Installing Cerberus
 USER drs
-CMD ["/home/drs/cerberus/script/cerberus_setup.sh"]
+RUN /bin/zsh -l -c "/home/drs/cerberus/script/cerberus_setup.sh"
+
+# Change work dir
+WORKDIR /home/drs/cerberus

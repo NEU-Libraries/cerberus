@@ -17,6 +17,7 @@ class Admin::CommunitiesController < AdminController
 
   # Loads @community
   load_resource
+  before_filter :not_neu?, only: [:edit, :update, :destroy]
 
   def index
     self.solr_search_params_logic += [:limit_to_communities]
@@ -138,5 +139,12 @@ class Admin::CommunitiesController < AdminController
     def keyword_search(solr_parameters, user_parameters)
       solr_parameters[:fq] ||= []
       solr_parameters[:fq] << "title_ssi:*#{params[:search]}*"
+    end
+    def not_neu?
+      if @community.pid != 'neu:1'
+        return true
+      else
+        render_403
+      end
     end
 end
