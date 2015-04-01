@@ -90,7 +90,13 @@ class Admin::CommunitiesController < AdminController
     self.solr_search_params_logic += [:limit_to_communities]
     (@response, @communities) = get_search_results
     respond_to do |format|
-      format.js
+      format.js {
+        if @response.response['numFound'] == 0
+          render js:"$('.communities').replaceWith(\"<div class='communities'>No results found.</div>\");"
+        else
+          render :filter_list
+        end
+      }
     end
   end
 
