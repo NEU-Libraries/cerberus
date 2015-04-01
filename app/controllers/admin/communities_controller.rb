@@ -24,15 +24,6 @@ class Admin::CommunitiesController < AdminController
     @page_title = "Administer Communities"
   end
 
-  def filter_list
-    self.solr_search_params_logic += [:keyword_search]
-    self.solr_search_params_logic += [:limit_to_communities]
-    (@response, @communities) = get_search_results
-    respond_to do |format|
-      format.js
-    end
-  end
-
   def new
     @page_title = "Create New Community"
   end
@@ -91,6 +82,15 @@ class Admin::CommunitiesController < AdminController
     else
       flash[:error] = "Failed to destroy community"
       redirect_to admin_communities_path
+    end
+  end
+
+  def filter_list
+    self.solr_search_params_logic += [:keyword_search]
+    self.solr_search_params_logic += [:limit_to_communities]
+    (@response, @communities) = get_search_results
+    respond_to do |format|
+      format.js
     end
   end
 
