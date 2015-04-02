@@ -433,6 +433,16 @@ class CoreFilesController < ApplicationController
           puts "#{item.key}\t#{item.value}"
           if item.key == 'iptc/Headline'
             core_file.title = item.value
+          # creator (iptc/Credit)
+          #elsif item.key == 'iptc/Credit'
+          #  core_file.corporate_creators = item.value
+          elsif item.key == 'iptc/Caption'
+            core_file.description = item.value
+          # organization (iptc/Source)
+          #elsif item.key == 'iptc/Source'
+          #  core_file.organization = item.value
+          elsif item.key == 'iptc/Keywords'
+            core_file.keywords = item.value
           end
         end
       end
