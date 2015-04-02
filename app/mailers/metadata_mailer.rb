@@ -49,10 +49,12 @@ class MetadataMailer < ActionMailer::Base
     elsif "test" == Rails.env
       mail(to: "Test <test@test.com>", subject: "Daily Featured Content Uploads and Updates - #{count} items")
     else
-      git_config = ParseConfig.new('/home/vagrant/.gitconfig')
-      address = git_config['user']['email']
-      mail(to: "Developer <#{address}>", subject: "Daily Featured Content Uploads and Updates - #{count} items",
-      content_type: "text/html")
+      if File.exist?('/home/vagrant/.gitconfig')
+        git_config = ParseConfig.new('/home/vagrant/.gitconfig')
+        address = git_config['user']['email']
+        mail(to: "Developer <#{address}>", subject: "Daily Featured Content Uploads and Updates - #{count} items",
+        content_type: "text/html")
+      end
     end
   end
 

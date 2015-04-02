@@ -21,8 +21,10 @@ class XmlMailer < ActionMailer::Base
       elsif "test" == Rails.env
         "test@test.com"
       else
-        git_config = ParseConfig.new('/home/vagrant/.gitconfig')
-        git_config['user']['email']
+        if File.exist?('/home/vagrant/.gitconfig')
+          git_config = ParseConfig.new('/home/vagrant/.gitconfig')
+          git_config['user']['email']
+        end
       end
     end
 end
