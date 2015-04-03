@@ -8,8 +8,8 @@ test: &TEST
   url: <%= "http://127.0.0.1:#{ENV['TEST_JETTY_PORT'] || 8983}/fedora-test" %>
 staging:
   user: fedoraAdmin
-  password: <%= ENV["FEDORA_PASSWD"] %>
-  url: http://nb4676.neu.edu:8080/fedora
+  password: fedoraAdmin
+  url: http://127.0.0.1:8983/fedora
 production:
   user: fedoraAdmin
   password: <%= ENV["FEDORA_PASSWD"] %>

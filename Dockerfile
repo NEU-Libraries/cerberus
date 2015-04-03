@@ -38,24 +38,27 @@ RUN sed -i "s/^.*requiretty/#Defaults requiretty/" /etc/sudoers
 RUN echo_supervisord_conf > /etc/supervisord.conf
 RUN sed -i "s/^nodaemon.*/nodaemon=true/" /etc/supervisord.conf
 
+# Updating redis config
+RUN sed -i "s/^daemonize.*/daemonize no/" /etc/redis.conf
+
 RUN echo '[program:mysqld]' >> /etc/supervisord.conf
 RUN echo 'command=/usr/bin/pidproxy /var/run/mysqld/mysqld.pid /usr/bin/mysqld_safe' >> /etc/supervisord.conf
 
 RUN echo '[program:redis]' >> /etc/supervisord.conf
-RUN echo 'command=/usr/bin/pidproxy /var/run/redis/redis.pid /usr/sbin/redis-server /etc/redis.conf' >> /etc/supervisord.conf
+RUN echo 'command=/usr/sbin/redis-server /etc/redis.conf' >> /etc/supervisord.conf
 
 RUN echo '[program:jetty]' >> /etc/supervisord.conf
-RUN echo 'command=/usr/bin/pidproxy /home/drs/cerberus/tmp/pids/_home_drs_cerberus_jetty.pid /home/drs/.rvm/gems/ruby-2.0.0-p643/wrappers/rake jetty:start' >> /etc/supervisord.conf
+RUN echo 'command=/usr/bin/java -Djetty.port=8983 -Dsolr.solr.home=/home/drs/cerberus/jetty/solr -XX:MaxPermSize=128m -Xmx256m -jar start.jar' >> /etc/supervisord.conf
 RUN echo 'user=drs' >> /etc/supervisord.conf
-RUN echo 'directory=/home/drs/cerberus' >> /etc/supervisord.conf
+RUN echo 'directory=/home/drs/cerberus/jetty' >> /etc/supervisord.conf
 
 RUN echo '[program:rails]' >> /etc/supervisord.conf
-RUN echo 'command=/usr/bin/pidproxy /home/drs/cerberus/tmp/pids/server.pid /home/drs/.rvm/gems/ruby-2.0.0-p643/wrappers/bundle exec rails server -d' >> /etc/supervisord.conf
+RUN echo 'command=/home/drs/.rvm/gems/ruby-2.0.0-p643/wrappers/bundle exec rails server -e %(ENV_RAILS_ENV)s' >> /etc/supervisord.conf
 RUN echo 'user=drs' >> /etc/supervisord.conf
 RUN echo 'directory=/home/drs/cerberus' >> /etc/supervisord.conf
 
 RUN echo '[program:resque]' >> /etc/supervisord.conf
-RUN echo 'command=/usr/bin/pidproxy /home/drs/cerberus/tmp/pids/resque-pool.pid /home/drs/.rvm/gems/ruby-2.0.0-p643/wrappers/bundle exec resque-pool --daemon -p /home/drs/cerberus/tmp/pids/resque-pool.pid' >> /etc/supervisord.conf
+RUN echo 'command=/home/drs/.rvm/gems/ruby-2.0.0-p643/wrappers/bundle exec resque-pool -p /home/drs/cerberus/tmp/pids/resque-pool.pid' >> /etc/supervisord.conf
 RUN echo 'user=drs' >> /etc/supervisord.conf
 RUN echo 'directory=/home/drs/cerberus' >> /etc/supervisord.conf
 

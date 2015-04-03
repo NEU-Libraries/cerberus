@@ -44,7 +44,7 @@ class MetadataMailer < ActionMailer::Base
     #count += @other_pubs_new.count
     #count += @other_pubs_update.count
 
-    if ["staging", "production"].include? Rails.env
+    if ["production"].include? Rails.env
       mail(to: "Metadata Mailing List <Library-DRS-Metadata@neu.edu>", subject: "Daily Featured Content Uploads and Updates - #{count} items", content_type: "text/html")
     elsif "test" == Rails.env
       mail(to: "Test <test@test.com>", subject: "Daily Featured Content Uploads and Updates - #{count} items")
