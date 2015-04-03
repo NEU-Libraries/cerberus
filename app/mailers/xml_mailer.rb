@@ -16,7 +16,7 @@ class XmlMailer < ActionMailer::Base
 
   private
     def pick_receiver
-      if ["staging", "production"].include? Rails.env
+      if ["production"].include? Rails.env
         "Library-DRS-Metadata@neu.edu"
       elsif "test" == Rails.env
         "test@test.com"

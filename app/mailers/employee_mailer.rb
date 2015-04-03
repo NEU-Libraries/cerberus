@@ -12,7 +12,7 @@ class EmployeeMailer < ActionMailer::Base
 
   private
     def pick_receiver
-      if ["staging", "production"].include? Rails.env
+      if ["production"].include? Rails.env
         "sj.sweeney@neu.edu"
       elsif "test" == Rails.env
         "test@test.com"
