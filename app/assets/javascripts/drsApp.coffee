@@ -346,9 +346,9 @@ $(document).ready ->
         delta = $(this).data('method')
         switch delta
           when 'post'
-            $(this).text('Remove from' + $(this).text()).data('method', 'delete').removeClass('btn-success add-to-compilation').addClass 'btn-danger remove-from-compilation'
+            $(this).text('Remove from ' + $(this).text()).data('method', 'delete').removeClass('btn-success add-to-compilation').addClass 'btn-danger remove-from-compilation'
           when 'delete'
-            $(this).data('method', 'post').text($(this).text().replace('Remove from', '')).addClass('btn-success add-to-compilation').removeClass 'btn-danger remove-from-compilation'
+            $(this).data('method', 'post').text($(this).text().replace('Remove from ', '')).addClass('btn-success add-to-compilation').removeClass 'btn-danger remove-from-compilation'
           else
             console.log 'ajax successful, but not sure what to do!'
       ).on 'ajax:error', ->

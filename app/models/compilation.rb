@@ -35,9 +35,7 @@ class Compilation < ActiveFedora::Base
       query = self.entry_ids.map! { |id| "\"#{id}\""}.join(" OR ")
       query = "id:(#{query})"
 
-      results = ActiveFedora::SolrService.query(query)
-
-      results.map { |result| SolrDocument.new result }
+      solr_query(query)
     else
       []
     end
@@ -98,5 +96,15 @@ class Compilation < ActiveFedora::Base
     # and returns just the pid
     def trim_to_pid(string)
       return string.split('/').last
+    end
+
+    def solr_query(query_string)
+      # By default, SolrService.query only returns 10 rows
+      # You can specify more rows than you need, but not just to return all results
+      # This is a small helper method that combines SolrService's count and query to
+      # get back all results, without guessing at an upper limit
+      row_count = ActiveFedora::SolrService.count(query_string)
+      query_result = ActiveFedora::SolrService.query(query_string, :rows => row_count)
+      return query_result.map { |x| SolrDocument.new(x) }
     end
 end
