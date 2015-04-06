@@ -9,7 +9,6 @@
   -if content.klass != "ImageThumbnailFile"
     - if (!current_user.nil? && (current_user.can? :read, content)) || content.public?
       - pid = content.pid
-      - short_pid = pid[4..-1]
       - dir = content.pid_hash[0,2]
       - encoded = content.encode
       - if content.mime_type == 'video/mp4' || content.mime_type == 'video/quicktime'
