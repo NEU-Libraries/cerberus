@@ -8,7 +8,8 @@
 - @content_objects.each do |content|
   -if content.klass != "ImageThumbnailFile"
     - if (!current_user.nil? && (current_user.can? :read, content)) || content.public?
-      - short_pid = content.pid[4..-1]
+      - pid = content.pid
+      - short_pid = pid[4..-1]
       - dir = content.pid_hash[0,2]
       - encoded = content.encode
       - if content.mime_type == 'video/mp4' || content.mime_type == 'video/quicktime'
@@ -66,7 +67,7 @@
         jwplayer().resize('100%', 50);
         $(".replace_thumbs").removeClass("hidden")
       }
-      $.ajax("/files/#{content.pid}/log_stream")
+      $.ajax("/files/#{pid}/log_stream")
     })
     $(".replace_thumbs").click(function() {
       jwplayer().play()
