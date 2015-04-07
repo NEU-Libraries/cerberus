@@ -65,6 +65,7 @@ class Admin::EmployeesController < AdminController
 
   def filter_list
     params[:q] = params[:search]
+    self.solr_search_params_logic += [:title_search]
     self.solr_search_params_logic += [:limit_to_employees]
     (@response, @employees) = get_search_results
     respond_to do |format|
@@ -88,5 +89,8 @@ class Admin::EmployeesController < AdminController
       employee_model = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:Employee"
       solr_parameters[:fq] ||= []
       solr_parameters[:fq] << "has_model_ssim:\"#{employee_model}\""
+    end
+    def title_search(solr_parameters, user_parameters)
+      solr_parameters[:qf] = "title_tesim"
     end
 end
