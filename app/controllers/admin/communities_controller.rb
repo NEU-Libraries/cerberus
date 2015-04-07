@@ -87,7 +87,7 @@ class Admin::CommunitiesController < AdminController
   end
 
   def filter_list
-    self.solr_search_params_logic += [:keyword_search]
+    params[:q] = params[:search]
     self.solr_search_params_logic += [:limit_to_communities]
     (@response, @communities) = get_search_results
     respond_to do |format|
@@ -135,11 +135,7 @@ class Admin::CommunitiesController < AdminController
       community_model = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:Community"
       solr_parameters[:fq] ||= []
       solr_parameters[:fq] << "has_model_ssim:\"#{community_model}\""
-    end
-    def keyword_search(solr_parameters, user_parameters)
-      solr_parameters[:fq] ||= []
-      solr_parameters[:fq] << "title_ssi:*#{params[:search]}*"
-    end
+    end    
     def not_neu?
       if @community.pid != 'neu:1'
         return true
