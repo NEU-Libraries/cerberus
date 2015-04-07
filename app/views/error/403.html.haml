@@ -1,4 +1,7 @@
 -if !current_user.nil?
+  %h3
+    %i.icon-warning-sign.icon-2x
+    Permissions Error
   %p.red
     You have insufficient permissions to access this page.
   %p
@@ -7,5 +10,8 @@
     , or
     %a{:href => "http://library.northeastern.edu/get-help/tech-support/report-a-problem?resource=#{CGI::escape(request.original_url)}", :target => "_blank"} reporting the problem.
 -else
+  %h3
+    %i.icon-warning-sign.icon-2x
+    Permissions Error
   %p
     You're not currently logged in. Doing so may grant you access to this object.
