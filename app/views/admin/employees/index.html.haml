@@ -12,9 +12,3 @@
   = submit_tag "Search", :name => nil, :class => "btn btn-info"
 
 = render partial: "employee_admin", locals: { employees: @employees }
-
-:javascript
-  $("#search").keyup(function() {
-    var search = $("#search").val();
-    $.getScript('/admin/employees/filter_list?search=' + search);
-  });
