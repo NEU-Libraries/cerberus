@@ -16,12 +16,9 @@ class Admin::EmployeesController < AdminController
 
   before_filter :authenticate_user!
   before_filter :verify_admin
-  before_filter :load_employee, except: [:index, :update]
+  before_filter :load_employee, except: [:index, :update, :filter_list]
 
   def index
-    # employee_model = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:Employee"
-    # query_result = ActiveFedora::SolrService.query("has_model_ssim:\"#{employee_model}\"")
-    # @employees = query_result.map { |x| SolrDocument.new(x) }
     self.solr_search_params_logic += [:limit_to_employees]
     (@response, @employees) = get_search_results
     @page_title = "Administer Employees"
@@ -63,6 +60,21 @@ class Admin::EmployeesController < AdminController
       redirect_to admin_employees_path, notice: "Employee #{nuid} removed"
     else
       redirect_to admin_employees_path, notice: "Something went wrong"
+    end
+  end
+
+  def filter_list
+    params[:q] = params[:search]
+    self.solr_search_params_logic += [:limit_to_employees]
+    (@response, @employees) = get_search_results
+    respond_to do |format|
+      format.js {
+        if @response.response['numFound'] == 0
+          render js:"$('.employees').replaceWith(\"<div class='employees'>No results found.</div>\");"
+        else
+          render :filter_list
+        end
+      }
     end
   end
 
