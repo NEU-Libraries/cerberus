@@ -319,6 +319,7 @@ class CoreFilesController < ApplicationController
 
   def log_stream
     log_action("stream", "COMPLETE")
+    render :nothing => true
   end
 
   protected
