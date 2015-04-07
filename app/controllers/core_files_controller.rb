@@ -269,6 +269,9 @@ class CoreFilesController < ApplicationController
 
   def update
     @core_file = CoreFile.find(params[:id])
+    
+    # Invalidate cache
+    Rails.cache.delete("/mods/#{@core_file.pid}-#{@core_file.modified_date}")
 
     # if no title or keyword, send them back. Only God knows what they did to the form...
     # fix for #671
