@@ -1,0 +1,1 @@
+$('.employees').replaceWith("<%= escape_javascript render(:partial => 'employee_admin', :locals => { :employees => @employees }) %>");

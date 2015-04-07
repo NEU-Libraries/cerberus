@@ -12,10 +12,15 @@
 %br
 %br
 
-= render 'catalog/results_pagination'
+= form_tag admin_communities_filter_list_path, :method => 'get', :class => 'form-inline', :remote => true do
+  = text_field_tag :search, params[:search]
+  //note that this is case sensitive right now
+  = submit_tag "Search", :name => nil, :class => "btn btn-info"
 
-%table.table.table-striped
-  - @communities.each do |community|
-    = render partial: "admin_community", locals: { community: community }
+= render partial: "admin_community", locals: { communities: @communities }
 
-= render 'catalog/results_pagination'
+:javascript
+  $("#search").keyup(function() {
+    var search = $("#search").val();
+    $.getScript('/admin/communities/filter_list?search=' + search);
+  });

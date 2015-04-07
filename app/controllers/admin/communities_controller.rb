@@ -20,9 +20,6 @@ class Admin::CommunitiesController < AdminController
   before_filter :not_neu?, only: [:edit, :update, :destroy]
 
   def index
-    # community_model = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:Community"
-    # query_result = ActiveFedora::SolrService.query("has_model_ssim:\"#{community_model}\"", :rows => 999)
-    # @communities = query_result.map { |x| SolrDocument.new(x) }
     self.solr_search_params_logic += [:limit_to_communities]
     (@response, @communities) = get_search_results
     @page_title = "Administer Communities"
@@ -89,6 +86,21 @@ class Admin::CommunitiesController < AdminController
     end
   end
 
+  def filter_list
+    params[:q] = params[:search]
+    self.solr_search_params_logic += [:limit_to_communities]
+    (@response, @communities) = get_search_results
+    respond_to do |format|
+      format.js {
+        if @response.response['numFound'] == 0
+          render js:"$('.communities').replaceWith(\"<div class='communities'>No results found.</div>\");"
+        else
+          render :filter_list
+        end
+      }
+    end
+  end
+
   private
 
     def get_parent_mass_permissions
@@ -123,8 +135,7 @@ class Admin::CommunitiesController < AdminController
       community_model = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:Community"
       solr_parameters[:fq] ||= []
       solr_parameters[:fq] << "has_model_ssim:\"#{community_model}\""
-    end
-
+    end    
     def not_neu?
       if @community.pid != 'neu:1'
         return true
