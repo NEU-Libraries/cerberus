@@ -12,7 +12,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
            'xmlns:drs' => 'https://repository.neu.edu/spec/v1',
            'xmlns:mods' => 'http://www.loc.gov/mods/v3',
            'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
-           'xsi:schemaLocation' => 'http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-4.xsd',
+           'xsi:schemaLocation' => 'http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd',
            'xmlns:niec' => 'http://repository.neu.edu/schema/niec')
     t.title_info(path: 'titleInfo', namespace_prefix: 'mods'){
       t.title(path: 'title', namespace_prefix: 'mods', index_as: [:stored_searchable, stored_sortable])
@@ -253,7 +253,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
   def self.xml_template
     builder = Nokogiri::XML::Builder.new do |xml|
       xml.mods('xmlns:drs' => 'https://repository.neu.edu/spec/v1', 'xmlns:mods' => 'http://www.loc.gov/mods/v3', 'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
-                'xsi:schemaLocation' => 'http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-4.xsd',
+                'xsi:schemaLocation' => 'http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd',
                 'xmlns:niec' => 'http://repository.neu.edu/schema/niec'){
         xml.parent.namespace = xml.parent.namespace_definitions.find { |ns| ns.prefix=="mods" }
         xml.titleInfo("usage" => "primary") {

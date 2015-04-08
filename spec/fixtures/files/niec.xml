@@ -1,6 +1,6 @@
 <!-->This is a sample MODS record with a fully descriptive NIEC record  <-->
 
-<mods:mods xmlns:mods="http://www.loc.gov/mods/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-4.xsd">
+<mods:mods xmlns:mods="http://www.loc.gov/mods/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd">
   <mods:extension>
     <niec:niec xmlns:niec="http://repository.neu.edu/schema/niec" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://repository.neu.edu/schema/niec http://repository.neu.edu/schema/niec/niec.xsd">
       <niec:title>Deaf Education- Turning the Tide</niec:title>
