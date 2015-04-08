@@ -34,14 +34,15 @@ class ResolrizeJob
       begin
         pid = object.pid
         obj = ActiveFedora::Base.find(pid, :cast=>true)
+
+        # Delete it's old solr record
+        ActiveFedora::SolrService.instance.conn.delete_by_id("#{pid}", params: {'softCommit' => true})
+
+        # Remake the solr document
+        rsolr_conn.add(obj.to_solr)
+        rsolr_conn.commit
+
         if obj.is_a?(CoreFile)
-          # Delete it's old solr record
-          ActiveFedora::SolrService.instance.conn.delete_by_id("#{pid}", params: {'softCommit' => true})
-
-          # Remake the solr document
-          rsolr_conn.add(obj.to_solr)
-          rsolr_conn.commit
-
           result = obj.healthy?
           if result == true
             progress_logger.info "#{Time.now} - Processed PID: #{pid}"
@@ -54,9 +55,15 @@ class ResolrizeJob
               errors_for_pid.warn(e)
             end
           end
-        end
+        else
+          progress_logger.info "#{Time.now} - Processed PID: #{pid}"
+        end        
       rescue Exception => error
         failed_pids_log.warn "#{Time.now} - Error processing PID: #{pid}"
+        errors_for_pid = Logger.new("#{Rails.root}/log/#{job_id}/#{pid}.log")
+        errors_for_pid.warn "#{Time.now} - #{$!.inspect}"
+        errors_for_pid.warn "#{Time.now} - #{$!}"
+        errors_for_pid.warn "#{Time.now} - #{$@}"
       end
     end
 
