@@ -91,6 +91,6 @@ class Admin::EmployeesController < AdminController
       solr_parameters[:fq] << "has_model_ssim:\"#{employee_model}\""
     end
     def title_search(solr_parameters, user_parameters)
-      solr_parameters[:qf] = "title_tesim"
+      solr_parameters[:qf] = "employee_name_tesim"
     end
 end

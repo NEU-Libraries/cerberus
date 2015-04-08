@@ -18,9 +18,3 @@
   = submit_tag "Search", :name => nil, :class => "btn btn-info"
 
 = render partial: "admin_community", locals: { communities: @communities }
-
-:javascript
-  $("#search").keyup(function() {
-    var search = $("#search").val();
-    $.getScript('/admin/communities/filter_list?search=' + search);
-  });
