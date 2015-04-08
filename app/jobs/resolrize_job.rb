@@ -48,7 +48,7 @@ class ResolrizeJob
           end
         rescue NoMethodError
           # If this an obj that doesn't have mods, thats ok, else, log it
-          if self.class.in?([Collection, Community, CoreFile, Compilation])
+          if obj.class.in?([Collection, Community, CoreFile, Compilation])
             failed_pids_log.warn "#{Time.now} - Error processing PID: #{pid}"
             errors_for_pid = Logger.new("#{Rails.root}/log/#{job_id}/#{pid}.log")
             errors_for_pid.warn "This #{self.class.to_s} has no MODS to inpsect or update"
