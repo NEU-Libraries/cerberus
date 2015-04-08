@@ -35,8 +35,32 @@ class ResolrizeJob
         pid = object.pid
         obj = ActiveFedora::Base.find(pid, :cast=>true)
 
+        # Check its MODS and update if needed
+        begin
+          # Check MODS schemalocation value
+          doc = Nokogiri::XML(obj.mods.content)
+          schemata_by_ns = Hash[ doc.root.attributes['schemaLocation'].value.scan(/(\S+)\s+(\S+)/) ]
+          if schemata_by_ns["http://www.loc.gov/mods/v3"] == "http://www.loc.gov/standards/mods/v3/mods-3-4.xsd"
+            # Update to 3-5 as per #703
+            doc.root.attributes['schemaLocation'].value = "http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd"
+            obj.mods.content = doc.root.to_s
+            obj.save!
+          end
+        rescue NoMethodError
+          # If this an obj that doesn't have mods, thats ok, else, log it
+          if !self.class.in?([Collection, Community, CoreFile, Compilation])
+            failed_pids_log.warn "#{Time.now} - Error processing PID: #{pid}"
+            errors_for_pid = Logger.new("#{Rails.root}/log/#{job_id}/#{pid}.log")
+            errors_for_pid.warn "This #{self.class.to_s} has no MODS to inpsect or update"
+          end
+        rescue Exception
+          failed_pids_log.warn "#{Time.now} - Error processing PID: #{pid}"
+          errors_for_pid = Logger.new("#{Rails.root}/log/#{job_id}/#{pid}.log")
+          errors_for_pid.warn(e)
+        end
+
         # Delete it's old solr record
-        ActiveFedora::SolrService.instance.conn.delete_by_id("#{pid}", params: {'softCommit' => true})
+        ActiveFedora::SolrService.instance.conn.delete_by_id("#{pid}", params: {'softCommit' => true})        
 
         # Remake the solr document
         rsolr_conn.add(obj.to_solr)
@@ -57,7 +81,7 @@ class ResolrizeJob
           end
         else
           progress_logger.info "#{Time.now} - Processed PID: #{pid}"
-        end        
+        end
       rescue Exception => error
         failed_pids_log.warn "#{Time.now} - Error processing PID: #{pid}"
         errors_for_pid = Logger.new("#{Rails.root}/log/#{job_id}/#{pid}.log")
