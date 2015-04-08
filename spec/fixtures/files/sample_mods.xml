@@ -6,26 +6,26 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:mods="http://www.loc.gov/mods/v3"
     xsi:schemaLocation="http://www.loc.gov/mods/v3
-    http://www.loc.gov/standards/mods/v3/mods-3-4.xsd">
-    
-    <mods:titleInfo>      
+    http://www.loc.gov/standards/mods/v3/mods-3-5.xsd">
+
+    <mods:titleInfo>
         <mods:title>Single-crystal yttrium iron garnet phase shifter at X band</mods:title>
     </mods:titleInfo>
-       
+
     <mods:name authority="local" type="personal">
         <mods:namePart>How, H.</mods:namePart>
         <mods:role>
             <mods:roleTerm authority="marcrelator" type="text">Author</mods:roleTerm>
         </mods:role>
     </mods:name>
-    
+
     <mods:name authority="local" type="personal">
         <mods:namePart>Hu, W.</mods:namePart>
         <mods:role>
             <mods:roleTerm authority="marcrelator" type="text">Author</mods:roleTerm>
         </mods:role>
     </mods:name>
-    
+
     <mods:name authority="local" type="personal">
         <mods:namePart>Vittoria, C.</mods:namePart>
         <mods:affiliation>Northeastern University</mods:affiliation>
@@ -33,25 +33,25 @@
             <mods:roleTerm authority="marcrelator" type="text">Author</mods:roleTerm>
         </mods:role>
     </mods:name>
-    
+
     <mods:name authority="local" type="personal">
         <mods:namePart>Kempel, L.C.</mods:namePart>
         <mods:role>
             <mods:roleTerm authority="marcrelator" type="text">Author</mods:roleTerm>
         </mods:role>
     </mods:name>
-    
+
     <mods:name authority="local" type="personal">
         <mods:namePart>Trott, K.D.</mods:namePart>
         <mods:role>
             <mods:roleTerm authority="marcrelator" type="text">Author</mods:roleTerm>
         </mods:role>
     </mods:name>
-      
+
     <mods:typeOfResource>text</mods:typeOfResource>
-    
+
     <mods:genre authority="aat">articles</mods:genre>
-    
+
     <mods:originInfo>
         <mods:publisher>American Institute of Physics</mods:publisher>
         <mods:dateIssued encoding="w3cdtf" keyDate="yes">1999-04-15</mods:dateIssued>
@@ -59,56 +59,56 @@
         <mods:dateOther encoding="w3cdtf">2012-04-03</mods:dateOther>
         <mods:issuance>monographic</mods:issuance>
     </mods:originInfo>
-    
+
     <mods:language>
         <mods:languageTerm type="code" authority="iso639-2b">eng</mods:languageTerm>
     </mods:language>
-    
+
     <mods:physicalDescription>
         <mods:form authority="marcform">electronic</mods:form>
         <mods:digitalOrigin>born digital</mods:digitalOrigin>
     </mods:physicalDescription>
-    
+
     <mods:abstract>A tunable phase shifter at X band using single-crystal yttrium iron garnet film material grown on GGG substrates is fabricated. The phase shifter is a fourth wavelength in the absence of a bias magnetic field. The phase can be tuned 120 degrees by varying the bias magnetic field from 3440 to 3720 Oe. The resultant variation in insertion loss was 0.5 dB. Measurements compared very well with calculations</mods:abstract>
-   
+
     <mods:note type="comments">Originally published in Journal of Applied Physics 85, 4853 (1999). DOI:10.1063/1.370043 (http://dx.doi.org/10.1063/1.370043).</mods:note>
     <mods:note type="collection_name">Electrical and Computer Engineering Faculty Publications</mods:note>
-    
+
     <mods:subject>
         <mods:topic authority="lcsh">Phase shifters</mods:topic>
     </mods:subject>
-    
+
     <mods:subject>
         <mods:topic authority="lcsh">Thin films</mods:topic>
     </mods:subject>
-    
+
     <mods:subject>
         <mods:topic>tunable phase shifter</mods:topic>
     </mods:subject>
-    
+
     <mods:subject>
         <mods:topic>single crystal yttrium iron garnet</mods:topic>
     </mods:subject>
-    
+
     <mods:subject>
         <mods:topic>X band</mods:topic>
     </mods:subject>
-    
+
     <mods:subject>
         <mods:topic>GGG substrates</mods:topic>
     </mods:subject>
-    
+
     <mods:subject>
         <mods:topic authority="discipline">Electromagnetics and photonics</mods:topic>
     </mods:subject>
-   
+
     <mods:relatedItem type="host">
-        <mods:titleInfo>           
-            <mods:title>Journal of Applied Physics</mods:title>         
+        <mods:titleInfo>
+            <mods:title>Journal of Applied Physics</mods:title>
         </mods:titleInfo>
         <mods:part>
             <mods:detail type="volume">
-                <mods:number>85</mods:number>             
+                <mods:number>85</mods:number>
             </mods:detail>
             <mods:detail type="issue">
                 <mods:number>8</mods:number>
@@ -132,14 +132,13 @@
         </mods:originInfo>
         <mods:physicalDescription>
             <mods:form authority="marcform">electronic</mods:form>
-            <mods:digitalOrigin>born digital</mods:digitalOrigin>          
+            <mods:digitalOrigin>born digital</mods:digitalOrigin>
         </mods:physicalDescription>
         <mods:identifier type="issn">0021-8979</mods:identifier>
     </mods:relatedItem>
-    
+
     <mods:identifier type="hdl">http://hdl.handle.net/2047/d20002293</mods:identifier>
-    
+
 </mods:mods>
 
 <!--  Last updated by Daniel Jergovic 11/19/13 -->
-
