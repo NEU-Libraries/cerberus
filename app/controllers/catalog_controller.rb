@@ -341,7 +341,7 @@ class CatalogController < ApplicationController
   end
 
   def no_incomplete_records(solr_parameters, user_parameters)
-    query = "-in_progress_tesim:true"
+    query = "-in_progress_tesim:true OR -incomplete_tesim:true"
 
     solr_parameters[:fq] ||= []
     solr_parameters[:fq] << query
