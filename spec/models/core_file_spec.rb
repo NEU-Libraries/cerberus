@@ -43,7 +43,7 @@ describe CoreFile do
       begin
         @abandoned           = CoreFile.new
         @abandoned.depositor = nuid
-        @abandoned.tag_as_in_progress
+        @abandoned.tag_as_incomplete
         @abandoned.save!
 
         # Note that this doesn't work very well, and that
@@ -274,5 +274,3 @@ describe CoreFile do
     end
   end
 end
-
-

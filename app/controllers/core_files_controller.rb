@@ -64,7 +64,14 @@ class CoreFilesController < ApplicationController
     else
       @core_file = CoreFile.find(@core_file.pid)
       @core_file.destroy
-      render :nothing => true
+
+      respond_to do |format|
+        format.html{
+            flash[:notice] = "Incomplete file destroyed"
+            redirect_to(root_path) and return
+          }
+        format.js   { render :nothing => true }
+      end
     end
   end
 
@@ -372,12 +379,17 @@ class CoreFilesController < ApplicationController
 
     #Allows us to map different params
     def update_metadata_from_upload_screen(core_file, file, collection_id, tmp_path, proxy)
+
       if current_user.proxy_staff? && proxy == "proxy"
         core_file.depositor = Collection.find(collection_id).depositor
         core_file.proxy_uploader = current_user.nuid
       else
         core_file.depositor = current_user.nuid
       end
+
+      core_file.tag_as_incomplete
+      core_file.save!
+      core_file.reload
 
       # Context derived attributes
       core_file.title = file.original_filename
