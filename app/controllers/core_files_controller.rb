@@ -58,13 +58,11 @@ class CoreFilesController < ApplicationController
     @core_file = fetch_solr_document
 
     if @core_file.in_progress? && (@core_file.klass == "CoreFile")
+      # User completed second screen, so they most likely went back accidentally
+      # Do nothing
+    else
       @core_file = CoreFile.find(@core_file.pid)
       @core_file.destroy
-      flash[:notice] = "Incomplete file destroyed"
-      redirect_to(root_path) and return
-    else
-      flash[:error] = "File not destroyed"
-      redirect_to(root_path) and return
     end
   end
 
@@ -103,6 +101,9 @@ class CoreFilesController < ApplicationController
     if !title_and_keyword?
       redirect_to files_provide_metadata_path(@core_file.pid) and return
     end
+
+    # Moved to later in process to prevent accidental deletion
+    core_file.tag_as_in_progress
 
     if @core_file.proxy_uploader.present?
       depositor_nuid = @core_file.proxy_uploader
@@ -269,7 +270,7 @@ class CoreFilesController < ApplicationController
 
   def update
     @core_file = CoreFile.find(params[:id])
-    
+
     # Invalidate cache
     Rails.cache.delete("/mods/#{@core_file.pid}-#{@core_file.modified_date}")
 
@@ -375,7 +376,6 @@ class CoreFilesController < ApplicationController
       end
 
       # Context derived attributes
-      core_file.tag_as_in_progress
       core_file.title = file.original_filename
       core_file.tmp_path = tmp_path
       core_file.original_filename = file.original_filename
