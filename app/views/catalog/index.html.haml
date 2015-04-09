@@ -1,9 +1,5 @@
 - facet_list ||= facet_field_names
 
-- content_for :local_js do
-  \// setting a fixed height so that the dialog does not hop around when you get to the last small page
-  \//$.ui.dialog.prototype.options["height"]=window.innerHeight  *0.75
-
 - if !has_search_parameters? && (params[:action] == 'index')
   - content_for :page_header do
     = render 'home'
@@ -45,4 +41,3 @@
       = render 'results_pagination'
       = render :partial => 'document_list'
       = render 'results_pagination'
-
