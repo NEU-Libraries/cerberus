@@ -8,7 +8,7 @@ FactoryGirl.define do
 
     trait :incomplete do
       before(:create) do |file|
-        file.tag_as_in_progress
+        file.tag_as_incomplete
       end
     end
 
