@@ -9,13 +9,15 @@
     return "Your metadata has not been saved, if you leave the process now your uploaded files will be deleted.";
   });
   $(window).on("unload", function() {
-    $.ajax( {
-      url: '#{destroy_incomplete_file_path(params['id'])}',
-      type: 'DELETE',
-      async: false,
-      success: function(result) {
-      }
-    });
+    if(confirmation_needed){
+      $.ajax( {
+        url: '#{destroy_incomplete_file_path(params['id'])}',
+        type: 'DELETE',
+        async: false,
+        success: function(result) {
+        }
+      });
+    }
   });
 
 - content_for :page_header do
@@ -35,5 +37,5 @@
   / We need to account for the different file types here to extend the metdata screen
 
   .form-actions
-    = f.submit class: ['btn', 'btn-primary'], :onclick => "confirmation_needed = false;", value: 'Submit', data: { disable_with: "Please wait..."}
+    = f.submit class: ['btn', 'btn-primary'], :onclick => "$(window).unbind('beforeunload'); confirmation_needed = false;", value: 'Submit', data: { disable_with: "Please wait..."}
     = button_tag "Reset", class: 'btn', type: :reset
