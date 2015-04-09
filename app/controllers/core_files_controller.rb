@@ -103,7 +103,9 @@ class CoreFilesController < ApplicationController
     end
 
     # Moved to later in process to prevent accidental deletion
-    core_file.tag_as_in_progress
+    @core_file.tag_as_in_progress
+    @core_record.save!
+    @core_record.reload
 
     if @core_file.proxy_uploader.present?
       depositor_nuid = @core_file.proxy_uploader
