@@ -64,7 +64,14 @@ class CoreFilesController < ApplicationController
     else
       @core_file = CoreFile.find(@core_file.pid)
       @core_file.destroy
-      render :nothing => true
+
+      respond_to do |format|
+        format.html{
+            flash[:notice] = "Incomplete file destroyed"
+            redirect_to(root_path) and return
+          }
+        format.js   { render :nothing => true }
+      end
     end
   end
 
