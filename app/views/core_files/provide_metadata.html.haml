@@ -5,6 +5,7 @@
   $('#permissions_display').show();
   // initialize popover helpers
   $("a[rel=popover]").popover({ html: true });
+  var confirmation_needed = true;
   $(window).on("beforeunload", function() {
     return "Your metadata has not been saved, if you leave the process now your uploaded files will be deleted.";
   });
