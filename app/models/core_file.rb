@@ -181,7 +181,7 @@ class CoreFile < ActiveFedora::Base
     proxy_uploader = "proxy_uploader_tesim:#{nuid}"
 
     true_depositor_query = "(#{depositor} OR #{proxy_uploader})"
-    f_query = as.query("#{true_depositor_query} AND in_progress_tesim:true")
+    f_query = as.query("#{true_depositor_query} AND incomplete_tesim:true")
     docs    = f_query.map { |x| SolrDocument.new (x) }
     now     = DateTime.now
 
@@ -197,6 +197,14 @@ class CoreFile < ActiveFedora::Base
 
   def tag_as_in_progress
     self.properties.tag_as_in_progress
+  end
+
+  def tag_as_incomplete
+    self.properties.incomplete = 'true'
+  end
+
+  def incomplete?
+    return ! self.in_progress.empty?
   end
 
   def propagate_metadata_changes!

@@ -372,6 +372,10 @@ class CoreFilesController < ApplicationController
 
     #Allows us to map different params
     def update_metadata_from_upload_screen(core_file, file, collection_id, tmp_path, proxy)
+      core_file.tag_as_incomplete
+      core_file.save!
+      core_file.reload
+
       if current_user.proxy_staff? && proxy == "proxy"
         core_file.depositor = Collection.find(collection_id).depositor
         core_file.proxy_uploader = current_user.nuid

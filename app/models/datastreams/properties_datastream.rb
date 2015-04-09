@@ -8,6 +8,7 @@ class PropertiesDatastream < ActiveFedora::OmDatastream
     t.proxy_uploader :index_as=>[:stored_searchable]
     t.thumbnail_list :index_as=>[:stored_searchable]
     t.canonical  :index_as=>[:stored_searchable]
+    t.incomplete :index_as=>[:stored_searchable]
     t.in_progress path: 'inProgress', :index_as=>[:stored_searchable]
     # This is where we put the relative path of the file if submitted as a folder
     t.relative_path
@@ -35,10 +36,12 @@ class PropertiesDatastream < ActiveFedora::OmDatastream
   end
 
   def tag_as_in_progress
+    self.incomplete = []
     self.in_progress = 'true'
   end
 
   def tag_as_completed
+    self.incomplete = []
     self.in_progress = []
   end
 

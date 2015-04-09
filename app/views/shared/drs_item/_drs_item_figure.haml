@@ -21,6 +21,9 @@
         - if item.klass == "CoreFile" && item.embargo_date_in_effect?
           %span.label.small.embargoed
             = "Embargoed"
+        - elsif item.klass == "CoreFile" && item.incomplete?
+          %span.label.small.incomplete
+            = "Incomplete"
         - elsif item.klass == "CoreFile" && item.in_progress?
           %span.label.small.updating
             = "Updating"

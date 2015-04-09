@@ -328,6 +328,11 @@ module Cerberus
       return now < e
     end
 
+    # Check if the current object is incomplete
+    def incomplete?
+      return Array(self["incomplete_tesim"]).first == "true"
+    end
+
     # Check if the current object is under embargo
     def under_embargo?(user)
       e = embargo_release_date
