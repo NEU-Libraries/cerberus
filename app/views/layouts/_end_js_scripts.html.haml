@@ -1,10 +1,5 @@
 
 / = analytics_init local: Rails.env.development?
-:javascript
-  $(function() {
-    #{yield(:local_js)}
-  });
-
 = javascript_include_tag 'picturefill.all', :async => true
 :javascript
   $('.selectpicker').selectpicker();
