@@ -60,9 +60,11 @@ class CoreFilesController < ApplicationController
     if @core_file.in_progress? && (@core_file.klass == "CoreFile")
       # User completed second screen, so they most likely went back accidentally
       # Do nothing
+      render :nothing => true
     else
       @core_file = CoreFile.find(@core_file.pid)
       @core_file.destroy
+      render :nothing => true
     end
   end
 
