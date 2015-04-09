@@ -1,10 +1,10 @@
-%p= "Upload of file #{incomplete.title_or_label} was never completed.  You may now either complete this upload by proceding to metadata addition, or you may delete it.  Do note that if you have multiple incomplete files, you will be brought to this page once for each of them."
+%p= "The uploading process of file #{incomplete.title_or_label} was never completed.  You may now either complete this upload by proceeding to metadata addition, or you may delete it.  Do note that if you have multiple incomplete files, you will be brought to this page once for each of them."
 
-- if @incomplete.proxy_uploader
+- if @incomplete.proxy_uploader.present?
   %p= "Further note that this was a proxy upload for a user with nuid #{@incomplete.depositor}"
 
 %h4= "Actions for #{incomplete.title_or_label || 'Unnamed File'}:"
 %ul#actions
   %li= link_to "Complete this object", files_provide_metadata_path(incomplete.pid, proxy: @incomplete.depositor)
-  %li= link_to "Destroy this object", destroy_incomplete_file_path(incomplete.pid), method: 'delete'
-  %li= link_to "Go back to home and think about it more", root_path
+  %li= link_to "Delete this object", destroy_incomplete_file_path(incomplete.pid), method: 'delete'
+  %li= link_to "Go back to the home page", root_path

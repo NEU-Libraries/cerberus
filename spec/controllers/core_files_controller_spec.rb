@@ -115,7 +115,9 @@ describe CoreFilesController do
       # bills_incomplete_files.length.should == 2
 
       # Check that bills complete file was not deleted
-      CoreFile.find(complete_file.pid).should == complete_file      
+      CoreFile.find(complete_file.pid).should == complete_file
+
+      expect(response).to redirect_to(root_path)      
     end
   end
 
