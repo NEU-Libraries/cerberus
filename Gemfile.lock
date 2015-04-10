@@ -150,6 +150,7 @@ GEM
     devise-guests (0.3.2)
       devise
     diff-lcs (1.2.4)
+    diffy (3.0.7)
     docile (1.1.5)
     em-websocket (0.5.0)
       eventmachine (>= 0.12.9)
@@ -507,6 +508,7 @@ DEPENDENCIES
   date_time_precision
   devise
   devise-guests (~> 0.3)
+  diffy
   exception_notification
   factory_girl_rails
   figaro

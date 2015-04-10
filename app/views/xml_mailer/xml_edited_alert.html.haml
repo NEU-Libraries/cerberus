@@ -2,6 +2,8 @@
 %html
   %head
     %meta{:content => "text/html; charset=UTF-8", "http-equiv" => "Content-Type"}/
+    :css
+      "#{@diff_css}"
   %body
     %h3 Xml Editor Alert
 
@@ -12,4 +14,5 @@
       %li= "Email: #{@email}"
       %li= "Core File PID: #{@pid} - #{core_file_url(@pid)}"
 
-    %p= "Both old and new xml files have been attached, reflecting the change made to this metadata."
+    :erb
+      <%=@diff.html_safe%>
