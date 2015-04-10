@@ -6,13 +6,15 @@
       "#{@diff_css}"
   %body
     %h3 Xml Editor Alert
+    - @xml_edits.each_with_index do |alert, i|
+      %h5 Item "#{i}"
+      %p The XML editor has been used by a user.  Their attributes are
+      as follows:
+      %ul
+        %li= "Name: #{alert.name}"
+        %li= "Email: #{alert.email}"
+        %li= "Core File Title: #{alert.title}"
+        %li= "Core File PID: #{alert.pid} - #{core_file_url(@pid)}"
 
-    %p The XML editor has been used by a user.  Their attributes are
-    as follows:
-    %ul
-      %li= "Name: #{@name}"
-      %li= "Email: #{@email}"
-      %li= "Core File PID: #{@pid} - #{core_file_url(@pid)}"
-
-    :erb
-      <%=@diff.html_safe%>
+      :erb
+        <%=altert.diff.html_safe%>
