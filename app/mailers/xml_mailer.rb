@@ -2,7 +2,7 @@ class XmlMailer < ActionMailer::Base
   default from: "notifier@repository.library.northeastern.edu"
   after_filter :tag_as_notified
 
-  def daily_xml_email
+  def daily_alert_email
 
     @diff_css = Diffy::CSS
     @xml_edits = XmlAlert.where('notified = ?', false).find_all
