@@ -253,20 +253,20 @@ class CoreFilesController < ApplicationController
         new_doc = Nokogiri::XML(params[:raw_xml].first)
         old_doc = Nokogiri::XML(@core_file.mods.content)
 
-        new_tmp_file = "#{Rails.root}/tmp/new#{Time.now.to_f}.xml"
-        old_tmp_file = "#{Rails.root}/tmp/old#{Time.now.to_f}.xml"
+        # new_tmp_file = "#{Rails.root}/tmp/new#{Time.now.to_f}.xml"
+        # old_tmp_file = "#{Rails.root}/tmp/old#{Time.now.to_f}.xml"
 
-        File.open(new_tmp_file, 'w') {|f| f.write("#{new_doc.to_s}") }
-        File.open(old_tmp_file, 'w') {|f| f.write("#{old_doc.to_s}") }
+        # File.open(new_tmp_file, 'w') {|f| f.write("#{new_doc.to_s}") }
+        # File.open(old_tmp_file, 'w') {|f| f.write("#{old_doc.to_s}") }
 
-        XmlMailer.xml_edited_alert(@core_file, current_user, new_tmp_file, old_tmp_file).deliver!
+        XmlMailer.xml_edited_alert(@core_file, current_user, new_doc.to_s, old_doc.to_s).deliver!
 
         @core_file.mods.content = params[:raw_xml].first
         @core_file.save!
         @core_file.match_dc_to_mods
 
-        FileUtils.rm(new_tmp_file)
-        FileUtils.rm(old_tmp_file)
+        # FileUtils.rm(new_tmp_file)
+        # FileUtils.rm(old_tmp_file)
 
         render js: "window.location = '#{core_file_path(@core_file.pid)}'" and return
       end
