@@ -1,9 +1,7 @@
 -if !current_user.nil?
   %h3
-    %i.icon-warning-sign.icon-2x
-    Permissions Error
-  %p.red
-    You have insufficient permissions to access this page.
+    %i.icon-asterisk
+    Sorry, you don't have permission to access this page.
   %p
     You might be interested in
     %a{:href => "mailto:Library-Repository-Team@neu.edu"} contacting the DRS staff
@@ -11,7 +9,12 @@
     %a{:href => "http://library.northeastern.edu/get-help/tech-support/report-a-problem?resource=#{CGI::escape(request.original_url)}", :target => "_blank"} reporting the problem.
 -else
   %h3
-    %i.icon-warning-sign.icon-2x
-    Permissions Error
+    %i.icon-asterisk
+    Sorry, you don't have permission to access this page.
   %p
-    You're not currently logged in. Doing so may grant you access to this object.
+    Try
+    - if Rails.env.production?
+      %a{:href => "/users/auth/shibboleth"} logging in
+    - else
+      %a{:href => new_user_session_path} logging in
+    to gain access.
