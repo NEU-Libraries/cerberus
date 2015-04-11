@@ -150,7 +150,11 @@ class CoreFile < ActiveFedora::Base
   end
 
   def tombstoned?
-    return ! self.properties.tombstoned.first.empty?
+    if self.properties.tombstoned.first.nil? || self.properties.tombstoned.first.empty?
+      return false
+    else
+      return true
+    end
   end
 
   def pdf?
