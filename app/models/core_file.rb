@@ -91,6 +91,12 @@ class CoreFile < ActiveFedora::Base
 
   def to_solr(solr_doc = Hash.new())
 
+    if self.tombstoned?
+      solr_doc["id"] = self.pid
+      solr_doc["tombstoned_ssi"] = 'true'
+      return solr_doc
+    end
+
     (0..self.mods.personal_name.length).each do |i|
       fn = self.mods.personal_name(i).name_part_given
       ln = self.mods.personal_name(i).name_part_family
@@ -131,6 +137,20 @@ class CoreFile < ActiveFedora::Base
     end
 
     return solr_doc
+  end
+
+  def tombstone
+    self.properties.tombstoned = 'true'
+    self.save!
+  end
+
+  def revive
+    self.properties.tombstoned = ''
+    self.save!
+  end
+
+  def tombstoned?
+    return ! self.properties.tombstoned.first.empty?
   end
 
   def pdf?
