@@ -14,7 +14,7 @@
         %li= "Name: #{alert.name}"
         %li= "Email: #{alert.email}"
         %li= "Core File Title: #{alert.title}"
-        %li= "Core File PID: #{alert.pid} - #{core_file_url(@pid)}"
+        %li= "Core File PID: #{alert.pid} - #{core_file_url(alert.pid)}"
 
       :erb
         <%=altert.diff.html_safe%>
