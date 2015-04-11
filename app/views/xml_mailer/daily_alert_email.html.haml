@@ -1,0 +1,19 @@
+!!!
+%html
+  %head
+    %meta{:content => "text/html; charset=UTF-8", "http-equiv" => "Content-Type"}/
+    :css
+      "#{@diff_css}"
+  %body
+    %h3 Xml Editor Alert
+    - @xml_edits.each_with_index do |alert, i|
+      %h5 Item #{i + 1}
+      %p The XML editor has been used by a user.  Their attributes are as follows:
+      %ul
+        %li= "Name: #{alert.name}"
+        %li= "Email: #{alert.email}"
+        %li= "Core File Title: #{alert.title}"
+        %li= "Core File PID: #{alert.pid} - #{core_file_url(alert.pid)}"
+
+      :erb
+        <%=alert.diff.html_safe%>

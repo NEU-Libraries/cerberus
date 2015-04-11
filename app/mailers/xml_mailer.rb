@@ -1,20 +1,27 @@
 class XmlMailer < ActionMailer::Base
+  include AbstractController::Callbacks
+  
   default from: "notifier@repository.library.northeastern.edu"
+  after_filter :tag_as_notified
 
-  def xml_edited_alert(core_file, user, new_tmp_file, old_tmp_file)
-    @name = user.pretty_name || "No name set.  Uh oh!"
-    @email = user.email || "No email set.  Uh oh!"
-    @pid  = core_file.pid  || "No pid set.  Uh oh!"
+  def daily_alert_email
 
-    mail.attachments['new.xml'] = File.read(new_tmp_file)
-    mail.attachments['old.xml'] = File.read(old_tmp_file)
+    @diff_css = Diffy::CSS
+    @xml_edits = XmlAlert.where('notified = ?', false).find_all
 
     mail(to: pick_receiver,
-         subject: "[cerberus] XML Edited for #{core_file.title} - #{core_file.pid}",
+         subject: "Daily digest of XML edits - #{@xml_edits.count} items",
          content_type: "text/html")
   end
 
   private
+    def tag_as_notified
+      @xml_edits.each do |alert|
+        alert.notified = true
+        alert.save
+      end
+    end
+
     def pick_receiver
       if ["production"].include? Rails.env
         "Library-DRS-Metadata@neu.edu"
