@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20141211205041) do
+ActiveRecord::Schema.define(:version => 20150411012901) do
 
   create_table "bookmarks", :force => true do |t|
     t.integer  "user_id",     :null => false
@@ -214,6 +214,19 @@ ActiveRecord::Schema.define(:version => 20141211205041) do
     t.string   "committer_login"
     t.datetime "created_at",      :null => false
     t.datetime "updated_at",      :null => false
+  end
+
+  create_table "xml_alerts", :force => true do |t|
+    t.string   "pid"
+    t.string   "name"
+    t.string   "email"
+    t.string   "title"
+    t.string   "old_file_str"
+    t.string   "new_file_str"
+    t.string   "diff"
+    t.datetime "created_at",   :null => false
+    t.datetime "updated_at",   :null => false
+    t.string   "notified"
   end
 
 end
