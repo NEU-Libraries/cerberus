@@ -3,7 +3,7 @@ describe XmlMailer do
 
   describe "daily_alert_email" do
     before :each do
-      FactoryGirl.create_list(:xml_alert, 2)
+      FactoryGirl.create_list(:updated_xml, 2)
     end
 
     let(:mail) { XmlMailer.daily_alert_email }
