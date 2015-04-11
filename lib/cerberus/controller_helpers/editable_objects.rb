@@ -56,6 +56,10 @@ module Cerberus
           render_404(ActiveFedora::ObjectNotFoundError.new) and return
         end
 
+        if record.tombstoned?
+          render_404(ActiveFedora::ObjectNotFoundError.new) and return
+        end
+
         if current_user.nil?
           record.public? ? true : render_403
         elsif current_user.can? :read, record
