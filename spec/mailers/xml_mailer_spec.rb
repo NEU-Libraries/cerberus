@@ -1,5 +1,4 @@
 require "spec_helper"
-
 describe XmlMailer do
 
   describe "daily_alert_email" do

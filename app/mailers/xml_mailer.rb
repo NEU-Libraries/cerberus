@@ -1,4 +1,6 @@
 class XmlMailer < ActionMailer::Base
+  include AbstractController::Callbacks
+  
   default from: "notifier@repository.library.northeastern.edu"
   after_filter :tag_as_notified
 
