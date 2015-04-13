@@ -3,7 +3,7 @@ require 'blacklight_advanced_search'
 require 'parslet'
 require 'parsing_nesting/tree'
 
-class Admin::EmployeesController < AdminController
+class Admin::CoreFilesController < AdminController
 
   include Blacklight::Catalog
   include Blacklight::Configurable # comply with BL 3.7
@@ -21,12 +21,15 @@ class Admin::EmployeesController < AdminController
   def index
     self.solr_search_params_logic += [:limit_to_tombstone]
     (@response, @tombstoned) = get_search_results
+    @count_for_tombstone = @tombstoned.length
     self.solr_search_params_logic.delete(:limit_to_tombstone)
     self.solr_search_params_logic += [:limit_to_in_progress]
     (@response, @in_progress) = get_search_results
+    @count_for_in_progress = @in_progress.length
     self.solr_search_params_logic.delete(:limit_to_in_progress)
     self.solr_search_params_logic += [:limit_to_incomplete]
     (@response, @incomplete) = get_search_results
+    @count_for_incomplete = @incomplete.length
     self.solr_search_params_logic.delete(:limit_to_incomplete)
 
 

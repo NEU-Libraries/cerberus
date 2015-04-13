@@ -9,21 +9,22 @@
 %br
 %ul.nav.nav-tabs
   %li.active
-    = link_to 'Incomplete', '#incomplete'
+    = link_to "Tombstoned (#{@count_for_tombstone})", '#tombstoned'
   %li
-    = link_to 'In Progress', '#in_progress'
+    = link_to "Incomplete (#{@count_for_incomplete})", '#incomplete'
   %li
-    = link_to 'Tombstoned', '#tombstoned'
+    = link_to "In Progress (#{@count_for_in_progress})", '#in_progress'
 
 .tab-content
-  #incomplete.tab-pane.active
+  #tombstoned.tab-pane.active
+    = render partial: "tombstoned", locals: { core_files: @tombstoned }
+
+  #incomplete.tab-pane
     = render partial: "incomplete", locals: { core_files: @incomplete }
 
   #in_progress.tab-pane
     = render partial: "in_progress", locals: { core_files: @in_progress }
 
-  #tombstoned.tab-pane
-      = render partial: "tombstoned", locals: { core_files: @tombstoned }
 
   :javascript
     $('.nav-tabs a').click(function (e) {
