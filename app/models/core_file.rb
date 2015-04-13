@@ -94,6 +94,7 @@ class CoreFile < ActiveFedora::Base
     if self.tombstoned?
       solr_doc["id"] = self.pid
       solr_doc["tombstoned_ssi"] = 'true'
+      solr_doc["title_ssi"] = self.title
       return solr_doc
     end
 
