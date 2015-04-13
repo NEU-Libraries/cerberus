@@ -23,10 +23,12 @@ class Admin::CoreFilesController < AdminController
     (@response, @tombstoned) = get_search_results
     @count_for_tombstone = @tombstoned.length
     self.solr_search_params_logic.delete(:limit_to_tombstone)
+
     self.solr_search_params_logic += [:limit_to_in_progress]
     (@response, @in_progress) = get_search_results
     @count_for_in_progress = @in_progress.length
     self.solr_search_params_logic.delete(:limit_to_in_progress)
+
     self.solr_search_params_logic += [:limit_to_incomplete]
     (@response, @incomplete) = get_search_results
     @count_for_incomplete = @incomplete.length
@@ -36,15 +38,20 @@ class Admin::CoreFilesController < AdminController
     @page_title = "Administer Core Files"
   end
 
+  def revive
+    @core_file = CoreFile.find(params[:id])
+    @core_file.revive
+    redirect_to admin_files_path, notice: "Core File #{link_to pid, core_file_path(pid)}".html_safe
+  end
 
   def destroy
-    @core_file = CoreFile.find(@core_file.pid)
+    @core_file = CoreFile.find(params[:id])
     pid = @core_file.pid
 
     if @core_file.pid
-      redirect_to admin_core_files_path, notice: "Core File #{pid} removed"
+      redirect_to admin_files_path, notice: "Core File #{pid} removed"
     else
-      redirect_to admin_core_files_path, notice: "Something went wrong"
+      redirect_to admin_files_path, notice: "Something went wrong"
     end
   end
 
