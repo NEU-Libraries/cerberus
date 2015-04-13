@@ -4,7 +4,7 @@
   - breadcrumb_to_root(@core_file).each do |breadcrumb|
     =breadcrumb
 
-- if @core_file.embargo_date_in_effect?
+- if !@core_file.tombstoned? && @core_file.embargo_date_in_effect?
   %span.embargo-alert= "This item is under embargo and its content will be available for download and viewing on #{@core_file.embargo_release_date(formatted: true)}"
 
 %article{class: ['drs-item', 'drs-item-full'],  data: { drsitem: @core_file.pid } }
@@ -15,9 +15,15 @@
       = kramdown_parse(@core_file.title)
 
   %section.row
-    - @content_objects = cached_content_objects(@core_file)
     %div{class: layout_class}
-      = render :partial => 'core_files/media_display', locals: {contents: @content_objects}
+      - if @core_file.tombstoned?
+        -if @thumbs.length > 0
+          = render partial: 'shared/thumbnails/full_picture'
+        -else
+          %i.icon-file.icon-4x.icon-border.drs-icon-figure
+      - else
+        - @content_objects = cached_content_objects(@core_file)
+        = render :partial => 'core_files/media_display', locals: {contents: @content_objects}
     %div{itemscope: "", itemtype: "http://schema.org/CreativeWork", class:  [ layout_class, 'drs-item-details'] }
       = render partial: 'actions_nav'
       .tab-content
@@ -38,7 +44,7 @@
 
           .drs-item-add-details
             = @mods
-          -if @content_objects
+          - if !@core_file.tombstoned? && @content_objects
             %section.drs-item-derivatives
               = render partial: 'show_derivatives', locals: {contents: @content_objects}
         #supplemental-files.tab-pane
