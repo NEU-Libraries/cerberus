@@ -72,7 +72,11 @@ Cerberus::Application.routes.draw do
     resources :communities, except: [:show]
     resources :employees, only: [:index, :edit, :update, :destroy]
     resources :statistics, only: [:index]
-    resources :core_files, only: [:index, :show]
+    #resources :core_files, only: [:index, :show, :destroy]
+    get "/files" => 'core_files#index'
+    get "/files/:id" => "core_files#show", as: 'view_file'
+    get "/files/:id/revive" => "core_files#revive", as: 'revive_file'
+    get "/files/:id/delete" => "core_files#delete", as: 'delete_file'
     get "/communities/filter_list" => 'communities#filter_list', as: 'communities_filter_list'
     get "/employees/filter_list" => "employees#filter_list", as: 'employees_filter_list'
   end
