@@ -1,0 +1,21 @@
+.core_files
+  = render 'catalog/results_pagination'
+
+  %table.table.table-striped
+    - @core_files.each do |core_file|
+      %tr
+        %td
+          .large= core_file.title.html_safe
+        %td
+          = link_to("View", edit_admin_community_path(community),
+          class: "btn btn-small btn-warning")
+        %td
+          = link_to("Revive", edit_admin_community_path(community),
+          class: "btn btn-small btn-warning")
+        %td
+          = link_to("Delete", admin_community_path(community),
+          method: :delete,
+          confirm: "This action is irreversible",
+          class: "btn btn-small btn-danger")
+
+  = render 'catalog/results_pagination'
