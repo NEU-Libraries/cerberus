@@ -1,0 +1,7 @@
+%div
+  -if current_user.admin?
+    %a.btn.btn-danger{ href:tombstone_file_path, data: { confirm: "Are you sure you want to tombstone this file?" } }
+      Tombstone File
+  -else
+    %a.btn.btn-danger{ href:request_tombstone_file_path, data: { confirm: "Are you sure you want to request that this file be deleted?"} }
+      Request Deletion
