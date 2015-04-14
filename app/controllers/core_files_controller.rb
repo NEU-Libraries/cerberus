@@ -328,6 +328,18 @@ class CoreFilesController < ApplicationController
     render :nothing => true
   end
 
+  def tombstone
+    core_file = CoreFile.find(params[:id])
+    title = core_file.title
+    collection = core_file.parent.id
+    core_file.tombstone
+    if current_user.admin?
+      redirect_to collection_path(id: collection), notice: "Core file '#{title}' has been tombstoned"
+    else
+      redirect_to collection_path(id: collection), notice: "Core File '#{title}' has been tombstoned"
+    end
+  end
+
   protected
 
     def complete?

@@ -2,10 +2,15 @@
   = render 'catalog/results_pagination'
 
   %table.table.table-striped
-    - @incomplete.each do |core_file|
+    - @core_files.each do |core_file|
       %tr
         %td
           .large= core_file.title.html_safe
+        -if @type.to_s == "tombstoned"
+          %td
+            = link_to("View", admin_view_file_path(core_file), class: "btn btn-small btn-info")
+          %td
+            = link_to("Revive", admin_revive_file_path(core_file), class: "btn btn-small btn-warning")
         %td
           = link_to("Delete", admin_delete_file_path(core_file),
           method: :destroy,

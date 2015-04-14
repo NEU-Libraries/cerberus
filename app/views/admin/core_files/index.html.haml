@@ -9,29 +9,31 @@
 %br
 %ul.nav.nav-tabs
   %li.active
-    = link_to "Tombstoned (#{@count_for_tombstone})", '#tombstoned'
+    = link_to "Tombstoned", '#tombstoned'
   %li
-    = link_to "Incomplete (#{@count_for_incomplete})", '#incomplete'
+    = link_to "Incomplete", '#incomplete'
   %li
-    = link_to "In Progress (#{@count_for_in_progress})", '#in_progress'
+    = link_to "In Progress", '#in_progress'
 
 .tab-content
   #tombstoned.tab-pane.active
-    = render partial: "tombstoned", locals: { core_files: @tombstoned }
+    .core_files
 
   #incomplete.tab-pane
-    = render partial: "incomplete", locals: { core_files: @incomplete }
+    .core_files
 
   #in_progress.tab-pane
-    = render partial: "in_progress", locals: { core_files: @in_progress }
+    .core_files
 
 
   :javascript
     $('.nav-tabs a').click(function (e) {
       e.preventDefault();
       $(this).tab('show');
+      var href = $(this).attr("href");
+      href = '/admin/files/'+href.substring(1, href.length);
+      $.getScript(href);
     });
-    var url = document.location.toString();
-    if (url.match('#')) {
-        $('.nav-tabs a[href=#'+url.split('#')[1]+']').tab('show') ;
-    }
+    $(document).ready(function() {
+      $.getScript('/admin/files/tombstoned');
+    })

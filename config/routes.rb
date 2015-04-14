@@ -53,7 +53,7 @@ Cerberus::Application.routes.draw do
   get "/files/:id/edit/xml" => "core_files#edit_xml", as: "edit_core_file_xml"
   put "/files/:id/validate_xml" => "core_files#validate_xml", as: "core_file_validate_xml"
 
-  get "/files/:id/tombstone" => "core_files#tombstone", as: "core_file_tombstone"
+  get "/files/:id/tombstone" => "core_files#tombstone", as: "tombstone_file"
 
   put '/item_display' => 'users#update', as: 'view_pref'
 
@@ -75,6 +75,9 @@ Cerberus::Application.routes.draw do
     resources :employees, only: [:index, :edit, :update, :destroy]
     resources :statistics, only: [:index]
     get "/files" => 'core_files#index', as: 'files'
+    get "/files/tombstoned" => 'core_files#get_tombstoned', as: 'tombstoned'
+    get "/files/incomplete" => 'core_files#get_incomplete', as: 'incomplete'
+    get "/files/in_progress" => 'core_files#get_in_progress', as: 'in_progress'
     get "/files/:id" => "core_files#show", as: 'view_file'
     get "/files/:id/revive" => "core_files#revive", as: 'revive_file'
     get "/files/:id/delete" => "core_files#delete", as: 'delete_file'

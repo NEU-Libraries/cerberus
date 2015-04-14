@@ -16,25 +16,8 @@ class Admin::CoreFilesController < AdminController
 
   before_filter :authenticate_user!
   before_filter :verify_admin
-  #before_filter :load_employee, except: [:index, :update, :filter_list]
 
   def index
-    self.solr_search_params_logic += [:limit_to_tombstone]
-    (@response, @tombstoned) = get_search_results
-    @count_for_tombstone = @tombstoned.length
-    self.solr_search_params_logic.delete(:limit_to_tombstone)
-
-    self.solr_search_params_logic += [:limit_to_in_progress]
-    (@response, @in_progress) = get_search_results
-    @count_for_in_progress = @in_progress.length
-    self.solr_search_params_logic.delete(:limit_to_in_progress)
-
-    self.solr_search_params_logic += [:limit_to_incomplete]
-    (@response, @incomplete) = get_search_results
-    @count_for_incomplete = @incomplete.length
-    self.solr_search_params_logic.delete(:limit_to_incomplete)
-
-
     @page_title = "Administer Core Files"
   end
 
@@ -57,10 +40,39 @@ class Admin::CoreFilesController < AdminController
     end
   end
 
+  def get_core_files(type)
+    filter_name = "limit_to_#{type}"
+    @type = type.to_sym
+    self.solr_search_params_logic += [filter_name.to_sym]
+    (@response, @core_files) = get_search_results
+    @count_for_files = @response.response['numFound']
+    respond_to do |format|
+      format.js {
+        if @response.response['numFound'] == 0
+          render js:"$('##{type} .core_files').replaceWith(\"<div class='core_files'>There are currently 0 #{type} files.</div>\");"
+        else
+          render "#{type.to_sym}"
+        end
+      }
+    end
+    self.solr_search_params_logic.delete(filter_name.to_sym)
+  end
+
+  def get_tombstoned
+    get_core_files("tombstoned")
+  end
+
+  def get_in_progress
+    get_core_files("in_progress")
+  end
+
+  def get_incomplete
+    get_core_files("incomplete")
+  end
 
   private
 
-    def limit_to_tombstone(solr_parameters, user_parameters)
+    def limit_to_tombstoned(solr_parameters, user_parameters)
       solr_parameters[:fq] ||= []
       solr_parameters[:fq] << "tombstoned_ssi:\"true\""
     end
