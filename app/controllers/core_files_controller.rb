@@ -340,6 +340,14 @@ class CoreFilesController < ApplicationController
     end
   end
 
+  def request_tombstone
+    core_file = CoreFile.find(params[:id])
+    title = core_file.title
+    collection = core_file.parent.id
+    TombstoneMailer.tombstone_alert(core_file).deliver!
+    flash[:notice] = "Item has been requested for deletion"
+  end
+
   protected
 
     def complete?
