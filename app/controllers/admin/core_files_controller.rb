@@ -40,8 +40,10 @@ class Admin::CoreFilesController < AdminController
 
   def revive
     @core_file = CoreFile.find(params[:id])
+    pid = @core_file.pid
+    title = @core_file.title
     @core_file.revive
-    redirect_to admin_files_path, notice: "Core File #{link_to pid, core_file_path(pid)}".html_safe
+    redirect_to admin_files_path, notice: "Core File #{ActionController::Base.helpers.link_to title, core_file_path(pid)} has been revived".html_safe
   end
 
   def destroy
