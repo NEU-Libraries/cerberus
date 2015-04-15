@@ -54,7 +54,7 @@ Cerberus::Application.routes.draw do
   put "/files/:id/validate_xml" => "core_files#validate_xml", as: "core_file_validate_xml"
 
   get "/files/:id/tombstone" => "core_files#tombstone", as: "tombstone_file"
-  get "/files/:id/request_tombstone" => "core_files#request_tombstone", as:"request_tombstone_file"
+  match "/files/:id/request_tombstone" => "core_files#request_tombstone", via: 'post', as:"request_tombstone_file"
 
   put '/item_display' => 'users#update', as: 'view_pref'
 
