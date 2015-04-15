@@ -12,3 +12,5 @@
 
     - if @pid
       %p= "A link to the record can be found #{link_to 'here', core_file_url(@pid)}".html_safe
+
+    %p= "The reason for deletion is: #{@reason}".html_safe
