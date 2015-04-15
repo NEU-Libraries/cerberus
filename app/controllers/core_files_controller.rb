@@ -346,6 +346,7 @@ class CoreFilesController < ApplicationController
     collection = core_file.parent.id
     TombstoneMailer.tombstone_alert(core_file).deliver!
     flash[:notice] = "Item has been requested for deletion"
+    redirect_to core_file and return
   end
 
   protected
