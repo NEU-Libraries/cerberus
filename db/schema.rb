@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150411012901) do
+ActiveRecord::Schema.define(:version => 20150416223648) do
 
   create_table "bookmarks", :force => true do |t|
     t.integer  "user_id",     :null => false
@@ -221,11 +221,11 @@ ActiveRecord::Schema.define(:version => 20150411012901) do
     t.string   "name"
     t.string   "email"
     t.string   "title"
-    t.string   "old_file_str"
-    t.string   "new_file_str"
-    t.string   "diff"
-    t.datetime "created_at",   :null => false
-    t.datetime "updated_at",   :null => false
+    t.text     "old_file_str", :limit => 4294967295
+    t.text     "new_file_str", :limit => 4294967295
+    t.text     "diff",         :limit => 4294967295
+    t.datetime "created_at",                         :null => false
+    t.datetime "updated_at",                         :null => false
     t.string   "notified"
   end
 
