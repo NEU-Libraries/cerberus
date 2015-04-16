@@ -12,6 +12,10 @@
         %a{ href: edit_core_file_path(@core_file),  data: {event: "external"} }
           %i.icon-pencil
           Edit
+      %li
+        %a{ href: "#delete", data: {toggle: "tab"}}
+          %i.icon-remove
+          Delete
       - if current_user.repo_staff? || current_user.beta?
         %li
           %a{ href: edit_core_file_xml_path(@core_file),  data: {event: "external"} }

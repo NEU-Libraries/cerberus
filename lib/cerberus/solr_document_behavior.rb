@@ -354,6 +354,10 @@ module Cerberus
       return Array(self["is_part_of_ssim"]).any?
     end
 
+    def tombstoned?
+      return Array(self["tombstoned_ssi"]).first == "true"
+    end
+
     def get_core_record
       id = Array(self["is_part_of_ssim"]).first.split("/").last
       return SolrDocument.new ActiveFedora::SolrService.query("id:\"#{id}\"").first

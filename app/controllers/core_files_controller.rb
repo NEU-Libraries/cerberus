@@ -196,7 +196,7 @@ class CoreFilesController < ApplicationController
     rescue => exception
       logger.error "CoreFilesController::create rescued #{exception.class}\n\t#{exception.to_s}\n #{exception.backtrace.join("\n")}\n\n"
       email_handled_exception(exception)
-      json_error "Error occurred while creating core file."
+      json_error "Error occurred while creating file."
     ensure
       # remove the tempfile (only if it is a temp file)
       file.tempfile.delete if file.respond_to?(:tempfile)
@@ -326,6 +326,28 @@ class CoreFilesController < ApplicationController
   def log_stream
     log_action("stream", "COMPLETE")
     render :nothing => true
+  end
+
+  def tombstone
+    core_file = CoreFile.find(params[:id])
+    title = core_file.title
+    collection = core_file.parent.id
+    core_file.tombstone
+    if current_user.admin?
+      redirect_to collection_path(id: collection), notice: "The file '#{title}' has been tombstoned"
+    else
+      redirect_to collection_path(id: collection), notice: "The file '#{title}' has been tombstoned"
+    end
+  end
+
+  def request_tombstone
+    core_file = CoreFile.find(params[:id])
+    title = core_file.title
+    collection = core_file.parent.id
+    reason = params[:reason]
+    TombstoneMailer.tombstone_alert(core_file, reason).deliver!
+    flash[:notice] = "Item has been requested for deletion"
+    redirect_to core_file and return
   end
 
   protected

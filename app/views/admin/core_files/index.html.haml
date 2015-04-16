@@ -1,0 +1,39 @@
+%ul.breadcrumb
+  %li
+    = link_to 'Admin Panel', '/admin'
+  %li.active
+    = link_to 'Manage Files', admin_files_path
+
+%h2.page-header Core Files
+
+%br
+%ul.nav.nav-tabs
+  %li.active
+    = link_to "Tombstoned", '#tombstoned'
+  %li
+    = link_to "Incomplete", '#incomplete'
+  %li
+    = link_to "In Progress", '#in_progress'
+
+.tab-content
+  #tombstoned.tab-pane.active
+    .core_files
+
+  #incomplete.tab-pane
+    .core_files
+
+  #in_progress.tab-pane
+    .core_files
+
+
+  :javascript
+    $('.nav-tabs a').click(function (e) {
+      e.preventDefault();
+      $(this).tab('show');
+      var href = $(this).attr("href");
+      href = '/admin/files/'+href.substring(1, href.length);
+      $.getScript(href);
+    });
+    $(document).ready(function() {
+      $.getScript('/admin/files/tombstoned');
+    })
