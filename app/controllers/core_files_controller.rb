@@ -196,7 +196,7 @@ class CoreFilesController < ApplicationController
     rescue => exception
       logger.error "CoreFilesController::create rescued #{exception.class}\n\t#{exception.to_s}\n #{exception.backtrace.join("\n")}\n\n"
       email_handled_exception(exception)
-      json_error "Error occurred while creating core file."
+      json_error "Error occurred while creating file."
     ensure
       # remove the tempfile (only if it is a temp file)
       file.tempfile.delete if file.respond_to?(:tempfile)
@@ -334,9 +334,9 @@ class CoreFilesController < ApplicationController
     collection = core_file.parent.id
     core_file.tombstone
     if current_user.admin?
-      redirect_to collection_path(id: collection), notice: "Core file '#{title}' has been tombstoned"
+      redirect_to collection_path(id: collection), notice: "The file '#{title}' has been tombstoned"
     else
-      redirect_to collection_path(id: collection), notice: "Core File '#{title}' has been tombstoned"
+      redirect_to collection_path(id: collection), notice: "The file '#{title}' has been tombstoned"
     end
   end
 
