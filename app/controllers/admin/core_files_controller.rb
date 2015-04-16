@@ -13,12 +13,21 @@ class Admin::CoreFilesController < AdminController
 
   include BlacklightAdvancedSearch::ParseBasicQ
   include BlacklightAdvancedSearch::Controller
+  include ModsDisplay::ControllerExtension
 
   before_filter :authenticate_user!
   before_filter :verify_admin
 
   def index
     @page_title = "Administer Core Files"
+  end
+
+  # routed to /admin/files/:id
+  def show
+    @core_file = ActiveFedora::Base.find(params[:id], cast: true)
+    @mods = render_mods_display(CoreFile.find(@core_file.pid)).to_html.html_safe
+    @thumbs = @core_file.thumbnail_list
+    @page_title = @core_file.title
   end
 
   def revive

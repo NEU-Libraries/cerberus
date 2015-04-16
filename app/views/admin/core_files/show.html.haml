@@ -1,0 +1,28 @@
+- layout_class =  'span6'
+
+%ul.breadcrumb
+  %li
+    = link_to 'Admin Panel', '/admin'
+  %li
+    = link_to 'Manage Files', admin_files_path
+  %li.active
+    = @core_file.title
+
+%article{class: ['drs-item', 'drs-item-full'],  data: { drsitem: @core_file.pid } }
+  %header
+    %h1.page-header
+      = "#{@core_file.non_sort} "
+      = kramdown_parse(@core_file.title)
+
+  %section.row
+    %div{class: layout_class}
+      %figure
+        -if @thumbs.length > 0
+          = render partial: 'shared/thumbnails/full_picture'
+        -else
+          %i.icon-file.icon-4x.icon-border.drs-icon-figure
+    %div{itemscope: "", itemtype: "http://schema.org/CreativeWork", class:  [ layout_class, 'drs-item-details'] }
+      .tab-content
+        #metadata.tab-pane.active
+          .drs-item-add-details
+            = @mods
