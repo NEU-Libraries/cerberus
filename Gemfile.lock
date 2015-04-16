@@ -1,7 +1,7 @@
 GIT
   remote: https://github.com/NEU-Libraries/hydra-derivatives.git
-  revision: 93187250fd8b0e8a5dbccb1f77bdf67e6010a2e4
-  ref: 93187250fd8b0e8a5dbccb1f77bdf67e6010a2e4
+  revision: d95f3e880a74713867f7c88b77429251cbb0b9b1
+  ref: d95f3e880a74713867f7c88b77429251cbb0b9b1
   specs:
     hydra-derivatives (0.0.5)
       active-fedora
