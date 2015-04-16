@@ -13,7 +13,7 @@
             = link_to("Revive", admin_revive_file_path(core_file), class: "btn btn-small btn-warning")
         %td
           = link_to("Delete", admin_delete_file_path(core_file),
-          method: :destroy,
+          method: :delete,
           confirm: "This action is irreversible",
           class: "btn btn-small btn-danger")
 
