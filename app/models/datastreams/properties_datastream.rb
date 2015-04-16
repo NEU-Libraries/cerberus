@@ -18,6 +18,7 @@ class PropertiesDatastream < ActiveFedora::OmDatastream
     t.tmp_path
     t.original_filename
     t.canonical_class :index_as=>[:stored_searchable]
+    t.tombstoned
   end
 
   def self.xml_template

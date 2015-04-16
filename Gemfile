@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-gem 'rails', '3.2.13'
+gem 'rails', '3.2.12'
 gem 'redis-rails'
 gem 'mysql2' # Used in staging environment.
 gem 'retries'
@@ -26,7 +26,8 @@ gem "bower-rails", "~> 0.5.0"
 gem 'webshims-rails'
 gem 'rmagick', '~> 2.13.2'
 gem 'zipruby', '~> 0.3.6'
-gem 'hydra-derivatives', '~> 0.0.5'
+# gem 'hydra-derivatives', '~> 0.0.5'
+gem 'hydra-derivatives', :git => 'https://github.com/NEU-Libraries/hydra-derivatives.git', :ref => '93187250fd8b0e8a5dbccb1f77bdf67e6010a2e4'
 gem 'resque-pool', '0.3.0'
 gem 'mailboxer', '~> 0.11.0'
 gem 'nest', '~> 1.1.1'
