@@ -61,7 +61,7 @@ class CoreFilesController < ApplicationController
       # User completed second screen, so they most likely went back accidentally
       # Do nothing
       render :nothing => true
-    else
+    elsif @core_file.incomplete?
       @core_file = CoreFile.find(@core_file.pid)
       @core_file.destroy
 
