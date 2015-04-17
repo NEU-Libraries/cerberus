@@ -79,7 +79,7 @@ class CoreFilesController < ApplicationController
     @core_file = CoreFile.find(params[:id])
     @collection = @core_file.parent
 
-    if !@collection.nil? && !@collection.smart_collection_type.blank? && !@collection.smart_collection_type != "miscellany"
+    if !@collection.nil? && !@collection.smart_collection_type.blank? && @collection.smart_collection_type != "miscellany"
       flash[:alert] = "Note: You are depositing this file in a Smart Collection. Library staff will review permissions and enhance metadata as needed."
     end
 
