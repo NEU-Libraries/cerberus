@@ -32,8 +32,12 @@ class CommunitiesController < ApplicationController
 
   rescue_from Hydra::AccessDenied, CanCan::AccessDenied do |exception|
     flash[:error] = exception.message
-    email_handled_exception(exception)
-    redirect_to root_path and return
+
+    if !current_user.nil?
+      email_handled_exception(exception)
+    end
+
+    render_403 and return
   end
 
   def facet

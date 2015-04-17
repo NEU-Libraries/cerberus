@@ -40,7 +40,11 @@ class CollectionsController < ApplicationController
 
   rescue_from Hydra::AccessDenied, CanCan::AccessDenied do |exception|
     flash[:error] = exception.message
-    email_handled_exception(exception)
+
+    if !current_user.nil?
+      email_handled_exception(exception)
+    end
+
     render_403 and return
   end
 
