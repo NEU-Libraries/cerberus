@@ -1,5 +1,5 @@
 %div
-  -if current_user.admin?
+  -if !current_user.nil? && current_user.admin?
     %a.btn.btn-danger{ href:tombstone_file_path, data: { confirm: "Are you sure you want to tombstone this file?" } }
       Tombstone File
   -else
