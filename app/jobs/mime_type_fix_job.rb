@@ -1,6 +1,6 @@
 class MimeTypeFixJob
   def queue_name
-    :mime_type_fix_job
+    :mime_type_fix
   end
 
   def run
