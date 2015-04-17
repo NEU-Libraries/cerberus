@@ -30,7 +30,7 @@ class ResolrizeJob
     conn = ActiveFedora::RubydoraConnection.new(ActiveFedora.config.credentials).connection
     rsolr_conn = ActiveFedora::SolrService.instance.conn
 
-    conn.search(nil) do |object|
+    conn.search(nil) { |object|
       begin
         pid = object.pid
         obj = ActiveFedora::Base.find(pid, :cast=>true)
@@ -89,7 +89,8 @@ class ResolrizeJob
         errors_for_pid.warn "#{Time.now} - #{$!}"
         errors_for_pid.warn "#{Time.now} - #{$@}"
       end
-    end
+    # end
+    }
 
     progress_logger.info "#{Time.now} - Done!"
   end
