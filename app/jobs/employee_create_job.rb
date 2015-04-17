@@ -7,7 +7,7 @@ class EmployeeCreateJob
   end
 
   def queue_name
-    :employee_create_job
+    :employee_create
   end
 
   def run
