@@ -26,9 +26,13 @@ class DownloadsController < ApplicationController
 
   rescue_from Hydra::AccessDenied, CanCan::AccessDenied do |exception|
     flash[:error] = exception.message
-    email_handled_exception(exception)
+
+    if !current_user.nil?
+      email_handled_exception(exception)
+    end
+
     render_403 and return
-  end  
+  end
 
   private
     def ensure_not_embargoed
