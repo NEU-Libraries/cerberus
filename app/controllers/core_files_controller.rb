@@ -350,16 +350,6 @@ class CoreFilesController < ApplicationController
     redirect_to core_file and return
   end
 
-  def request_move
-    core_file = CoreFile.find(params[:id])
-    title = core_file.title
-    collection = core_file.parent.id
-    reason = params[:reason]
-    MoveMailer.move_alert(core_file, reason).deliver!
-    flash[:notice] = "Item has been requested for moving"
-    redirect_to core_file and return
-  end
-
   protected
 
     def complete?
