@@ -355,9 +355,16 @@ class CoreFilesController < ApplicationController
     title = core_file.title
     collection = core_file.parent.id
     reason = params[:reason]
-    MoveMailer.move_alert(core_file, reason).deliver!
-    flash[:notice] = "Item has been requested for moving"
-    redirect_to core_file and return
+    collection_url = params[:collection_url]
+    collection_pid = collection_url[/([^\/]+)$/]
+    if Collection.exists?(collection_pid)
+      MoveMailer.move_alert(core_file, reason, collection_url).deliver!
+      flash[:notice] = "Item has been requested for moving"
+      redirect_to core_file and return
+    else
+      flash[:error] = "Collection you requested for item to be moved to does not exist"
+      redirect_to core_file and return
+    end
   end
 
   protected
