@@ -428,6 +428,13 @@ class CoreFilesController < ApplicationController
       if core_file.canonical_class == "ImageMasterFile"
         session[:slider_max] = nil # Ensure we aren't using data from a prior upload
         session[:slider_max] = SliderMaxCalculator.compute(tmp_path)
+        photo = IPTC::JPEG::Image.from_file tmp_path, quick=true
+        photo.values.each do |item|
+          puts "#{item.key}\t#{item.value}"
+          if item.key == 'iptc/Headline'
+            core_file.title = item.value
+          end
+        end
       end
 
       collection = !collection_id.blank? ? Collection.find(collection_id) : nil
