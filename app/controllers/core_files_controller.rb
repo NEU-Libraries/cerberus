@@ -441,8 +441,8 @@ class CoreFilesController < ApplicationController
           # organization (iptc/Source)
           #elsif item.key == 'iptc/Source'
           #  core_file.organization = item.value
-          elsif item.key == 'iptc/Keywords'
-            core_file.keywords = item.value
+          #elsif item.key == 'iptc/Keywords'
+          #  core_file.keywords = item.value
           end
         end
       end
