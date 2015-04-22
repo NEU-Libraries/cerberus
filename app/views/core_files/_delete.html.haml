@@ -3,10 +3,14 @@
     %a.btn.btn-danger{ href:tombstone_file_path, data: { confirm: "Are you sure you want to tombstone this file?" } }
       Tombstone File
   -else
+    %p
+      The DRS is a permanent archive, but we recognize that occasionally it may be necessary to remove files. Please review
+      = link_to('our policies', '/terms/')
+      for more information about withdrawing DRS content.
     = form_tag( request_tombstone_file_path ) do
       %fieldset
         .row-fluid
           .span10
-            = label_tag :reason, "Why are you requesting this item be deleted?", class: 'required-label'
+            = label_tag :reason, "Why would you like us to delete this file?"
             = text_area_tag :reason, nil, :required => true, rows: 5, class: 'input-block-level'
-            = submit_tag 'Request Deletion', class: "btn btn-danger", data: { confirm: "Are you sure you want to request that this file be deleted?"}
+            = submit_tag 'Request', class: "btn btn-danger", data: { confirm: "Are you sure you want to delete this file?"}
