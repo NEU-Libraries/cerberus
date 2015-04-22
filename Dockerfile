@@ -75,7 +75,8 @@ RUN /bin/bash -l -c "curl -sSL https://get.rvm.io | bash -s stable"
 RUN /bin/bash -l -c "rvm pkg install libyaml"
 RUN /bin/bash -l -c "rvm install ruby-2.0.0-p643"
 RUN /bin/bash -l -c "rvm use ruby-2.0.0-p643"
-RUN sed -i -e 's/^export PATH="/export PATH="$PATH:/' /home/drs/.zshrc
+RUN sed -i -e 's/^export PATH="/#export PATH="/' /home/vagrant/.zshrc
+RUN echo 'source /home/vagrant/.rvm/scripts/rvm' >> /home/vagrant/.zshrc
 
 # Installing FITS
 RUN curl -O http://librarystaff.neu.edu/fits/fits-0.6.2.zip
