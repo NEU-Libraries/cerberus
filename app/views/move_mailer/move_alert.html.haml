@@ -10,6 +10,8 @@
       %li= "Title: #{@title}"
       %li= "PID: #{@pid}"
       %li= "New Collection URL: #{@collection_url}"
+      %li= "User: #{@user.name}"
+      %li= "User Email: #{@user.email}"
 
     - if @pid
       %p= "A link to the record can be found #{link_to 'here', core_file_url(@pid)}".html_safe
