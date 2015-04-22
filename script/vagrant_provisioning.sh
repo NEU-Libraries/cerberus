@@ -82,6 +82,7 @@ rvm pkg install libyaml
 rvm install ruby-2.0.0-p643
 rvm use ruby-2.0.0-p643
 source /home/vagrant/.rvm/scripts/rvm
+sed -i -e 's/^export PATH="/export PATH="$PATH:/' /home/vagrant/.zshrc
 
 echo "Setting up Cerberus"
 cd /home/vagrant/cerberus
