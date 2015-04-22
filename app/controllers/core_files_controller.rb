@@ -344,8 +344,9 @@ class CoreFilesController < ApplicationController
     core_file = CoreFile.find(params[:id])
     title = core_file.title
     collection = core_file.parent.id
+    user = current_user
     reason = params[:reason]
-    TombstoneMailer.tombstone_alert(core_file, reason).deliver!
+    TombstoneMailer.tombstone_alert(core_file, reason, user).deliver!
     flash[:notice] = "Item has been requested for deletion"
     redirect_to core_file and return
   end
@@ -354,11 +355,12 @@ class CoreFilesController < ApplicationController
     core_file = CoreFile.find(params[:id])
     title = core_file.title
     collection = core_file.parent.id
+    user = current_user
     reason = params[:reason]
     collection_url = params[:collection_url]
     collection_pid = collection_url[/([^\/]+)$/]
     if Collection.exists?(collection_pid)
-      MoveMailer.move_alert(core_file, reason, collection_url).deliver!
+      MoveMailer.move_alert(core_file, reason, collection_url, user).deliver!
       flash[:notice] = "Item has been requested for moving"
       redirect_to core_file and return
     else
