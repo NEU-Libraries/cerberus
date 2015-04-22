@@ -76,11 +76,10 @@ source /home/vagrant/.bashrc
 echo "Install newer File"
 cd /home/vagrant
 git clone https://github.com/file/file.git file
-cd file
-autoreconf -i
-./configure
-make
-sudo make install
+cd file && autoreconf -i
+cd file && ./configure
+cd file && make
+cd file && sudo make install
 
 echo "Installing RVM"
 cd /home/vagrant
