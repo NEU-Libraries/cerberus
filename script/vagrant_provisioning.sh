@@ -38,7 +38,7 @@ sudo yum install mysql-devel --assumeyes
 sudo yum install mysql-server --assumeyes
 sudo yum install nodejs --assumeyes
 sudo yum install htop --assumeyes
-sudo yum install gcc gettext-devel expat-devel curl-devel zlib-devel openssl-devel perl-ExtUtils-CBuilder perl-ExtUtils-MakeMaker --assumeyes
+sudo yum install libtool gcc gettext-devel expat-devel curl-devel zlib-devel openssl-devel perl-ExtUtils-CBuilder perl-ExtUtils-MakeMaker --assumeyes
 sudo yum install wget --assumeyes
 
 echo "Making redis auto-start"
@@ -52,7 +52,7 @@ sudo service mysqld start
 echo "Setting timezone for vm so embargo doesn't get confused"
 echo 'export TZ=America/New_York' >> /home/vagrant/.zshrc
 echo 'export TZ=America/New_York' >> /home/vagrant/.bashrc
-
+#
 echo "Installing Git"
 wget https://www.kernel.org/pub/software/scm/git/git-1.8.2.3.tar.gz
 tar xzvf git-1.8.2.3.tar.gz
@@ -72,14 +72,6 @@ sudo mv /home/vagrant/fits-0.6.2 /opt/fits-0.6.2
 echo 'PATH=$PATH:/opt/fits-0.6.2' >> /home/vagrant/.bashrc
 echo 'export PATH'  >> /home/vagrant/.bashrc
 source /home/vagrant/.bashrc
-
-echo "Install newer File"
-cd /home/vagrant
-git clone https://github.com/file/file.git file
-cd file && autoreconf -i
-cd file && ./configure
-cd file && make
-cd file && sudo make install
 
 echo "Installing RVM"
 cd /home/vagrant
@@ -108,6 +100,14 @@ chmod +x /home/vagrant/cerberus/.git/hooks/pre-push
 
 echo "Setting up faux handles"
 mysql -u root < /home/vagrant/cerberus/spec/fixtures/files/handlesMIN.sql
+
+echo "Install newer File"
+cd /home/vagrant
+git clone https://github.com/file/file.git file
+cd /home/vagrant/file && autoreconf -i
+cd /home/vagrant/file && ./configure
+cd /home/vagrant/file && make
+cd /home/vagrant/file && sudo make install
 
 echo "Installing Oh-My-Zsh"
 cd /home/vagrant
