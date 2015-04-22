@@ -65,7 +65,7 @@ rm -rf /home/vagrant/git-1.8.2.3
 
 echo "Installing FITS"
 cd /home/vagrant
-curl -O https://fits.googlecode.com/files/fits-0.6.2.zip
+curl -O http://librarystaff.neu.edu/fits/fits-0.6.2.zip
 unzip fits-0.6.2.zip
 chmod +x /home/vagrant/fits-0.6.2/fits.sh
 sudo mv /home/vagrant/fits-0.6.2 /opt/fits-0.6.2
@@ -73,14 +73,23 @@ echo 'PATH=$PATH:/opt/fits-0.6.2' >> /home/vagrant/.bashrc
 echo 'export PATH'  >> /home/vagrant/.bashrc
 source /home/vagrant/.bashrc
 
+echo "Install newer File"
+cd /home/vagrant
+git clone https://github.com/file/file.git file
+cd file
+autoreconf -i
+./configure
+make
+sudo make install
+
 echo "Installing RVM"
 cd /home/vagrant
 gpg2 --keyserver hkp://keys.gnupg.net --recv-keys D39DC0E3
 \curl -sSL https://get.rvm.io | bash -s stable
 source /home/vagrant/.profile
 rvm pkg install libyaml
-rvm install ruby-2.0.0-p598
-rvm use ruby-2.0.0-p598
+rvm install ruby-2.0.0-p643
+rvm use ruby-2.0.0-p643
 source /home/vagrant/.rvm/scripts/rvm
 
 echo "Setting up Cerberus"

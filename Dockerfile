@@ -77,11 +77,18 @@ RUN /bin/bash -l -c "rvm install ruby-2.0.0-p643"
 RUN /bin/bash -l -c "rvm use ruby-2.0.0-p643"
 
 # Installing FITS
-RUN curl -O https://fits.googlecode.com/files/fits-0.6.2.zip
+RUN curl -O http://librarystaff.neu.edu/fits/fits-0.6.2.zip
 RUN unzip fits-0.6.2.zip
 RUN chmod +x /home/drs/fits-0.6.2/fits.sh
 RUN echo 'PATH=$PATH:/opt/fits-0.6.2' >> /home/drs/.bashrc
 RUN echo 'export PATH'  >> /home/drs/.bashrc
+
+# Installing new file
+RUN git clone https://github.com/file/file.git file
+RUN cd file && autoreconf -i
+RUN cd file && ./configure
+RUN cd file && make
+RUN cd file && sudo make install
 
 # Installing Oh-My-Zsh
 RUN \curl -Lk http://install.ohmyz.sh | sh
