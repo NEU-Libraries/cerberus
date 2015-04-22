@@ -3,8 +3,9 @@
     %fieldset
       .row-fluid
         .span10
-          = label_tag "Where would you like this file to be moved?"
-          = label_tag :collection_url, "Please enter the URL for the destination collection."
+          = label_tag :collection_url, "Where would you like this file to be moved?"
+          = label_tag do
+            %small Please enter the URL for the destination collection.
           = text_field_tag :collection_url, nil, :required => true
       .row-fluid
         .span10
