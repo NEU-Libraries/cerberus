@@ -3,16 +3,18 @@
   %head
     %meta{:content => "text/html; charset=UTF-8", "http-equiv" => "Content-Type"}/
   %body
-    %h3 Tombstone Alert
+    %h3 File Move Alert
 
-    %p A user has requested that a file be deleted:
+    %p A user has requested that a file be moved:
     %ul
       %li= "Title: #{@title}"
       %li= "PID: #{@pid}"
+      %li= "New Collection URL: #{@collection_url}"
       %li= "User: #{@user.name}"
       %li= "User Email: #{@user.email}"
 
     - if @pid
       %p= "A link to the record can be found #{link_to 'here', core_file_url(@pid)}".html_safe
 
-    %p= "The reason for deletion is: #{@reason}".html_safe
+    %p= "#{link_to @title, core_file_url(@pid)} should be moved to #{link_to @collection_url, @collection_url}".html_safe
+    %p= "The reason for moving is: #{@reason}".html_safe
