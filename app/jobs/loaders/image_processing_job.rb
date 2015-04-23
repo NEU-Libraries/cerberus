@@ -3,6 +3,8 @@ class Loaders::ImageProcessingJob
     :loader_image_processing
   end
 
-  def run    
+  def run
+    # extract metadata from iptc
+    # if theres an exception, log details to file_report
   end
 end
