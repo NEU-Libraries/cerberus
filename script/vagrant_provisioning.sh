@@ -19,15 +19,14 @@ echo "Installing package dependencies"
 # The reason we need 4.0.4.2-9 is that the version after this silently fails when
 # converting objects (which hydra-derivatives is trying to do). There are many bug
 # reports for this issue, but no fixes that I can find that work reliably.
-sudo yum install libreoffice-opensymbol-fonts-4.0.4.2-9.el6.x86_64 --assumeyes
+sudo yum install ImageMagick-devel-6.5.4.7-6.el6_2.x86_64 --assumeyes
+libreoffice-opensymbol-fonts-4.0.4.2-9.el6.noarch
 sudo yum install libreoffice-ure-4.0.4.2-9.el6.x86_64 --assumeyes
 sudo yum install libreoffice-writer-4.0.4.2-9.el6.x86_64 --assumeyes
 sudo yum install libreoffice-headless-4.0.4.2-9.el6.x86_64 --assumeyes
 
 sudo yum install java-1.6.0-openjdk java-1.6.0-openjdk-devel --assumeyes
 sudo yum install ghostscript --assumeyes
-sudo yum install ImageMagick-devel --assumeyes
-sudo yum install libreoffice-headless --assumeyes
 sudo yum install file-devel --assumeyes
 sudo yum install file-libs --assumeyes
 sudo yum install sqlite-devel --assumeyes
