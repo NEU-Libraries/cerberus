@@ -13,8 +13,12 @@
           %i.icon-pencil
           Edit
       %li
+        %a{ href: "#move", data: {toggle: "tab"}}
+          %i.icon-exchange
+          Move
+      %li
         %a{ href: "#delete", data: {toggle: "tab"}}
-          %i.icon-remove
+          %i.icon-trash
           Delete
       - if current_user.repo_staff? || current_user.beta?
         %li

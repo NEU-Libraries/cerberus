@@ -344,10 +344,29 @@ class CoreFilesController < ApplicationController
     core_file = CoreFile.find(params[:id])
     title = core_file.title
     collection = core_file.parent.id
+    user = current_user
     reason = params[:reason]
-    TombstoneMailer.tombstone_alert(core_file, reason).deliver!
-    flash[:notice] = "Item has been requested for deletion"
+    TombstoneMailer.tombstone_alert(core_file, reason, user).deliver!
+    flash[:notice] = "Your request has been received and will be processed soon."
     redirect_to core_file and return
+  end
+
+  def request_move
+    core_file = CoreFile.find(params[:id])
+    title = core_file.title
+    collection = core_file.parent.id
+    user = current_user
+    reason = params[:reason]
+    collection_url = params[:collection_url]
+    collection_pid = collection_url[/([^\/]+)$/]
+    if Collection.exists?(collection_pid)
+      MoveMailer.move_alert(core_file, reason, collection_url, user).deliver!
+      flash[:notice] = "Your request has been received and will be processed soon."
+      redirect_to core_file and return
+    else
+      flash[:error] = "That collection does not exist. Please submit a new request and enter a valid collection URL."
+      redirect_to core_file and return
+    end
   end
 
   protected

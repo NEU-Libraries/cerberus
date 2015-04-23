@@ -43,5 +43,8 @@
               = render partial: 'show_derivatives', locals: {contents: @content_objects}
         #supplemental-files.tab-pane
           = render partial: "supplemental_files"
-        #delete.tab-pane
-          = render partial: "delete"
+        - if current_user_can? :edit, @core_file
+          #move.tab-pane
+            = render partial: "move"
+          #delete.tab-pane
+            = render partial: "delete"

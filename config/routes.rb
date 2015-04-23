@@ -55,6 +55,8 @@ Cerberus::Application.routes.draw do
 
   get "/files/:id/tombstone" => "core_files#tombstone", as: "tombstone_file"
   match "/files/:id/request_tombstone" => "core_files#request_tombstone", via: 'post', as:"request_tombstone_file"
+  match "/files/:id/request_move" => "core_files#request_move", via: 'post', as:"request_move_file"
+
 
   put '/item_display' => 'users#update', as: 'view_pref'
 
