@@ -8,7 +8,7 @@ class Loaders::ProcessZipJob
     # for each file in new dir
       # start a new image_processing_job like...
       # result = ImageProcessingJob.new().run
-      # result will be a file_report
+      # result will be an image_report
     # when all images are processed, create a load_report
   end
 end
