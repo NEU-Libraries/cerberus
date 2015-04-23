@@ -3,6 +3,8 @@ class Loaders::MarcomController < ApplicationController
   before_filter :verify_group
 
   def new
+    @parent = "pid goes here"
+    render :template => 'loaders/new'
   end
 
   def create

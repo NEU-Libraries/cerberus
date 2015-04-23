@@ -89,6 +89,14 @@ class EmployeesController < ApplicationController
     render :template => 'employees/communities'
   end
 
+  def my_loaders
+    fetch_employee
+    @page_title = "My Loaders"
+    #@loaders = Loader.all
+    
+    render :template => 'employees/my_loaders'
+  end
+
   def communities
     get_employee
     if user_examining_self?

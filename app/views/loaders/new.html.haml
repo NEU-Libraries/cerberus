@@ -1,0 +1,30 @@
+-# Single file upload form
+
+-content_for :page_header do
+  -# - loader_parent = Loader.find( params[:parent] ).title
+  -# %h1.page-header
+  -#   Upload File to
+  -#   - if loader_parent
+  -#     %i
+  -#       = loader_parent
+
+= form_tag("/create", method: "post", multipart: true, id: "loaderForm") do
+  = hidden_field_tag(:community_id, @community_id)
+  .row
+    %fieldset.span4
+      %legend
+        1. Terms of Service Agreement
+      %span.help-block
+        Please read and accept the
+        %a{href: "/terms" , data: { remote: true} }
+          terms of use
+      %label.checkbox.required-label{ for: "terms_of_service" }
+        I have read and accept the terms of service.
+        = check_box_tag 'terms_of_service', 1, nil, data: { activate:  "activate-submit" }
+    %filedset.span4
+      %legend
+        2. File Upload
+      = label_tag "file", "File to upload", class: "required-label"
+      = file_field_tag 'file', required: true, "aria-required" => true
+  .form-actions
+    = submit_tag "Upload", disabled: "true", class: 'btn btn-large btn-primary activate-submit', data: { disable_with: "Please wait..."}
