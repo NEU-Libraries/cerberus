@@ -1,4 +1,4 @@
-class Loaders::ImageReport < FileReport
+class Loaders::ImageReport < Loaders::FileReport
   attr_accessible :exception, :valid, :pid, :title, :collection, :iptc, :name, :email
 
   def self.create_success(core_file, user, iptc)
