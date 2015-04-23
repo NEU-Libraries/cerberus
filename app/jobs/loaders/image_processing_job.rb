@@ -5,6 +5,6 @@ class Loaders::ImageProcessingJob
 
   def run
     # extract metadata from iptc
-    # if theres an exception, log details to file_report
+    # if theres an exception, log details to image_report
   end
 end
