@@ -4,10 +4,10 @@ module Cerberus
     include ActiveModel::MassAssignmentSecurity
     include Hydra::ModelMethods
     include Hydra::Derivatives
-    include Hydra::ModelMixins::RightsMetadata    
-    include Cerberus::MetadataAssignment
+    include Hydra::ModelMixins::RightsMetadata
     include Cerberus::Rights::MassPermissions
-    include Cerberus::ContentFile::Characterizable
+    include Cerberus::MetadataAssignment
+    include Cerberus::Characterization
     include Cerberus::Find
     include Cerberus::ImpressionCount
     include Cerberus::MimeTypes
