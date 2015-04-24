@@ -15,26 +15,6 @@ module Cerberus
         around_save :characterize_if_changed
       end
 
-      def pdf?
-        self.class.pdf_mime_types.include? self.mime_type
-      end
-
-      def image?
-        self.class.image_mime_types.include? self.mime_type
-      end
-
-      def video?
-        self.class.video_mime_types.include? self.mime_type
-      end
-
-      def audio?
-        self.class.audio_mime_types.include? self.mime_type
-      end
-
-      def zip?
-        self.class.zip_mime_types.include? self.mime_type
-      end
-
       def characterize
         self.characterization.ng_xml = self.content.extract_metadata
         self.filename = self.label
