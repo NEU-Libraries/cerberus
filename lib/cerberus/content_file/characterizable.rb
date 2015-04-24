@@ -7,9 +7,7 @@ module Cerberus
     module Characterizable
       extend ActiveSupport::Concern
 
-      # Required Sufia code
-      include Cerberus::CoreFile::MimeTypes
-      include Cerberus::CoreFile::Characterization
+      include Cerberus::Characterization
 
       included do
         around_save :characterize_if_changed
