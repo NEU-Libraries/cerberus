@@ -113,6 +113,24 @@ module Cerberus
       return []
     end
 
+    def keyword_list
+      keywords = Array(self["subject_topic_tesim"])
+      if keywords.length > 0
+        return keywords.join(", ")
+      else
+        return []
+      end
+    end
+
+    def creator_list
+      creators = Array(self["creator_tesim"])
+      if creators.length > 0
+        return creators.join(", ")
+      else
+        return []
+      end
+    end
+
     def klass
       Array(self[Solrizer.solr_name("active_fedora_model", :stored_sortable)]).first
     end
