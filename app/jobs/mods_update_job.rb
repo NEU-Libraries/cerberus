@@ -30,6 +30,8 @@ class ModsUpdateJob
         obj.mods.content = doc.root.to_s
         obj.save!
         progress_logger.info "#{Time.now} - Processed PID: #{pid}"
+      else
+        progress_logger.info "#{Time.now} - Processed PID: #{pid}"
       end
     rescue NoMethodError
       # If this an obj that doesn't have mods, thats ok, else, log it
