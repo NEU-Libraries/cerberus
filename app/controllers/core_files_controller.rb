@@ -408,7 +408,7 @@ class CoreFilesController < ApplicationController
       core_file.original_filename = file.original_filename
       core_file.label = file.original_filename
 
-      core_file.instantiate_appropriate_content_object(tmp_path, file.original_filename)
+      core_file.instantiate_appropriate_content_object(tmp_path)
 
       # If the content_object created is an ImageMasterFile, we want to read the image and store as session vars
       # the length of its longest side.  This is used to calculate the dimensions to allow for the small/med/large
