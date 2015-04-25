@@ -13,7 +13,7 @@ class IndexJob
   def run
     pid = self.pid
     job_id = self.job_id
-    
+
     progress_logger = Logger.new("#{Rails.root}/log/#{job_id}/resolrize-job.log")
     failed_pids_log = Logger.new("#{Rails.root}/log/#{job_id}/resolrize-job-failed-pids.log")
 
@@ -29,22 +29,8 @@ class IndexJob
       rsolr_conn.add(obj.to_solr)
       rsolr_conn.commit
 
-      if obj.is_a?(CoreFile)
-        result = obj.healthy?
-        if result == true
-          progress_logger.info "#{Time.now} - Processed PID: #{pid}"
-        else
-          # we have some errors on validation
-          failed_pids_log.warn "#{Time.now} - Error processing PID: #{pid}"
-
-          result[:errors].each do |e|
-            errors_for_pid = Logger.new("#{Rails.root}/log/#{job_id}/#{pid}.log")
-            errors_for_pid.warn(e)
-          end
-        end
-      else
-        progress_logger.info "#{Time.now} - Processed PID: #{pid}"
-      end
+      progress_logger.info "#{Time.now} - Processed PID: #{pid}"
+      
     rescue Exception => error
       failed_pids_log.warn "#{Time.now} - Error processing PID: #{pid}"
       errors_for_pid = Logger.new("#{Rails.root}/log/#{job_id}/#{pid}.log")
