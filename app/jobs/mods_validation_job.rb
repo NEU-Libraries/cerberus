@@ -1,4 +1,4 @@
-class IndexJob
+class ModsValidationJob
   attr_accessor :pid, :job_id
 
   def initialize(pid, job_id)
@@ -7,27 +7,20 @@ class IndexJob
   end
 
   def queue_name
-    :index
+    :mods_validation
   end
 
   def run
     pid = self.pid
     job_id = self.job_id
-    
-    progress_logger = Logger.new("#{Rails.root}/log/#{job_id}/resolrize-job.log")
-    failed_pids_log = Logger.new("#{Rails.root}/log/#{job_id}/resolrize-job-failed-pids.log")
+
+    progress_logger = Logger.new("#{Rails.root}/log/#{job_id}/mods-validation-job.log")
+    failed_pids_log = Logger.new("#{Rails.root}/log/#{job_id}/mods-validation-job-failed-pids.log")
 
     rsolr_conn = ActiveFedora::SolrService.instance.conn
 
     begin
       obj = ActiveFedora::Base.find(pid, :cast=>true)
-
-      # Delete it's old solr record
-      ActiveFedora::SolrService.instance.conn.delete_by_id("#{pid}", params: {'softCommit' => true})
-
-      # Remake the solr document
-      rsolr_conn.add(obj.to_solr)
-      rsolr_conn.commit
 
       if obj.is_a?(CoreFile)
         result = obj.healthy?
