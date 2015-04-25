@@ -35,8 +35,6 @@ class ModsValidationJob
             errors_for_pid.warn(e)
           end
         end
-      else
-        progress_logger.info "#{Time.now} - Processed PID: #{pid}"
       end
     rescue Exception => error
       failed_pids_log.warn "#{Time.now} - Error processing PID: #{pid}"
