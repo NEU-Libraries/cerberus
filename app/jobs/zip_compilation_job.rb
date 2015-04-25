@@ -39,7 +39,7 @@ class ZipCompilationJob
             cf.content_objects.each do |content|
               if user.can?(:read, content) && content.content.content && content.class != ImageThumbnailFile
                 download_label = I18n.t("drs.display_labels.#{content.klass}.download")
-                io.add_buffer("#{self.title}/neu_#{id.split(":").last}-#{download_label}#{extract_extension(content.characterization.mime_type.first)}", content.content.content)
+                io.add_buffer("#{self.title}/neu_#{id.split(":").last}-#{download_label}.#{extract_extension(content.characterization.mime_type.first)}", content.content.content)
               end
             end
           end

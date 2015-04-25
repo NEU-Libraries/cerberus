@@ -16,7 +16,7 @@ module Cerberus
       if datastream.dsid == self.class.default_content_dsid
         # params[:filename] || asset.label
         # Fix for #680
-        "neu_#{asset.pid.split(":").last}#{extract_extension(asset.characterization.mime_type.first)}"
+        "neu_#{asset.pid.split(":").last}.#{extract_extension(asset.characterization.mime_type.first)}"
       else
         params[:datastream_id]
       end
