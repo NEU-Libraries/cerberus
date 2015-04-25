@@ -30,7 +30,7 @@
       file = File.open(path)
 
       imf.add_file(file, "content", "test_pic.jpeg")
-      imf.parent.instantiate_appropriate_content_object(path)
+      imf.core_record.instantiate_appropriate_content_object(path)
     end
   end
 
@@ -40,7 +40,7 @@
       file = File.open(path)
 
       imf.add_file(file, "content", "test_pic_two.jpeg")
-      imf.parent.instantiate_appropriate_content_object(path)
+      imf.core_record.instantiate_appropriate_content_object(path)
     end
   end
 
@@ -50,7 +50,7 @@
       file = File.open(path)
 
       imf.add_file(file, "content", "test.pdf")
-      imf.parent.instantiate_appropriate_content_object(path)
+      imf.core_record.instantiate_appropriate_content_object(path)
     end
   end
 
@@ -60,7 +60,7 @@
       file = File.open(path)
 
       doc.add_file(file, "content", "test_docx.docx")
-      doc.parent.instantiate_appropriate_content_object(path)
+      doc.core_record.instantiate_appropriate_content_object(path)
     end
   end
 
