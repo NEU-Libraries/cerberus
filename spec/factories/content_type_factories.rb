@@ -29,30 +29,37 @@
       file = File.open("#{Rails.root}/spec/fixtures/files/test_pic.jpeg")
 
       imf.add_file(file, "content", "test_pic.jpeg")
+      imf.instantiate_appropriate_content_object(tmp_path)
     end
   end
 
   trait :has_different_jpeg do
     before :create do |imf|
-      file = File.open("#{Rails.root}/spec/fixtures/files/test_pic_two.jpeg")
+      path = "#{Rails.root}/spec/fixtures/files/test_pic_two.jpeg"
+      file = File.open(path)
 
       imf.add_file(file, "content", "test_pic_two.jpeg")
+      imf.instantiate_appropriate_content_object(path)
     end
   end
 
   trait :has_pdf do
     before :create do |imf|
-      file = File.open("#{Rails.root}/spec/fixtures/files/test.pdf")
+      path = "#{Rails.root}/spec/fixtures/files/test.pdf"
+      file = File.open(path)
 
       imf.add_file(file, "content", "test.pdf")
+      imf.instantiate_appropriate_content_object(path)
     end
   end
 
   trait :has_docx do
     before :create do |doc|
-      file = File.open("#{Rails.root}/spec/fixtures/files/test_docx.docx")
+      path = "#{Rails.root}/spec/fixtures/files/test_docx.docx"
+      file = File.open(path)
 
       doc.add_file(file, 'content', 'test_docx.docx')
+      doc.instantiate_appropriate_content_object(path)
     end
   end
 

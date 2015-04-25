@@ -3,7 +3,7 @@ module Cerberus
     module AssignType
       include MimeHelper
 
-      def instantiate_appropriate_content_object(file_path, file_name)
+      def instantiate_appropriate_content_object(file_path)
 
         mime_type = extract_mime_type(file_path)
         ext = extract_extension(mime_type)
