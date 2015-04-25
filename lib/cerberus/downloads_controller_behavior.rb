@@ -12,6 +12,19 @@ module Cerberus
       prepend_before_filter :normalize_identifier
     end
 
+    # overriding hydra-head 6.3.3
+    # render an HTTP HEAD response
+    def content_head
+      response.headers['Content-Length'] = datastream.dsSize
+      # mimeType gets from Fedora, which fails when you've incorrectly
+      # given the mime type - Migration from IRis had some tiffs as jpegs
+      # mimeType gets from the 1st version (instead of the lastest), so
+      # rather than re-do thousands of items, we're going to rely on FITS instead
+      # response.headers['Content-Type'] = datastream.mimeType
+      response.headers['Content-Type'] = asset.characterization.mime_type.first
+      head :ok
+    end
+
     def datastream_name
       if datastream.dsid == self.class.default_content_dsid
         # params[:filename] || asset.label
