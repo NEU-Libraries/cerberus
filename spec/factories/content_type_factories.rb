@@ -26,10 +26,11 @@
 
   trait :has_jpeg do
     before :create do |imf|
-      file = File.open("#{Rails.root}/spec/fixtures/files/test_pic.jpeg")
+      path = "#{Rails.root}/spec/fixtures/files/test_pic.jpeg"
+      file = File.open(path)
 
       imf.add_file(file, "content", "test_pic.jpeg")
-      imf.instantiate_appropriate_content_object(tmp_path)
+      imf.instantiate_appropriate_content_object(path)
     end
   end
 
@@ -58,7 +59,7 @@
       path = "#{Rails.root}/spec/fixtures/files/test_docx.docx"
       file = File.open(path)
 
-      doc.add_file(file, 'content', 'test_docx.docx')
+      doc.add_file(file, "content", "test_docx.docx")
       doc.instantiate_appropriate_content_object(path)
     end
   end
