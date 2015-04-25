@@ -12,7 +12,7 @@ module MimeHelper
   end
 
   def extract_extension(mime_type)
-    result = `grep "application/vnd.openxmlformats-officedocument.presentationml.presentation" /etc/mime.types | awk '{print $2}'`.gsub(/\n/," ").strip
+    result = `grep "#{mime_type}" /etc/mime.types | awk '{print $2}'`.gsub(/\n/," ").strip
 
     if !result.match(/\s/).nil?
       return result.slice(0..(result.index(' ')-1))
