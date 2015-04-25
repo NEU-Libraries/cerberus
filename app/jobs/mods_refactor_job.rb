@@ -1,21 +1,22 @@
-class ResolrizeJob
+class ModsRefactorJob
   def queue_name
-    :resolrize
+    :mods_refactor
   end
 
   def run
     require 'fileutils'
-    job_id = "#{Time.now.to_i}-resolrize"
+    job_id = "#{Time.now.to_i}-mods-refactor"
     FileUtils.mkdir_p "#{Rails.root}/log/#{job_id}"
 
-    failed_pids_log = Logger.new("#{Rails.root}/log/#{job_id}/resolrize-job-failed-pids.log")
+    failed_pids_log = Logger.new("#{Rails.root}/log/#{job_id}/mods-refactor-job-failed-pids.log")
 
     conn = ActiveFedora::RubydoraConnection.new(ActiveFedora.config.credentials).connection
 
     conn.search(nil) { |object|
       begin
         pid = object.pid
-        Cerberus::Application::Queue.push(IndexJob.new(pid, job_id))
+        # Cerberus::Application::Queue.push(ModsValidationJob.new(pid, job_id))
+        Cerberus::Application::Queue.push(ModsUpdateJob.new(pid, job_id))
       rescue Exception => error
         failed_pids_log.warn "#{Time.now} - Error processing PID: #{pid}"
         errors_for_pid = Logger.new("#{Rails.root}/log/#{job_id}/#{pid}.log")

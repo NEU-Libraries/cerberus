@@ -258,12 +258,10 @@ class CoreFile < ActiveFedora::Base
   end
 
   # Find the canonical record for this object.
-  # Raise a warning if none or more than one exist.
   def canonical_object
     full_self_id = RSolr.escape("info:fedora/#{self.pid}")
     c = ActiveFedora::SolrService.query("canonical_tesim:yes AND is_part_of_ssim:#{full_self_id}").first
     if c.nil?
-      Rails.logger.warn "#{pid} is returning #{c} content objects. It should have one."
       return false
     end
 
