@@ -28,7 +28,6 @@ module Cerberus
       ## Extract the metadata from the content datastream and record it in the characterization datastream
       def characterize
         self.characterization.ng_xml = self.content.extract_metadata
-        self.append_metadata
         self.filename = self.label
         save
       end
