@@ -32,9 +32,7 @@ class RecharacterizeJob
           # Most likely a poorly formed object from IRis migration
           failed_pids_log.warn "#{Time.now} - Error processing PID: #{pid}"
           errors_for_pid = Logger.new("#{Rails.root}/log/#{job_id}/#{pid}.log")
-          errors_for_pid.warn "#{Time.now} - #{$!.inspect}"
-          errors_for_pid.warn "#{Time.now} - #{$!}"
-          errors_for_pid.warn "#{Time.now} - #{$@}"
+          errors_for_pid.warn "#{Time.now} - This core file has no canonical object"
         else
           # recharacterize
           Cerberus::Application::Queue.push(AtomisticCharacterizationJob.new(canon.pid))
