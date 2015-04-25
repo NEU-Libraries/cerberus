@@ -29,6 +29,7 @@ class ModsUpdateJob
         doc.root.attributes['schemaLocation'].value = "http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd"
         obj.mods.content = doc.root.to_s
         obj.save!
+        progress_logger.info "#{Time.now} - Processed PID: #{pid}"
       end
     rescue NoMethodError
       # If this an obj that doesn't have mods, thats ok, else, log it
