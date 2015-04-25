@@ -12,8 +12,6 @@ class RecharacterizeJob
     progress_logger = Logger.new("#{Rails.root}/log/#{job_id}/recharacterize-job.log")
     failed_pids_log = Logger.new("#{Rails.root}/log/#{job_id}/recharacterize-job-failed-pids.log")
 
-    # logger = Logger.new("#{Rails.root}/log/recharacterize.log")
-
     core_file_model = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:CoreFile"
     query_string = "has_model_ssim:\"#{core_file_model}\""
     row_count = ActiveFedora::SolrService.count(query_string)
