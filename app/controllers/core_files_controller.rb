@@ -122,9 +122,7 @@ class CoreFilesController < ApplicationController
     else
       depositor_nuid = current_user.nuid
       proxy_nuid     = nil
-    end
-
-    Cerberus::Application::Queue.push(MetadataUpdateJob.new(depositor_nuid, params, proxy_nuid))
+    end    
 
     update_metadata if params[:core_file]
     max = session[:slider_max]
