@@ -28,6 +28,7 @@ Cerberus::Application.routes.draw do
   get '/faculty_and_staff' => 'catalog#faculty_and_staff', as: 'catalog_faculty_and_staff'
 
   # Community Specific queries
+  get '/communities/:id/other' => 'communities#other_publications', as: 'community_other'
   get '/communities/:id/employees' => 'communities#employees', as: 'community_employees'
   get '/communities/:id/research' => 'communities#research_publications', as: 'community_research'
   get '/communities/:id/presentations' => 'communities#presentations', as: 'community_presentations'
