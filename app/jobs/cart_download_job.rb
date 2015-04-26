@@ -1,4 +1,5 @@
 class CartDownloadJob
+  include MimeHelper
 
   attr_accessor :sess_id, :pids, :nuid, :user, :path, :ip_address
 
@@ -29,7 +30,7 @@ class CartDownloadJob
           item = ActiveFedora::Base.find(pid, cast: true)
           download_label = I18n.t("drs.display_labels.#{item.klass}.download")
           if item.public? || user.can?(:read, item)
-            io.add_buffer("downloads/neu_#{pid.split(":").last}-#{download_label}#{Rack::Mime::MIME_TYPES.invert[item.characterization.mime_type.first]}", item.content.content)
+            io.add_buffer("downloads/neu_#{pid.split(":").last}-#{download_label}.#{extract_extension(item.characterization.mime_type.first)}", item.content.content)
 
             # Record the download
             opts = "pid = ? AND session_id = ? AND status = 'INCOMPLETE' AND action = 'download'"
