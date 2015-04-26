@@ -2,6 +2,7 @@ module Cerberus
   module DownloadsControllerBehavior
     extend ActiveSupport::Concern
     include Hydra::Controller::DownloadBehavior
+    include MimeHelper
 
     included do
       # module mixes in normalize_identifier method
@@ -11,11 +12,24 @@ module Cerberus
       prepend_before_filter :normalize_identifier
     end
 
+    # overriding hydra-head 6.3.3
+    # render an HTTP HEAD response
+    def content_head
+      response.headers['Content-Length'] = datastream.dsSize
+      # mimeType gets from Fedora, which fails when you've incorrectly
+      # given the mime type - Migration from IRis had some tiffs as jpegs
+      # mimeType gets from the 1st version (instead of the lastest), so
+      # rather than re-do thousands of items, we're going to rely on FITS instead
+      # response.headers['Content-Type'] = datastream.mimeType
+      response.headers['Content-Type'] = asset.characterization.mime_type.first
+      head :ok
+    end
+
     def datastream_name
       if datastream.dsid == self.class.default_content_dsid
         # params[:filename] || asset.label
         # Fix for #680
-        "neu_#{asset.pid.split(":").last}#{Rack::Mime::MIME_TYPES.invert[asset.characterization.mime_type.first]}"
+        "neu_#{asset.pid.split(":").last}.#{extract_extension(asset.characterization.mime_type.first)}"
       else
         params[:datastream_id]
       end
