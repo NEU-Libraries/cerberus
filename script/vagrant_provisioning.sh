@@ -70,21 +70,6 @@ echo 'PATH=$PATH:/opt/fits-0.6.2' >> /home/vagrant/.bashrc
 echo 'export PATH'  >> /home/vagrant/.bashrc
 source /home/vagrant/.bashrc
 
-echo "Setting up Cerberus"
-cd /home/vagrant/cerberus
-gem install bundler
-bundle install --retry 5
-rake db:migrate
-rm -rf /home/vagrant/cerberus/jetty
-rails g hydra:jetty
-rake jetty:config
-rake db:test:prepare
-rm -f /home/vagrant/cerberus/.git/hooks/pre-push
-touch /home/vagrant/cerberus/.git/hooks/pre-push
-echo '#!/bin/sh' >> /home/vagrant/cerberus/.git/hooks/pre-push
-echo 'rake smoke_test' >> /home/vagrant/cerberus/.git/hooks/pre-push
-chmod +x /home/vagrant/cerberus/.git/hooks/pre-push
-
 echo "Setting up faux handles"
 mysql -u root < /home/vagrant/cerberus/spec/fixtures/files/handlesMIN.sql
 
@@ -112,3 +97,18 @@ rvm use ruby-2.0.0-p643
 echo "Setting timezone for vm so embargo doesn't get confused"
 echo 'export TZ=America/New_York' >> /home/vagrant/.zshrc
 echo 'export TZ=America/New_York' >> /home/vagrant/.bashrc
+
+echo "Setting up Cerberus"
+cd /home/vagrant/cerberus
+gem install bundler
+bundle install --retry 5
+rake db:migrate
+rm -rf /home/vagrant/cerberus/jetty
+rails g hydra:jetty
+rake jetty:config
+rake db:test:prepare
+rm -f /home/vagrant/cerberus/.git/hooks/pre-push
+touch /home/vagrant/cerberus/.git/hooks/pre-push
+echo '#!/bin/sh' >> /home/vagrant/cerberus/.git/hooks/pre-push
+echo 'rake smoke_test' >> /home/vagrant/cerberus/.git/hooks/pre-push
+chmod +x /home/vagrant/cerberus/.git/hooks/pre-push
