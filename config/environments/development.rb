@@ -1,7 +1,7 @@
 Cerberus::Application.configure do
   # Settings specified here will take precedence over those in config/application.rb
 
-  config.fedora_home = "/home/vagrant/cerberus/jetty/fedora/default/data/datastreamStore"
+  config.fedora_home = "/home/vagrant/cerberus/jetty/fedora/default/data/datastreamStore/"
 
   # In the development environment your application's code is reloaded on
   # every request. This slows down response time but is perfect for development
