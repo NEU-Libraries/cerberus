@@ -76,5 +76,17 @@ FactoryGirl.define do
         update
       end
     end
+
+    factory :other_pub_alert do
+      content_type "Datasets"
+
+      factory :other_pub_notified_alert do
+        notified
+      end
+
+      factory :other_pub_update_alert do
+        update
+      end
+    end
   end
 end
