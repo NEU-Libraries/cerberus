@@ -69,7 +69,10 @@ Cerberus::Application.routes.draw do
   get '/my_communities' => 'employees#my_communities', as: 'my_communities'
   get '/my_loaders' => 'employees#my_loaders', as: 'my_loaders'
 
-  resources :marcom, :controller => "loaders/marcom", only: [:new, :create]
+  #resources :marcom, :controller => "loaders/marcom", only: [:new]
+  namespace :loaders do
+    resources :marcom, only: [:new, :create]
+  end
 
   # Facets for communities and collections
   get "/communities/:id/facet/:solr_field" => 'communities#facet', as: 'community_facet'
