@@ -31,13 +31,12 @@ module Cerberus
     end
 
     def fedora_file_path
-      config_path = Rails.application.config.fedora_home
-      dir_path = config_path + "/data/datastreamStore/"
+      config_path = Rails.application.config.fedora_home      
       datastream_str = "info:fedora/#{self.pid}/content/content.0"
       escaped_datastream = Rack::Utils.escape(datastream_str)
       md5_str = Digest::MD5.hexdigest(datastream_str)
       dir_name = md5_str[0,2]
-      file_path = dir_path + dir_name + "/" + escaped_datastream
+      file_path = config_path + dir_name + "/" + escaped_datastream
       return file_path
     end
 
