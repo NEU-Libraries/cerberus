@@ -23,6 +23,10 @@ describe UploadAlert do
       FactoryGirl.create_list(:learning_object_alert, 2)
       FactoryGirl.create_list(:learning_object_update_alert, 2)
       FactoryGirl.create(:learning_object_notified_alert)
+
+      FactoryGirl.create_list(:other_pub_alert, 2)
+      FactoryGirl.create_list(:other_pub_update_alert, 2)
+      FactoryGirl.create(:other_pub_notified_alert)
     end
 
     after(:all) { UploadAlert.destroy_all }
@@ -74,12 +78,12 @@ describe UploadAlert do
       it_should_behave_like "withheld queries"
     end
 
-    #context "for other publications alerts" do
-    #  let(:created) { UploadAlert.withheld_other_pubs(:create) }
-    #  let(:updated) { UploadAlert.withheld_other_pubs(:update) }
+    context "for other publications alerts" do
+     let(:created) { UploadAlert.withheld_other_pubs(:create) }
+     let(:updated) { UploadAlert.withheld_other_pubs(:update) }
 
-    #  it_should_behave_like "withheld queries"
-    #end
+     it_should_behave_like "withheld queries"
+    end
   end
 
 
