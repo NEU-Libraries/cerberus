@@ -122,9 +122,7 @@ class CoreFilesController < ApplicationController
     else
       depositor_nuid = current_user.nuid
       proxy_nuid     = nil
-    end
-
-    Cerberus::Application::Queue.push(MetadataUpdateJob.new(depositor_nuid, params, proxy_nuid))
+    end    
 
     update_metadata if params[:core_file]
     max = session[:slider_max]
@@ -282,23 +280,6 @@ class CoreFilesController < ApplicationController
       redirect_to edit_core_file_path(@core_file.pid) and return
     end
 
-    version_event = false
-
-    if params.has_key?(:revision) and params[:revision] !=  @core_file.content.latest_version.versionID
-      revision = @core_file.content.get_version(params[:revision])
-      @core_file.add_file(revision.content, datastream_id, revision.label)
-      version_event = true
-      Cerberus::Application::Queue.push(ContentRestoredVersionEventJob.new(@core_file.pid, current_user.user_key, params[:revision]))
-    end
-
-    if params.has_key?(:filedata)
-      file = params[:filedata]
-      return unless virus_check(file) == 0
-      @core_file.add_file(file, datastream_id, file.original_filename)
-      version_event = true
-      Cerberus::Application::Queue.push(ContentNewVersionEventJob.new(@core_file.pid, current_user.user_key))
-    end
-
     # only update metadata if there is a core_file object which is not the case for version updates
     update_metadata if params[:core_file]
 
@@ -314,10 +295,6 @@ class CoreFilesController < ApplicationController
         q = Cerberus::Application::Queue
         q.push(PropagateCoreMetadataChangeJob.new(@core_file.pid))
       end
-
-      # do not trigger an update event if a version event has already been triggered
-      Cerberus::Application::Queue.push(ContentUpdateEventJob.new(@core_file.pid, current_user.user_key)) unless version_event
-      # @core_file.record_version_committer(current_user)
     end
 
     redirect_to(@core_file)
@@ -429,7 +406,7 @@ class CoreFilesController < ApplicationController
       core_file.original_filename = file.original_filename
       core_file.label = file.original_filename
 
-      core_file.instantiate_appropriate_content_object(tmp_path, file.original_filename)
+      core_file.instantiate_appropriate_content_object(tmp_path)
 
       # If the content_object created is an ImageMasterFile, we want to read the image and store as session vars
       # the length of its longest side.  This is used to calculate the dimensions to allow for the small/med/large

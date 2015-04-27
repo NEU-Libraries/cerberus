@@ -3,13 +3,14 @@ module Cerberus
     extend ActiveSupport::Concern
     include ActiveModel::MassAssignmentSecurity
     include Hydra::ModelMethods
-    include Cerberus::MetadataAssignment
-    include Cerberus::Rights::MassPermissions
-    include Cerberus::ContentFile::Characterizable
     include Hydra::Derivatives
+    include Hydra::ModelMixins::RightsMetadata
+    include Cerberus::Rights::MassPermissions
+    include Cerberus::ContentFile::Characterization
+    include Cerberus::MetadataAssignment    
     include Cerberus::Find
     include Cerberus::ImpressionCount
-    include Hydra::ModelMixins::RightsMetadata
+    include Cerberus::MimeTypes
 
     included do
       attr_accessible :title, :description, :keywords, :identifier
@@ -44,4 +45,3 @@ module Cerberus
     end
   end
 end
-

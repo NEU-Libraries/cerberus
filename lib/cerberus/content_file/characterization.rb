@@ -1,5 +1,5 @@
 module Cerberus
-  module CoreFile
+  module ContentFile
     module Characterization
       extend ActiveSupport::Concern
       included do
@@ -22,52 +22,23 @@ module Cerberus
                                         :markup_language, :duration, :bit_depth,
                                         :sample_rate, :channels, :data_format, :offset]
 
+        around_save :characterize_if_changed
       end
 
       ## Extract the metadata from the content datastream and record it in the characterization datastream
       def characterize
         self.characterization.ng_xml = self.content.extract_metadata
-        self.append_metadata
         self.filename = self.label
         save
       end
 
-      # Populate descMetadata with fields from FITS (e.g. Author from pdfs)
-      def append_metadata
-        terms = self.characterization_terms
-        Sufia.config.fits_to_desc_mapping.each_pair do |k, v|
-          if terms.has_key?(k)
-            # coerce to array to remove a conditional
-            terms[k] = [terms[k]] unless terms[k].is_a? Array
-            terms[k].each do |term_value|
-              proxy_term = self.send(v)
-              if proxy_term.kind_of?(Array)
-                proxy_term << term_value unless proxy_term.include?(term_value)
-              else
-                # these are single-valued terms which cannot be appended to
-                self.send("#{v}=", term_value)
-              end
-            end
-          end
+      private
+
+        def characterize_if_changed
+          content_changed = self.content.changed?
+          yield
+          Cerberus::Application::Queue.push(AtomisticCharacterizationJob.new(self.pid)) if content_changed
         end
-      end
-
-      def characterization_terms
-        h = {}
-        self.characterization.class.terminology.terms.each_pair do |k, v|
-          next unless v.respond_to? :proxied_term
-          term = v.proxied_term
-          begin
-            value = self.send(term.name)
-            h[term.name] = value unless value.empty?
-          rescue NoMethodError
-            next
-          end
-        end
-        h
-      end
-
-
     end
   end
 end
