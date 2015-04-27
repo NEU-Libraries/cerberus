@@ -27,7 +27,7 @@ class MimeTypeFixJob
     row_count = ActiveFedora::SolrService.count(query_string)
     query_result = ActiveFedora::SolrService.query(query_string, :fl => "id", :rows => row_count)
 
-    progress_logger.info "#{Time.now} - Starting recharacterization for canonical objects."
+    progress_logger.info "#{Time.now} - Moving mime type and checksum to properties for canonical objects."
 
     progress_logger.info "Processing #{query_result.length} content objects."
 
