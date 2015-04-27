@@ -37,7 +37,7 @@ module Cerberus
         def characterize_if_changed
           content_changed = self.content.changed?
           yield
-          Cerberus::Application::Queue.push(AtomisticCharacterizationJob.new(self.pid)) if content_changed
+          # Cerberus::Application::Queue.push(AtomisticCharacterizationJob.new(self.pid)) if content_changed
         end
     end
   end

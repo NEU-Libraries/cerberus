@@ -1,3 +1,6 @@
+include MimeHelper
+include ChecksumHelper
+
   FactoryGirl.define do
 
   trait :dad do
@@ -30,6 +33,8 @@
       file = File.open(path)
 
       imf.add_file(file, "content", "test_pic.jpeg")
+      imf.properties.mime_type = extract_mime_type(path)
+      imf.properties.md5_checksum = new_checksum(path)
       imf.core_record.instantiate_appropriate_content_object(path)
     end
   end
@@ -40,6 +45,8 @@
       file = File.open(path)
 
       imf.add_file(file, "content", "test_pic_two.jpeg")
+      imf.properties.mime_type = extract_mime_type(path)
+      imf.properties.md5_checksum = new_checksum(path)
       imf.core_record.instantiate_appropriate_content_object(path)
     end
   end
@@ -50,6 +57,8 @@
       file = File.open(path)
 
       imf.add_file(file, "content", "test.pdf")
+      imf.properties.mime_type = extract_mime_type(path)
+      imf.properties.md5_checksum = new_checksum(path)
       imf.core_record.instantiate_appropriate_content_object(path)
     end
   end
@@ -60,6 +69,8 @@
       file = File.open(path)
 
       doc.add_file(file, "content", "test_docx.docx")
+      doc.properties.mime_type = extract_mime_type(path)
+      doc.properties.md5_checksum = new_checksum(path)
       doc.core_record.instantiate_appropriate_content_object(path)
     end
   end

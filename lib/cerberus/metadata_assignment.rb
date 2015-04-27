@@ -8,6 +8,22 @@ module Cerberus
 
     included do
 
+      # def mime_type=(string)
+      #   if_properties_exists_strict { self.properties.mime_type = string }
+      # end
+
+      # def mime_type
+      #   if_properties_exists_strict { self.properties.mime_type.first }
+      # end
+
+      # def checksum=(string)
+      #   if_properties_exists_strict { self.properties.md5_checksum = string }
+      # end
+
+      # def checksum
+      #   if_properties_exists_strict { self.properties.md5_checksum.first }
+      # end      
+
       def canonical_class=(string)
         if_properties_exists_strict { self.properties.canonical_class = string }
       end
