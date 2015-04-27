@@ -2,6 +2,9 @@ module Cerberus
   module ContentFile
     module Characterization
       extend ActiveSupport::Concern
+      include ChecksumHelper
+      include MimeHelper
+      
       included do
         has_metadata :name => "characterization", :type => FitsDatastream
         delegate :mime_type, :to => :characterization, :unique => true
