@@ -1,6 +1,8 @@
 Cerberus::Application.configure do
   # Settings specified here will take precedence over those in config/application.rb
 
+  config.fedora_home = "/home/vagrant/cerberus/jetty/fedora/default"
+
   # The test environment is used exclusively to run your application's
   # test suite. You never need to work with it otherwise. Remember that
   # your test database is "scratch space" for the test suite and is wiped
@@ -35,6 +37,6 @@ Cerberus::Application.configure do
   # Print deprecation notices to the stderr
   config.active_support.deprecation = :stderr
 
-  # Tell Mailer to use localhost:3000 as the default host 
+  # Tell Mailer to use localhost:3000 as the default host
   config.action_mailer.default_url_options = { :host => "localhost:3000" }
 end
