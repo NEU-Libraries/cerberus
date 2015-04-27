@@ -1,4 +1,6 @@
 class ContentCreationJob
+  include MimeHelper
+  include ChecksumHelper
 
   attr_accessor :core_file_pid, :file_path, :file_name, :delete_file, :poster_path, :small_size, :medium_size, :large_size
   attr_accessor :core_record, :employee
@@ -62,6 +64,8 @@ class ContentCreationJob
 
       content_object.canonize
       content_object.characterize
+      content_object.properties.mime_type = extract_mime_type(file_path)
+      content_object.properties.md5_checksum = new_checksum(file_path)
 
       content_object.save! ? content_object : false
 
