@@ -39,7 +39,7 @@ class MimeTypeFixJob
         cf.properties.mime_type = extract_mime_type(cf.fedora_file_path)
         cf.properties.md5_checksum = new_checksum(cf.fedora_file_path)
         cf.save!
-        progress_logger.info "Processed #{pid}"
+        progress_logger.info "#{Time.now} - Processed #{pid}"
       rescue Exception => error
         failed_pids_log.warn "#{Time.now} - Error processing PID: #{pid}"
         errors_for_pid = Logger.new("#{Rails.root}/log/#{job_id}/#{pid}.log")
@@ -48,6 +48,6 @@ class MimeTypeFixJob
         errors_for_pid.warn "#{Time.now} - #{$@}"
       end
     end
-
+    progress_logger.info "#{Time.now} - Done!"
   end
 end
