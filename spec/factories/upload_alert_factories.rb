@@ -78,7 +78,7 @@ FactoryGirl.define do
     end
 
     factory :other_pub_alert do
-      content_type "Datasets"
+      content_type "Other Publications"
 
       factory :other_pub_notified_alert do
         notified
