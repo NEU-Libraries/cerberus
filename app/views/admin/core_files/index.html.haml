@@ -32,8 +32,15 @@
       $(this).tab('show');
       var href = $(this).attr("href");
       href = '/admin/files/'+href.substring(1, href.length);
-      $.getScript(href);
+      $.getScript(href).done( function() { fixPagination(); });
     });
     $(document).ready(function() {
-      $.getScript('/admin/files/tombstoned');
-    })
+      $.getScript('/admin/files/tombstoned').done( function() { fixPagination(); });
+    });
+    function fixPagination() {
+      $('.pagination a').click( function(e) {
+        e.preventDefault();
+        var href = $(this).attr('href');
+        $.getScript(href).done( function() { fixPagination(); });
+      });
+    }

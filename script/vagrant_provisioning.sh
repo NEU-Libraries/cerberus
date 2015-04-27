@@ -19,15 +19,13 @@ echo "Installing package dependencies"
 # The reason we need 4.0.4.2-9 is that the version after this silently fails when
 # converting objects (which hydra-derivatives is trying to do). There are many bug
 # reports for this issue, but no fixes that I can find that work reliably.
-sudo yum install libreoffice-opensymbol-fonts-4.0.4.2-9.el6.x86_64 --assumeyes
+sudo yum install ImageMagick-devel-6.5.4.7-6.el6_2.x86_64 --assumeyes
 sudo yum install libreoffice-ure-4.0.4.2-9.el6.x86_64 --assumeyes
 sudo yum install libreoffice-writer-4.0.4.2-9.el6.x86_64 --assumeyes
 sudo yum install libreoffice-headless-4.0.4.2-9.el6.x86_64 --assumeyes
 
 sudo yum install java-1.6.0-openjdk java-1.6.0-openjdk-devel --assumeyes
 sudo yum install ghostscript --assumeyes
-sudo yum install ImageMagick-devel --assumeyes
-sudo yum install libreoffice-headless --assumeyes
 sudo yum install file-devel --assumeyes
 sudo yum install file-libs --assumeyes
 sudo yum install sqlite-devel --assumeyes
@@ -38,8 +36,11 @@ sudo yum install mysql-devel --assumeyes
 sudo yum install mysql-server --assumeyes
 sudo yum install nodejs --assumeyes
 sudo yum install htop --assumeyes
-sudo yum install gcc gettext-devel expat-devel curl-devel zlib-devel openssl-devel perl-ExtUtils-CBuilder perl-ExtUtils-MakeMaker --assumeyes
+sudo yum install libtool gcc gettext-devel expat-devel curl-devel zlib-devel openssl-devel perl-ExtUtils-CBuilder perl-ExtUtils-MakeMaker --assumeyes
 sudo yum install wget --assumeyes
+
+# We need httpd for /etc/mime.types
+sudo yum install httpd --assumeyes
 
 echo "Making redis auto-start"
 sudo chkconfig redis on
@@ -48,10 +49,6 @@ sudo service redis start
 echo "Making mysql auto-start"
 sudo chkconfig mysqld on
 sudo service mysqld start
-
-echo "Setting timezone for vm so embargo doesn't get confused"
-echo 'export TZ=America/New_York' >> /home/vagrant/.zshrc
-echo 'export TZ=America/New_York' >> /home/vagrant/.bashrc
 
 echo "Installing Git"
 wget https://www.kernel.org/pub/software/scm/git/git-1.8.2.3.tar.gz
@@ -65,7 +62,7 @@ rm -rf /home/vagrant/git-1.8.2.3
 
 echo "Installing FITS"
 cd /home/vagrant
-curl -O https://fits.googlecode.com/files/fits-0.6.2.zip
+curl -O http://librarystaff.neu.edu/fits/fits-0.6.2.zip
 unzip fits-0.6.2.zip
 chmod +x /home/vagrant/fits-0.6.2/fits.sh
 sudo mv /home/vagrant/fits-0.6.2 /opt/fits-0.6.2
@@ -73,15 +70,33 @@ echo 'PATH=$PATH:/opt/fits-0.6.2' >> /home/vagrant/.bashrc
 echo 'export PATH'  >> /home/vagrant/.bashrc
 source /home/vagrant/.bashrc
 
+echo "Setting up faux handles"
+mysql -u root < /home/vagrant/cerberus/spec/fixtures/files/handlesMIN.sql
+
+echo "Install newer File"
+cd /home/vagrant
+git clone https://github.com/file/file.git file
+cd /home/vagrant/file && autoreconf -i
+cd /home/vagrant/file && ./configure
+cd /home/vagrant/file && make
+cd /home/vagrant/file && sudo make install
+
+echo "Installing Oh-My-Zsh"
+cd /home/vagrant
+\curl -Lk http://install.ohmyz.sh | sh
+sudo chsh -s /bin/zsh vagrant
+
 echo "Installing RVM"
 cd /home/vagrant
 gpg2 --keyserver hkp://keys.gnupg.net --recv-keys D39DC0E3
-\curl -sSL https://get.rvm.io | bash -s stable
-source /home/vagrant/.profile
-rvm pkg install libyaml
-rvm install ruby-2.0.0-p598
-rvm use ruby-2.0.0-p598
+\curl -sSL https://get.rvm.io | bash -s stable --autolibs=enabled
 source /home/vagrant/.rvm/scripts/rvm
+rvm install ruby-2.0.0-p643
+rvm use ruby-2.0.0-p643
+
+echo "Setting timezone for vm so embargo doesn't get confused"
+echo 'export TZ=America/New_York' >> /home/vagrant/.zshrc
+echo 'export TZ=America/New_York' >> /home/vagrant/.bashrc
 
 echo "Setting up Cerberus"
 cd /home/vagrant/cerberus
@@ -97,11 +112,3 @@ touch /home/vagrant/cerberus/.git/hooks/pre-push
 echo '#!/bin/sh' >> /home/vagrant/cerberus/.git/hooks/pre-push
 echo 'rake smoke_test' >> /home/vagrant/cerberus/.git/hooks/pre-push
 chmod +x /home/vagrant/cerberus/.git/hooks/pre-push
-
-echo "Setting up faux handles"
-mysql -u root < /home/vagrant/cerberus/spec/fixtures/files/handlesMIN.sql
-
-echo "Installing Oh-My-Zsh"
-cd /home/vagrant
-\curl -Lk http://install.ohmyz.sh | sh
-sudo chsh -s /bin/zsh vagrant

@@ -22,8 +22,8 @@ class MetadataMailer < ActionMailer::Base
     @presentations_new       = UploadAlert.withheld_presentations(:create)
     @presentations_update    = UploadAlert.withheld_presentations(:update)
 
-    #@other_pubs_new          = UploadAlert.withheld_other_pubs(:create)
-    #@other_pubs_update       = UploadAlert.withheld_other_pubs(:update)
+    @other_pubs_new          = UploadAlert.withheld_other_pubs(:create)
+    @other_pubs_update       = UploadAlert.withheld_other_pubs(:update)
 
     count = 0
     count += @research_new.count
@@ -41,8 +41,8 @@ class MetadataMailer < ActionMailer::Base
     count += @presentations_new.count
     count += @presentations_update.count
 
-    #count += @other_pubs_new.count
-    #count += @other_pubs_update.count
+    count += @other_pubs_new.count
+    count += @other_pubs_update.count
 
     if ["production"].include? Rails.env
       mail(to: "Metadata Mailing List <Library-DRS-Metadata@neu.edu>", subject: "Daily Featured Content Uploads and Updates - #{count} items", content_type: "text/html")
@@ -77,7 +77,7 @@ class MetadataMailer < ActionMailer::Base
       tag_as_notified_helper @learning_objects_update
       tag_as_notified_helper @presentations_new
       tag_as_notified_helper @presentations_update
-      #tag_as_notified_helper @other_pubs_new
-      #tag_as_notified_helper @other_pubs_update
+      tag_as_notified_helper @other_pubs_new
+      tag_as_notified_helper @other_pubs_update
     end
 end

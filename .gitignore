@@ -11,7 +11,8 @@
 db/*.sqlite3
 
 # Ignore all logfiles and tempfiles.
-log/*.log
+log/*
+!log/.gitkeep
 tmp
 
 # Ignore jetty because it's broken if you don't generate it on your own machine.
