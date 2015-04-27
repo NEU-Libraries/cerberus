@@ -37,6 +37,11 @@ module Cerberus
         def characterize_if_changed
           content_changed = self.content.changed?
           yield
+          if content_changed
+            self.properties.mime_type = extract_mime_type(self.fedora_file_path)
+            self.properties.md5_checksum = new_checksum(self.fedora_file_path)
+            self.save!
+          end
           Cerberus::Application::Queue.push(AtomisticCharacterizationJob.new(self.pid)) if content_changed
         end
     end
