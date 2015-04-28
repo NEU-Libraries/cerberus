@@ -10,7 +10,7 @@ class Loaders::MarcomsController < ApplicationController
   before_filter :verify_group
 
   def new
-    @parent = Community.find("neu:8s45qc00v")
+    @parent = Community.find("neu:8s45qc456")
     @collections_options = Array.new
     cols = @parent.child_collections.sort_by{|c| c.title}
     cols.each do |child|
@@ -57,9 +57,12 @@ class Loaders::MarcomsController < ApplicationController
   protected
     def process_file(file)
       if virus_check(file) == 0
-        new_path = move_file_to_tmp(file)
+        tempdir = Rails.root.join("tmp")
+        uniq_hsh = Digest::MD5.hexdigest("#{file.original_filename}")[0,2]
+        new_path = tempdir.join("#{Time.now.to_i.to_s}-#{uniq_hsh}.zip")
+        FileUtils.mv(file.tempfile.path, new_path.to_s)
         # send to job
-        Cerberus::Application::Queue.push(Loaders::ProcessZipJob.new(file, new_path))
+        Cerberus::Application::Queue.push(ProcessZipJob.new(new_path.to_s))
         redirect_to "/my_loaders"
       else
         render :json => [{:error => "Error creating file."}]
