@@ -9,7 +9,7 @@
 -#       = loader_parent
 
 
-= form_tag("/loaders/marcom", method: "post", multipart: true, id: "loaderForm") do
+= form_tag("/loaders/marcom", action: "create", method: "post", multipart: true, id: "loaderForm") do
   = hidden_field_tag(:community_id, @community_id)
   .row
     %fieldset.span4

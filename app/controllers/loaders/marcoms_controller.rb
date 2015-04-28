@@ -1,4 +1,11 @@
-class Loaders::MarcomController < ApplicationController
+# -*- coding: utf-8 -*-
+
+class Loaders::MarcomsController < ApplicationController
+  include Cerberus::Controller
+  include Cerberus::TempFileStorage
+  include Cerberus::ControllerHelpers::EditableObjects
+  include Cerberus::ControllerHelpers::ViewLogger
+  include Cerberus::ControllerHelpers::PermissionsCheck
   before_filter :authenticate_user!
   before_filter :verify_group
 
@@ -34,7 +41,10 @@ class Loaders::MarcomController < ApplicationController
       else
         process_file(file)
       end
-    rescue Exception => exception
+    rescue => exception
+      logger.error "MarcomsController::create rescued #{exception.class}\n\t#{exception.to_s}\n #{exception.backtrace.join("\n")}\n\n"
+      email_handled_exception(exception)
+      json_error "Error occurred while creating file."
     ensure
       # remove the tempfile (only if it is a temp file)
       file.tempfile.delete if file.respond_to?(:tempfile)
@@ -48,12 +58,33 @@ class Loaders::MarcomController < ApplicationController
     def process_file(file)
       if virus_check(file) == 0
         # send to job?
+        #@loader = Marcom.new
         new_path = move_file_to_tmp(file)
-        Cerberus::Application::Queue.push(ProcessZipJob.new(file, new_path))
-        redirect_to my_loaders_path
+        Cerberus::Application::Queue.push(ProcessZipJob.new(file, new_path, @loader))
+        redirect_to "/my_loaders"
       else
         render :json => [{:error => "Error creating file."}]
       end
+    end
+
+    def json_error(error, name=nil, additional_arguments={})
+      args = {:error => error}
+      args[:name] = name if name
+      render additional_arguments.merge({:json => [args]})
+    end
+
+    def empty_file?(file)
+      (file.respond_to?(:tempfile) && file.tempfile.size == 0) || (file.respond_to?(:size) && file.size == 0)
+    end
+
+    def terms_accepted?
+      params[:terms_of_service] == '1'
+    end
+
+    def virus_check( file)
+      stat = Cerberus::ContentFile.virus_check(file)
+      flash[:error] = "Virus checking did not pass for #{File.basename(file.path)} status = #{stat}" unless stat == 0
+      stat
     end
 
   private

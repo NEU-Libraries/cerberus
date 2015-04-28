@@ -70,8 +70,11 @@ Cerberus::Application.routes.draw do
   get '/my_loaders' => 'employees#my_loaders', as: 'my_loaders'
 
   #resources :marcom, :controller => "loaders/marcom", only: [:new]
-  namespace :loaders do
-    resources :marcom, only: [:new, :create]
+  # namespace :loaders do
+  #   resources :marcoms, only: [:new, :create, :index]
+  # end
+  scope :module => Loaders do
+   resources :marcoms, only: [:new, :create, :index], :path => "loaders/marcom"
   end
 
   # Facets for communities and collections
