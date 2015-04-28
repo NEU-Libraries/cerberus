@@ -1,14 +1,15 @@
 class ProcessZipJob
-  attr_accessor :zip_path, :file_name, :file_path
+  attr_accessor :zip_path, :file_name, :file_path, :parent
 
   def queue_name
     :loader_process_zip
   end
 
-  def initialize(zip_path, file_name, file_path)
+  def initialize(zip_path, file_name, file_path, parent)
     self.zip_path = zip_path
     self.file_name = file_name
     self.file_name = file_path
+    self.parent = parent
   end
 
   def run
@@ -32,6 +33,7 @@ class ProcessZipJob
         open(fpath, 'wb') do |z|
           z << f.read
         end
+        result = ImageProcessingJob.new(fpath, parent).run
       end
     end
   end
