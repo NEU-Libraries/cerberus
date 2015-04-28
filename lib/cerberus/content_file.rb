@@ -7,10 +7,9 @@ module Cerberus
     include Hydra::ModelMixins::RightsMetadata
     include Cerberus::Rights::MassPermissions
     include Cerberus::ContentFile::Characterization
-    include Cerberus::MetadataAssignment    
+    include Cerberus::MetadataAssignment
     include Cerberus::Find
     include Cerberus::ImpressionCount
-    include Cerberus::MimeTypes
 
     included do
       attr_accessible :title, :description, :keywords, :identifier
@@ -22,11 +21,23 @@ module Cerberus
       has_metadata name: 'properties', type: PropertiesDatastream
       has_file_datastream name: "content", type: FileContentDatastream
 
+      # delegate :mime_type, :to => :properties, :unique => true
+
       belongs_to :core_record, property: :is_part_of, class_name: 'CoreFile'
     end
 
     def public?
       self.mass_permissions == "public"
+    end
+
+    def fedora_file_path
+      config_path = Rails.application.config.fedora_home      
+      datastream_str = "info:fedora/#{self.pid}/content/content.0"
+      escaped_datastream = Rack::Utils.escape(datastream_str)
+      md5_str = Digest::MD5.hexdigest(datastream_str)
+      dir_name = md5_str[0,2]
+      file_path = config_path + dir_name + "/" + escaped_datastream
+      return file_path
     end
 
     def klass
