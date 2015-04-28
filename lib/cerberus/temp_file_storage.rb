@@ -7,7 +7,6 @@ module Cerberus::TempFileStorage
       tempdir = Rails.root.join("tmp")
       new_path = tempdir.join("#{file.original_filename}")
       FileUtils.mv(file.tempfile.path, new_path.to_s)
-      puts "we're in the move file function"
       return new_path.to_s
     end
   end

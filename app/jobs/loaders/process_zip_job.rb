@@ -1,21 +1,20 @@
 class Loaders::ProcessZipJob
 
-  attr_accessor :file, :new_path, :loader
+  attr_accessor :file, :new_path
 
   def queue_name
     :loader_process_zip
   end
 
-  def initialize(file, new_path, loader)
+  def initialize(file, new_path)
     self.file = file
     self.new_path = new_path
-    self.loader = loader
   end
 
   def run
     # unzip zip file to tmp storage
     puts "we made it to run the job for #{new_path}"
-    Zip::Archive.open(file) do |ar|
+    Zip::Archive.open(self.file) do |ar|
       n = ar.num_files # number of entries
 
       n.times do |i|
