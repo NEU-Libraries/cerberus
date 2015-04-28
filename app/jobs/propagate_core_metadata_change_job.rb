@@ -1,6 +1,10 @@
 class PropagateCoreMetadataChangeJob
   attr_accessor :core
 
+  def queue_name
+    :propagate_change
+  end
+
   def initialize(pid)
     self.core = pid
   end
