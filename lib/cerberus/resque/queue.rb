@@ -11,6 +11,8 @@ module Cerberus
 
       def push(job)
         queue = job.respond_to?(:queue_name) ? job.queue_name : default_queue_name
+        puts queue
+        puts job
         begin
           ::Resque.enqueue_to queue, MarshaledJob, Base64.encode64(Marshal.dump(job))
         rescue Redis::CannotConnectError

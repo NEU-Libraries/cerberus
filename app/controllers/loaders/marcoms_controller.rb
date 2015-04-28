@@ -57,10 +57,9 @@ class Loaders::MarcomsController < ApplicationController
   protected
     def process_file(file)
       if virus_check(file) == 0
-        # send to job?
-        #@loader = Marcom.new
         new_path = move_file_to_tmp(file)
-        Cerberus::Application::Queue.push(ProcessZipJob.new(file, new_path, @loader))
+        # send to job
+        Cerberus::Application::Queue.push(Loaders::ProcessZipJob.new(file, new_path))
         redirect_to "/my_loaders"
       else
         render :json => [{:error => "Error creating file."}]
