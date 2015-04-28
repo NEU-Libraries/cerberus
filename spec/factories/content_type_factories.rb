@@ -1,3 +1,6 @@
+include MimeHelper
+include ChecksumHelper
+
   FactoryGirl.define do
 
   trait :dad do
