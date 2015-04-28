@@ -20,7 +20,7 @@ class Loaders::MarcomsController < ApplicationController
         @collections_options.push([" - #{c.title}", c.pid])
       end
     end
-    render 'loaders/new', locals: { collections_options: @collections_options }
+    render 'loaders/new', locals: { collections_options: @collections_options, parent: @parent.pid }
   end
 
   def create
@@ -29,6 +29,7 @@ class Loaders::MarcomsController < ApplicationController
       return json_error("Error! No file to save") if !params.has_key?(:file)
 
       file = params[:file]
+      parent = params[:parent]
       if !file
         flash[:error] = "Error! No file for upload"
         redirect_to(:back) and return
@@ -39,7 +40,7 @@ class Loaders::MarcomsController < ApplicationController
         flash[:error] = "You must accept the terms of service!"
         redirect_to(:back) and return
       else
-        process_file(file)
+        process_file(file, parent)
       end
     rescue => exception
       logger.error "MarcomsController::create rescued #{exception.class}\n\t#{exception.to_s}\n #{exception.backtrace.join("\n")}\n\n"
@@ -55,7 +56,7 @@ class Loaders::MarcomsController < ApplicationController
   end
 
   protected
-    def process_file(file)
+    def process_file(file, parent)
       if virus_check(file) == 0
         tempdir = Rails.root.join("tmp")
         uniq_hsh = Digest::MD5.hexdigest("#{file.original_filename}")[0,2]
@@ -64,7 +65,7 @@ class Loaders::MarcomsController < ApplicationController
         new_file = "#{new_path}.zip"
         FileUtils.mv(file.tempfile.path, new_file)
         # send to job
-        Cerberus::Application::Queue.push(ProcessZipJob.new(new_file.to_s, new_path, file_name))
+        Cerberus::Application::Queue.push(ProcessZipJob.new(new_file.to_s, new_path, file_name, parent))
         redirect_to "/my_loaders"
       else
         render :json => [{:error => "Error creating file."}]

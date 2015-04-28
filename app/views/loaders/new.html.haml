@@ -10,7 +10,7 @@
 
 
 = form_tag("/loaders/marcom", action: "create", method: "post", multipart: true, id: "loaderForm") do
-  = hidden_field_tag(:community_id, @community_id)
+  = hidden_field_tag(:parent, @parent.pid)
   .row
     %fieldset.span4
       %legend
