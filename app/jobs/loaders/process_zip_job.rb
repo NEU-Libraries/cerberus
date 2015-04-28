@@ -1,11 +1,21 @@
 class Loaders::ProcessZipJob
+
+  attr_accessor :file, :new_path, :loader
+
   def queue_name
     :loader_process_zip
   end
 
+  def initialize(file, new_path, loader)
+    self.file = file
+    self.new_path = new_path
+    self.loader = loader
+  end
+
   def run
     # unzip zip file to tmp storage
-    Zip::Archive.open(new_path) do |ar|
+    puts "we made it to run the job for #{new_path}"
+    Zip::Archive.open(file) do |ar|
       n = ar.num_files # number of entries
 
       n.times do |i|
@@ -13,16 +23,11 @@ class Loaders::ProcessZipJob
 
         # open entry
         ar.fopen(entry_name) do |f| # or ar.fopen(i) do |f|
-          name = f.name           # name of the file
+          file_name = f.name           # name of the file
           size = f.size           # size of file (uncompressed)
           comp_size = f.comp_size # size of file (compressed)
         end
         result = ImageProcessingJob.new(i).run
-      end
-
-      # Zip::Archive includes Enumerable
-      entry_names = ar.map do |f|
-        f.name
       end
     end
 
