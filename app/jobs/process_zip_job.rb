@@ -14,7 +14,6 @@ class ProcessZipJob
 
   def run
     # unzip zip file to tmp storage
-    puts "we made it to run the job for #{zip_path}"
     unzip(zip_path)
     # for each file in new dir
       # start a new image_processing_job like...
