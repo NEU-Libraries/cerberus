@@ -2,10 +2,6 @@
 
 class Loaders::MarcomsController < ApplicationController
   include Cerberus::Controller
-  include Cerberus::TempFileStorage
-  include Cerberus::ControllerHelpers::EditableObjects
-  include Cerberus::ControllerHelpers::ViewLogger
-  include Cerberus::ControllerHelpers::PermissionsCheck
   before_filter :authenticate_user!
   before_filter :verify_group
 
@@ -20,7 +16,7 @@ class Loaders::MarcomsController < ApplicationController
         @collections_options.push([" - #{c.title}", c.pid])
       end
     end
-    render 'loaders/new', locals: { collections_options: @collections_options, parent: @parent.pid }
+    render 'loaders/new', locals: { collections_options: @collections_options}
   end
 
   def create

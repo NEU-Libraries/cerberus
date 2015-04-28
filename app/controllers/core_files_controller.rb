@@ -122,7 +122,7 @@ class CoreFilesController < ApplicationController
     else
       depositor_nuid = current_user.nuid
       proxy_nuid     = nil
-    end    
+    end
 
     update_metadata if params[:core_file]
     max = session[:slider_max]
@@ -414,23 +414,6 @@ class CoreFilesController < ApplicationController
       if core_file.canonical_class == "ImageMasterFile"
         session[:slider_max] = nil # Ensure we aren't using data from a prior upload
         session[:slider_max] = SliderMaxCalculator.compute(tmp_path)
-        photo = IPTC::JPEG::Image.from_file tmp_path, quick=true
-        photo.values.each do |item|
-          puts "#{item.key}\t#{item.value}"
-          if item.key == 'iptc/Headline'
-            core_file.title = item.value
-          # creator (iptc/Credit)
-          #elsif item.key == 'iptc/Credit'
-          #  core_file.corporate_creators = item.value
-          elsif item.key == 'iptc/Caption'
-            core_file.description = item.value
-          # organization (iptc/Source)
-          #elsif item.key == 'iptc/Source'
-          #  core_file.organization = item.value
-          #elsif item.key == 'iptc/Keywords'
-          #  core_file.keywords = item.value
-          end
-        end
       end
 
       collection = !collection_id.blank? ? Collection.find(collection_id) : nil
