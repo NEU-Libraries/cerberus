@@ -91,6 +91,7 @@ module Cerberus
     config.minter_statefile = '/tmp/minter-state'
 
     config.fits_path = "/opt/fits-0.6.2/fits.sh"
+    config.file_path = "/usr/local/bin/file"
 
     config.ffmpeg_path = 'ffmpeg'
     config.enable_ffmpeg = false
