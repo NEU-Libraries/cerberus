@@ -59,10 +59,12 @@ class Loaders::MarcomsController < ApplicationController
       if virus_check(file) == 0
         tempdir = Rails.root.join("tmp")
         uniq_hsh = Digest::MD5.hexdigest("#{file.original_filename}")[0,2]
-        new_path = tempdir.join("#{Time.now.to_i.to_s}-#{uniq_hsh}.zip")
-        FileUtils.mv(file.tempfile.path, new_path.to_s)
+        file_name = "#{Time.now.to_i.to_s}-#{uniq_hsh}"
+        new_path = tempdir.join(file_name).to_s
+        new_file = "#{new_path}.zip"
+        FileUtils.mv(file.tempfile.path, new_file)
         # send to job
-        Cerberus::Application::Queue.push(ProcessZipJob.new(new_path.to_s))
+        Cerberus::Application::Queue.push(ProcessZipJob.new(new_file.to_s, new_path, file_name))
         redirect_to "/my_loaders"
       else
         render :json => [{:error => "Error creating file."}]
