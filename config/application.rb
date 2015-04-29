@@ -91,6 +91,7 @@ module Cerberus
     config.minter_statefile = '/tmp/minter-state'
 
     config.fits_path = "/opt/fits-0.6.2/fits.sh"
+
     if !ENV['TRAVIS'].nil? && ENV['TRAVIS'] == 'true'
       config.file_path = "file"
     else
