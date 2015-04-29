@@ -10,10 +10,12 @@ development:
   timeout: 5000
 
 staging:
-  adapter: sqlite3
-  database: db/development.sqlite3
-  pool: 5
-  timeout: 5000
+  adapter: mysql2
+  encoding: utf8
+  database: drs
+  username: drs
+  password: <%= ENV["MYSQL_PASSWD"] %>
+  host: localhost
 
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".
