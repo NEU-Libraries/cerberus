@@ -16,7 +16,7 @@ class ImageProcessingJob
     core_file = ::CoreFile.new
     core_file.depositor = "000000000"
     core_file.parent = Collection.find(parent)
-
+    core_file.properties.parent_id = core_file.parent.pid
     core_file.tag_as_in_progress
     # Context derived attributes
     core_file.tmp_path = file
