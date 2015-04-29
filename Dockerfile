@@ -79,10 +79,10 @@ RUN echo 'export PATH'  >> /home/drs/.bashrc
 
 # Installing new file
 RUN git clone https://github.com/file/file.git file
-RUN cd file && autoreconf -i
-RUN cd file && ./configure
-RUN cd file && make
-RUN cd file && sudo make install
+RUN cd /home/drs/file && autoreconf -i
+RUN cd /home/drs/file && ./configure
+RUN cd /home/drs/file && make
+RUN cd /home/drs/file && sudo make install
 
 # Moving FITS
 USER root
