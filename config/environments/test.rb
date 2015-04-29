@@ -1,7 +1,11 @@
 Cerberus::Application.configure do
   # Settings specified here will take precedence over those in config/application.rb
 
-  config.fedora_home = "/home/vagrant/cerberus/jetty/fedora/test/data/datastreamStore/"
+  if !ENV['TRAVIS'].nil? && ENV['TRAVIS'] == 'true'
+    config.fedora_home = "/home/travis/cerberus/jetty/fedora/test/data/datastreamStore/"
+  else
+    config.fedora_home = "/home/vagrant/cerberus/jetty/fedora/test/data/datastreamStore/"
+  end
 
   # The test environment is used exclusively to run your application's
   # test suite. You never need to work with it otherwise. Remember that
