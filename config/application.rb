@@ -92,6 +92,12 @@ module Cerberus
 
     config.fits_path = "/opt/fits-0.6.2/fits.sh"
 
+    if !ENV['TRAVIS'].nil? && ENV['TRAVIS'] == 'true'
+      config.file_path = "file"
+    else
+      config.file_path = "/usr/local/bin/file"
+    end
+
     config.ffmpeg_path = 'ffmpeg'
     config.enable_ffmpeg = false
     config.temp_file_base = nil
