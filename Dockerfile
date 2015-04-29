@@ -25,6 +25,7 @@ RUN yum install libreoffice-writer-4.0.4.2-9.el6.x86_64 --assumeyes
 RUN yum install libreoffice-headless-4.0.4.2-9.el6.x86_64 --assumeyes
 RUN yum install sudo --assumeyes
 RUN yum install python-setuptools --assumeyes
+RUN yum install httpd --assumeyes
 RUN easy_install supervisor
 
 # Init mysql
@@ -69,15 +70,6 @@ USER drs
 ENV HOME /home/drs
 WORKDIR /home/drs
 
-# Installing RVM
-RUN gpg2 --keyserver hkp://keys.gnupg.net --recv-keys D39DC0E3
-RUN /bin/bash -l -c "curl -sSL https://get.rvm.io | bash -s stable"
-RUN /bin/bash -l -c "rvm pkg install libyaml"
-RUN /bin/bash -l -c "rvm install ruby-2.0.0-p643"
-RUN /bin/bash -l -c "rvm use ruby-2.0.0-p643"
-RUN sed -i -e 's/^export PATH="/#export PATH="/' /home/vagrant/.zshrc
-RUN echo 'source /home/vagrant/.rvm/scripts/rvm' >> /home/vagrant/.zshrc
-
 # Installing FITS
 RUN curl -O http://librarystaff.neu.edu/fits/fits-0.6.2.zip
 RUN unzip fits-0.6.2.zip
@@ -87,18 +79,10 @@ RUN echo 'export PATH'  >> /home/drs/.bashrc
 
 # Installing new file
 RUN git clone https://github.com/file/file.git file
-RUN cd file && autoreconf -i
-RUN cd file && ./configure
-RUN cd file && make
-RUN cd file && sudo make install
-
-# Installing Oh-My-Zsh
-RUN \curl -Lk http://install.ohmyz.sh | sh
-
-# Setting timezone for vm so embargo doesn't get confused
-RUN echo 'export TZ=America/New_York' >> /home/drs/.zshrc
-RUN echo 'export TZ=America/New_York' >> /home/drs/.bashrc
-RUN echo 'source /home/drs/.profile' >> /home/drs/.zshrc
+RUN cd /home/drs/file && autoreconf -i
+RUN cd /home/drs/file && ./configure
+RUN cd /home/drs/file && make
+RUN cd /home/drs/file && sudo make install
 
 # Moving FITS
 USER root
@@ -108,6 +92,22 @@ RUN mv /home/drs/fits-0.6.2 /opt/fits-0.6.2
 USER root
 ADD / cerberus/
 RUN chown -R drs:drs cerberus/
+
+# Installing Oh-My-Zsh
+USER drs
+RUN \curl -Lk http://install.ohmyz.sh | sh
+
+# Setting timezone for vm so embargo doesn't get confused
+RUN echo 'export TZ=America/New_York' >> /home/drs/.zshrc
+RUN echo 'export TZ=America/New_York' >> /home/drs/.bashrc
+RUN echo 'source /home/drs/.profile' >> /home/drs/.zshrc
+
+# Installing RVM
+USER drs
+RUN gpg2 --keyserver hkp://keys.gnupg.net --recv-keys D39DC0E3
+RUN /bin/bash -l -c "\curl -ksSL https://get.rvm.io | bash -s stable --autolibs=enabled"
+RUN /bin/bash -l -c "rvm install ruby-2.0.0-p643"
+RUN /bin/bash -l -c "rvm use ruby-2.0.0-p643"
 
 # Kludge for https://github.com/projecthydra/jettywrapper/issues/15
 USER drs
