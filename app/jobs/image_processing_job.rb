@@ -55,6 +55,9 @@ class ImageProcessingJob
     core_file.identifier = make_handle(core_file.persistent_url)
     #core_file.save!
     #return core_file
+    puts core_file.pid
+    puts core_file.tmp_path
+    puts core_file.original_filename
 
     # Process Thumbnail
     Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename))
@@ -67,7 +70,6 @@ class ImageProcessingJob
         UploadAlert.create_from_core_file(core_file, :create)
       end
     end
-    puts core_file.pid
 
     #redirect_to core_file_path(@core_file.pid)
   end
