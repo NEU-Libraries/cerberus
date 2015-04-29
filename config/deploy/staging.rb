@@ -42,7 +42,7 @@ namespace :deploy do
   desc "Clearing cache"
   task :clear_cache do
     on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake cache:clear)"
+      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake cache:clear)", raise_on_non_zero_exit: false # if it was never run, theres no dir
     end
   end
 
