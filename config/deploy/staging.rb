@@ -46,18 +46,24 @@ namespace :deploy do
     end
   end
 
-  desc "Jetty"
-  task :start_jetty do
+  desc "Make Jetty"
+  task :gen_jetty do
     on roles(:app), :in => :sequence, :wait => 5 do
       # massive kludge because the zip never downloads properly...
       execute "mkdir -p #{release_path}/tmp && cd #{release_path}/tmp && wget -q http://librarystaff.neu.edu/DRSzip/new-solr-schema.zip"
       execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec rails g hydra:jetty)"
       execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec rake jetty:config)"
+    end
+  end
+
+  desc "Start Jetty"
+  task :start_jetty do
+    on roles(:app), :in => :sequence, :wait => 5 do
       execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec rake jetty:start)"
     end
   end
 
-  desc "Jetty"
+  desc "Stop Jetty"
   task :stop_jetty do
     on roles(:app), :in => :sequence, :wait => 5 do
       execute "cd /home/drs/cerberus/current && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake jetty:stop)", raise_on_non_zero_exit: false
@@ -107,6 +113,7 @@ after 'deploy:updating', 'deploy:migrate'
 after 'deploy:updating', 'deploy:whenever'
 after 'deploy:updating', 'deploy:clear_cache'
 after 'deploy:finished', 'deploy:flush_redis'
+after 'deploy:updating', 'deploy:gen_jetty'
 after 'deploy:updating', 'deploy:start_jetty'
 after 'deploy:finished', 'deploy:start_httpd'
 after 'deploy:finished', 'deploy:restart_workers'
