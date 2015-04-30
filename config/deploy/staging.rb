@@ -47,12 +47,18 @@ namespace :deploy do
   end
 
   desc "Jetty"
-  task :jetty do
+  task :start_jetty do
     on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd /home/drs/cerberus/current && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake jetty:stop)", raise_on_non_zero_exit: false
       execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec rails g hydra:jetty)"
       execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec rake jetty:config)"
       execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec rake jetty:start)"
+    end
+  end
+
+  desc "Jetty"
+  task :stop_jetty do
+    on roles(:app), :in => :sequence, :wait => 5 do
+      execute "cd /home/drs/cerberus/current && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake jetty:stop)", raise_on_non_zero_exit: false
     end
   end
 
@@ -90,13 +96,14 @@ before 'deploy:restart_workers', 'rvm1:hook'
 # occurs.  This is the task that handles refreshing the app code, so this
 # should only fire on actual deployments.
 before 'deploy:starting', 'deploy:stop_httpd'
+before 'deploy:starting', 'deploy:stop_jetty'
 
 after 'deploy:updating', 'bundler:install'
-after 'deploy:updating', 'deploy:jetty'
 after 'deploy:updating', 'deploy:copy_yml_file'
 after 'deploy:updating', 'deploy:migrate'
 after 'deploy:updating', 'deploy:whenever'
 after 'deploy:updating', 'deploy:clear_cache'
 after 'deploy:finished', 'deploy:flush_redis'
+after 'deploy:updating', 'deploy:start_jetty'
 after 'deploy:finished', 'deploy:start_httpd'
 after 'deploy:finished', 'deploy:restart_workers'
