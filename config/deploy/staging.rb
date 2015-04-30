@@ -46,6 +46,15 @@ namespace :deploy do
     end
   end
 
+  desc "Jetty"
+  task :jetty do
+    on roles(:app), :in => :sequence, :wait => 5 do
+      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec rails g hydra:jetty)"
+      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec rake jetty:config)"
+      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec rake jetty:start)"
+    end
+  end
+
   desc "Copy Figaro YAML"
   task :copy_yml_file do
     on roles(:app), :in => :sequence, :wait => 5 do
@@ -95,8 +104,8 @@ before 'deploy:restart_workers', 'rvm1:hook'
 # should only fire on actual deployments.
 before 'deploy:starting', 'deploy:stop_httpd'
 
-# after 'deploy:updating', 'deploy:copy_rvmrc_file'
-# after 'deploy:updating', 'deploy:trust_rvmrc'
+after 'deploy:updating', 'deploy:copy_rvmrc_file'
+after 'deploy:updating', 'deploy:trust_rvmrc'
 after 'deploy:updating', 'bundler:install'
 after 'deploy:updating', 'deploy:copy_yml_file'
 after 'deploy:updating', 'deploy:migrate'
