@@ -412,6 +412,30 @@ class CoreFilesController < ApplicationController
       # the length of its longest side.  This is used to calculate the dimensions to allow for the small/med/large
       # sliders on the Provide Metadata page.
       if core_file.canonical_class == "ImageMasterFile"
+        core_file.mods.genre = "photographs"
+        core_file.mods.genre.authority = "aat"
+        #core_file.mods.physical_description.digital_origin = "born digital"
+        #core_file.mods.extent = "1 photograph"
+        photo = IPTC::JPEG::Image.from_file tmp_path, quick=true
+        photo.values.each do |item|
+          puts "#{item.key}\t#{item.value}"
+          if item.key == 'iptc/Headline'
+            core_file.title = item.value
+          # creator (iptc/Credit)
+          #elsif item.key == 'iptc/Credit'
+          #  core_file.corporate_creators = item.value
+          elsif item.key == 'iptc/City'
+            core_file.mods.origin_info.place.term = item.value
+          elsif item.key == 'iptc/Caption'
+            core_file.description = item.value
+          elsif item.key == 'iptc/Source'
+            core_file.mods.origin_info.publisher = item.value
+          elsif item.key == "iptc/DateCreated"
+            core_file.mods.origin_info.copyright = "#{item.value[0..3]}-#{item.value[4..5]}-#{item.value[6..7]}"
+          elsif item.key == 'iptc/Keywords'
+            core_file.keywords = item.value
+          end
+        end
         session[:slider_max] = nil # Ensure we aren't using data from a prior upload
         session[:slider_max] = SliderMaxCalculator.compute(tmp_path)
       end
