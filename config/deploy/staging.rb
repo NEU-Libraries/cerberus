@@ -50,7 +50,7 @@ namespace :deploy do
   task :start_jetty do
     on roles(:app), :in => :sequence, :wait => 5 do
       # massive kludge because the zip never downloads properly...
-      execute "mkdir -p #{release_path}/tmp && cd #{release_path}/tmp && curl -s -L http://librarystaff.neu.edu/DRSzip/new-solr-schema.zip"
+      execute "mkdir -p #{release_path}/tmp && cd #{release_path}/tmp && wget -q http://librarystaff.neu.edu/DRSzip/new-solr-schema.zip"
       execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec rails g hydra:jetty)"
       execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec rake jetty:config)"
       execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec rake jetty:start)"
