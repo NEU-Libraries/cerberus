@@ -53,7 +53,7 @@ namespace :deploy do
       execute "mkdir -p #{release_path}/tmp && cd #{release_path}/tmp && wget -q http://librarystaff.neu.edu/DRSzip/new-solr-schema.zip"
       execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec rails g hydra:jetty)"
       execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec rake jetty:config)"
-      execute "cd #{release_path} && bundle exec rake jetty:start"
+      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec rake jetty:start)"
     end
   end
 
@@ -92,7 +92,7 @@ end
 # This will be necessary for any hook that needs access to ruby.
 # Note the use of the rvm-auto shell in the task definition.
 
-before 'deploy:restart_workers', 'rvm1:hook'
+before 'deploy:starting', 'rvm1:hook'
 
 # These hooks execute in the listed order after the deploy:updating task
 # occurs.  This is the task that handles refreshing the app code, so this
