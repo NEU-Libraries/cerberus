@@ -92,7 +92,8 @@ end
 # This will be necessary for any hook that needs access to ruby.
 # Note the use of the rvm-auto shell in the task definition.
 
-before 'deploy:starting', 'rvm1:hook'
+before 'deploy:start_jetty', 'rvm1:hook'
+before 'deploy:restart_workers', 'rvm1:hook'
 
 # These hooks execute in the listed order after the deploy:updating task
 # occurs.  This is the task that handles refreshing the app code, so this
