@@ -49,6 +49,7 @@ namespace :deploy do
   desc "Jetty"
   task :jetty do
     on roles(:app), :in => :sequence, :wait => 5 do
+      execute "cd /home/drs/cerberus/current && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake jetty:stop)", raise_on_non_zero_exit: false
       execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec rails g hydra:jetty)"
       execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec rake jetty:config)"
       execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec rake jetty:start)"
@@ -91,6 +92,7 @@ before 'deploy:restart_workers', 'rvm1:hook'
 before 'deploy:starting', 'deploy:stop_httpd'
 
 after 'deploy:updating', 'bundler:install'
+after 'deploy:updating', 'deploy:jetty'
 after 'deploy:updating', 'deploy:copy_yml_file'
 after 'deploy:updating', 'deploy:migrate'
 after 'deploy:updating', 'deploy:whenever'
