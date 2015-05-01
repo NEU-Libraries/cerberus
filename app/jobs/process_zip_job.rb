@@ -1,15 +1,14 @@
 class ProcessZipJob
-  attr_accessor :zip_path, :file_name, :file_path, :parent
+  attr_accessor :zip_path, :parent, :copyright
 
   def queue_name
     :loader_process_zip
   end
 
-  def initialize(zip_path, file_name, file_path, parent)
+  def initialize(zip_path, parent, copyright)
     self.zip_path = zip_path
-    self.file_name = file_name
-    self.file_name = file_path
     self.parent = parent
+    self.copyright = copyright
   end
 
   def run
@@ -27,12 +26,12 @@ class ProcessZipJob
     to = File.join(File.dirname(file), File.basename(file, ".*"))
     FileUtils.mkdir(to) unless File.exists? to
     zipfile.each do |f|
-      if !f.directory? # Don't extract directories
+      if !f.directory? && File.basename(f.name)[0..1] != "._" # Don't extract directories
         fpath = File.join(to, File.basename(f.name))
         open(fpath, 'wb') do |z|
           z << f.read
         end
-        result = ImageProcessingJob.new(fpath, parent).run
+        result = ImageProcessingJob.new(fpath, parent, copyright).run
       end
     end
   end
