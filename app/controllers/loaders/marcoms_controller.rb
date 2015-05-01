@@ -23,11 +23,11 @@ class Loaders::MarcomsController < ApplicationController
       end
     end
     @page_title = "Marketing and Communications Loader"
-    @copyright = 'Marketing and Communications images are for use only within the context of Northeastern University. Appropriate uses include: Northeastern University-related websites, Northeastern University-based print/web publications and for speaking appearances when acting as a representative of Northeastern University. Images should be credited: "Photographer Name/Northeastern University.” Images are not to be used for self-promotional purposes outside of Northeastern University such as LinkedIn, Facebook or in commercial/external publications such as advertisements, books or magazines without written permission from Northeastern Marketing and Communications. For more information, please contact the senior staff photographer in the office of Marketing and Communications at 617.373.6767'
     render 'loaders/new', locals: { collections_options: @collections_options}
   end
 
   def create
+    @copyright = 'Marketing and Communications images are for use only within the context of Northeastern University. Appropriate uses include: Northeastern University-related websites, Northeastern University-based print/web publications and for speaking appearances when acting as a representative of Northeastern University. Images should be credited: "Photographer Name/Northeastern University.” Images are not to be used for self-promotional purposes outside of Northeastern University such as LinkedIn, Facebook or in commercial/external publications such as advertisements, books or magazines without written permission from Northeastern Marketing and Communications. For more information, please contact the senior staff photographer in the office of Marketing and Communications at 617.373.6767'
     begin
       # check error condition No files
       return json_error("Error! No file to save") if !params.has_key?(:file)
@@ -44,7 +44,7 @@ class Loaders::MarcomsController < ApplicationController
         flash[:error] = "You must accept the terms of service!"
         redirect_to(:back) and return
       else
-        process_file(file, parent)
+        process_file(file, parent, @copyright)
       end
     rescue => exception
       logger.error "MarcomsController::create rescued #{exception.class}\n\t#{exception.to_s}\n #{exception.backtrace.join("\n")}\n\n"
@@ -60,7 +60,7 @@ class Loaders::MarcomsController < ApplicationController
   end
 
   protected
-    def process_file(file, parent)
+    def process_file(file, parent, copyright)
       if virus_check(file) == 0
         tempdir = Rails.root.join("tmp")
         uniq_hsh = Digest::MD5.hexdigest("#{file.original_filename}")[0,2]
@@ -68,10 +68,11 @@ class Loaders::MarcomsController < ApplicationController
         new_path = tempdir.join(file_name).to_s
         new_file = "#{new_path}.zip"
         FileUtils.mv(file.tempfile.path, new_file)
+        puts @copyright
         #if zip
         if extract_mime_type(new_file) == 'application/zip'
           # send to job
-          Cerberus::Application::Queue.push(ProcessZipJob.new(new_file.to_s, parent, @copyright))
+          Cerberus::Application::Queue.push(ProcessZipJob.new(new_file.to_s, parent, copyright))
           flash[:notice] = "Your file has been submitted and is now being processed. Check back soon for a load report."
           redirect_to "/my_loaders"
         else
