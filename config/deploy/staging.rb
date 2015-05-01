@@ -25,7 +25,7 @@ namespace :deploy do
   desc "Restarting application"
   task :start_httpd do
     on roles(:app), :in => :sequence, :wait => 5 do
-      sudo "service httpd start"
+      execute :sudo, "service httpd start"
     end
   end
 
