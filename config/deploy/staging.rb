@@ -14,14 +14,23 @@ set :rails_env, :staging
 
 server 'drs@cerberus.library.northeastern.edu', user: 'drs', roles: %w{web app db}
 
-namespace :deploy do
+namespace :start do
+  desc "Start Jetty"
+  task :start_jetty do
+    on roles(:app), :in => :sequence, :wait => 5 do
+      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec rake jetty:start)"
+    end
+  end
+
   desc "Restarting application"
   task :start_httpd do
     on roles(:app), :in => :sequence, :wait => 5 do
       sudo "service httpd start"
     end
   end
+end
 
+namespace :stop do
   desc "Restarting application"
   task :stop_httpd do
     on roles(:app), :in => :sequence, :wait => 5 do
@@ -29,10 +38,19 @@ namespace :deploy do
     end
   end
 
+  desc "Stop Jetty"
+  task :stop_jetty do
+    on roles(:app), :in => :sequence, :wait => 5 do
+      execute "cd /home/drs/cerberus/current && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake jetty:stop)", raise_on_non_zero_exit: false
+    end
+  end
+end
+
+namespace :deploy do
   desc "Restarting the resque workers"
   task :restart_workers do
     on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec kill -TERM $(cat /home/drs/config/resque-pool.pid))", raise_on_non_zero_exit: false
+      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec kill -TERM $(cat /home/drs/config/resque-pool.pid > /dev/null 2> /dev/null) > /dev/null 2> /dev/null); true", raise_on_non_zero_exit: false
       execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . kill $(ps aux | grep -i resque | awk '{print $2}'))", raise_on_non_zero_exit: false
       execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rm -f /home/drs/config/resque-pool.pid)", raise_on_non_zero_exit: false
       execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec resque-pool --daemon -p /home/drs/config/resque-pool.pid)"
@@ -46,21 +64,13 @@ namespace :deploy do
     end
   end
 
-  desc "Jetty"
-  task :start_jetty do
+  desc "Make Jetty"
+  task :gen_jetty do
     on roles(:app), :in => :sequence, :wait => 5 do
       # massive kludge because the zip never downloads properly...
       execute "mkdir -p #{release_path}/tmp && cd #{release_path}/tmp && wget -q http://librarystaff.neu.edu/DRSzip/new-solr-schema.zip"
       execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec rails g hydra:jetty)"
       execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec rake jetty:config)"
-      execute "cd #{release_path} && bundle exec rake jetty:start"
-    end
-  end
-
-  desc "Jetty"
-  task :stop_jetty do
-    on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd /home/drs/cerberus/current && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake jetty:stop)", raise_on_non_zero_exit: false
     end
   end
 
@@ -97,8 +107,8 @@ before 'deploy:restart_workers', 'rvm1:hook'
 # These hooks execute in the listed order after the deploy:updating task
 # occurs.  This is the task that handles refreshing the app code, so this
 # should only fire on actual deployments.
-before 'deploy:starting', 'deploy:stop_httpd'
-before 'deploy:starting', 'deploy:stop_jetty'
+before 'deploy:starting', 'stop:stop_httpd'
+before 'deploy:starting', 'stop:stop_jetty'
 
 after 'deploy:updating', 'bundler:install'
 after 'deploy:updating', 'deploy:copy_yml_file'
@@ -106,6 +116,8 @@ after 'deploy:updating', 'deploy:migrate'
 after 'deploy:updating', 'deploy:whenever'
 after 'deploy:updating', 'deploy:clear_cache'
 after 'deploy:finished', 'deploy:flush_redis'
-after 'deploy:updating', 'deploy:start_jetty'
-after 'deploy:finished', 'deploy:start_httpd'
+after 'deploy:updating', 'deploy:gen_jetty'
 after 'deploy:finished', 'deploy:restart_workers'
+
+after 'deploy:finished', 'start:start_jetty'
+after 'deploy:finished', 'start:start_httpd'
