@@ -55,12 +55,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
 
     t.origin_info(path: 'originInfo', namespace_prefix: 'mods'){
       t.publisher(path: 'publisher', namespace_prefix: 'mods', index_as: [:stored_searchable])
-      t.place(path: 'place', namespace_prefix: 'mods', index_as: [:stored_searchable]){
-        t.term(path: 'placeTerm', namespace_prefix: 'mods'){
-          t.type(path: { attribute: 'type' })
-          t.authority(path: { attribute: 'authority' })
-        }
-      }
+      t.place(path: 'place', namespace_prefix: 'mods', index_as: [:stored_searchable])
       t.date_created(path: 'dateCreated', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable], attributes: { encoding: 'w3cdtf', keyDate: 'yes' })
       t.copyright(path: 'copyrightDate', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable], attributes: { encoding: 'w3cdtf' })
       t.date_issued(path: 'dateIssued', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable], attributes: { encoding: 'w3cdtf' })
@@ -93,12 +88,6 @@ class ModsDatastream < ActiveFedora::OmDatastream
       t.scoped_topic(path: 'topic', namespace_prefix: 'mods', attributes: { authority: :any })
     }
     t.identifier(path: 'identifier', namespace_prefix: 'mods', index_as: [:stored_searchable]){
-      t.type(path: { attribute: 'type'})
-    }
-
-    t.classification(path: 'classification', namespace_prefix: 'mods')
-
-    t.access_condition(path: 'accessCondition', namespace_prefix: 'mods'){
       t.type(path: { attribute: 'type'})
     }
 

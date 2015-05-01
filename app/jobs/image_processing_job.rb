@@ -113,8 +113,8 @@ class ImageProcessingJob
           core_file.mods.genre.authority = "aat"
           # core_file.mods.physical_description.digital_origin = "born digital"
           # core_file.mods.physical_description.extent = "1 photograph"
-          # core_file.mods.access_condition = copyright
-          # core_file.mods.access_condition.type = "use and reproduction"
+          core_file.mods.access_condition = copyright
+          core_file.mods.access_condition.type = "use and reproduction"
         end
 
         # Featured Content tagging
@@ -146,6 +146,7 @@ class ImageProcessingJob
       puts "There was an error"
       puts error
       pid = core_file.pid
+      puts pid
       failed_pids_log.warn "#{Time.now} - Error processing PID: #{pid}"
       errors_for_pid = Logger.new("#{Rails.root}/log/#{job_id}/#{pid}.log")
       errors_for_pid.warn "#{Time.now} - #{$!.inspect}"
