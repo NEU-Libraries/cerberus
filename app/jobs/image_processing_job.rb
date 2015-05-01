@@ -35,21 +35,48 @@ class ImageProcessingJob
         #create failure report because it isn't an image
         core_file.destroy
       else
+        classification = ''
         photo = IPTC::JPEG::Image.from_file file, quick=true
         photo.values.each do |item|
           puts "#{item.key}\t#{item.value}"
           if item.key == 'iptc/Headline'
             core_file.title = item.value
+          elsif item.key == 'iptc/Category'
+            if item.value == "ALU"
+              k = "alumni"
+            elsif item.value == "ATH"
+              k = "athletics"
+            elsif item.value == "CAM"
+              k = "campus"
+            elsif item.value == "CLA"
+              k = "classroom"
+            elsif item.value == "COM"
+              k = "community outreach"
+            elsif item.value == "EXPERIENTIAL LEARNING"
+              k = item.value.downcase
+            elsif item.value == "HEA"
+              k = "headshots"
+            elsif item.value == "POR"
+              k = "portraits"
+            elsif item.value == "PRE"
+              k = "president"
+            elsif item.value == "RES"
+              k = "research"
+            end
+            classification = k
+            core_file.mods.classification = classification
           elsif item.key == 'iptc/SuppCategory'
-            # core_file.mods.classification = ''
-            # if item.value.kind_of?(Array)
-            #   puts "its an array"
-            #   item.value.each do |i|
-            #     core_file.mods.classification = core_file.mods.classification + " #{i}"
-            #   end
-            # else
-            #   core_file.mods.classification = item.value
-            # end
+            s = ''
+            if item.value.kind_of?(Array)
+              item.value.each do |i|
+                if i.kind_of?(String)
+                  s = s + " -- " + i.downcase
+                end
+              end
+              core_file.mods.classification = "#{classification}#{s}"
+            else
+              core_file.mods.classification = "#{classification}#{item.value}"
+            end
           elsif item.key == 'iptc/City'
             # core_file.mods.origin_info.place.term = item.value
             # core_file.mods.origin_info.place.term.type = "text"
