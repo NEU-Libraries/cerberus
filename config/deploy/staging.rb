@@ -18,7 +18,7 @@ namespace :start do
   desc "Start Jetty"
   task :start_jetty do
     on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec rake jetty:start)"
+      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec rake jetty:start_staging)"
     end
   end
 
@@ -41,7 +41,7 @@ namespace :stop do
   desc "Stop Jetty"
   task :stop_jetty do
     on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd /home/drs/cerberus/current && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake jetty:stop)", raise_on_non_zero_exit: false
+      execute "cd /home/drs/cerberus/current && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake jetty:stop_staging)", raise_on_non_zero_exit: false
     end
   end
 end
@@ -96,6 +96,20 @@ namespace :deploy do
     end
   end
 
+  desc "Copy rvmrc"
+  task :copy_rvmrc_file do
+    on roles(:app), :in => :sequence, :wait => 5 do
+      execute "cp /home/drs/.drsrvmrc #{release_path}/.rvmrc"
+    end
+  end
+
+  desc 'Trust rvmrc file'
+  task :trust_rvmrc do
+    on roles(:app), :in => :sequence, :wait => 5 do
+      execute "/home/drs/.rvm/bin/rvm rvmrc trust #{release_path}"
+    end
+  end
+
 end
 
 # Load the rvm environment before executing the refresh data hook.
@@ -110,6 +124,8 @@ before 'deploy:restart_workers', 'rvm1:hook'
 before 'deploy:starting', 'stop:stop_httpd'
 before 'deploy:starting', 'stop:stop_jetty'
 
+after 'deploy:updating', 'deploy:copy_rvmrc_file'
+after 'deploy:updating', 'deploy:trust_rvmrc'
 after 'deploy:updating', 'bundler:install'
 after 'deploy:updating', 'deploy:copy_yml_file'
 after 'deploy:updating', 'deploy:migrate'
