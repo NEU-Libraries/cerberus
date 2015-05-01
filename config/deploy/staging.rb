@@ -15,13 +15,6 @@ set :rails_env, :staging
 server 'drs@cerberus.library.northeastern.edu', user: 'drs', roles: %w{web app db}
 
 namespace :start do
-  desc "Start Jetty"
-  task :start_jetty do
-    on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec rake jetty:start_staging)"
-    end
-  end
-
   desc "Restarting application"
   task :start_httpd do
     on roles(:app), :in => :sequence, :wait => 5 do
@@ -35,13 +28,6 @@ namespace :stop do
   task :stop_httpd do
     on roles(:app), :in => :sequence, :wait => 5 do
       sudo "service httpd stop"
-    end
-  end
-
-  desc "Stop Jetty"
-  task :stop_jetty do
-    on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd /home/drs/cerberus/current && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake jetty:stop_staging)", raise_on_non_zero_exit: false
     end
   end
 end
@@ -61,16 +47,6 @@ namespace :deploy do
   task :clear_cache do
     on roles(:app), :in => :sequence, :wait => 5 do
       execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake cache:clear)", raise_on_non_zero_exit: false # if it was never run, theres no dir
-    end
-  end
-
-  desc "Make Jetty"
-  task :gen_jetty do
-    on roles(:app), :in => :sequence, :wait => 5 do
-      # massive kludge because the zip never downloads properly...
-      execute "mkdir -p #{release_path}/tmp && cd #{release_path}/tmp && wget -q http://librarystaff.neu.edu/DRSzip/new-solr-schema.zip"
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec rails g hydra:jetty)"
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec rake jetty:config)"
     end
   end
 
@@ -122,7 +98,6 @@ before 'deploy:restart_workers', 'rvm1:hook'
 # occurs.  This is the task that handles refreshing the app code, so this
 # should only fire on actual deployments.
 before 'deploy:starting', 'stop:stop_httpd'
-before 'deploy:starting', 'stop:stop_jetty'
 
 after 'deploy:updating', 'deploy:copy_rvmrc_file'
 after 'deploy:updating', 'deploy:trust_rvmrc'
@@ -132,8 +107,6 @@ after 'deploy:updating', 'deploy:migrate'
 after 'deploy:updating', 'deploy:whenever'
 after 'deploy:updating', 'deploy:clear_cache'
 after 'deploy:finished', 'deploy:flush_redis'
-after 'deploy:updating', 'deploy:gen_jetty'
 after 'deploy:finished', 'deploy:restart_workers'
 
-after 'deploy:finished', 'start:start_jetty'
 after 'deploy:finished', 'start:start_httpd'

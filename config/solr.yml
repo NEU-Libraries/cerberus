@@ -3,7 +3,7 @@
 development:
   url: http://localhost:8983/solr/development
 staging:
-  url: http://localhost:8983/solr/development
+  url: http://localhost:8080/solr/development-core
 test: &TEST
   url: <%= "http://127.0.0.1:#{ENV['TEST_JETTY_PORT'] || 8983}/solr/test" %>
 cucumber:
