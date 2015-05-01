@@ -105,4 +105,4 @@ after 'deploy:updating', 'deploy:clear_cache'
 
 after 'deploy:finished', 'deploy:flush_redis'
 # after 'deploy:finished', 'deploy:start_httpd'
-after 'deploy:finished', 'deploy:restart_workers'
+after 'deploy:finished', 'deploy:restart_workers
