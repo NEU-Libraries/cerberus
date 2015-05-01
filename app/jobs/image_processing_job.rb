@@ -40,15 +40,15 @@ class ImageProcessingJob
           puts "#{item.key}\t#{item.value}"
           if item.key == 'iptc/Headline'
             core_file.title = item.value
-          elsif item.key == 'iptc/Category'
-            #core_file.mods.classification = item.value.downcase
           elsif item.key == 'iptc/SuppCategory'
-            # if item.value.kind_of(Array)
+            # core_file.mods.classification = ''
+            # if item.value.kind_of?(Array)
+            #   puts "its an array"
             #   item.value.each do |i|
-            #     core_file.mods.classification << " -- i"
+            #     core_file.mods.classification = core_file.mods.classification + " #{i}"
             #   end
             # else
-            #   core_file.mods.classification << " -- #{item.value}"
+            #   core_file.mods.classification = item.value
             # end
           elsif item.key == 'iptc/City'
             # core_file.mods.origin_info.place.term = item.value
@@ -74,7 +74,7 @@ class ImageProcessingJob
             core_file.mods.origin_info.publisher = item.value
           elsif item.key == "iptc/DateCreated"
             core_file.mods.origin_info.copyright = "#{item.value[0..3]}-#{item.value[4..5]}-#{item.value[6..7]}"
-            core_file.mods.date = "#{item.value[0..3]}-#{item.value[4..5]}-#{item.value[6..7]}"
+            core_file.date = "#{item.value[0..3]}-#{item.value[4..5]}-#{item.value[6..7]}"
           elsif item.key == 'iptc/Keywords'
             if item.value.kind_of?(Array)
               core_file.keywords = item.value

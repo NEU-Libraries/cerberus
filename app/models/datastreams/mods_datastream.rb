@@ -96,6 +96,12 @@ class ModsDatastream < ActiveFedora::OmDatastream
       t.type(path: { attribute: 'type'})
     }
 
+    t.classification(path: 'classification', namespace_prefix: 'mods')
+
+    t.access_condition(path: 'accessCondition', namespace_prefix: 'mods'){
+      t.type(path: { attribute: 'type'})
+    }
+
     t.related_item(path: 'relatedItem', namespace_prefix: 'mods'){
       t.title_info(path: 'titleInfo', namespace_prefix: 'mods'){
         t.title(path: 'title', namespace_prefix: 'mods')
