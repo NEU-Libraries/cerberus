@@ -14,25 +14,21 @@ set :rails_env, :staging
 
 server 'drs@cerberus.library.northeastern.edu', user: 'drs', roles: %w{web app db}
 
-namespace :start do
-  desc "Restarting application"
-  task :start_httpd do
-    on roles(:app), :in => :sequence, :wait => 5 do
-      sudo "service httpd start"
-    end
-  end
-end
-
-namespace :stop do
+namespace :deploy do
   desc "Restarting application"
   task :stop_httpd do
     on roles(:app), :in => :sequence, :wait => 5 do
       sudo "service httpd stop"
     end
   end
-end
 
-namespace :deploy do
+  desc "Restarting application"
+  task :start_httpd do
+    on roles(:app), :in => :sequence, :wait => 5 do
+      sudo "service httpd start"
+    end
+  end
+
   desc "Restarting the resque workers"
   task :restart_workers do
     on roles(:app), :in => :sequence, :wait => 5 do
@@ -97,7 +93,7 @@ end
 # These hooks execute in the listed order after the deploy:updating task
 # occurs.  This is the task that handles refreshing the app code, so this
 # should only fire on actual deployments.
-before 'deploy:starting', 'stop:stop_httpd'
+before 'deploy:starting', 'deploy:stop_httpd'
 
 after 'deploy:updating', 'deploy:copy_rvmrc_file'
 after 'deploy:updating', 'deploy:trust_rvmrc'
@@ -108,5 +104,5 @@ after 'deploy:updating', 'deploy:whenever'
 after 'deploy:updating', 'deploy:clear_cache'
 
 after 'deploy:finished', 'deploy:flush_redis'
-after 'deploy:finished', 'start:start_httpd'
+after 'deploy:finished', 'deploy:start_httpd'
 after 'deploy:finished', 'deploy:restart_workers'
