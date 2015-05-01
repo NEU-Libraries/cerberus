@@ -2,6 +2,8 @@
 
 class Loaders::MarcomsController < ApplicationController
   include Cerberus::Controller
+  include MimeHelper
+
   before_filter :authenticate_user!
   before_filter :verify_group
 
@@ -14,8 +16,14 @@ class Loaders::MarcomsController < ApplicationController
       children = child.child_collections.sort_by{|c| c.title}
       children.each do |c|
         @collections_options.push([" - #{c.title}", c.pid])
+        children_next = c.child_collections.sort_by{|c| c.title}
+        children_next.each do |c|
+          @collections_options.push(["  -- #{c.title}", c.pid])
+        end
       end
     end
+    @page_title = "Marketing and Communications Loader"
+    @copyright = 'Marketing and Communications images are for use only within the context of Northeastern University. Appropriate uses include: Northeastern University-related websites, Northeastern University-based print/web publications and for speaking appearances when acting as a representative of Northeastern University. Images should be credited: "Photographer Name/Northeastern University.” Images are not to be used for self-promotional purposes outside of Northeastern University such as LinkedIn, Facebook or in commercial/external publications such as advertisements, books or magazines without written permission from Northeastern Marketing and Communications. For more information, please contact the senior staff photographer in the office of Marketing and Communications at 617.373.6767'
     render 'loaders/new', locals: { collections_options: @collections_options}
   end
 
@@ -60,11 +68,20 @@ class Loaders::MarcomsController < ApplicationController
         new_path = tempdir.join(file_name).to_s
         new_file = "#{new_path}.zip"
         FileUtils.mv(file.tempfile.path, new_file)
-        # send to job
-        Cerberus::Application::Queue.push(ProcessZipJob.new(new_file.to_s, new_path, file_name, parent))
-        redirect_to "/my_loaders"
+        #if zip
+        if extract_mime_type(new_file) == 'application/zip'
+          # send to job
+          Cerberus::Application::Queue.push(ProcessZipJob.new(new_file.to_s, parent, @copyright))
+          redirect_to "/my_loaders"
+        else
+          #error out
+          FileUtils.rm(new_file)
+          flash[:error] = "The file you uploaded was not a zipfile. Please try again."
+          redirect_to("/my_loaders")
+        end
       else
-        render :json => [{:error => "Error creating file."}]
+        flash[:error] = "Error creating file."
+        redirect_to("/my_loaders")
       end
     end
 

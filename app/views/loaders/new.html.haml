@@ -1,12 +1,8 @@
 -# Bulk upload form
 
-//-content_for :page_header do
--# - loader_parent = Loader.find( params[:parent] ).title
--# %h1.page-header
--#   Upload File to
--#   - if loader_parent
--#     %i
--#       = loader_parent
+-content_for :page_header do
+  %h1.page-header
+    =@page_title
 
 
 = form_tag("/loaders/marcom", action: "create", method: "post", multipart: true, id: "loaderForm") do
