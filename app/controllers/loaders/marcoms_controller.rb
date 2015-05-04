@@ -8,7 +8,7 @@ class Loaders::MarcomsController < ApplicationController
   before_filter :verify_group
 
   def new
-    @parent = Community.find("neu:kh04dp90j")
+    @parent = Community.find("neu:pn89d6966")
     @collections_options = Array.new
     cols = @parent.child_collections.sort_by{|c| c.title}
     cols.each do |child|
