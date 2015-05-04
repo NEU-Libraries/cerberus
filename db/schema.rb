@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150504145055) do
+ActiveRecord::Schema.define(:version => 20150504194419) do
 
   create_table "bookmarks", :force => true do |t|
     t.integer  "user_id",     :null => false
@@ -68,6 +68,19 @@ ActiveRecord::Schema.define(:version => 20150504145055) do
 
   add_index "follows", ["followable_id", "followable_type"], :name => "fk_followables"
   add_index "follows", ["follower_id", "follower_type"], :name => "fk_follows"
+
+  create_table "image_reports", :force => true do |t|
+    t.boolean  "valid"
+    t.string   "pid"
+    t.string   "collection"
+    t.string   "name"
+    t.string   "email"
+    t.string   "title"
+    t.text     "iptc"
+    t.text     "exception"
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
+  end
 
   create_table "impressions", :force => true do |t|
     t.string "pid"

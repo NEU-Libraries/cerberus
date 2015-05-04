@@ -1,4 +1,5 @@
-class Loaders::ImageReport < Loaders::FileReport
+class Loaders::ImageReport < ActiveRecord::Base
+  belongs_to :load_report
   attr_accessible :exception, :valid, :pid, :title, :collection, :iptc, :name, :email
 
   def self.create_success(core_file, user, iptc)
