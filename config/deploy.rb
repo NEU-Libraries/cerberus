@@ -2,7 +2,9 @@ set :rvm_ruby_string,  ENV['GEM_HOME'].gsub(/.*\//,"")
 set :application, 'drs'
 
 set :scm, :git
-set :repo_url, 'git@github.com:nu-lts/drs.git'
+# set :repo_url, 'git@github.com:nu-lts/drs.git'
+# set :repo_url, 'git@github.com:NEU-Libraries/cerberus.git'
+set :repo_url, 'https://github.com/NEU-Libraries/cerberus.git'
 
 # ask :branch, proc { `git rev-parse --abbrev-ref HEAD`.chomp }
 
@@ -11,8 +13,8 @@ set :rvm_ruby_string,  ENV['GEM_HOME'].gsub(/.*\//,"")
 set :deploy_via, :copy
 
 # set :format, :pretty
-# set :log_level, :debug
-set :pty, true
+set :log_level, :debug
+# set :pty, true
 
 # set :linked_files, %w{config/database.yml}
 # set :linked_dirs, %w{bin log tmp/pids tmp/cache tmp/sockets vendor/bundle public/system}
@@ -21,7 +23,8 @@ set :pty, true
 set :keep_releases, 5
 
 set :ssh_options, {
-   forward_agent: true,
+  #  forward_agent: true,
+  # verbose: :debug,
  }
 
 namespace :deploy do
