@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150504194419) do
+ActiveRecord::Schema.define(:version => 20150504194859) do
 
   create_table "bookmarks", :force => true do |t|
     t.integer  "user_id",     :null => false
@@ -78,8 +78,9 @@ ActiveRecord::Schema.define(:version => 20150504194419) do
     t.string   "title"
     t.text     "iptc"
     t.text     "exception"
-    t.datetime "created_at", :null => false
-    t.datetime "updated_at", :null => false
+    t.datetime "created_at",     :null => false
+    t.datetime "updated_at",     :null => false
+    t.integer  "load_report_id"
   end
 
   create_table "impressions", :force => true do |t|
