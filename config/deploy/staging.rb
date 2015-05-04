@@ -32,17 +32,10 @@ namespace :deploy do
   desc "Restarting the resque workers"
   task :restart_workers do
     on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec kill -TERM $(cat /home/drs/config/resque-pool.pid > /dev/null 2> /dev/null) > /dev/null 2> /dev/null); true", raise_on_non_zero_exit: false
+      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec kill -TERM $(cat /home/drs/config/resque-pool.pid))", raise_on_non_zero_exit: false
       execute "kill $(ps aux | grep -i resque | awk '{print $2}')", raise_on_non_zero_exit: false
       execute "rm -f /home/drs/config/resque-pool.pid", raise_on_non_zero_exit: false
       execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec resque-pool --daemon -p /home/drs/config/resque-pool.pid)"
-    end
-  end
-
-  desc "Clearing cache"
-  task :clear_cache do
-    on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . rake cache:clear)", raise_on_non_zero_exit: false # if it was never run, theres no dir
     end
   end
 
@@ -88,7 +81,7 @@ end
 # This will be necessary for any hook that needs access to ruby.
 # Note the use of the rvm-auto shell in the task definition.
 
-# before 'deploy:restart_workers', 'rvm1:hook'
+before 'deploy:restart_workers', 'rvm1:hook'
 
 # These hooks execute in the listed order after the deploy:updating task
 # occurs.  This is the task that handles refreshing the app code, so this
@@ -101,8 +94,7 @@ after 'deploy:updating', 'bundler:install'
 after 'deploy:updating', 'deploy:copy_yml_file'
 after 'deploy:updating', 'deploy:migrate'
 after 'deploy:updating', 'deploy:whenever'
-after 'deploy:updating', 'deploy:clear_cache'
+after 'deploy:updating', 'deploy:flush_redis'
 
-after 'deploy:finished', 'deploy:flush_redis'
-# after 'deploy:finished', 'deploy:start_httpd'
 after 'deploy:finished', 'deploy:restart_workers'
+after 'deploy:finished', 'deploy:start_httpd'
