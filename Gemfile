@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 
-gem "colorize", "0.6.0"
-gem "sshkit", github: "cheald/sshkit", branch: "fix_multithread_conn_pooling"
+gem "colorize", "0.6.0" # https://github.com/capistrano/sshkit/issues/200
+gem "sshkit", github: "cheald/sshkit", branch: "fix_multithread_conn_pooling" # https://github.com/capistrano/sshkit/pull/137 - staging was failing on cap deploy
 gem 'rails', '3.2.12'
 gem 'redis-rails'
 gem 'mysql2' # Used in staging environment.
