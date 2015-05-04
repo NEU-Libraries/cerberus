@@ -33,9 +33,9 @@ class ImageProcessingJob
       core_file.instantiate_appropriate_content_object(file)
       if core_file.canonical_class != "ImageMasterFile"
         #create failure report because it isn't an image
-        # report = Loaders::ImageReport.create_failure(current_user, "File is not an image", NULL)
+        report = Loaders::ImageReport.create_failure(current_user, "File is not an image", NULL)
         core_file.destroy
-        #return report
+        return report
       else
         classification = ''
         photo = IPTC::JPEG::Image.from_file file, quick=true
@@ -143,8 +143,8 @@ class ImageProcessingJob
           end
         end
         #create success report
-        # report = Loaders::ImageReport.create_success(core_file, current_user, photo.values)
-        # return report
+        report = Loaders::ImageReport.create_success(core_file, current_user, photo.values)
+        return report
 
       end
     rescue Exception => error
@@ -158,9 +158,9 @@ class ImageProcessingJob
       errors_for_pid.warn "#{Time.now} - #{$!}"
       errors_for_pid.warn "#{Time.now} - #{$@}"
       #create failure report
-      # report = Loaders::ImageReport.create_failure(current_user, error, photo.values)
+      report = Loaders::ImageReport.create_failure(current_user, error, photo.values)
       core_file.destroy
-      #return report
+      return report
     end
   end
 end
