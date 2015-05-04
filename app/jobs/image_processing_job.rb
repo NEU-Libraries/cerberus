@@ -1,14 +1,15 @@
 class ImageProcessingJob
-  attr_accessor :file, :parent, :copyright
+  attr_accessor :file, :parent, :copyright, :current_user
 
   def queue_name
     :loader_image_processing
   end
 
-  def initialize(file, parent, copyright)
+  def initialize(file, parent, copyright, current_user)
     self.file = file
     self.parent = parent
     self.copyright = copyright
+    self.current_user = current_user
   end
 
   def run
@@ -25,7 +26,6 @@ class ImageProcessingJob
       core_file.parent = Collection.find(parent)
       core_file.properties.parent_id = core_file.parent.pid
       core_file.tag_as_in_progress
-      # Context derived attributes
       core_file.tmp_path = file
       core_file.properties.original_filename = File.basename(file)
       core_file.label = File.basename(file)
@@ -33,11 +33,14 @@ class ImageProcessingJob
       core_file.instantiate_appropriate_content_object(file)
       if core_file.canonical_class != "ImageMasterFile"
         #create failure report because it isn't an image
+        # report = Loaders::ImageReport.create_failure(current_user, "File is not an image", NULL)
         core_file.destroy
+        #return report
       else
         classification = ''
         photo = IPTC::JPEG::Image.from_file file, quick=true
         photo.values.each do |item|
+          #handle special characters like smart quotes and ampersands
           puts "#{item.key}\t#{item.value}"
           if item.key == 'iptc/Headline'
             core_file.title = item.value
@@ -140,6 +143,8 @@ class ImageProcessingJob
           end
         end
         #create success report
+        # report = Loaders::ImageReport.create_success(core_file, current_user, photo.values)
+        # return report
 
       end
     rescue Exception => error
@@ -152,7 +157,10 @@ class ImageProcessingJob
       errors_for_pid.warn "#{Time.now} - #{$!.inspect}"
       errors_for_pid.warn "#{Time.now} - #{$!}"
       errors_for_pid.warn "#{Time.now} - #{$@}"
+      #create failure report
+      # report = Loaders::ImageReport.create_failure(current_user, error, photo.values)
       core_file.destroy
+      #return report
     end
   end
 end

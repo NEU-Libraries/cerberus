@@ -1,14 +1,16 @@
 class ProcessZipJob
-  attr_accessor :zip_path, :parent, :copyright
+  attr_accessor :loader_name, :zip_path, :parent, :copyright, :current_user
 
   def queue_name
     :loader_process_zip
   end
 
-  def initialize(zip_path, parent, copyright)
+  def initialize(loader_name, zip_path, parent, copyright, current_user)
+    self.loader_name = loader_name
     self.zip_path = zip_path
     self.parent = parent
     self.copyright = copyright
+    self.current_user = current_user
   end
 
   def run
@@ -19,6 +21,9 @@ class ProcessZipJob
       # result = ImageProcessingJob.new().run
       # result will be an image_report
     # when all images are processed, create a load_report
+    results = []
+    Loaders::LoadReport.create_from_strings(current_user, Time.new, results, loader_name)
+
   end
 
   def unzip(file)
@@ -31,7 +36,7 @@ class ProcessZipJob
         open(fpath, 'wb') do |z|
           z << f.read
         end
-        result = ImageProcessingJob.new(fpath, parent, copyright).run
+        result = ImageProcessingJob.new(fpath, parent, copyright, current_user).run
       end
     end
   end

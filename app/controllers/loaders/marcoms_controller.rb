@@ -68,11 +68,10 @@ class Loaders::MarcomsController < ApplicationController
         new_path = tempdir.join(file_name).to_s
         new_file = "#{new_path}.zip"
         FileUtils.mv(file.tempfile.path, new_file)
-        puts @copyright
         #if zip
         if extract_mime_type(new_file) == 'application/zip'
           # send to job
-          Cerberus::Application::Queue.push(ProcessZipJob.new(new_file.to_s, parent, copyright))
+          Cerberus::Application::Queue.push(ProcessZipJob.new("marcom", new_file.to_s, parent, copyright, current_user))
           flash[:notice] = "Your file has been submitted and is now being processed. Check back soon for a load report."
           redirect_to "/my_loaders"
         else

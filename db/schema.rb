@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150416223648) do
+ActiveRecord::Schema.define(:version => 20150504145055) do
 
   create_table "bookmarks", :force => true do |t|
     t.integer  "user_id",     :null => false
@@ -79,6 +79,16 @@ ActiveRecord::Schema.define(:version => 20150416223648) do
   end
 
   add_index "impressions", ["pid"], :name => "index_drs_impressions_on_pid"
+
+  create_table "load_reports", :force => true do |t|
+    t.string   "name"
+    t.string   "email"
+    t.string   "loader_name"
+    t.string   "time"
+    t.integer  "number_of_files"
+    t.datetime "created_at",      :null => false
+    t.datetime "updated_at",      :null => false
+  end
 
   create_table "local_authorities", :force => true do |t|
     t.string "name"
