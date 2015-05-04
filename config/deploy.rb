@@ -3,7 +3,8 @@ set :application, 'drs'
 
 set :scm, :git
 # set :repo_url, 'git@github.com:nu-lts/drs.git'
-set :repo_url, 'git@github.com:NEU-Libraries/cerberus.git'
+# set :repo_url, 'git@github.com:NEU-Libraries/cerberus.git'
+set :repo_url, 'https://github.com/NEU-Libraries/cerberus.git'
 
 # ask :branch, proc { `git rev-parse --abbrev-ref HEAD`.chomp }
 
