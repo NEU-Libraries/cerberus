@@ -36,7 +36,6 @@ class ImageProcessingJob
         core_file.destroy
       else
         classification = ''
-        places = []
         photo = IPTC::JPEG::Image.from_file file, quick=true
         photo.values.each do |item|
           puts "#{item.key}\t#{item.value}"
@@ -78,17 +77,6 @@ class ImageProcessingJob
             else
               core_file.mods.classification = "#{classification}#{item.value}"
             end
-          elsif item.key == 'iptc/City'
-            # core_file.mods.origin_info.place.term = item.value
-            # core_file.mods.origin_info.place.term.type = "text"
-            # places.push(item.value)
-          elsif item.key == 'iptc/ProvinceState'
-            # if item.value == "MA"
-            #   core_file.mods.origin_info.place.term = "mau"
-            #   core_file.mods.origin_info.place.term.type = "code"
-            #   core_file.mods.origin_info.place.term.authority = "marccountry"
-            # end
-            #places.push(item.value)
           elsif item.key == "iptc/Byline"
             pers = item.value.split(",")
             # pers = {:first_names=>[pers[1].strip], :last_names=>[pers[0].strip]}
@@ -111,6 +99,15 @@ class ImageProcessingJob
             else
               core_file.keywords = ["#{item.value}"]
             end
+          elsif item.key == 'iptc/City'
+            # core_file.mods.origin_info.place.term = item.value
+            # core_file.mods.origin_info.place.term.type = "text"
+          elsif item.key == 'iptc/ProvinceState'
+            # if item.value == "MA"
+            #   core_file.mods.origin_info.place.term = "mau"
+            #   core_file.mods.origin_info.place.term.type = "code"
+            #   core_file.mods.origin_info.place.term.authority = "marccountry"
+            # end
           end
           core_file.mods.genre = "photographs"
           core_file.mods.genre.authority = "aat"
@@ -118,7 +115,6 @@ class ImageProcessingJob
           core_file.mods.physical_description.extent = "1 photograph"
           core_file.mods.access_condition = copyright
           core_file.mods.access_condition.type = "use and reproduction"
-          # core_file.mods.places = places
         end
 
         # Featured Content tagging
