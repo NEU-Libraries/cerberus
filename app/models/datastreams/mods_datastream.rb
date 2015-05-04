@@ -55,7 +55,11 @@ class ModsDatastream < ActiveFedora::OmDatastream
 
     t.origin_info(path: 'originInfo', namespace_prefix: 'mods'){
       t.publisher(path: 'publisher', namespace_prefix: 'mods', index_as: [:stored_searchable])
-      t.place(path: 'place', namespace_prefix: 'mods', index_as: [:stored_searchable])
+      t.place(path: 'place', namespace_prefix: 'mods'){
+        t.term(path: 'placeTerm', namespace_prefix: 'mods'){
+          t.type(path: { attribute: 'type' })
+        }
+      }
       t.date_created(path: 'dateCreated', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable], attributes: { encoding: 'w3cdtf', keyDate: 'yes' })
       t.copyright(path: 'copyrightDate', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable], attributes: { encoding: 'w3cdtf' })
       t.date_issued(path: 'dateIssued', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable], attributes: { encoding: 'w3cdtf' })
@@ -74,7 +78,8 @@ class ModsDatastream < ActiveFedora::OmDatastream
       t.form(path: 'form', namespace_prefix: 'mods'){
         t.authority(path: {attribute: 'authority'})
       }
-      t.digital_origin(path: 'digitalOrigin')
+      t.digital_origin(path: 'digitalOrigin', namespace_prefix: 'mods')
+      t.extent(path: 'extent', namespace_prefix: 'mods')
     }
 
     t.note(path: 'note', namespace_prefix: 'mods', index_as: [:stored_searchable]){
@@ -270,6 +275,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
         xml.name('type' => 'corporate')
         xml.originInfo {
           xml.dateCreated('keyDate' => 'yes', 'encoding' => 'w3cdtf')
+          xml.place
         }
         xml.language{
           xml.languageTerm
@@ -278,6 +284,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
         xml.subject
         xml.identifier('type' => 'uri')
         xml.typeOfResource
+        xml.physicalDescription
 
         # We instantiate all of these fields for every MODS record because terminology
         # generation/access seems to barf without it.
@@ -359,6 +366,31 @@ class ModsDatastream < ActiveFedora::OmDatastream
       self.subject(index).topic = kw
     end
   end
+
+  # def places=(array_of_strings)
+  #   array_of_places = array_of_strings.select {|kw| !kw.blank? }
+  #
+  #   if array_of_places.length < self.origin_info.place.length
+  #     node_count = self.origin_info.place.length - array_of_places.length
+  #     trim_nodes_from_zero(:subject, node_count)
+  #   end
+  #
+  #   array_of_places.each_with_index do |kw, index|
+  #     if self.origin_info.place[index].nil?
+  #       #self.insert_new_node(:place)
+  #       #will this only work if place is off the root node?
+  #       term = :place
+  #       node = self.class.send("#{term.to_s}_template")
+  #       puts node
+  #       self.ng_xml.root.add_child(node)
+  #       #self.xpath("//mods/originInfo").add_child(node)
+  #
+  #     end
+  #
+  #     self.origin_info.place(index).term = kw
+  #     puts kw
+  #   end
+  # end
 
   # The following four methods are probably deprecated, given that we won't be
   # collecting corporate/personal names separately from end users, and therefore shouldn't
@@ -483,4 +515,11 @@ class ModsDatastream < ActiveFedora::OmDatastream
     end
     return builder.doc.root
   end
+
+  # def self.place_template
+  #   builder = Nokogiri::XML::Builder.new do |xml|
+  #     xml.originInfo.place
+  #   end
+  #   return builder.doc.root
+  # end
 end
