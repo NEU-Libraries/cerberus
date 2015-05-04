@@ -1,4 +1,5 @@
 class Loaders::LoadReport < ActiveRecord::Base
+  has_many :image_reports
   attr_accessible :timestamp, :number_of_files, :success_count, :fail_count, :name, :email, :loader
 
   def self.create_from_strings(user, time, results, loader_name)
