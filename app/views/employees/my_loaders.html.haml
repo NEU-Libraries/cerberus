@@ -22,23 +22,9 @@
 %section.row
   %article.span6
     %h3 My Loaders
-    = link_to("Marketing and Communications", "/loaders/marcom/new", class: "btn btn-lg btn-primary")
+    = link_to("Marketing and Communications", loaders_marcom_path, class: "btn btn-lg btn-primary")
 
   %article.span6
     %h3 Past Loads
-    %table.table.table-striped
-      %th Loader
-      %th Time of Upload
-      %th Number of Files
-      %th
-      - Loaders::LoadReport.all.each do |loader|
-        %tr
-          %td
-            = loader.loader_name.capitalize
-          %td
-            = loader.created_at.strftime("%m-%d-%Y %T")
-          %td
-            = loader.number_of_files
-          %td
-            = link_to("View", "linkgoeshere",
-            class: "btn btn-small btn-success")
+    - @loads = Loaders::LoadReport.where('loader_name = "marcom"', true).find_all
+    = render template: "/loaders/index", locals: {loads: @loads}

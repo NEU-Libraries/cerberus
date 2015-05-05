@@ -1,0 +1,17 @@
+%table.table.table-striped
+  %th Loader
+  %th Time of Upload
+  %th Number of Files
+  %th
+  - @loads.sort_by!{|l| Loaders::LoadReport.find(l).created_at}
+  - @loads.each do |loader|
+    %tr
+      %td
+        = loader.loader_name.capitalize
+      %td
+        = loader.created_at.strftime("%m-%d-%Y %T")
+      %td
+        = loader.number_of_files
+      %td
+        = link_to("View Report", loaders_report_path(loader.id),
+        class: "btn btn-small btn-success")
