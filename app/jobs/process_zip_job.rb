@@ -14,7 +14,7 @@ class ProcessZipJob
   end
 
   def run
-    report_id = Loaders::LoadReport.create_from_strings(current_user, Time.new, loader_name)
+    report_id = Loaders::LoadReport.create_from_strings(current_user, Time.new, 0, loader_name)
     # unzip zip file to tmp storage
     unzip(zip_path, report_id)
     # for each file in new dir
@@ -25,17 +25,20 @@ class ProcessZipJob
   end
 
   def unzip(file, report_id)
+    load_report = Loaders::LoadReport.find(report_id)
   Zip::Archive.open(file) do |zipfile|
     to = File.join(File.dirname(file), File.basename(file, ".*"))
     FileUtils.mkdir(to) unless File.exists? to
     zipfile.each do |f|
-      if !f.directory? && File.basename(f.name)[0..1] != "._" # Don't extract directories or mac specific files
+      if !f.directory? && File.basename(f.name)[0] != "." # Don't extract directories or mac specific files
         #also need to put in fix for spaces in the name of the file
         fpath = File.join(to, File.basename(f.name))
         open(fpath, 'wb') do |z|
           z << f.read
         end
         ImageProcessingJob.new(fpath, parent, copyright, current_user, report_id).run
+        load_report.number_of_files = load_report.number_of_files + 1
+        load_report.save!
       end
     end
   end

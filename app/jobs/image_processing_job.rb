@@ -36,8 +36,6 @@ class ImageProcessingJob
       if core_file.canonical_class != "ImageMasterFile"
         #create failure report because it isn't an image
         report = load_report.image_reports.create_failure(current_user, "File is not an image", "")
-        load_report.number_of_files = load_report.number_of_files + 1
-        load_report.save!
         core_file.destroy
         #return report
       #also check to make sure its a jpg before doing this
@@ -150,8 +148,6 @@ class ImageProcessingJob
         end
         #create success report
         report = load_report.image_reports.create_success(core_file, current_user, iptc)
-        load_report.number_of_files = load_report.number_of_files + 1
-        load_report.save!
         puts "number of files is #{load_report.number_of_files}"
         #return report
 
@@ -168,8 +164,6 @@ class ImageProcessingJob
       errors_for_pid.warn "#{Time.now} - #{$@}"
       #create failure report
       report = load_report.image_reports.create_failure(current_user, error, iptc)
-      load_report.number_of_files = load_report.number_of_files + 1
-      load_report.save!
       core_file.destroy
       #return report
     end

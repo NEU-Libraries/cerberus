@@ -1,0 +1,39 @@
+- collection = Collection.find("#{@images.first.collection}")
+%h1
+  = "#{@report.loader_name.capitalize} Load into "
+  %em
+    = link_to(collection.title, collection_path(collection.pid))
+%br
+%h4
+  Created at:
+  = @images.first.created_at.strftime("%m-%d-%Y %T")
+%h4
+  User:
+  = @report.name
+%br
+%table.table.table-striped
+  %th File Name
+  %th Core File Title
+  %th File Status
+  %th
+  - @images.each do |image|
+    - if image.validity == true
+      - image = CoreFile.find("#{image.pid}")
+      %tr.success
+        %td
+          = image.label
+        %td
+          = image.title
+        %td Success
+        %td
+          = link_to("View", core_file_path(image.pid), class:"btn btn-small btn-success")
+    - else
+      %tr.error
+        %td
+          = image.title
+        %td
+          = image.title
+        %td Error
+        - if image.iptc
+          %td
+            //view iptc
