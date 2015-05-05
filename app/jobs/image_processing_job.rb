@@ -1,15 +1,16 @@
 class ImageProcessingJob
-  attr_accessor :file, :parent, :copyright, :current_user
+  attr_accessor :file, :parent, :copyright, :current_user, :report_id
 
   def queue_name
     :loader_image_processing
   end
 
-  def initialize(file, parent, copyright, current_user)
+  def initialize(file, parent, copyright, current_user, report_id)
     self.file = file
     self.parent = parent
     self.copyright = copyright
     self.current_user = current_user
+    self.report_id = report_id
   end
 
   def run
@@ -19,7 +20,8 @@ class ImageProcessingJob
     job_id = "#{Time.now.to_i}-loader-image"
     FileUtils.mkdir_p "#{Rails.root}/log/#{job_id}"
     failed_pids_log = Logger.new("#{Rails.root}/log/#{job_id}/loader-image-process-job.log")
-
+    iptc = {}
+    load_report = Loaders::LoadReport.find(report_id)
     begin
       core_file = ::CoreFile.new
       core_file.depositor = "000000000"
@@ -33,13 +35,17 @@ class ImageProcessingJob
       core_file.instantiate_appropriate_content_object(file)
       if core_file.canonical_class != "ImageMasterFile"
         #create failure report because it isn't an image
-        report = Loaders::ImageReport.create_failure(current_user, "File is not an image", NULL)
+        report = load_report.image_reports.create_failure(current_user, "File is not an image", "")
+        load_report.number_of_files = load_report.number_of_files + 1
+        load_report.save!
         core_file.destroy
-        return report
+        #return report
+      #also check to make sure its a jpg before doing this
       else
         classification = ''
         photo = IPTC::JPEG::Image.from_file file, quick=true
         photo.values.each do |item|
+          iptc[:"#{item.key}"] = item.value
           #handle special characters like smart quotes and ampersands
           puts "#{item.key}\t#{item.value}"
           if item.key == 'iptc/Headline'
@@ -143,8 +149,11 @@ class ImageProcessingJob
           end
         end
         #create success report
-        report = Loaders::ImageReport.create_success(core_file, current_user, photo.values)
-        return report
+        report = load_report.image_reports.create_success(core_file, current_user, iptc)
+        load_report.number_of_files = load_report.number_of_files + 1
+        load_report.save!
+        puts "number of files is #{load_report.number_of_files}"
+        #return report
 
       end
     rescue Exception => error
@@ -158,9 +167,11 @@ class ImageProcessingJob
       errors_for_pid.warn "#{Time.now} - #{$!}"
       errors_for_pid.warn "#{Time.now} - #{$@}"
       #create failure report
-      report = Loaders::ImageReport.create_failure(current_user, error, photo.values)
+      report = load_report.image_reports.create_failure(current_user, error, iptc)
+      load_report.number_of_files = load_report.number_of_files + 1
+      load_report.save!
       core_file.destroy
-      return report
+      #return report
     end
   end
 end
