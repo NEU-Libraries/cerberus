@@ -3,7 +3,7 @@
   %th Time of Upload
   %th Number of Files
   %th
-  - @loads.sort_by!{|l| Loaders::LoadReport.find(l).created_at}
+  - @loads = @loads.sort_by{|l| l.created_at}.reverse
   - @loads.each do |loader|
     %tr
       %td
