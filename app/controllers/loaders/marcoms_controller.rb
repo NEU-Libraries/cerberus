@@ -63,7 +63,9 @@ class Loaders::MarcomsController < ApplicationController
   def show
     @report = Loaders::LoadReport.find(params[:id])
     @images = Loaders::ImageReport.where(load_report_id:"#{@report.id}").find_all
-    render 'loaders/show', locals: {images: @images}
+    @user = User.find_by_nuid(@report.nuid)
+    puts @user
+    render 'loaders/show', locals: {images: @images, user: @user}
   end
 
   protected

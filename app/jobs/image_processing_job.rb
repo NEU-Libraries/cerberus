@@ -1,15 +1,15 @@
 class ImageProcessingJob
-  attr_accessor :file, :parent, :copyright, :current_user, :report_id
+  attr_accessor :file, :parent, :copyright, :report_id
+  include MimeHelper
 
   def queue_name
     :loader_image_processing
   end
 
-  def initialize(file, parent, copyright, current_user, report_id)
+  def initialize(file, parent, copyright, report_id)
     self.file = file
     self.parent = parent
     self.copyright = copyright
-    self.current_user = current_user
     self.report_id = report_id
   end
 
@@ -33,18 +33,15 @@ class ImageProcessingJob
       core_file.label = File.basename(file)
 
       core_file.instantiate_appropriate_content_object(file)
-      if core_file.canonical_class != "ImageMasterFile"
-        #create failure report because it isn't an image
-        report = load_report.image_reports.create_failure(current_user, "File is not an image", "")
+      if core_file.canonical_class != "ImageMasterFile" or extract_mime_type(file) != 'image/jpeg'
+        report = load_report.image_reports.create_failure("File is not a JPG image", "", core_file.label)
         core_file.destroy
-        #return report
-      #also check to make sure its a jpg before doing this
       else
         classification = ''
         photo = IPTC::JPEG::Image.from_file file, quick=true
         photo.values.each do |item|
           iptc[:"#{item.key}"] = item.value
-          #handle special characters like smart quotes and ampersands
+          #handle special characters like smart quotes and ampersands- TO DO
           puts "#{item.key}\t#{item.value}"
           if item.key == 'iptc/Headline'
             core_file.title = item.value
@@ -133,11 +130,8 @@ class ImageProcessingJob
 
         # Create a handle
         core_file.identifier = make_handle(core_file.persistent_url)
-        puts core_file.pid
-        puts core_file.tmp_path
-        puts core_file.original_filename
 
-        # Process Thumbnail - this doens't actually seem to be working right now - I might not be passing the right params
+        # Process Thumbnail - this doens't actually seem to be working right now - I might not be passing the right params TO DO
         Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename))
         core_file.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, "edit")
 
@@ -146,26 +140,18 @@ class ImageProcessingJob
             UploadAlert.create_from_core_file(core_file, :create)
           end
         end
-        #create success report
-        report = load_report.image_reports.create_success(core_file, current_user, iptc)
-        puts "number of files is #{load_report.number_of_files}"
-        #return report
+        report = load_report.image_reports.create_success(core_file, iptc)
 
       end
     rescue Exception => error
-      puts "There was an error"
-      puts error
       pid = core_file.pid
-      puts pid
       failed_pids_log.warn "#{Time.now} - Error processing PID: #{pid}"
       errors_for_pid = Logger.new("#{Rails.root}/log/#{job_id}/#{pid}.log")
       errors_for_pid.warn "#{Time.now} - #{$!.inspect}"
       errors_for_pid.warn "#{Time.now} - #{$!}"
       errors_for_pid.warn "#{Time.now} - #{$@}"
-      #create failure report
-      report = load_report.image_reports.create_failure(current_user, error, iptc)
+      report = load_report.image_reports.create_failure(error, iptc, core_file.label)
       core_file.destroy
-      #return report
     end
   end
 end
