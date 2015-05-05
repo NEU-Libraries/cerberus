@@ -67,6 +67,29 @@ task :reset_data => :environment do
   root_dept = Community.new(pid: 'neu:1', identifier: 'neu:1', title: 'Northeastern University', description: "Founded in 1898, Northeastern is a global, experiential, research university built on a tradition of engagement with the world, creating a distinctive approach to education and research. The university offers a comprehensive range of undergraduate and graduate programs leading to degrees through the doctorate in nine colleges and schools, and select advanced degrees at graduate campuses in Charlotte, North Carolina, and Seattle.")
   root_dept.save!
 
+  # Add marcom structure for loader testing
+  marcom_dept = Community.new(mass_permissions: 'public', pid: 'neu:353', identifier: 'neu:353', title: 'Office of Marketing and Communications')
+  marcom_dept.parent = "neu:1"
+  marcom_dept.save!
+
+  # Parent collection
+  p_c = Collection.new(mass_permissions: 'public', parent: marcom_dept, pid: 'neu:6240', title: 'Marketing and Communications Photo Archive')
+  p_c.save!
+
+  # Marcom children collections - 12
+  p_1 = Collection.create(mass_permissions: 'public', parent: p_c, pid: 'neu:6241', title: 'Alumni (Photographs)')
+  p_2 = Collection.create(mass_permissions: 'public', parent: p_c, pid: 'neu:6242', title: 'Athletics (Photographs)')
+  p_3 = Collection.create(mass_permissions: 'public', parent: p_c, pid: 'neu:6243', title: 'Campus (Photographs)')
+  p_4 = Collection.create(mass_permissions: 'public', parent: p_c, pid: 'neu:6244', title: 'Campus Life (Photographs)')
+  p_5 = Collection.create(mass_permissions: 'public', parent: p_c, pid: 'neu:6245', title: 'Classroom (Photographs)')
+  p_6 = Collection.create(mass_permissions: 'public', parent: p_c, pid: 'neu:6246', title: 'Community Outreach (Photographs)')
+  p_7 = Collection.create(mass_permissions: 'public', parent: p_c, pid: 'neu:6247', title: 'Experiential Learning (Photographs)')
+  p_8 = Collection.create(mass_permissions: 'public', parent: p_c, pid: 'neu:6248', title: 'Graduation (Photographs)')
+  p_9 = Collection.create(mass_permissions: 'public', parent: p_c, pid: 'neu:6249', title: 'Headshot (Photographs)')
+  p_10 = Collection.create(mass_permissions: 'public', parent: p_c, pid: 'neu:6250', title: 'Potrait (Photographs)')
+  p_11 = Collection.create(mass_permissions: 'public', parent: p_c, pid: 'neu:6251', title: 'President (Photographs)')
+  p_12 = Collection.create(mass_permissions: 'public', parent: p_c, pid: 'neu:6252', title: 'Research (Photographs)')
+
   root_dept.rightsMetadata.permissions({group: 'public'}, 'read')
 
   tmp_user = User.find_by_email("drsadmin@neu.edu")
