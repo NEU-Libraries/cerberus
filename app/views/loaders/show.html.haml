@@ -1,15 +1,15 @@
-//- collection = Collection.find("#{@images.first.collection}")
+- collection = Collection.find(@report.collection)
 %h1
   = "#{@report.loader_name.capitalize} Load into "
   %em
-  //  = link_to(collection.title, collection_path(collection.pid))
+    = link_to(collection.title, collection_path(@report.collection))
 %br
 %h4
   Created at:
   = @images.first.created_at.strftime("%m-%d-%Y %T")
 %h4
   User:
-  = @report.name
+  = @user.name
 %br
 %table.table.table-striped
   %th File Name
@@ -30,10 +30,11 @@
     - else
       %tr.error
         %td
-          = image.title
+          = image.original_file
         %td
           = image.title
-        %td Error
+        %td
+          = "Error - #{image.exception}"
         - if image.iptc
           %td
-            //view iptc
+            //view iptc TO DO
