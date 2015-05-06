@@ -61,7 +61,10 @@ task :reset_data => :environment do
   end
 
   Rake::Task["db:reset"].reenable
-  Rake::Task["db:reset"].invoke  
+  Rake::Task["db:reset"].invoke
+
+  Rake::Task["db:test:prepare"].reenable
+  Rake::Task["db:test:prepare"].invoke  
 
   # User.find(:all).each do |user|
   #   user.destroy
