@@ -36,78 +36,88 @@ class ImageProcessingJob
       if core_file.canonical_class != "ImageMasterFile" or extract_mime_type(file) != 'image/jpeg'
         report = load_report.image_reports.create_failure("File is not a JPG image", "", core_file.label)
         core_file.destroy
+        load_report.update_counts
       else
         classification = ''
+        #handle special characters like smart quotes and ampersands
+        encoding_options = {
+          :invalid           => :replace,  # Replace invalid byte sequences
+          :undef             => :replace,  # Replace anything not defined in ASCII
+          :replace           => '',        # Use a blank for those replacements
+          :universal_newline => true       # Always break lines with \n
+        }
         photo = IPTC::JPEG::Image.from_file file, quick=true
         photo.values.each do |item|
-          iptc[:"#{item.key}"] = item.value
-          #handle special characters like smart quotes and ampersands- TO DO
-          puts "#{item.key}\t#{item.value}"
+          val = item.value
+          if val.kind_of?(String)
+            val = val.encode(Encoding.find('ASCII'), encoding_options)
+          end
+          iptc[:"#{item.key}"] = val
           if item.key == 'iptc/Headline'
-            core_file.title = item.value
+            core_file.title = val
           elsif item.key == 'iptc/Category'
-            if item.value == "ALU"
+            if val == "ALU"
               k = "alumni"
-            elsif item.value == "ATH"
+            elsif val == "ATH"
               k = "athletics"
-            elsif item.value == "CAM"
+            elsif val == "CAM"
               k = "campus"
-            elsif item.value == "CLA"
+            elsif val == "CLA"
               k = "classroom"
-            elsif item.value == "COM"
+            elsif val == "COM"
               k = "community outreach"
-            elsif item.value == "EXPERIENTIAL LEARNING"
-              k = item.value.downcase
-            elsif item.value == "HEA"
+            elsif val == "EXPERIENTIAL LEARNING"
+              k = val.downcase
+            elsif val == "HEA"
               k = "headshots"
-            elsif item.value == "POR"
+            elsif val == "POR"
               k = "portraits"
-            elsif item.value == "PRE"
+            elsif val == "PRE"
               k = "president"
-            elsif item.value == "RES"
+            elsif val == "RES"
               k = "research"
             end
             classification = k
             core_file.mods.classification = classification
           elsif item.key == 'iptc/SuppCategory'
             s = ''
-            if item.value.kind_of?(Array)
-              item.value.each do |i|
+            if val.kind_of?(Array)
+              val.each do |i|
                 if i.kind_of?(String)
                   s = s + " -- " + i.downcase
                 end
               end
               core_file.mods.classification = "#{classification}#{s}"
             else
-              core_file.mods.classification = "#{classification}#{item.value}"
+              core_file.mods.classification = "#{classification}#{val}"
             end
           elsif item.key == "iptc/Byline"
-            pers = item.value.split(",")
+            pers = val.split(",")
             # pers = {:first_names=>[pers[1].strip], :last_names=>[pers[0].strip]}
             # core_file.creators = pers
             core_file.mods.personal_name.name_part_given = pers[1].strip
             core_file.mods.personal_name.name_part_family = pers[0].strip
           elsif item.key == 'iptc/BylineTitle'
-            core_file.mods.personal_name.role.role_term = item.value
+            core_file.mods.personal_name.role.role_term = val
             core_file.mods.personal_name.role.role_term.type = "text"
           elsif item.key == 'iptc/Caption'
-            core_file.description = item.value
+            core_file.description = val
           elsif item.key == 'iptc/Source'
-            core_file.mods.origin_info.publisher = item.value
+            core_file.mods.origin_info.publisher = val
           elsif item.key == "iptc/DateCreated"
-            core_file.mods.origin_info.copyright = "#{item.value[0..3]}-#{item.value[4..5]}-#{item.value[6..7]}"
-            core_file.date = "#{item.value[0..3]}-#{item.value[4..5]}-#{item.value[6..7]}"
+            core_file.mods.origin_info.copyright = "#{val[0..3]}-#{val[4..5]}-#{val[6..7]}"
+            core_file.date = "#{val[0..3]}-#{val[4..5]}-#{val[6..7]}"
           elsif item.key == 'iptc/Keywords'
-            if item.value.kind_of?(Array)
-              core_file.keywords = item.value
+            if val.kind_of?(Array)
+              core_file.keywords = val
             else
-              core_file.keywords = ["#{item.value}"]
+              core_file.keywords = ["#{val}"]
             end
           elsif item.key == 'iptc/City'
-            # core_file.mods.origin_info.place.term = item.value
+            # core_file.mods.origin_info.place.term = val
             # core_file.mods.origin_info.place.term.type = "text"
           elsif item.key == 'iptc/ProvinceState'
-            # if item.value == "MA"
+            # if val == "MA"
             #   core_file.mods.origin_info.place.term = "mau"
             #   core_file.mods.origin_info.place.term.type = "code"
             #   core_file.mods.origin_info.place.term.authority = "marccountry"
@@ -141,7 +151,7 @@ class ImageProcessingJob
           end
         end
         report = load_report.image_reports.create_success(core_file, iptc)
-
+        load_report.update_counts
       end
     rescue Exception => error
       pid = core_file.pid
@@ -150,8 +160,9 @@ class ImageProcessingJob
       errors_for_pid.warn "#{Time.now} - #{$!.inspect}"
       errors_for_pid.warn "#{Time.now} - #{$!}"
       errors_for_pid.warn "#{Time.now} - #{$@}"
-      report = load_report.image_reports.create_failure(error, iptc, core_file.label)
+      report = load_report.image_reports.create_failure(error.message, iptc, core_file.label)
       core_file.destroy
+      load_report.update_counts
     end
   end
 end

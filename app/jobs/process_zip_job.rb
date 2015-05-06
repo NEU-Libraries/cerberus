@@ -31,8 +31,7 @@ class ProcessZipJob
       FileUtils.mkdir(to) unless File.exists? to
       zipfile.each do |f|
         if !f.directory? && File.basename(f.name)[0] != "." # Don't extract directories or mac specific files
-          fpath = File.join(to, File.basename(f.name.gsub!(/[()\s+]/, "_"))) # Replaces parens and spaces in file names with underscores
-          puts fpath
+          fpath = File.join(to, File.basename(f.name.gsub(/[()\s+]/, "_"))) # Replaces parens and spaces in file names with underscores
           open(fpath, 'wb') do |z|
             z << f.read
           end

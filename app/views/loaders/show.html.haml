@@ -1,17 +1,17 @@
+- collection = Collection.find(@report.collection)
+
 %ul.breadcrumb
   %li
     = link_to 'My Loaders', '/my_loaders'
-  %li
-    //= link_to 'Manage Communitities', '/admin/communities'
   %li.active
-    //= link_to 'Edit ' "#{@community.title}".html_safe, {:action => "edit"}
+    = "#{@report.loader_name.capitalize} Load into "
+    %em
+      = link_to(collection.title, collection_path(@report.collection))
 
-- collection = Collection.find(@report.collection)
 %h2.page-header
   = "#{@report.loader_name.capitalize} Load into "
   %em
     = link_to(collection.title, collection_path(@report.collection))
-%br
 %h4
   Created at:
   = @report.created_at.strftime("%m-%d-%Y %T")
