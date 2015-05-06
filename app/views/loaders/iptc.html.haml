@@ -1,0 +1,22 @@
+- collection = Collection.find(@load.collection)
+
+%ul.breadcrumb
+  %li
+    = link_to 'My Loaders', my_loaders_path
+  %li
+    = link_to "#{@load.loader_name.capitalize} Load into #{collection.title}", loaders_report_path(@load.id)
+  %li.active
+    = image.original_file
+
+%h2.page-header
+  = image.original_file
+%h4
+  Created at:
+  = @load.created_at.strftime("%m-%d-%Y %T")
+%h4
+  File Status:
+  = "Error - #{image.exception}"
+%h4
+  IPTC Data:
+%p
+  = image.iptc
