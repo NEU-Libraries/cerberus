@@ -16,9 +16,10 @@ class Loaders::LoadReport < ActiveRecord::Base
     return x.id
   end
 
-  #this doesn't do anything yet
   def update_counts
     images = Loaders::ImageReport.where(load_report_id:"#{self.id}").find_all
+    self.success_count = 0
+    self.fail_count = 0
     images.each do |i|
       if i.validity == true
         self.success_count = self.success_count + 1
