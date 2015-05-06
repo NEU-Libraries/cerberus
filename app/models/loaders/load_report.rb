@@ -14,9 +14,9 @@ class Loaders::LoadReport < ActiveRecord::Base
     x.save! ? x : false
 
     return x.id
-    # iterate over results to get @success_count and @fail_count
   end
 
+  #this doesn't do anything yet
   def update_counts(report_id)
     r = Loaders::LoadReport.find(report_id)
     images = Loaders::ImageReport.where(load_report_id:"#{@report.id}").find_all

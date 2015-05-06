@@ -1,15 +1,27 @@
+%ul.breadcrumb
+  %li
+    = link_to 'My Loaders', '/my_loaders'
+  %li
+    //= link_to 'Manage Communitities', '/admin/communities'
+  %li.active
+    //= link_to 'Edit ' "#{@community.title}".html_safe, {:action => "edit"}
+
 - collection = Collection.find(@report.collection)
-%h1
+%h2.page-header
   = "#{@report.loader_name.capitalize} Load into "
   %em
     = link_to(collection.title, collection_path(@report.collection))
 %br
 %h4
   Created at:
-  = @images.first.created_at.strftime("%m-%d-%Y %T")
+  = @report.created_at.strftime("%m-%d-%Y %T")
 %h4
   User:
   = @user.name
+%h4
+  Total Files:
+  = "#{@report.number_of_files} (Successful: #{@report.success_count}, Error: #{@report.fail_count})"
+
 %br
 %table.table.table-striped
   %th File Name
@@ -37,4 +49,4 @@
           = "Error - #{image.exception}"
         - if image.iptc
           %td
-            //view iptc TO DO
+            = image.iptc
