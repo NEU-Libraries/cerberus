@@ -22,7 +22,6 @@ class ProcessZipJob
       # start a new image_processing_job like...
       # result = ImageProcessingJob.new().run
       # result will be an image_report
-    load_report.update_counts(report_id)
     # when all images are processed, create a load_report
   end
 
@@ -32,8 +31,8 @@ class ProcessZipJob
       FileUtils.mkdir(to) unless File.exists? to
       zipfile.each do |f|
         if !f.directory? && File.basename(f.name)[0] != "." # Don't extract directories or mac specific files
-          #also need to put in fix for spaces in the name of the file
-          fpath = File.join(to, File.basename(f.name))
+          fpath = File.join(to, File.basename(f.name.gsub!(/[()\s+]/, "_"))) # Replaces parens and spaces in file names with underscores
+          puts fpath
           open(fpath, 'wb') do |z|
             z << f.read
           end

@@ -82,16 +82,16 @@ class Loaders::MarcomsController < ApplicationController
           # send to job
           Cerberus::Application::Queue.push(ProcessZipJob.new("marcom", new_file.to_s, parent, copyright, current_user))
           flash[:notice] = "Your file has been submitted and is now being processed. Check back soon for a load report."
-          redirect_to "/my_loaders"
+          redirect_to my_loaders_path
         else
           #error out
           FileUtils.rm(new_file)
           flash[:error] = "The file you uploaded was not a zipfile. Please try again."
-          redirect_to("/my_loaders/marcom/new")
+          redirect_to my_loaders_path
         end
       else
         flash[:error] = "Error creating file."
-        redirect_to("/my_loaders")
+        redirect_to my_loaders_path
       end
     end
 
