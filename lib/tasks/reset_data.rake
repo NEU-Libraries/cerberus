@@ -64,7 +64,7 @@ task :reset_data => :environment do
   Rake::Task["db:reset"].invoke
 
   Rake::Task["db:test:prepare"].reenable
-  Rake::Task["db:test:prepare"].invoke  
+  Rake::Task["db:test:prepare"].invoke
 
   # User.find(:all).each do |user|
   #   user.destroy
@@ -97,12 +97,6 @@ task :reset_data => :environment do
   p_12 = Collection.create(mass_permissions: 'public', parent: p_c, pid: 'neu:6252', title: 'Research (Photographs)')
 
   root_dept.rightsMetadata.permissions({group: 'public'}, 'read')
-
-  tmp_user = User.find_by_email("drsadmin@neu.edu")
-
-  if !tmp_user.nil?
-    tmp_user.destroy
-  end
 
   tmp_user = User.create(:password => "drs12345", :password_confirmation => "drs12345", full_name:"Temp User", nuid:"000000000")
   tmp_user.email = "drsadmin@neu.edu"
