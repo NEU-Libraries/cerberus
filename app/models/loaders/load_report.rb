@@ -17,16 +17,15 @@ class Loaders::LoadReport < ActiveRecord::Base
   end
 
   #this doesn't do anything yet
-  def update_counts(report_id)
-    r = Loaders::LoadReport.find(report_id)
-    images = Loaders::ImageReport.where(load_report_id:"#{@report.id}").find_all
+  def update_counts
+    images = Loaders::ImageReport.where(load_report_id:"#{self.id}").find_all
     images.each do |i|
       if i.validity == true
-        r.success_count = r.success_count + 1
+        self.success_count = self.success_count + 1
       else
-        r.fail_count = r.fail_count + 1
+        self.fail_count = self.fail_count + 1
       end
     end
-    r.save!
+    self.save!
   end
 end
