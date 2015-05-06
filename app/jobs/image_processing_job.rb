@@ -39,19 +39,9 @@ class ImageProcessingJob
         load_report.update_counts
       else
         classification = ''
-        #handle special characters like smart quotes and ampersands
-        encoding_options = {
-          :invalid           => :replace,  # Replace invalid byte sequences
-          :undef             => :replace,  # Replace anything not defined in ASCII
-          :replace           => '',        # Use a blank for those replacements
-          :universal_newline => true       # Always break lines with \n
-        }
         photo = IPTC::JPEG::Image.from_file file, quick=true
         photo.values.each do |item|
           val = item.value
-          if val.kind_of?(String)
-            val = val.encode(Encoding.find('ASCII'), encoding_options)
-          end
           iptc[:"#{item.key}"] = val
           if item.key == 'iptc/Headline'
             core_file.title = val
