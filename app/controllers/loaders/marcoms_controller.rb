@@ -68,6 +68,12 @@ class Loaders::MarcomsController < ApplicationController
     render 'loaders/show', locals: {images: @images, user: @user}
   end
 
+  def show_iptc
+    @image = Loaders::ImageReport.find(params[:id])
+    @load = Loaders::LoadReport.find(@image.load_report_id)
+    render 'loaders/iptc', locals: {image: @image, load: @load}
+  end
+
   protected
     def process_file(file, parent, copyright)
       if virus_check(file) == 0

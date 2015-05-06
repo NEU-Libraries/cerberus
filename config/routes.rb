@@ -73,6 +73,7 @@ Cerberus::Application.routes.draw do
    resources :marcoms, only: [:new, :create, :index, :show], :path => "loaders/marcom"
    get "/loaders/marcom/new" => 'marcoms#new', as: 'loaders_marcom'
    get "/loaders/report/:id" => 'marcoms#show', as: 'loaders_report'
+   get "/loaders/file/:id" => 'marcoms#show_iptc', as: 'loaders_iptc'
   end
 
   # Facets for communities and collections

@@ -47,6 +47,6 @@
           = image.title
         %td
           = "Error - #{image.exception}"
-        - if image.iptc
-          %td
-            = image.iptc
+        %td
+          - if image.iptc != ""
+            = link_to("View IPTC", loaders_iptc_path(image.id), class:"btn btn-small btn-warning")
