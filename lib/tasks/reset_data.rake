@@ -60,9 +60,12 @@ task :reset_data => :environment do
     file.destroy
   end
 
-  User.find(:all).each do |user|
-    user.destroy
-  end
+  Rake::Task["db:reset"].reenable
+  Rake::Task["db:reset"].invoke  
+
+  # User.find(:all).each do |user|
+  #   user.destroy
+  # end
 
   root_dept = Community.new(pid: 'neu:1', identifier: 'neu:1', title: 'Northeastern University', description: "Founded in 1898, Northeastern is a global, experiential, research university built on a tradition of engagement with the world, creating a distinctive approach to education and research. The university offers a comprehensive range of undergraduate and graduate programs leading to degrees through the doctorate in nine colleges and schools, and select advanced degrees at graduate campuses in Charlotte, North Carolina, and Seattle.")
   root_dept.save!
@@ -117,9 +120,6 @@ task :reset_data => :environment do
   create_content_file(:image_master_file, tmp_user, roCol)
   create_content_file(:pdf_file, tmp_user, roCol)
   create_content_file(:docx_file, tmp_user, roCol)
-
-  # Rake::Task["solr:reindex"].reenable
-  # Rake::Task["solr:reindex"].invoke
 
   puts "Reset to stock objects complete."
 
