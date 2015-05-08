@@ -38,7 +38,7 @@ class ImageProcessingJob
       if core_file.canonical_class != "ImageMasterFile" or extract_mime_type(file) != 'image/jpeg'
         report = load_report.image_reports.create_failure("File is not a JPG image", "", core_file.label)
         core_file.destroy
-        #FileUtils.rm(file)
+        FileUtils.rm(file)
       else
         classification = ''
         photo = MiniExiftool.new("#{file}", iptc_encoding: 'UTF8', exif_encoding: 'UTF8')
@@ -102,10 +102,10 @@ class ImageProcessingJob
             puts core_file.description
           elsif tag == 'Source'
             core_file.mods.origin_info.publisher = val
-          # elsif tag == "DateCreated"
-          #   core_file.mods.origin_info.copyright = "#{val[0..3]}-#{val[4..5]}-#{val[6..7]}"
-          #   core_file.date = "#{val[0..3]}-#{val[4..5]}-#{val[6..7]}"
-          #   puts core_file.date
+          elsif tag == "DateCreated"
+            core_file.mods.origin_info.copyright = val.to_s
+            core_file.date = val.to_s
+            puts core_file.date
           elsif tag == 'Keywords'
             if val.kind_of?(Array)
               core_file.keywords = val
@@ -159,7 +159,8 @@ class ImageProcessingJob
       errors_for_pid.warn "#{Time.now} - #{$!}"
       errors_for_pid.warn "#{Time.now} - #{$@}"
       report = load_report.image_reports.create_failure(error.message, iptc, core_file.label)
-      #core_file.destroy
+      FileUtils.rm(file)
+      core_file.destroy
     end
   end
 end
