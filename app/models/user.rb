@@ -138,6 +138,10 @@ class User < ActiveRecord::Base
     return self.role.eql?('admin')
   end
 
+  def loader?
+    return self.groups.include? "northeastern:drs:repository:loaders:marcom" # or include other groups for other loaders in future
+  end
+
   def marcom_loader?
     return self.groups.include? "northeastern:drs:repository:loaders:marcom"
   end
