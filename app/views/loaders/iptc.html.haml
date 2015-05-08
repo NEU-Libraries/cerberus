@@ -18,5 +18,8 @@
   = "Error - #{image.exception}"
 %h4
   IPTC Data:
-%p
-  = image.iptc
+%table.table.table-striped.table-bordered
+  - image.iptc.sort.map do |key, value|
+    %tr
+      %td= key
+      %td= value
