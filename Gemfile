@@ -60,8 +60,7 @@ gem 'diffy'
 
 gem "ruby-prof"
 gem 'picturefill'
-gem 'iptc', '~> 0.0.9'
-
+gem 'mini_exiftool'
 # Gems used only for assets and not required
 # in production environments by default.
 group :assets do

@@ -233,7 +233,6 @@ GEM
       hydra-core (= 6.3.3)
       rails (>= 3.2.6)
     i18n (0.7.0)
-    iptc (0.0.9)
     iso-639 (0.2.5)
     jasmine (1.3.2)
       jasmine-core (~> 1.3.1)
@@ -278,6 +277,7 @@ GEM
     mediashelf-loggable (0.4.9)
     method_source (0.8.2)
     mime-types (1.25.1)
+    mini_exiftool (2.5.0)
     mini_portile (0.6.0)
     mods (0.0.23)
       iso-639
@@ -527,7 +527,6 @@ DEPENDENCIES
   hashie
   hydra-derivatives!
   hydra-head
-  iptc (~> 0.0.9)
   jasmine
   jasmine-jquery-rails
   jettywrapper
@@ -537,6 +536,7 @@ DEPENDENCIES
   launchy
   lograge
   mailboxer (~> 0.11.0)
+  mini_exiftool
   mods_display!
   multi_json (~> 1.7.9)
   mysql2
