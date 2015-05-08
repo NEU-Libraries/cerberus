@@ -122,7 +122,7 @@ class CoreFilesController < ApplicationController
     else
       depositor_nuid = current_user.nuid
       proxy_nuid     = nil
-    end    
+    end
 
     update_metadata if params[:core_file]
     max = session[:slider_max]
@@ -167,6 +167,12 @@ class CoreFilesController < ApplicationController
 
     if @core_file.in_progress?
       flash[:notice] = 'Your files are being processed by ' + t('drs.product_name.short') + ' in the background. The metadata and access controls you specified are being applied. Files will be marked <span class="label label-warning" title="Updating">Updating</span> until this process is complete (shouldn\'t take too long, hang in there!).'
+    end
+
+    if ((Time.now.utc - DateTime.parse(@core_file.updated_at)) / 1.hour) < 1
+      response.headers["Cache-Control"] = "no-cache, no-store, max-age=0, must-revalidate"
+      response.headers["Pragma"] = "no-cache"
+      response.headers["Expires"] = "Fri, 01 Jan 1990 00:00:00 GMT"
     end
   end
 
@@ -245,7 +251,7 @@ class CoreFilesController < ApplicationController
         @core_file = CoreFile.find(params[:id])
 
         # Invalidate cache
-        Rails.cache.delete("/mods/#{@core_file.pid}-#{@core_file.modified_date}")
+        Rails.cache.delete_matched("/mods/#{@core_file.pid}*")
 
         # Email the metadata changes
         new_doc = Nokogiri::XML(params[:raw_xml].first)
@@ -272,7 +278,7 @@ class CoreFilesController < ApplicationController
     @core_file = CoreFile.find(params[:id])
 
     # Invalidate cache
-    Rails.cache.delete("/mods/#{@core_file.pid}-#{@core_file.modified_date}")
+    Rails.cache.delete_matched("/mods/#{@core_file.pid}*")
 
     # if no title or keyword, send them back. Only God knows what they did to the form...
     # fix for #671
