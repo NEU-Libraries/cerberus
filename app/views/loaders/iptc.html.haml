@@ -4,7 +4,7 @@
   %li
     = link_to 'My Loaders', my_loaders_path
   %li
-    = link_to "#{@load.loader_name.capitalize} Load into #{collection.title}", loaders_report_path(@load.id)
+    = link_to "#{@load.loader_name} Load into #{collection.title}", loaders_report_path(@load.id)
   %li.active
     = image.original_file
 
