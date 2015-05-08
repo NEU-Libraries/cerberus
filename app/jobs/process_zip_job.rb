@@ -45,9 +45,9 @@ class ProcessZipJob
       load_report.number_of_files = count
       if load_report.success_count + load_report.fail_count == load_report.number_of_files
         LoaderMailer.load_alert(load_report, User.find_by_nuid(load_report.nuid)).deliver!
+        FileUtils.rmdir(to)
       end
       load_report.save!
-      FileUtils.rmdir(to)
     end
     FileUtils.rm(file)
   end
