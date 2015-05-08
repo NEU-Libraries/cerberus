@@ -29,6 +29,7 @@ class ProcessZipJob
     Zip::Archive.open(file) do |zipfile|
       to = File.join(File.dirname(file), File.basename(file, ".*"))
       FileUtils.mkdir(to) unless File.exists? to
+      count = 0
       zipfile.each do |f|
         if !f.directory? && File.basename(f.name)[0] != "." # Don't extract directories or mac specific files
           fpath = File.join(to, File.basename(f.name.gsub(/[()\s+]/, "_"))) # Replaces parens and spaces in file names with underscores
@@ -36,10 +37,16 @@ class ProcessZipJob
             z << f.read
           end
           ImageProcessingJob.new(fpath, parent, copyright, load_report.id).run
-          load_report.number_of_files = load_report.number_of_files + 1
+          load_report.update_counts
+          count = count + 1
           load_report.save!
         end
       end
+      load_report.number_of_files = count
+      if load_report.success_count + load_report.fail_count == load_report.number_of_files
+        LoaderMailer.load_alert(load_report, User.find_by_nuid(load_report.nuid)).deliver!
+      end
+      load_report.save!
     end
   end
 end
