@@ -13,4 +13,4 @@
       %li= "Time Completed: #{@load.updated_at}"
       %li= "Number of Files: #{@load.number_of_files}"
 
-    %p= "A link to the load report can be found #{link_to 'here', loaders_report_path(@load.id)}".html_safe
+    %p= "A link to the load report can be found #{link_to 'here', loaders_report_url(@load.id)}".html_safe
