@@ -18,7 +18,7 @@ class ImageProcessingJob
     # if theres an exception, log details to image_report
     require 'fileutils'
     require 'mini_exiftool'
-    MiniExiftool.command = '/home/vagrant/cerberus/exiftool/exiftool'
+    MiniExiftool.command = '/opt/exiftool/exiftool'
     job_id = "#{Time.now.to_i}-loader-image"
     FileUtils.mkdir_p "#{Rails.root}/log/#{job_id}"
     failed_pids_log = Logger.new("#{Rails.root}/log/#{job_id}/loader-image-process-job.log")
