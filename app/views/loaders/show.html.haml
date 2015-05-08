@@ -4,12 +4,12 @@
   %li
     = link_to 'My Loaders', '/my_loaders'
   %li.active
-    = "#{@report.loader_name.capitalize} Load into "
+    = "#{@report.loader_name} Load into "
     %em
       = link_to(collection.title, collection_path(@report.collection))
 
 %h2.page-header
-  = "#{@report.loader_name.capitalize} Load into "
+  = "#{@report.loader_name} Load into "
   %em
     = link_to(collection.title, collection_path(@report.collection))
 %h4

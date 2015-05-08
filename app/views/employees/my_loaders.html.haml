@@ -26,5 +26,5 @@
 
   %article.span6
     %h3 Past Loads
-    - @loads = Loaders::LoadReport.where('loader_name = "marcom"', true).find_all
+    - @loads = Loaders::LoadReport.where('loader_name = "Marketing and Communications"', true).find_all
     = render template: "/loaders/index", locals: {loads: @loads}

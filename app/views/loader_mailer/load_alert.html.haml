@@ -8,7 +8,7 @@
     %p The following load has completed:
     %ul
       %li= "Loader: #{@load.loader_name}"
-      %li= "Collection: #{@load.collection}"
+      %li= "Collection: #{Collection.find("#{@load.collection}").title}"
       %li= "Time Started: #{@load.created_at}"
       %li= "Time Completed: #{@load.updated_at}"
       %li= "Number of Files: #{@load.number_of_files}"
