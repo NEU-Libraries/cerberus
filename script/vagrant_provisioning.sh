@@ -70,6 +70,13 @@ echo 'PATH=$PATH:/opt/fits-0.6.2' >> /home/vagrant/.bashrc
 echo 'export PATH'  >> /home/vagrant/.bashrc
 source /home/vagrant/.bashrc
 
+echo "Installing exiftool"
+cd /home/vagrant
+wget http://www.sno.phy.queensu.ca/\~phil/exiftool/Image-ExifTool-9.94.tar.gz
+tar -zxvf Image-ExifTool-9.94.tar.gz
+sudo mv Image-ExifTool-9.94 /opt/exiftool
+rm Image-ExifTool-9.94.tar.gz
+
 echo "Setting up faux handles"
 mysql -u root < /home/vagrant/cerberus/spec/fixtures/files/handlesMIN.sql
 
