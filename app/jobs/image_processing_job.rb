@@ -44,9 +44,19 @@ class ImageProcessingJob
         photo = MiniExiftool.new("#{file}", iptc_encoding: 'UTF8', exif_encoding: 'UTF8')
         puts file
         photo.tags.each do |tag|
-          iptc[:"#{tag}"] = photo[tag]
-          #puts "#{tag}: #{photo[tag]}"
           val = photo[tag]
+          iptc[:"#{tag}"] = val
+
+          if val.kind_of?(String) and (val.include? "“" or val.include? "”" or val.include? "‘" or val.include? "’")
+            create_special_error("#{tag} contains invalid smart quotes", iptc, core_file, load_report)
+            return
+          elsif val.kind_of?(String) and (val.include? "–" or val.include? "—")
+            create_special_error("#{tag} contains invalid em dash", iptc, core_file, load_report)
+            return
+          elsif val.kind_of?(String) and (val.include? "…")
+            create_special_error("#{tag} contains invalid ellipsis", iptc, core_file, load_report)
+            return
+          end
           if tag == 'Headline'
             core_file.title = val
           elsif tag == 'Category'
@@ -103,8 +113,8 @@ class ImageProcessingJob
           elsif tag == 'Source'
             core_file.mods.origin_info.publisher = val
           elsif tag == "DateCreated"
-            core_file.mods.origin_info.copyright = val.to_s
-            core_file.date = val.to_s
+            core_file.mods.origin_info.copyright = val.strftime("%F")
+            core_file.date = val.strftime("%F")
             puts core_file.date
           elsif tag == 'Keywords'
             if val.kind_of?(Array)
@@ -162,5 +172,12 @@ class ImageProcessingJob
       FileUtils.rm(file)
       core_file.destroy
     end
+  end
+
+  def create_special_error(error_message, iptc, core_file, load_report)
+    report = load_report.image_reports.create_failure(error_message, iptc, core_file.label)
+    core_file.destroy
+    FileUtils.rm(file)
+    return report
   end
 end
