@@ -57,7 +57,7 @@ class Loaders::MarcomsController < ApplicationController
   end
 
   def index
-    @loads = Loaders::LoadReport.where('loader_name = "marcom"', true).find_all
+    @loads = Loaders::LoadReport.where('loader_name = "Marketing and Communications"', true).find_all
   end
 
   def show
@@ -91,7 +91,7 @@ class Loaders::MarcomsController < ApplicationController
         #if zip
         if extract_mime_type(new_file) == 'application/zip'
           # send to job
-          Cerberus::Application::Queue.push(ProcessZipJob.new("marcom", new_file.to_s, parent, copyright, current_user))
+          Cerberus::Application::Queue.push(ProcessZipJob.new("Marketing and Communications", new_file.to_s, parent, copyright, current_user))
           flash[:notice] = "Your file has been submitted and is now being processed. You will receive an email when the load is complete."
           redirect_to my_loaders_path
         else
