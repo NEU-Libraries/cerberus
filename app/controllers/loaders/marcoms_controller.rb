@@ -129,6 +129,6 @@ class Loaders::MarcomsController < ApplicationController
   private
 
     def verify_group
-      # if user is not part of the marcom_loader grouper group, bounce them
+      redirect_to root_path unless current_user.marcom_loader?
     end
 end

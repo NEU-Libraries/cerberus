@@ -138,6 +138,11 @@ class User < ActiveRecord::Base
     return self.role.eql?('admin')
   end
 
+  def marcom_loader?
+    return self.groups.include? "northeastern:drs:repository:loaders:marcom"
+  end
+
+
   def user_key
     self.nuid
   end
