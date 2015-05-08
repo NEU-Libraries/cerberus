@@ -42,12 +42,8 @@ def create_content_file(factory_sym, user, parent)
 end
 
 def set_edit_permissions(obj)
-  admin_users = ["001967405", "001905497", "000513515", "000000000"]
-
-  admin_users.each do |nuid|
-    obj.rightsMetadata.permissions({person: nuid}, 'edit')
-    obj.save!
-  end
+  obj.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
+  obj.save!
 end
 
 task :reset_data => :environment do
@@ -78,19 +74,55 @@ task :reset_data => :environment do
 
   # Marcom children collections - 12
   p_1 = Collection.create(mass_permissions: 'public', parent: p_c, pid: 'neu:6241', title: 'Alumni (Photographs)')
+  p_1.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
+  p_1.save!
+
   p_2 = Collection.create(mass_permissions: 'public', parent: p_c, pid: 'neu:6242', title: 'Athletics (Photographs)')
+  p_2.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
+  p_2.save!
+
   p_3 = Collection.create(mass_permissions: 'public', parent: p_c, pid: 'neu:6243', title: 'Campus (Photographs)')
+  p_3.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
+  p_3.save!
+
   p_4 = Collection.create(mass_permissions: 'public', parent: p_c, pid: 'neu:6244', title: 'Campus Life (Photographs)')
+  p_4.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
+  p_4.save!
+
   p_5 = Collection.create(mass_permissions: 'public', parent: p_c, pid: 'neu:6245', title: 'Classroom (Photographs)')
+  p_5.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
+  p_5.save!
+
   p_6 = Collection.create(mass_permissions: 'public', parent: p_c, pid: 'neu:6246', title: 'Community Outreach (Photographs)')
+  p_6.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
+  p_6.save!
+
   p_7 = Collection.create(mass_permissions: 'public', parent: p_c, pid: 'neu:6247', title: 'Experiential Learning (Photographs)')
+  p_7.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
+  p_7.save!
+
   p_8 = Collection.create(mass_permissions: 'public', parent: p_c, pid: 'neu:6248', title: 'Graduation (Photographs)')
+  p_8.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
+  p_8.save!
+
   p_9 = Collection.create(mass_permissions: 'public', parent: p_c, pid: 'neu:6249', title: 'Headshot (Photographs)')
+  p_9.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
+  p_9.save!
+
   p_10 = Collection.create(mass_permissions: 'public', parent: p_c, pid: 'neu:6250', title: 'Potrait (Photographs)')
+  p_10.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
+  p_10.save!
+
   p_11 = Collection.create(mass_permissions: 'public', parent: p_c, pid: 'neu:6251', title: 'President (Photographs)')
+  p_11.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
+  p_11.save!
+
   p_12 = Collection.create(mass_permissions: 'public', parent: p_c, pid: 'neu:6252', title: 'Research (Photographs)')
+  p_12.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
+  p_12.save!
 
   root_dept.rightsMetadata.permissions({group: 'public'}, 'read')
+  set_edit_permissions(root_dept)
 
   tmp_user = User.create(:password => "drs12345", :password_confirmation => "drs12345", full_name:"Temp User", nuid:"000000000")
   tmp_user.email = "drsadmin@neu.edu"
@@ -98,9 +130,45 @@ task :reset_data => :environment do
   tmp_user.view_pref = "list"
   tmp_user.save!
 
-  Cerberus::Application::Queue.push(EmployeeCreateJob.new(tmp_user.nuid, tmp_user.full_name))
+  # Add David, Eli Pat Sarah and Brooks
 
-  set_edit_permissions(root_dept)
+  sarah = User.create(:password => "password", :password_confirmation => "password", full_name:"Sweeney, Sarah Jean", nuid:"001126975")
+  sarah.email = "sj.sweeney@neu.edu"
+  sarah.role = "admin"
+  sarah.save!
+
+  pat = User.create(:password => "password", :password_confirmation => "password", full_name:"Yott, Patrick", nuid:"000572965")
+  pat.email = "p.yott@neu.edu"
+  pat.role = "admin"
+  pat.save!
+
+  brooks = User.create(:password => "password", :password_confirmation => "password", full_name:"Canaday, Brooks Harwood", nuid:"001980907")
+  brooks.email = "b.canaday@neu.edu"
+  brooks.save!
+
+  eli = User.create(:password => "password", :password_confirmation => "password", full_name:"Zoller, Eli Scott", nuid:"001790966")
+  eli.email = "e.zoller@neu.edu"
+  eli.role = "admin"
+  eli.save!
+
+  david = User.create(:password => "password", :password_confirmation => "password", full_name:"Cliff, David Graeme", nuid:"001905497")
+  david.email = "d.cliff@neu.edu"
+  david.role = "admin"
+  david.save!
+
+  sarah.add_group("northeastern:drs:repository:loaders:marcom")
+  pat.add_group("northeastern:drs:repository:loaders:marcom")
+  brooks.add_group("northeastern:drs:repository:loaders:marcom")
+  eli.add_group("northeastern:drs:repository:loaders:marcom")
+  david.add_group("northeastern:drs:repository:loaders:marcom")
+
+  sarah.add_group("northeastern:drs:repository:staff")
+  pat.add_group("northeastern:drs:repository:staff")
+  brooks.add_group("northeastern:drs:repository:staff")
+  eli.add_group("northeastern:drs:repository:staff")
+  david.add_group("northeastern:drs:repository:staff")
+
+  Cerberus::Application::Queue.push(EmployeeCreateJob.new(tmp_user.nuid, tmp_user.full_name))
 
   engDept = create_collection(Community, 'neu:1', 'English Department')
   sciDept = create_collection(Community, 'neu:1', 'Science Department')
