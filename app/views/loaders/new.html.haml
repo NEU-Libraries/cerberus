@@ -20,7 +20,7 @@
     %fieldset.span4
       %legend
         2. Choose Collection
-      = label_tag "parent", "What collection should these files go in?", class: "required-label"
+      = label_tag "parent", "Where do you want to deposit these files?", class: "required-label"
       = select_tag "parent", options_for_select(@collections_options), {prompt: 'Select Collection', required: true}
     %fieldset.span4
       %legend
