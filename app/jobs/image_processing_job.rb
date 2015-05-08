@@ -17,6 +17,8 @@ class ImageProcessingJob
     # extract metadata from iptc
     # if theres an exception, log details to image_report
     require 'fileutils'
+    require 'mini_exiftool'
+    MiniExiftool.command = '/home/vagrant/cerberus/exiftool/exiftool'
     job_id = "#{Time.now.to_i}-loader-image"
     FileUtils.mkdir_p "#{Rails.root}/log/#{job_id}"
     failed_pids_log = Logger.new("#{Rails.root}/log/#{job_id}/loader-image-process-job.log")
@@ -36,16 +38,18 @@ class ImageProcessingJob
       if core_file.canonical_class != "ImageMasterFile" or extract_mime_type(file) != 'image/jpeg'
         report = load_report.image_reports.create_failure("File is not a JPG image", "", core_file.label)
         core_file.destroy
-        load_report.update_counts
+        #FileUtils.rm(file)
       else
         classification = ''
-        photo = IPTC::JPEG::Image.from_file file, quick=true
-        photo.values.each do |item|
-          val = item.value
-          iptc[:"#{item.key}"] = val
-          if item.key == 'iptc/Headline'
+        photo = MiniExiftool.new("#{file}", iptc_encoding: 'UTF8', exif_encoding: 'UTF8')
+        puts file
+        photo.tags.each do |tag|
+          iptc[:"#{tag}"] = photo[tag]
+          #puts "#{tag}: #{photo[tag]}"
+          val = photo[tag]
+          if tag == 'Headline'
             core_file.title = val
-          elsif item.key == 'iptc/Category'
+          elsif tag == 'Category'
             if val == "ALU"
               k = "alumni"
             elsif val == "ATH"
@@ -66,47 +70,52 @@ class ImageProcessingJob
               k = "president"
             elsif val == "RES"
               k = "research"
+            else
+              k = val.downcase
             end
             classification = k
             core_file.mods.classification = classification
-          elsif item.key == 'iptc/SuppCategory'
+          elsif tag == 'SupplementalCategories'
             s = ''
             if val.kind_of?(Array)
               val.each do |i|
                 if i.kind_of?(String)
                   s = s + " -- " + i.downcase
+                  s = s.gsub("_", " ")
                 end
               end
               core_file.mods.classification = "#{classification}#{s}"
             else
               core_file.mods.classification = "#{classification}#{val}"
             end
-          elsif item.key == "iptc/Byline"
+          elsif tag == "By-line"
             pers = val.split(",")
             # pers = {:first_names=>[pers[1].strip], :last_names=>[pers[0].strip]}
             # core_file.creators = pers
             core_file.mods.personal_name.name_part_given = pers[1].strip
             core_file.mods.personal_name.name_part_family = pers[0].strip
-          elsif item.key == 'iptc/BylineTitle'
+          elsif tag == 'By-lineTitle'
             core_file.mods.personal_name.role.role_term = val
             core_file.mods.personal_name.role.role_term.type = "text"
-          elsif item.key == 'iptc/Caption'
+          elsif tag == 'Description'
             core_file.description = val
-          elsif item.key == 'iptc/Source'
+            puts core_file.description
+          elsif tag == 'Source'
             core_file.mods.origin_info.publisher = val
-          elsif item.key == "iptc/DateCreated"
-            core_file.mods.origin_info.copyright = "#{val[0..3]}-#{val[4..5]}-#{val[6..7]}"
-            core_file.date = "#{val[0..3]}-#{val[4..5]}-#{val[6..7]}"
-          elsif item.key == 'iptc/Keywords'
+          # elsif tag == "DateCreated"
+          #   core_file.mods.origin_info.copyright = "#{val[0..3]}-#{val[4..5]}-#{val[6..7]}"
+          #   core_file.date = "#{val[0..3]}-#{val[4..5]}-#{val[6..7]}"
+          #   puts core_file.date
+          elsif tag == 'Keywords'
             if val.kind_of?(Array)
               core_file.keywords = val
             else
               core_file.keywords = ["#{val}"]
             end
-          elsif item.key == 'iptc/City'
+          elsif tag == 'City'
             # core_file.mods.origin_info.place.term = val
             # core_file.mods.origin_info.place.term.type = "text"
-          elsif item.key == 'iptc/ProvinceState'
+          elsif tag == 'State'
             # if val == "MA"
             #   core_file.mods.origin_info.place.term = "mau"
             #   core_file.mods.origin_info.place.term.type = "code"
@@ -141,7 +150,6 @@ class ImageProcessingJob
           end
         end
         report = load_report.image_reports.create_success(core_file, iptc)
-        load_report.update_counts
       end
     rescue Exception => error
       pid = core_file.pid
@@ -151,8 +159,7 @@ class ImageProcessingJob
       errors_for_pid.warn "#{Time.now} - #{$!}"
       errors_for_pid.warn "#{Time.now} - #{$@}"
       report = load_report.image_reports.create_failure(error.message, iptc, core_file.label)
-      core_file.destroy
-      load_report.update_counts
+      #core_file.destroy
     end
   end
 end
