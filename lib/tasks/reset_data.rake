@@ -151,7 +151,7 @@ task :reset_data => :environment do
   eli.role = "admin"
   eli.save!
 
-  david = User.create(:password => "password", :password_confirmation => "password", full_name:"Cliff, David Graeme", nuid:"001905497")
+  david = User.create(:password => "password", :password_confirmation => "password", full_name:"Cliff, David", nuid:"001905497")
   david.email = "d.cliff@neu.edu"
   david.role = "admin"
   david.save!
@@ -167,6 +167,12 @@ task :reset_data => :environment do
   brooks.add_group("northeastern:drs:repository:staff")
   eli.add_group("northeastern:drs:repository:staff")
   david.add_group("northeastern:drs:repository:staff")
+
+  Cerberus::Application::Queue.push(EmployeeCreateJob.new(sarah.nuid, sarah.full_name))
+  Cerberus::Application::Queue.push(EmployeeCreateJob.new(pat.nuid, pat.full_name))
+  Cerberus::Application::Queue.push(EmployeeCreateJob.new(brooks.nuid, brooks.full_name))
+  Cerberus::Application::Queue.push(EmployeeCreateJob.new(eli.nuid, eli.full_name))
+  Cerberus::Application::Queue.push(EmployeeCreateJob.new(david.nuid, david.full_name))
 
   Cerberus::Application::Queue.push(EmployeeCreateJob.new(tmp_user.nuid, tmp_user.full_name))
 
