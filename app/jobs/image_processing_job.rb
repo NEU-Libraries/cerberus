@@ -150,8 +150,19 @@ class ImageProcessingJob
         # Create a handle
         core_file.identifier = make_handle(core_file.persistent_url)
 
-        # Process Thumbnail - this doens't actually seem to be working right now - I might not be passing the right params TO DO
-        Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename))
+        # Process Thumbnail
+        width = photo.imagewidth
+        height =  photo.imageheight
+        if width > height
+          size = width
+        else
+          size = height
+        end
+
+        l = 1400.to_f/size.to_f
+        m = 0.to_f/size.to_f
+        s = 600.to_f/size.to_f
+        Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename, nil, s, m, l))
         core_file.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, "edit")
 
         if core_file.save!
