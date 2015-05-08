@@ -8,17 +8,22 @@
         %li
           %a{ href: employee_path(@employee) }
             %i.icon-user
-            - if current_user && current_user.nuid == @employee.nuid
+            - if current_user && user_examining_self?
               My Collections
             - else
               ="#{@employee.employee_first_name}'s collections"
           %li
             %a{ href: employee_communities_path(@employee) }
               %i.icon-group
-              - if current_user && current_user.nuid == @employee.nuid
+              - if current_user && user_examining_self?
                 My Communities
               - else
                 ="#{@employee.employee_first_name}'s communities"
+          -if current_user.loader? && user_examining_self?
+            %li
+              %a{ href: my_loaders_path(@employee) }
+                %i.icon-upload-alt
+                My Loaders
 
 
 .row
