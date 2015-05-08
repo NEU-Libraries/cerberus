@@ -3,3 +3,4 @@ default:
   java_opts:
     - "-XX:MaxPermSize=128m"
     - "-Xmx256m"
+    - "-Duser.timezone=America/New_York"
