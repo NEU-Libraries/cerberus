@@ -1,14 +1,4 @@
 GIT
-  remote: git://github.com/cheald/sshkit.git
-  revision: 492f97d9c3cd4f50d296f44d8a11197801515d05
-  branch: fix_multithread_conn_pooling
-  specs:
-    sshkit (1.4.0)
-      colorize
-      net-scp (>= 1.1.2)
-      net-ssh (>= 2.8.0)
-
-GIT
   remote: https://github.com/NEU-Libraries/hydra-derivatives.git
   revision: d95f3e880a74713867f7c88b77429251cbb0b9b1
   ref: d95f3e880a74713867f7c88b77429251cbb0b9b1
@@ -39,6 +29,16 @@ GIT
       nokogiri
       stomp
       xml-simple
+
+GIT
+  remote: https://github.com/cheald/sshkit.git
+  revision: 492f97d9c3cd4f50d296f44d8a11197801515d05
+  branch: fix_multithread_conn_pooling
+  specs:
+    sshkit (1.4.0)
+      colorize
+      net-scp (>= 1.1.2)
+      net-ssh (>= 2.8.0)
 
 GIT
   remote: https://github.com/harai/kaminari.git
