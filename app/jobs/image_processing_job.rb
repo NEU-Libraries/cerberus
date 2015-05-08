@@ -50,7 +50,7 @@ class ImageProcessingJob
           if val.kind_of?(String) and (val.include? "“" or val.include? "”" or val.include? "‘" or val.include? "’")
             create_special_error("#{tag} contains invalid smart quotes", iptc, core_file, load_report)
             return
-          elsif val.kind_of?(String) and (val.include? "–" or val.include? "—")
+          elsif val.kind_of?(String) and (val.include? "—" or val.include? "—")
             create_special_error("#{tag} contains invalid em dash", iptc, core_file, load_report)
             return
           elsif val.kind_of?(String) and (val.include? "…")
@@ -158,7 +158,6 @@ class ImageProcessingJob
         else
           size = height
         end
-
         l = 1400.to_f/size.to_f
         m = 0.to_f/size.to_f
         s = 600.to_f/size.to_f
