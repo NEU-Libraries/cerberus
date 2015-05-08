@@ -1,6 +1,7 @@
 class Loaders::ImageReport < ActiveRecord::Base
   belongs_to :load_report
   attr_accessible :exception, :valid, :pid, :title, :collection, :iptc, :original_file
+  serialize :iptc
 
   def self.create_success(core_file, iptc)
     x = Loaders::ImageReport.new
