@@ -22,7 +22,8 @@
 %section.row
   %article.span6
     %h3 My Loaders
-    = link_to("Marketing and Communications", loaders_marcom_path, class: "btn btn-lg btn-primary")
+    - if current_user.marcom_loader?
+      = link_to("Marketing and Communications", loaders_marcom_path, class: "btn btn-lg btn-primary")
 
   %article.span6
     %h3 Past Loads
