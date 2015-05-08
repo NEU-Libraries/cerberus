@@ -47,6 +47,8 @@ class ProcessZipJob
         LoaderMailer.load_alert(load_report, User.find_by_nuid(load_report.nuid)).deliver!
       end
       load_report.save!
+      FileUtils.rmdir(to)
     end
+    FileUtils.rm(file)
   end
 end
