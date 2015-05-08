@@ -77,7 +77,6 @@ class Loaders::MarcomsController < ApplicationController
   protected
     def process_file(file, parent, copyright)
       if virus_check(file) == 0
-        #does this work?
         if Rails.env.production?
           tempdir = "/mnt/libraries/DRStmp"
         else
