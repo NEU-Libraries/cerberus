@@ -77,7 +77,13 @@ class Loaders::MarcomsController < ApplicationController
   protected
     def process_file(file, parent, copyright)
       if virus_check(file) == 0
-        tempdir = Rails.root.join("tmp")
+        #does this work?
+        if Rails.env.production?
+          tempdir = "/mnt/libraries/DRStmp"
+        else
+          tempdir = Rails.root.join("tmp")
+        end
+
         uniq_hsh = Digest::MD5.hexdigest("#{file.original_filename}")[0,2]
         file_name = "#{Time.now.to_i.to_s}-#{uniq_hsh}"
         new_path = tempdir.join(file_name).to_s
@@ -87,7 +93,7 @@ class Loaders::MarcomsController < ApplicationController
         if extract_mime_type(new_file) == 'application/zip'
           # send to job
           Cerberus::Application::Queue.push(ProcessZipJob.new("marcom", new_file.to_s, parent, copyright, current_user))
-          flash[:notice] = "Your file has been submitted and is now being processed. Check back soon for a load report."
+          flash[:notice] = "Your file has been submitted and is now being processed. You will receive an email when the load is complete."
           redirect_to my_loaders_path
         else
           #error out
