@@ -8,18 +8,18 @@
         %li
           %a{ href: employee_path(@employee) }
             %i.icon-user
-            - if current_user && user_examining_self?
+            - if current_user && current_user.nuid == @employee.nuid
               My Collections
             - else
               ="#{@employee.employee_first_name}'s collections"
         %li
           %a{ href: employee_files_path(@employee) }
             %i.icon-file
-            - if current_user && user_examining_self?
+            - if current_user && current_user.nuid == @employee.nuid
               My Deposits
             - else
               ="#{@employee.employee_first_name}'s files"
-        -if current_user.loader? && user_examining_self?
+        -if current_user.loader? && current_user.nuid == @employee.nuid
           %li
             %a{ href: my_loaders_path(@employee) }
               %i.icon-upload-alt

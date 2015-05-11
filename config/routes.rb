@@ -72,8 +72,16 @@ Cerberus::Application.routes.draw do
   scope :module => Loaders do
    resources :marcoms, only: [:new, :create, :index, :show], :path => "loaders/marcom"
    get "/loaders/marcom/new" => 'marcoms#new', as: 'loaders_marcom'
-   get "/loaders/report/:id" => 'marcoms#show', as: 'loaders_report'
-   get "/loaders/file/:id" => 'marcoms#show_iptc', as: 'loaders_iptc'
+   get "/loaders/marcom/report/:id" => 'marcoms#show', as: 'loaders_marcom_report'
+   get "/loaders/marcom/file/:id" => 'marcoms#show_iptc', as: 'loaders_marcom_iptc'
+   resources :engineerings, only: [:new, :create, :index, :show], :path => "loaders/engineering"
+   get "/loaders/engineering/new" => 'engineerings#new', as: 'loaders_engineering'
+   get "/loaders/engineering/report/:id" => 'engineerings#show', as: 'loaders_engeering_report'
+   get "/loaders/engineering/file/:id" => 'engineerings#show_iptc', as: 'loaders_engineering_iptc'
+   resources :cpss, only: [:new, :create, :index, :show], :path => "loaders/cps"
+   get "/loaders/cps/new" => 'cps#new', as: 'loaders_cps'
+   get "/loaders/cps/report/:id" => 'cps#show', as: 'loaders_cps_report'
+   get "/loaders/cps/file/:id" => 'cps#show_iptc', as: 'loaders_cps_iptc'
   end
 
   # Facets for communities and collections
