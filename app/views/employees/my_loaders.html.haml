@@ -24,8 +24,24 @@
     %h3 My Loaders
     - if current_user.marcom_loader?
       = link_to("Marketing and Communications", loaders_marcom_path, class: "btn btn-lg btn-primary")
+    - if current_user.coe_loader?
+      = link_to("College of Engineering", loaders_coe_path, class: "btn btn-lg btn-primary")
+    - if current_user.cps_loader?
+      = link_to("College of Professional Studies", loaders_cps_path, class: "btn btn-lg btn-primary")
 
   %article.span6
     %h3 Past Loads
-    - @loads = Loaders::LoadReport.where('loader_name = "Marketing and Communications"', true).find_all
+    //- puts current_user.loaders
+    - q = ""
+    - l = current_user.loaders.length
+    //- puts l
+    - i = 0
+    - current_user.loaders.each do |loader|
+      //- puts loader
+      - i = i + 1
+      - q = "#{q}"
+      - if l > i
+        - q = "#{q} OR loader_name = "
+      //- puts q
+    - @loads = Loaders::LoadReport.where('loader_name = ?', q).find_all
     = render template: "/loaders/index", locals: {loads: @loads}

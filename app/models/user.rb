@@ -139,11 +139,36 @@ class User < ActiveRecord::Base
   end
 
   def loader?
-    return self.groups.include? "northeastern:drs:repository:loaders:marcom" # or include other groups for other loaders in future
+    if self.groups.include? "northeastern:drs:repository:loaders:marcom" or self.groups.include? "northeastern:drs:repository:loaders:coe" or self.groups.include? "northeastern:drs:repository:loaders:cps"
+      return true
+    end
   end
 
   def marcom_loader?
     return self.groups.include? "northeastern:drs:repository:loaders:marcom"
+  end
+
+  def coe_loader?
+    return self.groups.include? "northeastern:drs:repository:loaders:coe"
+  end
+
+  def cps_loader?
+    return self.groups.include? "northeastern:drs:repository:loaders:cps"
+  end
+
+  def loaders
+    loaders = []
+    if self.marcom_loader?
+      loaders.push("Marketing and Communications")
+    end
+    if self.coe_loader?
+      loaders.push("College of Engineering")
+    end
+    if self.cps_loader?
+      loaders.push("College of Professional Studies")
+    end
+    puts loaders
+    return loaders
   end
 
 

@@ -14,7 +14,7 @@
           %a{ href: employee_communities_path(@employee) }
             %i.icon-group
             My Communities
-        -if current_user.loader? && user_examining_self?
+        -if current_user.loader? && current_user.nuid == @employee.nuid
           %li
             %a{ href: my_loaders_path(@employee) }
               %i.icon-upload-alt
