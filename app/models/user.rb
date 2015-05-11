@@ -167,7 +167,6 @@ class User < ActiveRecord::Base
     if self.cps_loader?
       loaders.push("College of Professional Studies")
     end
-    puts loaders
     return loaders
   end
 
