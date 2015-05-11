@@ -13,5 +13,9 @@
       %td
         = loader.number_of_files
       %td
-        = link_to("View Report", loaders_report_path(loader.id),
-        class: "btn btn-small btn-success")
+        -if loader.loader_name == "Marketing and Communications"
+          = link_to("View Report", loaders_marcom_report_path(loader.id), class: "btn btn-small btn-success")
+        - elsif loader.loader_name == "College of Engineering"
+          = link_to("View Report", loaders_engineering_report_path(loader.id), class: "btn btn-small btn-success")
+        - elsif loader.loader_name == "College of Professional Studies"
+          = link_to("View Report", loaders_cps_report_path(loader.id), class: "btn btn-small btn-success")
