@@ -22,12 +22,14 @@ class Loaders::CpssController < ApplicationController
         end
       end
     end
-    @page_title = "College of Professional Studies Loader"
+    @loader_name = t('drs.loaders.cps.long_name')
+    @loader_short_name = t('drs.loaders.cps.short_name')
+    @page_title = @loader_name + " Loader"
     render 'loaders/new', locals: { collections_options: @collections_options}
   end
 
   def create
-    @copyright = ' '
+    @copyright = t('drs.loaders.cps.copyright')
     begin
       # check error condition No files
       return json_error("Error! No file to save") if !params.has_key?(:file)
@@ -57,14 +59,13 @@ class Loaders::CpssController < ApplicationController
   end
 
   def index
-    @loads = Loaders::LoadReport.where('loader_name = "College of Progessional Studies"', true).find_all
+    @loads = Loaders::LoadReport.where('loader_name = "'+ t('drs.loaders.cps.long_name') +'"', true).find_all
   end
 
   def show
     @report = Loaders::LoadReport.find(params[:id])
     @images = Loaders::ImageReport.where(load_report_id:"#{@report.id}").find_all
     @user = User.find_by_nuid(@report.nuid)
-    puts @user
     render 'loaders/show', locals: {images: @images, user: @user}
   end
 
@@ -76,6 +77,7 @@ class Loaders::CpssController < ApplicationController
 
   protected
     def process_file(file, parent, copyright)
+      @loader_name = t('drs.loaders.cps.long_name')
       if virus_check(file) == 0
         if Rails.env.production?
           tempdir = "/mnt/libraries/DRStmp"
@@ -91,7 +93,7 @@ class Loaders::CpssController < ApplicationController
         #if zip
         if extract_mime_type(new_file) == 'application/zip'
           # send to job
-          Cerberus::Application::Queue.push(ProcessZipJob.new("College of Professoinal Studies", new_file.to_s, parent, copyright, current_user))
+          Cerberus::Application::Queue.push(ProcessZipJob.new(@loader_name, new_file.to_s, parent, copyright, current_user))
           flash[:notice] = "Your file has been submitted and is now being processed. You will receive an email when the load is complete."
           redirect_to my_loaders_path
         else

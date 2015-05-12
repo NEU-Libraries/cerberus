@@ -185,5 +185,18 @@ en:
         short: Set
     full_metadata:
       processing note: "The metadata details and access controls you specified are being processed in the background. Your file will be marked as 'Private' until this brief process is complete."
+    loaders:
+      marcom:
+        long_name: "Marketing and Communications"
+        short_name: "marcom"
+        copyright: 'Marketing and Communications images are for use only within the context of Northeastern University. Appropriate uses include: Northeastern University-related websites, Northeastern University-based print/web publications and for speaking appearances when acting as a representative of Northeastern University. Images should be credited: "Photographer Name/Northeastern University.” Images are not to be used for self-promotional purposes outside of Northeastern University such as LinkedIn, Facebook or in commercial/external publications such as advertisements, books or magazines without written permission from Northeastern Marketing and Communications. For more information, please contact the senior staff photographer in the office of Marketing and Communications at 617.373.6767'
+      engineering:
+        long_name: "College of Engineering"
+        short_name: "engineering"
+        copyright: ""
+      cps:
+        long_name: "College of Professional Studies"
+        short_name: "cps"
+        copyright: ""
   blacklight:
     application_name: "DRS"
