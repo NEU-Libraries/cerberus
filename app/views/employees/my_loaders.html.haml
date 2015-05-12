@@ -37,15 +37,4 @@
 
   %article.span6
     %h3 Past Loads
-    - q = ""
-    - l = current_user.loaders.length
-    - i = 0
-    - current_user.loaders.each do |loader|
-      - i = i + 1
-      - if i == 1
-        - q = 'loader_name = "' + loader + '"'
-      - else
-        - q = q + ' OR loader_name = "' + loader + '"'
-    //= q
-    - @loads = Loaders::LoadReport.where(q).find_all
     = render template: "/loaders/index", locals: {loads: @loads}
