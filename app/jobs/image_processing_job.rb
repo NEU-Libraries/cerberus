@@ -99,10 +99,8 @@ class ImageProcessingJob
             end
           elsif tag == "By-line"
             pers = val.split(",")
-            # pers = {:first_names=>[pers[1].strip], :last_names=>[pers[0].strip]}
-            # core_file.creators = pers
-            core_file.mods.personal_name.name_part_given = pers[1].strip
-            core_file.mods.personal_name.name_part_family = pers[0].strip
+            pers = {'first_names'=>[pers[1].strip], 'last_names'=>[pers[0].strip]}
+            core_file.creators = pers
           elsif tag == 'By-lineTitle'
             core_file.mods.personal_name.role.role_term = val
             core_file.mods.personal_name.role.role_term.type = "text"
