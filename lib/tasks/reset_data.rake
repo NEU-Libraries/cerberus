@@ -166,13 +166,11 @@ task :reset_data => :environment do
 
   sarah.add_group("northeastern:drs:repository:loaders:coe")
   pat.add_group("northeastern:drs:repository:loaders:coe")
-  brooks.add_group("northeastern:drs:repository:loaders:coe")
   eli.add_group("northeastern:drs:repository:loaders:coe")
   david.add_group("northeastern:drs:repository:loaders:coe")
 
   sarah.add_group("northeastern:drs:repository:loaders:cps")
   pat.add_group("northeastern:drs:repository:loaders:cps")
-  brooks.add_group("northeastern:drs:repository:loaders:cps")
   eli.add_group("northeastern:drs:repository:loaders:cps")
   david.add_group("northeastern:drs:repository:loaders:cps")
 
