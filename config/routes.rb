@@ -70,18 +70,18 @@ Cerberus::Application.routes.draw do
   get '/my_loaders' => 'employees#my_loaders', as: 'my_loaders'
 
   scope :module => Loaders do
-   resources :marcoms, only: [:new, :create, :show], :path => "loaders/marcom"
-   get "/loaders/marcom/new" => 'marcoms#new', as: 'loaders_marcom'
-   get "/loaders/marcom/report/:id" => 'marcoms#show', as: 'loaders_marcom_report'
-   get "/loaders/marcom/file/:id" => 'marcoms#show_iptc', as: 'loaders_marcom_iptc'
-   resources :engineerings, only: [:new, :create, :show], :path => "loaders/engineering"
-   get "/loaders/engineering/new" => 'engineerings#new', as: 'loaders_engineering'
-   get "/loaders/engineering/report/:id" => 'engineerings#show', as: 'loaders_engeering_report'
-   get "/loaders/engineering/file/:id" => 'engineerings#show_iptc', as: 'loaders_engineering_iptc'
-   resources :cpss, only: [:new, :create, :show], :path => "loaders/cps"
-   get "/loaders/cps/new" => 'cps#new', as: 'loaders_cps'
-   get "/loaders/cps/report/:id" => 'cps#show', as: 'loaders_cps_report'
-   get "/loaders/cps/file/:id" => 'cps#show_iptc', as: 'loaders_cps_iptc'
+   resources :marcom_loads, only: [:new, :create, :show], :path => "loaders/marcom"
+   get "/loaders/marcom/new" => 'marcom_loads#new', as: 'loaders_marcom'
+   get "/loaders/marcom/report/:id" => 'marcom_loads#show', as: 'loaders_marcom_report'
+   get "/loaders/marcom/file/:id" => 'marcom_loads#show_iptc', as: 'loaders_marcom_iptc'
+   resources :coe_loads, only: [:new, :create, :show], :path => "loaders/coe"
+   get "/loaders/engineering/new" => 'coe_loads#new', as: 'loaders_coe'
+   get "/loaders/engineering/report/:id" => 'coe_loads#show', as: 'loaders_coe_report'
+   get "/loaders/engineering/file/:id" => 'coe_loads#show_iptc', as: 'loaders_coe_iptc'
+   resources :cps_loads, only: [:new, :create, :show], :path => "loaders/cps"
+   get "/loaders/cps/new" => 'cps_loads#new', as: 'loaders_cps'
+   get "/loaders/cps/report/:id" => 'cps_loads#show', as: 'loaders_cps_report'
+   get "/loaders/cps/file/:id" => 'cps_loads#show_iptc', as: 'loaders_cps_iptc'
   end
 
   # Facets for communities and collections

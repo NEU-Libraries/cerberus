@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-class Loaders::MarcomsController < ApplicationController
+class Loaders::MarcomLoadsController < ApplicationController
   include Cerberus::Controller
   include MimeHelper
 
@@ -49,7 +49,7 @@ class Loaders::MarcomsController < ApplicationController
         process_file(file, parent, @copyright)
       end
     rescue => exception
-      logger.error "MarcomsController::create rescued #{exception.class}\n\t#{exception.to_s}\n #{exception.backtrace.join("\n")}\n\n"
+      logger.error "MarcomLoadsController::create rescued #{exception.class}\n\t#{exception.to_s}\n #{exception.backtrace.join("\n")}\n\n"
       email_handled_exception(exception)
       json_error "Error occurred while creating file."
     ensure
