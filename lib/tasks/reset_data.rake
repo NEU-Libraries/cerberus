@@ -66,7 +66,7 @@ task :reset_data => :environment do
   # Add marcom structure for loader testing
   marcom_dept = Community.new(mass_permissions: 'public', pid: 'neu:353', identifier: 'neu:353', title: 'Office of Marketing and Communications')
   marcom_dept.parent = "neu:1"
-  marcon_dept.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
+  marcom_dept.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
   marcom_dept.save!
 
   # Parent collection
@@ -163,6 +163,18 @@ task :reset_data => :environment do
   brooks.add_group("northeastern:drs:repository:loaders:marcom")
   eli.add_group("northeastern:drs:repository:loaders:marcom")
   david.add_group("northeastern:drs:repository:loaders:marcom")
+
+  sarah.add_group("northeastern:drs:repository:loaders:coe")
+  pat.add_group("northeastern:drs:repository:loaders:coe")
+  brooks.add_group("northeastern:drs:repository:loaders:coe")
+  eli.add_group("northeastern:drs:repository:loaders:coe")
+  david.add_group("northeastern:drs:repository:loaders:coe")
+
+  sarah.add_group("northeastern:drs:repository:loaders:cps")
+  pat.add_group("northeastern:drs:repository:loaders:cps")
+  brooks.add_group("northeastern:drs:repository:loaders:cps")
+  eli.add_group("northeastern:drs:repository:loaders:cps")
+  david.add_group("northeastern:drs:repository:loaders:cps")
 
   sarah.add_group("northeastern:drs:repository:staff")
   pat.add_group("northeastern:drs:repository:staff")
