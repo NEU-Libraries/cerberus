@@ -92,8 +92,18 @@ class EmployeesController < ApplicationController
   def my_loaders
     fetch_employee
     @page_title = "My Loaders"
-    #@loaders = Loader.all
-    
+    q = ""
+    l = current_user.loaders.length
+    i = 0
+    current_user.loaders.each do |loader|
+      i = i + 1
+      if i == 1
+        q = 'loader_name = "' + loader + '"'
+      else
+        q = q + ' OR loader_name = "' + loader + '"'
+      end
+    end
+    @loads = Loaders::LoadReport.where(q).find_all
     render :template => 'employees/my_loaders'
   end
 
