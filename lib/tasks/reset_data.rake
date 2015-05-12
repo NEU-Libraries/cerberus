@@ -119,7 +119,7 @@ task :reset_data => :environment do
   p_1.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
   p_1.save!
 
-  p_2 = Collection.create(mass_permissions: 'public', parent: p_c2, pid: 'neu:5m60qz35j', title: 'Ambassador Meet and Greet')
+  p_2 = Collection.create(mass_permissions: 'public', parent: p_1, pid: 'neu:5m60qz35j', title: 'Ambassador Meet and Greet')
   p_2.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
   p_2.save!
 
@@ -166,13 +166,11 @@ task :reset_data => :environment do
 
   sarah.add_group("northeastern:drs:repository:loaders:coe")
   pat.add_group("northeastern:drs:repository:loaders:coe")
-  brooks.add_group("northeastern:drs:repository:loaders:coe")
   eli.add_group("northeastern:drs:repository:loaders:coe")
   david.add_group("northeastern:drs:repository:loaders:coe")
 
   sarah.add_group("northeastern:drs:repository:loaders:cps")
   pat.add_group("northeastern:drs:repository:loaders:cps")
-  brooks.add_group("northeastern:drs:repository:loaders:cps")
   eli.add_group("northeastern:drs:repository:loaders:cps")
   david.add_group("northeastern:drs:repository:loaders:cps")
 
