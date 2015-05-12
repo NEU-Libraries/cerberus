@@ -159,13 +159,13 @@ class User < ActiveRecord::Base
   def loaders
     loaders = []
     if self.marcom_loader?
-      loaders.push("Marketing and Communications")
+      loaders.push(I18n.t("drs.loaders.marcom.long_name"))
     end
     if self.coe_loader?
-      loaders.push("College of Engineering")
+      loaders.push(I18n.t("drs.loaders.engineering.long_name"))
     end
     if self.cps_loader?
-      loaders.push("College of Professional Studies")
+      loaders.push(I18n.t("drs.loaders.cps.long_name"))
     end
     return loaders
   end
