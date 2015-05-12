@@ -100,13 +100,13 @@ task :reset_data => :environment do
   p_1.save!
 
   # Add CPS structure for loader testing
-  cps_dept = Community.new(mass_permissions: 'public', pid: 'neu:103', identifier: 'neu:108', title: 'College of Professional Studies')
+  cps_dept = Community.new(mass_permissions: 'public', pid: 'neu:108', identifier: 'neu:108', title: 'College of Professional Studies')
   cps_dept.parent = "neu:1"
   cps_dept.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
   cps_dept.save!
 
   # Parent collections
-  p_c = Collection.new(mass_permissions: 'public', parent: cps_dept, pid: 'neu:5m60qz152', title: 'College of Proffesional Studies of the Dean')
+  p_c = Collection.new(mass_permissions: 'public', parent: cps_dept, pid: 'neu:5m60qz152', title: 'College of Professional Studies Office of the Dean')
   p_c.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
   p_c.save!
 
