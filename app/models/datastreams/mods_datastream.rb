@@ -55,7 +55,11 @@ class ModsDatastream < ActiveFedora::OmDatastream
 
     t.origin_info(path: 'originInfo', namespace_prefix: 'mods'){
       t.publisher(path: 'publisher', namespace_prefix: 'mods', index_as: [:stored_searchable])
-      t.place(path: 'place', namespace_prefix: 'mods', index_as: [:stored_searchable])
+      t.place(path: 'place', namespace_prefix: 'mods'){
+        t.term(path: 'placeTerm', namespace_prefix: 'mods'){
+          t.type(path: { attribute: 'type' })
+        }
+      }
       t.date_created(path: 'dateCreated', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable], attributes: { encoding: 'w3cdtf', keyDate: 'yes' })
       t.copyright(path: 'copyrightDate', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable], attributes: { encoding: 'w3cdtf' })
       t.date_issued(path: 'dateIssued', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable], attributes: { encoding: 'w3cdtf' })
