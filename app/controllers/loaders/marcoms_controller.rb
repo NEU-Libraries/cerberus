@@ -58,10 +58,6 @@ class Loaders::MarcomsController < ApplicationController
     end
   end
 
-  def index
-    @loads = Loaders::LoadReport.where('loader_name = "'+ t('drs.loaders.marcom.long_name') +'"', true).find_all
-  end
-
   def show
     @report = Loaders::LoadReport.find(params[:id])
     @images = Loaders::ImageReport.where(load_report_id:"#{@report.id}").find_all
