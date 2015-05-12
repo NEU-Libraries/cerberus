@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-class Loaders::EngineeringsController < ApplicationController
+class Loaders::CpsLoadsController < ApplicationController
   include Cerberus::Controller
   include MimeHelper
 
@@ -8,7 +8,7 @@ class Loaders::EngineeringsController < ApplicationController
   before_filter :verify_group
 
   def new
-    @parent = Collection.find("neu:5m60qz05t")
+    @parent = Collection.find("neu:5m60qz16b")
     @collections_options = Array.new
     cols = @parent.child_collections.sort_by{|c| c.title}
     cols.each do |child|
@@ -22,14 +22,14 @@ class Loaders::EngineeringsController < ApplicationController
         end
       end
     end
-    @loader_name = t('drs.loaders.engineering.long_name')
-    @loader_short_name = t('drs.loaders.engineering.short_name')
+    @loader_name = t('drs.loaders.cps.long_name')
+    @loader_short_name = t('drs.loaders.cps.short_name')
     @page_title = @loader_name + " Loader"
     render 'loaders/new', locals: { collections_options: @collections_options}
   end
 
   def create
-    @copyright = t('drs.loaders.engineering.copyright')
+    @copyright = t('drs.loaders.cps.copyright')
     begin
       # check error condition No files
       return json_error("Error! No file to save") if !params.has_key?(:file)
@@ -49,7 +49,7 @@ class Loaders::EngineeringsController < ApplicationController
         process_file(file, parent, @copyright)
       end
     rescue => exception
-      logger.error "EngineeringsController::create rescued #{exception.class}\n\t#{exception.to_s}\n #{exception.backtrace.join("\n")}\n\n"
+      logger.error "CpsLoadsController::create rescued #{exception.class}\n\t#{exception.to_s}\n #{exception.backtrace.join("\n")}\n\n"
       email_handled_exception(exception)
       json_error "Error occurred while creating file."
     ensure
@@ -73,7 +73,7 @@ class Loaders::EngineeringsController < ApplicationController
 
   protected
     def process_file(file, parent, copyright)
-      @loader_name = t('drs.loaders.engineering.long_name')
+      @loader_name = t('drs.loaders.cps.long_name')
       if virus_check(file) == 0
         if Rails.env.production?
           tempdir = "/mnt/libraries/DRStmp"
@@ -127,6 +127,6 @@ class Loaders::EngineeringsController < ApplicationController
   private
 
     def verify_group
-      redirect_to root_path unless current_user.coe_loader?
+      redirect_to root_path unless current_user.cps_loader?
     end
 end

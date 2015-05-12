@@ -162,7 +162,7 @@ class User < ActiveRecord::Base
       loaders.push(I18n.t("drs.loaders.marcom.long_name"))
     end
     if self.coe_loader?
-      loaders.push(I18n.t("drs.loaders.engineering.long_name"))
+      loaders.push(I18n.t("drs.loaders.coe.long_name"))
     end
     if self.cps_loader?
       loaders.push(I18n.t("drs.loaders.cps.long_name"))

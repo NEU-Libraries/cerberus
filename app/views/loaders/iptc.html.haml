@@ -6,8 +6,8 @@
   %li
     -if @load.loader_name == t('drs.loaders.marcom.long_name')
       - path = loaders_marcom_report_path(@load.id)
-    - elsif @load.loader_name == t('drs.loaders.engineering.long_name')
-      - path = loaders_engineering_report_path(@load.id)
+    - elsif @load.loader_name == t('drs.loaders.coe.long_name')
+      - path = loaders_coe_report_path(@load.id)
     - elsif @load.loader_name == t('drs.loaders.cps.long_name')
       - path = loaders_cps_report_path(@load.id)
     = link_to "#{@load.loader_name} Load into #{collection.title}", path
