@@ -49,4 +49,9 @@
           = "Error - #{image.exception}"
         %td
           - if image.iptc != ""
-            = link_to("View IPTC", loaders_iptc_path(image.id), class:"btn btn-small btn-warning")
+            -if @report.loader_name == "Marketing and Communications"
+              = link_to("View IPTC", loaders_marcom_iptc_path(image.id), class:"btn btn-small btn-warning")
+            - elsif @report.loader_name == "College of Engineering"
+              = link_to("View IPTC", loaders_engineering_iptc_path(image.id), class:"btn btn-small btn-warning")
+            - elsif @report.loader_name == "College of Professional Studies"
+              = link_to("View IPTC", loaders_cps_iptc_path(image.id), class:"btn btn-small btn-warning")
