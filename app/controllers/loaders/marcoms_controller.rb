@@ -22,12 +22,14 @@ class Loaders::MarcomsController < ApplicationController
         end
       end
     end
-    @page_title = "Marketing and Communications Loader"
+    @loader_name = t('drs.loaders.marcom.long_name')
+    @loader_short_name = t('drs.loaders.marcom.short_name')
+    @page_title = @loader_name + " Loader"
     render 'loaders/new', locals: { collections_options: @collections_options}
   end
 
   def create
-    @copyright = 'Marketing and Communications images are for use only within the context of Northeastern University. Appropriate uses include: Northeastern University-related websites, Northeastern University-based print/web publications and for speaking appearances when acting as a representative of Northeastern University. Images should be credited: "Photographer Name/Northeastern University.” Images are not to be used for self-promotional purposes outside of Northeastern University such as LinkedIn, Facebook or in commercial/external publications such as advertisements, books or magazines without written permission from Northeastern Marketing and Communications. For more information, please contact the senior staff photographer in the office of Marketing and Communications at 617.373.6767'
+    @copyright = t('drs.loaders.marcom.copyright')
     begin
       # check error condition No files
       return json_error("Error! No file to save") if !params.has_key?(:file)
@@ -57,14 +59,13 @@ class Loaders::MarcomsController < ApplicationController
   end
 
   def index
-    @loads = Loaders::LoadReport.where('loader_name = "Marketing and Communications"', true).find_all
+    @loads = Loaders::LoadReport.where('loader_name = "'+ t('drs.loaders.marcom.long_name') +'"', true).find_all
   end
 
   def show
     @report = Loaders::LoadReport.find(params[:id])
     @images = Loaders::ImageReport.where(load_report_id:"#{@report.id}").find_all
     @user = User.find_by_nuid(@report.nuid)
-    puts @user
     render 'loaders/show', locals: {images: @images, user: @user}
   end
 
@@ -76,6 +77,7 @@ class Loaders::MarcomsController < ApplicationController
 
   protected
     def process_file(file, parent, copyright)
+      @loader_name = t('drs.loaders.marcom.long_name')
       if virus_check(file) == 0
         if Rails.env.production?
           tempdir = "/mnt/libraries/DRStmp"
@@ -91,7 +93,7 @@ class Loaders::MarcomsController < ApplicationController
         #if zip
         if extract_mime_type(new_file) == 'application/zip'
           # send to job
-          Cerberus::Application::Queue.push(ProcessZipJob.new("Marketing and Communications", new_file.to_s, parent, copyright, current_user))
+          Cerberus::Application::Queue.push(ProcessZipJob.new(@loader_name, new_file.to_s, parent, copyright, current_user))
           flash[:notice] = "Your file has been submitted and is now being processed. You will receive an email when the load is complete."
           redirect_to my_loaders_path
         else

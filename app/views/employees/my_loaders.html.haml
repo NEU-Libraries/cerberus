@@ -23,15 +23,15 @@
   %article.span6
     %h3 My Loaders
     - if current_user.marcom_loader?
-      = link_to("Marketing and Communications", loaders_marcom_path, class: "btn btn-lg btn-primary")
+      = link_to(t('drs.loaders.marcom.long_name'), loaders_marcom_path, class: "btn btn-lg btn-primary")
       %br
       %br
     - if current_user.coe_loader?
-      = link_to("College of Engineering", loaders_engineering_path, class: "btn btn-lg btn-primary")
+      = link_to(t('drs.loaders.engineering.long_name'), loaders_engineering_path, class: "btn btn-lg btn-primary")
       %br
       %br
     - if current_user.cps_loader?
-      = link_to("College of Professional Studies", loaders_cps_path, class: "btn btn-lg btn-primary")
+      = link_to(t('drs.loaders.cps.long_name'), loaders_cps_path, class: "btn btn-lg btn-primary")
       %br
       %br
 

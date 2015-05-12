@@ -42,7 +42,6 @@ class ImageProcessingJob
       else
         classification = ''
         photo = MiniExiftool.new("#{file}", iptc_encoding: 'UTF8', exif_encoding: 'UTF8')
-        puts file
         photo.tags.each do |tag|
           val = photo[tag]
           iptc[:"#{tag}"] = val
@@ -109,13 +108,11 @@ class ImageProcessingJob
             core_file.mods.personal_name.role.role_term.type = "text"
           elsif tag == 'Description'
             core_file.description = val
-            puts core_file.description
           elsif tag == 'Source'
             core_file.mods.origin_info.publisher = val
           elsif tag == "DateCreated"
             core_file.mods.origin_info.copyright = val.strftime("%F")
             core_file.date = val.strftime("%F")
-            puts core_file.date
           elsif tag == 'Keywords'
             if val.kind_of?(Array)
               core_file.keywords = val

@@ -4,11 +4,11 @@
   %li
     = link_to 'My Loaders', my_loaders_path
   %li
-    -if @load.loader_name == "Marketing and Communications"
+    -if @load.loader_name == t('drs.loaders.marcom.long_name')
       - path = loaders_marcom_report_path(@load.id)
-    - elsif @load.loader_name == "College of Engineering"
+    - elsif @load.loader_name == t('drs.loaders.engineering.long_name')
       - path = loaders_engineering_report_path(@load.id)
-    - elsif @load.loader_name == "College of Professional Studies"
+    - elsif @load.loader_name == t('drs.loaders.cps.long_name')
       - path = loaders_cps_report_path(@load.id)
     = link_to "#{@load.loader_name} Load into #{collection.title}", path
   %li.active
