@@ -66,60 +66,62 @@ task :reset_data => :environment do
   # Add marcom structure for loader testing
   marcom_dept = Community.new(mass_permissions: 'public', pid: 'neu:353', identifier: 'neu:353', title: 'Office of Marketing and Communications')
   marcom_dept.parent = "neu:1"
+  marcon_dept.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
   marcom_dept.save!
 
   # Parent collection
   p_c = Collection.new(mass_permissions: 'public', parent: marcom_dept, pid: 'neu:6240', title: 'Marketing and Communications Photo Archive')
+  p_c.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
   p_c.save!
 
-  # Marcom children collections - 12
+  # Marcom children collections
   p_1 = Collection.create(mass_permissions: 'public', parent: p_c, pid: 'neu:6241', title: 'Alumni (Photographs)')
   p_1.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
   p_1.save!
 
-  p_2 = Collection.create(mass_permissions: 'public', parent: p_c, pid: 'neu:6242', title: 'Athletics (Photographs)')
+  # Add COE structure for loader testing
+  coe_dept = Community.new(mass_permissions: 'public', pid: 'neu:103', identifier: 'neu:103', title: 'College of Engineering')
+  coe_dept.parent = "neu:1"
+  coe_dept.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
+  coe_dept.save!
+
+  # Parent collections
+  p_c = Collection.new(mass_permissions: 'public', parent: coe_dept, pid: 'neu:5m60qz04j', title: 'College of Engineering Office of the Dean')
+  p_c.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
+  p_c.save!
+
+  p_c2 = Collection.new(mass_permissions: 'public', parent: p_c, pid: 'neu:5m60qz05t', title: 'Photographs')
+  p_c2.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
+  p_c2.save!
+
+  # COE children collections
+  p_1 = Collection.create(mass_permissions: 'public', parent: p_c2, pid: 'neu:5m60qz063', title: 'Capstone Projects')
+  p_1.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
+  p_1.save!
+
+  # Add CPS structure for loader testing
+  cps_dept = Community.new(mass_permissions: 'public', pid: 'neu:103', identifier: 'neu:108', title: 'College of Professional Studies')
+  cps_dept.parent = "neu:1"
+  cps_dept.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
+  cps_dept.save!
+
+  # Parent collections
+  p_c = Collection.new(mass_permissions: 'public', parent: cps_dept, pid: 'neu:5m60qz152', title: 'College of Proffesional Studies of the Dean')
+  p_c.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
+  p_c.save!
+
+  p_c2 = Collection.new(mass_permissions: 'public', parent: p_c, pid: 'neu:5m60qz16b', title: 'Photographs')
+  p_c2.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
+  p_c2.save!
+
+  # CPS children collections
+  p_1 = Collection.create(mass_permissions: 'public', parent: p_c2, pid: 'neu:5m60qz23r', title: 'Graduation and Other Events')
+  p_1.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
+  p_1.save!
+
+  p_2 = Collection.create(mass_permissions: 'public', parent: p_c2, pid: 'neu:5m60qz35j', title: 'Ambassador Meet and Greet')
   p_2.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
   p_2.save!
-
-  p_3 = Collection.create(mass_permissions: 'public', parent: p_c, pid: 'neu:6243', title: 'Campus (Photographs)')
-  p_3.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
-  p_3.save!
-
-  p_4 = Collection.create(mass_permissions: 'public', parent: p_c, pid: 'neu:6244', title: 'Campus Life (Photographs)')
-  p_4.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
-  p_4.save!
-
-  p_5 = Collection.create(mass_permissions: 'public', parent: p_c, pid: 'neu:6245', title: 'Classroom (Photographs)')
-  p_5.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
-  p_5.save!
-
-  p_6 = Collection.create(mass_permissions: 'public', parent: p_c, pid: 'neu:6246', title: 'Community Outreach (Photographs)')
-  p_6.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
-  p_6.save!
-
-  p_7 = Collection.create(mass_permissions: 'public', parent: p_c, pid: 'neu:6247', title: 'Experiential Learning (Photographs)')
-  p_7.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
-  p_7.save!
-
-  p_8 = Collection.create(mass_permissions: 'public', parent: p_c, pid: 'neu:6248', title: 'Graduation (Photographs)')
-  p_8.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
-  p_8.save!
-
-  p_9 = Collection.create(mass_permissions: 'public', parent: p_c, pid: 'neu:6249', title: 'Headshot (Photographs)')
-  p_9.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
-  p_9.save!
-
-  p_10 = Collection.create(mass_permissions: 'public', parent: p_c, pid: 'neu:6250', title: 'Potrait (Photographs)')
-  p_10.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
-  p_10.save!
-
-  p_11 = Collection.create(mass_permissions: 'public', parent: p_c, pid: 'neu:6251', title: 'President (Photographs)')
-  p_11.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
-  p_11.save!
-
-  p_12 = Collection.create(mass_permissions: 'public', parent: p_c, pid: 'neu:6252', title: 'Research (Photographs)')
-  p_12.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
-  p_12.save!
 
   root_dept.rightsMetadata.permissions({group: 'public'}, 'read')
   set_edit_permissions(root_dept)
