@@ -141,6 +141,8 @@ class User < ActiveRecord::Base
   def loader?
     if self.groups.include? "northeastern:drs:repository:loaders:marcom" or self.groups.include? "northeastern:drs:repository:loaders:coe" or self.groups.include? "northeastern:drs:repository:loaders:cps"
       return true
+    else
+      return false
     end
   end
 
