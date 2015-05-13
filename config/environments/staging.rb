@@ -35,7 +35,7 @@ Cerberus::Application.configure do
   config.assets.debug = true
 
   # Tell Mailer to use localhost:3000 as the default host
-  config.action_mailer.default_url_options = { :host => "localhost:3000" }
+  config.action_mailer.default_url_options = { :host => "cerberus.library.northeastern.edu" }
 
   # Mailer configuration
   ActionMailer::Base.smtp_settings = {
