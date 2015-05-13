@@ -14,8 +14,8 @@ class EmployeesController < ApplicationController
   include BlacklightAdvancedSearch::ParseBasicQ
   include BlacklightAdvancedSearch::Controller
 
-  before_filter :authenticate_user!, only: [:personal_graph, :personal_files]
-  before_filter :get_employee, only: [:show, :list_files]
+  before_filter :authenticate_user!, only: [:personal_graph, :personal_files, :my_communities, :my_loaders]
+  before_filter :get_employee, only: [:show, :list_files, :communities, :loaders]
 
   rescue_from ActiveFedora::ObjectNotFoundError do |exception|
     @obj_type = "Faculty Member"
@@ -89,32 +89,47 @@ class EmployeesController < ApplicationController
     render :template => 'employees/communities'
   end
 
-  def my_loaders
-    fetch_employee
-    @page_title = "My Loaders"
-    q = ""
-    l = current_user.loaders.length
-    i = 0
-    current_user.loaders.each do |loader|
-      i = i + 1
-      if i == 1
-        q = 'loader_name = "' + loader + '"'
-      else
-        q = q + ' OR loader_name = "' + loader + '"'
-      end
-    end
-    @loads = Loaders::LoadReport.where(q).find_all
-    render :template => 'employees/my_loaders'
-  end
-
   def communities
-    get_employee
     if user_examining_self?
       return redirect_to my_communities_path
     end
     @communities = @employee.communities
     @communities.sort_by!{|c| Community.find(c).title}
     @page_title = "#{@employee.pretty_employee_name}'s Communities"
+  end
+
+  def my_loaders
+    fetch_employee
+    @page_title = "My Loaders"
+    q = ""
+    l = current_user.loaders.length
+    if l == 0
+      render_403 and return
+    else
+      i = 0
+      current_user.loaders.each do |loader|
+        i = i + 1
+        if i == 1
+          q = 'loader_name = "' + loader + '"'
+        else
+          q = q + ' OR loader_name = "' + loader + '"'
+        end
+      end
+      @loads = Loaders::LoadReport.where(q).find_all
+      render :template => 'employees/my_loaders'
+    end
+  end
+
+  def loaders
+    if user_examining_self?
+      if current_user.loader?
+        return redirect_to my_loaders_path
+      else
+        render_403 and return
+      end
+    else
+      render_403 and return
+    end
   end
 
   private
