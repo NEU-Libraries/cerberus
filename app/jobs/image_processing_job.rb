@@ -118,14 +118,11 @@ class ImageProcessingJob
               core_file.keywords = ["#{val}"]
             end
           elsif tag == 'City'
-            # core_file.mods.origin_info.place.term = val
-            # core_file.mods.origin_info.place.term.type = "text"
+            core_file.mods.origin_info.place.city_term = val
           elsif tag == 'State'
-            # if val == "MA"
-            #   core_file.mods.origin_info.place.term = "mau"
-            #   core_file.mods.origin_info.place.term.type = "code"
-            #   core_file.mods.origin_info.place.term.authority = "marccountry"
-            # end
+            if val == "MA"
+              core_file.mods.origin_info.place.state_term = "mau"
+            end
           end
           core_file.mods.genre = "photographs"
           core_file.mods.genre.authority = "aat"
