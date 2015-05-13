@@ -37,5 +37,11 @@ FactoryGirl.define do
       group_list ['group_two']
       nuid "000000004"
     end
+
+    factory :brooks do
+      email 'b@blah.com'
+      group_list ['northeastern:drs:repository:loaders:marcom', 'northeastern:drs:repository:staff']
+      nuid "000000005"
+    end
   end
 end
