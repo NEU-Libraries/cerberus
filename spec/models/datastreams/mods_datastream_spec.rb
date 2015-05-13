@@ -191,7 +191,6 @@ describe ModsDatastream do
     it "creates a tesim field for all origin place entries" do
       mods.origin_info = [""]
       mods.origin_info.place.city_term = "New York City"
-
       result["origin_info_place_tesim"].should == ["New York City"]
     end
 
