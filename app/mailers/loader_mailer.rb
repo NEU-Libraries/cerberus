@@ -13,6 +13,8 @@ class LoaderMailer < ActionMailer::Base
     def pick_receiver
       if ["production"].include? Rails.env
         @user.email
+      elsif ["staging"].include? Rails.env
+        @user.email
       elsif "test" == Rails.env
         "test@test.com"
       else
