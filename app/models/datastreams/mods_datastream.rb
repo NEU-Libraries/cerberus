@@ -126,10 +126,8 @@ class ModsDatastream < ActiveFedora::OmDatastream
       }
       t.origin_info(path: 'originInfo', namespace_prefix: 'mods'){
         t.place(path: 'place', namespace_prefix: 'mods'){
-          t.term(path: 'placeTerm', namespace_prefix: 'mods'){
-            t.city_term(path: 'placeTerm', namespace_prefix: 'mods', attributes: { type: 'text' })
-            t.state_term(path: 'placeTerm', namespace_prefix: 'mods', attributes: { type: 'code', authority: 'marccountry' })
-          }
+          t.city_term(path: 'placeTerm', namespace_prefix: 'mods', attributes: { type: 'text' })
+          t.state_term(path: 'placeTerm', namespace_prefix: 'mods', attributes: { type: 'code', authority: 'marccountry' })
         }
         t.publisher(path: 'publisher', namespace_prefix: 'mods', index_as: [:stored_searchable])
         t.issuance(path: 'issuance', namespace_prefix: 'mods')
