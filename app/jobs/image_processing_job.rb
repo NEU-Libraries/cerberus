@@ -45,6 +45,23 @@ class ImageProcessingJob
         photo.tags.each do |tag|
           val = photo[tag]
           iptc[:"#{tag}"] = val
+          if val.kind_of?(String) or val.kind_of?(Time)
+            val = val
+          elsif val.kind_of?(Integer) or val.kind_of?(Float) or val.kind_of?(Rational) or val.kind_of?(TrueClass) or val.kind_of?(FalseClass)
+            val = String(val)
+          elsif val.kind_of?(Array)
+            val.map! do |i|
+              if i.kind_of?(String) or i.kind_of?(Integer) or val.kind_of?(Float) or val.kind_of?(Time) or val.kind_of?(Rational) or val.kind_of?(TrueClass)
+                i = String(i)
+              else
+                create_special_error("#{tag} contains #{val.class.name} data", iptc, core_file, load_report)
+                return
+              end
+            end
+          else
+            create_special_error("#{tag} contains #{val.class.name} data", iptc, core_file, load_report)
+            return
+          end
 
           if val.kind_of?(String) and (val.include? "“" or val.include? "”" or val.include? "‘" or val.include? "’")
             create_special_error("#{tag} contains invalid smart quotes", iptc, core_file, load_report)
@@ -108,12 +125,12 @@ class ImageProcessingJob
             core_file.description = val
           elsif tag == 'Source'
             core_file.mods.origin_info.publisher = val
-          elsif tag == "DateCreated"
+          elsif tag == "DateTimeOriginal"
             core_file.mods.origin_info.copyright = val.strftime("%F")
             core_file.date = val.strftime("%F")
           elsif tag == 'Keywords'
             if val.kind_of?(Array)
-              core_file.keywords = val
+              core_file.keywords = val.map #(&:to_s)
             else
               core_file.keywords = ["#{val}"]
             end
