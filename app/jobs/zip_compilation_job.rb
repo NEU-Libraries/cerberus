@@ -10,15 +10,22 @@ class ZipCompilationJob
   end
 
   def initialize(user, compilation)
-    self.nuid = user.nuid
+    if !user.nil?
+      self.nuid = user.nuid
+    else
+      self.nuid = nil
+    end
     self.title = compilation.title
     self.comp_pid = compilation.pid
     self.entry_ids = compilation.entry_ids
   end
 
   def run
-
-    user = User.find_by_nuid(nuid)
+    if !nuid.nil?
+      user = User.find_by_nuid(nuid)
+    else
+      user = nil
+    end
     dir = Rails.root.join("tmp", self.comp_pid)
 
     # Removes any stale zip files that might still be sitting around.
@@ -35,11 +42,13 @@ class ZipCompilationJob
 
         if CoreFile.exists?(id)
           cf = CoreFile.find(id)
-          if !(cf.under_embargo?(User.find_by_nuid(nuid)))
+          if !(cf.under_embargo?(user))
             cf.content_objects.each do |content|
-              if user.can?(:read, content) && content.content.content && content.class != ImageThumbnailFile
-                download_label = I18n.t("drs.display_labels.#{content.klass}.download")
-                io.add_buffer("#{self.title}/neu_#{id.split(":").last}-#{download_label}.#{extract_extension(content.characterization.mime_type.first)}", content.content.content)
+              if !user.nil? ? user.can?(:read, content) : content.public?
+                if content.content.content && content.class != ImageThumbnailFile
+                  download_label = I18n.t("drs.display_labels.#{content.klass}.download")
+                  io.add_buffer("#{self.title}/neu_#{id.split(":").last}-#{download_label}.#{extract_extension(content.characterization.mime_type.first)}", content.content.content)
+                end
               end
             end
           end
