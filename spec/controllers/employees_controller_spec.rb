@@ -47,4 +47,17 @@ describe EmployeesController do
       sign_out user
     end
   end
+
+  describe "GET #loaders" do
+    it "renders 403 when user is auth but not self"
+      # admin = FactoryGirl.create(:admin)
+      # admin_emp = Employee.create(nuid: admin.nuid)
+      # user = FactoryGirl.create(:brooks)
+      # employee = Employee.create(nuid: user.nuid)
+      # sign_in admin
+      # get :loaders { employee.pid => employee.pid}
+      # response.status.should == 403
+      # sign_out admin
+    end
+  end
 end
