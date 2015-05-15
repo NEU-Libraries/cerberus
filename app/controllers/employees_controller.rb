@@ -15,7 +15,7 @@ class EmployeesController < ApplicationController
   include BlacklightAdvancedSearch::Controller
 
   before_filter :authenticate_user!, only: [:personal_graph, :personal_files, :my_communities, :my_loaders]
-  before_filter :get_employee, only: [:show, :list_files, :communities]
+  before_filter :get_employee, only: [:show, :list_files, :communities, :loaders]
 
   rescue_from ActiveFedora::ObjectNotFoundError do |exception|
     @obj_type = "Faculty Member"
@@ -120,13 +120,13 @@ class EmployeesController < ApplicationController
     end
   end
 
-  # def loaders
-  #   if user_examining_self?
-  #     return redirect_to my_loaders_path
-  #   else
-  #     render_403 and return
-  #   end
-  # end
+  def loaders
+    if user_examining_self?
+      return redirect_to my_loaders_path
+    else
+      render_403 and return
+    end
+  end
 
   private
 
