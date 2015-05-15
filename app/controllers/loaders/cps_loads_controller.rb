@@ -62,12 +62,14 @@ class Loaders::CpsLoadsController < ApplicationController
     @report = Loaders::LoadReport.find(params[:id])
     @images = Loaders::ImageReport.where(load_report_id:"#{@report.id}").find_all
     @user = User.find_by_nuid(@report.nuid)
+    @page_title = @report.loader_name + " Load into " + Collection.find(@report.collection).title
     render 'loaders/show', locals: {images: @images, user: @user}
   end
 
   def show_iptc
     @image = Loaders::ImageReport.find(params[:id])
     @load = Loaders::LoadReport.find(@image.load_report_id)
+    @page_title = @image.original_file
     render 'loaders/iptc', locals: {image: @image, load: @load}
   end
 
