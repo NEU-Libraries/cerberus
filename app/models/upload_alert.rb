@@ -37,8 +37,16 @@ class UploadAlert < ActiveRecord::Base
     u = UploadAlert.new
     user = User.find_by_nuid(core_file.true_depositor)
 
-    u.depositor_email   = user.email
-    u.depositor_name    = user.full_name
+    if !user.nil?
+      u.depositor_email   = user.email
+      u.depositor_name    = user.full_name
+    else
+      # try to find the emp obj - iris migrated objects most likely
+      emp = Employee.find_by_nuid(core_file.true_depositor)
+      u.depositor_name    = emp.name
+      u.depositor_email   = ""
+    end
+
     u.title             = core_file.title
     u.content_type      = core_file.category.first
     u.pid               = core_file.pid
