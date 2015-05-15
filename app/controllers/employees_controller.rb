@@ -103,30 +103,29 @@ class EmployeesController < ApplicationController
     @page_title = "My Loaders"
     q = ""
     l = current_user.loaders.length
-    # if l == 0
-    #   render_403 and return
-    # else
-    i = 0
-    current_user.loaders.each do |loader|
-      i = i + 1
-      if i == 1
-        q = 'loader_name = "' + loader + '"'
-      else
-        q = q + ' OR loader_name = "' + loader + '"'
+    if l == 0
+      render_403 and return
+    else
+      i = 0
+      current_user.loaders.each do |loader|
+        i = i + 1
+        if i == 1
+          q = 'loader_name = "' + loader + '"'
+        else
+          q = q + ' OR loader_name = "' + loader + '"'
+        end
       end
+      @loads = Loaders::LoadReport.where(q).find_all
+      render 'employees/my_loaders',locals: { employee: @employee, loads: @loads }
     end
-    @loads = Loaders::LoadReport.where(q).find_all
-    render :template => 'employees/my_loaders'
-    # end
   end
 
   def loaders
     if user_examining_self?
       return redirect_to my_loaders_path
+    else
+      render_403 and return
     end
-    # else
-    #   render_403 and return
-    # end
   end
 
   private
