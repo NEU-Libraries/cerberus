@@ -3,15 +3,18 @@
   %head
     %meta{:content => "text/html; charset=UTF-8", "http-equiv" => "Content-Type"}/
   %body
-    %h3 Load Completion Alert
+    %h3= @load.loader_name + " Load Completion Alert"
 
     %p The following load has completed:
     %ul
       %li= "Loader: #{@load.loader_name}"
       %li= "Collection: #{Collection.find("#{@load.collection}").title}"
+      %li= "User: #{@user.name}"
       %li= "Time Started: #{@load.created_at}"
       %li= "Time Completed: #{@load.updated_at}"
       %li= "Number of Files: #{@load.number_of_files}"
+      %li= "Success Count: #{@load.success_count}"
+      %li= "Error Count: #{@load.fail_count}"
       -if @load.loader_name == t('drs.loaders.marcom.long_name')
         %p= "A link to the load report can be found #{link_to 'here', loaders_marcom_report_url(@load.id)}".html_safe
       - elsif @load.loader_name == t('drs.loaders.coe.long_name')

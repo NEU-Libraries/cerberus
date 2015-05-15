@@ -5,7 +5,7 @@ class LoaderMailer < ActionMailer::Base
     @load = load
     @user = user
     mail(to: pick_receiver,
-         subject: "[cerberus] Load Complete",
+         subject: "[DRS] Load Complete",
          content_type: "text/html")
   end
 

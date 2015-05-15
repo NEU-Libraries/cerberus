@@ -1,5 +1,6 @@
 %table.table.table-striped
   %th Loader
+  %th Collection
   %th Time of Upload
   %th Total Files
   %th
@@ -9,9 +10,11 @@
       %td
         = loader.loader_name
       %td
+        = Collection.find(loader.collection).title
+      %td
         = loader.created_at.strftime("%m-%d-%Y %T")
       %td
-        = loader.number_of_files
+        .text-center= loader.number_of_files
       %td
         -if loader.loader_name == t('drs.loaders.marcom.long_name')
           = link_to("View Report", loaders_marcom_report_path(loader.id), class: "btn btn-small btn-success")
