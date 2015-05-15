@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe CoreFilesController do
+describe Loaders::MarcomLoadsController do
   # create non-marcom loader user
   # create marcom loader user
   # create load report
@@ -20,7 +20,7 @@ describe CoreFilesController do
       #expect(response).to redirect_to(new_user_session_path)
     end
 
-    it "renders marcom new if authed and marcom_loader"
+    it "renders marcom new if authed and marcom_loader" do
       #sign_in marcom loader user
       #expect(response).to render_template('loaders/new')
     end
