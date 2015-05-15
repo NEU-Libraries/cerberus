@@ -1,7 +1,7 @@
 - if !permissions.empty?
   - permissions.each_with_index do |perm, index|
     .permission.to-remove
-      = f.text_field :identity, value: perm[:name], name: "#{array_type}[permissions][identity][]", pattern: ".*\\S.*", class: "span12", readonly: true
+      = f.text_field :identity, value: perm[:name].gsub(/northeastern:drs:/, '').titleize.gsub(/:/, " - "), name: "#{array_type}[permissions][identity][]", pattern: ".*\\S.*", class: "span12", readonly: true
       = label_tag "#{array_type}[permissions][identity_type][]", "Should this identity be allowed to read or edit?"
       %div.input-append{:style => "display: block;"}
         = select_tag "#{array_type}[permissions][permission_type][]", options_for_select(['read', 'edit'], perm[:access]), class: "span11 selectpicker"
@@ -11,13 +11,19 @@
 - if (defined? read_only)
   .permission
     = f.label :identity, "Select Group"
-    = select_tag "#{array_type}[permissions][identity][]", options_for_select(current_user.groups.unshift("")), class: "span12"
+    - options = {"" => ""}
+    - current_user.groups.each do |s|
+      - options[:"#{s.gsub(/northeastern:drs:/, '').titleize.gsub(/:/, " - ")}"] = s
+    = select_tag "#{array_type}[permissions][identity][]", options_for_select(options), class: "span12"
     %div{:style => "display: block;"}
       = text_field_tag "#{array_type}[permissions][permission_type][]", "read", class: "span12", readonly: true
 - else
   .permission
     = f.label :identity, "Select Group"
-    = select_tag "#{array_type}[permissions][identity][]", options_for_select(current_user.groups.unshift("")), class: "span12"
+    - options = {"" => ""}
+    - current_user.groups.each do |s|
+      - options[:"#{s.gsub(/northeastern:drs:/, '').titleize.gsub(/:/, " - ")}"] = s
+    = select_tag "#{array_type}[permissions][identity][]", options_for_select(options), class: "span12"
     = label_tag "#{array_type}[permissions][permission_type][]", "Should this identity be allowed to read or edit?"
     %div{:style => "display: block;"}
       = select_tag "#{array_type}[permissions][permission_type][]", options_for_select(['read', 'edit']), class: "span12"
