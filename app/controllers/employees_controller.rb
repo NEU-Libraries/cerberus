@@ -116,7 +116,7 @@ class EmployeesController < ApplicationController
         end
       end
       @loads = Loaders::LoadReport.where(q).find_all
-      render 'employees/my_loaders',locals: { employee: @employee, loads: @loads }
+      render 'employees/my_loaders'
     end
   end
 
