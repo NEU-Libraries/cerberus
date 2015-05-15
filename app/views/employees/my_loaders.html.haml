@@ -20,7 +20,7 @@
 
 
 %section.row
-  %article.span6
+  %article.span4
     %h3 My Loaders
     - if current_user.marcom_loader?
       = link_to(t('drs.loaders.marcom.long_name'), loaders_marcom_path, class: "btn btn-lg btn-primary")
@@ -35,6 +35,6 @@
       %br
       %br
 
-  %article.span6
+  %article.span8
     %h3 Past Loads
     = render template: "/loaders/index", locals: {loads: @loads}
