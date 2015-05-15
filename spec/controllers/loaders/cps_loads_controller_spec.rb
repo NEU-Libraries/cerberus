@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe CoreFilesController do
+describe Loaders::CpsLoadsController do
   # create non-cps loader user
   # create cps loader user
   # create load report
@@ -20,7 +20,7 @@ describe CoreFilesController do
       #expect(response).to redirect_to(new_user_session_path)
     end
 
-    it "renders cps new if authed and cps_loader"
+    it "renders cps new if authed and cps_loader" do
       #sign_in cps loader user
       #expect(response).to render_template('loaders/new')
     end

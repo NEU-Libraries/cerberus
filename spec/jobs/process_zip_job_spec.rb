@@ -13,7 +13,7 @@ describe ProcessZipJob do
 
     it 'changes loadreport length to 1' do
       #should create load report
-      Loaders::LoadReport.all.length should == 1
+      #Loaders::LoadReport.all.length should == 1
     end
 
     it 'removes zip file from tmp dir' do
@@ -28,7 +28,5 @@ describe ProcessZipJob do
       # deletes brooks
       # clears out load reports and image reports
     end
-
-  end
 
 end

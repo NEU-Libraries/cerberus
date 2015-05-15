@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe CoreFilesController do
+describe Loaders::CoeLoadsController do
   # create non-coe loader user
   # create coe loader user
   # create load report
@@ -20,7 +20,7 @@ describe CoreFilesController do
       #expect(response).to redirect_to(new_user_session_path)
     end
 
-    it "renders coe new if authed and coe_loader"
+    it "renders coe new if authed and coe_loader" do
       #sign_in coe loader user
       #expect(response).to render_template('loaders/new')
     end

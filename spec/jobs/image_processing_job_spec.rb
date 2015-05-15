@@ -125,6 +125,5 @@ describe ImageProcessingJob do
       # deletes core_file
     end
 
-  end
 
 end
