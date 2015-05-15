@@ -190,6 +190,7 @@ class ImageProcessingJob
       report = load_report.image_reports.create_failure(error.message, iptc, core_file.label)
       FileUtils.rm(file)
       core_file.destroy
+      raise error
     end
   end
 
