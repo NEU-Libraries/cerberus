@@ -11,6 +11,6 @@ describe LoaderMailer do
     it "should send mail" do
       #sends mail?
     end
-
+    #after delete list?
   end
 end
