@@ -99,7 +99,8 @@ class EmployeesController < ApplicationController
   end
 
   def my_loaders
-    fetch_employee
+    #fetch_employee
+    @employee = Employee.find(current_user.employee_pid)
     @page_title = "My Loaders"
     q = ""
     l = current_user.loaders.length
