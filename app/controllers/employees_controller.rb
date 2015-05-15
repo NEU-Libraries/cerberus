@@ -123,9 +123,10 @@ class EmployeesController < ApplicationController
   def loaders
     if user_examining_self?
       return redirect_to my_loaders_path
-    else
-      render_403 and return
     end
+    # else
+    #   render_403 and return
+    # end
   end
 
   private
