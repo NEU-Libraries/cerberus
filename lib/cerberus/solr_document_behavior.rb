@@ -395,6 +395,10 @@ module Cerberus
       Digest::MD5.hexdigest(string)
     end
 
+    def checksum
+      Array(self["md5_checksum_tesim"]).first
+    end
+
     def encode
       self.pid.gsub(':','%3A')
     end
