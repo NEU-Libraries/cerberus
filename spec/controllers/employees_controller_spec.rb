@@ -60,4 +60,6 @@ describe EmployeesController do
       # sign_out admin
     end
   end
+
+  #destroy users and employees?
 end
