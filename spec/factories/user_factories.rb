@@ -39,7 +39,7 @@ FactoryGirl.define do
     end
 
     factory :brooks do
-      email 'b@blah.com'
+      email 'a@example.com'
       group_list ['northeastern:drs:repository:loaders:marcom', 'northeastern:drs:repository:staff']
       nuid "000000005"
     end
