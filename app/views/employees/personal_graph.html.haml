@@ -16,7 +16,7 @@
             My Communities
         -if current_user.loader? && current_user.nuid == @employee.nuid
           %li
-            %a{ href: employee_loaders_path(@employee) }
+            %a{ href: my_loaders_path(@employee) }
               %i.icon-upload-alt
               My Loaders
 
