@@ -15,7 +15,7 @@ class EmployeesController < ApplicationController
   include BlacklightAdvancedSearch::Controller
 
   before_filter :authenticate_user!, only: [:personal_graph, :personal_files, :my_communities, :my_loaders]
-  before_filter :get_employee, only: [:show, :list_files, :communities, :loaders]
+  before_filter :get_employee, only: [:show, :list_files, :communities]
 
   rescue_from ActiveFedora::ObjectNotFoundError do |exception|
     @obj_type = "Faculty Member"
@@ -99,8 +99,7 @@ class EmployeesController < ApplicationController
   end
 
   def my_loaders
-    #fetch_employee
-    @employee = Employee.find(current_user.employee_pid)
+    fetch_employee
     @page_title = "My Loaders"
     q = ""
     l = current_user.loaders.length
