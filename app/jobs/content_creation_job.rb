@@ -63,7 +63,7 @@ class ContentCreationJob
       content_object.original_filename = core_record.original_filename
 
       content_object.canonize
-      content_object.characterize
+      # content_object.characterize
       # content_object.properties.mime_type = extract_mime_type(file_path)
       # content_object.properties.md5_checksum = new_checksum(file_path)
 

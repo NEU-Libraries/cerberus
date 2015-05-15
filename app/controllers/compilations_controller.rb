@@ -2,7 +2,7 @@ class CompilationsController < ApplicationController
   include Cerberus::ControllerHelpers::EditableObjects
   include Cerberus::ControllerHelpers::PermissionsCheck
 
-  before_filter :authenticate_user!, except: [:show, :show_download, :download]
+  before_filter :authenticate_user!, except: [:show, :show_download, :download, :ping_download]
 
   before_filter :can_edit?, only: [:edit, :update, :destroy, :add_entry, :delete_entry]
   before_filter :can_read?, only: [:show, :show_download, :download]
