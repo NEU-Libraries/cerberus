@@ -10,7 +10,10 @@
       %td
         = loader.loader_name
       %td
-        = Collection.find(loader.collection).title
+        -if Collection.exists?(loader.collection)
+          = Collection.find(loader.collection).title
+        - else
+          N/A
       %td
         = loader.created_at.strftime("%m-%d-%Y %T")
       %td
