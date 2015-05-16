@@ -21,7 +21,7 @@ module Cerberus
       has_metadata name: 'properties', type: PropertiesDatastream
       has_file_datastream name: "content", type: FileContentDatastream
 
-      # delegate :mime_type, :to => :properties, :unique => true
+      delegate :mime_type, :to => :properties, :unique => true
 
       belongs_to :core_record, property: :is_part_of, class_name: 'CoreFile'
     end
@@ -31,7 +31,7 @@ module Cerberus
     end
 
     def fedora_file_path
-      config_path = Rails.application.config.fedora_home      
+      config_path = Rails.application.config.fedora_home
       datastream_str = "info:fedora/#{self.pid}/content/content.0"
       escaped_datastream = Rack::Utils.escape(datastream_str)
       md5_str = Digest::MD5.hexdigest(datastream_str)
