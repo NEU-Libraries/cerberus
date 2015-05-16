@@ -44,16 +44,20 @@ class MetadataMailer < ActionMailer::Base
     count += @other_pubs_new.count
     count += @other_pubs_update.count
 
-    if ["production"].include? Rails.env
-      mail(to: "Metadata Mailing List <Library-DRS-Metadata@neu.edu>", subject: "Daily Featured Content Uploads and Updates - #{count} items", content_type: "text/html")
-    elsif "test" == Rails.env
-      mail(to: "Test <test@test.com>", subject: "Daily Featured Content Uploads and Updates - #{count} items")
+    if count == 0
+      self.message.perform_deliveries = false
     else
-      if File.exist?('/home/vagrant/.gitconfig')
-        git_config = ParseConfig.new('/home/vagrant/.gitconfig')
-        address = git_config['user']['email']
-        mail(to: "Developer <#{address}>", subject: "Daily Featured Content Uploads and Updates - #{count} items",
-        content_type: "text/html")
+      if ["production"].include? Rails.env
+        mail(to: "Metadata Mailing List <Library-DRS-Metadata@neu.edu>", subject: "Daily Featured Content Uploads and Updates - #{count} items", content_type: "text/html")
+      elsif "test" == Rails.env
+        mail(to: "Test <test@test.com>", subject: "Daily Featured Content Uploads and Updates - #{count} items")
+      else
+        if File.exist?('/home/vagrant/.gitconfig')
+          git_config = ParseConfig.new('/home/vagrant/.gitconfig')
+          address = git_config['user']['email']
+          mail(to: "Developer <#{address}>", subject: "Daily Featured Content Uploads and Updates - #{count} items",
+          content_type: "text/html")
+        end
       end
     end
   end
