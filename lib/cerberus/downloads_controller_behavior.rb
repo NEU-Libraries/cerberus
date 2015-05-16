@@ -21,7 +21,7 @@ module Cerberus
       # mimeType gets from the 1st version (instead of the lastest), so
       # rather than re-do thousands of items, we're going to rely on FITS instead
       # response.headers['Content-Type'] = datastream.mimeType
-      response.headers['Content-Type'] = asset.characterization.mime_type.first
+      response.headers['Content-Type'] = asset.properties.mime_type.first
       head :ok
     end
 
@@ -29,7 +29,7 @@ module Cerberus
       if datastream.dsid == self.class.default_content_dsid
         # params[:filename] || asset.label
         # Fix for #680
-        "neu_#{asset.pid.split(":").last}.#{extract_extension(asset.characterization.mime_type.first)}"
+        "neu_#{asset.pid.split(":").last}.#{extract_extension(asset.properties.mime_type.first)}"
       else
         params[:datastream_id]
       end
