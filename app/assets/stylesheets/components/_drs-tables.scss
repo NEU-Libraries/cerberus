@@ -1,0 +1,6 @@
+.table tbody tr.success > td {
+  background:rgba($brand-success, .2)
+}
+.table tbody tr.error > td  {
+  background:rgba($brand-danger, .2)
+}

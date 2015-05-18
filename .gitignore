@@ -33,3 +33,6 @@ public/assets
 
 # Ignore coveralls.io generated folder
 coverage
+
+# Ignore irrelevant system nfs files
+.nfs*

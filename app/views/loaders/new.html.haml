@@ -1,0 +1,31 @@
+-# Bulk upload form
+
+-content_for :page_header do
+  %h1.page-header
+    =@page_title
+
+- url = '/loaders/' + @loader_short_name
+= form_tag(url, action: "create", method: "post", multipart: true, id: "loaderForm") do
+  .row
+    %fieldset.span4
+      %legend
+        1. Terms of Service Agreement
+      %span.help-block
+        Please read and accept the
+        %a{href: "/terms" , data: { remote: true} }
+          terms of use
+      %label.checkbox.required-label{ for: "terms_of_service" }
+        I have read and accept the terms of service.
+        = check_box_tag 'terms_of_service', 1, nil, data: { activate:  "activate-submit" }
+    %fieldset.span4
+      %legend
+        2. Choose Collection
+      = label_tag "parent", "Where do you want to deposit these files?", class: "required-label"
+      = select_tag "parent", options_for_select(@collections_options), {prompt: 'Select Collection', required: true}
+    %fieldset.span4
+      %legend
+        3. File Upload
+      = label_tag "file", "File to upload", class: "required-label"
+      = file_field_tag 'file', required: true, "aria-required" => true
+  .form-actions
+    = submit_tag "Upload", disabled: "true", class: 'btn btn-large btn-primary activate-submit', data: { disable_with: "Please wait..."}
