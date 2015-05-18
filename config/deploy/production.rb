@@ -15,6 +15,13 @@ set :rails_env, :production
 server 'drs@repository.library.northeastern.edu', user: 'drs', roles: %w{web app db}
 
 namespace :deploy do
+  desc "Updating ClamAV"
+  task :update_clamav do
+    on roles(:app), :in => :sequence, :wait => 5 do
+      execute "sudo freshclam"
+    end
+  end
+  
   desc "Restarting application"
   task :start_httpd do
     on roles(:app), :in => :sequence, :wait => 5 do
@@ -110,6 +117,7 @@ before 'deploy:assets_kludge', 'deploy:clear_cache'
 # occurs.  This is the task that handles refreshing the app code, so this
 # should only fire on actual deployments.
 before 'deploy:starting', 'deploy:stop_httpd'
+before 'deploy:starting', 'deploy:update_clamav'
 
 after 'deploy:updating', 'deploy:copy_rvmrc_file'
 after 'deploy:updating', 'deploy:trust_rvmrc'
