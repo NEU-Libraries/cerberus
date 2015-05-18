@@ -6,8 +6,7 @@ module Cerberus
       include MimeHelper
 
       included do
-        has_metadata :name => "characterization", :type => FitsDatastream
-        delegate :mime_type, :to => :characterization, :unique => true
+        has_metadata :name => "characterization", :type => FitsDatastream        
         delegate_to :characterization, [:format_label, :file_size, :last_modified,
                                         :filename, :original_checksum, :rights_basis,
                                         :copyright_basis, :copyright_note,
