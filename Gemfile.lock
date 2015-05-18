@@ -493,6 +493,7 @@ GEM
     whenever (0.8.4)
       activesupport (>= 2.3.4)
       chronic (>= 0.6.3)
+    will_paginate (3.0.7)
     xml-simple (1.1.4)
     xpath (2.0.0)
       nokogiri (~> 1.3)
@@ -573,4 +574,5 @@ DEPENDENCIES
   uglifier (>= 1.0.3)
   webshims-rails
   whenever
+  will_paginate
   zipruby (~> 0.3.6)
