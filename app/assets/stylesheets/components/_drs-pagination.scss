@@ -21,3 +21,24 @@
 .pager .next>span{
   float: none;
 }
+
+div.pagination {
+  .previous_page {
+    &.disabled {
+      display:none;
+    }
+  }
+  .next_page {
+    &.disabled {
+      display:none;
+    }
+  }
+  a {
+    padding:5px;
+  }
+  em.current {
+    text-decoration:none;
+    font-style:normal;
+    padding:5px;
+  }
+}
