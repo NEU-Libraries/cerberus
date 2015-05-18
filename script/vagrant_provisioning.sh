@@ -38,6 +38,7 @@ sudo yum install nodejs --assumeyes
 sudo yum install htop --assumeyes
 sudo yum install libtool gcc gettext-devel expat-devel curl-devel zlib-devel openssl-devel perl-ExtUtils-CBuilder perl-ExtUtils-MakeMaker --assumeyes
 sudo yum install wget --assumeyes
+sudo yum install clamav clamav-devel --assumeyes
 
 # We need httpd for /etc/mime.types
 sudo yum install httpd --assumeyes
@@ -104,6 +105,9 @@ rvm use ruby-2.0.0-p643
 echo "Setting timezone for vm so embargo doesn't get confused"
 echo 'export TZ=America/New_York' >> /home/vagrant/.zshrc
 echo 'export TZ=America/New_York' >> /home/vagrant/.bashrc
+
+echo "Updating ClamAV"
+sudo freshclam
 
 echo "Setting up Cerberus"
 cd /home/vagrant/cerberus
