@@ -1,0 +1,57 @@
+- collection = Collection.find(@report.collection)
+
+%ul.breadcrumb
+  %li
+    = link_to 'My Loaders', '/my_loaders'
+  %li.active
+    = "#{@report.loader_name} Load into "
+    %em
+      = link_to(collection.title, collection_path(@report.collection))
+
+%h2.page-header
+  = "#{@report.loader_name} Load into "
+  %em
+    = link_to(collection.title, collection_path(@report.collection))
+%h4
+  Created at:
+  = @report.created_at.strftime("%m-%d-%Y %T")
+%h4
+  User:
+  = @user.name
+%h4
+  Total Files:
+  = "#{@report.number_of_files} (Successful: #{@report.success_count}, Error: #{@report.fail_count})"
+
+%br
+%table.table.table-striped
+  %th File Name
+  %th Core File Title
+  %th File Status
+  %th
+  - @images.each do |image|
+    - if image.validity == true
+      - image = CoreFile.find("#{image.pid}")
+      %tr.success
+        %td
+          = image.label
+        %td
+          = image.title
+        %td Success
+        %td
+          = link_to("View", core_file_path(image.pid), class:"btn btn-small btn-success")
+    - else
+      %tr.error
+        %td
+          = image.original_file
+        %td
+          = image.title
+        %td
+          = "Error - #{image.exception}"
+        %td
+          - if image.iptc != ""
+            -if @report.loader_name == t('drs.loaders.marcom.long_name')
+              = link_to("View IPTC", loaders_marcom_iptc_path(image.id), class:"btn btn-small btn-warning")
+            - elsif @report.loader_name == t('drs.loaders.coe.long_name')
+              = link_to("View IPTC", loaders_coe_iptc_path(image.id), class:"btn btn-small btn-warning")
+            - elsif @report.loader_name == t('drs.loaders.cps.long_name')
+              = link_to("View IPTC", loaders_cps_iptc_path(image.id), class:"btn btn-small btn-warning")

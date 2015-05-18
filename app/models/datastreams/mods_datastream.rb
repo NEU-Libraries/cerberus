@@ -55,7 +55,10 @@ class ModsDatastream < ActiveFedora::OmDatastream
 
     t.origin_info(path: 'originInfo', namespace_prefix: 'mods'){
       t.publisher(path: 'publisher', namespace_prefix: 'mods', index_as: [:stored_searchable])
-      t.place(path: 'place', namespace_prefix: 'mods', index_as: [:stored_searchable])
+      t.place(path: 'place', namespace_prefix: 'mods'){
+        t.city_term(path: 'placeTerm', namespace_prefix: 'mods', attributes: { type: 'text' })
+        t.state_term(path: 'placeTerm', namespace_prefix: 'mods', attributes: { type: 'code', authority: 'marccountry' })
+      }
       t.date_created(path: 'dateCreated', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable], attributes: { encoding: 'w3cdtf', keyDate: 'yes' })
       t.copyright(path: 'copyrightDate', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable], attributes: { encoding: 'w3cdtf' })
       t.date_issued(path: 'dateIssued', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable], attributes: { encoding: 'w3cdtf' })
@@ -74,7 +77,8 @@ class ModsDatastream < ActiveFedora::OmDatastream
       t.form(path: 'form', namespace_prefix: 'mods'){
         t.authority(path: {attribute: 'authority'})
       }
-      t.digital_origin(path: 'digitalOrigin')
+      t.digital_origin(path: 'digitalOrigin', namespace_prefix: 'mods')
+      t.extent(path: 'extent', namespace_prefix: 'mods')
     }
 
     t.note(path: 'note', namespace_prefix: 'mods', index_as: [:stored_searchable]){
@@ -90,6 +94,12 @@ class ModsDatastream < ActiveFedora::OmDatastream
     t.identifier(path: 'identifier', namespace_prefix: 'mods', index_as: [:stored_searchable]){
       t.type(path: { attribute: 'type'})
     }
+
+    t.access_condition(path: 'accessCondition', namespace_prefix: 'mods') {
+      t.type(path: {attribute: 'type'})
+    }
+
+    t.classification(path: 'classification', namespace_prefix: 'mods')
 
     t.related_item(path: 'relatedItem', namespace_prefix: 'mods'){
       t.title_info(path: 'titleInfo', namespace_prefix: 'mods'){
@@ -116,9 +126,8 @@ class ModsDatastream < ActiveFedora::OmDatastream
       }
       t.origin_info(path: 'originInfo', namespace_prefix: 'mods'){
         t.place(path: 'place', namespace_prefix: 'mods'){
-          t.term(path: 'placeTerm', namespace_prefix: 'mods'){
-            t.type(path: { attribute: 'type' })
-          }
+          t.city_term(path: 'placeTerm', namespace_prefix: 'mods', attributes: { type: 'text' })
+          t.state_term(path: 'placeTerm', namespace_prefix: 'mods', attributes: { type: 'code', authority: 'marccountry' })
         }
         t.publisher(path: 'publisher', namespace_prefix: 'mods', index_as: [:stored_searchable])
         t.issuance(path: 'issuance', namespace_prefix: 'mods')
@@ -243,6 +252,8 @@ class ModsDatastream < ActiveFedora::OmDatastream
     # Creating sortable creator field
     solr_doc["creator_ssi"] = all_names.first
 
+    solr_doc["origin_info_place_tesim"] = self.origin_info.place.city_term
+
     solr_doc = self.generate_niec_solr_hash(solr_doc)
 
     #TODO:  Extract dateBegin/dateEnd information ]
@@ -264,6 +275,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
         xml.name('type' => 'corporate')
         xml.originInfo {
           xml.dateCreated('keyDate' => 'yes', 'encoding' => 'w3cdtf')
+          xml.place
         }
         xml.language{
           xml.languageTerm
@@ -272,6 +284,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
         xml.subject
         xml.identifier('type' => 'uri')
         xml.typeOfResource
+        xml.physicalDescription
 
         # We instantiate all of these fields for every MODS record because terminology
         # generation/access seems to barf without it.

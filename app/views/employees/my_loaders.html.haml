@@ -1,0 +1,40 @@
+-content_for :page_header do
+  %h1.page-header
+    ="#{@employee.pretty_employee_name}"
+    %small
+      All Loaders
+    %nav{role: "navigation", class: ["pull-right"]}
+      %ul.nav.nav-tabs
+        %li
+          %a{ href: employee_path(@employee) }
+            %i.icon-user
+            My Collections
+        %li
+          %a{ href: employee_files_path(@employee) }
+            %i.icon-file
+            My Deposits
+        %li
+          %a{ href: employee_communities_path(@employee) }
+            %i.icon-group
+            My Communities
+
+
+%section.row
+  %article.span4
+    %h3 My Loaders
+    - if current_user.marcom_loader?
+      = link_to(t('drs.loaders.marcom.long_name'), loaders_marcom_path, class: "btn btn-lg btn-primary")
+      %br
+      %br
+    - if current_user.coe_loader?
+      = link_to(t('drs.loaders.coe.long_name'), loaders_coe_path, class: "btn btn-lg btn-primary")
+      %br
+      %br
+    - if current_user.cps_loader?
+      = link_to(t('drs.loaders.cps.long_name'), loaders_cps_path, class: "btn btn-lg btn-primary")
+      %br
+      %br
+
+  %article.span8
+    %h3 Past Loads
+    = render template: "/loaders/index", locals: {loads: @loads}

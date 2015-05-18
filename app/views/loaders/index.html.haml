@@ -1,0 +1,27 @@
+%table.table.table-striped
+  %th Loader
+  %th Collection
+  %th Time of Upload
+  %th Total Files
+  %th
+  - @loads = @loads.sort_by{|l| l.created_at}.reverse
+  - @loads.each do |loader|
+    %tr
+      %td
+        = loader.loader_name
+      %td
+        -if Collection.exists?(loader.collection)
+          = Collection.find(loader.collection).title
+        - else
+          N/A
+      %td
+        = loader.created_at.strftime("%m-%d-%Y %T")
+      %td
+        .text-center= loader.number_of_files
+      %td
+        -if loader.loader_name == t('drs.loaders.marcom.long_name')
+          = link_to("View Report", loaders_marcom_report_path(loader.id), class: "btn btn-small btn-success")
+        - elsif loader.loader_name == t('drs.loaders.coe.long_name')
+          = link_to("View Report", loaders_coe_report_path(loader.id), class: "btn btn-small btn-success")
+        - elsif loader.loader_name == t('drs.loaders.cps.long_name')
+          = link_to("View Report", loaders_cps_report_path(loader.id), class: "btn btn-small btn-success")

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150416223648) do
+ActiveRecord::Schema.define(:version => 20150505195919) do
 
   create_table "bookmarks", :force => true do |t|
     t.integer  "user_id",     :null => false
@@ -69,6 +69,19 @@ ActiveRecord::Schema.define(:version => 20150416223648) do
   add_index "follows", ["followable_id", "followable_type"], :name => "fk_followables"
   add_index "follows", ["follower_id", "follower_type"], :name => "fk_follows"
 
+  create_table "image_reports", :force => true do |t|
+    t.boolean  "validity"
+    t.string   "pid"
+    t.string   "collection"
+    t.string   "title"
+    t.text     "iptc"
+    t.text     "exception"
+    t.datetime "created_at",     :null => false
+    t.datetime "updated_at",     :null => false
+    t.integer  "load_report_id"
+    t.string   "original_file"
+  end
+
   create_table "impressions", :force => true do |t|
     t.string "pid"
     t.string "session_id"
@@ -79,6 +92,17 @@ ActiveRecord::Schema.define(:version => 20150416223648) do
   end
 
   add_index "impressions", ["pid"], :name => "index_drs_impressions_on_pid"
+
+  create_table "load_reports", :force => true do |t|
+    t.string   "loader_name"
+    t.integer  "number_of_files"
+    t.datetime "created_at",      :null => false
+    t.datetime "updated_at",      :null => false
+    t.integer  "success_count"
+    t.integer  "fail_count"
+    t.string   "nuid"
+    t.string   "collection"
+  end
 
   create_table "local_authorities", :force => true do |t|
     t.string "name"

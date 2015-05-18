@@ -138,6 +138,41 @@ class User < ActiveRecord::Base
     return self.role.eql?('admin')
   end
 
+  def loader?
+    if self.groups.include? "northeastern:drs:repository:loaders:marcom" or self.groups.include? "northeastern:drs:repository:loaders:coe" or self.groups.include? "northeastern:drs:repository:loaders:cps"
+      return true
+    else
+      return false
+    end
+  end
+
+  def marcom_loader?
+    return self.groups.include? "northeastern:drs:repository:loaders:marcom"
+  end
+
+  def coe_loader?
+    return self.groups.include? "northeastern:drs:repository:loaders:coe"
+  end
+
+  def cps_loader?
+    return self.groups.include? "northeastern:drs:repository:loaders:cps"
+  end
+
+  def loaders
+    loaders = []
+    if self.marcom_loader?
+      loaders.push(I18n.t("drs.loaders.marcom.long_name"))
+    end
+    if self.coe_loader?
+      loaders.push(I18n.t("drs.loaders.coe.long_name"))
+    end
+    if self.cps_loader?
+      loaders.push(I18n.t("drs.loaders.cps.long_name"))
+    end
+    return loaders
+  end
+
+
   def user_key
     self.nuid
   end

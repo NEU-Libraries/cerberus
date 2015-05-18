@@ -190,14 +190,13 @@ describe ModsDatastream do
 
     it "creates a tesim field for all origin place entries" do
       mods.origin_info = [""]
-      mods.origin_info.place = "New York City"
-
+      mods.origin_info.place.city_term = "New York City"
       result["origin_info_place_tesim"].should == ["New York City"]
     end
 
     it "indexes publisher information stored within a related item entry" do
       mods.related_item = ['']
-      mods.related_item.origin_info.place = "New York City"
+      mods.related_item.origin_info.place.city_term = "New York City"
 
       result["origin_info_place_tesim"].should == ["New York City"]
     end

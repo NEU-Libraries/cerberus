@@ -60,7 +60,7 @@ gem 'diffy'
 
 gem "ruby-prof"
 gem 'picturefill'
-
+gem 'mini_exiftool'
 # Gems used only for assets and not required
 # in production environments by default.
 group :assets do

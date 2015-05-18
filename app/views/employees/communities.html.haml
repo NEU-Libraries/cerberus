@@ -19,6 +19,11 @@
               My Deposits
             - else
               ="#{@employee.employee_first_name}'s files"
+        -if current_user.loader? && current_user.nuid == @employee.nuid
+          %li
+            %a{ href: employee_loaders_path(@employee) }
+              %i.icon-upload-alt
+              My Loaders
 
 -if @communities.length == 0
   .alert.alert-info
