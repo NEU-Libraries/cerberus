@@ -188,6 +188,10 @@ class CoreFilesController < ApplicationController
       elsif (empty_file?(file))
         flash[:error] = "Error! Zero Length File!"
         redirect_to(:back) and return
+      elsif ((File.size(file.tempfile).to_f / 1024000).round(2) > 100) #500 is 500MB
+        puts (File.size(file.tempfile).to_f / 1024000).round(2)
+        flash[:error] = "The file you chose is larger than 500MB. Please contact DRS staff for help uploading files larger than 500MB."
+        redirect_to(:back) and return
       elsif (!terms_accepted?)
         flash[:error] = "You must accept the terms of service!"
         redirect_to(:back) and return
