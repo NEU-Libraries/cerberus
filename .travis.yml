@@ -5,10 +5,12 @@ before_install:
   - sudo apt-get install libmagic-dev
   - sudo apt-get install redis-server
   - sudo apt-get install libreoffice-common
+  - sudo apt-get install clamav clamav-devel
 rvm:
   - 2.1
 before_script:
   - "sudo service redis-server start"
+  - "sudo freshclam"
 cache: bundler
 script: "bundle exec rake ci:build"
 notifications:
