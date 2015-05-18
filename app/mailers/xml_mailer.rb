@@ -1,6 +1,6 @@
 class XmlMailer < ActionMailer::Base
   include AbstractController::Callbacks
-  
+
   default from: "notifier@repository.library.northeastern.edu"
   after_filter :tag_as_notified
 
@@ -9,9 +9,13 @@ class XmlMailer < ActionMailer::Base
     @diff_css = Diffy::CSS
     @xml_edits = XmlAlert.where('notified = ?', false).find_all
 
-    mail(to: pick_receiver,
+    if @xml_edits.count == 0
+      self.message.perform_deliveries = false
+    else
+      mail(to: pick_receiver,
          subject: "Daily digest of XML edits - #{@xml_edits.count} items",
          content_type: "text/html")
+     end
   end
 
   private
