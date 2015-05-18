@@ -5,7 +5,7 @@ before_install:
   - sudo apt-get install libmagic-dev
   - sudo apt-get install redis-server
   - sudo apt-get install libreoffice-common
-  - sudo apt-get install clamav clamav-devel
+  - sudo apt-get install clamav clamav-freshclam libclamav-dev libclamav6
 rvm:
   - 2.1
 before_script:
