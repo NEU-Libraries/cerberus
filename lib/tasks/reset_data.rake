@@ -39,6 +39,8 @@ def create_content_file(factory_sym, user, parent)
   core.identifier = make_handle(core.persistent_url)
 
   core.save!
+
+  set_edit_permissions(core)
 end
 
 def set_edit_permissions(obj)
