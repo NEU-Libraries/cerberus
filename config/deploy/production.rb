@@ -103,6 +103,13 @@ namespace :deploy do
     end
   end
 
+  desc 'Generate Sitemap'
+  task :generate_sitemap do
+    on roles(:app), :in => :sequence, :wait => 5 do
+      execute :rake, 'sitemap:generate'
+    end
+  end
+
 end
 
 # Load the rvm environment before executing the refresh data hook.
@@ -131,4 +138,4 @@ after 'deploy:finished', 'deploy:start_solrizerd'
 after 'deploy:finished', 'deploy:flush_redis'
 after 'deploy:finished', 'deploy:start_httpd'
 after 'deploy:finished', 'deploy:restart_workers'
-after 'deploy:finished', 'sitemap:generate'
+after 'deploy:finished', 'deploy:generate_sitemap'
