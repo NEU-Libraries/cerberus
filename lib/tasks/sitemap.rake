@@ -17,13 +17,15 @@ namespace :sitemap do
             add core_file_path(doc.pid)
           end
         rescue Exception => error
-          # 
+          #
         end
       end
 
     end
+
     if Rails.env.production?
       SitemapGenerator::Sitemap.ping_search_engines
     end
+    
   end
 end

@@ -21,7 +21,7 @@ namespace :deploy do
       execute "sudo freshclam"
     end
   end
-  
+
   desc "Restarting application"
   task :start_httpd do
     on roles(:app), :in => :sequence, :wait => 5 do
@@ -131,3 +131,4 @@ after 'deploy:finished', 'deploy:start_solrizerd'
 after 'deploy:finished', 'deploy:flush_redis'
 after 'deploy:finished', 'deploy:start_httpd'
 after 'deploy:finished', 'deploy:restart_workers'
+after 'deploy:finished', 'sitemap:generate'
