@@ -29,9 +29,43 @@
         = radio_button_tag 'upload_type', 'personal', false
         = label_tag 'upload_type', 'Upload as proxy (collection owner will be depositor)'
         = radio_button_tag 'upload_type', 'proxy', false
+  .progress.progress-striped
+    .bar{style: "width:0%"}
   .form-actions
-    = submit_tag "Upload", disabled: "true", class: 'btn btn-large btn-primary activate-submit', data: { disable_with: "Please wait..."}
+    = submit_tag "Upload", disabled: "true", class: 'btn btn-large btn-primary activate-submit', data: { disable_with: "Please wait..."}, id: "singleSubmit"
 :javascript
+  $(function () {
+    $("#singleSubmit").click(function(e) {
+      e.preventDefault();
+    });
+    $(".progress").hide();
+    $('#singleFileUploadForm').fileupload({
+        dataType: 'html',
+        replaceFileInput: false,
+        autoUpload: false,
+        add: function (e, data) {
+            data.context = $("#singleSubmit")
+                .click(function () {
+                  $(this).attr("disabled", true);
+                  $(this).val("Please wait...");
+                  data.submit();
+                });
+          $(".progress").show();
+        },
+        progressall: function (e, data) {
+            var progress = parseInt(data.loaded / data.total * 100, 10);
+            $('.progress .bar').css(
+                'width',
+                progress + '%'
+            );
+        },
+        done: function (e, data) {
+           url = JSON.parse(data.result);
+           url = url.url;
+           window.location = url;
+        }
+    });
+  });
   $('#file').bind('change', function() {
     //over 500MB check
     if (this.files[0].size/ 1024000 > 500) {
