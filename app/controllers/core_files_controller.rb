@@ -450,7 +450,9 @@ class CoreFilesController < ApplicationController
         new_path = move_file_to_tmp(file)
 
         update_metadata_from_upload_screen(@core_file, file, params[:collection_id], new_path, params[:upload_type])
-        redirect_to files_provide_metadata_path(@core_file.pid)
+        respond_to do |format|
+          format.json { render json: { url: files_provide_metadata_path(@core_file.pid) } }
+        end
       else
         render :json => [{:error => "Error creating file."}]
       end

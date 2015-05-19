@@ -29,6 +29,7 @@
 //= require drsApp
 
 //= require jquery_validate/jquery.validate.min.js
+//= require jquery.fileupload.js
 
 //= require dateSelectBoxes.pack.js
 
