@@ -1,7 +1,8 @@
 %div
   -if !current_user.nil? && current_user.admin?
-    %a.btn.btn-danger{ href:tombstone_file_path, data: { confirm: "Are you sure you want to tombstone this file?" } }
+    %a.btn.btn-danger{ href:"#deleteModal", data: {toggle: "modal"} }
       Tombstone File
+    = render partial: 'delete_modal', locals: { delete_path: tombstone_file_path, title: "Confirm Tombstone" }
   -else
     %p
       The DRS is a permanent archive, but we recognize that occasionally it may be necessary to remove files. Please review
@@ -13,4 +14,6 @@
           .span10
             = label_tag :reason, "Why would you like us to delete this file?"
             = text_area_tag :reason, nil, :required => true, rows: 5, class: 'input-block-level'
-            = submit_tag 'Request', class: "btn btn-danger", data: { confirm: "Are you sure you want to delete this file?"}
+            %a.btn.btn-danger{href:"#deleteModal", title: "Request", data: {toggle: "modal"}}
+              Request
+      = render partial: 'delete_modal', locals: { title: "Confirm Delete Request"}

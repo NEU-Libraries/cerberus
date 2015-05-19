@@ -11,4 +11,6 @@
         .span10
           = label_tag :reason, "Why would you like us to move this file?"
           = text_area_tag :reason, nil, :required => true, rows: 5, class: 'input-block-level'
-          = submit_tag 'Request', class: "btn btn-warning", data: { confirm: "Are you sure you want to move this file?"}
+          %a.btn.btn-warning{href:"#moveModal", title: "Request Move", data: {toggle: "modal"}}
+            Request
+    = render partial: 'move_modal', locals: { move_path: request_move_file_path }
