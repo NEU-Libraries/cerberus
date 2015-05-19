@@ -106,7 +106,7 @@ namespace :deploy do
   desc 'Generate Sitemap'
   task :generate_sitemap do
     on roles(:app), :in => :sequence, :wait => 5 do
-      execute :rake, 'sitemap:generate'
+      execute "cd #{release_path} && (RAILS_ENV=production /tmp/drs/rvm-auto.sh . rake sitemap:generate)"
     end
   end
 
