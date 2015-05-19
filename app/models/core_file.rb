@@ -109,12 +109,15 @@ class CoreFile < ActiveFedora::Base
           self.mods.personal_name(i).name_part_family = name_obj.family
           self.mods.personal_name(i).name_part = ""
 
-          # Pat introduced records with missing or bad depositor information
-          # this ensures it doesn't crash a solr re-index
-          begin
-            self.save!
-          rescue ActiveFedora::RecordInvalid => exception
-            ExceptionNotifier.notify_exception(exception, :data => {:id => "#{self.pid}"})
+          # Most likely the XML Editor, we shouldn't try and save the cf
+          if self.pid != "__DO_NOT_USE__"  
+            # Pat introduced records with missing or bad depositor information
+            # this ensures it doesn't crash a solr re-index
+            begin
+              self.save!
+            rescue ActiveFedora::RecordInvalid => exception
+              ExceptionNotifier.notify_exception(exception, :data => {:id => "#{self.pid}"})
+            end
           end
         end
       end
