@@ -27,5 +27,44 @@
         3. File Upload
       = label_tag "file", "File to upload", class: "required-label"
       = file_field_tag 'file', required: true, "aria-required" => true
+  .progress.progress-striped
+    .bar{style: "width:0%"}
   .form-actions
-    = submit_tag "Upload", disabled: "true", class: 'btn btn-large btn-primary activate-submit', data: { disable_with: "Please wait..."}
+    = submit_tag "Upload", disabled: "true", class: 'btn btn-large btn-primary activate-submit', data: { disable_with: "Please wait..."}, id: "loaderSubmit"
+:javascript
+  $(function () {
+    $("#loaderSubmit").click(function(e) {
+      e.preventDefault();
+    });
+    $(".progress").hide();
+    $('#loaderForm').fileupload({
+        dataType: 'html',
+        replaceFileInput: false,
+        autoUpload: false,
+        add: function (e, data) {
+            data.context = $("#loaderSubmit")
+                .click(function () {
+                  $(this).attr("disabled", true);
+                  $(this).val("Please wait...");
+                  data.submit();
+                });
+          $(".progress").show();
+        },
+        progressall: function (e, data) {
+            var progress = parseInt(data.loaded / data.total * 100, 10);
+            $('.progress .bar').css(
+                'width',
+                progress + '%'
+            );
+            if (progress == 100) {
+              $(".progress").after("<div class='alert alert-success'>Your file has been uploaded and is now being processed.</div>");
+            }
+        },
+        done: function (e, data) {
+           //url = JSON.parse(data.result);
+           //url = url.url;
+           window.location = '/my_loaders';
+           //$(location).attr('href', url);
+        }
+    });
+  });
