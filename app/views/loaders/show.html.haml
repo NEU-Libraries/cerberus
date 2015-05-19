@@ -30,15 +30,24 @@
   %th
   - @images.each do |image|
     - if image.validity == true
-      - image = CoreFile.find("#{image.pid}")
-      %tr.success
-        %td
-          = image.label
-        %td
-          = image.title
-        %td Success
-        %td
-          = link_to("View", core_file_path(image.pid), class:"btn btn-small btn-success")
+      -if CoreFile.exists?(image.pid)
+        - image = CoreFile.find("#{image.pid}")
+        %tr.success
+          %td
+            = image.label
+          %td
+            = image.title
+          %td Success
+          %td
+            = link_to("View", core_file_path(image.pid), class:"btn btn-small btn-success")
+      -else
+        %tr.success
+          %td
+            =image.original_file
+          %td
+            = image.title
+          %td Success
+          %td File no longer exists
     - else
       %tr.error
         %td

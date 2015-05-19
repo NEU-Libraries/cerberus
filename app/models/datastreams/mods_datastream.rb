@@ -275,7 +275,9 @@ class ModsDatastream < ActiveFedora::OmDatastream
         xml.name('type' => 'corporate')
         xml.originInfo {
           xml.dateCreated('keyDate' => 'yes', 'encoding' => 'w3cdtf')
-          xml.place
+          xml.place{
+            xml.placeTerm
+          }
         }
         xml.language{
           xml.languageTerm
@@ -284,7 +286,9 @@ class ModsDatastream < ActiveFedora::OmDatastream
         xml.subject
         xml.identifier('type' => 'uri')
         xml.typeOfResource
-        xml.physicalDescription
+        xml.physicalDescription{
+          xml.form
+        }
 
         # We instantiate all of these fields for every MODS record because terminology
         # generation/access seems to barf without it.
