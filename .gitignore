@@ -30,6 +30,7 @@ dump.rdb
 /config/application.yml
 
 public/assets
+public/sitemap*
 
 # Ignore coveralls.io generated folder
 coverage
