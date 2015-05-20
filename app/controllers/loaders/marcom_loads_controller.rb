@@ -92,18 +92,16 @@ class Loaders::MarcomLoadsController < ApplicationController
         if extract_mime_type(new_file) == 'application/zip'
           # send to job
           Cerberus::Application::Queue.push(ProcessZipJob.new(@loader_name, new_file.to_s, parent, copyright, current_user))
-          flash[:notice] = "Your file has been submitted and is now being processed. You will receive an email when the load is complete."
-          redirect_to my_loaders_path
+          session[:flash_success] = "Your file has been submitted and is now being processed. You will receive an email when the load is complete."
         else
           #error out
           FileUtils.rm(new_file)
-          flash[:error] = "The file you uploaded was not a zipfile. Please try again."
-          redirect_to my_loaders_path
+          session[:flash_error] = 'The file you uploaded was not a zipfile. Please try again.';
         end
       else
-        flash[:error] = "Error creating file."
-        redirect_to my_loaders_path
+        session[:flash_error] = 'Error creating file.';
       end
+      render :nothing => true
     end
 
     def json_error(error, name=nil, additional_arguments={})
