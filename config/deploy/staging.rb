@@ -103,7 +103,7 @@ before 'deploy:restart_workers', 'rvm1:hook'
 before 'deploy:starting', 'deploy:stop_httpd'
 before 'deploy:starting', 'deploy:update_clamav'
 
-before 'deploy:updating', 'deploy:nokogiri'
+before 'deploy:bundle', 'deploy:nokogiri'
 
 after 'deploy:updating', 'deploy:copy_rvmrc_file'
 after 'deploy:updating', 'deploy:trust_rvmrc'
