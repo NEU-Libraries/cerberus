@@ -150,6 +150,10 @@ task :reset_data => :environment do
   brooks.email = "b.canaday@neu.edu"
   brooks.save!
 
+  matt = User.create(:password => "password", :password_confirmation => "password", full_name:"Modoono, Matt", nuid:"001795872")
+  matt.email = "m.modoono@neu.edu"
+  matt.save!
+
   eli = User.create(:password => "password", :password_confirmation => "password", full_name:"Zoller, Eli Scott", nuid:"001790966")
   eli.email = "e.zoller@neu.edu"
   eli.role = "admin"
@@ -163,6 +167,7 @@ task :reset_data => :environment do
   sarah.add_group("northeastern:drs:repository:loaders:marcom")
   pat.add_group("northeastern:drs:repository:loaders:marcom")
   brooks.add_group("northeastern:drs:repository:loaders:marcom")
+  matt.add_group("northeastern:drs:repository:loaders:marcom")
   eli.add_group("northeastern:drs:repository:loaders:marcom")
   david.add_group("northeastern:drs:repository:loaders:marcom")
 
