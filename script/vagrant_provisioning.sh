@@ -39,6 +39,7 @@ sudo yum install htop --assumeyes
 sudo yum install libtool gcc gettext-devel expat-devel curl-devel zlib-devel openssl-devel perl-ExtUtils-CBuilder perl-ExtUtils-MakeMaker --assumeyes
 sudo yum install wget --assumeyes
 sudo yum install clamav clamav-devel --assumeyes
+sudo yum install libxml-devel libxslt-devel --assumeyes
 
 # We need httpd for /etc/mime.types
 sudo yum install httpd --assumeyes
