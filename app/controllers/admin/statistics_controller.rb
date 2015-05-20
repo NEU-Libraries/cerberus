@@ -14,6 +14,10 @@ class Admin::StatisticsController < ApplicationController
     @user_count = User.find(:all).length
 
     @content_type_counts = sort_content_type_counts
+
+    @views = Impression.where('action = ?', 'view')
+    @downloads = Impression.where('action = ?', 'download')
+    @streams = Impression.where('action = ?', 'stream')
   end
 
   private

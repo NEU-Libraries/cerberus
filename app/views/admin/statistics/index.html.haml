@@ -6,57 +6,84 @@
 
 %h2.page-header Stats Page
 
-.row
-  .span5
-    %table.table.table-striped.table-bordered
-      %tr
-        %td
-          .large
-            = link_to('Communities', '/admin/communities')
-        %td
-          .large
-            = @community_count
-      %tr
-        %td
-          .large Collections
-        %td
-          .large
-            = @collection_count
-      %tr
-        %td
-          .large Core Files
-        %td
-          .large
-            = @core_file_count
-      %tr
-        %td
-          .large
-            = link_to('Employees', '/admin/employees')
-        %td
-          .large
-            = @employee_file_count
-      %tr
-        %td
-          .large Users
-        %td
-          .large
-            = @user_count
-    %table.table.table-striped.table-bordered
-      %tr
-        %td
-          Public Core Files
-        %td
-          = @public_core_file_count
-      %tr
-        %td
-          Private Core Files
-        %td
-          = @private_core_file_count
-  .span5.pull-right
-    %table.table.table-striped.table-bordered
-      - @content_type_counts.each do |type, value|
-        %tr
-          %td
-            = type
-          %td
-            = value
+
+%ul.nav.nav-tabs
+  %li.active
+    = link_to "Overview", '#files'
+  %li
+    = link_to "Views", '#views'
+  %li
+    = link_to "Downloads", '#downloads'
+  %li
+    = link_to "Streams", '#streams'
+
+.tab-content
+  #files.tab-pane.active
+    .row
+      .span5
+        %table.table.table-striped.table-bordered
+          %tr
+            %td
+              .large
+                = link_to('Communities', '/admin/communities')
+            %td
+              .large
+                = @community_count
+          %tr
+            %td
+              .large Collections
+            %td
+              .large
+                = @collection_count
+          %tr
+            %td
+              .large Core Files
+            %td
+              .large
+                = @core_file_count
+          %tr
+            %td
+              .large
+                = link_to('Employees', '/admin/employees')
+            %td
+              .large
+                = @employee_file_count
+          %tr
+            %td
+              .large Users
+            %td
+              .large
+                = @user_count
+        %table.table.table-striped.table-bordered
+          %tr
+            %td
+              Public Core Files
+            %td
+              = @public_core_file_count
+          %tr
+            %td
+              Private Core Files
+            %td
+              = @private_core_file_count
+      .span5.pull-right
+        %table.table.table-striped.table-bordered
+          - @content_type_counts.each do |type, value|
+            %tr
+              %td
+                = type
+              %td
+                = value
+  #views.tab-pane
+    =render partial: 'impressions', locals: {impressions: @views }
+
+  #downloads.tab-pane
+    =render partial: 'impressions', locals: {impressions: @downloads }
+
+  #streams.tab-pane
+    =render partial: 'impressions', locals: {impressions: @streams }
+
+:javascript
+  $('.nav-tabs a').click(function (e) {
+    e.preventDefault();
+    $(this).tab('show');
+  });
