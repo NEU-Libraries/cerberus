@@ -1,0 +1,32 @@
+%table.table.table-striped.table-bordered
+  %th Time
+  %th Pid
+  %th IP Address
+  %th Session ID
+  %th Referrer
+  %th Status
+  %th User Agent
+  %th Public
+  - impressions.each do |i|
+    %tr
+      %td
+        = i.created_at
+      %td
+        -if CoreFile.exists?(i.pid)
+          %a{:href => core_file_path(i.pid), :target => "_blank"}
+            = i.pid
+        - else
+          = i.pid
+      %td
+        = i.ip_address
+      %td
+        = i.session_id
+      %td
+        %a{:href => i.referrer, :target => "_blank"}
+          = i.referrer
+      %td
+        = i.status
+      %td
+        = i.user_agent
+      %td
+        = i.public
