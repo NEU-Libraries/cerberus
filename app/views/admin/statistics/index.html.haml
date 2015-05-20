@@ -10,12 +10,12 @@
 %ul.nav.nav-tabs
   %li.active
     = link_to "Overview", '#files'
-  %li
-    = link_to "Views", '#views'
-  %li
-    = link_to "Downloads", '#downloads'
-  %li
-    = link_to "Streams", '#streams'
+  -# %li
+  -#   = link_to "Views", '#views'
+  -# %li
+  -#   = link_to "Downloads", '#downloads'
+  -# %li
+  -#   = link_to "Streams", '#streams'
 
 .tab-content
   #files.tab-pane.active
@@ -73,17 +73,17 @@
                 = type
               %td
                 = value
-  #views.tab-pane
-    =render partial: 'impressions', locals: {impressions: @views }
-
-  #downloads.tab-pane
-    =render partial: 'impressions', locals: {impressions: @downloads }
-
-  #streams.tab-pane
-    =render partial: 'impressions', locals: {impressions: @streams }
-
-:javascript
-  $('.nav-tabs a').click(function (e) {
-    e.preventDefault();
-    $(this).tab('show');
-  });
+-#   #views.tab-pane
+-#     =render partial: 'impressions', locals: {impressions: @views }
+-#
+-#   #downloads.tab-pane
+-#     =render partial: 'impressions', locals: {impressions: @downloads }
+-#
+-#   #streams.tab-pane
+-#     =render partial: 'impressions', locals: {impressions: @streams }
+-#
+-# :javascript
+  // $('.nav-tabs a').click(function (e) {
+  //   e.preventDefault();
+  //   $(this).tab('show');
+  // });

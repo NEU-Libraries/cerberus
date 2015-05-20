@@ -15,9 +15,9 @@ class Admin::StatisticsController < ApplicationController
 
     @content_type_counts = sort_content_type_counts
 
-    @views = Impression.where('action = ?', 'view')
-    @downloads = Impression.where('action = ?', 'download')
-    @streams = Impression.where('action = ?', 'stream')
+    # @views = Impression.where('action = ?', 'view').paginate(:page => params[:views_page], :per_page => 10)
+    # @downloads = Impression.where('action = ?', 'download').paginate(:page => params[:downloads_page], :per_page => 10)
+    # @streams = Impression.where('action = ?', 'stream').paginate(:page => params[:streams_page], :per_page => 10)
   end
 
   private
