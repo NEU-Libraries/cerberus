@@ -116,6 +116,14 @@ class EmployeesController < ApplicationController
         end
       end
       @loads = Loaders::LoadReport.where(q).paginate(:page => params[:page], :per_page => 10)
+      if session[:flash_error]
+        flash[:error] = session[:flash_error]
+        session[:flash_error] = nil
+      end
+      if session[:flash_success]
+        flash[:notice] = session[:flash_success]
+        session[:flash_success] = nil
+      end
       render 'employees/my_loaders'
     end
   end
