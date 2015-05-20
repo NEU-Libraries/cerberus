@@ -36,6 +36,13 @@ namespace :deploy do
     end
   end
 
+  desc "Tell nokogiri to use system libs"
+  task :nokogiri do
+    on roles(:app), :in => :sequence, :wait => 5 do
+      execute "cd #{release_path} && (RAILS_ENV=production /tmp/drs/rvm-auto.sh . bundle config build.nokogiri --use-system-libraries)"
+    end
+  end
+
   desc "Restarting the resque workers"
   task :restart_workers do
     on roles(:app), :in => :sequence, :wait => 5 do
@@ -98,6 +105,7 @@ before 'deploy:starting', 'deploy:update_clamav'
 
 after 'deploy:updating', 'deploy:copy_rvmrc_file'
 after 'deploy:updating', 'deploy:trust_rvmrc'
+after 'deploy:updating', 'bundler:nokogiri'
 after 'deploy:updating', 'bundler:install'
 after 'deploy:updating', 'deploy:copy_yml_file'
 after 'deploy:updating', 'deploy:migrate'
