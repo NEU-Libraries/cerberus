@@ -183,21 +183,20 @@ class CoreFilesController < ApplicationController
 
       file = params[:file]
       if !file
-        flash[:error] = "Error! No file for upload"
-        redirect_to(:back) and return
+        session[:flash_error] = "Error! No file for upload"
+        render :json => { url: session[:previous_url] }
       elsif (empty_file?(file))
-        flash[:error] = "Error! Zero Length File!"
-        redirect_to(:back) and return
-      elsif ((File.size(file.tempfile).to_f / 1024000).round(2) > 100) #500 is 500MB
-        puts (File.size(file.tempfile).to_f / 1024000).round(2)
-        flash[:error] = "The file you chose is larger than 500MB. Please contact DRS staff for help uploading files larger than 500MB."
-        redirect_to(:back) and return
+        session[:flash_error] = "Error! Zero Length File!"
+        render :json => { url: session[:previous_url] }
+      elsif ((File.size(file.tempfile).to_f / 1024000).round(2) > 500) #500 is 500MB
+        session[:flash_error] = "The file you chose is larger than 500MB. Please contact DRS staff for help uploading files larger than 500MB."
+        render :json => { url: session[:previous_url] }
       elsif (!terms_accepted?)
-        flash[:error] = "You must accept the terms of service!"
-        redirect_to(:back) and return
+        session[:flash_error] = "You must accept the terms of service!"
+        render :json => { url: session[:previous_url] }
       elsif current_user.proxy_staff? && params[:upload_type].nil?
-        flash[:error] = "You must select whether this is a proxy or personal upload"
-        redirect_to(:back) and return
+        session[:flash_error] = "You must select whether this is a proxy or personal upload"
+        render :json => { url: session[:previous_url] }
       else
         process_file(file)
       end
@@ -221,6 +220,15 @@ class CoreFilesController < ApplicationController
       file = abandoned_files.first
       redirect_to rescue_incomplete_file_path("abandoned" => file.pid)
       return
+    end
+
+    if session[:flash_error]
+      flash[:error] = session[:flash_error]
+      session[:flash_error] = nil
+    end
+    if session[:flash_success]
+      flash[:notice] = session[:flash_success]
+      session[:flash_success] = nil
     end
 
     @core_file = ::CoreFile.new
