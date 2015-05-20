@@ -112,6 +112,7 @@ sudo freshclam
 echo "Setting up Cerberus"
 cd /home/vagrant/cerberus
 gem install bundler
+bundle config build.nokogiri --use-system-libraries
 bundle install --retry 5
 rake db:migrate
 rm -rf /home/vagrant/cerberus/jetty
