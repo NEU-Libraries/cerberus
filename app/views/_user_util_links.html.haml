@@ -18,6 +18,11 @@
       - if !current_user.employee_id.blank?
         %li{:class => ("active" if action_name == "personal_files")}
           = link_to raw('<span class="icon-file" aria-hidden="true" ></span> My Deposits'), personal_files_path, "tab-index" => "-1"
+      - if current_user.loader?
+        %li{:class => ("active" if action_name == "my_loaders")}
+          %a.top_nav{href: my_loaders_path, "tab-index" => "-1"}
+            %span.icon-upload-alt( aria-hidden="true")
+            My Loaders
       %li{:class => ("active" if controller_name == "compilations" && action_name == "index")}
         %a.top_nav{href: compilations_path,  "tab-index" => "-1"}
           %span.icon-folder-open-alt( aria-hidden="true" )
