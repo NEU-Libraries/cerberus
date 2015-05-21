@@ -99,7 +99,9 @@ class EmployeesController < ApplicationController
   end
 
   def my_loaders
-    fetch_employee
+    if Employee.exists?(current_user.employee_id)
+      fetch_employee
+    end
     @page_title = "My Loaders"
     q = ""
     l = current_user.loaders.length
