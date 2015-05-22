@@ -1,21 +1,26 @@
 = render partial: "tabs"
-= Impression.all.length
 .tab-content
   .tab-pane.active{:id => "##{type}"}
     .impressions
-      %p
-        = "Total #{type}: #{impressions.length}"
       = will_paginate impressions
       %table.table.table-striped.table-bordered
-        %th Time
-        %th Pid
-        %th IP Address
-        %th Session ID
-        %th Referrer
+        %th
+          = sortable "created_at", "Time"
+        %th
+          = sortable "pid", "PID"
+        %th
+          = sortable "ip_address", "IP Address"
+        %th
+          = sortable "session_id"
+        %th
+          = sortable "referrer"
         -if type == "downloads"
-          %th Status
-        %th User Agent
-        %th Public
+          %th
+            = sortable "status"
+        %th
+          = sortable "user_agent"
+        %th
+          = sortable "public"
         - impressions.each do |i|
           %tr
             %td

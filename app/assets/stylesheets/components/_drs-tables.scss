@@ -4,3 +4,10 @@
 .table tbody tr.error > td  {
   background:rgba($brand-danger, .2)
 }
+
+th .asc span {
+  @extend .icon-chevron-up;
+}
+th .desc span {
+  @extend .icon-chevron-down;
+}
