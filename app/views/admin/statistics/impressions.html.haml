@@ -1,0 +1,42 @@
+= render partial: "tabs"
+= Impression.all.length
+.tab-content
+  .tab-pane.active{:id => "##{type}"}
+    .impressions
+      %p
+        = "Total #{type}: #{impressions.length}"
+      = will_paginate impressions
+      %table.table.table-striped.table-bordered
+        %th Time
+        %th Pid
+        %th IP Address
+        %th Session ID
+        %th Referrer
+        -if type == "downloads"
+          %th Status
+        %th User Agent
+        %th Public
+        - impressions.each do |i|
+          %tr
+            %td
+              = i.created_at.strftime("%F %T")
+            %td
+              -if CoreFile.exists?(i.pid)
+                %a{:href => core_file_path(i.pid), :target => "_blank"}
+                  = i.pid
+              - else
+                = i.pid
+            %td
+              = i.ip_address
+            %td
+              = i.session_id
+            %td
+              %a{:href => i.referrer, :target => "_blank"}
+                = i.referrer
+            -if type == "downloads"
+              %td
+                = i.status
+            %td
+              = i.user_agent
+            %td
+              = i.public
