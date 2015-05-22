@@ -94,6 +94,9 @@ Cerberus::Application.routes.draw do
     resources :communities, except: [:show]
     resources :employees, only: [:index, :edit, :update, :destroy]
     resources :statistics, only: [:index]
+    get "/statistics/views" => 'statistics#get_views', as: 'views'
+    get "/statistics/downloads" => 'statistics#get_downloads', as: 'downloads'
+    get "/statistics/streams" => 'statistics#get_streams', as: 'streams'
     get "/files" => 'core_files#index', as: 'files'
     get "/files/tombstoned" => 'core_files#get_tombstoned', as: 'tombstoned'
     get "/files/incomplete" => 'core_files#get_incomplete', as: 'incomplete'

@@ -1,0 +1,49 @@
+= render partial: "tabs"
+.tab-content
+  .tab-pane.active{:id => "##{type}"}
+    .impressions
+      %h4
+        = "Total #{type}: #{impressions.count}"
+      = will_paginate impressions
+      %table.table.table-striped.table-bordered
+        %th
+          = sortable "created_at", "Time"
+        %th
+          = sortable "pid", "PID"
+        %th
+          = sortable "ip_address", "IP Address"
+        %th
+          = sortable "session_id"
+        %th
+          = sortable "referrer"
+        -if type == "downloads"
+          %th
+            = sortable "status"
+        %th
+          = sortable "user_agent"
+        %th
+          = sortable "public"
+        - impressions.each do |i|
+          %tr
+            %td
+              = i.created_at.strftime("%F %T")
+            %td
+              -if CoreFile.exists?(i.pid)
+                %a{:href => core_file_path(i.pid), :target => "_blank"}
+                  = i.pid
+              - else
+                = i.pid
+            %td
+              = i.ip_address
+            %td
+              = i.session_id
+            %td
+              %a{:href => i.referrer, :target => "_blank"}
+                = i.referrer
+            -if type == "downloads"
+              %td
+                = i.status
+            %td
+              = i.user_agent
+            %td
+              = i.public

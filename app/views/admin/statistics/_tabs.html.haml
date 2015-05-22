@@ -1,0 +1,18 @@
+%ul.breadcrumb
+  %li
+    = link_to 'Admin Panel', '/admin'
+  %li.active
+    = link_to 'Stats Page', '/admin/statistics'
+
+%h2.page-header Stats Page
+
+
+%ul.nav.nav-tabs
+  %li{:class => ("active" if action_name == "index")}
+    = link_to "Overview", admin_statistics_path
+  %li{:class => ("active" if action_name == "get_views")}
+    = link_to "Views", admin_views_path
+  %li{:class => ("active" if action_name == "get_downloads")}
+    = link_to "Downloads", admin_downloads_path
+  %li{:class => ("active" if action_name == "get_streams")}
+    = link_to "Streams", admin_streams_path
