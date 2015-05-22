@@ -14,10 +14,21 @@ class Admin::StatisticsController < ApplicationController
     @user_count = User.find(:all).length
 
     @content_type_counts = sort_content_type_counts
+  end
 
-    # @views = Impression.where('action = ?', 'view').paginate(:page => params[:views_page], :per_page => 10)
-    # @downloads = Impression.where('action = ?', 'download').paginate(:page => params[:downloads_page], :per_page => 10)
-    # @streams = Impression.where('action = ?', 'stream').paginate(:page => params[:streams_page], :per_page => 10)
+  def get_views
+    @views = Impression.where('action = ?', 'view').paginate(:page => params[:views_page], :per_page => 10).order('created_at DESC')
+    render 'impressions', locals: {impressions: @views, type: "views" }
+  end
+
+  def get_downloads
+    @downloads = Impression.where('action = ?', 'download').paginate(:page => params[:downloads_page], :per_page => 10).order('created_at DESC')
+    render 'impressions', locals: {impressions: @downloads, type: "downloads" }
+  end
+
+  def get_streams
+    @streams = Impression.where('action = ?', 'stream').paginate(:page => params[:streams_page], :per_page => 10).order('created_at DESC')
+    render 'impressions', locals: {impressions: @streams, type: "streams" }
   end
 
   private
