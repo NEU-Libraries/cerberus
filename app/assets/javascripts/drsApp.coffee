@@ -417,7 +417,7 @@ $(document).ready ->
     Tooltip Setup
     ###
     tooltipSetup = ->
-      $('body').tooltip selector: 'a[data-toggle=tooltip]'
+      $('a[data-toggle=tooltip]').tooltip container: 'body'
       return
 
 
