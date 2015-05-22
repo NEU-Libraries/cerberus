@@ -2,6 +2,8 @@
 .tab-content
   .tab-pane.active{:id => "##{type}"}
     .impressions
+      %h4
+        = "Total #{type}: #{impressions.count}"
       = will_paginate impressions
       %table.table.table-striped.table-bordered
         %th
