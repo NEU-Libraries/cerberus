@@ -26,18 +26,19 @@
 %section.row
   %article.span4
     %h3 My Loaders
-    - if current_user.marcom_loader?
-      = link_to(t('drs.loaders.marcom.long_name'), loaders_marcom_path, class: "btn btn-lg btn-primary")
-      %br
-      %br
-    - if current_user.coe_loader?
-      = link_to(t('drs.loaders.coe.long_name'), loaders_coe_path, class: "btn btn-lg btn-primary")
-      %br
-      %br
-    - if current_user.cps_loader?
-      = link_to(t('drs.loaders.cps.long_name'), loaders_cps_path, class: "btn btn-lg btn-primary")
-      %br
-      %br
+    - if !current_user.nil?
+      - if current_user.marcom_loader?
+        = link_to(t('drs.loaders.marcom.long_name'), loaders_marcom_path, class: "btn btn-lg btn-primary")
+        %br
+        %br
+      - if current_user.coe_loader?
+        = link_to(t('drs.loaders.coe.long_name'), loaders_coe_path, class: "btn btn-lg btn-primary")
+        %br
+        %br
+      - if current_user.cps_loader?
+        = link_to(t('drs.loaders.cps.long_name'), loaders_cps_path, class: "btn btn-lg btn-primary")
+        %br
+        %br
 
   %article.span8
     %h3 Past Loads
