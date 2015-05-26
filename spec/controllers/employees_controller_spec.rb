@@ -34,7 +34,6 @@ describe EmployeesController do
       employee = Employee.create(nuid: user.nuid)
       sign_in user
       get :my_loaders
-      assigns(:employee).pid.should == employee.pid
       expect(response).to render_template(:my_loaders)
       sign_out user
     end

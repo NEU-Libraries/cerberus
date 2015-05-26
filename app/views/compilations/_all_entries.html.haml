@@ -10,7 +10,8 @@
       .media
         %h4.media-heading
           %a{href: core_file_path(entry.pid)}
-            = entry.title
+            = "#{entry.non_sort} "
+            = kramdown_parse(entry.title)
         -if !entry.description.blank?
           %p
             =entry.description

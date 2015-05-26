@@ -1,22 +1,26 @@
 -content_for :page_header do
   %h1.page-header
-    ="#{@employee.pretty_employee_name}"
-    %small
-      All Loaders
-    %nav{role: "navigation", class: ["pull-right"]}
-      %ul.nav.nav-tabs
-        %li
-          %a{ href: employee_path(@employee) }
-            %i.icon-user
-            My Collections
-        %li
-          %a{ href: employee_files_path(@employee) }
-            %i.icon-file
-            My Deposits
-        %li
-          %a{ href: employee_communities_path(@employee) }
-            %i.icon-group
-            My Communities
+    -if Employee.exists?(current_user.employee_id)
+      ="#{@employee.pretty_employee_name}"
+      %small
+        My Loaders
+      %nav{role: "navigation", class: ["pull-right"]}
+        %ul.nav.nav-tabs
+          %li
+            %a{ href: employee_path(@employee) }
+              %i.icon-user
+              My Collections
+          %li
+            %a{ href: employee_files_path(@employee) }
+              %i.icon-file
+              My Deposits
+          %li
+            %a{ href: employee_communities_path(@employee) }
+              %i.icon-group
+              My Communities
+    -else
+      %span.icon-upload-alt( aria-hidden="true")
+      My Loaders
 
 
 %section.row
