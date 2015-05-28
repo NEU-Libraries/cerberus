@@ -17,11 +17,13 @@ module Api
       include BlacklightAdvancedSearch::Controller
 
       def search
-        if params[:id].blank?
-          render json: {error: "A starting id is required"} and return
+
+        begin
+          @set = fetch_solr_document
+        rescue ActiveFedora::ObjectNotFoundError
+          render json: {error: "A valid starting id is required"} and return
         end
 
-        @set = fetch_solr_document
         self.solr_search_params_logic += [:limit_to_scope]
 
         (@response, @document_list) = get_search_results
