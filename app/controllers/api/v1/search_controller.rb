@@ -17,6 +17,13 @@ module Api
       include BlacklightAdvancedSearch::Controller
 
       def search
+        if params[:id].blank?
+          render json: {error: "A starting id is required"} and return
+        end
+
+        @set = fetch_solr_document
+        self.solr_search_params_logic += [:limit_to_scope]
+
         (@response, @document_list) = get_search_results
         @pagination = paginate_params(@response)
 
@@ -26,6 +33,28 @@ module Api
 
         render json: {pagination: @pagination, response: @response}
       end
+
+      protected
+
+        def limit_to_scope(solr_parameters, user_parameters)
+          descendents = @set.combined_set_descendents
+
+          # Limit query to items that are set descendents
+          # or files off set descendents
+          query = descendents.map do |set|
+            p = set.pid
+            set = "id:\"#{p}\" OR is_member_of_ssim:\"info:fedora/#{p}\""
+          end
+
+          # Ensure files directly on scoping collection are added in
+          # as well
+          query << "is_member_of_ssim:\"info:fedora/#{@set.pid}\""
+
+          fq = query.join(" OR ")
+
+          solr_parameters[:fq] ||= []
+          solr_parameters[:fq] << fq
+        end
 
     end
   end
