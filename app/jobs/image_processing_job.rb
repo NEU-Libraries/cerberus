@@ -143,6 +143,8 @@ class ImageProcessingJob
           end
           core_file.mods.genre = "photographs"
           core_file.mods.genre.authority = "aat"
+          core_file.mods.physical_description.form = "electronic"
+          core_file.mods.physical_description.form.authority = "marcform"
           core_file.mods.physical_description.digital_origin = "born digital"
           core_file.mods.physical_description.extent = "1 photograph"
           core_file.mods.access_condition = copyright
