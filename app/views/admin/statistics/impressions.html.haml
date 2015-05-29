@@ -28,9 +28,17 @@
             %td
               = i.created_at.strftime("%F %T")
             %td
-              -if CoreFile.exists?(i.pid)
-                %a{:href => core_file_path(i.pid), :target => "_blank"}
-                  = i.pid
+              - solr = ActiveFedora::SolrService.query("id:\"#{i.pid}\"").first
+              - if !solr.nil?
+                - doc = SolrDocument.new(solr)
+                - if doc.klass == "CoreFile"
+                  %a{:href => core_file_path(doc.pid), :target => "_blank"}
+                    = doc.pid
+                - else
+                  - parent = doc.get_core_record
+                  %a{:href => core_file_path(parent.pid), :target => "_blank"}
+                    = parent.pid
+                  = doc.klass
               - else
                 = i.pid
             %td
