@@ -26,3 +26,5 @@ branches:
   only:
     - master
     - develop
+notifications:
+  slack: neu-lts:urFXFxLoFDSvKEFdBMYDpy6v
