@@ -78,7 +78,7 @@ class Loaders::MarcomLoadsController < ApplicationController
       @loader_name = t('drs.loaders.marcom.long_name')
       if virus_check(file) == 0
         if Rails.env.production?
-          tempdir = "/mnt/libraries/DRStmp"
+          tempdir = Pathname.new("/tmp/DRStmp/")
         else
           tempdir = Rails.root.join("tmp")
         end

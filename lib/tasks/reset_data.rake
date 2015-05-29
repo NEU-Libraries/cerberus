@@ -183,9 +183,16 @@ task :reset_data => :environment do
 
   sarah.add_group("northeastern:drs:repository:staff")
   pat.add_group("northeastern:drs:repository:staff")
-  brooks.add_group("northeastern:drs:repository:staff")
   eli.add_group("northeastern:drs:repository:staff")
   david.add_group("northeastern:drs:repository:staff")
+
+
+  sarah.add_group("northeastern:drs:staff")
+  pat.add_group("northeastern:drs:staff")
+  eli.add_group("northeastern:drs:staff")
+  david.add_group("northeastern:drs:staff")
+  matt.add_group("northeastern:drs:staff")
+  brooks.add_group("northeastern:drs:staff")
 
   Cerberus::Application::Queue.push(EmployeeCreateJob.new(sarah.nuid, sarah.full_name))
   Cerberus::Application::Queue.push(EmployeeCreateJob.new(pat.nuid, pat.full_name))
