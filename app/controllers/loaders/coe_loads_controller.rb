@@ -78,7 +78,7 @@ class Loaders::CoeLoadsController < ApplicationController
       @loader_name = t('drs.loaders.coe.long_name')
       if virus_check(file) == 0
         if Rails.env.production?
-          tempdir = "/mnt/libraries/DRStmp"
+          tempdir = Pathname.new("/tmp/DRStmp/")
         else
           tempdir = Rails.root.join("tmp")
         end
