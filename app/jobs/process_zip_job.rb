@@ -1,16 +1,17 @@
 class ProcessZipJob
-  attr_accessor :loader_name, :zip_path, :parent, :copyright, :current_user
+  attr_accessor :loader_name, :zip_path, :parent, :copyright, :current_user, :read_permissions
 
   def queue_name
     :loader_process_zip
   end
 
-  def initialize(loader_name, zip_path, parent, copyright, current_user)
+  def initialize(loader_name, zip_path, parent, copyright, current_user, read_permissions)
     self.loader_name = loader_name
     self.zip_path = zip_path
     self.parent = parent
     self.copyright = copyright
     self.current_user = current_user
+    self.read_permissions = read_permissions
   end
 
   def run
@@ -36,7 +37,7 @@ class ProcessZipJob
           open(fpath, 'wb') do |z|
             z << f.read
           end
-          ImageProcessingJob.new(fpath, parent, copyright, load_report.id).run
+          ImageProcessingJob.new(fpath, parent, copyright, load_report.id, read_permissions).run
           load_report.update_counts
           count = count + 1
           load_report.save!

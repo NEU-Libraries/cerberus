@@ -30,6 +30,7 @@ class Loaders::MarcomLoadsController < ApplicationController
 
   def create
     @copyright = t('drs.loaders.marcom.copyright')
+    read_permissions = ["northeastern:drs:faculty", "northeastern:drs:staff", "northeastern:drs:repository:staff", "northeastern:drs:marketing_and_communications:staff"]
     begin
       # check error condition No files
       return json_error("Error! No file to save") if !params.has_key?(:file)
@@ -46,7 +47,7 @@ class Loaders::MarcomLoadsController < ApplicationController
         flash[:error] = "You must accept the terms of service!"
         redirect_to(:back) and return
       else
-        process_file(file, parent, @copyright)
+        process_file(file, parent, @copyright, read_permissions)
       end
     rescue => exception
       logger.error "MarcomLoadsController::create rescued #{exception.class}\n\t#{exception.to_s}\n #{exception.backtrace.join("\n")}\n\n"
@@ -74,7 +75,7 @@ class Loaders::MarcomLoadsController < ApplicationController
   end
 
   protected
-    def process_file(file, parent, copyright)
+    def process_file(file, parent, copyright, read_permissions)
       @loader_name = t('drs.loaders.marcom.long_name')
       if virus_check(file) == 0
         if Rails.env.production?
@@ -91,7 +92,7 @@ class Loaders::MarcomLoadsController < ApplicationController
         #if zip
         if extract_mime_type(new_file) == 'application/zip'
           # send to job
-          Cerberus::Application::Queue.push(ProcessZipJob.new(@loader_name, new_file.to_s, parent, copyright, current_user))
+          Cerberus::Application::Queue.push(ProcessZipJob.new(@loader_name, new_file.to_s, parent, copyright, current_user, read_permissions))
           session[:flash_success] = "Your file has been submitted and is now being processed. You will receive an email when the load is complete."
         else
           #error out
