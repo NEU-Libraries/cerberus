@@ -1,16 +1,17 @@
 class ImageProcessingJob
-  attr_accessor :file, :parent, :copyright, :report_id
+  attr_accessor :file, :parent, :copyright, :report_id, :read_permissions
   include MimeHelper
 
   def queue_name
     :loader_image_processing
   end
 
-  def initialize(file, parent, copyright, report_id)
+  def initialize(file, parent, copyright, report_id, read_permissions=[])
     self.file = file
     self.parent = parent
     self.copyright = copyright
     self.report_id = report_id
+    self.read_permissions = read_permissions
   end
 
   def run
@@ -174,6 +175,9 @@ class ImageProcessingJob
         s = 600.to_f/size.to_f
         Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename, nil, s, m, l))
         core_file.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, "edit")
+        read_permissions.each do |perm|
+          core_file.rightsMetadata.permissions({group: perm}, "read")
+        end
 
         if core_file.save!
           if core_file && !core_file.category.first.blank?
