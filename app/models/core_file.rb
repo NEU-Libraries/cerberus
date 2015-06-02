@@ -10,6 +10,7 @@ class CoreFile < ActiveFedora::Base
   include Cerberus::CoreFile::Export
   include Cerberus::CoreFile::AssignType
   include Cerberus::CoreFile::Validation
+  include Cerberus::CoreFile::ExtractValues
 
   include Cerberus::Rights::MassPermissions
   include Cerberus::Rights::Embargoable
@@ -110,7 +111,7 @@ class CoreFile < ActiveFedora::Base
           self.mods.personal_name(i).name_part = ""
 
           # Most likely the XML Editor, we shouldn't try and save the cf
-          if self.pid != "__DO_NOT_USE__"  
+          if self.pid != "__DO_NOT_USE__"
             # Pat introduced records with missing or bad depositor information
             # this ensures it doesn't crash a solr re-index
             begin
