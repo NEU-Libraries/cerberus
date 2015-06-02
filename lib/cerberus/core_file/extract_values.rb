@@ -16,7 +16,6 @@ module Cerberus
         end
       end
 
-
       protected
         def doc_to_url(solr_doc)
           return download_path(solr_doc.pid, :only_path => false)
