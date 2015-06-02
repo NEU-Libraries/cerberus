@@ -45,6 +45,9 @@ Cerberus::Application.configure do
   # Tell Mailer to use repositorydev as the default host
   config.action_mailer.default_url_options = { :host => "repository.library.northeastern.edu" }
 
+  Rails.application.routes.default_url_options[:host] = "repository.library.northeastern.edu"
+  config.force_ssl = true
+
   config.cache_store = :redis_store, 'redis://localhost:6379/0/cache', { expires_in: 12.hours }
 
   # Mailer configuration
