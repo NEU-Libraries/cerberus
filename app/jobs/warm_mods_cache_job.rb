@@ -15,7 +15,9 @@ class WarmModsCacheJob
     pid_list.each do |pid|
       begin
         cf = CoreFile.find(pid)
-        cf.to_hash
+        Rails.cache.write("/api/#{cf.pid}-#{cf.updated_at}",
+          cf.to_hash,
+          :expires_in => 12.hours)
       rescue Exception => error
         #
       end
