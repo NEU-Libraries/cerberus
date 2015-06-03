@@ -115,6 +115,8 @@ Cerberus::Application.routes.draw do
       post "/handles/create_handle/*url" => "handles#create_handle", as: "create_handle", :defaults => { :format => 'json' }, :url => /.*/
       # search
       get "/search/:id" => "search#search", as: "search", :defaults => { :format => 'json' }
+      # export
+      get "/export/:id" => "export#get_files", as: "files", :defaults => { :format => 'json' }
       # files
       get "/files/:id" => "core_files#show", as: "show", :defaults => { :format => 'json' }
     end
