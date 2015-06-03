@@ -46,6 +46,33 @@ class ApplicationController < ActionController::Base
     Cerberus::Noid.namespaceize(Cerberus::IdService.mint)
   end
 
+  def fetch_core_hash(options = {})
+    options = options.with_indifferent_access
+
+    fetch = Proc.new do |pid|
+      q = ActiveFedora::SolrService.query("id:\"#{pid}\"").first
+      raise ActiveFedora::ObjectNotFoundError if q.nil?
+      @core_doc = SolrDocument.new(q)
+
+      result_hsh = Hash.new
+      if !Rails.cache.exist?("/api/#{@core_doc.pid}-#{@core_doc.updated_at}")
+        result_hsh = Rails.cache.fetch("/api/#{@core_doc.pid}-#{@core_doc.updated_at}", :expires_in => 12.hours) do
+          @core_file = ActiveFedora::Base.find(pid, cast: true)
+          @core_file.to_hash
+        end
+      else
+        result_hsh = Rails.cache.fetch("/api/#{@core_doc.pid}-#{@core_doc.updated_at}")
+      end
+      return result_hsh
+    end
+
+    if options[:id]
+      fetch.call(options[:id])
+    else
+      fetch.call(params[:id])
+    end
+  end
+
   def fetch_solr_document(options = {})
     options = options.with_indifferent_access
 
