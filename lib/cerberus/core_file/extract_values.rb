@@ -8,8 +8,8 @@ module Cerberus
         result_hsh = Hash.new
         result_hsh["pid"] = self.pid
         result_hsh["thumbnails"] = @core_doc.thumbnail_list.map { |url_string| "#{root_path(:only_path => false)}#{url_string.sub!(/^\//, '')}"}
-        result_hsh["canonical_object"] = @core_doc.canonical_object.map { |doc| doc_to_url(doc) }
-        result_hsh["content_objects"] = @core_doc.content_objects.map { |doc| doc_to_url(doc) }
+        result_hsh["canonical_object"] = @core_doc.canonical_object.map { |doc| [doc_to_url(doc), doc.derivative_label] }
+        result_hsh["content_objects"] = @core_doc.content_objects.map { |doc| [doc_to_url(doc), doc.derivative_label] }
         result_hsh["mods"] = JSON.parse(mods_json)
         return result_hsh
       end
