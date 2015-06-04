@@ -174,12 +174,10 @@ class ImageProcessingJob
         m = 0.to_f/size.to_f
         s = 600.to_f/size.to_f
         Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename, nil, s, m, l))
-        #core_file.rightsMetadata.permissions({person: "northeastern:drs:repository:staff"}, "edit")
-        permissions["read"].each do |perm|
-          core_file.rightsMetadata.permissions({group: perm}, "read")
-        end
-        permissions["edit"].each do |perm|
-          core_file.rightsMetadata.permissions({group: perm}, "edit")
+        permissions.each do |perm, values|
+          values.each do |group|
+            core_file.rightsMetadata.permissions({group: group}, "#{perm}")
+          end
         end
 
         if core_file.save!
