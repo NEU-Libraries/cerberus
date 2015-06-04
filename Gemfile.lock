@@ -280,7 +280,7 @@ GEM
     mime-types (1.25.1)
     mini_exiftool (2.5.0)
     mini_portile (0.6.0)
-    mods (2.0.1)
+    mods (2.0.2)
       iso-639
       nokogiri
       nom-xml
@@ -542,6 +542,7 @@ DEPENDENCIES
   lograge
   mailboxer (~> 0.11.0)
   mini_exiftool
+  mods (= 2.0.2)
   mods_display!
   multi_json (~> 1.7.9)
   mysql2
