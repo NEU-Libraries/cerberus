@@ -30,7 +30,7 @@ class Loaders::CpsLoadsController < ApplicationController
 
   def create
     @copyright = t('drs.loaders.cps.copyright')
-    read_permissions = ["northeastern:drs:college_of_professional_studies:media", "northeastern:drs:repository:staff"]
+    permissions = {"edit" => ["northeastern:drs:college_of_professional_studies:media", "northeastern:drs:repository:staff"]}
     begin
       # check error condition No files
       return json_error("Error! No file to save") if !params.has_key?(:file)
@@ -47,7 +47,7 @@ class Loaders::CpsLoadsController < ApplicationController
         flash[:error] = "You must accept the terms of service!"
         redirect_to(:back) and return
       else
-        process_file(file, parent, @copyright, read_permissions)
+        process_file(file, parent, @copyright, permissions)
       end
     rescue => exception
       logger.error "CpsLoadsController::create rescued #{exception.class}\n\t#{exception.to_s}\n #{exception.backtrace.join("\n")}\n\n"
@@ -75,7 +75,7 @@ class Loaders::CpsLoadsController < ApplicationController
   end
 
   protected
-    def process_file(file, parent, copyright, read_permissions)
+    def process_file(file, parent, copyright, permissions)
       @loader_name = t('drs.loaders.cps.long_name')
       if virus_check(file) == 0
         if Rails.env.production?
@@ -92,7 +92,7 @@ class Loaders::CpsLoadsController < ApplicationController
         #if zip
         if extract_mime_type(new_file) == 'application/zip'
           # send to job
-          Cerberus::Application::Queue.push(ProcessZipJob.new(@loader_name, new_file.to_s, parent, copyright, current_user, read_permissions))
+          Cerberus::Application::Queue.push(ProcessZipJob.new(@loader_name, new_file.to_s, parent, copyright, current_user, permissions))
           session[:flash_success] = "Your file has been submitted and is now being processed. You will receive an email when the load is complete."
         else
           #error out
