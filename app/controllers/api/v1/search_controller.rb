@@ -28,9 +28,9 @@ module Api
 
         (@response, @document_list) = get_search_results
         @pagination = paginate_params(@response)
-        render json: {error: "There were no results matching your query.", pagination: @pagination} and return
-        if @pagination.total_count == 0
 
+        if @pagination.total_count == 0
+          render json: {error: "There were no results matching your query.", pagination: @pagination} and return
         end
 
         if @pagination.current_page > @pagination.num_pages
