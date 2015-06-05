@@ -115,14 +115,9 @@ module Cerberus
         lns = hash['last_names'] || []
         cns = hash['corporate_names'] || []
 
-        # dont run methods if there's no values
         if_mods_exists do
-          if !(fns.first.blank? || lns.first.blank?)
-            self.mods.assign_creator_personal_names(fns, lns)
-          end
-          if !(cns.first.blank?)
-            self.mods.assign_corporate_names(cns)
-          end
+          self.mods.assign_creator_personal_names(fns, lns)
+          self.mods.assign_corporate_names(cns)
         end
 
         if_DC_exists { self.DC.assign_creators(fns, lns, cns) }
