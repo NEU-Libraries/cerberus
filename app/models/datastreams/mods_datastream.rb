@@ -391,20 +391,22 @@ class ModsDatastream < ActiveFedora::OmDatastream
       trim_nodes_from_zero(:personal_name, node_count)
     end
 
-    name_pairs.each_with_index do |(first_name, last_name), index|
-      if self.personal_name[index].nil?
-        self.insert_new_node(:personal_name)
+    if name_pairs.length > 0
+      name_pairs.each_with_index do |(first_name, last_name), index|
+        if self.personal_name[index].nil?
+          self.insert_new_node(:personal_name)
+        end
+
+        self.personal_name(index).name_part_given = first_name
+        self.personal_name(index).name_part_family = last_name
       end
 
-      self.personal_name(index).name_part_given = first_name
-      self.personal_name(index).name_part_family = last_name
-    end
-
-    # Set usage attribute to primary
-    self.personal_name(0).usage = "primary"
-    if !self.corporate_name(0).first.blank?
-      # Set usage attribute to blank
-      self.corporate_name(0).usage = ""
+      # Set usage attribute to primary
+      self.personal_name(0).usage = "primary"
+      if !self.corporate_name(0).first.blank?
+        # Set usage attribute to blank
+        self.corporate_name(0).usage = nil
+      end
     end
   end
 
@@ -418,19 +420,21 @@ class ModsDatastream < ActiveFedora::OmDatastream
       trim_nodes_from_zero(:corporate_name, node_count)
     end
 
-    cns.each_with_index do |c_name, index|
-      if self.corporate_name[index].nil?
-        self.insert_new_node(:corporate_name)
+    if cns.length > 0
+      cns.each_with_index do |c_name, index|
+        if self.corporate_name[index].nil?
+          self.insert_new_node(:corporate_name)
+        end
+
+        self.corporate_name(index).name_part = c_name
       end
 
-      self.corporate_name(index).name_part = c_name
-    end
-
-    # Set usage attribute to primary
-    if self.personal_name(0).first.blank?
-      self.corporate_name(0).usage = "primary"
-      # Set usage attribute to blank
-      self.personal_name(0).usage = ""
+      # Set usage attribute to primary
+      if self.personal_name(0).first.blank?
+        self.corporate_name(0).usage = "primary"
+        # Set usage attribute to blank
+        self.personal_name(0).usage = nil
+      end
     end
   end
 
