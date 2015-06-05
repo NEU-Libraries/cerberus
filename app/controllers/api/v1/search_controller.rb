@@ -28,6 +28,10 @@ module Api
 
         (@response, @document_list) = get_search_results
         @pagination = paginate_params(@response)
+        render json: {error: "There were no results matching your query.", pagination: @pagination} and return
+        if @pagination.total_count == 0
+
+        end
 
         if @pagination.current_page > @pagination.num_pages
           render json: {error: "The page you've requested is more than is available.", pagination: @pagination} and return
