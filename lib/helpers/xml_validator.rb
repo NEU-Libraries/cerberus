@@ -48,7 +48,7 @@ module XmlValidator
     end
 
     # Does it have at least one keyword?
-    if doc.keywords == []
+    if doc.mods.subject.blank?
       results[:errors] << Exceptions::MissingMetadata.new("keywords")
       return results
     end
