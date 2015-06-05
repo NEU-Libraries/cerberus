@@ -117,16 +117,17 @@ $(document).ready ->
 
       if $("#full_title").length > 0
         nonSort = ''
-        fullTitle = $('#full_title').val().toLowerCase()
+        fullTitleLowerCase = $('#full_title').val().toLowerCase()
+        fullTitle = $('#full_title').val()
 
-        if fullTitle.indexOf('the ') is 0
-          shortTitle = fullTitle.split("the ")[1]
+        if fullTitleLowerCase.indexOf('the ') is 0
+          shortTitle = fullTitle.slice(4)
           nonSort = "The"
-        else if fullTitle.indexOf('an ') is 0
-          shortTitle = fullTitle.split("an ")[1]
+        else if fullTitleLowerCase.indexOf('an ') is 0
+          shortTitle = fullTitle.slice(3)
           nonSort = "An"
-        else if fullTitle.indexOf('a ') is 0
-          shortTitle = fullTitle.split("a ")[1]
+        else if fullTitleLowerCase.indexOf('a ') is 0
+          shortTitle = fullTitle.slice(2)
           nonSort = "A"
 
         if nonSort != ''
