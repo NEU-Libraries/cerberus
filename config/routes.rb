@@ -111,14 +111,14 @@ Cerberus::Application.routes.draw do
   namespace :api, defaults: {format: 'json'} do
     namespace :v1 do
       # handles
-      get "/handles/get_handle/*url" => "handles#get_handle", as: "get_handle", :defaults => { :format => 'json' }, :url => /.*/
-      post "/handles/create_handle/*url" => "handles#create_handle", as: "create_handle", :defaults => { :format => 'json' }, :url => /.*/
+      get "/handles/get_handle/*url" => "handles#get_handle", as: "get_handle", :url => /.*/
+      post "/handles/create_handle/*url" => "handles#create_handle", as: "create_handle", :url => /.*/
       # search
-      get "/search/:id" => "search#search", as: "search", :defaults => { :format => 'json' }
+      get "/search/:id" => "search#search", as: "search"
       # export
-      get "/export/:id" => "export#get_files", as: "files", :defaults => { :format => 'json' }
+      get "/export/:id" => "export#get_files", as: "files"
       # files
-      get "/files/:id" => "core_files#show", as: "show", :defaults => { :format => 'json' }
+      get "/files/:id" => "core_files#show", as: "show"
     end
   end
 
