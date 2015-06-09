@@ -18,6 +18,12 @@ FactoryGirl.define do
       end
     end
 
+    trait :private_permissions do
+      after(:create) do |file|
+        file.mass_permissions = 'private'
+      end
+    end
+
     factory :featured_content do
       mass_permissions 'public'
       deposited_by_bill
@@ -63,6 +69,12 @@ FactoryGirl.define do
     factory :bills_incomplete_file do
       deposited_by_bill
       incomplete
+    end
+
+    factory :bills_private_file do
+      deposited_by_bill
+      complete
+      private_permissions
     end
   end
 end
