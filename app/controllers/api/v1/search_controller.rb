@@ -66,6 +66,7 @@ module Api
         def limit_to_public(solr_parameters, user_parameters)
           solr_parameters[:fq] ||= []
           solr_parameters[:fq] << "read_access_group_ssim:\"public\""
+          solr_parameters[:fq] << "-embargo_release_date_dtsi:[* TO *]"
         end
 
     end
