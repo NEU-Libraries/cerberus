@@ -24,6 +24,12 @@ FactoryGirl.define do
       end
     end
 
+    trait :embargoed do
+      after(:create) do |file|
+        file.embargo_release_date = Date.tomorrow
+      end
+    end
+
     factory :featured_content do
       mass_permissions 'public'
       deposited_by_bill
@@ -75,6 +81,12 @@ FactoryGirl.define do
       deposited_by_bill
       complete
       private_permissions
+    end
+
+    factory :bills_embargoed_file do
+      deposited_by_bill
+      complete
+      embargoed
     end
   end
 end

@@ -2,7 +2,8 @@ require 'spec_helper'
 
 describe Api::V1::CoreFilesController, :type => :controller do
 
-  let(:file) { FactoryGirl.create(:bills_private_file) }
+  let(:private_file) { FactoryGirl.create(:bills_private_file) }
+  let(:embargoed_file) { FactoryGirl.create(:bills_embargoed_file)}
 
   describe "GET #show" do
     it "gives an error indicating if no id given" do
@@ -17,11 +18,16 @@ describe Api::V1::CoreFilesController, :type => :controller do
       @expected = {
         :error  => "The item you've requested is unavailable."
       }.to_json
-      get :show, :id => file.pid
+      get :show, :id => private_file.pid
       response.body.should == @expected
     end
 
     it "gives an error if the file is embargoed" do
+      @expected = {
+        :error  => "The item you've requested is unavailable."
+      }.to_json
+      get :show, :id => embargoed_file.pid
+      response.body.should == @expected
     end
   end
 
