@@ -4,9 +4,11 @@ describe Api::V1::CoreFilesController, :type => :controller do
 
   describe "GET #show" do
     it "provides an error indicating that an id is required" do
-      # get api_v1_search_path(id: "")
+      @expected = {
+        :error  => "An id is required for this action."
+      }.to_json
       get :show, :id => ""
-      response.body.should == "derp"
+      response.body.should == @expected
     end
   end
 
