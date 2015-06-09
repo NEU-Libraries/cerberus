@@ -25,6 +25,7 @@ module Api
         end
 
         self.solr_search_params_logic += [:limit_to_scope]
+        self.solr_search_params_logic += [:limit_to_public]
 
         (@response, @document_list) = get_search_results
         @pagination = paginate_params(@response)
@@ -60,6 +61,11 @@ module Api
 
           solr_parameters[:fq] ||= []
           solr_parameters[:fq] << fq
+        end
+
+        def limit_to_public(solr_parameters, user_parameters)
+          solr_parameters[:fq] ||= []
+          solr_parameters[:fq] << "read_access_group_ssim:\"public\""
         end
 
     end

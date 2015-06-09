@@ -24,6 +24,7 @@ module Api
         end
 
         self.solr_search_params_logic += [:limit_to_scope]
+        self.solr_search_params_logic += [:limit_to_public]
         self.solr_search_params_logic += [:exclude_unwanted_models]
 
         (@response, @document_list) = get_search_results
@@ -67,6 +68,11 @@ module Api
         def exclude_unwanted_models(solr_parameters, user_parameters)
           solr_parameters[:fq] ||= []
           solr_parameters[:fq] << "#{Solrizer.solr_name("has_model", :symbol)}:\"info:fedora/afmodel:CoreFile\""
+        end
+
+        def limit_to_public(solr_parameters, user_parameters)
+          solr_parameters[:fq] ||= []
+          solr_parameters[:fq] << "read_access_group_ssim:\"public\""
         end
 
     end
