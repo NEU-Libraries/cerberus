@@ -238,6 +238,10 @@ class CoreFile < ActiveFedora::Base
     return ! self.in_progress.empty?
   end
 
+  def in_progress?
+    return ! self.properties.in_progress.empty?
+  end
+
   def propagate_metadata_changes!
     content_objects.each do |content|
       content.rightsMetadata.content = self.rightsMetadata.content

@@ -9,7 +9,11 @@ module Api
           render json: {error: "An id is required for this action."} and return
         end
 
-        if @core_doc.blank? || !@core_doc.public? || @core_doc.embargo_date_in_effect?
+        if @core_doc.blank?         ||
+            !@core_doc.public?      ||
+            @core_doc.in_progress?  ||
+            @core_doc.incomplete?   ||
+            @core_doc.embargo_date_in_effect?
           render json: {error: "The item you've requested is unavailable."} and return
         end
 
