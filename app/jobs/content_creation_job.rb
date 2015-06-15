@@ -55,7 +55,7 @@ class ContentCreationJob
       else
         File.open(file_path) do |file_contents|
           content_object.add_file(file_contents, 'content', file_name)
-          cotent_object.save!
+          content_object.save!
         end
       end
 
