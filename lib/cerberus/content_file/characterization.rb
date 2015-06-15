@@ -6,7 +6,7 @@ module Cerberus
       include MimeHelper
 
       included do
-        has_metadata :name => "characterization", :type => FitsDatastream        
+        has_metadata :name => "characterization", :type => FitsDatastream
         delegate_to :characterization, [:format_label, :file_size, :last_modified,
                                         :filename, :original_checksum, :rights_basis,
                                         :copyright_basis, :copyright_note,
@@ -40,7 +40,7 @@ module Cerberus
           content_changed = self.content.changed?
           yield
           if content_changed
-            Cerberus::Application::Queue.push(AtomisticCharacterizationJob.new(self.pid)) if content_changed
+            # Cerberus::Application::Queue.push(AtomisticCharacterizationJob.new(self.pid))
             self.properties.mime_type = extract_mime_type(self.fedora_file_path)
             self.properties.md5_checksum = new_checksum(self.fedora_file_path)
             self.save!
