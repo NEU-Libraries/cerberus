@@ -22,8 +22,8 @@
 
 // Base modal
 .modal {
-  position: fixed;
-  top: 10%;
+  position: fixed !important;
+  top: 10% !important;
   left: 50%;
   z-index: $zindexModal;
   width: 560px;
@@ -42,7 +42,7 @@
     @include transition(opacity .3s linear, top .3s ease-out);
     top: -25%;
   }
-  &.fade.in { top: 10%; }
+  &.fade.in { top: 10% !important; }
 }
 .modal-header {
   padding: 9px 15px;
@@ -59,8 +59,8 @@
 // Body (where all modal content resides)
 .modal-body {
   position: relative;
-  overflow-y: auto;
-  max-height: 400px;
+  overflow-y: auto !important;
+  max-height: calc(100vh - 212px) !important;
   padding: 15px;
 }
 // Remove bottom margin if need be
