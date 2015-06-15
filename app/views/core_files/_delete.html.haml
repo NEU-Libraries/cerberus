@@ -2,7 +2,7 @@
   -if !current_user.nil? && current_user.admin?
     %a.btn.btn-danger{ href:"#deleteModal", data: {toggle: "modal"} }
       Tombstone File
-    = render partial: 'delete_modal', locals: { delete_path: tombstone_file_path, title: "Confirm Tombstone" }
+    = render partial: 'delete_modal', locals: { delete_path: tombstone_file_path, title: "Confirm Tombstone Request" }
   -else
     %p
       The DRS is a permanent archive, but we recognize that occasionally it may be necessary to remove files. Please review
