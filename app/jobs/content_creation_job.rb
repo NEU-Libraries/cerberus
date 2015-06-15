@@ -33,6 +33,7 @@ class ContentCreationJob
         poster_object = ImageMasterFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint), core_record: core_record)
         poster_contents = File.open(poster_path)
         poster_object.add_file(poster_contents, 'content', "poster#{File.extname(poster_path)}")
+        poster_contents.close
         poster_object.rightsMetadata.content = core_record.rightsMetadata.content
         poster_object.save!
         DerivativeCreator.new(poster_object.pid).generate_derivatives
@@ -44,12 +45,14 @@ class ContentCreationJob
         if File.extname(file_path) == ".zip"
           file_contents = File.open(file_path)
           content_object.add_file(file_contents, 'content', file_name)
+          file_contents.close
         else
           zip_content(content_object)
         end
       else
         file_contents = File.open(file_path)
         content_object.add_file(file_contents, 'content', file_name)
+        file_contents.close
       end
 
       # Assign relevant metadata
@@ -113,6 +116,7 @@ class ContentCreationJob
         # Add zipfile to the ZipFile object
         f = File.open(zipfile_name)
         content_object.add_file(f, "content", File.basename(zipfile_name))
+        f.close
       ensure
         FileUtils.rm(zipfile_name)
       end
