@@ -33,9 +33,9 @@
       %nav.set-actions
         %ul.nav.nav-pills
           %li
-            %a{:href =>  edit_collection_path(@set)}
-              Edit
-      =render partial: 'shared/sets/delete_item_modal', locals: { item: @set }
+            %a.btn.btn-clear{:href =>  edit_collection_path(@set)}
+              %i.icon-pencil
+              Manage Collection
 
 - if render_constraints(params) != ""
   %h1.page-header
