@@ -7,6 +7,9 @@ Cerberus::Application.routes.draw do
 
   resources :collections, :path => 'collections', except: [:index, :destroy]
   get "/collections" => redirect("/communities")
+  get "/collections/:id/tombstone" => "collections#tombstone", as: "tombstone_collection"
+  match "/collections/:id/request_tombstone" => "collections#request_tombstone", via: 'post', as:"request_tombstone_collection"
+  match "/collections/:id/request_move" => "collections#request_move", via: 'post', as:"request_move_collection"
 
   resources :communities, only: [:show]
 
