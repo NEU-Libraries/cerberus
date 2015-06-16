@@ -171,6 +171,44 @@ class CollectionsController < ApplicationController
     end
   end
 
+  def tombstone
+    collection = Collection.find(params[:id])
+    title = collection.title
+    collection.tombstone
+    if current_user.admin?
+      redirect_to collection_path(id: collection), notice: "The file '#{title}' has been tombstoned"
+    else
+      redirect_to collection_path(id: collection), notice: "The file '#{title}' has been tombstoned"
+    end
+  end
+
+  def request_tombstone
+    collection = Collection.find(params[:id])
+    title = collection.title
+    user = current_user
+    reason = params[:reason]
+    TombstoneMailer.tombstone_alert(collection, reason, user).deliver!
+    flash[:notice] = "Your request has been received and will be processed soon."
+    redirect_to collection and return
+  end
+
+  def request_move
+    collection = Collection.find(params[:id])
+    title = collection.title
+    user = current_user
+    reason = params[:reason]
+    collection_url = params[:collection_url]
+    collection_pid = collection_url[/([^\/]+)$/]
+    if Collection.exists?(collection_pid)
+      MoveMailer.move_alert(collection, reason, collection_url, user).deliver!
+      flash[:notice] = "Your request has been received and will be processed soon."
+      redirect_to collection and return
+    else
+      flash[:error] = "That collection does not exist. Please submit a new request and enter a valid collection URL."
+      redirect_to collection and return
+    end
+  end
+
   protected
 
     def index_redirect(exception)
