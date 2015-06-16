@@ -3,9 +3,9 @@
   %head
     %meta{:content => "text/html; charset=UTF-8", "http-equiv" => "Content-Type"}/
   %body
-    %h3 File Move Alert
+    %h3="#{@type} Move Alert"
 
-    %p A user has requested that a file be moved:
+    %p= "A user has requested that a #{@type} be moved:"
     %ul
       %li= "Title: #{@title}"
       %li= "PID: #{@pid}"
@@ -14,7 +14,7 @@
       %li= "User Email: #{@user.email}"
 
     - if @pid
-      %p= "A link to the record can be found #{link_to 'here', core_file_url(@pid)}".html_safe
+      %p= "A link to the #{@type} can be found #{link_to 'here', @object_url}".html_safe
 
-    %p= "#{link_to @title, core_file_url(@pid)} should be moved to #{link_to @collection_url, @collection_url}".html_safe
+    %p= "#{link_to @title, @object_url} should be moved to #{link_to @collection_url, @collection_url}".html_safe
     %p= "The reason for moving is: #{@reason}".html_safe
