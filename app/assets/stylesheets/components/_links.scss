@@ -20,5 +20,9 @@ a{
   .nav-pills{
     margin: 0px;
     float: right;
+    a:hover, a:focus{
+      color:#FFF;
+      background:$brand-primary;
+    }
   }
 }
