@@ -158,6 +158,7 @@ class CoreFilesController < ApplicationController
   # routed to /files/:id
   def show
     @core_file = fetch_solr_document
+    @parent = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{@core_file.parent}\"").first)
 
     @mods = fetch_mods
 
