@@ -78,7 +78,8 @@
     // hash from "#stay" to "#no-back", which triggers this function
     window.onhashchange = function() {
       // User tried to go back; warn user, rinse and repeat
-      if ( location.hash == '#no-back' ) {
+      var lh = location.hash
+      if ( lh == '#no-back' ) {
         $("#backModal").modal("show");
         if ( history_api ) history.pushState(null, '', '#stay')
         else location.hash = '#stay'

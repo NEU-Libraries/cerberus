@@ -117,7 +117,7 @@ describe CoreFilesController do
       # Check that bills complete file was not deleted
       CoreFile.find(complete_file.pid).should == complete_file
 
-      expect(response).to redirect_to(root_path)      
+      expect(response).to redirect_to(root_path)
     end
   end
 
