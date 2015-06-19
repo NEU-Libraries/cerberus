@@ -60,7 +60,6 @@ class CoreFilesController < ApplicationController
     if @core_file.in_progress? && (@core_file.klass == "CoreFile")
       # User completed second screen, so they most likely went back accidentally
       # Do nothing
-      render :nothing => true
     elsif @core_file.incomplete?
       @core_file = CoreFile.find(@core_file.pid)
       @core_file.destroy
@@ -73,6 +72,8 @@ class CoreFilesController < ApplicationController
         format.js   { render :nothing => true }
       end
     end
+
+    render :nothing => true
   end
 
   def provide_metadata
@@ -151,12 +152,13 @@ class CoreFilesController < ApplicationController
       end
     end
 
-    redirect_to core_file_path(@core_file.pid)
+    redirect_to core_file_path(@core_file.pid) + '#no-back'
   end
 
   # routed to /files/:id
   def show
     @core_file = fetch_solr_document
+    @parent = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{@core_file.parent}\"").first)
 
     @mods = fetch_mods
 
