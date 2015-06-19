@@ -52,6 +52,7 @@ FactoryGirl.define do
       after(:build) do |u, evaluator|
         u.depositor = evaluator.depositor if evaluator.depositor
         u.parent = evaluator.parent if evaluator.parent
+        u.properties.parent_id = evaluator.parent.pid if evaluator.parent
       end
     end
 
