@@ -53,3 +53,36 @@
             = render partial: "move"
           #delete.tab-pane
             = render partial: "delete"
+
+#backModal.modal.hide.fade{"aria-hidden" => "true", "aria-labelledby" => "backModalLabel", role: "dialog", tabindex: "-1" }
+  .modal-header
+    %button.close{"aria-hidden" => "true", "data-dismiss" => "modal", type: "button"} x
+    %h3#backModalLabel
+      Your file is being processed
+  .modal-body
+    %p= "Return to #{link_to(kramdown_parse(@parent.title).html_safe, polymorphic_path(@parent))}".html_safe
+  .modal-footer
+    %button.btn{"aria-hidden" => "true", "data-dismiss" => "modal" } Close
+
+:javascript
+  // It works without the History API, but will clutter up the history
+  var history_api = typeof history.pushState !== 'undefined'
+
+  // The previous page asks that it not be returned to
+  if ( location.hash == '#no-back' ) {
+    // Push "#no-back" onto the history, making it the most recent "page"
+    if ( history_api ) history.pushState(null, '', '#stay')
+    else location.hash = '#stay'
+
+    // When the back button is pressed, it will harmlessly change the url
+    // hash from "#stay" to "#no-back", which triggers this function
+    window.onhashchange = function() {
+      // User tried to go back; warn user, rinse and repeat
+      var lh = location.hash
+      if ( lh == '#no-back' ) {
+        $("#backModal").modal("show");
+        if ( history_api ) history.pushState(null, '', '#stay')
+        else location.hash = '#stay'
+      }
+    }
+  }

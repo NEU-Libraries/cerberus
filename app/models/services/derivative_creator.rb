@@ -17,6 +17,10 @@ class DerivativeCreator
       pdf = create_pdf_file
       pdf.transform_datastream(:content, content: { datastream: 'content', size: '1000x1000>' })
       blob = pdf.content.content
+    elsif master.instance_of?(PdfFile)
+      copy = master
+      copy.transform_datastream(:content, content: { datastream: 'content', size: '1000x1000>' })
+      blob = copy.content.content
     else
       blob = self.master.content.content
     end
