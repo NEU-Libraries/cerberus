@@ -31,10 +31,13 @@ class ContentCreationJob
 
       if !poster_path.blank? # Video or Audio posters
         poster_object = ImageMasterFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint), core_record: core_record)
-        poster_contents = File.open(poster_path)
-        poster_object.add_file(poster_contents, 'content', "poster#{File.extname(poster_path)}")
-        poster_object.rightsMetadata.content = core_record.rightsMetadata.content
-        poster_object.save!
+
+        File.open(poster_path) do |poster_contents|
+          poster_object.add_file(poster_contents, 'content', "poster#{File.extname(poster_path)}")
+          poster_object.rightsMetadata.content = core_record.rightsMetadata.content
+          poster_object.save!
+        end
+
         DerivativeCreator.new(poster_object.pid).generate_derivatives
       end
 
@@ -42,14 +45,18 @@ class ContentCreationJob
       if content_object.instance_of? ZipFile
         # Is it literally a zipfile? or did it just fail to be the other types...
         if File.extname(file_path) == ".zip"
-          file_contents = File.open(file_path)
-          content_object.add_file(file_contents, 'content', file_name)
+          File.open(file_path) do |file_contents|
+            content_object.add_file(file_contents, 'content', file_name)
+            content_object.save!
+          end
         else
           zip_content(content_object)
         end
       else
-        file_contents = File.open(file_path)
-        content_object.add_file(file_contents, 'content', file_name)
+        File.open(file_path) do |file_contents|
+          content_object.add_file(file_contents, 'content', file_name)
+          content_object.save!
+        end
       end
 
       # Assign relevant metadata
@@ -111,8 +118,10 @@ class ContentCreationJob
         end
 
         # Add zipfile to the ZipFile object
-        f = File.open(zipfile_name)
-        content_object.add_file(f, "content", File.basename(zipfile_name))
+        File.open(zipfile_name) do |f|
+          content_object.add_file(f, "content", File.basename(zipfile_name))
+          content_object.save!
+        end
       ensure
         FileUtils.rm(zipfile_name)
       end
