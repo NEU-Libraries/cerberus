@@ -60,7 +60,10 @@
     %h3#backModalLabel
       Your file is being processed
   .modal-body
-    %p= "Return to #{link_to(kramdown_parse(@parent.title).html_safe, polymorphic_path(@parent))}".html_safe
+    - if !@parent.blank?
+      %p= "Return to #{link_to(kramdown_parse(@parent.title).html_safe, polymorphic_path(@parent))}".html_safe
+    - else
+      %p= "Return to the #{link_to("Home Page", root_path)}"
   .modal-footer
     %button.btn{"aria-hidden" => "true", "data-dismiss" => "modal" } Close
 
