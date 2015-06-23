@@ -1,4 +1,7 @@
 <% page_params = paginate_params(@response) %>
+<% extra_count = 0 %>
+
+<% (!@smart_collections.nil? && @smart_collections.length > 0 && page_params.current_page == 1 && render_constraints(params) == "") ? extra_count = @smart_collections.length : extra_count = 0 %>
 
 <% if page_params.total_count > 0 %>
   <div class="pager">
@@ -6,7 +9,7 @@
       <%= paginate_rsolr_response(@response)%>
     <% end %>
     <span class="pull-left">
-      Displaying <%= page_params.start %> to <%=page_params.end %> of <%=page_params.total_count%>
+      Displaying <%= page_params.start %> to <%=page_params.end %> of <%=page_params.total_count + extra_count%>
     </span>
     <div class="clearfix"></div>
   </div><!-- /pager -->
