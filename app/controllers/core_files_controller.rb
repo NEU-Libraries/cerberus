@@ -165,8 +165,15 @@ class CoreFilesController < ApplicationController
     @core_file = fetch_solr_document
     @mods = fetch_mods
 
-    @parent = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{@core_file.parent}\"").first)
-
+    begin
+      @parent = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{@core_file.parent}\"").first)
+    rescue => exception
+      # At this stage most likely a supplemental file
+      if @core_file.supplemental_material_for.blank?
+        email_handled_exception(exception)
+      end
+    end
+    
     @thumbs = @core_file.thumbnail_list
     @page_title = @core_file.title
 
