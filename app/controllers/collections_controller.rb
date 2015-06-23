@@ -174,11 +174,12 @@ class CollectionsController < ApplicationController
   def tombstone
     collection = Collection.find(params[:id])
     title = collection.title
+    parent = collection.parent
     collection.tombstone
     if current_user.admin?
-      redirect_to collection_path(id: collection), notice: "The file '#{title}' has been tombstoned"
+      redirect_to collection_path(id: parent), notice: "The file '#{title}' has been tombstoned"
     else
-      redirect_to collection_path(id: collection), notice: "The file '#{title}' has been tombstoned"
+      redirect_to collection_path(id: parent), notice: "The file '#{title}' has been tombstoned"
     end
   end
 

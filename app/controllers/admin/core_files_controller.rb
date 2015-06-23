@@ -84,6 +84,8 @@ class Admin::CoreFilesController < AdminController
     def limit_to_tombstoned(solr_parameters, user_parameters)
       solr_parameters[:fq] ||= []
       solr_parameters[:fq] << "tombstoned_ssi:\"true\""
+      solr_parameters[:fq] << "-active_fedora_model_ssi:\"CoreFile\""
+
     end
     def limit_to_in_progress(solr_parameters, user_parameters)
       solr_parameters[:fq] ||= []

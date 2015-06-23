@@ -1,0 +1,37 @@
+%ul.breadcrumb
+  %li
+    = link_to 'Admin Panel', '/admin'
+  %li.active
+    = link_to 'Manage Collections', admin_collections_path
+
+%h2.page-header Collections
+
+%br
+%ul.nav.nav-tabs
+  %li.active
+    = link_to "Tombstoned", '#tombstoned'
+
+.tab-content
+  #tombstoned.tab-pane.active
+    .collections
+
+
+  :javascript
+    // $('.nav-tabs a').click(function (e) {
+    //   e.preventDefault();
+    //   $(this).tab('show');
+    //   var href = $(this).attr("href");
+    //   href = '/admin/files/'+href.substring(1, href.length);
+    //   $.getScript(href).done( function() { fixPagination(); });
+    // });
+    $(document).ready(function() {
+      $.getScript('/admin/collections/tombstoned').done( function() { //fixPagination();
+       });
+    });
+    // function fixPagination() {
+    //   $('.pagination a').click( function(e) {
+    //     e.preventDefault();
+    //     var href = $(this).attr('href');
+    //     $.getScript(href).done( function() { fixPagination(); });
+    //   });
+    // }
