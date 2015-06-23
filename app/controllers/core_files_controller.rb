@@ -42,6 +42,11 @@ class CoreFilesController < ApplicationController
     render_404(ActiveFedora::ObjectNotFoundError.new) and return
   end
 
+  rescue_from Exceptions::SearchResultTypeError do |exception|
+    # No longer emailing this error - it's always Pat debugging
+    render_404(ActiveFedora::ObjectNotFoundError.new) and return
+  end
+
   configure_mods_display do
     access_condition do
       display!
@@ -158,9 +163,9 @@ class CoreFilesController < ApplicationController
   # routed to /files/:id
   def show
     @core_file = fetch_solr_document
-    @parent = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{@core_file.parent}\"").first)
-
     @mods = fetch_mods
+
+    @parent = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{@core_file.parent}\"").first)
 
     @thumbs = @core_file.thumbnail_list
     @page_title = @core_file.title
