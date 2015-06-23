@@ -35,6 +35,13 @@ class Collection < ActiveFedora::Base
   belongs_to :community_parent, property: :is_member_of, :class_name => "Community"
 
   def to_solr(solr_doc = Hash.new())
+    if self.tombstoned?
+      solr_doc["id"] = self.pid
+      solr_doc["tombstoned_ssi"] = 'true'
+      solr_doc["title_ssi"] = self.title
+      return solr_doc
+    end
+
     super(solr_doc)
     solr_doc["type_sim"] = I18n.t("drs.display_labels.#{self.class}.name")
     return solr_doc
@@ -77,6 +84,34 @@ class Collection < ActiveFedora::Base
     end
 
     yield self
+  end
+
+  def tombstone
+    self.properties.tombstoned = 'true'
+    self.child_files.each do |child|
+      child.tombstone
+    end
+    self.save!
+  end
+
+  def revive
+    puts "i'm in the revive function"
+    self.properties.tombstoned = ''
+    puts self.tombstoned?
+    self.child_files.each do |cf|
+      # puts "#{cf.title} is revived"
+      cf.revive
+      puts cf.tombstoned?
+    end
+    self.save!
+  end
+
+  def tombstoned?
+    if self.properties.tombstoned.first.nil? || self.properties.tombstoned.first.empty?
+      return false
+    else
+      return true
+    end
   end
 
   protected

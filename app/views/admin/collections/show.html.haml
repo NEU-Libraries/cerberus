@@ -1,0 +1,28 @@
+- layout_class =  'span6'
+
+%ul.breadcrumb
+  %li
+    = link_to 'Admin Panel', '/admin'
+  %li
+    = link_to 'Manage Collections', admin_collections_path
+  %li.active
+    = @collection.title
+
+//%article{class: ['drs-item', 'drs-item-full'],  data: { drsitem: @collection.pid } }
+%header
+  %h1.page-header
+    = "#{@collection.non_sort} "
+    = kramdown_parse(@collection.title)
+
+%section.row
+  %div{class: layout_class}
+    %figure
+      -if @thumbs.length > 0
+        = render partial: 'shared/thumbnails/full_picture'
+      -else
+        %i.icon-file.icon-4x.icon-border.drs-icon-figure
+  -# %div{itemscope: "", itemtype: "http://schema.org/CreativeWork", class:  [ layout_class, 'drs-item-details'] }
+  -#   .tab-content
+  -#     #metadata.tab-pane.active
+  -#       .drs-item-add-details
+          //= @mods
