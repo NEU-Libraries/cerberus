@@ -23,6 +23,10 @@
       =render partial: 'shared/icon', locals: { class_string: t('drs.featured_content.research.icon') }
       #{ t('drs.featured_content.research.name') }
 
+    %a.btn.btn-clear.btn-block{href: catalog_monographs_path, data: {toggle: "tooltip"}, title: t('drs.featured_content.monographs.description')}
+      =render partial: 'shared/icon', locals: { class_string: t('drs.featured_content.monographs.icon') }
+      #{ t('drs.featured_content.monographs.name') }
+
     %a.btn.btn-clear.btn-block{href: catalog_presentations_path, data: {toggle: "tooltip"}, title: t('drs.featured_content.presentations.description')}
       =render partial: 'shared/icon', locals: { class_string: t('drs.featured_content.presentations.icon') }
       #{ t('drs.featured_content.presentations.name') }
