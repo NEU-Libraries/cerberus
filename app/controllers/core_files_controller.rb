@@ -23,10 +23,10 @@ class CoreFilesController < ApplicationController
                                           :update,
                                           :destroy]
 
-  before_filter :can_edit_parent_or_proxy_upload?, only: [:new, :create]
+  before_filter :can_edit_parent_or_proxy_upload?, only: [:new, :create, :destroy_incomplete_file]
 
   before_filter :can_read?, only: [:show]
-  before_filter :can_edit?, only: [:edit, :update, :destroy_incomplete_file]
+  before_filter :can_edit?, only: [:edit, :update]
   before_filter :complete?, only: [:edit, :update]
 
   before_filter :valid_form_permissions?, only: [:process_metadata, :update]
@@ -173,7 +173,7 @@ class CoreFilesController < ApplicationController
         email_handled_exception(exception)
       end
     end
-    
+
     @thumbs = @core_file.thumbnail_list
     @page_title = @core_file.title
 
