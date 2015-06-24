@@ -112,6 +112,12 @@ class CatalogController < ApplicationController
     render 'smart_collection', locals: { smart_collection: 'datasets' }
   end
 
+  def monographs
+    self.solr_search_params_logic += [:monographs_filter]
+    (@response, @document_list) = get_search_results
+    render 'smart_collection', locals: { smart_collection: 'monographs' }
+  end
+
   def faculty_and_staff
     self.solr_search_params_logic += [:faculty_and_staff_filter]
     (@response, @document_list) = get_search_results
@@ -336,6 +342,12 @@ class CatalogController < ApplicationController
 
   def theses_and_dissertations_filter(solr_parameters, user_parameters)
     query = "drs_category_ssim:\"Theses and Dissertations\""
+    solr_parameters[:fq] ||= []
+    solr_parameters[:fq] << query
+  end
+
+  def monographs_filter(solr_parameters, user_parameters)
+    query = "drs_category_ssim:\"Monographs\""
     solr_parameters[:fq] ||= []
     solr_parameters[:fq] << query
   end
