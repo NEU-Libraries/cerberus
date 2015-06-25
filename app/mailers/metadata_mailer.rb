@@ -25,6 +25,9 @@ class MetadataMailer < ActionMailer::Base
     @other_pubs_new          = UploadAlert.withheld_other_pubs(:create)
     @other_pubs_update       = UploadAlert.withheld_other_pubs(:update)
 
+    @monographs_new       = UploadAlert.withheld_monographs(:create)
+    @monographs_update    = UploadAlert.withheld_monographs(:update)
+
     count = 0
     count += @research_new.count
     count += @research_update.count
@@ -43,6 +46,9 @@ class MetadataMailer < ActionMailer::Base
 
     count += @other_pubs_new.count
     count += @other_pubs_update.count
+
+    count += @monographs_new.count
+    count += @monographs_update.count
 
     if count == 0
       self.message.perform_deliveries = false
@@ -83,5 +89,7 @@ class MetadataMailer < ActionMailer::Base
       tag_as_notified_helper @presentations_update
       tag_as_notified_helper @other_pubs_new
       tag_as_notified_helper @other_pubs_update
+      tag_as_notified_helper @monographs_new
+      tag_as_notified_helper @monographs_update
     end
 end

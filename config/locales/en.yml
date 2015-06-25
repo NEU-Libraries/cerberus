@@ -62,6 +62,10 @@ en:
         name: Theses and Dissertations
         description: NU’s master's theses and doctoral dissertations from 2008 to the present
         icon: icon-book
+      monographs:
+        name: Monographs
+        description: Books written, edited, translated, or published by NU faculty
+        icon: icon-leanpub
       communities:
         name: Communities
         description: Browse Northeastern departments and groups by name

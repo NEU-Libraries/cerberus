@@ -27,6 +27,10 @@ describe UploadAlert do
       FactoryGirl.create_list(:other_pub_alert, 2)
       FactoryGirl.create_list(:other_pub_update_alert, 2)
       FactoryGirl.create(:other_pub_notified_alert)
+
+      FactoryGirl.create_list(:monograph_alert, 2)
+      FactoryGirl.create_list(:monograph_update_alert, 2)
+      FactoryGirl.create(:monograph_notified_alert)
     end
 
     after(:all) { UploadAlert.destroy_all }
@@ -83,6 +87,13 @@ describe UploadAlert do
      let(:updated) { UploadAlert.withheld_other_pubs(:update) }
 
      it_should_behave_like "withheld queries"
+    end
+
+    context "for monographs alerts" do
+      let(:created) { UploadAlert.withheld_monographs(:create) }
+      let(:updated) { UploadAlert.withheld_monographs(:update) }
+
+      it_should_behave_like "withheld queries"
     end
   end
 

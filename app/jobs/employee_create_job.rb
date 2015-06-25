@@ -30,6 +30,7 @@ class EmployeeCreateJob
     create_personal_collection("Presentations", emp, parent)
     create_personal_collection("Datasets", emp, parent)
     create_personal_collection("Learning Objects", emp, parent)
+    create_personal_collection("Monographs", emp, parent)
 
     # Tag the employee as completed and resave to Fedora.
     emp.employee_is_complete

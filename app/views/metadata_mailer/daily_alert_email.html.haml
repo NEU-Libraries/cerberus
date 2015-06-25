@@ -16,6 +16,12 @@
     %h3 Updated Research Publications
     = render partial: 'alert_items', locals: { alerts: @research_update }
 
+    %h3 New Monographs
+    = render partial: 'alert_items', locals: { alerts: @monographs_new }
+
+    %h3 Updated Monographs
+    = render partial: 'alert_items', locals: { alerts: @monographs_update }
+
     %h3 New Presentations
     = render partial: 'alert_items', locals: { alerts: @presentations_new }
 
