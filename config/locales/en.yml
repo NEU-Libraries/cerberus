@@ -64,7 +64,7 @@ en:
         icon: icon-book
       monographs:
         name: Monographs
-        description: books
+        description: Books written, edited, translated, or published by NU faculty
         icon: icon-leanpub
       communities:
         name: Communities
