@@ -2,6 +2,14 @@
   = render 'catalog/results_pagination'
 
   %table.table.table-striped
+    -if @type.to_s != "tombstoned"
+      %tr
+        %th= "Core File Title"
+        %th= "Depositor Name"
+        %th= "Depositor Email"
+        %th= "Created At"
+        %th= "Updated At"
+        %th
     - @core_files.each do |core_file|
       %tr
         %td
@@ -11,6 +19,18 @@
             = link_to("View", admin_view_file_path(core_file), class: "btn btn-small btn-info")
           %td
             = link_to("Revive", admin_revive_file_path(core_file), class: "btn btn-small btn-warning")
+        -else
+          - if core_file.depositor
+            - user = User.find_by_nuid("#{core_file.depositor}")
+            %td
+              = user.name
+            %td
+              = link_to(user.email, "mailto:#{user.email}")
+          %td
+            = DateTime.parse(core_file["system_create_dtsi"]).strftime("%c")
+          %td
+            = DateTime.parse(core_file["system_modified_dtsi"]).strftime("%c")
+
         %td
           = link_to("Delete", admin_delete_file_path(core_file),
           method: :delete,
