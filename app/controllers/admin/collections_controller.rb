@@ -77,9 +77,7 @@ class Admin::CollectionsController < AdminController
 
     def limit_to_tombstoned(solr_parameters, user_parameters)
       solr_parameters[:fq] ||= []
-      solr_parameters[:fq] << "tombstoned_ssi:\"true\""
-      solr_parameters[:fq] << "active_fedora_model_ssi:\"Collection\""
-
+      solr_parameters[:fq] << "tombstoned_ssi:\"true\" AND active_fedora_model_ssi:\"Collection\""
     end
 
 end
