@@ -95,13 +95,11 @@ class Collection < ActiveFedora::Base
   end
 
   def revive
-    puts "i'm in the revive function"
     self.properties.tombstoned = ''
-    puts self.tombstoned?
-    self.child_files.each do |cf|
-      # puts "#{cf.title} is revived"
-      cf.revive
-      puts cf.tombstoned?
+    cfs = ActiveFedora::SolrService.query("parent_id_tesim:\"#{self.pid}\"")
+    cfs.each do |cf|
+      child = CoreFile.find(cf['id'])
+      child.revive
     end
     self.save!
   end

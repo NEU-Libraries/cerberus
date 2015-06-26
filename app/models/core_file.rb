@@ -93,6 +93,8 @@ class CoreFile < ActiveFedora::Base
       solr_doc["id"] = self.pid
       solr_doc["tombstoned_ssi"] = 'true'
       solr_doc["title_ssi"] = self.title
+      solr_doc["fields_parent_id_tesim"] = self.parent.pid
+      solr_doc["parent_id_tesim"] = self.parent.pid
       return solr_doc
     end
 
@@ -110,7 +112,7 @@ class CoreFile < ActiveFedora::Base
           self.mods.personal_name(i).name_part = ""
 
           # Most likely the XML Editor, we shouldn't try and save the cf
-          if self.pid != "__DO_NOT_USE__"  
+          if self.pid != "__DO_NOT_USE__"
             # Pat introduced records with missing or bad depositor information
             # this ensures it doesn't crash a solr re-index
             begin
