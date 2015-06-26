@@ -93,6 +93,9 @@ class Collection < ActiveFedora::Base
     self.child_files.each do |child|
       child.tombstone
     end
+    self.child_collections.each do |col_child|
+      col_child.tombstone
+    end
     self.save!
   end
 
@@ -100,8 +103,13 @@ class Collection < ActiveFedora::Base
     self.properties.tombstoned = ''
     cfs = ActiveFedora::SolrService.query("parent_id_tesim:\"#{self.pid}\"")
     cfs.each do |cf|
-      child = CoreFile.find(cf['id'])
-      child.revive
+      if cf['active_fedora_model_ssi'] == 'CoreFile'
+        child = CoreFile.find(cf['id'])
+        child.revive
+      elsif cf['active_fedora_model_ssi'] == 'Collection'
+        col_child = Collection.find(cf['id'])
+        col_child.revive
+      end
     end
     self.save!
   end
