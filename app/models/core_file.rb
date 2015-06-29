@@ -96,37 +96,7 @@ class CoreFile < ActiveFedora::Base
       solr_doc["title_ssi"] = self.title
       return solr_doc
     end
-
-<<<<<<< HEAD
-    (0..self.mods.personal_name.length).each do |i|
-      fn = self.mods.personal_name(i).name_part_given
-      ln = self.mods.personal_name(i).name_part_family
-      full_name = self.mods.personal_name(i).name_part
-
-      if !full_name.blank? && full_name.first.length > 0
-        name_array = Namae.parse full_name.first
-        name_obj = name_array[0]
-        if !name_obj.nil? && !name_obj.given.blank? && !name_obj.family.blank?
-          self.mods.personal_name(i).name_part_given = name_obj.given
-          self.mods.personal_name(i).name_part_family = name_obj.family
-          self.mods.personal_name(i).name_part = ""
-
-          # Most likely the XML Editor, we shouldn't try and save the cf
-          if self.pid != "__DO_NOT_USE__"
-            # Pat introduced records with missing or bad depositor information
-            # this ensures it doesn't crash a solr re-index
-            begin
-              self.save!
-            rescue ActiveFedora::RecordInvalid => exception
-              ExceptionNotifier.notify_exception(exception, :data => {:id => "#{self.pid}"})
-            end
-          end
-        end
-      end
-    end
-
-=======
->>>>>>> develop
+    
     super(solr_doc)
 
     #Accounting for Pat's files coming in through the Fedora-direct harvest
