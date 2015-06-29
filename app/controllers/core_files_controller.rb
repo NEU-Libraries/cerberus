@@ -23,10 +23,10 @@ class CoreFilesController < ApplicationController
                                           :update,
                                           :destroy]
 
-  before_filter :can_edit_parent_or_proxy_upload?, only: [:new, :create]
+  before_filter :can_edit_parent_or_proxy_upload?, only: [:new, :create, :destroy_incomplete_file]
 
   before_filter :can_read?, only: [:show]
-  before_filter :can_edit?, only: [:edit, :update, :destroy_incomplete_file]
+  before_filter :can_edit?, only: [:edit, :update]
   before_filter :complete?, only: [:edit, :update]
 
   before_filter :valid_form_permissions?, only: [:process_metadata, :update]
@@ -39,6 +39,11 @@ class CoreFilesController < ApplicationController
   rescue_from ActiveFedora::ObjectNotFoundError do |exception|
     @obj_type = "Object"
     email_handled_exception(exception)
+    render_404(ActiveFedora::ObjectNotFoundError.new) and return
+  end
+
+  rescue_from Exceptions::SearchResultTypeError do |exception|
+    # No longer emailing this error - it's always Pat debugging
     render_404(ActiveFedora::ObjectNotFoundError.new) and return
   end
 
@@ -158,9 +163,16 @@ class CoreFilesController < ApplicationController
   # routed to /files/:id
   def show
     @core_file = fetch_solr_document
-    @parent = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{@core_file.parent}\"").first)
-
     @mods = fetch_mods
+
+    begin
+      @parent = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{@core_file.parent}\"").first)
+    rescue => exception
+      # At this stage most likely a supplemental file
+      if @core_file.supplemental_material_for.blank?
+        email_handled_exception(exception)
+      end
+    end
 
     @thumbs = @core_file.thumbnail_list
     @page_title = @core_file.title
@@ -239,6 +251,7 @@ class CoreFilesController < ApplicationController
 
   def edit
     @core_file = CoreFile.find(params[:id])
+    @core_file.extract_names
     @page_title = "Edit #{@core_file.title}"
   end
 

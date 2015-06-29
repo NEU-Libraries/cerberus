@@ -41,6 +41,18 @@ FactoryGirl.define do
       end
     end
 
+    factory :monograph_alert do
+      content_type "Monographs"
+
+      factory :monograph_notified_alert do
+        notified
+      end
+
+      factory :monograph_update_alert do
+        update
+      end
+    end
+
     factory :presentation_alert do
       content_type "Presentations"
 
