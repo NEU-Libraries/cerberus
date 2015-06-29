@@ -25,13 +25,7 @@ describe Api::V1::ExportController, :type => :controller do
     end
 
     it "limits to the scope of the starting ID" do
-      @expected = {
-        :error  => "A valid starting id is required"
-      }.to_json
-      get :get_files, :id => @root.pid
-      response.body.should == @expected
-      # root_doc = SolrDocument.new(@root.to_solr)
-      # root_doc.all_descendent_files.length.should == 3
+      # TODO
     end
 
     it "doesn't provide embargoed items" do
