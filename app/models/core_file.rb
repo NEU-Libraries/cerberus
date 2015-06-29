@@ -97,6 +97,7 @@ class CoreFile < ActiveFedora::Base
       return solr_doc
     end
 
+<<<<<<< HEAD
     (0..self.mods.personal_name.length).each do |i|
       fn = self.mods.personal_name(i).name_part_given
       ln = self.mods.personal_name(i).name_part_family
@@ -124,6 +125,8 @@ class CoreFile < ActiveFedora::Base
       end
     end
 
+=======
+>>>>>>> develop
     super(solr_doc)
 
     #Accounting for Pat's files coming in through the Fedora-direct harvest
@@ -309,6 +312,26 @@ class CoreFile < ActiveFedora::Base
   end
 
   private
+
+    def extract_names
+      (0..self.mods.personal_name.length).each do |i|
+        fn = self.mods.personal_name(i).name_part_given
+        ln = self.mods.personal_name(i).name_part_family
+        full_name = self.mods.personal_name(i).name_part
+
+        if !full_name.blank? && full_name.first.length > 0
+          name_array = Namae.parse full_name.first
+          name_obj = name_array[0]
+          if !name_obj.nil? && !name_obj.given.blank? && !name_obj.family.blank?
+            self.mods.personal_name(i).name_part_given = name_obj.given
+            self.mods.personal_name(i).name_part_family = name_obj.family
+            self.mods.personal_name(i).name_part = ""
+
+            self.save!
+          end
+        end
+      end
+    end
 
     def purge_content_bearing_objects
       self.content_objects.each do |e|

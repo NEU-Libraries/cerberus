@@ -17,7 +17,7 @@ feature "Faculty and staff featured content" do
 
     # Verify employee state is as we expect it to be
     @list.map { |e| expect(e.is_building?).to be false }
-    @list.map { |e| expect(e.smart_collections.length).to eq 6 }
+    @list.map { |e| expect(e.smart_collections.length).to eq 7 }
     @list.map { |e| expect(e.mass_permissions).to eq "public" }
 
     # Ensure the "Faculty" featured content widget
