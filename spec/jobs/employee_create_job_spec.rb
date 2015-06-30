@@ -31,8 +31,8 @@ describe EmployeeCreateJob do
     # Lookup the employee
     employee = Employee.find_by_nuid(nuid)
 
-    # Employee has six required smart_collections
-    expect(employee.smart_collections.length).to eq 6
+    # Employee has seven required smart_collections
+    expect(employee.smart_collections.length).to eq 7
 
     # All required smart_collections were spun up
     expect(employee.user_root_collection.class).to eq Collection
@@ -55,8 +55,8 @@ describe EmployeeCreateJob do
     # Look up employee again to ensure fresh state
     employee = Employee.find_by_nuid(nuid)
 
-    # Verify that there are still only six smart collections
-    expect(employee.smart_collections.length).to eq 6
+    # Verify that there are still only seven smart collections
+    expect(employee.smart_collections.length).to eq 7
   end
 
   it "sends a new employee alert email as long as an employee is created" do
