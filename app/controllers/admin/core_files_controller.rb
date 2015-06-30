@@ -34,8 +34,13 @@ class Admin::CoreFilesController < AdminController
     @core_file = CoreFile.find(params[:id])
     pid = @core_file.pid
     title = @core_file.title
+    parent = Collection.find(@core_file.properties.parent_id[0])
     @core_file.revive
-    redirect_to admin_files_path, notice: "The file #{ActionController::Base.helpers.link_to title, core_file_path(pid)} has been revived".html_safe
+    if @core_file.revive
+      redirect_to admin_files_path, notice: "The file #{ActionController::Base.helpers.link_to title, core_file_path(pid)} has been revived".html_safe
+    else
+      redirect_to admin_files_path, alert: "The core file '#{title}' could not be revived because the parent '#{ActionController::Base.helpers.link_to parent.title, admin_collections_path(parent.pid)}' is tombstoned.".html_safe
+    end
   end
 
   def destroy
