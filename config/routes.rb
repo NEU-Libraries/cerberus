@@ -28,6 +28,7 @@ Cerberus::Application.routes.draw do
   get '/research' => 'catalog#research', as: 'catalog_research'
   get '/presentations' => 'catalog#presentations', as: 'catalog_presentations'
   get '/datasets' => 'catalog#datasets', as: 'catalog_datasets'
+  get '/monographs' => 'catalog#monographs', as: 'catalog_monographs'
   get '/faculty_and_staff' => 'catalog#faculty_and_staff', as: 'catalog_faculty_and_staff'
 
   # Community Specific queries
@@ -37,6 +38,7 @@ Cerberus::Application.routes.draw do
   get '/communities/:id/presentations' => 'communities#presentations', as: 'community_presentations'
   get '/communities/:id/datasets' => 'communities#datasets', as: 'community_datasets'
   get '/communities/:id/learning' => 'communities#learning_objects', as: 'community_learning_objects'
+  get '/communities/:id/monographs' => 'communities#monographs', as: 'community_monographs'
   post '/communities/:id/attach_employee/:employee_id' => 'communities#attach_employee', as: 'attach_employee'
 
   resources :compilations, :controller => "compilations", :path => "sets"

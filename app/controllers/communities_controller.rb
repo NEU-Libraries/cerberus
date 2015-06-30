@@ -119,6 +119,12 @@ class CommunitiesController < ApplicationController
     render 'smart_collection', locals: { smart_collection: 'learning' }
   end
 
+  def monographs
+    @page_title = "#{@set.title} #{t('drs.featured_content.monographs.name')}"
+    safe_get_smart_docs(@set.monographs)
+    render 'smart_collection', locals: { smart_collection: 'monographs' }
+  end
+
   protected
 
     def get_set
