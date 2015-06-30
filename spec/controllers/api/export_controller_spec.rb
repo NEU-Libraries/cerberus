@@ -25,7 +25,9 @@ describe Api::V1::ExportController, :type => :controller do
     end
 
     it "limits to the scope of the starting ID" do
-      # TODO
+      get :get_files, :id => @root.pid
+      res = JSON.parse(response.body)
+      res["pagination"]["table"]["total_count"].should == 3
     end
 
     it "doesn't provide embargoed items" do
