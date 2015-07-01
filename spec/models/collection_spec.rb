@@ -197,33 +197,26 @@ describe Collection do
       end
     end
 
-    # it "revives collection children and grandchildren" do
-    #   @child_two.tombstone
-    #   @child_two.save!
-    #   @child_two.revive
-    #   @child_two.save!
-    #   @child_two.child_collections do |col_child|
-    #     col_child.tombstoned?.should be false
-    #   end
-    # end
-    #
-    # it "revives corefile great grandchildren" do
-    #   @child_two.tombstone
-    #   @child_two.save!
-    #   @child_two.revive
-    #   @child_two.save!
-    #   gg = CoreFile.find("#{@gg_gf.pid}")
-    #   gg.tombstoned?.should be false
-    # end
-    #
-    # it "revives collection great grandchild" do
-    #   @child_two.tombstone
-    #   @child_two.save!
-    #   @child_two.revive
-    #   @child_two.save!
-    #   gg = Collection.find("#{@great_grandchild.pid}")
-    #   gg.tombstoned?.should be false
-    # end
+    it "revives collection children and grandchildren" do
+      @child_two.tombstone
+      @child_two.save!
+      @child_two.revive
+      @child_two.save!
+      @child_two.child_collections do |col_child|
+        col_child.tombstoned?.should be false
+      end
+      gg = Collection.find("#{@great_grandchild.pid}")
+      gg.tombstoned?.should be false
+    end
+
+    it "revives corefile great grandchildren" do
+      @child_two.tombstone
+      @child_two.save!
+      @child_two.revive
+      @child_two.save!
+      gg = CoreFile.find("#{@gg_gf.pid}")
+      gg.tombstoned?.should be false
+    end
   end
 
   after :all do

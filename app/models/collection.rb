@@ -117,6 +117,7 @@ class Collection < ActiveFedora::Base
       return false
     else
       self.properties.tombstoned = ''
+      self.save!
       cfs = ActiveFedora::SolrService.query("parent_id_tesim:\"#{self.pid}\"")
       cfs.each do |cf|
         if cf['active_fedora_model_ssi'] == 'CoreFile'
@@ -127,7 +128,6 @@ class Collection < ActiveFedora::Base
           col_child.revive
         end
       end
-      self.save!
     end
   end
 
