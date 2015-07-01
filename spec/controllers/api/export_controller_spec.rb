@@ -13,6 +13,7 @@ describe Api::V1::ExportController, :type => :controller do
     @great_grandchild = Collection.create(title: "Great Grandchild", parent: @grandchild)
     @gg_cf = CoreFile.create(title: "GG CF", parent: @great_grandchild, depositor: "0", mass_permissions: "public")
     @out_of_scope_cf = CoreFile.create(title: "Out of scope", parent: @other_collection, depositor: "0", mass_permissions: "public")
+    @embargoed = CoreFile.create(title: "Embargo Test", parent: @child_one, depositor: "0", mass_permissions: "public", embargo_release_date: Date.tomorrow.to_s)
   end
 
   describe "GET #get_files" do
@@ -31,6 +32,18 @@ describe Api::V1::ExportController, :type => :controller do
     end
 
     it "doesn't provide embargoed items" do
+      get :get_files, :id => @root.pid
+      res = JSON.parse(response.body)
+      res["pagination"]["table"]["total_count"].should == 3 # no pagination allows for the following checks to be true
+
+      items = res["items"]
+      embargoed_found = false
+      items.each do |key, item|
+        if item["pid"][0] == @embargoed.pid
+          embargoed_found = true
+        end
+      end
+      embargoed_found.should == false
     end
 
     it "doesn't provide in progress items" do
