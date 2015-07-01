@@ -90,11 +90,17 @@ class Collection < ActiveFedora::Base
 
   def tombstone
     self.properties.tombstoned = 'true'
-    self.child_files.each do |child|
-      child.tombstone
+    doc = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{self.pid}\"").first)
+    if doc.child_files
+      doc.child_files.each do |child|
+        cf = CoreFile.find(child.pid)
+        cf.tombstone
+      end
     end
-    self.child_collections.each do |col_child|
-      col_child.tombstone
+    if self.child_collections
+      self.child_collections.each do |col_child|
+        col_child.tombstone
+      end
     end
     self.save!
   end
