@@ -121,8 +121,14 @@ class CoreFile < ActiveFedora::Base
   end
 
   def revive
-    parent = Collection.find(self.properties.parent_id[0])
-    if parent.tombstoned?
+    if self.properties.parent_id[0]
+      parent = Collection.find(self.properties.parent_id[0])
+    elsif self.parent
+      parent = Collection.find(self.parent.pid)
+    else
+      parent = nil
+    end
+    if parent && parent.tombstoned?
       return false
     else
       self.properties.tombstoned = ''
