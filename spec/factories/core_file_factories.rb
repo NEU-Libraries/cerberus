@@ -41,6 +41,10 @@ FactoryGirl.define do
       factory :learning_object do
         category 'Learning Objects'
       end
+
+      factory :monograph do
+       category 'Monographs'
+      end
     end
 
     factory :complete_file do

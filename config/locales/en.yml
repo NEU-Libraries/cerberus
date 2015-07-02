@@ -61,6 +61,10 @@ en:
       theses:
         name: Theses and Dissertations
         description: NU’s master's theses and doctoral dissertations from 2008 to the present
+        icon: icon-graduation-cap
+      monographs:
+        name: Monographs
+        description: Books written, edited, translated, or published by NU faculty
         icon: icon-book
       communities:
         name: Communities
