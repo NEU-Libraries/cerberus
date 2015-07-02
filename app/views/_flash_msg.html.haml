@@ -1,6 +1,6 @@
 - flash_types_to_classes = { :notice => 'alert-success', :error => 'alert-error' }
 .container
-  - [:notice, :error, :alert].each do |type|
+  - [:error, :alert, :notice].each do |type|
     - if flash[type]
       %div{:class => "alert #{flash_types_to_classes[type] rescue ''} ui-corner-all #{type.to_s}"}
         %a.close{"data-dismiss" => "alert", :href => "#"} ×
