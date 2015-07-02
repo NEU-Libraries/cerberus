@@ -1,6 +1,6 @@
 - facet_list ||= facet_field_names
 
-- if !has_search_parameters? && (params[:action] == 'index')
+- if !has_search_parameters?
   - content_for :page_header do
     = render 'home'
 - else
