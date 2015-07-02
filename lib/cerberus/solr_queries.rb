@@ -138,6 +138,10 @@ module Cerberus
       find_all_files_by_type("Learning Objects")
     end
 
+    def monographs
+      find_all_files_by_type("Monographs")
+    end
+
     def smart_collections
       smart_collection_list ||= []
 
@@ -155,6 +159,9 @@ module Cerberus
       # end
       if self.other_publications.length > 0
         smart_collection_list << "other"
+      end
+      if self.monographs.length > 0
+        smart_collection_list << "monographs"
       end
 
       if smart_collection_list.length > 0
