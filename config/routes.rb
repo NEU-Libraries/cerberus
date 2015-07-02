@@ -152,9 +152,9 @@ Cerberus::Application.routes.draw do
   get ':action' => 'static#:action', constraints: { action: /help|terms/ }, as: :static
 
   # Catch-all (for routing errors)
-  unless Rails.env.development?
+  # unless Rails.env.development?
     match '*error' => 'catalog#bad_route', via: [:get, :post]
-  end
+  # end
 
   # This must be the very last route in the file because it has a catch all route for 404 errors.
   # This behavior seems to show up only in production mode.
