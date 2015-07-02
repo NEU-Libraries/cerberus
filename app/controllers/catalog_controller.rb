@@ -34,7 +34,8 @@ class CatalogController < ApplicationController
     self.solr_search_params_logic += [:disable_highlighting]
     recent
     respond_to do |format|
-      format.any { render :template => 'catalog/index', :status => 404 }
+      format.html { render :template => 'catalog/index', :status => 404 }
+      format.any { render_404(ActiveFedora::ObjectNotFoundError.new) }
     end
   end
 
