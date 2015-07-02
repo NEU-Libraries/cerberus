@@ -33,7 +33,9 @@ class CatalogController < ApplicationController
     flash[:alert] = "If you were trying to access an item in IRis, our previous institutional repository, please perform a search to locate it in the DRS."
     self.solr_search_params_logic += [:disable_highlighting]
     recent
-    render :template => 'catalog/index', :status => 404
+    respond_to do |format|
+      format.any { render :template => 'catalog/index', :status => 404 }
+    end
   end
 
   def index
