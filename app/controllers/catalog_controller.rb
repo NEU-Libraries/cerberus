@@ -29,6 +29,8 @@ class CatalogController < ApplicationController
   skip_before_filter :default_html_head
 
   def bad_route
+    params.clear
+
     flash[:error] = "Sorry - the page you requested, #{params[:error]}, was not found in the system."
     flash[:alert] = "If you were trying to access an item in IRis, our previous institutional repository, please perform a search to locate it in the DRS."
     self.solr_search_params_logic += [:disable_highlighting]
