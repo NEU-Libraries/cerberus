@@ -17,6 +17,7 @@ a{
 }
 
 .set-actions{
+  padding-top:19px;
   .nav-pills{
     margin: 0px;
     float: right;
@@ -26,4 +27,7 @@ a{
       background:$brand-primary;
     }
   }
+}
+.set-description + .set-actions {
+  padding-top:0;
 }
