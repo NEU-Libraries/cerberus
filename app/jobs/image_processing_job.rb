@@ -1,13 +1,14 @@
 class ImageProcessingJob
-  attr_accessor :file, :parent, :copyright, :report_id, :permissions
+  attr_accessor :file, :file_name, :parent, :copyright, :report_id, :permissions
   include MimeHelper
 
   def queue_name
     :loader_image_processing
   end
 
-  def initialize(file, parent, copyright, report_id, permissions=[])
+  def initialize(file, file_name, parent, copyright, report_id, permissions=[])
     self.file = file
+    self.file_name = file_name
     self.parent = parent
     self.copyright = copyright
     self.report_id = report_id
@@ -32,8 +33,8 @@ class ImageProcessingJob
       core_file.properties.parent_id = core_file.parent.pid
       core_file.tag_as_in_progress
       core_file.tmp_path = file
-      core_file.properties.original_filename = File.basename(file)
-      core_file.label = File.basename(file)
+      core_file.properties.original_filename = File.basename(file_name)
+      core_file.label = File.basename(file_name)
 
       core_file.instantiate_appropriate_content_object(file)
       if core_file.canonical_class != "ImageMasterFile" or extract_mime_type(file) != 'image/jpeg'
