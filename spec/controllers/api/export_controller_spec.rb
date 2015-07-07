@@ -17,11 +17,19 @@ describe Api::V1::ExportController, :type => :controller do
   end
 
   describe "GET #get_files" do
-    it "gives an error with a non-valid starting ID" do
+    it "gives an error with a invalid starting ID" do
       @expected = {
-        :error  => "A valid starting id is required"
+        :error  => "A valid starting ID is required"
       }.to_json
       get :get_files, :id => ""
+      response.body.should == @expected
+    end
+    
+    it "gives an error if the ID class isn't a Collection or Compilation" do
+      @expected = {
+        :error  => "ID must match either a Collection or a Set"
+      }.to_json
+      get :get_files, :id => @c1_gf.pid
       response.body.should == @expected
     end
 

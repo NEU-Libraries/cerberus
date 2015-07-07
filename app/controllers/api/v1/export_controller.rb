@@ -19,8 +19,12 @@ module Api
       def get_files
         begin
           @set = fetch_solr_document
+          # Must be a community or a compilation
+          if @set.klass != "Collection" && @set.klass != "Compilation"
+            render json: {error: "ID must match either a Collection or a Set"} and return
+          end
         rescue ActiveFedora::ObjectNotFoundError
-          render json: {error: "A valid starting id is required"} and return
+          render json: {error: "A valid starting ID is required"} and return
         end
 
         self.solr_search_params_logic += [:limit_to_scope]
