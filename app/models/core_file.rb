@@ -98,10 +98,7 @@ class CoreFile < ActiveFedora::Base
       solr_doc["active_fedora_model_ssi"] = self.class
       return solr_doc
     end
-<<<<<<< HEAD
-    
-=======
->>>>>>> develop
+
     super(solr_doc)
 
     #Accounting for Pat's files coming in through the Fedora-direct harvest
