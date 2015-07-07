@@ -1,0 +1,22 @@
+%ul.breadcrumb
+  %li
+    = link_to 'Admin Panel', '/admin'
+  %li.active
+    = link_to 'Manage Collections', admin_collections_path
+
+%h2.page-header Collections
+
+%br
+%ul.nav.nav-tabs
+  %li.active
+    = link_to "Tombstoned", '#tombstoned'
+
+.tab-content
+  #tombstoned.tab-pane.active
+    .collections
+
+
+  :javascript
+    $(document).ready(function() {
+      $.getScript('/admin/collections/tombstoned').done( function() {});
+    });

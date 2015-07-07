@@ -3,9 +3,9 @@
   %head
     %meta{:content => "text/html; charset=UTF-8", "http-equiv" => "Content-Type"}/
   %body
-    %h3 Tombstone Alert
+    %h3= "Tombstone #{@type} Alert"
 
-    %p A user has requested that a file be deleted:
+    %p="A user has requested that a #{@type} be deleted:"
     %ul
       %li= "Title: #{@title}"
       %li= "PID: #{@pid}"
@@ -13,6 +13,6 @@
       %li= "User Email: #{@user.email}"
 
     - if @pid
-      %p= "A link to the record can be found #{link_to 'here', core_file_url(@pid)}".html_safe
+      %p= "A link to the #{@type} can be found #{link_to 'here', @object_url}".html_safe
 
     %p= "The reason for deletion is: #{@reason}".html_safe

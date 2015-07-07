@@ -7,6 +7,9 @@ Cerberus::Application.routes.draw do
 
   resources :collections, :path => 'collections', except: [:index, :destroy]
   get "/collections" => redirect("/communities")
+  get "/collections/:id/tombstone" => "collections#tombstone", as: "tombstone_collection"
+  match "/collections/:id/request_tombstone" => "collections#request_tombstone", via: 'post', as:"request_tombstone_collection"
+  match "/collections/:id/request_move" => "collections#request_move", via: 'post', as:"request_move_collection"
 
   resources :communities, only: [:show]
 
@@ -106,6 +109,11 @@ Cerberus::Application.routes.draw do
     get "/files/:id" => "core_files#show", as: 'view_file'
     get "/files/:id/revive" => "core_files#revive", as: 'revive_file'
     delete "/files/:id/delete" => "core_files#destroy", as: 'delete_file'
+    get "/collections" => 'collections#index', as: 'collections'
+    get "/collections/tombstoned" => 'collections#get_tombstoned', as: 'tombstoned_collection'
+    get "/collections/:id" => "collections#show", as: 'view_collection'
+    get "/collections/:id/revive" => "collections#revive", as: 'revive_collection'
+    delete "/collections/:id/delete" => "collections#destroy", as: 'delete_collection'
     get "/communities/filter_list" => 'communities#filter_list', as: 'communities_filter_list'
     get "/employees/filter_list" => "employees#filter_list", as: 'employees_filter_list'
   end
