@@ -25,7 +25,13 @@
 %h4
   IPTC Data:
 %table.table.table-striped.table-bordered
-  - image.iptc.sort.map do |key, value|
-    %tr
-      %td= key
-      %td= value
+  - begin
+    - image.iptc.sort.map do |key, value|
+      %tr
+        %td= key
+        %td= value
+  - rescue => exception
+    - image.iptc.each do |key, value|
+      %tr
+        %td= key
+        %td= value
