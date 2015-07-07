@@ -44,7 +44,6 @@ class ImageProcessingJob
       else
         classification = ''
         photo = MiniExiftool.new("#{file}", iptc_encoding: 'UTF8', exif_encoding: 'UTF8')
-        puts photo.tags
         photo.tags.each do |tag|
           val = photo[tag]
           iptc[:"#{tag}"] = val
