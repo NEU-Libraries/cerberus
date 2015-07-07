@@ -1,0 +1,35 @@
+- layout_class =  'span6'
+
+%ul.breadcrumb
+  %li
+    = link_to 'Admin Panel', '/admin'
+  %li
+    = link_to 'Manage Collections', admin_collections_path
+  %li.active
+    = @collection.title
+
+%header
+  %h1.page-header
+    = "#{@collection.non_sort} "
+    = kramdown_parse(@collection.title)
+
+%section.row
+  %div{class: layout_class}
+    %figure
+      -if @thumbs.length > 0
+        = render partial: 'shared/thumbnails/full_picture'
+      -else
+        %i.icon-file.icon-4x.icon-border.drs-icon-figure
+  %div{class: layout_class}
+    %dl
+      -if @collection.description != ''
+        %dt Description:
+        %dd= @collection.description
+      -if @collection.keywords.length > 0
+        %dt Keywords:
+        %dd
+          - @collections.keywords.each do |kw|
+            = kw
+            %br
+      %dt Parent:
+      %dd= link_to(@collection.parent.title, collection_path(@collection.parent))

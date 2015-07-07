@@ -33,11 +33,13 @@ class ProcessZipJob
       count = 0
       zipfile.each do |f|
         if !f.directory? && File.basename(f.name)[0] != "." # Don't extract directories or mac specific files
-          fpath = File.join(to, File.basename(f.name.gsub(/[()\s+]/, "_"))) # Replaces parens and spaces in file names with underscores
+          file_name = File.basename(f.name)
+          uniq_hsh = Digest::MD5.hexdigest("#{f.name}")[0,2]
+          fpath = File.join(to, "#{Time.now.to_i.to_s}-#{uniq_hsh}") # Names file time and hash string
           open(fpath, 'wb') do |z|
             z << f.read
           end
-          ImageProcessingJob.new(fpath, parent, copyright, load_report.id, permissions).run
+          ImageProcessingJob.new(fpath, file_name, parent, copyright, load_report.id, permissions).run
           load_report.update_counts
           count = count + 1
           load_report.save!
