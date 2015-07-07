@@ -70,7 +70,7 @@
     });
   });
   $('#file').bind('change', function() {
-    //over 500MB check
+    over 500MB check
     if (this.files[0].size/ 1024000 > 500) {
       $(this).before('<div class="alert alert-warning">The file you chose is larger than 500MB.</div>');
       $("input[type='submit']").prop("disabled", "true");

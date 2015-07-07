@@ -1,14 +1,20 @@
 class MoveMailer < ActionMailer::Base
   default from: "notifier@repository.library.northeastern.edu"
 
-  def move_alert(core_file, reason, collection_url, user)
-    @title = core_file.title || "No title set.  Uh oh!"
-    @pid  = core_file.pid  || "No pid set.  Uh oh!"
+  def move_alert(object, reason, collection_url, user)
+    @title = object.title || "No title set.  Uh oh!"
+    @pid  = object.pid  || "No pid set.  Uh oh!"
     @reason = reason
     @collection_url = collection_url
     @user= user
+    @type = object.class
+    if @type == Collection
+      @object_url = collection_url(@pid)
+    elsif @type == CoreFile
+      @object_url = core_file_url(@pid)
+    end
     mail(to: pick_receiver,
-         subject: "[cerberus] User Requested File Move",
+         subject: "[cerberus] User Requested #{@type} Move",
          content_type: "text/html")
   end
 
