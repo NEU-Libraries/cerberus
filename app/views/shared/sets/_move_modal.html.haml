@@ -1,0 +1,10 @@
+#moveModal.modal.hide.fade{"aria-hidden" => "true", "aria-labelledby" => "moveModalLabel", role: "dialog", tabindex: "-1" }
+  .modal-header
+    %button.close{"aria-hidden" => "true", "data-dismiss" => "modal", type: "button"} x
+    %h3#moveModalLabel
+      Confirm move request
+  .modal-body
+    %p= "Are you sure you want to move this item?"
+  .modal-footer
+    %button.btn{"aria-hidden" => "true", "data-dismiss" => "modal" } Close
+    = submit_tag 'Request', class: "btn btn-warning"

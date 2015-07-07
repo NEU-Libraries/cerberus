@@ -1,0 +1,13 @@
+#deleteModal.modal.hide.fade{"aria-hidden" => "true", "aria-labelledby" => "deleteModalLabel", role: "dialog", tabindex: "-1" }
+  .modal-header
+    %button.close{"aria-hidden" => "true", "data-dismiss" => "modal", type: "button"} x
+    %h3#deleteModalLabel
+      = title
+  .modal-body
+    %p= "Are you sure you want to delete this item?"
+  .modal-footer
+    %button.btn{"aria-hidden" => "true", "data-dismiss" => "modal" } Close
+    -if defined? delete_path
+      =link_to("Tombstone", delete_path, method: 'get', class: 'btn btn-danger')
+    -else
+      = submit_tag 'Request', class: "btn btn-danger"

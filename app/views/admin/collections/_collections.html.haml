@@ -1,0 +1,20 @@
+.collections
+  = render 'catalog/results_pagination'
+
+  %table.table.table-striped
+    - @collections.each do |collection|
+      %tr
+        %td
+          .large= collection.title
+        -if @type.to_s == "tombstoned"
+          %td
+            = link_to("View", admin_view_collection_path(collection), class: "btn btn-small btn-info")
+          %td
+            = link_to("Revive", admin_revive_collection_path(collection), class: "btn btn-small btn-warning")
+        %td
+          = link_to("Delete", admin_delete_collection_path(collection),
+          method: :delete,
+          confirm: "This action is irreversible",
+          class: "btn btn-small btn-danger")
+
+  = render 'catalog/results_pagination'

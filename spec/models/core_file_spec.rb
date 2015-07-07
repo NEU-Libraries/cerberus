@@ -273,4 +273,73 @@ describe CoreFile do
       @one.destroy ; @two.destroy ; @three.destroy ; @four.destroy
     end
   end
+
+  describe 'tombstone file' do
+    before(:each) do
+      @root = Collection.create(title: "Root")
+      @child_one = Collection.create(title: "Child One", parent: @root)
+      @c1_gf = CoreFile.create(title: "Core File One", parent: @child_one, depositor: "nobody@nobody.com")
+      @c1_gf.tombstone
+      @c1_gf.save!
+      @solr =  @c1_gf.to_solr
+    end
+
+    it "sets properties.tombstoned to true" do
+      @c1_gf.properties.tombstoned should = 'true'
+    end
+
+    it "sets solr doc tombstoned_ssi to true" do
+      @solr["tombstoned_ssi"].should == 'true'
+    end
+
+    it "sets tombstoned? to true" do
+      @c1_gf.tombstoned?.should be true
+    end
+
+    after(:each) do
+      @c1_gf.destroy
+      @child_one.destroy
+      @root.destroy
+    end
+  end
+
+  describe 'revive file' do
+    before(:each) do
+      @root = Collection.create(title: "Root")
+      @parent = Collection.create(title: "Child One", parent: @root)
+      @c1_gf = CoreFile.create(title: "Core File One", parent: @parent, depositor: "nobody@nobody.com")
+      @c1_gf.tombstone
+      @c1_gf.save!
+      @solr =  @c1_gf.to_solr
+    end
+
+    it "sets properties.tombstoned to empty" do
+      @c1_gf.revive
+      @c1_gf.properties.tombstoned should = ''
+    end
+
+    it "sets solr doc tombstoned_ssi to empty" do
+      @c1_gf.revive
+      @c1_gf.save!
+      @solr =  @c1_gf.to_solr
+      @solr["tombstoned_ssi"].should be nil
+    end
+
+    it "sets tombstoned? to false" do
+      @c1_gf.revive
+      @c1_gf.tombstoned?.should be false
+    end
+
+    it "returns false if parent is tombstoned" do
+      @parent.tombstone
+      @parent.save!
+      @c1_gf.revive.should be false
+    end
+
+    after(:each) do
+      @c1_gf.destroy
+      @parent.destroy
+      @root.destroy
+    end
+  end
 end
