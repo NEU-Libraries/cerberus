@@ -44,103 +44,106 @@ class ImageProcessingJob
       else
         classification = ''
         photo = MiniExiftool.new("#{file}", iptc_encoding: 'UTF8', exif_encoding: 'UTF8')
+        puts photo.tags
         photo.tags.each do |tag|
           val = photo[tag]
           iptc[:"#{tag}"] = val
-          if val.kind_of?(String) or val.kind_of?(Time)
-            val = val
-          elsif val.kind_of?(Integer) or val.kind_of?(Float) or val.kind_of?(Rational) or val.kind_of?(TrueClass) or val.kind_of?(FalseClass)
-            val = String(val)
-          elsif val.kind_of?(Array)
-            val.map! do |i|
-              if i.kind_of?(String) or i.kind_of?(Integer) or val.kind_of?(Float) or val.kind_of?(Time) or val.kind_of?(Rational) or val.kind_of?(TrueClass)
-                i = String(i)
-              else
-                create_special_error("#{tag} contains #{val.class.name} data", iptc, core_file, load_report)
-                return
-              end
-            end
-          else
-            create_special_error("#{tag} contains #{val.class.name} data", iptc, core_file, load_report)
-            return
-          end
-
-          if val.kind_of?(String) and (val.include? "“" or val.include? "”" or val.include? "‘" or val.include? "’")
-            create_special_error("#{tag} contains invalid smart quotes", iptc, core_file, load_report)
-            return
-          elsif val.kind_of?(String) and (val.include? "—" or val.include? "—")
-            create_special_error("#{tag} contains invalid em dash", iptc, core_file, load_report)
-            return
-          elsif val.kind_of?(String) and (val.include? "…")
-            create_special_error("#{tag} contains invalid ellipsis", iptc, core_file, load_report)
-            return
-          end
-          if tag == 'Headline'
-            core_file.title = val
-          elsif tag == 'Category'
-            if val == "ALU"
-              k = "alumni"
-            elsif val == "ATH"
-              k = "athletics"
-            elsif val == "CAM"
-              k = "campus"
-            elsif val == "CLA"
-              k = "classroom"
-            elsif val == "COM"
-              k = "community outreach"
-            elsif val == "EXPERIENTIAL LEARNING"
-              k = val.downcase
-            elsif val == "HEA"
-              k = "headshots"
-            elsif val == "POR"
-              k = "portraits"
-            elsif val == "PRE"
-              k = "president"
-            elsif val == "RES"
-              k = "research"
-            else
-              k = val.downcase
-            end
-            classification = k
-            core_file.mods.classification = classification
-          elsif tag == 'SupplementalCategories'
-            s = ''
-            if val.kind_of?(Array)
-              val.each do |i|
-                if i.kind_of?(String)
-                  s = s + " -- " + i.downcase
-                  s = s.gsub("_", " ")
+          if !tag.nil? && !val.nil?
+            if val.kind_of?(String) or val.kind_of?(Time)
+              val = val
+            elsif val.kind_of?(Integer) or val.kind_of?(Float) or val.kind_of?(Rational) or val.kind_of?(TrueClass) or val.kind_of?(FalseClass)
+              val = String(val)
+            elsif val.kind_of?(Array)
+              val.map! do |i|
+                if i.kind_of?(String) or i.kind_of?(Integer) or val.kind_of?(Float) or val.kind_of?(Time) or val.kind_of?(Rational) or val.kind_of?(TrueClass)
+                  i = String(i)
+                else
+                  create_special_error("#{tag} contains #{val.class.name} data", iptc, core_file, load_report)
+                  return
                 end
               end
-              core_file.mods.classification = "#{classification}#{s}"
             else
-              core_file.mods.classification = "#{classification}#{val}"
+              create_special_error("#{tag} contains #{val.class.name} data", iptc, core_file, load_report)
+              return
             end
-          elsif tag == "By-line"
-            pers = val.split(",")
-            pers = {'first_names'=>[pers[1].strip], 'last_names'=>[pers[0].strip]}
-            core_file.creators = pers
-          elsif tag == 'By-lineTitle'
-            core_file.mods.personal_name.role.role_term = val
-            core_file.mods.personal_name.role.role_term.type = "text"
-          elsif tag == 'Description'
-            core_file.description = val
-          elsif tag == 'Source'
-            core_file.mods.origin_info.publisher = val
-          elsif tag == "DateTimeOriginal"
-            core_file.mods.origin_info.copyright = val.strftime("%F")
-            core_file.date = val.strftime("%F")
-          elsif tag == 'Keywords'
-            if val.kind_of?(Array)
-              core_file.keywords = val.map #(&:to_s)
-            else
-              core_file.keywords = ["#{val}"]
+
+            if val.kind_of?(String) and (val.include? "“" or val.include? "”" or val.include? "‘" or val.include? "’")
+              create_special_error("#{tag} contains invalid smart quotes", iptc, core_file, load_report)
+              return
+            elsif val.kind_of?(String) and (val.include? "—" or val.include? "—")
+              create_special_error("#{tag} contains invalid em dash", iptc, core_file, load_report)
+              return
+            elsif val.kind_of?(String) and (val.include? "…")
+              create_special_error("#{tag} contains invalid ellipsis", iptc, core_file, load_report)
+              return
             end
-          elsif tag == 'City'
-            core_file.mods.origin_info.place.city_term = val
-          elsif tag == 'State'
-            if val == "MA"
-              core_file.mods.origin_info.place.state_term = "mau"
+            if tag == 'Headline'
+              core_file.title = val
+            elsif tag == 'Category'
+              if val == "ALU"
+                k = "alumni"
+              elsif val == "ATH"
+                k = "athletics"
+              elsif val == "CAM"
+                k = "campus"
+              elsif val == "CLA"
+                k = "classroom"
+              elsif val == "COM"
+                k = "community outreach"
+              elsif val == "EXPERIENTIAL LEARNING"
+                k = val.downcase
+              elsif val == "HEA"
+                k = "headshots"
+              elsif val == "POR"
+                k = "portraits"
+              elsif val == "PRE"
+                k = "president"
+              elsif val == "RES"
+                k = "research"
+              else
+                k = val.downcase
+              end
+              classification = k
+              core_file.mods.classification = classification
+            elsif tag == 'SupplementalCategories'
+              s = ''
+              if val.kind_of?(Array)
+                val.each do |i|
+                  if i.kind_of?(String)
+                    s = s + " -- " + i.downcase
+                    s = s.gsub("_", " ")
+                  end
+                end
+                core_file.mods.classification = "#{classification}#{s}"
+              else
+                core_file.mods.classification = "#{classification}#{val}"
+              end
+            elsif tag == "By-line"
+              pers = val.split(",")
+              pers = {'first_names'=>[pers[1].strip], 'last_names'=>[pers[0].strip]}
+              core_file.creators = pers
+            elsif tag == 'By-lineTitle'
+              core_file.mods.personal_name.role.role_term = val
+              core_file.mods.personal_name.role.role_term.type = "text"
+            elsif tag == 'Description'
+              core_file.description = val
+            elsif tag == 'Source'
+              core_file.mods.origin_info.publisher = val
+            elsif tag == "DateTimeOriginal"
+              core_file.mods.origin_info.copyright = val.strftime("%F")
+              core_file.date = val.strftime("%F")
+            elsif tag == 'Keywords'
+              if val.kind_of?(Array)
+                core_file.keywords = val.map #(&:to_s)
+              else
+                core_file.keywords = ["#{val}"]
+              end
+            elsif tag == 'City'
+              core_file.mods.origin_info.place.city_term = val
+            elsif tag == 'State'
+              if val == "MA"
+                core_file.mods.origin_info.place.state_term = "mau"
+              end
             end
           end
           core_file.mods.genre = "photographs"
