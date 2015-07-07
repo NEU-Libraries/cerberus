@@ -17,21 +17,6 @@
 
 
   :javascript
-    // $('.nav-tabs a').click(function (e) {
-    //   e.preventDefault();
-    //   $(this).tab('show');
-    //   var href = $(this).attr("href");
-    //   href = '/admin/files/'+href.substring(1, href.length);
-    //   $.getScript(href).done( function() { fixPagination(); });
-    // });
     $(document).ready(function() {
-      $.getScript('/admin/collections/tombstoned').done( function() { //fixPagination();
-       });
+      $.getScript('/admin/collections/tombstoned').done( function() {});
     });
-    // function fixPagination() {
-    //   $('.pagination a').click( function(e) {
-    //     e.preventDefault();
-    //     var href = $(this).attr('href');
-    //     $.getScript(href).done( function() { fixPagination(); });
-    //   });
-    // }
