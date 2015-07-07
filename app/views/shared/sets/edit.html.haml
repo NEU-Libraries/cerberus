@@ -1,0 +1,31 @@
+%h1.page-header
+  Edit
+  %i
+    = @set.title
+%ul.nav.nav-tabs
+  %li.active
+    %a{ href: "#edit",  data: {toggle: "tab"} }
+      %i.icon-pencil
+      Edit
+  %li
+    %a{ href: "#move", data: {toggle: "tab"}}
+      %i.icon-exchange
+      Move
+  %li
+    %a{ href: "#delete", data: {toggle: "tab"}}
+      %i.icon-trash
+      Delete
+
+.tab-content
+  #edit.tab-pane.active
+    = render partial: "shared/sets/data_form", locals: { set: @set }
+  #move.tab-pane
+    = render partial: "shared/sets/move", locals:  {set: @set }
+  #delete.tab-pane
+    = render partial: "shared/sets/delete", locals:  {set: @set }
+
+:javascript
+  $('.nav-tabs a').click(function (e) {
+    e.preventDefault();
+    $(this).tab('show');
+  });
