@@ -1,13 +1,19 @@
 class TombstoneMailer < ActionMailer::Base
   default from: "notifier@repository.library.northeastern.edu"
 
-  def tombstone_alert(core_file, reason, user)
-    @title = core_file.title || "No title set.  Uh oh!"
-    @pid  = core_file.pid  || "No pid set.  Uh oh!"
+  def tombstone_alert(object, reason, user)
+    @title = object.title || "No title set.  Uh oh!"
+    @pid  = object.pid  || "No pid set.  Uh oh!"
     @reason = reason
     @user= user
+    @type = object.class
+    if @type == Collection
+      @object_url = collection_url(@pid)
+    elsif @type == CoreFile
+      @object_url = core_file_url(@pid)
+    end
     mail(to: pick_receiver,
-         subject: "[cerberus] User Requested Deletion",
+         subject: "[cerberus] User Requested #{@type} Deletion",
          content_type: "text/html")
   end
 

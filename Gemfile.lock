@@ -579,3 +579,6 @@ DEPENDENCIES
   whenever
   will_paginate
   zipruby (~> 0.3.6)
+
+BUNDLED WITH
+   1.10.1

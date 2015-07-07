@@ -93,9 +93,10 @@ class CoreFile < ActiveFedora::Base
       solr_doc["id"] = self.pid
       solr_doc["tombstoned_ssi"] = 'true'
       solr_doc["title_ssi"] = self.title
+      solr_doc["parent_id_tesim"] = self.parent.pid
+      solr_doc["active_fedora_model_ssi"] = self.class
       return solr_doc
     end
-
     super(solr_doc)
 
     #Accounting for Pat's files coming in through the Fedora-direct harvest
@@ -120,8 +121,19 @@ class CoreFile < ActiveFedora::Base
   end
 
   def revive
-    self.properties.tombstoned = ''
-    self.save!
+    if self.properties.parent_id[0]
+      parent = Collection.find(self.properties.parent_id[0])
+    elsif self.parent
+      parent = Collection.find(self.parent.pid)
+    else
+      parent = nil
+    end
+    if parent && parent.tombstoned?
+      return false
+    else
+      self.properties.tombstoned = ''
+      self.save!
+    end
   end
 
   def tombstoned?

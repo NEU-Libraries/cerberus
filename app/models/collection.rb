@@ -35,6 +35,15 @@ class Collection < ActiveFedora::Base
   belongs_to :community_parent, property: :is_member_of, :class_name => "Community"
 
   def to_solr(solr_doc = Hash.new())
+    if self.tombstoned?
+      solr_doc["id"] = self.pid
+      solr_doc["tombstoned_ssi"] = 'true'
+      solr_doc["title_ssi"] = self.title
+      solr_doc["parent_id_tesim"] = self.parent.pid
+      solr_doc["active_fedora_model_ssi"] = self.class
+      return solr_doc
+    end
+
     super(solr_doc)
     solr_doc["type_sim"] = I18n.t("drs.display_labels.#{self.class}.name")
     return solr_doc
@@ -77,6 +86,57 @@ class Collection < ActiveFedora::Base
     end
 
     yield self
+  end
+
+  def tombstone
+    self.properties.tombstoned = 'true'
+    doc = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{self.pid}\"").first)
+    if doc.child_files
+      doc.child_files.each do |child|
+        cf = CoreFile.find(child.pid)
+        cf.tombstone
+      end
+    end
+    if self.child_collections
+      self.child_collections.each do |col_child|
+        col_child.tombstone
+      end
+    end
+    self.save!
+  end
+
+  def revive
+    if self.properties.parent_id[0]
+      parent = Collection.find(self.properties.parent_id[0])
+    elsif self.parent
+      parent = parent
+    else
+      parent = nil
+    end
+    if parent && parent.tombstoned?
+      return false
+    else
+      self.properties.tombstoned = ''
+      self.save!
+      cfs = ActiveFedora::SolrService.query("parent_id_tesim:\"#{self.pid}\"")
+      cfs.each do |cf|
+        if cf['active_fedora_model_ssi'] == 'CoreFile'
+          child = CoreFile.find(cf['id'])
+          child.revive
+        elsif cf['active_fedora_model_ssi'] == 'Collection'
+          col_child = Collection.find(cf['id'])
+          col_child.revive
+        end
+      end
+    end
+  end
+
+  def tombstoned?
+    if self.properties.tombstoned.first.nil? || self.properties.tombstoned.first.empty?
+      return false
+    else
+      return true
+    end
   end
 
   protected

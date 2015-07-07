@@ -90,6 +90,135 @@ describe Collection do
     end
   end
 
+  describe 'tombstone collection' do
+    before(:each) do
+      ActiveFedora::Base.find(:all).each do |file|
+        file.destroy
+      end
+
+      @root = Collection.create(title: "Root")
+      @child_one = Collection.create(title: "Child One", parent: @root)
+      @c1_gf = CoreFile.create(title: "Core File One", parent: @child_one, depositor: "nobody@nobody.com")
+      @child_two = Collection.create(title: "Child Two", parent: @root)
+      @grandchild = Collection.create(title: "Grandchild", parent: @child_two)
+      @great_grandchild = Collection.create(title: "Great Grandchild", parent: @grandchild)
+      @gg_gf = CoreFile.create(title: "GG CF", parent: @great_grandchild, depositor: "nobody@nobody.com")
+      @child_one.tombstone
+      @child_one.save!
+      @solr = @child_one.to_solr
+    end
+
+    it "sets properties.tombstoned to true" do
+      @child_one.properties.tombstoned should = 'true'
+    end
+
+    it "sets solr doc tombstoned_ssi to true" do
+      @solr["tombstoned_ssi"].should == 'true'
+    end
+
+    it "sets tombstoned? to true" do
+      @child_one.tombstoned?.should be true
+    end
+
+    it "tombstones corefile children" do
+      doc =  SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{@child_one.pid}\"").first)
+      doc.child_files.each do |child|
+        child = CoreFile.find("#{child.pid}")
+        child.tombstoned?.should be true
+      end
+    end
+
+    it "tombstones collection children" do
+      @child_two.tombstone
+      @child_two.save!
+      @child_two.child_collections do |col_child|
+        col_child.tombstoned?.should be true
+      end
+    end
+
+    it "tombstones corefile great grandchild" do
+      @child_two.tombstone
+      @child_two.save!
+      gg = CoreFile.find("#{@gg_gf.pid}")
+      gg.tombstoned?.should be true
+    end
+
+    it "tombstones collection great grandchild" do
+      @child_two.tombstone
+      @child_two.save!
+      gg = Collection.find("#{@great_grandchild.pid}")
+      gg.tombstoned?.should be true
+    end
+  end
+
+  describe 'revive collection' do
+    before(:each) do
+      @root = Collection.create(title: "Root")
+      @child_one = Collection.create(title: "Child One", parent: @root)
+      @c1_gf = CoreFile.create(title: "Core File One", parent: @child_one, depositor: "nobody@nobody.com")
+      @child_two = Collection.create(title: "Child Two", parent: @root)
+      @grandchild = Collection.create(title: "Grandchild", parent: @child_two)
+      @great_grandchild = Collection.create(title: "Great Grandchild", parent: @grandchild)
+      @gg_gf = CoreFile.create(title: "GG CF", parent: @great_grandchild, depositor: "nobody@nobody.com")
+      @child_one.tombstone
+      @child_one.save!
+      @solr =  @child_one.to_solr
+    end
+
+    it "sets properties.tombstoned to empty" do
+      @child_one.revive
+      @child_one.properties.tombstoned should = ''
+    end
+
+    it "sets solr doc tombstoned_ssi to empty" do
+      @child_one.revive
+      @child_one.save!
+      @solr = @child_one.to_solr
+      @solr["tombstoned_ssi"].should be nil
+    end
+
+    it "sets tombstoned? to false" do
+      @child_one.revive
+      @child_one.tombstoned?.should be false
+    end
+
+    it "returns false if parent is tombstoned" do
+      @child_two.tombstone
+      @child_two.save!
+      @grandchild.revive.should be false
+    end
+
+    it "revives corefile children" do
+      @child_one.revive
+      doc =  SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{@child_one.pid}\"").first)
+      doc.child_files.each do |child|
+        child = CoreFile.find("#{child.pid}")
+        child.tombstoned?.should be false
+      end
+    end
+
+    it "revives collection children and grandchildren" do
+      @child_two.tombstone
+      @child_two.save!
+      @child_two.revive
+      @child_two.save!
+      @child_two.child_collections do |col_child|
+        col_child.tombstoned?.should be false
+      end
+      gg = Collection.find("#{@great_grandchild.pid}")
+      gg.tombstoned?.should be false
+    end
+
+    it "revives corefile great grandchildren" do
+      @child_two.tombstone
+      @child_two.save!
+      @child_two.revive
+      @child_two.save!
+      gg = CoreFile.find("#{@gg_gf.pid}")
+      gg.tombstoned?.should be false
+    end
+  end
+
   after :all do
     Collection.find(:all).each do |coll|
       coll.destroy
