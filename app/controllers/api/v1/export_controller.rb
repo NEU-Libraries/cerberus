@@ -34,6 +34,7 @@ module Api
 
         self.solr_search_params_logic += [:limit_to_public]
         self.solr_search_params_logic += [:exclude_unwanted_models]
+        self.solr_search_params_logic += [:disable_facet_limit]
 
         # If the pid is a compilation, we need to get the pids and fake the search
         if @set.klass == "Compilation"
@@ -92,6 +93,10 @@ module Api
           solr_parameters[:fq] << "read_access_group_ssim:\"public\""
           solr_parameters[:fq] << "-in_progress_tesim:true OR -incomplete_tesim:true"
           solr_parameters[:fq] << "-embargo_release_date_dtsi:[* TO *]"
+        end
+
+        def disable_facet_limit(solr_parameters, user_parameters)
+          solr_parameters["facet.limit"] = "-1"
         end
 
     end
