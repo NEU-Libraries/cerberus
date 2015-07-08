@@ -82,7 +82,7 @@
 
        <str name="facet">true</str>
        <str name="facet.mincount">1</str>
-       <str name="facet.limit">10</str>
+       <str name="facet.limit">5</str>
        <str name="facet.field">active_fedora_model_ssi</str>
        <str name="facet.field">subject_sim</str>
 
