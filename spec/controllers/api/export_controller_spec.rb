@@ -64,24 +64,31 @@ describe Api::V1::ExportController, :type => :controller do
     end
 
     it "doesn't provide in progress items" do
+      #TODO
     end
 
     it "doesn't provide incomplete items" do
+      #TODO
     end
 
     it "doesn't provide private items" do
+      #TODO
     end
 
     it "only shows public items" do
+      #TODO
     end
 
     it "only shows Core File objects" do
+      #TODO
     end
 
     it "has working pagination" do
+      #TODO
     end
 
     it "works with compilations" do
+      #TODO
     end
   end
 
