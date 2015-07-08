@@ -60,6 +60,7 @@
             );
             if (progress == 100) {
               $(".progress").after("<div class='alert alert-success'>Your file has been uploaded and is now being processed.</div>");
+              spinner = enable_spinner('main-content');
             }
         },
         done: function (e, data) {
@@ -70,7 +71,6 @@
     });
   });
   $('#file').bind('change', function() {
-    over 500MB check
     if (this.files[0].size/ 1024000 > 500) {
       $(this).before('<div class="alert alert-warning">The file you chose is larger than 500MB.</div>');
       $("input[type='submit']").prop("disabled", "true");
