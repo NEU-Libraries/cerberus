@@ -163,6 +163,7 @@ class CatalogController < ApplicationController
     ## Default parameters to send to solr for all search-like requests. See also SolrHelper#solr_search_params
     config.default_solr_params = {
       :qt => "search",
+      "facet.limit" => "-1",
       :rows => 10
     }
 
@@ -179,15 +180,15 @@ class CatalogController < ApplicationController
     #   The ordering of the field names is the order of the display
     # copyright
     # config.add_facet_field solr_name("origin_info_copyright", :facetable), label: "Copyright", limit: 5
-    config.add_facet_field solr_name("creator", :facetable), label: "Creator", limit: 5
-    config.add_facet_field solr_name("creation_year", :facetable), label: "Year", limit: 5
-    config.add_facet_field solr_name("drs_department", :symbol), label: "Department", limit: 5
-    config.add_facet_field solr_name("drs_degree", :symbol), label: "Degree Level", limit: 5
-    config.add_facet_field solr_name("drs_course_number", :symbol), label: "Course Number", limit: 5
-    config.add_facet_field solr_name("drs_course_title", :symbol), label: "Course Title", limit: 5
-    config.add_facet_field solr_name("subject", :facetable), label: "Subject", limit: 5
-    config.add_facet_field solr_name("type", :facetable), label: "Type", limit: 5
-    config.add_facet_field solr_name("community_name", :symbol), label: "Community", limit: 5
+    config.add_facet_field solr_name("creator", :facetable), label: "Creator", limit: true
+    config.add_facet_field solr_name("creation_year", :facetable), label: "Year", limit: true
+    config.add_facet_field solr_name("drs_department", :symbol), label: "Department", limit: true
+    config.add_facet_field solr_name("drs_degree", :symbol), label: "Degree Level", limit: true
+    config.add_facet_field solr_name("drs_course_number", :symbol), label: "Course Number", limit: true
+    config.add_facet_field solr_name("drs_course_title", :symbol), label: "Course Title", limit: true
+    config.add_facet_field solr_name("subject", :facetable), label: "Subject", limit: true
+    config.add_facet_field solr_name("type", :facetable), label: "Type", limit: true
+    config.add_facet_field solr_name("community_name", :symbol), label: "Community", limit: true
 
     # Have BL send all facet field names to Solr, which has been the default
     # previously. Simply remove these lines if you'd rather use Solr request
