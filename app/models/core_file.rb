@@ -10,6 +10,7 @@ class CoreFile < ActiveFedora::Base
   include Cerberus::CoreFile::Export
   include Cerberus::CoreFile::AssignType
   include Cerberus::CoreFile::Validation
+  include Cerberus::CoreFile::ExtractValues
 
   include Cerberus::Rights::MassPermissions
   include Cerberus::Rights::Embargoable
@@ -97,6 +98,7 @@ class CoreFile < ActiveFedora::Base
       solr_doc["active_fedora_model_ssi"] = self.class
       return solr_doc
     end
+
     super(solr_doc)
 
     #Accounting for Pat's files coming in through the Fedora-direct harvest
@@ -220,6 +222,10 @@ class CoreFile < ActiveFedora::Base
 
   def incomplete?
     return ! self.in_progress.empty?
+  end
+
+  def in_progress?
+    return ! self.properties.in_progress.empty?
   end
 
   def propagate_metadata_changes!
