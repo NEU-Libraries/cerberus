@@ -5,6 +5,7 @@ describe Api::V1::ExportController, :type => :controller do
   before(:all) do
     @root = Collection.create(title: "Root", mass_permissions: "public")
     @other_collection = Collection.create(title: "Other collection", mass_permissions: "public")
+    @private_collection = Collection.create(title: "Other collection", mass_permissions: "private")
     @child_one = Collection.create(title: "Child One", parent: @root, mass_permissions: "public")
     @c1_gf = CoreFile.create(title: "Core File One", parent: @child_one, depositor: "0", mass_permissions: "public")
     @c2_gf = CoreFile.create(title: "Core File Two", parent: @child_one, depositor: "0", mass_permissions: "public")
@@ -24,12 +25,20 @@ describe Api::V1::ExportController, :type => :controller do
       get :get_files, :id => ""
       response.body.should == @expected
     end
-    
+
     it "gives an error if the ID class isn't a Collection or Compilation" do
       @expected = {
         :error  => "ID must match either a Collection or a Set"
       }.to_json
       get :get_files, :id => @c1_gf.pid
+      response.body.should == @expected
+    end
+
+    it "gives an error if the starting ID is for an obj that isn't public" do
+      @expected = {
+        :error  => "ID must be for a public item"
+      }.to_json
+      get :get_files, :id => @private_collection.pid
       response.body.should == @expected
     end
 
@@ -73,7 +82,6 @@ describe Api::V1::ExportController, :type => :controller do
     end
 
     it "works with compilations" do
-      #TODO - implement
     end
   end
 
