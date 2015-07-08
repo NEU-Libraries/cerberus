@@ -3,7 +3,7 @@
         :limit => facet_limit_for(solr_field))
       %>
 <li class="dropdown-submenu">
-  <a tabindex="-1"><%=facet_field.label%><%=facet_limit_for(solr_field)%></a>
+  <a tabindex="-1"><%=facet_field.label%></a>
   <ul class="dropdown-menu">
   <!-- Fixes #647 - Bit of a kludge - FacetPaginator doesn't seem to care about :sort... -->
   <% if facet_field.label == "Year" then paginator.items.sort_by!{|x| x.value.to_i}.reverse! end %>
