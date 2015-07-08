@@ -1,6 +1,7 @@
 FactoryGirl.define do
   factory :core_file, class: CoreFile do
     sequence(:title) { |n| "Core File #{n}" }
+    sequence(:mass_permissions) { 'public' }
 
     trait :deposited_by_bill do
       depositor "000000001"
@@ -15,6 +16,24 @@ FactoryGirl.define do
     trait :complete do
       before(:create) do |file|
         file.tag_as_completed
+      end
+    end
+
+    trait :in_progress do
+      before(:create) do |file|
+        file.tag_as_in_progress
+      end
+    end
+
+    trait :private_permissions do
+      before(:create) do |file|
+        file.mass_permissions = 'private'
+      end
+    end
+
+    trait :embargoed do
+      before(:create) do |file|
+        file.embargo_release_date = Date.tomorrow
       end
     end
 
@@ -68,6 +87,23 @@ FactoryGirl.define do
     factory :bills_incomplete_file do
       deposited_by_bill
       incomplete
+    end
+
+    factory :bills_in_progress_file do
+      deposited_by_bill
+      in_progress
+    end
+
+    factory :bills_private_file do
+      deposited_by_bill
+      complete
+      private_permissions
+    end
+
+    factory :bills_embargoed_file do
+      deposited_by_bill
+      complete
+      embargoed
     end
   end
 end

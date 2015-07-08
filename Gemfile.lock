@@ -10,8 +10,8 @@ GIT
 
 GIT
   remote: https://github.com/NEU-Libraries/mods_display.git
-  revision: af03004e2d31cac406a25364b28d2379d5b4e448
-  ref: af03004e2d31cac406a25364b28d2379d5b4e448
+  revision: 5773cb38ba4fa5d191c047179dfcffe1214f5e4d
+  ref: 5773cb38ba4fa5d191c047179dfcffe1214f5e4d
   specs:
     mods_display (0.3.3)
       i18n
@@ -280,7 +280,7 @@ GEM
     mime-types (1.25.1)
     mini_exiftool (2.5.0)
     mini_portile (0.6.0)
-    mods (0.0.23)
+    mods (2.0.2)
       iso-639
       nokogiri
       nom-xml
@@ -467,7 +467,7 @@ GEM
       rack (~> 1.0)
       tilt (~> 1.1, != 1.3.0)
     sqlite3 (1.3.8)
-    stanford-mods (1.0.3)
+    stanford-mods (1.1.2)
       mods
     stomp (1.3.4)
     tdiff (0.3.3)
@@ -542,6 +542,7 @@ DEPENDENCIES
   lograge
   mailboxer (~> 0.11.0)
   mini_exiftool
+  mods (= 2.0.2)
   mods_display!
   multi_json (~> 1.7.9)
   mysql2
