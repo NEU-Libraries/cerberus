@@ -101,6 +101,14 @@ module Cerberus
       private
 
         def find_parent(hash)
+          if !hash[:id].blank?
+            begin
+              doc = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first)
+              return SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{doc.parent}\"").first)
+            rescue NoMethodError
+              raise Exceptions::NoParentFoundError
+            end
+          end
           hash.each do |k, v|
             parent  = ((k == :parent) || (k == "parent"))
             coll_id = ((k == :collection_id) || (k == "collection_id"))
