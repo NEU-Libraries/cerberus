@@ -163,6 +163,7 @@ class CatalogController < ApplicationController
     ## Default parameters to send to solr for all search-like requests. See also SolrHelper#solr_search_params
     config.default_solr_params = {
       :qt => "search",
+      "facet.limit" => "5",
       :rows => 10
     }
 
