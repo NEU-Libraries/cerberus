@@ -154,6 +154,10 @@ task :reset_data => :environment do
   matt.email = "m.modoono@neu.edu"
   matt.save!
 
+  joey = User.create(:password => "password", :password_confirmation => "password", full_name:"Heinen, Joey", nuid:"001670214")
+  joey.email = "j.heinen@neu.edu"
+  joey.save!
+
   eli = User.create(:password => "password", :password_confirmation => "password", full_name:"Zoller, Eli Scott", nuid:"001790966")
   eli.email = "e.zoller@neu.edu"
   eli.role = "admin"
@@ -168,27 +172,32 @@ task :reset_data => :environment do
   pat.add_group("northeastern:drs:repository:loaders:marcom")
   brooks.add_group("northeastern:drs:repository:loaders:marcom")
   matt.add_group("northeastern:drs:repository:loaders:marcom")
+  joey.add_group("northeastern:drs:repository:loaders:marcom")
   eli.add_group("northeastern:drs:repository:loaders:marcom")
   david.add_group("northeastern:drs:repository:loaders:marcom")
 
   sarah.add_group("northeastern:drs:repository:loaders:coe")
   pat.add_group("northeastern:drs:repository:loaders:coe")
+  joey.add_group("northeastern:drs:repository:loaders:coe")
   eli.add_group("northeastern:drs:repository:loaders:coe")
   david.add_group("northeastern:drs:repository:loaders:coe")
 
   sarah.add_group("northeastern:drs:repository:loaders:cps")
   pat.add_group("northeastern:drs:repository:loaders:cps")
+  joey.add_group("northeastern:drs:repository:loaders:cps")
   eli.add_group("northeastern:drs:repository:loaders:cps")
   david.add_group("northeastern:drs:repository:loaders:cps")
 
   sarah.add_group("northeastern:drs:repository:staff")
   pat.add_group("northeastern:drs:repository:staff")
+  joey.add_group("northeastern:drs:repository:staff")
   eli.add_group("northeastern:drs:repository:staff")
   david.add_group("northeastern:drs:repository:staff")
 
 
   sarah.add_group("northeastern:drs:staff")
   pat.add_group("northeastern:drs:staff")
+  joey.add_group("northeastern:drs:staff")
   eli.add_group("northeastern:drs:staff")
   david.add_group("northeastern:drs:staff")
   matt.add_group("northeastern:drs:staff")
@@ -197,6 +206,7 @@ task :reset_data => :environment do
   Cerberus::Application::Queue.push(EmployeeCreateJob.new(sarah.nuid, sarah.full_name))
   Cerberus::Application::Queue.push(EmployeeCreateJob.new(pat.nuid, pat.full_name))
   Cerberus::Application::Queue.push(EmployeeCreateJob.new(brooks.nuid, brooks.full_name))
+  Cerberus::Application::Queue.push(EmployeeCreateJob.new(joey.nuid, joey.full_name))
   Cerberus::Application::Queue.push(EmployeeCreateJob.new(eli.nuid, eli.full_name))
   Cerberus::Application::Queue.push(EmployeeCreateJob.new(david.nuid, david.full_name))
 
