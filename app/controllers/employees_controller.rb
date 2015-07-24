@@ -117,7 +117,7 @@ class EmployeesController < ApplicationController
           q = q + ' OR loader_name = "' + loader + '"'
         end
       end
-      @loads = Loaders::LoadReport.where(q).paginate(:page => params[:page], :per_page => 10)
+      @loads = Loaders::LoadReport.where(q).order('created_at DESC').paginate(:page => params[:page], :per_page => 10)
       if session[:flash_error]
         flash[:error] = session[:flash_error]
         session[:flash_error] = nil
