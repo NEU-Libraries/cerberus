@@ -5,7 +5,6 @@
   %th Time of Upload
   %th Total Files
   %th
-  - @loads = @loads.sort_by{|l| l.created_at}.reverse
   - @loads.each do |loader|
     %tr
       %td
