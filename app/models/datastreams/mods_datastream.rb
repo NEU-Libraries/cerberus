@@ -93,6 +93,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
     }
     t.identifier(path: 'identifier', namespace_prefix: 'mods', index_as: [:stored_searchable]){
       t.type(path: { attribute: 'type'})
+      t.display_label(path: {attribute: 'displayLabel'})
     }
 
     t.access_condition(path: 'accessCondition', namespace_prefix: 'mods') {
