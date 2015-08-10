@@ -202,7 +202,7 @@ describe ModsDatastream do
     end
 
     it "creates a tesim field for all role entries" do
-      mods.personal_name = ["", ""]
+      mods.assign_creator_personal_names(["John", "Joe"], ["Smith", "Adams"])
       mods.personal_name(0).role = "Author"
       mods.personal_name(1).role = "Editor"
 
