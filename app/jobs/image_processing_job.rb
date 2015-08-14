@@ -155,6 +155,15 @@ class ImageProcessingJob
           core_file.mods.access_condition.type = "use and reproduction"
         end
 
+        if core_file.title.blank?
+          create_special_error("Missing title (IPTC Headline)", iptc, core_file, load_report)
+          return
+        end
+        if core_file.keywords.blank?
+          create_special_error("Missing keyword", iptc, core_file, load_report)
+          return
+        end
+
         # Featured Content tagging
         sc_type = core_file.parent.smart_collection_type
 
