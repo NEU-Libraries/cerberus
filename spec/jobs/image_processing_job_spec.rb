@@ -1,129 +1,191 @@
 require 'spec_helper'
-describe ImageProcessingJob do
-    before(:all) do
-      # set file path to marcom.jpeg (copy it to tmp dir first)
-      # set parent pid to marcom collection
-      # set copyright to string
-      # create factory load_report
-      # run image processing job ImageProcessingJob.new(fpath, parent, copyright, load_report.id).run
-      # do we need to get the core_file that the job creates here so it can be passed in to all the tests?
+include HandleHelper
+
+describe ImageProcessingJob, unless: $in_travis do
+  def context(o_path)
+    @collection = FactoryGirl.create(:root_collection)
+    @file_name = File.basename(o_path)
+    FileUtils.cp(o_path, "#{Rails.root}/tmp/#{@file_name}")
+    @uniq_hsh = Digest::MD5.hexdigest("#{File.basename(o_path)}")[0,2]
+    File.rename("#{Rails.root}/tmp/#{@file_name}", "#{Rails.root}/tmp/#{Time.now.to_i.to_s}-#{@uniq_hsh}") # Names file time and hash string
+    @fpath = "#{Rails.root}/tmp/#{Time.now.to_i.to_s}-#{@uniq_hsh}"
+    @parent = @collection.pid
+    @copyright = "Test Copyright Statement"
+    @user = FactoryGirl.create(:user)
+    @loader_name = "Marketing and Communications"
+    @report_id = Loaders::LoadReport.create_from_strings(@user, 0, @loader_name, @parent)
+    @load_report = Loaders::LoadReport.find(@report_id)
+    @permissions = {"edit" => ["northeastern:drs:repository:staff"]}
+    ImageProcessingJob.new(@fpath, @file_name, @parent, @copyright, @load_report.id, @permissions).run
+    @images = Loaders::ImageReport.where(load_report_id:"#{@report_id}").find_all
+  end
+
+  def clear_context
+    @core_file.destroy if @core_file
+    @load_report.destroy if @load_report
+  end
+
+
+  describe "Image creation" do
+
+    context "correct file included" do
+      before(:all) {
+        context("#{Rails.root}/spec/fixtures/files/marcom.jpeg")
+        @core_file = CoreFile.find("#{@images.first.pid}")
+       }
+      after(:all)  { clear_context }
+
+      it 'creates core file' do
+        @core_file.should == CoreFile.find("#{@images.first.pid}")
+      end
+
+      it 'sets core_file.depositor to 000000000' do
+        @core_file.depositor.should == '000000000'
+      end
+
+      it 'sets correct parent' do
+        @core_file.parent.should == Collection.find("#{@parent}") #for marcom collection
+      end
+
+      it 'be tagged as in_progress' do
+        @core_file.in_progress_for_user?(@user)
+      end
+
+      it 'sets original_filename to basename of file in tmp dir' do
+        @core_file.original_filename.should == 'marcom.jpeg'
+        #check for replacement of spaces and parens in file name?
+      end
+
+      it 'sets title to iptc headline' do
+        @core_file.title.should == "Blizzard Juno"
+      end
+
+      it 'sets mods classification to iptc category + supp category' do
+        @core_file.mods.classification.should == ["campus life -- students -- cargill hall"]
+      end
+
+      it 'sets mods personal name and role to iptc byline' do
+        @core_file.creators.should == ["Maria Amasanti"]
+        @core_file.mods.personal_name.role.role_term.should == ["Photographer"]
+      end
+
+      it 'sets description to iptc description' do
+        @core_file.description.should == "January 27, 2015 - A Northeastern University student fights the wind during a blizzard. "
+      end
+
+      it 'sets publisher to iptc source' do
+        @core_file.mods.origin_info.publisher.should == ["Northeastern University"]
+      end
+
+      it 'sets date and copyright date to iptc date time original' do
+        @core_file.mods.origin_info.copyright.should == ["2015-01-27"]
+        @core_file.date.should == "2015-01-27"
+      end
+
+      it 'sets keywords to iptc keywords' do
+        @core_file.keywords.should == ["blizzard", "juno", "campus", "campus life"]
+      end
+
+      it 'sets city to iptc city' do
+        @core_file.mods.origin_info.place.city_term.should == ["Boston"]
+      end
+
+      it 'sets state to iptc state' do
+        @core_file.mods.origin_info.place.state_term.should == ["mau"]
+      end
+
+      it 'sets static values' do
+        @core_file.mods.genre.should == ["photographs"]
+        @core_file.mods.genre.authority.should == ["aat"]
+        @core_file.mods.physical_description.digital_origin.should == ["born digital"]
+        @core_file.mods.physical_description.form.should == ["electronic"]
+        @core_file.mods.physical_description.form.authority.should == ["marcform"]
+        @core_file.mods.physical_description.extent.should == ["1 photograph"]
+        @core_file.mods.access_condition.should == ["Test Copyright Statement"]
+        @core_file.mods.access_condition.type.should == ["use and reproduction"]
+      end
+
+      it 'creates success report' do
+        @images.count.should == 1
+      end
+
+      it 'creates handle' do
+        @core_file.identifier.should == retrieve_handle(@core_file.persistent_url)
+        @core_file.mods.identifier.type.should == ["handle"]
+        @core_file.mods.identifier.display_label.should == ["Permanent URL"]
+      end
+
+      it 'removes tmp file' do
+        File.exist?("#{Rails.root}/tmp/#{Time.now.to_i.to_s}-#{@uniq_hsh}").should be false
+      end
+
+      it 'creates success report' do
+        @images.first.validity.should be true
+      end
     end
 
-    it 'creates core file' do
-      # should create core file
-    end
-
-    it 'sets core_file.depositor to 000000000' do
-      #core_file.depositor should == '000000000'
-    end
-
-    it 'sets correct parent' do
-      #core_file.parent should == parent pid for marcom collection
-      #core_file.properties.parent should == parent pid from marcom collection
-    end
-
-    it 'be tagged as in_progress' do
-      #core_file should be_in_progress
-    end
-
-    it 'sets tmp_path as path to file in tmp dir' do
-      #core_file.tmp_path should == 'tmp/marcom.jpeg'
-      #check for replacement of spaces and parens in file name?
-    end
-
-    it 'sets original_filename to basename of file in tmp dir' do
-      #core_file.original_filename should == 'marcom.jpeg'
-      #check for replacement of spaces and parens in file name?
-    end
-
-    #for iptc values would we just hard code the values we know they should be from the fixture file?
-    it 'sets title to iptc headline' do
-      #core_file.title should == "Blizzard Juno"
-    end
-
-    it 'sets mods classification to iptc category + supp category' do
-      #core_file.mods.classification should == "campus life -- students -- cargill hall"
-    end
-
-    it 'sets mods personal name and role to iptc byline' do
-      #core_file.creators should == "[Maria Amasanti]"
-      #core_file.mods.personal_name.role.role_term should == Photographer
-    end
-
-    it 'sets description to iptc description' do
-      #core_file.description should == "January 27, 2015 - A Northeastern University student fights the wind during a blizzard."
-    end
-
-    it 'sets publisher to iptc source' do
-      #core_file.mods.origin_info.publisher should == ["Northeastern University"]
-    end
-
-    it 'sets date and copyright date to iptc date time original' do
-      # core_file.mods.origin_info.copyright should == ["2015-01-27"]
-      # core_file.date should == "2015-01-27"
-    end
-
-    it 'sets keywords to iptc keywords' do
-      # core_file.keywords should == ["blizzard", "juno", "campus", "campus life"]
-    end
-
-    it 'sets city to iptc city' do
-      #core_file.mods.origin_info.place.city_term should == "Boston"
-    end
-
-    it 'sets state to iptc state' do
-      #core_file.mods.origin_info.place.state_term should == "mau"
-    end
-
-    it 'sets static values' do
-      # core_file.mods.genre should == "photographs"
-      # core_file.mods.physical_description.digital_origin should == "born digital"
-      # core_file.mods.physical_description.extent should == "1 photograph"
-      # core_file.mods.access_condition should == copyright string
-    end
-
-    it 'creates success report' do
-      #Loaders::ImageReport.find_all(validity = ?, true).count should == 1
-    end
-
-    it 'creates handle' do
-      # core_file.identifier should == make_handle(core_file.persistent_url)
-    end
-
-    it 'removes tmp file' do
-      #file should not exist as tmp/marcom.jpeg
-    end
-
-    # THIS SECTION WOULD CHECK FOR THE ERROR REPORTS BEING CREATE - not sure how to set up to keep from repeating tests with different files being passed in
-    #context not ImageMasterFile
-      #pass in a different file like word doc
+    shared_examples_for "failed uploads" do
       it 'creates error report if not ImageMasterFile' do
-        #Loaders::ImageReport.find_all(validity = ?, false).count should == 1
+        @images.count.should == 1
+        @images.first.validity.should be false
       end
-      it 'destroy core_file' do
-        #created core_file should raise ActiveFedora::ObjectNotFound
+
+      it 'should have empty pid value' do
+        @images.first.pid.should be nil
       end
-    #end context
 
-    #context not JPEG
-      #pass in a different image file like tif
-      #same tests as not ImageMasterFile
-    #end context
-
-    #context JPEG w/ non-ascii chars in iptc
-      #pass in a bad jpeg w/ smart quotes or emdash or ellipsis char
-      #same tests as not ImageMasterFile
-    #end context
-
-    #context JPEG w/ incorrect class object in iptc
-      #pass in bad jpeg w/ weird value in iptc like ruby object?
-      #same tests as not ImageMasterFile
-    #end context
-
-    after(:all) do
-      # clears out load reports and image reports
-      # deletes core_file
+      it 'should not create core_file' do
+        expect { CoreFile.find("#{@images.first.pid}").to raise_error ActiveFedora::ObjectNotFoundError }
+      end
     end
 
+    context "not image file" do
+      before(:all) {
+        context("#{Rails.root}/spec/fixtures/files/test_doc.doc")
+      }
+      after(:all)  { clear_context }
+      it_should_behave_like "failed uploads"
+    end #end context
+
+    context "missing title" do
+      before(:all) {
+        context("#{Rails.root}/spec/fixtures/files/marcom_no_title.jpg")
+      }
+      after(:all)  { clear_context }
+
+      it "should return no title error" do
+        @images.first.exception.should == "Missing title (IPTC Headline)"
+      end
+
+      it_should_behave_like "failed uploads"
+    end
+
+    context "missing keyword" do
+      before(:all) {
+        context("#{Rails.root}/spec/fixtures/files/marcom_no_keyword.jpg")
+      }
+      after(:all)  { clear_context }
+
+      it "should return no keyword error" do
+        @images.first.exception.should == "Missing keyword"
+      end
+
+      it_should_behave_like "failed uploads"
+    end
+
+    context "bad iptc" do
+      before(:all) {
+        context("#{Rails.root}/spec/fixtures/files/marcom_bad_iptc.jpg")
+      }
+      after(:all)  { clear_context }
+
+      it "should return bad iptc error" do
+        @images.first.exception.should == "ImageDescription contains invalid smart quotes"
+      end
+
+      it_should_behave_like "failed uploads"
+    end
+
+  end
 
 end
