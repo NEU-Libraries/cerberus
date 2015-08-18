@@ -16,8 +16,8 @@
     %legend Basic Information
 %fieldset.row-fluid
   .span6
-    = f.hidden_field(:non_sort)
-    = f.hidden_field(:title, name: 'core_file[title][]')
+    = f.hidden_field(:non_sort, :value => "#{@core_file.non_sort}")
+    = f.hidden_field(:title, :value => "#{@core_file.title}", name: 'core_file[title][]')
     = f.label :title, "Title", class: "required-label"
     - if !@title.nil?
       = text_field_tag :full_title, @title.split(".")[0], required: true, pattern: ".*\\S.*", class: "input-block-level", placeholder: "US Congressman poses with a supporter"
