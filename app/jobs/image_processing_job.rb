@@ -160,7 +160,7 @@ class ImageProcessingJob
           return
         end
         if core_file.keywords.blank?
-          create_special_error("Missing keyword", iptc, core_file, load_report)
+          create_special_error("Missing keyword(s)", iptc, core_file, load_report)
           return
         end
 
