@@ -387,6 +387,9 @@ class ModsDatastream < ActiveFedora::OmDatastream
   # Takes two arrays of equal length and turns them into correctly formatted
   # mods_personal_name nodes.
   def assign_creator_personal_names(first_names, last_names)
+
+    # Check if names have changed - if not, we do nothing to avoid muddling hand-made MODS XML
+
     if first_names.length != last_names.length
       raise "#{first_names.length} first names received and #{last_names.length} last names received, which won't do at all."
     end
@@ -457,10 +460,30 @@ class ModsDatastream < ActiveFedora::OmDatastream
 
   # Formats the otherwise messy return for personal creator information
   def personal_creators
+    
+    result_array = []
+    first_names = []
+    last_names = []
+
+    (0..self.mods.personal_name.length).each do |i|
+      fn = self.personal_name(i).name_part_given
+      ln = self.personal_name(i).name_part_family
+      full_name = self.personal_name(i).name_part
+
+      if !full_name.blank? && full_name.first.length > 0 && fn.blank? && ln.blank?
+        name_array = Namae.parse full_name.first
+        name_obj = name_array[0]
+        if !name_obj.nil? && !name_obj.given.blank? && !name_obj.family.blank?
+          first_names << name_obj.given
+          last_names << name_obj.family
+        end
+      end
+    end
+
     result_array = []
 
-    first_names = self.personal_name.name_part_given
-    last_names = self.personal_name.name_part_family
+    first_names.concat self.personal_name.name_part_given
+    last_names.concat self.personal_name.name_part_family
 
     names = first_names.zip(last_names)
 
