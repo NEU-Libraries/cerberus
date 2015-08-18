@@ -46,16 +46,16 @@ module Cerberus
       end
 
       def title
-        if_mods_exists { return self.mods.title.first }
+        if_mods_exists { return self.mods.title }
         if_DC_exists { return self.DC.nu_title.first }
       end
 
       def non_sort=(string)
-        if_mods_exists { self.mods.title_info.non_sort = string }
+        if_mods_exists { self.mods.non_sort = string }
       end
 
       def non_sort
-        if_mods_exists { return self.mods.title_info.non_sort.first }
+        if_mods_exists { return self.mods.non_sort }
       end
 
       def dc_type=(string)
