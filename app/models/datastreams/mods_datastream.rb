@@ -14,12 +14,20 @@ class ModsDatastream < ActiveFedora::OmDatastream
            'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
            'xsi:schemaLocation' => 'http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd',
            'xmlns:niec' => 'http://repository.neu.edu/schema/niec')
-    t.title_info(path: 'titleInfo', namespace_prefix: 'mods'){
+    t.title_info(path: 'mods/mods:titleInfo', namespace_prefix: 'mods'){
       t.title(path: 'title', namespace_prefix: 'mods', index_as: [:stored_searchable, stored_sortable])
       t.non_sort(path: 'nonSort', namespace_prefix: 'mods', index_as: [:stored_searchable])
       t.sub_title(path: 'subTitle', namespace_prefix: 'mods', index_as: [:stored_searchable])
       t.part_name(path: 'partName', namespace_prefix: 'mods', index_as: [:stored_searchable])
       t.part_number(path: 'partNumber', namespace_prefix: 'mods', index_as: [:stored_searchable])
+    }
+
+    t.other_titles(path: 'titleInfo', namespace_prefix: 'mods'){
+      t.title(path: 'title', namespace_prefix: 'mods')
+      t.non_sort(path: 'nonSort', namespace_prefix: 'mods')
+      t.sub_title(path: 'subTitle', namespace_prefix: 'mods')
+      t.part_name(path: 'partName', namespace_prefix: 'mods')
+      t.part_number(path: 'partNumber', namespace_prefix: 'mods')
     }
 
     t.abstract(path: 'abstract', namespace_prefix: 'mods', index_as: [:stored_searchable])
@@ -161,6 +169,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
     }
 
     t.title(proxy: [:title_info, :title])
+    t.non_sort(proxy: [:title_info, :non_sort])
     t.category(ref: [:extension, :scholarly_object, :category])
     t.department(ref: [:extension, :scholarly_object, :department])
     t.degree(ref: [:extension, :scholarly_object, :degree])
@@ -202,12 +211,11 @@ class ModsDatastream < ActiveFedora::OmDatastream
     # Over and over and around we go, patching up this junk forever and ever
     solr_doc["title_info_title_ssi"] = kramdown_parse(self.title_info.title.first)
     solr_doc["title_info_title_tesim"] = kramdown_parse(self.title_info.title.first)
-    solr_doc["title_info_0_title_ssi"] = kramdown_parse(self.title_info.title.first)
-    solr_doc["title_info_0_title_tesim"] = kramdown_parse(self.title_info.title.first)
     solr_doc["title_tesim"] = kramdown_parse(self.title_info.title.first)
 
     # Kramdown parse for search purposes - #439
-    solr_doc["title_ssi"] = kramdown_parse(self.title_info.title.first)
+    # title_ssi will only be used for sorting - #766
+    solr_doc["title_ssi"] = kramdown_parse(self.title_info.title.first).downcase
 
     # Sortable for date
     solr_doc["date_ssi"] = self.date.first
