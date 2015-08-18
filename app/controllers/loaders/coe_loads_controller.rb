@@ -7,6 +7,10 @@ class Loaders::CoeLoadsController < ApplicationController
   before_filter :authenticate_user!
   before_filter :verify_group
 
+  rescue_from ActiveRecord::RecordNotFound do |exception|
+    render_404(ActiveRecord::RecordNotFound.new) and return
+  end
+
   def new
     @parent = Collection.find("neu:5m60qz05t")
     @collections_options = Array.new
@@ -128,6 +132,7 @@ class Loaders::CoeLoadsController < ApplicationController
   private
 
     def verify_group
+      redirect_to new_user_session_path if current_user.nil?
       redirect_to root_path unless current_user.coe_loader?
     end
 end
