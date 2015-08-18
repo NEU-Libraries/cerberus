@@ -248,7 +248,7 @@ class CoreFilesController < ApplicationController
 
   def edit
     @core_file = CoreFile.find(params[:id])
-    @core_file.extract_names
+    # @core_file.extract_names
     @page_title = "Edit #{@core_file.title}"
   end
 

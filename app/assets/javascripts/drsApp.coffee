@@ -48,7 +48,6 @@ $(document).ready ->
       multiModalToggle()
       triggerCompilationDownload()
       triggerCartDownload()
-      parseTitle()
       groupPermissionDisplayWhenPrivate()
       handleGroupPermissionAdd()
       handleGroupPermissionRemoval()
@@ -116,7 +115,12 @@ $(document).ready ->
     parseTitle = ->
 
       if $("#full_title").length > 0
-        nonSort = ''
+
+        if $('#full_title').val().toLowerCase().trim().indexOf($('#core_file_non_sort').val().toLowerCase() + " ") == -1
+          $("#core_file_non_sort").val ""
+          $("#core_file_title").val $("#full_title").val().trim()
+
+        nonSort = $("#core_file_non_sort").val()
         fullTitleLowerCase = $('#full_title').val().toLowerCase()
         fullTitle = $('#full_title').val()
 
