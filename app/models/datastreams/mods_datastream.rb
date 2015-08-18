@@ -324,6 +324,22 @@ class ModsDatastream < ActiveFedora::OmDatastream
     builder.doc
   end
 
+  def title=(string)
+
+  end
+
+  def title
+
+  end
+
+  def non_sort=(string)
+
+  end
+
+  def non_sort
+    
+  end
+
   # Consolidating all date options for the edit form
   def date
     if self.origin_info.date_created.any? && !self.origin_info.date_created.first.blank?
