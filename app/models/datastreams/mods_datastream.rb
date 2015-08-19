@@ -389,6 +389,32 @@ class ModsDatastream < ActiveFedora::OmDatastream
   def assign_creator_personal_names(first_names, last_names)
 
     # Check if names have changed - if not, we do nothing to avoid muddling hand-made MODS XML
+    existing_names = self.personal_creators
+    existing_first_names = []
+    existing_last_names = []
+    changed = false
+
+    existing_names.each do |hsh|
+      hsh.each do |key, val|
+        if key == :first
+          existing_first_names << val
+        elsif key == :last
+          existing_last_names << val
+        end
+      end
+    end
+
+    if existing_first_names != first_names
+      changed = true
+    end
+    if existing_last_names != last_names
+      changed = true
+    end
+
+    if !changed
+      # No changes, so let's not unnecessarily muddle hand made MODS
+      return
+    end
 
     if first_names.length != last_names.length
       raise "#{first_names.length} first names received and #{last_names.length} last names received, which won't do at all."
@@ -411,6 +437,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
 
         self.personal_name(index).name_part_given = first_name
         self.personal_name(index).name_part_family = last_name
+        self.personal_name(index).name_part = ""
       end
 
       # Set usage attribute to primary
@@ -460,7 +487,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
 
   # Formats the otherwise messy return for personal creator information
   def personal_creators
-    
+
     result_array = []
     first_names = []
     last_names = []
