@@ -172,7 +172,7 @@ class CoreFilesController < ApplicationController
     end
 
     @thumbs = @core_file.thumbnail_list
-    @page_title = @core_file.title
+    @page_title = "#{@core_file.non_sort} #{@core_file.title}"
 
     log_action("view", "COMPLETE")
 
