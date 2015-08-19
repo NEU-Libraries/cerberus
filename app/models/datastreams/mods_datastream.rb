@@ -211,7 +211,11 @@ class ModsDatastream < ActiveFedora::OmDatastream
     # Over and over and around we go, patching up this junk forever and ever
     solr_doc["title_info_title_ssi"] = kramdown_parse(self.title_info.title.first)
     solr_doc["title_info_title_tesim"] = kramdown_parse(self.title_info.title.first)
-    solr_doc["title_tesim"] = kramdown_parse(self.title_info.title.first)
+
+    # Make sure all titles and non_sorts end up in title_tesim
+    total_title_array = self.other_titles.non_sort.concat self.other_titles.title
+    solr_doc["title_tesim"] = total_title_array.map! {|item| kramdown_parse(item)}
+    # solr_doc["title_tesim"] = kramdown_parse(self.title_info.title.first)
 
     # Kramdown parse for search purposes - #439
     # title_ssi will only be used for sorting - #766
