@@ -143,7 +143,7 @@ describe ModsDatastream do
       mods.title_info.title = "Test Title"
 
       result["title_ssi"].should == "test title"
-      result["title_tesim"].should == "Test Title"
+      result["title_tesim"].should == ["Test Title"]
     end
 
     it "Gives back tesim fields for all role entries" do
