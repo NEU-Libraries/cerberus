@@ -4,7 +4,7 @@
   .drs-item-details
     %header
       %h4.drs-item-title
-        = metadata.title
+        = "#{metadata.non_sort} #{metadata.title}"
         %small= "(#{content.get_content_label})"
     .addtional-details
       .drs-item-add-details
@@ -33,4 +33,3 @@
       %menu.btn-toolbar(type="toolbar")
         %a{ href: "#removeFromCartModal", title: "Remove from #{t('drs.shoppingcarts.name')}", data: { toggle: "modal", delete_path: shopping_cart_path(delete: content.pid)}, :class => ["btn", "btn-danger", "btn-small", "cart-multi-modal"] }
           remove
-
