@@ -38,7 +38,7 @@ class Collection < ActiveFedora::Base
     if self.tombstoned?
       solr_doc["id"] = self.pid
       solr_doc["tombstoned_ssi"] = 'true'
-      solr_doc["title_ssi"] = self.title
+      solr_doc["title_info_title_ssi"] = self.title
       solr_doc["parent_id_tesim"] = self.parent.pid
       solr_doc["active_fedora_model_ssi"] = self.class
       return solr_doc
