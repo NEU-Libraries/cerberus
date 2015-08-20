@@ -93,7 +93,7 @@ class CoreFile < ActiveFedora::Base
     if self.tombstoned?
       solr_doc["id"] = self.pid
       solr_doc["tombstoned_ssi"] = 'true'
-      solr_doc["title_ssi"] = self.title
+      solr_doc["title_info_title_ssi"] = self.title
       solr_doc["parent_id_tesim"] = self.parent.pid
       solr_doc["active_fedora_model_ssi"] = self.class
       return solr_doc
@@ -292,26 +292,6 @@ class CoreFile < ActiveFedora::Base
     self.DC.creator = nil
     self.DC.assign_creators(fns, lns, cns)
     self.save!
-  end
-
-  def extract_names
-    (0..self.mods.personal_name.length).each do |i|
-      fn = self.mods.personal_name(i).name_part_given
-      ln = self.mods.personal_name(i).name_part_family
-      full_name = self.mods.personal_name(i).name_part
-
-      if !full_name.blank? && full_name.first.length > 0
-        name_array = Namae.parse full_name.first
-        name_obj = name_array[0]
-        if !name_obj.nil? && !name_obj.given.blank? && !name_obj.family.blank?
-          self.mods.personal_name(i).name_part_given = name_obj.given
-          self.mods.personal_name(i).name_part_family = name_obj.family
-          self.mods.personal_name(i).name_part = ""
-
-          self.save!
-        end
-      end
-    end
   end
 
   private

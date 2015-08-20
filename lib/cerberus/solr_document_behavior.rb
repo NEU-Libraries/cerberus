@@ -215,7 +215,7 @@ module Cerberus
       if self.klass == "Employee"
         title_str = Array(self[Solrizer.solr_name("employee_name", :stored_searchable, type: :text)]).first
       else
-        title_str = Array(self[Solrizer.solr_name("title", :stored_sortable)]).first
+        title_str = Array(self[Solrizer.solr_name("title_info_title", :stored_sortable)]).first
       end
     end
 
