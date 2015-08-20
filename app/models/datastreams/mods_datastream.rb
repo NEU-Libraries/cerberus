@@ -14,12 +14,20 @@ class ModsDatastream < ActiveFedora::OmDatastream
            'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
            'xsi:schemaLocation' => 'http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd',
            'xmlns:niec' => 'http://repository.neu.edu/schema/niec')
-    t.title_info(path: 'titleInfo', namespace_prefix: 'mods'){
+    t.title_info(path: 'mods/mods:titleInfo', namespace_prefix: 'mods'){
       t.title(path: 'title', namespace_prefix: 'mods', index_as: [:stored_searchable, stored_sortable])
       t.non_sort(path: 'nonSort', namespace_prefix: 'mods', index_as: [:stored_searchable])
       t.sub_title(path: 'subTitle', namespace_prefix: 'mods', index_as: [:stored_searchable])
       t.part_name(path: 'partName', namespace_prefix: 'mods', index_as: [:stored_searchable])
       t.part_number(path: 'partNumber', namespace_prefix: 'mods', index_as: [:stored_searchable])
+    }
+
+    t.other_titles(path: 'titleInfo', namespace_prefix: 'mods'){
+      t.title(path: 'title', namespace_prefix: 'mods')
+      t.non_sort(path: 'nonSort', namespace_prefix: 'mods')
+      t.sub_title(path: 'subTitle', namespace_prefix: 'mods')
+      t.part_name(path: 'partName', namespace_prefix: 'mods')
+      t.part_number(path: 'partNumber', namespace_prefix: 'mods')
     }
 
     t.abstract(path: 'abstract', namespace_prefix: 'mods', index_as: [:stored_searchable])
@@ -161,6 +169,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
     }
 
     t.title(proxy: [:title_info, :title])
+    t.non_sort(proxy: [:title_info, :non_sort])
     t.category(ref: [:extension, :scholarly_object, :category])
     t.department(ref: [:extension, :scholarly_object, :department])
     t.degree(ref: [:extension, :scholarly_object, :degree])
@@ -202,12 +211,15 @@ class ModsDatastream < ActiveFedora::OmDatastream
     # Over and over and around we go, patching up this junk forever and ever
     solr_doc["title_info_title_ssi"] = kramdown_parse(self.title_info.title.first)
     solr_doc["title_info_title_tesim"] = kramdown_parse(self.title_info.title.first)
-    solr_doc["title_info_0_title_ssi"] = kramdown_parse(self.title_info.title.first)
-    solr_doc["title_info_0_title_tesim"] = kramdown_parse(self.title_info.title.first)
-    solr_doc["title_tesim"] = kramdown_parse(self.title_info.title.first)
+
+    # Make sure all titles and non_sorts end up in title_tesim
+    total_title_array = self.other_titles.non_sort.concat self.other_titles.title
+    solr_doc["title_tesim"] = total_title_array.map! {|item| kramdown_parse(item)}
+    # solr_doc["title_tesim"] = kramdown_parse(self.title_info.title.first)
 
     # Kramdown parse for search purposes - #439
-    solr_doc["title_ssi"] = kramdown_parse(self.title_info.title.first)
+    # title_ssi will only be used for sorting - #766
+    solr_doc["title_ssi"] = kramdown_parse(self.title_info.title.first).downcase
 
     # Sortable for date
     solr_doc["date_ssi"] = self.date.first
@@ -379,6 +391,35 @@ class ModsDatastream < ActiveFedora::OmDatastream
   # Takes two arrays of equal length and turns them into correctly formatted
   # mods_personal_name nodes.
   def assign_creator_personal_names(first_names, last_names)
+
+    # Check if names have changed - if not, we do nothing to avoid muddling hand-made MODS XML
+    existing_names = self.personal_creators
+    existing_first_names = []
+    existing_last_names = []
+    changed = false
+
+    existing_names.each do |hsh|
+      hsh.each do |key, val|
+        if key == :first
+          existing_first_names << val
+        elsif key == :last
+          existing_last_names << val
+        end
+      end
+    end
+
+    if existing_first_names != first_names
+      changed = true
+    end
+    if existing_last_names != last_names
+      changed = true
+    end
+
+    if !changed
+      # No changes, so let's not unnecessarily muddle hand made MODS
+      return
+    end
+
     if first_names.length != last_names.length
       raise "#{first_names.length} first names received and #{last_names.length} last names received, which won't do at all."
     end
@@ -400,6 +441,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
 
         self.personal_name(index).name_part_given = first_name
         self.personal_name(index).name_part_family = last_name
+        self.personal_name(index).name_part = ""
       end
 
       # Set usage attribute to primary
@@ -449,10 +491,30 @@ class ModsDatastream < ActiveFedora::OmDatastream
 
   # Formats the otherwise messy return for personal creator information
   def personal_creators
+
+    result_array = []
+    first_names = []
+    last_names = []
+
+    (0..self.mods.personal_name.length).each do |i|
+      fn = self.personal_name(i).name_part_given
+      ln = self.personal_name(i).name_part_family
+      full_name = self.personal_name(i).name_part
+
+      if !full_name.blank? && full_name.first.length > 0 && fn.blank? && ln.blank?
+        name_array = Namae.parse full_name.first
+        name_obj = name_array[0]
+        if !name_obj.nil? && !name_obj.given.blank? && !name_obj.family.blank?
+          first_names << name_obj.given
+          last_names << name_obj.family
+        end
+      end
+    end
+
     result_array = []
 
-    first_names = self.personal_name.name_part_given
-    last_names = self.personal_name.name_part_family
+    first_names.concat self.personal_name.name_part_given
+    last_names.concat self.personal_name.name_part_family
 
     names = first_names.zip(last_names)
 

@@ -142,8 +142,8 @@ describe ModsDatastream do
     it "Gives back ssi and tesim fields for the title entry" do
       mods.title_info.title = "Test Title"
 
-      result["title_ssi"].should == "Test Title"
-      result["title_tesim"].should == "Test Title"
+      result["title_ssi"].should == "test title"
+      result["title_tesim"].should == ["Test Title"]
     end
 
     it "Gives back tesim fields for all role entries" do
