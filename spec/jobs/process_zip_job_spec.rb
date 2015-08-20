@@ -1,8 +1,8 @@
 require 'spec_helper'
-include HandleHelper
 
 describe ProcessZipJob, unless: $in_travis do
     before(:all) do
+      ActionMailer::Base.deliveries = []
       @loader_name = "College of Engineering"
       tempdir = Rails.root.join("tmp")
       @uniq_hsh = Digest::MD5.hexdigest("#{Rails.root}/spec/fixtures/files/jpgs.zip")[0,2]
@@ -38,6 +38,11 @@ describe ProcessZipJob, unless: $in_travis do
       lr.number_of_files.should == 2
       lr.success_count.should == 2
       lr.fail_count.should == 0
+    end
+
+    it 'sends email correctly' do
+      expect(ActionMailer::Base.deliveries.length).to eq 1
+      expect(ActionMailer::Base.deliveries.first.subject).to eq "[DRS] Load Complete"
     end
 
     after(:all) do
