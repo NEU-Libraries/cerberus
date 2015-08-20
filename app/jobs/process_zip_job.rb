@@ -19,11 +19,6 @@ class ProcessZipJob
     load_report = Loaders::LoadReport.find(report_id)
     # unzip zip file to tmp storage
     unzip(zip_path, load_report)
-    # for each file in new dir
-      # start a new image_processing_job like...
-      # result = ImageProcessingJob.new().run
-      # result will be an image_report
-    # when all images are processed, create a load_report
   end
 
   def unzip(file, load_report)
