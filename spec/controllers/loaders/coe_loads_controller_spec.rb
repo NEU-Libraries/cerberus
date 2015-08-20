@@ -3,17 +3,14 @@ require 'spec_helper'
 describe Loaders::CoeLoadsController do
   let(:bill) { FactoryGirl.create(:bill) }
   let(:coe_loader) { FactoryGirl.create(:coe_loader) }
-  # let(:@coe_col) { FactoryGirl.create(:@coe_col) }
+
   before :each do
     sign_in coe_loader
     @coe_col = Collection.create(pid: 'neu:5m60qz05t', title: 'COE Coll')
     @report_id = Loaders::LoadReport.create_from_strings(coe_loader, 0, "College of Engineering", @coe_col.pid)
 
   end
-  # let(:coe_comm) { FactoryGirl.create(:coe_comm) }
-  # create fake collection
-  # create load report
-  # create image reports - one success, one error
+
   describe "GET #new" do
     it "redirects authed user not coe_loader" do
       sign_in bill
@@ -30,8 +27,7 @@ describe Loaders::CoeLoadsController do
     it "renders coe new if authed and coe_loader" do
       get :new
       expect(response).to render_template('loaders/new')
-      # should have correct page title
-      # #should have correct array of child collections
+      #should check for correct values in select
     end
   end
 
@@ -106,7 +102,9 @@ describe Loaders::CoeLoadsController do
     end
 
     it "creates load report on creation" do
-      #post :create, {parent: @coe_col.id, file: "#{Rails.root}/spec/fixtures/files/marcom.jpg"}
+      # post :create, {parent: @coe_col.id, file: "#{Rails.root}/spec/fixtures/files/jpgs.zip"}
+      # raise response.body
+      # expect(response).to render_template("/employees/my_loaders")
       #need to pass a zip in and redirect to my_loaders afterwards
     end
   end
@@ -114,8 +112,12 @@ describe Loaders::CoeLoadsController do
   after :each do
     Loaders::LoadReport.find(@report_id).destroy
     @coe_col.destroy if @coe_col
-    @core_file.destroy if @core_file
-    @image_report.destroy if @image_report
+    CoreFile.all.each do |c|
+      c.destroy
+    end
+    Loaders::ImageReport.all.each do |ir|
+      ir.destroy
+    end
   end
 
 end
