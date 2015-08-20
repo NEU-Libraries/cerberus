@@ -297,7 +297,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
         }
         xml.note('type' => 'citation')
         xml.subject
-        xml.identifier('type' => 'uri')
+        xml.identifier('type' => 'handle', 'displayLabel' => 'Permanent URL')
         xml.typeOfResource
         xml.physicalDescription{
           xml.form
