@@ -13,7 +13,7 @@ describe ProcessZipJob, unless: $in_travis do
       parent = FactoryGirl.create(:root_collection).pid
       copyright = "Copyright statement"
       @user = FactoryGirl.create(:user)
-      permissions = {"edit" => ["northeastern:drs:repository:staff"]}
+      permissions = {"CoreFile" => {"read"  => ["northeastern:drs:all"], "edit" => ["northeastern:drs:repository:staff"]}, "ImageThumbnailFile" => {"read"  => ["northeastern:drs:all"], "edit" => ["northeastern:drs:repository:staff"]}, "ImageSmallFile" => {"read"  => ["northeastern:drs:repository:staff"], "edit" => ["northeastern:drs:repository:staff"]}, "ImageLargeFile" => {"read"  => ["northeastern:drs:repository:staff"], "edit" => ["northeastern:drs:repository:staff"]}, "ImageMasterFile" => {"read"  => ["northeastern:drs:repository:staff"], "edit" => ["northeastern:drs:repository:staff"]}}
       ProcessZipJob.new(@loader_name, new_file.to_s, parent, copyright, @user, permissions).run
     end
 
