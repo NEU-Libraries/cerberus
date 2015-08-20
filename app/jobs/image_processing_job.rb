@@ -1,6 +1,7 @@
 class ImageProcessingJob
   attr_accessor :file, :file_name, :parent, :copyright, :report_id, :permissions
   include MimeHelper
+  include HandleHelper
 
   def queue_name
     :loader_image_processing
