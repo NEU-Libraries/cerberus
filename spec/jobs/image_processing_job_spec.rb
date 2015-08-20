@@ -24,6 +24,10 @@ describe ImageProcessingJob, unless: $in_travis do
   def clear_context
     @core_file.destroy if @core_file
     @load_report.destroy if @load_report
+    @user.destroy if @user
+    Loaders::ImageReport.all.each do |ir|
+      ir.destroy
+    end
   end
 
 
