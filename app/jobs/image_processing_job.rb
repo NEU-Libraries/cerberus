@@ -187,10 +187,22 @@ class ImageProcessingJob
         l = 1400.to_f/size.to_f
         m = 0.to_f/size.to_f
         s = 600.to_f/size.to_f
-        Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename, nil, s, m, l))
-        permissions.each do |perm, values|
-          values.each do |group|
+
+        permissions['CoreFile'].each do |perm, vals|
+          vals.each do |group|
             core_file.rightsMetadata.permissions({group: group}, "#{perm}")
+          end
+        end
+        Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename, nil, s, m, l))
+        core_file.content_objects.each do |c|
+          perms = permissions["#{c.klass}"]
+          perms.each do |perm, vals|
+            vals.each do |group|
+              this_class = Object.const_get("#{c.klass}")
+              this_obj = this_class.find("#{c.pid}")
+              this_obj.rightsMetadata.permissions({group: group}, "#{perm}")
+              this_obj.save!
+            end
           end
         end
 
