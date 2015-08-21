@@ -46,6 +46,11 @@ class CatalogController < ApplicationController
     if !params[:q].nil?
       # Fixes #667 - we remove single characters. They're a pretty terrible idea with a strict AND
       params[:q].gsub!(/(^| ).( |$)/, ' ')
+
+      if params[:sort].blank?
+        # Default sort relevance
+        params[:sort] = "score desc, #{Solrizer.solr_name('system_create', :stored_sortable, type: :date)} desc"
+      end
     end
 
     if !has_search_parameters?
