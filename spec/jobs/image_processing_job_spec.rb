@@ -15,7 +15,6 @@ describe ImageProcessingJob, unless: $in_travis do
     @loader_name = "Marketing and Communications"
     @report_id = Loaders::LoadReport.create_from_strings(@user, 0, @loader_name, @parent)
     @load_report = Loaders::LoadReport.find(@report_id)
-    # @permissions = {"edit" => ["northeastern:drs:repository:staff"]}
     @permissions = {"CoreFile" => {"read"  => ["northeastern:drs:all"], "edit" => ["northeastern:drs:repository:staff"]}, "ImageThumbnailFile" => {"read"  => ["northeastern:drs:all"], "edit" => ["northeastern:drs:repository:staff"]}, "ImageSmallFile" => {"read"  => ["northeastern:drs:repository:staff"], "edit" => ["northeastern:drs:repository:staff"]}, "ImageLargeFile" => {"read"  => ["northeastern:drs:repository:staff"], "edit" => ["northeastern:drs:repository:staff"]}, "ImageMasterFile" => {"read"  => ["northeastern:drs:repository:staff"], "edit" => ["northeastern:drs:repository:staff"]}}
     ImageProcessingJob.new(@fpath, @file_name, @parent, @copyright, @load_report.id, @permissions).run
     @images = Loaders::ImageReport.where(load_report_id:"#{@report_id}").find_all
