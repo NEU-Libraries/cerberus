@@ -132,7 +132,8 @@ task :reset_data => :environment do
   emsa_dept.save!
 
   # Parent collection
-  p_c = Collection.new(mass_permissions: 'public', parent: emsa_dept, pid: 'neu:rx915867k', title: 'Enrollment Marketing and Communications')
+  p_c = Community.new(mass_permissions: 'public', pid: 'neu:rx915867k', title: 'Enrollment Marketing and Communications')
+  p_c.parent = "neu:5m60qx98m"
   p_c.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
   p_c.save!
 
@@ -140,6 +141,10 @@ task :reset_data => :environment do
   p_1 = Collection.create(mass_permissions: 'public', parent: p_c, pid: 'neu:5m60qx99w', title: 'Enrollment Marketing and Communications Media')
   p_1.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
   p_1.save!
+
+  p_2 = Collection.create(mass_permissions: 'public', parent: p_1, pid: 'neu:rx915x94d', title: 'Photographs')
+  p_2.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
+  p_2.save!
 
   root_dept.rightsMetadata.permissions({group: 'public'}, 'read')
   set_edit_permissions(root_dept)
@@ -174,7 +179,7 @@ task :reset_data => :environment do
   joey.email = "j.heinen@neu.edu"
   joey.save!
 
-  julio = User.create(:password => "password", :password_confirmation => "password", full_name:"Heinen, Joey", nuid:"000000111")
+  julio = User.create(:password => "password", :password_confirmation => "password", full_name:"Chuy, Julio", nuid:"000000111")
   julio.email = "j.chuy@neu.edu"
   julio.save!
 
