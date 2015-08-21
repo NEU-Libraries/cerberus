@@ -71,6 +71,11 @@ class CommunitiesController < ApplicationController
       if params[:id] != Rails.application.config.root_community_id
         self.solr_search_params_logic += [:limit_to_scope]
       end
+
+      if params[:sort].blank?
+        # Default sort relevance
+        params[:sort] = "score desc, #{Solrizer.solr_name('system_create', :stored_sortable, type: :date)} desc"
+      end
     else
       self.solr_search_params_logic += [:disable_highlighting]
       self.solr_search_params_logic += [:show_children_only]
