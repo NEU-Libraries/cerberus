@@ -14,7 +14,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
            'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
            'xsi:schemaLocation' => 'http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd',
            'xmlns:niec' => 'http://repository.neu.edu/schema/niec')
-    t.title_info(path: 'mods/mods:titleInfo', namespace_prefix: 'mods', attributes: { usage: 'primary'}){
+    t.title_info(path: 'mods/mods:titleInfo', namespace_prefix: 'mods', attributes: { type: :none }){
       t.title(path: 'title', namespace_prefix: 'mods', index_as: [:stored_searchable, stored_sortable])
       t.non_sort(path: 'nonSort', namespace_prefix: 'mods', index_as: [:stored_searchable])
       t.sub_title(path: 'subTitle', namespace_prefix: 'mods', index_as: [:stored_searchable])
