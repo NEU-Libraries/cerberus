@@ -138,6 +138,11 @@ class CollectionsController < ApplicationController
 
     if !params[:q].nil?
       self.solr_search_params_logic += [:limit_to_scope]
+
+      if params[:sort].blank?
+        # Default sort relevance
+        params[:sort] = "score desc, #{Solrizer.solr_name('system_create', :stored_sortable, type: :date)} desc"
+      end
     else
       self.solr_search_params_logic += [:disable_highlighting]
       self.solr_search_params_logic += [:show_children_only]
