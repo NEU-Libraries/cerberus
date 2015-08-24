@@ -125,6 +125,27 @@ task :reset_data => :environment do
   p_2.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
   p_2.save!
 
+  # Add EMSA structure for loader testing
+  emsa_dept = Community.new(mass_permissions: 'public', pid: 'neu:5m60qx98m', title: 'Enrollment Management and Student Affairs')
+  emsa_dept.parent = "neu:1"
+  emsa_dept.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
+  emsa_dept.save!
+
+  # Parent collection
+  p_c = Community.new(mass_permissions: 'public', pid: 'neu:rx915867k', title: 'Enrollment Marketing and Communications')
+  p_c.parent = "neu:5m60qx98m"
+  p_c.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
+  p_c.save!
+
+  # EMSA children Collections
+  p_1 = Collection.create(mass_permissions: 'public', parent: p_c, pid: 'neu:5m60qx99w', title: 'Enrollment Marketing and Communications Media')
+  p_1.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
+  p_1.save!
+
+  p_2 = Collection.create(mass_permissions: 'public', parent: p_1, pid: 'neu:rx915x94d', title: 'Photographs')
+  p_2.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
+  p_2.save!
+
   root_dept.rightsMetadata.permissions({group: 'public'}, 'read')
   set_edit_permissions(root_dept)
 
@@ -134,7 +155,7 @@ task :reset_data => :environment do
   tmp_user.view_pref = "list"
   tmp_user.save!
 
-  # Add David, Eli Pat Sarah and Brooks
+  # Add David, Eli Pat Sarah Joey Julio and Brooks
 
   sarah = User.create(:password => "password", :password_confirmation => "password", full_name:"Sweeney, Sarah Jean", nuid:"001126975")
   sarah.email = "sj.sweeney@neu.edu"
@@ -157,6 +178,10 @@ task :reset_data => :environment do
   joey = User.create(:password => "password", :password_confirmation => "password", full_name:"Heinen, Joey", nuid:"001670214")
   joey.email = "j.heinen@neu.edu"
   joey.save!
+
+  julio = User.create(:password => "password", :password_confirmation => "password", full_name:"Chuy, Julio", nuid:"000000111")
+  julio.email = "j.chuy@neu.edu"
+  julio.save!
 
   eli = User.create(:password => "password", :password_confirmation => "password", full_name:"Zoller, Eli Scott", nuid:"001790966")
   eli.email = "e.zoller@neu.edu"
@@ -188,6 +213,13 @@ task :reset_data => :environment do
   eli.add_group("northeastern:drs:repository:loaders:cps")
   david.add_group("northeastern:drs:repository:loaders:cps")
 
+  sarah.add_group("northeastern:drs:repository:loaders:emsa_emc")
+  pat.add_group("northeastern:drs:repository:loaders:emsa_emc")
+  joey.add_group("northeastern:drs:repository:loaders:emsa_emc")
+  eli.add_group("northeastern:drs:repository:loaders:emsa_emc")
+  david.add_group("northeastern:drs:repository:loaders:emsa_emc")
+  julio.add_group("northeastern:drs:repository:loaders:emsa_emc")
+
   sarah.add_group("northeastern:drs:repository:staff")
   pat.add_group("northeastern:drs:repository:staff")
   joey.add_group("northeastern:drs:repository:staff")
@@ -207,6 +239,7 @@ task :reset_data => :environment do
   Cerberus::Application::Queue.push(EmployeeCreateJob.new(pat.nuid, pat.full_name))
   Cerberus::Application::Queue.push(EmployeeCreateJob.new(brooks.nuid, brooks.full_name))
   Cerberus::Application::Queue.push(EmployeeCreateJob.new(joey.nuid, joey.full_name))
+  Cerberus::Application::Queue.push(EmployeeCreateJob.new(julio.nuid, julio.full_name))
   Cerberus::Application::Queue.push(EmployeeCreateJob.new(eli.nuid, eli.full_name))
   Cerberus::Application::Queue.push(EmployeeCreateJob.new(david.nuid, david.full_name))
 
