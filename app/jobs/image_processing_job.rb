@@ -21,9 +21,10 @@ class ImageProcessingJob
     # if theres an exception, log details to image_report
     require 'fileutils'
     require 'mini_exiftool'
-    MiniExiftool.command = '/opt/exiftool/exiftool'
     if !ENV['TRAVIS'].nil? && ENV['TRAVIS'] == 'true'
       MiniExiftool.command = '/usr/bin/exiftool/exiftool'
+    else
+      MiniExiftool.command = '/opt/exiftool/exiftool'
     end
     job_id = "#{Time.now.to_i}-loader-image"
     FileUtils.mkdir_p "#{Rails.root}/log/#{job_id}"
