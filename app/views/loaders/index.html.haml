@@ -25,3 +25,5 @@
           = link_to("View Report", loaders_coe_report_path(loader.id), class: "btn btn-small btn-success")
         - elsif loader.loader_name == t('drs.loaders.cps.long_name')
           = link_to("View Report", loaders_cps_report_path(loader.id), class: "btn btn-small btn-success")
+        - elsif loader.loader_name == t('drs.loaders.emsa.long_name')
+          = link_to("View Report", loaders_emsa_report_path(loader.id), class: "btn btn-small btn-success")
