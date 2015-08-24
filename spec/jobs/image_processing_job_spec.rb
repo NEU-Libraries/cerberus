@@ -15,7 +15,7 @@ describe ImageProcessingJob, unless: $in_travis do
     @loader_name = "Marketing and Communications"
     @report_id = Loaders::LoadReport.create_from_strings(@user, 0, @loader_name, @parent)
     @load_report = Loaders::LoadReport.find(@report_id)
-    @permissions = {"edit" => ["northeastern:drs:repository:staff"]}
+    @permissions = {"CoreFile" => {"read"  => ["northeastern:drs:all"], "edit" => ["northeastern:drs:repository:staff"]}, "ImageThumbnailFile" => {"read"  => ["northeastern:drs:all"], "edit" => ["northeastern:drs:repository:staff"]}, "ImageSmallFile" => {"read"  => ["northeastern:drs:repository:staff"], "edit" => ["northeastern:drs:repository:staff"]}, "ImageLargeFile" => {"read"  => ["northeastern:drs:repository:staff"], "edit" => ["northeastern:drs:repository:staff"]}, "ImageMasterFile" => {"read"  => ["northeastern:drs:repository:staff"], "edit" => ["northeastern:drs:repository:staff"]}}
     ImageProcessingJob.new(@fpath, @file_name, @parent, @copyright, @load_report.id, @permissions).run
     @images = Loaders::ImageReport.where(load_report_id:"#{@report_id}").find_all
   end
@@ -23,6 +23,10 @@ describe ImageProcessingJob, unless: $in_travis do
   def clear_context
     @core_file.destroy if @core_file
     @load_report.destroy if @load_report
+    @user.destroy if @user
+    Loaders::ImageReport.all.each do |ir|
+      ir.destroy
+    end
   end
 
 
@@ -122,6 +126,22 @@ describe ImageProcessingJob, unless: $in_travis do
       it 'creates success report' do
         @images.first.validity.should be true
       end
+
+      it 'sets correct permissions for core_files' do
+        @core_file.permissions.should == [{:type=>"group", :access=>"read", :name=>"northeastern:drs:all"}, {:type=>"group", :access=>"edit", :name=>"northeastern:drs:repository:staff"}, {:type=>"user", :access=>"edit", :name=>"000000000"}]
+      end
+
+      it 'sets correct permissions for content_objects' do
+        @core_file.content_objects.each do |c|
+          this_class = Object.const_get("#{c.klass}")
+          this_obj = this_class.find("#{c.pid}")
+          if c.klass == 'ImageThumbnailFile'
+            this_obj.permissions.should == [{:type=>"group", :access=>"read", :name=>"northeastern:drs:all"}, {:type=>"group", :access=>"edit", :name=>"northeastern:drs:repository:staff"}, {:type=>"user", :access=>"edit", :name=>"000000000"}]
+          else
+            this_obj.permissions.should == [{:type=>"group", :access=>"read", :name=>"northeastern:drs:repository:staff"}, {:type=>"group", :access=>"edit", :name=>"northeastern:drs:repository:staff"}, {:type=>"user", :access=>"edit", :name=>"000000000"}]
+          end
+        end
+      end
     end
 
     shared_examples_for "failed uploads" do
@@ -167,7 +187,7 @@ describe ImageProcessingJob, unless: $in_travis do
       after(:all)  { clear_context }
 
       it "should return no keyword error" do
-        @images.first.exception.should == "Missing keyword"
+        @images.first.exception.should == "Missing keyword(s)"
       end
 
       it_should_behave_like "failed uploads"
