@@ -39,6 +39,10 @@
         = link_to(t('drs.loaders.cps.long_name'), loaders_cps_path, class: "btn btn-lg btn-primary")
         %br
         %br
+      - if current_user.emsa_loader?
+        = link_to(t('drs.loaders.emsa.long_name'), loaders_emsa_path, class: "btn btn-lg btn-primary")
+        %br
+        %br
 
   %article.span8
     %h3 Past Loads
