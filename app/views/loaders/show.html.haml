@@ -64,3 +64,5 @@
               = link_to("View IPTC", loaders_coe_iptc_path(image.id), class:"btn btn-small btn-warning")
             - elsif @report.loader_name == t('drs.loaders.cps.long_name')
               = link_to("View IPTC", loaders_cps_iptc_path(image.id), class:"btn btn-small btn-warning")
+            - elsif @report.loader_name == t('drs.loaders.emsa.long_name')
+              = link_to("View IPTC", loaders_emsa_iptc_path(image.id), class:"btn btn-small btn-warning")

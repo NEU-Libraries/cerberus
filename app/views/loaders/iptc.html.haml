@@ -10,6 +10,8 @@
       - path = loaders_coe_report_path(@load.id)
     - elsif @load.loader_name == t('drs.loaders.cps.long_name')
       - path = loaders_cps_report_path(@load.id)
+    - elsif @load.loader_name == t('drs.loaders.emsa.long_name')
+      - path = loaders_emsa_report_path(@load.id)
     = link_to "#{@load.loader_name} Load into #{collection.title}", path
   %li.active
     = image.original_file
