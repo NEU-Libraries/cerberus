@@ -24,6 +24,7 @@ class ImageProcessingJob
     MiniExiftool.command = '/opt/exiftool/exiftool'
     if !ENV['TRAVIS'].nil? && ENV['TRAVIS'] == 'true'
       MiniExiftool.command = '/usr/bin/exiftool/exiftool'
+    end
     job_id = "#{Time.now.to_i}-loader-image"
     FileUtils.mkdir_p "#{Rails.root}/log/#{job_id}"
     failed_pids_log = Logger.new("#{Rails.root}/log/#{job_id}/loader-image-process-job.log")
