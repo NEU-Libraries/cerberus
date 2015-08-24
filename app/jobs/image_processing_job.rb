@@ -22,7 +22,7 @@ class ImageProcessingJob
     require 'fileutils'
     require 'mini_exiftool'
     if !ENV['TRAVIS'].nil? && ENV['TRAVIS'] == 'true'
-      # MiniExiftool.command = '/usr/bin/exiftool/exiftool'
+      MiniExiftool.command = '/usr/bin/exiftool'
     else
       MiniExiftool.command = '/opt/exiftool/exiftool'
     end
