@@ -6,7 +6,6 @@ before_install:
   - sudo apt-get install redis-server
   - sudo apt-get install libreoffice-common
   - sudo apt-get install clamav clamav-freshclam libclamav-dev libclamav6
-  # - sudo apt-get install libimage-exiftool-perl
 rvm:
   - 2.1
 before_script:
@@ -14,6 +13,8 @@ before_script:
   - "sudo freshclam"
 cache: bundler
 script: "bundle exec rake ci:build"
+after_script:
+  - sudo find / -name exiftool
 notifications:
   slack: neu-lts:urFXFxLoFDSvKEFdBMYDpy6v
   email:
