@@ -1,7 +1,7 @@
 require 'spec_helper'
 include HandleHelper
 
-describe ImageProcessingJob, unless: $in_travis do
+describe ImageProcessingJob do
   def context(o_path)
     @collection = FactoryGirl.create(:root_collection)
     @file_name = File.basename(o_path)

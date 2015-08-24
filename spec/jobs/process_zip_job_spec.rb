@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe ProcessZipJob, unless: $in_travis do
+describe ProcessZipJob do
     before(:all) do
       ActionMailer::Base.deliveries = []
       @loader_name = "College of Engineering"
