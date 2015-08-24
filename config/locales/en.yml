@@ -202,5 +202,9 @@ en:
         long_name: "College of Professional Studies"
         short_name: "cps"
         copyright: ""
+      emsa:
+        long_name: "Enrollment Management and Student Affairs"
+        short_name: "emsa"
+        copyright: "Enrollment Marketing and Communications images are for use only within the context of Northeastern University. Appropriate uses include: Northeastern University-related websites, Northeastern University-based print/web publications and for speaking appearances when acting as a representative of Northeastern University. Images should be credited: \"(Insert Photographer's Name)/Northeastern University.\" Images are not to be used for self-promotional purposes outside of Northeastern University or in commercial/external publications such as advertisements, books or magazines without written permission from Northeastern Enrollment Marketing and Communications. Full size downloads are restricted to Enrollment Management and Student Affairs staff. For more information, please email Enrollment Marketing and Communications at Gnphotorequest@neu.edu."
   blacklight:
     application_name: "DRS"
