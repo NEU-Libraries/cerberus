@@ -1,6 +1,7 @@
 class ImageProcessingJob
   attr_accessor :file, :file_name, :parent, :copyright, :report_id, :permissions
   include MimeHelper
+  include HandleHelper
 
   def queue_name
     :loader_image_processing
@@ -20,7 +21,11 @@ class ImageProcessingJob
     # if theres an exception, log details to image_report
     require 'fileutils'
     require 'mini_exiftool'
-    MiniExiftool.command = '/opt/exiftool/exiftool'
+    if !ENV['TRAVIS'].nil? && ENV['TRAVIS'] == 'true'
+      MiniExiftool.command = '/usr/bin/exiftool/exiftool'
+    else
+      MiniExiftool.command = '/opt/exiftool/exiftool'
+    end
     job_id = "#{Time.now.to_i}-loader-image"
     FileUtils.mkdir_p "#{Rails.root}/log/#{job_id}"
     failed_pids_log = Logger.new("#{Rails.root}/log/#{job_id}/loader-image-process-job.log")
@@ -160,7 +165,7 @@ class ImageProcessingJob
           return
         end
         if core_file.keywords.blank?
-          create_special_error("Missing keyword", iptc, core_file, load_report)
+          create_special_error("Missing keyword(s)", iptc, core_file, load_report)
           return
         end
 
@@ -187,10 +192,22 @@ class ImageProcessingJob
         l = 1400.to_f/size.to_f
         m = 0.to_f/size.to_f
         s = 600.to_f/size.to_f
-        Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename, nil, s, m, l))
-        permissions.each do |perm, values|
-          values.each do |group|
+
+        permissions['CoreFile'].each do |perm, vals|
+          vals.each do |group|
             core_file.rightsMetadata.permissions({group: group}, "#{perm}")
+          end
+        end
+        Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename, nil, s, m, l))
+        core_file.content_objects.each do |c|
+          perms = permissions["#{c.klass}"]
+          perms.each do |perm, vals|
+            vals.each do |group|
+              this_class = Object.const_get("#{c.klass}")
+              this_obj = this_class.find("#{c.pid}")
+              this_obj.rightsMetadata.permissions({group: group}, "#{perm}")
+              this_obj.save!
+            end
           end
         end
 

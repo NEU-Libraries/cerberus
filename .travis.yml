@@ -13,6 +13,8 @@ before_script:
   - "sudo freshclam"
 cache: bundler
 script: "bundle exec rake ci:build"
+after_script:
+  - sudo find / -name exiftool
 notifications:
   slack: neu-lts:urFXFxLoFDSvKEFdBMYDpy6v
   email:
