@@ -1,9 +1,14 @@
 require "spec_helper"
+ENV["HANDLE_HOST"] = "localhost"
+ENV["HANDLE_USERNAME"] = "root"
+ENV["HANDLE_PASSWORD"] = ""
+ENV["HANDLE_DATABASE"] = "handles_test"
 describe LoaderMailer do
 
   describe "load_alert" do
     before :each do
-      #FactoryGirl.create_list(:marcom_load)
+      `mysql -u "#{ENV["HANDLE_USERNAME"]}" < "#{Rails.root}"/spec/fixtures/files/handlesTEST.sql`
+      @client = Mysql2::Client.new(:host => "#{ENV["HANDLE_HOST"]}", :username => "#{ENV["HANDLE_USERNAME"]}", :password => "#{ENV["HANDLE_PASSWORD"]}", :database => "#{ENV["HANDLE_DATABASE"]}")
       @loader_name = "College of Engineering"
       tempdir = Rails.root.join("tmp")
       @uniq_hsh = Digest::MD5.hexdigest("#{Rails.root}/spec/fixtures/files/jpgs.zip")[0,2]
@@ -23,6 +28,18 @@ describe LoaderMailer do
     it "should have a subject with a correct subject" do
       expect(ActionMailer::Base.deliveries.length).to eq 1
       expect(ActionMailer::Base.deliveries.first.subject).to eq "[DRS] Load Complete"
+    end
+
+    after :each do
+      @client.query("TRUNCATE TABLE handles_test.handles;")
+      @user.destroy if @user
+      Loaders::LoadReport.all.each do |lr|
+        lr.destroy
+      end
+      Loaders::ImageReport.all.each do |ir|
+        ir.destroy
+      end
+      CoreFile.all.map { |x| x.destroy }
     end
 
   end
