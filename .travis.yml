@@ -7,8 +7,7 @@ before_install:
   - sudo apt-get install libreoffice-common
   - sudo apt-get install clamav clamav-freshclam libclamav-dev libclamav6
   - sudo apt-get install libimage-exiftool-perl
-  - sudo find / -name exiftool
-  #- sudo mv x /opt/exiftool
+  - sudo ls -s /usr/bin/exifool /opt/exiftool
 rvm:
   - 2.1
 before_script:
