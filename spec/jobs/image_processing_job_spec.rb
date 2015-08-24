@@ -1,8 +1,14 @@
 require 'spec_helper'
 include HandleHelper
+ENV["HANDLE_HOST"] = "localhost"
+ENV["HANDLE_USERNAME"] = "root"
+ENV["HANDLE_PASSWORD"] = ""
+ENV["HANDLE_DATABASE"] = "handles_test"
 
-describe ImageProcessingJob, unless: $in_travis do
+describe ImageProcessingJob do
   def context(o_path)
+    `mysql -u "#{ENV["HANDLE_USERNAME"]}" < "#{Rails.root}"/spec/fixtures/files/handlesTEST.sql`
+    @client = Mysql2::Client.new(:host => "#{ENV["HANDLE_HOST"]}", :username => "#{ENV["HANDLE_USERNAME"]}", :password => "#{ENV["HANDLE_PASSWORD"]}", :database => "#{ENV["HANDLE_DATABASE"]}")
     @collection = FactoryGirl.create(:root_collection)
     @file_name = File.basename(o_path)
     FileUtils.cp(o_path, "#{Rails.root}/tmp/#{@file_name}")
@@ -21,7 +27,8 @@ describe ImageProcessingJob, unless: $in_travis do
   end
 
   def clear_context
-    @core_file.destroy if @core_file
+    @client.query("TRUNCATE TABLE handles_test.handles;")
+    CoreFile.all.map { |x| x.destroy }
     @load_report.destroy if @load_report
     @user.destroy if @user
     Loaders::ImageReport.all.each do |ir|
@@ -35,70 +42,84 @@ describe ImageProcessingJob, unless: $in_travis do
     context "correct file included" do
       before(:all) {
         context("#{Rails.root}/spec/fixtures/files/marcom.jpeg")
-        @core_file = CoreFile.find("#{@images.first.pid}")
        }
       after(:all)  { clear_context }
 
       it 'creates core file' do
+        @core_file = CoreFile.find("#{@images.first.pid}")
         @core_file.should == CoreFile.find("#{@images.first.pid}")
       end
 
       it 'sets core_file.depositor to 000000000' do
+        @core_file = CoreFile.find("#{@images.first.pid}")
         @core_file.depositor.should == '000000000'
       end
 
       it 'sets correct parent' do
+        @core_file = CoreFile.find("#{@images.first.pid}")
         @core_file.parent.should == Collection.find("#{@parent}") #for marcom collection
       end
 
       it 'be tagged as in_progress' do
+        @core_file = CoreFile.find("#{@images.first.pid}")
         @core_file.in_progress_for_user?(@user)
       end
 
       it 'sets original_filename to basename of file in tmp dir' do
+        @core_file = CoreFile.find("#{@images.first.pid}")
         @core_file.original_filename.should == 'marcom.jpeg'
         #check for replacement of spaces and parens in file name?
       end
 
       it 'sets title to iptc headline' do
+        @core_file = CoreFile.find("#{@images.first.pid}")
         @core_file.title.should == "Blizzard Juno"
       end
 
       it 'sets mods classification to iptc category + supp category' do
+        @core_file = CoreFile.find("#{@images.first.pid}")
         @core_file.mods.classification.should == ["campus life -- students -- cargill hall"]
       end
 
       it 'sets mods personal name and role to iptc byline' do
+        @core_file = CoreFile.find("#{@images.first.pid}")
         @core_file.creators.should == ["Maria Amasanti"]
         @core_file.mods.personal_name.role.role_term.should == ["Photographer"]
       end
 
       it 'sets description to iptc description' do
+        @core_file = CoreFile.find("#{@images.first.pid}")
         @core_file.description.should == "January 27, 2015 - A Northeastern University student fights the wind during a blizzard. "
       end
 
       it 'sets publisher to iptc source' do
+        @core_file = CoreFile.find("#{@images.first.pid}")
         @core_file.mods.origin_info.publisher.should == ["Northeastern University"]
       end
 
       it 'sets date and copyright date to iptc date time original' do
+        @core_file = CoreFile.find("#{@images.first.pid}")
         @core_file.mods.origin_info.copyright.should == ["2015-01-27"]
         @core_file.date.should == "2015-01-27"
       end
 
       it 'sets keywords to iptc keywords' do
+        @core_file = CoreFile.find("#{@images.first.pid}")
         @core_file.keywords.should == ["blizzard", "juno", "campus", "campus life"]
       end
 
       it 'sets city to iptc city' do
+        @core_file = CoreFile.find("#{@images.first.pid}")
         @core_file.mods.origin_info.place.city_term.should == ["Boston"]
       end
 
       it 'sets state to iptc state' do
+        @core_file = CoreFile.find("#{@images.first.pid}")
         @core_file.mods.origin_info.place.state_term.should == ["mau"]
       end
 
       it 'sets static values' do
+        @core_file = CoreFile.find("#{@images.first.pid}")
         @core_file.mods.genre.should == ["photographs"]
         @core_file.mods.genre.authority.should == ["aat"]
         @core_file.mods.physical_description.digital_origin.should == ["born digital"]
@@ -114,6 +135,7 @@ describe ImageProcessingJob, unless: $in_travis do
       end
 
       it 'creates handle' do
+        @core_file = CoreFile.find("#{@images.first.pid}")
         @core_file.identifier.should == retrieve_handle(@core_file.persistent_url)
         @core_file.mods.identifier.type.should == ["handle"]
         @core_file.mods.identifier.display_label.should == ["Permanent URL"]
@@ -128,10 +150,12 @@ describe ImageProcessingJob, unless: $in_travis do
       end
 
       it 'sets correct permissions for core_files' do
+        @core_file = CoreFile.find("#{@images.first.pid}")
         @core_file.permissions.should == [{:type=>"group", :access=>"read", :name=>"northeastern:drs:all"}, {:type=>"group", :access=>"edit", :name=>"northeastern:drs:repository:staff"}, {:type=>"user", :access=>"edit", :name=>"000000000"}]
       end
 
       it 'sets correct permissions for content_objects' do
+        @core_file = CoreFile.find("#{@images.first.pid}")
         @core_file.content_objects.each do |c|
           this_class = Object.const_get("#{c.klass}")
           this_obj = this_class.find("#{c.pid}")

@@ -1,7 +1,13 @@
 require 'spec_helper'
+ENV["HANDLE_HOST"] = "localhost"
+ENV["HANDLE_USERNAME"] = "root"
+ENV["HANDLE_PASSWORD"] = ""
+ENV["HANDLE_DATABASE"] = "handles_test"
 
-describe ProcessZipJob, unless: $in_travis do
-    before(:all) do
+describe ProcessZipJob do
+    before(:each) do
+      `mysql -u "#{ENV["HANDLE_USERNAME"]}" < "#{Rails.root}"/spec/fixtures/files/handlesTEST.sql`
+      @client = Mysql2::Client.new(:host => "#{ENV["HANDLE_HOST"]}", :username => "#{ENV["HANDLE_USERNAME"]}", :password => "#{ENV["HANDLE_PASSWORD"]}", :database => "#{ENV["HANDLE_DATABASE"]}")
       ActionMailer::Base.deliveries = []
       @loader_name = "College of Engineering"
       tempdir = Rails.root.join("tmp")
@@ -45,7 +51,8 @@ describe ProcessZipJob, unless: $in_travis do
       expect(ActionMailer::Base.deliveries.first.subject).to eq "[DRS] Load Complete"
     end
 
-    after(:all) do
+    after(:each) do
+      @client.query("TRUNCATE TABLE handles_test.handles;")
       @user.destroy if @user
       Loaders::LoadReport.all.each do |lr|
         lr.destroy
@@ -53,9 +60,7 @@ describe ProcessZipJob, unless: $in_travis do
       Loaders::ImageReport.all.each do |ir|
         ir.destroy
       end
-      CoreFile.all.each do |c|
-        c.destroy
-      end
+      CoreFile.all.map { |x| x.destroy }
     end
 
 end
