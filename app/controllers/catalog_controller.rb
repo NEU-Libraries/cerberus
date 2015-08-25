@@ -13,6 +13,8 @@ class CatalogController < ApplicationController
   include Hydra::Controller::ControllerBehavior
   include BlacklightAdvancedSearch::ParseBasicQ
 
+  before_filter :default_search, except: [:facet, :recent]
+
   # These before_filters apply the hydra access controls
   before_filter :enforce_show_permissions, :only=>:show
   # This applies appropriate access controls to all solr queries
@@ -42,17 +44,6 @@ class CatalogController < ApplicationController
   end
 
   def index
-
-    if !params[:q].nil?
-      # Fixes #667 - we remove single characters. They're a pretty terrible idea with a strict AND
-      params[:q].gsub!(/(^| ).( |$)/, ' ')
-
-      if params[:sort].blank?
-        # Default sort relevance
-        params[:sort] = "score desc, #{Solrizer.solr_name('system_create', :stored_sortable, type: :date)} desc"
-      end
-    end
-
     if !has_search_parameters?
       self.solr_search_params_logic += [:disable_highlighting]
       recent
@@ -89,21 +80,6 @@ class CatalogController < ApplicationController
     self.solr_search_params_logic += [:well_formed_items]
 
     (_, @recent_documents) = get_search_results(:q =>'', :sort=>"#{Solrizer.solr_name('system_create', :stored_sortable, type: :date)} desc", :rows=>999)
-    # if user_signed_in?
-    #   # grab other people's documents
-    #   (_, @recent_documents) = get_search_results(:q =>filter_not_mine,
-    #                                     :sort=>sort_field, :rows=>3)
-    # else
-    #   # grab any documents we do not know who you are
-    #   (_, @recent_documents) = get_search_results(:q =>'', :sort=>sort_field, :rows=>3)
-    # end
-  end
-
-  def recent_me
-    if user_signed_in?
-      (_, @recent_user_documents) = get_search_results(:q =>filter_mine,
-                                        :sort=>"#{Solrizer.solr_name('system_create', :stored_sortable, type: :date)} desc", :rows=>3)
-    end
   end
 
   def communities
@@ -280,6 +256,18 @@ class CatalogController < ApplicationController
   end
 
   protected
+
+  def default_search
+    if !params[:q].nil?
+      # Fixes #667 - we remove single characters. They're a pretty terrible idea with a strict AND
+      params[:q].gsub!(/(^| ).( |$)/, ' ')
+
+      if params[:sort].blank?
+        # Default sort relevance
+        params[:sort] = "score desc, #{Solrizer.solr_name('system_create', :stored_sortable, type: :date)} desc"
+      end
+    end
+  end
 
   # Limits search results just to CoreFiles
   # @param solr_parameters the current solr parameters
