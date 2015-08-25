@@ -8,7 +8,7 @@ before_install:
   - sudo apt-get install clamav clamav-freshclam libclamav-dev libclamav6
   - sudo apt-get install libimage-exiftool-perl
   - mysql -u root < /home/travis/build/NEU-Libraries/cerberus/spec/fixtures/files/handlesTEST.sql
-  - echo "\nHANDLE_USERNAME\:\ \"root\"\nHANDLE_PASSWORD\:\ \"\"\nHANDLE_HOST\:\ \"localhost\"\nHANDLE_DATABASE\:\ \"handles\"" >> /home/travis/build/NEU-Libraries/cerberus/config/application.yml
+  - echo "\nHANDLE_USERNAME: \"root\"\nHANDLE_PASSWORD: \"\"\nHANDLE_HOST: \"localhost\"\nHANDLE_DATABASE: \"handles\"" >> /home/travis/build/NEU-Libraries/cerberus/config/application.yml
 rvm:
   - 2.1
 before_script:
