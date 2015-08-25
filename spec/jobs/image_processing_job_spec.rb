@@ -1,9 +1,5 @@
 require 'spec_helper'
 include HandleHelper
-ENV["HANDLE_HOST"] = "localhost"
-ENV["HANDLE_USERNAME"] = "root"
-ENV["HANDLE_PASSWORD"] = ""
-ENV["HANDLE_DATABASE"] = "handles_test"
 
 describe ImageProcessingJob do
   def context(o_path)
