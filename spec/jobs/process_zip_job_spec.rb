@@ -1,8 +1,4 @@
 require 'spec_helper'
-ENV["HANDLE_HOST"] = "localhost"
-ENV["HANDLE_USERNAME"] = "root"
-ENV["HANDLE_PASSWORD"] = ""
-ENV["HANDLE_DATABASE"] = "handles_test"
 
 describe ProcessZipJob do
     before(:each) do
