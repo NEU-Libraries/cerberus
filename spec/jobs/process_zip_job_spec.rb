@@ -3,7 +3,7 @@ require 'spec_helper'
 describe ProcessZipJob do
     before(:each) do
       `mysql -u "#{ENV["HANDLE_USERNAME"]}" < "#{Rails.root}"/spec/fixtures/files/handlesTEST.sql`
-      @client = Mysql2::Client.new(:host => "#{ENV["HANDLE_HOST"]}", :username => "#{ENV["HANDLE_USERNAME"]}", :password => "#{ENV["HANDLE_PASSWORD"]}", :database => "#{ENV["HANDLE_DATABASE"]}")
+      @client = Mysql2::Client.new(:host => "#{ENV["HANDLE_TEST_HOST"]}", :username => "#{ENV["HANDLE_TEST_USERNAME"]}", :password => "#{ENV["HANDLE_TEST_PASSWORD"]}", :database => "#{ENV["HANDLE_TEST_DATABASE"]}")
       ActionMailer::Base.deliveries = []
       @loader_name = "College of Engineering"
       tempdir = Rails.root.join("tmp")
@@ -16,7 +16,7 @@ describe ProcessZipJob do
       copyright = "Copyright statement"
       @user = FactoryGirl.create(:user)
       permissions = {"CoreFile" => {"read"  => ["northeastern:drs:all"], "edit" => ["northeastern:drs:repository:staff"]}, "ImageThumbnailFile" => {"read"  => ["northeastern:drs:all"], "edit" => ["northeastern:drs:repository:staff"]}, "ImageSmallFile" => {"read"  => ["northeastern:drs:repository:staff"], "edit" => ["northeastern:drs:repository:staff"]}, "ImageLargeFile" => {"read"  => ["northeastern:drs:repository:staff"], "edit" => ["northeastern:drs:repository:staff"]}, "ImageMasterFile" => {"read"  => ["northeastern:drs:repository:staff"], "edit" => ["northeastern:drs:repository:staff"]}}
-      ProcessZipJob.new(@loader_name, new_file.to_s, parent, copyright, @user, permissions).run
+      ProcessZipJob.new(@loader_name, new_file.to_s, parent, copyright, @user, permissions, @client).run
     end
 
     it 'changes loadreport length to 1' do
@@ -48,7 +48,7 @@ describe ProcessZipJob do
     end
 
     after(:each) do
-      @client.query("TRUNCATE TABLE handles_test.handles;")
+      @client.query("DROP DATABASE #{ENV["HANDLE_TEST_DATABASE"]};")
       @user.destroy if @user
       Loaders::LoadReport.all.each do |lr|
         lr.destroy
