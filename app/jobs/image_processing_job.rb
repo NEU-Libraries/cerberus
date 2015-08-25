@@ -1,5 +1,5 @@
 class ImageProcessingJob
-  attr_accessor :file, :file_name, :parent, :copyright, :report_id, :permissions
+  attr_accessor :file, :file_name, :parent, :copyright, :report_id, :permissions, :client
   include MimeHelper
   include HandleHelper
 
@@ -7,7 +7,7 @@ class ImageProcessingJob
     :loader_image_processing
   end
 
-  def initialize(file, file_name, parent, copyright, report_id, permissions=[])
+  def initialize(file, file_name, parent, copyright, report_id, permissions=[], client=nil)
     self.file = file
     self.file_name = file_name
     self.parent = parent
@@ -173,7 +173,7 @@ class ImageProcessingJob
         end
 
         # Create a handle
-        core_file.identifier = make_handle(core_file.persistent_url)
+        core_file.identifier = make_handle(core_file.persistent_url, client)
         core_file.mods.identifier.type = "handle"
         core_file.mods.identifier.display_label = "Permanent URL"
 

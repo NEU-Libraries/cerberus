@@ -4,7 +4,7 @@ include HandleHelper
 describe HandleHelper do
   let(:bills_file) { FactoryGirl.create(:bills_complete_file) }
   before :all do
-    `mysql -u "#{ENV["HANDLE_USERNAME"]}" < "#{Rails.root}"/spec/fixtures/files/handlesTEST.sql`
+    `mysql -u "#{ENV["HANDLE_TEST_USERNAME"]}" < "#{Rails.root}"/spec/fixtures/files/handlesTEST.sql`
     @client = Mysql2::Client.new(:host => "#{ENV["HANDLE_TEST_HOST"]}", :username => "#{ENV["HANDLE_TEST_USERNAME"]}", :password => "#{ENV["HANDLE_TEST_PASSWORD"]}", :database => "#{ENV["HANDLE_TEST_DATABASE"]}")
   end
 
@@ -15,6 +15,6 @@ describe HandleHelper do
   end
 
   after :all do
-    @client.query("TRUNCATE TABLE handles_test.handles;")
+    @client.query("DROP DATABASE #{ENV["HANDLE_TEST_DATABASE"]};")
   end
 end

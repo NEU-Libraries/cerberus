@@ -4,7 +4,7 @@ include HandleHelper
 describe ImageProcessingJob do
   def context(o_path)
     `mysql -u "#{ENV["HANDLE_USERNAME"]}" < "#{Rails.root}"/spec/fixtures/files/handlesTEST.sql`
-    @client = Mysql2::Client.new(:host => "#{ENV["HANDLE_HOST"]}", :username => "#{ENV["HANDLE_USERNAME"]}", :password => "#{ENV["HANDLE_PASSWORD"]}", :database => "#{ENV["HANDLE_DATABASE"]}")
+    @client = Mysql2::Client.new(:host => "#{ENV["HANDLE_TEST_HOST"]}", :username => "#{ENV["HANDLE_TEST_USERNAME"]}", :password => "#{ENV["HANDLE_TEST_PASSWORD"]}", :database => "#{ENV["HANDLE_TEST_DATABASE"]}")
     @collection = FactoryGirl.create(:root_collection)
     @file_name = File.basename(o_path)
     FileUtils.cp(o_path, "#{Rails.root}/tmp/#{@file_name}")
@@ -18,12 +18,12 @@ describe ImageProcessingJob do
     @report_id = Loaders::LoadReport.create_from_strings(@user, 0, @loader_name, @parent)
     @load_report = Loaders::LoadReport.find(@report_id)
     @permissions = {"CoreFile" => {"read"  => ["northeastern:drs:all"], "edit" => ["northeastern:drs:repository:staff"]}, "ImageThumbnailFile" => {"read"  => ["northeastern:drs:all"], "edit" => ["northeastern:drs:repository:staff"]}, "ImageSmallFile" => {"read"  => ["northeastern:drs:repository:staff"], "edit" => ["northeastern:drs:repository:staff"]}, "ImageLargeFile" => {"read"  => ["northeastern:drs:repository:staff"], "edit" => ["northeastern:drs:repository:staff"]}, "ImageMasterFile" => {"read"  => ["northeastern:drs:repository:staff"], "edit" => ["northeastern:drs:repository:staff"]}}
-    ImageProcessingJob.new(@fpath, @file_name, @parent, @copyright, @load_report.id, @permissions).run
+    ImageProcessingJob.new(@fpath, @file_name, @parent, @copyright, @load_report.id, @permissions, @client).run
     @images = Loaders::ImageReport.where(load_report_id:"#{@report_id}").find_all
   end
 
   def clear_context
-    @client.query("TRUNCATE TABLE handles_test.handles;")
+    @client.query("DROP DATABASE #{ENV["HANDLE_TEST_DATABASE"]};")
     CoreFile.all.map { |x| x.destroy }
     @load_report.destroy if @load_report
     @user.destroy if @user

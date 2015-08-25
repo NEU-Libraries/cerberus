@@ -27,7 +27,7 @@ describe LoaderMailer do
     end
 
     after :each do
-      @client.query("TRUNCATE TABLE handles_test.handles;")
+      @client.query("DROP DATABASE #{ENV["HANDLE_TEST_DATABASE"]};")
       @user.destroy if @user
       Loaders::LoadReport.all.each do |lr|
         lr.destroy
