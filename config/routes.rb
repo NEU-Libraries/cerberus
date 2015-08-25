@@ -88,6 +88,10 @@ Cerberus::Application.routes.draw do
    get "/loaders/cps/new" => 'cps_loads#new', as: 'loaders_cps'
    get "/loaders/cps/report/:id" => 'cps_loads#show', as: 'loaders_cps_report'
    get "/loaders/cps/file/:id" => 'cps_loads#show_iptc', as: 'loaders_cps_iptc'
+   resources :emsa_loads, only: [:new, :create, :show], :path => "loaders/emsa"
+   get "/loaders/emsa/new" => 'emsa_loads#new', as: 'loaders_emsa'
+   get "/loaders/emsa/report/:id" => 'emsa_loads#show', as: 'loaders_emsa_report'
+   get "/loaders/emsa/file/:id" => 'emsa_loads#show_iptc', as: 'loaders_emsa_iptc'
   end
 
   # Facets for communities and collections
