@@ -17,7 +17,7 @@ describe ImageProcessingJob do
     @loader_name = "Marketing and Communications"
     @report_id = Loaders::LoadReport.create_from_strings(@user, 0, @loader_name, @parent)
     @load_report = Loaders::LoadReport.find(@report_id)
-    @permissions = {"CoreFile" => {"read"  => ["northeastern:drs:all"], "edit" => ["northeastern:drs:repository:staff"]}, "ImageThumbnailFile" => {"read"  => ["northeastern:drs:all"], "edit" => ["northeastern:drs:repository:staff"]}, "ImageSmallFile" => {"read"  => ["northeastern:drs:repository:staff"], "edit" => ["northeastern:drs:repository:staff"]}, "ImageLargeFile" => {"read"  => ["northeastern:drs:repository:staff"], "edit" => ["northeastern:drs:repository:staff"]}, "ImageMasterFile" => {"read"  => ["northeastern:drs:repository:staff"], "edit" => ["northeastern:drs:repository:staff"]}}
+    @permissions = {"CoreFile" => {"read"  => ["northeastern:drs:all"], "edit" => ["northeastern:drs:repository:corefile"]}, "ImageSmallFile" => {"read"  => ["northeastern:drs:repository:test"], "edit" => ["northeastern:drs:repository:small"]}, "ImageLargeFile" => {"read"  => ["northeastern:drs:repository:test"], "edit" => ["northeastern:drs:repository:large"]}, "ImageMasterFile" => {"read"  => ["northeastern:drs:repository:test"], "edit" => ["northeastern:drs:repository:master"]}}
     ImageProcessingJob.new(@fpath, @file_name, @parent, @copyright, @load_report.id, @permissions, @client).run
     @images = Loaders::ImageReport.where(load_report_id:"#{@report_id}").find_all
   end
@@ -147,21 +147,9 @@ describe ImageProcessingJob do
 
       it 'sets correct permissions for core_files' do
         @core_file = CoreFile.find("#{@images.first.pid}")
-        @core_file.permissions.should == [{:type=>"group", :access=>"read", :name=>"northeastern:drs:all"}, {:type=>"group", :access=>"edit", :name=>"northeastern:drs:repository:staff"}, {:type=>"user", :access=>"edit", :name=>"000000000"}]
+        @core_file.permissions.should == [{:type=>"group", :access=>"read", :name=>"northeastern:drs:all"}, {:type=>"group", :access=>"edit", :name=>"northeastern:drs:repository:corefile"}, {:type=>"user", :access=>"edit", :name=>"000000000"}]
       end
 
-      it 'sets correct permissions for content_objects' do
-        @core_file = CoreFile.find("#{@images.first.pid}")
-        @core_file.content_objects.each do |c|
-          this_class = Object.const_get("#{c.klass}")
-          this_obj = this_class.find("#{c.pid}")
-          if c.klass == 'ImageThumbnailFile'
-            this_obj.permissions.should == [{:type=>"group", :access=>"read", :name=>"northeastern:drs:all"}, {:type=>"group", :access=>"edit", :name=>"northeastern:drs:repository:staff"}, {:type=>"user", :access=>"edit", :name=>"000000000"}]
-          else
-            this_obj.permissions.should == [{:type=>"group", :access=>"read", :name=>"northeastern:drs:repository:staff"}, {:type=>"group", :access=>"edit", :name=>"northeastern:drs:repository:staff"}, {:type=>"user", :access=>"edit", :name=>"000000000"}]
-          end
-        end
-      end
     end
 
     shared_examples_for "failed uploads" do
