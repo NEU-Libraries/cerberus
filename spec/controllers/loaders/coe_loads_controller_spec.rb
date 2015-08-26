@@ -118,9 +118,7 @@ describe Loaders::CoeLoadsController do
   after :each do
     Loaders::LoadReport.find(@report_id).destroy
     @coe_col.destroy if @coe_col
-    CoreFile.all.each do |c|
-      c.destroy
-    end
+    CoreFile.all.map { |x| x.destroy }
     Loaders::ImageReport.all.each do |ir|
       ir.destroy
     end
