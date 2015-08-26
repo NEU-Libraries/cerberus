@@ -14,6 +14,7 @@ class ImageProcessingJob
     self.copyright = copyright
     self.report_id = report_id
     self.permissions = permissions
+    self.client = client
   end
 
   def run
