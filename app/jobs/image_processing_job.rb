@@ -1,18 +1,20 @@
 class ImageProcessingJob
-  attr_accessor :file, :file_name, :parent, :copyright, :report_id, :permissions
+  attr_accessor :file, :file_name, :parent, :copyright, :report_id, :permissions, :client
   include MimeHelper
+  include HandleHelper
 
   def queue_name
     :loader_image_processing
   end
 
-  def initialize(file, file_name, parent, copyright, report_id, permissions=[])
+  def initialize(file, file_name, parent, copyright, report_id, permissions=[], client=nil)
     self.file = file
     self.file_name = file_name
     self.parent = parent
     self.copyright = copyright
     self.report_id = report_id
     self.permissions = permissions
+    self.client = client
   end
 
   def run
@@ -20,7 +22,7 @@ class ImageProcessingJob
     # if theres an exception, log details to image_report
     require 'fileutils'
     require 'mini_exiftool'
-    MiniExiftool.command = '/opt/exiftool/exiftool'
+    MiniExiftool.command = "#{Cerberus::Application.config.minitool_path}"
     job_id = "#{Time.now.to_i}-loader-image"
     FileUtils.mkdir_p "#{Rails.root}/log/#{job_id}"
     failed_pids_log = Logger.new("#{Rails.root}/log/#{job_id}/loader-image-process-job.log")
@@ -160,7 +162,7 @@ class ImageProcessingJob
           return
         end
         if core_file.keywords.blank?
-          create_special_error("Missing keyword", iptc, core_file, load_report)
+          create_special_error("Missing keyword(s)", iptc, core_file, load_report)
           return
         end
 
@@ -172,7 +174,7 @@ class ImageProcessingJob
         end
 
         # Create a handle
-        core_file.identifier = make_handle(core_file.persistent_url)
+        core_file.identifier = make_handle(core_file.persistent_url, client)
         core_file.mods.identifier.type = "handle"
         core_file.mods.identifier.display_label = "Permanent URL"
 
@@ -187,12 +189,13 @@ class ImageProcessingJob
         l = 1400.to_f/size.to_f
         m = 0.to_f/size.to_f
         s = 600.to_f/size.to_f
-        Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename, nil, s, m, l))
-        permissions.each do |perm, values|
-          values.each do |group|
+
+        permissions['CoreFile'].each do |perm, vals|
+          vals.each do |group|
             core_file.rightsMetadata.permissions({group: group}, "#{perm}")
           end
         end
+        Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename, nil, s, m, l, true, permissions))
 
         if core_file.save!
           if core_file && !core_file.category.first.blank?
@@ -208,7 +211,8 @@ class ImageProcessingJob
       errors_for_pid.warn "#{Time.now} - #{$!.inspect}"
       errors_for_pid.warn "#{Time.now} - #{$!}"
       errors_for_pid.warn "#{Time.now} - #{$@}"
-      report = load_report.image_reports.create_failure(error.message, iptc, core_file.label)
+      iptc = "" if iptc.empty?
+      report = load_report.image_reports.create_failure(error.message, iptc, File.basename(file_name))
       FileUtils.rm(file)
       core_file.destroy
       raise error

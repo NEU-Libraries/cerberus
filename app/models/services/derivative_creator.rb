@@ -84,7 +84,7 @@ class DerivativeCreator
       object.depositor              = core.depositor
       object.proxy_uploader         = core.proxy_uploader
       object.core_record            = core
-      object.rightsMetadata.content = master.rightsMetadata.content
+      object.rightsMetadata.content = core.rightsMetadata.content
       object.save!
 
       return object.pid

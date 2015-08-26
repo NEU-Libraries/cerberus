@@ -118,4 +118,23 @@ describe ContentCreationJob, unless: $in_travis do
 
   #   it_should_behave_like "master creation process"
   # end
+
+  describe "Master creation with irregular permissions" do
+    before(:all) do
+      @user = FactoryGirl.create(:user)
+      @core = FactoryGirl.create(:complete_file, depositor: @user.nuid)
+      @fn = File.basename("#{Rails.root}/spec/fixtures/files/test_pic.jpeg")
+      FileUtils.cp("#{Rails.root}/spec/fixtures/files/test_pic.jpeg", "#{Rails.root}/tmp/#{@fn}")
+      @path = "#{Rails.root}/tmp/#{@fn}"
+      @core.instantiate_appropriate_content_object(@path)
+      @permissions = {"ImageMasterFile" => {"read"  => ["northeastern:drs:repository:test"], "edit" => ["northeastern:drs:repository:master"]}}
+      @master = ContentCreationJob.new(@core.pid, @path, @fn, nil, 0, 0, 0, true, @permissions).run
+    end
+
+    it "should set correct permissions for master file" do
+      @master.permissions.should == [{:type=>"group", :access=>"read", :name=>"northeastern:drs:repository:test"}, {:type=>"group", :access=>"edit", :name=>"northeastern:drs:repository:master"}, {:type=>"user", :access=>"edit", :name=>"#{@user.nuid}"}]
+    end
+
+    after(:all)  { clear_context }
+  end
 end
