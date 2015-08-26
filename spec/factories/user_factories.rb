@@ -43,5 +43,23 @@ FactoryGirl.define do
       group_list ['northeastern:drs:repository:loaders:marcom', 'northeastern:drs:repository:staff']
       nuid "000000005"
     end
+
+    factory :cps_loader do
+      email 'a@example.com'
+      group_list ['northeastern:drs:repository:loaders:cps', 'northeastern:drs:repository:staff']
+      nuid "000000005"
+    end
+
+    factory :coe_loader do
+      email 'a@example.com'
+      group_list ['northeastern:drs:repository:loaders:coe', 'northeastern:drs:repository:staff']
+      nuid "000000005"
+    end
+
+    factory :emsa_loader do
+      email 'a@example.com'
+      group_list ['northeastern:drs:repository:loaders:emsa_emc', 'northeastern:drs:repository:staff']
+      nuid "000000005"
+    end
   end
 end
