@@ -4,24 +4,25 @@ include Magick
 class ScaledImageCreator
 
   attr_accessor :small, :med, :large
-  attr_accessor :master, :core
+  attr_accessor :master, :core, :permissions
 
   # Size instance vars should be scale factors, e.g. .25 for a derivative
   # 25% the size of the original
   # Pass nil for s/m/l if you do not wish that size of Image derivative
-  def initialize(s, m, l, mast)
+  def initialize(s, m, l, mast, permissions=nil)
     @small = s
     @med = m
     @large = l
     @master = mast
     @core = self.master.core_record
+    @permissions = permissions
   end
 
   def create_scaled_images
     if valid_dimensions?
-      creation_helper(small, ImageSmallFile, master) if small
-      creation_helper(med, ImageMediumFile, master) if med
-      creation_helper(large, ImageLargeFile, master) if large
+      creation_helper(small, ImageSmallFile, master, permissions) if small
+      creation_helper(med, ImageMediumFile, master, permissions) if med
+      creation_helper(large, ImageLargeFile, master, permissions) if large
     end
   end
 
@@ -55,7 +56,7 @@ class ScaledImageCreator
       return valid
     end
 
-    def creation_helper(size, klass, master)
+    def creation_helper(size, klass, master, permissions=nil)
       if size > 0
         target = core.content_objects.find { |x| x.instance_of? klass }
 
@@ -63,7 +64,17 @@ class ScaledImageCreator
         if !target
           target = klass.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
           target.description = "Derivative for #{core.pid}"
-          target.rightsMetadata.content = master.rightsMetadata.content
+          if !permissions.nil? && permissions["#{target.klass}"]
+              perms = permissions["#{target.klass}"]
+              perms.each do |perm, vals|
+                vals.each do |group|
+                  this_class = Object.const_get("#{target.klass}")
+                  target.rightsMetadata.permissions({group: group}, "#{perm}")
+                end
+              end
+          else
+            target.rightsMetadata.content = core.rightsMetadata.content
+          end
           target.identifier = target.pid
           target.core_record = CoreFile.find(core.pid)
           target.save!
