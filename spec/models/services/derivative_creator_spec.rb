@@ -44,8 +44,8 @@ describe DerivativeCreator, unless: $in_travis do
       @thumb.core_record.pid.should == @core.pid
     end
 
-    it "Has identical privileges to its master object" do
-      @thumb.rightsMetadata.content.should == @master.rightsMetadata.content
+    it "Has identical privileges to its core_file object" do
+      @thumb.rightsMetadata.content.should == @core.rightsMetadata.content
     end
   end
 

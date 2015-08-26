@@ -53,6 +53,10 @@ describe Api::V1::CoreFilesController, :type => :controller do
       get :show, :id => complete_file.pid
       response.body.should == complete_file.to_hash.to_json
     end
+
+    after(:all) do
+      CoreFile.all.map { |x| x.destroy }
+    end
   end
 
 end
