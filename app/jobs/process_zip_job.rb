@@ -12,6 +12,7 @@ class ProcessZipJob
     self.copyright = copyright
     self.current_user = current_user
     self.permissions = permissions
+    self.client = client
   end
 
   def run
