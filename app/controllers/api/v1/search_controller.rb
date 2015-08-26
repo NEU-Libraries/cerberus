@@ -56,6 +56,9 @@ module Api
           render json: {error: "The page you've requested is more than is available.", pagination: @pagination} and return
         end
 
+        # If response has facets, zip them together for easier parsing
+        @response.facet_counts["facet_fields"].each { |k, v| @response.facet_counts["facet_fields"][k] = Hash[v.each_slice(2).to_a] }
+
         render json: {pagination: @pagination, response: @response}
       end
 
