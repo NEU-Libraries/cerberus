@@ -21,7 +21,7 @@ class ImageProcessingJob
     # if theres an exception, log details to image_report
     require 'fileutils'
     require 'mini_exiftool'
-    MiniExiftool.command = Cerberus::Application.config.minitool_path
+    MiniExiftool.command = "#{Cerberus::Application.config.minitool_path}"
     job_id = "#{Time.now.to_i}-loader-image"
     FileUtils.mkdir_p "#{Rails.root}/log/#{job_id}"
     failed_pids_log = Logger.new("#{Rails.root}/log/#{job_id}/loader-image-process-job.log")
@@ -194,18 +194,7 @@ class ImageProcessingJob
             core_file.rightsMetadata.permissions({group: group}, "#{perm}")
           end
         end
-        Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename, nil, s, m, l))
-        core_file.content_objects.each do |c|
-          perms = permissions["#{c.klass}"]
-          perms.each do |perm, vals|
-            vals.each do |group|
-              this_class = Object.const_get("#{c.klass}")
-              this_obj = this_class.find("#{c.pid}")
-              this_obj.rightsMetadata.permissions({group: group}, "#{perm}")
-              this_obj.save!
-            end
-          end
-        end
+        Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename, nil, s, m, l, true, permissions))
 
         if core_file.save!
           if core_file && !core_file.category.first.blank?
