@@ -10,8 +10,8 @@ GIT
 
 GIT
   remote: https://github.com/NEU-Libraries/mods_display.git
-  revision: 5773cb38ba4fa5d191c047179dfcffe1214f5e4d
-  ref: 5773cb38ba4fa5d191c047179dfcffe1214f5e4d
+  revision: b723822482b1f895b836071c9916af37ea3111b4
+  ref: b723822482b1f895b836071c9916af37ea3111b4
   specs:
     mods_display (0.3.3)
       i18n
@@ -467,8 +467,8 @@ GEM
       rack (~> 1.0)
       tilt (~> 1.1, != 1.3.0)
     sqlite3 (1.3.8)
-    stanford-mods (1.1.2)
-      mods
+    stanford-mods (1.1.4)
+      mods (~> 2.0.2)
     stomp (1.3.4)
     tdiff (0.3.3)
     term-ansicolor (1.2.2)
@@ -582,4 +582,4 @@ DEPENDENCIES
   zipruby (~> 0.3.6)
 
 BUNDLED WITH
-   1.10.1
+   1.10.5
