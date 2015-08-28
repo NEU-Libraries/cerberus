@@ -29,7 +29,7 @@
       = kramdown_parse(@set.description)
 
   - if current_user
-    -if @set.klass == "Collection" && (current_user.can? :edit, @set.pid) && (@set.smart_collection_type.nil? || @set.smart_collection_type == "miscellany")
+    -if @set.klass == "Collection" && (current_user.can? :edit, @set.pid) && (current_user.admin? || @set.smart_collection_type.nil? || @set.smart_collection_type == "miscellany")
       %nav.set-actions
         %ul.nav.nav-pills
           %li
