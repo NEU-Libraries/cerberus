@@ -220,6 +220,13 @@ task :reset_data => :environment do
   david.add_group("northeastern:drs:repository:loaders:emsa_emc")
   julio.add_group("northeastern:drs:repository:loaders:emsa_emc")
 
+  sarah.add_group("northeastern:drs:enrollment_management:emc:emc_admin")
+  pat.add_group("northeastern:drs:enrollment_management:emc:emc_admin")
+  joey.add_group("northeastern:drs:enrollment_management:emc:emc_admin")
+  eli.add_group("northeastern:drs:enrollment_management:emc:emc_admin")
+  david.add_group("northeastern:drs:enrollment_management:emc:emc_admin")
+  julio.add_group("northeastern:drs:enrollment_management:emc:emc_admin")
+
   sarah.add_group("northeastern:drs:repository:staff")
   pat.add_group("northeastern:drs:repository:staff")
   joey.add_group("northeastern:drs:repository:staff")
