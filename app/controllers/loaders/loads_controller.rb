@@ -3,7 +3,7 @@ class Loaders::LoadsController < ApplicationController
   include MimeHelper
 
   before_filter :authenticate_user!
-  
+
   rescue_from ActiveRecord::RecordNotFound do |exception|
     render_404(ActiveRecord::RecordNotFound.new) and return
   end
@@ -78,7 +78,7 @@ class Loaders::LoadsController < ApplicationController
     def process_file(file, parent, copyright, permissions, short_name)
       @loader_name = t('drs.loaders.'+short_name+'.long_name')
       if virus_check(file) == 0
-        if Rails.env.production?
+        if Rails.env.production? || Rails.env.secondary?
           tempdir = Pathname.new("/tmp/DRStmp/")
         else
           tempdir = Rails.root.join("tmp")
