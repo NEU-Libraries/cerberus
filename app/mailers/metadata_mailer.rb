@@ -53,7 +53,7 @@ class MetadataMailer < ActionMailer::Base
     if count == 0
       self.message.perform_deliveries = false
     else
-      if ["production"].include? Rails.env
+      if ["production", "secondary"].include? Rails.env
         mail(to: "Metadata Mailing List <Library-DRS-Metadata@neu.edu>", subject: "Daily Featured Content Uploads and Updates - #{count} items", content_type: "text/html")
       elsif "test" == Rails.env
         mail(to: "Test <test@test.com>", subject: "Daily Featured Content Uploads and Updates - #{count} items")

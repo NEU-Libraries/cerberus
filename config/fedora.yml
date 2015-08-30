@@ -14,5 +14,9 @@ production:
   user: fedoraAdmin
   password: <%= ENV["FEDORA_PASSWD"] %>
   url: http://nb4676.neu.edu:8080/fedora
+secondary:
+  user: fedoraAdmin
+  password: <%= ENV["FEDORA_PASSWD"] %>
+  url: http://nb4676.neu.edu:8080/fedora
 cucumber:
   <<: *TEST
