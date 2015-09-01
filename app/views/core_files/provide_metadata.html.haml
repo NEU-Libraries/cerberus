@@ -30,7 +30,7 @@
 
 = form_for(@core_file, :url => files_process_metadata_path, method: 'post', :html => {:multipart => true}) do |f|
 
-  = hidden_field_tag(:collection_id, @collection.identifier)
+  = hidden_field_tag(:collection_id, @collection.pid)
   = hidden_field_tag(:proxy, params[:proxy])
 
   = render :partial => 'core_files/metadata/default', :formats => [:html], :locals => {:f => f, :new_object => true}
