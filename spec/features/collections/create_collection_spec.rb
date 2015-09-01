@@ -32,14 +32,14 @@ feature "Creating a collection" do
   describe "Signed Access and Form Creation" do
     scenario "Authenticated Creation and Edit" do
       features_sign_in bill
-      visit new_collection_path(parent: @root.identifier)
+      visit new_collection_path(parent: @root.pid)
 
       # Because we authenticated we don't get booted out.
       current_path.should == '/collections/new'
 
       # Verifies that hidden 'parent' parameter is set correctly
       page.all('input#collection_parent').length.should == 1
-      page.all('input#collection_parent').first.value.should == @root.identifier
+      page.all('input#collection_parent').first.value.should == @root.pid
 
       # Fill out and submit the Collection creation form.
       fill_in 'Title', with: "My Title"

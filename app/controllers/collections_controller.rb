@@ -120,7 +120,7 @@ class CollectionsController < ApplicationController
     begin
       @set.save!
       flash[:notice] = "Collection created successfully."
-      redirect_to collection_path(id: @set.identifier) and return
+      redirect_to collection_path(id: @set.pid) and return
     rescue => exception
       logger.error "CollectionsController::create rescued #{exception.class}\n\t#{exception.to_s}\n #{exception.backtrace.join("\n")}\n\n"
       flash.now[:error] = "Something went wrong"
