@@ -219,6 +219,10 @@ module Cerberus
       end
     end
 
+    def identifier
+      Array(self[Solrizer.solr_name("identifier", :stored_searchable)]).first
+    end
+
     def description
       Array(self[Solrizer.solr_name("abstract", :stored_searchable)]).first
     end

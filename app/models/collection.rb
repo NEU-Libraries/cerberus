@@ -143,7 +143,7 @@ class Collection < ActiveFedora::Base
 
     def belong_check
       if single_lookup(:is_member_of, [Community]) && single_lookup(:is_member_of, [Collection])
-        errors.add(:identifier, "#{self.identifier} already has a parent relationship")
+        errors.add(:identifier, "#{self.pid} already has a parent relationship")
       end
     end
 end
