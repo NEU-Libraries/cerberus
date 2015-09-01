@@ -16,7 +16,8 @@ module Cerberus
       g.test_framework :rspec, :spec => true
     end
 
-    config.persistent_hostpath = "https://repository.library.northeastern.edu/files/"
+    config.persistent_hostpath        = "https://repository.library.northeastern.edu/files/"
+    config.persistent_collection_path = "https://repository.library.northeastern.edu/collections/"
 
     config.autoload_paths += Dir[ Rails.root.join('app', 'models', '**/') ]
     config.autoload_paths += %W(#{config.root}/lib/helpers)
