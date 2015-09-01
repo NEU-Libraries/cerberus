@@ -63,7 +63,7 @@ class Compilation < ActiveFedora::Base
 
   # Adds a simple JSON api to use with the JavaScript a bit easier than before
   def as_json(opts = nil)
-    { id: self.identifier,
+    { id: self.pid,
       title: self.title,
       depositor: self.depositor,
       description:  self.description,
@@ -97,5 +97,5 @@ class Compilation < ActiveFedora::Base
     # and returns just the pid
     def trim_to_pid(string)
       return string.split('/').last
-    end    
+    end
 end

@@ -27,6 +27,10 @@
   - if !@set.description.blank?
     %p.set-description
       = kramdown_parse(@set.description)
+  - if @set.klass == "Collection" && !@set.identifier.blank? && @set.identifier != @set.pid
+    -# Display handles if they exist, and aren't just the pid
+    %p.set-handle
+      = link_to "#{@set.identifier}", @set.identifier
 
   - if current_user
     -if @set.klass == "Collection" && (current_user.can? :edit, @set.pid) && (current_user.admin? || @set.smart_collection_type.nil? || @set.smart_collection_type == "miscellany")
