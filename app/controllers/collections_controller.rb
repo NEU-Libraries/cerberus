@@ -109,7 +109,10 @@ class CollectionsController < ApplicationController
     end
 
     @set.depositor = current_user.nuid
-    @set.identifier = @set.pid
+    # @set.identifier = @set.pid
+
+    # Create a handle
+    @set.identifier = make_handle("#{Rails.configuration.persistent_collection_path}#{@set.pid}")
 
     # Add drs staff to permissions for #608
     @set.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, "edit")
