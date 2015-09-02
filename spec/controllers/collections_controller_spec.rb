@@ -6,6 +6,11 @@ describe CollectionsController do
   let(:root)             { FactoryGirl.create(:root_collection) }
   let(:bills_collection) { FactoryGirl.create(:bills_private_collection) }
 
+  before :all do
+    `mysql -u "#{ENV["HANDLE_TEST_USERNAME"]}" < "#{Rails.root}"/spec/fixtures/files/handlesTEST.sql`
+    @client = Mysql2::Client.new(:host => "#{ENV["HANDLE_TEST_HOST"]}", :username => "#{ENV["HANDLE_TEST_USERNAME"]}", :password => "#{ENV["HANDLE_TEST_PASSWORD"]}", :database => "#{ENV["HANDLE_TEST_DATABASE"]}")
+  end
+
   describe "GET #index" do
     #TODO Implement
   end
@@ -185,5 +190,9 @@ describe CollectionsController do
       assigns(:set).title.should == "nu title"
       expect(response).to redirect_to(collection_path(id: bills_collection.pid))
     end
+  end
+
+  after :all do
+    @client.query("DROP DATABASE #{ENV["HANDLE_TEST_DATABASE"]};")
   end
 end
