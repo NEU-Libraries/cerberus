@@ -4,6 +4,7 @@ class Employee < ActiveFedora::Base
   include Cerberus::Employee::SmartCollections
   include Cerberus::Find
   include Cerberus::Rights::MassPermissions
+  include ApplicationHelper
 
   attr_accessible :nuid, :name, :community
   attr_accessor   :building
@@ -21,7 +22,8 @@ class Employee < ActiveFedora::Base
 
   def to_solr(solr_doc = Hash.new())
     super(solr_doc)
-    solr_doc["#{Solrizer.solr_name("title_info_title", :stored_sortable)}"] = self.name
+    solr_doc["#{Solrizer.solr_name("title_info_title", :stored_sortable)}"] = kramdown_parse(self.name)
+    solr_doc["#{Solrizer.solr_name("title", :stored_sortable)}"] = kramdown_parse(self.name).downcase
     solr_doc["type_sim"] = I18n.t("drs.display_labels.#{self.class}.name")
     return solr_doc
   end
@@ -36,7 +38,7 @@ class Employee < ActiveFedora::Base
     # safety return
     return ""
   end
-  
+
   def employee_first_name
     if !self.employee_name.blank?
       name_array = Namae.parse self.employee_name
