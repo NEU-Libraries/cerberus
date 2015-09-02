@@ -3,6 +3,9 @@ require 'spec_helper'
 feature "Creating a collection" do
 
   before :all do
+    `mysql -u "#{ENV["HANDLE_TEST_USERNAME"]}" < "#{Rails.root}"/spec/fixtures/files/handlesTEST.sql`
+    @client = Mysql2::Client.new(:host => "#{ENV["HANDLE_TEST_HOST"]}", :username => "#{ENV["HANDLE_TEST_USERNAME"]}", :password => "#{ENV["HANDLE_TEST_PASSWORD"]}", :database => "#{ENV["HANDLE_TEST_DATABASE"]}")
+    
     User.all.each do |user|
       user.destroy
     end
@@ -68,5 +71,9 @@ feature "Creating a collection" do
     Collection.find(:all).each do |coll|
       coll.destroy
     end
+  end
+
+  after :all do
+    @client.query("DROP DATABASE #{ENV["HANDLE_TEST_DATABASE"]};")
   end
 end
