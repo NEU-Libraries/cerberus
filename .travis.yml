@@ -7,7 +7,7 @@ before_install:
   - sudo apt-get install libreoffice-common
   - sudo apt-get install clamav clamav-freshclam libclamav-dev libclamav6
   - sudo apt-get install libimage-exiftool-perl
-  - curl https://gist.githubusercontent.com/dgcliff/0336ad90e69f9d9b0344/raw/f21685e41001f342c401ec0f46cb7385fbe87141/handle_values.txt 2>/dev/null > /home/travis/build/NEU-Libraries/cerberus/config/application.yml
+  - curl https://gist.githubusercontent.com/dgcliff/0336ad90e69f9d9b0344/raw/0aa46a8ba6b1657a48467ffd9f1b96a6176ddf86/handle_values.txt 2>/dev/null > /home/travis/build/NEU-Libraries/cerberus/config/application.yml
 rvm:
   - 2.1
 before_script:
