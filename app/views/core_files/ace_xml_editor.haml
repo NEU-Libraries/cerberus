@@ -10,6 +10,9 @@
 
   .span6
     %h3 XML
+    %label.text-right
+      %input#toggle_word_wrap{"type"=>"checkbox"}
+      ="Toggle Word Wrap"
     #editor.well
       = @core_file.mods.to_xml
 
@@ -37,14 +40,20 @@
   editor.setTheme("ace/theme/eclipse");
   editor.getSession().setMode("ace/mode/xml");
   editor.setOptions({
-    maxLines: 50,
+    maxLines: Infinity,
     minLines: 20,
     useSoftTabs: true,
     showInvisibles: true,
-    wrap:true,
   });
 
   $(function() {
+    $('#toggle_word_wrap').on('change', function(){
+      if ($('#toggle_word_wrap').is(':checked')){
+        editor.getSession().setUseWrapMode(true);
+      } else {
+        editor.getSession().setUseWrapMode(false);
+      }
+    })
     $('#raw_xml_form').submit(function() {
       $("#raw_xml_").val(editor.getSession().getValue());
       $('#mods').html("");
