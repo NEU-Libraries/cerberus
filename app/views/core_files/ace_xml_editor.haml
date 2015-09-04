@@ -37,10 +37,11 @@
   editor.setTheme("ace/theme/eclipse");
   editor.getSession().setMode("ace/mode/xml");
   editor.setOptions({
-    maxLines: Infinity,
+    maxLines: 50,
     minLines: 20,
     useSoftTabs: true,
-    showInvisibles: true
+    showInvisibles: true,
+    wrap:true,
   });
 
   $(function() {
