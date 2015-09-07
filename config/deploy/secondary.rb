@@ -1,13 +1,13 @@
 set :stage, :secondary
 set :whenever_environment, 'secondary'
 
-set :deploy_to, '/home/drs/apps/develop/'
+set :deploy_to, '/home/drs/cerberus/'
 
 # parses out the current branch you're on. See: http://www.harukizaemon.com/2008/05/deploying-branches-with-capistrano.html
 current_branch = `git branch`.match(/\* (\S+)\s/m)[1]
 
 # use the branch specified as a param, then use the current branch. If all fails use master branch
-set :branch, ENV['branch'] || current_branch || "develop" # you can use the 'branch' parameter on deployment to specify the branch you wish to deploy
+set :branch, ENV['branch'] || current_branch || "master" # you can use the 'branch' parameter on deployment to specify the branch you wish to deploy
 
 set :user, 'drs'
 set :rails_env, :secondary
@@ -125,12 +125,12 @@ end
 
 before 'deploy:restart_workers', 'rvm1:hook'
 
-before 'deploy:assets_kludge', 'deploy:clear_cache'
+# before 'deploy:assets_kludge', 'deploy:clear_cache'
 
 # These hooks execute in the listed order after the deploy:updating task
 # occurs.  This is the task that handles refreshing the app code, so this
 # should only fire on actual deployments.
-before 'deploy:starting', 'deploy:stop_httpd'
+# before 'deploy:starting', 'deploy:stop_httpd'
 before 'deploy:starting', 'deploy:update_clamav'
 
 after 'deploy:updating', 'deploy:nokogiri'
@@ -140,10 +140,10 @@ after 'deploy:updating', 'bundler:install'
 after 'deploy:updating', 'deploy:copy_yml_file'
 after 'deploy:updating', 'deploy:migrate'
 after 'deploy:updating', 'deploy:whenever'
-after 'deploy:updating', 'deploy:assets_kludge'
+# after 'deploy:updating', 'deploy:assets_kludge'
 
-after 'deploy:finished', 'deploy:start_solrizerd'
+# after 'deploy:finished', 'deploy:start_solrizerd'
 after 'deploy:finished', 'deploy:flush_redis'
-after 'deploy:finished', 'deploy:start_httpd'
-after 'deploy:finished', 'deploy:restart_workers'
+# after 'deploy:finished', 'deploy:start_httpd'
+# after 'deploy:finished', 'deploy:restart_workers'
 # after 'deploy:finished', 'deploy:generate_sitemap'

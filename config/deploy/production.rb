@@ -7,7 +7,7 @@ set :deploy_to, '/home/drs/apps/develop/'
 current_branch = `git branch`.match(/\* (\S+)\s/m)[1]
 
 # use the branch specified as a param, then use the current branch. If all fails use master branch
-set :branch, ENV['branch'] || current_branch || "develop" # you can use the 'branch' parameter on deployment to specify the branch you wish to deploy
+set :branch, ENV['branch'] || current_branch || "master" # you can use the 'branch' parameter on deployment to specify the branch you wish to deploy
 
 set :user, 'drs'
 set :rails_env, :production
