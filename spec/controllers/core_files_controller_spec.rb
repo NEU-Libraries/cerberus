@@ -21,7 +21,7 @@ describe CoreFilesController do
     it "goes to the upload page for users with no incomplete files and edit permissions on the assigned parent" do
       sign_in bill
 
-      get :new, { parent: root.identifier }
+      get :new, { parent: root.pid }
 
       expect(response).to render_template('core_files/new')
     end
@@ -32,7 +32,7 @@ describe CoreFilesController do
       a = FactoryGirl.create(:bills_incomplete_file)
 
       Timecop.travel(7.hours) do
-        get :new, { parent: root.identifier }
+        get :new, { parent: root.pid }
         expect(response).to redirect_to(rescue_incomplete_file_path(abandoned: a.pid))
       end
     end
@@ -40,7 +40,7 @@ describe CoreFilesController do
     it "403s if authed user has no edit permissions on the parent object" do
       sign_in bo
 
-      get :new, { parent: root.identifier }
+      get :new, { parent: root.pid }
 
       response.status.should == 403
     end
