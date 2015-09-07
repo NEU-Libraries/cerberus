@@ -6,6 +6,11 @@ describe CollectionsController do
   let(:root)             { FactoryGirl.create(:root_collection) }
   let(:bills_collection) { FactoryGirl.create(:bills_private_collection) }
 
+  before :all do
+    `mysql -u "#{ENV["HANDLE_TEST_USERNAME"]}" < "#{Rails.root}"/spec/fixtures/files/handlesTEST.sql`
+    @client = Mysql2::Client.new(:host => "#{ENV["HANDLE_TEST_HOST"]}", :username => "#{ENV["HANDLE_TEST_USERNAME"]}", :password => "#{ENV["HANDLE_TEST_PASSWORD"]}", :database => "#{ENV["HANDLE_TEST_DATABASE"]}")
+  end
+
   describe "GET #index" do
     #TODO Implement
   end
@@ -30,13 +35,13 @@ describe CollectionsController do
     it "renders the new page when a parent is set" do
       sign_in bill
 
-      get :new, { parent: root.identifier }
+      get :new, { parent: root.pid }
 
       expect(response).to render_template('shared/sets/new')
     end
 
     it "requests signin from unauthenticated users" do
-      get :new, { parent: root.identifier }
+      get :new, { parent: root.pid }
 
       expect(response).to redirect_to(new_user_session_path)
     end
@@ -44,7 +49,7 @@ describe CollectionsController do
     it "renders a 403 page for users without edit access to the parent object" do
       sign_in bo
 
-      get :new, {parent: root.identifier}
+      get :new, {parent: root.pid}
 
       response.status.should == 403
     end
@@ -71,7 +76,7 @@ describe CollectionsController do
 
       post :create, {set: attrs}
 
-      id = assigns(:set).identifier
+      id = assigns(:set).pid
       expect(response).to redirect_to(collection_path(id: id))
     end
 
@@ -85,7 +90,7 @@ describe CollectionsController do
 
       post :create, { set: { parent: employee_root.pid, user_parent: employee.nuid, title: "New" } }
 
-      id = assigns(:set).identifier
+      id = assigns(:set).pid
       assigns(:set).smart_collection_type.should == 'miscellany'
       expect(response).to redirect_to(collection_path(id: id))
     end
@@ -96,21 +101,21 @@ describe CollectionsController do
     it "403s for users without read access" do
       sign_in bo
 
-      get :show, { id: bills_collection.identifier }
+      get :show, { id: bills_collection.pid }
 
       response.status.should == 403
     end
 
     it "403s for unauthenticated users when collection is private" do
 
-      get :show, { id: bills_collection.identifier }
+      get :show, { id: bills_collection.pid }
 
       response.status.should == 403
     end
 
     it "renders the show template for unauthed users on public collections" do
 
-      get :show, { id: root.identifier }
+      get :show, { id: root.pid }
 
       expect(response).to render_template('shared/sets/show')
     end
@@ -118,7 +123,7 @@ describe CollectionsController do
     it "renders the show template for users with proper permissions" do
       sign_in bill
 
-      get :show, { id: bills_collection.identifier }
+      get :show, { id: bills_collection.pid }
 
       expect(response).to render_template('shared/sets/show')
     end
@@ -132,7 +137,7 @@ describe CollectionsController do
   describe "GET #edit" do
 
     it "requests signin from unauthed users" do
-      get :edit, { id: bills_collection.identifier }
+      get :edit, { id: bills_collection.pid }
 
       expect(response).to redirect_to(new_user_session_path)
     end
@@ -140,7 +145,7 @@ describe CollectionsController do
     it "403s for users without edit access" do
       sign_in bo
 
-      get :edit, { id: bills_collection.identifier }
+      get :edit, { id: bills_collection.pid }
 
       response.status.should == 403
     end
@@ -148,7 +153,7 @@ describe CollectionsController do
     it "renders the page for users with edit access" do
       sign_in bill
 
-      get :edit, { id: bills_collection.identifier }
+      get :edit, { id: bills_collection.pid }
 
       expect(response).to render_template('shared/sets/edit')
     end
@@ -156,7 +161,7 @@ describe CollectionsController do
 
   describe "PUTS #update" do
     it "requests signin from unauthenticated users" do
-      put :update, { id: root.identifier }
+      put :update, { id: root.pid }
 
       expect(response).to redirect_to(new_user_session_path)
     end
@@ -164,7 +169,7 @@ describe CollectionsController do
     it "403s when a user without edit access tries to modify a collection" do
       sign_in bo
 
-      put :update, { id: bills_collection.identifier, set: {title: "New Title" } }
+      put :update, { id: bills_collection.pid, set: {title: "New Title" } }
 
       response.status.should == 403
     end
@@ -172,7 +177,7 @@ describe CollectionsController do
     it "does not allow users with read permissions to edit a collection" do
       sign_in bo
 
-      put :update ,{ id: root.identifier, :set => { title: "New Title" } }
+      put :update ,{ id: root.pid, :set => { title: "New Title" } }
 
       response.status.should == 403
     end
@@ -180,10 +185,14 @@ describe CollectionsController do
     it "succeeds for users with edit permissions on the collection" do
       sign_in bill
 
-      put :update, { id: bills_collection.identifier, set: { title: "nu title" } }
+      put :update, { id: bills_collection.pid, set: { title: "nu title" } }
 
       assigns(:set).title.should == "nu title"
-      expect(response).to redirect_to(collection_path(id: bills_collection.identifier))
+      expect(response).to redirect_to(collection_path(id: bills_collection.pid))
     end
+  end
+
+  after :all do
+    @client.query("DROP DATABASE #{ENV["HANDLE_TEST_DATABASE"]};")
   end
 end

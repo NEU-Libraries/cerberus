@@ -3,6 +3,9 @@ require 'spec_helper'
 feature "Creating a collection" do
 
   before :all do
+    `mysql -u "#{ENV["HANDLE_TEST_USERNAME"]}" < "#{Rails.root}"/spec/fixtures/files/handlesTEST.sql`
+    @client = Mysql2::Client.new(:host => "#{ENV["HANDLE_TEST_HOST"]}", :username => "#{ENV["HANDLE_TEST_USERNAME"]}", :password => "#{ENV["HANDLE_TEST_PASSWORD"]}", :database => "#{ENV["HANDLE_TEST_DATABASE"]}")
+    
     User.all.each do |user|
       user.destroy
     end
@@ -32,14 +35,14 @@ feature "Creating a collection" do
   describe "Signed Access and Form Creation" do
     scenario "Authenticated Creation and Edit" do
       features_sign_in bill
-      visit new_collection_path(parent: @root.identifier)
+      visit new_collection_path(parent: @root.pid)
 
       # Because we authenticated we don't get booted out.
       current_path.should == '/collections/new'
 
       # Verifies that hidden 'parent' parameter is set correctly
       page.all('input#collection_parent').length.should == 1
-      page.all('input#collection_parent').first.value.should == @root.identifier
+      page.all('input#collection_parent').first.value.should == @root.pid
 
       # Fill out and submit the Collection creation form.
       fill_in 'Title', with: "My Title"
@@ -68,5 +71,9 @@ feature "Creating a collection" do
     Collection.find(:all).each do |coll|
       coll.destroy
     end
+  end
+
+  after :all do
+    @client.query("DROP DATABASE #{ENV["HANDLE_TEST_DATABASE"]};")
   end
 end

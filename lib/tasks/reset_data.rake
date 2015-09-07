@@ -10,6 +10,7 @@ def create_collection(klass, parent_str, title_str, description = "Lorem ipsum d
   col = klass.new(parent: parent_str, pid: newPid, identifier: newPid, title: title_str, description: description)
 
   col.rightsMetadata.permissions({group: 'public'}, 'read')
+  col.identifier = make_handle("#{Rails.configuration.persistent_collection_path}#{col.pid}")
   col.save!
 
   set_edit_permissions(col)
