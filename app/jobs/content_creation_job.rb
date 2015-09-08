@@ -123,7 +123,7 @@ class ContentCreationJob
         zipfile_name = Rails.root.join("tmp", z).to_s
 
         # Load our content into said zipfile.
-        Zip::Archive.open(zipfile_name, Zip::CREATE) do |zipfile|
+        Zip::File.open(zipfile_name, Zip::File::CREATE) do |zipfile|
           zipfile.add_file(file_path)
         end
 

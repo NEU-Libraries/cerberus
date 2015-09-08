@@ -37,7 +37,7 @@ class ZipCompilationJob
 
     zipfile_name = safe_zipfile_name
 
-    Zip::Archive.open(safe_zipfile_name, Zip::CREATE) do |io|
+    Zip::File.open(zipfile_name, Zip::File::CREATE) do |zipfile|
       self.entry_ids.each do |id|
 
         if CoreFile.exists?(id)
@@ -47,12 +47,14 @@ class ZipCompilationJob
               if !user.nil? ? user.can?(:read, content) : content.public?
                 if content.content.content && content.class != ImageThumbnailFile
                   download_label = I18n.t("drs.display_labels.#{content.klass}.download")
-                  io.add_buffer("#{self.title}/neu_#{id.split(":").last}-#{download_label}.#{extract_extension(content.properties.mime_type.first)}", content.content.content)
+                  zipfile.get_output_stream("#{self.title}/neu_#{id.split(":").last}-#{download_label}.#{extract_extension(content.properties.mime_type.first)}") { |f| f.write content.content.content }
+                  # zipfile.add_buffer("#{self.title}/neu_#{id.split(":").last}-#{download_label}.#{extract_extension(content.properties.mime_type.first)}", content.content.content)
                 end
               end
             end
           end
         end
+        
       end
     end
 
