@@ -23,7 +23,7 @@ class ProcessZipJob
   end
 
   def unzip(file, load_report, client)
-    Zip::Archive.open(file) do |zipfile|
+    Zip::File.open(file) do |zipfile|
       to = File.join(File.dirname(file), File.basename(file, ".*"))
       FileUtils.mkdir(to) unless File.exists? to
       count = 0

@@ -36,11 +36,13 @@ describe ZipCompilationJob do
     end
 
     it "adds the zipfile and removes the old zipfile" do
+      puts "DGC DEBUG"
+      puts Dir.glob("#{@zip_dir}/**")
       Dir.glob("#{@zip_dir}/**").length.should be 1
     end
 
     it "creates a zipfile with the right files in it" do
-      Zip::Archive.open(archive) do |ar|
+      Zip::File.open(archive) do |zipfile|
         t = @compilation.title
 
         ugly_from_fine = Proc.new do |x|
