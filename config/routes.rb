@@ -92,6 +92,9 @@ Cerberus::Application.routes.draw do
    get "/loaders/emsa/new" => 'emsa_loads#new', as: 'loaders_emsa'
    get "/loaders/emsa/report/:id" => 'emsa_loads#show', as: 'loaders_emsa_report'
    get "/loaders/emsa/file/:id" => 'emsa_loads#show_iptc', as: 'loaders_emsa_iptc'
+   resources :multipage_loads, only: [:new, :create, :show], :path => "loaders/multipage"
+   get "/loaders/multipage/new" => 'multipage_loads#new', as: 'loaders_multipage'
+   get "/loaders/multipage/report/:id" => 'multipage_loads#show', as: 'loaders_multipage_report'
   end
 
   # Facets for communities and collections
