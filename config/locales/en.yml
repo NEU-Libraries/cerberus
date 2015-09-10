@@ -204,7 +204,7 @@ en:
         copyright: ""
       multipage:
         long_name: "Multipage"
-        short_name: "multi"
+        short_name: "multipage"
         copyright: ""
       emsa:
         long_name: "Enrollment Management and Student Affairs"
