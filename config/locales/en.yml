@@ -202,6 +202,10 @@ en:
         long_name: "College of Professional Studies"
         short_name: "cps"
         copyright: ""
+      multipage:
+        long_name: "Multipage"
+        short_name: "multi"
+        copyright: ""
       emsa:
         long_name: "Enrollment Management and Student Affairs"
         short_name: "emsa"
