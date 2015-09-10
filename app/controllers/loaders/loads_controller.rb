@@ -91,7 +91,7 @@ class Loaders::LoadsController < ApplicationController
         FileUtils.mv(file.tempfile.path, new_file)
         #if zip
         if extract_mime_type(new_file) == 'application/zip'
-          if short_name == "multi"
+          if short_name == "multipage"
             # multipage zip job
             Cerberus::Application::Queue.push(ProcessMultipageZipJob.new(@loader_name, new_file.to_s, parent, copyright, current_user, permissions))
           else
