@@ -27,26 +27,19 @@ class ProcessMultipageZipJob
       to = File.join(File.dirname(file), File.basename(file, ".*"))
       FileUtils.mkdir(to) unless File.exists? to
       count = 0
+
+      # Extract all files
       zipfile.each do |f|
         if !f.directory? && File.basename(f.name)[0] != "." # Don't extract directories or mac specific files
-          file_name = File.basename(f.name)
-          uniq_hsh = Digest::MD5.hexdigest("#{f.name}")[0,2]
-          fpath = File.join(to, "#{Time.now.to_i.to_s}-#{uniq_hsh}") # Names file time and hash string
-          open(fpath, 'wb') do |z|
-            z << f.read
-          end
-          # ImageProcessingJob.new(fpath, file_name, parent, copyright, load_report.id, permissions, client).run
-          load_report.update_counts
-          count = count + 1
-          load_report.save!
+          fpath = File.join(to, f.name)
+          FileUtils.mkdir_p(File.dirname(fpath))
+          zipfile.extract(f, fpath) unless File.exist?(fpath)
         end
       end
-      load_report.number_of_files = count
-      if load_report.success_count + load_report.fail_count == load_report.number_of_files
-        LoaderMailer.load_alert(load_report, User.find_by_nuid(load_report.nuid)).deliver!
-        FileUtils.rmdir(to)
-      end
-      load_report.save!
+
+      # Find the spreadsheet
+      
+
     end
     FileUtils.rm(file)
   end
