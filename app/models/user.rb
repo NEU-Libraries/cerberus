@@ -162,6 +162,10 @@ class User < ActiveRecord::Base
     return self.groups.include? "northeastern:drs:repository:loaders:emsa_emc"
   end
 
+  def multipage_loader?
+    return self.groups.include? "northeastern:drs:repository:loaders:multipage_loader"
+  end
+
   def loaders
     loaders = []
     if self.marcom_loader?
@@ -175,6 +179,9 @@ class User < ActiveRecord::Base
     end
     if self.emsa_loader?
       loaders.push(I18n.t("drs.loaders.emsa.long_name"))
+    end
+    if self.multipage_loader?
+      loaders.push(I18n.t("drs.loaders.multipage.long_name"))
     end
     return loaders
   end
