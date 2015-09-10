@@ -2,7 +2,7 @@ class ProcessIptcZipJob
   attr_accessor :loader_name, :zip_path, :parent, :copyright, :current_user, :permissions, :client
 
   def queue_name
-    :iptc_process_zip
+    :multipage_process_zip
   end
 
   def initialize(loader_name, zip_path, parent, copyright, current_user, permissions, client=nil)
