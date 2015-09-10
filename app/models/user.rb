@@ -163,7 +163,7 @@ class User < ActiveRecord::Base
   end
 
   def multipage_loader?
-    return self.groups.include? "northeastern:drs:repository:loaders:multipage_loader"
+    return self.groups.include? "northeastern:drs:repository:loaders:multipage"
   end
 
   def loaders
