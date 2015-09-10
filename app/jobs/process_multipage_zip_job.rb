@@ -1,8 +1,8 @@
-class ProcessZipJob
+class ProcessMultipageZipJob
   attr_accessor :loader_name, :zip_path, :parent, :copyright, :current_user, :permissions, :client
 
   def queue_name
-    :loader_process_zip
+    :iptc_process_zip
   end
 
   def initialize(loader_name, zip_path, parent, copyright, current_user, permissions, client=nil)
@@ -35,7 +35,7 @@ class ProcessZipJob
           open(fpath, 'wb') do |z|
             z << f.read
           end
-          ImageProcessingJob.new(fpath, file_name, parent, copyright, load_report.id, permissions, client).run
+          # ImageProcessingJob.new(fpath, file_name, parent, copyright, load_report.id, permissions, client).run
           load_report.update_counts
           count = count + 1
           load_report.save!
