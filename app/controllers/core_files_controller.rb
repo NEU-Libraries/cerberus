@@ -387,7 +387,7 @@ class CoreFilesController < ApplicationController
 
     def fetch_mods
       Rails.cache.fetch("/mods/#{@core_file.pid}-#{@core_file.updated_at}", :expires_in => 12.hours) do
-        render_mods_display(CoreFile.find(@core_file.pid)).to_html.html_safe
+        Sanitize.clean(Kramdown::Document.new(render_mods_display(CoreFile.find(@core_file.pid))).to_html, :elements => ['sup', 'sub', 'dt', 'dd', 'br', 'a']).html_safe
       end
     end
 
