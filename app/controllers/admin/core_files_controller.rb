@@ -25,7 +25,7 @@ class Admin::CoreFilesController < AdminController
   # routed to /admin/files/:id
   def show
     @core_file = ActiveFedora::Base.find(params[:id], cast: true)
-    @mods = render_mods_display(CoreFile.find(@core_file.pid)).to_html.html_safe
+    @mods = Sanitize.clean(Kramdown::Document.new(render_mods_display(CoreFile.find(@core_file.pid))).to_html, :elements => ['sup', 'sub', 'dt', 'dd', 'br', 'a']).html_safe
     @thumbs = @core_file.thumbnail_list
     @page_title = @core_file.title
   end
