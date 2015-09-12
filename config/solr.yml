@@ -10,3 +10,5 @@ cucumber:
   <<: *TEST
 production:
   url: http://solr.lib.neu.edu:8080/solr/development
+secondary:
+  url: http://solr.lib.neu.edu:8080/solr/development
