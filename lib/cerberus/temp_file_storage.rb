@@ -4,7 +4,7 @@ module Cerberus::TempFileStorage
     def move_file_to_tmp(file)
       # We move the file contents to a more permanent location so that our various jobs can access them.
       # An ensure block in that job handles cleanup of this file.
-      if Rails.env.production?
+      if Rails.env.production? || Rails.env.secondary?
         tempdir = Pathname.new("/tmp/DRStmp/")
       else
         tempdir = Rails.root.join("tmp")
