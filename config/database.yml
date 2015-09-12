@@ -33,3 +33,11 @@ production:
   username: drs
   password: <%= ENV["MYSQL_PASSWD"] %>
   host: localhost
+
+secondary:
+  adapter: mysql2
+  encoding: utf8
+  database: drs
+  username: drs
+  password: <%= ENV["MYSQL_PASSWD"] %>
+  host: nb4404.neu.edu
