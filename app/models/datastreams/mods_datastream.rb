@@ -222,7 +222,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
     solr_doc["title_ssi"] = kramdown_parse(self.title_info.title.first).downcase
 
     # Full title so the api doesn't have to parse it
-    solr_doc["full_title_ssi"] = "#{self.non_sort.first} #{kramdown_parse(self.title_info.title.first)}"
+    solr_doc["full_title_ssi"] = "#{self.non_sort.first} #{kramdown_parse(self.title_info.title.first)}".strip
 
     # Sortable for date
     solr_doc["date_ssi"] = self.date.first
