@@ -39,7 +39,7 @@ namespace :deploy do
   desc "Tell nokogiri to use system libs"
   task :nokogiri do
     on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd #{release_path} && (RAILS_ENV=production /tmp/drs/rvm-auto.sh . bundle config build.nokogiri --use-system-libraries)"
+      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle config build.nokogiri --use-system-libraries)"
     end
   end
 
