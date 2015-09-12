@@ -48,7 +48,7 @@ Cerberus::Application.configure do
   Rails.application.routes.default_url_options[:host] = "repository.library.northeastern.edu"
   config.force_ssl = true
 
-  config.cache_store = :redis_store, 'redis://localhost:6379/0/cache', { expires_in: 12.hours }
+  config.cache_store = :redis_store, 'redis://nb4404.neu.edu:6379/0/cache', { expires_in: 12.hours }
 
   # Mailer configuration
   ActionMailer::Base.smtp_settings = {
