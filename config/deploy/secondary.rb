@@ -106,7 +106,7 @@ namespace :deploy do
   desc 'Flush Redis'
   task :flush_redis do
     on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd #{release_path} && (RAILS_ENV=secondary /tmp/drs/rvm-auto.sh . redis-cli FLUSHALL)"
+      execute "cd #{release_path} && (RAILS_ENV=secondary /tmp/drs/rvm-auto.sh . redis-cli -h nb4404.neu.edu FLUSHALL)"
     end
   end
 
