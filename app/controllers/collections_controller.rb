@@ -4,6 +4,7 @@ require 'parslet'
 require 'parsing_nesting/tree'
 
 class CollectionsController < ApplicationController
+  include HandleHelper
   include Cerberus::TempFileStorage
   include Cerberus::ControllerHelpers::EditableObjects
   include Cerberus::ControllerHelpers::PermissionsCheck
