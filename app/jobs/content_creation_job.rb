@@ -29,6 +29,7 @@ class ContentCreationJob
 
       klass = core_record.canonical_class.constantize
       content_object = klass.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
+      content_object.save!
 
       if !poster_path.blank? # Video or Audio posters
         poster_object = ImageMasterFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint), core_record: core_record)
@@ -46,17 +47,26 @@ class ContentCreationJob
       if content_object.instance_of? ZipFile
         # Is it literally a zipfile? or did it just fail to be the other types...
         if File.extname(file_path) == ".zip"
-          File.open(file_path) do |file_contents|
-            content_object.add_file(file_contents, 'content', file_name)
-            content_object.save!
+          if File.size(file_path) / 1024000 > 500
+            large_upload(file_path, 'content')
+          else
+            File.open(file_path) do |file_contents|
+              content_object.add_file(file_contents, 'content', file_name)
+              content_object.save!
+            end
           end
         else
           zip_content(content_object)
         end
       else
-        File.open(file_path) do |file_contents|
-          content_object.add_file(file_contents, 'content', file_name)
-          content_object.save!
+        # if file is large, we http kludge it in to avoid loading into memory
+        if File.size(file_path) / 1024000 > 500
+          large_upload(file_path, 'content')
+        else
+          File.open(file_path) do |file_contents|
+            content_object.add_file(file_contents, 'content', file_name)
+            content_object.save!
+          end
         end
       end
 
@@ -114,6 +124,19 @@ class ContentCreationJob
   end
 
   private
+
+    def large_upload(file_path, dsid)
+      url = URI("#{ActiveFedora.config.credentials[:url]}")
+      req = Net::HTTP::Post.new("#{ActiveFedora.config.credentials[:url]}/objects/#{content_object.pid}/datastreams/#{dsid}?controlGroup=M")
+      req.basic_auth("#{ActiveFedora.config.credentials[:user]}", "#{ActiveFedora.config.credentials[:password]}")
+      req.add_field("Content-Type", "#{extract_mime_type(file_path)}")
+      req.add_field("Transfer-Encoding", "chunked")
+      req.body_stream = File.open(file_path)
+      res = Net::HTTP.start(url.host, url.port) {|http|
+          http.request(req)
+      }
+      return res
+    end
 
     def zip_content(content_object)
       begin
