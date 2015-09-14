@@ -24,7 +24,7 @@ describe ProcessZipJob do
     end
 
     it 'removes zip file from tmp dir' do
-      File.exist?("#{Rails.root}/tmp/#{Time.now.to_i.to_s}-#{@uniq_hsh}.zip").should be false
+      File.exist?("#{Rails.application.config.tmp_path}/#{Time.now.to_i.to_s}-#{@uniq_hsh}.zip").should be false
     end
 
     it 'triggers image report job' do

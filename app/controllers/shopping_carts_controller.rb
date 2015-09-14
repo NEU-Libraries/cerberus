@@ -77,8 +77,8 @@ class ShoppingCartsController < ApplicationController
   # HTML requests bring the user to the download.html page and fire off the cart download job.
   # JS requests handle eventually triggering the download once on the download page.
   def download
-    dir = "#{Rails.root}/tmp/carts/#{request.session_options[:id]}/"
-    f = "#{Rails.root}/tmp/carts/#{request.session_options[:id]}/drs_queue.zip"
+    dir = "#{Rails.application.config.tmp_path}/carts/#{request.session_options[:id]}/"
+    f = "#{Rails.application.config.tmp_path}/carts/#{request.session_options[:id]}/drs_queue.zip"
 
     respond_to do |format|
       format.html do
@@ -100,7 +100,7 @@ class ShoppingCartsController < ApplicationController
 
   # Actually trigger a download.
   def fire_download
-    f = "#{Rails.root}/tmp/carts/#{request.session_options[:id]}/drs_queue.zip"
+    f = "#{Rails.application.config.tmp_path}/carts/#{request.session_options[:id]}/drs_queue.zip"
     send_file(f)
   end
 
