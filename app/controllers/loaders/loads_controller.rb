@@ -78,11 +78,7 @@ class Loaders::LoadsController < ApplicationController
     def process_file(file, parent, copyright, permissions, short_name)
       @loader_name = t('drs.loaders.'+short_name+'.long_name')
       if virus_check(file) == 0
-        if Rails.env.production? || Rails.env.secondary?
-          tempdir = Pathname.new("/tmp/DRStmp/")
-        else
-          tempdir = Rails.root.join("tmp")
-        end
+        tempdir = Pathname.new("#{Rails.application.config.tmp_path}/")
 
         uniq_hsh = Digest::MD5.hexdigest("#{file.original_filename}")[0,2]
         file_name = "#{Time.now.to_i.to_s}-#{uniq_hsh}"
