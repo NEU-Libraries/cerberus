@@ -48,7 +48,7 @@ class ContentCreationJob
         # Is it literally a zipfile? or did it just fail to be the other types...
         if File.extname(file_path) == ".zip"
           if File.size(file_path) / 1024000 > 500
-            large_upload(file_path, 'content')
+            large_upload(content_object, file_path, 'content')
           else
             File.open(file_path) do |file_contents|
               content_object.add_file(file_contents, 'content', file_name)
@@ -61,7 +61,7 @@ class ContentCreationJob
       else
         # if file is large, we http kludge it in to avoid loading into memory
         if File.size(file_path) / 1024000 > 500
-          large_upload(file_path, 'content')
+          large_upload(content_object, file_path, 'content')
         else
           File.open(file_path) do |file_contents|
             content_object.add_file(file_contents, 'content', file_name)
@@ -125,7 +125,7 @@ class ContentCreationJob
 
   private
 
-    def large_upload(file_path, dsid)
+    def large_upload(content_object, file_path, dsid)
       url = URI("#{ActiveFedora.config.credentials[:url]}")
       req = Net::HTTP::Post.new("#{ActiveFedora.config.credentials[:url]}/objects/#{content_object.pid}/datastreams/#{dsid}?controlGroup=M")
       req.basic_auth("#{ActiveFedora.config.credentials[:user]}", "#{ActiveFedora.config.credentials[:password]}")
