@@ -105,5 +105,11 @@ module Cerberus
     config.ffmpeg_path = 'ffmpeg'
     config.enable_ffmpeg = false
     config.temp_file_base = nil
+
+    if Rails.env.production? || Rails.env.secondary?
+      config.tmp_path = "/tmp/DRStmp"
+    else
+      config.tmp_path = "#{Rails.root}/tmp"
+    end
   end
 end
