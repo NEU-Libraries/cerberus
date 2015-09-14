@@ -110,7 +110,7 @@ class CompilationsController < ApplicationController
   end
 
   def download
-    path_to_dl = Dir["#{Rails.root}/tmp/#{params[:id]}/*"].first
+    path_to_dl = Dir["#{Rails.application.config.tmp_path}/#{params[:id]}/*"].first
     send_file path_to_dl
   end
 
@@ -163,6 +163,6 @@ class CompilationsController < ApplicationController
   def safe_zipfile_name
     safe_title = @compilation.title.gsub(/\s+/, "")
     safe_title = safe_title.gsub(":", "_")
-    return "#{Rails.root}/tmp/#{@compilation.pid}/#{safe_title}.zip"
+    return "#{Rails.application.config.tmp_path}/#{@compilation.pid}/#{safe_title}.zip"
   end
 end

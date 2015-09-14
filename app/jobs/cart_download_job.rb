@@ -19,7 +19,7 @@ class CartDownloadJob
   # currently executed from.
   def run
     self.user = !nuid.blank? ? User.find_by_nuid(nuid) : nil
-    self.path = "#{Rails.root}/tmp/carts/#{sess_id}"
+    self.path = "#{Rails.application.config.tmp_path}/carts/#{sess_id}"
 
     FileUtils.mkdir_p path
     full_path = "#{path}/drs_queue.zip"
