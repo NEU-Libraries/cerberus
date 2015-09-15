@@ -1,3 +1,5 @@
+require 'net/http/post/multipart'
+
 class ContentCreationJob
   include MimeHelper
   include ChecksumHelper
@@ -126,16 +128,14 @@ class ContentCreationJob
   private
 
     def large_upload(content_object, file_path, dsid)
-      url = URI("#{ActiveFedora.config.credentials[:url]}")
-      req = Net::HTTP::Post.new("#{ActiveFedora.config.credentials[:url]}/objects/#{content_object.pid}/datastreams/#{dsid}?controlGroup=M")
-      req.basic_auth("#{ActiveFedora.config.credentials[:user]}", "#{ActiveFedora.config.credentials[:password]}")
-      req.add_field("Content-Type", "#{extract_mime_type(file_path)}")
-      req.add_field("Transfer-Encoding", "chunked")
-      req.body_stream = File.open(file_path)
-      res = Net::HTTP.start(url.host, url.port) {|http|
+      url = URI.parse("#{ActiveFedora.config.credentials[:url]}")
+      File.open(file_path) do |item|
+        req = Net::HTTP::Post::Multipart.new("#{ActiveFedora.config.credentials[:url]}/objects/#{content_object.pid}/datastreams/#{dsid}?controlGroup=M", "file" => UploadIO.new(item, "#{extract_mime_type(file_path)}", "duck.jpeg"))
+        req.basic_auth("#{ActiveFedora.config.credentials[:user]}", "#{ActiveFedora.config.credentials[:password]}")
+        res = Net::HTTP.start(url.host, url.port) do |http|
           http.request(req)
-      }
-      return res
+        end
+      end
     end
 
     def zip_content(content_object)
