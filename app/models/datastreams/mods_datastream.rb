@@ -247,10 +247,17 @@ class ModsDatastream < ActiveFedora::OmDatastream
     (0..self.personal_name.length).each do |i|
       fn = self.personal_name(i).name_part_given
       ln = self.personal_name(i).name_part_family
+      full_name = self.personal_name(i).name_part
 
       if fn.any? && ln.any?
         # Kramdown parse for search purposes - #439
         full_names << kramdown_parse("#{ln.first}, #{fn.first}")
+      elsif full_name.any?
+        name_array = Namae.parse full_name.first
+        name_obj = name_array[0]
+        if !name_obj.nil? && !name_obj.given.blank? && !name_obj.family.blank?
+          full_names << kramdown_parse("#{name_obj.family}, #{name_obj.given}")
+        end
       end
     end
 
@@ -499,7 +506,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
     first_names = []
     last_names = []
 
-    (0..self.mods.personal_name.length).each do |i|
+    for i in (0..(self.personal_name.length - 1))
       fn = self.personal_name(i).name_part_given
       ln = self.personal_name(i).name_part_family
       full_name = self.personal_name(i).name_part
