@@ -7,10 +7,10 @@ describe ImageProcessingJob do
     @client = Mysql2::Client.new(:host => "#{ENV["HANDLE_TEST_HOST"]}", :username => "#{ENV["HANDLE_TEST_USERNAME"]}", :password => "#{ENV["HANDLE_TEST_PASSWORD"]}", :database => "#{ENV["HANDLE_TEST_DATABASE"]}")
     @collection = FactoryGirl.create(:root_collection)
     @file_name = File.basename(o_path)
-    FileUtils.cp(o_path, "#{Rails.root}/tmp/#{@file_name}")
+    FileUtils.cp(o_path, "#{Rails.application.config.tmp_path}/#{@file_name}")
     @uniq_hsh = Digest::MD5.hexdigest("#{File.basename(o_path)}")[0,2]
-    File.rename("#{Rails.root}/tmp/#{@file_name}", "#{Rails.root}/tmp/#{Time.now.to_i.to_s}-#{@uniq_hsh}") # Names file time and hash string
-    @fpath = "#{Rails.root}/tmp/#{Time.now.to_i.to_s}-#{@uniq_hsh}"
+    File.rename("#{Rails.application.config.tmp_path}/#{@file_name}", "#{Rails.application.config.tmp_path}/#{Time.now.to_i.to_s}-#{@uniq_hsh}") # Names file time and hash string
+    @fpath = "#{Rails.application.config.tmp_path}/#{Time.now.to_i.to_s}-#{@uniq_hsh}"
     @parent = @collection.pid
     @copyright = "Test Copyright Statement"
     @user = FactoryGirl.create(:user)
@@ -138,7 +138,7 @@ describe ImageProcessingJob do
       end
 
       it 'removes tmp file' do
-        File.exist?("#{Rails.root}/tmp/#{Time.now.to_i.to_s}-#{@uniq_hsh}").should be false
+        File.exist?("#{Rails.application.config.tmp_path}/#{Time.now.to_i.to_s}-#{@uniq_hsh}").should be false
       end
 
       it 'creates success report' do

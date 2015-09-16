@@ -54,8 +54,8 @@ describe ContentCreationJob, unless: $in_travis do
     @user = FactoryGirl.create(:user)
     @core = FactoryGirl.create(:complete_file, depositor: @user.nuid)
     @fn = File.basename(o_path)
-    FileUtils.cp(o_path, "#{Rails.root}/tmp/#{@fn}")
-    @path = "#{Rails.root}/tmp/#{@fn}"
+    FileUtils.cp(o_path, "#{Rails.application.config.tmp_path}/#{@fn}")
+    @path = "#{Rails.application.config.tmp_path}/#{@fn}"
     @core.instantiate_appropriate_content_object(@path)
     @master = ContentCreationJob.new(@core.pid, @path, @fn).run
   end
@@ -124,8 +124,8 @@ describe ContentCreationJob, unless: $in_travis do
       @user = FactoryGirl.create(:user)
       @core = FactoryGirl.create(:complete_file, depositor: @user.nuid)
       @fn = File.basename("#{Rails.root}/spec/fixtures/files/test_pic.jpeg")
-      FileUtils.cp("#{Rails.root}/spec/fixtures/files/test_pic.jpeg", "#{Rails.root}/tmp/#{@fn}")
-      @path = "#{Rails.root}/tmp/#{@fn}"
+      FileUtils.cp("#{Rails.root}/spec/fixtures/files/test_pic.jpeg", "#{Rails.application.config.tmp_path}/#{@fn}")
+      @path = "#{Rails.application.config.tmp_path}/#{@fn}"
       @core.instantiate_appropriate_content_object(@path)
       @permissions = {"ImageMasterFile" => {"read"  => ["northeastern:drs:repository:test"], "edit" => ["northeastern:drs:repository:master"]}}
       @master = ContentCreationJob.new(@core.pid, @path, @fn, nil, 0, 0, 0, true, @permissions).run

@@ -67,6 +67,6 @@ class ZipCompilationJob
     def safe_zipfile_name
       safe_title = self.title.gsub(/\s+/, "")
       safe_title = safe_title.gsub(":", "_")
-      return "#{Rails.root}/tmp/#{self.comp_pid}/#{safe_title}.zip"
+      return "#{Rails.application.config.tmp_path}/#{self.comp_pid}/#{safe_title}.zip"
     end
 end
