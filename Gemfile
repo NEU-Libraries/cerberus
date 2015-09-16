@@ -60,7 +60,6 @@ gem 'multi_json', '~> 1.7.9'
 # Test coverage service
 gem 'coveralls', require: false
 gem 'diffy'
-gem 'multipart-post'
 
 gem "ruby-prof"
 gem 'picturefill'
