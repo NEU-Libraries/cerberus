@@ -19,10 +19,18 @@ class ProcessMultipageZipJob
     report_id = Loaders::LoadReport.create_from_strings(current_user, 0, loader_name, parent)
     load_report = Loaders::LoadReport.find(report_id)
     # unzip zip file to tmp storage
-    unzip(zip_path, load_report, client)
+    spreadsheet_file_path = unzip(zip_path, load_report, client)
+
+    process_spreadsheet(spreadsheet_file_path)
+  end
+
+  def process_spreadsheet(spreadsheet_file_path)
+    
   end
 
   def unzip(file, load_report, client)
+    spreadsheet_file_path = ""
+
     Zip::File.open(file) do |zipfile|
       to = File.join(File.dirname(file), File.basename(file, ".*"))
       FileUtils.mkdir(to) unless File.exists? to
@@ -38,9 +46,18 @@ class ProcessMultipageZipJob
       end
 
       # Find the spreadsheet
-      
+      xlsx_array = Dir.glob("#{Rails.application.config.tmp_path}/1442429470-31/*.xlsx")
 
+      if xlsx_array.length > 1
+        raise Exceptions::MultipleSpreadsheetError
+      elsif xlsx_array.length == 0
+        raise Exceptions::NoSpreadsheetError
+      end
+
+      spreadsheet_file_path = xlsx_array.first
     end
+
     FileUtils.rm(file)
+    return spreadsheet_file_path
   end
 end
