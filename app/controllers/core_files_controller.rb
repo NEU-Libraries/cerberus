@@ -199,7 +199,7 @@ class CoreFilesController < ApplicationController
       elsif (empty_file?(file))
         session[:flash_error] = "Error! Zero Length File!"
         render :json => { url: session[:previous_url] }
-      elsif ((File.size(file.tempfile).to_f / 1024000).round(2) > 500) #500 is 500MB
+      elsif (!current_user.admin? && (File.size(file.tempfile).to_f / 1024000).round(2) > 500) #500 is 500MB
         session[:flash_error] = "The file you chose is larger than 500MB. Please contact DRS staff for help uploading files larger than 500MB."
         render :json => { url: session[:previous_url] }
       elsif (!terms_accepted?)
@@ -387,7 +387,7 @@ class CoreFilesController < ApplicationController
 
     def fetch_mods
       Rails.cache.fetch("/mods/#{@core_file.pid}-#{@core_file.updated_at}", :expires_in => 12.hours) do
-        render_mods_display(CoreFile.find(@core_file.pid)).to_html.html_safe
+        Sanitize.clean(Kramdown::Document.new(render_mods_display(CoreFile.find(@core_file.pid))).to_html, :elements => ['sup', 'sub', 'dt', 'dd', 'br', 'a']).html_safe
       end
     end
 

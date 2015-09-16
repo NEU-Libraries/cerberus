@@ -29,6 +29,7 @@ class ContentCreationJob
 
       klass = core_record.canonical_class.constantize
       content_object = klass.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
+      content_object.save!
 
       if !poster_path.blank? # Video or Audio posters
         poster_object = ImageMasterFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint), core_record: core_record)
@@ -120,7 +121,8 @@ class ContentCreationJob
         # Create the name for the zipfile.
         # This prevents the zip upload issue in #664
         z = File.basename(Time.now.to_i.to_s, ".*") + ".zip"
-        zipfile_name = Rails.root.join("tmp", z).to_s
+        tempdir = Pathname.new("#{Rails.application.config.tmp_path}/")
+        zipfile_name = tempdir.join(z).to_s
 
         # Load our content into said zipfile.
         Zip::File.open(zipfile_name, Zip::File::CREATE) do |zipfile|

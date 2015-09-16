@@ -1,11 +1,11 @@
-require 'rake/task' 
+require 'rake/task'
 
-namespace :carts do 
+namespace :carts do
 
-  # Delete all shopping carts.  
+  # Delete all shopping carts.
   # Should move this into a daemon at some point.
-  task :clear do 
-    dir = "#{Rails.root}/tmp/carts"
-    FileUtils.rm_rf(Dir.glob(dir)) if File.directory?(dir) 
+  task :clear do
+    dir = "#{Rails.application.config.tmp_path}/carts"
+    FileUtils.rm_rf(Dir.glob(dir)) if File.directory?(dir)
   end
 end
