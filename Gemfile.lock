@@ -285,7 +285,6 @@ GEM
       nokogiri
       nom-xml
     multi_json (1.7.9)
-    multipart-post (2.0.0)
     mysql2 (0.3.14)
     namae (0.8.7)
     nest (1.1.2)
@@ -546,7 +545,6 @@ DEPENDENCIES
   mods (= 2.0.2)
   mods_display!
   multi_json (~> 1.7.9)
-  multipart-post
   mysql2
   namae
   nest (~> 1.1.1)
