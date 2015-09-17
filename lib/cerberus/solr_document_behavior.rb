@@ -284,10 +284,10 @@ module Cerberus
     # This method encapsulates reaching into the SolrDocument created from a
     # content object and fetching its filename.  Which is a surprisingly
     # involved process
-    def get_content_label
-      hsh = JSON.parse(get "object_profile_ssm")
-      return hsh["datastreams"]["content"]["dsLabel"]
-    end
+    # def get_content_label
+    #   hsh = JSON.parse(get "object_profile_ssm")
+    #   return hsh["datastreams"]["content"]["dsLabel"]
+    # end
 
     def is_empty_collection?
       return false if self.klass != "Collection"
