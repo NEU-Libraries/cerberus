@@ -1,4 +1,6 @@
 class ProcessMultipageZipJob
+  include SpreadsheetHelper
+
   attr_accessor :loader_name, :zip_path, :parent, :copyright, :current_user, :permissions, :client
 
   def queue_name
@@ -25,7 +27,15 @@ class ProcessMultipageZipJob
   end
 
   def process_spreadsheet(spreadsheet_file_path)
-    
+    ss = load_spreadsheet(spreadsheet_file_path)
+  end
+
+  def process_a_row(header_row, row_value)
+    file_name         = find_in_row(header_row, row_value, 'Filename')
+    title             = find_in_row(header_row, row_value, 'Title')
+    parent_filename   = find_in_row(header_row, row_value, 'Parent Filename')
+    sequence          = find_in_row(header_row, row_value, 'Sequence')
+    last_item         = find_in_row(header_row, row_value, 'Last Item')
   end
 
   def unzip(file, load_report, client)
