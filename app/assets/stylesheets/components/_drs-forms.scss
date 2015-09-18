@@ -2,6 +2,9 @@
   .add-on{
     padding: 7px 6px;
   }
+  .btn-group > .btn:only-of-type{
+    @include border-radius($inputBorderRadius 0 0 $inputBorderRadius);
+  }
 }
 
 .required-label{
