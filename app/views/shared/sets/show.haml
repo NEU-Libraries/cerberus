@@ -26,7 +26,7 @@
     %img{src: @set.thumbnail_list.first, title: @set.title, alt: "", class: ['pull-left', 'well-padded-thumb']}(aria-labeledby="#{@set.pid}-title" role="presentation")
   - if !@set.description.blank?
     %p.set-description
-      = kramdown_parse(@set.description)
+      = @pretty_description
   - if @set.klass == "Collection" && !@set.identifier.blank? && @set.identifier != @set.pid
     -# Display handles if they exist, and aren't just the pid
     %p.set-handle
