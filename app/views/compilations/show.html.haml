@@ -4,8 +4,9 @@
   %small
     = t('drs.compilations.name').capitalize
 
-%p.lead
-  = @compilation.description
+  - if !@compilation.description.blank?
+    %p.lead
+      = @pretty_description.html_safe
 
 =render partial: 'compilations_actions_nav.haml', locals: {entries: @entries }
 =render partial: 'shared/sets/delete_item_modal', locals: {item: @compilation }

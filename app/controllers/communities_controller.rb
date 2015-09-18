@@ -14,6 +14,7 @@ class CommunitiesController < ApplicationController
 
   include BlacklightAdvancedSearch::ParseBasicQ
   include BlacklightAdvancedSearch::Controller
+  include UrlHelper
 
   # We can do better by using SOLR check instead of Fedora
   before_filter :can_read?, except: [:index, :show]
@@ -66,6 +67,9 @@ class CommunitiesController < ApplicationController
     @smart_collections = nil
 
     @page_title = @set.title
+    if !@set.description.blank?
+      @pretty_description = convert_urls(@set.description)
+    end
 
     if !params[:q].nil?
       if params[:id] != Rails.application.config.root_community_id
@@ -85,7 +89,7 @@ class CommunitiesController < ApplicationController
 
     @smart_collections = @set.smart_collections
 
-    render :template => 'shared/sets/show'
+    render 'shared/sets/show', locals: {pretty_description: @pretty_description}
   end
 
   def employees
