@@ -1,6 +1,7 @@
 class CompilationsController < ApplicationController
   include Cerberus::ControllerHelpers::EditableObjects
   include Cerberus::ControllerHelpers::PermissionsCheck
+  include UrlHelper
 
   before_filter :authenticate_user!, except: [:show, :show_download, :download, :ping_download]
 
@@ -54,9 +55,12 @@ class CompilationsController < ApplicationController
 
   def show
     @page_title = "#{@compilation.title}"
+    if !@compilation.description.blank?
+      @pretty_description = convert_urls(@compilation.description)
+    end
 
     respond_to do |format|
-      format.html{ render action: "show" }
+      format.html{ render action: "show", locals: {pretty_description: @pretty_description}}
       format.json{ render json: @compilation  }
     end
   end
