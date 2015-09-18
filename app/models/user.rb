@@ -26,6 +26,18 @@ class User < ActiveRecord::Base
     return !self.group_list.blank? ? self.group_list : []
   end
 
+  def pretty_groups
+    if !self.group_list.blank?
+      pretty_groups = {}
+      self.group_list.each do |group|
+        pretty_groups[I18n.t("groups.#{group}.name", :default => group)] = group
+      end
+      return pretty_groups
+    else
+      return {}
+    end
+  end
+
   def add_group(group)
     gl = self.group_list.blank? ? [] : self.group_list
     gl << group
