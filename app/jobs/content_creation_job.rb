@@ -128,8 +128,9 @@ class ContentCreationJob
 
     def large_upload(content_object, file_path, dsid)
       url = URI("#{ActiveFedora.config.credentials[:url]}")
-      req = Net::HTTP::Post.new("#{ActiveFedora.config.credentials[:url]}/objects/#{content_object.pid}/datastreams/#{dsid}?controlGroup=M&mimeType=text/xml&dsLocation=file://#{file_path}")
+      req = Net::HTTP::Post.new("#{ActiveFedora.config.credentials[:url]}/objects/#{content_object.pid}/datastreams/#{dsid}?controlGroup=M&dsLocation=file://#{file_path}")
       req.basic_auth("#{ActiveFedora.config.credentials[:user]}", "#{ActiveFedora.config.credentials[:password]}")
+      req.add_field("Content-Type", "#{extract_mime_type(file_path)}")
       req.add_field("Transfer-Encoding", "chunked")
       res = Net::HTTP.start(url.host, url.port) {|http|
           http.request(req)
