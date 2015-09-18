@@ -50,6 +50,9 @@ class ContentCreationJob
           # if file is large, we http kludge it in to avoid loading into memory
           if File.size(file_path) / 1024000 > 500
             large_upload(content_object, file_path, 'content')
+            content_object.properties.mime_type = extract_mime_type(file_path)
+            content_object.properties.md5_checksum = new_checksum(file_path)
+            content_object.save!
           else
             File.open(file_path) do |file_contents|
               content_object.add_file(file_contents, 'content', file_name)
@@ -63,6 +66,9 @@ class ContentCreationJob
         # if file is large, we http kludge it in to avoid loading into memory
         if File.size(file_path) / 1024000 > 500
           large_upload(content_object, file_path, 'content')
+          content_object.properties.mime_type = extract_mime_type(file_path)
+          content_object.properties.md5_checksum = new_checksum(file_path)
+          content_object.save!
         else
           File.open(file_path) do |file_contents|
             content_object.add_file(file_contents, 'content', file_name)
