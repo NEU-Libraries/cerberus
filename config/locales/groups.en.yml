@@ -1,14 +1,2 @@
 en:
   groups:
-    northeastern:drs:repository:loaders:marcom:
-      name: "Marketing and Communications Loaders"
-    northeastern:drs:repository:loaders:coe:
-      name: "College of Engineering Loaders"
-    northeastern:drs:repository:loaders:cps:
-      name: "College of Professional Studies Loaders"
-    northeastern:drs:repository:loaders:emsa_emc:
-      name: "EMC Loaders"
-    northeastern:drs:staff:
-      name: "Staff"
-    northeastern:drs:repository:staff:
-      name: "DRS Staff"
