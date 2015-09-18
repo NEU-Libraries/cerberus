@@ -106,7 +106,10 @@ class ContentCreationJob
          ScaledImageCreator.new(small_size, medium_size, large_size, content_object, permissions).create_scaled_images
       end
 
-      DerivativeCreator.new(content_object.pid).generate_derivatives
+      # Derivative creator loads into memory, we're skipping for large files
+      if File.size(file_path) / 1024000 < 500
+        DerivativeCreator.new(content_object.pid).generate_derivatives
+      end
 
       # Derivative creator modifies the core record and these changes are
       # overriden if we save this open copy of the core record without

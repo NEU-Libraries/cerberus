@@ -13,7 +13,7 @@ class DerivativeCreator
 
     blob = nil
 
-    if !master.instance_of(VideoFile)
+    if !master.instance_of?(VideoFile)
 
       if master.instance_of?(MswordFile)
         pdf = create_pdf_file
