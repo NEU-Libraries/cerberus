@@ -231,6 +231,10 @@ module Cerberus
       Array(self[Solrizer.solr_name('label')]).first
     end
 
+    def sub_title
+      Array(self[Solrizer.solr_name("title_info_sub_title", :stored_searchable)]).first
+    end
+
     def file_format
        Array(self[Solrizer.solr_name('file_format')]).first
     end
