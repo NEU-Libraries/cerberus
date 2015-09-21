@@ -7,7 +7,6 @@ module UrlHelper
     unless string =~ /<a/ # we'll assume that linking has already occured and we don't want to double link
       matches.each do |match|
         string = string.gsub(match, "<a href='#{match}' target='_blank'>#{match}</a>")
-        puts string
       end
     end
     return string.html_safe
