@@ -215,6 +215,9 @@
 .drs-item-creator{
   display: inline-block;
 }
+.drs-item-subtitle{
+  font-size:14px;
+}
 
 
 .drs-items-grid{
@@ -228,6 +231,9 @@
     @media (max-width: $breakpoint-xl){
       font-size: 18px;
     }
+  }
+  .drs-item-subtitle{
+    display:none;
   }
   .drs-item-title
   , .drs-item-creator{
