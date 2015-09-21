@@ -176,53 +176,54 @@ $(document).ready ->
 
 
     datePartial = ->
-      if $('#core_file_date').length > 0
-        $().dateSelectBoxes $("#doiMonth"), $("#doiDay"), $("#doiYear"), true
+      $('.date').each ->
+        if $(this).length > 0
+          $().dateSelectBoxes $(this).siblings(".doiMonth"), $(this).siblings(".doiDay"), $(this).siblings(".doiYear"), true
 
-        try
-          $("#doiYear").val $("#core_file_date").val().split("-")[0]
-        catch error
+          try
+            $(this).siblings(".doiYear").val $(this).val().split("-")[0]
+          catch error
 
-        try
-          $("#doiMonth").val $("#core_file_date").val().split("-")[1].replace(/^0*/, "")
-        catch error
+          try
+            $(this).siblings(".doiMonth").val $(this).val().split("-")[1].replace(/^0*/, "")
+          catch error
 
-        try
-          $("#doiDay").val $("#core_file_date").val().split("-")[2].replace(/^0*/, "")
-        catch error
+          try
+            $(this).siblings(".doiDay").val $(this).val().split("-")[2].replace(/^0*/, "")
+          catch error
 
-        if $("#doiMonth").val() == ""
-          $("#doiDay").val $("#doiDay option:first").val()
-          $("#doiDay").prop("disabled", true)
-        else
-          $("#doiDay").prop("disabled", false)
+          if $(this).siblings(".doiMonth").val() == ""
+            $(this).siblings(".doiDay").val $(this).siblings(".doiDay option:first").val()
+            $(this).siblings(".doiDay").prop("disabled", true)
+          else
+            $(this).siblings(".doiDay").prop("disabled", false)
 
-      $("#doiDay").change ->
-        combineDate()
-        return
+        $(this).siblings(".doiDay").change ->
+          combineDate($(this).siblings(".date"))
+          return
 
-      $("#doiMonth").change ->
-        if $("#doiMonth").val() == ""
-          $("#doiDay").val $("#doiDay option:first").val()
-          $("#doiDay").prop("disabled", true)
-        else
-          $("#doiDay").prop("disabled", false)
+        $(this).siblings(".doiMonth").change ->
+          if $(this).siblings(".doiMonth").val() == ""
+            $(this).siblings(".doiDay").val $(this).siblings(".doiDay option:first").val()
+            $(this).siblings(".doiDay").prop("disabled", true)
+          else
+            $(this).siblings(".doiDay").prop("disabled", false)
 
-        combineDate()
-        return
+          combineDate($(this).siblings(".date"))
+          return
 
-      $("#doiYear").change ->
-        combineDate()
+        $(this).siblings(".doiYear").change ->
+          combineDate($(this).siblings(".date"))
+          return
         return
 
       return
 
-    combineDate = ->
-      $("#core_file_date").val $("#doiYear").val() + "-" + String("0" + $("#doiMonth").val()).slice(-2) + "-" + String("0" + $("#doiDay").val()).slice(-2)
-      $("#core_file_date").val $("#core_file_date").val().replace(/-+$/, "")
-      $("#core_file_date").val $("#core_file_date").val().replace(/-[0]$/, "").replace(/-[0]$/, "")
+    combineDate = (date) ->
+      $(date).val $(date).siblings('.doiYear').val() + "-" + String("0" + $(date).siblings('.doiMonth').val()).slice(-2) + "-" + String("0" + $(date).siblings('.doiDay').val()).slice(-2)
+      $(date).val $(date).val().replace(/-+$/, "")
+      $(date).val $(date).val().replace(/-[0]$/, "").replace(/-[0]$/, "")
       return
-
 
     enforceSizes = ->
       if parseInt($("#small_image_size").val()) >= parseInt($("input.slider.small").attr("data-slider-max"))
