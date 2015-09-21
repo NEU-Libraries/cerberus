@@ -1,0 +1,5 @@
+= f.label :embargo_release_date, "If this item is embargoed, please enter the release date."
+= f.hidden_field :embargo_release_date, {class: 'date'}
+= select_year(0, {start_year: Time.zone.now.year, end_year: 2050, prompt: 'Year'}, {class: 'span4 doiYear'})
+= select_month(0, {prompt: 'Month'}, {class: 'span4 doiMonth'})
+= select_day(0, {prompt: 'Day'}, {class: 'span4 doiDay'})
