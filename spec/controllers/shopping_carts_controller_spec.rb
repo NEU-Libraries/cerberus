@@ -42,6 +42,30 @@ describe ShoppingCartsController do
       assigns(:items).should == []
       expect(response).to render_template('shopping_carts/show')
     end
+
+    it "handles the case where an item has been tombstoned" do
+      root = Collection.create(title: "Root")
+      cf = CoreFile.create(title: "Core File One", parent: root, depositor: "nobody@nobody.com")
+      cf.save!
+      file.core_record = cf
+      file.save!
+
+      session[:ids] = [file.pid, pdf.pid]
+      cf.tombstone
+      cf.save!
+
+      get :show
+      assigns(:items).length.should == 1
+      expect(response).to render_template('shopping_carts/show')
+    end
+
+    it "handles the case where an item has been deleted" do
+      session[:ids] = [file.pid, pdf.pid]
+      file.delete
+      get :show
+      assigns(:items).length.should == 1
+      expect(response).to render_template('shopping_carts/show')
+    end
   end
 
   describe "PUT #update" do
