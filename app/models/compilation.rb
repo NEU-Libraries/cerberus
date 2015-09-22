@@ -85,6 +85,10 @@ class Compilation < ActiveFedora::Base
         results << entry
         remove_entry(entry)
       end
+      if CoreFile.find(entry).tombstoned?
+        results << entry
+        remove_entry(entry)
+      end
     end
 
     self.save!
