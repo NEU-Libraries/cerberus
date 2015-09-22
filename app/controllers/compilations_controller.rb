@@ -150,7 +150,7 @@ class CompilationsController < ApplicationController
     dead_entries = @compilation.remove_dead_entries
 
     if dead_entries.length > 0
-      flash.now[:error] = "The following items no longer exist in the repository and have been removed from your #{ t('drs.compilations.name') }: #{dead_entries.join(', ')}"
+      flash.now[:error] = "#{dead_entries.length} items no longer exist in the repository and have been removed from your #{ t('drs.compilations.name')}."
     end
   end
 
