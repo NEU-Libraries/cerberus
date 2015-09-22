@@ -2,7 +2,6 @@ require 'spec_helper'
 
 describe Compilation do
   let(:bill) { FactoryGirl.create(:bill) }
-
   let(:compilation) { FactoryGirl.create(:compilation) }
   let(:file) { FactoryGirl.create(:bills_complete_file) }
   let(:file_two) { FactoryGirl.create(:bills_complete_file) }
@@ -15,8 +14,8 @@ describe Compilation do
   it { should respond_to(:remove_entry) }
 
   after(:each) do
-    Compilation.find(:all).each do |compilation|
-      compilation.destroy
+    ActiveFedora::Base.find(:all).each do |file|
+      file.destroy
     end
   end
 
@@ -92,7 +91,24 @@ describe Compilation do
   end
 
   describe "Removing dead links" do
+    it "cleans out tombstoned objects" do
+      root = Collection.create(title: "Root")
+      file = CoreFile.create(title: "Core File One", parent: root, depositor: "nobody@nobody.com")
+      file.save!
+      compilation.add_entry(file)
+      compilation.add_entry(file_two)
+      compilation.save!
 
+      file_pid = file.pid
+      file.tombstone
+      file.save!
+
+      comp_pid = compilation.pid
+      compilation = Compilation.find(comp_pid)
+      compilation.remove_dead_entries.should == [file_pid]
+
+      compilation.entry_ids.should =~ [file_two.pid]
+    end
     it "cleans out deleted objects" do
       compilation.add_entry(file)
       compilation.add_entry(file_two)
