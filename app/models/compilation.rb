@@ -84,8 +84,7 @@ class Compilation < ActiveFedora::Base
       if !ActiveFedora::Base.exists?(entry)
         results << entry
         remove_entry(entry)
-      end
-      if CoreFile.find(entry).tombstoned?
+      elsif CoreFile.find(entry).tombstoned?
         results << entry
         remove_entry(entry)
       end
