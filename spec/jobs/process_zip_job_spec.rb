@@ -28,17 +28,18 @@ describe ProcessZipJob do
     end
 
     it 'triggers image report job' do
-      Loaders::ImageReport.all.length.should == 2
+      Loaders::ImageReport.all.length.should == 3
     end
 
     it 'creates two core files' do
-      CoreFile.all.length.should == 2
+      CoreFile.all.length.should == 3
     end
 
     it 'sets correct number of success, fail, total number counts' do
       lr = Loaders::LoadReport.all.first
-      lr.number_of_files.should == 2
+      lr.number_of_files.should == 3
       lr.success_count.should == 2
+      lr.modified_count.should == 1
       lr.fail_count.should == 0
     end
 
