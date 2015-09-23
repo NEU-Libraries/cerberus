@@ -27,15 +27,38 @@ class ProcessMultipageZipJob
   end
 
   def process_spreadsheet(spreadsheet_file_path)
-    ss = load_spreadsheet(spreadsheet_file_path)
+    spreadsheet = load_spreadsheet(spreadsheet_file_path)
+    
+    header_position = 1
+    header_row = spreadsheet.row(header_position)
+
+    spreadsheet.each_row_streaming(offset: header_position) do |row|
+      if row.present? && header_row.present?
+        # puts row.inspect # Array of Excelx::Cell objects
+        row_results = process_a_row(header_row, row)
+        puts row_results
+      end
+    end
   end
 
   def process_a_row(header_row, row_value)
-    file_name         = find_in_row(header_row, row_value, 'Filename')
-    title             = find_in_row(header_row, row_value, 'Title')
-    parent_filename   = find_in_row(header_row, row_value, 'Parent Filename')
-    sequence          = find_in_row(header_row, row_value, 'Sequence')
-    last_item         = find_in_row(header_row, row_value, 'Last Item')
+    results = Hash.new
+    results["file_name"]         = find_in_row(header_row, row_value, 'Filename')
+    results["title"]             = find_in_row(header_row, row_value, 'Title')
+    results["parent_filename"]   = find_in_row(header_row, row_value, 'Parent Filename')
+    results["sequence"]          = find_in_row(header_row, row_value, 'Sequence')
+    results["last_item"]         = find_in_row(header_row, row_value, 'Last Item')
+    return results
+  end
+
+  def find_in_row(header_row, row_value, column_identifier)
+    0.upto header_row.length do |row_pos|
+      case header_row[row_pos]
+        when column_identifier
+          return row_value[row_pos].to_s
+      end
+    end
+    return nil
   end
 
   def unzip(file, load_report, client)
