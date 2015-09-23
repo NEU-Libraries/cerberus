@@ -35,12 +35,8 @@ describe ImageProcessingJob do
 
   describe "Image creation" do
 
-    context "correct file included" do
-      before(:all) {
-        context("#{Rails.root}/spec/fixtures/files/marcom.jpeg")
-       }
-      after(:all)  { clear_context }
 
+    shared_examples_for "successful uploads" do
       it 'creates core file' do
         @core_file = CoreFile.find("#{@images.first.pid}")
         @core_file.should == CoreFile.find("#{@images.first.pid}")
@@ -59,12 +55,6 @@ describe ImageProcessingJob do
       it 'be tagged as in_progress' do
         @core_file = CoreFile.find("#{@images.first.pid}")
         @core_file.in_progress_for_user?(@user)
-      end
-
-      it 'sets original_filename to basename of file in tmp dir' do
-        @core_file = CoreFile.find("#{@images.first.pid}")
-        @core_file.original_filename.should == 'marcom.jpeg'
-        #check for replacement of spaces and parens in file name?
       end
 
       it 'sets title to iptc headline' do
@@ -141,10 +131,6 @@ describe ImageProcessingJob do
         File.exist?("#{Rails.application.config.tmp_path}/#{Time.now.to_i.to_s}-#{@uniq_hsh}").should be false
       end
 
-      it 'creates success report' do
-        @images.first.validity.should be true
-      end
-
       it 'sets correct permissions for core_files' do
         @core_file = CoreFile.find("#{@images.first.pid}")
         @core_file.permissions.should == [{:type=>"group", :access=>"read", :name=>"northeastern:drs:all"}, {:type=>"group", :access=>"edit", :name=>"northeastern:drs:repository:corefile"}, {:type=>"user", :access=>"edit", :name=>"000000000"}]
@@ -165,6 +151,26 @@ describe ImageProcessingJob do
       it 'should not create core_file' do
         expect { CoreFile.find("#{@images.first.pid}").to raise_error ActiveFedora::ObjectNotFoundError }
       end
+    end
+
+    context "well formed file" do
+      before(:all) {
+        context("#{Rails.root}/spec/fixtures/files/marcom.jpeg")
+       }
+      after(:all)  { clear_context }
+
+      it 'creates success report' do
+        @images.first.validity.should be true
+        @images.first.modified.should be false
+      end
+
+      it 'sets original_filename to basename of file in tmp dir' do
+        @core_file = CoreFile.find("#{@images.first.pid}")
+        @core_file.original_filename.should == 'marcom.jpeg'
+        #check for replacement of spaces and parens in file name?
+      end
+
+      it_should_behave_like "successful uploads"
     end
 
     context "not image file" do
@@ -199,6 +205,27 @@ describe ImageProcessingJob do
       end
 
       it_should_behave_like "failed uploads"
+    end
+
+    context "backwards name" do
+      before(:all) {
+        context("#{Rails.root}/spec/fixtures/files/marcom_mod_name.jpg")
+      }
+      after(:all)  { clear_context }
+
+      it 'creates modified report' do
+        @images.count.should == 1
+        @images.first.validity.should be true
+        @images.first.modified.should be true
+      end
+
+      it 'sets original_filename to basename of file in tmp dir' do
+        @core_file = CoreFile.find("#{@images.first.pid}")
+        @core_file.original_filename.should == 'marcom_mod_name.jpg'
+        #check for replacement of spaces and parens in file name?
+      end
+
+      it_should_behave_like "successful uploads"
     end
 
     context "bad iptc" do
