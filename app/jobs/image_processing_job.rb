@@ -120,9 +120,23 @@ class ImageProcessingJob
                 core_file.mods.classification = "#{classification}#{val}"
               end
             elsif tag == "By-line"
-              pers = val.split(",")
-              pers = {'first_names'=>[pers[1].strip], 'last_names'=>[pers[0].strip]}
-              core_file.creators = pers
+              if val.kind_of?(String)
+                if val.include? ","
+                  pers = val.split(",")
+                  pers = {'first_names'=>[pers[1].strip], 'last_names'=>[pers[0].strip]}
+                else
+                  name_array = Namae.parse val
+                  name_obj = name_array[0]
+                  if !name_obj.nil? && !name_obj.given.blank? && !name_obj.family.blank?
+                    pers = {'first_names'=>[name_obj.given], 'last_names'=>[name_obj.family]}
+                    # create a special modified warning message here
+                  else
+                    create_special_error("Incorrectly formatted By-line", iptc, core_file, load_report)
+                    return
+                  end
+                end
+                core_file.creators = pers
+              end
             elsif tag == 'By-lineTitle'
               core_file.mods.personal_name.role.role_term = val
               core_file.mods.personal_name.role.role_term.type = "text"
