@@ -264,7 +264,7 @@ $(document).ready ->
       if $(date).is("#core_file_embargo_release_date")
         year = $(date).siblings('.doiYear').val()
         if year == ""
-          $(date).val("nil")
+          $(date).val("")
         else
           month = String("0" + $(date).siblings('.doiMonth').val()).slice(-2)
           if month == "" || month == "0"
