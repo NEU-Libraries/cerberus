@@ -20,7 +20,7 @@
   = @user.name
 %h4
   Total Files:
-  = "#{@report.number_of_files} (Successful: #{@report.success_count}, Error: #{@report.fail_count})"
+  = "#{@report.number_of_files} (Successful: #{@report.success_count}, Modified: #{@report.modified_count}, Error: #{@report.fail_count})"
 
 %br
 %table.table.table-striped
@@ -29,24 +29,45 @@
   %th File Status
   %th
   - @images.each do |image|
-    - if image.validity == true
+    - if image.validity == true && image.modified == false
       -if CoreFile.exists?(image.pid)
-        - image = CoreFile.find("#{image.pid}")
+        - cf = CoreFile.find("#{image.pid}")
         %tr.success
           %td
-            = image.label
+            = cf.label
           %td
-            = image.title
+            = cf.title
           %td Success
           %td
-            = link_to("View", core_file_path(image.pid), class:"btn btn-small btn-success")
+            = link_to("View", core_file_path(cf.pid), class:"btn btn-small btn-success")
       -else
         %tr.success
           %td
-            =image.original_file
+            = cf.original_file
           %td
-            = image.title
+            = cf.title
           %td Success
+          %td File no longer exists
+    - elsif image.validity == true && image.modified == true
+      -if CoreFile.exists?(image.pid)
+        - cf = CoreFile.find("#{image.pid}")
+        %tr.warning
+          %td
+            = cf.label
+          %td
+            = cf.title
+          %td
+            = "Modified - #{image.exception}"
+          %td
+            = link_to("View", core_file_path(cf.pid), class:"btn btn-small btn-success")
+      -else
+        %tr.warning
+          %td
+            =cf.original_file
+          %td
+            = cf.title
+          %td
+            = "Modified - #{image.exception}"
           %td File no longer exists
     - else
       %tr.error
