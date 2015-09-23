@@ -4,6 +4,9 @@
 .table tbody tr.error > td  {
   background:rgba($brand-danger, .2)
 }
+.table tbody tr.warning > td {
+  background: rgba($brand-warning, .2)
+}
 
 th .asc span {
   @extend .icon-chevron-up;
