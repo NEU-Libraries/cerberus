@@ -2,7 +2,7 @@
   - permissions.each_with_index do |perm, index|
     .permission.to-remove
       = text_field_tag "pretty_name", I18n.t("groups.#{perm[:name]}.name", :default => perm[:name]), class: "span12", readonly: true
-      = f.text_field :identity, value: perm[:name], name: "#{array_type}[permissions][identity][]", pattern: ".*\\S.*", class: "span12 hidden", readonly: true
+      = f.hidden_field :identity, value: perm[:name], name: "#{array_type}[permissions][identity][]", pattern: ".*\\S.*", class: "span12", readonly: true
       = label_tag "#{array_type}[permissions][identity_type][]", "Should this identity be allowed to read or edit?"
       %div.input-append{:style => "display: block;"}
         = select_tag "#{array_type}[permissions][permission_type][]", options_for_select(['read', 'edit'], perm[:access]), class: "span11 selectpicker"
