@@ -176,6 +176,10 @@ $(document).ready ->
 
 
     datePartial = ->
+      today = new Date()
+      year = today.getFullYear()
+      month = today.getMonth() + 1
+      date = today.getDate()
       $('.date').each ->
         if $(this).length > 0
           $().dateSelectBoxes $(this).siblings(".doiMonth"), $(this).siblings(".doiDay"), $(this).siblings(".doiYear"), true
@@ -192,6 +196,12 @@ $(document).ready ->
             $(this).siblings(".doiDay").val $(this).val().split("-")[2].replace(/^0*/, "")
           catch error
 
+          if $(this).siblings(".doiYear").val() == ""
+            $(this).siblings(".doiMonth").val $(this).siblings(".doiMonth option:first").val()
+            $(this).siblings(".doiMonth").prop("disabled", true)
+          else
+            $(this).siblings(".doiMonth").prop("disabled", false)
+
           if $(this).siblings(".doiMonth").val() == ""
             $(this).siblings(".doiDay").val $(this).siblings(".doiDay option:first").val()
             $(this).siblings(".doiDay").prop("disabled", true)
@@ -203,16 +213,47 @@ $(document).ready ->
           return
 
         $(this).siblings(".doiMonth").change ->
-          if $(this).siblings(".doiMonth").val() == ""
+          if $(this).val() == ""
             $(this).siblings(".doiDay").val $(this).siblings(".doiDay option:first").val()
             $(this).siblings(".doiDay").prop("disabled", true)
           else
             $(this).siblings(".doiDay").prop("disabled", false)
+            if $(this).siblings(".date").is("#core_file_embargo_release_date")
+              if $(this).val() == String(month) && $(this).siblings('.doiYear').val() == String(year)
+                $(this).siblings(".doiDay").find('option').each ->
+                  if $(this).val() <= date && $.isNumeric($(this).val())
+                    $(this).hide()
+                  else
+                    $(this).show()
+              else
+                $(this).siblings(".doiDay").find('option').show()
 
           combineDate($(this).siblings(".date"))
           return
 
         $(this).siblings(".doiYear").change ->
+          if $(this).val() == ""
+            $(this).siblings(".doiMonth").val $(this).siblings(".doiMonth option:first").val()
+            $(this).siblings(".doiDay").val $(this).siblings(".doiDay option:first").val()
+            $(this).siblings(".doiMonth").prop("disabled", true)
+            $(this).siblings(".doiDay").prop("disabled", true)
+          else
+            $(this).siblings(".doiMonth").prop("disabled", false)
+            if $(this).siblings(".date").is("#core_file_embargo_release_date")
+              if $(this).val() == String(year)
+                $(this).siblings(".doiMonth").find('option').each ->
+                  if $(this).val() < month && $.isNumeric($(this).val())
+                    $(this).hide()
+                  else
+                    $(this).show()
+                if $(this).siblings('.doiMonth').val() == String(month)
+                  $(this).siblings(".doiDay").find('option').each ->
+                    if $(this).val() <= date && $.isNumeric($(this).val())
+                      $(this).hide()
+                else
+                  $(this).siblings(".doiDay").find('option').show()
+              else if $(this).val() > String(year)
+                $(this).siblings(".doiMonth").find('option').show()
           combineDate($(this).siblings(".date"))
           return
         return
@@ -220,9 +261,26 @@ $(document).ready ->
       return
 
     combineDate = (date) ->
-      $(date).val $(date).siblings('.doiYear').val() + "-" + String("0" + $(date).siblings('.doiMonth').val()).slice(-2) + "-" + String("0" + $(date).siblings('.doiDay').val()).slice(-2)
-      $(date).val $(date).val().replace(/-+$/, "")
-      $(date).val $(date).val().replace(/-[0]$/, "").replace(/-[0]$/, "")
+      if $(date).is("#core_file_embargo_release_date")
+        year = $(date).siblings('.doiYear').val()
+        if year == ""
+          $(date).val("nil")
+        else
+          month = String("0" + $(date).siblings('.doiMonth').val()).slice(-2)
+          if month == "" || month == "0"
+            month = "01"
+          else
+            month = String("0" + $(date).siblings('.doiMonth').val()).slice(-2)
+          day = String("0" + $(date).siblings('.doiDay').val()).slice(-2)
+          if day == "" || day == "0"
+            day = "01"
+          else
+            day = String("0" + $(date).siblings('.doiDay').val()).slice(-2)
+          $(date).val year + "-" + month + "-" + day
+      else
+        $(date).val $(date).siblings('.doiYear').val() + "-" + String("0" + $(date).siblings('.doiMonth').val()).slice(-2) + "-" + String("0" + $(date).siblings('.doiDay').val()).slice(-2)
+        $(date).val $(date).val().replace(/-+$/, "")
+        $(date).val $(date).val().replace(/-[0]$/, "").replace(/-[0]$/, "")
       return
 
     enforceSizes = ->
