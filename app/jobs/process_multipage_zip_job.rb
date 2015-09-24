@@ -20,15 +20,17 @@ class ProcessMultipageZipJob
   def run
     report_id = Loaders::LoadReport.create_from_strings(current_user, 0, loader_name, parent)
     load_report = Loaders::LoadReport.find(report_id)
-    # unzip zip file to tmp storage
-    spreadsheet_file_path = unzip(zip_path, load_report, client)
 
-    process_spreadsheet(spreadsheet_file_path)
+    # unzip zip file to tmp storage
+    dir_path = File.join(File.dirname(file), File.basename(file, ".*"))
+    spreadsheet_file_path = unzip(zip_path, dir_path)
+
+    process_spreadsheet(dir_path, spreadsheet_file_path, load_report)
   end
 
-  def process_spreadsheet(spreadsheet_file_path)
+  def process_spreadsheet(dir_path, spreadsheet_file_path, load_report)
     spreadsheet = load_spreadsheet(spreadsheet_file_path)
-    
+
     header_position = 1
     header_row = spreadsheet.row(header_position)
 
@@ -36,7 +38,8 @@ class ProcessMultipageZipJob
       if row.present? && header_row.present?
         # puts row.inspect # Array of Excelx::Cell objects
         row_results = process_a_row(header_row, row)
-        puts row_results
+        # puts row_results
+        MultipageProcessingJob.new(dir_path + row_results["file_name"], row_results["file_name"], parent, copyright, load_report.id, permissions, client).run
       end
     end
   end
@@ -61,25 +64,24 @@ class ProcessMultipageZipJob
     return nil
   end
 
-  def unzip(file, load_report, client)
+  def unzip(file, dir_path)
     spreadsheet_file_path = ""
 
     Zip::File.open(file) do |zipfile|
-      to = File.join(File.dirname(file), File.basename(file, ".*"))
-      FileUtils.mkdir(to) unless File.exists? to
+      FileUtils.mkdir(dir_path) unless File.exists? dir_path
       count = 0
 
       # Extract all files
       zipfile.each do |f|
         if !f.directory? && File.basename(f.name)[0] != "." # Don't extract directories or mac specific files
-          fpath = File.join(to, f.name)
+          fpath = File.join(dir_path, f.name)
           FileUtils.mkdir_p(File.dirname(fpath))
           zipfile.extract(f, fpath) unless File.exist?(fpath)
         end
       end
 
       # Find the spreadsheet
-      xlsx_array = Dir.glob("#{Rails.application.config.tmp_path}/1442429470-31/*.xlsx")
+      xlsx_array = Dir.glob("#{dir_path}/*.xlsx")
 
       if xlsx_array.length > 1
         raise Exceptions::MultipleSpreadsheetError
