@@ -6,7 +6,7 @@ describe LoaderMailer do
       `mysql -u "#{ENV["HANDLE_TEST_USERNAME"]}" < "#{Rails.root}"/spec/fixtures/files/handlesTEST.sql`
       @client = Mysql2::Client.new(:host => "#{ENV["HANDLE_TEST_HOST"]}", :username => "#{ENV["HANDLE_TEST_USERNAME"]}", :password => "#{ENV["HANDLE_TEST_PASSWORD"]}", :database => "#{ENV["HANDLE_TEST_DATABASE"]}")
       @loader_name = "College of Engineering"
-      tempdir = Rails.root.join("tmp")
+      tempdir = Pathname.new("#{Rails.application.config.tmp_path}/")
       @uniq_hsh = Digest::MD5.hexdigest("#{Rails.root}/spec/fixtures/files/jpgs.zip")[0,2]
       file_name = "#{Time.now.to_i.to_s}-#{@uniq_hsh}"
       new_path = tempdir.join(file_name).to_s
