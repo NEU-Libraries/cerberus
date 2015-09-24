@@ -39,7 +39,8 @@ class ProcessMultipageZipJob
         # puts row.inspect # Array of Excelx::Cell objects
         row_results = process_a_row(header_row, row)
         # puts row_results
-        MultipageProcessingJob.new(dir_path + row_results["file_name"], row_results["file_name"], parent, copyright, load_report.id, permissions, client).run
+        core_file = CoreFile.new
+        MultipageProcessingJob.new(dir_path + row_results["file_name"], row_results["file_name"], core_file, copyright, load_report.id, permissions, client).run
       end
     end
   end
