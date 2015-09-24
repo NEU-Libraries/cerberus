@@ -1,5 +1,5 @@
 class MultipageProcessingJob
-  attr_accessor :file, :file_name, :parent, :copyright, :report_id, :permissions, :client
+  attr_accessor :file, :file_name, :core_file, :copyright, :report_id, :permissions, :client
   include MimeHelper
   include HandleHelper
 
@@ -7,10 +7,10 @@ class MultipageProcessingJob
     :loader_multipage_processing
   end
 
-  def initialize(file, file_name, parent, copyright, report_id, permissions=[], client=nil)
+  def initialize(file, file_name, core_file, copyright, report_id, permissions=[], client=nil)
     self.file = file
     self.file_name = file_name
-    self.parent = parent
+    self.core_file = core_file
     self.copyright = copyright
     self.report_id = report_id
     self.permissions = permissions
