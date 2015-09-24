@@ -104,7 +104,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
       t.display_label(path: {attribute: 'displayLabel'})
     }
 
-    t.access_condition(path: 'accessCondition', namespace_prefix: 'mods') {
+    t.access_condition(path: 'accessCondition', namespace_prefix: 'mods', index_as: [:stored_searchable]) {
       t.type(path: {attribute: 'type'})
     }
 
@@ -277,6 +277,8 @@ class ModsDatastream < ActiveFedora::OmDatastream
 
     solr_doc["origin_info_place_tesim"] = self.origin_info.place.city_term
 
+    solr_doc["access_condition_tesim"] = self.access_condition.last
+
     solr_doc = self.generate_niec_solr_hash(solr_doc)
 
     #TODO:  Extract dateBegin/dateEnd information ]
@@ -391,6 +393,26 @@ class ModsDatastream < ActiveFedora::OmDatastream
       end
 
       self.subject(index).topic = kw
+    end
+  end
+
+  # Allows for tombstone message
+  def add_suppressed_access=(array_of_strings)
+    array_of_access = array_of_strings.select {|ac| !ac.blank? }
+    #
+    if array_of_access.length < self.access_condition.length
+      node_count = self.access_condition.length - array_of_access.length
+      trim_nodes_from_zero(:access_condition, node_count)
+    end
+    #
+    array_of_access.each_with_index do |ac, index|
+      if self.access_condition[index].nil?
+        self.insert_new_node(:access_condition)
+      end
+
+      self.access_condition = array_of_access
+      count = self.access_condition.count
+      self.access_condition(count-1).type = "suppressed"
     end
   end
 
@@ -568,6 +590,13 @@ class ModsDatastream < ActiveFedora::OmDatastream
   def self.corporate_name_template
     builder = Nokogiri::XML::Builder.new do |xml|
       xml.name('type' => 'corporate')
+    end
+    return builder.doc.root
+  end
+
+  def self.access_condition_template
+    builder = Nokogiri::XML::Builder.new do |xml|
+      xml.accessCondition('type' => 'suppressed')
     end
     return builder.doc.root
   end
