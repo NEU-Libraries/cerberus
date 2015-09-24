@@ -1,2 +1,64 @@
 en:
   groups:
+    northeastern:drs:aslp:niec:
+      name: "National Interpreter Education Center"
+    northeastern:drs:athletics:hall_of_fame:
+      name: "Department of Athletics - Hall of Fame"
+    northeastern:drs:board_of_trustees:board_members:
+      name: "Board of Trustees"
+    northeastern:drs:camd:department_of_art_and_design:art_and_design_gallery:
+      name: "CAMD - Art and Design Gallery"
+    northeastern:drs:college_of_engineering:deans_office:
+      name: "College of Engineering - Dean's Office"
+    northeastern:drs:college_of_engineering:electrical_and_computer_engineering:bspiral:
+      name: "College of Engineering - BSPIRAL"
+    northeastern:drs:college_of_professional_studies:media:
+      name: "College of Professional Studies - Media Group"
+    northeastern:drs:college_of_science:social_interaction_lab:
+      name: "College of Science - Social Interaction Lab"
+    northeastern:drs:damore_mckim:marcom:
+      name: "D'Amore-McKim - Marketing Group"
+    northeastern:drs:drspt:arader_gallery:
+      name: "Arader Picturing the World Gallery"
+    northeastern:drs:enrollment_management:emc:emc_admin:
+      name: "EMSA - EMC Admin"
+    northeastern:drs:enrollment_management:emc:emc_staff:
+      name: "EMSA - EMC Staff"
+    northeastern:drs:enrollment_management:emsa:
+      name: "EMSA Staff"
+    northeastern:drs:library:archives:
+      name: "University Archives and Special Collections"
+    northeastern:drs:library:communications:
+      name: "University Library - Communications Office"
+    northeastern:drs:library:dmc_studios:
+      name: "University Library - DMC Studios"
+    northeastern:drs:library:dsg:
+      name: "University Library - Digital Scholarship Group"
+    northeastern:drs:library:admin:
+      name: "University Library - Administration"
+    northeastern:drs:library:scholarly_communications:
+      name: "University Library - Scholarly Communications"
+    northeastern:drs:marketing_and_communications:staff:
+      name: "Office of Marketing and Communications"
+    northeastern:drs:repository:beta_users:
+      name: "DRS Beta Users"
+    northeastern:drs:repository:loaders:coe:
+      name: "DRS Zip Loader - COE"
+    northeastern:drs:repository:loaders:cps:
+      name: "DRS Zip Loader - CPS"
+    northeastern:drs:repository:loaders:emsa_emc:
+      name: "DRS Zip Loader - EMSA EMC"
+    northeastern:drs:repository:loaders:marcom:
+      name: "DRS Zip Loader - Marketing"
+    northeastern:drs:repository:proxystaff:
+      name: "DRS Proxy Staff"
+    northeastern:drs:repository:staff:
+      name: "DRS Repository Staff"
+    northeastern:drs:school_of_law:law_library:staff:
+      name: "School of Law - Law Library Staff"
+    northeastern:drs:all:
+      name: "Northeastern - All"
+    northeastern:drs:faculty:
+      name: "Northeastern - Faculty"
+    northeastern:drs:staff:
+      name: "Northeastern - Staff"
