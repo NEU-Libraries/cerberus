@@ -21,6 +21,7 @@ class PropertiesDatastream < ActiveFedora::OmDatastream
     t.tombstoned
     t.md5_checksum :index_as=>[:stored_searchable]
     t.mime_type :index_as=>[:stored_searchable]
+    t.file_size :index_as=>[:stored_searchable]
   end
 
   def self.xml_template

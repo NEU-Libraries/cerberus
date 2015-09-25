@@ -43,6 +43,7 @@ module Cerberus
             # Cerberus::Application::Queue.push(AtomisticCharacterizationJob.new(self.pid))
             self.properties.mime_type = extract_mime_type(self.fedora_file_path)
             self.properties.md5_checksum = new_checksum(self.fedora_file_path)
+            self.properties.file_size = File.size(self.fedora_file_path).to_s
             self.save!
           end
         end
