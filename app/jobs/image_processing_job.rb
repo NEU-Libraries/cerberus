@@ -2,6 +2,7 @@ class ImageProcessingJob
   attr_accessor :file, :file_name, :parent, :copyright, :report_id, :permissions, :client
   include MimeHelper
   include HandleHelper
+  include ApplicationHelper
 
   def queue_name
     :loader_image_processing
@@ -45,6 +46,8 @@ class ImageProcessingJob
         FileUtils.rm(file)
       else
         classification = ''
+        modified = false
+        modified_message = ''
         photo = MiniExiftool.new("#{file}", iptc_encoding: 'UTF8', exif_encoding: 'UTF8')
         photo.tags.each do |tag|
           val = photo[tag]
@@ -120,9 +123,24 @@ class ImageProcessingJob
                 core_file.mods.classification = "#{classification}#{val}"
               end
             elsif tag == "By-line"
-              pers = val.split(",")
-              pers = {'first_names'=>[pers[1].strip], 'last_names'=>[pers[0].strip]}
-              core_file.creators = pers
+              if val.kind_of?(String)
+                if val.include? ","
+                  pers = val.split(",")
+                  pers = {'first_names'=>[pers[1].strip], 'last_names'=>[pers[0].strip]}
+                else
+                  name_array = Namae.parse val
+                  name_obj = name_array[0]
+                  if !name_obj.nil? && !name_obj.given.blank? && !name_obj.family.blank?
+                    pers = {'first_names'=>[name_obj.given], 'last_names'=>[name_obj.family]}
+                    modified_message = "By-line parsed into Last Name, First Name format."
+                    modified = true
+                  else
+                    create_special_error("Incorrectly formatted By-line", iptc, core_file, load_report)
+                    return
+                  end
+                end
+                core_file.creators = pers
+              end
             elsif tag == 'By-lineTitle'
               core_file.mods.personal_name.role.role_term = val
               core_file.mods.personal_name.role.role_term.type = "text"
@@ -202,7 +220,11 @@ class ImageProcessingJob
             UploadAlert.create_from_core_file(core_file, :create)
           end
         end
-        report = load_report.image_reports.create_success(core_file, iptc)
+        if modified == true
+          report = load_report.image_reports.create_modified(modified_message, core_file, iptc)
+        else
+          report = load_report.image_reports.create_success(core_file, iptc)
+        end
       end
     rescue Exception => error
       pid = core_file.pid

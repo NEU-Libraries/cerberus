@@ -8,6 +8,7 @@ class CollectionsController < ApplicationController
   include Cerberus::TempFileStorage
   include Cerberus::ControllerHelpers::EditableObjects
   include Cerberus::ControllerHelpers::PermissionsCheck
+  include UrlHelper
 
   include Blacklight::Catalog
   include Blacklight::Configurable # comply with BL 3.7
@@ -134,6 +135,9 @@ class CollectionsController < ApplicationController
     @set = fetch_solr_document
 
     @page_title = @set.title
+    if !@set.description.blank?
+      @pretty_description = convert_urls(@set.description)
+    end
 
     if !@set.smart_collection_type.nil? && @set.smart_collection_type == 'User Root'
       #redirect to employee view
@@ -154,7 +158,7 @@ class CollectionsController < ApplicationController
 
     (@response, @document_list) = get_search_results
 
-    render :template => 'shared/sets/show'
+    render 'shared/sets/show', locals: {pretty_description: @pretty_description}
   end
 
   def edit

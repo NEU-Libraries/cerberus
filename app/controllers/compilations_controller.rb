@@ -1,6 +1,7 @@
 class CompilationsController < ApplicationController
   include Cerberus::ControllerHelpers::EditableObjects
   include Cerberus::ControllerHelpers::PermissionsCheck
+  include UrlHelper
 
   before_filter :authenticate_user!, except: [:show, :show_download, :download, :ping_download]
 
@@ -54,9 +55,12 @@ class CompilationsController < ApplicationController
 
   def show
     @page_title = "#{@compilation.title}"
+    if !@compilation.description.blank?
+      @pretty_description = convert_urls(@compilation.description)
+    end
 
     respond_to do |format|
-      format.html{ render action: "show" }
+      format.html{ render action: "show", locals: {pretty_description: @pretty_description}}
       format.json{ render json: @compilation  }
     end
   end
@@ -146,7 +150,7 @@ class CompilationsController < ApplicationController
     dead_entries = @compilation.remove_dead_entries
 
     if dead_entries.length > 0
-      flash.now[:error] = "The following items no longer exist in the repository and have been removed from your #{ t('drs.compilations.name') }: #{dead_entries.join(', ')}"
+      flash.now[:error] = "#{dead_entries.length} items no longer exist in the repository and have been removed from your #{ t('drs.compilations.name')}."
     end
   end
 

@@ -13,6 +13,12 @@ describe CompilationsController do
     end
   end
 
+  after :each do
+    ActiveFedora::Base.find(:all).each do |file|
+      file.destroy
+    end
+  end
+
   describe "GET #index" do
 
     it "loads all compilations for the signed in user" do
@@ -113,6 +119,24 @@ describe CompilationsController do
         comp.add_entry(file)
         comp.save!
         file.delete
+      end
+
+      it "purges the deleted objects from the compilation before showing it" do
+        get :show, id: compilation.pid
+        assigns(:compilation).entry_ids.should == []
+      end
+    end
+    context "with tombstoned files" do
+      # Operating over a copy of the compilation seems to eliminate
+      # some strange RELS_EXT behavior that occurs when a file is deleted.
+      before :each do
+        root = Collection.create(title: "Root")
+        file = CoreFile.create(title: "Core File One", parent: root, depositor: "nobody@nobody.com")
+        comp = Compilation.find(compilation.pid)
+        comp.add_entry(file)
+        comp.save!
+        file.tombstone
+        file.save!
       end
 
       it "purges the deleted objects from the compilation before showing it" do

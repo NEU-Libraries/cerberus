@@ -23,6 +23,7 @@ class PropertiesDatastream < ActiveFedora::OmDatastream
     t.mime_type :index_as=>[:stored_searchable]
     t.ordinal_value :index_as=>[:stored_searchable]
     t.ordinal_last :index_as=>[:stored_searchable]
+    t.file_size :index_as=>[:stored_searchable]
   end
 
   def self.xml_template

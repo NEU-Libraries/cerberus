@@ -6,7 +6,7 @@ describe ProcessIptcZipJob do
       @client = Mysql2::Client.new(:host => "#{ENV["HANDLE_TEST_HOST"]}", :username => "#{ENV["HANDLE_TEST_USERNAME"]}", :password => "#{ENV["HANDLE_TEST_PASSWORD"]}", :database => "#{ENV["HANDLE_TEST_DATABASE"]}")
       ActionMailer::Base.deliveries = []
       @loader_name = "College of Engineering"
-      tempdir = Rails.root.join("tmp")
+      tempdir = Pathname.new("#{Rails.application.config.tmp_path}/")
       @uniq_hsh = Digest::MD5.hexdigest("#{Rails.root}/spec/fixtures/files/jpgs.zip")[0,2]
       file_name = "#{Time.now.to_i.to_s}-#{@uniq_hsh}"
       new_path = tempdir.join(file_name).to_s
@@ -28,17 +28,18 @@ describe ProcessIptcZipJob do
     end
 
     it 'triggers image report job' do
-      Loaders::ImageReport.all.length.should == 2
+      Loaders::ImageReport.all.length.should == 3
     end
 
     it 'creates two core files' do
-      CoreFile.all.length.should == 2
+      CoreFile.all.length.should == 3
     end
 
     it 'sets correct number of success, fail, total number counts' do
       lr = Loaders::LoadReport.all.first
-      lr.number_of_files.should == 2
+      lr.number_of_files.should == 3
       lr.success_count.should == 2
+      lr.modified_count.should == 1
       lr.fail_count.should == 0
     end
 
