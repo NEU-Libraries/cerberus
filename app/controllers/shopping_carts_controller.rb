@@ -111,9 +111,10 @@ class ShoppingCartsController < ApplicationController
     # user that this has occurred.
     def check_availability
       deleted = []
-
       session[:ids].each do |pid|
         if !ActiveFedora::Base.exists?(pid)
+          deleted << pid
+        elsif ActiveFedora::Base.find(pid, cast: true).core_record == nil
           deleted << pid
         end
       end
@@ -126,9 +127,7 @@ class ShoppingCartsController < ApplicationController
         flash[:error] = "All items associated with this cart have been deleted.  Cancelling Download"
         redirect_to shopping_cart_path and return
       elsif !deleted.empty?
-        flash.now[:error] = "The following items no longer exist in the" +
-        " repository and have been removed from your cart:" +
-        " #{deleted.join(', ')}"
+        flash.now[:error] = "#{deleted.length} items no longer exist in the repository and have been removed from your cart."
       end
     end
 

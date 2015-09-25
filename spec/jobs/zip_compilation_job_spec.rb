@@ -8,7 +8,7 @@ describe ZipCompilationJob do
     @image       = FactoryGirl.create(:image_master_file)
     @pdf         = FactoryGirl.create(:pdf_file)
     @compilation = FactoryGirl.create(:bills_compilation)
-    @zip_dir     = Rails.root.join("tmp", @compilation.pid)
+    @zip_dir     = Pathname.new("#{Rails.application.config.tmp_path}/").join(@compilation.pid)
   end
 
   describe "zipping a compilation" do
@@ -66,8 +66,8 @@ describe ZipCompilationJob do
     CoreFile.all.map { |x| x.destroy }
     Compilation.all.map { |c| c.destroy }
 
-    if File.directory? Rails.root.join("tmp", @compilation.pid)
-      FileUtils.remove_dir Rails.root.join("tmp", @compilation.pid)
+    if File.directory? Pathname.new("#{Rails.application.config.tmp_path}/").join(@compilation.pid)
+      FileUtils.remove_dir Pathname.new("#{Rails.application.config.tmp_path}/").join(@compilation.pid)
     end
   end
 end

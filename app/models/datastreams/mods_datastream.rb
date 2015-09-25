@@ -225,7 +225,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
     solr_doc["full_title_ssi"] = "#{self.non_sort.first} #{kramdown_parse(self.title_info.title.first)}".strip
 
     # Sortable for date
-    solr_doc["date_ssi"] = self.date.first
+    solr_doc["date_ssi"] = self.date
 
     # Kramdown parse for search purposes - #439
     solr_doc["abstract_tesim"] = kramdown_parse(self.abstract.first)

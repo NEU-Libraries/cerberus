@@ -47,17 +47,35 @@ class ContentCreationJob
       if content_object.instance_of? ZipFile
         # Is it literally a zipfile? or did it just fail to be the other types...
         if File.extname(file_path) == ".zip"
-          File.open(file_path) do |file_contents|
-            content_object.add_file(file_contents, 'content', file_name)
+          # if file is large, we http kludge it in to avoid loading into memory
+          if File.size(file_path) / 1024000 > 500
+            large_upload(content_object, file_path, 'content')
+            content_object.properties.mime_type = extract_mime_type(file_path)
+            content_object.properties.md5_checksum = new_checksum(file_path)
+            content_object.properties.file_size = File.size(file_path)
             content_object.save!
+          else
+            File.open(file_path) do |file_contents|
+              content_object.add_file(file_contents, 'content', file_name)
+              content_object.save!
+            end
           end
         else
           zip_content(content_object)
         end
       else
-        File.open(file_path) do |file_contents|
-          content_object.add_file(file_contents, 'content', file_name)
+        # if file is large, we http kludge it in to avoid loading into memory
+        if File.size(file_path) / 1024000 > 500
+          large_upload(content_object, file_path, 'content')
+          content_object.properties.mime_type = extract_mime_type(file_path)
+          content_object.properties.md5_checksum = new_checksum(file_path)
+          content_object.properties.file_size = File.size(file_path)
           content_object.save!
+        else
+          File.open(file_path) do |file_contents|
+            content_object.add_file(file_contents, 'content', file_name)
+            content_object.save!
+          end
         end
       end
 
@@ -96,7 +114,10 @@ class ContentCreationJob
          ScaledImageCreator.new(small_size, medium_size, large_size, content_object, permissions).create_scaled_images
       end
 
-      DerivativeCreator.new(content_object.pid).generate_derivatives
+      # Derivative creator loads into memory, we're skipping for large files
+      if File.size(file_path) / 1024000 < 500
+        DerivativeCreator.new(content_object.pid).generate_derivatives
+      end
 
       # Derivative creator modifies the core record and these changes are
       # overriden if we save this open copy of the core record without
@@ -115,6 +136,18 @@ class ContentCreationJob
   end
 
   private
+
+    def large_upload(content_object, file_path, dsid)
+      url = URI("#{ActiveFedora.config.credentials[:url]}")
+      req = Net::HTTP::Post.new("#{ActiveFedora.config.credentials[:url]}/objects/#{content_object.pid}/datastreams/#{dsid}?controlGroup=M&dsLocation=file://#{file_path}")
+      req.basic_auth("#{ActiveFedora.config.credentials[:user]}", "#{ActiveFedora.config.credentials[:password]}")
+      req.add_field("Content-Type", "#{extract_mime_type(file_path)}")
+      req.add_field("Transfer-Encoding", "chunked")
+      res = Net::HTTP.start(url.host, url.port) {|http|
+          http.request(req)
+      }
+      return res
+    end
 
     def zip_content(content_object)
       begin

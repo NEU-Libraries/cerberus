@@ -9,8 +9,14 @@ module Cerberus
       included do
         attr_accessible :embargo_release_date
 
-        def embargo_release_date=(string)
-          self.rightsMetadata.embargo_release_date = string
+        def embargo_release_date=(release_date)
+          release_date = release_date.to_s if release_date.is_a? Date
+          begin
+            release_date.blank? || Date.parse(release_date)
+          rescue
+            return "INVALID DATE"
+          end
+          self.rightsMetadata.update_values({[:embargo,:machine,:date]=>release_date})
         end
 
         def embargo_release_date

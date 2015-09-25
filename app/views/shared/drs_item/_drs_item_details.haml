@@ -5,6 +5,9 @@
         / = item.title or "Default title"
         = "#{item.non_sort} "
         = kramdown_parse(item.title) or "Default title"
+        - if !item.sub_title.blank?
+          %span.drs-item-subtitle
+            = ": " + item.sub_title
     -if defined? cart_remove_link
       = cart_remove_link
   = render partial: 'shared/drs_item/drs_item_ad_details', locals: {item: item}

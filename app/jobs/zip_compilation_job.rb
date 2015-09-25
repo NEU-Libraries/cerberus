@@ -26,7 +26,8 @@ class ZipCompilationJob
     else
       user = nil
     end
-    dir = Rails.root.join("tmp", self.comp_pid)
+    tempdir = Pathname.new("#{Rails.application.config.tmp_path}/")
+    dir = tempdir.join(self.comp_pid)
 
     # Removes any stale zip files that might still be sitting around.
     if File.directory? dir

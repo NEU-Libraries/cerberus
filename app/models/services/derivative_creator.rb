@@ -13,19 +13,24 @@ class DerivativeCreator
 
     blob = nil
 
-    if master.instance_of?(MswordFile)
-      pdf = create_pdf_file
-      pdf.transform_datastream(:content, content: { datastream: 'content', size: '1000x1000>' })
-      blob = pdf.content.content
-    elsif master.instance_of?(PdfFile)
-      copy = master
-      copy.transform_datastream(:content, content: { datastream: 'content', size: '1000x1000>' })
-      blob = copy.content.content
-    else
-      blob = self.master.content.content
+    if !master.instance_of?(VideoFile)
+
+      if master.instance_of?(MswordFile)
+        pdf = create_pdf_file
+        pdf.transform_datastream(:content, content: { datastream: 'content', size: '1000x1000>' })
+        blob = pdf.content.content
+      elsif master.instance_of?(PdfFile)
+        copy = master
+        copy.transform_datastream(:content, content: { datastream: 'content', size: '1000x1000>' })
+        blob = copy.content.content
+      else
+        blob = self.master.content.content
+      end
+
+      create_all_thumbnail_sizes(blob)
+
     end
 
-    create_all_thumbnail_sizes(blob)
   end
 
   private
