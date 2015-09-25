@@ -14,8 +14,10 @@ class ResolrizeJob
 
     conn.search(nil) { |object|
       begin
-        pid = object.pid
-        Cerberus::Application::Queue.push(IndexJob.new(pid, job_id))
+        if !object.datastreams.keys.include? "thumbnail_1"
+          pid = object.pid
+          Cerberus::Application::Queue.push(IndexJob.new(pid, job_id))
+        end
       rescue Exception => error
         failed_pids_log.warn "#{Time.now} - Error processing PID: #{pid}"
         errors_for_pid = Logger.new("#{Rails.root}/log/#{job_id}/#{pid}.log")
