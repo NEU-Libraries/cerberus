@@ -97,6 +97,7 @@ class CoreFile < ActiveFedora::Base
       solr_doc["title_info_title_ssi"] = self.title
       solr_doc["parent_id_tesim"] = self.parent.pid
       solr_doc["active_fedora_model_ssi"] = self.class
+      solr_doc["tombstone_reason_tesim"] = self.tombstone_reason if self.tombstone_reason
       return solr_doc
     end
 
@@ -154,6 +155,18 @@ class CoreFile < ActiveFedora::Base
       return false
     else
       return true
+    end
+  end
+
+  def tombstone_reason
+    if self.mods.access_condition
+      self.mods.access_condition.each_with_index do |ac, i|
+        if self.mods.access_condition(i).type[0] == "suppressed"
+          return self.mods.access_condition[i]
+        end
+      end
+    else
+      return
     end
   end
 
