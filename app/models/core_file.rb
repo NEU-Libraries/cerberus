@@ -18,6 +18,7 @@ class CoreFile < ActiveFedora::Base
   include Cerberus::Rights::PermissionsAssignmentHelper
 
   include ModsDisplay::ModelExtension
+  include NodeHelper
 
   has_metadata name: 'DC', type: DublinCoreDatastream
   has_metadata name: 'properties', type: PropertiesDatastream
@@ -117,8 +118,17 @@ class CoreFile < ActiveFedora::Base
     return solr_doc
   end
 
-  def tombstone
+  def tombstone(reason = "")
     self.properties.tombstoned = 'true'
+    if reason != ""
+      hash = {}
+      self.mods.access_condition.each_with_index do |ac, i|
+        type = self.mods.access_condition(i).type[0]
+        hash["#{type}"] = self.mods.access_condition[i]
+      end
+      hash["suppressed"] = reason
+      self.mods.access_conditions = hash
+    end
     self.save!
   end
 
@@ -134,6 +144,7 @@ class CoreFile < ActiveFedora::Base
       return false
     else
       self.properties.tombstoned = ''
+      hash = self.mods.remove_suppressed_access
       self.save!
     end
   end
