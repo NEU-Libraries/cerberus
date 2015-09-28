@@ -88,19 +88,36 @@ class Collection < ActiveFedora::Base
     yield self
   end
 
-  def tombstone
+  def tombstone(reason = "")
     self.properties.tombstoned = 'true'
     doc = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{self.pid}\"").first)
     if doc.child_files
       doc.child_files.each do |child|
         cf = CoreFile.find(child.pid)
-        cf.tombstone
+        if reason != ""
+          cf.tombstone(reason)
+        else
+          cf.tombstone
+        end
       end
     end
     if self.child_collections
       self.child_collections.each do |col_child|
-        col_child.tombstone
+        if reason != ""
+          col_child.tombstone(reason)
+        else
+          col_child.tombstone
+        end
       end
+    end
+    if reason != ""
+      hash = {}
+      self.mods.access_condition.each_with_index do |ac, i|
+        type = self.mods.access_condition(i).type[0]
+        hash["#{type}"] = self.mods.access_condition[i]
+      end
+      hash["suppressed"] = reason
+      self.mods.access_conditions = hash
     end
     self.save!
   end
@@ -117,6 +134,7 @@ class Collection < ActiveFedora::Base
       return false
     else
       self.properties.tombstoned = ''
+      self.mods.remove_suppressed_access
       self.save!
       cfs = ActiveFedora::SolrService.query("parent_id_tesim:\"#{self.pid}\"")
       cfs.each do |cf|
@@ -136,6 +154,18 @@ class Collection < ActiveFedora::Base
       return false
     else
       return true
+    end
+  end
+
+  def tombstone_reason
+    if self.mods.access_condition
+      self.mods.access_condition.each_with_index do |ac, i|
+        if self.mods.access_condition(i).type[0] == "suppressed"
+          return self.mods.access_condition[i]
+        end
+      end
+    else
+      return
     end
   end
 
