@@ -57,6 +57,7 @@ module Cerberus
         end
 
         if record.tombstoned?
+          flash.now[:alert] = "#{record.tombstone_reason}" || "This record has been removed."
           render_404(ActiveFedora::ObjectNotFoundError.new) and return
         end
 
