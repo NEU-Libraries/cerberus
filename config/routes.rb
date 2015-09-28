@@ -59,7 +59,7 @@ Cerberus::Application.routes.draw do
   get "/files/:id/edit/xml" => "core_files#edit_xml", as: "edit_core_file_xml"
   put "/files/:id/validate_xml" => "core_files#validate_xml", as: "core_file_validate_xml"
 
-  get "/files/:id/tombstone" => "core_files#tombstone", as: "tombstone_file"
+  match "/files/:id/tombstone" => "core_files#tombstone", via: 'post', as: "tombstone_file"
   match "/files/:id/request_tombstone" => "core_files#request_tombstone", via: 'post', as:"request_tombstone_file"
   match "/files/:id/request_move" => "core_files#request_move", via: 'post', as:"request_move_file"
 
