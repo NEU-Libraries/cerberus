@@ -145,7 +145,7 @@ class CoreFile < ActiveFedora::Base
       return false
     else
       self.properties.tombstoned = ''
-      hash = self.mods.remove_suppressed_access
+      self.mods.remove_suppressed_access
       self.save!
     end
   end
