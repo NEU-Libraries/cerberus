@@ -8,7 +8,7 @@
             = select_tag :reason, options_for_select(I18n.t "drs.tombstone_reasons"), {prompt: "Select reason", required: true, class: 'span12'}
             %a.btn.btn-danger{href:"#deleteModal", title: "Tombstone File", data: {toggle: "modal"}}
               Tombstone File
-      = render partial: 'delete_modal', locals: { title: "Confirm Tombstone", delete_path: tombstone_file_path, button_title: "Tombstone" }
+      = render partial: 'delete_modal', locals: { title: "Confirm Tombstone", button_title: "Tombstone" }
   -else
     %p
       The DRS is a permanent archive, but we recognize that occasionally it may be necessary to remove files. Please review
