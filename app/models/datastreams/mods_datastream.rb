@@ -276,9 +276,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
     solr_doc["creator_ssi"] = all_names.first
 
     solr_doc["origin_info_place_tesim"] = self.origin_info.place.city_term
-
-    solr_doc["access_condition_tesim"] = self.access_condition.last
-
+    
     solr_doc = self.generate_niec_solr_hash(solr_doc)
 
     #TODO:  Extract dateBegin/dateEnd information ]
