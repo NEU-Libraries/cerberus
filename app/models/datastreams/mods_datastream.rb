@@ -104,7 +104,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
       t.display_label(path: {attribute: 'displayLabel'})
     }
 
-    t.access_condition(path: 'accessCondition', namespace_prefix: 'mods', index_as: [:stored_searchable]) {
+    t.access_condition(path: 'accessCondition', namespace_prefix: 'mods') {
       t.type(path: {attribute: 'type'})
     }
 
@@ -276,7 +276,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
     solr_doc["creator_ssi"] = all_names.first
 
     solr_doc["origin_info_place_tesim"] = self.origin_info.place.city_term
-    
+
     solr_doc = self.generate_niec_solr_hash(solr_doc)
 
     #TODO:  Extract dateBegin/dateEnd information ]
