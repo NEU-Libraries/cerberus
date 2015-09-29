@@ -394,6 +394,42 @@ class ModsDatastream < ActiveFedora::OmDatastream
     end
   end
 
+  # Allows for tombstone message
+  def access_conditions=(hash_of_strings)
+    hash_of_access = hash_of_strings.select { |ac| !ac.blank? }
+
+    if hash_of_access.length < self.access_condition.length
+      node_count = self.access_condition.length - hash_of_access.length
+      trim_nodes_from_zero(:access_condition, node_count)
+    end
+    i = 0
+    hash_of_access.each do |key, val|
+      if self.access_condition[i].nil?
+        self.insert_new_node(:access_condition)
+      end
+      self.access_condition(i).type = key
+      i = i+1
+    end
+    self.access_condition = hash_of_access.values
+  end
+
+  def remove_suppressed_access
+    hash = Hash.new
+    self.access_condition.each_with_index do |ac, i|
+      type = self.access_condition(i).type[0]
+      if type != "suppressed"
+        hash["#{type}"] = self.access_condition[i]
+      end
+    end
+    self.access_condition = hash
+    i = 0
+    hash.each do |key, val|
+      self.access_condition(i).type = key
+      i = i+1
+    end
+    return hash
+  end
+
   # The following four methods are probably deprecated, given that we won't be
   # collecting corporate/personal names separately from end users, and therefore shouldn't
   # have to assign to it/read from it for the purposes of the frontend.
@@ -568,6 +604,13 @@ class ModsDatastream < ActiveFedora::OmDatastream
   def self.corporate_name_template
     builder = Nokogiri::XML::Builder.new do |xml|
       xml.name('type' => 'corporate')
+    end
+    return builder.doc.root
+  end
+
+  def self.access_condition_template
+    builder = Nokogiri::XML::Builder.new do |xml|
+      xml.accessCondition " "
     end
     return builder.doc.root
   end
