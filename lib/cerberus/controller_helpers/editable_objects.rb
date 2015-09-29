@@ -53,12 +53,12 @@ module Cerberus
         begin
           record = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first)
         rescue NoMethodError
-          render_404(ActiveFedora::ObjectNotFoundError.new) and return
+          render_404(ActiveFedora::ObjectNotFoundError.new, request.env['PATH_INFO']) and return
         end
 
         if record.tombstoned?
           flash.now[:alert] = "#{record.tombstone_reason}"
-          render_404(ActiveFedora::ObjectNotFoundError.new) and return
+          render_410(Exceptions::TombstonedObject.new) and return
         end
 
         if current_user.nil?
