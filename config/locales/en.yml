@@ -110,6 +110,10 @@ en:
         granular_permissions:
           heading: "Granular Permissions"
           read_edit: "Should this person or group be allowed to edit metadata for this file?"
+    tombstone_reasons:
+      - "Removed from view at Northeastern University’s discretion"
+      - "Removed from view at Northeastern University Libraries’ discretion"
+      - "Removed from view by legal order"
     user_notifications:
       message: "[title] has been saved."
     dashboard:

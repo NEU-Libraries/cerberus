@@ -24,9 +24,12 @@ class Admin::CoreFilesController < AdminController
 
   # routed to /admin/files/:id
   def show
-    @core_file = ActiveFedora::Base.find(params[:id], cast: true)
+    @core_file = SolrDocument.new ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first
     @mods = Sanitize.clean(Kramdown::Document.new(render_mods_display(CoreFile.find(@core_file.pid))).to_html, :elements => ['sup', 'sub', 'dt', 'dd', 'br', 'a'], :attributes => {'a' => ['href']}).html_safe
-    @thumbs = @core_file.thumbnail_list
+    @thumbs = ActiveFedora::Base.find(params[:id], cast: true).thumbnail_list
+    if @core_file.tombstone_reason
+      flash.now[:alert] = "#{@core_file.tombstone_reason}"
+    end
     @page_title = @core_file.title
   end
 

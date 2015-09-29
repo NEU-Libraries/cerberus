@@ -57,6 +57,7 @@ module Cerberus
         end
 
         if record.tombstoned?
+          flash.now[:alert] = "#{record.tombstone_reason}"
           render_404(ActiveFedora::ObjectNotFoundError.new) and return
         end
 

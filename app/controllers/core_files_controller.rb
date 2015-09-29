@@ -338,12 +338,13 @@ class CoreFilesController < ApplicationController
     core_file = CoreFile.find(params[:id])
     title = core_file.title
     collection = core_file.parent.id
-    core_file.tombstone
-    if current_user.admin?
-      redirect_to collection_path(id: collection), notice: "The file '#{title}' has been tombstoned"
+    reason = params[:reason]
+    if reason
+      core_file.tombstone(reason + " " + DateTime.now.strftime("%F"))
     else
-      redirect_to collection_path(id: collection), notice: "The file '#{title}' has been tombstoned"
+      core_file.tombstone
     end
+    redirect_to collection_path(id: collection), notice: "The file '#{title}' has been tombstoned"
   end
 
   def request_tombstone
