@@ -26,6 +26,9 @@ class Admin::CollectionsController < AdminController
   def show
     @collection = ActiveFedora::Base.find(params[:id], cast: true)
     @thumbs = @collection.thumbnail_list
+    if @collection.tombstone_reason
+      flash.now[:alert] = "#{@collection.tombstone_reason}"
+    end
     @page_title = @collection.title
   end
 
