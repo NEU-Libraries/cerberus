@@ -34,13 +34,46 @@ class ProcessMultipageZipJob
     header_position = 1
     header_row = spreadsheet.row(header_position)
 
+    core_file = nil
+    seq_num = -1
+
     spreadsheet.each_row_streaming(offset: header_position) do |row|
       if row.present? && header_row.present?
-        # puts row.inspect # Array of Excelx::Cell objects
         row_results = process_a_row(header_row, row)
-        # puts row_results
-        core_file = CoreFile.new
-        MultipageProcessingJob.new(dir_path + row_results["file_name"], row_results["file_name"], core_file, copyright, load_report.id, permissions, client).run
+
+        row_num = row_results["sequence"].to_i
+
+        # if row_results ordinal 0
+        if row_num == 0
+          core_file = CoreFile.new
+          core_file.depositor = "000000000"
+          core_file.parent = Collection.find(parent)
+          core_file.properties.parent_id = core_file.parent.pid
+          core_file.tag_as_in_progress
+          core_file.save!
+        end
+
+        if !(row_num == seq_num + 1)
+          #TODO: mark as error
+        else
+          MultipageProcessingJob.new(dir_path + row_results["file_name"],
+                                      row_results["file_name"],
+                                      core_file,
+                                      copyright,
+                                      load_report.id,
+                                      permissions,
+                                      client).run
+
+          if row_results["last_item"] == "TRUE"
+            # reset for next paged item
+            core_file = nil
+            seq_num = -1
+          else
+            # Keep on goin'
+            seq_num = row_num
+          end
+        end
+
       end
     end
   end
