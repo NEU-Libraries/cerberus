@@ -18,7 +18,6 @@ class CoreFile < ActiveFedora::Base
   include Cerberus::Rights::PermissionsAssignmentHelper
 
   include ModsDisplay::ModelExtension
-  include NodeHelper
 
   has_metadata name: 'DC', type: DublinCoreDatastream
   has_metadata name: 'properties', type: PropertiesDatastream
