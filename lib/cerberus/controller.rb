@@ -22,9 +22,14 @@ module Cerberus::Controller
     render :template => '/error/403', :layout => "error", :formats => [:html], :status => 403
   end
 
-  def render_404(exception)
-    logger.error("Rendering 404 page due to exception: #{exception.inspect} - #{exception.backtrace if exception.respond_to? :backtrace}")    
+  def render_404(exception, path="")
+    logger.error("Rendering 404 page for #{path if path != ""} due to exception: #{exception.inspect} - #{exception.backtrace if exception.respond_to? :backtrace}")
     render :template => '/error/404', :layout => "error", :formats => [:html], :status => 404
+  end
+
+  def render_410(exception)
+    logger.error("Rendering the 410 page due to exception: #{exception.inspect} - #{exception.backtrace if exception.respond_to? :backtrace}")
+    render :template => '/error/410', :layout => "error", :formats => [:html], :status => 410
   end
 
   def render_500(exception)
