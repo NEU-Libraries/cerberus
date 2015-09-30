@@ -56,8 +56,7 @@ class ProcessMultipageZipJob
         if !(row_num == seq_num + 1)
           #TODO: mark as error
         else
-          MultipageProcessingJob.new(dir_path + row_results["file_name"],
-                                      row_results["file_name"],
+          MultipageProcessingJob.new(row_results,
                                       core_file,
                                       copyright,
                                       load_report.id,

@@ -1,5 +1,5 @@
 class MultipageProcessingJob
-  attr_accessor :file, :file_name, :core_file, :copyright, :report_id, :permissions, :client
+  attr_accessor :file_values, :core_file, :copyright, :report_id, :permissions, :client
   include MimeHelper
   include HandleHelper
 
@@ -7,9 +7,8 @@ class MultipageProcessingJob
     :loader_multipage_processing
   end
 
-  def initialize(file, file_name, core_file, copyright, report_id, permissions=[], client=nil)
-    self.file = file
-    self.file_name = file_name
+  def initialize(file_values, core_file, copyright, report_id, permissions=[], client=nil)
+    self.file_values = file_values
     self.core_file = core_file
     self.copyright = copyright
     self.report_id = report_id
@@ -28,7 +27,7 @@ class MultipageProcessingJob
     failed_pids_log = Logger.new("#{Rails.root}/log/#{job_id}/loader-multipage-process-job.log")
     load_report = Loaders::LoadReport.find(report_id)
     begin
-
+      
     rescue Exception => error
       # TODO: fill in
     end
