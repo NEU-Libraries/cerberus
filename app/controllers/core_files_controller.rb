@@ -150,7 +150,7 @@ class CoreFilesController < ApplicationController
 
     if @core_file.save!
       if params[:core_file] && !@core_file.category.first.blank?
-        UploadAlert.create_from_core_file(@core_file, :create)
+        UploadAlert.create_from_core_file(@core_file, :create, current_user)
       end
     end
 
@@ -315,7 +315,7 @@ class CoreFilesController < ApplicationController
     #always save the file so the new version or metadata gets recorded
     if @core_file.save
       if params[:core_file] && !@core_file.category.first.blank?
-        UploadAlert.create_from_core_file(@core_file, :update)
+        UploadAlert.create_from_core_file(@core_file, :update, current_user)
       end
 
       # If this change updated metadata, propagate the change outwards to
