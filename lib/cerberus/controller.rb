@@ -29,7 +29,10 @@ module Cerberus::Controller
 
   def render_410(exception)
     logger.error("Rendering the 410 page due to exception: #{exception.inspect} - #{exception.backtrace if exception.respond_to? :backtrace}")
-    render :template => '/error/410', :layout => "error", :formats => [:html], :status => 410
+    if !params[:id].blank?
+      record = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first)
+    end
+    render :template => '/error/410', :layout => "error", :formats => [:html], :status => 410, locals: {record:record}
   end
 
   def render_500(exception)
