@@ -157,11 +157,13 @@ describe Collection do
         @gg_gf = CoreFile.create(title: "GG CF", parent: @great_grandchild, depositor: "nobody@nobody.com")
         @child_one.tombstone("Removed at the request of Northeastern University")
         @child_one.save!
-        @solr = @child_one.to_solr
+        @solr = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{@child_one.pid}\"").first)
       end
 
       it "has tombstone message" do
+        @solr = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{@child_one.pid}\"").first)
         @child_one.tombstone_reason.should == "Removed at the request of Northeastern University"
+        @solr.tombstone_reason.should == "Removed at the request of Northeastern University"
       end
 
       it "has mods accessCondition" do
@@ -179,6 +181,8 @@ describe Collection do
           child.tombstone_reason.should == "Removed at the request of Northeastern University"
           child.mods.access_condition.should == ["Removed at the request of Northeastern University"]
           child.mods.access_condition(0).type.should == ["suppressed"]
+          child_solr = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{child.pid}\"").first)
+          child_solr.tombstone_reason.should == "Removed at the request of Northeastern University"
         end
       end
 
@@ -189,6 +193,8 @@ describe Collection do
           col_child.tombstone_reason.should == "Removed at the request of Northeastern University"
           col_child.mods.access_condition.should == ["Removed at the request of Northeastern University"]
           col_child.mods.access_condition(0).type.should == ["suppressed"]
+          col_child_solr = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{col_child.pid}\"").first)
+          col_child_solr.tombstone_reason.should == "Removed at the request of Northeastern University"
         end
       end
 
@@ -196,20 +202,22 @@ describe Collection do
         @child_two.tombstone("Removed at the request of Northeastern University")
         @child_two.save!
         gg = CoreFile.find("#{@gg_gf.pid}")
-        #this doesn't work
         gg.tombstone_reason.should == "Removed at the request of Northeastern University"
         gg.mods.access_condition.should == ["Removed at the request of Northeastern University"]
         gg.mods.access_condition(0).type.should == ["suppressed"]
+        gg_solr = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{gg.pid}\"").first)
+        gg_solr.tombstone_reason.should == "Removed at the request of Northeastern University"
       end
 
       it "sets collection great grandchild tombstone message" do
         @child_two.tombstone("Removed at the request of Northeastern University")
         @child_two.save!
         gg = Collection.find("#{@great_grandchild.pid}")
-        #this doesn't work
         gg.tombstone_reason.should == "Removed at the request of Northeastern University"
         gg.mods.access_condition.should == ["Removed at the request of Northeastern University"]
         gg.mods.access_condition(0).type.should == ["suppressed"]
+        gg_solr = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{gg.pid}\"").first)
+        gg_solr.tombstone_reason.should == "Removed at the request of Northeastern University"
       end
 
       it_should_behave_like 'successful tombstone collection'
@@ -239,6 +247,16 @@ describe Collection do
 
   describe 'revive collection' do
     shared_examples_for 'successful revive collection' do
+      it "has no mods accessCondition" do
+        @child_one.revive
+        @child_one.mods.access_condition.should == []
+      end
+
+      it "has no tombstone reason" do
+        @child_one.revive
+        @child_one.tombstone_reason.should == []
+      end
+
       it "sets properties.tombstoned to empty" do
         @child_one.revive
         @child_one.properties.tombstoned should = ''
@@ -267,29 +285,29 @@ describe Collection do
         doc =  SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{@child_one.pid}\"").first)
         doc.child_files.each do |child|
           child = CoreFile.find("#{child.pid}")
-          child.tombstoned?.should be false
+          child.mods.access_condition.should == []
+          child.tombstone_reason.should == []
         end
       end
 
-      it "revives collection children and grandchildren" do
-        @child_two.tombstone
-        @child_two.save!
-        @child_two.revive
-        @child_two.save!
-        @child_two.child_collections do |col_child|
-          col_child.tombstoned?.should be false
-        end
-        gg = Collection.find("#{@great_grandchild.pid}")
-        gg.tombstoned?.should be false
-      end
-
-      it "revives corefile great grandchildren" do
-        @child_two.tombstone
-        @child_two.save!
+      it "revives collection children and grandchildren and corefile great grandchildren" do
         @child_two.revive
         @child_two.save!
         gg = CoreFile.find("#{@gg_gf.pid}")
-        gg.tombstoned?.should be false
+        cfs = ActiveFedora::SolrService.query("parent_id_tesim:\"#{@child_two.pid}\"")
+        cfs.each do |cf|
+          if cf['active_fedora_model_ssi'] == 'CoreFile'
+            child = CoreFile.find(cf['id'])
+            child.tombstoned?.should be false
+            child.mods.access_condition.should == []
+            child.tombstone_reason.should == []
+          elsif cf['active_fedora_model_ssi'] == 'Collection'
+            col_child = Collection.find(cf['id'])
+            col_child.tombstoned?.should be false
+            col_child.mods.access_condition.should == []
+            col_child.tombstone_reason.should == []
+          end
+        end
       end
 
       after :all do
@@ -311,6 +329,8 @@ describe Collection do
         @child_one.tombstone
         @child_one.save!
         @solr =  @child_one.to_solr
+        @child_two.tombstone
+        @child_two.save!
       end
 
       it_should_behave_like "successful revive collection"
@@ -328,49 +348,8 @@ describe Collection do
         @child_one.tombstone("Removed at the request of Northeastern University")
         @child_one.save!
         @solr =  @child_one.to_solr
-      end
-
-      it "has no mods accessCondition" do
-        @child_one.revive
-        @child_one.mods.access_condition.should == []
-      end
-
-      it "has no tombstone reason" do
-        @child_one.revive
-        @child_one.tombstone_reason.should == []
-      end
-
-      it "revives corefile children" do
-        @child_one.revive
-        doc =  SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{@child_one.pid}\"").first)
-        doc.child_files.each do |child|
-          child = CoreFile.find("#{child.pid}")
-          child.mods.access_condition.should == []
-          child.tombstone_reason.should == []
-        end
-      end
-
-      it "revives collection children and grandchildren" do
-        @child_two.tombstone
+        @child_two.tombstone("Removed at the request of Northeastern University")
         @child_two.save!
-        @child_two.revive
-        @child_two.save!
-        @child_two.child_collections do |col_child|
-          col_child.tombstoned?.should be false
-        end
-        gg = Collection.find("#{@great_grandchild.pid}")
-        gg.mods.access_condition.should == []
-        gg.tombstone_reason.should == []
-      end
-
-      it "revives corefile great grandchildren" do
-        @child_two.tombstone
-        @child_two.save!
-        @child_two.revive
-        @child_two.save!
-        gg = CoreFile.find("#{@gg_gf.pid}")
-        gg.mods.access_condition.should == []
-        gg.tombstone_reason.should == []
       end
 
       it_should_behave_like "successful revive collection"

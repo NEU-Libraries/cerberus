@@ -22,8 +22,8 @@ class CollectionsController < ApplicationController
   before_filter :authenticate_user!, only: [:new, :edit, :create, :update, :destroy ]
 
   # We can do better by using SOLR check instead of Fedora
-  #before_filter :can_read?, only: [:show]
-  before_filter :enforce_show_permissions, :only=>:show
+  before_filter :can_read?, only: [:show]
+  # before_filter :enforce_show_permissions, :only=>:show
   self.solr_search_params_logic += [:add_access_controls_to_solr_params]
 
   before_filter :can_edit?, only: [:edit, :update]
@@ -189,7 +189,7 @@ class CollectionsController < ApplicationController
     title = collection.title
     parent = collection.parent
     reason = params[:reason]
-    if reason
+    if reason != ""
       collection.tombstone(reason + " " + DateTime.now.strftime("%F"))
     else
       collection.tombstone
