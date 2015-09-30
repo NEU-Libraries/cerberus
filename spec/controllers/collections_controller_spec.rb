@@ -1,6 +1,7 @@
 require 'spec_helper'
 
 describe CollectionsController do
+  let(:admin)            { FactoryGirl.create(:admin) }
   let(:bill)             { FactoryGirl.create(:bill) }
   let(:bo)               { FactoryGirl.create(:bo) }
   let(:root)             { FactoryGirl.create(:root_collection) }
@@ -131,6 +132,16 @@ describe CollectionsController do
     it "renders the 404 template for objects that don't exist" do
       get :show, { id: "neu:xcvsxcvzc" }
       expect(response).to render_template('error/404')
+    end
+
+    it "renders the 410 template for objects that have been tombstoned" do
+      sign_in admin
+      root = Collection.create(title: "Root")
+      child_one = Collection.create(title: "Child One", parent: root)
+      child_one.tombstone
+      get :show, { id: child_one.pid }
+      expect(response).to render_template('error/410')
+      response.status.should == 410
     end
   end
 
