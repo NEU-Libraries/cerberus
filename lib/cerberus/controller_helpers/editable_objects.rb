@@ -57,7 +57,6 @@ module Cerberus
         end
 
         if record.tombstoned?
-          flash.now[:alert] = "#{record.tombstone_reason}"
           render_410(Exceptions::TombstonedObject.new) and return
         end
 
