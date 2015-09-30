@@ -8,6 +8,14 @@
   %br
     Depositor:
     = "#{alert.depositor_name} (#{alert.depositor_email})"
+  - if !alert.editor_nuid.blank? && !alert.editor_nuid.nil?
+    - alert_editor = User.find_by_nuid("#{alert.editor_nuid}")
+    %br
+      Editor:
+      - if !alert_editor.full_name.blank? && !alert_editor.full_name.nil?
+        = "#{alert_editor.full_name}"
+      - if !alert_editor.email.blank? && !alert_editor.email.nil?
+        = "(#{alert_editor.email})"
   %br
     PID:
     = "#{alert.pid}"

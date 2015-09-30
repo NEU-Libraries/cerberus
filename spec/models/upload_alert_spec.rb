@@ -150,6 +150,18 @@ describe UploadAlert do
       it "has a collection pid" do
         @alert.collection_pid.should == @core.parent.pid
       end
+
+      it "has no editor nuid" do
+        @alert.editor_nuid.should be nil
+      end
+    end
+
+    context "with editor" do
+      before(:each) { @alert = UploadAlert.create_from_core_file(@core, :update, @user)}
+
+      it "has an editor nuid" do
+        @alert.editor_nuid.should == @user.nuid
+      end
     end
 
     context "on core file update" do
