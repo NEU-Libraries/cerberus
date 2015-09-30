@@ -323,11 +323,12 @@ describe CoreFile do
         @c1_gf = CoreFile.create(title: "Core File One", parent: @child_one, depositor: "nobody@nobody.com")
         @c1_gf.tombstone("Removed at the request of Northeastern University")
         @c1_gf.save!
-        @solr =  @c1_gf.to_solr
+        @solr = SolrDocument.new(@c1_gf.to_solr)
       end
 
       it "has tombstone message" do
         @c1_gf.tombstone_reason.should == "Removed at the request of Northeastern University"
+        @solr.tombstone_reason.should == "Removed at the request of Northeastern University"
       end
 
       it "has mods accessCondition" do
