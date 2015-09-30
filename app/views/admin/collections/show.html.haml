@@ -33,3 +33,11 @@
             %br
       %dt Parent:
       %dd= link_to(@collection.parent.title, collection_path(@collection.parent))
+      -if @collection.identifier
+        %dt Permanent URL:
+        %dd
+          %a{"href"=>@collection.identifier}
+            =@collection.identifier
+      -if @collection.tombstone_reason
+        %dt Tombstone Reason:
+        %dd= @collection.tombstone_reason

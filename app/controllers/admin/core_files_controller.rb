@@ -42,7 +42,7 @@ class Admin::CoreFilesController < AdminController
     if @core_file.revive
       redirect_to admin_files_path, notice: "The file #{ActionController::Base.helpers.link_to title, core_file_path(pid)} has been revived".html_safe
     else
-      redirect_to admin_files_path, alert: "The core file '#{title}' could not be revived because the parent '#{ActionController::Base.helpers.link_to parent.title, admin_collections_path(parent.pid)}' is tombstoned.".html_safe
+      redirect_to admin_files_path, alert: "The core file '#{title}' could not be revived because the parent '#{ActionController::Base.helpers.link_to parent.title, admin_view_collection_path(parent.pid)}' is tombstoned.".html_safe
     end
   end
 
