@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150923175201) do
+ActiveRecord::Schema.define(:version => 20150930142913) do
 
   create_table "bookmarks", :force => true do |t|
     t.integer  "user_id",     :null => false
@@ -194,6 +194,7 @@ ActiveRecord::Schema.define(:version => 20150923175201) do
     t.string   "change_type"
     t.string   "collection_pid"
     t.string   "collection_title"
+    t.string   "editor_nuid"
   end
 
   add_index "upload_alerts", ["content_type"], :name => "index_upload_alerts_on_type"
