@@ -41,6 +41,7 @@ class Collection < ActiveFedora::Base
       solr_doc["title_info_title_ssi"] = self.title
       solr_doc["parent_id_tesim"] = self.parent.pid
       solr_doc["active_fedora_model_ssi"] = self.class
+      solr_doc["tombstone_reason_tesim"] = self.tombstone_reason if self.tombstone_reason
       return solr_doc
     end
 
