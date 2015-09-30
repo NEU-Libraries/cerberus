@@ -36,7 +36,7 @@ class Admin::CollectionsController < AdminController
     @collection = Collection.find(params[:id])
     pid = @collection.pid
     title = @collection.title
-    parent = Collection.find(@collection.properties.parent_id[0])
+    parent = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{@collection.properties.parent_id[0]}\"").first)
     if @collection.revive
       redirect_to admin_collections_path, notice: "The collection #{ActionController::Base.helpers.link_to title, collection_path(pid)} has been revived".html_safe
     else
