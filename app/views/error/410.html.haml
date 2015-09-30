@@ -1,23 +1,23 @@
-- if @obj_type.blank?
-  - if params[:controller] == 'core_files'
-    - obj_type = 'file'
-  - else
-    - obj_type = 'page'
-- else
-  - obj_type = @obj_type
-- if params[:id].blank?
-  - url = "'#{params[:error]}'"
-- else
-  - url = "pid '#{params[:id]}'"
-
 %h3
   %i.icon-asterisk
-  Sorry, the #{obj_type} you requested at #{url} was removed from the system.
+  -if record
+    - if record.tombstone_reason
+      = "\"#{record.title}\" was #{record.tombstone_reason[0,1].downcase + record.tombstone_reason[1..-1]}."
+    - else
+      = "\"#{record.title}\" was removed from the system."
+  -else
+    = "#{params[:id]} has been removed."
 %br
+  -if record.title
+    %dt Title:
+    %dd= record.title
+  -if record.identifier
+    %dt Permanent URL:
+    %dd
+      %a{"href"=>record.identifier}
+        =record.identifier
 %p
-  You might be interested in
-  %a{:href => "mailto:Library-Repository-Team@neu.edu"} contacting the DRS staff
-  , or
-  %a{:href => "http://library.northeastern.edu/get-help/tech-support/report-a-problem?resource=#{CGI::escape(url)} (#{CGI::escape(request.original_url)})", :target => "_blank"} reporting the problem.
+  If you believe this item was removed in error, please
+  %a{:href => "mailto:Library-Repository-Team@neu.edu"} contact the DRS staff.
 %br
 %a.btn.btn-lg{:href => "/"} DRS Home
