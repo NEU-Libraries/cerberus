@@ -339,7 +339,7 @@ class CoreFilesController < ApplicationController
     title = core_file.title
     collection = core_file.parent.id
     reason = params[:reason]
-    if reason
+    if reason != ""
       core_file.tombstone(reason + " " + DateTime.now.strftime("%F"))
     else
       core_file.tombstone

@@ -189,7 +189,7 @@ class CollectionsController < ApplicationController
     title = collection.title
     parent = collection.parent
     reason = params[:reason]
-    if reason
+    if reason != ""
       collection.tombstone(reason + " " + DateTime.now.strftime("%F"))
     else
       collection.tombstone
