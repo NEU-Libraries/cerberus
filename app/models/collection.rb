@@ -124,7 +124,7 @@ class Collection < ActiveFedora::Base
 
   def revive
     if self.properties.parent_id[0]
-      parent = Collection.find(self.properties.parent_id[0])
+      parent = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{self.properties.parent_id[0]}\"").first)
     elsif self.parent
       parent = parent
     else
