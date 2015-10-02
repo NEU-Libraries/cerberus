@@ -8,7 +8,7 @@ describe ZipCompilationJob do
     @image       = FactoryGirl.create(:image_master_file)
     @pdf         = FactoryGirl.create(:pdf_file)
     @compilation = FactoryGirl.create(:bills_compilation)
-    @zip_dir     = Pathname.new("#{Rails.application.config.tmp_path}/").join(@compilation.pid)
+    @zip_dir     = Pathname.new("#{Rails.application.config.tmp_path}/").join(@compilation.pid.gsub(":", "_"))
   end
 
   describe "zipping a compilation" do

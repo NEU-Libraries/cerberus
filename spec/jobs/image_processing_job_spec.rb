@@ -9,8 +9,8 @@ describe ImageProcessingJob do
     @file_name = File.basename(o_path)
     FileUtils.cp(o_path, "#{Rails.application.config.tmp_path}/#{@file_name}")
     @uniq_hsh = Digest::MD5.hexdigest("#{File.basename(o_path)}")[0,2]
-    File.rename("#{Rails.application.config.tmp_path}/#{@file_name}", "#{Rails.application.config.tmp_path}/#{Time.now.to_i.to_s}-#{@uniq_hsh}") # Names file time and hash string
-    @fpath = "#{Rails.application.config.tmp_path}/#{Time.now.to_i.to_s}-#{@uniq_hsh}"
+    @fpath = "#{Rails.application.config.tmp_path}/#{Time.now.to_f.to_s.gsub!('.','-')}-#{@uniq_hsh}"
+    File.rename("#{Rails.application.config.tmp_path}/#{@file_name}", "#{@fpath}") # Names file time and hash string
     @parent = @collection.pid
     @copyright = "Test Copyright Statement"
     @user = FactoryGirl.create(:user)
@@ -125,10 +125,6 @@ describe ImageProcessingJob do
         @core_file.identifier.should == retrieve_handle(@core_file.persistent_url, @client)
         @core_file.mods.identifier.type.should == ["handle"]
         @core_file.mods.identifier.display_label.should == ["Permanent URL"]
-      end
-
-      it 'removes tmp file' do
-        File.exist?("#{Rails.application.config.tmp_path}/#{Time.now.to_i.to_s}-#{@uniq_hsh}").should be false
       end
 
       it 'sets correct permissions for core_files' do
