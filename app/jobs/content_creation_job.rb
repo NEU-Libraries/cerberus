@@ -153,7 +153,7 @@ class ContentCreationJob
       begin
         # Create the name for the zipfile.
         # This prevents the zip upload issue in #664
-        z = File.basename(Time.now.to_i.to_s, ".*") + ".zip"
+        z = File.basename(Time.now.to_f.to_s.gsub!('.','-'), ".*") + ".zip"
         tempdir = Pathname.new("#{Rails.application.config.tmp_path}/")
         zipfile_name = tempdir.join(z).to_s
 
