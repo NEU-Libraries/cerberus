@@ -7,7 +7,7 @@ module Cerberus::TempFileStorage
       tempdir = Pathname.new("#{Rails.application.config.tmp_path}/")
 
       uniq_hsh = Digest::MD5.hexdigest("#{file.original_filename}")[0,2]
-      new_path = tempdir.join("#{Time.now.to_i.to_s}-#{uniq_hsh}")
+      new_path = tempdir.join("#{Time.now.to_f.to_s.gsub!('.','-')}-#{uniq_hsh}")
       FileUtils.mv(file.tempfile.path, new_path.to_s)
       return new_path.to_s
     end
