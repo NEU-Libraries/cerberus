@@ -105,10 +105,8 @@ module Cerberus
       end
 
       def keywords=(array_of_strings)
-        if array_of_strings.length > 0 && !array_of_strings.first.blank?
-          if_mods_exists { self.mods.topics = array_of_strings }
-          if_DC_exists   { self.DC.subject = array_of_strings }
-        end
+        if_mods_exists { self.mods.topics = array_of_strings }
+        if_DC_exists   { self.DC.subject = array_of_strings }
       end
 
       def keywords
