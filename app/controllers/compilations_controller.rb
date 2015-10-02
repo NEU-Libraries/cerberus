@@ -167,6 +167,6 @@ class CompilationsController < ApplicationController
   def safe_zipfile_name
     safe_title = @compilation.title.gsub(/\s+/, "")
     safe_title = safe_title.gsub(":", "_")
-    return "#{Rails.application.config.tmp_path}/#{@compilation.pid}/#{safe_title}.zip"
+    return "#{Rails.application.config.tmp_path}/#{@compilation.pid.gsub(":", "_")}/#{safe_title}.zip"
   end
 end
