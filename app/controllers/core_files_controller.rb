@@ -411,8 +411,13 @@ class CoreFilesController < ApplicationController
     end
 
     def update_metadata
-      if @core_file.update_attributes(params[:core_file])
-        flash[:notice] =  "#{@core_file.title} was updated successfully."
+      begin
+        if @core_file.update_attributes(params[:core_file])
+          flash[:notice] =  "#{@core_file.title} was updated successfully."
+        end
+      rescue OM::XML::TemplateMissingException => exception
+        flash[:error] =  "#{@core_file.title} was not updated due to an error. DRS staff have been notified of the issue."
+        email_handled_exception(exception)
       end
     end
 
