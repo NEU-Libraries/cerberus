@@ -114,7 +114,7 @@ class CompilationsController < ApplicationController
   end
 
   def download
-    path_to_dl = Dir["#{Rails.application.config.tmp_path}/#{params[:id]}/*"].first
+    path_to_dl = Dir["#{Rails.application.config.tmp_path}/#{params[:id].gsub(":", "_")}/*"].first
     send_file path_to_dl
   end
 
