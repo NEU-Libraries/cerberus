@@ -94,6 +94,7 @@ class CoreFile < ActiveFedora::Base
       solr_doc["id"] = self.pid
       solr_doc["tombstoned_ssi"] = 'true'
       solr_doc["title_info_title_ssi"] = self.title
+      solr_doc["title_info_non_sort_tesim"] = self.non_sort
       solr_doc["parent_id_tesim"] = self.properties.parent_id
       solr_doc["active_fedora_model_ssi"] = self.class
       solr_doc["tombstone_reason_tesim"] = self.tombstone_reason if self.tombstone_reason
