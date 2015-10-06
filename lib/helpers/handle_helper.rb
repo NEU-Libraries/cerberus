@@ -31,7 +31,8 @@ module HandleHelper
 
   def handle_exists?(url, client = nil)
     client || client = Mysql2::Client.new(:host => "#{ENV["HANDLE_HOST"]}", :username => "#{ENV["HANDLE_USERNAME"]}", :password => "#{ENV["HANDLE_PASSWORD"]}", :database => "#{ENV["HANDLE_DATABASE"]}")
-    mysql_response = client.query("select data from handles WHERE type = 'URL' and data = '#{url}';")
+    query = "SELECT handle FROM handles WHERE type=\"URL\" and data=\"#{url}\";"
+    mysql_response = client.query(query)
     if mysql_response.count == 0
       return false
     end
@@ -42,8 +43,9 @@ module HandleHelper
   def retrieve_handle(url, client = nil)
     client || client = Mysql2::Client.new(:host => "#{ENV["HANDLE_HOST"]}", :username => "#{ENV["HANDLE_USERNAME"]}", :password => "#{ENV["HANDLE_PASSWORD"]}", :database => "#{ENV["HANDLE_DATABASE"]}")
     if handle_exists?(url, client)
-      mysql_response = client.query("select handle from handles WHERE type = 'URL' and data = '#{url}';")
-      handle = mysql_response.first.first[1]
+      query = "SELECT handle FROM handles WHERE type=\"URL\" and data=\"#{url}\";"
+      mysql_response = client.query(query)
+      handle = mysql_response.first["handle"]
       return "http://hdl.handle.net/#{handle}"
     else
       return nil
