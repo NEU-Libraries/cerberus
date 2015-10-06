@@ -16,7 +16,7 @@ module Api
 
       def get_handle
         providedUrl = params.fetch(:url)
-        puts providedUrl
+        Rails.logger.warn providedUrl
         handle = retrieve_handle(providedUrl)
         render :json => [{:handle => "#{handle}"}]
       end

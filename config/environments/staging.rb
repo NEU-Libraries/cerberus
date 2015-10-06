@@ -49,8 +49,8 @@ Cerberus::Application.configure do
     enable_starttls_auto: true
   }
 
-  config.lograge.enabled = true
-  # config.log_level = :info
+  config.lograge.enabled = false
+  config.log_level = :debug
 
   # config.action_mailer.delivery_method = :sendmail
   config.action_mailer.delivery_method = :smtp

@@ -32,7 +32,7 @@ module HandleHelper
   def handle_exists?(url, client = nil)
     client || client = Mysql2::Client.new(:host => "#{ENV["HANDLE_HOST"]}", :username => "#{ENV["HANDLE_USERNAME"]}", :password => "#{ENV["HANDLE_PASSWORD"]}", :database => "#{ENV["HANDLE_DATABASE"]}")
     query = "SELECT handle FROM handles WHERE type=\"URL\" and data=\"#{url}\";"
-    puts query
+    Rails.logger.warn query
     mysql_response = client.query(query)
     if mysql_response.count == 0
       return false
