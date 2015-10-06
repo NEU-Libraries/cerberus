@@ -28,6 +28,7 @@ module Cerberus::Controller
   end
 
   def render_410(exception)
+    @page_title = "File Removed"
     logger.error("Rendering the 410 page due to exception: #{exception.inspect} - #{exception.backtrace if exception.respond_to? :backtrace}")
     if !params[:id].blank?
       record = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first)
