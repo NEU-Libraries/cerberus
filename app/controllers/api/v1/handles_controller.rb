@@ -5,7 +5,7 @@ module Api
       include HandleHelper
 
       def create_handle
-        providedUrl = params[:url]
+        providedUrl = CGI.unescape(params.[:url])
         if handle_exists?(providedUrl)
           handle = retrieve_handle(providedUrl)
         else
@@ -15,7 +15,7 @@ module Api
       end
 
       def get_handle
-        providedUrl = params.fetch(:url)
+        providedUrl = CGI.unescape(params.[:url])
         Rails.logger.warn providedUrl
         handle = retrieve_handle(providedUrl)
         render :json => [{:handle => "#{handle}"}]
