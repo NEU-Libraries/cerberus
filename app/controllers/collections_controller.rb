@@ -158,7 +158,9 @@ class CollectionsController < ApplicationController
 
     (@response, @document_list) = get_search_results
 
-    render 'shared/sets/show', locals: {pretty_description: @pretty_description}
+    respond_to do |format|
+      format.html { render 'shared/sets/show', locals: {pretty_description: @pretty_description} }
+    end
   end
 
   def edit
