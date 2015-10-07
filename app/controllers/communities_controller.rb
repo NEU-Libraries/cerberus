@@ -89,7 +89,9 @@ class CommunitiesController < ApplicationController
 
     @smart_collections = @set.smart_collections
 
-    render 'shared/sets/show', locals: {pretty_description: @pretty_description}
+    respond_to do |format|
+      format.html { render 'shared/sets/show', locals: {pretty_description: @pretty_description} }
+    end
   end
 
   def employees
