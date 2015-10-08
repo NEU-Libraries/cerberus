@@ -9,6 +9,7 @@ class CoreFilesController < ApplicationController
   include Cerberus::ControllerHelpers::PermissionsCheck
 
   include ModsDisplay::ControllerExtension
+  include ApplicationHelper
   include XmlValidator
   include HandleHelper
 
@@ -261,7 +262,10 @@ class CoreFilesController < ApplicationController
   end
 
   def validate_xml
-    @result = xml_valid?(params[:raw_xml].first)
+    # Unicode replace fancy punctuation
+    raw_xml = CGI.unescapeHTML(Unidecoder.decode(params[:raw_xml].first))
+
+    @result = xml_valid?(raw_xml)
 
     if !@result[:errors].blank?
       # Formatting error array for template
@@ -279,12 +283,12 @@ class CoreFilesController < ApplicationController
         Rails.cache.delete_matched("/mods/#{@core_file.pid}*")
 
         # Email the metadata changes
-        new_doc = Nokogiri::XML(params[:raw_xml].first)
+        new_doc = Nokogiri::XML(raw_xml)
         old_doc = Nokogiri::XML(@core_file.mods.content)
 
         XmlAlert.create_from_strings(@core_file, current_user, old_doc.to_s, new_doc.to_s)
 
-        @core_file.mods.content = params[:raw_xml].first
+        @core_file.mods.content = raw_xml
         @core_file.save!
         @core_file.match_dc_to_mods
 
