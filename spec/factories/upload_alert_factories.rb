@@ -100,5 +100,29 @@ FactoryGirl.define do
         update
       end
     end
+
+    factory :nonfeatured_alert do
+      content_type ""
+
+      factory :nonfeatured_notified_alert do
+        notified
+      end
+
+      factory :nonfeatured_update_alert do
+        update
+      end
+    end
+
+    factory :collection_alert do
+      content_type "collection"
+
+      factory :collection_notified_alert do
+        notified
+      end
+
+      factory :collection_update_alert do
+        update
+      end
+    end
   end
 end

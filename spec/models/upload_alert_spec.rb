@@ -31,6 +31,14 @@ describe UploadAlert do
       FactoryGirl.create_list(:monograph_alert, 2)
       FactoryGirl.create_list(:monograph_update_alert, 2)
       FactoryGirl.create(:monograph_notified_alert)
+
+      FactoryGirl.create_list(:nonfeatured_alert, 2)
+      FactoryGirl.create_list(:nonfeatured_update_alert, 2)
+      FactoryGirl.create(:nonfeatured_notified_alert)
+
+      FactoryGirl.create_list(:collection_alert, 2)
+      FactoryGirl.create_list(:collection_update_alert, 2)
+      FactoryGirl.create(:collection_notified_alert)
     end
 
     after(:all) { UploadAlert.destroy_all }
@@ -92,6 +100,20 @@ describe UploadAlert do
     context "for monographs alerts" do
       let(:created) { UploadAlert.withheld_monographs(:create) }
       let(:updated) { UploadAlert.withheld_monographs(:update) }
+
+      it_should_behave_like "withheld queries"
+    end
+
+    context "for nonfeatured alerts" do
+      let(:created) { UploadAlert.withheld_nonfeatured(:create) }
+      let(:updated) { UploadAlert.withheld_nonfeatured(:update) }
+
+      it_should_behave_like "withheld queries"
+    end
+
+    context "for collection alerts" do
+      let(:created) { UploadAlert.withheld_collections(:create) }
+      let(:updated) { UploadAlert.withheld_collections(:update) }
 
       it_should_behave_like "withheld queries"
     end
@@ -180,6 +202,94 @@ describe UploadAlert do
 
       it "raises an error" do
         expect{ UploadAlert.create_from_core_file(@core, :edi) }.to raise_error
+      end
+    end
+  end
+
+  describe "creation from collection" do
+    before :all do
+      @user = FactoryGirl.create(:bill)
+      @core = FactoryGirl.create(:bills_complete_file)
+
+      @root = FactoryGirl.create(:root_collection)
+      @collection = Collection.create(title: "Child One", parent: @root, mass_permissions: "public", depositor:@user.nuid)
+
+
+      @core.parent = @collection
+      @core.category =  "Theses and Dissertations"
+      @core.save!
+    end
+
+    after(:all) { @user.destroy ; @core.destroy }
+
+    def create_alert(change_type)
+      @alert = UploadAlert.create_from_collection(@collection, change_type)
+    end
+
+    context "on collection creation" do
+      before(:each) { create_alert(:create) }
+
+      it "has a title" do
+        @alert.title.should == @collection.title
+      end
+
+      it "has an email" do
+        @alert.depositor_email.should == @user.email
+      end
+
+      it "has a full name" do
+        @alert.depositor_name.should == @user.full_name
+      end
+
+      it "has a pid" do
+        @alert.pid.should == @collection.pid
+      end
+
+      it "has a content type" do
+        @alert.content_type.should == "collection"
+      end
+
+      it "has a change type" do
+        @alert.change_type.should == :create
+      end
+
+      it "has a collection title" do
+        @alert.collection_title.should == @collection.parent.title
+      end
+
+      it "has a collection pid" do
+        @alert.collection_pid.should == @collection.parent.pid
+      end
+
+      it "has no editor nuid" do
+        @alert.editor_nuid.should be nil
+      end
+    end
+
+    context "with editor" do
+      before(:each) { @alert = UploadAlert.create_from_collection(@collection, :update, @user)}
+
+      it "has an editor nuid" do
+        @alert.editor_nuid.should == @user.nuid
+      end
+    end
+
+    context "on collection update" do
+      before(:each) { create_alert(:update) }
+
+      it "has a change type" do
+        @alert.change_type.should == :update
+      end
+    end
+
+    context "with invalid change type" do
+
+      it "raises an error" do
+        expect{ UploadAlert.create_from_collection(@collection, 'edit') }.to raise_error
+      end
+
+      it "raises an error" do
+        expect{ UploadAlert.create_from_collection(@collection, :edi) }.to raise_error
       end
     end
   end
