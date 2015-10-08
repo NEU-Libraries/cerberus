@@ -13,7 +13,7 @@ describe ImageProcessingJob do
     File.rename("#{Rails.application.config.tmp_path}/#{@file_name}", "#{@fpath}") # Names file time and hash string
     @parent = @collection.pid
     @copyright = "Test Copyright Statement"
-    @user = FactoryGirl.create(:user)
+    @user = FactoryGirl.create(:admin)
     @loader_name = "Marketing and Communications"
     @report_id = Loaders::LoadReport.create_from_strings(@user, 0, @loader_name, @parent)
     @load_report = Loaders::LoadReport.find(@report_id)
