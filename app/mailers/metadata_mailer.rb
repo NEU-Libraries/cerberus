@@ -2,7 +2,8 @@ class MetadataMailer < ActionMailer::Base
   include AbstractController::Callbacks
 
   default from: "notifier@repository.library.northeastern.edu"
-  after_filter :tag_as_notified
+  after_filter :tag_as_notified, only:[:daily_alert_email]
+  after_filter :tag_as_notified_nonfeatured, only:[:daily_nonfeatured_alert_email]
 
 
   # Generate the email
@@ -68,6 +69,39 @@ class MetadataMailer < ActionMailer::Base
     end
   end
 
+  def daily_nonfeatured_alert_email
+    @nonfeatured_new        = UploadAlert.withheld_nonfeatured(:create)
+    @nonfeatured_update     = UploadAlert.withheld_nonfeatured(:update)
+
+    @collections_new        = UploadAlert.withheld_collections(:create)
+    @collections_update     = UploadAlert.withheld_collections(:update)
+
+    nonfeatured_count = 0
+
+    nonfeatured_count += @nonfeatured_new.count
+    nonfeatured_count += @nonfeatured_update.count
+
+    nonfeatured_count += @collections_new.count
+    nonfeatured_count += @collections_update.count
+
+    if nonfeatured_count == 0
+      self.message.perform_deliveries = false
+    else
+      if ["production", "secondary"].include? Rails.env
+        mail(to: "Sarah <sj.sweeney@neu.edu>", subject: "Daily Non-Featured Content and Collection Uploads and Updates - #{nonfeatured_count} items", content_type: "text/html")
+      elsif "test" == Rails.env
+        mail(to: "Test <test@test.com>", subject: "Daily Non-Featured Content and Collection Uploads and Updates - #{nonfeatured_count} items")
+      else
+        if File.exist?('/home/vagrant/.gitconfig')
+          git_config = ParseConfig.new('/home/vagrant/.gitconfig')
+          address = git_config['user']['email']
+          mail(to: "Developer <#{address}>", subject: "Daily Non-Featured Content and Collection Uploads and Updates - #{nonfeatured_count} items",
+          content_type: "text/html")
+        end
+      end
+    end
+  end
+
   private
     def tag_as_notified_helper(enum)
       enum.each do |alert|
@@ -91,5 +125,12 @@ class MetadataMailer < ActionMailer::Base
       tag_as_notified_helper @other_pubs_update
       tag_as_notified_helper @monographs_new
       tag_as_notified_helper @monographs_update
+    end
+
+    def tag_as_notified_nonfeatured
+      tag_as_notified_helper @nonfeatured_new
+      tag_as_notified_helper @nonfeatured_update
+      tag_as_notified_helper @collections_new
+      tag_as_notified_helper @collections_update
     end
 end
