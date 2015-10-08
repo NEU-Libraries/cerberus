@@ -32,6 +32,14 @@ class UploadAlert < ActiveRecord::Base
     unknown_content_query('Monographs', ct)
   end
 
+  def self.withheld_nonfeatured(ct = :create)
+    unknown_content_query("", ct)
+  end
+
+  def self.withheld_collections(ct = :create)
+    unknown_content_query('collection', ct)
+  end
+
   def self.create_from_core_file(core_file, change_type, current_user=nil)
     if !([:update, :create].include? change_type)
       raise %Q(Passed #{change_type.class} #{change_type} to create_from_core_file,
@@ -57,6 +65,32 @@ class UploadAlert < ActiveRecord::Base
     u.change_type       = change_type
     u.collection_pid    = core_file.parent.pid
     u.collection_title  = core_file.parent.title
+    if !current_user.nil?
+      u.editor_nuid       = current_user.nuid
+    end
+    u.save! ? u : false
+  end
+
+  def self.create_from_collection(collection, change_type, current_user=nil)
+    if !([:update, :create].include? change_type)
+      raise %Q(Passed #{change_type.class} #{change_type} to create_from_collection,
+               which takes either symbol :update or :create)
+    end
+
+    u = UploadAlert.new
+    user = User.find_by_nuid(collection.true_depositor)
+
+    if !user.nil?
+      u.depositor_email   = user.email
+      u.depositor_name    = user.full_name
+    end
+
+    u.title             = collection.title
+    u.content_type      = "collection"
+    u.pid               = collection.pid
+    u.change_type       = change_type
+    u.collection_pid    = collection.parent.pid
+    u.collection_title  = collection.parent.title
     if !current_user.nil?
       u.editor_nuid       = current_user.nuid
     end

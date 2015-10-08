@@ -1,0 +1,16 @@
+!!!
+%html
+  %head
+    %meta{:content => "text/html; charset=UTF-8", "http-equiv" => "Content-Type"}/
+  %body
+    %h3 New Nonfeatured Items
+    = render partial: 'alert_items', locals: { alerts: @nonfeatured_new }
+
+    %h3 Updated Nonfeatured Items
+    = render partial: 'alert_items', locals: { alerts: @nonfeatured_update }
+
+    %h3 New Collections
+    = render partial: 'alert_items', locals: { alerts: @collections_new}
+
+    %h3 Updated Collections
+    = render partial: 'alert_items', locals: { alerts: @collections_update}

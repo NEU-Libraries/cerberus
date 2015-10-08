@@ -121,6 +121,7 @@ class CollectionsController < ApplicationController
 
     begin
       @set.save!
+      UploadAlert.create_from_collection(@set, :create, current_user)
       flash[:notice] = "Collection created successfully."
       redirect_to collection_path(id: @set.pid) and return
     rescue => exception
@@ -180,6 +181,7 @@ class CollectionsController < ApplicationController
     end
 
     if @set.update_attributes(params[:set])
+      UploadAlert.create_from_collection(@set, :update, current_user)
       redirect_to(@set, notice: "Collection #{@set.title} was updated successfully." )
     else
       redirect_to(@set, notice: "Collection #{@set.title} failed to update.")
