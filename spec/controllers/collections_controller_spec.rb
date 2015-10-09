@@ -207,5 +207,6 @@ describe CollectionsController do
 
   after :all do
     @client.query("DROP DATABASE #{ENV["HANDLE_TEST_DATABASE"]};")
+    ActiveFedora::Base.destroy_all
   end
 end
