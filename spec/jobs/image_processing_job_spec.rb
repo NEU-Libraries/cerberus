@@ -226,15 +226,16 @@ describe ImageProcessingJob do
 
     context "bad iptc" do
       before(:all) {
-        context("#{Rails.root}/spec/fixtures/files/marcom_bad_iptc.jpg")
+        context("#{Rails.root}/spec/fixtures/files/iptc_smartquotes.jpg")
       }
       after(:all)  { clear_context }
 
-      it "should return bad iptc error" do
-        @images.first.exception.should == "ImageDescription contains invalid smart quotes"
+      it 'creates modified report' do
+        @images.count.should == 1
+        @images.first.validity.should be true
+        @images.first.modified.should be true
       end
 
-      it_should_behave_like "failed uploads"
     end
 
   end

@@ -71,16 +71,26 @@ class ImageProcessingJob
               return
             end
 
-            if val.kind_of?(String) and (val.include? "“" or val.include? "”" or val.include? "‘" or val.include? "’")
-              create_special_error("#{tag} contains invalid smart quotes", iptc, core_file, load_report)
-              return
-            elsif val.kind_of?(String) and (val.include? "—" or val.include? "—")
-              create_special_error("#{tag} contains invalid em dash", iptc, core_file, load_report)
-              return
-            elsif val.kind_of?(String) and (val.include? "…")
-              create_special_error("#{tag} contains invalid ellipsis", iptc, core_file, load_report)
-              return
+            # if val.kind_of?(String) and (val.include? "“" or val.include? "”" or val.include? "‘" or val.include? "’")
+            #   create_special_error("#{tag} contains invalid smart quotes", iptc, core_file, load_report)
+            #   return
+            # elsif val.kind_of?(String) and (val.include? "—" or val.include? "—")
+            #   create_special_error("#{tag} contains invalid em dash", iptc, core_file, load_report)
+            #   return
+            # elsif val.kind_of?(String) and (val.include? "…")
+            #   create_special_error("#{tag} contains invalid ellipsis", iptc, core_file, load_report)
+            #   return
+            # end
+
+            if val.kind_of?(String)
+              raw_val = val
+              val = CGI.unescapeHTML(Unidecoder.decode(raw_val))
+              if val != raw_val
+                modified_message = "#{tag} contained Unicode general punctuation. This has been replaced with the ASCII equivalent."
+                modified = true
+              end
             end
+
             if tag == 'Headline'
               core_file.title = val
             elsif tag == 'Category'
