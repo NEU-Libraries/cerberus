@@ -21,7 +21,7 @@ a{
   clear:both;
   .nav-pills{
     margin: 0px;
-    float: right;
+    width:100%;
     a:hover, a:focus{
       color:#FFF;
       background:$brand-primary;
