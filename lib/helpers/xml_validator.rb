@@ -9,10 +9,19 @@ module XmlValidator
     results[:errors] = []
 
     # Nokogiri xml validation, catch errors
-    doc = Nokogiri::XML(xml_str)
-    if doc.errors != []
-      results[:errors] = doc.errors
+    begin
+      doc = Nokogiri::XML(xml_str)
+      if doc.errors != []
+        results[:errors] = doc.errors
+        return results
+      end
+    rescue => exception
+      results[:errors] << exception
       return results
+    end
+
+    if doc.encoding != "UTF-8"
+      results[:errors] << Exceptions::XmlEncodingError.new
     end
 
     # Nokogiri schema validation
