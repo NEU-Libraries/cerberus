@@ -136,6 +136,14 @@ class CommunitiesController < ApplicationController
     render 'smart_collection', locals: { smart_collection: 'monographs' }
   end
 
+  def recent_deposits
+    self.solr_search_params_logic += [:limit_to_core_files]
+    params[:limit] = 10
+    params[:sort] = "#{Solrizer.solr_name('system_create', :stored_sortable, type: :date)} desc"
+    (@response, @recent_deposits) = get_search_results
+    render partial:"/shared/sets/recent_deposits"
+  end
+
   protected
 
     def get_set
@@ -169,6 +177,25 @@ class CommunitiesController < ApplicationController
 
       fq = query.join(" OR ")
 
+      solr_parameters[:fq] ||= []
+      solr_parameters[:fq] << fq
+    end
+
+    def limit_to_core_files(solr_parameters, user_parameters)
+      descendents = @set.combined_set_descendents
+
+      # Limit query to items that are set descendents
+      # or files off set descendents
+      query = descendents.map do |set|
+        p = set.pid
+        set = "is_member_of_ssim:\"info:fedora/#{p}\""
+      end
+
+      # Ensure files directly on scoping collection are added in
+      # as well
+      query << "is_member_of_ssim:\"info:fedora/#{@set.pid}\""
+      fq = query.join(" OR ")
+      fq = "(#{fq}) AND active_fedora_model_ssi:\"CoreFile\""
       solr_parameters[:fq] ||= []
       solr_parameters[:fq] << fq
     end
