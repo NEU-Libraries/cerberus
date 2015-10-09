@@ -19,6 +19,8 @@ class CollectionsController < ApplicationController
   include BlacklightAdvancedSearch::ParseBasicQ
   include BlacklightAdvancedSearch::Controller
 
+  helper_method :sort_value
+
   before_filter :authenticate_user!, only: [:new, :edit, :create, :update, :destroy ]
 
   # We can do better by using SOLR check instead of Fedora
@@ -232,6 +234,15 @@ class CollectionsController < ApplicationController
     end
   end
 
+  def author_list
+    @page_title = "#{@set.title} Author List"
+    @set = fetch_solr_document
+    self.solr_search_params_logic += [:limit_to_scope]
+
+    (@response, @document_list) = get_search_results
+    render 'shared/sets/author_list', locals:{sort_value:sort_value}
+  end
+
   protected
 
     def index_redirect(exception)
@@ -271,8 +282,17 @@ class CollectionsController < ApplicationController
       solr_parameters[:fq] << fq
     end
 
+    def limit_to_creators(solr_parameters, user_parameters)
+      solr_parameters[:fl] ||= []
+      solr_parameters[:fl] << "#{Solrizer.solr_name("creator", :stored_searchable)}"
+    end
+
     def disable_highlighting(solr_parameters, user_parameters)
       solr_parameters[:hl] = "false"
+    end
+
+    def sort_value
+      %w[value hits].include?(params[:sort_val]) ? params[:sort_val] : "value"
     end
 
 end
