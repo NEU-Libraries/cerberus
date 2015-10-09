@@ -24,12 +24,12 @@ describe ImageProcessingJob do
 
   def clear_context
     @client.query("DROP DATABASE #{ENV["HANDLE_TEST_DATABASE"]};")
-    CoreFile.all.map { |x| x.destroy }
     @load_report.destroy if @load_report
     @user.destroy if @user
     Loaders::ImageReport.all.each do |ir|
       ir.destroy
     end
+    ActiveFedora::Base.destroy_all
   end
 
 

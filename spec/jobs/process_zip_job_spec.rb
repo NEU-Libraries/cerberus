@@ -57,7 +57,7 @@ describe ProcessZipJob do
       Loaders::ImageReport.all.each do |ir|
         ir.destroy
       end
-      CoreFile.all.map { |x| x.destroy }
+      ActiveFedora::Base.destroy_all
     end
 
 end
