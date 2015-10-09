@@ -41,7 +41,10 @@ describe UploadAlert do
       FactoryGirl.create(:collection_notified_alert)
     end
 
-    after(:all) { UploadAlert.destroy_all }
+    after(:all) {
+      UploadAlert.destroy_all
+      ActiveFedora::Base.destroy_all
+     }
 
     shared_examples_for "withheld queries" do
       it "return the correct number of results" do
