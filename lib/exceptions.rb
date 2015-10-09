@@ -121,4 +121,10 @@ module Exceptions
       super "This object has been tombstoned"
     end
   end
+
+  class XmlEncodingError < StandardError
+    def initialize
+      super "This object requires a prolog with UTF-8 encoding."
+    end
+  end
 end
