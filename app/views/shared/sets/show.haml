@@ -31,15 +31,24 @@
     -# Display handles if they exist, and aren't just the pid
     %p.set-handle
       = link_to "#{@set.identifier}", @set.identifier
-
-  - if current_user
-    -if @set.klass == "Collection" && (current_user.can? :edit, @set.pid) && (current_user.admin? || @set.smart_collection_type.nil? || @set.smart_collection_type == "miscellany")
-      %nav.set-actions
-        %ul.nav.nav-pills
-          %li
-            %a.btn.btn-default{:href =>  edit_collection_path(@set)}
-              %i.icon-pencil
-              Manage Collection
+  %nav.set-actions
+    %ul.nav.nav-pills
+      -if @set.klass == "Community"
+        %li
+          %a.btn.btn-default{href:"#recentModal", data: {toggle: "modal"}}
+            %i.icon-time
+            Recent Deposits
+      -if @set.klass == "Collection"
+        %li
+          %a.btn.btn-default{:href=>collection_author_list_path(@set)} Author List
+        %li
+          %a.btn.btn-default{:href=>""} Title List
+        - if current_user
+          -if (current_user.can? :edit, @set.pid) && (current_user.admin? || @set.smart_collection_type.nil? || @set.smart_collection_type == "miscellany")
+            %li.pull-right
+              %a.btn.btn-default{:href =>  edit_collection_path(@set)}
+                %i.icon-pencil
+                Manage Collection
 
 - if render_constraints(params) != ""
   %h1.page-header
@@ -69,5 +78,15 @@
     = render :partial => 'catalog/document_list'
     = render 'catalog/results_pagination'
     = render partial: 'shared/sets/bottom_action_menu'
+    -if @set.klass == "Community"
+      %br
+      %div.modal.fade#recentModal
 
 %div#add_compilation_form{ style: 'display:none' }
+-if @set.klass == "Community"
+  :javascript
+    $(document).ready(function(){
+      $.get('/communities/#{@set.pid}/recent', function(data){
+        $("#recentModal").html(data);
+      })
+    });
