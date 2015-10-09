@@ -4,6 +4,7 @@ describe MetadataMailer do
 
   describe "daily_alert_email" do
     before :each do
+      UploadAlert.destroy_all
       FactoryGirl.create_list(:theses_alert, 2)
     end
 
@@ -24,6 +25,7 @@ describe MetadataMailer do
 
   describe "daily_nonfeatured_alert_email" do
     before :each do
+      UploadAlert.destroy_all
       FactoryGirl.create_list(:collection_alert, 2)
     end
     let(:mail){MetadataMailer.daily_nonfeatured_alert_email}
