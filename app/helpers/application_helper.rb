@@ -25,6 +25,13 @@ module ApplicationHelper
     return output_str.html_safe
   end
 
+  def xml_decode(input_str)
+    escaped_val = input_str.gsub("&amp;", "&amp;amp;")
+    escaped_val = escaped_val.gsub("&lt;", "&amp;lt;")
+    escaped_val = escaped_val.gsub("&gt;", "&amp;gt;")
+    CGI.unescapeHTML(Unidecoder.decode(escaped_val))
+  end
+
   def title_string(page_title)
     if page_title.blank?
       return "DRS"
