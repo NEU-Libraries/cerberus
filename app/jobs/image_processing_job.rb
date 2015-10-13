@@ -84,7 +84,8 @@ class ImageProcessingJob
 
             if val.kind_of?(String)
               raw_val = val
-              val = CGI.unescapeHTML(Unidecoder.decode(raw_val))
+              # val = CGI.unescapeHTML(Unidecoder.decode(raw_val))
+              val = xml_decode(raw_val)
               if val != raw_val
                 modified_message = "#{tag} contained Unicode general punctuation. This has been replaced with the ASCII equivalent."
                 modified = true
