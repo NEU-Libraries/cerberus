@@ -263,7 +263,8 @@ class CoreFilesController < ApplicationController
 
   def validate_xml
     # Unicode replace fancy punctuation
-    raw_xml = CGI.unescapeHTML(Unidecoder.decode(params[:raw_xml].first))
+    # raw_xml = CGI.unescapeHTML(Unidecoder.decode(params[:raw_xml].first))
+    raw_xml = xml_decode(params[:raw_xml].first)
 
     @result = xml_valid?(raw_xml)
 
