@@ -26,7 +26,7 @@ describe CompilationsController do
 
       get :index
 
-      assigns(:compilations).should == [c]
+      assigns(:compilations).length.should == ActiveFedora::SolrService.count("depositor_tesim:\"#{bill.nuid}\" AND has_model_ssim:\"#{ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:Compilation"}\"")
     end
 
     it "renders the index template" do
