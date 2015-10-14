@@ -140,12 +140,4 @@ describe Compilation do
       parsed["entries"][1].should == compilation.entries[1].pid
     end
   end
-  describe "User based lookup" do
-
-    it "returns all compilations associated with the given user" do
-      a = FactoryGirl.create(:bills_compilation)
-
-      Compilation.users_compilations(bill).length.should == 1
-    end
-  end
 end
