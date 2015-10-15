@@ -24,20 +24,29 @@ class CartDownloadJob
     FileUtils.mkdir_p path
     full_path = "#{path}/drs_queue.zip"
 
-    Zip::Archive.open(full_path, Zip::CREATE) do |io|
-      pids.each do |pid|
-        if ActiveFedora::Base.exists?(pid)
-          item = ActiveFedora::Base.find(pid, cast: true)
-          download_label = I18n.t("drs.display_labels.#{item.klass}.download")
-          if item.public? || user.can?(:read, item)
-            io.add_buffer("downloads/neu_#{pid.split(":").last}-#{download_label}.#{extract_extension(item.properties.mime_type.first)}", item.content.content)
+    # Kludge to avoid putting all zip items into memory
+    Zip::Archive.open(safe_zipfile_name, Zip::CREATE) do |io|
+      io.add_buffer("start.txt", "")
+    end
 
-            # Record the download
-            opts = "pid = ? AND session_id = ? AND status = 'INCOMPLETE' AND action = 'download'"
-            Impression.update_all("status = 'COMPLETE'", [opts, pid, sess_id])
+    pids.each do |pid|
+      if ActiveFedora::Base.exists?(pid)
+        item = ActiveFedora::Base.find(pid, cast: true)
+        download_label = I18n.t("drs.display_labels.#{item.klass}.download")
+        if item.public? || user.can?(:read, item)
+          Zip::Archive.open(full_path) do |io|
+            io.add_buffer("downloads/neu_#{pid.split(":").last}-#{download_label}.#{extract_extension(item.properties.mime_type.first)}", item.content.content)
           end
+
+          # Record the download
+          opts = "pid = ? AND session_id = ? AND status = 'INCOMPLETE' AND action = 'download'"
+          Impression.update_all("status = 'COMPLETE'", [opts, pid, sess_id])
         end
       end
     end
+
+    # Remove kludge empty first item
+    Zip::Archive.open("/home/vagrant/derp.zip") do |io| io.fdelete(0) end
+
   end
 end
