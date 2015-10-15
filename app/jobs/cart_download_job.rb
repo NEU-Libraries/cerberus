@@ -26,7 +26,7 @@ class CartDownloadJob
 
     # Kludge to avoid putting all zip items into memory
     Zip::Archive.open(full_path, Zip::CREATE) do |io|
-      io.add_buffer(".", "")
+      io.add_buffer("_", "")
     end
 
     pids.each do |pid|
