@@ -38,16 +38,21 @@ class ZipCompilationJob
 
     zipfile_name = safe_zipfile_name
 
+    # Kludge to avoid putting all zip items into memory
     Zip::Archive.open(safe_zipfile_name, Zip::CREATE) do |io|
-      self.entry_ids.each do |id|
+      io.add_buffer("start.txt", "")
+    end
 
-        if CoreFile.exists?(id)
-          cf = CoreFile.find(id)
-          if !(cf.under_embargo?(user))
-            cf.content_objects.each do |content|
-              if !user.nil? ? user.can?(:read, content) : content.public?
-                if content.content.content && content.class != ImageThumbnailFile
-                  download_label = I18n.t("drs.display_labels.#{content.klass}.download")
+    self.entry_ids.each do |id|
+
+      if CoreFile.exists?(id)
+        cf = CoreFile.find(id)
+        if !(cf.under_embargo?(user))
+          cf.content_objects.each do |content|
+            if !user.nil? ? user.can?(:read, content) : content.public?
+              if content.content.content && content.class != ImageThumbnailFile
+                download_label = I18n.t("drs.display_labels.#{content.klass}.download")
+                Zip::Archive.open(safe_zipfile_name) do |io|
                   io.add_buffer("#{self.title}/neu_#{id.split(":").last}-#{download_label}.#{extract_extension(content.properties.mime_type.first)}", content.content.content)
                 end
               end
@@ -56,6 +61,9 @@ class ZipCompilationJob
         end
       end
     end
+
+    # Remove kludge empty first item
+    Zip::Archive.open(safe_zipfile_name) do |io| io.fdelete(0) end
 
     return zipfile_name
   end
