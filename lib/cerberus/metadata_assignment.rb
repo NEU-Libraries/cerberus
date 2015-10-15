@@ -81,8 +81,10 @@ module Cerberus
       end
 
       def description=(string)
-        if_mods_exists { self.mods.abstract = string }
-        if_DC_exists { self.DC.nu_description = string }
+        if !string.blank?
+          if_mods_exists { self.mods.abstract = string }
+          if_DC_exists { self.DC.nu_description = string }
+        end
       end
 
       def description
@@ -91,8 +93,10 @@ module Cerberus
       end
 
       def date=(string)
-        if_mods_exists { self.mods.date = string }
-        if_DC_exists   { self.DC.date = string }
+        if !string.blank?
+          if_mods_exists { self.mods.date = string }
+          if_DC_exists   { self.DC.date = string }
+        end
       end
 
       def date

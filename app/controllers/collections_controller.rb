@@ -22,8 +22,8 @@ class CollectionsController < ApplicationController
   before_filter :authenticate_user!, only: [:new, :edit, :create, :update, :destroy ]
 
   # We can do better by using SOLR check instead of Fedora
-  #before_filter :can_read?, only: [:show]
-  before_filter :enforce_show_permissions, :only=>:show
+  before_filter :can_read?, only: [:show]
+  # before_filter :enforce_show_permissions, :only=>:show
   self.solr_search_params_logic += [:add_access_controls_to_solr_params]
 
   before_filter :can_edit?, only: [:edit, :update]
@@ -121,6 +121,7 @@ class CollectionsController < ApplicationController
 
     begin
       @set.save!
+      UploadAlert.create_from_collection(@set, :create, current_user)
       flash[:notice] = "Collection created successfully."
       redirect_to collection_path(id: @set.pid) and return
     rescue => exception
@@ -158,7 +159,9 @@ class CollectionsController < ApplicationController
 
     (@response, @document_list) = get_search_results
 
-    render 'shared/sets/show', locals: {pretty_description: @pretty_description}
+    respond_to do |format|
+      format.html { render 'shared/sets/show', locals: {pretty_description: @pretty_description} }
+    end
   end
 
   def edit
@@ -178,6 +181,7 @@ class CollectionsController < ApplicationController
     end
 
     if @set.update_attributes(params[:set])
+      UploadAlert.create_from_collection(@set, :update, current_user)
       redirect_to(@set, notice: "Collection #{@set.title} was updated successfully." )
     else
       redirect_to(@set, notice: "Collection #{@set.title} failed to update.")
@@ -188,11 +192,16 @@ class CollectionsController < ApplicationController
     collection = Collection.find(params[:id])
     title = collection.title
     parent = collection.parent
-    collection.tombstone
-    if current_user.admin?
-      redirect_to collection_path(id: parent), notice: "The file '#{title}' has been tombstoned"
+    reason = params[:reason]
+    if reason != ""
+      collection.tombstone(reason + " " + DateTime.now.strftime("%F"))
     else
-      redirect_to collection_path(id: parent), notice: "The file '#{title}' has been tombstoned"
+      collection.tombstone
+    end
+    if current_user.admin?
+      redirect_to collection_path(id: parent), notice: "The collection '#{title}' has been tombstoned"
+    else
+      redirect_to collection_path(id: parent), notice: "The collection '#{title}' has been tombstoned"
     end
   end
 

@@ -1,6 +1,7 @@
 require 'spec_helper'
 
 describe CollectionsController do
+  let(:admin)            { FactoryGirl.create(:admin) }
   let(:bill)             { FactoryGirl.create(:bill) }
   let(:bo)               { FactoryGirl.create(:bo) }
   let(:root)             { FactoryGirl.create(:root_collection) }
@@ -132,6 +133,16 @@ describe CollectionsController do
       get :show, { id: "neu:xcvsxcvzc" }
       expect(response).to render_template('error/404')
     end
+
+    it "renders the 410 template for objects that have been tombstoned" do
+      sign_in admin
+      root = Collection.create(title: "Root")
+      child_one = Collection.create(title: "Child One", parent: root)
+      child_one.tombstone
+      get :show, { id: child_one.pid }
+      expect(response).to render_template('error/410')
+      response.status.should == 410
+    end
   end
 
   describe "GET #edit" do
@@ -183,16 +194,19 @@ describe CollectionsController do
     end
 
     it "succeeds for users with edit permissions on the collection" do
+      root = Collection.create(title: "Root", mass_permissions: "public")
+      child_one = Collection.create(title: "Child One", parent: root, mass_permissions: "public", depositor:"000000001")
       sign_in bill
 
-      put :update, { id: bills_collection.pid, set: { title: "nu title" } }
+      put :update, { id: child_one.pid, set: { title: "nu title" } }
 
       assigns(:set).title.should == "nu title"
-      expect(response).to redirect_to(collection_path(id: bills_collection.pid))
+      expect(response).to redirect_to(collection_path(id: child_one.pid))
     end
   end
 
   after :all do
     @client.query("DROP DATABASE #{ENV["HANDLE_TEST_DATABASE"]};")
+    ActiveFedora::Base.destroy_all
   end
 end

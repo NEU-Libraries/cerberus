@@ -13,7 +13,10 @@
     - @core_files.each do |core_file|
       %tr
         %td
-          .large= core_file.title
+          .large
+            -if !core_file.non_sort.blank?
+              = "#{core_file.non_sort} "
+            = core_file.title
         -if @type.to_s == "tombstoned"
           %td
             = link_to("View", admin_view_file_path(core_file), class: "btn btn-small btn-info")

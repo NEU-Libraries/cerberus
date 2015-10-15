@@ -71,16 +71,27 @@ class ImageProcessingJob
               return
             end
 
-            if val.kind_of?(String) and (val.include? "“" or val.include? "”" or val.include? "‘" or val.include? "’")
-              create_special_error("#{tag} contains invalid smart quotes", iptc, core_file, load_report)
-              return
-            elsif val.kind_of?(String) and (val.include? "—" or val.include? "—")
-              create_special_error("#{tag} contains invalid em dash", iptc, core_file, load_report)
-              return
-            elsif val.kind_of?(String) and (val.include? "…")
-              create_special_error("#{tag} contains invalid ellipsis", iptc, core_file, load_report)
-              return
+            # if val.kind_of?(String) and (val.include? "“" or val.include? "”" or val.include? "‘" or val.include? "’")
+            #   create_special_error("#{tag} contains invalid smart quotes", iptc, core_file, load_report)
+            #   return
+            # elsif val.kind_of?(String) and (val.include? "—" or val.include? "—")
+            #   create_special_error("#{tag} contains invalid em dash", iptc, core_file, load_report)
+            #   return
+            # elsif val.kind_of?(String) and (val.include? "…")
+            #   create_special_error("#{tag} contains invalid ellipsis", iptc, core_file, load_report)
+            #   return
+            # end
+
+            if val.kind_of?(String)
+              raw_val = val
+              # val = CGI.unescapeHTML(Unidecoder.decode(raw_val))
+              val = xml_decode(raw_val)
+              if val != raw_val
+                modified_message = "#{tag} contained Unicode general punctuation. This has been replaced with the ASCII equivalent."
+                modified = true
+              end
             end
+
             if tag == 'Headline'
               core_file.title = val
             elsif tag == 'Category'
@@ -216,9 +227,7 @@ class ImageProcessingJob
         Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename, nil, s, m, l, true, permissions))
 
         if core_file.save!
-          if core_file && !core_file.category.first.blank?
-            UploadAlert.create_from_core_file(core_file, :create)
-          end
+          UploadAlert.create_from_core_file(core_file, :create)
         end
         if modified == true
           report = load_report.image_reports.create_modified(modified_message, core_file, iptc)

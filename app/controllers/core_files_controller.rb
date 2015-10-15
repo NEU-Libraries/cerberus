@@ -9,6 +9,7 @@ class CoreFilesController < ApplicationController
   include Cerberus::ControllerHelpers::PermissionsCheck
 
   include ModsDisplay::ControllerExtension
+  include ApplicationHelper
   include XmlValidator
   include HandleHelper
 
@@ -149,8 +150,8 @@ class CoreFilesController < ApplicationController
     @core_file.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, "edit")
 
     if @core_file.save!
-      if params[:core_file] && !@core_file.category.first.blank?
-        UploadAlert.create_from_core_file(@core_file, :create)
+      if params[:core_file]
+        UploadAlert.create_from_core_file(@core_file, :create, current_user)
       end
     end
 
@@ -185,6 +186,8 @@ class CoreFilesController < ApplicationController
       response.headers["Pragma"] = "no-cache"
       response.headers["Expires"] = "Fri, 01 Jan 1990 00:00:00 GMT"
     end
+
+    respond_to :html
   end
 
   def create
@@ -259,7 +262,11 @@ class CoreFilesController < ApplicationController
   end
 
   def validate_xml
-    @result = xml_valid?(params[:raw_xml].first)
+    # Unicode replace fancy punctuation
+    # raw_xml = CGI.unescapeHTML(Unidecoder.decode(params[:raw_xml].first))
+    raw_xml = xml_decode(params[:raw_xml].first)
+
+    @result = xml_valid?(raw_xml)
 
     if !@result[:errors].blank?
       # Formatting error array for template
@@ -277,12 +284,12 @@ class CoreFilesController < ApplicationController
         Rails.cache.delete_matched("/mods/#{@core_file.pid}*")
 
         # Email the metadata changes
-        new_doc = Nokogiri::XML(params[:raw_xml].first)
+        new_doc = Nokogiri::XML(raw_xml)
         old_doc = Nokogiri::XML(@core_file.mods.content)
 
         XmlAlert.create_from_strings(@core_file, current_user, old_doc.to_s, new_doc.to_s)
 
-        @core_file.mods.content = params[:raw_xml].first
+        @core_file.mods.content = raw_xml
         @core_file.save!
         @core_file.match_dc_to_mods
 
@@ -314,8 +321,8 @@ class CoreFilesController < ApplicationController
 
     #always save the file so the new version or metadata gets recorded
     if @core_file.save
-      if params[:core_file] && !@core_file.category.first.blank?
-        UploadAlert.create_from_core_file(@core_file, :update)
+      if params[:core_file]
+        UploadAlert.create_from_core_file(@core_file, :update, current_user)
       end
 
       # If this change updated metadata, propagate the change outwards to
@@ -338,12 +345,13 @@ class CoreFilesController < ApplicationController
     core_file = CoreFile.find(params[:id])
     title = core_file.title
     collection = core_file.parent.id
-    core_file.tombstone
-    if current_user.admin?
-      redirect_to collection_path(id: collection), notice: "The file '#{title}' has been tombstoned"
+    reason = params[:reason]
+    if reason != ""
+      core_file.tombstone(reason + " " + DateTime.now.strftime("%F"))
     else
-      redirect_to collection_path(id: collection), notice: "The file '#{title}' has been tombstoned"
+      core_file.tombstone
     end
+    redirect_to collection_path(id: collection), notice: "The file '#{title}' has been tombstoned"
   end
 
   def request_tombstone
@@ -410,8 +418,13 @@ class CoreFilesController < ApplicationController
     end
 
     def update_metadata
-      if @core_file.update_attributes(params[:core_file])
-        flash[:notice] =  "#{@core_file.title} was updated successfully."
+      begin
+        if @core_file.update_attributes(params[:core_file])
+          flash[:notice] =  "#{@core_file.title} was updated successfully."
+        end
+      rescue OM::XML::TemplateMissingException => exception
+        flash[:error] =  "#{@core_file.title} was not updated due to an error. DRS staff have been notified of the issue."
+        email_handled_exception(exception)
       end
     end
 

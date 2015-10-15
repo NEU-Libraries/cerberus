@@ -70,6 +70,12 @@ describe CoreFilesController do
       Impression.count.should == 0
     end
 
+    it "renders the 410 page for objects that have been tombstoned" do
+      file.tombstone
+      get :show, { id: file.pid }
+      expect(response).to render_template('error/410')
+    end
+
     it "renders the show page for valid, authenticated requests" do
       sign_in bill
 

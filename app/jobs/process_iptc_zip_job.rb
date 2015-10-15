@@ -31,7 +31,7 @@ class ProcessIptcZipJob
         if !f.directory? && File.basename(f.name)[0] != "." # Don't extract directories or mac specific files
           file_name = File.basename(f.name)
           uniq_hsh = Digest::MD5.hexdigest("#{f.name}")[0,2]
-          fpath = File.join(to, "#{Time.now.to_i.to_s}-#{uniq_hsh}") # Names file time and hash string
+          fpath = File.join(to, "#{Time.now.to_f.to_s.gsub!('.','-')}-#{uniq_hsh}") # Names file time and hash string
           open(fpath, 'wb') do |z|
             z << f.read
           end

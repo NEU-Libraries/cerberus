@@ -52,7 +52,7 @@ class ContentCreationJob
             large_upload(content_object, file_path, 'content')
             content_object.properties.mime_type = extract_mime_type(file_path)
             content_object.properties.md5_checksum = new_checksum(file_path)
-            content_object.properties.file_size = File.size(file_path)
+            content_object.properties.file_size = File.size(file_path).to_s
             content_object.save!
           else
             File.open(file_path) do |file_contents|
@@ -69,7 +69,7 @@ class ContentCreationJob
           large_upload(content_object, file_path, 'content')
           content_object.properties.mime_type = extract_mime_type(file_path)
           content_object.properties.md5_checksum = new_checksum(file_path)
-          content_object.properties.file_size = File.size(file_path)
+          content_object.properties.file_size = File.size(file_path).to_s
           content_object.save!
         else
           File.open(file_path) do |file_contents|
@@ -153,7 +153,7 @@ class ContentCreationJob
       begin
         # Create the name for the zipfile.
         # This prevents the zip upload issue in #664
-        z = File.basename(Time.now.to_i.to_s, ".*") + ".zip"
+        z = File.basename(Time.now.to_f.to_s.gsub!('.','-'), ".*") + ".zip"
         tempdir = Pathname.new("#{Rails.application.config.tmp_path}/")
         zipfile_name = tempdir.join(z).to_s
 

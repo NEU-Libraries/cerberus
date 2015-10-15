@@ -1,0 +1,34 @@
+%h3
+  %i.icon-asterisk
+  -if record
+    - if record.tombstone_reason
+      - if !record.non_sort.blank?
+        = "\"#{record.non_sort} #{record.title}\""
+      - else
+        = "\"#{record.title}\""
+      = " was #{record.tombstone_reason[0,1].downcase + record.tombstone_reason[1..-1]}."
+    - else
+      - if !record.non_sort.blank?
+        = "\"#{record.non_sort} #{record.title}\""
+      - else
+        = "\"#{record.title}\""
+      = " was removed from the system."
+  -else
+    = "#{params[:id]} has been removed."
+%br
+  -if record.title
+    %dt Title:
+    %dd
+      - if !record.non_sort.blank?
+        = "#{record.non_sort} "
+      = record.title
+  -if record.identifier
+    %dt Permanent URL:
+    %dd
+      %a{"href"=>record.identifier}
+        =record.identifier
+%p
+  If you believe this item was removed in error, please
+  %a{:href => "mailto:Library-Repository-Team@neu.edu"} contact the DRS staff.
+%br
+%a.btn.btn-lg{:href => "/"} DRS Home
