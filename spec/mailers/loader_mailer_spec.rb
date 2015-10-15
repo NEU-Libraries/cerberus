@@ -8,13 +8,13 @@ describe LoaderMailer do
       @loader_name = "College of Engineering"
       tempdir = Pathname.new("#{Rails.application.config.tmp_path}/")
       @uniq_hsh = Digest::MD5.hexdigest("#{Rails.root}/spec/fixtures/files/jpgs.zip")[0,2]
-      file_name = "#{Time.now.to_i.to_s}-#{@uniq_hsh}"
+      file_name = "#{Time.now.to_f.to_s.gsub!('.','-')}-#{@uniq_hsh}"
       new_path = tempdir.join(file_name).to_s
       new_file = "#{new_path}.zip"
       FileUtils.cp("#{Rails.root}/spec/fixtures/files/jpgs.zip", new_file)
       parent = FactoryGirl.create(:root_collection).pid
       copyright = "Copyright statement"
-      @user = FactoryGirl.create(:user)
+      @user = FactoryGirl.create(:admin)
       permissions = {"CoreFile" => {"read"  => ["northeastern:drs:all"], "edit" => ["northeastern:drs:repository:staff"]}, "ImageSmallFile" => {"read"  => ["northeastern:drs:repository:staff"], "edit" => ["northeastern:drs:repository:staff"]}, "ImageLargeFile" => {"read"  => ["northeastern:drs:repository:staff"], "edit" => ["northeastern:drs:repository:staff"]}, "ImageMasterFile" => {"read"  => ["northeastern:drs:repository:staff"], "edit" => ["northeastern:drs:repository:staff"]}}
       ProcessIptcZipJob.new(@loader_name, new_file.to_s, parent, copyright, @user, permissions, @client).run
     end
@@ -35,7 +35,7 @@ describe LoaderMailer do
       Loaders::ImageReport.all.each do |ir|
         ir.destroy
       end
-      CoreFile.all.map { |x| x.destroy }
+      ActiveFedora::Base.destroy_all
     end
 
   end

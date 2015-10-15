@@ -275,71 +275,139 @@ describe CoreFile do
   end
 
   describe 'tombstone file' do
-    before(:each) do
-      @root = Collection.create(title: "Root")
-      @child_one = Collection.create(title: "Child One", parent: @root)
-      @c1_gf = CoreFile.create(title: "Core File One", parent: @child_one, depositor: "nobody@nobody.com")
-      @c1_gf.tombstone
-      @c1_gf.save!
-      @solr =  @c1_gf.to_solr
+    shared_examples_for "successful tombstone" do
+      it "sets properties.tombstoned to true" do
+        @c1_gf.properties.tombstoned should = 'true'
+      end
+
+      it "sets solr doc tombstoned_ssi to true" do
+        @solr["tombstoned_ssi"].should == 'true'
+      end
+
+      it "sets tombstoned? to true" do
+        @c1_gf.tombstoned?.should be true
+      end
+
+      after(:each) do
+        @c1_gf.destroy
+        @child_one.destroy
+        @root.destroy
+      end
     end
 
-    it "sets properties.tombstoned to true" do
-      @c1_gf.properties.tombstoned should = 'true'
+    context "without tombstone reason" do
+      before(:each) do
+        @root = Collection.create(title: "Root")
+        @child_one = Collection.create(title: "Child One", parent: @root)
+        @c1_gf = CoreFile.create(title: "Core File One", parent: @child_one, depositor: "nobody@nobody.com")
+        @c1_gf.tombstone
+        @c1_gf.save!
+        @solr =  @c1_gf.to_solr
+      end
+
+      it "has no mods accessCondition" do
+        @c1_gf.mods.access_condition.should == []
+      end
+
+      it "has no tombstone reason" do
+        @c1_gf.tombstone_reason.should == []
+      end
+
+      it_should_behave_like "successful tombstone"
     end
 
-    it "sets solr doc tombstoned_ssi to true" do
-      @solr["tombstoned_ssi"].should == 'true'
-    end
+    context "with tombstone reason" do
+      before(:each) do
+        @root = Collection.create(title: "Root")
+        @child_one = Collection.create(title: "Child One", parent: @root)
+        @c1_gf = CoreFile.create(title: "Core File One", parent: @child_one, depositor: "nobody@nobody.com")
+        @c1_gf.tombstone("Removed at the request of Northeastern University")
+        @c1_gf.save!
+        @solr = SolrDocument.new(@c1_gf.to_solr)
+      end
 
-    it "sets tombstoned? to true" do
-      @c1_gf.tombstoned?.should be true
-    end
+      it "has tombstone message" do
+        @c1_gf.tombstone_reason.should == "Removed at the request of Northeastern University"
+        @solr.tombstone_reason.should == "Removed at the request of Northeastern University"
+      end
 
-    after(:each) do
-      @c1_gf.destroy
-      @child_one.destroy
-      @root.destroy
+      it "has mods accessCondition" do
+        @c1_gf.mods.access_condition.should == ["Removed at the request of Northeastern University"]
+      end
+
+      it "has correct mods accessCondition type" do
+        @c1_gf.mods.access_condition(0).type.should == ["suppressed"]
+      end
+
+      it_should_behave_like "successful tombstone"
     end
   end
 
   describe 'revive file' do
-    before(:each) do
-      @root = Collection.create(title: "Root")
-      @parent = Collection.create(title: "Child One", parent: @root)
-      @c1_gf = CoreFile.create(title: "Core File One", parent: @parent, depositor: "nobody@nobody.com")
-      @c1_gf.tombstone
-      @c1_gf.save!
-      @solr =  @c1_gf.to_solr
+    shared_examples_for "successful revive" do
+      it "sets properties.tombstoned to empty" do
+        @c1_gf.revive
+        @c1_gf.properties.tombstoned should = ''
+      end
+
+      it "sets solr doc tombstoned_ssi to empty" do
+        @c1_gf.revive
+        @c1_gf.save!
+        @solr =  @c1_gf.to_solr
+        @solr["tombstoned_ssi"].should be nil
+      end
+
+      it "sets tombstoned? to false" do
+        @c1_gf.revive
+        @c1_gf.tombstoned?.should be false
+      end
+
+      it "returns false if parent is tombstoned" do
+        @parent.tombstone
+        @parent.save!
+        @c1_gf.revive.should be false
+      end
+
+      after(:each) do
+        @c1_gf.destroy
+        @parent.destroy
+        @root.destroy
+      end
     end
 
-    it "sets properties.tombstoned to empty" do
-      @c1_gf.revive
-      @c1_gf.properties.tombstoned should = ''
+    context "with tombstone reason" do
+      before(:each) do
+        @root = Collection.create(title: "Root")
+        @parent = Collection.create(title: "Child One", parent: @root)
+        @c1_gf = CoreFile.create(title: "Core File One", parent: @parent, depositor: "nobody@nobody.com")
+        @c1_gf.tombstone("Removed at the request of Northeastern University")
+        @c1_gf.save!
+        @solr =  @c1_gf.to_solr
+      end
+      it "has no mods accessCondition" do
+        @c1_gf.revive
+        @c1_gf.mods.access_condition.should == []
+      end
+
+      it "has no tombstone reason" do
+        @c1_gf.revive
+        @c1_gf.tombstone_reason.should == []
+      end
+
+      it_should_behave_like "successful revive"
     end
 
-    it "sets solr doc tombstoned_ssi to empty" do
-      @c1_gf.revive
-      @c1_gf.save!
-      @solr =  @c1_gf.to_solr
-      @solr["tombstoned_ssi"].should be nil
-    end
+    context "without tombstone reason" do
+      before(:each) do
+        @root = Collection.create(title: "Root")
+        @parent = Collection.create(title: "Child One", parent: @root)
+        @c1_gf = CoreFile.create(title: "Core File One", parent: @parent, depositor: "nobody@nobody.com")
+        @c1_gf.tombstone
+        @c1_gf.save!
+        @solr =  @c1_gf.to_solr
+      end
 
-    it "sets tombstoned? to false" do
-      @c1_gf.revive
-      @c1_gf.tombstoned?.should be false
-    end
-
-    it "returns false if parent is tombstoned" do
-      @parent.tombstone
-      @parent.save!
-      @c1_gf.revive.should be false
-    end
-
-    after(:each) do
-      @c1_gf.destroy
-      @parent.destroy
-      @root.destroy
+      it_should_behave_like "successful revive"
     end
   end
 end

@@ -62,6 +62,7 @@ gem 'coveralls', require: false
 gem 'diffy'
 gem 'roo', :git => 'https://github.com/roo-rb/roo'
 gem 'roo-xls', :git => 'https://github.com/roo-rb/roo-xls.git'
+gem 'unidecode'
 
 gem "ruby-prof"
 gem 'picturefill'

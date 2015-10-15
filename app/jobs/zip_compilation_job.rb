@@ -27,11 +27,11 @@ class ZipCompilationJob
       user = nil
     end
     tempdir = Pathname.new("#{Rails.application.config.tmp_path}/")
-    dir = tempdir.join(self.comp_pid)
+    dir = tempdir.join(self.comp_pid.gsub(":", "_"))
 
     # Removes any stale zip files that might still be sitting around.
     if File.directory? dir
-      FileUtils.remove_dir dir
+      FileUtils.rm_rf dir
     end
 
     FileUtils.mkdir_p dir
@@ -68,6 +68,6 @@ class ZipCompilationJob
     def safe_zipfile_name
       safe_title = self.title.gsub(/\s+/, "")
       safe_title = safe_title.gsub(":", "_")
-      return "#{Rails.application.config.tmp_path}/#{self.comp_pid}/#{safe_title}.zip"
+      return "#{Rails.application.config.tmp_path}/#{self.comp_pid.gsub(":", "_")}/#{safe_title}.zip"
     end
 end

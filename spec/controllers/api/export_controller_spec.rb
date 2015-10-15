@@ -17,6 +17,10 @@ describe Api::V1::ExportController, :type => :controller do
     @embargoed = CoreFile.create(title: "Embargo Test", parent: @child_one, depositor: "0", mass_permissions: "public", embargo_release_date: Date.tomorrow.to_s)
   end
 
+  after(:all) do
+    ActiveFedora::Base.destroy_all
+  end
+
   describe "GET #get_files" do
     it "gives an error with a invalid starting ID" do
       @expected = {

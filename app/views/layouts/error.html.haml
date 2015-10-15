@@ -3,7 +3,10 @@
   %head
     %title
       = h(application_name)
-      \: System Error
+      - if @page_title.blank?
+        \: System Error
+      - else
+        = h(title_string(": #{@page_title}"))
     = render :partial => "layouts/head_tag_content"
   -# Add the data signed-in to tell app.js what to do on toggle click.
   - if user_signed_in?
@@ -33,4 +36,3 @@
       %h3#ajax-modal-heading
     .modal-body#ajax-modal-body
     .modal-footer#ajax-modal-footer
-

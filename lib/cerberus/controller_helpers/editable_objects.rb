@@ -53,11 +53,11 @@ module Cerberus
         begin
           record = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first)
         rescue NoMethodError
-          render_404(ActiveFedora::ObjectNotFoundError.new) and return
+          render_404(ActiveFedora::ObjectNotFoundError.new, request.env['PATH_INFO']) and return
         end
 
         if record.tombstoned?
-          render_404(ActiveFedora::ObjectNotFoundError.new) and return
+          render_410(Exceptions::TombstonedObject.new) and return
         end
 
         if current_user.nil?
@@ -79,7 +79,7 @@ module Cerberus
 
         if current_user.nil?
           render_403
-        elsif !record.smart_collection_type.nil? && record.smart_collection_type != "miscellany"
+        elsif !current_user.admin? && !record.smart_collection_type.nil? && record.smart_collection_type != "miscellany"
           render_403
         elsif current_user.can? :edit, record
           return true

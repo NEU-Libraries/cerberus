@@ -24,9 +24,12 @@ class Admin::CoreFilesController < AdminController
 
   # routed to /admin/files/:id
   def show
-    @core_file = ActiveFedora::Base.find(params[:id], cast: true)
+    @core_file = SolrDocument.new ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first
     @mods = Sanitize.clean(Kramdown::Document.new(render_mods_display(CoreFile.find(@core_file.pid))).to_html, :elements => ['sup', 'sub', 'dt', 'dd', 'br', 'a'], :attributes => {'a' => ['href']}).html_safe
     @thumbs = @core_file.thumbnail_list
+    if @core_file.tombstone_reason
+      flash.now[:alert] = "#{@core_file.tombstone_reason}"
+    end
     @page_title = @core_file.title
   end
 
@@ -39,7 +42,7 @@ class Admin::CoreFilesController < AdminController
     if @core_file.revive
       redirect_to admin_files_path, notice: "The file #{ActionController::Base.helpers.link_to title, core_file_path(pid)} has been revived".html_safe
     else
-      redirect_to admin_files_path, alert: "The core file '#{title}' could not be revived because the parent '#{ActionController::Base.helpers.link_to parent.title, admin_collections_path(parent.pid)}' is tombstoned.".html_safe
+      redirect_to admin_files_path, alert: "The core file '#{title}' could not be revived because the parent '#{ActionController::Base.helpers.link_to parent.title, admin_view_collection_path(parent.pid)}' is tombstoned.".html_safe
     end
   end
 

@@ -3,6 +3,15 @@ class CompilationsController < ApplicationController
   include Cerberus::ControllerHelpers::PermissionsCheck
   include UrlHelper
 
+  # Here be solr access boilerplate
+  include Blacklight::Catalog
+  include Blacklight::Configurable # comply with BL 3.7
+  include ActionView::Helpers::DateHelper
+  # This is needed as of BL 3.7
+  self.copy_blacklight_config_from(CatalogController)
+  include BlacklightAdvancedSearch::ParseBasicQ
+  include BlacklightAdvancedSearch::Controller
+
   before_filter :authenticate_user!, except: [:show, :show_download, :download, :ping_download]
 
   before_filter :can_edit?, only: [:edit, :update, :destroy, :add_entry, :delete_entry]
@@ -15,7 +24,11 @@ class CompilationsController < ApplicationController
   before_filter :valid_form_permissions?, only: [:update]
 
   def index
-    @compilations = Compilation.users_compilations(current_user)
+    self.solr_search_params_logic += [:exclude_unwanted_models]
+    self.solr_search_params_logic += [:find_user_compilations]
+
+    (@response, @compilations) = get_search_results
+
     @page_title = "My " + t('drs.compilations.name').capitalize + "s"
   end
 
@@ -114,7 +127,7 @@ class CompilationsController < ApplicationController
   end
 
   def download
-    path_to_dl = Dir["#{Rails.application.config.tmp_path}/#{params[:id]}/*"].first
+    path_to_dl = Dir["#{Rails.application.config.tmp_path}/#{params[:id].gsub(":", "_")}/*"].first
     send_file path_to_dl
   end
 
@@ -162,11 +175,21 @@ class CompilationsController < ApplicationController
     end
   end
 
+  def find_user_compilations(solr_parameters, user_parameters)
+    solr_parameters[:fq] ||= []
+    solr_parameters[:fq] << "#{Solrizer.solr_name("depositor", :stored_searchable)}:\"#{current_user.nuid}\""
+  end
+
+  def exclude_unwanted_models(solr_parameters, user_parameters)
+    solr_parameters[:fq] ||= []
+    solr_parameters[:fq] << "#{Solrizer.solr_name("has_model", :symbol)}:\"info:fedora/afmodel:Compilation\""
+  end
+
   private
 
   def safe_zipfile_name
     safe_title = @compilation.title.gsub(/\s+/, "")
     safe_title = safe_title.gsub(":", "_")
-    return "#{Rails.application.config.tmp_path}/#{@compilation.pid}/#{safe_title}.zip"
+    return "#{Rails.application.config.tmp_path}/#{@compilation.pid.gsub(":", "_")}/#{safe_title}.zip"
   end
 end
