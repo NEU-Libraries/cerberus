@@ -25,8 +25,8 @@ class CartDownloadJob
     full_path = "#{path}/drs_queue.zip"
 
     # Kludge to avoid putting all zip items into memory
-    Zip::Archive.open(safe_zipfile_name, Zip::CREATE) do |io|
-      io.add_buffer("start.txt", "")
+    Zip::Archive.open(full_path, Zip::CREATE) do |io|
+      io.add_buffer(".", "")
     end
 
     pids.each do |pid|
@@ -44,9 +44,6 @@ class CartDownloadJob
         end
       end
     end
-
-    # Remove kludge empty first item
-    Zip::Archive.open(safe_zipfile_name) do |io| io.fdelete(0) end
 
   end
 end
