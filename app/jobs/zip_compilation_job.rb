@@ -40,7 +40,7 @@ class ZipCompilationJob
 
     # Kludge to avoid putting all zip items into memory
     Zip::Archive.open(safe_zipfile_name, Zip::CREATE) do |io|
-      io.add_buffer("start.txt", "")
+      io.add_buffer(".", "")
     end
 
     self.entry_ids.each do |id|
@@ -61,9 +61,6 @@ class ZipCompilationJob
         end
       end
     end
-
-    # Remove kludge empty first item
-    Zip::Archive.open(safe_zipfile_name) do |io| io.fdelete(0) end
 
     return zipfile_name
   end
