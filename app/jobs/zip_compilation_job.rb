@@ -40,7 +40,7 @@ class ZipCompilationJob
 
     # Kludge to avoid putting all zip items into memory
     Zip::Archive.open(safe_zipfile_name, Zip::CREATE) do |io|
-      io.add_buffer(".", "")
+      io.add_buffer("_", "")
     end
 
     self.entry_ids.each do |id|
