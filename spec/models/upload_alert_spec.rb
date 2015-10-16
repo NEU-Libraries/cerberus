@@ -4,6 +4,7 @@ describe UploadAlert do
 
   describe "querying" do
     before :all do
+      UploadAlert.destroy_all
       FactoryGirl.create_list(:theses_alert, 2)
       FactoryGirl.create_list(:theses_update_alert, 2)
       FactoryGirl.create(:theses_notified_alert)
