@@ -27,7 +27,9 @@ class CompilationsController < ApplicationController
     self.solr_search_params_logic += [:exclude_unwanted_models]
     self.solr_search_params_logic += [:find_user_compilations]
 
-    (@response, @compilations) = get_search_results
+    (@response, compilations) = get_search_results
+
+    @compilations = compilations.map{|c| Compilation.find(c.pid)}
 
     @page_title = "My " + t('drs.compilations.name').capitalize + "s"
   end
