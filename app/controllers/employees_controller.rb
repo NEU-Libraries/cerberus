@@ -44,6 +44,8 @@ class EmployeesController < ApplicationController
     end
 
     @page_title = "#{@employee.pretty_employee_name}"
+
+    respond_to :html
   end
 
   def list_files
