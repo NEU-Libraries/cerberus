@@ -52,7 +52,7 @@ class ImageProcessingJob
         photo.tags.each do |tag|
           val = photo[tag]
           iptc[:"#{tag}"] = val
-          if !tag.nil? && !val.nil?
+          if !tag.nil? && !val.nil? && !val.blank?
             if val.kind_of?(String) or val.kind_of?(Time)
               val = val
             elsif val.kind_of?(Integer) or val.kind_of?(Float) or val.kind_of?(Rational) or val.kind_of?(TrueClass) or val.kind_of?(FalseClass)
