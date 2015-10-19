@@ -307,7 +307,9 @@ class ModsDatastream < ActiveFedora::OmDatastream
           xml.languageTerm
         }
         xml.note('type' => 'citation')
-        xml.subject
+        xml.subject{
+          xml.keyword ""
+        }
         xml.identifier('type' => 'handle', 'displayLabel' => 'Permanent URL')
         xml.typeOfResource
         xml.physicalDescription{
@@ -407,6 +409,10 @@ class ModsDatastream < ActiveFedora::OmDatastream
     array_of_keywords.each_with_index do |kw, index|
       if self.subject[index].nil?
         self.insert_new_node(:subject)
+      end
+
+      if self.subject(index).topic == []
+        self.subject(index).topic = [""]
       end
     end
 
@@ -608,7 +614,9 @@ class ModsDatastream < ActiveFedora::OmDatastream
 
   def self.subject_template
     builder = Nokogiri::XML::Builder.new do |xml|
-      xml.subject
+      xml.subject{
+        xml.topic ""
+      }
     end
     return builder.doc.root
   end
