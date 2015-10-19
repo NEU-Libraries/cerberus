@@ -93,7 +93,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
       t.type(path: { attribute: 'type' })
     }
 
-    t.subject(path: 'subject', namespace_prefix: 'mods'){
+    t.subject(path: 'mods/mods:subject', namespace_prefix: 'mods'){
       t.topic(path: 'topic', namespace_prefix: 'mods', index_as: [:stored_searchable]){
         t.authority(path: { attribute: 'authority' })
       }
@@ -168,6 +168,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
       }
     }
 
+    t.topic(proxy: [:subject, :topic])
     t.title(proxy: [:title_info, :title])
     t.non_sort(proxy: [:title_info, :non_sort])
     t.category(ref: [:extension, :scholarly_object, :category])
@@ -378,10 +379,28 @@ class ModsDatastream < ActiveFedora::OmDatastream
 
   # Filters out blank keyword entries
   def topics=(array_of_strings)
+    changed = false
+
     array_of_keywords = array_of_strings.select {|kw| !kw.blank? }
 
-    if array_of_keywords.length < self.subject.length
-      node_count = self.subject.length - array_of_keywords.length
+    if array_of_keywords.length == self.subject.topic.length
+      array_of_keywords.each_with_index do |kw, i|
+        puts kw
+        puts self.subject.topic[i]
+        if kw != self.subject.topic[i]
+          changed = true
+        end
+      end
+    else
+      changed = true
+    end
+
+    if !changed
+      return
+    end
+
+    if array_of_keywords.length < self.subject.topic.length
+      node_count = self.subject.topic.length - array_of_keywords.length
       trim_nodes_from_zero(:subject, node_count)
     end
 
@@ -389,9 +408,9 @@ class ModsDatastream < ActiveFedora::OmDatastream
       if self.subject[index].nil?
         self.insert_new_node(:subject)
       end
-
-      self.subject(index).topic = kw
     end
+
+    self.topic = array_of_keywords
   end
 
   # Allows for tombstone message
