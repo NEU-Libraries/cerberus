@@ -39,8 +39,8 @@
           .endAngle(function(d) { return d.x + d.dx - .01 / (d.depth + .5); })
           .innerRadius(function(d) { return radius / 3 * d.depth; })
           .outerRadius(function(d) { return radius / 3 * (d.depth + 1) - 1; });
-
-      d3.json("#{request.protocol}#{request.host_with_port}/flare.json", function(error, root) {
+      //#{request.protocol}#{request.host_with_port}/flare.json
+      d3.json("#{api_v1_file_sizes_url}", function(error, root) {
 
         // Compute the initial layout on the entire tree to sum sizes.
         // Also compute the full name and fill color for each node,

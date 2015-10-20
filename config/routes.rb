@@ -134,6 +134,8 @@ Cerberus::Application.routes.draw do
       get "/export/:id" => "export#get_files", as: "export"
       # files
       get "/files/:id" => "core_files#show", as: "file_display"
+      # file sizes
+      get "/file_sizes" => "core_files#file_sizes", as: "file_sizes"
     end
   end
 
