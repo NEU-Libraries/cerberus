@@ -21,6 +21,10 @@ module Api
 
         render json: result_hsh.to_json
       end
+
+      def file_sizes
+        render json: FileSizeGraphJob.new().run
+      end
     end
   end
 end
