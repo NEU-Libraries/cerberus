@@ -59,6 +59,13 @@ class FileSizeGraphJob
         results << x
       else
         x = Hash.new
+
+        # if doc is of klass Employee, replace with the user root collection
+        # to prevent overlapping caused by our aggregation
+        if doc.klass == "Employee"
+          doc = doc.user_root_collection
+        end
+
         internal_results = populate(doc)
 
         x["name"] = doc.title
