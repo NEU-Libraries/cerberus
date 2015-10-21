@@ -35,7 +35,7 @@
           .range([0, radius]);
 
       //var color = d3.scale.category20c();
-      var hue = d3.scale.category20c();
+      var hue = d3.scale.category20();
 
       var luminance = d3.scale.sqrt()
           .domain([0, 1e6])
@@ -84,10 +84,13 @@
             .attr("d", arc)
             .style("fill", function(d) {
               var p = d;
-              while (p.depth > 1) p = p.parent;
+              var depth = 0
+              while (p.depth > 1) {
+                p = p.parent;
+                depth += 1;
+              }
               var c = d3.lab(hue(p.name));
-              c.l = luminance(d.value) + 20;
-              console.log(d.value);
+              c.l = (luminance(d.value) + (depth * 10));
               return c;
             })
             .on("click", click)
