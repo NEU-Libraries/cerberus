@@ -67,8 +67,11 @@ class FileSizeGraphJob
         x["total"] = internal_results["total"].to_i
         x["children"] = internal_results["results"]
 
-        total += x["total"].to_i
-        results << x
+        # Removing empty Communities and Collections so as to not pollute the graph
+        if x["total"].to_i > 0
+          total += x["total"].to_i
+          results << x
+        end
       end
     end
 
