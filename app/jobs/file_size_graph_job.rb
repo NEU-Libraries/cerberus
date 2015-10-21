@@ -9,7 +9,9 @@ class FileSizeGraphJob
 
     neu_doc = SolrDocument.new(Community.find("neu:1").to_solr)
 
-    results_hsh["children"] = populate(neu_doc)
+    total_results = populate(neu_doc)
+    results_hsh["total"] = total_results["total"]
+    results_hsh["children"] = total_results["results"]
 
     return results_hsh.to_json
   end
@@ -39,29 +41,40 @@ class FileSizeGraphJob
     children.push(*child_sets(parent_doc.pid))
     children.push(*child_files(parent_doc.pid))
 
-    return [] if children.length == 0 # base case
+    return { "results" => [], "total" => 0 } if children.length == 0 # base case
 
     results = []
+    total = 0
 
     children.each do |doc|
       if doc.klass == "CoreFile"
         x = Hash.new
+
         x["name"] = doc.title
         x["type"] = doc.klass
         x["pid"] = doc.pid
         x["size"] = core_file_size(doc.pid)
+
+        total += x["size"].to_i
         results << x
       else
         x = Hash.new
+        internal_results = populate(doc)
+
         x["name"] = doc.title
         x["type"] = doc.klass
         x["pid"] = doc.pid
-        x["children"] = populate(doc)
+        x["total"] = internal_results["total"].to_i
+        x["children"] = internal_results["results"]
+
+        total += x["total"].to_i
         results << x
       end
     end
 
-    return results
+    results_and_total = { "results" => results, "total" => total }
+
+    return results_and_total
   end
 
   # -----
