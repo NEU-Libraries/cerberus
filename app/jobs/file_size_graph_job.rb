@@ -21,7 +21,7 @@ class FileSizeGraphJob
     results_hsh["total"] = total_results["total"]
     results_hsh["children"] = total_results["results"]
 
-    new_graph = FileSizeGraph.new(json_values: results_hsh.to_json)
+    new_graph = FileSizeGraph.new(json_values: Zlib::Deflate.deflate(results_hsh.to_json))
     new_graph.save!
   end
 
