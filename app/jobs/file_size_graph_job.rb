@@ -18,7 +18,7 @@ class FileSizeGraphJob
     neu_doc = SolrDocument.new(Community.find("neu:1").to_solr)
 
     total_results = populate(neu_doc)
-    results_hsh["total"] = total_results["total"]
+    results_hsh["size"] = total_results["size"]
     results_hsh["children"] = total_results["results"]
 
     # new_graph = FileSizeGraph.new(json_values: Base64.encode64(Zlib::Deflate.deflate(results_hsh.to_json)))
@@ -52,22 +52,14 @@ class FileSizeGraphJob
       children.push(*child_sets(parent_doc.pid))
       children.push(*child_files(parent_doc.pid))
 
-      return { "results" => [], "total" => 0 } if children.length == 0 # base case
+      return { "results" => [], "size" => 0 } if children.length == 0 # base case
 
       results = []
       total = 0
 
       children.each do |doc|
         if doc.klass == "CoreFile"
-          x = Hash.new
-
-          x["name"] = doc.title
-          x["type"] = doc.klass
-          x["pid"] = doc.pid
-          x["size"] = core_file_size(doc.pid)
-
-          total += x["size"].to_i
-          results << x
+          total += core_file_size(doc.pid)
         else
           x = Hash.new
 
@@ -82,18 +74,18 @@ class FileSizeGraphJob
           x["name"] = doc.title
           x["type"] = doc.klass
           x["pid"] = doc.pid
-          x["total"] = internal_results["total"].to_i
+          x["size"] = internal_results["size"].to_i
           x["children"] = internal_results["results"]
 
           # Removing empty Communities and Collections so as to not pollute the graph
-          if x["total"].to_i > 0
-            total += x["total"].to_i
+          if x["size"].to_i > 0
+            total += x["size"].to_i
             results << x
           end
         end
       end
 
-      results_and_total = { "results" => results, "total" => total }
+      results_and_total = { "results" => results, "size" => total }
 
       return results_and_total
     rescue Exception => error
@@ -102,7 +94,7 @@ class FileSizeGraphJob
       errors_for_pid.warn "#{Time.now} - #{$!.inspect}"
       errors_for_pid.warn "#{Time.now} - #{$!}"
       errors_for_pid.warn "#{Time.now} - #{$@}"
-      return { "results" => [], "total" => 0 } if children.length == 0 # base case
+      return { "results" => [], "size" => 0 } if children.length == 0 # base case
     end
   end
 
