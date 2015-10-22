@@ -24,7 +24,8 @@ module Api
 
       def file_sizes
         begin
-          render json: Zlib::Inflate.inflate(FileSizeGraph.last.json_values)
+          # render json: Zlib::Inflate.inflate(Base64.decode64(FileSizeGraph.last.json_values))
+          render json: FileSizeGraph.last.json_values
         rescue NoMethodError
           render json: ({"name" => "No file sizes yet", "size" => "0"}).to_json
         end
