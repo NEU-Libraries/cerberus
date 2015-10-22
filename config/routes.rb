@@ -106,6 +106,7 @@ Cerberus::Application.routes.draw do
     get "/statistics/views" => 'statistics#get_views', as: 'views'
     get "/statistics/downloads" => 'statistics#get_downloads', as: 'downloads'
     get "/statistics/streams" => 'statistics#get_streams', as: 'streams'
+    get "/statistics/file_sizes" => 'statistics#get_file_sizes', as: 'file_sizes'
     get "/files" => 'core_files#index', as: 'files'
     get "/files/tombstoned" => 'core_files#get_tombstoned', as: 'tombstoned'
     get "/files/incomplete" => 'core_files#get_incomplete', as: 'incomplete'
@@ -133,6 +134,8 @@ Cerberus::Application.routes.draw do
       get "/export/:id" => "export#get_files", as: "export"
       # files
       get "/files/:id" => "core_files#show", as: "file_display"
+      # file sizes
+      get "/file_sizes" => "core_files#file_sizes", as: "file_sizes"
     end
   end
 
