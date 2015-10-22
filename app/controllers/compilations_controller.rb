@@ -1,16 +1,8 @@
 class CompilationsController < ApplicationController
   include Cerberus::ControllerHelpers::EditableObjects
   include Cerberus::ControllerHelpers::PermissionsCheck
+  include ApplicationHelper
   include UrlHelper
-
-  # Here be solr access boilerplate
-  include Blacklight::Catalog
-  include Blacklight::Configurable # comply with BL 3.7
-  include ActionView::Helpers::DateHelper
-  # This is needed as of BL 3.7
-  self.copy_blacklight_config_from(CatalogController)
-  include BlacklightAdvancedSearch::ParseBasicQ
-  include BlacklightAdvancedSearch::Controller
 
   before_filter :authenticate_user!, except: [:show, :show_download, :download, :ping_download]
 
@@ -24,12 +16,8 @@ class CompilationsController < ApplicationController
   before_filter :valid_form_permissions?, only: [:update]
 
   def index
-    self.solr_search_params_logic += [:exclude_unwanted_models]
-    self.solr_search_params_logic += [:find_user_compilations]
-
-    (@response, compilations) = get_search_results
-
-    @compilations = compilations.map{|c| Compilation.find(c.pid)}
+    compilation_docs = solr_query("depositor_tesim:\"#{current_user.nuid}\" AND has_model_ssim:\"#{ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:Compilation"}\"")
+    @compilations = compilation_docs.map{|c| Compilation.find(c.pid)}
 
     @page_title = "My " + t('drs.compilations.name').capitalize + "s"
   end
@@ -175,16 +163,6 @@ class CompilationsController < ApplicationController
     else
       flash.now.error = "#{t('drs.compilations.name').capitalize} was not successfully updated"
     end
-  end
-
-  def find_user_compilations(solr_parameters, user_parameters)
-    solr_parameters[:fq] ||= []
-    solr_parameters[:fq] << "#{Solrizer.solr_name("depositor", :stored_searchable)}:\"#{current_user.nuid}\""
-  end
-
-  def exclude_unwanted_models(solr_parameters, user_parameters)
-    solr_parameters[:fq] ||= []
-    solr_parameters[:fq] << "#{Solrizer.solr_name("has_model", :symbol)}:\"info:fedora/afmodel:Compilation\""
   end
 
   private
