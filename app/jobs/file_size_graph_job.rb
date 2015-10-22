@@ -4,6 +4,9 @@ class FileSizeGraphJob
   end
 
   def run
+    @job_id = "#{Time.now.to_i}-file-size-graph-job"
+    failed_pids_log = Logger.new("#{Rails.root}/log/#{job_id}/file-size-graph-job-failed-pids.log")
+
     results_hsh = Hash.new
     results_hsh["name"] = "Northeastern University"
 
@@ -38,54 +41,63 @@ class FileSizeGraphJob
   # -----
 
   def populate(parent_doc)
-    children = []
-    children.push(*child_sets(parent_doc.pid))
-    children.push(*child_files(parent_doc.pid))
+    begin
+      children = []
+      children.push(*child_sets(parent_doc.pid))
+      children.push(*child_files(parent_doc.pid))
 
-    return { "results" => [], "total" => 0 } if children.length == 0 # base case
+      return { "results" => [], "total" => 0 } if children.length == 0 # base case
 
-    results = []
-    total = 0
+      results = []
+      total = 0
 
-    children.each do |doc|
-      if doc.klass == "CoreFile"
-        x = Hash.new
+      children.each do |doc|
+        if doc.klass == "CoreFile"
+          x = Hash.new
 
-        x["name"] = doc.title
-        x["type"] = doc.klass
-        x["pid"] = doc.pid
-        x["size"] = core_file_size(doc.pid)
+          x["name"] = doc.title
+          x["type"] = doc.klass
+          x["pid"] = doc.pid
+          x["size"] = core_file_size(doc.pid)
 
-        total += x["size"].to_i
-        results << x
-      else
-        x = Hash.new
-
-        # if doc is of klass Employee, replace with the user root collection
-        # to prevent overlapping caused by our aggregation
-        if doc.klass == "Employee"
-          doc = doc.user_root_collection
-        end
-
-        internal_results = populate(doc)
-
-        x["name"] = doc.title
-        x["type"] = doc.klass
-        x["pid"] = doc.pid
-        x["total"] = internal_results["total"].to_i
-        x["children"] = internal_results["results"]
-
-        # Removing empty Communities and Collections so as to not pollute the graph
-        if x["total"].to_i > 0
-          total += x["total"].to_i
+          total += x["size"].to_i
           results << x
+        else
+          x = Hash.new
+
+          # if doc is of klass Employee, replace with the user root collection
+          # to prevent overlapping caused by our aggregation
+          if doc.klass == "Employee"
+            doc = doc.user_root_collection
+          end
+
+          internal_results = populate(doc)
+
+          x["name"] = doc.title
+          x["type"] = doc.klass
+          x["pid"] = doc.pid
+          x["total"] = internal_results["total"].to_i
+          x["children"] = internal_results["results"]
+
+          # Removing empty Communities and Collections so as to not pollute the graph
+          if x["total"].to_i > 0
+            total += x["total"].to_i
+            results << x
+          end
         end
       end
+
+      results_and_total = { "results" => results, "total" => total }
+
+      return results_and_total
+    rescue Exception => error
+      failed_pids_log.warn "#{Time.now} - Error processing PID: #{pid}"
+      errors_for_pid = Logger.new("#{Rails.root}/log/#{@job_id}/#{pid}.log")
+      errors_for_pid.warn "#{Time.now} - #{$!.inspect}"
+      errors_for_pid.warn "#{Time.now} - #{$!}"
+      errors_for_pid.warn "#{Time.now} - #{$@}"
+      return { "results" => [], "total" => 0 } if children.length == 0 # base case
     end
-
-    results_and_total = { "results" => results, "total" => total }
-
-    return results_and_total
   end
 
   # -----
