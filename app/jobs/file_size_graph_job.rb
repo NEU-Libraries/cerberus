@@ -5,7 +5,12 @@ class FileSizeGraphJob
 
   def run
     @job_id = "#{Time.now.to_i}-file-size-graph-job"
-    failed_pids_log = Logger.new("#{Rails.root}/log/#{job_id}/file-size-graph-job-failed-pids.log")
+
+    dir = "#{Rails.root}/log/#{@job_id}"
+    log = "file-size-graph-job-failed-pids.log"
+    FileUtils.mkdir_p(dir) unless File.directory?(dir)
+
+    failed_pids_log = Logger.new(dir + "/" + log)
 
     results_hsh = Hash.new
     results_hsh["name"] = "Northeastern University"
