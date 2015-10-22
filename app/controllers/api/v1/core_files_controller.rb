@@ -23,7 +23,11 @@ module Api
       end
 
       def file_sizes
-        render json: FileSizeGraphJob.new().run
+        begin
+          render json: FileSizeGraph.last.json_values
+        rescue NoMethodError
+          render json: ({"name" => "No file sizes yet", "size" => "0"}).to_json
+        end
       end
     end
   end
