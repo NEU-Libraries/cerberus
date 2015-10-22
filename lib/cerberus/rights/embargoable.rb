@@ -23,6 +23,14 @@ module Cerberus
           self.rightsMetadata.embargo_release_date
         end
 
+        def under_embargo?
+          if !self.rightsMetadata.embargo_release_date.blank?
+            (self.rightsMetadata.embargo_release_date && Date.today < self.rightsMetadata.embargo_release_date.to_date) ? true : false
+          else
+            false
+          end
+        end
+
         def under_embargo?(user)
           if user.nil?
             return self.rightsMetadata.under_embargo?

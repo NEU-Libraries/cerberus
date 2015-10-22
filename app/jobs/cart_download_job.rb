@@ -22,11 +22,12 @@ class CartDownloadJob
     self.path = "#{Rails.application.config.tmp_path}/carts/#{sess_id}"
 
     FileUtils.mkdir_p path
+    temp_path = "#{path}/in_progress.zip"
     full_path = "#{path}/drs_queue.zip"
 
     # Kludge to avoid putting all zip items into memory
-    Zip::Archive.open(full_path, Zip::CREATE) do |io|
-      io.add_buffer("_", "")
+    Zip::Archive.open(temp_path, Zip::CREATE) do |io|
+      io.add_buffer("#{sess_id}.txt", "")
     end
 
     pids.each do |pid|
@@ -34,7 +35,7 @@ class CartDownloadJob
         item = ActiveFedora::Base.find(pid, cast: true)
         download_label = I18n.t("drs.display_labels.#{item.klass}.download")
         if item.public? || user.can?(:read, item)
-          Zip::Archive.open(full_path) do |io|
+          Zip::Archive.open(temp_path) do |io|
             io.add_buffer("downloads/neu_#{pid.split(":").last}-#{download_label}.#{extract_extension(item.properties.mime_type.first)}", item.content.content)
           end
 
@@ -45,5 +46,7 @@ class CartDownloadJob
       end
     end
 
+    # Rename temp path to full path so download can pick it up
+    FileUtils.mv(temp_path, full_path)
   end
 end
