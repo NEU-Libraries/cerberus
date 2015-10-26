@@ -5,6 +5,7 @@ class ApplicationController < ActionController::Base
   include Cerberus::Controller
   # Solr Escape group values
   include Cerberus::ControllerHelpers::SolrEscapeGroups
+  include Blacklight::CatalogHelperBehavior
 
   unless Rails.application.config.consider_all_requests_local
     rescue_from Exception, with: lambda { |exception| render_500(exception) }
@@ -17,6 +18,7 @@ class ApplicationController < ActionController::Base
 
   protect_from_forgery
   before_filter :store_location
+  after_filter :redirect_blacklight_overrun
 
   # around_filter :profile
 
@@ -102,6 +104,17 @@ class ApplicationController < ActionController::Base
         !(request.path.include? "/downloads/") &&
         !request.xhr?) # don't store ajax calls
       session[:previous_url] = request.fullpath
+    end
+  end
+
+  def redirect_blacklight_overrun
+    if !@response.blank?
+      page_params = paginate_params(@response)
+      if page_params.current_page > page_params.num_pages
+        # change page param to 1, redirect with response.location and 302
+        response.location = request.base_url + request.path + "?" + params.except(:action, :controller).merge(page: 1).to_query
+        response.status = 302
+      end
     end
   end
 
