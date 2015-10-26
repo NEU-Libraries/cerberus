@@ -79,7 +79,7 @@ class ZipCompilationJob
       else
         name = "Not Logged In"
       end
-      ExceptionNotifier.notify_exception(exception, :env => request.env, :data => {:user => "#{name}"})
+      ExceptionNotifier.notify_exception(exception, :backtrace => "#{$@}", :data => {:user => "#{name}"})
     end
   end
 
