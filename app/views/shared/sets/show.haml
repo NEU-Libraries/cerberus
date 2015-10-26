@@ -70,6 +70,4 @@
     = render 'catalog/results_pagination'
     = render partial: 'shared/sets/bottom_action_menu'
 
-= debug (request.base_url + request.path + "?" + params.merge(page: 1).to_query)
-
 %div#add_compilation_form{ style: 'display:none' }
