@@ -33,7 +33,7 @@ class ZipCompilationJob
       # Removes any stale zip files that might still be sitting around.
       if File.directory? dir
         # Only remove the directory if it's older than an hour
-        if ((Time.now.utc - DateTime.parse(File.stat(dir).mtime.to_s)) / 1.hour) < 1
+        if ((Time.now.utc - DateTime.parse(File.stat(dir).mtime.to_s)) / 1.hour) > 1
           FileUtils.rm_rf dir
         else
           return
