@@ -49,16 +49,17 @@ class ZipCompilationJob
         if CoreFile.exists?(id)
           cf = CoreFile.find(id)
           if !(cf.under_embargo?(user))
-            cf.content_objects.each do |content|
-              if !user.nil? ? user.can?(:read, content) : content.public?
-                if content.content.content && content.class != ImageThumbnailFile
-                  download_label = I18n.t("drs.display_labels.#{content.klass}.download")
-                  Zip::Archive.open(temp_zipfile_name) do |io|
-                    io.add_buffer("#{self.title}/neu_#{id.split(":").last}-#{download_label}.#{extract_extension(content.properties.mime_type.first)}", content.content.content)
-                  end
+            # cf.content_objects.each do |content|
+            content = cf.canonical_object
+            if !user.nil? ? user.can?(:read, content) : content.public?
+              if content.content.content && content.class != ImageThumbnailFile
+                download_label = I18n.t("drs.display_labels.#{content.klass}.download")
+                Zip::Archive.open(temp_zipfile_name) do |io|
+                  io.add_buffer("#{self.title}/neu_#{id.split(":").last}-#{download_label}.#{extract_extension(content.properties.mime_type.first)}", content.content.content)
                 end
               end
             end
+            # end
           end
         end
       end
@@ -67,7 +68,7 @@ class ZipCompilationJob
       FileUtils.mv(temp_zipfile_name, safe_zipfile_name)
 
       return safe_zipfile_name
-    rescue Exception => error
+    rescue Exception => exception
       if !self.nuid.blank?
         name = User.find_by_nuid(self.nuid).name
       else
