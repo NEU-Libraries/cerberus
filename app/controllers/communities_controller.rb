@@ -71,10 +71,8 @@ class CommunitiesController < ApplicationController
       @pretty_description = convert_urls(@set.description)
     end
 
-    if !params[:q].nil? && !params[:q].blank?
-      if params[:id] != Rails.application.config.root_community_id
-        self.solr_search_params_logic += [:limit_to_scope]
-      end
+    if !params[:q].nil? && params[:id] != Rails.application.config.root_community_id
+      self.solr_search_params_logic += [:limit_to_scope]
 
       if params[:sort].blank?
         # Default sort relevance
