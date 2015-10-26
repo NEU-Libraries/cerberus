@@ -110,7 +110,7 @@ class ApplicationController < ActionController::Base
   def redirect_blacklight_overrun
     if !@response.blank?
       page_params = paginate_params(@response)
-      if page_params.current_page > page_params.num_pages
+      if !(page_params.num_pages == 0) && page_params.current_page > page_params.num_pages
         # change page param to 1, redirect with response.location and 302
         response.location = request.base_url + request.path + "?" + params.except(:action, :controller).merge(page: 1).to_query
         response.status = 302
