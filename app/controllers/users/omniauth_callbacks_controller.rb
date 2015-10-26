@@ -7,7 +7,7 @@ class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
 
       if @user.persisted?
         sign_in @user, :event => :authentication #this will throw if @user is not activated
-        redirect_to session[:previous_url] || root_path
+        redirect_to (session[:previous_url] || root_path) and return
       end
     rescue Exception => error
       # We fall down to the error use case
