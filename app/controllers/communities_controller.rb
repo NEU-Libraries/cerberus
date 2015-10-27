@@ -28,7 +28,7 @@ class CommunitiesController < ApplicationController
   rescue_from Blacklight::Exceptions::InvalidSolrID, ActiveFedora::ObjectNotFoundError do |exception|
     @obj_type = "Community"
     email_handled_exception(exception)
-    render_404(ActiveFedora::ObjectNotFoundError.new) and return
+    render_404(ActiveFedora::ObjectNotFoundError.new, request.fullpath) and return
   end
 
   rescue_from Hydra::AccessDenied, CanCan::AccessDenied do |exception|

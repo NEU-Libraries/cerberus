@@ -40,12 +40,12 @@ class CoreFilesController < ApplicationController
   rescue_from ActiveFedora::ObjectNotFoundError do |exception|
     @obj_type = "Object"
     email_handled_exception(exception)
-    render_404(ActiveFedora::ObjectNotFoundError.new) and return
+    render_404(ActiveFedora::ObjectNotFoundError.new, request.fullpath) and return
   end
 
   rescue_from Exceptions::SearchResultTypeError do |exception|
     # No longer emailing this error - it's always Pat debugging
-    render_404(ActiveFedora::ObjectNotFoundError.new) and return
+    render_404(ActiveFedora::ObjectNotFoundError.new, request.fullpath) and return
   end
 
   configure_mods_display do
