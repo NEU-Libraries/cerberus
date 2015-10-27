@@ -21,7 +21,7 @@ class DownloadsController < ApplicationController
       email_handled_exception(exception)
     end
 
-    render_404(ActiveFedora::ObjectNotFoundError.new) and return
+    render_404(ActiveFedora::ObjectNotFoundError.new, request.fullpath) and return
   end
 
   rescue_from Hydra::AccessDenied, CanCan::AccessDenied do |exception|
