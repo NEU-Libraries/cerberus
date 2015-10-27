@@ -5,7 +5,7 @@ class Loaders::LoadsController < ApplicationController
   before_filter :authenticate_user!
 
   rescue_from ActiveRecord::RecordNotFound do |exception|
-    render_404(ActiveRecord::RecordNotFound.new) and return
+    render_404(ActiveRecord::RecordNotFound.new, request.fullpath) and return
   end
 
   def process_new(parent, short_name)
