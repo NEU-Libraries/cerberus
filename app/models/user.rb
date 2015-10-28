@@ -54,6 +54,10 @@ class User < ActiveRecord::Base
     end
   end
 
+  def admin_group?
+    return self.groups.include? "northeastern:drs:repository:admin"
+  end
+
   def repo_staff?
     return self.groups.include? "northeastern:drs:repository:staff"
   end
