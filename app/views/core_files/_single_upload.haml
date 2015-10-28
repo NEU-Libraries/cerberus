@@ -71,7 +71,7 @@
     });
   });
 
-- if current_user.admin?
+- if current_user.admin_group? || current_user.admin?
   :javascript
     $('#file').bind('change', function() {
       $(".alert").remove();
