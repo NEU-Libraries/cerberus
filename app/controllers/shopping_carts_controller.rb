@@ -38,6 +38,8 @@ class ShoppingCartsController < ApplicationController
       @items = []
       @item_core_records = []
     end
+
+    respond_to :html
   end
 
   # Allow the user to add/remove items from their shopping cart.

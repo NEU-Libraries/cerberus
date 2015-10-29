@@ -39,7 +39,7 @@ class CatalogController < ApplicationController
     recent
     respond_to do |format|
       format.html { render :template => 'catalog/index', :status => 404 }
-      format.any { render_404(ActiveFedora::ObjectNotFoundError.new) }
+      format.any { render_404(ActiveFedora::ObjectNotFoundError.new, request.fullpath) }
     end
   end
 

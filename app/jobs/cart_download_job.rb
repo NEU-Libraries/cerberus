@@ -22,25 +22,31 @@ class CartDownloadJob
     self.path = "#{Rails.application.config.tmp_path}/carts/#{sess_id}"
 
     FileUtils.mkdir_p path
+    temp_path = "#{path}/in_progress.zip"
     full_path = "#{path}/drs_queue.zip"
 
-    Zip::File.open(zipfile_name, Zip::File::CREATE) do |zipfile|
-      pids.each do |pid|
-        if ActiveFedora::Base.exists?(pid)
-          item = ActiveFedora::Base.find(pid, cast: true)
-          download_label = I18n.t("drs.display_labels.#{item.klass}.download")
-          if item.public? || user.can?(:read, item)
-            zipfile.get_output_stream("downloads/neu_#{pid.split(":").last}-#{download_label}.#{extract_extension(item.properties.mime_type.first)}") { |f| f.write item.content.content }
-            # zipfile.add_buffer("downloads/neu_#{pid.split(":").last}-#{download_label}.#{extract_extension(item.properties.mime_type.first)}", item.content.content)
+    # Kludge to avoid putting all zip items into memory
+    Zip::Archive.open(temp_path, Zip::CREATE) do |io|
+      io.add_buffer("#{sess_id}.txt", "")
+    end
 
-            # Record the download
-            opts = "pid = ? AND session_id = ? AND status = 'INCOMPLETE' AND action = 'download'"
-            Impression.update_all("status = 'COMPLETE'", [opts, pid, sess_id])
+    pids.each do |pid|
+      if ActiveFedora::Base.exists?(pid)
+        item = ActiveFedora::Base.find(pid, cast: true)
+        download_label = I18n.t("drs.display_labels.#{item.klass}.download")
+        if item.public? || user.can?(:read, item)
+          Zip::Archive.open(temp_path) do |io|
+            io.add_buffer("downloads/neu_#{pid.split(":").last}-#{download_label}.#{extract_extension(item.properties.mime_type.first)}", item.content.content)
           end
+
+          # Record the download
+          opts = "pid = ? AND session_id = ? AND status = 'INCOMPLETE' AND action = 'download'"
+          Impression.update_all("status = 'COMPLETE'", [opts, pid, sess_id])
         end
       end
     end
 
+    # Rename temp path to full path so download can pick it up
+    FileUtils.mv(temp_path, full_path)
   end
-
 end

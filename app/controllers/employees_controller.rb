@@ -20,7 +20,7 @@ class EmployeesController < ApplicationController
   rescue_from ActiveFedora::ObjectNotFoundError do |exception|
     @obj_type = "Faculty Member"
     email_handled_exception(exception)
-    render_404(ActiveFedora::ObjectNotFoundError.new) and return
+    render_404(ActiveFedora::ObjectNotFoundError.new, request.fullpath) and return
   end
 
   def show
@@ -44,6 +44,8 @@ class EmployeesController < ApplicationController
     end
 
     @page_title = "#{@employee.pretty_employee_name}"
+
+    respond_to :html
   end
 
   def list_files

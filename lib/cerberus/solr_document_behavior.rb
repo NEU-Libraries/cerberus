@@ -388,6 +388,10 @@ module Cerberus
       return Array(self["tombstone_reason_tesim"]).first
     end
 
+    def file_size
+      return Array(self["file_size_tesim"]).first
+    end
+
     def get_core_record
       id = Array(self["is_part_of_ssim"]).first.split("/").last
       return SolrDocument.new ActiveFedora::SolrService.query("id:\"#{id}\"").first

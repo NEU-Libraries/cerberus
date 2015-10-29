@@ -28,7 +28,7 @@ class CommunitiesController < ApplicationController
   rescue_from Blacklight::Exceptions::InvalidSolrID, ActiveFedora::ObjectNotFoundError do |exception|
     @obj_type = "Community"
     email_handled_exception(exception)
-    render_404(ActiveFedora::ObjectNotFoundError.new) and return
+    render_404(ActiveFedora::ObjectNotFoundError.new, request.fullpath) and return
   end
 
   rescue_from Hydra::AccessDenied, CanCan::AccessDenied do |exception|
@@ -71,10 +71,8 @@ class CommunitiesController < ApplicationController
       @pretty_description = convert_urls(@set.description)
     end
 
-    if !params[:q].nil?
-      if params[:id] != Rails.application.config.root_community_id
-        self.solr_search_params_logic += [:limit_to_scope]
-      end
+    if !params[:q].nil? && params[:id] != Rails.application.config.root_community_id
+      self.solr_search_params_logic += [:limit_to_scope]
 
       if params[:sort].blank?
         # Default sort relevance
