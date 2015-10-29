@@ -43,10 +43,11 @@ class ZipCompilationJob
       FileUtils.mkdir_p dir
 
       temp_zipfile_name = dir.to_s + "/temp.zip"
+      temp_txt = "#{self.comp_pid.gsub(":", "_")}.txt"
 
       # Kludge to avoid putting all zip items into memory
-      Zip::Archive.open(temp_zipfile_name, Zip::CREATE) do |io|
-        io.add_buffer("#{self.comp_pid.gsub(":", "_")}.txt", "")
+      Zip::File.open(temp_zipfile_name, Zip::File::CREATE) do |zipfile|
+        zipfile.get_output_stream(temp_txt) { |f| f.puts "" }
       end
 
       self.entry_ids.each do |id|
@@ -57,16 +58,21 @@ class ZipCompilationJob
             # cf.content_objects.each do |content|
             content = cf.canonical_object
             if !user.nil? ? user.can?(:read, content) : content.public?
-              if content.content.content && content.class != ImageThumbnailFile
+              if content.class != ImageThumbnailFile
                 download_label = I18n.t("drs.display_labels.#{content.klass}.download")
-                Zip::Archive.open(temp_zipfile_name) do |io|
-                  io.add_buffer("#{self.title}/neu_#{id.split(":").last}-#{download_label}.#{extract_extension(content.properties.mime_type.first)}", content.content.content)
+                Zip::File.open(temp_zipfile_name) do |zip_file|
+                  zip_file.add("#{self.title}/neu_#{id.split(":").last}-#{download_label}.#{extract_extension(content.properties.mime_type.first)}", content.fedora_file_path)
                 end
               end
             end
             # end
           end
         end
+      end
+
+      # Remove temp txt file
+      Zip::File.open(temp_zipfile_name) do |zip_file|
+        zipfile.remove(temp_txt)
       end
 
       # Rename temp path to full path so download can pick it up
