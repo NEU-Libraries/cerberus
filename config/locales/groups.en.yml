@@ -6,6 +6,8 @@ en:
       name: "Department of Athletics - Hall of Fame"
     northeastern:drs:board_of_trustees:board_members:
       name: "Board of Trustees"
+    northeastern:drs:bouve:deans_office:media:
+      name: "Bouvé College of Health Sciences - Dean's Office Media Group"
     northeastern:drs:camd:department_of_art_and_design:art_and_design_gallery:
       name: "CAMD - Art and Design Gallery"
     northeastern:drs:college_of_engineering:deans_office:
