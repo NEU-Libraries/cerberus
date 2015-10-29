@@ -16,11 +16,7 @@ describe ProcessIptcZipJob do
       copyright = "Copyright statement"
       @user = FactoryGirl.create(:admin)
       permissions = {"CoreFile" => {"read"  => ["northeastern:drs:all"], "edit" => ["northeastern:drs:repository:staff"]}, "ImageSmallFile" => {"read"  => ["northeastern:drs:repository:staff"], "edit" => ["northeastern:drs:repository:staff"]}, "ImageLargeFile" => {"read"  => ["northeastern:drs:repository:staff"], "edit" => ["northeastern:drs:repository:staff"]}, "ImageMasterFile" => {"read"  => ["northeastern:drs:repository:staff"], "edit" => ["northeastern:drs:repository:staff"]}}
-<<<<<<< HEAD
       ProcessIptcZipJob.new(@loader_name, new_file.to_s, parent, copyright, @user, permissions, @client).run
-=======
-      ProcessZipJob.new(@loader_name, @new_file.to_s, parent, copyright, @user, permissions, @client).run
->>>>>>> master
     end
 
     it 'changes loadreport length to 1' do

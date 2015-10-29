@@ -115,8 +115,6 @@ module Exceptions
       super "No valid #{required_data} in xml"
     end
   end
-
-<<<<<<< HEAD
   class MultipleSpreadsheetError < StandardError
     def initialize
       super "Multiple spreadsheet files found in zip file"
@@ -126,7 +124,9 @@ module Exceptions
   class NoSpreadsheetError < StandardError
     def initialize
       super "No spreadsheet files found in zip file"
-=======
+    end
+  end
+
   class TombstonedObject < StandardError
     def initialize
       super "This object has been tombstoned"
@@ -136,7 +136,6 @@ module Exceptions
   class XmlEncodingError < StandardError
     def initialize
       super "This object requires a prolog with UTF-8 encoding."
->>>>>>> master
     end
   end
 end
