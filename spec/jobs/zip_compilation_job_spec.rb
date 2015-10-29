@@ -36,8 +36,6 @@ describe ZipCompilationJob do
     end
 
     it "adds the zipfile and removes the old zipfile" do
-      puts "DGC DEBUG"
-      puts Dir.glob("#{@zip_dir}/**")
       Dir.glob("#{@zip_dir}/**").length.should be 1
     end
 
