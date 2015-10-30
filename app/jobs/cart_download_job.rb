@@ -36,8 +36,8 @@ class CartDownloadJob
         item = ActiveFedora::Base.find(pid, cast: true)
         download_label = I18n.t("drs.display_labels.#{item.klass}.download")
         if item.public? || user.can?(:read, item)
-          Zip::File.open(temp_path) do |zip_file|
-            zip_file.add("downloads/neu_#{pid.split(":").last}-#{download_label}.#{extract_extension(item.properties.mime_type.first)}", item.fedora_file_path)
+          Zip::File.open(temp_path) do |zipfile|
+            zipfile.add("downloads/neu_#{pid.split(":").last}-#{download_label}.#{extract_extension(item.properties.mime_type.first)}", item.fedora_file_path)
           end
 
           # Record the download
@@ -48,7 +48,7 @@ class CartDownloadJob
     end
 
     # Remove temp txt file
-    Zip::File.open(temp_path) do |zip_file|
+    Zip::File.open(temp_path) do |zipfile|
       zipfile.remove(temp_txt)
     end
 
