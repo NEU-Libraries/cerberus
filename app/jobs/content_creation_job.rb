@@ -159,7 +159,7 @@ class ContentCreationJob
 
         # Load our content into said zipfile.
         Zip::File.open(zipfile_name, Zip::File::CREATE) do |zipfile|
-          zipfile.add_file(file_path)
+          zipfile.add(file_name, file_path)
         end
 
         # Add zipfile to the ZipFile object
