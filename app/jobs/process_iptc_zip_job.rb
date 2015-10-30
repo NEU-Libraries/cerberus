@@ -32,9 +32,10 @@ class ProcessIptcZipJob
           file_name = File.basename(f.name)
           uniq_hsh = Digest::MD5.hexdigest("#{f.name}")[0,2]
           fpath = File.join(to, "#{Time.now.to_f.to_s.gsub!('.','-')}-#{uniq_hsh}") # Names file time and hash string
-          open(fpath, 'wb') do |z|
-            z << f.read
-          end
+          # open(fpath, 'wb') do |z|
+          #   z << f.read
+          # end
+          f.extract(fpath)
           ImageProcessingJob.new(fpath, file_name, parent, copyright, load_report.id, permissions, client).run
           load_report.update_counts
           count = count + 1
