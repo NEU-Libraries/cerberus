@@ -2,39 +2,39 @@ require 'RMagick'
 include Magick
 
 module Cerberus::ThumbnailCreation
-  def create_scaled_progressive_jpeg(item_pid, blob, size, dsid)
-
-    # if (master.is_a? ImageMasterFile) && !(master.width.first.to_i >= size[:width])
-    #   return false
-    # end
-
-    item = ActiveFedora::Base.find(item_pid, cast: true)
-
-    if blob.instance_of? (StringIO)
-      blob = blob.string
-    end
-
-    begin
-      img = Magick::Image.from_blob(blob).first
-
-      if size[:height] && size[:width]
-        scaled_img = img.resize_to_fit(size[:height], size[:width])
-        fill = Magick::Image.new(size[:height], size[:width])
-        fill = fill.matte_floodfill(1, 1)
-        end_img = fill.composite!(scaled_img, Magick::CenterGravity, Magick::OverCompositeOp)
-      elsif size[:width]
-        end_img = img.resize_to_fit(size[:width])
-      else
-        raise "Size must be hash containing :height/:width or :width keys"
-      end
-
-      end_img.format = "JPEG"
-      end_img.interlace = Magick::PlaneInterlace
-
-      item.add_file(end_img.to_blob, dsid, "#{dsid}.jpeg")
-      item.save!
-    rescue Magick::ImageMagickError => exception
-      logger.warn "Unable to make thumbnail with #{item_pid}: #{exception.inspect}"
-    end
+  def create_all_thumbnail_sizes(file_path, thumb_pid)
+    create_scaled_progressive_jpeg(thumb_pid, file_path, {height: 85, width: 85}, 'thumbnail_1')
+    create_scaled_progressive_jpeg(thumb_pid, file_path, {height: 170, width: 170}, 'thumbnail_2')
+    create_scaled_progressive_jpeg(thumb_pid, file_path, {height: 340, width: 340}, 'thumbnail_3')
+    create_scaled_progressive_jpeg(thumb_pid, file_path, {width: 500}, 'thumbnail_4')
+    create_scaled_progressive_jpeg(thumb_pid, file_path, {width: 1000}, 'thumbnail_5')
   end
+
+  private
+    def create_scaled_progressive_jpeg(item_pid, file_path, size, dsid)
+      item = ActiveFedora::Base.find(item_pid, cast: true)
+
+      begin
+        img = Magick::Image.read(file_path).first
+
+        if size[:height] && size[:width]
+          scaled_img = img.resize_to_fit(size[:height], size[:width])
+          fill = Magick::Image.new(size[:height], size[:width])
+          fill = fill.matte_floodfill(1, 1)
+          end_img = fill.composite!(scaled_img, Magick::CenterGravity, Magick::OverCompositeOp)
+        elsif size[:width]
+          end_img = img.resize_to_fit(size[:width])
+        else
+          raise "Size must be hash containing :height/:width or :width keys"
+        end
+
+        end_img.format = "JPEG"
+        end_img.interlace = Magick::PlaneInterlace
+
+        item.add_file(end_img.to_blob, dsid, "#{dsid}.jpeg")
+        item.save!
+      rescue Magick::ImageMagickError => exception
+        logger.warn "Unable to make thumbnail with #{item_pid}: #{exception.inspect}"
+      end
+    end
 end
