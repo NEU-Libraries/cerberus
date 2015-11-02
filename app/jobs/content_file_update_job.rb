@@ -15,7 +15,7 @@ class ContentFileUpdateJob
     all_possible_models = [ "ImageSmallFile", "ImageMediumFile", "ImageLargeFile",
                             "ImageMasterFile", "ImageThumbnailFile", "MsexcelFile",
                             "MspowerpointFile", "MswordFile", "PdfFile", "TextFile",
-                            "ZipFile", "AudioFile", "VideoFile" ]
+                            "ZipFile", "AudioFile", "VideoFile", "PageFile" ]
 
     models_stringified = all_possible_models.inject { |base, str| base + " or #{str}" }
     models_query = RSolr.escape(models_stringified)
