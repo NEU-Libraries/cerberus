@@ -51,6 +51,7 @@ class ProcessMultipageZipJob
           core_file.properties.parent_id = core_file.parent.pid
           core_file.properties.ordinal_value = "0"
           core_file.tag_as_in_progress
+          core_file.title = row_results["title"]
           core_file.save!
         end
 
@@ -63,7 +64,7 @@ class ProcessMultipageZipJob
             # reset for next paged item
             core_file.tag_as_completed
             core_file.save!
-            
+
             core_file = nil
             seq_num = -1
           else
