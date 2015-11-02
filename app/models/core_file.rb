@@ -268,7 +268,7 @@ class CoreFile < ActiveFedora::Base
     all_possible_models = [ "ImageSmallFile", "ImageMediumFile", "ImageLargeFile",
                             "ImageMasterFile", "ImageThumbnailFile", "MsexcelFile",
                             "MspowerpointFile", "MswordFile", "PdfFile", "TextFile",
-                            "ZipFile", "AudioFile", "VideoFile" ]
+                            "ZipFile", "AudioFile", "VideoFile", "PageFile" ]
 
     models_stringified = all_possible_models.inject { |base, str| base + " or #{str}" }
     models_query = RSolr.escape(models_stringified)
@@ -276,6 +276,12 @@ class CoreFile < ActiveFedora::Base
 
     query_result = ActiveFedora::SolrService.query("active_fedora_model_ssi:(#{models_stringified}) AND is_part_of_ssim:#{full_self_id}")
 
+    return assigned_lookup(query_result)
+  end
+
+  def page_objects
+    full_self_id = RSolr.escape("info:fedora/#{self.pid}")
+    query_result = ActiveFedora::SolrService.query("active_fedora_model_ssi:PageFile AND is_part_of_ssim:#{full_self_id}")
     return assigned_lookup(query_result)
   end
 

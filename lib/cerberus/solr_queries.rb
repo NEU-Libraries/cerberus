@@ -48,11 +48,15 @@ module Cerberus
       all_possible_models = [ "ImageSmallFile", "ImageMediumFile", "ImageLargeFile",
                               "ImageMasterFile", "ImageThumbnailFile", "MsexcelFile",
                               "MspowerpointFile", "MswordFile", "PdfFile", "TextFile",
-                              "ZipFile", "AudioFile", "VideoFile" ]
+                              "ZipFile", "AudioFile", "VideoFile", "PageFile" ]
       models_stringified = all_possible_models.inject { |base, str| base + " or #{str}" }
       models_query = ActiveFedora::SolrService.escape_uri_for_query models_stringified
 
       solr_query("active_fedora_model_ssi:(#{models_stringified}) AND is_part_of_ssim:#{self.full_self_id}")
+    end
+
+    def page_objects
+      solr_query("active_fedora_model_ssi:PageFile AND is_part_of_ssim:#{self.full_self_id}")
     end
 
     # Imposes an arbitrary but aesthetically pleasing order on returned images
@@ -237,8 +241,4 @@ module Cerberus
     end
 
     def associated_files_by_type(relation)
-      str = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/#{self.pid}"
-      solr_query("#{relation}:\"#{str}\"")
-    end
-  end
-end
+      str = ActiveFedo
