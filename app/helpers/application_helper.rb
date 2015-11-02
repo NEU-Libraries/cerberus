@@ -20,9 +20,16 @@ module ApplicationHelper
 
   def kramdown_parse(input_str)
     return "" unless input_str
-    output_str = Sanitize.clean(Kramdown::Document.new(input_str).to_html, :elements => ['sup', 'sub'])
+    output_str = Unidecoder.decode(Sanitize.clean(Kramdown::Document.new(input_str).to_html, :elements => ['sup', 'sub']))
     output_str = output_str.strip
     return output_str.html_safe
+  end
+
+  def xml_decode(input_str)
+    escaped_val = input_str.gsub("&amp;", "&amp;amp;")
+    escaped_val = escaped_val.gsub("&lt;", "&amp;lt;")
+    escaped_val = escaped_val.gsub("&gt;", "&amp;gt;")
+    CGI.unescapeHTML(Unidecoder.decode(escaped_val))
   end
 
   def title_string(page_title)

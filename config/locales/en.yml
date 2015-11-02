@@ -64,7 +64,7 @@ en:
         icon: icon-graduation-cap
       monographs:
         name: Monographs
-        description: Books written, edited, translated, or published by NU faculty
+        description: Books written, edited, or translated by NU faculty, and books produced by Northeastern University
         icon: icon-book
       communities:
         name: Communities
