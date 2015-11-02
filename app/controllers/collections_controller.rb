@@ -24,7 +24,7 @@ class CollectionsController < ApplicationController
   before_filter :authenticate_user!, only: [:new, :edit, :create, :update, :destroy ]
 
   # We can do better by using SOLR check instead of Fedora
-  before_filter :can_read?, only: [:show]
+  before_filter :can_read?, only: [:show, :author_list]
   # before_filter :enforce_show_permissions, :only=>:show
   self.solr_search_params_logic += [:add_access_controls_to_solr_params]
 
@@ -234,9 +234,18 @@ class CollectionsController < ApplicationController
     end
   end
 
+  def recent_deposits
+    self.solr_search_params_logic += [:limit_to_core_files]
+    params[:limit] = 10
+    params[:sort] = "#{Solrizer.solr_name('system_create', :stored_sortable, type: :date)} desc"
+    (@response, @recent_deposits) = get_search_results
+    render partial:"/shared/sets/recent_deposits"
+  end
+
   def author_list
-    @page_title = "#{@set.title} Author List"
     @set = fetch_solr_document
+    @page_title = "#{@set.title} Author List"
+    # @pagination = get_facet_pagination(params[:solr_field], params)
     self.solr_search_params_logic += [:limit_to_scope]
 
     (@response, @document_list) = get_search_results
