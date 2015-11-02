@@ -31,6 +31,10 @@ class Admin::StatisticsController < ApplicationController
     render 'impressions', locals: {impressions: @streams, type: "streams" }
   end
 
+  def get_file_sizes
+    render 'file_sizes', locals: {type: "file_sizes" }
+  end
+
   private
 
     def verify_admin

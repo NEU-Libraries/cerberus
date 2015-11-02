@@ -17,10 +17,6 @@ class Compilation < ActiveFedora::Base
 
   has_many :entries, class_name: "CoreFile",  property: :has_member
 
-  def self.users_compilations(user)
-    Compilation.find(:all).keep_if { |file| file.depositor == user.nuid }
-  end
-
   # Returns the pids of all objects tagged as entries
   # in this collection.
   def entry_ids

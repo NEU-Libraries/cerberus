@@ -40,12 +40,12 @@ class CoreFilesController < ApplicationController
   rescue_from ActiveFedora::ObjectNotFoundError do |exception|
     @obj_type = "Object"
     email_handled_exception(exception)
-    render_404(ActiveFedora::ObjectNotFoundError.new) and return
+    render_404(ActiveFedora::ObjectNotFoundError.new, request.fullpath) and return
   end
 
   rescue_from Exceptions::SearchResultTypeError do |exception|
     # No longer emailing this error - it's always Pat debugging
-    render_404(ActiveFedora::ObjectNotFoundError.new) and return
+    render_404(ActiveFedora::ObjectNotFoundError.new, request.fullpath) and return
   end
 
   configure_mods_display do
@@ -202,7 +202,7 @@ class CoreFilesController < ApplicationController
       elsif (empty_file?(file))
         session[:flash_error] = "Error! Zero Length File!"
         render :json => { url: session[:previous_url] }
-      elsif (!current_user.admin? && (File.size(file.tempfile).to_f / 1024000).round(2) > 500) #500 is 500MB
+      elsif (!(current_user.admin_group? || current_user.admin?) && (File.size(file.tempfile).to_f / 1024000).round(2) > 500) #500 is 500MB
         session[:flash_error] = "The file you chose is larger than 500MB. Please contact DRS staff for help uploading files larger than 500MB."
         render :json => { url: session[:previous_url] }
       elsif (!terms_accepted?)
@@ -263,7 +263,8 @@ class CoreFilesController < ApplicationController
 
   def validate_xml
     # Unicode replace fancy punctuation
-    raw_xml = CGI.unescapeHTML(Unidecoder.decode(params[:raw_xml].first))
+    # raw_xml = CGI.unescapeHTML(Unidecoder.decode(params[:raw_xml].first))
+    raw_xml = xml_decode(params[:raw_xml].first)
 
     @result = xml_valid?(raw_xml)
 

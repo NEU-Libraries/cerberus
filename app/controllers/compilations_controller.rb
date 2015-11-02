@@ -1,6 +1,7 @@
 class CompilationsController < ApplicationController
   include Cerberus::ControllerHelpers::EditableObjects
   include Cerberus::ControllerHelpers::PermissionsCheck
+  include ApplicationHelper
   include UrlHelper
 
   before_filter :authenticate_user!, except: [:show, :show_download, :download, :ping_download]
@@ -15,7 +16,9 @@ class CompilationsController < ApplicationController
   before_filter :valid_form_permissions?, only: [:update]
 
   def index
-    @compilations = Compilation.users_compilations(current_user)
+    compilation_docs = solr_query("depositor_tesim:\"#{current_user.nuid}\" AND has_model_ssim:\"#{ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:Compilation"}\"")
+    @compilations = compilation_docs.map{|c| Compilation.find(c.pid)}
+
     @page_title = "My " + t('drs.compilations.name').capitalize + "s"
   end
 
