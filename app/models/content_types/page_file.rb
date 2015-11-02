@@ -2,7 +2,7 @@ class PageFile < ImageThumbnailFile
   include Cerberus::ContentFile
 
   def ordinal_value=(ord_val)
-    self.properties.ordinal_value = date_val
+    self.properties.ordinal_value = ord_val
   end
 
   def ordinal_value
