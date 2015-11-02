@@ -36,6 +36,17 @@ class MultipageProcessingJob
     else
       # TODO: raise error
     end
+
+    if self.file_values["sequence"] == "1"
+      # Make thumbnails for core_file
+      thumbnail_list = []
+      for i in 1..5 do
+        thumbnail_list << "/downloads/#{thumb.pid}?datastream_id=thumbnail_#{i}"
+      end
+
+      self.core_file.thumbnail_list = thumbnail_list
+      self.core_file.save!
+    end
   end
 
 end
