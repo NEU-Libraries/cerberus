@@ -241,4 +241,8 @@ module Cerberus
     end
 
     def associated_files_by_type(relation)
-      str = ActiveFedo
+      str = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/#{self.pid}"
+      solr_query("#{relation}:\"#{str}\"")
+    end
+  end
+end
