@@ -42,6 +42,8 @@
     - solr_fname = "creator_sim"
     - display_facet = @response.facets.detect {|f| f.name == solr_fname}
     -if has_facet_values?
+      -# %div.facet_pagination.top
+        -# = render :partial=>'catalog/facet_pagination'
       %table.table.table-bordered
         %tr
           %th
