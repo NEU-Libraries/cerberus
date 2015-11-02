@@ -16,6 +16,8 @@ class CommunitiesController < ApplicationController
   include BlacklightAdvancedSearch::Controller
   include UrlHelper
 
+  helper_method :sort_value
+
   # We can do better by using SOLR check instead of Fedora
   before_filter :can_read?, except: [:index, :show]
   before_filter :enforce_show_permissions, :only=>:show
@@ -136,10 +138,21 @@ class CommunitiesController < ApplicationController
 
   def recent_deposits
     self.solr_search_params_logic += [:limit_to_core_files]
-    params[:limit] = 10
+    # params[:limit] = 10
     params[:sort] = "#{Solrizer.solr_name('system_create', :stored_sortable, type: :date)} desc"
     (@response, @recent_deposits) = get_search_results
-    render partial:"/shared/sets/recent_deposits"
+    respond_to do |format|
+      format.html { render 'shared/sets/show' }
+    end
+  end
+
+  def author_list
+    @set = fetch_solr_document
+    @page_title = "#{@set.title} Author List"
+    self.solr_search_params_logic += [:limit_to_scope]
+
+    (@response, @document_list) = get_search_results
+    render 'shared/sets/author_list', locals:{sort_value: sort_value}
   end
 
   protected
@@ -230,5 +243,9 @@ class CommunitiesController < ApplicationController
 
     def disable_highlighting(solr_parameters, user_parameters)
       solr_parameters[:hl] = "false"
+    end
+
+    def sort_value
+      %w[value hits].include?(params[:sort_val]) ? params[:sort_val] : "value"
     end
 end

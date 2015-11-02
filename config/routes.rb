@@ -42,6 +42,7 @@ Cerberus::Application.routes.draw do
   get '/communities/:id/monographs' => 'communities#monographs', as: 'community_monographs'
   post '/communities/:id/attach_employee/:employee_id' => 'communities#attach_employee', as: 'attach_employee'
   get '/communities/:id/recent' => 'communities#recent_deposits', as: 'community_recent_deposits'
+  get '/communities/:id/authors' => 'communities#author_list', as: 'community_author_list'
 
   resources :compilations, :controller => "compilations", :path => "sets"
   get "/sets/:id/download" => 'compilations#show_download', as: 'prepare_download'
