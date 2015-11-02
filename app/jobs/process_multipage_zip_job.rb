@@ -22,7 +22,7 @@ class ProcessMultipageZipJob
     load_report = Loaders::LoadReport.find(report_id)
 
     # unzip zip file to tmp storage
-    dir_path = File.join(File.dirname(file), File.basename(file, ".*"))
+    dir_path = File.join(File.dirname(zip_path), File.basename(zip_path, ".*"))
     spreadsheet_file_path = unzip(zip_path, dir_path)
 
     process_spreadsheet(dir_path, spreadsheet_file_path, load_report)
@@ -45,26 +45,25 @@ class ProcessMultipageZipJob
 
         # if row_results ordinal 0
         if row_num == 0
-          core_file = CoreFile.new
+          core_file = CoreFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
           core_file.depositor = "000000000"
           core_file.parent = Collection.find(parent)
           core_file.properties.parent_id = core_file.parent.pid
+          core_file.properties.ordinal_value = "0"
           core_file.tag_as_in_progress
           core_file.save!
         end
 
-        if !(row_num == seq_num + 1)
+        if !(row_num > seq_num)
           #TODO: mark as error
-        else
-          MultipageProcessingJob.new(row_results,
-                                      core_file,
-                                      copyright,
-                                      load_report.id,
-                                      permissions,
-                                      client).run
+        elsif row_num > 0
+          MultipageProcessingJob.new(dir_path, row_results, core_file).run
 
           if row_results["last_item"] == "TRUE"
             # reset for next paged item
+            core_file.tag_as_completed
+            core_file.save!
+            
             core_file = nil
             seq_num = -1
           else
@@ -72,7 +71,6 @@ class ProcessMultipageZipJob
             seq_num = row_num
           end
         end
-
       end
     end
   end
