@@ -52,6 +52,13 @@ class ProcessMultipageZipJob
           core_file.properties.ordinal_value = "0"
           core_file.tag_as_in_progress
           core_file.title = row_results["title"]
+
+          permissions['CoreFile'].each do |perm, vals|
+            vals.each do |group|
+              core_file.rightsMetadata.permissions({group: group}, "#{perm}")
+            end
+          end
+          
           core_file.save!
         end
 
