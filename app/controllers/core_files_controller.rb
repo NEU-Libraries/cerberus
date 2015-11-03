@@ -1,3 +1,7 @@
+require 'blacklight/catalog'
+require 'blacklight_advanced_search'
+require 'parslet'
+require 'parsing_nesting/tree'
 require 'stanford-mods'
 
 # -*- coding: utf-8 -*-
@@ -12,6 +16,14 @@ class CoreFilesController < ApplicationController
   include ApplicationHelper
   include XmlValidator
   include HandleHelper
+  include Blacklight::Catalog
+  include Blacklight::Configurable # comply with BL 3.7
+  include ActionView::Helpers::DateHelper
+  # This is needed as of BL 3.7
+  self.copy_blacklight_config_from(CatalogController)
+
+  include BlacklightAdvancedSearch::ParseBasicQ
+  include BlacklightAdvancedSearch::Controller
 
   before_filter :authenticate_user!, except: [:show]
 
@@ -383,6 +395,26 @@ class CoreFilesController < ApplicationController
     end
   end
 
+  def get_page_images
+    self.solr_search_params_logic += [:filter_by_page_images]
+    (@response, @document_list) = get_search_results
+    respond_to do |format|
+      format.js {
+        if @response.response['numFound'] == 0
+          render js:"$('.page-images').html(\"There are currently 0 page images.\");"
+        else
+          render "page_images"
+        end
+      }
+    end
+  end
+
+  def get_page_file
+    puts params[:id]
+    @page_file = PageFile.find("#{params[:id]}")
+    render "/page_files/show"
+  end
+
   protected
 
     def complete?
@@ -529,4 +561,15 @@ class CoreFilesController < ApplicationController
           redirect_to root_path
         end
       end
+
+      def filter_by_page_images(solr_parameters, user_parameters)
+        full_self_id = RSolr.escape("info:fedora/neu:z603zm86x")
+        solr_parameters[:fq] ||= []
+        # has_model_ssim: "info:fedora/afmodel:PageFile"
+        solr_parameters[:fq] << "#{Solrizer.solr_name("has_model", :symbol)}:\"info:fedora/afmodel:PageFile\" AND #{Solrizer.solr_name("is_part_of", :symbol)}:\"#{full_self_id}\""
+      end
+
+      # def fil/ter_by_core_pid(solr_parameters, user_parameters)
+        # solr_parameters[:fq] ||= []
+      # end
 end
