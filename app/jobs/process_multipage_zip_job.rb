@@ -68,10 +68,11 @@ class ProcessMultipageZipJob
           MultipageProcessingJob.new(dir_path, row_results, core_file, load_report.id).run
 
           if row_results["last_item"] == "TRUE"
-            # reset for next paged item
+            load_report.image_reports.create_success(core_file, "")
             core_file.tag_as_completed
             core_file.save!
 
+            # reset for next paged item
             core_file = nil
             seq_num = -1
           else
