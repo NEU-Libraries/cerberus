@@ -1,19 +1,21 @@
 include Cerberus::ThumbnailCreation
 
 class MultipageProcessingJob
-  attr_accessor :dir_path, :file_values, :core_file
+  attr_accessor :dir_path, :file_values, :core_file, :report_id
 
   def queue_name
     :loader_multipage_processing
   end
 
-  def initialize(dir_path, file_values, core_file)
+  def initialize(dir_path, file_values, core_file, report_id)
     self.dir_path = dir_path
     self.file_values = file_values
     self.core_file = core_file
+    self.report_id = report_id
   end
 
   def run
+    load_report = Loaders::LoadReport.find(report_id)
     file_path = self.dir_path + "/" + self.file_values["file_name"]
 
     # test file_path
@@ -34,7 +36,7 @@ class MultipageProcessingJob
 
       create_all_thumbnail_sizes(file_path, thumb.pid)
     else
-      # TODO: raise error
+      load_report.image_reports.create_failure("File not found in zip file", "", self.file_values["file_name"])
     end
 
     if self.file_values["sequence"] == "1"
