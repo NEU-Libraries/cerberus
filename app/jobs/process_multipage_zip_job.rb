@@ -29,6 +29,7 @@ class ProcessMultipageZipJob
   end
 
   def process_spreadsheet(dir_path, spreadsheet_file_path, load_report)
+    count = 0
     spreadsheet = load_spreadsheet(spreadsheet_file_path)
 
     header_position = 1
@@ -68,10 +69,15 @@ class ProcessMultipageZipJob
           MultipageProcessingJob.new(dir_path, row_results, core_file, load_report.id).run
 
           if row_results["last_item"] == "TRUE"
-            # reset for next paged item
+            load_report.image_reports.create_success(core_file, "")
             core_file.tag_as_completed
             core_file.save!
 
+            count = count + 1
+            load_report.save!
+            load_report.update_counts
+
+            # reset for next paged item
             core_file = nil
             seq_num = -1
           else
@@ -81,6 +87,15 @@ class ProcessMultipageZipJob
         end
       end
     end
+
+    load_report.number_of_files = count
+    if load_report.success_count + load_report.fail_count + load_report.modified_count == load_report.number_of_files
+      LoaderMailer.load_alert(load_report, User.find_by_nuid(load_report.nuid)).deliver!
+    end
+    load_report.save!
+
+    # Cleanup
+    FileUtils.rm_rf dir_path
   end
 
   def process_a_row(header_row, row_value)
