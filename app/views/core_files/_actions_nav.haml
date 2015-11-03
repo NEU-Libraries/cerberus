@@ -5,7 +5,7 @@
         Metadata
     - if !@core_file.supplemental_materials.blank? || !@core_file.supplemental_material_for.blank? || @core_file.page_objects.length > 1
       %li
-        %a(href="#supplemental-files" data-toggle="tab")
+        %a(href="#supplemental-files" data-toggle="tab" data-pid="#{@core_file.pid}")
           Associated Files
     - if current_user_can? :edit, @core_file
       %li

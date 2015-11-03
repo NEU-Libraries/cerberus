@@ -51,7 +51,6 @@
             = render partial: "supplemental_files"
           - if @core_file.page_objects.length > 1
             %div.page-images
-            -# = render partial: "page_images"
         - if current_user_can? :edit, @core_file
           #move.tab-pane
             = render partial: "move"
@@ -96,10 +95,10 @@
   $('a[href="#supplemental-files"]').click(function (e) {
     e.preventDefault();
     $(this).tab('show');
-    $.getScript( "/files/neu:z603zm86x/page_images", function( data, textStatus, jqxhr ) {
-      console.log( data ); // Data returned
-      console.log( textStatus ); // Success
-      console.log( jqxhr.status ); // 200
-      console.log( "Load was performed." );
+    var pid = $(this).data("pid");
+    $.getScript( "/files/"+pid+"/page_images", function( data, textStatus, jqxhr ) {
+      picturefill({
+        reevaluate: true,
+      });
     });
   });
