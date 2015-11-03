@@ -32,6 +32,7 @@ class MultipageProcessingJob
       thumb.core_record            = self.core_file
       thumb.rightsMetadata.content = self.core_file.rightsMetadata.content
       thumb.ordinal_value          = self.file_values["sequence"]
+      thumb.ordinal_last           = self.file_values["last_item"] unless self.file_values["last_item"].nil?
       thumb.save!
 
       create_all_thumbnail_sizes(file_path, thumb.pid)
