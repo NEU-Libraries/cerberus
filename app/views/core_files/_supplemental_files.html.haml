@@ -1,4 +1,5 @@
-%div
+%div.supplemental-files
+  %h4 Associated Files
   - @core_file.supplemental_materials.each do |s|
     %h5
       %a{ href: core_file_path(s.pid) }
