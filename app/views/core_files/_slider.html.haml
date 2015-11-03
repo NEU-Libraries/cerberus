@@ -1,0 +1,17 @@
+-if @thumbs.length > 0
+  /Fallback content for non-JS browsers. Same img src as the initial, unqualified source element.
+  %noscript
+    %img{alt: " ", src: @thumbs[0]}
+  %div#page-image-carousel.carousel.slide
+    %div.carousel-inner
+      - @core_file.page_objects.each_with_index do |page, index|
+        %div{"class"=>"item #{:active if index==0}"}
+          %a{"href"=>"/page_images/#{page.pid}"}
+            %img{"src"=> "/downloads/#{page.pid}?datastream_id=thumbnail_4"}
+    %a.carousel-control.left{"href"=>"#page-image-carousel", "data-slide"=>"prev"}
+    %a.carousel-control.right{"href"=>"#page-image-carousel", "data-slide"=>"next"}
+
+:javascript
+  $('#page-image-carousel').carousel({
+    interval: false
+  });
