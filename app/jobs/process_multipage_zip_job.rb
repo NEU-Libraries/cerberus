@@ -58,12 +58,12 @@ class ProcessMultipageZipJob
               core_file.rightsMetadata.permissions({group: group}, "#{perm}")
             end
           end
-          
+
           core_file.save!
         end
 
         if !(row_num > seq_num)
-          #TODO: mark as error
+          load_report.image_reports.create_failure("Row is out of order - row num #{row_num} seq_num #{seq_num}", "", row_results["file_name"])
         elsif row_num > 0
           MultipageProcessingJob.new(dir_path, row_results, core_file).run
 
