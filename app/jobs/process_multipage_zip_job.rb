@@ -65,7 +65,7 @@ class ProcessMultipageZipJob
         if !(row_num > seq_num)
           load_report.image_reports.create_failure("Row is out of order - row num #{row_num} seq_num #{seq_num}", "", row_results["file_name"])
         elsif row_num > 0
-          MultipageProcessingJob.new(dir_path, row_results, core_file).run
+          MultipageProcessingJob.new(dir_path, row_results, core_file, load_report.id).run
 
           if row_results["last_item"] == "TRUE"
             # reset for next paged item
