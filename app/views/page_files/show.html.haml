@@ -1,4 +1,21 @@
-%h3
+%ul.breadcrumb
+  - page_file_breadcrumb_to_root(@page_file).each do |breadcrumb|
+    =breadcrumb
+
+%h1.page-header
   = "#{@page_file.title}"
   %small= "Page #{@page_file.ordinal_value}"
-%img{:src=>"/downloads/#{@page_file.pid}?datastream_id=thumbnail_1"}
+
+%div.span-12
+  %ul.pager
+    %li.previous{:class=> ("disabled hidden" if @page_file.ordinal_value == '1')}
+      %a{:href=>"/files/#{core_file}/page/#{(@page_file.ordinal_value.to_i-1).to_s}"}
+        %i.icon-arrow-left
+        = I18n.t("drs.display_labels.PageFile.short")+" "+(@page_file.ordinal_value.to_i-1).to_s
+    %li.next{:class=> ("disabled hidden" if @page_file.ordinal_last == "TRUE")}
+      %a{:href=>"/files/#{core_file}/page/#{(@page_file.ordinal_value.to_i+1).to_s}"}
+        = I18n.t("drs.display_labels.PageFile.short")+" "+(@page_file.ordinal_value.to_i+1).to_s
+        %i.icon-arrow-right
+
+  %figure
+    %img{:src=>"/downloads/#{@page_file.pid}?datastream_id=thumbnail_5"}
