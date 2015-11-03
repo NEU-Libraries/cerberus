@@ -396,6 +396,7 @@ class CoreFilesController < ApplicationController
   end
 
   def get_page_images
+    @core_file = fetch_solr_document
     self.solr_search_params_logic += [:filter_by_page_images]
     (@response, @document_list) = get_search_results
     respond_to do |format|
@@ -410,9 +411,10 @@ class CoreFilesController < ApplicationController
   end
 
   def get_page_file
-    puts params[:id]
-    @page_file = PageFile.find("#{params[:id]}")
-    render "/page_files/show"
+    core_file = params[:cf]
+    full_cf_id = RSolr.escape("info:fedora/#{core_file}")
+    @page_file = SolrDocument.new(ActiveFedora::SolrService.query("active_fedora_model_ssi:PageFile AND is_part_of_ssim:#{full_cf_id} AND ordinal_value_tesim:#{params[:ord]}").first)
+    render "/page_files/show", locals:{core_file:core_file}
   end
 
   protected
@@ -563,13 +565,10 @@ class CoreFilesController < ApplicationController
       end
 
       def filter_by_page_images(solr_parameters, user_parameters)
-        full_self_id = RSolr.escape("info:fedora/neu:z603zm86x")
+        full_self_id = RSolr.escape("info:fedora/#{@core_file.pid}")
         solr_parameters[:fq] ||= []
-        # has_model_ssim: "info:fedora/afmodel:PageFile"
         solr_parameters[:fq] << "#{Solrizer.solr_name("has_model", :symbol)}:\"info:fedora/afmodel:PageFile\" AND #{Solrizer.solr_name("is_part_of", :symbol)}:\"#{full_self_id}\""
+        solr_parameters[:df] ||= []
+        solr_parameters[:df] << "per_page:5"
       end
-
-      # def fil/ter_by_core_pid(solr_parameters, user_parameters)
-        # solr_parameters[:fq] ||= []
-      # end
 end
