@@ -29,6 +29,7 @@ limitations under the License.
 //= require bootstrap-tooltip
 //= require bootstrap-popover
 //= require bootstrap-tab
+//= require bootstrap-carousel
 
 //= require jquery.validate
 //= require swfobject

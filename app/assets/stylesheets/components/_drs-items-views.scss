@@ -295,3 +295,26 @@
 .embargo-alert{
   padding: 3px 3px 0 0;
 }
+
+.carousel-control.left{
+  @extend .icon-chevron-left;
+  font-family: FontAwesome;
+  font-size: 20px;
+  padding-top: 3px;
+  padding-right: 2px;
+}
+.carousel-control.right{
+  @extend .icon-chevron-right;
+  font-family: FontAwesome;
+  font-size: 20px;
+  padding-top: 3px;
+  padding-left: 2px;
+}
+.carousel-inner{
+  .item{
+    img{
+      margin-left:auto;
+      margin-right:auto;
+    }
+  }
+}
