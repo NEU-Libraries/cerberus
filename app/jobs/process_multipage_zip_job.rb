@@ -65,8 +65,9 @@ class ProcessMultipageZipJob
           end
 
           core_file.save!
+          seq_num = row_num
 
-          xml_file_path = row_results["file_name"]
+          xml_file_path = dir_path + "/" + row_results["file_name"]
           if !xml_file_path.blank? && File.exists?(xml_file_path) && File.extname(xml_file_path) == ".xml"
             # Load mods xml and cleaning
             raw_xml = xml_decode(File.open(xml_file_path, "rb").read)
@@ -100,29 +101,32 @@ class ProcessMultipageZipJob
           end
         end
 
-        if !(row_num == seq_num + 1)
-          if !core_file.blank?
-            load_report.image_reports.create_failure("Row is out of order - row num #{row_num} seq_num #{seq_num}", "", row_results["file_name"])
-            core_file.destroy
-          end
-        elsif row_num > 0
-          MultipageProcessingJob.new(dir_path, row_results, core_file, load_report.id).run
+        if row_num > 0
+          if !(row_num == seq_num + 1)
+            if !core_file.blank?
+              load_report.image_reports.create_failure("Row is out of order - row num #{row_num} seq_num #{seq_num}", "", row_results["file_name"])
+              core_file.destroy
+              core_file = nil
+            end
+          elsif !core_file.blank?
+            MultipageProcessingJob.new(dir_path, row_results, core_file, load_report.id).run
 
-          if row_results["last_item"] == "TRUE"
-            load_report.image_reports.create_success(core_file, "")
-            core_file.tag_as_completed
-            core_file.save!
+            if row_results["last_item"] == "TRUE"
+              load_report.image_reports.create_success(core_file, "")
+              core_file.tag_as_completed
+              core_file.save!
 
-            count = count + 1
-            load_report.save!
-            load_report.update_counts
+              count = count + 1
+              load_report.save!
+              load_report.update_counts
 
-            # reset for next paged item
-            core_file = nil
-            seq_num = -1
-          else
-            # Keep on goin'
-            seq_num = row_num
+              # reset for next paged item
+              core_file = nil
+              seq_num = -1
+            else
+              # Keep on goin'
+              seq_num = row_num
+            end
           end
         end
       end
