@@ -142,7 +142,7 @@ after 'deploy:updating', 'deploy:migrate'
 after 'deploy:updating', 'deploy:whenever'
 # after 'deploy:updating', 'deploy:assets_kludge'
 
-# after 'deploy:finished', 'deploy:start_solrizerd'
+after 'deploy:finished', 'deploy:start_solrizerd'
 after 'deploy:finished', 'deploy:flush_redis'
 # after 'deploy:finished', 'deploy:start_httpd'
 after 'deploy:finished', 'deploy:restart_workers'
