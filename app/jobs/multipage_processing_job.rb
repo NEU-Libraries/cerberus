@@ -38,6 +38,8 @@ class MultipageProcessingJob
       create_all_thumbnail_sizes(file_path, thumb.pid)
     else
       load_report.image_reports.create_failure("File not found in zip file", "", self.file_values["file_name"])
+      self.core_file.destroy
+      return
     end
 
     if self.file_values["sequence"] == "1"

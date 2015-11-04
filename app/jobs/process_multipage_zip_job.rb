@@ -48,6 +48,10 @@ class ProcessMultipageZipJob
 
         # if row_results ordinal 0
         if row_num == 0
+          count = count + 1
+          load_report.save!
+          load_report.update_counts
+          
           core_file = CoreFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
           core_file.depositor = "000000000"
           core_file.parent = Collection.find(parent)
@@ -113,12 +117,10 @@ class ProcessMultipageZipJob
 
             if row_results["last_item"] == "TRUE"
               load_report.image_reports.create_success(core_file, "")
-              core_file.tag_as_completed
-              core_file.save!
-
-              count = count + 1
-              load_report.save!
-              load_report.update_counts
+              if !core_file.blank?
+                core_file.tag_as_completed
+                core_file.save!
+              end
 
               # reset for next paged item
               core_file = nil
