@@ -1,5 +1,7 @@
 class ProcessMultipageZipJob
   include SpreadsheetHelper
+  include XmlValidator
+  include ApplicationHelper
 
   attr_accessor :loader_name, :zip_path, :parent, :copyright, :current_user, :permissions, :client
 
@@ -63,10 +65,47 @@ class ProcessMultipageZipJob
           end
 
           core_file.save!
+
+          xml_file_path = row_results["file_name"]
+          # if File.extname(file_path) == ".zip"
+          if !xml_file_path.blank? && File.exists?(xml_file_path) && File.extname(xml_file_path) == ".xml"
+            # Load mods xml and cleaning
+            raw_xml = xml_decode(File.open(xml_file_path, "rb").read)
+
+            # Validate
+            validation_result = xml_valid?(raw_xml)
+
+            if validation_result[:errors].blank?
+              core_file.mods.content = raw_xml
+              core_file.save!
+              core_file.match_dc_to_mods
+            else
+              # Raise error, invalid mods
+              load_report.image_reports.create_failure("Invalid MODS", validation_result[:errors], row_results["file_name"])
+
+              # Delete unfinished core_file
+              core_file.destroy
+              # Reset count
+              core_file = nil
+              seq_num = -1
+            end
+          else
+            # Raise error, can't load core file mods metadata
+            load_report.image_reports.create_failure("Can't load MODS XML", "", row_results["file_name"])
+
+            # Delete unfinished core_file
+            core_file.destroy
+            # Reset count
+            core_file = nil
+            seq_num = -1
+          end
         end
 
-        if !(row_num > seq_num)
-          load_report.image_reports.create_failure("Row is out of order - row num #{row_num} seq_num #{seq_num}", "", row_results["file_name"])
+        if !(row_num == seq_num + 1)
+          if !core_file.blank?
+            load_report.image_reports.create_failure("Row is out of order - row num #{row_num} seq_num #{seq_num}", "", row_results["file_name"])
+            core_file.destroy
+          end
         elsif row_num > 0
           MultipageProcessingJob.new(dir_path, row_results, core_file, load_report.id).run
 
