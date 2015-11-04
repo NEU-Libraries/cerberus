@@ -67,7 +67,6 @@ class ProcessMultipageZipJob
           core_file.save!
 
           xml_file_path = row_results["file_name"]
-          # if File.extname(file_path) == ".zip"
           if !xml_file_path.blank? && File.exists?(xml_file_path) && File.extname(xml_file_path) == ".xml"
             # Load mods xml and cleaning
             raw_xml = xml_decode(File.open(xml_file_path, "rb").read)
