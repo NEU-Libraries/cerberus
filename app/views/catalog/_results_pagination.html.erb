@@ -9,7 +9,7 @@
       <%= paginate_rsolr_response(@response)%>
     <% end %>
     <span class="pull-left">
-      Displaying <%= page_params.start %> to <%=page_params.end %> of <%=page_params.total_count + extra_count%>
+      Displaying <%= page_params.start %> to <%=page_params.end + extra_count%> of <%=page_params.total_count + extra_count%>
     </span>
     <div class="clearfix"></div>
   </div><!-- /pager -->
