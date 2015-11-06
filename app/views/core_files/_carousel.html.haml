@@ -7,11 +7,31 @@
       - @core_file.page_objects.each_with_index do |page, index|
         %div{"class"=>"item #{:active if index==0}"}
           %a{"href"=>"/page_images/#{page.pid}"}
-            %img{"src"=> "/downloads/#{page.pid}?datastream_id=thumbnail_4"}
+            %img{:src => (index==0 ? "/downloads/#{page.pid}?datastream_id=thumbnail_4" : nil), "data-src" => (index>0 ? "/downloads/#{page.pid}?datastream_id=thumbnail_4" : nil)}
+            /# {"src"=> "/downloads/#{page.pid}?datastream_id=thumbnail_4"}
     %a.carousel-control.left{"href"=>"#page-image-carousel", "data-slide"=>"prev"}
     %a.carousel-control.right{"href"=>"#page-image-carousel", "data-slide"=>"next"}
 
 :javascript
   $('#page-image-carousel').carousel({
     interval: false
+  });
+  var cHeight = 0;
+  $('#page-image-carousel').on('slide.bs.carousel', function(e) {
+    var $nextImage = $(e.relatedTarget).find('img');
+    $activeItem = $('.active.item', this);
+
+    // prevents the slide decrease in height
+    if (cHeight == 0) {
+      cHeight = $(this).height();
+      $activeItem.next('.item').height(cHeight);
+    }
+
+    // prevents the loaded image if it is already loaded
+    var src = $nextImage.data('src');
+
+    if (typeof src !== "undefined" && src != "") {
+      $nextImage.attr('src', src)
+      $nextImage.data('src', '');
+    }
   });
