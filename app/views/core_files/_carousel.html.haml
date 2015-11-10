@@ -8,7 +8,6 @@
         %div{"class"=>"item #{:active if index==0}"}
           %a{"href"=>"/page_images/#{page.pid}"}
             %img{:src => (index==0 ? "/downloads/#{page.pid}?datastream_id=thumbnail_4" : nil), "data-src" => (index>0 ? "/downloads/#{page.pid}?datastream_id=thumbnail_4" : nil)}
-            /# {"src"=> "/downloads/#{page.pid}?datastream_id=thumbnail_4"}
     %a.carousel-control.left{"href"=>"#page-image-carousel", "data-slide"=>"prev"}
     %a.carousel-control.right{"href"=>"#page-image-carousel", "data-slide"=>"next"}
 
