@@ -37,6 +37,7 @@ class ProcessMultipageZipJob
     header_position = 1
     header_row = spreadsheet.row(header_position)
 
+    zip_files = []
     core_file = nil
     seq_num = -1
 
@@ -51,7 +52,7 @@ class ProcessMultipageZipJob
           count = count + 1
           load_report.save!
           load_report.update_counts
-          
+
           core_file = CoreFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
           core_file.depositor = "000000000"
           core_file.parent = Collection.find(parent)
@@ -92,6 +93,7 @@ class ProcessMultipageZipJob
               # Reset count
               core_file = nil
               seq_num = -1
+              zip_files = []
             end
           else
             # Raise error, can't load core file mods metadata
@@ -102,6 +104,7 @@ class ProcessMultipageZipJob
             # Reset count
             core_file = nil
             seq_num = -1
+            zip_files = []
           end
         end
 
@@ -111,21 +114,20 @@ class ProcessMultipageZipJob
               load_report.image_reports.create_failure("Row is out of order - row num #{row_num} seq_num #{seq_num}", "", row_results["file_name"])
               core_file.destroy
               core_file = nil
+              zip_files = []
             end
           elsif !core_file.blank?
-            MultipageProcessingJob.new(dir_path, row_results, core_file, load_report.id).run
-
-            if row_results["last_item"] == "TRUE"
-              load_report.image_reports.create_success(core_file, "")
-              if !core_file.blank?
-                core_file.tag_as_completed
-                core_file.save!
-              end
-
+            if row_results["last_item"].downcase == "true"
+              zip_files << row_results["file_name"]
+              # Send an array of file_names to be zipped and attached to the core_file
+              MultipageProcessingJob.new(dir_path, row_results, core_file.pid, load_report.id, zip_files).run
               # reset for next paged item
               core_file = nil
               seq_num = -1
+              zip_files = []
             else
+              zip_files << row_results["file_name"]
+              MultipageProcessingJob.new(dir_path, row_results, core_file.pid, load_report.id).run
               # Keep on goin'
               seq_num = row_num
             end
@@ -135,13 +137,10 @@ class ProcessMultipageZipJob
     end
 
     load_report.number_of_files = count
+
     if load_report.success_count + load_report.fail_count + load_report.modified_count == load_report.number_of_files
       LoaderMailer.load_alert(load_report, User.find_by_nuid(load_report.nuid)).deliver!
     end
-    load_report.save!
-
-    # Cleanup
-    FileUtils.rm_rf dir_path
   end
 
   def process_a_row(header_row, row_value)
