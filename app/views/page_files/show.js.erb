@@ -1,0 +1,18 @@
+$(".breadcrumb li:last-of-type").html("<%=I18n.t('drs.display_labels.PageFile.short')%> <%=@page.ordinal_value %>");
+$("h1.page-header small").html("<%=I18n.t('drs.display_labels.PageFile.short')%> <%=@page.ordinal_value %>");
+$("figure img").attr("src", "/downloads/<%= @page.pid%>?datastream_id=thumbnail_5");
+window.location.hash = '<%=@page.ordinal_value %>';
+$("ul.pager li.previous a").attr("href", "/files/<%=@core_file.pid%>/page/<%=(@page.ordinal_value.to_i-1).to_s%>");
+$("ul.pager li.previous span").html("<%=I18n.t('drs.display_labels.PageFile.short')%> <%=@page.ordinal_value.to_i-1 %>");
+<% if @page.ordinal_value == '1'%>
+  $("ul.pager li.previous").attr("class", "previous disabled hidden");
+<% else %>
+  $("ul.pager li.previous").attr("class", "previous");
+<% end %>
+$("ul.pager li.next a").attr("href", "/files/<%=@core_file.pid%>/page/<%=(@page.ordinal_value.to_i+1).to_s%>");
+$("ul.pager li.next span").html("<%=I18n.t('drs.display_labels.PageFile.short')%> <%=@page.ordinal_value.to_i+1 %>");
+<% if @page.ordinal_last == "TRUE"%>
+  $("ul.pager li.next").attr("class", "next disabled hidden");
+<% else %>
+  $("ul.pager li.next").attr("class", "next");
+<% end %>
