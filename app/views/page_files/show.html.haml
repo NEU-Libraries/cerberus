@@ -1,21 +1,40 @@
 %ul.breadcrumb
-  - page_file_breadcrumb_to_root(@page_file).each do |breadcrumb|
+  - page_file_breadcrumb_to_root(@page).each do |breadcrumb|
     =breadcrumb
 
 %h1.page-header
-  = "#{@page_file.title}"
-  %small= "Page #{@page_file.ordinal_value}"
+  = "#{@core_file.title}"
+  %small= I18n.t('drs.display_labels.PageFile.short') + " #{@page.ordinal_value}"
 
 %div.span-12
   %ul.pager
-    %li.previous{:class=> ("disabled hidden" if @page_file.ordinal_value == '1')}
-      %a{:href=>"/files/#{core_file}/page/#{(@page_file.ordinal_value.to_i-1).to_s}"}
+    %li.previous{:class=> ("disabled hidden" if @page.ordinal_value == '1')}
+      %a{:href=>"/files/#{@core_file.pid}/page/#{(@page.ordinal_value.to_i-1).to_s}"}
         %i.icon-arrow-left
-        = I18n.t("drs.display_labels.PageFile.short")+" "+(@page_file.ordinal_value.to_i-1).to_s
-    %li.next{:class=> ("disabled hidden" if @page_file.ordinal_last == "TRUE")}
-      %a{:href=>"/files/#{core_file}/page/#{(@page_file.ordinal_value.to_i+1).to_s}"}
-        = I18n.t("drs.display_labels.PageFile.short")+" "+(@page_file.ordinal_value.to_i+1).to_s
+        %span= I18n.t("drs.display_labels.PageFile.short")+" "+(@page.ordinal_value.to_i-1).to_s
+    %li.next{:class=> ("disabled hidden" if @page.ordinal_last == "TRUE")}
+      %a{:href=>"/files/#{@core_file.pid}/page/#{(@page.ordinal_value.to_i+1).to_s}"}
+        %span= I18n.t("drs.display_labels.PageFile.short")+" "+(@page.ordinal_value.to_i+1).to_s
         %i.icon-arrow-right
 
-  %figure
-    %img{:src=>"/downloads/#{@page_file.pid}?datastream_id=thumbnail_5"}
+  %figure#single_page
+    %img{:src=>"/downloads/#{@page.pid}?datastream_id=thumbnail_5"}
+
+:javascript
+  $(document).ready(function(){
+    page = window.location.hash;
+    if (page[0] == '#'){ page = page.substring(1, page.length)}
+    if (page){
+      $.getScript("/files/#{@core_file.pid}/page/"+page, function(data, textStatus, jqxhr){
+      });
+    }
+
+    $(".pager li a").on("click", function(e){
+      e.preventDefault();
+      spinner = enable_spinner('single_page');
+      var href = $(this).attr("href");
+      $.getScript(href, function(data, textStatus, jqxhr){
+        $("#single_page .spinner").remove();
+      });
+    })
+  })
