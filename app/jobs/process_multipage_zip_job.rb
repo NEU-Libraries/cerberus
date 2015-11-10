@@ -136,7 +136,9 @@ class ProcessMultipageZipJob
       end
     end
 
+    load_report.update_counts
     load_report.number_of_files = count
+    load_report.save!
 
     if load_report.success_count + load_report.fail_count + load_report.modified_count == load_report.number_of_files
       LoaderMailer.load_alert(load_report, User.find_by_nuid(load_report.nuid)).deliver!
