@@ -63,7 +63,7 @@ Cerberus::Application.routes.draw do
   match "/files/:id/request_tombstone" => "core_files#request_tombstone", via: 'post', as:"request_tombstone_file"
   match "/files/:id/request_move" => "core_files#request_move", via: 'post', as:"request_move_file"
   get "/files/:id/page_images" => "core_files#get_page_images", as: 'page_images'
-  get "/files/:cf/page/:ord" => "core_files#get_page_file", as: 'page_file'
+  get "/files/:cf/page/:page" => "core_files#get_page_file", as: 'page_file'
 
 
   put '/item_display' => 'users#update', as: 'view_pref'
