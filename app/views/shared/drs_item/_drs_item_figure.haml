@@ -30,6 +30,9 @@
         - elsif item.klass == "CoreFile" && item.in_progress?
           %span.label.small.updating
             = "Updating"
+        - elsif item.klass == "PageFile"
+          %span.label.small
+            = item.type_label + " " + item.ordinal_value
         - else
           %span.label.small
             = item.type_label
