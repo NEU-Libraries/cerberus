@@ -402,7 +402,7 @@ class CoreFilesController < ApplicationController
     respond_to do |format|
       format.js {
         if @response.response['numFound'] == 0
-          render js:"$('.page-images').html(\"There are currently 0 page images.\");"
+          render js:"$('#page-images').html(\"There are currently 0 page images.\");"
         else
           render "page_images"
         end
@@ -411,10 +411,19 @@ class CoreFilesController < ApplicationController
   end
 
   def get_page_file
-    core_file = params[:cf]
-    full_cf_id = RSolr.escape("info:fedora/#{core_file}")
-    @page_file = SolrDocument.new(ActiveFedora::SolrService.query("active_fedora_model_ssi:PageFile AND is_part_of_ssim:#{full_cf_id} AND ordinal_value_tesim:#{params[:ord]}").first)
-    render "/page_files/show", locals:{core_file:core_file}
+    cf = params[:cf]
+    page = params[:page]
+    full_cf_id = RSolr.escape("info:fedora/#{cf}")
+    @page = SolrDocument.new(ActiveFedora::SolrService.query("active_fedora_model_ssi:PageFile AND is_part_of_ssim:#{full_cf_id} AND ordinal_value_tesim:#{page}").first)
+    @core_file = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{cf}\"").first)
+    respond_to do |format|
+      format.js {
+        render "/page_files/show", locals:{page:@page}
+      }
+      format.html {
+        render "/page_files/show", locals:{core_file:@core_file, page:@page}
+      }
+    end
   end
 
   protected
