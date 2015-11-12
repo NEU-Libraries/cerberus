@@ -41,7 +41,7 @@ class User < ActiveRecord::Base
   def add_group(group)
     gl = self.group_list.blank? ? [] : self.group_list
     gl << group
-    self.group_list = gl
+    self.group_list = gl.uniq
     self.save!
   end
 
@@ -79,21 +79,34 @@ class User < ActiveRecord::Base
   end
 
   def self.find_for_shib(auth, signed_in_resource=nil)
-    user = User.where(:email => auth.info.email).first
+    # user = User.where(:email => auth.info.email).first
+
+    if auth.info.nuid.blank?
+      raise Exceptions::NoNuidProvided
+    end
+
+    # Switch to NUID as the true unique value
+    user = User.find_by_nuid(auth.info.nuid).first
 
     unless user
-      name_array = Namae.parse auth.info.name
-      name_obj = name_array[0]
-      emp_name = "#{name_obj.family}, #{name_obj.given}"
-
       user = User.create(password:Devise.friendly_token[0,20], full_name:emp_name, nuid:auth.info.nuid)
-      user.email = auth.info.email
-      user.save!
 
       if(auth.info.employee == "faculty")
         Cerberus::Application::Queue.push(EmployeeCreateJob.new(auth.info.nuid, emp_name))
       end
     end
+
+    name_array = Namae.parse auth.info.name
+    name_obj = name_array[0]
+    emp_name = "#{name_obj.family}, #{name_obj.given}"
+
+    if auth.info.email.blank?
+      user.email = auth.info.nuid + "@neu.edu"
+    else
+      user.email = auth.info.email
+    end
+
+    user.save!
 
     if !auth.info.grouper.nil?
       user.group_list = (auth.info.grouper).split(";")
