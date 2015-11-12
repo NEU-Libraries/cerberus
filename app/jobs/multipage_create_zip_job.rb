@@ -1,4 +1,7 @@
 class MultipageCreateZipJob
+  include MimeHelper
+  include ChecksumHelper
+  
   attr_accessor :dir_path, :core_file_pid, :zip_files
 
   def queue_name
@@ -9,6 +12,18 @@ class MultipageCreateZipJob
     self.dir_path = dir_path
     self.core_file_pid = core_file_pid
     self.zip_files = zip_files
+  end
+
+  def large_upload(content_object, file_path, dsid)
+    url = URI("#{ActiveFedora.config.credentials[:url]}")
+    req = Net::HTTP::Post.new("#{ActiveFedora.config.credentials[:url]}/objects/#{content_object.pid}/datastreams/#{dsid}?controlGroup=M&dsLocation=file://#{file_path}")
+    req.basic_auth("#{ActiveFedora.config.credentials[:user]}", "#{ActiveFedora.config.credentials[:password]}")
+    req.add_field("Content-Type", "#{extract_mime_type(file_path)}")
+    req.add_field("Transfer-Encoding", "chunked")
+    res = Net::HTTP.start(url.host, url.port) {|http|
+        http.request(req)
+    }
+    return res
   end
 
   def run
@@ -44,10 +59,12 @@ class MultipageCreateZipJob
       zf.rightsMetadata.content = core_file.rightsMetadata.content
       zf.save!
 
-      File.open(zipfile_name) do |file_contents|
-        zf.add_file(file_contents, 'content', "page_items.zip")
-        zf.save!
-      end
+      # File.open(zipfile_name) do |file_contents|
+      #   zf.add_file(file_contents, 'content', "page_items.zip")
+      #   zf.save!
+      # end
+
+      large_upload(zf, zipfile_name, 'content')
 
       if !core_file.blank?
         core_file.tag_as_completed
