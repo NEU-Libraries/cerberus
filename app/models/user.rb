@@ -79,36 +79,37 @@ class User < ActiveRecord::Base
   end
 
   def self.find_for_shib(auth, signed_in_resource=nil)
-    # user = User.where(:email => auth.info.email).first
+    # Temporary kludge until full featured user switching is put in place
+    user = User.where(:email => auth.info.email).first
 
     if auth.info.nuid.blank?
       raise Exceptions::NoNuidProvided
     end
 
-    name_array = Namae.parse auth.info.name
-    name_obj = name_array[0]
-    emp_name = "#{name_obj.family}, #{name_obj.given}"
-
-    # Switch to NUID as the true unique value
-    user = User.find_by_nuid(auth.info.nuid)
+    # Switch to NUID as the true unique value (delayed until full featured user switching is put in place)
+    # unless user
+    #   user = User.find_by_nuid(auth.info.nuid)
+    # end
 
     unless user
       user = User.create(password:Devise.friendly_token[0,20], full_name:emp_name, nuid:auth.info.nuid)
+
+      if auth.info.email.blank?
+        user.email = auth.info.nuid + "@neu.edu"
+      else
+        user.email = auth.info.email
+      end
+
+      name_array = Namae.parse auth.info.name
+      name_obj = name_array[0]
+      emp_name = "#{name_obj.family}, #{name_obj.given}"
+      user.full_name = emp_name
+      user.save!
 
       if(auth.info.employee == "faculty")
         Cerberus::Application::Queue.push(EmployeeCreateJob.new(auth.info.nuid, emp_name))
       end
     end
-
-    user.full_name = emp_name
-
-    if auth.info.email.blank?
-      user.email = auth.info.nuid + "@neu.edu"
-    else
-      user.email = auth.info.email
-    end
-
-    user.save!
 
     if !auth.info.grouper.nil?
       user.group_list = (auth.info.grouper).split(";")
