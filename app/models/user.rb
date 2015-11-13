@@ -86,7 +86,7 @@ class User < ActiveRecord::Base
     end
 
     # Switch to NUID as the true unique value
-    user = User.find_by_nuid(auth.info.nuid).first
+    user = User.find_by_nuid(auth.info.nuid)
 
     unless user
       user = User.create(password:Devise.friendly_token[0,20], full_name:emp_name, nuid:auth.info.nuid)
