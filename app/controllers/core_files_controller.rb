@@ -396,6 +396,9 @@ class CoreFilesController < ApplicationController
   end
 
   def get_page_images
+    # Kludgey kludge kludge
+    params[:per_page] = 5
+
     @core_file = fetch_solr_document
     self.solr_search_params_logic += [:filter_by_page_images]
     (@response, @document_list) = get_search_results
@@ -577,7 +580,5 @@ class CoreFilesController < ApplicationController
         full_self_id = RSolr.escape("info:fedora/#{@core_file.pid}")
         solr_parameters[:fq] ||= []
         solr_parameters[:fq] << "#{Solrizer.solr_name("has_model", :symbol)}:\"info:fedora/afmodel:PageFile\" AND #{Solrizer.solr_name("is_part_of", :symbol)}:\"#{full_self_id}\""
-        solr_parameters[:df] ||= []
-        solr_parameters[:df] << "per_page:5"
       end
 end
