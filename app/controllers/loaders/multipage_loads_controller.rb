@@ -2,8 +2,17 @@ class Loaders::MultipageLoadsController < Loaders::LoadsController
   before_filter :verify_group
 
   def new
-    parent = "neu:6240"
-    process_new(parent, t('drs.loaders.multipage.short_name'))
+    query_result = ActiveFedora::SolrService.query("active_fedora_model_ssi:\"Collection\"", :fl => "id, title_tesim", :rows => 999999999)
+    @collections_options = Array.new()
+    query_result.each do |c|
+      if current_user.can?(:edit, c['id'])
+        @collections_options << {'label' => c['title_tesim'][0], 'value' => c['id']}
+      end
+    end
+    @loader_name = t('drs.loaders.'+t('drs.loaders.multipage.short_name')+'.long_name')
+    @loader_short_name = t('drs.loaders.multipage.short_name')
+    @page_title = @loader_name + " Loader"
+    render 'loaders/new', locals: { collections_options: @collections_options}
   end
 
   def create
