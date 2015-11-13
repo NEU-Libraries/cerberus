@@ -6,7 +6,7 @@
   = "#{@core_file.title}"
   %small= I18n.t('drs.display_labels.PageFile.short') + " #{@page.ordinal_value}"
 
-%div.span-12
+%div.span12
   %ul.pager
     %li.previous{:class=> ("disabled hidden" if @page.ordinal_value == '1')}
       %a{:href=>"/files/#{@core_file.pid}/page/#{(@page.ordinal_value.to_i-1).to_s}"}
