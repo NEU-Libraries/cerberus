@@ -7,6 +7,12 @@ module Exceptions
     end
   end
 
+  class NoNuidProvided < StandardError
+    def initialize
+      super "No nuid provided by shib"
+    end
+  end
+
   class NoSuchNuidError < StandardError
     attr_accessor :nuid
     def initialize(nuid)
