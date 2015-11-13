@@ -95,9 +95,10 @@ class User < ActiveRecord::Base
       name_array = Namae.parse auth.info.name
       name_obj = name_array[0]
       emp_name = "#{name_obj.family}, #{name_obj.given}"
-      user.full_name = emp_name
-      
+
       user = User.create(password:Devise.friendly_token[0,20], full_name:emp_name, nuid:auth.info.nuid)
+      
+      user.full_name = emp_name
 
       if auth.info.email.blank?
         user.email = auth.info.nuid + "@neu.edu"
