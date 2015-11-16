@@ -1,0 +1,16 @@
+%h1.page-header
+  =render partial: 'shared/icon', locals: {class_string: "icon-group"}
+  Switch Account
+%p.lead
+  Select the account that you would like to switch to.
+
+- current_user.associated_accounts.each do |email|
+  %p
+    = link_to("#{email}", switch_user_path(email: email))
+
+%br
+
+%p.lead
+  Set current account as preferred?
+  %p
+    = link_to "Save as preferred", set_preferred_user_path(email: current_user.email), class: "btn btn-success"
