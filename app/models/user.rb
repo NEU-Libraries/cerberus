@@ -105,8 +105,6 @@ class User < ActiveRecord::Base
 
       user = User.create(password:Devise.friendly_token[0,20], full_name:emp_name, nuid:auth.info.nuid)
 
-      user.full_name = emp_name
-
       if auth.info.email.blank?
         user.email = auth.info.nuid + "@neu.edu"
       else
