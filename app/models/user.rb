@@ -14,7 +14,7 @@ class User < ActiveRecord::Base
          :recoverable, :rememberable, :trackable, :validatable, :omniauthable, :omniauth_providers => [:shibboleth]
   # attr_accessible :title, :body
 
-  attr_accessible :password, :email, :password_confirmation, :remember_me, :nuid, :full_name, :view_pref, :employee_id
+  attr_accessible :password, :email, :password_confirmation, :remember_me, :nuid, :full_name, :view_pref, :employee_id, :account_pref, :multiple_accounts
   delegate :can?, :cannot?, :to => :ability
   serialize(:group_list, Array)
 
@@ -97,7 +97,7 @@ class User < ActiveRecord::Base
       emp_name = "#{name_obj.family}, #{name_obj.given}"
 
       user = User.create(password:Devise.friendly_token[0,20], full_name:emp_name, nuid:auth.info.nuid)
-      
+
       user.full_name = emp_name
 
       if auth.info.email.blank?
