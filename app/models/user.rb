@@ -86,19 +86,13 @@ class User < ActiveRecord::Base
   end
 
   def self.find_for_shib(auth, signed_in_resource=nil)
-    # Temporary kludge until full featured user switching is put in place
-    user = User.where(:email => auth.info.email).first
+    users = User.where(:nuid => auth.info.nuid)
 
     if auth.info.nuid.blank?
       raise Exceptions::NoNuidProvided
     end
 
-    # Switch to NUID as the true unique value (delayed until full featured user switching is put in place)
-    # unless user
-    #   user = User.find_by_nuid(auth.info.nuid)
-    # end
-
-    unless user
+    if users.blank?
       name_array = Namae.parse auth.info.name
       name_obj = name_array[0]
       emp_name = "#{name_obj.family}, #{name_obj.given}"
@@ -115,6 +109,15 @@ class User < ActiveRecord::Base
 
       if(auth.info.employee == "faculty")
         Cerberus::Application::Queue.push(EmployeeCreateJob.new(auth.info.nuid, emp_name))
+      end
+    else
+      # Previously logged in
+      user = User.where(:email => auth.info.email).first
+
+      # Preferred account?
+      if !user.account_pref.blank?
+        email = user.account_pref
+        user = User.where(:email => email).first
       end
     end
 
