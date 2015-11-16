@@ -396,9 +396,6 @@ class CoreFilesController < ApplicationController
   end
 
   def get_page_images
-    # Kludgey kludge kludge
-    params[:per_page] = 5
-
     @core_file = fetch_solr_document
     self.solr_search_params_logic += [:filter_by_page_images]
     (@response, @document_list) = get_search_results

@@ -97,9 +97,19 @@
     $(this).tab('show');
     spinner = enable_spinner('page-images');
     var pid = $(this).data("pid");
-    $.getScript( "/files/"+pid+"/page_images", function( data, textStatus, jqxhr ) {
+    get_page("/files/"+pid+"/page_images?per_page=5");
+  });
+  function get_page(path){
+    $.getScript( path, function() {
       picturefill({
         reevaluate: true,
       });
+      enable_pagination();
     });
-  });
+  }
+  function enable_pagination(){
+    $("#page-images .pagination a").on("click", function(e){
+      e.preventDefault();
+      get_page($(this).attr("href"));
+    });
+  }

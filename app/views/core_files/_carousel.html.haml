@@ -23,7 +23,7 @@
     // prevents the slide decrease in height
     if (cHeight == 0) {
       cHeight = $(this).height();
-      $activeItem.next('.item').height(cHeight);
+      $activeItem.next('.item').find("img").height(cHeight);
     }
 
     // prevents the loaded image if it is already loaded
