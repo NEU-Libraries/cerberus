@@ -75,6 +75,10 @@ Cerberus::Application.routes.draw do
   get '/my_communities' => 'employees#my_communities', as: 'my_communities'
   get '/my_loaders' => 'employees#my_loaders', as: 'my_loaders'
 
+  get '/select_account' => 'users#select_account', as: 'select_account'
+  get '/switch_user' => 'users#switch_user', as: 'switch_user'
+  get '/set_preferred_user' => 'users#set_preferred_user', as: 'set_preferred_user'
+
   scope :module => Loaders do
    resources :marcom_loads, only: [:new, :create, :show], :path => "loaders/marcom"
    get "/loaders/marcom/new" => 'marcom_loads#new', as: 'loaders_marcom'

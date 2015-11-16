@@ -22,6 +22,13 @@ class User < ActiveRecord::Base
 
   ROLES = %w[admin employee]
 
+  def associated_accounts
+    if self.multiple_accounts
+      users = User.where(:nuid => self.nuid)
+      return users.map do |u| u.email end
+    end
+  end
+
   def groups
     return !self.group_list.blank? ? self.group_list : []
   end

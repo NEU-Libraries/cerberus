@@ -1,5 +1,36 @@
 class UsersController < ApplicationController
 
+  def switch_user
+    email = params[:email]
+    if current_user.multiple_accounts
+      user = User.find_by_email(email)
+      if user.nuid == current_user.nuid
+        # Valid choice
+        sign_in user, :event => :authentication
+        flash[:notice] = "Switched to account associated with #{email}"
+        redirect_to root_path and return
+      else
+        # Invalid, notify of account tampering
+      end
+    else
+      # Invalid, notify of account tampering
+    end
+  end
+
+  def set_preferred_user
+    if current_user.multiple_accounts
+      users = User.where(:nuid => current_user.nuid)
+
+      users.map do |u|
+        u.account_pref = current_user.email
+        u.save!
+      end
+
+      flash[:notice] = "Set preferred account to #{current_user.email}"
+      redirect_to root_path and return
+    end
+  end
+
   # Process changes from profile form
   def update
 
@@ -33,4 +64,3 @@ class UsersController < ApplicationController
   end
 
 end
-
