@@ -86,13 +86,14 @@ class User < ActiveRecord::Base
   end
 
   def self.find_for_shib(auth, signed_in_resource=nil)
+    user = User.where(:email => auth.info.email).first
     users = User.where(:nuid => auth.info.nuid)
 
     if auth.info.nuid.blank?
       raise Exceptions::NoNuidProvided
     end
 
-    if users.blank?
+    if user.nil? || users.blank?
       name_array = Namae.parse auth.info.name
       name_obj = name_array[0]
       emp_name = "#{name_obj.family}, #{name_obj.given}"
@@ -134,6 +135,12 @@ class User < ActiveRecord::Base
     end
 
     user.add_group("northeastern:drs:all")
+
+    users = User.where(:nuid => auth.info.nuid)
+    users.map do |u|
+      u.multiple_account = true
+      u.save!
+    end
 
     return user
   end
