@@ -18,7 +18,8 @@ describe ImageProcessingJob do
     @report_id = Loaders::LoadReport.create_from_strings(@user, 0, @loader_name, @parent)
     @load_report = Loaders::LoadReport.find(@report_id)
     @permissions = {"CoreFile" => {"read"  => ["northeastern:drs:all"], "edit" => ["northeastern:drs:repository:corefile"]}, "ImageSmallFile" => {"read"  => ["northeastern:drs:repository:test"], "edit" => ["northeastern:drs:repository:small"]}, "ImageLargeFile" => {"read"  => ["northeastern:drs:repository:test"], "edit" => ["northeastern:drs:repository:large"]}, "ImageMasterFile" => {"read"  => ["northeastern:drs:repository:test"], "edit" => ["northeastern:drs:repository:master"]}}
-    ImageProcessingJob.new(@fpath, @file_name, @parent, @copyright, @load_report.id, @permissions, @client).run
+    @derivatives = false
+    ImageProcessingJob.new(@fpath, @file_name, @parent, @copyright, @load_report.id, @permissions, @derivatives, @client).run
     @images = Loaders::ImageReport.where(load_report_id:"#{@report_id}").find_all
   end
 
