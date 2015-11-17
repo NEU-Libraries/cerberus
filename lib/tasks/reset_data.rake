@@ -147,6 +147,27 @@ task :reset_data => :environment do
   p_2.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
   p_2.save!
 
+  # Add Bouve structure for loader testing
+  bouve_dept = Community.new(mass_permissions: 'public', pid: 'neu:38', title: 'Bouvé College of Health Sciences')
+  bouve_dept.parent = "neu:1"
+  bouve_dept.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
+  bouve_dept.save!
+
+  # Bouve dean's office community
+  p_c = Community.new(mass_permissions: 'public', pid: 'neu:rx917k98s', title: 'Bouvé College of Health Sciences Office of the Dean')
+  p_c.parent = "neu:38"
+  p_c.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
+  p_c.save!
+
+  # Bouve children collections
+  p_1 = Collection.create(mass_permissions: 'public', parent: p_c, pid: 'neu:rx917k992', title: 'Media')
+  p_1.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
+  p_1.save!
+
+  p_2 = Collection.create(mass_permissions: 'public', parent: p_1, pid: 'neu:rx917m00m', title: 'Photographs')
+  p_2.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
+  p_2.save!
+
   root_dept.rightsMetadata.permissions({group: 'public'}, 'read')
   set_edit_permissions(root_dept)
 
@@ -227,6 +248,12 @@ task :reset_data => :environment do
   eli.add_group("northeastern:drs:enrollment_management:emc:emc_admin")
   david.add_group("northeastern:drs:enrollment_management:emc:emc_admin")
   julio.add_group("northeastern:drs:enrollment_management:emc:emc_admin")
+
+  sarah.add_group("northeastern:drs:repository:loaders:bouve_dean")
+  pat.add_group("northeastern:drs:repository:loaders:bouve_dean")
+  joey.add_group("northeastern:drs:repository:loaders:bouve_dean")
+  eli.add_group("northeastern:drs:repository:loaders:bouve_dean")
+  david.add_group("northeastern:drs:repository:loaders:bouve_dean")
 
   sarah.add_group("northeastern:drs:repository:staff")
   pat.add_group("northeastern:drs:repository:staff")
