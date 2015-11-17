@@ -1,5 +1,5 @@
 class ImageProcessingJob
-  attr_accessor :file, :file_name, :parent, :copyright, :report_id, :permissions, :client
+  attr_accessor :file, :file_name, :parent, :copyright, :report_id, :permissions, :client, :derivatives
   include MimeHelper
   include HandleHelper
   include ApplicationHelper
@@ -8,7 +8,7 @@ class ImageProcessingJob
     :loader_image_processing
   end
 
-  def initialize(file, file_name, parent, copyright, report_id, permissions=[], client=nil)
+  def initialize(file, file_name, parent, copyright, report_id, permissions=[], derivatives=false, client=nil)
     self.file = file
     self.file_name = file_name
     self.parent = parent
@@ -16,6 +16,7 @@ class ImageProcessingJob
     self.report_id = report_id
     self.permissions = permissions
     self.client = client
+    self.derivatives = derivatives
   end
 
   def run
@@ -215,9 +216,15 @@ class ImageProcessingJob
         else
           size = height
         end
-        l = 1400.to_f/size.to_f
-        m = 0.to_f/size.to_f
-        s = 600.to_f/size.to_f
+        if derivatives
+          l = 1400.to_f/size.to_f
+          m = 0.to_f/size.to_f
+          s = 600.to_f/size.to_f
+        else
+          l = 0.to_f
+          m = 0.to_f
+          s = 0.to_f
+        end
 
         permissions['CoreFile'].each do |perm, vals|
           vals.each do |group|
