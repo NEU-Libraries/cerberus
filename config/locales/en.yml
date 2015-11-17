@@ -213,5 +213,9 @@ en:
         long_name: "Enrollment Management and Student Affairs"
         short_name: "emsa"
         copyright: "Enrollment Marketing and Communications images are for use only within the context of Northeastern University. Appropriate uses include: Northeastern University-related websites, Northeastern University-based print/web publications and for speaking appearances when acting as a representative of Northeastern University. Images should be credited: \"(Insert Photographer's Name)/Northeastern University.\" Images are not to be used for self-promotional purposes outside of Northeastern University or in commercial/external publications such as advertisements, books or magazines without written permission from Northeastern Enrollment Marketing and Communications. Full size downloads are restricted to Enrollment Management and Student Affairs staff. For more information, please email Enrollment Marketing and Communications at Gnphotorequest@neu.edu."
+      bouve:
+        long_name: "Bouvé College of Health Sciences"
+        short_name: "bouve"
+        copyright: "Bouvé College of Health Sciences images are for use only within the context of Northeastern University. Appropriate uses include: Northeastern University-related websites, Northeastern University-based print/web publications. Images should be credited: \"Photographer Name/Northeastern University.\" Images are not to be used for self-promotional purposes outside of Northeastern University such as LinkedIn, Facebook or in commercial/external publications such as advertisements, books or magazines without written permission from Northeastern University, Bouvé  College of Health Sciences. For more information, please contact the Office of the Dean at 617-373-3323."
   blacklight:
     application_name: "DRS"
