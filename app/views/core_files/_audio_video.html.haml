@@ -6,7 +6,7 @@
     = render 'shared/thumbnails/full_picture'
 - type = dir = encoded = provider = pid = ''
 - @content_objects.each do |content|
-  -if content.klass == "VideoFile" || "AudioFile"
+  -if content.klass == "VideoFile" || content.klass == "AudioFile"
     - if (!current_user.nil? && (current_user.can? :read, content)) || content.public?
       - pid = content.pid
       - dir = content.pid_hash[0,2]
