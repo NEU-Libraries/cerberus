@@ -36,7 +36,7 @@ class CartDownloadJob
         download_label = I18n.t("drs.display_labels.#{item.klass}.download")
         if item.public? || user.can?(:read, item)
           Zip::Archive.open(temp_path) do |io|
-            io.add_buffer("downloads/neu_#{pid.split(":").last}-#{download_label}.#{extract_extension(item.properties.mime_type.first)}", item.content.content)
+            io.add_buffer("downloads/neu_#{pid.split(":").last}-#{download_label}.#{extract_extension(item.properties.mime_type.first, File.extname(item.original_filename).delete!("."))}", item.content.content)
           end
 
           # Record the download
