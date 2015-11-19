@@ -7,13 +7,17 @@
 %h2.page-header All Users
 
 = will_paginate @users
-%table.table.table-striped
-  %th Loader
-  %th Collection
-  %th Time of Upload
-  %th Total Files
-  %th
-  - @users.each do |user|
-    %tr
-      %td
-        =user.inspect
+- @users.each_with_index do |user, i|
+  #accordion.accordion
+    .accordion-group
+      .accordion-heading
+        %a.accordion-toggle{"style" => "text-decoration: none", "data-parent" => "#accordion", "data-toggle" => "collapse", :href => "#collapse#{i}"}
+          =user.full_name
+          ="(#{user.email})"
+      .accordion-body.collapse{:id => "collapse#{i}"}
+        .accordion-inner
+          %dt NUID:
+          %dd=user.nuid
+          %dt Groups:
+          -user.groups.each do |g|
+            %dd=g
