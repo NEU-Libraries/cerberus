@@ -11,14 +11,22 @@ module MimeHelper
     return mime_type
   end
 
-  def extract_extension(mime_type)
+  def extract_extension(mime_type, original_extension="")
     result = `grep "#{mime_type}" /etc/mime.types | awk '{print $2}'`.gsub(/\n/," ").strip
+    multiple = `grep "#{mime_type}" /etc/mime.types | awk '{$1=""; print $0}'`.strip.split(" ")
 
-    if !result.match(/\s/).nil?
+    if !original_extension.blank?
+      if multiple.include? original_extension
+        return original_extension
+      end
+    elsif result.blank?
+      return original_extension
+    elsif !result.match(/\s/).nil?
       return result.slice(0..(result.index(' ')-1))
-    else
-      return result
     end
+
+    # Catch all
+    return result
   end
 
 end
