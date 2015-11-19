@@ -1,0 +1,19 @@
+%ul.breadcrumb
+  %li
+    = link_to 'Admin Panel', '/admin'
+  %li.active
+    = link_to 'Manage Users', '/admin/users'
+
+%h2.page-header All Users
+
+= will_paginate @users
+%table.table.table-striped
+  %th Loader
+  %th Collection
+  %th Time of Upload
+  %th Total Files
+  %th
+  - @users.each do |user|
+    %tr
+      %td
+        =user.inspect

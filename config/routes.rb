@@ -111,6 +111,7 @@ Cerberus::Application.routes.draw do
     resources :communities, except: [:show]
     resources :employees, only: [:index, :edit, :update, :destroy]
     resources :statistics, only: [:index]
+    resources :users, only: [:index, :show]
     get "/statistics/views" => 'statistics#get_views', as: 'views'
     get "/statistics/downloads" => 'statistics#get_downloads', as: 'downloads'
     get "/statistics/streams" => 'statistics#get_streams', as: 'streams'
