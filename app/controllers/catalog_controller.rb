@@ -44,6 +44,7 @@ class CatalogController < ApplicationController
   end
 
   def index
+    flash[:alert] = "Northeastern's centralized login system is scheduled to be updated from 7am to 8am on Sunday, November 22. This update may affect your ability to sign in to the DRS during that time. More information about this update and a full list of affected services can be found here: <a href=\"http://stspg.io/1fOw\">http://stspg.io/1fOw</a>"
     if !has_search_parameters?
       self.solr_search_params_logic += [:disable_highlighting]
       recent

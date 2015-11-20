@@ -1,17 +1,18 @@
 class ProcessZipJob
-  attr_accessor :loader_name, :zip_path, :parent, :copyright, :current_user, :permissions, :client
+  attr_accessor :loader_name, :zip_path, :parent, :copyright, :current_user, :permissions, :client, :derivatives
 
   def queue_name
     :loader_process_zip
   end
 
-  def initialize(loader_name, zip_path, parent, copyright, current_user, permissions, client=nil)
+  def initialize(loader_name, zip_path, parent, copyright, current_user, permissions, derivatives=false, client=nil)
     self.loader_name = loader_name
     self.zip_path = zip_path
     self.parent = parent
     self.copyright = copyright
     self.current_user = current_user
     self.permissions = permissions
+    self.derivatives = derivatives
     self.client = client
   end
 
@@ -19,10 +20,10 @@ class ProcessZipJob
     report_id = Loaders::LoadReport.create_from_strings(current_user, 0, loader_name, parent)
     load_report = Loaders::LoadReport.find(report_id)
     # unzip zip file to tmp storage
-    unzip(zip_path, load_report, client)
+    unzip(zip_path, load_report, derivatives, client)
   end
 
-  def unzip(file, load_report, client)
+  def unzip(file, load_report, derivatives=false, client)
     Zip::Archive.open(file) do |zipfile|
       to = File.join(File.dirname(file), File.basename(file, ".*"))
       FileUtils.mkdir(to) unless File.exists? to
@@ -35,7 +36,7 @@ class ProcessZipJob
           open(fpath, 'wb') do |z|
             z << f.read
           end
-          ImageProcessingJob.new(fpath, file_name, parent, copyright, load_report.id, permissions, client).run
+          ImageProcessingJob.new(fpath, file_name, parent, copyright, load_report.id, permissions, derivatives, client).run
           load_report.update_counts
           count = count + 1
           load_report.save!
