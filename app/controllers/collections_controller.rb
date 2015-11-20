@@ -273,10 +273,16 @@ class CollectionsController < ApplicationController
   def title_list
     @set = fetch_solr_document
     @page_title = "#{@set.title} Title List"
-    self.solr_search_params_logic += [:limit_to_scope]
+    self.solr_search_params_logic += [:limit_to_core_files]
+    params[:fl] = 'title_ssi'
 
     (@response, @document_list) = get_search_results
-    render 'shared/sets/title_list', locals:{sort_value:sort_value}
+    if @response.response['numFound'] > 0
+      render 'shared/sets/title_list', locals:{sort_value:sort_value}
+    else
+      flash[:notice] = "There are no titles"
+      redirect_to @set
+    end
   end
 
   protected
