@@ -1,53 +1,13 @@
 - content_for(:description) do
   - @set.description
 - facet_list ||= facet_field_names
+= render partial: 'shared/sets/head'
 
-%ul.breadcrumb
-  - breadcrumb_to_root(@set).each do |breadcrumb|
-    =breadcrumb
-  = render partial: 'shared/sets/breadcrumb_action_menu'
--# Had to break off the partial into two files to make sure the popover div renders outside of the list.
-= render partial: 'shared/sets/breadcrumb_action_menu_links'
-
-
-%article.well.clearfix.inline-headings
-  %h1{:class => @set.klass, :id => "#{@set.pid}-title",}
-    = kramdown_parse(@set.title)
-  %h3
-    - if @set.klass == "Collection" # and doesn't have a thumbnail to render
-      = render partial: 'shared/icon', locals: { class_string: 'icon-folder-open' }
-    - elsif @set.klass == "Community"
-      = render partial: 'shared/icon', locals: { class_string: 'icon-group' }
-    = render partial: 'catalog/search_form', locals: { scope: "true", scoped_placeholder: "Search this #{@set.type_label.downcase}" }
-  %h1
+- if !params[:sort].nil?
+  %h1.page-header
+    %i.icon-sort
     %small
-      = @set.type_label
-  - if !@set.thumbnail_list.empty?
-    %img{src: @set.thumbnail_list.first, title: @set.title, alt: "", class: ['pull-left', 'well-padded-thumb']}(aria-labeledby="#{@set.pid}-title" role="presentation")
-  - if !@set.description.blank?
-    %p.set-description
-      = @pretty_description
-  - if @set.klass == "Collection" && !@set.identifier.blank? && @set.identifier != @set.pid
-    -# Display handles if they exist, and aren't just the pid
-    %p.set-handle
-      = link_to "#{@set.identifier}", @set.identifier
-  %nav.set-actions
-    %ul.nav.nav-pills
-      %li
-        %a.btn.btn-default{:href=>community_recent_deposits_path(@set)}
-          %i.icon-time
-          Recent Deposits
-      %li
-        %a.btn.btn-default{:href=>community_author_list_path(@set)} Author List
-      %li
-        %a.btn.btn-default{:href=>""} Title List
-      - if current_user
-        -if (current_user.can? :edit, @set.pid) && (current_user.admin? || @set.smart_collection_type.nil? || @set.smart_collection_type == "miscellany")
-          %li.pull-right
-            %a.btn.btn-default{:href =>  edit_collection_path(@set)}
-              %i.icon-pencil
-              Manage Collection
-
+      = render_constraint_element("Sort", params[:sort], :classes => ["sort"], :remove => url_for(params.merge(:sort=>nil)))
 - if render_constraints(params) != ""
   %h1.page-header
     %i.icon-search
