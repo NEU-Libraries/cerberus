@@ -7,7 +7,7 @@ class UsersController < ApplicationController
       if user.nuid == current_user.nuid
         # Valid choice
         sign_in user, :event => :authentication
-        flash[:notice] = "Switched to account associated with #{email}"
+        flash[:notice] = "#{t('drs.multiple_accounts.switched_user')} #{email}"
         redirect_to root_path and return
       else
         # Invalid, notify of account tampering
@@ -26,7 +26,7 @@ class UsersController < ApplicationController
         u.save!
       end
 
-      flash[:notice] = "Set preferred account to #{current_user.email}"
+      flash[:notice] = "#{t('drs.multiple_accounts.set_confirmation')} #{current_user.email}"
       redirect_to root_path and return
     end
   end
@@ -52,7 +52,7 @@ class UsersController < ApplicationController
         end
 
       else
-        flash[:error] = "Preference wasn't saved, please try again."
+        flash[:error] = t('drs.multiple_accounts.preferred_failure')
       end
     end
 

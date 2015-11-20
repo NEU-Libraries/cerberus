@@ -32,7 +32,7 @@
         %li{:class => ("active" if action_name == "select_account")}
           %a.top_nav{href: select_account_path, "tab-index" => "-1"}
             %span.icon-group( aria-hidden="true")
-            Switch Account
+            = t('drs.multiple_accounts.menu_link')
       %li= link_to raw('<span class="icon-signout" aria-hidden="true" ></span> Log Out'), destroy_user_session_path, :id => 'logout_nav_link',  "tab-index" => "-1"
   - else
     - if Rails.env.production?

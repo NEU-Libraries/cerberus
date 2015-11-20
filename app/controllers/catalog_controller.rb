@@ -51,7 +51,7 @@ class CatalogController < ApplicationController
       # If user has multiple accounts, and no preferred account, send flash
       if current_user
         if current_user.multiple_accounts && current_user.account_pref.blank?
-          flash[:notice] = "There are multiple accounts associated with these credentials. If have a preferred email, you can set that #{ActionController::Base.helpers.link_to("here", select_account_path)}"
+          flash[:notice] = "#{t('drs.multiple_accounts.login_alert')} #{ActionController::Base.helpers.link_to("here", select_account_path)}"
         end
       end
     else

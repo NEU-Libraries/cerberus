@@ -217,5 +217,15 @@ en:
         long_name: "Bouvé College of Health Sciences"
         short_name: "bouve"
         copyright: "Bouvé College of Health Sciences images are for use only within the context of Northeastern University. Appropriate uses include: Northeastern University-related websites, Northeastern University-based print/web publications. Images should be credited: \"Photographer Name/Northeastern University.\" Images are not to be used for self-promotional purposes outside of Northeastern University such as LinkedIn, Facebook or in commercial/external publications such as advertisements, books or magazines without written permission from Northeastern University, Bouvé  College of Health Sciences. For more information, please contact the Office of the Dean at 617-373-3323."
+    multiple_accounts:
+      login_alert: "There are multiple accounts associated with these credentials. If have a preferred email, you can set that"
+      menu_link: "Switch Account"
+      page_title: "Switch Account"
+      select_account: "Select the account that you would like to switch to."
+      set_preferred: "Set current account as preferred?"
+      save_preferred: "Save as preferred"
+      set_confirmation: "Set preferred account to"
+      preferred_failure: "Preference wasn't saved, please try again."
+      switched_user: "Switched to account associated with"
   blacklight:
     application_name: "DRS"
