@@ -7,3 +7,11 @@
     %h5
       %a{ href: core_file_path(s.pid) }
         = s.title
+  - @core_file.instructional_materials.each do |s|
+    %h5
+      %a{ href: core_file_path(s.pid) }
+        = s.title
+  - @core_file.instructional_material_for.each do |s|
+    %h5
+      %a{ href: core_file_path(s.pid) }
+        = s.title

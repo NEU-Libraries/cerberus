@@ -79,34 +79,39 @@ class User < ActiveRecord::Base
   end
 
   def self.find_for_shib(auth, signed_in_resource=nil)
-    # user = User.where(:email => auth.info.email).first
+    # Temporary kludge until full featured user switching is put in place
+    user = User.where(:email => auth.info.email).first
 
     if auth.info.nuid.blank?
       raise Exceptions::NoNuidProvided
     end
 
-    # Switch to NUID as the true unique value
-    user = User.find_by_nuid(auth.info.nuid)
+    # Switch to NUID as the true unique value (delayed until full featured user switching is put in place)
+    # unless user
+    #   user = User.find_by_nuid(auth.info.nuid)
+    # end
 
     unless user
+      name_array = Namae.parse auth.info.name
+      name_obj = name_array[0]
+      emp_name = "#{name_obj.family}, #{name_obj.given}"
+
       user = User.create(password:Devise.friendly_token[0,20], full_name:emp_name, nuid:auth.info.nuid)
+
+      user.full_name = emp_name
+
+      if auth.info.email.blank?
+        user.email = auth.info.nuid + "@neu.edu"
+      else
+        user.email = auth.info.email
+      end
+
+      user.save!
 
       if(auth.info.employee == "faculty")
         Cerberus::Application::Queue.push(EmployeeCreateJob.new(auth.info.nuid, emp_name))
       end
     end
-
-    name_array = Namae.parse auth.info.name
-    name_obj = name_array[0]
-    emp_name = "#{name_obj.family}, #{name_obj.given}"
-
-    if auth.info.email.blank?
-      user.email = auth.info.nuid + "@neu.edu"
-    else
-      user.email = auth.info.email
-    end
-
-    user.save!
 
     if !auth.info.grouper.nil?
       user.group_list = (auth.info.grouper).split(";")
@@ -168,7 +173,7 @@ class User < ActiveRecord::Base
   end
 
   def loader?
-    if self.groups.include? "northeastern:drs:repository:loaders:marcom" or self.groups.include? "northeastern:drs:repository:loaders:coe" or self.groups.include? "northeastern:drs:repository:loaders:cps" or self.groups.include? "northeastern:drs:repository:loaders:emsa_emc"
+    if self.groups.include? "northeastern:drs:repository:loaders:marcom" or self.groups.include? "northeastern:drs:repository:loaders:coe" or self.groups.include? "northeastern:drs:repository:loaders:cps" or self.groups.include? "northeastern:drs:repository:loaders:emsa_emc" or self.groups.include? "northeastern:drs:repository:loaders:bouve_dean"
       return true
     else
       return false
@@ -191,6 +196,10 @@ class User < ActiveRecord::Base
     return self.groups.include? "northeastern:drs:repository:loaders:emsa_emc"
   end
 
+  def bouve_loader?
+    return self.groups.include? "northeastern:drs:repository:loaders:bouve_dean"
+  end
+
   def loaders
     loaders = []
     if self.marcom_loader?
@@ -204,6 +213,9 @@ class User < ActiveRecord::Base
     end
     if self.emsa_loader?
       loaders.push(I18n.t("drs.loaders.emsa.long_name"))
+    end
+    if self.bouve_loader?
+      loaders.push(I18n.t("drs.loaders.bouve.long_name"))
     end
     return loaders
   end

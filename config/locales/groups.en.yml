@@ -52,6 +52,8 @@ en:
       name: "DRS Zip Loader - EMSA EMC"
     northeastern:drs:repository:loaders:marcom:
       name: "DRS Zip Loader - Marketing"
+    northeastern:drs:repository:loaders:bouve_dean:
+      name: "DRS Zip Loader - Bouve"
     northeastern:drs:repository:proxystaff:
       name: "DRS Proxy Staff"
     northeastern:drs:repository:staff:

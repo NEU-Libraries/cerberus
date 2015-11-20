@@ -98,6 +98,10 @@ Cerberus::Application.routes.draw do
    get "/loaders/emsa/new" => 'emsa_loads#new', as: 'loaders_emsa'
    get "/loaders/emsa/report/:id" => 'emsa_loads#show', as: 'loaders_emsa_report'
    get "/loaders/emsa/file/:id" => 'emsa_loads#show_iptc', as: 'loaders_emsa_iptc'
+   resources :bouve_loads, only: [:new, :create, :show], :path => "loaders/bouve"
+   get "/loaders/bouve/new" => 'bouve_loads#new', as: 'loaders_bouve'
+   get "/loaders/bouve/report/:id" => 'bouve_loads#show', as: 'loaders_bouve_report'
+   get "/loaders/bouve/file/:id" => 'bouve_loads#show_iptc', as: 'loaders_bouve_iptc'
   end
 
   # Facets for communities and collections

@@ -8,7 +8,7 @@ class Loaders::MarcomLoadsController < Loaders::LoadsController
 
   def create
     permissions = {"CoreFile" => {"read"  => ["northeastern:drs:faculty", "northeastern:drs:staff"], "edit" => ["northeastern:drs:marketing_and_communications:staff", "northeastern:drs:repository:staff"]}, "ImageSmallFile" => {"read"  => ["northeastern:drs:faculty", "northeastern:drs:staff"], "edit" => ["northeastern:drs:marketing_and_communications:staff", "northeastern:drs:repository:staff"]}, "ImageLargeFile" => {"read"  => ["northeastern:drs:faculty", "northeastern:drs:staff"], "edit" => ["northeastern:drs:marketing_and_communications:staff", "northeastern:drs:repository:staff"]}, "ImageMasterFile" => {"read"  => ["northeastern:drs:faculty", "northeastern:drs:staff"], "edit" => ["northeastern:drs:marketing_and_communications:staff", "northeastern:drs:repository:staff"]}}
-    process_create(permissions, t('drs.loaders.marcom.short_name'), "MarcomLoadsController")
+    process_create(permissions, t('drs.loaders.marcom.short_name'), "MarcomLoadsController", true)
   end
 
   private
