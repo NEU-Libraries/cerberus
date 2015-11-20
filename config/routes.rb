@@ -130,6 +130,7 @@ Cerberus::Application.routes.draw do
     delete "/collections/:id/delete" => "collections#destroy", as: 'delete_collection'
     get "/communities/filter_list" => 'communities#filter_list', as: 'communities_filter_list'
     get "/employees/filter_list" => "employees#filter_list", as: 'employees_filter_list'
+    get "/impersonate_user/:id" => "users#impersonate_user", as: 'impersonate_user'
   end
 
   namespace :api, defaults: {format: 'json'} do
