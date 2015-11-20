@@ -1,54 +1,23 @@
-%ul.breadcrumb
-  - breadcrumb_to_root(@set).each do |breadcrumb|
-    =breadcrumb
-  = render partial: 'shared/sets/breadcrumb_action_menu'
--# Had to break off the partial into two files to make sure the popover div renders outside of the list.
-= render partial: 'shared/sets/breadcrumb_action_menu_links'
-
-%article.well.clearfix.inline-headings
-  %h1{:class => @set.klass, :id => "#{@set.pid}-title",}
-    = kramdown_parse(@set.title)
-  %h3
-    = render partial: 'shared/icon', locals: { class_string: 'icon-folder-open' }
-    = render partial: 'catalog/search_form', locals: { scope: "true", scoped_placeholder: "Search this #{@set.type_label.downcase}" }
-  %h1
-    %small
-      = @set.type_label
-  - if !@set.thumbnail_list.empty?
-    %img{src: @set.thumbnail_list.first, title: @set.title, alt: "", class: ['pull-left', 'well-padded-thumb']}(aria-labeledby="#{@set.pid}-title" role="presentation")
-  - if !@set.description.blank?
-    %p.set-description
-      = @pretty_description
-  - if !@set.identifier.blank? && @set.identifier != @set.pid
-    %p.set-handle
-      = link_to "#{@set.identifier}", @set.identifier
-  %nav.set-actions
-    %ul.nav.nav-pills
-      %li
-        %a.btn.btn-primary{:href=>collection_author_list_path(@set)} Author List
-      %li
-        %a.btn.btn-default{:href=>""} Title List
-      - if current_user
-        -if (current_user.can? :edit, @set.pid) && (current_user.admin? || @set.smart_collection_type.nil? || @set.smart_collection_type == "miscellany")
-          %li.pull-right
-            %a.btn.btn-default{:href =>  edit_collection_path(@set)}
-              %i.icon-pencil
-              Manage Collection
+- content_for(:description) do
+  - @set.description
+- facet_list ||= facet_field_names
+= render partial: 'shared/sets/head'
 %h2.page-header Author List
 -# add pagination
 
 %main.row( role="main" )
   %section.span12
-    - solr_fname = "creator_sim"
-    - display_facet = @response.facets.detect {|f| f.name == solr_fname}
+    -# - solr_fname = "creator_sim"
+    -# - display_facet = @response.facets.detect {|f| f.name == solr_fname}
     -if has_facet_values?
-      -# %div.facet_pagination.top
+      %div.facet_pagination.top
+        -# = render :partial=>'catalog/facets', locals: { facet_list: facet_list }
         -# = render :partial=>'catalog/facet_pagination'
       %table.table.table-bordered
         %tr
           %th
             -if sort_value == "value"
-              - display_facet.items.sort_by!{|i| i.value}
+              - @display_facet.items.sort_by!{|i| i.value}
               = "Creator"
               %span.icon-small.icon-chevron-down
             -else
@@ -59,7 +28,7 @@
               %span.icon-small.icon-chevron-down
             -else
               = link_to "Count", url_for("controller" => "collections", :action=> "author_list", :sort_val=>"hits")
-        - display_facet.items.each do |item|
+        - @display_facet.items.each do |item|
           %tr
             - if item.hits > 0
               %td

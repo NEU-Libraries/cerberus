@@ -10,7 +10,9 @@ Cerberus::Application.routes.draw do
   match "/collections/:id/tombstone" => "collections#tombstone", via: 'post', as: "tombstone_collection"
   match "/collections/:id/request_tombstone" => "collections#request_tombstone", via: 'post', as:"request_tombstone_collection"
   match "/collections/:id/request_move" => "collections#request_move", via: 'post', as:"request_move_collection"
+  get 'collections/:id/recent' => 'collections#recent_deposits', as: 'collection_recent_deposits'
   get 'collections/:id/authors' => "collections#author_list", as:"collection_author_list"
+  get 'collections/:id/titles' => "collections#title_list", as:"collection_title_list"
 
   resources :communities, only: [:show]
 
@@ -43,6 +45,7 @@ Cerberus::Application.routes.draw do
   post '/communities/:id/attach_employee/:employee_id' => 'communities#attach_employee', as: 'attach_employee'
   get '/communities/:id/recent' => 'communities#recent_deposits', as: 'community_recent_deposits'
   get '/communities/:id/authors' => 'communities#author_list', as: 'community_author_list'
+  get '/communities/:id/titles' => 'communities#title_list', as: 'community_title_list'
 
   resources :compilations, :controller => "compilations", :path => "sets"
   get "/sets/:id/download" => 'compilations#show_download', as: 'prepare_download'

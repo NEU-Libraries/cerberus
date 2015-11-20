@@ -69,3 +69,12 @@ h1 small, h2 small, h3 small, h4 small, h5 small, h6 small {
   font-size: $fontSizeLarge;
   padding: 5px;
 }
+
+h1.Collection a, h1.Community a {
+  color: $blueDark;
+  font-weight:300;
+  &:hover, &:focus{
+    text-decoration:none;
+    color:darken($blueDark, 20%);
+  }
+}
