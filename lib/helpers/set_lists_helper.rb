@@ -26,7 +26,6 @@ module SetListsHelper
     self.solr_search_params_logic += [:limit_to_scope]
 
     (@response, @document_list) = get_search_results
-    # @pagination = paginate_params(@response)
     solr_fname = "creator_sim"
     @display_facet = @response.facets.detect {|f| f.name == solr_fname}
     facet_count = @display_facet.items.length
@@ -43,7 +42,7 @@ module SetListsHelper
     @set = fetch_solr_document
     @page_title = "#{@set.title} Title List"
     self.solr_search_params_logic += [:limit_to_core_files]
-    params[:fl] = 'title_ssi'
+    params[:fl] = 'title_ssi, id'
 
     (@response, @document_list) = get_search_results
     if @response.response['numFound'] > 0

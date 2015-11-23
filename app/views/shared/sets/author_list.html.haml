@@ -6,11 +6,7 @@
 %main.row( role="main" )
   %section.span12
     -if has_facet_values?
-      %div.btn-toolbar.alpha_list{:role=>"toolbar"}
-        %div.btn-group{:role=>"group"}
-          -("a".."z").each do |l|
-            %button.btn.btn-clear.btn-small{:type=>"button"}
-              = link_to( l.capitalize, "##{l.capitalize}")
+      = render partial: '/shared/sets/alpha'
       %table.table.table-bordered
         %tr
           %th
