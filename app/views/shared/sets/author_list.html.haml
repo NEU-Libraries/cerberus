@@ -1,18 +1,16 @@
 - content_for(:description) do
   - @set.description
-- facet_list ||= facet_field_names
 = render partial: 'shared/sets/head'
 %h2.page-header Author List
--# add pagination
 
 %main.row( role="main" )
   %section.span12
-    -# - solr_fname = "creator_sim"
-    -# - display_facet = @response.facets.detect {|f| f.name == solr_fname}
     -if has_facet_values?
-      %div.facet_pagination.top
-        -# = render :partial=>'catalog/facets', locals: { facet_list: facet_list }
-        -# = render :partial=>'catalog/facet_pagination'
+      %div.btn-toolbar.alpha_list{:role=>"toolbar"}
+        %div.btn-group{:role=>"group"}
+          -("a".."z").each do |l|
+            %button.btn.btn-clear.btn-small{:type=>"button"}
+              = link_to( l.capitalize, "##{l.capitalize}")
       %table.table.table-bordered
         %tr
           %th
@@ -28,11 +26,22 @@
               %span.icon-small.icon-chevron-down
             -else
               = link_to "Count", url_for("controller" => "collections", :action=> "author_list", :sort_val=>"hits")
+        - alpha = []
         - @display_facet.items.each do |item|
-          %tr
+          %tr{:id=>(item.value[0] if !alpha.include? item.value[0])}
             - if item.hits > 0
+              - if !alpha.include? item.value[0]
+                - alpha << item.value[0]
               %td
                 - link_options = add_facet_params(solr_fname, item.value).merge!Hash["controller" => "collections", :action=> "show"]
                 = link_to h(item.value), url_for(link_options)
               %td
                 = format_num item.hits
+        :javascript
+          var alpha = '#{alpha}';
+          $(".alpha_list .btn").each(function(){
+            if (alpha.indexOf($.trim($(this).text())) > 0){
+            } else {
+              $(this).addClass("disabled")
+            }
+          })
