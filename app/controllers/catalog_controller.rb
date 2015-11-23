@@ -12,6 +12,7 @@ class CatalogController < ApplicationController
   # Extend Blacklight::Catalog with Hydra behaviors (primarily editing).
   include Hydra::Controller::ControllerBehavior
   include BlacklightAdvancedSearch::ParseBasicQ
+  include BlacklightOaiProvider::ControllerExtension
 
   before_filter :default_search, except: [:facet, :recent]
 
@@ -141,6 +142,19 @@ class CatalogController < ApplicationController
   end
 
   configure_blacklight do |config|
+    config.oai = {
+      :provider => {
+        :repository_name => 'Cerberus',
+        :repository_url => root_url,
+        :record_prefix => '',
+        :admin_email => 'sj.sweeney@neu.edu'
+      },
+      :document => {
+        :timestamp => 'timestamp',
+        :limit => 25
+      }
+    }
+
     ## Default parameters to send to solr for all search-like requests. See also SolrHelper#solr_search_params
     config.default_solr_params = {
       :qt => "search",
