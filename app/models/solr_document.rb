@@ -28,10 +28,7 @@ class SolrDocument
   # Recommendation: Use field names from Dublin Core
   use_extension( Blacklight::Solr::Document::DublinCore)
   field_semantics.merge!(
-                         :title => "title_display",
-                         :author => "author_display",
-                         :language => "language_facet",
-                         :format => "format"
+                         :title => "title_tesim"                       
                          )
 
   def pf_belongs_to_user?(user)
