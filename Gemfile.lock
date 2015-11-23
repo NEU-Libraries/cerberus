@@ -1,4 +1,14 @@
 GIT
+  remote: https://github.com/NEU-Libraries/blacklight_oai_provider.git
+  revision: 9ceac8948c0ecff965e7c0fa8b2905f70abd9248
+  ref: 9ceac8948c0ecff965e7c0fa8b2905f70abd9248
+  specs:
+    blacklight_oai_provider (0.1.1)
+      blacklight (>= 3.0)
+      oai
+      rails (>= 3.0)
+
+GIT
   remote: https://github.com/NEU-Libraries/hydra-derivatives.git
   revision: d95f3e880a74713867f7c88b77429251cbb0b9b1
   ref: d95f3e880a74713867f7c88b77429251cbb0b9b1
@@ -190,6 +200,10 @@ GEM
     factory_girl_rails (4.2.1)
       factory_girl (~> 4.2.0)
       railties (>= 3.0.0)
+    faraday (0.9.2)
+      multipart-post (>= 1.2, < 3)
+    faraday_middleware (0.10.0)
+      faraday (>= 0.7.4, < 0.10)
     fastercsv (1.5.5)
     ffi (1.9.0)
     figaro (0.7.0)
@@ -285,6 +299,7 @@ GEM
       nokogiri
       nom-xml
     multi_json (1.7.9)
+    multipart-post (2.0.0)
     mysql2 (0.3.14)
     namae (0.8.7)
     nest (1.1.2)
@@ -303,6 +318,10 @@ GEM
       activesupport
       i18n
       nokogiri
+    oai (0.3.1)
+      builder (>= 2.0.0)
+      faraday
+      faraday_middleware
     om (3.0.3)
       activemodel
       activesupport
@@ -509,6 +528,7 @@ DEPENDENCIES
   ace-rails-ap
   blacklight
   blacklight_advanced_search (~> 2.1.0)
+  blacklight_oai_provider!
   bootstrap-sass (~> 2.3.2.1)
   bootstrap-slider-rails
   bower-rails (~> 0.5.0)

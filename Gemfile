@@ -61,6 +61,7 @@ gem 'multi_json', '~> 1.7.9'
 gem 'coveralls', require: false
 gem 'diffy'
 gem 'unidecode'
+gem 'blacklight_oai_provider', :git => 'https://github.com/NEU-Libraries/blacklight_oai_provider.git', :ref => '9ceac8948c0ecff965e7c0fa8b2905f70abd9248'
 
 gem "ruby-prof"
 gem 'picturefill'
