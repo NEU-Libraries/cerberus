@@ -3,16 +3,13 @@
 - facet_list ||= facet_field_names
 = render partial: 'shared/sets/head'
 
-- if !params[:sort].nil?
-  %h1.page-header
-    %i.icon-sort
-    %small
-      = render_constraint_element("Sort", params[:sort], :classes => ["sort"], :remove => url_for(params.merge(:sort=>nil)))
-- if render_constraints(params) != ""
+- if render_constraints(params) != "" || (!params[:sort].nil? && params[:action] == 'recent_deposits')
   %h1.page-header
     %i.icon-search
     %small
       = render_constraints(params)
+      - if !params[:sort].nil? && params[:action] == 'recent_deposits'
+        = render_constraint_element("Sort", @pretty_sort_name, :classes => ["sort"], :remove => url_for(params.merge(:sort=>nil)))
 
 - drs_items_class = drs_view_class == "list" ? "span9" : "span12"
 - sidebar_class = drs_view_class == "list" ? "span3" : "span12"
