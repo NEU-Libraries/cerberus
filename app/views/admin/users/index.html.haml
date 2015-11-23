@@ -6,19 +6,14 @@
 
 %h2.page-header All Users
 
-= will_paginate @users
-- @users.each_with_index do |user, i|
-  #accordion.accordion
-    .accordion-group
-      .accordion-heading
-        %a.accordion-toggle{"style" => "text-decoration: none", "data-parent" => "#accordion", "data-toggle" => "collapse", :href => "#collapse#{i}"}
-          =user.full_name
-          ="(#{user.email})"
-      .accordion-body.collapse{:id => "collapse#{i}"}
-        .accordion-inner
-          %dt NUID:
-          %dd=user.nuid
-          %dt Groups:
-          -user.groups.each do |g|
-            %dd=g
-          = link_to("Impersonate", admin_impersonate_user_path(:id => user.id), class: "btn btn-mini btn-danger", style:"margin: 5px 0px")
+= form_tag admin_users_path, :method => 'get', :class => 'form-inline', :remote => true do
+  = text_field_tag :search, params[:search]
+  = submit_tag "Search", :name => nil, :class => "btn btn-info"
+
+= render :partial => 'admin/users/users'
+
+
+:javascript
+  $("input[name='search']").on('keyup', function(){
+    $.getScript('/admin/users?search='+$(this).val());
+  });

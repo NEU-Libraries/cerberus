@@ -4,7 +4,11 @@ class Admin::UsersController < AdminController
   before_filter :verify_admin
 
   def index
-    @users = User.order(:full_name).paginate(:page => params[:page], :per_page => 10)
+    get_users(params)
+    respond_to do |format|
+      format.html
+      format.js
+    end
   end
 
   def impersonate_user
@@ -16,5 +20,14 @@ class Admin::UsersController < AdminController
     else
       # raise error and email developers
     end
+  end
+
+  def get_users(params)
+    if params[:search]
+      @users = User.where('full_name LIKE ?', "%#{params[:search]}%").order(:full_name).paginate(:page => params[:page], :per_page => 10)
+    else
+      @users = User.order(:full_name).paginate(:page => params[:page], :per_page => 10)
+    end
+    return @users
   end
 end
