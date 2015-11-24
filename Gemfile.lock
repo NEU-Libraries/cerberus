@@ -1,7 +1,7 @@
 GIT
   remote: https://github.com/NEU-Libraries/blacklight_oai_provider.git
-  revision: 9ceac8948c0ecff965e7c0fa8b2905f70abd9248
-  ref: 9ceac8948c0ecff965e7c0fa8b2905f70abd9248
+  revision: 915700c2982d4677934aa9f90a0284b21a7af48d
+  ref: 915700c2982d4677934aa9f90a0284b21a7af48d
   specs:
     blacklight_oai_provider (0.1.1)
       blacklight (>= 3.0)
