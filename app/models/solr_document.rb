@@ -26,10 +26,12 @@ class SolrDocument
   # single valued. See Blacklight::Solr::Document::ExtendableClassMethods#field_semantics
   # and Blacklight::Solr::Document#to_semantic_values
   # Recommendation: Use field names from Dublin Core
-  use_extension( Blacklight::Solr::Document::DublinCore)
-  field_semantics.merge!(
-                         :title => "title_tesim"                       
-                         )
+  # use_extension( Blacklight::Solr::Document::DublinCore)
+  # field_semantics.merge!(
+  #                        :title => "title_tesim"
+  #                        )
+
+  use_extension ( Blacklight::Solr::Document::Mods )
 
   def pf_belongs_to_user?(user)
     is_member_of = self.is_member_of
