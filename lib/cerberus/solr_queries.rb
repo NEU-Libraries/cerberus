@@ -251,10 +251,6 @@ module Cerberus
       fq = query.join(" OR ")
       fq = "(#{fq}) AND active_fedora_model_ssi:\"CoreFile\""
       query_result = ActiveFedora::SolrService.query(fq, :fl=>"creator_tesim")
-      puts query_result
-      puts "core_file author length is #{query_result.length}"
-      # puts query_result.has_key?("creator_tesim")
-      puts query_result.select{|f| f.has_key?("creator_tesim")}.length
       return query_result.select{|f| f.has_key?("creator_tesim")}.length > 0
     end
 
