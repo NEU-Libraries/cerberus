@@ -17,7 +17,7 @@
       %td
         - if u[:account_pref] == u[:email]
           =render partial: 'shared/icon', locals: { class_string: "#{t('drs.multiple_accounts.preferred_icon')} text-success" }
-          Primary
+          Preferred
         - else
           = link_to "#{t('drs.multiple_accounts.save_preferred')}", set_preferred_user_path(email: current_user.email), class: "btn btn-success btn-small"
 
