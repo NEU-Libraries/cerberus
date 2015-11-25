@@ -212,11 +212,74 @@ describe CollectionsController do
   describe "GET #recent_deposits" do
     it_should_behave_like "show validations"
 
-    it "should have correct path" do
+    it "should redirect to collection if no core_files" do
       sign_in bill
       get :recent_deposits, { id: bills_collection.pid }
+      doc = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{bills_collection.pid}\"").first)
+      doc.has_core_file_children?.should == false
+      expect(response).to redirect_to(collection_path(id: bills_collection.pid))
+    end
+
+    it "should have docs if there are core_files" do
+      sign_in bill
+      cf = CoreFile.create(title: "Bill's Core", parent: bills_collection, mass_permissions: "public", depositor: bill.nuid)
+      get :recent_deposits, { id: bills_collection.pid }
+      doc = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{bills_collection.pid}\"").first)
+      doc.has_core_file_children?.should == true
       expected = "/collections/#{bills_collection.pid}/recent"
       request.path.should == expected
+      response.body.should =~ /Recent Deposits/m
+      response.body.should =~ /Bill's Core/m
+    end
+  end
+
+  describe "GET #author_list" do
+    it_should_behave_like "show validations"
+    it "should redirect to collection if no core_files" do
+      sign_in bill
+      get :recent_deposits, { id: bills_collection.pid }
+      doc = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{bills_collection.pid}\"").first)
+      doc.has_core_file_children?.should == false
+      doc.has_authors?.should == false
+      expect(response).to redirect_to(collection_path(id: bills_collection.pid))
+    end
+
+    it "should have docs if there are core_files with authors" do
+      sign_in bill
+      cf = CoreFile.create(title: "Bill's Core", parent: bills_collection, mass_permissions: "public", depositor: bill.nuid)
+      cf.creators = {'first_names' => ["Billy"],'last_names'  => ["Jean"]}
+      cf.save!
+      get :recent_deposits, { id: bills_collection.pid }
+      doc = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{bills_collection.pid}\"").first)
+      doc.has_core_file_children?.should == true
+      doc.has_authors?.should == true
+      expected = "/collections/#{bills_collection.pid}/recent"
+      request.path.should == expected
+      response.body.should =~ /Author List/m
+      response.body.should =~ /Jean, Billy/m
+    end
+  end
+
+  describe "GET #title_list" do
+    it_should_behave_like "show validations"
+    it "should redirect to collection if no core_files" do
+      sign_in bill
+      get :recent_deposits, { id: bills_collection.pid }
+      doc = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{bills_collection.pid}\"").first)
+      doc.has_core_file_children?.should == false
+      expect(response).to redirect_to(collection_path(id: bills_collection.pid))
+    end
+
+    it "should have docs if there are core_files" do
+      sign_in bill
+      cf = CoreFile.create(title: "Bill's Core", parent: bills_collection, mass_permissions: "public", depositor: bill.nuid)
+      get :recent_deposits, { id: bills_collection.pid }
+      doc = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{bills_collection.pid}\"").first)
+      doc.has_core_file_children?.should == true
+      expected = "/collections/#{bills_collection.pid}/recent"
+      request.path.should == expected
+      response.body.should =~ /Title List/m
+      response.body.should =~ /Bill's Core/m
     end
   end
 
