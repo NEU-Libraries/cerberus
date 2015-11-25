@@ -117,3 +117,7 @@
 .nu-masthead .btn.disabled {
   opacity:100;
 }
+
+a[data-toggle="ellipsis"]:hover, a[data-toggle="ellipsis"]:focus{
+  text-decoration:none;
+}
