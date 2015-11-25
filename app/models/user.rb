@@ -25,7 +25,7 @@ class User < ActiveRecord::Base
   def associated_accounts
     if self.multiple_accounts
       users = User.where(:nuid => self.nuid)
-      return users.map do |u| u.email end
+      return users.map do |u| {:email=>u.email, :account_pref=>u.account_pref, :affiliation=>u.affiliation} end
     end
   end
 
