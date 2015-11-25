@@ -1,16 +1,26 @@
+- @page_title = t('drs.multiple_accounts.page_title')
 %h1.page-header
-  =render partial: 'shared/icon', locals: {class_string: "icon-group"}
+  =render partial: 'shared/icon', locals: { class_string: t('drs.multiple_accounts.menu_icon') }
   = t('drs.multiple_accounts.page_title')
 %p.lead
   = t('drs.multiple_accounts.select_account')
 
-- current_user.associated_accounts.each do |email|
-  %p
-    = link_to("#{email}", switch_user_path(email: email))
+%table.table.table-bordered
+  %tr
+    %th Affiliation
+    %th Email
+    %th Status
+  - current_user.associated_accounts.each do |u|
+    %tr
+      %td= u[:affiliation]
+      %td= link_to("#{u[:email]}", switch_user_path(email: u[:email]))
+      %td
+        - if u[:account_pref] == u[:email]
+          =render partial: 'shared/icon', locals: { class_string: "#{t('drs.multiple_accounts.preferred_icon')} text-success" }
+          Primary
+        - else
+          = link_to "#{t('drs.multiple_accounts.save_preferred')}", set_preferred_user_path(email: current_user.email), class: "btn btn-success btn-small"
 
 %br
-
-%p.lead
-  = t('drs.multiple_accounts.set_preferred')
-  %p
-    = link_to "#{t('drs.multiple_accounts.save_preferred')}", set_preferred_user_path(email: current_user.email), class: "btn btn-success"
+%p
+  = t('drs.multiple_accounts.helper_text')

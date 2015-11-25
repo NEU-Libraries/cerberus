@@ -8,7 +8,7 @@ class UsersController < ApplicationController
         # Valid choice
         sign_in user, :event => :authentication
         flash[:notice] = "#{t('drs.multiple_accounts.switched_user')} #{email}"
-        redirect_to root_path and return
+        redirect_to select_account_path and return
       else
         # Invalid, notify of account tampering
       end
