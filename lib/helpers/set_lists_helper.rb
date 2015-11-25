@@ -15,7 +15,6 @@ module SetListsHelper
         format.html { render 'shared/sets/show' }
       end
     else
-      flash[:notice] = "There are no recent deposits"
       redirect_to @set and return
     end
   end
@@ -33,7 +32,6 @@ module SetListsHelper
     if facet_count > 0
       render 'shared/sets/author_list', locals:{sort_value:sort_value, solr_fname:solr_fname}
     else
-      flash[:notice] = "There are no authors"
       redirect_to @set
     end
   end
@@ -48,7 +46,6 @@ module SetListsHelper
     if @response.response['numFound'] > 0
       render 'shared/sets/title_list', locals:{sort_value:sort_value}
     else
-      flash[:notice] = "There are no titles"
       redirect_to @set
     end
   end
