@@ -4,6 +4,7 @@ class Admin::UsersController < AdminController
   before_filter :verify_admin
 
   def index
+    @page_title = "Administer Users"
     get_users(params)
     respond_to do |format|
       format.html
