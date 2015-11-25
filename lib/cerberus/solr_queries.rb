@@ -240,5 +240,36 @@ module Cerberus
       str = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/#{self.pid}"
       solr_query("#{relation}:\"#{str}\"")
     end
+
+    def has_authors?
+      descendents = self.combined_set_descendents
+      query = descendents.map do |set|
+        p = set.pid
+        set = "is_member_of_ssim:\"info:fedora/#{p}\""
+      end
+      query << "is_member_of_ssim:\"info:fedora/#{self.pid}\""
+      fq = query.join(" OR ")
+      fq = "(#{fq}) AND active_fedora_model_ssi:\"CoreFile\""
+      query_result = ActiveFedora::SolrService.query(fq, :fl=>"creator_tesim")
+      puts query_result
+      puts "core_file author length is #{query_result.length}"
+      # puts query_result.has_key?("creator_tesim")
+      puts query_result.select{|f| f.has_key?("creator_tesim")}.length
+      return query_result.select{|f| f.has_key?("creator_tesim")}.length > 0
+    end
+
+    def has_core_file_children?
+      descendents = self.combined_set_descendents
+      query = descendents.map do |set|
+        p = set.pid
+        set = "is_member_of_ssim:\"info:fedora/#{p}\""
+      end
+      query << "is_member_of_ssim:\"info:fedora/#{self.pid}\""
+      fq = query.join(" OR ")
+      fq = "(#{fq}) AND active_fedora_model_ssi:\"CoreFile\""
+      query_result = ActiveFedora::SolrService.query(fq, :fl=>id)
+      puts "core_file children length is #{query_result.length}"
+      return query_result.length > 0
+    end
   end
 end
