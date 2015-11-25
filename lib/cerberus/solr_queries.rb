@@ -264,7 +264,6 @@ module Cerberus
       fq = query.join(" OR ")
       fq = "(#{fq}) AND active_fedora_model_ssi:\"CoreFile\""
       query_result = ActiveFedora::SolrService.query(fq, :fl=>id)
-      puts "core_file children length is #{query_result.length}"
       return query_result.length > 0
     end
   end
