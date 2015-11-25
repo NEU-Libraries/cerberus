@@ -9,7 +9,7 @@
     %small
       = render_constraints(params)
       - if !params[:sort].nil? && params[:action] == 'recent_deposits'
-        = render_constraint_element("Sort", @pretty_sort_name, :classes => ["sort"], :remove => url_for(params.merge(:sort=>nil)))
+        = render_constraint_element("Sort", @pretty_sort_name, :classes => ["sort"], :remove => url_for(params.merge(:action=>'show',:sort=>nil,:limit=>nil)))
 
 - drs_items_class = drs_view_class == "list" ? "span9" : "span12"
 - sidebar_class = drs_view_class == "list" ? "span3" : "span12"
