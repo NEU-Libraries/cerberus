@@ -145,7 +145,7 @@ class CatalogController < ApplicationController
     config.oai = {
       :provider => {
         :repository_name => 'Cerberus',
-        :repository_url => 'https://cerberus.library.northeastern.edu',
+        :repository_url => 'https://repository.library.northeastern.edu',
         :record_prefix => '',
         :admin_email => 'sj.sweeney@neu.edu'
       },
