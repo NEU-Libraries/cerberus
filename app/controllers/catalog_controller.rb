@@ -83,6 +83,14 @@ class CatalogController < ApplicationController
     (_, @recent_documents) = get_search_results(:q =>'', :sort=>"#{Solrizer.solr_name('system_create', :stored_sortable, type: :date)} desc", :rows=>999)
   end
 
+  def oai
+    self.solr_search_params_logic += [:exclude_unwanted_models]
+    # Due to errors or poor metadata in Fedora, we need to check for title
+    self.solr_search_params_logic += [:well_formed_items]
+    self.solr_search_params_logic += [:limit_to_public]
+    super
+  end
+
   def communities
     self.solr_search_params_logic += [:communities_filter]
     (@response, @document_list) = get_search_results
@@ -316,6 +324,13 @@ class CatalogController < ApplicationController
 
   def search_layout
     "homepage"
+  end
+
+  def limit_to_public(solr_parameters, user_parameters)
+    solr_parameters[:fq] ||= []
+    solr_parameters[:fq] << "read_access_group_ssim:\"public\""
+    solr_parameters[:fq] << "-in_progress_tesim:true OR -incomplete_tesim:true"
+    solr_parameters[:fq] << "-embargo_release_date_dtsi:[* TO *]"
   end
 
   def no_personal_items(solr_parameters, user_parameters)
