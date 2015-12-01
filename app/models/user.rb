@@ -25,7 +25,7 @@ class User < ActiveRecord::Base
   def associated_accounts
     if self.multiple_accounts
       users = User.where(:nuid => self.nuid)
-      return users.map do |u| {:email=>u.email, :account_pref=>u.account_pref, :affiliation=>u.affiliation} end
+      return users.map do |u| {:email=>u.email, :account_pref=>u.account_pref, :affiliation=>u.affiliation, :name=>u.name} end
     end
   end
 
@@ -104,6 +104,10 @@ class User < ActiveRecord::Base
         user.email = auth.info.nuid + "@neu.edu"
       else
         user.email = auth.info.email
+      end
+
+      if !auth.info.employee.blank? || !auth.info.employee.nil?
+        user.affiliation = auth.info.employee
       end
 
       user.save!
