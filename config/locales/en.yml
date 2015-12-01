@@ -223,7 +223,6 @@ en:
       menu_icon: "icon-paw"
       page_title: "Manage Accounts"
       select_account: "The DRS uses your Northeastern account information to determine what files you can view and download. Please select the account you would like to use as your preferred DRS account:"
-      helper_text: "You can temporarily switch between these accounts at any time by clicking the email address associated with the desired account."
       save_preferred: "Save as preferred"
       preferred_icon: "icon-ok-sign"
       set_confirmation: "Set preferred account to"
