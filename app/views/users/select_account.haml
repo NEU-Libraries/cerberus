@@ -19,7 +19,7 @@
         - else
           %a.btn.btn-primary.btn-small{:href => switch_user_path(email: u[:email])}
             %span.icon-refresh( aria-hidden="true" )
-            Switch to this account
+            = t('drs.multiple_accounts.switch_account_button')
       %td
         - if u[:email].rpartition('@')[0] == current_user.nuid
           = u[:name]

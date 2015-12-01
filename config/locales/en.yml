@@ -227,6 +227,7 @@ en:
       preferred_icon: "icon-ok-sign"
       set_confirmation: "Set preferred account to"
       preferred_failure: "Your preference was not saved. Please try again."
+      switch_account_button: "Temporarily switch to this account"
       switched_user: "You are now signed in using"
   blacklight:
     application_name: "DRS"
