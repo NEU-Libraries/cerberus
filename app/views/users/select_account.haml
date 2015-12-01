@@ -8,7 +8,6 @@
 %table.table.table-bordered
   %tr
     %th Status
-    %th Affiliation
     %th Email
     %th Preferred Account
   - current_user.associated_accounts.each do |u|
@@ -21,8 +20,11 @@
           %a.btn.btn-primary.btn-small{:href => switch_user_path(email: u[:email])}
             %span.icon-refresh( aria-hidden="true" )
             Switch to this account
-      %td= u[:affiliation]
-      %td= link_to(u[:email], "mailto:#{u[:email]}")
+      %td
+        - if u[:email].rpartition('@')[0] == current_user.nuid
+          = u[:name]
+        - else
+          = link_to(u[:email], "mailto:#{u[:email]}")
       %td
         - if u[:account_pref] == u[:email]
           =render partial: 'shared/icon', locals: { class_string: "#{t('drs.multiple_accounts.preferred_icon')} text-success" }
