@@ -49,7 +49,12 @@ class CatalogController < ApplicationController
       self.solr_search_params_logic += [:disable_highlighting]
       recent
     else
-      super
+      begin
+        super
+      rescue Net::ReadTimeout
+        self.solr_search_params_logic += [:disable_highlighting]
+        super
+      end
     end
   end
 
