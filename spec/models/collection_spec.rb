@@ -356,5 +356,10 @@ describe Collection do
     end
   end
 
+  after :all do
+    ActiveFedora::Base.find(:all).each do |file|
+      file.destroy
+    end
+  end
 
 end
