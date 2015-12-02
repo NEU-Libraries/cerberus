@@ -118,6 +118,7 @@ Cerberus::Application.routes.draw do
     get "/files/:id" => "core_files#show", as: 'view_file'
     get "/files/:id/revive" => "core_files#revive", as: 'revive_file'
     delete "/files/:id/delete" => "core_files#destroy", as: 'delete_file'
+    delete "/files/multi_delete" => "core_files#multi_delete", as: 'multi_delete_files'
     get "/collections" => 'collections#index', as: 'collections'
     get "/collections/tombstoned" => 'collections#get_tombstoned', as: 'tombstoned_collection'
     get "/collections/:id" => "collections#show", as: 'view_collection'
