@@ -1,17 +1,30 @@
 .core_files
+  %div.toolbar.hidden
+    = form_tag(admin_multi_delete_files_path, method: 'delete') do
+      = hidden_field_tag(:ids)
+      =submit_tag("Delete Selected", confirm: "This action is irreversible", class: "btn btn-small btn-danger")
+
   = render 'catalog/results_pagination'
 
-  %table.table.table-striped
-    -if @type.to_s != "tombstoned"
-      %tr
-        %th= "Core File Title"
+  %table.table.table-striped{:id=>"#{@type}"}
+    %tr
+      %th
+        %input{:type=>"checkbox", :class=>"select_all"}
+      %th= "Core File Title"
+      -if @type.to_s != "tombstoned"
         %th= "Depositor Name"
         %th= "Depositor Email"
         %th= "Created At"
         %th= "Updated At"
         %th
+      - else
+        %th
+        %th
+        %th
     - @core_files.each do |core_file|
       %tr
+        %td
+          %input{:type=>"checkbox", :class=>"cf_select", "data-pid"=>core_file.pid}
         %td
           .large
             -if !core_file.non_sort.blank?
@@ -41,3 +54,41 @@
           class: "btn btn-small btn-danger")
 
   = render 'catalog/results_pagination'
+
+:javascript
+  $(".select_all").on("change", function(){
+    var table = $(this).parents("table");
+    var val = $(this).prop("checked");
+    table.find(".cf_select").prop("checked", val);
+    show_toolbar(table);
+  });
+  $(".cf_select").on("change", function(){
+    var table = $(this).parents("table");
+    var val = $(this).prop("checked");
+    if (val == false && table.find(".select_all").prop("checked") == true){
+      table.find(".select_all").prop("checked", false);
+    }
+    var checked = $(this).prop("checked");
+    show_toolbar(table);
+  });
+  function show_toolbar(table) {
+    var checked = false;
+    var pids = '';
+    table.find(".cf_select").each(function(){
+      if ($(this).prop("checked") == true){
+        checked = true;
+        if (pids != ""){
+          pids += ", " + $(this).data("pid");
+        } else {
+          pids += $(this).data("pid");
+        }
+      }
+    });
+    if (checked == true){
+      $(".toolbar").removeClass("hidden");
+      table.siblings(".toolbar").find("input[name='ids']").val(pids);
+    } else {
+      $(".toolbar").addClass("hidden");
+      table.siblings(".toolbar").find("input[name='ids']").val("");
+    }
+  }
