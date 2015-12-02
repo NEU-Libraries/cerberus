@@ -2,7 +2,8 @@
   %div.toolbar.hidden
     = form_tag(admin_multi_delete_files_path, method: 'delete') do
       = hidden_field_tag(:ids)
-      =submit_tag("Delete Selected", confirm: "This action is irreversible", class: "btn btn-small btn-danger")
+      = render partial: 'delete_modal', locals: { title: "Confirm Delete", button_title: "Delete", index: "all", core_file:nil}
+      = link_to("Delete", "#deleteModalall", data: { toggle: "modal" }, class: "btn btn-small btn-danger")
 
   = render 'catalog/results_pagination'
 
@@ -21,7 +22,8 @@
         %th
         %th
         %th
-    - @core_files.each do |core_file|
+    - @core_files.each_with_index do |core_file, i|
+      = render partial: 'delete_modal', locals: { title: "Confirm Delete", button_title: "Delete", index: "#{i}", core_file:core_file}
       %tr
         %td
           %input{:type=>"checkbox", :class=>"cf_select", "data-pid"=>core_file.pid}
@@ -48,10 +50,7 @@
             = DateTime.parse(core_file["system_modified_dtsi"]).strftime("%c")
 
         %td
-          = link_to("Delete", admin_delete_file_path(core_file),
-          method: :delete,
-          confirm: "This action is irreversible",
-          class: "btn btn-small btn-danger")
+          = link_to("Delete", "#deleteModal#{i}", data: { toggle: "modal" }, class: "btn btn-small btn-danger")
 
   = render 'catalog/results_pagination'
 
@@ -74,6 +73,7 @@
   function show_toolbar(table) {
     var checked = false;
     var pids = '';
+    var pid_count = 0;
     table.find(".cf_select").each(function(){
       if ($(this).prop("checked") == true){
         checked = true;
@@ -82,13 +82,16 @@
         } else {
           pids += $(this).data("pid");
         }
+        pid_count++;
       }
     });
     if (checked == true){
       $(".toolbar").removeClass("hidden");
       table.siblings(".toolbar").find("input[name='ids']").val(pids);
+      $("#deleteModalall").find(".modal-body").html("Are you sure you want to permanently delete the " + pid_count + " files that are selected?");
     } else {
       $(".toolbar").addClass("hidden");
       table.siblings(".toolbar").find("input[name='ids']").val("");
+      $("#deleteModalall").find(".modal-body").html("");
     }
   }
