@@ -2,6 +2,8 @@ en:
   groups:
     northeastern:drs:aslp:niec:
       name: "National Interpreter Education Center"
+      northeastern:drs:aslp:series:
+      name: "National Interpreter Education Center - Series (Test Group)"
     northeastern:drs:athletics:hall_of_fame:
       name: "Department of Athletics - Hall of Fame"
     northeastern:drs:board_of_trustees:board_members:
@@ -14,6 +16,8 @@ en:
       name: "College of Engineering - Dean's Office"
     northeastern:drs:college_of_engineering:electrical_and_computer_engineering:bspiral:
       name: "College of Engineering - BSPIRAL"
+    northeastern:drs:college_of_engineering:electrical_and_computer_engineering:cognitive_systems_laboratory:
+      name: "College of Engineering - Cognitive Systems Laboratory"
     northeastern:drs:college_of_professional_studies:media:
       name: "College of Professional Studies - Media Group"
     northeastern:drs:college_of_science:social_interaction_lab:
@@ -42,6 +46,8 @@ en:
       name: "University Library - Scholarly Communications"
     northeastern:drs:marketing_and_communications:staff:
       name: "Office of Marketing and Communications"
+    northeastern:drs:repository:admin:
+      name: "DRS Advanced Users"
     northeastern:drs:repository:beta_users:
       name: "DRS Beta Users"
     northeastern:drs:repository:loaders:coe:
