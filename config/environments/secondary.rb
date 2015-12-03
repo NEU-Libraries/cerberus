@@ -35,6 +35,7 @@ Cerberus::Application.configure do
 
   # Serve static assets
   config.serve_static_assets = true
+  config.static_cache_control = "public, max-age=315360000"
 
   # Expands the lines which load the assets
   config.assets.debug = false
