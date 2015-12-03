@@ -34,6 +34,13 @@ class DownloadsController < ApplicationController
     render_403 and return
   end
 
+  def show
+    if asset.public?
+      expires_in 10.years, public: true
+    end
+    super
+  end
+
   private
     def ensure_not_embargoed
       dl = fetch_solr_document

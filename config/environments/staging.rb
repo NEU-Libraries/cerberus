@@ -6,14 +6,14 @@ Cerberus::Application.configure do
   # In the development environment your application's code is reloaded on
   # every request. This slows down response time but is perfect for development
   # since you don't have to restart the web server when you make code changes.
-  config.cache_classes = false
+  config.cache_classes = true
 
   # Log error messages when you accidentally call methods on nil.
-  config.whiny_nils = true
+  config.whiny_nils = false
 
   # Show full error reports and disable caching
-  config.consider_all_requests_local       = true
-  config.action_controller.perform_caching = false
+  config.consider_all_requests_local       = false
+  config.action_controller.perform_caching = true
 
   # Print deprecation notices to the Rails logger
   config.active_support.deprecation = :log
@@ -29,10 +29,13 @@ Cerberus::Application.configure do
   config.active_record.auto_explain_threshold_in_seconds = 0.5
 
   # Do not compress assets
-  config.assets.compress = false
+  config.assets.compress = true
+
+  # Serve static assets
+  config.serve_static_assets = true
 
   # Expands the lines which load the assets
-  config.assets.debug = true
+  config.assets.debug = false
 
   # Tell Mailer to use localhost:3000 as the default host
   config.action_mailer.default_url_options = { :host => "cerberus.library.northeastern.edu" }
