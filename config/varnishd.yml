@@ -1,0 +1,31 @@
+development:
+  listen: 127.0.0.1:3001
+  telnet: 127.0.0.1:6082
+  backend: 127.0.0.1:3000
+  sbin_path: /usr/sbin
+  bin_path: /usr/bin
+  storage: "file,#{Rails.root}/log/varnishd.#{Rails.env}.cache,100MB"
+
+test:
+  listen: 127.0.0.1:3002
+  telnet: 127.0.0.1:6083
+  backend: 127.0.0.1:3000
+  sbin_path: /usr/sbin
+  bin_path: /usr/bin
+  storage: "file,#{Rails.root}/log/varnishd.#{Rails.env}.cache,100MB"
+
+production:
+  listen: :80
+  telnet: localhost:6082
+  backend: backend_server:8080
+  use_sudo: false
+  sbin_path: /usr/local/sbin
+  bin_path: /usr/local/bin
+  pid_path: <%= Rails.root.join('log') %>
+  storage: "file,#{Rails.root}/log/varnishd.#{Rails.env}.cache,100MB"
+  params:
+    overflow_max: 2000          # for Varnish 2.x ... use "queue_max: 2000" for Varnish 3.x
+    thread_pool_add_delay: 2
+    thread_pools: 4             # <Number of cpu cores>
+    thread_pool_min: 200        # <800/number of cpu cores>
+    thread_pool_max: 4000
