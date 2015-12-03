@@ -35,7 +35,7 @@ class DownloadsController < ApplicationController
   end
 
   def show
-    if asset.public?
+    if asset.mass_permissions == "public"
       expires_in 10.years, public: true
     end
     super
