@@ -20,6 +20,8 @@ class ApplicationController < ActionController::Base
   before_filter :store_location
   after_filter :redirect_blacklight_overrun
 
+  caches_action :fetch_core_hash, :layout => false
+
   # around_filter :profile
 
   def profile
