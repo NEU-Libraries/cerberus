@@ -31,6 +31,10 @@ Cerberus::Application.configure do
   # Do not compress assets
   config.assets.compress = true
 
+  # Serve static assets
+  config.serve_static_assets = true
+  config.static_cache_control = "public, max-age=31536000"
+
   # Expands the lines which load the assets
   config.assets.debug = true
 
