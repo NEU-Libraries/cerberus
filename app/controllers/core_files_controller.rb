@@ -49,8 +49,6 @@ class CoreFilesController < ApplicationController
     render_404(ActiveFedora::ObjectNotFoundError.new, request.fullpath) and return
   end
 
-  caches_action :show, :layout => false
-
   configure_mods_display do
     access_condition do
       display!
@@ -195,9 +193,6 @@ class CoreFilesController < ApplicationController
       response.headers["Cache-Control"] = "no-cache, no-store, max-age=0, must-revalidate"
       response.headers["Pragma"] = "no-cache"
       response.headers["Expires"] = "Fri, 01 Jan 1990 00:00:00 GMT"
-
-      expire_action :action => show
-      expire_action :action => fetch_core_hash
     end
 
     respond_to :html
@@ -263,17 +258,11 @@ class CoreFilesController < ApplicationController
   end
 
   def edit
-    expire_action :action => show
-    expire_action :action => fetch_core_hash
-
     @core_file = CoreFile.find(params[:id])
     @page_title = "Edit #{@core_file.title}"
   end
 
   def edit_xml
-    expire_action :action => show
-    expire_action :action => fetch_core_hash
-
     @core_file = CoreFile.find(params[:id])
     @page_title = "Edit #{@core_file.title}'s xml"
     @mods_html = render_mods_display(CoreFile.find(@core_file.pid)).to_html.html_safe
@@ -324,9 +313,6 @@ class CoreFilesController < ApplicationController
   end
 
   def update
-    expire_action :action => show
-    expire_action :action => fetch_core_hash
-    
     @core_file = CoreFile.find(params[:id])
 
     # Invalidate cache
@@ -364,9 +350,6 @@ class CoreFilesController < ApplicationController
   end
 
   def tombstone
-    expire_action :action => show
-    expire_action :action => fetch_core_hash
-
     core_file = CoreFile.find(params[:id])
     title = core_file.title
     collection = core_file.parent.id
