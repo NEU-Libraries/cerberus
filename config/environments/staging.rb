@@ -9,10 +9,10 @@ Cerberus::Application.configure do
   config.cache_classes = true
 
   # Log error messages when you accidentally call methods on nil.
-  config.whiny_nils = true
+  config.whiny_nils = false
 
   # Show full error reports and disable caching
-  config.consider_all_requests_local       = true
+  config.consider_all_requests_local       = false
   config.action_controller.perform_caching = true
 
   # Print deprecation notices to the Rails logger
@@ -35,7 +35,7 @@ Cerberus::Application.configure do
   config.serve_static_assets = false
 
   # Expands the lines which load the assets
-  config.assets.debug = true
+  config.assets.debug = false
 
   # Tell Mailer to use localhost:3000 as the default host
   config.action_mailer.default_url_options = { :host => "cerberus.library.northeastern.edu" }
