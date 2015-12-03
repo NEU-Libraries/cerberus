@@ -2,7 +2,7 @@ en:
   groups:
     northeastern:drs:aslp:niec:
       name: "National Interpreter Education Center"
-      northeastern:drs:aslp:series:
+    northeastern:drs:aslp:series:
       name: "National Interpreter Education Center - Series (Test Group)"
     northeastern:drs:athletics:hall_of_fame:
       name: "Department of Athletics - Hall of Fame"
