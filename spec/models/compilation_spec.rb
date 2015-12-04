@@ -5,6 +5,8 @@ describe Compilation do
   let(:compilation) { FactoryGirl.create(:compilation) }
   let(:file) { FactoryGirl.create(:bills_complete_file) }
   let(:file_two) { FactoryGirl.create(:bills_complete_file) }
+  let(:bills_collection) { FactoryGirl.create(:valid_owned_by_bill) }
+  let(:bills_collection_2) { FactoryGirl.create(:valid_owned_by_bill) }
 
   subject { compilation }
 
@@ -33,6 +35,18 @@ describe Compilation do
 
       member_entries.should have_entries_for([file.pid])
     end
+
+    it "can be done via saved Collection object" do
+      compilation.add_entry(bills_collection)
+
+      member_entries.should have_entries_for([bills_collection.pid])
+    end
+
+    it "can be done via the pid of a Collection object" do
+      compilation.add_entry(bills_collection.pid)
+
+      member_entries.should have_entries_for([bills_collection.pid])
+    end
   end
 
   describe "Removing entries" do
@@ -58,6 +72,28 @@ describe Compilation do
 
       compilation.relationships(:has_member).should have_entries_for([file_two.pid])
     end
+
+    it "can be done via the pid of a CoreFile object" do
+      compilation.add_entry(bills_collection)
+      compilation.add_entry(bills_collection_2)
+
+      compilation.relationships(:has_member).should have_entries_for([bills_collection.pid, bills_collection_2.pid])
+
+      compilation.remove_entry(bills_collection.pid)
+
+      compilation.relationships(:has_member).should have_entries_for([bills_collection_2.pid])
+    end
+
+    it "can be done via saved Collection object" do
+      compilation.add_entry(bills_collection)
+      compilation.add_entry(bills_collection_2)
+
+      compilation.relationships(:has_member).should have_entries_for([bills_collection.pid, bills_collection_2.pid])
+
+      compilation.remove_entry(bills_collection)
+
+      compilation.relationships(:has_member).should have_entries_for([bills_collection_2.pid])
+    end
   end
 
   describe "Entry retrieval" do
@@ -72,26 +108,26 @@ describe Compilation do
     it "can return an array of SolrDocument objects" do
       compilation.add_entry(file)
       compilation.add_entry(file_two)
-
+      compilation.add_entry(bills_collection)
 
       result = compilation.entries
 
-      expect(result.map{ |x| x["id"] }).to match_array [file.pid, file_two.pid]
+      expect(result.map{ |x| x["id"] }).to match_array [file.pid, file_two.pid, bills_collection.pid]
       expect(result.all? { |x| x.class == SolrDocument}).to be true
     end
 
-    it "can return an array of CoreFile PIDS" do
+    it "can return an array of PIDS" do
       compilation.add_entry(file)
       compilation.add_entry(file_two)
-
-      gf_pid_array = [file.pid, file_two.pid]
+      compilation.add_entry(bills_collection)
+      gf_pid_array = [file.pid, file_two.pid, bills_collection.pid]
 
       compilation.entry_ids.should =~ gf_pid_array
     end
   end
 
   describe "Removing dead links" do
-    it "cleans out tombstoned objects" do
+    it "cleans out tombstoned corefiles" do
       root = Collection.create(title: "Root")
       file = CoreFile.create(title: "Core File One", parent: root, depositor: "nobody@nobody.com")
       file.save!
@@ -109,7 +145,26 @@ describe Compilation do
 
       compilation.entry_ids.should =~ [file_two.pid]
     end
-    it "cleans out deleted objects" do
+
+    it "cleans out tombstoned collections" do
+      col1 = Collection.create(title: "Col1")
+      col2 = Collection.create(title: "Col2")
+      compilation.add_entry(col1)
+      compilation.add_entry(col2)
+      compilation.save!
+
+      col1_pid = col1.pid
+      col1.tombstone
+      col1.save!
+
+      comp_pid = compilation.pid
+      compilation = Compilation.find(comp_pid)
+      compilation.remove_dead_entries.should == [col1_pid]
+
+      compilation.entry_ids.should =~ [col2.pid]
+    end
+
+    it "cleans out deleted corefiles" do
       compilation.add_entry(file)
       compilation.add_entry(file_two)
       compilation.save!
@@ -123,6 +178,21 @@ describe Compilation do
 
       compilation.entry_ids.should =~ [file_two.pid]
     end
+
+    it "cleans out deleted collections" do
+      compilation.add_entry(bills_collection)
+      compilation.add_entry(bills_collection_2)
+      compilation.save!
+
+      col_pid = bills_collection.pid
+      bills_collection.delete
+
+      comp_pid = compilation.pid
+      compilation = Compilation.find(comp_pid)
+      compilation.remove_dead_entries.should == [col_pid]
+
+      compilation.entry_ids.should =~ [bills_collection_2.pid]
+    end
   end
 
   describe "Represents the compilation attributes as JSON" do
@@ -130,6 +200,7 @@ describe Compilation do
 
       compilation.add_entry(file)
       compilation.add_entry(file_two)
+      compilation.add_entry(bills_collection)
       compilation_json = compilation.to_json
 
       parsed = JSON.parse(compilation_json);
@@ -138,6 +209,7 @@ describe Compilation do
       parsed["title"].should == compilation.title
       parsed["entries"][0].should == compilation.entries[0].pid
       parsed["entries"][1].should == compilation.entries[1].pid
+      parsed["entries"][2].should == compilation.entries[2].pid
     end
   end
 end

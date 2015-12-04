@@ -15,7 +15,8 @@ class Compilation < ActiveFedora::Base
 
   attr_accessible :title, :identifier, :depositor, :description
 
-  has_many :entries, class_name: "CoreFile",  property: :has_member
+  has_many :entries, class_name: "CoreFile, Collection",  property: :has_member
+
 
   # Returns the pids of all objects tagged as entries
   # in this collection.
@@ -24,7 +25,7 @@ class Compilation < ActiveFedora::Base
     return a.map{ |rels| trim_to_pid(rels) }
   end
 
-  # Returns all CoreFile objects tagged as entries
+  # Returns all CoreFile and Collection objects tagged as entries
   # in this collection as SolrDocument objects.
   def entries
     if entry_ids.any?
@@ -41,16 +42,25 @@ class Compilation < ActiveFedora::Base
   def add_entry(value)
     if value.instance_of?(CoreFile)
       add_relationship(:has_member, value)
+    elsif value.instance_of?(Collection)
+      add_relationship(:has_member, value)
     elsif value.instance_of?(String)
-      object = CoreFile.find(value)
-      add_relationship(:has_member, object)
+      obj = ActiveFedora::SolrService.query("id:\"#{value}\"")
+      doc = SolrDocument.new(obj.first)
+      if doc.klass == "CoreFile"
+        object = CoreFile.find(value)
+        add_relationship(:has_member, object)
+      elsif doc.klass == "Collection"
+        object = Collection.find(value)
+        add_relationship(:has_member, object)
+      end
     else
-      raise "Add item can only take a string or an instance of a Core object"
+      raise "Add item can only take a string or an instance of a Core object or Collection"
     end
   end
 
   def remove_entry(value)
-    if value.instance_of?(CoreFile)
+    if value.instance_of?(CoreFile) || value.instance_of?(Collection)
       remove_relationship(:has_member, value)
     elsif value.instance_of?(String)
       remove_relationship(:has_member, "info:fedora/#{value}")
@@ -80,9 +90,13 @@ class Compilation < ActiveFedora::Base
       if !ActiveFedora::Base.exists?(entry)
         results << entry
         remove_entry(entry)
-      elsif CoreFile.find(entry).tombstoned?
-        results << entry
-        remove_entry(entry)
+      elsif entry.instance_of?(String)
+        obj = ActiveFedora::SolrService.query("id:\"#{entry}\"")
+        doc = SolrDocument.new(obj.first)
+        if doc.tombstoned?
+          results << entry
+          remove_entry(entry)
+        end
       end
     end
 
