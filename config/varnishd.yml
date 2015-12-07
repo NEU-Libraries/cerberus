@@ -22,7 +22,6 @@ staging:
   backend: localhost:3000
   sbin_path: /usr/sbin
   bin_path: /usr/bin
-  pid_path: <%= Rails.root.join('log') %>
   storage: "malloc,100MB"
   use_sudo: true
   params:
@@ -38,7 +37,6 @@ production:
   backend: localhost:3000
   sbin_path: /usr/sbin
   bin_path: /usr/bin
-  pid_path: <%= Rails.root.join('log') %>
   storage: "malloc,100MB"
   use_sudo: true
   params:
