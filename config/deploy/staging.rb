@@ -68,6 +68,35 @@ namespace :deploy do
     end
   end
 
+  desc "Stop Varnish"
+  task :stop_varnish do
+    on roles(:app), :in => :sequence, :wait => 5 do
+      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec rake lacquer:varnishd:stop)", raise_on_non_zero_exit: false
+    end
+  end
+
+  desc "Start Varnish"
+  task :start_varnish do
+    on roles(:app), :in => :sequence, :wait => 5 do
+      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec rake lacquer:varnishd:start)"
+    end
+  end
+
+  # bundle exec rvmsudo RAILS_ENV=staging passenger start
+  desc "Stop Passenger"
+  task :stop_passenger do
+    on roles(:app), :in => :sequence, :wait => 5 do
+      execute "cd #{previous_release} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec rvmsudo RAILS_ENV=staging passenger stop)", raise_on_non_zero_exit: false
+    end
+  end
+
+  desc "Start Passenger"
+  task :start_passenger do
+    on roles(:app), :in => :sequence, :wait => 5 do
+      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec rvmsudo RAILS_ENV=staging passenger start)"
+    end
+  end
+
   desc 'Flush Redis'
   task :flush_redis do
     on roles(:app), :in => :sequence, :wait => 5 do
@@ -100,7 +129,9 @@ before 'deploy:restart_workers', 'rvm1:hook'
 # These hooks execute in the listed order after the deploy:updating task
 # occurs.  This is the task that handles refreshing the app code, so this
 # should only fire on actual deployments.
-before 'deploy:starting', 'deploy:stop_httpd'
+# before 'deploy:starting', 'deploy:stop_httpd'
+before 'deploy:starting', 'deploy:stop_passenger'
+before 'deploy:starting', 'deploy:stop_varnish'
 before 'deploy:starting', 'deploy:update_clamav'
 
 after 'deploy:updating', 'deploy:nokogiri'
@@ -113,4 +144,6 @@ after 'deploy:updating', 'deploy:whenever'
 after 'deploy:updating', 'deploy:flush_redis'
 
 after 'deploy:finished', 'deploy:restart_workers'
-after 'deploy:finished', 'deploy:start_httpd'
+after 'deploy:finished', 'deploy:start_varnish'
+after 'deploy:finished', 'deploy:start_passenger'
+# after 'deploy:finished', 'deploy:start_httpd'
