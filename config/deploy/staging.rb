@@ -86,6 +86,7 @@ namespace :deploy do
   desc "Stop Passenger"
   task :stop_passenger do
     on roles(:app), :in => :sequence, :wait => 5 do
+      previous_release = `ls #{releases_path}`.split("\n").sort_by(&:to_i)[-2]
       execute "cd #{previous_release} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec rvmsudo RAILS_ENV=staging passenger stop)", raise_on_non_zero_exit: false
     end
   end
