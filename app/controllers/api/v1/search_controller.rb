@@ -7,7 +7,7 @@ module Api
   module V1
     class SearchController < ApplicationController
 
-      before_filter { |controller| controller.set_cache_ttl(5.minutes) }
+      before_filter { |controller| controller.set_cache_ttl(5.minutes) if Rails.env.production? }
 
       include Blacklight::Catalog
       include Blacklight::CatalogHelperBehavior
