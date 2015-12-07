@@ -35,7 +35,7 @@ class DownloadsController < ApplicationController
   end
 
   def show
-    if asset.mass_permissions == "public"
+    if asset.class == ImageThumbnailFile
       expires_in 10.years, public: true
     end
     super
