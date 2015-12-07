@@ -1,5 +1,5 @@
 development:
-  listen: 127.0.0.1:3001
+  listen: 0.0.0.0:3001
   telnet: 127.0.0.1:6082
   backend: 127.0.0.1:3000
   sbin_path: /usr/sbin
