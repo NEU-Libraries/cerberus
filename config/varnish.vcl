@@ -16,18 +16,18 @@ sub vcl_recv {
       req.request != "DELETE") {
     return(pipe);
   }
-  
+
   if (req.backend.healthy) {
      set req.grace = 30s;
   } else {
      set req.grace = 1h;
-  }  
-  
+  }
+
   # Pass requests that are not GET or HEAD
   if (req.request != "GET" && req.request != "HEAD") {
     return(pass);
   }
-  
+
   # Handle compression correctly. Varnish treats headers literally, not
   # semantically. So it is very well possible that there are cache misses
   # because the headers sent by different browsers aren't the same.
@@ -65,14 +65,14 @@ sub vcl_pipe {
 sub vcl_fetch {
   # Set the grace time
   set beresp.grace = 1h;
-  
+
   # Do not cache the object if the status is not in the 200s
   if (beresp.status >= 300) {
     # Remove the Set-Cookie header
     remove beresp.http.Set-Cookie;
     return(pass);
   }
-  
+
   # Do not cache the object if the backend application does not want us to.
   if (beresp.http.Cache-Control ~ "(no-cache|no-store|private|must-revalidate)") {
     return(pass);
@@ -90,8 +90,8 @@ sub vcl_fetch {
 # Called before the response is sent back to the client
 sub vcl_deliver {
   # Force browsers and intermediary caches to always check back with us
-  set resp.http.Cache-Control = "private, max-age=0, must-revalidate";
-  set resp.http.Pragma = "no-cache";
+  # set resp.http.Cache-Control = "private, max-age=0, must-revalidate";
+  # set resp.http.Pragma = "no-cache";
 
   # Add a header to indicate a cache HIT/MISS
   if (obj.hits > 0) {
