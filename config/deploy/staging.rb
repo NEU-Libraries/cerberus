@@ -87,14 +87,14 @@ namespace :deploy do
   task :stop_passenger do
     on roles(:app), :in => :sequence, :wait => 5 do
       previous_release = `ls #{releases_path}`.split("\n").sort_by(&:to_i)[-2]
-      execute "cd #{previous_release} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec rvmsudo RAILS_ENV=staging passenger stop)", raise_on_non_zero_exit: false
+      execute "cd #{previous_release} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec passenger stop)", raise_on_non_zero_exit: false
     end
   end
 
   desc "Start Passenger"
   task :start_passenger do
     on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec rvmsudo RAILS_ENV=staging passenger start)"
+      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec passenger start)"
     end
   end
 
@@ -131,10 +131,10 @@ before 'deploy:restart_workers', 'rvm1:hook'
 # occurs.  This is the task that handles refreshing the app code, so this
 # should only fire on actual deployments.
 # before 'deploy:starting', 'deploy:stop_httpd'
-before 'deploy:starting', 'deploy:stop_passenger'
 before 'deploy:starting', 'deploy:stop_varnish'
 before 'deploy:starting', 'deploy:update_clamav'
 
+after 'deploy:updating', 'deploy:stop_passenger'
 after 'deploy:updating', 'deploy:nokogiri'
 after 'deploy:updating', 'deploy:copy_rvmrc_file'
 after 'deploy:updating', 'deploy:trust_rvmrc'
