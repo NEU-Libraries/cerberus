@@ -72,7 +72,7 @@ namespace :deploy do
   task :stop_varnish do
     on roles(:app), :in => :sequence, :wait => 5 do
       previous_release = capture("ls #{releases_path}").split("\n").sort_by(&:to_i)[-2]
-      execute "cd #{previous_release} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec rake lacquer:varnishd:stop)", raise_on_non_zero_exit: false
+      execute "cd #{releases_path}/#{previous_release} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec rake lacquer:varnishd:stop)", raise_on_non_zero_exit: false
     end
   end
 
@@ -88,7 +88,7 @@ namespace :deploy do
   task :stop_passenger do
     on roles(:app), :in => :sequence, :wait => 5 do
       previous_release = capture("ls #{releases_path}").split("\n").sort_by(&:to_i)[-2]
-      execute "cd #{previous_release} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec passenger stop)", raise_on_non_zero_exit: false
+      execute "cd #{releases_path}/#{previous_release} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec passenger stop)", raise_on_non_zero_exit: false
     end
   end
 
