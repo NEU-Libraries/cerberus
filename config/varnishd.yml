@@ -5,6 +5,7 @@ development:
   sbin_path: /usr/sbin
   bin_path: /usr/bin
   storage: "file,#{Rails.root}/log/varnishd.#{Rails.env}.cache,100MB"
+  use_sudo: true
 
 test:
   listen: 127.0.0.1:3002
@@ -13,6 +14,7 @@ test:
   sbin_path: /usr/sbin
   bin_path: /usr/bin
   storage: "file,#{Rails.root}/log/varnishd.#{Rails.env}.cache,100MB"
+  use_sudo: true
 
 production:
   listen: :80
@@ -23,6 +25,7 @@ production:
   bin_path: /usr/local/bin
   pid_path: <%= Rails.root.join('log') %>
   storage: "file,#{Rails.root}/log/varnishd.#{Rails.env}.cache,100MB"
+  use_sudo: true
   params:
     overflow_max: 2000          # for Varnish 2.x ... use "queue_max: 2000" for Varnish 3.x
     thread_pool_add_delay: 2
