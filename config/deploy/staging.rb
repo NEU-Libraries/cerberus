@@ -70,8 +70,9 @@ namespace :deploy do
 
   desc "Stop Varnish"
   task :stop_varnish do
+    previous_release = `ls #{releases_path}`.split("\n").sort_by(&:to_i)[-2]
     on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec rake lacquer:varnishd:stop)", raise_on_non_zero_exit: false
+      execute "cd #{previous_release} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec rake lacquer:varnishd:stop)", raise_on_non_zero_exit: false
     end
   end
 
@@ -131,9 +132,9 @@ before 'deploy:restart_workers', 'rvm1:hook'
 # occurs.  This is the task that handles refreshing the app code, so this
 # should only fire on actual deployments.
 # before 'deploy:starting', 'deploy:stop_httpd'
-before 'deploy:starting', 'deploy:stop_varnish'
 before 'deploy:starting', 'deploy:update_clamav'
 
+after 'deploy:updating', 'deploy:stop_varnish'
 after 'deploy:updating', 'deploy:stop_passenger'
 after 'deploy:updating', 'deploy:nokogiri'
 after 'deploy:updating', 'deploy:copy_rvmrc_file'
