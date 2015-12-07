@@ -28,6 +28,7 @@ en:
       browse label: "Explore"
     compilations:
       name: set
+      icon: "icon-briefcase"
       lead: "Sets are curated compilations of DRS files. You may create as many Sets as you need, and you may add any DRS file to your Sets. Sets are sustainable and won't disappear unless you delete the Set yourself."
       created_message: "Your set was created successfully."
       updated_message: "Your set was updated successfully."
