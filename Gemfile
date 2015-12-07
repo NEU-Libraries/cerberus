@@ -1,5 +1,6 @@
 source 'https://rubygems.org'
 
+gem 'passenger'
 gem "sitemap_generator"
 gem "clamav"
 gem "colorize", "0.6.0" # https://github.com/capistrano/sshkit/issues/200

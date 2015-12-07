@@ -1,0 +1,5 @@
+{
+  "port": 3000,
+  "daemonize": true,
+  "user": "drs"
+}
