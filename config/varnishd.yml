@@ -16,13 +16,28 @@ test:
   storage: "file,#{Rails.root}/log/varnishd.#{Rails.env}.cache,100MB"
   use_sudo: true
 
-production:
-  listen: :80
+staging:
+  listen: 0.0.0.0:80
   telnet: localhost:6082
-  backend: backend_server:8080
-  use_sudo: false
-  sbin_path: /usr/local/sbin
-  bin_path: /usr/local/bin
+  backend: localhost:3000
+  sbin_path: /usr/sbin
+  bin_path: /usr/bin
+  pid_path: <%= Rails.root.join('log') %>
+  storage: "malloc,100MB"
+  use_sudo: true
+  params:
+    overflow_max: 2000          # for Varnish 2.x ... use "queue_max: 2000" for Varnish 3.x
+    thread_pool_add_delay: 1
+    thread_pools: 1             # <Number of cpu cores>
+    thread_pool_min: 100        # <800/number of cpu cores>
+    thread_pool_max: 1000
+
+production:
+  listen: 0.0.0.0:80
+  telnet: localhost:6082
+  backend: localhost:3000
+  sbin_path: /usr/sbin
+  bin_path: /usr/bin
   pid_path: <%= Rails.root.join('log') %>
   storage: "malloc,100MB"
   use_sudo: true
