@@ -1,2 +1,5 @@
-%h2.page-header New Collection
+-if "#{@set.class}" == 'Compilation'
+  %h2.page-header New Set
+-else
+  %h2.page-header New Collection
 = render partial: 'shared/sets/data_form'
