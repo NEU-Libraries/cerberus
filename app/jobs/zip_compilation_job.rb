@@ -51,9 +51,11 @@ class ZipCompilationJob
 
       self.entry_ids.each do |id|
 
-        if CoreFile.exists?(id)
+        obj = ActiveFedora::SolrService.query("id:\"#{id}\"")
+        doc = SolrDocument.new(obj.first)
+        if doc.klass == "CoreFile" && CoreFile.exists?(id)
           cf = CoreFile.find(id)
-          if !(cf.under_embargo?(user))
+          if !(cf.under_embargo?(user)) && !cf.tombstoned?
             # cf.content_objects.each do |content|
             content = cf.canonical_object
             if !user.nil? ? user.can?(:read, content) : content.public?
