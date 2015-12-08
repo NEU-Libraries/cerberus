@@ -41,6 +41,9 @@ Cerberus::Application.routes.draw do
   get '/communities/:id/monographs' => 'communities#monographs', as: 'community_monographs'
   post '/communities/:id/attach_employee/:employee_id' => 'communities#attach_employee', as: 'attach_employee'
 
+  get "/sets/collaborative" => "compilations#collaborative_compilations", as: 'sets_collaborative'
+  get "/sets/my" => "compilations#my_sets", as: 'sets_my'
+  get "/sets/editable" => "compilations#editable_compilations", as: 'sets_editable'
   resources :compilations, :controller => "compilations", :path => "sets"
   get "/sets/:id/download" => 'compilations#show_download', as: 'prepare_download'
   get "/sets/:id/ping" => 'compilations#ping_download', as: 'ping_download'
