@@ -18,7 +18,10 @@
       = render partial: 'shared/icon', locals: { class_string: 'icon-folder-open' }
     - elsif @set.klass == "Community"
       = render partial: 'shared/icon', locals: { class_string: 'icon-group' }
-    = render partial: 'catalog/search_form', locals: { scope: "true", scoped_placeholder: "Search this #{@set.type_label.downcase}" }
+    - elsif @set.klass == "Compilation"
+      =render partial: 'shared/icon', locals: { class_string: t('drs.compilations.icon') }
+    - if @set.klass != "Compilation"
+      = render partial: 'catalog/search_form', locals: { scope: "true", scoped_placeholder: "Search this #{@set.type_label.downcase}" }
   %h1
     %small
       = @set.type_label
@@ -33,13 +36,26 @@
       = link_to "#{@set.identifier}", @set.identifier
 
   - if current_user
-    -if @set.klass == "Collection" && (current_user.can? :edit, @set.pid) && (current_user.admin? || @set.smart_collection_type.nil? || @set.smart_collection_type == "miscellany")
+    -if (@set.klass == "Collection" || @set.klass == "Compilation") && (current_user.can? :edit, @set.pid) && (current_user.admin? || @set.smart_collection_type.nil? || @set.smart_collection_type == "miscellany")
       %nav.set-actions
         %ul.nav.nav-pills
           %li
-            %a.btn.btn-default{:href =>  edit_collection_path(@set)}
+            %a.btn.btn-default{:href =>  @set.klass == "Collection" ? edit_collection_path(@set) : edit_compilation_path(@set)}
               %i.icon-pencil
-              Manage Collection
+              = "Manage #{@set.type_label}"
+          -if @set.klass == "Compilation"
+            %li
+              -if current_user.nuid == @set.depositor && (current_user.can? :edit, @set.pid)
+                %a.btn{:href => "#deleteItemModal", title: "Delete #{@set.title}", data: { toggle: "modal", title: "#{@set.title}", delete_path: "#{polymorphic_path(@set)}"}}
+                  %i.icon-trash
+                  = "Delete"
+              -elsif current_user.can? :edit, @set.pid
+                -# do something here for when the person not the depositor is trying to delete the compilation
+            %li
+              %a.btn{ href: prepare_download_path(id: @compilation.pid ) , method: 'get' }
+                %i.icon-download
+                Download
+            = render partial: 'shared/sets/delete_item_modal', locals: { item: @set }
 
 - if render_constraints(params) != ""
   %h1.page-header
