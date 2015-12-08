@@ -9,18 +9,10 @@
         %button.btn.btn-danger{"data-delete" => "", "data-remove" => "true", "data-target" => ".permission", title: "Remove permission", type: "button"}
           = render partial: 'shared/icon' , locals: { class_string: 'icon-remove', alt_text: "Remove Field" }
 
-- if (defined? read_only)
-  .permission
-    = f.label :identity, "Select Group"
-    - options = {"" => ""}
-    = select_tag "#{array_type}[permissions][identity][]", options_for_select(current_user.pretty_groups), class: "span12", prompt: "-- Select Group --"
-    %div{:style => "display: block;"}
-      = text_field_tag "#{array_type}[permissions][permission_type][]", "read", class: "span12", readonly: true
-- else
-  .permission
-    = f.label :identity, "Select Group"
-    - options = {"" => ""}
-    = select_tag "#{array_type}[permissions][identity][]", options_for_select(current_user.pretty_groups), class: "span12", prompt: "-- Select Group --"
-    = label_tag "#{array_type}[permissions][permission_type][]", "Should this identity be allowed to read or edit?"
-    %div{:style => "display: block;"}
-      = select_tag "#{array_type}[permissions][permission_type][]", options_for_select(['read', 'edit']), class: "span12"
+.permission
+  = f.label :identity, "Select Group"
+  - options = {"" => ""}
+  = select_tag "#{array_type}[permissions][identity][]", options_for_select(current_user.pretty_groups), class: "span12", prompt: "-- Select Group --"
+  = label_tag "#{array_type}[permissions][permission_type][]", "Should this identity be allowed to read or edit?"
+  %div{:style => "display: block;"}
+    = select_tag "#{array_type}[permissions][permission_type][]", options_for_select(['read', 'edit']), class: "span12"

@@ -7,10 +7,11 @@
     %a{ href: "#edit",  data: {toggle: "tab"} }
       %i.icon-pencil
       Edit
-  %li
-    %a{ href: "#move", data: {toggle: "tab"}}
-      %i.icon-exchange
-      Move
+  - if "#{@set.class}" != "Compilation"
+    %li
+      %a{ href: "#move", data: {toggle: "tab"}}
+        %i.icon-exchange
+        Move
   %li
     %a{ href: "#delete", data: {toggle: "tab"}}
       %i.icon-trash
@@ -19,8 +20,9 @@
 .tab-content
   #edit.tab-pane.active
     = render partial: "shared/sets/data_form", locals: { set: @set }
-  #move.tab-pane
-    = render partial: "shared/sets/move", locals:  {set: @set }
+  - if "#{@set.class}" != "Compilation"
+    #move.tab-pane
+      = render partial: "shared/sets/move", locals:  {set: @set }
   #delete.tab-pane
     = render partial: "shared/sets/delete", locals:  {set: @set }
 
