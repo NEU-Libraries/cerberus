@@ -6,7 +6,7 @@
       .span8
         = f.label :title, "Title", class: "required-label", title: "Required Field", data: { toggle: "tooltip"}
         = f.text_field :title, required: true, pattern: ".*\\S.*", class: "input-block-level", placeholder: "University Libraries"
-      - if @set.class != "Compilation"
+      - if "#{@set.class}" != "Compilation"
         .span4
           = f.label :thumbnail, "Upload thumbnail"
           = f.file_field :thumbnail, name: 'thumbnail'
