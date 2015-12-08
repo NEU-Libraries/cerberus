@@ -127,14 +127,7 @@ class CompilationsController < ApplicationController
 
     @set = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{@compilation.pid}\"").first)
 
-    # if @compilation.entry_ids.length > 0
     self.solr_search_params_logic += [:filter_entry_ids]
-    # end
-    # else
-      # @response = nil
-      # @document_list = nil
-      # flash[:notice] = "There are no items in this set. Please search or browse for an item or collection and add it to this set."
-    # end
     (@response, @document_list) = get_search_results
     if @response.response['numFound'] == 0
       flash[:notice] = "There are no items in this set. Please search or browse for an item or collection and add it to this set."
@@ -200,41 +193,6 @@ class CompilationsController < ApplicationController
   end
 
   private
-
-  # def get_readable_entries
-  #   @entries = @compilation.entries.keep_if { |x| current_user_can? :read, x }
-  # end
-  #
-  # def ensure_any_readable
-  #   entries = get_readable_entries
-  #   error   = "You cannot download a set with no readable content"
-  #
-  #   if entries.empty?
-  #     flash[:error] = error
-  #     redirect_to @compilation and return
-  #   end
-  #
-  #   content = []
-  #   entries.each do |entry|
-  #     content = content + entry.content_objects
-  #   end
-  #
-  #   content.keep_if { |c| c.klass != "ImageThumbnailFile" }
-  #
-  #   unless (content.any? { |x| current_user_can? :read, x })
-  #     flash[:error] = error
-  #     redirect_to(@compilation) and return
-  #   end
-  # end
-
-  # def remove_dead_entries
-  #   # this hasn't been fixed yet
-  #   dead_entries = @compilation.remove_dead_entries
-  #
-  #   if dead_entries.length > 0
-  #     flash.now[:error] = "#{dead_entries.length} items no longer exist in the repository and have been removed from your #{ t('drs.compilations.name')}."
-  #   end
-  # end
 
   def save_or_bust(compilation)
     if compilation.save!
