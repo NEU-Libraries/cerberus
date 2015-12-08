@@ -13,6 +13,8 @@
       = render partial: 'shared/icon', locals: { class_string: 'icon-group' }
     - elsif item.klass == "Employee"
       = render partial: 'shared/icon', locals: { class_string: 'icon-user' }
+    - elsif item.klass == 'Compilation'
+      =render partial: 'shared/icon', locals: { class_string: t('drs.compilations.icon') }
     -else #the most generic option
       = render partial: 'shared/icon', locals: { class_string: 'icon-file' }
 
