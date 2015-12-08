@@ -4,27 +4,84 @@ class CompilationsController < ApplicationController
   include ApplicationHelper
   include UrlHelper
 
+  # Here be solr access boilerplate
+  include Blacklight::Catalog
+  include Blacklight::Configurable # comply with BL 3.7
+  include ActionView::Helpers::DateHelper
+  # This is needed as of BL 3.7
+  self.copy_blacklight_config_from(CatalogController)
+  include BlacklightAdvancedSearch::ParseBasicQ
+  include BlacklightAdvancedSearch::Controller
+
   before_filter :authenticate_user!, except: [:show, :show_download, :download, :ping_download]
 
   before_filter :can_edit?, only: [:edit, :update, :destroy, :add_entry, :delete_entry]
   before_filter :can_read?, only: [:show, :show_download, :download]
 
   load_resource
-  before_filter :get_readable_entries, only: [:show]
-  before_filter :remove_dead_entries, only: [:show, :show_download]
-  before_filter :ensure_any_readable, only: [:show_download]
   before_filter :valid_form_permissions?, only: [:update]
 
   def index
-    compilation_docs = solr_query("depositor_tesim:\"#{current_user.nuid}\" AND has_model_ssim:\"#{ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:Compilation"}\"")
+    @page_title = "My " + t('drs.compilations.name').capitalize + "s"
+    respond_to do |format|
+      format.html
+    end
+  end
+
+
+  def my_sets
+    self.solr_search_params_logic += [:exclude_unwanted_models]
+    self.solr_search_params_logic += [:find_user_compilations]
+
+    (@response, @compilations) = get_search_results
+
+    respond_to do |format|
+      format.js {
+        if @response.response['numFound'] < 1
+          render js: "$('#my').replaceWith('<div class=\"alert alert-info\">No #{t('drs.compilations.name') + 's'} available! Create a new #{t('drs.compilations.name')} today.</div>');"
+        else
+          render "my"
+        end
+      }
+    end
+  end
+
+  def editable_compilations
+    # use this for the popup when adding to sets
+    u_groups = current_user.groups
+    groups = u_groups.map! { |g| "\"#{g}\""}.join(" OR ")
+    compilation_docs = solr_query("(depositor_tesim:\"#{current_user.nuid}\" OR edit_access_group_ssim:(#{groups})) AND has_model_ssim:\"#{ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:Compilation"}\"")
     @compilations = compilation_docs.map{|c| Compilation.find(c.pid)}
 
-    @page_title = "My " + t('drs.compilations.name').capitalize + "s"
+    respond_to do |format|
+      format.js{ render "editable" }
+    end
+  end
+
+  def collaborative_compilations
+    self.solr_search_params_logic += [:exclude_unwanted_models]
+    self.solr_search_params_logic += [:get_compilations_with_permissions]
+
+    (@response, @compilations) = get_search_results
+
+    respond_to do |format|
+      format.js {
+        if @response.response['numFound'] < 1
+          render js: "$('#collaborative').replaceWith('<div class=\"alert alert-info\">You have no collaborative #{t('drs.compilations.name').capitalize.pluralize} yet. Collaborative #{t('drs.compilations.name').pluralize} are #{t('drs.compilations.name').pluralize} that are created by other users but editable by you.</div>');"
+        else
+          render "collaborative"
+        end
+      }
+    end
   end
 
   def new
-    @compilation = Compilation.new
+    @set = Compilation.new
     @page_title = "New " + t('drs.compilations.name').capitalize
+    respond_to do |format|
+      format.js { render 'new' }
+      format.html { render 'shared/sets/new' }
+    end
   end
 
   def create
@@ -43,6 +100,8 @@ class CompilationsController < ApplicationController
 
   def edit
     @page_title = "Edit #{@compilation.title}"
+    @set = @compilation
+    render :template => 'shared/sets/edit'
   end
 
   def update
@@ -62,8 +121,27 @@ class CompilationsController < ApplicationController
       @pretty_description = convert_urls(@compilation.description)
     end
 
+    if params['q']
+      params.delete :q # this disables querying compilations
+    end
+
+    @set = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{@compilation.pid}\"").first)
+
+    # if @compilation.entry_ids.length > 0
+    self.solr_search_params_logic += [:filter_entry_ids]
+    # end
+    # else
+      # @response = nil
+      # @document_list = nil
+      # flash[:notice] = "There are no items in this set. Please search or browse for an item or collection and add it to this set."
+    # end
+    (@response, @document_list) = get_search_results
+    if @response.response['numFound'] == 0
+      flash[:notice] = "There are no items in this set. Please search or browse for an item or collection and add it to this set."
+    end
+
     respond_to do |format|
-      format.html{ render action: "show", locals: {pretty_description: @pretty_description}}
+      format.html{ render "shared/sets/show", locals: {pretty_description: @pretty_description}}
       format.json{ render json: @compilation  }
     end
   end
@@ -123,39 +201,40 @@ class CompilationsController < ApplicationController
 
   private
 
-  def get_readable_entries
-    @entries = @compilation.entries.keep_if { |x| current_user_can? :read, x }
-  end
+  # def get_readable_entries
+  #   @entries = @compilation.entries.keep_if { |x| current_user_can? :read, x }
+  # end
+  #
+  # def ensure_any_readable
+  #   entries = get_readable_entries
+  #   error   = "You cannot download a set with no readable content"
+  #
+  #   if entries.empty?
+  #     flash[:error] = error
+  #     redirect_to @compilation and return
+  #   end
+  #
+  #   content = []
+  #   entries.each do |entry|
+  #     content = content + entry.content_objects
+  #   end
+  #
+  #   content.keep_if { |c| c.klass != "ImageThumbnailFile" }
+  #
+  #   unless (content.any? { |x| current_user_can? :read, x })
+  #     flash[:error] = error
+  #     redirect_to(@compilation) and return
+  #   end
+  # end
 
-  def ensure_any_readable
-    entries = get_readable_entries
-    error   = "You cannot download a set with no readable content"
-
-    if entries.empty?
-      flash[:error] = error
-      redirect_to @compilation and return
-    end
-
-    content = []
-    entries.each do |entry|
-      content = content + entry.content_objects
-    end
-
-    content.keep_if { |c| c.klass != "ImageThumbnailFile" }
-
-    unless (content.any? { |x| current_user_can? :read, x })
-      flash[:error] = error
-      redirect_to(@compilation) and return
-    end
-  end
-
-  def remove_dead_entries
-    dead_entries = @compilation.remove_dead_entries
-
-    if dead_entries.length > 0
-      flash.now[:error] = "#{dead_entries.length} items no longer exist in the repository and have been removed from your #{ t('drs.compilations.name')}."
-    end
-  end
+  # def remove_dead_entries
+  #   # this hasn't been fixed yet
+  #   dead_entries = @compilation.remove_dead_entries
+  #
+  #   if dead_entries.length > 0
+  #     flash.now[:error] = "#{dead_entries.length} items no longer exist in the repository and have been removed from your #{ t('drs.compilations.name')}."
+  #   end
+  # end
 
   def save_or_bust(compilation)
     if compilation.save!
@@ -163,6 +242,35 @@ class CompilationsController < ApplicationController
     else
       flash.now.error = "#{t('drs.compilations.name').capitalize} was not successfully updated"
     end
+  end
+
+  def filter_entry_ids(solr_parameters, user_parameters)
+    solr_parameters[:fq] ||= []
+    solr_parameters[:fq] << "!tombstoned_ssi:\"true\""
+    query = @compilation.entry_ids.map! { |id| "\"#{id}\""}.join(" OR ")
+    if query.length > 0
+      solr_parameters[:fq] << "id:(#{query})"
+    else
+      solr_parameters[:fq] << "id:\"\""
+    end
+  end
+
+  def find_user_compilations(solr_parameters, user_parameters)
+    solr_parameters[:fq] ||= []
+    solr_parameters[:fq] << "#{Solrizer.solr_name("depositor", :stored_searchable)}:\"#{current_user.nuid}\""
+  end
+
+  def exclude_unwanted_models(solr_parameters, user_parameters)
+    solr_parameters[:fq] ||= []
+    solr_parameters[:fq] << "#{Solrizer.solr_name("has_model", :symbol)}:\"info:fedora/afmodel:Compilation\""
+  end
+
+  def get_compilations_with_permissions(solr_parameters, user_parameters)
+    solr_parameters[:fq] ||= []
+    solr_parameters[:fq] << "!#{Solrizer.solr_name("depositor", :stored_searchable)}:\"#{current_user.nuid}\""
+    u_groups = current_user.groups
+    query = u_groups.map! { |g| "\"#{g}\""}.join(" OR ")
+    solr_parameters[:fq] << "edit_access_group_ssim:(#{query}) OR read_access_group_ssim:(#{query})"
   end
 
   private
