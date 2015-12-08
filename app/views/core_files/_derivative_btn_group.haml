@@ -31,3 +31,10 @@
     .btn-group
       - icon = render partial: 'shared/icon',  locals: { class_string: "icon-comments-alt" }
       =link_to icon.html_safe , "http://library.northeastern.edu/get-help/tech-support/report-a-problem?resource=#{item.title} - #{item.pid} (#{CGI::escape(request.original_url)})", :target => "_blank", title:  "Report a problem", data: {toggle: "tooltip"}, class: 'btn btn-mini btn-clear'
+    -if controller_name == 'compilations' && (current_user_can? :edit, @compilation)
+      .btn-group
+        %a.btn.btn-mini.btn-clear{ href: "#removeFromCompilationModal#{item.pid.gsub(":","")}", data: { toggle: "modal" }, title: "Remove from set" }
+          %i.icon-trash
+          %span.sr-only
+            Remove #{item.title} from #{@compilation.title}
+      = render partial: 'remove_modal', locals: { entry: item, entry_id: item.pid.gsub(":",""), compilation: @compilation }
