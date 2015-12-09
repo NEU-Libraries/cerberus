@@ -20,6 +20,9 @@ class Admin::UsersController < AdminController
       redirect_to root_path
     else
       # raise error and email developers
+      email_handled_exception(Exceptions::SecurityEscalationError.new())
+      flash[:error] = "Attempted impersonation of admin user, this is not allowed. DRS Staff have been notified."
+      redirect_to(root_path) and return
     end
   end
 

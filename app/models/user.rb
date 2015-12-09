@@ -143,7 +143,7 @@ class User < ActiveRecord::Base
     users = User.where(:nuid => auth.info.nuid)
     if users.length > 1
       users.map do |u|
-        u.multiple_account = true
+        u.multiple_accounts = true
         u.save!
       end
     end
