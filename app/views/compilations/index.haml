@@ -8,6 +8,7 @@
   %article.span6
     %h3= "My #{t('drs.compilations.name').capitalize}s"
     %div#my
+    = link_to("Create a new #{t('drs.compilations.name')}", new_compilation_path, class: ["btn", "btn-clear", "btn-block", ] )
   %article.span6
     %h3="Collaborative #{t('drs.compilations.name').capitalize}s"
     %div#collaborative
@@ -20,5 +21,3 @@
     spinner = enable_spinner('collaborative');
     $.getScript("sets/collaborative");
   });
--# - if @compilations.any?
--#   = render partial: 'shared/sets/delete_item_modal', locals: { item: @compilations.first }
