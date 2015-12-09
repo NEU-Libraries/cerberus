@@ -48,6 +48,13 @@ class CatalogController < ApplicationController
     if !has_search_parameters?
       self.solr_search_params_logic += [:disable_highlighting]
       recent
+
+      # If user has multiple accounts, and no preferred account, send flash
+      if current_user
+        if current_user.multiple_accounts && current_user.account_pref.blank?
+          flash[:notice] = "#{t('drs.multiple_accounts.login_alert')} Please visit your #{ActionController::Base.helpers.link_to("Accounts", select_account_path)} page to select a primary account."
+        end
+      end
     else
       begin
         super

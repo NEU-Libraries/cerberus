@@ -1,0 +1,33 @@
+- @page_title = t('drs.multiple_accounts.page_title')
+%h1.page-header
+  =render partial: 'shared/icon', locals: { class_string: t('drs.multiple_accounts.menu_icon') }
+  = t('drs.multiple_accounts.page_title')
+%p.lead
+  = t('drs.multiple_accounts.select_account')
+
+%table.table.table-bordered
+  %tr
+    %th Status
+    %th Email
+    %th Preferred Account
+  - current_user.associated_accounts.each do |u|
+    %tr
+      %td{:width=>"35%"}
+        - if u[:email] == current_user.email
+          =render partial: 'shared/icon', locals: { class_string: "#{t('drs.multiple_accounts.preferred_icon')} text-success" }
+          = "You are currently logged in with this account"
+        - else
+          %a.btn.btn-primary.btn-small{:href => switch_user_path(email: u[:email])}
+            %span.icon-refresh( aria-hidden="true" )
+            = t('drs.multiple_accounts.switch_account_button')
+      %td
+        - if u[:email].rpartition('@')[0] == current_user.nuid
+          = u[:name]
+        - else
+          = link_to(u[:email], "mailto:#{u[:email]}")
+      %td
+        - if u[:account_pref] == u[:email]
+          =render partial: 'shared/icon', locals: { class_string: "#{t('drs.multiple_accounts.preferred_icon')} text-success" }
+          Preferred
+        - else
+          = link_to "#{t('drs.multiple_accounts.save_preferred')}", set_preferred_user_path(email: current_user.email), class: "btn btn-success btn-small"
