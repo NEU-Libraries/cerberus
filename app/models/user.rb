@@ -106,7 +106,7 @@ class User < ActiveRecord::Base
         user.email = auth.info.email
       end
 
-      if !auth.info.employee.blank? || !auth.info.employee.nil?
+      if !auth.info.employee.blank?
         user.affiliation = auth.info.employee
       end
 
@@ -141,9 +141,11 @@ class User < ActiveRecord::Base
     user.add_group("northeastern:drs:all")
 
     users = User.where(:nuid => auth.info.nuid)
-    users.map do |u|
-      u.multiple_account = true
-      u.save!
+    if users.length > 1
+      users.map do |u|
+        u.multiple_account = true
+        u.save!
+      end
     end
 
     return user
