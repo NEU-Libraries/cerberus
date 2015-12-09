@@ -11,9 +11,11 @@ class UsersController < ApplicationController
         redirect_to select_account_path and return
       else
         # Invalid, notify of account tampering
+        raise Exceptions::SecurityTamperingError
       end
     else
       # Invalid, notify of account tampering
+      raise Exceptions::SecurityTamperingError
     end
   end
 
