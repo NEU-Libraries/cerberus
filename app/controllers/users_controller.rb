@@ -1,8 +1,17 @@
 class UsersController < ApplicationController
 
+  rescue_from Exceptions::SecurityTamperingError do |exception|
+    flash[:error] = exception.message
+    email_handled_exception(exception)
+    redirect_to root_path and return
+  end
+
   def switch_user
     email = params[:email]
-    if current_user.multiple_accounts
+    if current_user.blank?
+      # Invalid, notify of account tampering
+      raise Exceptions::SecurityTamperingError
+    elsif current_user.multiple_accounts
       user = User.find_by_email(email)
       if user.nuid == current_user.nuid
         # Valid choice
