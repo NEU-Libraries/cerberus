@@ -12,6 +12,7 @@ class CatalogController < ApplicationController
   # Extend Blacklight::Catalog with Hydra behaviors (primarily editing).
   include Hydra::Controller::ControllerBehavior
   include BlacklightAdvancedSearch::ParseBasicQ
+  include BlacklightOaiProvider::ControllerExtension
 
   before_filter :default_search, except: [:facet, :recent]
 
@@ -47,8 +48,20 @@ class CatalogController < ApplicationController
     if !has_search_parameters?
       self.solr_search_params_logic += [:disable_highlighting]
       recent
+
+      # If user has multiple accounts, and no preferred account, send flash
+      if current_user
+        if current_user.multiple_accounts && current_user.account_pref.blank?
+          flash[:notice] = "#{t('drs.multiple_accounts.login_alert')} Please visit your #{ActionController::Base.helpers.link_to("Accounts", select_account_path)} page to select a primary account."
+        end
+      end
     else
-      super
+      begin
+        super
+      rescue Net::ReadTimeout
+        self.solr_search_params_logic += [:disable_highlighting]
+        super
+      end
     end
   end
 
@@ -80,6 +93,14 @@ class CatalogController < ApplicationController
     self.solr_search_params_logic += [:well_formed_items]
 
     (_, @recent_documents) = get_search_results(:q =>'', :sort=>"#{Solrizer.solr_name('system_create', :stored_sortable, type: :date)} desc", :rows=>999)
+  end
+
+  def oai
+    self.solr_search_params_logic += [:exclude_unwanted_models]
+    # Due to errors or poor metadata in Fedora, we need to check for title
+    self.solr_search_params_logic += [:well_formed_items]
+    self.solr_search_params_logic += [:limit_to_public]
+    super
   end
 
   def communities
@@ -141,6 +162,19 @@ class CatalogController < ApplicationController
   end
 
   configure_blacklight do |config|
+    config.oai = {
+      :provider => {
+        :repository_name => 'Cerberus',
+        :repository_url => 'https://repository.library.northeastern.edu',
+        :record_prefix => '',
+        :admin_email => 'sj.sweeney@neu.edu'
+      },
+      :document => {
+        :timestamp => 'timestamp',
+        :limit => 25
+      }
+    }
+
     ## Default parameters to send to solr for all search-like requests. See also SolrHelper#solr_search_params
     config.default_solr_params = {
       :qt => "search",
@@ -302,6 +336,13 @@ class CatalogController < ApplicationController
 
   def search_layout
     "homepage"
+  end
+
+  def limit_to_public(solr_parameters, user_parameters)
+    solr_parameters[:fq] ||= []
+    solr_parameters[:fq] << "read_access_group_ssim:\"public\""
+    solr_parameters[:fq] << "-in_progress_tesim:true OR -incomplete_tesim:true"
+    solr_parameters[:fq] << "-embargo_release_date_dtsi:[* TO *]"
   end
 
   def no_personal_items(solr_parameters, user_parameters)

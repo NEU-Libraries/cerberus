@@ -6,8 +6,8 @@
 - else
   - # Better search results here
   - html_constraints = render_constraints( params )
-  - safe_constraints = strip_tags( html_constraints.sub( "</span>" , ""  ) )
-  - @page_title = @search_type || "Search: '#{safe_constraints}'"
+  - safe_constraints = params[:q] ? strip_tags( params[:q].sub( "</span>" , ""  ) ) : ''
+  - @page_title = @search_type || safe_constraints != "" ? "Search: '#{safe_constraints}'" : "Search"
 
   -content_for :page_header do
     %h1.page-header

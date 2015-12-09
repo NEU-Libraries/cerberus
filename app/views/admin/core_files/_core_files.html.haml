@@ -1,17 +1,32 @@
 .core_files
+  %div.toolbar.hidden
+    = form_tag(admin_multi_delete_files_path, method: 'delete') do
+      = hidden_field_tag(:ids)
+      = render partial: 'delete_modal', locals: { title: "Confirm Delete", button_title: "Delete", index: "all", core_file:nil}
+      = link_to("Delete", "#deleteModalall", data: { toggle: "modal" }, class: "btn btn-small btn-danger")
+
   = render 'catalog/results_pagination'
 
-  %table.table.table-striped
-    -if @type.to_s != "tombstoned"
-      %tr
-        %th= "Core File Title"
+  %table.table.table-striped{:id=>"#{@type}"}
+    %tr
+      %th
+        %input{:type=>"checkbox", :class=>"select_all"}
+      %th= "Core File Title"
+      -if @type.to_s != "tombstoned"
         %th= "Depositor Name"
         %th= "Depositor Email"
         %th= "Created At"
         %th= "Updated At"
         %th
-    - @core_files.each do |core_file|
+      - else
+        %th
+        %th
+        %th
+    - @core_files.each_with_index do |core_file, i|
+      = render partial: 'delete_modal', locals: { title: "Confirm Delete", button_title: "Delete", index: "#{i}", core_file:core_file}
       %tr
+        %td
+          %input{:type=>"checkbox", :class=>"cf_select", "data-pid"=>core_file.pid}
         %td
           .large
             -if !core_file.non_sort.blank?
@@ -35,9 +50,48 @@
             = DateTime.parse(core_file["system_modified_dtsi"]).strftime("%c")
 
         %td
-          = link_to("Delete", admin_delete_file_path(core_file),
-          method: :delete,
-          confirm: "This action is irreversible",
-          class: "btn btn-small btn-danger")
+          = link_to("Delete", "#deleteModal#{i}", data: { toggle: "modal" }, class: "btn btn-small btn-danger")
 
   = render 'catalog/results_pagination'
+
+:javascript
+  $(".select_all").on("change", function(){
+    var table = $(this).parents("table");
+    var val = $(this).prop("checked");
+    table.find(".cf_select").prop("checked", val);
+    show_toolbar(table);
+  });
+  $(".cf_select").on("change", function(){
+    var table = $(this).parents("table");
+    var val = $(this).prop("checked");
+    if (val == false && table.find(".select_all").prop("checked") == true){
+      table.find(".select_all").prop("checked", false);
+    }
+    var checked = $(this).prop("checked");
+    show_toolbar(table);
+  });
+  function show_toolbar(table) {
+    var checked = false;
+    var pids = '';
+    var pid_count = 0;
+    table.find(".cf_select").each(function(){
+      if ($(this).prop("checked") == true){
+        checked = true;
+        if (pids != ""){
+          pids += ", " + $(this).data("pid");
+        } else {
+          pids += $(this).data("pid");
+        }
+        pid_count++;
+      }
+    });
+    if (checked == true){
+      $(".toolbar").removeClass("hidden");
+      table.siblings(".toolbar").find("input[name='ids']").val(pids);
+      $("#deleteModalall").find(".modal-body").html("Are you sure you want to permanently delete the " + pid_count + " files that are selected?");
+    } else {
+      $(".toolbar").addClass("hidden");
+      table.siblings(".toolbar").find("input[name='ids']").val("");
+      $("#deleteModalall").find(".modal-body").html("");
+    }
+  }

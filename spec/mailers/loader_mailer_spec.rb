@@ -16,7 +16,8 @@ describe LoaderMailer do
       copyright = "Copyright statement"
       @user = FactoryGirl.create(:admin)
       permissions = {"CoreFile" => {"read"  => ["northeastern:drs:all"], "edit" => ["northeastern:drs:repository:staff"]}, "ImageSmallFile" => {"read"  => ["northeastern:drs:repository:staff"], "edit" => ["northeastern:drs:repository:staff"]}, "ImageLargeFile" => {"read"  => ["northeastern:drs:repository:staff"], "edit" => ["northeastern:drs:repository:staff"]}, "ImageMasterFile" => {"read"  => ["northeastern:drs:repository:staff"], "edit" => ["northeastern:drs:repository:staff"]}}
-      ProcessIptcZipJob.new(@loader_name, new_file.to_s, parent, copyright, @user, permissions, @client).run
+      derivatives = false
+      ProcessIptcZipJob.new(@loader_name, new_file.to_s, parent, copyright, @user, permissions, derivatives, @client).run
     end
 
     let(:mail) { LoaderMailer.load_alert }

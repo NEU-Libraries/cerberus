@@ -14,13 +14,20 @@ class User < ActiveRecord::Base
          :recoverable, :rememberable, :trackable, :validatable, :omniauthable, :omniauth_providers => [:shibboleth]
   # attr_accessible :title, :body
 
-  attr_accessible :password, :email, :password_confirmation, :remember_me, :nuid, :full_name, :view_pref, :employee_id
+  attr_accessible :password, :email, :password_confirmation, :remember_me, :nuid, :full_name, :view_pref, :employee_id, :account_pref, :multiple_accounts
   delegate :can?, :cannot?, :to => :ability
   serialize(:group_list, Array)
 
   acts_as_messageable
 
   ROLES = %w[admin employee]
+
+  def associated_accounts
+    if self.multiple_accounts
+      users = User.where(:nuid => self.nuid)
+      return users.map do |u| {:email=>u.email, :account_pref=>u.account_pref, :affiliation=>u.affiliation, :name=>u.name} end
+    end
+  end
 
   def groups
     return !self.group_list.blank? ? self.group_list : []
@@ -79,24 +86,18 @@ class User < ActiveRecord::Base
   end
 
   def self.find_for_shib(auth, signed_in_resource=nil)
-    # Temporary kludge until full featured user switching is put in place
     user = User.where(:email => auth.info.email).first
+    users = User.where(:nuid => auth.info.nuid)
 
     if auth.info.nuid.blank?
       raise Exceptions::NoNuidProvided
     end
 
-    # Switch to NUID as the true unique value (delayed until full featured user switching is put in place)
-    # unless user
-    #   user = User.find_by_nuid(auth.info.nuid)
-    # end
-
-    unless user
+    if user.nil? || users.blank?
       name_array = Namae.parse auth.info.name
       name_obj = name_array[0]
       emp_name = "#{name_obj.family}, #{name_obj.given}"
-      user.full_name = emp_name
-      
+
       user = User.create(password:Devise.friendly_token[0,20], full_name:emp_name, nuid:auth.info.nuid)
 
       if auth.info.email.blank?
@@ -105,10 +106,23 @@ class User < ActiveRecord::Base
         user.email = auth.info.email
       end
 
+      if !auth.info.employee.blank?
+        user.affiliation = auth.info.employee
+      end
+
       user.save!
 
       if(auth.info.employee == "faculty")
         Cerberus::Application::Queue.push(EmployeeCreateJob.new(auth.info.nuid, emp_name))
+      end
+    else
+      # Previously logged in
+      user = User.where(:email => auth.info.email).first
+
+      # Preferred account?
+      if !user.account_pref.blank?
+        email = user.account_pref
+        user = User.where(:email => email).first
       end
     end
 
@@ -125,6 +139,14 @@ class User < ActiveRecord::Base
     end
 
     user.add_group("northeastern:drs:all")
+
+    users = User.where(:nuid => auth.info.nuid)
+    if users.length > 1
+      users.map do |u|
+        u.multiple_accounts = true
+        u.save!
+      end
+    end
 
     return user
   end
@@ -199,6 +221,10 @@ class User < ActiveRecord::Base
     return self.groups.include? "northeastern:drs:repository:loaders:multipage"
   end
 
+  def bouve_loader?
+    return self.groups.include? "northeastern:drs:repository:loaders:bouve_dean"
+  end
+
   def loaders
     loaders = []
     if self.marcom_loader?
@@ -215,6 +241,9 @@ class User < ActiveRecord::Base
     end
     if self.multipage_loader?
       loaders.push(I18n.t("drs.loaders.multipage.long_name"))
+    end
+    if self.bouve_loader?
+      loaders.push(I18n.t("drs.loaders.bouve.long_name"))
     end
     return loaders
   end

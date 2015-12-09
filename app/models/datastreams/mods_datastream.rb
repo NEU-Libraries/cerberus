@@ -231,6 +231,13 @@ class ModsDatastream < ActiveFedora::OmDatastream
     # Kramdown parse for search purposes - #439
     solr_doc["abstract_tesim"] = kramdown_parse(self.abstract.first)
 
+    # Fixes #836
+    solr_doc["subject_tesim"] = self.subject.map do |sub|
+      sub.squish
+    end
+
+    solr_doc["subject_tesim"] = solr_doc["subject_tesim"] - self.subject
+
     # Extract special subject/topic fields
     authorized_keywords = []
 

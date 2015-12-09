@@ -43,9 +43,9 @@
       -else
         %tr.success
           %td
-            = cf.original_file
+            = image.original_file
           %td
-            = cf.title
+            = image.title
           %td Success
           %td File no longer exists
     - elsif image.validity == true && image.modified == true
@@ -63,9 +63,9 @@
       -else
         %tr.warning
           %td
-            =cf.original_file
+            = image.original_file
           %td
-            = cf.title
+            = image.title
           %td
             = "Modified - #{image.exception}"
           %td File no longer exists
@@ -87,3 +87,5 @@
               = link_to("View IPTC", loaders_cps_iptc_path(image.id), class:"btn btn-small btn-warning")
             - elsif @report.loader_name == t('drs.loaders.emsa.long_name')
               = link_to("View IPTC", loaders_emsa_iptc_path(image.id), class:"btn btn-small btn-warning")
+            - elsif @report.loader_name == t('drs.loaders.bouve.long_name')
+              = link_to("View IPTC", loaders_bouve_iptc_path(image.id), class:"btn btn-small btn-warning")

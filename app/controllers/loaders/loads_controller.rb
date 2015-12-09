@@ -29,7 +29,7 @@ class Loaders::LoadsController < ApplicationController
     render 'loaders/new', locals: { collections_options: @collections_options}
   end
 
-  def process_create(permissions, short_name, controller_name)
+  def process_create(permissions, short_name, controller_name, derivatives=false)
     @copyright = t('drs.loaders.'+short_name+'.copyright')
     begin
       # check error condition No files
@@ -47,7 +47,7 @@ class Loaders::LoadsController < ApplicationController
         flash[:error] = "You must accept the terms of service!"
         redirect_to(:back) and return
       else
-        process_file(file, parent, @copyright, permissions, short_name)
+        process_file(file, parent, @copyright, permissions, short_name, derivatives)
       end
     rescue => exception
       logger.error controller_name+"::create rescued #{exception.class}\n\t#{exception.to_s}\n #{exception.backtrace.join("\n")}\n\n"
@@ -75,7 +75,7 @@ class Loaders::LoadsController < ApplicationController
   end
 
   protected
-    def process_file(file, parent, copyright, permissions, short_name)
+    def process_file(file, parent, copyright, permissions, short_name, derivatives=false)
       @loader_name = t('drs.loaders.'+short_name+'.long_name')
       if virus_check(file) == 0
         tempdir = Pathname.new("#{Rails.application.config.tmp_path}/")
@@ -92,7 +92,7 @@ class Loaders::LoadsController < ApplicationController
             Cerberus::Application::Queue.push(ProcessMultipageZipJob.new(@loader_name, new_file.to_s, parent, copyright, current_user, permissions))
           else
             # send to iptc job
-            Cerberus::Application::Queue.push(ProcessIptcZipJob.new(@loader_name, new_file.to_s, parent, copyright, current_user, permissions))
+            Cerberus::Application::Queue.push(ProcessIptcZipJob.new(@loader_name, new_file.to_s, parent, copyright, current_user, permissions, derivatives))
           end
           session[:flash_success] = "Your file has been submitted and is now being processed. You will receive an email when the load is complete."
         else
