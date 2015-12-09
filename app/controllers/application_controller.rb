@@ -23,6 +23,13 @@ class ApplicationController < ActionController::Base
 
   # around_filter :profile
 
+  def assets
+    if (Rails.env.staging? || Rails.env.production?)
+      expires_in 1.year, :public => true
+      render :layout => false
+    end
+  end
+
   def profile
     if params[:profile] && result = RubyProf.profile { yield }
 
