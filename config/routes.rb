@@ -81,6 +81,10 @@ Cerberus::Application.routes.draw do
   get '/my_communities' => 'employees#my_communities', as: 'my_communities'
   get '/my_loaders' => 'employees#my_loaders', as: 'my_loaders'
 
+  get '/select_account' => 'users#select_account', as: 'select_account'
+  get '/switch_user' => 'users#switch_user', as: 'switch_user'
+  get '/set_preferred_user' => 'users#set_preferred_user', as: 'set_preferred_user'
+
   scope :module => Loaders do
    resources :marcom_loads, only: [:new, :create, :show], :path => "loaders/marcom"
    get "/loaders/marcom/new" => 'marcom_loads#new', as: 'loaders_marcom'
@@ -113,6 +117,7 @@ Cerberus::Application.routes.draw do
     resources :communities, except: [:show]
     resources :employees, only: [:index, :edit, :update, :destroy]
     resources :statistics, only: [:index]
+    resources :users, only: [:index, :show]
     get "/statistics/views" => 'statistics#get_views', as: 'views'
     get "/statistics/downloads" => 'statistics#get_downloads', as: 'downloads'
     get "/statistics/streams" => 'statistics#get_streams', as: 'streams'
@@ -124,6 +129,7 @@ Cerberus::Application.routes.draw do
     get "/files/:id" => "core_files#show", as: 'view_file'
     get "/files/:id/revive" => "core_files#revive", as: 'revive_file'
     delete "/files/:id/delete" => "core_files#destroy", as: 'delete_file'
+    delete "/files/multi_delete" => "core_files#multi_delete", as: 'multi_delete_files'
     get "/collections" => 'collections#index', as: 'collections'
     get "/collections/tombstoned" => 'collections#get_tombstoned', as: 'tombstoned_collection'
     get "/collections/:id" => "collections#show", as: 'view_collection'
@@ -131,6 +137,7 @@ Cerberus::Application.routes.draw do
     delete "/collections/:id/delete" => "collections#destroy", as: 'delete_collection'
     get "/communities/filter_list" => 'communities#filter_list', as: 'communities_filter_list'
     get "/employees/filter_list" => "employees#filter_list", as: 'employees_filter_list'
+    get "/impersonate_user/:id" => "users#impersonate_user", as: 'impersonate_user'
   end
 
   namespace :api, defaults: {format: 'json'} do
