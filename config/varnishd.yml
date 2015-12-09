@@ -24,7 +24,7 @@ staging:
   bin_path: /usr/bin
   storage: "malloc,100MB"
   use_sudo: true
-  pid_path: /home/drs/config/varnish.pid
+  pid_path: /home/drs/config
   params:
     overflow_max: 2000          # for Varnish 2.x ... use "queue_max: 2000" for Varnish 3.x
     thread_pool_add_delay: 1
@@ -40,7 +40,7 @@ production:
   bin_path: /usr/bin
   storage: "malloc,100MB"
   use_sudo: true
-  pid_path: /home/drs/config/varnish.pid
+  pid_path: /home/drs/config
   params:
     overflow_max: 2000          # for Varnish 2.x ... use "queue_max: 2000" for Varnish 3.x
     thread_pool_add_delay: 1
