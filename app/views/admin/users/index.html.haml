@@ -1,0 +1,19 @@
+%ul.breadcrumb
+  %li
+    = link_to 'Admin Panel', '/admin'
+  %li.active
+    = link_to 'Manage Users', '/admin/users'
+
+%h2.page-header All Users
+
+= form_tag admin_users_path, :method => 'get', :class => 'form-inline', :remote => true do
+  = text_field_tag :search, params[:search]
+  = submit_tag "Search", :name => nil, :class => "btn btn-info"
+
+= render :partial => 'admin/users/users'
+
+
+:javascript
+  $("input[name='search']").on('keyup', function(){
+    $.getScript('/admin/users?search='+$(this).val());
+  });

@@ -57,6 +57,16 @@ class Admin::CoreFilesController < AdminController
     end
   end
 
+  def multi_delete
+    cfs = params[:ids]
+    cfs = cfs.split(',').map(&:strip)
+    cf_count = cfs.length
+    cfs.each do |cf|
+      CoreFile.find(cf).destroy
+    end
+    redirect_to admin_files_path, notice: "#{cf_count} files have been deleted"
+  end
+
   def get_core_files(type)
     filter_name = "limit_to_#{type}"
     @type = type.to_sym
