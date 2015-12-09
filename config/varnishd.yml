@@ -17,7 +17,7 @@ test:
   use_sudo: true
 
 staging:
-  listen: 0.0.0.0:80
+  listen: 0.0.0.0:4000
   telnet: localhost:6082
   backend: localhost:3000
   sbin_path: /usr/sbin
@@ -33,7 +33,7 @@ staging:
     thread_pool_max: 1000
 
 production:
-  listen: 0.0.0.0:80
+  listen: 0.0.0.0:4000
   telnet: localhost:6082
   backend: localhost:3000
   sbin_path: /usr/sbin
