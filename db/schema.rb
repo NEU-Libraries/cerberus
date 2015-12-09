@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20151022013230) do
+ActiveRecord::Schema.define(:version => 20151116151444) do
 
   create_table "bookmarks", :force => true do |t|
     t.integer  "user_id",     :null => false
@@ -57,9 +57,9 @@ ActiveRecord::Schema.define(:version => 20151022013230) do
   add_index "domain_terms_local_authorities", ["local_authority_id", "domain_term_id"], :name => "dtla_by_ids1"
 
   create_table "file_size_graphs", :force => true do |t|
-    t.text     "json_values",      :limit => 4294967295
-    t.datetime "created_at",                       :null => false
-    t.datetime "updated_at",                       :null => false
+    t.text     "json_values", :limit => 4294967295
+    t.datetime "created_at",                        :null => false
+    t.datetime "updated_at",                        :null => false
   end
 
   create_table "follows", :force => true do |t|
@@ -239,6 +239,8 @@ ActiveRecord::Schema.define(:version => 20151022013230) do
     t.string   "full_name"
     t.string   "view_pref",              :default => "list"
     t.string   "employee_id"
+    t.string   "account_pref",           :default => ""
+    t.boolean  "multiple_accounts",      :default => false
   end
 
   add_index "users", ["email"], :name => "index_users_on_email", :unique => true
