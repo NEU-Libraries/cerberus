@@ -71,7 +71,6 @@ namespace :deploy do
   desc "Stop Varnish"
   task :stop_varnish do
     on roles(:app), :in => :sequence, :wait => 5 do
-      previous_release = capture("ls #{releases_path}").split("\n").sort_by(&:to_i)[-2]
       execute "cd #{releases_path}/#{previous_release} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec rake lacquer:varnishd:stop)", raise_on_non_zero_exit: false
     end
   end
@@ -79,23 +78,23 @@ namespace :deploy do
   desc "Start Varnish"
   task :start_varnish do
     on roles(:app), :in => :sequence, :wait => 5 do
+      execute "rm -f /home/drs/config/varnish.pid", raise_on_non_zero_exit: false
       execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec rake lacquer:varnishd:start)"
     end
   end
 
-  # bundle exec rvmsudo RAILS_ENV=staging passenger start
   desc "Stop Passenger"
   task :stop_passenger do
     on roles(:app), :in => :sequence, :wait => 5 do
-      previous_release = capture("ls #{releases_path}").split("\n").sort_by(&:to_i)[-2]
-      execute "cd #{releases_path}/#{previous_release} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec passenger stop)", raise_on_non_zero_exit: false
+      execute "cd #{releases_path}/#{previous_release} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec passenger stop --pid-file /home/drs/config/passenger.pid)", raise_on_non_zero_exit: false
     end
   end
 
   desc "Start Passenger"
   task :start_passenger do
     on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec passenger start)"
+      execute "rm -f /home/drs/config/passenger.pid", raise_on_non_zero_exit: false
+      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec passenger start --pid-file /home/drs/config/passenger.pid)"
     end
   end
 
