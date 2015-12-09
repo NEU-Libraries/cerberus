@@ -194,7 +194,7 @@ class User < ActiveRecord::Base
   end
 
   def loader?
-    if self.groups.include? "northeastern:drs:repository:loaders:marcom" or self.groups.include? "northeastern:drs:repository:loaders:coe" or self.groups.include? "northeastern:drs:repository:loaders:cps" or self.groups.include? "northeastern:drs:repository:loaders:emsa_emc"
+    if self.groups.include? "northeastern:drs:repository:loaders:marcom" or self.groups.include? "northeastern:drs:repository:loaders:coe" or self.groups.include? "northeastern:drs:repository:loaders:cps" or self.groups.include? "northeastern:drs:repository:loaders:emsa_emc" or self.groups.include? "northeastern:drs:repository:loaders:bouve_dean"
       return true
     else
       return false
@@ -217,6 +217,10 @@ class User < ActiveRecord::Base
     return self.groups.include? "northeastern:drs:repository:loaders:emsa_emc"
   end
 
+  def bouve_loader?
+    return self.groups.include? "northeastern:drs:repository:loaders:bouve_dean"
+  end
+
   def loaders
     loaders = []
     if self.marcom_loader?
@@ -230,6 +234,9 @@ class User < ActiveRecord::Base
     end
     if self.emsa_loader?
       loaders.push(I18n.t("drs.loaders.emsa.long_name"))
+    end
+    if self.bouve_loader?
+      loaders.push(I18n.t("drs.loaders.bouve.long_name"))
     end
     return loaders
   end
