@@ -43,10 +43,12 @@
         = link_to(t('drs.loaders.emsa.long_name'), loaders_emsa_path, class: "btn btn-lg btn-primary")
         %br
         %br
-      - if current_user.multipage_loader?
-        = link_to(t('drs.loaders.multipage.long_name'), loaders_multipage_path, class: "btn btn-lg btn-primary")
       - if current_user.bouve_loader?
         = link_to(t('drs.loaders.bouve.long_name'), loaders_bouve_path, class: "btn btn-lg btn-primary")
+        %br
+        %br
+      - if current_user.multipage_loader?
+        = link_to(t('drs.loaders.multipage.long_name'), loaders_multipage_path, class: "btn btn-lg btn-primary")
         %br
         %br
 
