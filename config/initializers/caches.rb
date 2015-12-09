@@ -9,4 +9,7 @@ Lacquer.cache_control.configure do |config|
 
   config.register :static,              :url => "^/javascripts",
                                         :expires_in => "365d"
+
+  config.register :static,              :url => "^/assets",
+                                        :expires_in => "365d"
 end
