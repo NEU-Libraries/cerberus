@@ -63,6 +63,7 @@ gem 'diffy'
 gem 'roo', :git => 'https://github.com/roo-rb/roo'
 gem 'roo-xls', :git => 'https://github.com/roo-rb/roo-xls.git'
 gem 'unidecode'
+gem 'blacklight_oai_provider', :git => 'https://github.com/NEU-Libraries/blacklight_oai_provider.git', :ref => '915700c2982d4677934aa9f90a0284b21a7af48d'
 
 gem "ruby-prof"
 gem 'picturefill'

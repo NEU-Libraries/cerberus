@@ -1,5 +1,17 @@
 module Exceptions
 
+  class SecurityEscalationError < StandardError
+    def initialize
+      super "Attempted impersonation of an admin user"
+    end
+  end
+
+  class SecurityTamperingError < StandardError
+    def initialize
+      super "Attempted manual user switch, when not allowed"
+    end
+  end
+
   class GroupPermissionsError < StandardError
     attr_accessor :valid_groups, :supplied_groups, :user_name, :permissions
     def initialize(permissions, valid_groups, supplied_groups, user_name)

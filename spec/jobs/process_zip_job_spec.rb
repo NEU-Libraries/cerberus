@@ -12,11 +12,12 @@ describe ProcessIptcZipJob do
       new_path = tempdir.join(file_name).to_s
       @new_file = "#{new_path}.zip"
       FileUtils.cp("#{Rails.root}/spec/fixtures/files/jpgs.zip", @new_file)
-      parent = FactoryGirl.create(:root_collection).pid
+      @parent = FactoryGirl.create(:root_collection).pid
       copyright = "Copyright statement"
       @user = FactoryGirl.create(:admin)
       permissions = {"CoreFile" => {"read"  => ["northeastern:drs:all"], "edit" => ["northeastern:drs:repository:staff"]}, "ImageSmallFile" => {"read"  => ["northeastern:drs:repository:staff"], "edit" => ["northeastern:drs:repository:staff"]}, "ImageLargeFile" => {"read"  => ["northeastern:drs:repository:staff"], "edit" => ["northeastern:drs:repository:staff"]}, "ImageMasterFile" => {"read"  => ["northeastern:drs:repository:staff"], "edit" => ["northeastern:drs:repository:staff"]}}
-      ProcessIptcZipJob.new(@loader_name, @new_file.to_s, parent, copyright, @user, permissions, @client).run
+      derivatives = false
+      ProcessIptcZipJob.new(@loader_name, @new_file.to_s, @parent, copyright, @user, permissions, derivatives, @client).run
     end
 
     it 'changes loadreport length to 1' do
@@ -32,7 +33,8 @@ describe ProcessIptcZipJob do
     end
 
     it 'creates two core files' do
-      CoreFile.all.length.should == 3
+      count = ActiveFedora::SolrService.count("is_member_of_ssim:\"info:fedora/#{@parent}\" AND active_fedora_model_ssi:\"CoreFile\"")
+      count.should == 3
     end
 
     it 'sets correct number of success, fail, total number counts' do
