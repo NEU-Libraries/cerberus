@@ -133,8 +133,6 @@ before 'deploy:restart_workers', 'rvm1:hook'
 # before 'deploy:starting', 'deploy:stop_httpd'
 before 'deploy:starting', 'deploy:update_clamav'
 
-after 'deploy:updating', 'deploy:stop_varnish'
-after 'deploy:updating', 'deploy:stop_passenger'
 after 'deploy:updating', 'deploy:nokogiri'
 after 'deploy:updating', 'deploy:copy_rvmrc_file'
 after 'deploy:updating', 'deploy:trust_rvmrc'
@@ -143,6 +141,9 @@ after 'deploy:updating', 'deploy:copy_yml_file'
 after 'deploy:updating', 'deploy:migrate'
 after 'deploy:updating', 'deploy:whenever'
 after 'deploy:updating', 'deploy:flush_redis'
+
+after 'deploy:updating', 'deploy:stop_varnish'
+after 'deploy:updating', 'deploy:stop_passenger'
 
 after 'deploy:finished', 'deploy:restart_workers'
 after 'deploy:finished', 'deploy:start_varnish'
