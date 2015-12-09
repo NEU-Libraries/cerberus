@@ -3,11 +3,17 @@
 - facet_list ||= facet_field_names
 
 %ul.breadcrumb
-  - breadcrumb_to_root(@set).each do |breadcrumb|
-    =breadcrumb
-  = render partial: 'shared/sets/breadcrumb_action_menu'
--# Had to break off the partial into two files to make sure the popover div renders outside of the list.
-= render partial: 'shared/sets/breadcrumb_action_menu_links'
+  -if @set.klass != "Compilation"
+    - breadcrumb_to_root(@set).each do |breadcrumb|
+      =breadcrumb
+    = render partial: 'shared/sets/breadcrumb_action_menu'
+    -# Had to break off the partial into two files to make sure the popover div renders outside of the list.
+    = render partial: 'shared/sets/breadcrumb_action_menu_links'
+  -else
+    %li
+      = link_to('Sets', '/sets')
+    %li.active
+      = @set.title.html_safe
 
 
 %article.well.clearfix.inline-headings
@@ -84,6 +90,7 @@
     = render 'catalog/results_pagination'
     = render :partial => 'catalog/document_list'
     = render 'catalog/results_pagination'
-    = render partial: 'shared/sets/bottom_action_menu'
+    -if @set.klass != "Compilation"
+      = render partial: 'shared/sets/bottom_action_menu'
 
 %div#add_compilation_form{ style: 'display:none' }
