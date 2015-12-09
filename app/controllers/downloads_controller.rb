@@ -35,8 +35,8 @@ class DownloadsController < ApplicationController
   end
 
   def show
-    if asset.class == ImageThumbnailFile && Rails.env.production?
-      expires_in 10.years, public: true
+    if asset.class == ImageThumbnailFile && (Rails.env.staging? || Rails.env.production?)
+      expires_in 1.year, public: true
     end
     super
   end
