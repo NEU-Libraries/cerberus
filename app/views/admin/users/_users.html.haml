@@ -1,0 +1,17 @@
+= will_paginate @users
+%div.users
+  - @users.each_with_index do |user, i|
+    #accordion.accordion
+      .accordion-group
+        .accordion-heading
+          %a.accordion-toggle{"style" => "text-decoration: none", "data-parent" => "#accordion", "data-toggle" => "collapse", :href => "#collapse#{i}"}
+            =user.full_name
+            ="(#{user.email})"
+        .accordion-body.collapse{:id => "collapse#{i}"}
+          .accordion-inner
+            %dt NUID:
+            %dd=user.nuid
+            %dt Groups:
+            -user.groups.each do |g|
+              %dd=g
+            = link_to("Impersonate", admin_impersonate_user_path(:id => user.id), class: "btn btn-mini btn-danger", style:"margin: 5px 0px")
