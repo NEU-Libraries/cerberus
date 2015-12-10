@@ -34,13 +34,6 @@ class DownloadsController < ApplicationController
     render_403 and return
   end
 
-  def show
-    if asset.class == ImageThumbnailFile && (Rails.env.staging? || Rails.env.production?)
-      expires_in 1.year, public: true
-    end
-    super
-  end
-
   private
     def ensure_not_embargoed
       dl = fetch_solr_document
