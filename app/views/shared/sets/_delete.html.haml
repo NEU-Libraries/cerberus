@@ -1,5 +1,5 @@
 %div
-  -if !current_user.nil? && current_user.admin?
+  -if !current_user.nil? && current_user.admin? && "#{@set.class}" != 'Compilation'
     = form_tag( tombstone_collection_path ) do
       %fieldset
         .row-fluid
@@ -9,6 +9,27 @@
             %a.btn.btn-danger{href:"#deleteModal", title: "Tombstone Collection", data: {toggle: "modal"}}
               Tombstone Collection
       = render partial: 'shared/sets/delete_modal', locals: { title: "Confirm Tombstone", button_title: "Tombstone" }
+  -elsif "#{@set.class}" == 'Compilation' && current_user.nuid == @set.depositor
+    = form_tag( polymorphic_path(@set) ) do
+      %p= "Deleting a #{t('drs.compilations.name')} is a permanent action that cannot be undone but does not delete the items within the #{t('drs.compilations.name')}."
+      -# if depositor then can delete the set
+      %a{ href: "#deleteItemModal", title: "Destroy this #{t('drs.compilations.name')}", data: {toggle: 'modal', delete_path: "#{polymorphic_path(@set)}"}, class:"btn btn-clear" }
+        %i.icon-trash
+        Delete
+      = render partial: 'shared/sets/delete_item_modal', locals: { title: "Confirm Delete", button_title: "Delete", item: @set }
+  -elsif "#{@set.class}" == 'Compilation' && (current_user_can? :edit, @set)
+    -# if not the depositor then can request deletion
+    %p
+      ="You are not the original creator of the #{t('drs.compilations.name')}. Please request deletion."
+    = form_tag( request_delete_set_path ) do
+      %fieldset
+        .row-fluid
+          .span10
+            = label_tag :reason, "Why would you like us to delete this #{t('drs.compilations.name')}?"
+            = text_area_tag :reason, nil, :required => true, rows: 5, class: 'input-block-level'
+            %a.btn.btn-danger{href:"#deleteModal", title: "Request", data: {toggle: "modal"}}
+              Request
+      = render partial: 'shared/sets/delete_modal', locals: { title: "Confirm Delete Request", button_title: "Request"}
   -else
     %p
       The DRS is a permanent archive, but we recognize that occasionally it may be necessary to remove files. Please review

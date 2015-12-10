@@ -51,17 +51,9 @@
               = "Manage #{@set.type_label}"
           -if @set.klass == "Compilation"
             %li
-              -if current_user.nuid == @set.depositor && (current_user.can? :edit, @set.pid)
-                %a.btn{:href => "#deleteItemModal", title: "Delete #{@set.title}", data: { toggle: "modal", title: "#{@set.title}", delete_path: "#{polymorphic_path(@set)}"}}
-                  %i.icon-trash
-                  = "Delete"
-              -elsif current_user.can? :edit, @set.pid
-                -# do something here for when the person not the depositor is trying to delete the compilation
-            %li
               %a.btn{ href: prepare_download_path(id: @compilation.pid ) , method: 'get' }
                 %i.icon-download
                 Download
-            = render partial: 'shared/sets/delete_item_modal', locals: { item: @set }
 
 - if render_constraints(params) != ""
   %h1.page-header

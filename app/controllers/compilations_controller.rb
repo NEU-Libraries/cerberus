@@ -38,7 +38,7 @@ class CompilationsController < ApplicationController
     respond_to do |format|
       format.js {
         if @response.response['numFound'] < 1
-          render js: "$('#my').replaceWith('<div class=\"alert alert-info\">No #{t('drs.compilations.name') + 's'} available! Create a new #{t('drs.compilations.name')} today.</div>');"
+          render js: "$('#my').replaceWith('<div class=\"alert alert-info\">You have not created any #{t('drs.compilations.name') + 's'} yet! Create a new #{t('drs.compilations.name')} today.</div>');"
         else
           render "my"
         end
@@ -190,6 +190,16 @@ class CompilationsController < ApplicationController
   def download
     path_to_dl = Dir["#{Rails.application.config.tmp_path}/#{params[:id].gsub(":", "_")}/*"].first
     send_file path_to_dl
+  end
+
+  def request_delete
+    set = @compilation
+    title = set.title
+    user = current_user
+    reason = params[:reason]
+    TombstoneMailer.tombstone_alert(set, reason, user).deliver!
+    flash[:notice] = "Your request has been received and will be processed soon."
+    redirect_to set and return
   end
 
   private
