@@ -5,8 +5,7 @@ class ApplicationController < ActionController::Base
   include Cerberus::Controller
   # Solr Escape group values
   include Cerberus::ControllerHelpers::SolrEscapeGroups
-  include Blacklight::CatalogHelperBehavior
-  include Lacquer::CacheUtils
+  include Blacklight::CatalogHelperBehavior  
 
   unless Rails.application.config.consider_all_requests_local
     rescue_from Exception, with: lambda { |exception| render_500(exception) }

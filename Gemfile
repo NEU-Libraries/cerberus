@@ -1,6 +1,5 @@
 source 'https://rubygems.org'
 
-gem 'passenger'
 gem "sitemap_generator"
 gem "clamav"
 gem "colorize", "0.6.0" # https://github.com/capistrano/sshkit/issues/200
@@ -63,7 +62,6 @@ gem 'coveralls', require: false
 gem 'diffy'
 gem 'unidecode'
 gem 'blacklight_oai_provider', :git => 'https://github.com/NEU-Libraries/blacklight_oai_provider.git', :ref => '915700c2982d4677934aa9f90a0284b21a7af48d'
-gem 'lacquer'
 
 gem "ruby-prof"
 gem 'picturefill'
