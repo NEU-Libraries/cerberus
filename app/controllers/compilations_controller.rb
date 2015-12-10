@@ -132,6 +132,12 @@ class CompilationsController < ApplicationController
     if @response.response['numFound'] == 0
       flash[:notice] = "There are no items in this set. Please search or browse for an item or collection and add it to this set."
     end
+    if @compilation.entry_ids.length != @response.response['numFound']
+      dead_entries = @compilation.remove_dead_entries
+      if dead_entries.length > 0
+        flash.now[:error] = "#{dead_entries.length} items no longer exist in the repository and have been removed from your #{ t('drs.compilations.name')}."
+      end
+    end
 
     respond_to do |format|
       format.html{ render "shared/sets/show", locals: {pretty_description: @pretty_description}}
