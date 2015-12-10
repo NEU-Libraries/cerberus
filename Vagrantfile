@@ -16,6 +16,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Forward default rails development server port
   config.vm.network :forwarded_port, guest: 3000, host: 3000
 
+  # Varnish
+  config.vm.network :forwarded_port, guest: 3001, host: 3001
+
   # Live Reload runs on this server
   config.vm.network :forwarded_port, guest: 35729, host: 35729
 
