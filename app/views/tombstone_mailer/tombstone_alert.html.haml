@@ -11,6 +11,9 @@
       %li= "PID: #{@pid}"
       %li= "User: #{@user.name}"
       %li= "User Email: #{@user.email}"
+      -if @type == Compilation
+        %li= "Depositor: #{@depositor_name}"
+        %li= "Depositor Email: #{@depositor_email}"
 
     - if @pid
       %p= "A link to the #{@type} can be found #{link_to 'here', @object_url}".html_safe
