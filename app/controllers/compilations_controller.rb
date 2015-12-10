@@ -197,7 +197,7 @@ class CompilationsController < ApplicationController
     title = set.title
     user = current_user
     reason = params[:reason]
-    TombstoneMailer.tombstone_alert(set, reason, user).deliver!
+    DeleteMailer.delete_alert(set, reason, user).deliver!
     flash[:notice] = "Your request has been received and will be processed soon."
     redirect_to set and return
   end

@@ -1,7 +1,7 @@
-class TombstoneMailer < ActionMailer::Base
+class DeleteMailer < ActionMailer::Base
   default from: "notifier@repository.library.northeastern.edu"
 
-  def tombstone_alert(object, reason, user)
+  def delete_alert(object, reason, user)
     @title = object.title || "No title set.  Uh oh!"
     @pid  = object.pid  || "No pid set.  Uh oh!"
     @reason = reason
