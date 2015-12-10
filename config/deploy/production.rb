@@ -117,6 +117,36 @@ namespace :deploy do
     end
   end
 
+  desc "Stop Varnish"
+  task :stop_varnish do
+    on roles(:app), :in => :sequence, :wait => 5 do
+      execute "cd #{release_path} && (RAILS_ENV=production /tmp/drs/rvm-auto.sh . bundle exec rake lacquer:varnishd:stop)", raise_on_non_zero_exit: false
+    end
+  end
+
+  desc "Start Varnish"
+  task :start_varnish do
+    on roles(:app), :in => :sequence, :wait => 5 do
+      execute "rm -f /home/drs/config/varnish.pid", raise_on_non_zero_exit: false
+      execute "cd #{release_path} && (RAILS_ENV=production /tmp/drs/rvm-auto.sh . bundle exec rake lacquer:varnishd:start)"
+    end
+  end
+
+  desc "Stop Passenger"
+  task :stop_passenger do
+    on roles(:app), :in => :sequence, :wait => 5 do
+      execute "cd #{release_path} && (RAILS_ENV=production /tmp/drs/rvm-auto.sh . bundle exec passenger stop --pid-file /home/drs/config/passenger.pid)", raise_on_non_zero_exit: false
+    end
+  end
+
+  desc "Start Passenger"
+  task :start_passenger do
+    on roles(:app), :in => :sequence, :wait => 5 do
+      execute "rm -f /home/drs/config/passenger.pid", raise_on_non_zero_exit: false
+      execute "cd #{release_path} && (RAILS_ENV=production /tmp/drs/rvm-auto.sh . bundle exec passenger start --pid-file /home/drs/config/passenger.pid --instance-registry-dir /tmp/DRStmp --data-buffer-dir /tmp/DRStmp)"
+    end
+  end
+
 end
 
 # Load the rvm environment before executing the refresh data hook.
@@ -130,7 +160,7 @@ before 'deploy:assets_kludge', 'deploy:clear_cache'
 # These hooks execute in the listed order after the deploy:updating task
 # occurs.  This is the task that handles refreshing the app code, so this
 # should only fire on actual deployments.
-before 'deploy:starting', 'deploy:stop_httpd'
+# before 'deploy:starting', 'deploy:stop_httpd'
 before 'deploy:starting', 'deploy:update_clamav'
 
 after 'deploy:updating', 'deploy:nokogiri'
@@ -142,8 +172,13 @@ after 'deploy:updating', 'deploy:migrate'
 after 'deploy:updating', 'deploy:whenever'
 after 'deploy:updating', 'deploy:assets_kludge'
 
+after 'deploy:updating', 'deploy:stop_varnish'
+after 'deploy:updating', 'deploy:stop_passenger'
+
 # after 'deploy:finished', 'deploy:start_solrizerd'
 after 'deploy:finished', 'deploy:flush_redis'
-after 'deploy:finished', 'deploy:start_httpd'
+after 'deploy:finished', 'deploy:start_varnish'
+after 'deploy:finished', 'deploy:start_passenger'
+# after 'deploy:finished', 'deploy:start_httpd'
 # after 'deploy:finished', 'deploy:restart_workers'
 # after 'deploy:finished', 'deploy:generate_sitemap'
