@@ -18,6 +18,7 @@ class ApplicationController < ActionController::Base
   layout "homepage"
 
   protect_from_forgery
+  before_filter :impersonate_warning
   before_filter :store_location
   after_filter :redirect_blacklight_overrun
 
@@ -90,6 +91,12 @@ class ApplicationController < ActionController::Base
       fetch.call(options[:id])
     else
       fetch.call(params[:id])
+    end
+  end
+
+  def impersonate_warning
+    if !session[:impersonate].blank?
+      flash[:error] = "#{session[:impersonate]}"
     end
   end
 
