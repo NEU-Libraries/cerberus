@@ -368,7 +368,7 @@ class CoreFilesController < ApplicationController
     collection = core_file.parent.id
     user = current_user
     reason = params[:reason]
-    TombstoneMailer.tombstone_alert(core_file, reason, user).deliver!
+    DeleteMailer.delete_alert(core_file, reason, user).deliver!
     flash[:notice] = "Your request has been received and will be processed soon."
     redirect_to core_file and return
   end

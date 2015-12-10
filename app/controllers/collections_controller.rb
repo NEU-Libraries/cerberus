@@ -210,7 +210,7 @@ class CollectionsController < ApplicationController
     title = collection.title
     user = current_user
     reason = params[:reason]
-    TombstoneMailer.tombstone_alert(collection, reason, user).deliver!
+    DeleteMailer.delete_alert(collection, reason, user).deliver!
     flash[:notice] = "Your request has been received and will be processed soon."
     redirect_to collection and return
   end

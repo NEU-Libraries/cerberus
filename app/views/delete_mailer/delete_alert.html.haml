@@ -3,7 +3,10 @@
   %head
     %meta{:content => "text/html; charset=UTF-8", "http-equiv" => "Content-Type"}/
   %body
-    %h3= "Tombstone #{@type} Alert"
+    -if @type == Compilation
+      %h3= "Delete #{@type} Request"
+    -else
+      %h3= "Tombstone #{@type} Alert"
 
     %p="A user has requested that a #{@type} be deleted:"
     %ul
