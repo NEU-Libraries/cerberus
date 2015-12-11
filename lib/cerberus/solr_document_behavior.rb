@@ -418,5 +418,21 @@ module Cerberus
     def encode
       self.pid.gsub(':','%3A')
     end
+
+    def entries
+      e = Array(self[Solrizer.solr_name("has_member", :symbol)])
+      if e.count > 0
+        query = ""
+        query = e.map! { |id| "\"#{id.split('/').last}\""}.join(" OR ")
+        query = "id:(#{query})"
+        puts query
+        row_count = ActiveFedora::SolrService.count(query)
+        puts row_count
+        query_result = ActiveFedora::SolrService.query(query, :rows => row_count)
+        return query_result.map { |x| SolrDocument.new(x) }
+      else
+        []
+      end
+    end
   end
 end

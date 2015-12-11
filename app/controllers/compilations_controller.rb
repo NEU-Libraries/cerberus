@@ -204,6 +204,24 @@ class CompilationsController < ApplicationController
     redirect_to set and return
   end
 
+  def get_total_count
+    @set = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first)
+    docs = []
+    @set.entries.each do |e|
+      if e.klass == 'CoreFile'
+        docs << e
+      else
+        e.all_descendent_files.each do |f|
+          docs << f
+        end
+      end
+    end
+    docs.select! { |doc| current_user.can?(:read, doc) }
+    respond_to do |format|
+      format.js { render "count", locals:{count:docs.count}}
+    end
+  end
+
   private
 
   def save_or_bust(compilation)
