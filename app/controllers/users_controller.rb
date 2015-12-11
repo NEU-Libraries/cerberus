@@ -38,7 +38,7 @@ class UsersController < ApplicationController
       end
 
       flash[:notice] = "#{t('drs.multiple_accounts.set_confirmation')} #{current_user.email}"
-      redirect_to root_path and return
+      redirect_to select_account_path and return
     end
   end
 
