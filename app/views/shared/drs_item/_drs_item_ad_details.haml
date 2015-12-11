@@ -39,6 +39,8 @@
   - if !item.under_embargo?(current_user)
     .list-buttons
       = render partial: 'core_files/derivative_btn_group', locals: {contents: @content_objects, list_view: true, item: item, alignment: "pull-right"}
+    -if controller_name == 'compilations' && current_user && @compilation && (current_user_can? :edit, @compilation)
+      = render partial: 'remove_modal', locals: { entry: item, entry_id: item.pid.gsub(":",""), compilation: @compilation }
   - if !item.date.blank?
     %dl.drs-item-date-list
       %dt.drs-item-date-label
@@ -62,3 +64,10 @@
     .btn-group
       - icon = render partial: 'shared/icon',  locals: { class_string: "icon-comments-alt", alt_text: "Add to " + t('drs.compilations.name')}
       =link_to icon.html_safe , "mailto:Library-Help@neu.edu?body=Please%20describe%20the%20problem%20you%20are%20experiencing.&Subject=#{item.title} - #{item.pid} (#{CGI::escape(request.original_url)})", :target => "_top", title:  "Report a problem", data: {toggle: "tooltip"}, class: 'btn btn-mini btn-clear'
+    -if controller_name == 'compilations' && current_user && (current_user_can? :edit, @compilation)
+      .btn-group
+        %a.btn.btn-mini.btn-danger{ href: "#removeFromCompilationModal#{item.pid.gsub(":","")}", data: { toggle: "modal" }, title: "Remove from set" }
+          %i.icon-remove
+          Remove
+          %span.sr-only
+            Remove #{item.title} from #{@compilation.title}
