@@ -14,7 +14,6 @@
     %tr
       %td{:width=>"35%"}
         - if u[:email] == current_user.email
-          =render partial: 'shared/icon', locals: { class_string: "#{t('drs.multiple_accounts.preferred_icon')} text-success" }
           = "You are currently logged in with this account"
         - else
           %a.btn.btn-primary.btn-small{:href => switch_user_path(email: u[:email])}
