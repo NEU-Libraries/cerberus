@@ -50,8 +50,7 @@ class CompilationsController < ApplicationController
     # use this for the popup when adding to sets
     u_groups = current_user.groups
     groups = u_groups.map! { |g| "\"#{g}\""}.join(" OR ")
-    compilation_docs = solr_query("(depositor_tesim:\"#{current_user.nuid}\" OR edit_access_group_ssim:(#{groups})) AND has_model_ssim:\"#{ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:Compilation"}\"")
-    @compilations = compilation_docs.map{|c| Compilation.find(c.pid)}
+    @compilations = solr_query("(depositor_tesim:\"#{current_user.nuid}\" OR edit_access_group_ssim:(#{groups})) AND has_model_ssim:\"#{ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:Compilation"}\"")
 
     respond_to do |format|
       format.js{ render "editable" }
@@ -134,9 +133,6 @@ class CompilationsController < ApplicationController
     end
     if @compilation.entry_ids.length != @response.response['numFound']
       dead_entries = @compilation.remove_dead_entries
-      if dead_entries.length > 0
-        flash.now[:error] = "#{dead_entries.length} items no longer exist in the repository and have been removed from your #{ t('drs.compilations.name')}."
-      end
     end
 
     respond_to do |format|
