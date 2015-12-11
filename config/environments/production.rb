@@ -34,7 +34,8 @@ Cerberus::Application.configure do
   config.assets.compress = true
 
   # Serve static assets
-  config.serve_static_assets = true
+  # config.serve_static_assets = true
+  # config.static_cache_control = "public, max-age=315360000"
 
   # Expands the lines which load the assets
   config.assets.debug = false
@@ -46,7 +47,9 @@ Cerberus::Application.configure do
   config.action_mailer.default_url_options = { :host => "repository.library.northeastern.edu" }
 
   Rails.application.routes.default_url_options[:host] = "repository.library.northeastern.edu"
-  config.force_ssl = true
+  Rails.application.routes.default_url_options[:protocol] = "https"
+
+  # config.force_ssl = true
 
   config.cache_store = :redis_store, 'redis://localhost:6379/0/cache', { expires_in: 12.hours }
 
