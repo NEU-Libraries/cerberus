@@ -17,9 +17,12 @@ a{
 }
 
 .set-actions{
+  width:100%;
+  display:block;
   padding-top:19px;
   clear:both;
   .nav-pills{
+    width:100%;
     margin: 0px;
     float: right;
     a:hover, a:focus{

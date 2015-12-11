@@ -45,6 +45,7 @@ Cerberus::Application.routes.draw do
   get "/sets/my" => "compilations#my_sets", as: 'sets_my'
   get "/sets/editable" => "compilations#editable_compilations", as: 'sets_editable'
   match "/sets/:id/request_delete" => "compilations#request_delete", via: 'post', as:"request_delete_set"
+  get "/sets/:id/count" => "compilations#get_total_count", as: 'set_count'
   resources :compilations, :controller => "compilations", :path => "sets"
   get "/sets/:id/download" => 'compilations#show_download', as: 'prepare_download'
   get "/sets/:id/ping" => 'compilations#ping_download', as: 'ping_download'
