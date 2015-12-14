@@ -37,7 +37,7 @@
       = link_to "#{@set.identifier}", @set.identifier
   %nav.set-actions
     %ul.nav.nav-pills
-      - if ((@response && @response.response['numFound'] > 0) || @files && @files.count > 0)&& @set.has_core_file_children?
+      - if ((@response && @response.response['numFound'] > 0) || @files && @files.count > 0)&& @set.has_core_file_children? && @set.pid != "neu:1"
         %li{:class=>("active" if current_page?(action: 'recent_deposits'))}
           - if @set.klass == "Collection"
             %a.btn.btn-default{:href=>collection_recent_deposits_path(@set)}
