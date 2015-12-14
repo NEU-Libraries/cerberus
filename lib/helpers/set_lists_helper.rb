@@ -29,7 +29,9 @@ module SetListsHelper
     solr_fname = "creator_sim"
     @display_facet = @response.facets.detect {|f| f.name == solr_fname}
     facet_count = @display_facet.items.length
-    if facet_count > 0
+    if !params[:f].nil?
+      render 'shared/sets/show'
+    elsif facet_count > 0
       render 'shared/sets/creator_list', locals:{sort_value:sort_value, solr_fname:solr_fname}
     else
       redirect_to @set
