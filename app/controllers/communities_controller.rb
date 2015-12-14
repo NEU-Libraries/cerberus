@@ -23,6 +23,7 @@ class CommunitiesController < ApplicationController
   before_filter :can_read?, except: [:index, :show, :creator_list, :title_list, :recent_deposits]
   before_filter :enforce_show_permissions, :only=>:show
   before_filter :get_set, except: [:index]
+  before_filter :not_root, :only=>[:creator_list, :title_list, :recent_deposits]
 
   self.solr_search_params_logic += [:add_access_controls_to_solr_params]
 

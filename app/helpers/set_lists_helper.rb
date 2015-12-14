@@ -93,4 +93,12 @@ module SetListsHelper
   def sort_value
     %w[value hits].include?(params[:sort_val]) ? params[:sort_val] : "value"
   end
+
+  def not_root
+    if @set.pid == "neu:1"
+      redirect_to @set and return
+    else
+      return false
+    end
+  end
 end
