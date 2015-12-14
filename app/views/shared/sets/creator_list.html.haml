@@ -19,8 +19,6 @@
           %th
             -if sort_value == 'hits'
               - @display_facet.items.sort_by!{|i| i.hits}.reverse!
-              - puts @display_facet.items
-              -# #this isn't working
               = "Count"
               %span.icon-small.icon-chevron-down
             -else
