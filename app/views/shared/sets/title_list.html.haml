@@ -5,17 +5,17 @@
 
 %main.row( role="main" )
   %section.span12
-    - if @response.response.count > 0
+    - if @files.count > 0
       = render partial: '/shared/sets/alpha'
       %table.table.table-bordered
         %tr
           %th= "Title"
         - alpha = []
-        - @document_list.each do |r|
+        - @files.each do |r|
           %tr{:id=>(r.title[0].capitalize if !alpha.include? r.title[0].capitalize)}
             - if !alpha.include? r.title[0].capitalize
               - alpha << r.title[0].capitalize
-            %td= link_to(r.title, "/files/#{r['id']}")
+            %td= link_to(r.title, "/@files/#{r.id}")
       :javascript
         var alpha = '#{alpha}';
         $(".alpha_list .btn").each(function(){
