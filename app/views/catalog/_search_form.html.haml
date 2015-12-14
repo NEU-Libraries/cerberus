@@ -1,5 +1,5 @@
 - q = params[:q]
-- action_url = !(defined? scope) ? catalog_index_path : request.path
+- action_url = !(defined? scope) ? catalog_index_path : (@set ? (@set.klass == 'Community' ? community_path(id: @set.pid) : collection_path(id: @set.pid)) : request.path)
 = form_tag action_url, :method => :get, :id => "search-form-header" , :class => "navbar-form pull-right", role: "search" do
   = search_as_hidden_fields(:omit_keys => [:q, :search_field, :qt, :page]).html_safe
   %label.sr-only(for="searchFieldHeader")
