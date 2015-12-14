@@ -159,7 +159,7 @@ class ProcessMultipageZipJob
     0.upto header_row.length do |row_pos|
       case header_row[row_pos]
         when column_identifier
-          return row_value[row_pos].to_s
+          return row_value[row_pos].to_s || ""
       end
     end
     return ""
