@@ -19,17 +19,18 @@ module SetListsHelper
     end
   end
 
-  def author_list
+  def creator_list
     @set = fetch_solr_document
-    @page_title = "#{@set.title} Author List"
+    @page_title = "#{@set.title} Creator List"
     self.solr_search_params_logic += [:limit_to_scope]
+    self.solr_search_params_logic += [:disable_facet_limit]
 
     (@response, @document_list) = get_search_results
     solr_fname = "creator_sim"
     @display_facet = @response.facets.detect {|f| f.name == solr_fname}
     facet_count = @display_facet.items.length
     if facet_count > 0
-      render 'shared/sets/author_list', locals:{sort_value:sort_value, solr_fname:solr_fname}
+      render 'shared/sets/creator_list', locals:{sort_value:sort_value, solr_fname:solr_fname}
     else
       redirect_to @set
     end
@@ -38,12 +39,11 @@ module SetListsHelper
   def title_list
     @set = fetch_solr_document
     @page_title = "#{@set.title} Title List"
-    self.solr_search_params_logic += [:limit_to_core_files]
-    params[:fl] = 'title_ssi, id'
-
-    (@response, @document_list) = get_search_results
-    if @response.response['numFound'] > 0
-      render 'shared/sets/title_list', locals:{sort_value:sort_value}
+    @files = @set.all_descendent_files.sort_by!{|i| i['title_ssi']}
+    count = @files.count
+    @files.select! { |doc| current_user.can?(:read, doc) }
+    if count > 0
+      render 'shared/sets/title_list', locals:{sort_value:sort_value, files:@files}
     else
       redirect_to @set
     end
@@ -66,6 +66,10 @@ module SetListsHelper
     fq = "(#{fq}) AND active_fedora_model_ssi:\"CoreFile\""
     solr_parameters[:fq] ||= []
     solr_parameters[:fq] << fq
+  end
+
+  def disable_facet_limit(solr_parameters, user_parameters)
+    solr_parameters["facet.limit"] = "-1"
   end
 
   def pretty_sort_name(sort)

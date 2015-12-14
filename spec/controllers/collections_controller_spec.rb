@@ -233,7 +233,7 @@ describe CollectionsController do
     end
   end
 
-  describe "GET #author_list" do
+  describe "GET #creator_list" do
     it_should_behave_like "show validations"
     it "should redirect to collection if no core_files" do
       sign_in bill
