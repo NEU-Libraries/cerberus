@@ -20,7 +20,7 @@ class CommunitiesController < ApplicationController
   helper_method :sort_value
 
   # We can do better by using SOLR check instead of Fedora
-  before_filter :can_read?, except: [:index, :show]
+  before_filter :can_read?, except: [:index, :show, :creator_list, :title_list, :recent_deposits]
   before_filter :enforce_show_permissions, :only=>:show
   before_filter :get_set, except: [:index]
 
