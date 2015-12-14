@@ -162,7 +162,7 @@ class ProcessMultipageZipJob
           return row_value[row_pos].to_s
       end
     end
-    return nil
+    return ""
   end
 
   def unzip(file, dir_path)
@@ -180,6 +180,9 @@ class ProcessMultipageZipJob
           zipfile.extract(f, fpath) unless File.exist?(fpath)
         end
       end
+
+      # Ensure all files have ok permissions
+      FileUtils.chmod_R(0777, "#{dir_path}")
 
       # Find the spreadsheet
       xlsx_array = Dir.glob("#{dir_path}/*.xlsx")
