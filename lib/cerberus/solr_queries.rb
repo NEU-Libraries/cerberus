@@ -241,7 +241,7 @@ module Cerberus
       solr_query("#{relation}:\"#{str}\"")
     end
 
-    def has_authors?
+    def has_creators?
       descendents = self.combined_set_descendents
       query = descendents.map do |set|
         p = set.pid
