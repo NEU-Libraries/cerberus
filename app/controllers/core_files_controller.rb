@@ -17,7 +17,7 @@ class CoreFilesController < ApplicationController
   include XmlValidator
   include HandleHelper
   include MimeHelper
-  
+
   include Blacklight::Catalog
   include Blacklight::Configurable # comply with BL 3.7
   include ActionView::Helpers::DateHelper
@@ -27,7 +27,7 @@ class CoreFilesController < ApplicationController
   include BlacklightAdvancedSearch::ParseBasicQ
   include BlacklightAdvancedSearch::Controller
 
-  before_filter :authenticate_user!, except: [:show]
+  before_filter :authenticate_user!, except: [:show, :get_page_images, :get_page_file]
 
   skip_before_filter :normalize_identifier
   skip_load_and_authorize_resource only: [:provide_metadata,
@@ -40,7 +40,7 @@ class CoreFilesController < ApplicationController
 
   before_filter :can_edit_parent_or_proxy_upload?, only: [:new, :create, :destroy_incomplete_file]
 
-  before_filter :can_read?, only: [:show]
+  before_filter :can_read?, only: [:show, :get_page_images, :get_page_file]
   before_filter :can_edit?, only: [:edit, :update]
   before_filter :complete?, only: [:edit, :update]
 
@@ -420,7 +420,7 @@ class CoreFilesController < ApplicationController
   end
 
   def get_page_file
-    cf = params[:cf]
+    cf = params[:id]
     page = params[:page]
     full_cf_id = RSolr.escape("info:fedora/#{cf}")
     @page = SolrDocument.new(ActiveFedora::SolrService.query("active_fedora_model_ssi:PageFile AND is_part_of_ssim:#{full_cf_id} AND ordinal_value_tesim:#{page}").first)
