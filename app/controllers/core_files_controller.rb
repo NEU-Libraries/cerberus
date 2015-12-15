@@ -421,10 +421,14 @@ class CoreFilesController < ApplicationController
 
   def get_page_file
     cf = params[:id]
-    page = params[:page]
-    full_cf_id = RSolr.escape("info:fedora/#{cf}")
-    @page = SolrDocument.new(ActiveFedora::SolrService.query("active_fedora_model_ssi:PageFile AND is_part_of_ssim:#{full_cf_id} AND ordinal_value_tesim:#{page}").first)
+    @page = params[:page]
+    @full_cf_id = RSolr.escape("info:fedora/#{cf}")
+    params[:per_page] = 1
+    self.solr_search_params_logic += [:limit_to_ordinal_vals]
+    (@response, @document_list) = get_search_results
+    @pagination = paginate_params(@response)
     @core_file = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{cf}\"").first)
+    @page_title = "#{@core_file.title} - Page #{params[:page]}"
     respond_to do |format|
       format.js {
         render "/page_files/show", locals:{page:@page}
@@ -586,5 +590,15 @@ class CoreFilesController < ApplicationController
         full_self_id = RSolr.escape("info:fedora/#{@core_file.pid}")
         solr_parameters[:fq] ||= []
         solr_parameters[:fq] << "#{Solrizer.solr_name("has_model", :symbol)}:\"info:fedora/afmodel:PageFile\" AND #{Solrizer.solr_name("is_part_of", :symbol)}:\"#{full_self_id}\""
+      end
+
+      def limit_to_ordinal_vals(solr_parameters, user_parameters)
+        solr_parameters[:fq] ||= []
+        solr_parameters[:fq] << "active_fedora_model_ssi:PageFile AND is_part_of_ssim:#{@full_cf_id}"
+        # solr_parameters[:df] = 1
+        solr_parameters[:per_page] = 1
+        # solr_parameters[:rows] = 1
+        solr_parameters[:sort] = "ordinal_value_ssi asc"
+        solr_parameters[:fl] = "id, ordinal_value_ssi"
       end
 end
