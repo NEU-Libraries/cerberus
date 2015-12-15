@@ -23,36 +23,35 @@
       if (page){
         get_page("/files/#{@core_file.pid}/page/"+page, page);
       }
-    ajax_pagination();
-    function ajax_pagination(){
-      $(".pagination span a").on("click", function(e){
-        e.preventDefault();
-        spinner = enable_spinner('single_page');
-        var href = $(this).attr("href");
-        var url = href.split('?')[0];
-        var params = href.split('?')[1];
-        var ordinal_value = 0;
-        if (href.indexOf('/files/#{@core_file.pid}/page') == -1){
-          href = "#{page_file_path(@core_file, 1)}?"+params;
-          ordinal_value = 1;
-        } else {
-          ordinal_value = $(this).text();
-          if (!$.isNumeric(ordinal_value)){
-            ordinal_value = url[url.length-1];
-          }
-        }
-        get_page(href, ordinal_value);
-      })
-    }
-    function get_page(path, ordinal_value){
-      $.getScript( path, function() {
-        $("#single_page .spinner").remove();
-        enable_pagination();
-        location.hash = ordinal_value
-      });
-    }
-    function enable_pagination(){
       ajax_pagination();
-    }
-
-  })
+      function ajax_pagination(){
+        $(".pagination span a").on("click", function(e){
+          e.preventDefault();
+          spinner = enable_spinner('single_page');
+          var href = $(this).attr("href");
+          var url = href.split('?')[0];
+          var params = href.split('?')[1];
+          var ordinal_value = 0;
+          if (href.indexOf('/files/#{@core_file.pid}/page') == -1){
+            href = "#{page_file_path(@core_file, 1)}?"+params;
+            ordinal_value = 1;
+          } else {
+            ordinal_value = $(this).text();
+            if (!$.isNumeric(ordinal_value)){
+              ordinal_value = url[url.length-1];
+            }
+          }
+          get_page(href, ordinal_value);
+        })
+      }
+      function get_page(path, ordinal_value){
+        $.getScript( path, function() {
+          $("#single_page .spinner").remove();
+          enable_pagination();
+          location.hash = ordinal_value
+        });
+      }
+      function enable_pagination(){
+        ajax_pagination();
+      }
+    })

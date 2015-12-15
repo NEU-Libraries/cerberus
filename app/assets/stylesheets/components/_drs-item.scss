@@ -18,6 +18,16 @@
   text-align:center;
 }
 
-.page_file .span12{
-  margin-left:0;
+.page_file{
+  .span12{
+    margin-left:0;
+  }
+  .pager .pull-left{
+    display:none;
+  }
+  .pager .pagination{
+    float:none;
+    width:100%;
+    text-align:center;
+  }
 }
