@@ -19,7 +19,7 @@ en:
           scoped_placeholder: "Search this collection"
           placeholder: "Search the DRS"
     provide_metadata_page:
-      image_slider_error: "Something went wrong and we are unable to process your image. Please try again. If the problem persists, please use the Library's <a href=\"mailto:Library-Help@neu.edu?body=Please%20describe%20the%20problem%20you%20are%20experiencing.&Subject=DRS%20Problem\" target=\"_top\">Report a Problem</a> form."
+      image_slider_error: "Something went wrong and we are unable to process your image. Please try again. If the problem persists, please use the Library's <a href=\"http://library.northeastern.edu/get-help/tech-support/report-a-problem\" target=\"_top\">Report a Problem</a> form."
     homepage:
       description:
         short: "The Digital Repository Service is a secure repository system, designed to store and share scholarly, administrative, and archival materials from the Northeastern University community."
@@ -38,7 +38,8 @@ en:
       destroy_link: "Delete this set"
     shoppingcarts:
       name: download queue
-      lead: "Your Download Queue is like a shopping cart. Files added to your Download Queue will remain in the queue until you sign out. If you want to save a file and come back to it later, add it to a Set."
+      lead: "Your Download Queue is like a shopping cart. Files added to your Download Queue will remain in the queue until you close your browser or your browsing session is refreshed. If you want to save a file and come back to it later, sign in to the DRS and add the file to a Set."
+      empty_message: "Your download queue is empty! Click the 'Add to download queue' button next to any file to add it to your queue."
       destroy_button: "Clear Queue"
       download_message: "Please wait a moment while your download is being prepared. If your Download Queue is large, this process may take some time."
     #Featured Content labels
