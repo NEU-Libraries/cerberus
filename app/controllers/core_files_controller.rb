@@ -590,7 +590,7 @@ class CoreFilesController < ApplicationController
         full_self_id = RSolr.escape("info:fedora/#{@core_file.pid}")
         solr_parameters[:fq] ||= []
         solr_parameters[:fq] << "#{Solrizer.solr_name("has_model", :symbol)}:\"info:fedora/afmodel:PageFile\" AND #{Solrizer.solr_name("is_part_of", :symbol)}:\"#{full_self_id}\""
-        solr_parameters[:sort] = "ordinal_value_ssi asc"
+        solr_parameters[:sort] = "ordinal_value_isi asc"
       end
 
       def limit_to_ordinal_vals(solr_parameters, user_parameters)
@@ -599,7 +599,7 @@ class CoreFilesController < ApplicationController
         # solr_parameters[:df] = 1
         solr_parameters[:per_page] = 1
         # solr_parameters[:rows] = 1
-        solr_parameters[:sort] = "ordinal_value_ssi asc"
-        solr_parameters[:fl] = "id, ordinal_value_ssi"
+        solr_parameters[:sort] = "ordinal_value_isi asc"
+        solr_parameters[:fl] = "id, ordinal_value_isi"
       end
 end
