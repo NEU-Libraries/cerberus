@@ -56,7 +56,10 @@ module Cerberus
     end
 
     def page_objects
-      solr_query("active_fedora_model_ssi:PageFile AND is_part_of_ssim:#{self.full_self_id}")
+      query_string = "active_fedora_model_ssi:PageFile AND is_part_of_ssim:#{self.full_self_id}"
+      row_count = ActiveFedora::SolrService.count(query_string)
+      query_result = ActiveFedora::SolrService.query(query_string, :rows => row_count, :sort => "ordinal_value_isi asc")
+      return query_result.map { |x| SolrDocument.new(x) }
     end
 
     # Imposes an arbitrary but aesthetically pleasing order on returned images
