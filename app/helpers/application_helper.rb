@@ -81,7 +81,7 @@ module ApplicationHelper
 
   def page_file_breadcrumb_to_root(page_file, core_pid, breadcrumb = [])
     if breadcrumb.empty?
-      title_str = I18n.t("drs.display_labels.PageFile.short")+" "+page_file['ordinal_value_isi']
+      title_str = "#{I18n.t("drs.display_labels.PageFile.short")} #{page_file.ordinal_value}"
       breadcrumb << content_tag(:li, title_str.html_safe, class: 'active')
     end
     parent = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{core_pid}\"").first)
