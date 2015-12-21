@@ -12,10 +12,10 @@
         - if !item.sub_title.blank?
           %span.drs-item-subtitle
             = ": " + item.sub_title
-        - if ordinal_value
+        - if ordinal_value && !ordinal_value.blank?
           - item = page_item
           %small
-            = I18n.t("drs.display_labels.PageFile.short")+" "+ordinal_value
+            = "#{I18n.t("drs.display_labels.PageFile.short")} #{ordinal_value}"
     -if defined? cart_remove_link
       = cart_remove_link
   = render partial: 'shared/drs_item/drs_item_ad_details', locals: {item: item}
