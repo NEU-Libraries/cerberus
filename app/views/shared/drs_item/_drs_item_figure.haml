@@ -32,7 +32,7 @@
             = "Updating"
         - elsif item.klass == "PageFile"
           %span.label.small
-            = item.type_label + " " + item.ordinal_value
+            = "#{item.type_label} #{item.ordinal_value}"
         - else
           %span.label.small
             = item.type_label
