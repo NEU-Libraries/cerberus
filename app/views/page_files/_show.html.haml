@@ -1,20 +1,16 @@
 .page_file
-  - page = nil
-  - @document_list.each do |doc|
-    - if doc['ordinal_value_isi'] == params[:page]
-      - page = doc
   %ul.breadcrumb
-    - page_file_breadcrumb_to_root(page, @core_file.pid).each do |breadcrumb|
+    - page_file_breadcrumb_to_root(@page, @core_file.pid).each do |breadcrumb|
       =breadcrumb
 
   %h1.page-header
     = "#{@core_file.title}"
-    %small= I18n.t('drs.display_labels.PageFile.short') + " #{page['ordinal_value_isi']}"
+    %small= "#{I18n.t('drs.display_labels.PageFile.short')} #{@page['ordinal_value_isi']}"
 
   %div.span12
     = render 'catalog/results_pagination'
     %figure#single_page
-      %img{:src=>"/downloads/#{page.id}?datastream_id=thumbnail_5"}
+      %img{:src=>"/downloads/#{@page.id}?datastream_id=thumbnail_5"}
 
   :javascript
     $(document).ready(function(){
@@ -33,7 +29,7 @@
           var params = href.split('?')[1];
           var ordinal_value = 0;
           if (href.indexOf('/files/#{@core_file.pid}/page') == -1){
-            href = "#{page_file_path(@core_file, 1)}?"+params;
+            href = "#{page_file_path(@core_file.pid, 1)}?"+params;
             ordinal_value = 1;
           } else {
             ordinal_value = $(this).text();
