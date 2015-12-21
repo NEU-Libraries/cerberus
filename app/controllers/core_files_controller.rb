@@ -421,20 +421,34 @@ class CoreFilesController < ApplicationController
 
   def get_page_file
     cf = params[:id]
-    @page = params[:page]
     @full_cf_id = RSolr.escape("info:fedora/#{cf}")
     params[:per_page] = 1
     self.solr_search_params_logic += [:limit_to_ordinal_vals]
     (@response, @document_list) = get_search_results
     @pagination = paginate_params(@response)
+    @document_list.each do |doc|
+      if doc.ordinal_value.to_i == params[:page].to_i
+        @page = doc
+      end
+    end
     @core_file = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{cf}\"").first)
     @page_title = "#{@core_file.title} - Page #{params[:page]}"
     respond_to do |format|
       format.js {
-        render "/page_files/show", locals:{page:@page}
+        if @page
+          render "/page_files/show", locals:{page:@page}
+        else
+          @response = nil
+          render js: "window.location.href = '#{core_file_path(cf)}';"
+        end
       }
       format.html {
-        render "/page_files/show", locals:{core_file:@core_file, page:@page}
+        if @page
+          render "/page_files/show", locals:{core_file:@core_file, page:@page}
+        else
+          @response = nil
+          redirect_to @core_file
+        end
       }
     end
   end
