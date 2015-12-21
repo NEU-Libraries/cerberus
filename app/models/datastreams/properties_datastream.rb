@@ -21,7 +21,7 @@ class PropertiesDatastream < ActiveFedora::OmDatastream
     t.tombstoned
     t.md5_checksum :index_as=>[:stored_searchable]
     t.mime_type :index_as=>[:stored_searchable]
-    t.ordinal_value :index_as=>[:stored_searchable, :stored_sortable]
+    t.ordinal_value :index_as=>[:stored_searchable, :stored_sortable], type: :integer
     t.ordinal_last :index_as=>[:stored_searchable]
     t.file_size :index_as=>[:stored_searchable]
   end
