@@ -406,7 +406,9 @@ $(document).ready ->
       return
 
     addToComplationLink = (e) ->
-      e.on('ajax:success', ->
+      e.on('click', ->
+        $(this).addClass('btn-warning').removeClass('btn-success')
+      ).on('ajax:success', ->
         delta = $(this).data('method')
         switch delta
           when 'post'
