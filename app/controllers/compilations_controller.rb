@@ -151,13 +151,15 @@ class CompilationsController < ApplicationController
   end
 
   def add_entry
-    @compilation.add_entry(params[:entry_id])
-    save_or_bust @compilation
-
     respond_to do |format|
-      format.html { redirect_to @compilation }
-      format.json { render :nothing => true }
-      format.js   { render :nothing => true }
+      if @compilation.add_entry(params[:entry_id])
+        save_or_bust @compilation
+        format.html { redirect_to @compilation }
+        format.json { render :nothing => true }
+        format.js   { render :nothing => true }
+      else
+        format.json { render json: {error: "This object is already in the set. Please go back and try a different object."}, status: :unprocessable_entity }
+      end
     end
   end
 
