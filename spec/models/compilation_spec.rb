@@ -109,7 +109,10 @@ describe Compilation do
       compilation.add_entry(file)
       compilation.add_entry(file_two)
       compilation.add_entry(bills_collection)
+      compilation.save!
 
+      comp_pid = compilation.pid
+      compilation = Compilation.find(comp_pid)
       result = compilation.entries
 
       expect(result.map{ |x| x["id"] }).to match_array [file.pid, file_two.pid, bills_collection.pid]
@@ -201,15 +204,20 @@ describe Compilation do
       compilation.add_entry(file)
       compilation.add_entry(file_two)
       compilation.add_entry(bills_collection)
+      compilation.save!
+
       compilation_json = compilation.to_json
 
       parsed = JSON.parse(compilation_json);
       parsed.length.should > 0;
+      comp_pid = compilation.pid
+      compilation = Compilation.find(comp_pid)
+      entries = compilation.entries
 
       parsed["title"].should == compilation.title
-      parsed["entries"][0].should == compilation.entries[0].pid
-      parsed["entries"][1].should == compilation.entries[1].pid
-      parsed["entries"][2].should == compilation.entries[2].pid
+      parsed["entries"][0].should == entries[0]['id']
+      parsed["entries"][1].should == entries[1]['id']
+      parsed["entries"][2].should == entries[2]['id']
     end
   end
 end

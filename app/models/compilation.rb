@@ -17,12 +17,16 @@ class Compilation < ActiveFedora::Base
 
   has_many :entries, class_name: "CoreFile, Collection",  property: :has_member
 
+  def entries
+    @set = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{self.id}\"").first)
+    return @set.entries
+  end
 
   # Returns the pids of all objects tagged as entries
   # in this collection.
   def entry_ids
     a = self.relationships(:has_member)
-    return a.map{ |rels| trim_to_pid(rels) }
+    return a.map{ |rels| rels.split('/').last }
   end
 
   def add_entry(value)
