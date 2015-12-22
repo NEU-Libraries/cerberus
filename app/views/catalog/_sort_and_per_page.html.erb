@@ -2,7 +2,7 @@
     <%-# kind of hacky way to get this to work on catalog and folder controllers.  May be able to simple do {:action=>"index"} but I'm not sure -%>
     <%= form_tag request.path, :method => :get, :class => "form-inline" do %>
   <div class="sorting">
-      <%= label_tag(:sort, "<strong>Sort by</strong> ".html_safe) %>
+      <%= label_tag(:sort, "<strong>Sorted by</strong> ".html_safe) %>
       <%= select_tag(:sort, options_for_select(sort_fields, h(params[:sort])), :class => "input-medium") %>
 
       <%= label_tag(:per_page) do %>
