@@ -219,8 +219,9 @@ class CompilationsController < ApplicationController
       end
     end
     docs.select! { |doc| current_user.can?(:read, doc) }
+    @count = docs.count
     respond_to do |format|
-      format.js { render "count", locals:{count:docs.count}}
+      format.js { render "count", locals:{count:@count}}
     end
   end
 
