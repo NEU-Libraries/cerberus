@@ -25,37 +25,43 @@ class Compilation < ActiveFedora::Base
     return a.map{ |rels| trim_to_pid(rels) }
   end
 
-  # Returns all CoreFile and Collection objects tagged as entries
-  # in this collection as SolrDocument objects.
-  def entries
-    if entry_ids.any?
-      query = ""
-      query = self.entry_ids.map! { |id| "\"#{id}\""}.join(" OR ")
-      query = "id:(#{query})"
-
-      solr_query(query)
-    else
-      []
-    end
-  end
-
   def add_entry(value)
     if value.instance_of?(CoreFile)
-      add_relationship(:has_member, value)
+      if !check_for_duplicates(value)
+        add_relationship(:has_member, value)
+        true
+      else
+        false
+      end
     elsif value.instance_of?(Collection)
-      add_relationship(:has_member, value)
+      if !check_for_duplicates(value)
+        add_relationship(:has_member, value)
+        true
+      else
+        false
+      end
     elsif value.instance_of?(String)
       obj = ActiveFedora::SolrService.query("id:\"#{value}\"")
       doc = SolrDocument.new(obj.first)
       if doc.klass == "CoreFile"
         object = CoreFile.find(value)
-        add_relationship(:has_member, object)
+        if !check_for_duplicates(object)
+          add_relationship(:has_member, object)
+          true
+        else
+          false
+        end
       elsif doc.klass == "Collection"
         object = Collection.find(value)
-        add_relationship(:has_member, object)
+        if !check_for_duplicates(object)
+          add_relationship(:has_member, object)
+          true
+        else
+          false
+        end
       end
     else
-      raise "Add item can only take a string or an instance of a Core object or Collection"
+      false
     end
   end
 
@@ -102,6 +108,39 @@ class Compilation < ActiveFedora::Base
 
     self.save!
     return results
+  end
+
+  def check_for_duplicates(object)
+    if !self.entry_ids.include?(object.pid)
+      all = []
+      self.entry_ids.each do |e|
+        if e.instance_of?(String)
+          doc = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{e}\"").first)
+          if doc.klass == 'CoreFile'
+            all << doc.pid
+          elsif doc.klass == 'Collection'
+            children = doc.all_descendent_files
+            children.each do |c|
+              all << c.pid
+            end
+          end
+        elsif e.instance_of?(CoreFile)
+          all << e.pid
+        elsif e.instance_of?(Collection)
+          children = doc.all_descendent_files
+          children.each do |c|
+            all << c.pid
+          end
+        end
+      end
+      if all.include?(object) || all.include?(object.pid)
+        true
+      else
+        false
+      end
+    else
+      false
+    end
   end
 
   private
