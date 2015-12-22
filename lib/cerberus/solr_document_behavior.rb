@@ -425,9 +425,7 @@ module Cerberus
         query = ""
         query = e.map! { |id| "\"#{id.split('/').last}\""}.join(" OR ")
         query = "id:(#{query})"
-        puts query
         row_count = ActiveFedora::SolrService.count(query)
-        puts row_count
         query_result = ActiveFedora::SolrService.query(query, :rows => row_count)
         return query_result.map { |x| SolrDocument.new(x) }
       else
@@ -441,9 +439,7 @@ module Cerberus
         query = ""
         query = e.map! { |id| "\"#{id.split('/').last}\""}.join(" OR ")
         query = "id:(#{query})"
-        puts query
         row_count = ActiveFedora::SolrService.count(query)
-        puts row_count
         query_result = ActiveFedora::SolrService.query(query, :rows => row_count, :fl=>"id")
         return query_result.map { |x| x['id'] }
       else
