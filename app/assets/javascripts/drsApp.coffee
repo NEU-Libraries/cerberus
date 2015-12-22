@@ -408,8 +408,10 @@ $(document).ready ->
     addToComplationLink = (e) ->
       e.on('click', ->
         $(this).addClass('btn-warning').removeClass('btn-success')
+        spinner = enable_spinner('ajax-modal');
       ).on('ajax:success', ->
         delta = $(this).data('method')
+        $("#ajax-modal").find(".spinner").remove();
         switch delta
           when 'post'
             $(this).text('Remove from ' + $(this).text()).data('method', 'delete').removeClass('btn-success add-to-compilation').addClass 'btn-danger remove-from-compilation'
