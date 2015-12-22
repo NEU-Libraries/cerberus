@@ -45,12 +45,16 @@
     -if (@set.klass == "Collection" || @set.klass == "Compilation") && (current_user.can? :edit, @set.pid) && (current_user.admin? || @set.smart_collection_type.nil? || @set.smart_collection_type == "miscellany")
       %nav.set-actions
         %ul.nav.nav-pills
-          %li
+          -if @set.klass == "Compilation"
+            %li.pull-left
+              %b Total File Count:
+              %span.compilation_count Calculating...
+          %li.pull-right
             %a.btn.btn-default{:href =>  @set.klass == "Collection" ? edit_collection_path(@set) : edit_compilation_path(@set)}
               %i.icon-pencil
               = "Manage #{@set.type_label}"
           -if @set.klass == "Compilation"
-            %li
+            %li.pull-right
               %a.btn{ href: prepare_download_path(id: @compilation.pid ) , method: 'get' }
                 %i.icon-download
                 Download
@@ -86,3 +90,9 @@
       = render partial: 'shared/sets/bottom_action_menu'
 
 %div#add_compilation_form{ style: 'display:none' }
+
+-if @set.klass == "Compilation"
+  :javascript
+    $(document).ready(function(){
+      $.getScript("#{set_count_path(@set)}");
+    });
