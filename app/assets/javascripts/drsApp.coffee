@@ -431,15 +431,14 @@ $(document).ready ->
 
     newCompilationForm = ->
       $("#new_compilation").parent(".modal").removeClass("modal-compilation")
-      $('#new_compilation').on('ajax:success', ->
+      entry_id = encodeURIComponent($("#new_compilation").find("#entry_id").val());
+      $('#new_compilation').on('ajax:success', (data)->
         $(this).closest('.modal').modal 'hide'
-        $('.breadcrumb').addBsAlert
-          classes: 'alert alert-success'
-          strong: 'Success!'
-          text: 'You created a new set!'
+        $("a[href='/sets/editable?file="+entry_id+"']").click();
+        setTimeout(successAlert, 500)
       ).on 'ajax:error', ->
         $(this).closest('.modal').modal 'hide'
-        $('.breadcrumb').addBsAlert
+        $('.page-header').addBsAlert
           classes: 'alert alert-danger'
           strong: 'Error,'
           text: 'Something went wrong, please reload the page and try again.'
@@ -447,6 +446,10 @@ $(document).ready ->
         return
 
       return
+
+    successAlert = ->
+      $('.modal-body').prepend('<div class="alert alert-success"><b>Success!</b> You created a new set and added an item to it!</div>');
+
     ###
     Handles the compilation modal object for the page
     ###
