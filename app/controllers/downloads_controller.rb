@@ -34,6 +34,13 @@ class DownloadsController < ApplicationController
     render_403 and return
   end
 
+  def show
+    if asset.class == ImageThumbnailFile && (Rails.env.staging? || Rails.env.production?)
+      response.headers['Cache-Control'] = "public"
+    end
+    super
+  end
+
   private
     def ensure_not_embargoed
       dl = fetch_solr_document
