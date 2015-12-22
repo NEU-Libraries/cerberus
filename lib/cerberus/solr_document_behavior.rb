@@ -434,5 +434,21 @@ module Cerberus
         []
       end
     end
+
+    def entry_ids
+      e = Array(self[Solrizer.solr_name("has_member", :symbol)])
+      if e.count > 0
+        query = ""
+        query = e.map! { |id| "\"#{id.split('/').last}\""}.join(" OR ")
+        query = "id:(#{query})"
+        puts query
+        row_count = ActiveFedora::SolrService.count(query)
+        puts row_count
+        query_result = ActiveFedora::SolrService.query(query, :rows => row_count, :fl=>"id")
+        return query_result.map { |x| x['id'] }
+      else
+        []
+      end
+    end
   end
 end
