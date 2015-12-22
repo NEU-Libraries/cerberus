@@ -4,6 +4,7 @@ describe CompilationsController do
   let(:bill) { FactoryGirl.create(:bill) }
   let(:bo) { FactoryGirl.create(:bo) }
   let(:file) { FactoryGirl.create(:bills_complete_file) }
+  let(:collection) { FactoryGirl.create(:bills_private_collection) }
 
   before :each do
     sign_in bill
@@ -21,12 +22,27 @@ describe CompilationsController do
 
   describe "GET #index" do
 
-    it "loads all compilations for the signed in user" do
+    it "loads all compilations for which the signed in user is depositor" do
       c = FactoryGirl.create(:bills_compilation)
 
-      get :index
+      get :my_sets
 
       assigns(:compilations).length.should == ActiveFedora::SolrService.count("depositor_tesim:\"#{bill.nuid}\" AND has_model_ssim:\"#{ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:Compilation"}\"")
+    end
+
+    it "loads all compilations for which the signed in user has edit permissions" do
+      c = FactoryGirl.create(:bos_compilation)
+      bill.add_group("special:group")
+      bill.save!
+      c.rightsMetadata.permissions({group:"special:group"}, "edit")
+      c.save!
+
+      get :collaborative_compilations
+
+      u_groups = bill.groups
+      query = u_groups.map! { |g| "\"#{g}\""}.join(" OR ")
+
+      assigns(:compilations).length.should == ActiveFedora::SolrService.count("!depositor_tesim:\"#{bill.nuid}\" AND edit_access_group_ssim:(#{query}) OR read_access_group_ssim:(#{query})")
     end
 
     it "renders the index template" do
@@ -47,7 +63,7 @@ describe CompilationsController do
     it "renders the new compilation template for authenticated users" do
       get :new
 
-      expect(response).to render_template('compilations/new')
+      expect(response).to render_template('shared/sets/new')
     end
 
     it "boots out users who aren't signed in" do
@@ -98,7 +114,7 @@ describe CompilationsController do
 
       get :show, id: compilation.pid
 
-      expect(response).to render_template('compilations/show')
+      expect(response).to render_template('shared/sets/show')
     end
 
     it "renders an error page for users besides the depositor who attempt access" do
@@ -109,6 +125,18 @@ describe CompilationsController do
 
       response.status.should == 403
       assigns(:compilation).should be nil
+    end
+
+    it "renders the template for user with read or edit permissions" do
+      sign_out bill
+      bo.add_group("special:group")
+      bo.save!
+      compilation.rightsMetadata.permissions({group:"special:group"}, "read")
+      compilation.save!
+      sign_in bo
+      get :show, id: compilation.pid
+
+      expect(response).to render_template('shared/sets/show')
     end
 
     context "with deleted files" do
@@ -170,8 +198,32 @@ describe CompilationsController do
     it "Shows the edit template to the depositing user" do
       get :edit, id: compilation.pid
 
-      expect(response).to render_template('compilations/edit')
+      expect(response).to render_template('shared/sets/edit')
       assigns(:compilation).instance_of?(Compilation).should be true
+    end
+
+    it "shows the edit template to a user who is not depositor but has edit permissions" do
+      sign_out bill
+      bo.add_group("special:group")
+      bo.save!
+      compilation.rightsMetadata.permissions({group:"special:group"}, "edit")
+      compilation.save!
+      sign_in bo
+      get :edit, id: compilation.pid
+      expect(response).to render_template('shared/sets/edit')
+      assigns(:compilation).instance_of?(Compilation).should be true
+    end
+
+    it "renders an error for users who only have read permissions" do
+      sign_out bill
+      bo.add_group("special:group")
+      bo.save!
+      compilation.rightsMetadata.permissions({group:"special:group"}, "read")
+      compilation.save!
+      sign_in bo
+      get :edit, id: compilation.pid
+      response.status.should == 403
+      assigns(:compilation).should be nil
     end
   end
 
@@ -200,6 +252,14 @@ describe CompilationsController do
       post :add_entry, id: compilation.pid, entry_id: file.pid
       expect(response.body).to redirect_to compilation_path(compilation)
       expect(assigns(:compilation).entry_ids).to include file.pid
+    end
+
+    it "Does not allow duplicate entries" do
+      cf = CoreFile.create(title:"Core File", parent: collection, depositor: bill.nuid, mass_permissions: "public")
+      post :add_entry, id: compilation.pid, entry_id: collection.pid
+      post :add_entry, id: compilation.pid, entry_id: cf.pid
+      expect(response.body).to be_blank
+      expect(response.status).to eq 406
     end
   end
 
@@ -232,6 +292,17 @@ describe CompilationsController do
       delete :delete_entry, id: compilation.pid, entry_id: file.pid, format: "js"
       expect(response.body).to be_blank
       expect(assigns(:compilation).entry_ids).not_to include file.pid
+    end
+  end
+
+  describe "GET #get_total_count" do
+    let(:compilation) { FactoryGirl.create(:bills_compilation) }
+    it "retrieves total core file count recursively" do
+      cf = CoreFile.create(title:"Core File", parent: collection, depositor: bill.nuid, mass_permissions: "public")
+      post :add_entry, id: compilation.pid, entry_id: collection.pid
+      post :add_entry, id: compilation.pid, entry_id: file.pid
+      get :get_total_count, id: compilation.pid
+      expect(assigns(:count)).to eq 2
     end
   end
 end
