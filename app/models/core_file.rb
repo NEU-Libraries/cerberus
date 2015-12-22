@@ -99,6 +99,7 @@ class CoreFile < ActiveFedora::Base
       solr_doc["active_fedora_model_ssi"] = self.class
       solr_doc["tombstone_reason_tesim"] = self.tombstone_reason if self.tombstone_reason
       solr_doc["identifier_tesim"] = self.identifier if self.identifier
+      solr_doc["tombstone_date_ssi"] = DateTime.now.strftime("%Y-%m-%dT%H:%M:%SZ")
       return solr_doc
     end
 
