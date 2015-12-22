@@ -420,7 +420,7 @@ $(document).ready ->
         $('.breadcrumb').addBsAlert
           classes: 'alert alert-danger'
           strong: 'Error,'
-          text: 'Something went wrong, please reload the page and try again.'
+          text: 'Something went wrong. This object could already be in this set. Please reload the page and try again or try a different object.'
 
         return
 
