@@ -280,7 +280,7 @@ class CatalogController < ApplicationController
     config.add_sort_field "#{title_field} asc", :label => "Title"
     config.add_sort_field "#{creator_field} asc", :label => "Creator, A-Z"
     config.add_sort_field "#{creator_field} desc", :label => "Creator, Z-A"
-    config.add_sort_field "#{uploaded_field} desc", :label => "Recently added"
+    config.add_sort_field "#{uploaded_field} desc", :label => "Recently uploaded"
     config.add_sort_field "#{created_field} desc", :label => "Recently created"
     config.add_sort_field "score desc, #{uploaded_field} desc", :label => "Relevance"
 
