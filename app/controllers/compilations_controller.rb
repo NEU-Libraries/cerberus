@@ -15,7 +15,7 @@ class CompilationsController < ApplicationController
 
   before_filter :authenticate_user!, except: [:show, :show_download, :download, :ping_download]
 
-  before_filter :can_edit?, only: [:edit, :update, :destroy, :add_entry, :delete_entry]
+  before_filter :can_edit?, only: [:edit, :update, :destroy, :add_entry, :delete_entry, :add_multiple_entries, :delete_multiple_entries]
   before_filter :can_read?, only: [:show, :show_download, :download]
 
   load_resource
@@ -163,6 +163,37 @@ class CompilationsController < ApplicationController
     end
   end
 
+  def add_multiple_entries
+    count_before = total_count
+    entry_count = params[:entry_ids].count
+    params[:entry_ids].each do |e|
+      @compilation.add_entry(e)
+    end
+    save_or_bust @compilation
+    count_after = total_count
+    if count_before + entry_count != count_after
+      flash[:notice] = "Some of the items may have already been in the set."
+    end
+    respond_to do |format|
+      format.html { redirect_to @compilation }
+      format.json { render :nothing => true }
+      format.js   { render :nothing => true }
+    end
+  end
+
+  def delete_multiple_entries
+    puts params
+    params[:entry_ids].each do |e|
+      @compilation.remove_entry(e)
+    end
+    save_or_bust @compilation
+    respond_to do |format|
+      format.html { redirect_to @compilation }
+      format.json { render :nothing => true }
+      format.js   { render :nothing => true }
+    end
+  end
+
   def delete_entry
     @compilation.remove_entry(params[:entry_id])
     save_or_bust @compilation
@@ -207,6 +238,15 @@ class CompilationsController < ApplicationController
   end
 
   def get_total_count
+    @count = total_count
+    respond_to do |format|
+      format.js { render "count", locals:{count:@count}}
+    end
+  end
+
+  private
+
+  def total_count
     @set = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first)
     docs = []
     @set.entries.each do |e|
@@ -220,12 +260,8 @@ class CompilationsController < ApplicationController
     end
     docs.select! { |doc| current_user.can?(:read, doc) }
     @count = docs.count
-    respond_to do |format|
-      format.js { render "count", locals:{count:@count}}
-    end
+    return @count
   end
-
-  private
 
   def save_or_bust(compilation)
     if compilation.save!

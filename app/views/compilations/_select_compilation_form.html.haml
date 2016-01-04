@@ -6,10 +6,24 @@
   - @compilations.sort_by!{|c| c.title}
   - @compilations.each do |c|
     - pids = c.entry_ids
-    - if !pids.include?(params[:file])
-      = link_to("#{c.title}", add_entry_path(id: c.pid, entry_id: params[:file]), method: 'post', remote: true, id: "add-to-compilation-#{c.pid}", class: "btn btn-success btn-block btn-compilation", data: { disable_with: "Please wait..."} );
-    -  else
-      = link_to("Remove from #{ c.title }", delete_entry_path(id: c.pid, entry_id: params[:file]), method: 'delete', remote: true, id: "remove-from-compilation-#{c.pid}", class: "btn btn-danger btn-block btn-compilation");
+    - if params[:files]
+      - pids_set = pids.to_set
+      - files_set = params[:files].to_set
+      - if files_set.subset? pids_set
+        = form_tag(delete_multiple_entries_path(:id=>c.pid), method: "delete", remote: true, class: "multi-compilation") do
+          - params[:files].each do |e|
+            = hidden_field_tag(:entry_ids, e, :multiple=>true, :name=>"entry_ids[]")
+          = submit_tag("#{c.title}",  :class => "btn btn-danger btn-block btn-compilation", data: { disable_with: "Please wait..."}, id: "remove-from-compilation-#{c.pid}")
+      -else
+        = form_tag(add_multiple_entries_path(:id=>c.pid), method: 'post', remote: true, class: "multi-compilation") do
+          - params[:files].each do |e|
+            = hidden_field_tag(:entry_ids, e, :multiple=>true, :name=>"entry_ids[]")
+          = submit_tag("#{c.title}",  :class => "btn btn-success btn-block btn-compilation", data: { disable_with: "Please wait..."}, id: "add-to-compilation-#{c.pid}")
+    -else
+      - if !pids.include?(params[:file])
+        = link_to("#{c.title}", add_entry_path(id: c.pid, entry_id: params[:file]), method: 'post', remote: true, id: "add-to-compilation-#{c.pid}", class: "btn btn-success btn-block btn-compilation", data: { disable_with: "Please wait..."} );
+      -  else
+        = link_to("Remove from #{ c.title }", delete_entry_path(id: c.pid, entry_id: params[:file]), method: 'delete', remote: true, id: "remove-from-compilation-#{c.pid}", class: "btn btn-danger btn-block btn-compilation");
 
 .modal-footer
   %button.btn{"data-dismiss" => "modal"} Close

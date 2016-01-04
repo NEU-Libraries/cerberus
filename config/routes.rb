@@ -51,6 +51,8 @@ Cerberus::Application.routes.draw do
   get "/sets/:id/ping" => 'compilations#ping_download', as: 'ping_download'
   get "/sets/:id/trigger_download" => 'compilations#download', as: 'trigger_download'
 
+  match "/sets/:id/multiple" => 'compilations#add_multiple_entries', via: 'post', as: 'add_multiple_entries'
+  match "/sets/:id/multiple" => 'compilations#delete_multiple_entries', via: 'delete', as: 'delete_multiple_entries'
   match "/sets/:id/:entry_id" => 'compilations#delete_entry', via: 'delete', as: 'delete_entry'
   match "/sets/:id/:entry_id" => 'compilations#add_entry', via: 'post', as: 'add_entry'
 
