@@ -1,7 +1,7 @@
 class MultipageCreateZipJob
   include MimeHelper
   include ChecksumHelper
-  
+
   attr_accessor :dir_path, :core_file_pid, :zip_files
 
   def queue_name
@@ -57,6 +57,10 @@ class MultipageCreateZipJob
       zf.depositor              = core_file.depositor
       zf.core_record            = core_file
       zf.rightsMetadata.content = core_file.rightsMetadata.content
+
+      zf.properties.mime_type = extract_mime_type(zipfile_name)
+      zf.properties.md5_checksum = new_checksum(zipfile_name)
+      zf.properties.file_size = File.size(zipfile_name).to_s
       zf.save!
 
       # File.open(zipfile_name) do |file_contents|
