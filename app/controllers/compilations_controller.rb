@@ -182,7 +182,6 @@ class CompilationsController < ApplicationController
   end
 
   def delete_multiple_entries
-    puts params
     params[:entry_ids].each do |e|
       @compilation.remove_entry(e)
     end

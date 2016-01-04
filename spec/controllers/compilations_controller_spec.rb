@@ -4,6 +4,7 @@ describe CompilationsController do
   let(:bill) { FactoryGirl.create(:bill) }
   let(:bo) { FactoryGirl.create(:bo) }
   let(:file) { FactoryGirl.create(:bills_complete_file) }
+  let(:file2) { FactoryGirl.create(:bills_complete_file) }
   let(:collection) { FactoryGirl.create(:bills_private_collection) }
 
   before :each do
@@ -263,6 +264,36 @@ describe CompilationsController do
     end
   end
 
+  describe "POST #add_multiple_entries" do
+    let(:compilation) { FactoryGirl.create(:bills_compilation) }
+
+    it "kicks out unauthenticated users" do
+      sign_out bill
+      post :add_multiple_entries, id: compilation.pid, entry_ids: [file.pid, file2.pid]
+      expect(response).to redirect_to new_user_session_path
+    end
+
+    it "403s for users without edit permissions" do
+      sign_out bill ; sign_in bo
+      post :add_multiple_entries, id: compilation.pid, entry_ids: [file.pid, file2.pid]
+      expect(response.status).to eq 403
+    end
+
+    it "Adds the entry and renders nothing for JS requests" do
+      post :add_multiple_entries, id: compilation.pid, entry_ids: [file.pid, file2.pid], format: "js"
+      expect(response.body).to be_blank
+      expect(assigns(:compilation).entry_ids).to include file.pid
+      expect(assigns(:compilation).entry_ids).to include file2.pid
+    end
+
+    it "Adds the entry and renders nothing for HTML requests" do
+      post :add_multiple_entries, id: compilation.pid, entry_ids: [file.pid, file2.pid]
+      expect(response.body).to redirect_to compilation_path(compilation)
+      expect(assigns(:compilation).entry_ids).to include file.pid
+      expect(assigns(:compilation).entry_ids).to include file2.pid
+    end
+  end
+
   describe "DELETE #delete_entry" do
     let(:compilation) { FactoryGirl.create(:bills_compilation) }
 
@@ -294,6 +325,41 @@ describe CompilationsController do
       expect(assigns(:compilation).entry_ids).not_to include file.pid
     end
   end
+
+  describe "DELETE #delete_multiple_entries" do
+    let(:compilation) { FactoryGirl.create(:bills_compilation) }
+
+    it "kicks out unauthenticated users" do
+      sign_out bill
+      compilation.add_entry file
+      delete :delete_multiple_entries, id: compilation.pid, entry_ids: [file.pid, file2.pid]
+      expect(response).to redirect_to new_user_session_path
+    end
+
+    it "403s for users without edit permissions" do
+      sign_out bill ; sign_in bo
+      compilation.add_entry file
+      delete :delete_multiple_entries, id: compilation.pid, entry_ids: [file.pid, file2.pid]
+      expect(response.status).to eq 403
+    end
+
+    it "removes the entry and redirects to the #show action for html requests" do
+      compilation.add_entry file
+      delete :delete_multiple_entries, id: compilation.pid, entry_ids: [file.pid, file2.pid]
+      expect(response).to redirect_to compilation_path(compilation)
+      expect(assigns(:compilation).entry_ids).not_to include file.pid
+      expect(assigns(:compilation).entry_ids).not_to include file2.pid
+    end
+
+    it "removes the entry and does nothing for .js requests" do
+      compilation.add_entry file
+      delete :delete_multiple_entries, id: compilation.pid, entry_ids: [file.pid, file2.pid], format: "js"
+      expect(response.body).to be_blank
+      expect(assigns(:compilation).entry_ids).not_to include file.pid
+      expect(assigns(:compilation).entry_ids).not_to include file2.pid
+    end
+  end
+
 
   describe "GET #get_total_count" do
     let(:compilation) { FactoryGirl.create(:bills_compilation) }
