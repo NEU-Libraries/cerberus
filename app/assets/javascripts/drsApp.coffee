@@ -409,7 +409,7 @@ $(document).ready ->
       e.on('click', ->
         $(this).addClass('btn-warning').removeClass('btn-success')
         spinner = enable_spinner('ajax-modal');
-      ).on('ajax:success', ->
+      ).on('ajax:success', (data)->
         delta = $(this).data('method')
         $("#ajax-modal").find(".spinner").remove();
         switch delta
@@ -417,9 +417,30 @@ $(document).ready ->
             $(this).text('Remove from ' + $(this).text()).data('method', 'delete').removeClass('btn-success add-to-compilation').addClass 'btn-danger remove-from-compilation'
           when 'delete'
             $(this).data('method', 'post').text($(this).text().replace('Remove from ', '')).addClass('btn-success add-to-compilation').removeClass 'btn-danger remove-from-compilation'
-          else
-            console.log 'ajax successful, but not sure what to do!'
-      ).on 'ajax:error', ->
+      ).on 'ajax:error', (data)->
+        $(this).closest('.modal').modal 'hide'
+        $('.breadcrumb').addBsAlert
+          classes: 'alert alert-danger'
+          strong: 'Error,'
+          text: 'Something went wrong. This object could already be in this set. Please reload the page and try again or try a different object.'
+
+        return
+
+      return
+
+    addToComplationMultiLink = (e) ->
+      e.on('ajax:success', (data)->
+        delta = $(this).find('input[name="_method"]').val() || $(this).attr('method')
+        # if delta
+        $("#ajax-modal").find(".spinner").remove();
+        switch delta
+          when 'post'
+            $(this).find('.btn-compilation').text('Remove from ' + $(this).find('.btn-compilation').text()).removeClass('btn-success add-to-compilation').addClass 'btn-danger remove-from-compilation'
+            $(this).find('input[name="_method"]').val('delete')
+          when 'delete'
+            $(this).find('.btn-compilation').text($(this).find('.btn-compilation').text().replace('Remove from ', '')).addClass('btn-success add-to-compilation').removeClass 'btn-danger remove-from-compilation'
+            $(this).attr('method', 'post').find('input[name="_method"]').val('post')
+      ).on 'ajax:error', (data)->
         $(this).closest('.modal').modal 'hide'
         $('.breadcrumb').addBsAlert
           classes: 'alert alert-danger'
@@ -465,6 +486,7 @@ $(document).ready ->
         return
 
       drsApp.addToComplationLink $('.btn-compilation')
+      drsApp.addToComplationMultiLink $('.multi-compilation')
       drsApp.newCompilationForm()
       return
 
@@ -883,6 +905,7 @@ $(document).ready ->
 
     init: init
     addToComplationLink: addToComplationLink
+    addToComplationMultiLink: addToComplationMultiLink
     newCompilationForm: newCompilationForm
     compilationsModal: compilationsModal
     initModal: initModal
