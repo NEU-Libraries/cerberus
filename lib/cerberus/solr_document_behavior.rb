@@ -402,6 +402,10 @@ module Cerberus
       return Array(self["in_progress_tesim"]).first == "true"
     end
 
+    def stream_only?
+      return Array(self["stream_only_tesim"]).first == "true"
+    end
+
     def communities
       Array(self[Solrizer.solr_name("has_affiliation", :symbol)])
     end
