@@ -58,6 +58,7 @@
             );
             if (progress == 100) {
               $(".progress").after("<div class='alert alert-success'>Your file has been uploaded and is now being processed.</div>");
+              spinner = enable_spinner('main-content');
             }
         },
         done: function (e, data) {
