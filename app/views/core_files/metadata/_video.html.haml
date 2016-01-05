@@ -9,3 +9,8 @@
     = f.file_field :poster, name: 'poster', required: true, accept:".jpg,.jpeg,.png"
     %span.help-block
       This image will be displayed on the file page.
+  .row-fluid
+    .span6
+      = label_tag :stream_only, "Streaming Only"
+      = check_box_tag :stream_only
+      %small This file is for streaming only and cannot be downloaded
