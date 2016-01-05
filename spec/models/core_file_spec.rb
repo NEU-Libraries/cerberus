@@ -28,6 +28,18 @@ describe CoreFile do
     end
   end
 
+  describe "stream only state" do
+    let(:bill) { FactoryGirl.create(:bill) }
+    let(:bo) { FactoryGirl.create(:bo) }
+    let(:gf) { CoreFile.new }
+
+    it "is true if the file is tagged as in progress" do
+      gf.tag_as_stream_only
+
+      gf.stream_only?.should be true
+    end
+  end
+
   describe "Abandoned file lookup" do
     let(:bill) { FactoryGirl.create(:bill) }
     let(:nuid) { bill.nuid }

@@ -23,6 +23,17 @@ describe PropertiesDatastream do
     end
   end
 
+  describe "stream only state" do
+    it "is false on initialization" do
+      properties.stream_only?.should be false
+    end
+
+    it "can be toggled to true using the appropriate helper" do
+      properties.tag_as_stream_only
+      properties.stream_only?.should be true
+    end
+  end
+
   describe "Canonization" do
     it "allows us to assert that an object is now canonical" do
       properties.canonize
