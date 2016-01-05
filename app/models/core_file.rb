@@ -254,6 +254,14 @@ class CoreFile < ActiveFedora::Base
     return ! self.properties.in_progress.empty?
   end
 
+  def tag_as_stream_only
+    self.properties.tag_as_stream_only
+  end
+
+  def stream_only?
+    return ! self.properties.stream_only.empty?
+  end
+
   def propagate_metadata_changes!
     content_objects.each do |content|
       content.rightsMetadata.content = self.rightsMetadata.content

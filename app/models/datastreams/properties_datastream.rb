@@ -22,6 +22,7 @@ class PropertiesDatastream < ActiveFedora::OmDatastream
     t.md5_checksum :index_as=>[:stored_searchable]
     t.mime_type :index_as=>[:stored_searchable]
     t.file_size :index_as=>[:stored_searchable]
+    t.stream_only :index_as=>[:stored_searchable]
   end
 
   def self.xml_template
@@ -60,4 +61,13 @@ class PropertiesDatastream < ActiveFedora::OmDatastream
   def canonical?
     return self.canonical.first == 'yes'
   end
+
+  def tag_as_stream_only
+    self.stream_only = 'true'
+  end
+
+  def stream_only?
+    return ! self.stream_only.empty?
+  end
+
 end
