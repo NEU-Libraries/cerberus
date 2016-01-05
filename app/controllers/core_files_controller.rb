@@ -157,6 +157,12 @@ class CoreFilesController < ApplicationController
     # Add drs staff to permissions for #608
     @core_file.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, "edit")
 
+    if params[:stream_only]
+      @core_file.tag_as_stream_only
+      @core_file.save!
+      @core_file.reload
+    end
+
     if @core_file.save!
       if params[:core_file]
         UploadAlert.create_from_core_file(@core_file, :create, current_user)
