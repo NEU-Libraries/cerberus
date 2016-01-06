@@ -419,6 +419,14 @@ module Cerberus
       Array(self["md5_checksum_tesim"]).first
     end
 
+    def niec_values
+      cc = CatalogController.new
+      facet_labels = cc.blacklight_config.facet_fields.map { |key, facet| [key, facet.label] }
+      raw_niec = (Array(self).map{|kv| kv if kv[0].downcase.starts_with?("niec")}).compact
+      # TODO replace _ssim values with pretty labels
+      pretty_niec = raw_niec.map{  }
+    end
+
     def encode
       self.pid.gsub(':','%3A')
     end
