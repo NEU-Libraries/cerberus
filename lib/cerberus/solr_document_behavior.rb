@@ -420,18 +420,24 @@ module Cerberus
     end
 
     def niec_values
-      cc = CatalogController.new
-      facet_labels = cc.blacklight_config.facet_fields.map { |key, facet| [key, facet.label] }
+      # cc = CatalogController.new
+      # facet_labels = cc.blacklight_config.facet_fields.map { |key, facet| [key, facet.label] }
       raw_niec = (Array(self).map{|kv| kv if kv[0].downcase.starts_with?("niec")}).compact
-      # TODO replace _ssim values with pretty labels
-      facet_labels.each do |fl|
-        raw_niec.each_with_index do |rn, index|
-          if rn[0] == fl[0]
-            raw_niec[index][0] = fl[1]
-          end
-        end
+
+      # facet_labels.each do |fl|
+      #   raw_niec.each_with_index do |rn, index|
+      #     if rn[0] == fl[0]
+      #       raw_niec[index][0] = fl[1]
+      #     end
+      #   end
+      # end
+      hsh = Hash.new
+
+      raw_niec.each do |kv|
+        hsh["#{kv[0]}"] = kv[1]
       end
-      return raw_niec
+
+      return hsh
     end
 
     def encode
