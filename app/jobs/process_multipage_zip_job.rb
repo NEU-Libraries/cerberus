@@ -157,8 +157,9 @@ class ProcessMultipageZipJob
 
   def find_in_row(header_row, row_value, column_identifier)
     0.upto header_row.length do |row_pos|
-      case header_row[row_pos]
-        when column_identifier
+      # Account for case insensitivity
+      case header_row[row_pos].downcase
+      when column_identifier.downcase
           return row_value[row_pos].to_s || ""
       end
     end
