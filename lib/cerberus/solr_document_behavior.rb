@@ -424,7 +424,14 @@ module Cerberus
       facet_labels = cc.blacklight_config.facet_fields.map { |key, facet| [key, facet.label] }
       raw_niec = (Array(self).map{|kv| kv if kv[0].downcase.starts_with?("niec")}).compact
       # TODO replace _ssim values with pretty labels
-      pretty_niec = raw_niec.map{  }
+      facet_labels.each do |fl|
+        raw_niec.each_with_index do |rn, index|
+          if rn[0] == fl[0]
+            raw_niec[index][0] = fl[1]
+          end
+        end
+      end
+      return raw_niec
     end
 
     def encode
