@@ -195,6 +195,9 @@ en:
       Compilation:
         name: Set
         short: Set
+      PageFile:
+        name: Page
+        short: Page
     full_metadata:
       processing note: "The metadata details and access controls you specified are being processed in the background. Your file will be marked as 'Private' until this brief process is complete."
     loaders:
@@ -209,6 +212,10 @@ en:
       cps:
         long_name: "College of Professional Studies"
         short_name: "cps"
+        copyright: ""
+      multipage:
+        long_name: "Multipage"
+        short_name: "multipage"
         copyright: ""
       emsa:
         long_name: "Enrollment Management and Student Affairs"

@@ -40,7 +40,7 @@ describe ZipCompilationJob do
     end
 
     it "creates a zipfile with the right files in it" do
-      Zip::Archive.open(archive) do |ar|
+      Zip::File.open(archive) do |zipfile|
         t = @compilation.title
 
         ugly_from_fine = Proc.new do |x|

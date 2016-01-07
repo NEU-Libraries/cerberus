@@ -16,7 +16,7 @@ module Cerberus
     def send_content(asset)
       # Fuzzy thumbnails with send_file for some reason...small kludge. Everything else, don't use Hydra
       # Collections and others can have non-standard thumbnails - inlcuding a check to see if it's a "true" content type
-      if (asset.class != ImageThumbnailFile) && (asset.datastreams.keys.include? "content")
+      if !(asset.class == ImageThumbnailFile || asset.class == PageFile) && (asset.datastreams.keys.include? "content")
         file_name = "neu_#{asset.pid.split(":").last}.#{extract_extension(asset.properties.mime_type.first, File.extname(asset.original_filename || "").delete!("."))}"
         send_file asset.fedora_file_path, :filename =>  file_name, :type => asset.mime_type || extract_mime_type(asset.fedora_file_path), :disposition => 'inline'
       else
