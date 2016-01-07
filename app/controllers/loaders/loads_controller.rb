@@ -87,8 +87,13 @@ class Loaders::LoadsController < ApplicationController
         FileUtils.mv(file.tempfile.path, new_file)
         #if zip
         if extract_mime_type(new_file) == 'application/zip'
-          # send to job
-          Cerberus::Application::Queue.push(ProcessZipJob.new(@loader_name, new_file.to_s, parent, copyright, current_user, permissions, derivatives))
+          if short_name == "multipage"
+            # multipage zip job
+            Cerberus::Application::Queue.push(ProcessMultipageZipJob.new(@loader_name, new_file.to_s, parent, copyright, current_user, permissions))
+          else
+            # send to iptc job
+            Cerberus::Application::Queue.push(ProcessIptcZipJob.new(@loader_name, new_file.to_s, parent, copyright, current_user, permissions, derivatives))
+          end
           session[:flash_success] = "Your file has been submitted and is now being processed. You will receive an email when the load is complete."
         else
           #error out
