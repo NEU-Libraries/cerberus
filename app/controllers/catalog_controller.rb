@@ -205,6 +205,40 @@ class CatalogController < ApplicationController
     config.add_facet_field solr_name("type", :facetable), label: "Type", limit: true
     config.add_facet_field solr_name("community_name", :symbol), label: "Community", limit: true
 
+    # NIEC
+    # Speaker Gender = niec_gender_ssim
+    config.add_facet_field solr_name("niec_gender", :symbol), label: "Speaker Gender", limit: true
+    # Speaker Age = niec_age_ssim
+    config.add_facet_field solr_name("niec_age", :symbol), label: "Speaker Age", limit: true
+    # Speaker Race = niec_race_ssim
+    config.add_facet_field solr_name("niec_race", :symbol), label: "Speaker Race", limit: true
+    # Pace = niec_sign_pace_ssim
+    config.add_facet_field solr_name("niec_sign_pace", :symbol), label: "Pace", limit: true
+    # Fingerspelling Extent = niec_fingerspelling_extent_ssim
+    config.add_facet_field solr_name("niec_fingerspelling_extent", :symbol), label: "Fingerspelling Extent", limit: true
+    # Fingerspelling Pace = niec_fingerspelling_pace_ssim
+    config.add_facet_field solr_name("niec_fingerspelling_pace", :symbol), label: "Fingerspelling Pace", limit: true
+    # Numbers Pace = niec_numbers_pace_ssim
+    config.add_facet_field solr_name("niec_numbers_pace", :symbol), label: "Numbers Pace", limit: true
+    # Numbers Extent = niec_numbers_extent_ssim
+    config.add_facet_field solr_name("niec_numbers_extent", :symbol), label: "Numbers Extent", limit: true
+    # Classifiers Extent = niec_classifiers_extent_ssim
+    config.add_facet_field solr_name("niec_classifiers_extent", :symbol), label: "Classifiers Extent", limit: true
+    # Use of Space Extent = niec_use_of_space_extent_ssim
+    config.add_facet_field solr_name("niec_use_of_space_extent", :symbol), label: "Use of Space Extent", limit: true
+    # Use of Space = niec_how_space_used_ssim
+    config.add_facet_field solr_name("niec_how_space_used", :symbol), label: "Use of Space", limit: true
+    # Type of Text = niec_text_type_ssim
+    config.add_facet_field solr_name("niec_text_type", :symbol), label: "Type of Text", limit: true
+    # Register = niec_register_ssim
+    config.add_facet_field solr_name("niec_register", :symbol), label: "Register", limit: true
+    # Conversation Type = niec_conversation_type_ssim
+    config.add_facet_field solr_name("niec_conversation_type", :symbol), label: "Conversation Type", limit: true
+    # Audience = niec_audience_ssim
+    config.add_facet_field solr_name("niec_audience", :symbol), label: "Audience", limit: true
+    # Language = niec_signed_language_ssim
+    config.add_facet_field solr_name("niec_signed_language", :symbol), label: "Language", limit: true
+
     # Have BL send all facet field names to Solr, which has been the default
     # previously. Simply remove these lines if you'd rather use Solr request
     # handler defaults, or have no facets.
