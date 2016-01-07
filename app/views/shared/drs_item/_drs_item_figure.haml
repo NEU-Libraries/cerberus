@@ -15,6 +15,9 @@
       = render partial: 'shared/icon', locals: { class_string: 'icon-user' }
     - elsif item.klass == 'Compilation'
       =render partial: 'shared/icon', locals: { class_string: t('drs.compilations.icon') }
+    - elsif item.klass == "PageFile"
+      - @thumbs = ["/downloads/#{item.pid}?datastream_id=thumbnail_1", "/downloads/#{item.pid}?datastream_id=thumbnail_2", "/downloads/#{item.pid}?datastream_id=thumbnail_3"]
+      = render partial: 'shared/thumbnails/thumbnail_picture', locals: {thumbs: @thumbs}
     -else #the most generic option
       = render partial: 'shared/icon', locals: { class_string: 'icon-file' }
 
@@ -29,6 +32,9 @@
         - elsif item.klass == "CoreFile" && item.in_progress?
           %span.label.small.updating
             = "Updating"
+        - elsif item.klass == "PageFile"
+          %span.label.small
+            = "#{item.type_label} #{item.ordinal_value}"
         - else
           %span.label.small
             = item.type_label

@@ -188,7 +188,12 @@ module Cerberus
 
     def path
       # url_for and polymorphic_path are slow given we know the class and pid
-      send("#{self.klass.underscore}_path", self.pid)
+      if self.klass == 'PageFile'
+        core = self.get_core_record
+        send("#{self.klass.underscore}_path", core.pid, self.ordinal_value)
+      else
+        send("#{self.klass.underscore}_path", self.pid)
+      end
     end
 
     def noid
@@ -419,6 +424,27 @@ module Cerberus
       Array(self["md5_checksum_tesim"]).first
     end
 
+    def niec_values
+      # cc = CatalogController.new
+      # facet_labels = cc.blacklight_config.facet_fields.map { |key, facet| [key, facet.label] }
+      raw_niec = (Array(self).map{|kv| kv if kv[0].downcase.starts_with?("niec")}).compact
+
+      # facet_labels.each do |fl|
+      #   raw_niec.each_with_index do |rn, index|
+      #     if rn[0] == fl[0]
+      #       raw_niec[index][0] = fl[1]
+      #     end
+      #   end
+      # end
+      hsh = Hash.new
+
+      raw_niec.each do |kv|
+        hsh["#{kv[0]}"] = kv[1]
+      end
+
+      return hsh
+    end
+
     def encode
       self.pid.gsub(':','%3A')
     end
@@ -465,6 +491,14 @@ module Cerberus
       end
       # docs.select! { |doc| current_user.can?(:read, doc) }
       docs
+    end
+
+    def ordinal_value
+      Array(self["ordinal_value_isi"]).first
+    end
+
+    def ordinal_last
+      Array(self["ordinal_last_tesim"]).first
     end
   end
 end

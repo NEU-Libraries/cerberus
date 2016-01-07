@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe ProcessZipJob do
+describe ProcessIptcZipJob do
     before(:each) do
       `mysql -u "#{ENV["HANDLE_USERNAME"]}" < "#{Rails.root}"/spec/fixtures/files/handlesTEST.sql`
       @client = Mysql2::Client.new(:host => "#{ENV["HANDLE_TEST_HOST"]}", :username => "#{ENV["HANDLE_TEST_USERNAME"]}", :password => "#{ENV["HANDLE_TEST_PASSWORD"]}", :database => "#{ENV["HANDLE_TEST_DATABASE"]}")
@@ -17,7 +17,7 @@ describe ProcessZipJob do
       @user = FactoryGirl.create(:admin)
       permissions = {"CoreFile" => {"read"  => ["northeastern:drs:all"], "edit" => ["northeastern:drs:repository:staff"]}, "ImageSmallFile" => {"read"  => ["northeastern:drs:repository:staff"], "edit" => ["northeastern:drs:repository:staff"]}, "ImageLargeFile" => {"read"  => ["northeastern:drs:repository:staff"], "edit" => ["northeastern:drs:repository:staff"]}, "ImageMasterFile" => {"read"  => ["northeastern:drs:repository:staff"], "edit" => ["northeastern:drs:repository:staff"]}}
       derivatives = false
-      ProcessZipJob.new(@loader_name, @new_file.to_s, @parent, copyright, @user, permissions, derivatives, @client).run
+      ProcessIptcZipJob.new(@loader_name, @new_file.to_s, @parent, copyright, @user, permissions, derivatives, @client).run
     end
 
     it 'changes loadreport length to 1' do

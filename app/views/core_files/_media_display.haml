@@ -21,6 +21,8 @@
       %i.icon-picture.icon-4x.icon-border.drs-icon-figure
   - elsif @core_file.zip?
     %i.icon-zip.icon-4x.icon-border.drs-icon-figure
+  - elsif @core_file.page_objects.length > 1
+    = render partial: 'carousel'
   - else
     -if @thumbs.length > 0
       = render partial: 'shared/thumbnails/full_picture'

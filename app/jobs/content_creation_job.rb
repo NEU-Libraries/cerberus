@@ -158,8 +158,8 @@ class ContentCreationJob
         zipfile_name = tempdir.join(z).to_s
 
         # Load our content into said zipfile.
-        Zip::Archive.open(zipfile_name, Zip::CREATE) do |zipfile|
-          zipfile.add_file(file_path)
+        Zip::File.open(zipfile_name, Zip::File::CREATE) do |zipfile|
+          zipfile.add(file_name, file_path)
         end
 
         # Add zipfile to the ZipFile object
