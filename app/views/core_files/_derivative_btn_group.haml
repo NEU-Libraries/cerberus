@@ -6,7 +6,7 @@
   %ul.dropdown-menu
     - contents.each do |content|
       - if (!current_user.nil? && (current_user.can? :read, content)) || content.public?
-        -if content.klass != "ImageThumbnailFile"
+        -if content.klass != "ImageThumbnailFile" && content.klass != "PageFile" && !((content.klass == 'AudioFile' || content.klass == 'VideoFile') && item.stream_only?)
           .btn-group
             = render partial: 'core_files/derivative_button', locals: {content: content }
             = render partial: 'shopping_carts/add_or_remove_btn', locals: { :id => content.pid }
@@ -19,7 +19,7 @@
   %div{ class: alignment }
     - contents.each do |content|
       - if (!current_user.nil? && (current_user.can? :read, content)) || content.public?
-        -if content.klass != "ImageThumbnailFile"
+        -if content.klass != "ImageThumbnailFile" && content.klass != "PageFile" && !((content.klass == 'AudioFile' || content.klass == 'VideoFile') && item.stream_only?)
           .btn-group
             = render partial: 'core_files/derivative_button', locals: {content: content }
             = render partial: 'shopping_carts/add_or_remove_btn', locals: { :id => content.pid }

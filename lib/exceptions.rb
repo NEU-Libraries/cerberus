@@ -133,6 +133,17 @@ module Exceptions
       super "No valid #{required_data} in xml"
     end
   end
+  class MultipleSpreadsheetError < StandardError
+    def initialize
+      super "Multiple spreadsheet files found in zip file"
+    end
+  end
+
+  class NoSpreadsheetError < StandardError
+    def initialize
+      super "No spreadsheet files found in zip file"
+    end
+  end
 
   class TombstonedObject < StandardError
     def initialize

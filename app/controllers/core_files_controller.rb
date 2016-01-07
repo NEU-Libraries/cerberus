@@ -1,3 +1,7 @@
+require 'blacklight/catalog'
+require 'blacklight_advanced_search'
+require 'parslet'
+require 'parsing_nesting/tree'
 require 'stanford-mods'
 
 # -*- coding: utf-8 -*-
@@ -14,7 +18,16 @@ class CoreFilesController < ApplicationController
   include HandleHelper
   include MimeHelper
 
-  before_filter :authenticate_user!, except: [:show]
+  include Blacklight::Catalog
+  include Blacklight::Configurable # comply with BL 3.7
+  include ActionView::Helpers::DateHelper
+  # This is needed as of BL 3.7
+  self.copy_blacklight_config_from(CatalogController)
+
+  include BlacklightAdvancedSearch::ParseBasicQ
+  include BlacklightAdvancedSearch::Controller
+
+  before_filter :authenticate_user!, except: [:show, :get_page_images, :get_page_file]
 
   skip_before_filter :normalize_identifier
   skip_load_and_authorize_resource only: [:provide_metadata,
@@ -27,7 +40,7 @@ class CoreFilesController < ApplicationController
 
   before_filter :can_edit_parent_or_proxy_upload?, only: [:new, :create, :destroy_incomplete_file]
 
-  before_filter :can_read?, only: [:show]
+  before_filter :can_read?, only: [:show, :get_page_images, :get_page_file]
   before_filter :can_edit?, only: [:edit, :update]
   before_filter :complete?, only: [:edit, :update]
 
@@ -156,6 +169,12 @@ class CoreFilesController < ApplicationController
 
     # Add drs staff to permissions for #608
     @core_file.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, "edit")
+
+    if params[:stream_only]
+      @core_file.tag_as_stream_only
+      @core_file.save!
+      @core_file.reload
+    end
 
     if @core_file.save!
       if params[:core_file]
@@ -391,6 +410,55 @@ class CoreFilesController < ApplicationController
     end
   end
 
+  def get_page_images
+    @core_file = fetch_solr_document
+    self.solr_search_params_logic += [:filter_by_page_images]
+    (@response, @document_list) = get_search_results
+    respond_to do |format|
+      format.js {
+        if @response.response['numFound'] == 0
+          render js:"$('#page-images').html(\"There are currently 0 page images.\");"
+        else
+          render "page_images"
+        end
+      }
+    end
+  end
+
+  def get_page_file
+    cf = params[:id]
+    @full_cf_id = RSolr.escape("info:fedora/#{cf}")
+    params[:per_page] = 1
+    self.solr_search_params_logic += [:limit_to_ordinal_vals]
+    (@response, @document_list) = get_search_results
+    @pagination = paginate_params(@response)
+    @document_list.each do |doc|
+      if doc.ordinal_value.to_i == params[:page].to_i
+        @page = doc
+      end
+    end
+    @core_file = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{cf}\"").first)
+    @page_title = "#{@core_file.title} - Page #{params[:page]}"
+    respond_to do |format|
+      format.js {
+        if @page
+          render "/page_files/show", locals:{page:@page}
+        else
+          @response = nil
+          render js: "window.location.href = '#{core_file_path(cf)}';"
+        end
+      }
+      format.html {
+        if @page
+          render "/page_files/show", locals:{core_file:@core_file, page:@page}
+        else
+          @response = nil
+          redirect_to @core_file
+        end
+      }
+    end
+  end
+
   protected
 
     def complete?
@@ -536,5 +604,22 @@ class CoreFilesController < ApplicationController
           flash[:error] = "You do not have privileges to use that feature"
           redirect_to root_path
         end
+      end
+
+      def filter_by_page_images(solr_parameters, user_parameters)
+        full_self_id = RSolr.escape("info:fedora/#{@core_file.pid}")
+        solr_parameters[:fq] ||= []
+        solr_parameters[:fq] << "#{Solrizer.solr_name("has_model", :symbol)}:\"info:fedora/afmodel:PageFile\" AND #{Solrizer.solr_name("is_part_of", :symbol)}:\"#{full_self_id}\""
+        solr_parameters[:sort] = "ordinal_value_isi asc"
+      end
+
+      def limit_to_ordinal_vals(solr_parameters, user_parameters)
+        solr_parameters[:fq] ||= []
+        solr_parameters[:fq] << "active_fedora_model_ssi:PageFile AND is_part_of_ssim:#{@full_cf_id}"
+        # solr_parameters[:df] = 1
+        solr_parameters[:per_page] = 1
+        # solr_parameters[:rows] = 1
+        solr_parameters[:sort] = "ordinal_value_isi asc"
+        solr_parameters[:fl] = "id, ordinal_value_isi"
       end
 end

@@ -48,6 +48,8 @@ class CommunitiesController < ApplicationController
   def facet
     @set = fetch_solr_document
 
+    self.solr_search_params_logic += [:increase_facet_limit]
+
     if !params[:q].nil?
       # Fixes #667 - we remove single characters. They're a pretty terrible idea with a strict AND
       params[:q].gsub!(/(^| ).( |$)/, ' ')
@@ -207,5 +209,9 @@ class CommunitiesController < ApplicationController
 
     def disable_highlighting(solr_parameters, user_parameters)
       solr_parameters[:hl] = "false"
+    end
+
+    def increase_facet_limit(solr_parameters, user_parameters)
+      solr_parameters["facet.limit"] = "15"
     end
 end

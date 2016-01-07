@@ -47,7 +47,10 @@
             %section.drs-item-derivatives
               = render partial: 'show_derivatives', locals: {contents: @content_objects}
         #supplemental-files.tab-pane
-          = render partial: "supplemental_files"
+          - if !@core_file.supplemental_materials.blank? || !@core_file.supplemental_material_for.blank?
+            = render partial: "supplemental_files"
+          - if @core_file.page_objects.length > 1
+            %div#page-images
         - if current_user_can? :edit, @core_file
           #move.tab-pane
             = render partial: "move"
@@ -88,4 +91,25 @@
         else location.hash = '#stay'
       }
     }
+  }
+  $('a[href="#supplemental-files"]').click(function (e) {
+    e.preventDefault();
+    $(this).tab('show');
+    spinner = enable_spinner('page-images');
+    var pid = $(this).data("pid");
+    get_page("/files/"+pid+"/page_images?per_page=5");
+  });
+  function get_page(path){
+    $.getScript( path, function() {
+      picturefill({
+        reevaluate: true,
+      });
+      enable_pagination();
+    });
+  }
+  function enable_pagination(){
+    $("#page-images .pagination a").on("click", function(e){
+      e.preventDefault();
+      get_page($(this).attr("href"));
+    });
   }

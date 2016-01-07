@@ -10,9 +10,11 @@ describe DerivativeCreator, unless: $in_travis do
   def context(factory_sym, core_title)
     @master = FactoryGirl.create(factory_sym)
 
-    if !$in_travis
-      @master.characterize
-    end
+    # No longer doing FITS characterization, for the time being
+    # 
+    # if !$in_travis
+    #   @master.characterize
+    # end
 
     @core = titled_core_record(@master.core_record, core_title)
     DerivativeCreator.new(@master.pid).generate_derivatives

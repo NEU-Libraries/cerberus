@@ -17,7 +17,7 @@ describe LoaderMailer do
       @user = FactoryGirl.create(:admin)
       permissions = {"CoreFile" => {"read"  => ["northeastern:drs:all"], "edit" => ["northeastern:drs:repository:staff"]}, "ImageSmallFile" => {"read"  => ["northeastern:drs:repository:staff"], "edit" => ["northeastern:drs:repository:staff"]}, "ImageLargeFile" => {"read"  => ["northeastern:drs:repository:staff"], "edit" => ["northeastern:drs:repository:staff"]}, "ImageMasterFile" => {"read"  => ["northeastern:drs:repository:staff"], "edit" => ["northeastern:drs:repository:staff"]}}
       derivatives = false
-      ProcessZipJob.new(@loader_name, new_file.to_s, parent, copyright, @user, permissions, derivatives, @client).run
+      ProcessIptcZipJob.new(@loader_name, new_file.to_s, parent, copyright, @user, permissions, derivatives, @client).run
     end
 
     let(:mail) { LoaderMailer.load_alert }

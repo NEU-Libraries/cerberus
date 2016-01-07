@@ -261,6 +261,10 @@ task :reset_data => :environment do
   eli.add_group("northeastern:drs:repository:staff")
   david.add_group("northeastern:drs:repository:staff")
 
+  tmp_user.add_group("northeastern:drs:repository:loaders:multipage")
+  sarah.add_group("northeastern:drs:repository:loaders:multipage")
+  eli.add_group("northeastern:drs:repository:loaders:multipage")
+  david.add_group("northeastern:drs:repository:loaders:multipage")
 
   sarah.add_group("northeastern:drs:staff")
   pat.add_group("northeastern:drs:staff")
