@@ -27,5 +27,7 @@
           = link_to("View Report", loaders_cps_report_path(loader.id), class: "btn btn-small btn-success")
         - elsif loader.loader_name == t('drs.loaders.emsa.long_name')
           = link_to("View Report", loaders_emsa_report_path(loader.id), class: "btn btn-small btn-success")
+        - elsif loader.loader_name == t('drs.loaders.multipage.long_name')
+          = link_to("View Report", loaders_multipage_report_path(loader.id), class: "btn btn-small btn-success")
         - elsif loader.loader_name == t('drs.loaders.bouve.long_name')
           = link_to("View Report", loaders_bouve_report_path(loader.id), class: "btn btn-small btn-success")
