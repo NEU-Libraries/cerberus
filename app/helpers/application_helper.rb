@@ -20,6 +20,7 @@ module ApplicationHelper
 
   def kramdown_parse(input_str)
     return "" unless input_str
+    input_str = input_str.gsub("--", "&#45;&#45;")
     output_str = Unidecoder.decode(Sanitize.clean(Kramdown::Document.new(input_str).to_html, :elements => ['sup', 'sub']))
     output_str = output_str.strip
     return output_str.html_safe
@@ -95,6 +96,16 @@ module ApplicationHelper
       breadcrumb << content_tag(:li, link_to(kramdown_parse(parent.title).html_safe, polymorphic_path(parent)))
       breadcrumb_to_root(parent, breadcrumb)
     end
+  end
+
+  def page_file_breadcrumb_to_root(page_file, core_pid, breadcrumb = [])
+    if breadcrumb.empty?
+      title_str = "#{I18n.t("drs.display_labels.PageFile.short")} #{page_file.ordinal_value}"
+      breadcrumb << content_tag(:li, title_str.html_safe, class: 'active')
+    end
+    parent = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{core_pid}\"").first)
+    breadcrumb << content_tag(:li, link_to(kramdown_parse(parent.title).html_safe, polymorphic_path(parent)))
+    breadcrumb_to_root(parent, breadcrumb)
   end
 
   def drs_view_class

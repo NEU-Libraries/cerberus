@@ -68,6 +68,8 @@ Cerberus::Application.routes.draw do
   match "/files/:id/tombstone" => "core_files#tombstone", via: 'post', as: "tombstone_file"
   match "/files/:id/request_tombstone" => "core_files#request_tombstone", via: 'post', as:"request_tombstone_file"
   match "/files/:id/request_move" => "core_files#request_move", via: 'post', as:"request_move_file"
+  get "/files/:id/page_images" => "core_files#get_page_images", as: 'page_images'
+  get "/files/:id/page/:page" => "core_files#get_page_file", as: 'page_file'
 
 
   put '/item_display' => 'users#update', as: 'view_pref'
@@ -102,6 +104,9 @@ Cerberus::Application.routes.draw do
    get "/loaders/emsa/new" => 'emsa_loads#new', as: 'loaders_emsa'
    get "/loaders/emsa/report/:id" => 'emsa_loads#show', as: 'loaders_emsa_report'
    get "/loaders/emsa/file/:id" => 'emsa_loads#show_iptc', as: 'loaders_emsa_iptc'
+   resources :multipage_loads, only: [:new, :create, :show], :path => "loaders/multipage"
+   get "/loaders/multipage/new" => 'multipage_loads#new', as: 'loaders_multipage'
+   get "/loaders/multipage/report/:id" => 'multipage_loads#show', as: 'loaders_multipage_report'
    resources :bouve_loads, only: [:new, :create, :show], :path => "loaders/bouve"
    get "/loaders/bouve/new" => 'bouve_loads#new', as: 'loaders_bouve'
    get "/loaders/bouve/report/:id" => 'bouve_loads#show', as: 'loaders_bouve_report'
