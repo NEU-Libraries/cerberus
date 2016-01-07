@@ -29,7 +29,7 @@ gem 'sanitize'
 gem "bower-rails", "~> 0.5.0"
 gem 'webshims-rails'
 gem 'rmagick', '~> 2.13.2'
-gem 'zipruby', '~> 0.3.6'
+gem 'rubyzip', '1.1.3'
 # gem 'hydra-derivatives', '~> 0.0.5'
 gem 'hydra-derivatives', :git => 'https://github.com/NEU-Libraries/hydra-derivatives.git', :ref => 'd95f3e880a74713867f7c88b77429251cbb0b9b1'
 gem 'resque-pool', '0.3.0'
@@ -60,6 +60,8 @@ gem 'multi_json', '~> 1.7.9'
 # Test coverage service
 gem 'coveralls', require: false
 gem 'diffy'
+gem 'roo', :git => 'https://github.com/roo-rb/roo'
+gem 'roo-xls', :git => 'https://github.com/roo-rb/roo-xls.git'
 gem 'unidecode'
 gem 'blacklight_oai_provider', :git => 'https://github.com/NEU-Libraries/blacklight_oai_provider.git', :ref => '915700c2982d4677934aa9f90a0284b21a7af48d'
 

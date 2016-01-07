@@ -37,6 +37,7 @@ $(document).ready ->
       ellipsisExpand()
       drsToggleView()
       handleDrsCommunities()
+      handleDrsCollectionsAutoComplete()
       handleDrsAdminCommunities()
       handleCommunitiesAdminAutoComplete()
       toggleShoppingCart $('*[data-shoppingcart]')
@@ -705,6 +706,25 @@ $(document).ready ->
             return
 
         $('#community_autocomplete').attr 'autocomplete', 'on'
+      return
+
+    handleDrsCollectionsAutoComplete = ->
+      if $('#collection_autocomplete').length > 0
+        $('#collection_autocomplete').autocomplete
+          source: collections_for_autocomplete
+          select: (e, ui) ->
+            e.preventDefault()
+            $('#collection_parent').val ui.item.value
+            $(this).val ui.item.label
+            return
+
+          focus: (e, ui) ->
+            e.preventDefault()
+            $("#collection_parent").val ui.item.value
+            $("#collection_autocomplete").val ui.item.label
+            return
+
+        $('#collection_autocomplete').attr 'autocomplete', 'on'
       return
 
     handleDrsAdminCommunities = ->
