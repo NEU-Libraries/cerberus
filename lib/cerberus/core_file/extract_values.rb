@@ -15,6 +15,9 @@ module Cerberus
         result_hsh["canonical_object"] = @core_doc.canonical_object.map { |doc| [doc_to_url(doc), doc.derivative_label] }
         result_hsh["content_objects"] = @core_doc.content_objects.map { |doc| [doc_to_url(doc), doc.derivative_label] }
         result_hsh["mods"] = JSON.parse(mods_json)
+        if !@core_doc.niec_values.blank?
+          result_hsh["niec"] = @core_doc.niec_values
+        end
         return result_hsh
       end
 
