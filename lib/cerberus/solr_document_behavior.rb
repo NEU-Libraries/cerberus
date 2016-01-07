@@ -188,7 +188,12 @@ module Cerberus
 
     def path
       # url_for and polymorphic_path are slow given we know the class and pid
-      send("#{self.klass.underscore}_path", self.pid)
+      if self.klass == 'PageFile'
+        core = self.get_core_record
+        send("#{self.klass.underscore}_path", core.pid, self.ordinal_value)
+      else
+        send("#{self.klass.underscore}_path", self.pid)
+      end
     end
 
     def noid
@@ -442,6 +447,14 @@ module Cerberus
 
     def encode
       self.pid.gsub(':','%3A')
+    end
+
+    def ordinal_value
+      Array(self["ordinal_value_isi"]).first
+    end
+
+    def ordinal_last
+      Array(self["ordinal_last_tesim"]).first
     end
   end
 end

@@ -24,10 +24,11 @@ class CartDownloadJob
     FileUtils.mkdir_p path
     temp_path = "#{path}/in_progress.zip"
     full_path = "#{path}/drs_queue.zip"
+    temp_txt = "#{sess_id}.txt"
 
     # Kludge to avoid putting all zip items into memory
-    Zip::Archive.open(temp_path, Zip::CREATE) do |io|
-      io.add_buffer("#{sess_id}.txt", "")
+    Zip::File.open(temp_path, Zip::File::CREATE) do |zipfile|
+      zipfile.get_output_stream(temp_txt) { |f| f.puts "" }
     end
 
     pids.each do |pid|
@@ -35,8 +36,8 @@ class CartDownloadJob
         item = ActiveFedora::Base.find(pid, cast: true)
         download_label = I18n.t("drs.display_labels.#{item.klass}.download")
         if item.public? || user.can?(:read, item)
-          Zip::Archive.open(temp_path) do |io|
-            io.add_buffer("downloads/neu_#{pid.split(":").last}-#{download_label}.#{extract_extension(item.properties.mime_type.first, File.extname(item.original_filename || "").delete!("."))}", item.content.content)
+          Zip::File.open(temp_path) do |zipfile|
+            zipfile.add("downloads/neu_#{pid.split(":").last}-#{download_label}.#{extract_extension(item.properties.mime_type.first)}", item.fedora_file_path)
           end
 
           # Record the download
@@ -44,6 +45,11 @@ class CartDownloadJob
           Impression.update_all("status = 'COMPLETE'", [opts, pid, sess_id])
         end
       end
+    end
+
+    # Remove temp txt file
+    Zip::File.open(temp_path) do |zipfile|
+      zipfile.remove(temp_txt)
     end
 
     # Rename temp path to full path so download can pick it up
