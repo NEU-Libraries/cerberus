@@ -445,6 +445,6 @@ class CatalogController < ApplicationController
   end
 
   def increase_facet_limit(solr_parameters, user_parameters)
-    solr_parameters["facet.limit"] = "15"
+    solr_parameters["facet.limit"] = "12"
   end
 end
