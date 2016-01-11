@@ -221,16 +221,30 @@ class CollectionsController < ApplicationController
     collection = Collection.find(params[:id])
     title = collection.title
     user = current_user
-    reason = params[:reason]
-    collection_url = params[:collection_url]
-    collection_pid = collection_url[/([^\/]+)$/]
-    if Collection.exists?(collection_pid)
-      MoveMailer.move_alert(collection, reason, collection_url, user).deliver!
-      flash[:notice] = "Your request has been received and will be processed soon."
-      redirect_to collection and return
+
+    if current_user.admin?
+      destination_pid = params[:destination_pid]
+      if Community.exists?(destination_pid) || Collection.exists?(destination_pid)
+        collection.parent = destination_pid
+        collection.save!
+        flash[:notice] = "This collection has been moved."
+        redirect_to collection and return
+      else
+        flash[:error] = "That community or collection does not exist. Please submit a new request and enter a valid community or collection PID."
+        redirect_to collection and return
+      end
     else
-      flash[:error] = "That collection does not exist. Please submit a new request and enter a valid collection URL."
-      redirect_to collection and return
+      reason = params[:reason]
+      destination_url = params[:destination_url]
+      destination_pid = collection_url[/([^\/]+)$/]
+      if Community.exists?(destination_pid) || Collection.exists?(destination_pid)
+        MoveMailer.move_alert(collection, reason, destination_url, user).deliver!
+        flash[:notice] = "Your request has been received and will be processed soon."
+        redirect_to collection and return
+      else
+        flash[:error] = "That community or collection does not exist. Please submit a new request and enter a valid collection URL."
+        redirect_to collection and return
+      end
     end
   end
 
