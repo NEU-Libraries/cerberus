@@ -1,0 +1,26 @@
+- content_for(:description) do
+  - @set.description
+= render partial: 'shared/sets/head'
+%h2.page-header Title List
+
+%main.row( role="main" )
+  %section.span12
+    - if @files.count > 0
+      = render partial: '/shared/sets/alpha'
+      %table.table.table-bordered
+        %tr
+          %th= "Title"
+        - alpha = []
+        - @files.each do |r|
+          %tr{:id=>(r.title[0].capitalize if !alpha.include? r.title[0].capitalize)}
+            - if !alpha.include? r.title[0].capitalize
+              - alpha << r.title[0].capitalize
+            %td= link_to(r.title, "/@files/#{r.id}")
+      :javascript
+        var alpha = '#{alpha}';
+        $(".alpha_list .btn").each(function(){
+          if (alpha.indexOf($.trim($(this).text())) > 0){
+          } else {
+            $(this).addClass("disabled")
+          }
+        })
