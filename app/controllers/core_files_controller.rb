@@ -397,16 +397,29 @@ class CoreFilesController < ApplicationController
     title = core_file.title
     collection = core_file.parent.id
     user = current_user
-    reason = params[:reason]
-    collection_url = params[:collection_url]
-    collection_pid = collection_url[/([^\/]+)$/]
-    if Collection.exists?(collection_pid)
-      MoveMailer.move_alert(core_file, reason, collection_url, user).deliver!
-      flash[:notice] = "Your request has been received and will be processed soon."
-      redirect_to core_file and return
+
+    if current_user.admin?
+      collection_pid = params[:collection_pid]
+      if Collection.exists?(collection_pid)
+        core_file.set_parent(Collection.find(collection_pid), current_user)
+        flash[:notice] = "This file has been moved."
+        redirect_to core_file and return
+      else
+        flash[:error] = "That collection does not exist. Please submit a new request and enter a valid collection PID."
+        redirect_to core_file and return
+      end
     else
-      flash[:error] = "That collection does not exist. Please submit a new request and enter a valid collection URL."
-      redirect_to core_file and return
+      reason = params[:reason]
+      collection_url = params[:collection_url]
+      collection_pid = collection_url[/([^\/]+)$/]
+      if Collection.exists?(collection_pid)
+        MoveMailer.move_alert(core_file, reason, collection_url, user).deliver!
+        flash[:notice] = "Your request has been received and will be processed soon."
+        redirect_to core_file and return
+      else
+        flash[:error] = "That collection does not exist. Please submit a new request and enter a valid collection URL."
+        redirect_to core_file and return
+      end
     end
   end
 
