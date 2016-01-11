@@ -7,4 +7,7 @@
     %p= "Are you sure you want to move this item?"
   .modal-footer
     %button.btn{"aria-hidden" => "true", "data-dismiss" => "modal" } Close
-    = submit_tag 'Request', class: "btn btn-warning"
+    -if !current_user.nil? && current_user.admin?
+      = submit_tag 'Move', class: "btn btn-warning"
+    -else
+      = submit_tag 'Request', class: "btn btn-warning"
