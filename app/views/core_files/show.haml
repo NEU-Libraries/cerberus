@@ -47,7 +47,7 @@
             %section.drs-item-derivatives
               = render partial: 'show_derivatives', locals: {contents: @content_objects}
         #supplemental-files.tab-pane
-          - if !@core_file.supplemental_materials.blank? || !@core_file.supplemental_material_for.blank?
+          - if !@core_file.supplemental_materials.blank? || !@core_file.supplemental_material_for.blank? || !@core_file.instructional_materials.blank? ||  !@core_file.instructional_material_for.blank?
             = render partial: "supplemental_files"
           - if @core_file.page_objects.length > 1
             %div#page-images
