@@ -80,6 +80,24 @@ module ApplicationHelper
     end
   end
 
+  def set_breadcrumb_to_root(set, breadcrumb = [])
+    if breadcrumb.empty?
+      breadcrumb << content_tag(:li, params[:action].humanize.titleize, class: 'active')
+    end
+    if breadcrumb.length == 1
+      title_str = CGI::unescapeHTML "#{set.non_sort} #{kramdown_parse(set.title)}"
+      breadcrumb << content_tag(:li, link_to(title_str.html_safe, polymorphic_path(set)))
+    end
+
+    if set.parent.nil?
+      return breadcrumb.reverse
+    else
+      parent = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{set.parent}\"").first)
+      breadcrumb << content_tag(:li, link_to(kramdown_parse(parent.title).html_safe, polymorphic_path(parent)))
+      breadcrumb_to_root(parent, breadcrumb)
+    end
+  end
+
   def page_file_breadcrumb_to_root(page_file, core_pid, breadcrumb = [])
     if breadcrumb.empty?
       title_str = "#{I18n.t("drs.display_labels.PageFile.short")} #{page_file.ordinal_value}"

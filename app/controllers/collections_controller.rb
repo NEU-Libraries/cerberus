@@ -9,6 +9,7 @@ class CollectionsController < ApplicationController
   include Cerberus::ControllerHelpers::EditableObjects
   include Cerberus::ControllerHelpers::PermissionsCheck
   include UrlHelper
+  include SetListsHelper
 
   include Blacklight::Catalog
   include Blacklight::Configurable # comply with BL 3.7
@@ -19,10 +20,12 @@ class CollectionsController < ApplicationController
   include BlacklightAdvancedSearch::ParseBasicQ
   include BlacklightAdvancedSearch::Controller
 
+  helper_method :sort_value
+
   before_filter :authenticate_user!, only: [:new, :edit, :create, :update, :destroy ]
 
   # We can do better by using SOLR check instead of Fedora
-  before_filter :can_read?, only: [:show]
+  before_filter :can_read?, except: [:index, :show, :creator_list, :title_list, :recent_deposits]
   # before_filter :enforce_show_permissions, :only=>:show
   self.solr_search_params_logic += [:add_access_controls_to_solr_params]
 

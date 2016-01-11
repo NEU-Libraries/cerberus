@@ -1,51 +1,15 @@
 - content_for(:description) do
   - @set.description
 - facet_list ||= facet_field_names
+= render partial: 'shared/sets/head'
 
-%ul.breadcrumb
-  - breadcrumb_to_root(@set).each do |breadcrumb|
-    =breadcrumb
-  = render partial: 'shared/sets/breadcrumb_action_menu'
--# Had to break off the partial into two files to make sure the popover div renders outside of the list.
-= render partial: 'shared/sets/breadcrumb_action_menu_links'
-
-
-%article.well.clearfix.inline-headings
-  %h1{:class => @set.klass, :id => "#{@set.pid}-title",}
-    = kramdown_parse(@set.title)
-  %h3
-    - if @set.klass == "Collection" # and doesn't have a thumbnail to render
-      = render partial: 'shared/icon', locals: { class_string: 'icon-folder-open' }
-    - elsif @set.klass == "Community"
-      = render partial: 'shared/icon', locals: { class_string: 'icon-group' }
-    = render partial: 'catalog/search_form', locals: { scope: "true", scoped_placeholder: "Search this #{@set.type_label.downcase}" }
-  %h1
-    %small
-      = @set.type_label
-  - if !@set.thumbnail_list.empty?
-    %img{src: @set.thumbnail_list.first, title: @set.title, alt: "", class: ['pull-left', 'well-padded-thumb']}(aria-labeledby="#{@set.pid}-title" role="presentation")
-  - if !@set.description.blank?
-    %p.set-description
-      = @pretty_description
-  - if @set.klass == "Collection" && !@set.identifier.blank? && @set.identifier != @set.pid
-    -# Display handles if they exist, and aren't just the pid
-    %p.set-handle
-      = link_to "#{@set.identifier}", @set.identifier
-
-  - if current_user
-    -if @set.klass == "Collection" && (current_user.can? :edit, @set.pid) && (current_user.admin? || @set.smart_collection_type.nil? || @set.smart_collection_type == "miscellany")
-      %nav.set-actions
-        %ul.nav.nav-pills
-          %li
-            %a.btn.btn-default{:href =>  edit_collection_path(@set)}
-              %i.icon-pencil
-              Manage Collection
-
-- if render_constraints(params) != ""
+- if render_constraints(params) != "" || (!params[:sort].nil? && params[:action] == 'recent_deposits')
   %h1.page-header
     %i.icon-search
     %small
       = render_constraints(params)
+      - if !params[:sort].nil? && params[:action] == 'recent_deposits'
+        = render_constraint_element("Sort", @pretty_sort_name, :classes => ["sort"], :remove => url_for(params.merge(:action=>'show',:sort=>nil,:limit=>nil)))
 
 - drs_items_class = drs_view_class == "list" ? "span9" : "span12"
 - sidebar_class = drs_view_class == "list" ? "span3" : "span12"
@@ -69,5 +33,3 @@
     = render :partial => 'catalog/document_list'
     = render 'catalog/results_pagination'
     = render partial: 'shared/sets/bottom_action_menu'
-
-%div#add_compilation_form{ style: 'display:none' }

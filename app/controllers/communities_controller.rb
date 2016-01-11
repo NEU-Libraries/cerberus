@@ -15,11 +15,15 @@ class CommunitiesController < ApplicationController
   include BlacklightAdvancedSearch::ParseBasicQ
   include BlacklightAdvancedSearch::Controller
   include UrlHelper
+  include SetListsHelper
+
+  helper_method :sort_value
 
   # We can do better by using SOLR check instead of Fedora
-  before_filter :can_read?, except: [:index, :show]
+  before_filter :can_read?, except: [:index, :show, :creator_list, :title_list, :recent_deposits]
   before_filter :enforce_show_permissions, :only=>:show
   before_filter :get_set, except: [:index]
+  before_filter :not_root, :only=>[:creator_list, :title_list, :recent_deposits]
 
   self.solr_search_params_logic += [:add_access_controls_to_solr_params]
 
