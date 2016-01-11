@@ -205,6 +205,7 @@ class CoreFile < ActiveFedora::Base
     if user.can?(:edit, collection) || user.proxy_staff?
       self.parent = collection
       self.properties.parent_id = collection.pid
+      self.save!
       return true
     else
       raise "User with nuid #{user.nuid} cannot add items to collection with pid of #{collection.pid}"
