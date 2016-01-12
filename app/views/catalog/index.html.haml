@@ -36,7 +36,7 @@
       - if current_user
         %hr
         .pane.page-to-compilation
-          =link_to("Save for later", sets_editable_path(files: @document_list.map{|d| d['id']}), remote: true, title:  "Add to " + t('drs.compilations.name'), data: {toggle: "tooltip"}, class: "btn btn-mini btn-clear")
+          =link_to("Save files for later", sets_editable_path(files: @document_list.map{|d| d['id']}), remote: true, title:  "Add to " + t('drs.compilations.name'), data: {toggle: "tooltip"}, class: "btn btn-mini btn-clear")
 
     %section{ class: drs_items_class }
       -# Main content
