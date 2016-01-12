@@ -121,3 +121,25 @@
 a[data-toggle="ellipsis"]:hover, a[data-toggle="ellipsis"]:focus{
   text-decoration:none;
 }
+
+
+.alpha_list{
+  padding-bottom:12px;
+}
+.alpha_list .btn-group{
+  white-space: normal;
+  .btn-clear.disabled, .btn-clear.disabled:hover, .btn-clear.disabled:focus{
+    color:#c8cdd0;
+    background:#FFF;
+    border-color:#c8cdd0;
+    a{
+      color:#c8cdd0;
+      cursor:default;
+    }
+  }
+  .btn-clear:hover, .btn-clear:focus, .btn-clear:active, .btn-clear.active{
+    a{
+      color:#FFF;
+    }
+  }
+}
