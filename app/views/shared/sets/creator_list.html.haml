@@ -6,7 +6,8 @@
 %main.row( role="main" )
   %section.span12
     -if has_facet_values?
-      = render partial: '/shared/sets/alpha'
+      - if sort_value == "value"
+        = render partial: '/shared/sets/alpha'
       %table.table.table-bordered
         %tr
           %th
