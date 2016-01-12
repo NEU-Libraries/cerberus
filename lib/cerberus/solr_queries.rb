@@ -14,7 +14,7 @@ module Cerberus
 
     def child_files
       core_file_model = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:CoreFile"
-      solr_query("is_member_of_ssim:#{self.full_self_id} AND has_model_ssim:#{core_file_model}")
+      solr_query("is_member_of_ssim:#{self.full_self_id} AND has_model_ssim:#{core_file_model}", true)
     end
 
     def combined_set_children
@@ -118,7 +118,8 @@ module Cerberus
       cols.each do |c|
         doc_list.concat c.first.all_descendent_files
       end
-      return doc_list
+      # return doc_list
+      doc_list.map{|doc| doc.pid}
     end
 
     def theses
