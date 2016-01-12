@@ -51,9 +51,18 @@ class CompilationsController < ApplicationController
     u_groups = current_user.groups
     groups = u_groups.map! { |g| "\"#{g}\""}.join(" OR ")
     @compilations = solr_query("(depositor_tesim:\"#{current_user.nuid}\" OR edit_access_group_ssim:(#{groups})) AND has_model_ssim:\"#{ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:Compilation"}\"")
+    if params[:class] == 'Collection'
+      doc = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:file]}\"").first)
+    end
 
     respond_to do |format|
-      format.js{ render "editable" }
+      if doc && doc.klass == 'Collection' && doc.child_collections.length > 0
+        format.js{
+          render js:'$("#ajax-modal .modal-body").text("This collection has nested collections and cannot be added to a set. Please add collections which contain files or files to your set."); $("#ajax-modal").modal("show"); $("#ajax-modal-heading").text("Add to Set"); $("#ajax-modal-footer").html("<button class=\"btn\" data-dismiss=\"modal\">Close</button>");'
+         }
+      else
+        format.js{ render "editable" }
+      end
     end
   end
 
@@ -161,8 +170,6 @@ class CompilationsController < ApplicationController
     respond_to do |format|
       if col_pids && !(@compilation.entry_ids & col_pids).empty?
         overlap = (@compilation.entry_ids & col_pids).length
-        remove_pids = @compilation.entry_ids & col_pids
-        add_pids = params[:entry_id]
         format.json { render :json => { :error => "#{overlap} items in this collection are already in the set. You will need to go back to the set, remove the items and then add the collection"}, status: :unprocessable_entity}
       elsif (@compilation.object_ids.include? params[:entry_id])
         format.json { render :json => { :error => "This object is already in the set." }, status: :unprocessable_entity}
