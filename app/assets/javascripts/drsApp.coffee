@@ -410,23 +410,28 @@ $(document).ready ->
       e.on('click', ->
         $(this).addClass('btn-warning').removeClass('btn-success')
         spinner = enable_spinner('ajax-modal');
+        $(this).text('Please wait...');
       ).on('ajax:success', (data)->
+        console.log(data)
         delta = $(this).data('method')
         $("#ajax-modal").find(".spinner").remove();
         switch delta
           when 'post'
-            $(this).text('Remove from ' + $(this).text()).data('method', 'delete').removeClass('btn-success add-to-compilation').addClass 'btn-danger remove-from-compilation'
+            $(this).removeClass('btn-success add-to-compilation').addClass('btn-danger remove-from-compilation').text('Remove from ' + $(this).data('title')).data('method', 'delete')
           when 'delete'
-            $(this).data('method', 'post').text($(this).text().replace('Remove from ', '')).addClass('btn-success add-to-compilation').removeClass 'btn-danger remove-from-compilation'
+            $(this).data('method', 'post').text($(this).data('title')).addClass('btn-success add-to-compilation').removeClass 'btn-danger remove-from-compilation'
       ).on('ajax:complete', (xhr, status)->
+        console.log(status)
       ).on 'ajax:error', (xhr, status, error)->
+        $("#ajax-modal .spinner").remove();
+        console.log(status);
         $(this).closest('.modal').find('.modal-body').html(status.responseJSON.error)
         $(this).closest('.modal').find('.modal-footer').html('<a class="btn btn-success" href=""></a><button class="btn" data-dismiss="modal">No</button>')
         # $(this).closest('.modal').modal 'hide'
-        $('.breadcrumb').addBsAlert
-          classes: 'alert alert-danger'
-          strong: 'Error,'
-          text: 'There was an error adding this item to the set. Please go back and try a different object.'
+        # $('.breadcrumb').addBsAlert
+        #   classes: 'alert alert-danger'
+        #   strong: 'Error,'
+        #   text: 'There was an error adding this item to the set. Please go back and try a different object.'
         return
 
       return
