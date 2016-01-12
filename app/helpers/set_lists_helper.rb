@@ -41,9 +41,10 @@ module SetListsHelper
   def title_list
     @set = fetch_solr_document
     @page_title = "#{@set.title} Title List"
-    @files = @set.all_descendent_files.sort_by!{|i| i['title_ssi']}
-    count = @files.count
-    @files.select! { |doc| current_user.can?(:read, doc) }
+    self.solr_search_params_logic += [:limit_to_core_files]
+    params[:sort] = "#{Solrizer.solr_name('title', :stored_sortable, type: :string)} asc"
+    (@response, @files) = get_search_results
+    count = @response.response['numFound']
     if count > 0
       render 'shared/sets/title_list', locals:{sort_value:sort_value, files:@files}
     else
