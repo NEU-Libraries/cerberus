@@ -163,7 +163,7 @@ class CompilationsController < ApplicationController
         overlap = (@compilation.entry_ids & col_pids).length
         remove_pids = @compilation.entry_ids & col_pids
         add_pids = params[:entry_id]
-        format.json { render :json => { :error => "#{overlap} items in this collection are already in the set. You will need to go back to the set, remove the items and then add the collection", status: :unprocessable_entity} }
+        format.json { render :json => { :error => "#{overlap} items in this collection are already in the set. You will need to go back to the set, remove the items and then add the collection"}, status: :unprocessable_entity}
       elsif (@compilation.object_ids.include? params[:entry_id])
         format.json { render :json => { :error => "This object is already in the set." }, status: :unprocessable_entity}
       elsif @compilation.add_entry(params[:entry_id])
@@ -208,13 +208,19 @@ class CompilationsController < ApplicationController
   end
 
   def delete_entry
-    @compilation.remove_entry(params[:entry_id])
-    save_or_bust @compilation
-
     respond_to do |format|
-      format.html { redirect_to @compilation }
-      format.json { render :nothing => true }
-      format.js   { render :nothing => true }
+      puts @compilation.entry_ids
+      puts params[:entry_id]
+      if @compilation.entry_ids.include?(params[:entry_id]) && @compilation.remove_entry(params[:entry_id])
+        save_or_bust @compilation
+        format.html { redirect_to @compilation }
+        format.json { render :nothing => true }
+        format.js   { render :nothing => true }
+      elsif @compilation.object_ids.include?(params[:entry_id])
+        format.json { render :json => { :error => "This item cannot be removed from the set because the parent collection is in the set. If you wish to remove this item, remove the collection from the set. #{ActionController::Base.helpers.link_to("Go to the Set", compilation_path(@compilation))}"}, status: :unprocessable_entity}
+      else
+        format.json { render :json => { :error => "There was an error removing this item from the set", status: :unprocessable_entity} }
+      end
     end
   end
 
