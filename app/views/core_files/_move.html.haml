@@ -1,16 +1,29 @@
 %div
-  = form_tag( request_move_file_path ) do
-    %fieldset
-      .row-fluid
-        .span10
-          = label_tag :collection_url, "Where would you like this file to be moved?"
-          = label_tag do
-            %small Please enter the URL for the destination collection.
-          = text_field_tag :collection_url, nil, :required => true
-      .row-fluid
-        .span10
-          = label_tag :reason, "Why would you like us to move this file?"
-          = text_area_tag :reason, nil, :required => true, rows: 5, class: 'input-block-level'
-          %a.btn.btn-warning{href:"#moveModal", title: "Request Move", data: {toggle: "modal"}}
-            Request
-    = render partial: 'move_modal', locals: { move_path: request_move_file_path }
+  -if !current_user.nil? && current_user.admin?
+    = form_tag( request_move_file_path ) do
+      %fieldset
+        .row-fluid
+          .span10
+            = label_tag :collection_pid, "Enter the PID of the destination collection"
+            = text_field_tag :collection_pid, nil, :required => true
+        .row-fluid
+          .span10
+            %a.btn.btn-warning{href:"#moveModal", title: "Request Move", data: {toggle: "modal"}}
+              Move Item
+      = render partial: 'move_modal', locals: { move_path: request_move_file_path }
+  -else
+    = form_tag( request_move_file_path ) do
+      %fieldset
+        .row-fluid
+          .span10
+            = label_tag :collection_url, "Where would you like this file to be moved?"
+            = label_tag do
+              %small Please enter the URL for the destination collection.
+            = text_field_tag :collection_url, nil, :required => true
+        .row-fluid
+          .span10
+            = label_tag :reason, "Why would you like us to move this file?"
+            = text_area_tag :reason, nil, :required => true, rows: 5, class: 'input-block-level'
+            %a.btn.btn-warning{href:"#moveModal", title: "Request Move", data: {toggle: "modal"}}
+              Request
+      = render partial: 'move_modal', locals: { move_path: request_move_file_path }

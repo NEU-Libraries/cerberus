@@ -9,6 +9,7 @@ class CollectionsController < ApplicationController
   include Cerberus::ControllerHelpers::EditableObjects
   include Cerberus::ControllerHelpers::PermissionsCheck
   include UrlHelper
+  include SetListsHelper
 
   include Blacklight::Catalog
   include Blacklight::Configurable # comply with BL 3.7
@@ -19,10 +20,12 @@ class CollectionsController < ApplicationController
   include BlacklightAdvancedSearch::ParseBasicQ
   include BlacklightAdvancedSearch::Controller
 
+  helper_method :sort_value
+
   before_filter :authenticate_user!, only: [:new, :edit, :create, :update, :destroy ]
 
   # We can do better by using SOLR check instead of Fedora
-  before_filter :can_read?, only: [:show]
+  before_filter :can_read?, only: [:show, :creator_list, :title_list, :recent_deposits]
   # before_filter :enforce_show_permissions, :only=>:show
   self.solr_search_params_logic += [:add_access_controls_to_solr_params]
 
@@ -221,16 +224,30 @@ class CollectionsController < ApplicationController
     collection = Collection.find(params[:id])
     title = collection.title
     user = current_user
-    reason = params[:reason]
-    collection_url = params[:collection_url]
-    collection_pid = collection_url[/([^\/]+)$/]
-    if Collection.exists?(collection_pid)
-      MoveMailer.move_alert(collection, reason, collection_url, user).deliver!
-      flash[:notice] = "Your request has been received and will be processed soon."
-      redirect_to collection and return
+
+    if current_user.admin?
+      destination_pid = params[:destination_pid]
+      if Community.exists?(destination_pid) || Collection.exists?(destination_pid)
+        collection.parent = destination_pid
+        collection.save!
+        flash[:notice] = "This collection has been moved."
+        redirect_to collection and return
+      else
+        flash[:error] = "That community or collection does not exist. Please submit a new request and enter a valid community or collection PID."
+        redirect_to collection and return
+      end
     else
-      flash[:error] = "That collection does not exist. Please submit a new request and enter a valid collection URL."
-      redirect_to collection and return
+      reason = params[:reason]
+      destination_url = params[:destination_url]
+      destination_pid = collection_url[/([^\/]+)$/]
+      if Community.exists?(destination_pid) || Collection.exists?(destination_pid)
+        MoveMailer.move_alert(collection, reason, destination_url, user).deliver!
+        flash[:notice] = "Your request has been received and will be processed soon."
+        redirect_to collection and return
+      else
+        flash[:error] = "That community or collection does not exist. Please submit a new request and enter a valid collection URL."
+        redirect_to collection and return
+      end
     end
   end
 
