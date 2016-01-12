@@ -52,7 +52,7 @@
         %li.pull-left
           %b Total File Count:
           %span.compilation_count Calculating...
-      - if ((@response && @response.response['numFound'] > 0) || @files && @files.count > 0)&& @set.has_core_file_children? && @set.pid != "neu:1" && @set.klass != "Compilation"
+      - if @set.pid != "neu:1" && ((@response && @response.response['numFound'] > 0) || @files && @files.count > 0)&& @set.has_core_file_children? && @set.klass != "Compilation"
         %li{:class=>("active" if current_page?(action: 'recent_deposits'))}
           - if @set.klass == "Collection"
             %a.btn.btn-default{:href=>collection_recent_deposits_path(@set)}
