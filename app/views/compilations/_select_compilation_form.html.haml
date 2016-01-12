@@ -21,9 +21,9 @@
           = submit_tag("#{c.title}",  :class => "btn btn-success btn-block btn-compilation", data: { disable_with: "Please wait..."}, id: "add-to-compilation-#{c.pid}")
     -else
       - if !object_ids.include?(params[:file])
-        = link_to("#{c.title}", add_entry_path(id: c.pid, entry_id: params[:file]), method: 'post', remote: true, id: "add-to-compilation-#{c.pid}", class: "btn btn-success btn-block btn-compilation", data: { disable_with: "Please wait..."} );
-      -  else
-        = link_to("Remove from #{ c.title }", delete_entry_path(id: c.pid, entry_id: params[:file]), method: 'delete', remote: true, id: "remove-from-compilation-#{c.pid}", class: "btn btn-danger btn-block btn-compilation");
+        = link_to("#{c.title}", add_entry_path(id: c.pid, entry_id: params[:file]), method: 'post', remote: true, id: "add-to-compilation-#{c.pid}", class: "btn btn-success btn-block btn-compilation", data: { title: "#{c.title}"} )
+      - else
+        = link_to("Remove from #{ c.title }", delete_entry_path(id: c.pid, entry_id: params[:file]), method: 'delete', remote: true, id: "remove-from-compilation-#{c.pid}", class: "btn btn-danger btn-block btn-compilation", data: { title: "#{c.title}"})
 
 .modal-footer
   %button.btn{"data-dismiss" => "modal"} Close
