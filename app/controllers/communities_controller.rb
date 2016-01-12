@@ -188,23 +188,10 @@ class CommunitiesController < ApplicationController
       solr_parameters[:fq] << fq
     end
 
-    # Ensures that only current_user readable items are returned
-    def safe_get_smart_docs(docs)
-      if !current_user
-        docs.select! { |doc| doc.public? }
-      else
-        docs.select! { |doc| current_user.can?(:read, doc) }
-      end
-
-      @ids = docs.map {|x| x.id}
-
-      # if q or f, change to emulate limit_to_scope
-      if !params[:q].nil? || !params[:f].nil?
-        self.solr_search_params_logic += [:limit_to_pids]
-        (@response, @document_list) = get_search_results
-      else
-        (@response, @document_list) = get_solr_response_for_field_values('id', @ids, {}).first
-      end
+    def safe_get_smart_docs(pids)
+      @ids = pids
+      self.solr_search_params_logic += [:limit_to_pids]
+      (@response, @document_list) = get_search_results
     end
 
     def disable_highlighting(solr_parameters, user_parameters)
