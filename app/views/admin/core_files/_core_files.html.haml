@@ -23,7 +23,7 @@
         %th
         %th
     - @core_files.each_with_index do |core_file, i|
-      = render partial: 'delete_modal', locals: { title: "Confirm Delete", button_title: "Delete", index: "#{i}", core_file:core_file}
+      = render partial: 'delete_modal', locals: { title: "Confirm Delete", button_title: "Delete", index: "#{@type}_#{i}", core_file:core_file}
       %tr
         %td
           %input{:type=>"checkbox", :class=>"cf_select", "data-pid"=>core_file.pid}
@@ -50,7 +50,7 @@
             = DateTime.parse(core_file["system_modified_dtsi"]).strftime("%c")
 
         %td
-          = link_to("Delete", "#deleteModal#{i}", data: { toggle: "modal" }, class: "btn btn-small btn-danger")
+          = link_to("Delete", "#deleteModal#{@type}_#{i}", data: { toggle: "modal" }, class: "btn btn-small btn-danger")
 
   = render 'catalog/results_pagination'
 
