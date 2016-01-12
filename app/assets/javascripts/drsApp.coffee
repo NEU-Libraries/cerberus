@@ -418,13 +418,15 @@ $(document).ready ->
             $(this).text('Remove from ' + $(this).text()).data('method', 'delete').removeClass('btn-success add-to-compilation').addClass 'btn-danger remove-from-compilation'
           when 'delete'
             $(this).data('method', 'post').text($(this).text().replace('Remove from ', '')).addClass('btn-success add-to-compilation').removeClass 'btn-danger remove-from-compilation'
-      ).on 'ajax:error', (data)->
-        $(this).closest('.modal').modal 'hide'
+      ).on('ajax:complete', (xhr, status)->
+      ).on 'ajax:error', (xhr, status, error)->
+        $(this).closest('.modal').find('.modal-body').html(status.responseJSON.error)
+        $(this).closest('.modal').find('.modal-footer').html('<a class="btn btn-success" href=""></a><button class="btn" data-dismiss="modal">No</button>')
+        # $(this).closest('.modal').modal 'hide'
         $('.breadcrumb').addBsAlert
           classes: 'alert alert-danger'
           strong: 'Error,'
-          text: 'Something went wrong. This object could already be in this set. Please reload the page and try again or try a different object.'
-
+          text: 'There was an error adding this item to the set. Please go back and try a different object.'
         return
 
       return
@@ -432,11 +434,10 @@ $(document).ready ->
     addToComplationMultiLink = (e) ->
       e.on('ajax:success', (data)->
         delta = $(this).find('input[name="_method"]').val() || $(this).attr('method')
-        # if delta
         $("#ajax-modal").find(".spinner").remove();
         switch delta
           when 'post'
-            $(this).find('.btn-compilation').text('Remove from ' + $(this).find('.btn-compilation').text()).removeClass('btn-success add-to-compilation').addClass 'btn-danger remove-from-compilation'
+            $(this).find('.btn-compilation').text('Remove from ' + $(this).text()).removeClass('btn-success add-to-compilation').addClass 'btn-danger remove-from-compilation'
             $(this).find('input[name="_method"]').val('delete')
           when 'delete'
             $(this).find('.btn-compilation').text($(this).find('.btn-compilation').text().replace('Remove from ', '')).addClass('btn-success add-to-compilation').removeClass 'btn-danger remove-from-compilation'

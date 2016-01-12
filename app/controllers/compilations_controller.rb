@@ -151,14 +151,28 @@ class CompilationsController < ApplicationController
   end
 
   def add_entry
+    doc = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:entry_id]}\"").first)
+    if doc.klass == "Collection"
+      col_pids = []
+      doc.all_descendent_files.each do |f|
+        col_pids << f.pid
+      end
+    end
     respond_to do |format|
-      if @compilation.add_entry(params[:entry_id])
+      if !(@compilation.entry_ids & col_pids).empty?
+        overlap = (@compilation.entry_ids & col_pids).length
+        remove_pids = @compilation.entry_ids & col_pids
+        add_pids = params[:entry_id]
+        format.json { render :json => { :error => "#{overlap} items in this collection are already in the set. You will need to go back to the set, remove the items and then add the collection", status: :unprocessable_entity}
+      elsif (@compilation.object_ids.include? params[:entry_id])
+        format.json { render :json => { :error => "This object is already in the set." }, status: :unprocessable_entity}
+      elsif @compilation.add_entry(params[:entry_id])
         save_or_bust @compilation
         format.html { redirect_to @compilation }
         format.json { render :nothing => true }
         format.js   { render :nothing => true }
       else
-        format.json { render json: {error: "This object is already in the set. Please go back and try a different object."}, status: :unprocessable_entity }
+        format.json { render json: {error: "There was an error adding this item to the set. Please go back and try a different object."}.to_json, status: :unprocessable_entity }
       end
     end
   end
