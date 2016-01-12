@@ -147,6 +147,22 @@ class Compilation < ActiveFedora::Base
     end
   end
 
+  def object_ids
+    docs = []
+    self.entries.each do |e|
+      if e.klass == 'CoreFile'
+        docs << e.pid
+      else
+        docs << e.pid
+        e.all_descendent_files.each do |f|
+          docs << f.pid
+        end
+      end
+    end
+    # docs.select! { |doc| current_user.can?(:read, doc) }
+    docs
+  end
+
   private
 
     # Takes a string of form "info:fedora/neu:abc123"
