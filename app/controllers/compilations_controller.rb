@@ -159,11 +159,11 @@ class CompilationsController < ApplicationController
       end
     end
     respond_to do |format|
-      if !(@compilation.entry_ids & col_pids).empty?
+      if col_pids && !(@compilation.entry_ids & col_pids).empty?
         overlap = (@compilation.entry_ids & col_pids).length
         remove_pids = @compilation.entry_ids & col_pids
         add_pids = params[:entry_id]
-        format.json { render :json => { :error => "#{overlap} items in this collection are already in the set. You will need to go back to the set, remove the items and then add the collection", status: :unprocessable_entity}
+        format.json { render :json => { :error => "#{overlap} items in this collection are already in the set. You will need to go back to the set, remove the items and then add the collection", status: :unprocessable_entity} }
       elsif (@compilation.object_ids.include? params[:entry_id])
         format.json { render :json => { :error => "This object is already in the set." }, status: :unprocessable_entity}
       elsif @compilation.add_entry(params[:entry_id])
