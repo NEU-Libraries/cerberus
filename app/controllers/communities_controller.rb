@@ -89,6 +89,7 @@ class CommunitiesController < ApplicationController
         break
       end
     end
+    self.solr_search_params_logic.delete(:limit_to_scope)
 
     if !params[:q].nil? && params[:id] != Rails.application.config.root_community_id
       self.solr_search_params_logic += [:limit_to_scope]
