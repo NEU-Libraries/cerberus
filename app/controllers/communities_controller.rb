@@ -77,6 +77,19 @@ class CommunitiesController < ApplicationController
       @pretty_description = convert_urls(@set.description)
     end
 
+    # Determine if there are creators and core file children (nested)
+    # for browse buttons
+    self.solr_search_params_logic += [:limit_to_scope]
+    (response, document_list) = get_search_results
+    @creators = response.facet_counts["facet_fields"]["creator_sim"].length > 0
+    @core_file_children = false
+    response["response"]["docs"].each do |doc|
+      if doc["active_fedora_model_ssi"] == "CoreFile"
+        @core_file_children = true
+        break
+      end
+    end
+
     if !params[:q].nil? && params[:id] != Rails.application.config.root_community_id
       self.solr_search_params_logic += [:limit_to_scope]
 
