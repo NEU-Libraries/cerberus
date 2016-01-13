@@ -354,27 +354,47 @@ class CoreFilesController < ApplicationController
         # Destroy old thumbnail
         ImageThumbnailFile.find(@core_file.thumbnail.pid).destroy
 
-        # Create thumbnail obj
-        thumb = ImageThumbnailFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
-
-        thumb.depositor              = @core_file.depositor
-        thumb.core_record            = @core_file
-        thumb.rightsMetadata.content = @core_file.rightsMetadata.content
-        thumb.save!
-
-        create_all_thumbnail_sizes(thumb_path, thumb.pid)
-
-        thumbnail_list = []
-
-        thumb.reload
-        if thumb.datastreams["thumbnail_1"].content != nil
-          for i in 1..5 do
-            thumbnail_list << "/downloads/#{thumb.pid}?datastream_id=thumbnail_#{i}"
+        if @core_file.canonical_class == "VideoFile" || @core_file.canonical_class == "AudioFile"
+          # Destroy old poster
+          @core_file.content_objects.each do |co|
+            if co.class == ImageMasterFile
+              co.destroy
+            end
           end
-        end
 
-        @core_file.thumbnail_list = thumbnail_list
-        @core_file.save!
+          poster_object = ImageMasterFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint), core_record: @core_file)
+
+          File.open(thumb_path) do |poster_contents|
+            poster_object.add_file(poster_contents, 'content', "poster#{File.extname(thumb_path)}")
+            poster_object.rightsMetadata.content = @core_file.rightsMetadata.content
+            poster_object.save!
+          end
+
+          DerivativeCreator.new(poster_object.pid).generate_derivatives
+          @core_file.update_index
+        else
+          # Create thumbnail obj
+          thumb = ImageThumbnailFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
+
+          thumb.depositor              = @core_file.depositor
+          thumb.core_record            = @core_file
+          thumb.rightsMetadata.content = @core_file.rightsMetadata.content
+          thumb.save!
+
+          create_all_thumbnail_sizes(thumb_path, thumb.pid)
+
+          thumbnail_list = []
+
+          thumb.reload
+          if thumb.datastreams["thumbnail_1"].content != nil
+            for i in 1..5 do
+              thumbnail_list << "/downloads/#{thumb.pid}?datastream_id=thumbnail_#{i}"
+            end
+          end
+
+          @core_file.thumbnail_list = thumbnail_list
+          @core_file.save!
+        end
       else
         flash[:error] = "Error! The thumbnail attached is not an image."
         redirect_to files_provide_metadata_path(@core_file.pid) and return
