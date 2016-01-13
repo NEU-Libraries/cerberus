@@ -77,17 +77,17 @@ class CommunitiesController < ApplicationController
       @pretty_description = convert_urls(@set.description)
     end
 
-    if params[:id] != Rails.application.config.root_community_id
-      # Determine if there are creators and core file children (nested)
-      # for browse buttons
-      self.solr_search_params_logic += [:limit_to_scope]
-      self.solr_search_params_logic += [:exclude_unwanted_models]
-      (response, document_list) = get_search_results
-      @creators = response.facet_counts["facet_fields"]["creator_sim"].length > 0
-      @core_file_children = response["response"]["docs"].length > 0
-      self.solr_search_params_logic.delete(:limit_to_scope)
-      self.solr_search_params_logic.delete(:exclude_unwanted_models)
-    end
+    # if params[:id] != Rails.application.config.root_community_id
+    #   # Determine if there are creators and core file children (nested)
+    #   # for browse buttons
+    #   self.solr_search_params_logic += [:limit_to_scope]
+    #   self.solr_search_params_logic += [:exclude_unwanted_models]
+    #   (response, document_list) = get_search_results
+    #   @creators = response.facet_counts["facet_fields"]["creator_sim"].length > 0
+    #   @core_file_children = response["response"]["docs"].length > 0
+    #   self.solr_search_params_logic.delete(:limit_to_scope)
+    #   self.solr_search_params_logic.delete(:exclude_unwanted_models)
+    # end
 
     if !params[:q].nil? && params[:id] != Rails.application.config.root_community_id
       self.solr_search_params_logic += [:limit_to_scope]
