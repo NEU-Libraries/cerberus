@@ -77,19 +77,17 @@ class CommunitiesController < ApplicationController
       @pretty_description = convert_urls(@set.description)
     end
 
-    # Determine if there are creators and core file children (nested)
-    # for browse buttons
-    self.solr_search_params_logic += [:limit_to_scope]
-    (response, document_list) = get_search_results
-    @creators = response.facet_counts["facet_fields"]["creator_sim"].length > 0
-    @core_file_children = false
-    response["response"]["docs"].each do |doc|
-      if doc["active_fedora_model_ssi"] == "CoreFile"
-        @core_file_children = true
-        break
-      end
+    if params[:id] != Rails.application.config.root_community_id
+      # Determine if there are creators and core file children (nested)
+      # for browse buttons
+      self.solr_search_params_logic += [:limit_to_scope]
+      self.solr_search_params_logic += [:exclude_unwanted_models]
+      (response, document_list) = get_search_results
+      @creators = response.facet_counts["facet_fields"]["creator_sim"].length > 0
+      @core_file_children = response["response"]["docs"].length > 0
+      self.solr_search_params_logic.delete(:limit_to_scope)
+      self.solr_search_params_logic.delete(:exclude_unwanted_models)
     end
-    self.solr_search_params_logic.delete(:limit_to_scope)
 
     if !params[:q].nil? && params[:id] != Rails.application.config.root_community_id
       self.solr_search_params_logic += [:limit_to_scope]
@@ -214,5 +212,11 @@ class CommunitiesController < ApplicationController
 
     def increase_facet_limit(solr_parameters, user_parameters)
       solr_parameters["facet.limit"] = "12"
+    end
+
+    def exclude_unwanted_models(solr_parameters, user_parameters)
+      solr_parameters[:fq] ||= []
+      solr_parameters[:fq] << "#{Solrizer.solr_name("has_model", :symbol)}:\"info:fedora/afmodel:CoreFile\""
+      solr_parameters[:fq] << "-#{Solrizer.solr_name("is_supplemental_material_for", :symbol)}:[* TO *]"
     end
 end
