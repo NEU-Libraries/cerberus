@@ -69,6 +69,8 @@ module SetListsHelper
     fq = "(#{fq}) AND active_fedora_model_ssi:\"CoreFile\""
     solr_parameters[:fq] ||= []
     solr_parameters[:fq] << fq
+
+    solr_parameters[:per_page] = @set.all_descendent_files.length
   end
 
   def disable_facet_limit(solr_parameters, user_parameters)

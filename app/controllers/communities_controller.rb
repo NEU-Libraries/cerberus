@@ -77,6 +77,20 @@ class CommunitiesController < ApplicationController
       @pretty_description = convert_urls(@set.description)
     end
 
+    # Determine if there are creators and core file children (nested)
+    # for browse buttons
+    self.solr_search_params_logic += [:limit_to_scope]
+    (response, document_list) = get_search_results
+    @creators = response.facet_counts["facet_fields"]["creator_sim"].length > 0
+    @core_file_children = false
+    response["response"]["docs"].each do |doc|
+      if doc["active_fedora_model_ssi"] == "CoreFile"
+        @core_file_children = true
+        break
+      end
+    end
+    self.solr_search_params_logic.delete(:limit_to_scope)
+
     if !params[:q].nil? && params[:id] != Rails.application.config.root_community_id
       self.solr_search_params_logic += [:limit_to_scope]
 
@@ -188,23 +202,10 @@ class CommunitiesController < ApplicationController
       solr_parameters[:fq] << fq
     end
 
-    # Ensures that only current_user readable items are returned
-    def safe_get_smart_docs(docs)
-      if !current_user
-        docs.select! { |doc| doc.public? }
-      else
-        docs.select! { |doc| current_user.can?(:read, doc) }
-      end
-
-      @ids = docs.map {|x| x.id}
-
-      # if q or f, change to emulate limit_to_scope
-      if !params[:q].nil? || !params[:f].nil?
-        self.solr_search_params_logic += [:limit_to_pids]
-        (@response, @document_list) = get_search_results
-      else
-        (@response, @document_list) = get_solr_response_for_field_values('id', @ids, {}).first
-      end
+    def safe_get_smart_docs(pids)
+      @ids = pids
+      self.solr_search_params_logic += [:limit_to_pids]
+      (@response, @document_list) = get_search_results
     end
 
     def disable_highlighting(solr_parameters, user_parameters)
