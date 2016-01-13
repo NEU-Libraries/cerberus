@@ -11,6 +11,9 @@
   - if @core_file.category.first == "Learning Objects"
     %fieldset.row-fluid
       = render partial: 'core_files/metadata/learning_object', locals: {:f => f}
+- if params[:action] == "edit"
+  %fieldset.row-fluid
+    = render partial: 'core_files/metadata/replacement_thumbnail', locals: {:f => f}
 .row-fluid
   .span12
     %legend Basic Information
