@@ -4,7 +4,7 @@ module SetListsHelper
     @set = fetch_solr_document
     @page_title = "#{@set.title} Recent Deposits"
     self.solr_search_params_logic += [:limit_to_core_files]
-    params[:limit] = 10
+    # params[:limit] = 10
     if !params[:sort]
       params[:sort] = "#{Solrizer.solr_name('system_create', :stored_sortable, type: :date)} desc"
     end
@@ -43,6 +43,7 @@ module SetListsHelper
     @page_title = "#{@set.title} Title List"
     self.solr_search_params_logic += [:limit_to_core_files]
     params[:sort] = "#{Solrizer.solr_name('title', :stored_sortable, type: :string)} asc"
+    params[:per_page] = @set.all_descendent_files.length
     (@response, @files) = get_search_results
     count = @response.response['numFound']
     if count > 0
@@ -69,8 +70,6 @@ module SetListsHelper
     fq = "(#{fq}) AND active_fedora_model_ssi:\"CoreFile\""
     solr_parameters[:fq] ||= []
     solr_parameters[:fq] << fq
-
-    solr_parameters[:per_page] = @set.all_descendent_files.length
   end
 
   def disable_facet_limit(solr_parameters, user_parameters)
