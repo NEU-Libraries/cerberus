@@ -37,27 +37,27 @@
       = link_to "#{@set.identifier}", @set.identifier
   %nav.set-actions
     %ul.nav.nav-pills
-      - if @set.pid != "neu:1" && ((@response && @response.response['numFound'] > 0) || @files && @files.count > 0)&& @core_file_children
-        %li{:class=>("active" if current_page?(action: 'recent_deposits'))}
-          - if @set.klass == "Collection"
-            %a.btn.btn-default{:href=>collection_recent_deposits_path(@set)}
-              %i.icon-time
-              Recent Deposits
-          -elsif @set.klass == "Community"
-            %a.btn.btn-default{:href=>community_recent_deposits_path(@set)}
-              %i.icon-time
-              Recent Deposits
-        - if @creators
-          %li{:class=>("active" if current_page?(action: 'creator_list'))}
-            - if @set.klass == "Collection"
-              %a.btn.btn-default{:href=>collection_creator_list_path(@set)} Creator List
-            - elsif @set.klass == "Community"
-              %a.btn.btn-default{:href=>community_creator_list_path(@set)} Creator List
-        %li{:class=>("active" if current_page?(action: 'title_list'))}
-          - if @set.klass == "Collection"
-            %a.btn.btn-default{:href=>collection_title_list_path(@set)} Title List
-          - elsif @set.klass == "Community"
-            %a.btn.btn-default{:href=>community_title_list_path(@set)} Title List
+      -# - if @set.pid != "neu:1" && ((@response && @response.response['numFound'] > 0) || @files && @files.count > 0)&& @core_file_children
+      -#   %li{:class=>("active" if current_page?(action: 'recent_deposits'))}
+      -#     - if @set.klass == "Collection"
+      -#       %a.btn.btn-default{:href=>collection_recent_deposits_path(@set)}
+      -#         %i.icon-time
+      -#         Recent Deposits
+      -#     -elsif @set.klass == "Community"
+      -#       %a.btn.btn-default{:href=>community_recent_deposits_path(@set)}
+      -#         %i.icon-time
+      -#         Recent Deposits
+      -#   - if @creators
+      -#     %li{:class=>("active" if current_page?(action: 'creator_list'))}
+      -#       - if @set.klass == "Collection"
+      -#         %a.btn.btn-default{:href=>collection_creator_list_path(@set)} Creator List
+      -#       - elsif @set.klass == "Community"
+      -#         %a.btn.btn-default{:href=>community_creator_list_path(@set)} Creator List
+      -#   %li{:class=>("active" if current_page?(action: 'title_list'))}
+      -#     - if @set.klass == "Collection"
+      -#       %a.btn.btn-default{:href=>collection_title_list_path(@set)} Title List
+      -#     - elsif @set.klass == "Community"
+      -#       %a.btn.btn-default{:href=>community_title_list_path(@set)} Title List
       - if current_user && @set.klass == "Collection"
         -if (current_user.can? :edit, @set.pid) && (current_user.admin? || @set.smart_collection_type.nil? || @set.smart_collection_type == "miscellany")
           %li.pull-right
