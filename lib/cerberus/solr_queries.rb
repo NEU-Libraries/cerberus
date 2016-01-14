@@ -14,7 +14,7 @@ module Cerberus
 
     def child_files
       core_file_model = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:CoreFile"
-      solr_query("is_member_of_ssim:#{self.full_self_id} AND has_model_ssim:#{core_file_model}")
+      solr_query("is_member_of_ssim:#{self.full_self_id} AND has_model_ssim:#{core_file_model}", true)
     end
 
     def child_collections
@@ -123,7 +123,8 @@ module Cerberus
       cols.each do |c|
         doc_list.concat c.first.all_descendent_files
       end
-      return doc_list
+      # return doc_list
+      doc_list.map{|doc| doc.pid}
     end
 
     def theses
@@ -253,30 +254,30 @@ module Cerberus
       solr_query("#{relation}:\"#{str}\"")
     end
 
-    def has_creators?
-      descendents = self.combined_set_descendents
-      query = descendents.map do |set|
-        p = set.pid
-        set = "is_member_of_ssim:\"info:fedora/#{p}\""
-      end
-      query << "is_member_of_ssim:\"info:fedora/#{self.pid}\""
-      fq = query.join(" OR ")
-      fq = "(#{fq}) AND active_fedora_model_ssi:\"CoreFile\""
-      query_result = ActiveFedora::SolrService.query(fq, :fl=>"creator_tesim")
-      return query_result.select{|f| f.has_key?("creator_tesim")}.length > 0
-    end
-
-    def has_core_file_children?
-      descendents = self.combined_set_descendents
-      query = descendents.map do |set|
-        p = set.pid
-        set = "is_member_of_ssim:\"info:fedora/#{p}\""
-      end
-      query << "is_member_of_ssim:\"info:fedora/#{self.pid}\""
-      fq = query.join(" OR ")
-      fq = "(#{fq}) AND active_fedora_model_ssi:\"CoreFile\""
-      query_result = ActiveFedora::SolrService.query(fq, :fl=>id)
-      return query_result.length > 0
-    end
+    # def has_creators?
+    #   descendents = self.combined_set_descendents
+    #   query = descendents.map do |set|
+    #     p = set.pid
+    #     set = "is_member_of_ssim:\"info:fedora/#{p}\""
+    #   end
+    #   query << "is_member_of_ssim:\"info:fedora/#{self.pid}\""
+    #   fq = query.join(" OR ")
+    #   fq = "(#{fq}) AND active_fedora_model_ssi:\"CoreFile\""
+    #   query_result = ActiveFedora::SolrService.query(fq, :fl=>"creator_tesim")
+    #   return query_result.select{|f| f.has_key?("creator_tesim")}.length > 0
+    # end
+    #
+    # def has_core_file_children?
+    #   descendents = self.combined_set_descendents
+    #   query = descendents.map do |set|
+    #     p = set.pid
+    #     set = "is_member_of_ssim:\"info:fedora/#{p}\""
+    #   end
+    #   query << "is_member_of_ssim:\"info:fedora/#{self.pid}\""
+    #   fq = query.join(" OR ")
+    #   fq = "(#{fq}) AND active_fedora_model_ssi:\"CoreFile\""
+    #   query_result = ActiveFedora::SolrService.query(fq, :fl=>id)
+    #   return query_result.length > 0
+    # end
   end
 end
