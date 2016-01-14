@@ -2,13 +2,17 @@ module ApplicationHelper
 
   # Only things with theoretically near universal potential use should go here.
 
-  def solr_query(query_string)
+  def solr_query(query_string, pid_only = false)
     # By default, SolrService.query only returns 10 rows
     # You can specify more rows than you need, but not just to return all results
     # This is a small helper method that combines SolrService's count and query to
     # get back all results, without guessing at an upper limit
     row_count = ActiveFedora::SolrService.count(query_string)
-    query_result = ActiveFedora::SolrService.query(query_string, :rows => row_count)
+    if pid_only
+      query_result = ActiveFedora::SolrService.query(query_string, :rows => row_count, :fl => "id")
+    else
+      query_result = ActiveFedora::SolrService.query(query_string, :rows => row_count)
+    end
     return query_result.map { |x| SolrDocument.new(x) }
   end
 

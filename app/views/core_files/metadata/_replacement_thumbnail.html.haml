@@ -1,0 +1,11 @@
+.row-fluid
+  .span12
+    %legend Replacement Thumbnail
+.video_metadata
+  .span6
+    = f.label :description, "Thumbnail"
+    %small Choose a replacement image for this item
+  .span6
+    = f.file_field :replacement_thumbnail, name: 'replacement_thumbnail', accept:".jpg,.jpeg,.png"
+    %span.help-block
+      This image will be displayed on the item page. We strongly suggest a high resolution image, with a longest edge of at least 1000 px.
