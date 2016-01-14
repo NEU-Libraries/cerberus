@@ -12,12 +12,14 @@
       - if files_set.subset? pids_set
         = form_tag(delete_multiple_entries_path(:id=>c.pid), method: "delete", remote: true, class: "multi-compilation") do
           - params[:files].each do |e|
-            = hidden_field_tag(:entry_ids, e, :multiple=>true, :name=>"entry_ids[]")
+            - if !e.blank?
+              = hidden_field_tag(:entry_ids, e, :multiple=>true, :name=>"entry_ids[]")
           = submit_tag("#{c.title}",  :class => "btn btn-danger btn-block btn-compilation", data: { disable_with: "Please wait..."}, id: "remove-from-compilation-#{c.pid}")
       -else
         = form_tag(add_multiple_entries_path(:id=>c.pid), method: 'post', remote: true, class: "multi-compilation") do
           - params[:files].each do |e|
-            = hidden_field_tag(:entry_ids, e, :multiple=>true, :name=>"entry_ids[]")
+            - if !e.blank?
+              = hidden_field_tag(:entry_ids, e, :multiple=>true, :name=>"entry_ids[]")
           = submit_tag("#{c.title}",  :class => "btn btn-success btn-block btn-compilation", data: { disable_with: "Please wait..."}, id: "add-to-compilation-#{c.pid}")
     -else
       - if object_ids.include?(params[:file])
