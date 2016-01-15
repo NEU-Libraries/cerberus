@@ -80,6 +80,11 @@
               %i.icon-pencil
               Manage Collection
       -if @set.klass == "Compilation"
+        -if (current_user.can? :edit, @set.pid) && (current_user.admin?)
+          %li.pull-right
+            %a.btn.btn-default{:href =>  edit_compilation_path(@set)}
+              %i.icon-pencil
+              = "Manage #{t('drs.compilations.name').capitalize}"
         %li.pull-right
           %a.btn{ href: prepare_download_path(id: @compilation.pid ) , method: 'get' }
             %i.icon-download
