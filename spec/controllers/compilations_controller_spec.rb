@@ -5,7 +5,7 @@ describe CompilationsController do
   let(:bo) { FactoryGirl.create(:bo) }
   let(:file) { FactoryGirl.create(:bills_complete_file) }
   let(:file2) { FactoryGirl.create(:bills_complete_file) }
-  let(:collection) { FactoryGirl.create(:bills_private_collection) }
+  let(:collection) { FactoryGirl.create(:valid_owned_by_bill) }
 
   before :each do
     sign_in bill
@@ -312,9 +312,13 @@ describe CompilationsController do
     end
 
     it "removes the entry and redirects to the #show action for html requests" do
-      compilation.add_entry file
-      delete :delete_entry, id: compilation.pid, entry_id: file.pid
-      expect(response).to redirect_to compilation_path(compilation)
+      sign_in bill
+      # compilation.add_entry file
+      post :add_entry, id: compilation.pid, entry_id: file.pid
+      post :add_entry, id: compilation.pid, entry_id: file2.pid
+      puts file.pid
+      delete :delete_entry, id: compilation.pid, entry_id: file.pid, format: "html"
+      expect(response).to redirect_to "/sets/#{compilation.pid}"
       expect(assigns(:compilation).entry_ids).not_to include file.pid
     end
 
@@ -364,11 +368,24 @@ describe CompilationsController do
   describe "GET #get_total_count" do
     let(:compilation) { FactoryGirl.create(:bills_compilation) }
     it "retrieves total core file count recursively" do
+      sign_in bill
       cf = CoreFile.create(title:"Core File", parent: collection, depositor: bill.nuid, mass_permissions: "public")
-      post :add_entry, id: compilation.pid, entry_id: collection.pid
       post :add_entry, id: compilation.pid, entry_id: file.pid
       get :get_total_count, id: compilation.pid
-      expect(assigns(:count)).to eq 2
+      expect(assigns(:count)).to eq 1
+      post :add_entry, id: compilation.pid, entry_id: collection.pid
+      comp = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{compilation.pid}\"").first)
+      docs = []
+      comp.entries.each do |e|
+        if e.klass == 'CoreFile'
+          docs << e
+        else
+          e.all_descendent_files.each do |f|
+            docs << f
+          end
+        end
+      end
+      expect(docs.count).to eq 2
     end
   end
 end

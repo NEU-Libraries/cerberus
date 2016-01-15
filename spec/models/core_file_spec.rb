@@ -90,7 +90,7 @@ describe CoreFile do
       core.parent.should == bills_collection
       core.save!
 
-      bills_collection.child_object_ids.include?(core.pid).should be true
+      bills_collection.child_file_ids.include?(core.pid).should be true
     end
 
     it "fails when the user does not have edit permissions on the targetted collection" do
@@ -106,8 +106,8 @@ describe CoreFile do
 
       core.save!
 
-      bills_collection.child_object_ids.include?(core.pid).should be false
-      bills_collection_two.child_object_ids.include?(core.pid).should be true
+      bills_collection.child_file_ids.include?(core.pid).should be false
+      bills_collection_two.child_file_ids.include?(core.pid).should be true
     end
   end
 

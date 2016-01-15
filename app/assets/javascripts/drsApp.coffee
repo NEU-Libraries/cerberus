@@ -423,18 +423,13 @@ $(document).ready ->
         $("#ajax-modal .spinner").remove();
         $(this).closest('.modal').find('.modal-body').html(status.responseJSON.error)
         $(this).closest('.modal').find('.modal-footer').html('<a class="btn btn-success" href=""></a><button class="btn" data-dismiss="modal">No</button>')
-        # $(this).closest('.modal').modal 'hide'
-        # $('.breadcrumb').addBsAlert
-        #   classes: 'alert alert-danger'
-        #   strong: 'Error,'
-        #   text: 'There was an error adding this item to the set. Please go back and try a different object.'
         return
 
       return
 
     addToComplationMultiLink = (e) ->
       e.on('ajax:success', (data)->
-        $(this).closest('.modal').find('.modal-body').append("<div class='alert alert-success'>Items successfully added to set.</div>")
+        $(this).closest('.modal').find('.modal-body').append("<div class='alert alert-success'>Items successfully added.</div>")
         $(this).closest('.modal').find('.modal-footer').html("<button class='btn' data-dismiss='modal'>Close</button>");
         setTimeout(dismissModal, 2000)
       )
