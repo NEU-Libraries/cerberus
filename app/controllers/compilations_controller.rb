@@ -298,9 +298,7 @@ class CompilationsController < ApplicationController
         end
       end
     end
-    docs.select! { |doc| doc.public? || (!current_user.nil? && current_user.can?(:read, doc.pid)) }
-    # (!current_user.nil? && (current_user.can? :read, content)) || content.public?
-    # docs.select! { |doc| current_user.can?(:read, doc) }
+    docs.select! { |doc| ((!current_user.nil? && current_user.can?(:read, doc)) || doc.public?) }
     @count = docs.count
     return @count
   end
