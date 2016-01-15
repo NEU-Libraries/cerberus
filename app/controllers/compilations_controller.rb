@@ -184,17 +184,33 @@ class CompilationsController < ApplicationController
     end
   end
 
+  def check_multiple_entries
+    entries = params[:entries]
+    intersection = (entries & @compilation.object_ids).to_a
+    if !intersection.empty?
+      intersection.each do |i|
+        entries.delete(i)
+      end
+    end
+
+    respond_to do |format|
+      if entries.count > 0
+        format.js{ render "check_multi_add", locals: {entries: entries, compilation: @compilation} }
+      else
+        format.js{
+          render js: "$(\"#ajax-modal .modal-body\").text(\"#{intersection.count} items are already in #{@compilation.title}\"); $(\"#ajax-modal\").modal(\"show\"); $(\"#ajax-modal-heading\").text(\"Add to Set\"); $(\"#ajax-modal-footer\").html(\"<button class='btn' data-dismiss='modal'>Close</button>\");"
+         }
+      end
+    end
+
+  end
+
   def add_multiple_entries
-    count_before = total_count
-    entry_count = params[:entry_ids].count
-    params[:entry_ids].each do |e|
+    entries = params[:entry_ids]
+    entries.each do |e|
       @compilation.add_entry(e)
     end
     save_or_bust @compilation
-    count_after = total_count
-    if count_before + entry_count != count_after
-      flash[:notice] = "Some of the items may have already been in the set."
-    end
     respond_to do |format|
       format.html { redirect_to @compilation }
       format.json { render :nothing => true }

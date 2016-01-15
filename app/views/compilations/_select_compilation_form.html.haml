@@ -7,20 +7,8 @@
   - @compilations.each do |c|
     - object_ids = c.object_ids
     - if params[:files]
-      - pids_set = object_ids.to_set
-      - files_set = params[:files].to_set
-      - if files_set.subset? pids_set
-        = form_tag(delete_multiple_entries_path(:id=>c.pid), method: "delete", remote: true, class: "multi-compilation") do
-          - params[:files].each do |e|
-            - if !e.blank?
-              = hidden_field_tag(:entry_ids, e, :multiple=>true, :name=>"entry_ids[]")
-          = submit_tag("#{c.title}",  :class => "btn btn-danger btn-block btn-compilation", data: { disable_with: "Please wait..."}, id: "remove-from-compilation-#{c.pid}")
-      -else
-        = form_tag(add_multiple_entries_path(:id=>c.pid), method: 'post', remote: true, class: "multi-compilation") do
-          - params[:files].each do |e|
-            - if !e.blank?
-              = hidden_field_tag(:entry_ids, e, :multiple=>true, :name=>"entry_ids[]")
-          = submit_tag("#{c.title}",  :class => "btn btn-success btn-block btn-compilation", data: { disable_with: "Please wait..."}, id: "add-to-compilation-#{c.pid}")
+      =link_to("#{c.title}", check_multi_path(id: c.pid, entries: params[:files]), class:"btn btn-primary btn-block", remote:true)
+      %br
     -else
       - if object_ids.include?(params[:file])
         = link_to("Remove from #{ c.title }", delete_entry_path(id: c.pid, entry_id: params[:file]), method: 'delete', remote: true, id: "remove-from-compilation-#{c.pid}", class: "btn btn-danger btn-block btn-compilation", data: { title: "#{c.title}"})

@@ -412,7 +412,6 @@ $(document).ready ->
         spinner = enable_spinner('ajax-modal');
         $(this).text('Please wait...');
       ).on('ajax:success', (data)->
-        console.log(data)
         delta = $(this).data('method')
         $("#ajax-modal").find(".spinner").remove();
         switch delta
@@ -420,11 +419,8 @@ $(document).ready ->
             $(this).removeClass('btn-success add-to-compilation').addClass('btn-danger remove-from-compilation').text('Remove from ' + $(this).data('title')).data('method', 'delete')
           when 'delete'
             $(this).data('method', 'post').text($(this).data('title')).addClass('btn-success add-to-compilation').removeClass 'btn-danger remove-from-compilation'
-      ).on('ajax:complete', (xhr, status)->
-        console.log(status)
       ).on 'ajax:error', (xhr, status, error)->
         $("#ajax-modal .spinner").remove();
-        console.log(status);
         $(this).closest('.modal').find('.modal-body').html(status.responseJSON.error)
         $(this).closest('.modal').find('.modal-footer').html('<a class="btn btn-success" href=""></a><button class="btn" data-dismiss="modal">No</button>')
         # $(this).closest('.modal').modal 'hide'
@@ -438,26 +434,15 @@ $(document).ready ->
 
     addToComplationMultiLink = (e) ->
       e.on('ajax:success', (data)->
-        delta = $(this).find('input[name="_method"]').val() || $(this).attr('method')
-        $("#ajax-modal").find(".spinner").remove();
-        switch delta
-          when 'post'
-            $(this).find('.btn-compilation').text('Remove from ' + $(this).text()).removeClass('btn-success add-to-compilation').addClass 'btn-danger remove-from-compilation'
-            $(this).find('input[name="_method"]').val('delete')
-          when 'delete'
-            $(this).find('.btn-compilation').text($(this).find('.btn-compilation').text().replace('Remove from ', '')).addClass('btn-success add-to-compilation').removeClass 'btn-danger remove-from-compilation'
-            $(this).attr('method', 'post').find('input[name="_method"]').val('post')
-      ).on 'ajax:error', (data)->
-        $(this).closest('.modal').modal 'hide'
-        $('.breadcrumb').addBsAlert
-          classes: 'alert alert-danger'
-          strong: 'Error,'
-          text: 'Something went wrong. This object could already be in this set. Please reload the page and try again or try a different object.'
-
-        return
-
+        $(this).closest('.modal').find('.modal-body').append("<div class='alert alert-success'>Items successfully added to set.</div>")
+        $(this).closest('.modal').find('.modal-footer').html("<button class='btn' data-dismiss='modal'>Close</button>");
+        setTimeout(dismissModal, 2000)
+      )
       return
+
     # Builds and requests the new compilation form for the ajax request
+    dismissModal = () ->
+      $('.modal').modal 'hide'
 
     newCompilationForm = ->
       $("#new_compilation").parent(".modal").removeClass("modal-compilation")

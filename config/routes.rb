@@ -61,6 +61,7 @@ Cerberus::Application.routes.draw do
   match "/sets/:id/multiple" => 'compilations#delete_multiple_entries', via: 'delete', as: 'delete_multiple_entries'
   match "/sets/:id/:entry_id" => 'compilations#delete_entry', via: 'delete', as: 'delete_entry'
   match "/sets/:id/:entry_id" => 'compilations#add_entry', via: 'post', as: 'add_entry'
+  get "/sets/:id/check" => 'compilations#check_multiple_entries', as: 'check_multi'
 
   get "/files/:id/provide_metadata" => "core_files#provide_metadata", as: "files_provide_metadata"
   post "/files/:id/process_metadata" => "core_files#process_metadata", as: "files_process_metadata"
