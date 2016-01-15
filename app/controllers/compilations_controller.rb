@@ -58,7 +58,7 @@ class CompilationsController < ApplicationController
     respond_to do |format|
       if doc && doc.klass == 'Collection' && doc.child_collections.length > 0
         format.js{
-          render js:'$("#ajax-modal .modal-body").text("This collection has nested collections and cannot be added to a #{t(\'drs.compilations.name\').capitalize}. Please add collections which contain files or files to your #{t(\'drs.compilations.name\').capitalize}."); $("#ajax-modal").modal("show"); $("#ajax-modal-heading").text("Add to #{t(\'drs.compilations.name\').capitalize}"); $("#ajax-modal-footer").html("<button class=\"btn\" data-dismiss=\"modal\">Close</button>");'
+          render js: "$('#ajax-modal .modal-body').text('This collection has nested collections and cannot be added to a #{t('drs.compilations.name').capitalize}. Please add collections which contain files or files to your #{t('drs.compilations.name')}.'); $('#ajax-modal').modal('show'); $('#ajax-modal-heading').text('Add to #{t('drs.compilations.name')}'); $('#ajax-modal-footer').html('<button class=\"btn\" data-dismiss=\"modal\">Close</button>');"
          }
       else
         format.js{ render "editable" }
