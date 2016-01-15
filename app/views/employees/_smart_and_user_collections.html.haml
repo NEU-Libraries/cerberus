@@ -24,7 +24,7 @@
         - user_collections.sort_by!{|f| f.title}
         - user_collections.each do |f|
           - # Don't show empty smart collections unless they're the current user's
-          - if !f.is_empty_collection? || (current_user && @current_user.nuid == @employee.nuid)
+          - if !f.is_empty_collection? || (current_user && (@current_user.nuid == @employee.nuid || @current_user.proxy_staff?))
             - @thumbs = f.thumbnail_list
             =render partial: "shared/drs_item/drs_item", locals: { item: f }
     -if user_collections.length == 0
