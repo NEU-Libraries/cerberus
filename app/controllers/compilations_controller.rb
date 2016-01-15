@@ -58,7 +58,7 @@ class CompilationsController < ApplicationController
     respond_to do |format|
       if doc && doc.klass == 'Collection' && doc.child_collections.length > 0
         format.js{
-          render js:'$("#ajax-modal .modal-body").text("This collection has nested collections and cannot be added to a set. Please add collections which contain files or files to your set."); $("#ajax-modal").modal("show"); $("#ajax-modal-heading").text("Add to Set"); $("#ajax-modal-footer").html("<button class=\"btn\" data-dismiss=\"modal\">Close</button>");'
+          render js:'$("#ajax-modal .modal-body").text("This collection has nested collections and cannot be added to a #{t(\'drs.compilations.name\').capitalize}. Please add collections which contain files or files to your #{t(\'drs.compilations.name\').capitalize}."); $("#ajax-modal").modal("show"); $("#ajax-modal-heading").text("Add to #{t(\'drs.compilations.name\').capitalize}"); $("#ajax-modal-footer").html("<button class=\"btn\" data-dismiss=\"modal\">Close</button>");'
          }
       else
         format.js{ render "editable" }
@@ -138,7 +138,7 @@ class CompilationsController < ApplicationController
     self.solr_search_params_logic += [:filter_entry_ids]
     (@response, @document_list) = get_search_results
     if @response.response['numFound'] == 0
-      flash[:notice] = "There are no items in this set. Please search or browse for an item or collection and add it to this set."
+      flash[:notice] = "There are no items in this #{t('drs.compilations.name').capitalize}. Please search or browse for an item or collection and add it to this #{t('drs.compilations.name').capitalize}."
     end
     if @compilation.entry_ids.length != @response.response['numFound']
       dead_entries = @compilation.remove_dead_entries
@@ -170,16 +170,16 @@ class CompilationsController < ApplicationController
     respond_to do |format|
       if col_pids && !(@compilation.entry_ids & col_pids).empty?
         overlap = (@compilation.entry_ids & col_pids).length
-        format.json { render :json => { :error => "#{overlap} items in this collection are already in the set. You will need to go back to the set, remove the items and then add the collection"}, status: :unprocessable_entity}
+        format.json { render :json => { :error => "#{overlap} items in this collection are already in the #{t('drs.compilations.name').capitalize}. You will need to go back to the #{t('drs.compilations.name').capitalize}, remove the items and then add the collection"}, status: :unprocessable_entity}
       elsif (@compilation.object_ids.include? params[:entry_id])
-        format.json { render :json => { :error => "This object is already in the set." }, status: :unprocessable_entity}
+        format.json { render :json => { :error => "This object is already in the #{t('drs.compilations.name').capitalize}." }, status: :unprocessable_entity}
       elsif @compilation.add_entry(params[:entry_id])
         save_or_bust @compilation
         format.html { redirect_to @compilation }
         format.json { render :nothing => true }
         format.js   { render :nothing => true }
       else
-        format.json { render json: {error: "There was an error adding this item to the set. Please go back and try a different object."}.to_json, status: :unprocessable_entity }
+        format.json { render json: {error: "There was an error adding this item to the #{t('drs.compilations.name').capitalize}. Please go back and try a different object."}.to_json, status: :unprocessable_entity }
       end
     end
   end
@@ -198,7 +198,7 @@ class CompilationsController < ApplicationController
         format.js{ render "check_multi_add", locals: {entries: entries, compilation: @compilation} }
       else
         format.js{
-          render js: "$(\"#ajax-modal .modal-body\").text(\"#{intersection.count} items are already in #{@compilation.title}\"); $(\"#ajax-modal\").modal(\"show\"); $(\"#ajax-modal-heading\").text(\"Add to Set\"); $(\"#ajax-modal-footer\").html(\"<button class='btn' data-dismiss='modal'>Close</button>\");"
+          render js: "$(\"#ajax-modal .modal-body\").text(\"#{intersection.count} items are already in #{@compilation.title}\"); $(\"#ajax-modal\").modal(\"show\"); $(\"#ajax-modal-heading\").text(\"Add to #{t('drs.compilations.name').capitalize}\"); $(\"#ajax-modal-footer\").html(\"<button class='btn' data-dismiss='modal'>Close</button>\");"
          }
       end
     end
@@ -232,17 +232,17 @@ class CompilationsController < ApplicationController
 
   def delete_entry
     respond_to do |format|
-      puts @compilation.entry_ids
-      puts params[:entry_id]
-      if @compilation.entry_ids.include?(params[:entry_id]) && @compilation.remove_entry(params[:entry_id])
+      this_entry = params[:entry_id]
+      if @compilation.entry_ids.include?(this_entry)
+        @compilation.remove_entry(this_entry)
         save_or_bust @compilation
         format.html { redirect_to @compilation }
         format.json { render :nothing => true }
         format.js   { render :nothing => true }
-      elsif @compilation.object_ids.include?(params[:entry_id])
-        format.json { render :json => { :error => "This item cannot be removed from the set because the parent collection is in the set. If you wish to remove this item, remove the collection from the set. #{ActionController::Base.helpers.link_to("Go to the Set", compilation_path(@compilation))}"}, status: :unprocessable_entity}
+      elsif @compilation.object_ids.include?(this_entry)
+        format.json { render :json => { :error => "This item cannot be removed from the #{t('drs.compilations.name').capitalize} because the parent collection is in the #{t('drs.compilations.name').capitalize}. If you wish to remove this item, remove the collection from the #{t('drs.compilations.name').capitalize}. #{ActionController::Base.helpers.link_to("Go to the t('drs.compilations.name').capitalize", compilation_path(@compilation))}"}, status: :unprocessable_entity}
       else
-        format.json { render :json => { :error => "There was an error removing this item from the set", status: :unprocessable_entity} }
+        format.json { render :json => { :error => "There was an error removing this item from the #{t('drs.compilations.name').capitalize}", status: :unprocessable_entity} }
       end
     end
   end

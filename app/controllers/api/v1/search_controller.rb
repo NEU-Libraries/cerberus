@@ -22,7 +22,7 @@ module Api
           @set = fetch_solr_document
           # Must be a community or a compilation
           if @set.klass != "Collection" && @set.klass != "Compilation"
-            render json: {error: "ID must match either a Collection or a Set"} and return
+            render json: {error: "ID must match either a Collection or a #{t('drs.compilations.name').capitalize}"} and return
           end
         rescue ActiveFedora::ObjectNotFoundError
           render json: {error: "A valid starting ID is required"} and return

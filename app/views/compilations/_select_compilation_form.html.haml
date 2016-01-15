@@ -7,8 +7,8 @@
   - @compilations.each do |c|
     - object_ids = c.object_ids
     - if params[:files]
-      =link_to("#{c.title}", check_multi_path(id: c.pid, entries: params[:files]), class:"btn btn-primary btn-block", remote:true)
       %br
+      =link_to("#{c.title}", check_multi_path(id: c.pid, entries: params[:files]), class:"btn btn-primary btn-block", remote:true)
     -else
       - if object_ids.include?(params[:file])
         = link_to("Remove from #{ c.title }", delete_entry_path(id: c.pid, entry_id: params[:file]), method: 'delete', remote: true, id: "remove-from-compilation-#{c.pid}", class: "btn btn-danger btn-block btn-compilation", data: { title: "#{c.title}"})
