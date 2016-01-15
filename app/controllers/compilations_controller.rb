@@ -286,8 +286,6 @@ class CompilationsController < ApplicationController
     end
   end
 
-  private
-
   def total_count
     @set = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first)
     docs = []
@@ -300,11 +298,14 @@ class CompilationsController < ApplicationController
         end
       end
     end
-    docs.select! { |doc| current_user.can?(:read, doc) }
+    docs.select! { |doc| doc.public? || (!current_user.nil? && current_user.can?(:read, doc.pid)) }
+    # (!current_user.nil? && (current_user.can? :read, content)) || content.public?
+    # docs.select! { |doc| current_user.can?(:read, doc) }
     @count = docs.count
     return @count
   end
 
+  private
   def save_or_bust(compilation)
     if compilation.save!
       flash[:notice] = "#{t('drs.compilations.name').capitalize} successfully updated"
