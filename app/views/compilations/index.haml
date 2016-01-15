@@ -17,7 +17,18 @@
 :javascript
   $(document).ready(function(){
     spinner = enable_spinner('my');
-    $.getScript("sets/my");
+    get_page("sets/my");
     spinner = enable_spinner('collaborative');
-    $.getScript("sets/collaborative");
+    get_page("sets/collaborative");
+    function get_page(path){
+      $.getScript( path, function() {
+        enable_pagination();
+      });
+    }
+    function enable_pagination(){
+      $(".pager .pagination a").on("click", function(e){
+        e.preventDefault();
+        get_page($(this).attr("href"));
+      });
+    }
   });
