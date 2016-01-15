@@ -13,7 +13,7 @@ class CompilationsController < ApplicationController
   include BlacklightAdvancedSearch::ParseBasicQ
   include BlacklightAdvancedSearch::Controller
 
-  before_filter :authenticate_user!, except: [:show, :show_download, :download, :ping_download]
+  before_filter :authenticate_user!, except: [:show, :show_download, :download, :ping_download, :get_total_count, :total_count]
 
   before_filter :can_edit?, only: [:edit, :update, :destroy, :add_entry, :delete_entry, :add_multiple_entries, :delete_multiple_entries]
   before_filter :can_read?, only: [:show, :show_download, :download]
@@ -298,7 +298,7 @@ class CompilationsController < ApplicationController
         end
       end
     end
-    docs.select! { |doc| ((!current_user.nil? && current_user.can?(:read, doc)) || doc.public?) }
+    docs.select! { |doc| (doc.public? || (!current_user.nil? && current_user.can?(:read, doc.pid))) }
     @count = docs.count
     return @count
   end
