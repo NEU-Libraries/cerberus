@@ -114,11 +114,7 @@ class ZipCompilationJob
         if !col.tombstoned?
           descendents = doc.all_descendent_files
           descendents.each do |c|
-            if c.klass == "CoreFile"
-              zip_core_file(c, user, temp_zipfile_name)
-            elsif c.klass == "Collection"
-              zip_collection(c, user, temp_zipfile_name)
-            end
+            zip_core_file(c, user, temp_zipfile_name)
           end
         end
       end
