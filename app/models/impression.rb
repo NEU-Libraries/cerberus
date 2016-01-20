@@ -1,5 +1,5 @@
 class Impression < ActiveRecord::Base
-  attr_accessible :pid, :session_id, :action, :ip_address, :referrer, :status, :user_agent, :public
+  attr_accessible :pid, :session_id, :action, :ip_address, :referrer, :status, :user_agent, :public, :processed
 
   # Ensure that all required fields are present
   validates :pid, :session_id, :action, :ip_address, presence: true
