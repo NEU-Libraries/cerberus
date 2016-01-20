@@ -48,6 +48,8 @@ Cerberus::Application.routes.draw do
   get '/communities/:id/recent' => 'communities#recent_deposits', as: 'community_recent_deposits'
   get '/communities/:id/creators' => 'communities#creator_list', as: 'community_creator_list'
   get '/communities/:id/titles' => 'communities#title_list', as: 'community_title_list'
+  get '/communities/:id/:smart_col/recent' => 'communities#smart_col_recent_deposits', as: 'community_smart_col_recent'
+  get '/communities/:id/:smart_col/creators' => 'communities#smart_col_creator_list', as: 'community_smart_col_creator_list'
 
   resources :compilations, :controller => "compilations", :path => "sets"
   get "/sets/:id/download" => 'compilations#show_download', as: 'prepare_download'

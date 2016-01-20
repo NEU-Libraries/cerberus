@@ -6,16 +6,24 @@
     = render partial: 'catalog/search_form', locals: {scope: "true", scoped_placeholder: "Search this featured content" }
   %p
     = t("drs.featured_content.#{smart_collection}.description")
-  - if smart_collection.to_s != "communities" && smart_collection != "faculty_and_staff"
+  - if smart_collection.to_s != "communities" && smart_collection != "employees"
     %nav.set-actions
       %ul.nav.nav-pills
-        - if @response && @response.response['numFound'] > 0
+        - if (@response && @response.response['numFound'] > 0) || (@smart_collections && @smart_collections.count > 0)
           %li{:class=>("active" if current_page?(action: 'smart_col_recent_deposits'))}
-            %a.btn.btn-default{:href=>smart_col_recent_path(smart_collection)}
+            - if @set
+              - href = community_smart_col_recent_path(@set, smart_collection)
+            -else
+              - href = smart_col_recent_path(smart_collection)
+            %a.btn.btn-default{:href=>href}
               %i.icon-time
               Recent Deposits
           %li{:class=>("active" if current_page?(action: 'smart_col_creator_list'))}
-            %a.btn.btn-default{:href=>smart_col_creator_list_path(smart_collection)} Creator List
+            - if @set
+              - href = community_smart_col_creator_list_path(@set, smart_collection)
+            -else
+              - href = smart_col_creator_list_path(smart_collection)
+            %a.btn.btn-default{:href=>href} Creator List
 
 - if render_constraints(params) != "" || (!params[:sort].nil? && params[:action] == 'smart_col_recent_deposits')
   %h1.page-header

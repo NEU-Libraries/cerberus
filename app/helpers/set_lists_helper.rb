@@ -54,12 +54,17 @@ module SetListsHelper
   end
 
   def smart_col_recent_deposits
-    if params[:smart_col].to_s == "communities" || params[:smart_col].to_s == "faculty_and_staff"
+    if params[:smart_col].to_s == "communities" || params[:smart_col].to_s == "employees"
       render 'shared/smart_collections/smart_collection', locals: { smart_collection: params[:smart_col] }
     else
-      smart_col = "#{params[:smart_col]}_filter".parameterize.underscore
+      if params[:id]
+        @page_title = "#{@set.title} #{t('drs.featured_content.research.name')}"
+        safe_get_smart_docs(@set.research_publications)
+      else
+        smart_col = "#{params[:smart_col]}_filter".parameterize.underscore
+        self.solr_search_params_logic += [smart_col.to_sym]
+      end
       params[:sort] = "#{Solrizer.solr_name('system_create', :stored_sortable, type: :date)} desc"
-      self.solr_search_params_logic += [smart_col.to_sym]
       @pretty_sort_name = pretty_sort_name(params[:sort])
       (@response, @document_list) = get_search_results
       if @response.response['numFound'] > 0
@@ -73,12 +78,16 @@ module SetListsHelper
   end
 
   def smart_col_creator_list
-    puts params[:smart_col].to_s
-    if params[:smart_col].to_s == "communities" || params[:smart_col].to_s == "faculty_and_staff"
+    if params[:smart_col].to_s == "communities" || params[:smart_col].to_s == "employees"
       render 'shared/smart_collections/smart_collection', locals: { smart_collection: params[:smart_col] }
     else
-      smart_col = "#{params[:smart_col]}_filter".parameterize.underscore
-      self.solr_search_params_logic += [smart_col.to_sym]
+      if params[:id]
+        @page_title = "#{@set.title} #{t('drs.featured_content.research.name')}"
+        safe_get_smart_docs(@set.research_publications)
+      else
+        smart_col = "#{params[:smart_col]}_filter".parameterize.underscore
+        self.solr_search_params_logic += [smart_col.to_sym]
+      end
       self.solr_search_params_logic += [:disable_facet_limit]
       (@response, @document_list) = get_search_results
       solr_fname = "creator_sim"
