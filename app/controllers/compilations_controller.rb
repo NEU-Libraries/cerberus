@@ -58,7 +58,7 @@ class CompilationsController < ApplicationController
     respond_to do |format|
       if doc && doc.klass == 'Collection' && doc.child_collections.length > 0
         format.js{
-          render js: "$('#ajax-modal .modal-body').text('This collection has nested collections and cannot be added to a #{t('drs.compilations.name').capitalize}. Please add collections which contain files or files to your #{t('drs.compilations.name')}.'); $('#ajax-modal').modal('show'); $('#ajax-modal-heading').text('Add to #{t('drs.compilations.name')}'); $('#ajax-modal-footer').html('<button class=\"btn\" data-dismiss=\"modal\">Close</button>');"
+          render js: "$('#ajax-modal .modal-body').text('Collections that contain other collections cannot be added to a #{t('drs.compilations.name').capitalize}. Please open this collection and select the specific files or collections you would like to add to your #{t('drs.compilations.name').capitalize}.'); $('#ajax-modal').modal('show'); $('#ajax-modal-heading').text('Add to a #{t('drs.compilations.name').capitalize}'); $('#ajax-modal-footer').html('<button class=\"btn\" data-dismiss=\"modal\">Close</button>');"
          }
       else
         format.js{ render "editable" }
@@ -167,10 +167,11 @@ class CompilationsController < ApplicationController
         col_pids << f.pid
       end
     end
+    intersection = @compilation.entry_ids & col_pids
     respond_to do |format|
-      if col_pids && !(@compilation.entry_ids & col_pids).empty?
-        overlap = (@compilation.entry_ids & col_pids).length
-        format.json { render :json => { :error => "#{overlap} items in this collection are already in the #{t('drs.compilations.name').capitalize}. You will need to go back to the #{t('drs.compilations.name').capitalize}, remove the items and then add the collection"}, status: :unprocessable_entity}
+      if col_pids && !intersection.empty?
+        overlap = intersection.length
+        format.json { render :json => { :error => "Some files in this collection already exist in \"#{@compilation.title}\". If you add this collection to the Set, the duplicate files will be removed.", :title => "Add to \"#{@compilation.title}\"", :pids_to_remove=>intersection, :pids_to_add=>params[:entry_id]}, status: :unprocessable_entity}
       elsif (@compilation.object_ids.include? params[:entry_id])
         format.json { render :json => { :error => "This object is already in the #{t('drs.compilations.name').capitalize}." }, status: :unprocessable_entity}
       elsif @compilation.add_entry(params[:entry_id])
@@ -198,7 +199,7 @@ class CompilationsController < ApplicationController
         format.js{ render "check_multi_add", locals: {entries: entries, compilation: @compilation} }
       else
         format.js{
-          render js: "$(\"#ajax-modal .modal-body\").text(\"#{intersection.count} items are already in #{@compilation.title}\"); $(\"#ajax-modal\").modal(\"show\"); $(\"#ajax-modal-heading\").text(\"Add to #{t('drs.compilations.name').capitalize}\"); $(\"#ajax-modal-footer\").html(\"<button class='btn' data-dismiss='modal'>Close</button>\");"
+          render js: "$(\"#ajax-modal .modal-body\").text(\"#{intersection.count} items are already in #{@compilation.title}\"); $(\"#ajax-modal\").modal(\"show\"); $(\"#ajax-modal-heading\").text('Add to \"#{@compilation.title}\"'); $(\"#ajax-modal-footer\").html(\"<button class='btn' data-dismiss='modal'>Close</button>\");"
          }
       end
     end
