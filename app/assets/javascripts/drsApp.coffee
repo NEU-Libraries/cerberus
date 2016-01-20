@@ -420,9 +420,12 @@ $(document).ready ->
           when 'delete'
             $(this).data('method', 'post').text($(this).data('title')).addClass('btn-success add-to-compilation').removeClass 'btn-danger remove-from-compilation'
       ).on 'ajax:error', (xhr, status, error)->
+        console.log(status.responseJSON);
         $("#ajax-modal .spinner").remove();
+        if (status.responseJSON.hasOwnProperty('pids_to_remove'))
+          $(this).closest('.modal').find('.modal-footer').html('<button class="btn">View Duplicates</button><button class="btn" data-dismiss="modal">Close</button><a class="btn btn-success" href="'+status.responseJSON.pids_to_add+'">Add Collection</a>')
+          $(this).closest('#ajaxModalLabel').html(status.responseJSON.title)
         $(this).closest('.modal').find('.modal-body').html(status.responseJSON.error)
-        $(this).closest('.modal').find('.modal-footer').html('<a class="btn btn-success" href=""></a><button class="btn" data-dismiss="modal">No</button>')
         return
 
       return
