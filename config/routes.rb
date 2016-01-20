@@ -33,6 +33,8 @@ Cerberus::Application.routes.draw do
   get '/datasets' => 'catalog#datasets', as: 'catalog_datasets'
   get '/monographs' => 'catalog#monographs', as: 'catalog_monographs'
   get '/faculty_and_staff' => 'catalog#faculty_and_staff', as: 'catalog_faculty_and_staff'
+  get '/:smart_col/recent' => 'catalog#smart_col_recent_deposits', as: 'smart_col_recent'
+  get '/:smart_col/creators' => 'catalog#smart_col_creator_list', as: 'smart_col_creator_list'
 
   # Community Specific queries
   get '/communities/:id/other' => 'communities#other_publications', as: 'community_other'

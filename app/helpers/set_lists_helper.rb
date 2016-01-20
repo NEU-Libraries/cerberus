@@ -53,6 +53,47 @@ module SetListsHelper
     end
   end
 
+  def smart_col_recent_deposits
+    if params[:smart_col].to_s == "communities" || params[:smart_col].to_s == "faculty_and_staff"
+      render 'shared/smart_collections/smart_collection', locals: { smart_collection: params[:smart_col] }
+    else
+      smart_col = "#{params[:smart_col]}_filter".parameterize.underscore
+      params[:sort] = "#{Solrizer.solr_name('system_create', :stored_sortable, type: :date)} desc"
+      self.solr_search_params_logic += [smart_col.to_sym]
+      @pretty_sort_name = pretty_sort_name(params[:sort])
+      (@response, @document_list) = get_search_results
+      if @response.response['numFound'] > 0
+        respond_to do |format|
+          format.html { render 'shared/smart_collections/smart_collection', locals: { smart_collection: params[:smart_col] } }
+        end
+      else
+        render 'shared/smart_collections/smart_collection', locals: { smart_collection: params[:smart_col] }
+      end
+    end
+  end
+
+  def smart_col_creator_list
+    puts params[:smart_col].to_s
+    if params[:smart_col].to_s == "communities" || params[:smart_col].to_s == "faculty_and_staff"
+      render 'shared/smart_collections/smart_collection', locals: { smart_collection: params[:smart_col] }
+    else
+      smart_col = "#{params[:smart_col]}_filter".parameterize.underscore
+      self.solr_search_params_logic += [smart_col.to_sym]
+      self.solr_search_params_logic += [:disable_facet_limit]
+      (@response, @document_list) = get_search_results
+      solr_fname = "creator_sim"
+      @display_facet = @response.facets.detect {|f| f.name == solr_fname}
+      facet_count = @display_facet.items.length
+      if !params[:f].nil?
+        render 'shared/smart_collections/smart_collection', locals: { smart_collection: params[:smart_col] }
+      elsif facet_count > 0
+        render 'shared/smart_collections/creator_list', locals:{sort_value:sort_value, solr_fname:solr_fname, smart_collection:params[:smart_col]}
+      else
+        render 'shared/smart_collections/smart_collection', locals: { smart_collection: params[:smart_col] }
+      end
+    end
+  end
+
   def limit_to_core_files(solr_parameters, user_parameters)
     descendents = @set.combined_set_descendents
 
