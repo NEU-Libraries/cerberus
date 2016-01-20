@@ -1,9 +1,23 @@
+-if @set
+  %ul.breadcrumb
+    - smart_collection_breadcrumb(@set).each do |breadcrumb|
+      =breadcrumb
+    = content_tag(:li, t("drs.featured_content.#{smart_collection}.name"), class: 'active')
 %article.well.clearfix.inline-headings
-  %h1
-    = t("drs.featured_content.#{smart_collection}.name")
-  %h3
-    = render partial: 'shared/icon', locals: { class_string: t("drs.featured_content.#{smart_collection}.icon") }
-    = render partial: 'catalog/search_form', locals: {scope: "true", scoped_placeholder: "Search this featured content" }
+  -if @set
+    %h1{:class => @set.klass, :id => "#{@set.pid}-title"}
+      = render partial: 'shared/icon', locals: { class_string: t("drs.featured_content.#{smart_collection}.icon") }
+      = t("drs.featured_content.#{smart_collection}.name")
+      - if smart_collection != "employees"
+        %small
+          Featured Content
+      = render partial: 'catalog/search_form', locals: {smart_collection: "#{smart_collection}", scope: "true", scoped_placeholder: "Search this featured content" }
+  -else
+    %h1
+      = t("drs.featured_content.#{smart_collection}.name")
+    %h3
+      = render partial: 'shared/icon', locals: { class_string: t("drs.featured_content.#{smart_collection}.icon") }
+      = render partial: 'catalog/search_form', locals: {scope: "true", scoped_placeholder: "Search this featured content" }
   %p
     = t("drs.featured_content.#{smart_collection}.description")
   - if smart_collection.to_s != "communities" && smart_collection != "employees"
