@@ -7,6 +7,9 @@ class DeleteMailer < ActionMailer::Base
     @reason = reason
     @user= user
     @type = object.class
+    if @type == Compilation
+      @type = t('drs.compilations.name').capitalize
+    end
     @depositor = object.depositor
     @depositor_name = get_depositor_name(object)
     @depositor_email = get_depositor_email(object)
@@ -14,7 +17,7 @@ class DeleteMailer < ActionMailer::Base
       @object_url = collection_url(@pid)
     elsif @type == CoreFile
       @object_url = core_file_url(@pid)
-    elsif @type == Compilation
+    elsif @type == t('drs.compilations.name').capitalize
       @object_url = compilation_url(@pid)
     end
     mail(to: pick_receiver,
