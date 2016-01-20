@@ -3,7 +3,7 @@
   %head
     %meta{:content => "text/html; charset=UTF-8", "http-equiv" => "Content-Type"}/
   %body
-    -if @type == Compilation
+    -if @type == t('drs.compilations.name').capitalize
       %h3= "Delete #{@type} Request"
     -else
       %h3= "Tombstone #{@type} Alert"
@@ -14,7 +14,7 @@
       %li= "PID: #{@pid}"
       %li= "User: #{@user.name}"
       %li= "User Email: #{@user.email}"
-      -if @type == Compilation
+      -if @type == t('drs.compilations.name').capitalize
         %li= "Depositor: #{@depositor_name}"
         %li= "Depositor Email: #{@depositor_email}"
 
