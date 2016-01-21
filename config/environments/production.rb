@@ -74,7 +74,7 @@ Cerberus::Application.configure do
   config.action_mailer.raise_delivery_errors = true
 
   config.middleware.use ExceptionNotification::Rack,
-    :ignore_crawlers => %w{Googlebot bingbot},
+    :ignore_crawlers => %w{Googlebot Applebot bingbot},
     :email => {
       :email_prefix => "[DRS Production] ",
       :sender_address => %{"notifier" <notifier@repository.library.northeastern.edu>},
