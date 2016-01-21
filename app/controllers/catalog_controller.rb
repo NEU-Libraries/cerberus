@@ -13,6 +13,7 @@ class CatalogController < ApplicationController
   include Hydra::Controller::ControllerBehavior
   include BlacklightAdvancedSearch::ParseBasicQ
   include BlacklightOaiProvider::ControllerExtension
+  include SetListsHelper
 
   before_filter :default_search, except: [:facet, :recent]
 
@@ -107,43 +108,43 @@ class CatalogController < ApplicationController
   def communities
     self.solr_search_params_logic += [:communities_filter]
     (@response, @document_list) = get_search_results
-    render 'smart_collection', locals: { smart_collection: 'communities' }
+    render 'shared/smart_collections/smart_collection', locals: { smart_collection: 'communities' }
   end
 
   def research
     self.solr_search_params_logic += [:research_filter]
     (@response, @document_list) = get_search_results
-    render 'smart_collection', locals: { smart_collection: 'research' }
+    render 'shared/smart_collections/smart_collection', locals: { smart_collection: 'research' }
   end
 
   def presentations
     self.solr_search_params_logic += [:presentations_filter]
     (@response, @document_list) = get_search_results
-    render 'smart_collection', locals: { smart_collection: 'presentations' }
+    render 'shared/smart_collections/smart_collection', locals: { smart_collection: 'presentations' }
   end
 
   def datasets
     self.solr_search_params_logic += [:datasets_filter]
     (@response, @document_list) = get_search_results
-    render 'smart_collection', locals: { smart_collection: 'datasets' }
+    render 'shared/smart_collections/smart_collection', locals: { smart_collection: 'datasets' }
   end
 
   def monographs
     self.solr_search_params_logic += [:monographs_filter]
     (@response, @document_list) = get_search_results
-    render 'smart_collection', locals: { smart_collection: 'monographs' }
+    render 'shared/smart_collections/smart_collection', locals: { smart_collection: 'monographs' }
   end
 
   def faculty_and_staff
     self.solr_search_params_logic += [:faculty_and_staff_filter]
     (@response, @document_list) = get_search_results
-    render 'smart_collection', locals: { smart_collection: 'employees' }
+    render 'shared/smart_collections/smart_collection', locals: { smart_collection: 'employees' }
   end
 
   def theses_and_dissertations
-    self.solr_search_params_logic += [:theses_and_dissertations_filter]
+    self.solr_search_params_logic += [:theses_filter]
     (@response, @document_list) = get_search_results
-    render 'smart_collection', locals: { smart_collection: 'theses' }
+    render 'shared/smart_collections/smart_collection', locals: { smart_collection: 'theses' }
   end
 
   def self.uploaded_field
@@ -421,7 +422,7 @@ class CatalogController < ApplicationController
     solr_parameters[:fq] << query
   end
 
-  def theses_and_dissertations_filter(solr_parameters, user_parameters)
+  def theses_filter(solr_parameters, user_parameters)
     query = "drs_category_ssim:\"Theses and Dissertations\""
     solr_parameters[:fq] ||= []
     solr_parameters[:fq] << query
