@@ -141,7 +141,7 @@ class CatalogController < ApplicationController
     render 'shared/smart_collections/smart_collection', locals: { smart_collection: 'employees' }
   end
 
-  def theses_and_dissertations
+  def theses
     self.solr_search_params_logic += [:theses_filter]
     (@response, @document_list) = get_search_results
     render 'shared/smart_collections/smart_collection', locals: { smart_collection: 'theses' }
