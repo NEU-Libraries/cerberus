@@ -33,6 +33,8 @@ Cerberus::Application.routes.draw do
   get '/datasets' => 'catalog#datasets', as: 'catalog_datasets'
   get '/monographs' => 'catalog#monographs', as: 'catalog_monographs'
   get '/faculty_and_staff' => 'catalog#faculty_and_staff', as: 'catalog_faculty_and_staff'
+  get '/:smart_col/recent' => 'catalog#smart_col_recent_deposits', as: 'smart_col_recent'
+  get '/:smart_col/creators' => 'catalog#smart_col_creator_list', as: 'smart_col_creator_list'
 
   # Community Specific queries
   get '/communities/:id/other' => 'communities#other_publications', as: 'community_other'
@@ -46,6 +48,8 @@ Cerberus::Application.routes.draw do
   get '/communities/:id/recent' => 'communities#recent_deposits', as: 'community_recent_deposits'
   get '/communities/:id/creators' => 'communities#creator_list', as: 'community_creator_list'
   get '/communities/:id/titles' => 'communities#title_list', as: 'community_title_list'
+  get '/communities/:id/:smart_col/recent' => 'communities#smart_col_recent_deposits', as: 'community_smart_col_recent'
+  get '/communities/:id/:smart_col/creators' => 'communities#smart_col_creator_list', as: 'community_smart_col_creator_list'
 
   resources :compilations, :controller => "compilations", :path => "sets"
   get "/sets/:id/download" => 'compilations#show_download', as: 'prepare_download'
