@@ -62,9 +62,6 @@ module SetListsHelper
         safe_get_smart_docs(@set.research_publications)
       else
         smart_col = "#{params[:smart_col]}_filter".parameterize.underscore
-        if smart_col == 'theses_filter'
-          smart_col = 'theses_and_dissertations_filter'
-        end
         self.solr_search_params_logic += [smart_col.to_sym]
       end
       params[:sort] = "#{Solrizer.solr_name('system_create', :stored_sortable, type: :date)} desc"
@@ -89,9 +86,6 @@ module SetListsHelper
         safe_get_smart_docs(@set.research_publications)
       else
         smart_col = "#{params[:smart_col]}_filter".parameterize.underscore
-        if smart_col == 'theses_filter'
-          smart_col = 'theses_and_dissertations_filter'
-        end
         self.solr_search_params_logic += [smart_col.to_sym]
       end
       self.solr_search_params_logic += [:disable_facet_limit]
