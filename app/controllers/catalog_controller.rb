@@ -142,7 +142,7 @@ class CatalogController < ApplicationController
   end
 
   def theses_and_dissertations
-    self.solr_search_params_logic += [:theses_filter]
+    self.solr_search_params_logic += [:theses_and_dissertations_filter]
     (@response, @document_list) = get_search_results
     render 'shared/smart_collections/smart_collection', locals: { smart_collection: 'theses' }
   end
@@ -422,7 +422,7 @@ class CatalogController < ApplicationController
     solr_parameters[:fq] << query
   end
 
-  def theses_filter(solr_parameters, user_parameters)
+  def theses_and_dissertations_filter(solr_parameters, user_parameters)
     query = "drs_category_ssim:\"Theses and Dissertations\""
     solr_parameters[:fq] ||= []
     solr_parameters[:fq] << query
