@@ -9,7 +9,7 @@ class ImpressionProcessingJob
       ua = imp.user_agent.downcase
       botlist = I18n.t("bots").map(&:downcase)
 
-      if !botlist.any?{|s| ua.include?(s)} && !low_filter.any?{|s| ua == s }
+      if !botlist.any?{|s| ua.include?(s)}
         imp.public = true
       end
 
