@@ -58,8 +58,10 @@ module SetListsHelper
       render 'shared/smart_collections/smart_collection', locals: { smart_collection: params[:smart_col] }
     else
       if params[:id]
-        @page_title = "#{@set.title} #{t('drs.featured_content.research.name')}"
-        safe_get_smart_docs(@set.research_publications)
+        smart_col_name = "drs.featured_content.#{params[:smart_col]}.name"
+        @page_title = "#{@set.title} #{t(smart_col_name)}"
+        @ids = @set.send(params[:smart_col].to_sym)
+        self.solr_search_params_logic += [:limit_to_pids]
       else
         smart_col = "#{params[:smart_col]}_filter".parameterize.underscore
         self.solr_search_params_logic += [smart_col.to_sym]
@@ -82,8 +84,10 @@ module SetListsHelper
       render 'shared/smart_collections/smart_collection', locals: { smart_collection: params[:smart_col] }
     else
       if params[:id]
-        @page_title = "#{@set.title} #{t('drs.featured_content.research.name')}"
-        safe_get_smart_docs(@set.research_publications)
+        smart_col_name = "drs.featured_content.#{params[:smart_col]}.name"
+        @page_title = "#{@set.title} #{t(smart_col_name)}"
+        @ids = @set.send(params[:smart_col].to_sym)
+        self.solr_search_params_logic += [:limit_to_pids]
       else
         smart_col = "#{params[:smart_col]}_filter".parameterize.underscore
         self.solr_search_params_logic += [smart_col.to_sym]
@@ -94,11 +98,11 @@ module SetListsHelper
       @display_facet = @response.facets.detect {|f| f.name == solr_fname}
       facet_count = @display_facet.items.length
       if !params[:f].nil?
-        render 'shared/smart_collections/smart_collection', locals: { smart_collection: params[:smart_col] }
+        redirect_to action:params[:smart_col]
       elsif facet_count > 0
         render 'shared/smart_collections/creator_list', locals:{sort_value:sort_value, solr_fname:solr_fname, smart_collection:params[:smart_col]}
       else
-        render 'shared/smart_collections/smart_collection', locals: { smart_collection: params[:smart_col] }
+        redirect_to action:params[:smart_col]
       end
     end
   end
