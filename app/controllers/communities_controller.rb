@@ -113,43 +113,43 @@ class CommunitiesController < ApplicationController
   def employees
     @page_title = "#{@set.title} #{t('drs.featured_content.employees.name')}"
     safe_get_smart_docs(@set.find_employees)
-    render 'smart_collection', locals: { smart_collection: 'employees' }
+    render 'shared/smart_collections/smart_collection', locals: { smart_collection: 'employees' }
   end
 
-  def research_publications
+  def research
     @page_title = "#{@set.title} #{t('drs.featured_content.research.name')}"
-    safe_get_smart_docs(@set.research_publications)
-    render 'smart_collection', locals: { smart_collection: 'research' }
+    safe_get_smart_docs(@set.research)
+    render 'shared/smart_collections/smart_collection', locals: { smart_collection: 'research' }
   end
 
   def other_publications
     @page_title = "#{@set.title} #{t('drs.featured_content.other.name')}"
     safe_get_smart_docs(@set.other_publications)
-    render 'smart_collection', locals: { smart_collection: 'other' }
+    render 'shared/smart_collections/smart_collection', locals: { smart_collection: 'other' }
   end
 
   def presentations
     @page_title = "#{@set.title} #{t('drs.featured_content.presentations.name')}"
     safe_get_smart_docs(@set.presentations)
-    render 'smart_collection', locals: { smart_collection: 'presentations' }
+    render 'shared/smart_collections/smart_collection', locals: { smart_collection: 'presentations' }
   end
 
   def datasets
     @page_title = "#{@set.title} #{t('drs.featured_content.datasets.name')}"
     safe_get_smart_docs(@set.datasets)
-    render 'smart_collection', locals: { smart_collection: 'datasets' }
+    render 'shared/smart_collections/smart_collection', locals: { smart_collection: 'datasets' }
   end
 
   def learning_objects
     @page_title = "#{@set.title} #{t('drs.featured_content.learning.name')}"
     safe_get_smart_docs(@set.learning_objects)
-    render 'smart_collection', locals: { smart_collection: 'learning' }
+    render 'shared/smart_collections/smart_collection', locals: { smart_collection: 'learning' }
   end
 
   def monographs
     @page_title = "#{@set.title} #{t('drs.featured_content.monographs.name')}"
     safe_get_smart_docs(@set.monographs)
-    render 'smart_collection', locals: { smart_collection: 'monographs' }
+    render 'shared/smart_collections/smart_collection', locals: { smart_collection: 'monographs' }
   end
 
   protected

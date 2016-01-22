@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20151116151444) do
+ActiveRecord::Schema.define(:version => 20160120193042) do
 
   create_table "bookmarks", :force => true do |t|
     t.integer  "user_id",     :null => false
@@ -100,6 +100,7 @@ ActiveRecord::Schema.define(:version => 20151116151444) do
     t.boolean  "public",     :default => false
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.boolean  "processed",  :default => false
   end
 
   add_index "impressions", ["pid"], :name => "index_drs_impressions_on_pid"

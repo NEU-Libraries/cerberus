@@ -1,0 +1,55 @@
+-if @set
+  %ul.breadcrumb
+    - smart_collection_breadcrumb(@set).each do |breadcrumb|
+      =breadcrumb
+    - if params['action'] == 'smart_col_recent_deposits' || params['action'] == 'smart_col_creator_list'
+      = content_tag(:li, link_to(t("drs.featured_content.#{smart_collection}.name"), url_for(action:params[:smart_col])))
+      = content_tag(:li, params[:action].sub("smart_col_","").humanize.titleize, class: 'active')
+    - else
+      = content_tag(:li, t("drs.featured_content.#{smart_collection}.name"), class: 'active')
+%article.well.clearfix.inline-headings
+  -if @set
+    %h1{:class => @set.klass, :id => "#{@set.pid}-title"}
+      = render partial: 'shared/icon', locals: { class_string: t("drs.featured_content.#{smart_collection}.icon") }
+      = t("drs.featured_content.#{smart_collection}.name")
+      - if smart_collection != "employees"
+        %small
+          Featured Content
+      = render partial: 'catalog/search_form', locals: {smart_collection: "#{smart_collection}", scope: "true", scoped_placeholder: "Search this featured content" }
+  -else
+    %h1
+      = t("drs.featured_content.#{smart_collection}.name")
+    %h3
+      = render partial: 'shared/icon', locals: { class_string: t("drs.featured_content.#{smart_collection}.icon") }
+      = render partial: 'catalog/search_form', locals: {scope: "true", scoped_placeholder: "Search this featured content" }
+  %p
+    = t("drs.featured_content.#{smart_collection}.description")
+  - if smart_collection.to_s != "communities" && smart_collection != "employees"
+    %nav.set-actions
+      %ul.nav.nav-pills
+        - if (@response && @response.response['numFound'] > 0) || (@smart_collections && @smart_collections.count > 0)
+          %li{:class=>("active" if current_page?(action: 'smart_col_recent_deposits'))}
+            - if @set
+              - href = community_smart_col_recent_path(@set, smart_collection)
+            -else
+              - href = smart_col_recent_path(smart_collection)
+            %a.btn.btn-default{:href=>href}
+              %i.icon-time
+              Recent Deposits
+          %li{:class=>("active" if current_page?(action: 'smart_col_creator_list'))}
+            - if @set
+              - href = community_smart_col_creator_list_path(@set, smart_collection)
+            -else
+              - href = smart_col_creator_list_path(smart_collection)
+            %a.btn.btn-default{:href=>href} Creator List
+
+- if render_constraints(params) != "" || (!params[:sort].nil? && params[:action] == 'smart_col_recent_deposits')
+  %h1.page-header
+    %i.icon-search
+    %small
+      = render_constraints(params)
+      - if !params[:sort].nil? && params[:action] == 'smart_col_recent_deposits'
+        - remove_params = params.clone
+        - remove_params[:sort] = "title_ssi asc"
+        - remove_params[:action] = params[:smart_collection] || params[:smart_col]
+        = render_constraint_element("Sort", @pretty_sort_name, :classes => ["sort"], :remove => url_for(remove_params))

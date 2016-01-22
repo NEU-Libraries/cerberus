@@ -6,6 +6,7 @@ include Rails.application.routes.url_helpers
 module Cerberus
   module SolrDocumentBehavior
     include Cerberus::SolrQueries
+    include Cerberus::ImpressionCount
 
     def process_date(date_string)
       begin

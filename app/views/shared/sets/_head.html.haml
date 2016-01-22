@@ -53,7 +53,7 @@
           %b Total File Count:
           %span.compilation_count Calculating...
       -else
-        - if @set.pid != "neu:1" && ((@response && @response.response['numFound'] > 0) || @files && @files.count > 0)
+        - if @set.pid != "neu:1" && ((@response && @response.response['numFound'] > 0) || @files && @files.count > 0 || @smart_collections && @smart_collections.count > 0)
           -# && @core_file_children
           %li{:class=>("active" if current_page?(action: 'recent_deposits'))}
             - if @set.klass == "Collection"
