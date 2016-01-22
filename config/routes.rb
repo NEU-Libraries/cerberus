@@ -27,17 +27,19 @@ Cerberus::Application.routes.draw do
 
   # Featured Content
   get '/communities' => 'catalog#communities', as: 'catalog_communities'
-  get '/theses_and_dissertations' => 'catalog#theses_and_dissertations', as: 'catalog_theses_and_dissertations'
+  get '/theses_and_dissertations' => 'catalog#theses', as: 'catalog_theses_and_dissertations'
   get '/research' => 'catalog#research', as: 'catalog_research'
   get '/presentations' => 'catalog#presentations', as: 'catalog_presentations'
   get '/datasets' => 'catalog#datasets', as: 'catalog_datasets'
   get '/monographs' => 'catalog#monographs', as: 'catalog_monographs'
   get '/faculty_and_staff' => 'catalog#faculty_and_staff', as: 'catalog_faculty_and_staff'
+  get '/:smart_col/recent' => 'catalog#smart_col_recent_deposits', as: 'smart_col_recent'
+  get '/:smart_col/creators' => 'catalog#smart_col_creator_list', as: 'smart_col_creator_list'
 
   # Community Specific queries
   get '/communities/:id/other' => 'communities#other_publications', as: 'community_other'
   get '/communities/:id/employees' => 'communities#employees', as: 'community_employees'
-  get '/communities/:id/research' => 'communities#research_publications', as: 'community_research'
+  get '/communities/:id/research' => 'communities#research', as: 'community_research'
   get '/communities/:id/presentations' => 'communities#presentations', as: 'community_presentations'
   get '/communities/:id/datasets' => 'communities#datasets', as: 'community_datasets'
   get '/communities/:id/learning' => 'communities#learning_objects', as: 'community_learning_objects'
@@ -46,6 +48,8 @@ Cerberus::Application.routes.draw do
   get '/communities/:id/recent' => 'communities#recent_deposits', as: 'community_recent_deposits'
   get '/communities/:id/creators' => 'communities#creator_list', as: 'community_creator_list'
   get '/communities/:id/titles' => 'communities#title_list', as: 'community_title_list'
+  get '/communities/:id/:smart_col/recent' => 'communities#smart_col_recent_deposits', as: 'community_smart_col_recent'
+  get '/communities/:id/:smart_col/creators' => 'communities#smart_col_creator_list', as: 'community_smart_col_creator_list'
 
   get "/sets/collaborative" => "compilations#collaborative_compilations", as: 'sets_collaborative'
   get "/sets/my" => "compilations#my_sets", as: 'sets_my'
