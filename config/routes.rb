@@ -39,7 +39,7 @@ Cerberus::Application.routes.draw do
   # Community Specific queries
   get '/communities/:id/other' => 'communities#other_publications', as: 'community_other'
   get '/communities/:id/employees' => 'communities#employees', as: 'community_employees'
-  get '/communities/:id/research' => 'communities#research_publications', as: 'community_research'
+  get '/communities/:id/research' => 'communities#research', as: 'community_research'
   get '/communities/:id/presentations' => 'communities#presentations', as: 'community_presentations'
   get '/communities/:id/datasets' => 'communities#datasets', as: 'community_datasets'
   get '/communities/:id/learning' => 'communities#learning_objects', as: 'community_learning_objects'

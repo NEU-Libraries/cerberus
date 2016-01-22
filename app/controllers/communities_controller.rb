@@ -116,9 +116,9 @@ class CommunitiesController < ApplicationController
     render 'shared/smart_collections/smart_collection', locals: { smart_collection: 'employees' }
   end
 
-  def research_publications
+  def research
     @page_title = "#{@set.title} #{t('drs.featured_content.research.name')}"
-    safe_get_smart_docs(@set.research_publications)
+    safe_get_smart_docs(@set.research)
     render 'shared/smart_collections/smart_collection', locals: { smart_collection: 'research' }
   end
 
