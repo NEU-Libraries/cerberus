@@ -1,0 +1,11 @@
+%h4 Statistics
+
+= "Views: #{@core_file.impression_views}"
+
+%br
+
+- download_count = 0
+- @content_objects.each do |doc|
+  - download_count += doc.impression_downloads
+  
+= "Downloads: #{download_count}"
