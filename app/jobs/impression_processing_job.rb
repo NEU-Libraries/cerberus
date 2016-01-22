@@ -4,18 +4,6 @@ class ImpressionProcessingJob
   end
 
   def run
-    # Low pass
-    all_uas = Impression.pluck(:user_agent)
-    ua_count = Hash.new(0)
-
-    all_uas.each do |ua|
-      ua_count[ua.downcase] += 1
-    end
-
-    low_filter_hsh = ua_count.select{|k,v| v < 10}
-    low_filter_hsh = Hash[low_filter_hsh.sort_by{|k, v| v}]
-    low_filter = low_filter_hsh.map {|k,v| k}
-
     # Only process what hasn't been done already
     Impression.where(processed: false).find_each do |imp|
       ua = imp.user_agent.downcase
