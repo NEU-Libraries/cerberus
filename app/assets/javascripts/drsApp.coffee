@@ -420,11 +420,12 @@ $(document).ready ->
           when 'delete'
             $(this).data('method', 'post').text($(this).data('title')).addClass('btn-success add-to-compilation').removeClass 'btn-danger remove-from-compilation'
       ).on 'ajax:error', (xhr, status, error)->
-        console.log(status.responseJSON);
         $("#ajax-modal .spinner").remove();
-        if (status.responseJSON.hasOwnProperty('pids_to_remove'))
-          $(this).closest('.modal').find('.modal-footer').html('<button class="btn">View Duplicates</button><button class="btn" data-dismiss="modal">Close</button><a class="btn btn-success" href="'+status.responseJSON.pids_to_add+'">Add Collection</a>')
-          $(this).closest('#ajaxModalLabel').html(status.responseJSON.title)
+        if (status.responseJSON.hasOwnProperty('title'))
+          $('#ajaxModalLabel').text(status.responseJSON.title)
+          $(this).closest('.modal').find('.modal-footer').html('<a class="btn btn-dups" href="/sets/'+status.responseJSON.set+'/'+status.responseJSON.entry_id+'/dups" data-remote="true">View Duplicates</a><button class="btn" data-dismiss="modal">Close</button><a class="btn btn-success btn-proceed" href="/sets/'+status.responseJSON.set+'/'+status.responseJSON.entry_id+'?proceed=true" data-method="post" data-remote="true">Add Collection</a>')
+          drsApp.addToCompilationProceed $('.btn-proceed')
+
         $(this).closest('.modal').find('.modal-body').html(status.responseJSON.error)
         return
 
@@ -435,6 +436,14 @@ $(document).ready ->
         $(this).closest('.modal').find('.modal-body').append("<div class='alert alert-success'>Items successfully added.</div>")
         $(this).closest('.modal').find('.modal-footer').html("<button class='btn' data-dismiss='modal'>Close</button>");
         setTimeout(dismissModal, 2000)
+      )
+      return
+
+    addToCompilationProceed = (e) ->
+      e.on('ajax:success', (data)->
+        $(this).closest('.modal').find('.modal-body').html("<div class='alert alert-success'>Items successfully added.</div>")
+        $(this).closest('.modal').find('.modal-footer').html("<button class='btn' data-dismiss='modal'>Close</button>");
+        setTimeout(dismissModal, 3000)
       )
       return
 
@@ -477,6 +486,7 @@ $(document).ready ->
 
       drsApp.addToComplationLink $('.btn-compilation')
       drsApp.addToComplationMultiLink $('.multi-compilation')
+      drsApp.addToCompilationProceed $('.btn-proceed')
       drsApp.newCompilationForm()
       return
 
@@ -915,6 +925,7 @@ $(document).ready ->
     init: init
     addToComplationLink: addToComplationLink
     addToComplationMultiLink: addToComplationMultiLink
+    addToCompilationProceed: addToCompilationProceed
     newCompilationForm: newCompilationForm
     compilationsModal: compilationsModal
     initModal: initModal

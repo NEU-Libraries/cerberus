@@ -152,7 +152,7 @@ class CompilationsController < ApplicationController
 
   def destroy
     if @compilation.destroy
-      flash[:notice] = "#{t('drs.compilations.name').capitalize} was successfully destroyed"
+      flash[:notice] = "#{t('drs.compilations.name').capitalize} was successfully deleted"
       redirect_to compilations_path
     else
       flash.now.error = "#{t('drs.compilations.name').capitalize} #{@compilation.title} was not successfully destroyed"
@@ -167,11 +167,20 @@ class CompilationsController < ApplicationController
         col_pids << f.pid
       end
     end
-    intersection = @compilation.entry_ids & col_pids
     respond_to do |format|
-      if col_pids && !intersection.empty?
-        overlap = intersection.length
-        format.json { render :json => { :error => "Some files in this collection already exist in \"#{@compilation.title}\". If you add this collection to the Set, the duplicate files will be removed.", :title => "Add to \"#{@compilation.title}\"", :pids_to_remove=>intersection, :pids_to_add=>params[:entry_id]}, status: :unprocessable_entity}
+      if col_pids && !(@compilation.entry_ids & col_pids).empty?
+        intersection = @compilation.entry_ids & col_pids
+        if params[:proceed]
+          intersection.each do |i|
+            @compilation.remove_entry(i)
+            save_or_bust @compilation
+          end
+          @compilation.add_entry(params[:entry_id])
+          save_or_bust @compilation
+          format.json { render :json => {:status=>"Collection successfully added to set"}, status: 200}
+        else
+          format.json { render :json => { :error => "Some files in this collection already exist in \"#{@compilation.title}\". If you add this collection to the Set, the duplicate files will be removed.", :title => "Add to \"#{@compilation.title}\"", :set=>@compilation.pid, :entry_id=>params[:entry_id]}, status: :unprocessable_entity}
+        end
       elsif (@compilation.object_ids.include? params[:entry_id])
         format.json { render :json => { :error => "This object is already in the #{t('drs.compilations.name').capitalize}." }, status: :unprocessable_entity}
       elsif @compilation.add_entry(params[:entry_id])
@@ -181,6 +190,23 @@ class CompilationsController < ApplicationController
         format.js   { render :nothing => true }
       else
         format.json { render json: {error: "There was an error adding this item to the #{t('drs.compilations.name').capitalize}. Please go back and try a different object."}.to_json, status: :unprocessable_entity }
+      end
+    end
+  end
+
+  def add_entry_dups
+    doc = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:entry_id]}\"").first)
+    if doc.klass == "Collection"
+      col_pids = []
+      doc.all_descendent_files.each do |f|
+        col_pids << f.pid
+      end
+    end
+    if col_pids && !(@compilation.entry_ids & col_pids).empty?
+      intersection = @compilation.entry_ids & col_pids
+      intersection.map!{|i| i=SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{i}\"").first)}
+      respond_to do |format|
+        format.js{render "dups", locals:{intersection:intersection}}
       end
     end
   end

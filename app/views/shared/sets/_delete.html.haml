@@ -11,16 +11,21 @@
       = render partial: 'shared/sets/delete_modal', locals: { title: "Confirm Tombstone", button_title: "Tombstone" }
   -elsif "#{@set.class}" == 'Compilation' && current_user.nuid == @set.depositor
     = form_tag( polymorphic_path(@set) ) do
-      %p= "Deleting a #{t('drs.compilations.name')} is a permanent action that cannot be undone but does not delete the items within the #{t('drs.compilations.name')}."
+      %p= "#{t('drs.compilations.delete_warning')}"
       -# if depositor then can delete the set
-      %a{ href: "#deleteItemModal", title: "Destroy this #{t('drs.compilations.name')}", data: {toggle: 'modal', delete_path: "#{polymorphic_path(@set)}"}, class:"btn btn-clear" }
+      %a{ href: "#deleteItemModal", title: "Delete \"#{@set.title}\"?", data: {toggle: 'modal', delete_path: "#{polymorphic_path(@set)}"}, class:"btn btn-clear" }
         %i.icon-trash
         Delete
-      = render partial: 'shared/sets/delete_item_modal', locals: { title: "Confirm Delete", button_title: "Delete", item: @set }
+      = render partial: 'shared/sets/delete_item_modal', locals: { title: "Delete \"#{@set.title}\"?", button_title: "Delete", item: @set }
   -elsif "#{@set.class}" == 'Compilation' && (current_user_can? :edit, @set)
     -# if not the depositor then can request deletion
+    - if User.exists?("#{@set.depositor}")
+      - user = User.find_by_nuid("#{@set.depositor}")
+      - user_name = user.full_name
+    - else
+      - user_name = "the original creator"
     %p
-      ="You are not the original creator of the #{t('drs.compilations.name')}. Please request deletion."
+      ="Only #{user_name} can delete \"#{@set.title}\". If you believe \"#{@set.title}\" should be deleted, please contact #{user_name} or tell us below why the #{t('drs.compilations.name').capitalize} should be deleted."
     = form_tag( request_delete_set_path ) do
       %fieldset
         .row-fluid
@@ -29,7 +34,7 @@
             = text_area_tag :reason, nil, :required => true, rows: 5, class: 'input-block-level'
             %a.btn.btn-danger{href:"#deleteModal", title: "Request", data: {toggle: "modal"}}
               Request
-      = render partial: 'shared/sets/delete_modal', locals: { title: "Confirm Delete Request", button_title: "Request"}
+      = render partial: 'shared/sets/delete_modal', locals: { title: "Delete \"#{@set.title}\"?", button_title: "Request"}
   -else
     %p
       The DRS is a permanent archive, but we recognize that occasionally it may be necessary to remove files. Please review
