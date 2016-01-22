@@ -2,7 +2,11 @@
   %ul.breadcrumb
     - smart_collection_breadcrumb(@set).each do |breadcrumb|
       =breadcrumb
-    = content_tag(:li, t("drs.featured_content.#{smart_collection}.name"), class: 'active')
+    - if params['action'] == 'smart_col_recent_deposits' || params['action'] == 'smart_col_creator_list'
+      = content_tag(:li, link_to(t("drs.featured_content.#{smart_collection}.name"), url_for(action:params[:smart_col])))
+      = content_tag(:li, params[:action].sub("smart_col_","").humanize.titleize, class: 'active')
+    - else
+      = content_tag(:li, t("drs.featured_content.#{smart_collection}.name"), class: 'active')
 %article.well.clearfix.inline-headings
   -if @set
     %h1{:class => @set.klass, :id => "#{@set.pid}-title"}
