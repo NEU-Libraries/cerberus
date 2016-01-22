@@ -35,6 +35,14 @@ class Admin::StatisticsController < ApplicationController
     render 'file_sizes', locals: {type: "file_sizes" }
   end
 
+  def export_file_sizes
+    csv_string = CSV.generate do |csv|
+      JSON.parse(FileSizeGraph.last.json_values).each do |hash|
+        csv << hash.values
+      end
+    end
+  end
+
   private
 
     def verify_admin

@@ -21,6 +21,7 @@ every 1.day, at: '1:30am'  do
   runner "MetadataMailer.daily_alert_email.deliver!"
   runner "MetadataMailer.daily_nonfeatured_alert_email.deliver!"
   runner "XmlMailer.daily_alert_email.deliver!"
+  runner "ImpressionProcessingJob.new().run"
 end
 
 # Learn more: http://github.com/javan/whenever

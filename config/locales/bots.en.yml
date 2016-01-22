@@ -1,0 +1,13 @@
+en:
+  bots:
+    - slurp
+    - crawl
+    - nutch
+    - bot
+    - lynx
+    - spider
+    - curl
+    - java
+    - scrape
+    - scrapy
+    - archive
