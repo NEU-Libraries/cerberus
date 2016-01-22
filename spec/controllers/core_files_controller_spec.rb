@@ -67,6 +67,7 @@ describe CoreFilesController do
       get :show, { id: 'neu:adsfasdfa' }
       expect(response).to render_template('error/404')
 
+      ImpressionProcessingJob.new().run
       Impression.count.should == 0
     end
 
@@ -82,6 +83,7 @@ describe CoreFilesController do
       get :show, { id: file.pid }
       expect(response).to render_template('core_files/show')
 
+      ImpressionProcessingJob.new().run
       Impression.count.should == 1
       file.impression_views.should == 1
     end
@@ -92,6 +94,7 @@ describe CoreFilesController do
       get :show, { id: file.pid }
       get :show, { id: file.pid }
 
+      ImpressionProcessingJob.new().run
       Impression.count.should == 1
       file.impression_views.should == 1
     end
