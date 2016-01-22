@@ -45,4 +45,7 @@
     %small
       = render_constraints(params)
       - if !params[:sort].nil? && params[:action] == 'smart_col_recent_deposits'
-        = render_constraint_element("Sort", @pretty_sort_name, :classes => ["sort"], :remove => url_for(params.merge(:action=>'show',:sort=>nil,:limit=>nil)))
+        - remove_params = params.clone
+        - remove_params[:sort] = "title_ssi asc"
+        - remove_params[:action] = params[:smart_collection] || params[:smart_col]
+        = render_constraint_element("Sort", @pretty_sort_name, :classes => ["sort"], :remove => url_for(remove_params))

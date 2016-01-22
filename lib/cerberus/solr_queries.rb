@@ -126,7 +126,7 @@ module Cerberus
       find_all_files_by_type("Theses and Dissertations")
     end
 
-    def research_publications
+    def research
       find_all_files_by_type("Research Publications")
     end
 
@@ -153,7 +153,7 @@ module Cerberus
     def smart_collections
       smart_collection_list ||= []
 
-      if self.research_publications.length > 0
+      if self.research.length > 0
         smart_collection_list << "research"
       end
       if self.datasets.length > 0
