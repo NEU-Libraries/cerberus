@@ -26,11 +26,15 @@ describe "ImpressionCount" do
   it "Knows how to distinguish between impressions" do
     Impression.create(pid: "1", session_id: "def", action: "view", ip_address: "1", referrer: "a", user_agent: "chrome", status: "COMPLETE")
     Impression.create(pid: "1", session_id: "ghi", action: "view", ip_address: "2", referrer: "a", user_agent: "chrome", status: "COMPLETE")
-    Impression.create(pid: "1", session_id: "def", action: "view", ip_address: "3", referrer: "a", user_agent: "chrome", status: "COMPLETE") # This should not be counted
     Impression.create(pid: "1", session_id: "def", action: "download", ip_address: "4", referrer: "a", user_agent: "chrome", status: "COMPLETE")
     Impression.create(pid: "2", session_id: "def", action: "view", ip_address: "5", referrer: "a", user_agent: "chrome", status: "COMPLETE")
 
     imp.impression_views.should == 2
     imp.impression_downloads.should == 1
+  end
+
+  it "Validates that an impression for an ip address, action and pid, can only be done once an hour" do
+    Impression.create(pid: "100", session_id: "def", action: "view", ip_address: "1", referrer: "a", user_agent: "chrome", status: "COMPLETE")
+    Impression.create(pid: "100", session_id: "def", action: "view", ip_address: "1", referrer: "a", user_agent: "chrome", status: "COMPLETE").persisted?.should be false
   end
 end
