@@ -34,7 +34,7 @@ en:
       updated_message: "Your set was updated successfully."
       add_to_set_popup: "Add to your sets:"
       download_message: "Please wait a moment while your download is being prepared. If your set is large, this process may take some time."
-      delete_warning: "Deleting a set cannot be undone. Items in the set will not be deleted."
+      delete_warning: "Deleting a Set is permanent and cannot be undone. Items contained within the Set will not be deleted."
       destroy_link: "Delete this set"
     shoppingcarts:
       name: download queue
