@@ -5,7 +5,12 @@ module Cerberus::ControllerHelpers::ViewLogger
   def log_action(action, status, id = nil)
     id ||= params[:id]
 
-    session = request.session_options[:id]
+    if request.session_options[:id].blank?
+      session = "direct"
+    else
+      session = request.session_options[:id]
+    end
+
     ip = request.remote_ip
 
     if request.referrer.blank?
