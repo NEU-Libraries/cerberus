@@ -6,12 +6,12 @@ module Cerberus::ImpressionCount
     # Impressions table.
     # * Unique as determined by viewing session_id
     def impression_views
-      Impression.where("pid = ? AND action = ? AND status = 'COMPLETE'", self.pid, 'view').count
+      Impression.where("pid = ? AND action = ? AND public = ? AND status = 'COMPLETE'", self.pid, 'view', true).count
     end
 
     # Same as above, but with recorded download actions
     def impression_downloads
-      Impression.where("pid = ? AND action = ? AND status = 'COMPLETE'", self.pid, 'download').count
+      Impression.where("pid = ? AND action = ? AND public = ? AND status = 'COMPLETE'", self.pid, 'download', true).count
     end
   end
 end
