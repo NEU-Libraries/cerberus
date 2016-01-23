@@ -8,6 +8,8 @@
 %meta{content: content_for?(:keywords) ? yield(:keywords) : "Digital Repository Service, DRS, Northeastern University Libraries, Northeastern University Library, digital repository, digital repositories, faculty research, theses, dissertations, ETDs", name: "keywords"}
 -if content_for?(:author)
   =yield(:author)
+-if content_for?(:google_scholar)
+  =yield(:google_scholar)  
 
 %title= h(title_string(@page_title))
 / application css

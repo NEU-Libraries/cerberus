@@ -68,7 +68,7 @@ module Cerberus
     end
 
     def date
-      process_date(Array(self[Solrizer.solr_name("date", :symbol)]).first)
+      process_date(Array(self[Solrizer.solr_name("date", :stored_sortable)]).first)
     end
 
     def create_date
