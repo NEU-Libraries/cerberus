@@ -13,5 +13,10 @@ module Cerberus::ImpressionCount
     def impression_downloads
       Impression.where("pid = ? AND action = ? AND public = ? AND status = 'COMPLETE'", self.pid, 'download', true).count
     end
+
+    # Same as above, but with recorded download actions
+    def impression_streams
+      Impression.where("pid = ? AND action = ? AND public = ? AND status = 'COMPLETE'", self.pid, 'stream', true).count
+    end
   end
 end
