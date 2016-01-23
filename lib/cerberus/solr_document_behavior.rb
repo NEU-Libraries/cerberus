@@ -124,12 +124,7 @@ module Cerberus
     end
 
     def creator_list
-      creators = Array(self["creator_tesim"])
-      if creators.length > 0
-        return creators.join(", ")
-      else
-        return []
-      end
+      Array(self["creator_tesim"])
     end
 
     def klass

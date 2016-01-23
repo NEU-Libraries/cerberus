@@ -3,7 +3,8 @@
 - content_for(:keywords) do
   - @core_file.keyword_list
 - content_for(:author) do
-  - @core_file.creator_list
+  - @core_file.creator_list.each do |author|
+    ="<meta content=\"#{author}\" name=\"author\">".html_safe
 - layout_class =  'span6'
 %ul.breadcrumb
   - breadcrumb_to_root(@core_file).each do |breadcrumb|
