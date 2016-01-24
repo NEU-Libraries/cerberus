@@ -6,11 +6,11 @@
   - @core_file.creator_list.each do |author|
     ="<meta content=\"#{author}\" name=\"author\">".html_safe
 - content_for(:google_scholar) do
-  ="<meta content=\"#{@core_file.title}\" name=\"citation_title\">".html_safe
-  ="<meta content=\"#{@core_file.date}\" name=\"citation_publication_date\">".html_safe
+  ="<meta content=\"#{@core_file.google_title}\" name=\"citation_title\">".html_safe
+  ="<meta content=\"#{@core_file.google_scholar_date}\" name=\"citation_publication_date\">".html_safe
   ="<meta content=\"#{download_path(@core_file.canonical_object.first.pid, :only_path => false)}\" name=\"citation_pdf_url\">".html_safe
   - @core_file.creator_list.each do |author|
-    ="<meta content=\"#{author}\" name=\"citation_author\">".html_safe  
+    ="<meta content=\"#{author}\" name=\"citation_author\">".html_safe
 - layout_class =  'span6'
 %ul.breadcrumb
   - breadcrumb_to_root(@core_file).each do |breadcrumb|
