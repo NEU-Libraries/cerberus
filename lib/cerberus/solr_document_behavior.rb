@@ -68,7 +68,15 @@ module Cerberus
     end
 
     def date
-      process_date(Array(self[Solrizer.solr_name("date", :stored_sortable)]).first)
+      process_date(Array(self[Solrizer.solr_name("date", :symbol)]).first)
+    end
+
+    def google_scholar_date
+      Array(self[Solrizer.solr_name("date", :stored_sortable)]).first
+    end
+
+    def google_title
+      Sanitize.clean(self.title)
     end
 
     def create_date
