@@ -10,7 +10,8 @@
     ="<meta content=\"#{@core_file.google_title}\" name=\"citation_title\">".html_safe
     - if !@core_file.google_scholar_date.blank?
       ="<meta content=\"#{@core_file.google_scholar_date}\" name=\"citation_publication_date\">".html_safe
-    ="<meta content=\"#{download_path(@core_file.canonical_object.first.pid, :only_path => false)}?datastream_id=content\" name=\"citation_pdf_url\">".html_safe
+    - if !@core_file.canonical_object.first.blank?
+      ="<meta content=\"#{download_path(@core_file.canonical_object.first.pid, :only_path => false)}?datastream_id=content\" name=\"citation_pdf_url\">".html_safe
     - @core_file.creator_list.each do |author|
       ="<meta content=\"#{author}\" name=\"citation_author\">".html_safe
 - layout_class =  'span6'
