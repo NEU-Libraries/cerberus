@@ -90,7 +90,7 @@ module Cerberus
     end
 
     def google_title
-      Sanitize.clean(self.title)
+      CGI::escapeHTML(Sanitize.clean(self.title))
     end
 
     def create_date
