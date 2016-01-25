@@ -15,6 +15,27 @@ namespace :sitemap do
           doc = SolrDocument.new ActiveFedora::SolrService.query("id:\"#{pid}\"").first
           if doc.public?
             add core_file_path(doc.pid)
+            # If ETD, add PDF
+            if doc.category == "Theses and Dissertations"
+              add download_path(doc.canonical_object.first.pid, {datastream_id: 'content'})
+            end
+          end
+        rescue Exception => error
+          #
+        end
+      end
+
+      # Add collections and communities
+      query_string = "#{Solrizer.solr_name("has_model", :symbol)}:\"info:fedora/afmodel:Community\" OR #{Solrizer.solr_name("has_model", :symbol)}:\"info:fedora/afmodel:Collection\""
+      row_count = ActiveFedora::SolrService.count(query_string)
+      query_result = ActiveFedora::SolrService.query(query_string, :fl => "id", :rows => row_count)
+
+      query_result.each_with_index do |search_result, i|
+        begin
+          pid = query_result[i]["id"]
+          doc = SolrDocument.new ActiveFedora::SolrService.query("id:\"#{pid}\"").first
+          if doc.public?
+            add polymorphic_path(doc)
           end
         rescue Exception => error
           #
@@ -26,6 +47,6 @@ namespace :sitemap do
     if Rails.env.production?
       SitemapGenerator::Sitemap.ping_search_engines
     end
-    
+
   end
 end
