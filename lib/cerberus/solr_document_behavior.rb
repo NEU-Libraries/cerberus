@@ -67,8 +67,30 @@ module Cerberus
       Array(self[Solrizer.solr_name("has_affiliation", :symbol)]).first
     end
 
+    def category
+      Array(self[Solrizer.solr_name("drs_category", :symbol)]).first
+    end
+
     def date
       process_date(Array(self[Solrizer.solr_name("date", :symbol)]).first)
+    end
+
+    def google_scholar_date
+      g_date = Array(self[Solrizer.solr_name("date", :stored_sortable)]).first
+
+      if !g_date.blank?
+        g_date.gsub!("-", "/")
+        # If we have Year and Month, but no Day
+        if g_date.split("/").count == 2
+          g_date = g_date + "/01"
+        end
+      end
+
+      return g_date
+    end
+
+    def google_title
+      CGI::escapeHTML(Sanitize.clean(self.title))
     end
 
     def create_date
@@ -124,12 +146,7 @@ module Cerberus
     end
 
     def creator_list
-      creators = Array(self["creator_tesim"])
-      if creators.length > 0
-        return creators.join(", ")
-      else
-        return []
-      end
+      Array(self["creator_tesim"])
     end
 
     def klass
