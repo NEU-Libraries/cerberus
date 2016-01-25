@@ -17,7 +17,7 @@ namespace :sitemap do
             add core_file_path(doc.pid)
             # If ETD, add PDF
             if doc.category == "Theses and Dissertations"
-              add "#{download_path(doc.canonical_object.first.pid, :only_path => false)}?datastream_id=content"
+              add download_path(doc.canonical_object.first.pid, {datastream_id: 'content'})
             end
           end
         rescue Exception => error
@@ -35,7 +35,7 @@ namespace :sitemap do
           pid = query_result[i]["id"]
           doc = SolrDocument.new ActiveFedora::SolrService.query("id:\"#{pid}\"").first
           if doc.public?
-            add polymorphic_path(doc.pid)
+            add polymorphic_path(doc)
           end
         rescue Exception => error
           #
