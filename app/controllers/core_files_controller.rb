@@ -352,7 +352,9 @@ class CoreFilesController < ApplicationController
       type = mime.split("/").first.strip
       if type == 'image'
         # Destroy old thumbnail
-        ImageThumbnailFile.find(@core_file.thumbnail.pid).destroy
+        if @core_file.thumbnail != false
+          ImageThumbnailFile.find(@core_file.thumbnail.pid).destroy
+        end
 
         if @core_file.canonical_class == "VideoFile" || @core_file.canonical_class == "AudioFile"
           # Destroy old poster
