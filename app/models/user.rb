@@ -20,7 +20,7 @@ class User < ActiveRecord::Base
 
   acts_as_messageable
 
-  ROLES = %w[admin employee]
+  ROLES = %w[admin employee developer]
 
   def associated_accounts
     if self.multiple_accounts
@@ -191,6 +191,10 @@ class User < ActiveRecord::Base
 
   def admin?
     return self.role.eql?('admin')
+  end
+
+  def developer?
+    return self.role.eql?('developer')
   end
 
   def loader?
