@@ -56,7 +56,9 @@ class MultipageProcessingJob
       end
 
       core_file.thumbnail_list = thumbnail_list
-      core_file.save!
+      if core_file.save!
+        UploadAlert.create_from_core_file(core_file, :create)
+      end
     end
 
     if !self.zip_files.blank?
