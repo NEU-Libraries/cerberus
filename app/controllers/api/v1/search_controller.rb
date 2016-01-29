@@ -57,7 +57,9 @@ module Api
         end
 
         # If response has facets, zip them together for easier parsing
-        @response.facet_counts["facet_fields"].each { |k, v| @response.facet_counts["facet_fields"][k] = Hash[v.each_slice(2).to_a] }
+        if !@response.facet_counts["facet_fields"].blank?
+          @response.facet_counts["facet_fields"].each { |k, v| @response.facet_counts["facet_fields"][k] = Hash[v.each_slice(2).to_a] }
+        end
 
         render json: {pagination: @pagination, response: @response}
       end
