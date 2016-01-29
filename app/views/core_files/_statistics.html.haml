@@ -2,10 +2,19 @@
 
 = "Views: #{@core_file.impression_views}"
 
-%br
+- if !@core_file.stream_only?
+  - download_count = 0
+  - @content_objects.each do |doc|
+    - download_count += doc.impression_downloads
 
-- download_count = 0
-- @content_objects.each do |doc|
-  - download_count += doc.impression_downloads
-  
-= "Downloads: #{download_count}"
+  %br
+  = "Downloads: #{download_count}"
+
+- if @core_file.canonical_class == "AudioFile" || @core_file.canonical_class == "VideoFile"
+
+  - stream_count = 0
+  - @content_objects.each do |doc|
+    - stream_count += doc.impression_streams
+    
+  %br
+  = "Streams: #{stream_count}"

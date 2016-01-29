@@ -24,4 +24,8 @@ every 1.day, at: '1:30am'  do
   runner "ImpressionProcessingJob.new().run"
 end
 
+every 1.day, at: '4:00am'  do
+  rake "sitemap:generate"
+end
+
 # Learn more: http://github.com/javan/whenever
