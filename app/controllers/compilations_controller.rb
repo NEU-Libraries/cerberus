@@ -342,9 +342,13 @@ class CompilationsController < ApplicationController
   def filter_entry_ids(solr_parameters, user_parameters)
     solr_parameters[:fq] ||= []
     solr_parameters[:fq] << "!tombstoned_ssi:\"true\""
-    query = @compilation.entry_ids.map! { |id| "\"#{id}\""}.join(" OR ")
+    query = @compilation.entry_ids.map do |pid|
+      "id:\"#{pid.split('/').last}\""
+    end
+
+    query = query.join(" OR ")
     if query.length > 0
-      solr_parameters[:fq] << "id:(#{query})"
+      solr_parameters[:fq] << query
     else
       solr_parameters[:fq] << "id:\"\""
     end
