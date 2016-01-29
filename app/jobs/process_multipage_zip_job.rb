@@ -54,7 +54,8 @@ class ProcessMultipageZipJob
           load_report.update_counts
 
           core_file = CoreFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
-          core_file.depositor = "000000000"
+          core_file.depositor = self.current_user.nuid
+          # core_file.depositor = "000000000"
           core_file.parent = Collection.find(parent)
           core_file.properties.parent_id = core_file.parent.pid
           core_file.properties.ordinal_value = "0"
@@ -141,7 +142,9 @@ class ProcessMultipageZipJob
     load_report.save!
 
     if load_report.success_count + load_report.fail_count + load_report.modified_count == load_report.number_of_files
-      LoaderMailer.load_alert(load_report, User.find_by_nuid(load_report.nuid)).deliver!
+      # Disabling for now - Sarah is proxying as another user, who doesn't need to receive
+      # these notifications.
+      # LoaderMailer.load_alert(load_report, User.find_by_nuid(load_report.nuid)).deliver!
     end
   end
 

@@ -18,7 +18,7 @@ Cerberus::Application.routes.draw do
 
   resque_web_constraint = lambda do |request|
     current_user = request.env['warden'].user
-    current_user.present? && current_user.respond_to?(:admin?) && current_user.admin?
+    current_user.present? && (current_user.admin? || current_user.developer?)
   end
 
   constraints resque_web_constraint do

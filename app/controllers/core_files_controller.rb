@@ -28,7 +28,7 @@ class CoreFilesController < ApplicationController
   include BlacklightAdvancedSearch::ParseBasicQ
   include BlacklightAdvancedSearch::Controller
 
-  before_filter :authenticate_user!, except: [:show, :get_page_images, :get_page_file]
+  before_filter :authenticate_user!, except: [:show, :get_page_images, :get_page_file, :log_stream]
 
   skip_before_filter :normalize_identifier
   skip_load_and_authorize_resource only: [:provide_metadata,
@@ -352,7 +352,9 @@ class CoreFilesController < ApplicationController
       type = mime.split("/").first.strip
       if type == 'image'
         # Destroy old thumbnail
-        ImageThumbnailFile.find(@core_file.thumbnail.pid).destroy
+        if @core_file.thumbnail != false
+          ImageThumbnailFile.find(@core_file.thumbnail.pid).destroy
+        end
 
         if @core_file.canonical_class == "VideoFile" || @core_file.canonical_class == "AudioFile"
           # Destroy old poster
