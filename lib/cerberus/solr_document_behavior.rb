@@ -453,9 +453,12 @@ module Cerberus
     def entries
       e = Array(self[Solrizer.solr_name("has_member", :symbol)])
       if e.count > 0
-        query = ""
-        query = e.map! { |id| "\"#{id.split('/').last}\""}.join(" OR ")
-        query = "id:(#{query})"
+        query = e.map do |pid|
+          "id:\"#{pid.split('/').last}\""
+        end
+
+        query = query.join(" OR ")
+
         row_count = ActiveFedora::SolrService.count(query)
         query_result = ActiveFedora::SolrService.query(query, :rows => row_count)
         return query_result.map { |x| SolrDocument.new(x) }
@@ -467,9 +470,12 @@ module Cerberus
     def entry_ids
       e = Array(self[Solrizer.solr_name("has_member", :symbol)])
       if e.count > 0
-        query = ""
-        query = e.map! { |id| "\"#{id.split('/').last}\""}.join(" OR ")
-        query = "id:(#{query})"
+        query = e.map do |pid|
+          "id:\"#{pid.split('/').last}\""
+        end
+
+        query = query.join(" OR ")
+
         row_count = ActiveFedora::SolrService.count(query)
         query_result = ActiveFedora::SolrService.query(query, :rows => row_count, :fl=>"id")
         return query_result.map { |x| x['id'] }
