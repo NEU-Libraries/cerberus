@@ -460,6 +460,8 @@ class CoreFilesController < ApplicationController
       collection_pid = params[:collection_pid]
       if Collection.exists?(collection_pid)
         core_file.set_parent(Collection.find(collection_pid), current_user)
+        # Reconcile compilations
+        Cerberus::Application::Queue.push(ReconcileCompilationsJob.new(params[:id]))
         flash[:notice] = "This file has been moved."
         redirect_to core_file and return
       else
