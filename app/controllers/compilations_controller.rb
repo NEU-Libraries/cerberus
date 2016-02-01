@@ -267,7 +267,7 @@ class CompilationsController < ApplicationController
         format.json { render :nothing => true }
         format.js   { render :nothing => true }
       elsif @compilation.object_ids.include?(this_entry)
-        format.json { render :json => { :error => "This item cannot be removed from the #{t('drs.compilations.name').capitalize} because the parent collection is in the #{t('drs.compilations.name').capitalize}. If you wish to remove this item, remove the collection from the #{t('drs.compilations.name').capitalize}. #{ActionController::Base.helpers.link_to("Go to the #{t('drs.compilations.name').capitalize}", compilation_path(@compilation))}"}, status: :unprocessable_entity}
+        format.json { render :json => { :error => "This item cannot be removed from the #{t('drs.compilations.name').capitalize} because its parent collection is in the #{t('drs.compilations.name').capitalize}.<br><br> If you wish to remove this item, remove the collection from the #{t('drs.compilations.name').capitalize} first.<br><br> #{ActionController::Base.helpers.link_to("Click here to go to the #{t('drs.compilations.name').capitalize}", compilation_path(@compilation))}"}, status: :unprocessable_entity}
       else
         format.json { render :json => { :error => "There was an error removing this item from the #{t('drs.compilations.name').capitalize}", status: :unprocessable_entity} }
       end
