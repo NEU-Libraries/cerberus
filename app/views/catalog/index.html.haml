@@ -34,10 +34,7 @@
         /   = render_pagination_info @response, :entry_name=>'item'
         = render 'sort_and_per_page'
       - if current_user
-        %hr
-        .pane.page-to-compilation
-          -files = @document_list.select{|d| if (d['active_fedora_model_ssi'] == 'CoreFile') then d['id'] end}
-          =link_to("Save files for later", sets_editable_path(files: files), remote: true, title:  "Add to " + t('drs.compilations.name'), data: {toggle: "tooltip"}, class: "btn btn-mini btn-clear")
+        = render :partial=>'shared/save_files'
 
     %section{ class: drs_items_class }
       -# Main content
