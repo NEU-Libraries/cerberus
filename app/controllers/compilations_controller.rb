@@ -204,6 +204,7 @@ class CompilationsController < ApplicationController
     if col_pids && !(@compilation.entry_ids & col_pids).empty?
       intersection = @compilation.entry_ids & col_pids
       intersection.map!{|i| i=SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{i}\"").first)}
+      intersection.sort_by! { |c| c.title }
       respond_to do |format|
         format.js{render "dups", locals:{intersection:intersection}}
       end
