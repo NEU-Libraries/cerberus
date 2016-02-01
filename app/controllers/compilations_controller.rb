@@ -134,7 +134,6 @@ class CompilationsController < ApplicationController
     end
 
     @set = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{@compilation.pid}\"").first)
-
     self.solr_search_params_logic += [:filter_entry_ids]
     (@response, @document_list) = get_search_results
     if @response.response['numFound'] == 0
@@ -341,14 +340,17 @@ class CompilationsController < ApplicationController
 
   def filter_entry_ids(solr_parameters, user_parameters)
     solr_parameters[:fq] ||= []
-    solr_parameters[:fq] << "!tombstoned_ssi:\"true\""
-
     query = @compilation.entry_ids.map do |pid|
       "id:\"#{pid}\""
     end
 
     fq = query.join(" OR ")
-    solr_parameters[:fq] << fq
+    if !fq.blank?
+      solr_parameters[:fq] << fq
+      solr_parameters[:fq] << "!tombstoned_ssi:\"true\""
+    else
+      solr_parameters[:fq] << "id:\"\""
+    end
   end
 
   def find_user_compilations(solr_parameters, user_parameters)
