@@ -82,7 +82,7 @@
               %i.icon-pencil
               Manage Collection
       -if @set.klass == "Compilation"
-        -if !current_user.nil? && (current_user.can? :edit, @set.pid) && (current_user.admin?)
+        -if !current_user.nil? && (current_user.can? :edit, @set.pid)
           %li.pull-right
             %a.btn.btn-default{:href =>  edit_compilation_path(@set)}
               %i.icon-pencil
