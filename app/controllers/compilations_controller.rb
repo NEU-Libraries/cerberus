@@ -222,7 +222,7 @@ class CompilationsController < ApplicationController
 
     respond_to do |format|
       if entries.count > 0
-        format.js{ render "check_multi_add", locals: {entries: entries, compilation: @compilation} }
+        format.js{ render "check_multi_add", locals: {entries: entries, compilation: @compilation, dup_count: intersection.length} }
       else
         format.js{
           render js: "$(\"#ajax-modal .modal-body\").text(\"#{intersection.count} items are already in #{@compilation.title}\"); $(\"#ajax-modal\").modal(\"show\"); $(\"#ajax-modal-heading\").text('Add to \"#{@compilation.title}\"'); $(\"#ajax-modal-footer\").html(\"<button class='btn' data-dismiss='modal'>Close</button>\");"
