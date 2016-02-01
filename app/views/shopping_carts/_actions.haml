@@ -2,4 +2,4 @@
   = link_to("Download", cart_download_path, class: "btn btn-success")
   =link_to("Save files for later", sets_editable_path(files: @item_core_records), remote: true, title:  "Add to " + t('drs.compilations.name'), data: {toggle: "tooltip"}, class: "btn btn-primary")
   %a{ href: "#emptyCartModal", data: { toggle: "modal" }, :class => "btn btn-danger" }
-    Delete
+    =t('drs.shoppingcarts.destroy_button')
