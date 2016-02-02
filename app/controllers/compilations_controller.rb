@@ -301,7 +301,7 @@ class CompilationsController < ApplicationController
     end
     size = (size / 1024000).round(2)
 
-    if size > 500
+    if size > 5000
       params[:action] = "show"
       redirect_to url_for(params.merge(:large=>true))
     else
