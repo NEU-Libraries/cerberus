@@ -15,3 +15,7 @@
 - if @items.any?
   = render partial: 'remove_from_cart_modal', locals: { item: @items.first }
   = render partial: 'empty_cart_modal'
+  = render partial: 'large_modal'
+  -if params[:large]
+    :javascript
+      $('#largeCartModal').modal('show')
