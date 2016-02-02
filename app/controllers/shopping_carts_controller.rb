@@ -80,22 +80,35 @@ class ShoppingCartsController < ApplicationController
   def download
     dir = "#{Rails.application.config.tmp_path}/carts/#{request.session_options[:id]}/"
     f = "#{Rails.application.config.tmp_path}/carts/#{request.session_options[:id]}/drs_queue.zip"
+    size = 0
+    session[:ids].each do |i|
+      doc = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{i}\"").first)
+      size = size + doc.file_size.to_f
+    end
+    size = (size / 1024000).round(2)
 
     respond_to do |format|
-      format.html do
-        FileUtils.rm_rf(Dir.glob("#{dir}/*")) if File.directory?(dir)
-        Cerberus::Application::Queue.push(CartDownloadJob.new(request.session_options[:id], session[:ids], !current_user.nil? ? current_user.nuid : "", request.remote_ip))
-        @page_title = "Start Download - #{t('drs.shoppingcarts.name')}"
-      end
-
-      format.js do
-        if File.file?(f)
-          render("download")
-          # redirect_to fire_download_path and return
-        else
-          render :nothing => true
+        format.html do
+          if size > 5000
+            params[:action] = "show"
+            redirect_to url_for(params.merge(:large=>true))
+          else
+            FileUtils.rm_rf(Dir.glob("#{dir}/*")) if File.directory?(dir)
+            Cerberus::Application::Queue.push(CartDownloadJob.new(request.session_options[:id], session[:ids], !current_user.nil? ? current_user.nuid : "", request.remote_ip))
+            @page_title = "Start Download - #{t('drs.shoppingcarts.name')}"
+          end
         end
-      end
+
+        format.js do
+          if size > 5000
+            render "large_download"
+          elsif File.file?(f)
+            render("download")
+            # redirect_to fire_download_path and return
+          else
+            render :nothing => true
+          end
+        end
     end
   end
 

@@ -1,0 +1,12 @@
+#largeCompilationModal.modal.hide.fade{"aria-hidden" => "true", "aria-labelledby" => "largeCompilationModalLabel", role: "dialog", tabindex: "-1" }
+  .modal-header
+    %button.close{"aria-hidden" => "true", "data-dismiss" => "modal", type: "button"} x
+    %h3#largeCompilationModalLabel
+      #{t('drs.compilations.name').titleize} Too Large
+  .modal-body
+    %p
+      ="Sorry, this #{t('drs.compilations.name')} is too large to download at this time. Please"
+      %a{href:"mailto:Library-Repository-Team@neu.edu"} contact DRS staff
+      =" for help downloading this file."
+  .modal-footer
+    %button.btn{"aria-hidden" => "true", "data-dismiss" => "modal" } Close
