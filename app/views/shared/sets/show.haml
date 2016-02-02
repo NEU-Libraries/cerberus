@@ -24,6 +24,8 @@
       = render :partial=>'catalog/facets', locals: { facet_list: facet_list }
     .pane.pagination-info{ class: pane_large_class }
       = render 'catalog/sort_and_per_page'
+    - if current_user && @set.klass != "Compilation"
+      = render :partial=>'shared/save_files'
 
   %section{ class: drs_items_class }
     -# Main content
@@ -32,4 +34,13 @@
     = render 'catalog/results_pagination'
     = render :partial => 'catalog/document_list'
     = render 'catalog/results_pagination'
-    = render partial: 'shared/sets/bottom_action_menu'
+    -if @set.klass != "Compilation"
+      = render partial: 'shared/sets/bottom_action_menu'
+
+%div#add_compilation_form{ style: 'display:none' }
+
+-if @set.klass == "Compilation"
+  :javascript
+    $(document).ready(function(){
+      $.getScript("#{set_count_path(@set)}");
+    });

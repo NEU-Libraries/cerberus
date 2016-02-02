@@ -467,6 +467,56 @@ module Cerberus
       self.pid.gsub(':','%3A')
     end
 
+    def entries
+      e = Array(self[Solrizer.solr_name("has_member", :symbol)])
+      if e.count > 0
+        query = e.map do |pid|
+          "id:\"#{pid.split('/').last}\""
+        end
+
+        query = query.join(" OR ")
+
+        row_count = ActiveFedora::SolrService.count(query)
+        query_result = ActiveFedora::SolrService.query(query, :rows => row_count)
+        return query_result.map { |x| SolrDocument.new(x) }
+      else
+        []
+      end
+    end
+
+    def entry_ids
+      e = Array(self[Solrizer.solr_name("has_member", :symbol)])
+      if e.count > 0
+        query = e.map do |pid|
+          "id:\"#{pid.split('/').last}\""
+        end
+
+        query = query.join(" OR ")
+
+        row_count = ActiveFedora::SolrService.count(query)
+        query_result = ActiveFedora::SolrService.query(query, :rows => row_count, :fl=>"id")
+        return query_result.map { |x| x['id'] }
+      else
+        []
+      end
+    end
+
+    def object_ids
+      docs = []
+      self.entries.each do |e|
+        if e.klass == 'CoreFile'
+          docs << e.pid
+        else
+          docs << e.pid
+          e.all_descendent_files.each do |f|
+            docs << f.pid
+          end
+        end
+      end
+      # docs.select! { |doc| current_user.can?(:read, doc) }
+      docs
+    end
+
     def ordinal_value
       Array(self["ordinal_value_isi"]).first
     end

@@ -1,0 +1,16 @@
+= form_tag(add_multiple_entries_path(:id=>compilation.pid), method: 'post', remote: true, class: "multi-compilation") do
+  .modal-header
+    %button.close{"aria-hidden" => "true", "data-dismiss" => "modal", type: "button"} &#215;
+    %h3#ajaxModalLabel Add to "#{compilation.title}"
+  - entries.each do |e|
+    - if !e.blank?
+      = hidden_field_tag(:entry_ids, e, :multiple=>true, :name=>"entry_ids[]")
+  .modal-body
+    %p
+      -if dup_count > 0
+        = "\"#{compilation.title}\" already contains #{dup_count} file#{'s' unless entries.count == 1}. "
+      = "Are you sure you want to add #{entries.count} file#{'s' unless entries.count == 1} to \"#{compilation.title}\"?"
+
+  .modal-footer
+    %button.btn{"data-dismiss" => "modal"} No
+    = submit_tag("Yes",  :class => "btn btn-primary", data: { disable_with: "Please wait..."}, id: "add-to-compilation-#{compilation.pid}")

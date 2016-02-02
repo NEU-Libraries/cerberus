@@ -1,24 +1,34 @@
 %h1.page-header
-  - compilations_icon =render partial: 'shared/icon', locals: {class_string: "icon-th-list"  }
-  = compilations_icon
-  My
+  = render partial: 'shared/icon', locals: { class_string: t('drs.compilations.icon') }
   = t('drs.compilations.name').capitalize + 's'
 %p.lead
   = t('drs.compilations.lead')
-%ul.all-compilations.thumbnails
-  - if !@compilations.empty?
-    = render partial: 'all_compilations', locals: { compilations: @compilations }
-  - else
-    %li.span12
-      .alert.alert-info
-        %strong No #{t('drs.compilations.name') + 's'} available!
-        Create a new #{t('drs.compilations.name')} today.
-  %li.span2
-    %a.thumbnail.thumbnail-btn(href=new_compilation_path)
-      %br
-      %h5.text-center
-        =compilations_icon
-        Create a new #{t('drs.compilations.name')}
-- if @compilations.any?
-  = render partial: 'shared/sets/delete_item_modal', locals: { item: @compilations.first }
 
+%section.row
+  %article.span6
+    %h3= "My #{t('drs.compilations.name').capitalize}s"
+    %div#my
+    = link_to("Create a new #{t('drs.compilations.name')}", new_compilation_path, class: ["btn", "btn-clear", "btn-block", ] )
+  %article.span6
+    %h3="Collaborative #{t('drs.compilations.name').capitalize}s"
+    %div#collaborative
+
+
+:javascript
+  $(document).ready(function(){
+    spinner = enable_spinner('my');
+    get_page("sets/my");
+    spinner = enable_spinner('collaborative');
+    get_page("sets/collaborative");
+    function get_page(path){
+      $.getScript( path, function() {
+        enable_pagination();
+      });
+    }
+    function enable_pagination(){
+      $(".pager .pagination a").on("click", function(e){
+        e.preventDefault();
+        get_page($(this).attr("href"));
+      });
+    }
+  });

@@ -4,27 +4,92 @@ class CompilationsController < ApplicationController
   include ApplicationHelper
   include UrlHelper
 
-  before_filter :authenticate_user!, except: [:show, :show_download, :download, :ping_download]
+  # Here be solr access boilerplate
+  include Blacklight::Catalog
+  include Blacklight::Configurable # comply with BL 3.7
+  include ActionView::Helpers::DateHelper
+  # This is needed as of BL 3.7
+  self.copy_blacklight_config_from(CatalogController)
+  include BlacklightAdvancedSearch::ParseBasicQ
+  include BlacklightAdvancedSearch::Controller
 
-  before_filter :can_edit?, only: [:edit, :update, :destroy, :add_entry, :delete_entry]
+  before_filter :authenticate_user!, except: [:show, :show_download, :download, :ping_download, :get_total_count, :total_count]
+
+  before_filter :can_edit?, only: [:edit, :update, :destroy, :add_entry, :delete_entry, :add_multiple_entries, :delete_multiple_entries]
   before_filter :can_read?, only: [:show, :show_download, :download]
 
   load_resource
-  before_filter :get_readable_entries, only: [:show]
-  before_filter :remove_dead_entries, only: [:show, :show_download]
-  before_filter :ensure_any_readable, only: [:show_download]
   before_filter :valid_form_permissions?, only: [:update]
 
   def index
-    compilation_docs = solr_query("depositor_tesim:\"#{current_user.nuid}\" AND has_model_ssim:\"#{ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:Compilation"}\"")
-    @compilations = compilation_docs.map{|c| Compilation.find(c.pid)}
-
     @page_title = "My " + t('drs.compilations.name').capitalize + "s"
+    respond_to do |format|
+      format.html
+    end
+  end
+
+
+  def my_sets
+    self.solr_search_params_logic += [:exclude_unwanted_models]
+    self.solr_search_params_logic += [:find_user_compilations]
+
+    (@response, @compilations) = get_search_results
+
+    respond_to do |format|
+      format.js {
+        if @response.response['numFound'] < 1
+          render js: "$('#my').replaceWith('<div class=\"alert alert-info\">You have not created any #{t('drs.compilations.name') + 's'} yet! Create a new #{t('drs.compilations.name')} today.</div>');"
+        else
+          render "my"
+        end
+      }
+    end
+  end
+
+  def editable_compilations
+    # use this for the popup when adding to sets
+    u_groups = current_user.groups
+    groups = u_groups.map! { |g| "\"#{g}\""}.join(" OR ")
+    @compilations = solr_query("(depositor_tesim:\"#{current_user.nuid}\" OR edit_access_group_ssim:(#{groups})) AND has_model_ssim:\"#{ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:Compilation"}\"")
+    if params[:class] == 'Collection'
+      doc = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:file]}\"").first)
+    end
+
+    respond_to do |format|
+      if doc && doc.klass == 'Collection' && doc.child_collections.length > 0
+        format.js{
+          render js: "$('#ajax-modal .modal-body').text('Collections that contain other collections cannot be added to a #{t('drs.compilations.name').capitalize}. Please open this collection and select the specific files or collections you would like to add to your #{t('drs.compilations.name').capitalize}.'); $('#ajax-modal').modal('show'); $('#ajax-modal-heading').text('Add to a #{t('drs.compilations.name').capitalize}'); $('#ajax-modal-footer').html('<button class=\"btn\" data-dismiss=\"modal\">Close</button>');"
+         }
+      else
+        format.js{ render "editable" }
+      end
+    end
+  end
+
+  def collaborative_compilations
+    self.solr_search_params_logic += [:exclude_unwanted_models]
+    self.solr_search_params_logic += [:get_compilations_with_permissions]
+
+    (@response, @compilations) = get_search_results
+
+    respond_to do |format|
+      format.js {
+        if @response.response['numFound'] < 1
+          render js: "$('#collaborative').replaceWith('<div class=\"alert alert-info\">You have no collaborative #{t('drs.compilations.name').capitalize.pluralize} yet. Collaborative #{t('drs.compilations.name').pluralize} are #{t('drs.compilations.name').pluralize} that are created by other users but editable by you.</div>');"
+        else
+          render "collaborative"
+        end
+      }
+    end
   end
 
   def new
-    @compilation = Compilation.new
+    @set = Compilation.new
     @page_title = "New " + t('drs.compilations.name').capitalize
+    respond_to do |format|
+      format.js { render 'new' }
+      format.html { render 'shared/sets/new' }
+    end
   end
 
   def create
@@ -43,6 +108,8 @@ class CompilationsController < ApplicationController
 
   def edit
     @page_title = "Edit #{@compilation.title}"
+    @set = @compilation
+    render :template => 'shared/sets/edit'
   end
 
   def update
@@ -62,15 +129,29 @@ class CompilationsController < ApplicationController
       @pretty_description = convert_urls(@compilation.description)
     end
 
+    if params['q']
+      params.delete :q # this disables querying compilations
+    end
+
+    @set = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{@compilation.pid}\"").first)
+    self.solr_search_params_logic += [:filter_entry_ids]
+    (@response, @document_list) = get_search_results
+    if @response.response['numFound'] == 0
+      flash[:notice] = "There are no items in this #{t('drs.compilations.name').capitalize}. Please search or browse for an item or collection and add it to this #{t('drs.compilations.name').capitalize}."
+    end
+    if @compilation.entry_ids.length != @response.response['numFound']
+      dead_entries = @compilation.remove_dead_entries
+    end
+
     respond_to do |format|
-      format.html{ render action: "show", locals: {pretty_description: @pretty_description}}
+      format.html{ render "shared/sets/show", locals: {pretty_description: @pretty_description}}
       format.json{ render json: @compilation  }
     end
   end
 
   def destroy
     if @compilation.destroy
-      flash[:notice] = "#{t('drs.compilations.name').capitalize} was successfully destroyed"
+      flash[:notice] = "#{t('drs.compilations.name').capitalize} was successfully deleted"
       redirect_to compilations_path
     else
       flash.now.error = "#{t('drs.compilations.name').capitalize} #{@compilation.title} was not successfully destroyed"
@@ -78,9 +159,97 @@ class CompilationsController < ApplicationController
   end
 
   def add_entry
-    @compilation.add_entry(params[:entry_id])
-    save_or_bust @compilation
+    doc = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:entry_id]}\"").first)
+    if doc.klass == "Collection"
+      col_pids = []
+      doc.all_descendent_files.each do |f|
+        col_pids << f.pid
+      end
+    end
+    respond_to do |format|
+      if col_pids && !(@compilation.entry_ids & col_pids).empty?
+        intersection = @compilation.entry_ids & col_pids
+        if params[:proceed]
+          intersection.each do |i|
+            @compilation.remove_entry(i)
+            save_or_bust @compilation
+          end
+          @compilation.add_entry(params[:entry_id])
+          save_or_bust @compilation
+          format.json { render :json => {:status=>"Collection successfully added to set"}, status: 200}
+        else
+          format.json { render :json => { :error => "Some files in this collection already exist in \"#{@compilation.title}\". If you add this collection to the Set, the duplicate files will be removed.", :title => "Add to \"#{@compilation.title}\"", :set=>@compilation.pid, :entry_id=>params[:entry_id]}, status: :unprocessable_entity}
+        end
+      elsif (@compilation.object_ids.include? params[:entry_id])
+        format.json { render :json => { :error => "This object is already in the #{t('drs.compilations.name').capitalize}." }, status: :unprocessable_entity}
+      elsif @compilation.add_entry(params[:entry_id])
+        save_or_bust @compilation
+        format.html { redirect_to @compilation }
+        format.json { render :nothing => true }
+        format.js   { render :nothing => true }
+      else
+        format.json { render json: {error: "There was an error adding this item to the #{t('drs.compilations.name').capitalize}. Please go back and try a different object."}.to_json, status: :unprocessable_entity }
+      end
+    end
+  end
 
+  def add_entry_dups
+    doc = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:entry_id]}\"").first)
+    if doc.klass == "Collection"
+      col_pids = []
+      doc.all_descendent_files.each do |f|
+        col_pids << f.pid
+      end
+    end
+    if col_pids && !(@compilation.entry_ids & col_pids).empty?
+      intersection = @compilation.entry_ids & col_pids
+      intersection.map!{|i| i=SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{i}\"").first)}
+      intersection.sort_by! { |c| c.title }
+      respond_to do |format|
+        format.js{render "dups", locals:{intersection:intersection}}
+      end
+    end
+  end
+
+  def check_multiple_entries
+    entries = params[:entries]
+    intersection = (entries & @compilation.object_ids).to_a
+    if !intersection.empty?
+      intersection.each do |i|
+        entries.delete(i)
+      end
+    end
+
+    respond_to do |format|
+      if entries.count > 0
+        format.js{ render "check_multi_add", locals: {entries: entries, compilation: @compilation, dup_count: intersection.length} }
+      else
+        format.js{
+          render js: "$(\"#ajax-modal .modal-body\").text(\"#{intersection.count} items are already in #{@compilation.title}\"); $(\"#ajax-modal\").modal(\"show\"); $(\"#ajax-modal-heading\").text('Add to \"#{@compilation.title}\"'); $(\"#ajax-modal-footer\").html(\"<button class='btn' data-dismiss='modal'>Close</button>\");"
+         }
+      end
+    end
+
+  end
+
+  def add_multiple_entries
+    entries = params[:entry_ids]
+    entries.each do |e|
+      @compilation.add_entry(e)
+    end
+    save_or_bust @compilation
+    respond_to do |format|
+      format.html { redirect_to @compilation }
+      format.json { render :nothing => true }
+      format.js   { render :nothing => true }
+    end
+  end
+
+  def delete_multiple_entries
+    params[:entry_ids].each do |e|
+      @compilation.remove_entry(e)
+    end
+    save_or_bust @compilation
     respond_to do |format|
       format.html { redirect_to @compilation }
       format.json { render :nothing => true }
@@ -89,13 +258,19 @@ class CompilationsController < ApplicationController
   end
 
   def delete_entry
-    @compilation.remove_entry(params[:entry_id])
-    save_or_bust @compilation
-
     respond_to do |format|
-      format.html { redirect_to @compilation }
-      format.json { render :nothing => true }
-      format.js   { render :nothing => true }
+      this_entry = params[:entry_id]
+      if @compilation.entry_ids.include?(this_entry)
+        @compilation.remove_entry(this_entry)
+        save_or_bust @compilation
+        format.html { redirect_to @compilation }
+        format.json { render :nothing => true }
+        format.js   { render :nothing => true }
+      elsif @compilation.object_ids.include?(this_entry)
+        format.json { render :json => { :error => "This item cannot be removed from the #{t('drs.compilations.name').capitalize} because its parent collection is in the #{t('drs.compilations.name').capitalize}.<br><br> If you wish to remove this item, remove the collection from the #{t('drs.compilations.name').capitalize} first.<br><br> #{ActionController::Base.helpers.link_to("Click here to go to the #{t('drs.compilations.name').capitalize}", compilation_path(@compilation))}"}, status: :unprocessable_entity}
+      else
+        format.json { render :json => { :error => "There was an error removing this item from the #{t('drs.compilations.name').capitalize}", status: :unprocessable_entity} }
+      end
     end
   end
 
@@ -121,48 +296,80 @@ class CompilationsController < ApplicationController
     send_file path_to_dl
   end
 
+  def request_delete
+    set = @compilation
+    title = set.title
+    user = current_user
+    reason = params[:reason]
+    DeleteMailer.delete_alert(set, reason, user).deliver!
+    flash[:notice] = "Your request has been received and will be processed soon."
+    redirect_to set and return
+  end
+
+  def get_total_count
+    @count = total_count
+    respond_to do |format|
+      format.js { render "count", locals:{count:@count}}
+    end
+  end
+
+  def total_count
+    @set = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first)
+    docs = []
+    @set.entries.each do |e|
+      if e.klass == 'CoreFile'
+        docs << e
+      else
+        e.all_descendent_files.each do |f|
+          docs << f
+        end
+      end
+    end
+    docs.select! { |doc| (doc.public? || (!current_user.nil? && current_user.can?(:read, doc.pid))) }
+    @count = docs.count
+    return @count
+  end
+
   private
-
-  def get_readable_entries
-    @entries = @compilation.entries.keep_if { |x| current_user_can? :read, x }
-  end
-
-  def ensure_any_readable
-    entries = get_readable_entries
-    error   = "You cannot download a set with no readable content"
-
-    if entries.empty?
-      flash[:error] = error
-      redirect_to @compilation and return
-    end
-
-    content = []
-    entries.each do |entry|
-      content = content + entry.content_objects
-    end
-
-    content.keep_if { |c| c.klass != "ImageThumbnailFile" }
-
-    unless (content.any? { |x| current_user_can? :read, x })
-      flash[:error] = error
-      redirect_to(@compilation) and return
-    end
-  end
-
-  def remove_dead_entries
-    dead_entries = @compilation.remove_dead_entries
-
-    if dead_entries.length > 0
-      flash.now[:error] = "#{dead_entries.length} items no longer exist in the repository and have been removed from your #{ t('drs.compilations.name')}."
-    end
-  end
-
   def save_or_bust(compilation)
     if compilation.save!
       flash[:notice] = "#{t('drs.compilations.name').capitalize} successfully updated"
     else
       flash.now.error = "#{t('drs.compilations.name').capitalize} was not successfully updated"
     end
+  end
+
+  def filter_entry_ids(solr_parameters, user_parameters)
+    solr_parameters[:fq] ||= []
+    query = @compilation.entry_ids.map do |pid|
+      "id:\"#{pid}\""
+    end
+
+    fq = query.join(" OR ")
+    if !fq.blank?
+      solr_parameters[:fq] << fq
+      solr_parameters[:fq] << "!tombstoned_ssi:\"true\""
+    else
+      solr_parameters[:fq] << "id:\"\""
+    end
+  end
+
+  def find_user_compilations(solr_parameters, user_parameters)
+    solr_parameters[:fq] ||= []
+    solr_parameters[:fq] << "#{Solrizer.solr_name("depositor", :stored_searchable)}:\"#{current_user.nuid}\""
+  end
+
+  def exclude_unwanted_models(solr_parameters, user_parameters)
+    solr_parameters[:fq] ||= []
+    solr_parameters[:fq] << "#{Solrizer.solr_name("has_model", :symbol)}:\"info:fedora/afmodel:Compilation\""
+  end
+
+  def get_compilations_with_permissions(solr_parameters, user_parameters)
+    solr_parameters[:fq] ||= []
+    solr_parameters[:fq] << "!#{Solrizer.solr_name("depositor", :stored_searchable)}:\"#{current_user.nuid}\""
+    u_groups = current_user.groups
+    query = u_groups.map! { |g| "\"#{g}\""}.join(" OR ")
+    solr_parameters[:fq] << "edit_access_group_ssim:(#{query}) OR read_access_group_ssim:(#{query})"
   end
 
   private

@@ -4,7 +4,10 @@
     %h3#deleteModalLabel
       = title
   .modal-body
-    %p= "Are you sure you want to delete this collection?"
+    -if @set.is_a?(Compilation)
+      %p= "Are you sure you want \"#{@set.title}\" to be deleted?"
+    -else
+      %p= "Are you sure you want to delete \"#{@set.title}\" and all of the items it contains?  We cannot undo this action!"
   .modal-footer
     %button.btn{"aria-hidden" => "true", "data-dismiss" => "modal" } Close
     = submit_tag button_title, class: "btn btn-danger"

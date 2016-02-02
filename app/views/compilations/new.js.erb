@@ -1,5 +1,5 @@
 (function($){
-  var partial = $('<%= j render( :partial =>  "remote_data_form", :locals => { compilation: @compilation } ) %>');
+  var partial = $('<%= j render( :partial =>  "shared/sets/data_form", :locals => { compilation: @compilation, remote: true } ) %>');
 
   drsApp.compilationsModal(partial, "");
 
