@@ -369,7 +369,7 @@ class CompilationsController < ApplicationController
     solr_parameters[:fq] << "!#{Solrizer.solr_name("depositor", :stored_searchable)}:\"#{current_user.nuid}\""
     u_groups = current_user.groups
     query = u_groups.map! { |g| "\"#{g}\""}.join(" OR ")
-    solr_parameters[:fq] << "edit_access_group_ssim:(#{query}) OR read_access_group_ssim:(#{query})"
+    solr_parameters[:fq] << "edit_access_group_ssim:(#{query})"
   end
 
   private
