@@ -4,7 +4,8 @@
   .drs-item-details
     %header
       %h4.drs-item-title
-        = "#{metadata.non_sort} #{metadata.title}"
+        %a{href:core_file_path(metadata.pid)}
+          = "#{metadata.non_sort} #{metadata.title}"
         %small= "(#{content.derivative_label})"
     .addtional-details
       .drs-item-add-details

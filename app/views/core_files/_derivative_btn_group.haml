@@ -11,10 +11,10 @@
             = render partial: 'core_files/derivative_button', locals: {content: content }
             = render partial: 'shopping_carts/add_or_remove_btn', locals: { :id => content.pid }
     - if item
-      - if item.klass == "CoreFile"
+      - if item.klass == "CoreFile" || item.klass == "Collection"
         - if current_user
           .btn-group
-            =link_to("Save for later", compilations_path(file: item.pid), remote: true, title:  "Add to " + t('drs.compilations.name'), data: {toggle: "tooltip"}, class: "btn btn-mini btn-clear")
+            =link_to("Save for later", sets_editable_path(file: item.pid, class:"#{item.klass}"), remote: true, title:  "Add to " + t('drs.compilations.name'), data: {toggle: "tooltip"}, class: "btn btn-mini btn-clear")
 - else
   %div{ class: alignment }
     - contents.each do |content|
@@ -24,10 +24,17 @@
             = render partial: 'core_files/derivative_button', locals: {content: content }
             = render partial: 'shopping_carts/add_or_remove_btn', locals: { :id => content.pid }
     - if item
-      - if item.klass == "CoreFile"
+      - if item.klass == "CoreFile" || item.klass == "Collection"
         - if current_user
           .btn-group
-            =link_to("Save for later", compilations_path(file: item.pid), remote: true, title:  "Add to " + t('drs.compilations.name'), data: {toggle: "tooltip"}, class: "btn btn-mini btn-clear")
+            =link_to("Save for later", sets_editable_path(file: item.pid, class:"#{item.klass}"), remote: true, title:  "Add to " + t('drs.compilations.name'), data: {toggle: "tooltip"}, class: "btn btn-mini btn-clear")
     .btn-group
       - icon = render partial: 'shared/icon',  locals: { class_string: "icon-comments-alt" }
       =link_to icon.html_safe , "http://library.northeastern.edu/get-help/tech-support/report-a-problem?resource=#{item.title} - #{item.pid} (#{CGI::escape(request.original_url)})", :target => "_blank", title:  "Report a problem", data: {toggle: "tooltip"}, class: 'btn btn-mini btn-clear'
+    -if controller_name == 'compilations' && current_user && (current_user_can? :edit, @compilation)
+      .btn-group
+        %a.btn.btn-mini.btn-danger{ href: "#removeFromCompilationModal#{item.pid.gsub(":","")}", data: { toggle: "modal" }, title: "Remove from set" }
+          %i.icon-remove
+          Remove
+          %span.sr-only
+            Remove #{item.title} from #{@compilation.title}

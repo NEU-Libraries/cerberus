@@ -4,7 +4,7 @@
     %h3#emptyCartModalLabel
       Confirm clearing #{t('drs.shoppingcarts.name')}
   .modal-body
-    %p Are you sure you want to clear your #{t('drs.shoppingcarts.name')}
+    %p Are you sure you want to clear your #{t('drs.shoppingcarts.name')}?
   .modal-footer
     %button.btn{"aria-hidden" => "true", "data-dismiss" => "modal" } Close
     =link_to("Clear", shopping_cart_path, method: :delete, class: "btn btn-danger")

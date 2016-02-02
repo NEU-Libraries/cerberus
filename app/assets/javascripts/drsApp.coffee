@@ -407,38 +407,60 @@ $(document).ready ->
       return
 
     addToComplationLink = (e) ->
-      e.on('ajax:success', ->
+      e.on('click', ->
+        $(this).addClass('btn-warning').removeClass('btn-success')
+        spinner = enable_spinner('ajax-modal');
+        $(this).text('Please wait...');
+      ).on('ajax:success', (data)->
         delta = $(this).data('method')
+        $("#ajax-modal").find(".spinner").remove();
         switch delta
           when 'post'
-            $(this).text('Remove from ' + $(this).text()).data('method', 'delete').removeClass('btn-success add-to-compilation').addClass 'btn-danger remove-from-compilation'
+            $(this).removeClass('btn-success add-to-compilation').addClass('btn-danger remove-from-compilation').text('Remove from ' + $(this).data('title')).data('method', 'delete')
           when 'delete'
-            $(this).data('method', 'post').text($(this).text().replace('Remove from ', '')).addClass('btn-success add-to-compilation').removeClass 'btn-danger remove-from-compilation'
-          else
-            console.log 'ajax successful, but not sure what to do!'
-      ).on 'ajax:error', ->
-        $(this).closest('.modal').modal 'hide'
-        $('.breadcrumb').addBsAlert
-          classes: 'alert alert-danger'
-          strong: 'Error,'
-          text: 'Something went wrong, please reload the page and try again.'
+            $(this).data('method', 'post').text($(this).data('title')).addClass('btn-success add-to-compilation').removeClass 'btn-danger remove-from-compilation'
+      ).on 'ajax:error', (xhr, status, error)->
+        $("#ajax-modal .spinner").remove();
+        if (status.responseJSON.hasOwnProperty('title'))
+          $('#ajaxModalLabel').text(status.responseJSON.title)
+          $(this).closest('.modal').find('.modal-footer').html('<a class="btn btn-dups" href="/sets/'+status.responseJSON.set+'/'+status.responseJSON.entry_id+'/dups" data-remote="true">View Duplicates</a><button class="btn" data-dismiss="modal">Close</button><a class="btn btn-success btn-proceed" href="/sets/'+status.responseJSON.set+'/'+status.responseJSON.entry_id+'?proceed=true" data-method="post" data-remote="true">Add Collection</a>')
+          drsApp.addToCompilationProceed $('.btn-proceed')
 
+        $(this).closest('.modal').find('.modal-body').html(status.responseJSON.error)
         return
 
       return
+
+    addToComplationMultiLink = (e) ->
+      e.on('ajax:success', (data)->
+        $(this).closest('.modal').find('.modal-body').append("<div class='alert alert-success'>Items successfully added.</div>")
+        $(this).closest('.modal').find('.modal-footer').html("<button class='btn' data-dismiss='modal'>Close</button>");
+        setTimeout(dismissModal, 2000)
+      )
+      return
+
+    addToCompilationProceed = (e) ->
+      e.on('ajax:success', (data)->
+        $(this).closest('.modal').find('.modal-body').html("<div class='alert alert-success'>Items successfully added.</div>")
+        $(this).closest('.modal').find('.modal-footer').html("<button class='btn' data-dismiss='modal'>Close</button>");
+        setTimeout(dismissModal, 3000)
+      )
+      return
+
     # Builds and requests the new compilation form for the ajax request
+    dismissModal = () ->
+      $('.modal').modal 'hide'
 
     newCompilationForm = ->
       $("#new_compilation").parent(".modal").removeClass("modal-compilation")
-      $('#new_compilation').on('ajax:success', ->
+      entry_id = encodeURIComponent($("#new_compilation").find("#entry_id").val());
+      $('#new_compilation').on('ajax:success', (data)->
         $(this).closest('.modal').modal 'hide'
-        $('.breadcrumb').addBsAlert
-          classes: 'alert alert-success'
-          strong: 'Success!'
-          text: 'You created a new set!'
+        $("a[href='/sets/editable?file="+entry_id+"']").click();
+        setTimeout(successAlert, 500)
       ).on 'ajax:error', ->
         $(this).closest('.modal').modal 'hide'
-        $('.breadcrumb').addBsAlert
+        $('.page-header').addBsAlert
           classes: 'alert alert-danger'
           strong: 'Error,'
           text: 'Something went wrong, please reload the page and try again.'
@@ -446,6 +468,10 @@ $(document).ready ->
         return
 
       return
+
+    successAlert = ->
+      $('.modal-body').prepend('<div class="alert alert-success"><b>Success!</b> You created a new set and added an item to it!</div>');
+
     ###
     Handles the compilation modal object for the page
     ###
@@ -459,6 +485,8 @@ $(document).ready ->
         return
 
       drsApp.addToComplationLink $('.btn-compilation')
+      drsApp.addToComplationMultiLink $('.multi-compilation')
+      drsApp.addToCompilationProceed $('.btn-proceed')
       drsApp.newCompilationForm()
       return
 
@@ -896,6 +924,8 @@ $(document).ready ->
 
     init: init
     addToComplationLink: addToComplationLink
+    addToComplationMultiLink: addToComplationMultiLink
+    addToCompilationProceed: addToCompilationProceed
     newCompilationForm: newCompilationForm
     compilationsModal: compilationsModal
     initModal: initModal

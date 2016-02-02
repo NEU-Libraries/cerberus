@@ -13,6 +13,8 @@
       = render partial: 'shared/icon', locals: { class_string: 'icon-group' }
     - elsif item.klass == "Employee"
       = render partial: 'shared/icon', locals: { class_string: 'icon-user' }
+    - elsif item.klass == 'Compilation'
+      =render partial: 'shared/icon', locals: { class_string: t('drs.compilations.icon') }
     - elsif item.klass == "PageFile"
       - @thumbs = ["/downloads/#{item.pid}?datastream_id=thumbnail_1", "/downloads/#{item.pid}?datastream_id=thumbnail_2", "/downloads/#{item.pid}?datastream_id=thumbnail_3"]
       = render partial: 'shared/thumbnails/thumbnail_picture', locals: {thumbs: @thumbs}
