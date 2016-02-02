@@ -33,6 +33,8 @@ class CompilationsController < ApplicationController
     self.solr_search_params_logic += [:exclude_unwanted_models]
     self.solr_search_params_logic += [:find_user_compilations]
 
+    @forced_view = "drs-items-list"
+
     (@response, @compilations) = get_search_results
 
     respond_to do |format|
@@ -69,6 +71,8 @@ class CompilationsController < ApplicationController
   def collaborative_compilations
     self.solr_search_params_logic += [:exclude_unwanted_models]
     self.solr_search_params_logic += [:get_compilations_with_permissions]
+
+    @forced_view = "drs-items-list"
 
     (@response, @compilations) = get_search_results
 
