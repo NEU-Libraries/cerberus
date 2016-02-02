@@ -291,8 +291,23 @@ class CompilationsController < ApplicationController
   end
 
   def show_download
-    Cerberus::Application::Queue.push(ZipCompilationJob.new(current_user, @compilation))
-    @page_title = "Download #{@compilation.title}"
+    size = 0
+    @set = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first)
+    @set.entries.each do |i|
+      if i.klass == 'CoreFile' && !i.tombstoned? && (!current_user.nil? ? current_user.can?(:read, i) : i.public?)
+        co = i.canonical_object.first
+        size = size + co.file_size.to_f
+      end
+    end
+    size = (size / 1024000).round(2)
+
+    if size > 500
+      params[:action] = "show"
+      redirect_to url_for(params.merge(:large=>true))
+    else
+      Cerberus::Application::Queue.push(ZipCompilationJob.new(current_user, @compilation))
+      @page_title = "Download #{@compilation.title}"
+    end
   end
 
   def download
