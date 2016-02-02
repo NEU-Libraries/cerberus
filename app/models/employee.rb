@@ -127,8 +127,7 @@ class Employee < ActiveFedora::Base
       lookup = Employee.find(id)
       if !lookup.is_building?
         return lookup
-      elsif retries < 3
-        puts "retry #{retries}"
+      elsif retries < 3        
         sleep 3
         safe_employee_lookup(id, retries + 1)
       else

@@ -316,7 +316,7 @@ describe CompilationsController do
       # compilation.add_entry file
       post :add_entry, id: compilation.pid, entry_id: file.pid
       post :add_entry, id: compilation.pid, entry_id: file2.pid
-      puts file.pid
+      
       delete :delete_entry, id: compilation.pid, entry_id: file.pid, format: "html"
       expect(response).to redirect_to "/sets/#{compilation.pid}"
       expect(assigns(:compilation).entry_ids).not_to include file.pid
