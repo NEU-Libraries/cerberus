@@ -394,8 +394,6 @@ class ModsDatastream < ActiveFedora::OmDatastream
 
     if array_of_keywords.length == self.subject.topic.length
       array_of_keywords.each_with_index do |kw, i|
-        puts kw
-        puts self.subject.topic[i]
         if kw != self.subject.topic[i]
           changed = true
         end
