@@ -15,42 +15,62 @@ class Compilation < ActiveFedora::Base
 
   attr_accessible :title, :identifier, :depositor, :description
 
-  has_many :entries, class_name: "CoreFile",  property: :has_member
+  has_many :entries, class_name: "CoreFile, Collection",  property: :has_member
+
+  def entries
+    @set = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{self.id}\"").first)
+    return @set.entries
+  end
 
   # Returns the pids of all objects tagged as entries
   # in this collection.
   def entry_ids
     a = self.relationships(:has_member)
-    return a.map{ |rels| trim_to_pid(rels) }
-  end
-
-  # Returns all CoreFile objects tagged as entries
-  # in this collection as SolrDocument objects.
-  def entries
-    if entry_ids.any?
-      query = ""
-      query = self.entry_ids.map! { |id| "\"#{id}\""}.join(" OR ")
-      query = "id:(#{query})"
-
-      solr_query(query)
-    else
-      []
-    end
+    return a.map{ |rels| rels.split('/').last }
   end
 
   def add_entry(value)
     if value.instance_of?(CoreFile)
-      add_relationship(:has_member, value)
+      if !check_for_duplicates(value)
+        add_relationship(:has_member, value)
+        true
+      else
+        false
+      end
+    elsif value.instance_of?(Collection)
+      if !check_for_duplicates(value)
+        add_relationship(:has_member, value)
+        true
+      else
+        false
+      end
     elsif value.instance_of?(String)
-      object = CoreFile.find(value)
-      add_relationship(:has_member, object)
+      obj = ActiveFedora::SolrService.query("id:\"#{value}\"")
+      doc = SolrDocument.new(obj.first)
+      if doc.klass == "CoreFile"
+        object = CoreFile.find(value)
+        if !check_for_duplicates(object)
+          add_relationship(:has_member, object)
+          true
+        else
+          false
+        end
+      elsif doc.klass == "Collection"
+        object = Collection.find(value)
+        if !check_for_duplicates(object)
+          add_relationship(:has_member, object)
+          true
+        else
+          false
+        end
+      end
     else
-      raise "Add item can only take a string or an instance of a Core object"
+      false
     end
   end
 
   def remove_entry(value)
-    if value.instance_of?(CoreFile)
+    if value.instance_of?(CoreFile) || value.instance_of?(Collection)
       remove_relationship(:has_member, value)
     elsif value.instance_of?(String)
       remove_relationship(:has_member, "info:fedora/#{value}")
@@ -80,14 +100,67 @@ class Compilation < ActiveFedora::Base
       if !ActiveFedora::Base.exists?(entry)
         results << entry
         remove_entry(entry)
-      elsif CoreFile.find(entry).tombstoned?
-        results << entry
-        remove_entry(entry)
+      elsif entry.instance_of?(String)
+        obj = ActiveFedora::SolrService.query("id:\"#{entry}\"")
+        doc = SolrDocument.new(obj.first)
+        if doc.tombstoned?
+          results << entry
+          remove_entry(entry)
+        end
       end
     end
 
     self.save!
     return results
+  end
+
+  def check_for_duplicates(object)
+    if !self.entry_ids.include?(object.pid)
+      all = []
+      self.entry_ids.each do |e|
+        if e.instance_of?(String)
+          doc = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{e}\"").first)
+          if doc.klass == 'CoreFile'
+            all << doc.pid
+          elsif doc.klass == 'Collection'
+            children = doc.all_descendent_files
+            children.each do |c|
+              all << c.pid
+            end
+          end
+        elsif e.instance_of?(CoreFile)
+          all << e.pid
+        elsif e.instance_of?(Collection)
+          children = doc.all_descendent_files
+          children.each do |c|
+            all << c.pid
+          end
+        end
+      end
+      if all.include?(object) || all.include?(object.pid)
+        true
+      else
+        false
+      end
+    else
+      false
+    end
+  end
+
+  def object_ids
+    docs = []
+    self.entries.each do |e|
+      if e.klass == 'CoreFile'
+        docs << e.pid
+      else
+        docs << e.pid
+        e.all_descendent_files.each do |f|
+          docs << f.pid
+        end
+      end
+    end
+    # docs.select! { |doc| current_user.can?(:read, doc) }
+    docs
   end
 
   private

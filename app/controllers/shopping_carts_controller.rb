@@ -71,7 +71,6 @@ class ShoppingCartsController < ApplicationController
                               session_id: request.session_options[:id])
     session[:ids] = []
 
-    flash[:notice] = "Sessions successfully cleared"
     redirect_to shopping_cart_path
   end
 
