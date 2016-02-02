@@ -22,7 +22,7 @@ module Api
           @set = fetch_solr_document
           # Must be a community or a compilation
           if @set.klass != "Collection" && @set.klass != "Compilation"
-            render json: {error: "ID must match either a Collection or a Set"} and return
+            render json: {error: "ID must match either a Collection or a #{t('drs.compilations.name').capitalize}"} and return
           end
         rescue ActiveFedora::ObjectNotFoundError
           render json: {error: "A valid starting ID is required"} and return
@@ -57,7 +57,9 @@ module Api
         end
 
         # If response has facets, zip them together for easier parsing
-        @response.facet_counts["facet_fields"].each { |k, v| @response.facet_counts["facet_fields"][k] = Hash[v.each_slice(2).to_a] }
+        if !@response.facet_counts["facet_fields"].blank?
+          @response.facet_counts["facet_fields"].each { |k, v| @response.facet_counts["facet_fields"][k] = Hash[v.each_slice(2).to_a] }
+        end
 
         render json: {pagination: @pagination, response: @response}
       end

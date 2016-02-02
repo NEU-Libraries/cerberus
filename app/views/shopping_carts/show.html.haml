@@ -5,6 +5,9 @@
     %small
       = @items.length
 .row
+  .span12
+    %p.lead= t('drs.shoppingcarts.lead')
+.row
   .span8.offset2
     = render partial: "download_list"
     = render partial: "actions"

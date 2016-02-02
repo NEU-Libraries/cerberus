@@ -2,9 +2,15 @@
   .modal-header
     %button.close{"aria-hidden" => "true", "data-dismiss" => "modal", type: "button"} x
     %h3#deleteItemModalLabel
-      Confirm deleting #{item.title}
+      -if !title
+        = "Confirm deleting #{item.title}"
+      - else
+        = title
   .modal-body
-    %p= "Are you sure you want to delete #{item.title} and all of the items it contains?  We cannot undo this action!"
+    -if item.is_a? Compilation
+      %p="Are you sure you want to delete \"#{item.title}\"?"
+    -else
+      %p= "Are you sure you want to delete #{item.title} and all of the items it contains?  We cannot undo this action!"
   .modal-footer
     %button.btn{"aria-hidden" => "true", "data-dismiss" => "modal"} Close
     =link_to("Delete", polymorphic_path(item), method: :delete, class: "btn btn-danger")

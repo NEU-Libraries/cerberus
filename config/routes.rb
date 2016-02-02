@@ -51,13 +51,22 @@ Cerberus::Application.routes.draw do
   get '/communities/:id/:smart_col/recent' => 'communities#smart_col_recent_deposits', as: 'community_smart_col_recent'
   get '/communities/:id/:smart_col/creators' => 'communities#smart_col_creator_list', as: 'community_smart_col_creator_list'
 
+  get "/sets/collaborative" => "compilations#collaborative_compilations", as: 'sets_collaborative'
+  get "/sets/my" => "compilations#my_sets", as: 'sets_my'
+  get "/sets/editable" => "compilations#editable_compilations", as: 'sets_editable'
+  match "/sets/:id/request_delete" => "compilations#request_delete", via: 'post', as:"request_delete_set"
+  get "/sets/:id/count" => "compilations#get_total_count", as: 'set_count'
   resources :compilations, :controller => "compilations", :path => "sets"
   get "/sets/:id/download" => 'compilations#show_download', as: 'prepare_download'
   get "/sets/:id/ping" => 'compilations#ping_download', as: 'ping_download'
   get "/sets/:id/trigger_download" => 'compilations#download', as: 'trigger_download'
 
+  match "/sets/:id/multiple" => 'compilations#add_multiple_entries', via: 'post', as: 'add_multiple_entries'
+  match "/sets/:id/multiple" => 'compilations#delete_multiple_entries', via: 'delete', as: 'delete_multiple_entries'
   match "/sets/:id/:entry_id" => 'compilations#delete_entry', via: 'delete', as: 'delete_entry'
   match "/sets/:id/:entry_id" => 'compilations#add_entry', via: 'post', as: 'add_entry'
+  get "/sets/:id/:entry_id/dups" => 'compilations#add_entry_dups', as: 'add_entry_dups'
+  get "/sets/:id/check" => 'compilations#check_multiple_entries', as: 'check_multi'
 
   get "/files/:id/provide_metadata" => "core_files#provide_metadata", as: "files_provide_metadata"
   post "/files/:id/process_metadata" => "core_files#process_metadata", as: "files_process_metadata"

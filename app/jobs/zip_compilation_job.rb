@@ -52,21 +52,12 @@ class ZipCompilationJob
 
       self.entry_ids.each do |id|
 
-        if CoreFile.exists?(id)
-          cf = CoreFile.find(id)
-          if !(cf.under_embargo?(user))
-            # cf.content_objects.each do |content|
-            content = cf.canonical_object
-            if !user.nil? ? user.can?(:read, content) : content.public?
-              if content.class != ImageThumbnailFile
-                download_label = I18n.t("drs.display_labels.#{content.klass}.download")
-                Zip::File.open(temp_zipfile_name) do |zipfile|
-                  zipfile.add("#{self.title}/neu_#{id.split(":").last}-#{download_label}.#{extract_extension(content.properties.mime_type.first)}", content.fedora_file_path)
-                end
-              end
-            end
-            # end
-          end
+        obj = ActiveFedora::SolrService.query("id:\"#{id}\"")
+        doc = SolrDocument.new(obj.first)
+        if doc.klass == "CoreFile"
+          zip_core_file(doc, user, temp_zipfile_name)
+        elsif doc.klass == 'Collection'
+          zip_collection(doc, user, temp_zipfile_name)
         end
       end
 
@@ -97,4 +88,36 @@ class ZipCompilationJob
       safe_title = safe_title.gsub(":", "_")
       return "#{Rails.application.config.tmp_path}/#{self.comp_pid.gsub(":", "_")}/#{safe_title}.zip"
     end
+
+    def zip_core_file(doc, user, temp_zipfile_name)
+      id = doc.pid
+      if CoreFile.exists?(id)
+        cf = CoreFile.find(id)
+        if !(cf.under_embargo?(user)) && !cf.tombstoned?
+          content = cf.canonical_object
+          if !user.nil? ? user.can?(:read, content) : content.public?
+            if content.content.content && content.class != ImageThumbnailFile
+              download_label = I18n.t("drs.display_labels.#{content.klass}.download")
+              Zip::File.open(temp_zipfile_name) do |zipfile|
+                zipfile.add("#{self.title}/neu_#{id.split(":").last}-#{download_label}.#{extract_extension(content.properties.mime_type.first)}", content.fedora_file_path)
+              end
+            end
+          end
+        end
+      end
+    end
+
+    def zip_collection(doc, user, temp_zipfile_name)
+      id = doc.pid
+      if Collection.exists?(id)
+        col = Collection.find(id)
+        if !col.tombstoned?
+          descendents = doc.all_descendent_files
+          descendents.each do |c|
+            zip_core_file(c, user, temp_zipfile_name)
+          end
+        end
+      end
+    end
+
 end
