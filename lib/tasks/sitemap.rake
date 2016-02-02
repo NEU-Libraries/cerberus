@@ -17,7 +17,9 @@ namespace :sitemap do
             add core_file_path(doc.pid)
             # If ETD, add PDF
             if doc.category == "Theses and Dissertations"
-              add download_path(doc.canonical_object.first.pid, {datastream_id: 'content'})
+              if !doc.canonical_object.first.embargo_date_in_effect?
+                add download_path(doc.canonical_object.first.pid, {datastream_id: 'content'})
+              end
             end
           end
         rescue Exception => error
