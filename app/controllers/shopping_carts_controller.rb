@@ -89,7 +89,7 @@ class ShoppingCartsController < ApplicationController
 
     respond_to do |format|
         format.html do
-          if size > 500
+          if size > 5000
             params[:action] = "show"
             redirect_to url_for(params.merge(:large=>true))
           else
@@ -100,7 +100,7 @@ class ShoppingCartsController < ApplicationController
         end
 
         format.js do
-          if size > 500
+          if size > 5000
             render "large_download"
           elsif File.file?(f)
             render("download")
