@@ -1,6 +1,6 @@
 - page_info = paginate_params(@response)
-- view_class = "drs-items-#{drs_view_class}"
-%ul.drs-items{start: 1+((page_info.current_page-1)*page_info.limit_value), data: {toggle: "drs-view"}, class: view_class}  
+- view_class = @forced_view || "drs-items-#{drs_view_class}"
+%ul.drs-items{start: 1+((page_info.current_page-1)*page_info.limit_value), data: {toggle: "drs-view"}, class: view_class}
   -if !@smart_collections.nil? && @smart_collections.length > 0 && page_info.current_page == 1 && render_constraints(params) == ""
     - @smart_collections.each do |smart_collection|
       =render :partial => 'shared/drs_item/drs_item_smart_collection', locals: { smart_collection: smart_collection }
