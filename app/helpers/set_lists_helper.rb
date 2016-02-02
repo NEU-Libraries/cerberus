@@ -9,7 +9,7 @@ module SetListsHelper
       params[:sort] = "#{Solrizer.solr_name('system_create', :stored_sortable, type: :date)} desc"
     end
     @pretty_sort_name = pretty_sort_name(params[:sort])
-    (@response, @recent_deposits) = get_search_results
+    (@response, @document_list) = get_search_results
     if @response.response['numFound'] > 0
       respond_to do |format|
         format.html { render 'shared/sets/show' }
