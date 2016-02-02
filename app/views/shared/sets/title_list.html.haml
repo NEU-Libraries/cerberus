@@ -15,7 +15,7 @@
           %tr{:id=>(r.title[0].capitalize if !alpha.include? r.title[0].capitalize)}
             - if !alpha.include? r.title[0].capitalize
               - alpha << r.title[0].capitalize
-            %td= link_to(r.title, "/@files/#{r.id}")
+            %td= link_to(r.title, "/files/#{r.id}")
       :javascript
         var alpha = '#{alpha}';
         $(".alpha_list .btn").each(function(){
