@@ -33,4 +33,5 @@
 
       %menu.btn-toolbar(type="toolbar")
         %a{ href: "#removeFromCartModal", title: "Remove from #{t('drs.shoppingcarts.name')}", data: { toggle: "modal", delete_path: shopping_cart_path(delete: content.pid)}, :class => ["btn", "btn-danger", "btn-small", "cart-multi-modal"] }
-          remove
+          %i.icon-remove
+          Remove

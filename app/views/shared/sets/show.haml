@@ -40,6 +40,10 @@
 %div#add_compilation_form{ style: 'display:none' }
 
 -if @set.klass == "Compilation"
+  = render partial: 'large_modal'
+  -if params[:large]
+    :javascript
+      $('#largeCompilationModal').modal('show')
   :javascript
     $(document).ready(function(){
       $.getScript("#{set_count_path(@set)}");
