@@ -293,7 +293,7 @@ class CompilationsController < ApplicationController
   def show_download
     size = 0
     @set = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first)
-    @set.entries.each do |i|
+    @set.object_ids.each do |i|
       if i.klass == 'CoreFile' && !i.tombstoned? && (!current_user.nil? ? current_user.can?(:read, i) : i.public?)
         co = i.canonical_object.first
         size = size + co.file_size.to_f
