@@ -39,13 +39,13 @@ module Api
         # If the pid is a compilation, we need to get the pids and fake the search
         if @set.klass == "Compilation"
           comp = Compilation.find(@set.pid)
-          pids = comp.entry_ids
-          (@response, @document_list) = get_solr_response_for_field_values('id', pids, {}).first
+          @pids = comp.object_ids
+          self.solr_search_params_logic += [:limit_to_compilation_scope]
         else
           self.solr_search_params_logic += [:limit_to_scope]
-          (@response, @document_list) = get_search_results
         end
 
+        (@response, @document_list) = get_search_results
         @pagination = paginate_params(@response)
 
         if @pagination.total_count == 0
@@ -79,6 +79,17 @@ module Api
           # Ensure files directly on scoping collection are added in
           # as well
           query << "is_member_of_ssim:\"info:fedora/#{@set.pid}\""
+
+          fq = query.join(" OR ")
+
+          solr_parameters[:fq] ||= []
+          solr_parameters[:fq] << fq
+        end
+
+        def limit_to_compilation_scope(solr_parameters, user_parameters)
+          query = @pids.map do |pid|
+            set = "id:\"#{pid}\""
+          end
 
           fq = query.join(" OR ")
 
