@@ -62,7 +62,22 @@ class MultipageProcessingJob
     end
 
     if !self.zip_files.blank?
-      Cerberus::Application::Queue.push(MultipageCreateZipJob.new(self.dir_path, core_file.pid, self.zip_files))
+      # and if it's not just one file
+      if zip_file.length > 1
+        Cerberus::Application::Queue.push(MultipageCreateZipJob.new(self.dir_path, core_file.pid, self.zip_files))
+      elsif zip_file.length == 1
+        # else just make the one file canonical and add
+        content_object = ImageMasterFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
+        content_object.canonize
+        content_object.save!
+
+        full_path = self.dir_path + "/" + zip_file.first
+
+        File.open(full_path) do |file_contents|
+          content_object.add_file(file_contents, 'content', zip_file.first)
+          content_object.save!
+        end
+      end
     end
 
     if self.file_values["last_item"].downcase == "true"
