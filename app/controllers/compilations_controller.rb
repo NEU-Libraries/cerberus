@@ -294,9 +294,12 @@ class CompilationsController < ApplicationController
     size = 0
     @set = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first)
     @set.object_ids.each do |i|
-      if i.klass == 'CoreFile' && !i.tombstoned? && (!current_user.nil? ? current_user.can?(:read, i) : i.public?)
-        co = i.canonical_object.first
-        size = size + co.file_size.to_f
+      doc = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{i}\"").first)
+      if doc.klass == 'CoreFile' && !doc.tombstoned? && (!current_user.nil? ? current_user.can?(:read, doc) : doc.public?)
+        co = doc.canonical_object.first
+        if !co.blank?
+          size = size + co.file_size.to_f
+        end
       end
     end
     size = (size / 1024000).round(2)
