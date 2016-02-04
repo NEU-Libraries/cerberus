@@ -28,20 +28,44 @@ class MultipageProcessingJob
     # test file_path
     if File.exists?(file_path)
 
-      # Create thumbnail obj
-      thumb = PageFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
+      if self.zip_files.length == 1
+        # just make the one file canonical and add
+        content_object = ImageMasterFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
+        content_object.canonize
+        content_object.rightsMetadata.content = core_file.rightsMetadata.content
+        content_object.depositor              = core_file.depositor
+        content_object.core_record            = core_file
+        content_object.save!
 
-      thumb.title                  = self.file_values["title"]
-      thumb.identifier             = thumb.pid
-      thumb.keywords               = core_file.keywords.flatten unless core_file.keywords.nil?
-      thumb.depositor              = core_file.depositor
-      thumb.core_record            = core_file
-      thumb.rightsMetadata.content = core_file.rightsMetadata.content
-      thumb.ordinal_value          = self.file_values["sequence"]
-      thumb.ordinal_last           = self.file_values["last_item"] unless self.file_values["last_item"].nil?
-      thumb.save!
+        full_path = self.dir_path + "/" + self.zip_files.first
 
-      create_all_thumbnail_sizes(file_path, thumb.pid)
+        File.open(full_path) do |file_contents|
+          content_object.add_file(file_contents, 'content', self.zip_files.first)
+          content_object.save!
+        end
+
+        create_all_thumbnail_sizes(full_path, content_object.pid)
+
+        core_file.tag_as_completed
+        core_file.save!
+      else
+
+        # Create thumbnail obj
+        thumb = PageFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
+
+        thumb.title                  = self.file_values["title"]
+        thumb.identifier             = thumb.pid
+        thumb.keywords               = core_file.keywords.flatten unless core_file.keywords.nil?
+        thumb.depositor              = core_file.depositor
+        thumb.core_record            = core_file
+        thumb.rightsMetadata.content = core_file.rightsMetadata.content
+        thumb.ordinal_value          = self.file_values["sequence"]
+        thumb.ordinal_last           = self.file_values["last_item"] unless self.file_values["last_item"].nil?
+        thumb.save!
+
+        create_all_thumbnail_sizes(file_path, thumb.pid)
+
+      end
     else
       load_report.image_reports.create_failure("File not found in zip file", "", self.file_values["file_name"])
       core_file.destroy
@@ -63,20 +87,8 @@ class MultipageProcessingJob
 
     if !self.zip_files.blank?
       # and if it's not just one file
-      if zip_file.length > 1
+      if self.zip_files.length > 1
         Cerberus::Application::Queue.push(MultipageCreateZipJob.new(self.dir_path, core_file.pid, self.zip_files))
-      elsif zip_file.length == 1
-        # else just make the one file canonical and add
-        content_object = ImageMasterFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
-        content_object.canonize
-        content_object.save!
-
-        full_path = self.dir_path + "/" + zip_file.first
-
-        File.open(full_path) do |file_contents|
-          content_object.add_file(file_contents, 'content', zip_file.first)
-          content_object.save!
-        end
       end
     end
 
