@@ -8,6 +8,9 @@ module SetListsHelper
     if !params[:sort]
       params[:sort] = "#{Solrizer.solr_name('system_create', :stored_sortable, type: :date)} desc"
     end
+    if !@set.description.blank?
+      @pretty_description = convert_urls(@set.description)
+    end
     @pretty_sort_name = pretty_sort_name(params[:sort])
     (@response, @document_list) = get_search_results
     if @response.response['numFound'] > 0
@@ -28,6 +31,9 @@ module SetListsHelper
     (@response, @document_list) = get_search_results
     solr_fname = "creator_sim"
     @display_facet = @response.facets.detect {|f| f.name == solr_fname}
+    if !@set.description.blank?
+      @pretty_description = convert_urls(@set.description)
+    end
     facet_count = @display_facet.items.length
     if !params[:f].nil?
       render 'shared/sets/show'
