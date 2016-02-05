@@ -99,7 +99,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
       }
       t.scoped_topic(path: 'topic', namespace_prefix: 'mods', attributes: { authority: :any })
     }
-    t.identifier(path: 'identifier', namespace_prefix: 'mods', index_as: [:stored_searchable]){
+    t.identifier(path: 'identifier', namespace_prefix: 'mods', index_as: [:stored_searchable], attributes: { type: 'handle', displayLabel: 'Permanent URL' }){
       t.type(path: { attribute: 'type'})
       t.display_label(path: {attribute: 'displayLabel'})
     }
