@@ -10,7 +10,7 @@ before_install:
   - gem install bundler -v 1.10.6
   - curl https://gist.githubusercontent.com/dgcliff/0336ad90e69f9d9b0344/raw/0aa46a8ba6b1657a48467ffd9f1b96a6176ddf86/handle_values.txt 2>/dev/null > /home/travis/build/NEU-Libraries/cerberus/config/application.yml
 rvm:
-  - 2.1
+  - 2.0.0
 before_script:
   - "sudo service redis-server start"
   - "sudo freshclam"
