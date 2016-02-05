@@ -44,7 +44,7 @@ class MultipageProcessingJob
           content_object.save!
         end
 
-        create_all_thumbnail_sizes(full_path, content_object.pid)
+        DerivativeCreator.new(content_object.pid).generate_derivatives
 
         core_file.tag_as_completed
         core_file.save!
@@ -72,7 +72,7 @@ class MultipageProcessingJob
       return
     end
 
-    if self.file_values["sequence"] == "1"
+    if self.file_values["sequence"] == "1" && !thumb.blank?
       # Make thumbnails for core_file
       thumbnail_list = []
       for i in 1..5 do
