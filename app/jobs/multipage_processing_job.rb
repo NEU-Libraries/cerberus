@@ -1,4 +1,5 @@
 include Cerberus::ThumbnailCreation
+include HandleHelper
 
 class MultipageProcessingJob
   attr_accessor :dir_path, :file_values, :core_file_pid, :report_id, :zip_files
@@ -30,7 +31,8 @@ class MultipageProcessingJob
 
       if self.zip_files.length == 1
         # just make the one file canonical and add
-        content_object = ImageMasterFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
+        co_pid = Cerberus::Noid.namespaceize(Cerberus::IdService.mint)
+        content_object = ImageMasterFile.new(pid: co_pid)
         content_object.canonize
         content_object.rightsMetadata.content = core_file.rightsMetadata.content
         content_object.depositor              = core_file.depositor
@@ -44,8 +46,9 @@ class MultipageProcessingJob
           content_object.save!
         end
 
-        DerivativeCreator.new(content_object.pid).generate_derivatives
+        DerivativeCreator.new(co_pid).generate_derivatives
 
+        core_file.reload
         core_file.tag_as_completed
         core_file.save!
       else
@@ -94,6 +97,10 @@ class MultipageProcessingJob
 
     if self.file_values["last_item"].downcase == "true"
       load_report.image_reports.create_success(core_file, "")
+
+      core_file.reload
+      core_file.identifier = make_handle(core_file.persistent_url)
+      core_file.save!
     end
   end
 
