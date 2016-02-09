@@ -31,8 +31,7 @@
               - if !alpha.include? item.value[0]
                 - alpha << item.value[0]
               %td
-                - link_options = add_facet_params(solr_fname, item.value).merge!Hash["controller" => "collections", :action=> "creator_list"]
-                -# :id=>@set.pid
+                - link_options = add_facet_params(solr_fname, item.value).merge!Hash["controller" => "catalog", :action=> params['smart_col'], :smart_col=>params['smart_col']]
                 = link_to h(item.value), url_for(link_options)
               %td
                 = format_num item.hits
