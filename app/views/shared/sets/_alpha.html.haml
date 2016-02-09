@@ -1,5 +1,4 @@
 %div.btn-toolbar.alpha_list{:role=>"toolbar"}
   %div.btn-group{:role=>"group"}
     -("a".."z").each do |l|
-      %button.btn.btn-clear.btn-small{:type=>"button"}
-        = link_to( l.capitalize, "##{l.capitalize}")
+      = link_to( l.capitalize, "##{l.capitalize}", class: "btn btn-clear btn-small")
