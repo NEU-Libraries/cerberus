@@ -1,7 +1,9 @@
 %header
   %h1.page-header
     Edit raw XML for
-    =@core_file.title
+    %i
+      = "#{@core_file.non_sort} "
+      = kramdown_parse(@core_file.title)
 
 = form_tag core_file_validate_xml_path, :method => :put, :id => "raw_xml_form", :remote => true do
   = hidden_field_tag( "raw_xml[]", "")
