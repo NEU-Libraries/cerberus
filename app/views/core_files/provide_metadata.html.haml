@@ -7,7 +7,7 @@
   $("a[rel=popover]").popover({ html: true });
   var confirmation_needed = true;
   $(window).on("beforeunload", function() {
-    return "Your metadata has not been saved, if you leave the process now your uploaded files will be deleted.";
+    return "Your file has been uploaded, but the metadata has not been saved. If you abandon the process now your file will be deleted from the system.";
   });
   $(window).on("unload", function() {
     if(confirmation_needed){
