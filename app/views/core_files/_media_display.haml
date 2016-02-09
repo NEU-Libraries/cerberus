@@ -1,9 +1,6 @@
 %figure
-  - if @core_file.image?
-    -if @thumbs.length > 0
-      = render partial: 'shared/thumbnails/full_picture'
-    -else
-      %i.icon-picture.icon-4x.icon-border.drs-icon-figure
+  -if @thumbs.length > 0
+    = render partial: 'shared/thumbnails/full_picture'
   - elsif @core_file.video?
     -if @thumbs.length > 0
       = render partial: 'audio_video', locals: {contents: @content_objects}
@@ -24,7 +21,4 @@
   - elsif @core_file.page_objects.length > 1
     = render partial: 'carousel'
   - else
-    -if @thumbs.length > 0
-      = render partial: 'shared/thumbnails/full_picture'
-    -else
-      %i.icon-file.icon-4x.icon-border.drs-icon-figure
+    %i.icon-file.icon-4x.icon-border.drs-icon-figure
