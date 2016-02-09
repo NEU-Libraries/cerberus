@@ -32,7 +32,7 @@ class DerivativeCreator
 
     thumbnail_list = []
 
-    if self.core.thumbnail.datastreams["thumbnail_1"].content != nil
+    if self.core.thumbnail && self.core.thumbnail.datastreams["thumbnail_1"].content != nil
       for i in 1..5 do
         thumbnail_list << "/downloads/#{self.core.thumbnail.pid}?datastream_id=thumbnail_#{i}"
       end
