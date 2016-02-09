@@ -64,11 +64,6 @@
             = render partial: "supplemental_files"
           - if @core_file.page_objects.length > 1
             %div#page-images
-        - if current_user_can? :edit, @core_file
-          #move.tab-pane
-            = render partial: "move"
-          #delete.tab-pane
-            = render partial: "delete"
 
 #backModal.modal.hide.fade{"aria-hidden" => "true", "aria-labelledby" => "backModalLabel", role: "dialog", tabindex: "-1" }
   .modal-header
