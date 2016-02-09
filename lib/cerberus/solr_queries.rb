@@ -95,14 +95,16 @@ module Cerberus
 
     def find_employees
       employee_model = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:Employee"
-      solr_query("has_affiliation_ssim:\"#{self.full_self_id}\" AND has_model_ssim:\"#{employee_model}\"")
+      docs = solr_query("has_affiliation_ssim:\"#{self.full_self_id}\" AND has_model_ssim:\"#{employee_model}\"", true)
+      # return pid list
+      docs.map{|doc| doc.pid}
     end
 
     def find_user_root_collections
       doc_list ||= []
       employee_list = find_employees
-      employee_list.each do |e|
-        full_employee_id = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/#{e.pid}"
+      employee_list.each do |e_pid|
+        full_employee_id = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/#{e_pid}"
         doc_list << solr_query("is_member_of_ssim:\"#{full_employee_id}\" AND smart_collection_type_tesim:\"User Root\"")
       end
       return doc_list
