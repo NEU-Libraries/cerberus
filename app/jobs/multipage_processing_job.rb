@@ -50,6 +50,7 @@ class MultipageProcessingJob
 
         core_file.reload
         core_file.tag_as_completed
+        core_file.canonical_class = "ImageMasterFile"
         core_file.save!
       else
 
@@ -92,6 +93,8 @@ class MultipageProcessingJob
       # and if it's not just one file
       if self.zip_files.length > 1
         Cerberus::Application::Queue.push(MultipageCreateZipJob.new(self.dir_path, core_file.pid, self.zip_files))
+        core_file.canonical_class = "ZipFile"
+        core_file.save!
       end
     end
 
