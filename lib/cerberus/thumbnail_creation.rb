@@ -36,7 +36,7 @@ module Cerberus::ThumbnailCreation
         item.add_file(end_img.to_blob, dsid, "#{dsid}.jpeg")
         item.save!
       rescue Exception => error
-        ExceptionNotifier.notify_exception(error, :env => request.env, :data => {:user => "#{@user.inspect}"})
+        ExceptionNotifier.notify_exception(error, :pid => item_pid)
       end
     end
 end
