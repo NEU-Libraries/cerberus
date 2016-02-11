@@ -33,6 +33,11 @@
           %a.top_nav{href: select_account_path, "tab-index" => "-1"}
             =render partial: 'shared/icon', locals: { class_string: t('drs.multiple_accounts.menu_icon') }
             = t('drs.multiple_accounts.menu_link')
+      - if current_user.admin?
+        %li{:class => ("active" if action_name == "admin_panel")}
+          %a.top_nav{href: admin_panel_path, "tab-index" => "-1"}
+            %span.icon-star( aria-hidden="true")
+            Admin
       %li= link_to raw('<span class="icon-signout" aria-hidden="true" ></span> Log Out'), destroy_user_session_path, :id => 'logout_nav_link',  "tab-index" => "-1"
   - else
     - if Rails.env.production?
