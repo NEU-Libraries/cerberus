@@ -17,9 +17,11 @@ module Cerberus
         result_hsh["canonical_object"] = @core_doc.canonical_object.map { |doc| {doc_to_url(doc) => doc.derivative_label} }.reduce(&:merge)
         result_hsh["content_objects"] = @core_doc.content_objects.map { |doc| {doc_to_url(doc) => doc.derivative_label} }.reduce(&:merge)
 
-        result_hsh["content_objects"].each do |k,v|
-          if v == "Page"
-            page_objects["#{k}?datastream_id=thumbnail_5"] = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{k.split("/").last}\"").first).ordinal_value
+        if !result_hsh["content_objects"].blank?
+          result_hsh["content_objects"].each do |k,v|
+            if v == "Page"
+              page_objects["#{k}?datastream_id=thumbnail_5"] = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{k.split("/").last}\"").first).ordinal_value
+            end
           end
         end
 
