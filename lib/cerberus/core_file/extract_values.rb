@@ -11,6 +11,9 @@ module Cerberus
         result_hsh["pid"] = self.pid
         result_hsh["breadcrumbs"] = breadcrumb_to_root(SolrDocument.new(self.to_solr))
         result_hsh["parent"] = @core_doc.parent
+        if !@core_doc.ordinal_value.blank?
+          result_hsh["ordinal_value"] = @core_doc.ordinal_value
+        end
         result_hsh["thumbnails"] = @core_doc.thumbnail_list.map { |url_string| "#{root_path(:only_path => false)}#{url_string.sub!(/^\//, '')}"}
         result_hsh["canonical_object"] = @core_doc.canonical_object.map { |doc| {doc_to_url(doc) => doc.derivative_label} }.reduce(&:merge)
         result_hsh["content_objects"] = @core_doc.content_objects.map { |doc| {doc_to_url(doc) => doc.derivative_label} }.reduce(&:merge)
