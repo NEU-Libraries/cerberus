@@ -5,18 +5,31 @@ module Cerberus
       include ApplicationHelper
 
       def to_hash
+        page_objects = Hash.new
+
         @core_doc = SolrDocument.new(self.to_solr)
         mods_json = fetch_mods_json
         result_hsh = Hash.new
         result_hsh["pid"] = self.pid
         result_hsh["breadcrumbs"] = breadcrumb_to_root(SolrDocument.new(self.to_solr))
         result_hsh["parent"] = @core_doc.parent
-        if !@core_doc.ordinal_value.blank?
-          result_hsh["ordinal_value"] = @core_doc.ordinal_value
-        end
         result_hsh["thumbnails"] = @core_doc.thumbnail_list.map { |url_string| "#{root_path(:only_path => false)}#{url_string.sub!(/^\//, '')}"}
         result_hsh["canonical_object"] = @core_doc.canonical_object.map { |doc| {doc_to_url(doc) => doc.derivative_label} }.reduce(&:merge)
         result_hsh["content_objects"] = @core_doc.content_objects.map { |doc| {doc_to_url(doc) => doc.derivative_label} }.reduce(&:merge)
+
+        result_hsh["content_objects"].each do |k,v|
+          if v == "Page"
+            page_objects["#{k}?datastream_id=thumbnail_5"] = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{k.split("/").last}\"").first).ordinal_value
+          end
+        end
+
+        if page_objects.length > 0
+          page_objects.each do |k,v|
+            result_hsh["content_objects"].delete("#{k.split("?").first}")
+          end
+          result_hsh["page_objects"] = Hash[page_objects.sort_by {|_key, value| value}]
+        end
+
         result_hsh["mods"] = JSON.parse(mods_json)
 
         associated_docs = []
