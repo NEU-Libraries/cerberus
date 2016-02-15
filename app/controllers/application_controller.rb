@@ -5,7 +5,7 @@ class ApplicationController < ActionController::Base
   include Cerberus::Controller
   # Solr Escape group values
   include Cerberus::ControllerHelpers::SolrEscapeGroups
-  include Blacklight::CatalogHelperBehavior  
+  include Blacklight::CatalogHelperBehavior
 
   unless Rails.application.config.consider_all_requests_local
     rescue_from Exception, with: lambda { |exception| render_500(exception) }
@@ -17,9 +17,11 @@ class ApplicationController < ActionController::Base
   layout "homepage"
 
   protect_from_forgery
+  
   before_filter :impersonate_warning
   before_filter :store_location
   after_filter :redirect_blacklight_overrun
+  before_filter :set_cache_headers
 
   # around_filter :profile
 
@@ -160,4 +162,12 @@ class ApplicationController < ActionController::Base
   def self.around_filters
     filters(:around)
   end
+
+  private
+
+    def set_cache_headers
+      response.headers["Cache-Control"] = "no-cache, no-store, max-age=0, must-revalidate"
+      response.headers["Pragma"] = "no-cache"
+      response.headers["Expires"] = "Fri, 01 Jan 1990 00:00:00 GMT"
+    end
 end
