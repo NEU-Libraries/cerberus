@@ -21,6 +21,10 @@ describe UploadAlert do
       FactoryGirl.create_list(:dataset_update_alert, 2)
       FactoryGirl.create(:dataset_notified_alert)
 
+      FactoryGirl.create_list(:technical_report_alert, 2)
+      FactoryGirl.create_list(:technical_report_update_alert, 2)
+      FactoryGirl.create(:technical_report_notified_alert)
+
       FactoryGirl.create_list(:learning_object_alert, 2)
       FactoryGirl.create_list(:learning_object_update_alert, 2)
       FactoryGirl.create(:learning_object_notified_alert)
@@ -83,6 +87,13 @@ describe UploadAlert do
     context "for dataset alerts" do
       let(:created) { UploadAlert.withheld_datasets(:create) }
       let(:updated) { UploadAlert.withheld_datasets(:update) }
+
+      it_should_behave_like "withheld queries"
+    end
+
+    context "for technical report alerts" do
+      let(:created) { UploadAlert.withheld_technical_reports(:create) }
+      let(:updated) { UploadAlert.withheld_technical_reports(:update) }
 
       it_should_behave_like "withheld queries"
     end
