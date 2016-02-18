@@ -53,6 +53,18 @@ FactoryGirl.define do
       end
     end
 
+    factory :technical_report_alert do
+      content_type "Technical Reports"
+
+      factory :technical_report_notified_alert do
+        notified
+      end
+
+      factory :technical_report_update_alert do
+        update
+      end
+    end
+
     factory :presentation_alert do
       content_type "Presentations"
 

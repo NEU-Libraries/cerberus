@@ -129,6 +129,12 @@ class CatalogController < ApplicationController
     render 'shared/smart_collections/smart_collection', locals: { smart_collection: 'datasets' }
   end
 
+  def technical_reports
+    self.solr_search_params_logic += [:technical_reports_filter]
+    (@response, @document_list) = get_search_results
+    render 'shared/smart_collections/smart_collection', locals: { smart_collection: 'technical_reports' }
+  end
+
   def monographs
     self.solr_search_params_logic += [:monographs_filter]
     (@response, @document_list) = get_search_results
@@ -412,6 +418,12 @@ class CatalogController < ApplicationController
 
   def datasets_filter(solr_parameters, user_parameters)
     query = "drs_category_ssim:\"Datasets\""
+    solr_parameters[:fq] ||= []
+    solr_parameters[:fq] << query
+  end
+
+  def technical_reports_filter(solr_parameters, user_parameters)
+    query = "drs_category_ssim:\"Technical Reports\""
     solr_parameters[:fq] ||= []
     solr_parameters[:fq] << query
   end

@@ -16,6 +16,10 @@ class UploadAlert < ActiveRecord::Base
     unknown_content_query('Datasets', ct)
   end
 
+  def self.withheld_technical_reports(ct = :create)
+    unknown_content_query('Technical Reports', ct)
+  end
+
   def self.withheld_learning_objects(ct = :create)
     unknown_content_query('Learning Objects', ct)
   end

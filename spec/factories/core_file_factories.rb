@@ -57,6 +57,10 @@ FactoryGirl.define do
         category 'Datasets'
       end
 
+      factory :technical_report do
+        category 'Technical Reports'
+      end
+
       factory :learning_object do
         category 'Learning Objects'
       end

@@ -48,6 +48,10 @@ en:
         name: Datasets
         description: High value datasets, such as statistical datasets and research datasets
         icon: icon-table
+      technical_reports:
+        name: Technical Reports
+        description: Documents describing research conducted by Northeastern faculty and staff
+        icon: icon-university
       research:
         name: Research Publications
         description: Faculty research, including articles, preprints, and offprints
