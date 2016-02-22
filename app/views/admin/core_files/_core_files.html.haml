@@ -2,8 +2,8 @@
   %div.toolbar.hidden
     = form_tag(admin_multi_delete_files_path, method: 'delete') do
       = hidden_field_tag(:ids)
-      = render partial: 'delete_modal', locals: { title: "Confirm Delete", button_title: "Delete", index: "all", core_file:nil}
-      = link_to("Delete", "#deleteModalall", data: { toggle: "modal" }, class: "btn btn-small btn-danger")
+      = render partial: 'delete_modal', locals: { title: "Confirm Delete", button_title: "Delete", index: "#{@type}_all", core_file:nil}
+      = link_to("Delete", "#deleteModal#{@type}_all", data: { toggle: "modal" }, class: "btn btn-small btn-danger")
 
   = render 'catalog/results_pagination'
 
@@ -88,10 +88,10 @@
     if (checked == true){
       $(".toolbar").removeClass("hidden");
       table.siblings(".toolbar").find("input[name='ids']").val(pids);
-      $("#deleteModalall").find(".modal-body").html("Are you sure you want to permanently delete the " + pid_count + " files that are selected?");
+      $("#deleteModal#{@type}_all").find(".modal-body").html("Are you sure you want to permanently delete the " + pid_count + " files that are selected?");
     } else {
       $(".toolbar").addClass("hidden");
       table.siblings(".toolbar").find("input[name='ids']").val("");
-      $("#deleteModalall").find(".modal-body").html("");
+      $("#deleteModal#{@type}_all").find(".modal-body").html("");
     }
   }
