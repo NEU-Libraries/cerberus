@@ -29,6 +29,12 @@
       = "#{@core_file.non_sort} "
       = kramdown_parse(@core_file.title)
 
+  -if !@core_file.identifier.blank?
+    %div.handle
+      %i.icon.icon-link
+      ="Permanent URL: "
+      =link_to(@core_file.identifier)
+
   %section.row
     %div{class: layout_class}
       - @content_objects = cached_content_objects(@core_file)
