@@ -1,4 +1,9 @@
+- doc = @set.class == SolrDocument ? @set : SolrDocument.new(@set.to_solr)
 %div
   .row-fluid
     .span10
-      Statistics
+      = "Views: #{doc.impression_views}"
+      %br
+      = "Downloads: #{doc.impression_downloads}"
+      %br
+      = "Streams: #{doc.impression_streams}"
