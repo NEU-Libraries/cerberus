@@ -55,6 +55,7 @@ $(document).ready ->
       doSelectSubmit()
       submenuMobileFix()
       handleSetButtons()
+      closeFacetMenu()
 
       return
 
@@ -175,6 +176,11 @@ $(document).ready ->
         $(this).children('.dropdown-menu').attr('style', '')
       return
 
+    # This is to close the facet menu after the more button has been clicked
+    closeFacetMenu = ->
+      $(".facets .more_facets_link").click (e) ->
+        $(this).parents('.open').addClass('closed').removeClass('open');
+      return
 
     datePartial = ->
       today = new Date()
