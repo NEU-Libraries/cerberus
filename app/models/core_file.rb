@@ -4,7 +4,6 @@ class CoreFile < ActiveFedora::Base
   include Cerberus::ModelMethods
   include Cerberus::MetadataAssignment
   include Cerberus::Find
-  include Cerberus::ImpressionCount
 
   include Cerberus::CoreFile::Permissions
   include Cerberus::CoreFile::Export
