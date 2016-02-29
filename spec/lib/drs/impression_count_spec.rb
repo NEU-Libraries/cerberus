@@ -1,16 +1,8 @@
 require 'spec_helper'
 
 describe "ImpressionCount" do
-  class ImpTest
-    include Cerberus::ImpressionCount
-    attr_accessor :pid
 
-    def initialize(pid)
-      self.pid = pid
-    end
-  end
-
-  let(:imp) { ImpTest.new("1") }
+  let(:imp) { SolrDocument.new(ImageMasterFile.new(pid: "1").to_solr) }
 
   it "Returns zero impressions when none have been recorded" do
     imp.impression_views.should == 0
