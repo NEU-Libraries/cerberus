@@ -85,7 +85,8 @@ describe CoreFilesController do
 
       ImpressionProcessingJob.new().run
       Impression.count.should == 1
-      file.impression_views.should == 1
+      doc = SolrDocument.new(file.to_solr)
+      doc.impression_views.should == 1
     end
 
     it "only writes a single impression on multiple hits" do
@@ -96,7 +97,8 @@ describe CoreFilesController do
 
       ImpressionProcessingJob.new().run
       Impression.count.should == 1
-      file.impression_views.should == 1
+      doc = SolrDocument.new(file.to_solr)
+      doc.impression_views.should == 1
     end
   end
 
