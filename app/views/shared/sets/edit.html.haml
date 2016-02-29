@@ -16,6 +16,10 @@
     %a{ href: "#delete", data: {toggle: "tab"}}
       %i.icon-trash
       Delete
+  %li
+    %a{ href: "#statistics", data: {toggle: "tab"}}
+      %i.icon-bar-chart
+      Statistics
 
 .tab-content
   #edit.tab-pane.active
@@ -25,6 +29,8 @@
       = render partial: "shared/sets/move", locals:  {set: @set }
   #delete.tab-pane
     = render partial: "shared/sets/delete", locals:  {set: @set }
+  #statistics.tab-pane
+    = render partial: "shared/sets/statistics", locals:  {set: @set }
 
 :javascript
   $('.nav-tabs a').click(function (e) {
