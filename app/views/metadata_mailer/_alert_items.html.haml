@@ -4,7 +4,10 @@
   = link_to("#{alert.collection_title}", controller: 'collections', action: 'show', id: alert.collection_pid, only_path: false)
   %br
     Title:
-    = link_to("#{alert.title}", controller: 'core_files', action: 'show', id: alert.pid, only_path: false)
+    -if alert.content_type == "collection"
+      = link_to("#{alert.title}", controller: 'collections', action: 'show', id: alert.pid, only_path: false)
+    -else
+      = link_to("#{alert.title}", controller: 'core_files', action: 'show', id: alert.pid, only_path: false)
   %br
     Depositor:
     = "#{alert.depositor_name} (#{alert.depositor_email})"
