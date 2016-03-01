@@ -340,7 +340,6 @@ module Cerberus
 
     def supplemental_material_for
       is_material_for_helper("is_supplemental_material_for_ssim")
-
     end
 
     def transcription_of
@@ -348,7 +347,7 @@ module Cerberus
     end
 
     def is_material_for_helper(relation)
-      all = self[relation] || []
+      all = Array(self[relation]) || []
       all.map { |x| SolrDocument.new ActiveFedora::SolrService.query("id:\"#{x.split("/").last}\"").first }
     end
 
