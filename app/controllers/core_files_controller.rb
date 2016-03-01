@@ -485,7 +485,28 @@ class CoreFilesController < ApplicationController
     end
   end
 
+  def get_associated_files
+    @forced_view = "drs-items-list"
+    @core_file = fetch_solr_document
+    if !@core_file.supplemental_materials.blank? || !@core_file.instructional_materials.blank?
+      self.solr_search_params_logic += [:filter_by_associated_files_for]
+    else
+      self.solr_search_params_logic += [:filter_by_associated_files]
+    end
+    (@response, @document_list) = get_search_results
+    respond_to do |format|
+      format.js {
+        if @response.response['numFound'] == 0
+          render :nothing => true
+        else
+          render "associated_files"
+        end
+      }
+    end
+  end
+
   def get_page_images
+    @forced_view = "drs-items-list"
     @core_file = fetch_solr_document
     self.solr_search_params_logic += [:filter_by_page_images]
     (@response, @document_list) = get_search_results
@@ -686,6 +707,33 @@ class CoreFilesController < ApplicationController
         solr_parameters[:fq] ||= []
         solr_parameters[:fq] << "#{Solrizer.solr_name("has_model", :symbol)}:\"info:fedora/afmodel:PageFile\" AND #{Solrizer.solr_name("is_part_of", :symbol)}:\"#{full_self_id}\""
         solr_parameters[:sort] = "ordinal_value_isi asc"
+      end
+
+      def filter_by_associated_files(solr_parameters, user_parameters)
+        all = []
+        @core_file['is_supplemental_material_for_ssim'].to_a.each do |x|
+          all << x
+        end
+        @core_file['is_instructional_material_for_ssim'].to_a.each do |x|
+          all << x
+        end
+        if all.count > 0
+          query = []
+          all.each do |x|
+            if !x.nil?
+              x = x.split("/").last
+              query << "id:\"#{x}\""
+            end
+          end
+        end
+        solr_parameters[:fq] ||= []
+        solr_parameters[:fq] << query.join(" OR ")
+      end
+
+      def filter_by_associated_files_for(solr_parameters, user_parameters)
+        str = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/#{@core_file.pid}"
+        solr_parameters[:fq] ||= []
+        solr_parameters[:fq] << "is_supplemental_material_for_ssim:\"#{str}\" || is_instructional_material_for_ssim:\"#{str}\""
       end
 
       def limit_to_ordinal_vals(solr_parameters, user_parameters)
