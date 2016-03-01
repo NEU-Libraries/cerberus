@@ -67,7 +67,7 @@
               = render partial: 'statistics', locals: {contents: @content_objects}
         #supplemental-files.tab-pane
           - if !@core_file.supplemental_materials.blank? || !@core_file.supplemental_material_for.blank? || !@core_file.instructional_materials.blank? ||  !@core_file.instructional_material_for.blank?
-            = render partial: "supplemental_files"
+            %div#associated_files
           - if @core_file.page_objects.length > 1
             %div#page-images
 
@@ -112,6 +112,7 @@
     spinner = enable_spinner('page-images');
     var pid = $(this).data("pid");
     get_page("/files/"+pid+"/page_images?per_page=5");
+    get_page("/files/"+pid+"/associated?per_page=5");
   });
   function get_page(path){
     $.getScript( path, function() {
