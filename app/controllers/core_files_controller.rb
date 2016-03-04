@@ -28,7 +28,7 @@ class CoreFilesController < ApplicationController
   include BlacklightAdvancedSearch::ParseBasicQ
   include BlacklightAdvancedSearch::Controller
 
-  before_filter :authenticate_user!, except: [:show, :get_page_images, :get_page_file, :log_stream]
+  before_filter :authenticate_user!, except: [:show, :get_associated_files, :get_page_file, :log_stream]
 
   skip_before_filter :normalize_identifier
   skip_load_and_authorize_resource only: [:provide_metadata,
@@ -41,7 +41,7 @@ class CoreFilesController < ApplicationController
 
   before_filter :can_edit_parent_or_proxy_upload?, only: [:new, :create, :destroy_incomplete_file]
 
-  before_filter :can_read?, only: [:show, :get_page_images, :get_page_file]
+  before_filter :can_read?, only: [:show, :get_associated_files, :get_page_file]
   before_filter :can_edit?, only: [:edit, :update]
   before_filter :complete?, only: [:edit, :update]
 
@@ -488,34 +488,15 @@ class CoreFilesController < ApplicationController
   def get_associated_files
     @forced_view = "drs-items-list"
     @core_file = fetch_solr_document
-    if !@core_file.supplemental_materials.blank? || !@core_file.instructional_materials.blank?
-      self.solr_search_params_logic += [:filter_by_associated_files_for]
-    else
-      self.solr_search_params_logic += [:filter_by_associated_files]
-    end
+    self.solr_search_params_logic += [:filter_by_associated_files]
     (@response, @document_list) = get_search_results
     respond_to do |format|
       format.js {
         if @response.response['numFound'] == 0
           render :nothing => true
+          # render js:"$('#page-images').html(\"There are currently 0 page images.\");"
         else
           render "associated_files"
-        end
-      }
-    end
-  end
-
-  def get_page_images
-    @forced_view = "drs-items-list"
-    @core_file = fetch_solr_document
-    self.solr_search_params_logic += [:filter_by_page_images]
-    (@response, @document_list) = get_search_results
-    respond_to do |format|
-      format.js {
-        if @response.response['numFound'] == 0
-          render js:"$('#page-images').html(\"There are currently 0 page images.\");"
-        else
-          render "page_images"
         end
       }
     end
@@ -702,38 +683,37 @@ class CoreFilesController < ApplicationController
         end
       end
 
-      def filter_by_page_images(solr_parameters, user_parameters)
-        full_self_id = RSolr.escape("info:fedora/#{@core_file.pid}")
-        solr_parameters[:fq] ||= []
-        solr_parameters[:fq] << "#{Solrizer.solr_name("has_model", :symbol)}:\"info:fedora/afmodel:PageFile\" AND #{Solrizer.solr_name("is_part_of", :symbol)}:\"#{full_self_id}\""
-        solr_parameters[:sort] = "ordinal_value_isi asc"
-      end
-
       def filter_by_associated_files(solr_parameters, user_parameters)
-        all = []
-        @core_file['is_supplemental_material_for_ssim'].to_a.each do |x|
-          all << x
-        end
-        @core_file['is_instructional_material_for_ssim'].to_a.each do |x|
-          all << x
-        end
-        if all.count > 0
-          query = []
-          all.each do |x|
-            if !x.nil?
-              x = x.split("/").last
-              query << "id:\"#{x}\""
+        solr_parameters[:fq] ||= []
+        query = []
+
+        # if !@core_file.supplemental_materials.blank? || !@core_file.instructional_materials.blank?
+          str = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/#{@core_file.pid}"
+          query << "is_supplemental_material_for_ssim:\"#{str}\" || is_instructional_material_for_ssim:\"#{str}\""
+        # end
+        # if !@core_file.supplemental_material_for.blank? || @core_file.instructional_material_for.blank?
+          all = []
+          @core_file['is_supplemental_material_for_ssim'].to_a.each do |x|
+            all << x
+          end
+          @core_file['is_instructional_material_for_ssim'].to_a.each do |x|
+            all << x
+          end
+          if all.count > 0
+            all.each do |x|
+              if !x.nil?
+                x = x.split("/").last
+                query << "id:\"#{x}\""
+              end
             end
           end
-        end
-        solr_parameters[:fq] ||= []
+        # end
+        # if @core_file.page_objects.length > 1
+          full_self_id = RSolr.escape("info:fedora/#{@core_file.pid}")
+          query << "(#{Solrizer.solr_name("has_model", :symbol)}:\"info:fedora/afmodel:PageFile\" AND #{Solrizer.solr_name("is_part_of", :symbol)}:\"#{full_self_id}\")"
+          solr_parameters[:sort] = "ordinal_value_isi asc, title_ssi asc"
+        # end
         solr_parameters[:fq] << query.join(" OR ")
-      end
-
-      def filter_by_associated_files_for(solr_parameters, user_parameters)
-        str = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/#{@core_file.pid}"
-        solr_parameters[:fq] ||= []
-        solr_parameters[:fq] << "is_supplemental_material_for_ssim:\"#{str}\" || is_instructional_material_for_ssim:\"#{str}\""
       end
 
       def limit_to_ordinal_vals(solr_parameters, user_parameters)
