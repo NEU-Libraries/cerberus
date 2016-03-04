@@ -14,6 +14,11 @@ class ModsDatastream < ActiveFedora::OmDatastream
            'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
            'xsi:schemaLocation' => 'http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd',
            'xmlns:niec' => 'http://repository.neu.edu/schema/niec')
+
+    t.key_date(path: '*', namespace_prefix: 'mods', attributes: { keyDate: "yes" }){
+      t.qualifier(path: { attribute: "qualifier" })
+    }
+
     t.title_info(path: 'mods/mods:titleInfo', namespace_prefix: 'mods', attributes: { type: :none }){
       t.title(path: 'title', namespace_prefix: 'mods', index_as: [:stored_searchable, stored_sortable])
       t.non_sort(path: 'nonSort', namespace_prefix: 'mods', index_as: [:stored_searchable])
@@ -94,6 +99,10 @@ class ModsDatastream < ActiveFedora::OmDatastream
     }
 
     t.subject(path: 'mods/mods:subject', namespace_prefix: 'mods'){
+      t.cartographics(path: 'cartographics', namespace_prefix: 'mods'){
+        t.coordinates(path: 'coordinates', namespace_prefix: 'mods')
+      }
+      t.geographic(path: 'geographic', namespace_prefix: 'mods')
       t.topic(path: 'topic', namespace_prefix: 'mods', index_as: [:stored_searchable]){
         t.authority(path: { attribute: 'authority' })
       }
