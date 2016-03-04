@@ -64,6 +64,7 @@ namespace :deploy do
   task :clear_cache do
     on roles(:app), :in => :sequence, :wait => 5 do
       execute "cd #{release_path} && (RAILS_ENV=production /tmp/drs/rvm-auto.sh . rake cache:clear)"
+      execute "sudo htcacheclean -p /var/cache/mod_proxy -l1K -v -r"
     end
   end
 

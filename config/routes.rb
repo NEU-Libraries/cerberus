@@ -5,6 +5,8 @@ Cerberus::Application.routes.draw do
   HydraHead.add_routes(self)
   # Hydra::BatchEdit.add_routes(self)
 
+  get "/statistics/:id" => "statistics#all_counts", as: 'statistics_count'
+
   resources :collections, :path => 'collections', except: [:index, :destroy]
   get "/collections" => redirect("/communities")
   match "/collections/:id/tombstone" => "collections#tombstone", via: 'post', as: "tombstone_collection"

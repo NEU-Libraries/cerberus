@@ -9,7 +9,6 @@ module Cerberus
     include Cerberus::ContentFile::Characterization
     include Cerberus::MetadataAssignment
     include Cerberus::Find
-    include Cerberus::ImpressionCount
 
     included do
       attr_accessible :title, :description, :keywords, :identifier
