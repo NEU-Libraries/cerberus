@@ -47,6 +47,28 @@ module Cerberus
           result_hsh["niec"] = @core_doc.niec_values
         end
 
+        if !self.mods.key_date.blank?
+          kd = self.mods.key_date.first
+          kd.gsub!("-", "/")
+          # If we have Year and Month, but no Day
+          if kd.split("/").count == 2
+            kd = kd + "/01"
+          # If we have Year and no Month or Day
+          elsif kd.split("/").count == 1
+            kd = kd + "/01/01"
+          end
+
+          result_hsh["key_date"] = { kd => self.mods.key_date.qualifier.blank? ? nil : self.mods.key_date.qualifier.first }
+        end
+
+        if !self.mods.subject.cartographics.coordinates.blank?
+          result_hsh["coordinates"] = self.mods.subject.cartographics.coordinates.first
+        end
+
+        if !self.mods.subject.geographic.blank?
+          result_hsh["geographic"] = Array(self.mods.subject.geographic)
+        end
+
         return result_hsh
       end
 
