@@ -55,6 +55,7 @@ $(document).ready ->
       doSelectSubmit()
       submenuMobileFix()
       handleSetButtons()
+      closeFacetMenu()
 
       return
 
@@ -70,7 +71,7 @@ $(document).ready ->
 
       if $('#sc_download_page').length > 0
         if $('#button_slot').is(':empty')
-          x.download_interval_id = setInterval(x.addDownloadLink, 3000)
+          x.download_interval_id = setInterval(x.addDownloadLink, Math.floor(Math.random()*(10000-5000+1)+5000))
 
     triggerCompilationDownload = ->
       x =
@@ -85,7 +86,7 @@ $(document).ready ->
 
       if $('#display_download_link').length > 0
         if $('#display_download_link').is(':empty')
-          x.download_interval_id = setInterval(x.addDownloadLink, 3000)
+          x.download_interval_id = setInterval(x.addDownloadLink, Math.floor(Math.random()*(10000-5000+1)+5000))
 
 
     removeFromCartToggle = ->
@@ -175,6 +176,11 @@ $(document).ready ->
         $(this).children('.dropdown-menu').attr('style', '')
       return
 
+    # This is to close the facet menu after the more button has been clicked
+    closeFacetMenu = ->
+      $(".facets .more_facets_link").click (e) ->
+        $(this).parents('.open').addClass('closed').removeClass('open');
+      return
 
     datePartial = ->
       today = new Date()

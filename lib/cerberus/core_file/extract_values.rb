@@ -37,6 +37,8 @@ module Cerberus
         associated_docs = []
         associated_docs.push(*@core_doc.instructional_materials)
         associated_docs.push(*@core_doc.supplemental_materials)
+        associated_docs.push(*@core_doc.instructional_material_for)
+        associated_docs.push(*@core_doc.supplemental_material_for)
 
         # Associated Files - key/val - pid/title
         result_hsh["associated"] = associated_docs.map { |doc| { doc.pid => doc.title } }.reduce(&:merge)
