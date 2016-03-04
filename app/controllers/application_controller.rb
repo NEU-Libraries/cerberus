@@ -5,7 +5,7 @@ class ApplicationController < ActionController::Base
   include Cerberus::Controller
   # Solr Escape group values
   include Cerberus::ControllerHelpers::SolrEscapeGroups
-  include Blacklight::CatalogHelperBehavior  
+  include Blacklight::CatalogHelperBehavior
 
   unless Rails.application.config.consider_all_requests_local
     rescue_from Exception, with: lambda { |exception| render_500(exception) }
@@ -58,13 +58,17 @@ class ApplicationController < ActionController::Base
       @core_doc = SolrDocument.new(q)
 
       result_hsh = Hash.new
-      if !Rails.cache.exist?("/api/#{@core_doc.pid}-#{@core_doc.updated_at}")
-        result_hsh = Rails.cache.fetch("/api/#{@core_doc.pid}-#{@core_doc.updated_at}", :expires_in => 12.hours) do
-          @core_file = ActiveFedora::Base.find(pid, cast: true)
-          @core_file.to_hash
-        end
+      if !params[:solr_only].blank? && params[:solr_only].downcase == "true"
+        result_hsh = @core_doc
       else
-        result_hsh = Rails.cache.fetch("/api/#{@core_doc.pid}-#{@core_doc.updated_at}")
+        if !Rails.cache.exist?("/api/#{@core_doc.pid}-#{@core_doc.updated_at}")
+          result_hsh = Rails.cache.fetch("/api/#{@core_doc.pid}-#{@core_doc.updated_at}", :expires_in => 12.hours) do
+            @core_file = ActiveFedora::Base.find(pid, cast: true)
+            @core_file.to_hash
+          end
+        else
+          result_hsh = Rails.cache.fetch("/api/#{@core_doc.pid}-#{@core_doc.updated_at}")
+        end
       end
       return result_hsh
     end
