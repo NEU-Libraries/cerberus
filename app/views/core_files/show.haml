@@ -66,10 +66,8 @@
             %section.drs-item-statistics
               = render partial: 'statistics', locals: {contents: @content_objects}
         #supplemental-files.tab-pane
-          - if !@core_file.supplemental_materials.blank? || !@core_file.supplemental_material_for.blank? || !@core_file.instructional_materials.blank? ||  !@core_file.instructional_material_for.blank?
-            = render partial: "supplemental_files"
-          - if @core_file.page_objects.length > 1
-            %div#page-images
+          - if !@core_file.supplemental_materials.blank? || !@core_file.supplemental_material_for.blank? || !@core_file.instructional_materials.blank? ||  !@core_file.instructional_material_for.blank? || @core_file.page_objects.length > 1
+            %div#associated_files
 
 #backModal.modal.hide.fade{"aria-hidden" => "true", "aria-labelledby" => "backModalLabel", role: "dialog", tabindex: "-1" }
   .modal-header
@@ -109,9 +107,9 @@
   $('a[href="#supplemental-files"]').click(function (e) {
     e.preventDefault();
     $(this).tab('show');
-    spinner = enable_spinner('page-images');
+    spinner = enable_spinner('associated_files');
     var pid = $(this).data("pid");
-    get_page("/files/"+pid+"/page_images?per_page=5");
+    get_page("/files/"+pid+"/associated?per_page=5");
   });
   function get_page(path){
     $.getScript( path, function() {
@@ -122,7 +120,7 @@
     });
   }
   function enable_pagination(){
-    $("#page-images .pagination a").on("click", function(e){
+    $("#associated_files .pagination a").on("click", function(e){
       e.preventDefault();
       get_page($(this).attr("href"));
     });
