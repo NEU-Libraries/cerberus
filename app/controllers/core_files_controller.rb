@@ -230,8 +230,11 @@ class CoreFilesController < ApplicationController
       elsif (empty_file?(file))
         session[:flash_error] = "Error! Zero Length File!"
         render :json => { url: session[:previous_url] }
-      elsif (!(current_user.admin_group? || current_user.admin?) && (File.size(file.tempfile).to_f / 1024000).round(2) > 500) #500 is 500MB
-        session[:flash_error] = "The file you chose is larger than 500MB. Please contact DRS staff for help uploading files larger than 500MB."
+      elsif (!(current_user.admin_group? || current_user.admin?) && current_user.repo_staff? && (File.size(file.tempfile).to_f / 1024000).round(2) > 10000) #10000 is 10000MB
+        session[:flash_error] = "The file you chose is larger than 10,000MB. Please contact DRS staff for help uploading files larger than 10,000MB."
+        render :json => { url: session[:previous_url] }        
+      elsif (!(current_user.admin_group? || current_user.admin?) && (File.size(file.tempfile).to_f / 1024000).round(2) > 1000) #1000 is 1000MB
+        session[:flash_error] = "The file you chose is larger than 1000MB. Please contact DRS staff for help uploading files larger than 1000MB."
         render :json => { url: session[:previous_url] }
       elsif (!terms_accepted?)
         session[:flash_error] = "You must accept the terms of service!"
