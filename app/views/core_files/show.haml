@@ -33,7 +33,8 @@
     %div.handle
       %i.icon.icon-link
       ="Permanent URL: "
-      =link_to(@core_file.identifier)
+      -# =link_to(@core_file.identifier)
+      %a{:href => "#{@core_file.identifier}"} #{@core_file.identifier}
 
   %section.row
     %div{class: layout_class}
