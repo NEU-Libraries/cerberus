@@ -20,7 +20,7 @@
         %small
           Please
           %a{:href => "mailto:Library-Repository-Team@neu.edu"} contact the DRS staff
-          for help uploading files larger than 500MB.
+          for help uploading files larger than 1000MB.
     - if current_user.proxy_staff?
       %fieldset.span4
         %legend
@@ -77,11 +77,22 @@
       $(".alert").remove();
       $("input[type='submit']").removeProp("disabled");
     });
+- elsif current_user.repo_staff?
+  :javascript
+    $('#file').bind('change', function() {
+      if (this.files[0].size/ 1024000 > 10000) {
+        $(this).before('<div class="alert alert-warning">The file you chose is larger than 10,000MB.</div>');
+        $("input[type='submit']").prop("disabled", "true");
+      } else {
+        $(".alert").remove();
+        $("input[type='submit']").removeProp("disabled");
+      }
+    });
 - else
   :javascript
     $('#file').bind('change', function() {
-      if (this.files[0].size/ 1024000 > 500) {
-        $(this).before('<div class="alert alert-warning">The file you chose is larger than 500MB.</div>');
+      if (this.files[0].size/ 1024000 > 1000) {
+        $(this).before('<div class="alert alert-warning">The file you chose is larger than 1000MB.</div>');
         $("input[type='submit']").prop("disabled", "true");
       } else {
         $(".alert").remove();
