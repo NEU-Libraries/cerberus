@@ -7,7 +7,7 @@ class AggregatedStatisticsJob
 
   def run
     require 'fileutils'
-    
+
     self.communities = Hash.new{|h, k| h[k] = Hash.new{ |h, k| h[k] = 0 }}
     self.collections = Hash.new{|h, k| h[k] = Hash.new{ |h, k| h[k] = 0 }}
     self.files = Hash.new{|h, k| h[k] = Hash.new{ |h, k| h[k] = 0 }}
@@ -35,6 +35,12 @@ class AggregatedStatisticsJob
         else
           # Is a content object
           cf = doc.get_core_record
+
+          # Stub out
+          self.files["#{cf.pid}"]["view"]
+          self.files["#{cf.pid}"]["download"]
+          self.files["#{cf.pid}"]["stream"]
+
           self.files["#{cf.pid}"]["#{imp.action}"] += 1
           increase_parent_statistics(cf.parent, imp.action)
         end
