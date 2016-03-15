@@ -5,14 +5,13 @@ class AggregatedStatisticsJob
 
   attr_accessor :communities, :collections, :files
 
-  def initialize
+  def run
+    require 'fileutils'
+    
     self.communities = Hash.new{|h, k| h[k] = Hash.new{ |h, k| h[k] = 0 }}
     self.collections = Hash.new{|h, k| h[k] = Hash.new{ |h, k| h[k] = 0 }}
     self.files = Hash.new{|h, k| h[k] = Hash.new{ |h, k| h[k] = 0 }}
-  end
 
-  def run
-    require 'fileutils'
     job_id = "#{Time.now.to_i}-aggregated-statistics"
     FileUtils.mkdir_p "#{Rails.root}/log/#{job_id}"
 
