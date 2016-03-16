@@ -28,7 +28,7 @@ class CoreFilesController < ApplicationController
   include BlacklightAdvancedSearch::ParseBasicQ
   include BlacklightAdvancedSearch::Controller
 
-  before_filter :authenticate_user!, except: [:show, :get_page_images, :get_page_file, :log_stream]
+  before_filter :authenticate_user!, except: [:show, :get_associated_files, :get_page_file, :log_stream]
 
   skip_before_filter :normalize_identifier
   skip_load_and_authorize_resource only: [:provide_metadata,
@@ -41,7 +41,7 @@ class CoreFilesController < ApplicationController
 
   before_filter :can_edit_parent_or_proxy_upload?, only: [:new, :create, :destroy_incomplete_file]
 
-  before_filter :can_read?, only: [:show, :get_page_images, :get_page_file]
+  before_filter :can_read?, only: [:show, :get_associated_files, :get_page_file]
   before_filter :can_edit?, only: [:edit, :update]
   before_filter :complete?, only: [:edit, :update]
 
@@ -230,8 +230,11 @@ class CoreFilesController < ApplicationController
       elsif (empty_file?(file))
         session[:flash_error] = "Error! Zero Length File!"
         render :json => { url: session[:previous_url] }
-      elsif (!(current_user.admin_group? || current_user.admin?) && (File.size(file.tempfile).to_f / 1024000).round(2) > 500) #500 is 500MB
-        session[:flash_error] = "The file you chose is larger than 500MB. Please contact DRS staff for help uploading files larger than 500MB."
+      elsif (!(current_user.admin_group? || current_user.admin?) && current_user.repo_staff? && (File.size(file.tempfile).to_f / 1024000).round(2) > 10000) #10000 is 10000MB
+        session[:flash_error] = "The file you chose is larger than 10,000MB. Please contact DRS staff for help uploading files larger than 10,000MB."
+        render :json => { url: session[:previous_url] }        
+      elsif (!(current_user.admin_group? || current_user.admin?) && (File.size(file.tempfile).to_f / 1024000).round(2) > 1000) #1000 is 1000MB
+        session[:flash_error] = "The file you chose is larger than 1000MB. Please contact DRS staff for help uploading files larger than 1000MB."
         render :json => { url: session[:previous_url] }
       elsif (!terms_accepted?)
         session[:flash_error] = "You must accept the terms of service!"
@@ -485,16 +488,17 @@ class CoreFilesController < ApplicationController
     end
   end
 
-  def get_page_images
+  def get_associated_files
+    @forced_view = "drs-items-list"
     @core_file = fetch_solr_document
-    self.solr_search_params_logic += [:filter_by_page_images]
+    self.solr_search_params_logic += [:filter_by_associated_files]
     (@response, @document_list) = get_search_results
     respond_to do |format|
       format.js {
         if @response.response['numFound'] == 0
-          render js:"$('#page-images').html(\"There are currently 0 page images.\");"
+          render :nothing => true
         else
-          render "page_images"
+          render "associated_files"
         end
       }
     end
@@ -681,11 +685,30 @@ class CoreFilesController < ApplicationController
         end
       end
 
-      def filter_by_page_images(solr_parameters, user_parameters)
-        full_self_id = RSolr.escape("info:fedora/#{@core_file.pid}")
+      def filter_by_associated_files(solr_parameters, user_parameters)
         solr_parameters[:fq] ||= []
-        solr_parameters[:fq] << "#{Solrizer.solr_name("has_model", :symbol)}:\"info:fedora/afmodel:PageFile\" AND #{Solrizer.solr_name("is_part_of", :symbol)}:\"#{full_self_id}\""
-        solr_parameters[:sort] = "ordinal_value_isi asc"
+        query = []
+        str = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/#{@core_file.pid}"
+        query << "is_supplemental_material_for_ssim:\"#{str}\" || is_instructional_material_for_ssim:\"#{str}\""
+        all = []
+        @core_file['is_supplemental_material_for_ssim'].to_a.each do |x|
+          all << x
+        end
+        @core_file['is_instructional_material_for_ssim'].to_a.each do |x|
+          all << x
+        end
+        if all.count > 0
+          all.each do |x|
+            if !x.nil?
+              x = x.split("/").last
+              query << "id:\"#{x}\""
+            end
+          end
+        end
+        full_self_id = RSolr.escape("info:fedora/#{@core_file.pid}")
+        query << "(#{Solrizer.solr_name("has_model", :symbol)}:\"info:fedora/afmodel:PageFile\" AND #{Solrizer.solr_name("is_part_of", :symbol)}:\"#{full_self_id}\")"
+        solr_parameters[:sort] = "ordinal_value_isi asc, title_ssi asc"
+        solr_parameters[:fq] << query.join(" OR ")
       end
 
       def limit_to_ordinal_vals(solr_parameters, user_parameters)
