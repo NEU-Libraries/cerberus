@@ -79,6 +79,19 @@ class CoreFilesController < ApplicationController
 
     # This will be restricted per request to the largest available square (aspect-ratio constrained)
     # thumbnail, which at the time of coding this, is thumbnail_3 or lower (340 x 340)
+    @core_file = fetch_solr_document
+
+    thumbnail_list = @core_file.thumbnail_list
+    if thumbnail_list.length > 2
+      redirect_to thumbnail_list[2]
+    elsif thumbnail_list.length > 1
+      redirect_to thumbnail_list[1]
+    elsif thumbnail_list.length == 1
+      redirect_to thumbnail_list[0]
+    else
+      # No thumbnail
+      render_404(ActiveFedora::ObjectNotFoundError.new, request.fullpath) and return
+    end
   end
 
   def destroy_incomplete_file
