@@ -29,7 +29,7 @@ class MultipageProcessingJob
     # test file_path
     if File.exists?(file_path)
 
-      if self.zip_files.length == 1
+      if !self.zip_files.blank? && self.zip_files.length == 1
         # just make the one file canonical and add
         co_pid = Cerberus::Noid.namespaceize(Cerberus::IdService.mint)
         content_object = ImageMasterFile.new(pid: co_pid)
