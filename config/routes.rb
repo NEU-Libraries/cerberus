@@ -86,6 +86,8 @@ Cerberus::Application.routes.draw do
   get "/files/:id/associated" => "core_files#get_associated_files", as: 'associated'
   get "/files/:id/page/:page" => "core_files#get_page_file", as: 'page_file'
 
+  get "/files/:id/oai_thumbnail" => "core_files#oai_thumbnail", as: 'oai_thumbnail'
+
 
   put '/item_display' => 'users#update', as: 'view_pref'
 
