@@ -240,6 +240,10 @@ class CatalogController < ApplicationController
     config.add_facet_field solr_name("niec_audience", :symbol), label: "Audience", limit: true
     # Language = niec_signed_language_ssim
     config.add_facet_field solr_name("niec_signed_language", :symbol), label: "Language", limit: true
+    # Lends Itself to Classifiers = niec_lends_itself_to_classifiers_ssim
+    config.add_facet_field solr_name("niec_lends_itself_to_classifiers", :symbol), label: "Lends Itself to Classifiers Use", limit: true
+    # Lends Itself to Space = niec_lends_itself_to_use_of_space_ssim
+    config.add_facet_field solr_name("niec_lends_itself_to_use_of_space", :symbol), label: "Lends Itself to Space Use", limit: true
 
     # Have BL send all facet field names to Solr, which has been the default
     # previously. Simply remove these lines if you'd rather use Solr request
