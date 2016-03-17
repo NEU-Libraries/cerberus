@@ -17,9 +17,9 @@
 :javascript
   $(document).ready(function(){
     spinner = enable_spinner('my');
-    get_page("sets/my");
+    get_page("/sets/my");
     spinner = enable_spinner('collaborative');
-    get_page("sets/collaborative");
+    get_page("/sets/collaborative");
     function get_page(path){
       $.getScript( path, function() {
         enable_pagination();
