@@ -144,6 +144,7 @@ Cerberus::Application.routes.draw do
     get "/statistics/downloads" => 'statistics#get_downloads', as: 'downloads'
     get "/statistics/streams" => 'statistics#get_streams', as: 'streams'
     get "/statistics/file_sizes" => 'statistics#get_file_sizes', as: 'file_sizes'
+    get "/statistics/daily_report" => 'statistics#get_daily_report', as: 'daily_report'
     get "/files" => 'core_files#index', as: 'files'
     get "/files/tombstoned" => 'core_files#get_tombstoned', as: 'tombstoned'
     get "/files/incomplete" => 'core_files#get_incomplete', as: 'incomplete'
