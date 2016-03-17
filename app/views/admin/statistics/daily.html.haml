@@ -1,0 +1,94 @@
+= render partial: "tabs"
+.tab-content
+  .tab-pane.active{:id=>"daily_report"}
+    %h5= "*Note that these statistics are based on yesterday (#{DateTime.yesterday})"
+    .row
+      .span5
+        %table.table.table-striped.table-bordered
+          %tr
+            %th
+              Core File Impressions
+            %th
+          %tr
+            %td
+              Views
+            %td
+              = @cf_views
+          %tr
+            %td
+              Downloads
+            %td
+              = @cf_downloads
+          %tr
+            %td
+              Streams
+            %td
+              = @cf_streams
+      .span5.pull-right
+        %table.table.table-striped.table-bordered
+          %tr
+            %th
+              Core File Edits
+            %th
+          %tr
+            %td
+              Tab Edits
+            %td
+              = @edit_tab_edits
+          %tr
+            %td
+              XML Edits
+            %td
+              = @xml_edits
+          %tr
+            %td
+              Total
+            %td
+              = @cf_edits
+    .row
+      .span5
+        %table.table.table-striped.table-bordered
+          %tr
+            %th
+              Uploads
+            %th
+              Count
+            %th
+              Size
+          %tr
+            %td
+              Loaders
+            %td
+              = @loader_uploads
+            %td
+              = @loader_upload_size
+          %tr
+            %td
+              Interface
+            %td
+              = @interface_uploads
+            %td
+              = @interface_upload_size
+          %tr
+            %td
+              Total
+            %td
+              = @uploads_count
+            %td
+              = @uploads_size
+      .span5.pull-right
+        %table.table.table-striped.table-bordered
+          %tr
+            %th
+              Users
+            %th
+          %tr
+            %td
+              Unique Visitors
+            %td
+              = @unique_users
+          %tr
+            %td
+              New Users
+            %td
+              = @new_users

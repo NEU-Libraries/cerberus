@@ -31,6 +31,48 @@ class Admin::StatisticsController < ApplicationController
     render 'impressions', locals: {impressions: @streams, type: "streams" }
   end
 
+  def get_daily_report
+    @cf_views = Impression.where('action = ? AND (updated_at BETWEEN ? AND ?) AND status = "COMPLETE"', 'view', DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day).count
+    @cf_downloads = Impression.where('action = ? AND (updated_at BETWEEN ? AND ?) AND status = "COMPLETE"', 'download', DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day).count
+    @cf_streams = Impression.where('action = ? AND (updated_at BETWEEN ? AND ?) AND status = "COMPLETE"', 'stream', DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day).count
+    @unique_users = Impression.where('(created_at BETWEEN ? AND ?) AND status = "COMPLETE"', DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day).uniq.pluck(:ip_address).count
+    @new_users = User.where('created_at BETWEEN ? AND ?', DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day).count
+    @loader_uploads = Loaders::ImageReport.where('validity = ? AND (created_at BETWEEN ? AND ?)', true, DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day).count
+    @interface_uploads = UploadAlert.where('change_type = ? AND content_type != ? AND (updated_at BETWEEN ? AND ?)', 'create', 'collection', DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day).count
+    @uploads_count = @loader_uploads + @interface_uploads
+    @interface_upload_size = 0
+    interface_uploads = UploadAlert.where('change_type = ? AND content_type != ? AND (updated_at BETWEEN ? AND ?)', 'create', 'collection', DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day).pluck(:pid)
+    interface_uploads.each do |pid|
+      cf_doc = SolrDocument.new ActiveFedora::SolrService.query("id:\"#{pid}\"").first
+      all_possible_models = [ "ImageSmallFile", "ImageMediumFile", "ImageLargeFile",
+                              "ImageMasterFile", "ImageThumbnailFile", "MsexcelFile",
+                              "MspowerpointFile", "MswordFile", "PdfFile", "TextFile",
+                              "ZipFile", "AudioFile", "VideoFile", "PageFile" ]
+      models_stringified = all_possible_models.inject { |base, str| base + " or #{str}" }
+      models_query = ActiveFedora::SolrService.escape_uri_for_query models_stringified
+      content_objects = solr_query_file_size("active_fedora_model_ssi:(#{models_stringified}) AND is_part_of_ssim:#{full_pid(pid)}")
+      content_objects.map{|doc| @interface_upload_size += doc.file_size.to_i}
+    end
+    @loader_upload_size = 0
+    loader_uploads = Loaders::ImageReport.where('validity = ? AND (created_at BETWEEN ? AND ?)', true, DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day).pluck(:pid)
+    loader_uploads.each do |pid|
+      cf_doc = SolrDocument.new ActiveFedora::SolrService.query("id:\"#{pid}\"").first
+      all_possible_models = [ "ImageSmallFile", "ImageMediumFile", "ImageLargeFile",
+                              "ImageMasterFile", "ImageThumbnailFile", "MsexcelFile",
+                              "MspowerpointFile", "MswordFile", "PdfFile", "TextFile",
+                              "ZipFile", "AudioFile", "VideoFile", "PageFile" ]
+      models_stringified = all_possible_models.inject { |base, str| base + " or #{str}" }
+      models_query = ActiveFedora::SolrService.escape_uri_for_query models_stringified
+      content_objects = solr_query_file_size("active_fedora_model_ssi:(#{models_stringified}) AND is_part_of_ssim:#{full_pid(pid)}")
+      content_objects.map{|doc| @loader_upload_size += doc.file_size.to_i}
+    end
+    @uploads_size = @interface_upload_size + @loader_upload_size
+    @edit_tab_edits = UploadAlert.where('change_type = ? AND content_type != ? AND (updated_at BETWEEN ? AND ?)', 'update', 'collection', DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day).count
+    @xml_edits = XmlAlert.where('created_at BETWEEN ? AND ?', DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day).count
+    @cf_edits = @edit_tab_edits + @xml_edits
+    render 'daily'
+  end
+
   def get_file_sizes
     render 'file_sizes', locals: {type: "file_sizes" }
   end
@@ -98,6 +140,16 @@ class Admin::StatisticsController < ApplicationController
 
     def sort_direction
       %w[asc desc].include?(params[:direction]) ? params[:direction] : "asc"
+    end
+
+    def full_pid(pid)
+      return ActiveFedora::SolrService.escape_uri_for_query "info:fedora/#{pid}"
+    end
+
+    def solr_query_file_size(query_string)
+      row_count = ActiveFedora::SolrService.count(query_string)
+      query_result = ActiveFedora::SolrService.query(query_string, :fl => "id file_size_tesim", :rows => row_count)
+      return query_result.map { |x| SolrDocument.new(x) }
     end
 
 end
