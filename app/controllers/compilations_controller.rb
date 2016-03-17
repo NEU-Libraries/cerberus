@@ -17,6 +17,7 @@ class CompilationsController < ApplicationController
 
   before_filter :can_edit?, only: [:edit, :update, :destroy, :add_entry, :delete_entry, :add_multiple_entries, :delete_multiple_entries]
   before_filter :can_read?, only: [:show, :show_download, :download]
+  self.solr_search_params_logic += [:add_access_controls_to_solr_params]
 
   load_resource
   before_filter :valid_form_permissions?, only: [:update]
