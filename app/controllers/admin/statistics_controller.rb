@@ -57,9 +57,9 @@ class Admin::StatisticsController < ApplicationController
     render 'daily'
   end
 
-  def get_file_sizes
-    render 'file_sizes', locals: {type: "file_sizes" }
-  end
+  # def get_file_sizes
+  #   render 'file_sizes', locals: {type: "file_sizes" }
+  # end
 
   def export_file_sizes
     csv_string = CSV.generate do |csv|
