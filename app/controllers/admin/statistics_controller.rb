@@ -32,16 +32,16 @@ class Admin::StatisticsController < ApplicationController
   end
 
   def get_daily_report
-    @cf_views = Impression.where('action = ? AND (updated_at BETWEEN ? AND ?) AND status = "COMPLETE"', 'view', DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day).count
-    @cf_downloads = Impression.where('action = ? AND (updated_at BETWEEN ? AND ?) AND status = "COMPLETE"', 'download', DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day).count
-    @cf_streams = Impression.where('action = ? AND (updated_at BETWEEN ? AND ?) AND status = "COMPLETE"', 'stream', DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day).count
-    @unique_users = Impression.where('(created_at BETWEEN ? AND ?) AND status = "COMPLETE"', DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day).uniq.pluck(:ip_address).count
+    @cf_views = Impression.where('action = ? AND (created_at BETWEEN ? AND ?) AND status = ? AND public = ?', 'view', DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day, "COMPLETE", true).count
+    @cf_downloads = Impression.where('action = ? AND (created_at BETWEEN ? AND ?) AND status = ? AND public = ?', 'download', DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day, "COMPLETE", true).count
+    @cf_streams = Impression.where('action = ? AND (created_at BETWEEN ? AND ?) AND status = ? AND public = ?', 'stream', DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day, "COMPLETE", true).count
+    @unique_users = Impression.where('(created_at BETWEEN ? AND ?) AND status = ? AND public = ?', DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day, "COMPLETE", true).uniq.pluck(:ip_address).count
     @new_users = User.where('created_at BETWEEN ? AND ?', DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day).count
     @loader_uploads = Loaders::ImageReport.where('validity = ? AND (created_at BETWEEN ? AND ?)', true, DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day).count
-    @interface_uploads = UploadAlert.where('change_type = ? AND content_type != ? AND (updated_at BETWEEN ? AND ?)', 'create', 'collection', DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day).count
+    @interface_uploads = UploadAlert.where('change_type = ? AND content_type != ? AND (created_at BETWEEN ? AND ?)', 'create', 'collection', DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day).count
     @uploads_count = @loader_uploads + @interface_uploads
     @interface_upload_size = 0
-    interface_uploads = UploadAlert.where('change_type = ? AND content_type != ? AND (updated_at BETWEEN ? AND ?)', 'create', 'collection', DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day).pluck(:pid)
+    interface_uploads = UploadAlert.where('change_type = ? AND content_type != ? AND (created_at BETWEEN ? AND ?)', 'create', 'collection', DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day).pluck(:pid)
     interface_uploads.each do |pid|
       @interface_upload_size += get_core_file_size(pid)
     end
@@ -51,7 +51,7 @@ class Admin::StatisticsController < ApplicationController
       @loader_upload_size += get_core_file_size(pid)
     end
     @uploads_size = @interface_upload_size + @loader_upload_size
-    @edit_tab_edits = UploadAlert.where('change_type = ? AND content_type != ? AND (updated_at BETWEEN ? AND ?)', 'update', 'collection', DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day).count
+    @edit_tab_edits = UploadAlert.where('change_type = ? AND content_type != ? AND (created_at BETWEEN ? AND ?)', 'update', 'collection', DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day).count
     @xml_edits = XmlAlert.where('created_at BETWEEN ? AND ?', DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day).count
     @cf_edits = @edit_tab_edits + @xml_edits
     render 'daily'
