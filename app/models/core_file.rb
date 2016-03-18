@@ -18,6 +18,8 @@ class CoreFile < ActiveFedora::Base
 
   include ModsDisplay::ModelExtension
 
+  before_save :clean_xml
+
   has_metadata name: 'DC', type: DublinCoreDatastream
   has_metadata name: 'properties', type: PropertiesDatastream
   has_metadata name: 'mods', type: ModsDatastream
@@ -85,6 +87,11 @@ class CoreFile < ActiveFedora::Base
 
   mods_xml_source do |model|
     model.mods.content
+  end
+
+  def clean_xml
+    # When edit form is used, make sure we clean up unicode
+    self.mods.content = xml_decode(self.mods.content)
   end
 
   def to_solr(solr_doc = Hash.new())
