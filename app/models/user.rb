@@ -112,7 +112,7 @@ class User < ActiveRecord::Base
 
       user.save!
 
-      if(auth.info.employee == "faculty")
+      if(auth.info.employee.include?("faculty") || auth.info.employee.include?("staff"))
         Cerberus::Application::Queue.push(EmployeeCreateJob.new(auth.info.nuid, emp_name))
       end
     else
