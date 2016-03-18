@@ -73,8 +73,8 @@ en:
         description: Browse Northeastern departments and groups by name
         icon: icon-group
       employees:
-        name: Faculty
-        description: Browse faculty by name
+        name: Faculty and Staff
+        description: Browse faculty and staff by name
         icon: icon-user
       other:
         name: Other Publications
