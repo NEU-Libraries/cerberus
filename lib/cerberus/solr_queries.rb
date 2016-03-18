@@ -260,7 +260,7 @@ module Cerberus
 
         csc.each do |set|
           # Temporary, until we get Learning Objects sorted out
-          if !set.smart_collection_type.nil? && set.smart_collection_type != "miscellany" && set.smart_collection_type != "Learning Objects"
+          if !set.smart_collection_type.nil? && set.smart_collection_type != "miscellany" && set.smart_collection_type != "Learning Objects" && set.smart_collection_type != "Datasets"
             smart_collection_list << set
           end
         end
