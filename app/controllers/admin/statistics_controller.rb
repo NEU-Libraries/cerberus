@@ -43,28 +43,12 @@ class Admin::StatisticsController < ApplicationController
     @interface_upload_size = 0
     interface_uploads = UploadAlert.where('change_type = ? AND content_type != ? AND (updated_at BETWEEN ? AND ?)', 'create', 'collection', DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day).pluck(:pid)
     interface_uploads.each do |pid|
-      cf_doc = SolrDocument.new ActiveFedora::SolrService.query("id:\"#{pid}\"").first
-      all_possible_models = [ "ImageSmallFile", "ImageMediumFile", "ImageLargeFile",
-                              "ImageMasterFile", "ImageThumbnailFile", "MsexcelFile",
-                              "MspowerpointFile", "MswordFile", "PdfFile", "TextFile",
-                              "ZipFile", "AudioFile", "VideoFile", "PageFile" ]
-      models_stringified = all_possible_models.inject { |base, str| base + " or #{str}" }
-      models_query = ActiveFedora::SolrService.escape_uri_for_query models_stringified
-      content_objects = solr_query_file_size("active_fedora_model_ssi:(#{models_stringified}) AND is_part_of_ssim:#{full_pid(pid)}")
-      content_objects.map{|doc| @interface_upload_size += doc.file_size.to_i}
+      @interface_upload_size += get_core_file_size(pid)
     end
     @loader_upload_size = 0
     loader_uploads = Loaders::ImageReport.where('validity = ? AND (created_at BETWEEN ? AND ?)', true, DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day).pluck(:pid)
     loader_uploads.each do |pid|
-      cf_doc = SolrDocument.new ActiveFedora::SolrService.query("id:\"#{pid}\"").first
-      all_possible_models = [ "ImageSmallFile", "ImageMediumFile", "ImageLargeFile",
-                              "ImageMasterFile", "ImageThumbnailFile", "MsexcelFile",
-                              "MspowerpointFile", "MswordFile", "PdfFile", "TextFile",
-                              "ZipFile", "AudioFile", "VideoFile", "PageFile" ]
-      models_stringified = all_possible_models.inject { |base, str| base + " or #{str}" }
-      models_query = ActiveFedora::SolrService.escape_uri_for_query models_stringified
-      content_objects = solr_query_file_size("active_fedora_model_ssi:(#{models_stringified}) AND is_part_of_ssim:#{full_pid(pid)}")
-      content_objects.map{|doc| @loader_upload_size += doc.file_size.to_i}
+      @loader_upload_size += get_core_file_size(pid)
     end
     @uploads_size = @interface_upload_size + @loader_upload_size
     @edit_tab_edits = UploadAlert.where('change_type = ? AND content_type != ? AND (updated_at BETWEEN ? AND ?)', 'update', 'collection', DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day).count
@@ -140,6 +124,20 @@ class Admin::StatisticsController < ApplicationController
 
     def sort_direction
       %w[asc desc].include?(params[:direction]) ? params[:direction] : "asc"
+    end
+
+    def get_core_file_size(pid)
+      total = 0
+      cf_doc = SolrDocument.new ActiveFedora::SolrService.query("id:\"#{pid}\"").first
+      all_possible_models = [ "ImageSmallFile", "ImageMediumFile", "ImageLargeFile",
+                              "ImageMasterFile", "ImageThumbnailFile", "MsexcelFile",
+                              "MspowerpointFile", "MswordFile", "PdfFile", "TextFile",
+                              "ZipFile", "AudioFile", "VideoFile", "PageFile" ]
+      models_stringified = all_possible_models.inject { |base, str| base + " or #{str}" }
+      models_query = ActiveFedora::SolrService.escape_uri_for_query models_stringified
+      content_objects = solr_query_file_size("active_fedora_model_ssi:(#{models_stringified}) AND is_part_of_ssim:#{full_pid(pid)}")
+      content_objects.map{|doc| total += doc.file_size.to_i}
+      return total
     end
 
     def full_pid(pid)
