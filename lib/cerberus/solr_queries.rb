@@ -195,6 +195,10 @@ module Cerberus
       find_all_files_by_type("Datasets")
     end
 
+    def technical_reports
+      find_all_files_by_type("Technical Reports")
+    end
+
     def presentations
       find_all_files_by_type("Presentations")
     end
@@ -215,6 +219,9 @@ module Cerberus
       end
       if self.datasets.length > 0
         smart_collection_list << "datasets"
+      end
+      if self.technical_reports.length > 0
+        smart_collection_list << "technical reports"
       end
       if self.presentations.length > 0
         smart_collection_list << "presentations"
