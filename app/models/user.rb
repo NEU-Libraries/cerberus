@@ -111,10 +111,6 @@ class User < ActiveRecord::Base
       end
 
       user.save!
-
-      if(auth.info.employee.include?("faculty") || auth.info.employee.include?("staff"))
-        Cerberus::Application::Queue.push(EmployeeCreateJob.new(auth.info.nuid, emp_name))
-      end
     else
       # Previously logged in
       user = User.where(:email => auth.info.email).first
@@ -123,6 +119,12 @@ class User < ActiveRecord::Base
       if !user.account_pref.blank?
         email = user.account_pref
         user = User.where(:email => email).first
+      end
+    end
+
+    if user.employee_id.blank?
+      if(auth.info.employee.include?("faculty") || auth.info.employee.include?("staff"))
+        Cerberus::Application::Queue.push(EmployeeCreateJob.new(auth.info.nuid, emp_name))
       end
     end
 
