@@ -91,7 +91,9 @@ class CoreFile < ActiveFedora::Base
 
   def clean_xml
     # When edit form is used, make sure we clean up unicode
-    self.mods.content = xml_decode(self.mods.content)
+    if !self.mods.content.blank?
+      self.mods.content = xml_decode(self.mods.content)
+    end
   end
 
   def to_solr(solr_doc = Hash.new())

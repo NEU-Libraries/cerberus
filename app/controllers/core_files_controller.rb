@@ -124,8 +124,6 @@ class CoreFilesController < ApplicationController
       flash[:alert] = "Note: You are depositing this file in a Smart Collection. Library staff will review permissions and enhance metadata as needed."
     end
 
-    @title = @core_file.title
-
     @page_title = "Provide Upload Metadata"
   end
 
@@ -620,7 +618,12 @@ class CoreFilesController < ApplicationController
       core_file.reload
 
       # Context derived attributes
-      core_file.title = file.original_filename
+      if file.original_filename.include? "."
+        core_file.title = file.original_filename.split(".")[0]
+      else
+        core_file.title = file.original_filename
+      end
+
       core_file.tmp_path = tmp_path
       core_file.original_filename = file.original_filename
       core_file.label = file.original_filename
