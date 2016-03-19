@@ -22,10 +22,7 @@
     = f.hidden_field(:non_sort, :value => "#{@core_file.non_sort}")
     = f.hidden_field(:title, :value => "#{@core_file.title}", name: 'core_file[title][]')
     = f.label :title, "Title", class: "required-label"
-    - if !@title.nil?
-      = text_field_tag :full_title, @title.split(".")[0], required: true, pattern: ".*\\S.*", class: "input-block-level", placeholder: "US Congressman poses with a supporter"
-    - else
-      = text_field_tag :full_title, "#{@core_file.non_sort} #{@core_file.title}".strip, required: true, pattern: ".*\\S.*", class: "input-block-level", placeholder: "US Congressman poses with a supporter"
+    = text_field_tag :full_title, "#{@core_file.non_sort} #{@core_file.title}".strip, required: true, pattern: ".*\\S.*", class: "input-block-level", placeholder: "US Congressman poses with a supporter"
   .span6
     = render partial: 'core_files/metadata/data_form_date', locals: {:f => f}
 %fieldset.row-fluid

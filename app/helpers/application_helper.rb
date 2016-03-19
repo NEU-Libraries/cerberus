@@ -31,6 +31,7 @@ module ApplicationHelper
   end
 
   def xml_decode(input_str)
+    return "" unless input_str
     escaped_val = input_str.gsub("&amp;", "&amp;amp;")
     escaped_val = escaped_val.gsub("&lt;", "&amp;lt;")
     escaped_val = escaped_val.gsub("&gt;", "&amp;gt;")
