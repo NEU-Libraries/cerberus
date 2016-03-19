@@ -22,7 +22,7 @@ feature "Faculty and staff featured content" do
 
     # Ensure the "Faculty" featured content widget
     # has loaded
-    expected_title = "[title='Browse faculty by name']"
+    expected_title = "[title='Browse faculty and staff by name']"
     expect(page).to have_content("Faculty")
     expect(page).to have_css("div.featured-content a#{expected_title}")
 
