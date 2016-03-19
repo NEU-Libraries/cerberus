@@ -1,6 +1,13 @@
 module Unidecoder
   class << self
     def decode(string)
+      # Kludge - en em and figure dash seems to be arbitrarily not being converted. Now doing manually
+      string.gsub!("–", "-")
+      string.gsub!("—", "-")
+      string.gsub!("‒", "-")
+      # Kludge - swung dash is also not converted. Manually making tilde
+      string.gsub!("⁓", "~")
+
       string.gsub(/[^x20-x7e]/u) do |character|
         codepoint = character.unpack("U").first
         if should_transliterate?(codepoint)
