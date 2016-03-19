@@ -17,6 +17,9 @@ class MetadataMailer < ActionMailer::Base
     @datasets_new            = UploadAlert.withheld_datasets(:create)
     @datasets_update         = UploadAlert.withheld_datasets(:update)
 
+    @technical_reports_new            = UploadAlert.withheld_technical_reports(:create)
+    @technical_reports_update         = UploadAlert.withheld_technical_reports(:update)
+
     @learning_objects_new    = UploadAlert.withheld_learning_objects(:create)
     @learning_objects_update = UploadAlert.withheld_learning_objects(:update)
 
@@ -38,6 +41,9 @@ class MetadataMailer < ActionMailer::Base
 
     count += @datasets_new.count
     count += @datasets_update.count
+
+    count += @technical_reports_new.count
+    count += @technical_reports_update.count
 
     count += @learning_objects_new.count
     count += @learning_objects_update.count
@@ -117,6 +123,8 @@ class MetadataMailer < ActionMailer::Base
       tag_as_notified_helper @theses_update
       tag_as_notified_helper @datasets_new
       tag_as_notified_helper @datasets_update
+      tag_as_notified_helper @technical_reports_new
+      tag_as_notified_helper @technical_reports_update
       tag_as_notified_helper @learning_objects_new
       tag_as_notified_helper @learning_objects_update
       tag_as_notified_helper @presentations_new

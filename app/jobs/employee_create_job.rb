@@ -29,6 +29,7 @@ class EmployeeCreateJob
     create_personal_collection("Other Publications", emp, parent)
     create_personal_collection("Presentations", emp, parent)
     create_personal_collection("Datasets", emp, parent)
+    create_personal_collection("Technical Reports", emp, parent)
     create_personal_collection("Learning Objects", emp, parent)
     create_personal_collection("Monographs", emp, parent)
 

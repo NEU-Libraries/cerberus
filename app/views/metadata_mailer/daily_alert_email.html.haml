@@ -34,6 +34,12 @@
     %h3 Updated Datasets
     = render partial: 'alert_items', locals: { alerts: @datasets_update }
 
+    %h3 New Technical Reports
+    = render partial: 'alert_items', locals: { alerts: @technical_reports_new }
+
+    %h3 Updated Technical Reports
+    = render partial: 'alert_items', locals: { alerts: @technical_reports_update }
+
     %h3 New Other Publications
     = render partial: 'alert_items', locals: { alerts: @other_pubs_new}
 

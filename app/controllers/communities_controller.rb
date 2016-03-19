@@ -140,6 +140,12 @@ class CommunitiesController < ApplicationController
     render 'shared/smart_collections/smart_collection', locals: { smart_collection: 'datasets' }
   end
 
+  def technical_reports
+    @page_title = "#{@set.title} #{t('drs.featured_content.technical_reports.name')}"
+    safe_get_smart_docs(@set.technical_reports)
+    render 'shared/smart_collections/smart_collection', locals: { smart_collection: 'technical_reports' }
+  end
+
   def learning_objects
     @page_title = "#{@set.title} #{t('drs.featured_content.learning.name')}"
     safe_get_smart_docs(@set.learning_objects)
