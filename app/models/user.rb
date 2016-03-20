@@ -137,9 +137,9 @@ class User < ActiveRecord::Base
       user.save!
     end
 
-    if(auth.info.employee == "faculty")
+    if auth.info.employee.include?("faculty")
       user.add_group("northeastern:drs:faculty")
-    elsif(auth.info.employee == "staff")
+    elsif auth.info.employee.include?("staff")
       user.add_group("northeastern:drs:staff")
     end
 
