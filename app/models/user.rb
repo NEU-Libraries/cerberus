@@ -93,10 +93,13 @@ class User < ActiveRecord::Base
       raise Exceptions::NoNuidProvided
     end
 
-    if user.nil? || users.blank?
+    if !auth.info.name.blank?
       name_array = Namae.parse auth.info.name
       name_obj = name_array[0]
       emp_name = "#{name_obj.family}, #{name_obj.given}"
+    end
+
+    if user.nil? || users.blank?
 
       user = User.create(password:Devise.friendly_token[0,20], full_name:emp_name, nuid:auth.info.nuid)
 
