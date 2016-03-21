@@ -12,6 +12,8 @@ en:
       name: "Bouvé College of Health Sciences - Dean's Office Media Group"
     northeastern:drs:camd:department_of_art_and_design:art_and_design_gallery:
       name: "CAMD - Art and Design Gallery"
+    northeastern:drs:college_of_computer_information_science:CCIS_technical_reports:
+      name: "CCIS Technical Reports"
     northeastern:drs:college_of_engineering:deans_office:
       name: "College of Engineering - Dean's Office"
     northeastern:drs:college_of_engineering:electrical_and_computer_engineering:bspiral:
@@ -58,6 +60,8 @@ en:
       name: "DRS Zip Loader - EMSA EMC"
     northeastern:drs:repository:loaders:marcom:
       name: "DRS Zip Loader - Marketing"
+    northeastern:drs:repository:loaders:multipage:
+      name: "DRS Multipage Loader"
     northeastern:drs:repository:loaders:bouve_dean:
       name: "DRS Zip Loader - Bouve"
     northeastern:drs:repository:proxystaff:
