@@ -154,6 +154,14 @@ class User < ActiveRecord::Base
       end
     end
 
+    # If admin user, copy their groups to 000000000 so that they can impersonate
+    # and have access to everywhere they should
+    if user.admin?
+      system_user = User.find_by_nuid("000000000")
+      system_user.group_list = user.group_list
+      system_user.save!
+    end
+
     return user
   end
 
