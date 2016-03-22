@@ -200,7 +200,11 @@ Cerberus::Application.routes.draw do
     end
   end
 
-  devise_for :users, :controllers => { :sessions => "sessions", :omniauth_callbacks => "users/omniauth_callbacks" }
+  if Rails.env.production?
+    devise_for :users, :controllers => { :sessions => "sessions", :omniauth_callbacks => "users/omniauth_callbacks" }, :path_names => {:sign_in => 'auth/shibboleth'}
+  else
+    devise_for :users, :controllers => { :sessions => "sessions", :omniauth_callbacks => "users/omniauth_callbacks" }
+  end
 
   # SUFIA
   # Downloads controller route
