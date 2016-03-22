@@ -40,7 +40,4 @@
             Admin
       %li= link_to raw('<span class="icon-signout" aria-hidden="true" ></span> Log Out'), destroy_user_session_path, :id => 'logout_nav_link',  "tab-index" => "-1"
   - else
-    - if Rails.env.production?
-      = link_to raw('<span class="icon-signin" aria-hidden="true" ></span> Login'), "https://repository.library.northeastern.edu/users/auth/shibboleth", :class => "btn"
-    - else
-      = link_to raw('<span class="icon-signin" aria-hidden="true" ></span> Login'), new_user_session_path, :class => "btn"
+    = link_to raw('<span class="icon-signin" aria-hidden="true" ></span> Login'), new_user_session_path, :class => "btn"
