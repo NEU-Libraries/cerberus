@@ -29,7 +29,7 @@ Cerberus::Application.routes.draw do
 
   # Featured Content
   get '/communities' => 'catalog#communities', as: 'catalog_communities'
-  get '/theses_and_dissertations' => 'catalog#theses', as: 'catalog_theses_and_dissertations'
+  get '/theses_and_dissertations' => 'catalog#theses_and_dissertations', as: 'catalog_theses_and_dissertations'
   get '/research' => 'catalog#research', as: 'catalog_research'
   get '/presentations' => 'catalog#presentations', as: 'catalog_presentations'
   get '/datasets' => 'catalog#datasets', as: 'catalog_datasets'
