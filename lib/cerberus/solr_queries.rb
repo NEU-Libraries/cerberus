@@ -179,7 +179,7 @@ module Cerberus
       doc_list.map{|doc| doc.pid}
     end
 
-    def theses
+    def theses_and_dissertations
       find_all_files_by_type("Theses and Dissertations")
     end
 
