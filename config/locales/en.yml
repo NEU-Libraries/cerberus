@@ -64,7 +64,7 @@ en:
         name: Learning Objects
         description: Materials used to support teaching and learning, such as syllabi and activities
         icon: icon-pencil
-      theses:
+      theses_and_dissertations:
         name: Theses and Dissertations
         description: NU’s master's theses and doctoral dissertations from 2008 to the present
         icon: icon-graduation-cap
