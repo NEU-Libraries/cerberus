@@ -469,7 +469,7 @@ GEM
       mime-types
       nokogiri
       rest-client
-    rubyzip (1.1.3)
+    rubyzip (1.2.0)
     rvm1-capistrano3 (0.9.0)
       capistrano (~> 3.0)
     sanitize (2.1.0)
@@ -608,7 +608,7 @@ DEPENDENCIES
   rspec-rails
   ruby-filemagic (~> 0.4.2)
   ruby-prof
-  rubyzip (= 1.1.3)
+  rubyzip (= 1.2.0)
   rvm1-capistrano3
   sanitize
   sass-rails (~> 3.2.3)
