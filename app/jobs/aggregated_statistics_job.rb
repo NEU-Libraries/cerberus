@@ -194,8 +194,15 @@ class AggregatedStatisticsJob
     end
 
     begin
-      parent = SolrDocument.new ActiveFedora::SolrService.query("id:\"#{set.parent}\"").first
-      increase_parent_size(parent.pid, size)
+      if set.parent
+        parent = SolrDocument.new ActiveFedora::SolrService.query("id:\"#{set.parent}\"").first
+        increase_parent_size(parent.pid, size)
+      elsif set.smart_collection_type == "User Root" #this lets us go past a user root collection and into the commmunities they belong to
+        emp = Employee.find("#{set.is_member_of.split("/").last}")
+        emp.communities.each do |c|
+          increase_parent_size(c.pid, size)
+        end
+      end
     rescue
       #
     end
