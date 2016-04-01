@@ -34,6 +34,7 @@ module Cerberus
       # rather than re-do thousands of items, we're going to rely on FITS instead
       # response.headers['Content-Type'] = datastream.mimeType
       response.headers['Content-Type'] = asset.properties.mime_type.first
+      response.headers['Content-Disposition'] = 'attachment'
       head :ok
     end
 
