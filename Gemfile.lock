@@ -29,8 +29,8 @@ GIT
 
 GIT
   remote: https://github.com/NEU-Libraries/solrizer.git
-  revision: a304059e4bc85bbe22fc765d5e2a7ccf38ea1602
-  ref: a304059e4bc85bbe22fc765d5e2a7ccf38ea1602
+  revision: aff90ea60b6190f1674e8b8bb01fa1d1b98be1d4
+  ref: aff90ea60b6190f1674e8b8bb01fa1d1b98be1d4
   specs:
     solrizer (3.1.1)
       activesupport
@@ -187,7 +187,7 @@ GEM
       simplecov (>= 0.7)
       term-ansicolor
       thor
-    daemons (1.1.9)
+    daemons (1.2.3)
     date_time_precision (0.7.0)
     deprecation (0.0.5)
       activesupport
@@ -469,7 +469,7 @@ GEM
       mime-types
       nokogiri
       rest-client
-    rubyzip (1.1.3)
+    rubyzip (1.2.0)
     rvm1-capistrano3 (0.9.0)
       capistrano (~> 3.0)
     sanitize (2.1.0)
@@ -508,7 +508,7 @@ GEM
     sqlite3 (1.3.8)
     stanford-mods (1.1.4)
       mods (~> 2.0.2)
-    stomp (1.3.4)
+    stomp (1.3.5)
     tdiff (0.3.3)
     term-ansicolor (1.2.2)
       tins (~> 0.8)
@@ -536,7 +536,7 @@ GEM
       activesupport (>= 2.3.4)
       chronic (>= 0.6.3)
     will_paginate (3.0.7)
-    xml-simple (1.1.4)
+    xml-simple (1.1.5)
     xpath (2.0.0)
       nokogiri (~> 1.3)
 
@@ -608,7 +608,7 @@ DEPENDENCIES
   rspec-rails
   ruby-filemagic (~> 0.4.2)
   ruby-prof
-  rubyzip (= 1.1.3)
+  rubyzip (= 1.2.0)
   rvm1-capistrano3
   sanitize
   sass-rails (~> 3.2.3)
