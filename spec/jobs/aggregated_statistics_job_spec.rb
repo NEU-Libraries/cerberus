@@ -307,20 +307,33 @@ describe "aggregated statistics job" do
       @job.run
       @job.files["#{@bill_file.pid}"]["view"].should == 1
       @job.collections["#{@emp_col.pid}"]["view"].should == 1
-      # @job.communities["#{root_community.pid}"]["view"].should == 1 #goes up to user collection but doesn't pass through that relationship to the community(plural?) attached to the employee
+      @job.collections["#{@emp_col.parent.pid}"]["view"].should == 1
+      @job.communities["#{root_community.pid}"]["view"].should == 1
     end
 
-    # it 'fails gracefully if object no longer exists' do #right now this actually means the count would be zero because it depends on data retrieved from the solr doc which can't be retreived if the item is deleted
-    #   UploadAlert.create_from_core_file(file, :create)
-    #   UploadAlert.create_from_core_file(file, :update)
-    #   pid = file.pid
-    #   file.destroy
-    #   date = DateTime.now
-    #   @job = AggregatedStatisticsJob.new(date)
-    #   @job.run
-    #   @job.files["#{pid}"]["form_edits"].should == 1
-    #   @job.files["#{pid}"]["user_uploads"].should == 1
-    # end
+    it 'fails gracefully if object no longer exists' do #this is expected that if an object no longer exists, the aggregated_statistic will not be generated for this object
+      Impression.create(pid: file.pid, session_id: "doop", action: "view", ip_address: "00.00.00", referrer: "direct", user_agent: "RSpec", status: "COMPLETE", public: "true")
+      Impression.create(pid: file.pid, session_id: "doop", action: "download", ip_address: "00.00.00", referrer: "direct", user_agent: "RSpec", status: "COMPLETE", public: "true")
+      Impression.create(pid: file.pid, session_id: "doop", action: "stream", ip_address: "00.00.00", referrer: "direct", user_agent: "RSpec", status: "COMPLETE", public: "true")
+      parent = collection.pid
+      report_id = Loaders::LoadReport.create_from_strings(bill, 0, "College of Engineering", parent)
+      load_report = Loaders::LoadReport.find(report_id)
+      load_report.image_reports.create_success(file, "")
+      UploadAlert.create_from_core_file(file, :create)
+      UploadAlert.create_from_core_file(file, :update)
+      date = DateTime.now
+      xml_alert.first.pid
+      XmlAlert.all.count
+      pid = file.pid
+      file.destroy
+      date = DateTime.now
+      @job = AggregatedStatisticsJob.new(date)
+      @job.run
+      @job.files["#{pid}"].should == {}
+      AggregatedStatistic.where(:object_type=>"file").count.should == 0
+      AggregatedStatistic.where(:object_type=>"collection").count.should == 0
+      AggregatedStatistic.where(:object_type=>"community").count.should == 0
+    end
 
   end
 
