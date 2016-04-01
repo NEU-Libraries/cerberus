@@ -134,7 +134,7 @@ en:
       default: Theses and dissertations for
     display_labels:
       Employee:
-        name: Faculty
+        name: Faculty and Staff
         short: Person
       AudioFile:
         name: Audio File
