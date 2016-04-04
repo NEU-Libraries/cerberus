@@ -171,19 +171,39 @@ class ProcessMultipageZipJob
 
   def unzip(file, dir_path)
     spreadsheet_file_path = ""
+    FileUtils.mkdir(dir_path) unless File.exists? dir_path
 
-    Zip::File.open(file) do |zipfile|
-      FileUtils.mkdir(dir_path) unless File.exists? dir_path
-      count = 0
+    begin
+      Zip::File.open(file) do |zipfile|
+        count = 0
 
-      # Extract all files
-      zipfile.each do |f|
-        if !f.directory? && File.basename(f.name)[0] != "." # Don't extract directories or mac specific files
-          fpath = File.join(dir_path, f.name)
-          FileUtils.mkdir_p(File.dirname(fpath))
-          zipfile.extract(f, fpath) unless File.exist?(fpath)
+        # Extract all files
+        zipfile.each do |f|
+          if !f.directory? && File.basename(f.name)[0] != "." # Don't extract directories or mac specific files
+            fpath = File.join(dir_path, f.name)
+            FileUtils.mkdir_p(File.dirname(fpath))
+            zipfile.extract(f, fpath) unless File.exist?(fpath)
+          end
         end
+
+        # Ensure all files have ok permissions
+        FileUtils.chmod_R(0777, "#{dir_path}")
+
+        # Find the spreadsheet
+        xlsx_array = Dir.glob("#{dir_path}/*.xlsx")
+
+        if xlsx_array.length > 1
+          raise Exceptions::MultipleSpreadsheetError
+        elsif xlsx_array.length == 0
+          raise Exceptions::NoSpreadsheetError
+        end
+
+        spreadsheet_file_path = xlsx_array.first
       end
+    rescue Exception => error
+      # Error with zip, potentially formatting issue due to size
+      # Attempt to use unzip manually to extract - very large kludge
+      `unzip #{file} -d #{dir_path}`
 
       # Ensure all files have ok permissions
       FileUtils.chmod_R(0777, "#{dir_path}")
