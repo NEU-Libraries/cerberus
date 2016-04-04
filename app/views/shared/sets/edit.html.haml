@@ -7,15 +7,16 @@
     %a{ href: "#edit",  data: {toggle: "tab"} }
       %i.icon-pencil
       Edit
-  - if "#{@set.class}" != "Compilation"
+  - if ("#{@set.class}" == "Collection" && !@set.is_smart_collection?) || (@set.is_smart_collection? && @set.smart_collection_type == "miscellany")
     %li
       %a{ href: "#move", data: {toggle: "tab"}}
         %i.icon-exchange
         Move
-  %li
-    %a{ href: "#delete", data: {toggle: "tab"}}
-      %i.icon-trash
-      Delete
+  - if !@set.is_smart_collection? || @set.smart_collection_type == "miscellany"
+    %li
+      %a{ href: "#delete", data: {toggle: "tab"}}
+        %i.icon-trash
+        Delete
   %li
     %a{ href: "#statistics", data: {toggle: "tab"}}
       %i.icon-bar-chart
@@ -23,12 +24,16 @@
 
 .tab-content
   #edit.tab-pane.active
-    = render partial: "shared/sets/data_form", locals: { set: @set }
-  - if "#{@set.class}" != "Compilation"
+    - if @set.is_smart_collection? && @set.smart_collection_type != "miscellany"
+      %div= t('drs.personal_graph.full_description').html_safe
+    - else
+      = render partial: "shared/sets/data_form", locals: { set: @set }
+  - if ("#{@set.class}" == "Collection" && !@set.is_smart_collection?) || (@set.is_smart_collection? && @set.smart_collection_type == "miscellany")
     #move.tab-pane
       = render partial: "shared/sets/move", locals:  {set: @set }
-  #delete.tab-pane
-    = render partial: "shared/sets/delete", locals:  {set: @set }
+  - if !@set.is_smart_collection? || @set.smart_collection_type == "miscellany"
+    #delete.tab-pane
+      = render partial: "shared/sets/delete", locals:  {set: @set }
   #statistics.tab-pane
     = render partial: "shared/sets/statistics", locals:  {set: @set }
 
