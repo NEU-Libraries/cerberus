@@ -202,8 +202,8 @@ class ProcessMultipageZipJob
       end
     rescue Exception => error
       # Error with zip, potentially formatting issue due to size
-      # Attempt to use tar to extract - very large kludge
-      `tar xf #{file} -C #{dir_path}`
+      # Attempt to use unzip manually to extract - very large kludge
+      `unzip #{file} -d #{dir_path}`
 
       # Ensure all files have ok permissions
       FileUtils.chmod_R(0777, "#{dir_path}")
