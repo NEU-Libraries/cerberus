@@ -128,15 +128,21 @@ class Admin::StatisticsController < ApplicationController
 
     def get_core_file_size(pid)
       total = 0
-      cf_doc = SolrDocument.new ActiveFedora::SolrService.query("id:\"#{pid}\"").first
-      all_possible_models = [ "ImageSmallFile", "ImageMediumFile", "ImageLargeFile",
-                              "ImageMasterFile", "ImageThumbnailFile", "MsexcelFile",
-                              "MspowerpointFile", "MswordFile", "PdfFile", "TextFile",
-                              "ZipFile", "AudioFile", "VideoFile", "PageFile" ]
-      models_stringified = all_possible_models.inject { |base, str| base + " or #{str}" }
-      models_query = ActiveFedora::SolrService.escape_uri_for_query models_stringified
-      content_objects = solr_query_file_size("active_fedora_model_ssi:(#{models_stringified}) AND is_part_of_ssim:#{full_pid(pid)}")
-      content_objects.map{|doc| total += doc.file_size.to_i}
+
+      begin
+        cf_doc = SolrDocument.new ActiveFedora::SolrService.query("id:\"#{pid}\"").first
+        all_possible_models = [ "ImageSmallFile", "ImageMediumFile", "ImageLargeFile",
+                                "ImageMasterFile", "ImageThumbnailFile", "MsexcelFile",
+                                "MspowerpointFile", "MswordFile", "PdfFile", "TextFile",
+                                "ZipFile", "AudioFile", "VideoFile", "PageFile" ]
+        models_stringified = all_possible_models.inject { |base, str| base + " or #{str}" }
+        models_query = ActiveFedora::SolrService.escape_uri_for_query models_stringified
+        content_objects = solr_query_file_size("active_fedora_model_ssi:(#{models_stringified}) AND is_part_of_ssim:#{full_pid(pid)}")
+        content_objects.map{|doc| total += doc.file_size.to_i}
+      rescue Exception => error
+        # File most likely deleted, or otherwise malformed
+      end
+
       return total
     end
 
