@@ -28,4 +28,9 @@ every 1.day, at: '4:00am'  do
   rake "sitemap:generate"
 end
 
+every :sunday, :at => '4:00am' do
+  date = DateTime.now.end_of_week.-2.days
+  runner "AggregatedStatisticsJob.new(#{date}).run"
+end
+
 # Learn more: http://github.com/javan/whenever
