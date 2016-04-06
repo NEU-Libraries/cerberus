@@ -129,6 +129,22 @@ module ApplicationHelper
     return user_view_pref
   end
 
+  def drs_per_page
+    if current_user
+      if !current_user.per_page_pref
+        current_user.per_page_pref = '10'
+        current_user.save!
+      end
+      user_view_pref = current_user.per_page_pref
+    else
+      if !session[:per_page_pref]
+        session[:per_page_pref] = '10'
+      end
+      user_view_pref = session[:per_page_pref]
+    end
+    return user_view_pref
+  end
+
   def sortable(column, title = nil)
     title ||= column.titleize
     css_class = column == sort_column ? "current #{sort_direction}" : nil
