@@ -107,48 +107,56 @@ class CatalogController < ApplicationController
 
   def communities
     self.solr_search_params_logic += [:communities_filter]
+    self.solr_search_params_logic += [:apply_per_page_limit]
     (@response, @document_list) = get_search_results
     render 'shared/smart_collections/smart_collection', locals: { smart_collection: 'communities' }
   end
 
   def research
     self.solr_search_params_logic += [:research_filter]
+    self.solr_search_params_logic += [:apply_per_page_limit]
     (@response, @document_list) = get_search_results
     render 'shared/smart_collections/smart_collection', locals: { smart_collection: 'research' }
   end
 
   def presentations
     self.solr_search_params_logic += [:presentations_filter]
+    self.solr_search_params_logic += [:apply_per_page_limit]
     (@response, @document_list) = get_search_results
     render 'shared/smart_collections/smart_collection', locals: { smart_collection: 'presentations' }
   end
 
   def datasets
     self.solr_search_params_logic += [:datasets_filter]
+    self.solr_search_params_logic += [:apply_per_page_limit]
     (@response, @document_list) = get_search_results
     render 'shared/smart_collections/smart_collection', locals: { smart_collection: 'datasets' }
   end
 
   def technical_reports
     self.solr_search_params_logic += [:technical_reports_filter]
+    self.solr_search_params_logic += [:apply_per_page_limit]
     (@response, @document_list) = get_search_results
     render 'shared/smart_collections/smart_collection', locals: { smart_collection: 'technical_reports' }
   end
 
   def monographs
     self.solr_search_params_logic += [:monographs_filter]
+    self.solr_search_params_logic += [:apply_per_page_limit]
     (@response, @document_list) = get_search_results
     render 'shared/smart_collections/smart_collection', locals: { smart_collection: 'monographs' }
   end
 
   def faculty_and_staff
     self.solr_search_params_logic += [:faculty_and_staff_filter]
+    self.solr_search_params_logic += [:apply_per_page_limit]
     (@response, @document_list) = get_search_results
     render 'shared/smart_collections/smart_collection', locals: { smart_collection: 'employees' }
   end
 
   def theses_and_dissertations
     self.solr_search_params_logic += [:theses_and_dissertations_filter]
+    self.solr_search_params_logic += [:apply_per_page_limit]
     (@response, @document_list) = get_search_results
     render 'shared/smart_collections/smart_collection', locals: { smart_collection: 'theses_and_dissertations' }
   end

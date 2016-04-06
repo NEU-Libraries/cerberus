@@ -145,6 +145,10 @@ module ApplicationHelper
     return user_view_pref
   end
 
+  def apply_per_page_limit(solr_parameters, user_parameters)
+    solr_parameters[:per_page] = drs_per_page
+  end
+
   def sortable(column, title = nil)
     title ||= column.titleize
     css_class = column == sort_column ? "current #{sort_direction}" : nil
