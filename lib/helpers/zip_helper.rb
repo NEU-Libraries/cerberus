@@ -36,8 +36,15 @@ module ZipHelper
       `unzip #{zip_file_path} -d #{output_dir}`
     end
 
+    dir_list = Dir.glob("#{output_dir}/*")
+
+    # Loop through and remove directories
+    dir_list.delete_if do |item|
+      File.directory?(item)
+    end
+
     # returns file list with absolute paths
-    return Dir.glob("#{output_dir}/*")
+    return dir_list
   end
 
 end
