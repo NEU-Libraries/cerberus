@@ -1,4 +1,5 @@
 class ApplicationController < ActionController::Base
+  include ApplicationHelper
   # Adds a few additional behaviors into the application controller
   include Blacklight::Controller
   # Adds Drs behaviors into the application controller
@@ -163,5 +164,10 @@ class ApplicationController < ActionController::Base
 
   def self.around_filters
     filters(:around)
+  end
+
+  def apply_per_page_limit(solr_parameters, user_parameters)
+    # solr_parameters[:per_page] = drs_per_page
+    solr_parameters[:rows] = drs_per_page
   end
 end
