@@ -1,6 +1,6 @@
 class ProcessIptcZipJob
   include ZipHelper
-  
+
   attr_accessor :loader_name, :zip_path, :parent, :copyright, :current_user, :permissions, :client, :derivatives
 
   def queue_name
@@ -29,7 +29,7 @@ class ProcessIptcZipJob
     dir_path = File.join(File.dirname(file), File.basename(file, ".*"))
 
     # Extract load zip
-    file_list = safe_unzip(file, dir_path)
+    file_list = safe_unzip(file, dir_path, true)
 
     count = 0
     # loop through file list
