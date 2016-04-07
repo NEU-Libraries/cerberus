@@ -464,4 +464,14 @@ class CatalogController < ApplicationController
   def increase_facet_limit(solr_parameters, user_parameters)
     solr_parameters["facet.limit"] = "12"
   end
+
+  def oai_time_filters(solr_parameters, user_parameters)
+    if params.has_key?(:from) && params.has_key?(:until)
+      solr_parameters[:fq] << "timestamp:[" + params[:from] + " TO " + params[:until] + "]"
+    elsif params.has_key?(:from)
+      solr_parameters[:fq] << "timestamp:[" + params[:from] + " TO NOW]"
+    elsif params.has_key?(:until)
+      solr_parameters[:fq] << "timestamp:[" + Time.at(0).utc.xmlschema + " TO " + params[:until]+ "]"
+    end
+  end
 end
