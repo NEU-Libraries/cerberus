@@ -20,7 +20,7 @@ module ZipHelper
       Zip::File.open(zip_file_path) do |zipfile|
         zipfile.each do |f|
           if !f.directory? && File.basename(f.name)[0] != "." # Don't extract directories or mac specific files
-            fpath = File.join(dir_path, f.name)
+            fpath = File.join(output_dir, f.name)
             FileUtils.mkdir_p(File.dirname(fpath))
             zipfile.extract(f, fpath) unless File.exist?(fpath)
           end
@@ -29,6 +29,8 @@ module ZipHelper
     rescue Exception => error
       # we'll check for empty dir afterwards
     end
+
+    puts Dir[output_dir + "/*"].empty?
 
     # Empty dir?
     if Dir[output_dir].empty?

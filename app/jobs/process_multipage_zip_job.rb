@@ -2,6 +2,7 @@ class ProcessMultipageZipJob
   include SpreadsheetHelper
   include XmlValidator
   include ApplicationHelper
+  include ZipHelper
 
   attr_accessor :loader_name, :zip_path, :parent, :copyright, :current_user, :permissions, :client
 
