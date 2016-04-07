@@ -173,52 +173,19 @@ class ProcessMultipageZipJob
     spreadsheet_file_path = ""
     FileUtils.mkdir(dir_path) unless File.exists? dir_path
 
-    begin
-      Zip::File.open(file) do |zipfile|
-        count = 0
+    # Extract load zip
+    file_list = safe_unzip(file, dir_path)
 
-        # Extract all files
-        zipfile.each do |f|
-          if !f.directory? && File.basename(f.name)[0] != "." # Don't extract directories or mac specific files
-            fpath = File.join(dir_path, f.name)
-            FileUtils.mkdir_p(File.dirname(fpath))
-            zipfile.extract(f, fpath) unless File.exist?(fpath)
-          end
-        end
+    # Find the spreadsheet
+    xlsx_array = Dir.glob("#{dir_path}/*.xlsx")
 
-        # Ensure all files have ok permissions
-        FileUtils.chmod_R(0777, "#{dir_path}")
-
-        # Find the spreadsheet
-        xlsx_array = Dir.glob("#{dir_path}/*.xlsx")
-
-        if xlsx_array.length > 1
-          raise Exceptions::MultipleSpreadsheetError
-        elsif xlsx_array.length == 0
-          raise Exceptions::NoSpreadsheetError
-        end
-
-        spreadsheet_file_path = xlsx_array.first
-      end
-    rescue Exception => error
-      # Error with zip, potentially formatting issue due to size
-      # Attempt to use unzip manually to extract - very large kludge
-      `unzip #{file} -d #{dir_path}`
-
-      # Ensure all files have ok permissions
-      FileUtils.chmod_R(0777, "#{dir_path}")
-
-      # Find the spreadsheet
-      xlsx_array = Dir.glob("#{dir_path}/*.xlsx")
-
-      if xlsx_array.length > 1
-        raise Exceptions::MultipleSpreadsheetError
-      elsif xlsx_array.length == 0
-        raise Exceptions::NoSpreadsheetError
-      end
-
-      spreadsheet_file_path = xlsx_array.first
+    if xlsx_array.length > 1
+      raise Exceptions::MultipleSpreadsheetError
+    elsif xlsx_array.length == 0
+      raise Exceptions::NoSpreadsheetError
     end
+
+    spreadsheet_file_path = xlsx_array.first
 
     FileUtils.rm(file)
     return spreadsheet_file_path
