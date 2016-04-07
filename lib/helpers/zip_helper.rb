@@ -30,10 +30,8 @@ module ZipHelper
       # we'll check for empty dir afterwards
     end
 
-    puts Dir[output_dir + "/*"].empty?
-
     # Empty dir?
-    if Dir[output_dir].empty?
+    if Dir[output_dir + "/*"].empty?
       # Standard gem zip extraction didn't work, let's shell out to unzip
       `unzip #{zip_file_path} -d #{output_dir}`
     end
