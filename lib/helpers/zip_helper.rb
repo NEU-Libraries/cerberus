@@ -36,6 +36,9 @@ module ZipHelper
       `unzip #{zip_file_path} -d #{output_dir}`
     end
 
+    # Ensure all files have ok permissions
+    FileUtils.chmod_R(0777, "#{output_dir}")
+
     dir_list = Dir.glob("#{output_dir}/*")
 
     # Loop through and remove directories
