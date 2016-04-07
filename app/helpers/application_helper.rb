@@ -142,11 +142,10 @@ module ApplicationHelper
       end
       user_view_pref = session[:per_page_pref]
     end
+    if params.has_key?(:per_page) && (user_view_pref != params[:per_page])
+      user_view_pref = params[:per_page]
+    end
     return user_view_pref
-  end
-
-  def apply_per_page_limit(solr_parameters, user_parameters)
-    solr_parameters[:per_page] = drs_per_page
   end
 
   def sortable(column, title = nil)
