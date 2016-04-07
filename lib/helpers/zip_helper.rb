@@ -1,6 +1,6 @@
 module ZipHelper
 
-  def safe_unzip(zip_file_path, output_dir)
+  def safe_unzip(zip_file_path, output_dir, squash = false)
     # For certain zip files, the gem we use struggles to open and extract their contents
     # It seems related to OSX's handling of large zip files, and their zip64 structure
     # Further reading can be had here - https://bitinn.net/10716/
@@ -20,7 +20,16 @@ module ZipHelper
       Zip::File.open(zip_file_path) do |zipfile|
         zipfile.each do |f|
           if !f.directory? && File.basename(f.name)[0] != "." # Don't extract directories or mac specific files
-            fpath = File.join(output_dir, f.name)
+
+            if squash
+              # Legacy zip construction for certain loaders forces us to flatten internal
+              # structure, so to do this we give each file a unique name to avoid collision        
+              uniq_hsh = Digest::MD5.hexdigest("#{f.name}")[0,2]
+              fpath = File.join(output_dir, "#{Time.now.to_f.to_s.gsub!('.','-')}-#{uniq_hsh}") # Names file time and hash string
+            else
+              fpath = File.join(output_dir, f.name)
+            end
+
             FileUtils.mkdir_p(File.dirname(fpath))
             zipfile.extract(f, fpath) unless File.exist?(fpath)
           end
