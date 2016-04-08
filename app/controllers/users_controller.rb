@@ -47,8 +47,9 @@ class UsersController < ApplicationController
 
     @user = current_user
 
-    if params[:view_pref].present?
+    if params[:view_pref].present? || params[:per_page_pref]
       view_pref  = params[:view_pref]
+      per_page_pref = params[:per_page_pref]
 
       #make sure it is only one of these strings
       if view_pref == 'grid' || view_pref == 'list'
@@ -60,6 +61,21 @@ class UsersController < ApplicationController
           end
         else
           session[:view_pref] = view_pref
+        end
+
+      else
+        flash[:error] = t('drs.multiple_accounts.preferred_failure')
+      end
+
+      if per_page_pref == '10' || per_page_pref == '20' || per_page_pref == '50' || per_page_pref == '100'
+
+        if @user
+          unless @user.per_page_pref == per_page_pref
+            @user.per_page_pref = per_page_pref
+            @user.save!
+          end
+        else
+          session[:per_page_pref] = per_page_pref
         end
 
       else
