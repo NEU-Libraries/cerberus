@@ -167,6 +167,7 @@ class CollectionsController < ApplicationController
 
     respond_to do |format|
       format.html { render 'shared/sets/show', locals: {pretty_description: @pretty_description} }
+      format.rss  { render 'catalog/index', :formats => [:rss] }
     end
   end
 
