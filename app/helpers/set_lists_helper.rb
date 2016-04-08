@@ -12,6 +12,7 @@ module SetListsHelper
       @pretty_description = convert_urls(@set.description)
     end
     @pretty_sort_name = pretty_sort_name(params[:sort])
+    self.solr_search_params_logic += [:apply_per_page_limit]
     (@response, @document_list) = get_search_results
     if @response.response['numFound'] > 0
       respond_to do |format|
@@ -74,6 +75,7 @@ module SetListsHelper
       end
       params[:sort] = "#{Solrizer.solr_name('system_create', :stored_sortable, type: :date)} desc"
       @pretty_sort_name = pretty_sort_name(params[:sort])
+      self.solr_search_params_logic += [:apply_per_page_limit]
       (@response, @document_list) = get_search_results
       if @response.response['numFound'] > 0
         respond_to do |format|

@@ -14,7 +14,7 @@ class User < ActiveRecord::Base
          :recoverable, :rememberable, :trackable, :validatable, :omniauthable, :omniauth_providers => [:shibboleth]
   # attr_accessible :title, :body
 
-  attr_accessible :password, :email, :password_confirmation, :remember_me, :nuid, :full_name, :view_pref, :employee_id, :account_pref, :multiple_accounts
+  attr_accessible :password, :email, :password_confirmation, :remember_me, :nuid, :full_name, :view_pref, :employee_id, :account_pref, :multiple_accounts, :per_page_pref
   delegate :can?, :cannot?, :to => :ability
   serialize(:group_list, Array)
 

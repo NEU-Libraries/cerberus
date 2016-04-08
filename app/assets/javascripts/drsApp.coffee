@@ -629,7 +629,7 @@ $(document).ready ->
 
 
       $('[data-toggle="drs-item-views-radio"]').on 'click', 'a , button', handleClick
-
+      $("select#per_page").on 'change', updateUserPerPagePref
 
 
     # Utility Function for what to switch to
@@ -644,7 +644,6 @@ $(document).ready ->
         else
           throw new DrsAppError 'dataTarget wasn\'t given', dataTarget
       return
-
 
     ###
     updateUserViewPref
@@ -662,6 +661,19 @@ $(document).ready ->
             view_pref: gridOrListSwitch(target)
 
           complete: (jqXHR, textStatus) ->
+
+      return
+
+    updateUserPerPagePref = (element) ->
+      userId = $('body').data('user') or 5
+      queryString = '/users/' + userId + '/per_page_pref'
+      $.ajax
+        url: queryString
+        type: 'post'
+        data:
+          per_page_pref: $("select#per_page option:selected").val()
+
+        complete: (jqXHR, textStatus) ->
 
       return
 

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20160318201131) do
+ActiveRecord::Schema.define(:version => 20160404172259) do
 
   create_table "aggregated_statistics", :force => true do |t|
     t.string   "object_type"
@@ -256,6 +256,7 @@ ActiveRecord::Schema.define(:version => 20160318201131) do
     t.string   "employee_id"
     t.string   "account_pref",           :default => ""
     t.boolean  "multiple_accounts",      :default => false
+    t.integer  "per_page_pref",          :default => 10
   end
 
   add_index "users", ["email"], :name => "index_users_on_email", :unique => true
