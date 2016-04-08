@@ -17,6 +17,7 @@ module SetListsHelper
     if @response.response['numFound'] > 0
       respond_to do |format|
         format.html { render 'shared/sets/show' }
+        format.rss  { render 'catalog/index', :formats => [:rss] }
       end
     else
       redirect_to @set and return
