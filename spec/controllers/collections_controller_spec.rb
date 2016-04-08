@@ -2,15 +2,19 @@ require 'spec_helper'
 
 describe CollectionsController do
   render_views
-  let(:admin)            { FactoryGirl.create(:admin) }
   let(:bill)             { FactoryGirl.create(:bill) }
   let(:bo)               { FactoryGirl.create(:bo) }
   let(:root)             { FactoryGirl.create(:root_collection) }
-  let(:bills_collection) { FactoryGirl.create(:bills_private_collection) }
 
   before :all do
     `mysql -u "#{ENV["HANDLE_TEST_USERNAME"]}" < "#{Rails.root}"/spec/fixtures/files/handlesTEST.sql`
     @client = Mysql2::Client.new(:host => "#{ENV["HANDLE_TEST_HOST"]}", :username => "#{ENV["HANDLE_TEST_USERNAME"]}", :password => "#{ENV["HANDLE_TEST_PASSWORD"]}", :database => "#{ENV["HANDLE_TEST_DATABASE"]}")
+    @admin =  FactoryGirl.create(:admin)
+    @admin.add_group("northeastern:drs:repository:staff")
+    @admin.save!
+    @bills_collection = FactoryGirl.create(:bills_private_collection)
+    @bills_collection.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, "edit")
+    @bills_collection.save!
   end
 
   describe "GET #index" do
@@ -67,14 +71,14 @@ describe CollectionsController do
     it "403s when users attempt to create with a parent they cannot edit" do
       sign_in bo
 
-      post :create, { parent: bills_collection.id }
+      post :create, { parent: @bills_collection.id }
 
       response.status.should == 403
     end
 
     it "redirects to the new show page on successful create" do
       sign_in bill
-      attrs = {title: "Test", description: "test", date: Date.today.to_s, parent: bills_collection.id }
+      attrs = {title: "Test", description: "test", date: Date.today.to_s, parent: @bills_collection.id }
 
       post :create, {set: attrs}
 
@@ -102,14 +106,14 @@ describe CollectionsController do
     it "403s for users without read access" do
       sign_in bo
 
-      get :show, { id: bills_collection.pid }
+      get :show, { id: @bills_collection.pid }
 
       response.status.should == 403
     end
 
     it "403s for unauthenticated users when collection is private" do
 
-      get :show, { id: bills_collection.pid }
+      get :show, { id: @bills_collection.pid }
 
       response.status.should == 403
     end
@@ -124,7 +128,7 @@ describe CollectionsController do
     it "renders the show template for users with proper permissions" do
       sign_in bill
 
-      get :show, { id: bills_collection.pid }
+      get :show, { id: @bills_collection.pid }
 
       expect(response).to render_template('shared/sets/show')
     end
@@ -135,7 +139,7 @@ describe CollectionsController do
     end
 
     it "renders the 410 template for objects that have been tombstoned" do
-      sign_in admin
+      sign_in @admin
       root = Collection.create(title: "Root")
       child_one = Collection.create(title: "Child One", parent: root)
       child_one.tombstone
@@ -152,7 +156,7 @@ describe CollectionsController do
   describe "GET #edit" do
 
     it "requests signin from unauthed users" do
-      get :edit, { id: bills_collection.pid }
+      get :edit, { id: @bills_collection.pid }
 
       expect(response).to redirect_to(new_user_session_path)
     end
@@ -160,7 +164,7 @@ describe CollectionsController do
     it "403s for users without edit access" do
       sign_in bo
 
-      get :edit, { id: bills_collection.pid }
+      get :edit, { id: @bills_collection.pid }
 
       response.status.should == 403
     end
@@ -168,8 +172,36 @@ describe CollectionsController do
     it "renders the page for users with edit access" do
       sign_in bill
 
-      get :edit, { id: bills_collection.pid }
+      get :edit, { id: @bills_collection.pid }
 
+      expect(response).to render_template('shared/sets/edit')
+    end
+
+    it "renders the page for users with edit access on user's smart collections" do
+      sign_in bill
+
+      EmployeeCreateJob.new(bill.nuid, "John Doe").run
+      emp = Employee.find_by_nuid(bill.nuid)
+      get :edit, { id: emp.smart_collections.last.pid }
+      expect(response).to render_template('shared/sets/edit')
+    end
+
+    it "renders the page for admin users of regular collections" do
+      sign_in @admin
+      get :edit, { id: @bills_collection.pid }
+
+      expect(response).to render_template('shared/sets/edit')
+    end
+
+    it "renders the page for admin users of smart collections" do
+      sign_in @admin
+
+      EmployeeCreateJob.new(bill.nuid, "John Doe").run
+      emp = Employee.find_by_nuid(bill.nuid)
+      smart_col = emp.smart_collections.last
+      smart_col.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, "edit")
+      smart_col.save!
+      get :edit, { id: smart_col.pid }
       expect(response).to render_template('shared/sets/edit')
     end
   end
@@ -184,7 +216,7 @@ describe CollectionsController do
     it "403s when a user without edit access tries to modify a collection" do
       sign_in bo
 
-      put :update, { id: bills_collection.pid, set: {title: "New Title" } }
+      put :update, { id: @bills_collection.pid, set: {title: "New Title" } }
 
       response.status.should == 403
     end
@@ -214,19 +246,19 @@ describe CollectionsController do
 
     it "should redirect to collection if no core_files" do
       sign_in bill
-      get :recent_deposits, { id: bills_collection.pid }
-      doc = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{bills_collection.pid}\"").first)
+      get :recent_deposits, { id: @bills_collection.pid }
+      doc = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{@bills_collection.pid}\"").first)
       # doc.has_core_file_children?.should == false
-      expect(response).to redirect_to(collection_path(id: bills_collection.pid))
+      expect(response).to redirect_to(collection_path(id: @bills_collection.pid))
     end
 
     it "should have docs if there are core_files" do
       sign_in bill
-      cf = CoreFile.create(title: "Bills Core", parent: bills_collection, mass_permissions: "public", depositor: bill.nuid)
-      get :recent_deposits, { id: bills_collection.pid }
-      doc = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{bills_collection.pid}\"").first)
+      cf = CoreFile.create(title: "Bills Core", parent: @bills_collection, mass_permissions: "public", depositor: bill.nuid)
+      get :recent_deposits, { id: @bills_collection.pid }
+      doc = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{@bills_collection.pid}\"").first)
       # doc.has_core_file_children?.should == true
-      expected = "/collections/#{bills_collection.pid}/recent"
+      expected = "/collections/#{@bills_collection.pid}/recent"
       request.path.should == expected
       response.body.should =~ /Recent Deposits/m
       response.body.should =~ /Bills Core/m
@@ -237,23 +269,23 @@ describe CollectionsController do
     it_should_behave_like "show validations"
     it "should redirect to collection if no core_files" do
       sign_in bill
-      get :creator_list, { id: bills_collection.pid }
-      doc = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{bills_collection.pid}\"").first)
+      get :creator_list, { id: @bills_collection.pid }
+      doc = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{@bills_collection.pid}\"").first)
       # doc.has_core_file_children?.should == false
       # doc.has_creators?.should == false
-      expect(response).to redirect_to(collection_path(id: bills_collection.pid))
+      expect(response).to redirect_to(collection_path(id: @bills_collection.pid))
     end
 
     it "should have docs if there are core_files with authors" do
       sign_in bill
-      cf = CoreFile.create(title: "Bills Core", parent: bills_collection, mass_permissions: "public", depositor: bill.nuid)
+      cf = CoreFile.create(title: "Bills Core", parent: @bills_collection, mass_permissions: "public", depositor: bill.nuid)
       cf.creators = {'first_names' => ["Billy"],'last_names'  => ["Jean"]}
       cf.save!
-      get :creator_list, { id: bills_collection.pid }
-      doc = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{bills_collection.pid}\"").first)
+      get :creator_list, { id: @bills_collection.pid }
+      doc = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{@bills_collection.pid}\"").first)
       # doc.has_core_file_children?.should == true
       # doc.has_creators?.should == true
-      expected = "/collections/#{bills_collection.pid}/creators"
+      expected = "/collections/#{@bills_collection.pid}/creators"
       request.path.should == expected
       response.body.should =~ /Creator List/m
       response.body.should =~ /Jean, Billy/m
@@ -264,19 +296,19 @@ describe CollectionsController do
   #   it_should_behave_like "show validations"
   #   it "should redirect to collection if no core_files" do
   #     sign_in bill
-  #     get :title_list, { id: bills_collection.pid }
-  #     doc = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{bills_collection.pid}\"").first)
+  #     get :title_list, { id: @bills_collection.pid }
+  #     doc = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{@bills_collection.pid}\"").first)
   #     # doc.has_core_file_children?.should == false
-  #     expect(response).to redirect_to(collection_path(id: bills_collection.pid))
+  #     expect(response).to redirect_to(collection_path(id: @bills_collection.pid))
   #   end
   #
   #   it "should have docs if there are core_files" do
   #     sign_in bill
-  #     cf = CoreFile.create(title: "Bills Core", parent: bills_collection, mass_permissions: "public", depositor: bill.nuid)
-  #     get :title_list, { id: bills_collection.pid }
-  #     doc = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{bills_collection.pid}\"").first)
+  #     cf = CoreFile.create(title: "Bills Core", parent: @bills_collection, mass_permissions: "public", depositor: bill.nuid)
+  #     get :title_list, { id: @bills_collection.pid }
+  #     doc = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{@bills_collection.pid}\"").first)
   #     # doc.has_core_file_children?.should == true
-  #     expected = "/collections/#{bills_collection.pid}/titles"
+  #     expected = "/collections/#{@bills_collection.pid}/titles"
   #     request.path.should == expected
   #     response.body.should =~ /Title List/m
   #     response.body.should =~ /Bills Core/m
@@ -286,5 +318,6 @@ describe CollectionsController do
   after :all do
     @client.query("DROP DATABASE #{ENV["HANDLE_TEST_DATABASE"]};")
     ActiveFedora::Base.destroy_all
+    User.destroy_all
   end
 end
