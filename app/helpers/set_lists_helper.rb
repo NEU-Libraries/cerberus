@@ -12,7 +12,11 @@ module SetListsHelper
       @pretty_description = convert_urls(@set.description)
     end
     @pretty_sort_name = pretty_sort_name(params[:sort])
-    self.solr_search_params_logic += [:apply_per_page_limit]
+    if params[:format] == "rss"
+      params[:per_page] = 10
+    else
+      self.solr_search_params_logic += [:apply_per_page_limit]
+    end
     (@response, @document_list) = get_search_results
     if @response.response['numFound'] > 0
       respond_to do |format|
