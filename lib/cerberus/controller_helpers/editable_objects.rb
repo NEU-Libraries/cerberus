@@ -79,8 +79,6 @@ module Cerberus
 
         if current_user.nil?
           render_403
-        elsif !current_user.admin? && !record.smart_collection_type.nil? && record.smart_collection_type != "miscellany"
-          render_403
         elsif current_user.can? :edit, record
           return true
         else
