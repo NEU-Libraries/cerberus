@@ -76,7 +76,7 @@
       -#     - elsif @set.klass == "Community"
       -#       %a.btn.btn-default{:href=>community_title_list_path(@set)} Title List
       - if current_user && @set.klass == "Collection"
-        -if (current_user.can? :edit, @set.pid) && (current_user.admin? || @set.smart_collection_type == "miscellany")
+        -if (current_user.can? :edit, @set.pid) || current_user.admin?
           %li.pull-right
             %a.btn.btn-default{:href =>  edit_collection_path(@set)}
               %i.icon-pencil
