@@ -2,10 +2,10 @@ require 'spec_helper'
 
 describe CollectionsController do
   render_views
-  let(:admin)            { FactoryGirl.create(:admin) }
   let(:bill)             { FactoryGirl.create(:bill) }
   let(:bo)               { FactoryGirl.create(:bo) }
   let(:root)             { FactoryGirl.create(:root_collection) }
+  let(:admin)            { FactoryGirl.create(:admin) }
   let(:bills_collection) { FactoryGirl.create(:bills_private_collection) }
 
   before :all do
@@ -172,6 +172,42 @@ describe CollectionsController do
 
       expect(response).to render_template('shared/sets/edit')
     end
+
+    it "renders the page for users with edit access on user's smart collections" do
+      sign_in bill
+
+      EmployeeCreateJob.new(bill.nuid, "John Doe").run
+      emp = Employee.find_by_nuid(bill.nuid)
+      get :edit, { id: emp.smart_collections.last.pid }
+      expect(response).to render_template('shared/sets/edit')
+    end
+
+    it "renders the page for admin users of regular collections" do
+      admin.add_group("northeastern:drs:repository:staff")
+      admin.save!
+      bills_collection.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, "edit")
+      bills_collection.save!
+      sign_in admin
+      get :edit, { id: bills_collection.pid }
+
+      expect(response).to render_template('shared/sets/edit')
+    end
+
+    it "renders the page for admin users of smart collections" do
+      admin.add_group("northeastern:drs:repository:staff")
+      admin.save!
+      bills_collection.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, "edit")
+      bills_collection.save!
+      sign_in admin
+
+      EmployeeCreateJob.new(bill.nuid, "John Doe").run
+      emp = Employee.find_by_nuid(bill.nuid)
+      smart_col = emp.smart_collections.last
+      smart_col.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, "edit")
+      smart_col.save!
+      get :edit, { id: smart_col.pid }
+      expect(response).to render_template('shared/sets/edit')
+    end
   end
 
   describe "PUTS #update" do
@@ -286,5 +322,6 @@ describe CollectionsController do
   after :all do
     @client.query("DROP DATABASE #{ENV["HANDLE_TEST_DATABASE"]};")
     ActiveFedora::Base.destroy_all
+    User.destroy_all
   end
 end
