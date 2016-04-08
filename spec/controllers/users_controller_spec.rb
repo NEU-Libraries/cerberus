@@ -10,6 +10,10 @@ describe UsersController do
       expect(bill.view_pref == "grid")
       put :update, id: bill,  view_pref: 'list'
       expect(bill.view_pref == 'list')
+      bill.per_page_pref = 20
+      expect(bill.per_page_pref == 20)
+      put :update, id: bill, per_page_pref: 50
+      expect(bill.per_page_pref == 50)
     end
 
   end

@@ -100,7 +100,7 @@ class CommunitiesController < ApplicationController
       self.solr_search_params_logic += [:disable_highlighting]
       self.solr_search_params_logic += [:show_children_only]
     end
-
+    self.solr_search_params_logic += [:apply_per_page_limit]
     (@response, @document_list) = get_search_results
 
     @smart_collections = @set.smart_collections
@@ -209,6 +209,7 @@ class CommunitiesController < ApplicationController
     def safe_get_smart_docs(pids)
       @ids = pids
       self.solr_search_params_logic += [:limit_to_pids]
+      self.solr_search_params_logic += [:apply_per_page_limit]
       (@response, @document_list) = get_search_results
     end
 

@@ -140,6 +140,7 @@ class CompilationsController < ApplicationController
 
     @set = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{@compilation.pid}\"").first)
     self.solr_search_params_logic += [:filter_entry_ids]
+    self.solr_search_params_logic += [:apply_per_page_limit]
     (@response, @document_list) = get_search_results
     if @response.response['numFound'] == 0
       flash[:notice] = "There are no items in this #{t('drs.compilations.name').capitalize}. Please search or browse for an item or collection and add it to this #{t('drs.compilations.name').capitalize}."

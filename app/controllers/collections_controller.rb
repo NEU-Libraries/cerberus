@@ -161,6 +161,7 @@ class CollectionsController < ApplicationController
       self.solr_search_params_logic += [:disable_highlighting]
       self.solr_search_params_logic += [:show_children_only]
     end
+    self.solr_search_params_logic += [:apply_per_page_limit]
 
     (@response, @document_list) = get_search_results
 
