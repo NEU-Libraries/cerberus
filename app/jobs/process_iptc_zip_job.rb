@@ -29,13 +29,15 @@ class ProcessIptcZipJob
     dir_path = File.join(File.dirname(file), File.basename(file, ".*"))
 
     # Extract load zip
-    file_list = safe_unzip(file, dir_path, true)
+    total_list = safe_unzip(file, dir_path, true)
+    file_list = total_list[0]
+    original_names = total_list[1]
 
     count = 0
     # loop through file list
-    file_list.each do |fpath|
-      file_name = File.basename(fpath)
-      ImageProcessingJob.new(fpath, file_name, parent, copyright, load_report.id, permissions, derivatives, client).run
+    file_list.each_with_index do |fpath, i|
+      # file_name = File.basename(fpath)
+      ImageProcessingJob.new(fpath, original_names[i], parent, copyright, load_report.id, permissions, derivatives, client).run
       load_report.update_counts
       count = count + 1
       load_report.save!
