@@ -3,3 +3,10 @@
   -files = @document_list.select{|d| if (d['active_fedora_model_ssi'] == 'CoreFile') then d['id'] end}
   -if !files.blank?
     =link_to("Save files for later", sets_editable_path(files: files), remote: true, title:  "Add to " + t('drs.compilations.name'), data: {toggle: "tooltip"}, class: "btn btn-mini btn-clear")
+  -if @document_list.length > 0
+    -if smart_col && smart_col != "communities" && smart_col != "employees"
+      %a.btn.btn-primary.btn-mini{:href => url_for(params.merge(:format=>"rss", :action=>"smart_col_recent_deposits", :smart_col=>smart_col))}
+        %span.icon-rss( aria-hidden="true")
+    -elsif !smart_col
+      %a.btn.btn-primary.btn-mini{:href => url_for(params.merge(:format=>"rss", :action=>"recent_deposits"))}
+        %span.icon-rss( aria-hidden="true")
