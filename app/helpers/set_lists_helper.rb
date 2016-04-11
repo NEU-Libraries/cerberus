@@ -85,6 +85,7 @@ module SetListsHelper
       if @response.response['numFound'] > 0
         respond_to do |format|
           format.html { render 'shared/smart_collections/smart_collection', locals: { smart_collection: params[:smart_col] } }
+          format.rss  { render 'catalog/index', :formats => [:rss] }
         end
       else
         render 'shared/smart_collections/smart_collection', locals: { smart_collection: params[:smart_col] }

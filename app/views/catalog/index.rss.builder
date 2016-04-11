@@ -4,7 +4,7 @@ xml.rss(:version=>"2.0") {
   xml.channel {
 
     xml.title(application_name + " Search Results")
-    xml.link(catalog_index_url(params))
+    xml.link("#{request.base_url}" + url_for(params))
     xml.description(application_name + " Search Results")
     xml.language('en-us')
     @document_list.each do |doc|
