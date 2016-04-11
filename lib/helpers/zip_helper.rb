@@ -12,6 +12,9 @@ module ZipHelper
     # Making a generalized helper method to re-use throughout the various places we handle
     # zips in the codebase
 
+    # Need to accumulate original names to account for squashing
+    original_names = []
+
     # Make the output path if it doesn't already exist
     FileUtils.mkdir(output_dir) unless File.exists? output_dir
 
@@ -23,7 +26,8 @@ module ZipHelper
 
             if squash
               # Legacy zip construction for certain loaders forces us to flatten internal
-              # structure, so to do this we give each file a unique name to avoid collision        
+              # structure, so to do this we give each file a unique name to avoid collision
+              original_names << f.name
               uniq_hsh = Digest::MD5.hexdigest("#{f.name}")[0,2]
               fpath = File.join(output_dir, "#{Time.now.to_f.to_s.gsub!('.','-')}-#{uniq_hsh}") # Names file time and hash string
             else
@@ -55,8 +59,13 @@ module ZipHelper
       File.directory?(item)
     end
 
-    # returns file list with absolute paths
-    return dir_list
+    if squash
+      # returns file list with absolute paths and original names
+      return [dir_list, original_names]
+    else
+      # returns file list with absolute paths
+      return dir_list
+    end
   end
 
 end
