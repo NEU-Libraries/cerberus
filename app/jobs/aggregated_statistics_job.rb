@@ -6,7 +6,7 @@ class AggregatedStatisticsJob
   attr_accessor :communities, :collections, :files, :date
 
   def initialize(date)
-    self.date = date
+    self.date = date.new_offset(0) #this converts to UTC, since created_at uses UTC datestamps
   end
 
   def run
@@ -25,7 +25,7 @@ class AggregatedStatisticsJob
     progress_logger.info "#{Time.now} - Processing #{Impression.count(:ip_address, :distinct => true)} impressions."
 
     # Get the complete, public impressions (views, downloads, streams) and aggregate up to parent collection(s) and community(ies)
-    Impression.where("public = ? AND status = ? AND (created_at BETWEEN ? AND ?)", true, "COMPLETE", (date-1.week).beginning_of_day, date.end_of_day).find_each do |imp|
+    Impression.where("public = ? AND status = ? AND (created_at BETWEEN ? AND ?)", true, "COMPLETE", (date-6.days).beginning_of_day, date.end_of_day).find_each do |imp|
       begin
         doc = SolrDocument.new ActiveFedora::SolrService.query("id:\"#{imp.pid}\"").first
         if doc.klass == "CoreFile"
@@ -55,7 +55,7 @@ class AggregatedStatisticsJob
     end
 
     # User uploads and form edits for core_files and aggregate up to collection(s) and community(ies)
-    UploadAlert.where('content_type != ? AND (created_at BETWEEN ? AND ?)', 'collection', (date-1.week).beginning_of_day, date.end_of_day).find_each do |upl|
+    UploadAlert.where('content_type != ? AND (created_at BETWEEN ? AND ?)', 'collection', (date-6.days).beginning_of_day, date.end_of_day).find_each do |upl|
       begin
         doc = SolrDocument.new ActiveFedora::SolrService.query("id:\"#{upl.pid}\"").first
         if doc.klass == "CoreFile"
@@ -82,7 +82,7 @@ class AggregatedStatisticsJob
     end
 
     # Loader uploads and aggregate up
-    Loaders::ImageReport.where('validity = ? AND (created_at BETWEEN ? AND ?)', true, (date-1.week).beginning_of_day, date.end_of_day).find_each do |upl|
+    Loaders::ImageReport.where('validity = ? AND (created_at BETWEEN ? AND ?)', true, (date-6.days).beginning_of_day, date.end_of_day).find_each do |upl|
       begin
         doc = SolrDocument.new ActiveFedora::SolrService.query("id:\"#{upl.pid}\"").first
         if doc.klass == "CoreFile"
@@ -105,7 +105,7 @@ class AggregatedStatisticsJob
 
 
     # XML edits and aggregate up
-    XmlAlert.where('created_at BETWEEN ? AND ?', (date-1.week).beginning_of_day, date.end_of_day).find_each do |e|
+    XmlAlert.where('created_at BETWEEN ? AND ?', (date-6.days).beginning_of_day, date.end_of_day).find_each do |e|
       begin
         doc = SolrDocument.new ActiveFedora::SolrService.query("id:\"#{e.pid}\"").first
         if doc.klass == "CoreFile"
@@ -124,17 +124,17 @@ class AggregatedStatisticsJob
     end
 
     self.communities.each do |key, hsh|
-      s = AggregatedStatistic.new(:pid=>key, :object_type=>"community", :views=>hsh["view"], :downloads=>hsh["download"], :streams=>hsh["stream"], :user_uploads=>hsh["user_uploads"], :loader_uploads=>hsh["loader_uploads"], :form_edits=>hsh["form_edits"], :xml_edits=>hsh["xml_edits"], :size_increase=>hsh["size_increase"], :processed_at=>DateTime.now)
+      s = AggregatedStatistic.new(:pid=>key, :object_type=>"community", :views=>hsh["view"], :downloads=>hsh["download"], :streams=>hsh["stream"], :user_uploads=>hsh["user_uploads"], :loader_uploads=>hsh["loader_uploads"], :form_edits=>hsh["form_edits"], :xml_edits=>hsh["xml_edits"], :size_increase=>hsh["size_increase"], :processed_at=>date.new_offset("-04:00"))
       s.save!
     end
 
     self.collections.each do |key, hsh|
-      s = AggregatedStatistic.new(:pid=>key, :object_type=>"collection", :views=>hsh["view"], :downloads=>hsh["download"], :streams=>hsh["stream"], :user_uploads=>hsh["user_uploads"], :loader_uploads=>hsh["loader_uploads"], :form_edits=>hsh["form_edits"], :xml_edits=>hsh["xml_edits"], :size_increase=>hsh["size_increase"], :processed_at=>DateTime.now)
+      s = AggregatedStatistic.new(:pid=>key, :object_type=>"collection", :views=>hsh["view"], :downloads=>hsh["download"], :streams=>hsh["stream"], :user_uploads=>hsh["user_uploads"], :loader_uploads=>hsh["loader_uploads"], :form_edits=>hsh["form_edits"], :xml_edits=>hsh["xml_edits"], :size_increase=>hsh["size_increase"], :processed_at=>date.new_offset("-04:00"))
       s.save!
     end
 
     self.files.each do |key, hsh|
-      s = AggregatedStatistic.new(:pid=>key, :object_type=>"file", :views=>hsh["view"], :downloads=>hsh["download"], :streams=>hsh["stream"], :user_uploads=>hsh["user_uploads"], :loader_uploads=>hsh["loader_uploads"], :form_edits=>hsh["form_edits"], :xml_edits=>hsh["xml_edits"], :size_increase=>hsh["size_increase"], :processed_at=>DateTime.now)
+      s = AggregatedStatistic.new(:pid=>key, :object_type=>"file", :views=>hsh["view"], :downloads=>hsh["download"], :streams=>hsh["stream"], :user_uploads=>hsh["user_uploads"], :loader_uploads=>hsh["loader_uploads"], :form_edits=>hsh["form_edits"], :xml_edits=>hsh["xml_edits"], :size_increase=>hsh["size_increase"], :processed_at=>date.new_offset("-04:00"))
       s.save!
     end
   end
