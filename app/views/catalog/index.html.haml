@@ -34,7 +34,8 @@
         /   = render_pagination_info @response, :entry_name=>'item'
         = render 'sort_and_per_page'
       - if current_user
-        = render :partial=>'shared/save_files', locals: {smart_col: false}
+        = render :partial=>'shared/save_files'
+      = render :partial => "shared/rss", locals: {smart_col: false}
 
     %section{ class: drs_items_class }
       -# Main content
