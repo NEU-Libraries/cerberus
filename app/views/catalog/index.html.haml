@@ -35,6 +35,7 @@
         = render 'sort_and_per_page'
       - if current_user
         = render :partial=>'shared/save_files'
+      = render :partial => "shared/rss", locals: {smart_col: false}
 
     %section{ class: drs_items_class }
       -# Main content

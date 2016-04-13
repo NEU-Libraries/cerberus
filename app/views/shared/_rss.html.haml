@@ -1,0 +1,11 @@
+-if @document_list.length > 0 && !(params[:controller]=='communities' && params[:id]=="neu:1")
+  -if params[:action] == "index" #search
+    %a.btn.btn-clear.btn-mini{:href => url_for(params.merge(:format=>"rss"))}
+      %span.icon-rss( aria-hidden="true")
+  - else #browse
+    -if smart_col && smart_col != "communities" && smart_col != "employees"
+      %a.btn.btn-clear.btn-mini{:href => url_for(params.merge(:format=>"rss", :action=>"smart_col_recent_deposits", :smart_col=>smart_col))}
+        %span.icon-rss( aria-hidden="true")
+    -elsif !smart_col
+      %a.btn.btn-clear.btn-mini{:href => url_for(params.merge(:format=>"rss", :action=>"recent_deposits"))}
+        %span.icon-rss( aria-hidden="true")
