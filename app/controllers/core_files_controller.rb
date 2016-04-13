@@ -536,6 +536,7 @@ class CoreFilesController < ApplicationController
         @page = doc
       end
     end
+    params.delete(:per_page)
     @core_file = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{cf}\"").first)
     @page_title = "#{@core_file.title} - Page #{params[:page]}"
     respond_to do |format|
