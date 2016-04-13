@@ -13,6 +13,16 @@ describe Admin::CoreFilesController do
                                   depositor: "000000001",
                                   parent: root) }
 
+  before :all do
+    User.destroy.all
+    ActiveFedora::Base.destroy_all
+  end
+
+  after :all do
+    User.destroy.all
+    ActiveFedora::Base.destroy_all
+  end
+
   describe "GET #index" do
     context "as an admin" do
       before { sign_in admin }
