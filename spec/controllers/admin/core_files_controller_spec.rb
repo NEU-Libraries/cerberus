@@ -14,12 +14,12 @@ describe Admin::CoreFilesController do
                                   parent: root) }
 
   before :all do
-    User.destroy.all
+    User.destroy_all
     ActiveFedora::Base.destroy_all
   end
 
   after :all do
-    User.destroy.all
+    User.destroy_all
     ActiveFedora::Base.destroy_all
   end
 
