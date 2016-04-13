@@ -26,6 +26,9 @@
       = render 'catalog/sort_and_per_page'
     - if current_user && @set.klass != "Compilation"
       = render :partial=>'shared/save_files'
+    - if @set.klass != "Compilation"
+      = render :partial => "shared/rss", locals: {smart_col: false}
+
 
   %section{ class: drs_items_class }
     -# Main content

@@ -12,14 +12,22 @@ module SetListsHelper
       @pretty_description = convert_urls(@set.description)
     end
     @pretty_sort_name = pretty_sort_name(params[:sort])
-    self.solr_search_params_logic += [:apply_per_page_limit]
-    (@response, @document_list) = get_search_results
-    if @response.response['numFound'] > 0
-      respond_to do |format|
-        format.html { render 'shared/sets/show' }
-      end
+    if params[:format] == "rss"
+      params[:per_page] = 10
+      self.solr_search_params_logic += [:limit_to_public]
     else
-      redirect_to @set and return
+      self.solr_search_params_logic += [:apply_per_page_limit]
+    end
+    (@response, @document_list) = get_search_results
+    respond_to do |format|
+      format.html {
+        if @response.response['numFound'] > 0
+          render 'shared/sets/show'
+        else
+          redirect_to @set and return
+        end
+      }
+      format.rss  { render 'catalog/index', :formats => [:rss] }
     end
   end
 
@@ -75,14 +83,16 @@ module SetListsHelper
       end
       params[:sort] = "#{Solrizer.solr_name('system_create', :stored_sortable, type: :date)} desc"
       @pretty_sort_name = pretty_sort_name(params[:sort])
-      self.solr_search_params_logic += [:apply_per_page_limit]
-      (@response, @document_list) = get_search_results
-      if @response.response['numFound'] > 0
-        respond_to do |format|
-          format.html { render 'shared/smart_collections/smart_collection', locals: { smart_collection: params[:smart_col] } }
-        end
+      if params[:format] == "rss"
+        params[:per_page] = 10
+        self.solr_search_params_logic += [:limit_to_public]
       else
-        render 'shared/smart_collections/smart_collection', locals: { smart_collection: params[:smart_col] }
+        self.solr_search_params_logic += [:apply_per_page_limit]
+      end
+      (@response, @document_list) = get_search_results
+      respond_to do |format|
+        format.html { render 'shared/smart_collections/smart_collection', locals: { smart_collection: params[:smart_col] } }
+        format.rss  { render 'catalog/index', :formats => [:rss] }
       end
     end
   end
@@ -164,5 +174,12 @@ module SetListsHelper
     else
       return false
     end
+  end
+
+  def limit_to_public(solr_parameters, user_parameters)
+    solr_parameters[:fq] ||= []
+    solr_parameters[:fq] << "read_access_group_ssim:\"public\""
+    solr_parameters[:fq] << "-in_progress_tesim:true OR -incomplete_tesim:true"
+    solr_parameters[:fq] << "-embargo_release_date_dtsi:[* TO *]"
   end
 end

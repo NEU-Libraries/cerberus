@@ -58,7 +58,12 @@ class CatalogController < ApplicationController
       end
     else
       begin
-        self.solr_search_params_logic += [:apply_per_page_limit]
+        if params[:format] == "rss"
+          params[:per_page] = 10
+          self.solr_search_params_logic += [:limit_to_public]
+        else
+          self.solr_search_params_logic += [:apply_per_page_limit]
+        end
         super
       rescue Net::ReadTimeout
         self.solr_search_params_logic += [:disable_highlighting]
