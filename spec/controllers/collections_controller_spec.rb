@@ -7,6 +7,8 @@ describe CollectionsController do
   let(:root)             { FactoryGirl.create(:root_collection) }
   let(:admin)            { FactoryGirl.create(:admin) }
   let(:bills_collection) { FactoryGirl.create(:bills_private_collection) }
+  let(:incomplete_file)  { FactoryGirl.create(:bills_incomplete_file, parent: bills_collection)}
+  let(:embargoed_file)   { FactoryGirl.create(:bills_embargoed_file, parent: bills_collection)}
 
   before :all do
     `mysql -u "#{ENV["HANDLE_TEST_USERNAME"]}" < "#{Rails.root}"/spec/fixtures/files/handlesTEST.sql`
@@ -266,6 +268,34 @@ describe CollectionsController do
       request.path.should == expected
       response.body.should =~ /Recent Deposits/m
       response.body.should =~ /Bills Core/m
+    end
+
+    it "should respond with rss when asked for it" do
+      sign_in bill
+      cf = CoreFile.create(title: "Bills Core", parent: bills_collection, mass_permissions: "public", depositor: bill.nuid)
+      get :recent_deposits, { id: bills_collection.pid, format: "rss" }
+      response.body.should =~ /rss/m
+      response.body.should =~ /<item>/m
+    end
+
+    it "should not return items which are not public" do
+      sign_in bill
+      cf = CoreFile.create(title: "Bills Core", parent: bills_collection, mass_permissions: "private", depositor: bill.nuid)
+      get :recent_deposits, { id: bills_collection.pid, format: "rss" }
+      response.body.should =~ /rss/m
+      response.body.should_not =~ /<item>/m
+    end
+
+    it "should not return items which are incomplete or in progress" do
+      get :recent_deposits, { id: bills_collection.pid, format: "rss" }
+      response.body.should =~ /rss/m
+      response.body.should_not =~ /<item>/m
+    end
+
+    it "should not return items which are embargoed" do
+      get :recent_deposits, { id: bills_collection.pid, format: "rss" }
+      response.body.should =~ /rss/m
+      response.body.should_not =~ /<item>/m
     end
   end
 
