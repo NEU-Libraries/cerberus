@@ -2,7 +2,6 @@ require 'spec_helper'
 include ApplicationHelper
 
 describe "aggregated statistics job" do
-  # let(:employee)              { FactoryGirl.create(:employee) }
   let(:bill)                  { FactoryGirl.create(:bill) }
   let(:root_community)        { FactoryGirl.create(:root_community) }
   let(:test_community)        { FactoryGirl.create(:test_community, parent: root_community.pid) }
