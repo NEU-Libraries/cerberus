@@ -14,11 +14,6 @@
 
   :javascript
     $(document).ready(function(){
-      page = window.location.hash;
-      if (page[0] == '#'){ page = page.substring(1, page.length)}
-      if (page){
-        get_page("/files/#{@core_file.pid}/page/"+page, page);
-      }
       ajax_pagination();
       function ajax_pagination(){
         $(".pagination span a").on("click", function(e){
@@ -41,10 +36,11 @@
         })
       }
       function get_page(path, ordinal_value){
+        var stateObj = {};
+        history.pushState(stateObj,"", ordinal_value);
         $.getScript( path, function() {
           $("#single_page .spinner").remove();
           enable_pagination();
-          location.hash = ordinal_value
         });
       }
       function enable_pagination(){
