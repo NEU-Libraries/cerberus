@@ -6,6 +6,9 @@
   margin-left: 0;
   margin-bottom: 15px;
 }
+.pane.page-to-compilation{
+  display:inline-block;
+}
 
 .drs-facet-selected{
   @extend .alert;
