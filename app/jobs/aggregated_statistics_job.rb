@@ -124,17 +124,17 @@ class AggregatedStatisticsJob
     end
 
     self.communities.each do |key, hsh|
-      s = AggregatedStatistic.new(:pid=>key, :object_type=>"community", :views=>hsh["view"], :downloads=>hsh["download"], :streams=>hsh["stream"], :user_uploads=>hsh["user_uploads"], :loader_uploads=>hsh["loader_uploads"], :form_edits=>hsh["form_edits"], :xml_edits=>hsh["xml_edits"], :size_increase=>hsh["size_increase"], :processed_at=>date.new_offset("-04:00"))
+      s = AggregatedStatistic.new(:pid=>key, :object_type=>"community", :views=>hsh["view"], :downloads=>hsh["download"], :streams=>hsh["stream"], :user_uploads=>hsh["user_uploads"], :loader_uploads=>hsh["loader_uploads"], :form_edits=>hsh["form_edits"], :xml_edits=>hsh["xml_edits"], :size_increase=>hsh["size_increase"], :processed_at=>date)
       s.save!
     end
 
     self.collections.each do |key, hsh|
-      s = AggregatedStatistic.new(:pid=>key, :object_type=>"collection", :views=>hsh["view"], :downloads=>hsh["download"], :streams=>hsh["stream"], :user_uploads=>hsh["user_uploads"], :loader_uploads=>hsh["loader_uploads"], :form_edits=>hsh["form_edits"], :xml_edits=>hsh["xml_edits"], :size_increase=>hsh["size_increase"], :processed_at=>date.new_offset("-04:00"))
+      s = AggregatedStatistic.new(:pid=>key, :object_type=>"collection", :views=>hsh["view"], :downloads=>hsh["download"], :streams=>hsh["stream"], :user_uploads=>hsh["user_uploads"], :loader_uploads=>hsh["loader_uploads"], :form_edits=>hsh["form_edits"], :xml_edits=>hsh["xml_edits"], :size_increase=>hsh["size_increase"], :processed_at=>date)
       s.save!
     end
 
     self.files.each do |key, hsh|
-      s = AggregatedStatistic.new(:pid=>key, :object_type=>"file", :views=>hsh["view"], :downloads=>hsh["download"], :streams=>hsh["stream"], :user_uploads=>hsh["user_uploads"], :loader_uploads=>hsh["loader_uploads"], :form_edits=>hsh["form_edits"], :xml_edits=>hsh["xml_edits"], :size_increase=>hsh["size_increase"], :processed_at=>date.new_offset("-04:00"))
+      s = AggregatedStatistic.new(:pid=>key, :object_type=>"file", :views=>hsh["view"], :downloads=>hsh["download"], :streams=>hsh["stream"], :user_uploads=>hsh["user_uploads"], :loader_uploads=>hsh["loader_uploads"], :form_edits=>hsh["form_edits"], :xml_edits=>hsh["xml_edits"], :size_increase=>hsh["size_increase"], :processed_at=>date)
       s.save!
     end
   end
