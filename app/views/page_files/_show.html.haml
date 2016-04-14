@@ -29,7 +29,8 @@
           } else {
             ordinal_value = $(this).text();
             if (!$.isNumeric(ordinal_value)){
-              ordinal_value = url[url.length-1];
+              ordinal_value = url.split('/');
+              ordinal_value = ordinal_value[ordinal_value.length-1];
             }
           }
           get_page(href, ordinal_value);
