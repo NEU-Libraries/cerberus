@@ -488,4 +488,18 @@ class CatalogController < ApplicationController
       solr_parameters[:fq] << "timestamp:[" + Time.at(0).utc.xmlschema + " TO " + params[:until]+ "]"
     end
   end
+
+  def oai_set_filter(solr_parameters, user_parameters)
+    comp = Compilation.find("neu:#{params[:set]}")
+    pids = comp.object_ids
+
+    query = pids.map do |pid|
+      set = "id:\"#{pid}\""
+    end
+
+    fq = query.join(" OR ")
+
+    solr_parameters[:fq] ||= []
+    solr_parameters[:fq] << fq
+  end
 end
