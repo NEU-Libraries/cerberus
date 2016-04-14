@@ -25,6 +25,7 @@ class PropertiesDatastream < ActiveFedora::OmDatastream
     t.ordinal_last :index_as=>[:stored_searchable]
     t.file_size :index_as=>[:stored_searchable]
     t.stream_only :index_as=>[:stored_searchable]
+    t.published_set :index_as=>[:stored_searchable]
   end
 
   def self.xml_template
