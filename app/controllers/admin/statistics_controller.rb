@@ -42,12 +42,12 @@ class Admin::StatisticsController < ApplicationController
     @uploads_count = @loader_uploads + @interface_uploads
     @interface_upload_size = 0
     interface_upload_pids = UploadAlert.where('change_type = ? AND content_type != ? AND (created_at BETWEEN ? AND ?)', 'create', 'collection', DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day).pluck(:pid)
-    interface_uploads.each do |pid|
+    interface_upload_pids.each do |pid|
       @interface_upload_size += get_core_file_size(pid)
     end
     @loader_upload_size = 0
     loader_upload_pids = Loaders::ImageReport.where('validity = ? AND (created_at BETWEEN ? AND ?)', true, DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day).pluck(:pid)
-    loader_uploads.each do |pid|
+    loader_upload_pids.each do |pid|
       @loader_upload_size += get_core_file_size(pid)
     end
     @uploads_size = @interface_upload_size + @loader_upload_size
