@@ -24,6 +24,8 @@ en:
       name: "College of Professional Studies - Media Group"
     northeastern:drs:college_of_science:social_interaction_lab:
       name: "College of Science - Social Interaction Lab"
+    northeastern:drs:college_of_social_sciences_humanities:dudley_square_project:
+      name: "College of Social Sciences and Humanities - Dudley Square Project"
     northeastern:drs:damore_mckim:marcom:
       name: "D'Amore-McKim - Marketing Group"
     northeastern:drs:drspt:arader_gallery:
@@ -47,7 +49,9 @@ en:
     northeastern:drs:library:scholarly_communications:
       name: "University Library - Scholarly Communications"
     northeastern:drs:marketing_and_communications:staff:
-      name: "Office of Marketing and Communications"
+      name: "Office of Marketing and Communications - Photography Staff"
+    northeastern:drs:marketing_and_communications:art_staff:
+      name: "Office of Marketing and Communications - Art Staff"
     northeastern:drs:repository:admin:
       name: "DRS Advanced Users"
     northeastern:drs:repository:beta_users:
