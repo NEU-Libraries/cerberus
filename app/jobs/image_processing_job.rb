@@ -205,8 +205,8 @@ class ImageProcessingJob
 
         # Create a handle
         core_file.identifier = make_handle(core_file.persistent_url, client)
-        core_file.mods.identifier.type = "handle"
-        core_file.mods.identifier.display_label = "Permanent URL"
+        # core_file.mods.identifier.type = "handle"
+        # core_file.mods.identifier.display_label = "Permanent URL"
 
         # Process Thumbnail
         width = photo.imagewidth
