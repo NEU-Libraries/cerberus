@@ -2,18 +2,19 @@ include Cerberus::ThumbnailCreation
 include HandleHelper
 
 class MultipageProcessingJob
-  attr_accessor :dir_path, :file_values, :core_file_pid, :report_id, :zip_files
+  attr_accessor :dir_path, :file_values, :core_file_pid, :report_id, :client, :zip_files
 
   def queue_name
     :loader_multipage_processing
   end
 
-  def initialize(dir_path, file_values, core_file_pid, report_id, zip_files = nil)
+  def initialize(dir_path, file_values, core_file_pid, report_id, zip_files=nil, client=nil)
     self.dir_path = dir_path
     self.file_values = file_values
     self.core_file_pid = core_file_pid
     self.report_id = report_id
     self.zip_files = zip_files
+    self.client = client
   end
 
   def run
@@ -102,7 +103,7 @@ class MultipageProcessingJob
       load_report.image_reports.create_success(core_file, "")
 
       core_file.reload
-      core_file.identifier = make_handle(core_file.persistent_url)
+      core_file.identifier = make_handle(core_file.persistent_url, client)
       core_file.save!
     end
   end
