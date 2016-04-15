@@ -10,6 +10,8 @@ describe "MultipageCreateZipJob" do
     new_file = "#{new_path}.zip"
     zip_path = new_file.to_s
     @dir_path = File.join(File.dirname(zip_path), File.basename(zip_path, ".*"))
+    FileUtils.cp("#{Rails.root}/spec/fixtures/files/multipage/bdr_43889.tif", "#{@dir_path}/bdr_43889.tif")
+    FileUtils.cp("#{Rails.root}/spec/fixtures/files/multipage/bdr_43889.tif", "#{@dir_path}/bdr_43890.tif")
     @zip_files = ["bdr_43889.tif","bdr_43890.tif"]
   end
 
