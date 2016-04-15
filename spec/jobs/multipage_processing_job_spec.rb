@@ -22,7 +22,6 @@ describe MultipageProcessingJob do
 
   after :each do
     @client.query("DROP DATABASE #{ENV["HANDLE_TEST_DATABASE"]};")
-    @load_report.destroy if @load_report
     @user.destroy if @user
     Loaders::ImageReport.destroy_all
     Loaders::LoadReport.destroy_all
