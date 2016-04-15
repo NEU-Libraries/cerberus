@@ -326,7 +326,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
         xml.subject{
           xml.keyword ""
         }
-        xml.identifier('type' => 'handle', 'displayLabel' => 'Permanent URL')
+        xml.identifier('type' => 'hdl', 'displayLabel' => 'Permanent URL')
         xml.typeOfResource
         xml.physicalDescription{
           xml.form
