@@ -124,7 +124,7 @@ describe ImageProcessingJob do
       it 'creates handle' do
         @core_file = CoreFile.find("#{@images.first.pid}")
         @core_file.identifier.should == retrieve_handle(@core_file.persistent_url, @client)
-        @core_file.mods.identifier.type.should == ["handle"]
+        @core_file.mods.identifier.type.should == ["hdl"]
         @core_file.mods.identifier.display_label.should == ["Permanent URL"]
       end
 
