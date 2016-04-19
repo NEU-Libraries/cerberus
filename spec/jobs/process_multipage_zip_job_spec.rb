@@ -1,14 +1,14 @@
 require 'spec_helper'
 
 describe ProcessMultipageZipJob do
-  before(:all) do
+  before(:each) do
     `mysql -u "#{ENV["HANDLE_USERNAME"]}" < "#{Rails.root}"/spec/fixtures/files/handlesTEST.sql`
     @client = Mysql2::Client.new(:host => "#{ENV["HANDLE_TEST_HOST"]}", :username => "#{ENV["HANDLE_TEST_USERNAME"]}", :password => "#{ENV["HANDLE_TEST_PASSWORD"]}", :database => "#{ENV["HANDLE_TEST_DATABASE"]}")
     @loader_name = "Multipage"
     @user = FactoryGirl.create(:admin)
   end
 
-  after(:all) do
+  after(:each) do
     @client.query("DROP DATABASE #{ENV["HANDLE_TEST_DATABASE"]};")
     @user.destroy if @user
   end
@@ -74,7 +74,7 @@ describe ProcessMultipageZipJob do
   end
 
   context "multipage object" do
-    before(:all) do
+    before(:each) do
       @parent = FactoryGirl.create(:root_collection)
       tempdir = Pathname.new("#{Rails.application.config.tmp_path}/")
       @uniq_hsh = Digest::MD5.hexdigest("#{Rails.root}/spec/fixtures/files/multipage.zip")[0,2]
@@ -105,7 +105,7 @@ describe ProcessMultipageZipJob do
       cf.label.should == "bdr_43888.mods.xml"
     end
 
-    after :all do
+    after :each do
       Loaders::LoadReport.destroy_all
       Loaders::ImageReport.destroy_all
       ActiveFedora::Base.destroy_all
@@ -113,7 +113,7 @@ describe ProcessMultipageZipJob do
   end
 
   context "single object" do
-    before(:all) do
+    before(:each) do
       @parent = FactoryGirl.create(:root_collection)
       tempdir = Pathname.new("#{Rails.application.config.tmp_path}/")
       @uniq_hsh = Digest::MD5.hexdigest("#{Rails.root}/spec/fixtures/files/multipage-notmulti.zip")[0,2]
@@ -150,7 +150,7 @@ describe ProcessMultipageZipJob do
       PageFile.count.should == 0
     end
 
-    after :all do
+    after :each do
       Loaders::LoadReport.destroy_all
       Loaders::ImageReport.destroy_all
       ActiveFedora::Base.destroy_all
@@ -158,7 +158,7 @@ describe ProcessMultipageZipJob do
   end
 
   context "fails if invalid mods" do
-    before(:all) do
+    before(:each) do
       @parent = FactoryGirl.create(:root_collection)
       tempdir = Pathname.new("#{Rails.application.config.tmp_path}/")
       @uniq_hsh = Digest::MD5.hexdigest("#{Rails.root}/spec/fixtures/files/multipage-invalid-mods.zip")[0,2]
@@ -179,7 +179,7 @@ describe ProcessMultipageZipJob do
       rep.exception.should == "Invalid MODS"
     end
 
-    after :all do
+    after :each do
       Loaders::LoadReport.destroy_all
       Loaders::ImageReport.destroy_all
       ActiveFedora::Base.destroy_all
@@ -187,7 +187,7 @@ describe ProcessMultipageZipJob do
   end
 
   context  "fails if no mods provided" do
-    before(:all) do
+    before(:each) do
       @parent = FactoryGirl.create(:root_collection)
       tempdir = Pathname.new("#{Rails.application.config.tmp_path}/")
       @uniq_hsh = Digest::MD5.hexdigest("#{Rails.root}/spec/fixtures/files/multipage-no-mods.zip")[0,2]
@@ -208,7 +208,7 @@ describe ProcessMultipageZipJob do
       rep.exception.should == "Can't load MODS XML"
     end
 
-    after :all do
+    after :each do
       Loaders::LoadReport.destroy_all
       Loaders::ImageReport.destroy_all
       ActiveFedora::Base.destroy_all
@@ -216,7 +216,7 @@ describe ProcessMultipageZipJob do
   end
 
   context "bad row sequence" do
-    before(:all) do
+    before(:each) do
       @parent = FactoryGirl.create(:root_collection)
       tempdir = Pathname.new("#{Rails.application.config.tmp_path}/")
       @uniq_hsh = Digest::MD5.hexdigest("#{Rails.root}/spec/fixtures/files/multipage-bad-sequence.zip")[0,2]
@@ -237,7 +237,7 @@ describe ProcessMultipageZipJob do
       rep.exception.should == "Row is out of order - row num 3 seq_num 1"
     end
 
-    after :all do
+    after :each do
       Loaders::LoadReport.destroy_all
       Loaders::ImageReport.destroy_all
       ActiveFedora::Base.destroy_all
