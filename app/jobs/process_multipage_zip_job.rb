@@ -28,10 +28,10 @@ class ProcessMultipageZipJob
     dir_path = File.join(File.dirname(zip_path), File.basename(zip_path, ".*"))
     spreadsheet_file_path = unzip(zip_path, dir_path)
 
-    process_spreadsheet(dir_path, spreadsheet_file_path, load_report)
+    process_spreadsheet(dir_path, spreadsheet_file_path, load_report, client)
   end
 
-  def process_spreadsheet(dir_path, spreadsheet_file_path, load_report)
+  def process_spreadsheet(dir_path, spreadsheet_file_path, load_report, client)
     count = 0
     spreadsheet = load_spreadsheet(spreadsheet_file_path)
 
@@ -122,14 +122,14 @@ class ProcessMultipageZipJob
             if row_results["last_item"].downcase == "true"
               zip_files << row_results["file_name"]
               # Send an array of file_names to be zipped and attached to the core_file
-              MultipageProcessingJob.new(dir_path, row_results, core_file.pid, load_report.id, zip_files).run
+              MultipageProcessingJob.new(dir_path, row_results, core_file.pid, load_report.id, zip_files, client).run
               # reset for next paged item
               core_file = nil
               seq_num = -1
               zip_files = []
             else
               zip_files << row_results["file_name"]
-              MultipageProcessingJob.new(dir_path, row_results, core_file.pid, load_report.id).run
+              MultipageProcessingJob.new(dir_path, row_results, core_file.pid, load_report.id, nil, client).run
               # Keep on goin'
               seq_num = row_num
             end
