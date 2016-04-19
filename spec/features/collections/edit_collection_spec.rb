@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 feature "Editing collections" do
-  before :all do
+  before :each do
     Employee.destroy_all
     @root = Community.create(pid: "neu:1")
     @root.identifier = "neu:1"
@@ -109,7 +109,7 @@ feature "Editing collections" do
 
   # Objects instantiated in before :all hooks aren't cleaned up by rails transactional behavior.
   # Fedora objects are generally not rolled back either.
-  after :all do
+  after :each do
     ActiveFedora::Base.destroy_all
     User.destroy_all
   end
