@@ -26,6 +26,8 @@ en:
       name: "College of Science - Social Interaction Lab"
     northeastern:drs:college_of_social_sciences_humanities:dudley_square_project:
       name: "College of Social Sciences and Humanities - Dudley Square Project"
+    northeastern:drs:college_of_social_sciences_humanities:holocaust_awareness_committee:
+      name: "Holocaust Awareness Committee"
     northeastern:drs:damore_mckim:marcom:
       name: "D'Amore-McKim - Marketing Group"
     northeastern:drs:drspt:arader_gallery:
