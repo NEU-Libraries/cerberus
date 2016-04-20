@@ -167,7 +167,7 @@ class ApplicationController < ActionController::Base
   end
 
   def apply_per_page_limit(solr_parameters, user_parameters)
-    # solr_parameters[:per_page] = drs_per_page
     solr_parameters[:rows] = drs_per_page
+    user_parameters[:rows] = drs_per_page
   end
 end
