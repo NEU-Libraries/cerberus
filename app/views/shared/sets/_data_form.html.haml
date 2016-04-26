@@ -18,7 +18,7 @@
         - if "#{@set.class}" != "Compilation"
           .span4
             = f.label :thumbnail, "Upload thumbnail"
-            = f.file_field :thumbnail, name: 'thumbnail'
+            = f.file_field :thumbnail, name: 'thumbnail', accept:".jpg,.jpeg,.png"
             %span.help-block
               Will be displayed on collection pages. (150px by 150px)
       = f.label :description, "Description"
