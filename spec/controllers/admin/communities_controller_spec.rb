@@ -61,6 +61,31 @@ describe Admin::CommunitiesController do
       get :new
       expect(response).to redirect_to(root_path)
     end
+
+    it "redirects to admin communities if thumbnail is not an image" do
+      sign_in admin
+      file = fixture_file_upload("/files/test.pdf")
+      attrs = {title: "Test", description: "test", parent: root_community.id }
+
+      post :create, {community: attrs, thumbnail: file}
+
+      id = assigns(:community).pid
+      expect(response).to redirect_to(admin_communities_path)
+    end
+
+    it "creates collection thumbnail if thumbnail is an image" do
+      sign_in admin
+      file = fixture_file_upload("/files/image.png")
+      attrs = {title: "Test", description: "test", parent: root_community.id }
+
+      post :create, {community: attrs, thumbnail: file}
+
+      id = assigns(:community).pid
+      expect(response).to redirect_to(admin_communities_path)
+      set = Community.find(id)
+      set.thumbnail_1.should_not be nil
+      set.thumbnail_1.should be_instance_of(FileContentDatastream)
+    end
   end
 
   describe "GET #edit" do
@@ -84,6 +109,30 @@ describe Admin::CommunitiesController do
 
       assigns(:community).title.should eq "Test title edit"
       assigns(:community).description.should eq "Test edit desc"
+    end
+
+    it "redirects to admin communities page if thumbnail is not an image" do
+      sign_in admin
+      file = fixture_file_upload("/files/test.pdf")
+      attrs = {title: "Test title edit", description: "Test edit desc"}
+      put :update, {id: test_community.pid, community: attrs, thumbnail: file}
+
+      id = assigns(:community).pid
+      expect(response).to redirect_to(admin_communities_path)
+    end
+
+    it "creates collection thumbnail if thumbnail is an image" do
+      sign_in admin
+      file = fixture_file_upload("/files/image.png")
+      attrs = {title: "Test title edit", description: "Test edit desc"}
+
+      put :update, {id: test_community.pid, community: attrs, thumbnail: file}
+
+      id = assigns(:community).pid
+      expect(response).to redirect_to(admin_communities_path)
+      set = Community.find(id)
+      set.thumbnail_1.should_not be nil
+      set.thumbnail_1.should be_instance_of(FileContentDatastream)
     end
   end
 
