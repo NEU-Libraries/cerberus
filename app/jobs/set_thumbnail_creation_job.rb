@@ -22,11 +22,10 @@ class SetThumbnailCreationJob
     thumbnail_list = []
 
     set = ActiveFedora::Base.find(@set_pid, cast: true)
-    blob = File.open(@file_path).read
 
-    create_scaled_progressive_jpeg(@set_pid, blob, {height: 85, width: 85}, 'thumbnail_1')
-    create_scaled_progressive_jpeg(@set_pid, blob, {height: 170, width: 170}, 'thumbnail_2')
-    create_scaled_progressive_jpeg(@set_pid, blob, {height: 340, width: 340}, 'thumbnail_3')
+    create_scaled_progressive_jpeg(@set_pid, @file_path, {height: 85, width: 85}, 'thumbnail_1')
+    create_scaled_progressive_jpeg(@set_pid, @file_path, {height: 170, width: 170}, 'thumbnail_2')
+    create_scaled_progressive_jpeg(@set_pid, @file_path, {height: 340, width: 340}, 'thumbnail_3')
 
     set.reload
 
