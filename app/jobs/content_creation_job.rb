@@ -48,7 +48,7 @@ class ContentCreationJob
         # Is it literally a zipfile? or did it just fail to be the other types...
         if File.extname(file_path) == ".zip"
           # if file is large, we http kludge it in to avoid loading into memory
-          if File.size(file_path) / 1024000 > 500
+          if File.size(file_path) / 1024000 > 50
             large_upload(content_object, file_path, 'content')
             content_object.properties.mime_type = extract_mime_type(file_path)
             content_object.properties.md5_checksum = new_checksum(file_path)
@@ -65,7 +65,7 @@ class ContentCreationJob
         end
       else
         # if file is large, we http kludge it in to avoid loading into memory
-        if File.size(file_path) / 1024000 > 500
+        if File.size(file_path) / 1024000 > 50
           large_upload(content_object, file_path, 'content')
           content_object.properties.mime_type = extract_mime_type(file_path)
           content_object.properties.md5_checksum = new_checksum(file_path)
