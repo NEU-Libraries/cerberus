@@ -119,7 +119,7 @@ class CollectionsController < ApplicationController
         Cerberus::Application::Queue.push(SetThumbnailCreationJob.new(@set.pid, new_path))
       else
         flash[:error] = "Error! The thumbnail attached is not an image."
-        redirect_to new_collection_path(@set.pid) and return
+        redirect_to new_collection_path and return
       end
     end
 

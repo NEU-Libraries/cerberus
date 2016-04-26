@@ -6,7 +6,7 @@ describe CollectionsController do
   let(:bo)               { FactoryGirl.create(:bo) }
   let(:root)             { FactoryGirl.create(:root_collection) }
   let(:admin)            { FactoryGirl.create(:admin) }
-  let(:bills_collection) { FactoryGirl.create(:bills_private_collection) }
+  let(:bills_collection) { FactoryGirl.create(:bills_private_collection, parent: root)}
   let(:incomplete_file)  { FactoryGirl.create(:bills_incomplete_file, parent: bills_collection)}
   let(:embargoed_file)   { FactoryGirl.create(:bills_embargoed_file, parent: bills_collection)}
 
@@ -97,6 +97,33 @@ describe CollectionsController do
       id = assigns(:set).pid
       assigns(:set).smart_collection_type.should == 'miscellany'
       expect(response).to redirect_to(collection_path(id: id))
+    end
+
+    it "redirects to new show page if thumbnail is not an image" do
+      sign_in bill
+      file = fixture_file_upload("/files/test.pdf")
+      attrs = {title: "Test", description: "test", date: Date.today.to_s, parent: bills_collection.id}
+
+      post :create, {set: attrs, thumbnail: file}
+
+      id = assigns(:set).pid
+      expect(response).to redirect_to(new_collection_path)
+    end
+
+    it "creates collection thumbnail if thumbnail is an image" do
+      sign_in bill
+      file = fixture_file_upload("/files/image.png")
+      attrs = {title: "Test", description: "test", date: Date.today.to_s, parent: bills_collection.id}
+
+      post :create, {set: attrs, thumbnail: file}
+
+      id = assigns(:set).pid
+      expect(response).to redirect_to(collection_path(id: id))
+      set = Collection.find(id)
+      set.thumbnail_1.should_not be nil
+      set.thumbnail_2.should_not be nil
+      set.thumbnail_3.should_not be nil
+      set.thumbnail_1.should be_instance_of(FileContentDatastream)
     end
   end
 
@@ -244,6 +271,29 @@ describe CollectionsController do
 
       assigns(:set).title.should == "nu title"
       expect(response).to redirect_to(collection_path(id: child_one.pid))
+    end
+
+    it "redirects to edit page if thumbnail is not an image" do
+      sign_in bill
+      file = fixture_file_upload("/files/test.pdf")
+
+      put :update, {id: bills_collection.pid, set:{ title: "nu title" }, thumbnail: file}
+
+      expect(response).to redirect_to(edit_collection_path(id:bills_collection.id))
+    end
+
+    it "creates collection thumbnail if thumbnail is an image" do
+      sign_in bill
+      file = fixture_file_upload("/files/image.png")
+
+      put :update, {id: bills_collection.pid, set:{ title: "nu title" }, thumbnail: file}
+
+      expect(response).to redirect_to(collection_path(id: bills_collection.id))
+      set = Collection.find(bills_collection.id)
+      set.thumbnail_1.should_not be nil
+      set.thumbnail_2.should_not be nil
+      set.thumbnail_3.should_not be nil
+      set.thumbnail_1.should be_instance_of(FileContentDatastream)
     end
   end
 
