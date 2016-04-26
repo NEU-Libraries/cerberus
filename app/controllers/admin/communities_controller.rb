@@ -12,7 +12,7 @@ class Admin::CommunitiesController < AdminController
 
   include BlacklightAdvancedSearch::ParseBasicQ
   include BlacklightAdvancedSearch::Controller
-
+  include MimeHelper
   include Cerberus::TempFileStorage
 
   # Loads @community
@@ -118,7 +118,14 @@ class Admin::CommunitiesController < AdminController
       if params[:thumbnail]
         file = params[:thumbnail]
         new_path = move_file_to_tmp(file)
-        Cerberus::Application::Queue.push(SetThumbnailCreationJob.new(@community.pid, new_path))
+        mime = extract_mime_type(new_path)
+        type = mime.split("/").first.strip
+        if type == 'image'
+          Cerberus::Application::Queue.push(SetThumbnailCreationJob.new(@community.pid, new_path))
+        else
+          flash[:error] = "Error! The thumbnail attached is not an image."
+          return false
+        end
       end
 
       if params[:theses] && !@community.has_theses?
