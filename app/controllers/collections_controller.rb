@@ -10,6 +10,7 @@ class CollectionsController < ApplicationController
   include Cerberus::ControllerHelpers::PermissionsCheck
   include UrlHelper
   include SetListsHelper
+  include MimeHelper
 
   include Blacklight::Catalog
   include Blacklight::Configurable # comply with BL 3.7
@@ -112,7 +113,14 @@ class CollectionsController < ApplicationController
     if params[:thumbnail]
       file = params[:thumbnail]
       new_path = move_file_to_tmp(file)
-      Cerberus::Application::Queue.push(SetThumbnailCreationJob.new(@set.pid, new_path))
+      mime = extract_mime_type(new_path)
+      type = mime.split("/").first.strip
+      if type == 'image'
+        Cerberus::Application::Queue.push(SetThumbnailCreationJob.new(@set.pid, new_path))
+      else
+        flash[:error] = "Error! The thumbnail attached is not an image."
+        redirect_to new_collection_path(@set.pid) and return
+      end
     end
 
     @set.depositor = current_user.nuid
@@ -183,7 +191,14 @@ class CollectionsController < ApplicationController
     if params[:thumbnail]
       file = params[:thumbnail]
       new_path = move_file_to_tmp(file)
-      Cerberus::Application::Queue.push(SetThumbnailCreationJob.new(@set.pid, new_path))
+      mime = extract_mime_type(new_path)
+      type = mime.split("/").first.strip
+      if type == 'image'
+        Cerberus::Application::Queue.push(SetThumbnailCreationJob.new(@set.pid, new_path))
+      else
+        flash[:error] = "Error! The thumbnail attached is not an image."
+        redirect_to edit_collection_path(@set.pid) and return
+      end
     end
 
     if @set.update_attributes(params[:set])

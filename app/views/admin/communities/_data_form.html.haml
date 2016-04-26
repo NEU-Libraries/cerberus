@@ -31,7 +31,7 @@
       .row-fluid
         .span8
           = f.label :thumbnail, "Thumbnail"
-          = f.file_field :thumbnail, name: 'thumbnail'
+          = f.file_field :thumbnail, name: 'thumbnail', accept:".jpg,.jpeg,.png"
     %hr
     %legend Theses and Dissertations
     %fieldset
