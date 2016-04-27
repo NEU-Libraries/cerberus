@@ -1,17 +1,25 @@
 class AggregatedStatisticsJob
+  require 'fileutils'
+
   def queue_name
     :aggregated_statistics
   end
 
-  attr_accessor :communities, :collections, :files, :date
+  attr_accessor :date, :communities, :collections, :files
 
   def initialize(date)
-    self.date = date.new_offset(0) #this converts to UTC, since created_at uses UTC datestamps
+    if date.nil?
+      if AggregatedStatistic.count > 0
+        self.date = AggregatedStatistic.last.processed_at.+1.week
+      else
+        self.date = DateTime.now.end_of_week.-2.days
+      end
+    else
+      self.date = date.new_offset(0)
+    end
   end
 
   def run
-    require 'fileutils'
-
     self.communities = Hash.new{|h, k| h[k] = Hash.new{ |h, k| h[k] = 0 }}
     self.collections = Hash.new{|h, k| h[k] = Hash.new{ |h, k| h[k] = 0 }}
     self.files = Hash.new{|h, k| h[k] = Hash.new{ |h, k| h[k] = 0 }}
@@ -124,19 +132,22 @@ class AggregatedStatisticsJob
     end
 
     self.communities.each do |key, hsh|
-      s = AggregatedStatistic.new(:pid=>key, :object_type=>"community", :views=>hsh["view"], :downloads=>hsh["download"], :streams=>hsh["stream"], :user_uploads=>hsh["user_uploads"], :loader_uploads=>hsh["loader_uploads"], :form_edits=>hsh["form_edits"], :xml_edits=>hsh["xml_edits"], :size_increase=>hsh["size_increase"], :processed_at=>date)
+      s = AggregatedStatistic.new(:pid=>key, :object_type=>"community", :views=>hsh["view"], :downloads=>hsh["download"], :streams=>hsh["stream"], :user_uploads=>hsh["user_uploads"], :loader_uploads=>hsh["loader_uploads"], :form_edits=>hsh["form_edits"], :xml_edits=>hsh["xml_edits"], :size_increase=>size_in_mb(hsh["size_increase"]), :processed_at=>date)
       s.save!
     end
 
     self.collections.each do |key, hsh|
-      s = AggregatedStatistic.new(:pid=>key, :object_type=>"collection", :views=>hsh["view"], :downloads=>hsh["download"], :streams=>hsh["stream"], :user_uploads=>hsh["user_uploads"], :loader_uploads=>hsh["loader_uploads"], :form_edits=>hsh["form_edits"], :xml_edits=>hsh["xml_edits"], :size_increase=>hsh["size_increase"], :processed_at=>date)
+      s = AggregatedStatistic.new(:pid=>key, :object_type=>"collection", :views=>hsh["view"], :downloads=>hsh["download"], :streams=>hsh["stream"], :user_uploads=>hsh["user_uploads"], :loader_uploads=>hsh["loader_uploads"], :form_edits=>hsh["form_edits"], :xml_edits=>hsh["xml_edits"], :size_increase=>size_in_mb(hsh["size_increase"]), :processed_at=>date)
       s.save!
     end
 
     self.files.each do |key, hsh|
-      s = AggregatedStatistic.new(:pid=>key, :object_type=>"file", :views=>hsh["view"], :downloads=>hsh["download"], :streams=>hsh["stream"], :user_uploads=>hsh["user_uploads"], :loader_uploads=>hsh["loader_uploads"], :form_edits=>hsh["form_edits"], :xml_edits=>hsh["xml_edits"], :size_increase=>hsh["size_increase"], :processed_at=>date)
+      s = AggregatedStatistic.new(:pid=>key, :object_type=>"file", :views=>hsh["view"], :downloads=>hsh["download"], :streams=>hsh["stream"], :user_uploads=>hsh["user_uploads"], :loader_uploads=>hsh["loader_uploads"], :form_edits=>hsh["form_edits"], :xml_edits=>hsh["xml_edits"], :size_increase=>size_in_mb(hsh["size_increase"]), :processed_at=>date)
       s.save!
     end
+
+    progress_logger.close()
+    failed_pids_log.close()
   end
 
   def increase_parent_statistics(pid, action)
@@ -185,11 +196,11 @@ class AggregatedStatisticsJob
 
     if set.klass == "Community"
       # Stub out
-      self.communities["#{pid}"]["size_increase"]
+      self.communities["#{pid}"]["size_increase"] #in MB
       self.communities["#{pid}"]["size_increase"] += size
     elsif set.klass == "Collection"
       # Stub out
-      self.collections["#{pid}"]["size_increase"]
+      self.collections["#{pid}"]["size_increase"] #in MB
       self.collections["#{pid}"]["size_increase"] += size
     end
 
@@ -240,6 +251,10 @@ class AggregatedStatisticsJob
     self.files["#{pid}"]["loader_uploads"]
     self.files["#{pid}"]["form_edits"]
     self.files["#{pid}"]["xml_edits"]
-    self.files["#{pid}"]["size_increase"]
+    self.files["#{pid}"]["size_increase"] #in MB
+  end
+
+  def size_in_mb(size)
+    return (size/1024)/1024)
   end
 end
