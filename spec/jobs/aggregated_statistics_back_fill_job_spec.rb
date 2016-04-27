@@ -147,7 +147,7 @@ describe "aggregated statistics back fill job" do
 
       it 'gets filesize for user_uploads and propogates up' do
         UploadAlert.create_from_core_file(file, :create)
-        size = get_core_file_size(file.pid)
+        size = (get_core_file_size(file.pid)/1024)/1024
         date = DateTime.now.+2.weeks
         @job = AggregatedStatisticsBackFillJob.new(date)
         @job.run
