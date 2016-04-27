@@ -17,13 +17,19 @@ module Cerberus::ThumbnailCreation
       begin
         item = ActiveFedora::Base.find(item_pid, cast: true)
 
-        img = Magick::Image.read(file_path).first
+        if item.core_record.canonical_class.in?(['MswordFile', 'PdfFile'])
+          img = Magick::Image.read("#{file_path}[0]").first
+        else
+          img = Magick::Image.read(file_path).first
+        end
 
         if size[:height] && size[:width]
           scaled_img = img.resize_to_fit(size[:height], size[:width])
           fill = Magick::Image.new(size[:height], size[:width])
           fill = fill.matte_floodfill(1, 1)
           end_img = fill.composite!(scaled_img, Magick::CenterGravity, Magick::OverCompositeOp)
+
+          scaled_img.destroy!
         elsif size[:width]
           end_img = img.resize_to_fit(size[:width])
         else
@@ -35,6 +41,9 @@ module Cerberus::ThumbnailCreation
 
         item.add_file(end_img.to_blob, dsid, "#{dsid}.jpeg")
         item.save!
+
+        img.destroy!
+        end_img.destroy!
       rescue Exception => error
         ExceptionNotifier.notify_exception(error, :data => {:pid => "#{item_pid}"})
       end
