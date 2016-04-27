@@ -12,23 +12,14 @@ class AggregatedStatisticsBackFillJob
   def run
     require 'fileutils'
 
-    job_id = "#{Time.now.to_i}-aggregated-statistics-backfill"
-    FileUtils.mkdir_p "#{Rails.root}/log/#{job_id}"
-
-    failed_pids_log = Logger.new("#{Rails.root}/log/#{job_id}/aggregated-statistics-job-failed-pids.log")
-
-    progress_logger = Logger.new("#{Rails.root}/log/#{job_id}/aggregated-statistics-job.log")
-    progress_logger.info "#{Time.now} - Processing #{Impression.count(:ip_address, :distinct => true)} impressions."
-
     #queue off back fill from given date until the beginning of time
     if (date > (DateTime.now.-2.years))
       AggregatedStatisticsJob.new(date).run #run the week being kicked off
-      AggregatedStatisticsBackFillJob.new(date.-1.week).run #run this job again for the week before
+      prior_week = date.-1.week
+      AggregatedStatisticsBackFillJob.new(prior_week).run #run this job again for the week before
     else
       #we don't have stats this old, lets stop the process
     end
-
-
   end
 
 end
