@@ -30,7 +30,7 @@ module HandleHelper
   end
 
   def handle_exists?(url, client = nil)
-    client || client = Mysql2::Client.new(:host => "#{ENV["HANDLE_HOST"]}", :username => "#{ENV["HANDLE_USERNAME"]}", :password => "#{ENV["HANDLE_PASSWORD"]}", :database => "#{ENV["HANDLE_DATABASE"]}")
+    client || client = Rails.application.config.handles_connection
     query = "SELECT handle FROM handles WHERE type=\"URL\" and data=\"#{url}\";"
     mysql_response = client.query(query)
     if mysql_response.count == 0
@@ -41,7 +41,7 @@ module HandleHelper
   end
 
   def retrieve_handle(url, client = nil)
-    client || client = Mysql2::Client.new(:host => "#{ENV["HANDLE_HOST"]}", :username => "#{ENV["HANDLE_USERNAME"]}", :password => "#{ENV["HANDLE_PASSWORD"]}", :database => "#{ENV["HANDLE_DATABASE"]}")
+    client || client = Rails.application.config.handles_connection
     if handle_exists?(url, client)
       query = "SELECT handle FROM handles WHERE type=\"URL\" and data=\"#{url}\";"
       mysql_response = client.query(query)
