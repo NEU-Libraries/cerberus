@@ -1,7 +1,7 @@
 module HandleHelper
 
   def make_handle(url, client = nil)
-    client || client = Mysql2::Client.new(:host => "#{ENV["HANDLE_HOST"]}", :username => "#{ENV["HANDLE_USERNAME"]}", :password => "#{ENV["HANDLE_PASSWORD"]}", :database => "#{ENV["HANDLE_DATABASE"]}")
+    client || client = Rails.application.config.handles_connection
 
     handler = Proc.new do |exception, attempt_number, total_delay|
       logger.warn "Handler saw a #{exception.class}; retry attempt #{attempt_number}; #{total_delay} seconds have passed."
