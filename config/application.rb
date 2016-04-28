@@ -111,5 +111,7 @@ module Cerberus
     else
       config.tmp_path = "#{Rails.root}/tmp"
     end
+
+    config.handles_connection = Mysql2::Client.new(:host => "#{ENV["HANDLE_HOST"]}", :username => "#{ENV["HANDLE_USERNAME"]}", :password => "#{ENV["HANDLE_PASSWORD"]}", :database => "#{ENV["HANDLE_DATABASE"]}")
   end
 end
