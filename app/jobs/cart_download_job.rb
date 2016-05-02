@@ -37,7 +37,7 @@ class CartDownloadJob
         download_label = I18n.t("drs.display_labels.#{item.klass}.download")
         if item.public? || user.can?(:read, item)
           Zip::File.open(temp_path) do |zipfile|
-            zipfile.add("downloads/neu_#{pid.split(":").last}-#{download_label}.#{extract_extension(item.properties.mime_type.first)}", item.fedora_file_path)
+            zipfile.add("downloads/neu_#{pid.split(":").last}-#{download_label}.#{extract_extension(item.properties.mime_type.first, File.extname(item.original_filename || "").delete!("."))}", item.fedora_file_path)
           end
 
           # Record the download

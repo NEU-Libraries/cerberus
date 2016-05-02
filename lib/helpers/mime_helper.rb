@@ -22,7 +22,7 @@ module MimeHelper
     elsif result.blank?
       return original_extension
     elsif !result.match(/\s/).nil?
-      return result.slice(0..(result.index(' ')-1))
+      return result.slice(0..(result.index(' ')-1)).gsub(/[^0-9a-z ]/i, '') #stip non alphanumeric characters
     end
 
     # Catch all
