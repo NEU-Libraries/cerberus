@@ -99,7 +99,7 @@ class ZipCompilationJob
             if content.content.content && content.class != ImageThumbnailFile
               download_label = I18n.t("drs.display_labels.#{content.klass}.download")
               Zip::File.open(temp_zipfile_name) do |zipfile|
-                zipfile.add("#{self.title}/neu_#{id.split(":").last}-#{download_label}.#{extract_extension(content.properties.mime_type.first)}", content.fedora_file_path)
+                zipfile.add("#{self.title}/neu_#{id.split(":").last}-#{download_label}.#{extract_extension(content.properties.mime_type.first, File.extname(content.original_filename || "").delete!("."))}", content.fedora_file_path)
               end
             end
           end
