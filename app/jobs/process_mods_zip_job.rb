@@ -42,7 +42,6 @@ class ProcessModsZipJob
       if row.present? && header_row.present?
         row_results = process_a_row(header_row, row)
         # TODO fill out
-        end
       end
     end
 
