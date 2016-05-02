@@ -38,113 +38,19 @@ class ProcessModsZipJob
     header_position = 1
     header_row = spreadsheet.row(header_position)
 
-    zip_files = []
-    core_file = nil
-    seq_num = -1
-
     spreadsheet.each_row_streaming(offset: header_position) do |row|
       if row.present? && header_row.present?
         row_results = process_a_row(header_row, row)
-
-        row_num = row_results["sequence"].to_i
-
-        # if row_results ordinal 0
-        if row_num == 0
-          count = count + 1
-          load_report.save!
-          load_report.update_counts
-
-          core_file = CoreFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
-          core_file.depositor = self.current_user.nuid
-          # core_file.depositor = "000000000"
-          core_file.parent = Collection.find(parent)
-          core_file.properties.parent_id = core_file.parent.pid
-          core_file.properties.ordinal_value = "0"
-          core_file.tag_as_in_progress
-          core_file.title = row_results["title"]
-          core_file.properties.original_filename = row_results["file_name"]
-          core_file.label = row_results["file_name"]
-
-          permissions['CoreFile'].each do |perm, vals|
-            vals.each do |group|
-              core_file.rightsMetadata.permissions({group: group}, "#{perm}")
-            end
-          end
-
-          core_file.save!
-          seq_num = row_num
-
-          xml_file_path = dir_path + "/" + row_results["file_name"]
-          if !xml_file_path.blank? && File.exists?(xml_file_path) && File.extname(xml_file_path) == ".xml"
-            # Load mods xml and cleaning
-            raw_xml = xml_decode(File.open(xml_file_path, "rb").read)
-
-            # Validate
-            validation_result = xml_valid?(raw_xml)
-
-            if validation_result[:errors].blank?
-              core_file.mods.content = raw_xml
-              core_file.save!
-              core_file.match_dc_to_mods
-            else
-              # Raise error, invalid mods
-              load_report.image_reports.create_failure("Invalid MODS", validation_result[:errors], row_results["file_name"])
-
-              # Delete unfinished core_file
-              core_file.destroy
-              # Reset count
-              core_file = nil
-              seq_num = -1
-              zip_files = []
-            end
-          else
-            # Raise error, can't load core file mods metadata
-            load_report.image_reports.create_failure("Can't load MODS XML", "", row_results["file_name"])
-
-            # Delete unfinished core_file
-            core_file.destroy
-            # Reset count
-            core_file = nil
-            seq_num = -1
-            zip_files = []
-          end
-        end
-
-        if row_num > 0
-          if !(row_num == seq_num + 1)
-            if !core_file.blank?
-              load_report.image_reports.create_failure("Row is out of order - row num #{row_num} seq_num #{seq_num}", "", row_results["file_name"])
-              core_file.destroy
-              core_file = nil
-              zip_files = []
-            end
-          elsif !core_file.blank?
-            if row_results["last_item"].downcase == "true"
-              zip_files << row_results["file_name"]
-              # Send an array of file_names to be zipped and attached to the core_file
-              MultipageProcessingJob.new(dir_path, row_results, core_file.pid, load_report.id, zip_files, client).run
-              # reset for next paged item
-              core_file = nil
-              seq_num = -1
-              zip_files = []
-            else
-              zip_files << row_results["file_name"]
-              MultipageProcessingJob.new(dir_path, row_results, core_file.pid, load_report.id, nil, client).run
-              # Keep on goin'
-              seq_num = row_num
-            end
-          end
+        # TODO fill out
         end
       end
     end
 
-    load_report.update_counts
-    load_report.number_of_files = count
-    load_report.save!
+    # load_report.update_counts
+    # load_report.number_of_files = count
+    # load_report.save!
 
     if load_report.success_count + load_report.fail_count + load_report.modified_count == load_report.number_of_files
-      # Disabling for now - Sarah is proxying as another user, who doesn't need to receive
-      # these notifications.
       # LoaderMailer.load_alert(load_report, User.find_by_nuid(load_report.nuid)).deliver!
     end
   end
