@@ -11,7 +11,7 @@
       %label.checkbox.required-label{ for: "terms_of_service" }
         I have read and accept the terms of service.
         = check_box_tag 'terms_of_service', 1, nil, data: { activate:  "activate-submit" }
-    %filedset.span4
+    %fieldset.span4
       %legend
         2. File Upload
       = label_tag "file", "File to upload", class: "required-label"
@@ -39,10 +39,8 @@
     = submit_tag "Upload", disabled: "true", class: 'btn btn-large btn-primary activate-submit', data: { disable_with: "Please wait..."}, id: "singleSubmit"
 :javascript
   $(function () {
-    $("#singleSubmit").click(function(e) {
-      e.preventDefault();
-    });
     $(".progress").hide();
+    var file_list = [];
     $('#singleFileUploadForm').fileupload({
         dataType: 'html',
         replaceFileInput: false,
@@ -52,9 +50,9 @@
                 .click(function () {
                   $(this).attr("disabled", true);
                   $(this).val("Please wait...");
-                  data.submit();
                 });
           $(".progress").show();
+          file_list = [data.files[0]]; //this guarantees that the files being uploaded is only the most recently added one
         },
         progressall: function (e, data) {
             var progress = parseInt(data.loaded / data.total * 100, 10);
@@ -73,6 +71,9 @@
            window.location = url;
         }
     });
+    $('#singleSubmit').click(function(){
+      $('#singleFileUploadForm').fileupload('send', {files:file_list});
+    })
   });
 
 - if current_user.admin_group? || current_user.admin?
