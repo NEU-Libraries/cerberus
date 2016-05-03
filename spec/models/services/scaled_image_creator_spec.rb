@@ -36,7 +36,7 @@ describe ScaledImageCreator do
       @master = FactoryGirl.create(:image_master_file)
       @root = @master.core_record
 
-      ScaledImageCreator.new(0.3, 0.6, 0.9, @master).create_scaled_images
+      ScaledImageCreator.new(0.3, 0.6, 0.9, @master.pid).create_scaled_images
     end
 
     after(:all) { @root.destroy }
@@ -78,7 +78,7 @@ describe ScaledImageCreator do
       @root = @master.core_record
       permissions = {"CoreFile" => {"read"  => ["northeastern:drs:all"], "edit" => ["northeastern:drs:repository:corefile"]}, "ImageSmallFile" => {"read"  => ["northeastern:drs:repository:test"], "edit" => ["northeastern:drs:repository:small"]}, "ImageLargeFile" => {"read"  => ["northeastern:drs:repository:test"], "edit" => ["northeastern:drs:repository:large"]}, "ImageMediumFile" => {"read"  => ["northeastern:drs:repository:test"], "edit" => ["northeastern:drs:repository:medium"]}, "ImageMasterFile" => {"read"  => ["northeastern:drs:repository:test"], "edit" => ["northeastern:drs:repository:master"]}}
 
-      ScaledImageCreator.new(0.3, 0.6, 0.9, @master, permissions).create_scaled_images
+      ScaledImageCreator.new(0.3, 0.6, 0.9, @master.pid, permissions).create_scaled_images
     end
 
     after(:all) { @root.destroy }
