@@ -51,6 +51,10 @@
         = link_to(t('drs.loaders.multipage.long_name'), loaders_multipage_path, class: "btn btn-lg btn-primary")
         %br
         %br
+      - if current_user.mods_spreadsheet_loader?
+        = link_to(t('drs.loaders.mods_spreadsheet.long_name'), loaders_mods_spreadsheet_path, class: "btn btn-lg btn-primary")
+        %br
+        %br
 
   %article.span8
     %h3 Past Loads

@@ -90,6 +90,9 @@ class Loaders::LoadsController < ApplicationController
           if short_name == "multipage"
             # multipage zip job
             Cerberus::Application::Queue.push(ProcessMultipageZipJob.new(@loader_name, new_file.to_s, parent, copyright, current_user, permissions))
+          elsif short_name == "mods_spreadsheet"
+            #mods spreadsheet job
+            Cerberus::Application::Queue.push(ProcessModsZipJob.new(@loader_name, new_file.to_s, parent, copyright, current_user, permissions))
           else
             # send to iptc job
             Cerberus::Application::Queue.push(ProcessIptcZipJob.new(@loader_name, new_file.to_s, parent, copyright, current_user, permissions, derivatives))

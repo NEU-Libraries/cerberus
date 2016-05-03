@@ -1,0 +1,54 @@
+%header
+  %h1.page-header
+    Preview MODS
+    %i
+      = "#{@core_file.non_sort} "
+      = kramdown_parse(@core_file.title)
+
+%h3 Load Information
+%h4
+  Collection:
+  = link_to(@collection_title, collection_path(@report.collection))
+%h4
+  Created at:
+  = @report.created_at.strftime("%m-%d-%Y %T")
+%h4
+  User:
+  = @user.name
+%h4
+  Total Files:
+  = @report.number_of_files
+
+.span6
+  %h3 XML
+  #editor.well
+    = @core_file.mods.content
+
+.drs-item-details.span5
+  %h3 MODS HTML
+  #mods{ style: 'position:relative;min-height:320px;' }
+    = @mods_html
+
+.span12
+  %button.btn.btn-danger
+    = "Cancel Load"
+
+  %button.btn.btn-success.pull-right
+    = "Proceed with Load"
+
+:javascript
+  // This is a hack, need to trim to due haml pretty printing
+  str = $("#editor").text();
+  $("#editor").text(str.trim());
+
+  // Setting up the editor
+  var editor = ace.edit("editor");
+  editor.setTheme("ace/theme/eclipse");
+  editor.getSession().setMode("ace/mode/xml");
+  editor.setOptions({
+    maxLines: Infinity,
+    minLines: 20,
+    useSoftTabs: true,
+    showInvisibles: true,
+    readOnly: true,
+  });
