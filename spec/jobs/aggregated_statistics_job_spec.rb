@@ -39,6 +39,12 @@ describe "aggregated statistics job" do
   end
 
   describe "run" do
+    it 'calculates the date if no date passed in' do
+      date = DateTime.now.end_of_week.-2.days
+      @job = AggregatedStatisticsJob.new(nil)
+      @job.run
+      @job.date.should == date
+    end
 
     it 'gets impressions' do  #for views, downloads, streams
       Impression.create(pid: file.pid, session_id: "doop", action: "view", ip_address: "00.00.00", referrer: "direct", user_agent: "RSpec", status: "COMPLETE", public: "true")
@@ -191,7 +197,7 @@ describe "aggregated statistics job" do
     it 'creates aggregatedstatistic objects for form_edits, user_uploads, and size_increase' do
       UploadAlert.create_from_core_file(file, :create)
       UploadAlert.create_from_core_file(file, :update)
-      size = get_core_file_size(file.pid)
+      size = (get_core_file_size(file.pid)/1024)/1024
       date = DateTime.now
       @job = AggregatedStatisticsJob.new(date)
       @job.run
