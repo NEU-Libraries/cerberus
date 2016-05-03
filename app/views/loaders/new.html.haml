@@ -21,7 +21,7 @@
       %legend
         2. Choose Collection
       = label_tag "parent", "Where do you want to deposit these files?", class: "required-label"
-      - if @loader_short_name == 'multipage'
+      - if @loader_short_name == 'multipage' || @loader_short_name == 'mods_spreadsheet'
         :javascript
           var collections_for_autocomplete = #{@collections_options.to_json}
         = text_field_tag :parent, "", id: 'collection_autocomplete', required: true

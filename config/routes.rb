@@ -131,6 +131,10 @@ Cerberus::Application.routes.draw do
    get "/loaders/bouve/new" => 'bouve_loads#new', as: 'loaders_bouve'
    get "/loaders/bouve/report/:id" => 'bouve_loads#show', as: 'loaders_bouve_report'
    get "/loaders/bouve/file/:id" => 'bouve_loads#show_iptc', as: 'loaders_bouve_iptc'
+   resources :mods_spreadsheet_loads, only: [:new, :create, :preview], :path => "loaders/mods_spreadsheet"
+   get "/loaders/mods_spreadsheet/new" => 'mods_spreadsheet_loads#new', as: 'loaders_mods_spreadsheet'
+   get "/loaders/mods_spreadsheet/report/:id" => 'mods_spreadsheet_loads#show', as: 'loaders_mods_spreadsheet_report'
+   get "/loaders/mods_spreadsheet/preview/:id" => 'mods_spreadsheet_loads#preview',  as: 'loaders_mods_spreadsheet_preview'
   end
 
   # Facets for communities and collections

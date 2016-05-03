@@ -243,6 +243,11 @@ class User < ActiveRecord::Base
     return self.groups.include? "northeastern:drs:repository:loaders:bouve_dean"
   end
 
+  def mods_spreadsheet_loader?
+    # return self.groups.include? "northeastern:drs:repository:loaders:mods_spreadsheet" #TODO:NOT SURE YET
+    return TRUE
+  end
+
   def loaders
     loaders = []
     if self.marcom_loader?
@@ -262,6 +267,9 @@ class User < ActiveRecord::Base
     end
     if self.bouve_loader?
       loaders.push(I18n.t("drs.loaders.bouve.long_name"))
+    end
+    if self.mods_spreadsheet_loader?
+      loaders.push(I18n.t("drs.loaders.mods_spreadsheet.long_name"))
     end
     return loaders
   end
