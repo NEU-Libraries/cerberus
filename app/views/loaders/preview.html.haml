@@ -1,3 +1,6 @@
+- content_for :page_header do
+  %style{:type=>"text/css"}
+    = raw @diff_css
 %header
   %h1.page-header
     Preview MODS
@@ -9,20 +12,27 @@
 %h4
   Collection:
   = link_to(@collection_title, collection_path(@report.collection))
+  ="(#{@report.collection})"
 %h4
-  Created at:
+  Load Start Time:
   = @report.created_at.strftime("%m-%d-%Y %T")
 %h4
-  User:
+  Load Depositor:
   = @user.name
 %h4
   Total Files:
   = @report.number_of_files
 
 .span6
-  %h3 XML
-  #editor.well
-    = @core_file.mods.content
+  - if @diff
+    %h3 MODS Changes
+    #mods_diff
+      = @diff
+  - else
+    %h3 XML
+    #editor.well
+      = @core_file.mods.content
+
 
 .drs-item-details.span5
   %h3 MODS HTML
@@ -38,17 +48,20 @@
 
 :javascript
   // This is a hack, need to trim to due haml pretty printing
-  str = $("#editor").text();
-  $("#editor").text(str.trim());
+  if (document.getElementById('#editor') === null){ }
+  else {
+      str = $("#editor").text();
+      $("#editor").text(str.trim());
 
-  // Setting up the editor
-  var editor = ace.edit("editor");
-  editor.setTheme("ace/theme/eclipse");
-  editor.getSession().setMode("ace/mode/xml");
-  editor.setOptions({
-    maxLines: Infinity,
-    minLines: 20,
-    useSoftTabs: true,
-    showInvisibles: true,
-    readOnly: true,
-  });
+      // Setting up the editor
+      var editor = ace.edit("editor");
+      editor.setTheme("ace/theme/eclipse");
+      editor.getSession().setMode("ace/mode/xml");
+      editor.setOptions({
+        maxLines: Infinity,
+        minLines: 20,
+        useSoftTabs: true,
+        showInvisibles: true,
+        readOnly: true,
+      });
+  }
