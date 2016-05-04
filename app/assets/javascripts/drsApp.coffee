@@ -615,6 +615,7 @@ $(document).ready ->
             $('.pane.facets').addClass('span3')
             $('.pane.pagination-info').addClass('span6')
             $('.pane.results-view').addClass('span3')
+            $('hr.pane_separator').hide()
           else
             container.removeClass('drs-items-grid').addClass 'drs-items-list'
             sidebar.removeClass('span12')
@@ -624,6 +625,7 @@ $(document).ready ->
             $('.pane.facets').removeClass('span3')
             $('.pane.pagination-info').removeClass('span6')
             $('.pane.results-view').removeClass('span3')
+            $('hr.pane_separator').show()
         return
 
 
