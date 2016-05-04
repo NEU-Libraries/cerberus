@@ -11,10 +11,6 @@ describe ScaledImageCreator do
     @root.content_objects.count { |x| x.instance_of? klass }
   end
 
-  def content_label_from_master
-    return "#{@master.label.chomp(File.extname(@master.label))}.jpg"
-  end
-
   shared_examples_for "image creation" do
 
     it "creates a single image file record" do
@@ -26,9 +22,6 @@ describe ScaledImageCreator do
       @current.content.content.should_not be_nil
     end
 
-    it "attaches the correct label" do
-      @current.content.label.should == content_label_from_master
-    end
   end
 
   context "Without preexisting scaled image objects," do

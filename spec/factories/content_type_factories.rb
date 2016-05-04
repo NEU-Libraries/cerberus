@@ -80,16 +80,19 @@ include ChecksumHelper
 
     factory :image_master_file, class: ImageMasterFile do
       title "test_pic.jpeg"
+      original_filename "test_pic.jpeg"
       has_jpeg
     end
 
     factory :pdf_file, class: PdfFile do
       title "test.pdf"
+      original_filename "test.pdf"
       has_pdf
     end
 
     factory :docx_file, class: MswordFile do
       title "test_docx.docx"
+      original_filename "test_docx.docx"
       has_docx
     end
   end
