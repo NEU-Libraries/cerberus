@@ -24,10 +24,12 @@
       = render :partial=>'catalog/facets', locals: { facet_list: facet_list }
     .pane.pagination-info{ class: pane_large_class }
       = render 'catalog/sort_and_per_page'
-    - if current_user && @set.klass != "Compilation"
-      = render :partial=>'shared/save_files'
-    - if @set.klass != "Compilation"
-      = render :partial => "shared/rss", locals: {smart_col: false}
+    %hr.pane_separator{:style=> ("display:none" if drs_view_class == "grid")}
+    .pane.extras{ class: "span12" }
+      - if current_user && @set.klass != "Compilation"
+        = render :partial=>'shared/save_files'
+      - if @set.klass != "Compilation"
+        = render :partial => "shared/rss", locals: {smart_col: false}
 
 
   %section{ class: drs_items_class }
