@@ -49,6 +49,8 @@ class CoreFilesController < ApplicationController
 
   before_filter :verify_staff_or_beta, only: [:validate_xml, :edit_xml]
 
+  before_filter :verify_admin, only: [:create_attached_file, :new_attached_file, :provide_file_metadata, :process_file_metadata]
+
   rescue_from Exceptions::NoParentFoundError, with: :no_parent_rescue
   rescue_from Exceptions::GroupPermissionsError, with: :group_permission_rescue
 
@@ -125,6 +127,11 @@ class CoreFilesController < ApplicationController
     end
 
     @page_title = "Provide Upload Metadata"
+  end
+
+  def provide_file_metadata
+    @core_file = CoreFile.find(params[:id])
+    @page_title = "Provide File Metadata"
   end
 
   # routed to files/rescue_incomplete_files
@@ -206,6 +213,20 @@ class CoreFilesController < ApplicationController
     redirect_to core_file_path(@core_file.pid) + '#no-back'
   end
 
+  def process_file_metadata
+    @core_file = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first)
+    klass = @core_file.canonical_class.constantize
+    if klass == AudioFile
+      klass = AudioMasterFile
+    elsif klass == VideoFile
+      klass = VideoMasterFile
+    end
+    @content_object = klass.find(params[:content_object])
+    Cerberus::Application::Queue.push(ContentAttachmentJob.new(@core_file.pid, @content_object.tmp_path, @content_object.pid, @content_object.original_filename, true, params[:permissions]))
+    flash[:notice] = "Your file is being added. Please check back soon."
+    redirect_to core_file_path(@core_file.pid) + '#no-back'
+  end
+
   # routed to /files/:id
   def show
     @core_file = fetch_solr_document
@@ -275,6 +296,57 @@ class CoreFilesController < ApplicationController
     end
   end
 
+  def create_attached_file
+    begin
+      @core_file = CoreFile.find(params[:id])
+      # check error condition No files
+      return json_error("Error! No file to save") if !params.has_key?(:file)
+
+      file = params[:file]
+      if !file
+        session[:flash_error] = "Error! No file for upload"
+        render :json => { url: session[:previous_url] }
+      elsif (empty_file?(file))
+        session[:flash_error] = "Error! Zero Length File!"
+        render :json => { url: session[:previous_url] }
+      elsif (!terms_accepted?)
+        session[:flash_error] = "You must accept the terms of service!"
+        render :json => { url: session[:previous_url] }
+      elsif current_user.proxy_staff? && params[:upload_type].nil?
+        session[:flash_error] = "You must select whether this is a proxy or personal upload"
+        render :json => { url: session[:previous_url] }
+      elsif @core_file.canonical_class_from_file(file) != @core_file.canonical_class
+        session[:flash_error] = "The type of file uploaded doesn't match the type of the existing file, which is a #{t("drs.display_labels.#{@core_file.canonical_class}.short")}."
+        render :json => { url: session[:previous_url] }
+      else
+        if virus_check(file) == 0
+          new_path = move_file_to_tmp(file)
+          klass = @core_file.canonical_class.constantize
+          if klass == AudioFile
+            klass = AudioMasterFile
+          elsif klass == VideoFile
+            klass = VideoMasterFile
+          end
+          content_object = klass.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
+          content_object.tmp_path = new_path
+          content_object.original_filename = file.original_filename
+          content_object.save!
+          render json: { url: files_provide_file_metadata_path(@core_file.pid, content_object.pid)}
+        else
+          session[:flash_error] = "The file attached did not pass virus check."
+          render :json => { url: session[:previous_url] }
+        end
+      end
+    rescue => exception
+      logger.error "CoreFilesController::create rescued #{exception.class}\n\t#{exception.to_s}\n #{exception.backtrace.join("\n")}\n\n"
+      email_handled_exception(exception)
+      json_error "Error occurred while creating file."
+    ensure
+      # remove the tempfile (only if it is a temp file)
+      # file.tempfile.delete if file.respond_to?(:tempfile)
+    end
+  end
+
   # routed to /files/new
   def new
     @page_title = "Upload New Files"
@@ -298,6 +370,21 @@ class CoreFilesController < ApplicationController
 
     @core_file = ::CoreFile.new
     @collection_id = params[:parent]
+  end
+
+  def new_attached_file
+    @core_file = fetch_solr_document
+
+    if session[:flash_error]
+      flash[:error] = session[:flash_error]
+      session[:flash_error] = nil
+    end
+    if session[:flash_success]
+      flash[:notice] = session[:flash_success]
+      session[:flash_success] = nil
+    end
+
+    render 'new_attached_file'
   end
 
   def edit
@@ -708,6 +795,16 @@ class CoreFilesController < ApplicationController
         if !(current_user.repo_staff? || current_user.beta?)
           flash[:error] = "You do not have privileges to use that feature"
           redirect_to root_path
+        end
+      end
+
+      def verify_admin
+        if current_user.nil?
+          flash[:error] = "You do not have privileges to use that feature"
+          render_403
+        elsif !(current_user.admin? || current_user.admin_group?)
+          flash[:error] = "You do not have privileges to use that feature"
+          render_403
         end
       end
 

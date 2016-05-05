@@ -1,0 +1,41 @@
+:javascript
+  if (navigator.userAgent.match("MSIE")) {
+    $("#new_core_file").validate();
+  }
+  $('#permissions_display').show();
+  // initialize popover helpers
+  $("a[rel=popover]").popover({ html: true });
+  var confirmation_needed = true;
+  $(window).on("beforeunload", function() {
+    return "Your file has been uploaded, but the metadata has not been saved. If you abandon the process now your file will be deleted from the system.";
+  });
+  $(window).on("unload", function() {
+    if(confirmation_needed){
+      $.ajax( {
+        url: '#{destroy_incomplete_file_path(params['id'])}',
+        type: 'DELETE',
+        async: false,
+        success: function(result) {
+        }
+      });
+    }
+  });
+
+- content_for :page_header do
+  %h1.page-header
+    = render partial: 'shared/icon', locals: {class_string: t('drs.metadata.icon') }
+    = t('drs.metadata.edit_page_title')
+    %small
+      = t('drs.metadata.edit_subtitle')
+
+= form_for(@core_file, :url => files_process_file_metadata_path, method: 'post', :html => {:multipart => true}) do |f|
+
+  = hidden_field_tag(:proxy, params[:proxy])
+
+  = render :partial => 'core_files/metadata/content_object', :formats => [:html], :locals => {:f => f, :new_object => true}
+
+  / We need to account for the different file types here to extend the metdata screen
+
+  .form-actions
+    = f.submit class: ['btn', 'btn-primary'], :onclick => "$(window).unbind('beforeunload'); confirmation_needed = false;", value: 'Submit', data: { disable_with: "Please wait..."}
+    = button_tag "Reset", class: 'btn', type: :reset

@@ -3,11 +3,17 @@ require 'spec_helper'
 describe CoreFilesController do
   let(:bill) { FactoryGirl.create(:bill) }
   let(:bo)   { FactoryGirl.create(:bo) }
+  let(:admin) { FactoryGirl.create(:admin) }
   let(:root) { FactoryGirl.create(:root_collection) }
 
   let(:file) { FactoryGirl.create(:complete_file,
                                   depositor: "000000001",
                                   parent: root) }
+
+  after(:all) do
+    ActiveFedora::Base.destroy_all
+    User.destroy_all
+  end
 
   describe "GET #new" do
 
@@ -152,6 +158,304 @@ describe CoreFilesController do
       assigns(:core_file).should == file_one
 
       expect(response).to render_template('core_files/provide_metadata')
+    end
+  end
+
+  describe "GET #provide_file_metadata" do
+    it "should render provide_file_metadata template for admin users" do
+      sign_in admin
+      get :provide_file_metadata, id: file.pid
+      expect(response).to render_template('core_files/provide_file_metadata')
+    end
+
+    it "should redirect to user signin non logged in users" do
+      sign_out bill
+      sign_out bo
+      sign_out admin
+      get :provide_file_metadata, id: file.pid
+      expect(response).to redirect_to(new_user_session_path)
+    end
+
+    it "should 403 for non admin users" do
+      sign_in bo
+      get :provide_file_metadata, id: file.pid
+      response.status.should == 403
+    end
+
+    it "should get core file object from params" do
+      sign_in admin
+      get :provide_file_metadata, id: file.pid
+      assigns(:core_file).should == file
+    end
+
+    it "should have page title" do
+      sign_in admin
+      get :provide_file_metadata, id: file.pid
+      assigns(:page_title).should == "Provide File Metadata"
+    end
+  end
+
+  describe "POST #process_file_metadata" do
+      before(:each) do
+        file.canonical_class = "VideoFile"
+        file.save!
+        sign_in admin
+        test_file = fixture_file_upload("/files/video.mp4")
+        post :create_attached_file, id:file.pid, file:test_file, terms_of_service:1
+        @video = VideoMasterFile.first
+        sign_out admin
+      end
+
+      after(:each) do
+        VideoMasterFile.destroy_all
+      end
+
+      it "403s for users not admin" do
+        sign_in bo
+        post :process_file_metadata, id:file.pid, content_object:@video.pid
+        response.status.should == 403
+      end
+
+      it "redirects to user signin for non logged in users" do
+        sign_out bill
+        sign_out bo
+        sign_out admin
+        post :process_file_metadata, id:file.pid, content_object:@video.pid
+        expect(response).to redirect_to(new_user_session_path)
+      end
+
+      it "assigns core_file" do
+        sign_in admin
+        post :process_file_metadata, id:file.pid, content_object:@video.pid
+        doc = SolrDocument.new(file.to_solr)
+        assigns(:core_file).pid.should == doc.pid
+      end
+
+      it "assigns content_object" do
+        sign_in admin
+        post :process_file_metadata, id:file.pid, content_object:@video.pid
+        assigns(:content_object).should == @video
+      end
+
+      it "redirects to core_file_path" do
+        sign_in admin
+        post :process_file_metadata, id:file.pid, content_object:@video.pid
+        expect(response).to redirect_to core_file_path(file.pid)+"#no-back"
+      end
+
+      it "sets flash:notice" do
+        sign_in admin
+        post :process_file_metadata, id:file.pid, content_object:@video.pid
+        expect(flash[:notice]).to be_present
+      end
+
+      it "kicks job off to queue" do
+        pending_before = Resque.info[:pending]
+        sign_in admin
+        post :process_file_metadata, id:file.pid, content_object:@video.pid
+        Resque.info[:pending].should == pending_before + 1
+      end
+  end
+
+  describe "POST #create_attached_file" do
+    it "403s for users not admin" do
+      sign_in bo
+      test_file = fixture_file_upload("/files/image.png")
+      post :create_attached_file, id:file.pid, file:test_file
+      response.status.should == 403
+    end
+
+    it "redirects to user signin for non logged in users" do
+      sign_out bill
+      sign_out bo
+      sign_out admin
+      test_file = fixture_file_upload("/files/image.png")
+      post :create_attached_file, id:file.pid, file:test_file
+      expect(response).to redirect_to(new_user_session_path)
+    end
+
+    it "returns json_error Error! No file to save if file is empty" do
+      sign_in admin
+      get :new_attached_file, id:file.pid
+      post :create_attached_file, id:file.pid, file:nil, terms_of_service:1
+      @expected = {:url=>"/files/#{file.pid}/new"}.to_json
+      response.body.should == @expected
+      session[:flash_error].should == "Error! No file for upload"
+    end
+
+    it "returns json_error Error! No file to save if params doesn't have file param" do
+      sign_in admin
+      get :new_attached_file, id:file.pid
+      post :create_attached_file, id:file.pid
+      @expected = [{:error=>"Error! No file to save"}].to_json
+      response.body.should == @expected
+    end
+
+    it "returns json error for empty_file?" do
+      sign_in admin
+      get :new_attached_file, id:file.pid
+      test_file = fixture_file_upload("/files/empty_file.mov") #has file_size 0
+      post :create_attached_file, id:file.pid, file:test_file, terms_of_service:1
+      @expected = {:url=>"/files/#{file.pid}/new"}.to_json
+      response.body.should == @expected
+      session[:flash_error].should == "Error! Zero Length File!"
+    end
+
+    it "returns json error if !terms_accepted?" do
+      sign_in admin
+      get :new_attached_file, id:file.pid
+      test_file = fixture_file_upload("/files/image.png")
+      post :create_attached_file, id:file.pid, file:test_file, terms_of_service:0 #terms_of_service param not checked
+      @expected = {:url=>"/files/#{file.pid}/new"}.to_json
+      response.body.should == @expected
+      session[:flash_error].should == "You must accept the terms of service!"
+      get :new_attached_file, id:file.pid
+      post :create_attached_file, id:file.pid, file:test_file #no terms_of_service param
+      @expected = {:url=>"/files/#{file.pid}/new"}.to_json
+      response.body.should == @expected
+      session[:flash_error].should == "You must accept the terms of service!"
+    end
+
+    it "returns proxy select error if user is proxy user and type of upload not selected" do
+      admin.add_group("northeastern:drs:repository:proxystaff")
+      admin.save!
+      sign_in admin
+      get :new_attached_file, id:file.pid
+      test_file = fixture_file_upload("/files/image.png")
+      post :create_attached_file, id:file.pid, file:test_file, terms_of_service:1, upload_type:nil
+      session[:flash_error].should == "You must select whether this is a proxy or personal upload"
+      @expected = {:url=>"/files/#{file.pid}/new"}.to_json
+      response.body.should == @expected
+    end
+
+    it "returns json error if type of uploaded file does not match canonical class - test only audio and video for now" do
+      sign_in admin
+
+      # canonical_class is nil
+      file.canonical_class = nil
+      file.save!
+      get :new_attached_file, id:file.pid
+      test_file = fixture_file_upload("/files/image.png")
+      post :create_attached_file, id:file.pid, file:test_file, terms_of_service:1
+      session[:flash_error].should  == "The type of file uploaded doesn't match the type of the existing file, which is a #{I18n.t("drs.display_labels.#{file.canonical_class}.short")}."
+      @expected = {:url=>"/files/#{file.pid}/new"}.to_json
+      response.body.should == @expected
+
+      #canonical_class is "AudioFile"
+      file.canonical_class = "AudioFile"
+      file.save!
+      get :new_attached_file, id:file.pid
+      test_file = fixture_file_upload("/files/image.png")
+      post :create_attached_file, id:file.pid, file:test_file, terms_of_service:1
+      session[:flash_error].should  == "The type of file uploaded doesn't match the type of the existing file, which is a #{I18n.t("drs.display_labels.#{file.canonical_class}.short")}."
+      @expected = {:url=>"/files/#{file.pid}/new"}.to_json
+      response.body.should == @expected
+
+      #canonical_class is "VideoFile"
+      file.canonical_class = "VideoFile"
+      file.save!
+      get :new_attached_file, id:file.pid
+      test_file = fixture_file_upload("/files/image.png")
+      post :create_attached_file, id:file.pid, file:test_file, terms_of_service:1
+      session[:flash_error].should  == "The type of file uploaded doesn't match the type of the existing file, which is a #{I18n.t("drs.display_labels.#{file.canonical_class}.short")}."
+      @expected = {:url=>"/files/#{file.pid}/new"}.to_json
+      response.body.should == @expected
+
+      #canonical_class is "ImageMasterFile"
+      file.canonical_class = "ImageMasterFile"
+      file.save!
+      get :new_attached_file, id:file.pid
+      test_file = fixture_file_upload("/files/test_two.pdf")
+      post :create_attached_file, id:file.pid, file:test_file, terms_of_service:1
+      session[:flash_error].should  == "The type of file uploaded doesn't match the type of the existing file, which is a #{I18n.t("drs.display_labels.#{file.canonical_class}.short")}."
+      @expected = {:url=>"/files/#{file.pid}/new"}.to_json
+      response.body.should == @expected
+    end
+
+    it "returns json error if the file does not pass virus check" do
+      # not sure how to fake a failing virus check
+    end
+
+    it "assigns core_file" do
+      sign_in admin
+      file.canonical_class = "VideoFile"
+      file.save!
+      get :new_attached_file, id:file.pid
+      test_file = fixture_file_upload("/files/video.mp4")
+      post :create_attached_file, id:file.pid, file:test_file, terms_of_service:1
+      assigns(:core_file).should == file
+      VideoMasterFile.destroy_all
+    end
+
+
+    it "creates content object with canonical class from core file" do
+      file.canonical_class = "VideoFile"
+      file.save!
+      sign_in admin
+      get :new_attached_file, id:file.pid
+      test_file = fixture_file_upload("/files/video.mp4")
+      post :create_attached_file, id:file.pid, file:test_file, terms_of_service:1
+      VideoMasterFile.all.count.should == 1
+      VideoMasterFile.destroy_all
+    end
+
+    it "assigns tmp_path to content_object" do
+      file.canonical_class = "VideoFile"
+      file.save!
+      sign_in admin
+      get :new_attached_file, id:file.pid
+      test_file = fixture_file_upload("/files/video.mp4")
+      post :create_attached_file, id:file.pid, file:test_file, terms_of_service:1
+      video = VideoMasterFile.first
+      video.tmp_path.should_not == nil
+      VideoMasterFile.destroy_all
+    end
+
+    it "assigns original_filename to content_object" do
+      file.canonical_class = "VideoFile"
+      file.save!
+      sign_in admin
+      get :new_attached_file, id:file.pid
+      test_file = fixture_file_upload("/files/video.mp4")
+      post :create_attached_file, id:file.pid, file:test_file, terms_of_service:1
+      video = VideoMasterFile.first
+      video.original_filename.should == test_file.original_filename
+      VideoMasterFile.destroy_all
+    end
+
+    it "renders json url: files_provide_file_metadata_path(@core_file.pid, content_object.pid)" do
+      file.canonical_class = "VideoFile"
+      file.save!
+      sign_in admin
+      get :new_attached_file, id:file.pid
+      test_file = fixture_file_upload("/files/video.mp4")
+      post :create_attached_file, id:file.pid, file:test_file, terms_of_service:1
+      video = VideoMasterFile.first
+      @expected = {:url=>files_provide_file_metadata_path(file.pid, video.pid)}.to_json
+      response.body.should == @expected
+      VideoMasterFile.destroy_all
+    end
+  end
+
+  describe "GET #new_attached_file" do
+    it "renders to new_attached_file template for admin users" do
+      sign_in admin
+      get :new_attached_file, id: file.pid
+      expect(response).to render_template('core_files/new_attached_file')
+    end
+
+    it "403s for users not logged in" do
+      sign_out bill
+      sign_out bo
+      sign_out admin
+      get :new_attached_file, id: file.pid
+      expect(response).to redirect_to(new_user_session_path)
+    end
+
+    it "403s for users that are not admins" do
+      sign_in bo
+      get :new_attached_file, id: file.pid
+      response.status.should == 403
     end
   end
 end
