@@ -29,11 +29,12 @@ module ZipHelper
             if squash
               # Legacy zip construction for certain loaders forces us to flatten internal
               # structure, so to do this we give each file a unique name to avoid collision
-              original_names << f.name
               uniq_hsh = Digest::MD5.hexdigest("#{f.name}")[0,2]
               uniq_filename = "#{Time.now.to_f.to_s.gsub!('.','-')}-#{uniq_hsh}"
-              new_names << fpath
               fpath = File.join(output_dir, uniq_filename) # Names file time and hash string
+
+              new_names << fpath
+              original_names << f.name
             else
               fpath = File.join(output_dir, f.name)
             end
