@@ -47,7 +47,8 @@
         autoUpload: false,
         add: function (e, data) {
             data.context = $("#singleSubmit")
-                .click(function () {
+                .click(function (e) {
+                  e.preventDefault();
                   $(this).attr("disabled", true);
                   $(this).val("Please wait...");
                 });
@@ -71,7 +72,8 @@
            window.location = url;
         }
     });
-    $('#singleSubmit').click(function(){
+    $('#singleSubmit').click(function(e){
+      e.preventDefault();
       $('#singleFileUploadForm').fileupload('send', {files:file_list});
     })
   });
