@@ -14,4 +14,12 @@ module CoreFilesHelper
 	def render_show_field_partial(key, locals)
 		render_show_field_partial_with_action('core_files', key, locals)
 	end
+
+	# Render a button for attaching files to this core_file
+	# if the current user is admin.
+	def render_attach_files_button(parent, text = "Attach files to this file" , html_options = {} )
+		if (!current_user.nil? && ( current_user.admin_group? || current_user.admin? ))
+			link_to( text , new_attached_file_path, html_options )
+		end
+	end
 end
