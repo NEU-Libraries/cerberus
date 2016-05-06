@@ -12,7 +12,7 @@
   $(window).on("unload", function() {
     if(confirmation_needed){
       $.ajax( {
-        url: '#{destroy_incomplete_file_path(params['id'])}',
+        url: '#{destroy_incomplete_file_path(params['content_object_id'])}',
         type: 'DELETE',
         async: false,
         success: function(result) {

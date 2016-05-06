@@ -1,11 +1,11 @@
 .row-fluid
   %fieldset.span6
     %legend Mass Permissions
-    = label_tag 'core_file[mass_permissions]', "Choose Mass Permissions:"
+    = label_tag 'content_object[mass_permissions]', "Choose Mass Permissions:"
     - if params[:action] == "edit"
-      = select_tag 'core_file[mass_permissions]', options_for_select(@core_file.valid_mass_permissions, @core_file.mass_permissions) , class: "span6"
+      = select_tag 'content_object[mass_permissions]', options_for_select(@core_file.valid_mass_permissions, @core_file.mass_permissions) , class: "span6"
     - else
-      = select_tag 'core_file[mass_permissions]', options_for_select(@core_file.valid_mass_permissions, 'public') , class: "span6"
+      = select_tag 'content_object[mass_permissions]', options_for_select(@core_file.valid_mass_permissions, 'public') , class: "span6"
     %p.help-block
       %ul
         %li Setting to 'public' will allow anyone accessing the site to see your collection.
@@ -13,7 +13,7 @@
 
   %fieldset.span6
     %legend Permissions
-    = render partial: 'shared/sets/data_form_permissions_element', locals: {:f => f, :array_type => "core_file", :permissions => filtered_permissions(@core_file) }
+    = render partial: 'shared/sets/data_form_permissions_element', locals: {:f => f, :array_type => "content_object", :permissions => filtered_permissions(@core_file) }
     %button#add_another_permission.btn.btn-success.btn-block{:type => "button"}
       %i.icon-plus-sign.icon-large
       Add Permission
