@@ -2,20 +2,19 @@ class ContentAttachmentJob
   include MimeHelper
   include ChecksumHelper
 
-  attr_accessor :core_file_pid, :file_path, :delete_file, :permissions, :content_object_pid, :file_name
-  attr_accessor :core_record
+  attr_accessor :core_file_pid, :file_path, :permissions, :content_object_pid, :file_name, :mass_permissions
+  attr_accessor :core_record, :content_object
 
   def queue_name
     :content_attachment
   end
 
-  def initialize(core_file, file_path, content_object, file_name, delete_file=true, permissions=nil)
+  def initialize(core_file, file_path, content_object, file_name, permissions, mass_permissions)
     self.core_file_pid = core_file
     self.file_path     = file_path
-    self.delete_file   = delete_file
     self.file_name     = file_name
     self.content_object_pid = content_object
-
+    self.mass_permissions = mass_permissions
     self.permissions   = permissions
   end
 
@@ -28,7 +27,7 @@ class ContentAttachmentJob
       elsif klass == VideoFile
         klass = VideoMasterFile
       end
-      content_object = klass.find(content_object_pid)
+      self.content_object = klass.find(content_object_pid)
 
       # if file is large, we http kludge it in to avoid loading into memory
       if File.size(file_path) / 1024000 > 50
@@ -48,21 +47,10 @@ class ContentAttachmentJob
       content_object.core_record    = core_record
       content_object.title          = file_name
       content_object.identifier     = content_object.pid
-      content_object.depositor      = core_record.depositor
       content_object.proxy_uploader = core_record.proxy_uploader
-      puts "permissions are #{permissions}"
-      if !permissions.nil? && permissions["#{content_object.klass}"]
-          perms = permissions["#{content_object.klass}"]
-          perms.each do |perm, vals|
-            vals.each do |group|
-              this_class = Object.const_get("#{content_object.klass}")
-              content_object.rightsMetadata.permissions({group: group}, "#{perm}")
-            end
-          end
-      else
-        content_object.rightsMetadata.content = core_record.rightsMetadata.content
-      end
-      content_object.original_filename = file_path
+      content_object.permissions = permissions
+      content_object.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, "edit") #this is required
+      content_object.mass_permissions = mass_permissions
 
       # content_object.characterize
       content_object.properties.mime_type = extract_mime_type(file_path)
@@ -78,15 +66,12 @@ class ContentAttachmentJob
 
       # reload just to be safe
       core_record.reload
-      core_record.tag_as_completed
       core_record.save!
       Rails.cache.delete_matched("/content_objects/#{core_record.pid}*")
       return content_object
     ensure
-      if delete_file
-        if File.exists?(file_path)
-          FileUtils.rm(file_path)
-        end
+      if File.exists?(file_path)
+        FileUtils.rm(file_path)
       end
     end
   end
