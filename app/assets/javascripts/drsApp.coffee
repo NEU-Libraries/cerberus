@@ -17,8 +17,7 @@ $(document).ready ->
       drsApp.config =
         $drsBootstrapSelect: $('select.bs-select')
         $addToSetLink: $('*[data-add-to-set]')
-        breadCrumbMenuContent: $('#addToSetLinks').html()
-        breadCrumbMenuContent: $('#addToCoreLinks').html()
+        breadCrumbMenuContent: $('#addToSetLinks, #addToCoreLinks').html()
         fitTextTarget: $('.fit-text')
         removeFormFields:
           listener : false
