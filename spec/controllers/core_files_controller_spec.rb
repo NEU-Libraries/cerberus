@@ -162,9 +162,24 @@ describe CoreFilesController do
   end
 
   describe "GET #provide_file_metadata" do
+    before(:each) do
+      file.canonical_class = "VideoFile"
+      file.save!
+      sign_in admin
+      emp = EmployeeCreateJob.new(admin.nuid, "John Doe").run
+      test_file = fixture_file_upload("/files/video.mp4")
+      post :create_attached_file, id:file.pid, file:test_file, terms_of_service:1
+      @video = VideoMasterFile.first
+      sign_out admin
+    end
+
+    after(:each) do
+      VideoMasterFile.destroy_all
+    end
+
     it "should render provide_file_metadata template for admin users" do
       sign_in admin
-      get :provide_file_metadata, id: file.pid
+      get :provide_file_metadata, id: file.pid, content_object_id:@video.pid
       expect(response).to render_template('core_files/provide_file_metadata')
     end
 
@@ -172,26 +187,32 @@ describe CoreFilesController do
       sign_out bill
       sign_out bo
       sign_out admin
-      get :provide_file_metadata, id: file.pid
+      get :provide_file_metadata, id: file.pid, content_object_id:@video.pid
       expect(response).to redirect_to(new_user_session_path)
     end
 
     it "should 403 for non admin users" do
       sign_in bo
-      get :provide_file_metadata, id: file.pid
+      get :provide_file_metadata, id: file.pid, content_object_id:@video.pid
       response.status.should == 403
     end
 
     it "should get core file object from params" do
       sign_in admin
-      get :provide_file_metadata, id: file.pid
+      get :provide_file_metadata, id: file.pid, content_object_id:@video.pid
       assigns(:core_file).should == file
     end
 
     it "should have page title" do
       sign_in admin
-      get :provide_file_metadata, id: file.pid
+      get :provide_file_metadata, id: file.pid, content_object_id:@video.pid
       assigns(:page_title).should == "Provide File Metadata"
+    end
+
+    it "assigns content_object" do
+      sign_in admin
+      get :provide_file_metadata, id: file.pid, content_object_id:@video.pid
+      assigns(:content_object).should == @video
     end
   end
 
@@ -199,6 +220,9 @@ describe CoreFilesController do
       before(:each) do
         file.canonical_class = "VideoFile"
         file.save!
+        emp = EmployeeCreateJob.new(admin.nuid, "John Doe").run
+        sign_out bill
+        sign_out bo
         sign_in admin
         test_file = fixture_file_upload("/files/video.mp4")
         post :create_attached_file, id:file.pid, file:test_file, terms_of_service:1
@@ -212,7 +236,8 @@ describe CoreFilesController do
 
       it "403s for users not admin" do
         sign_in bo
-        post :process_file_metadata, id:file.pid, content_object:@video.pid
+        content_object = {mass_permissions:"public", permissions:{"identity"=>["northeastern:drs:repository:staff"], "permission_type"=>["edit"]}}
+        post :process_file_metadata, id:file.pid, content_object_id:@video.pid, content_object:content_object
         response.status.should == 403
       end
 
@@ -220,40 +245,53 @@ describe CoreFilesController do
         sign_out bill
         sign_out bo
         sign_out admin
-        post :process_file_metadata, id:file.pid, content_object:@video.pid
+        content_object = {mass_permissions:"public", permissions:{"identity"=>["northeastern:drs:repository:staff"], "permission_type"=>["edit"]}}
+        post :process_file_metadata, id:file.pid, content_object_id:@video.pid, content_object:content_object
         expect(response).to redirect_to(new_user_session_path)
       end
 
       it "assigns core_file" do
         sign_in admin
-        post :process_file_metadata, id:file.pid, content_object:@video.pid
-        doc = SolrDocument.new(file.to_solr)
-        assigns(:core_file).pid.should == doc.pid
+        content_object = {mass_permissions:"public", permissions:{"identity"=>["northeastern:drs:repository:staff"], "permission_type"=>["edit"]}}
+        post :process_file_metadata, id:file.pid, content_object_id:@video.pid, content_object:content_object
+        assigns(:core_file) == file
       end
 
       it "assigns content_object" do
         sign_in admin
-        post :process_file_metadata, id:file.pid, content_object:@video.pid
+        content_object = {mass_permissions:"public", permissions:{"identity"=>["northeastern:drs:repository:staff"], "permission_type"=>["edit"]}}
+        post :process_file_metadata, id:file.pid, content_object_id:@video.pid, content_object:content_object
         assigns(:content_object).should == @video
       end
 
       it "redirects to core_file_path" do
         sign_in admin
-        post :process_file_metadata, id:file.pid, content_object:@video.pid
+        content_object = {mass_permissions:"public", permissions:{"identity"=>["northeastern:drs:repository:staff"], "permission_type"=>["edit"]}}
+        post :process_file_metadata, id:file.pid, content_object_id:@video.pid, content_object:content_object
         expect(response).to redirect_to core_file_path(file.pid)+"#no-back"
       end
 
       it "sets flash:notice" do
         sign_in admin
-        post :process_file_metadata, id:file.pid, content_object:@video.pid
+        content_object = {mass_permissions:"public", permissions:{"identity"=>["northeastern:drs:repository:staff"], "permission_type"=>["edit"]}}
+        post :process_file_metadata, id:file.pid, content_object_id:@video.pid, content_object:content_object
         expect(flash[:notice]).to be_present
       end
 
       it "kicks job off to queue" do
         pending_before = Resque.info[:pending]
         sign_in admin
-        post :process_file_metadata, id:file.pid, content_object:@video.pid
+        content_object = {mass_permissions:"public", permissions:{"identity"=>["northeastern:drs:repository:staff"], "permission_type"=>["edit"]}}
+        post :process_file_metadata, id:file.pid, content_object_id:@video.pid, content_object:content_object
         Resque.info[:pending].should == pending_before + 1
+      end
+
+      it "creates uploadAlert" do
+        ua_before = UploadAlert.count
+        sign_in admin
+        content_object = {mass_permissions:"public", permissions:{"identity"=>["northeastern:drs:repository:staff"], "permission_type"=>["edit"]}}
+        post :process_file_metadata, id:file.pid, content_object_id:@video.pid, content_object:content_object
+        UploadAlert.count.should == ua_before + 1
       end
   end
 
@@ -326,6 +364,7 @@ describe CoreFilesController do
       session[:flash_error].should == "You must select whether this is a proxy or personal upload"
       @expected = {:url=>"/files/#{file.pid}/new"}.to_json
       response.body.should == @expected
+      admin.delete_group("northeastern:drs:repository:proxystaff")
     end
 
     it "returns json error if type of uploaded file does not match canonical class - test only audio and video for now" do
@@ -433,6 +472,51 @@ describe CoreFilesController do
       video = VideoMasterFile.first
       @expected = {:url=>files_provide_file_metadata_path(file.pid, video.pid)}.to_json
       response.body.should == @expected
+      VideoMasterFile.destroy_all
+    end
+
+    it "assigns depositor as current user if not a proxy upload" do
+      file.canonical_class = "VideoFile"
+      file.save!
+      admin.add_group("northeastern:drs:repository:proxystaff")
+      admin.save!
+      sign_in admin
+      get :new_attached_file, id:file.pid
+      test_file = fixture_file_upload("/files/video.mp4")
+      post :create_attached_file, id:file.pid, file:test_file, terms_of_service:1, upload_type:"proxy"
+      video = VideoMasterFile.first
+      video.proxy_uploader.should == admin.nuid
+      video.depositor.should == bill.nuid
+      VideoMasterFile.destroy_all
+      admin.delete_group("northeastern:drs:repository:proxystaff")
+    end
+
+    it "assigns proxy_uploader as current user and depositor as core_file depositor if it is a proxy_upload" do
+      file.canonical_class = "VideoFile"
+      file.save!
+      admin.add_group("northeastern:drs:repository:proxystaff")
+      admin.save!
+      sign_in admin
+      get :new_attached_file, id:file.pid
+      test_file = fixture_file_upload("/files/video.mp4")
+      post :create_attached_file, id:file.pid, file:test_file, terms_of_service:1, upload_type:"personal"
+      video = VideoMasterFile.first
+      video.proxy_uploader.should be nil
+      video.depositor.should == admin.nuid
+      VideoMasterFile.destroy_all
+      admin.delete_group("northeastern:drs:repository:proxystaff")
+    end
+
+    it "assigns depositor as current user if not proxystaff" do
+      file.canonical_class = "VideoFile"
+      file.save!
+      sign_in admin
+      get :new_attached_file, id:file.pid
+      test_file = fixture_file_upload("/files/video.mp4")
+      post :create_attached_file, id:file.pid, file:test_file, terms_of_service:1
+      video = VideoMasterFile.first
+      video.proxy_uploader.should be nil
+      video.depositor.should == admin.nuid
       VideoMasterFile.destroy_all
     end
   end
