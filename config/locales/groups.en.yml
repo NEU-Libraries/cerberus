@@ -76,6 +76,8 @@ en:
       name: "DRS Repository Staff"
     northeastern:drs:school_of_law:law_library:staff:
       name: "School of Law - Law Library Staff"
+    northeastern:drs:spectrum:staff:
+      name: "Spectrum Literary Arts Magazine Staff"
     northeastern:drs:all:
       name: "Northeastern - All"
     northeastern:drs:faculty:
