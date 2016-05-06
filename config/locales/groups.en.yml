@@ -38,6 +38,8 @@ en:
       name: "EMSA - EMC Staff"
     northeastern:drs:enrollment_management:emsa:
       name: "EMSA Staff"
+    northeastern:drs:facilities:archive_staff:
+      name: "Facilities Division - Archive Staff"
     northeastern:drs:library:archives:
       name: "University Archives and Special Collections"
     northeastern:drs:library:communications:
