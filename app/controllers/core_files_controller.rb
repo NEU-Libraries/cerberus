@@ -131,6 +131,8 @@ class CoreFilesController < ApplicationController
 
   def provide_file_metadata
     @core_file = CoreFile.find(params[:id])
+    klass = class_for_attached_file(@core_file)
+    @content_object = klass.find(params[:content_object_id])
     @page_title = "Provide File Metadata"
   end
 
@@ -214,15 +216,11 @@ class CoreFilesController < ApplicationController
   end
 
   def process_file_metadata
-    @core_file = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first)
-    klass = @core_file.canonical_class.constantize
-    if klass == AudioFile
-      klass = AudioMasterFile
-    elsif klass == VideoFile
-      klass = VideoMasterFile
-    end
-    @content_object = klass.find(params[:content_object])
-    Cerberus::Application::Queue.push(ContentAttachmentJob.new(@core_file.pid, @content_object.tmp_path, @content_object.pid, @content_object.original_filename, true, params[:permissions]))
+    @core_file = CoreFile.find(params[:id])
+    klass = class_for_attached_file(@core_file)
+    @content_object = klass.find(params[:content_object_id])
+    Cerberus::Application::Queue.push(ContentAttachmentJob.new(@core_file.pid, @content_object.tmp_path, @content_object.pid, @content_object.original_filename, params[:content_object][:permissions], params[:content_object][:mass_permissions]))
+    UploadAlert.create_from_core_file(@core_file, :update, current_user)
     flash[:notice] = "Your file is being added. Please check back soon."
     redirect_to core_file_path(@core_file.pid) + '#no-back'
   end
@@ -321,15 +319,16 @@ class CoreFilesController < ApplicationController
       else
         if virus_check(file) == 0
           new_path = move_file_to_tmp(file)
-          klass = @core_file.canonical_class.constantize
-          if klass == AudioFile
-            klass = AudioMasterFile
-          elsif klass == VideoFile
-            klass = VideoMasterFile
-          end
+          klass = class_for_attached_file(@core_file)
           content_object = klass.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
           content_object.tmp_path = new_path
           content_object.original_filename = file.original_filename
+          if current_user.proxy_staff? && params[:upload_type] == "proxy"
+            content_object.depositor = @core_file.depositor
+            content_object.proxy_uploader = current_user.nuid
+          else
+            content_object.depositor = current_user.nuid
+          end
           content_object.save!
           render json: { url: files_provide_file_metadata_path(@core_file.pid, content_object.pid)}
         else
@@ -842,5 +841,15 @@ class CoreFilesController < ApplicationController
         # solr_parameters[:rows] = 1
         solr_parameters[:sort] = "ordinal_value_isi asc"
         solr_parameters[:fl] = "id, ordinal_value_isi"
+      end
+
+      def class_for_attached_file(core_file)
+        klass = core_file.canonical_class.constantize
+        if klass == AudioFile
+          klass = AudioMasterFile
+        elsif klass == VideoFile
+          klass = VideoMasterFile
+        end
+        return klass
       end
 end
