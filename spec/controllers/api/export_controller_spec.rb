@@ -22,6 +22,7 @@ describe Api::V1::ExportController, :type => :controller do
   end
 
   describe "GET #get_files" do
+<<<<<<< Updated upstream
     it "gives an error with a invalid starting ID" do
       @expected = {
         :error  => "A valid starting ID is required"
@@ -93,7 +94,33 @@ describe Api::V1::ExportController, :type => :controller do
 
     it "works with compilations" do
       #TODO
+=======
+    it "limits scope" do
+    end
+
+    it "only retrieves core_files" do
+    end
+
+    it "only retrieves public obejcts" do
+    end
+
+    it "doesn't return embargoed objects" do
+    end
+
+    it "doesn't return in progress objects" do
+>>>>>>> Stashed changes
+    end
+
+    it "doesn't return incomplete objects" do
+    end
+
+    it "includes pagination in the JSON" do
+    end
+
+    it "prevents the user from going to a page that doesn't exist" do
+    end
+
+    it "doesn't allow an invalid starting id" do
     end
   end
-
 end

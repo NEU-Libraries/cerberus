@@ -82,7 +82,7 @@ module Cerberus
 
       def description=(string)
         if !string.blank?
-          if_mods_exists { self.mods.abstract = string }
+          if_mods_exists { self.mods.description = string }
           if_DC_exists { self.DC.nu_description = string }
         end
       end
@@ -129,7 +129,11 @@ module Cerberus
 
       # Assumes you want a type agnostic dump of all creators and therefore uses the DC record
       def creators
-        if_DC_exists_strict { self.DC.creator }
+        # if_DC_exists_strict { self.DC.creator }
+        c = []
+        c.concat personal_creators.map { |hsh| "#{hsh[:first]} #{hsh[:last]}" }
+        c.concat corporate_creators
+        c.reject { |c| c.empty? }
       end
 
       # Should return [{first: "Will", last: "Jackson"}, {first: "next_first", last: "etc"}]
