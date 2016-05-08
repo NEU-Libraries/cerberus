@@ -357,6 +357,20 @@ class ModsDatastream < ActiveFedora::OmDatastream
     builder.doc
   end
 
+  def title=(title)
+    if title.kind_of?(Array)
+      title = title[0]
+    end
+    self.title_info.title = title.gsub(/[\s\b\v]+/, " ")
+  end
+
+  def description=(desc)
+    if desc.kind_of?(Array)
+      desc = desc[0]
+    end
+    self.abstract = desc.gsub(/[\s\b\v]+/, " ")
+  end
+
   # Consolidating all date options for the edit form
   def date
     if self.origin_info.date_created.any? && !self.origin_info.date_created.first.blank?
@@ -430,7 +444,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
       end
     end
 
-    self.topic = array_of_keywords
+    self.topic = array_of_keywords.map {|kw| kw.gsub(/[\s\b\v]+/, " ") }
   end
 
   # Allows for tombstone message
@@ -524,8 +538,8 @@ class ModsDatastream < ActiveFedora::OmDatastream
           self.insert_new_node(:personal_name)
         end
 
-        self.personal_name(index).name_part_given = first_name
-        self.personal_name(index).name_part_family = last_name
+        self.personal_name(index).name_part_given = first_name.gsub(/[\s\b\v]+/, " ")
+        self.personal_name(index).name_part_family = last_name.gsub(/[\s\b\v]+/, " ")
         self.personal_name(index).name_part = ""
       end
 
@@ -554,7 +568,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
           self.insert_new_node(:corporate_name)
         end
 
-        self.corporate_name(index).name_part = c_name
+        self.corporate_name(index).name_part = c_name.gsub(/[\s\b\v]+/, " ")
       end
 
       # Set usage attribute to primary
