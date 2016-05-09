@@ -281,7 +281,7 @@ class CoreFile < ActiveFedora::Base
   end
 
   def incomplete?
-    return ! self.in_progress.empty?
+    return ! self.properties.incomplete.empty?
   end
 
   def in_progress?
