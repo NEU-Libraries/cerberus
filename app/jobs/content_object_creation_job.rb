@@ -1,4 +1,4 @@
-class ContentAttachmentJob
+class ContentObjectCreationJob
   include MimeHelper
   include ChecksumHelper
 
@@ -6,7 +6,7 @@ class ContentAttachmentJob
   attr_accessor :core_record, :content_object
 
   def queue_name
-    :content_attachment
+    :content_object_creation
   end
 
   def initialize(core_file, file_path, content_object, file_name, permissions, mass_permissions)
@@ -63,7 +63,8 @@ class ContentAttachmentJob
       # if core_record.canonical_class.in?(['TextFile', 'MswordFile', 'PdfFile'])
       #   content_object.extract_content
       # end
-
+      # MARK AS COMPLETED - TODO: figure out how the incomplete will work- rescuing and destroying functionality just for the content_object
+      content_object.properties.tag_as_completed
       # reload just to be safe
       core_record.reload
       core_record.save!

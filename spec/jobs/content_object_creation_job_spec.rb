@@ -4,7 +4,7 @@ include ChecksumHelper
 include ActionDispatch::TestProcess
 include Cerberus::TempFileStorage
 
-describe ContentAttachmentJob do
+describe ContentObjectCreationJob do
   before(:each) do
     @user = FactoryGirl.create(:admin)
     @core_file = FactoryGirl.create(:complete_file, depositor:"000000000")
@@ -18,7 +18,7 @@ describe ContentAttachmentJob do
     @content_object.save!
     @permissions = {"identity"=>["northeastern:drs:repository:staff", "northeastern:drs:repository:loaders:emsa_emc"], "permission_type"=>["edit", "read"]}
     @mass_permissions = "public"
-    @job = ContentAttachmentJob.new(@core_file.pid, @content_object.tmp_path, @content_object.pid, @content_object.original_filename, @permissions, @mass_permissions)
+    @job = ContentObjectCreationJob.new(@core_file.pid, @content_object.tmp_path, @content_object.pid, @content_object.original_filename, @permissions, @mass_permissions)
     @job.run
     @core_file.reload
     @content_object.reload
@@ -79,7 +79,12 @@ describe ContentAttachmentJob do
     @content_object.properties.mime_type.should == [extract_mime_type(new_path)]
   end
 
+  it "sets content_object to complete" do
+    @content_object.properties.incomplete?.should be false
+    @content_object.properties.in_progress?.should be false
+  end
+
   it "deletes tmp file" do
-    # TODO
+    File.exist?("#{@content_object.tmp_path}").should be false
   end
 end
