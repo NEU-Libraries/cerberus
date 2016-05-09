@@ -126,9 +126,7 @@ class CoreFilesController < ApplicationController
     elsif @content_object.incomplete?
       @content_object = ActiveFedora::Base.find(@content_object.pid)
       @content_object.destroy
-      puts "the content object has been destroyed"
       session[:flash_success] = "Incomplete file destroyed"
-      puts params
       respond_to do |format|
         format.html{
             redirect_to(root_path) and return

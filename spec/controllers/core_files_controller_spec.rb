@@ -138,6 +138,36 @@ describe CoreFilesController do
     end
   end
 
+  describe "DELETE #destroy_incomplete_content_object" do
+
+    # Ensures no contamination between test runs.
+    after(:each) do
+      a = VideoMasterFile.find(:all).each do |file|
+        file.destroy
+      end
+    end
+
+    it "removes an incomplete file associated with the signed in user" do
+      sign_in admin
+
+      incomplete_co = VideoMasterFile.new()
+      incomplete_co.properties.tag_as_incomplete
+      incomplete_co.save!
+      complete_co = VideoMasterFile.new()
+      complete_co.save!
+
+      Timecop.travel(7.hours) do
+        delete :destroy_incomplete_content_object, id: incomplete_co.pid
+        CoreFile.abandoned_for_nuid(bill.nuid).length.should == 0
+      end
+
+      # Check that bills complete content_object was not deleted
+      VideoMasterFile.find(complete_co.pid).should == complete_co
+
+      expect(response).to redirect_to(root_path)
+    end
+  end
+
   describe "GET #provide_metadata" do
 
     # Ensures no contamination between test runs
@@ -435,6 +465,17 @@ describe CoreFilesController do
       test_file = fixture_file_upload("/files/video.mp4")
       post :create_attached_file, id:file.pid, file:test_file, terms_of_service:1
       VideoMasterFile.all.count.should == 1
+      VideoMasterFile.destroy_all
+    end
+
+    it "sets content_object as incomplete" do
+      file.canonical_class = "VideoFile"
+      file.save!
+      sign_in admin
+      get :new_attached_file, id:file.pid
+      test_file = fixture_file_upload("/files/video.mp4")
+      post :create_attached_file, id:file.pid, file:test_file, terms_of_service:1
+      VideoMasterFile.first.properties.incomplete?.should be true
       VideoMasterFile.destroy_all
     end
 
