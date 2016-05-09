@@ -233,7 +233,32 @@ class CoreFile < ActiveFedora::Base
     proxy_uploader = "proxy_uploader_tesim:#{nuid}"
 
     true_depositor_query = "(#{depositor} OR #{proxy_uploader})"
-    f_query = as.query("#{true_depositor_query} AND incomplete_tesim:true")
+    f_query = as.query("#{true_depositor_query} AND incomplete_tesim:true AND active_fedora_model_ssi:\"CoreFile\"")
+    docs    = f_query.map { |x| SolrDocument.new (x) }
+    now     = DateTime.now
+
+    docs.keep_if do |doc|
+      create_date     = doc.create_date_time
+      (now - 15.minutes) > create_date
+    end
+  end
+
+  # Returns an array of all abandoned content_objects for this given depositor nuid
+  def self.abandoned_content_objects_for_nuid(nuid)
+    as = ActiveFedora::SolrService
+
+    nuid = "\"#{nuid}\""
+    depositor = "depositor_tesim:#{nuid}"
+    proxy_uploader = "proxy_uploader_tesim:#{nuid}"
+
+    true_depositor_query = "(#{depositor} OR #{proxy_uploader})"
+    all_possible_models = [ "ImageSmallFile", "ImageMediumFile", "ImageLargeFile",
+                            "ImageMasterFile", "ImageThumbnailFile", "MsexcelFile",
+                            "MspowerpointFile", "MswordFile", "PdfFile", "TextFile",
+                            "ZipFile", "AudioFile", "VideoFile", "PageFile", "VideoMasterFile", "AudioMasterFile" ]
+    models_stringified = all_possible_models.inject { |base, str| base + " or #{str}" }
+    models_query = ActiveFedora::SolrService.escape_uri_for_query models_stringified
+    f_query = as.query("#{true_depositor_query} AND incomplete_tesim:true AND active_fedora_model_ssi:(#{models_stringified})")
     docs    = f_query.map { |x| SolrDocument.new (x) }
     now     = DateTime.now
 

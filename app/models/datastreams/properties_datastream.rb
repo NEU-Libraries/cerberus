@@ -53,6 +53,11 @@ class PropertiesDatastream < ActiveFedora::OmDatastream
     self.in_progress = []
   end
 
+  def tag_as_incomplete
+    self.incomplete = 'true'
+    self.in_progress = []
+  end
+
   def canonize
     self.canonical = 'yes'
   end
