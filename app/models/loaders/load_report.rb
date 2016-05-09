@@ -2,6 +2,7 @@ class Loaders::LoadReport < ActiveRecord::Base
   has_many :image_reports
   has_many :multipage_reports
   attr_accessible :timestamp, :number_of_files, :success_count, :fail_count, :modified_count, :nuid, :loader, :collection
+  attr_accessible :comparison_file_pid, :preview_file_pid
 
   def self.create_from_strings(user, results, loader_name, collection)
     x = Loaders::LoadReport.new

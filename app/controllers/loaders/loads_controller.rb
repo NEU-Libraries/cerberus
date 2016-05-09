@@ -92,7 +92,8 @@ class Loaders::LoadsController < ApplicationController
             Cerberus::Application::Queue.push(ProcessMultipageZipJob.new(@loader_name, new_file.to_s, parent, copyright, current_user, permissions))
           elsif short_name == "mods_spreadsheet"
             #mods spreadsheet job
-            Cerberus::Application::Queue.push(ProcessModsZipJob.new(@loader_name, new_file.to_s, parent, copyright, current_user, permissions))
+            report_id = ProcessModsZipJob.new(@loader_name, new_file.to_s, parent, copyright, current_user, permissions, true).run
+            redirect_to loaders_mods_spreadsheet_preview_compare_path(id: report_id)
           else
             # send to iptc job
             Cerberus::Application::Queue.push(ProcessIptcZipJob.new(@loader_name, new_file.to_s, parent, copyright, current_user, permissions, derivatives))
