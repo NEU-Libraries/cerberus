@@ -12,7 +12,7 @@
   $(window).on("unload", function() {
     if(confirmation_needed){
       $.ajax( {
-        url: '#{destroy_incomplete_file_path(params['content_object_id'])}',
+        url: '#{destroy_incomplete_content_object_path(params['content_object_id'])}',
         type: 'DELETE',
         async: false,
         success: function(result) {
@@ -33,8 +33,6 @@
   = hidden_field_tag(:proxy, params[:proxy])
 
   = render :partial => 'core_files/metadata/content_object', :formats => [:html], :locals => {:f => f, :new_object => true}
-
-  / We need to account for the different file types here to extend the metdata screen
 
   .form-actions
     = f.submit class: ['btn', 'btn-primary'], :onclick => "$(window).unbind('beforeunload'); confirmation_needed = false;", value: 'Submit', data: { disable_with: "Please wait..."}
