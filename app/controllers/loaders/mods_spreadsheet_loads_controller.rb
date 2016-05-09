@@ -23,9 +23,11 @@ class Loaders::ModsSpreadsheetLoadsController < Loaders::LoadsController
   end
 
   def preview
-    @core_file = CoreFile.first #TODO: hook this in the with the job, just hardcoded for now
-    @mods_html = render_mods_display(CoreFile.find(@core_file.pid)).to_html.html_safe
     @report = Loaders::LoadReport.find(params[:id])
+
+    @core_file = CoreFile.find(@report.preview_file_pid)
+    @mods_html = render_mods_display(CoreFile.find(@core_file.pid)).to_html.html_safe
+
     @user = User.find_by_nuid(@report.nuid)
     @collection_title = ActiveFedora::SolrService.query("id:\"#{@report.collection}\"", :fl=>"title_tesim")
     @collection_title = @collection_title[0]['title_tesim'][0]
@@ -36,12 +38,15 @@ class Loaders::ModsSpreadsheetLoadsController < Loaders::LoadsController
   end
 
   def preview_compare
-    @core_file = CoreFile.first #TODO: hook this in the with the job, just hardcoded for now
-    old_core = CoreFile.all[2] #TODO: hook this is in with the job
+    @report = Loaders::LoadReport.find(params[:id])
+
+    @core_file = CoreFile.find(@report.preview_file_pid)
+    old_core = CoreFile.find(@report.comparison_file_pid)
+
     @diff = mods_diff(@core_file, old_core)
     @diff_css = Diffy::CSS
     @mods_html = render_mods_display(CoreFile.find(@core_file.pid)).to_html.html_safe
-    @report = Loaders::LoadReport.find(params[:id])
+
     @user = User.find_by_nuid(@report.nuid)
     @collection_title = ActiveFedora::SolrService.query("id:\"#{@report.collection}\"", :fl=>"title_tesim")
     @collection_title = @collection_title[0]['title_tesim'][0]
