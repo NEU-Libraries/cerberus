@@ -353,6 +353,23 @@ class CoreFilesController < ApplicationController
     abandoned_files = CoreFile.abandoned_for_nuid(current_user.nuid)
 
     if abandoned_files.any?
+      # Delete abandoned files that no longer have their file available
+      # either failed, and can't complete, or fell foul of the 6 hour window
+      abandoned_files.delete_if do |doc|
+        begin
+          cf = CoreFile.find(doc.pid)
+          if !(File.exists?(cf.tmp_path))
+            cf.destroy
+            return true
+          end
+        rescue Exception => error
+          return true
+        end
+        false
+      end
+    end
+
+    if abandoned_files.any?
       file = abandoned_files.first
       redirect_to rescue_incomplete_file_path("abandoned" => file.pid)
       return
