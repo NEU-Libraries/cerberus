@@ -43,6 +43,10 @@ class PropertiesDatastream < ActiveFedora::OmDatastream
     return ! self.in_progress.empty?
   end
 
+  def incomplete?
+    return ! self.incomplete.empty?
+  end
+
   def tag_as_in_progress
     self.incomplete = []
     self.in_progress = 'true'
