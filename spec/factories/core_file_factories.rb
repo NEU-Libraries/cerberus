@@ -10,6 +10,7 @@ FactoryGirl.define do
     trait :incomplete do
       before(:create) do |file|
         file.tag_as_incomplete
+        file.tmp_path = "#{Rails.root}/spec/fixtures/files/test_pic.jpeg"
       end
     end
 
