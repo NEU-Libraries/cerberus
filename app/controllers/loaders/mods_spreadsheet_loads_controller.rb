@@ -56,6 +56,37 @@ class Loaders::ModsSpreadsheetLoadsController < Loaders::LoadsController
     render 'loaders/preview'
   end
 
+  def cancel_load
+    @report = Loaders::LoadReport.find(params[:id])
+    if !@report.preview_file_pid.blank?
+      cf = CoreFile.find(preview_file_pid)
+      FileUtils.rm(cf.tmp_path)
+      cf.destroy
+    elsif !@report.comparison_file_pid.blank?
+      cf = CoreFile.find(comparison_file_pid)
+      FileUtils.rm(cf.tmp_path)
+      cf.destroy
+    end
+    flash[:notice] = "Your load has been cancelled."
+    redirect_to "/my_loaders"
+  end
+
+  def proceed_load
+    @report = Loaders::LoadReport.find(params[:id])
+    @loader_name = t('drs.loaders.'+t('drs.loaders.mods_spreadsheet.short_name')+'.long_name')
+    if !@report.preview_file_pid.blank?
+      cf = CoreFile.find(@report.preview_file_pid)
+      spreadsheet_file_path = cf.tmp_path
+    elsif !@report.comparison_file_pid.blank?
+      cf = CoreFile.find(@report.comparison_file_pid)
+      spreadsheet_file_path = cf.tmp_path
+    end
+    copyright = t('drs.loaders.mods_spreadsheet.copyright')
+    permissions = {"CoreFile" => {"read"  => ["public"], "edit" => ["northeastern:drs:repository:staff"]}}
+    Cerberus::Application::Queue.push(ProcessModsZipJob.new(@loader_name, spreadsheet_file_path, @report.collection, copyright, current_user, permissions, @report.id, false))
+    redirect_to "/loaders/mods_spreadsheet/report/#{@report.id}"
+  end
+
   private
 
     def verify_group
