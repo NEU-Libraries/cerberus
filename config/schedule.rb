@@ -29,8 +29,7 @@ every 1.day, at: '4:00am'  do
 end
 
 every :sunday, :at => '4:00am' do
-  date = DateTime.now.end_of_week.-2.days
-  runner "AggregatedStatisticsJob.new(#{date}).run"
+  runner "AggregatedStatisticsJob.new(nil).run"
 end
 
 # Learn more: http://github.com/javan/whenever
