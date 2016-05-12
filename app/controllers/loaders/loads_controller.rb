@@ -90,25 +90,37 @@ class Loaders::LoadsController < ApplicationController
         if extract_mime_type(new_file) == 'application/zip'
           if short_name == "multipage"
             # multipage zip job
-            Cerberus::Application::Queue.push(ProcessMultipageZipJob.new(@loader_name, new_file.to_s, parent, copyright, current_user, permissions))
+            report_id = Loaders::LoadReport.create_from_strings(current_user, 0, @loader_name, parent)
+            Cerberus::Application::Queue.push(ProcessMultipageZipJob.new(@loader_name, new_file.to_s, parent, copyright, current_user, permissions, report_id))
+            render :json => {report_id: report_id}.to_json and return
           elsif short_name == "mods_spreadsheet"
             #mods spreadsheet job
             spreadsheet_file_path = unzip(new_file, new_path)
-            ProcessModsZipJob.new(@loader_name, spreadsheet_file_path, parent, copyright, current_user, permissions, true).run
+            report_id = Loaders::LoadReport.create_from_strings(current_user, 0, @loader_name, parent)
+            ProcessModsZipJob.new(@loader_name, spreadsheet_file_path, parent, copyright, current_user, permissions, report_id, true).run
+            load_report = Loaders::LoadReport.find(report_id)
+            if !load_report.preview_file_pid.blank?
+              render :json => {report_id: report_id, preview_file_pid: load_report.preview_file_pid}.to_json and return
+            elsif !load_report.comparison_file_pid.blank?
+              render :json => {report_id: report_id, comparison_file_pid: load_report.comparison_file_pid}.to_json and return
+            end
           else
             # send to iptc job
-            Cerberus::Application::Queue.push(ProcessIptcZipJob.new(@loader_name, new_file.to_s, parent, copyright, current_user, permissions, derivatives))
+            report_id = Loaders::LoadReport.create_from_strings(current_user, 0, @loader_name, parent)
+            Cerberus::Application::Queue.push(ProcessIptcZipJob.new(@loader_name, new_file.to_s, parent, copyright, current_user, permissions, report_id,  derivatives))
+            render :json => {report_id: report_id}.to_json and return
           end
           session[:flash_success] = "Your file has been submitted and is now being processed. You will receive an email when the load is complete."
         else
           #error out
           FileUtils.rm(new_file)
           session[:flash_error] = 'The file you uploaded was not a zipfile. Please try again.';
+          render :nothing => true
         end
       else
         session[:flash_error] = 'Error creating file.';
+        render :nothing => true
       end
-      render :nothing => true
     end
 
     def json_error(error, name=nil, additional_arguments={})
