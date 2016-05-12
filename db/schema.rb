@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20160509142646) do
+ActiveRecord::Schema.define(:version => 20160512185017) do
 
   create_table "aggregated_statistics", :force => true do |t|
     t.string   "object_type"
@@ -122,8 +122,8 @@ ActiveRecord::Schema.define(:version => 20160509142646) do
   create_table "load_reports", :force => true do |t|
     t.string   "loader_name"
     t.integer  "number_of_files"
-    t.datetime "created_at",                          :null => false
-    t.datetime "updated_at",                          :null => false
+    t.datetime "created_at",                             :null => false
+    t.datetime "updated_at",                             :null => false
     t.integer  "success_count"
     t.integer  "fail_count"
     t.string   "nuid"
@@ -131,6 +131,7 @@ ActiveRecord::Schema.define(:version => 20160509142646) do
     t.integer  "modified_count"
     t.string   "comparison_file_pid", :default => ""
     t.string   "preview_file_pid",    :default => ""
+    t.boolean  "completed",           :default => false
   end
 
   create_table "local_authorities", :force => true do |t|
