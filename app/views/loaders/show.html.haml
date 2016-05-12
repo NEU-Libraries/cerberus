@@ -23,7 +23,7 @@
   = "#{@report.number_of_files} (Successful: #{@report.success_count}, Modified: #{@report.modified_count}, Error: #{@report.fail_count})"
 
 %br
-%table.table.table-striped
+%table.table.table-striped#report
   %th File Name
   %th Core File Title
   %th File Status
@@ -89,3 +89,14 @@
               = link_to("View IPTC", loaders_emsa_iptc_path(image.id), class:"btn btn-small btn-warning")
             - elsif @report.loader_name == t('drs.loaders.bouve.long_name')
               = link_to("View IPTC", loaders_bouve_iptc_path(image.id), class:"btn btn-small btn-warning")
+
+:javascript
+  $(document).ready(function(){
+    if (#{!@report.completed}){
+      console.log("this report isn't completed yet");
+      spinner = enable_spinner('report');
+      setTimeout("location.reload(true);", 30000);
+    } else {
+      console.log("this report is completed");
+    }
+  });
