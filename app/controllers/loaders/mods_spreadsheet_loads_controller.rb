@@ -43,7 +43,7 @@ class Loaders::ModsSpreadsheetLoadsController < Loaders::LoadsController
     @core_file = CoreFile.find(@report.preview_file_pid)
     old_core = CoreFile.find(@report.comparison_file_pid)
 
-    @diff = mods_diff(@core_file, old_core)
+    @diff = mods_diff(old_core, @core_file)
     @diff_css = Diffy::CSS
     @mods_html = render_mods_display(CoreFile.find(@core_file.pid)).to_html.html_safe
 
@@ -69,25 +69,4 @@ class Loaders::ModsSpreadsheetLoadsController < Loaders::LoadsController
       return Diffy::Diff.new(mods_a, mods_b, :include_plus_and_minus_in_html => true, :context => 1).to_s(:html).html_safe
     end
 
-    def unzip(file, dir_path)
-      spreadsheet_file_path = ""
-      FileUtils.mkdir(dir_path) unless File.exists? dir_path
-
-      # Extract load zip
-      file_list = safe_unzip(file, dir_path)
-
-      # Find the spreadsheet
-      xlsx_array = Dir.glob("#{dir_path}/*.xlsx")
-
-      if xlsx_array.length > 1
-        raise Exceptions::MultipleSpreadsheetError
-      elsif xlsx_array.length == 0
-        raise Exceptions::NoSpreadsheetError
-      end
-
-      spreadsheet_file_path = xlsx_array.first
-
-      FileUtils.rm(file)
-      return spreadsheet_file_path
-    end
 end
