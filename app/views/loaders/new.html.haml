@@ -68,7 +68,14 @@
             }
         },
         done: function (e, data) {
-           window.location = '/my_loaders';
+          response = JSON.parse(data.result);
+          if ('preview_file_pid' in response) {
+            window.location = "/loaders/mods_spreadsheet/preview/"+response.report_id;
+          } else if ('comparison_file_pid' in response) {
+            window.location = "/loaders/mods_spreadsheet/preview_compare/"+response.report_id;
+          } else {
+            window.location = "/loaders/#{@loader_short_name}/report/"+response.report_id;
+          }
         }
     });
   });
