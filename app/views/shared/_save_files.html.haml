@@ -1,5 +1,3 @@
-%hr
-.pane.page-to-compilation
-  -files = @document_list.select{|d| if (d['active_fedora_model_ssi'] == 'CoreFile') then d['id'] end}
-  -if !files.blank?
-    =link_to("Save files for later", sets_editable_path(files: files), remote: true, title:  "Add to " + t('drs.compilations.name'), data: {toggle: "tooltip"}, class: "btn btn-mini btn-clear")
+-files = @document_list.select{|d| if (d['active_fedora_model_ssi'] == 'CoreFile') then d['id'] end}
+-if !files.blank?
+  =link_to("Save files for later", sets_editable_path(files: files), remote: true, title:  "Add to " + t('drs.compilations.name'), data: {toggle: "tooltip"}, class: "btn btn-mini btn-clear")

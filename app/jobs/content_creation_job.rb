@@ -24,6 +24,13 @@ class ContentCreationJob
   end
 
   def run
+    # If file_path doesn't exist, or file doesn't exist, don't run
+    # and email exception
+    if file_path.blank? || !(File.exists?(file_path))      
+      ExceptionNotifier.notify_exception(Exceptions::MissingFile.new(), :env => request.env)
+      return
+    end
+
     begin
       self.core_record = CoreFile.find(core_file_pid)
 
@@ -111,7 +118,7 @@ class ContentCreationJob
       end
 
       if (content_object.instance_of? ImageMasterFile)
-         ScaledImageCreator.new(small_size, medium_size, large_size, content_object, permissions).create_scaled_images
+         ScaledImageCreator.new(small_size, medium_size, large_size, content_object.pid, permissions).create_scaled_images
       end
 
       # Derivative creator loads into memory, we're skipping for large files

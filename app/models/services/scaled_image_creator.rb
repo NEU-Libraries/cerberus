@@ -9,12 +9,12 @@ class ScaledImageCreator
   # Size instance vars should be scale factors, e.g. .25 for a derivative
   # 25% the size of the original
   # Pass nil for s/m/l if you do not wish that size of Image derivative
-  def initialize(s, m, l, mast, permissions=nil)
+  def initialize(s, m, l, master_pid, permissions=nil)
     @small = s
     @med = m
     @large = l
-    @master = mast
-    @core = self.master.core_record
+    @master = ActiveFedora::Base.find(master_pid, cast: true)
+    @core = CoreFile.find(self.master.core_record.pid)
     @permissions = permissions
   end
 
@@ -86,7 +86,7 @@ class ScaledImageCreator
         img.interlace = Magick::PlaneInterlace
         scaled_img = img.resize(size)
 
-        fname = master.content.label
+        fname = master.original_filename
         fname = "#{fname.chomp(File.extname(fname))}.jpg"
 
         target.add_file(scaled_img.to_blob, 'content', fname)

@@ -128,6 +128,12 @@ module Exceptions
     end
   end
 
+  class MissingFile < StandardError
+    def initialize
+      super "No binary file found in tmp directory"
+    end
+  end
+
   class MissingMetadata < StandardError
     def initialize(required_data)
       super "No valid #{required_data} in xml"
