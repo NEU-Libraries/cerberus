@@ -4,13 +4,13 @@ class ProcessModsZipJob
   include ApplicationHelper
   include ZipHelper
 
-  attr_accessor :loader_name, :spreadsheet_file_path, :parent, :copyright, :current_user, :permissions, :preview, :client
+  attr_accessor :loader_name, :spreadsheet_file_path, :parent, :copyright, :current_user, :permissions, :preview, :client, :report_id
 
   def queue_name
     :mods_process_zip
   end
 
-  def initialize(loader_name, spreadsheet_file_path, parent, copyright, current_user, permissions, preview=nil, client=nil)
+  def initialize(loader_name, spreadsheet_file_path, parent, copyright, current_user, permissions, report_id, preview=nil, client=nil)
     self.loader_name = loader_name
     self.spreadsheet_file_path = spreadsheet_file_path
     self.parent = parent
@@ -19,10 +19,10 @@ class ProcessModsZipJob
     self.permissions = permissions
     self.preview = preview
     self.client = client
+    self.report_id = report_id
   end
 
   def run
-    report_id = Loaders::LoadReport.create_from_strings(current_user, 0, loader_name, parent)
     load_report = Loaders::LoadReport.find(report_id)
 
     # unzip zip file to tmp storage
@@ -49,7 +49,7 @@ class ProcessModsZipJob
           preview_file.depositor              = comparison_file.depositor
           preview_file.rightsMetadata.content = comparison_file.rightsMetadata.content
           preview_file.mods.content           = comparison_file.mods.content
-
+          preview_file.tmp_path = spreadsheet_file_path
           # Load row of metadata in for preview - turn into a method, for demos sake
           # let's just do the title
           preview_file.title = row_results["title"]
@@ -64,11 +64,13 @@ class ProcessModsZipJob
       end
     end
 
-    # load_report.update_counts
-    # load_report.number_of_files = count
-    # load_report.save!
+    load_report.update_counts
+    load_report.number_of_files = count
+    load_report.save!
 
     if load_report.success_count + load_report.fail_count + load_report.modified_count == load_report.number_of_files
+      load_report.completed = true
+      load_report.save!
       # LoaderMailer.load_alert(load_report, User.find_by_nuid(load_report.nuid)).deliver!
     end
   end
