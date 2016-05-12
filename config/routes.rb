@@ -136,6 +136,8 @@ Cerberus::Application.routes.draw do
    get "/loaders/mods_spreadsheet/report/:id" => 'mods_spreadsheet_loads#show', as: 'loaders_mods_spreadsheet_report'
    get "/loaders/mods_spreadsheet/preview/:id" => 'mods_spreadsheet_loads#preview',  as: 'loaders_mods_spreadsheet_preview'
    get "/loaders/mods_spreadsheet/preview_compare/:id" => 'mods_spreadsheet_loads#preview_compare', as: 'loaders_mods_spreadsheet_preview_compare'
+   get "/loaders/:id/cancel_load" => "mods_spreadsheet_loads#cancel_load", as: "loaders_cancel_load"
+   get "/loaders/:id/proceed_load" => "mods_spreadsheet_loads#proceed_load", as: "loaders_proceed_load"
   end
 
   # Facets for communities and collections
