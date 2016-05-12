@@ -4,19 +4,20 @@ class ProcessModsZipJob
   include ApplicationHelper
   include ZipHelper
 
-  attr_accessor :loader_name, :zip_path, :parent, :copyright, :current_user, :permissions, :client
+  attr_accessor :loader_name, :spreadsheet_file_path, :parent, :copyright, :current_user, :permissions, :preview, :client
 
   def queue_name
     :mods_process_zip
   end
 
-  def initialize(loader_name, zip_path, parent, copyright, current_user, permissions, client=nil)
+  def initialize(loader_name, spreadsheet_file_path, parent, copyright, current_user, permissions, preview=nil, client=nil)
     self.loader_name = loader_name
-    self.zip_path = zip_path
+    self.spreadsheet_file_path = spreadsheet_file_path
     self.parent = parent
     self.copyright = copyright
     self.current_user = current_user
     self.permissions = permissions
+    self.preview = preview
     self.client = client
   end
 
@@ -25,13 +26,12 @@ class ProcessModsZipJob
     load_report = Loaders::LoadReport.find(report_id)
 
     # unzip zip file to tmp storage
-    dir_path = File.join(File.dirname(zip_path), File.basename(zip_path, ".*"))
-    spreadsheet_file_path = unzip(zip_path, dir_path)
+    dir_path = File.join(File.dirname(spreadsheet_file_path), File.basename(spreadsheet_file_path, ".*"))
 
-    process_spreadsheet(dir_path, spreadsheet_file_path, load_report, client)
+    process_spreadsheet(dir_path, spreadsheet_file_path, load_report, preview, client)
   end
 
-  def process_spreadsheet(dir_path, spreadsheet_file_path, load_report, client)
+  def process_spreadsheet(dir_path, spreadsheet_file_path, load_report, preview, client)
     count = 0
     spreadsheet = load_spreadsheet(spreadsheet_file_path)
 
@@ -41,7 +41,26 @@ class ProcessModsZipJob
     spreadsheet.each_row_streaming(offset: header_position) do |row|
       if row.present? && header_row.present?
         row_results = process_a_row(header_row, row)
-        # TODO fill out
+        if preview
+          # Process first row
+          comparison_file = CoreFile.find(row_results["pid"])
+
+          preview_file = CoreFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
+          preview_file.depositor              = comparison_file.depositor
+          preview_file.rightsMetadata.content = comparison_file.rightsMetadata.content
+          preview_file.mods.content           = comparison_file.mods.content
+
+          # Load row of metadata in for preview - turn into a method, for demos sake
+          # let's just do the title
+          preview_file.title = row_results["title"]
+          preview_file.save!
+
+          load_report.comparison_file_pid = comparison_file.pid
+          load_report.preview_file_pid = preview_file.pid
+
+          load_report.save!
+          return
+        end
       end
     end
 
@@ -141,9 +160,11 @@ class ProcessModsZipJob
   def find_in_row(header_row, row_value, column_identifier)
     0.upto header_row.length do |row_pos|
       # Account for case insensitivity
-      case header_row[row_pos].downcase
-      when column_identifier.downcase
-          return row_value[row_pos].to_s || ""
+      if !header_row[row_pos].blank?
+        case header_row[row_pos].downcase
+        when column_identifier.downcase
+            return row_value[row_pos].to_s || ""
+        end
       end
     end
     return ""

@@ -1,6 +1,7 @@
 class Loaders::LoadsController < ApplicationController
   include Cerberus::Controller
   include MimeHelper
+  include ZipHelper
 
   before_filter :authenticate_user!
 
@@ -92,8 +93,8 @@ class Loaders::LoadsController < ApplicationController
             Cerberus::Application::Queue.push(ProcessMultipageZipJob.new(@loader_name, new_file.to_s, parent, copyright, current_user, permissions))
           elsif short_name == "mods_spreadsheet"
             #mods spreadsheet job
-            report_id = ProcessModsZipJob.new(@loader_name, new_file.to_s, parent, copyright, current_user, permissions, true).run
-            redirect_to loaders_mods_spreadsheet_preview_compare_path(id: report_id)
+            spreadsheet_file_path = unzip(new_file, new_path)
+            ProcessModsZipJob.new(@loader_name, spreadsheet_file_path, parent, copyright, current_user, permissions, true).run
           else
             # send to iptc job
             Cerberus::Application::Queue.push(ProcessIptcZipJob.new(@loader_name, new_file.to_s, parent, copyright, current_user, permissions, derivatives))
@@ -128,5 +129,27 @@ class Loaders::LoadsController < ApplicationController
       stat = Cerberus::ContentFile.virus_check(file)
       flash[:error] = "Virus checking did not pass for #{File.basename(file.path)} status = #{stat}" unless stat == 0
       stat
+    end
+
+    def unzip(file, dir_path)
+      spreadsheet_file_path = ""
+      FileUtils.mkdir(dir_path) unless File.exists? dir_path
+
+      # Extract load zip
+      file_list = safe_unzip(file, dir_path)
+
+      # Find the spreadsheet
+      xlsx_array = Dir.glob("#{dir_path}/*.xlsx")
+
+      if xlsx_array.length > 1
+        raise Exceptions::MultipleSpreadsheetError
+      elsif xlsx_array.length == 0
+        raise Exceptions::NoSpreadsheetError
+      end
+
+      spreadsheet_file_path = xlsx_array.first
+
+      FileUtils.rm(file)
+      return spreadsheet_file_path
     end
 end
