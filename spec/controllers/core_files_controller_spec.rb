@@ -406,7 +406,7 @@ describe CoreFilesController do
       get :new_attached_file, id:file.pid
       test_file = fixture_file_upload("/files/image.png")
       post :create_attached_file, id:file.pid, file:test_file, terms_of_service:1
-      session[:flash_error].should  == "The type of file uploaded doesn't match the type of the existing file, which is a #{I18n.t("drs.display_labels.#{file.canonical_class}.short")}."
+      session[:flash_error].should  == "You must upload a #{I18n.t("drs.display_labels.#{file.canonical_class}.short")} file."
       @expected = {:url=>"/files/#{file.pid}/new"}.to_json
       response.body.should == @expected
 
@@ -416,7 +416,7 @@ describe CoreFilesController do
       get :new_attached_file, id:file.pid
       test_file = fixture_file_upload("/files/image.png")
       post :create_attached_file, id:file.pid, file:test_file, terms_of_service:1
-      session[:flash_error].should  == "The type of file uploaded doesn't match the type of the existing file, which is a #{I18n.t("drs.display_labels.#{file.canonical_class}.short")}."
+      session[:flash_error].should  == "You must upload a #{I18n.t("drs.display_labels.#{file.canonical_class}.short")} file."
       @expected = {:url=>"/files/#{file.pid}/new"}.to_json
       response.body.should == @expected
 
@@ -426,7 +426,7 @@ describe CoreFilesController do
       get :new_attached_file, id:file.pid
       test_file = fixture_file_upload("/files/image.png")
       post :create_attached_file, id:file.pid, file:test_file, terms_of_service:1
-      session[:flash_error].should  == "The type of file uploaded doesn't match the type of the existing file, which is a #{I18n.t("drs.display_labels.#{file.canonical_class}.short")}."
+      session[:flash_error].should  == "You must upload a #{I18n.t("drs.display_labels.#{file.canonical_class}.short")} file."
       @expected = {:url=>"/files/#{file.pid}/new"}.to_json
       response.body.should == @expected
 
@@ -436,7 +436,7 @@ describe CoreFilesController do
       get :new_attached_file, id:file.pid
       test_file = fixture_file_upload("/files/test_two.pdf")
       post :create_attached_file, id:file.pid, file:test_file, terms_of_service:1
-      session[:flash_error].should  == "The type of file uploaded doesn't match the type of the existing file, which is a #{I18n.t("drs.display_labels.#{file.canonical_class}.short")}."
+      session[:flash_error].should  == "You must upload a #{I18n.t("drs.display_labels.#{file.canonical_class}.short")} file."
       @expected = {:url=>"/files/#{file.pid}/new"}.to_json
       response.body.should == @expected
     end
