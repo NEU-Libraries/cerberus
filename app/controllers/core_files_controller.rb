@@ -245,7 +245,7 @@ class CoreFilesController < ApplicationController
     @content_object.properties.tag_as_in_progress
     Cerberus::Application::Queue.push(ContentObjectCreationJob.new(@core_file.pid, @content_object.tmp_path, @content_object.pid, @content_object.original_filename, params[:content_object][:permissions], params[:content_object][:mass_permissions]))
     UploadAlert.create_from_core_file(@core_file, :update, current_user)
-    flash[:notice] = "Your file is being added. Please check back soon."
+    flash[:notice] = "Your file is being processed."
     redirect_to core_file_path(@core_file.pid) + '#no-back'
   end
 
@@ -338,7 +338,7 @@ class CoreFilesController < ApplicationController
         session[:flash_error] = "You must select whether this is a proxy or personal upload"
         render :json => { url: session[:previous_url] }
       elsif @core_file.canonical_class_from_file(file) != @core_file.canonical_class
-        session[:flash_error] = "The type of file uploaded doesn't match the type of the existing file, which is a #{t("drs.display_labels.#{@core_file.canonical_class}.short")}."
+        session[:flash_error] = "You must upload an #{t("drs.display_labels.#{@core_file.canonical_class}.short")} file."
         render :json => { url: session[:previous_url] }
       else
         if virus_check(file) == 0
