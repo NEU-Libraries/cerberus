@@ -4,13 +4,13 @@ class ProcessMultipageZipJob
   include ApplicationHelper
   include ZipHelper
 
-  attr_accessor :loader_name, :zip_path, :parent, :copyright, :current_user, :permissions, :client
+  attr_accessor :loader_name, :zip_path, :parent, :copyright, :current_user, :permissions, :client, :report_id
 
   def queue_name
     :multipage_process_zip
   end
 
-  def initialize(loader_name, zip_path, parent, copyright, current_user, permissions, client=nil)
+  def initialize(loader_name, zip_path, parent, copyright, current_user, permissions, report_id, client=nil)
     self.loader_name = loader_name
     self.zip_path = zip_path
     self.parent = parent
@@ -18,10 +18,10 @@ class ProcessMultipageZipJob
     self.current_user = current_user
     self.permissions = permissions
     self.client = client
+    self.report_id = report_id
   end
 
   def run
-    report_id = Loaders::LoadReport.create_from_strings(current_user, 0, loader_name, parent)
     load_report = Loaders::LoadReport.find(report_id)
 
     # unzip zip file to tmp storage
@@ -143,6 +143,8 @@ class ProcessMultipageZipJob
     load_report.save!
 
     if load_report.success_count + load_report.fail_count + load_report.modified_count == load_report.number_of_files
+      load_report.completed = true
+      load_report.save!
       # Disabling for now - Sarah is proxying as another user, who doesn't need to receive
       # these notifications.
       # LoaderMailer.load_alert(load_report, User.find_by_nuid(load_report.nuid)).deliver!
