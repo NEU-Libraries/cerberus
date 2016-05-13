@@ -19,7 +19,11 @@ module Cerberus::Controller
   end
 
   def render_403
-    render :template => '/error/403', :layout => "error", :formats => [:html], :status => 403
+    if current_user.nil?
+      redirect_to new_user_session_path
+    else
+      render :template => '/error/403', :layout => "error", :formats => [:html], :status => 403
+    end
   end
 
   def render_404(exception, path="")
