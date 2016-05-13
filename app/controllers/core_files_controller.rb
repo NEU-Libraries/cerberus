@@ -18,6 +18,7 @@ class CoreFilesController < ApplicationController
   include XmlValidator
   include HandleHelper
   include MimeHelper
+  include ChecksumHelper
 
   include Blacklight::Catalog
   include Blacklight::Configurable # comply with BL 3.7
@@ -126,9 +127,9 @@ class CoreFilesController < ApplicationController
     elsif @content_object.incomplete?
       @content_object = ActiveFedora::Base.find(@content_object.pid)
       @content_object.destroy
-      session[:flash_success] = "Incomplete file destroyed"
       respond_to do |format|
         format.html{
+            flash[:notice] = "Incomplete file destroyed"
             redirect_to(root_path) and return
           }
         format.js   { render :nothing => true }
@@ -154,6 +155,14 @@ class CoreFilesController < ApplicationController
     klass = class_for_attached_file(@core_file)
     @content_object = klass.find(params[:content_object_id])
     @page_title = "Provide File Metadata"
+    if session[:flash_error]
+      flash[:error] = session[:flash_error]
+      session[:flash_error] = nil
+    end
+    if session[:flash_success]
+      flash[:notice] = session[:flash_success]
+      session[:flash_success] = nil
+    end
   end
 
   # routed to files/rescue_incomplete_files
@@ -245,7 +254,7 @@ class CoreFilesController < ApplicationController
     @content_object.properties.tag_as_in_progress
     Cerberus::Application::Queue.push(ContentObjectCreationJob.new(@core_file.pid, @content_object.tmp_path, @content_object.pid, @content_object.original_filename, params[:content_object][:permissions], params[:content_object][:mass_permissions]))
     UploadAlert.create_from_core_file(@core_file, :update, current_user)
-    flash[:notice] = "Your file is being processed."
+    flash[:notice] = "Your file is being processed. The file's checksum is #{@content_object.properties.md5_checksum.first}"
     redirect_to core_file_path(@core_file.pid) + '#no-back'
   end
 
@@ -340,12 +349,20 @@ class CoreFilesController < ApplicationController
       elsif @core_file.canonical_class_from_file(file) != @core_file.canonical_class
         session[:flash_error] = "You must upload an #{t("drs.display_labels.#{@core_file.canonical_class}.short")} file."
         render :json => { url: session[:previous_url] }
+      elsif @core_file.has_master_object?
+        session[:flash_error] = "This file already has a master file."
+        render :json => { url: session[:previous_url] }
       else
         if virus_check(file) == 0
           new_path = move_file_to_tmp(file)
           klass = class_for_attached_file(@core_file)
           content_object = klass.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
           content_object.tmp_path = new_path
+          checksum = new_checksum(new_path)
+          if params[:checksum] && params[:checksum] != checksum
+            session[:flash_error] = "The submitted MD5 hash value does not match the MD5 generated during ingest."
+          end
+          content_object.properties.md5_checksum = checksum
           content_object.original_filename = file.original_filename
           if current_user.proxy_staff? && params[:upload_type] == "proxy"
             content_object.depositor = @core_file.depositor

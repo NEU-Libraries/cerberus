@@ -384,6 +384,21 @@ describe CoreFilesController do
       session[:flash_error].should == "You must accept the terms of service!"
     end
 
+    it "returns json error if core_file has_master_object?" do
+      sign_in admin
+      test_file = fixture_file_upload("/files/video.mp4")
+      video = VideoMasterFile.new()
+      video.core_record = file
+      video.save!
+      file.canonical_class = "VideoFile"
+      file.save!
+      get :new_attached_file, id:file.pid
+      post :create_attached_file, id:file.pid, file:test_file, terms_of_service:1
+      @expected = {:url=>"/files/#{file.pid}/new"}.to_json
+      response.body.should == @expected
+      session[:flash_error].should == "This file already has a master file."
+    end
+
     it "returns proxy select error if user is proxy user and type of upload not selected" do
       admin.add_group("northeastern:drs:repository:proxystaff")
       admin.save!
@@ -400,23 +415,13 @@ describe CoreFilesController do
     it "returns json error if type of uploaded file does not match canonical class - test only audio and video for now" do
       sign_in admin
 
-      # canonical_class is nil
-      file.canonical_class = nil
-      file.save!
-      get :new_attached_file, id:file.pid
-      test_file = fixture_file_upload("/files/image.png")
-      post :create_attached_file, id:file.pid, file:test_file, terms_of_service:1
-      session[:flash_error].should  == "You must upload a #{I18n.t("drs.display_labels.#{file.canonical_class}.short")} file."
-      @expected = {:url=>"/files/#{file.pid}/new"}.to_json
-      response.body.should == @expected
-
       #canonical_class is "AudioFile"
       file.canonical_class = "AudioFile"
       file.save!
       get :new_attached_file, id:file.pid
       test_file = fixture_file_upload("/files/image.png")
       post :create_attached_file, id:file.pid, file:test_file, terms_of_service:1
-      session[:flash_error].should  == "You must upload a #{I18n.t("drs.display_labels.#{file.canonical_class}.short")} file."
+      session[:flash_error].should  == "You must upload an #{I18n.t("drs.display_labels.#{file.canonical_class}.short")} file."
       @expected = {:url=>"/files/#{file.pid}/new"}.to_json
       response.body.should == @expected
 
@@ -426,7 +431,7 @@ describe CoreFilesController do
       get :new_attached_file, id:file.pid
       test_file = fixture_file_upload("/files/image.png")
       post :create_attached_file, id:file.pid, file:test_file, terms_of_service:1
-      session[:flash_error].should  == "You must upload a #{I18n.t("drs.display_labels.#{file.canonical_class}.short")} file."
+      session[:flash_error].should  == "You must upload an #{I18n.t("drs.display_labels.#{file.canonical_class}.short")} file."
       @expected = {:url=>"/files/#{file.pid}/new"}.to_json
       response.body.should == @expected
 
@@ -436,7 +441,7 @@ describe CoreFilesController do
       get :new_attached_file, id:file.pid
       test_file = fixture_file_upload("/files/test_two.pdf")
       post :create_attached_file, id:file.pid, file:test_file, terms_of_service:1
-      session[:flash_error].should  == "You must upload a #{I18n.t("drs.display_labels.#{file.canonical_class}.short")} file."
+      session[:flash_error].should  == "You must upload an #{I18n.t("drs.display_labels.#{file.canonical_class}.short")} file."
       @expected = {:url=>"/files/#{file.pid}/new"}.to_json
       response.body.should == @expected
     end
@@ -560,6 +565,33 @@ describe CoreFilesController do
       video.depositor.should == admin.nuid
       VideoMasterFile.destroy_all
     end
+
+    it "creates and attaches md5 checksum" do
+      file.canonical_class = "VideoFile"
+      file.save!
+      sign_in admin
+      get :new_attached_file, id:file.pid
+      test_file = fixture_file_upload("/files/video.mp4")
+      post :create_attached_file, id:file.pid, file:test_file, terms_of_service:1
+      video = VideoMasterFile.first
+      video.properties.md5_checksum.should == ["d55bddf8d62910879ed9f605522149a8"]
+      VideoMasterFile.destroy_all
+    end
+
+    it "shows flash if checksums do not match" do
+      file.canonical_class = "VideoFile"
+      file.save!
+      sign_in admin
+      get :new_attached_file, id:file.pid
+      test_file = fixture_file_upload("/files/video.mp4")
+      post :create_attached_file, id:file.pid, file:test_file, terms_of_service:1, checksum: "garbledy gook"
+      video = VideoMasterFile.first
+      @expected = {:url=>files_provide_file_metadata_path(file.pid, video.pid)}.to_json
+      session[:flash_error].should == "The submitted MD5 hash value does not match the MD5 generated during ingest."
+      response.body.should == @expected
+      VideoMasterFile.destroy_all
+    end
+
   end
 
   describe "GET #new_attached_file" do
