@@ -368,6 +368,16 @@ class CoreFile < ActiveFedora::Base
     self.save!
   end
 
+  def has_master_object?
+    master = false
+    self.content_objects.each do |co|
+      if co.class == VideoMasterFile || co.class == AudioMasterFile || (co.class == ImageMasterFile && (self.canonical_class != "VideoFile" && self.canonical_class != "AudioFile"))
+        master = true
+      end
+    end
+    return master
+  end
+
   private
 
     def purge_content_bearing_objects
