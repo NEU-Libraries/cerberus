@@ -96,6 +96,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
       }
       t.digital_origin(path: 'digitalOrigin', namespace_prefix: 'mods')
       t.extent(path: 'extent', namespace_prefix: 'mods')
+      t.reformatting_quality(path: 'reformattingQuality', namespace_prefix: 'mods')
     }
 
     t.note(path: 'note', namespace_prefix: 'mods', index_as: [:stored_searchable]){
