@@ -397,6 +397,7 @@ describe CoreFilesController do
       @expected = {:url=>"/files/#{file.pid}/new"}.to_json
       response.body.should == @expected
       session[:flash_error].should == "This file already has a master file."
+      VideoMasterFile.destroy_all
     end
 
     it "returns proxy select error if user is proxy user and type of upload not selected" do
