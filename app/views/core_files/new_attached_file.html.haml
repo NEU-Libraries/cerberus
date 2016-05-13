@@ -21,14 +21,23 @@
         2. File Upload
       = label_tag "file", "File to upload", class: "required-label"
       = file_field_tag 'file', required: true, "aria-required" => true
-    - if current_user.proxy_staff?
+    %fieldset.span4
+      %legend
+        3. MD5 Hash Value
+      %span.help-block
+        Enter MD5 for hash validation
+      = text_field_tag :checksum
+
+  - if current_user.proxy_staff?
+    .row
       %fieldset.span4
         %legend
-          3. Proxy
+          4. Proxy
         = label_tag 'upload_type', 'Upload as myself (I will be the depositor)'
         = radio_button_tag 'upload_type', 'personal', false
         = label_tag 'upload_type', 'Upload as proxy (collection owner will be depositor)'
         = radio_button_tag 'upload_type', 'proxy', false
+
   .progress.progress-striped
     .bar{style: "width:0%"}
   .form-actions
