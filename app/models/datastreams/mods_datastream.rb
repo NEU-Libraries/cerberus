@@ -77,6 +77,10 @@ class ModsDatastream < ActiveFedora::OmDatastream
       t.date_issued(path: 'dateIssued', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable], attributes: { encoding: 'w3cdtf' })
       t.date_other(path: 'dateOther', namespace_prefix: 'mods', index_as: [:stored_searchable], attributes: { encoding: 'w3cdtf'})
       t.issuance(path: 'issuance', namespace_prefix: 'mods')
+      t.edition(path: 'edition', namespace_prefix: 'mods')
+      t.frequency(path: 'frequency', namespace_prefix: 'mods'){
+        t.authority(path: { attribute: 'authority'})
+      }
     }
 
     t.language(path: 'language', namespace_prefix: 'mods'){
