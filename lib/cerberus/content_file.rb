@@ -6,6 +6,7 @@ module Cerberus
     include Hydra::Derivatives
     include Hydra::ModelMixins::RightsMetadata
     include Cerberus::Rights::MassPermissions
+    include Cerberus::Rights::PermissionsAssignmentHelper
     include Cerberus::ContentFile::Characterization
     include Cerberus::MetadataAssignment
     include Cerberus::Find

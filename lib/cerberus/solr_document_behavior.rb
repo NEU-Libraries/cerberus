@@ -523,5 +523,15 @@ module Cerberus
     def ordinal_last
       Array(self["ordinal_last_tesim"]).first
     end
+
+    def has_master_object?
+      master = false
+      self.content_objects.each do |co|
+        if co.klass == "VideoMasterFile" || co.klass == "AudioMasterFile" || (co.klass == "ImageMasterFile" && (self.canonical_class != "VideoFile" && self.canonical_class != "AudioFile"))
+          master = true
+        end
+      end
+      return master
+    end
   end
 end
