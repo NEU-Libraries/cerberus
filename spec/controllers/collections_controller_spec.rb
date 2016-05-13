@@ -140,7 +140,8 @@ describe CollectionsController do
 
       get :show, { id: bills_collection.pid }
 
-      response.status.should == 403
+      expect(response).to redirect_to(new_user_session_path)
+      # response.status.should == 403
     end
 
     it "renders the show template for unauthed users on public collections" do
@@ -338,14 +339,18 @@ describe CollectionsController do
 
     it "should not return items which are incomplete or in progress" do
       get :recent_deposits, { id: bills_collection.pid, format: "rss" }
-      response.body.should =~ /rss/m
-      response.body.should_not =~ /<item>/m
+
+      expect(response).to redirect_to(new_user_session_path)
+      # response.body.should =~ /rss/m
+      # response.body.should_not =~ /<item>/m
     end
 
     it "should not return items which are embargoed" do
       get :recent_deposits, { id: bills_collection.pid, format: "rss" }
-      response.body.should =~ /rss/m
-      response.body.should_not =~ /<item>/m
+
+      expect(response).to redirect_to(new_user_session_path)
+      # response.body.should =~ /rss/m
+      # response.body.should_not =~ /<item>/m
     end
   end
 

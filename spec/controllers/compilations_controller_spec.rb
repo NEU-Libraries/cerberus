@@ -108,7 +108,8 @@ describe CompilationsController do
 
       get :show, :id => compilation.pid
 
-      expect(response.status).to eq 403
+      expect(response).to redirect_to(new_user_session_path)
+      # expect(response.status).to eq 403
     end
 
     it "renders the template for the depositing owner" do
@@ -316,7 +317,7 @@ describe CompilationsController do
       # compilation.add_entry file
       post :add_entry, id: compilation.pid, entry_id: file.pid
       post :add_entry, id: compilation.pid, entry_id: file2.pid
-      
+
       delete :delete_entry, id: compilation.pid, entry_id: file.pid, format: "html"
       expect(response).to redirect_to "/sets/#{compilation.pid}"
       expect(assigns(:compilation).entry_ids).not_to include file.pid
