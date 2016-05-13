@@ -23,6 +23,25 @@ describe PropertiesDatastream do
     end
   end
 
+  describe "Incomplete state" do
+    it "is false on initialization" do
+      properties.incomplete?.should be false
+    end
+
+    it "can be toggled to true using the appropriate helper" do
+      properties.tag_as_incomplete
+      properties.incomplete?.should be true
+    end
+
+    it "can be toggled to false using the appropriate helper" do
+      properties.tag_as_incomplete
+      properties.incomplete?.should be true
+
+      properties.tag_as_completed
+      properties.incomplete?.should be false
+    end
+  end
+
   describe "stream only state" do
     it "is false on initialization" do
       properties.stream_only?.should be false
