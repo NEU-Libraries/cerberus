@@ -69,8 +69,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
     t.origin_info(path: 'originInfo', namespace_prefix: 'mods'){
       t.publisher(path: 'publisher', namespace_prefix: 'mods', index_as: [:stored_searchable])
       t.place(path: 'place', namespace_prefix: 'mods'){
-        t.city_term(path: 'placeTerm', namespace_prefix: 'mods', attributes: { type: 'text' })
-        t.state_term(path: 'placeTerm', namespace_prefix: 'mods', attributes: { type: 'code', authority: 'marccountry' })
+        t.place_term(path: 'placeTerm', namespace_prefix: 'mods', attributes: { type: 'text' })
       }
       t.date_created(path: 'dateCreated', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable], attributes: { encoding: 'w3cdtf', keyDate: 'yes' })
       t.copyright(path: 'copyrightDate', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable], attributes: { encoding: 'w3cdtf' })
@@ -149,8 +148,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
       }
       t.origin_info(path: 'originInfo', namespace_prefix: 'mods'){
         t.place(path: 'place', namespace_prefix: 'mods'){
-          t.city_term(path: 'placeTerm', namespace_prefix: 'mods', attributes: { type: 'text' })
-          t.state_term(path: 'placeTerm', namespace_prefix: 'mods', attributes: { type: 'code', authority: 'marccountry' })
+          t.place_term(path: 'placeTerm', namespace_prefix: 'mods', attributes: { type: 'text' })
         }
         t.publisher(path: 'publisher', namespace_prefix: 'mods', index_as: [:stored_searchable])
         t.issuance(path: 'issuance', namespace_prefix: 'mods')
@@ -297,7 +295,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
     # Creating sortable creator field
     solr_doc["creator_ssi"] = all_names.first
 
-    solr_doc["origin_info_place_tesim"] = self.origin_info.place.city_term
+    solr_doc["origin_info_place_tesim"] = self.origin_info.place.place_term
 
     solr_doc = self.generate_niec_solr_hash(solr_doc)
 
