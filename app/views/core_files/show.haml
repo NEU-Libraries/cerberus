@@ -18,6 +18,8 @@
 %ul.breadcrumb
   - breadcrumb_to_root(@core_file).each do |breadcrumb|
     =breadcrumb
+  = render partial: 'breadcrumb_action_menu'
+  = render partial: 'breadcrumb_action_menu_links'
 
 - if @core_file.embargo_date_in_effect?
   %span.embargo-alert= "This item is under embargo and its content will be available for download and viewing on #{@core_file.embargo_release_date(formatted: true)}"
