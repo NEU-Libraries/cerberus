@@ -239,6 +239,47 @@ describe CoreFile do
     end
   end
 
+  describe "has master object" do
+    let(:core) { CoreFile.create(depositor: "dummy@example.com") }
+    after(:each)  { ActiveFedora::Base.destroy_all }
+
+    it "returns true if core_file has object of master class" do
+      image = ImageMasterFile.new()
+      image.core_record = core
+      image.save!
+      core.reload
+      core.has_master_object?.should == true
+
+      audio = AudioMasterFile.new()
+      audio.core_record = core
+      audio.save!
+      core.reload
+      core.has_master_object?.should == true
+
+      video = VideoMasterFile.new()
+      video.core_record = core
+      video.save!
+      core.reload
+      core.has_master_object?.should == true
+    end
+
+    it "returns false if core_file does not have object of master class" do
+      core.has_master_object?.should == false
+    end
+
+    it "returns false if audio/video file and only has image master file not audio/video master" do
+      image = ImageMasterFile.new()
+      image.core_record = core
+      image.save!
+      core.reload
+      core.canonical_class = "VideoFile"
+      core.save!
+      core.reload
+      core.has_master_object?.should == false
+    end
+
+  end
+
   describe "Custom relationships" do
     before :all do
       @one   = FactoryGirl.create(:bills_complete_file)

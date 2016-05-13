@@ -1,6 +1,5 @@
 class ContentObjectCreationJob
   include MimeHelper
-  include ChecksumHelper
 
   attr_accessor :core_file_pid, :file_path, :permissions, :content_object_pid, :file_name, :mass_permissions
   attr_accessor :core_record, :content_object
@@ -54,7 +53,6 @@ class ContentObjectCreationJob
 
       # content_object.characterize
       content_object.properties.mime_type = extract_mime_type(file_path)
-      content_object.properties.md5_checksum = new_checksum(file_path)
 
       content_object.save! ? content_object : false
 
@@ -63,7 +61,7 @@ class ContentObjectCreationJob
       # if core_record.canonical_class.in?(['TextFile', 'MswordFile', 'PdfFile'])
       #   content_object.extract_content
       # end
-      # MARK AS COMPLETED - TODO: figure out how the incomplete will work- rescuing and destroying functionality just for the content_object
+
       content_object.properties.tag_as_completed
       # reload just to be safe
       core_record.reload

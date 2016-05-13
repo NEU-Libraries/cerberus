@@ -1,6 +1,5 @@
 require 'spec_helper'
 include MimeHelper
-include ChecksumHelper
 include ActionDispatch::TestProcess
 include Cerberus::TempFileStorage
 
@@ -65,12 +64,6 @@ describe ContentObjectCreationJob do
 
   it "sets original_filename" do
     @content_object.original_filename.should == @content_object.original_filename
-  end
-
-  it "sets md5" do
-    file = fixture_file_upload("/files/video.mp4")
-    new_path = copy_file_to_tmp(file)
-    @content_object.properties.md5_checksum.should == [new_checksum(new_path)]
   end
 
   it "sets mime_type" do
