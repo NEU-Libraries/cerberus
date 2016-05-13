@@ -18,6 +18,7 @@ class CoreFilesController < ApplicationController
   include XmlValidator
   include HandleHelper
   include MimeHelper
+  include ChecksumHelper
 
   include Blacklight::Catalog
   include Blacklight::Configurable # comply with BL 3.7
@@ -48,6 +49,8 @@ class CoreFilesController < ApplicationController
   before_filter :valid_form_permissions?, only: [:process_metadata, :update]
 
   before_filter :verify_staff_or_beta, only: [:validate_xml, :edit_xml]
+
+  before_filter :verify_admin, only: [:create_attached_file, :new_attached_file, :provide_file_metadata, :process_file_metadata, :destroy_incomplete_content_object]
 
   rescue_from Exceptions::NoParentFoundError, with: :no_parent_rescue
   rescue_from Exceptions::GroupPermissionsError, with: :group_permission_rescue
@@ -116,6 +119,26 @@ class CoreFilesController < ApplicationController
     render :nothing => true
   end
 
+  def destroy_incomplete_content_object
+    @content_object = fetch_solr_document({:id=>params[:content_object_id]})
+    if @content_object.in_progress?
+      # User completed second screen, so they most likely went back accidentally
+      # Do nothing
+    elsif @content_object.incomplete?
+      @content_object = ActiveFedora::Base.find(@content_object.pid)
+      @content_object.destroy
+      respond_to do |format|
+        format.html{
+            flash[:notice] = "Incomplete file destroyed"
+            redirect_to(root_path) and return
+          }
+        format.js   { render :nothing => true }
+      end
+    end
+
+    render :nothing => true
+  end
+
   def provide_metadata
     @core_file = CoreFile.find(params[:id])
     @collection = @core_file.parent
@@ -127,11 +150,29 @@ class CoreFilesController < ApplicationController
     @page_title = "Provide Upload Metadata"
   end
 
+  def provide_file_metadata
+    @core_file = CoreFile.find(params[:id])
+    klass = class_for_attached_file(@core_file)
+    @content_object = klass.find(params[:content_object_id])
+    @page_title = "Provide File Metadata"
+    if session[:flash_error]
+      flash[:error] = session[:flash_error]
+      session[:flash_error] = nil
+    end
+    if session[:flash_success]
+      flash[:notice] = session[:flash_success]
+      session[:flash_success] = nil
+    end
+  end
+
   # routed to files/rescue_incomplete_files
   # page for allowing users to either permanently delete or apply metadata to
   # files abandoned without completing step two of the upload process.
   def rescue_incomplete_file
-    if params["abandoned"]
+    if params["core_file"]
+      @incomplete = fetch_solr_document(id: params["abandoned"])
+      @core_file = fetch_solr_document(id: params["core_file"])
+    elsif params["abandoned"]
       @incomplete = fetch_solr_document(id: params["abandoned"])
     else
       file = CoreFile.abandoned_for_nuid(current_user.nuid).first
@@ -206,6 +247,17 @@ class CoreFilesController < ApplicationController
     redirect_to core_file_path(@core_file.pid) + '#no-back'
   end
 
+  def process_file_metadata
+    @core_file = CoreFile.find(params[:id])
+    klass = class_for_attached_file(@core_file)
+    @content_object = klass.find(params[:content_object_id])
+    @content_object.properties.tag_as_in_progress
+    Cerberus::Application::Queue.push(ContentObjectCreationJob.new(@core_file.pid, @content_object.tmp_path, @content_object.pid, @content_object.original_filename, params[:content_object][:permissions], params[:content_object][:mass_permissions]))
+    UploadAlert.create_from_core_file(@core_file, :update, current_user)
+    flash[:notice] = "Your file is being processed. The file's checksum is #{@content_object.properties.md5_checksum.first}"
+    redirect_to core_file_path(@core_file.pid) + '#no-back'
+  end
+
   # routed to /files/:id
   def show
     @core_file = fetch_solr_document
@@ -275,6 +327,67 @@ class CoreFilesController < ApplicationController
     end
   end
 
+  def create_attached_file
+    begin
+      @core_file = CoreFile.find(params[:id])
+      # check error condition No files
+      return json_error("Error! No file to save") if !params.has_key?(:file)
+
+      file = params[:file]
+      if !file
+        session[:flash_error] = "Error! No file for upload"
+        render :json => { url: session[:previous_url] }
+      elsif (empty_file?(file))
+        session[:flash_error] = "Error! Zero Length File!"
+        render :json => { url: session[:previous_url] }
+      elsif (!terms_accepted?)
+        session[:flash_error] = "You must accept the terms of service!"
+        render :json => { url: session[:previous_url] }
+      elsif current_user.proxy_staff? && params[:upload_type].nil?
+        session[:flash_error] = "You must select whether this is a proxy or personal upload"
+        render :json => { url: session[:previous_url] }
+      elsif @core_file.canonical_class_from_file(file) != @core_file.canonical_class
+        session[:flash_error] = "You must upload an #{t("drs.display_labels.#{@core_file.canonical_class}.short")} file."
+        render :json => { url: session[:previous_url] }
+      elsif @core_file.has_master_object?
+        session[:flash_error] = "This file already has a master file."
+        render :json => { url: session[:previous_url] }
+      else
+        if virus_check(file) == 0
+          new_path = move_file_to_tmp(file)
+          klass = class_for_attached_file(@core_file)
+          content_object = klass.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
+          content_object.tmp_path = new_path
+          checksum = new_checksum(new_path)
+          if params[:checksum] && params[:checksum] != checksum
+            session[:flash_error] = "The submitted MD5 hash value does not match the MD5 generated during ingest."
+          end
+          content_object.properties.md5_checksum = checksum
+          content_object.original_filename = file.original_filename
+          if current_user.proxy_staff? && params[:upload_type] == "proxy"
+            content_object.depositor = @core_file.depositor
+            content_object.proxy_uploader = current_user.nuid
+          else
+            content_object.depositor = current_user.nuid
+          end
+          content_object.properties.tag_as_incomplete
+          content_object.save!
+          render json: { url: files_provide_file_metadata_path(@core_file.pid, content_object.pid)}
+        else
+          session[:flash_error] = "The file attached did not pass virus check."
+          render :json => { url: session[:previous_url] }
+        end
+      end
+    rescue => exception
+      logger.error "CoreFilesController::create rescued #{exception.class}\n\t#{exception.to_s}\n #{exception.backtrace.join("\n")}\n\n"
+      email_handled_exception(exception)
+      json_error "Error occurred while creating file."
+    ensure
+      # remove the tempfile (only if it is a temp file)
+      # file.tempfile.delete if file.respond_to?(:tempfile)
+    end
+  end
+
   # routed to /files/new
   def new
     @page_title = "Upload New Files"
@@ -315,6 +428,28 @@ class CoreFilesController < ApplicationController
 
     @core_file = ::CoreFile.new
     @collection_id = params[:parent]
+  end
+
+  def new_attached_file
+    @core_file = fetch_solr_document
+    abandoned_files = CoreFile.abandoned_content_objects_for_nuid(current_user.nuid)
+
+    if abandoned_files.any?
+      file = abandoned_files.first
+      redirect_to rescue_incomplete_file_path("abandoned" => file.pid, "core_file" => @core_file.pid)
+      return
+    end
+
+    if session[:flash_error]
+      flash[:error] = session[:flash_error]
+      session[:flash_error] = nil
+    end
+    if session[:flash_success]
+      flash[:notice] = session[:flash_success]
+      session[:flash_success] = nil
+    end
+
+    render 'new_attached_file'
   end
 
   def edit
@@ -728,6 +863,16 @@ class CoreFilesController < ApplicationController
         end
       end
 
+      def verify_admin
+        if current_user.nil?
+          flash[:error] = "You do not have privileges to use that feature"
+          render_403
+        elsif !(current_user.admin? || current_user.admin_group?)
+          flash[:error] = "You do not have privileges to use that feature"
+          render_403
+        end
+      end
+
       def filter_by_associated_files(solr_parameters, user_parameters)
         solr_parameters[:fq] ||= []
         query = []
@@ -762,5 +907,15 @@ class CoreFilesController < ApplicationController
         # solr_parameters[:rows] = 1
         solr_parameters[:sort] = "ordinal_value_isi asc"
         solr_parameters[:fl] = "id, ordinal_value_isi"
+      end
+
+      def class_for_attached_file(core_file)
+        klass = core_file.canonical_class.constantize
+        if klass == AudioFile
+          klass = AudioMasterFile
+        elsif klass == VideoFile
+          klass = VideoMasterFile
+        end
+        return klass
       end
 end
