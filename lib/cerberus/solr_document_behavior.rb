@@ -90,7 +90,8 @@ module Cerberus
     end
 
     def google_title
-      CGI::escapeHTML(Sanitize.clean(self.title))
+      result = CGI::escapeHTML(Sanitize.clean(self.title))
+      return "#{self.non_sort} #{result}".strip
     end
 
     def create_date
@@ -225,6 +226,11 @@ module Cerberus
 
     def proxy_uploader(default = '')
       val = Array(self["proxy_uploader_tesim"]).first
+      val.present? ? val : default
+    end
+
+    def author(default = '')
+      val = Array(self["author_tesi"]).first
       val.present? ? val : default
     end
 
