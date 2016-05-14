@@ -55,6 +55,10 @@ class ModsDatastream < ActiveFedora::OmDatastream
       }
     }
 
+    t.author_name_part(:path=>"roleTerm[.='Author']/../../mods:namePart", namespace_prefix: 'mods')
+    t.author_given(:path=>"roleTerm[.='Author']/../../mods:namePart", namespace_prefix: 'mods', attributes: { type: 'given' })
+    t.author_family(:path=>"roleTerm[.='Author']/../../mods:namePart", namespace_prefix: 'mods', attributes: { type: 'family' })
+
     t.corporate_name(path: 'mods/mods:name', namespace_prefix: 'mods', attributes: { type: 'corporate' }){
       t.usage(path: { attribute: "usage" })
       t.name_part(path: 'namePart', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable])
@@ -277,6 +281,26 @@ class ModsDatastream < ActiveFedora::OmDatastream
         end
       end
     end
+
+    # Author for Google
+    author_full_name = ""
+
+    given = self.author_given
+    family = self.author_family
+    author_name_part = self.author_name_part
+
+    if given.any? && family.any?
+      # Kramdown parse for search purposes - #439
+      author_full_name = kramdown_parse("#{family.first}, #{given.first}")
+    elsif author_name_part.any?
+      name_array = Namae.parse author_name_part.first
+      name_obj = name_array[0]
+      if !name_obj.nil? && !name_obj.given.blank? && !name_obj.family.blank?
+        author_full_name = kramdown_parse("#{name_obj.family}, #{name_obj.given}")
+      end
+    end
+
+    solr_doc["author_tesi"] = author_full_name
 
     solr_doc["personal_creators_tesim"] = full_names
     solr_doc["personal_creators_sim"] = full_names
