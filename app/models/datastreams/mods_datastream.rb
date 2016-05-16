@@ -124,6 +124,22 @@ class ModsDatastream < ActiveFedora::OmDatastream
     t.classification(path: 'classification', namespace_prefix: 'mods')
     t.table_of_contents(path: 'tableOfContents', namespace_prefix: 'mods')
 
+    t.record_info(path: 'recordInfo', namespace_prefix: 'mods'){
+      t.record_content_source(path: 'recordContentSource', namespace_prefix: 'mods')
+      t.record_origin(path: 'recordOrigin', namespace_prefix: 'mods')
+      t.language_of_cataloging(path: 'languageOfCataloging', namespace_prefix: 'mods'){
+        t.language_term(path: 'languageTerm', namespace_prefix: 'mods'){
+          t.language_term_type(path: { attribute: 'type'})
+          t.language_authority(path: { attribute: 'authority'})
+          t.language_authority_uri(path: { attribute: 'authorityURI'})
+          t.language_value_uri(path: { attribute: 'valueURI'})
+        }
+      }
+      t.description_standard(path: 'descriptionStandard', namespace_prefix: 'mods'){
+        t.authority(path: {attribute: 'authority'})
+      }
+    }
+
     t.related_item(path: 'relatedItem', namespace_prefix: 'mods'){
       t.title_info(path: 'titleInfo', namespace_prefix: 'mods'){
         t.title(path: 'title', namespace_prefix: 'mods')
@@ -334,6 +350,12 @@ class ModsDatastream < ActiveFedora::OmDatastream
         xml.typeOfResource
         xml.physicalDescription{
           xml.form
+        }
+
+        xml.recordInfo {
+          xml.languageOfCataloging{
+            xml.languageTerm
+          }
         }
 
         # We instantiate all of these fields for every MODS record because terminology
