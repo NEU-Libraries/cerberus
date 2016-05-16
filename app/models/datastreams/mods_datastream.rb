@@ -122,6 +122,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
     }
 
     t.classification(path: 'classification', namespace_prefix: 'mods')
+    t.table_of_contents(path: 'tableOfContents', namespace_prefix: 'mods')
 
     t.related_item(path: 'relatedItem', namespace_prefix: 'mods'){
       t.title_info(path: 'titleInfo', namespace_prefix: 'mods'){
