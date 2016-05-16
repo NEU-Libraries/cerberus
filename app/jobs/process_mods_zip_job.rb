@@ -48,7 +48,8 @@ class ProcessModsZipJob
           preview_file = CoreFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
           preview_file.depositor              = comparison_file.depositor
           preview_file.rightsMetadata.content = comparison_file.rightsMetadata.content
-          preview_file.mods.content           = comparison_file.mods.content
+          # commenting this out because it means that changes to the xml_template will be removed if they didn't exist before the comparison_file was created, the diff still works without this but it means whatever is in the spreadsheet becomes all of the metadata, not just changing some of the fields
+          # preview_file.mods.content           = comparison_file.mods.content
           preview_file.tmp_path = spreadsheet_file_path
 
           # Load row of metadata in for preview
@@ -84,16 +85,81 @@ class ProcessModsZipJob
     core_file.mods.origin_info.copyright = row_results["copyright_date"]
     core_file.mods.origin_info.date_issued = row_results["date_issued"]
     core_file.mods.origin_info.publisher = row_results["publisher_name"]
-    # core_file.mods.origin_info.place.place_term = row_results["place_of_publication"]
-    # core_file.mods.origin_info.edition = row_results["edition"]
+    core_file.mods.origin_info.place.place_term = row_results["place_of_publication"]
+    core_file.mods.origin_info.edition = row_results["edition"]
     core_file.mods.origin_info.issuance = row_results["issuance"]
-    # core_file.mods.origin_info.frequency = row_results["frequency"]
+    core_file.mods.origin_info.frequency = row_results["frequency"]
     # core_file.mods.origin_info.frequency.authority = #need authority
     core_file.mods.physical_description.extent = row_results["extent"]
     core_file.mods.physical_description.digital_origin = row_results["digital_origin"]
-    # core_file.mods.physical_description.reformatting_quality = row_results["reformatting_quality"]
+    core_file.mods.physical_description.reformatting_quality = row_results["reformatting_quality"]
     core_file.mods.language.language_term = row_results["language"] #need type, authority, potentially authorityURI and valueURI
-    # core_file.mods.table_of_contents = row_results["table_of_contents"]
+    core_file.mods.table_of_contents = row_results["table_of_contents"]
+
+    access_conditions = {}
+    if !row_results["acess_condition_use_and_reproduction"].blank?
+      access_conditions["use and reproduction"] = row_results["acess_condition_use_and_reproduction"]
+    end
+    if !row_results["acess_condition_use_and_reproduction"].blank?
+      access_conditions["restriction on access"] = row_results["acess_condition_use_and_reproduction"]
+    end
+    if !access_conditions.blank?
+      core_file.mods.access_conditions = access_conditions
+    end
+
+    notes = {}
+    if !row_results["provenance"].blank?
+      notes["provenance"] = row_results["provenance"]
+    end
+    if !row_results["other_notes"].blank?
+      notes["other"] = row_results["other_notes"]
+    end
+    if !notes.blank?
+      core_file.mods.notes = notes
+    end
+
+    # for related items - three separate related items based on different fields at the end of the spreadsheet
+    # perhaps it will make sense to make a hash of hashes...or different methods for the difference related item "types"
+    related_items = {}
+    # original item
+    if !row_results["original_title"].blank? || !row_results["physical_location"].blank? || !row_results["identifier"].blank?
+      related_items["original"] = {}
+      if !row_results["original_title"].blank?
+        related_items["original"][:title] = row_results["original_title"]
+      end
+      if !row_results["physical_location"].blank?
+        related_items["original"][:physical_location] = row_results["physical_location"]
+      end
+      if !row_results["identifier"].blank?
+        related_items["original"][:identifier] = row_results["identifier"]
+      end
+    end
+    # host aka collection
+    if !row_results["collection_title"].blank?
+      related_items["host"] = {:title => row_results["collection_title"]}
+    end
+    # series
+    if !row_results["series_title"].blank?
+      related_items["series"] = {:title => row_results["series_title"]}
+    end
+    if !related_items.blank?
+      core_file.mods.related_items = related_items
+    end
+
+    # timestamp - does not need to be recorded, it is a google generated timestamp
+
+    # default values inserted on every record
+    core_file.mods.record_info.record_content_source = "Northeastern University Libraries"
+    core_file.mods.record_info.record_origin = "Generated from spreadsheet"
+    core_file.mods.record_info.language_of_cataloging.language_term = "English"
+    core_file.mods.record_info.language_of_cataloging.language_term.language_authority = "iso639-2b"
+    core_file.mods.record_info.language_of_cataloging.language_term.language_authority_uri = "http://id.loc.gov/vocabulary/iso639-2"
+    core_file.mods.record_info.language_of_cataloging.language_term.language_term_type = "text"
+    core_file.mods.record_info.language_of_cataloging.language_term.language_value_uri = "http://id.loc.gov/vocabulary/iso639-2/eng"
+    core_file.mods.record_info.description_standard = "RDA"
+    core_file.mods.record_info.description_standard.authority = "marcdescription"
+    core_file.mods.physical_description.form = "electronic"
+    core_file.mods.physical_description.form.authority = "marcform"
 
     core_file.save!
   end
@@ -173,12 +239,12 @@ class ProcessModsZipJob
     results["additional_personal_name_subject_headings"]    = find_in_row(header_row, row_value, 'Additional Personal Name Subject Headings')
     results["corporate_name_subject_headings"]              = find_in_row(header_row, row_value, 'Corporate Name Subject Headings')
     results["addiditional_corporate"]                       = find_in_row(header_row, row_value, 'Addiditional Corporate Name Subject Headings')
-    # results["Title"]                                      = find_in_row(header_row, row_value, '') #commented out until it has a unique value
+    results["original_title"]                               = find_in_row(header_row, row_value, 'Original Title') #commented out until it has a unique value
     results["physical_location"]                            = find_in_row(header_row, row_value, 'What is the physical location for this object?')
     results["identifier"]                                   = find_in_row(header_row, row_value, 'What is the identifier for this object?')
-    # results["Title"]                                      = find_in_row(header_row, row_value, '') #commented out until it has a unique value
+    results["collection_title"]                             = find_in_row(header_row, row_value, 'Collection Title') #commented out until it has a unique value
     results["timestamp"]                                    = find_in_row(header_row, row_value, 'Timestamp')
-    # results["Title"]                                      = find_in_row(header_row, row_value, '') #commented out until it has a unique value
+    results["series_title"]                                  = find_in_row(header_row, row_value, 'Series Title') #commented out until it has a unique value
     return results
   end
 
