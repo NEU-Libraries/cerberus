@@ -102,6 +102,22 @@ class ModsDatastream < ActiveFedora::OmDatastream
       t.reformatting_quality(path: 'reformattingQuality', namespace_prefix: 'mods')
     }
 
+    t.record_info(path: 'recordInfo', namespace_prefix: 'mods'){
+      t.record_content_source(path: 'recordContentSource', namespace_prefix: 'mods')
+      t.record_origin(path: 'recordOrigin', namespace_prefix: 'mods')
+      t.language_of_cataloging(path: 'languageOfCataloging', namespace_prefix: 'mods'){
+        t.language_term(path: 'languageTerm', namespace_prefix: 'mods'){
+          t.language_term_type(path: { attribute: 'type'})
+          t.language_authority(path: { attribute: 'authority'})
+          t.language_authority_uri(path: { attribute: 'authorityURI'})
+          t.language_value_uri(path: { attribute: 'valueURI'})
+        }
+      }
+      t.description_standard(path: 'descriptionStandard', namespace_prefix: 'mods'){
+        t.authority(path: {attribute: 'authority'})
+      }
+    }
+
     t.note(path: 'note', namespace_prefix: 'mods', index_as: [:stored_searchable]){
       t.type(path: { attribute: 'type' })
     }
@@ -128,23 +144,8 @@ class ModsDatastream < ActiveFedora::OmDatastream
     t.classification(path: 'classification', namespace_prefix: 'mods')
     t.table_of_contents(path: 'tableOfContents', namespace_prefix: 'mods')
 
-    t.record_info(path: 'recordInfo', namespace_prefix: 'mods'){
-      t.record_content_source(path: 'recordContentSource', namespace_prefix: 'mods')
-      t.record_origin(path: 'recordOrigin', namespace_prefix: 'mods')
-      t.language_of_cataloging(path: 'languageOfCataloging', namespace_prefix: 'mods'){
-        t.language_term(path: 'languageTerm', namespace_prefix: 'mods'){
-          t.language_term_type(path: { attribute: 'type'})
-          t.language_authority(path: { attribute: 'authority'})
-          t.language_authority_uri(path: { attribute: 'authorityURI'})
-          t.language_value_uri(path: { attribute: 'valueURI'})
-        }
-      }
-      t.description_standard(path: 'descriptionStandard', namespace_prefix: 'mods'){
-        t.authority(path: {attribute: 'authority'})
-      }
-    }
-
     t.related_item(path: 'relatedItem', namespace_prefix: 'mods'){
+      t.type(path: {attribute: 'type'})
       t.title_info(path: 'titleInfo', namespace_prefix: 'mods'){
         t.title(path: 'title', namespace_prefix: 'mods')
       }
@@ -185,6 +186,9 @@ class ModsDatastream < ActiveFedora::OmDatastream
       }
       t.identifier(path: 'identifier', namespace_prefix: 'mods'){
         t.type(path: { attribute: 'type' })
+      }
+      t.location(path: 'location', namespace_prefix: 'mods'){
+        t.physical_location(path: 'physicalLocation', namespace_prefix: 'mods')
       }
     }
 
@@ -372,14 +376,15 @@ class ModsDatastream < ActiveFedora::OmDatastream
         }
         xml.identifier('type' => 'hdl', 'displayLabel' => 'Permanent URL')
         xml.typeOfResource
-        xml.physicalDescription{
-          xml.form
+
+        xml.recordInfo{
+          xml.recordContentSource
+          xml.recordOrigin
+          xml.descriptionStandard
         }
 
-        xml.recordInfo {
-          xml.languageOfCataloging{
-            xml.languageTerm
-          }
+        xml.physicalDescription{
+          xml.form
         }
 
         # We instantiate all of these fields for every MODS record because terminology
@@ -550,6 +555,35 @@ class ModsDatastream < ActiveFedora::OmDatastream
       i = i+1
     end
     self.note = hash_of_notes.values
+  end
+
+  # Allows for multiple related items to be attached to one mods record
+  def related_items=(hash_of_hashes)
+    hash_of_items = hash_of_hashes.select { |ac| !ac.blank? }
+
+    if hash_of_items.length < self.related_item.length
+      node_count = self.related_item.length - hash_of_items.length
+      trim_nodes_from_zero(:related_item, node_count)
+    end
+    i = 0
+    hash_of_items.each do |key, val|
+      if self.related_item[i].nil?
+        self.insert_new_node(:related_item)
+      end
+      self.related_item(i).type = key
+      puts val
+      # take hash and assign its values
+      if val.has_key?(:title)
+        self.related_item(i).title_info.title = val[:title]
+      end
+      if val.has_key?(:physical_location)
+        self.related_item(i).location.physical_location = val[:physical_location]
+      end
+      if val.has_key?(:identifier)
+        self.related_item(i).identifier = val[:identifier]
+      end
+      i = i+1
+    end
   end
 
   # The following four methods are probably deprecated, given that we won't be
@@ -742,6 +776,17 @@ class ModsDatastream < ActiveFedora::OmDatastream
   def self.note_template
     builder = Nokogiri::XML::Builder.new do |xml|
       xml.note " "
+    end
+    return builder.doc.root
+  end
+
+  def self.related_item_template
+    builder = Nokogiri::XML::Builder.new do |xml|
+      xml.relatedItem{
+        xml.titleInfo{
+          xml.title " "
+        }
+      }
     end
     return builder.doc.root
   end
