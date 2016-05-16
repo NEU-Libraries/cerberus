@@ -487,6 +487,25 @@ class ModsDatastream < ActiveFedora::OmDatastream
     return hash
   end
 
+  # Allows for multiple notes to be attached to one mods record
+  def notes=(hash_of_strings)
+    hash_of_notes = hash_of_strings.select { |ac| !ac.blank? }
+
+    if hash_of_notes.length < self.note.length
+      node_count = self.note.length - hash_of_notes.length
+      trim_nodes_from_zero(:note, node_count)
+    end
+    i = 0
+    hash_of_notes.each do |key, val|
+      if self.note[i].nil?
+        self.insert_new_node(:note)
+      end
+      self.note(i).type = key
+      i = i+1
+    end
+    self.note = hash_of_notes.values
+  end
+
   # The following four methods are probably deprecated, given that we won't be
   # collecting corporate/personal names separately from end users, and therefore shouldn't
   # have to assign to it/read from it for the purposes of the frontend.
@@ -670,6 +689,13 @@ class ModsDatastream < ActiveFedora::OmDatastream
   def self.access_condition_template
     builder = Nokogiri::XML::Builder.new do |xml|
       xml.accessCondition " "
+    end
+    return builder.doc.root
+  end
+
+  def self.note_template
+    builder = Nokogiri::XML::Builder.new do |xml|
+      xml.note " "
     end
     return builder.doc.root
   end
