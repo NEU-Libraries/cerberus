@@ -64,7 +64,11 @@ class UploadAlert < ActiveRecord::Base
     end
 
     u.title             = core_file.title
-    u.content_type      = core_file.category.first
+    if !core_file.category.blank?
+      u.content_type      = core_file.category.first
+    else
+      u.content_type      = "core file"
+    end
     u.pid               = core_file.pid
     u.change_type       = change_type
     u.collection_pid    = core_file.parent.pid

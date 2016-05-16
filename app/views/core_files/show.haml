@@ -3,21 +3,23 @@
 - content_for(:keywords) do
   - @core_file.keyword_list
 - content_for(:author) do
-  - @core_file.creator_list.each do |author|
-    ="<meta content=\"#{author}\" name=\"author\">".html_safe
+  - if !@core_file.author.blank?
+    ="<meta content=\"#{@core_file.author}\" name=\"author\">".html_safe
 - if @core_file.category == "Theses and Dissertations"
   - content_for(:google_scholar) do
     ="<meta content=\"#{@core_file.google_title}\" name=\"citation_title\">".html_safe
     - if !@core_file.google_scholar_date.blank?
       ="<meta content=\"#{@core_file.google_scholar_date}\" name=\"citation_publication_date\">".html_safe
     - if !@core_file.canonical_object.first.blank?
-      ="<meta content=\"#{download_path(@core_file.canonical_object.first.pid, :only_path => false)}?datastream_id=content\" name=\"citation_pdf_url\">".html_safe
-    - @core_file.creator_list.each do |author|
-      ="<meta content=\"#{author}\" name=\"citation_author\">".html_safe
+      ="<meta content=\"#{file_fulltext_path(@core_file.pid, :only_path => false)}\" name=\"citation_pdf_url\">".html_safe
+    - if !@core_file.author.blank?
+      ="<meta content=\"#{@core_file.author}\" name=\"citation_author\">".html_safe
 - layout_class =  'span6'
 %ul.breadcrumb
   - breadcrumb_to_root(@core_file).each do |breadcrumb|
     =breadcrumb
+  = render partial: 'breadcrumb_action_menu'
+  = render partial: 'breadcrumb_action_menu_links'
 
 - if @core_file.embargo_date_in_effect?
   %span.embargo-alert= "This item is under embargo and its content will be available for download and viewing on #{@core_file.embargo_release_date(formatted: true)}"

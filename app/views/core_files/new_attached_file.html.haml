@@ -1,0 +1,112 @@
+%h1.page-header
+  Upload File to
+  %i
+    = @core_file.title
+
+= form_tag(create_attached_file_path, method: "post", multipart: true, id: "FileUploadForm") do
+  = hidden_field_tag(:collection_id, @collection_id)
+  .row
+    %fieldset.span4
+      %legend
+        1. Terms of Service Agreement
+      %span.help-block
+        Please read and accept the
+        %a{href: "/terms" , data: { remote: true} }
+          terms of use
+      %label.checkbox.required-label{ for: "terms_of_service" }
+        I have read and accept the terms of service.
+        = check_box_tag 'terms_of_service', 1, nil, data: { activate:  "activate-submit" }
+    %fieldset.span4
+      %legend
+        2. File Upload
+      = label_tag "file", "File to upload", class: "required-label"
+      = file_field_tag 'file', required: true, "aria-required" => true
+    %fieldset.span4
+      %legend
+        3. MD5 Hash Value
+      %span.help-block
+        Enter MD5 for hash validation
+      = text_field_tag :checksum
+
+  - if current_user.proxy_staff?
+    .row
+      %fieldset.span4
+        %legend
+          4. Proxy
+        = label_tag 'upload_type', 'Upload as myself (I will be the depositor)'
+        = radio_button_tag 'upload_type', 'personal', false
+        = label_tag 'upload_type', 'Upload as proxy (collection owner will be depositor)'
+        = radio_button_tag 'upload_type', 'proxy', false
+
+  .progress.progress-striped
+    .bar{style: "width:0%"}
+  .form-actions
+    = submit_tag "Upload", disabled: "true", class: 'btn btn-large btn-primary activate-submit', data: { disable_with: "Please wait..."}, id: "fileSubmit"
+:javascript
+  $(function () {
+    $(".progress").hide();
+    var file_list = [];
+    $('#FileUploadForm').fileupload({
+        dataType: 'html',
+        replaceFileInput: false,
+        autoUpload: false,
+        add: function (e, data) {
+            data.context = $("#fileSubmit")
+                .click(function () {
+                  $(this).attr("disabled", true);
+                  $(this).val("Please wait...");
+                });
+          $(".progress").show();
+          file_list = [data.files[0]]; //this guarantees that the files being uploaded is only the most recently added one
+        },
+        progressall: function (e, data) {
+            var progress = parseInt(data.loaded / data.total * 100, 10);
+            $('.progress .bar').css(
+                'width',
+                progress + '%'
+            );
+            if (progress == 100) {
+              $(".progress").after("<div class='alert alert-success'>Your file has been uploaded and is now being processed.</div>");
+              spinner = enable_spinner('main-content');
+            }
+        },
+        done: function (e, data) {
+          console.log(data);
+           url = JSON.parse(data.result);
+           url = url.url;
+           window.location = url;
+        }
+    });
+    $('#fileSubmit').click(function(){
+      $('#FileUploadForm').fileupload('send', {files:file_list});
+    })
+  });
+
+- if current_user.admin_group? || current_user.admin?
+  :javascript
+    $('#file').bind('change', function() {
+      $(".alert").remove();
+      $("input[type='submit']").removeProp("disabled");
+    });
+- elsif current_user.repo_staff?
+  :javascript
+    $('#file').bind('change', function() {
+      if (this.files[0].size/ 1024000 > 10000) {
+        $(this).before('<div class="alert alert-warning">The file you chose is larger than 10,000MB.</div>');
+        $("input[type='submit']").prop("disabled", "true");
+      } else {
+        $(".alert").remove();
+        $("input[type='submit']").removeProp("disabled");
+      }
+    });
+- else
+  :javascript
+    $('#file').bind('change', function() {
+      if (this.files[0].size/ 1024000 > 1000) {
+        $(this).before('<div class="alert alert-warning">The file you chose is larger than 1000MB.</div>');
+        $("input[type='submit']").prop("disabled", "true");
+      } else {
+        $(".alert").remove();
+        $("input[type='submit']").removeProp("disabled");
+      }
+    });

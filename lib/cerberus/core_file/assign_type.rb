@@ -2,6 +2,7 @@ module Cerberus
   module CoreFile
     module AssignType
       include MimeHelper
+      include TempFileStorage
 
       def instantiate_appropriate_content_object(file_path)
 
@@ -30,6 +31,35 @@ module Cerberus
         end
 
         assign_obj_type
+      end
+
+      def canonical_class_from_file(file_path)
+        file_path = copy_file_to_tmp(file_path)
+        mime_type = extract_mime_type(file_path)
+        ext = extract_extension(mime_type)
+        result = hash_mime_type(mime_type)
+
+        if is_image?(result)
+          canonical_class = "ImageMasterFile"
+        elsif is_pdf?(result)
+          canonical_class = "PdfFile"
+        elsif is_audio?(result)
+          canonical_class = "AudioFile"
+        elsif is_video?(result)
+          canonical_class = "VideoFile"
+        elsif is_msword?(ext)
+          canonical_class = "MswordFile"
+        elsif is_msexcel?(ext)
+          canonical_class = "MsexcelFile"
+        elsif is_msppt?(ext)
+          canonical_class = "MspowerpointFile"
+        elsif is_texty?(result)
+          canonical_class = "TextFile"
+        else
+          canonical_class = "ZipFile"
+        end
+        FileUtils.rm(file_path)
+        return canonical_class
       end
 
       private

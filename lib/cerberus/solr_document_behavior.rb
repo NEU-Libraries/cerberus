@@ -90,7 +90,8 @@ module Cerberus
     end
 
     def google_title
-      CGI::escapeHTML(Sanitize.clean(self.title))
+      result = CGI::escapeHTML(Sanitize.clean(self.title))
+      return "#{self.non_sort} #{result}".strip
     end
 
     def create_date
@@ -225,6 +226,11 @@ module Cerberus
 
     def proxy_uploader(default = '')
       val = Array(self["proxy_uploader_tesim"]).first
+      val.present? ? val : default
+    end
+
+    def author(default = '')
+      val = Array(self["author_tesi"]).first
       val.present? ? val : default
     end
 
@@ -522,6 +528,16 @@ module Cerberus
 
     def ordinal_last
       Array(self["ordinal_last_tesim"]).first
+    end
+
+    def has_master_object?
+      master = false
+      self.content_objects.each do |co|
+        if co.klass == "VideoMasterFile" || co.klass == "AudioMasterFile" || (co.klass == "ImageMasterFile" && (self.canonical_class != "VideoFile" && self.canonical_class != "AudioFile"))
+          master = true
+        end
+      end
+      return master
     end
   end
 end

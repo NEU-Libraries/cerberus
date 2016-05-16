@@ -141,6 +141,10 @@ en:
         name: Audio File
         short: Audio
         download: audio
+      AudioMasterFile:
+        name: Master Audio File
+        short: Audio
+        download: master
       ImageLargeFile:
         name: Large Image
         short: Image
@@ -185,6 +189,10 @@ en:
         name: Video File
         short: Video
         download: video
+      VideoMasterFile:
+        name: Master Video File
+        short: Video
+        download: master
       ZipFile:
         name: Zip File
         short: Zip
