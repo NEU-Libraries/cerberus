@@ -76,6 +76,12 @@ Cerberus::Application.routes.draw do
   post "/files/:id/process_metadata" => "core_files#process_metadata", as: "files_process_metadata"
   get "/files/:id/log_stream" => "core_files#log_stream", as: "log_stream"
 
+  get "/files/:id/new" => "core_files#new_attached_file", as: "new_attached_file"
+  match "/files/:id/create" => "core_files#create_attached_file", via:"post", as: "create_attached_file"
+  get "/files/:id/provide_file_metadata/:content_object_id" => "core_files#provide_file_metadata", as: "files_provide_file_metadata"
+  post "/files/:id/process_file_metadata/:content_object_id" => "core_files#process_file_metadata", as: "files_process_file_metadata"
+  match "/incomplete_content_object/:content_object_id" => 'core_files#destroy_incomplete_content_object', as: "destroy_incomplete_content_object"
+
   get "/files/rescue_incomplete_file" => "core_files#rescue_incomplete_file", as: 'rescue_incomplete_file'
   match "/incomplete_file/:id" => "core_files#destroy_incomplete_file", via: 'delete', as: 'destroy_incomplete_file'
 
@@ -90,6 +96,7 @@ Cerberus::Application.routes.draw do
 
   get "/files/:id/oai_thumbnail" => "core_files#oai_thumbnail", as: 'oai_thumbnail'
 
+  get "/files/:id/fulltext.pdf" => "core_files#fulltext", as: 'file_fulltext'
 
   put '/item_display' => 'users#update', as: 'view_pref'
   match "/users/:id/per_page_pref" => "users#update", via: 'post', as: "per_page_pref"

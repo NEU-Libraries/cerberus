@@ -28,6 +28,21 @@ describe CoreFile do
     end
   end
 
+  describe "Incomplete state" do
+    let(:bill) { FactoryGirl.create(:bill) }
+    let(:bo) { FactoryGirl.create(:bo) }
+    let(:gf) { CoreFile.new }
+
+    it "is false by default" do
+      gf.incomplete?.should be false
+    end
+
+    it "is true if tagged as so" do
+      gf.tag_as_incomplete
+      gf.incomplete?.should be true
+    end
+  end
+
   describe "stream only state" do
     let(:bill) { FactoryGirl.create(:bill) }
     let(:bo) { FactoryGirl.create(:bo) }
@@ -70,6 +85,41 @@ describe CoreFile do
         end
       ensure
         @abandoned.destroy
+      end
+    end
+  end
+
+  describe "Abandoned content_object lookup" do
+    let(:bill) { FactoryGirl.create(:bill) }
+    let(:nuid) { bill.nuid }
+    let(:gf)   { CoreFile.new }
+    let(:co)   { VideoMasterFile.new }
+
+    it "returns the empty array if no abandoned files exist" do
+      gf.depositor = nuid
+      gf.save!
+      expect(CoreFile.abandoned_content_objects_for_nuid(nuid)).to eq []
+    end
+
+    it "returns an array of SolrDocuments" do
+      begin
+        @abandoned           = VideoMasterFile.new
+        @abandoned.depositor = nuid
+        @abandoned.properties.tag_as_incomplete
+        @abandoned.save!
+
+        # Note that this doesn't work very well, and that
+        # the requirement of a one day jump is being imposed by
+        # an inability to escape Timezone hell.  Can't seem to get
+        # offsets to be interpretted correctly by Timecop.  Also
+        # other things aren't working.
+        Timecop.freeze(DateTime.now + 1) do
+          expected = [SolrDocument.new(@abandoned.to_solr).pid]
+          result   = CoreFile.abandoned_content_objects_for_nuid(nuid).map { |x| x.pid }
+          expect(result).to match_array expected
+        end
+      ensure
+        VideoMasterFile.destroy_all
       end
     end
   end
@@ -187,6 +237,47 @@ describe CoreFile do
       @thumb = ImageThumbnailFile.create(title: "thumb", core_record: core)
       core.thumbnail.should == @thumb
     end
+  end
+
+  describe "has master object" do
+    let(:core) { CoreFile.create(depositor: "dummy@example.com") }
+    after(:each)  { ActiveFedora::Base.destroy_all }
+
+    it "returns true if core_file has object of master class" do
+      image = ImageMasterFile.new()
+      image.core_record = core
+      image.save!
+      core.reload
+      core.has_master_object?.should == true
+
+      audio = AudioMasterFile.new()
+      audio.core_record = core
+      audio.save!
+      core.reload
+      core.has_master_object?.should == true
+
+      video = VideoMasterFile.new()
+      video.core_record = core
+      video.save!
+      core.reload
+      core.has_master_object?.should == true
+    end
+
+    it "returns false if core_file does not have object of master class" do
+      core.has_master_object?.should == false
+    end
+
+    it "returns false if audio/video file and only has image master file not audio/video master" do
+      image = ImageMasterFile.new()
+      image.core_record = core
+      image.save!
+      core.reload
+      core.canonical_class = "VideoFile"
+      core.save!
+      core.reload
+      core.has_master_object?.should == false
+    end
+
   end
 
   describe "Custom relationships" do
