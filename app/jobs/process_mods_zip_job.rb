@@ -50,10 +50,9 @@ class ProcessModsZipJob
           preview_file.rightsMetadata.content = comparison_file.rightsMetadata.content
           preview_file.mods.content           = comparison_file.mods.content
           preview_file.tmp_path = spreadsheet_file_path
-          # Load row of metadata in for preview - turn into a method, for demos sake
-          # let's just do the title
-          preview_file.title = row_results["title"]
-          preview_file.save!
+
+          # Load row of metadata in for preview
+          assign_a_row(row_results, preview_file)
 
           load_report.comparison_file_pid = comparison_file.pid
           load_report.preview_file_pid = preview_file.pid
@@ -73,6 +72,30 @@ class ProcessModsZipJob
       load_report.save!
       # LoaderMailer.load_alert(load_report, User.find_by_nuid(load_report.nuid)).deliver!
     end
+  end
+
+  def assign_a_row(row_results, core_file)
+    core_file.title = row_results["title"]
+    core_file.mods.title_info.sub_title = row_results["subtitle"]
+
+    core_file.mods.type_of_resource = row_results["type_of_resource"]
+    core_file.mods.genre = row_results["genre"]
+    # core_file.mods.genre.authority = #need authority
+    core_file.mods.origin_info.copyright = row_results["copyright_date"]
+    core_file.mods.origin_info.date_issued = row_results["date_issued"]
+    core_file.mods.origin_info.publisher = row_results["publisher_name"]
+    # core_file.mods.origin_info.place.place_term = row_results["place_of_publication"]
+    # core_file.mods.origin_info.edition = row_results["edition"]
+    core_file.mods.origin_info.issuance = row_results["issuance"]
+    # core_file.mods.origin_info.frequency = row_results["frequency"]
+    # core_file.mods.origin_info.frequency.authority = #need authority
+    core_file.mods.physical_description.extent = row_results["extent"]
+    core_file.mods.physical_description.digital_origin = row_results["digital_origin"]
+    # core_file.mods.physical_description.reformatting_quality = row_results["reformatting_quality"]
+    core_file.mods.language.language_term = row_results["language"] #need type, authority, potentially authorityURI and valueURI
+    # core_file.mods.table_of_contents = row_results["table_of_contents"]
+
+    core_file.save!
   end
 
   def process_a_row(header_row, row_value)

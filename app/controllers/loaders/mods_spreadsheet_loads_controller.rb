@@ -59,11 +59,7 @@ class Loaders::ModsSpreadsheetLoadsController < Loaders::LoadsController
   def cancel_load
     @report = Loaders::LoadReport.find(params[:id])
     if !@report.preview_file_pid.blank?
-      cf = CoreFile.find(preview_file_pid)
-      FileUtils.rm(cf.tmp_path)
-      cf.destroy
-    elsif !@report.comparison_file_pid.blank?
-      cf = CoreFile.find(comparison_file_pid)
+      cf = CoreFile.find(@report.preview_file_pid)
       FileUtils.rm(cf.tmp_path)
       cf.destroy
     end
