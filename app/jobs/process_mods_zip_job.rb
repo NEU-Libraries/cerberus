@@ -76,12 +76,43 @@ class ProcessModsZipJob
   end
 
   def assign_a_row(row_results, core_file)
-    core_file.title = row_results["title"]
+    core_file.mods.identifier = row_results["handle"] #will need to check that this matches the original handle or else this file should error
+    # core_file.mods. = row_results["archives_identifier"] #not sure where this goes in the mods yet
+
+    core_file.mods.title = row_results["title"]
     core_file.mods.title_info.sub_title = row_results["subtitle"]
+    core_file.mods.title_info.non_sort = row_results["title_initial_article"]
+    core_file.mods.other_titles.title = row_results["alternate_title"]
+    core_file.mods.other_titles.non_sort = row_results["alternate_title_initial_article"]
+    core_file.mods.other_titles.sub_title = row_results["alternate_subtitle"]
+
+    # TODO - work creator magic loop here
+    creators = row_results.select { |key, value| key.to_s.match(/^creator_\d+_name$/) }
+    creator_nums = creators.keys.map {|key| key.scan(/\d/)[0].to_i }
+    if creators.count > 0
+      creator_hash = {}
+      creator_hash['corporate_names'] = []
+      creator_hash['first_names'] = []
+      creator_hash['last_names'] = []
+      creator_nums.each do |n|
+        name_type = row_results["creator_#{n}_name_type"]
+        if name_type == 'corporate'
+          creator_hash['corporate_names'] << row_results["creator_#{n}_name"]
+        elsif name_type == 'personal'
+          creator_hash['first_names'] << row_results["creator_#{n}_name"]
+          # last_names - not sure how to parse this since its one field
+        end
+      end
+      puts creator_hash
+      core_file.creators = creator_hash
+      # currently the hash only accepts first_names, last_names, and corporate_names so we'd need to loop back through to assign the role and affiliation
+    end
 
     core_file.mods.type_of_resource = row_results["type_of_resource"]
     core_file.mods.genre = row_results["genre"]
     # core_file.mods.genre.authority = #need authority
+    # core_file.mods.date = row_results["date_created"] + row_results["date_created_end_date"] + row_results["approximate_inferred_questionable"] #not sure on this - how to string together? we currently have no notion of the point attribute for start and end in the mods datastream
+
     core_file.mods.origin_info.copyright = row_results["copyright_date"]
     core_file.mods.origin_info.date_issued = row_results["date_issued"]
     core_file.mods.origin_info.publisher = row_results["publisher_name"]
@@ -94,6 +125,7 @@ class ProcessModsZipJob
     core_file.mods.physical_description.digital_origin = row_results["digital_origin"]
     core_file.mods.physical_description.reformatting_quality = row_results["reformatting_quality"]
     core_file.mods.language.language_term = row_results["language"] #need type, authority, potentially authorityURI and valueURI
+    core_file.mods.description = row_results["abstract"]
     core_file.mods.table_of_contents = row_results["table_of_contents"]
 
     access_conditions = {}
@@ -101,7 +133,7 @@ class ProcessModsZipJob
       access_conditions["use and reproduction"] = row_results["acess_condition_use_and_reproduction"]
     end
     if !row_results["acess_condition_use_and_reproduction"].blank?
-      access_conditions["restriction on access"] = row_results["acess_condition_use_and_reproduction"]
+      access_conditions["restriction on access"] = row_results["acess_condition_restriction"]
     end
     if !access_conditions.blank?
       core_file.mods.access_conditions = access_conditions
@@ -117,6 +149,17 @@ class ProcessModsZipJob
     if !notes.blank?
       core_file.mods.notes = notes
     end
+
+    # subjects/topics
+    # will these have different attributes for the different types?
+    keywords = []
+    keywords << row_results["topical_subject_headings"]
+    keywords << row_results["personal_name_subject_headings"]
+    keywords << row_results["additional_personal_name_subject_headings"]
+    keywords << row_results["corporate_name_subject_headings"]
+    keywords << row_results["addiditional_corporate"]
+    core_file.keywords = keywords
+
 
     # for related items - three separate related items based on different fields at the end of the spreadsheet
     # perhaps it will make sense to make a hash of hashes...or different methods for the difference related item "types"
@@ -239,12 +282,12 @@ class ProcessModsZipJob
     results["additional_personal_name_subject_headings"]    = find_in_row(header_row, row_value, 'Additional Personal Name Subject Headings')
     results["corporate_name_subject_headings"]              = find_in_row(header_row, row_value, 'Corporate Name Subject Headings')
     results["addiditional_corporate"]                       = find_in_row(header_row, row_value, 'Addiditional Corporate Name Subject Headings')
-    results["original_title"]                               = find_in_row(header_row, row_value, 'Original Title') #commented out until it has a unique value
+    results["original_title"]                               = find_in_row(header_row, row_value, 'Original Title') #updated cell title
     results["physical_location"]                            = find_in_row(header_row, row_value, 'What is the physical location for this object?')
     results["identifier"]                                   = find_in_row(header_row, row_value, 'What is the identifier for this object?')
-    results["collection_title"]                             = find_in_row(header_row, row_value, 'Collection Title') #commented out until it has a unique value
+    results["collection_title"]                             = find_in_row(header_row, row_value, 'Collection Title') #updated cell title
     results["timestamp"]                                    = find_in_row(header_row, row_value, 'Timestamp')
-    results["series_title"]                                  = find_in_row(header_row, row_value, 'Series Title') #commented out until it has a unique value
+    results["series_title"]                                  = find_in_row(header_row, row_value, 'Series Title') #updated cell title
     return results
   end
 
