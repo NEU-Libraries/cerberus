@@ -99,13 +99,15 @@ class ProcessModsZipJob
         if name_type == 'corporate'
           creator_hash['corporate_names'] << row_results["creator_#{n}_name"]
         elsif name_type == 'personal'
-          creator_hash['first_names'] << row_results["creator_#{n}_name"]
-          # last_names - not sure how to parse this since its one field
+          creator_hash['first_names'] << row_results["creator_#{n}_name"].split(",")[1].strip
+          creator_hash['last_names'] << row_results["creator_#{n}_name"].split(",")[0].strip
         end
       end
       puts creator_hash
       core_file.creators = creator_hash
       # currently the hash only accepts first_names, last_names, and corporate_names so we'd need to loop back through to assign the role and affiliation
+      # will need authority info for roles
+      # need to assign primary based on n = 1
     end
 
     core_file.mods.type_of_resource = row_results["type_of_resource"]
@@ -151,14 +153,25 @@ class ProcessModsZipJob
     end
 
     # subjects/topics
-    # will these have different attributes for the different types?
     keywords = []
-    keywords << row_results["topical_subject_headings"]
-    keywords << row_results["personal_name_subject_headings"]
-    keywords << row_results["additional_personal_name_subject_headings"]
-    keywords << row_results["corporate_name_subject_headings"]
-    keywords << row_results["addiditional_corporate"]
-    core_file.keywords = keywords
+    row_results["topical_subject_headings"].split(",").each do |topic|
+      keywords << topic.strip
+    end
+    core_file.mods.topics = keywords #have to create the subject nodes first
+    core_file.mods.subject.topic.each_with_index do |subject, key|
+      if subject.include? "--"
+        topics = []
+        core_file.mods.subject(key).topic[0].split("--").each do |topic|
+          topics << topic.strip
+        end
+        core_file.mods.subject(key).topic = topics
+      end
+    end
+
+    # keywords << row_results["personal_name_subject_headings"]
+    # keywords << row_results["additional_personal_name_subject_headings"]
+    # keywords << row_results["corporate_name_subject_headings"]
+    # keywords << row_results["addiditional_corporate"]
 
 
     # for related items - three separate related items based on different fields at the end of the spreadsheet
