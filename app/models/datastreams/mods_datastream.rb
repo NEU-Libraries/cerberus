@@ -382,6 +382,9 @@ class ModsDatastream < ActiveFedora::OmDatastream
         xml.subject{
           xml.keyword ""
         }
+        xml.subject{
+          xml.topic ""
+        }
         xml.identifier('type' => 'hdl', 'displayLabel' => 'Permanent URL')
         xml.typeOfResource
 
@@ -795,6 +798,13 @@ class ModsDatastream < ActiveFedora::OmDatastream
           xml.title " "
         }
       }
+    end
+    return builder.doc.root
+  end
+
+  def self.topic_template
+    builder = Nokogiri::XML::Builder.new do |xml|
+      xml.topic " "
     end
     return builder.doc.root
   end
