@@ -27,12 +27,17 @@ class ModsDatastream < ActiveFedora::OmDatastream
       t.part_number(path: 'partNumber', namespace_prefix: 'mods', index_as: [:stored_searchable])
     }
 
-    t.other_titles(path: 'titleInfo', namespace_prefix: 'mods'){
+    t.alternate_title(path: 'titleInfo', namespace_prefix: 'mods', attributes: {type: "alternative"}){
       t.title(path: 'title', namespace_prefix: 'mods')
       t.non_sort(path: 'nonSort', namespace_prefix: 'mods')
       t.sub_title(path: 'subTitle', namespace_prefix: 'mods')
       t.part_name(path: 'partName', namespace_prefix: 'mods')
       t.part_number(path: 'partNumber', namespace_prefix: 'mods')
+    }
+
+    t.all_titles(path:'titleInfo', namespace_prefix:'mods'){
+      t.title(path:'title', namespace_prefix: 'mods')
+      t.non_sort(path: 'nonSort', namespace_prefix: 'mods')
     }
 
     t.abstract(path: 'abstract', namespace_prefix: 'mods', index_as: [:stored_searchable])
@@ -251,7 +256,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
     solr_doc["title_info_title_tesim"] = kramdown_parse(self.title_info.title.first)
 
     # Make sure all titles and non_sorts end up in title_tesim
-    total_title_array = self.other_titles.non_sort.concat self.other_titles.title
+    total_title_array = self.all_titles.non_sort.concat self.all_titles.title
     solr_doc["title_tesim"] = total_title_array.map! {|item| kramdown_parse(item)}
     # solr_doc["title_tesim"] = kramdown_parse(self.title_info.title.first)
 
@@ -356,6 +361,9 @@ class ModsDatastream < ActiveFedora::OmDatastream
                 'xmlns:niec' => 'http://repository.neu.edu/schema/niec'){
         xml.parent.namespace = xml.parent.namespace_definitions.find { |ns| ns.prefix=="mods" }
         xml.titleInfo("usage" => "primary") {
+          xml.title
+        }
+        xml.titleInfo("type" => "alternative"){
           xml.title
         }
         xml.abstract

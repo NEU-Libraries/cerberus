@@ -82,9 +82,9 @@ class ProcessModsZipJob
     core_file.mods.title = row_results["title"]
     core_file.mods.title_info.sub_title = row_results["subtitle"]
     core_file.mods.title_info.non_sort = row_results["title_initial_article"]
-    core_file.mods.other_titles.title = row_results["alternate_title"]
-    core_file.mods.other_titles.non_sort = row_results["alternate_title_initial_article"]
-    core_file.mods.other_titles.sub_title = row_results["alternate_subtitle"]
+    core_file.mods.alternate_title.title = row_results["alternate_title"]
+    core_file.mods.alternate_title.non_sort = row_results["alternate_title_initial_article"]
+    core_file.mods.alternate_title.sub_title = row_results["alternate_subtitle"]
 
     # TODO - work creator magic loop here
     creators = row_results.select { |key, value| key.to_s.match(/^creator_\d+_name$/) }
