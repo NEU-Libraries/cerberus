@@ -19,7 +19,7 @@ namespace :sitemap do
             if doc.category == "Theses and Dissertations"
               if !doc.canonical_object.first.embargo_date_in_effect?
                 # add download_path(doc.canonical_object.first.pid, {datastream_id: 'content'})
-                add file_fulltext_path(doc.pid, :only_path => false)
+                add file_fulltext_path(doc.pid)
               end
             end
           end
