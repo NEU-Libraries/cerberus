@@ -76,6 +76,8 @@ en:
       name: "DRS Proxy Staff"
     northeastern:drs:repository:staff:
       name: "DRS Repository Staff"
+    northeastern:drs:school_of_law:crrj:staff:
+      name: "Civil Rights and Restorative Justice Project"
     northeastern:drs:school_of_law:law_library:staff:
       name: "School of Law - Law Library Staff"
     northeastern:drs:spectrum:staff:
