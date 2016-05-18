@@ -88,7 +88,11 @@ class ModsDatastream < ActiveFedora::OmDatastream
       t.place(path: 'place', namespace_prefix: 'mods'){
         t.place_term(path: 'placeTerm', namespace_prefix: 'mods', attributes: { type: 'text' })
       }
-      t.date_created(path: 'dateCreated', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable], attributes: { encoding: 'w3cdtf', keyDate: 'yes' })
+      t.date_created(path: 'dateCreated', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable], attributes: { encoding: 'w3cdtf', keyDate: 'yes' }){
+        t.point(path: {attribute: 'point'})
+        t.qualifier(path: {attribute: 'qualifier'})
+      }
+      t.date_created_end(path: 'dateCreated', namespace_prefix: 'mods', attributes: { encoding: 'w3cdtf', point: 'end'})
       t.copyright(path: 'copyrightDate', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable], attributes: { encoding: 'w3cdtf' })
       t.date_issued(path: 'dateIssued', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable], attributes: { encoding: 'w3cdtf' })
       t.date_other(path: 'dateOther', namespace_prefix: 'mods', index_as: [:stored_searchable], attributes: { encoding: 'w3cdtf'})
@@ -461,8 +465,11 @@ class ModsDatastream < ActiveFedora::OmDatastream
     return ""
   end
 
-  def date=(date_val)
+  def date=(date_val, point=nil)
     self.origin_info.date_created = date_val
+    if !point.blank?
+      self.origin_info.date_created.point = point
+    end
   end
 
   # Filters out blank entries, builds nodes as required
