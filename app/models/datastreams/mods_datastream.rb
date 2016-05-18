@@ -148,6 +148,12 @@ class ModsDatastream < ActiveFedora::OmDatastream
         t.authority(path: { attribute: 'authority' })
       }
       t.scoped_topic(path: 'topic', namespace_prefix: 'mods', attributes: { authority: :any })
+      t.name(path: 'name', namespace_prefix: 'mods', index_as: [:stored_searchable]){
+        t.type(path: {attribute: 'type'})
+        t.name_part(path: 'namePart', namespace_prefix: 'mods', attributes: { type: :none })
+        t.name_part_given(path: 'namePart', namespace_prefix: 'mods', attributes: { type: 'given' })
+        t.name_part_family(path: 'namePart', namespace_prefix: 'mods', attributes: { type: 'family' })
+      }
     }
     t.identifier(path: 'identifier', namespace_prefix: 'mods', index_as: [:stored_searchable], attributes: { type: 'hdl' }){
       t.type(path: { attribute: 'type'})
@@ -526,6 +532,16 @@ class ModsDatastream < ActiveFedora::OmDatastream
     end
 
     self.topic = array_of_keywords.map {|kw| kw.gsub(/[\s\b\v]+/, " ") }
+  end
+
+  def name_subjects=(hash_of_names)
+    hash_of_names.select! { |ac| !ac.values[0].blank? }
+    hash_of_names.each_with_index do |subj, i|
+      self.insert_new_node(:subject)
+      i = self.subject.length-1 #last one
+      self.subject(i).name.type = subj.keys[0].to_s
+      self.subject(i).name.name_part = subj.values[0]
+    end
   end
 
   # Allows for tombstone message
