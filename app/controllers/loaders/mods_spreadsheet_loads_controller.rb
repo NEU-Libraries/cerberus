@@ -2,6 +2,11 @@ class Loaders::ModsSpreadsheetLoadsController < Loaders::LoadsController
   before_filter :verify_group
   require 'stanford-mods'
   include ModsDisplay::ControllerExtension
+  configure_mods_display do
+    subject do
+      delimiter " -- "
+    end
+  end
 
   def new
     query_result = ActiveFedora::SolrService.query("active_fedora_model_ssi:\"Collection\"", :fl => "id, title_tesim", :rows => 999999999, :sort => "id asc")

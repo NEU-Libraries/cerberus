@@ -134,29 +134,29 @@ class ProcessModsZipJob
     core_file.mods.type_of_resource = row_results["type_of_resource"] unless row_results["type_of_resource"].blank?
     core_file.mods.genre = row_results["genre"] unless row_results["genre"].blank?
     # core_file.mods.genre.authority = #need authority
-    # TODO - need corresponding mods datastream methods
-    # if !row_results["date_created_end_date"].blank?
-      # core_file.mods.date_created_start = row_results["date_created"]
-      # core_file.mods.date_created_end = row_results["date_created_end_date"]
-    # else
-      # core_file.mods.date = row_results["date_created"]
-    # end
-    # core_file.mods.date.qualifier = row_results["approximate_inferred_questionable"]
+    if !row_results["date_created_end_date"].blank?
+      core_file.mods.origin_info.date_created = row_results["date_created"]
+      core_file.mods.origin_info.date_created.point = "start"
+      core_file.mods.origin_info.date_created_end = row_results["date_created_end_date"]
+    else
+      core_file.mods.date = row_results["date_created"] unless row_results["date_created"].blank?
+    end
+    core_file.mods.origin_info.date_created.qualifier = row_results["approximate_inferred_questionable"] unless row_results["approximate_inferred_questionable"].blank?
 
     core_file.mods.origin_info.copyright = row_results["copyright_date"] unless row_results["copyright_date"].blank?
     core_file.mods.origin_info.date_issued = row_results["date_issued"] unless row_results["date_issued"].blank?
-    core_file.mods.origin_info.publisher = row_results["publisher_name"]
-    core_file.mods.origin_info.place.place_term = row_results["place_of_publication"]
-    core_file.mods.origin_info.edition = row_results["edition"]
-    core_file.mods.origin_info.issuance = row_results["issuance"]
-    core_file.mods.origin_info.frequency = row_results["frequency"]
+    core_file.mods.origin_info.publisher = row_results["publisher_name"] unless row_results["publisher_name"].blank?
+    core_file.mods.origin_info.place.place_term = row_results["place_of_publication"] unless row_results["place_of_publication"].blank?
+    core_file.mods.origin_info.edition = row_results["edition"] unless row_results["edition"].blank?
+    core_file.mods.origin_info.issuance = row_results["issuance"] unless row_results["issuance"].blank?
+    core_file.mods.origin_info.frequency = row_results["frequency"] unless row_results["frequency"].blank?
     # core_file.mods.origin_info.frequency.authority = #need authority
-    core_file.mods.physical_description.extent = row_results["extent"]
-    core_file.mods.physical_description.digital_origin = row_results["digital_origin"]
+    core_file.mods.physical_description.extent = row_results["extent"] unless row_results["extent"].blank?
+    core_file.mods.physical_description.digital_origin = row_results["digital_origin"] unless row_results["digital_origin"].blank?
     core_file.mods.physical_description.reformatting_quality = row_results["reformatting_quality"]
     core_file.mods.language.language_term = row_results["language"] #need type, authority, potentially authorityURI and valueURI
-    core_file.mods.description = row_results["abstract"]
-    core_file.mods.table_of_contents = row_results["table_of_contents"]
+    core_file.mods.description = row_results["abstract"] unless row_results["abstract"].blank?
+    core_file.mods.table_of_contents = row_results["table_of_contents"] unless row_results["table_of_contents"].blank?
 
     access_conditions = {}
     if !row_results["acess_condition_use_and_reproduction"].blank?
