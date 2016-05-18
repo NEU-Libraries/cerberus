@@ -193,14 +193,27 @@ class ProcessModsZipJob
           topics << topic.strip
         end
         core_file.mods.subject(key).topic = topics
+      else
+        core_file.mods.subject(key).topic = subject
       end
     end
 
-    # TODO - need methods in mods datastream for created subjects with names nested within
-    # keywords << row_results["personal_name_subject_headings"]
-    # keywords << row_results["additional_personal_name_subject_headings"]
-    # keywords << row_results["corporate_name_subject_headings"]
-    # keywords << row_results["addiditional_corporate"]
+    name_subjects = []
+    row_results["personal_name_subject_headings"].split(";").each do |name|
+      name_subjects << {:personal => name.strip}
+    end
+    row_results["additional_personal_name_subject_headings"].split(";").each do |name|
+      name_subjects << {:personal => name.strip}
+    end
+    row_results["corporate_name_subject_headings"].split(";").each do |name|
+      name_subjects << {:corporate => name.strip}
+    end
+    row_results["addiditional_corporate"].split(";").each do |name|
+      name_subjects << {:corporate => name.strip}
+    end
+    if name_subjects.length > 0
+      core_file.mods.name_subjects = name_subjects
+    end
 
 
     # for related items
