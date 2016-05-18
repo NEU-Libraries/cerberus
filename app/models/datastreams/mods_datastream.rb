@@ -27,7 +27,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
       t.part_number(path: 'partNumber', namespace_prefix: 'mods', index_as: [:stored_searchable])
     }
 
-    t.alternate_title(path: 'titleInfo', namespace_prefix: 'mods', attributes: {type: "alternative"}){
+    t.alternate_title(path: 'mods/mods:titleInfo', namespace_prefix: 'mods', attributes: {type: "alternative"}){
       t.title(path: 'title', namespace_prefix: 'mods')
       t.non_sort(path: 'nonSort', namespace_prefix: 'mods')
       t.sub_title(path: 'subTitle', namespace_prefix: 'mods')
@@ -58,6 +58,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
           t.type(path: { attribute: 'type'})
         }
       }
+      t.affiliation(namespace_prefix: 'mods')
     }
 
     t.author_name_part(:path=>"roleTerm[.='Author']/../../mods:namePart", namespace_prefix: 'mods')
@@ -67,6 +68,13 @@ class ModsDatastream < ActiveFedora::OmDatastream
     t.corporate_name(path: 'mods/mods:name', namespace_prefix: 'mods', attributes: { type: 'corporate' }){
       t.usage(path: { attribute: "usage" })
       t.name_part(path: 'namePart', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable])
+      t.role(namespace_prefix: 'mods', index_as: [:stored_searchable]){
+        t.role_term(path: 'roleTerm', namespace_prefix: 'mods'){
+          t.authority(path: { attribute: 'authority'})
+          t.type(path: { attribute: 'type'})
+        }
+      }
+      t.affiliation(namespace_prefix: 'mods')
     }
 
     t.type_of_resource(path: 'typeOfResource', namespace_prefix: 'mods')

@@ -77,16 +77,14 @@ class ProcessModsZipJob
 
   def assign_a_row(row_results, core_file)
     core_file.mods.identifier = row_results["handle"] #will need to check that this matches the original handle or else this file should error
-    # core_file.mods. = row_results["archives_identifier"] #not sure where this goes in the mods yet
 
     core_file.mods.title = row_results["title"]
-    core_file.mods.title_info.sub_title = row_results["subtitle"]
-    core_file.mods.title_info.non_sort = row_results["title_initial_article"]
-    core_file.mods.alternate_title.title = row_results["alternate_title"]
-    core_file.mods.alternate_title.non_sort = row_results["alternate_title_initial_article"]
-    core_file.mods.alternate_title.sub_title = row_results["alternate_subtitle"]
+    core_file.mods.title_info.sub_title = row_results["subtitle"] unless row_results["subtitle"].blank?
+    core_file.mods.title_info.non_sort = row_results["title_initial_article"] unless row_results["title_initial_article"].blank?
+    core_file.mods.alternate_title.title = row_results["alternate_title"] unless row_results["alternate_title"].blank?
+    core_file.mods.alternate_title.non_sort = row_results["alternate_title_initial_article"] unless row_results["alternate_title_initial_article"].blank?
+    core_file.mods.alternate_title.sub_title = row_results["alternate_subtitle"] unless row_results["alternate_subtitle"].blank?
 
-    # TODO - work creator magic loop here
     creators = row_results.select { |key, value| key.to_s.match(/^creator_\d+_name$/) }
     creator_nums = creators.keys.map {|key| key.scan(/\d/)[0].to_i }
     if creators.count > 0
@@ -103,20 +101,50 @@ class ProcessModsZipJob
           creator_hash['last_names'] << row_results["creator_#{n}_name"].split(",")[0].strip
         end
       end
-      puts creator_hash
       core_file.creators = creator_hash
-      # currently the hash only accepts first_names, last_names, and corporate_names so we'd need to loop back through to assign the role and affiliation
-      # will need authority info for roles
-      # need to assign primary based on n = 1
+      # assign primary
+      if row_results["creator_1_name_type"] == "personal"
+        core_file.mods.corporate_name(0).usage = nil
+        core_file.mods.personal_name(0).usage = "primary"
+      elsif row_results["creator_1_name_type"] == "corporate"
+        core_file.mods.corporate_name(0).usage = "primary"
+        core_file.mods.personal_name(0).usage = nil
+      end
+      creator_nums.each do |n|
+        name_type = row_results["creator_#{n}_name_type"]
+        role = row_results["creator_#{n}_role"]
+        # will need authority info for roles
+        affiliation = row_results["creator_#{n}_affliation"]
+        if name_type == 'corporate'
+          corp_creators = row_results.select { |key, value| key.to_s.match(/^creator_\d+_name_type$/) && value.to_s.match(/^corporate$/) }
+          corp_nums = corp_creators.keys.map {|key| key.scan(/\d/)[0].to_i }
+          corp_num = corp_nums.index(n) #this basically maps the row_results n number to the creator index since corp and pers are separate in the mods
+          core_file.mods.corporate_name(corp_num).role.role_term = role unless role.blank?
+          core_file.mods.corporate_name(corp_num).affiliation = affiliation unless affiliation.blank?
+        elsif name_type == 'personal'
+          personal_creators = row_results.select { |key, value| key.to_s.match(/^creator_\d+_name_type$/) && value.to_s.match(/^personal$/) }
+          pers_nums = personal_creators.keys.map {|key| key.scan(/\d/)[0].to_i }
+          pers_num = pers_nums.index(n)
+          core_file.mods.personal_name(pers_num).role.role_term = role unless role.blank?
+          core_file.mods.personal_name(pers_num).affiliation = affiliation unless affiliation.blank?
+        end
+      end
     end
 
-    core_file.mods.type_of_resource = row_results["type_of_resource"]
-    core_file.mods.genre = row_results["genre"]
+    core_file.mods.type_of_resource = row_results["type_of_resource"] unless row_results["type_of_resource"].blank?
+    core_file.mods.genre = row_results["genre"] unless row_results["genre"].blank?
     # core_file.mods.genre.authority = #need authority
-    # core_file.mods.date = row_results["date_created"] + row_results["date_created_end_date"] + row_results["approximate_inferred_questionable"] #not sure on this - how to string together? we currently have no notion of the point attribute for start and end in the mods datastream
+    # TODO - need corresponding mods datastream methods
+    # if !row_results["date_created_end_date"].blank?
+      # core_file.mods.date_created_start = row_results["date_created"]
+      # core_file.mods.date_created_end = row_results["date_created_end_date"]
+    # else
+      # core_file.mods.date = row_results["date_created"]
+    # end
+    # core_file.mods.date.qualifier = row_results["approximate_inferred_questionable"]
 
-    core_file.mods.origin_info.copyright = row_results["copyright_date"]
-    core_file.mods.origin_info.date_issued = row_results["date_issued"]
+    core_file.mods.origin_info.copyright = row_results["copyright_date"] unless row_results["copyright_date"].blank?
+    core_file.mods.origin_info.date_issued = row_results["date_issued"] unless row_results["date_issued"].blank?
     core_file.mods.origin_info.publisher = row_results["publisher_name"]
     core_file.mods.origin_info.place.place_term = row_results["place_of_publication"]
     core_file.mods.origin_info.edition = row_results["edition"]
@@ -168,14 +196,14 @@ class ProcessModsZipJob
       end
     end
 
+    # TODO - need methods in mods datastream for created subjects with names nested within
     # keywords << row_results["personal_name_subject_headings"]
     # keywords << row_results["additional_personal_name_subject_headings"]
     # keywords << row_results["corporate_name_subject_headings"]
     # keywords << row_results["addiditional_corporate"]
 
 
-    # for related items - three separate related items based on different fields at the end of the spreadsheet
-    # perhaps it will make sense to make a hash of hashes...or different methods for the difference related item "types"
+    # for related items
     related_items = {}
     # original item
     if !row_results["original_title"].blank? || !row_results["physical_location"].blank? || !row_results["identifier"].blank?
@@ -246,24 +274,24 @@ class ProcessModsZipJob
     results["creator_1_role"] = find_in_row(header_row, row_value, 'Creator 1 Role')
     results["creator_1_affiliation"] = find_in_row(header_row, row_value, 'Creator 1 Affiliation')
 
-    results["creator_2_name"] = find_in_row(header_row, row_value, 'Creator 2 Name - Primary Creator')
+    results["creator_2_name"] = find_in_row(header_row, row_value, 'Creator 2 Name')
     results["creator_2_name_type"] = find_in_row(header_row, row_value, 'Creator 2 Name Type')
     results["creator_2_role"] = find_in_row(header_row, row_value, 'Creator 2 Role')
     results["creator_2_affiliation"] = find_in_row(header_row, row_value, 'Creator 2 Affiliation')
 
     results["more_creators"] = find_in_row(header_row, row_value, 'Would you like to add more creators?')
 
-    results["creator_3_name"] = find_in_row(header_row, row_value, 'Creator 3 Name - Primary Creator')
+    results["creator_3_name"] = find_in_row(header_row, row_value, 'Creator 3 Name')
     results["creator_3_name_type"] = find_in_row(header_row, row_value, 'Creator 3 Name Type')
     results["creator_3_role"] = find_in_row(header_row, row_value, 'Creator 3 Role')
     results["creator_3_affiliation"] = find_in_row(header_row, row_value, 'Creator 3 Affiliation')
 
-    results["creator_4_name"] = find_in_row(header_row, row_value, 'Creator 4 Name - Primary Creator')
+    results["creator_4_name"] = find_in_row(header_row, row_value, 'Creator 4 Name')
     results["creator_4_name_type"] = find_in_row(header_row, row_value, 'Creator 4 Name Type')
     results["creator_4_role"] = find_in_row(header_row, row_value, 'Creator 4 Role')
     results["creator_4_affiliation"] = find_in_row(header_row, row_value, 'Creator 4 Affiliation')
 
-    results["creator_5_name"] = find_in_row(header_row, row_value, 'Creator 5 Name - Primary Creator')
+    results["creator_5_name"] = find_in_row(header_row, row_value, 'Creator 5 Name')
     results["creator_5_name_type"] = find_in_row(header_row, row_value, 'Creator 5 Name Type')
     results["creator_5_role"] = find_in_row(header_row, row_value, 'Creator 5 Role')
     results["creator_5_affiliation"] = find_in_row(header_row, row_value, 'Creator 5 Affiliation')
