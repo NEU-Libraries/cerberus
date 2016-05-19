@@ -1,5 +1,6 @@
 class ContentObjectCreationJob
   include MimeHelper
+  include ChecksumHelper
 
   attr_accessor :core_file_pid, :file_path, :permissions, :content_object_pid, :file_name, :mass_permissions
   attr_accessor :core_record, :content_object
