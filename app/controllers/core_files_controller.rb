@@ -370,7 +370,7 @@ class CoreFilesController < ApplicationController
           content_object = klass.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
           content_object.tmp_path = new_path
           checksum = new_checksum(new_path)
-          if params[:checksum] && params[:checksum] != checksum
+          if !params[:checksum].blank? && params[:checksum] != checksum
             session[:flash_error] = "The submitted MD5 hash value does not match the MD5 generated during ingest."
           end
           content_object.properties.md5_checksum = checksum
