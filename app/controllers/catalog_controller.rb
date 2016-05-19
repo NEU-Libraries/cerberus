@@ -260,6 +260,8 @@ class CatalogController < ApplicationController
     config.add_facet_field solr_name("niec_audience", :symbol), label: "Audience", limit: true
     # Language = niec_signed_language_ssim
     config.add_facet_field solr_name("niec_signed_language", :symbol), label: "Language", limit: true
+    # Spoken Language = niec_spoken_language_ssim
+    config.add_facet_field solr_name("niec_spoken_language", :symbol), label: "Spoken Language", limit: true
     # Lends Itself to Classifiers = niec_lends_itself_to_classifiers_ssim
     config.add_facet_field solr_name("niec_lends_itself_to_classifiers", :symbol), label: "Lends Itself to Classifiers Use", limit: true
     # Lends Itself to Space = niec_lends_itself_to_use_of_space_ssim
