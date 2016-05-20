@@ -135,19 +135,32 @@ class ProcessModsZipJob
       creator_nums.each do |n|
         name_type = row_results["creator_#{n}_name_type"]
         role = row_results["creator_#{n}_role"]
+        role_uri = row_results["creator_#{n}_role_value_uri"]
         # will need authority info for roles
         affiliation = row_results["creator_#{n}_affliation"]
         if name_type == 'corporate'
           corp_creators = row_results.select { |key, value| key.to_s.match(/^creator_\d+_name_type$/) && value.to_s.match(/^corporate$/) }
           corp_nums = corp_creators.keys.map {|key| key.scan(/\d/)[0].to_i }
           corp_num = corp_nums.index(n) #this basically maps the row_results n number to the creator index since corp and pers are separate in the mods
-          core_file.mods.corporate_name(corp_num).role.role_term = role unless role.blank?
+          if !role.blank?
+            core_file.mods.corporate_name(corp_num).role.role_term = role
+            core_file.mods.corporate_name(corp_num).role.role_term.value_uri = role_uri unless role_uri.blank?
+            core_file.mods.corporate_name(corp_num).role.role_term.authority = "marcrelator"
+            core_file.mods.corporate_name(corp_num).role.role_term.authority_uri = "http://id.loc.gov/vocabulary/relators"
+            core_file.mods.corporate_name(corp_num).role.role_term.type = "text"
+          end
           core_file.mods.corporate_name(corp_num).affiliation = affiliation unless affiliation.blank?
         elsif name_type == 'personal'
           personal_creators = row_results.select { |key, value| key.to_s.match(/^creator_\d+_name_type$/) && value.to_s.match(/^personal$/) }
           pers_nums = personal_creators.keys.map {|key| key.scan(/\d/)[0].to_i }
           pers_num = pers_nums.index(n)
-          core_file.mods.personal_name(pers_num).role.role_term = role unless role.blank?
+          if !role.blank?
+            core_file.mods.personal_name(pers_num).role.role_term = role
+            core_file.mods.personal_name(pers_num).role.role_term.value_uri = role_uri unless role_uri.blank?
+            core_file.mods.personal_name(pers_num).role.role_term.authority = "marcrelator"
+            core_file.mods.personal_name(pers_num).role.role_term.authority_uri = "http://id.loc.gov/vocabulary/relators"
+            core_file.mods.personal_name(pers_num).role.role_term.type = "text"
+          end
           core_file.mods.personal_name(pers_num).affiliation = affiliation unless affiliation.blank?
         end
       end
@@ -312,11 +325,13 @@ class ProcessModsZipJob
     results["creator_1_name"] = find_in_row(header_row, row_value, 'Creator 1 Name - Primary Creator')
     results["creator_1_name_type"] = find_in_row(header_row, row_value, 'Creator 1 Name Type')
     results["creator_1_role"] = find_in_row(header_row, row_value, 'Creator 1 Role')
+    results["creator_1_role_value_uri"] = find_in_row(header_row, row_value, 'Creator 1 Role Value URI')
     results["creator_1_affiliation"] = find_in_row(header_row, row_value, 'Creator 1 Affiliation')
 
     results["creator_2_name"] = find_in_row(header_row, row_value, 'Creator 2 Name')
     results["creator_2_name_type"] = find_in_row(header_row, row_value, 'Creator 2 Name Type')
     results["creator_2_role"] = find_in_row(header_row, row_value, 'Creator 2 Role')
+    results["creator_2_role_value_uri"] = find_in_row(header_row, row_value, 'Creator 2 Role Value URI')
     results["creator_2_affiliation"] = find_in_row(header_row, row_value, 'Creator 2 Affiliation')
 
     results["more_creators"] = find_in_row(header_row, row_value, 'Would you like to add more creators?')
@@ -324,16 +339,19 @@ class ProcessModsZipJob
     results["creator_3_name"] = find_in_row(header_row, row_value, 'Creator 3 Name')
     results["creator_3_name_type"] = find_in_row(header_row, row_value, 'Creator 3 Name Type')
     results["creator_3_role"] = find_in_row(header_row, row_value, 'Creator 3 Role')
+    results["creator_3_role_value_uri"] = find_in_row(header_row, row_value, 'Creator 3 Role Value URI')
     results["creator_3_affiliation"] = find_in_row(header_row, row_value, 'Creator 3 Affiliation')
 
     results["creator_4_name"] = find_in_row(header_row, row_value, 'Creator 4 Name')
     results["creator_4_name_type"] = find_in_row(header_row, row_value, 'Creator 4 Name Type')
     results["creator_4_role"] = find_in_row(header_row, row_value, 'Creator 4 Role')
+    results["creator_4_role_value_uri"] = find_in_row(header_row, row_value, 'Creator 4 Role Value URI')
     results["creator_4_affiliation"] = find_in_row(header_row, row_value, 'Creator 4 Affiliation')
 
     results["creator_5_name"] = find_in_row(header_row, row_value, 'Creator 5 Name')
     results["creator_5_name_type"] = find_in_row(header_row, row_value, 'Creator 5 Name Type')
     results["creator_5_role"] = find_in_row(header_row, row_value, 'Creator 5 Role')
+    results["creator_5_role_value_uri"] = find_in_row(header_row, row_value, 'Creator 5 Role Value URI')
     results["creator_5_affiliation"] = find_in_row(header_row, row_value, 'Creator 5 Affiliation')
 
     results["type_of_resource"]                             = find_in_row(header_row, row_value, 'Type of Resource')

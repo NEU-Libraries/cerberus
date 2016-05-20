@@ -56,6 +56,8 @@ class ModsDatastream < ActiveFedora::OmDatastream
         t.role_term(path: 'roleTerm', namespace_prefix: 'mods'){
           t.authority(path: { attribute: 'authority'})
           t.type(path: { attribute: 'type'})
+          t.authority_uri(path: {attribute: 'authorityURI'})
+          t.value_uri(path: {attribute: 'valueURI'})
         }
       }
       t.affiliation(namespace_prefix: 'mods')
@@ -72,6 +74,8 @@ class ModsDatastream < ActiveFedora::OmDatastream
         t.role_term(path: 'roleTerm', namespace_prefix: 'mods'){
           t.authority(path: { attribute: 'authority'})
           t.type(path: { attribute: 'type'})
+          t.authority_uri(path: {attribute: 'authorityURI'})
+          t.value_uri(path: {attribute: 'valueURI'})
         }
       }
       t.affiliation(namespace_prefix: 'mods')
