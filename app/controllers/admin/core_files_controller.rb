@@ -106,12 +106,12 @@ class Admin::CoreFilesController < AdminController
     end
     def limit_to_in_progress(solr_parameters, user_parameters)
       solr_parameters[:fq] ||= []
-      solr_parameters[:fq] << "in_progress_tesim:\"true\""
+      solr_parameters[:fq] << "in_progress_tesim:\"true\" AND active_fedora_model_ssi:\"CoreFile\""
       solr_parameters[:sort] = "system_modified_dtsi desc"
     end
     def limit_to_incomplete(solr_parameters, user_parameters)
       solr_parameters[:fq] ||= []
-      solr_parameters[:fq] << "incomplete_tesim:\"true\""
+      solr_parameters[:fq] << "incomplete_tesim:\"true\" AND active_fedora_model_ssi:\"CoreFile\""
       solr_parameters[:sort] = "system_modified_dtsi desc"
     end
 
