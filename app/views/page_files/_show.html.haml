@@ -14,13 +14,10 @@
 
   :javascript
     $(document).ready(function(){
-      var original_page = "";
-      var original_ordinal = "";
       ajax_pagination(true);
       function ajax_pagination(first=false){
         $(".pagination span a").on("click", function(e){
           e.preventDefault();
-          spinner = enable_spinner('single_page');
           var href = $(this).attr("href");
           var url = href.split('?')[0];
           var params = href.split('?')[1];
@@ -43,35 +40,9 @@
         })
       }
       function get_page(path, ordinal_value){
-        var stateObj = {url:path, ordinal_value:ordinal_value};
-        history.pushState(stateObj, path, ordinal_value);
-        $.getScript( path, function() {
-          $("#single_page .spinner").remove();
-          enable_pagination();
-        });
+        window.location.href = path;
       }
       function enable_pagination(){
         ajax_pagination();
       }
-      function change(state) {
-        console.log("in change event");
-          if(state === null) { // initial page
-            console.log("state is null")
-            console.log("original page is" + original_page);
-            console.log("original ordinal is " + original_ordinal);
-            get_page(original_page, original_ordinal);
-          } else { // page added with pushState
-            console.log("state is not null");
-            $.getScript( state.url, function() {
-              $("#single_page .spinner").remove();
-              enable_pagination();
-            });
-            var stateObj = {url:state.url, ordinal_value:state.ordinal_value};
-          }
-      }
-      $(window).on("popstate", function(e) {
-          console.log(e.originalEvent);
-          console.log(e.originalEvent.state);
-          change(e.originalEvent.state);
-      });
     })
