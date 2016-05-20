@@ -80,7 +80,7 @@ Cerberus::Application.routes.draw do
   match "/files/:id/create" => "core_files#create_attached_file", via:"post", as: "create_attached_file"
   get "/files/:id/provide_file_metadata/:content_object_id" => "core_files#provide_file_metadata", as: "files_provide_file_metadata"
   post "/files/:id/process_file_metadata/:content_object_id" => "core_files#process_file_metadata", as: "files_process_file_metadata"
-  match "/incomplete_content_object/:content_object_id" => 'core_files#destroy_incomplete_content_object', as: "destroy_incomplete_content_object"
+  match "/destroy_content_object/:content_object_id" => 'core_files#destroy_content_object', as: "destroy_content_object"
 
   get "/files/rescue_incomplete_file" => "core_files#rescue_incomplete_file", as: 'rescue_incomplete_file'
   match "/incomplete_file/:id" => "core_files#destroy_incomplete_file", via: 'delete', as: 'destroy_incomplete_file'

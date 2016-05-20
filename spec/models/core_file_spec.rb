@@ -89,41 +89,6 @@ describe CoreFile do
     end
   end
 
-  describe "Abandoned content_object lookup" do
-    let(:bill) { FactoryGirl.create(:bill) }
-    let(:nuid) { bill.nuid }
-    let(:gf)   { CoreFile.new }
-    let(:co)   { VideoMasterFile.new }
-
-    it "returns the empty array if no abandoned files exist" do
-      gf.depositor = nuid
-      gf.save!
-      expect(CoreFile.abandoned_content_objects_for_nuid(nuid)).to eq []
-    end
-
-    it "returns an array of SolrDocuments" do
-      begin
-        @abandoned           = VideoMasterFile.new
-        @abandoned.depositor = nuid
-        @abandoned.properties.tag_as_incomplete
-        @abandoned.save!
-
-        # Note that this doesn't work very well, and that
-        # the requirement of a one day jump is being imposed by
-        # an inability to escape Timezone hell.  Can't seem to get
-        # offsets to be interpretted correctly by Timecop.  Also
-        # other things aren't working.
-        Timecop.freeze(DateTime.now + 1) do
-          expected = [SolrDocument.new(@abandoned.to_solr).pid]
-          result   = CoreFile.abandoned_content_objects_for_nuid(nuid).map { |x| x.pid }
-          expect(result).to match_array expected
-        end
-      ensure
-        VideoMasterFile.destroy_all
-      end
-    end
-  end
-
   describe "Setting parent" do
     let(:bill) { FactoryGirl.create(:bill) }
     let(:bo) { FactoryGirl.create(:bo) }
