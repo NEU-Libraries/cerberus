@@ -74,7 +74,7 @@ class Loaders::ModsSpreadsheetLoadsController < Loaders::LoadsController
 
   def proceed_load
     @report = Loaders::LoadReport.find(params[:id])
-    @loader_name = t('drs.loaders.'+t('drs.loaders.mods_spreadsheet.short_name')+'.long_name')
+    @loader_name = t('drs.loaders.mods_spreadsheet.long_name')
     if !@report.preview_file_pid.blank?
       cf = CoreFile.find(@report.preview_file_pid)
       spreadsheet_file_path = cf.tmp_path
@@ -84,7 +84,16 @@ class Loaders::ModsSpreadsheetLoadsController < Loaders::LoadsController
     end
     copyright = t('drs.loaders.mods_spreadsheet.copyright')
     permissions = {"CoreFile" => {"read"  => ["public"], "edit" => ["northeastern:drs:repository:staff"]}}
-    Cerberus::Application::Queue.push(ProcessModsZipJob.new(@loader_name, spreadsheet_file_path, @report.collection, copyright, current_user, permissions, @report.id, false))
+    puts @loader_name
+    puts spreadsheet_file_path
+    puts @report.collection
+    puts copyright
+    puts current_user
+    puts permissions
+    puts @report.id
+    puts Resque.info
+    Cerberus::Application::Queue.push(ProcessModsZipJob.new(@loader_name, spreadsheet_file_path, @report.collection, copyright, current_user, permissions, @report.id, nil))
+    puts Resque.info
     redirect_to "/loaders/mods_spreadsheet/report/#{@report.id}"
   end
 
