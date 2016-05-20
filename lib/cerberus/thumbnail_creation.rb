@@ -36,10 +36,18 @@ module Cerberus::ThumbnailCreation
           raise "Size must be hash containing :height/:width or :width keys"
         end
 
-        end_img.format = "JPEG"
-        end_img.interlace = Magick::PlaneInterlace
+        extension = ""
 
-        item.add_file(end_img.to_blob, dsid, "#{dsid}.jpeg")
+        if item.core_record.canonical_class.in?(['MswordFile', 'PdfFile'])
+          end_img.format = "PNG"
+          extension = "png"
+        else
+          end_img.format = "JPEG"
+          end_img.interlace = Magick::PlaneInterlace
+          extension = "jpeg"
+        end
+
+        item.add_file(end_img.to_blob, dsid, "#{dsid}.#{extension}")
         item.save!
 
         img.destroy!
