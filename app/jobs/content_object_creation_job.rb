@@ -55,8 +55,6 @@ class ContentObjectCreationJob
 
       # content_object.characterize
       content_object.properties.mime_type = extract_mime_type(file_path)
-      content_object.properties.tag_as_completed
-
       content_object.save!
 
       # If the file is of type with text, see if we can get solr to do a full text index
