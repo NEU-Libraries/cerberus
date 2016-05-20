@@ -27,7 +27,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
       t.part_number(path: 'partNumber', namespace_prefix: 'mods', index_as: [:stored_searchable])
     }
 
-    t.alternate_title(path: 'titleInfo', namespace_prefix: 'mods', attributes: {type: "alternative"}){
+    t.alternate_title(path: 'mods/mods:titleInfo', namespace_prefix: 'mods', attributes: {type: "alternative"}){
       t.title(path: 'title', namespace_prefix: 'mods')
       t.non_sort(path: 'nonSort', namespace_prefix: 'mods')
       t.sub_title(path: 'subTitle', namespace_prefix: 'mods')
@@ -144,6 +144,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
     }
 
     t.subject(path: 'mods/mods:subject', namespace_prefix: 'mods'){
+      t.authority(path: {attribute: 'authority'})
       t.cartographics(path: 'cartographics', namespace_prefix: 'mods'){
         t.coordinates(path: 'coordinates', namespace_prefix: 'mods')
       }
@@ -385,9 +386,9 @@ class ModsDatastream < ActiveFedora::OmDatastream
         xml.titleInfo("usage" => "primary") {
           xml.title
         }
-        # xml.titleInfo("type" => "alternative"){
-        #   xml.title
-        # }
+        xml.titleInfo("type" => "alternative"){
+          xml.title
+        }
         xml.abstract
         xml.name('type' => 'personal')
         xml.name('type' => 'corporate')
@@ -790,7 +791,6 @@ class ModsDatastream < ActiveFedora::OmDatastream
   def self.subject_template
     builder = Nokogiri::XML::Builder.new do |xml|
       xml.subject{
-        xml.topic ""
       }
     end
     return builder.doc.root
