@@ -29,7 +29,6 @@ class ProcessModsZipJob
     dir_path = File.join(File.dirname(spreadsheet_file_path), File.basename(spreadsheet_file_path, ".*"))
 
     process_spreadsheet(dir_path, spreadsheet_file_path, load_report, preview, client)
-    puts "we are in the run method for the job"
   end
 
   def process_spreadsheet(dir_path, spreadsheet_file_path, load_report, preview, client)
@@ -37,12 +36,10 @@ class ProcessModsZipJob
 
     header_position = 1
     header_row = spreadsheet.row(header_position)
-    puts "we are in the process spreadsheet method in the job"
 
     if !preview.nil?
       row = spreadsheet.row(header_position + 1)
       if row.present? && header_row.present?
-        puts "processing preview"
         row_results = process_a_row(header_row, row)
         # Process first row
         comparison_file = CoreFile.find(row_results["pid"])
@@ -216,8 +213,9 @@ class ProcessModsZipJob
 
     # subjects/topics
     keywords = []
-    row_results["topical_subject_headings"].split(",").each do |topic|
-      keywords << topic.strip
+    topical_headings = row_results.select { |key, value| key.to_s.match(/^topic_\d+$/) }
+    topical_headings.each do |topic|
+      keywords << topic[1]
     end
     core_file.mods.topics = keywords #have to create the subject nodes first
     core_file.mods.subject.topic.each_with_index do |subject, key|
@@ -230,6 +228,7 @@ class ProcessModsZipJob
       else
         core_file.mods.subject(key).topic = subject
       end
+      core_file.mods.subject(key).authority = row_results["topic_#{key+1}_authority"] unless row_results["topic_#{key+1}_authority"].blank? #adds authority if it is set, key begins from 0 but topics begin from 1 in spreadsheet
     end
 
     name_subjects = []
@@ -362,7 +361,20 @@ class ProcessModsZipJob
     results["acess_condition_use_and_reproduction"]         = find_in_row(header_row, row_value, 'Access Condition : Use and Reproduction')
     results["provenance"]                                   = find_in_row(header_row, row_value, 'Provenance note')
     results["other_notes"]                                  = find_in_row(header_row, row_value, 'Other notes')
-    results["topical_subject_headings"]                     = find_in_row(header_row, row_value, 'Topical Subject Headings')
+    results["topic_1"]                                      = find_in_row(header_row, row_value, 'Topical Subject Heading 1')
+    results["topic_1_authority"]                            = find_in_row(header_row, row_value, 'Topical Subject Heading Authority 1')
+    results["topic_2"]                                      = find_in_row(header_row, row_value, 'Topical Subject Heading 2')
+    results["topic_2_authority"]                            = find_in_row(header_row, row_value, 'Topical Subject Heading Authority 2')
+    results["topic_3"]                                      = find_in_row(header_row, row_value, 'Topical Subject Heading 3')
+    results["topic_3_authority"]                            = find_in_row(header_row, row_value, 'Topical Subject Heading Authority 3')
+    results["topic_4"]                                      = find_in_row(header_row, row_value, 'Topical Subject Heading 4')
+    results["topic_4_authority"]                            = find_in_row(header_row, row_value, 'Topical Subject Heading Authority 4')
+    results["topic_5"]                                      = find_in_row(header_row, row_value, 'Topical Subject Heading 5')
+    results["topic_5_authority"]                            = find_in_row(header_row, row_value, 'Topical Subject Heading Authority 5')
+    results["topic_6"]                                      = find_in_row(header_row, row_value, 'Topical Subject Heading 6')
+    results["topic_6_authority"]                            = find_in_row(header_row, row_value, 'Topical Subject Heading Authority 6')
+    results["topic_7"]                                      = find_in_row(header_row, row_value, 'Topical Subject Heading 7')
+    results["topic_7_authority"]                            = find_in_row(header_row, row_value, 'Topical Subject Heading Authority 7')
     results["personal_name_subject_headings"]               = find_in_row(header_row, row_value, 'Personal Name Subject Headings')
     results["additional_personal_name_subject_headings"]    = find_in_row(header_row, row_value, 'Additional Personal Name Subject Headings')
     results["corporate_name_subject_headings"]              = find_in_row(header_row, row_value, 'Corporate Name Subject Headings')
