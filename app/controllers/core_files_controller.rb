@@ -50,7 +50,7 @@ class CoreFilesController < ApplicationController
 
   before_filter :verify_staff_or_beta, only: [:validate_xml, :edit_xml]
 
-  before_filter :verify_admin, only: [:create_attached_file, :new_attached_file, :provide_file_metadata, :process_file_metadata, :destroy_incomplete_content_object]
+  before_filter :verify_admin, only: [:create_attached_file, :new_attached_file, :provide_file_metadata, :process_file_metadata, :destroy_content_object]
 
   rescue_from Exceptions::NoParentFoundError, with: :no_parent_rescue
   rescue_from Exceptions::GroupPermissionsError, with: :group_permission_rescue
@@ -120,7 +120,7 @@ class CoreFilesController < ApplicationController
 
       respond_to do |format|
         format.html{
-            flash[:notice] = "Incomplete file destroyed"
+            flash[:notice] = "Temporary file destroyed"
             redirect_to(root_path) and return
           }
         format.js   { render :nothing => true }
@@ -130,21 +130,20 @@ class CoreFilesController < ApplicationController
     render :nothing => true
   end
 
-  def destroy_incomplete_content_object
+  def destroy_content_object
     @content_object = fetch_solr_document({:id=>params[:content_object_id]})
-    if @content_object.in_progress?
-      # User completed second screen, so they most likely went back accidentally
-      # Do nothing
-    elsif @content_object.incomplete?
-      @content_object = ActiveFedora::Base.find(@content_object.pid)
-      @content_object.destroy
-      respond_to do |format|
-        format.html{
-            flash[:notice] = "Incomplete file destroyed"
-            redirect_to(root_path) and return
-          }
-        format.js   { render :nothing => true }
-      end
+    klass = @content_object.klass.constantize
+    @content_object = klass.find(params[:content_object_id])
+    if File.exists?(@content_object.tmp_path)
+      FileUtils.rm(@content_object.tmp_path)
+    end
+    @content_object.destroy
+    respond_to do |format|
+      format.html{
+          flash[:notice] = "File destroyed"
+          redirect_to(root_path) and return
+        }
+      format.js   { render :nothing => true }
     end
 
     render :nothing => true
@@ -180,10 +179,7 @@ class CoreFilesController < ApplicationController
   # page for allowing users to either permanently delete or apply metadata to
   # files abandoned without completing step two of the upload process.
   def rescue_incomplete_file
-    if params["core_file"]
-      @incomplete = fetch_solr_document(id: params["abandoned"])
-      @core_file = fetch_solr_document(id: params["core_file"])
-    elsif params["abandoned"]
+    if params["abandoned"]
       @incomplete = fetch_solr_document(id: params["abandoned"])
     else
       file = CoreFile.abandoned_for_nuid(current_user.nuid).first
@@ -262,7 +258,6 @@ class CoreFilesController < ApplicationController
     @core_file = CoreFile.find(params[:id])
     klass = class_for_attached_file(@core_file)
     @content_object = klass.find(params[:content_object_id])
-    @content_object.properties.tag_as_in_progress
     Cerberus::Application::Queue.push(ContentObjectCreationJob.new(@core_file.pid, @content_object.tmp_path, @content_object.pid, @content_object.original_filename, params[:content_object][:permissions], params[:content_object][:mass_permissions]))
     UploadAlert.create_from_core_file(@core_file, :update, current_user)
     flash[:notice] = "Your file is being processed. The file's checksum is #{@content_object.properties.md5_checksum.first}"
@@ -381,7 +376,6 @@ class CoreFilesController < ApplicationController
           else
             content_object.depositor = current_user.nuid
           end
-          content_object.properties.tag_as_incomplete
           content_object.save!
           render json: { url: files_provide_file_metadata_path(@core_file.pid, content_object.pid)}
         else
@@ -443,13 +437,6 @@ class CoreFilesController < ApplicationController
 
   def new_attached_file
     @core_file = fetch_solr_document
-    abandoned_files = CoreFile.abandoned_content_objects_for_nuid(current_user.nuid)
-
-    if abandoned_files.any?
-      file = abandoned_files.first
-      redirect_to rescue_incomplete_file_path("abandoned" => file.pid, "core_file" => @core_file.pid)
-      return
-    end
 
     if session[:flash_error]
       flash[:error] = session[:flash_error]

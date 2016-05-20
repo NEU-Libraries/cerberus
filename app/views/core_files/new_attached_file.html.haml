@@ -52,7 +52,8 @@
         autoUpload: false,
         add: function (e, data) {
             data.context = $("#fileSubmit")
-                .click(function () {
+                .click(function (e) {
+                  e.preventDefault();
                   $(this).attr("disabled", true);
                   $(this).val("Please wait...");
                 });
@@ -77,7 +78,8 @@
            window.location = url;
         }
     });
-    $('#fileSubmit').click(function(){
+    $('#fileSubmit').click(function(e){
+      e.preventDefault();
       $('#FileUploadForm').fileupload('send', {files:file_list});
     })
   });
