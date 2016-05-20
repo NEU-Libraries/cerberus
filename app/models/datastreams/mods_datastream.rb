@@ -27,7 +27,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
       t.part_number(path: 'partNumber', namespace_prefix: 'mods', index_as: [:stored_searchable])
     }
 
-    t.alternate_title(path: 'mods/mods:titleInfo', namespace_prefix: 'mods', attributes: {type: "alternative"}){
+    t.alternate_title(path: 'titleInfo', namespace_prefix: 'mods', attributes: {type: "alternative"}){
       t.title(path: 'title', namespace_prefix: 'mods')
       t.non_sort(path: 'nonSort', namespace_prefix: 'mods')
       t.sub_title(path: 'subTitle', namespace_prefix: 'mods')
@@ -92,7 +92,9 @@ class ModsDatastream < ActiveFedora::OmDatastream
         t.point(path: {attribute: 'point'})
         t.qualifier(path: {attribute: 'qualifier'})
       }
-      t.date_created_end(path: 'dateCreated', namespace_prefix: 'mods', attributes: { encoding: 'w3cdtf', point: 'end'})
+      t.date_created_end(path: 'dateCreated', namespace_prefix: 'mods', attributes: { encoding: 'w3cdtf', point: 'end'}){
+        t.qualifier(path: {attribute: 'qualifier'})
+      }
       t.copyright(path: 'copyrightDate', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable], attributes: { encoding: 'w3cdtf' })
       t.date_issued(path: 'dateIssued', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable], attributes: { encoding: 'w3cdtf' })
       t.date_other(path: 'dateOther', namespace_prefix: 'mods', index_as: [:stored_searchable], attributes: { encoding: 'w3cdtf'})
@@ -107,6 +109,8 @@ class ModsDatastream < ActiveFedora::OmDatastream
       t.language_term(path: 'languageTerm', namespace_prefix: 'mods'){
         t.language_term_type(path: { attribute: 'type'})
         t.language_authority(path: { attribute: 'authority'})
+        t.language_authority_uri(path: {attribute: 'authorityURI'})
+        t.language_value_uri(path: { attribute: 'valueURI'})
       }
     }
 
@@ -381,25 +385,22 @@ class ModsDatastream < ActiveFedora::OmDatastream
         xml.titleInfo("usage" => "primary") {
           xml.title
         }
-        xml.titleInfo("type" => "alternative"){
-          xml.title
-        }
+        # xml.titleInfo("type" => "alternative"){
+        #   xml.title
+        # }
         xml.abstract
         xml.name('type' => 'personal')
         xml.name('type' => 'corporate')
         xml.originInfo {
-          xml.dateCreated('keyDate' => 'yes', 'encoding' => 'w3cdtf')
           xml.place{
             xml.placeTerm
           }
+          xml.dateCreated('keyDate' => 'yes', 'encoding' => 'w3cdtf')
         }
         xml.language{
           xml.languageTerm
         }
         xml.note('type' => 'citation')
-        xml.subject{
-          xml.keyword ""
-        }
         xml.subject{
           xml.topic ""
         }
@@ -410,6 +411,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
           xml.recordContentSource
           xml.recordOrigin
           xml.descriptionStandard
+          xml.languageOfCataloging
         }
 
         xml.physicalDescription{

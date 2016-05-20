@@ -29,44 +29,69 @@ class ProcessModsZipJob
     dir_path = File.join(File.dirname(spreadsheet_file_path), File.basename(spreadsheet_file_path, ".*"))
 
     process_spreadsheet(dir_path, spreadsheet_file_path, load_report, preview, client)
+    puts "we are in the run method for the job"
   end
 
   def process_spreadsheet(dir_path, spreadsheet_file_path, load_report, preview, client)
-    count = 0
     spreadsheet = load_spreadsheet(spreadsheet_file_path)
 
     header_position = 1
     header_row = spreadsheet.row(header_position)
+    puts "we are in the process spreadsheet method in the job"
 
-    spreadsheet.each_row_streaming(offset: header_position) do |row|
+    if !preview.nil?
+      row = spreadsheet.row(header_position + 1)
       if row.present? && header_row.present?
+        puts "processing preview"
         row_results = process_a_row(header_row, row)
-        if preview
-          # Process first row
-          comparison_file = CoreFile.find(row_results["pid"])
+        # Process first row
+        comparison_file = CoreFile.find(row_results["pid"])
 
-          preview_file = CoreFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
-          preview_file.depositor              = comparison_file.depositor
-          preview_file.rightsMetadata.content = comparison_file.rightsMetadata.content
-          # commenting this out because it means that changes to the xml_template will be removed if they didn't exist before the comparison_file was created, the diff still works without this but it means whatever is in the spreadsheet becomes all of the metadata, not just changing some of the fields
-          # preview_file.mods.content           = comparison_file.mods.content
-          preview_file.tmp_path = spreadsheet_file_path
+        preview_file = CoreFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
+        preview_file.depositor              = comparison_file.depositor
+        preview_file.rightsMetadata.content = comparison_file.rightsMetadata.content
+        # commenting this out because it means that changes to the xml_template will be removed if they didn't exist before the comparison_file was created, the diff still works without this but it means whatever is in the spreadsheet becomes all of the metadata, not just changing some of the fields
+        # preview_file.mods.content           = comparison_file.mods.content
+        preview_file.tmp_path = spreadsheet_file_path
 
-          # Load row of metadata in for preview
-          assign_a_row(row_results, preview_file)
+        # Load row of metadata in for preview
+        assign_a_row(row_results, preview_file)
 
-          load_report.comparison_file_pid = comparison_file.pid
-          load_report.preview_file_pid = preview_file.pid
+        load_report.comparison_file_pid = comparison_file.pid
+        load_report.preview_file_pid = preview_file.pid
+        load_report.number_of_files = spreadsheet.last_row - header_position
 
-          load_report.save!
-          return
+        load_report.save!
+      else
+        puts "row not present"
+      end
+    else
+      puts "not a preview anymore"
+      spreadsheet.each_row_streaming(offset: header_position) do |row|
+        if row.present? && header_row.present?
+          begin
+            row_results = process_a_row(header_row, row)
+            core_file = CoreFile.find(row_results["pid"])
+            core_file.mods.content = ModsDatastream.xml_template.to_xml
+            assign_a_row(row_results, core_file)
+            raw_xml = xml_decode(core_file.mods.content)
+            result = xml_valid?(raw_xml)
+            if !result[:errors].blank?
+              load_report.image_reports.create_failure(error, "", "")
+            else
+              puts "mods is valid"
+              load_report.image_reports.create_success(core_file, "")
+            end
+          rescue Exception => error
+            puts error
+            puts error.backtrace
+            load_report.image_reports.create_failure(error, "", "")
+          end
         end
       end
+      load_report.update_counts
+      load_report.save!
     end
-
-    load_report.update_counts
-    load_report.number_of_files = count
-    load_report.save!
 
     if load_report.success_count + load_report.fail_count + load_report.modified_count == load_report.number_of_files
       load_report.completed = true
@@ -133,13 +158,16 @@ class ProcessModsZipJob
 
     core_file.mods.type_of_resource = row_results["type_of_resource"] unless row_results["type_of_resource"].blank?
     core_file.mods.genre = row_results["genre"] unless row_results["genre"].blank?
-    # core_file.mods.genre.authority = #need authority
+    core_file.mods.genre.authority = row_results["genre_authority"] unless row_results["genre_authority"].blank?
     if !row_results["date_created_end_date"].blank?
       core_file.mods.origin_info.date_created = row_results["date_created"]
       core_file.mods.origin_info.date_created.point = "start"
       core_file.mods.origin_info.date_created_end = row_results["date_created_end_date"]
+      core_file.mods.origin_info.date_created.qualifier = row_results["approximate_inferred_questionable"] unless row_results["approximate_inferred_questionable"].blank?
+      core_file.mods.origin_info.date_created_end.qualifier = row_results["approximate_inferred_questionable"] unless row_results["approximate_inferred_questionable"].blank?
     else
       core_file.mods.date = row_results["date_created"] unless row_results["date_created"].blank?
+      core_file.mods.origin_info.date_created.qualifier = row_results["approximate_inferred_questionable"] unless row_results["approximate_inferred_questionable"].blank?
     end
     core_file.mods.origin_info.date_created.qualifier = row_results["approximate_inferred_questionable"] unless row_results["approximate_inferred_questionable"].blank?
 
@@ -150,11 +178,17 @@ class ProcessModsZipJob
     core_file.mods.origin_info.edition = row_results["edition"] unless row_results["edition"].blank?
     core_file.mods.origin_info.issuance = row_results["issuance"] unless row_results["issuance"].blank?
     core_file.mods.origin_info.frequency = row_results["frequency"] unless row_results["frequency"].blank?
-    # core_file.mods.origin_info.frequency.authority = #need authority
+    core_file.mods.origin_info.frequency.authority = row_results["frequency_authority"] unless row_results["frequency_authority"].blank?
     core_file.mods.physical_description.extent = row_results["extent"] unless row_results["extent"].blank?
     core_file.mods.physical_description.digital_origin = row_results["digital_origin"] unless row_results["digital_origin"].blank?
     core_file.mods.physical_description.reformatting_quality = row_results["reformatting_quality"]
-    core_file.mods.language.language_term = row_results["language"] #need type, authority, potentially authorityURI and valueURI
+    if !row_results["language"].blank?
+      core_file.mods.language.language_term = row_results["language"]
+      core_file.mods.language.language_term.language_term_type = "text"
+      core_file.mods.language.language_term.language_authority = "iso639-2b"
+      core_file.mods.language.language_term.language_authority_uri = "http://id.loc.gov/vocabulary/iso639-2"
+      core_file.mods.language.language_term.language_value_uri = row_results["language_uri"] unless row_results["language_uri"].blank?
+    end
     core_file.mods.description = row_results["abstract"] unless row_results["abstract"].blank?
     core_file.mods.table_of_contents = row_results["table_of_contents"] unless row_results["table_of_contents"].blank?
 
@@ -208,7 +242,7 @@ class ProcessModsZipJob
     row_results["corporate_name_subject_headings"].split(";").each do |name|
       name_subjects << {:corporate => name.strip}
     end
-    row_results["addiditional_corporate"].split(";").each do |name|
+    row_results["additional_corporate"].split(";").each do |name|
       name_subjects << {:corporate => name.strip}
     end
     if name_subjects.length > 0
@@ -263,12 +297,6 @@ class ProcessModsZipJob
 
   def process_a_row(header_row, row_value)
     results = Hash.new
-    # results["file_name"]         = find_in_row(header_row, row_value, 'Filename')
-    # results["title"]             = find_in_row(header_row, row_value, 'Title')
-    # results["parent_filename"]   = find_in_row(header_row, row_value, 'Parent Filename')
-    # results["sequence"]          = find_in_row(header_row, row_value, 'Sequence')
-    # results["last_item"]         = find_in_row(header_row, row_value, 'Last Item')
-
     results["user_name"]                        = find_in_row(header_row, row_value, 'What is your name?')
     results["pid"]                              = find_in_row(header_row, row_value, 'What is PID for the digitized object?')
     results["handle"]                           = find_in_row(header_row, row_value, 'What is handle for the digitized object?')
@@ -311,6 +339,7 @@ class ProcessModsZipJob
 
     results["type_of_resource"]                             = find_in_row(header_row, row_value, 'Type of Resource')
     results["genre"]                                        = find_in_row(header_row, row_value, 'Genre')
+    results["genre_authority"]                                        = find_in_row(header_row, row_value, 'Genre Authority')
     results["date_created"]                                 = find_in_row(header_row, row_value, 'Date Created')
     results["date_created_end_date"]                        = find_in_row(header_row, row_value, 'Date Created - End Date')
     results["approximate_inferred_questionable"]            = find_in_row(header_row, row_value, 'Date Created - Is this date approximate, inferred, or questionable?')
@@ -321,10 +350,12 @@ class ProcessModsZipJob
     results["edition"]                                      = find_in_row(header_row, row_value, 'Edition')
     results["issuance"]                                     = find_in_row(header_row, row_value, 'Issuance')
     results["frequency"]                                    = find_in_row(header_row, row_value, 'Frequency')
+    results["frequency_authority"]                          = find_in_row(header_row, row_value, 'Frequency Authority')
     results["reformatting_quality"]                         = find_in_row(header_row, row_value, 'Reformatting Quality')
     results["extent"]                                       = find_in_row(header_row, row_value, 'Extent')
     results["digital_origin"]                               = find_in_row(header_row, row_value, 'Digital Origin')
     results["language"]                                     = find_in_row(header_row, row_value, 'Language')
+    results["language_uri"]                                 = find_in_row(header_row, row_value, 'Language URI')
     results["abstract"]                                     = find_in_row(header_row, row_value, 'Abstract')
     results["table_of_contents"]                            = find_in_row(header_row, row_value, 'Table of Contents')
     results["acess_condition_restriction"]                  = find_in_row(header_row, row_value, 'Access Condition : Restriction on access')
@@ -335,7 +366,7 @@ class ProcessModsZipJob
     results["personal_name_subject_headings"]               = find_in_row(header_row, row_value, 'Personal Name Subject Headings')
     results["additional_personal_name_subject_headings"]    = find_in_row(header_row, row_value, 'Additional Personal Name Subject Headings')
     results["corporate_name_subject_headings"]              = find_in_row(header_row, row_value, 'Corporate Name Subject Headings')
-    results["addiditional_corporate"]                       = find_in_row(header_row, row_value, 'Addiditional Corporate Name Subject Headings')
+    results["additional_corporate"]                       = find_in_row(header_row, row_value, 'Additional Corporate Name Subject Headings')
     results["original_title"]                               = find_in_row(header_row, row_value, 'Original Title') #updated cell title
     results["physical_location"]                            = find_in_row(header_row, row_value, 'What is the physical location for this object?')
     results["identifier"]                                   = find_in_row(header_row, row_value, 'What is the identifier for this object?')
