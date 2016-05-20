@@ -10,7 +10,7 @@ before_script:
   - "sudo service redis-server start"
   - "sudo freshclam"
 cache:
-  - bundler
+  bundler: true
   directories:
     - /var/lib/clamav/
 script: "bundle exec rake ci:build"
