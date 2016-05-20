@@ -9,13 +9,7 @@ namespace :ci do
     jetty_params = Jettywrapper.load_config
     jetty_params[:startup_wait] = 60
     Jettywrapper.wrap(jetty_params) do
-      Rake::Task['spec:controllers'].invoke
-      Rake::Task['spec:features'].invoke
-      Rake::Task['spec:helpers'].invoke
-      Rake::Task['spec:jobs'].invoke
-      Rake::Task['spec:lib'].invoke
-      Rake::Task['spec:mailers'].invoke
-      Rake::Task['spec:models'].invoke
+      Rake::Task['spec'].invoke
     end
   end
 end
