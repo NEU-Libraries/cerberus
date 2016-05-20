@@ -42,6 +42,7 @@ class ContentObjectCreationJob
           content_object.save!
         end
       end
+      content_object.reload
 
       # Assign relevant metadata
       content_object.core_record    = core_record
@@ -54,8 +55,9 @@ class ContentObjectCreationJob
 
       # content_object.characterize
       content_object.properties.mime_type = extract_mime_type(file_path)
+      content_object.properties.tag_as_completed
 
-      content_object.save! ? content_object : false
+      content_object.save!
 
       # If the file is of type with text, see if we can get solr to do a full text index
       # commenting out because we are only useing this for audio/video right now
@@ -63,10 +65,6 @@ class ContentObjectCreationJob
       #   content_object.extract_content
       # end
 
-      content_object.properties.tag_as_completed
-      # reload just to be safe
-      core_record.reload
-      core_record.save!
       Rails.cache.delete_matched("/content_objects/#{core_record.pid}*")
       return content_object
     ensure
