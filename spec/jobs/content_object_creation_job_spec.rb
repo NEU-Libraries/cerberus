@@ -72,11 +72,6 @@ describe ContentObjectCreationJob do
     @content_object.properties.mime_type.should == [extract_mime_type(new_path)]
   end
 
-  it "sets content_object to complete" do
-    @content_object.properties.incomplete?.should be false
-    @content_object.properties.in_progress?.should be false
-  end
-
   it "deletes tmp file" do
     File.exist?("#{@content_object.tmp_path}").should be false
   end
