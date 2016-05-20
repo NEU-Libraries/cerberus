@@ -5,10 +5,6 @@
 
 %h4= "Actions for #{incomplete.title_or_label || 'Unnamed File'}:"
 %ul#actions
-  - if @core_file
-    %li= link_to "Complete this object", files_provide_file_metadata_path(@core_file.pid, @incomplete.pid, proxy: @incomplete.depositor)
-    %li= link_to "Delete this object", destroy_incomplete_content_object_path(incomplete.pid), method: 'delete'
-  - else
-    %li= link_to "Complete this object", files_provide_metadata_path(incomplete.pid, proxy: @incomplete.depositor)
-    %li= link_to "Delete this object", destroy_incomplete_file_path(incomplete.pid), method: 'delete'
+  %li= link_to "Complete this object", files_provide_metadata_path(incomplete.pid, proxy: @incomplete.depositor)
+  %li= link_to "Delete this object", destroy_incomplete_file_path(incomplete.pid), method: 'delete'
   %li= link_to "Go back to the home page", root_path
