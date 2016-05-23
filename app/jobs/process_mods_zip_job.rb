@@ -70,7 +70,7 @@ class ProcessModsZipJob
             row_results = process_a_row(header_row, row)
             core_file = CoreFile.find(row_results["pid"])
             if core_file.identifier != row_results["handle"]
-              image_report = load_report.image_reports.create_failure("Handle does not match", "", "")
+              image_report = load_report.image_reports.create_failure("Handle does not match", row_results, "")
               image_report.title = core_file.title
               image_report.save!
             else
@@ -79,7 +79,7 @@ class ProcessModsZipJob
               raw_xml = xml_decode(core_file.mods.content)
               result = xml_valid?(raw_xml)
               if !result[:errors].blank?
-                image_report = load_report.image_reports.create_failure(error, "", "")
+                image_report = load_report.image_reports.create_failure(error, row_results, "")
                 image_report.title = core_file.title
                 image_report.save!
               else

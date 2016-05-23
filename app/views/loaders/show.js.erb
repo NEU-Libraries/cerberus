@@ -1,0 +1,3 @@
+$('#report').html("<%= escape_javascript render :partial=>'/loaders/load_report', locals: {images: @images, user: @user} %>");
+$('.file_count').html('<%= "#{@report.number_of_files} (Successful: #{@report.success_count}, Modified: #{@report.modified_count}, Error: #{@report.fail_count})" %>');
+var completed = '<%= "#{@report.completed}" %>';

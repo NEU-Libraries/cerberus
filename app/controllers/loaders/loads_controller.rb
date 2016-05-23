@@ -65,7 +65,14 @@ class Loaders::LoadsController < ApplicationController
     @images = Loaders::ImageReport.where(load_report_id:"#{@report.id}").find_all
     @user = User.find_by_nuid(@report.nuid)
     @page_title = @report.loader_name + " Load into " + Collection.find(@report.collection).title
-    render 'loaders/show', locals: {images: @images, user: @user}
+    respond_to do |format|
+      format.js {
+        render 'loaders/show', locals: {images: @images, user: @user}
+      }
+      format.html {
+        render 'loaders/show', locals: {images: @images, user: @user}
+      }
+    end
   end
 
   def show_iptc
