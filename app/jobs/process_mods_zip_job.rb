@@ -47,8 +47,6 @@ class ProcessModsZipJob
         preview_file = CoreFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
         preview_file.depositor              = comparison_file.depositor
         preview_file.rightsMetadata.content = comparison_file.rightsMetadata.content
-        # commenting this out because it means that changes to the xml_template will be removed if they didn't exist before the comparison_file was created, the diff still works without this but it means whatever is in the spreadsheet becomes all of the metadata, not just changing some of the fields
-        # preview_file.mods.content           = comparison_file.mods.content
         preview_file.tmp_path = spreadsheet_file_path
 
         # Load row of metadata in for preview
@@ -60,32 +58,42 @@ class ProcessModsZipJob
 
         load_report.save!
       else
-        puts "row not present"
+        # row not present
       end
-    else
-      puts "not a preview anymore"
+    else #not a preview
       spreadsheet.each_row_streaming(offset: header_position) do |row|
         if row.present? && header_row.present?
           begin
             row_results = process_a_row(header_row, row)
-            core_file = CoreFile.find(row_results["pid"])
-            if core_file.identifier != row_results["handle"]
-              image_report = load_report.image_reports.create_failure("Handle does not match", row_results, "")
-              image_report.title = core_file.title
-              image_report.save!
-            else
+            if CoreFile.exists?(row_results["pid"])
+              core_file = CoreFile.find(row_results["pid"])
+              handle = core_file.identifier
               core_file.mods.content = ModsDatastream.xml_template.to_xml
+              core_file.mods.identifier = handle
               assign_a_row(row_results, core_file)
-              raw_xml = xml_decode(core_file.mods.content)
-              result = xml_valid?(raw_xml)
-              if !result[:errors].blank?
-                image_report = load_report.image_reports.create_failure(error, row_results, "")
+              if core_file.keywords.length < 1
+                image_report = load_report.image_reports.create_failure("Must have at least one keyword", row_results, "")
+                image_report.title = core_file.title
+                image_report.save!
+              elsif core_file.title.blank?
+                image_report = load_report.image_reports.create_failure("Must have a title", row_results, "")
                 image_report.title = core_file.title
                 image_report.save!
               else
-                puts "mods is valid"
-                load_report.image_reports.create_success(core_file, "")
+                raw_xml = xml_decode(core_file.mods.content)
+                result = xml_valid?(raw_xml)
+                if !result[:errors].blank?
+                  image_report = load_report.image_reports.create_failure(error, row_results, "")
+                  image_report.title = core_file.title
+                  image_report.save!
+                else
+                  load_report.image_reports.create_success(core_file, "")
+                end
               end
+            else
+              image_report = load_report.image_reports.create_failure("Core file does not exist", row_results, "")
+              image_report.title = row_results["pid"]
+              image_report.save!
             end
           rescue Exception => error
             puts error
@@ -106,8 +114,6 @@ class ProcessModsZipJob
   end
 
   def assign_a_row(row_results, core_file)
-    core_file.mods.identifier = row_results["handle"]
-
     core_file.mods.title = row_results["title"]
     core_file.mods.title_info.sub_title = row_results["subtitle"] unless row_results["subtitle"].blank?
     core_file.mods.title_info.non_sort = row_results["title_initial_article"] unless row_results["title_initial_article"].blank?
@@ -330,7 +336,6 @@ class ProcessModsZipJob
     results = Hash.new
     results["user_name"]                        = find_in_row(header_row, row_value, 'What is your name?')
     results["pid"]                              = find_in_row(header_row, row_value, 'What is PID for the digitized object?')
-    results["handle"]                           = find_in_row(header_row, row_value, 'What is handle for the digitized object?')
     results["file_name"]                        = find_in_row(header_row, row_value, 'File Name')
     results["archives_identifier"]              = find_in_row(header_row, row_value, 'Archives Identifier')
     results["supplied_title"]                   = find_in_row(header_row, row_value, 'Is this a supplied title?')
