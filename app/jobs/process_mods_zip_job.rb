@@ -69,15 +69,23 @@ class ProcessModsZipJob
           begin
             row_results = process_a_row(header_row, row)
             core_file = CoreFile.find(row_results["pid"])
-            core_file.mods.content = ModsDatastream.xml_template.to_xml
-            assign_a_row(row_results, core_file)
-            raw_xml = xml_decode(core_file.mods.content)
-            result = xml_valid?(raw_xml)
-            if !result[:errors].blank?
-              load_report.image_reports.create_failure(error, "", "")
+            if core_file.identifier != row_results["handle"]
+              image_report = load_report.image_reports.create_failure("Handle does not match", "", "")
+              image_report.title = core_file.title
+              image_report.save!
             else
-              puts "mods is valid"
-              load_report.image_reports.create_success(core_file, "")
+              core_file.mods.content = ModsDatastream.xml_template.to_xml
+              assign_a_row(row_results, core_file)
+              raw_xml = xml_decode(core_file.mods.content)
+              result = xml_valid?(raw_xml)
+              if !result[:errors].blank?
+                image_report = load_report.image_reports.create_failure(error, "", "")
+                image_report.title = core_file.title
+                image_report.save!
+              else
+                puts "mods is valid"
+                load_report.image_reports.create_success(core_file, "")
+              end
             end
           rescue Exception => error
             puts error
@@ -98,7 +106,7 @@ class ProcessModsZipJob
   end
 
   def assign_a_row(row_results, core_file)
-    core_file.mods.identifier = row_results["handle"] #will need to check that this matches the original handle or else this file should error
+    core_file.mods.identifier = row_results["handle"]
 
     core_file.mods.title = row_results["title"]
     core_file.mods.title_info.sub_title = row_results["subtitle"] unless row_results["subtitle"].blank?
@@ -136,7 +144,6 @@ class ProcessModsZipJob
         name_type = row_results["creator_#{n}_name_type"]
         role = row_results["creator_#{n}_role"]
         role_uri = row_results["creator_#{n}_role_value_uri"]
-        # will need authority info for roles
         affiliation = row_results["creator_#{n}_affliation"]
         authority = row_results["creator_#{n}_authority"].split("|")[0]
         authority_uri = row_results["creator_#{n}_authority"].split("|")[1]
@@ -257,6 +264,7 @@ class ProcessModsZipJob
       core_file.mods.subject(key).authority = row_results["topic_#{key+1}_authority"] unless row_results["topic_#{key+1}_authority"].blank? #adds authority if it is set, key begins from 0 but topics begin from 1 in spreadsheet
     end
 
+    # this will probably be refactored
     name_subjects = []
     row_results["personal_name_subject_headings"].split(";").each do |name|
       name_subjects << {:personal => name.strip}
@@ -301,8 +309,6 @@ class ProcessModsZipJob
     if !related_items.blank?
       core_file.mods.related_items = related_items
     end
-
-    # timestamp - does not need to be recorded, it is a google generated timestamp
 
     # default values inserted on every record
     core_file.mods.record_info.record_content_source = "Northeastern University Libraries"
