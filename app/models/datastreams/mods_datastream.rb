@@ -49,9 +49,12 @@ class ModsDatastream < ActiveFedora::OmDatastream
     t.personal_name(path: 'mods/mods:name', namespace_prefix: 'mods', attributes: { type: 'personal' }){
       t.usage(path: { attribute: "usage" })
       t.authority(path: { attribute: 'authority' })
+      t.authority_uri(path: {attribute: 'authorityURI'})
+      t.value_uri(path: {attribute: 'valueURI'})
       t.name_part(path: 'namePart', namespace_prefix: 'mods', attributes: { type: :none }, index_as: [:stored_searchable, :facetable])
       t.name_part_given(path: 'namePart', namespace_prefix: 'mods', attributes: { type: 'given' })
       t.name_part_family(path: 'namePart', namespace_prefix: 'mods', attributes: { type: 'family' })
+      t.name_part_date(path: 'namePart', namespace_prefix: 'mods', attributes: {type: 'date'})
       t.role(namespace_prefix: 'mods', index_as: [:stored_searchable]){
         t.role_term(path: 'roleTerm', namespace_prefix: 'mods'){
           t.authority(path: { attribute: 'authority'})
@@ -69,6 +72,9 @@ class ModsDatastream < ActiveFedora::OmDatastream
 
     t.corporate_name(path: 'mods/mods:name', namespace_prefix: 'mods', attributes: { type: 'corporate' }){
       t.usage(path: { attribute: "usage" })
+      t.authority(path: { attribute: 'authority' })
+      t.authority_uri(path: {attribute: 'authorityURI'})
+      t.value_uri(path: {attribute: 'valueURI'})
       t.name_part(path: 'namePart', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable])
       t.role(namespace_prefix: 'mods', index_as: [:stored_searchable]){
         t.role_term(path: 'roleTerm', namespace_prefix: 'mods'){

@@ -117,10 +117,10 @@ class ProcessModsZipJob
       creator_nums.each do |n|
         name_type = row_results["creator_#{n}_name_type"]
         if name_type == 'corporate'
-          creator_hash['corporate_names'] << row_results["creator_#{n}_name"]
+          creator_hash['corporate_names'] << row_results["creator_#{n}_name"].split("|")[0].strip
         elsif name_type == 'personal'
-          creator_hash['first_names'] << row_results["creator_#{n}_name"].split(",")[1].strip
-          creator_hash['last_names'] << row_results["creator_#{n}_name"].split(",")[0].strip
+          creator_hash['first_names'] << row_results["creator_#{n}_name"].split("|")[1].strip
+          creator_hash['last_names'] << row_results["creator_#{n}_name"].split("|")[0].strip
         end
       end
       core_file.creators = creator_hash
@@ -138,6 +138,9 @@ class ProcessModsZipJob
         role_uri = row_results["creator_#{n}_role_value_uri"]
         # will need authority info for roles
         affiliation = row_results["creator_#{n}_affliation"]
+        authority = row_results["creator_#{n}_authority"].split("|")[0]
+        authority_uri = row_results["creator_#{n}_authority"].split("|")[1]
+        value_uri = row_results["creator_#{n}_name"].split("|").last
         if name_type == 'corporate'
           corp_creators = row_results.select { |key, value| key.to_s.match(/^creator_\d+_name_type$/) && value.to_s.match(/^corporate$/) }
           corp_nums = corp_creators.keys.map {|key| key.scan(/\d/)[0].to_i }
@@ -150,10 +153,15 @@ class ProcessModsZipJob
             core_file.mods.corporate_name(corp_num).role.role_term.type = "text"
           end
           core_file.mods.corporate_name(corp_num).affiliation = affiliation unless affiliation.blank?
+          core_file.mods.corporate_name(corp_num).authority = authority.strip unless authority.blank?
+          core_file.mods.corporate_name(corp_num).authority_uri = authority_uri.strip unless authority_uri.blank?
+          core_file.mods.corporate_name(corp_num).value_uri = value_uri.strip unless value_uri.blank?
         elsif name_type == 'personal'
           personal_creators = row_results.select { |key, value| key.to_s.match(/^creator_\d+_name_type$/) && value.to_s.match(/^personal$/) }
           pers_nums = personal_creators.keys.map {|key| key.scan(/\d/)[0].to_i }
           pers_num = pers_nums.index(n)
+          address = row_results["creator_#{n}_name"].split("|")[2]
+          date = row_results["creator_#{n}_name"].split("|")[3]
           if !role.blank?
             core_file.mods.personal_name(pers_num).role.role_term = role
             core_file.mods.personal_name(pers_num).role.role_term.value_uri = role_uri unless role_uri.blank?
@@ -162,6 +170,11 @@ class ProcessModsZipJob
             core_file.mods.personal_name(pers_num).role.role_term.type = "text"
           end
           core_file.mods.personal_name(pers_num).affiliation = affiliation unless affiliation.blank?
+          core_file.mods.personal_name(pers_num).authority = authority.strip unless authority.blank?
+          core_file.mods.personal_name(pers_num).authority_uri = authority_uri.strip unless authority_uri.blank?
+          core_file.mods.personal_name(pers_num).value_uri = value_uri.strip unless value_uri.blank?
+          # core_file.mods.personal_name(pers_num).address = address.strip unless address.blank? #do not know correct mods for this field
+          core_file.mods.personal_name(pers_num).name_part_date = date.strip unless date.blank?
         end
       end
     end
@@ -323,32 +336,35 @@ class ProcessModsZipJob
     results["alternate_subtitle"]               = find_in_row(header_row, row_value, 'Alternate Subtitle')
 
     results["creator_1_name"] = find_in_row(header_row, row_value, 'Creator 1 Name - Primary Creator')
+    results["creator_1_authority"] = find_in_row(header_row, row_value, 'Creator 1 Authority')
     results["creator_1_name_type"] = find_in_row(header_row, row_value, 'Creator 1 Name Type')
     results["creator_1_role"] = find_in_row(header_row, row_value, 'Creator 1 Role')
     results["creator_1_role_value_uri"] = find_in_row(header_row, row_value, 'Creator 1 Role Value URI')
     results["creator_1_affiliation"] = find_in_row(header_row, row_value, 'Creator 1 Affiliation')
 
     results["creator_2_name"] = find_in_row(header_row, row_value, 'Creator 2 Name')
+    results["creator_2_authority"] = find_in_row(header_row, row_value, 'Creator 2 Authority')
     results["creator_2_name_type"] = find_in_row(header_row, row_value, 'Creator 2 Name Type')
     results["creator_2_role"] = find_in_row(header_row, row_value, 'Creator 2 Role')
     results["creator_2_role_value_uri"] = find_in_row(header_row, row_value, 'Creator 2 Role Value URI')
     results["creator_2_affiliation"] = find_in_row(header_row, row_value, 'Creator 2 Affiliation')
 
-    results["more_creators"] = find_in_row(header_row, row_value, 'Would you like to add more creators?')
-
     results["creator_3_name"] = find_in_row(header_row, row_value, 'Creator 3 Name')
+    results["creator_3_authority"] = find_in_row(header_row, row_value, 'Creator 3 Authority')
     results["creator_3_name_type"] = find_in_row(header_row, row_value, 'Creator 3 Name Type')
     results["creator_3_role"] = find_in_row(header_row, row_value, 'Creator 3 Role')
     results["creator_3_role_value_uri"] = find_in_row(header_row, row_value, 'Creator 3 Role Value URI')
     results["creator_3_affiliation"] = find_in_row(header_row, row_value, 'Creator 3 Affiliation')
 
     results["creator_4_name"] = find_in_row(header_row, row_value, 'Creator 4 Name')
+    results["creator_4_authority"] = find_in_row(header_row, row_value, 'Creator 4 Authority')
     results["creator_4_name_type"] = find_in_row(header_row, row_value, 'Creator 4 Name Type')
     results["creator_4_role"] = find_in_row(header_row, row_value, 'Creator 4 Role')
     results["creator_4_role_value_uri"] = find_in_row(header_row, row_value, 'Creator 4 Role Value URI')
     results["creator_4_affiliation"] = find_in_row(header_row, row_value, 'Creator 4 Affiliation')
 
     results["creator_5_name"] = find_in_row(header_row, row_value, 'Creator 5 Name')
+    results["creator_5_authority"] = find_in_row(header_row, row_value, 'Creator 5 Authority')
     results["creator_5_name_type"] = find_in_row(header_row, row_value, 'Creator 5 Name Type')
     results["creator_5_role"] = find_in_row(header_row, row_value, 'Creator 5 Role')
     results["creator_5_role_value_uri"] = find_in_row(header_row, row_value, 'Creator 5 Role Value URI')
