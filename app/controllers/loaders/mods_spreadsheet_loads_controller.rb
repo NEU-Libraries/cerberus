@@ -84,17 +84,16 @@ class Loaders::ModsSpreadsheetLoadsController < Loaders::LoadsController
     end
     copyright = t('drs.loaders.mods_spreadsheet.copyright')
     permissions = {"CoreFile" => {"read"  => ["public"], "edit" => ["northeastern:drs:repository:staff"]}}
-    puts @loader_name
-    puts spreadsheet_file_path
-    puts @report.collection
-    puts copyright
-    puts current_user
-    puts permissions
-    puts @report.id
-    puts Resque.info
     Cerberus::Application::Queue.push(ProcessModsZipJob.new(@loader_name, spreadsheet_file_path, @report.collection, copyright, current_user, permissions, @report.id, nil))
-    puts Resque.info
+    flash[:notice] = "Your spreadsheet is being processed. The information on this page will be updated periodically until the processing is completed."
     redirect_to "/loaders/mods_spreadsheet/report/#{@report.id}"
+  end
+
+  def show_mods
+    @image = Loaders::ImageReport.find(params[:id])
+    @load = Loaders::LoadReport.find(@image.load_report_id)
+    @page_title = @image.original_file
+    render 'loaders/iptc', locals: {image: @image, load: @load}
   end
 
   private
