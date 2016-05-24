@@ -202,7 +202,7 @@ class ProcessModsZipJob
           core_file.mods.personal_name(pers_num).authority = authority.strip unless authority.blank?
           core_file.mods.personal_name(pers_num).authority_uri = authority_uri.strip unless authority_uri.blank?
           core_file.mods.personal_name(pers_num).value_uri = value_uri.strip unless value_uri.blank?
-          # core_file.mods.personal_name(pers_num).address = address.strip unless address.blank? #do not know correct mods for this field
+          core_file.mods.personal_name(pers_num).name_part_address = address.strip unless address.blank?
           core_file.mods.personal_name(pers_num).name_part_date = date.strip unless date.blank?
         end
       end
@@ -294,6 +294,7 @@ class ProcessModsZipJob
       if row_results["subject_name_#{i}_type"] == "personal"
         name_subjects[i] = {:personal => name[1].strip}
       elsif row_results["subject_name_#{i}_type"] == "corporate"
+        puts name[1].split("|")[0].strip
         name_subjects[i] = {:corporate => name[1].split("|")[0].strip}
       end
     end
@@ -316,7 +317,7 @@ class ProcessModsZipJob
           core_file.mods.subject(corp_num).name.value_uri = value_uri.strip unless value_uri.blank?
         elsif name_type == 'personal'
           pers_num = i
-          name = row_results["creator_#{n}_name"].split("|")
+          name = row_results["subject_name_#{n}"].split("|")
           family = name[0]
           given = name[1]
           address = name[2]
@@ -328,7 +329,7 @@ class ProcessModsZipJob
           core_file.mods.subject(pers_num).name.authority = authority.strip unless authority.blank?
           core_file.mods.subject(pers_num).name.authority_uri = authority_uri.strip unless authority_uri.blank?
           core_file.mods.subject(pers_num).name.value_uri = value_uri.strip unless value_uri.blank?
-          # core_file.mods.subject(pers_num).address = address.strip unless address.blank? #do not know correct mods for this field
+          core_file.mods.subject(pers_num).name.name_part_address = address.strip unless address.blank?
           core_file.mods.subject(pers_num).name.name_part_date = date.strip unless date.blank?
         end
       end

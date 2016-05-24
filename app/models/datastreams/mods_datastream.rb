@@ -55,6 +55,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
       t.name_part_given(path: 'namePart', namespace_prefix: 'mods', attributes: { type: 'given' })
       t.name_part_family(path: 'namePart', namespace_prefix: 'mods', attributes: { type: 'family' })
       t.name_part_date(path: 'namePart', namespace_prefix: 'mods', attributes: {type: 'date'})
+      t.name_part_address(path: 'namePart', namespace_prefix: 'mods', attributes: {type: 'termsOfAddress'})
       t.role(namespace_prefix: 'mods', index_as: [:stored_searchable]){
         t.role_term(path: 'roleTerm', namespace_prefix: 'mods'){
           t.authority(path: { attribute: 'authority'})
@@ -170,6 +171,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
         t.name_part_given(path: 'namePart', namespace_prefix: 'mods', attributes: { type: 'given' })
         t.name_part_family(path: 'namePart', namespace_prefix: 'mods', attributes: { type: 'family' })
         t.name_part_date(path: 'namePart', namespace_prefix: 'mods', attributes: {type: 'date'})
+        t.name_part_address(path: 'namePart', namespace_prefix: 'mods', attributes: {type: 'termsOfAddress'})
         t.affiliation(namespace_prefix: 'mods', attribute: 'affiliation')
         t.authority(path: { attribute: 'authority' })
         t.authority_uri(path: {attribute: 'authorityURI'})
