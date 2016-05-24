@@ -32,7 +32,7 @@
     function check_report(report_completed){
       if (!report_completed){
         spinner = enable_spinner('report');
-        setTimeout(refresh_report, 15000);
+        setTimeout(refresh_report, 30000);
       } else {
         $(".alert-success").html("This load is completed.");
       }

@@ -40,23 +40,28 @@ class ProcessModsZipJob
     if !preview.nil?
       row = spreadsheet.row(header_position + 1)
       if row.present? && header_row.present?
-        row_results = process_a_row(header_row, row)
-        # Process first row
-        comparison_file = CoreFile.find(row_results["pid"])
+        begin
+          row_results = process_a_row(header_row, row)
+          # Process first row
+          comparison_file = CoreFile.find(row_results["pid"])
 
-        preview_file = CoreFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
-        preview_file.depositor              = comparison_file.depositor
-        preview_file.rightsMetadata.content = comparison_file.rightsMetadata.content
-        preview_file.tmp_path = spreadsheet_file_path
+          preview_file = CoreFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
+          preview_file.depositor              = comparison_file.depositor
+          preview_file.rightsMetadata.content = comparison_file.rightsMetadata.content
+          preview_file.tmp_path = spreadsheet_file_path
 
-        # Load row of metadata in for preview
-        assign_a_row(row_results, preview_file)
+          # Load row of metadata in for preview
+          assign_a_row(row_results, preview_file)
 
-        load_report.comparison_file_pid = comparison_file.pid
-        load_report.preview_file_pid = preview_file.pid
-        load_report.number_of_files = spreadsheet.last_row - header_position
+          load_report.comparison_file_pid = comparison_file.pid
+          load_report.preview_file_pid = preview_file.pid
+          load_report.number_of_files = spreadsheet.last_row - header_position
 
-        load_report.save!
+          load_report.save!
+        rescue Exception => error
+          puts error
+          return
+        end
       else
         # row not present
       end
@@ -65,18 +70,27 @@ class ProcessModsZipJob
         if row.present? && header_row.present?
           begin
             row_results = process_a_row(header_row, row)
-            if CoreFile.exists?(row_results["pid"])
+            if core_file_checks(row_results["pid"])
               core_file = CoreFile.find(row_results["pid"])
               handle = core_file.identifier
+              old_mods = core_file.mods.content
               core_file.mods.content = ModsDatastream.xml_template.to_xml
               core_file.mods.identifier = handle
               assign_a_row(row_results, core_file)
               if core_file.keywords.length < 1
+                core_file.mods.content = old_mods
+                core_file.save!
                 image_report = load_report.image_reports.create_failure("Must have at least one keyword", row_results, "")
                 image_report.title = core_file.title
                 image_report.save!
               elsif core_file.title.blank?
+                core_file.mods.content = old_mods
+                core_file.save!
                 image_report = load_report.image_reports.create_failure("Must have a title", row_results, "")
+                image_report.title = core_file.title
+                image_report.save!
+              elsif core_file.identifier != row_results["handle"]
+                image_report = load_report.image_reports.create_modified("Handle does not match", core_file, row_results)
                 image_report.title = core_file.title
                 image_report.save!
               else
@@ -98,7 +112,9 @@ class ProcessModsZipJob
           rescue Exception => error
             puts error
             puts error.backtrace
-            load_report.image_reports.create_failure(error, "", "")
+            image_report = load_report.image_reports.create_failure(error.message, "", "")
+            image_report.title = find_in_row(header_row, row, 'Title')
+            image_report.save!
           end
         end
       end
@@ -270,24 +286,53 @@ class ProcessModsZipJob
       core_file.mods.subject(key).authority = row_results["topic_#{key+1}_authority"] unless row_results["topic_#{key+1}_authority"].blank? #adds authority if it is set, key begins from 0 but topics begin from 1 in spreadsheet
     end
 
-    # this will probably be refactored
+    subj_count = core_file.mods.subject.count
     name_subjects = []
-    row_results["personal_name_subject_headings"].split(";").each do |name|
-      name_subjects << {:personal => name.strip}
-    end
-    row_results["additional_personal_name_subject_headings"].split(";").each do |name|
-      name_subjects << {:personal => name.strip}
-    end
-    row_results["corporate_name_subject_headings"].split(";").each do |name|
-      name_subjects << {:corporate => name.strip}
-    end
-    row_results["additional_corporate"].split(";").each do |name|
-      name_subjects << {:corporate => name.strip}
+    name_headings = row_results.select { |key, value| key.to_s.match(/^subject_name_\d+$/) }
+    name_headings.each_with_index do |name, i|
+      i = i + 1 #spreadsheet index starts with 1 not 0
+      if row_results["subject_name_#{i}_type"] == "personal"
+        name_subjects[i] = {:personal => name[1].strip}
+      elsif row_results["subject_name_#{i}_type"] == "corporate"
+        name_subjects[i] = {:corporate => name[1].split("|")[0].strip}
+      end
     end
     if name_subjects.length > 0
       core_file.mods.name_subjects = name_subjects
     end
-
+    core_file.mods.subject.each_with_index do |sub, i|
+      if !core_file.mods.subject(i).name.blank?
+        n = i - subj_count + 1
+        name_type = row_results["subject_name_#{n}_type"]
+        affiliation = row_results["subject_name_#{n}_affliation"]
+        authority = row_results["subject_name_#{n}_authority"].split("|")[0]
+        authority_uri = row_results["subject_name_#{n}_authority"].split("|")[1]
+        value_uri = row_results["subject_name_#{n}"].split("|").last
+        if name_type == 'corporate'
+          corp_num = i
+          core_file.mods.subject(corp_num).name.affiliation = affiliation unless affiliation.blank?
+          core_file.mods.subject(corp_num).name.authority = authority.strip unless authority.blank?
+          core_file.mods.subject(corp_num).name.authority_uri = authority_uri.strip unless authority_uri.blank?
+          core_file.mods.subject(corp_num).name.value_uri = value_uri.strip unless value_uri.blank?
+        elsif name_type == 'personal'
+          pers_num = i
+          name = row_results["creator_#{n}_name"].split("|")
+          family = name[0]
+          given = name[1]
+          address = name[2]
+          date = name[3]
+          core_file.mods.subject(pers_num).name = "" #clean out the basic name and rebuild
+          core_file.mods.subject(pers_num).name.name_part_family = family.strip unless family.blank?
+          core_file.mods.subject(pers_num).name.name_part_given = given.strip unless given.blank?
+          core_file.mods.subject(pers_num).name.affiliation = affiliation.strip unless affiliation.blank?
+          core_file.mods.subject(pers_num).name.authority = authority.strip unless authority.blank?
+          core_file.mods.subject(pers_num).name.authority_uri = authority_uri.strip unless authority_uri.blank?
+          core_file.mods.subject(pers_num).name.value_uri = value_uri.strip unless value_uri.blank?
+          # core_file.mods.subject(pers_num).address = address.strip unless address.blank? #do not know correct mods for this field
+          core_file.mods.subject(pers_num).name.name_part_date = date.strip unless date.blank?
+        end
+      end
+    end
 
     # for related items
     related_items = {}
@@ -326,6 +371,7 @@ class ProcessModsZipJob
     core_file.mods.record_info.language_of_cataloging.language_term.language_value_uri = "http://id.loc.gov/vocabulary/iso639-2/eng"
     core_file.mods.record_info.description_standard = "RDA"
     core_file.mods.record_info.description_standard.authority = "marcdescription"
+    core_file.mods.record_info.record_creation_date = DateTime.now.strftime("%F")
     core_file.mods.physical_description.form = "electronic"
     core_file.mods.physical_description.form.authority = "marcform"
 
@@ -334,6 +380,7 @@ class ProcessModsZipJob
 
   def process_a_row(header_row, row_value)
     results = Hash.new
+    results["handle"]                           = find_in_row(header_row, row_value, 'What is handle for the digitized object?')
     results["user_name"]                        = find_in_row(header_row, row_value, 'What is your name?')
     results["pid"]                              = find_in_row(header_row, row_value, 'What is PID for the digitized object?')
     results["file_name"]                        = find_in_row(header_row, row_value, 'File Name')
@@ -346,40 +393,16 @@ class ProcessModsZipJob
     results["alternate_title"]                  = find_in_row(header_row, row_value, 'Alternate Title')
     results["alternate_subtitle"]               = find_in_row(header_row, row_value, 'Alternate Subtitle')
 
-    results["creator_1_name"] = find_in_row(header_row, row_value, 'Creator 1 Name - Primary Creator')
-    results["creator_1_authority"] = find_in_row(header_row, row_value, 'Creator 1 Authority')
-    results["creator_1_name_type"] = find_in_row(header_row, row_value, 'Creator 1 Name Type')
-    results["creator_1_role"] = find_in_row(header_row, row_value, 'Creator 1 Role')
-    results["creator_1_role_value_uri"] = find_in_row(header_row, row_value, 'Creator 1 Role Value URI')
-    results["creator_1_affiliation"] = find_in_row(header_row, row_value, 'Creator 1 Affiliation')
-
-    results["creator_2_name"] = find_in_row(header_row, row_value, 'Creator 2 Name')
-    results["creator_2_authority"] = find_in_row(header_row, row_value, 'Creator 2 Authority')
-    results["creator_2_name_type"] = find_in_row(header_row, row_value, 'Creator 2 Name Type')
-    results["creator_2_role"] = find_in_row(header_row, row_value, 'Creator 2 Role')
-    results["creator_2_role_value_uri"] = find_in_row(header_row, row_value, 'Creator 2 Role Value URI')
-    results["creator_2_affiliation"] = find_in_row(header_row, row_value, 'Creator 2 Affiliation')
-
-    results["creator_3_name"] = find_in_row(header_row, row_value, 'Creator 3 Name')
-    results["creator_3_authority"] = find_in_row(header_row, row_value, 'Creator 3 Authority')
-    results["creator_3_name_type"] = find_in_row(header_row, row_value, 'Creator 3 Name Type')
-    results["creator_3_role"] = find_in_row(header_row, row_value, 'Creator 3 Role')
-    results["creator_3_role_value_uri"] = find_in_row(header_row, row_value, 'Creator 3 Role Value URI')
-    results["creator_3_affiliation"] = find_in_row(header_row, row_value, 'Creator 3 Affiliation')
-
-    results["creator_4_name"] = find_in_row(header_row, row_value, 'Creator 4 Name')
-    results["creator_4_authority"] = find_in_row(header_row, row_value, 'Creator 4 Authority')
-    results["creator_4_name_type"] = find_in_row(header_row, row_value, 'Creator 4 Name Type')
-    results["creator_4_role"] = find_in_row(header_row, row_value, 'Creator 4 Role')
-    results["creator_4_role_value_uri"] = find_in_row(header_row, row_value, 'Creator 4 Role Value URI')
-    results["creator_4_affiliation"] = find_in_row(header_row, row_value, 'Creator 4 Affiliation')
-
-    results["creator_5_name"] = find_in_row(header_row, row_value, 'Creator 5 Name')
-    results["creator_5_authority"] = find_in_row(header_row, row_value, 'Creator 5 Authority')
-    results["creator_5_name_type"] = find_in_row(header_row, row_value, 'Creator 5 Name Type')
-    results["creator_5_role"] = find_in_row(header_row, row_value, 'Creator 5 Role')
-    results["creator_5_role_value_uri"] = find_in_row(header_row, row_value, 'Creator 5 Role Value URI')
-    results["creator_5_affiliation"] = find_in_row(header_row, row_value, 'Creator 5 Affiliation')
+    creator_count = header_row.select{|i| i[/^Creator \d+ Name$/]}.count + 1 #have to add one for primary special case
+    for i in 1..creator_count
+      results["creator_#{i}_name"] = find_in_row(header_row, row_value, "Creator #{i} Name")
+      results["creator_#{i}_authority"] = find_in_row(header_row, row_value, "Creator #{i} Authority")
+      results["creator_#{i}_name_type"] = find_in_row(header_row, row_value, "Creator #{i} Name Type")
+      results["creator_#{i}_role"] = find_in_row(header_row, row_value, "Creator #{i} Role")
+      results["creator_#{i}_role_value_uri"] = find_in_row(header_row, row_value, "Creator #{i} Role Value URI")
+      results["creator_#{i}_affiliation"] = find_in_row(header_row, row_value, "Creator #{i} Affiliation")
+    end
+    results["creator_1_name"] = find_in_row(header_row, row_value, "Creator 1 Name - Primary Creator") #primary special case
 
     results["type_of_resource"]                             = find_in_row(header_row, row_value, 'Type of Resource')
     results["genre"]                                        = find_in_row(header_row, row_value, 'Genre')
@@ -406,29 +429,25 @@ class ProcessModsZipJob
     results["acess_condition_use_and_reproduction"]         = find_in_row(header_row, row_value, 'Access Condition : Use and Reproduction')
     results["provenance"]                                   = find_in_row(header_row, row_value, 'Provenance note')
     results["other_notes"]                                  = find_in_row(header_row, row_value, 'Other notes')
-    results["topic_1"]                                      = find_in_row(header_row, row_value, 'Topical Subject Heading 1')
-    results["topic_1_authority"]                            = find_in_row(header_row, row_value, 'Topical Subject Heading Authority 1')
-    results["topic_2"]                                      = find_in_row(header_row, row_value, 'Topical Subject Heading 2')
-    results["topic_2_authority"]                            = find_in_row(header_row, row_value, 'Topical Subject Heading Authority 2')
-    results["topic_3"]                                      = find_in_row(header_row, row_value, 'Topical Subject Heading 3')
-    results["topic_3_authority"]                            = find_in_row(header_row, row_value, 'Topical Subject Heading Authority 3')
-    results["topic_4"]                                      = find_in_row(header_row, row_value, 'Topical Subject Heading 4')
-    results["topic_4_authority"]                            = find_in_row(header_row, row_value, 'Topical Subject Heading Authority 4')
-    results["topic_5"]                                      = find_in_row(header_row, row_value, 'Topical Subject Heading 5')
-    results["topic_5_authority"]                            = find_in_row(header_row, row_value, 'Topical Subject Heading Authority 5')
-    results["topic_6"]                                      = find_in_row(header_row, row_value, 'Topical Subject Heading 6')
-    results["topic_6_authority"]                            = find_in_row(header_row, row_value, 'Topical Subject Heading Authority 6')
-    results["topic_7"]                                      = find_in_row(header_row, row_value, 'Topical Subject Heading 7')
-    results["topic_7_authority"]                            = find_in_row(header_row, row_value, 'Topical Subject Heading Authority 7')
-    results["personal_name_subject_headings"]               = find_in_row(header_row, row_value, 'Personal Name Subject Headings')
-    results["additional_personal_name_subject_headings"]    = find_in_row(header_row, row_value, 'Additional Personal Name Subject Headings')
-    results["corporate_name_subject_headings"]              = find_in_row(header_row, row_value, 'Corporate Name Subject Headings')
-    results["additional_corporate"]                       = find_in_row(header_row, row_value, 'Additional Corporate Name Subject Headings')
+
+    topic_count = header_row.select{|i| i[/^Topical Subject Heading \d+$/]}.count
+    for i in 1..topic_count
+      results["topic_#{i}"]                                      = find_in_row(header_row, row_value, "Topical Subject Heading #{i}")
+      results["topic_#{i}_authority"]                            = find_in_row(header_row, row_value, "Topical Subject Heading Authority #{i}")
+    end
+
+    subject_count = header_row.select{|i| i[/^Subject Name \d+$/]}.count
+    for i in 1..subject_count
+      results["subject_name_#{i}"]                               = find_in_row(header_row, row_value, "Subject Name #{i}")
+      results["subject_name_#{i}_authority"]                     = find_in_row(header_row, row_value, "Subject Name #{i} Authority")
+      results["subject_name_#{i}_type"]                          = find_in_row(header_row, row_value, "Subject Name #{i} Name Type")
+      results["subject_name_#{i}_affiliation"]                   = find_in_row(header_row, row_value, "Subject Name #{i} Affiliation")
+    end
+
     results["original_title"]                               = find_in_row(header_row, row_value, 'Original Title') #updated cell title
     results["physical_location"]                            = find_in_row(header_row, row_value, 'What is the physical location for this object?')
     results["identifier"]                                   = find_in_row(header_row, row_value, 'What is the identifier for this object?')
     results["collection_title"]                             = find_in_row(header_row, row_value, 'Collection Title') #updated cell title
-    results["timestamp"]                                    = find_in_row(header_row, row_value, 'Timestamp')
     results["series_title"]                                  = find_in_row(header_row, row_value, 'Series Title') #updated cell title
     return results
   end
@@ -444,6 +463,36 @@ class ProcessModsZipJob
       end
     end
     return ""
+  end
+
+  def core_file_checks(pid)
+    begin
+      if !ActiveFedora::Base.exists?(pid)
+        raise "Core file #{pid} does not exist"
+      else
+        cf = ActiveFedora::Base.find(pid, :cast=>true)
+        if cf.class != CoreFile
+          raise "pid #{pid} is not a CoreFile object"
+        else
+          doc = SolrDocument.new(cf.to_solr)
+          if (cf.mods.title.blank? || cf.mods.subject.length < 1) || (doc.title.blank? || doc['subject_topic_tesim'].nil?)
+            raise "No title and/or keyword found for #{pid}"
+          else
+            if !cf.healthy?
+              raise "Core file is not healthy"
+            else
+              if cf.tombstoned? || cf.in_progress? || cf.incomplete?
+                raise "Core file has non-active state: tombstoned, incomplete, or in_progress"
+              else
+                return true
+              end
+            end
+          end
+        end
+      end
+    rescue Exception => error
+      raise error
+    end
   end
 
 end
