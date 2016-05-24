@@ -11,6 +11,7 @@ module XmlValidator
     # Nokogiri xml validation, catch errors
     begin
       doc = Nokogiri::XML(xml_str)
+
       if doc.errors != []
         results[:errors] = doc.errors
         return results
@@ -28,7 +29,13 @@ module XmlValidator
     begin
       schemata_by_ns = Hash[ doc.root.attributes['schemaLocation'].value.scan(/(\S+)\s+(\S+)/) ]
       schemata_by_ns.each do |ns,xsd_uri|
-        xsd = Nokogiri::XML.Schema(Net::HTTP.get(URI.parse(xsd_uri)))
+
+        # Cache xsd response so as to not be a burden on external systems
+        xsd_str = Rails.cache.fetch("/xsd/#{xsd_uri}", :expires_in => 12.hours) do
+          Net::HTTP.get(URI.parse(xsd_uri))
+        end
+
+        xsd = Nokogiri::XML.Schema(xsd_str)
         xsd.validate(doc).each do |error|
           results[:errors] << error
         end
