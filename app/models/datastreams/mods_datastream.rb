@@ -63,7 +63,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
           t.value_uri(path: {attribute: 'valueURI'})
         }
       }
-      t.affiliation(namespace_prefix: 'mods')
+      t.affiliation(namespace_prefix: 'mods', attribute: 'affiliation')
     }
 
     t.author_name_part(:path=>"roleTerm[.='Author']/../../mods:namePart", namespace_prefix: 'mods')
@@ -84,7 +84,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
           t.value_uri(path: {attribute: 'valueURI'})
         }
       }
-      t.affiliation(namespace_prefix: 'mods')
+      t.affiliation(namespace_prefix: 'mods', attribute: 'affiliation')
     }
 
     t.type_of_resource(path: 'typeOfResource', namespace_prefix: 'mods')
@@ -147,6 +147,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
       t.description_standard(path: 'descriptionStandard', namespace_prefix: 'mods'){
         t.authority(path: {attribute: 'authority'})
       }
+      t.record_creation_date(path: 'recordCreationDate', namespace_prefix: 'mods', attributes: { encoding: 'w3cdtf' })
     }
 
     t.note(path: 'note', namespace_prefix: 'mods', index_as: [:stored_searchable]){
@@ -168,8 +169,14 @@ class ModsDatastream < ActiveFedora::OmDatastream
         t.name_part(path: 'namePart', namespace_prefix: 'mods', attributes: { type: :none })
         t.name_part_given(path: 'namePart', namespace_prefix: 'mods', attributes: { type: 'given' })
         t.name_part_family(path: 'namePart', namespace_prefix: 'mods', attributes: { type: 'family' })
+        t.name_part_date(path: 'namePart', namespace_prefix: 'mods', attributes: {type: 'date'})
+        t.affiliation(namespace_prefix: 'mods', attribute: 'affiliation')
+        t.authority(path: { attribute: 'authority' })
+        t.authority_uri(path: {attribute: 'authorityURI'})
+        t.value_uri(path: {attribute: 'valueURI'})
       }
     }
+
     t.identifier(path: 'identifier', namespace_prefix: 'mods', index_as: [:stored_searchable], attributes: { type: 'hdl' }){
       t.type(path: { attribute: 'type'})
       t.display_label(path: {attribute: 'displayLabel'})
@@ -547,9 +554,9 @@ class ModsDatastream < ActiveFedora::OmDatastream
     self.topic = array_of_keywords.map {|kw| kw.gsub(/[\s\b\v]+/, " ") }
   end
 
-  def name_subjects=(hash_of_names)
-    hash_of_names.select! { |ac| !ac.values[0].blank? }
-    hash_of_names.each_with_index do |subj, i|
+  def name_subjects=(array_of_hashes)
+    array_of_hashes.select!{ |ac| !ac.blank? && !ac.values.blank?}
+    array_of_hashes.each_with_index do |subj, i|
       self.insert_new_node(:subject)
       i = self.subject.length-1 #last one
       self.subject(i).name.type = subj.keys[0].to_s
@@ -626,7 +633,6 @@ class ModsDatastream < ActiveFedora::OmDatastream
         self.insert_new_node(:related_item)
       end
       self.related_item(i).type = key
-      puts val
       # take hash and assign its values
       if val.has_key?(:title)
         self.related_item(i).title_info.title = val[:title]

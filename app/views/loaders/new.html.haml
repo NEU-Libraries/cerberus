@@ -49,7 +49,8 @@
         autoUpload: false,
         add: function (e, data) {
             data.context = $("#loaderSubmit")
-                .click(function () {
+                .click(function (e) {
+                  e.preventDefault();
                   $(this).attr("disabled", true);
                   $(this).val("Please wait...");
                   data.submit();
@@ -69,7 +70,7 @@
         },
         done: function (e, data) {
           response = JSON.parse(data.result);
-          if ('comparison_file_pid' in response) {            
+          if ('comparison_file_pid' in response) {
             window.location = "/loaders/mods_spreadsheet/preview_compare/"+response.report_id;
           } else if ('preview_file_pid' in response) {
             window.location = "/loaders/mods_spreadsheet/preview/"+response.report_id;
