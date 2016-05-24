@@ -457,6 +457,16 @@ class CoreFilesController < ApplicationController
 
   def edit_xml
     @core_file = CoreFile.find(params[:id])
+
+    # Purge bad keyword template mapping
+    xml = Nokogiri::XML(@core_file.mods.content)
+    xml.search("//mods:keyword").each do |node|
+      node.remove
+    end
+
+    @core_file.mods.content = xml.to_s
+    @core_file.save!
+
     @page_title = "Edit #{@core_file.title}'s xml"
     @mods_html = render_mods_display(CoreFile.find(@core_file.pid)).to_html.html_safe
     render :template => 'core_files/ace_xml_editor'
