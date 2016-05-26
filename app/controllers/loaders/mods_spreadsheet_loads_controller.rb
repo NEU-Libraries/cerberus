@@ -13,7 +13,7 @@ class Loaders::ModsSpreadsheetLoadsController < Loaders::LoadsController
     @collections_options = Array.new()
     query_result.each do |c|
       if current_user.can?(:edit, c['id'])
-        @collections_options << {'label' => "#{c['id']} - #{c['title_tesim'][0]}", 'value' => c['id']}
+        @collections_options << {'label' => "#{c['id']} - #{c['title_info_title_tesim']}", 'value' => c['id']}
       end
     end
     @loader_name = t('drs.loaders.'+t('drs.loaders.mods_spreadsheet.short_name')+'.long_name')
