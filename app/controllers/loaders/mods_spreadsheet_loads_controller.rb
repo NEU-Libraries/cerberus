@@ -34,8 +34,8 @@ class Loaders::ModsSpreadsheetLoadsController < Loaders::LoadsController
     @mods_html = render_mods_display(CoreFile.find(@core_file.pid)).to_html.html_safe
 
     @user = User.find_by_nuid(@report.nuid)
-    @collection_title = ActiveFedora::SolrService.query("id:\"#{@report.collection}\"", :fl=>"title_tesim")
-    @collection_title = @collection_title[0]['title_tesim'][0]
+    @collection_title = ActiveFedora::SolrService.query("id:\"#{@report.collection}\"", :fl=>"title_info_title_tesim")
+    @collection_title = @collection_title[0]['title_info_title_tesim'][0]
     if @collection_title.blank?
       @collection_title = "N/A"
     end
@@ -53,8 +53,8 @@ class Loaders::ModsSpreadsheetLoadsController < Loaders::LoadsController
     @mods_html = render_mods_display(CoreFile.find(@core_file.pid)).to_html.html_safe
 
     @user = User.find_by_nuid(@report.nuid)
-    @collection_title = ActiveFedora::SolrService.query("id:\"#{@report.collection}\"", :fl=>"title_tesim")
-    @collection_title = @collection_title[0]['title_tesim'][0]
+    @collection_title = ActiveFedora::SolrService.query("id:\"#{@report.collection}\"", :fl=>"title_info_title_tesim")
+    @collection_title = @collection_title[0]['title_info_title_tesim'][0]
     if @collection_title.blank?
       @collection_title = "N/A"
     end
