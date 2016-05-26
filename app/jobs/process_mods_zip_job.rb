@@ -183,7 +183,7 @@ class ProcessModsZipJob
     core_file.mods.alternate_title.title = row_results["alternate_title"] unless row_results["alternate_title"].blank?
     core_file.mods.alternate_title.non_sort = row_results["alternate_title_initial_article"] unless row_results["alternate_title_initial_article"].blank?
     core_file.mods.alternate_title.sub_title = row_results["alternate_subtitle"] unless row_results["alternate_subtitle"].blank?
-    core_file.mods.title_info.supplied = "yes" if row_results["supplied_title"] == "supplied" 
+    core_file.mods.title_info.supplied = "yes" if row_results["supplied_title"] == "supplied"
 
     creators = row_results.select { |key, value| key.to_s.match(/^creator_\d+_name$/) }
     creator_nums = creators.keys.map {|key| key.scan(/\d/)[0].to_i }
@@ -510,7 +510,7 @@ class ProcessModsZipJob
       if !header_row[row_pos].blank?
         case header_row[row_pos].downcase
         when column_identifier.downcase
-            return row_value[row_pos].to_s || ""
+            return row_value[row_pos].to_s.strip || ""
         end
       end
     end
