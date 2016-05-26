@@ -455,6 +455,21 @@ class CoreFilesController < ApplicationController
     @page_title = "Edit #{@core_file.title}"
   end
 
+  def mods_history
+    @core_file = CoreFile.find(params[:id])
+
+    if params[:version] != @core_file.mods.versions.length
+      mods_a = Nokogiri::XML(@core_file.mods.versions[params[:version].to_i + 1].content).to_s
+    else
+      mods_a = ""
+    end
+
+    mods_b = Nokogiri::XML(@core_file.mods.versions[params[:version].to_i].content).to_s
+
+    @diff = mods_diff(mods_a, mods_b)
+    @diff_css = Diffy::CSS
+  end
+
   def edit_xml
     @core_file = CoreFile.find(params[:id])
 
@@ -720,6 +735,10 @@ class CoreFilesController < ApplicationController
   end
 
   protected
+
+    def mods_diff(mods_a, mods_b)
+      return Diffy::Diff.new(mods_a, mods_b, :include_plus_and_minus_in_html => true, :context => 1).to_s(:html).html_safe
+    end
 
     def complete?
       core = CoreFile.find(params[:id])
