@@ -68,8 +68,6 @@ class ProcessModsZipJob
           puts error.backtrace
           return
         end
-      else
-        row not present
       end
     else #not a preview
       spreadsheet.each_row_streaming(offset: header_position) do |row|
