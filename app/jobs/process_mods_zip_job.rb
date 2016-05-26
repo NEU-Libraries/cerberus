@@ -3,6 +3,7 @@ class ProcessModsZipJob
   include XmlValidator
   include ApplicationHelper
   include ZipHelper
+  include HandleHelper
 
   attr_accessor :loader_name, :spreadsheet_file_path, :parent, :copyright, :current_user, :permissions, :preview, :client, :report_id
 
@@ -43,23 +44,28 @@ class ProcessModsZipJob
         begin
           row_results = process_a_row(header_row, row)
           # Process first row
-          comparison_file = CoreFile.find(row_results["pid"])
-
           preview_file = CoreFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
-          preview_file.depositor              = comparison_file.depositor
-          preview_file.rightsMetadata.content = comparison_file.rightsMetadata.content
+
+          if row_results["pid"].blank? && !row_results["file_path"].blank? #make new file
+            preview_file.depositor = current_user.nuid
+          else
+            comparison_file = CoreFile.find(row_results["pid"])
+            preview_file.depositor              = comparison_file.depositor
+            preview_file.rightsMetadata.content = comparison_file.rightsMetadata.content
+            load_report.comparison_file_pid = comparison_file.pid
+          end
           preview_file.tmp_path = spreadsheet_file_path
 
           # Load row of metadata in for preview
           assign_a_row(row_results, preview_file)
 
-          load_report.comparison_file_pid = comparison_file.pid
           load_report.preview_file_pid = preview_file.pid
           load_report.number_of_files = spreadsheet.last_row - header_position
 
           load_report.save!
         rescue Exception => error
           puts error
+          puts error.backtrace
           return
         end
       else
@@ -70,26 +76,81 @@ class ProcessModsZipJob
         if row.present? && header_row.present?
           begin
             row_results = process_a_row(header_row, row)
-            if core_file_checks(row_results["pid"])
-              core_file = CoreFile.find(row_results["pid"])
-              handle = core_file.identifier
-              old_mods = core_file.mods.content
-              core_file.mods.content = ModsDatastream.xml_template.to_xml
-              core_file.mods.identifier = handle
+            if row_results.blank?
+              # do nothing
+            else
+              existing_file = false
+              if row_results["pid"].blank? && !row_results["file_path"].blank? #make new file
+                new_file = File.dirname(dir_path) + "/" + row_results["file_path"]
+                if File.exists? new_file
+                  if Cerberus::ContentFile.virus_check(File.new(new_file)) == 0
+                    core_file = CoreFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
+                    core_file.tag_as_in_progress
+                    core_file.tmp_path = new_file
+                    collection = !load_report.collection.blank? ? Collection.find(load_report.collection) : nil
+                    system_user = User.find_by_nuid("000000000")
+                    core_file.parent = collection
+                    core_file.properties.parent_id = collection.pid
+                    core_file.depositor = "000000000" #change this to get from the preivew page - allow user to choose between system user and collection depositor
+                    core_file.rightsMetadata.content = collection.rightsMetadata.content
+                    core_file.rightsMetadata.permissions({person: '000000000'}, 'edit')
+                    core_file.original_filename = row_results["file_path"]
+                    core_file.label = row_results["file_path"]
+                    core_file.instantiate_appropriate_content_object(new_file)
+                    sc_type = collection.smart_collection_type
+                    if !sc_type.nil? && sc_type != ""
+                      core_file.category = sc_type
+                    end
+                    core_file.identifier = make_handle(core_file.persistent_url, client)
+                    Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename))
+                  else
+                    raise "File triggered failure for virus check"
+                  end
+                else
+                  raise "File specified does not exist"
+                end
+              else
+                existing_file = true
+                puts "checks return #{core_file_checks(row_results["pid"])}"
+                if core_file_checks(row_results["pid"]) == true
+                  core_file = CoreFile.find(row_results["pid"])
+                  handle = core_file.identifier
+                  old_mods = core_file.mods.content
+                  core_file.mods.content = ModsDatastream.xml_template.to_xml
+                  core_file.mods.identifier = handle
+                else
+                  # error = core_file_checks(row_results["pid"])
+                  raise core_file_checks(row_results["pid"])
+                  # image_report = load_report.image_reports.create_failure(error, row_results, "")
+                  # image_report.title = row_results["title"].blank? ? find_in_row(header_row, row, 'Title') : row_results["title"]
+                  # image_report.original_file = row_results["file_path"].blank? ? find_in_row(header_row, row, 'What is the file path for this object?') : row_results["file_path"]
+                  # image_report.save!
+                end
+              end
               assign_a_row(row_results, core_file)
               if core_file.keywords.length < 1
-                core_file.mods.content = old_mods
-                core_file.save!
+                if existing_file
+                  core_file.mods.content = old_mods
+                  core_file.save!
+                else
+                  core_file.destroy if core_file
+                end
                 image_report = load_report.image_reports.create_failure("Must have at least one keyword", row_results, "")
-                image_report.title = core_file.title
+                image_report.title = core_file.title.blank? ? row_results["title"] : core_file.title
+                image_report.original_file = core_file.original_filename.blank? ? row_results["file_path"] : core_file.original_filename
                 image_report.save!
               elsif core_file.title.blank?
-                core_file.mods.content = old_mods
-                core_file.save!
+                if existing_file
+                  core_file.mods.content = old_mods
+                  core_file.save!
+                else
+                  core_file.destroy if core_file
+                end
                 image_report = load_report.image_reports.create_failure("Must have a title", row_results, "")
+                image_report.original_file = core_file.original_filename.blank? ? row_results["file_path"] : core_file.original_filename
                 image_report.title = core_file.title
                 image_report.save!
-              elsif core_file.identifier != row_results["handle"]
+              elsif !row_results["handle"].blank? && core_file.identifier != row_results["handle"]
                 image_report = load_report.image_reports.create_modified("Handle does not match", core_file, row_results)
                 image_report.title = core_file.title
                 image_report.save!
@@ -97,23 +158,34 @@ class ProcessModsZipJob
                 raw_xml = xml_decode(core_file.mods.content)
                 result = xml_valid?(raw_xml)
                 if !result[:errors].blank?
+                  if existing_file
+                    core_file.mods.content = old_mods
+                    core_file.save!
+                  else
+                    core_file.destroy if core_file
+                  end
                   image_report = load_report.image_reports.create_failure(error, row_results, "")
-                  image_report.title = core_file.title
+                  image_report.title = core_file.title.blank? ? row_results["title"] : core_file.title
+                  image_report.original_file = core_file.original_filename.blank? ? row_results["file_path"] : core_file.original_filename
                   image_report.save!
                 else
                   load_report.image_reports.create_success(core_file, "")
                 end
               end
-            else
-              image_report = load_report.image_reports.create_failure("Core file does not exist", row_results, "")
-              image_report.title = row_results["pid"]
-              image_report.save!
             end
           rescue Exception => error
             puts error
             puts error.backtrace
-            image_report = load_report.image_reports.create_failure(error.message, "", "")
+            if existing_file && core_file
+              core_file.mods.content = old_mods
+              core_file.save!
+            else
+              core_file.destroy if core_file
+            end
+            row_results = row_results.blank? ? nil : row_results
+            image_report = load_report.image_reports.create_failure(error.message, row_results, "")
             image_report.title = find_in_row(header_row, row, 'Title')
+            image_report.original_file = find_in_row(header_row, row, 'What is the file path for this object?')
             image_report.save!
           end
         end
@@ -126,6 +198,13 @@ class ProcessModsZipJob
       load_report.completed = true
       load_report.save!
       # LoaderMailer.load_alert(load_report, User.find_by_nuid(load_report.nuid)).deliver!
+      # cleaning up
+      FileUtils.rmdir(File.dirname(dir_path))
+      if CoreFile.exists?(load_report.preview_file_pid)
+        CoreFile.find(load_report.preview_file_pid).destroy
+      elsif CoreFile.exists?(load_report.comparison_file_pid)
+        CoreFile.find(load_report.comparison_file_pid).destroy
+      end
     end
   end
 
@@ -294,7 +373,6 @@ class ProcessModsZipJob
       if row_results["subject_name_#{i}_type"] == "personal"
         name_subjects[i] = {:personal => name[1].strip}
       elsif row_results["subject_name_#{i}_type"] == "corporate"
-        puts name[1].split("|")[0].strip
         name_subjects[i] = {:corporate => name[1].split("|")[0].strip}
       end
     end
@@ -384,6 +462,7 @@ class ProcessModsZipJob
     results["handle"]                           = find_in_row(header_row, row_value, 'What is handle for the digitized object?')
     results["user_name"]                        = find_in_row(header_row, row_value, 'What is your name?')
     results["pid"]                              = find_in_row(header_row, row_value, 'What is PID for the digitized object?')
+    results["file_path"]                        = find_in_row(header_row, row_value, 'What is the file path for this object?')
     results["file_name"]                        = find_in_row(header_row, row_value, 'File Name')
     results["archives_identifier"]              = find_in_row(header_row, row_value, 'Archives Identifier')
     results["supplied_title"]                   = find_in_row(header_row, row_value, 'Is this a supplied title?')
@@ -469,21 +548,21 @@ class ProcessModsZipJob
   def core_file_checks(pid)
     begin
       if !ActiveFedora::Base.exists?(pid)
-        raise "Core file #{pid} does not exist"
+        return "Core file #{pid} does not exist"
       else
         cf = ActiveFedora::Base.find(pid, :cast=>true)
         if cf.class != CoreFile
-          raise "pid #{pid} is not a CoreFile object"
+          return "pid #{pid} is not a CoreFile object"
         else
           doc = SolrDocument.new(cf.to_solr)
           if (cf.mods.title.blank? || cf.mods.subject.length < 1) || (doc.title.blank? || doc['subject_topic_tesim'].nil?)
-            raise "No title and/or keyword found for #{pid}"
+            return "No title and/or keyword found for #{pid}"
           else
             if !cf.healthy?
-              raise "Core file is not healthy"
+              return "Core file is not healthy"
             else
               if cf.tombstoned? || cf.in_progress? || cf.incomplete?
-                raise "Core file has non-active state: tombstoned, incomplete, or in_progress"
+                return "Core file has non-active state: tombstoned, incomplete, or in_progress"
               else
                 return true
               end
@@ -492,7 +571,7 @@ class ProcessModsZipJob
         end
       end
     rescue Exception => error
-      raise error
+      return error
     end
   end
 
