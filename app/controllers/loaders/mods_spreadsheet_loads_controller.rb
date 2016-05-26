@@ -34,10 +34,11 @@ class Loaders::ModsSpreadsheetLoadsController < Loaders::LoadsController
     @mods_html = render_mods_display(CoreFile.find(@core_file.pid)).to_html.html_safe
 
     @user = User.find_by_nuid(@report.nuid)
-    @collection_title = ActiveFedora::SolrService.query("id:\"#{@report.collection}\"", :fl=>"title_info_title_tesim")
-    @collection_title = @collection_title[0]['title_info_title_tesim'][0]
-    if @collection_title.blank?
-      @collection_title = "N/A"
+    @collection = fetch_solr_document({:id=>@report.collection})
+    collection_depositor = !@collection.true_depositor.blank? ? User.find_by_nuid("#{@collection.true_depositor}").name : nil
+    @depositor_options = [["System User", "000000000"]]
+    if !collection_depositor.blank?
+      @depositor_options << [collection_depositor, @collection.true_depositor]
     end
     render 'loaders/preview'
   end
@@ -53,10 +54,11 @@ class Loaders::ModsSpreadsheetLoadsController < Loaders::LoadsController
     @mods_html = render_mods_display(CoreFile.find(@core_file.pid)).to_html.html_safe
 
     @user = User.find_by_nuid(@report.nuid)
-    @collection_title = ActiveFedora::SolrService.query("id:\"#{@report.collection}\"", :fl=>"title_info_title_tesim")
-    @collection_title = @collection_title[0]['title_info_title_tesim'][0]
-    if @collection_title.blank?
-      @collection_title = "N/A"
+    @collection = fetch_solr_document({:id=>@report.collection})
+    collection_depositor = !@collection.true_depositor.blank? ? User.find_by_nuid("#{@collection.true_depositor}").name : nil
+    @depositor_options = [["System User", "000000000"]]
+    if !collection_depositor.blank?
+      @depositor_options << [collection_depositor, @collection.true_depositor]
     end
     render 'loaders/preview'
   end
@@ -73,6 +75,7 @@ class Loaders::ModsSpreadsheetLoadsController < Loaders::LoadsController
   end
 
   def proceed_load
+    puts params
     @report = Loaders::LoadReport.find(params[:id])
     @loader_name = t('drs.loaders.mods_spreadsheet.long_name')
     if !@report.preview_file_pid.blank?
@@ -83,8 +86,13 @@ class Loaders::ModsSpreadsheetLoadsController < Loaders::LoadsController
       spreadsheet_file_path = cf.tmp_path
     end
     copyright = t('drs.loaders.mods_spreadsheet.copyright')
-    permissions = {"CoreFile" => {"read"  => ["public"], "edit" => ["northeastern:drs:repository:staff"]}}
-    Cerberus::Application::Queue.push(ProcessModsZipJob.new(@loader_name, spreadsheet_file_path, @report.collection, copyright, current_user, permissions, @report.id, nil))
+    permissions = {} #we aren't getting these externally yet
+    if params[:depositor]
+      depositor = params[:depositor]
+    else
+      depositor = nil
+    end
+    Cerberus::Application::Queue.push(ProcessModsZipJob.new(@loader_name, spreadsheet_file_path, @report.collection, copyright, current_user, permissions, @report.id, depositor, nil))
     flash[:notice] = "Your spreadsheet is being processed. The information on this page will be updated periodically until the processing is completed."
     redirect_to "/loaders/mods_spreadsheet/report/#{@report.id}"
   end

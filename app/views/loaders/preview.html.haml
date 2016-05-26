@@ -11,7 +11,7 @@
 %h3 Load Information
 %h4
   Collection:
-  = link_to(@collection_title, collection_path(@report.collection))
+  = link_to(@collection.title, collection_path(@report.collection))
   ="(#{@report.collection})"
 %h4
   Load Start Time:
@@ -23,34 +23,45 @@
   Total Files:
   = @report.number_of_files
 
-.span6
-  - if @diff
-    %h3 MODS Changes
-    #mods_diff
-      = @diff
-  - else
-    %h3 XML
-    #editor.well
-      = @core_file.mods.content
+.row
+  .span6
+    - if @diff
+      %h3 MODS Changes
+      #mods_diff
+        = @diff
+    - else
+      %h3 XML
+      #editor.well
+        = @core_file.mods.content
 
 
-.drs-item-details.span5
-  %h3 MODS HTML
-  #mods{ style: 'position:relative;min-height:320px;' }
-    = @mods_html
+  .drs-item-details.span5
+    %h3 MODS HTML
+    #mods{ style: 'position:relative;min-height:320px;' }
+      = @mods_html
 
-.span8
-  %div.alert.alert-warning
-    %span= "You are about to #{@diff ? "edit" : "create"} #{@report.number_of_files} files. Are you sure you want to proceed?"
-  = link_to("Cancel Load", loaders_cancel_load_path(:id => @report.id), class: "btn btn-danger")
-  = link_to("Proceed with Load", loaders_proceed_load_path(:id => @report.id), class: "btn btn-success pull-right")
+%br
+.row
+  .span8
+    %div.alert.alert-warning
+      %span= "You are about to #{@diff ? "edit" : "create"} #{@report.number_of_files} files. Are you sure you want to proceed?"
+    - if @diff
+      = link_to("Cancel Load", loaders_cancel_load_path(:id => @report.id), class: "btn btn-danger")
+      = link_to("Proceed with Load", loaders_proceed_load_path(:id => @report.id), class: "btn btn-success pull-right")
+    -else
+      = form_tag loaders_proceed_load_path, :method => 'get' do
+        = hidden_field_tag :id, @report.id
+        = label_tag "depositor", "Depositor:"
+        = select_tag "depositor", options_for_select(@depositor_options)
+        %br
+        = link_to("Cancel Load", loaders_cancel_load_path(:id => @report.id), class: "btn btn-danger")
+        = submit_tag "Proceed with Load", :class => "btn btn-success pull-right"
 
 :javascript
   $(document).ready(function() {
     // This is a hack, need to trim to due haml pretty printing
     if (document.getElementById('editor') === null){ }
     else {
-      console.log("the editor exists");
         str = $("#editor").text();
         $("#editor").text(str.trim());
 

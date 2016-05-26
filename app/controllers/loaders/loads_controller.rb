@@ -104,7 +104,7 @@ class Loaders::LoadsController < ApplicationController
             #mods spreadsheet job
             spreadsheet_file_path = unzip(new_file, new_path)
             report_id = Loaders::LoadReport.create_from_strings(current_user, 0, @loader_name, parent)
-            ProcessModsZipJob.new(@loader_name, spreadsheet_file_path, parent, copyright, current_user, permissions, report_id, true).run
+            ProcessModsZipJob.new(@loader_name, spreadsheet_file_path, parent, copyright, current_user, permissions, report_id, nil, true).run
             load_report = Loaders::LoadReport.find(report_id)
 
             if !load_report.comparison_file_pid.blank?
@@ -112,7 +112,7 @@ class Loaders::LoadsController < ApplicationController
             elsif !load_report.preview_file_pid.blank?
               render :json => {report_id: report_id, preview_file_pid: load_report.preview_file_pid}.to_json and return
             end
-            
+
           else
             # send to iptc job
             report_id = Loaders::LoadReport.create_from_strings(current_user, 0, @loader_name, parent)
