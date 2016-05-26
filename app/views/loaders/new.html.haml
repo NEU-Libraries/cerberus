@@ -77,6 +77,11 @@
           } else {
             window.location = "/loaders/#{@loader_short_name}/report/"+response.report_id;
           }
+        },
+        fail: function(data){
+          console.log(data);
+          window.alert("There was an issue processing your load.");
+          window.location = "/my_loaders";
         }
     });
   });
