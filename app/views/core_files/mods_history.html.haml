@@ -1,0 +1,64 @@
+- content_for :page_header do
+  %style{:type=>"text/css"}
+    = raw @diff_css
+
+%header
+  %h1.page-header
+    MODS History for
+    %i
+      = "#{@core_file.non_sort} "
+      = kramdown_parse(@core_file.title)
+
+= form_tag core_file_validate_xml_path, :method => :put, :id => "raw_xml_form", :remote => true do
+
+  .span6
+    %h3
+      XML as of
+      = @core_file.mods.versions[params[:version].to_i].createDate.localtime.to_s
+    %label.text-right
+      %input#toggle_word_wrap{"type"=>"checkbox"}
+      ="Toggle Word Wrap"
+    #editor.well
+      = @core_file.mods.versions[params[:version].to_i].content
+
+  .span5
+    %h3 MODS Changes
+    #mods_diff
+      = @diff
+
+  .span11
+    .well
+      = submit_tag "Restore", :class => ['btn', 'btn-primary'], :id => "restore_button", data: { disable_with: "Please wait..."}
+
+:javascript
+  // This is a hack, need to trim to due haml pretty printing
+  str = $("#editor").text();
+  $("#editor").text(str.trim());
+
+  // Setting up the editor
+  var editor = ace.edit("editor");
+  editor.setTheme("ace/theme/eclipse");
+  editor.getSession().setMode("ace/mode/xml");
+  editor.setOptions({
+    maxLines: Infinity,
+    minLines: 20,
+    useSoftTabs: true,
+    showInvisibles: true,
+    showGutter: false,
+  });
+
+  $(function() {
+    $('#toggle_word_wrap').on('change', function(){
+      if ($('#toggle_word_wrap').is(':checked')){
+        editor.getSession().setUseWrapMode(true);
+      } else {
+        editor.getSession().setUseWrapMode(false);
+      }
+    })
+    $('#raw_xml_form').submit(function() {
+      $("#raw_xml_").val(editor.getSession().getValue());
+      $('#mods').html("");
+      spinner = enable_spinner('mods');
+      return true;
+    });
+  });

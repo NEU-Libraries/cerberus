@@ -17,3 +17,7 @@
         %a{ href: edit_core_file_xml_path(@core_file),  data: {event: "external"} }
           %i.icon-edit
           XML
+      %li
+        %a{ href: core_file_mods_history_path(@core_file, 0),  data: {event: "external"} }
+          %i.icon-undo
+          MODS History
