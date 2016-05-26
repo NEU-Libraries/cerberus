@@ -5,13 +5,13 @@ class ProcessModsZipJob
   include ZipHelper
   include HandleHelper
 
-  attr_accessor :loader_name, :spreadsheet_file_path, :parent, :copyright, :current_user, :permissions, :preview, :client, :report_id
+  attr_accessor :loader_name, :spreadsheet_file_path, :parent, :copyright, :current_user, :permissions, :preview, :depositor, :client, :report_id
 
   def queue_name
     :mods_process_zip
   end
 
-  def initialize(loader_name, spreadsheet_file_path, parent, copyright, current_user, permissions, report_id, preview=nil, client=nil)
+  def initialize(loader_name, spreadsheet_file_path, parent, copyright, current_user, permissions, report_id, depositor, preview=nil, client=nil)
     self.loader_name = loader_name
     self.spreadsheet_file_path = spreadsheet_file_path
     self.parent = parent
@@ -21,6 +21,7 @@ class ProcessModsZipJob
     self.preview = preview
     self.client = client
     self.report_id = report_id
+    self.depositor = depositor
   end
 
   def run
@@ -87,12 +88,11 @@ class ProcessModsZipJob
                     core_file.tag_as_in_progress
                     core_file.tmp_path = new_file
                     collection = !load_report.collection.blank? ? Collection.find(load_report.collection) : nil
-                    system_user = User.find_by_nuid("000000000")
                     core_file.parent = collection
                     core_file.properties.parent_id = collection.pid
-                    core_file.depositor = "000000000" #change this to get from the preivew page - allow user to choose between system user and collection depositor
+                    core_file.depositor = depositor
                     core_file.rightsMetadata.content = collection.rightsMetadata.content
-                    core_file.rightsMetadata.permissions({person: '000000000'}, 'edit')
+                    core_file.rightsMetadata.permissions({person: "#{depositor}"}, 'edit')
                     core_file.original_filename = row_results["file_name"]
                     core_file.label = row_results["file_name"]
                     core_file.instantiate_appropriate_content_object(new_file)
@@ -550,7 +550,7 @@ class ProcessModsZipJob
       original_file = core_file.original_filename.blank? ? row_results["file_name"] : core_file.original_filename
     else
       title = find_in_row(header_row, row, 'Title')
-      original_file = find_in_row(header_row, row, 'What is the file path for this object?')
+      original_file = find_in_row(header_row, row, 'File Name')
     end
     image_report = load_report.image_reports.create_failure(error, row_results, "")
     image_report.title = title
