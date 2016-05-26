@@ -9,7 +9,7 @@ class Loaders::ModsSpreadsheetLoadsController < Loaders::LoadsController
   end
 
   def new
-    query_result = ActiveFedora::SolrService.query("active_fedora_model_ssi:\"Collection\"", :fl => "id, title_tesim", :rows => 999999999, :sort => "id asc")
+    query_result = ActiveFedora::SolrService.query("active_fedora_model_ssi:\"Collection\"", :fl => "id, title_info_title_tesim", :rows => 999999999, :sort => "id asc")
     @collections_options = Array.new()
     query_result.each do |c|
       if current_user.can?(:edit, c['id'])
