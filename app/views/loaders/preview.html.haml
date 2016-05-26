@@ -39,7 +39,9 @@
   #mods{ style: 'position:relative;min-height:320px;' }
     = @mods_html
 
-.span12
+.span8
+  %div.alert.alert-warning
+    %span= "You are about to #{@diff ? "edit" : "create"} #{@report.number_of_files} files. Are you sure you want to proceed?"
   = link_to("Cancel Load", loaders_cancel_load_path(:id => @report.id), class: "btn btn-danger")
   = link_to("Proceed with Load", loaders_proceed_load_path(:id => @report.id), class: "btn btn-success pull-right")
 
