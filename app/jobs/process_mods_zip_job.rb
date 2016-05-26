@@ -211,8 +211,8 @@ class ProcessModsZipJob
       end
       creator_nums.each do |n|
         name_type = row_results["creator_#{n}_name_type"]
-        role = row_results["creator_#{n}_role"]
-        role_uri = row_results["creator_#{n}_role_value_uri"]
+        role = row_results["creator_#{n}_role"].split("|")[0]
+        role_uri = row_results["creator_#{n}_role"].split("|")[1]
         affiliation = row_results["creator_#{n}_affliation"]
         authority = row_results["creator_#{n}_authority"].split("|")[0]
         authority_uri = row_results["creator_#{n}_authority"].split("|")[1]
@@ -446,7 +446,6 @@ class ProcessModsZipJob
       results["creator_#{i}_authority"] = find_in_row(header_row, row_value, "Creator #{i} Authority")
       results["creator_#{i}_name_type"] = find_in_row(header_row, row_value, "Creator #{i} Name Type")
       results["creator_#{i}_role"] = find_in_row(header_row, row_value, "Creator #{i} Role")
-      results["creator_#{i}_role_value_uri"] = find_in_row(header_row, row_value, "Creator #{i} Role Value URI")
       results["creator_#{i}_affiliation"] = find_in_row(header_row, row_value, "Creator #{i} Affiliation")
     end
     results["creator_1_name"] = find_in_row(header_row, row_value, "Creator 1 Name - Primary Creator") #primary special case
