@@ -25,6 +25,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
       t.sub_title(path: 'subTitle', namespace_prefix: 'mods', index_as: [:stored_searchable])
       t.part_name(path: 'partName', namespace_prefix: 'mods', index_as: [:stored_searchable])
       t.part_number(path: 'partNumber', namespace_prefix: 'mods', index_as: [:stored_searchable])
+      t.supplied(path: {attribute: 'supplied'})
     }
 
     t.alternate_title(path: 'mods/mods:titleInfo', namespace_prefix: 'mods', attributes: {type: "alternative"}){
