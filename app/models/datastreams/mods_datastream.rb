@@ -299,7 +299,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
 
     # Make sure all titles and non_sorts end up in title_tesim
     total_title_array = self.all_titles.non_sort.concat self.all_titles.title
-    solr_doc["title_tesim"] = total_title_array.map! {|item| kramdown_parse(item)}
+    solr_doc["title_tesim"] = total_title_array.select {|item| kramdown_parse(item) unless item.blank?}
 
     # Kramdown parse for search purposes - #439
     # title_ssi will only be used for sorting - #766
