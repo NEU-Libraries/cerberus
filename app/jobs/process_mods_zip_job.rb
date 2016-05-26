@@ -183,6 +183,7 @@ class ProcessModsZipJob
     core_file.mods.alternate_title.title = row_results["alternate_title"] unless row_results["alternate_title"].blank?
     core_file.mods.alternate_title.non_sort = row_results["alternate_title_initial_article"] unless row_results["alternate_title_initial_article"].blank?
     core_file.mods.alternate_title.sub_title = row_results["alternate_subtitle"] unless row_results["alternate_subtitle"].blank?
+    core_file.mods.title_info.supplied = "yes" if row_results["supplied_title"] == "supplied" 
 
     creators = row_results.select { |key, value| key.to_s.match(/^creator_\d+_name$/) }
     creator_nums = creators.keys.map {|key| key.scan(/\d/)[0].to_i }
@@ -213,7 +214,7 @@ class ProcessModsZipJob
         name_type = row_results["creator_#{n}_name_type"]
         role = row_results["creator_#{n}_role"].split("|")[0]
         role_uri = row_results["creator_#{n}_role"].split("|")[1]
-        affiliation = row_results["creator_#{n}_affliation"]
+        affiliation = row_results["creator_#{n}_affiliation"]
         authority = row_results["creator_#{n}_authority"].split("|")[0]
         authority_uri = row_results["creator_#{n}_authority"].split("|")[1]
         value_uri = row_results["creator_#{n}_name"].split("|").last
@@ -351,7 +352,7 @@ class ProcessModsZipJob
       if !core_file.mods.subject(i).name.blank?
         n = i - subj_count + 1
         name_type = row_results["subject_name_#{n}_type"]
-        affiliation = row_results["subject_name_#{n}_affliation"]
+        affiliation = row_results["subject_name_#{n}_affiliation"]
         authority = row_results["subject_name_#{n}_authority"].split("|")[0]
         authority_uri = row_results["subject_name_#{n}_authority"].split("|")[1]
         value_uri = row_results["subject_name_#{n}"].split("|").last
@@ -421,6 +422,11 @@ class ProcessModsZipJob
     core_file.mods.record_info.record_creation_date = DateTime.now.strftime("%F")
     core_file.mods.physical_description.form = "electronic"
     core_file.mods.physical_description.form.authority = "marcform"
+
+    core_file.save!
+    xml = core_file.mods.content
+    doc = Nokogiri::XML(xml,&:noblanks)
+    core_file.mods.content = doc.to_s
 
     core_file.save!
   end
