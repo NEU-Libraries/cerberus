@@ -9,26 +9,30 @@
       = "#{@core_file.non_sort} "
       = kramdown_parse(@core_file.title)
 
-= form_tag core_file_validate_xml_path, :method => :put, :id => "raw_xml_form", :remote => true do
+= will_paginate @mods_pages, :previous_label => '< Newer', :next_label => 'Older >'
 
-  .span6
-    %h3
-      XML as of
-      = @core_file.mods.versions[params[:version].to_i].createDate.localtime.to_s
-    %label.text-right
-      %input#toggle_word_wrap{"type"=>"checkbox"}
-      ="Toggle Word Wrap"
-    #editor.well
-      = @core_file.mods.versions[params[:version].to_i].content
+-# = form_tag edit_core_file_xml_path(id: @core_file.pid, version: params[:page].to_i - 1), :method => :get, :id => "mods_version_form" do
 
-  .span5
-    %h3 MODS Changes
-    #mods_diff
-      = @diff
+.span6
+  %h3
+    XML as of
+    = @core_file.mods.versions[params[:page].to_i - 1].createDate.localtime.to_s
+  %label.text-right
+    %input#toggle_word_wrap{"type"=>"checkbox"}
+    ="Toggle Word Wrap"
+  #editor.well
+    = @core_file.mods.versions[params[:page].to_i - 1].content
 
-  .span11
-    .well
-      = submit_tag "Restore", :class => ['btn', 'btn-primary'], :id => "restore_button", data: { disable_with: "Please wait..."}
+.span5
+  %h3 MODS Changes from previous version
+  #mods_diff
+    = @diff
+
+.span11
+  .well
+    -# = submit_tag "Insert XML", :class => ['btn', 'btn-primary'], :id => "restore_button", data: { disable_with: "Please wait..."}
+    %a.btn.btn-primary{data: { disable_with: "Please wait..."}, :href => edit_core_file_xml_path(id: @core_file.pid, version: params[:page].to_i - 1)}
+      Insert XML
 
 :javascript
   // This is a hack, need to trim to due haml pretty printing
@@ -43,8 +47,9 @@
     maxLines: Infinity,
     minLines: 20,
     useSoftTabs: true,
-    showInvisibles: true,
+    showInvisibles: false,
     showGutter: false,
+    readOnly: true,
   });
 
   $(function() {
