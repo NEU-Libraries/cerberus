@@ -456,8 +456,9 @@ class ProcessModsZipJob
     results["alternate_title"]                  = find_in_row(header_row, row_value, 'Alternate Title')
     results["alternate_subtitle"]               = find_in_row(header_row, row_value, 'Alternate Subtitle')
 
-    creator_count = header_row.select{|n| n[/^Creator \d+ Name$/]}.count + 1 #have to add one for primary special case
-    for i in 1..creator_count
+    creator_count = header_row.select{|n| n[/^Creator \d+ Name$/]} #have to add one for primary special case
+    creator_count.each_with_index do |x, i|
+      i = i+1 #ignore primary
       results["creator_#{i}_name"] = find_in_row(header_row, row_value, "Creator #{i} Name")
       results["creator_#{i}_authority"] = find_in_row(header_row, row_value, "Creator #{i} Authority")
       results["creator_#{i}_name_type"] = find_in_row(header_row, row_value, "Creator #{i} Name Type")
@@ -465,6 +466,10 @@ class ProcessModsZipJob
       results["creator_#{i}_affiliation"] = find_in_row(header_row, row_value, "Creator #{i} Affiliation")
     end
     results["creator_1_name"] = find_in_row(header_row, row_value, "Creator 1 Name - Primary Creator") #primary special case
+    results["creator_1_authority"] = find_in_row(header_row, row_value, "Creator 1 Authority")
+    results["creator_1_name_type"] = find_in_row(header_row, row_value, "Creator 1 Name Type")
+    results["creator_1_role"] = find_in_row(header_row, row_value, "Creator 1 Role")
+    results["creator_1_affiliation"] = find_in_row(header_row, row_value, "Creator 1 Affiliation")
 
     results["type_of_resource"]                             = find_in_row(header_row, row_value, 'Type of Resource')
     results["genre"]                                        = find_in_row(header_row, row_value, 'Genre')
@@ -492,18 +497,18 @@ class ProcessModsZipJob
     results["provenance"]                                   = find_in_row(header_row, row_value, 'Provenance note')
     results["other_notes"]                                  = find_in_row(header_row, row_value, 'Other notes')
 
-    topic_count = header_row.select{|m| m[/^Topical Subject Heading \d+$/]}.count
-    for x in 1..topic_count
-      results["topic_#{x}"]                                      = find_in_row(header_row, row_value, "Topical Subject Heading #{x}")
-      results["topic_#{x}_authority"]                            = find_in_row(header_row, row_value, "Topical Subject Heading Authority #{x}")
+    topic_count = header_row.select{|m| m[/^Topical Subject Heading \d+$/]}
+    topic_count.each_with_index do |x, i|
+      results["topic_#{i}"]                                      = find_in_row(header_row, row_value, "Topical Subject Heading #{i}")
+      results["topic_#{i}_authority"]                            = find_in_row(header_row, row_value, "Topical Subject Heading Authority #{i}")
     end
 
-    subject_count = header_row.select{|y| y[/^Subject Name \d+$/]}.count
-    for z in 1..subject_count
-      results["subject_name_#{z}"]                               = find_in_row(header_row, row_value, "Subject Name #{z}")
-      results["subject_name_#{z}_authority"]                     = find_in_row(header_row, row_value, "Subject Name #{z} Authority")
-      results["subject_name_#{z}_type"]                          = find_in_row(header_row, row_value, "Subject Name #{z} Name Type")
-      results["subject_name_#{z}_affiliation"]                   = find_in_row(header_row, row_value, "Subject Name #{z} Affiliation")
+    subject_count = header_row.select{|y| y[/^Subject Name \d+$/]}
+    subject_count.each_with_index do |x, i|
+      results["subject_name_#{i}"]                               = find_in_row(header_row, row_value, "Subject Name #{i}")
+      results["subject_name_#{i}_authority"]                     = find_in_row(header_row, row_value, "Subject Name #{i} Authority")
+      results["subject_name_#{i}_type"]                          = find_in_row(header_row, row_value, "Subject Name #{i} Name Type")
+      results["subject_name_#{i}_affiliation"]                   = find_in_row(header_row, row_value, "Subject Name #{i} Affiliation")
     end
 
     results["original_title"]                               = find_in_row(header_row, row_value, 'Original Title') #updated cell title
@@ -515,18 +520,12 @@ class ProcessModsZipJob
   end
 
   def find_in_row(header_row, row_value, column_identifier)
-    0.upto header_row.length do |row_pos|
+    0.upto header_row.length-1 do |row_pos|
       # Account for case insensitivity
       if !header_row[row_pos].blank?
         case header_row[row_pos].downcase
         when column_identifier.downcase
-          if row_value[row_pos].nil? || row_value[row_pos].blank?
-            return ""
-          elsif row_value[row_pos].class.to_s == "Date" || row_value[row_pos].class.to_s == "DateTime" || row_value[row_pos].class.to_s == "String" || row_value[row_pos].class.to_s == "Fixnum"
-            return row_value[row_pos].to_s.strip || ""
-          else
-            return row_value[row_pos].value.to_s.strip || ""
-          end
+          return row_value[row_pos].to_s.strip || ""
         end
       end
     end
