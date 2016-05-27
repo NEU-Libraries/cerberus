@@ -37,7 +37,7 @@ class ProcessModsZipJob
     spreadsheet = load_spreadsheet(spreadsheet_file_path)
 
     header_position = 1
-    header_row = spreadsheet.row(header_position)
+    header_row = spreadsheet.row(header_position).reject(&:blank?)
 
     if !preview.nil?
       row = spreadsheet.row(header_position + 1)
@@ -525,7 +525,7 @@ class ProcessModsZipJob
       if !header_row[row_pos].blank?
         case header_row[row_pos].downcase
         when column_identifier.downcase
-          return row_value[row_pos].to_s.strip || ""
+          return row_value[row_pos].to_s || ""
         end
       end
     end
