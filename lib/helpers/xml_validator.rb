@@ -40,6 +40,9 @@ module XmlValidator
           results[:errors] << error
         end
       end
+    rescue Nokogiri::XML::SyntaxError
+      # Purge rails cache of xsd - most likely an unfortunate poor response from xsd provider
+      Rails.cache.delete_matched("/xsd/*")
     rescue NoMethodError
       # Rescue NoMethodError - this will occur if there is no schemaLocation provided
       results[:errors] << Exceptions::MissingMetadata.new("schemaLocation")
