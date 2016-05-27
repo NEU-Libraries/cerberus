@@ -217,7 +217,7 @@ class ProcessModsZipJob
         affiliation = row_results["creator_#{n}_affiliation"]
         authority = row_results["creator_#{n}_authority"].split("|")[0]
         authority_uri = row_results["creator_#{n}_authority"].split("|")[1]
-        value_uri = row_results["creator_#{n}_name"].split("|").last
+        value_uri = row_results["creator_#{n}_name"].split("|")[1]
         if name_type == 'corporate'
           corp_creators = row_results.select { |key, value| key.to_s.match(/^creator_\d+_name_type$/) && value.to_s.match(/^corporate$/) }
           corp_nums = corp_creators.keys.map {|key| key.scan(/\d/)[0].to_i }
@@ -257,8 +257,16 @@ class ProcessModsZipJob
     end
 
     core_file.mods.type_of_resource = row_results["type_of_resource"] unless row_results["type_of_resource"].blank?
-    core_file.mods.genre = row_results["genre"] unless row_results["genre"].blank?
-    core_file.mods.genre.authority = row_results["genre_authority"] unless row_results["genre_authority"].blank?
+    if !row_results["genre"].blank?
+      genre = row_results["genre"].split("|")[0]
+      value_uri = row_results["genre"].split("|")[1]
+      authority = row_results["genre_authority"].split("|")[0]
+      authority_uri = row_results["genre_authority"].split("|")[1]
+      core_file.mods.genre = genre.strip
+      core_file.mods.genre.authority = authority.strip unless authority.blank?
+      core_file.mods.genre.authority_uri = authority_uri.strip unless authority_uri.blank?
+      core_file.mods.genre.value_uri = value_uri.strip unless value_uri.blank?
+    end
     if !row_results["date_created_end_date"].blank?
       core_file.mods.origin_info.date_created = row_results["date_created"]
       core_file.mods.origin_info.date_created.point = "start"
@@ -318,7 +326,7 @@ class ProcessModsZipJob
     keywords = []
     topical_headings = row_results.select { |key, value| key.to_s.match(/^topic_\d+$/) }
     topical_headings.each do |topic|
-      keywords << topic[1]
+      keywords << topic[1] if !topic.blank?
     end
     core_file.mods.topics = keywords #have to create the subject nodes first
     core_file.mods.subject.topic.each_with_index do |subject, key|
@@ -338,11 +346,13 @@ class ProcessModsZipJob
     name_subjects = []
     name_headings = row_results.select { |key, value| key.to_s.match(/^subject_name_\d+$/) }
     name_headings.each_with_index do |name, i|
-      i = i + 1 #spreadsheet index starts with 1 not 0
-      if row_results["subject_name_#{i}_type"] == "personal"
-        name_subjects[i] = {:personal => name[1].strip}
-      elsif row_results["subject_name_#{i}_type"] == "corporate"
-        name_subjects[i] = {:corporate => name[1].split("|")[0].strip}
+      if !name[1].blank?
+        i = i + 1 #spreadsheet index starts with 1 not 0
+        if row_results["subject_name_#{i}_type"] == "personal"
+          name_subjects[i] = {:personal => name[1].strip}
+        elsif row_results["subject_name_#{i}_type"] == "corporate"
+          name_subjects[i] = {:corporate => name[1].split("|")[0].strip}
+        end
       end
     end
     if name_subjects.length > 0
@@ -446,7 +456,7 @@ class ProcessModsZipJob
     results["alternate_title"]                  = find_in_row(header_row, row_value, 'Alternate Title')
     results["alternate_subtitle"]               = find_in_row(header_row, row_value, 'Alternate Subtitle')
 
-    creator_count = header_row.select{|i| i[/^Creator \d+ Name$/]}.count + 1 #have to add one for primary special case
+    creator_count = header_row.select{|n| n[/^Creator \d+ Name$/]}.count + 1 #have to add one for primary special case
     for i in 1..creator_count
       results["creator_#{i}_name"] = find_in_row(header_row, row_value, "Creator #{i} Name")
       results["creator_#{i}_authority"] = find_in_row(header_row, row_value, "Creator #{i} Authority")
@@ -458,7 +468,7 @@ class ProcessModsZipJob
 
     results["type_of_resource"]                             = find_in_row(header_row, row_value, 'Type of Resource')
     results["genre"]                                        = find_in_row(header_row, row_value, 'Genre')
-    results["genre_authority"]                                        = find_in_row(header_row, row_value, 'Genre Authority')
+    results["genre_authority"]                              = find_in_row(header_row, row_value, 'Genre Authority')
     results["date_created"]                                 = find_in_row(header_row, row_value, 'Date Created')
     results["date_created_end_date"]                        = find_in_row(header_row, row_value, 'Date Created - End Date')
     results["approximate_inferred_questionable"]            = find_in_row(header_row, row_value, 'Date Created - Is this date approximate, inferred, or questionable?')
@@ -482,18 +492,18 @@ class ProcessModsZipJob
     results["provenance"]                                   = find_in_row(header_row, row_value, 'Provenance note')
     results["other_notes"]                                  = find_in_row(header_row, row_value, 'Other notes')
 
-    topic_count = header_row.select{|i| i[/^Topical Subject Heading \d+$/]}.count
-    for i in 1..topic_count
-      results["topic_#{i}"]                                      = find_in_row(header_row, row_value, "Topical Subject Heading #{i}")
-      results["topic_#{i}_authority"]                            = find_in_row(header_row, row_value, "Topical Subject Heading Authority #{i}")
+    topic_count = header_row.select{|m| m[/^Topical Subject Heading \d+$/]}.count
+    for x in 1..topic_count
+      results["topic_#{x}"]                                      = find_in_row(header_row, row_value, "Topical Subject Heading #{x}")
+      results["topic_#{x}_authority"]                            = find_in_row(header_row, row_value, "Topical Subject Heading Authority #{x}")
     end
 
-    subject_count = header_row.select{|i| i[/^Subject Name \d+$/]}.count
-    for i in 1..subject_count
-      results["subject_name_#{i}"]                               = find_in_row(header_row, row_value, "Subject Name #{i}")
-      results["subject_name_#{i}_authority"]                     = find_in_row(header_row, row_value, "Subject Name #{i} Authority")
-      results["subject_name_#{i}_type"]                          = find_in_row(header_row, row_value, "Subject Name #{i} Name Type")
-      results["subject_name_#{i}_affiliation"]                   = find_in_row(header_row, row_value, "Subject Name #{i} Affiliation")
+    subject_count = header_row.select{|y| y[/^Subject Name \d+$/]}.count
+    for z in 1..subject_count
+      results["subject_name_#{z}"]                               = find_in_row(header_row, row_value, "Subject Name #{z}")
+      results["subject_name_#{z}_authority"]                     = find_in_row(header_row, row_value, "Subject Name #{z} Authority")
+      results["subject_name_#{z}_type"]                          = find_in_row(header_row, row_value, "Subject Name #{z} Name Type")
+      results["subject_name_#{z}_affiliation"]                   = find_in_row(header_row, row_value, "Subject Name #{z} Affiliation")
     end
 
     results["original_title"]                               = find_in_row(header_row, row_value, 'Original Title') #updated cell title
@@ -510,7 +520,15 @@ class ProcessModsZipJob
       if !header_row[row_pos].blank?
         case header_row[row_pos].downcase
         when column_identifier.downcase
+          if row_value[row_pos].nil? || row_value[row_pos].blank?
+            return ""
+          elsif row_value[row_pos].class.to_s == "Date" || row_value[row_pos].class.to_s == "DateTime"
             return row_value[row_pos].to_s.strip || ""
+          elsif row_value[row_pos].class.to_s == "String"
+            return row_value[row_pos].to_s.strip || ""
+          else
+            return row_value[row_pos].value.to_s.strip || ""
+          end
         end
       end
     end
