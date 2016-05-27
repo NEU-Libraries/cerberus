@@ -522,8 +522,10 @@ class ProcessModsZipJob
         when column_identifier.downcase
           if row_value[row_pos].nil? || row_value[row_pos].blank?
             return ""
-          else
+          elsif row_value[row_pos].class.to_s == "Date" || row_value[row_pos].class.to_s == "DateTime" || row_value[row_pos].class.to_s == "String" || row_value[row_pos].class.to_s == "Fixnum"
             return row_value[row_pos].to_s.strip || ""
+          else
+            return row_value[row_pos].value.to_s.strip || ""
           end
         end
       end
