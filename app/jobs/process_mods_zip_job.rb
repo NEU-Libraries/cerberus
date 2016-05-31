@@ -37,7 +37,7 @@ class ProcessModsZipJob
     spreadsheet = load_spreadsheet(spreadsheet_file_path)
 
     header_position = 1
-    header_row = spreadsheet.row(header_position).reject(&:blank?)
+    header_row = spreadsheet.row(header_position)
 
     if !preview.nil?
       row = spreadsheet.row(header_position + 1)
@@ -71,7 +71,11 @@ class ProcessModsZipJob
         end
       end
     else #not a preview
-      spreadsheet.each_row_streaming(offset: header_position) do |row|
+      # spreadsheet.each_row_streaming(offset: header_position) do |row|
+      start = header_position + 1
+      end_row = spreadsheet.last_row.to_i
+      for x in start..end_row
+        row = spreadsheet.row(x)
         if row.present? && header_row.present?
           begin
             row_results = process_a_row(header_row, row)
@@ -193,12 +197,14 @@ class ProcessModsZipJob
       creator_hash['first_names'] = []
       creator_hash['last_names'] = []
       creator_nums.each do |n|
-        name_type = row_results["creator_#{n}_name_type"]
-        if name_type == 'corporate'
-          creator_hash['corporate_names'] << row_results["creator_#{n}_name"].split("|")[0].strip
-        elsif name_type == 'personal'
-          creator_hash['first_names'] << row_results["creator_#{n}_name"].split("|")[1].strip
-          creator_hash['last_names'] << row_results["creator_#{n}_name"].split("|")[0].strip
+        if !row_results["creator_#{n}_name"].blank?
+          name_type = row_results["creator_#{n}_name_type"]
+          if name_type == 'corporate'
+            creator_hash['corporate_names'] << row_results["creator_#{n}_name"].split("|")[0].strip
+          elsif name_type == 'personal'
+            creator_hash['first_names'] << row_results["creator_#{n}_name"].split("|")[1].strip
+            creator_hash['last_names'] << row_results["creator_#{n}_name"].split("|")[0].strip
+          end
         end
       end
       core_file.creators = creator_hash
@@ -211,47 +217,53 @@ class ProcessModsZipJob
         core_file.mods.personal_name(0).usage = nil
       end
       creator_nums.each do |n|
-        name_type = row_results["creator_#{n}_name_type"]
-        role = row_results["creator_#{n}_role"].split("|")[0]
-        role_uri = row_results["creator_#{n}_role"].split("|")[1]
-        affiliation = row_results["creator_#{n}_affiliation"]
-        authority = row_results["creator_#{n}_authority"].split("|")[0]
-        authority_uri = row_results["creator_#{n}_authority"].split("|")[1]
-        value_uri = row_results["creator_#{n}_name"].split("|")[1]
-        if name_type == 'corporate'
-          corp_creators = row_results.select { |key, value| key.to_s.match(/^creator_\d+_name_type$/) && value.to_s.match(/^corporate$/) }
-          corp_nums = corp_creators.keys.map {|key| key.scan(/\d/)[0].to_i }
-          corp_num = corp_nums.index(n) #this basically maps the row_results n number to the creator index since corp and pers are separate in the mods
-          if !role.blank?
-            core_file.mods.corporate_name(corp_num).role.role_term = role
-            core_file.mods.corporate_name(corp_num).role.role_term.value_uri = role_uri unless role_uri.blank?
-            core_file.mods.corporate_name(corp_num).role.role_term.authority = "marcrelator"
-            core_file.mods.corporate_name(corp_num).role.role_term.authority_uri = "http://id.loc.gov/vocabulary/relators"
-            core_file.mods.corporate_name(corp_num).role.role_term.type = "text"
+        if !row_results["creator_#{n}_name"].blank?
+          name_type = row_results["creator_#{n}_name_type"]
+          role = row_results["creator_#{n}_role"].split("|")[0]
+          role_uri = row_results["creator_#{n}_role"].split("|")[1]
+          affiliation = row_results["creator_#{n}_affiliation"]
+          authority = row_results["creator_#{n}_authority"].split("|")[0]
+          authority_uri = row_results["creator_#{n}_authority"].split("|")[1]
+          value_uri = row_results["creator_#{n}_name"].split("|")[1]
+          if name_type == 'corporate'
+            corp_creators = row_results.select { |key, value| key.to_s.match(/^creator_\d+_name_type$/) && value.to_s.match(/^corporate$/) }
+            corp_nums = corp_creators.keys.map {|key| key.scan(/\d/)[0].to_i }
+            corp_num = corp_nums.index(n) #this basically maps the row_results n number to the creator index since corp and pers are separate in the mods
+            if !core_file.mods.corporate_name(corp_num).blank?
+              if !role.blank?
+                core_file.mods.corporate_name(corp_num).role.role_term = role
+                core_file.mods.corporate_name(corp_num).role.role_term.value_uri = role_uri unless role_uri.blank?
+                core_file.mods.corporate_name(corp_num).role.role_term.authority = "marcrelator"
+                core_file.mods.corporate_name(corp_num).role.role_term.authority_uri = "http://id.loc.gov/vocabulary/relators"
+                core_file.mods.corporate_name(corp_num).role.role_term.type = "text"
+              end
+              core_file.mods.corporate_name(corp_num).affiliation = affiliation unless affiliation.blank?
+              core_file.mods.corporate_name(corp_num).authority = authority.strip unless authority.blank?
+              core_file.mods.corporate_name(corp_num).authority_uri = authority_uri.strip unless authority_uri.blank?
+              core_file.mods.corporate_name(corp_num).value_uri = value_uri.strip unless value_uri.blank?
+            end
+          elsif name_type == 'personal'
+            personal_creators = row_results.select { |key, value| key.to_s.match(/^creator_\d+_name_type$/) && value.to_s.match(/^personal$/) }
+            pers_nums = personal_creators.keys.map {|key| key.scan(/\d/)[0].to_i }
+            pers_num = pers_nums.index(n)
+            address = row_results["creator_#{n}_name"].split("|")[2]
+            date = row_results["creator_#{n}_name"].split("|")[3]
+            if !core_file.mods.personal_name(pers_num).blank?
+              if !role.blank?
+                core_file.mods.personal_name(pers_num).role.role_term = role
+                core_file.mods.personal_name(pers_num).role.role_term.value_uri = role_uri unless role_uri.blank?
+                core_file.mods.personal_name(pers_num).role.role_term.authority = "marcrelator"
+                core_file.mods.personal_name(pers_num).role.role_term.authority_uri = "http://id.loc.gov/vocabulary/relators"
+                core_file.mods.personal_name(pers_num).role.role_term.type = "text"
+              end
+              core_file.mods.personal_name(pers_num).affiliation = affiliation unless affiliation.blank?
+              core_file.mods.personal_name(pers_num).authority = authority.strip unless authority.blank?
+              core_file.mods.personal_name(pers_num).authority_uri = authority_uri.strip unless authority_uri.blank?
+              core_file.mods.personal_name(pers_num).value_uri = value_uri.strip unless value_uri.blank?
+              core_file.mods.personal_name(pers_num).name_part_address = address.strip unless address.blank?
+              core_file.mods.personal_name(pers_num).name_part_date = date.strip unless date.blank?
+            end
           end
-          core_file.mods.corporate_name(corp_num).affiliation = affiliation unless affiliation.blank?
-          core_file.mods.corporate_name(corp_num).authority = authority.strip unless authority.blank?
-          core_file.mods.corporate_name(corp_num).authority_uri = authority_uri.strip unless authority_uri.blank?
-          core_file.mods.corporate_name(corp_num).value_uri = value_uri.strip unless value_uri.blank?
-        elsif name_type == 'personal'
-          personal_creators = row_results.select { |key, value| key.to_s.match(/^creator_\d+_name_type$/) && value.to_s.match(/^personal$/) }
-          pers_nums = personal_creators.keys.map {|key| key.scan(/\d/)[0].to_i }
-          pers_num = pers_nums.index(n)
-          address = row_results["creator_#{n}_name"].split("|")[2]
-          date = row_results["creator_#{n}_name"].split("|")[3]
-          if !role.blank?
-            core_file.mods.personal_name(pers_num).role.role_term = role
-            core_file.mods.personal_name(pers_num).role.role_term.value_uri = role_uri unless role_uri.blank?
-            core_file.mods.personal_name(pers_num).role.role_term.authority = "marcrelator"
-            core_file.mods.personal_name(pers_num).role.role_term.authority_uri = "http://id.loc.gov/vocabulary/relators"
-            core_file.mods.personal_name(pers_num).role.role_term.type = "text"
-          end
-          core_file.mods.personal_name(pers_num).affiliation = affiliation unless affiliation.blank?
-          core_file.mods.personal_name(pers_num).authority = authority.strip unless authority.blank?
-          core_file.mods.personal_name(pers_num).authority_uri = authority_uri.strip unless authority_uri.blank?
-          core_file.mods.personal_name(pers_num).value_uri = value_uri.strip unless value_uri.blank?
-          core_file.mods.personal_name(pers_num).name_part_address = address.strip unless address.blank?
-          core_file.mods.personal_name(pers_num).name_part_date = date.strip unless date.blank?
         end
       end
     end
@@ -456,9 +468,8 @@ class ProcessModsZipJob
     results["alternate_title"]                  = find_in_row(header_row, row_value, 'Alternate Title')
     results["alternate_subtitle"]               = find_in_row(header_row, row_value, 'Alternate Subtitle')
 
-    creator_count = header_row.select{|n| n[/^Creator \d+ Name$/]} #have to add one for primary special case
-    creator_count.each_with_index do |x, i|
-      i = i+1 #ignore primary
+    creators = header_row.select{|n| n[/^Creator \d+ Name$/] if !n.blank?} #have to add one for primary special case
+    creators.each.with_index(2) do |x, i|
       results["creator_#{i}_name"] = find_in_row(header_row, row_value, "Creator #{i} Name")
       results["creator_#{i}_authority"] = find_in_row(header_row, row_value, "Creator #{i} Authority")
       results["creator_#{i}_name_type"] = find_in_row(header_row, row_value, "Creator #{i} Name Type")
@@ -496,26 +507,25 @@ class ProcessModsZipJob
     results["acess_condition_use_and_reproduction"]         = find_in_row(header_row, row_value, 'Access Condition : Use and Reproduction')
     results["provenance"]                                   = find_in_row(header_row, row_value, 'Provenance note')
     results["other_notes"]                                  = find_in_row(header_row, row_value, 'Other notes')
+    results["original_title"]                               = find_in_row(header_row, row_value, 'Original Title')
+    results["physical_location"]                            = find_in_row(header_row, row_value, 'What is the physical location for this object?')
+    results["identifier"]                                   = find_in_row(header_row, row_value, 'What is the identifier for this object?')
+    results["collection_title"]                             = find_in_row(header_row, row_value, 'Collection Title')
+    results["series_title"]                                  = find_in_row(header_row, row_value, 'Series Title')
 
-    topic_count = header_row.select{|m| m[/^Topical Subject Heading \d+$/]}
-    topic_count.each_with_index do |x, i|
+    topics = header_row.select{|m| m[/^Topical Subject Heading \d+$/] if !m.blank?}
+    topics.each.with_index(1) do |x, i|
       results["topic_#{i}"]                                      = find_in_row(header_row, row_value, "Topical Subject Heading #{i}")
       results["topic_#{i}_authority"]                            = find_in_row(header_row, row_value, "Topical Subject Heading Authority #{i}")
     end
 
-    subject_count = header_row.select{|y| y[/^Subject Name \d+$/]}
-    subject_count.each_with_index do |x, i|
+    subjects = header_row.select{|y| y[/^Subject Name \d+$/] if !y.blank?}
+    subjects.each.with_index(1) do |x, i|
       results["subject_name_#{i}"]                               = find_in_row(header_row, row_value, "Subject Name #{i}")
       results["subject_name_#{i}_authority"]                     = find_in_row(header_row, row_value, "Subject Name #{i} Authority")
       results["subject_name_#{i}_type"]                          = find_in_row(header_row, row_value, "Subject Name #{i} Name Type")
       results["subject_name_#{i}_affiliation"]                   = find_in_row(header_row, row_value, "Subject Name #{i} Affiliation")
     end
-
-    results["original_title"]                               = find_in_row(header_row, row_value, 'Original Title') #updated cell title
-    results["physical_location"]                            = find_in_row(header_row, row_value, 'What is the physical location for this object?')
-    results["identifier"]                                   = find_in_row(header_row, row_value, 'What is the identifier for this object?')
-    results["collection_title"]                             = find_in_row(header_row, row_value, 'Collection Title') #updated cell title
-    results["series_title"]                                  = find_in_row(header_row, row_value, 'Series Title') #updated cell title
     return results
   end
 
@@ -525,7 +535,12 @@ class ProcessModsZipJob
       if !header_row[row_pos].blank?
         case header_row[row_pos].downcase
         when column_identifier.downcase
-          return row_value[row_pos].to_s || ""
+          value = row_value[row_pos].to_s || ""
+          if !value.blank? && value != ""
+            return value.strip
+          else
+            return value
+          end
         end
       end
     end
