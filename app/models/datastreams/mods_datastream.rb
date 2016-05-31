@@ -160,6 +160,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
 
     t.subject(path: 'mods/mods:subject', namespace_prefix: 'mods'){
       t.authority(path: {attribute: 'authority'})
+      t.authority_uri(path: {attribute: 'authorityURI'})
       t.cartographics(path: 'cartographics', namespace_prefix: 'mods'){
         t.coordinates(path: 'coordinates', namespace_prefix: 'mods')
       }
