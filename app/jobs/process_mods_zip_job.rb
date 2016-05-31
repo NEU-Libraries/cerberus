@@ -229,40 +229,37 @@ class ProcessModsZipJob
             corp_creators = row_results.select { |key, value| key.to_s.match(/^creator_\d+_name_type$/) && value.to_s.match(/^corporate$/) }
             corp_nums = corp_creators.keys.map {|key| key.scan(/\d/)[0].to_i }
             corp_num = corp_nums.index(n) #this basically maps the row_results n number to the creator index since corp and pers are separate in the mods
-            if !core_file.mods.corporate_name(corp_num).blank?
-              if !role.blank?
-                core_file.mods.corporate_name(corp_num).role.role_term = role
-                core_file.mods.corporate_name(corp_num).role.role_term.value_uri = role_uri unless role_uri.blank?
-                core_file.mods.corporate_name(corp_num).role.role_term.authority = "marcrelator"
-                core_file.mods.corporate_name(corp_num).role.role_term.authority_uri = "http://id.loc.gov/vocabulary/relators"
-                core_file.mods.corporate_name(corp_num).role.role_term.type = "text"
-              end
-              core_file.mods.corporate_name(corp_num).affiliation = affiliation unless affiliation.blank?
-              core_file.mods.corporate_name(corp_num).authority = authority.strip unless authority.blank?
-              core_file.mods.corporate_name(corp_num).authority_uri = authority_uri.strip unless authority_uri.blank?
-              core_file.mods.corporate_name(corp_num).value_uri = value_uri.strip unless value_uri.blank?
+            if !role.blank?
+              core_file.mods.corporate_name(corp_num).role.role_term = role
+              core_file.mods.corporate_name(corp_num).role.role_term.value_uri = role_uri.strip unless role_uri.blank?
+              core_file.mods.corporate_name(corp_num).role.role_term.authority = "marcrelator"
+              core_file.mods.corporate_name(corp_num).role.role_term.authority_uri = "http://id.loc.gov/vocabulary/relators"
+              core_file.mods.corporate_name(corp_num).role.role_term.type = "text"
             end
+            core_file.mods.corporate_name(corp_num).affiliation = affiliation unless affiliation.blank?
+            core_file.mods.corporate_name(corp_num).authority = authority.strip unless authority.blank?
+            core_file.mods.corporate_name(corp_num).authority_uri = authority_uri.strip unless authority_uri.blank?
+            core_file.mods.corporate_name(corp_num).value_uri = value_uri.strip unless value_uri.blank?
           elsif name_type == 'personal'
             personal_creators = row_results.select { |key, value| key.to_s.match(/^creator_\d+_name_type$/) && value.to_s.match(/^personal$/) }
             pers_nums = personal_creators.keys.map {|key| key.scan(/\d/)[0].to_i }
             pers_num = pers_nums.index(n)
             address = row_results["creator_#{n}_name"].split("|")[2]
             date = row_results["creator_#{n}_name"].split("|")[3]
-            if !core_file.mods.personal_name(pers_num).blank?
-              if !role.blank?
-                core_file.mods.personal_name(pers_num).role.role_term = role
-                core_file.mods.personal_name(pers_num).role.role_term.value_uri = role_uri unless role_uri.blank?
-                core_file.mods.personal_name(pers_num).role.role_term.authority = "marcrelator"
-                core_file.mods.personal_name(pers_num).role.role_term.authority_uri = "http://id.loc.gov/vocabulary/relators"
-                core_file.mods.personal_name(pers_num).role.role_term.type = "text"
-              end
-              core_file.mods.personal_name(pers_num).affiliation = affiliation unless affiliation.blank?
-              core_file.mods.personal_name(pers_num).authority = authority.strip unless authority.blank?
-              core_file.mods.personal_name(pers_num).authority_uri = authority_uri.strip unless authority_uri.blank?
-              core_file.mods.personal_name(pers_num).value_uri = value_uri.strip unless value_uri.blank?
-              core_file.mods.personal_name(pers_num).name_part_address = address.strip unless address.blank?
-              core_file.mods.personal_name(pers_num).name_part_date = date.strip unless date.blank?
+            value_uri = row_results["creator_#{n}_name"].split("|")[4]
+            if !role.blank?
+              core_file.mods.personal_name(pers_num).role.role_term = role
+              core_file.mods.personal_name(pers_num).role.role_term.value_uri = role_uri.strip unless role_uri.blank?
+              core_file.mods.personal_name(pers_num).role.role_term.authority = "marcrelator"
+              core_file.mods.personal_name(pers_num).role.role_term.authority_uri = "http://id.loc.gov/vocabulary/relators"
+              core_file.mods.personal_name(pers_num).role.role_term.type = "text"
             end
+            core_file.mods.personal_name(pers_num).affiliation = affiliation unless affiliation.blank?
+            core_file.mods.personal_name(pers_num).authority = authority.strip unless authority.blank?
+            core_file.mods.personal_name(pers_num).authority_uri = authority_uri.strip unless authority_uri.blank?
+            core_file.mods.personal_name(pers_num).value_uri = value_uri.strip unless value_uri.blank?
+            core_file.mods.personal_name(pers_num).name_part_address = address.strip unless address.blank?
+            core_file.mods.personal_name(pers_num).name_part_date = date.strip unless date.blank?
           end
         end
       end
@@ -303,11 +300,13 @@ class ProcessModsZipJob
     core_file.mods.physical_description.digital_origin = row_results["digital_origin"] unless row_results["digital_origin"].blank?
     core_file.mods.physical_description.reformatting_quality = row_results["reformatting_quality"]
     if !row_results["language"].blank?
-      core_file.mods.language.language_term = row_results["language"]
+      lang = row_results["language"].split("|")[0]
+      lang_uri = row_results["language"].split("|")[1]
+      core_file.mods.language.language_term = lang.strip
       core_file.mods.language.language_term.language_term_type = "text"
       core_file.mods.language.language_term.language_authority = "iso639-2b"
       core_file.mods.language.language_term.language_authority_uri = "http://id.loc.gov/vocabulary/iso639-2"
-      core_file.mods.language.language_term.language_value_uri = row_results["language_uri"] unless row_results["language_uri"].blank?
+      core_file.mods.language.language_term.language_value_uri = lang_uri.strip unless lang_uri.blank?
     end
     core_file.mods.description = row_results["abstract"] unless row_results["abstract"].blank?
     core_file.mods.table_of_contents = row_results["table_of_contents"] unless row_results["table_of_contents"].blank?
@@ -351,7 +350,11 @@ class ProcessModsZipJob
       else
         core_file.mods.subject(key).topic = subject
       end
-      core_file.mods.subject(key).authority = row_results["topic_#{key+1}_authority"] unless row_results["topic_#{key+1}_authority"].blank? #adds authority if it is set, key starts from 0 but topics start from 1 in spreadsheet
+      authority = row_results["topic_#{key+1}_authority"].split("|")[0]
+      authority_uri = row_results["topic_#{key+1}_authority"].split("|")[1]
+      core_file.mods.subject(key).authority = authority.strip unless authority.blank?
+      core_file.mods.subject(key).authority_uri = authority_uri.strip unless authority_uri.blank?
+      #adds authority if it is set, key starts from 0 but topics start from 1 in spreadsheet
     end
 
     subj_count = core_file.mods.subject.count
@@ -377,7 +380,7 @@ class ProcessModsZipJob
         affiliation = row_results["subject_name_#{n}_affiliation"]
         authority = row_results["subject_name_#{n}_authority"].split("|")[0]
         authority_uri = row_results["subject_name_#{n}_authority"].split("|")[1]
-        value_uri = row_results["subject_name_#{n}"].split("|").last
+        value_uri = row_results["subject_name_#{n}"].split("|")[1]
         if name_type == 'corporate'
           corp_num = i
           core_file.mods.subject(corp_num).name.affiliation = affiliation unless affiliation.blank?
@@ -391,6 +394,7 @@ class ProcessModsZipJob
           given = name[1]
           address = name[2]
           date = name[3]
+          value_uri = name[4]
           core_file.mods.subject(pers_num).name = "" #clean out the basic name and rebuild
           core_file.mods.subject(pers_num).name.name_part_family = family.strip unless family.blank?
           core_file.mods.subject(pers_num).name.name_part_given = given.strip unless given.blank?
@@ -471,10 +475,17 @@ class ProcessModsZipJob
     creators = header_row.select{|n| n[/^Creator \d+ Name$/] if !n.blank?} #have to add one for primary special case
     creators.each.with_index(2) do |x, i|
       results["creator_#{i}_name"] = find_in_row(header_row, row_value, "Creator #{i} Name")
-      results["creator_#{i}_authority"] = find_in_row(header_row, row_value, "Creator #{i} Authority")
-      results["creator_#{i}_name_type"] = find_in_row(header_row, row_value, "Creator #{i} Name Type")
-      results["creator_#{i}_role"] = find_in_row(header_row, row_value, "Creator #{i} Role")
-      results["creator_#{i}_affiliation"] = find_in_row(header_row, row_value, "Creator #{i} Affiliation")
+      if !results["creator_#{i}_name"].blank?
+        results["creator_#{i}_authority"] = find_in_row(header_row, row_value, "Creator #{i} Authority")
+        results["creator_#{i}_name_type"] = find_in_row(header_row, row_value, "Creator #{i} Name Type")
+        results["creator_#{i}_role"] = find_in_row(header_row, row_value, "Creator #{i} Role")
+        results["creator_#{i}_affiliation"] = find_in_row(header_row, row_value, "Creator #{i} Affiliation")
+      else
+        results["creator_#{i}_authority"] = ""
+        results["creator_#{i}_name_type"] = ""
+        results["creator_#{i}_role"] = ""
+        results["creator_#{i}_affiliation"] = ""
+      end
     end
     results["creator_1_name"] = find_in_row(header_row, row_value, "Creator 1 Name - Primary Creator") #primary special case
     results["creator_1_authority"] = find_in_row(header_row, row_value, "Creator 1 Authority")
@@ -500,7 +511,6 @@ class ProcessModsZipJob
     results["extent"]                                       = find_in_row(header_row, row_value, 'Extent')
     results["digital_origin"]                               = find_in_row(header_row, row_value, 'Digital Origin')
     results["language"]                                     = find_in_row(header_row, row_value, 'Language')
-    results["language_uri"]                                 = find_in_row(header_row, row_value, 'Language URI')
     results["abstract"]                                     = find_in_row(header_row, row_value, 'Abstract')
     results["table_of_contents"]                            = find_in_row(header_row, row_value, 'Table of Contents')
     results["acess_condition_restriction"]                  = find_in_row(header_row, row_value, 'Access Condition : Restriction on access')
@@ -519,12 +529,12 @@ class ProcessModsZipJob
       results["topic_#{i}_authority"]                            = find_in_row(header_row, row_value, "Topical Subject Heading Authority #{i}")
     end
 
-    subjects = header_row.select{|y| y[/^Subject Name \d+$/] if !y.blank?}
+    subjects = header_row.select{|y| y[/^Name Subject Heading \d+$/] if !y.blank?}
     subjects.each.with_index(1) do |x, i|
-      results["subject_name_#{i}"]                               = find_in_row(header_row, row_value, "Subject Name #{i}")
-      results["subject_name_#{i}_authority"]                     = find_in_row(header_row, row_value, "Subject Name #{i} Authority")
-      results["subject_name_#{i}_type"]                          = find_in_row(header_row, row_value, "Subject Name #{i} Name Type")
-      results["subject_name_#{i}_affiliation"]                   = find_in_row(header_row, row_value, "Subject Name #{i} Affiliation")
+      results["subject_name_#{i}"]                               = find_in_row(header_row, row_value, "Name Subject Heading #{i}")
+      results["subject_name_#{i}_authority"]                     = find_in_row(header_row, row_value, "Name Subject Heading Authority #{i}")
+      results["subject_name_#{i}_type"]                          = find_in_row(header_row, row_value, "Name Subject Heading Name Type #{i}")
+      results["subject_name_#{i}_affiliation"]                   = find_in_row(header_row, row_value, "Name Subject Heading Affiliation #{i}")
     end
     return results
   end
