@@ -244,8 +244,7 @@ class User < ActiveRecord::Base
   end
 
   def mods_spreadsheet_loader?
-    # return self.groups.include? "northeastern:drs:repository:loaders:mods_spreadsheet" #TODO:NOT SURE YET
-    return TRUE
+    return self.groups.include? "northeastern:drs:repository:loaders:spreadsheet"
   end
 
   def loaders
