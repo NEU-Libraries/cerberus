@@ -65,6 +65,14 @@ class Loaders::LoadsController < ApplicationController
     @images = Loaders::ImageReport.where(load_report_id:"#{@report.id}").find_all
     @user = User.find_by_nuid(@report.nuid)
     @page_title = @report.loader_name + " Load into " + Collection.find(@report.collection).title
+    if session[:flash_error]
+      flash[:error] = session[:flash_error]
+      session[:flash_error] = nil
+    end
+    if session[:flash_success]
+      flash[:notice] = session[:flash_success]
+      session[:flash_success] = nil
+    end
     respond_to do |format|
       format.js {
         render 'loaders/show', locals: {images: @images, user: @user}
@@ -99,6 +107,7 @@ class Loaders::LoadsController < ApplicationController
             # multipage zip job
             report_id = Loaders::LoadReport.create_from_strings(current_user, 0, @loader_name, parent)
             Cerberus::Application::Queue.push(ProcessMultipageZipJob.new(@loader_name, new_file.to_s, parent, copyright, current_user, permissions, report_id))
+            session[:flash_success] = "Your file has been submitted and is now being processed. You will receive an email when the load is complete."
             render :json => {report_id: report_id}.to_json and return
           elsif short_name == "mods_spreadsheet"
             #mods spreadsheet job
@@ -106,7 +115,7 @@ class Loaders::LoadsController < ApplicationController
             report_id = Loaders::LoadReport.create_from_strings(current_user, 0, @loader_name, parent)
             ProcessModsZipJob.new(@loader_name, spreadsheet_file_path, parent, copyright, current_user, permissions, report_id, nil, true).run
             load_report = Loaders::LoadReport.find(report_id)
-
+            session[:flash_success] = "Your file has been submitted and is now being processed. You will receive an email when the load is complete."
             if !load_report.comparison_file_pid.blank?
               render :json => {report_id: report_id, comparison_file_pid: load_report.comparison_file_pid}.to_json and return
             elsif !load_report.preview_file_pid.blank?
@@ -117,9 +126,9 @@ class Loaders::LoadsController < ApplicationController
             # send to iptc job
             report_id = Loaders::LoadReport.create_from_strings(current_user, 0, @loader_name, parent)
             Cerberus::Application::Queue.push(ProcessIptcZipJob.new(@loader_name, new_file.to_s, parent, copyright, current_user, permissions, report_id,  derivatives))
+            session[:flash_success] = "Your file has been submitted and is now being processed. You will receive an email when the load is complete."
             render :json => {report_id: report_id}.to_json and return
           end
-          session[:flash_success] = "Your file has been submitted and is now being processed. You will receive an email when the load is complete."
         else
           #error out
           FileUtils.rm(new_file)
