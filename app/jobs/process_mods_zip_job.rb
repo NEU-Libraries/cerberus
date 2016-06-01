@@ -477,7 +477,7 @@ class ProcessModsZipJob
       results["creator_#{i}_name"] = find_in_row(header_row, row_value, "Creator #{i} Name")
       if !results["creator_#{i}_name"].blank?
         results["creator_#{i}_authority"] = find_in_row(header_row, row_value, "Creator #{i} Authority")
-        results["creator_#{i}_name_type"] = find_in_row(header_row, row_value, "Creator #{i} Name Type")
+        results["creator_#{i}_name_type"] = find_in_row(header_row, row_value, "Creator #{i} Name Type").downcase
         results["creator_#{i}_role"] = find_in_row(header_row, row_value, "Creator #{i} Role")
         results["creator_#{i}_affiliation"] = find_in_row(header_row, row_value, "Creator #{i} Affiliation")
       else
@@ -533,7 +533,7 @@ class ProcessModsZipJob
     subjects.each.with_index(1) do |x, i|
       results["subject_name_#{i}"]                               = find_in_row(header_row, row_value, "Name Subject Heading #{i}")
       results["subject_name_#{i}_authority"]                     = find_in_row(header_row, row_value, "Name Subject Heading Authority #{i}")
-      results["subject_name_#{i}_type"]                          = find_in_row(header_row, row_value, "Name Subject Heading Name Type #{i}")
+      results["subject_name_#{i}_type"]                          = find_in_row(header_row, row_value, "Name Subject Heading Name Type #{i}").downcase
       results["subject_name_#{i}_affiliation"]                   = find_in_row(header_row, row_value, "Name Subject Heading Affiliation #{i}")
     end
     return results
