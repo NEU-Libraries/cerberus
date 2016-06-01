@@ -156,7 +156,7 @@ class ProcessModsZipJob
           rescue Exception => error
             puts error
             puts error.backtrace
-            populate_error_report(load_report, existing_file, error.messsage, row_results, core_file, old_mods, header_row, row)
+            populate_error_report(load_report, existing_file, error.message, row_results, core_file, old_mods, header_row, row)
             next
           end
         end
@@ -171,7 +171,8 @@ class ProcessModsZipJob
       # LoaderMailer.load_alert(load_report, User.find_by_nuid(load_report.nuid)).deliver!
       # cleaning up
       FileUtils.rm(spreadsheet_file_path)
-      FileUtils.rmdir(File.dirname(dir_path))
+      dir_path = File.dirname(spreadsheet_file_path)
+      FileUtils.rm_rf(dir_path)
       if CoreFile.exists?(load_report.preview_file_pid)
         CoreFile.find(load_report.preview_file_pid).destroy
       elsif CoreFile.exists?(load_report.comparison_file_pid)
@@ -230,7 +231,7 @@ class ProcessModsZipJob
             corp_nums = corp_creators.keys.map {|key| key.scan(/\d/)[0].to_i }
             corp_num = corp_nums.index(n) #this basically maps the row_results n number to the creator index since corp and pers are separate in the mods
             if !role.blank?
-              core_file.mods.corporate_name(corp_num).role.role_term = role
+              core_file.mods.corporate_name(corp_num).role.role_term = role.strip
               core_file.mods.corporate_name(corp_num).role.role_term.value_uri = role_uri.strip unless role_uri.blank?
               core_file.mods.corporate_name(corp_num).role.role_term.authority = "marcrelator"
               core_file.mods.corporate_name(corp_num).role.role_term.authority_uri = "http://id.loc.gov/vocabulary/relators"
@@ -248,7 +249,7 @@ class ProcessModsZipJob
             date = row_results["creator_#{n}_name"].split("|")[3]
             value_uri = row_results["creator_#{n}_name"].split("|")[4]
             if !role.blank?
-              core_file.mods.personal_name(pers_num).role.role_term = role
+              core_file.mods.personal_name(pers_num).role.role_term = role.strip
               core_file.mods.personal_name(pers_num).role.role_term.value_uri = role_uri.strip unless role_uri.blank?
               core_file.mods.personal_name(pers_num).role.role_term.authority = "marcrelator"
               core_file.mods.personal_name(pers_num).role.role_term.authority_uri = "http://id.loc.gov/vocabulary/relators"
@@ -584,11 +585,11 @@ class ProcessModsZipJob
   end
 
   def populate_error_report(load_report, existing_file, error, row_results, core_file, old_mods, header_row, row)
-    if existing_file && core_file
+    if existing_file && CoreFile.exists?(core_file.pid)
       core_file.mods.content = old_mods
       core_file.save!
     else
-      core_file.destroy if core_file
+      core_file.destroy if CoreFile.exists?(core_file.pid)
     end
     row_results = row_results.blank? ? nil : row_results
     if core_file
