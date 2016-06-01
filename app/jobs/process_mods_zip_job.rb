@@ -5,7 +5,7 @@ class ProcessModsZipJob
   include ZipHelper
   include HandleHelper
 
-  attr_accessor :loader_name, :spreadsheet_file_path, :parent, :copyright, :current_user, :permissions, :preview, :depositor, :client, :report_id
+  attr_accessor :loader_name, :spreadsheet_file_path, :parent, :copyright, :current_user, :permissions, :preview, :depositor, :client, :report_id, :existing_files
 
   def queue_name
     :mods_process_zip
@@ -22,6 +22,7 @@ class ProcessModsZipJob
     self.client = client
     self.report_id = report_id
     self.depositor = depositor
+    self.existing_files = false #flag to determine if the spreadsheet as a whole is editing or creating files, goes off of first row which is tested on preview, that way the user knows if they're editing or creating before proceeding with the load
   end
 
   def run
@@ -38,7 +39,6 @@ class ProcessModsZipJob
 
     header_position = 1
     header_row = spreadsheet.row(header_position)
-
     if !preview.nil?
       row = spreadsheet.row(header_position + 1)
       if row.present? && header_row.present?
@@ -79,12 +79,15 @@ class ProcessModsZipJob
         if row.present? && header_row.present?
           begin
             row_results = process_a_row(header_row, row)
+            if x == start
+              existing_files = set_existing_files(row_results)
+            end
             if row_results.blank?
               # do nothing
             else
               existing_file = false
               old_mods = nil
-              if row_results["pid"].blank? && !row_results["file_name"].blank? #make new file
+              if row_results["pid"].blank? && !row_results["file_name"].blank? && existing_files == false #make new file
                 new_file = File.dirname(dir_path) + "/" + row_results["file_name"]
                 if File.exists? new_file
                   if Cerberus::ContentFile.virus_check(File.new(new_file)) == 0
@@ -114,7 +117,7 @@ class ProcessModsZipJob
                   populate_error_report(load_report, existing_file, "File specified does not exist", row_results, core_file, old_mods, header_row, row)
                   next
                 end
-              else
+              elsif existing_files == true
                 existing_file = true
                 if core_file_checks(row_results["pid"]) == true
                   core_file = CoreFile.find(row_results["pid"])
@@ -126,6 +129,10 @@ class ProcessModsZipJob
                   populate_error_report(load_report, existing_file, core_file_checks(row_results["pid"]), row_results, core_file, old_mods, header_row, row)
                   next
                 end
+              else
+                # mix match spreadsheet with new files and existing files
+                populate_error_report(load_report, existing_file, "File was missing pid or file name", row_results, nil, old_mods, header_row, row)
+                next
               end
               assign_a_row(row_results, core_file)
               if core_file.keywords.length < 1
@@ -585,14 +592,14 @@ class ProcessModsZipJob
   end
 
   def populate_error_report(load_report, existing_file, error, row_results, core_file, old_mods, header_row, row)
-    if existing_file && CoreFile.exists?(core_file.pid)
-      core_file.mods.content = old_mods
-      core_file.save!
-    else
-      core_file.destroy if CoreFile.exists?(core_file.pid)
-    end
     row_results = row_results.blank? ? nil : row_results
     if core_file
+      if existing_file && CoreFile.exists?(core_file.pid)
+        core_file.mods.content = old_mods
+        core_file.save!
+      else
+        core_file.destroy if CoreFile.exists?(core_file.pid)
+      end
       title = core_file.title.blank? ? row_results["title"] : core_file.title
       original_file = core_file.original_filename.blank? ? row_results["file_name"] : core_file.original_filename
     else
@@ -603,5 +610,13 @@ class ProcessModsZipJob
     image_report.title = title
     image_report.original_file = original_file
     image_report.save!
+  end
+
+  def set_existing_files(row_results)
+    if row_results["pid"].blank? && !row_results["file_name"].blank?
+      return false
+    else
+      return true
+    end
   end
 end
