@@ -25,14 +25,20 @@ class ModsDatastream < ActiveFedora::OmDatastream
       t.sub_title(path: 'subTitle', namespace_prefix: 'mods', index_as: [:stored_searchable])
       t.part_name(path: 'partName', namespace_prefix: 'mods', index_as: [:stored_searchable])
       t.part_number(path: 'partNumber', namespace_prefix: 'mods', index_as: [:stored_searchable])
+      t.supplied(path: {attribute: 'supplied'})
     }
 
-    t.other_titles(path: 'titleInfo', namespace_prefix: 'mods'){
+    t.alternate_title(path: 'mods/mods:titleInfo', namespace_prefix: 'mods', attributes: {type: "alternative"}){
       t.title(path: 'title', namespace_prefix: 'mods')
       t.non_sort(path: 'nonSort', namespace_prefix: 'mods')
       t.sub_title(path: 'subTitle', namespace_prefix: 'mods')
       t.part_name(path: 'partName', namespace_prefix: 'mods')
       t.part_number(path: 'partNumber', namespace_prefix: 'mods')
+    }
+
+    t.all_titles(path:'titleInfo', namespace_prefix:'mods'){
+      t.title(path:'title', namespace_prefix: 'mods')
+      t.non_sort(path: 'nonSort', namespace_prefix: 'mods')
     }
 
     t.abstract(path: 'abstract', namespace_prefix: 'mods', index_as: [:stored_searchable])
@@ -44,15 +50,22 @@ class ModsDatastream < ActiveFedora::OmDatastream
     t.personal_name(path: 'mods/mods:name', namespace_prefix: 'mods', attributes: { type: 'personal' }){
       t.usage(path: { attribute: "usage" })
       t.authority(path: { attribute: 'authority' })
+      t.authority_uri(path: {attribute: 'authorityURI'})
+      t.value_uri(path: {attribute: 'valueURI'})
       t.name_part(path: 'namePart', namespace_prefix: 'mods', attributes: { type: :none }, index_as: [:stored_searchable, :facetable])
       t.name_part_given(path: 'namePart', namespace_prefix: 'mods', attributes: { type: 'given' })
       t.name_part_family(path: 'namePart', namespace_prefix: 'mods', attributes: { type: 'family' })
+      t.name_part_date(path: 'namePart', namespace_prefix: 'mods', attributes: {type: 'date'})
+      t.name_part_address(path: 'namePart', namespace_prefix: 'mods', attributes: {type: 'termsOfAddress'})
       t.role(namespace_prefix: 'mods', index_as: [:stored_searchable]){
         t.role_term(path: 'roleTerm', namespace_prefix: 'mods'){
           t.authority(path: { attribute: 'authority'})
           t.type(path: { attribute: 'type'})
+          t.authority_uri(path: {attribute: 'authorityURI'})
+          t.value_uri(path: {attribute: 'valueURI'})
         }
       }
+      t.affiliation(namespace_prefix: 'mods', attribute: 'affiliation')
     }
 
     t.author_name_part(:path=>"roleTerm[.='Author']/../../mods:namePart", namespace_prefix: 'mods')
@@ -61,32 +74,57 @@ class ModsDatastream < ActiveFedora::OmDatastream
 
     t.corporate_name(path: 'mods/mods:name', namespace_prefix: 'mods', attributes: { type: 'corporate' }){
       t.usage(path: { attribute: "usage" })
+      t.authority(path: { attribute: 'authority' })
+      t.authority_uri(path: {attribute: 'authorityURI'})
+      t.value_uri(path: {attribute: 'valueURI'})
       t.name_part(path: 'namePart', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable])
+      t.role(namespace_prefix: 'mods', index_as: [:stored_searchable]){
+        t.role_term(path: 'roleTerm', namespace_prefix: 'mods'){
+          t.authority(path: { attribute: 'authority'})
+          t.type(path: { attribute: 'type'})
+          t.authority_uri(path: {attribute: 'authorityURI'})
+          t.value_uri(path: {attribute: 'valueURI'})
+        }
+      }
+      t.affiliation(namespace_prefix: 'mods', attribute: 'affiliation')
     }
 
     t.type_of_resource(path: 'typeOfResource', namespace_prefix: 'mods')
 
     t.genre(path: 'genre', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable]){
       t.authority(path: { attribute: 'authority' })
+      t.authority_uri(path: { attribute: 'authorityURI' })
+      t.value_uri(path: { attribute: 'valueURI' })
     }
 
     t.origin_info(path: 'originInfo', namespace_prefix: 'mods'){
       t.publisher(path: 'publisher', namespace_prefix: 'mods', index_as: [:stored_searchable])
       t.place(path: 'place', namespace_prefix: 'mods'){
-        t.city_term(path: 'placeTerm', namespace_prefix: 'mods', attributes: { type: 'text' })
-        t.state_term(path: 'placeTerm', namespace_prefix: 'mods', attributes: { type: 'code', authority: 'marccountry' })
+        t.place_term(path: 'placeTerm', namespace_prefix: 'mods', attributes: { type: 'text' })
       }
-      t.date_created(path: 'dateCreated', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable], attributes: { encoding: 'w3cdtf', keyDate: 'yes' })
+      t.date_created(path: 'dateCreated', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable], attributes: { encoding: 'w3cdtf', keyDate: 'yes' }){
+        t.point(path: {attribute: 'point'})
+        t.qualifier(path: {attribute: 'qualifier'})
+      }
+      t.date_created_end(path: 'dateCreated', namespace_prefix: 'mods', attributes: { encoding: 'w3cdtf', point: 'end'}){
+        t.qualifier(path: {attribute: 'qualifier'})
+      }
       t.copyright(path: 'copyrightDate', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable], attributes: { encoding: 'w3cdtf' })
       t.date_issued(path: 'dateIssued', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable], attributes: { encoding: 'w3cdtf' })
       t.date_other(path: 'dateOther', namespace_prefix: 'mods', index_as: [:stored_searchable], attributes: { encoding: 'w3cdtf'})
       t.issuance(path: 'issuance', namespace_prefix: 'mods')
+      t.edition(path: 'edition', namespace_prefix: 'mods')
+      t.frequency(path: 'frequency', namespace_prefix: 'mods'){
+        t.authority(path: { attribute: 'authority'})
+      }
     }
 
     t.language(path: 'language', namespace_prefix: 'mods'){
       t.language_term(path: 'languageTerm', namespace_prefix: 'mods'){
         t.language_term_type(path: { attribute: 'type'})
         t.language_authority(path: { attribute: 'authority'})
+        t.language_authority_uri(path: {attribute: 'authorityURI'})
+        t.language_value_uri(path: { attribute: 'valueURI'})
       }
     }
 
@@ -96,6 +134,24 @@ class ModsDatastream < ActiveFedora::OmDatastream
       }
       t.digital_origin(path: 'digitalOrigin', namespace_prefix: 'mods')
       t.extent(path: 'extent', namespace_prefix: 'mods')
+      t.reformatting_quality(path: 'reformattingQuality', namespace_prefix: 'mods')
+    }
+
+    t.record_info(path: 'recordInfo', namespace_prefix: 'mods'){
+      t.record_content_source(path: 'recordContentSource', namespace_prefix: 'mods')
+      t.record_origin(path: 'recordOrigin', namespace_prefix: 'mods')
+      t.language_of_cataloging(path: 'languageOfCataloging', namespace_prefix: 'mods'){
+        t.language_term(path: 'languageTerm', namespace_prefix: 'mods'){
+          t.language_term_type(path: { attribute: 'type'})
+          t.language_authority(path: { attribute: 'authority'})
+          t.language_authority_uri(path: { attribute: 'authorityURI'})
+          t.language_value_uri(path: { attribute: 'valueURI'})
+        }
+      }
+      t.description_standard(path: 'descriptionStandard', namespace_prefix: 'mods'){
+        t.authority(path: {attribute: 'authority'})
+      }
+      t.record_creation_date(path: 'recordCreationDate', namespace_prefix: 'mods', attributes: { encoding: 'w3cdtf' })
     }
 
     t.note(path: 'note', namespace_prefix: 'mods', index_as: [:stored_searchable]){
@@ -103,6 +159,8 @@ class ModsDatastream < ActiveFedora::OmDatastream
     }
 
     t.subject(path: 'mods/mods:subject', namespace_prefix: 'mods'){
+      t.authority(path: {attribute: 'authority'})
+      t.authority_uri(path: {attribute: 'authorityURI'})
       t.cartographics(path: 'cartographics', namespace_prefix: 'mods'){
         t.coordinates(path: 'coordinates', namespace_prefix: 'mods')
       }
@@ -111,7 +169,20 @@ class ModsDatastream < ActiveFedora::OmDatastream
         t.authority(path: { attribute: 'authority' })
       }
       t.scoped_topic(path: 'topic', namespace_prefix: 'mods', attributes: { authority: :any })
+      t.name(path: 'name', namespace_prefix: 'mods', index_as: [:stored_searchable]){
+        t.type(path: {attribute: 'type'})
+        t.name_part(path: 'namePart', namespace_prefix: 'mods', attributes: { type: :none })
+        t.name_part_given(path: 'namePart', namespace_prefix: 'mods', attributes: { type: 'given' })
+        t.name_part_family(path: 'namePart', namespace_prefix: 'mods', attributes: { type: 'family' })
+        t.name_part_date(path: 'namePart', namespace_prefix: 'mods', attributes: {type: 'date'})
+        t.name_part_address(path: 'namePart', namespace_prefix: 'mods', attributes: {type: 'termsOfAddress'})
+        t.affiliation(namespace_prefix: 'mods', attribute: 'affiliation')
+        t.authority(path: { attribute: 'authority' })
+        t.authority_uri(path: {attribute: 'authorityURI'})
+        t.value_uri(path: {attribute: 'valueURI'})
+      }
     }
+
     t.identifier(path: 'identifier', namespace_prefix: 'mods', index_as: [:stored_searchable], attributes: { type: 'hdl' }){
       t.type(path: { attribute: 'type'})
       t.display_label(path: {attribute: 'displayLabel'})
@@ -122,8 +193,10 @@ class ModsDatastream < ActiveFedora::OmDatastream
     }
 
     t.classification(path: 'classification', namespace_prefix: 'mods')
+    t.table_of_contents(path: 'tableOfContents', namespace_prefix: 'mods')
 
     t.related_item(path: 'relatedItem', namespace_prefix: 'mods'){
+      t.type(path: {attribute: 'type'})
       t.title_info(path: 'titleInfo', namespace_prefix: 'mods'){
         t.title(path: 'title', namespace_prefix: 'mods')
       }
@@ -148,8 +221,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
       }
       t.origin_info(path: 'originInfo', namespace_prefix: 'mods'){
         t.place(path: 'place', namespace_prefix: 'mods'){
-          t.city_term(path: 'placeTerm', namespace_prefix: 'mods', attributes: { type: 'text' })
-          t.state_term(path: 'placeTerm', namespace_prefix: 'mods', attributes: { type: 'code', authority: 'marccountry' })
+          t.place_term(path: 'placeTerm', namespace_prefix: 'mods', attributes: { type: 'text' })
         }
         t.publisher(path: 'publisher', namespace_prefix: 'mods', index_as: [:stored_searchable])
         t.issuance(path: 'issuance', namespace_prefix: 'mods')
@@ -165,6 +237,9 @@ class ModsDatastream < ActiveFedora::OmDatastream
       }
       t.identifier(path: 'identifier', namespace_prefix: 'mods'){
         t.type(path: { attribute: 'type' })
+      }
+      t.location(path: 'location', namespace_prefix: 'mods'){
+        t.physical_location(path: 'physicalLocation', namespace_prefix: 'mods')
       }
     }
 
@@ -227,9 +302,8 @@ class ModsDatastream < ActiveFedora::OmDatastream
     solr_doc["title_info_title_tesim"] = kramdown_parse(self.title_info.title.first)
 
     # Make sure all titles and non_sorts end up in title_tesim
-    total_title_array = self.other_titles.non_sort.concat self.other_titles.title
-    solr_doc["title_tesim"] = total_title_array.map! {|item| kramdown_parse(item)}
-    # solr_doc["title_tesim"] = kramdown_parse(self.title_info.title.first)
+    total_title_array = self.all_titles.non_sort.concat self.all_titles.title
+    solr_doc["title_tesim"] = total_title_array.select {|item| kramdown_parse(item) unless item.blank?}
 
     # Kramdown parse for search purposes - #439
     # title_ssi will only be used for sorting - #766
@@ -316,7 +390,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
     # Creating sortable creator field
     solr_doc["creator_ssi"] = all_names.first
 
-    solr_doc["origin_info_place_tesim"] = self.origin_info.place.city_term
+    solr_doc["origin_info_place_tesim"] = self.origin_info.place.place_term
 
     solr_doc = self.generate_niec_solr_hash(solr_doc)
 
@@ -334,24 +408,35 @@ class ModsDatastream < ActiveFedora::OmDatastream
         xml.titleInfo("usage" => "primary") {
           xml.title
         }
+        xml.titleInfo("type" => "alternative"){
+          xml.title
+        }
         xml.abstract
         xml.name('type' => 'personal')
         xml.name('type' => 'corporate')
         xml.originInfo {
-          xml.dateCreated('keyDate' => 'yes', 'encoding' => 'w3cdtf')
           xml.place{
             xml.placeTerm
           }
+          xml.dateCreated('keyDate' => 'yes', 'encoding' => 'w3cdtf')
         }
         xml.language{
           xml.languageTerm
         }
         xml.note('type' => 'citation')
         xml.subject{
-          xml.keyword ""
+          xml.topic ""
         }
         xml.identifier('type' => 'hdl', 'displayLabel' => 'Permanent URL')
         xml.typeOfResource
+
+        xml.recordInfo{
+          xml.recordContentSource
+          xml.recordOrigin
+          xml.descriptionStandard
+          xml.languageOfCataloging
+        }
+
         xml.physicalDescription{
           xml.form
         }
@@ -411,8 +496,11 @@ class ModsDatastream < ActiveFedora::OmDatastream
     return ""
   end
 
-  def date=(date_val)
+  def date=(date_val, point=nil)
     self.origin_info.date_created = date_val
+    if !point.blank?
+      self.origin_info.date_created.point = point
+    end
   end
 
   # Filters out blank entries, builds nodes as required
@@ -471,6 +559,16 @@ class ModsDatastream < ActiveFedora::OmDatastream
     self.topic = array_of_keywords.map {|kw| kw.gsub(/[\s\b\v]+/, " ") }
   end
 
+  def name_subjects=(array_of_hashes)
+    array_of_hashes.select!{ |ac| !ac.blank? && !ac.values.blank?}
+    array_of_hashes.each_with_index do |subj, i|
+      self.insert_new_node(:subject)
+      i = self.subject.length-1 #last one
+      self.subject(i).name.type = subj.keys[0].to_s
+      self.subject(i).name.name_part = subj.values[0]
+    end
+  end
+
   # Allows for tombstone message
   def access_conditions=(hash_of_strings)
     hash_of_access = hash_of_strings.select { |ac| !ac.blank? }
@@ -505,6 +603,53 @@ class ModsDatastream < ActiveFedora::OmDatastream
       i = i+1
     end
     return hash
+  end
+
+  # Allows for multiple notes to be attached to one mods record
+  def notes=(hash_of_strings)
+    hash_of_notes = hash_of_strings.select { |ac| !ac.blank? }
+
+    if hash_of_notes.length < self.note.length
+      node_count = self.note.length - hash_of_notes.length
+      trim_nodes_from_zero(:note, node_count)
+    end
+    i = 0
+    hash_of_notes.each do |key, val|
+      if self.note[i].nil?
+        self.insert_new_node(:note)
+      end
+      self.note(i).type = key
+      i = i+1
+    end
+    self.note = hash_of_notes.values
+  end
+
+  # Allows for multiple related items to be attached to one mods record
+  def related_items=(hash_of_hashes)
+    hash_of_items = hash_of_hashes.select { |ac| !ac.blank? }
+
+    if hash_of_items.length < self.related_item.length
+      node_count = self.related_item.length - hash_of_items.length
+      trim_nodes_from_zero(:related_item, node_count)
+    end
+    i = 0
+    hash_of_items.each do |key, val|
+      if self.related_item[i].nil?
+        self.insert_new_node(:related_item)
+      end
+      self.related_item(i).type = key
+      # take hash and assign its values
+      if val.has_key?(:title)
+        self.related_item(i).title_info.title = val[:title]
+      end
+      if val.has_key?(:physical_location)
+        self.related_item(i).location.physical_location = val[:physical_location]
+      end
+      if val.has_key?(:identifier)
+        self.related_item(i).identifier = val[:identifier]
+      end
+      i = i+1
+    end
   end
 
   # The following four methods are probably deprecated, given that we won't be
@@ -667,7 +812,6 @@ class ModsDatastream < ActiveFedora::OmDatastream
   def self.subject_template
     builder = Nokogiri::XML::Builder.new do |xml|
       xml.subject{
-        xml.topic ""
       }
     end
     return builder.doc.root
@@ -690,6 +834,31 @@ class ModsDatastream < ActiveFedora::OmDatastream
   def self.access_condition_template
     builder = Nokogiri::XML::Builder.new do |xml|
       xml.accessCondition " "
+    end
+    return builder.doc.root
+  end
+
+  def self.note_template
+    builder = Nokogiri::XML::Builder.new do |xml|
+      xml.note " "
+    end
+    return builder.doc.root
+  end
+
+  def self.related_item_template
+    builder = Nokogiri::XML::Builder.new do |xml|
+      xml.relatedItem{
+        xml.titleInfo{
+          xml.title " "
+        }
+      }
+    end
+    return builder.doc.root
+  end
+
+  def self.topic_template
+    builder = Nokogiri::XML::Builder.new do |xml|
+      xml.topic " "
     end
     return builder.doc.root
   end

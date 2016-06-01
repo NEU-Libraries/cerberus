@@ -1,0 +1,68 @@
+%table.table.table-striped#report
+  %th File Name
+  %th Core File Title
+  %th File Status
+  %th
+  - @images.each do |image|
+    - if image.validity == true && image.modified == false
+      -if CoreFile.exists?(image.pid)
+        - cf = CoreFile.find("#{image.pid}")
+        %tr.success
+          %td
+            = cf.label
+          %td
+            = cf.title
+          %td Success
+          %td
+            = link_to("View", core_file_path(cf.pid), class:"btn btn-small btn-success")
+      -else
+        %tr.success
+          %td
+            = image.original_file
+          %td
+            = image.title
+          %td Success
+          %td File no longer exists
+    - elsif image.validity == true && image.modified == true
+      -if CoreFile.exists?(image.pid)
+        - cf = CoreFile.find("#{image.pid}")
+        %tr.warning
+          %td
+            = cf.label
+          %td
+            = cf.title
+          %td
+            = "Modified - #{image.exception}"
+          %td
+            = link_to("View", core_file_path(cf.pid), class:"btn btn-small btn-success")
+      -else
+        %tr.warning
+          %td
+            = image.original_file
+          %td
+            = image.title
+          %td
+            = "Modified - #{image.exception}"
+          %td File no longer exists
+    - else
+      %tr.error
+        %td
+          = image.original_file
+        %td
+          = image.title
+        %td
+          = "Error - #{image.exception}"
+        %td
+          - if image.iptc != ""
+            -if @report.loader_name == t('drs.loaders.marcom.long_name')
+              = link_to("View IPTC", loaders_marcom_iptc_path(image.id), class:"btn btn-small btn-warning")
+            - elsif @report.loader_name == t('drs.loaders.coe.long_name')
+              = link_to("View IPTC", loaders_coe_iptc_path(image.id), class:"btn btn-small btn-warning")
+            - elsif @report.loader_name == t('drs.loaders.cps.long_name')
+              = link_to("View IPTC", loaders_cps_iptc_path(image.id), class:"btn btn-small btn-warning")
+            - elsif @report.loader_name == t('drs.loaders.emsa.long_name')
+              = link_to("View IPTC", loaders_emsa_iptc_path(image.id), class:"btn btn-small btn-warning")
+            - elsif @report.loader_name == t('drs.loaders.bouve.long_name')
+              = link_to("View IPTC", loaders_bouve_iptc_path(image.id), class:"btn btn-small btn-warning")
+            - elsif @report.loader_name == t('drs.loaders.mods_spreadsheet.long_name')
+              = link_to("View MODS", loaders_mods_spreadsheet_mods_path(image.id), class:"btn btn-small btn-warning")

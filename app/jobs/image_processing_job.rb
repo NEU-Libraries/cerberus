@@ -170,10 +170,16 @@ class ImageProcessingJob
                 core_file.keywords = ["#{val}"]
               end
             elsif tag == 'City'
-              core_file.mods.origin_info.place.city_term = val
+              if !core_file.mods.origin_info.place.place_term.blank?
+                core_file.mods.origin_info.place.place_term = val + "#{core_file.mods.origin_info.place.place_term.first}"
+              else
+                core_file.mods.origin_info.place.place_term = val
+              end
             elsif tag == 'State'
-              if val == "MA"
-                core_file.mods.origin_info.place.state_term = "mau"
+              if !core_file.mods.origin_info.place.place_term.blank?
+                core_file.mods.origin_info.place.place_term = "#{core_file.mods.origin_info.place.place_term.first} #{val}"
+              else
+                core_file.mods.origin_info.place.place_term = val
               end
             end
           end
@@ -191,7 +197,7 @@ class ImageProcessingJob
           create_special_error("Missing title (IPTC Headline)", iptc, core_file, load_report)
           return
         end
-        if core_file.keywords.blank?
+        if core_file.keywords.first.blank?
           create_special_error("Missing keyword(s)", iptc, core_file, load_report)
           return
         end

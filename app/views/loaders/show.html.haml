@@ -20,72 +20,26 @@
   = @user.name
 %h4
   Total Files:
-  = "#{@report.number_of_files} (Successful: #{@report.success_count}, Modified: #{@report.modified_count}, Error: #{@report.fail_count})"
+  %span.file_count
+    = "#{@report.number_of_files} (Successful: #{@report.success_count}, Modified: #{@report.modified_count}, Error: #{@report.fail_count})"
 
 %br
-%table.table.table-striped
-  %th File Name
-  %th Core File Title
-  %th File Status
-  %th
-  - @images.each do |image|
-    - if image.validity == true && image.modified == false
-      -if CoreFile.exists?(image.pid)
-        - cf = CoreFile.find("#{image.pid}")
-        %tr.success
-          %td
-            = cf.label
-          %td
-            = cf.title
-          %td Success
-          %td
-            = link_to("View", core_file_path(cf.pid), class:"btn btn-small btn-success")
-      -else
-        %tr.success
-          %td
-            = image.original_file
-          %td
-            = image.title
-          %td Success
-          %td File no longer exists
-    - elsif image.validity == true && image.modified == true
-      -if CoreFile.exists?(image.pid)
-        - cf = CoreFile.find("#{image.pid}")
-        %tr.warning
-          %td
-            = cf.label
-          %td
-            = cf.title
-          %td
-            = "Modified - #{image.exception}"
-          %td
-            = link_to("View", core_file_path(cf.pid), class:"btn btn-small btn-success")
-      -else
-        %tr.warning
-          %td
-            = image.original_file
-          %td
-            = image.title
-          %td
-            = "Modified - #{image.exception}"
-          %td File no longer exists
-    - else
-      %tr.error
-        %td
-          = image.original_file
-        %td
-          = image.title
-        %td
-          = "Error - #{image.exception}"
-        %td
-          - if image.iptc != ""
-            -if @report.loader_name == t('drs.loaders.marcom.long_name')
-              = link_to("View IPTC", loaders_marcom_iptc_path(image.id), class:"btn btn-small btn-warning")
-            - elsif @report.loader_name == t('drs.loaders.coe.long_name')
-              = link_to("View IPTC", loaders_coe_iptc_path(image.id), class:"btn btn-small btn-warning")
-            - elsif @report.loader_name == t('drs.loaders.cps.long_name')
-              = link_to("View IPTC", loaders_cps_iptc_path(image.id), class:"btn btn-small btn-warning")
-            - elsif @report.loader_name == t('drs.loaders.emsa.long_name')
-              = link_to("View IPTC", loaders_emsa_iptc_path(image.id), class:"btn btn-small btn-warning")
-            - elsif @report.loader_name == t('drs.loaders.bouve.long_name')
-              = link_to("View IPTC", loaders_bouve_iptc_path(image.id), class:"btn btn-small btn-warning")
+=render :partial=>"/loaders/load_report", locals: {images: @images, user: @user}
+
+:javascript
+  $(document).ready(function(){
+    check_report(#{@report.completed});
+    function check_report(report_completed){
+      if (report_completed == "false" || report_completed == false){
+        spinner = enable_spinner('report');
+        setTimeout(refresh_report, 30000);
+      } else {
+        $(".alert-success").html("This load is completed.");
+      }
+    }
+    function refresh_report(){
+      $.getScript(location.href).done( function(data) {
+        check_report(completed);
+      });
+    }
+  });
