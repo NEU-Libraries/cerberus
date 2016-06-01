@@ -15,6 +15,11 @@ describe ModsDatastream do
       basic_mods.abstract = "This is a test object created for testing"
       basic_mods.identifier = "neu:123abc"
       basic_mods.date = "2013-05-05"
+      basic_mods.alternate_title.title = "Other title"
+      basic_mods.assign_creator_personal_names(["Will"],["Jackson"])
+      basic_mods.personal_name(0).authority = "lcsh"
+      basic_mods.personal_name(0).authority_uri = "lcsh URI"
+      basic_mods.personal_name(0).value_uri = "value URI"
     end
 
     it "Has set the title correctly" do
@@ -32,6 +37,17 @@ describe ModsDatastream do
     it "Has the mods issuance date set correctly" do
       basic_mods.origin_info(0).date_created.first.should == '2013-05-05'
     end
+
+    it "has the alternate title set correctly" do
+      basic_mods.alternate_title(0).title.first.should == "Other title"
+    end
+
+    it "has personal name authorities set correctly" do
+      basic_mods.personal_name(0).authority.first.should == "lcsh"
+      basic_mods.personal_name(0).authority_uri.first.should == "lcsh URI"
+      basic_mods.personal_name(0).value_uri.first.should == "value URI"
+    end
+    # name part date
   end
 
   # Note that factories which create more or less equivalent objects do exist.
