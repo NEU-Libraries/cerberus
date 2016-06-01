@@ -84,7 +84,8 @@ describe ProcessMultipageZipJob do
       FileUtils.cp("#{Rails.root}/spec/fixtures/files/multipage.zip", @new_file)
       copyright = "Copyright statement"
       @permissions = {"CoreFile" => {"read"  => ["public"], "edit" => ["northeastern:drs:repository:staff"]}}
-      ProcessMultipageZipJob.new(@loader_name, @new_file.to_s, @parent.pid, copyright, @user, @permissions, @client).run
+      report_id = Loaders::LoadReport.create_from_strings(@user, 0, @loader_name, @parent.pid)
+      ProcessMultipageZipJob.new(@loader_name, @new_file.to_s, @parent.pid, copyright, @user, @permissions, report_id, @client).run
     end
 
     it_should_behave_like "success"
@@ -123,7 +124,8 @@ describe ProcessMultipageZipJob do
       FileUtils.cp("#{Rails.root}/spec/fixtures/files/multipage-notmulti.zip", @new_file)
       copyright = "Copyright statement"
       @permissions = {"CoreFile" => {"read"  => ["public"], "edit" => ["northeastern:drs:repository:staff"]}}
-      ProcessMultipageZipJob.new(@loader_name, @new_file.to_s, @parent.pid, copyright, @user, @permissions, @client).run
+      report_id = Loaders::LoadReport.create_from_strings(@user, 0, @loader_name, @parent.pid)
+      ProcessMultipageZipJob.new(@loader_name, @new_file.to_s, @parent.pid, copyright, @user, @permissions, report_id, @client).run
     end
 
     it_should_behave_like "success"
@@ -168,7 +170,8 @@ describe ProcessMultipageZipJob do
       FileUtils.cp("#{Rails.root}/spec/fixtures/files/multipage-invalid-mods.zip", @new_file)
       copyright = "Copyright statement"
       @permissions = {"CoreFile" => {"read"  => ["public"], "edit" => ["northeastern:drs:repository:staff"]}}
-      ProcessMultipageZipJob.new(@loader_name, @new_file.to_s, @parent.pid, copyright, @user, @permissions, @client).run
+      report_id = Loaders::LoadReport.create_from_strings(@user, 0, @loader_name, @parent.pid)
+      ProcessMultipageZipJob.new(@loader_name, @new_file.to_s, @parent.pid, copyright, @user, @permissions, report_id, @client).run
     end
 
     it_should_behave_like "failure"
@@ -197,7 +200,8 @@ describe ProcessMultipageZipJob do
       FileUtils.cp("#{Rails.root}/spec/fixtures/files/multipage-no-mods.zip", @new_file)
       copyright = "Copyright statement"
       permissions = {"CoreFile" => {"read"  => ["public"], "edit" => ["northeastern:drs:repository:staff"]}}
-      ProcessMultipageZipJob.new(@loader_name, @new_file.to_s, @parent.pid, copyright, @user, permissions, @client).run
+      report_id = Loaders::LoadReport.create_from_strings(@user, 0, @loader_name, @parent.pid)
+      ProcessMultipageZipJob.new(@loader_name, @new_file.to_s, @parent.pid, copyright, @user, permissions, report_id, @client).run
     end
 
     it_should_behave_like "failure"
@@ -226,7 +230,8 @@ describe ProcessMultipageZipJob do
       FileUtils.cp("#{Rails.root}/spec/fixtures/files/multipage-bad-sequence.zip", @new_file)
       copyright = "Copyright statement"
       permissions = {"CoreFile" => {"read"  => ["public"], "edit" => ["northeastern:drs:repository:staff"]}}
-      ProcessMultipageZipJob.new(@loader_name, @new_file.to_s, @parent.pid, copyright, @user, permissions, @client).run
+      report_id = Loaders::LoadReport.create_from_strings(@user, 0, @loader_name, @parent.pid)
+      ProcessMultipageZipJob.new(@loader_name, @new_file.to_s, @parent.pid, copyright, @user, permissions, report_id, @client).run
     end
 
     it_should_behave_like "failure"

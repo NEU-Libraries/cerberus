@@ -1,13 +1,13 @@
 class ProcessIptcZipJob
   include ZipHelper
 
-  attr_accessor :loader_name, :zip_path, :parent, :copyright, :current_user, :permissions, :client, :derivatives
+  attr_accessor :loader_name, :zip_path, :parent, :copyright, :current_user, :permissions, :client, :derivatives, :report_id
 
   def queue_name
     :iptc_process_zip
   end
 
-  def initialize(loader_name, zip_path, parent, copyright, current_user, permissions, derivatives=false, client=nil)
+  def initialize(loader_name, zip_path, parent, copyright, current_user, permissions, report_id, derivatives=false, client=nil)
     self.loader_name = loader_name
     self.zip_path = zip_path
     self.parent = parent
@@ -16,10 +16,10 @@ class ProcessIptcZipJob
     self.permissions = permissions
     self.derivatives = derivatives
     self.client = client
+    self.report_id = report_id
   end
 
   def run
-    report_id = Loaders::LoadReport.create_from_strings(current_user, 0, loader_name, parent)
     load_report = Loaders::LoadReport.find(report_id)
     # unzip zip file to tmp storage
     unzip(zip_path, load_report, derivatives, client)
@@ -45,6 +45,8 @@ class ProcessIptcZipJob
 
     load_report.number_of_files = count
     if load_report.success_count + load_report.fail_count + load_report.modified_count == load_report.number_of_files
+      load_report.completed = true
+      load_report.save!
       LoaderMailer.load_alert(load_report, User.find_by_nuid(load_report.nuid)).deliver!
       FileUtils.rmdir(dir_path)
     end

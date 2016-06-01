@@ -1,0 +1,80 @@
+- content_for :page_header do
+  %style{:type=>"text/css"}
+    = raw @diff_css
+%header
+  %h1.page-header
+    Preview MODS
+    %i
+      = "#{@core_file.non_sort} "
+      = kramdown_parse(@core_file.title)
+
+%h3 Load Information
+%h4
+  Collection:
+  = link_to(@collection.title, collection_path(@report.collection))
+  ="(#{@report.collection})"
+%h4
+  Load Start Time:
+  = @report.created_at.strftime("%m-%d-%Y %T")
+%h4
+  Load Depositor:
+  = @user.name
+%h4
+  Total Files:
+  = @report.number_of_files
+
+.row
+  .span6
+    - if @diff
+      %h3 MODS Changes
+      #mods_diff
+        = @diff
+    - else
+      %h3 XML
+      #editor.well
+        = @core_file.mods.content
+
+
+  .drs-item-details.span5
+    %h3 MODS HTML
+    #mods{ style: 'position:relative;min-height:320px;' }
+      = @mods_html
+
+%br
+.row
+  .span8
+    %div.alert.alert-warning
+      %span= "You are about to #{@diff ? "edit" : "create"} #{@report.number_of_files} files. Are you sure you want to proceed?"
+    - if @diff
+      = link_to("Cancel Load", loaders_cancel_load_path(:id => @report.id), class: "btn btn-danger")
+      = link_to("Proceed with Load", loaders_proceed_load_path(:id => @report.id), class: "btn btn-success pull-right")
+    -else
+      = form_tag loaders_proceed_load_path, :method => 'get' do
+        = hidden_field_tag :id, @report.id
+        = label_tag "depositor", "Depositor:"
+        = select_tag "depositor", options_for_select(@depositor_options)
+        %br
+        = link_to("Cancel Load", loaders_cancel_load_path(:id => @report.id), class: "btn btn-danger")
+        = submit_tag "Proceed with Load", :class => "btn btn-success pull-right"
+
+:javascript
+  $(document).ready(function() {
+    // This is a hack, need to trim to due haml pretty printing
+    if (document.getElementById('editor') === null){ }
+    else {
+        str = $("#editor").text();
+        $("#editor").text(str.trim());
+
+        // Setting up the editor
+        var editor = ace.edit("editor");
+        editor.setTheme("ace/theme/eclipse");
+        editor.getSession().setMode("ace/mode/xml");
+        editor.setOptions({
+          maxLines: Infinity,
+          minLines: 20,
+          useSoftTabs: true,
+          showInvisibles: true,
+          readOnly: true,
+        });
+    }
+  });

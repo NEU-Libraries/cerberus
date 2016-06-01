@@ -1,6 +1,7 @@
 class Loaders::LoadsController < ApplicationController
   include Cerberus::Controller
   include MimeHelper
+  include ZipHelper
 
   before_filter :authenticate_user!
 
@@ -64,7 +65,22 @@ class Loaders::LoadsController < ApplicationController
     @images = Loaders::ImageReport.where(load_report_id:"#{@report.id}").find_all
     @user = User.find_by_nuid(@report.nuid)
     @page_title = @report.loader_name + " Load into " + Collection.find(@report.collection).title
-    render 'loaders/show', locals: {images: @images, user: @user}
+    if session[:flash_error]
+      flash[:error] = session[:flash_error]
+      session[:flash_error] = nil
+    end
+    if session[:flash_success]
+      flash[:notice] = session[:flash_success]
+      session[:flash_success] = nil
+    end
+    respond_to do |format|
+      format.js {
+        render 'loaders/show', locals: {images: @images, user: @user}
+      }
+      format.html {
+        render 'loaders/show', locals: {images: @images, user: @user}
+      }
+    end
   end
 
   def show_iptc
@@ -89,21 +105,40 @@ class Loaders::LoadsController < ApplicationController
         if extract_mime_type(new_file) == 'application/zip'
           if short_name == "multipage"
             # multipage zip job
-            Cerberus::Application::Queue.push(ProcessMultipageZipJob.new(@loader_name, new_file.to_s, parent, copyright, current_user, permissions))
+            report_id = Loaders::LoadReport.create_from_strings(current_user, 0, @loader_name, parent)
+            Cerberus::Application::Queue.push(ProcessMultipageZipJob.new(@loader_name, new_file.to_s, parent, copyright, current_user, permissions, report_id))
+            session[:flash_success] = "Your file has been submitted and is now being processed. You will receive an email when the load is complete."
+            render :json => {report_id: report_id}.to_json and return
+          elsif short_name == "mods_spreadsheet"
+            #mods spreadsheet job
+            spreadsheet_file_path = unzip(new_file, new_path)
+            report_id = Loaders::LoadReport.create_from_strings(current_user, 0, @loader_name, parent)
+            ProcessModsZipJob.new(@loader_name, spreadsheet_file_path, parent, copyright, current_user, permissions, report_id, nil, true).run
+            load_report = Loaders::LoadReport.find(report_id)
+            session[:flash_success] = "Your file has been submitted and is now being processed. You will receive an email when the load is complete."
+            if !load_report.comparison_file_pid.blank?
+              render :json => {report_id: report_id, comparison_file_pid: load_report.comparison_file_pid}.to_json and return
+            elsif !load_report.preview_file_pid.blank?
+              render :json => {report_id: report_id, preview_file_pid: load_report.preview_file_pid}.to_json and return
+            end
+
           else
             # send to iptc job
-            Cerberus::Application::Queue.push(ProcessIptcZipJob.new(@loader_name, new_file.to_s, parent, copyright, current_user, permissions, derivatives))
+            report_id = Loaders::LoadReport.create_from_strings(current_user, 0, @loader_name, parent)
+            Cerberus::Application::Queue.push(ProcessIptcZipJob.new(@loader_name, new_file.to_s, parent, copyright, current_user, permissions, report_id,  derivatives))
+            session[:flash_success] = "Your file has been submitted and is now being processed. You will receive an email when the load is complete."
+            render :json => {report_id: report_id}.to_json and return
           end
-          session[:flash_success] = "Your file has been submitted and is now being processed. You will receive an email when the load is complete."
         else
           #error out
           FileUtils.rm(new_file)
           session[:flash_error] = 'The file you uploaded was not a zipfile. Please try again.';
+          render :nothing => true
         end
       else
         session[:flash_error] = 'Error creating file.';
+        render :nothing => true
       end
-      render :nothing => true
     end
 
     def json_error(error, name=nil, additional_arguments={})
@@ -124,5 +159,27 @@ class Loaders::LoadsController < ApplicationController
       stat = Cerberus::ContentFile.virus_check(file)
       flash[:error] = "Virus checking did not pass for #{File.basename(file.path)} status = #{stat}" unless stat == 0
       stat
+    end
+
+    def unzip(file, dir_path)
+      spreadsheet_file_path = ""
+      FileUtils.mkdir(dir_path) unless File.exists? dir_path
+
+      # Extract load zip
+      file_list = safe_unzip(file, dir_path)
+
+      # Find the spreadsheet
+      xlsx_array = Dir.glob("#{dir_path}/*.xlsx")
+
+      if xlsx_array.length > 1
+        raise Exceptions::MultipleSpreadsheetError
+      elsif xlsx_array.length == 0
+        raise Exceptions::NoSpreadsheetError
+      end
+
+      spreadsheet_file_path = xlsx_array.first
+
+      FileUtils.rm(file)
+      return spreadsheet_file_path
     end
 end

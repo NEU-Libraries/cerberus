@@ -95,14 +95,9 @@ describe ImageProcessingJob do
         @core_file.keywords.should == ["blizzard", "juno", "campus", "campus life"]
       end
 
-      it 'sets city to iptc city' do
+      it 'sets city to iptc place term' do
         @core_file = CoreFile.find("#{@images.first.pid}")
-        @core_file.mods.origin_info.place.city_term.should == ["Boston"]
-      end
-
-      it 'sets state to iptc state' do
-        @core_file = CoreFile.find("#{@images.first.pid}")
-        @core_file.mods.origin_info.place.state_term.should == ["mau"]
+        @core_file.mods.origin_info.place.place_term.should == ["Boston MA"]
       end
 
       it 'sets static values' do

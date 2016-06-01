@@ -17,7 +17,8 @@ describe ProcessIptcZipJob do
       @user = FactoryGirl.create(:admin)
       permissions = {"CoreFile" => {"read"  => ["northeastern:drs:all"], "edit" => ["northeastern:drs:repository:staff"]}, "ImageSmallFile" => {"read"  => ["northeastern:drs:repository:staff"], "edit" => ["northeastern:drs:repository:staff"]}, "ImageLargeFile" => {"read"  => ["northeastern:drs:repository:staff"], "edit" => ["northeastern:drs:repository:staff"]}, "ImageMasterFile" => {"read"  => ["northeastern:drs:repository:staff"], "edit" => ["northeastern:drs:repository:staff"]}}
       derivatives = false
-      ProcessIptcZipJob.new(@loader_name, @new_file.to_s, @parent, copyright, @user, permissions, derivatives, @client).run
+      report_id = Loaders::LoadReport.create_from_strings(@user, 0, @loader_name, @parent)
+      ProcessIptcZipJob.new(@loader_name, @new_file.to_s, @parent, copyright, @user, permissions, report_id, derivatives, @client).run
     end
 
     it 'changes loadreport length to 1' do

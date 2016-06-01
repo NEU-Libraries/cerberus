@@ -138,6 +138,14 @@ Cerberus::Application.routes.draw do
    get "/loaders/bouve/new" => 'bouve_loads#new', as: 'loaders_bouve'
    get "/loaders/bouve/report/:id" => 'bouve_loads#show', as: 'loaders_bouve_report'
    get "/loaders/bouve/file/:id" => 'bouve_loads#show_iptc', as: 'loaders_bouve_iptc'
+   resources :mods_spreadsheet_loads, only: [:new, :create, :preview, :preview_compare], :path => "loaders/mods_spreadsheet"
+   get "/loaders/mods_spreadsheet/new" => 'mods_spreadsheet_loads#new', as: 'loaders_mods_spreadsheet'
+   get "/loaders/mods_spreadsheet/report/:id" => 'mods_spreadsheet_loads#show', as: 'loaders_mods_spreadsheet_report'
+   get "/loaders/mods_spreadsheet/preview/:id" => 'mods_spreadsheet_loads#preview',  as: 'loaders_mods_spreadsheet_preview'
+   get "/loaders/mods_spreadsheet/preview_compare/:id" => 'mods_spreadsheet_loads#preview_compare', as: 'loaders_mods_spreadsheet_preview_compare'
+   get "/loaders/mods_spreadsheet/file/:id" => 'mods_spreadsheet_loads#show_mods', as: 'loaders_mods_spreadsheet_mods'
+   get "/loaders/:id/cancel_load" => "mods_spreadsheet_loads#cancel_load", as: "loaders_cancel_load"
+   get "/loaders/:id/proceed_load" => "mods_spreadsheet_loads#proceed_load", as: "loaders_proceed_load"
   end
 
   # Facets for communities and collections
