@@ -197,7 +197,7 @@ class ImageProcessingJob
           create_special_error("Missing title (IPTC Headline)", iptc, core_file, load_report)
           return
         end
-        if core_file.keywords.blank?
+        if core_file.keywords.first.blank?
           create_special_error("Missing keyword(s)", iptc, core_file, load_report)
           return
         end
