@@ -142,7 +142,7 @@ describe ProcessModsZipJob do
 
     it "should set the number of files to the load report" do
       lr = Loaders::LoadReport.find("#{@report_id}")
-      lr.number_of_files.should == 7
+      lr.number_of_files.should == 4
       lr.image_reports.length.should == 0 #no image reports created when its a preview
     end
 
