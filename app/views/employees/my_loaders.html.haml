@@ -47,6 +47,10 @@
         = link_to(t('drs.loaders.bouve.long_name'), loaders_bouve_path, class: "btn btn-lg btn-primary")
         %br
         %br
+      - if current_user.damore_loader?
+        = link_to(t('drs.loaders.damore.long_name'), loaders_damore_path, class: "btn btn-lg btn-primary")
+        %br
+        %br
       - if current_user.multipage_loader?
         = link_to(t('drs.loaders.multipage.long_name'), loaders_multipage_path, class: "btn btn-lg btn-primary")
         %br

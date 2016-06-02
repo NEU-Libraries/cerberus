@@ -138,6 +138,10 @@ Cerberus::Application.routes.draw do
    get "/loaders/bouve/new" => 'bouve_loads#new', as: 'loaders_bouve'
    get "/loaders/bouve/report/:id" => 'bouve_loads#show', as: 'loaders_bouve_report'
    get "/loaders/bouve/file/:id" => 'bouve_loads#show_iptc', as: 'loaders_bouve_iptc'
+   resources :damore_loads, only: [:new, :create, :show], :path => "loaders/damore"
+   get "/loaders/damore/new" => 'damore_loads#new', as: 'loaders_damore'
+   get "/loaders/damore/report/:id" => 'damore_loads#show', as: 'loaders_damore_report'
+   get "/loaders/damore/file/:id" => 'damore_loads#show_iptc', as: 'loaders_damore_iptc'
    resources :mods_spreadsheet_loads, only: [:new, :create, :preview, :preview_compare], :path => "loaders/mods_spreadsheet"
    get "/loaders/mods_spreadsheet/new" => 'mods_spreadsheet_loads#new', as: 'loaders_mods_spreadsheet'
    get "/loaders/mods_spreadsheet/report/:id" => 'mods_spreadsheet_loads#show', as: 'loaders_mods_spreadsheet_report'
