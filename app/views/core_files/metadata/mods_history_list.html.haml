@@ -1,0 +1,13 @@
+%header
+  %h1.page-header
+    MODS History List for
+    %i
+      = "#{@core_file.non_sort} "
+      = kramdown_parse(@core_file.title)
+
+%table.table.table-striped.table-bordered
+  %th
+    "Date of change"
+  - w.each do |str|
+    %tr
+      = "#{str}"
