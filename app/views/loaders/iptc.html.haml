@@ -14,6 +14,8 @@
       - path = loaders_emsa_report_path(@load.id)
     - elsif @load.loader_name == t('drs.loaders.bouve.long_name')
       - path = loaders_bouve_report_path(@load.id)
+    - elsif @load.loader_name == t('drs.loaders.damore.long_name')
+      - path = loaders_damore_report_path(@load.id)
     - elsif @load.loader_name == t('drs.loaders.mods_spreadsheet.long_name')
       - path = loaders_mods_spreadsheet_report_path(@load.id)
     = link_to "#{@load.loader_name} Load into #{collection.title}", path

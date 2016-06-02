@@ -10,7 +10,7 @@ class Loaders::LoadsController < ApplicationController
   end
 
   def process_new(parent, short_name)
-    @parent = Collection.find("#{parent}")
+    @parent = ActiveFedora::Base.find("#{parent}", cast: true)
     @collections_options = Array.new
     cols = @parent.child_collections.sort_by{|c| c.title}
     cols.each do |child|
