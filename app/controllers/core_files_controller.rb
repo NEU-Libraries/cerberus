@@ -458,16 +458,24 @@ class CoreFilesController < ApplicationController
 
   def mods_history_list
     @core_file = CoreFile.find(params[:id])
-    @mods_changes = []
+    @mods_changes = Hash.new
+
     @core_file.mods.versions.each_with_index do |v, i|
       date = v.createDate.localtime.to_s
 
       a = v.content
-      b = @core_file.mods.versions[i - 1].content || ""
+
+      if !@core_file.mods.versions[i + 1].blank?
+        b = @core_file.mods.versions[i + 1].content
+      else
+        b = ""
+      end
+
+      distance = DamerauLevenshtein.distance(a, b)
+
+      @mods_changes[date] = distance.to_s
     end
 
-    # line_count = `diff -y --suppress-common-lines <(echo "#{a}" ) <(echo "#{b}") | grep '^' | wc -l`
-    # @core_file.mods.versions[params[:page].to_i - 1].createDate.localtime.to_s
   end
 
   def mods_history
