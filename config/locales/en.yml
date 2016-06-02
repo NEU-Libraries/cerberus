@@ -243,6 +243,10 @@ en:
         long_name: "MODS Spreadsheet"
         short_name: "mods_spreadsheet"
         copyright: ""
+      damore:
+        long_name: "D'Amore-McKim School of Business Marketing and Communications"
+        short_name: "damore"
+        copyright: "D'Amore-McKim School of Business Marketing & Communications images are for use only within the context of the marketing and promotion of the D'Amore-McKim School of Business at Northeastern University. Use and reproduction of these images is restricted to D'Amore-McKim School of Business Marketing and Communications employees only. All other uses require written permission from the D'Amore-McKim School of Business Marketing and Communications department. Appropriate uses include placement in D'Amore-McKim-related websites and insertion into D'Amore-McKim print and presentation materials. D'Amore-McKim faculty and staff are generally granted permission to reuse images for D'Amore-McKim-related marketing and communications efforts; however, the D'Amore-McKim Marketing and Communications team reserves the right to restrict use for brand consistency and to avoid overuse. Images must be credited: \"Photographer Name/Northeastern University.\" If faculty, students, or other persons are easily identifiable in the photo, exercise discretion when using their likeness. Requesting permission from the individual(s) photographed is strongly encouraged. Images may be used for self-promotional purposes outside of Northeastern University such as on LinkedIn or Facebook, but usage must be in good faith and approved with written permission from D'Amore-McKim School of Business. For more information, please contact the D'Amore-McKim Marketing and Communications team at dmsbnews@neu.edu."
     multiple_accounts:
       login_alert: "Your login appears to be associated with multiple Northeastern accounts."
       menu_link: "Accounts"
