@@ -168,6 +168,32 @@ task :reset_data => :environment do
   p_2.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
   p_2.save!
 
+  # Add D'Amore Mckim structure for loader testing
+  damore_comm = Community.new(mass_permissions: 'public', pid: 'neu:77', title: "D'Amore-McKim School of Business")
+  damore_comm.parent = "neu:1"
+  damore_comm.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
+  damore_comm.save!
+
+  # Damore marcom community
+  p_c = Community.new(mass_permissions: 'public', pid: 'neu:rx913r53s', title: "D'Amore-McKim Marketing and Communications Office")
+  p_c.parent = "neu:77"
+  p_c.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
+  p_c.save!
+
+  # Damore children collections
+  p_1 = Collection.create(mass_permissions: 'private', parent: p_c, pid: 'neu:rx913r57w', title: 'Photographs')
+  p_1.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
+  p_1.rightsMetadata.permissions({group: "northeastern:drs:all"}, 'read')
+  p_1.save!
+
+  p_2 = Collection.create(mass_permissions: 'private', parent: p_1, pid: 'neu:cj82mw96w', title: '2016 Photos')
+  p_2.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
+  p_2.save!
+
+  p_3 = Collection.create(mass_permissions: 'private', parent: p_1, pid: 'neu:cj82mw95m', title: 'Private and Sensitive Photography')
+  p_3.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
+  p_3.save!
+
   root_dept.rightsMetadata.permissions({group: 'public'}, 'read')
   set_edit_permissions(root_dept)
 
@@ -258,6 +284,12 @@ task :reset_data => :environment do
   joey.add_group("northeastern:drs:repository:loaders:bouve_dean")
   eli.add_group("northeastern:drs:repository:loaders:bouve_dean")
   david.add_group("northeastern:drs:repository:loaders:bouve_dean")
+
+  sarah.add_group("northeastern:drs:repository:loaders:damore_mckim")
+  pat.add_group("northeastern:drs:repository:loaders:damore_mckim")
+  joey.add_group("northeastern:drs:repository:loaders:damore_mckim")
+  eli.add_group("northeastern:drs:repository:loaders:damore_mckim")
+  david.add_group("northeastern:drs:repository:loaders:damore_mckim")
 
   sarah.add_group("northeastern:drs:repository:staff")
   pat.add_group("northeastern:drs:repository:staff")
