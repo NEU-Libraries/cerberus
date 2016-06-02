@@ -1,0 +1,19 @@
+%header
+  %h1.page-header
+    MODS History List for
+    %i
+      = "#{@core_file.non_sort} "
+      = kramdown_parse(@core_file.title)
+
+%table.table.table-striped
+  - @mods_changes.each_with_index do |(k, v), i|
+    %tr
+      %td
+        .large
+          %a{href: core_file_mods_history_path(id: @core_file.pid, page: i + 1)}
+            = k
+      %td
+        .large
+          = "Changes: #{v}"
+
+* Changes are measured by Damerau–Levenshtein distance

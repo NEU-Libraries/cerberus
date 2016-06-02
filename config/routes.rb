@@ -89,6 +89,7 @@ Cerberus::Application.routes.draw do
   put "/files/:id/validate_xml" => "core_files#validate_xml", as: "core_file_validate_xml"
 
   get "/files/:id/mods" => "core_files#mods_history", as: "core_file_mods_history"
+  get "/files/:id/mods_list" => "core_files#mods_history_list", as: "core_file_mods_history_list"
 
   match "/files/:id/tombstone" => "core_files#tombstone", via: 'post', as: "tombstone_file"
   match "/files/:id/request_tombstone" => "core_files#request_tombstone", via: 'post', as:"request_tombstone_file"

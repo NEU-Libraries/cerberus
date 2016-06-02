@@ -2,6 +2,12 @@
   %style{:type=>"text/css"}
     = raw @diff_css
 
+%ul.breadcrumb
+  %li
+    = link_to 'MODS History List', core_file_mods_history_list_path(id: @core_file.pid)
+  %li.active
+    = @core_file.mods.versions[params[:page].to_i - 1].createDate.localtime.to_s
+
 %header
   %h1.page-header
     MODS History for
@@ -10,8 +16,6 @@
       = kramdown_parse(@core_file.title)
 
 = will_paginate @mods_pages, :previous_label => '< Newer', :next_label => 'Older >'
-
--# = form_tag edit_core_file_xml_path(id: @core_file.pid, version: params[:page].to_i - 1), :method => :get, :id => "mods_version_form" do
 
 .span6
   %h3
