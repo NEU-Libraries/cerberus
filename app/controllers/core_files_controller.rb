@@ -456,6 +456,20 @@ class CoreFilesController < ApplicationController
     @page_title = "Edit #{@core_file.title}"
   end
 
+  def mods_history_list
+    @core_file = CoreFile.find(params[:id])
+    @mods_changes = []
+    @core_file.mods.versions.each_with_index do |v, i|
+      date = v.createDate.localtime.to_s
+
+      a = v.content
+      b = @core_file.mods.versions[i - 1].content || ""
+    end
+
+    # line_count = `diff -y --suppress-common-lines <(echo "#{a}" ) <(echo "#{b}") | grep '^' | wc -l`
+    # @core_file.mods.versions[params[:page].to_i - 1].createDate.localtime.to_s
+  end
+
   def mods_history
     @core_file = CoreFile.find(params[:id])
     @mods_pages = @core_file.mods.versions.paginate(:page => params[:page], :per_page => 1)
