@@ -139,6 +139,13 @@ module Exceptions
       super "No valid #{required_data} in xml"
     end
   end
+
+  class MissingHandle < StandardError
+    def initialize
+      super "No valid handle in xml. Must take the form of <mods:identifier type=\"hdl\" displayLabel=\"Permanent URL\">"
+    end
+  end
+
   class MultipleSpreadsheetError < StandardError
     def initialize
       super "Multiple spreadsheet files found in zip file"

@@ -60,6 +60,12 @@ module XmlValidator
       return results
     end
 
+    # Does it have a handle?
+    if doc.mods.identifier.blank?
+      results[:errors] << Exceptions::MissingHandle.new
+      return results
+    end
+
     # Does it have a title?
     if doc.title == nil
       results[:errors] << Exceptions::MissingMetadata.new("title")
