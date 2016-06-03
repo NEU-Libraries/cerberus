@@ -108,7 +108,6 @@ class ProcessModsZipJob
                       core_file.category = sc_type
                     end
                     core_file.identifier = make_handle(core_file.persistent_url, client)
-                    Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename))
                   else
                     populate_error_report(load_report, existing_file, "File triggered failure for virus check", row_results, core_file, old_mods, header_row, row)
                     next
@@ -156,6 +155,7 @@ class ProcessModsZipJob
                   populate_error_report(load_report, existing_file, error_list, row_results, core_file, old_mods, header_row, row)
                   next
                 else
+                  Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename))
                   load_report.image_reports.create_success(core_file, "")
                 end
               end
