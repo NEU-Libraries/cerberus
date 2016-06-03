@@ -1,3 +1,9 @@
+%ul.breadcrumb
+  %li
+    = link_to "Manage #{@core_file.title}", edit_core_file_path(id: @core_file.pid)
+  %li.active
+    MODS History List
+
 %header
   %h1.page-header
     MODS History List for
