@@ -471,7 +471,7 @@ class CoreFilesController < ApplicationController
         b = ""
       end
 
-      distance = DamerauLevenshtein.distance(a, b)
+      distance = DamerauLevenshtein.distance(a, b, 1, 10000)
 
       @mods_changes[date] = distance.to_s
     end
