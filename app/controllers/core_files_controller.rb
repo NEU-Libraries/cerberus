@@ -531,7 +531,7 @@ class CoreFilesController < ApplicationController
       # Formatting error array for template
       error_list = "<h4 class='xml-error'>Invalid XML provided</h4></br> "
       @result[:errors].each do |entry|
-        error_list = error_list.concat("#{entry.class.to_s}: #{entry} </br></br> ")
+        error_list = error_list.concat(CGI::escapeHTML("#{entry.class.to_s}: #{entry}") + " </br></br> ")
       end
       @result = error_list
     elsif !params[:commit].blank? && params[:commit] == "Save"
