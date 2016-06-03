@@ -525,7 +525,7 @@ class CoreFilesController < ApplicationController
     # raw_xml = CGI.unescapeHTML(Unidecoder.decode(params[:raw_xml].first))
     raw_xml = xml_decode(params[:raw_xml].first)
 
-    @result = xml_valid?(raw_xml)
+    @result = xml_valid?(raw_xml, true)
 
     if !@result[:errors].blank?
       # Formatting error array for template
