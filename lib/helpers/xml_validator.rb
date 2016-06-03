@@ -3,7 +3,7 @@
 
 module XmlValidator
 
-  def xml_valid?(xml_str)
+  def xml_valid?(xml_str, handle_check = false)
     # Never trust the user
     results = Hash.new
     results[:errors] = []
@@ -60,10 +60,12 @@ module XmlValidator
       return results
     end
 
-    # Does it have a handle?
-    if doc.mods.identifier.blank?
-      results[:errors] << Exceptions::MissingHandle.new
-      return results
+    if handle_check
+      # Does it have a handle?
+      if doc.mods.identifier.blank?
+        results[:errors] << Exceptions::MissingHandle.new
+        return results
+      end
     end
 
     # Does it have a title?
