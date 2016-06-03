@@ -434,7 +434,9 @@ class ModsDatastream < ActiveFedora::OmDatastream
           xml.recordContentSource
           xml.recordOrigin
           xml.descriptionStandard
-          xml.languageOfCataloging
+          xml.languageOfCataloging{
+            xml.languageTerm
+          }
         }
 
         xml.physicalDescription{
