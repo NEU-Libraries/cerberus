@@ -69,6 +69,9 @@ gem "ruby-prof"
 gem 'picturefill'
 gem 'mini_exiftool'
 gem 'will_paginate'
+
+gem 'damerau-levenshtein'
+
 # Gems used only for assets and not required
 # in production environments by default.
 group :assets do

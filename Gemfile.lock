@@ -188,6 +188,7 @@ GEM
       term-ansicolor
       thor
     daemons (1.2.3)
+    damerau-levenshtein (1.1.2)
     date_time_precision (0.7.0)
     deprecation (0.0.5)
       activesupport
@@ -560,6 +561,7 @@ DEPENDENCIES
   colorize (= 0.6.0)
   compass-rails
   coveralls
+  damerau-levenshtein
   date_time_precision
   devise
   devise-guests (~> 0.3)
