@@ -34,7 +34,7 @@
   #mods_diff
     = @diff
 
-.span11
+.span11{:style=> ("padding-top:10px")}
   .well
     -# = submit_tag "Insert XML", :class => ['btn', 'btn-primary'], :id => "restore_button", data: { disable_with: "Please wait..."}
     %a.btn.btn-primary{data: { disable_with: "Please wait..."}, :href => edit_core_file_xml_path(id: @core_file.pid, version: params[:page].to_i - 1)}
@@ -66,10 +66,4 @@
         editor.getSession().setUseWrapMode(false);
       }
     })
-    $('#raw_xml_form').submit(function() {
-      $("#raw_xml_").val(editor.getSession().getValue());
-      $('#mods').html("");
-      spinner = enable_spinner('mods');
-      return true;
-    });
   });
