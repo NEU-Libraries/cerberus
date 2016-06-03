@@ -3,6 +3,7 @@ require 'blacklight_advanced_search'
 require 'parslet'
 require 'parsing_nesting/tree'
 require 'stanford-mods'
+require 'will_paginate/array'
 
 # -*- coding: utf-8 -*-
 class CoreFilesController < ApplicationController
@@ -455,20 +456,67 @@ class CoreFilesController < ApplicationController
     @page_title = "Edit #{@core_file.title}"
   end
 
+  def mods_history_list
+    @core_file = CoreFile.find(params[:id])
+    @mods_changes = Hash.new
+
+    @core_file.mods.versions.each_with_index do |v, i|
+      date = v.createDate.localtime.to_s
+
+      a = v.content
+
+      if !@core_file.mods.versions[i + 1].blank?
+        b = @core_file.mods.versions[i + 1].content
+      else
+        b = ""
+      end
+
+      distance = DamerauLevenshtein.distance(a, b)
+
+      @mods_changes[date] = distance.to_s
+    end
+
+  end
+
+  def mods_history
+    @core_file = CoreFile.find(params[:id])
+    @mods_pages = @core_file.mods.versions.paginate(:page => params[:page], :per_page => 1)
+
+    if params[:page].to_i != @core_file.mods.versions.length
+      mods_a = Nokogiri::XML(@core_file.mods.versions[params[:page].to_i].content).to_s
+    else
+      mods_a = ""
+    end
+
+    mods_b = Nokogiri::XML(@core_file.mods.versions[params[:page].to_i - 1].content).to_s
+
+    @diff = mods_diff(mods_a, mods_b)
+    @diff_css = Diffy::CSS
+  end
+
   def edit_xml
     @core_file = CoreFile.find(params[:id])
 
-    # Purge bad keyword template mapping
-    xml = Nokogiri::XML(@core_file.mods.content)
-    xml.search("//mods:keyword").each do |node|
-      node.remove
+    if params[:version]
+      @mods = @core_file.mods.versions[params[:version].to_i].content
+      flash[:notice] =  "XML Editor has been populated with MODS from #{@core_file.mods.versions[params[:version].to_i].createDate.localtime.to_s}"
+    else
+      # Purge bad keyword template mapping
+      xml = Nokogiri::XML(@core_file.mods.content)
+      xml.search("//mods:keyword").each do |node|
+        node.remove
+      end
+
+      @core_file.mods.content = xml.to_s
+      @core_file.save!
+
+      @mods = @core_file.mods.content
     end
 
-    @core_file.mods.content = xml.to_s
-    @core_file.save!
-
     @page_title = "Edit #{@core_file.title}'s xml"
-    @mods_html = render_mods_display(CoreFile.find(@core_file.pid)).to_html.html_safe
+    md = CoreFile.new
+    md.mods.content = @mods
+    @mods_html = render_mods_display(md).to_html.html_safe
     render :template => 'core_files/ace_xml_editor'
   end
 
@@ -720,6 +768,10 @@ class CoreFilesController < ApplicationController
   end
 
   protected
+
+    def mods_diff(mods_a, mods_b)
+      return Diffy::Diff.new(mods_a, mods_b, :include_plus_and_minus_in_html => true, :context => 1).to_s(:html).html_safe
+    end
 
     def complete?
       core = CoreFile.find(params[:id])
