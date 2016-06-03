@@ -16,7 +16,6 @@ describe ProcessModsZipJob do
 
   shared_examples_for "successful mods" do
     it "assigns mods values" do
-      cf = CoreFile.first
       cf.title.should == "Annual report of the Citywide Educational Coalition, 1981-1982."
       cf.mods.title_info.non_sort.should == ["The"]
       cf.mods.corporate_name(0).usage.should == ["primary"]
@@ -127,26 +126,33 @@ describe ProcessModsZipJob do
       FileUtils.cp(spreadsheet_file_path, @new_path)
       permissions = @parent.permissions
       @report_id = Loaders::LoadReport.create_from_strings(@user, 0, @loader_name, @parent.pid)
+      @lr = Loaders::LoadReport.find("#{@report_id}")
       ProcessModsZipJob.new(@loader_name, spreadsheet_file_path, @parent, copyright, @user, permissions, @report_id, @user.nuid, true).run
     end
 
     it "should create preview file" do
-      lr = Loaders::LoadReport.find("#{@report_id}")
-      lr.preview_file_pid.should == CoreFile.first.pid
+      @lr.reload
+      CoreFile.exists?(@lr.preview_file_pid).should be true
     end
 
     it "should set depositor to current user" do
-      cf = CoreFile.first
+      @lr.reload
+      cf = CoreFile.find(@lr.preview_file_pid)
       cf.depositor.should == @user.nuid
     end
 
     it "should set the number of files to the load report" do
-      lr = Loaders::LoadReport.find("#{@report_id}")
-      lr.number_of_files.should == 4
-      lr.image_reports.length.should == 0 #no image reports created when its a preview
+      @lr.reload
+      @lr.number_of_files.should == 4
+      @lr.image_reports.length.should == 0 #no image reports created when its a preview
     end
 
-    it_should_behave_like "successful mods"
+    it_should_behave_like "successful mods" do
+      let(:cf) {
+        @lr.reload
+        CoreFile.find(@lr.preview_file_pid)
+       }
+    end
 
     after :all do
       Loaders::LoadReport.destroy_all
@@ -176,9 +182,7 @@ describe ProcessModsZipJob do
     end
 
     it "should set depositor to current user" do
-      cf = CoreFile.first
-      cf.depositor.should == @user.nuid
-      CoreFile.count.should == 1
+      CoreFile.exists?(@lr.image_reports[0].pid).should be true
     end
 
     it "should set the correct number of files" do
@@ -189,7 +193,12 @@ describe ProcessModsZipJob do
       @lr.success_count.should == 1
     end
 
-    it_should_behave_like "successful mods"
+    it_should_behave_like "successful mods" do
+      let(:cf) {
+        @lr.reload
+        CoreFile.find(@lr.image_reports[0].pid)
+       }
+    end
 
     it "should fail if no title" do
       @lr.reload
@@ -211,9 +220,6 @@ describe ProcessModsZipJob do
       failure.validity.should == false
       failure.exception.should == "File specified does not exist"
     end
-
-    # it "should fail if invalid mods" do
-    # end
 
     after :all do
       Loaders::LoadReport.destroy_all
