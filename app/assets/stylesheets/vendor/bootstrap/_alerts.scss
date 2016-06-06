@@ -61,6 +61,11 @@
 .alert-info h4 {
   color: $infoText;
 }
+.alert-primary {
+  background-color: $brand-primary;
+  border-color: $infoBorder;
+  color: $infoText;
+}
 
 
 // Block alerts
