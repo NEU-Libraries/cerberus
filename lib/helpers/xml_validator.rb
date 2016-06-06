@@ -78,7 +78,7 @@ module XmlValidator
     keywords = doc.mods.subject
     keywords.collect!(&:strip)
 
-    if keywords.any? {|kw| !kw.blank?}
+    if !(keywords.any? {|kw| !kw.blank?})
       results[:errors] << Exceptions::MissingMetadata.new("keywords")
       return results
     end
