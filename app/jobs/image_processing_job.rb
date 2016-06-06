@@ -234,7 +234,11 @@ class ImageProcessingJob
 
         permissions['CoreFile'].each do |perm, vals|
           vals.each do |group|
-            core_file.rightsMetadata.permissions({group: group}, "#{perm}")
+            if group.include? "northeastern"  #its a grouper group
+              core_file.rightsMetadata.permissions({group: group}, "#{perm}")
+            else #its an nuid for a user
+              core_file.rightsMetadata.permissions({person: group}, "#{perm}")
+            end
           end
         end
         Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename, nil, s, m, l, true, permissions))
