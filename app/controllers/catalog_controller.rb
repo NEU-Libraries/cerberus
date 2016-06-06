@@ -55,6 +55,8 @@ class CatalogController < ApplicationController
         if current_user.multiple_accounts && current_user.account_pref.blank?
           flash[:notice] = "#{t('drs.multiple_accounts.login_alert')} Please visit your #{ActionController::Base.helpers.link_to("Accounts", select_account_path)} page to select a primary account."
         end
+      else
+        flash[:info] = "<a href='#{new_user_session_path}'>Sign in</a> with your myNEU username and password to see more content."
       end
     else
       begin
