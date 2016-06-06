@@ -69,13 +69,16 @@ module XmlValidator
     end
 
     # Does it have a title?
-    if doc.title == nil
+    if doc.title.blank?
       results[:errors] << Exceptions::MissingMetadata.new("title")
       return results
     end
 
     # Does it have at least one keyword?
-    if doc.mods.subject.blank?
+    keywords = doc.mods.subject
+    keywords.collect!(&:strip)
+
+    if keywords.any? {|kw| !kw.blank?}
       results[:errors] << Exceptions::MissingMetadata.new("keywords")
       return results
     end
