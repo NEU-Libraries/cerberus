@@ -26,8 +26,8 @@ class ContentCreationJob
   def run
     # If file_path doesn't exist, or file doesn't exist, don't run
     # and email exception
-    if file_path.blank? || !(File.exists?(file_path))      
-      ExceptionNotifier.notify_exception(Exceptions::MissingFile.new(), :env => request.env)
+    if file_path.blank? || !(File.exists?(file_path))
+      ExceptionNotifier.notify_exception(Exceptions::MissingFile.new())
       return
     end
 
