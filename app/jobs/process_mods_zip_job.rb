@@ -318,11 +318,11 @@ class ProcessModsZipJob
     core_file.mods.table_of_contents = row_results["table_of_contents"] unless row_results["table_of_contents"].blank?
 
     access_conditions = {}
-    if !row_results["acess_condition_use_and_reproduction"].blank?
-      access_conditions["use and reproduction"] = row_results["acess_condition_use_and_reproduction"]
+    if !row_results["access_condition_use_and_reproduction"].blank?
+      access_conditions["use and reproduction"] = row_results["access_condition_use_and_reproduction"]
     end
-    if !row_results["acess_condition_use_and_reproduction"].blank?
-      access_conditions["restriction on access"] = row_results["acess_condition_restriction"]
+    if !row_results["access_condition_restriction"].blank?
+      access_conditions["restriction on access"] = row_results["access_condition_restriction"]
     end
     if !access_conditions.blank?
       core_file.mods.access_conditions = access_conditions
@@ -519,8 +519,8 @@ class ProcessModsZipJob
     results["language"]                                     = find_in_row(header_row, row_value, 'Language')
     results["abstract"]                                     = find_in_row(header_row, row_value, 'Abstract')
     results["table_of_contents"]                            = find_in_row(header_row, row_value, 'Table of Contents')
-    results["acess_condition_restriction"]                  = find_in_row(header_row, row_value, 'Access Condition : Restriction on access')
-    results["acess_condition_use_and_reproduction"]         = find_in_row(header_row, row_value, 'Access Condition : Use and Reproduction')
+    results["access_condition_restriction"]                 = find_in_row(header_row, row_value, 'Access Condition : Restriction on access')
+    results["access_condition_use_and_reproduction"]        = find_in_row(header_row, row_value, 'Access Condition : Use and Reproduction')
     results["provenance"]                                   = find_in_row(header_row, row_value, 'Provenance note')
     results["other_notes"]                                  = find_in_row(header_row, row_value, 'Other notes')
     results["original_title"]                               = find_in_row(header_row, row_value, 'Original Title')
