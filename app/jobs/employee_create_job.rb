@@ -17,6 +17,17 @@ class EmployeeCreateJob
     # we'd ever use it.
     if Employee.exists_by_nuid?(self.nuid)
       emp = Employee.find_by_nuid(self.nuid)
+
+      users = User.where(:nuid => auth.info.nuid)
+
+      users.each do |u|
+        if !u.nil?
+          u.employee_id = emp.pid
+          u.save!
+        end
+      end
+
+      return
     else
       emp = Employee.create(nuid: self.nuid, name: self.name, building: true, mass_permissions: 'public')
     end
@@ -43,13 +54,11 @@ class EmployeeCreateJob
       u.save!
     end
 
-
-    ensure
-      # As long as emp has been initialized to an Employee object
-      # and has been persisted to Fedora we need to send this email
-      if (emp.instance_of? Employee) && emp.persisted?
-        EmployeeMailer.new_employee_alert(emp).deliver!
-      end
+    # As long as emp has been initialized to an Employee object
+    # and has been persisted to Fedora we need to send this email
+    if (emp.instance_of? Employee) && emp.persisted?
+      EmployeeMailer.new_employee_alert(emp).deliver!
+    end
   end
 
   private
