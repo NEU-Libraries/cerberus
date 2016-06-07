@@ -3,12 +3,18 @@ require 'spec_helper'
 feature "Faculty and staff featured content" do
   before :all do
     ResqueSpec.inline = true
-    @list = FactoryGirl.create_list(:sequenced_employee, 4)
-    @list.map { |emp| EmployeeCreateJob.new(emp.nuid, emp.name).run }
+    # @list = FactoryGirl.create_list(:sequenced_employee, 4)
+    # @list.map { |emp| EmployeeCreateJob.new(emp.nuid, emp.name).run }
+    @list = []
+    1.upto(2) do |i|
+      EmployeeCreateJob.new("#{i}", "Fake Name").run
+      @list << Employee.find_by_nuid("#{i}")
+    end
+
     @employee_1 = @list.first
-    @employee_2 = @list[1]
-    @employee_3 = @list[2]
-    @employee_4 = @list[3]
+    # @employee_2 = @list[1]
+    # @employee_3 = @list[2]
+    # @employee_4 = @list[3]
   end
 
   scenario "Visit featured content page and then employee page" do
@@ -46,7 +52,7 @@ feature "Faculty and staff featured content" do
     # for each of the employees is correct
     expect(page).to have_css("ul.drs-items.drs-items-list")
     employees = page.all("article.drs-item")
-    expect(employees.length).to eq 4
+    expect(employees.length).to eq 2
 
     # TODO: Names section needs updating, no longer works.
 
