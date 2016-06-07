@@ -123,10 +123,9 @@ class User < ActiveRecord::Base
       end
     end
 
-    # Can't reload a nil object, so we go looking again
-    user = User.where(:email => auth.info.email).first
+    user.reload
 
-    if !user.nil? && user.employee_id.blank?
+    if user.employee_id.blank?
       if(auth.info.employee.include?("faculty") || auth.info.employee.include?("staff"))
         Cerberus::Application::Queue.push(EmployeeCreateJob.new(auth.info.nuid, emp_name))
       end
