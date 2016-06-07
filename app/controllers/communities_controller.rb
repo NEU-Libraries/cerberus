@@ -54,6 +54,9 @@ class CommunitiesController < ApplicationController
       # Fixes #667 - we remove single characters. They're a pretty terrible idea with a strict AND
       params[:q].gsub!(/(^| ).( |$)/, ' ')
       self.solr_search_params_logic += [:limit_to_scope]
+    elsif params[:smart_collection] || params[:smart_col]
+      smart_col = params[:smart_collection] || params[:smart_col]
+      safe_get_smart_docs(@set.send(smart_col.to_sym))
     else
       self.solr_search_params_logic += [:show_children_only]
     end
