@@ -17,7 +17,7 @@
         %a{ href: edit_core_file_xml_path(@core_file),  data: {event: "external"} }
           %i.icon-edit
           XML
-    - if current_user.admin? || current_user.developer?
+    - if current_user.repo_staff?
       %li
         %a{ href: core_file_mods_history_list_path(id: @core_file.pid)}
           %i.icon-undo
