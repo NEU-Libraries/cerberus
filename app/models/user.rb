@@ -5,8 +5,6 @@ class User < ActiveRecord::Base
   include Blacklight::User
   include Mailboxer::Models::Messageable
 
-  before_destroy :remove_drs_object
-
   # Include default devise modules. Others available are:
   # :token_authenticatable, :confirmable,
   # :lockable, :timeoutable and :omniauthable
@@ -104,7 +102,7 @@ class User < ActiveRecord::Base
       user = User.create(password:Devise.friendly_token[0,20], full_name:emp_name, nuid:auth.info.nuid)
 
       if auth.info.email.blank?
-        user.email = auth.info.nuid + "@neu.edu"
+        user.email = auth.info.nuid + "@northeastern.edu"
       else
         user.email = auth.info.email
       end
@@ -289,14 +287,4 @@ class User < ActiveRecord::Base
     self.send("find_by_nuid".to_sym, key)
   end
 
-  private
-
-    def remove_drs_object
-      if !self.nuid.nil?
-        if Employee.exists_by_nuid?(self.nuid)
-          object = Employee.find_by_nuid(self.nuid)
-          object.destroy
-        end
-      end
-    end
 end
