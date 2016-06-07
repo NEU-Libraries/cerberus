@@ -31,7 +31,7 @@ class Loaders::ModsSpreadsheetLoadsController < Loaders::LoadsController
     @report = Loaders::LoadReport.find(params[:id])
 
     @core_file = CoreFile.find(@report.preview_file_pid)
-    @mods_html = render_mods_display(CoreFile.find(@core_file.pid)).to_html.html_safe
+    @mods_html = CoreFilesController.new.render_mods_display(@core_file).to_html.html_safe
 
     @user = User.find_by_nuid(@report.nuid)
     @collection = fetch_solr_document({:id=>@report.collection})
@@ -51,7 +51,7 @@ class Loaders::ModsSpreadsheetLoadsController < Loaders::LoadsController
 
     @diff = mods_diff(old_core, @core_file)
     @diff_css = Diffy::CSS
-    @mods_html = render_mods_display(CoreFile.find(@core_file.pid)).to_html.html_safe
+    @mods_html = CoreFilesController.new.render_mods_display(@core_file).to_html.html_safe
 
     @user = User.find_by_nuid(@report.nuid)
     @collection = fetch_solr_document({:id=>@report.collection})
