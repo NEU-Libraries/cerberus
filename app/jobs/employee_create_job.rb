@@ -18,7 +18,7 @@ class EmployeeCreateJob
     if Employee.exists_by_nuid?(self.nuid)
       emp = Employee.find_by_nuid(self.nuid)
 
-      users = User.where(:nuid => auth.info.nuid)
+      users = User.where(:nuid => self.nuid)
 
       users.each do |u|
         if !u.nil?
