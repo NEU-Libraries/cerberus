@@ -88,6 +88,20 @@ class CompilationsController < ApplicationController
     end
   end
 
+  def facet
+    @set = fetch_solr_document
+    self.solr_search_params_logic += [:increase_facet_limit]
+    self.solr_search_params_logic += [:filter_entry_ids]
+    @pagination = get_facet_pagination(params[:solr_field], params)
+    respond_to do |format|
+      # Draw the facet selector for users who have javascript disabled:
+      format.html { render :template => 'catalog/facet' }
+
+      # Draw the partial for the "more" facet modal window:
+      format.js { render :template => 'catalog/facet', :layout => false }
+    end
+  end
+
   def new
     @set = Compilation.new
     @page_title = "New " + t('drs.compilations.name').capitalize
@@ -394,6 +408,10 @@ class CompilationsController < ApplicationController
     u_groups = current_user.groups
     query = u_groups.map! { |g| "\"#{g}\""}.join(" OR ")
     solr_parameters[:fq] << "edit_access_group_ssim:(#{query})"
+  end
+  
+  def increase_facet_limit(solr_parameters, user_parameters)
+    solr_parameters["facet.limit"] = "12"
   end
 
   private

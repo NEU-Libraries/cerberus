@@ -80,10 +80,11 @@ class CatalogController < ApplicationController
     params[:solr_field] = params[:id]
     # Put in logic handling the smart collections
     if params[:smart_collection]
+      params.delete(:id)
       filter_name = "#{params[:smart_collection].to_s}_filter"
       self.solr_search_params_logic += [filter_name.to_sym]
       (_, @document_list) = get_search_results
-      @pagination = get_facet_pagination(params[:id], params)
+      @pagination = get_facet_pagination(params[:solr_field], params)
       respond_to do |format|
         # Draw the facet selector for users who have javascript disabled:
         format.html { render :template => 'catalog/facet' }
