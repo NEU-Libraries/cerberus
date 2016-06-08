@@ -155,9 +155,10 @@ Cerberus::Application.routes.draw do
    get "/loaders/:id/proceed_load" => "mods_spreadsheet_loads#proceed_load", as: "loaders_proceed_load"
   end
 
-  # Facets for communities and collections
+  # Facets for communities, collections, and sets
   get "/communities/:id/facet/:solr_field" => 'communities#facet', as: 'community_facet'
   get "/collections/:id/facet/:solr_field" => 'collections#facet', as: 'collection_facet'
+  get "/sets/:id/facet/:solr_field" => 'compilations#facet', as: 'compilation_facet'
 
   namespace :admin do
     # Add/Remove communities from an employee, delete employee
