@@ -70,7 +70,8 @@ class Loaders::ModsSpreadsheetLoadsController < Loaders::LoadsController
       FileUtils.rm(cf.tmp_path)
       cf.destroy
     end
-    flash[:notice] = "Your load has been cancelled."
+    @report.destroy
+    session[:flash_success] = "Your load has been cancelled."
     redirect_to "/my_loaders"
   end
 
