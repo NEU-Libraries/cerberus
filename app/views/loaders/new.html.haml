@@ -39,9 +39,7 @@
     = submit_tag "Upload", disabled: "true", class: 'btn btn-large btn-primary activate-submit', data: { disable_with: "Please wait..."}, id: "loaderSubmit"
 :javascript
   $(function () {
-    $("#loaderSubmit").click(function(e) {
-      e.preventDefault();
-    });
+    var file_list = [];
     $(".progress").hide();
     $('#loaderForm').fileupload({
         dataType: 'html',
@@ -53,9 +51,9 @@
                   e.preventDefault();
                   $(this).attr("disabled", true);
                   $(this).val("Please wait...");
-                  data.submit();
                 });
           $(".progress").show();
+          file_list = [data.files[0]]; //this guarantees that the files being uploaded is only the most recently added one
         },
         progressall: function (e, data) {
             var progress = parseInt(data.loaded / data.total * 100, 10);
@@ -83,5 +81,9 @@
           window.alert("There was an issue processing your load.");
           window.location = "/my_loaders";
         }
+    });
+    $('#loaderSubmit').click(function(e){
+      e.preventDefault();
+      $('#loaderForm').fileupload('send', {files:file_list});
     });
   });
