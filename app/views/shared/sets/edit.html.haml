@@ -21,6 +21,10 @@
     %a{ href: "#statistics", data: {toggle: "tab"}}
       %i.icon-bar-chart
       Statistics
+  %li
+    %a{ href: "#export", data: {toggle: "tab"}}
+      %i.icon-cloud-download
+      Export
 
 .tab-content
   #edit.tab-pane.active
@@ -36,6 +40,8 @@
       = render partial: "shared/sets/delete", locals:  {set: @set }
   #statistics.tab-pane
     = render partial: "shared/sets/statistics", locals:  {set: @set }
+  #export.tab-pane
+    = render partial: "shared/sets/export_mods", locals:  {set: @set }
 
 :javascript
   $('.nav-tabs a').click(function (e) {
