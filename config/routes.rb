@@ -233,6 +233,8 @@ Cerberus::Application.routes.draw do
   # SUFIA
   # Downloads controller route
   resources :downloads, :only => "show"
+  get "/downloads/mods/:session_id" => "downloads#mods_download", as: 'mods_download'
+
   # "Notifications" route for catalog index view
   get "users/notifications_number" => "users#notifications_number", :as => :user_notify
   # Messages
