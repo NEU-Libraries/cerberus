@@ -28,35 +28,35 @@
     %h3 My Loaders
     - if !current_user.nil?
       - if current_user.marcom_loader?
-        = link_to(t('drs.loaders.marcom.long_name'), loaders_marcom_path, class: "btn btn-lg btn-primary")
+        = link_to(t('drs.loaders.marcom.long_name'), new_marcom_load_path, class: "btn btn-lg btn-primary")
         %br
         %br
       - if current_user.coe_loader?
-        = link_to(t('drs.loaders.coe.long_name'), loaders_coe_path, class: "btn btn-lg btn-primary")
+        = link_to(t('drs.loaders.coe.long_name'), new_coe_load_path, class: "btn btn-lg btn-primary")
         %br
         %br
       - if current_user.cps_loader?
-        = link_to(t('drs.loaders.cps.long_name'), loaders_cps_path, class: "btn btn-lg btn-primary")
+        = link_to(t('drs.loaders.cps.long_name'), new_cps_load_path, class: "btn btn-lg btn-primary")
         %br
         %br
       - if current_user.emsa_loader?
-        = link_to(t('drs.loaders.emsa.long_name'), loaders_emsa_path, class: "btn btn-lg btn-primary")
+        = link_to(t('drs.loaders.emsa.long_name'), new_emsa_load_path, class: "btn btn-lg btn-primary")
         %br
         %br
       - if current_user.bouve_loader?
-        = link_to(t('drs.loaders.bouve.long_name'), loaders_bouve_path, class: "btn btn-lg btn-primary")
+        = link_to(t('drs.loaders.bouve.long_name'), new_bouve_load_path, class: "btn btn-lg btn-primary")
         %br
         %br
       - if current_user.damore_loader?
-        = link_to(t('drs.loaders.damore.long_name'), loaders_damore_path, class: "btn btn-lg btn-primary")
+        = link_to(t('drs.loaders.damore.long_name'), new_damore_load_path, class: "btn btn-lg btn-primary")
         %br
         %br
       - if current_user.multipage_loader?
-        = link_to(t('drs.loaders.multipage.long_name'), loaders_multipage_path, class: "btn btn-lg btn-primary")
+        = link_to(t('drs.loaders.multipage.long_name'), new_multipage_load_path, class: "btn btn-lg btn-primary")
         %br
         %br
       - if current_user.mods_spreadsheet_loader?
-        = link_to(t('drs.loaders.mods_spreadsheet.long_name'), loaders_mods_spreadsheet_path, class: "btn btn-lg btn-primary")
+        = link_to(t('drs.loaders.mods_spreadsheet.long_name'), new_mods_spreadsheet_load_path, class: "btn btn-lg btn-primary")
         %br
         %br
 
