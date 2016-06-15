@@ -34,10 +34,6 @@ class DownloadsController < ApplicationController
     render_403 and return
   end
 
-  def mods_download
-    send_file "#{Rails.application.config.tmp_path}/mods/#{params[:session_id]}/mods_export.zip"
-  end
-
   def show
     if asset.class == ImageThumbnailFile && (Rails.env.staging? || Rails.env.production?)
       response.headers['Cache-Control'] = "public"
