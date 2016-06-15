@@ -15,6 +15,7 @@ Cerberus::Application.routes.draw do
   get 'collections/:id/recent' => 'collections#recent_deposits', as: 'collection_recent_deposits'
   get 'collections/:id/creators' => "collections#creator_list", as:"collection_creator_list"
   # get 'collections/:id/titles' => "collections#title_list", as:"collection_title_list"
+  get 'collections/:id/export_mods' => "collections#export_mods", as: "export_mods"
 
   resources :communities, only: [:show]
 
@@ -233,7 +234,6 @@ Cerberus::Application.routes.draw do
   # SUFIA
   # Downloads controller route
   resources :downloads, :only => "show"
-  get "/downloads/mods/:session_id" => "downloads#mods_download", as: 'mods_download'
 
   # "Notifications" route for catalog index view
   get "users/notifications_number" => "users#notifications_number", :as => :user_notify
@@ -243,6 +243,7 @@ Cerberus::Application.routes.draw do
   match 'notifications/:uid/delete' => 'mailbox#delete', as: :mailbox_delete, via: [:get, :post]
 
   get ':action' => 'static#:action', constraints: { action: /help|iris|terms/ }, as: :static
+  get "/downloads/mods/:session_id" => "static#mods_download", as: 'mods_download'
 
   # Catch-all (for routing errors)
   unless Rails.env.development?

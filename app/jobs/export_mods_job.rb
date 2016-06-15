@@ -1,5 +1,5 @@
 class ExportModsJob
-  attr_accessor :sess_id, :pid, :nuid
+  attr_accessor :sess_id, :pid, :nuid, :user, :path
 
   def initialize(sess_id, pid, nuid)
     self.sess_id = sess_id
@@ -8,14 +8,16 @@ class ExportModsJob
   end
 
   def queue_name
-    :cart_download
+    :export_mods
   end
 
   def run
     self.user = !nuid.blank? ? User.find_by_nuid(nuid) : nil
     self.path = "#{Rails.application.config.tmp_path}/mods/#{sess_id}"
 
+    FileUtils.rm_rf(Dir.glob("#{path}/*")) if File.directory?(path)
     FileUtils.mkdir_p path
+
     temp_path = "#{path}/in_progress.zip"
     full_path = "#{path}/mods_export.zip"
     temp_txt = "#{sess_id}.txt"
@@ -35,7 +37,7 @@ class ExportModsJob
         File.write("#{path}/#{pid.split(":").last}-MODS.xml", item.mods.content)
 
         Zip::File.open(temp_path) do |zipfile|
-          zipfile.add("neu_#{pid.split(":").last}.#{extract_extension(item.properties.mime_type.first, File.extname(item.original_filename || "").delete!("."))}", "#{path}/#{pid.split(":").last}-MODS.xml")
+          zipfile.add("neu-#{pid.split(":").last}-MODS.xml", "#{path}/#{pid.split(":").last}-MODS.xml")
         end
 
         FileUtils.rm("#{path}/#{pid.split(":").last}-MODS.xml")
@@ -51,6 +53,6 @@ class ExportModsJob
     FileUtils.mv(temp_path, full_path)
 
     # Email user their download link
-    EmployeeMailer.new_employee_alert(emp).deliver!
+    ModsMailer.export_alert(self.nuid, self.sess_id).deliver!
   end
 end

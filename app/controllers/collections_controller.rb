@@ -185,7 +185,9 @@ class CollectionsController < ApplicationController
   end
 
   def export_mods
+    flash[:notice] = "MODS Export process started - you'll be emailed a download link when it finishes."
     Cerberus::Application::Queue.push(ExportModsJob.new(request.session_options[:id], params[:id], current_user.nuid))
+    redirect_to collection_path(params[:id]) and return
   end
 
   def update
