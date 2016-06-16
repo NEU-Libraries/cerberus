@@ -13,7 +13,7 @@ class ExportModsJob
 
   def run
     self.user = !nuid.blank? ? User.find_by_nuid(nuid) : nil
-    self.path = "#{Rails.application.config.tmp_path}/mods/#{sess_id}"
+    self.path = "#{Rails.application.config.tmp_path}/mods/#{sess_id}-#{pid.split(":").last}"
 
     FileUtils.rm_rf(Dir.glob("#{path}/*")) if File.directory?(path)
     FileUtils.mkdir_p path
@@ -29,18 +29,33 @@ class ExportModsJob
 
     pids = SolrDocument.new(ActiveFedora::Base.find(pid, cast: true).to_solr).all_descendent_pids
 
-    pids.each do |pid|
-      if ActiveFedora::Base.exists?(pid)
-        item = ActiveFedora::Base.find(pid, cast: true)
+    # Make spreadsheet
+    Axlsx::Package.new do |x|
+      x.workbook.add_worksheet(:name => "work sheet") do |sheet|
+        sheet.add_row ["PIDs", "MODS XML File Path"]
 
-        # Make temp XML file
-        File.write("#{path}/#{pid.split(":").last}-MODS.xml", item.mods.content)
+        pids.each do |pid|
+          if ActiveFedora::Base.exists?(pid)
+            item = ActiveFedora::Base.find(pid, cast: true)
 
-        Zip::File.open(temp_path) do |zipfile|
-          zipfile.add("neu-#{pid.split(":").last}-MODS.xml", "#{path}/#{pid.split(":").last}-MODS.xml")
+            # Make temp XML file
+            File.write("#{path}/#{pid.split(":").last}-MODS.xml", item.mods.content)
+
+            Zip::File.open(temp_path) do |zipfile|
+              zipfile.add("neu-#{pid.split(":").last}-MODS.xml", "#{path}/#{pid.split(":").last}-MODS.xml")
+            end
+
+            sheet.add_row ["#{pid}", "neu-#{pid.split(":").last}-MODS.xml"]
+
+            FileUtils.rm("#{path}/#{pid.split(":").last}-MODS.xml")
+          end
         end
 
-        FileUtils.rm("#{path}/#{pid.split(":").last}-MODS.xml")
+      end
+      x.serialize("#{path}/manifest.xlsx")
+
+      Zip::File.open(temp_path) do |zipfile|
+        zipfile.add("manifest.xlsx", "#{path}/manifest.xlsx")
       end
     end
 
@@ -53,6 +68,6 @@ class ExportModsJob
     FileUtils.mv(temp_path, full_path)
 
     # Email user their download link
-    ModsMailer.export_alert(self.nuid, self.sess_id).deliver!
+    ModsMailer.export_alert(self.pid ,self.nuid, self.sess_id).deliver!
   end
 end

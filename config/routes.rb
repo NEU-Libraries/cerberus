@@ -243,7 +243,7 @@ Cerberus::Application.routes.draw do
   match 'notifications/:uid/delete' => 'mailbox#delete', as: :mailbox_delete, via: [:get, :post]
 
   get ':action' => 'static#:action', constraints: { action: /help|iris|terms/ }, as: :static
-  get "/downloads/mods/:session_id" => "static#mods_download", as: 'mods_download'
+  get "/downloads/:id/mods/:session_id" => "static#mods_download", as: 'mods_download'
 
   # Catch-all (for routing errors)
   unless Rails.env.development?
