@@ -119,8 +119,14 @@ class ProcessModsZipJob
               elsif existing_files == true
                 existing_file = true
                 if core_file_checks(row_results["pid"]) == true
+                  blank_handle = false
                   core_file = CoreFile.find(row_results["pid"])
                   handle = core_file.identifier
+                  if handle.blank?
+                    blank_handle = true
+                    xml = Nokogiri::XML(core_file.mods.content)
+                    handle = xml.xpath("//mods:identifier[contains(., 'hdl.handle.net')]").text
+                  end
                   old_mods = core_file.mods.content
                   core_file.mods.content = ModsDatastream.xml_template.to_xml
                   core_file.mods.identifier = handle
@@ -140,7 +146,7 @@ class ProcessModsZipJob
               elsif core_file.title.blank?
                 populate_error_report(load_report, existing_file, "Must have a title", row_results, core_file, old_mods, header_row, row)
                 next
-              elsif !row_results["handle"].blank? && core_file.identifier != row_results["handle"]
+              elsif (!row_results["handle"].blank? && core_file.identifier != row_results["handle"]) || blank_handle
                 image_report = load_report.image_reports.create_modified("Handle does not match", core_file, row_results)
                 image_report.title = core_file.title
                 image_report.save!
