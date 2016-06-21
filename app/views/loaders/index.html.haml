@@ -33,5 +33,5 @@
           = link_to("View Report", loaders_bouve_report_path(loader.id), class: "btn btn-small btn-success")
         - elsif loader.loader_name == t('drs.loaders.damore.long_name')
           = link_to("View Report", loaders_damore_report_path(loader.id), class: "btn btn-small btn-success")
-        - elsif loader.loader_name == t('drs.loaders.mods_spreadsheet.long_name')
-          = link_to("View Report", loaders_mods_spreadsheet_report_path(loader.id), class: "btn btn-small btn-success")
+        - elsif loader.loader_name == t('drs.loaders.spreadsheet_loader.long_name')
+          = link_to("View Report", loaders_spreadsheet_report_path(loader.id), class: "btn btn-small btn-success")

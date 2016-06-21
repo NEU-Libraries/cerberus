@@ -55,8 +55,12 @@
         = link_to(t('drs.loaders.multipage.long_name'), loaders_multipage_path, class: "btn btn-lg btn-primary")
         %br
         %br
-      - if current_user.mods_spreadsheet_loader?
-        = link_to(t('drs.loaders.mods_spreadsheet.long_name'), loaders_mods_spreadsheet_path, class: "btn btn-lg btn-primary")
+      - if current_user.spreadsheet_loader?
+        = link_to(t('drs.loaders.spreadsheet_loader.long_name'), loaders_spreadsheet_path, class: "btn btn-lg btn-primary")
+        %br
+        %br
+      - if current_user.admin? || current_user.developer?
+        = link_to(t('drs.loaders.xml.long_name'), loaders_xml_path, class: "btn btn-lg btn-primary")
         %br
         %br
 

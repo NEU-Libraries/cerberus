@@ -109,7 +109,7 @@ class Loaders::LoadsController < ApplicationController
             Cerberus::Application::Queue.push(ProcessMultipageZipJob.new(@loader_name, new_file.to_s, parent, copyright, current_user, permissions, report_id))
             session[:flash_success] = "Your file has been submitted and is now being processed. You will receive an email when the load is complete."
             render :json => {report_id: report_id}.to_json and return
-          elsif short_name == "mods_spreadsheet"
+          elsif short_name == "spreadsheet_loader"
             #mods spreadsheet job
             spreadsheet_file_path = unzip(new_file, new_path)
             report_id = Loaders::LoadReport.create_from_strings(current_user, 0, @loader_name, parent)

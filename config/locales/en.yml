@@ -239,9 +239,13 @@ en:
         long_name: "Bouvé College of Health Sciences"
         short_name: "bouve"
         copyright: "Bouvé College of Health Sciences images are for use only within the context of Northeastern University. Appropriate uses include: Northeastern University-related websites, Northeastern University-based print/web publications. Images should be credited: \"Photographer Name/Northeastern University.\" Images are not to be used for self-promotional purposes outside of Northeastern University such as LinkedIn, Facebook or in commercial/external publications such as advertisements, books or magazines without written permission from Northeastern University, Bouvé  College of Health Sciences. For more information, please contact the Office of the Dean at 617-373-3323."
-      mods_spreadsheet:
-        long_name: "MODS Spreadsheet"
-        short_name: "mods_spreadsheet"
+      spreadsheet_loader:
+        long_name: "Spreadsheet Loader"
+        short_name: "spreadsheet_loader"
+        copyright: ""
+      xml_loader:
+        long_name: "XML Loader"
+        short_name: "xml_loader"
         copyright: ""
       damore:
         long_name: "D'Amore-McKim School of Business Marketing and Communications"
