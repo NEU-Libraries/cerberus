@@ -360,9 +360,15 @@ class ProcessModsZipJob
     end
     core_file.mods.topics = keywords #have to create the subject nodes first
     core_file.mods.subject.topic.each_with_index do |subject, key|
+      value_uri = ""
+      if subject.include? "|"
+        subject = subject.split("|")
+        value_uri = subject[1].strip unless subject[1].strip.blank?
+        subject = subject[0].strip
+      end
       if subject.include? "--"
         topics = []
-        core_file.mods.subject(key).topic[0].split("--").each do |topic|
+        subject.split("--").each do |topic|
           topics << topic.strip
         end
         core_file.mods.subject(key).topic = topics
@@ -373,6 +379,7 @@ class ProcessModsZipJob
       authority_uri = row_results["topic_#{key+1}_authority"].split("|")[1]
       core_file.mods.subject(key).authority = authority.strip unless authority.blank?
       core_file.mods.subject(key).authority_uri = authority_uri.strip unless authority_uri.blank?
+      core_file.mods.subject(key).value_uri = value_uri.strip unless value_uri.blank?
       #adds authority if it is set, key starts from 0 but topics start from 1 in spreadsheet
     end
 
