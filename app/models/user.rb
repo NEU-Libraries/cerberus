@@ -243,7 +243,7 @@ class User < ActiveRecord::Base
     return self.groups.include? "northeastern:drs:repository:loaders:bouve_dean"
   end
 
-  def mods_spreadsheet_loader?
+  def spreadsheet_loader?
     return self.groups.include? "northeastern:drs:repository:loaders:spreadsheet"
   end
 
@@ -271,8 +271,8 @@ class User < ActiveRecord::Base
     if self.bouve_loader?
       loaders.push(I18n.t("drs.loaders.bouve.long_name"))
     end
-    if self.mods_spreadsheet_loader?
-      loaders.push(I18n.t("drs.loaders.mods_spreadsheet.long_name"))
+    if self.spreadsheet_loader?
+      loaders.push(I18n.t("drs.loaders.spreadsheet_loader.long_name"))
     end
     if self.damore_loader?
       loaders.push(I18n.t("drs.loaders.damore.long_name"))
