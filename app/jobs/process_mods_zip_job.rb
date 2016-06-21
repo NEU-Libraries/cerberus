@@ -150,6 +150,7 @@ class ProcessModsZipJob
                 image_report = load_report.image_reports.create_modified("Handle does not match", core_file, row_results)
                 image_report.title = core_file.title
                 image_report.save!
+                next
               else
                 raw_xml = xml_decode(core_file.mods.content)
                 result = xml_valid?(raw_xml)
