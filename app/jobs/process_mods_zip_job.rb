@@ -71,10 +71,10 @@ class ProcessModsZipJob
         end
       end
     else #not a preview
-      # spreadsheet.each_row_streaming(offset: header_position) do |row|
+      existing_files = false
       start = header_position + 1
       end_row = spreadsheet.last_row.to_i
-      for x in start..end_row
+        (start..end_row).each do |x|
         row = spreadsheet.row(x)
         if row.present? && header_row.present?
           begin
@@ -142,15 +142,12 @@ class ProcessModsZipJob
               assign_a_row(row_results, core_file)
               if core_file.keywords.length < 1
                 populate_error_report(load_report, existing_file, "Must have at least one keyword", row_results, core_file, old_mods, header_row, row)
-                next
               elsif core_file.title.blank?
                 populate_error_report(load_report, existing_file, "Must have a title", row_results, core_file, old_mods, header_row, row)
-                next
               elsif (!row_results["handle"].blank? && core_file.identifier != row_results["handle"]) || blank_handle
                 image_report = load_report.image_reports.create_modified("Handle does not match", core_file, row_results)
                 image_report.title = core_file.title
                 image_report.save!
-                next
               else
                 raw_xml = xml_decode(core_file.mods.content)
                 result = xml_valid?(raw_xml)
@@ -160,7 +157,6 @@ class ProcessModsZipJob
                     error_list = error_list.concat("#{entry.class.to_s}: #{entry} </br></br> ")
                   end
                   populate_error_report(load_report, existing_file, error_list, row_results, core_file, old_mods, header_row, row)
-                  next
                 else
                   Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename))
                   load_report.image_reports.create_success(core_file, "")
@@ -171,7 +167,6 @@ class ProcessModsZipJob
             puts error
             puts error.backtrace
             populate_error_report(load_report, existing_file, error.message, row_results, core_file, old_mods, header_row, row)
-            next
           end
         end
       end
