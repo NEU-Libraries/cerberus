@@ -159,6 +159,7 @@ describe ProcessModsZipJob do
       Loaders::ImageReport.destroy_all
       ActiveFedora::Base.destroy_all
       FileUtils.rm("#{@new_path}")
+      FileUtils.rm_rf(Pathname.new("#{Rails.application.config.tmp_path}/")+"demo_mods_new_file")
     end
   end
 
@@ -225,6 +226,7 @@ describe ProcessModsZipJob do
       Loaders::LoadReport.destroy_all
       Loaders::ImageReport.destroy_all
       ActiveFedora::Base.destroy_all
+      FileUtils.rm_rf(Pathname.new("#{Rails.application.config.tmp_path}/")+"demo_mods_new_file")
     end
   end
 end
