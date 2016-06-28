@@ -25,6 +25,11 @@
   margin-left:-200px;
 }
 
+.modal-body {
+  overflow-y: auto !important;
+  max-height: calc(100vh - 230px) !important;
+}
+
 fieldset{
   margin-bottom: 10px;
 }

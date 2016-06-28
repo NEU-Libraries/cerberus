@@ -69,18 +69,22 @@ describe ProcessModsZipJob do
       cf.mods.subject(0).topic(1).should == ["Massachusetts"]
       cf.mods.subject(0).topic(2).should == ["Boston"]
       cf.mods.subject(0).authority.should == ["lcsh"]
+      cf.mods.subject(0).value_uri.should == ["Value URI"]
       cf.mods.subject(1).topic(0).should == ["African Americans"]
       cf.mods.subject(1).topic(1).should == ["Education"]
       cf.mods.subject(1).topic(2).should == ["Massachusetts"]
       cf.mods.subject(1).topic(3).should == ["Boston"]
+      cf.mods.subject(1).value_uri.should == ["Value URI"]
       cf.mods.subject(2).topic(0).should == ["Civil rights"]
       cf.mods.subject(2).topic(1).should == ["Massachusetts"]
       cf.mods.subject(2).topic(2).should == ["Boston"]
       cf.mods.subject(2).authority.should == ["lcsh"]
+      cf.mods.subject(2).value_uri.should == []
       cf.mods.subject(3).topic(0).should == ["Public schools"]
       cf.mods.subject(3).topic(1).should == ["Massachusetts"]
       cf.mods.subject(3).topic(2).should == ["Boston"]
       cf.mods.subject(3).authority.should == ["lcsh"]
+      cf.mods.subject(3).value_uri.should == []
       cf.mods.subject(4).name.name_part.should == ["Citywide Educational Coalition"]
       cf.mods.subject(4).name.value_uri.should == ["URI for value"]
       cf.mods.subject(4).name.authority.should == ["lcsh"]
@@ -159,6 +163,7 @@ describe ProcessModsZipJob do
       Loaders::ImageReport.destroy_all
       ActiveFedora::Base.destroy_all
       FileUtils.rm("#{@new_path}")
+      FileUtils.rm_rf(Pathname.new("#{Rails.application.config.tmp_path}/")+"demo_mods_new_file")
     end
   end
 
@@ -225,6 +230,7 @@ describe ProcessModsZipJob do
       Loaders::LoadReport.destroy_all
       Loaders::ImageReport.destroy_all
       ActiveFedora::Base.destroy_all
+      FileUtils.rm_rf(Pathname.new("#{Rails.application.config.tmp_path}/")+"demo_mods_new_file")
     end
   end
 end

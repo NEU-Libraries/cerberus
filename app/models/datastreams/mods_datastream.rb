@@ -161,6 +161,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
     t.subject(path: 'mods/mods:subject', namespace_prefix: 'mods'){
       t.authority(path: {attribute: 'authority'})
       t.authority_uri(path: {attribute: 'authorityURI'})
+      t.value_uri(path: {attribute: 'valueURI'})
       t.cartographics(path: 'cartographics', namespace_prefix: 'mods'){
         t.coordinates(path: 'coordinates', namespace_prefix: 'mods')
       }
@@ -654,6 +655,22 @@ class ModsDatastream < ActiveFedora::OmDatastream
     end
   end
 
+  def languages=(array_of_strings)
+    array_of_langs = array_of_strings.select {|kw| !kw.blank? }
+    if array_of_langs.length < self.language.length
+      node_count = self.language.length - array_of_langs.length
+      trim_nodes_from_zero(:language, node_count)
+    end
+    i = 0
+    array_of_langs.each_with_index do |key, val|
+      if self.language[i].nil?
+        self.insert_new_node(:language)
+      end
+      self.language(i).language_term = key
+      i = i+1
+    end
+  end
+
   # The following four methods are probably deprecated, given that we won't be
   # collecting corporate/personal names separately from end users, and therefore shouldn't
   # have to assign to it/read from it for the purposes of the frontend.
@@ -861,6 +878,14 @@ class ModsDatastream < ActiveFedora::OmDatastream
   def self.topic_template
     builder = Nokogiri::XML::Builder.new do |xml|
       xml.topic " "
+    end
+    return builder.doc.root
+  end
+
+  def self.language_template
+    builder = Nokogiri::XML::Builder.new do |xml|
+      xml.language {
+      }
     end
     return builder.doc.root
   end
