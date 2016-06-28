@@ -147,8 +147,15 @@ Cerberus::Application.routes.draw do
    get "/loaders/spreadsheet/preview/:id" => 'spreadsheet_loads#preview',  as: 'loaders_spreadsheet_preview'
    get "/loaders/spreadsheet/preview_compare/:id" => 'spreadsheet_loads#preview_compare', as: 'loaders_spreadsheet_preview_compare'
    get "/loaders/spreadsheet/file/:id" => 'spreadsheet_loads#show_mods', as: 'loaders_spreadsheet_mods'
-   get "/loaders/:id/cancel_load" => "spreadsheet_loads#cancel_load", as: "loaders_cancel_load"
-   get "/loaders/:id/proceed_load" => "spreadsheet_loads#proceed_load", as: "loaders_proceed_load"
+   get "/loaders/:id/cancel_load" => "spreadsheet_loads#cancel_load", as: "loaders_spreadsheet_cancel_load"
+   get "/loaders/:id/proceed_load" => "spreadsheet_loads#proceed_load", as: "loaders_spreadsheet_proceed_load"
+   resources :xml_loads, only: [:new, :create, :preview, :preview_compare], :path => "loaders/xml"
+   get "/loaders/xml/report/:id" => 'xml_loads#show', as: 'loaders_xml_report'
+   get "/loaders/xml/preview/:id" => 'xml_loads#preview',  as: 'loaders_xml_preview'
+   get "/loaders/xml/preview_compare/:id" => 'xml_loads#preview_compare', as: 'loaders_xml_preview_compare'
+   get "/loaders/xml/file/:id" => 'xml_loads#show_mods', as: 'loaders_xml_mods'
+   get "/loaders/:id/cancel_load" => "xml_loads#cancel_load", as: "loaders_xml_cancel_load"
+   get "/loaders/:id/proceed_load" => "xml_loads#proceed_load", as: "loaders_xml_proceed_load"
   end
 
   # Facets for communities, collections, and sets

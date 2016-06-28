@@ -1,4 +1,4 @@
-class Loaders::ModsSpreadsheetLoadsController < Loaders::LoadsController
+class Loaders::XmlLoadsController < Loaders::LoadsController
   before_filter :verify_group
   require 'stanford-mods'
   include ModsDisplay::ControllerExtension
@@ -16,15 +16,15 @@ class Loaders::ModsSpreadsheetLoadsController < Loaders::LoadsController
         @collections_options << {'label' => "#{c['id']} - #{c['title_info_title_tesim'][0]}", 'value' => c['id']}
       end
     end
-    @loader_name = t('drs.loaders.'+t('drs.loaders.spreadsheet_loader.short_name')+'.long_name')
-    @loader_short_name = t('drs.loaders.spreadsheet_loader.short_name')
+    @loader_name = t('drs.loaders.'+t('drs.loaders.xml_loader.short_name')+'.long_name')
+    @loader_short_name = t('drs.loaders.xml_loader.short_name')
     @page_title = @loader_name + " Loader"
     render 'loaders/new', locals: { collections_options: @collections_options}
   end
 
   def create
     permissions = {"CoreFile" => {"read"  => ["public"], "edit" => ["northeastern:drs:repository:staff"]}}
-    process_create(permissions, t('drs.loaders.spreadsheet_loader.short_name'), "ModsSpreadsheetLoadsController")
+    process_create(permissions, t('drs.loaders.xml_loader.short_name'), "XmlLoadsController")
   end
 
   def preview
@@ -78,7 +78,7 @@ class Loaders::ModsSpreadsheetLoadsController < Loaders::LoadsController
   def proceed_load
     puts params
     @report = Loaders::LoadReport.find(params[:id])
-    @loader_name = t('drs.loaders.spreadsheet_loader.long_name')
+    @loader_name = t('drs.loaders.xml_loader.long_name')
     if !@report.preview_file_pid.blank?
       cf = CoreFile.find(@report.preview_file_pid)
       spreadsheet_file_path = cf.tmp_path
@@ -86,7 +86,7 @@ class Loaders::ModsSpreadsheetLoadsController < Loaders::LoadsController
       cf = CoreFile.find(@report.comparison_file_pid)
       spreadsheet_file_path = cf.tmp_path
     end
-    copyright = t('drs.loaders.spreadsheet_loader.copyright')
+    copyright = t('drs.loaders.xml_loader.copyright')
     permissions = {} #we aren't getting these externally yet
     if params[:depositor]
       depositor = params[:depositor]
@@ -95,7 +95,7 @@ class Loaders::ModsSpreadsheetLoadsController < Loaders::LoadsController
     end
     Cerberus::Application::Queue.push(ProcessModsZipJob.new(@loader_name, spreadsheet_file_path, @report.collection, copyright, current_user, permissions, @report.id, depositor, nil))
     flash[:notice] = "Your spreadsheet is being processed. The information on this page will be updated periodically until the processing is completed."
-    redirect_to "/loaders/spreadsheet/report/#{@report.id}"
+    redirect_to "/loaders/xml/report/#{@report.id}"
   end
 
   def show_mods
@@ -109,7 +109,7 @@ class Loaders::ModsSpreadsheetLoadsController < Loaders::LoadsController
 
     def verify_group
       redirect_to new_user_session_path if current_user.nil?
-      redirect_to root_path unless current_user.spreadsheet_loader?
+      redirect_to root_path unless (current_user.admin? || current_user.developer?)
     end
 
     def mods_diff(core_file_a, core_file_b)
