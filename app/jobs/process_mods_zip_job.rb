@@ -71,10 +71,10 @@ class ProcessModsZipJob
         end
       end
     else #not a preview
-      # spreadsheet.each_row_streaming(offset: header_position) do |row|
+      existing_files = false
       start = header_position + 1
       end_row = spreadsheet.last_row.to_i
-      for x in start..end_row
+        (start..end_row).each do |x|
         row = spreadsheet.row(x)
         if row.present? && header_row.present?
           begin
@@ -119,8 +119,14 @@ class ProcessModsZipJob
               elsif existing_files == true
                 existing_file = true
                 if core_file_checks(row_results["pid"]) == true
+                  blank_handle = false
                   core_file = CoreFile.find(row_results["pid"])
                   handle = core_file.identifier
+                  if handle.blank?
+                    blank_handle = true
+                    xml = Nokogiri::XML(core_file.mods.content)
+                    handle = xml.xpath("//mods:identifier[contains(., 'hdl.handle.net')]").text
+                  end
                   old_mods = core_file.mods.content
                   core_file.mods.content = ModsDatastream.xml_template.to_xml
                   core_file.mods.identifier = handle
@@ -136,11 +142,9 @@ class ProcessModsZipJob
               assign_a_row(row_results, core_file)
               if core_file.keywords.length < 1
                 populate_error_report(load_report, existing_file, "Must have at least one keyword", row_results, core_file, old_mods, header_row, row)
-                next
               elsif core_file.title.blank?
                 populate_error_report(load_report, existing_file, "Must have a title", row_results, core_file, old_mods, header_row, row)
-                next
-              elsif !row_results["handle"].blank? && core_file.identifier != row_results["handle"]
+              elsif (!row_results["handle"].blank? && core_file.identifier != row_results["handle"]) || blank_handle
                 image_report = load_report.image_reports.create_modified("Handle does not match", core_file, row_results)
                 image_report.title = core_file.title
                 image_report.save!
@@ -153,7 +157,6 @@ class ProcessModsZipJob
                     error_list = error_list.concat("#{entry.class.to_s}: #{entry} </br></br> ")
                   end
                   populate_error_report(load_report, existing_file, error_list, row_results, core_file, old_mods, header_row, row)
-                  next
                 else
                   Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename))
                   load_report.image_reports.create_success(core_file, "")
@@ -164,7 +167,6 @@ class ProcessModsZipJob
             puts error
             puts error.backtrace
             populate_error_report(load_report, existing_file, error.message, row_results, core_file, old_mods, header_row, row)
-            next
           end
         end
       end
@@ -305,14 +307,20 @@ class ProcessModsZipJob
     core_file.mods.physical_description.extent = row_results["extent"] unless row_results["extent"].blank?
     core_file.mods.physical_description.digital_origin = row_results["digital_origin"] unless row_results["digital_origin"].blank?
     core_file.mods.physical_description.reformatting_quality = row_results["reformatting_quality"]
-    if !row_results["language"].blank?
-      lang = row_results["language"].split("|")[0]
-      lang_uri = row_results["language"].split("|")[1]
-      core_file.mods.language.language_term = lang.strip
-      core_file.mods.language.language_term.language_term_type = "text"
-      core_file.mods.language.language_term.language_authority = "iso639-2b"
-      core_file.mods.language.language_term.language_authority_uri = "http://id.loc.gov/vocabulary/iso639-2"
-      core_file.mods.language.language_term.language_value_uri = lang_uri.strip unless lang_uri.blank?
+    languages = row_results.select { |key, value| key.to_s.match(/^language_\d+$/) }
+    core_file.mods.languages = languages.values
+    i=0
+    languages.each do |key, language|
+      if !language.blank?
+        lang = language.split("|")[0]
+        lang_uri = language.split("|")[1]
+        core_file.mods.language(i).language_term = lang.strip
+        core_file.mods.language(i).language_term.language_term_type = "text"
+        core_file.mods.language(i).language_term.language_authority = "iso639-2b"
+        core_file.mods.language(i).language_term.language_authority_uri = "http://id.loc.gov/vocabulary/iso639-2"
+        core_file.mods.language(i).language_term.language_value_uri = lang_uri.strip unless lang_uri.blank?
+      end
+      i=i+1
     end
     core_file.mods.description = row_results["abstract"] unless row_results["abstract"].blank?
     core_file.mods.table_of_contents = row_results["table_of_contents"] unless row_results["table_of_contents"].blank?
@@ -347,9 +355,15 @@ class ProcessModsZipJob
     end
     core_file.mods.topics = keywords #have to create the subject nodes first
     core_file.mods.subject.topic.each_with_index do |subject, key|
+      value_uri = ""
+      if subject.include? "|"
+        subject = subject.split("|")
+        value_uri = subject[1].strip unless subject[1].strip.blank?
+        subject = subject[0].strip
+      end
       if subject.include? "--"
         topics = []
-        core_file.mods.subject(key).topic[0].split("--").each do |topic|
+        subject.split("--").each do |topic|
           topics << topic.strip
         end
         core_file.mods.subject(key).topic = topics
@@ -360,6 +374,7 @@ class ProcessModsZipJob
       authority_uri = row_results["topic_#{key+1}_authority"].split("|")[1]
       core_file.mods.subject(key).authority = authority.strip unless authority.blank?
       core_file.mods.subject(key).authority_uri = authority_uri.strip unless authority_uri.blank?
+      core_file.mods.subject(key).value_uri = value_uri.strip unless value_uri.blank?
       #adds authority if it is set, key starts from 0 but topics start from 1 in spreadsheet
     end
 
@@ -516,7 +531,12 @@ class ProcessModsZipJob
     results["reformatting_quality"]                         = find_in_row(header_row, row_value, 'Reformatting Quality')
     results["extent"]                                       = find_in_row(header_row, row_value, 'Extent')
     results["digital_origin"]                               = find_in_row(header_row, row_value, 'Digital Origin')
-    results["language"]                                     = find_in_row(header_row, row_value, 'Language')
+
+    languages = header_row.select{|m| m[/^Language \d+$/] if !m.blank?}
+    languages.each.with_index(1) do |x, i|
+      results["language_#{i}"]                              = find_in_row(header_row, row_value, "Language #{i}")
+    end
+
     results["abstract"]                                     = find_in_row(header_row, row_value, 'Abstract')
     results["table_of_contents"]                            = find_in_row(header_row, row_value, 'Table of Contents')
     results["access_condition_restriction"]                 = find_in_row(header_row, row_value, 'Access Condition : Restriction on access')
