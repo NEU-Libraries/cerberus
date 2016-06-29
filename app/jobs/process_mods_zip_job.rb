@@ -308,19 +308,21 @@ class ProcessModsZipJob
     core_file.mods.physical_description.digital_origin = row_results["digital_origin"] unless row_results["digital_origin"].blank?
     core_file.mods.physical_description.reformatting_quality = row_results["reformatting_quality"]
     languages = row_results.select { |key, value| key.to_s.match(/^language_\d+$/) }
-    core_file.mods.languages = languages.values
-    i=0
-    languages.each do |key, language|
-      if !language.blank?
-        lang = language.split("|")[0]
-        lang_uri = language.split("|")[1]
-        core_file.mods.language(i).language_term = lang.strip
-        core_file.mods.language(i).language_term.language_term_type = "text"
-        core_file.mods.language(i).language_term.language_authority = "iso639-2b"
-        core_file.mods.language(i).language_term.language_authority_uri = "http://id.loc.gov/vocabulary/iso639-2"
-        core_file.mods.language(i).language_term.language_value_uri = lang_uri.strip unless lang_uri.blank?
+    if languages.count > 0
+      core_file.mods.languages = languages.values
+      i=0
+      languages.each do |key, language|
+        if !language.blank?
+          lang = language.split("|")[0]
+          lang_uri = language.split("|")[1]
+          core_file.mods.language(i).language_term = lang.strip
+          core_file.mods.language(i).language_term.language_term_type = "text"
+          core_file.mods.language(i).language_term.language_authority = "iso639-2b"
+          core_file.mods.language(i).language_term.language_authority_uri = "http://id.loc.gov/vocabulary/iso639-2"
+          core_file.mods.language(i).language_term.language_value_uri = lang_uri.strip unless lang_uri.blank?
+        end
+        i=i+1
       end
-      i=i+1
     end
     core_file.mods.description = row_results["abstract"] unless row_results["abstract"].blank?
     core_file.mods.table_of_contents = row_results["table_of_contents"] unless row_results["table_of_contents"].blank?
