@@ -296,15 +296,21 @@ class ProcessModsZipJob
     end
 
     core_file.mods.type_of_resource = row_results["type_of_resource"] unless row_results["type_of_resource"].blank?
-    if !row_results["genre"].blank?
-      genre = row_results["genre"].split("|")[0]
-      value_uri = row_results["genre"].split("|")[1]
-      authority = row_results["genre_authority"].split("|")[0]
-      authority_uri = row_results["genre_authority"].split("|")[1]
-      core_file.mods.genre = genre.strip
-      core_file.mods.genre.authority = authority.strip unless authority.blank?
-      core_file.mods.genre.authority_uri = authority_uri.strip unless authority_uri.blank?
-      core_file.mods.genre.value_uri = value_uri.strip unless value_uri.blank?
+    genres = row_results.select { |key, value| key.to_s.match(/^genre_\d+$/) if !value.blank? }
+    if genres.count > 0 && !genres.values.blank?
+      core_file.mods.genres = genres.values.map {|value| value.split("|")[0].strip }
+      i=0
+      genres.each do |key, genre|
+        if !genre.blank?
+          value_uri = row_results["genre_#{i+1}"].split("|")[1]
+          authority = row_results["genre_authority_#{i+1}"].split("|")[0]
+          authority_uri = row_results["genre_authority_#{i+1}"].split("|")[1]
+          core_file.mods.genre(i).authority = authority.strip unless authority.blank?
+          core_file.mods.genre(i).authority_uri = authority_uri.strip unless authority_uri.blank?
+          core_file.mods.genre(i).value_uri = value_uri.strip unless value_uri.blank?
+        end
+        i=i+1
+      end
     end
     if !row_results["date_created_end_date"].blank?
       core_file.mods.origin_info.date_created = row_results["date_created"] unless row_results["date_created"].blank?
@@ -345,7 +351,10 @@ class ProcessModsZipJob
         i=i+1
       end
     end
-    core_file.mods.description = row_results["abstract"] unless row_results["abstract"].blank?
+    abstracts = row_results.select { |key, value| key.to_s.match(/^abstract_\d+$/) if !value.blank? }
+    if abstracts.count > 0 && !abstracts.values.blank?
+      core_file.mods.abstracts = abstracts.values
+    end
     core_file.mods.table_of_contents = row_results["table_of_contents"] unless row_results["table_of_contents"].blank?
 
     access_conditions = []
@@ -711,8 +720,11 @@ class ProcessModsZipJob
     results["creator_1_affiliation"] = find_in_row(header_row, row_value, "Creator 1 Affiliation")
 
     results["type_of_resource"]                             = find_in_row(header_row, row_value, 'Type of Resource')
-    results["genre"]                                        = find_in_row(header_row, row_value, 'Genre')
-    results["genre_authority"]                              = find_in_row(header_row, row_value, 'Genre Authority')
+    genres = header_row.select{|m| m[/^Genre \d+$/] if !m.blank?}
+    genres.each.with_index(1) do |x, i|
+      results["genre_#{i}"] = find_in_row(header_row, row_value, "Genre #{i}")
+      results["genre_authority_#{i}"] = find_in_row(header_row, row_value, "Genre Authority #{i}")
+    end
     results["date_created"]                                 = find_in_row(header_row, row_value, 'Date Created')
     results["date_created_end_date"]                        = find_in_row(header_row, row_value, 'Date Created - End Date')
     results["approximate_inferred_questionable"]            = find_in_row(header_row, row_value, 'Date Created - Is this date approximate, inferred, or questionable?')
@@ -732,8 +744,10 @@ class ProcessModsZipJob
     languages.each.with_index(1) do |x, i|
       results["language_#{i}"]                              = find_in_row(header_row, row_value, "Language #{i}")
     end
-
-    results["abstract"]                                     = find_in_row(header_row, row_value, 'Abstract')
+    abstracts = header_row.select{|m| m[/^Abstract \d+$/] if !m.blank?}
+    abstracts.each.with_index(1) do |x, i|
+      results["abstract_#{i}"]                              = find_in_row(header_row, row_value, "Abstract #{i}")
+    end
     results["table_of_contents"]                            = find_in_row(header_row, row_value, 'Table of Contents')
     restrictions = header_row.select{|m| m[/^Access Condition : Restriction on access \d+$/] if !m.blank?}
     restrictions.each.with_index(1) do |x, i|
