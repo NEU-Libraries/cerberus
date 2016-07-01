@@ -374,12 +374,17 @@ class ProcessModsZipJob
       core_file.mods.access_conditions = access_conditions
     end
 
-    notes = {}
-    if !row_results["provenance"].blank?
-      notes["provenance"] = row_results["provenance"]
-    end
-    if !row_results["other_notes"].blank?
-      notes["other"] = row_results["other_notes"]
+    notes = []
+    note_results = row_results.select { |key, value| key.to_s.match(/^notes_\d+$/) if !value.blank? }
+    i = 1
+    note_results.each do |key, note|
+      if !note.blank?
+        hash = {}
+        hash[:note] = note
+        hash[:type] = row_results["notes_#{i}_type"]
+        notes << hash if !hash.blank? && !hash.values.blank?
+      end
+      i = i + 1
     end
     if !notes.blank?
       core_file.mods.notes = notes
@@ -757,13 +762,16 @@ class ProcessModsZipJob
     uses.each.with_index(1) do |x, i|
       results["access_condition_use_and_reproduction_#{i}"] = find_in_row(header_row, row_value, "Access Condition : Use and Reproduction #{i}")
     end
-    results["provenance"]                                   = find_in_row(header_row, row_value, 'Provenance note')
-    results["other_notes"]                                  = find_in_row(header_row, row_value, 'Other notes')
+    notes = header_row.select{|m| m[/^Note \d+$/] if !m.blank?}
+    notes.each.with_index(1) do |x, i|
+      results["notes_#{i}"]                                 = find_in_row(header_row, row_value, "Note #{i}")
+      results["notes_#{i}_type"]                            = find_in_row(header_row, row_value, "Note #{i} Attribute")
+    end
     results["original_title"]                               = find_in_row(header_row, row_value, 'Original Title')
     results["physical_location"]                            = find_in_row(header_row, row_value, 'What is the physical location for this object?')
     results["identifier"]                                   = find_in_row(header_row, row_value, 'What is the identifier for this object?')
     results["collection_title"]                             = find_in_row(header_row, row_value, 'Collection Title')
-    results["series_title"]                                  = find_in_row(header_row, row_value, 'Series Title')
+    results["series_title"]                                 = find_in_row(header_row, row_value, 'Series Title')
 
     topics = header_row.select{|m| m[/^Topical Subject Heading \d+$/] if !m.blank?}
     topics.each.with_index(1) do |x, i|

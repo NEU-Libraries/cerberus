@@ -737,22 +737,24 @@ class ModsDatastream < ActiveFedora::OmDatastream
   end
 
   # Allows for multiple notes to be attached to one mods record
-  def notes=(hash_of_strings)
-    hash_of_notes = hash_of_strings.select { |ac| !ac.blank? }
+  def notes=(array_of_hashes)
+    array_of_hashes = array_of_hashes.select { |ac| !ac.blank? }
 
-    if hash_of_notes.length < self.note.length
-      node_count = self.note.length - hash_of_notes.length
+    if array_of_hashes.length < self.note.length
+      node_count = self.note.length - array_of_hashes.length
       trim_nodes_from_zero(:note, node_count)
     end
     i = 0
-    hash_of_notes.each do |key, val|
+    notes = []
+    array_of_hashes.each_with_index do |hash, i|
       if self.note[i].nil?
         self.insert_new_node(:note)
       end
-      self.note(i).type = key
+      self.note(i).type = hash[:type]
+      notes << hash[:note]
       i = i+1
     end
-    self.note = hash_of_notes.values
+    self.note = notes if !notes.blank?
   end
 
   # Allows for multiple related items to be attached to one mods record
