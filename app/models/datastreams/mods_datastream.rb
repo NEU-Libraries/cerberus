@@ -546,6 +546,38 @@ class ModsDatastream < ActiveFedora::OmDatastream
     end
   end
 
+  def genres=(array_of_strings)
+    array_of_strings.select!{ |ac| !ac.blank?}
+    if self.genre.length > array_of_strings.length
+      node_count = self.genre.length - array_of_strings.length
+      trim_nodes_from_zero(:genre, node_c)
+    end
+    array = []
+    array_of_strings.each_with_index do |genre, i|
+      if self.genre[i].nil?
+        self.insert_new_node(:genre)
+      end
+      array << genre
+    end
+    self.genre = array if !array.blank?
+  end
+
+  def abstracts=(array_of_strings)
+    array_of_strings.select!{ |ac| !ac.blank?}
+    if self.abstract.length > array_of_strings.length
+      node_count = self.abstract.length - array_of_strings.length
+      trim_nodes_from_zero(:abstract, node_count)
+    end
+    array = []
+    array_of_strings.each_with_index do |abs, i|
+      if self.abstract[i].nil?
+        self.insert_new_node(:abstract)
+      end
+      array << abs
+    end
+    self.abstract = array if !array.blank?
+  end
+
   # Filters out blank keyword entries
   def topics=(array_of_strings)
     changed = false
@@ -1035,6 +1067,20 @@ class ModsDatastream < ActiveFedora::OmDatastream
     builder = Nokogiri::XML::Builder.new do |xml|
       xml.titleInfo('type' => 'alternative') {
       }
+    end
+    return builder.doc.root
+  end
+
+  def self.abstract_template
+    builder = Nokogiri::XML::Builder.new do |xml|
+      xml.abstract " "
+    end
+    return builder.doc.root
+  end
+
+  def self.genre_template
+    builder = Nokogiri::XML::Builder.new do |xml|
+      xml.genre " "
     end
     return builder.doc.root
   end
