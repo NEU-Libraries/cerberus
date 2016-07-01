@@ -272,7 +272,7 @@ class User < ActiveRecord::Base
       loaders.push(I18n.t("drs.loaders.bouve.long_name"))
     end
     if self.spreadsheet_loader?
-      loaders.push(I18n.t("drs.loaders.spreadsheet_loader.long_name"))
+      loaders.push(I18n.t("drs.loaders.spreadsheet.long_name"))
     end
     if self.damore_loader?
       loaders.push(I18n.t("drs.loaders.damore.long_name"))
