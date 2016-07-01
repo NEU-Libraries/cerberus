@@ -192,12 +192,26 @@ class ProcessModsZipJob
     core_file.mods.title = row_results["title"]
     core_file.mods.title_info.sub_title = row_results["subtitle"] unless row_results["subtitle"].blank?
     core_file.mods.title_info.non_sort = row_results["title_initial_article"] unless row_results["title_initial_article"].blank?
-    core_file.mods.alternate_title.title = row_results["alternate_title"] unless row_results["alternate_title"].blank?
-    core_file.mods.alternate_title.non_sort = row_results["alternate_title_initial_article"] unless row_results["alternate_title_initial_article"].blank?
-    core_file.mods.alternate_title.sub_title = row_results["alternate_subtitle"] unless row_results["alternate_subtitle"].blank?
+    alternate_titles = row_results.select { |key, value| key.to_s.match(/^alternate_title_\d+$/) if !value.blank? }
+    if alternate_titles.count > 0
+      alt_titles_array = []
+      i = 1
+      alternate_titles.each do |key, title|
+        if !title.blank?
+          hash = {}
+          hash[:title] = title
+          hash[:non_sort] = row_results["alternate_title_#{i}_non_sort"] unless row_results["alternate_title_#{i}_non_sort"].blank?
+          hash[:sub_title] = row_results["alternate_title_#{i}_subtitle"] unless row_results["alternate_title_#{i}_subtitle"].blank?
+        end
+        alt_titles_array << hash
+        i = i + 1
+      end
+      core_file.mods.alternate_titles = alt_titles_array
+    end
+
     core_file.mods.title_info.supplied = "yes" if row_results["supplied_title"] == "supplied"
 
-    creators = row_results.select { |key, value| key.to_s.match(/^creator_\d+_name$/) }
+    creators = row_results.select { |key, value| key.to_s.match(/^creator_\d+_name$/) if !value.blank? }
     creator_nums = creators.keys.map {|key| key.scan(/\d/)[0].to_i }
     if creators.count > 0
       creator_hash = {}
@@ -237,6 +251,14 @@ class ProcessModsZipJob
             corp_creators = row_results.select { |key, value| key.to_s.match(/^creator_\d+_name_type$/) && value.to_s.match(/^corporate$/) }
             corp_nums = corp_creators.keys.map {|key| key.scan(/\d/)[0].to_i }
             corp_num = corp_nums.index(n) #this basically maps the row_results n number to the creator index since corp and pers are separate in the mods
+            name = row_results["creator_#{n}_name"].split("|")[0].strip
+            if name.include? "--"
+              name_parts = []
+              name.split("--").each do |name_part|
+                name_parts << name_part.strip
+              end
+              core_file.mods.corporate_name(corp_num).name_part = name_parts
+            end
             if !role.blank?
               core_file.mods.corporate_name(corp_num).role.role_term = role.strip
               core_file.mods.corporate_name(corp_num).role.role_term.value_uri = role_uri.strip unless role_uri.blank?
@@ -285,8 +307,8 @@ class ProcessModsZipJob
       core_file.mods.genre.value_uri = value_uri.strip unless value_uri.blank?
     end
     if !row_results["date_created_end_date"].blank?
-      core_file.mods.origin_info.date_created = row_results["date_created"]
-      core_file.mods.origin_info.date_created.point = "start"
+      core_file.mods.origin_info.date_created = row_results["date_created"] unless row_results["date_created"].blank?
+      core_file.mods.origin_info.date_created.point = "start" unless row_results["date_created"].blank?
       core_file.mods.origin_info.date_created_end = row_results["date_created_end_date"]
       core_file.mods.origin_info.date_created.qualifier = row_results["approximate_inferred_questionable"] unless row_results["approximate_inferred_questionable"].blank?
       core_file.mods.origin_info.date_created_end.qualifier = row_results["approximate_inferred_questionable"] unless row_results["approximate_inferred_questionable"].blank?
@@ -294,7 +316,6 @@ class ProcessModsZipJob
       core_file.mods.date = row_results["date_created"] unless row_results["date_created"].blank?
       core_file.mods.origin_info.date_created.qualifier = row_results["approximate_inferred_questionable"] unless row_results["approximate_inferred_questionable"].blank?
     end
-    core_file.mods.origin_info.date_created.qualifier = row_results["approximate_inferred_questionable"] unless row_results["approximate_inferred_questionable"].blank?
 
     core_file.mods.origin_info.copyright = row_results["copyright_date"] unless row_results["copyright_date"].blank?
     core_file.mods.origin_info.date_issued = row_results["date_issued"] unless row_results["date_issued"].blank?
@@ -306,9 +327,9 @@ class ProcessModsZipJob
     core_file.mods.origin_info.frequency.authority = row_results["frequency_authority"] unless row_results["frequency_authority"].blank?
     core_file.mods.physical_description.extent = row_results["extent"] unless row_results["extent"].blank?
     core_file.mods.physical_description.digital_origin = row_results["digital_origin"] unless row_results["digital_origin"].blank?
-    core_file.mods.physical_description.reformatting_quality = row_results["reformatting_quality"]
-    languages = row_results.select { |key, value| key.to_s.match(/^language_\d+$/) }
-    if languages.count > 0
+    core_file.mods.physical_description.reformatting_quality = row_results["reformatting_quality"] unless row_results["reformatting_quality"].blank?
+    languages = row_results.select { |key, value| key.to_s.match(/^language_\d+$/) if !value.blank? }
+    if languages.count > 0 && !languages.values.blank?
       core_file.mods.languages = languages.values
       i=0
       languages.each do |key, language|
@@ -327,12 +348,18 @@ class ProcessModsZipJob
     core_file.mods.description = row_results["abstract"] unless row_results["abstract"].blank?
     core_file.mods.table_of_contents = row_results["table_of_contents"] unless row_results["table_of_contents"].blank?
 
-    access_conditions = {}
-    if !row_results["access_condition_use_and_reproduction"].blank?
-      access_conditions["use and reproduction"] = row_results["access_condition_use_and_reproduction"]
+    access_conditions = []
+    uses = row_results.select { |key, value| key.to_s.match(/^access_condition_use_and_reproduction_\d+$/) if !value.blank? }
+    uses.each do |key, use|
+      if !use.blank?
+        access_conditions << {:type=>"use and reproduction", :value=>use}
+      end
     end
-    if !row_results["access_condition_restriction"].blank?
-      access_conditions["restriction on access"] = row_results["access_condition_restriction"]
+    restrictions = row_results.select { |key, value| key.to_s.match(/^access_condition_restriction_\d+$/) if !value.blank? }
+    restrictions.each do |key, restriction|
+      if !restriction.blank?
+        access_conditions << {:type=>"restriction on access", :value=>restriction}
+      end
     end
     if !access_conditions.blank?
       core_file.mods.access_conditions = access_conditions
@@ -351,7 +378,7 @@ class ProcessModsZipJob
 
     # subjects/topics
     keywords = []
-    topical_headings = row_results.select { |key, value| key.to_s.match(/^topic_\d+$/) }
+    topical_headings = row_results.select { |key, value| key.to_s.match(/^topic_\d+$/) if !value.blank? }
     topical_headings.each do |topic|
       keywords << topic[1] if !topic.blank?
     end
@@ -382,7 +409,7 @@ class ProcessModsZipJob
 
     subj_count = core_file.mods.subject.count
     name_subjects = []
-    name_headings = row_results.select { |key, value| key.to_s.match(/^subject_name_\d+$/) }
+    name_headings = row_results.select { |key, value| key.to_s.match(/^subject_name_\d+$/) if !value.blank? }
     name_headings.each_with_index do |name, i|
       if !name[1].blank?
         i = i + 1 #spreadsheet index starts with 1 not 0
@@ -406,6 +433,14 @@ class ProcessModsZipJob
         value_uri = row_results["subject_name_#{n}"].split("|")[1]
         if name_type == 'corporate'
           corp_num = i
+          name = row_results["subject_name_#{n}"].split("|")[0].strip
+          if name.include? "--"
+            name_parts = []
+            name.split("--").each do |name_part|
+              name_parts << name_part.strip
+            end
+            core_file.mods.subject(corp_num).name.name_part = name_parts
+          end
           core_file.mods.subject(corp_num).name.affiliation = affiliation unless affiliation.blank?
           core_file.mods.subject(corp_num).name.authority = authority.strip unless authority.blank?
           core_file.mods.subject(corp_num).name.authority_uri = authority_uri.strip unless authority_uri.blank?
@@ -430,6 +465,161 @@ class ProcessModsZipJob
         end
       end
     end
+
+    geog_subjects = row_results.select { |key, value| key.to_s.match(/^subject_geo_\d+$/) if !value.blank? }
+    if geog_subjects.count > 0
+      subj_count = core_file.mods.subject.count
+      geo_array = []
+      geog_subjects.each.with_index(1) do |geo, i|
+        geo = row_results["subject_geo_#{i}"].split("|")[0]
+        if !geo.blank?
+          vals = geo.split("--")
+          array = []
+          vals.each do |val|
+            array << val.strip if !val.blank?
+          end
+          geo_array << array
+        end
+      end
+      core_file.mods.geog_subjects = geo_array
+      core_file.mods.subject.each_with_index do |geo, i|
+        if !core_file.mods.subject(i).geographic.blank?
+          n = i - subj_count + 1
+          value_uri = row_results["subject_geo_#{n}"].split("|")[1]
+          authority = row_results["subject_geo_#{n}_authority"].split("|")[0]
+          authority_uri = row_results["subject_geo_#{n}_authority"].split("|")[1]
+          core_file.mods.subject(i).value_uri = value_uri.strip unless value_uri.blank?
+          core_file.mods.subject(i).authority = authority.strip unless authority.blank?
+          core_file.mods.subject(i).authority_uri = authority_uri.strip unless authority_uri.blank?
+        end
+      end
+    end
+
+    temporal_subjects = row_results.select { |key, value| key.to_s.match(/^subject_temporal_\d+$/) if !value.blank? }
+    if temporal_subjects.count > 0
+      subj_count = core_file.mods.subject.count
+      temp_array = []
+      temporal_subjects.each.with_index(1) do |temp, i|
+        hash = {}
+        this_temp = row_results["subject_temporal_#{i}"].strip
+        hash[:dates] = []
+        hash[:dates] << this_temp unless this_temp.blank?
+        hash[:dates] << row_results["subject_temporal_#{i}_end"].strip unless row_results["subject_temporal_#{i}_end"].blank?
+        hash[:point] = [] unless row_results["subject_temporal_#{i}_end"].blank?
+        hash[:point] << "start" if !row_results["subject_temporal_#{i}"].blank? && !row_results["subject_temporal_#{i}_end"].blank?
+        hash[:point] << "end" unless row_results["subject_temporal_#{i}_end"].blank?
+        hash[:qualifier] = row_results["subject_temporal_#{i}_qualifier"].strip unless row_results["subject_temporal_#{i}_qualifier"].blank?
+        temp_array << hash unless hash.blank? || hash.values.blank?
+      end
+      core_file.mods.temporal_subjects = temp_array
+    end
+
+    title_subjects = row_results.select { |key, value| (key.to_s.match(/^subject_title_\d+$/) || key.to_s.match(/^subject_alt_title_\d+$/)) if !value.blank? }
+    if title_subjects.count > 0
+      subj_count = core_file.mods.subject.count
+      title_array = []
+      alt_i = 1
+      i = 1
+      title_subjects.each do |key, title|
+        if !title.blank?
+          hash = {}
+          hash[:title] = title
+          if key.include? "alt"
+            hash[:non_sort] = row_results["subject_alt_title_#{alt_i}_non_sort"] unless row_results["subject_alt_title_#{alt_i}_non_sort"].blank?
+            hash[:sub_title] = row_results["subject_alt_title_#{alt_i}_subtitle"] unless row_results["subject_alt_title_#{alt_i}_subtitle"].blank?
+            hash[:type] = "alternative"
+            alt_i = alt_i + 1
+          else
+            hash[:non_sort] = row_results["subject_title_#{i}_non_sort"] unless row_results["subject_title_#{i}_non_sort"].blank?
+            hash[:sub_title] = row_results["subject_title_#{i}_subtitle"] unless row_results["subject_title_#{i}_subtitle"].blank?
+            i = i + 1
+          end
+          title_array << hash unless hash.blank? || hash.values.blank?
+        end
+      end
+      core_file.mods.title_subjects = title_array unless title_array.blank?
+    end
+
+    geo_code_subjects = row_results.select { |key, value| key.to_s.match(/^subject_geo_code_\d+$/) if !value.blank? }
+    if geo_code_subjects.count > 0
+      subj_count = core_file.mods.subject.count
+      geo_code_array = []
+      geo_code_subjects.each.with_index(1) do |geo, i|
+        geo = row_results["subject_geo_code_#{i}"].split("|")[0]
+        if !geo.blank?
+          geo_code_array << geo.strip
+        end
+      end
+      core_file.mods.geo_code_subjects = geo_code_array
+      core_file.mods.subject.each_with_index do |geo, i|
+        if !core_file.mods.subject(i).geographic_code.blank?
+          n = i - subj_count + 1
+          value_uri = row_results["subject_geo_code_#{n}"].split("|")[1]
+          authority = row_results["subject_geo_code_#{n}_authority"].split("|")[0]
+          authority_uri = row_results["subject_geo_code_#{n}_authority"].split("|")[1]
+          core_file.mods.subject(i).value_uri = value_uri.strip unless value_uri.blank?
+          core_file.mods.subject(i).authority = authority.strip unless authority.blank?
+          core_file.mods.subject(i).authority_uri = authority_uri.strip unless authority_uri.blank?
+        end
+      end
+    end
+
+    genre_subjects = row_results.select { |key, value| key.to_s.match(/^subject_genre_\d+$/) if !value.blank? }
+    if genre_subjects.count > 0
+      subj_count = core_file.mods.subject.count
+      genre_array = []
+      genre_subjects.each.with_index(1) do |genre, i|
+        genre = row_results["subject_genre_#{i}"].split("|")[0]
+        if !genre.blank?
+          genre_array << genre.strip
+        end
+      end
+      core_file.mods.genre_subjects = genre_array
+      core_file.mods.subject.each_with_index do |genre, i|
+        if !core_file.mods.subject(i).genre.blank?
+          n = i - subj_count + 1
+          value_uri = row_results["subject_genre_#{n}"].split("|")[1]
+          authority = row_results["subject_genre_#{n}_authority"].split("|")[0]
+          authority_uri = row_results["subject_genre_#{n}_authority"].split("|")[1]
+          core_file.mods.subject(i).value_uri = value_uri.strip unless value_uri.blank?
+          core_file.mods.subject(i).authority = authority.strip unless authority.blank?
+          core_file.mods.subject(i).authority_uri = authority_uri.strip unless authority_uri.blank?
+        end
+      end
+    end
+
+    cartographic_subjects = row_results.select { |key, value| key.to_s.match(/^subject_cartographic_\d+/) if !value.blank? }
+    cartographic_nums = cartographic_subjects.keys.map {|key| key.scan(/\d/)[0].to_i }
+    cartographic_nums = cartographic_nums.uniq
+    if cartographic_nums.count > 0
+      subj_count = core_file.mods.subject.count
+      carto_array = []
+      cartographic_nums.each.with_index(1) do |i|
+        scale = row_results["subject_cartographic_#{i}_scale"]
+        projection = row_results["subject_cartographic_#{i}_projection"]
+        coordinates = row_results["subject_cartographic_#{i}_coordinates"].split("|")[0]
+        if !scale.blank? || !projection.blank? || !coordinates.blank?
+          hash = {}
+          hash[:scale] = scale unless scale.blank?
+          hash[:projection] = projection unless projection.blank?
+          hash[:coordinates] = coordinates.strip unless coordinates.blank?
+        end
+        carto_array << hash unless hash.blank? || hash.values.blank?
+      end
+      core_file.mods.cartographic_subjects = carto_array
+      core_file.mods.subject.cartographics.each_with_index do |carto, i|
+        if !core_file.mods.subject(i).cartographics.blank?
+          n = i - subj_count + 1
+          value_uri = row_results["subject_cartographic_#{n}_coordinates"].split("|")[1]
+          authority = row_results["subject_cartographic_#{n}_authority"].split("|")[0]
+          authority_uri = row_results["subject_cartographic_#{n}_authority"].split("|")[1]
+          core_file.mods.subject(i).value_uri = value_uri.strip unless value_uri.blank?
+          core_file.mods.subject(i).authority = authority.strip unless authority.blank?
+          core_file.mods.subject(i).authority_uri = authority_uri.strip unless authority_uri.blank?
+        end
+      end
+    end
+
 
     # for related items
     related_items = {}
@@ -491,9 +681,13 @@ class ProcessModsZipJob
     results["title_initial_article"]            = find_in_row(header_row, row_value, 'Title Initial Article')
     results["title"]                            = find_in_row(header_row, row_value, 'Title')
     results["subtitle"]                         = find_in_row(header_row, row_value, 'Subtitle')
-    results["alternate_title_initial_article"]  = find_in_row(header_row, row_value, 'Alternate Title Initial Article')
-    results["alternate_title"]                  = find_in_row(header_row, row_value, 'Alternate Title')
-    results["alternate_subtitle"]               = find_in_row(header_row, row_value, 'Alternate Subtitle')
+
+    alternate_titles = header_row.select{|m| m[/^Alternate Title \d+$/] if !m.blank?}
+    alternate_titles.each.with_index(1) do |x, i|
+      results["alternate_title_#{i}"]                              = find_in_row(header_row, row_value, "Alternate Title #{i}")
+      results["alternate_title_#{i}_non_sort"]                     = find_in_row(header_row, row_value, "Alternate Title #{i} Initial Article")
+      results["alternate_title_#{i}_subtitle"]                     = find_in_row(header_row, row_value, "Alternate Title #{i} Subtitle")
+    end
 
     creators = header_row.select{|n| n[/^Creator \d+ Name$/] if !n.blank?} #have to add one for primary special case
     creators.each.with_index(2) do |x, i|
@@ -541,8 +735,14 @@ class ProcessModsZipJob
 
     results["abstract"]                                     = find_in_row(header_row, row_value, 'Abstract')
     results["table_of_contents"]                            = find_in_row(header_row, row_value, 'Table of Contents')
-    results["access_condition_restriction"]                 = find_in_row(header_row, row_value, 'Access Condition : Restriction on access')
-    results["access_condition_use_and_reproduction"]        = find_in_row(header_row, row_value, 'Access Condition : Use and Reproduction')
+    restrictions = header_row.select{|m| m[/^Access Condition : Restriction on access \d+$/] if !m.blank?}
+    restrictions.each.with_index(1) do |x, i|
+      results["access_condition_restriction_#{i}"]          = find_in_row(header_row, row_value, "Access Condition : Restriction on access #{i}")
+    end
+    uses = header_row.select{|m| m[/^Access Condition : Use and Reproduction \d+$/] if !m.blank?}
+    uses.each.with_index(1) do |x, i|
+      results["access_condition_use_and_reproduction_#{i}"] = find_in_row(header_row, row_value, "Access Condition : Use and Reproduction #{i}")
+    end
     results["provenance"]                                   = find_in_row(header_row, row_value, 'Provenance note')
     results["other_notes"]                                  = find_in_row(header_row, row_value, 'Other notes')
     results["original_title"]                               = find_in_row(header_row, row_value, 'Original Title')
@@ -564,6 +764,51 @@ class ProcessModsZipJob
       results["subject_name_#{i}_type"]                          = find_in_row(header_row, row_value, "Name Subject Heading Name Type #{i}").downcase
       results["subject_name_#{i}_affiliation"]                   = find_in_row(header_row, row_value, "Name Subject Heading Affiliation #{i}")
     end
+
+    geog_subjects = header_row.select{|y| y[/^Geographic Subject Heading \d+$/] if !y.blank?}
+    geog_subjects.each.with_index(1) do |x, i|
+      results["subject_geo_#{i}"]                               = find_in_row(header_row, row_value, "Geographic Subject Heading #{i}")
+      results["subject_geo_#{i}_authority"]                     = find_in_row(header_row, row_value, "Geographic Subject Heading Authority #{i}")
+    end
+
+    temporal_subjects = header_row.select{|y| y[/^Temporal Subject Heading \d+$/] if !y.blank?}
+    temporal_subjects.each.with_index(1) do |x, i|
+      results["subject_temporal_#{i}"]                          = find_in_row(header_row, row_value, "Temporal Subject Heading #{i}")
+      results["subject_temporal_#{i}_end"]                      = find_in_row(header_row, row_value, "Temporal Subject Heading End Date #{i}")
+      results["subject_temporal_#{i}_qualifier"]                = find_in_row(header_row, row_value, "Temporal Subject Heading Qualifier #{i}")
+    end
+
+    title_subjects = header_row.select{|y| y[/^Title Subject \d+$/] if !y.blank?}
+    title_subjects.each.with_index(1) do |x, i|
+      results["subject_title_#{i}"]                             = find_in_row(header_row, row_value, "Title Subject #{i}")
+      results["subject_title_#{i}_non_sort"]                    = find_in_row(header_row, row_value, "Title Subject Initial Article #{i}")
+      results["subject_title_#{i}_subtitle"]                    = find_in_row(header_row, row_value, "Title Subject Subtitle #{i}")
+    end
+    alt_title_subjects = header_row.select{|y| y[/^Title Subject Alternate Title \d+$/] if !y.blank?}
+    alt_title_subjects.each.with_index(1) do |x, i|
+      results["subject_alt_title_#{i}"]                         = find_in_row(header_row, row_value, "Title Subject Alternate Title #{i}")
+      results["subject_alt_title_#{i}_non_sort"]                = find_in_row(header_row, row_value, "Title Subject Alternate Title Initial Article #{i}")
+      results["subject_alt_title_#{i}_subtitle"]                = find_in_row(header_row, row_value, "Title Subject Alternate Title Subtitle #{i}")
+    end
+    geo_code_subjects = header_row.select {|y| y[/^Geographic Code Subject Heading \d+$/] if !y.blank?}
+    geo_code_subjects.each.with_index(1) do |x, i|
+      results["subject_geo_code_#{i}"]                          = find_in_row(header_row, row_value, "Geographic Code Subject Heading #{i}")
+      results["subject_geo_code_#{i}_authority"]                = find_in_row(header_row, row_value, "Geographic Code Subject Heading Authority #{i}")
+    end
+    genre_subjects = header_row.select {|y| y[/^Genre Subject \d+$/] if !y.blank?}
+    genre_subjects.each.with_index(1) do |x, i|
+      results["subject_genre_#{i}"]                             = find_in_row(header_row, row_value, "Genre Subject #{i}")
+      results["subject_genre_#{i}_authority"]                   = find_in_row(header_row, row_value, "Genre Subject Authority #{i}")
+    end
+    cartographic_subjects = header_row.select {|key| key.to_s.match(/^Cartographics Subject [a-zA-Z]* \d+$/) if !key.blank?}
+    carto_nums = cartographic_subjects.map {|key| key.scan(/\d/)[0].to_i }
+    carto_nums.uniq.each.with_index(1) do |x, i|
+      results["subject_cartographic_#{i}_coordinates"]          = find_in_row(header_row, row_value, "Cartographics Subject Coordinates #{i}")
+      results["subject_cartographic_#{i}_scale"]                = find_in_row(header_row, row_value, "Cartographics Subject Scale #{i}")
+      results["subject_cartographic_#{i}_projection"]           = find_in_row(header_row, row_value, "Cartographics Subject Projection #{i}")
+      results["subject_cartographic_#{i}_authority"]            = find_in_row(header_row, row_value, "Cartographics Subject Authority #{i}")
+    end
+
     return results
   end
 

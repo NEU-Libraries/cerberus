@@ -163,6 +163,8 @@ class ModsDatastream < ActiveFedora::OmDatastream
       t.authority_uri(path: {attribute: 'authorityURI'})
       t.value_uri(path: {attribute: 'valueURI'})
       t.cartographics(path: 'cartographics', namespace_prefix: 'mods'){
+        t.scale(path: 'scale', namespace_prefix: 'mods')
+        t.projection(path: 'projection', namespace_prefix: 'mods')
         t.coordinates(path: 'coordinates', namespace_prefix: 'mods')
       }
       t.geographic(path: 'geographic', namespace_prefix: 'mods')
@@ -179,6 +181,26 @@ class ModsDatastream < ActiveFedora::OmDatastream
         t.name_part_address(path: 'namePart', namespace_prefix: 'mods', attributes: {type: 'termsOfAddress'})
         t.affiliation(namespace_prefix: 'mods', attribute: 'affiliation')
         t.authority(path: { attribute: 'authority' })
+        t.authority_uri(path: {attribute: 'authorityURI'})
+        t.value_uri(path: {attribute: 'valueURI'})
+      }
+      t.temporal(path: 'temporal', namespace_prefix: 'mods', attributes: { encoding: 'w3cdtf' }){
+        t.point(path: {attribute: 'point'})
+        t.qualifier(path: {attribute: 'qualifier'})
+      }
+      t.title_info(path: 'titleInfo', namespace_prefix: 'mods'){
+        t.type(path: {attribute: 'type'})
+        t.title(path: 'title', namespace_prefix: 'mods')
+        t.non_sort(path: 'nonSort', namespace_prefix: 'mods')
+        t.sub_title(path: 'subTitle', namespace_prefix: 'mods')
+      }
+      t.geographic_code(path: 'geographicCode', namespace_prefix: 'mods'){
+        t.authority(path: {attribute: 'authority'})
+        t.authority_uri(path: {attribute: 'authorityURI'})
+        t.value_uri(path: {attribute: 'valueURI'})
+      }
+      t.genre(path: 'genre', namespace_prefix: 'mods'){
+        t.authority(path: {attribute: 'authority'})
         t.authority_uri(path: {attribute: 'authorityURI'})
         t.value_uri(path: {attribute: 'valueURI'})
       }
@@ -564,6 +586,9 @@ class ModsDatastream < ActiveFedora::OmDatastream
 
   def name_subjects=(array_of_hashes)
     array_of_hashes.select!{ |ac| !ac.blank? && !ac.values.blank?}
+    if self.subject.name.length > 0
+      remove_subject_nodes(:name)
+    end
     array_of_hashes.each_with_index do |subj, i|
       self.insert_new_node(:subject)
       i = self.subject.length-1 #last one
@@ -572,23 +597,94 @@ class ModsDatastream < ActiveFedora::OmDatastream
     end
   end
 
-  # Allows for tombstone message
-  def access_conditions=(hash_of_strings)
-    hash_of_access = hash_of_strings.select { |ac| !ac.blank? }
+  def geog_subjects=(array_of_arrays)
+    array_of_arrays.select!{ |ac| !ac.blank?}
+    if self.subject.geographic.length > 0
+      remove_subject_nodes(:geographic)
+    end
+    array_of_arrays.each_with_index do |subj, i|
+      self.insert_new_node(:subject)
+      i = self.subject.length-1 #last one
+      self.subject(i).geographic = subj
+    end
+  end
 
-    if hash_of_access.length < self.access_condition.length
-      node_count = self.access_condition.length - hash_of_access.length
+  def temporal_subjects=(array_of_hashes)
+    # [{:dates=>["date","date"], :point=>["string","string"], :qualifier=>"string"}]
+    array_of_hashes.select!{ |ac| !ac.blank? && !ac.values.blank?}
+    if self.subject.temporal.length > 0
+      remove_subject_nodes(:temporal)
+    end
+    array_of_hashes.each_with_index do |subj, i|
+      self.insert_new_node(:subject)
+      i = self.subject.length-1 #last one
+      self.subject(i).temporal = subj[:dates] unless subj[:dates].blank?
+      self.subject(i).temporal.each_with_index do |temp, x|
+        if !subj[:point].blank?
+          self.subject(i).temporal(x).point = subj[:point][x] unless subj[:point][x].blank?
+        end
+        self.subject(i).temporal(x).qualifier = subj[:qualifier] unless subj[:qualifier].blank?
+      end
+    end
+  end
+
+  def geo_code_subjects=(array_of_strings)
+    array_of_strings.select!{ |ac| !ac.blank?}
+    if self.subject.geographic_code.length > 0
+      remove_subject_nodes(:geographic_code)
+    end
+    array_of_strings.each_with_index do |subj, i|
+      self.insert_new_node(:subject)
+      i = self.subject.length-1 #last one
+      self.subject(i).geographic_code = subj
+    end
+  end
+
+  def genre_subjects=(array_of_strings)
+    array_of_strings.select!{ |ac| !ac.blank?}
+    if self.subject.genre.length > 0
+      remove_subject_nodes(:genre)
+    end
+    array_of_strings.each_with_index do |subj, i|
+      self.insert_new_node(:subject)
+      i = self.subject.length-1 #last one
+      self.subject(i).genre = subj
+    end
+  end
+
+  def cartographic_subjects=(array_of_hashes)
+    array_of_hashes.select!{ |ac| !ac.blank? && !ac.values.blank?}
+    if self.subject.cartographics.length > 0
+      remove_subject_nodes(:cartographics)
+    end
+    array_of_hashes.each_with_index do |subj, i|
+      self.insert_new_node(:subject)
+      i = self.subject.length-1 #last one
+      self.subject(i).cartographics.scale = subj[:scale] unless subj[:scale].blank?
+      self.subject(i).cartographics.projection = subj[:projection] unless subj[:projection].blank?
+      self.subject(i).cartographics.coordinates = subj[:coordinates] unless subj[:coordinates].blank?
+    end
+  end
+
+  # Allows for tombstone message
+  def access_conditions=(array_of_hashes)
+    array_of_access = array_of_hashes.select { |ac| !ac.blank? }
+
+    if array_of_access.length < self.access_condition.length
+      node_count = self.access_condition.length - array_of_access.length
       trim_nodes_from_zero(:access_condition, node_count)
     end
     i = 0
-    hash_of_access.each do |key, val|
+    values = []
+    array_of_access.each do |hash|
       if self.access_condition[i].nil?
         self.insert_new_node(:access_condition)
       end
-      self.access_condition(i).type = key
+      self.access_condition(i).type = hash[:type]
+      values << hash[:value]
       i = i+1
     end
-    self.access_condition = hash_of_access.values
+    self.access_condition = values
   end
 
   def remove_suppressed_access
@@ -667,6 +763,44 @@ class ModsDatastream < ActiveFedora::OmDatastream
         self.insert_new_node(:language)
       end
       self.language(i).language_term = key
+      i = i+1
+    end
+  end
+
+  def alternate_titles=(array_of_hashes)
+    hash_of_titles = array_of_hashes.select { |ac| !ac.blank? }
+    if hash_of_titles.length < self.alternate_title.length
+      node_count = self.alternate_title.length - hash_of_titles.length
+      trim_nodes_from_zero(:alternate_title, node_count)
+    end
+    i = 0
+    hash_of_titles.each do |hash|
+      if self.alternate_title[i].nil?
+        self.insert_new_node(:alternate_title)
+      end
+      self.alternate_title(i).non_sort = hash[:non_sort] unless hash[:non_sort].blank?
+      self.alternate_title(i).title = hash[:title]
+      self.alternate_title(i).sub_title = hash[:sub_title] unless hash[:sub_title].blank?
+      self.alternate_title(i).part_name = hash[:part_name] unless hash[:part_name].blank?
+      self.alternate_title(i).part_name = hash[:part_number] unless hash[:part_number].blank?
+      i = i+1
+    end
+  end
+
+  def title_subjects=(array_of_hashes)
+    array_of_hashes.select { |ac| !ac.blank? && !ac.values.blank?}
+    if self.subject.title_info.length > 0
+      remove_subject_nodes(:title_info)
+    end
+    array_of_hashes.each do |hash, i|
+      if !hash[:title].blank?
+        self.insert_new_node(:subject)
+        i = self.subject.length-1
+        self.subject(i).title_info.non_sort = hash[:non_sort] unless hash[:non_sort].blank?
+        self.subject(i).title_info.title = hash[:title] unless hash[:title].blank?
+        self.subject(i).title_info.type = hash[:type] unless hash[:type].blank?
+        self.subject(i).title_info.sub_title = hash[:sub_title] unless hash[:sub_title].blank?
+      end
       i = i+1
     end
   end
@@ -850,6 +984,13 @@ class ModsDatastream < ActiveFedora::OmDatastream
     return builder.doc.root
   end
 
+  def self.name_part_template
+    builder = Nokogiri::XML::Builder.new do |xml|
+      xml.namePart " "
+    end
+    return builder.doc.root
+  end
+
   def self.access_condition_template
     builder = Nokogiri::XML::Builder.new do |xml|
       xml.accessCondition " "
@@ -885,6 +1026,14 @@ class ModsDatastream < ActiveFedora::OmDatastream
   def self.language_template
     builder = Nokogiri::XML::Builder.new do |xml|
       xml.language {
+      }
+    end
+    return builder.doc.root
+  end
+
+  def self.alternate_title_template
+    builder = Nokogiri::XML::Builder.new do |xml|
+      xml.titleInfo('type' => 'alternative') {
       }
     end
     return builder.doc.root

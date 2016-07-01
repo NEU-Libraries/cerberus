@@ -114,13 +114,15 @@ class Collection < ActiveFedora::Base
       end
     end
     if reason != ""
-      hash = {}
+      array = []
       self.mods.access_condition.each_with_index do |ac, i|
-        type = self.mods.access_condition(i).type[0]
-        hash["#{type}"] = self.mods.access_condition[i]
+        hash = {}
+        hash[:type] = self.mods.access_condition(i).type[0]
+        hash[:value] = self.mods.access_condition[i]
+        array << hash if !hash.blank?
       end
-      hash["suppressed"] = reason
-      self.mods.access_conditions = hash
+      array << {:type=>"suppressed",:value=>reason}
+      self.mods.access_conditions = array
     end
     self.save!
   end
