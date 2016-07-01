@@ -66,5 +66,5 @@
               = link_to("View IPTC", loaders_bouve_iptc_path(image.id), class:"btn btn-small btn-warning")
             - elsif @report.loader_name == t('drs.loaders.damore.long_name')
               = link_to("View IPTC", loaders_damore_iptc_path(image.id), class:"btn btn-small btn-warning")
-            - elsif @report.loader_name == t('drs.loaders.spreadsheet_loader.long_name')
+            - elsif @report.loader_name == t('drs.loaders.spreadsheet.long_name')
               = link_to("View MODS", loaders_spreadsheet_mods_path(image.id), class:"btn btn-small btn-warning")

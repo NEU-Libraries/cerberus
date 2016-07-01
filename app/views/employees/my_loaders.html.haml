@@ -56,11 +56,11 @@
         %br
         %br
       - if current_user.spreadsheet_loader?
-        = link_to(t('drs.loaders.spreadsheet_loader.long_name'), new_loaders_spreadsheet_path, class: "btn btn-lg btn-primary")
+        = link_to(t('drs.loaders.spreadsheet.long_name'), new_spreadsheet_load_path, class: "btn btn-lg btn-primary")
         %br
         %br
       - if current_user.admin? || current_user.developer?
-        = link_to(t('drs.loaders.xml_loader.long_name'), new_loaders_xml_path, class: "btn btn-lg btn-primary")
+        = link_to(t('drs.loaders.xml.long_name'), new_xml_load_path, class: "btn btn-lg btn-primary")
         %br
         %br
 

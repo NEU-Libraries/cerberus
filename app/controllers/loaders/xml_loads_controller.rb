@@ -16,15 +16,15 @@ class Loaders::XmlLoadsController < Loaders::LoadsController
         @collections_options << {'label' => "#{c['id']} - #{c['title_info_title_tesim'][0]}", 'value' => c['id']}
       end
     end
-    @loader_name = t('drs.loaders.'+t('drs.loaders.xml_loader.short_name')+'.long_name')
-    @loader_short_name = t('drs.loaders.xml_loader.short_name')
+    @loader_name = t('drs.loaders.'+t('drs.loaders.xml.short_name')+'.long_name')
+    @loader_short_name = t('drs.loaders.xml.short_name')
     @page_title = @loader_name + " Loader"
     render 'loaders/new', locals: { collections_options: @collections_options}
   end
 
   def create
     permissions = {"CoreFile" => {"read"  => ["public"], "edit" => ["northeastern:drs:repository:staff"]}}
-    process_create(permissions, t('drs.loaders.xml_loader.short_name'), "XmlLoadsController")
+    process_create(permissions, t('drs.loaders.xml.short_name'), "XmlLoadsController")
   end
 
   def preview
@@ -78,7 +78,7 @@ class Loaders::XmlLoadsController < Loaders::LoadsController
   def proceed_load
     puts params
     @report = Loaders::LoadReport.find(params[:id])
-    @loader_name = t('drs.loaders.xml_loader.long_name')
+    @loader_name = t('drs.loaders.xml.long_name')
     if !@report.preview_file_pid.blank?
       cf = CoreFile.find(@report.preview_file_pid)
       spreadsheet_file_path = cf.tmp_path
@@ -86,7 +86,7 @@ class Loaders::XmlLoadsController < Loaders::LoadsController
       cf = CoreFile.find(@report.comparison_file_pid)
       spreadsheet_file_path = cf.tmp_path
     end
-    copyright = t('drs.loaders.xml_loader.copyright')
+    copyright = t('drs.loaders.xml.copyright')
     permissions = {} #we aren't getting these externally yet
     if params[:depositor]
       depositor = params[:depositor]
