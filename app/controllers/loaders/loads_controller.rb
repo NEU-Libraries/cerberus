@@ -123,16 +123,20 @@ class Loaders::LoadsController < ApplicationController
             end
           elsif short_name == "xml"
             report_id = Loaders::LoadReport.create_from_strings(current_user, 0, @loader_name, parent)
-            # ProcessXmlZipJob.new(@loader_name, spreadsheet_file_path, parent, copyright, current_user, permissions, report_id, nil, true).run
-            Cerberus::Application::Queue.push(ProcessXmlZipJob.new(@loader_name, new_file.to_s, parent, copyright, current_user, permissions, report_id, nil))
+            ProcessXmlZipJob.new(@loader_name, new_file.to_s, parent, copyright, current_user, permissions, report_id, nil, true).run
             load_report = Loaders::LoadReport.find(report_id)
             session[:flash_success] = "Your file has been submitted and is now being processed. You will receive an email when the load is complete."
-            # if !load_report.comparison_file_pid.blank?
-            #   render :json => {report_id: report_id, comparison_file_pid: load_report.comparison_file_pid}.to_json and return
-            # elsif !load_report.preview_file_pid.blank?
-            #   render :json => {report_id: report_id, preview_file_pid: load_report.preview_file_pid}.to_json and return
-            # end
-            render :json => {report_id: report_id}.to_json and return
+            puts "DGC DEBUG - ARE WE GETTING HERE?"
+            puts "load_report_id: #{report_id}"
+            puts "file_path: #{new_file.to_s}"
+            puts "comp_file_pid: #{load_report.comparison_file_pid}"
+            puts "preview_file_pid: #{load_report.preview_file_pid}"
+            if !load_report.comparison_file_pid.blank?
+              render :json => {report_id: report_id, comparison_file_pid: load_report.comparison_file_pid}.to_json and return
+            elsif !load_report.preview_file_pid.blank?
+              render :json => {report_id: report_id, preview_file_pid: load_report.preview_file_pid}.to_json and return
+            end
+            # render :json => {report_id: report_id}.to_json and return
           else
             # send to iptc job
             report_id = Loaders::LoadReport.create_from_strings(current_user, 0, @loader_name, parent)
