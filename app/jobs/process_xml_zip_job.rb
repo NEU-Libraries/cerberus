@@ -10,7 +10,7 @@ class ProcessXmlZipJob
     :xml_loader_process_zip
   end
 
-  def initialize(loader_name, spreadsheet_file_path, parent, copyright, current_user, permissions, report_id, client=nil, preview=nil)
+  def initialize(loader_name, spreadsheet_file_path, parent, copyright, current_user, permissions, report_id, depositor, client=nil, preview=nil)
     self.loader_name = loader_name
     self.spreadsheet_file_path = spreadsheet_file_path
     self.parent = parent
@@ -20,6 +20,7 @@ class ProcessXmlZipJob
     self.client = client
     self.report_id = report_id
     self.preview = preview
+    self.depositor = depositor
     self.existing_files = false #flag to determine if the spreadsheet as a whole is editing or creating files, goes off of first row which is tested on preview, that way the user knows if they're editing or creating before proceeding with the load
   end
 
@@ -80,8 +81,40 @@ class ProcessXmlZipJob
         if row.present? && header_row.present?
           count = count + 1
           row_results = process_a_row(header_row, row)
-          core_file = CoreFile.find(row_results["pid"])
-          assign_a_row(row_results, core_file, dir_path, load_report)
+
+          if row_results["pid"].blank? && !row_results["file_name"].blank? #make new file
+            new_file = File.dirname(dir_path) + "/" + row_results["file_name"]
+            if File.exists? new_file
+              if Cerberus::ContentFile.virus_check(File.new(new_file)) == 0
+                core_file = CoreFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
+                core_file.tag_as_in_progress
+                core_file.tmp_path = new_file
+                collection = !load_report.collection.blank? ? Collection.find(load_report.collection) : nil
+                core_file.parent = collection
+                core_file.properties.parent_id = collection.pid
+                core_file.depositor = depositor
+                core_file.rightsMetadata.content = collection.rightsMetadata.content
+                core_file.rightsMetadata.permissions({person: "#{depositor}"}, 'edit')
+                core_file.original_filename = row_results["file_name"]
+                core_file.label = row_results["file_name"]
+                core_file.instantiate_appropriate_content_object(new_file)
+                sc_type = collection.smart_collection_type
+                if !sc_type.nil? && sc_type != ""
+                  core_file.category = sc_type
+                end
+                core_file.identifier = make_handle(core_file.persistent_url, client)
+              else
+                # populate_error_report(load_report, existing_file, "File triggered failure for virus check", row_results, core_file, old_mods, header_row, row)
+                next
+              end
+            else
+              # populate_error_report(load_report, existing_file, "File specified does not exist", row_results, core_file, old_mods, header_row, row)
+              next
+            end
+          else #edit existing file
+            core_file = CoreFile.find(row_results["pid"])
+            assign_a_row(row_results, core_file, dir_path, load_report)
+          end
         end
       end
     end
@@ -98,7 +131,6 @@ class ProcessXmlZipJob
 
   def assign_a_row(row_results, core_file, dir_path, load_report)
     xml_file_path = dir_path + "/" + row_results["xml_file_path"]
-
     if !xml_file_path.blank? && File.exists?(xml_file_path) && File.extname(xml_file_path) == ".xml"
       # Load mods xml and cleaning
       raw_xml = xml_decode(File.open(xml_file_path, "rb").read)
