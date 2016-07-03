@@ -4,15 +4,15 @@ class ProcessXmlZipJob
   include ApplicationHelper
   include ZipHelper
 
-  attr_accessor :loader_name, :zip_path, :parent, :copyright, :current_user, :permissions, :client, :report_id, :preview, :existing_files
+  attr_accessor :loader_name, :spreadsheet_file_path, :parent, :copyright, :current_user, :permissions, :client, :report_id, :preview, :existing_files
 
   def queue_name
     :xml_loader_process_zip
   end
 
-  def initialize(loader_name, zip_path, parent, copyright, current_user, permissions, report_id, client=nil, preview=nil)
+  def initialize(loader_name, spreadsheet_file_path, parent, copyright, current_user, permissions, report_id, client=nil, preview=nil)
     self.loader_name = loader_name
-    self.zip_path = zip_path
+    self.spreadsheet_file_path = spreadsheet_file_path
     self.parent = parent
     self.copyright = copyright
     self.current_user = current_user
@@ -26,9 +26,7 @@ class ProcessXmlZipJob
   def run
     load_report = Loaders::LoadReport.find(report_id)
 
-    # unzip zip file to tmp storage
-    dir_path = File.join(File.dirname(zip_path), File.basename(zip_path, ".*"))
-    spreadsheet_file_path = unzip(zip_path, dir_path)
+    dir_path = File.dirname(spreadsheet_file_path)
 
     process_spreadsheet(dir_path, spreadsheet_file_path, load_report, preview, client)
   end
@@ -57,17 +55,17 @@ class ProcessXmlZipJob
             preview_file.depositor              = comparison_file.depositor
             preview_file.rightsMetadata.content = comparison_file.rightsMetadata.content
             load_report.comparison_file_pid = comparison_file.pid
-            # load_report.comparison_file_pid = "NURTS"
             load_report.save!
           end
 
+          preview_file.save!
+
           preview_file.tmp_path = spreadsheet_file_path
           load_report.preview_file_pid = preview_file.pid
-          # load_report.preview_file_pid = "BLERTS"
           load_report.save!
 
           # Load row of metadata in for preview
-          assign_a_row(row_results, preview_file, dir_path)
+          assign_a_row(row_results, preview_file, dir_path, load_report)
 
           load_report.number_of_files = spreadsheet.last_row - header_position
           load_report.save!
@@ -83,7 +81,7 @@ class ProcessXmlZipJob
           count = count + 1
           row_results = process_a_row(header_row, row)
           core_file = CoreFile.find(row_results["pid"])
-          assign_a_row(row_results, core_file, dir_path)
+          assign_a_row(row_results, core_file, dir_path, load_report)
         end
       end
     end
@@ -98,12 +96,12 @@ class ProcessXmlZipJob
     end
   end
 
-  def assign_a_row(row_results, core_file, dir_path)
+  def assign_a_row(row_results, core_file, dir_path, load_report)
     xml_file_path = dir_path + "/" + row_results["xml_file_path"]
+
     if !xml_file_path.blank? && File.exists?(xml_file_path) && File.extname(xml_file_path) == ".xml"
       # Load mods xml and cleaning
       raw_xml = xml_decode(File.open(xml_file_path, "rb").read)
-
       # Validate
       validation_result = xml_valid?(raw_xml)
 
@@ -152,25 +150,4 @@ class ProcessXmlZipJob
     return ""
   end
 
-  def unzip(file, dir_path)
-    spreadsheet_file_path = ""
-    FileUtils.mkdir(dir_path) unless File.exists? dir_path
-
-    # Extract load zip
-    file_list = safe_unzip(file, dir_path)
-
-    # Find the spreadsheet
-    xlsx_array = Dir.glob("#{dir_path}/*.xlsx")
-
-    if xlsx_array.length > 1
-      raise Exceptions::MultipleSpreadsheetError
-    elsif xlsx_array.length == 0
-      raise Exceptions::NoSpreadsheetError
-    end
-
-    spreadsheet_file_path = xlsx_array.first
-
-    FileUtils.rm(file)
-    return spreadsheet_file_path
-  end
 end
