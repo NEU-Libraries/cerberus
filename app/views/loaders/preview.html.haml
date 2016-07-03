@@ -46,15 +46,17 @@
     %div.alert.alert-warning
       %span= "You are about to #{@diff ? "edit" : "create"} #{@report.number_of_files} files. Are you sure you want to proceed?"
     - if @diff
-      = link_to("Cancel Load", loaders_cancel_load_path(:id => @report.id), class: "btn btn-danger")
-      = link_to("Proceed with Load", loaders_proceed_load_path(:id => @report.id), class: "btn btn-success pull-right")
+      -# = link_to("Cancel Load", loaders_cancel_load_path(:id => @report.id), class: "btn btn-danger")
+      -# = link_to("Proceed with Load", loaders_proceed_load_path(:id => @report.id), class: "btn btn-success pull-right")
+      = link_to("Cancel Load", send("loaders_#{@loader_short_name}_cancel_load_path", @report.id), class: "btn btn-danger")
+      = link_to("Proceed with Load", send("loaders_#{@loader_short_name}_proceed_load_path", @report.id), class: "btn btn-success pull-right")
     -else
-      = form_tag loaders_proceed_load_path, :method => 'get' do
+      = form_tag send("loaders_#{@loader_short_name}_proceed_load_path", @report.id), :method => 'get' do
         = hidden_field_tag :id, @report.id
         = label_tag "depositor", "Depositor:"
         = select_tag "depositor", options_for_select(@depositor_options)
         %br
-        = link_to("Cancel Load", loaders_cancel_load_path(:id => @report.id), class: "btn btn-danger")
+        = link_to("Cancel Load", send("loaders_#{@loader_short_name}_cancel_load_path", @report.id), class: "btn btn-danger")
         = submit_tag "Proceed with Load", :class => "btn btn-success pull-right"
 
 :javascript

@@ -59,7 +59,7 @@
         = link_to(t('drs.loaders.spreadsheet.long_name'), new_spreadsheet_load_path, class: "btn btn-lg btn-primary")
         %br
         %br
-      - if current_user.admin? || current_user.developer?
+      - if current_user.xml_loader?
         = link_to(t('drs.loaders.xml.long_name'), new_xml_load_path, class: "btn btn-lg btn-primary")
         %br
         %br

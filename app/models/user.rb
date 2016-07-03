@@ -251,6 +251,11 @@ class User < ActiveRecord::Base
     return self.groups.include? "northeastern:drs:repository:loaders:damore_mckim"
   end
 
+  def xml_loader?
+    return (self.admin? || self.developer?)
+  end
+
+
   def loaders
     loaders = []
     if self.marcom_loader?
@@ -273,6 +278,9 @@ class User < ActiveRecord::Base
     end
     if self.spreadsheet_loader?
       loaders.push(I18n.t("drs.loaders.spreadsheet.long_name"))
+    end
+    if self.xml_loader?
+      loaders.push(I18n.t("drs.loaders.xml.long_name"))
     end
     if self.damore_loader?
       loaders.push(I18n.t("drs.loaders.damore.long_name"))

@@ -40,6 +40,9 @@ class Loaders::XmlLoadsController < Loaders::LoadsController
     if !collection_depositor.blank?
       @depositor_options << [collection_depositor, @collection.true_depositor]
     end
+
+    @loader_short_name = t('drs.loaders.xml.short_name')
+
     render 'loaders/preview'
   end
 
@@ -60,6 +63,9 @@ class Loaders::XmlLoadsController < Loaders::LoadsController
     if !collection_depositor.blank?
       @depositor_options << [collection_depositor, @collection.true_depositor]
     end
+
+    @loader_short_name = t('drs.loaders.xml.short_name')
+
     render 'loaders/preview'
   end
 
@@ -93,7 +99,7 @@ class Loaders::XmlLoadsController < Loaders::LoadsController
     else
       depositor = nil
     end
-    Cerberus::Application::Queue.push(ProcessModsZipJob.new(@loader_name, spreadsheet_file_path, @report.collection, copyright, current_user, permissions, @report.id, depositor, nil))
+    Cerberus::Application::Queue.push(ProcessXmlZipJob.new(@loader_name, spreadsheet_file_path, @report.collection, copyright, current_user, permissions, @report.id, depositor, nil))
     flash[:notice] = "Your spreadsheet is being processed. The information on this page will be updated periodically until the processing is completed."
     redirect_to "/loaders/xml/report/#{@report.id}"
   end
@@ -109,7 +115,7 @@ class Loaders::XmlLoadsController < Loaders::LoadsController
 
     def verify_group
       redirect_to new_user_session_path if current_user.nil?
-      redirect_to root_path unless (current_user.admin? || current_user.developer?)
+      redirect_to root_path unless current_user.xml_loader?
     end
 
     def mods_diff(core_file_a, core_file_b)
