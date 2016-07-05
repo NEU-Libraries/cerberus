@@ -23,7 +23,7 @@ class CollectionsController < ApplicationController
 
   helper_method :sort_value
 
-  before_filter :authenticate_user!, only: [:new, :edit, :create, :update, :destroy ]
+  before_filter :authenticate_user!, only: [:new, :edit, :create, :update, :destroy, :export_mods ]
 
   # We can do better by using SOLR check instead of Fedora
   before_filter :can_read?, only: [:show, :creator_list, :title_list, :recent_deposits]
@@ -182,6 +182,12 @@ class CollectionsController < ApplicationController
     @set = Collection.find(params[:id])
     @page_title = "Edit #{@set.title}"
     render :template => 'shared/sets/edit'
+  end
+
+  def export_mods
+    flash[:notice] = "MODS Export process started - you'll be emailed a download link when it finishes."
+    Cerberus::Application::Queue.push(ExportModsJob.new(request.session_options[:id], params[:id], current_user.nuid))
+    redirect_to collection_path(params[:id]) and return
   end
 
   def update

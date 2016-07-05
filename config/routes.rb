@@ -15,6 +15,7 @@ Cerberus::Application.routes.draw do
   get 'collections/:id/recent' => 'collections#recent_deposits', as: 'collection_recent_deposits'
   get 'collections/:id/creators' => "collections#creator_list", as:"collection_creator_list"
   # get 'collections/:id/titles' => "collections#title_list", as:"collection_title_list"
+  get 'collections/:id/export_mods' => "collections#export_mods", as: "export_mods"
 
   resources :communities, only: [:show]
 
@@ -141,13 +142,20 @@ Cerberus::Application.routes.draw do
    resources :damore_loads, only: [:new, :create, :show], :path => "loaders/damore"
    get "/loaders/damore/report/:id" => 'damore_loads#show', as: 'loaders_damore_report'
    get "/loaders/damore/file/:id" => 'damore_loads#show_iptc', as: 'loaders_damore_iptc'
-   resources :mods_spreadsheet_loads, only: [:new, :create, :preview, :preview_compare], :path => "loaders/mods_spreadsheet"
-   get "/loaders/mods_spreadsheet/report/:id" => 'mods_spreadsheet_loads#show', as: 'loaders_mods_spreadsheet_report'
-   get "/loaders/mods_spreadsheet/preview/:id" => 'mods_spreadsheet_loads#preview',  as: 'loaders_mods_spreadsheet_preview'
-   get "/loaders/mods_spreadsheet/preview_compare/:id" => 'mods_spreadsheet_loads#preview_compare', as: 'loaders_mods_spreadsheet_preview_compare'
-   get "/loaders/mods_spreadsheet/file/:id" => 'mods_spreadsheet_loads#show_mods', as: 'loaders_mods_spreadsheet_mods'
-   get "/loaders/:id/cancel_load" => "mods_spreadsheet_loads#cancel_load", as: "loaders_cancel_load"
-   get "/loaders/:id/proceed_load" => "mods_spreadsheet_loads#proceed_load", as: "loaders_proceed_load"
+   resources :spreadsheet_loads, only: [:new, :create, :preview, :preview_compare], :path => "loaders/spreadsheet"
+   get "/loaders/spreadsheet/report/:id" => 'spreadsheet_loads#show', as: 'loaders_spreadsheet_report'
+   get "/loaders/spreadsheet/preview/:id" => 'spreadsheet_loads#preview',  as: 'loaders_spreadsheet_preview'
+   get "/loaders/spreadsheet/preview_compare/:id" => 'spreadsheet_loads#preview_compare', as: 'loaders_spreadsheet_preview_compare'
+   get "/loaders/spreadsheet/file/:id" => 'spreadsheet_loads#show_mods', as: 'loaders_spreadsheet_mods'
+   get "/loaders/spreadsheet/:id/cancel_load" => "spreadsheet_loads#cancel_load", as: "loaders_spreadsheet_cancel_load"
+   get "/loaders/spreadsheet/:id/proceed_load" => "spreadsheet_loads#proceed_load", as: "loaders_spreadsheet_proceed_load"
+   resources :xml_loads, only: [:new, :create, :preview, :preview_compare], :path => "loaders/xml"
+   get "/loaders/xml/report/:id" => 'xml_loads#show', as: 'loaders_xml_report'
+   get "/loaders/xml/preview/:id" => 'xml_loads#preview',  as: 'loaders_xml_preview'
+   get "/loaders/xml/preview_compare/:id" => 'xml_loads#preview_compare', as: 'loaders_xml_preview_compare'
+   get "/loaders/xml/file/:id" => 'xml_loads#show_mods', as: 'loaders_xml_mods'
+   get "/loaders/xml/:id/cancel_load" => "xml_loads#cancel_load", as: "loaders_xml_cancel_load"
+   get "/loaders/xml/:id/proceed_load" => "xml_loads#proceed_load", as: "loaders_xml_proceed_load"
   end
 
   # Facets for communities, collections, and sets
@@ -228,6 +236,7 @@ Cerberus::Application.routes.draw do
   # SUFIA
   # Downloads controller route
   resources :downloads, :only => "show"
+
   # "Notifications" route for catalog index view
   get "users/notifications_number" => "users#notifications_number", :as => :user_notify
   # Messages
@@ -236,6 +245,7 @@ Cerberus::Application.routes.draw do
   match 'notifications/:uid/delete' => 'mailbox#delete', as: :mailbox_delete, via: [:get, :post]
 
   get ':action' => 'static#:action', constraints: { action: /help|iris|terms/ }, as: :static
+  get "/downloads/:id/mods/:session_id" => "static#mods_download", as: 'mods_download'
 
   # Catch-all (for routing errors)
   unless Rails.env.development?

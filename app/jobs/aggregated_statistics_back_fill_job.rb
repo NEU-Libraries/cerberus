@@ -1,6 +1,6 @@
 class AggregatedStatisticsBackFillJob
   def queue_name
-    :aggregated_statistics
+    :aggregated_statistics_back_fill
   end
 
   attr_accessor :date

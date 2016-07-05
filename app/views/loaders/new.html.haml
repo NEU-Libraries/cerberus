@@ -21,7 +21,7 @@
       %legend
         2. Choose Collection
       = label_tag "parent", "Where do you want to deposit these files?", class: "required-label"
-      - if @loader_short_name == 'multipage' || @loader_short_name == 'mods_spreadsheet'
+      - if @loader_short_name == 'multipage' || @loader_short_name == 'spreadsheet' || @loader_short_name == 'xml'
         :javascript
           var collections_for_autocomplete = #{@collections_options.to_json}
         = text_field_tag :parent, "", id: 'collection_autocomplete', required: true
@@ -69,15 +69,17 @@
         done: function (e, data) {
           response = JSON.parse(data.result);
           if ('comparison_file_pid' in response) {
-            window.location = "/loaders/mods_spreadsheet/preview_compare/"+response.report_id;
+            window.location = "/loaders/#{@loader_short_name}/preview_compare/"+response.report_id;
           } else if ('preview_file_pid' in response) {
-            window.location = "/loaders/mods_spreadsheet/preview/"+response.report_id;
+            window.location = "/loaders/#{@loader_short_name}/preview/"+response.report_id;
           } else {
             window.location = "/loaders/#{@loader_short_name}/report/"+response.report_id;
           }
         },
         fail: function(data){
           console.log(data);
+          console.log(response.report_id);
+          console.log("#{@loader_short_name}");
           window.alert("There was an issue processing your load.");
           window.location = "/my_loaders";
         }
