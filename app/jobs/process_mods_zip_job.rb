@@ -157,6 +157,14 @@ class ProcessModsZipJob
                     error_list = error_list.concat("#{entry.class.to_s}: #{entry} </br></br> ")
                   end
                   populate_error_report(load_report, existing_file, error_list, row_results, core_file, old_mods, header_row, row)
+                elsif core_file.canonical_class == "AudioFile" || core_file.canonical_class == "VideoFile"
+                  if row_results["poster_path"].blank?
+                    populate_error_report(load_report, existing_file, "Audio or Video File must have poster file", row_results, core_file, old_mods, header_row, row)
+                  else
+                    poster_path = File.dirname(dir_path) + "/" + row_results["poster_path"]
+                    Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename, poster_path))
+                    load_report.image_reports.create_success(core_file, "")
+                  end
                 else
                   Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename))
                   load_report.image_reports.create_success(core_file, "")
@@ -690,6 +698,7 @@ class ProcessModsZipJob
     results["user_name"]                        = find_in_row(header_row, row_value, 'What is your name?')
     results["pid"]                              = find_in_row(header_row, row_value, 'What is PID for the digitized object?')
     results["file_name"]                        = find_in_row(header_row, row_value, 'File Name')
+    results["poster_path"]                      = find_in_row(header_row, row_value, 'File Name - Poster')
     results["archives_identifier"]              = find_in_row(header_row, row_value, 'Archives Identifier')
     results["supplied_title"]                   = find_in_row(header_row, row_value, 'Is this a supplied title?')
     results["title_initial_article"]            = find_in_row(header_row, row_value, 'Title Initial Article')
