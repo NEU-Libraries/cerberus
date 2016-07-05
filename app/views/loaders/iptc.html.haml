@@ -16,8 +16,8 @@
       - path = loaders_bouve_report_path(@load.id)
     - elsif @load.loader_name == t('drs.loaders.damore.long_name')
       - path = loaders_damore_report_path(@load.id)
-    - elsif @load.loader_name == t('drs.loaders.mods_spreadsheet.long_name')
-      - path = loaders_mods_spreadsheet_report_path(@load.id)
+    - elsif @load.loader_name == t('drs.loaders.spreadsheet.long_name')
+      - path = loaders_spreadsheet_report_path(@load.id)
     = link_to "#{@load.loader_name} Load into #{collection.title}", path
   %li.active
     = image.original_file.blank? ? image.title : image.original_file
@@ -31,9 +31,9 @@
   File Status:
   = "Error - #{image.exception}"
 %h4
-  = @load.loader_name == t('drs.loaders.mods_spreadsheet.long_name') ? "Spreadsheet Data:" : "IPTC Data:"
+  = @load.loader_name == t('drs.loaders.spreadsheet.long_name') ? "Spreadsheet Data:" : "IPTC Data:"
 %table.table.table-striped.table-bordered
-  - if @load.loader_name == t('drs.loaders.mods_spreadsheet.long_name')
+  - if @load.loader_name == t('drs.loaders.spreadsheet.long_name')
     - image.iptc.each do |key, value|
       %tr
         %td= key.titleize

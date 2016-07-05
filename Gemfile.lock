@@ -60,6 +60,16 @@ GIT
       activesupport (>= 3.0.0)
 
 GIT
+  remote: https://github.com/randym/axlsx.git
+  revision: 9e07402a26f776b6dcdc264a202d804c5d24e8b3
+  ref: 9e07402a26f776b6dcdc264a202d804c5d24e8b3
+  specs:
+    axlsx (2.0.1)
+      htmlentities (~> 4.3.1)
+      nokogiri (>= 1.4.1)
+      rubyzip (~> 1.1.0)
+
+GIT
   remote: https://github.com/roo-rb/roo
   revision: dc3786bb47319f8d86e659797fa7474d881cfe28
   specs:
@@ -246,6 +256,7 @@ GEM
     hashie (2.0.5)
     hike (1.2.3)
     hooks (0.3.1)
+    htmlentities (4.3.4)
     http_parser.rb (0.5.3)
     hydra-access-controls (6.3.3)
       active-fedora (~> 6.1)
@@ -470,7 +481,7 @@ GEM
       mime-types
       nokogiri
       rest-client
-    rubyzip (1.2.0)
+    rubyzip (1.1.7)
     rvm1-capistrano3 (0.9.0)
       capistrano (~> 3.0)
     sanitize (2.1.0)
@@ -546,6 +557,7 @@ PLATFORMS
 
 DEPENDENCIES
   ace-rails-ap
+  axlsx!
   blacklight
   blacklight_advanced_search (~> 2.1.0)
   blacklight_oai_provider!
@@ -610,7 +622,7 @@ DEPENDENCIES
   rspec-rails
   ruby-filemagic (~> 0.4.2)
   ruby-prof
-  rubyzip (= 1.2.0)
+  rubyzip
   rvm1-capistrano3
   sanitize
   sass-rails (~> 3.2.3)

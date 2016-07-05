@@ -243,13 +243,18 @@ class User < ActiveRecord::Base
     return self.groups.include? "northeastern:drs:repository:loaders:bouve_dean"
   end
 
-  def mods_spreadsheet_loader?
+  def spreadsheet_loader?
     return self.groups.include? "northeastern:drs:repository:loaders:spreadsheet"
   end
 
   def damore_loader?
     return self.groups.include? "northeastern:drs:repository:loaders:damore_mckim"
   end
+
+  def xml_loader?
+    return (self.admin? || self.developer?)
+  end
+
 
   def loaders
     loaders = []
@@ -271,8 +276,11 @@ class User < ActiveRecord::Base
     if self.bouve_loader?
       loaders.push(I18n.t("drs.loaders.bouve.long_name"))
     end
-    if self.mods_spreadsheet_loader?
-      loaders.push(I18n.t("drs.loaders.mods_spreadsheet.long_name"))
+    if self.spreadsheet_loader?
+      loaders.push(I18n.t("drs.loaders.spreadsheet.long_name"))
+    end
+    if self.xml_loader?
+      loaders.push(I18n.t("drs.loaders.xml.long_name"))
     end
     if self.damore_loader?
       loaders.push(I18n.t("drs.loaders.damore.long_name"))

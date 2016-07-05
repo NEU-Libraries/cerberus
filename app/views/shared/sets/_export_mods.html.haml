@@ -1,0 +1,11 @@
+%br
+%fieldset
+  .row-fluid
+    .span10
+      Exporting the MODS XML for this collection will generate a zip file containing a spreadsheet manifest, and XML files for each item.
+      You'll be emailed a link to download the zip file, which will expire 24 hours after being generated.
+  .row-fluid
+    .span10
+      %br
+      %a.btn.btn-info{href:export_mods_path(@set.id), title: "Request Export"}
+        Export
