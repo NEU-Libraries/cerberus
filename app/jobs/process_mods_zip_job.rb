@@ -705,14 +705,14 @@ class ProcessModsZipJob
     results["title"]                            = find_in_row(header_row, row_value, 'Title')
     results["subtitle"]                         = find_in_row(header_row, row_value, 'Subtitle')
 
-    alternate_titles = header_row.select{|m| m[/^Alternate Title \d+$/] if !m.blank?}
+    alternate_titles = header_row.select{|m| m[/(?i)^Alternate Title \d+[ \f\t\v]*$/] if !m.blank?}
     alternate_titles.each.with_index(1) do |x, i|
       results["alternate_title_#{i}"]                              = find_in_row(header_row, row_value, "Alternate Title #{i}")
       results["alternate_title_#{i}_non_sort"]                     = find_in_row(header_row, row_value, "Alternate Title #{i} Initial Article")
       results["alternate_title_#{i}_subtitle"]                     = find_in_row(header_row, row_value, "Alternate Title #{i} Subtitle")
     end
 
-    creators = header_row.select{|n| n[/^Creator \d+ Name$/] if !n.blank?} #have to add one for primary special case
+    creators = header_row.select{|n| n[/(?i)^Creator \d+ Name[ \f\t\v]*$/] if !n.blank?} #have to add one for primary special case
     creators.each.with_index(2) do |x, i|
       results["creator_#{i}_name"] = find_in_row(header_row, row_value, "Creator #{i} Name")
       if !results["creator_#{i}_name"].blank?
@@ -734,7 +734,7 @@ class ProcessModsZipJob
     results["creator_1_affiliation"] = find_in_row(header_row, row_value, "Creator 1 Affiliation")
 
     results["type_of_resource"]                             = find_in_row(header_row, row_value, 'Type of Resource')
-    genres = header_row.select{|m| m[/^Genre \d+$/] if !m.blank?}
+    genres = header_row.select{|m| m[/(?i)^Genre \d+[ \f\t\v]*$/] if !m.blank?}
     genres.each.with_index(1) do |x, i|
       results["genre_#{i}"] = find_in_row(header_row, row_value, "Genre #{i}")
       results["genre_authority_#{i}"] = find_in_row(header_row, row_value, "Genre Authority #{i}")
@@ -754,24 +754,24 @@ class ProcessModsZipJob
     results["extent"]                                       = find_in_row(header_row, row_value, 'Extent')
     results["digital_origin"]                               = find_in_row(header_row, row_value, 'Digital Origin')
 
-    languages = header_row.select{|m| m[/^Language \d+$/] if !m.blank?}
+    languages = header_row.select{|m| m[/(?i)^Language \d+[ \f\t\v]*$/] if !m.blank?}
     languages.each.with_index(1) do |x, i|
       results["language_#{i}"]                              = find_in_row(header_row, row_value, "Language #{i}")
     end
-    abstracts = header_row.select{|m| m[/^Abstract \d+$/] if !m.blank?}
+    abstracts = header_row.select{|m| m[/(?i)^Abstract \d+[ \f\t\v]*$/] if !m.blank?}
     abstracts.each.with_index(1) do |x, i|
       results["abstract_#{i}"]                              = find_in_row(header_row, row_value, "Abstract #{i}")
     end
     results["table_of_contents"]                            = find_in_row(header_row, row_value, 'Table of Contents')
-    restrictions = header_row.select{|m| m[/^Access Condition : Restriction on access \d+$/] if !m.blank?}
+    restrictions = header_row.select{|m| m[/(?i)^Access Condition : Restriction on access \d+[ \f\t\v]*$/] if !m.blank?}
     restrictions.each.with_index(1) do |x, i|
       results["access_condition_restriction_#{i}"]          = find_in_row(header_row, row_value, "Access Condition : Restriction on access #{i}")
     end
-    uses = header_row.select{|m| m[/^Access Condition : Use and Reproduction \d+$/] if !m.blank?}
+    uses = header_row.select{|m| m[/(?i)^Access Condition : Use and Reproduction \d+[ \f\t\v]*$/] if !m.blank?}
     uses.each.with_index(1) do |x, i|
       results["access_condition_use_and_reproduction_#{i}"] = find_in_row(header_row, row_value, "Access Condition : Use and Reproduction #{i}")
     end
-    notes = header_row.select{|m| m[/^Note \d+$/] if !m.blank?}
+    notes = header_row.select{|m| m[/(?i)^Note \d+[ \f\t\v]*$/] if !m.blank?}
     notes.each.with_index(1) do |x, i|
       results["notes_#{i}"]                                 = find_in_row(header_row, row_value, "Note #{i}")
       results["notes_#{i}_type"]                            = find_in_row(header_row, row_value, "Note #{i} Attribute")
@@ -782,13 +782,13 @@ class ProcessModsZipJob
     results["collection_title"]                             = find_in_row(header_row, row_value, 'Collection Title')
     results["series_title"]                                 = find_in_row(header_row, row_value, 'Series Title')
 
-    topics = header_row.select{|m| m[/^Topical Subject Heading \d+$/] if !m.blank?}
+    topics = header_row.select{|m| m[/(?i)^Topical Subject Heading \d+[ \f\t\v]*$/] if !m.blank?}
     topics.each.with_index(1) do |x, i|
       results["topic_#{i}"]                                      = find_in_row(header_row, row_value, "Topical Subject Heading #{i}")
       results["topic_#{i}_authority"]                            = find_in_row(header_row, row_value, "Topical Subject Heading Authority #{i}")
     end
 
-    subjects = header_row.select{|y| y[/^Name Subject Heading \d+$/] if !y.blank?}
+    subjects = header_row.select{|y| y[/(?i)^Name Subject Heading \d+[ \f\t\v]*$/] if !y.blank?}
     subjects.each.with_index(1) do |x, i|
       results["subject_name_#{i}"]                               = find_in_row(header_row, row_value, "Name Subject Heading #{i}")
       results["subject_name_#{i}_authority"]                     = find_in_row(header_row, row_value, "Name Subject Heading Authority #{i}")
@@ -796,42 +796,42 @@ class ProcessModsZipJob
       results["subject_name_#{i}_affiliation"]                   = find_in_row(header_row, row_value, "Name Subject Heading Affiliation #{i}")
     end
 
-    geog_subjects = header_row.select{|y| y[/^Geographic Subject Heading \d+$/] if !y.blank?}
+    geog_subjects = header_row.select{|y| y[/(?i)^Geographic Subject Heading \d+[ \f\t\v]*$/] if !y.blank?}
     geog_subjects.each.with_index(1) do |x, i|
       results["subject_geo_#{i}"]                               = find_in_row(header_row, row_value, "Geographic Subject Heading #{i}")
       results["subject_geo_#{i}_authority"]                     = find_in_row(header_row, row_value, "Geographic Subject Heading Authority #{i}")
     end
 
-    temporal_subjects = header_row.select{|y| y[/^Temporal Subject Heading \d+$/] if !y.blank?}
+    temporal_subjects = header_row.select{|y| y[/(?i)^Temporal Subject Heading \d+[ \f\t\v]*$/] if !y.blank?}
     temporal_subjects.each.with_index(1) do |x, i|
       results["subject_temporal_#{i}"]                          = find_in_row(header_row, row_value, "Temporal Subject Heading #{i}")
       results["subject_temporal_#{i}_end"]                      = find_in_row(header_row, row_value, "Temporal Subject Heading End Date #{i}")
       results["subject_temporal_#{i}_qualifier"]                = find_in_row(header_row, row_value, "Temporal Subject Heading Qualifier #{i}")
     end
 
-    title_subjects = header_row.select{|y| y[/^Title Subject \d+$/] if !y.blank?}
+    title_subjects = header_row.select{|y| y[/(?i)^Title Subject \d+[ \f\t\v]*$/] if !y.blank?}
     title_subjects.each.with_index(1) do |x, i|
       results["subject_title_#{i}"]                             = find_in_row(header_row, row_value, "Title Subject #{i}")
       results["subject_title_#{i}_non_sort"]                    = find_in_row(header_row, row_value, "Title Subject Initial Article #{i}")
       results["subject_title_#{i}_subtitle"]                    = find_in_row(header_row, row_value, "Title Subject Subtitle #{i}")
     end
-    alt_title_subjects = header_row.select{|y| y[/^Title Subject Alternate Title \d+$/] if !y.blank?}
+    alt_title_subjects = header_row.select{|y| y[/(?i)^Title Subject Alternate Title \d+[ \f\t\v]*$/] if !y.blank?}
     alt_title_subjects.each.with_index(1) do |x, i|
       results["subject_alt_title_#{i}"]                         = find_in_row(header_row, row_value, "Title Subject Alternate Title #{i}")
       results["subject_alt_title_#{i}_non_sort"]                = find_in_row(header_row, row_value, "Title Subject Alternate Title Initial Article #{i}")
       results["subject_alt_title_#{i}_subtitle"]                = find_in_row(header_row, row_value, "Title Subject Alternate Title Subtitle #{i}")
     end
-    geo_code_subjects = header_row.select {|y| y[/^Geographic Code Subject Heading \d+$/] if !y.blank?}
+    geo_code_subjects = header_row.select {|y| y[/(?i)^Geographic Code Subject Heading \d+[ \f\t\v]*$/] if !y.blank?}
     geo_code_subjects.each.with_index(1) do |x, i|
       results["subject_geo_code_#{i}"]                          = find_in_row(header_row, row_value, "Geographic Code Subject Heading #{i}")
       results["subject_geo_code_#{i}_authority"]                = find_in_row(header_row, row_value, "Geographic Code Subject Heading Authority #{i}")
     end
-    genre_subjects = header_row.select {|y| y[/^Genre Subject \d+$/] if !y.blank?}
+    genre_subjects = header_row.select {|y| y[/(?i)^Genre Subject \d+[ \f\t\v]*$/] if !y.blank?}
     genre_subjects.each.with_index(1) do |x, i|
       results["subject_genre_#{i}"]                             = find_in_row(header_row, row_value, "Genre Subject #{i}")
       results["subject_genre_#{i}_authority"]                   = find_in_row(header_row, row_value, "Genre Subject Authority #{i}")
     end
-    cartographic_subjects = header_row.select {|key| key.to_s.match(/^Cartographics Subject [a-zA-Z]* \d+$/) if !key.blank?}
+    cartographic_subjects = header_row.select {|key| key.to_s.match(/(?i)^Cartographics Subject [a-zA-Z]* \d+[ \f\t\v]*$/) if !key.blank?}
     carto_nums = cartographic_subjects.map {|key| key.scan(/\d/)[0].to_i }
     carto_nums.uniq.each.with_index(1) do |x, i|
       results["subject_cartographic_#{i}_coordinates"]          = find_in_row(header_row, row_value, "Cartographics Subject Coordinates #{i}")
