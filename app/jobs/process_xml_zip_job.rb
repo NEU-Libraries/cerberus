@@ -4,13 +4,13 @@ class ProcessXmlZipJob
   include ApplicationHelper
   include ZipHelper
 
-  attr_accessor :loader_name, :spreadsheet_file_path, :parent, :copyright, :current_user, :permissions, :client, :report_id, :preview, :existing_files
+  attr_accessor :loader_name, :spreadsheet_file_path, :parent, :copyright, :current_user, :permissions, :client, :report_id, :preview, :existing_files, :depositor
 
   def queue_name
     :xml_loader_process_zip
   end
 
-  def initialize(loader_name, spreadsheet_file_path, parent, copyright, current_user, permissions, report_id, depositor, client=nil, preview=nil)
+  def initialize(loader_name, spreadsheet_file_path, parent, copyright, current_user, permissions, report_id, depositor, preview=nil, client=nil)
     self.loader_name = loader_name
     self.spreadsheet_file_path = spreadsheet_file_path
     self.parent = parent
@@ -117,11 +117,11 @@ class ProcessXmlZipJob
           end
         end
       end
-    end
 
-    load_report.update_counts
-    load_report.number_of_files = count
-    load_report.save!
+      load_report.update_counts
+      load_report.number_of_files = count
+      load_report.save!      
+    end
 
     if load_report.success_count + load_report.fail_count + load_report.modified_count == load_report.number_of_files
       load_report.completed = true
@@ -141,18 +141,15 @@ class ProcessXmlZipJob
         core_file.mods.content = raw_xml
         core_file.save!
         core_file.match_dc_to_mods
-
-        # Report success
-        load_report.image_reports.create_success(core_file, "")
       else
         # Raise error, invalid mods
-        load_report.image_reports.create_failure("Invalid MODS", validation_result[:errors], row_results["file_name"])
+        # TODO
 
         core_file = nil
       end
     else
       # Raise error, can't load core file mods metadata
-      load_report.image_reports.create_failure("Can't load MODS XML", "", row_results["file_name"])
+      # TODO
 
       core_file = nil
     end
