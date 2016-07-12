@@ -1,63 +1,69 @@
 en:
   groups:
     northeastern:drs:aslp:niec:
-      name: "National Interpreter Education Center"
+      name: "National Interpreter Education Center Staff"
     northeastern:drs:aslp:series:
       name: "National Interpreter Education Center - Series (Test Group)"
     northeastern:drs:athletics:hall_of_fame:
-      name: "Department of Athletics - Hall of Fame"
+      name: "Department of Athletics - Hall of Fame Staff"
     northeastern:drs:board_of_trustees:board_members:
       name: "Board of Trustees"
     northeastern:drs:bouve:deans_office:media:
       name: "Bouvé College of Health Sciences - Dean's Office Media Group"
     northeastern:drs:camd:department_of_art_and_design:art_and_design_gallery:
-      name: "CAMD - Art and Design Gallery"
+      name: "CAMD - Art and Design Group"
     northeastern:drs:college_of_computer_information_science:ccis_technical_reports:
-      name: "CCIS Technical Reports"
+      name: "CCIS Technical Reports Staff"
     northeastern:drs:college_of_engineering:deans_office:
-      name: "College of Engineering - Dean's Office"
+      name: "College of Engineering - Dean's Office Staff"
     northeastern:drs:college_of_engineering:electrical_and_computer_engineering:bspiral:
-      name: "College of Engineering - BSPIRAL"
+      name: "College of Engineering - BSPIRAL Team"
     northeastern:drs:college_of_engineering:electrical_and_computer_engineering:cognitive_systems_laboratory:
-      name: "College of Engineering - Cognitive Systems Laboratory"
+      name: "College of Engineering - Cognitive Systems Laboratory Team"
     northeastern:drs:college_of_professional_studies:media:
       name: "College of Professional Studies - Media Group"
     northeastern:drs:college_of_science:social_interaction_lab:
-      name: "College of Science - Social Interaction Lab"
+      name: "College of Science - Social Interaction Lab Staff"
+    northeastern:drs:college_of_social_sciences_humanities:dominican_prayer_book:
+      name: "Dominican Prayer Book Project Team"
     northeastern:drs:college_of_social_sciences_humanities:dudley_square_project:
-      name: "College of Social Sciences and Humanities - Dudley Square Project"
+      name: "College of Social Sciences and Humanities - Dudley Square Project Team"
     northeastern:drs:college_of_social_sciences_humanities:thoreau_drawings:
-      name: "College of Social Sciences and Humanities - Thoreau Project"
+      name: "College of Social Sciences and Humanities - Thoreau Project Team"
     northeastern:drs:college_of_social_sciences_humanities:holocaust_awareness_committee:
       name: "Holocaust Awareness Committee"
     northeastern:drs:damore_mckim:marcom:
       name: "D'Amore-McKim - Marketing Group"
     northeastern:drs:drspt:arader_gallery:
-      name: "Arader Picturing the World Gallery"
+      name: "Arader Picturing the World Gallery Project Team"
     northeastern:drs:enrollment_management:emc:emc_admin:
-      name: "EMSA - EMC Admin"
+      name: "EMSA - EMC Admin Staff"
     northeastern:drs:enrollment_management:emc:emc_staff:
-      name: "EMSA - EMC Staff"
+      name: "EMSA - EMC General Staff"
     northeastern:drs:enrollment_management:emsa:
       name: "EMSA Staff"
     northeastern:drs:facilities:archive_staff:
       name: "Facilities Division - Archive Staff"
+    northeastern:drs:jdoaai:archive_staff:
+      name: "John D. O'Bryant African American Institute Archives Staff"
     northeastern:drs:library:archives:
-      name: "University Archives and Special Collections"
+      name: "University Archives and Special Collections Staff"
     northeastern:drs:library:communications:
-      name: "University Library - Communications Office"
+      name: "University Library - Communications Office Staff"
     northeastern:drs:library:dmc_studios:
-      name: "University Library - DMC Studios"
+      name: "University Library - DMC Studios Staff"
     northeastern:drs:library:dsg:
-      name: "University Library - Digital Scholarship Group"
+      name: "University Library - Digital Scholarship Group Staff"
     northeastern:drs:library:admin:
-      name: "University Library - Administration"
+      name: "University Library - Administration Staff"
     northeastern:drs:library:scholarly_communications:
-      name: "University Library - Scholarly Communications"
+      name: "University Library - Scholarly Communications Staff"
     northeastern:drs:marketing_and_communications:staff:
       name: "Office of Marketing and Communications - Photography Staff"
     northeastern:drs:marketing_and_communications:art_staff:
       name: "Office of Marketing and Communications - Art Staff"
+    northeastern:drs:provost_office:center_research_innovation:center_for_research_innovation_staff:
+      name: "Center for Research Innovation Staff"
     northeastern:drs:repository:admin:
       name: "DRS Advanced Users"
     northeastern:drs:repository:beta_users:
@@ -83,13 +89,13 @@ en:
     northeastern:drs:repository:staff:
       name: "DRS Repository Staff"
     northeastern:drs:school_of_law:crrj:staff:
-      name: "Civil Rights and Restorative Justice Project"
+      name: "Civil Rights and Restorative Justice Project Team"
     northeastern:drs:school_of_law:law_library:staff:
       name: "School of Law - Law Library Staff"
     northeastern:drs:spectrum:staff:
       name: "Spectrum Literary Arts Magazine Staff"
     northeastern:drs:undergrad_research_office:staff:
-      name: "Office of Undergraduate Research and Fellowships"
+      name: "Office of Undergraduate Research and Fellowships Staff"
     northeastern:drs:all:
       name: "Northeastern - All"
     northeastern:drs:faculty:

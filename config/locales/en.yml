@@ -54,11 +54,11 @@ en:
         icon: icon-university
       research:
         name: Research Publications
-        description: Faculty research, including articles, preprints, and offprints
+        description: Research produced by faculty and staff, including articles, preprints, and offprints
         icon: icon-beaker
       presentations:
         name: Presentations
-        description: Faculty presentations from various conferences and meetings
+        description: Faculty and staff presentations from various conferences and meetings
         icon: icon-quote-right
       learning:
         name: Learning Objects
@@ -70,7 +70,7 @@ en:
         icon: icon-graduation-cap
       monographs:
         name: Monographs
-        description: Books written, edited, or translated by NU faculty, and books produced by Northeastern University
+        description: Books written, edited, or translated by NU faculty and staff, and books produced by Northeastern University
         icon: icon-book
       communities:
         name: Communities
