@@ -629,7 +629,7 @@ class ProcessModsZipJob
         carto_array << hash unless hash.blank? || hash.values.blank?
       end
       core_file.mods.cartographic_subjects = carto_array
-      core_file.mods.subject.cartographics.each_with_index do |carto, i|
+      core_file.mods.subject.each_with_index do |carto, i|
         if !core_file.mods.subject(i).cartographics.blank?
           n = i - subj_count + 1
           value_uri = row_results["subject_cartographic_#{n}_coordinates"].split("|")[1]
@@ -847,8 +847,8 @@ class ProcessModsZipJob
     0.upto header_row.length-1 do |row_pos|
       # Account for case insensitivity
       if !header_row[row_pos].blank?
-        case header_row[row_pos].downcase
-        when column_identifier.downcase
+        case header_row[row_pos].downcase.strip
+        when column_identifier.downcase.strip
           value = row_value[row_pos].to_s || ""
           if !value.blank? && value != ""
             return value.strip
