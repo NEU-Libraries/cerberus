@@ -73,54 +73,62 @@ class ProcessXmlZipJob
         rescue Exception => error
           puts error
           puts error.backtrace
+          # populate error report TODO
           return
         end
       end
     else # not a preview, process everything
       spreadsheet.each_row_streaming(offset: header_position) do |row|
-        if row.present? && header_row.present?
-          count = count + 1
-          row_results = process_a_row(header_row, row)
+        begin
+          if row.present? && header_row.present?
+            count = count + 1
+            row_results = process_a_row(header_row, row)
 
-          if row_results["pid"].blank? && !row_results["file_name"].blank? #make new file
-            new_file = File.dirname(dir_path) + "/" + row_results["file_name"]
-            if File.exists? new_file
-              if Cerberus::ContentFile.virus_check(File.new(new_file)) == 0
-                core_file = CoreFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
-                core_file.tag_as_in_progress
-                core_file.tmp_path = new_file
-                collection = !load_report.collection.blank? ? Collection.find(load_report.collection) : nil
-                core_file.parent = collection
-                core_file.properties.parent_id = collection.pid
-                core_file.depositor = depositor
-                core_file.rightsMetadata.content = collection.rightsMetadata.content
-                core_file.rightsMetadata.permissions({person: "#{depositor}"}, 'edit')
-                core_file.original_filename = row_results["file_name"]
-                core_file.label = row_results["file_name"]
-                core_file.instantiate_appropriate_content_object(new_file)
-                sc_type = collection.smart_collection_type
-                if !sc_type.nil? && sc_type != ""
-                  core_file.category = sc_type
+            if row_results["pid"].blank? && !row_results["file_name"].blank? #make new file
+              new_file = File.dirname(dir_path) + "/" + row_results["file_name"]
+              if File.exists? new_file
+                if Cerberus::ContentFile.virus_check(File.new(new_file)) == 0
+                  core_file = CoreFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
+                  core_file.tag_as_in_progress
+                  core_file.tmp_path = new_file
+                  collection = !load_report.collection.blank? ? Collection.find(load_report.collection) : nil
+                  core_file.parent = collection
+                  core_file.properties.parent_id = collection.pid
+                  core_file.depositor = depositor
+                  core_file.rightsMetadata.content = collection.rightsMetadata.content
+                  core_file.rightsMetadata.permissions({person: "#{depositor}"}, 'edit')
+                  core_file.original_filename = row_results["file_name"]
+                  core_file.label = row_results["file_name"]
+                  core_file.instantiate_appropriate_content_object(new_file)
+                  sc_type = collection.smart_collection_type
+                  if !sc_type.nil? && sc_type != ""
+                    core_file.category = sc_type
+                  end
+                  core_file.identifier = make_handle(core_file.persistent_url, client)
+                else
+                  populate_error_report(load_report, "File triggered failure for virus check", row_results, core_file, header_row, row)
+                  next
                 end
-                core_file.identifier = make_handle(core_file.persistent_url, client)
               else
-                # populate_error_report(load_report, existing_file, "File triggered failure for virus check", row_results, core_file, old_mods, header_row, row)
+                populate_error_report(load_report, "File specified does not exist", row_results, core_file, header_row, row)
                 next
               end
-            else
-              # populate_error_report(load_report, existing_file, "File specified does not exist", row_results, core_file, old_mods, header_row, row)
-              next
+            else #edit existing file
+              core_file = CoreFile.find(row_results["pid"])
+              assign_a_row(row_results, core_file, dir_path, load_report)
             end
-          else #edit existing file
-            core_file = CoreFile.find(row_results["pid"])
-            assign_a_row(row_results, core_file, dir_path, load_report)
           end
+        rescue Exception => error
+          puts error
+          puts error.backtrace
+          populate_error_report(load_report, error.message, row_results, core_file, header_row, row)
+          next
         end
       end
 
       load_report.update_counts
       load_report.number_of_files = count
-      load_report.save!      
+      load_report.save!
     end
 
     if load_report.success_count + load_report.fail_count + load_report.modified_count == load_report.number_of_files
@@ -143,14 +151,10 @@ class ProcessXmlZipJob
         core_file.match_dc_to_mods
       else
         # Raise error, invalid mods
-        # TODO
-
         core_file = nil
       end
     else
       # Raise error, can't load core file mods metadata
-      # TODO
-
       core_file = nil
     end
   end
@@ -177,6 +181,27 @@ class ProcessXmlZipJob
       end
     end
     return ""
+  end
+
+  def populate_error_report(load_report, error, row_results, core_file, header_row, row, existing_file = nil, old_mods = nil)
+    row_results = row_results.blank? ? nil : row_results
+    if core_file
+      if existing_file && CoreFile.exists?(core_file.pid)
+        core_file.mods.content = old_mods
+        core_file.save!
+      else
+        core_file.destroy if CoreFile.exists?(core_file.pid)
+      end
+      title = core_file.title.blank? ? row_results["title"] : core_file.title
+      original_file = core_file.original_filename.blank? ? row_results["file_name"] : core_file.original_filename
+    else
+      title = find_in_row(header_row, row, 'Title')
+      original_file = find_in_row(header_row, row, 'File Name')
+    end
+    image_report = load_report.image_reports.create_failure(error, row_results, "")
+    image_report.title = title
+    image_report.original_file = original_file
+    image_report.save!
   end
 
 end
