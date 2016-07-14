@@ -11,10 +11,13 @@ module Cerberus
 
         def embargo_release_date=(release_date)
           release_date = release_date.to_s if release_date.is_a? Date
+          if release_date.blank?
+            raise "Blank embargo release date."
+          end
           begin
-            release_date.blank? || Date.parse(release_date)
+            Date.parse(release_date)
           rescue
-            return "INVALID DATE"
+            raise "Invalid embargo release date."
           end
           self.rightsMetadata.update_values({[:embargo,:machine,:date]=>release_date})
         end
