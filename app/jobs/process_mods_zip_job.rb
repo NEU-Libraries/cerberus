@@ -188,10 +188,17 @@ class ProcessModsZipJob
       # LoaderMailer.load_alert(load_report, User.find_by_nuid(load_report.nuid)).deliver!
       # cleaning up
       FileUtils.rm(spreadsheet_file_path)
+      # Failing here for some strange reason??
       if CoreFile.exists?(load_report.preview_file_pid)
-        CoreFile.find(load_report.preview_file_pid).destroy
+        begin
+          CoreFile.find(load_report.preview_file_pid).destroy
+        rescue Exception => error
+        end
       elsif CoreFile.exists?(load_report.comparison_file_pid)
-        CoreFile.find(load_report.comparison_file_pid).destroy
+        begin
+          CoreFile.find(load_report.comparison_file_pid).destroy
+        rescue Exception => error
+        end
       end
     end
   end
