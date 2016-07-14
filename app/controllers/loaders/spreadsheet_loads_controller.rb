@@ -64,7 +64,7 @@ class Loaders::SpreadsheetLoadsController < Loaders::LoadsController
       @depositor_options << [collection_depositor, @collection.true_depositor]
     end
 
-    @loader_short_name = t('drs.loaders.xml.short_name')
+    @loader_short_name = t('drs.loaders.spreadsheet.short_name')
 
     render 'loaders/preview'
   end
