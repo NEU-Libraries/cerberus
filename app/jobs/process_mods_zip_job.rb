@@ -60,6 +60,9 @@ class ProcessModsZipJob
           # Load row of metadata in for preview
           assign_a_row(row_results, preview_file)
 
+          preview_file.identifier = comparison_file.identifier
+          preview_file.save!
+
           load_report.preview_file_pid = preview_file.pid
           load_report.number_of_files = spreadsheet.last_row - header_position
 
