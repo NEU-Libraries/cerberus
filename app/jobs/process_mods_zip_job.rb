@@ -42,7 +42,7 @@ class ProcessModsZipJob
     if !preview.nil?
       row = spreadsheet.row(header_position + 1)
       if row.present? && header_row.present?
-        # begin
+        begin
           row_results = process_a_row(header_row, row)
           # Process first row
           preview_file = CoreFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
@@ -64,11 +64,11 @@ class ProcessModsZipJob
           load_report.number_of_files = spreadsheet.last_row - header_position
 
           load_report.save!
-        # rescue Exception => error
-        #   puts error
-        #   puts error.backtrace
-        #   return
-        # end
+        rescue Exception => error
+          puts error
+          puts error.backtrace
+          return
+        end
       end
     else #not a preview
       existing_files = false
@@ -77,7 +77,7 @@ class ProcessModsZipJob
         (start..end_row).each do |x|
         row = spreadsheet.row(x)
         if row.present? && header_row.present?
-          # begin
+          begin
             row_results = process_a_row(header_row, row)
             if x == start
               existing_files = set_existing_files(row_results)
@@ -171,11 +171,11 @@ class ProcessModsZipJob
                 end
               end
             end
-          # rescue Exception => error
-          #   puts error
-          #   puts error.backtrace
-          #   populate_error_report(load_report, existing_file, error.message, row_results, core_file, old_mods, header_row, row)
-          # end
+          rescue Exception => error
+            puts error
+            puts error.backtrace
+            populate_error_report(load_report, existing_file, error.message, row_results, core_file, old_mods, header_row, row)
+          end
         end
       end
       load_report.update_counts
