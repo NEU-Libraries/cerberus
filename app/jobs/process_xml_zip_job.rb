@@ -85,7 +85,7 @@ class ProcessXmlZipJob
             row_results = process_a_row(header_row, row)
 
             if row_results["pid"].blank? && !row_results["file_name"].blank? #make new file
-              new_file = File.dirname(dir_path) + "/" + row_results["file_name"]
+              new_file = dir_path + "/" + row_results["file_name"]
               if File.exists? new_file
                 if Cerberus::ContentFile.virus_check(File.new(new_file)) == 0
                   core_file = CoreFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
@@ -105,6 +105,11 @@ class ProcessXmlZipJob
                     core_file.category = sc_type
                   end
                   core_file.identifier = make_handle(core_file.persistent_url, client)
+
+                  if !row_results["embargoed"].blank? && row_results["embargoed"].downcase == "true"
+                    core_file.embargo_release_date = row_results["embargo_date"]
+                  end
+
                 else
                   populate_error_report(load_report, "File triggered failure for virus check", row_results, core_file, header_row, row)
                   next
