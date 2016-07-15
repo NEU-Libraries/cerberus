@@ -53,6 +53,7 @@ class ProcessModsZipJob
             comparison_file = CoreFile.find(row_results["pid"])
             preview_file.depositor              = comparison_file.depositor
             preview_file.rightsMetadata.content = comparison_file.rightsMetadata.content
+            preview_file.mods.identifier = comparison_file.mods.identifier
             load_report.comparison_file_pid = comparison_file.pid
           end
           preview_file.tmp_path = spreadsheet_file_path
@@ -122,17 +123,17 @@ class ProcessModsZipJob
               elsif existing_files == true
                 existing_file = true
                 if core_file_checks(row_results["pid"]) == true
-                  # blank_handle = false
+                  blank_handle = false
                   core_file = CoreFile.find(row_results["pid"])
-                  # handle = core_file.identifier
-                  # if handle.blank?
-                  #   blank_handle = true
-                  #   xml = Nokogiri::XML(core_file.mods.content)
-                  #   handle = xml.xpath("//mods:identifier[contains(., 'hdl.handle.net')]").text
-                  # end
-                  # old_mods = core_file.mods.content
-                  # core_file.mods.content = ModsDatastream.xml_template.to_xml
-                  # core_file.mods.identifier = handle
+                  handle = core_file.identifier
+                  if handle.blank?
+                    blank_handle = true
+                    xml = Nokogiri::XML(core_file.mods.content)
+                    handle = xml.xpath("//mods:identifier[contains(., 'hdl.handle.net')]").text
+                  end
+                  old_mods = core_file.mods.content
+                  core_file.mods.content = ModsDatastream.xml_template.to_xml
+                  core_file.mods.identifier = handle
                 else
                   populate_error_report(load_report, existing_file, core_file_checks(row_results["pid"]), row_results, core_file, old_mods, header_row, row)
                   next
@@ -147,10 +148,14 @@ class ProcessModsZipJob
                 populate_error_report(load_report, existing_file, "Must have at least one keyword", row_results, core_file, old_mods, header_row, row)
               elsif core_file.title.blank?
                 populate_error_report(load_report, existing_file, "Must have a title", row_results, core_file, old_mods, header_row, row)
-              # elsif (!row_results["handle"].blank? && core_file.identifier != row_results["handle"]) || blank_handle
-              #   image_report = load_report.image_reports.create_modified("Handle does not match", core_file, row_results)
-              #   image_report.title = core_file.title
-              #   image_report.save!
+              elsif (!row_results["handle"].blank? && core_file.identifier != row_results["handle"]) || blank_handle
+                if handle.blank?
+                  image_report = load_report.image_reports.create_modified("The loader was unable to detect a handle for the original file.", core_file, row_results)
+                else
+                  image_report = load_report.image_reports.create_modified("Handle does not match", core_file, row_results)
+                end
+                image_report.title = core_file.title
+                image_report.save!
               else
                 raw_xml = xml_decode(core_file.mods.content)
                 result = xml_valid?(raw_xml)
@@ -169,7 +174,9 @@ class ProcessModsZipJob
                     load_report.image_reports.create_success(core_file, "")
                   end
                 else
-                  Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename))
+                  if !existing_files
+                    Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename))
+                  end
                   load_report.image_reports.create_success(core_file, "")
                 end
               end
