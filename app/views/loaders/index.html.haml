@@ -19,21 +19,6 @@
       %td
         .text-center= loader.number_of_files
       %td
-        -if loader.loader_name == t('drs.loaders.marcom.long_name')
-          = link_to("View Report", loaders_marcom_report_path(loader.id), class: "btn btn-small btn-success")
-        - elsif loader.loader_name == t('drs.loaders.coe.long_name')
-          = link_to("View Report", loaders_coe_report_path(loader.id), class: "btn btn-small btn-success")
-        - elsif loader.loader_name == t('drs.loaders.cps.long_name')
-          = link_to("View Report", loaders_cps_report_path(loader.id), class: "btn btn-small btn-success")
-        - elsif loader.loader_name == t('drs.loaders.emsa.long_name')
-          = link_to("View Report", loaders_emsa_report_path(loader.id), class: "btn btn-small btn-success")
-        - elsif loader.loader_name == t('drs.loaders.multipage.long_name')
-          = link_to("View Report", loaders_multipage_report_path(loader.id), class: "btn btn-small btn-success")
-        - elsif loader.loader_name == t('drs.loaders.bouve.long_name')
-          = link_to("View Report", loaders_bouve_report_path(loader.id), class: "btn btn-small btn-success")
-        - elsif loader.loader_name == t('drs.loaders.damore.long_name')
-          = link_to("View Report", loaders_damore_report_path(loader.id), class: "btn btn-small btn-success")
-        - elsif loader.loader_name == t('drs.loaders.spreadsheet.long_name')
-          = link_to("View Report", loaders_spreadsheet_report_path(loader.id), class: "btn btn-small btn-success")
-        - elsif loader.loader_name == t('drs.loaders.xml.long_name')
-          = link_to("View Report", loaders_xml_report_path(loader.id), class: "btn btn-small btn-success")
+        - short_name = t('loaders').values.select {|load| load[:long_name]==loader.loader_name}
+        - short_name = short_name[0][:short_name]
+        = link_to("View Report", "loaders/#{short_name}/report/#{loader.id}", class: "btn btn-small btn-success")

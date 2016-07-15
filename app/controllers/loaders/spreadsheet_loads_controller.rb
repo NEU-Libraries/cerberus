@@ -9,6 +9,19 @@ class Loaders::SpreadsheetLoadsController < Loaders::LoadsController
   end
 
   def new
+    @loader_name = t('loaders.'+t('loaders.spreadsheet.short_name')+'.long_name')
+    @loader_short_name = t('loaders.spreadsheet.short_name')
+    @page_title = @loader_name + " Loader"
+    render 'loaders/load_choices', locals: { collections_options: @collections_options }
+  end
+
+  def process_new
+    @loader_name = t('loaders.'+t('loaders.spreadsheet.short_name')+'.long_name')
+    @loader_short_name = t('loaders.spreadsheet.short_name')
+    @page_title = @loader_name + " Loader"
+    puts "in process new"
+    puts params
+
     query_result = ActiveFedora::SolrService.query("active_fedora_model_ssi:\"Collection\"", :fl => "id, title_info_title_tesim", :rows => 999999999, :sort => "id asc")
     @collections_options = Array.new()
     query_result.each do |c|
@@ -16,15 +29,16 @@ class Loaders::SpreadsheetLoadsController < Loaders::LoadsController
         @collections_options << {'label' => "#{c['id']} - #{c['title_info_title_tesim'][0]}", 'value' => c['id']}
       end
     end
-    @loader_name = t('drs.loaders.'+t('drs.loaders.spreadsheet.short_name')+'.long_name')
-    @loader_short_name = t('drs.loaders.spreadsheet.short_name')
-    @page_title = @loader_name + " Loader"
-    render 'loaders/new', locals: { collections_options: @collections_options}
+    respond_to do |format|
+      format.js {
+        render 'loaders/new', locals: { collections_options: @collections_options}
+      }
+    end
   end
 
   def create
     permissions = {"CoreFile" => {"read"  => ["public"], "edit" => ["northeastern:drs:repository:staff"]}}
-    process_create(permissions, t('drs.loaders.spreadsheet.short_name'), "SpreadsheetLoadsController")
+    process_create(permissions, t('loaders.spreadsheet.short_name'), "ModsSpreadsheetLoadsController")
   end
 
   def preview
@@ -41,7 +55,7 @@ class Loaders::SpreadsheetLoadsController < Loaders::LoadsController
       @depositor_options << [collection_depositor, @collection.true_depositor]
     end
 
-    @loader_short_name = t('drs.loaders.spreadsheet.short_name')
+    @loader_short_name = t('loaders.spreadsheet.short_name')
 
     render 'loaders/preview'
   end
@@ -64,7 +78,7 @@ class Loaders::SpreadsheetLoadsController < Loaders::LoadsController
       @depositor_options << [collection_depositor, @collection.true_depositor]
     end
 
-    @loader_short_name = t('drs.loaders.xml.short_name')
+    @loader_short_name = t('loaders.xml.short_name')
 
     render 'loaders/preview'
   end
@@ -84,7 +98,7 @@ class Loaders::SpreadsheetLoadsController < Loaders::LoadsController
   def proceed_load
     puts params
     @report = Loaders::LoadReport.find(params[:id])
-    @loader_name = t('drs.loaders.spreadsheet.long_name')
+    @loader_name = t('loaders.spreadsheet.long_name')
     if !@report.preview_file_pid.blank?
       cf = CoreFile.find(@report.preview_file_pid)
       spreadsheet_file_path = cf.tmp_path
@@ -92,7 +106,7 @@ class Loaders::SpreadsheetLoadsController < Loaders::LoadsController
       cf = CoreFile.find(@report.comparison_file_pid)
       spreadsheet_file_path = cf.tmp_path
     end
-    copyright = t('drs.loaders.spreadsheet.copyright')
+    copyright = t('loaders.spreadsheet.copyright')
     permissions = {} #we aren't getting these externally yet
     if params[:depositor]
       depositor = params[:depositor]

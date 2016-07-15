@@ -214,43 +214,6 @@ en:
         short: Page
     full_metadata:
       processing note: "The metadata details and access controls you specified are being processed in the background. Your file will be marked as 'Private' until this brief process is complete."
-    loaders:
-      marcom:
-        long_name: "Marketing and Communications"
-        short_name: "marcom"
-        copyright: 'Marketing and Communications images are for use only within the context of Northeastern University. Appropriate uses include: Northeastern University-related websites, Northeastern University-based print/web publications and for speaking appearances when acting as a representative of Northeastern University. Images should be credited: "Photographer Name/Northeastern University.” Images are not to be used for self-promotional purposes outside of Northeastern University such as LinkedIn, Facebook or in commercial/external publications such as advertisements, books or magazines without written permission from Northeastern Marketing and Communications. For more information, please contact the senior staff photographer in the office of Marketing and Communications at 617.373.6767'
-      coe:
-        long_name: "College of Engineering"
-        short_name: "coe"
-        copyright: ""
-      cps:
-        long_name: "College of Professional Studies"
-        short_name: "cps"
-        copyright: ""
-      multipage:
-        long_name: "Multipage"
-        short_name: "multipage"
-        copyright: ""
-      emsa:
-        long_name: "Enrollment Management and Student Affairs"
-        short_name: "emsa"
-        copyright: "Enrollment Marketing and Communications images are for use only within the context of Northeastern University. Appropriate uses include: Northeastern University-related websites, Northeastern University-based print/web publications and for speaking appearances when acting as a representative of Northeastern University. Images should be credited: \"(Insert Photographer's Name)/Northeastern University.\" Images are not to be used for self-promotional purposes outside of Northeastern University or in commercial/external publications such as advertisements, books or magazines without written permission from Northeastern Enrollment Marketing and Communications. Full size downloads are restricted to Enrollment Management and Student Affairs staff. For more information, please email Enrollment Marketing and Communications at Gnphotorequest@neu.edu."
-      bouve:
-        long_name: "Bouvé College of Health Sciences"
-        short_name: "bouve"
-        copyright: "Bouvé College of Health Sciences images are for use only within the context of Northeastern University. Appropriate uses include: Northeastern University-related websites, Northeastern University-based print/web publications. Images should be credited: \"Photographer Name/Northeastern University.\" Images are not to be used for self-promotional purposes outside of Northeastern University such as LinkedIn, Facebook or in commercial/external publications such as advertisements, books or magazines without written permission from Northeastern University, Bouvé  College of Health Sciences. For more information, please contact the Office of the Dean at 617-373-3323."
-      spreadsheet:
-        long_name: "Spreadsheet Loader"
-        short_name: "spreadsheet"
-        copyright: ""
-      xml:
-        long_name: "XML Loader"
-        short_name: "xml"
-        copyright: ""
-      damore:
-        long_name: "D'Amore-McKim School of Business Marketing and Communications"
-        short_name: "damore"
-        copyright: "D'Amore-McKim School of Business Marketing & Communications images are for use only within the context of the marketing and promotion of the D'Amore-McKim School of Business at Northeastern University. Use and reproduction of these images is restricted to D'Amore-McKim School of Business Marketing and Communications employees only. All other uses require written permission from the D'Amore-McKim School of Business Marketing and Communications department. Appropriate uses include placement in D'Amore-McKim-related websites and insertion into D'Amore-McKim print and presentation materials. D'Amore-McKim faculty and staff are generally granted permission to reuse images for D'Amore-McKim-related marketing and communications efforts; however, the D'Amore-McKim Marketing and Communications team reserves the right to restrict use for brand consistency and to avoid overuse. Images must be credited: \"Photographer Name/Northeastern University.\" If faculty, students, or other persons are easily identifiable in the photo, exercise discretion when using their likeness. Requesting permission from the individual(s) photographed is strongly encouraged. Images may be used for self-promotional purposes outside of Northeastern University such as on LinkedIn or Facebook, but usage must be in good faith and approved with written permission from D'Amore-McKim School of Business. For more information, please contact the D'Amore-McKim Marketing and Communications team at dmsbnews@neu.edu."
     multiple_accounts:
       login_alert: "Your login appears to be associated with multiple Northeastern accounts."
       menu_link: "Accounts"
