@@ -3,12 +3,12 @@ class Loaders::EmsaLoadsController < Loaders::LoadsController
 
   def new
     parent = "neu:5m60qx99w"
-    process_new(parent, t('drs.loaders.emsa.short_name'))
+    process_new(parent, t('loaders.emsa.short_name'))
   end
 
   def create
     permissions = {"CoreFile" => {"read"  => ["northeastern:drs:all"], "edit" => ["northeastern:drs:repository:staff", "northeastern:drs:enrollment_management:emc:emc_admin"]}, "ImageSmallFile" => {"read"  => ["northeastern:drs:all"], "edit" => ["northeastern:drs:repository:staff", "northeastern:drs:enrollment_management:emc:emc_admin"]}, "ImageLargeFile" => {"read"  => ["northeastern:drs:all"], "edit" => ["northeastern:drs:repository:staff", "northeastern:drs:enrollment_management:emc:emc_admin"]}, "ImageMasterFile" => {"read"  => ["northeastern:drs:all"], "edit" => ["northeastern:drs:repository:staff", "northeastern:drs:enrollment_management:emc:emc_admin"]}}
-    process_create(permissions, t('drs.loaders.emsa.short_name'), "EmsaLoadsController", true)
+    process_create(permissions, t('loaders.emsa.short_name'), "EmsaLoadsController", true)
   end
 
   private

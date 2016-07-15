@@ -149,6 +149,7 @@ Cerberus::Application.routes.draw do
    get "/loaders/spreadsheet/file/:id" => 'spreadsheet_loads#show_mods', as: 'loaders_spreadsheet_mods'
    get "/loaders/spreadsheet/:id/cancel_load" => "spreadsheet_loads#cancel_load", as: "loaders_spreadsheet_cancel_load"
    get "/loaders/spreadsheet/:id/proceed_load" => "spreadsheet_loads#proceed_load", as: "loaders_spreadsheet_proceed_load"
+   get "/loaders/spreadsheet/process_new" => "spreadsheet_loads#process_new", as: "loaders_spreadsheet_process_new"
    resources :xml_loads, only: [:new, :create, :preview, :preview_compare], :path => "loaders/xml"
    get "/loaders/xml/report/:id" => 'xml_loads#show', as: 'loaders_xml_report'
    get "/loaders/xml/preview/:id" => 'xml_loads#preview',  as: 'loaders_xml_preview'

@@ -1,0 +1,39 @@
+-content_for :page_header do
+  %h1.page-header
+    =@page_title
+.row
+  .span12
+    %h2= "What type of files are you uploading?"
+  .span6
+    %a{:href=>"", :class=>"btn btn-lg btn-primary new-files", }
+      %h2{:style=>"color:#fff"}
+        = "New Files"
+  .span6
+    %a{:href=>"", :class=>"btn btn-lg btn-primary existing-files", }
+      %h2{:style=>"color:#fff"}
+        = "Existing Files"
+
+.row.upload_form
+  -# = render partial: "loaders/new", locals: {@new: true}
+:javascript
+  $(".new-files").click(function(){
+    $.ajax({
+      url: "/loaders/#{@loader_short_name}/process_new",
+      data: {new: true} ,
+      success: function(results){
+        console.log("in success")
+        //console.log(results);
+        //$(".upload_form").html(results);
+      }
+    });
+  });
+  $(".existing-files").click(function(){
+    $.ajax({
+      url: "/loaders/#{@loader_short_name}/process_new",
+      data: {new: false} ,
+      success: function(results){
+        //console.log(results);
+        //$(".upload_form").html(results);
+      }
+    });
+  })

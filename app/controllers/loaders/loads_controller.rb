@@ -24,14 +24,14 @@ class Loaders::LoadsController < ApplicationController
         end
       end
     end
-    @loader_name = t('drs.loaders.'+short_name+'.long_name')
+    @loader_name = t('loaders.'+short_name+'.long_name')
     @loader_short_name = short_name
     @page_title = @loader_name + " Loader"
     render 'loaders/new', locals: { collections_options: @collections_options}
   end
 
   def process_create(permissions, short_name, controller_name, derivatives=false)
-    @copyright = t('drs.loaders.'+short_name+'.copyright')
+    @copyright = t('loaders.'+short_name+'.copyright')
     begin
       # check error condition No files
       return json_error("Error! No file to save") if !params.has_key?(:file)
@@ -92,7 +92,7 @@ class Loaders::LoadsController < ApplicationController
 
   protected
     def process_file(file, parent, copyright, permissions, short_name, derivatives=false)
-      @loader_name = t('drs.loaders.'+short_name+'.long_name')
+      @loader_name = t('loaders.'+short_name+'.long_name')
       if virus_check(file) == 0
         tempdir = Pathname.new("#{Rails.application.config.tmp_path}/")
 
