@@ -55,14 +55,12 @@ class ProcessModsZipJob
             preview_file.rightsMetadata.content = comparison_file.rightsMetadata.content
             preview_file.mods.identifier = comparison_file.mods.identifier
             load_report.comparison_file_pid = comparison_file.pid
+            preview_file.identifier = comparison_file.identifier
           end
           preview_file.tmp_path = spreadsheet_file_path
 
           # Load row of metadata in for preview
           assign_a_row(row_results, preview_file)
-
-          preview_file.identifier = comparison_file.identifier
-          preview_file.save!
 
           load_report.preview_file_pid = preview_file.pid
           load_report.number_of_files = spreadsheet.last_row - header_position
@@ -236,18 +234,24 @@ class ProcessModsZipJob
       creator_hash['corporate_names'] = []
       creator_hash['first_names'] = []
       creator_hash['last_names'] = []
+      personal_creators = {}
+      personal_creators['first_names'] = []
+      personal_creators['last_names'] = []
       creator_nums.each do |n|
         if !row_results["creator_#{n}_name"].blank?
           name_type = row_results["creator_#{n}_name_type"]
           if name_type == 'corporate'
             creator_hash['corporate_names'] << row_results["creator_#{n}_name"].split("|")[0].strip
           elsif name_type == 'personal'
-            creator_hash['first_names'] << row_results["creator_#{n}_name"].split("|")[1].strip
-            creator_hash['last_names'] << row_results["creator_#{n}_name"].split("|")[0].strip
+            first = row_results["creator_#{n}_name"].split("|")[1]
+            first = first.blank? ? " " : first.strip
+            personal_creators['first_names'] << first
+            personal_creators['last_names'] << row_results["creator_#{n}_name"].split("|")[0].strip
           end
         end
       end
       core_file.creators = creator_hash
+      core_file.mods.personal_creators = personal_creators
       # assign primary
       if row_results["creator_1_name_type"] == "personal"
         core_file.mods.corporate_name(0).usage = nil
