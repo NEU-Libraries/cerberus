@@ -53,12 +53,16 @@ class ProcessModsZipJob
             comparison_file = CoreFile.find(row_results["pid"])
             preview_file.depositor              = comparison_file.depositor
             preview_file.rightsMetadata.content = comparison_file.rightsMetadata.content
+            preview_file.mods.identifier = comparison_file.mods.identifier
             load_report.comparison_file_pid = comparison_file.pid
           end
           preview_file.tmp_path = spreadsheet_file_path
 
           # Load row of metadata in for preview
           assign_a_row(row_results, preview_file)
+
+          preview_file.identifier = comparison_file.identifier
+          preview_file.save!
 
           load_report.preview_file_pid = preview_file.pid
           load_report.number_of_files = spreadsheet.last_row - header_position
@@ -145,7 +149,11 @@ class ProcessModsZipJob
               elsif core_file.title.blank?
                 populate_error_report(load_report, existing_file, "Must have a title", row_results, core_file, old_mods, header_row, row)
               elsif (!row_results["handle"].blank? && core_file.identifier != row_results["handle"]) || blank_handle
-                image_report = load_report.image_reports.create_modified("Handle does not match", core_file, row_results)
+                if handle.blank?
+                  image_report = load_report.image_reports.create_modified("The loader was unable to detect a handle for the original file.", core_file, row_results)
+                else
+                  image_report = load_report.image_reports.create_modified("Handle does not match", core_file, row_results)
+                end
                 image_report.title = core_file.title
                 image_report.save!
               else
@@ -166,7 +174,9 @@ class ProcessModsZipJob
                     load_report.image_reports.create_success(core_file, "")
                   end
                 else
-                  Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename))
+                  if !existing_files
+                    Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename))
+                  end
                   load_report.image_reports.create_success(core_file, "")
                 end
               end
