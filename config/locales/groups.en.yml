@@ -62,6 +62,8 @@ en:
       name: "Office of Marketing and Communications - Photography Staff"
     northeastern:drs:marketing_and_communications:art_staff:
       name: "Office of Marketing and Communications - Art Staff"
+    northeastern:drs:provost_office:center_research_innovation:center_for_research_innovation_staff:
+      name: "Center for Research Innovation Staff"
     northeastern:drs:repository:admin:
       name: "DRS Advanced Users"
     northeastern:drs:repository:beta_users:
