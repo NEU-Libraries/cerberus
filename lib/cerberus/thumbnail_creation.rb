@@ -17,7 +17,7 @@ module Cerberus::ThumbnailCreation
       begin
         item = ActiveFedora::Base.find(item_pid, cast: true)
 
-        if item.core_record.canonical_class.in?(['MswordFile', 'PdfFile'])
+        if item.class == "CoreFile" && item.core_record.canonical_class.in?(['MswordFile', 'PdfFile'])
           img = Magick::Image.read("#{file_path}[0]").first
         else
           img = Magick::Image.read(file_path).first
@@ -38,7 +38,7 @@ module Cerberus::ThumbnailCreation
 
         extension = ""
 
-        if item.core_record.canonical_class.in?(['MswordFile', 'PdfFile'])
+        if item.class == "CoreFile" && item.core_record.canonical_class.in?(['MswordFile', 'PdfFile'])
           end_img.format = "PNG"
           extension = "png"
         else
