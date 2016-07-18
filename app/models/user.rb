@@ -252,7 +252,7 @@ class User < ActiveRecord::Base
   end
 
   def xml_loader?
-    return (self.admin? || self.developer?)
+    return self.groups.include? "northeastern:drs:repository:loaders:xml"
   end
 
 
