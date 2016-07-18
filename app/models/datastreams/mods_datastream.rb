@@ -550,7 +550,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
     array_of_strings.select!{ |ac| !ac.blank?}
     if self.genre.length > array_of_strings.length
       node_count = self.genre.length - array_of_strings.length
-      trim_nodes_from_zero(:genre, node_c)
+      trim_nodes_from_zero(:genre, node_count)
     end
     array = []
     array_of_strings.each_with_index do |genre, i|
