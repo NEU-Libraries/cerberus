@@ -40,8 +40,8 @@ describe ProcessModsZipJob do
       cf.mods.personal_name(0).role.role_term.type.should == ["text"]
       cf.mods.personal_name(0).affiliation.should == ["TREAD, Inc."]
       cf.mods.type_of_resource.should == ["text"]
-      cf.mods.genre.should == ["reports"]
-      cf.mods.genre.authority.should == ["aat"]
+      cf.mods.genre.should == ["reports", "fiction"]
+      cf.mods.genre.authority.should == ["aat", "aat"]
       cf.mods.origin_info.date_created.should == ["1981"]
       cf.mods.origin_info.date_created.point.should == ["start"]
       cf.mods.origin_info.date_created_end.should == ["1982"]
@@ -59,12 +59,12 @@ describe ProcessModsZipJob do
       cf.mods.language.language_term.language_authority.should == ["iso639-2b"]
       cf.mods.language.language_term.language_authority_uri.should == ["http://id.loc.gov/vocabulary/iso639-2"]
       cf.mods.language.language_term.language_value_uri.should == ["http://id.loc.gov/vocabulary/iso639-2/eng"]
-      cf.description.should == "Annual report from the Citywide Educational Coalition includes seminal information about the desegregation of the Boston Public Schools."
+      cf.description.should == "abstract goes here"
       cf.mods.access_condition(0).should == ["Permission to publish materials from this collection must be requested from Archives and Special Collections, Northeastern University."]
       cf.mods.access_condition(0).type.should == ["use and reproduction"]
-      cf.mods.note(0).should == ["Donated by Citywide Educational Coalition."]
+      cf.mods.note(0).should == ["this is provenance note"]
       cf.mods.note(0).type.should == ["provenance"]
-      cf.mods.subject.count.should == 6
+      cf.mods.subject.count.should == 10
       cf.mods.subject(0).topic(0).should == ["African American students"]
       cf.mods.subject(0).topic(1).should == ["Massachusetts"]
       cf.mods.subject(0).topic(2).should == ["Boston"]
