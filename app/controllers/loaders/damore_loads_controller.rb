@@ -19,7 +19,7 @@ class Loaders::DamoreLoadsController < Loaders::LoadsController
         end
       end
     end
-    process_create(permissions, t('loaders.damore.short_name'), "DamoreLoadsController", true)
+    process_create(permissions, t('loaders.damore.short_name'), "DamoreLoadsController", false, true)
   end
 
   private

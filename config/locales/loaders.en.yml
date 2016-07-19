@@ -21,19 +21,6 @@ en:
         small:
         medium:
         large:
-      permissions:
-        core_file:
-          read:["northeastern:drs:faculty", "northeastern:drs:staff"]
-          edit:["northeastern:drs:marketing_and_communications:staff", "northeastern:drs:repository:staff"]
-        image_small_file:
-          read:["northeastern:drs:faculty", "northeastern:drs:staff"]
-          edit:["northeastern:drs:marketing_and_communications:staff", "northeastern:drs:repository:staff"]
-        image_large_file:
-          read:["northeastern:drs:faculty", "northeastern:drs:staff"]
-          edit:["northeastern:drs:marketing_and_communications:staff", "northeastern:drs:repository:staff"]
-        image_master_file:
-          read:["northeastern:drs:faculty", "northeastern:drs:staff"]
-          edit:["northeastern:drs:marketing_and_communications:staff", "northeastern:drs:repository:staff"]
     coe:
       long_name: "College of Engineering"
       short_name: "coe"

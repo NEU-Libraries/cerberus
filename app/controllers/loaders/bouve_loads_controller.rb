@@ -8,7 +8,7 @@ class Loaders::BouveLoadsController < Loaders::LoadsController
 
   def create
     permissions = {"CoreFile" => {"read"  => ["northeastern:drs:faculty", "northeastern:drs:staff"], "edit" => ["northeastern:drs:bouve:deans_office:media", "northeastern:drs:repository:staff"]}, "ImageMasterFile" => {"read"  => ["northeastern:drs:faculty", "northeastern:drs:staff"], "edit" => ["northeastern:drs:bouve:deans_office:media", "northeastern:drs:repository:staff"]}}
-    process_create(permissions, t('loaders.bouve.short_name'), "BouveLoadsController", false)
+    process_create(permissions, t('loaders.bouve.short_name'), "BouveLoadsController", false, false)
   end
 
   private

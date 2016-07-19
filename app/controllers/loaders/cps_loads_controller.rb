@@ -9,7 +9,7 @@ class Loaders::CpsLoadsController < Loaders::LoadsController
   def create
     permissions = {"CoreFile" => {"edit" => ["northeastern:drs:college_of_professional_studies:media", "northeastern:drs:repository:staff"]}, "ImageSmallFile" => {"edit" => ["northeastern:drs:college_of_professional_studies:media", "northeastern:drs:repository:staff"]}, "ImageLargeFile" => {"edit" => ["northeastern:drs:college_of_professional_studies:media", "northeastern:drs:repository:staff"]}, "ImageMasterFile" => {"edit" => ["northeastern:drs:college_of_professional_studies:media", "northeastern:drs:repository:staff"]}}
 
-    process_create(permissions, t('loaders.cps.short_name'), "CpsLoadsController", true)
+    process_create(permissions, t('loaders.cps.short_name'), "CpsLoadsController", false, true)
   end
 
   private
