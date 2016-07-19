@@ -128,10 +128,10 @@ class Loaders::LoadsController < ApplicationController
             load_report = Loaders::LoadReport.find(report_id)
             session[:flash_success] = "Your file has been submitted and is now being processed. You will receive an email when the load is complete."
 
-            puts "DGC DEBUG"
-            puts "report_id: #{report_id}"
-            puts "comparison_file_pid: #{load_report.comparison_file_pid}"
-            puts "preview_file_pid: #{load_report.preview_file_pid}"
+            # puts "DGC DEBUG"
+            # puts "report_id: #{report_id}"
+            # puts "comparison_file_pid: #{load_report.comparison_file_pid}"
+            # puts "preview_file_pid: #{load_report.preview_file_pid}"
 
             if !load_report.comparison_file_pid.blank?
               render :json => {report_id: report_id, comparison_file_pid: load_report.comparison_file_pid}.to_json and return
