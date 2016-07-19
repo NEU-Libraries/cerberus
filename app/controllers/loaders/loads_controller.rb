@@ -64,7 +64,11 @@ class Loaders::LoadsController < ApplicationController
     @report = Loaders::LoadReport.find(params[:id])
     @images = Loaders::ImageReport.where(load_report_id:"#{@report.id}").find_all
     @user = User.find_by_nuid(@report.nuid)
-    @page_title = @report.loader_name + " Load into " + Collection.find(@report.collection).title
+    if @report.collection
+      @page_title = @report.loader_name + " Load into " + Collection.find(@report.collection).title
+    else
+      @page_title = @report.loader_name + " Load"
+    end
     if session[:flash_error]
       flash[:error] = session[:flash_error]
       session[:flash_error] = nil
@@ -104,7 +108,6 @@ class Loaders::LoadsController < ApplicationController
         #if zip
         if extract_mime_type(new_file) == 'application/zip'
           begin
-
             if short_name == "multipage"
               # multipage zip job
               report_id = Loaders::LoadReport.create_from_strings(current_user, 0, @loader_name, parent)
@@ -150,22 +153,20 @@ class Loaders::LoadsController < ApplicationController
             end
           rescue => exception
             logger.error controller_name+"::create rescued #{exception.class}\n\t#{exception.to_s}\n #{exception.backtrace.join("\n")}\n\n"
-            puts exception
-            # redirect_to "/my_loaders" and return
             # email_handled_exception(exception)
             json_error exception.to_s
-            # session[:flash_error] =
-            # render :nothing => true
+            session[:flash_error] = "Your file could not be processed. Please make sure the zip file contains the correct files and metadata. The error received was: #{exception.to_s}"
           end
         else
-          #error out
           FileUtils.rm(new_file)
-          session[:flash_error] = 'The file you uploaded was not a zipfile. Please try again.';
-          render :nothing => true
+          error = "The file uploaded was not a zip file."
+          session[:flash_error] = error
+          json_error error
         end
       else
-        session[:flash_error] = 'Error creating file.';
-        render :nothing => true
+        error = "Error processing file."
+        session[:flash_error] = error
+        json_error error
       end
     end
 

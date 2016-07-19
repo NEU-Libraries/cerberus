@@ -70,11 +70,13 @@ class Loaders::SpreadsheetLoadsController < Loaders::LoadsController
     @mods_html = CoreFilesController.new.render_mods_display(@core_file).to_html.html_safe
 
     @user = User.find_by_nuid(@report.nuid)
-    @collection = fetch_solr_document({:id=>@report.collection})
-    collection_depositor = !@collection.true_depositor.blank? ? User.find_by_nuid("#{@collection.true_depositor}").name : nil
-    @depositor_options = [["System User", "000000000"]]
-    if !collection_depositor.blank?
-      @depositor_options << [collection_depositor, @collection.true_depositor]
+    if @report.collection
+      @collection = fetch_solr_document({:id=>@report.collection})
+      collection_depositor = !@collection.true_depositor.blank? ? User.find_by_nuid("#{@collection.true_depositor}").name : nil
+      @depositor_options = [["System User", "000000000"]]
+      if !collection_depositor.blank?
+        @depositor_options << [collection_depositor, @collection.true_depositor]
+      end
     end
 
     @loader_short_name = t('loaders.spreadsheet.short_name')
