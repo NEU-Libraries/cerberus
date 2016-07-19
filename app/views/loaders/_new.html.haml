@@ -1,34 +1,36 @@
 - url = '/loaders/' + @loader_short_name
 = form_tag(url, action: "create", method: "post", multipart: true, id: "loaderForm") do
   .row
-    %ol
+    %fieldset.span4
+      %legend
+        1. Terms of Service Agreement
+      %span.help-block
+        Please read and accept the
+        %a{href: "/terms" , data: { remote: true} }
+          terms of use
+      %label.checkbox.required-label{ for: "terms_of_service" }
+        I have read and accept the terms of service.
+        = check_box_tag 'terms_of_service', 1, nil, data: { activate:  "activate-submit" }
+    - if @new == "true"
       %fieldset.span4
         %legend
-          %li Terms of Service Agreement
-        %span.help-block
-          Please read and accept the
-          %a{href: "/terms" , data: { remote: true} }
-            terms of use
-        %label.checkbox.required-label{ for: "terms_of_service" }
-          I have read and accept the terms of service.
-          = check_box_tag 'terms_of_service', 1, nil, data: { activate:  "activate-submit" }
-      - if @new
-        %fieldset.span4
-          %legend
-            %li Choose Collection
-          = label_tag "parent", "Where do you want to deposit these files?", class: "required-label"
-          - if @loader_short_name == 'multipage' || @loader_short_name == 'spreadsheet' || @loader_short_name == 'xml'
-            :javascript
-              var collections_for_autocomplete = #{@collections_options.to_json}
-            = text_field_tag :parent, "", id: 'collection_autocomplete', required: true
-            = hidden_field_tag :parent, "", id:"collection_parent"
-          - else
-            = select_tag "parent", options_for_select(@collections_options), {prompt: 'Select Collection', required: true}
-      %fieldset.span4
-        %legend
-          %li File Upload
-        = label_tag "file", "File to upload", class: "required-label"
-        = file_field_tag 'file', required: true, "aria-required" => true
+          2. Choose Collection
+        = label_tag "parent", "Where do you want to deposit these files?", class: "required-label"
+        - if @loader_short_name == 'multipage' || @loader_short_name == 'spreadsheet' || @loader_short_name == 'xml'
+          :javascript
+            var collections_for_autocomplete = #{@collections_options.to_json}
+          = text_field_tag :parent, "", id: 'collection_autocomplete', required: true
+          = hidden_field_tag :parent, "", id:"collection_parent"
+        - else
+          = select_tag "parent", options_for_select(@collections_options), {prompt: 'Select Collection', required: true}
+    %fieldset.span4
+      %legend
+        - if @new == "true"
+          3. File Upload
+        - else
+          2. File Upload
+      = label_tag "file", "File to upload", class: "required-label"
+      = file_field_tag 'file', required: true, "aria-required" => true
   .progress.progress-striped
     .bar{style: "width:0%"}
   .form-actions
