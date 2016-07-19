@@ -11,7 +11,7 @@ class ProcessModsZipJob
     :mods_process_zip
   end
 
-  def initialize(loader_name, spreadsheet_file_path, parent, copyright, current_user, permissions, report_id, depositor, preview=nil, client=nil)
+  def initialize(loader_name, spreadsheet_file_path, parent, copyright, current_user, permissions, report_id, existing_files, depositor, preview=nil, client=nil)
     self.loader_name = loader_name
     self.spreadsheet_file_path = spreadsheet_file_path
     self.parent = parent
@@ -22,7 +22,7 @@ class ProcessModsZipJob
     self.client = client
     self.report_id = report_id
     self.depositor = depositor
-    self.existing_files = false #flag to determine if the spreadsheet as a whole is editing or creating files, goes off of first row which is tested on preview, that way the user knows if they're editing or creating before proceeding with the load
+    self.existing_files = existing_files #flag to determine if the spreadsheet as a whole is editing or creating files, goes off of first row which is tested on preview, that way the user knows if they're editing or creating before proceeding with the load
   end
 
   def run
@@ -50,12 +50,19 @@ class ProcessModsZipJob
           row_results = process_a_row(header_row, row)
           # Process first row
           preview_file = CoreFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
+          if row_results["file_name"].blank? && row_results["pid"].blank?
+            raise "No file name or PID provided"
+            return
+          elsif row_results["pid"].blank? && !row_results["file_name"].blank? && existing_files == true
+            raise "Wrong type - trying to add new files with an existing files load"
+            return
+          elsif !row_results["pid"].blank? && existing_files == false
+            raise "Wrong type - trying to edit existing files with a new files load"
+            return
+          end
 
           if row_results["pid"].blank? && !row_results["file_name"].blank? #make new file
             preview_file.depositor = current_user.nuid
-          elsif row_results["file_name"].blank? && row_results["pid"].blank?
-            raise "No file name or PID provided"
-            return
           else
             comparison_file = CoreFile.find(row_results["pid"])
             preview_file.depositor              = comparison_file.depositor
@@ -63,6 +70,10 @@ class ProcessModsZipJob
             preview_file.mods.identifier = comparison_file.mods.identifier
             load_report.comparison_file_pid = comparison_file.pid
             preview_file.identifier = comparison_file.identifier
+            if load_report.collection.blank?
+              load_report.collection = comparison_file.parent.pid
+              collection = comparison_file.parent.pid
+            end
           end
           preview_file.tmp_path = spreadsheet_file_path
 
@@ -71,9 +82,6 @@ class ProcessModsZipJob
 
           load_report.preview_file_pid = preview_file.pid
           load_report.number_of_files = spreadsheet.last_row - header_position
-          if load_report.collection.blank?
-            load_report.collection = comparison_file.parent.pid
-          end
 
           load_report.save!
         rescue Exception => error
