@@ -36,6 +36,12 @@ class ProcessModsZipJob
 
   def process_spreadsheet(dir_path, spreadsheet_file_path, load_report, preview, client)
     spreadsheet = load_spreadsheet(spreadsheet_file_path)
+    if spreadsheet.first_row.nil?
+      # puts "Empty spreadsheet"
+      # populate_error_report(load_report, nil, "Empty spreadsheet", nil, nil, nil, nil, nil)
+      raise "Empty spreadsheet"
+      return
+    end
 
     header_position = 1
     header_row = spreadsheet.row(header_position)
@@ -908,9 +914,12 @@ class ProcessModsZipJob
       end
       title = core_file.title.blank? ? row_results["title"] : core_file.title
       original_file = core_file.original_filename.blank? ? row_results["file_name"] : core_file.original_filename
-    else
+    elsif !row_results.nil?
       title = find_in_row(header_row, row, 'Title')
       original_file = find_in_row(header_row, row, 'File Name')
+    else
+      title = ""
+      original_file = ""
     end
     image_report = load_report.image_reports.create_failure(error, row_results, "")
     image_report.title = title

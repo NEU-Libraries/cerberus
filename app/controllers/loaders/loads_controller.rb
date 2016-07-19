@@ -103,48 +103,59 @@ class Loaders::LoadsController < ApplicationController
         FileUtils.mv(file.tempfile.path, new_file)
         #if zip
         if extract_mime_type(new_file) == 'application/zip'
-          if short_name == "multipage"
-            # multipage zip job
-            report_id = Loaders::LoadReport.create_from_strings(current_user, 0, @loader_name, parent)
-            Cerberus::Application::Queue.push(ProcessMultipageZipJob.new(@loader_name, new_file.to_s, parent, copyright, current_user, permissions, report_id))
-            session[:flash_success] = "Your file has been submitted and is now being processed. You will receive an email when the load is complete."
-            render :json => {report_id: report_id}.to_json and return
-          elsif short_name == "spreadsheet"
-            #mods spreadsheet job
-            spreadsheet_file_path = unzip(new_file, new_path)
-            report_id = Loaders::LoadReport.create_from_strings(current_user, 0, @loader_name, parent)
-            ProcessModsZipJob.new(@loader_name, spreadsheet_file_path, parent, copyright, current_user, permissions, report_id, nil, true).run
-            load_report = Loaders::LoadReport.find(report_id)
-            session[:flash_success] = "Your file has been submitted and is now being processed. You will receive an email when the load is complete."
-            if !load_report.comparison_file_pid.blank?
-              render :json => {report_id: report_id, comparison_file_pid: load_report.comparison_file_pid}.to_json and return
-            elsif !load_report.preview_file_pid.blank?
-              render :json => {report_id: report_id, preview_file_pid: load_report.preview_file_pid}.to_json and return
-            end
-          elsif short_name == "xml"
-            spreadsheet_file_path = unzip(new_file, new_path)
-            report_id = Loaders::LoadReport.create_from_strings(current_user, 0, @loader_name, parent)
-            ProcessXmlZipJob.new(@loader_name, spreadsheet_file_path, parent, copyright, current_user, permissions, report_id, nil, true).run
-            load_report = Loaders::LoadReport.find(report_id)
-            session[:flash_success] = "Your file has been submitted and is now being processed. You will receive an email when the load is complete."
+          begin
 
-            puts "DGC DEBUG"
-            puts "report_id: #{report_id}"
-            puts "comparison_file_pid: #{load_report.comparison_file_pid}"
-            puts "preview_file_pid: #{load_report.preview_file_pid}"
+            if short_name == "multipage"
+              # multipage zip job
+              report_id = Loaders::LoadReport.create_from_strings(current_user, 0, @loader_name, parent)
+              Cerberus::Application::Queue.push(ProcessMultipageZipJob.new(@loader_name, new_file.to_s, parent, copyright, current_user, permissions, report_id))
+              session[:flash_success] = "Your file has been submitted and is now being processed. You will receive an email when the load is complete."
+              render :json => {report_id: report_id}.to_json and return
+            elsif short_name == "spreadsheet"
+              #mods spreadsheet job
+              spreadsheet_file_path = unzip(new_file, new_path)
+              report_id = Loaders::LoadReport.create_from_strings(current_user, 0, @loader_name, parent)
+              ProcessModsZipJob.new(@loader_name, spreadsheet_file_path, parent, copyright, current_user, permissions, report_id, nil, true).run
+              load_report = Loaders::LoadReport.find(report_id)
+              session[:flash_success] = "Your file has been submitted and is now being processed. You will receive an email when the load is complete."
+              if !load_report.comparison_file_pid.blank?
+                render :json => {report_id: report_id, comparison_file_pid: load_report.comparison_file_pid}.to_json and return
+              elsif !load_report.preview_file_pid.blank?
+                render :json => {report_id: report_id, preview_file_pid: load_report.preview_file_pid}.to_json and return
+              end
+            elsif short_name == "xml"
+              spreadsheet_file_path = unzip(new_file, new_path)
+              report_id = Loaders::LoadReport.create_from_strings(current_user, 0, @loader_name, parent)
+              ProcessXmlZipJob.new(@loader_name, spreadsheet_file_path, parent, copyright, current_user, permissions, report_id, nil, true).run
+              load_report = Loaders::LoadReport.find(report_id)
+              session[:flash_success] = "Your file has been submitted and is now being processed. You will receive an email when the load is complete."
 
-            if !load_report.comparison_file_pid.blank?
-              render :json => {report_id: report_id, comparison_file_pid: load_report.comparison_file_pid}.to_json and return
-            elsif !load_report.preview_file_pid.blank?
-              render :json => {report_id: report_id, preview_file_pid: load_report.preview_file_pid}.to_json and return
+              puts "DGC DEBUG"
+              puts "report_id: #{report_id}"
+              puts "comparison_file_pid: #{load_report.comparison_file_pid}"
+              puts "preview_file_pid: #{load_report.preview_file_pid}"
+
+              if !load_report.comparison_file_pid.blank?
+                render :json => {report_id: report_id, comparison_file_pid: load_report.comparison_file_pid}.to_json and return
+              elsif !load_report.preview_file_pid.blank?
+                render :json => {report_id: report_id, preview_file_pid: load_report.preview_file_pid}.to_json and return
+              end
+              # render :json => {report_id: report_id}.to_json and return
+            else
+              # send to iptc job
+              report_id = Loaders::LoadReport.create_from_strings(current_user, 0, @loader_name, parent)
+              Cerberus::Application::Queue.push(ProcessIptcZipJob.new(@loader_name, new_file.to_s, parent, copyright, current_user, permissions, report_id,  derivatives))
+              session[:flash_success] = "Your file has been submitted and is now being processed. You will receive an email when the load is complete."
+              render :json => {report_id: report_id}.to_json and return
             end
-            # render :json => {report_id: report_id}.to_json and return
-          else
-            # send to iptc job
-            report_id = Loaders::LoadReport.create_from_strings(current_user, 0, @loader_name, parent)
-            Cerberus::Application::Queue.push(ProcessIptcZipJob.new(@loader_name, new_file.to_s, parent, copyright, current_user, permissions, report_id,  derivatives))
-            session[:flash_success] = "Your file has been submitted and is now being processed. You will receive an email when the load is complete."
-            render :json => {report_id: report_id}.to_json and return
+          rescue => exception
+            logger.error controller_name+"::create rescued #{exception.class}\n\t#{exception.to_s}\n #{exception.backtrace.join("\n")}\n\n"
+            puts exception
+            # redirect_to "/my_loaders" and return
+            # email_handled_exception(exception)
+            json_error exception.to_s
+            # session[:flash_error] =
+            # render :nothing => true
           end
         else
           #error out
