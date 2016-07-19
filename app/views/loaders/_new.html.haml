@@ -11,7 +11,7 @@
       %label.checkbox.required-label{ for: "terms_of_service" }
         I have read and accept the terms of service.
         = check_box_tag 'terms_of_service', 1, nil, data: { activate:  "activate-submit" }
-    - if @new == "true"
+    - if (@loader_short_name != 'spreadsheet' && @loader_short_name != 'xml') || ((@loader_short_name == 'spreadsheet' || @loader_short_name == 'xml') && @new == "true")
       %fieldset.span4
         %legend
           2. Choose Collection
