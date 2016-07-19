@@ -37,8 +37,6 @@ class ProcessModsZipJob
   def process_spreadsheet(dir_path, spreadsheet_file_path, load_report, preview, client)
     spreadsheet = load_spreadsheet(spreadsheet_file_path)
     if spreadsheet.first_row.nil?
-      # puts "Empty spreadsheet"
-      # populate_error_report(load_report, nil, "Empty spreadsheet", nil, nil, nil, nil, nil)
       raise "Empty spreadsheet"
       return
     end
@@ -55,6 +53,9 @@ class ProcessModsZipJob
 
           if row_results["pid"].blank? && !row_results["file_name"].blank? #make new file
             preview_file.depositor = current_user.nuid
+          elsif row_results["file_name"].blank? && row_results["pid"].blank?
+            raise "No file name or PID provided"
+            return
           else
             comparison_file = CoreFile.find(row_results["pid"])
             preview_file.depositor              = comparison_file.depositor
@@ -70,11 +71,13 @@ class ProcessModsZipJob
 
           load_report.preview_file_pid = preview_file.pid
           load_report.number_of_files = spreadsheet.last_row - header_position
+          if load_report.collection.blank?
+            load_report.collection = comparison_file.parent.pid
+          end
 
           load_report.save!
         rescue Exception => error
-          puts error
-          puts error.backtrace
+          raise error.to_s
           return
         end
       end
