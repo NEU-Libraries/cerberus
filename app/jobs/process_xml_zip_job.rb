@@ -59,9 +59,10 @@ class ProcessXmlZipJob
             load_report.save!
           end
 
+          preview_file.title                  = "derp"
+          preview_file.tmp_path = spreadsheet_file_path
           preview_file.save!
 
-          preview_file.tmp_path = spreadsheet_file_path
           load_report.preview_file_pid = preview_file.pid
           load_report.save!
 
@@ -110,6 +111,11 @@ class ProcessXmlZipJob
                     core_file.embargo_release_date = row_results["embargo_date"]
                   end
 
+                  assign_a_row(row_results, core_file, dir_path, load_report)
+                  core_file.reload
+                  core_file.tag_as_completed
+                  core_file.save!
+
                 else
                   populate_error_report(load_report, "File triggered failure for virus check", row_results, core_file, header_row, row)
                   next
@@ -144,6 +150,11 @@ class ProcessXmlZipJob
 
   def assign_a_row(row_results, core_file, dir_path, load_report)
     xml_file_path = dir_path + "/" + row_results["xml_file_path"]
+
+    puts "DGC DEBUG"
+    puts "xml_file_path: #{xml_file_path}"
+    puts "row_results: #{row_results.inspect}"
+
     if !xml_file_path.blank? && File.exists?(xml_file_path) && File.extname(xml_file_path) == ".xml"
       # Load mods xml and cleaning
       raw_xml = xml_decode(File.open(xml_file_path, "rb").read)
