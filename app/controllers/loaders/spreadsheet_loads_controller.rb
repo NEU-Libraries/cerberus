@@ -37,7 +37,12 @@ class Loaders::SpreadsheetLoadsController < Loaders::LoadsController
 
   def create
     permissions = {"CoreFile" => {"read"  => ["public"], "edit" => ["northeastern:drs:repository:staff"]}}
-    process_create(permissions, t('loaders.spreadsheet.short_name'), "ModsSpreadsheetLoadsController")
+    if params[:new] == "true"
+      existing_files = false
+    else
+      existing_files = true
+    end
+    process_create(permissions, t('loaders.spreadsheet.short_name'), "ModsSpreadsheetLoadsController", existing_files)
   end
 
   def preview
@@ -70,13 +75,11 @@ class Loaders::SpreadsheetLoadsController < Loaders::LoadsController
     @mods_html = CoreFilesController.new.render_mods_display(@core_file).to_html.html_safe
 
     @user = User.find_by_nuid(@report.nuid)
-    if @report.collection
-      @collection = fetch_solr_document({:id=>@report.collection})
-      collection_depositor = !@collection.true_depositor.blank? ? User.find_by_nuid("#{@collection.true_depositor}").name : nil
-      @depositor_options = [["System User", "000000000"]]
-      if !collection_depositor.blank?
-        @depositor_options << [collection_depositor, @collection.true_depositor]
-      end
+    @collection = fetch_solr_document({:id=>@report.collection})
+    collection_depositor = !@collection.true_depositor.blank? ? User.find_by_nuid("#{@collection.true_depositor}").name : nil
+    @depositor_options = [["System User", "000000000"]]
+    if !collection_depositor.blank?
+      @depositor_options << [collection_depositor, @collection.true_depositor]
     end
 
     @loader_short_name = t('loaders.spreadsheet.short_name')
@@ -110,10 +113,12 @@ class Loaders::SpreadsheetLoadsController < Loaders::LoadsController
     permissions = {} #we aren't getting these externally yet
     if params[:depositor]
       depositor = params[:depositor]
+      existing_files = false
     else
       depositor = nil
+      existing_files = true
     end
-    Cerberus::Application::Queue.push(ProcessModsZipJob.new(@loader_name, spreadsheet_file_path, @report.collection, copyright, current_user, permissions, @report.id, depositor, nil))
+    Cerberus::Application::Queue.push(ProcessModsZipJob.new(@loader_name, spreadsheet_file_path, @report.collection, copyright, current_user, permissions, @report.id, existing_files, depositor, nil))
     flash[:notice] = "Your spreadsheet is being processed. The information on this page will be updated periodically until the processing is completed."
     redirect_to "/loaders/spreadsheet/report/#{@report.id}"
   end

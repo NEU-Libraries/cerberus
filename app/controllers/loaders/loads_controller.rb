@@ -30,7 +30,7 @@ class Loaders::LoadsController < ApplicationController
     render 'loaders/new', locals: { collections_options: @collections_options}
   end
 
-  def process_create(permissions, short_name, controller_name, derivatives=false)
+  def process_create(permissions, short_name, controller_name, existing_files=false, derivatives=false)
     @copyright = t('loaders.'+short_name+'.copyright')
     begin
       # check error condition No files
@@ -48,7 +48,7 @@ class Loaders::LoadsController < ApplicationController
         flash[:error] = "You must accept the terms of service!"
         redirect_to(:back) and return
       else
-        process_file(file, parent, @copyright, permissions, short_name, derivatives)
+        process_file(file, parent, @copyright, permissions, short_name, existing_files, derivatives)
       end
     rescue => exception
       logger.error controller_name+"::create rescued #{exception.class}\n\t#{exception.to_s}\n #{exception.backtrace.join("\n")}\n\n"
@@ -95,7 +95,7 @@ class Loaders::LoadsController < ApplicationController
   end
 
   protected
-    def process_file(file, parent, copyright, permissions, short_name, derivatives=false)
+    def process_file(file, parent, copyright, permissions, short_name, existing_files, derivatives=false)
       @loader_name = t('loaders.'+short_name+'.long_name')
       if virus_check(file) == 0
         tempdir = Pathname.new("#{Rails.application.config.tmp_path}/")
@@ -118,7 +118,7 @@ class Loaders::LoadsController < ApplicationController
               #mods spreadsheet job
               spreadsheet_file_path = unzip(new_file, new_path)
               report_id = Loaders::LoadReport.create_from_strings(current_user, 0, @loader_name, parent)
-              ProcessModsZipJob.new(@loader_name, spreadsheet_file_path, parent, copyright, current_user, permissions, report_id, nil, true).run
+              ProcessModsZipJob.new(@loader_name, spreadsheet_file_path, parent, copyright, current_user, permissions, report_id, existing_files, nil, true).run
               load_report = Loaders::LoadReport.find(report_id)
               session[:flash_success] = "Your file has been submitted and is now being processed. You will receive an email when the load is complete."
               if !load_report.comparison_file_pid.blank?
