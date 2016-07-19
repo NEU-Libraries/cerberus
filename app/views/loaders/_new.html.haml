@@ -68,13 +68,20 @@
             window.location = "/loaders/#{@loader_short_name}/preview_compare/"+response.report_id;
           } else if ('preview_file_pid' in response) {
             window.location = "/loaders/#{@loader_short_name}/preview/"+response.report_id;
-          } else {
+          } else if (response.report_id != undefined){
             window.location = "/loaders/#{@loader_short_name}/report/"+response.report_id;
+          } else {
+            console.log("broken");
+            console.log(response);
+            if (response[0].error != undefined){
+              //window.alert(response[0].error);
+              //window.location = "/my_loaders";
+            }
           }
         },
         fail: function(data){
           console.log(data);
-          console.log(response.report_id);
+          //console.log(response.report_id);
           console.log("#{@loader_short_name}");
           window.alert("There was an issue processing your load.");
           window.location = "/my_loaders";
