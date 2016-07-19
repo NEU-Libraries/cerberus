@@ -8,7 +8,7 @@ class Loaders::CoeLoadsController < Loaders::LoadsController
 
   def create
     permissions = {"CoreFile" => {"edit" => ["northeastern:drs:college_of_engineering:deans_office", "northeastern:drs:repository:staff"]}, "ImageSmallFile" => {"edit" => ["northeastern:drs:college_of_engineering:deans_office", "northeastern:drs:repository:staff"]}, "ImageLargeFile" => {"edit" => ["northeastern:drs:college_of_engineering:deans_office", "northeastern:drs:repository:staff"]}, "ImageMasterFile" => {"edit" => ["northeastern:drs:college_of_engineering:deans_office", "northeastern:drs:repository:staff"]}}
-    process_create(permissions, t('loaders.coe.short_name'), "CoeLoadsController", true)
+    process_create(permissions, t('loaders.coe.short_name'), "CoeLoadsController", false, true)
   end
 
   private

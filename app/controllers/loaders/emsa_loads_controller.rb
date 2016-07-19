@@ -8,7 +8,7 @@ class Loaders::EmsaLoadsController < Loaders::LoadsController
 
   def create
     permissions = {"CoreFile" => {"read"  => ["northeastern:drs:all"], "edit" => ["northeastern:drs:repository:staff", "northeastern:drs:enrollment_management:emc:emc_admin"]}, "ImageSmallFile" => {"read"  => ["northeastern:drs:all"], "edit" => ["northeastern:drs:repository:staff", "northeastern:drs:enrollment_management:emc:emc_admin"]}, "ImageLargeFile" => {"read"  => ["northeastern:drs:all"], "edit" => ["northeastern:drs:repository:staff", "northeastern:drs:enrollment_management:emc:emc_admin"]}, "ImageMasterFile" => {"read"  => ["northeastern:drs:all"], "edit" => ["northeastern:drs:repository:staff", "northeastern:drs:enrollment_management:emc:emc_admin"]}}
-    process_create(permissions, t('loaders.emsa.short_name'), "EmsaLoadsController", true)
+    process_create(permissions, t('loaders.emsa.short_name'), "EmsaLoadsController", false, true)
   end
 
   private
