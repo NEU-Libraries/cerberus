@@ -44,12 +44,11 @@
         replaceFileInput: false,
         autoUpload: false,
         add: function (e, data) {
-            data.context = $("#loaderSubmit")
-                .click(function (e) {
-                  e.preventDefault();
-                  $(this).attr("disabled", true);
-                  $(this).val("Please wait...");
-                });
+            data.context = $("#loaderSubmit").click(function (e) {
+              e.preventDefault();
+              $(this).attr("disabled", true);
+              $(this).val("Please wait...");
+            });
           $(".progress").show();
           file_list = [data.files[0]]; //this guarantees that the files being uploaded is only the most recently added one
         },
