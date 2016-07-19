@@ -948,6 +948,7 @@ $(document).ready ->
     addToCompilationProceed: addToCompilationProceed
     newCompilationForm: newCompilationForm
     compilationsModal: compilationsModal
+    handleDrsCollectionsAutoComplete: handleDrsCollectionsAutoComplete
     initModal: initModal
   )()
 
