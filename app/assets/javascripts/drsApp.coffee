@@ -929,6 +929,9 @@ $(document).ready ->
         window.location = href;
         return
 
+    termsOfService = ->
+      terms_of_service();
+
     ##DrsAppError Class for debugging
     DrsAppError = ( message = 'Error:', value = null ) ->
       @.message = message
@@ -949,6 +952,7 @@ $(document).ready ->
     newCompilationForm: newCompilationForm
     compilationsModal: compilationsModal
     handleDrsCollectionsAutoComplete: handleDrsCollectionsAutoComplete
+    termsOfService: termsOfService
     initModal: initModal
   )()
 
