@@ -19,8 +19,7 @@ class Loaders::SpreadsheetLoadsController < Loaders::LoadsController
     @loader_name = t('loaders.'+t('loaders.spreadsheet.short_name')+'.long_name')
     @loader_short_name = t('loaders.spreadsheet.short_name')
     @page_title = @loader_name + " Loader"
-    puts "in process new"
-    puts params
+    @new = params[:new]
 
     query_result = ActiveFedora::SolrService.query("active_fedora_model_ssi:\"Collection\"", :fl => "id, title_info_title_tesim", :rows => 999999999, :sort => "id asc")
     @collections_options = Array.new()
@@ -31,7 +30,7 @@ class Loaders::SpreadsheetLoadsController < Loaders::LoadsController
     end
     respond_to do |format|
       format.js {
-        render 'loaders/new', locals: { collections_options: @collections_options}
+        render 'loaders/new', locals: { collections_options: @collections_options, new: @new}
       }
     end
   end
@@ -96,7 +95,6 @@ class Loaders::SpreadsheetLoadsController < Loaders::LoadsController
   end
 
   def proceed_load
-    puts params
     @report = Loaders::LoadReport.find(params[:id])
     @loader_name = t('loaders.spreadsheet.long_name')
     if !@report.preview_file_pid.blank?
