@@ -55,7 +55,17 @@ class ProcessModsZipJob
             preview_file.rightsMetadata.content = comparison_file.rightsMetadata.content
             preview_file.mods.identifier = comparison_file.mods.identifier
             load_report.comparison_file_pid = comparison_file.pid
-            preview_file.identifier = comparison_file.identifier
+            handle = comparison_file.identifier
+            if handle.blank?
+              blank_handle = true
+              xml = Nokogiri::XML(comparison_file.mods.content)
+              handle = xml.xpath("//mods:identifier[contains(., 'hdl.handle.net')]").text
+            end
+            preview_file.identifier = handle
+            if load_report.collection.blank?
+              load_report.collection = comparison_file.parent.pid
+              collection = comparison_file.parent.pid
+            end
           end
           preview_file.tmp_path = spreadsheet_file_path
 
@@ -150,7 +160,13 @@ class ProcessModsZipJob
                 if handle.blank?
                   image_report = load_report.image_reports.create_modified("The loader was unable to detect a handle for the original file.", core_file, row_results)
                 else
-                  image_report = load_report.image_reports.create_modified("Handle does not match", core_file, row_results)
+                  xml = Nokogiri::XML(core_file.mods.content)
+                  handle = xml.xpath("//mods:identifier[contains(., 'hdl.handle.net')]").text
+                  if handle != row_results["handle"]
+                    image_report = load_report.image_reports.create_modified("Handle does not match", core_file, row_results)
+                  else
+                    image_report = load_report.image_reports.create_modified("Handle reformatted for correctness", core_file, row_results)
+                  end
                 end
                 image_report.title = core_file.title
                 image_report.save!
@@ -708,9 +724,9 @@ class ProcessModsZipJob
 
   def process_a_row(header_row, row_value)
     results = Hash.new
-    results["handle"]                           = find_in_row(header_row, row_value, 'What is handle for the digitized object?')
+    results["handle"]                           = find_in_row(header_row, row_value, 'What is the handle for the digitized object?')
     results["user_name"]                        = find_in_row(header_row, row_value, 'What is your name?')
-    results["pid"]                              = find_in_row(header_row, row_value, 'What is PID for the digitized object?')
+    results["pid"]                              = find_in_row(header_row, row_value, 'What is the PID for the digitized object?')
     results["file_name"]                        = find_in_row(header_row, row_value, 'File Name')
     results["poster_path"]                      = find_in_row(header_row, row_value, 'File Name - Poster')
     results["archives_identifier"]              = find_in_row(header_row, row_value, 'Archives Identifier')
