@@ -3,22 +3,25 @@
     =@page_title
 .row
   .span12
-    %h2= "What type of files are you uploading?"
-  .span6
+    %h2= "What are you uploading?"
+    %br
+  .span6.text-center
     %a{:href=>"", :class=>"btn btn-lg btn-primary new-files", }
       %h2{:style=>"color:#fff"}
-        = "New Files"
-  .span6
+        = "New Files + Metadata"
+  .span6.text-left
     %a{:href=>"", :class=>"btn btn-lg btn-primary existing-files", }
       %h2{:style=>"color:#fff"}
-        = "Existing Files"
-
+        = "Metadata Only"
+%br
 %br
 .row
   .span12.upload_form
 :javascript
   $(".new-files").click(function(e){
     e.preventDefault();
+    $(".existing-files").addClass("btn-primary").removeClass("btn-info");
+    $(this).addClass("btn-info").removeClass("btn-primary");
     $.ajax({
       url: "/loaders/#{@loader_short_name}/process_new",
       data: {new: true} ,
@@ -28,6 +31,8 @@
   });
   $(".existing-files").click(function(e){
     e.preventDefault();
+    $(".new-files").addClass("btn-primary").removeClass("btn-info");
+    $(this).addClass("btn-info").removeClass("btn-primary");
     $.ajax({
       url: "/loaders/#{@loader_short_name}/process_new",
       data: {new: false} ,
