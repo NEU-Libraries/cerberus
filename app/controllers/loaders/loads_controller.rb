@@ -153,9 +153,9 @@ class Loaders::LoadsController < ApplicationController
             end
           rescue => exception
             logger.error controller_name+"::create rescued #{exception.class}\n\t#{exception.to_s}\n #{exception.backtrace.join("\n")}\n\n"
-            # email_handled_exception(exception)
+            email_handled_exception(exception)
             json_error exception.to_s
-            session[:flash_error] = "Your file could not be processed. Please make sure the zip file contains the correct files and metadata. The error received was: #{exception.to_s}"
+            session[:flash_error] = exception.to_s
           end
         else
           FileUtils.rm(new_file)

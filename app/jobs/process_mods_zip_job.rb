@@ -37,7 +37,7 @@ class ProcessModsZipJob
   def process_spreadsheet(dir_path, spreadsheet_file_path, load_report, preview, client)
     spreadsheet = load_spreadsheet(spreadsheet_file_path)
     if spreadsheet.first_row.nil?
-      raise "Empty spreadsheet"
+      raise "Your upload could not be processed because the submitted .zip file contains an empty spreadsheet"
       return
     end
 
@@ -51,13 +51,13 @@ class ProcessModsZipJob
           # Process first row
           preview_file = CoreFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
           if row_results["file_name"].blank? && row_results["pid"].blank?
-            raise "No file name or PID provided"
+            raise "Your upload could not be processed because the spreadsheet is missing file names or PIDs. Please update the spreadsheet and try again"
             return
           elsif row_results["pid"].blank? && !row_results["file_name"].blank? && existing_files == true
-            raise "Wrong type - trying to add new files with an existing files load"
+            raise "Your upload could not be processed because the submitted .zip file contains new files. Please update the .zip file or select the \"New Files + Metadata\" option."
             return
           elsif !row_results["pid"].blank? && existing_files == false
-            raise "Wrong type - trying to edit existing files with a new files load"
+            raise "Your upload could not be processed because the submitted .zip file does not contain any files. Please update the .zip file or select the \"Metadata Only\" upload option."
             return
           end
 
