@@ -1,0 +1,54 @@
+-content_for :page_header do
+  %h1.page-header
+    =@page_title
+.row
+  .span12
+    %h2= "What are you uploading?"
+    %br
+  .span6.text-center
+    %a{:href=>"", :class=>"btn btn-lg btn-primary new-files", }
+      %h2{:style=>"color:#fff"}
+        = "New Files + Metadata"
+  .span6.text-left
+    %a{:href=>"", :class=>"btn btn-lg btn-primary existing-files", }
+      %h2{:style=>"color:#fff"}
+        = "Metadata Only"
+%br
+%br
+.row
+  .span12.upload_form
+:javascript
+  $(document).ready(function(){
+    var form_new = "";
+    $.ajax({
+      url: "/loaders/#{@loader_short_name}/process_new",
+      data: {new: true} ,
+      complete: function(results){
+        form_new = results.responseText;
+      }
+    });
+    var form_existing = "";
+    $.ajax({
+      url: "/loaders/#{@loader_short_name}/process_new",
+      data: {new: false} ,
+      complete: function(results){
+        form_existing = results.responseText;
+      }
+    });
+    $(".new-files").click(function(e){
+      e.preventDefault();
+      $(".existing-files").addClass("btn-primary").removeClass("btn-info");
+      $(this).addClass("btn-info").removeClass("btn-primary");
+      $(".upload_form").html(form_new);
+      drsApp.handleDrsCollectionsAutoComplete();
+      drsApp.termsOfService();
+    });
+    $(".existing-files").click(function(e){
+      e.preventDefault();
+      $(".new-files").addClass("btn-primary").removeClass("btn-info");
+      $(this).addClass("btn-info").removeClass("btn-primary");
+      $(".upload_form").html(form_existing);
+      drsApp.handleDrsCollectionsAutoComplete();
+      drsApp.termsOfService();
+    });
+  });
