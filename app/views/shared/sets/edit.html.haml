@@ -21,10 +21,11 @@
     %a{ href: "#statistics", data: {toggle: "tab"}}
       %i.icon-bar-chart
       Statistics
-  %li
-    %a{ href: "#export", data: {toggle: "tab"}}
-      %i.icon-cloud-download
-      Export
+  - if current_user.xml_loader?
+    %li
+      %a{ href: "#export", data: {toggle: "tab"}}
+        %i.icon-cloud-download
+        Export
 
 .tab-content
   #edit.tab-pane.active
