@@ -131,7 +131,7 @@ describe ProcessModsZipJob do
       permissions = @parent.permissions
       @report_id = Loaders::LoadReport.create_from_strings(@user, 0, @loader_name, @parent.pid)
       @lr = Loaders::LoadReport.find("#{@report_id}")
-      ProcessModsZipJob.new(@loader_name, spreadsheet_file_path, @parent, copyright, @user, permissions, @report_id, @user.nuid, true).run
+      ProcessModsZipJob.new(@loader_name, spreadsheet_file_path, @parent, copyright, @user, permissions, @report_id, false, @user.nuid, true).run
     end
 
     it "should create preview file" do
@@ -183,7 +183,7 @@ describe ProcessModsZipJob do
       @lr.number_of_files = 4
       @lr.save!
       new_file = @new_path +"/demo_mods_new_file.xlsx"
-      ProcessModsZipJob.new(@loader_name, new_file, @parent, copyright, @user, permissions, @report_id, @user.nuid, nil).run
+      ProcessModsZipJob.new(@loader_name, new_file, @parent, copyright, @user, permissions, @report_id, false, @user.nuid, nil).run
     end
 
     it "should set depositor to current user" do

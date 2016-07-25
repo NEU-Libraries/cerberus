@@ -154,7 +154,7 @@ module Exceptions
 
   class NoSpreadsheetError < StandardError
     def initialize
-      super "No spreadsheet files found in zip file"
+      super "Your upload could not be processed because the submitted .zip file does not contain a spreadsheet."
     end
   end
 
