@@ -1,6 +1,6 @@
 jQuery.fn.exists = function(){return this.length>0;}
 
-$(function () {
+function terms_of_service(){
   // all activate-submit buttons are disabled by default
   $('.activate-submit').each(function() {
     $(this).prop('disabled', true);
@@ -14,10 +14,10 @@ $(function () {
   // when data-activate checkbox is clicked, change the
   // disable state of all activate-submit buttons
   $('input[data-activate]').on("click", function () {
-    // get the checked state of the checkbox clicked and 
+    // get the checked state of the checkbox clicked and
     // set  all other tos checkboxes to same state
     var bool = $(this).is(":checked");
-    // if box is checked - enable submit, otherwise disable 
+    // if box is checked - enable submit, otherwise disable
     var disable = (bool) ? false : true;
     $('input[data-activate]').attr('checked', bool);
     $('.activate-submit').attr('disabled', disable);
@@ -38,4 +38,8 @@ $(function () {
   $('.activate-container').mouseleave(function(e){
       $('.activate-container').tooltip('hide')
   });
+}
+
+$(function () {
+  terms_of_service();
 });
