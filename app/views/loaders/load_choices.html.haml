@@ -18,25 +18,37 @@
 .row
   .span12.upload_form
 :javascript
-  $(".new-files").click(function(e){
-    e.preventDefault();
-    $(".existing-files").addClass("btn-primary").removeClass("btn-info");
-    $(this).addClass("btn-info").removeClass("btn-primary");
+  $(document).ready(function(){
+    var form_new = "";
     $.ajax({
       url: "/loaders/#{@loader_short_name}/process_new",
       data: {new: true} ,
-      success: function(results){
+      complete: function(results){
+        form_new = results.responseText;
       }
     });
-  });
-  $(".existing-files").click(function(e){
-    e.preventDefault();
-    $(".new-files").addClass("btn-primary").removeClass("btn-info");
-    $(this).addClass("btn-info").removeClass("btn-primary");
+    var form_existing = "";
     $.ajax({
       url: "/loaders/#{@loader_short_name}/process_new",
       data: {new: false} ,
-      success: function(results){
+      complete: function(results){
+        form_existing = results.responseText;
       }
     });
-  })
+    $(".new-files").click(function(e){
+      e.preventDefault();
+      $(".existing-files").addClass("btn-primary").removeClass("btn-info");
+      $(this).addClass("btn-info").removeClass("btn-primary");
+      $(".upload_form").html(form_new);
+      drsApp.handleDrsCollectionsAutoComplete();
+      drsApp.termsOfService();
+    });
+    $(".existing-files").click(function(e){
+      e.preventDefault();
+      $(".new-files").addClass("btn-primary").removeClass("btn-info");
+      $(this).addClass("btn-info").removeClass("btn-primary");
+      $(".upload_form").html(form_existing);
+      drsApp.handleDrsCollectionsAutoComplete();
+      drsApp.termsOfService();
+    });
+  });

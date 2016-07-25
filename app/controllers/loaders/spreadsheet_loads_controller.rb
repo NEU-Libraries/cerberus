@@ -30,7 +30,7 @@ class Loaders::SpreadsheetLoadsController < Loaders::LoadsController
     end
     respond_to do |format|
       format.js {
-        render 'loaders/new', locals: { collections_options: @collections_options, new: @new}
+        render :partial=>'/loaders/new', locals: {collections_options: @collections_options, new: @new}
       }
     end
   end
