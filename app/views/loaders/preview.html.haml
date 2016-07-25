@@ -9,10 +9,11 @@
       = kramdown_parse(@core_file.title)
 
 %h3 Load Information
-%h4
-  Collection:
-  = link_to(@collection.title, collection_path(@report.collection))
-  ="(#{@report.collection})"
+- if @collection
+  %h4
+    Collection:
+    = link_to(@collection.title, collection_path(@report.collection))
+    ="(#{@report.collection})"
 %h4
   Load Start Time:
   = @report.created_at.strftime("%m-%d-%Y %T")

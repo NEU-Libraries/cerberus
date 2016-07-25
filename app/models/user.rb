@@ -258,32 +258,10 @@ class User < ActiveRecord::Base
 
   def loaders
     loaders = []
-    if self.marcom_loader?
-      loaders.push(I18n.t("drs.loaders.marcom.long_name"))
-    end
-    if self.coe_loader?
-      loaders.push(I18n.t("drs.loaders.coe.long_name"))
-    end
-    if self.cps_loader?
-      loaders.push(I18n.t("drs.loaders.cps.long_name"))
-    end
-    if self.emsa_loader?
-      loaders.push(I18n.t("drs.loaders.emsa.long_name"))
-    end
-    if self.multipage_loader?
-      loaders.push(I18n.t("drs.loaders.multipage.long_name"))
-    end
-    if self.bouve_loader?
-      loaders.push(I18n.t("drs.loaders.bouve.long_name"))
-    end
-    if self.spreadsheet_loader?
-      loaders.push(I18n.t("drs.loaders.spreadsheet.long_name"))
-    end
-    if self.xml_loader?
-      loaders.push(I18n.t("drs.loaders.xml.long_name"))
-    end
-    if self.damore_loader?
-      loaders.push(I18n.t("drs.loaders.damore.long_name"))
+    I18n.t('loaders').each do |key, loader|
+      if self.send("#{loader[:short_name]}_loader?")
+        loaders.push(loader[:long_name])
+      end
     end
     return loaders
   end
