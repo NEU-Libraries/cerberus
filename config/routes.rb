@@ -157,6 +157,7 @@ Cerberus::Application.routes.draw do
    get "/loaders/xml/file/:id" => 'xml_loads#show_mods', as: 'loaders_xml_mods'
    get "/loaders/xml/:id/cancel_load" => "xml_loads#cancel_load", as: "loaders_xml_cancel_load"
    get "/loaders/xml/:id/proceed_load" => "xml_loads#proceed_load", as: "loaders_xml_proceed_load"
+   get "/loaders/xml/process_new" => "xml_loads#process_new", as: "loaders_xml_process_new"
   end
 
   # Facets for communities, collections, and sets
