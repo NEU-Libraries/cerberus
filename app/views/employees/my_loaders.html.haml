@@ -27,42 +27,11 @@
   %article.span4
     %h3 My Loaders
     - if !current_user.nil?
-      - if current_user.marcom_loader?
-        = link_to(t('drs.loaders.marcom.long_name'), new_marcom_load_path, class: "btn btn-lg btn-primary")
-        %br
-        %br
-      - if current_user.coe_loader?
-        = link_to(t('drs.loaders.coe.long_name'), new_coe_load_path, class: "btn btn-lg btn-primary")
-        %br
-        %br
-      - if current_user.cps_loader?
-        = link_to(t('drs.loaders.cps.long_name'), new_cps_load_path, class: "btn btn-lg btn-primary")
-        %br
-        %br
-      - if current_user.emsa_loader?
-        = link_to(t('drs.loaders.emsa.long_name'), new_emsa_load_path, class: "btn btn-lg btn-primary")
-        %br
-        %br
-      - if current_user.bouve_loader?
-        = link_to(t('drs.loaders.bouve.long_name'), new_bouve_load_path, class: "btn btn-lg btn-primary")
-        %br
-        %br
-      - if current_user.damore_loader?
-        = link_to(t('drs.loaders.damore.long_name'), new_damore_load_path, class: "btn btn-lg btn-primary")
-        %br
-        %br
-      - if current_user.multipage_loader?
-        = link_to(t('drs.loaders.multipage.long_name'), new_multipage_load_path, class: "btn btn-lg btn-primary")
-        %br
-        %br
-      - if current_user.spreadsheet_loader?
-        = link_to(t('drs.loaders.spreadsheet.long_name'), new_spreadsheet_load_path, class: "btn btn-lg btn-primary")
-        %br
-        %br
-      - if current_user.xml_loader?
-        = link_to(t('drs.loaders.xml.long_name'), new_xml_load_path, class: "btn btn-lg btn-primary")
-        %br
-        %br
+      - t('loaders').each do |key, loader|
+        - if current_user.send("#{loader[:short_name]}_loader?")
+          = link_to(loader[:long_name], "loaders/#{loader[:short_name]}/new", class: "btn btn-lg btn-primary")
+          %br
+          %br
 
   %article.span8
     %h3 Past Loads

@@ -11,7 +11,7 @@ class ProcessModsZipJob
     :mods_process_zip
   end
 
-  def initialize(loader_name, spreadsheet_file_path, parent, copyright, current_user, permissions, report_id, depositor, preview=nil, client=nil)
+  def initialize(loader_name, spreadsheet_file_path, parent, copyright, current_user, permissions, report_id, existing_files, depositor, preview=nil, client=nil)
     self.loader_name = loader_name
     self.spreadsheet_file_path = spreadsheet_file_path
     self.parent = parent
@@ -22,7 +22,7 @@ class ProcessModsZipJob
     self.client = client
     self.report_id = report_id
     self.depositor = depositor
-    self.existing_files = false #flag to determine if the spreadsheet as a whole is editing or creating files, goes off of first row which is tested on preview, that way the user knows if they're editing or creating before proceeding with the load
+    self.existing_files = existing_files #flag to determine if the spreadsheet as a whole is editing or creating files, goes off of first row which is tested on preview, that way the user knows if they're editing or creating before proceeding with the load
   end
 
   def run
@@ -36,6 +36,10 @@ class ProcessModsZipJob
 
   def process_spreadsheet(dir_path, spreadsheet_file_path, load_report, preview, client)
     spreadsheet = load_spreadsheet(spreadsheet_file_path)
+    if spreadsheet.first_row.nil?
+      raise "Your upload could not be processed because the submitted .zip file contains an empty spreadsheet"
+      return
+    end
 
     header_position = 1
     header_row = spreadsheet.row(header_position)
@@ -46,6 +50,16 @@ class ProcessModsZipJob
           row_results = process_a_row(header_row, row)
           # Process first row
           preview_file = CoreFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
+          if row_results["file_name"].blank? && row_results["pid"].blank?
+            raise "Your upload could not be processed because the spreadsheet is missing file names or PIDs. Please update the spreadsheet and try again"
+            return
+          elsif row_results["pid"].blank? && !row_results["file_name"].blank? && existing_files == true
+            raise "Your upload could not be processed because the submitted .zip file contains new files. Please update the .zip file or select the \"New Files + Metadata\" option."
+            return
+          elsif !row_results["pid"].blank? && existing_files == false
+            raise "Your upload could not be processed because the submitted .zip file does not contain any files. Please update the .zip file or select the \"Metadata Only\" upload option."
+            return
+          end
 
           if row_results["pid"].blank? && !row_results["file_name"].blank? #make new file
             preview_file.depositor = current_user.nuid
@@ -55,7 +69,17 @@ class ProcessModsZipJob
             preview_file.rightsMetadata.content = comparison_file.rightsMetadata.content
             preview_file.mods.identifier = comparison_file.mods.identifier
             load_report.comparison_file_pid = comparison_file.pid
-            preview_file.identifier = comparison_file.identifier
+            handle = comparison_file.identifier
+            if handle.blank?
+              blank_handle = true
+              xml = Nokogiri::XML(comparison_file.mods.content)
+              handle = xml.xpath("//mods:identifier[contains(., 'hdl.handle.net')]").text
+            end
+            preview_file.identifier = handle
+            if load_report.collection.blank?
+              load_report.collection = comparison_file.parent.pid
+              collection = comparison_file.parent.pid
+            end
           end
           preview_file.tmp_path = spreadsheet_file_path
 
@@ -67,8 +91,7 @@ class ProcessModsZipJob
 
           load_report.save!
         rescue Exception => error
-          puts error
-          puts error.backtrace
+          raise error.to_s
           return
         end
       end
@@ -150,7 +173,13 @@ class ProcessModsZipJob
                 if handle.blank?
                   image_report = load_report.image_reports.create_modified("The loader was unable to detect a handle for the original file.", core_file, row_results)
                 else
-                  image_report = load_report.image_reports.create_modified("Handle does not match", core_file, row_results)
+                  xml = Nokogiri::XML(core_file.mods.content)
+                  handle = xml.xpath("//mods:identifier[contains(., 'hdl.handle.net')]").text
+                  if handle != row_results["handle"]
+                    image_report = load_report.image_reports.create_modified("Handle does not match", core_file, row_results)
+                  else
+                    image_report = load_report.image_reports.create_modified("Handle reformatted for correctness", core_file, row_results)
+                  end
                 end
                 image_report.title = core_file.title
                 image_report.save!
@@ -708,9 +737,9 @@ class ProcessModsZipJob
 
   def process_a_row(header_row, row_value)
     results = Hash.new
-    results["handle"]                           = find_in_row(header_row, row_value, 'What is handle for the digitized object?')
+    results["handle"]                           = find_in_row(header_row, row_value, 'What is the handle for the digitized object?')
     results["user_name"]                        = find_in_row(header_row, row_value, 'What is your name?')
-    results["pid"]                              = find_in_row(header_row, row_value, 'What is PID for the digitized object?')
+    results["pid"]                              = find_in_row(header_row, row_value, 'What is the PID for the digitized object?')
     results["file_name"]                        = find_in_row(header_row, row_value, 'File Name')
     results["poster_path"]                      = find_in_row(header_row, row_value, 'File Name - Poster')
     results["archives_identifier"]              = find_in_row(header_row, row_value, 'Archives Identifier')
@@ -912,9 +941,12 @@ class ProcessModsZipJob
       end
       title = core_file.title.blank? ? row_results["title"] : core_file.title
       original_file = core_file.original_filename.blank? ? row_results["file_name"] : core_file.original_filename
-    else
+    elsif !row_results.nil?
       title = find_in_row(header_row, row, 'Title')
       original_file = find_in_row(header_row, row, 'File Name')
+    else
+      title = ""
+      original_file = ""
     end
     image_report = load_report.image_reports.create_failure(error, row_results, "")
     image_report.title = title

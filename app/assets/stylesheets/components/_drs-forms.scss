@@ -65,3 +65,7 @@ legend{
 form.multi-compilation{
   margin-bottom:0;
 }
+
+.ui-helper-hidden-accessible {
+  @include sr-only();
+}
