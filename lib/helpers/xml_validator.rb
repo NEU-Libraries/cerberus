@@ -3,6 +3,8 @@
 
 module XmlValidator
 
+  include XsdHelper
+
   def xml_valid?(xml_str, handle_check = false)
     # Never trust the user
     results = Hash.new
@@ -30,19 +32,18 @@ module XmlValidator
       schemata_by_ns = Hash[ doc.root.attributes['schemaLocation'].value.scan(/(\S+)\s+(\S+)/) ]
       schemata_by_ns.each do |ns,xsd_uri|
 
-        # Cache xsd response so as to not be a burden on external systems
-        xsd_str = Rails.cache.fetch("/xsd/#{xsd_uri}", :expires_in => 12.hours) do
-          Net::HTTP.get(URI.parse(xsd_uri))
-        end
+        xsd = fetch_schema(xsd_uri)
 
-        xsd = Nokogiri::XML.Schema(xsd_str)
         xsd.validate(doc).each do |error|
           results[:errors] << error
         end
       end
-    rescue Nokogiri::XML::SyntaxError
-      # Purge rails cache of xsd - most likely an unfortunate poor response from xsd provider
-      Rails.cache.delete_matched("/xsd/*")
+    rescue Errno::ETIMEDOUT => exception
+      # Email devs - online and offline failed
+      ExceptionNotifier.notify_exception(exception)
+    rescue Nokogiri::XML::SyntaxError => exception
+      # Email devs - most likely an unfortunate poor response from xsd provider
+      ExceptionNotifier.notify_exception(exception)
     rescue NoMethodError
       # Rescue NoMethodError - this will occur if there is no schemaLocation provided
       results[:errors] << Exceptions::MissingMetadata.new("schemaLocation")

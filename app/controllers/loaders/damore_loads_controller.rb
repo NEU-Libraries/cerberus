@@ -3,7 +3,7 @@ class Loaders::DamoreLoadsController < Loaders::LoadsController
 
   def new
     parent = "neu:rx913r53s"
-    process_new(parent, t('drs.loaders.damore.short_name'))
+    process_new(parent, t('loaders.damore.short_name'))
   end
 
   def create
@@ -19,7 +19,7 @@ class Loaders::DamoreLoadsController < Loaders::LoadsController
         end
       end
     end
-    process_create(permissions, t('drs.loaders.damore.short_name'), "DamoreLoadsController", true)
+    process_create(permissions, t('loaders.damore.short_name'), "DamoreLoadsController", false, true)
   end
 
   private

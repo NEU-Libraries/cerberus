@@ -9,15 +9,15 @@ class Loaders::MultipageLoadsController < Loaders::LoadsController
         @collections_options << {'label' => "#{c['id']} - #{c['title_tesim'][0]}", 'value' => c['id']}
       end
     end
-    @loader_name = t('drs.loaders.'+t('drs.loaders.multipage.short_name')+'.long_name')
-    @loader_short_name = t('drs.loaders.multipage.short_name')
+    @loader_name = t('loaders.'+t('loaders.multipage.short_name')+'.long_name')
+    @loader_short_name = t('loaders.multipage.short_name')
     @page_title = @loader_name + " Loader"
     render 'loaders/new', locals: { collections_options: @collections_options}
   end
 
   def create
     permissions = {"CoreFile" => {"read"  => ["public"], "edit" => ["northeastern:drs:repository:staff"]}}
-    process_create(permissions, t('drs.loaders.multipage.short_name'), "MultipageLoadsController")
+    process_create(permissions, t('loaders.multipage.short_name'), "MultipageLoadsController")
   end
 
   private
