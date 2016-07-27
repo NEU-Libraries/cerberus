@@ -59,7 +59,6 @@ class ProcessXmlZipJob
             load_report.save!
           end
 
-          preview_file.title                  = "derp"
           preview_file.tmp_path = spreadsheet_file_path
           preview_file.save!
 
@@ -113,8 +112,10 @@ class ProcessXmlZipJob
 
                   assign_a_row(row_results, core_file, dir_path, load_report)
                   core_file.reload
-                  core_file.tag_as_completed
                   core_file.save!
+
+                  Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename))
+                  load_report.image_reports.create_success(core_file, "")
 
                 else
                   populate_error_report(load_report, "File triggered failure for virus check", row_results, core_file, header_row, row)
