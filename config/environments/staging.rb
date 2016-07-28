@@ -61,18 +61,11 @@ Cerberus::Application.configure do
   config.action_mailer.perform_deliveries = true
   config.action_mailer.raise_delivery_errors = true
 
-  if File.exist?('/home/vagrant/.gitconfig')
-    git_config = ParseConfig.new('/home/vagrant/.gitconfig')
-    user_to_email = git_config['user']['email']
-  else
-    user_to_email = "changeme@email.com"
-  end
-
   config.middleware.use ExceptionNotification::Rack,
     :email => {
       :email_prefix => "[DRS Staging] ",
       :sender_address => %{"notifier" <notifier@repository.library.northeastern.edu>},
-      :exception_recipients => "#{user_to_email}"
+      :exception_recipients => ["d.cliff@neu.edu", "e.zoller@neu.edu"]
     }
 
 
