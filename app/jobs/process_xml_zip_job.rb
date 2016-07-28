@@ -55,6 +55,7 @@ class ProcessXmlZipJob
             comparison_file = CoreFile.find(row_results["pid"])
             preview_file.depositor              = comparison_file.depositor
             preview_file.rightsMetadata.content = comparison_file.rightsMetadata.content
+            load_report.collection = comparison_file.parent.pid
             load_report.comparison_file_pid = comparison_file.pid
             load_report.save!
           end
