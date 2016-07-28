@@ -159,7 +159,7 @@ class ProcessXmlZipJob
 
     if !xml_file_path.blank? && File.exists?(xml_file_path) && File.extname(xml_file_path) == ".xml"
       # Load mods xml and cleaning
-      raw_xml = xml_decode(File.open(xml_file_path, "rb").read)
+      raw_xml = xml_decode(File.open(xml_file_path, "r").read)
       # Validate
       validation_result = xml_valid?(raw_xml)
 
