@@ -53,3 +53,26 @@
     $(document).ready(function(){
       $.getScript("#{set_count_path(@set)}");
     });
+
+:javascript
+  // It works without the History API, but will clutter up the history
+  var history_api = typeof history.pushState !== 'undefined'
+
+  // The previous page asks that it not be returned to
+  if ( location.hash == '#no-back' ) {
+    // Push "#no-back" onto the history, making it the most recent "page"
+    if ( history_api ) history.pushState(null, '', '#stay')
+    else location.hash = '#stay'
+
+    // When the back button is pressed, it will harmlessly change the url
+    // hash from "#stay" to "#no-back", which triggers this function
+    window.onhashchange = function() {
+      // User tried to go back; warn user, rinse and repeat
+      var lh = location.hash
+      if ( lh == '#no-back' ) {
+        $("#backModal").modal("show");
+        if ( history_api ) history.pushState(null, '', '#stay')
+        else location.hash = '#stay'
+      }
+    }
+  }    
