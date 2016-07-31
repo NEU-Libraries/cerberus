@@ -90,6 +90,8 @@ class CollectionsController < ApplicationController
 
   def create
     @set = Collection.new(params[:set].merge(pid: mint_unique_pid))
+    @set.save!
+    @set.reload
 
     parent = ActiveFedora::Base.find(params[:set][:parent], cast: true)
 
@@ -116,7 +118,7 @@ class CollectionsController < ApplicationController
       mime = extract_mime_type(new_path)
       type = mime.split("/").first.strip
       if type == 'image'
-        Cerberus::Application::Queue.push(SetThumbnailCreationJob.new(@set.pid, new_path))
+        SetThumbnailCreationJob.new(@set.pid, new_path).run
       else
         flash[:error] = "Error! The thumbnail attached is not an image."
         redirect_to new_collection_path and return
@@ -136,7 +138,7 @@ class CollectionsController < ApplicationController
       @set.save!
       UploadAlert.create_from_collection(@set, :create, current_user)
       flash[:notice] = "Collection created successfully."
-      redirect_to collection_path(id: @set.pid) and return
+      redirect_to collection_path(id: @set.pid) + '#no-back' and return
     rescue => exception
       logger.error "CollectionsController::create rescued #{exception.class}\n\t#{exception.to_s}\n #{exception.backtrace.join("\n")}\n\n"
       flash.now[:error] = "Something went wrong"
@@ -204,7 +206,7 @@ class CollectionsController < ApplicationController
       mime = extract_mime_type(new_path)
       type = mime.split("/").first.strip
       if type == 'image'
-        Cerberus::Application::Queue.push(SetThumbnailCreationJob.new(@set.pid, new_path))
+        SetThumbnailCreationJob.new(@set.pid, new_path).run
       else
         flash[:error] = "Error! The thumbnail attached is not an image."
         redirect_to edit_collection_path(@set.pid) and return
