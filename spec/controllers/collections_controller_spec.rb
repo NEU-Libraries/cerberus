@@ -81,7 +81,7 @@ describe CollectionsController do
       post :create, {set: attrs}
 
       id = assigns(:set).pid
-      expect(response).to redirect_to(collection_path(id: id))
+      expect(response).to redirect_to(collection_path(id: id)+"#no-back")
     end
 
     it "assigns personal collection specific information on successful create" do
@@ -96,7 +96,7 @@ describe CollectionsController do
 
       id = assigns(:set).pid
       assigns(:set).smart_collection_type.should == 'miscellany'
-      expect(response).to redirect_to(collection_path(id: id))
+      expect(response).to redirect_to(collection_path(id: id)+"#no-back")
     end
 
     it "redirects to new show page if thumbnail is not an image" do
@@ -118,7 +118,7 @@ describe CollectionsController do
       post :create, {set: attrs, thumbnail: file}
 
       id = assigns(:set).pid
-      expect(response).to redirect_to(collection_path(id: id))
+      expect(response).to redirect_to(collection_path(id: id)+"#no-back")
       set = Collection.find(id)
       set.thumbnail_1.should_not be nil
       set.thumbnail_2.should_not be nil
