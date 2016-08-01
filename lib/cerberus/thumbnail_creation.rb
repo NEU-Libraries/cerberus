@@ -38,7 +38,7 @@ module Cerberus::ThumbnailCreation
 
         extension = ""
 
-        if item.class == "CoreFile" && item.core_record.canonical_class.in?(['MswordFile', 'PdfFile'])
+        if item.respond_to?(:core_record) && item.core_record.canonical_class.in?(['MswordFile', 'PdfFile'])
           end_img.format = "PNG"
           extension = "png"
         else
