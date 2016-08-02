@@ -192,7 +192,7 @@ class ProcessModsZipJob
                     error_list = error_list.concat("#{entry.class.to_s}: #{entry} </br></br> ")
                   end
                   populate_error_report(load_report, existing_file, error_list, row_results, core_file, old_mods, header_row, row)
-                elsif core_file.canonical_class == "AudioFile" || core_file.canonical_class == "VideoFile"
+                elsif (core_file.canonical_class == "AudioFile" || core_file.canonical_class == "VideoFile") && !existing_files
                   if row_results["poster_path"].blank?
                     populate_error_report(load_report, existing_file, "Audio or Video File must have poster file", row_results, core_file, old_mods, header_row, row)
                   else
