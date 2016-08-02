@@ -17,38 +17,25 @@
 %br
 .row
   .span12.upload_form
+= render partial: '/loaders/new_js'
 :javascript
   $(document).ready(function(){
-    var form_new = "";
-    $.ajax({
-      url: "/loaders/#{@loader_short_name}/process_new",
-      data: {new: true} ,
-      complete: function(results){
-        form_new = results.responseText;
-      }
-    });
-    var form_existing = "";
-    $.ajax({
-      url: "/loaders/#{@loader_short_name}/process_new",
-      data: {new: false} ,
-      complete: function(results){
-        form_existing = results.responseText;
-      }
-    });
     $(".new-files").click(function(e){
       e.preventDefault();
       $(".existing-files").addClass("btn-primary").removeClass("btn-info");
       $(this).addClass("btn-info").removeClass("btn-primary");
-      $(".upload_form").html(form_new);
+      $(".upload_form").html("#{escape_javascript @new_form}");
       drsApp.handleDrsCollectionsAutoComplete();
       drsApp.termsOfService();
+      activate_form();
     });
     $(".existing-files").click(function(e){
       e.preventDefault();
       $(".new-files").addClass("btn-primary").removeClass("btn-info");
       $(this).addClass("btn-info").removeClass("btn-primary");
-      $(".upload_form").html(form_existing);
+      $(".upload_form").html('#{escape_javascript @existing_form}');
       drsApp.handleDrsCollectionsAutoComplete();
       drsApp.termsOfService();
+      activate_form();
     });
   });
