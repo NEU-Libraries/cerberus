@@ -750,7 +750,12 @@ class ModsDatastream < ActiveFedora::OmDatastream
       if self.note[i].nil?
         self.insert_new_node(:note)
       end
-      self.note(i).type = hash[:type]
+      if !hash[:type].blank?
+        self.note(i).type = hash[:type]
+      elsif hash[:type].blank? && !self.note(i).type.blank? && i == 0
+        trim_nodes_from_zero(:note, 1)
+        self.insert_new_node(:note)
+      end
       notes << hash[:note]
       i = i+1
     end
