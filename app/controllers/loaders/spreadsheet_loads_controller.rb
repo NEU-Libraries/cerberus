@@ -12,15 +12,6 @@ class Loaders::SpreadsheetLoadsController < Loaders::LoadsController
     @loader_name = t('loaders.'+t('loaders.spreadsheet.short_name')+'.long_name')
     @loader_short_name = t('loaders.spreadsheet.short_name')
     @page_title = @loader_name + " Loader"
-    render 'loaders/load_choices', locals: { collections_options: @collections_options }
-  end
-
-  def process_new
-    @loader_name = t('loaders.'+t('loaders.spreadsheet.short_name')+'.long_name')
-    @loader_short_name = t('loaders.spreadsheet.short_name')
-    @page_title = @loader_name + " Loader"
-    @new = params[:new]
-
     query_result = ActiveFedora::SolrService.query("active_fedora_model_ssi:\"Collection\"", :fl => "id, title_info_title_tesim", :rows => 999999999, :sort => "id asc")
     @collections_options = Array.new()
     query_result.each do |c|
@@ -28,11 +19,11 @@ class Loaders::SpreadsheetLoadsController < Loaders::LoadsController
         @collections_options << {'label' => "#{c['id']} - #{c['title_info_title_tesim'][0]}", 'value' => c['id']}
       end
     end
-    respond_to do |format|
-      format.js {
-        render :partial=>'/loaders/new', locals: {collections_options: @collections_options, new: @new}
-      }
-    end
+    @new = "true"
+    @new_form = render_to_string(:partial=>'/loaders/new', locals: {collections_options: @collections_options, new: @new})
+    @new = "false"
+    @existing_form = render_to_string(:partial=>'/loaders/new', locals: {collections_options: @collections_options, new: @new})
+    render 'loaders/load_choices', locals: { collections_options: @collections_options }
   end
 
   def create
