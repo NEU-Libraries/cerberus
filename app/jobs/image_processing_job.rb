@@ -244,7 +244,7 @@ class ImageProcessingJob
         Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename, nil, s, m, l, true, permissions))
 
         if core_file.save!
-          UploadAlert.create_from_core_file(core_file, :create)
+          UploadAlert.create_from_core_file(core_file, :create, "iptc")
         end
         if modified == true
           report = load_report.image_reports.create_modified(modified_message, core_file, iptc)
