@@ -113,8 +113,8 @@ describe "aggregated statistics back fill job" do
       end
 
       it 'gets upload_alerts' do  #for form_edits and user_uploads
-        UploadAlert.create_from_core_file(file, :create)
-        UploadAlert.create_from_core_file(file, :update)
+        UploadAlert.create_from_core_file(file, :create, "single")
+        UploadAlert.create_from_core_file(file, :update, "single")
         date = DateTime.now.+2.weeks
         @job = AggregatedStatisticsBackFillJob.new(date)
         @job.run
@@ -124,8 +124,8 @@ describe "aggregated statistics back fill job" do
       end
 
       it 'aggregates upload_alerts up to parent collection' do
-        UploadAlert.create_from_core_file(file, :create)
-        UploadAlert.create_from_core_file(file, :update)
+        UploadAlert.create_from_core_file(file, :create, "single")
+        UploadAlert.create_from_core_file(file, :update, "single")
         date = DateTime.now.+2.weeks
         @job = AggregatedStatisticsBackFillJob.new(date)
         @job.run
@@ -135,8 +135,8 @@ describe "aggregated statistics back fill job" do
       end
 
       it 'aggregates upload_alerts up to parent community' do
-        UploadAlert.create_from_core_file(file, :create)
-        UploadAlert.create_from_core_file(file, :update)
+        UploadAlert.create_from_core_file(file, :create, "single")
+        UploadAlert.create_from_core_file(file, :update, "single")
         date = DateTime.now.+2.weeks
         @job = AggregatedStatisticsBackFillJob.new(date)
         @job.run
@@ -146,7 +146,7 @@ describe "aggregated statistics back fill job" do
       end
 
       it 'gets filesize for user_uploads and propogates up' do
-        UploadAlert.create_from_core_file(file, :create)
+        UploadAlert.create_from_core_file(file, :create, "single")
         size = (get_core_file_size(file.pid)/1024)/1024
         date = DateTime.now.+2.weeks
         @job = AggregatedStatisticsBackFillJob.new(date)
@@ -244,8 +244,8 @@ describe "aggregated statistics back fill job" do
         report_id = Loaders::LoadReport.create_from_strings(bill, 0, "College of Engineering", parent)
         load_report = Loaders::LoadReport.find(report_id)
         load_report.image_reports.create_success(file, "")
-        UploadAlert.create_from_core_file(file, :create)
-        UploadAlert.create_from_core_file(file, :update)
+        UploadAlert.create_from_core_file(file, :create, "single")
+        UploadAlert.create_from_core_file(file, :update, "single")
         date = DateTime.now.+2.weeks
         xml_alert.first.pid
         XmlAlert.all.count

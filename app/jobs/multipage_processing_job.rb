@@ -86,7 +86,7 @@ class MultipageProcessingJob
 
       core_file.thumbnail_list = thumbnail_list
       if core_file.save!
-        UploadAlert.create_from_core_file(core_file, :create)
+        UploadAlert.create_from_core_file(core_file, :create, "multipage")
       end
     end
 

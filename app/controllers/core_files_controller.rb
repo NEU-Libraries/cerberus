@@ -248,7 +248,7 @@ class CoreFilesController < ApplicationController
 
     if @core_file.save!
       if params[:core_file]
-        UploadAlert.create_from_core_file(@core_file, :create, current_user)
+        UploadAlert.create_from_core_file(@core_file, :create, "single", current_user)
       end
     end
 
@@ -260,7 +260,7 @@ class CoreFilesController < ApplicationController
     klass = class_for_attached_file(@core_file)
     @content_object = klass.find(params[:content_object_id])
     Cerberus::Application::Queue.push(ContentObjectCreationJob.new(@core_file.pid, @content_object.tmp_path, @content_object.pid, @content_object.original_filename, params[:content_object][:permissions], params[:content_object][:mass_permissions]))
-    UploadAlert.create_from_core_file(@core_file, :update, current_user)
+    UploadAlert.create_from_core_file(@core_file, :update, "content object", current_user)
     flash[:notice] = "Your file is being processed. The file's checksum is #{@content_object.properties.md5_checksum.first}"
     redirect_to core_file_path(@core_file.pid) + '#no-back'
   end
@@ -640,7 +640,7 @@ class CoreFilesController < ApplicationController
     #always save the file so the new version or metadata gets recorded
     if @core_file.save
       if params[:core_file]
-        UploadAlert.create_from_core_file(@core_file, :update, current_user)
+        UploadAlert.create_from_core_file(@core_file, :update, "single", current_user)
       end
 
       # If this change updated metadata, propagate the change outwards to
