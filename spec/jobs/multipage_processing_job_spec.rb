@@ -23,7 +23,7 @@ describe MultipageProcessingJob do
   after :each do
     @client.query("DROP DATABASE #{ENV["HANDLE_TEST_DATABASE"]};")
     @user.destroy if @user
-    Loaders::ImageReport.destroy_all
+    Loaders::ItemReport.destroy_all
     Loaders::LoadReport.destroy_all
     ActiveFedora::Base.destroy_all
   end
@@ -33,8 +33,8 @@ describe MultipageProcessingJob do
       row_results = {"file_name"=>"not_a_real_file.tif", "title"=>"Title"}
       zip_files = []
       MultipageProcessingJob.new(@dir_path, row_results, @core_file.pid, @load_report.id, zip_files, @client).run
-      Loaders::ImageReport.all.count.should == 1
-      images = Loaders::ImageReport.where(load_report_id:"#{@report_id}").find_all
+      Loaders::ItemReport.all.count.should == 1
+      images = Loaders::ItemReport.where(load_report_id:"#{@report_id}").find_all
       images.count.should == 1
       images.first.validity.should be false
       images.first.pid.should be nil
@@ -60,7 +60,7 @@ describe MultipageProcessingJob do
       @core_file.identifier.should_not == nil
       @core_file.mods.identifier.should_not == nil
       @core_file.mods.identifier.type.should == ["hdl"]
-      @load_report.reload.image_reports.count.should == 1
+      @load_report.reload.item_reports.count.should == 1
     end
   end
 
@@ -119,8 +119,8 @@ describe MultipageProcessingJob do
       @core_file.thumbnail_list.length.should == 0 #won't make a thumbnail list becuase it isn't the first one
     end
 
-    it "does not generate image_reports" do
-      @load_report.reload.image_reports.count.should == 0 #won't generate success image report until it is the last item
+    it "does not generate item_reports" do
+      @load_report.reload.item_reports.count.should == 0 #won't generate success image report until it is the last item
     end
   end
 
@@ -179,8 +179,8 @@ describe MultipageProcessingJob do
       @core_file.canonical_class.should == nil #won't have a canonical_class until it is the last item
     end
 
-    it "does not generate image_reports" do
-      @load_report.reload.image_reports.count.should == 0 #won't generate success image report until it is the last item
+    it "does not generate item_reports" do
+      @load_report.reload.item_reports.count.should == 0 #won't generate success image report until it is the last item
     end
   end
 
@@ -238,8 +238,8 @@ describe MultipageProcessingJob do
       @core_file.canonical_class.should == "ZipFile"
     end
 
-    it "generates image_reports" do
-      @load_report.reload.image_reports.count.should == 1
+    it "generates item_reports" do
+      @load_report.reload.item_reports.count.should == 1
     end
 
     it "creates handle" do

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20160512185017) do
+ActiveRecord::Schema.define(:version => 20160803151335) do
 
   create_table "aggregated_statistics", :force => true do |t|
     t.string   "object_type"
@@ -89,20 +89,6 @@ ActiveRecord::Schema.define(:version => 20160512185017) do
   add_index "follows", ["followable_id", "followable_type"], :name => "fk_followables"
   add_index "follows", ["follower_id", "follower_type"], :name => "fk_follows"
 
-  create_table "image_reports", :force => true do |t|
-    t.boolean  "validity"
-    t.string   "pid"
-    t.string   "collection"
-    t.string   "title"
-    t.text     "iptc"
-    t.text     "exception"
-    t.datetime "created_at",                        :null => false
-    t.datetime "updated_at",                        :null => false
-    t.integer  "load_report_id"
-    t.string   "original_file"
-    t.boolean  "modified",       :default => false
-  end
-
   create_table "impressions", :force => true do |t|
     t.string   "pid"
     t.string   "session_id"
@@ -118,6 +104,20 @@ ActiveRecord::Schema.define(:version => 20160512185017) do
   end
 
   add_index "impressions", ["pid"], :name => "index_drs_impressions_on_pid"
+
+  create_table "item_reports", :force => true do |t|
+    t.boolean  "validity"
+    t.string   "pid"
+    t.string   "collection"
+    t.string   "title"
+    t.text     "iptc"
+    t.text     "exception"
+    t.datetime "created_at",                        :null => false
+    t.datetime "updated_at",                        :null => false
+    t.integer  "load_report_id"
+    t.string   "original_file"
+    t.boolean  "modified",       :default => false
+  end
 
   create_table "load_reports", :force => true do |t|
     t.string   "loader_name"
@@ -211,14 +211,15 @@ ActiveRecord::Schema.define(:version => 20160512185017) do
     t.string   "title"
     t.string   "depositor_name"
     t.string   "depositor_email"
-    t.datetime "created_at",       :null => false
-    t.datetime "updated_at",       :null => false
+    t.datetime "created_at",                       :null => false
+    t.datetime "updated_at",                       :null => false
     t.string   "pid"
     t.boolean  "notified"
     t.string   "change_type"
     t.string   "collection_pid"
     t.string   "collection_title"
     t.string   "editor_nuid"
+    t.string   "load_type",        :default => ""
   end
 
   add_index "upload_alerts", ["content_type"], :name => "index_upload_alerts_on_type"

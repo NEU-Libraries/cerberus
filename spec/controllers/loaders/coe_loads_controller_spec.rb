@@ -66,7 +66,7 @@ describe Loaders::CoeLoadsController do
       @load_report = Loaders::LoadReport.find(@report_id)
       iptc = {:ImageDescription=>"April 9, 2015 - Scenes from the RISE:2015 expo and poster presentations held in Cabot Cage at Northeastern University on April 9, 2015. RISE (Research, Innovation and Scholarship Expo) is organized by the Center for Research Innovation and showcases student and faculty research at Northeastern University.", :Copyright=>"Copyright Northeastern University 2015", :"Province-State"=>"MA", :Keywords=>["innovation", "entrepreneurship", "venture", "research"], :"By-line"=>"Canaday, Brooks", :"By-lineTitle"=>"Staff Photographer", :Format=>"image/jpeg"}
       @core_file = CoreFile.create(title: "Test COE", parent: @coe_col, depositor: coe_loader.nuid)
-      @image_report = @load_report.image_reports.create_success(@core_file, iptc)
+      @item_report = @load_report.item_reports.create_success(@core_file, iptc)
     end
 
     it "renders the 404 page for image reports that don't exist" do
@@ -77,7 +77,7 @@ describe Loaders::CoeLoadsController do
     it "renders the show page for valid, authenticated requests" do
       features_sign_in coe_loader
 
-      get :show_iptc, { id: @image_report.id }
+      get :show_iptc, { id: @item_report.id }
       expect(response).to render_template('loaders/iptc')
       assert_select "td", "By-line"
       assert_select "td", "Canaday, Brooks"
@@ -90,13 +90,13 @@ describe Loaders::CoeLoadsController do
 
     it "redirects to sign in if unauthed user" do
       sign_out coe_loader
-      get :show_iptc, { id: @image_report.id}
+      get :show_iptc, { id: @item_report.id}
       expect(response).to redirect_to(new_user_session_path)
     end
 
     it "redirects authed user not coe_loader" do
       sign_in bill
-      get :show_iptc, { id: @image_report.id}
+      get :show_iptc, { id: @item_report.id}
       expect(response).to redirect_to(root_path)
     end
   end
@@ -119,7 +119,7 @@ describe Loaders::CoeLoadsController do
     Loaders::LoadReport.find(@report_id).destroy
     @coe_col.destroy if @coe_col
     CoreFile.all.map { |x| x.destroy }
-    Loaders::ImageReport.all.each do |ir|
+    Loaders::ItemReport.all.each do |ir|
       ir.destroy
     end
   end

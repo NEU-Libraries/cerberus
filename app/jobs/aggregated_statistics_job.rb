@@ -90,7 +90,7 @@ class AggregatedStatisticsJob
     end
 
     # Loader uploads and aggregate up
-    Loaders::ImageReport.where('validity = ? AND (created_at BETWEEN ? AND ?)', true, (date-6.days).beginning_of_day, date.end_of_day).find_each do |upl|
+    Loaders::ItemReport.where('validity = ? AND (created_at BETWEEN ? AND ?)', true, (date-6.days).beginning_of_day, date.end_of_day).find_each do |upl|
       begin
         doc = SolrDocument.new ActiveFedora::SolrService.query("id:\"#{upl.pid}\"").first
         if doc.klass == "CoreFile"
