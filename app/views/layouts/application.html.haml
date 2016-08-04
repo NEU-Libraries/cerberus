@@ -22,6 +22,7 @@
       .container
         = yield :content
       / /.container
+      = render :partial => '/drs_footer', :formats => [:html]
   = render partial: '/footer'
   / Javascript loaded at the end
   = render :partial => 'layouts/end_js_scripts'
