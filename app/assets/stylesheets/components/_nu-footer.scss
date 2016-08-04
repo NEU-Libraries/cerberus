@@ -34,7 +34,6 @@
     display: block;
     float: left;
     list-style: none;
-    margin-right: 7px;
 
     //add a single middle dot seperator
     &:after{
@@ -46,7 +45,8 @@
       content: "";
     }
     > a{
-      padding: 0.5em 0;
+      padding-right: 5px;
+      padding-left: 12px;
       color: $medium-gray;
       @include single-transition();
       &:hover,
@@ -54,6 +54,9 @@
         color: $textColor;
         @include single-transition();
       }
+    }
+    &:first-of-type > a{
+      padding-left: 0;
     }
   }
 }

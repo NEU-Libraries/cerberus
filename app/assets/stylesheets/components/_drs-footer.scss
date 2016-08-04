@@ -13,14 +13,14 @@
   > li{
     display: inline-block;
     list-style: none;
-    padding: 10px 7px 7px 0;
+    padding: 10px 9px 7px 0;
 
     //add a single middle dot seperator
     &:after{
         content: "\20\00b7";
         font-size: 1em;
         font-weight: 800;
-        padding-left: 7px;
+        padding-left: 5px;
         display: inline-block;
     }//except for the last
     &:last-of-type:after{
@@ -42,7 +42,7 @@
   margin: 7px 0;
   display: block;
   font-family: $baseFontFamily;
-  color: $brand-info;
+  color: $medium-gray;
   font-weight: 200;
   font-size: 1.8em;
   text-decoration: none;
@@ -54,5 +54,7 @@
   }
   &:hover {
     text-decoration: none;
+    color: $textColor;
+    @include single-transition();
   }
 }
