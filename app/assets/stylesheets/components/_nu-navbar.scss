@@ -9,11 +9,18 @@
 }
 
 .navbar .brand{
+  color: $brand-info;
+  font-size: 2em;
+  .icon-archive{
+    font-size: 1.1em;
+  }
+  small {
+    font-size: 65%;
+  }
   @include focus-states{
-    color: $navbarLinkColorHover;
+    color: $brand-info;
   }
   &.active{
-   color: $navbarLinkColorActive;
+   color: $brand-info;
   }
 }
-
