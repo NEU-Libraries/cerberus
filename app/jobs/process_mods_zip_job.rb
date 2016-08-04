@@ -171,18 +171,18 @@ class ProcessModsZipJob
                 populate_error_report(load_report, existing_file, "Must have a title", row_results, core_file, old_mods, header_row, row)
               elsif (!row_results["handle"].blank? && core_file.identifier != row_results["handle"]) || blank_handle
                 if handle.blank?
-                  image_report = load_report.image_reports.create_modified("The loader was unable to detect a handle for the original file.", core_file, row_results)
+                  item_report = load_report.item_reports.create_modified("The loader was unable to detect a handle for the original file.", core_file, row_results)
                 else
                   xml = Nokogiri::XML(core_file.mods.content)
                   handle = xml.xpath("//mods:identifier[contains(., 'hdl.handle.net')]").text
                   if handle != row_results["handle"]
-                    image_report = load_report.image_reports.create_modified("Handle does not match", core_file, row_results)
+                    item_report = load_report.item_reports.create_modified("Handle does not match", core_file, row_results)
                   else
-                    image_report = load_report.image_reports.create_modified("Handle reformatted for correctness", core_file, row_results)
+                    item_report = load_report.item_reports.create_modified("Handle reformatted for correctness", core_file, row_results)
                   end
                 end
-                image_report.title = core_file.title
-                image_report.save!
+                item_report.title = core_file.title
+                item_report.save!
               else
                 raw_xml = xml_decode(core_file.mods.content)
                 result = xml_valid?(raw_xml)
@@ -198,13 +198,15 @@ class ProcessModsZipJob
                   else
                     poster_path = File.dirname(dir_path) + "/" + row_results["poster_path"]
                     Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename, poster_path))
-                    load_report.image_reports.create_success(core_file, "")
+                    load_report.item_reports.create_success(core_file, "")
+                    UploadAlert.create_from_core_file(core_file, :create, "spreadsheet")
                   end
                 else
                   if !existing_files
                     Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename))
                   end
-                  load_report.image_reports.create_success(core_file, "")
+                  load_report.item_reports.create_success(core_file, "")
+                  UploadAlert.create_from_core_file(core_file, :create, "spreadsheet")
                 end
               end
             end
@@ -948,10 +950,10 @@ class ProcessModsZipJob
       title = ""
       original_file = ""
     end
-    image_report = load_report.image_reports.create_failure(error, row_results, "")
-    image_report.title = title
-    image_report.original_file = original_file
-    image_report.save!
+    item_report = load_report.item_reports.create_failure(error, row_results, "")
+    item_report.title = title
+    item_report.original_file = original_file
+    item_report.save!
   end
 
   def set_existing_files(row_results)

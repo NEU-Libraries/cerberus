@@ -148,7 +148,7 @@ describe ProcessModsZipJob do
     it "should set the number of files to the load report" do
       @lr.reload
       @lr.number_of_files.should == 4
-      @lr.image_reports.length.should == 0 #no image reports created when its a preview
+      @lr.item_reports.length.should == 0 #no image reports created when its a preview
     end
 
     it_should_behave_like "successful mods" do
@@ -160,7 +160,7 @@ describe ProcessModsZipJob do
 
     after :all do
       Loaders::LoadReport.destroy_all
-      Loaders::ImageReport.destroy_all
+      Loaders::ItemReport.destroy_all
       ActiveFedora::Base.destroy_all
       FileUtils.rm("#{@new_path}")
       FileUtils.rm_rf(Pathname.new("#{Rails.application.config.tmp_path}/")+"demo_mods_new_file")
@@ -187,13 +187,13 @@ describe ProcessModsZipJob do
     end
 
     it "should set depositor to current user" do
-      CoreFile.exists?(@lr.image_reports[0].pid).should be true
+      CoreFile.exists?(@lr.item_reports[0].pid).should be true
     end
 
     it "should set the correct number of files" do
       @lr.reload
       @lr.number_of_files.should == 4
-      @lr.image_reports.length.should == 4
+      @lr.item_reports.length.should == 4
       @lr.fail_count.should == 3
       @lr.success_count.should == 1
     end
@@ -201,34 +201,34 @@ describe ProcessModsZipJob do
     it_should_behave_like "successful mods" do
       let(:cf) {
         @lr.reload
-        CoreFile.find(@lr.image_reports[0].pid)
+        CoreFile.find(@lr.item_reports[0].pid)
        }
     end
 
     it "should fail if no title" do
       @lr.reload
-      failure = @lr.image_reports[1]
+      failure = @lr.item_reports[1]
       failure.validity.should == false
       failure.exception.should == "Must have a title"
     end
 
     it "should fail if no keywords" do
       @lr.reload
-      failure = @lr.image_reports[2]
+      failure = @lr.item_reports[2]
       failure.validity.should == false
       failure.exception.should == "Must have at least one keyword"
     end
 
     it "should fail if content file does not exist" do
       @lr.reload
-      failure = @lr.image_reports[3]
+      failure = @lr.item_reports[3]
       failure.validity.should == false
       failure.exception.should == "File specified does not exist"
     end
 
     after :all do
       Loaders::LoadReport.destroy_all
-      Loaders::ImageReport.destroy_all
+      Loaders::ItemReport.destroy_all
       ActiveFedora::Base.destroy_all
       FileUtils.rm_rf(Pathname.new("#{Rails.application.config.tmp_path}/")+"demo_mods_new_file")
     end

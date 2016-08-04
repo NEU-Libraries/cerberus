@@ -109,6 +109,7 @@ class ProcessXmlZipJob
                   if !row_results["embargoed"].blank? && row_results["embargoed"].downcase == "true"
                     core_file.embargo_release_date = row_results["embargo_date"]
                   end
+                  UploadAlert.create_from_core_file(core_file, :create, "xml")
 
                 else
                   populate_error_report(load_report, "File triggered failure for virus check", row_results, core_file, header_row, row)
@@ -121,6 +122,7 @@ class ProcessXmlZipJob
             else #edit existing file
               core_file = CoreFile.find(row_results["pid"])
               assign_a_row(row_results, core_file, dir_path, load_report)
+              UploadAlert.create_from_core_file(core_file, :create, "xml")
             end
           end
         rescue Exception => error
@@ -203,10 +205,10 @@ class ProcessXmlZipJob
       title = find_in_row(header_row, row, 'Title')
       original_file = find_in_row(header_row, row, 'File Name')
     end
-    image_report = load_report.image_reports.create_failure(error, row_results, "")
-    image_report.title = title
-    image_report.original_file = original_file
-    image_report.save!
+    item_report = load_report.item_reports.create_failure(error, row_results, "")
+    item_report.title = title
+    item_report.original_file = original_file
+    item_report.save!
   end
 
 end

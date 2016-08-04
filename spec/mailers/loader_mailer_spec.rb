@@ -34,7 +34,7 @@ describe LoaderMailer do
       Loaders::LoadReport.all.each do |lr|
         lr.destroy
       end
-      Loaders::ImageReport.all.each do |ir|
+      Loaders::ItemReport.all.each do |ir|
         ir.destroy
       end
       ActiveFedora::Base.destroy_all

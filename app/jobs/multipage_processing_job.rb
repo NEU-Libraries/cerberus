@@ -72,7 +72,7 @@ class MultipageProcessingJob
 
       end
     else
-      load_report.image_reports.create_failure("File not found in zip file", "", self.file_values["file_name"])
+      load_report.item_reports.create_failure("File not found in zip file", "", self.file_values["file_name"])
       core_file.destroy
       return
     end
@@ -100,7 +100,7 @@ class MultipageProcessingJob
     end
 
     if self.file_values["last_item"].downcase == "true"
-      load_report.image_reports.create_success(core_file, "")
+      load_report.item_reports.create_success(core_file, "")
 
       core_file.reload
       core_file.identifier = make_handle(core_file.persistent_url, client)

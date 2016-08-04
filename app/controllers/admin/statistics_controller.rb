@@ -37,7 +37,7 @@ class Admin::StatisticsController < ApplicationController
     @cf_streams = Impression.where('action = ? AND (created_at BETWEEN ? AND ?) AND status = ? AND public = ?', 'stream', DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day, "COMPLETE", true).count
     @unique_users = Impression.where('(created_at BETWEEN ? AND ?) AND status = ? AND public = ?', DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day, "COMPLETE", true).uniq.pluck(:ip_address).count
     @new_users = User.where('created_at BETWEEN ? AND ?', DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day).count
-    @loader_uploads = Loaders::ImageReport.where('validity = ? AND (created_at BETWEEN ? AND ?)', true, DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day).count
+    @loader_uploads = Loaders::ItemReport.where('validity = ? AND (created_at BETWEEN ? AND ?)', true, DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day).count
     @interface_uploads = UploadAlert.where('change_type = ? AND content_type != ? AND (created_at BETWEEN ? AND ?)', 'create', 'collection', DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day).count
     @uploads_count = @interface_uploads
     @interface_uploads = @interface_uploads - @loader_uploads
@@ -47,7 +47,7 @@ class Admin::StatisticsController < ApplicationController
       @interface_upload_size += get_core_file_size(pid)
     end
     @loader_upload_size = 0
-    loader_upload_pids = Loaders::ImageReport.where('validity = ? AND (created_at BETWEEN ? AND ?)', true, DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day).pluck(:pid)
+    loader_upload_pids = Loaders::ItemReport.where('validity = ? AND (created_at BETWEEN ? AND ?)', true, DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day).pluck(:pid)
     loader_upload_pids.each do |pid|
       @loader_upload_size += get_core_file_size(pid)
     end
