@@ -1,0 +1,40 @@
+.footer-drs{
+  // font-family: $serifFontFamily;
+  background-color: $grayLighter;
+  border: 2px solid $navbarBorder;
+  color: $medium-gray;
+  border-radius: 6px;
+  margin-top:40px;
+  text-align:center;
+}
+
+//nav list of footer links at the bottom of every page
+.footer-drs ul{
+  margin: 0;
+  > li{
+    display: inline-block;
+    list-style: none;
+    padding: 7px 7px 7px 0;
+
+    //add a single middle dot seperator
+    &:after{
+        content: "\20\00b7";
+        font-size: 1em;
+        font-weight: 800;
+        padding-left: 7px;
+        display: inline-block;
+    }//except for the last
+    &:last-of-type:after{
+      content: "";
+    }
+    > a{
+      color: $medium-gray;
+      @include single-transition();
+      &:hover,
+      &:focus{
+        color: $textColor;
+        @include single-transition();
+      }
+    }
+  }
+}
