@@ -22,6 +22,8 @@ en:
       name: "College of Engineering - Cognitive Systems Laboratory Team"
     northeastern:drs:college_of_professional_studies:media:
       name: "College of Professional Studies - Media Group"
+    northeastern:drs:college_of_science:marine_science_center:msc_staff:
+      name: "Marine Science Center Staff"
     northeastern:drs:college_of_science:social_interaction_lab:
       name: "College of Science - Social Interaction Lab Staff"
     northeastern:drs:college_of_social_sciences_humanities:dominican_prayer_book:
