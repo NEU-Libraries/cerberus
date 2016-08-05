@@ -2,7 +2,10 @@
   %nav.navbar#navigation(role="navigation")
     .navbar-inner
       %a{class: "top_nav brand drs #{'active' if params[:controller] == "catalog" and action_name == "index"}", href: "/"}
+        =render partial: "shared/icon", locals: {class_string: t('drs.product_icon') }
         DRS
+        %small
+          Digital Repository Service
         %span.sr-only
           Homepage
       %button.btn.btn-navbar.btn-navbar-collapse.btn-inverse{"data-target" => ".nav-collapse", "data-toggle" => "collapse", name: "Menu Toggle", type: "button", value: "Menu Toggle"}
