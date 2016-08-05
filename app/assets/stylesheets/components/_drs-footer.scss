@@ -5,6 +5,11 @@
   color: $medium-gray;
   margin-top:40px;
   text-align:left;
+  @media (max-width:$breakpoint-m) {
+    margin-left: -20px;
+    margin-right: -20px;
+    padding-left: 20px;
+  }
 }
 
 //nav list of footer links at the bottom of every page
@@ -51,6 +56,7 @@
   }
   small {
     font-size: 55%;
+    white-space: nowrap;
   }
   &:hover {
     text-decoration: none;
