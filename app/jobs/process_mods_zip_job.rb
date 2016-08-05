@@ -228,7 +228,7 @@ class ProcessModsZipJob
     if load_report.success_count + load_report.fail_count + load_report.modified_count == load_report.number_of_files
       load_report.completed = true
       load_report.save!
-      # LoaderMailer.load_alert(load_report, User.find_by_nuid(load_report.nuid)).deliver!
+      LoaderMailer.load_alert(load_report, User.find_by_nuid(load_report.nuid)).deliver!
       # cleaning up
       FileUtils.rm(spreadsheet_file_path)
       if CoreFile.exists?(load_report.preview_file_pid)
