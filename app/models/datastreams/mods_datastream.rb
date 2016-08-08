@@ -844,19 +844,20 @@ class ModsDatastream < ActiveFedora::OmDatastream
     end
   end
 
-  def personal_creators=(personal_creators_hash)
-    first_names = personal_creators_hash['first_names']
-    last_names = personal_creators_hash['last_names']
-    name_pairs = Hash[first_names.zip(last_names)]
-
-    if personal_creators_hash.length > 0
-      name_pairs.each_with_index do |(first_name, last_name), index|
+  def personal_creators=(name_pairs)
+    if name_pairs.length > 0
+      name_pairs.each_with_index do |name_arr, index|
         if self.personal_name[index].nil?
           self.insert_new_node(:personal_name)
         end
-
-        self.personal_name(index).name_part_given = first_name.gsub(/[\s\b\v]+/, " ")
-        self.personal_name(index).name_part_family = last_name.gsub(/[\s\b\v]+/, " ")
+        if !name_arr[0].blank? || !name_arr[1].blank?
+          if !name_arr[0].blank?
+            self.personal_name(index).name_part_given = name_arr[0].gsub(/[\s\b\v]+/, " ")
+          end
+          if !name_arr[1].blank?
+            self.personal_name(index).name_part_family = name_arr[1].gsub(/[\s\b\v]+/, " ")
+          end
+        end
         self.personal_name(index).name_part = ""
       end
     end
