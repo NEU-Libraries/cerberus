@@ -13,17 +13,15 @@ class Loaders::XmlLoadsController < Loaders::LoadsController
     @loader_name = t('loaders.'+t('loaders.xml.short_name')+'.long_name')
     @loader_short_name = t('loaders.xml.short_name')
     @page_title = @loader_name + " Loader"
-    query_result = ActiveFedora::SolrService.query("active_fedora_model_ssi:\"Collection\"", :fl => "id, title_info_title_tesim", :rows => 999999999, :sort => "id asc")
+    query_result = solr_query("(depositor_tesim:\"#{current_user.nuid}\" OR edit_access_group_ssim:(#{groups})) AND has_model_ssim:\"#{ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:Collection"}\"")
     @collections_options = Array.new()
     query_result.each do |c|
-      if current_user.can?(:edit, c['id'])
-        @collections_options << {'label' => "#{c['id']} - #{c['title_info_title_tesim'][0]}", 'value' => c['id']}
-      end
+      @collections_options << {'label' => "#{c['id']} - #{c['title_info_title_tesim'][0]}", 'value' => c['id']}
     end
     @new = "true"
     @new_form = render_to_string(:partial=>'/loaders/new', locals: {collections_options: @collections_options, new: @new})
     @new = "false"
-    @existing_form = render_to_string(:partial=>'/loaders/new', locals: {collections_options: @collections_options, new: @new})
+    @existing_form = render_to_string(:partial=>'/loaders/new', locals: {collections_options: [], new: @new})
     render 'loaders/load_choices', locals: { collections_options: @collections_options }
   end
 
