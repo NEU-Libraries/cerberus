@@ -1,0 +1,66 @@
+.footer-drs{
+  font-family: $serifFontFamily;
+  background-color: $footerBgColor;
+  border-top: 0.1em solid $footerBorderColor;
+  color: $medium-gray;
+  margin-top:40px;
+  text-align:left;
+  @media (max-width:$breakpoint-m) {
+    margin-left: -20px;
+    margin-right: -20px;
+    padding-left: 20px;
+  }
+}
+
+//nav list of footer links at the bottom of every page
+.footer-drs ul{
+  margin: 0;
+  > li{
+    display: inline-block;
+    list-style: none;
+    padding: 10px 9px 7px 0;
+
+    //add a single middle dot seperator
+    &:after{
+        content: "\20\00b7";
+        font-size: 1em;
+        font-weight: 800;
+        padding-left: 5px;
+        display: inline-block;
+    }//except for the last
+    &:last-of-type:after{
+      content: "";
+    }
+    > a{
+      color: $medium-gray;
+      @include single-transition();
+      &:hover,
+      &:focus{
+        color: $textColor;
+        @include single-transition();
+      }
+    }
+  }
+}
+
+.footer-drs .brand {
+  margin: 7px 0;
+  display: block;
+  font-family: $baseFontFamily;
+  color: $medium-gray;
+  font-weight: 200;
+  font-size: 1.8em;
+  text-decoration: none;
+  .icon-archive{
+    font-size: .9em;
+  }
+  small {
+    font-size: 55%;
+    white-space: nowrap;
+  }
+  &:hover {
+    text-decoration: none;
+    color: $textColor;
+    @include single-transition();
+  }
+}

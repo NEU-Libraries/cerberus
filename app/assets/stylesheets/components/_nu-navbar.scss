@@ -3,17 +3,49 @@
   background-image: none;
   text-shadow: none;
   padding: 12px 14px;
+  margin-top: 13px;
   .icon-bar{
     @include box-shadow(none);
   }
 }
 
 .navbar .brand{
+  color: $brand-info;
+  width: auto;
+  font-size: 2em;
+  .icon-archive{
+    font-size: 1.1em;
+  }
+  small {
+    font-size: 65%;
+  }
   @include focus-states{
-    color: $navbarLinkColorHover;
+    color: $brand-info;
   }
   &.active{
-   color: $navbarLinkColorActive;
+   color: $brand-info;
   }
+  @media (max-width:$breakpoint-sm) {
+    width: 230px;
+    small {
+      white-space: nowrap;
+    }
+  }
+  @media (max-width:$breakpoint-m) {
+    width: 80%;
+    small {
+      white-space: nowrap;
+    }
+  }
+  @media (max-width:370px) {
+    width: 120px;
+    small {
+      display: none;
+    }
+  }
+
 }
 
+.navbar-form {
+  padding-top: 5px;
+}
