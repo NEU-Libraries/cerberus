@@ -1,0 +1,25 @@
+%footer.footer-drs(role="contentinfo")
+  .container
+    .row-fluid
+      .span3
+        %a{class: "brand drs", href: "/"}
+          =render partial: "shared/icon", locals: {class_string: t('drs.product_icon') }
+          DRS
+          %small
+            Digital Repository Service
+          %span.sr-only
+            Homepage
+      .span9
+        %ul
+          %li
+            %a{:href => "http://dsg.neu.edu/resources/drs"} About the DRS
+          %li
+            %a{:href => "mailto:Library-Repository-Team@neu.edu"} Contact Us
+          %li
+            %a{:href => "https://repository.library.northeastern.edu/terms"} Terms of Service
+          %li
+            %a{:href => "https://repository.library.northeastern.edu/iris"} IRis and the DRS
+          %li
+            %a{:href => "http://dsg.neu.edu/wiki/DRS_User_Guide"} Help
+          %li
+            %a{:href => "http://library.northeastern.edu/get-help/tech-support/report-a-problem"} Report a Problem

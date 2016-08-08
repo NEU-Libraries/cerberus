@@ -64,6 +64,9 @@ class ProcessModsZipJob
           if row_results["pid"].blank? && !row_results["file_name"].blank? #make new file
             preview_file.depositor = current_user.nuid
           else
+            if !row_results["pid"].start_with?("neu:")
+              raise "Your upload could not be processed because the PID is incorrectly formatted."
+            end
             comparison_file = CoreFile.find(row_results["pid"])
             preview_file.depositor              = comparison_file.depositor
             preview_file.rightsMetadata.content = comparison_file.rightsMetadata.content
@@ -143,7 +146,10 @@ class ProcessModsZipJob
                 end
               elsif existing_files == true
                 existing_file = true
-                if core_file_checks(row_results["pid"]) == true
+                if !row_results["pid"].start_with?("neu:")
+                  populate_error_report(load_report, existing_file, "PID is incorrectly formatted", row_results, core_file, old_mods, header_row, row)
+                  next
+                elsif core_file_checks(row_results["pid"]) == true
                   blank_handle = false
                   core_file = CoreFile.find(row_results["pid"])
                   handle = core_file.identifier
@@ -224,7 +230,7 @@ class ProcessModsZipJob
     if load_report.success_count + load_report.fail_count + load_report.modified_count == load_report.number_of_files
       load_report.completed = true
       load_report.save!
-      # LoaderMailer.load_alert(load_report, User.find_by_nuid(load_report.nuid)).deliver!
+      LoaderMailer.load_alert(load_report, User.find_by_nuid(load_report.nuid)).deliver!
       # cleaning up
       FileUtils.rm(spreadsheet_file_path)
       if CoreFile.exists?(load_report.preview_file_pid)
@@ -263,11 +269,7 @@ class ProcessModsZipJob
     if creators.count > 0
       creator_hash = {}
       creator_hash['corporate_names'] = []
-      creator_hash['first_names'] = []
-      creator_hash['last_names'] = []
-      personal_creators = {}
-      personal_creators['first_names'] = []
-      personal_creators['last_names'] = []
+      personal_creators = []
       creator_nums.each do |n|
         if !row_results["creator_#{n}_name"].blank?
           name_type = row_results["creator_#{n}_name_type"]
@@ -276,8 +278,7 @@ class ProcessModsZipJob
           elsif name_type == 'personal'
             first = row_results["creator_#{n}_name"].split("|")[1]
             first = first.blank? ? " " : first.strip
-            personal_creators['first_names'] << first
-            personal_creators['last_names'] << row_results["creator_#{n}_name"].split("|")[0].strip
+            personal_creators << [first, row_results["creator_#{n}_name"].split("|")[0].strip]
           end
         end
       end
@@ -757,6 +758,11 @@ class ProcessModsZipJob
       results["alternate_title_#{i}_subtitle"]                     = find_in_row(header_row, row_value, "Alternate Title #{i} Subtitle")
     end
 
+    results["creator_1_name"] = find_in_row(header_row, row_value, "Creator 1 Name - Primary Creator") #primary special case
+    results["creator_1_authority"] = find_in_row(header_row, row_value, "Creator 1 Authority")
+    results["creator_1_name_type"] = find_in_row(header_row, row_value, "Creator 1 Name Type")
+    results["creator_1_role"] = find_in_row(header_row, row_value, "Creator 1 Role")
+    results["creator_1_affiliation"] = find_in_row(header_row, row_value, "Creator 1 Affiliation")
     creators = header_row.select{|n| n[/(?i)^Creator \d+ Name[ \f\t\v]*/] if !n.blank?} #have to add one for primary special case
     creators.each.with_index(2) do |x, i|
       results["creator_#{i}_name"] = find_in_row(header_row, row_value, "Creator #{i} Name")
@@ -772,11 +778,6 @@ class ProcessModsZipJob
         results["creator_#{i}_affiliation"] = ""
       end
     end
-    results["creator_1_name"] = find_in_row(header_row, row_value, "Creator 1 Name - Primary Creator") #primary special case
-    results["creator_1_authority"] = find_in_row(header_row, row_value, "Creator 1 Authority")
-    results["creator_1_name_type"] = find_in_row(header_row, row_value, "Creator 1 Name Type")
-    results["creator_1_role"] = find_in_row(header_row, row_value, "Creator 1 Role")
-    results["creator_1_affiliation"] = find_in_row(header_row, row_value, "Creator 1 Affiliation")
 
     results["type_of_resource"]                             = find_in_row(header_row, row_value, 'Type of Resource')
     genres = header_row.select{|m| m[/(?i)^Genre \d+[ \f\t\v]*/] if !m.blank?}

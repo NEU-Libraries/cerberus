@@ -54,7 +54,7 @@ en:
         icon: icon-university
       research:
         name: Research Publications
-        description: Research produced by faculty and staff, including articles, preprints, and offprints
+        description: Faculty and staff research, including published articles, accepted manuscripts, and preprints
         icon: icon-beaker
       presentations:
         name: Presentations
@@ -88,7 +88,7 @@ en:
       title: About the DRS
     iris:
       title: IRis content in the DRS
-      body: "The file you are trying to reach is currently unavailable.<br/><br/>In July 2015 Northeastern University Libraries transitioned from IRis, our previous repository platform, to the newly redesigned Digital Repository Service (DRS) and we are in the process of reviewing some IRis content to determine its suitability for permanent preservation.<br/><br/>If you feel this file should be permanently preserved, please contact <a href='mailto:Library-Repository-Team@neu.edu'>Library-Repository-Team@neu.edu</a>.<br/><br/>For more information about the DRS and the transition from IRis, please visit the Library's <a href='http://library.northeastern.edu/services/drs-digital-repository-service'>DRS resource page</a>."
+      body: "On July 1, 2015 a majority of the content stored in IRis, our former institutional repository, was folded into the DRS. The remaining files have been removed from access while we review them to determine their suitability for permanent preservation. If you would like us to restore access to particular files or collections of files, please contact <a href='mailto:Library-Repository-Team@neu.edu'>Library-Repository-Team@neu.edu</a>."
     personal_graph:
       title: My DRS
       description: "Smart Collections are designed to help you share your scholarly work with the Northeastern University community. The files you deposit in a Smart Collection will be discoverable from your collections, from your community’s collections, and from the Featured Content section on the DRS homepage."
