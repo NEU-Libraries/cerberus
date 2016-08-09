@@ -74,6 +74,9 @@ class CoreFilesController < ApplicationController
     subject do
       delimiter " -- "
     end
+    abstract do
+      delimiter "<br><br>"
+    end
   end
 
   def fulltext
