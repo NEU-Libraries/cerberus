@@ -151,7 +151,8 @@ class ContentCreationJob
       req.add_field("Content-Type", "#{extract_mime_type(file_path)}")
       req.add_field("Transfer-Encoding", "chunked")
       res = Net::HTTP.start(url.host, url.port) {|http|
-          http.request(req)
+        http.read_timeout = 600
+        http.request(req)
       }
       return res
     end
