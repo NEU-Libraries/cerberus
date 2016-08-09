@@ -90,20 +90,25 @@ class ZipCompilationJob
     end
 
     def zip_core_file(doc, user, temp_zipfile_name)
-      id = doc.pid
-      if CoreFile.exists?(id)
-        cf = CoreFile.find(id)
-        if !(cf.under_embargo?(user)) && !cf.tombstoned?
-          content = cf.canonical_object
-          if !user.nil? ? user.can?(:read, content) : content.public?
-            if content.content.content && content.class != ImageThumbnailFile
-              download_label = I18n.t("drs.display_labels.#{content.klass}.download")
-              Zip::File.open(temp_zipfile_name) do |zipfile|
-                zipfile.add("#{self.title}/neu_#{id.split(":").last}-#{download_label}.#{extract_extension(content.properties.mime_type.first, File.extname(content.original_filename || "").delete!("."))}", content.fedora_file_path)
+      begin
+        id = doc.pid
+        if CoreFile.exists?(id)
+          cf = CoreFile.find(id)
+          if !(cf.under_embargo?(user)) && !cf.tombstoned?
+            content = cf.canonical_object
+            if !user.nil? ? user.can?(:read, content) : content.public?
+              if content.content.content && content.class != ImageThumbnailFile
+                download_label = I18n.t("drs.display_labels.#{content.klass}.download")
+                Zip::File.open(temp_zipfile_name) do |zipfile|
+                  zipfile.add("#{self.title}/neu_#{id.split(":").last}-#{download_label}.#{extract_extension(content.properties.mime_type.first, File.extname(content.original_filename || "").delete!("."))}", content.fedora_file_path)
+                end
               end
             end
           end
         end
+      rescue Exception => error
+        # Any number of things could be wrong with the core file - malformed due to error
+        # or migration failure. Emails aren't currently working out of jobs. A TODO for later
       end
     end
 

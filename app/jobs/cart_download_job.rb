@@ -32,18 +32,23 @@ class CartDownloadJob
     end
 
     pids.each do |pid|
-      if ActiveFedora::Base.exists?(pid)
-        item = ActiveFedora::Base.find(pid, cast: true)
-        download_label = I18n.t("drs.display_labels.#{item.klass}.download")
-        if item.public? || user.can?(:read, item)
-          Zip::File.open(temp_path) do |zipfile|
-            zipfile.add("downloads/neu_#{pid.split(":").last}-#{download_label}.#{extract_extension(item.properties.mime_type.first, File.extname(item.original_filename || "").delete!("."))}", item.fedora_file_path)
-          end
+      begin
+        if ActiveFedora::Base.exists?(pid)
+          item = ActiveFedora::Base.find(pid, cast: true)
+          download_label = I18n.t("drs.display_labels.#{item.klass}.download")
+          if item.public? || user.can?(:read, item)
+            Zip::File.open(temp_path) do |zipfile|
+              zipfile.add("downloads/neu_#{pid.split(":").last}-#{download_label}.#{extract_extension(item.properties.mime_type.first, File.extname(item.original_filename || "").delete!("."))}", item.fedora_file_path)
+            end
 
-          # Record the download
-          opts = "pid = ? AND session_id = ? AND status = 'INCOMPLETE' AND action = 'download'"
-          Impression.update_all("status = 'COMPLETE'", [opts, pid, sess_id])
+            # Record the download
+            opts = "pid = ? AND session_id = ? AND status = 'INCOMPLETE' AND action = 'download'"
+            Impression.update_all("status = 'COMPLETE'", [opts, pid, sess_id])
+          end
         end
+      rescue Exception => error
+        # Any number of things could be wrong with the core file - malformed due to error
+        # or migration failure. Emails aren't currently working out of jobs. A TODO for later
       end
     end
 
