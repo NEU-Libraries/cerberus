@@ -11,7 +11,7 @@ module Cerberus
 
         def embargo_release_date=(release_date)
           release_date = release_date.to_s if release_date.is_a? Date
-          if !release_date.blank?            
+          if !release_date.blank?
             begin
               Date.parse(release_date)
             rescue

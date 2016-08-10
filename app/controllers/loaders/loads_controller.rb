@@ -129,7 +129,7 @@ class Loaders::LoadsController < ApplicationController
             elsif short_name == "xml"
               spreadsheet_file_path = unzip(new_file, new_path)
               report_id = Loaders::LoadReport.create_from_strings(current_user, 0, @loader_name, parent)
-              ProcessXmlZipJob.new(@loader_name, spreadsheet_file_path, parent, copyright, current_user, permissions, report_id, nil, true).run
+              ProcessXmlZipJob.new(@loader_name, spreadsheet_file_path, parent, copyright, current_user, permissions, report_id, existing_files, nil, true).run
               load_report = Loaders::LoadReport.find(report_id)
               session[:flash_success] = "Your file has been submitted and is now being processed. You will receive an email when the load is complete."
 

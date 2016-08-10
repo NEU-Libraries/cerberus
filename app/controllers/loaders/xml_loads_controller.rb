@@ -8,23 +8,33 @@ class Loaders::XmlLoadsController < Loaders::LoadsController
     end
   end
 
+
   def new
-    query_result = ActiveFedora::SolrService.query("active_fedora_model_ssi:\"Collection\"", :fl => "id, title_info_title_tesim", :rows => 999999999, :sort => "id asc")
-    @collections_options = Array.new()
-    query_result.each do |c|
-      if current_user.can?(:edit, c['id'])
-        @collections_options << {'label' => "#{c['id']} - #{c['title_info_title_tesim'][0]}", 'value' => c['id']}
-      end
-    end
     @loader_name = t('loaders.'+t('loaders.xml.short_name')+'.long_name')
     @loader_short_name = t('loaders.xml.short_name')
     @page_title = @loader_name + " Loader"
-    render 'loaders/new', locals: { collections_options: @collections_options}
+    u_groups = current_user.groups
+    groups = u_groups.map! { |g| "\"#{g}\""}.join(" OR ")
+    query_result = solr_query("(depositor_tesim:\"#{current_user.nuid}\" OR edit_access_group_ssim:(#{groups})) AND has_model_ssim:\"#{ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:Collection"}\"")
+    @collections_options = Array.new()
+    query_result.each do |c|
+      @collections_options << {'label' => "#{c['id']} - #{c['title_info_title_tesim'][0]}", 'value' => c['id']}
+    end
+    @new = "true"
+    @new_form = render_to_string(:partial=>'/loaders/new', locals: {collections_options: @collections_options, new: @new})
+    @new = "false"
+    @existing_form = render_to_string(:partial=>'/loaders/new', locals: {collections_options: [], new: @new})
+    render 'loaders/load_choices', locals: { collections_options: @collections_options }
   end
 
   def create
     permissions = {"CoreFile" => {"read"  => ["public"], "edit" => ["northeastern:drs:repository:staff"]}}
-    process_create(permissions, t('loaders.xml.short_name'), "XmlLoadsController")
+    if params[:new] == "true"
+      existing_files = false
+    else
+      existing_files = true
+    end
+    process_create(permissions, t('loaders.xml.short_name'), "XmlLoadsController", existing_files)
   end
 
   def preview
@@ -82,7 +92,6 @@ class Loaders::XmlLoadsController < Loaders::LoadsController
   end
 
   def proceed_load
-    puts params
     @report = Loaders::LoadReport.find(params[:id])
     @loader_name = t('loaders.xml.long_name')
     if !@report.preview_file_pid.blank?
@@ -96,19 +105,21 @@ class Loaders::XmlLoadsController < Loaders::LoadsController
     permissions = {} #we aren't getting these externally yet
     if params[:depositor]
       depositor = params[:depositor]
+      existing_files = false
     else
       depositor = nil
+      existing_files = true
     end
-    Cerberus::Application::Queue.push(ProcessXmlZipJob.new(@loader_name, spreadsheet_file_path, @report.collection, copyright, current_user, permissions, @report.id, depositor, nil))
+    Cerberus::Application::Queue.push(ProcessXmlZipJob.new(@loader_name, spreadsheet_file_path, @report.collection, copyright, current_user, permissions, @report.id, existing_files, depositor, nil))
     flash[:notice] = "Your spreadsheet is being processed. The information on this page will be updated periodically until the processing is completed."
     redirect_to "/loaders/xml/report/#{@report.id}"
   end
 
   def show_mods
-    @image = Loaders::ItemReport.find(params[:id])
-    @load = Loaders::LoadReport.find(@image.load_report_id)
-    @page_title = @image.original_file
-    render 'loaders/iptc', locals: {image: @image, load: @load}
+    @item = Loaders::ItemReport.find(params[:id])
+    @load = Loaders::LoadReport.find(@item.load_report_id)
+    @page_title = @item.original_file
+    render 'loaders/mods_xml', locals: {item: @item, load: @load}
   end
 
   private
