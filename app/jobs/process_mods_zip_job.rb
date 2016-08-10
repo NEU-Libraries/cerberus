@@ -210,9 +210,11 @@ class ProcessModsZipJob
                 else
                   if !existing_files
                     Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename))
+                    UploadAlert.create_from_core_file(core_file, :create, "spreadsheet")
+                  else
+                    UploadAlert.create_from_core_file(core_file, :update, "spreadsheet")
                   end
                   load_report.item_reports.create_success(core_file, "")
-                  UploadAlert.create_from_core_file(core_file, :create, "spreadsheet")
                 end
               end
             end
