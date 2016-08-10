@@ -187,7 +187,7 @@ class ProcessXmlZipJob
               end
               if existing_files == true && old_mods == core_file.mods.content
                 load_report.item_reports.create_success(core_file, "")
-                UploadAlert.create_from_core_file(core_file, :create, "xml")
+                UploadAlert.create_from_core_file(core_file, :update, "xml")
                 x = x+1
                 core_file.mods.content = old_mods
                 core_file.save!
@@ -213,9 +213,11 @@ class ProcessXmlZipJob
                 else
                   if !existing_files
                     Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename))
+                    UploadAlert.create_from_core_file(core_file, :create, "xml")
+                  else
+                    UploadAlert.create_from_core_file(core_file, :update, "xml")
                   end
                   load_report.item_reports.create_success(core_file, "")
-                  UploadAlert.create_from_core_file(core_file, :create, "xml")
                   x = x+1
                   next
                 end
