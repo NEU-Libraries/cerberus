@@ -1,0 +1,52 @@
+- collection = Collection.find(@load.collection)
+
+%ul.breadcrumb
+  %li
+    = link_to 'My Loaders', my_loaders_path
+  %li
+    -if @load.loader_name == t('loaders.xml.long_name')
+      - path = loaders_xml_report_path(@load.id)
+    = link_to "#{@load.loader_name} Load into #{collection.title}", path
+  %li.active
+    = item.original_file.blank? ? item.title : item.original_file
+
+%h2.page-header
+  = item.original_file.blank? ? item.title : item.original_file
+%h4
+  Created at:
+  = @load.created_at.strftime("%m-%d-%Y %T")
+%h4
+  File Status:
+  = "Error - #{item.exception}"
+%h4
+%table.table.table-striped.table-bordered
+  - item.iptc.each do |key, value|
+    - if key != "mods"
+      %tr
+        %td= key.titleize
+        %td= value
+- if !item.iptc["mods"].blank?
+  = "MODS Data:"
+  #editor.well
+    = item.iptc["mods"]
+  :javascript
+    $(document).ready(function() {
+      // This is a hack, need to trim to due haml pretty printing
+      if (document.getElementById('editor') === null){ }
+      else {
+          str = $("#editor").text();
+          $("#editor").text(str.trim());
+
+          // Setting up the editor
+          var editor = ace.edit("editor");
+          editor.setTheme("ace/theme/eclipse");
+          editor.getSession().setMode("ace/mode/xml");
+          editor.setOptions({
+            maxLines: Infinity,
+            minLines: 20,
+            useSoftTabs: true,
+            showInvisibles: true,
+            readOnly: true,
+          });
+      }
+    });

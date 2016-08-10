@@ -102,7 +102,7 @@ class ProcessModsZipJob
       existing_files = false
       start = header_position + 1
       end_row = spreadsheet.last_row.to_i
-        (start..end_row).each do |x|
+      (start..end_row).each do |x|
         row = spreadsheet.row(x)
         if row.present? && header_row.present?
           begin
