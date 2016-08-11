@@ -1,0 +1,67 @@
+<%= form_for @sentinel, url: {action: "create"} do |f| %>
+  <div>
+  <% @content_list.each_with_index do |a, i| %>
+    <% if i.even? %>
+      </div>
+      <div class="row-fluid">
+    <% end %>
+      <fieldset class="span6">
+        <legend>
+          <%= "#{a[0]}" %>
+        </legend>
+        <div class="permission<%= i %>">
+          <%= f.label :identity, "Select Group" %>
+          <% options = {"" => ""} %>
+          <%= select_tag "#{a[1]}[permissions][identity][]", options_for_select(current_user.pretty_groups), class: "span12", prompt: "-- Select Group --" %>
+          <%= label_tag "#{a[1]}[permissions][permission_type][]", "Should this identity be allowed to read or edit?" %>
+          <div style="display: block;">
+            <%= select_tag "#{a[1]}[permissions][permission_type][]", options_for_select(['read', 'edit']), class: "span12" %>
+          </div>
+        </div>
+        <button class="btn btn-success btn-block" id="add_another_permission<%= i %>" type="button">
+          <i class="icon-plus-sign icon-large"></i>
+          Add Permission
+        </button>
+      </fieldset>
+      <script>
+
+        $('#add_another_permission<%= i %>').addFormFields({
+          target: $('#add_another_permission<%= i %>').siblings('div:not(.to-remove)'),
+          titleText: 'Remove permission'
+        });
+
+      </script>
+      <% if i == @content_list.length %>
+        </div>
+      <% end %>
+      <% next %>
+      <fieldset class="span6">
+        <legend>
+          <%= "#{a[0]}" %>
+        </legend>
+        <div class="permission<%= i %>">
+          <%= f.label :identity, "Select Group" %>
+          <% options = {"" => ""} %>
+          <%= select_tag "#{a[1]}[permissions][identity][]", options_for_select(current_user.pretty_groups), class: "span12", prompt: "-- Select Group --" %>
+          <%= label_tag "#{a[1]}[permissions][permission_type][]", "Should this identity be allowed to read or edit?" %>
+          <div style="display: block;">
+            <%= select_tag "#{a[1]}[permissions][permission_type][]", options_for_select(['read', 'edit']), class: "span12" %>
+          </div>
+        </div>
+        <button class="btn btn-success btn-block" id="add_another_permission<%= i %>" type="button">
+          <i class="icon-plus-sign icon-large"></i>
+          Add Permission
+        </button>
+      </fieldset>
+      <script>
+
+        $('#add_another_permission<%= i %>').addFormFields({
+          target: $('#add_another_permission<%= i %>').siblings('div:not(.to-remove)'),
+          titleText: 'Remove permission'
+        });
+
+      </script>
+    </div>
+  <% end %>
+  <%= f.submit %>
+<% end %>
