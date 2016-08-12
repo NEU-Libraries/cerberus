@@ -19,9 +19,9 @@ class SentinelsController < ApplicationController
   end
 
   def create
-    puts "DGC DEBUG"
-    puts params.inspect
-    # sentinel = Sentinel.new(params[:sentinel].merge(pid: mint_unique_pid))
-    # sentinel.save!
+    sentinel = Sentinel.new(params["sentinel"])
+    sentinel.save!
+    flash[:notice] = "#{sentinel.id}"
+    redirect_to new_sentinel_path and return
   end
 end

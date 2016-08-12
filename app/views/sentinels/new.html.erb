@@ -1,3 +1,9 @@
+<header>
+  <h1 class="page-header">
+    Create a new Sentinel
+  </h1>
+</header>
+
 <%= form_for @sentinel, url: {action: "create"} do |f| %>
   <div>
   <% @content_list.each_with_index do |a, i| %>
@@ -12,10 +18,10 @@
         <div class="permission<%= i %>">
           <%= f.label :identity, "Select Group" %>
           <% options = {"" => ""} %>
-          <%= select_tag "#{a[1]}[permissions][identity][]", options_for_select(current_user.pretty_groups), class: "span12", prompt: "-- Select Group --" %>
-          <%= label_tag "#{a[1]}[permissions][permission_type][]", "Should this identity be allowed to read or edit?" %>
+          <%= select_tag "sentinel[#{a[1]}][permissions][identity][]", options_for_select(current_user.pretty_groups), class: "span12", prompt: "-- Select Group --" %>
+          <%= label_tag "sentinel[#{a[1]}][permissions][permission_type][]", "Should this identity be allowed to read or edit?" %>
           <div style="display: block;">
-            <%= select_tag "#{a[1]}[permissions][permission_type][]", options_for_select(['read', 'edit']), class: "span12" %>
+            <%= select_tag "sentinel[#{a[1]}][permissions][permission_type][]", options_for_select(['read', 'edit']), class: "span12" %>
           </div>
         </div>
         <button class="btn btn-success btn-block" id="add_another_permission<%= i %>" type="button">
@@ -42,10 +48,10 @@
         <div class="permission<%= i %>">
           <%= f.label :identity, "Select Group" %>
           <% options = {"" => ""} %>
-          <%= select_tag "#{a[1]}[permissions][identity][]", options_for_select(current_user.pretty_groups), class: "span12", prompt: "-- Select Group --" %>
-          <%= label_tag "#{a[1]}[permissions][permission_type][]", "Should this identity be allowed to read or edit?" %>
+          <%= select_tag "sentinel[#{a[1]}][permissions][identity][]", options_for_select(current_user.pretty_groups), class: "span12", prompt: "-- Select Group --" %>
+          <%= label_tag "sentinel[#{a[1]}][permissions][permission_type][]", "Should this identity be allowed to read or edit?" %>
           <div style="display: block;">
-            <%= select_tag "#{a[1]}[permissions][permission_type][]", options_for_select(['read', 'edit']), class: "span12" %>
+            <%= select_tag "sentinel[#{a[1]}][permissions][permission_type][]", options_for_select(['read', 'edit']), class: "span12" %>
           </div>
         </div>
         <button class="btn btn-success btn-block" id="add_another_permission<%= i %>" type="button">
