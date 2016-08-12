@@ -160,7 +160,8 @@ describe "aggregated statistics back fill job" do
         parent = collection.pid
         report_id = Loaders::LoadReport.create_from_strings(bill, 0, "College of Engineering", parent)
         load_report = Loaders::LoadReport.find(report_id)
-        load_report.item_reports.create_success(file, "")
+        load_report.item_reports.create_success(core_file, "", :create)
+
         date = DateTime.now.+2.weeks
         @job = AggregatedStatisticsBackFillJob.new(date)
         @job.run
@@ -172,7 +173,8 @@ describe "aggregated statistics back fill job" do
         parent = collection.pid
         report_id = Loaders::LoadReport.create_from_strings(bill, 0, "College of Engineering", parent)
         load_report = Loaders::LoadReport.find(report_id)
-        load_report.item_reports.create_success(file, "")
+        load_report.item_reports.create_success(core_file, "", :create)
+
         date = DateTime.now.+2.weeks
         @job = AggregatedStatisticsBackFillJob.new(date)
         @job.run
@@ -184,7 +186,8 @@ describe "aggregated statistics back fill job" do
         parent = collection.pid
         report_id = Loaders::LoadReport.create_from_strings(bill, 0, "College of Engineering", parent)
         load_report = Loaders::LoadReport.find(report_id)
-        load_report.item_reports.create_success(file, "")
+        load_report.item_reports.create_success(core_file, "", :create)
+
         date = DateTime.now.+2.weeks
         @job = AggregatedStatisticsBackFillJob.new(date)
         @job.run
@@ -243,7 +246,8 @@ describe "aggregated statistics back fill job" do
         parent = collection.pid
         report_id = Loaders::LoadReport.create_from_strings(bill, 0, "College of Engineering", parent)
         load_report = Loaders::LoadReport.find(report_id)
-        load_report.item_reports.create_success(file, "")
+        load_report.item_reports.create_success(core_file, "", :create)
+
         UploadAlert.create_from_core_file(file, :create, "single")
         UploadAlert.create_from_core_file(file, :update, "single")
         date = DateTime.now.+2.weeks

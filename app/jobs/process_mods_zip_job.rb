@@ -158,9 +158,11 @@ class ProcessModsZipJob
                     xml = Nokogiri::XML(core_file.mods.content)
                     handle = xml.xpath("//mods:identifier[contains(., 'hdl.handle.net')]").text
                   end
+                  old_cat = core_file.category
                   old_mods = core_file.mods.content
                   core_file.mods.content = ModsDatastream.xml_template.to_xml
                   core_file.mods.identifier = handle
+                  core_file.category = old_cat
                 else
                   populate_error_report(load_report, existing_file, core_file_checks(row_results["pid"]), row_results, core_file, old_mods, header_row, row)
                   next
@@ -171,20 +173,25 @@ class ProcessModsZipJob
                 next
               end
               assign_a_row(row_results, core_file)
-              if core_file.keywords.length < 1
+              if old_mods == core_file.mods.content
+                core_file.mods.content = old_mods
+                core_file.save!
+                load_report.item_reports.create_success(core_file, "", :update)
+                next
+              elsif core_file.keywords.length < 1
                 populate_error_report(load_report, existing_file, "Must have at least one keyword", row_results, core_file, old_mods, header_row, row)
               elsif core_file.title.blank?
                 populate_error_report(load_report, existing_file, "Must have a title", row_results, core_file, old_mods, header_row, row)
               elsif (!row_results["handle"].blank? && core_file.identifier != row_results["handle"]) || blank_handle
                 if handle.blank?
-                  item_report = load_report.item_reports.create_modified("The loader was unable to detect a handle for the original file.", core_file, row_results)
+                  item_report = load_report.item_reports.create_modified("The loader was unable to detect a handle for the original file.", core_file, row_results, :update)
                 else
                   xml = Nokogiri::XML(core_file.mods.content)
                   handle = xml.xpath("//mods:identifier[contains(., 'hdl.handle.net')]").text
                   if handle != row_results["handle"]
-                    item_report = load_report.item_reports.create_modified("Handle does not match", core_file, row_results)
+                    item_report = load_report.item_reports.create_modified("Handle does not match", core_file, row_results, :update)
                   else
-                    item_report = load_report.item_reports.create_modified("Handle reformatted for correctness", core_file, row_results)
+                    item_report = load_report.item_reports.create_modified("Handle reformatted for correctness", core_file, row_results, :update)
                   end
                 end
                 item_report.title = core_file.title
@@ -204,17 +211,21 @@ class ProcessModsZipJob
                   else
                     poster_path = File.dirname(dir_path) + "/" + row_results["poster_path"]
                     Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename, poster_path))
-                    load_report.item_reports.create_success(core_file, "")
+                    load_report.item_reports.create_success(core_file, "", :create)
                     UploadAlert.create_from_core_file(core_file, :create, "spreadsheet")
                   end
                 else
                   if !existing_files
                     Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename))
                     UploadAlert.create_from_core_file(core_file, :create, "spreadsheet")
+                    load_report.item_reports.create_success(core_file, "", :create)
                   else
-                    UploadAlert.create_from_core_file(core_file, :update, "spreadsheet")
+                    distance = DamerauLevenshtein.distance(old_mods, core_file.mods.content, 1, 10000)
+                    if distance > 0
+                      UploadAlert.create_from_core_file(core_file, :update, "spreadsheet")
+                    end
+                    load_report.item_reports.create_success(core_file, "", :update)
                   end
-                  load_report.item_reports.create_success(core_file, "")
                 end
               end
             end

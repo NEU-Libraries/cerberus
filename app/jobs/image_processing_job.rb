@@ -247,9 +247,9 @@ class ImageProcessingJob
           UploadAlert.create_from_core_file(core_file, :create, "iptc")
         end
         if modified == true
-          report = load_report.item_reports.create_modified(modified_message, core_file, iptc)
+          report = load_report.item_reports.create_modified(modified_message, core_file, iptc, :create)
         else
-          report = load_report.item_reports.create_success(core_file, iptc)
+          report = load_report.item_reports.create_success(core_file, iptc, :create)
         end
       end
     rescue Exception => error
