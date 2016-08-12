@@ -76,7 +76,13 @@ class AggregatedStatisticsJob
             self.files["#{upl.pid}"]["size_increase"] += size
             increase_parent_size(doc.parent, size)
           elsif upl.change_type == "update"
-            self.files["#{upl.pid}"]["form_edits"] += 1
+            if upl.load_type == "spreadsheet"
+              self.files["#{upl.pid}"]["spreadsheet_load_edits"] += 1
+            elsif up.load_type == "xml"
+              self.files["#{upl.pid}"]["xml_load_edits"] += 1
+            else
+              self.files["#{upl.pid}"]["form_edits"] += 1
+            end
             increase_parent_statistics(doc.parent, "form_edits")
           end
         end
@@ -96,11 +102,13 @@ class AggregatedStatisticsJob
         if doc.klass == "CoreFile"
           # Stub out
           stub_out_file_hash(upl.pid)
-          self.files["#{upl.pid}"]["loader_uploads"] += 1
-          increase_parent_statistics(doc.parent, "loader_uploads")
-          size = get_core_file_size(doc.pid)
-          self.files["#{upl.pid}"]["size_increase"] += size
-          increase_parent_size(doc.parent, size)
+          if upl.change_type != "update"
+            self.files["#{upl.pid}"]["loader_uploads"] += 1
+            increase_parent_statistics(doc.parent, "loader_uploads")
+            size = get_core_file_size(doc.pid)
+            self.files["#{upl.pid}"]["size_increase"] += size
+            increase_parent_size(doc.parent, size)
+          end
         end
       rescue Exception => error
         failed_pids_log.warn "#{Time.now} - Error processing PID: #{upl.pid}"
