@@ -186,8 +186,7 @@ class ProcessXmlZipJob
                 next
               end
               if existing_files == true && old_mods == core_file.mods.content
-                load_report.item_reports.create_success(core_file, "")
-                UploadAlert.create_from_core_file(core_file, :update, "xml")
+                load_report.item_reports.create_success(core_file, "", :update)
                 x = x+1
                 core_file.mods.content = old_mods
                 core_file.save!
@@ -205,7 +204,7 @@ class ProcessXmlZipJob
                   else
                     poster_path = dir_path + "/" + row_results["poster_path"]
                     Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename, poster_path))
-                    load_report.item_reports.create_success(core_file, "")
+                    load_report.item_reports.create_success(core_file, "", :create)
                     UploadAlert.create_from_core_file(core_file, :create, "xml")
                     x = x+1
                     next
@@ -214,10 +213,14 @@ class ProcessXmlZipJob
                   if !existing_files
                     Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename))
                     UploadAlert.create_from_core_file(core_file, :create, "xml")
+                    load_report.item_reports.create_success(core_file, "", :create)
                   else
-                    UploadAlert.create_from_core_file(core_file, :update, "xml")
+                    distance = DamerauLevenshtein.distance(old_mods, core_file.mods.content, 1, 10000)
+                    if distance > 0
+                      UploadAlert.create_from_core_file(core_file, :update, "xml")
+                      load_report.item_reports.create_success(core_file, "", :update)
+                    end
                   end
-                  load_report.item_reports.create_success(core_file, "")
                   x = x+1
                   next
                 end

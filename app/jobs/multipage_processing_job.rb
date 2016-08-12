@@ -100,7 +100,7 @@ class MultipageProcessingJob
     end
 
     if self.file_values["last_item"].downcase == "true"
-      load_report.item_reports.create_success(core_file, "")
+      load_report.item_reports.create_success(core_file, "", :create)
 
       core_file.reload
       core_file.identifier = make_handle(core_file.persistent_url, client)

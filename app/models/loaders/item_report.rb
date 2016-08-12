@@ -1,10 +1,10 @@
 class Loaders::ItemReport < ActiveRecord::Base
   belongs_to :load_report
   attr_accessible :exception, :valid, :pid, :title, :collection, :iptc, :original_file
-  attr_accessible :modified
+  attr_accessible :modified, :change_type
   serialize :iptc
 
-  def self.create_success(core_file, iptc)
+  def self.create_success(core_file, iptc, change_type)
     x = Loaders::ItemReport.new
     x.validity             = true
     x.modified             = false
@@ -13,10 +13,11 @@ class Loaders::ItemReport < ActiveRecord::Base
     x.title             = core_file.title
     x.iptc              = iptc
     x.original_file     = core_file.label
+    x.change_type       = change_type
     x.save! ? x : false
   end
 
-  def self.create_modified(exception, core_file, iptc)
+  def self.create_modified(exception, core_file, iptc, change_type)
     x = Loaders::ItemReport.new
     x.validity          = true
     x.modified          = true
@@ -26,6 +27,7 @@ class Loaders::ItemReport < ActiveRecord::Base
     x.exception         = exception
     x.iptc              = iptc
     x.original_file     = core_file.label
+    x.change_type       = change_type
     x.save! ? x : false
   end
 

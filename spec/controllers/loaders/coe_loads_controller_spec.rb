@@ -66,7 +66,7 @@ describe Loaders::CoeLoadsController do
       @load_report = Loaders::LoadReport.find(@report_id)
       iptc = {:ImageDescription=>"April 9, 2015 - Scenes from the RISE:2015 expo and poster presentations held in Cabot Cage at Northeastern University on April 9, 2015. RISE (Research, Innovation and Scholarship Expo) is organized by the Center for Research Innovation and showcases student and faculty research at Northeastern University.", :Copyright=>"Copyright Northeastern University 2015", :"Province-State"=>"MA", :Keywords=>["innovation", "entrepreneurship", "venture", "research"], :"By-line"=>"Canaday, Brooks", :"By-lineTitle"=>"Staff Photographer", :Format=>"image/jpeg"}
       @core_file = CoreFile.create(title: "Test COE", parent: @coe_col, depositor: coe_loader.nuid)
-      @item_report = @load_report.item_reports.create_success(@core_file, iptc)
+      @item_report = @load_report.item_reports.create_success(@core_file, iptc, :create)
     end
 
     it "renders the 404 page for image reports that don't exist" do
