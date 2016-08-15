@@ -19,7 +19,9 @@ class SentinelsController < ApplicationController
   end
 
   def create
-    sentinel = Sentinel.new(params["sentinel"])
+    set = ActiveFedora::Base.find(parent: params[:parent], cast: true)
+
+    sentinel = Sentinel.new(params["sentinel"].merge(set_pid: set.pid))
     sentinel.save!
     flash[:notice] = "#{sentinel.id}"
     redirect_to new_sentinel_path and return
