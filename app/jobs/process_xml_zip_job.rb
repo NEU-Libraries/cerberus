@@ -105,8 +105,8 @@ class ProcessXmlZipJob
       x = 0
       start = header_position + 1
       end_row = spreadsheet.last_row.to_i
-      (start..end_row).each do |x|
-        row = spreadsheet.row(x)
+      (start..end_row).each do |this_row|
+        row = spreadsheet.row(this_row)
         if row.present? && header_row.present?
           begin
             count = count + 1
