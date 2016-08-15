@@ -134,6 +134,7 @@ describe ImageProcessingJob do
       it 'creates error report if not ImageMasterFile' do
         @images.count.should == 1
         @images.first.validity.should be false
+        UploadAlert.where(:pid=>@images.first.pid).count.should == 0
       end
 
       it 'should have empty pid value' do
@@ -154,6 +155,8 @@ describe ImageProcessingJob do
       it 'creates success report' do
         @images.first.validity.should be true
         @images.first.modified.should be false
+        UploadAlert.where(:pid=>@images.first.pid).count.should == 1
+        UploadAlert.where(:pid=>@images.first.pid).first.load_type.should == "iptc"
       end
 
       it 'sets original_filename to basename of file in tmp dir' do
@@ -209,6 +212,8 @@ describe ImageProcessingJob do
         @images.count.should == 1
         @images.first.validity.should be true
         @images.first.modified.should be true
+        UploadAlert.where(:pid=>@images.first.pid).count.should == 1
+        UploadAlert.where(:pid=>@images.first.pid).first.load_type.should == "iptc"
       end
 
       it 'sets original_filename to basename of file in tmp dir' do
@@ -230,6 +235,8 @@ describe ImageProcessingJob do
         @images.count.should == 1
         @images.first.validity.should be true
         @images.first.modified.should be true
+        UploadAlert.where(:pid=>@images.first.pid).count.should == 1
+        UploadAlert.where(:pid=>@images.first.pid).first.load_type.should == "iptc"
       end
 
     end

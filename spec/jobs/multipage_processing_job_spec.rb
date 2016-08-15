@@ -61,6 +61,8 @@ describe MultipageProcessingJob do
       @core_file.mods.identifier.should_not == nil
       @core_file.mods.identifier.type.should == ["hdl"]
       @load_report.reload.item_reports.count.should == 1
+      UploadAlert.where(:pid=>@core_file.pid).count.should == 1
+      UploadAlert.where(:pid=>@core_file.pid).first.load_type.should == "multipage"
     end
   end
 
@@ -122,6 +124,10 @@ describe MultipageProcessingJob do
     it "does not generate item_reports" do
       @load_report.reload.item_reports.count.should == 0 #won't generate success image report until it is the last item
     end
+
+    it "does not create upload alert" do
+      UploadAlert.where(:pid=>@core_file.pid).count.should == 0
+    end
   end
 
   describe "true multipage object, first image" do
@@ -182,6 +188,10 @@ describe MultipageProcessingJob do
     it "does not generate item_reports" do
       @load_report.reload.item_reports.count.should == 0 #won't generate success image report until it is the last item
     end
+
+    it "does not create upload alert" do
+      UploadAlert.where(:pid=>@core_file.pid).count.should == 0
+    end
   end
 
   describe "true multipage object, last image" do
@@ -240,6 +250,8 @@ describe MultipageProcessingJob do
 
     it "generates item_reports" do
       @load_report.reload.item_reports.count.should == 1
+      UploadAlert.where(:pid=>@core_file.pid).count.should == 1
+      UploadAlert.where(:pid=>@core_file.pid).first.load_type.should == "multipage"
     end
 
     it "creates handle" do
