@@ -147,6 +147,7 @@ class ProcessXmlZipJob
                       else
                         if row_results["embargo_date"].match(/\d{4}-\d{2}-\d{2}/)
                           core_file.embargo_release_date = row_results["embargo_date"]
+                          core_file.save!
                         else
                           populate_error_report(load_report, existing_file, "Embargo date must follow format YYYY-MM-DD", row_results, core_file, old_mods, header_row, row)
                           x = x+1
