@@ -85,9 +85,7 @@ class MultipageProcessingJob
       end
 
       core_file.thumbnail_list = thumbnail_list
-      if core_file.save!
-        UploadAlert.create_from_core_file(core_file, :create, "multipage")
-      end
+      core_file.save!
     end
 
     if !self.zip_files.blank?
@@ -104,7 +102,9 @@ class MultipageProcessingJob
 
       core_file.reload
       core_file.identifier = make_handle(core_file.persistent_url, client)
-      core_file.save!
+      if core_file.save!
+        UploadAlert.create_from_core_file(core_file, :create, "multipage")
+      end
     end
   end
 
