@@ -103,7 +103,10 @@ class ProcessXmlZipJob
     else # not a preview, process everything
       existing_files = false
       x = 0
-      spreadsheet.each_row_streaming(offset: header_position) do |row|
+      start = header_position + 1
+      end_row = spreadsheet.last_row.to_i
+      (start..end_row).each do |x|
+        row = spreadsheet.row(x)
         if row.present? && header_row.present?
           begin
             count = count + 1
