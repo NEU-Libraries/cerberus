@@ -149,6 +149,8 @@ describe ProcessModsZipJob do
       @lr.reload
       @lr.number_of_files.should == 4
       @lr.item_reports.length.should == 0 #no image reports created when its a preview
+      cf = CoreFile.find(@lr.preview_file_pid)
+      UploadAlert.where(:pid=>cf.pid).count.should == 0
     end
 
     it_should_behave_like "successful mods" do
@@ -196,6 +198,9 @@ describe ProcessModsZipJob do
       @lr.item_reports.length.should == 4
       @lr.fail_count.should == 3
       @lr.success_count.should == 1
+      cf = CoreFile.find(@lr.item_reports[0].pid)
+      UploadAlert.where(:pid=>cf.pid).count.should == 1
+      UploadAlert.where(:pid=>cf.pid).first.load_type.should == "spreadsheet"
     end
 
     it_should_behave_like "successful mods" do
