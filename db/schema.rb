@@ -11,20 +11,22 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20160812152236) do
+ActiveRecord::Schema.define(:version => 20160812194852) do
 
   create_table "aggregated_statistics", :force => true do |t|
     t.string   "object_type"
     t.string   "pid"
-    t.integer  "views",                       :default => 0
-    t.integer  "downloads",                   :default => 0
-    t.integer  "streams",                     :default => 0
-    t.integer  "loader_uploads",              :default => 0
-    t.integer  "user_uploads",                :default => 0
-    t.integer  "form_edits",                  :default => 0
-    t.integer  "xml_edits",                   :default => 0
-    t.integer  "size_increase",  :limit => 8, :default => 0
+    t.integer  "views",                               :default => 0
+    t.integer  "downloads",                           :default => 0
+    t.integer  "streams",                             :default => 0
+    t.integer  "loader_uploads",                      :default => 0
+    t.integer  "user_uploads",                        :default => 0
+    t.integer  "form_edits",                          :default => 0
+    t.integer  "xml_edits",                           :default => 0
+    t.integer  "size_increase",          :limit => 8, :default => 0
     t.datetime "processed_at"
+    t.integer  "spreadsheet_load_edits",              :default => 0
+    t.integer  "xml_load_edits",                      :default => 0
   end
 
   create_table "bookmarks", :force => true do |t|

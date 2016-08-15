@@ -43,7 +43,7 @@ class Admin::StatisticsController < ApplicationController
     @uploads_count = @interface_uploads
     @interface_uploads = @interface_uploads - @loader_uploads
     @interface_upload_size = 0
-    interface_upload_pids = UploadAlert.where('change_type = ? AND content_type != ? AND (created_at BETWEEN ? AND ?)', 'create', 'collection', DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day).pluck(:pid)
+    interface_upload_pids = UploadAlert.where('change_type = ? AND content_type != ? AND (created_at BETWEEN ? AND ?) AND (load_type != ? AND load_type != ?)', 'create', 'collection', DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day, "spreadsheet", "xml").pluck(:pid)
     interface_upload_pids.each do |pid|
       @interface_upload_size += get_core_file_size(pid)
     end
