@@ -141,6 +141,7 @@ class ProcessXmlZipJob
                     end
                     assign_a_row(row_results, core_file, dir_path)
                     core_file.identifier = make_handle(core_file.persistent_url, client)
+                    core_file.save!
 
                     if !row_results["embargoed"].blank? && row_results["embargoed"].to_s.downcase == "true"
                       if row_results["embargo_date"].blank?
@@ -336,10 +337,10 @@ class ProcessXmlZipJob
   def populate_error_report(load_report, existing_file, error, row_results, core_file, old_mods, header_row, row)
     row_results = row_results.blank? ? nil : row_results
     if core_file
-      if existing_file && CoreFile.exists?(core_file.pid)
+      if old_mods
         core_file.mods.content = old_mods
         core_file.save!
-      else
+      elsif !existing_file
         core_file.destroy if CoreFile.exists?(core_file.pid)
       end
       title = core_file.title.blank? ? row_results["title"] : core_file.title
