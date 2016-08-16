@@ -21,6 +21,10 @@
         Enable <%= check_box_tag "#{a[1]}_checkbox" %>
         <br/>
         <br/>
+
+        <%= label_tag 'core_file[mass_permissions]', "Choose Mass Permissions:" %>
+        <%= select_tag 'core_file[mass_permissions]', options_for_select(['public', 'private'], 'public') , class: "span6", disabled: true %>
+
         <div class="permission<%= i %>">
           <%= f.label :identity, "Select Group" %>
           <% options = {"" => ""} %>
@@ -30,7 +34,7 @@
             <%= select_tag "sentinel[#{a[1]}][permissions][permission_type][]", options_for_select(['read', 'edit']), class: "span12", disabled: true %>
           </div>
         </div>
-        <button class="btn btn-success btn-block disabled" id="add_another_permission<%= i %>" type="button">
+        <button disabled class="btn btn-success btn-block" id="add_another_permission<%= i %>" type="button">
           <i class="icon-plus-sign icon-large"></i>
           Add Permission
         </button>
@@ -54,6 +58,10 @@
         Enable <%= check_box_tag "#{a[1]}_checkbox" %>
         <br/>
         <br/>
+
+        <%= label_tag 'core_file[mass_permissions]', "Choose Mass Permissions:" %>
+        <%= select_tag 'core_file[mass_permissions]', options_for_select(['public', 'private'], 'public') , class: "span6", disabled: true %>
+
         <div class="permission<%= i %>">
           <%= f.label :identity, "Select Group" %>
           <% options = {"" => ""} %>
@@ -80,3 +88,15 @@
   <% end %>
   <%= f.submit %>
 <% end %>
+
+<script>
+  $(document).ready(function () {
+  	$("input:checkbox").click(function () {
+  		if($(this).is(':checked')) {
+  			$(this).parent().find('*:disabled').removeAttr("disabled");
+  		} else {
+  			$(this).parent().find('select, button').prop('disabled', true);
+  		}
+  	});
+  });
+</script>
