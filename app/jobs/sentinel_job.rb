@@ -36,9 +36,11 @@ class SentinelJob
     if !sentinel.nil?
       content_docs.each do |content_doc|
         content_object = ActiveFedora::Base.find(content_doc.pid)
-        permissions = sentinel.send(model_hsh[content_doc.klass].to_sym)["permissions"]
-        content_object.permissions = permissions
-        content_object.save!
+        if !sentinel.send(model_hsh[content_doc.klass].to_sym).blank?
+          permissions = sentinel.send(model_hsh[content_doc.klass].to_sym)["permissions"]
+          content_object.permissions = permissions
+          content_object.save!
+        end
       end
     end
   end

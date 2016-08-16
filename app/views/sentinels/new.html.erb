@@ -5,6 +5,9 @@
 </header>
 
 <%= form_for @sentinel, url: {action: "create"} do |f| %>
+  <% if params[:parent].present? %>
+  <%= f.hidden_field :set_pid, :value => params[:parent] %>
+  <% end %>
   <div>
   <% @content_list.each_with_index do |a, i| %>
     <% if i.even? %>
@@ -15,16 +18,19 @@
         <legend>
           <%= "#{a[0]}" %>
         </legend>
+        Enable <%= check_box_tag "#{a[1]}_checkbox" %>
+        <br/>
+        <br/>
         <div class="permission<%= i %>">
           <%= f.label :identity, "Select Group" %>
           <% options = {"" => ""} %>
-          <%= select_tag "sentinel[#{a[1]}][permissions][identity][]", options_for_select(current_user.pretty_groups), class: "span12", prompt: "-- Select Group --" %>
+          <%= select_tag "sentinel[#{a[1]}][permissions][identity][]", options_for_select(current_user.pretty_groups), class: "span12", prompt: "-- Select Group --", disabled: true %>
           <%= label_tag "sentinel[#{a[1]}][permissions][permission_type][]", "Should this identity be allowed to read or edit?" %>
           <div style="display: block;">
-            <%= select_tag "sentinel[#{a[1]}][permissions][permission_type][]", options_for_select(['read', 'edit']), class: "span12" %>
+            <%= select_tag "sentinel[#{a[1]}][permissions][permission_type][]", options_for_select(['read', 'edit']), class: "span12", disabled: true %>
           </div>
         </div>
-        <button class="btn btn-success btn-block" id="add_another_permission<%= i %>" type="button">
+        <button class="btn btn-success btn-block disabled" id="add_another_permission<%= i %>" type="button">
           <i class="icon-plus-sign icon-large"></i>
           Add Permission
         </button>
@@ -45,16 +51,19 @@
         <legend>
           <%= "#{a[0]}" %>
         </legend>
+        Enable <%= check_box_tag "#{a[1]}_checkbox" %>
+        <br/>
+        <br/>
         <div class="permission<%= i %>">
           <%= f.label :identity, "Select Group" %>
           <% options = {"" => ""} %>
-          <%= select_tag "sentinel[#{a[1]}][permissions][identity][]", options_for_select(current_user.pretty_groups), class: "span12", prompt: "-- Select Group --" %>
+          <%= select_tag "sentinel[#{a[1]}][permissions][identity][]", options_for_select(current_user.pretty_groups), class: "span12", prompt: "-- Select Group --", disabled: true %>
           <%= label_tag "sentinel[#{a[1]}][permissions][permission_type][]", "Should this identity be allowed to read or edit?" %>
           <div style="display: block;">
-            <%= select_tag "sentinel[#{a[1]}][permissions][permission_type][]", options_for_select(['read', 'edit']), class: "span12" %>
+            <%= select_tag "sentinel[#{a[1]}][permissions][permission_type][]", options_for_select(['read', 'edit']), class: "span12", disabled: true %>
           </div>
         </div>
-        <button class="btn btn-success btn-block" id="add_another_permission<%= i %>" type="button">
+        <button class="btn btn-success btn-block disabled" id="add_another_permission<%= i %>" type="button">
           <i class="icon-plus-sign icon-large"></i>
           Add Permission
         </button>
