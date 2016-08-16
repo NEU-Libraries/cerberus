@@ -38,7 +38,7 @@ class ProcessXmlZipJob
     count = 0
     spreadsheet = load_spreadsheet(spreadsheet_file_path)
     if spreadsheet.first_row.nil?
-      raise "Your upload could not be processed because the submitted .zip file contains an empty spreadsheet"
+      raise "Your upload could not be processed because the submitted .zip file contains an empty spreadsheet."
       return
     end
 
@@ -55,7 +55,7 @@ class ProcessXmlZipJob
           # Process first row
           preview_file = CoreFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
           if row_results["file_name"].blank? && row_results["pid"].blank?
-            raise "Your upload could not be processed because the spreadsheet is missing file names or PIDs. Please update the spreadsheet and try again"
+            raise "Your upload could not be processed because the spreadsheet is missing file names or PIDs. Please update the spreadsheet and try again."
             return
           elsif row_results["pid"].blank? && !row_results["file_name"].blank? && existing_files == true
             raise "Your upload could not be processed because the submitted .zip file contains new files. Please update the .zip file or select the \"New Files + Metadata\" option."
@@ -103,7 +103,10 @@ class ProcessXmlZipJob
     else # not a preview, process everything
       existing_files = false
       x = 0
-      spreadsheet.each_row_streaming(offset: header_position) do |row|
+      start = header_position + 1
+      end_row = spreadsheet.last_row.to_i
+      (start..end_row).each do |this_row|
+        row = spreadsheet.row(this_row)
         if row.present? && header_row.present?
           begin
             count = count + 1
@@ -138,6 +141,7 @@ class ProcessXmlZipJob
                     end
                     assign_a_row(row_results, core_file, dir_path)
                     core_file.identifier = make_handle(core_file.persistent_url, client)
+                    core_file.save!
 
                     if !row_results["embargoed"].blank? && row_results["embargoed"].to_s.downcase == "true"
                       if row_results["embargo_date"].blank?
@@ -147,6 +151,7 @@ class ProcessXmlZipJob
                       else
                         if row_results["embargo_date"].match(/\d{4}-\d{2}-\d{2}/)
                           core_file.embargo_release_date = row_results["embargo_date"]
+                          core_file.save!
                         else
                           populate_error_report(load_report, existing_file, "Embargo date must follow format YYYY-MM-DD", row_results, core_file, old_mods, header_row, row)
                           x = x+1
@@ -276,7 +281,7 @@ class ProcessXmlZipJob
       end
     else
       # Raise error, can't load core file mods metadata
-      raise "XML Files does not exist at the path specified."
+      raise "Your upload could not be processed becuase the XML files could not be found."
       core_file = nil
     end
   end
@@ -340,10 +345,10 @@ class ProcessXmlZipJob
   def populate_error_report(load_report, existing_file, error, row_results, core_file, old_mods, header_row, row)
     row_results = row_results.blank? ? nil : row_results
     if core_file
-      if existing_file && CoreFile.exists?(core_file.pid)
+      if old_mods
         core_file.mods.content = old_mods
         core_file.save!
-      else
+      elsif !existing_file
         core_file.destroy if CoreFile.exists?(core_file.pid)
       end
       title = core_file.title.blank? ? row_results["title"] : core_file.title
