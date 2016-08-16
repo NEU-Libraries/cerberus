@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mods:mods xmlns:drs="https://repository.neu.edu/spec/v1" xmlns:mods="http://www.loc.gov/mods/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:niec="http://repository.neu.edu/schema/niec" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd">
+    <mods:titleInfo usage="primary">
+        <mods:title>Our Environment, Our Heath Event</mods:title>
+    </mods:titleInfo>
+    <mods:titleInfo type="alternative">
+        <mods:title/>
+    </mods:titleInfo>
+    <mods:abstract>July 18, 2016 - BOSTON, MA. - Linda Birnbaum, Director of the National Institute of Environmental Health Sciences, National Toxicology Program speaks during the Our Environmental, Our Health event in the Alumni Center at Northeastern University on July 18, 2016. Photo by Matthew Modoono/Northeastern University</mods:abstract>
+    <mods:name type="personal" usage="primary"><mods:namePart type="given">Matthew</mods:namePart><mods:namePart type="family">Modoono</mods:namePart><mods:namePart/><mods:role><mods:roleTerm type="text">University Photographer</mods:roleTerm></mods:role></mods:name>
+    <mods:name type="corporate"/>
+    <mods:originInfo>
+        <mods:place>
+            <mods:placeTerm/>
+            <mods:placeTerm type="text">BOSTON MA</mods:placeTerm></mods:place>
+        <mods:dateCreated keyDate="yes" encoding="w3cdtf">2016-07-18</mods:dateCreated>
+        <mods:publisher>Northeastern University</mods:publisher><mods:copyrightDate encoding="w3cdtf">2016-07-18</mods:copyrightDate></mods:originInfo>
+    <mods:language>
+        <mods:languageTerm/>
+    </mods:language>
+    <mods:note type="citation"/>
+    <mods:subject>
+        <mods:topic>northeastern</mods:topic>
+    </mods:subject><mods:subject><mods:topic>university</mods:topic></mods:subject><mods:subject><mods:topic>boston</mods:topic></mods:subject><mods:subject><mods:topic>campus</mods:topic></mods:subject><mods:subject><mods:topic>environment</mods:topic></mods:subject><mods:subject><mods:topic>health</mods:topic></mods:subject><mods:subject><mods:topic>linda</mods:topic></mods:subject><mods:subject><mods:topic>birnbaumw</mods:topic></mods:subject>
+    <mods:typeOfResource>still image</mods:typeOfResource>
+    <mods:recordInfo>
+        <mods:recordContentSource/>
+        <mods:recordOrigin/>
+        <mods:descriptionStandard/>
+        <mods:languageTerm/>
+    </mods:recordInfo>
+    <mods:physicalDescription>
+        <mods:form authority="marcform">electronic</mods:form>
+        <mods:digitalOrigin>born digital</mods:digitalOrigin><mods:extent>1 photograph</mods:extent></mods:physicalDescription>
+    <mods:extension displayLabel="scholarly_object">
+        <scholarly_object>
+            <category/>
+            <department/>
+            <degree/>
+            <course_info>
+                <course_number/>
+                <course_title/>
+            </course_info>
+        </scholarly_object>
+    </mods:extension>
+    <mods:extension>
+        <niec:niec/>
+    </mods:extension>
+    <mods:genre authority="aat">photographs</mods:genre><mods:accessCondition type="use and reproduction">Marketing and Communications images are for use only within the context of Northeastern University. Appropriate uses include: Northeastern University-related websites, Northeastern University-based print/web publications and for speaking appearances when acting as a representative of Northeastern University. Images should be credited: "Photographer Name/Northeastern University." Images are not to be used for self-promotional purposes outside of Northeastern University such as LinkedIn, Facebook or in commercial/external publications such as advertisements, books or magazines without written permission from Northeastern Marketing and Communications. For more information, please contact the senior staff photographer in the office of Marketing and Communications at 617.373.6767</mods:accessCondition><mods:classification>campus -- guest -- alumni center</mods:classification></mods:mods>

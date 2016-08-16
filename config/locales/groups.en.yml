@@ -26,12 +26,14 @@ en:
       name: "Marine Science Center Staff"
     northeastern:drs:college_of_science:social_interaction_lab:
       name: "College of Science - Social Interaction Lab Staff"
+    northeastern:drs:college_of_social_sciences_humanities:early_black_boston_digital_almanac:
+      name: "CSSH - Early Black Boston Digital Almanac Team"
     northeastern:drs:college_of_social_sciences_humanities:dominican_prayer_book:
-      name: "Dominican Prayer Book Project Team"
+      name: "CSSH - Dominican Prayer Book Project Team"
     northeastern:drs:college_of_social_sciences_humanities:dudley_square_project:
-      name: "College of Social Sciences and Humanities - Dudley Square Project Team"
+      name: "CSSH - Dudley Square Project Team"
     northeastern:drs:college_of_social_sciences_humanities:thoreau_drawings:
-      name: "College of Social Sciences and Humanities - Thoreau Project Team"
+      name: "CSSH - Thoreau Project Team"
     northeastern:drs:college_of_social_sciences_humanities:holocaust_awareness_committee:
       name: "Holocaust Awareness Committee"
     northeastern:drs:damore_mckim:marcom:
