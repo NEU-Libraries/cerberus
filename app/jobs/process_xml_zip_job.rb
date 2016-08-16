@@ -38,7 +38,7 @@ class ProcessXmlZipJob
     count = 0
     spreadsheet = load_spreadsheet(spreadsheet_file_path)
     if spreadsheet.first_row.nil?
-      raise "Your upload could not be processed because the submitted .zip file contains an empty spreadsheet"
+      raise "Your upload could not be processed because the submitted .zip file contains an empty spreadsheet."
       return
     end
 
@@ -55,7 +55,7 @@ class ProcessXmlZipJob
           # Process first row
           preview_file = CoreFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
           if row_results["file_name"].blank? && row_results["pid"].blank?
-            raise "Your upload could not be processed because the spreadsheet is missing file names or PIDs. Please update the spreadsheet and try again"
+            raise "Your upload could not be processed because the spreadsheet is missing file names or PIDs. Please update the spreadsheet and try again."
             return
           elsif row_results["pid"].blank? && !row_results["file_name"].blank? && existing_files == true
             raise "Your upload could not be processed because the submitted .zip file contains new files. Please update the .zip file or select the \"New Files + Metadata\" option."
@@ -273,7 +273,7 @@ class ProcessXmlZipJob
       end
     else
       # Raise error, can't load core file mods metadata
-      raise "XML Files does not exist at the path specified."
+      raise "Your upload could not be processed becuase the XML files could not be found."
       core_file = nil
     end
   end
