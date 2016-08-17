@@ -1,0 +1,33 @@
+<fieldset class="span6">
+  <legend>
+    <%= "#{a[0]}" %>
+  </legend>
+  Enable <%= check_box_tag "#{a[1]}_checkbox" %>
+  <br/>
+  <br/>
+
+  <%= label_tag "sentinel[#{a[1]}][mass_permissions]", "Choose Mass Permissions:" %>
+  <%= select_tag "sentinel[#{a[1]}][mass_permissions]", options_for_select(['public', 'private'], 'public') , class: "span6" %>
+
+  <div class="permission<%= i %>">
+    <%= f.label :identity, "Select Group" %>
+    <% options = {"" => ""} %>
+    <%= select_tag "sentinel[#{a[1]}][permissions][identity][]", options_for_select(current_user.pretty_groups), class: "span12", prompt: "-- Select Group --" %>
+    <%= label_tag "sentinel[#{a[1]}][permissions][permission_type][]", "Should this identity be allowed to read or edit?" %>
+    <div style="display: block;">
+      <%= select_tag "sentinel[#{a[1]}][permissions][permission_type][]", options_for_select(['read', 'edit']), class: "span12" %>
+    </div>
+  </div>
+  <button class="btn btn-success btn-block" id="add_another_permission<%= i %>" type="button">
+    <i class="icon-plus-sign icon-large"></i>
+    Add Permission
+  </button>
+</fieldset>
+<script>
+
+  $('#add_another_permission<%= i %>').addFormFields({
+    target: $('#add_another_permission<%= i %>').siblings('div:not(.to-remove)'),
+    titleText: 'Remove permission'
+  });
+
+</script>
