@@ -16,7 +16,15 @@ class SentinelsController < ApplicationController
                     ["Video Master", "video_master"],
                     ["Video", "video"],
                     ["Zip", "zip"]]
-    flash[:alert] = "Disabled models will receive no changes. Enabled models will have thier permissions wiped clean, and replaced with whatever is chosen on this form."
+
+    set = ActiveFedora::Base.find(params[:parent], cast: true)
+
+    if set.class == Collection
+      @collection = true
+      flash[:alert] = "Core File permissions are mandatory for Sentinels belonging to a Collection. Any disabled models will inherit their permissions from the Core File."
+    else
+      flash[:alert] = "Disabled models will receive no changes. Enabled models will have thier permissions wiped clean, and replaced with whatever is chosen on this form."
+    end
   end
 
   def create
