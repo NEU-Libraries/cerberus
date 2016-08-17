@@ -23,11 +23,11 @@
 
         <legend>Mass Permissions</legend>
         <% if @collection %>
-          <%= label_tag 'core_file[mass_permissions]', "Choose Mass Permissions:", class: "required-label" %>
+          <%= label_tag 'sentinel[core_file][mass_permissions]', "Choose Mass Permissions:", class: "required-label" %>
         <% else %>
-          <%= label_tag 'core_file[mass_permissions]', "Choose Mass Permissions:" %>
+          <%= label_tag 'sentinel[core_file][mass_permissions]', "Choose Mass Permissions:" %>
         <% end %>
-        <%= select_tag 'core_file[mass_permissions]', options_for_select(['public', 'private'], 'public') , class: "span6", disabled: true %>
+        <%= select_tag 'sentinel[core_file][mass_permissions]', options_for_select(['public', 'private'], 'public') , class: "span6", disabled: true %>
         <p class="help-block">
           <ul>
             <li>Setting to 'public' will allow anyone accessing the site to see your item.</li>
@@ -37,7 +37,7 @@
       </fieldset>
       <fieldset class="span6">
         <legend>Permissions</legend>
-        <%= render partial: 'shared/sets/data_form_permissions_element', locals: {:f => f, :array_type => "core_file", :permissions => [] } %>
+        <%= render partial: 'shared/sets/data_form_permissions_element', locals: {:f => f, :array_type => "sentinel[core_file]", :permissions => [] } %>
         <button class="btn btn-success btn-block" id="add_another_permission" type="button">
           <i class="icon-plus-sign icon-large"></i>
           Add Permission
