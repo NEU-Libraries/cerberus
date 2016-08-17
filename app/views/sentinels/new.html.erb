@@ -66,8 +66,8 @@
           <br/>
           <br/>
 
-          <%= label_tag "#{a[1]}[mass_permissions]", "Choose Mass Permissions:" %>
-          <%= select_tag "#{a[1]}[mass_permissions]", options_for_select(['public', 'private'], 'public') , class: "span6" %>
+          <%= label_tag "sentinel[#{a[1]}][mass_permissions]", "Choose Mass Permissions:" %>
+          <%= select_tag "sentinel[#{a[1]}][mass_permissions]", options_for_select(['public', 'private'], 'public') , class: "span6" %>
 
           <div class="permission<%= i %>">
             <%= f.label :identity, "Select Group" %>
@@ -103,8 +103,8 @@
           <br/>
           <br/>
 
-          <%= label_tag "#{a[1]}[mass_permissions]", "Choose Mass Permissions:" %>
-          <%= select_tag "#{a[1]}[mass_permissions]", options_for_select(['public', 'private'], 'public') , class: "span6" %>
+          <%= label_tag "sentinel[#{a[1]}][mass_permissions]", "Choose Mass Permissions:" %>
+          <%= select_tag "sentinel[#{a[1]}][mass_permissions]", options_for_select(['public', 'private'], 'public') , class: "span6" %>
 
           <div class="permission<%= i %>">
             <%= f.label :identity, "Select Group" %>
