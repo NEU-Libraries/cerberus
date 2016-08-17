@@ -33,4 +33,7 @@ class SentinelsController < ApplicationController
     flash[:notice] = "#{sentinel.id}"
     redirect_to(root_path) and return
   end
+
+  def edit
+  end
 end

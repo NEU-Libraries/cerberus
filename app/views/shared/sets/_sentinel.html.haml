@@ -1,10 +1,20 @@
 %br
 %fieldset
-  .row-fluid
-    .span10
-      No sentinel currently exists for this collection.
-  .row-fluid
-    .span10
-      %br
-      %a.btn.btn-info{href:new_sentinel_path(:parent => @set.id), title: "Create Sentinel"}
-        Create Sentinel
+  - if @sentinel
+    .row-fluid
+      .span10
+        A sentinel currently exists for this collection.
+    .row-fluid
+      .span10
+        %br
+        %a.btn.btn-info{href:edit_sentinel_path(@sentinel.id), title: "Edit Sentinel"}
+          Edit Sentinel
+  -else
+    .row-fluid
+      .span10
+        No sentinel currently exists for this collection.
+    .row-fluid
+      .span10
+        %br
+        %a.btn.btn-info{href:new_sentinel_path(:parent => @set.id), title: "Create Sentinel"}
+          Create Sentinel
