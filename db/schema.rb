@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20160810193944) do
+ActiveRecord::Schema.define(:version => 20160817184703) do
 
   create_table "aggregated_statistics", :force => true do |t|
     t.string   "object_type"
@@ -211,6 +211,7 @@ ActiveRecord::Schema.define(:version => 20160810193944) do
     t.string   "set_pid"
     t.boolean  "permanent"
     t.string   "email"
+    t.text     "core_file"
   end
 
   create_table "single_use_links", :force => true do |t|

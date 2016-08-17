@@ -31,6 +31,6 @@ class SentinelsController < ApplicationController
     sentinel = Sentinel.new(params["sentinel"])
     sentinel.save!
     flash[:notice] = "#{sentinel.id}"
-    redirect_to new_sentinel_path and return
+    redirect_to(root_path) and return
   end
 end
