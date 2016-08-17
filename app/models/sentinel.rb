@@ -1,7 +1,10 @@
 class Sentinel < ActiveRecord::Base
   attr_accessible :set_pid, :permanent, :email, :audio_master, :audio, :image_master,
                   :image_large, :image_medium, :image_small, :mspowerpoint, :msexcel,
-                  :msword, :page, :pdf, :text, :video_master, :video, :zip, :pid_list
+                  :msword, :page, :pdf, :text, :video_master, :video, :zip, :pid_list,
+                  :core_file
+
+  serialize :core_file, Hash
 
   serialize :audio_master, Hash
   serialize :audio, Hash
