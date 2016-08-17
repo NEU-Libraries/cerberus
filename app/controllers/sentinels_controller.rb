@@ -17,9 +17,9 @@ class SentinelsController < ApplicationController
                     ["Video", "video"],
                     ["Zip", "zip"]]
 
-    set = ActiveFedora::Base.find(params[:parent], cast: true)
+    @set = ActiveFedora::Base.find(params[:parent], cast: true)
 
-    if set.class == Collection
+    if @set.class == Collection
       @collection = true
       flash[:alert] = "Core File permissions are mandatory for Sentinels belonging to a Collection. Any disabled models will inherit their permissions from the Core File."
     else

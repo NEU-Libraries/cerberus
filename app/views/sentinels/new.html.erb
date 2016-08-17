@@ -133,22 +133,18 @@
 
     <div class="form-actions">
       <%= f.submit class: ['btn', 'btn-primary'], value: 'Submit', data: { disable_with: "Please wait..."} %>
-      <% if params[:action] == "edit" %>
-        <a class="<%= ["btn", "btn-warning"] %>" href="#cancelEditModal", data: { toggle: "modal" }>
-          Cancel
-        </a>
-      <% end %>
+      <a class="btn btn-warning" href="#cancelEditModal" data-toggle="modal" >
+        Cancel
+      </a>
     </div>
 
   <% end %>
 
+<%= render partial: 'shared/cancel_edit_modal', locals: { item: @set } %>
+
 <script>
   $(document).ready(function () {
-    $('select, button').prop('disabled', true);
-  });
-
-  $(document).ready(function () {
-    $('div.form-actions').find('select, button').removeAttr("disabled");
+    $('fieldset').find('select, button').prop('disabled', true);
   });
 
   $(document).ready(function () {
