@@ -18,7 +18,10 @@
         </div>
         <div class="row-fluid">
       <% end %>
-      <%= render partial: 'model', locals: {:f => f, :i => i, :a => a} %>
+      <% if !@sentinel.send("#{a[1]}".to_sym).blank? %>
+        <% permissions = @sentinel.send("#{a[1]}".to_sym)["permissions"]["identity"].zip(@sentinel.send("#{a[1]}".to_sym)["permissions"]["permission_type"]) %>
+      <% end %>
+      <%= render partial: 'model', locals: {:f => f, :i => i, :a => a, :permissions => permissions ? permissions : []} %>
       <% if i == @content_list.length - 1 %>
         </div>
       <% end %>
