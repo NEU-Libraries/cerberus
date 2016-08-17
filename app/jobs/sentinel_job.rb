@@ -30,6 +30,14 @@ class SentinelJob
 
   def apply_permissions(sentinel, core_file_pid, model_hsh)
     doc = SolrDocument.new ActiveFedora::SolrService.query("id:\"#{core_file_pid}\"").first
+    core_file = CoreFile.find(doc.pid)
+
+    if !sentinel.core_file.blank?
+      core_file.permissions = sentinel.core_file["permissions"]
+      core_file.mass_permissions = sentinel.core_file["mass_permissions"]
+      core_file.save!
+    end
+
     content_docs = doc.content_objects
     # content_models = content_docs.map{|doc| doc.klass}
 
@@ -37,8 +45,8 @@ class SentinelJob
       content_docs.each do |content_doc|
         content_object = ActiveFedora::Base.find(content_doc.pid)
         if !sentinel.send(model_hsh[content_doc.klass].to_sym).blank?
-          permissions = sentinel.send(model_hsh[content_doc.klass].to_sym)["permissions"]
-          content_object.permissions = permissions
+          content_object.permissions = sentinel.send(model_hsh[content_doc.klass].to_sym)["permissions"]
+          content_object.mass_permissions = sentinel.send(model_hsh[content_doc.klass].to_sym)["mass_permissions"]
           content_object.save!
         end
       end
