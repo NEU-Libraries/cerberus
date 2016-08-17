@@ -1,0 +1,34 @@
+<h3>
+  Core File
+</h3>
+<% if !@collection %>
+  Enable <%= check_box_tag "core_file_checkbox" %>
+<% end %>
+
+<div class="row-fluid core_file">
+  <fieldset class="span6">
+
+    <legend>Mass Permissions</legend>
+    <% if @collection %>
+      <%= label_tag 'sentinel[core_file][mass_permissions]', "Choose Mass Permissions:", class: "required-label" %>
+    <% else %>
+      <%= label_tag 'sentinel[core_file][mass_permissions]', "Choose Mass Permissions:" %>
+    <% end %>
+    <%= select_tag 'sentinel[core_file][mass_permissions]', options_for_select(['public', 'private'], 'public') , class: "span6" %>
+    <p class="help-block">
+      <ul>
+        <li>Setting to 'public' will allow anyone accessing the site to see your item.</li>
+        <li>Setting to 'private' will only allow groups explicitly chosen to see your item.</li>
+      </ul>
+    </p>
+  </fieldset>
+  <fieldset class="span6">
+    <legend>Permissions</legend>
+    <%= render partial: 'shared/sets/data_form_permissions_element', locals: {:f => f, :array_type => "sentinel[core_file]", :permissions => [] } %>
+    <button class="btn btn-success btn-block" id="add_another_permission" type="button">
+      <i class="icon-plus-sign icon-large"></i>
+      Add Permission
+    </button>
+  </fieldset>
+</div>
+</div>
