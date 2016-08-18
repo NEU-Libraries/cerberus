@@ -47,3 +47,17 @@
   });
 
 </script>
+
+<% if permissions.empty? %>
+  <script>
+    $(document).ready(function () {
+      $("[name^='<%= a[1] %>']").parent().find('select, button').prop('disabled', true);
+    });
+  </script>
+<% else %>
+  <script>
+    $(document).ready(function () {
+      $("[name^='<%= a[1] %>']").parent().find("#<%= a[1] %>_checkbox").prop('checked', true);
+    });
+  </script>
+<% end %>

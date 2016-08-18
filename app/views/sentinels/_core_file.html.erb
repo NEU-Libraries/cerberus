@@ -48,4 +48,17 @@
     </button>
   </fieldset>
 </div>
-</div>
+
+<% if permissions.empty? %>
+  <script>
+    $(document).ready(function () {
+      $("[name^='sentinel_core_file']").parent().find('select, button').prop('disabled', true);
+    });
+  </script>
+<% else %>
+  <script>
+    $(document).ready(function () {
+      $("#core_file_checkbox").prop('checked', true);
+    });
+  </script>
+<% end %>

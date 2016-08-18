@@ -5,3 +5,15 @@
 </header>
 
 <%= render partial: 'metadata' %>
+
+<script>
+  $(document).ready(function () {
+  	$("input:checkbox").click(function () {
+  		if($(this).is(':checked')) {
+  			$(this).parent().find('*:disabled').removeAttr("disabled");
+  		} else {
+  			$(this).parent().find('select, button').prop('disabled', true);
+  		}
+  	});
+  });
+</script>
