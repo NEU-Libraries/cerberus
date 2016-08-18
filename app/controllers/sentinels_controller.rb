@@ -50,8 +50,12 @@ class SentinelsController < ApplicationController
                     ["Video Master", "video_master"],
                     ["Video", "video"],
                     ["Zip", "zip"]]
-                    
+
     @sentinel = Sentinel.find(params[:id])
     @set = ActiveFedora::Base.find(@sentinel.set_pid, cast: true)
+
+    if @set.class == Collection
+      @collection = true
+    end
   end
 end
