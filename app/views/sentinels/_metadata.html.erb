@@ -18,6 +18,7 @@
 
   <div>
     <% @content_list.each_with_index do |a, i| %>
+      <% permissions = nil %>
       <% if i.even? %>
         </div>
         <div class="row-fluid">
