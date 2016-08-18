@@ -7,7 +7,7 @@
   <br/>
 
   <%= label_tag "sentinel[#{a[1]}][mass_permissions]", "Choose Mass Permissions:" %>
-  <%= select_tag "sentinel[#{a[1]}][mass_permissions]", options_for_select(['public', 'private'], 'public') , class: "span6" %>
+  <%= select_tag "sentinel[#{a[1]}][mass_permissions]", options_for_select(['public', 'private'], !mass_permissions.blank? ? mass_permissions : 'public') , class: "span6" %>
 
   <% if !permissions.empty? %>
     <% permissions.each_with_index do |perm, index| %>
