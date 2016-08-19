@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20160812194852) do
+ActiveRecord::Schema.define(:version => 20160817194158) do
 
   create_table "aggregated_statistics", :force => true do |t|
     t.string   "object_type"
@@ -120,6 +120,7 @@ ActiveRecord::Schema.define(:version => 20160812194852) do
     t.string   "original_file"
     t.boolean  "modified",       :default => false
     t.string   "change_type"
+    t.boolean  "preview_file",   :default => false
   end
 
   create_table "load_reports", :force => true do |t|

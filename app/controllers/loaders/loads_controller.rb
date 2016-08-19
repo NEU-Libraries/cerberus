@@ -108,54 +108,53 @@ class Loaders::LoadsController < ApplicationController
         #if zip
         if extract_mime_type(new_file) == 'application/zip'
           begin
+            @report_id = nil
             if short_name == "multipage"
               # multipage zip job
-              report_id = Loaders::LoadReport.create_from_strings(current_user, 0, @loader_name, parent)
-              Cerberus::Application::Queue.push(ProcessMultipageZipJob.new(@loader_name, new_file.to_s, parent, copyright, current_user, permissions, report_id))
+              @report_id = Loaders::LoadReport.create_from_strings(current_user, 0, @loader_name, parent)
+              Cerberus::Application::Queue.push(ProcessMultipageZipJob.new(@loader_name, new_file.to_s, parent, copyright, current_user, permissions, @report_id))
               session[:flash_success] = "Your file has been submitted and is now being processed. You will receive an email when the load is complete."
-              render :json => {report_id: report_id}.to_json and return
+              render :json => {report_id: @report_id}.to_json and return
             elsif short_name == "spreadsheet"
               #mods spreadsheet job
               spreadsheet_file_path = unzip(new_file, new_path)
-              report_id = Loaders::LoadReport.create_from_strings(current_user, 0, @loader_name, parent)
-              ProcessModsZipJob.new(@loader_name, spreadsheet_file_path, parent, copyright, current_user, permissions, report_id, existing_files, nil, true).run
-              load_report = Loaders::LoadReport.find(report_id)
+              @report_id = Loaders::LoadReport.create_from_strings(current_user, 0, @loader_name, parent)
+              ProcessModsZipJob.new(@loader_name, spreadsheet_file_path, parent, copyright, current_user, permissions, @report_id, existing_files, nil, true).run
+              load_report = Loaders::LoadReport.find(@report_id)
               session[:flash_success] = "Your file has been submitted and is now being processed. You will receive an email when the load is complete."
               if !load_report.comparison_file_pid.blank?
-                render :json => {report_id: report_id, comparison_file_pid: load_report.comparison_file_pid}.to_json and return
+                render :json => {report_id: @report_id, comparison_file_pid: load_report.comparison_file_pid}.to_json and return
               elsif !load_report.preview_file_pid.blank?
-                render :json => {report_id: report_id, preview_file_pid: load_report.preview_file_pid}.to_json and return
+                render :json => {report_id: @report_id, preview_file_pid: load_report.preview_file_pid}.to_json and return
               end
             elsif short_name == "xml"
               spreadsheet_file_path = unzip(new_file, new_path)
-              report_id = Loaders::LoadReport.create_from_strings(current_user, 0, @loader_name, parent)
-              ProcessXmlZipJob.new(@loader_name, spreadsheet_file_path, parent, copyright, current_user, permissions, report_id, existing_files, nil, true).run
-              load_report = Loaders::LoadReport.find(report_id)
+              @report_id = Loaders::LoadReport.create_from_strings(current_user, 0, @loader_name, parent)
+              ProcessXmlZipJob.new(@loader_name, spreadsheet_file_path, parent, copyright, current_user, permissions, @report_id, existing_files, nil, true).run
+              load_report = Loaders::LoadReport.find(@report_id)
               session[:flash_success] = "Your file has been submitted and is now being processed. You will receive an email when the load is complete."
-
-              puts "DGC DEBUG"
-              puts "report_id: #{report_id}"
-              puts "comparison_file_pid: #{load_report.comparison_file_pid}"
-              puts "preview_file_pid: #{load_report.preview_file_pid}"
-
               if !load_report.comparison_file_pid.blank?
-                render :json => {report_id: report_id, comparison_file_pid: load_report.comparison_file_pid}.to_json and return
+                render :json => {report_id: @report_id, comparison_file_pid: load_report.comparison_file_pid}.to_json and return
               elsif !load_report.preview_file_pid.blank?
-                render :json => {report_id: report_id, preview_file_pid: load_report.preview_file_pid}.to_json and return
+                render :json => {report_id: @report_id, preview_file_pid: load_report.preview_file_pid}.to_json and return
               end
-              # render :json => {report_id: report_id}.to_json and return
             else
               # send to iptc job
-              report_id = Loaders::LoadReport.create_from_strings(current_user, 0, @loader_name, parent)
-              Cerberus::Application::Queue.push(ProcessIptcZipJob.new(@loader_name, new_file.to_s, parent, copyright, current_user, permissions, report_id,  derivatives))
+              @report_id = Loaders::LoadReport.create_from_strings(current_user, 0, @loader_name, parent)
+              Cerberus::Application::Queue.push(ProcessIptcZipJob.new(@loader_name, new_file.to_s, parent, copyright, current_user, permissions, @report_id,  derivatives))
               session[:flash_success] = "Your file has been submitted and is now being processed. You will receive an email when the load is complete."
-              render :json => {report_id: report_id}.to_json and return
+              render :json => {report_id: @report_id}.to_json and return
             end
           rescue => exception
             logger.error controller_name+"::create rescued #{exception.class}\n\t#{exception.to_s}\n #{exception.backtrace.join("\n")}\n\n"
             email_handled_exception(exception)
+            if (exception.to_s.include?("Nokogiri") || exception.to_s.include?("MissingMetadata")) && (short_name == "spreadsheet" || short_name == "xml")
+              error_msg = "There was an error in displaying the Preview screen. Please <a href='/loaders/#{short_name}/report/#{@report_id}'>check the load report</a> for more information."
+              session[:flash_error] = error_msg
+            else
+              session[:flash_error] = exception.to_s
+            end
             json_error exception.to_s
-            session[:flash_error] = exception.to_s
           end
         else
           FileUtils.rm(new_file)
