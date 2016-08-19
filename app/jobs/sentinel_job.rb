@@ -12,6 +12,8 @@ class SentinelJob
   def run
     sentinel_id = self.sentinel_id
 
+    sentinel = Sentinel.find(sentinel_id)
+
     model_hsh = {"AudioMasterFile"=>"audio_master", "AudioFile"=>"audio", "ImageMasterFile"=>"image_master",
                   "ImageLargeFile"=>"image_large", "ImageMediumFile"=>"image_medium",
                   "ImageSmallFile"=>"image_small", "MspowerpointFile"=>"mspowerpoint",
@@ -43,14 +45,18 @@ class SentinelJob
 
     if !sentinel.nil?
       content_docs.each do |content_doc|
-        content_object = ActiveFedora::Base.find(content_doc.pid)
-        if !sentinel.send(model_hsh[content_doc.klass].to_sym).blank?
-          content_object.permissions = sentinel.send(model_hsh[content_doc.klass].to_sym)["permissions"]
-          content_object.mass_permissions = sentinel.send(model_hsh[content_doc.klass].to_sym)["mass_permissions"]
-          content_object.save!
+        content_object = ActiveFedora::Base.find(content_doc.pid, cast: true)
+        if !model_hsh[content_doc.klass].blank?
+          if !sentinel.send(model_hsh[content_doc.klass].to_sym).blank?
+            content_object.permissions = sentinel.send(model_hsh[content_doc.klass].to_sym)["permissions"]
+            content_object.mass_permissions = sentinel.send(model_hsh[content_doc.klass].to_sym)["mass_permissions"]
+            content_object.save!
+          end
         end
       end
     end
+
+    core_file.update_index
   end
 
 end
