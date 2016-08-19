@@ -30,6 +30,9 @@ class SentinelsController < ApplicationController
   def create
     sentinel = Sentinel.new(params["sentinel"])
     sentinel.save!
+
+    Cerberus::Application::Queue.push(SentinelJob.new(sentinel.id))
+
     flash[:notice] = "#{sentinel.id}"
     redirect_to(root_path) and return
   end

@@ -5,7 +5,7 @@ module Cerberus
         # Coming from the create/edit metadata form...
         if params.has_key?("identity") && params.has_key?("permission_type") && !params.has_key?("identity_type")
           # delete groups excepting mass permissions
-          existing_groups = self.rightsMetadata.groups.keys - ["public"]
+          existing_groups = self.rightsMetadata.groups.keys - ["public", "northeastern:drs:repository:staff"]
           form_groups = params["identity"]
           groups_to_delete = existing_groups - form_groups
 

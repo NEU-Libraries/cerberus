@@ -9,6 +9,15 @@
         %br
         %a.btn.btn-info{href:edit_sentinel_path(@sentinel.id), title: "Edit Sentinel"}
           Edit Sentinel
+  - elsif @set.class == Compilation
+    .row-fluid
+      .span10
+        Create a sentinel to change the permissions of Core Files and their Content Objects for this Set.
+    .row-fluid
+      .span10
+        %br
+        %a.btn.btn-info{href:new_sentinel_path(:parent => @set.id), title: "Create Sentinel"}
+          Create Sentinel
   -else
     .row-fluid
       .span10

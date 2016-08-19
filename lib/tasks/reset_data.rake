@@ -35,6 +35,7 @@ def create_content_file(factory_sym, user, parent)
   core.date = Date.today.to_s
   core.depositor = user.nuid
   core.mass_permissions = 'public'
+  core.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, "edit")
   core.keywords = ["#{master.class}", "content"]
   core.mods.subject(0).topic = "a"
   core.identifier = make_handle(core.persistent_url)
