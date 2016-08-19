@@ -33,8 +33,8 @@ class SentinelsController < ApplicationController
 
     Cerberus::Application::Queue.push(SentinelJob.new(sentinel.id))
 
-    flash[:notice] = "#{sentinel.id}"
-    redirect_to(root_path) and return
+    flash[:notice] = "A Sentinel was created, and is now effecting change."
+    redirect_to(polymorphic_path(ActiveFedora::Base.find(sentinel.set_pid, cast: true))) and return
   end
 
   def edit
