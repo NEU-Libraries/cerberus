@@ -97,7 +97,11 @@ class ProcessXmlZipJob
           load_report.save!
         rescue Exception => error
           xml_file_path = dir_path + "/" + row_results["xml_file_path"]
-          raw_xml = xml_decode(File.open(xml_file_path, "r").read)
+          if !xml_file_path.blank? && File.exists?(xml_file_path) && File.extname(xml_file_path) == ".xml"
+            raw_xml = xml_decode(File.open(xml_file_path, "r").read)
+          else
+            rax_xml = ""
+          end
           if !preview_file.mods.content.blank?
             item_report_info = row_results
             item_report_info["mods"] = preview_file.mods.content
@@ -121,6 +125,8 @@ class ProcessXmlZipJob
           raise error.to_s
           return
         end
+      else
+        raise "XML Files does not exist at the path specified. Please update the spreadsheet and try again."
       end
     else # not a preview, process everything
       existing_files = false
