@@ -17,7 +17,7 @@ class SentinelJob
     model_hsh = {"AudioMasterFile"=>"audio_master", "AudioFile"=>"audio", "ImageMasterFile"=>"image_master",
                   "ImageLargeFile"=>"image_large", "ImageMediumFile"=>"image_medium",
                   "ImageSmallFile"=>"image_small", "MspowerpointFile"=>"mspowerpoint",
-                  "MsexcelFile"=>"msexcel", "MswordFile "=>"msword",
+                  "MsexcelFile"=>"msexcel", "MswordFile"=>"msword",
                   "PageFile"=>"page", "PdfFile"=>"pdf", "TextFile"=>"text", "VideoMasterFile"=>"video_master",
                   "VideoFile"=>"video", "ZipFile"=>"zip"}
 
