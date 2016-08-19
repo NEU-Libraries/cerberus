@@ -88,12 +88,32 @@ class ProcessModsZipJob
 
           # Load row of metadata in for preview
           assign_a_row(row_results, preview_file)
+          raw_xml = xml_decode(preview_file.mods.content)
+          result = xml_valid?(raw_xml)
+          if !result[:errors].blank?
+            error_list = ""
+            result[:errors].each do |entry|
+              error_list = error_list.concat("#{entry.class.to_s}: #{entry}; ")
+            end
+            raise error_list
+          end
 
           load_report.preview_file_pid = preview_file.pid
           load_report.number_of_files = spreadsheet.last_row - header_position
 
           load_report.save!
         rescue Exception => error
+          item_report = load_report.item_reports.create_failure(error.to_s, row_results, "", true)
+          item_report.title = preview_file.title
+          item_report.original_file = find_in_row(header_row, row, 'File Name')
+          item_report.save!
+          load_report.completed = true
+          load_report.fail_count = 1
+          load_report.save!
+          FileUtils.rm(spreadsheet_file_path)
+          if CoreFile.exists?(load_report.preview_file_pid)
+            CoreFile.find(load_report.preview_file_pid).destroy
+          end
           raise error.to_s
           return
         end
@@ -202,7 +222,7 @@ class ProcessModsZipJob
                 if !result[:errors].blank?
                   error_list = ""
                   result[:errors].each do |entry|
-                    error_list = error_list.concat("#{entry.class.to_s}: #{entry} </br></br> ")
+                    error_list = error_list.concat("#{entry.class.to_s}: #{entry} ;")
                   end
                   populate_error_report(load_report, existing_file, error_list, row_results, core_file, old_mods, header_row, row)
                 elsif (core_file.canonical_class == "AudioFile" || core_file.canonical_class == "VideoFile") && !existing_files
@@ -248,8 +268,6 @@ class ProcessModsZipJob
       FileUtils.rm(spreadsheet_file_path)
       if CoreFile.exists?(load_report.preview_file_pid)
         CoreFile.find(load_report.preview_file_pid).destroy
-      elsif CoreFile.exists?(load_report.comparison_file_pid)
-        CoreFile.find(load_report.comparison_file_pid).destroy
       end
     end
   end

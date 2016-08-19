@@ -96,6 +96,28 @@ class ProcessXmlZipJob
           load_report.number_of_files = spreadsheet.last_row - header_position
           load_report.save!
         rescue Exception => error
+          xml_file_path = dir_path + "/" + row_results["xml_file_path"]
+          raw_xml = xml_decode(File.open(xml_file_path, "r").read)
+          if !preview_file.mods.content.blank?
+            item_report_info = row_results
+            item_report_info["mods"] = preview_file.mods.content
+          elsif !raw_xml.blank?
+            item_report_info = row_results
+            item_report_info["mods"] = raw_xml
+          else
+            item_report_info = row_results
+          end
+          item_report = load_report.item_reports.create_failure(error.to_s, item_report_info, "", true)
+          item_report.title = preview_file.title
+          item_report.original_file = find_in_row(header_row, row, 'File Name')
+          item_report.save!
+          load_report.completed = true
+          load_report.fail_count = 1
+          load_report.save!
+          FileUtils.rm(spreadsheet_file_path)
+          if CoreFile.exists?(load_report.preview_file_pid)
+            CoreFile.find(load_report.preview_file_pid).destroy
+          end
           raise error.to_s
           return
         end
@@ -250,8 +272,6 @@ class ProcessXmlZipJob
       FileUtils.rm(spreadsheet_file_path)
       if CoreFile.exists?(load_report.preview_file_pid)
         CoreFile.find(load_report.preview_file_pid).destroy
-      elsif CoreFile.exists?(load_report.comparison_file_pid)
-        CoreFile.find(load_report.comparison_file_pid).destroy
       end
     end
   end
@@ -366,7 +386,7 @@ class ProcessXmlZipJob
     else
       item_report_info = row_results
     end
-    item_report = load_report.item_reports.create_failure(error, item_report_info, "")
+    item_report = load_report.item_reports.create_failure(error, item_report_info, "", false)
     item_report.title = title
     item_report.original_file = original_file
     item_report.save!
