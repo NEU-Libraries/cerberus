@@ -42,7 +42,7 @@ class ProcessMultipageZipJob
     core_file = nil
     seq_num = -1
 
-    spreadsheet.each_row_streaming(offset: header_position) do |row|
+    spreadsheet.each_row_streaming(pad_cells: true, offset: header_position) do |row|
       if row.present? && header_row.present?
         row_results = process_a_row(header_row, row)
 
