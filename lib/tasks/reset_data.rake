@@ -41,6 +41,7 @@ def create_content_file(factory_sym, user, parent)
   core.identifier = make_handle(core.persistent_url)
 
   core.save!
+  core.propagate_metadata_changes!
 
   set_edit_permissions(core)
 end
