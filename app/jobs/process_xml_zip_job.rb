@@ -35,6 +35,8 @@ class ProcessXmlZipJob
   end
 
   def process_spreadsheet(dir_path, spreadsheet_file_path, load_report, preview, client)
+    sentinel = nil
+
     count = 0
     spreadsheet = load_spreadsheet(spreadsheet_file_path)
     if spreadsheet.first_row.nil?
@@ -127,7 +129,14 @@ class ProcessXmlZipJob
                     core_file.parent = collection
                     core_file.properties.parent_id = collection.pid
                     core_file.depositor = depositor
-                    core_file.rightsMetadata.content = collection.rightsMetadata.content
+
+                    # Does the collection have a sentinel?
+                    if collection.sentinel
+                      sentinel = collection.sentinel
+                    else
+                      core_file.rightsMetadata.content = collection.rightsMetadata.content
+                    end
+
                     core_file.rightsMetadata.permissions({person: "#{depositor}"}, 'edit')
                     core_file.original_filename = row_results["file_name"]
                     core_file.label = row_results["file_name"]
