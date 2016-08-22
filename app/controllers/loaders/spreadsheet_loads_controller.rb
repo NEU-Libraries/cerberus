@@ -115,7 +115,7 @@ class Loaders::SpreadsheetLoadsController < Loaders::LoadsController
   end
 
   def show_mods
-    @image = Loaders::ImageReport.find(params[:id])
+    @image = Loaders::ItemReport.find(params[:id])
     @load = Loaders::LoadReport.find(@image.load_report_id)
     @page_title = @image.original_file
     render 'loaders/iptc', locals: {image: @image, load: @load}

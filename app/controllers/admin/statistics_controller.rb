@@ -32,30 +32,35 @@ class Admin::StatisticsController < ApplicationController
   end
 
   def get_daily_report
+    @page_title = "Daily Report"
     @cf_views = Impression.where('action = ? AND (created_at BETWEEN ? AND ?) AND status = ? AND public = ?', 'view', DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day, "COMPLETE", true).count
     @cf_downloads = Impression.where('action = ? AND (created_at BETWEEN ? AND ?) AND status = ? AND public = ?', 'download', DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day, "COMPLETE", true).count
     @cf_streams = Impression.where('action = ? AND (created_at BETWEEN ? AND ?) AND status = ? AND public = ?', 'stream', DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day, "COMPLETE", true).count
     @unique_users = Impression.where('(created_at BETWEEN ? AND ?) AND status = ? AND public = ?', DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day, "COMPLETE", true).uniq.pluck(:ip_address).count
     @new_users = User.where('created_at BETWEEN ? AND ?', DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day).count
-    @loader_uploads = Loaders::ImageReport.where('validity = ? AND (created_at BETWEEN ? AND ?)', true, DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day).count
+    @loader_uploads = Loaders::ItemReport.where('validity = ? AND (created_at BETWEEN ? AND ?) AND change_type = ?', true, DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day, 'create').count
     @interface_uploads = UploadAlert.where('change_type = ? AND content_type != ? AND (created_at BETWEEN ? AND ?)', 'create', 'collection', DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day).count
     @uploads_count = @interface_uploads
     @interface_uploads = @interface_uploads - @loader_uploads
     @interface_upload_size = 0
-    interface_upload_pids = UploadAlert.where('change_type = ? AND content_type != ? AND (created_at BETWEEN ? AND ?)', 'create', 'collection', DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day).pluck(:pid)
+    interface_upload_pids = UploadAlert.where('change_type = ? AND content_type != ? AND (created_at BETWEEN ? AND ?) AND (load_type != ? AND load_type != ?)', 'create', 'collection', DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day, "spreadsheet", "xml").pluck(:pid)
     interface_upload_pids.each do |pid|
       @interface_upload_size += get_core_file_size(pid)
     end
     @loader_upload_size = 0
-    loader_upload_pids = Loaders::ImageReport.where('validity = ? AND (created_at BETWEEN ? AND ?)', true, DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day).pluck(:pid)
+    loader_upload_pids = Loaders::ItemReport.where('validity = ? AND (created_at BETWEEN ? AND ?) AND change_type = ?', true, DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day, 'create').pluck(:pid)
     loader_upload_pids.each do |pid|
       @loader_upload_size += get_core_file_size(pid)
     end
     @uploads_size = @interface_upload_size
     @interface_upload_size = @interface_upload_size - @loader_upload_size
-    @edit_tab_edits = UploadAlert.where('change_type = ? AND content_type != ? AND (created_at BETWEEN ? AND ?)', 'update', 'collection', DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day).count
+    @edits = UploadAlert.where('change_type = ? AND content_type != ? AND (created_at BETWEEN ? AND ?)', 'update', 'collection', DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day).count
+    @spreadsheet_edits = UploadAlert.where('change_type = ? AND content_type != ? AND (created_at BETWEEN ? AND ?) AND load_type = ?', 'update', 'collection', DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day, "spreadsheet").count
+    @xml_loader_edits = UploadAlert.where('change_type = ? AND content_type != ? AND (created_at BETWEEN ? AND ?) AND load_type = ?', 'update', 'collection', DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day, "xml").count
+    @loader_edits = @xml_loader_edits + @spreadsheet_edits
+    @edit_tab_edits = @edits - @loader_edits
     @xml_edits = XmlAlert.where('created_at BETWEEN ? AND ?', DateTime.yesterday.beginning_of_day, DateTime.yesterday.end_of_day).count
-    @cf_edits = @edit_tab_edits + @xml_edits
+    @cf_edits = @edits + @xml_edits
     render 'daily'
   end
 

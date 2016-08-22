@@ -305,6 +305,11 @@ task :reset_data => :environment do
   eli.add_group("northeastern:drs:repository:loaders:spreadsheet")
   david.add_group("northeastern:drs:repository:loaders:spreadsheet")
 
+  tmp_user.add_group("northeastern:drs:repository:loaders:xml")
+  sarah.add_group("northeastern:drs:repository:loaders:xml")
+  eli.add_group("northeastern:drs:repository:loaders:xml")
+  david.add_group("northeastern:drs:repository:loaders:xml")
+
   sarah.add_group("northeastern:drs:staff")
   pat.add_group("northeastern:drs:staff")
   joey.add_group("northeastern:drs:staff")
