@@ -30,7 +30,7 @@ describe ProcessIptcZipJob do
     end
 
     it 'triggers image report job' do
-      Loaders::ImageReport.all.length.should == 3
+      Loaders::ItemReport.all.length.should == 3
     end
 
     it 'creates two core files' do
@@ -57,7 +57,7 @@ describe ProcessIptcZipJob do
       Loaders::LoadReport.all.each do |lr|
         lr.destroy
       end
-      Loaders::ImageReport.all.each do |ir|
+      Loaders::ItemReport.all.each do |ir|
         ir.destroy
       end
       ActiveFedora::Base.destroy_all

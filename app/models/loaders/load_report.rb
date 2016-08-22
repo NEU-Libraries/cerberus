@@ -1,5 +1,5 @@
 class Loaders::LoadReport < ActiveRecord::Base
-  has_many :image_reports
+  has_many :item_reports
   has_many :multipage_reports
   attr_accessible :timestamp, :number_of_files, :success_count, :fail_count, :modified_count, :nuid, :loader, :collection
   attr_accessible :comparison_file_pid, :preview_file_pid, :completed
@@ -21,7 +21,7 @@ class Loaders::LoadReport < ActiveRecord::Base
   end
 
   def update_counts
-    images = Loaders::ImageReport.where(load_report_id:"#{self.id}").find_all
+    images = Loaders::ItemReport.where(load_report_id:"#{self.id}").find_all
     self.success_count = 0
     self.fail_count = 0
     self.modified_count = 0

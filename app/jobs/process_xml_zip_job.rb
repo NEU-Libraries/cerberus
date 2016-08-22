@@ -96,9 +96,37 @@ class ProcessXmlZipJob
           load_report.number_of_files = spreadsheet.last_row - header_position
           load_report.save!
         rescue Exception => error
+          xml_file_path = dir_path + "/" + row_results["xml_file_path"]
+          if !xml_file_path.blank? && File.exists?(xml_file_path) && File.extname(xml_file_path) == ".xml"
+            raw_xml = xml_decode(File.open(xml_file_path, "r").read)
+          else
+            rax_xml = ""
+          end
+          if !preview_file.mods.content.blank?
+            item_report_info = row_results
+            item_report_info["mods"] = preview_file.mods.content
+          elsif !raw_xml.blank?
+            item_report_info = row_results
+            item_report_info["mods"] = raw_xml
+          else
+            item_report_info = row_results
+          end
+          item_report = load_report.item_reports.create_failure(error.to_s, item_report_info, "", true)
+          item_report.title = preview_file.title
+          item_report.original_file = find_in_row(header_row, row, 'File Name')
+          item_report.save!
+          load_report.completed = true
+          load_report.fail_count = 1
+          load_report.save!
+          FileUtils.rm(spreadsheet_file_path)
+          if CoreFile.exists?(load_report.preview_file_pid)
+            CoreFile.find(load_report.preview_file_pid).destroy
+          end
           raise error.to_s
           return
         end
+      else
+        raise "XML Files does not exist at the path specified. Please update the spreadsheet and try again."
       end
     else # not a preview, process everything
       existing_files = false
@@ -191,7 +219,7 @@ class ProcessXmlZipJob
                 next
               end
               if existing_files == true && old_mods == core_file.mods.content
-                load_report.image_reports.create_success(core_file, "")
+                load_report.item_reports.create_success(core_file, "", :update)
                 x = x+1
                 core_file.mods.content = old_mods
                 core_file.save!
@@ -209,15 +237,23 @@ class ProcessXmlZipJob
                   else
                     poster_path = dir_path + "/" + row_results["poster_path"]
                     Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename, poster_path))
-                    load_report.image_reports.create_success(core_file, "")
+                    load_report.item_reports.create_success(core_file, "", :create)
+                    UploadAlert.create_from_core_file(core_file, :create, "xml")
                     x = x+1
                     next
                   end
                 else
                   if !existing_files
                     Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename))
+                    UploadAlert.create_from_core_file(core_file, :create, "xml")
+                    load_report.item_reports.create_success(core_file, "", :create)
+                  else
+                    distance = DamerauLevenshtein.distance(old_mods, core_file.mods.content, 1, 10000)
+                    if distance > 0
+                      UploadAlert.create_from_core_file(core_file, :update, "xml")
+                      load_report.item_reports.create_success(core_file, "", :update)
+                    end
                   end
-                  load_report.image_reports.create_success(core_file, "")
                   x = x+1
                   next
                 end
@@ -242,8 +278,6 @@ class ProcessXmlZipJob
       FileUtils.rm(spreadsheet_file_path)
       if CoreFile.exists?(load_report.preview_file_pid)
         CoreFile.find(load_report.preview_file_pid).destroy
-      elsif CoreFile.exists?(load_report.comparison_file_pid)
-        CoreFile.find(load_report.comparison_file_pid).destroy
       end
     end
   end
@@ -358,10 +392,10 @@ class ProcessXmlZipJob
     else
       item_report_info = row_results
     end
-    image_report = load_report.image_reports.create_failure(error, item_report_info, "")
-    image_report.title = title
-    image_report.original_file = original_file
-    image_report.save!
+    item_report = load_report.item_reports.create_failure(error, item_report_info, "", false)
+    item_report.title = title
+    item_report.original_file = original_file
+    item_report.save!
   end
 
   def set_existing_files(row_results)
