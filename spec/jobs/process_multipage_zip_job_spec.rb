@@ -23,7 +23,7 @@ describe ProcessMultipageZipJob do
     end
 
     it 'creates image reports' do
-      Loaders::ImageReport.all.length.should == 1
+      Loaders::ItemReport.all.length.should == 1
     end
 
     it 'creates one core file' do
@@ -108,7 +108,7 @@ describe ProcessMultipageZipJob do
 
     after :each do
       Loaders::LoadReport.destroy_all
-      Loaders::ImageReport.destroy_all
+      Loaders::ItemReport.destroy_all
       ActiveFedora::Base.destroy_all
     end
   end
@@ -154,7 +154,7 @@ describe ProcessMultipageZipJob do
 
     after :each do
       Loaders::LoadReport.destroy_all
-      Loaders::ImageReport.destroy_all
+      Loaders::ItemReport.destroy_all
       ActiveFedora::Base.destroy_all
     end
   end
@@ -177,14 +177,14 @@ describe ProcessMultipageZipJob do
     it_should_behave_like "failure"
 
     it 'creates image report' do
-      Loaders::ImageReport.all.length.should == 1
-      rep = Loaders::ImageReport.first
+      Loaders::ItemReport.all.length.should == 1
+      rep = Loaders::ItemReport.first
       rep.exception.should == "Invalid MODS"
     end
 
     after :each do
       Loaders::LoadReport.destroy_all
-      Loaders::ImageReport.destroy_all
+      Loaders::ItemReport.destroy_all
       ActiveFedora::Base.destroy_all
     end
   end
@@ -207,14 +207,14 @@ describe ProcessMultipageZipJob do
     it_should_behave_like "failure"
 
     it 'creates image report' do
-      Loaders::ImageReport.all.length.should == 1
-      rep = Loaders::ImageReport.first
+      Loaders::ItemReport.all.length.should == 1
+      rep = Loaders::ItemReport.first
       rep.exception.should == "Can't load MODS XML"
     end
 
     after :each do
       Loaders::LoadReport.destroy_all
-      Loaders::ImageReport.destroy_all
+      Loaders::ItemReport.destroy_all
       ActiveFedora::Base.destroy_all
     end
   end
@@ -237,14 +237,14 @@ describe ProcessMultipageZipJob do
     it_should_behave_like "failure"
 
     it 'creates image report' do
-      Loaders::ImageReport.all.length.should == 1
-      rep = Loaders::ImageReport.first
+      Loaders::ItemReport.all.length.should == 1
+      rep = Loaders::ItemReport.first
       rep.exception.should == "Row is out of order - row num 3 seq_num 1"
     end
 
     after :each do
       Loaders::LoadReport.destroy_all
-      Loaders::ImageReport.destroy_all
+      Loaders::ItemReport.destroy_all
       ActiveFedora::Base.destroy_all
     end
   end

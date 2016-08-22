@@ -70,14 +70,24 @@ class AggregatedStatisticsJob
           # Stub out
           stub_out_file_hash(upl.pid)
           if upl.change_type == "create"
-            self.files["#{upl.pid}"]["user_uploads"] += 1
-            increase_parent_statistics(doc.parent, "user_uploads")
-            size = get_core_file_size(doc.pid)
-            self.files["#{upl.pid}"]["size_increase"] += size
-            increase_parent_size(doc.parent, size)
+            if upl.load_type != "spreadsheet" && upl.load_type != "xml"
+              self.files["#{upl.pid}"]["user_uploads"] += 1
+              increase_parent_statistics(doc.parent, "user_uploads")
+              size = get_core_file_size(doc.pid)
+              self.files["#{upl.pid}"]["size_increase"] += size
+              increase_parent_size(doc.parent, size)
+            end
           elsif upl.change_type == "update"
-            self.files["#{upl.pid}"]["form_edits"] += 1
-            increase_parent_statistics(doc.parent, "form_edits")
+            if upl.load_type == "spreadsheet"
+              self.files["#{upl.pid}"]["spreadsheet_load_edits"] += 1
+              increase_parent_statistics(doc.parent, "spreadsheet_load_edits")
+            elsif upl.load_type == "xml"
+              self.files["#{upl.pid}"]["xml_load_edits"] += 1
+              increase_parent_statistics(doc.parent, "xml_load_edits")
+            else
+              self.files["#{upl.pid}"]["form_edits"] += 1
+              increase_parent_statistics(doc.parent, "form_edits")
+            end
           end
         end
       rescue Exception => error
@@ -90,17 +100,19 @@ class AggregatedStatisticsJob
     end
 
     # Loader uploads and aggregate up
-    Loaders::ImageReport.where('validity = ? AND (created_at BETWEEN ? AND ?)', true, (date-6.days).beginning_of_day, date.end_of_day).find_each do |upl|
+    Loaders::ItemReport.where('validity = ? AND (created_at BETWEEN ? AND ?)', true, (date-6.days).beginning_of_day, date.end_of_day).find_each do |upl|
       begin
         doc = SolrDocument.new ActiveFedora::SolrService.query("id:\"#{upl.pid}\"").first
         if doc.klass == "CoreFile"
           # Stub out
           stub_out_file_hash(upl.pid)
-          self.files["#{upl.pid}"]["loader_uploads"] += 1
-          increase_parent_statistics(doc.parent, "loader_uploads")
-          size = get_core_file_size(doc.pid)
-          self.files["#{upl.pid}"]["size_increase"] += size
-          increase_parent_size(doc.parent, size)
+          if upl.change_type != "update"
+            self.files["#{upl.pid}"]["loader_uploads"] += 1
+            increase_parent_statistics(doc.parent, "loader_uploads")
+            size = get_core_file_size(doc.pid)
+            self.files["#{upl.pid}"]["size_increase"] += size
+            increase_parent_size(doc.parent, size)
+          end
         end
       rescue Exception => error
         failed_pids_log.warn "#{Time.now} - Error processing PID: #{upl.pid}"
@@ -132,17 +144,17 @@ class AggregatedStatisticsJob
     end
 
     self.communities.each do |key, hsh|
-      s = AggregatedStatistic.new(:pid=>key, :object_type=>"community", :views=>hsh["view"], :downloads=>hsh["download"], :streams=>hsh["stream"], :user_uploads=>hsh["user_uploads"], :loader_uploads=>hsh["loader_uploads"], :form_edits=>hsh["form_edits"], :xml_edits=>hsh["xml_edits"], :size_increase=>size_in_mb(hsh["size_increase"]), :processed_at=>date)
+      s = AggregatedStatistic.new(:pid=>key, :object_type=>"community", :views=>hsh["view"], :downloads=>hsh["download"], :streams=>hsh["stream"], :user_uploads=>hsh["user_uploads"], :loader_uploads=>hsh["loader_uploads"], :form_edits=>hsh["form_edits"], :xml_edits=>hsh["xml_edits"], :spreadsheet_load_edits=>hsh["spreadsheet_load_edits"], :xml_load_edits=>hsh["xml_load_edits"], :size_increase=>size_in_mb(hsh["size_increase"]), :processed_at=>date)
       s.save!
     end
 
     self.collections.each do |key, hsh|
-      s = AggregatedStatistic.new(:pid=>key, :object_type=>"collection", :views=>hsh["view"], :downloads=>hsh["download"], :streams=>hsh["stream"], :user_uploads=>hsh["user_uploads"], :loader_uploads=>hsh["loader_uploads"], :form_edits=>hsh["form_edits"], :xml_edits=>hsh["xml_edits"], :size_increase=>size_in_mb(hsh["size_increase"]), :processed_at=>date)
+      s = AggregatedStatistic.new(:pid=>key, :object_type=>"collection", :views=>hsh["view"], :downloads=>hsh["download"], :streams=>hsh["stream"], :user_uploads=>hsh["user_uploads"], :loader_uploads=>hsh["loader_uploads"], :form_edits=>hsh["form_edits"], :xml_edits=>hsh["xml_edits"], :spreadsheet_load_edits=>hsh["spreadsheet_load_edits"], :xml_load_edits=>hsh["xml_load_edits"], :size_increase=>size_in_mb(hsh["size_increase"]), :processed_at=>date)
       s.save!
     end
 
     self.files.each do |key, hsh|
-      s = AggregatedStatistic.new(:pid=>key, :object_type=>"file", :views=>hsh["view"], :downloads=>hsh["download"], :streams=>hsh["stream"], :user_uploads=>hsh["user_uploads"], :loader_uploads=>hsh["loader_uploads"], :form_edits=>hsh["form_edits"], :xml_edits=>hsh["xml_edits"], :size_increase=>size_in_mb(hsh["size_increase"]), :processed_at=>date)
+      s = AggregatedStatistic.new(:pid=>key, :object_type=>"file", :views=>hsh["view"], :downloads=>hsh["download"], :streams=>hsh["stream"], :user_uploads=>hsh["user_uploads"], :loader_uploads=>hsh["loader_uploads"], :form_edits=>hsh["form_edits"], :xml_edits=>hsh["xml_edits"], :spreadsheet_load_edits=>hsh["spreadsheet_load_edits"], :xml_load_edits=>hsh["xml_load_edits"], :size_increase=>size_in_mb(hsh["size_increase"]), :processed_at=>date)
       s.save!
     end
 
@@ -160,6 +172,8 @@ class AggregatedStatisticsJob
       self.communities["#{pid}"]["user_uploads"]
       self.communities["#{pid}"]["loader_uploads"]
       self.communities["#{pid}"]["form_edits"]
+      self.communities["#{pid}"]["spreadsheet_load_edits"]
+      self.communities["#{pid}"]["xml_load_edits"]
       self.communities["#{pid}"]["xml_edits"]
 
       self.communities["#{pid}"]["#{action}"] += 1
@@ -171,6 +185,8 @@ class AggregatedStatisticsJob
       self.collections["#{pid}"]["user_uploads"]
       self.collections["#{pid}"]["loader_uploads"]
       self.collections["#{pid}"]["form_edits"]
+      self.collections["#{pid}"]["spreadsheet_load_edits"]
+      self.collections["#{pid}"]["xml_load_edits"]
       self.collections["#{pid}"]["xml_edits"]
 
       self.collections["#{pid}"]["#{action}"] += 1
@@ -250,6 +266,8 @@ class AggregatedStatisticsJob
     self.files["#{pid}"]["user_uploads"]
     self.files["#{pid}"]["loader_uploads"]
     self.files["#{pid}"]["form_edits"]
+    self.files["#{pid}"]["spreadsheet_load_edits"]
+    self.files["#{pid}"]["xml_load_edits"]
     self.files["#{pid}"]["xml_edits"]
     self.files["#{pid}"]["size_increase"] #in MB
   end

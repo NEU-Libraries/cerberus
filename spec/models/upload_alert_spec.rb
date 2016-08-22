@@ -150,7 +150,7 @@ describe UploadAlert do
     after(:all) { @user.destroy ; @core.destroy }
 
     def create_alert(change_type)
-      @alert = UploadAlert.create_from_core_file(@core, change_type)
+      @alert = UploadAlert.create_from_core_file(@core, change_type, "single")
     end
 
     context "on core file creation" do
@@ -194,7 +194,7 @@ describe UploadAlert do
     end
 
     context "with editor" do
-      before(:each) { @alert = UploadAlert.create_from_core_file(@core, :update, @user)}
+      before(:each) { @alert = UploadAlert.create_from_core_file(@core, :update, "single", @user)}
 
       it "has an editor nuid" do
         @alert.editor_nuid.should == @user.nuid
@@ -212,11 +212,11 @@ describe UploadAlert do
     context "with invalid change type" do
 
       it "raises an error" do
-        expect{ UploadAlert.create_from_core_file(@core, 'edit') }.to raise_error
+        expect{ UploadAlert.create_from_core_file(@core, 'edit', "single") }.to raise_error
       end
 
       it "raises an error" do
-        expect{ UploadAlert.create_from_core_file(@core, :edi) }.to raise_error
+        expect{ UploadAlert.create_from_core_file(@core, :edi, "single") }.to raise_error
       end
     end
   end
