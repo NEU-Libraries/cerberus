@@ -20,14 +20,14 @@ describe ImageProcessingJob do
     @permissions = {"CoreFile" => {"read"  => ["northeastern:drs:all"], "edit" => ["northeastern:drs:repository:corefile"]}, "ImageSmallFile" => {"read"  => ["northeastern:drs:repository:test"], "edit" => ["northeastern:drs:repository:small"]}, "ImageLargeFile" => {"read"  => ["northeastern:drs:repository:test"], "edit" => ["northeastern:drs:repository:large"]}, "ImageMasterFile" => {"read"  => ["northeastern:drs:repository:test"], "edit" => ["northeastern:drs:repository:master"]}}
     @derivatives = false
     ImageProcessingJob.new(@fpath, @file_name, @parent, @copyright, @load_report.id, @permissions, @derivatives, @client).run
-    @images = Loaders::ImageReport.where(load_report_id:"#{@report_id}").find_all
+    @images = Loaders::ItemReport.where(load_report_id:"#{@report_id}").find_all
   end
 
   def clear_context
     @client.query("DROP DATABASE #{ENV["HANDLE_TEST_DATABASE"]};")
     @load_report.destroy if @load_report
     @user.destroy if @user
-    Loaders::ImageReport.all.each do |ir|
+    Loaders::ItemReport.all.each do |ir|
       ir.destroy
     end
     ActiveFedora::Base.destroy_all
@@ -134,6 +134,7 @@ describe ImageProcessingJob do
       it 'creates error report if not ImageMasterFile' do
         @images.count.should == 1
         @images.first.validity.should be false
+        UploadAlert.where(:pid=>@images.first.pid).count.should == 0
       end
 
       it 'should have empty pid value' do
@@ -154,6 +155,8 @@ describe ImageProcessingJob do
       it 'creates success report' do
         @images.first.validity.should be true
         @images.first.modified.should be false
+        UploadAlert.where(:pid=>@images.first.pid).count.should == 1
+        UploadAlert.where(:pid=>@images.first.pid).first.load_type.should == "iptc"
       end
 
       it 'sets original_filename to basename of file in tmp dir' do
@@ -209,6 +212,8 @@ describe ImageProcessingJob do
         @images.count.should == 1
         @images.first.validity.should be true
         @images.first.modified.should be true
+        UploadAlert.where(:pid=>@images.first.pid).count.should == 1
+        UploadAlert.where(:pid=>@images.first.pid).first.load_type.should == "iptc"
       end
 
       it 'sets original_filename to basename of file in tmp dir' do
@@ -230,6 +235,8 @@ describe ImageProcessingJob do
         @images.count.should == 1
         @images.first.validity.should be true
         @images.first.modified.should be true
+        UploadAlert.where(:pid=>@images.first.pid).count.should == 1
+        UploadAlert.where(:pid=>@images.first.pid).first.load_type.should == "iptc"
       end
 
     end

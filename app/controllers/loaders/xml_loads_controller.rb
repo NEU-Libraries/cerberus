@@ -116,7 +116,7 @@ class Loaders::XmlLoadsController < Loaders::LoadsController
   end
 
   def show_mods
-    @item = Loaders::ImageReport.find(params[:id])
+    @item = Loaders::ItemReport.find(params[:id])
     @load = Loaders::LoadReport.find(@item.load_report_id)
     @page_title = @item.original_file
     render 'loaders/mods_xml', locals: {item: @item, load: @load}

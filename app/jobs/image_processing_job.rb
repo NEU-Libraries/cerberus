@@ -21,7 +21,7 @@ class ImageProcessingJob
 
   def run
     # extract metadata from iptc
-    # if theres an exception, log details to image_report
+    # if theres an exception, log details to item_report
     require 'fileutils'
     require 'mini_exiftool'
     MiniExiftool.command = "#{Cerberus::Application.config.minitool_path}"
@@ -42,7 +42,7 @@ class ImageProcessingJob
 
       core_file.instantiate_appropriate_content_object(file)
       if core_file.canonical_class != "ImageMasterFile" or extract_mime_type(file) != 'image/jpeg'
-        report = load_report.image_reports.create_failure("File is not a JPG image", "", core_file.label)
+        report = load_report.item_reports.create_failure("File is not a JPG image", "", core_file.label)
         core_file.destroy
         FileUtils.rm(file)
       else
@@ -244,12 +244,12 @@ class ImageProcessingJob
         Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename, nil, s, m, l, true, permissions))
 
         if core_file.save!
-          UploadAlert.create_from_core_file(core_file, :create)
+          UploadAlert.create_from_core_file(core_file, :create, "iptc")
         end
         if modified == true
-          report = load_report.image_reports.create_modified(modified_message, core_file, iptc)
+          report = load_report.item_reports.create_modified(modified_message, core_file, iptc, :create)
         else
-          report = load_report.image_reports.create_success(core_file, iptc)
+          report = load_report.item_reports.create_success(core_file, iptc, :create)
         end
       end
     rescue Exception => error
@@ -260,7 +260,7 @@ class ImageProcessingJob
       errors_for_pid.warn "#{Time.now} - #{$!}"
       errors_for_pid.warn "#{Time.now} - #{$@}"
       iptc = "" if iptc.empty?
-      report = load_report.image_reports.create_failure(error.message, iptc, File.basename(file_name))
+      report = load_report.item_reports.create_failure(error.message, iptc, File.basename(file_name))
       FileUtils.rm(file)
       core_file.destroy
       raise error
@@ -268,7 +268,7 @@ class ImageProcessingJob
   end
 
   def create_special_error(error_message, iptc, core_file, load_report)
-    report = load_report.image_reports.create_failure(error_message, iptc, core_file.label)
+    report = load_report.item_reports.create_failure(error_message, iptc, core_file.label)
     core_file.destroy
     FileUtils.rm(file)
     return report

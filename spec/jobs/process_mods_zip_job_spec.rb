@@ -5,7 +5,7 @@ describe ProcessModsZipJob do
   before(:all) do
     `mysql -u "#{ENV["HANDLE_USERNAME"]}" < "#{Rails.root}"/spec/fixtures/files/handlesTEST.sql`
     @client = Mysql2::Client.new(:host => "#{ENV["HANDLE_TEST_HOST"]}", :username => "#{ENV["HANDLE_TEST_USERNAME"]}", :password => "#{ENV["HANDLE_TEST_PASSWORD"]}", :database => "#{ENV["HANDLE_TEST_DATABASE"]}")
-    @loader_name = "MODS Spreadsheet"
+    @loader_name = "Spreadsheet"
     @user = FactoryGirl.create(:admin)
   end
 
@@ -148,7 +148,9 @@ describe ProcessModsZipJob do
     it "should set the number of files to the load report" do
       @lr.reload
       @lr.number_of_files.should == 4
-      @lr.image_reports.length.should == 0 #no image reports created when its a preview
+      @lr.item_reports.length.should == 0 #no image reports created when its a preview
+      cf = CoreFile.find(@lr.preview_file_pid)
+      UploadAlert.where(:pid=>cf.pid).count.should == 0
     end
 
     it_should_behave_like "successful mods" do
@@ -160,7 +162,7 @@ describe ProcessModsZipJob do
 
     after :all do
       Loaders::LoadReport.destroy_all
-      Loaders::ImageReport.destroy_all
+      Loaders::ItemReport.destroy_all
       ActiveFedora::Base.destroy_all
       FileUtils.rm("#{@new_path}")
       FileUtils.rm_rf(Pathname.new("#{Rails.application.config.tmp_path}/")+"demo_mods_new_file")
@@ -187,48 +189,51 @@ describe ProcessModsZipJob do
     end
 
     it "should set depositor to current user" do
-      CoreFile.exists?(@lr.image_reports[0].pid).should be true
+      CoreFile.exists?(@lr.item_reports[0].pid).should be true
     end
 
     it "should set the correct number of files" do
       @lr.reload
       @lr.number_of_files.should == 4
-      @lr.image_reports.length.should == 4
+      @lr.item_reports.length.should == 4
       @lr.fail_count.should == 3
       @lr.success_count.should == 1
+      cf = CoreFile.find(@lr.item_reports[0].pid)
+      UploadAlert.where(:pid=>cf.pid).count.should == 1
+      UploadAlert.where(:pid=>cf.pid).first.load_type.should == "spreadsheet"
     end
 
     it_should_behave_like "successful mods" do
       let(:cf) {
         @lr.reload
-        CoreFile.find(@lr.image_reports[0].pid)
+        CoreFile.find(@lr.item_reports[0].pid)
        }
     end
 
     it "should fail if no title" do
       @lr.reload
-      failure = @lr.image_reports[1]
+      failure = @lr.item_reports[1]
       failure.validity.should == false
       failure.exception.should == "Must have a title"
     end
 
     it "should fail if no keywords" do
       @lr.reload
-      failure = @lr.image_reports[2]
+      failure = @lr.item_reports[2]
       failure.validity.should == false
       failure.exception.should == "Must have at least one keyword"
     end
 
     it "should fail if content file does not exist" do
       @lr.reload
-      failure = @lr.image_reports[3]
+      failure = @lr.item_reports[3]
       failure.validity.should == false
       failure.exception.should == "File specified does not exist"
     end
 
     after :all do
       Loaders::LoadReport.destroy_all
-      Loaders::ImageReport.destroy_all
+      Loaders::ItemReport.destroy_all
       ActiveFedora::Base.destroy_all
       FileUtils.rm_rf(Pathname.new("#{Rails.application.config.tmp_path}/")+"demo_mods_new_file")
     end
