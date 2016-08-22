@@ -40,6 +40,7 @@ sudo yum install libtool gcc gettext-devel expat-devel curl-devel zlib-devel ope
 sudo yum install wget --assumeyes
 sudo yum install clamav clamav-devel --assumeyes
 sudo yum install libxml-devel libxslt-devel --assumeyes
+sudo yum install gitflow --assumeyes
 
 # We need httpd for /etc/mime.types
 sudo yum install httpd --assumeyes
@@ -125,3 +126,73 @@ touch /home/vagrant/cerberus/.git/hooks/pre-push
 echo '#!/bin/sh' >> /home/vagrant/cerberus/.git/hooks/pre-push
 echo 'rake smoke_test' >> /home/vagrant/cerberus/.git/hooks/pre-push
 chmod +x /home/vagrant/cerberus/.git/hooks/pre-push
+
+echo "Setting up Loris"
+sudo yum groupinstall "Development tools" --assumeyes
+sudo yum install zlib-devel bzip2-devl openssl-devel ncurses-devel \
+    sqlite-devel readline-devel tk-devel --assumeyes
+sudo wget http://python.org/ftp/python/2.7.3/Python-2.7.3.tar.bz2
+sudo tar xf Python-2.7.3.tar.bz2
+sudo cd Python-2.7.3
+sudo ./configure --prefix=/usr/local --enable-shared
+sudo make && make altinstall
+sudo echo "/usr/local/lib/python2.7" > /etc/ld.so.conf.d/python27.conf
+sudo echo "/usr/local/lib" >> /etc/ld.so.conf.d/python27.conf
+sudo ldconfig
+sudo wget https://raw.github.com/pypa/pip/master/contrib/get-pip.py
+sudo /usr/local/bin/python2.7 get-pip.py
+sudo yum install httpd-devel --assumeyes
+
+# sudo ./configure --with-python=/usr/local/bin/python2.7
+# sudo make && make install
+#python should be at /usr/local/bin/python
+#pip should be at /usr/local/bin/pip
+
+wget http://modwsgi.googlecode.com/files/mod_wsgi-3.4.tar.gz
+tar -zxf mod_wsgi-3.4.tar.gz
+cd mod_wsgi-3.4
+./configure --with-python=/usr/local/bin/python2.7
+make && make install
+
+sudo yum install libjpeg-turbo libjpeg-turbo-devel \
+    freetype freetype-devel \
+    zlib-devel \
+    libtiff-devel
+sudo wget https://github.com/ksclarke/freelib-djatoka/tree/master/lib/Linux-x86-64/libkdu_v60R.so
+sudo wget https://github.com/ksclarke/freelib-djatoka/tree/master/lib/Linux-x86-64/kdu_expand
+sudo mv libkdu_v60R.so /usr/local/lib
+sudo mv kdu_expand /usr/local/bin
+sudo export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
+sudo /usr/local/bin/pip2.7 install Werkzeug
+
+useradd -d /var/www/loris -s /sbin/false loris
+cd /opt
+git clone https://github.com/pulibrary/loris.git
+cd loris
+sudo /usr/local/bin/pip uninstall PIL
+sudo /usr/local/bin/pip uninstall Pillow
+sudo /usr/local/bin/pip uninstall configobj
+sudo /usr/local/bin/pip uninstall requests
+sudo /usr/local/bin/pip uninstall mock
+sudo /usr/local/bin/pip uninstall responses
+sudo /usr/local/bin/pip install Pillow
+sudo /usr/local/bin/pip install configobj
+sudo /usr/local/bin/pip install requests
+sudo /usr/local/bin/pip install mock
+sudo /usr/local/bin/pip install responses
+
+# (configure as necessary)
+cd /opt/loris
+/usr/local/bin/python2.7 setup.py install
+
+# set up conf in /etc/httpd/conf.d/loris.conf
+sh -c "cat >/etc/httpd/conf.d/loris.conf" <<'EOF'
+ExpiresActive On
+ExpiresDefault "access plus 5184000 seconds"
+AllowEncodedSlashes On
+LoadModule wsgi_module modules/mod_wsgi.so
+WSGIDaemonProcess loris2 user=loris group=loris processes=10 threads=15 maximum-requests=10000
+WSGIScriptAlias /loris /var/www/loris2/loris2.wsgi
+WSGIProcessGroup loris2
+WSGISocketPrefix /var/run/wsgi
+EOF
