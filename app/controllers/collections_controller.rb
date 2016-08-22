@@ -184,7 +184,7 @@ class CollectionsController < ApplicationController
     @set = Collection.find(params[:id])
 
     # Does a sentinel exist for this collection?
-    @sentinel = Sentinel.where(:set_pid => params[:id]).last
+    @sentinel = @set.sentinel
 
     @page_title = "Edit #{@set.title}"
     render :template => 'shared/sets/edit'
