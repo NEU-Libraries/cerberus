@@ -136,7 +136,7 @@ class ProcessModsZipJob
               existing_file = false
               old_mods = nil
               if row_results["pid"].blank? && !row_results["file_name"].blank? && existing_files == false #make new file
-                new_file = File.dirname(dir_path) + "/" + row_results["file_name"]
+                new_file = move_file_to_tmp(File.new(dir_path + "/" + row_results["file_name"]))
                 if File.exists? new_file
                   if Cerberus::ContentFile.virus_check(File.new(new_file)) == 0
                     core_file = CoreFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
