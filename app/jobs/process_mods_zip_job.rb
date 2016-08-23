@@ -193,7 +193,7 @@ class ProcessModsZipJob
                 next
               end
               assign_a_row(row_results, core_file)
-              if old_mods == core_file.mods.content
+              if Nokogiri::XML(old_mods,&:noblanks).to_s == Nokogiri::XML(core_file.mods.content,&:noblanks).to_s
                 core_file.mods.content = old_mods
                 core_file.save!
                 load_report.item_reports.create_success(core_file, "", :update)
@@ -240,10 +240,7 @@ class ProcessModsZipJob
                     UploadAlert.create_from_core_file(core_file, :create, "spreadsheet")
                     load_report.item_reports.create_success(core_file, "", :create)
                   else
-                    distance = DamerauLevenshtein.distance(old_mods, core_file.mods.content, 1, 10000)
-                    if distance > 0
-                      UploadAlert.create_from_core_file(core_file, :update, "spreadsheet")
-                    end
+                    UploadAlert.create_from_core_file(core_file, :update, "spreadsheet")
                     load_report.item_reports.create_success(core_file, "", :update)
                   end
                 end
