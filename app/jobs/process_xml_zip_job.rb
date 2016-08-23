@@ -218,7 +218,7 @@ class ProcessXmlZipJob
                 x = x+1
                 next
               end
-              if existing_files == true && old_mods == core_file.mods.content
+              if existing_files == true && Nokogiri::XML(old_mods,&:noblanks).to_s == Nokogiri::XML(core_file.mods.content,&:noblanks).to_s
                 load_report.item_reports.create_success(core_file, "", :update)
                 x = x+1
                 core_file.mods.content = old_mods
@@ -248,11 +248,8 @@ class ProcessXmlZipJob
                     UploadAlert.create_from_core_file(core_file, :create, "xml")
                     load_report.item_reports.create_success(core_file, "", :create)
                   else
-                    distance = DamerauLevenshtein.distance(old_mods, core_file.mods.content, 1, 10000)
-                    if distance > 0
-                      UploadAlert.create_from_core_file(core_file, :update, "xml")
-                      load_report.item_reports.create_success(core_file, "", :update)
-                    end
+                    UploadAlert.create_from_core_file(core_file, :update, "xml")
+                    load_report.item_reports.create_success(core_file, "", :update)
                   end
                   x = x+1
                   next
