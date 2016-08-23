@@ -97,7 +97,7 @@ class User < ActiveRecord::Base
       emp_name = "#{name_obj.family}, #{name_obj.given}"
     end
 
-    if user.nil? || users.blank?
+    if user.blank? && users.blank?
 
       user = User.create(password:Devise.friendly_token[0,20], full_name:emp_name, nuid:auth.info.nuid)
 
@@ -114,7 +114,7 @@ class User < ActiveRecord::Base
       user.save!
     else
       # Previously logged in
-      user = User.where(:email => auth.info.email).first
+      user = User.where(:nuid => auth.info.nuid).first
 
       # Preferred account?
       if !user.account_pref.blank?
