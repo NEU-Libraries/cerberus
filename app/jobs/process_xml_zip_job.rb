@@ -4,6 +4,7 @@ class ProcessXmlZipJob
   include ApplicationHelper
   include ZipHelper
   include HandleHelper
+  include Cerberus::TempFileStorage
 
   attr_accessor :loader_name, :spreadsheet_file_path, :parent, :copyright, :current_user, :permissions, :client, :report_id, :preview, :existing_files, :depositor, :mods_content
 
@@ -56,6 +57,7 @@ class ProcessXmlZipJob
           row_results = process_a_row(header_row, row)
           # Process first row
           preview_file = CoreFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
+          load_report.preview_file_pid = preview_file.pid
           if row_results["file_name"].blank? && row_results["pid"].blank?
             raise "Your upload could not be processed because the spreadsheet is missing file names or PIDs. Please update the spreadsheet and try again."
             return
@@ -89,7 +91,6 @@ class ProcessXmlZipJob
           preview_file.tmp_path = spreadsheet_file_path
           preview_file.save!
 
-          load_report.preview_file_pid = preview_file.pid
           load_report.save!
 
           # Load row of metadata in for preview
@@ -150,8 +151,9 @@ class ProcessXmlZipJob
               existing_file = false
               old_mods = nil
               if row_results["pid"].blank? && !row_results["file_name"].blank? #make new file
-                new_file = dir_path + "/" + row_results["file_name"]
-                if File.exists? new_file
+                new_file_path = dir_path + "/" + row_results["file_name"]
+                if File.exists? new_file_path
+                  new_file = move_file_to_tmp(File.new(new_file_path))
                   if Cerberus::ContentFile.virus_check(File.new(new_file)) == 0
                     core_file = CoreFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
                     core_file.tag_as_in_progress
@@ -227,7 +229,7 @@ class ProcessXmlZipJob
                 x = x+1
                 next
               end
-              if existing_files == true && old_mods == core_file.mods.content
+              if existing_files == true && Nokogiri::XML(old_mods,&:noblanks).to_s == Nokogiri::XML(core_file.mods.content,&:noblanks).to_s
                 load_report.item_reports.create_success(core_file, "", :update)
                 x = x+1
                 core_file.mods.content = old_mods
@@ -257,11 +259,8 @@ class ProcessXmlZipJob
                     UploadAlert.create_from_core_file(core_file, :create, "xml")
                     load_report.item_reports.create_success(core_file, "", :create)
                   else
-                    distance = DamerauLevenshtein.distance(old_mods, core_file.mods.content, 1, 10000)
-                    if distance > 0
-                      UploadAlert.create_from_core_file(core_file, :update, "xml")
-                      load_report.item_reports.create_success(core_file, "", :update)
-                    end
+                    UploadAlert.create_from_core_file(core_file, :update, "xml")
+                    load_report.item_reports.create_success(core_file, "", :update)
                   end
                   x = x+1
                   next
@@ -282,12 +281,12 @@ class ProcessXmlZipJob
     if load_report.success_count + load_report.fail_count + load_report.modified_count == load_report.number_of_files
       load_report.completed = true
       load_report.save!
-      LoaderMailer.load_alert(load_report, User.find_by_nuid(load_report.nuid)).deliver!
-      # cleaning up
-      FileUtils.rm(spreadsheet_file_path)
       if CoreFile.exists?(load_report.preview_file_pid)
         CoreFile.find(load_report.preview_file_pid).destroy
       end
+      LoaderMailer.load_alert(load_report, User.find_by_nuid(load_report.nuid)).deliver!
+      # cleaning up
+      FileUtils.rm(spreadsheet_file_path)
     end
   end
 
