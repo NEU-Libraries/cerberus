@@ -12,8 +12,6 @@
         add: function (e, data) {
             data.context = $("#loaderSubmit").click(function (e) {
               e.preventDefault();
-              $(this).attr("disabled", true);
-              $(this).val("Please wait...");
             });
           $(".progress").show();
           file_list = [data.files[0]]; //this guarantees that the files being uploaded is only the most recently added one
@@ -44,12 +42,22 @@
           }
         },
         fail: function(data){
-          window.alert("There was an issue processing your load.");
+          bootbox.alert("There was an issue processing your load.");
           window.location = "/my_loaders";
         }
     });
     $('#loaderSubmit').click(function(e){
       e.preventDefault();
+      if($("#collection_parent").val() == "" || $("#parent").val() == ""){
+        bootbox.alert("Please select a destination collection from the dropdown.");
+        return;
+      }
+      if (file_list.length != 1){
+        bootbox.alert("Please upload a zip file.");
+        return;
+      }
+      $(this).attr("disabled", true);
+      $(this).val("Please wait...");
       $('#loaderForm').fileupload('send', {files:file_list});
     });
   }
