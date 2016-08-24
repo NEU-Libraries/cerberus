@@ -1,4 +1,6 @@
 class SentinelJob
+  include ApplicationHelper
+
   attr_accessor :sentinel_id
 
   def initialize(sentinel_id)
@@ -33,6 +35,19 @@ class SentinelJob
   def apply_permissions(sentinel, core_file_pid, model_hsh)
     doc = SolrDocument.new ActiveFedora::SolrService.query("id:\"#{core_file_pid}\"").first
     core_file = CoreFile.find(doc.pid)
+
+    # Does the core file have a correctly formatted handle?
+    handle = core_file.identifier
+    if handle.blank?
+      blank_handle = true
+      xml = Nokogiri::XML(core_file.mods.content)
+      handle = xml.xpath("//mods:identifier[contains(., 'hdl.handle.net')]").text
+      core_file.identifier = handle
+      core_file.save!
+    end
+
+    # Clean the MODS XML Unicode
+    core_file.mods.content = xml_decode(core_file.mods.content)    
 
     if !sentinel.core_file.blank?
       core_file.permissions = sentinel.core_file["permissions"]
