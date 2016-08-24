@@ -28,6 +28,8 @@ en:
       name: "College of Science - Social Interaction Lab Staff"
     northeastern:drs:college_of_social_sciences_humanities:early_black_boston_digital_almanac:
       name: "CSSH - Early Black Boston Digital Almanac Team"
+    northeastern:drs:college_of_social_sciences_humanities:early_caribbean_digital_archive:
+      name: "CCSH - Early Caribbean Digital Archive Project Team"
     northeastern:drs:college_of_social_sciences_humanities:dominican_prayer_book:
       name: "CSSH - Dominican Prayer Book Project Team"
     northeastern:drs:college_of_social_sciences_humanities:dudley_square_project:
@@ -72,22 +74,26 @@ en:
       name: "DRS Advanced Users"
     northeastern:drs:repository:beta_users:
       name: "DRS Beta Users"
+    northeastern:drs:repository:loaders:aai_archives:
+      name: "DRS IPTC Loader - AAI"
     northeastern:drs:repository:loaders:coe:
-      name: "DRS Zip Loader - COE"
+      name: "DRS IPTC Loader - COE"
     northeastern:drs:repository:loaders:cps:
-      name: "DRS Zip Loader - CPS"
+      name: "DRS IPTC Loader - CPS"
     northeastern:drs:repository:loaders:damore_mckim:
-      name: "DRS Zip Loader - D'Amore-Mckim"
+      name: "DRS IPTC Loader - D'Amore-Mckim"
     northeastern:drs:repository:loaders:emsa_emc:
-      name: "DRS Zip Loader - EMSA EMC"
+      name: "DRS IPTC Loader - EMSA EMC"
     northeastern:drs:repository:loaders:marcom:
-      name: "DRS Zip Loader - Marketing"
+      name: "DRS IPTC Loader - Marketing"
+    northeastern:drs:repository:loaders:bouve_dean:
+      name: "DRS IPTC Loader - Bouve"
     northeastern:drs:repository:loaders:multipage:
       name: "DRS Multipage Loader"
-    northeastern:drs:repository:loaders:bouve_dean:
-      name: "DRS Zip Loader - Bouve"
     northeastern:drs:repository:loaders:spreadsheet:
       name: "DRS Spreadsheet Loader"
+    northeastern:drs:repository:loaders:xml:
+      name: "DRS XML Loader"
     northeastern:drs:repository:proxystaff:
       name: "DRS Proxy Staff"
     northeastern:drs:repository:staff:
