@@ -50,6 +50,7 @@ class ProcessModsZipJob
           row_results = process_a_row(header_row, row)
           # Process first row
           preview_file = CoreFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
+          load_report.preview_file_pid = preview_file.pid
           if row_results["file_name"].blank? && row_results["pid"].blank?
             raise "Your upload could not be processed because the spreadsheet is missing file names or PIDs. Please update the spreadsheet and try again."
             return
@@ -98,7 +99,6 @@ class ProcessModsZipJob
             raise error_list
           end
 
-          load_report.preview_file_pid = preview_file.pid
           load_report.number_of_files = spreadsheet.last_row - header_position
 
           load_report.save!
@@ -261,12 +261,12 @@ class ProcessModsZipJob
     if load_report.success_count + load_report.fail_count + load_report.modified_count == load_report.number_of_files
       load_report.completed = true
       load_report.save!
-      LoaderMailer.load_alert(load_report, User.find_by_nuid(load_report.nuid)).deliver!
-      # cleaning up
-      FileUtils.rm(spreadsheet_file_path)
       if CoreFile.exists?(load_report.preview_file_pid)
         CoreFile.find(load_report.preview_file_pid).destroy
       end
+      LoaderMailer.load_alert(load_report, User.find_by_nuid(load_report.nuid)).deliver!
+      # cleaning up
+      FileUtils.rm(spreadsheet_file_path)
     end
   end
 

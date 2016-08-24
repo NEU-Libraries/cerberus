@@ -35,18 +35,24 @@ class Loaders::LoadsController < ApplicationController
     begin
       # check error condition No files
       return json_error("Error! No file to save") if !params.has_key?(:file)
-
       file = params[:file]
       parent = params[:parent]
       if !file
-        flash[:error] = "Error! No file for upload"
-        redirect_to(:back) and return
+        msg = "Error! No file for upload"
+        session[:flash_error] = msg
+        render :json => [{error: msg}].to_json and return
+      elsif parent.blank? && existing_files == false
+        msg = "No collection was selected."
+        session[:flash_error] = msg
+        render :json => [{error: msg}].to_json and return
       elsif (empty_file?(file))
-        flash[:error] = "Error! Zero Length File!"
-        redirect_to(:back) and return
+        msg = "Error! Zero Length File!"
+        session[:flash_error] = msg
+        render :json => [{error: msg}].to_json and return
       elsif (!terms_accepted?)
-        flash[:error] = "You must accept the terms of service!"
-        redirect_to(:back) and return
+        msg = "You must accept the terms of service!"
+        session[:flash_error] = msg
+        render :json => [{error: msg}].to_json and return
       else
         process_file(file, parent, @copyright, permissions, short_name, existing_files, derivatives)
       end
