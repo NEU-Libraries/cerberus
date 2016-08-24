@@ -124,10 +124,6 @@ describe ProcessModsZipJob do
       spreadsheet_file_path = "#{Rails.root}/spec/fixtures/files/demo_mods_new_file/demo_mods_new_file.xlsx"
       copyright = ""
       @parent = FactoryGirl.create(:root_collection)
-      tempdir = Pathname.new("#{Rails.application.config.tmp_path}/")
-      file_name = File.basename(spreadsheet_file_path)
-      @new_path = tempdir.join(file_name).to_s
-      FileUtils.cp(spreadsheet_file_path, @new_path)
       permissions = @parent.permissions
       @report_id = Loaders::LoadReport.create_from_strings(@user, 0, @loader_name, @parent.pid)
       @lr = Loaders::LoadReport.find("#{@report_id}")
@@ -164,8 +160,6 @@ describe ProcessModsZipJob do
       Loaders::LoadReport.destroy_all
       Loaders::ItemReport.destroy_all
       ActiveFedora::Base.destroy_all
-      FileUtils.rm("#{@new_path}")
-      FileUtils.rm_rf(Pathname.new("#{Rails.application.config.tmp_path}/")+"demo_mods_new_file")
     end
   end
 
@@ -174,17 +168,15 @@ describe ProcessModsZipJob do
       spreadsheet_file_path = "#{Rails.root}/spec/fixtures/files/demo_mods_new_file/demo_mods_new_file.xlsx"
       copyright = ""
       @parent = FactoryGirl.create(:root_collection)
-      tempdir = Pathname.new("#{Rails.application.config.tmp_path}/")
       dir_name = File.dirname(spreadsheet_file_path)
-      file_name = File.basename(spreadsheet_file_path, ".*")
-      @new_path = tempdir.join(file_name).to_s
-      FileUtils.cp_r(dir_name, @new_path)
+      tmp_path = "#{Rails.application.config.tmp_path}"
+      FileUtils.cp_r(dir_name, tmp_path)
       permissions = @parent.permissions
       @report_id = Loaders::LoadReport.create_from_strings(@user, 0, @loader_name, @parent.pid)
       @lr = Loaders::LoadReport.find("#{@report_id}")
       @lr.number_of_files = 4
       @lr.save!
-      new_file = @new_path +"/demo_mods_new_file.xlsx"
+      new_file = "#{Rails.application.config.tmp_path}/demo_mods_new_file/demo_mods_new_file.xlsx"
       ProcessModsZipJob.new(@loader_name, new_file, @parent, copyright, @user, permissions, @report_id, false, @user.nuid, nil).run
     end
 

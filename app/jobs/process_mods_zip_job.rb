@@ -4,6 +4,7 @@ class ProcessModsZipJob
   include ApplicationHelper
   include ZipHelper
   include HandleHelper
+  include Cerberus::TempFileStorage
 
   attr_accessor :loader_name, :spreadsheet_file_path, :parent, :copyright, :current_user, :permissions, :preview, :depositor, :client, :report_id, :existing_files
 
@@ -28,8 +29,7 @@ class ProcessModsZipJob
   def run
     load_report = Loaders::LoadReport.find(report_id)
 
-    # unzip zip file to tmp storage
-    dir_path = File.join(File.dirname(spreadsheet_file_path), File.basename(spreadsheet_file_path, ".*"))
+    dir_path = File.dirname(spreadsheet_file_path)
 
     process_spreadsheet(dir_path, spreadsheet_file_path, load_report, preview, client)
   end
@@ -136,8 +136,9 @@ class ProcessModsZipJob
               existing_file = false
               old_mods = nil
               if row_results["pid"].blank? && !row_results["file_name"].blank? && existing_files == false #make new file
-                new_file = move_file_to_tmp(File.new(dir_path + "/" + row_results["file_name"]))
-                if File.exists? new_file
+                new_file_path = dir_path + "/" + row_results["file_name"]
+                if File.exists? new_file_path
+                  new_file = move_file_to_tmp(File.new(new_file_path))
                   if Cerberus::ContentFile.virus_check(File.new(new_file)) == 0
                     core_file = CoreFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
                     core_file.tag_as_in_progress
