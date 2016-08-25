@@ -70,7 +70,7 @@ class AggregatedStatisticsJob
           # Stub out
           stub_out_file_hash(upl.pid)
           if upl.change_type == "create"
-            if upl.load_type != "spreadsheet" && upl.load_type != "xml"
+            if upl.load_type != "spreadsheet" && upl.load_type != "xml" && upl.load_type != "multipage" && upl.load_type != "iptc"
               self.files["#{upl.pid}"]["user_uploads"] += 1
               increase_parent_statistics(doc.parent, "user_uploads")
               size = get_core_file_size(doc.pid)
