@@ -1,5 +1,6 @@
 class SentinelJob
   include ApplicationHelper
+  include SentinelHelper
 
   attr_accessor :sentinel_id
 
@@ -16,23 +17,16 @@ class SentinelJob
 
     sentinel = Sentinel.find(sentinel_id)
 
-    model_hsh = {"AudioMasterFile"=>"audio_master", "AudioFile"=>"audio", "ImageMasterFile"=>"image_master",
-                  "ImageLargeFile"=>"image_large", "ImageMediumFile"=>"image_medium",
-                  "ImageSmallFile"=>"image_small", "MspowerpointFile"=>"mspowerpoint",
-                  "MsexcelFile"=>"msexcel", "MswordFile"=>"msword",
-                  "PageFile"=>"page", "PdfFile"=>"pdf", "TextFile"=>"text", "VideoMasterFile"=>"video_master",
-                  "VideoFile"=>"video", "ZipFile"=>"zip"}
-
     set_doc = SolrDocument.new ActiveFedora::SolrService.query("id:\"#{sentinel.set_pid}\"").first
 
     cf_pids = set_doc.all_descendent_pids
 
     cf_pids.each do |pid|
-      apply_permissions(sentinel, pid, model_hsh)
+      apply_permissions(sentinel, pid)
     end
   end
 
-  def apply_permissions(sentinel, core_file_pid, model_hsh)
+  def apply_permissions(sentinel, core_file_pid)
     doc = SolrDocument.new ActiveFedora::SolrService.query("id:\"#{core_file_pid}\"").first
     core_file = CoreFile.find(doc.pid)
 
@@ -47,7 +41,7 @@ class SentinelJob
     end
 
     # Clean the MODS XML Unicode
-    core_file.mods.content = xml_decode(core_file.mods.content)    
+    core_file.mods.content = xml_decode(core_file.mods.content)
 
     if !sentinel.core_file.blank?
       core_file.permissions = sentinel.core_file["permissions"]
@@ -61,13 +55,13 @@ class SentinelJob
     if !sentinel.nil?
       content_docs.each do |content_doc|
         content_object = ActiveFedora::Base.find(content_doc.pid, cast: true)
-        if !model_hsh[content_doc.klass].blank?
-          if !sentinel.send(model_hsh[content_doc.klass].to_sym).blank?
-            content_object.permissions = sentinel.send(model_hsh[content_doc.klass].to_sym)["permissions"]
-            content_object.mass_permissions = sentinel.send(model_hsh[content_doc.klass].to_sym)["mass_permissions"]
+        # if !model_hsh[content_doc.klass].blank?
+          if !sentinel.send(sentinel_class_to_symbol(content_doc.klass)).blank?
+            content_object.permissions = sentinel.send(sentinel_class_to_symbol(content_doc.klass))["permissions"]
+            content_object.mass_permissions = sentinel.send(sentinel_class_to_symbol(content_doc.klass))["mass_permissions"]
             content_object.save!
           end
-        end
+        # end
       end
     end
 
