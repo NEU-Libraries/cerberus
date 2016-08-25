@@ -1,15 +1,16 @@
 class ContentCreationJob
   include MimeHelper
   include ChecksumHelper
+  include SentinelHelper
 
   attr_accessor :core_file_pid, :file_path, :file_name, :delete_file, :poster_path, :small_size, :medium_size, :large_size, :permissions
-  attr_accessor :core_record, :employee
+  attr_accessor :core_record, :employee, :sentinel
 
   def queue_name
     :content_creation
   end
 
-  def initialize(core_file, file_path, file_name, poster_path=nil, small_size=0, medium_size=0, large_size=0, delete_file=true, permissions=nil)
+  def initialize(core_file, file_path, file_name, poster_path=nil, small_size=0, medium_size=0, large_size=0, delete_file=true, permissions=nil, sentinel=nil)
     self.core_file_pid = core_file
     self.file_path     = file_path
     self.file_name     = file_name
@@ -21,6 +22,8 @@ class ContentCreationJob
     self.medium_size   = medium_size
     self.large_size    = large_size
     self.permissions   = permissions
+
+    self.sentinel      = sentinel
   end
 
   def run
@@ -43,6 +46,8 @@ class ContentCreationJob
 
         File.open(poster_path) do |poster_contents|
           poster_object.add_file(poster_contents, 'content', "poster#{File.extname(poster_path)}")
+          # Poster is a thumbnail, always take core record rightsMetadata
+          # no need for sentinel
           poster_object.rightsMetadata.content = core_record.rightsMetadata.content
           poster_object.save!
         end
@@ -101,7 +106,15 @@ class ContentCreationJob
             end
           end
       else
-        content_object.rightsMetadata.content = core_record.rightsMetadata.content
+        if sentinel && !sentinel.send(sentinel_class_to_symbol(klass.to_s)).blank?
+          # set content object to sentinel value
+          # convert klass to string to send to sentinel to get rights
+          content_object.permissions = sentinel.send(sentinel_class_to_symbol(klass.to_s))["permissions"]
+          content_object.mass_permissions = sentinel.send(sentinel_class_to_symbol(klass.to_s))["mass_permissions"]
+          content_object.save!
+        else
+          content_object.rightsMetadata.content = core_record.rightsMetadata.content
+        end
       end
       content_object.original_filename = core_record.original_filename
 
