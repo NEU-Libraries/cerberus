@@ -10,7 +10,7 @@ class ContentCreationJob
     :content_creation
   end
 
-  def initialize(core_file, file_path, file_name, poster_path=nil, small_size=0, medium_size=0, large_size=0, delete_file=true, permissions=nil, sentinel=nil)
+  def initialize(core_file, file_path, file_name, poster_path=nil, small_size=0, medium_size=0, large_size=0, delete_file=true, permissions=nil)
     self.core_file_pid = core_file
     self.file_path     = file_path
     self.file_name     = file_name
@@ -22,8 +22,6 @@ class ContentCreationJob
     self.medium_size   = medium_size
     self.large_size    = large_size
     self.permissions   = permissions
-
-    self.sentinel      = sentinel
   end
 
   def run
@@ -36,6 +34,7 @@ class ContentCreationJob
 
     begin
       self.core_record = CoreFile.find(core_file_pid)
+      self.sentinel = core_record.parent.sentinel
 
       klass = core_record.canonical_class.constantize
       content_object = klass.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
