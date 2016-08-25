@@ -1,4 +1,4 @@
-<%= form_for @sentinel, url: {action: "create"} do |f| %>
+<%= form_for @sentinel do |f| %>
   <% if params[:parent].present? %>
   <%= f.hidden_field :set_pid, :value => params[:parent] %>
   <% end %>

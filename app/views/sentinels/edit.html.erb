@@ -12,7 +12,7 @@
   		if($(this).is(':checked')) {
   			$(this).parent().find('*:disabled').removeAttr("disabled");
   		} else {
-  			$(this).parent().find('select, button').prop('disabled', true);
+  			$(this).parent().find('select, button, input:hidden').prop('disabled', true);
   		}
   	});
   });
