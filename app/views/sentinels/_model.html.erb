@@ -16,7 +16,7 @@
           <%= text_field_tag "pretty_name", I18n.t("groups.#{perm[0]}.name", :default => perm[0]), class: "span11", readonly: true %>
           <%= f.hidden_field :identity, value: perm[0], name: "sentinel[#{a[1]}][permissions][identity][]", pattern: ".*\\S.*", class: "span11", readonly: true %>
           <%= hidden_field_tag "sentinel[#{a[1]}][permissions][permission_type][]", "read", readonly: "true" %>
-          <button class="btn btn-danger" data-remove="true" data-target=".permission" title="Remove permission" type="button">
+          <button class="btn btn-danger" data-remove="true" data-delete="" data-target=".to-remove" title="Remove permission" type="button">
             <%= render partial: 'shared/icon' , locals: { class_string: 'icon-remove', alt_text: "Remove Field" } %>
           </button>
         </div>
