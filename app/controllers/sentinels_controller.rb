@@ -61,4 +61,11 @@ class SentinelsController < ApplicationController
       @collection = true
     end
   end
+
+  def update
+    sentinel = Sentinel.find(params[:id])
+    sentinel.update_attributes(params[:sentinel])
+    flash[:notice] = "The Sentinel was successfully edited."
+    redirect_to(polymorphic_path(ActiveFedora::Base.find(sentinel.set_pid, cast: true))) and return
+  end
 end
