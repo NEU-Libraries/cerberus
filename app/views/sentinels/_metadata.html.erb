@@ -6,7 +6,7 @@
 
   <div>
     <% if !@sentinel.core_file.blank? %>
-      <% permissions = @sentinel.core_file["permissions"]["identity"].zip(@sentinel.core_file["permissions"]["permission_type"]) %>
+      <% permissions = @sentinel.core_file["permissions"]["identity"].zip(@sentinel.core_file["permissions"]["permission_type"]).delete_if {|x| x[0].blank?} %>
       <% mass_permissions = @sentinel.core_file["mass_permissions"] %>
     <% end %>
     <%= render partial: 'core_file', locals: {:f => f, :permissions => permissions ? permissions : [], :mass_permissions => mass_permissions} %>
@@ -26,7 +26,7 @@
         <div class="row-fluid">
       <% end %>
       <% if !@sentinel.send("#{a[1]}".to_sym).blank? %>
-        <% permissions = @sentinel.send("#{a[1]}".to_sym)["permissions"]["identity"].zip(@sentinel.send("#{a[1]}".to_sym)["permissions"]["permission_type"]) %>
+        <% permissions = @sentinel.send("#{a[1]}".to_sym)["permissions"]["identity"].zip(@sentinel.send("#{a[1]}".to_sym)["permissions"]["permission_type"]).delete_if {|x| x[0].blank?} %>
         <% mass_permissions = @sentinel.send("#{a[1]}".to_sym)["mass_permissions"] %>
       <% end %>
       <%= render partial: 'model', locals: {:f => f, :i => i, :a => a, :permissions => permissions ? permissions : [], :mass_permissions => mass_permissions} %>
