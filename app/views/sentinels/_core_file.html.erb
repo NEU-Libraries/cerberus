@@ -33,7 +33,7 @@
           <%= label_tag "sentinel[core_file][permissions][identity_type][]", "Should this identity be allowed to read or edit?" %>
           <div class="input-append" style="display: block;">
             <%= select_tag "sentinel[core_file][permissions][permission_type][]", options_for_select(['read', 'edit'], perm[1]), class: "span11 selectpicker" %>
-            <button class="btn btn-danger" data-remove="true" data-target=".permission" title="Remove permission" type="button">
+            <button class="btn btn-danger" data-delete="" data-remove="true" data-target=".permission" title="Remove permission" type="button">
               <%= render partial: 'shared/icon' , locals: { class_string: 'icon-remove', alt_text: "Remove Field" } %>
             </button>
           </div>
