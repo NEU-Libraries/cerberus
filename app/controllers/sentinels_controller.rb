@@ -63,8 +63,12 @@ class SentinelsController < ApplicationController
   end
 
   def update
+    # Set disabled models to {}
+    model_list = Sentinel.column_names - ["id", "created_at", "updated_at", "set_pid", "pid_list", "permanent", "email", "core_file"]
+    model_list.reject! { |m| params["sentinel"].include? m }
+
     sentinel = Sentinel.find(params[:id])
-    sentinel.update_attributes(params[:sentinel])
+    sentinel.update_attributes(params[:sentinel].merge(Hash[model_list.map{ |m| [m,{}] }]))
     flash[:notice] = "The Sentinel was successfully edited."
     redirect_to(polymorphic_path(ActiveFedora::Base.find(sentinel.set_pid, cast: true))) and return
   end
