@@ -31,7 +31,20 @@ class SentinelsController < ApplicationController
     sentinel = Sentinel.new(params["sentinel"])
     sentinel.save!
 
-    Cerberus::Application::Queue.push(SentinelJob.new(sentinel.id))
+    doc = SolrDocument.new ActiveFedora::SolrService.query("id:\"#{sentinel.set_pid}\"").first
+
+    # Add user email
+    sentinel.email = current_user.email
+    sentinel.save!
+
+    # Collection sentinels are not retroactive
+    if doc.klass == "Compilation"
+      Cerberus::Application::Queue.push(SentinelJob.new(sentinel.id))
+    elsif doc.klass == "Collection"
+      # Designate as permanent
+      sentinel.permanent = true
+      sentinel.save!
+    end
 
     flash[:notice] = "A Sentinel was created, and is now effecting change."
     redirect_to(polymorphic_path(ActiveFedora::Base.find(sentinel.set_pid, cast: true))) and return
