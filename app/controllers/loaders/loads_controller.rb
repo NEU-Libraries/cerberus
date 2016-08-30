@@ -211,8 +211,10 @@ class Loaders::LoadsController < ApplicationController
         raise Exceptions::NoSpreadsheetError
       end
 
-      spreadsheet_file_path = xlsx_array.first
-
+      uniq_hsh = Digest::MD5.hexdigest("#{File.basename(xlsx_array.first)}")[0,2]
+      clean_path = dir_path+"/#{Time.now.to_f.to_s.gsub!('.','-')}-#{uniq_hsh}.xlsx"
+      FileUtils.mv(xlsx_array.first, clean_path)
+      spreadsheet_file_path = clean_path
       FileUtils.rm(file)
       return spreadsheet_file_path
     end
