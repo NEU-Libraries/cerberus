@@ -142,6 +142,9 @@ Cerberus::Application.routes.draw do
    resources :damore_loads, only: [:new, :create, :show], :path => "loaders/damore"
    get "/loaders/damore/report/:id" => 'damore_loads#show', as: 'loaders_damore_report'
    get "/loaders/damore/file/:id" => 'damore_loads#show_iptc', as: 'loaders_damore_iptc'
+   resources :aaia_loads, only: [:new, :create, :show], :path => "loaders/aaia"
+   get "/loaders/aaia/report/:id" => 'aaia_loads#show', as: 'loaders_aaia_report'
+   get "/loaders/aaia/file/:id" => 'aaia_loads#show_iptc', as: 'loaders_aaia_iptc'
    resources :spreadsheet_loads, only: [:new, :create, :preview, :preview_compare], :path => "loaders/spreadsheet"
    get "/loaders/spreadsheet/report/:id" => 'spreadsheet_loads#show', as: 'loaders_spreadsheet_report'
    get "/loaders/spreadsheet/preview/:id" => 'spreadsheet_loads#preview',  as: 'loaders_spreadsheet_preview'
