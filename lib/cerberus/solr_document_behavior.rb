@@ -234,6 +234,12 @@ module Cerberus
       val.present? ? val : default
     end
 
+    def personal_creators
+    (default = '')
+      val = Array(self["personal_creators_tesim"])
+      val.present? ? val : default
+    end
+
     def true_depositor
       return proxy_uploader if ( !proxy_uploader.blank? )
       return depositor
