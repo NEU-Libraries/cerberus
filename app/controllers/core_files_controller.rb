@@ -735,6 +735,49 @@ class CoreFilesController < ApplicationController
     end
   end
 
+  def get_all_associated_child_files
+    @forced_view = "drs-items-list"
+    @core_file = fetch_solr_document
+    self.solr_search_params_logic += [:filter_by_all_associated_child_files]
+    (@response, @document_list) = get_search_results
+    respond_to do |format|
+      format.js {
+        if @response.response['numFound'] == 0
+          render :nothing => true
+        else
+          render "associated_files"
+        end
+      }
+    end
+  end
+
+  def associate
+    @core_file = CoreFile.find(params[:id])
+    url = params[:core_file_url]
+    association_type = params[:association_type]
+    if url.include? "repository.library.northeastern.edu"
+      pid = url.split("/").last
+      if (pid.include? "neu:") && (CoreFile.exists?(pid))
+        child_file = CoreFile.find(pid)
+        existing_assoc = child_file.send(association_type.to_sym)
+        if !existing_assoc.include? @core_file
+          child_file.send(association_type.to_sym, existing_assoc << @core_file)
+          if child_file.save!
+            render json: { status: "success" }, status: :ok
+          else
+            render json: { :error=> "Could not save file" }, status: :unprocessable_entity
+          end
+        else
+          render json: { :error=> "The file is already associated" }, status: :unprocessable_entity
+        end
+      else
+        render json: { :error=> "Core file does not exist" },  status: :unprocessable_entity
+      end
+    else
+      render json: { :error=>"URL provided does not point to the DRS" }, status: :unprocessable_entity
+    end
+  end
+
   def get_page_file
     cf = params[:id]
     @full_cf_id = RSolr.escape("info:fedora/#{cf}")
@@ -959,6 +1002,15 @@ class CoreFilesController < ApplicationController
         full_self_id = RSolr.escape("info:fedora/#{@core_file.pid}")
         query << "(#{Solrizer.solr_name("has_model", :symbol)}:\"info:fedora/afmodel:PageFile\" AND #{Solrizer.solr_name("is_part_of", :symbol)}:\"#{full_self_id}\")"
         solr_parameters[:sort] = "ordinal_value_isi asc, title_ssi asc"
+        solr_parameters[:fq] << query.join(" OR ")
+      end
+
+      def filter_by_all_associated_child_files(solr_parameters, user_parameters)
+        solr_parameters[:fq] ||= []
+        query = []
+        str = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/#{@core_file.pid}"
+        query << "is_supplemental_material_for_ssim:\"#{str}\" || is_instructional_material_for_ssim:\"#{str}\" || is_codebook_for_ssim:\"#{str}\" || is_dataset_for_ssim:\"#{str}\" || is_figure_for_ssim:\"#{str}\" || is_transcription_of_ssim:\"#{str}\""
+        solr_parameters[:sort] = "title_ssi asc"
         solr_parameters[:fq] << query.join(" OR ")
       end
 

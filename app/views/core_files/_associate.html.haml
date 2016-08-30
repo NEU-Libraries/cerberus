@@ -1,0 +1,35 @@
+.row
+  .span4
+    %h3 Associate Files
+    = form_tag( "/files/#{@core_file.pid}/associate", remote: true, id: "associate_form" ) do
+      %fieldset
+        = label_tag :core_file_url, "What file would you like to associate with this file?"
+        = label_tag do
+          %small Please enter the URL for the file.
+        = text_field_tag :core_file_url, nil, :required => true
+      %br
+      %fieldset
+        = label_tag :association_type, "How is the selected file associated with this file?"
+        = select_tag :association_type, options_for_select({"Is Codebook For"=>"codebook_for", "Is Dataset For"=>"dataset_for", "Is Figure For"=>"figure_for", "Is Instructional Material For"=>"instructional_material_for", "Is Supplemental Material For"=>"supplemental_material_for", "Is Transcription of"=>"transcription_of"}, "supplemental_material_for"), :required => true
+      %br
+      = submit_tag "Associate", :name => nil, :class => "btn btn-info", :id => "submit_associate"
+
+  .span8
+    %h3 Currently Associated Files
+    - if !@core_file.supplemental_materials.blank? || !@core_file.instructional_materials.blank?
+      %div#associated_files
+    - else
+      %div#associated_files
+        %p="There are no associated files yet."
+
+
+:javascript
+  $("#associate_form").on("ajax:success", function(e, data, status, xhr){
+    spinner = enable_spinner('associated_files');
+    var pid = "#{@core_file.pid}";
+    get_page("/files/"+pid+"/associated_children?per_page=5");
+    spinner.stop();
+  }).on("ajax:error", function(e, data, status, error){
+    error = $.parseJSON(data.responseText);
+    bootbox.alert("There was an error processing your request. The error received was: \""+error.error+"\". Please try again or contact DRS Staff for help.");
+  });
