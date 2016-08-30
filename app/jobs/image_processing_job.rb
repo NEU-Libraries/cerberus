@@ -236,6 +236,10 @@ class ImageProcessingJob
           vals.each do |group|
             if group.include? "northeastern"  #its a grouper group
               core_file.rightsMetadata.permissions({group: group}, "#{perm}")
+            elsif group == "public"
+              core_file.mass_permissions = "public"
+            elsif group == "private"
+              core_file.mass_permissions = "private"
             else #its an nuid for a user
               core_file.rightsMetadata.permissions({person: group}, "#{perm}")
             end
