@@ -251,6 +251,10 @@ class User < ActiveRecord::Base
     return self.groups.include? "northeastern:drs:repository:loaders:damore_mckim"
   end
 
+  def aaia_loader?
+    return self.groups.include? "northeastern:drs:repository:loaders:aai_archives"
+  end
+
   def xml_loader?
     return self.groups.include? "northeastern:drs:repository:loaders:xml"
   end
