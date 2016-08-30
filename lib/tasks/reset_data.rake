@@ -186,7 +186,7 @@ task :reset_data => :environment do
   p_1.rightsMetadata.permissions({group: "northeastern:drs:all"}, 'read')
   p_1.save!
 
-  p_2 = Collection.create(mass_permissions: 'private', parent: p_1, pid: 'neu:cj82mw96w', title: '2016 Photos')
+  p_2 = Collection.create(mass_permissions: 'public', parent: p_1, pid: 'neu:cj82mw96w', title: '2016 Photos')
   p_2.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
   p_2.save!
 
