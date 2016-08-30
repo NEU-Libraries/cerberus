@@ -290,6 +290,9 @@
   &.incomplete{
     background-color: #470047;
   }
+  &.label-info{
+    background-color: $brand-primary;
+  }
 }
 
 .embargo-alert{

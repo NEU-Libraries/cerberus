@@ -21,7 +21,33 @@
 
   #move.tab-pane
     = render partial: "move"
+  #associate.tab-pane
+    = render partial: "associate"
   #delete.tab-pane
     = render partial: "delete"
 
 = render partial: "shared/cancel_edit_modal", locals: { item: @core_file }
+
+:javascript
+  $('a[href="#associate"]').click(function (e) {
+    e.preventDefault();
+    $(this).tab('show');
+    spinner = enable_spinner('associated_files');
+    var pid = "#{@core_file.pid}";
+    get_page("/files/"+pid+"/associated_children?per_page=5");
+    spinner.stop();
+  });
+  function get_page(path){
+    $.getScript( path, function() {
+      picturefill({
+        reevaluate: true,
+      });
+      enable_pagination();
+    });
+  }
+  function enable_pagination(){
+    $("#associated_files .pagination a").on("click", function(e){
+      e.preventDefault();
+      get_page($(this).attr("href"));
+    });
+  }
