@@ -21,6 +21,9 @@ class SentinelJob
 
     cf_pids = set_doc.all_descendent_pids
 
+    sentinel.pid_list = cf_pids
+    sentinel.save!
+
     cf_pids.each do |pid|
       apply_permissions(sentinel, pid)
     end
