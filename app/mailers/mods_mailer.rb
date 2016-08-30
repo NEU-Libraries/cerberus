@@ -5,6 +5,7 @@ class ModsMailer < ActionMailer::Base
     user = !nuid.blank? ? User.find_by_nuid(nuid) : nil
     @name = user.pretty_name || "No name set.  Uh oh!"
     @nuid = nuid || "No nuid set.  Uh oh!"
+    @collection_title = ActiveFedora::Base.find("#{pid}", cast: true).title || "No collection title."
     @file_url = mods_download_url(id: pid, session_id: session_id)  || "No url set.  Uh oh!"
     mail(to: user.email,
          subject: "[DRS] MODS Export download link",
