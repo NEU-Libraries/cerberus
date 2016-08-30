@@ -496,10 +496,17 @@ class CatalogController < ApplicationController
 
   def oai_set_filter(solr_parameters, user_parameters)
     comp = Compilation.find("neu:#{params[:set]}")
-    pids = comp.object_ids
+    pids = comp.entry_ids
 
     query = pids.map do |pid|
-      set = "id:\"#{pid}\""
+      doc = SolrDocument.new ActiveFedora::SolrService.query("id:\"#{pid}\"").first
+      if doc.klass == "Collection"
+        # if collection
+        "parent_id_tesim:\"#{pid}\""
+      else
+        # else core file
+        "id:\"#{pid}\""
+      end
     end
 
     fq = query.join(" OR ")
