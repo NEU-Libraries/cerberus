@@ -1,5 +1,5 @@
 = f.label :date, "Date Created"
 = f.hidden_field :date, {class: 'date'}
-= select_year(0, {start_year: Time.zone.now.year, end_year: 1850, prompt: 'Year'}, {class: 'span4 doiYear'})
+= select_year(0, {start_year: Time.zone.now.year, end_year: 1500, prompt: 'Year'}, {class: 'span4 doiYear'})
 = select_month(0, {prompt: 'Month'}, {class: 'span4 doiMonth'})
 = select_day(0, {prompt: 'Day'}, {class: 'span4 doiDay'})
