@@ -4,19 +4,18 @@ class ProcessMultipageZipJob
   include ApplicationHelper
   include ZipHelper
 
-  attr_accessor :loader_name, :zip_path, :parent, :copyright, :current_user, :permissions, :client, :report_id
+  attr_accessor :loader_name, :zip_path, :parent, :copyright, :current_user, :client, :report_id
 
   def queue_name
     :multipage_process_zip
   end
 
-  def initialize(loader_name, zip_path, parent, copyright, current_user, permissions, report_id, client=nil)
+  def initialize(loader_name, zip_path, parent, copyright, current_user, report_id, client=nil)
     self.loader_name = loader_name
     self.zip_path = zip_path
     self.parent = parent
     self.copyright = copyright
     self.current_user = current_user
-    self.permissions = permissions
     self.client = client
     self.report_id = report_id
   end
@@ -65,11 +64,7 @@ class ProcessMultipageZipJob
           core_file.properties.original_filename = row_results["file_name"]
           core_file.label = row_results["file_name"]
 
-          permissions['CoreFile'].each do |perm, vals|
-            vals.each do |group|
-              core_file.rightsMetadata.permissions({group: group}, "#{perm}")
-            end
-          end
+          # TODO: sentinel
 
           core_file.save!
           seq_num = row_num
