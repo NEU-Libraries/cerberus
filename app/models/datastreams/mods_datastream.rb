@@ -321,16 +321,37 @@ class ModsDatastream < ActiveFedora::OmDatastream
 
     # Ensure title is set to a title actually associated with this core file.
     # Over and over and around we go, patching up this junk forever and ever
-    solr_doc["title_info_title_ssi"] = kramdown_parse(self.title_info.title.first)
-    solr_doc["title_info_title_tesim"] = kramdown_parse(self.title_info.title.first)
+    # solr_doc["title_info_title_ssi"] = kramdown_parse(self.title_info.title.first)
+    # solr_doc["title_info_title_tesim"] = kramdown_parse(self.title_info.title.first)
+
+    # Fix for 883
+    # nonSort title : subTitle. partNumber, partName
+
+    t = self.title_info.title.first
+
+    if !self.title_info.sub_title.first.blank?
+      t = t + ": #{self.title_info.sub_title.first}."
+    end
+
+    if !self.title_info.part_number.first.blank?
+      t = t + " #{self.title_info.part_number.first}"
+    end
+
+    if !self.title_info.part_name.first.blank?
+      t = t + ", #{self.title_info.part_name.first}"
+    end
+
+    solr_doc["title_info_title_ssi"] = kramdown_parse(t)
+    solr_doc["title_info_title_tesim"] = kramdown_parse(t)
+
+    # Kramdown parse for search purposes - #439
+    # title_ssi will only be used for sorting - #766
+    # solr_doc["title_ssi"] = kramdown_parse(self.title_info.title.first).downcase
+    solr_doc["title_ssi"] = kramdown_parse(t).downcase
 
     # Make sure all titles and non_sorts end up in title_tesim
     total_title_array = self.all_titles.non_sort.concat self.all_titles.title
     solr_doc["title_tesim"] = total_title_array.select {|item| kramdown_parse(item) unless item.blank?}
-
-    # Kramdown parse for search purposes - #439
-    # title_ssi will only be used for sorting - #766
-    solr_doc["title_ssi"] = kramdown_parse(self.title_info.title.first).downcase
 
     # Full title so the api doesn't have to parse it
     solr_doc["full_title_ssi"] = "#{self.non_sort.first} #{kramdown_parse(self.title_info.title.first)}".strip
