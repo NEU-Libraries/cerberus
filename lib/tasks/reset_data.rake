@@ -186,13 +186,35 @@ task :reset_data => :environment do
   p_1.rightsMetadata.permissions({group: "northeastern:drs:all"}, 'read')
   p_1.save!
 
-  p_2 = Collection.create(mass_permissions: 'private', parent: p_1, pid: 'neu:cj82mw96w', title: '2016 Photos')
+  p_2 = Collection.create(mass_permissions: 'public', parent: p_1, pid: 'neu:cj82mw96w', title: '2016 Photos')
   p_2.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
   p_2.save!
 
   p_3 = Collection.create(mass_permissions: 'private', parent: p_1, pid: 'neu:cj82mw95m', title: 'Private and Sensitive Photography')
   p_3.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
   p_3.save!
+
+  # Add AAIA structure for loader testing
+  aai_comm = Community.new(mass_permissions: 'public', pid: 'neu:308', title: "John D. O'Bryant African American Institute")
+  aai_comm.parent = "neu:1"
+  aai_comm.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
+  aai_comm.save!
+
+  # AAIA  community
+  p_c = Community.new(mass_permissions: 'public', pid: 'neu:cj82n3331', title: "John D. O'Bryant African American Institute Archives")
+  p_c.parent = "neu:308"
+  p_c.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
+  p_c.save!
+
+  # AAIA children collections
+  p_1 = Collection.create(mass_permissions: 'private', parent: p_c, pid: 'neu:cj82n322h', title: 'Digital Collections')
+  p_1.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
+  p_1.rightsMetadata.permissions({group: "northeastern:drs:all"}, 'read')
+  p_1.save!
+
+  p_2 = Collection.create(mass_permissions: 'private', parent: p_1, pid: 'neu:cj82nc004', title: 'Ediface')
+  p_2.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
+  p_2.save!
 
   root_dept.rightsMetadata.permissions({group: 'public'}, 'read')
   set_edit_permissions(root_dept)
@@ -290,6 +312,12 @@ task :reset_data => :environment do
   joey.add_group("northeastern:drs:repository:loaders:damore_mckim")
   eli.add_group("northeastern:drs:repository:loaders:damore_mckim")
   david.add_group("northeastern:drs:repository:loaders:damore_mckim")
+
+  sarah.add_group("northeastern:drs:repository:loaders:aai_archives")
+  pat.add_group("northeastern:drs:repository:loaders:aai_archives")
+  joey.add_group("northeastern:drs:repository:loaders:aai_archives")
+  eli.add_group("northeastern:drs:repository:loaders:aai_archives")
+  david.add_group("northeastern:drs:repository:loaders:aai_archives")
 
   sarah.add_group("northeastern:drs:repository:staff")
   pat.add_group("northeastern:drs:repository:staff")
