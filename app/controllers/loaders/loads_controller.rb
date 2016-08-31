@@ -154,7 +154,7 @@ class Loaders::LoadsController < ApplicationController
           rescue => exception
             logger.error controller_name+"::create rescued #{exception.class}\n\t#{exception.to_s}\n #{exception.backtrace.join("\n")}\n\n"
             email_handled_exception(exception)
-            if (exception.to_s.include?("Nokogiri") || exception.to_s.include?("MissingMetadata") || exception.to_s.include?("XmlEncodingError")) && (short_name == "spreadsheet" || short_name == "xml")
+            if (exception.to_s.include?("Nokogiri") || exception.to_s.include?("MissingMetadata") || exception.to_s.include?("XmlEncodingError") || exception.to_s.include?("MalformedDate")) && (short_name == "spreadsheet" || short_name == "xml")
               error_msg = "There was an error in displaying the Preview screen. Please <a href='/loaders/#{short_name}/report/#{@report_id}'>check the load report</a> for more information."
               session[:flash_error] = error_msg
             else
