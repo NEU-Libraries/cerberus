@@ -16,8 +16,7 @@ class Loaders::MultipageLoadsController < Loaders::LoadsController
   end
 
   def create
-    permissions = {"CoreFile" => {"read"  => ["public"], "edit" => ["northeastern:drs:repository:staff"]}}
-    process_create(permissions, t('loaders.multipage.short_name'), "MultipageLoadsController")
+    process_create(t('loaders.multipage.short_name'), "MultipageLoadsController")
   end
 
   private
