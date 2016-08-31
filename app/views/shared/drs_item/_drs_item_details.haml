@@ -9,9 +9,6 @@
           - item = item.get_core_record
         = "#{item.non_sort} "
         = kramdown_parse(item.title) or "Default title"
-        - if !item.sub_title.blank?
-          %span.drs-item-subtitle
-            = ": " + item.sub_title
         - if ordinal_value && !ordinal_value.blank?
           - item = page_item
           %small
