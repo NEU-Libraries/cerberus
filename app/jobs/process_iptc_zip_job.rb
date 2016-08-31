@@ -1,19 +1,18 @@
 class ProcessIptcZipJob
   include ZipHelper
 
-  attr_accessor :loader_name, :zip_path, :parent, :copyright, :current_user, :permissions, :client, :derivatives, :report_id
+  attr_accessor :loader_name, :zip_path, :parent, :copyright, :current_user, :client, :derivatives, :report_id
 
   def queue_name
     :iptc_process_zip
   end
 
-  def initialize(loader_name, zip_path, parent, copyright, current_user, permissions, report_id, derivatives=false, client=nil)
+  def initialize(loader_name, zip_path, parent, copyright, current_user, report_id, derivatives=false, client=nil)
     self.loader_name = loader_name
     self.zip_path = zip_path
     self.parent = parent
     self.copyright = copyright
     self.current_user = current_user
-    self.permissions = permissions
     self.derivatives = derivatives
     self.client = client
     self.report_id = report_id
@@ -37,7 +36,7 @@ class ProcessIptcZipJob
     # loop through file list
     file_list.each_with_index do |fpath, i|
       # file_name = File.basename(fpath)
-      ImageProcessingJob.new(fpath, original_names[i], parent, copyright, load_report.id, permissions, derivatives, client).run
+      ImageProcessingJob.new(fpath, original_names[i], parent, copyright, load_report.id, derivatives, client).run
       load_report.update_counts
       count = count + 1
       load_report.save!
