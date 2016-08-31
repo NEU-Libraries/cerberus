@@ -164,8 +164,12 @@ class ProcessXmlZipJob
                     core_file.depositor = depositor
 
                     # Does the collection have a sentinel?
-                    if collection.sentinel
-                      sentinel = collection.sentinel
+                    sentinel = core_file.parent.sentinel
+
+                    if sentinel && !sentinel.core_file.blank?
+                      core_file.permissions = sentinel.core_file["permissions"]
+                      core_file.mass_permissions = sentinel.core_file["mass_permissions"]
+                      core_file.save!
                     else
                       core_file.rightsMetadata.content = collection.rightsMetadata.content
                     end
