@@ -84,6 +84,17 @@ module XmlValidator
       return results
     end
 
+    # Does it have a properly formatted date created
+    date_created = doc.mods.origin_info.date_created + doc.mods.origin_info.date_created_end
+    date_created.each do |dc|
+      if !dc.blank?
+        if !/^\d{4}((-\d{2}-\d{2})|(-\d{2})|())$/.match(dc)
+          results[:errors] << Exceptions::MalformedDate.new("date created")
+          return results
+        end
+      end
+    end
+
     # Can we solrize the core_file if we use this xml?
     begin
       doc.to_solr

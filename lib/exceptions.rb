@@ -140,6 +140,12 @@ module Exceptions
     end
   end
 
+  class MalformedDate < StandardError
+    def initialize(required_data)
+      super "#{required_data} malformed. Must follow YYYY-MM-DD (or YYYY-MM or YYYY) format"
+    end
+  end
+
   class MissingHandle < StandardError
     def initialize
       super "No valid handle in xml. Must take the form of <mods:identifier type=\"hdl\" displayLabel=\"Permanent URL\">"
