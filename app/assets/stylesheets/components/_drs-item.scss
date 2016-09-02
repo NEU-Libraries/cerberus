@@ -36,3 +36,18 @@
   margin-top: -15px;
   padding-bottom: 15px;
 }
+
+input[type="checkbox"].disassociate_checkbox {
+  float: left;
+  margin-right: 5px;
+}
+
+#disassociate_form {
+  label {
+    padding-left: 5px;
+  }
+}
+
+.disassociate_form {
+  display:inline;
+}

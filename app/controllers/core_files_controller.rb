@@ -742,11 +742,7 @@ class CoreFilesController < ApplicationController
     (@response, @document_list) = get_search_results
     respond_to do |format|
       format.js {
-        if @response.response['numFound'] == 0
-          render :nothing => true
-        else
-          render "associated_files"
-        end
+        render "associated_child_files"
       }
     end
   end
@@ -759,22 +755,37 @@ class CoreFilesController < ApplicationController
       pid = url.split("/").last
       if (pid.include? "neu:") && (CoreFile.exists?(pid))
         child_file = CoreFile.find(pid)
-        existing_assoc = child_file.send(association_type.to_sym)
-        if !existing_assoc.include? @core_file
-          child_file.send(association_type.to_sym, existing_assoc << @core_file)
-          if child_file.save!
-            render json: { status: "success" }, status: :ok
-          else
-            render json: { :error=> "Could not save file" }, status: :unprocessable_entity
-          end
-        else
-          render json: { :error=> "The file is already associated" }, status: :unprocessable_entity
+        begin
+          child_file.associate(association_type, @core_file)
+          render json: { status: "success" }, status: :ok
+        rescue => exception
+          render json: { :error => exception.to_s }, status: :unprocessable_entity
         end
       else
         render json: { :error=> "Core file does not exist" },  status: :unprocessable_entity
       end
     else
       render json: { :error=>"URL provided does not point to the DRS" }, status: :unprocessable_entity
+    end
+  end
+
+  def disassociate
+    @core_file = CoreFile.find(params[:id])
+    pids_to_remove = params[:pids_to_remove].split(",")
+    associations = params[:associations].split(",")
+    pids_to_remove.each_with_index do |pid, i|
+      if CoreFile.exists?(pid)
+        child_file = CoreFile.find(pid)
+        association_type = associations[i]
+        begin
+          child_file.disassociate(association_type, @core_file)
+          render json: { status: "success" }, status: :ok
+        rescue => exception
+          render json: { :error => exception.to_s }, status: :unprocessable_entity
+        end
+      else
+        render json: { :error=> "Core file does not exist" },  status: :unprocessable_entity
+      end
     end
   end
 

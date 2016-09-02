@@ -36,26 +36,6 @@
         = "... "
   - elsif item.description.blank?
     .list-view-spacer
-  -if params[:action] == "get_all_associated_child_files"
-    .pull-left
-      - if !item.supplemental_material_for.blank?
-        %span.label.label-info
-          Supplemental Material
-      - if !item.instructional_material_for.blank?
-        %span.label.label-info
-          Instructional Material
-      - if !item.transcription_of.blank?
-        %span.label.label-info
-          Transcription
-      - if !item.codebook_for.blank?
-        %span.label.label-info
-          Codebook
-      - if !item.dataset_for.blank?
-        %span.label.label-info
-          Dataset
-      - if !item.figure_for.blank?
-        %span.label.label-info
-          Figure
   - if !item.under_embargo?(current_user)
     .list-buttons
       = render partial: 'core_files/derivative_btn_group', locals: {contents: @content_objects, list_view: true, item: item, alignment: "pull-right"}

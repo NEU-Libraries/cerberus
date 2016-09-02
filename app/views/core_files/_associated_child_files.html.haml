@@ -1,0 +1,50 @@
+- if @response.response['numFound'] > 0
+  = form_tag( "/files/#{@core_file.pid}/disassociate", remote: true, id: "disassociate_form") do
+    = check_box_tag :check_all
+    = label_tag :check_all, "Select All", class: "checkbox inline"
+    = hidden_field_tag :pids_to_remove
+    = hidden_field_tag :associations
+    = submit_tag "Disassociate Selected", :class => "btn btn-danger btn-small hidden", :id => "submit_disassociate"
+  = render 'catalog/results_pagination'
+  = render :partial => 'catalog/document_list'
+  = render 'catalog/results_pagination'
+- else
+  %p There are currently no associated files.
+
+:javascript
+  $(".disassociate_pid").on("click", function(e){
+    e.preventDefault();
+    console.log("clicked disasocaite button");
+    $(this).parent(".disassociate_form").submit();
+    spinner = enable_spinner('associated_files');
+  });
+  $(".disassociate_form").on("ajax:success", function(e, data, status, xhr){
+    spinner = enable_spinner('associated_files');
+    var pid = "#{@core_file.pid}";
+    get_page("/files/"+pid+"/associated_children?per_page=5");
+    spinner.stop();
+  }).on("ajax:error", function(e, data, status, error){
+    error = $.parseJSON(data.responseText);
+    bootbox.alert("There was an error processing your request. The error received was: \""+error.error+"\". Please try again or contact DRS Staff for help.");
+    spinner.stop();
+  });
+  $("#check_all").on("change", function(){
+    if ($(this).is(":checked")){
+      $(".disassociate_checkbox").prop("checked", true);
+      $("#submit_disassociate").removeClass("hidden");
+    } else {
+      $(".disassociate_checkbox").prop("checked", false);
+      $("#submit_disassociate").addClass("hidden");
+    }
+  });
+  $(".disassociate_checkbox").on("change", function(){
+    if ($(this).is(":checked")){
+    } else {
+      $("#check_all").prop("checked", false);
+    }
+  });
+  $("#disassociate_form").submit, function(e){
+    e.preventDefault();
+    console.log("submitted");
+
+  });
