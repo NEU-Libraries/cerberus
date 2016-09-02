@@ -37,12 +37,13 @@
     <% end %>
 
     <div class="form-actions">
-      <%= f.submit class: ['btn', 'btn-primary'], value: 'Submit', data: { disable_with: "Please wait..."} %>
+      <a class="btn btn-primary" href="#submitModal" data-toggle="modal">Submit</a>
       <a class="btn btn-warning" href="#cancelEditModal" data-toggle="modal" >
         Cancel
       </a>
     </div>
-
+    
+    <%= render partial: 'submit_modal' %>
   <% end %>
 
 <%= render partial: 'shared/cancel_edit_modal', locals: { item: @set } %>
