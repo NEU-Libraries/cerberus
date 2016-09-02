@@ -115,14 +115,14 @@ describe ProcessXmlZipJob do
 
   context "new files" do
     before :all do
-      spreadsheet_file_path = "#{Rails.root}/spec/fixtures/files/xml_loader_new/manifest-new.xlsx"
+      spreadsheet_file_path = "#{Rails.root}/spec/fixtures/files/xml_loader_new/manifest.xlsx"
       copyright = ""
       @parent = FactoryGirl.create(:root_collection)
       tempdir = Pathname.new("#{Rails.application.config.tmp_path}/")
       dir_name = File.dirname(spreadsheet_file_path)
       new_path = tempdir.join("xml_loader_new").to_s
       FileUtils.cp_r(dir_name, new_path)
-      new_file = new_path +"/manifest-new.xlsx"
+      new_file = new_path +"/manifest.xlsx"
       permissions = @parent.permissions
       @report_id = Loaders::LoadReport.create_from_strings(@user, 0, @loader_name, @parent.pid)
       @lr = Loaders::LoadReport.find("#{@report_id}")

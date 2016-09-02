@@ -160,7 +160,7 @@ module Exceptions
 
   class NoSpreadsheetError < StandardError
     def initialize
-      super "Your upload could not be processed because the submitted .zip file does not contain a spreadsheet."
+      super "Your upload could not be processed because the submitted .zip file does not contain a spreadsheet named manifest.xlsx."
     end
   end
 
