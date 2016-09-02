@@ -46,7 +46,7 @@
 
 </script>
 
-<% if permissions.empty? %>
+<% if permissions.empty? && mass_permissions.empty? %>
   <script>
     $(document).ready(function () {
       $("[name^='sentinel[<%= a[1] %>]'").parent().find('select, button, input:hidden').prop('disabled', true);
