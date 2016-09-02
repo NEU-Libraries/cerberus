@@ -15,7 +15,7 @@ module Cerberus
 
           # sort so that edit goes last, being the stronger permission over read
           zipped_groups = params["identity"].zip(params["permission_type"]).delete_if {|x| x[0].blank?}
-          sorted_groups = zipped_groups.sort_by{|k,v| v == "read" ? 0 : 1}
+          sorted_groups = zipped_groups.sort_by{|k,v| v == "read" ? 0 : 1}.uniq
 
           # add groups
           # form_groups.each_with_index do |group, i|
