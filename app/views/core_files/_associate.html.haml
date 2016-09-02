@@ -16,20 +16,21 @@
 
   .span8
     %h3 Currently Associated Files
-    - if !@core_file.supplemental_materials.blank? || !@core_file.instructional_materials.blank?
-      %div#associated_files
-    - else
-      %div#associated_files
-        %p="There are no associated files yet."
-
+    %div#associated_files
 
 :javascript
+  spinner = enable_spinner('associated_files');
+  $("#associate_form").on("submit", function(){
+    spinner = enable_spinner('associated_files');
+  });
   $("#associate_form").on("ajax:success", function(e, data, status, xhr){
     spinner = enable_spinner('associated_files');
     var pid = "#{@core_file.pid}";
     get_page("/files/"+pid+"/associated_children?per_page=5");
     spinner.stop();
+    $("#associate_form")[0].reset();
   }).on("ajax:error", function(e, data, status, error){
     error = $.parseJSON(data.responseText);
     bootbox.alert("There was an error processing your request. The error received was: \""+error.error+"\". Please try again or contact DRS Staff for help.");
+    spinner.stop();
   });

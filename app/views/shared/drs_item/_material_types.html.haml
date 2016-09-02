@@ -1,0 +1,12 @@
+.pull-left
+  - item.associations_for.each do |assoc|
+    - if assoc.length > 0
+      %span.label.label-info
+        = assoc[0].to_s.titleize
+      = check_box_tag :disassociate_pid, item.pid, false, "class" => "disassociate_checkbox", id: "disassociate_pid_#{item.pid}"
+      = form_tag( "/files/#{@core_file.pid}/disassociate", :class=> "disassociate_form", :remote => true) do
+        = hidden_field_tag :pids_to_remove, item.pid
+        = hidden_field_tag :associations, assoc[0].to_s
+        %a.disassociate_pid.label.label-danger.btn-small
+          %i.icon-ban-circle
+      %br
