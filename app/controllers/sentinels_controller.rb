@@ -20,9 +20,9 @@ class SentinelsController < ApplicationController
 
     if @set.class == Collection
       @collection = true
-      flash[:alert] = "Core File permissions are mandatory for Sentinels belonging to a Collection. Any disabled models will inherit their permissions from the Core File."
+      flash[:alert] = "Core file mass permissions must be set for a collection sentinel. If a content object model is disabled, content objects uploaded to this collection with that file type will be assigned the same permissions set for the core file."
     else
-      flash[:alert] = "Disabled models will receive no changes. Enabled models will have thier permissions wiped clean, and replaced with whatever is chosen on this form."
+      flash[:alert] = "Enable models and select the correct permissions for the core files and content objects in this Set that you would like to update. If a content object model is disabled, content objects in this Set with that file type will not be updated."
     end
   end
 
@@ -39,13 +39,16 @@ class SentinelsController < ApplicationController
     # Collection sentinels are not retroactive
     if doc.klass == "Compilation"
       Cerberus::Application::Queue.push(SentinelJob.new(sentinel.id))
+
+      flash[:notice] = "A new sentinel has been created and the Set's files are being updated."
     elsif doc.klass == "Collection"
       # Designate as permanent
       sentinel.permanent = true
       sentinel.save!
+
+      flash[:notice] = "A new sentinel has been created and will be used to assign permissions for all future files uploaded to this collection using the XML, spreadsheet, multipage, or IPTC loaders."
     end
 
-    flash[:notice] = "A Sentinel was created, and is now effecting change."
     redirect_to(polymorphic_path(ActiveFedora::Base.find(sentinel.set_pid, cast: true))) and return
   end
 
@@ -80,7 +83,7 @@ class SentinelsController < ApplicationController
 
     sentinel = Sentinel.find(params[:id])
     sentinel.update_attributes(params[:sentinel].merge(Hash[model_list.map{ |m| [m,{}] }]))
-    flash[:notice] = "The Sentinel was successfully edited."
+    flash[:notice] = "The sentinel was successfully edited."
     redirect_to(polymorphic_path(ActiveFedora::Base.find(sentinel.set_pid, cast: true))) and return
   end
 end
