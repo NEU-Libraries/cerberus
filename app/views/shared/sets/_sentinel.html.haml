@@ -3,7 +3,7 @@
   - if @sentinel
     .row-fluid
       .span10
-        A sentinel currently exists for this collection.
+        This collection has an active sentinel. Edit this sentinel to assign core file and content object permissions for future files uploaded to this collection using the XML, spreadsheet, multipage, or IPTC loaders. To update the permissions for existing files in the collection, add those files to a Set and use the Set sentinel feature.
     .row-fluid
       .span10
         %br
@@ -12,7 +12,7 @@
   - elsif @set.class == Compilation
     .row-fluid
       .span10
-        Create a sentinel to change the permissions of Core Files and their Content Objects for this Set.
+        Create a sentinel to update the core file and content object permissions for all files in this Set, including files contained with Set collections.
     .row-fluid
       .span10
         %br
@@ -21,7 +21,7 @@
   -else
     .row-fluid
       .span10
-        No sentinel currently exists for this collection.
+        This collection does not have a sentinel. Create a sentinel to assign core file and content object permissions for future files uploaded to this collection using the XML, spreadsheet, multipage, or IPTC loaders. To update the permissions for existing files in the collection, add those files to a Set and use the Set sentinel feature.
     .row-fluid
       .span10
         %br
