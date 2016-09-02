@@ -203,7 +203,7 @@ class Loaders::LoadsController < ApplicationController
       file_list = safe_unzip(file, dir_path)
 
       # Find the spreadsheet
-      xlsx_array = Dir.glob("#{dir_path}/*.xlsx")
+      xlsx_array = Dir.glob("#{dir_path}/manifest.xlsx")
 
       if xlsx_array.length > 1
         raise Exceptions::MultipleSpreadsheetError
