@@ -1,5 +1,6 @@
 require 'RMagick'
 include Magick
+include SentinelHelper
 
 class ScaledImageCreator
 
@@ -59,6 +60,7 @@ class ScaledImageCreator
     def creation_helper(size, klass, master, permissions=nil)
       if size > 0
         target = core.content_objects.find { |x| x.instance_of? klass }
+        sentinel = core.parent.sentinel
 
         # If we can't find the derivative, create it.
         if !target
@@ -72,6 +74,12 @@ class ScaledImageCreator
                   target.rightsMetadata.permissions({group: group}, "#{perm}")
                 end
               end
+          elsif sentinel && !sentinel.send(sentinel_class_to_symbol(klass.to_s)).blank?
+            # set content object to sentinel value
+            # convert klass to string to send to sentinel to get rights
+            target.permissions = sentinel.send(sentinel_class_to_symbol(klass.to_s))["permissions"]
+            target.mass_permissions = sentinel.send(sentinel_class_to_symbol(klass.to_s))["mass_permissions"]
+            target.save!
           else
             target.rightsMetadata.content = core.rightsMetadata.content
           end

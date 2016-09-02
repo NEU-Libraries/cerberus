@@ -1,4 +1,5 @@
 include Cerberus::ThumbnailCreation
+include SentinelHelper
 
 class DerivativeCreator
 
@@ -71,6 +72,8 @@ class DerivativeCreator
         object = klass.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
       end
 
+      sentinel = self.core.parent.sentinel
+
       object.title                  = title
       object.identifier             = object.pid
       object.description            = desc
@@ -78,7 +81,17 @@ class DerivativeCreator
       object.depositor              = self.core.depositor
       object.proxy_uploader         = self.core.proxy_uploader
       object.core_record            = self.core
-      object.rightsMetadata.content = self.core.rightsMetadata.content
+
+      if klass != ImageThumbnailFile && sentinel && !sentinel.send(sentinel_class_to_symbol(klass.to_s)).blank?
+        # set content object to sentinel value
+        # convert klass to string to send to sentinel to get rights
+        object.permissions = sentinel.send(sentinel_class_to_symbol(klass.to_s))["permissions"]
+        object.mass_permissions = sentinel.send(sentinel_class_to_symbol(klass.to_s))["mass_permissions"]
+        object.save!
+      else
+        object.rightsMetadata.content = self.core.rightsMetadata.content
+      end
+
       object.save!
 
       return object.pid
