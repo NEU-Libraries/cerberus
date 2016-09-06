@@ -6,7 +6,8 @@ include ChecksumHelper
   trait :dad do
     depositor "nosuch@example.com"
     before :create do |imf|
-      imf.core_record = CoreFile.create(mass_permissions: 'public', depositor: "nosuch@example.com")
+      c = Collection.create(mass_permissions: 'public', pid: 'neu:12345', title: 'Test Parent Collection')
+      imf.core_record = CoreFile.create(mass_permissions: 'public', depositor: "nosuch@example.com", parent: c)
     end
   end
 
