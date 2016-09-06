@@ -588,4 +588,78 @@ describe CoreFilesController do
       response.status.should == 403
     end
   end
+
+  describe "POST #associate" do
+    before :each do
+      @child_file = CoreFile.new(parent: root, depositor: bill.nuid)
+      @child_file.save!
+      @params = {}
+      @params[:id] = file.pid
+    end
+
+    it "returns success if associated" do
+      @params[:association_type] = "supplemental_material_for"
+      @params[:core_file_url] = "http://repository.library.northeastern.edu/files/#{@child_file.pid}"
+      sign_in admin
+      post :associate, @params
+      response.body.should == {status: "success"}.to_json
+    end
+
+    it "returns error if core file does not exist" do
+      @params[:association_type] = "supplemental_material_for"
+      @params[:core_file_url] = "http://repository.library.northeastern.edu/files/neu:127"
+      sign_in admin
+      post :associate, @params
+      response.body.should == {error: "Core file does not exist"}.to_json
+    end
+
+    it "returns error if unknown association type" do
+      @params[:association_type] = "garbley_for"
+      @params[:core_file_url] = "http://repository.library.northeastern.edu/files/#{@child_file.pid}"
+      sign_in admin
+      post :associate, @params
+      response.status.should == 422
+    end
+
+    it "returns error if core file already associated" do
+      @child_file.associate("supplemental_material_for", file)
+      @params[:association_type] = "supplemental_material_for"
+      @params[:core_file_url] = "http://repository.library.northeastern.edu/files/#{@child_file.pid}"
+      sign_in admin
+      post :associate, @params
+      response.body.should == {error: "The file is already associated"}.to_json
+    end
+
+    it "returns error if not repository.library.northeastern.edu url" do
+      @params[:association_type] = "supplemental_material_for"
+      @params[:core_file_url] = "http://cerberus.library.northeastern.edu/files/#{@child_file.pid}"
+      sign_in admin
+      post :associate, @params
+      response.body.should == {error: "URL provided does not point to the DRS"}.to_json
+    end
+
+    it "returns error if pid doesn't start with neu" do
+      @params[:association_type] = "supplemental_material_for"
+      @params[:core_file_url] = "http://repository.library.northeastern.edu/files/drs:123"
+      sign_in admin
+      post :associate, @params
+      response.body.should == {error: "Core file does not exist"}.to_json
+    end
+
+    it "should redirect to sign in if not admin user" do
+      @params[:association_type] = "supplemental_material_for"
+      @params[:core_file_url] = "http://repository.library.northeastern.edu/files/#{@child_file.pid}"
+      sign_in bill
+      post :associate, @params
+      response.status.should == 403
+    end
+
+    after :each do
+      ActiveFedora::Base.destroy_all
+    end
+  end
+
+  # describe "POST #disassociate" do
+  #
+  # end
 end
