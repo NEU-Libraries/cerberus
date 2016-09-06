@@ -278,6 +278,8 @@ class CoreFile < ActiveFedora::Base
       content.rightsMetadata.content = self.rightsMetadata.content
       content.save!
     end
+    
+    self.update_index
   end
 
   def persistent_url

@@ -1,0 +1,61 @@
+<fieldset class="span6">
+  <legend>
+    <%= "#{a[0]}" %>
+  </legend>
+  Enable <%= check_box_tag "#{a[1]}_checkbox" %>
+  <br/>
+  <br/>
+
+  <%= label_tag "sentinel[#{a[1]}][mass_permissions]", "Choose Mass Permissions:" %>
+  <%= select_tag "sentinel[#{a[1]}][mass_permissions]", options_for_select(['public', 'private'], !mass_permissions.blank? ? mass_permissions : 'public') , class: "span6" %>
+
+  <% if !permissions.empty? %>
+    <% permissions.each_with_index do |perm, index| %>
+      <div class="permission to-remove">
+        <div class="input-append" style="display: block;">
+          <%= text_field_tag "pretty_name", I18n.t("groups.#{perm[0]}.name", :default => perm[0]), class: "span11", readonly: true %>
+          <%= f.hidden_field :identity, value: perm[0], name: "sentinel[#{a[1]}][permissions][identity][]", pattern: ".*\\S.*", class: "span11", readonly: true %>
+          <%= hidden_field_tag "sentinel[#{a[1]}][permissions][permission_type][]", "read", readonly: "true" %>
+          <button class="btn btn-danger" data-remove="true" data-delete="" data-target=".to-remove" title="Remove permission" type="button">
+            <%= render partial: 'shared/icon' , locals: { class_string: 'icon-remove', alt_text: "Remove Field" } %>
+          </button>
+        </div>
+      </div>
+    <% end %>
+  <% end %>
+
+  <div class="permission">
+    <%= f.label :identity, "Select Group" %>
+    <% options = {"" => ""} %>
+    <div style="display: block;">
+      <%= hidden_field_tag "sentinel[#{a[1]}][permissions][permission_type][]", "read", readonly: "true" %>
+      <%= select_tag "sentinel[#{a[1]}][permissions][identity][]", options_for_select(current_user.pretty_groups), class: "span12", prompt: "-- Select Group --" %>
+    </div>
+  </div>
+  <button class="btn btn-success btn-block" id="add_another_permission<%= i %>" type="button">
+    <i class="icon-plus-sign icon-large"></i>
+    Add Permission
+  </button>
+</fieldset>
+<script>
+
+  $('#add_another_permission<%= i %>').addFormFields({
+    target: $('#add_another_permission<%= i %>').siblings('div:not(.to-remove)'),
+    titleText: 'Remove permission'
+  });
+
+</script>
+
+<% if permissions.empty? && mass_permissions.empty? %>
+  <script>
+    $(document).ready(function () {
+      $("[name^='sentinel[<%= a[1] %>]'").parent().find('select, button, input:hidden').prop('disabled', true);
+    });
+  </script>
+<% else %>
+  <script>
+    $(document).ready(function () {
+      $("[name^='sentinel[<%= a[1] %>]'").parent().find("#<%= a[1] %>_checkbox").prop('checked', true);
+    });
+  </script>
+<% end %>
