@@ -49,7 +49,7 @@
   </fieldset>
 </div>
 
-<% if permissions.empty? %>
+<% if permissions.empty? && mass_permissions.empty? %>
   <script>
     $(document).ready(function () {
       $("[name^='sentinel_core_file']").parent().find('select, button').prop('disabled', true);

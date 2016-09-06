@@ -15,7 +15,10 @@ module Cerberus
 
           # sort so that edit goes last, being the stronger permission over read
           zipped_groups = params["identity"].zip(params["permission_type"]).delete_if {|x| x[0].blank?}
-          sorted_groups = zipped_groups.sort_by{|k,v| v == "read" ? 0 : 1}
+          # Add in repo staff if not already there
+          zipped_groups.unshift(["northeastern:drs:repository:staff", "read"])
+
+          sorted_groups = zipped_groups.sort_by{|k,v| v == "read" ? 0 : 1}.uniq
 
           # add groups
           # form_groups.each_with_index do |group, i|
