@@ -41,6 +41,15 @@
       $("#submit_multi_disassociate").removeClass("hidden");
     } else {
       $("#check_all").prop("checked", false);
+      var checked = false;
+      $(".disassociate_checkbox").each(function(){
+        if ($(this).is(":checked")){
+          checked = true;
+        }
+      });
+      if (checked == false){
+        $("#submit_multi_disassociate").addClass("hidden");
+      }
     }
   });
   $("#submit_multi_disassociate").on("click", function(e){
