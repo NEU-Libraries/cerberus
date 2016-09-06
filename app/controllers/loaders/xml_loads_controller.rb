@@ -101,7 +101,6 @@ class Loaders::XmlLoadsController < Loaders::LoadsController
       spreadsheet_file_path = cf.tmp_path
     end
     copyright = t('loaders.xml.copyright')
-    permissions = {} #we aren't getting these externally yet
     if params[:depositor]
       depositor = params[:depositor]
       existing_files = false
@@ -109,7 +108,7 @@ class Loaders::XmlLoadsController < Loaders::LoadsController
       depositor = nil
       existing_files = true
     end
-    Cerberus::Application::Queue.push(ProcessXmlZipJob.new(@loader_name, spreadsheet_file_path, @report.collection, copyright, current_user, permissions, @report.id, existing_files, depositor, nil))
+    Cerberus::Application::Queue.push(ProcessXmlZipJob.new(@loader_name, spreadsheet_file_path, @report.collection, copyright, current_user, @report.id, existing_files, depositor, nil))
     flash[:notice] = "Your spreadsheet is being processed. The information on this page will be updated periodically until the processing is completed."
     redirect_to "/loaders/xml/report/#{@report.id}"
   end
