@@ -51,7 +51,7 @@ class CoreFilesController < ApplicationController
 
   before_filter :verify_staff_or_beta, only: [:validate_xml, :edit_xml]
 
-  before_filter :verify_admin, only: [:create_attached_file, :new_attached_file, :provide_file_metadata, :process_file_metadata, :destroy_content_object]
+  before_filter :verify_admin, only: [:create_attached_file, :new_attached_file, :provide_file_metadata, :process_file_metadata, :destroy_content_object, :associate, :disassociate]
 
   rescue_from Exceptions::NoParentFoundError, with: :no_parent_rescue
   rescue_from Exceptions::GroupPermissionsError, with: :group_permission_rescue
