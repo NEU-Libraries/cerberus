@@ -1,0 +1,13 @@
+#submitModal.modal.hide.fade{"aria-hidden" => "true", "aria-labelledby" => "submitModalLabel", role: "dialog", tabindex: "-1" }
+  .modal-header
+    %button.close{"aria-hidden" => "true", "data-dismiss" => "modal", type: "button"} x
+    %h3#submitModalLabel
+      Confirm submit request
+  .modal-body
+    -if @collection
+      %p= "Are you sure you want to update the permissions for all future files uploaded to this collection?"
+    -else
+      %p= "Are you sure you want to change the permissions for all files in this Set?"
+  .modal-footer
+    %button.btn{"aria-hidden" => "true", "data-dismiss" => "modal" } Close
+    = submit_tag 'Submit', class: "btn btn-warning"

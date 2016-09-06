@@ -35,11 +35,13 @@ def create_content_file(factory_sym, user, parent)
   core.date = Date.today.to_s
   core.depositor = user.nuid
   core.mass_permissions = 'public'
+  core.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, "edit")
   core.keywords = ["#{master.class}", "content"]
   core.mods.subject(0).topic = "a"
   core.identifier = make_handle(core.persistent_url)
 
   core.save!
+  core.propagate_metadata_changes!
 
   set_edit_permissions(core)
 end
@@ -222,7 +224,6 @@ task :reset_data => :environment do
   tmp_user = User.create(:password => "drs12345", :password_confirmation => "drs12345", full_name:"Temp User", nuid:"000000000")
   tmp_user.email = "drsadmin@neu.edu"
   tmp_user.role = "admin"
-  tmp_user.role = "developer"
   tmp_user.view_pref = "list"
   tmp_user.save!
 
@@ -231,7 +232,6 @@ task :reset_data => :environment do
   sarah = User.create(:password => "password", :password_confirmation => "password", full_name:"Sweeney, Sarah Jean", nuid:"001126975")
   sarah.email = "sj.sweeney@neu.edu"
   sarah.role = "admin"
-  sarah.role = "developer"
   sarah.save!
 
   pat = User.create(:password => "password", :password_confirmation => "password", full_name:"Yott, Patrick", nuid:"000572965")
@@ -258,13 +258,11 @@ task :reset_data => :environment do
   eli = User.create(:password => "password", :password_confirmation => "password", full_name:"Zoller, Eli Scott", nuid:"001790966")
   eli.email = "e.zoller@neu.edu"
   eli.role = "admin"
-  eli.role = "developer"
   eli.save!
 
   david = User.create(:password => "password", :password_confirmation => "password", full_name:"Cliff, David", nuid:"001905497")
   david.email = "d.cliff@neu.edu"
   david.role = "admin"
-  david.role = "developer"
   david.save!
 
   sarah.add_group("northeastern:drs:repository:loaders:marcom")
