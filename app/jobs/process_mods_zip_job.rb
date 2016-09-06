@@ -146,7 +146,18 @@ class ProcessModsZipJob
                     core_file.parent = collection
                     core_file.properties.parent_id = collection.pid
                     core_file.depositor = depositor
-                    # TODO: sentinel
+
+                    sentinel = core_file.parent.sentinel
+
+                    if sentinel && !sentinel.core_file.blank?
+                      core_file.permissions = sentinel.core_file["permissions"]
+                      core_file.mass_permissions = sentinel.core_file["mass_permissions"]
+                      core_file.save!
+                    else
+                      core_file.rightsMetadata.content = collection.rightsMetadata.content
+                    end
+
+                    core_file.rightsMetadata.permissions({person: "#{depositor}"}, 'edit')
                     core_file.original_filename = row_results["file_name"]
                     core_file.label = row_results["file_name"]
                     core_file.instantiate_appropriate_content_object(new_file)

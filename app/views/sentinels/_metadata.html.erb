@@ -9,7 +9,7 @@
       <% permissions = @sentinel.core_file["permissions"]["identity"].zip(@sentinel.core_file["permissions"]["permission_type"]).delete_if {|x| x[0].blank?} %>
       <% mass_permissions = @sentinel.core_file["mass_permissions"] %>
     <% end %>
-    <%= render partial: 'core_file', locals: {:f => f, :permissions => permissions ? permissions : [], :mass_permissions => mass_permissions} %>
+    <%= render partial: 'core_file', locals: {:f => f, :permissions => permissions ? permissions : [], :mass_permissions => mass_permissions ? mass_permissions : []} %>
   </div>
   <hr>
 
@@ -26,10 +26,10 @@
         <div class="row-fluid">
       <% end %>
       <% if !@sentinel.send("#{a[1]}".to_sym).blank? %>
-        <% permissions = @sentinel.send("#{a[1]}".to_sym)["permissions"]["identity"].zip(@sentinel.send("#{a[1]}".to_sym)["permissions"]["permission_type"]).delete_if {|x| x[0].blank?} %>
+        <% permissions = @sentinel.send("#{a[1]}".to_sym)["permissions"]["identity"].uniq.zip(@sentinel.send("#{a[1]}".to_sym)["permissions"]["permission_type"]).delete_if {|x| x[0].blank?} %>
         <% mass_permissions = @sentinel.send("#{a[1]}".to_sym)["mass_permissions"] %>
       <% end %>
-      <%= render partial: 'model', locals: {:f => f, :i => i, :a => a, :permissions => permissions ? permissions : [], :mass_permissions => mass_permissions} %>
+      <%= render partial: 'model', locals: {:f => f, :i => i, :a => a, :permissions => permissions ? permissions : [], :mass_permissions => mass_permissions ? mass_permissions : []} %>
       <% if i == @content_list.length - 1 %>
         </div>
       <% end %>
@@ -37,12 +37,13 @@
     <% end %>
 
     <div class="form-actions">
-      <%= f.submit class: ['btn', 'btn-primary'], value: 'Submit', data: { disable_with: "Please wait..."} %>
+      <a class="btn btn-primary" href="#submitModal" data-toggle="modal">Submit</a>
       <a class="btn btn-warning" href="#cancelEditModal" data-toggle="modal" >
         Cancel
       </a>
     </div>
 
+    <%= render partial: 'submit_modal' %>
   <% end %>
 
 <%= render partial: 'shared/cancel_edit_modal', locals: { item: @set } %>

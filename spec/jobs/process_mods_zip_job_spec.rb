@@ -121,7 +121,7 @@ describe ProcessModsZipJob do
 
   context "creates preview file" do
     before(:all) do
-      spreadsheet_file_path = "#{Rails.root}/spec/fixtures/files/demo_mods_new_file/demo_mods_new_file.xlsx"
+      spreadsheet_file_path = "#{Rails.root}/spec/fixtures/files/demo_mods_new_file/manifest.xlsx"
       copyright = ""
       @parent = FactoryGirl.create(:root_collection)
       permissions = @parent.permissions
@@ -165,7 +165,7 @@ describe ProcessModsZipJob do
 
   context "creates new core files" do
     before(:all) do
-      spreadsheet_file_path = "#{Rails.root}/spec/fixtures/files/demo_mods_new_file/demo_mods_new_file.xlsx"
+      spreadsheet_file_path = "#{Rails.root}/spec/fixtures/files/demo_mods_new_file/manifest.xlsx"
       copyright = ""
       @parent = FactoryGirl.create(:root_collection)
       dir_name = File.dirname(spreadsheet_file_path)
@@ -176,7 +176,7 @@ describe ProcessModsZipJob do
       @lr = Loaders::LoadReport.find("#{@report_id}")
       @lr.number_of_files = 4
       @lr.save!
-      new_file = "#{Rails.application.config.tmp_path}/demo_mods_new_file/demo_mods_new_file.xlsx"
+      new_file = "#{Rails.application.config.tmp_path}/demo_mods_new_file/manifest.xlsx"
       ProcessModsZipJob.new(@loader_name, new_file, @parent, copyright, @user, permissions, @report_id, false, @user.nuid, nil).run
     end
 
