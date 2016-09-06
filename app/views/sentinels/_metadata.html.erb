@@ -1,0 +1,49 @@
+<%= form_for @sentinel do |f| %>
+  <% if params[:parent].present? %>
+  <%= f.hidden_field :set_pid, :value => params[:parent] %>
+  <% end %>
+
+
+  <div>
+    <% if !@sentinel.core_file.blank? %>
+      <% permissions = @sentinel.core_file["permissions"]["identity"].zip(@sentinel.core_file["permissions"]["permission_type"]).delete_if {|x| x[0].blank?} %>
+      <% mass_permissions = @sentinel.core_file["mass_permissions"] %>
+    <% end %>
+    <%= render partial: 'core_file', locals: {:f => f, :permissions => permissions ? permissions : [], :mass_permissions => mass_permissions ? mass_permissions : []} %>
+  </div>
+  <hr>
+
+  <h3>
+    Content Objects
+  </h3>
+
+  <div>
+    <% @content_list.each_with_index do |a, i| %>
+      <% permissions = nil %>
+      <% mass_permissions = nil %>
+      <% if i.even? %>
+        </div>
+        <div class="row-fluid">
+      <% end %>
+      <% if !@sentinel.send("#{a[1]}".to_sym).blank? %>
+        <% permissions = @sentinel.send("#{a[1]}".to_sym)["permissions"]["identity"].uniq.zip(@sentinel.send("#{a[1]}".to_sym)["permissions"]["permission_type"]).delete_if {|x| x[0].blank?} %>
+        <% mass_permissions = @sentinel.send("#{a[1]}".to_sym)["mass_permissions"] %>
+      <% end %>
+      <%= render partial: 'model', locals: {:f => f, :i => i, :a => a, :permissions => permissions ? permissions : [], :mass_permissions => mass_permissions ? mass_permissions : []} %>
+      <% if i == @content_list.length - 1 %>
+        </div>
+      <% end %>
+      <% next %>
+    <% end %>
+
+    <div class="form-actions">
+      <a class="btn btn-primary" href="#submitModal" data-toggle="modal">Submit</a>
+      <a class="btn btn-warning" href="#cancelEditModal" data-toggle="modal" >
+        Cancel
+      </a>
+    </div>
+
+    <%= render partial: 'submit_modal' %>
+  <% end %>
+
+<%= render partial: 'shared/cancel_edit_modal', locals: { item: @set } %>

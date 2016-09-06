@@ -193,6 +193,31 @@ ActiveRecord::Schema.define(:version => 20160817194158) do
 
   add_index "searches", ["user_id"], :name => "index_searches_on_user_id"
 
+  create_table "sentinels", :force => true do |t|
+    t.datetime "created_at",   :null => false
+    t.datetime "updated_at",   :null => false
+    t.text     "audio"
+    t.text     "audio_master"
+    t.text     "image_large"
+    t.text     "image_master"
+    t.text     "image_medium"
+    t.text     "image_small"
+    t.text     "msexcel"
+    t.text     "mspowerpoint"
+    t.text     "msword"
+    t.text     "page"
+    t.text     "pdf"
+    t.text     "text"
+    t.text     "video"
+    t.text     "video_master"
+    t.text     "zip"
+    t.text     "pid_list"
+    t.string   "set_pid"
+    t.boolean  "permanent"
+    t.string   "email"
+    t.text     "core_file"
+  end
+
   create_table "single_use_links", :force => true do |t|
     t.string   "downloadKey"
     t.string   "path"
