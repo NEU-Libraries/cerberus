@@ -773,19 +773,28 @@ class CoreFilesController < ApplicationController
     @core_file = CoreFile.find(params[:id])
     pids_to_remove = params[:pids_to_remove].split(",")
     associations = params[:associations].split(",")
+    success = false
     pids_to_remove.each_with_index do |pid, i|
       if CoreFile.exists?(pid)
         child_file = CoreFile.find(pid)
         association_type = associations[i]
         begin
           child_file.disassociate(association_type, @core_file)
-          render json: { status: "success" }, status: :ok
+          status = "ok"
+          success = true
         rescue => exception
-          render json: { :error => exception.to_s }, status: :unprocessable_entity
+          error = exception.to_s
+          success = false
         end
       else
-        render json: { :error=> "Core file does not exist" },  status: :unprocessable_entity
+        success = false
+        error = "Core file does not exist"
       end
+    end
+    if success == true
+      render json: { status: "success" }, status: :ok
+    else
+      render json: { :error=> error },  status: :unprocessable_entity
     end
   end
 
