@@ -72,12 +72,8 @@
   }
 }
 
-.thumbnail-s4 img {
+.thumbnail-s4 img, .thumbnail-s5 img {
   max-width:460px;
-}
-
-.thumbnail-s5 img{
-  max-width: 500px;
 }
 
 .drs-items-list .drs-item [class*="thumbnail-"] img{
