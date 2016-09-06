@@ -3,14 +3,14 @@ class ContentCreationJob
   include ChecksumHelper
   include SentinelHelper
 
-  attr_accessor :core_file_pid, :file_path, :file_name, :delete_file, :poster_path, :small_size, :medium_size, :large_size, :permissions
+  attr_accessor :core_file_pid, :file_path, :file_name, :delete_file, :poster_path, :small_size, :medium_size, :large_size
   attr_accessor :core_record, :employee, :sentinel
 
   def queue_name
     :content_creation
   end
 
-  def initialize(core_file, file_path, file_name, poster_path=nil, small_size=0, medium_size=0, large_size=0, delete_file=true, permissions=nil)
+  def initialize(core_file, file_path, file_name, poster_path=nil, small_size=0, medium_size=0, large_size=0, delete_file=true)
     self.core_file_pid = core_file
     self.file_path     = file_path
     self.file_name     = file_name
@@ -21,7 +21,6 @@ class ContentCreationJob
     self.small_size    = small_size
     self.medium_size   = medium_size
     self.large_size    = large_size
-    self.permissions   = permissions
   end
 
   def run
@@ -96,25 +95,17 @@ class ContentCreationJob
       content_object.identifier     = content_object.pid
       content_object.depositor      = core_record.depositor
       content_object.proxy_uploader = core_record.proxy_uploader
-      if !permissions.nil? && permissions["#{content_object.klass}"]
-          perms = permissions["#{content_object.klass}"]
-          perms.each do |perm, vals|
-            vals.each do |group|
-              this_class = Object.const_get("#{content_object.klass}")
-              content_object.rightsMetadata.permissions({group: group}, "#{perm}")
-            end
-          end
+
+      if sentinel && !sentinel.send(sentinel_class_to_symbol(klass.to_s)).blank?
+        # set content object to sentinel value
+        # convert klass to string to send to sentinel to get rights
+        content_object.permissions = sentinel.send(sentinel_class_to_symbol(klass.to_s))["permissions"]
+        content_object.mass_permissions = sentinel.send(sentinel_class_to_symbol(klass.to_s))["mass_permissions"]
+        content_object.save!
       else
-        if sentinel && !sentinel.send(sentinel_class_to_symbol(klass.to_s)).blank?
-          # set content object to sentinel value
-          # convert klass to string to send to sentinel to get rights
-          content_object.permissions = sentinel.send(sentinel_class_to_symbol(klass.to_s))["permissions"]
-          content_object.mass_permissions = sentinel.send(sentinel_class_to_symbol(klass.to_s))["mass_permissions"]
-          content_object.save!
-        else
-          content_object.rightsMetadata.content = core_record.rightsMetadata.content
-        end
+        content_object.rightsMetadata.content = core_record.rightsMetadata.content
       end
+
       content_object.original_filename = core_record.original_filename
 
       content_object.canonize
