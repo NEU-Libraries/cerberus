@@ -776,6 +776,7 @@ class CoreFilesController < ApplicationController
     pids_to_remove = params[:pids_to_remove].split(",")
     associations = params[:associations].split(",")
     success = false
+    error = ""
     pids_to_remove.each_with_index do |pid, i|
       if CoreFile.exists?(pid)
         child_file = CoreFile.find(pid)

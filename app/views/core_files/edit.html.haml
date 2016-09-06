@@ -1,3 +1,10 @@
+%ul.breadcrumb
+  - breadcrumb_to_root(@core_file, [""]).each do |breadcrumb|
+    =breadcrumb
+  %li
+    = link_to "#{@core_file.title}", core_file_path(id: @core_file.pid)
+  %li.active
+    = "Manage #{@core_file.title}"
 %h1
   = "Manage "
   %i
