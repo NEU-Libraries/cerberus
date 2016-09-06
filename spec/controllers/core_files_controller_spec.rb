@@ -659,7 +659,73 @@ describe CoreFilesController do
     end
   end
 
-  # describe "POST #disassociate" do
-  #
-  # end
+  describe "POST #disassociate" do
+    before :each do
+      @child_file = CoreFile.new(parent: root, depositor: bill.nuid)
+      @child_file.save!
+      @child_file.associate("supplemental_material_for", file)
+      @params = {}
+      @params[:id] = file.pid
+    end
+
+    it "returns success if disassociated" do
+      @params[:associations] = "supplemental_material_for"
+      @params[:pids_to_remove] = @child_file.pid
+      sign_in admin
+      post :disassociate, @params
+      response.body.should == {status: "success"}.to_json
+    end
+
+    it "returns error if core file does not exist" do
+      @params[:associations] = "supplemental_material_for"
+      @params[:pids_to_remove] = "neu:128"
+      sign_in admin
+      post :disassociate, @params
+      response.body.should == {error: "Core file does not exist"}.to_json
+    end
+
+    it "returns error if unknown association type" do
+      @params[:associations] = "garbley_for"
+      @params[:pids_to_remove] = @child_file.pid
+      sign_in admin
+      post :disassociate, @params
+      response.status.should == 422
+    end
+
+    it "returns error if core file already associated" do
+      @child_file.disassociate("supplemental_material_for", file)
+      @params[:associations] = "supplemental_material_for"
+      @params[:pids_to_remove] = @child_file.pid
+      sign_in admin
+      post :disassociate, @params
+      response.body.should == {error: "File was not associated"}.to_json
+    end
+
+    it "should redirect to sign in if not admin user" do
+      @params[:associations] = "supplemental_material_for"
+      @params[:pids_to_remove] = @child_file.pid
+      sign_in bill
+      post :disassociate, @params
+      response.status.should == 403
+    end
+
+    it "should disassociate multiple files as a time" do
+      c2 = CoreFile.new(parent: root, depositor: bill.nuid)
+      c2.save!
+      c2.associate("supplemental_material_for", file)
+      file.reload
+      file.supplemental_materials.should == [@child_file, c2]
+      @params[:associations] = "supplemental_material_for,supplemental_material_for"
+      @params[:pids_to_remove] = "#{@child_file.pid},#{c2.pid}"
+      sign_in admin
+      post :disassociate, @params
+      response.body.should == {status: "success"}.to_json
+      file.reload
+      file.supplemental_materials.should == []
+    end
+
+    after :each do
+      ActiveFedora::Base.destroy_all
+    end
+  end
 end
