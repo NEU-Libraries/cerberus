@@ -5,6 +5,8 @@ Cerberus::Application.routes.draw do
   HydraHead.add_routes(self)
   # Hydra::BatchEdit.add_routes(self)
 
+  resources :sentinels, :controller => "sentinels", except: [:index, :destroy]
+
   get "/statistics/:id" => "statistics#all_counts", as: 'statistics_count'
 
   resources :collections, :path => 'collections', except: [:index, :destroy]
