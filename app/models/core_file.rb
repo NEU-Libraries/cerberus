@@ -274,11 +274,19 @@ class CoreFile < ActiveFedora::Base
   end
 
   def propagate_metadata_changes!
-    content_objects.each do |content|
-      content.rightsMetadata.content = self.rightsMetadata.content
-      content.save!
+    if !self.parent.blank? && !self.parent.sentinel
+      content_objects.each do |content|
+        content.rightsMetadata.content = self.rightsMetadata.content
+        content.save!
+      end
     end
-    
+
+    if self.thumbnail
+      t = self.thumbnail
+      t.mass_permissions = "public"
+      t.save!
+    end
+
     self.update_index
   end
 
