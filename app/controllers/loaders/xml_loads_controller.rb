@@ -47,7 +47,7 @@ class Loaders::XmlLoadsController < Loaders::LoadsController
     @collection = fetch_solr_document({:id=>@report.collection})
     collection_depositor = !@collection.true_depositor.blank? ? User.find_by_nuid("#{@collection.true_depositor}").name : nil
     @depositor_options = [["System User", "000000000"]]
-    if !collection_depositor.blank?
+    if !collection_depositor.blank? && @collection.true_depositor != "000000000"
       @depositor_options << [collection_depositor, @collection.true_depositor]
     end
 
@@ -70,7 +70,7 @@ class Loaders::XmlLoadsController < Loaders::LoadsController
     @collection = fetch_solr_document({:id=>@report.collection})
     collection_depositor = !@collection.true_depositor.blank? ? User.find_by_nuid("#{@collection.true_depositor}").name : nil
     @depositor_options = [["System User", "000000000"]]
-    if !collection_depositor.blank?
+    if !collection_depositor.blank? && @collection.true_depositor != "000000000"
       @depositor_options << [collection_depositor, @collection.true_depositor]
     end
 
@@ -116,7 +116,7 @@ class Loaders::XmlLoadsController < Loaders::LoadsController
   end
 
   def show_mods
-    @item = Loaders::ImageReport.find(params[:id])
+    @item = Loaders::ItemReport.find(params[:id])
     @load = Loaders::LoadReport.find(@item.load_report_id)
     @page_title = @item.original_file
     render 'loaders/mods_xml', locals: {item: @item, load: @load}

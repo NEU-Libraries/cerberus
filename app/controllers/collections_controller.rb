@@ -182,6 +182,10 @@ class CollectionsController < ApplicationController
 
   def edit
     @set = Collection.find(params[:id])
+
+    # Does a sentinel exist for this collection?
+    @sentinel = @set.sentinel
+
     @page_title = "Edit #{@set.title}"
     render :template => 'shared/sets/edit'
   end

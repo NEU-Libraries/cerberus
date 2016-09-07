@@ -1,0 +1,64 @@
+<h3>
+  Core File
+</h3>
+<% if !@collection %>
+  Enable <%= check_box_tag "core_file_checkbox" %>
+<% end %>
+
+<div class="row-fluid core_file">
+  <fieldset class="span6">
+
+    <legend>Mass Permissions</legend>
+    <% if @collection %>
+      <%= label_tag 'sentinel[core_file][mass_permissions]', "Choose Mass Permissions:", class: "required-label" %>
+    <% else %>
+      <%= label_tag 'sentinel[core_file][mass_permissions]', "Choose Mass Permissions:" %>
+    <% end %>
+    <%= select_tag 'sentinel[core_file][mass_permissions]', options_for_select(['public', 'private'], !mass_permissions.blank? ? mass_permissions : 'public') , class: "span6" %>
+    <p class="help-block">
+      <ul>
+        <li>Setting to 'public' will allow anyone accessing the site to see your item.</li>
+        <li>Setting to 'private' will only allow groups explicitly chosen to see your item.</li>
+      </ul>
+    </p>
+  </fieldset>
+  <fieldset class="span6">
+    <legend>Permissions</legend>
+
+    <% if !permissions.empty? %>
+      <% permissions.each_with_index do |perm, index| %>
+        <div class="permission to-remove">
+          <%= text_field_tag "pretty_name", I18n.t("groups.#{perm[0]}.name", :default => perm[0]), class: "span12", readonly: true %>
+          <%= f.hidden_field :identity, value: perm[0], name: "sentinel[core_file][permissions][identity][]", pattern: ".*\\S.*", class: "span12", readonly: true %>
+          <%= label_tag "sentinel[core_file][permissions][identity_type][]", "Should this identity be allowed to read or edit?" %>
+          <div class="input-append" style="display: block;">
+            <%= select_tag "sentinel[core_file][permissions][permission_type][]", options_for_select(['read', 'edit'], perm[1]), class: "span11 selectpicker" %>
+            <button class="btn btn-danger" data-delete="" data-remove="true" data-target=".permission" title="Remove permission" type="button">
+              <%= render partial: 'shared/icon' , locals: { class_string: 'icon-remove', alt_text: "Remove Field" } %>
+            </button>
+          </div>
+        </div>
+      <% end %>
+    <% end %>
+
+    <%= render partial: 'shared/sets/data_form_permissions_element', locals: {:f => f, :array_type => "sentinel[core_file]", :permissions => [] } %>
+    <button class="btn btn-success btn-block" id="add_another_permission" type="button">
+      <i class="icon-plus-sign icon-large"></i>
+      Add Permission
+    </button>
+  </fieldset>
+</div>
+
+<% if permissions.empty? && mass_permissions.empty? %>
+  <script>
+    $(document).ready(function () {
+      $("[name^='sentinel_core_file']").parent().find('select, button').prop('disabled', true);
+    });
+  </script>
+<% else %>
+  <script>
+    $(document).ready(function () {
+      $("#core_file_checkbox").prop('checked', true);
+    });
+  </script>
+<% end %>

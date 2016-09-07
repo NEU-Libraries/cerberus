@@ -26,6 +26,12 @@
       %a{ href: "#export", data: {toggle: "tab"}}
         %i.icon-cloud-download
         Export
+  - if current_user.admin?
+    %li
+      %a{ href: "#sentinel", data: {toggle: "tab"} }
+        %i.icon-shield
+        Sentinel
+
 
 .tab-content
   #edit.tab-pane.active
@@ -43,6 +49,10 @@
     = render partial: "shared/sets/statistics", locals:  {set: @set }
   #export.tab-pane
     = render partial: "shared/sets/export_mods", locals:  {set: @set }
+  - if current_user.admin?
+    #sentinel.tab-pane
+      = render partial: "shared/sets/sentinel", locals:  {set: @set }
+
 
 :javascript
   $('.nav-tabs a').click(function (e) {

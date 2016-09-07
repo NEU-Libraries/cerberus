@@ -5,6 +5,8 @@ Cerberus::Application.routes.draw do
   HydraHead.add_routes(self)
   # Hydra::BatchEdit.add_routes(self)
 
+  resources :sentinels, :controller => "sentinels", except: [:index, :destroy]
+
   get "/statistics/:id" => "statistics#all_counts", as: 'statistics_count'
 
   resources :collections, :path => 'collections', except: [:index, :destroy]
@@ -97,6 +99,9 @@ Cerberus::Application.routes.draw do
   match "/files/:id/request_move" => "core_files#request_move", via: 'post', as:"request_move_file"
   get "/files/:id/associated" => "core_files#get_associated_files", as: 'associated'
   get "/files/:id/page/:page" => "core_files#get_page_file", as: 'page_file'
+  get "/files/:id/associated_children" => "core_files#get_all_associated_child_files", as: 'associated_children'
+  match "/files/:id/associate" => "core_files#associate", via: "post", as: "associate_file"
+  match "/files/:id/disassociate" => "core_files#disassociate", via: "post", as: "disassociate_file"
 
   get "/files/:id/oai_thumbnail" => "core_files#oai_thumbnail", as: 'oai_thumbnail'
 
@@ -142,6 +147,9 @@ Cerberus::Application.routes.draw do
    resources :damore_loads, only: [:new, :create, :show], :path => "loaders/damore"
    get "/loaders/damore/report/:id" => 'damore_loads#show', as: 'loaders_damore_report'
    get "/loaders/damore/file/:id" => 'damore_loads#show_iptc', as: 'loaders_damore_iptc'
+   resources :aaia_loads, only: [:new, :create, :show], :path => "loaders/aaia"
+   get "/loaders/aaia/report/:id" => 'aaia_loads#show', as: 'loaders_aaia_report'
+   get "/loaders/aaia/file/:id" => 'aaia_loads#show_iptc', as: 'loaders_aaia_iptc'
    resources :spreadsheet_loads, only: [:new, :create, :preview, :preview_compare], :path => "loaders/spreadsheet"
    get "/loaders/spreadsheet/report/:id" => 'spreadsheet_loads#show', as: 'loaders_spreadsheet_report'
    get "/loaders/spreadsheet/preview/:id" => 'spreadsheet_loads#preview',  as: 'loaders_spreadsheet_preview'

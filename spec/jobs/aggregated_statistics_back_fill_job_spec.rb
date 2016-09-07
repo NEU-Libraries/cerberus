@@ -32,7 +32,7 @@ describe "aggregated statistics back fill job" do
       Impression.destroy_all
       UploadAlert.destroy_all
       Loaders::LoadReport.destroy_all
-      Loaders::ImageReport.destroy_all
+      Loaders::ItemReport.destroy_all
       XmlAlert.destroy_all
       AggregatedStatistic.destroy_all
       User.destroy_all
@@ -113,8 +113,8 @@ describe "aggregated statistics back fill job" do
       end
 
       it 'gets upload_alerts' do  #for form_edits and user_uploads
-        UploadAlert.create_from_core_file(file, :create)
-        UploadAlert.create_from_core_file(file, :update)
+        UploadAlert.create_from_core_file(file, :create, "single")
+        UploadAlert.create_from_core_file(file, :update, "single")
         date = DateTime.now.+2.weeks
         @job = AggregatedStatisticsBackFillJob.new(date)
         @job.run
@@ -124,8 +124,8 @@ describe "aggregated statistics back fill job" do
       end
 
       it 'aggregates upload_alerts up to parent collection' do
-        UploadAlert.create_from_core_file(file, :create)
-        UploadAlert.create_from_core_file(file, :update)
+        UploadAlert.create_from_core_file(file, :create, "single")
+        UploadAlert.create_from_core_file(file, :update, "single")
         date = DateTime.now.+2.weeks
         @job = AggregatedStatisticsBackFillJob.new(date)
         @job.run
@@ -135,8 +135,8 @@ describe "aggregated statistics back fill job" do
       end
 
       it 'aggregates upload_alerts up to parent community' do
-        UploadAlert.create_from_core_file(file, :create)
-        UploadAlert.create_from_core_file(file, :update)
+        UploadAlert.create_from_core_file(file, :create, "single")
+        UploadAlert.create_from_core_file(file, :update, "single")
         date = DateTime.now.+2.weeks
         @job = AggregatedStatisticsBackFillJob.new(date)
         @job.run
@@ -146,7 +146,7 @@ describe "aggregated statistics back fill job" do
       end
 
       it 'gets filesize for user_uploads and propogates up' do
-        UploadAlert.create_from_core_file(file, :create)
+        UploadAlert.create_from_core_file(file, :create, "single")
         size = (get_core_file_size(file.pid)/1024)/1024
         date = DateTime.now.+2.weeks
         @job = AggregatedStatisticsBackFillJob.new(date)
@@ -156,11 +156,12 @@ describe "aggregated statistics back fill job" do
         AggregatedStatistic.where(:pid=>"#{root_community.pid}").first.size_increase.should == size
       end
 
-      it 'gets image_reports' do #for loader_uploads
+      it 'gets item_reports' do #for loader_uploads
         parent = collection.pid
         report_id = Loaders::LoadReport.create_from_strings(bill, 0, "College of Engineering", parent)
         load_report = Loaders::LoadReport.find(report_id)
-        load_report.image_reports.create_success(file, "")
+        load_report.item_reports.create_success(file, "", :create)
+
         date = DateTime.now.+2.weeks
         @job = AggregatedStatisticsBackFillJob.new(date)
         @job.run
@@ -168,11 +169,12 @@ describe "aggregated statistics back fill job" do
         AggregatedStatistic.where(:pid=>"#{file.pid}").first.loader_uploads.should == 1
       end
 
-      it 'aggregates image_reports up to parent collection' do
+      it 'aggregates item_reports up to parent collection' do
         parent = collection.pid
         report_id = Loaders::LoadReport.create_from_strings(bill, 0, "College of Engineering", parent)
         load_report = Loaders::LoadReport.find(report_id)
-        load_report.image_reports.create_success(file, "")
+        load_report.item_reports.create_success(file, "", :create)
+
         date = DateTime.now.+2.weeks
         @job = AggregatedStatisticsBackFillJob.new(date)
         @job.run
@@ -180,11 +182,12 @@ describe "aggregated statistics back fill job" do
         AggregatedStatistic.where(:pid=>"#{collection.pid}").first.loader_uploads.should == 1
       end
 
-      it 'aggregates image_reports up to parent community' do
+      it 'aggregates item_reports up to parent community' do
         parent = collection.pid
         report_id = Loaders::LoadReport.create_from_strings(bill, 0, "College of Engineering", parent)
         load_report = Loaders::LoadReport.find(report_id)
-        load_report.image_reports.create_success(file, "")
+        load_report.item_reports.create_success(file, "", :create)
+
         date = DateTime.now.+2.weeks
         @job = AggregatedStatisticsBackFillJob.new(date)
         @job.run
@@ -243,9 +246,10 @@ describe "aggregated statistics back fill job" do
         parent = collection.pid
         report_id = Loaders::LoadReport.create_from_strings(bill, 0, "College of Engineering", parent)
         load_report = Loaders::LoadReport.find(report_id)
-        load_report.image_reports.create_success(file, "")
-        UploadAlert.create_from_core_file(file, :create)
-        UploadAlert.create_from_core_file(file, :update)
+        load_report.item_reports.create_success(file, "", :create)
+
+        UploadAlert.create_from_core_file(file, :create, "single")
+        UploadAlert.create_from_core_file(file, :update, "single")
         date = DateTime.now.+2.weeks
         xml_alert.first.pid
         XmlAlert.all.count

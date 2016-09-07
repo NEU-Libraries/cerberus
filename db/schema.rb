@@ -11,20 +11,22 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20160512185017) do
+ActiveRecord::Schema.define(:version => 20160817194158) do
 
   create_table "aggregated_statistics", :force => true do |t|
     t.string   "object_type"
     t.string   "pid"
-    t.integer  "views",                       :default => 0
-    t.integer  "downloads",                   :default => 0
-    t.integer  "streams",                     :default => 0
-    t.integer  "loader_uploads",              :default => 0
-    t.integer  "user_uploads",                :default => 0
-    t.integer  "form_edits",                  :default => 0
-    t.integer  "xml_edits",                   :default => 0
-    t.integer  "size_increase",  :limit => 8, :default => 0
+    t.integer  "views",                               :default => 0
+    t.integer  "downloads",                           :default => 0
+    t.integer  "streams",                             :default => 0
+    t.integer  "loader_uploads",                      :default => 0
+    t.integer  "user_uploads",                        :default => 0
+    t.integer  "form_edits",                          :default => 0
+    t.integer  "xml_edits",                           :default => 0
+    t.integer  "size_increase",          :limit => 8, :default => 0
     t.datetime "processed_at"
+    t.integer  "spreadsheet_load_edits",              :default => 0
+    t.integer  "xml_load_edits",                      :default => 0
   end
 
   create_table "bookmarks", :force => true do |t|
@@ -89,20 +91,6 @@ ActiveRecord::Schema.define(:version => 20160512185017) do
   add_index "follows", ["followable_id", "followable_type"], :name => "fk_followables"
   add_index "follows", ["follower_id", "follower_type"], :name => "fk_follows"
 
-  create_table "image_reports", :force => true do |t|
-    t.boolean  "validity"
-    t.string   "pid"
-    t.string   "collection"
-    t.string   "title"
-    t.text     "iptc"
-    t.text     "exception"
-    t.datetime "created_at",                        :null => false
-    t.datetime "updated_at",                        :null => false
-    t.integer  "load_report_id"
-    t.string   "original_file"
-    t.boolean  "modified",       :default => false
-  end
-
   create_table "impressions", :force => true do |t|
     t.string   "pid"
     t.string   "session_id"
@@ -118,6 +106,22 @@ ActiveRecord::Schema.define(:version => 20160512185017) do
   end
 
   add_index "impressions", ["pid"], :name => "index_drs_impressions_on_pid"
+
+  create_table "item_reports", :force => true do |t|
+    t.boolean  "validity"
+    t.string   "pid"
+    t.string   "collection"
+    t.string   "title"
+    t.text     "iptc"
+    t.text     "exception"
+    t.datetime "created_at",                        :null => false
+    t.datetime "updated_at",                        :null => false
+    t.integer  "load_report_id"
+    t.string   "original_file"
+    t.boolean  "modified",       :default => false
+    t.string   "change_type"
+    t.boolean  "preview_file",   :default => false
+  end
 
   create_table "load_reports", :force => true do |t|
     t.string   "loader_name"
@@ -189,6 +193,31 @@ ActiveRecord::Schema.define(:version => 20160512185017) do
 
   add_index "searches", ["user_id"], :name => "index_searches_on_user_id"
 
+  create_table "sentinels", :force => true do |t|
+    t.datetime "created_at",   :null => false
+    t.datetime "updated_at",   :null => false
+    t.text     "audio"
+    t.text     "audio_master"
+    t.text     "image_large"
+    t.text     "image_master"
+    t.text     "image_medium"
+    t.text     "image_small"
+    t.text     "msexcel"
+    t.text     "mspowerpoint"
+    t.text     "msword"
+    t.text     "page"
+    t.text     "pdf"
+    t.text     "text"
+    t.text     "video"
+    t.text     "video_master"
+    t.text     "zip"
+    t.text     "pid_list"
+    t.string   "set_pid"
+    t.boolean  "permanent"
+    t.string   "email"
+    t.text     "core_file"
+  end
+
   create_table "single_use_links", :force => true do |t|
     t.string   "downloadKey"
     t.string   "path"
@@ -211,14 +240,15 @@ ActiveRecord::Schema.define(:version => 20160512185017) do
     t.string   "title"
     t.string   "depositor_name"
     t.string   "depositor_email"
-    t.datetime "created_at",       :null => false
-    t.datetime "updated_at",       :null => false
+    t.datetime "created_at",                       :null => false
+    t.datetime "updated_at",                       :null => false
     t.string   "pid"
     t.boolean  "notified"
     t.string   "change_type"
     t.string   "collection_pid"
     t.string   "collection_title"
     t.string   "editor_nuid"
+    t.string   "load_type",        :default => ""
   end
 
   add_index "upload_alerts", ["content_type"], :name => "index_upload_alerts_on_type"

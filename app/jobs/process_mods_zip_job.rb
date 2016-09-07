@@ -4,6 +4,7 @@ class ProcessModsZipJob
   include ApplicationHelper
   include ZipHelper
   include HandleHelper
+  include Cerberus::TempFileStorage
 
   attr_accessor :loader_name, :spreadsheet_file_path, :parent, :copyright, :current_user, :permissions, :preview, :depositor, :client, :report_id, :existing_files
 
@@ -28,8 +29,7 @@ class ProcessModsZipJob
   def run
     load_report = Loaders::LoadReport.find(report_id)
 
-    # unzip zip file to tmp storage
-    dir_path = File.join(File.dirname(spreadsheet_file_path), File.basename(spreadsheet_file_path, ".*"))
+    dir_path = File.dirname(spreadsheet_file_path)
 
     process_spreadsheet(dir_path, spreadsheet_file_path, load_report, preview, client)
   end
@@ -50,6 +50,7 @@ class ProcessModsZipJob
           row_results = process_a_row(header_row, row)
           # Process first row
           preview_file = CoreFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
+          load_report.preview_file_pid = preview_file.pid
           if row_results["file_name"].blank? && row_results["pid"].blank?
             raise "Your upload could not be processed because the spreadsheet is missing file names or PIDs. Please update the spreadsheet and try again."
             return
@@ -88,12 +89,31 @@ class ProcessModsZipJob
 
           # Load row of metadata in for preview
           assign_a_row(row_results, preview_file)
+          raw_xml = xml_decode(preview_file.mods.content)
+          result = xml_valid?(raw_xml)
+          if !result[:errors].blank?
+            error_list = ""
+            result[:errors].each do |entry|
+              error_list = error_list.concat("#{entry.class.to_s}: #{entry}; ")
+            end
+            raise error_list
+          end
 
-          load_report.preview_file_pid = preview_file.pid
           load_report.number_of_files = spreadsheet.last_row - header_position
 
           load_report.save!
         rescue Exception => error
+          item_report = load_report.item_reports.create_failure(error.to_s, row_results, "", true)
+          item_report.title = preview_file.title
+          item_report.original_file = find_in_row(header_row, row, 'File Name')
+          item_report.save!
+          load_report.completed = true
+          load_report.fail_count = 1
+          load_report.save!
+          FileUtils.rm(spreadsheet_file_path)
+          if CoreFile.exists?(load_report.preview_file_pid)
+            CoreFile.find(load_report.preview_file_pid).destroy
+          end
           raise error.to_s
           return
         end
@@ -116,8 +136,9 @@ class ProcessModsZipJob
               existing_file = false
               old_mods = nil
               if row_results["pid"].blank? && !row_results["file_name"].blank? && existing_files == false #make new file
-                new_file = File.dirname(dir_path) + "/" + row_results["file_name"]
-                if File.exists? new_file
+                new_file_path = dir_path + "/" + row_results["file_name"]
+                if File.exists? new_file_path
+                  new_file = move_file_to_tmp(File.new(new_file_path))
                   if Cerberus::ContentFile.virus_check(File.new(new_file)) == 0
                     core_file = CoreFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
                     core_file.tag_as_in_progress
@@ -126,7 +147,17 @@ class ProcessModsZipJob
                     core_file.parent = collection
                     core_file.properties.parent_id = collection.pid
                     core_file.depositor = depositor
-                    core_file.rightsMetadata.content = collection.rightsMetadata.content
+
+                    sentinel = core_file.parent.sentinel
+
+                    if sentinel && !sentinel.core_file.blank?
+                      core_file.permissions = sentinel.core_file["permissions"]
+                      core_file.mass_permissions = sentinel.core_file["mass_permissions"]
+                      core_file.save!
+                    else
+                      core_file.rightsMetadata.content = collection.rightsMetadata.content
+                    end
+
                     core_file.rightsMetadata.permissions({person: "#{depositor}"}, 'edit')
                     core_file.original_filename = row_results["file_name"]
                     core_file.label = row_results["file_name"]
@@ -158,9 +189,11 @@ class ProcessModsZipJob
                     xml = Nokogiri::XML(core_file.mods.content)
                     handle = xml.xpath("//mods:identifier[contains(., 'hdl.handle.net')]").text
                   end
+                  old_cat = core_file.category
                   old_mods = core_file.mods.content
                   core_file.mods.content = ModsDatastream.xml_template.to_xml
                   core_file.mods.identifier = handle
+                  core_file.category = old_cat
                 else
                   populate_error_report(load_report, existing_file, core_file_checks(row_results["pid"]), row_results, core_file, old_mods, header_row, row)
                   next
@@ -171,31 +204,36 @@ class ProcessModsZipJob
                 next
               end
               assign_a_row(row_results, core_file)
-              if core_file.keywords.length < 1
+              if Nokogiri::XML(old_mods,&:noblanks).to_s == Nokogiri::XML(core_file.mods.content,&:noblanks).to_s
+                core_file.mods.content = old_mods
+                core_file.save!
+                load_report.item_reports.create_success(core_file, "", :update)
+                next
+              elsif core_file.keywords.length < 1
                 populate_error_report(load_report, existing_file, "Must have at least one keyword", row_results, core_file, old_mods, header_row, row)
               elsif core_file.title.blank?
                 populate_error_report(load_report, existing_file, "Must have a title", row_results, core_file, old_mods, header_row, row)
               elsif (!row_results["handle"].blank? && core_file.identifier != row_results["handle"]) || blank_handle
                 if handle.blank?
-                  image_report = load_report.image_reports.create_modified("The loader was unable to detect a handle for the original file.", core_file, row_results)
+                  item_report = load_report.item_reports.create_modified("The loader was unable to detect a handle for the original file.", core_file, row_results, :update)
                 else
                   xml = Nokogiri::XML(core_file.mods.content)
                   handle = xml.xpath("//mods:identifier[contains(., 'hdl.handle.net')]").text
                   if handle != row_results["handle"]
-                    image_report = load_report.image_reports.create_modified("Handle does not match", core_file, row_results)
+                    item_report = load_report.item_reports.create_modified("Handle does not match", core_file, row_results, :update)
                   else
-                    image_report = load_report.image_reports.create_modified("Handle reformatted for correctness", core_file, row_results)
+                    item_report = load_report.item_reports.create_modified("Handle reformatted for correctness", core_file, row_results, :update)
                   end
                 end
-                image_report.title = core_file.title
-                image_report.save!
+                item_report.title = core_file.title
+                item_report.save!
               else
                 raw_xml = xml_decode(core_file.mods.content)
                 result = xml_valid?(raw_xml)
                 if !result[:errors].blank?
                   error_list = ""
                   result[:errors].each do |entry|
-                    error_list = error_list.concat("#{entry.class.to_s}: #{entry} </br></br> ")
+                    error_list = error_list.concat("#{entry.class.to_s}: #{entry} ;")
                   end
                   populate_error_report(load_report, existing_file, error_list, row_results, core_file, old_mods, header_row, row)
                 elsif (core_file.canonical_class == "AudioFile" || core_file.canonical_class == "VideoFile") && !existing_files
@@ -204,13 +242,18 @@ class ProcessModsZipJob
                   else
                     poster_path = File.dirname(dir_path) + "/" + row_results["poster_path"]
                     Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename, poster_path))
-                    load_report.image_reports.create_success(core_file, "")
+                    load_report.item_reports.create_success(core_file, "", :create)
+                    UploadAlert.create_from_core_file(core_file, :create, "spreadsheet")
                   end
                 else
                   if !existing_files
                     Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename))
+                    UploadAlert.create_from_core_file(core_file, :create, "spreadsheet")
+                    load_report.item_reports.create_success(core_file, "", :create)
+                  else
+                    UploadAlert.create_from_core_file(core_file, :update, "spreadsheet")
+                    load_report.item_reports.create_success(core_file, "", :update)
                   end
-                  load_report.image_reports.create_success(core_file, "")
                 end
               end
             end
@@ -228,14 +271,12 @@ class ProcessModsZipJob
     if load_report.success_count + load_report.fail_count + load_report.modified_count == load_report.number_of_files
       load_report.completed = true
       load_report.save!
+      if CoreFile.exists?(load_report.preview_file_pid)
+        CoreFile.find(load_report.preview_file_pid).destroy
+      end
       LoaderMailer.load_alert(load_report, User.find_by_nuid(load_report.nuid)).deliver!
       # cleaning up
       FileUtils.rm(spreadsheet_file_path)
-      if CoreFile.exists?(load_report.preview_file_pid)
-        CoreFile.find(load_report.preview_file_pid).destroy
-      elsif CoreFile.exists?(load_report.comparison_file_pid)
-        CoreFile.find(load_report.comparison_file_pid).destroy
-      end
     end
   end
 
@@ -949,10 +990,10 @@ class ProcessModsZipJob
       title = ""
       original_file = ""
     end
-    image_report = load_report.image_reports.create_failure(error, row_results, "")
-    image_report.title = title
-    image_report.original_file = original_file
-    image_report.save!
+    item_report = load_report.item_reports.create_failure(error, row_results, "")
+    item_report.title = title
+    item_report.original_file = original_file
+    item_report.save!
   end
 
   def set_existing_files(row_results)
