@@ -33,6 +33,13 @@ class SentinelJob
     doc = SolrDocument.new ActiveFedora::SolrService.query("id:\"#{core_file_pid}\"").first
     core_file = CoreFile.find(doc.pid)
 
+    # Make sure thumbnails are public
+    if core_file.thumbnail
+      t = core_file.thumbnail
+      t.mass_permissions = "public"
+      t.save!
+    end
+
     # Does the core file have a correctly formatted handle?
     handle = core_file.identifier
     if handle.blank?
