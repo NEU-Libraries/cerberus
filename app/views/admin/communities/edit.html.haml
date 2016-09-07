@@ -2,16 +2,16 @@
   %li
     = link_to 'Admin Panel', '/admin'
   %li
-    = link_to 'Manage Communitities', '/admin/communities'
+    = link_to 'Manage Communities', '/admin/communities'
   %li.active
     = link_to 'Edit ' "#{@community.title}".html_safe, {:action => "edit"}
 
 %h2.page-header= "Edit #{@community.title}".html_safe
 
 %ul.nav.nav-tabs
-  %li.active 
+  %li.active
     = link_to 'Edit Department', '#local'
-  %li 
+  %li
     = link_to 'Edit Employees', '#employee'
 
 .tab-content
@@ -37,7 +37,7 @@
       var url = document.location.toString();
       if (url.match('#')) {
           $('.nav-tabs a[href=#'+url.split('#')[1]+']').tab('show') ;
-      } 
+      }
 
     = form_tag admin_employee_path, :method => :put, :id => 'modify_employee', :remote => true do
       %input{:type=>"hidden", :id => "admin_employee", :name => "admin[employee]"}
@@ -58,5 +58,3 @@
 
     #community_employees
       = render partial: 'admin_community_employees', locals: { community: @community }
-
-
