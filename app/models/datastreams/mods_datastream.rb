@@ -351,7 +351,8 @@ class ModsDatastream < ActiveFedora::OmDatastream
 
     # Make sure all titles and non_sorts end up in title_tesim
     total_title_array = self.all_titles.non_sort.concat self.all_titles.title
-    solr_doc["title_tesim"] = total_title_array.select {|item| kramdown_parse(item) unless item.blank?}
+    solr_doc["title_tesim"] = total_title_array.select {|item| kramdown_parse(item) unless item.blank?}.map{|x| Sanitize.clean(x)}
+    solr_doc["title_tesim"] << Sanitize.clean("#{self.non_sort.first} #{kramdown_parse(t)}".strip)
 
     # Full title so the api doesn't have to parse it
     solr_doc["full_title_ssi"] = "#{self.non_sort.first} #{kramdown_parse(self.title_info.title.first)}".strip
