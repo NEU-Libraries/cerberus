@@ -81,7 +81,7 @@ class CoreFilesController < ApplicationController
 
   def fulltext
     doc = fetch_solr_document
-    if doc.category == "Theses and Dissertations" && !doc.canonical_object.first.embargo_date_in_effect?
+    if !doc.canonical_object.first.embargo_date_in_effect?
       asset = PdfFile.find(doc.canonical_object.first.pid)
       if !asset.blank?
         file_name = "neu_#{asset.pid.split(":").last}.#{extract_extension(asset.properties.mime_type.first, File.extname(asset.original_filename || "").delete!("."))}"
