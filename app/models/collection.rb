@@ -56,6 +56,10 @@ class Collection < ActiveFedora::Base
     single_lookup(:is_member_of, [Collection, Community])
   end
 
+  def sentinel
+    Sentinel.where(:set_pid => self.pid).last
+  end
+
   # Override parent= so that the string passed by the creation form can be used.
   def parent=(val)
     unique_assign_by_string(val, :is_member_of, [Collection, Community], allow_nil: true)

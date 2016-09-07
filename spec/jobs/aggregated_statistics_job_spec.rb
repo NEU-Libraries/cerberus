@@ -9,6 +9,7 @@ describe "aggregated statistics job" do
   let(:test_collection)       { FactoryGirl.create(:collection, parent: test_community) }
   let(:child_collection)      { FactoryGirl.create(:collection, parent: test_collection) }
   let(:file)                  { FactoryGirl.create(:complete_file, depositor: bill.nuid, parent: collection) }
+  let(:file2)                 { FactoryGirl.create(:complete_file, depositor: bill.nuid, parent: collection) }
   let(:nested_file)           { FactoryGirl.create(:complete_file, depositor: bill.nuid, parent: child_collection) }
   let(:image)                 { FactoryGirl.create(:image_master_file, depositor:bill.nuid) }
   let(:xml_alert)             { FactoryGirl.create_list(:updated_xml, 2, :pid=>file.pid) }
@@ -31,7 +32,7 @@ describe "aggregated statistics job" do
     Impression.destroy_all
     UploadAlert.destroy_all
     Loaders::LoadReport.destroy_all
-    Loaders::ImageReport.destroy_all
+    Loaders::ItemReport.destroy_all
     XmlAlert.destroy_all
     AggregatedStatistic.destroy_all
     User.destroy_all
@@ -154,94 +155,130 @@ describe "aggregated statistics job" do
     end
 
     it 'gets upload_alerts' do  #for form_edits and user_uploads
-      UploadAlert.create_from_core_file(file, :create)
-      UploadAlert.create_from_core_file(file, :update)
+      UploadAlert.create_from_core_file(file, :create, "single")
+      UploadAlert.create_from_core_file(file, :update, "")
+      UploadAlert.create_from_core_file(file2, :create, "spreadsheet")
+      UploadAlert.create_from_core_file(file2, :update, "xml")
       date = DateTime.now
       @job = AggregatedStatisticsJob.new(date)
       @job.run
       @job.files["#{file.pid}"]["form_edits"].should == 1
+      @job.files["#{file2.pid}"]["xml_load_edits"].should == 1
       @job.files["#{file.pid}"]["user_uploads"].should == 1
+      @job.files["#{file2.pid}"]["loader_uploads"].should == 0 #these are counted by item_reports
     end
 
     it 'aggregates upload_alerts up to parent collection' do
-      UploadAlert.create_from_core_file(file, :create)
-      UploadAlert.create_from_core_file(file, :update)
+      UploadAlert.create_from_core_file(file, :create, "single")
+      UploadAlert.create_from_core_file(file, :update, "")
+      UploadAlert.create_from_core_file(file2, :create, "spreadsheet")
+      UploadAlert.create_from_core_file(file2, :update, "xml")
       date = DateTime.now
       @job = AggregatedStatisticsJob.new(date)
       @job.run
       @job.collections["#{collection.pid}"]["form_edits"].should == 1
       @job.collections["#{collection.pid}"]["user_uploads"].should == 1
+      @job.collections["#{collection.pid}"]["xml_load_edits"].should == 1
+      @job.collections["#{collection.pid}"]["loader_uploads"].should == 0 #these are counted by item_reports
     end
 
     it 'aggregates upload_alerts up to parent community' do
-      UploadAlert.create_from_core_file(file, :create)
-      UploadAlert.create_from_core_file(file, :update)
+      UploadAlert.create_from_core_file(file, :create, "single")
+      UploadAlert.create_from_core_file(file, :update, "single")
+      UploadAlert.create_from_core_file(file2, :create, "spreadsheet")
+      UploadAlert.create_from_core_file(file2, :update, "xml")
       date = DateTime.now
       @job = AggregatedStatisticsJob.new(date)
       @job.run
       @job.communities["#{root_community.pid}"]["form_edits"].should == 1
       @job.communities["#{root_community.pid}"]["user_uploads"].should == 1
+      @job.communities["#{root_community.pid}"]["xml_load_edits"].should == 1
+      @job.communities["#{root_community.pid}"]["loader_uploads"].should == 0 #these are counted by item_reports
     end
 
     it 'gets filesize for user_uploads and propogates up' do
-      UploadAlert.create_from_core_file(file, :create)
+      UploadAlert.create_from_core_file(file, :create, "single")
+      UploadAlert.create_from_core_file(file2, :create, "spreadsheet")
+      parent = collection.pid
+      report_id = Loaders::LoadReport.create_from_strings(bill, 0, "College of Engineering", parent)
+      load_report = Loaders::LoadReport.find(report_id)
+      load_report.item_reports.create_success(file2, "", :create)
       size = get_core_file_size(file.pid)
+      size2 = get_core_file_size(file2.pid)
       date = DateTime.now
       @job = AggregatedStatisticsJob.new(date)
       @job.run
       @job.files["#{file.pid}"]["size_increase"].should == size
-      @job.collections["#{collection.pid}"]["size_increase"].should == size
-      @job.communities["#{root_community.pid}"]["size_increase"].should == size
+      @job.files["#{file2.pid}"]["size_increase"].should == size2
+      @job.collections["#{collection.pid}"]["size_increase"].should == size + size2
+      @job.communities["#{root_community.pid}"]["size_increase"].should == size + size2
     end
 
     it 'creates aggregatedstatistic objects for form_edits, user_uploads, and size_increase' do
-      UploadAlert.create_from_core_file(file, :create)
-      UploadAlert.create_from_core_file(file, :update)
+      UploadAlert.create_from_core_file(file, :create, "single")
+      UploadAlert.create_from_core_file(file, :update, "single")
+      UploadAlert.create_from_core_file(file2, :create, "spreadsheet")
+      UploadAlert.create_from_core_file(file2, :update, "xml")
+      parent = collection.pid
+      report_id = Loaders::LoadReport.create_from_strings(bill, 0, "College of Engineering", parent)
+      load_report = Loaders::LoadReport.find(report_id)
+      load_report.item_reports.create_success(file2, "", :create)
       size = (get_core_file_size(file.pid)/1024)/1024
+      size2 = (get_core_file_size(file2.pid)/1024)/1024
       date = DateTime.now
       @job = AggregatedStatisticsJob.new(date)
       @job.run
-      AggregatedStatistic.where(:object_type=>"file").count.should == 1
+      AggregatedStatistic.where(:object_type=>"file").count.should == 2
       AggregatedStatistic.where(:object_type=>"collection").count.should == 1
       AggregatedStatistic.where(:object_type=>"community").count.should == 1
       AggregatedStatistic.where(:pid=>"#{file.pid}").first.form_edits.should == 1
       AggregatedStatistic.where(:pid=>"#{file.pid}").first.user_uploads.should == 1
       AggregatedStatistic.where(:pid=>"#{file.pid}").first.size_increase.should == size
+      AggregatedStatistic.where(:pid=>"#{file2.pid}").first.xml_load_edits.should == 1
+      AggregatedStatistic.where(:pid=>"#{file2.pid}").first.loader_uploads.should == 1
+      AggregatedStatistic.where(:pid=>"#{file2.pid}").first.size_increase.should == size2
       AggregatedStatistic.where(:pid=>"#{collection.pid}").first.form_edits.should == 1
       AggregatedStatistic.where(:pid=>"#{collection.pid}").first.user_uploads.should == 1
-      AggregatedStatistic.where(:pid=>"#{collection.pid}").first.size_increase.should == size
+      AggregatedStatistic.where(:pid=>"#{collection.pid}").first.xml_load_edits.should == 1
+      AggregatedStatistic.where(:pid=>"#{collection.pid}").first.loader_uploads.should == 1
+      AggregatedStatistic.where(:pid=>"#{collection.pid}").first.size_increase.should == size + size2
       AggregatedStatistic.where(:pid=>"#{root_community.pid}").first.form_edits.should == 1
       AggregatedStatistic.where(:pid=>"#{root_community.pid}").first.user_uploads.should == 1
-      AggregatedStatistic.where(:pid=>"#{root_community.pid}").first.size_increase.should == size
+      AggregatedStatistic.where(:pid=>"#{root_community.pid}").first.xml_load_edits.should == 1
+      AggregatedStatistic.where(:pid=>"#{root_community.pid}").first.loader_uploads.should == 1
+      AggregatedStatistic.where(:pid=>"#{root_community.pid}").first.size_increase.should == size + size2
     end
 
-    it 'gets image_reports' do #for loader_uploads
+    it 'gets item_reports' do #for loader_uploads
       parent = collection.pid
       report_id = Loaders::LoadReport.create_from_strings(bill, 0, "College of Engineering", parent)
       load_report = Loaders::LoadReport.find(report_id)
-      load_report.image_reports.create_success(file, "")
+      load_report.item_reports.create_success(file, "", :create)
+
       date = DateTime.now
       @job = AggregatedStatisticsJob.new(date)
       @job.run
       @job.files["#{file.pid}"]["loader_uploads"].should == 1
     end
 
-    it 'aggregates image_reports up to parent collection' do
+    it 'aggregates item_reports up to parent collection' do
       parent = collection.pid
       report_id = Loaders::LoadReport.create_from_strings(bill, 0, "College of Engineering", parent)
       load_report = Loaders::LoadReport.find(report_id)
-      load_report.image_reports.create_success(file, "")
+      load_report.item_reports.create_success(file, "", :create)
+
       date = DateTime.now
       @job = AggregatedStatisticsJob.new(date)
       @job.run
       @job.collections["#{collection.pid}"]["loader_uploads"].should == 1
     end
 
-    it 'aggregates image_reports up to parent community' do
+    it 'aggregates item_reports up to parent community' do
       parent = collection.pid
       report_id = Loaders::LoadReport.create_from_strings(bill, 0, "College of Engineering", parent)
       load_report = Loaders::LoadReport.find(report_id)
-      load_report.image_reports.create_success(file, "")
+      load_report.item_reports.create_success(file, "", :create)
+
       date = DateTime.now
       @job = AggregatedStatisticsJob.new(date)
       @job.run
@@ -252,7 +289,8 @@ describe "aggregated statistics job" do
       parent = collection.pid
       report_id = Loaders::LoadReport.create_from_strings(bill, 0, "College of Engineering", parent)
       load_report = Loaders::LoadReport.find(report_id)
-      load_report.image_reports.create_success(file, "")
+      load_report.item_reports.create_success(file, "", :create)
+
       date = DateTime.now
       @job = AggregatedStatisticsJob.new(date)
       @job.run
@@ -323,9 +361,10 @@ describe "aggregated statistics job" do
       parent = collection.pid
       report_id = Loaders::LoadReport.create_from_strings(bill, 0, "College of Engineering", parent)
       load_report = Loaders::LoadReport.find(report_id)
-      load_report.image_reports.create_success(file, "")
-      UploadAlert.create_from_core_file(file, :create)
-      UploadAlert.create_from_core_file(file, :update)
+      load_report.item_reports.create_success(file, "", :create)
+
+      UploadAlert.create_from_core_file(file, :create, "single")
+      UploadAlert.create_from_core_file(file, :update, "single")
       date = DateTime.now
       xml_alert.first.pid
       XmlAlert.all.count

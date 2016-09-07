@@ -42,7 +42,7 @@ class ProcessMultipageZipJob
     core_file = nil
     seq_num = -1
 
-    spreadsheet.each_row_streaming(offset: header_position) do |row|
+    spreadsheet.each_row_streaming(pad_cells: true, offset: header_position) do |row|
       if row.present? && header_row.present?
         row_results = process_a_row(header_row, row)
 
@@ -88,7 +88,7 @@ class ProcessMultipageZipJob
               core_file.match_dc_to_mods
             else
               # Raise error, invalid mods
-              load_report.image_reports.create_failure("Invalid MODS", validation_result[:errors], row_results["file_name"])
+              load_report.item_reports.create_failure("Invalid MODS", validation_result[:errors], row_results["file_name"])
 
               # Delete unfinished core_file
               core_file.destroy
@@ -99,7 +99,7 @@ class ProcessMultipageZipJob
             end
           else
             # Raise error, can't load core file mods metadata
-            load_report.image_reports.create_failure("Can't load MODS XML", "", row_results["file_name"])
+            load_report.item_reports.create_failure("Can't load MODS XML", "", row_results["file_name"])
 
             # Delete unfinished core_file
             core_file.destroy
@@ -113,7 +113,7 @@ class ProcessMultipageZipJob
         if row_num > 0
           if !(row_num == seq_num + 1)
             if !core_file.blank?
-              load_report.image_reports.create_failure("Row is out of order - row num #{row_num} seq_num #{seq_num}", "", row_results["file_name"])
+              load_report.item_reports.create_failure("Row is out of order - row num #{row_num} seq_num #{seq_num}", "", row_results["file_name"])
               core_file.destroy
               core_file = nil
               zip_files = []
@@ -180,7 +180,7 @@ class ProcessMultipageZipJob
     file_list = safe_unzip(file, dir_path)
 
     # Find the spreadsheet
-    xlsx_array = Dir.glob("#{dir_path}/*.xlsx")
+    xlsx_array = Dir.glob("#{dir_path}/manifest.xlsx")
 
     if xlsx_array.length > 1
       raise Exceptions::MultipleSpreadsheetError

@@ -1,0 +1,32 @@
+<header>
+  <h1 class="page-header">
+    Create a new Sentinel
+  </h1>
+</header>
+
+<%= render partial: 'metadata' %>
+
+<script>
+  $(document).ready(function () {
+    $('fieldset').find('select, button, input:hidden').prop('disabled', true);
+  });
+
+  $(document).ready(function () {
+  	$("input:checkbox").click(function () {
+  		if($(this).is(':checked')) {
+  			$(this).parent().find('*:disabled').removeAttr("disabled");
+  		} else {
+  			$(this).parent().find('select, button, input:hidden').prop('disabled', true);
+  		}
+  	});
+  });
+</script>
+
+<% if @collection %>
+  <script>
+    $(document).ready(function () {
+      $("#core_file_mass_permissions").prop('required', true);
+      $("div.core_file").find('*:disabled').removeAttr("disabled");
+    });
+  </script>
+<% end %>

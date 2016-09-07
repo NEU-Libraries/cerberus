@@ -51,7 +51,7 @@ class CoreFilesController < ApplicationController
 
   before_filter :verify_staff_or_beta, only: [:validate_xml, :edit_xml]
 
-  before_filter :verify_admin, only: [:create_attached_file, :new_attached_file, :provide_file_metadata, :process_file_metadata, :destroy_content_object]
+  before_filter :verify_admin, only: [:create_attached_file, :new_attached_file, :provide_file_metadata, :process_file_metadata, :destroy_content_object, :associate, :disassociate]
 
   rescue_from Exceptions::NoParentFoundError, with: :no_parent_rescue
   rescue_from Exceptions::GroupPermissionsError, with: :group_permission_rescue
@@ -81,7 +81,7 @@ class CoreFilesController < ApplicationController
 
   def fulltext
     doc = fetch_solr_document
-    if doc.category == "Theses and Dissertations" && !doc.canonical_object.first.embargo_date_in_effect?
+    if !doc.canonical_object.first.embargo_date_in_effect?
       asset = PdfFile.find(doc.canonical_object.first.pid)
       if !asset.blank?
         file_name = "neu_#{asset.pid.split(":").last}.#{extract_extension(asset.properties.mime_type.first, File.extname(asset.original_filename || "").delete!("."))}"
@@ -251,7 +251,7 @@ class CoreFilesController < ApplicationController
 
     if @core_file.save!
       if params[:core_file]
-        UploadAlert.create_from_core_file(@core_file, :create, current_user)
+        UploadAlert.create_from_core_file(@core_file, :create, "single", current_user)
       end
     end
 
@@ -263,7 +263,7 @@ class CoreFilesController < ApplicationController
     klass = class_for_attached_file(@core_file)
     @content_object = klass.find(params[:content_object_id])
     Cerberus::Application::Queue.push(ContentObjectCreationJob.new(@core_file.pid, @content_object.tmp_path, @content_object.pid, @content_object.original_filename, params[:content_object][:permissions], params[:content_object][:mass_permissions]))
-    UploadAlert.create_from_core_file(@core_file, :update, current_user)
+    UploadAlert.create_from_core_file(@core_file, :update, "content object", current_user)
     flash[:notice] = "Your file is being processed. The file's checksum is #{@content_object.properties.md5_checksum.first}"
     redirect_to core_file_path(@core_file.pid) + '#no-back'
   end
@@ -643,14 +643,16 @@ class CoreFilesController < ApplicationController
     #always save the file so the new version or metadata gets recorded
     if @core_file.save
       if params[:core_file]
-        UploadAlert.create_from_core_file(@core_file, :update, current_user)
+        UploadAlert.create_from_core_file(@core_file, :update, "single", current_user)
       end
 
       # If this change updated metadata, propagate the change outwards to
       # all content objects
       if params[:core_file]
         q = Cerberus::Application::Queue
-        q.push(PropagateCoreMetadataChangeJob.new(@core_file.pid))
+        if !@core_file.parent.sentinel
+          q.push(PropagateCoreMetadataChangeJob.new(@core_file.pid))
+        end
       end
     end
 
@@ -732,6 +734,70 @@ class CoreFilesController < ApplicationController
           render "associated_files"
         end
       }
+    end
+  end
+
+  def get_all_associated_child_files
+    @forced_view = "drs-items-list"
+    @core_file = fetch_solr_document
+    self.solr_search_params_logic += [:filter_by_all_associated_child_files]
+    (@response, @document_list) = get_search_results
+    respond_to do |format|
+      format.js {
+        render "associated_child_files"
+      }
+    end
+  end
+
+  def associate
+    @core_file = CoreFile.find(params[:id])
+    url = params[:core_file_url]
+    association_type = params[:association_type]
+    if url.include? "repository.library.northeastern.edu"
+      pid = url.split("/").last
+      if (pid.include? "neu:") && (CoreFile.exists?(pid))
+        child_file = CoreFile.find(pid)
+        begin
+          child_file.associate(association_type, @core_file)
+          render json: { status: "success" }, status: :ok
+        rescue => exception
+          render json: { :error => exception.to_s }, status: :unprocessable_entity
+        end
+      else
+        render json: { :error=> "Core file does not exist" },  status: :unprocessable_entity
+      end
+    else
+      render json: { :error=>"URL provided does not point to the DRS" }, status: :unprocessable_entity
+    end
+  end
+
+  def disassociate
+    @core_file = CoreFile.find(params[:id])
+    pids_to_remove = params[:pids_to_remove].split(",")
+    associations = params[:associations].split(",")
+    success = false
+    error = ""
+    pids_to_remove.each_with_index do |pid, i|
+      if CoreFile.exists?(pid)
+        child_file = CoreFile.find(pid)
+        association_type = associations[i]
+        begin
+          child_file.disassociate(association_type, @core_file)
+          status = "ok"
+          success = true
+        rescue => exception
+          error = exception.to_s
+          success = false
+        end
+      else
+        success = false
+        error = "Core file does not exist"
+      end
+    end
+    if success == true
+      render json: { status: "success" }, status: :ok
+    else
+      render json: { :error=> error },  status: :unprocessable_entity
     end
   end
 
@@ -959,6 +1025,15 @@ class CoreFilesController < ApplicationController
         full_self_id = RSolr.escape("info:fedora/#{@core_file.pid}")
         query << "(#{Solrizer.solr_name("has_model", :symbol)}:\"info:fedora/afmodel:PageFile\" AND #{Solrizer.solr_name("is_part_of", :symbol)}:\"#{full_self_id}\")"
         solr_parameters[:sort] = "ordinal_value_isi asc, title_ssi asc"
+        solr_parameters[:fq] << query.join(" OR ")
+      end
+
+      def filter_by_all_associated_child_files(solr_parameters, user_parameters)
+        solr_parameters[:fq] ||= []
+        query = []
+        str = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/#{@core_file.pid}"
+        query << "is_supplemental_material_for_ssim:\"#{str}\" || is_instructional_material_for_ssim:\"#{str}\" || is_codebook_for_ssim:\"#{str}\" || is_dataset_for_ssim:\"#{str}\" || is_figure_for_ssim:\"#{str}\" || is_transcription_of_ssim:\"#{str}\""
+        solr_parameters[:sort] = "title_ssi asc"
         solr_parameters[:fq] << query.join(" OR ")
       end
 

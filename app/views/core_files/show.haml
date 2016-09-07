@@ -5,7 +5,7 @@
 - content_for(:author) do
   - if !@core_file.author.blank?
     ="<meta content=\"#{@core_file.author}\" name=\"author\">".html_safe
-- if @core_file.category == "Theses and Dissertations"
+- if ["Theses and Dissertations", "Technical Reports", "Research Publications"].include? @core_file.category
   - content_for(:google_scholar) do
     ="<meta content=\"#{@core_file.google_title}\" name=\"citation_title\">".html_safe
     - if !@core_file.google_scholar_date.blank?
@@ -14,6 +14,9 @@
       ="<meta content=\"#{file_fulltext_path(@core_file.pid, :only_path => false)}\" name=\"citation_pdf_url\">".html_safe
     - if !@core_file.author.blank?
       ="<meta content=\"#{@core_file.author}\" name=\"citation_author\">".html_safe
+    - elsif !@core_file.personal_creators.blank?
+      - @core_file.personal_creators.each do |pc|
+        ="<meta content=\"#{pc}\" name=\"citation_author\">".html_safe
 - layout_class =  'span6'
 %ul.breadcrumb
   - breadcrumb_to_root(@core_file).each do |breadcrumb|

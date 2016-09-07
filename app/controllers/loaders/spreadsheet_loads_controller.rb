@@ -46,7 +46,7 @@ class Loaders::SpreadsheetLoadsController < Loaders::LoadsController
     @collection = fetch_solr_document({:id=>@report.collection})
     collection_depositor = !@collection.true_depositor.blank? ? User.find_by_nuid("#{@collection.true_depositor}").name : nil
     @depositor_options = [["System User", "000000000"]]
-    if !collection_depositor.blank?
+    if !collection_depositor.blank? && @collection.true_depositor != "000000000"
       @depositor_options << [collection_depositor, @collection.true_depositor]
     end
 
@@ -69,7 +69,7 @@ class Loaders::SpreadsheetLoadsController < Loaders::LoadsController
     @collection = fetch_solr_document({:id=>@report.collection})
     collection_depositor = !@collection.true_depositor.blank? ? User.find_by_nuid("#{@collection.true_depositor}").name : nil
     @depositor_options = [["System User", "000000000"]]
-    if !collection_depositor.blank?
+    if !collection_depositor.blank? && @collection.true_depositor != "000000000"
       @depositor_options << [collection_depositor, @collection.true_depositor]
     end
 
@@ -115,7 +115,7 @@ class Loaders::SpreadsheetLoadsController < Loaders::LoadsController
   end
 
   def show_mods
-    @image = Loaders::ImageReport.find(params[:id])
+    @image = Loaders::ItemReport.find(params[:id])
     @load = Loaders::LoadReport.find(@image.load_report_id)
     @page_title = @image.original_file
     render 'loaders/iptc', locals: {image: @image, load: @load}

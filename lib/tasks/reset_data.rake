@@ -35,11 +35,13 @@ def create_content_file(factory_sym, user, parent)
   core.date = Date.today.to_s
   core.depositor = user.nuid
   core.mass_permissions = 'public'
+  core.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, "edit")
   core.keywords = ["#{master.class}", "content"]
   core.mods.subject(0).topic = "a"
   core.identifier = make_handle(core.persistent_url)
 
   core.save!
+  core.propagate_metadata_changes!
 
   set_edit_permissions(core)
 end
@@ -186,7 +188,7 @@ task :reset_data => :environment do
   p_1.rightsMetadata.permissions({group: "northeastern:drs:all"}, 'read')
   p_1.save!
 
-  p_2 = Collection.create(mass_permissions: 'private', parent: p_1, pid: 'neu:cj82mw96w', title: '2016 Photos')
+  p_2 = Collection.create(mass_permissions: 'public', parent: p_1, pid: 'neu:cj82mw96w', title: '2016 Photos')
   p_2.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
   p_2.save!
 
@@ -194,13 +196,34 @@ task :reset_data => :environment do
   p_3.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
   p_3.save!
 
+  # Add AAIA structure for loader testing
+  aai_comm = Community.new(mass_permissions: 'public', pid: 'neu:308', title: "John D. O'Bryant African American Institute")
+  aai_comm.parent = "neu:1"
+  aai_comm.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
+  aai_comm.save!
+
+  # AAIA  community
+  p_c = Community.new(mass_permissions: 'public', pid: 'neu:cj82n3331', title: "John D. O'Bryant African American Institute Archives")
+  p_c.parent = "neu:308"
+  p_c.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
+  p_c.save!
+
+  # AAIA children collections
+  p_1 = Collection.create(mass_permissions: 'private', parent: p_c, pid: 'neu:cj82n322h', title: 'Digital Collections')
+  p_1.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
+  p_1.rightsMetadata.permissions({group: "northeastern:drs:all"}, 'read')
+  p_1.save!
+
+  p_2 = Collection.create(mass_permissions: 'private', parent: p_1, pid: 'neu:cj82nc004', title: 'Ediface')
+  p_2.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
+  p_2.save!
+
   root_dept.rightsMetadata.permissions({group: 'public'}, 'read')
   set_edit_permissions(root_dept)
 
   tmp_user = User.create(:password => "drs12345", :password_confirmation => "drs12345", full_name:"Temp User", nuid:"000000000")
   tmp_user.email = "drsadmin@neu.edu"
   tmp_user.role = "admin"
-  tmp_user.role = "developer"
   tmp_user.view_pref = "list"
   tmp_user.save!
 
@@ -209,7 +232,6 @@ task :reset_data => :environment do
   sarah = User.create(:password => "password", :password_confirmation => "password", full_name:"Sweeney, Sarah Jean", nuid:"001126975")
   sarah.email = "sj.sweeney@neu.edu"
   sarah.role = "admin"
-  sarah.role = "developer"
   sarah.save!
 
   pat = User.create(:password => "password", :password_confirmation => "password", full_name:"Yott, Patrick", nuid:"000572965")
@@ -236,13 +258,11 @@ task :reset_data => :environment do
   eli = User.create(:password => "password", :password_confirmation => "password", full_name:"Zoller, Eli Scott", nuid:"001790966")
   eli.email = "e.zoller@neu.edu"
   eli.role = "admin"
-  eli.role = "developer"
   eli.save!
 
   david = User.create(:password => "password", :password_confirmation => "password", full_name:"Cliff, David", nuid:"001905497")
   david.email = "d.cliff@neu.edu"
   david.role = "admin"
-  david.role = "developer"
   david.save!
 
   sarah.add_group("northeastern:drs:repository:loaders:marcom")
@@ -291,6 +311,12 @@ task :reset_data => :environment do
   eli.add_group("northeastern:drs:repository:loaders:damore_mckim")
   david.add_group("northeastern:drs:repository:loaders:damore_mckim")
 
+  sarah.add_group("northeastern:drs:repository:loaders:aai_archives")
+  pat.add_group("northeastern:drs:repository:loaders:aai_archives")
+  joey.add_group("northeastern:drs:repository:loaders:aai_archives")
+  eli.add_group("northeastern:drs:repository:loaders:aai_archives")
+  david.add_group("northeastern:drs:repository:loaders:aai_archives")
+
   sarah.add_group("northeastern:drs:repository:staff")
   pat.add_group("northeastern:drs:repository:staff")
   joey.add_group("northeastern:drs:repository:staff")
@@ -306,6 +332,11 @@ task :reset_data => :environment do
   sarah.add_group("northeastern:drs:repository:loaders:spreadsheet")
   eli.add_group("northeastern:drs:repository:loaders:spreadsheet")
   david.add_group("northeastern:drs:repository:loaders:spreadsheet")
+
+  tmp_user.add_group("northeastern:drs:repository:loaders:xml")
+  sarah.add_group("northeastern:drs:repository:loaders:xml")
+  eli.add_group("northeastern:drs:repository:loaders:xml")
+  david.add_group("northeastern:drs:repository:loaders:xml")
 
   sarah.add_group("northeastern:drs:staff")
   pat.add_group("northeastern:drs:staff")
