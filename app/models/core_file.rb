@@ -357,6 +357,48 @@ class CoreFile < ActiveFedora::Base
     return master
   end
 
+  def associate(association_type, parent_file)
+    # accepts string for association type like "supplemental_material_for" and core_file object for parent_file
+    existing_assoc = self.send(association_type.to_sym)
+    if !existing_assoc.include? parent_file
+      self.send(association_type.to_sym, existing_assoc << parent_file)
+      if self.save!
+        return true
+      else
+        raise "Could not associate file"
+      end
+    else
+      raise "The file is already associated"
+    end
+  end
+
+  def disassociate(association_type, parent_file)
+    # accepts string for association type like "supplemental_material_for" and core_file object for parent_file
+    existing_assoc = self.send(association_type.to_sym)
+    if !existing_assoc.include? parent_file
+      raise "File was not associated"
+    else
+      existing_assoc.delete(parent_file)
+      if self.save!
+        return true
+      else
+        raise "Could not disassociate"
+      end
+    end
+  end
+
+  def associations_for
+    # retrieves all of the parent objects to which a given core file is associated
+    hash = {}
+    hash[:supplemental_material_for] = self.supplemental_material_for unless self.supplemental_material_for.blank?
+    hash[:instructional_material_for] = self.instructional_material_for unless self.instructional_material_for.blank?
+    hash[:transcription_of] = self.transcription_of unless self.transcription_of.blank?
+    hash[:codebook_for] = self.codebook_for unless self.codebook_for.blank?
+    hash[:dataset_for] = self.dataset_for unless self.dataset_for.blank?
+    hash[:figure_for] = self.figure_for unless self.figure_for.blank?
+    return hash
+  end
+
   private
 
     def purge_content_bearing_objects

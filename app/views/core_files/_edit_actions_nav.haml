@@ -8,6 +8,11 @@
       %a{ href: "#move", data: {toggle: "tab"}}
         %i.icon-exchange
         Move
+    - if current_user.admin_group? || current_user.admin?
+      %li
+        %a{ href: "#associate", data: {toggle: "tab"}}
+          %i.icon-resize-horizontal
+          Associate
     %li
       %a{ href: "#delete", data: {toggle: "tab"}}
         %i.icon-trash
