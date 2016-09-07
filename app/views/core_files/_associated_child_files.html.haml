@@ -1,0 +1,69 @@
+- if @response.response['numFound'] > 0
+  = form_tag( "/files/#{@core_file.pid}/disassociate", remote: true, id: "multi_disassociate_form") do
+    = check_box_tag :check_all
+    = label_tag :check_all, "Select All", class: "checkbox inline"
+    = hidden_field_tag :pids_to_remove
+    = hidden_field_tag :associations
+    = submit_tag "Disassociate Selected", :class => "btn btn-danger btn-small hidden", :id => "submit_multi_disassociate"
+  = render 'catalog/results_pagination'
+  = render :partial => 'catalog/document_list'
+  = render 'catalog/results_pagination'
+- else
+  %p There are currently no associated files.
+
+:javascript
+  $(".disassociate_pid").on("click", function(e){
+    e.preventDefault();
+    $(this).parent(".disassociate_form").submit();
+    spinner = enable_spinner('associated_files');
+  });
+  $(".disassociate_form, #multi_disassociate_form").on("ajax:success", function(e, data, status, xhr){
+    spinner = enable_spinner('associated_files');
+    var pid = "#{@core_file.pid}";
+    get_page("/files/"+pid+"/associated_children?per_page=5");
+    spinner.stop();
+  }).on("ajax:error", function(e, data, status, error){
+    error = $.parseJSON(data.responseText);
+    bootbox.alert("There was an error processing your request. The error received was: \""+error.error+"\". Please try again or contact DRS Staff for help.");
+    spinner.stop();
+  });
+  $("#check_all").on("change", function(){
+    if ($(this).is(":checked")){
+      $(".disassociate_checkbox").prop("checked", true);
+      $("#submit_multi_disassociate").removeClass("hidden");
+    } else {
+      $(".disassociate_checkbox").prop("checked", false);
+      $("#submit_multi_disassociate").addClass("hidden");
+    }
+  });
+  $(".disassociate_checkbox").on("change", function(){
+    if ($(this).is(":checked")){
+      $("#submit_multi_disassociate").removeClass("hidden");
+    } else {
+      $("#check_all").prop("checked", false);
+      var checked = false;
+      $(".disassociate_checkbox").each(function(){
+        if ($(this).is(":checked")){
+          checked = true;
+        }
+      });
+      if (checked == false){
+        $("#submit_multi_disassociate").addClass("hidden");
+      }
+    }
+  });
+  $("#submit_multi_disassociate").on("click", function(e){
+    e.preventDefault();
+    var pids = [];
+    var associations = [];
+    $(".disassociate_form").each(function(){
+      if ($(this).prev(".disassociate_checkbox").is(":checked")){
+        pids.push($(this).find("#pids_to_remove").val());
+        associations.push($(this).find("#associations").val());
+      }
+    });
+    $("#multi_disassociate_form #pids_to_remove").val(pids);
+    $("#multi_disassociate_form #associations").val(associations);
+    $("#multi_disassociate_form").submit();
+    spinner = enable_spinner('associated_files');
+  });

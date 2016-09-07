@@ -99,6 +99,9 @@ Cerberus::Application.routes.draw do
   match "/files/:id/request_move" => "core_files#request_move", via: 'post', as:"request_move_file"
   get "/files/:id/associated" => "core_files#get_associated_files", as: 'associated'
   get "/files/:id/page/:page" => "core_files#get_page_file", as: 'page_file'
+  get "/files/:id/associated_children" => "core_files#get_all_associated_child_files", as: 'associated_children'
+  match "/files/:id/associate" => "core_files#associate", via: "post", as: "associate_file"
+  match "/files/:id/disassociate" => "core_files#disassociate", via: "post", as: "disassociate_file"
 
   get "/files/:id/oai_thumbnail" => "core_files#oai_thumbnail", as: 'oai_thumbnail'
 
