@@ -128,7 +128,8 @@ describe CoreFile do
 
   describe "Content files" do
     before :each do
-      @core_file = CoreFile.create(depositor: "dummy@example.com")
+      @collection = Collection.create(mass_permissions: 'public', pid: 'neu:12345', title: 'Test Parent Collection')
+      @core_file = CoreFile.create(depositor: "dummy@example.com", parent: @collection)
       @img = ImageMasterFile.create(title: "Img", core_record: @core_file)
       @pdf = PdfFile.create(title: "Pdf", core_record: @core_file)
       @word = MswordFile.create(title: "MsWord", core_record: @core_file)
