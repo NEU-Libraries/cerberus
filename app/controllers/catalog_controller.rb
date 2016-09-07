@@ -66,6 +66,10 @@ class CatalogController < ApplicationController
         else
           self.solr_search_params_logic += [:apply_per_page_limit]
         end
+
+        # Unescape
+        params[:q].gsub!('\\', '')
+
         super
       rescue Net::ReadTimeout
         self.solr_search_params_logic += [:disable_highlighting]
@@ -360,6 +364,11 @@ class CatalogController < ApplicationController
     if !params[:q].nil?
       # Fixes #667 - we remove single characters. They're a pretty terrible idea with a strict AND
       params[:q].gsub!(/(^| ).( |$)/, ' ')
+
+      # Special Char escaping
+      map = {'+' => '\\+', '-' => '\\-', '&' => '\\&', '|' => '\\|', '!' => '\\!', '(' => '\\(', ')' => '\\)', '{' => '\\{', '}' => '\\}', '[' => '\\[', ']' => '\\]', '^' => '\\^', '"' => '\\"', '~' => '\\~', '*' => '\\*', '?' => '\\?', ':' => '\\:', '\\' => '\\\\'}
+      re = Regexp.union(map.keys)
+      params[:q].gsub!(re, map)
 
       if params[:sort].blank?
         # Default sort relevance
