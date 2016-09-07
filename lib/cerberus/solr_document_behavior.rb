@@ -363,6 +363,17 @@ module Cerberus
       all.map { |x| SolrDocument.new ActiveFedora::SolrService.query("id:\"#{x.split("/").last}\"").first }
     end
 
+    def associations_for
+      hash = {}
+      hash[:supplemental_material_for] = self.supplemental_material_for unless self.supplemental_material_for.blank?
+      hash[:instructional_material_for] = self.instructional_material_for unless self.instructional_material_for.blank?
+      hash[:transcription_of] = self.transcription_of unless self.transcription_of.blank?
+      hash[:codebook_for] = self.codebook_for unless self.codebook_for.blank?
+      hash[:dataset_for] = self.dataset_for unless self.dataset_for.blank?
+      hash[:figure_for] = self.figure_for unless self.figure_for.blank?
+      return hash
+    end
+
     # Fetch the current item's embargo release date
     def embargo_release_date(opts = {})
       opts = opts.with_indifferent_access

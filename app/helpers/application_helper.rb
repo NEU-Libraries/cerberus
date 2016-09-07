@@ -64,7 +64,11 @@ module ApplicationHelper
     if !set.respond_to?(:parent) || set.parent.nil?
       return breadcrumb.reverse
     else
-      parent = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{set.parent}\"").first)
+      if set.parent.is_a?(String)
+        parent = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{set.parent}\"").first)
+      else
+        parent = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{set.parent.pid}\"").first)
+      end
       breadcrumb << content_tag(:li, link_to(kramdown_parse(parent.title).html_safe, polymorphic_path(parent)))
       breadcrumb_to_root(parent, breadcrumb)
     end
