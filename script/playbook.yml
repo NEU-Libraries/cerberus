@@ -26,6 +26,9 @@
     - name: update pip
       shell: pip install --upgrade pip
 
+    - name: python version
+      shell: python --version
+
     - name: install pip dependencies
       pip: name={{item}}
       with_items:
@@ -74,11 +77,11 @@
     - name: ensure httpd enabled
       service: name=httpd enabled=yes
 
-    - name: ensure start firewall
-      service: name=firewalld state=started
+    # - name: ensure start firewall
+      # service: name=firewalld state=started
 
-    - name: poke hole in firewall for apache
-      firewalld: service=http permanent=true state=enabled immediate=yes
+    # - name: poke hole in firewall for apache
+      # firewalld: service=http permanent=true state=enabled immediate=yes
 
     - name: turn off selinux to work around mkfifo permissions issue
       selinux: state=disabled
