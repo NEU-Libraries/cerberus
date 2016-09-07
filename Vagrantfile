@@ -47,6 +47,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   end
 
   config.vm.provision "shell", path: "script/vagrant_provisioning.sh", privileged: false
+  config.vm.provision 'ansible' do |ansible|
+    ansible.extra_vars = { ansible_ssh_user: 'vagrant'}
+    ansible.playbook = 'script/playbook.yml'
+    # ansible.verbose = 'vvv'
+  end
 
   # Share the current directory to /vagrant on the virtual machine
   config.vm.synced_folder "." , "/home/vagrant/cerberus", nfs: true
