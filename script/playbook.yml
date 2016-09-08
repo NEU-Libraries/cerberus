@@ -34,6 +34,7 @@
       with_items:
         - Werkzeug
         - Pillow
+        - configobj
 
     - name: download kakadu
       get_url: url=http://kakadusoftware.com/wp-content/uploads/2014/06/KDU77_Demo_Apps_for_Linux-x86-64_150710.zip dest=/opt/
@@ -65,11 +66,14 @@
     - name: git clone loris
       git: repo=https://github.com/pulibrary/loris.git dest=/opt/loris
 
+    - name: set up loris conf
+      shell: rm /opt/loris/etc/loris2.conf && cp loris2.conf /opt/loris/etc/loris2.conf
+
     - name: install loris
       shell: cd /opt/loris && python setup.py install --kdu-expand /opt/kdu/kdu_expand --libkdu /opt/kdu
 
     - name: configure apache for loris
-      copy: src=loris.conf dest=/etc/httpd/conf.d/loris.conf
+      copy: src=httpd_loris.conf dest=/etc/httpd/conf.d/loris.conf
 
     - name: ensure restart httpd
       service: name=httpd state=restarted
@@ -86,15 +90,8 @@
     - name: turn off selinux to work around mkfifo permissions issue
       selinux: state=disabled
 
-    # Now install openseadragon demo
-    - name: git clone openseadragon demo
-      git: repo=https://github.com/jronallo/loris-openseadragon-demo.git dest=/opt/loris-openseadragon-demo
-
-    - name: copy OSD files to /var/www/html/.
-      shell: cp -r /opt/loris-openseadragon-demo/* /var/www/html/.
-
     - name: ensure /usr/local/share/images
       file: path=/usr/local/share/images state=directory
 
-    - name: copy sample images into place
-      shell: cp -r /opt/loris-openseadragon-demo/samples/* /usr/local/share/images/.
+    - name: ensure /usr/local/share/images/loris
+      file: path=/usr/local/share/images/loris state=directory
