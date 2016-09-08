@@ -650,9 +650,7 @@ class CoreFilesController < ApplicationController
       # all content objects
       if params[:core_file]
         q = Cerberus::Application::Queue
-        if !@core_file.parent.sentinel
-          q.push(PropagateCoreMetadataChangeJob.new(@core_file.pid))
-        end
+        q.push(PropagateCoreMetadataChangeJob.new(@core_file.pid))
       end
     end
 
