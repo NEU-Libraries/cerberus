@@ -66,8 +66,11 @@
     - name: git clone loris
       git: repo=https://github.com/pulibrary/loris.git dest=/opt/loris
 
-    - name: set up loris conf
-      shell: rm /opt/loris/etc/loris2.conf && cp loris2.conf /opt/loris/etc/loris2.conf
+    - name: remove default loris conf
+      shell: rm /opt/loris/etc/loris2.conf
+
+    - name: copy local loris conf
+      copy: src=loris2.conf dest=/opt/loris/etc/loris2.conf
 
     - name: install loris
       shell: cd /opt/loris && python setup.py install --kdu-expand /opt/kdu/kdu_expand --libkdu /opt/kdu
@@ -81,12 +84,6 @@
     - name: ensure httpd enabled
       service: name=httpd enabled=yes
 
-    # - name: ensure start firewall
-      # service: name=firewalld state=started
-
-    # - name: poke hole in firewall for apache
-      # firewalld: service=http permanent=true state=enabled immediate=yes
-
     - name: turn off selinux to work around mkfifo permissions issue
       selinux: state=disabled
 
@@ -94,4 +91,4 @@
       file: path=/usr/local/share/images state=directory
 
     - name: ensure /usr/local/share/images/loris
-      file: path=/usr/local/share/images/loris state=directory
+      file: path=/usr/local/share/images/loris state=directory mode=0777
