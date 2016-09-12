@@ -4,6 +4,7 @@ class ProcessXmlZipJob
   include ApplicationHelper
   include ZipHelper
   include HandleHelper
+  include MimeHelper
   include Cerberus::TempFileStorage
 
   attr_accessor :loader_name, :spreadsheet_file_path, :parent, :copyright, :current_user, :permissions, :client, :report_id, :preview, :existing_files, :depositor, :mods_content
@@ -134,6 +135,9 @@ class ProcessXmlZipJob
     else # not a preview, process everything
       existing_files = false
       x = 0
+      core_file = nil
+      zip_files = []
+      seq_num = -1
       start = header_position + 1
       end_row = spreadsheet.last_row.to_i
       (start..end_row).each do |this_row|
@@ -141,6 +145,7 @@ class ProcessXmlZipJob
         if row.present? && header_row.present?
           begin
             count = count + 1
+            load_report.update_counts
             row_results = process_a_row(header_row, row)
             if x == 0
               existing_files = set_existing_files(row_results)
@@ -148,14 +153,17 @@ class ProcessXmlZipJob
             if row_results.blank?
               # do nothing
             else
+              row_num = row_results["sequence"].to_i
               existing_file = false
               old_mods = nil
-              if row_results["pid"].blank? && !row_results["file_name"].blank? #make new file
+              if row_results["pid"].blank? && !row_results["file_name"].blank? && row_num == 0 #make new file #non-multipage file or first of multipage file
                 new_file_path = dir_path + "/" + row_results["file_name"]
                 if File.exists? new_file_path
                   new_file = move_file_to_tmp(File.new(new_file_path))
                   if Cerberus::ContentFile.virus_check(File.new(new_file)) == 0
+                    puts row_num
                     core_file = CoreFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
+                    puts core_file.pid
                     core_file.tag_as_in_progress
                     core_file.tmp_path = new_file
                     collection = !load_report.collection.blank? ? Collection.find(load_report.collection) : nil
@@ -182,13 +190,19 @@ class ProcessXmlZipJob
                     if !sc_type.nil? && sc_type != ""
                       core_file.category = sc_type
                     end
-                    assign_a_row(row_results, core_file, dir_path)
+                    puts "just before assign a row"
+                    assign_a_row(row_results, core_file, dir_path, new_file)
                     core_file.identifier = make_handle(core_file.persistent_url, client)
                     core_file.save!
+                    seq_num = row_num
+                    puts "core file saved for the first time"
 
                     if !row_results["embargoed"].blank? && row_results["embargoed"].to_s.downcase == "true"
                       if row_results["embargo_date"].blank?
                         populate_error_report(load_report, existing_file, "Embargoed content must include an embargo release date", row_results, core_file, old_mods, header_row, row)
+                        core_file = nil
+                        seq_num = -1
+                        zip_files = []
                         x = x+1
                         next
                       else
@@ -197,6 +211,9 @@ class ProcessXmlZipJob
                           core_file.save!
                         else
                           populate_error_report(load_report, existing_file, "Embargo date must follow format YYYY-MM-DD", row_results, core_file, old_mods, header_row, row)
+                          core_file = nil
+                          seq_num = -1
+                          zip_files = []
                           x = x+1
                           next
                         end
@@ -204,11 +221,17 @@ class ProcessXmlZipJob
                     end
                   else
                     populate_error_report(load_report, existing_file, "File triggered failure for virus check", row_results, core_file, old_mods, header_row, row)
+                    core_file = nil
+                    seq_num = -1
+                    zip_files = []
                     x = x+1
                     next
                   end
                 else
                   populate_error_report(load_report, existing_file, "File specified does not exist", row_results, core_file, old_mods, header_row, row)
+                  core_file = nil
+                  seq_num = -1
+                  zip_files = []
                   x = x+1
                   next
                 end
@@ -216,6 +239,9 @@ class ProcessXmlZipJob
                 existing_file = true
                 if !row_results["pid"].start_with?("neu:")
                   populate_error_report(load_report, existing_file, "PID is incorrectly formatted", row_results, core_file, old_mods, header_row, row)
+                  core_file = nil
+                  seq_num = -1
+                  zip_files = []
                   x = x+1
                   next
                 elsif core_file_checks(row_results["pid"]) == true
@@ -225,11 +251,44 @@ class ProcessXmlZipJob
                   assign_a_row(row_results, core_file, dir_path)
                 else
                   populate_error_report(load_report, existing_file, core_file_checks(row_results["pid"]), row_results, core_file, old_mods, header_row, row)
+                  core_file = nil
+                  seq_num = -1
+                  zip_files = []
                   x = x+1
                   next
                 end
+              elsif row_num > 0
+                puts row_num
+                if !(row_num == seq_num + 1)
+                  if !core_file.blank?
+                    load_report.item_reports.create_failure("Row is out of order - row num #{row_num} seq_num #{seq_num}", "", row_results["file_name"])
+                    core_file.destroy
+                    core_file = nil
+                    zip_files = []
+                  end
+                elsif !core_file.blank?
+                  if row_results["last_item"].downcase == "true"
+                    zip_files << row_results["file_name"]
+                    # Send an array of file_names to be zipped and attached to the core_file
+                    MultipageProcessingJob.new(dir_path, row_results, core_file.pid, load_report.id, zip_files, client).run
+                    # reset for next paged item
+                    core_file = nil
+                    seq_num = -1
+                    zip_files = []
+                    next
+                  else
+                    zip_files << row_results["file_name"]
+                    MultipageProcessingJob.new(dir_path, row_results, core_file.pid, load_report.id, nil, client).run
+                    # Keep on goin'
+                    seq_num = row_num
+                    next
+                  end
+                end
               else #mismatch
                 populate_error_report(load_report, existing_file, "File was missing pid or file name", row_results, nil, old_mods, header_row, row)
+                core_file = nil
+                seq_num = -1
+                zip_files = []
                 x = x+1
                 next
               end
@@ -273,6 +332,9 @@ class ProcessXmlZipJob
             end
           rescue Exception => error
             populate_error_report(load_report, existing_file, error.message, row_results, core_file, old_mods, header_row, row)
+            core_file = nil
+            seq_num = -1
+            zip_files = []
             x = x+1
           end
         end
@@ -294,11 +356,14 @@ class ProcessXmlZipJob
     end
   end
 
-  def assign_a_row(row_results, core_file, dir_path)
-    core_file.reload
+  def assign_a_row(row_results, core_file, dir_path, new_file=nil)
     xml_file_path = dir_path + "/" + row_results["xml_file_path"]
-
-    if !xml_file_path.blank? && File.exists?(xml_file_path) && File.extname(xml_file_path) == ".xml"
+    if row_results['file_name'] == row_results['xml_file_path'] && new_file != nil
+      xml_file_path = new_file
+    end
+    puts xml_file_path
+    if !xml_file_path.blank? && File.exists?(xml_file_path) && extract_mime_type(xml_file_path) == "text/xml"
+      # && File.extname(xml_file_path) == ".xml"
       raw_xml = xml_decode(File.open(xml_file_path, "r").read)
       self.mods_content = raw_xml
       # Validate
@@ -319,8 +384,8 @@ class ProcessXmlZipJob
       end
     else
       # Raise error, can't load core file mods metadata
-      raise "Your upload could not be processed becuase the XML files could not be found."
       core_file = nil
+      raise "Your upload could not be processed because the XML files could not be found."
     end
   end
 
@@ -333,6 +398,8 @@ class ProcessXmlZipJob
     results["file_name"]                 = find_in_row(header_row, row_value, 'File Name')
     results["embargoed"]                 = find_in_row(header_row, row_value, 'Embargoed?')
     results["embargo_date"]              = find_in_row(header_row, row_value, 'Embargo Date')
+    results["sequence"]                  = find_in_row(header_row, row_value, 'Sequence')
+    results["last_item"]                 = find_in_row(header_row, row_value, 'Last Item')
     return results
   end
 

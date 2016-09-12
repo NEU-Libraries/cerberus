@@ -218,7 +218,7 @@ describe ProcessXmlZipJob do
       @lr.number_of_files.should == 1
       @lr.fail_count.should == 1
       @lr.item_reports.first.validity.should == false
-      @lr.item_reports.first.exception.should == "Your upload could not be processed becuase the XML files could not be found."
+      @lr.item_reports.first.exception.should == "Your upload could not be processed because the XML files could not be found."
       UploadAlert.where(:pid=>@lr.item_reports.first.pid).count.should == 0
     end
 
