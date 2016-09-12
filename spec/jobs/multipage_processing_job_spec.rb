@@ -118,7 +118,7 @@ describe MultipageProcessingJob do
     end
 
     it "does not create thumbnail_list" do
-      @core_file.thumbnail_list.length.should == 0 #won't make a thumbnail list becuase it isn't the first one
+      @core_file.thumbnail_list.length.should == 0 #won't make a thumbnail list because it isn't the first one
     end
 
     it "does not generate item_reports" do
@@ -177,7 +177,7 @@ describe MultipageProcessingJob do
     end
 
     it "sets the thumbnail list" do
-      @core_file.thumbnail_list.length.should == 5 #makes a thumbnail list becuase it is the first one
+      @core_file.thumbnail_list.length.should == 5 #makes a thumbnail list because it is the first one
     end
 
     it "does not assign canonical" do
@@ -241,7 +241,7 @@ describe MultipageProcessingJob do
     end
 
     it "does not set the thumbnail list" do
-      @core_file.thumbnail_list.length.should == 0 #doesn't make a thumbnail list becuase it is not the first one
+      @core_file.thumbnail_list.length.should == 0 #doesn't make a thumbnail list because it is not the first one
     end
 
     it "assigns canonical" do

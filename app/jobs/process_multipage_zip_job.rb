@@ -26,9 +26,18 @@ class ProcessMultipageZipJob
 
     # unzip zip file to tmp storage
     dir_path = File.join(File.dirname(zip_path), File.basename(zip_path, ".*"))
-    spreadsheet_file_path = unzip(zip_path, dir_path)
+    begin
+      spreadsheet_file_path = unzip(zip_path, dir_path)
 
-    process_spreadsheet(dir_path, spreadsheet_file_path, load_report, client)
+      process_spreadsheet(dir_path, spreadsheet_file_path, load_report, client)
+    rescue => exception
+      puts "there was an error"
+      puts exception.to_s
+      load_report.item_reports.create_failure(exception.to_s, "", "")
+      load_report.number_of_files = 0
+      load_report.completed = true
+      load_report.save!
+    end
   end
 
   def process_spreadsheet(dir_path, spreadsheet_file_path, load_report, client)
