@@ -975,6 +975,9 @@ class ModsDatastream < ActiveFedora::OmDatastream
 
       # Set usage attribute to primary
       if self.personal_name(0).first.blank?
+        if self.personal_name[0].nil?
+          self.insert_new_node(:personal_name)
+        end
         self.corporate_name(0).usage = "primary"
         # Set usage attribute to blank
         self.personal_name(0).usage = nil
