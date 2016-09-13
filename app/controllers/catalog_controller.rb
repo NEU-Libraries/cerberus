@@ -67,8 +67,10 @@ class CatalogController < ApplicationController
           self.solr_search_params_logic += [:apply_per_page_limit]
         end
 
-        # Unescape
-        params[:q].gsub!('\\', '')
+        if params[:q]
+          # Unescape
+          params[:q].gsub!('\\', '')
+        end
 
         super
       rescue Net::ReadTimeout
