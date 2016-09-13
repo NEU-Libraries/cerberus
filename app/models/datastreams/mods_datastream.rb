@@ -517,6 +517,11 @@ class ModsDatastream < ActiveFedora::OmDatastream
     if title.kind_of?(Array)
       title = title[0]
     end
+
+    if self.title_info[0].nil?
+      self.insert_new_node(:title_info)
+    end
+
     self.title_info.title = title.gsub(/[\s\b\v]+/, " ")
   end
 
@@ -524,6 +529,11 @@ class ModsDatastream < ActiveFedora::OmDatastream
     if desc.kind_of?(Array)
       desc = desc[0]
     end
+
+    if self.abstract[0].nil?
+      self.insert_new_node(:abstract)
+    end
+
     self.abstract = desc.gsub(/[\s\b\v]+/, " ")
   end
 
@@ -544,6 +554,10 @@ class ModsDatastream < ActiveFedora::OmDatastream
   end
 
   def date=(date_val, point=nil)
+    if self.origin_info[0].nil?
+      self.insert_new_node(:origin_info)
+    end
+
     self.origin_info.date_created = date_val
     if !point.blank?
       self.origin_info.date_created.point = point
@@ -1117,6 +1131,22 @@ class ModsDatastream < ActiveFedora::OmDatastream
   def self.alternate_title_template
     builder = Nokogiri::XML::Builder.new do |xml|
       xml.titleInfo('type' => 'alternative') {
+      }
+    end
+    return builder.doc.root
+  end
+
+  def self.title_info_template
+    builder = Nokogiri::XML::Builder.new do |xml|
+      xml.titleInfo('usage' => 'primary') {
+      }
+    end
+    return builder.doc.root
+  end
+
+  def self.origin_info_template
+    builder = Nokogiri::XML::Builder.new do |xml|
+      xml.originInfo {
       }
     end
     return builder.doc.root
