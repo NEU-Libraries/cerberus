@@ -185,7 +185,9 @@ class ProcessXmlZipJob
                     core_file.rightsMetadata.permissions({person: "#{depositor}"}, 'edit')
                     core_file.original_filename = row_results["file_name"]
                     core_file.label = row_results["file_name"]
-                    core_file.instantiate_appropriate_content_object(new_file)
+                    if row_results["sequence"].blank?
+                      core_file.instantiate_appropriate_content_object(new_file)
+                    end
                     sc_type = collection.smart_collection_type
                     if !sc_type.nil? && sc_type != ""
                       core_file.category = sc_type
@@ -257,7 +259,7 @@ class ProcessXmlZipJob
                   x = x+1
                   next
                 end
-              elsif row_num > 0
+              elsif row_num > 0 #inherit core_file and proceed to add pages
                 puts row_num
                 if !(row_num == seq_num + 1)
                   if !core_file.blank?
@@ -265,18 +267,34 @@ class ProcessXmlZipJob
                     core_file.destroy
                     core_file = nil
                     zip_files = []
+                    next
                   end
                 elsif !core_file.blank?
                   if row_results["last_item"].downcase == "true"
+                    puts "its the last item"
                     zip_files << row_results["file_name"]
                     # Send an array of file_names to be zipped and attached to the core_file
                     MultipageProcessingJob.new(dir_path, row_results, core_file.pid, load_report.id, zip_files, client).run
-                    # reset for next paged item
-                    core_file = nil
-                    seq_num = -1
-                    zip_files = []
-                    next
+
+                    if this_row == end_row
+                      puts "and now the report is completed"
+                      load_report.completed = true
+                      load_report.save!
+                      if CoreFile.exists?(load_report.preview_file_pid)
+                        CoreFile.find(load_report.preview_file_pid).destroy
+                      end
+                      # LoaderMailer.load_alert(load_report, User.find_by_nuid(load_report.nuid)).deliver!
+                      # cleaning up
+                      FileUtils.rm(spreadsheet_file_path)
+                    else
+                      # reset for next paged item
+                      seq_num = -1
+                      zip_files = []
+                      core_file = nil
+                      next
+                    end
                   else
+                    puts "adding a page to #{core_file.pid}"
                     zip_files << row_results["file_name"]
                     MultipageProcessingJob.new(dir_path, row_results, core_file.pid, load_report.id, nil, client).run
                     # Keep on goin'
@@ -317,11 +335,11 @@ class ProcessXmlZipJob
                     next
                   end
                 else
-                  if !existing_files
+                  if !existing_files && row_results["sequence"].blank?
                     Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename))
                     UploadAlert.create_from_core_file(core_file, :create, "xml")
                     load_report.item_reports.create_success(core_file, "", :create)
-                  else
+                  elsif existing_files
                     UploadAlert.create_from_core_file(core_file, :update, "xml")
                     load_report.item_reports.create_success(core_file, "", :update)
                   end
