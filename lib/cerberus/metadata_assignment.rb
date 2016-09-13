@@ -51,7 +51,7 @@ module Cerberus
       end
 
       def non_sort=(string)
-        if_mods_exists { self.mods.title_info.non_sort = string }
+        if_mods_exists { self.mods.non_sort = string }
       end
 
       def non_sort
