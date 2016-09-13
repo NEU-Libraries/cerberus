@@ -525,6 +525,14 @@ class ModsDatastream < ActiveFedora::OmDatastream
     self.title_info.title = title.gsub(/[\s\b\v]+/, " ")
   end
 
+  def non_sort=(non_sort)
+    if self.title_info[0].nil?
+      self.insert_new_node(:title_info)
+    end
+    
+    self.title_info.non_sort = non_sort
+  end
+
   def description=(desc)
     if desc.kind_of?(Array)
       desc = desc[0]
