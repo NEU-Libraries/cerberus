@@ -22,14 +22,14 @@ describe ProcessXmlZipJob do
       spreadsheet_file_path = "#{Rails.root}/spec/fixtures/files/xml_loader_preview/manifest-preview.xlsx"
       copyright = ""
       @parent = FactoryGirl.create(:root_collection)
+      @parent.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
       tempdir = Pathname.new("#{Rails.application.config.tmp_path}/")
       file_name = File.basename(spreadsheet_file_path)
       new_path = tempdir.join(file_name).to_s
       FileUtils.cp(spreadsheet_file_path, new_path)
-      permissions = @parent.permissions
       @report_id = Loaders::LoadReport.create_from_strings(@user, 0, @loader_name, @parent.pid)
       @lr = Loaders::LoadReport.find("#{@report_id}")
-      ProcessXmlZipJob.new(@loader_name, spreadsheet_file_path, @parent, copyright, @user, permissions, @report_id, false, nil, true, @client).run
+      ProcessXmlZipJob.new(@loader_name, spreadsheet_file_path, @parent, copyright, @user, @report_id, false, nil, true, @client).run
     end
 
     it "should create preview if passed preview flag" do
@@ -83,11 +83,10 @@ describe ProcessXmlZipJob do
       new_path = tempdir.join("xml_loader_existing").to_s
       FileUtils.cp_r(dir_name, new_path)
       new_file = new_path +"/manifest-existing.xlsx"
-      permissions = @parent.permissions
       @report_id = Loaders::LoadReport.create_from_strings(@user, 0, @loader_name, @parent.pid)
       @lr = Loaders::LoadReport.find("#{@report_id}")
       depositor = @user.nuid
-      ProcessXmlZipJob.new(@loader_name, new_file, @parent, copyright, @user, permissions, @report_id, true, depositor, nil, @client).run
+      ProcessXmlZipJob.new(@loader_name, new_file, @parent, copyright, @user, @report_id, true, depositor, nil, @client).run
     end
 
     it "should update existing file if existing file spreadsheet" do
@@ -123,11 +122,10 @@ describe ProcessXmlZipJob do
       new_path = tempdir.join("xml_loader_new").to_s
       FileUtils.cp_r(dir_name, new_path)
       new_file = new_path +"/manifest.xlsx"
-      permissions = @parent.permissions
       @report_id = Loaders::LoadReport.create_from_strings(@user, 0, @loader_name, @parent.pid)
       @lr = Loaders::LoadReport.find("#{@report_id}")
       depositor = @user.nuid
-      ProcessXmlZipJob.new(@loader_name, new_file, @parent, copyright, @user, permissions, @report_id, false, depositor, nil, @client).run
+      ProcessXmlZipJob.new(@loader_name, new_file, @parent, copyright, @user, @report_id, false, depositor, nil, @client).run
     end
 
     it "should create new file if new file spreadsheet" do
@@ -201,7 +199,6 @@ describe ProcessXmlZipJob do
       @corefile.keywords = ["test"]
       @corefile.identifier = "http://testhandle"
       @corefile.save!
-      @permissions = @parent.permissions
       @report_id = Loaders::LoadReport.create_from_strings(@user, 0, @loader_name, @parent.pid)
       @lr = Loaders::LoadReport.find("#{@report_id}")
       @depositor = @user.nuid
@@ -213,7 +210,7 @@ describe ProcessXmlZipJob do
 
     it "should fail if xml file does not exist" do
       new_file = @new_path + "/manifest-xmlDNE.xlsx"
-      ProcessXmlZipJob.new(@loader_name, new_file, @parent, @copyright, @user, @permissions, @report_id, true, @depositor, nil, @client).run
+      ProcessXmlZipJob.new(@loader_name, new_file, @parent, @copyright, @user, @report_id, true, @depositor, nil, @client).run
       @lr.reload
       @lr.number_of_files.should == 1
       @lr.fail_count.should == 1
@@ -224,7 +221,7 @@ describe ProcessXmlZipJob do
 
     it "should fail if pid does not exist" do
       new_file = @new_path + "/manifest-pidDNE.xlsx"
-      ProcessXmlZipJob.new(@loader_name, new_file, @parent, @copyright, @user, @permissions, @report_id, true, @depositor, nil, @client).run
+      ProcessXmlZipJob.new(@loader_name, new_file, @parent, @copyright, @user, @report_id, true, @depositor, nil, @client).run
       @lr.reload
       @lr.number_of_files.should == 1
       @lr.fail_count.should == 1
@@ -235,7 +232,7 @@ describe ProcessXmlZipJob do
 
     it "should fail if invalid mods" do
       new_file = @new_path + "/manifest-invldMODS.xlsx"
-      ProcessXmlZipJob.new(@loader_name, new_file, @parent, @copyright, @user, @permissions, @report_id, true, @depositor, nil, @client).run
+      ProcessXmlZipJob.new(@loader_name, new_file, @parent, @copyright, @user, @report_id, true, @depositor, nil, @client).run
       @lr.reload
       @lr.number_of_files.should == 1
       @lr.fail_count.should == 1
@@ -246,12 +243,12 @@ describe ProcessXmlZipJob do
 
     it "should fail if empty spreadsheet" do
       new_file = @new_path + "/manifest-emptysheet.xlsx"
-      expect {ProcessXmlZipJob.new(@loader_name, new_file, @parent, @copyright, @user, @permissions, @report_id, true, @depositor, nil, @client).run}.to raise_error
+      expect {ProcessXmlZipJob.new(@loader_name, new_file, @parent, @copyright, @user, @report_id, true, @depositor, nil, @client).run}.to raise_error
     end
 
     it "should fail if no header row" do
       new_file = @new_path + "/manifest-noheader.xlsx"
-      ProcessXmlZipJob.new(@loader_name, new_file, @parent, @copyright, @user, @permissions, @report_id, true, @depositor, nil, @client).run
+      ProcessXmlZipJob.new(@loader_name, new_file, @parent, @copyright, @user, @report_id, true, @depositor, nil, @client).run
       @lr.reload
       @lr.number_of_files.should == 0
       @lr.fail_count.should == 0
@@ -259,7 +256,7 @@ describe ProcessXmlZipJob do
 
     it "should fail record if no title" do
       new_file = @new_path + "/manifest-no-title.xlsx"
-      ProcessXmlZipJob.new(@loader_name, new_file, @parent, @copyright, @user, @permissions, @report_id, true, @depositor, nil, @client).run
+      ProcessXmlZipJob.new(@loader_name, new_file, @parent, @copyright, @user, @report_id, true, @depositor, nil, @client).run
       @lr.reload
       @lr.number_of_files.should == 1
       @lr.fail_count.should == 1
@@ -270,7 +267,7 @@ describe ProcessXmlZipJob do
 
     it "should fail record if no keywords" do
       new_file = @new_path + "/manifest-no-keyword.xlsx"
-      ProcessXmlZipJob.new(@loader_name, new_file, @parent, @copyright, @user, @permissions, @report_id, true, @depositor, nil, @client).run
+      ProcessXmlZipJob.new(@loader_name, new_file, @parent, @copyright, @user, @report_id, true, @depositor, nil, @client).run
       @lr.reload
       @lr.number_of_files.should == 1
       @lr.fail_count.should == 1
@@ -281,7 +278,7 @@ describe ProcessXmlZipJob do
 
     it "should fail record if no handle" do
       new_file = @new_path + "/manifest-no-handle.xlsx"
-      ProcessXmlZipJob.new(@loader_name, new_file, @parent, @copyright, @user, @permissions, @report_id, true, @depositor, nil, @client).run
+      ProcessXmlZipJob.new(@loader_name, new_file, @parent, @copyright, @user, @report_id, true, @depositor, nil, @client).run
       @lr.reload
       @lr.number_of_files.should == 1
       @lr.fail_count.should == 1
@@ -292,7 +289,7 @@ describe ProcessXmlZipJob do
 
     it "should fail record if embargo date not correct format" do
       new_file = @new_path + "/manifest-invalid-embargo-date.xlsx"
-      ProcessXmlZipJob.new(@loader_name, new_file, @parent, @copyright, @user, @permissions, @report_id, true, @depositor, nil, @client).run
+      ProcessXmlZipJob.new(@loader_name, new_file, @parent, @copyright, @user, @report_id, true, @depositor, nil, @client).run
       @lr.reload
       @lr.number_of_files.should == 1
       @lr.fail_count.should == 1
@@ -303,7 +300,7 @@ describe ProcessXmlZipJob do
 
     it "should fail record if no poster provided for video/audio" do
       new_file = @new_path + "/manifest-no-poster-for-av.xlsx"
-      ProcessXmlZipJob.new(@loader_name, new_file, @parent, @copyright, @user, @permissions, @report_id, true, @depositor, nil, @client).run
+      ProcessXmlZipJob.new(@loader_name, new_file, @parent, @copyright, @user, @report_id, true, @depositor, nil, @client).run
       @lr.reload
       @lr.number_of_files.should == 1
       @lr.fail_count.should == 1
@@ -318,6 +315,208 @@ describe ProcessXmlZipJob do
       ActiveFedora::Base.destroy_all
       FileUtils.rm_rf(Pathname.new("#{Rails.application.config.tmp_path}/")+"failing_xml_loads")
       UploadAlert.destroy_all
+    end
+  end
+
+  context :multipage_loads do
+    shared_examples_for "multipage failure" do
+      it 'creates a load report' do
+        Loaders::LoadReport.all.length.should == 1
+        lr = Loaders::LoadReport.all.first
+        lr.number_of_files.should == 1
+        lr.fail_count.should == 1
+      end
+
+      it 'does not create a core file' do
+        CoreFile.count.should == 0
+      end
+    end
+
+    context "multipage object" do
+      before(:all) do
+        @parent = FactoryGirl.create(:root_collection)
+        spreadsheet_file_path = "#{Rails.root}/spec/fixtures/files/multipage/manifest.xlsx"
+        tempdir = Pathname.new("#{Rails.application.config.tmp_path}/")
+        @uniq_hsh = Digest::MD5.hexdigest(spreadsheet_file_path)[0,2]
+        file_name = "#{Time.now.to_f.to_s.gsub!('.','-')}-#{@uniq_hsh}"
+        dir_name = File.dirname(spreadsheet_file_path)
+        new_path = tempdir.join(file_name).to_s
+        new_file = new_path +"/manifest.xlsx"
+        FileUtils.cp_r(dir_name, new_path)
+        copyright = "Copyright statement"
+        @report_id = Loaders::LoadReport.create_from_strings(@user, 0, @loader_name, @parent.pid)
+        ProcessXmlZipJob.new(@loader_name, new_file.to_s, @parent, copyright, @user, @report_id, false, @user.nuid, nil, @client).run
+        @lr = Loaders::LoadReport.find(@report_id)
+        @cf = CoreFile.find(@lr.item_reports.first.pid)
+      end
+
+      it "sets core_file title" do
+        @cf.title.should == "Youngs Gap Casino, Parksville, N.Y."
+      end
+
+      it 'creates two page file objects attached' do
+        @cf.page_objects.count.should == 2
+      end
+
+      it "sets original_filename" do
+        @cf.properties.original_filename.should == ["bdr_43888.mods.xml"]
+        @cf.label.should == "bdr_43888.mods.xml"
+      end
+
+      it 'creates a load report' do
+        Loaders::LoadReport.all.length.should == 1
+      end
+
+      it 'removes zip file from tmp dir' do
+        File.exist?("#{@new_file}").should be false
+      end
+
+      it 'creates image reports' do
+        Loaders::ItemReport.all.length.should == 1
+      end
+
+      it 'creates one core file' do
+        CoreFile.count.should == 1
+      end
+
+      it "sets core_file depositor" do
+        @cf.depositor.should == @user.nuid
+      end
+
+      it "sets core_file parent" do
+        @cf.parent.should == @parent
+        @cf.properties.parent_id = @parent.pid
+      end
+
+      it "creates handle" do
+        @cf.mods.identifier.should_not == nil
+        @cf.mods.identifier.type.should == ["hdl"]
+      end
+
+      it 'sets correct number of success, fail, total number counts' do
+        lr = Loaders::LoadReport.all.first
+        lr.number_of_files.should == 1
+        lr.success_count.should == 1
+        lr.fail_count.should == 0
+      end
+
+      it "sets permissions" do
+        @cf.permissions.should == @parent.permissions << {:type=>"user",:access=>"edit",:name=>@user.nuid}
+      end
+
+      after :all do
+        Loaders::LoadReport.destroy_all
+        Loaders::ItemReport.destroy_all
+        ActiveFedora::Base.destroy_all
+      end
+    end
+
+    context "fails if invalid mods" do
+      before(:all) do
+        @parent = FactoryGirl.create(:root_collection)
+
+        spreadsheet_file_path = "#{Rails.root}/spec/fixtures/files/multipage-invalid-mods/manifest.xlsx"
+        tempdir = Pathname.new("#{Rails.application.config.tmp_path}/")
+        @uniq_hsh = Digest::MD5.hexdigest(spreadsheet_file_path)[0,2]
+        file_name = "#{Time.now.to_f.to_s.gsub!('.','-')}-#{@uniq_hsh}"
+        dir_name = File.dirname(spreadsheet_file_path)
+        new_path = tempdir.join(file_name).to_s
+        FileUtils.cp_r(dir_name, new_path)
+        @new_file = new_path +"/manifest.xlsx"
+        copyright = "Copyright statement"
+        report_id = Loaders::LoadReport.create_from_strings(@user, 0, @loader_name, @parent.pid)
+        ProcessXmlZipJob.new(@loader_name, @new_file.to_s, @parent, copyright, @user, report_id, false, @user.nuid, nil, @client).run
+      end
+
+      it_should_behave_like "multipage failure"
+
+      it 'creates image report' do
+        Loaders::ItemReport.all.length.should == 1
+        rep = Loaders::ItemReport.first
+        rep.exception.should == "Exceptions::MissingMetadata: No valid title in xml;"
+      end
+
+      after :all do
+        Loaders::LoadReport.destroy_all
+        Loaders::ItemReport.destroy_all
+        ActiveFedora::Base.destroy_all
+      end
+    end
+
+    context  "fails if no mods provided" do
+      before(:all) do
+        @parent = FactoryGirl.create(:root_collection)
+        # tempdir = Pathname.new("#{Rails.application.config.tmp_path}/")
+        # @uniq_hsh = Digest::MD5.hexdigest("#{Rails.root}/spec/fixtures/files/multipage-no-mods.zip")[0,2]
+        # file_name = "#{Time.now.to_f.to_s.gsub!('.','-')}-#{@uniq_hsh}"
+        # new_path = tempdir.join(file_name).to_s
+        # @new_file = "#{new_path}.zip"
+        # FileUtils.cp("#{Rails.root}/spec/fixtures/files/multipage-no-mods.zip", @new_file)
+        spreadsheet_file_path = "#{Rails.root}/spec/fixtures/files/multipage-no-mods/manifest.xlsx"
+        tempdir = Pathname.new("#{Rails.application.config.tmp_path}/")
+        @uniq_hsh = Digest::MD5.hexdigest(spreadsheet_file_path)[0,2]
+        file_name = "#{Time.now.to_f.to_s.gsub!('.','-')}-#{@uniq_hsh}"
+        dir_name = File.dirname(spreadsheet_file_path)
+        new_path = tempdir.join(file_name).to_s
+        @new_file = new_path +"/manifest.xlsx"
+        FileUtils.cp_r(dir_name, new_path)
+        copyright = "Copyright statement"
+        report_id = Loaders::LoadReport.create_from_strings(@user, 0, @loader_name, @parent.pid)
+        # ProcessMultipageZipJob.new(@loader_name, @new_file.to_s, @parent.pid, copyright, @user, permissions, report_id, @client).run
+        ProcessXmlZipJob.new(@loader_name, @new_file.to_s, @parent, copyright, @user, report_id, false, @user.nuid, nil, @client).run
+      end
+
+      it_should_behave_like "multipage failure"
+
+      it 'creates image report' do
+        Loaders::ItemReport.all.length.should == 1
+        rep = Loaders::ItemReport.first
+        rep.exception.should == "Your upload could not be processed because the XML files could not be found."
+      end
+
+      after :all do
+        Loaders::LoadReport.destroy_all
+        Loaders::ItemReport.destroy_all
+        ActiveFedora::Base.destroy_all
+      end
+    end
+
+    context "bad row sequence" do
+      before(:all) do
+        @parent = FactoryGirl.create(:root_collection)
+        # tempdir = Pathname.new("#{Rails.application.config.tmp_path}/")
+        # @uniq_hsh = Digest::MD5.hexdigest("#{Rails.root}/spec/fixtures/files/multipage-bad-sequence.zip")[0,2]
+        # file_name = "#{Time.now.to_f.to_s.gsub!('.','-')}-#{@uniq_hsh}"
+        # new_path = tempdir.join(file_name).to_s
+        # @new_file = "#{new_path}.zip"
+        # FileUtils.cp("#{Rails.root}/spec/fixtures/files/multipage-bad-sequence.zip", @new_file)
+        spreadsheet_file_path = "#{Rails.root}/spec/fixtures/files/multipage-bad-sequence/manifest.xlsx"
+        tempdir = Pathname.new("#{Rails.application.config.tmp_path}/")
+        @uniq_hsh = Digest::MD5.hexdigest(spreadsheet_file_path)[0,2]
+        file_name = "#{Time.now.to_f.to_s.gsub!('.','-')}-#{@uniq_hsh}"
+        dir_name = File.dirname(spreadsheet_file_path)
+        new_path = tempdir.join(file_name).to_s
+        @new_file = new_path +"/manifest.xlsx"
+        FileUtils.cp_r(dir_name, new_path)
+        copyright = "Copyright statement"
+        report_id = Loaders::LoadReport.create_from_strings(@user, 0, @loader_name, @parent.pid)
+        # ProcessMultipageZipJob.new(@loader_name, @new_file.to_s, @parent.pid, copyright, @user, permissions, report_id, @client).run
+        ProcessXmlZipJob.new(@loader_name, @new_file.to_s, @parent, copyright, @user, report_id, false, @user.nuid, nil, @client).run
+      end
+
+      it_should_behave_like "multipage failure"
+
+      it 'creates image report' do
+        Loaders::ItemReport.all.length.should == 1
+        rep = Loaders::ItemReport.first
+        rep.exception.should == "Row is out of order - row num 3 seq_num 1"
+      end
+
+      after :all do
+        Loaders::LoadReport.destroy_all
+        Loaders::ItemReport.destroy_all
+        ActiveFedora::Base.destroy_all
+      end
     end
   end
 end
