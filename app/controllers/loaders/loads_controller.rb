@@ -115,13 +115,7 @@ class Loaders::LoadsController < ApplicationController
         if extract_mime_type(new_file) == 'application/zip'
           begin
             @report_id = nil
-            if short_name == "multipage"
-              # multipage zip job
-              @report_id = Loaders::LoadReport.create_from_strings(current_user, 0, @loader_name, parent)
-              Cerberus::Application::Queue.push(ProcessMultipageZipJob.new(@loader_name, new_file.to_s, parent, copyright, current_user, permissions, @report_id))
-              session[:flash_success] = "Your file has been submitted and is now being processed. You will receive an email when the load is complete."
-              render :json => {report_id: @report_id}.to_json and return
-            elsif short_name == "spreadsheet"
+            if short_name == "spreadsheet"
               #mods spreadsheet job
               spreadsheet_file_path = unzip(new_file, new_path)
               @report_id = Loaders::LoadReport.create_from_strings(current_user, 0, @loader_name, parent)
@@ -136,7 +130,7 @@ class Loaders::LoadsController < ApplicationController
             elsif short_name == "xml"
               spreadsheet_file_path = unzip(new_file, new_path)
               @report_id = Loaders::LoadReport.create_from_strings(current_user, 0, @loader_name, parent)
-              ProcessXmlZipJob.new(@loader_name, spreadsheet_file_path, parent, copyright, current_user, permissions, @report_id, existing_files, nil, true).run
+              ProcessXmlZipJob.new(@loader_name, spreadsheet_file_path, parent, copyright, current_user, @report_id, existing_files, nil, true).run
               load_report = Loaders::LoadReport.find(@report_id)
               session[:flash_success] = "Your file has been submitted and is now being processed. You will receive an email when the load is complete."
               if !load_report.comparison_file_pid.blank?

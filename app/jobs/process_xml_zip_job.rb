@@ -7,19 +7,18 @@ class ProcessXmlZipJob
   include MimeHelper
   include Cerberus::TempFileStorage
 
-  attr_accessor :loader_name, :spreadsheet_file_path, :parent, :copyright, :current_user, :permissions, :client, :report_id, :preview, :existing_files, :depositor, :mods_content
+  attr_accessor :loader_name, :spreadsheet_file_path, :parent, :copyright, :current_user, :client, :report_id, :preview, :existing_files, :depositor, :mods_content
 
   def queue_name
     :xml_loader_process_zip
   end
 
-  def initialize(loader_name, spreadsheet_file_path, parent, copyright, current_user, permissions, report_id, existing_files, depositor, preview=nil, client=nil)
+  def initialize(loader_name, spreadsheet_file_path, parent, copyright, current_user, report_id, existing_files, depositor, preview=nil, client=nil)
     self.loader_name = loader_name
     self.spreadsheet_file_path = spreadsheet_file_path
     self.parent = parent
     self.copyright = copyright
     self.current_user = current_user
-    self.permissions = permissions
     self.client = client
     self.report_id = report_id
     self.preview = preview
@@ -122,7 +121,7 @@ class ProcessXmlZipJob
           load_report.completed = true
           load_report.fail_count = 1
           load_report.save!
-          FileUtils.rm(spreadsheet_file_path)
+          FileUtils.rm(spreadsheet_file_path) if File.exists? spreadsheet_file_path
           if CoreFile.exists?(load_report.preview_file_pid)
             CoreFile.find(load_report.preview_file_pid).destroy
           end
@@ -161,9 +160,7 @@ class ProcessXmlZipJob
                 if File.exists? new_file_path
                   new_file = move_file_to_tmp(File.new(new_file_path))
                   if Cerberus::ContentFile.virus_check(File.new(new_file)) == 0
-                    puts row_num
                     core_file = CoreFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
-                    puts core_file.pid
                     core_file.tag_as_in_progress
                     core_file.tmp_path = new_file
                     collection = !load_report.collection.blank? ? Collection.find(load_report.collection) : nil
@@ -192,12 +189,10 @@ class ProcessXmlZipJob
                     if !sc_type.nil? && sc_type != ""
                       core_file.category = sc_type
                     end
-                    puts "just before assign a row"
                     assign_a_row(row_results, core_file, dir_path, new_file)
                     core_file.identifier = make_handle(core_file.persistent_url, client)
                     core_file.save!
                     seq_num = row_num
-                    puts "core file saved for the first time"
 
                     if !row_results["embargoed"].blank? && row_results["embargoed"].to_s.downcase == "true"
                       if row_results["embargo_date"].blank?
@@ -230,7 +225,7 @@ class ProcessXmlZipJob
                     next
                   end
                 else
-                  populate_error_report(load_report, existing_file, "File specified does not exist", row_results, core_file, old_mods, header_row, row)
+                  populate_error_report(load_report, existing_file, "Your upload could not be processed because the XML files could not be found.", row_results, core_file, old_mods, header_row, row)
                   core_file = nil
                   seq_num = -1
                   zip_files = []
@@ -260,32 +255,43 @@ class ProcessXmlZipJob
                   next
                 end
               elsif row_num > 0 #inherit core_file and proceed to add pages
-                puts row_num
+                count = count - 1 # remove count for pages of the same file
                 if !(row_num == seq_num + 1)
                   if !core_file.blank?
                     load_report.item_reports.create_failure("Row is out of order - row num #{row_num} seq_num #{seq_num}", "", row_results["file_name"])
-                    core_file.destroy
-                    core_file = nil
-                    zip_files = []
-                    next
+                    if this_row == end_row
+                      load_report.completed = true
+                      core_file.destroy
+                      load_report.save!
+                      if CoreFile.exists?(load_report.preview_file_pid)
+                        CoreFile.find(load_report.preview_file_pid).destroy
+                      end
+                      LoaderMailer.load_alert(load_report, User.find_by_nuid(load_report.nuid)).deliver!
+                      # cleaning up
+                      FileUtils.rm(spreadsheet_file_path) if File.exists? spreadsheet_file_path
+                    else
+                      seq_num = -1
+                      core_file.destroy
+                      core_file = nil
+                      zip_files = []
+                      next
+                    end
                   end
                 elsif !core_file.blank?
                   if row_results["last_item"].downcase == "true"
-                    puts "its the last item"
                     zip_files << row_results["file_name"]
                     # Send an array of file_names to be zipped and attached to the core_file
                     MultipageProcessingJob.new(dir_path, row_results, core_file.pid, load_report.id, zip_files, client).run
 
                     if this_row == end_row
-                      puts "and now the report is completed"
                       load_report.completed = true
                       load_report.save!
                       if CoreFile.exists?(load_report.preview_file_pid)
                         CoreFile.find(load_report.preview_file_pid).destroy
                       end
-                      # LoaderMailer.load_alert(load_report, User.find_by_nuid(load_report.nuid)).deliver!
+                      LoaderMailer.load_alert(load_report, User.find_by_nuid(load_report.nuid)).deliver!
                       # cleaning up
-                      FileUtils.rm(spreadsheet_file_path)
+                      FileUtils.rm(spreadsheet_file_path) if File.exists? spreadsheet_file_path
                     else
                       # reset for next paged item
                       seq_num = -1
@@ -294,7 +300,6 @@ class ProcessXmlZipJob
                       next
                     end
                   else
-                    puts "adding a page to #{core_file.pid}"
                     zip_files << row_results["file_name"]
                     MultipageProcessingJob.new(dir_path, row_results, core_file.pid, load_report.id, nil, client).run
                     # Keep on goin'
@@ -310,42 +315,46 @@ class ProcessXmlZipJob
                 x = x+1
                 next
               end
-              if existing_files == true && Nokogiri::XML(old_mods,&:noblanks).to_s == Nokogiri::XML(core_file.mods.content,&:noblanks).to_s
-                load_report.item_reports.create_success(core_file, "", :update)
-                x = x+1
-                core_file.mods.content = old_mods
-                core_file.save!
-                next
-              elsif core_file.keywords.length < 1
-                populate_error_report(load_report, existing_file, "Must have at least one keyword", row_results, core_file, old_mods, header_row, row)
-              elsif core_file.title.blank?
-                populate_error_report(load_report, existing_file, "Must have a title", row_results, core_file, old_mods, header_row, row)
-              elsif core_file.identifier.blank?
-                populate_error_report(load_report, existing_file, "Must have a handle", row_results, core_file, old_mods, header_row, row)
-              else
-                if (core_file.canonical_class == "AudioFile" || core_file.canonical_class == "VideoFile") && !existing_files
-                  if row_results["poster_path"].blank?
-                    populate_error_report(load_report, existing_file, "Audio or Video File must have poster file", row_results, core_file, old_mods, header_row, row)
+              if !core_file.blank?
+                if existing_files == true && Nokogiri::XML(old_mods,&:noblanks).to_s == Nokogiri::XML(core_file.mods.content,&:noblanks).to_s
+                  load_report.item_reports.create_success(core_file, "", :update)
+                  x = x+1
+                  core_file.mods.content = old_mods
+                  core_file.save!
+                  next
+                elsif core_file.keywords.length < 1
+                  populate_error_report(load_report, existing_file, "Must have at least one keyword", row_results, core_file, old_mods, header_row, row)
+                elsif core_file.title.blank?
+                  populate_error_report(load_report, existing_file, "Must have a title", row_results, core_file, old_mods, header_row, row)
+                elsif core_file.identifier.blank?
+                  populate_error_report(load_report, existing_file, "Must have a handle", row_results, core_file, old_mods, header_row, row)
+                else
+                  if (core_file.canonical_class == "AudioFile" || core_file.canonical_class == "VideoFile") && !existing_files
+                    if row_results["poster_path"].blank?
+                      populate_error_report(load_report, existing_file, "Audio or Video File must have poster file", row_results, core_file, old_mods, header_row, row)
+                    else
+                      poster_path = dir_path + "/" + row_results["poster_path"]
+                      Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename, poster_path))
+                      load_report.item_reports.create_success(core_file, "", :create)
+                      UploadAlert.create_from_core_file(core_file, :create, "xml")
+                      x = x+1
+                      next
+                    end
                   else
-                    poster_path = dir_path + "/" + row_results["poster_path"]
-                    Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename, poster_path))
-                    load_report.item_reports.create_success(core_file, "", :create)
-                    UploadAlert.create_from_core_file(core_file, :create, "xml")
+                    if !existing_files && row_results["sequence"].blank?
+                      Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename))
+                      UploadAlert.create_from_core_file(core_file, :create, "xml")
+                      load_report.item_reports.create_success(core_file, "", :create)
+                    elsif existing_files
+                      UploadAlert.create_from_core_file(core_file, :update, "xml")
+                      load_report.item_reports.create_success(core_file, "", :update)
+                    end
                     x = x+1
                     next
                   end
-                else
-                  if !existing_files && row_results["sequence"].blank?
-                    Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename))
-                    UploadAlert.create_from_core_file(core_file, :create, "xml")
-                    load_report.item_reports.create_success(core_file, "", :create)
-                  elsif existing_files
-                    UploadAlert.create_from_core_file(core_file, :update, "xml")
-                    load_report.item_reports.create_success(core_file, "", :update)
-                  end
-                  x = x+1
-                  next
                 end
+              else
+                next
               end
             end
           rescue Exception => error
@@ -370,7 +379,7 @@ class ProcessXmlZipJob
       end
       LoaderMailer.load_alert(load_report, User.find_by_nuid(load_report.nuid)).deliver!
       # cleaning up
-      FileUtils.rm(spreadsheet_file_path)
+      FileUtils.rm(spreadsheet_file_path) if File.exists? spreadsheet_file_path
     end
   end
 
@@ -379,7 +388,6 @@ class ProcessXmlZipJob
     if row_results['file_name'] == row_results['xml_file_path'] && new_file != nil
       xml_file_path = new_file
     end
-    puts xml_file_path
     if !xml_file_path.blank? && File.exists?(xml_file_path) && extract_mime_type(xml_file_path) == "text/xml"
       # && File.extname(xml_file_path) == ".xml"
       raw_xml = xml_decode(File.open(xml_file_path, "r").read)
