@@ -865,7 +865,13 @@ class CoreFilesController < ApplicationController
     def no_parent_rescue(exception)
       flash[:error] = "Parent not specified or invalid"
       email_handled_exception(exception)
-      render json: { :error=> "Error! No parent set", url: root_path }
+      respond_to do |format|
+        format.json { render json: { :error=> "Error! No parent set", url: root_path } }
+        format.html{
+            redirect_to(root_path) and return
+          }
+      end
+
     end
 
     def group_permission_rescue(exception)
