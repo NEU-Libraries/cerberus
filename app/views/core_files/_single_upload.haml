@@ -1,5 +1,5 @@
 = form_tag("/files", method: "post", multipart: true, id: "singleFileUploadForm") do
-  = hidden_field_tag(:collection_id, @collection_id)
+  = hidden_field_tag(:collection_id, params[:parent])
   .row
     %fieldset.span4
       %legend

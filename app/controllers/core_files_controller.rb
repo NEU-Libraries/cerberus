@@ -302,6 +302,9 @@ class CoreFilesController < ApplicationController
 
   def create
     begin
+      # bounce them if no parent is set
+      return json_error("Error! No parent set") if !params.has_key?(:collection_id)
+
       # check error condition No files
       return json_error("Error! No file to save") if !params.has_key?(:file)
 
@@ -436,7 +439,6 @@ class CoreFilesController < ApplicationController
     end
 
     @core_file = ::CoreFile.new
-    @collection_id = params[:parent]
   end
 
   def new_attached_file
@@ -863,7 +865,7 @@ class CoreFilesController < ApplicationController
     def no_parent_rescue(exception)
       flash[:error] = "Parent not specified or invalid"
       email_handled_exception(exception)
-      redirect_to root_path
+      render json: { :error=> "Error! No parent set", url: root_path }
     end
 
     def group_permission_rescue(exception)
