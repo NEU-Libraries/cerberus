@@ -3,13 +3,13 @@ class ZipCompilationJob
   include Rails.application.routes.url_helpers
   include MimeHelper
 
-  attr_accessor :title, :comp_pid, :entry_ids, :nuid
+  attr_accessor :title, :comp_pid, :entry_ids, :nuid, :large
 
   def queue_name
     :zip_compilation
   end
 
-  def initialize(user, compilation)
+  def initialize(user, compilation, large = false)
     if !user.nil?
       self.nuid = user.nuid
     else
@@ -18,6 +18,7 @@ class ZipCompilationJob
     self.title = compilation.title
     self.comp_pid = compilation.pid
     self.entry_ids = compilation.entry_ids
+    self.large = large
   end
 
   def run

@@ -6,6 +6,6 @@ class StaticController < ApplicationController
   end
 
   def  large_download
-    send_file "#{Rails.application.config.tmp_path}/large/#{params[:session_id]}-#{params[:id].split(":").last}/large_download.zip"
+    send_file "#{Rails.application.config.tmp_path}/large/#{params[:session_id]}/drs_queue.zip"
   end
 end
