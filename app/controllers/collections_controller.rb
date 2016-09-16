@@ -63,11 +63,6 @@ class CollectionsController < ApplicationController
       # Fixes #667 - we remove single characters. They're a pretty terrible idea with a strict AND
       params[:q].gsub!(/(^| ).( |$)/, ' ')
 
-      # Special Char escaping
-      map = {'+' => '\\+', '-' => '\\-', '&' => '\\&', '|' => '\\|', '!' => '\\!', '(' => '\\(', ')' => '\\)', '{' => '\\{', '}' => '\\}', '[' => '\\[', ']' => '\\]', '^' => '\\^', '"' => '\\"', '~' => '\\~', '*' => '\\*', '?' => '\\?', ':' => '\\:', '\\' => '\\\\'}
-      re = Regexp.union(map.keys)
-      params[:q].gsub!(re, map)
-      
       self.solr_search_params_logic += [:limit_to_scope]
     else
       self.solr_search_params_logic += [:show_children_only]
