@@ -21,11 +21,7 @@ class CartDownloadJob
   def run
     self.user = !nuid.blank? ? User.find_by_nuid(nuid) : nil
 
-    if self.large
-      self.path = "#{Rails.application.config.tmp_path}/large/#{sess_id}"
-    else
-      self.path = "#{Rails.application.config.tmp_path}/carts/#{sess_id}"
-    end
+    self.path = "#{Rails.application.config.tmp_path}/carts/#{sess_id}"
 
     FileUtils.mkdir_p path
     temp_path = "#{path}/in_progress.zip"
@@ -63,12 +59,19 @@ class CartDownloadJob
       zipfile.remove(temp_txt)
     end
 
-    # Rename temp path to full path so download can pick it up
-    FileUtils.mv(temp_path, full_path)
-
     if self.large
+      time = Time.now.to_i
+      large_path = "#{Rails.application.config.tmp_path}/large/#{sess_id}"
+      full_large_path = "#{large_path}/#{time}.zip"
+
+      FileUtils.mkdir_p large_path
+      FileUtils.mv(temp_path, large_path)
+
       # Email user their download link
-      LargeDownloadMailer.export_alert(self.nuid, self.sess_id).deliver!
+      LargeDownloadMailer.export_alert(time, self.nuid, self.sess_id).deliver!
+    else
+      # Rename temp path to full path so download can pick it up
+      FileUtils.mv(temp_path, full_path)
     end
   end
 end
