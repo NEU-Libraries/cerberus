@@ -67,8 +67,20 @@ class ZipCompilationJob
         zipfile.remove(temp_txt)
       end
 
-      # Rename temp path to full path so download can pick it up
-      FileUtils.mv(temp_zipfile_name, safe_zipfile_name)
+      if self.large
+        time = Time.now.to_i
+        large_path = "#{Rails.application.config.tmp_path}/large/#{sess_id}"
+        full_large_path = "#{large_path}/#{time}.zip"
+
+        FileUtils.mkdir_p large_path
+        FileUtils.mv(temp_zipfile_name, large_path)
+
+        # Email user their download link
+        LargeDownloadMailer.export_alert(time, self.nuid, self.sess_id).deliver!
+      else
+        # Rename temp path to full path so download can pick it up
+        FileUtils.mv(temp_zipfile_name, safe_zipfile_name)
+      end
 
       return safe_zipfile_name
     rescue Exception => exception
