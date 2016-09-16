@@ -53,11 +53,6 @@ class CommunitiesController < ApplicationController
       # Fixes #667 - we remove single characters. They're a pretty terrible idea with a strict AND
       params[:q].gsub!(/(^| ).( |$)/, ' ') if params[:q]
 
-      # Special Char escaping
-      map = {'+' => '\\+', '-' => '\\-', '&' => '\\&', '|' => '\\|', '!' => '\\!', '(' => '\\(', ')' => '\\)', '{' => '\\{', '}' => '\\}', '[' => '\\[', ']' => '\\]', '^' => '\\^', '"' => '\\"', '~' => '\\~', '*' => '\\*', '?' => '\\?', ':' => '\\:', '\\' => '\\\\'}
-      re = Regexp.union(map.keys)
-      params[:q].gsub!(re, map)
-      
       self.solr_search_params_logic += [:limit_to_scope]
     elsif params[:smart_collection] || params[:smart_col]
       smart_col = params[:smart_collection] || params[:smart_col]
