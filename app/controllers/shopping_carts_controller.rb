@@ -89,7 +89,7 @@ class ShoppingCartsController < ApplicationController
 
     respond_to do |format|
         format.html do
-          if size > 0
+          if size > 5000
             if current_user && current_user.admin?
               flash[:notice] = "Your download exceeded 5GB - an email will be sent to you with the URL for downloading when it's ready."
               Cerberus::Application::Queue.push(CartDownloadJob.new(request.session_options[:id], session[:ids], current_user.nuid, request.remote_ip, true))
@@ -106,7 +106,7 @@ class ShoppingCartsController < ApplicationController
         end
 
         format.js do
-          if size > 0
+          if size > 5000
             render "large_download"
           elsif File.file?(f)
             render("download")

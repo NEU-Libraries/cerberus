@@ -320,7 +320,7 @@ class CompilationsController < ApplicationController
     end
     size = (size / 1024000).round(2)
 
-    if size > 0
+    if size > 5000
       if current_user.admin?
         flash[:notice] = "Your download exceeded 5GB - an email will be sent to you with the URL for downloading when it's ready."
         Cerberus::Application::Queue.push(ZipCompilationJob.new(current_user, @compilation, true))
