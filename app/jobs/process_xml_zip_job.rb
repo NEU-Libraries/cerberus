@@ -50,14 +50,12 @@ class ProcessXmlZipJob
 
     core_file = nil
 
-    if !preview.nil?
+    if !preview.nil? # preview file
       row = spreadsheet.row(header_position + 1)
       if row.present? && header_row.present?
         begin
-          row_results = process_a_row(header_row, row)
           # Process first row
-          preview_file = CoreFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
-          load_report.preview_file_pid = preview_file.pid
+          row_results = process_a_row(header_row, row)
           if row_results["file_name"].blank? && row_results["pid"].blank?
             raise "Your upload could not be processed because the spreadsheet is missing file names or PIDs. Please update the spreadsheet and try again."
             return
@@ -69,11 +67,15 @@ class ProcessXmlZipJob
             return
           end
 
+          preview_file = CoreFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
+          load_report.preview_file_pid = preview_file.pid
+
           if row_results["pid"].blank? && !row_results["file_name"].blank? #make new file
             preview_file.depositor = current_user.nuid
-          else
+          else # editing existing file
             if !row_results["pid"].start_with?("neu:")
               raise "Your upload could not be processed because the PID is incorrectly formatted."
+              return
             end
             comparison_file = CoreFile.find(row_results["pid"])
             preview_file.depositor              = comparison_file.depositor
@@ -90,6 +92,8 @@ class ProcessXmlZipJob
 
           preview_file.tmp_path = spreadsheet_file_path
           preview_file.save!
+          # new_file_path = dir_path + "/" + row_results["file_name"]
+          # new_file = move_file_to_tmp(File.new(new_file_path))
 
           load_report.save!
 
@@ -100,7 +104,7 @@ class ProcessXmlZipJob
           load_report.save!
         rescue Exception => error
           xml_file_path = dir_path + "/" + row_results["xml_file_path"]
-          if !xml_file_path.blank? && File.exists?(xml_file_path) && File.extname(xml_file_path) == ".xml"
+          if !xml_file_path.blank? && File.exists?(xml_file_path) && extract_mime_type(xml_file_path) == "text/xml"
             raw_xml = xml_decode(File.open(xml_file_path, "r").read)
           else
             rax_xml = ""
@@ -133,6 +137,7 @@ class ProcessXmlZipJob
       end
     else # not a preview, process everything
       existing_files = false
+      multipage = false
       x = 0
       core_file = nil
       zip_files = []
@@ -148,6 +153,7 @@ class ProcessXmlZipJob
             row_results = process_a_row(header_row, row)
             if x == 0
               existing_files = set_existing_files(row_results)
+              multipage = set_multipage(header_row)
             end
             if row_results.blank?
               # do nothing
@@ -182,7 +188,7 @@ class ProcessXmlZipJob
                     core_file.rightsMetadata.permissions({person: "#{depositor}"}, 'edit')
                     core_file.original_filename = row_results["file_name"]
                     core_file.label = row_results["file_name"]
-                    if row_results["sequence"].blank?
+                    if !multipage
                       core_file.instantiate_appropriate_content_object(new_file)
                     end
                     sc_type = collection.smart_collection_type
@@ -225,6 +231,8 @@ class ProcessXmlZipJob
                     next
                   end
                 else
+                  puts "error at line 230"
+                  puts new_file_path
                   populate_error_report(load_report, existing_file, "Your upload could not be processed because the XML files could not be found.", row_results, core_file, old_mods, header_row, row)
                   core_file = nil
                   seq_num = -1
@@ -245,7 +253,7 @@ class ProcessXmlZipJob
                   core_file = CoreFile.find(row_results["pid"])
                   old_mods = core_file.mods.content
                   core_file.mods.content = ModsDatastream.xml_template.to_xml
-                  assign_a_row(row_results, core_file, dir_path)
+                  assign_a_row(row_results, core_file, dir_path, new_file)
                 else
                   populate_error_report(load_report, existing_file, core_file_checks(row_results["pid"]), row_results, core_file, old_mods, header_row, row)
                   core_file = nil
@@ -266,7 +274,7 @@ class ProcessXmlZipJob
                       if CoreFile.exists?(load_report.preview_file_pid)
                         CoreFile.find(load_report.preview_file_pid).destroy
                       end
-                      LoaderMailer.load_alert(load_report, User.find_by_nuid(load_report.nuid)).deliver!
+                      # LoaderMailer.load_alert(load_report, User.find_by_nuid(load_report.nuid)).deliver!
                       # cleaning up
                       FileUtils.rm(spreadsheet_file_path) if File.exists? spreadsheet_file_path
                     else
@@ -289,7 +297,7 @@ class ProcessXmlZipJob
                       if CoreFile.exists?(load_report.preview_file_pid)
                         CoreFile.find(load_report.preview_file_pid).destroy
                       end
-                      LoaderMailer.load_alert(load_report, User.find_by_nuid(load_report.nuid)).deliver!
+                      # LoaderMailer.load_alert(load_report, User.find_by_nuid(load_report.nuid)).deliver!
                       # cleaning up
                       FileUtils.rm(spreadsheet_file_path) if File.exists? spreadsheet_file_path
                     else
@@ -341,7 +349,7 @@ class ProcessXmlZipJob
                       next
                     end
                   else
-                    if !existing_files && row_results["sequence"].blank?
+                    if !existing_files && !multipage
                       Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename))
                       UploadAlert.create_from_core_file(core_file, :create, "xml")
                       load_report.item_reports.create_success(core_file, "", :create)
@@ -377,19 +385,24 @@ class ProcessXmlZipJob
       if CoreFile.exists?(load_report.preview_file_pid)
         CoreFile.find(load_report.preview_file_pid).destroy
       end
-      LoaderMailer.load_alert(load_report, User.find_by_nuid(load_report.nuid)).deliver!
+      # LoaderMailer.load_alert(load_report, User.find_by_nuid(load_report.nuid)).deliver!
       # cleaning up
       FileUtils.rm(spreadsheet_file_path) if File.exists? spreadsheet_file_path
     end
   end
 
   def assign_a_row(row_results, core_file, dir_path, new_file=nil)
+    puts row_results
     xml_file_path = dir_path + "/" + row_results["xml_file_path"]
     if row_results['file_name'] == row_results['xml_file_path'] && new_file != nil
       xml_file_path = new_file
     end
+    puts xml_file_path
+    puts !xml_file_path.blank?
+    puts File.exists?(xml_file_path)
+    puts extract_mime_type(xml_file_path)
+    puts extract_mime_type(xml_file_path) == "text/xml"
     if !xml_file_path.blank? && File.exists?(xml_file_path) && extract_mime_type(xml_file_path) == "text/xml"
-      # && File.extname(xml_file_path) == ".xml"
       raw_xml = xml_decode(File.open(xml_file_path, "r").read)
       self.mods_content = raw_xml
       # Validate
@@ -410,7 +423,8 @@ class ProcessXmlZipJob
       end
     else
       # Raise error, can't load core file mods metadata
-      core_file = nil
+      puts "error in assign a row"
+      # core_file = nil
       raise "Your upload could not be processed because the XML files could not be found."
     end
   end
@@ -508,6 +522,14 @@ class ProcessXmlZipJob
       return false
     else
       return true
+    end
+  end
+
+  def set_multipage(header_row)
+    if (find_in_row(header_row, header_row, "Sequence") == "Sequence") && (find_in_row(header_row, header_row, "Last Item") == "Last Item")
+      return true
+    else
+      return false
     end
   end
 end
