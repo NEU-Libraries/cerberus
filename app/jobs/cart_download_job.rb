@@ -65,10 +65,10 @@ class CartDownloadJob
       full_large_path = "#{large_path}/#{time}.zip"
 
       FileUtils.mkdir_p large_path
-      FileUtils.mv(temp_path, large_path)
+      FileUtils.mv(temp_path, full_large_path)
 
       # Email user their download link
-      LargeDownloadMailer.export_alert(time, self.nuid, self.sess_id).deliver!
+      LargeDownloadMailer.download_alert(time, self.nuid, self.sess_id).deliver!
     else
       # Rename temp path to full path so download can pick it up
       FileUtils.mv(temp_path, full_path)

@@ -73,10 +73,10 @@ class ZipCompilationJob
         full_large_path = "#{large_path}/#{time}.zip"
 
         FileUtils.mkdir_p large_path
-        FileUtils.mv(temp_zipfile_name, large_path)
+        FileUtils.mv(temp_zipfile_name, full_large_path)
 
         # Email user their download link
-        LargeDownloadMailer.export_alert(time, self.nuid, self.sess_id).deliver!
+        LargeDownloadMailer.download_alert(time, self.nuid, self.sess_id).deliver!
       else
         # Rename temp path to full path so download can pick it up
         FileUtils.mv(temp_zipfile_name, safe_zipfile_name)
