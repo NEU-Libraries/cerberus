@@ -14,19 +14,13 @@ function terms_of_service(){
   // when data-activate checkbox is clicked, change the
   // disable state of all activate-submit buttons
   $('input[data-activate]').on("click", function () {
-    if ($('#collection_id').val() === '' || $('#collection_id').val() == null) {
-        alert('Parent id has not been set. This may be caused by copying and pasting urls, pressing the back button, disabled javascript or other processes. Please refresh this page to continue.');
-        return false;
-    }
-    else {
-      // get the checked state of the checkbox clicked and
-      // set  all other tos checkboxes to same state
-      var bool = $(this).is(":checked");
-      // if box is checked - enable submit, otherwise disable
-      var disable = (bool) ? false : true;
-      $('input[data-activate]').attr('checked', bool);
-      $('.activate-submit').attr('disabled', disable);
-    }
+    // get the checked state of the checkbox clicked and
+    // set  all other tos checkboxes to same state
+    var bool = $(this).is(":checked");
+    // if box is checked - enable submit, otherwise disable
+    var disable = (bool) ? false : true;
+    $('input[data-activate]').attr('checked', bool);
+    $('.activate-submit').attr('disabled', disable);
   })
 
   // show/hide the tooltip depending if the agreement is already checked
