@@ -446,12 +446,6 @@ describe ProcessXmlZipJob do
     context  "fails if no mods provided" do
       before(:all) do
         @parent = FactoryGirl.create(:root_collection)
-        # tempdir = Pathname.new("#{Rails.application.config.tmp_path}/")
-        # @uniq_hsh = Digest::MD5.hexdigest("#{Rails.root}/spec/fixtures/files/multipage-no-mods.zip")[0,2]
-        # file_name = "#{Time.now.to_f.to_s.gsub!('.','-')}-#{@uniq_hsh}"
-        # new_path = tempdir.join(file_name).to_s
-        # @new_file = "#{new_path}.zip"
-        # FileUtils.cp("#{Rails.root}/spec/fixtures/files/multipage-no-mods.zip", @new_file)
         spreadsheet_file_path = "#{Rails.root}/spec/fixtures/files/multipage-no-mods/manifest.xlsx"
         tempdir = Pathname.new("#{Rails.application.config.tmp_path}/")
         @uniq_hsh = Digest::MD5.hexdigest(spreadsheet_file_path)[0,2]
@@ -462,7 +456,6 @@ describe ProcessXmlZipJob do
         FileUtils.cp_r(dir_name, new_path)
         copyright = "Copyright statement"
         report_id = Loaders::LoadReport.create_from_strings(@user, 0, @loader_name, @parent.pid)
-        # ProcessMultipageZipJob.new(@loader_name, @new_file.to_s, @parent.pid, copyright, @user, permissions, report_id, @client).run
         ProcessXmlZipJob.new(@loader_name, @new_file.to_s, @parent, copyright, @user, report_id, false, @user.nuid, nil, @client).run
       end
 
@@ -484,12 +477,6 @@ describe ProcessXmlZipJob do
     context "bad row sequence" do
       before(:all) do
         @parent = FactoryGirl.create(:root_collection)
-        # tempdir = Pathname.new("#{Rails.application.config.tmp_path}/")
-        # @uniq_hsh = Digest::MD5.hexdigest("#{Rails.root}/spec/fixtures/files/multipage-bad-sequence.zip")[0,2]
-        # file_name = "#{Time.now.to_f.to_s.gsub!('.','-')}-#{@uniq_hsh}"
-        # new_path = tempdir.join(file_name).to_s
-        # @new_file = "#{new_path}.zip"
-        # FileUtils.cp("#{Rails.root}/spec/fixtures/files/multipage-bad-sequence.zip", @new_file)
         spreadsheet_file_path = "#{Rails.root}/spec/fixtures/files/multipage-bad-sequence/manifest.xlsx"
         tempdir = Pathname.new("#{Rails.application.config.tmp_path}/")
         @uniq_hsh = Digest::MD5.hexdigest(spreadsheet_file_path)[0,2]
@@ -500,7 +487,6 @@ describe ProcessXmlZipJob do
         FileUtils.cp_r(dir_name, new_path)
         copyright = "Copyright statement"
         report_id = Loaders::LoadReport.create_from_strings(@user, 0, @loader_name, @parent.pid)
-        # ProcessMultipageZipJob.new(@loader_name, @new_file.to_s, @parent.pid, copyright, @user, permissions, report_id, @client).run
         ProcessXmlZipJob.new(@loader_name, @new_file.to_s, @parent, copyright, @user, report_id, false, @user.nuid, nil, @client).run
       end
 
