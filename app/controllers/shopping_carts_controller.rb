@@ -202,5 +202,6 @@ class ShoppingCartsController < ApplicationController
 
       solr_parameters[:fq] ||= []
       solr_parameters[:fq] << filter_query
+      solr_parameters[:rows] = session[:ids].count
     end
 end
