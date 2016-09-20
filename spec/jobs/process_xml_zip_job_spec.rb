@@ -19,7 +19,7 @@ describe ProcessXmlZipJob do
 
   context "preview file" do
     before :all do
-      spreadsheet_file_path = "#{Rails.root}/spec/fixtures/files/xml_loader_preview/manifest-preview.xlsx"
+      spreadsheet_file_path = "#{Rails.root}/spec/fixtures/files/xml_loader_preview/manifest.xlsx"
       copyright = ""
       @parent = FactoryGirl.create(:root_collection)
       @parent.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
@@ -27,7 +27,7 @@ describe ProcessXmlZipJob do
       file_name = File.basename(spreadsheet_file_path)
       new_path = tempdir.join(file_name).to_s
       FileUtils.cp(spreadsheet_file_path, new_path)
-      @report_id = Loaders::LoadReport.create_from_strings(@user, 0, @loader_name, @parent.pid)
+      @report_id = Loaders::LoadReport.create_from_strings(@user, @loader_name, @parent.pid)
       @lr = Loaders::LoadReport.find("#{@report_id}")
       ProcessXmlZipJob.new(@loader_name, spreadsheet_file_path, @parent, copyright, @user, @report_id, false, nil, true, @client).run
     end
@@ -71,7 +71,7 @@ describe ProcessXmlZipJob do
 
   context "existing files" do
     before :all do
-      spreadsheet_file_path = "#{Rails.root}/spec/fixtures/files/xml_loader_existing/manifest-existing.xlsx"
+      spreadsheet_file_path = "#{Rails.root}/spec/fixtures/files/xml_loader_existing/manifest.xlsx"
       copyright = ""
       @parent = FactoryGirl.create(:root_collection)
       @corefile = CoreFile.create(pid: "neu:test123", title: "Core File Test", parent: @parent, depositor: @user.nuid, mass_permissions: "public")
@@ -82,8 +82,8 @@ describe ProcessXmlZipJob do
       dir_name = File.dirname(spreadsheet_file_path)
       new_path = tempdir.join("xml_loader_existing").to_s
       FileUtils.cp_r(dir_name, new_path)
-      new_file = new_path +"/manifest-existing.xlsx"
-      @report_id = Loaders::LoadReport.create_from_strings(@user, 0, @loader_name, @parent.pid)
+      new_file = new_path +"/manifest.xlsx"
+      @report_id = Loaders::LoadReport.create_from_strings(@user, @loader_name, @parent.pid)
       @lr = Loaders::LoadReport.find("#{@report_id}")
       depositor = @user.nuid
       ProcessXmlZipJob.new(@loader_name, new_file, @parent, copyright, @user, @report_id, true, depositor, nil, @client).run
@@ -122,7 +122,7 @@ describe ProcessXmlZipJob do
       new_path = tempdir.join("xml_loader_new").to_s
       FileUtils.cp_r(dir_name, new_path)
       new_file = new_path +"/manifest.xlsx"
-      @report_id = Loaders::LoadReport.create_from_strings(@user, 0, @loader_name, @parent.pid)
+      @report_id = Loaders::LoadReport.create_from_strings(@user, @loader_name, @parent.pid)
       @lr = Loaders::LoadReport.find("#{@report_id}")
       depositor = @user.nuid
       ProcessXmlZipJob.new(@loader_name, new_file, @parent, copyright, @user, @report_id, false, depositor, nil, @client).run
@@ -199,7 +199,7 @@ describe ProcessXmlZipJob do
       @corefile.keywords = ["test"]
       @corefile.identifier = "http://testhandle"
       @corefile.save!
-      @report_id = Loaders::LoadReport.create_from_strings(@user, 0, @loader_name, @parent.pid)
+      @report_id = Loaders::LoadReport.create_from_strings(@user, @loader_name, @parent.pid)
       @lr = Loaders::LoadReport.find("#{@report_id}")
       @depositor = @user.nuid
       temp_dir = Pathname.new("#{Rails.application.config.tmp_path}/")
@@ -319,18 +319,6 @@ describe ProcessXmlZipJob do
   end
 
   context :multipage_loads do
-    shared_examples_for "multipage failure" do
-      it 'creates a load report' do
-        Loaders::LoadReport.all.length.should == 1
-        lr = Loaders::LoadReport.all.first
-        lr.number_of_files.should == 1
-        lr.fail_count.should == 1
-      end
-
-      it 'does not create a core file' do
-        CoreFile.count.should == 0
-      end
-    end
 
     context "multipage object" do
       before(:all) do
@@ -344,7 +332,7 @@ describe ProcessXmlZipJob do
         new_file = new_path +"/manifest.xlsx"
         FileUtils.cp_r(dir_name, new_path)
         copyright = "Copyright statement"
-        @report_id = Loaders::LoadReport.create_from_strings(@user, 0, @loader_name, @parent.pid)
+        @report_id = Loaders::LoadReport.create_from_strings(@user, @loader_name, @parent.pid)
         ProcessXmlZipJob.new(@loader_name, new_file.to_s, @parent, copyright, @user, @report_id, false, @user.nuid, nil, @client).run
         @lr = Loaders::LoadReport.find(@report_id)
         @cf = CoreFile.find(@lr.item_reports.first.pid)
@@ -414,24 +402,31 @@ describe ProcessXmlZipJob do
     context "fails if invalid mods" do
       before(:all) do
         @parent = FactoryGirl.create(:root_collection)
-
         spreadsheet_file_path = "#{Rails.root}/spec/fixtures/files/multipage-invalid-mods/manifest.xlsx"
         tempdir = Pathname.new("#{Rails.application.config.tmp_path}/")
         @uniq_hsh = Digest::MD5.hexdigest(spreadsheet_file_path)[0,2]
         file_name = "#{Time.now.to_f.to_s.gsub!('.','-')}-#{@uniq_hsh}"
         dir_name = File.dirname(spreadsheet_file_path)
         new_path = tempdir.join(file_name).to_s
+        new_file = new_path +"/manifest.xlsx"
         FileUtils.cp_r(dir_name, new_path)
-        @new_file = new_path +"/manifest.xlsx"
         copyright = "Copyright statement"
-        report_id = Loaders::LoadReport.create_from_strings(@user, 0, @loader_name, @parent.pid)
-        ProcessXmlZipJob.new(@loader_name, @new_file.to_s, @parent, copyright, @user, report_id, false, @user.nuid, nil, @client).run
+        report_id = Loaders::LoadReport.create_from_strings(@user, @loader_name, @parent.pid)
+        ProcessXmlZipJob.new(@loader_name, new_file.to_s, @parent, copyright, @user, report_id, false, @user.nuid, nil, @client).run
+        @lr = Loaders::LoadReport.find(report_id)
       end
 
-      it_should_behave_like "multipage failure"
+      it 'creates a load report' do
+        @lr.number_of_files.should == 1
+        @lr.fail_count.should == 1
+      end
+
+      it 'does not create a core file' do
+        CoreFile.count.should == 0
+      end
 
       it 'creates image report' do
-        Loaders::ItemReport.all.length.should == 1
+        @lr.item_reports.count.should == 1
         rep = Loaders::ItemReport.first
         rep.exception.should == "Exceptions::MissingMetadata: No valid title in xml;"
       end
@@ -452,17 +447,25 @@ describe ProcessXmlZipJob do
         file_name = "#{Time.now.to_f.to_s.gsub!('.','-')}-#{@uniq_hsh}"
         dir_name = File.dirname(spreadsheet_file_path)
         new_path = tempdir.join(file_name).to_s
-        @new_file = new_path +"/manifest.xlsx"
+        new_file = new_path +"/manifest.xlsx"
         FileUtils.cp_r(dir_name, new_path)
         copyright = "Copyright statement"
-        report_id = Loaders::LoadReport.create_from_strings(@user, 0, @loader_name, @parent.pid)
-        ProcessXmlZipJob.new(@loader_name, @new_file.to_s, @parent, copyright, @user, report_id, false, @user.nuid, nil, @client).run
+        report_id = Loaders::LoadReport.create_from_strings(@user, @loader_name, @parent.pid)
+        ProcessXmlZipJob.new(@loader_name, new_file.to_s, @parent, copyright, @user, report_id, false, @user.nuid, nil, @client).run
+        @lr = Loaders::LoadReport.find(report_id)
       end
 
-      it_should_behave_like "multipage failure"
+      it 'creates a load report' do
+        @lr.number_of_files.should == 1
+        @lr.fail_count.should == 1
+      end
+
+      it 'does not create a core file' do
+        CoreFile.count.should == 0
+      end
 
       it 'creates image report' do
-        Loaders::ItemReport.all.length.should == 1
+        @lr.item_reports.count.should == 1
         rep = Loaders::ItemReport.first
         rep.exception.should == "Your upload could not be processed because the XML files could not be found."
       end
@@ -486,11 +489,19 @@ describe ProcessXmlZipJob do
         @new_file = new_path +"/manifest.xlsx"
         FileUtils.cp_r(dir_name, new_path)
         copyright = "Copyright statement"
-        report_id = Loaders::LoadReport.create_from_strings(@user, 0, @loader_name, @parent.pid)
+        report_id = Loaders::LoadReport.create_from_strings(@user, @loader_name, @parent.pid)
         ProcessXmlZipJob.new(@loader_name, @new_file.to_s, @parent, copyright, @user, report_id, false, @user.nuid, nil, @client).run
+        @lr = Loaders::LoadReport.find(report_id)
       end
 
-      it_should_behave_like "multipage failure"
+      it 'creates a load report' do
+        @lr.number_of_files.should == 1
+        @lr.fail_count.should == 1
+      end
+
+      it 'does not create a core file' do
+        CoreFile.count.should == 0
+      end
 
       it 'creates image report' do
         Loaders::ItemReport.all.length.should == 1

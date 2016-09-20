@@ -9,7 +9,7 @@ describe MultipageProcessingJob do
     @copyright = "Test Copyright Statement"
     @user = FactoryGirl.create(:admin)
     @loader_name = "Multipage"
-    @report_id = Loaders::LoadReport.create_from_strings(@user, 0, @loader_name, @parent)
+    @report_id = Loaders::LoadReport.create_from_strings(@user, @loader_name, @parent)
     @load_report = Loaders::LoadReport.find(@report_id)
     @core_file = CoreFile.create(title:"Title", parent:@collection, mass_permissions: "public", depositor:@user.nuid)
     uniq_hsh = Digest::MD5.hexdigest("#{Rails.root}/spec/fixtures/files/multipage.zip")[0,2]

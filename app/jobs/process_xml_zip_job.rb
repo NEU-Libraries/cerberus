@@ -99,8 +99,12 @@ class ProcessXmlZipJob
 
           # Load row of metadata in for preview
           assign_a_row(row_results, preview_file, dir_path)
-
-          load_report.number_of_files = spreadsheet.last_row - header_position
+          if (!set_multipage(header_row))
+            load_report.number_of_files = spreadsheet.last_row - header_position
+          else
+            last_count = spreadsheet.parse(last: "Last Item").select { |a| a[:last] == true }.count
+            load_report.number_of_files = last_count
+          end
           load_report.save!
         rescue Exception => error
           xml_file_path = dir_path + "/" + row_results["xml_file_path"]
@@ -155,13 +159,11 @@ class ProcessXmlZipJob
               existing_files = set_existing_files(row_results)
               multipage = set_multipage(header_row)
             end
-            if row_results.blank?
-              # do nothing
-            else
-              row_num = row_results["sequence"].to_i
+            if !row_results.blank? #not a blank row
+              row_num = row_results["sequence"].to_i #int 0..n for multipage, 0 for non-multipage
               existing_file = false
               old_mods = nil
-              if row_results["pid"].blank? && !row_results["file_name"].blank? && row_num == 0 #make new file #non-multipage file or first of multipage file
+              if !existing_files && row_num == 0 #make new non-multipage file or first of multipage file
                 new_file_path = dir_path + "/" + row_results["file_name"]
                 if File.exists? new_file_path
                   new_file = move_file_to_tmp(File.new(new_file_path))
@@ -231,8 +233,6 @@ class ProcessXmlZipJob
                     next
                   end
                 else
-                  puts "error at line 230"
-                  puts new_file_path
                   populate_error_report(load_report, existing_file, "Your upload could not be processed because the XML files could not be found.", row_results, core_file, old_mods, header_row, row)
                   core_file = nil
                   seq_num = -1
@@ -262,8 +262,9 @@ class ProcessXmlZipJob
                   x = x+1
                   next
                 end
-              elsif row_num > 0 #inherit core_file and proceed to add pages
+              elsif multipage && row_num > 0 #inherit core_file and proceed to add pages
                 count = count - 1 # remove count for pages of the same file
+
                 if !(row_num == seq_num + 1)
                   if !core_file.blank?
                     load_report.item_reports.create_failure("Row is out of order - row num #{row_num} seq_num #{seq_num}", "", row_results["file_name"])
@@ -274,7 +275,7 @@ class ProcessXmlZipJob
                       if CoreFile.exists?(load_report.preview_file_pid)
                         CoreFile.find(load_report.preview_file_pid).destroy
                       end
-                      # LoaderMailer.load_alert(load_report, User.find_by_nuid(load_report.nuid)).deliver!
+                      LoaderMailer.load_alert(load_report, User.find_by_nuid(load_report.nuid)).deliver!
                       # cleaning up
                       FileUtils.rm(spreadsheet_file_path) if File.exists? spreadsheet_file_path
                     else
@@ -297,7 +298,7 @@ class ProcessXmlZipJob
                       if CoreFile.exists?(load_report.preview_file_pid)
                         CoreFile.find(load_report.preview_file_pid).destroy
                       end
-                      # LoaderMailer.load_alert(load_report, User.find_by_nuid(load_report.nuid)).deliver!
+                      LoaderMailer.load_alert(load_report, User.find_by_nuid(load_report.nuid)).deliver!
                       # cleaning up
                       FileUtils.rm(spreadsheet_file_path) if File.exists? spreadsheet_file_path
                     else
@@ -323,6 +324,7 @@ class ProcessXmlZipJob
                 x = x+1
                 next
               end
+              # now finishing creation of core file if its well-formed
               if !core_file.blank?
                 if existing_files == true && Nokogiri::XML(old_mods,&:noblanks).to_s == Nokogiri::XML(core_file.mods.content,&:noblanks).to_s
                   load_report.item_reports.create_success(core_file, "", :update)
@@ -337,7 +339,7 @@ class ProcessXmlZipJob
                 elsif core_file.identifier.blank?
                   populate_error_report(load_report, existing_file, "Must have a handle", row_results, core_file, old_mods, header_row, row)
                 else
-                  if (core_file.canonical_class == "AudioFile" || core_file.canonical_class == "VideoFile") && !existing_files
+                  if (core_file.canonical_class == "AudioFile" || core_file.canonical_class == "VideoFile") && !existing_files && !multipage
                     if row_results["poster_path"].blank?
                       populate_error_report(load_report, existing_file, "Audio or Video File must have poster file", row_results, core_file, old_mods, header_row, row)
                     else
@@ -385,23 +387,17 @@ class ProcessXmlZipJob
       if CoreFile.exists?(load_report.preview_file_pid)
         CoreFile.find(load_report.preview_file_pid).destroy
       end
-      # LoaderMailer.load_alert(load_report, User.find_by_nuid(load_report.nuid)).deliver!
+      LoaderMailer.load_alert(load_report, User.find_by_nuid(load_report.nuid)).deliver!
       # cleaning up
       FileUtils.rm(spreadsheet_file_path) if File.exists? spreadsheet_file_path
     end
   end
 
   def assign_a_row(row_results, core_file, dir_path, new_file=nil)
-    puts row_results
     xml_file_path = dir_path + "/" + row_results["xml_file_path"]
     if row_results['file_name'] == row_results['xml_file_path'] && new_file != nil
       xml_file_path = new_file
     end
-    puts xml_file_path
-    puts !xml_file_path.blank?
-    puts File.exists?(xml_file_path)
-    puts extract_mime_type(xml_file_path)
-    puts extract_mime_type(xml_file_path) == "text/xml"
     if !xml_file_path.blank? && File.exists?(xml_file_path) && extract_mime_type(xml_file_path) == "text/xml"
       raw_xml = xml_decode(File.open(xml_file_path, "r").read)
       self.mods_content = raw_xml
@@ -423,7 +419,6 @@ class ProcessXmlZipJob
       end
     else
       # Raise error, can't load core file mods metadata
-      puts "error in assign a row"
       # core_file = nil
       raise "Your upload could not be processed because the XML files could not be found."
     end
@@ -490,10 +485,10 @@ class ProcessXmlZipJob
   def populate_error_report(load_report, existing_file, error, row_results, core_file, old_mods, header_row, row)
     row_results = row_results.blank? ? nil : row_results
     if core_file
-      if old_mods
+      if old_mods || existing_file
         core_file.mods.content = old_mods
         core_file.save!
-      elsif !existing_file
+      else
         core_file.destroy if CoreFile.exists?(core_file.pid)
       end
       title = core_file.title.blank? ? row_results["title"] : core_file.title

@@ -118,7 +118,7 @@ class Loaders::LoadsController < ApplicationController
             if short_name == "spreadsheet"
               #mods spreadsheet job
               spreadsheet_file_path = unzip(new_file, new_path)
-              @report_id = Loaders::LoadReport.create_from_strings(current_user, 0, @loader_name, parent)
+              @report_id = Loaders::LoadReport.create_from_strings(current_user, @loader_name, parent)
               ProcessModsZipJob.new(@loader_name, spreadsheet_file_path, parent, copyright, current_user, permissions, @report_id, existing_files, nil, true).run
               load_report = Loaders::LoadReport.find(@report_id)
               session[:flash_success] = "Your file has been submitted and is now being processed. You will receive an email when the load is complete."
@@ -129,7 +129,7 @@ class Loaders::LoadsController < ApplicationController
               end
             elsif short_name == "xml"
               spreadsheet_file_path = unzip(new_file, new_path)
-              @report_id = Loaders::LoadReport.create_from_strings(current_user, 0, @loader_name, parent)
+              @report_id = Loaders::LoadReport.create_from_strings(current_user, @loader_name, parent)
               ProcessXmlZipJob.new(@loader_name, spreadsheet_file_path, parent, copyright, current_user, @report_id, existing_files, nil, true).run
               load_report = Loaders::LoadReport.find(@report_id)
               session[:flash_success] = "Your file has been submitted and is now being processed. You will receive an email when the load is complete."
@@ -140,7 +140,7 @@ class Loaders::LoadsController < ApplicationController
               end
             else
               # send to iptc job
-              @report_id = Loaders::LoadReport.create_from_strings(current_user, 0, @loader_name, parent)
+              @report_id = Loaders::LoadReport.create_from_strings(current_user, @loader_name, parent)
               Cerberus::Application::Queue.push(ProcessIptcZipJob.new(@loader_name, new_file.to_s, parent, copyright, current_user, permissions, @report_id,  derivatives))
               session[:flash_success] = "Your file has been submitted and is now being processed. You will receive an email when the load is complete."
               render :json => {report_id: @report_id}.to_json and return
