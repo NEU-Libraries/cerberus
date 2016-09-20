@@ -67,9 +67,14 @@
             }
         },
         done: function (e, data) {
-           url = JSON.parse(data.result);
-           url = url.url;
-           window.location = url;
+           try {
+             url = JSON.parse(data.result);
+             url = url.url;
+             window.location = url;
+           }
+           catch(err) {
+              window.location = "#{new_core_file_path}"
+           }
         }
     });
     $('#singleSubmit').click(function(e){
