@@ -2,6 +2,7 @@ class Loaders::LoadsController < ApplicationController
   include Cerberus::Controller
   include MimeHelper
   include ZipHelper
+  include Cerberus::TempFileStorage
 
   before_filter :authenticate_user!
 
@@ -104,13 +105,8 @@ class Loaders::LoadsController < ApplicationController
     def process_file(file, parent, copyright, permissions, short_name, existing_files, derivatives=false)
       @loader_name = t('loaders.'+short_name+'.long_name')
       if virus_check(file) == 0
-        tempdir = Pathname.new("#{Rails.application.config.tmp_path}/")
-
-        uniq_hsh = Digest::MD5.hexdigest("#{file.original_filename}")[0,2]
-        file_name = "#{Time.now.to_f.to_s.gsub!('.','-')}-#{uniq_hsh}"
-        new_path = tempdir.join(file_name).to_s
-        new_file = "#{new_path}.zip"
-        FileUtils.mv(file.tempfile.path, new_file)
+        new_file = move_file_to_tmp(file.tempfile)
+        new_path = File.join( File.dirname(new_file), File.basename(new_file)+"_files" )
         #if zip
         if extract_mime_type(new_file) == 'application/zip'
           begin
