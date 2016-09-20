@@ -92,9 +92,6 @@ class ProcessXmlZipJob
 
           preview_file.tmp_path = spreadsheet_file_path
           preview_file.save!
-          puts "preview spreadsheet file path is #{spreadsheet_file_path}"
-          # new_file_path = dir_path + "/" + row_results["file_name"]
-          # new_file = move_file_to_tmp(File.new(new_file_path))
 
           load_report.save!
 
@@ -399,12 +396,7 @@ class ProcessXmlZipJob
     if row_results['file_name'] == row_results['xml_file_path'] && new_file != nil
       xml_file_path = new_file
     end
-    puts xml_file_path
-    puts !xml_file_path.blank?
-    puts File.exists?(xml_file_path)
-    puts extract_mime_type(xml_file_path) == "text/xml"
     if !xml_file_path.blank? && File.exists?(xml_file_path) && extract_mime_type(xml_file_path) == "text/xml"
-      puts "the file exists"
       raw_xml = xml_decode(File.open(xml_file_path, "r").read)
       self.mods_content = raw_xml
       # Validate
