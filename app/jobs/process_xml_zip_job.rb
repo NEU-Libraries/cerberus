@@ -92,13 +92,14 @@ class ProcessXmlZipJob
 
           preview_file.tmp_path = spreadsheet_file_path
           preview_file.save!
-          new_file_path = dir_path + "/" + row_results["file_name"]
-          new_file = move_file_to_tmp(File.new(new_file_path))
+          puts "preview spreadsheet file path is #{spreadsheet_file_path}"
+          # new_file_path = dir_path + "/" + row_results["file_name"]
+          # new_file = move_file_to_tmp(File.new(new_file_path))
 
           load_report.save!
 
           # Load row of metadata in for preview
-          assign_a_row(row_results, preview_file, dir_path, new_file)
+          assign_a_row(row_results, preview_file, dir_path)
           if (!set_multipage(header_row))
             load_report.number_of_files = spreadsheet.last_row - header_position
           else
