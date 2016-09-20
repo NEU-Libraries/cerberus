@@ -125,7 +125,7 @@ describe ProcessModsZipJob do
       copyright = ""
       @parent = FactoryGirl.create(:root_collection)
       permissions = @parent.permissions
-      @report_id = Loaders::LoadReport.create_from_strings(@user, 0, @loader_name, @parent.pid)
+      @report_id = Loaders::LoadReport.create_from_strings(@user, @loader_name, @parent.pid)
       @lr = Loaders::LoadReport.find("#{@report_id}")
       ProcessModsZipJob.new(@loader_name, spreadsheet_file_path, @parent, copyright, @user, permissions, @report_id, false, @user.nuid, true).run
     end
@@ -172,7 +172,7 @@ describe ProcessModsZipJob do
       tmp_path = "#{Rails.application.config.tmp_path}"
       FileUtils.cp_r(dir_name, tmp_path)
       permissions = @parent.permissions
-      @report_id = Loaders::LoadReport.create_from_strings(@user, 0, @loader_name, @parent.pid)
+      @report_id = Loaders::LoadReport.create_from_strings(@user, @loader_name, @parent.pid)
       @lr = Loaders::LoadReport.find("#{@report_id}")
       @lr.number_of_files = 4
       @lr.save!
