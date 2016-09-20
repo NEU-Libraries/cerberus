@@ -254,6 +254,7 @@ Cerberus::Application.routes.draw do
 
   get ':action' => 'static#:action', constraints: { action: /help|iris|terms/ }, as: :static
   get "/downloads/:id/mods/:session_id" => "static#mods_download", as: 'mods_download'
+  get "/downloads/large/:session_id/:time" => "static#large_download", as: 'large_download'
 
   # Catch-all (for routing errors)
   unless Rails.env.development?
