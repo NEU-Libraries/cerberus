@@ -40,7 +40,11 @@ module Api
         if @set.klass == "Compilation"
           comp = Compilation.find(@set.pid)
           @pids = comp.object_ids
-          self.solr_search_params_logic += [:limit_to_compilation_scope]
+          if @pids.count > 0
+            self.solr_search_params_logic += [:limit_to_compilation_scope]
+          else
+            render json: {error: "There were no results matching your query.", pagination: @pagination} and return
+          end
         else
           self.solr_search_params_logic += [:limit_to_scope]
         end
