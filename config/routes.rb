@@ -207,8 +207,6 @@ Cerberus::Application.routes.draw do
       post "/handles/create_handle/*url" => "handles#create_handle", as: "create_handle", :url => /.*/
       # search
       get "/search/:id" => "search#search", as: "search"
-      # export
-      get "/export/:id" => "export#get_files", as: "export"
       # files
       get "/files/:id" => "core_files#show", as: "file_display"
       # file sizes
