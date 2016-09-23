@@ -106,7 +106,8 @@ class ProcessXmlZipJob
           load_report.save!
         rescue Exception => error
           xml_file_path = dir_path + "/" + row_results["xml_file_path"]
-          if !xml_file_path.blank? && File.exists?(xml_file_path) && extract_mime_type(xml_file_path) == "text/xml"
+          mime = extract_mime_type(xml_file_path)
+          if !xml_file_path.blank? && File.exists?(xml_file_path) && (mime == "text/xml" || mime == "application/xml")
             raw_xml = xml_decode(File.open(xml_file_path, "r").read)
           else
             rax_xml = ""
@@ -396,7 +397,8 @@ class ProcessXmlZipJob
     if row_results['file_name'] == row_results['xml_file_path'] && new_file != nil
       xml_file_path = new_file
     end
-    if !xml_file_path.blank? && File.exists?(xml_file_path) && extract_mime_type(xml_file_path) == "text/xml"
+    mime = extract_mime_type(xml_file_path)
+    if !xml_file_path.blank? && File.exists?(xml_file_path) && (mime == "text/xml" || mime == "application/xml")
       raw_xml = xml_decode(File.open(xml_file_path, "r").read)
       self.mods_content = raw_xml
       # Validate
@@ -415,7 +417,7 @@ class ProcessXmlZipJob
         core_file = nil
         raise error_list
       end
-    elsif !xml_file_path.blank? && File.exists?(xml_file_path) && extract_mime_type(xml_file_path) != "text/xml"
+    elsif !xml_file_path.blank? && File.exists?(xml_file_path) && (mime != "text/xml" || mime != "application/xml")
       raise "The XML file does appear to have the correct mime type - it is #{extract_mime_type(xml_file_path)} from #{xml_file_path}"
     elsif !xml_file_path.blank? && !File.exists?(xml_file_path)
       raise "The XML File does not exist at #{xml_file_path}"
