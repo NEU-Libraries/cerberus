@@ -415,6 +415,12 @@ class ProcessXmlZipJob
         core_file = nil
         raise error_list
       end
+    elsif !xml_file_path.blank? && File.exists?(xml_file_path) && !extract_mime_type(xml_file_path) == "text/xml"
+      raise "The XML file does appear to have the correct mime type - it is #{extract_mime_type(xml_file_path)}"
+    elsif xml_file_path.blank?
+      raise "The XML file path is blank in #{row_results}"
+    elsif !xml_file_path.blank? && !File.exists?(xml_file_path)
+      raise "The XML File does not exist at #{xml_file_path}"
     else
       # Raise error, can't load core file mods metadata
       # core_file = nil
