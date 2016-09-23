@@ -107,7 +107,7 @@ class ProcessXmlZipJob
         rescue Exception => error
           xml_file_path = dir_path + "/" + row_results["xml_file_path"]
           mime = extract_mime_type(xml_file_path)
-          if !xml_file_path.blank? && File.exists?(xml_file_path) && (mime == "text/xml" || mime == "application/xml")
+          if !xml_file_path.blank? && File.exists?(xml_file_path) && !mime.match(/[a-zA-Z]*\/xml$/).nil?
             raw_xml = xml_decode(File.open(xml_file_path, "r").read)
           else
             rax_xml = ""
@@ -267,7 +267,7 @@ class ProcessXmlZipJob
                 if !(row_num == seq_num + 1)
                   if !core_file.blank?
                     load_report.item_reports.create_failure("Row is out of order - row num #{row_num} seq_num #{seq_num}", "", row_results["file_name"])
-                    if this_row == end_row
+                    if this_row == end_row && (load_report.success_count + load_report.fail_count + load_report.modified_count == load_report.number_of_files)
                       load_report.completed = true
                       core_file.destroy
                       load_report.save!
@@ -291,7 +291,7 @@ class ProcessXmlZipJob
                     # Send an array of file_names to be zipped and attached to the core_file
                     MultipageProcessingJob.new(dir_path, row_results, core_file.pid, load_report.id, zip_files, client).run
 
-                    if this_row == end_row
+                    if this_row == end_row && (load_report.success_count + load_report.fail_count + load_report.modified_count == load_report.number_of_files)
                       load_report.completed = true
                       load_report.save!
                       if CoreFile.exists?(load_report.preview_file_pid)
@@ -398,7 +398,7 @@ class ProcessXmlZipJob
       xml_file_path = new_file
     end
     mime = extract_mime_type(xml_file_path)
-    if !xml_file_path.blank? && File.exists?(xml_file_path) && (mime == "text/xml" || mime == "application/xml")
+    if !xml_file_path.blank? && File.exists?(xml_file_path) && !mime.match(/[a-zA-Z]*\/xml$/).nil?
       raw_xml = xml_decode(File.open(xml_file_path, "r").read)
       self.mods_content = raw_xml
       # Validate
