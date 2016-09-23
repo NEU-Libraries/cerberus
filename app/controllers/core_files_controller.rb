@@ -1031,7 +1031,7 @@ class CoreFilesController < ApplicationController
         full_self_id = RSolr.escape("info:fedora/#{@core_file.pid}")
         query << "(#{Solrizer.solr_name("has_model", :symbol)}:\"info:fedora/afmodel:PageFile\" AND #{Solrizer.solr_name("is_part_of", :symbol)}:\"#{full_self_id}\")"
         solr_parameters[:sort] = "ordinal_value_isi asc, title_ssi asc"
-        solr_parameters[:fq] << query.join(" OR ")
+        solr_parameters[:fq] << query
       end
 
       def filter_by_all_associated_child_files(solr_parameters, user_parameters)
@@ -1040,7 +1040,7 @@ class CoreFilesController < ApplicationController
         str = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/#{@core_file.pid}"
         query << "is_supplemental_material_for_ssim:\"#{str}\" || is_instructional_material_for_ssim:\"#{str}\" || is_codebook_for_ssim:\"#{str}\" || is_dataset_for_ssim:\"#{str}\" || is_figure_for_ssim:\"#{str}\" || is_transcription_of_ssim:\"#{str}\""
         solr_parameters[:sort] = "title_ssi asc"
-        solr_parameters[:fq] << query.join(" OR ")
+        solr_parameters[:fq] << query
       end
 
       def limit_to_ordinal_vals(solr_parameters, user_parameters)
