@@ -314,7 +314,7 @@ class ProcessXmlZipJob
                     seq_num = row_num
                     next
                   end
-                # end
+                end
               else #mismatch
                 populate_error_report(load_report, existing_file, "File was missing pid or file name", row_results, nil, old_mods, header_row, row)
                 core_file = nil
