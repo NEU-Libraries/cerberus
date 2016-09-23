@@ -261,59 +261,59 @@ class ProcessXmlZipJob
                   next
                 end
               elsif multipage && row_num > 0 #inherit core_file and proceed to add pages
-                count = count - 1 # remove count for pages of the same file
-
-                if !(row_num == seq_num + 1)
-                  if !core_file.blank?
-                    load_report.item_reports.create_failure("Row is out of order - row num #{row_num} seq_num #{seq_num}", "", row_results["file_name"])
-                    if this_row == end_row
-                      load_report.completed = true
-                      core_file.destroy
-                      load_report.save!
-                      if CoreFile.exists?(load_report.preview_file_pid)
-                        CoreFile.find(load_report.preview_file_pid).destroy
-                      end
-                      LoaderMailer.load_alert(load_report, User.find_by_nuid(load_report.nuid)).deliver!
-                      # cleaning up
-                      FileUtils.rm(spreadsheet_file_path) if File.exists? spreadsheet_file_path
-                    else
-                      seq_num = -1
-                      core_file.destroy
-                      core_file = nil
-                      zip_files = []
-                      next
-                    end
-                  end
-                elsif !core_file.blank?
-                  if row_results["last_item"].downcase == "true"
-                    zip_files << row_results["file_name"]
-                    # Send an array of file_names to be zipped and attached to the core_file
-                    MultipageProcessingJob.new(dir_path, row_results, core_file.pid, load_report.id, zip_files, client).run
-
-                    if this_row == end_row
-                      load_report.completed = true
-                      load_report.save!
-                      if CoreFile.exists?(load_report.preview_file_pid)
-                        CoreFile.find(load_report.preview_file_pid).destroy
-                      end
-                      LoaderMailer.load_alert(load_report, User.find_by_nuid(load_report.nuid)).deliver!
-                      # cleaning up
-                      FileUtils.rm(spreadsheet_file_path) if File.exists? spreadsheet_file_path
-                    else
-                      # reset for next paged item
-                      seq_num = -1
-                      zip_files = []
-                      core_file = nil
-                      next
-                    end
-                  else
-                    zip_files << row_results["file_name"]
-                    MultipageProcessingJob.new(dir_path, row_results, core_file.pid, load_report.id, nil, client).run
-                    # Keep on goin'
-                    seq_num = row_num
-                    next
-                  end
-                end
+                # count = count - 1 # remove count for pages of the same file
+                #
+                # if !(row_num == seq_num + 1)
+                #   if !core_file.blank?
+                #     load_report.item_reports.create_failure("Row is out of order - row num #{row_num} seq_num #{seq_num}", "", row_results["file_name"])
+                #     if this_row == end_row
+                #       load_report.completed = true
+                #       core_file.destroy
+                #       load_report.save!
+                #       if CoreFile.exists?(load_report.preview_file_pid)
+                #         CoreFile.find(load_report.preview_file_pid).destroy
+                #       end
+                #       LoaderMailer.load_alert(load_report, User.find_by_nuid(load_report.nuid)).deliver!
+                #       # cleaning up
+                #       FileUtils.rm(spreadsheet_file_path) if File.exists? spreadsheet_file_path
+                #     else
+                #       seq_num = -1
+                #       core_file.destroy
+                #       core_file = nil
+                #       zip_files = []
+                #       next
+                #     end
+                #   end
+                # elsif !core_file.blank?
+                #   if row_results["last_item"].downcase == "true"
+                #     zip_files << row_results["file_name"]
+                #     # Send an array of file_names to be zipped and attached to the core_file
+                #     MultipageProcessingJob.new(dir_path, row_results, core_file.pid, load_report.id, zip_files, client).run
+                #
+                #     if this_row == end_row
+                #       load_report.completed = true
+                #       load_report.save!
+                #       if CoreFile.exists?(load_report.preview_file_pid)
+                #         CoreFile.find(load_report.preview_file_pid).destroy
+                #       end
+                #       LoaderMailer.load_alert(load_report, User.find_by_nuid(load_report.nuid)).deliver!
+                #       # cleaning up
+                #       FileUtils.rm(spreadsheet_file_path) if File.exists? spreadsheet_file_path
+                #     else
+                #       # reset for next paged item
+                #       seq_num = -1
+                #       zip_files = []
+                #       core_file = nil
+                #       next
+                #     end
+                #   else
+                #     zip_files << row_results["file_name"]
+                #     MultipageProcessingJob.new(dir_path, row_results, core_file.pid, load_report.id, nil, client).run
+                #     # Keep on goin'
+                #     seq_num = row_num
+                #     next
+                #   end
+                # end
               else #mismatch
                 populate_error_report(load_report, existing_file, "File was missing pid or file name", row_results, nil, old_mods, header_row, row)
                 core_file = nil
