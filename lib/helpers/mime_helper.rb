@@ -16,7 +16,7 @@ module MimeHelper
     multiple = `grep "#{mime_type}" /etc/mime.types | awk '{$1=""; print $0}'`.strip.split(" ")
 
     if !original_extension.blank?
-      if multiple.include? original_extension
+      if mime_type.start_with?("text") || (multiple.include? original_extension)
         return original_extension
       end
     elsif result.blank?
