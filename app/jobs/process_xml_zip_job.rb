@@ -231,7 +231,7 @@ class ProcessXmlZipJob
                     next
                   end
                 else
-                  populate_error_report(load_report, existing_file, "Your upload could not be processed because the XML files could not be found.", row_results, core_file, old_mods, header_row, row)
+                  populate_error_report(load_report, existing_file, "Your upload could not be processed because the XML files could not be found while processing the individual file or the first page of a multipage object.", row_results, core_file, old_mods, header_row, row)
                   core_file = nil
                   seq_num = -1
                   zip_files = []
@@ -424,7 +424,7 @@ class ProcessXmlZipJob
     else
       # Raise error, can't load core file mods metadata
       # core_file = nil
-      raise "Your upload could not be processed because the XML files could not be found."
+      raise "Your upload could not be processed because the XML files could not be found - from assign a row method."
     end
   end
 
