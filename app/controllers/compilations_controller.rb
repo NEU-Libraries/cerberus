@@ -323,7 +323,7 @@ class CompilationsController < ApplicationController
     if size > 5000
       if current_user.admin?
         flash[:notice] = "Your download exceeded 5GB - an email will be sent to you with the URL for downloading when it's ready."
-        Cerberus::Application::Queue.push(ZipCompilationJob.new(current_user, @compilation, true))
+        Cerberus::Application::Queue.push(ZipCompilationJob.new(current_user, @compilation, true, request.session_options[:id]))
         redirect_to @set and return
       else
         params[:action] = "show"
