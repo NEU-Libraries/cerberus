@@ -1,6 +1,5 @@
 language: ruby
 before_install:
-  - mkdir /home/travis/freshclams
   - sudo apt-get update -qq
   - sudo apt-get install imagemagick libmagickcore-dev libmagic-dev redis-server libreoffice-common clamav clamav-data libclamav-dev libclamav6 libimage-exiftool-perl poppler-utils
   - gem install bundler -v 1.10.6
