@@ -10,7 +10,7 @@ env:
   - "bundler=1.10.6"
 before_script:
   - "sudo service redis-server start"
-  - "freshclam -u travis --datadir=/home/travis/freshclams"
+  - "freshclam -u travis --datadir=/home/travis/freshclams --log=/home/travis/freshclams/freshclam.log"
 cache:
   bundler: true
   directories:
