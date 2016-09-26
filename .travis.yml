@@ -1,5 +1,6 @@
 language: ruby
 before_install:
+  - mkdir /home/travis/freshclams
   - sudo apt-get update -qq
   - sudo apt-get install imagemagick libmagickcore-dev libmagic-dev redis-server libreoffice-common clamav clamav-data libclamav-dev libclamav6 libimage-exiftool-perl poppler-utils
   - gem install bundler -v 1.10.6
@@ -10,10 +11,11 @@ env:
   - "bundler=1.10.6"
 before_script:
   - "sudo service redis-server start"
+  - "freshclam -u travis --datadir=/home/travis/freshclams"
 cache:
   bundler: true
   directories:
-    - /var/lib/clamav/
+    - /home/travis/freshclams
 script: "bundle exec rake ci:build"
 notifications:
   slack: neu-lts:urFXFxLoFDSvKEFdBMYDpy6v
