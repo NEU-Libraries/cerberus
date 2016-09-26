@@ -1,5 +1,5 @@
 = form_tag("/files", method: "post", multipart: true, id: "singleFileUploadForm") do
-  = hidden_field_tag(:collection_id, @collection_id)
+  = hidden_field_tag(:collection_id, params[:parent])
   .row
     %fieldset.span4
       %legend
@@ -67,9 +67,14 @@
             }
         },
         done: function (e, data) {
-           url = JSON.parse(data.result);
-           url = url.url;
-           window.location = url;
+           try {
+             url = JSON.parse(data.result);
+             url = url.url;
+             window.location = url;
+           }
+           catch(err) {
+              window.location = "#{new_core_file_path}"
+           }
         }
     });
     $('#singleSubmit').click(function(e){

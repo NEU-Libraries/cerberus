@@ -62,6 +62,7 @@ class CollectionsController < ApplicationController
     if !params[:q].nil?
       # Fixes #667 - we remove single characters. They're a pretty terrible idea with a strict AND
       params[:q].gsub!(/(^| ).( |$)/, ' ')
+
       self.solr_search_params_logic += [:limit_to_scope]
     else
       self.solr_search_params_logic += [:show_children_only]

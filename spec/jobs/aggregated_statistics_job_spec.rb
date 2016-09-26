@@ -200,7 +200,7 @@ describe "aggregated statistics job" do
       UploadAlert.create_from_core_file(file, :create, "single")
       UploadAlert.create_from_core_file(file2, :create, "spreadsheet")
       parent = collection.pid
-      report_id = Loaders::LoadReport.create_from_strings(bill, 0, "College of Engineering", parent)
+      report_id = Loaders::LoadReport.create_from_strings(bill, "College of Engineering", parent)
       load_report = Loaders::LoadReport.find(report_id)
       load_report.item_reports.create_success(file2, "", :create)
       size = get_core_file_size(file.pid)
@@ -220,7 +220,7 @@ describe "aggregated statistics job" do
       UploadAlert.create_from_core_file(file2, :create, "spreadsheet")
       UploadAlert.create_from_core_file(file2, :update, "xml")
       parent = collection.pid
-      report_id = Loaders::LoadReport.create_from_strings(bill, 0, "College of Engineering", parent)
+      report_id = Loaders::LoadReport.create_from_strings(bill, "College of Engineering", parent)
       load_report = Loaders::LoadReport.find(report_id)
       load_report.item_reports.create_success(file2, "", :create)
       size = (get_core_file_size(file.pid)/1024)/1024
@@ -251,7 +251,7 @@ describe "aggregated statistics job" do
 
     it 'gets item_reports' do #for loader_uploads
       parent = collection.pid
-      report_id = Loaders::LoadReport.create_from_strings(bill, 0, "College of Engineering", parent)
+      report_id = Loaders::LoadReport.create_from_strings(bill, "College of Engineering", parent)
       load_report = Loaders::LoadReport.find(report_id)
       load_report.item_reports.create_success(file, "", :create)
 
@@ -263,7 +263,7 @@ describe "aggregated statistics job" do
 
     it 'aggregates item_reports up to parent collection' do
       parent = collection.pid
-      report_id = Loaders::LoadReport.create_from_strings(bill, 0, "College of Engineering", parent)
+      report_id = Loaders::LoadReport.create_from_strings(bill, "College of Engineering", parent)
       load_report = Loaders::LoadReport.find(report_id)
       load_report.item_reports.create_success(file, "", :create)
 
@@ -275,7 +275,7 @@ describe "aggregated statistics job" do
 
     it 'aggregates item_reports up to parent community' do
       parent = collection.pid
-      report_id = Loaders::LoadReport.create_from_strings(bill, 0, "College of Engineering", parent)
+      report_id = Loaders::LoadReport.create_from_strings(bill, "College of Engineering", parent)
       load_report = Loaders::LoadReport.find(report_id)
       load_report.item_reports.create_success(file, "", :create)
 
@@ -287,7 +287,7 @@ describe "aggregated statistics job" do
 
     it 'creates aggregatedstatistic objects for file, collection, and community' do
       parent = collection.pid
-      report_id = Loaders::LoadReport.create_from_strings(bill, 0, "College of Engineering", parent)
+      report_id = Loaders::LoadReport.create_from_strings(bill, "College of Engineering", parent)
       load_report = Loaders::LoadReport.find(report_id)
       load_report.item_reports.create_success(file, "", :create)
 
@@ -359,7 +359,7 @@ describe "aggregated statistics job" do
       Impression.create(pid: file.pid, session_id: "doop", action: "download", ip_address: "00.00.00", referrer: "direct", user_agent: "RSpec", status: "COMPLETE", public: "true")
       Impression.create(pid: file.pid, session_id: "doop", action: "stream", ip_address: "00.00.00", referrer: "direct", user_agent: "RSpec", status: "COMPLETE", public: "true")
       parent = collection.pid
-      report_id = Loaders::LoadReport.create_from_strings(bill, 0, "College of Engineering", parent)
+      report_id = Loaders::LoadReport.create_from_strings(bill, "College of Engineering", parent)
       load_report = Loaders::LoadReport.find(report_id)
       load_report.item_reports.create_success(file, "", :create)
 
