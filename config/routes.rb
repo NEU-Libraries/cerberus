@@ -207,8 +207,6 @@ Cerberus::Application.routes.draw do
       post "/handles/create_handle/*url" => "handles#create_handle", as: "create_handle", :url => /.*/
       # search
       get "/search/:id" => "search#search", as: "search"
-      # export
-      get "/export/:id" => "export#get_files", as: "export"
       # files
       get "/files/:id" => "core_files#show", as: "file_display"
       # file sizes
@@ -254,6 +252,7 @@ Cerberus::Application.routes.draw do
 
   get ':action' => 'static#:action', constraints: { action: /help|iris|terms/ }, as: :static
   get "/downloads/:id/mods/:session_id" => "static#mods_download", as: 'mods_download'
+  get "/downloads/large/:session_id/:time" => "static#large_download", as: 'large_download'
 
   # Catch-all (for routing errors)
   unless Rails.env.development?

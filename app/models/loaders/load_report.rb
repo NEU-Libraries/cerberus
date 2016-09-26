@@ -4,13 +4,13 @@ class Loaders::LoadReport < ActiveRecord::Base
   attr_accessible :timestamp, :number_of_files, :success_count, :fail_count, :modified_count, :nuid, :loader, :collection
   attr_accessible :comparison_file_pid, :preview_file_pid, :completed
 
-  def self.create_from_strings(user, results, loader_name, collection)
+  def self.create_from_strings(user, loader_name, collection)
     x = Loaders::LoadReport.new
 
     x.nuid             = user.nuid
     x.collection       = collection
     x.loader_name      = loader_name
-    x.number_of_files  = results
+    x.number_of_files  = 0
     x.success_count    = 0
     x.fail_count       = 0
     x.modified_count   = 0

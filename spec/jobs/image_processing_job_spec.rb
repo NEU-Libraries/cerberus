@@ -15,7 +15,7 @@ describe ImageProcessingJob do
     @copyright = "Test Copyright Statement"
     @user = FactoryGirl.create(:admin)
     @loader_name = "Marketing and Communications"
-    @report_id = Loaders::LoadReport.create_from_strings(@user, 0, @loader_name, @parent)
+    @report_id = Loaders::LoadReport.create_from_strings(@user, @loader_name, @parent)
     @load_report = Loaders::LoadReport.find(@report_id)
     @permissions = {"CoreFile" => {"read"  => ["northeastern:drs:all"], "edit" => ["northeastern:drs:repository:corefile"]}, "ImageSmallFile" => {"read"  => ["northeastern:drs:repository:test"], "edit" => ["northeastern:drs:repository:small"]}, "ImageLargeFile" => {"read"  => ["northeastern:drs:repository:test"], "edit" => ["northeastern:drs:repository:large"]}, "ImageMasterFile" => {"read"  => ["northeastern:drs:repository:test"], "edit" => ["northeastern:drs:repository:master"]}}
     @derivatives = false
