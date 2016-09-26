@@ -204,8 +204,12 @@ class CollectionsController < ApplicationController
   def update
     @set = Collection.find(params[:id])
 
-    # Update the thumbnail
-    if params[:thumbnail]
+    if params[:remove_thumbnail]
+      # Remove thumbnail
+      @set.thumbnail_list = []
+      @set.save!
+    elsif params[:thumbnail]
+      # Update the thumbnail
       file = params[:thumbnail]
       new_path = move_file_to_tmp(file)
       mime = extract_mime_type(new_path)
