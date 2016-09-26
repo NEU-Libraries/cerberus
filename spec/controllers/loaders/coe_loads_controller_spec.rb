@@ -8,7 +8,7 @@ describe Loaders::CoeLoadsController do
   before :each do
     sign_in coe_loader
     @coe_col = Collection.create(pid: 'neu:5m60qz05t', title: 'COE Coll')
-    @report_id = Loaders::LoadReport.create_from_strings(coe_loader, 0, "College of Engineering", @coe_col.pid)
+    @report_id = Loaders::LoadReport.create_from_strings(coe_loader, "College of Engineering", @coe_col.pid)
   end
 
   describe "GET #new" do
