@@ -51,7 +51,7 @@ FactoryGirl.define do
 
     trait :owned_by_bill do
       depositor '000000001'
-      permissions {{'permissions1' => {'identity_type' => 'person', 'identity' => '000000009', 'permission_type' => 'read' }}}
+      permissions {{'permissions1' => {'identity_type' => 'person', 'identity' => '000000009', 'permission_type' => 'read' }, 'permissions2' => { 'identity_type' => 'group', 'identity' => 'northeastern:drs:repository:staff', 'permission_type' => 'edit' }}}
     end
 
     trait :is_private do

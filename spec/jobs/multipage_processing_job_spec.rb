@@ -9,7 +9,7 @@ describe MultipageProcessingJob do
     @copyright = "Test Copyright Statement"
     @user = FactoryGirl.create(:admin)
     @loader_name = "Multipage"
-    @report_id = Loaders::LoadReport.create_from_strings(@user, 0, @loader_name, @parent)
+    @report_id = Loaders::LoadReport.create_from_strings(@user, @loader_name, @parent)
     @load_report = Loaders::LoadReport.find(@report_id)
     @core_file = CoreFile.create(title:"Title", parent:@collection, mass_permissions: "public", depositor:@user.nuid)
     uniq_hsh = Digest::MD5.hexdigest("#{Rails.root}/spec/fixtures/files/multipage.zip")[0,2]
@@ -118,7 +118,7 @@ describe MultipageProcessingJob do
     end
 
     it "does not create thumbnail_list" do
-      @core_file.thumbnail_list.length.should == 0 #won't make a thumbnail list becuase it isn't the first one
+      @core_file.thumbnail_list.length.should == 0 #won't make a thumbnail list because it isn't the first one
     end
 
     it "does not generate item_reports" do
@@ -177,7 +177,7 @@ describe MultipageProcessingJob do
     end
 
     it "sets the thumbnail list" do
-      @core_file.thumbnail_list.length.should == 5 #makes a thumbnail list becuase it is the first one
+      @core_file.thumbnail_list.length.should == 5 #makes a thumbnail list because it is the first one
     end
 
     it "does not assign canonical" do
@@ -241,7 +241,7 @@ describe MultipageProcessingJob do
     end
 
     it "does not set the thumbnail list" do
-      @core_file.thumbnail_list.length.should == 0 #doesn't make a thumbnail list becuase it is not the first one
+      @core_file.thumbnail_list.length.should == 0 #doesn't make a thumbnail list because it is not the first one
     end
 
     it "assigns canonical" do

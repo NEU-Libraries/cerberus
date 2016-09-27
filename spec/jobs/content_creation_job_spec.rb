@@ -52,7 +52,8 @@ describe ContentCreationJob, unless: $in_travis do
 
   def context(o_path)
     @user = FactoryGirl.create(:user)
-    @core = FactoryGirl.create(:complete_file, depositor: @user.nuid)
+    root =  FactoryGirl.create(:root_collection)
+    @core = FactoryGirl.create(:complete_file, depositor: @user.nuid, parent: root)
     @fn = File.basename(o_path)
     FileUtils.cp(o_path, "#{Rails.application.config.tmp_path}/#{@fn}")
     @path = "#{Rails.application.config.tmp_path}/#{@fn}"
@@ -122,7 +123,8 @@ describe ContentCreationJob, unless: $in_travis do
   describe "Master creation with irregular permissions" do
     before(:all) do
       @user = FactoryGirl.create(:user)
-      @core = FactoryGirl.create(:complete_file, depositor: @user.nuid)
+      root =  FactoryGirl.create(:root_collection)
+      @core = FactoryGirl.create(:complete_file, depositor: @user.nuid, parent: root)
       @fn = File.basename("#{Rails.root}/spec/fixtures/files/test_pic.jpeg")
       FileUtils.cp("#{Rails.root}/spec/fixtures/files/test_pic.jpeg", "#{Rails.application.config.tmp_path}/#{@fn}")
       @path = "#{Rails.application.config.tmp_path}/#{@fn}"

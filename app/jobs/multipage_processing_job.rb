@@ -20,7 +20,7 @@ class MultipageProcessingJob
   def run
     core_file = CoreFile.find(self.core_file_pid) || nil
 
-    if core_file.blank?
+    if core_file.blank? || core_file.nil?
       return
     end
 

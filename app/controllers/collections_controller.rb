@@ -62,6 +62,7 @@ class CollectionsController < ApplicationController
     if !params[:q].nil?
       # Fixes #667 - we remove single characters. They're a pretty terrible idea with a strict AND
       params[:q].gsub!(/(^| ).( |$)/, ' ')
+
       self.solr_search_params_logic += [:limit_to_scope]
     else
       self.solr_search_params_logic += [:show_children_only]
@@ -203,8 +204,12 @@ class CollectionsController < ApplicationController
   def update
     @set = Collection.find(params[:id])
 
-    # Update the thumbnail
-    if params[:thumbnail]
+    if params[:remove_thumbnail]
+      # Remove thumbnail
+      @set.thumbnail_list = []
+      @set.save!
+    elsif params[:thumbnail]
+      # Update the thumbnail
       file = params[:thumbnail]
       new_path = move_file_to_tmp(file)
       mime = extract_mime_type(new_path)

@@ -90,8 +90,14 @@ class ShoppingCartsController < ApplicationController
     respond_to do |format|
         format.html do
           if size > 5000
-            params[:action] = "show"
-            redirect_to url_for(params.merge(:large=>true))
+            if current_user && current_user.admin?
+              flash[:notice] = "Your download exceeded 5GB - an email will be sent to you with the URL for downloading when it's ready."
+              Cerberus::Application::Queue.push(CartDownloadJob.new(request.session_options[:id], session[:ids], current_user.nuid, request.remote_ip, true))
+              redirect_to shopping_cart_path and return
+            else
+              params[:action] = "show"
+              redirect_to url_for(params.merge(:large=>true))
+            end
           else
             FileUtils.rm_rf(Dir.glob("#{dir}/*")) if File.directory?(dir)
             Cerberus::Application::Queue.push(CartDownloadJob.new(request.session_options[:id], session[:ids], !current_user.nil? ? current_user.nuid : "", request.remote_ip))
@@ -202,5 +208,6 @@ class ShoppingCartsController < ApplicationController
 
       solr_parameters[:fq] ||= []
       solr_parameters[:fq] << filter_query
+      solr_parameters[:rows] = session[:ids].count
     end
 end

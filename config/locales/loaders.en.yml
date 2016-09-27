@@ -8,10 +8,6 @@ en:
       long_name: "XML"
       short_name: "xml"
       copyright:
-    multipage:
-      long_name: "Multipage"
-      short_name: "multipage"
-      copyright: ""
     marcom:
       long_name: "Marketing and Communications"
       short_name: "marcom"
