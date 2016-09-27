@@ -1,5 +1,5 @@
 class ImageProcessingJob
-  attr_accessor :file, :file_name, :parent, :copyright, :report_id, :permissions, :client, :derivatives
+  attr_accessor :file, :file_name, :parent, :copyright, :report_id, :client, :derivatives
   include MimeHelper
   include HandleHelper
   include ApplicationHelper
@@ -8,13 +8,12 @@ class ImageProcessingJob
     :loader_image_processing
   end
 
-  def initialize(file, file_name, parent, copyright, report_id, permissions=[], derivatives=false, client=nil)
+  def initialize(file, file_name, parent, copyright, report_id, derivatives=false, client=nil)
     self.file = file
     self.file_name = file_name
     self.parent = parent
     self.copyright = copyright
     self.report_id = report_id
-    self.permissions = permissions
     self.client = client
     self.derivatives = derivatives
   end
@@ -232,20 +231,19 @@ class ImageProcessingJob
           s = 0.to_f
         end
 
-        permissions['CoreFile'].each do |perm, vals|
-          vals.each do |group|
-            if group.include? "northeastern"  #its a grouper group
-              core_file.rightsMetadata.permissions({group: group}, "#{perm}")
-            elsif group == "public"
-              core_file.mass_permissions = "public"
-            elsif group == "private"
-              core_file.mass_permissions = "private"
-            else #its an nuid for a user
-              core_file.rightsMetadata.permissions({person: group}, "#{perm}")
-            end
-          end
+        # Does the collection have a sentinel?
+        sentinel = core_file.parent.sentinel
+
+        if sentinel && !sentinel.core_file.blank?
+          core_file.permissions = sentinel.core_file["permissions"]
+          core_file.mass_permissions = sentinel.core_file["mass_permissions"]
+          core_file.save!
+        else
+          core_file.rightsMetadata.content = core_file.parent.rightsMetadata.content
+          core_file.save!
         end
-        Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename, nil, s, m, l, true, permissions))
+
+        Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename, nil, s, m, l, true))
 
         if core_file.save!
           UploadAlert.create_from_core_file(core_file, :create, "iptc")
