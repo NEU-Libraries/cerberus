@@ -3,13 +3,13 @@ class ZipCompilationJob
   include Rails.application.routes.url_helpers
   include MimeHelper
 
-  attr_accessor :title, :comp_pid, :entry_ids, :nuid
+  attr_accessor :title, :comp_pid, :entry_ids, :nuid, :large, :sess_id
 
   def queue_name
     :zip_compilation
   end
 
-  def initialize(user, compilation)
+  def initialize(user, compilation, large = false, sess_id = false)
     if !user.nil?
       self.nuid = user.nuid
     else
@@ -18,6 +18,8 @@ class ZipCompilationJob
     self.title = compilation.title
     self.comp_pid = compilation.pid
     self.entry_ids = compilation.entry_ids
+    self.large = large
+    self.sess_id = sess_id
   end
 
   def run
@@ -66,8 +68,20 @@ class ZipCompilationJob
         zipfile.remove(temp_txt)
       end
 
-      # Rename temp path to full path so download can pick it up
-      FileUtils.mv(temp_zipfile_name, safe_zipfile_name)
+      if self.large
+        time = Time.now.to_i
+        large_path = "#{Rails.application.config.tmp_path}/large/#{sess_id}"
+        full_large_path = "#{large_path}/#{time}.zip"
+
+        FileUtils.mkdir_p large_path
+        FileUtils.mv(temp_zipfile_name, full_large_path)
+
+        # Email user their download link
+        LargeDownloadMailer.download_alert(time, self.nuid, self.sess_id).deliver!
+      else
+        # Rename temp path to full path so download can pick it up
+        FileUtils.mv(temp_zipfile_name, safe_zipfile_name)
+      end
 
       return safe_zipfile_name
     rescue Exception => exception

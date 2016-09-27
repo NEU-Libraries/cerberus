@@ -66,6 +66,7 @@ class CatalogController < ApplicationController
         else
           self.solr_search_params_logic += [:apply_per_page_limit]
         end
+
         super
       rescue Net::ReadTimeout
         self.solr_search_params_logic += [:disable_highlighting]

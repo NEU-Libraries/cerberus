@@ -5,3 +5,5 @@
 %article.drs-item{data: { href: item.path,  "drsitem" => item.pid  }}
   = render partial: 'shared/drs_item/drs_item_figure', locals: {item: item}
   = render partial: 'shared/drs_item/drs_item_details', locals: {item: item}
+  -if params[:action] == "get_all_associated_child_files"
+    = render partial: 'shared/drs_item/material_types', locals: {item: item}

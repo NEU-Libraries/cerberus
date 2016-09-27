@@ -128,7 +128,8 @@ describe CoreFile do
 
   describe "Content files" do
     before :each do
-      @core_file = CoreFile.create(depositor: "dummy@example.com")
+      @collection = Collection.create(mass_permissions: 'public', pid: 'neu:12345', title: 'Test Parent Collection')
+      @core_file = CoreFile.create(depositor: "dummy@example.com", parent: @collection)
       @img = ImageMasterFile.create(title: "Img", core_record: @core_file)
       @pdf = PdfFile.create(title: "Pdf", core_record: @core_file)
       @word = MswordFile.create(title: "MsWord", core_record: @core_file)
@@ -476,6 +477,71 @@ describe CoreFile do
       end
 
       it_should_behave_like "successful revive"
+    end
+  end
+
+  describe 'associate file' do
+    before :each do
+      @root = Collection.create(title: "Root")
+      @c1 = CoreFile.create(title: "Core File One", parent: @parent, depositor: "nobody@nobody.com")
+      @c2 = CoreFile.create(title: "Core File Two", parent: @parent, depositor: "nobody@nobody.com")
+    end
+
+    it "should associate file" do
+      @c1.associate("supplemental_material_for", @c2)
+      @c1.supplemental_material_for.should == [@c2]
+      @c2.supplemental_materials.should == [@c1]
+    end
+
+    it "should raise error if associate type not known" do
+      expect {@c1.associate("garbley_for", @c2)}.to raise_error
+
+    end
+
+    it "should raise error if core file object not core file object" do
+      expect {@c1.associate("supplemental_material_for", @root)}.to raise_error
+
+    end
+
+    it "should raise error if file is already associated with same relationship" do
+      @c1.associate("supplemental_material_for", @c2)
+      expect {@c1.associate("supplemental_material_for", @c2)}.to raise_error
+    end
+
+    after :each do
+      ActiveFedora::Base.destroy_all
+    end
+  end
+
+  describe 'disassociate file' do
+    before :each do
+      @root = Collection.create(title: "Root")
+      @c1 = CoreFile.create(title: "Core File One", parent: @parent, depositor: "nobody@nobody.com")
+      @c2 = CoreFile.create(title: "Core File Two", parent: @parent, depositor: "nobody@nobody.com")
+      @c1.associate("supplemental_material_for", @c2)
+    end
+
+    it "should disassociate file" do
+      @c1.disassociate("supplemental_material_for", @c2)
+      @c1.supplemental_material_for.should == []
+      @c2.supplemental_materials.should == []
+    end
+
+    it "should raise error if associate type not known" do
+      expect {@c1.disassociate("garbley_for", @c2)}.to raise_error
+    end
+
+    it "should raise error if core file object not core file object" do
+      expect {@c1.disassociate("supplemental_material_for", @root)}.to raise_error
+    end
+
+    it "should raise error if file was not associated with that relationship type" do
+      @c1.disassociate("supplemental_material_for", @c2)
+      expect {@c1.disassociate("supplemental_material_for", @c2)}.to raise_error
+    end
+
+    after :each do
+      ActiveFedora::Base.destroy_all
     end
   end
 end

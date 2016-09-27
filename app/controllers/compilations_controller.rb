@@ -321,8 +321,14 @@ class CompilationsController < ApplicationController
     size = (size / 1024000).round(2)
 
     if size > 5000
-      params[:action] = "show"
-      redirect_to url_for(params.merge(:large=>true))
+      if current_user.admin?
+        flash[:notice] = "Your download exceeded 5GB - an email will be sent to you with the URL for downloading when it's ready."
+        Cerberus::Application::Queue.push(ZipCompilationJob.new(current_user, @compilation, true, request.session_options[:id]))
+        redirect_to @set and return
+      else
+        params[:action] = "show"
+        redirect_to url_for(params.merge(:large=>true))
+      end
     else
       Cerberus::Application::Queue.push(ZipCompilationJob.new(current_user, @compilation))
       @page_title = "Download #{@compilation.title}"
@@ -409,7 +415,7 @@ class CompilationsController < ApplicationController
     query = u_groups.map! { |g| "\"#{g}\""}.join(" OR ")
     solr_parameters[:fq] << "edit_access_group_ssim:(#{query})"
   end
-  
+
   def increase_facet_limit(solr_parameters, user_parameters)
     solr_parameters["facet.limit"] = "12"
   end

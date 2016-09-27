@@ -99,6 +99,9 @@ Cerberus::Application.routes.draw do
   match "/files/:id/request_move" => "core_files#request_move", via: 'post', as:"request_move_file"
   get "/files/:id/associated" => "core_files#get_associated_files", as: 'associated'
   get "/files/:id/page/:page" => "core_files#get_page_file", as: 'page_file'
+  get "/files/:id/associated_children" => "core_files#get_all_associated_child_files", as: 'associated_children'
+  match "/files/:id/associate" => "core_files#associate", via: "post", as: "associate_file"
+  match "/files/:id/disassociate" => "core_files#disassociate", via: "post", as: "disassociate_file"
 
   get "/files/:id/oai_thumbnail" => "core_files#oai_thumbnail", as: 'oai_thumbnail'
 
@@ -204,8 +207,6 @@ Cerberus::Application.routes.draw do
       post "/handles/create_handle/*url" => "handles#create_handle", as: "create_handle", :url => /.*/
       # search
       get "/search/:id" => "search#search", as: "search"
-      # export
-      get "/export/:id" => "export#get_files", as: "export"
       # files
       get "/files/:id" => "core_files#show", as: "file_display"
       # file sizes
@@ -251,6 +252,7 @@ Cerberus::Application.routes.draw do
 
   get ':action' => 'static#:action', constraints: { action: /help|iris|terms/ }, as: :static
   get "/downloads/:id/mods/:session_id" => "static#mods_download", as: 'mods_download'
+  get "/downloads/large/:session_id/:time" => "static#large_download", as: 'large_download'
 
   # Catch-all (for routing errors)
   unless Rails.env.development?

@@ -19,9 +19,7 @@ class DerivativeCreator
       pdf.transform_datastream(:content, content: { datastream: 'content', size: '1000x1000>' })
       master_file_path = pdf.fedora_file_path
     elsif self.master.instance_of?(PdfFile)
-      copy = self.master
-      copy.transform_datastream(:content, content: { datastream: 'content', size: '1000x1000>' })
-      master_file_path = copy.fedora_file_path
+      master_file_path = self.master.fedora_file_path
     elsif self.master.instance_of?(ImageMasterFile)
       master_file_path = self.master.fedora_file_path
     end
