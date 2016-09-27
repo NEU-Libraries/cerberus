@@ -5,25 +5,24 @@ include SentinelHelper
 class ScaledImageCreator
 
   attr_accessor :small, :med, :large
-  attr_accessor :master, :core, :permissions
+  attr_accessor :master, :core
 
   # Size instance vars should be scale factors, e.g. .25 for a derivative
   # 25% the size of the original
   # Pass nil for s/m/l if you do not wish that size of Image derivative
-  def initialize(s, m, l, master_pid, permissions=nil)
+  def initialize(s, m, l, master_pid)
     @small = s
     @med = m
     @large = l
     @master = ActiveFedora::Base.find(master_pid, cast: true)
     @core = CoreFile.find(self.master.core_record.pid)
-    @permissions = permissions
   end
 
   def create_scaled_images
     if valid_dimensions?
-      creation_helper(small, ImageSmallFile, master, permissions) if small
-      creation_helper(med, ImageMediumFile, master, permissions) if med
-      creation_helper(large, ImageLargeFile, master, permissions) if large
+      creation_helper(small, ImageSmallFile, master) if small
+      creation_helper(med, ImageMediumFile, master) if med
+      creation_helper(large, ImageLargeFile, master) if large
     end
   end
 
@@ -57,7 +56,7 @@ class ScaledImageCreator
       return valid
     end
 
-    def creation_helper(size, klass, master, permissions=nil)
+    def creation_helper(size, klass, master)
       if size > 0
         target = core.content_objects.find { |x| x.instance_of? klass }
         sentinel = core.parent.sentinel
@@ -66,15 +65,7 @@ class ScaledImageCreator
         if !target
           target = klass.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
           target.description = "Derivative for #{core.pid}"
-          if !permissions.nil? && permissions["#{target.klass}"]
-              perms = permissions["#{target.klass}"]
-              perms.each do |perm, vals|
-                vals.each do |group|
-                  this_class = Object.const_get("#{target.klass}")
-                  target.rightsMetadata.permissions({group: group}, "#{perm}")
-                end
-              end
-          elsif sentinel && !sentinel.send(sentinel_class_to_symbol(klass.to_s)).blank?
+          if sentinel && !sentinel.send(sentinel_class_to_symbol(klass.to_s)).blank?
             # set content object to sentinel value
             # convert klass to string to send to sentinel to get rights
             target.permissions = sentinel.send(sentinel_class_to_symbol(klass.to_s))["permissions"]

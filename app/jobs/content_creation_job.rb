@@ -121,7 +121,7 @@ class ContentCreationJob
       end
 
       if (content_object.instance_of? ImageMasterFile)
-         ScaledImageCreator.new(small_size, medium_size, large_size, content_object.pid, permissions).create_scaled_images
+         ScaledImageCreator.new(small_size, medium_size, large_size, content_object.pid).create_scaled_images
       end
 
       # Derivative creator loads into memory, we're skipping for large files
