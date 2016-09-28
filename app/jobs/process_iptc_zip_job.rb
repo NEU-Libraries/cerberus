@@ -36,7 +36,7 @@ class ProcessIptcZipJob
     # loop through file list
     file_list.each_with_index do |fpath, i|
       # file_name = File.basename(fpath)
-      ImageProcessingJob.new(fpath, original_names[i], parent, copyright, load_report.id, derivatives, client).run
+      ImageProcessingJob.new(fpath, original_names[i], parent, copyright, load_report.id, current_user, derivatives, client).run
       load_report.update_counts
       count = count + 1
       load_report.save!

@@ -124,10 +124,10 @@ describe ProcessModsZipJob do
       spreadsheet_file_path = "#{Rails.root}/spec/fixtures/files/demo_mods_new_file/manifest.xlsx"
       copyright = ""
       @parent = FactoryGirl.create(:root_collection)
-      permissions = @parent.permissions
+      # permissions = @parent.permissions
       @report_id = Loaders::LoadReport.create_from_strings(@user, @loader_name, @parent.pid)
       @lr = Loaders::LoadReport.find("#{@report_id}")
-      ProcessModsZipJob.new(@loader_name, spreadsheet_file_path, @parent, copyright, @user, permissions, @report_id, false, @user.nuid, true).run
+      ProcessModsZipJob.new(@loader_name, spreadsheet_file_path, @parent, copyright, @user, @report_id, false, @user.nuid, true).run
     end
 
     it "should create preview file" do
@@ -171,13 +171,13 @@ describe ProcessModsZipJob do
       dir_name = File.dirname(spreadsheet_file_path)
       tmp_path = "#{Rails.application.config.tmp_path}"
       FileUtils.cp_r(dir_name, tmp_path)
-      permissions = @parent.permissions
+      # permissions = @parent.permissions
       @report_id = Loaders::LoadReport.create_from_strings(@user, @loader_name, @parent.pid)
       @lr = Loaders::LoadReport.find("#{@report_id}")
       @lr.number_of_files = 4
       @lr.save!
       new_file = "#{Rails.application.config.tmp_path}/demo_mods_new_file/manifest.xlsx"
-      ProcessModsZipJob.new(@loader_name, new_file, @parent, copyright, @user, permissions, @report_id, false, @user.nuid, nil).run
+      ProcessModsZipJob.new(@loader_name, new_file, @parent, copyright, @user, @report_id, false, @user.nuid, nil).run
     end
 
     it "should set depositor to current user" do

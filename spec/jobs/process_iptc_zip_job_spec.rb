@@ -15,10 +15,10 @@ describe ProcessIptcZipJob do
       @parent = FactoryGirl.create(:root_collection).pid
       copyright = "Copyright statement"
       @user = FactoryGirl.create(:admin)
-      permissions = {"CoreFile" => {"read"  => ["northeastern:drs:all"], "edit" => ["northeastern:drs:repository:staff"]}, "ImageSmallFile" => {"read"  => ["northeastern:drs:repository:staff"], "edit" => ["northeastern:drs:repository:staff"]}, "ImageLargeFile" => {"read"  => ["northeastern:drs:repository:staff"], "edit" => ["northeastern:drs:repository:staff"]}, "ImageMasterFile" => {"read"  => ["northeastern:drs:repository:staff"], "edit" => ["northeastern:drs:repository:staff"]}}
+      # permissions = {"CoreFile" => {"read"  => ["northeastern:drs:all"], "edit" => ["northeastern:drs:repository:staff"]}, "ImageSmallFile" => {"read"  => ["northeastern:drs:repository:staff"], "edit" => ["northeastern:drs:repository:staff"]}, "ImageLargeFile" => {"read"  => ["northeastern:drs:repository:staff"], "edit" => ["northeastern:drs:repository:staff"]}, "ImageMasterFile" => {"read"  => ["northeastern:drs:repository:staff"], "edit" => ["northeastern:drs:repository:staff"]}}
       derivatives = false
       report_id = Loaders::LoadReport.create_from_strings(@user, @loader_name, @parent)
-      ProcessIptcZipJob.new(@loader_name, @new_file.to_s, @parent, copyright, @user, permissions, report_id, derivatives, @client).run
+      ProcessIptcZipJob.new(@loader_name, @new_file.to_s, @parent, copyright, @user, report_id, derivatives, @client).run
     end
 
     it 'changes loadreport length to 1' do
