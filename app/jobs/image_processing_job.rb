@@ -1,5 +1,5 @@
 class ImageProcessingJob
-  attr_accessor :file, :file_name, :parent, :copyright, :report_id, :client, :derivatives
+  attr_accessor :file, :file_name, :parent, :copyright, :report_id, :client, :derivatives, :user
   include MimeHelper
   include HandleHelper
   include ApplicationHelper
@@ -8,7 +8,7 @@ class ImageProcessingJob
     :loader_image_processing
   end
 
-  def initialize(file, file_name, parent, copyright, report_id, derivatives=false, client=nil)
+  def initialize(file, file_name, parent, copyright, report_id, user, derivatives=false, client=nil)
     self.file = file
     self.file_name = file_name
     self.parent = parent
@@ -16,6 +16,7 @@ class ImageProcessingJob
     self.report_id = report_id
     self.client = client
     self.derivatives = derivatives
+    self.user = user
   end
 
   def run
@@ -237,9 +238,11 @@ class ImageProcessingJob
         if sentinel && !sentinel.core_file.blank?
           core_file.permissions = sentinel.core_file["permissions"]
           core_file.mass_permissions = sentinel.core_file["mass_permissions"]
+          core_file.depositor = user.nuid
           core_file.save!
         else
           core_file.rightsMetadata.content = core_file.parent.rightsMetadata.content
+          core_file.depositor = user.nuid
           core_file.save!
         end
 
