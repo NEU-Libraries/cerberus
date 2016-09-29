@@ -45,7 +45,7 @@ module Cerberus
     end
 
     def self.virus_check(file)
-      if (defined? ClamAV) && (!Rails.env.test?) && !(!ENV['TRAVIS'].nil? && ENV['TRAVIS'] == 'true')
+      if defined? ClamAV
         cav = ClamAV.instance
         cav.loaddb
         stat = cav.scanfile(file.path)
