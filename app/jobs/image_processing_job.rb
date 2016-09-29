@@ -233,7 +233,8 @@ class ImageProcessingJob
         end
 
         # Does the collection have a sentinel?
-        sentinel = core_file.parent.sentinel
+        collection = Collection.find(core_file.parent.pid)
+        sentinel = collection.sentinel
 
         if sentinel && !sentinel.core_file.blank?
           core_file.permissions = sentinel.core_file["permissions"]
@@ -241,7 +242,7 @@ class ImageProcessingJob
           core_file.depositor = user.nuid
           core_file.save!
         else
-          core_file.rightsMetadata.content = core_file.parent.rightsMetadata.content
+          core_file.rightsMetadata.content = collection.rightsMetadata.content
           core_file.depositor = user.nuid
           core_file.save!
         end
