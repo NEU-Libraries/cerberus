@@ -129,8 +129,13 @@ class ProcessModsZipJob
             if x == start
               existing_files = set_existing_files(row_results)
             end
-            if row_results.blank?
-              # do nothing
+            values = row_results.values
+            values.reject! { |c| c.blank? }
+            if values.blank?
+              # do nothing - the whole row is blank
+              load_report.number_of_files = load_report.number_of_files-1
+              load_report.save!
+              next
             else
               existing_file = false
               old_mods = nil
