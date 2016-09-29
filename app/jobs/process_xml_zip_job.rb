@@ -158,7 +158,13 @@ class ProcessXmlZipJob
               existing_files = set_existing_files(row_results)
               multipage = set_multipage(header_row)
             end
-            if !row_results.blank? #not a blank row
+            values = row_results.values
+            values.reject! { |c| c.blank? }
+            if values.blank?
+              # do nothing - the whole row is blank
+              count=count-1
+              next
+            else
               row_num = row_results["sequence"].to_i #int 0..n for multipage, 0 for non-multipage
               existing_file = false
               old_mods = nil
