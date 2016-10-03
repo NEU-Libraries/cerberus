@@ -112,6 +112,9 @@ module Cerberus
       config.tmp_path = "#{Rails.root}/tmp"
     end
 
+    Kataba.configuration.offline_storage = "#{Rails.application.config.tmp_path}/xsd_files"
+    Kataba.configuration.mirror_list = File.join(Rails.root, 'config', 'mirror.yml')    
+
     if !Rails.env.test? && !(!ENV['TRAVIS'].nil? && ENV['TRAVIS'] == 'true')
       config.handles_connection = Mysql2::Client.new(:reconnect => true, :host => "#{ENV["HANDLE_HOST"]}", :username => "#{ENV["HANDLE_USERNAME"]}", :password => "#{ENV["HANDLE_PASSWORD"]}", :database => "#{ENV["HANDLE_DATABASE"]}")
     else
