@@ -1,0 +1,4 @@
+---
+  "http://www.loc.gov/standards/mods/v3/mods-3-5.xsd": "https://raw.githubusercontent.com/dgcliff/kataba/master/test/fixtures/mods-3-5.xsd"
+  "http://www.loc.gov/mods/xml.xsd": "https://raw.githubusercontent.com/dgcliff/kataba/master/test/fixtures/xml.xsd"
+  "http://www.loc.gov/standards/xlink/xlink.xsd": "https://raw.githubusercontent.com/dgcliff/kataba/master/test/fixtures/xlink.xsd"
