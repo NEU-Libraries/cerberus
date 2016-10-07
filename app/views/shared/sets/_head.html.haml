@@ -20,22 +20,17 @@
   %h1{:class => @set.klass, :id => "#{@set.pid}-title",}
     - if @set.klass == "Collection"
       = link_to kramdown_parse(@set.title), collection_path(@set)
-    - elsif @set.klass == "Community"
-      = link_to kramdown_parse(@set.title), community_path(@set)
-    - elsif @set.klass == "Compilation"
-      = link_to kramdown_parse(@set.title), compilation_path(@set)
-  %h3
-    - if @set.klass == "Collection" # and doesn't have a thumbnail to render
       = render partial: 'shared/icon', locals: { class_string: 'icon-folder-open' }
     - elsif @set.klass == "Community"
+      = link_to kramdown_parse(@set.title), community_path(@set)
       = render partial: 'shared/icon', locals: { class_string: 'icon-group' }
     - elsif @set.klass == "Compilation"
+      = link_to kramdown_parse(@set.title), compilation_path(@set)
       =render partial: 'shared/icon', locals: { class_string: t('drs.compilations.icon') }
-    - if @set.klass != "Compilation"
-      = render partial: 'catalog/search_form', locals: { scope: "true", scoped_placeholder: "Search this #{@set.type_label.downcase}" }
-  %h1
     %small
       = @set.type_label
+  - if @set.klass != "Compilation"
+    = render partial: 'catalog/search_form', locals: { scope: "true", scoped_placeholder: "Search this #{@set.type_label.downcase}" }
   - if !@set.thumbnail_list.empty?
     %img{src: @set.thumbnail_list.first, title: @set.title, alt: "", class: ['pull-left', 'well-padded-thumb']}(aria-labeledby="#{@set.pid}-title" role="presentation")
   - if !@set.description.blank?
