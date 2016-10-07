@@ -5,16 +5,29 @@
   border: 1px solid #ccc;
   border: 1px solid rgba(0,0,0,.2);
   text-align: center;
+  @media(max-width:$breakpoint-m){
+    margin: 10px 10px 10px 0px;
+  }
 }
 
 .set-description{
   overflow: hidden;
   margin-top: 10px;
+  @media(max-width:$breakpoint-m){
+    clear: both;
+  }
 }
 
 .inline-headings{
   h1{
     margin-right: 5px;
+    small {
+      padding-left: 0;
+    }
+    span[class*="icon-"] {
+      font-size: 25px;
+      padding-left: 5px;
+    }
   }
   h1,
   h2,
@@ -26,6 +39,15 @@
   }
   p{
     margin-top: 10px;
+  }
+  @media(max-width:$breakpoint-m){
+    .navbar-form {
+      float: none;
+    }
+    #searchFieldHeader {
+      width: 80%;
+      display: inline-block;
+    }
   }
 }
 
