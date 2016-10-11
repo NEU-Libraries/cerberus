@@ -346,8 +346,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
 
     # Kramdown parse for search purposes - #439
     # title_ssi will only be used for sorting - #766
-    # solr_doc["title_ssi"] = kramdown_parse(self.title_info.title.first).downcase
-    solr_doc["title_ssi"] = kramdown_parse(t).downcase
+    solr_doc["title_ssi"] = kramdown_parse(t).downcase.gsub(/[^0-9a-z ]/i, '').gsub(/^a /i, '').gsub(/^an /i, '').gsub(/^the /i, '')
 
     # Make sure all titles and non_sorts end up in title_tesim
     total_title_array = self.all_titles.non_sort.concat self.all_titles.title
@@ -529,7 +528,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
     if self.title_info[0].nil?
       self.insert_new_node(:title_info)
     end
-    
+
     self.title_info.non_sort = non_sort
   end
 
