@@ -27,13 +27,12 @@ class Loaders::SpreadsheetLoadsController < Loaders::LoadsController
   end
 
   def create
-    permissions = {"CoreFile" => {"read"  => ["public"], "edit" => ["northeastern:drs:repository:staff"]}}
     if params[:new] == "true"
       existing_files = false
     else
       existing_files = true
     end
-    process_create(permissions, t('loaders.spreadsheet.short_name'), "ModsSpreadsheetLoadsController", existing_files)
+    process_create(t('loaders.spreadsheet.short_name'), "ModsSpreadsheetLoadsController", existing_files)
   end
 
   def preview
@@ -101,7 +100,6 @@ class Loaders::SpreadsheetLoadsController < Loaders::LoadsController
       spreadsheet_file_path = cf.tmp_path
     end
     copyright = t('loaders.spreadsheet.copyright')
-    permissions = {} #we aren't getting these externally yet
     if params[:depositor]
       depositor = params[:depositor]
       existing_files = false
@@ -109,7 +107,7 @@ class Loaders::SpreadsheetLoadsController < Loaders::LoadsController
       depositor = nil
       existing_files = true
     end
-    Cerberus::Application::Queue.push(ProcessModsZipJob.new(@loader_name, spreadsheet_file_path, @report.collection, copyright, current_user, permissions, @report.id, existing_files, depositor, nil))
+    Cerberus::Application::Queue.push(ProcessModsZipJob.new(@loader_name, spreadsheet_file_path, @report.collection, copyright, current_user, @report.id, existing_files, depositor, nil))
     flash[:notice] = "Your spreadsheet is being processed. The information on this page will be updated periodically until the processing is completed."
     redirect_to "/loaders/spreadsheet/report/#{@report.id}"
   end

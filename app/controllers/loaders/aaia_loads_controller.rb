@@ -7,9 +7,7 @@ class Loaders::AaiaLoadsController < Loaders::LoadsController
   end
 
   def create
-    permissions = {"CoreFile" => {"edit" => ["northeastern:drs:jdoaai:archive_staff", "northeastern:drs:repository:staff"]}, "ImageSmallFile" => {"edit" => ["northeastern:drs:jdoaai:archive_staff", "northeastern:drs:repository:staff"]}, "ImageLargeFile" => {"edit" => ["northeastern:drs:jdoaai:archive_staff", "northeastern:drs:repository:staff"]}, "ImageMasterFile" => {"edit" => ["northeastern:drs:jdoaai:archive_staff", "northeastern:drs:repository:staff"]}}
-
-    process_create(permissions, t('loaders.aaia.short_name'), "AaiaLoadsController", false, false)
+    process_create(t('loaders.aaia.short_name'), "AaiaLoadsController", false, false)
   end
 
   private

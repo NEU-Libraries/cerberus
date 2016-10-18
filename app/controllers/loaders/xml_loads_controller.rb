@@ -28,13 +28,12 @@ class Loaders::XmlLoadsController < Loaders::LoadsController
   end
 
   def create
-    permissions = {"CoreFile" => {"read"  => ["public"], "edit" => ["northeastern:drs:repository:staff"]}}
     if params[:new] == "true"
       existing_files = false
     else
       existing_files = true
     end
-    process_create(permissions, t('loaders.xml.short_name'), "XmlLoadsController", existing_files)
+    process_create(t('loaders.xml.short_name'), "XmlLoadsController", existing_files)
   end
 
   def preview
