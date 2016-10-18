@@ -3,8 +3,6 @@
 
 module XmlValidator
 
-  include XsdHelper
-
   def xml_valid?(xml_str, handle_check = false)
     # Never trust the user
     results = Hash.new
@@ -32,7 +30,7 @@ module XmlValidator
       schemata_by_ns = Hash[ doc.root.attributes['schemaLocation'].value.scan(/(\S+)\s+(\S+)/) ]
       schemata_by_ns.each do |ns,xsd_uri|
 
-        xsd = fetch_schema(xsd_uri)
+        xsd = Kataba.fetch_schema(xsd_uri)
 
         xsd.validate(doc).each do |error|
           results[:errors] << error
