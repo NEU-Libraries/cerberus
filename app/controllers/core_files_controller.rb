@@ -729,7 +729,7 @@ class CoreFilesController < ApplicationController
     respond_to do |format|
       format.js {
         if @response.response['numFound'] == 0
-          render :nothing => true
+          render js: "$('#associated_files').html('No associated files were found.');"
         else
           render "associated_files"
         end
@@ -1031,7 +1031,7 @@ class CoreFilesController < ApplicationController
         full_self_id = RSolr.escape("info:fedora/#{@core_file.pid}")
         query << "(#{Solrizer.solr_name("has_model", :symbol)}:\"info:fedora/afmodel:PageFile\" AND #{Solrizer.solr_name("is_part_of", :symbol)}:\"#{full_self_id}\")"
         solr_parameters[:sort] = "ordinal_value_isi asc, title_ssi asc"
-        solr_parameters[:fq] << query
+        solr_parameters[:fq] << query.join(" OR ")
       end
 
       def filter_by_all_associated_child_files(solr_parameters, user_parameters)
