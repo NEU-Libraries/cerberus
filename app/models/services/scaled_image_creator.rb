@@ -65,19 +65,19 @@ class ScaledImageCreator
         if !target
           target = klass.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
           target.description = "Derivative for #{core.pid}"
+          target.rightsMetadata.content = core.rightsMetadata.content
+          target.identifier = target.pid
+          target.core_record = CoreFile.find(core.pid)
+          target.save!
+          target.reload
+
           if sentinel && !sentinel.send(sentinel_class_to_symbol(klass.to_s)).blank?
             # set content object to sentinel value
             # convert klass to string to send to sentinel to get rights
             target.permissions = sentinel.send(sentinel_class_to_symbol(klass.to_s))["permissions"]
             target.mass_permissions = sentinel.send(sentinel_class_to_symbol(klass.to_s))["mass_permissions"]
             target.save!
-          else
-            target.rightsMetadata.content = core.rightsMetadata.content
           end
-          target.identifier = target.pid
-          target.core_record = CoreFile.find(core.pid)
-          target.save!
-          target.reload
         end
 
         img = Magick::Image.from_blob(master.content.content).first
