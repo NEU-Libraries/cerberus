@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-gem "sitemap_generator"
+gem 'sitemap', github: 'ualbertalib/rails-sitemap'
 gem "colorize", "0.6.0" # https://github.com/capistrano/sshkit/issues/200
 gem "sshkit", :git => "https://github.com/cheald/sshkit.git", branch: "fix_multithread_conn_pooling" # https://github.com/capistrano/sshkit/pull/137 - staging was failing on cap deploy
 gem 'rails', '3.2.12'
