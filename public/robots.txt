@@ -15,3 +15,4 @@ User-Agent: Baiduspider
 Allow: /
 User-Agent: archive.org_bot
 Allow: /
+Sitemap: https://repository.library.northeastern.edu/sitemap.xml
