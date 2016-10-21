@@ -25,15 +25,11 @@ every 1.day, at: '1:30am'  do
 end
 
 every 1.day, at: '4:00am'  do
-  if Rails.env.production?
-    rake "sitemap:generate"
-  end
+  rake "sitemap:generate"
 end
 
 every 1.day, at: '8:00am'  do
-  if Rails.env.production?
-    rake "sitemap:ping"
-  end
+  rake "sitemap:ping"
 end
 
 every :sunday, :at => '4:00am' do
