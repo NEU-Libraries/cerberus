@@ -1,10 +1,4 @@
 GIT
-  remote: git://github.com/ualbertalib/rails-sitemap.git
-  revision: b5552f24c6aba99596733a3415cb1ccdc6d9bf7a
-  specs:
-    sitemap (0.3.3)
-
-GIT
   remote: https://github.com/NEU-Libraries/blacklight_oai_provider.git
   revision: 232f30f4a5f70a30b1082362d9a44e2308c4f1b8
   ref: 232f30f4a5f70a30b1082362d9a44e2308c4f1b8
@@ -91,6 +85,12 @@ GIT
       nokogiri
       roo (>= 2.0.0beta1, < 3)
       spreadsheet (> 0.9.0)
+
+GIT
+  remote: https://github.com/ualbertalib/rails-sitemap.git
+  revision: b5552f24c6aba99596733a3415cb1ccdc6d9bf7a
+  specs:
+    sitemap (0.3.3)
 
 GEM
   remote: https://rubygems.org/
