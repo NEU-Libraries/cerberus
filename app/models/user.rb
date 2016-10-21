@@ -37,7 +37,7 @@ class User < ActiveRecord::Base
       self.group_list.each do |group|
         pretty_groups[I18n.t("groups.#{group}.name", :default => group)] = group
       end
-      return pretty_groups
+      return pretty_groups.sort
     else
       return {}
     end
@@ -157,6 +157,10 @@ class User < ActiveRecord::Base
     # If admin user, copy their groups to 000000000 so that they can impersonate
     # and have access to everywhere they should
     if user.admin?
+      user.add_group("northeastern:drs:faculty")
+      user.add_group("northeastern:drs:staff")
+      user.save!
+      
       system_user = User.find_by_nuid("000000000")
       system_user.group_list = user.group_list
       system_user.save!
