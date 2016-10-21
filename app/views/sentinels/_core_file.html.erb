@@ -15,7 +15,7 @@
       <%= label_tag 'sentinel[core_file][mass_permissions]', "Choose Mass Permissions:" %>
     <% end %>
     <!-- ['public', 'private'] -->
-    <%= select_tag 'sentinel[core_file][mass_permissions]', options_for_select(@collection ? [@set.mass_permissions] : ['public', 'private'], !mass_permissions.blank? ? mass_permissions : 'public') , class: "span6" %>
+    <%= select_tag 'sentinel[core_file][mass_permissions]', options_for_select(@collection ? [@set.mass_permissions, 'private'].uniq : ['public', 'private'], !mass_permissions.blank? ? mass_permissions : 'public') , class: "span6" %>
     <p class="help-block">
       <ul>
         <li>Setting to 'public' will allow anyone accessing the site to see your item.</li>
