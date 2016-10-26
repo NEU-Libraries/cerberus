@@ -158,11 +158,6 @@ describe ProcessXmlZipJob do
       cf.original_filename.should == "image.png"
     end
 
-    it "should set label to file name" do
-      cf = CoreFile.find(@lr.reload.item_reports.first.pid)
-      cf.label.should == "image.png"
-    end
-
     it "should instantiate_appropriate_content_object" do
       cf = CoreFile.find(@lr.reload.item_reports.first.pid)
       cf.canonical_class.should == "ImageMasterFile"
@@ -348,7 +343,6 @@ describe ProcessXmlZipJob do
 
       it "sets original_filename" do
         @cf.properties.original_filename.should == ["bdr_43888.mods.xml"]
-        @cf.label.should == "bdr_43888.mods.xml"
       end
 
       it 'creates a load report' do
