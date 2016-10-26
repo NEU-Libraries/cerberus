@@ -25,7 +25,9 @@ module Cerberus
       end
 
       def original_filename=(string)
-        if_properties_exists_strict { self.properties.original_filename = string }
+        # Required because somehow Marcom was able to place invisible characters into filenames with Photo Mechanic
+        # which caused "\xC2" from ASCII-8BIT to UTF-8 (Encoding::UndefinedConversionError)
+        if_properties_exists_strict { self.properties.original_filename = Unidecoder.decode(string) }
       end
 
       def original_filename

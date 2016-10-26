@@ -37,12 +37,12 @@ class ImageProcessingJob
       core_file.properties.parent_id = core_file.parent.pid
       core_file.tag_as_in_progress
       core_file.tmp_path = file
-      core_file.properties.original_filename = File.basename(file_name)
-      core_file.label = File.basename(file_name)
+      core_file.original_filename = File.basename(file_name)
+      # core_file.label = File.basename(file_name)
 
       core_file.instantiate_appropriate_content_object(file)
       if core_file.canonical_class != "ImageMasterFile" or extract_mime_type(file) != 'image/jpeg'
-        report = load_report.item_reports.create_failure("File is not a JPG image", "", core_file.label)
+        report = load_report.item_reports.create_failure("File is not a JPG image", "", core_file.original_filename)
         core_file.destroy
         FileUtils.rm(file)
       else
@@ -266,7 +266,7 @@ class ImageProcessingJob
       errors_for_pid.warn "#{Time.now} - #{$!}"
       errors_for_pid.warn "#{Time.now} - #{$@}"
       iptc = "" if iptc.empty?
-      report = load_report.item_reports.create_failure(error.message, iptc, File.basename(file_name))
+      report = load_report.item_reports.create_failure(error.message, iptc, Unidecoder.decode(File.basename(file_name)))
       FileUtils.rm(file)
       core_file.destroy
       raise error
@@ -274,7 +274,7 @@ class ImageProcessingJob
   end
 
   def create_special_error(error_message, iptc, core_file, load_report)
-    report = load_report.item_reports.create_failure(error_message, iptc, core_file.label)
+    report = load_report.item_reports.create_failure(error_message, iptc, core_file.original_filename)
     core_file.destroy
     FileUtils.rm(file)
     return report
