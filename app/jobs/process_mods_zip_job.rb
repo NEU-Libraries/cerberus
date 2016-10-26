@@ -164,7 +164,7 @@ class ProcessModsZipJob
 
                     core_file.rightsMetadata.permissions({person: "#{depositor}"}, 'edit')
                     core_file.original_filename = row_results["file_name"]
-                    core_file.label = row_results["file_name"]
+                    # core_file.label = row_results["file_name"]
                     core_file.instantiate_appropriate_content_object(new_file)
                     sc_type = collection.smart_collection_type
                     if !sc_type.nil? && sc_type != ""
