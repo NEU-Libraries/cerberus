@@ -12,7 +12,7 @@ class Loaders::ItemReport < ActiveRecord::Base
     x.collection        = core_file.parent.pid
     x.title             = core_file.title
     x.iptc              = iptc
-    x.original_file     = core_file.label
+    x.original_file     = core_file.original_filename
     x.change_type       = change_type
     x.save! ? x : false
   end
@@ -26,7 +26,7 @@ class Loaders::ItemReport < ActiveRecord::Base
     x.title             = core_file.title
     x.exception         = exception
     x.iptc              = iptc
-    x.original_file     = core_file.label
+    x.original_file     = core_file.original_filename
     x.change_type       = change_type
     x.save! ? x : false
   end
