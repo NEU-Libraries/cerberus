@@ -378,7 +378,14 @@ class ModsDatastream < ActiveFedora::OmDatastream
       end
     end
 
-    solr_doc["subject_sim"] = authorized_keywords
+    # Fix for #1011
+    (0..self.subject.length).each do |i|
+      if self.subject(i).authority.any?
+        authorized_keywords << self.subject(i).topic.first
+      end
+    end
+
+    solr_doc["subject_sim"] = authorized_keywords.uniq
 
     #Extract and solrize names divided into first/last parts
     full_names = []
