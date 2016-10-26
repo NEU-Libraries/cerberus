@@ -914,7 +914,7 @@ class CoreFilesController < ApplicationController
 
       core_file.tmp_path = tmp_path
       core_file.original_filename = file.original_filename
-      core_file.label = file.original_filename
+      # core_file.label = file.original_filename
 
       core_file.instantiate_appropriate_content_object(tmp_path)
 
