@@ -72,7 +72,7 @@ class MultipageProcessingJob
 
       end
     else
-      load_report.item_reports.create_failure("File not found in zip file", "", self.file_values["file_name"])
+      load_report.item_reports.create_failure("File not found in zip file", "", Unidecoder.decode(self.file_values["file_name"]))
       core_file.destroy
       return
     end
