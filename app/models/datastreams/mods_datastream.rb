@@ -162,6 +162,19 @@ class ModsDatastream < ActiveFedora::OmDatastream
       t.authority(path: {attribute: 'authority'})
       t.authority_uri(path: {attribute: 'authorityURI'})
       t.value_uri(path: {attribute: 'valueURI'})
+      t.hierarchical_geographic(path: 'hierarchicalGeographic', namespace_prefix: 'mods'){
+        t.continent(path: 'continent', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable])
+        t.country(path: 'country', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable])
+        t.region(path: 'region', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable])
+        t.state(path: 'state', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable])
+        t.territory(path: 'territory', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable])
+        t.county(path: 'county', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable])
+        t.city(path: 'city', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable])
+        t.city_section(path: 'citySection', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable])
+        t.island(path: 'island', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable])
+        t.area(path: 'area', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable])
+        t.extraterrestrial_area(path: 'extraterrestrialArea', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable])
+      }
       t.cartographics(path: 'cartographics', namespace_prefix: 'mods'){
         t.scale(path: 'scale', namespace_prefix: 'mods')
         t.projection(path: 'projection', namespace_prefix: 'mods')
