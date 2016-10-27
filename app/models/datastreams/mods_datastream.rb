@@ -336,10 +336,6 @@ class ModsDatastream < ActiveFedora::OmDatastream
       solr_doc["coordinates_ssi"] = self.subject.cartographics.coordinates.first
     end
 
-    if !self.subject.geographic.blank?
-      solr_doc["geographic_ssi"] = Array(self.subject.geographic)
-    end
-
     # Solrize extension information.
     solr_doc["drs_category_ssim"] = self.category.first if !self.category.first.blank?
     solr_doc["drs_department_ssim"] = self.department.first if !self.department.first.blank?
