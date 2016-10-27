@@ -167,14 +167,14 @@ class ModsDatastream < ActiveFedora::OmDatastream
         t.projection(path: 'projection', namespace_prefix: 'mods')
         t.coordinates(path: 'coordinates', namespace_prefix: 'mods')
       }
-      t.geographic(path: 'geographic', namespace_prefix: 'mods')
+      t.geographic(path: 'geographic', namespace_prefix: 'mods', index_as: [:stored_searchable])
       t.topic(path: 'topic', namespace_prefix: 'mods', index_as: [:stored_searchable]){
         t.authority(path: { attribute: 'authority' })
       }
       t.scoped_topic(path: 'topic', namespace_prefix: 'mods', attributes: { authority: :any })
       t.name(path: 'name', namespace_prefix: 'mods', index_as: [:stored_searchable]){
         t.type(path: {attribute: 'type'})
-        t.name_part(path: 'namePart', namespace_prefix: 'mods', attributes: { type: :none })
+        t.name_part(path: 'namePart', namespace_prefix: 'mods', attributes: { type: :none }, index_as: [:stored_searchable])
         t.name_part_given(path: 'namePart', namespace_prefix: 'mods', attributes: { type: 'given' })
         t.name_part_family(path: 'namePart', namespace_prefix: 'mods', attributes: { type: 'family' })
         t.name_part_date(path: 'namePart', namespace_prefix: 'mods', attributes: {type: 'date'})
@@ -190,16 +190,16 @@ class ModsDatastream < ActiveFedora::OmDatastream
       }
       t.title_info(path: 'titleInfo', namespace_prefix: 'mods'){
         t.type(path: {attribute: 'type'})
-        t.title(path: 'title', namespace_prefix: 'mods')
+        t.title(path: 'title', namespace_prefix: 'mods', index_as: [:stored_searchable])
         t.non_sort(path: 'nonSort', namespace_prefix: 'mods')
-        t.sub_title(path: 'subTitle', namespace_prefix: 'mods')
+        t.sub_title(path: 'subTitle', namespace_prefix: 'mods', index_as: [:stored_searchable])
       }
       t.geographic_code(path: 'geographicCode', namespace_prefix: 'mods'){
         t.authority(path: {attribute: 'authority'})
         t.authority_uri(path: {attribute: 'authorityURI'})
         t.value_uri(path: {attribute: 'valueURI'})
       }
-      t.genre(path: 'genre', namespace_prefix: 'mods'){
+      t.genre(path: 'genre', namespace_prefix: 'mods', index_as: [:stored_searchable]){
         t.authority(path: {attribute: 'authority'})
         t.authority_uri(path: {attribute: 'authorityURI'})
         t.value_uri(path: {attribute: 'valueURI'})
