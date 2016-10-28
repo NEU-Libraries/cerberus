@@ -329,7 +329,10 @@ class ModsDatastream < ActiveFedora::OmDatastream
         kd = kd + "/01/01"
       end
 
-      solr_doc["key_date_ssi"] = { kd => self.key_date.qualifier.blank? ? nil : self.key_date.qualifier.first }
+      solr_doc["key_date_ssi"] = kd
+      if !self.key_date.qualifier.blank?
+        solr_doc["key_date_qualifier_ssi"] = self.key_date.qualifier.first
+      end
     end
 
     if !self.subject.cartographics.coordinates.blank?
