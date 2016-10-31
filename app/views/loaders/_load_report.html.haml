@@ -9,7 +9,7 @@
         - cf = CoreFile.find("#{image.pid}")
         %tr.success
           %td
-            = cf.label
+            = cf.original_filename
           %td
             = cf.title
           %td Success
@@ -28,7 +28,7 @@
         - cf = CoreFile.find("#{image.pid}")
         %tr.warning
           %td
-            = cf.label
+            = cf.original_filename
           %td
             = cf.title
           %td
