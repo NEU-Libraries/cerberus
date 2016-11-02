@@ -9,8 +9,3 @@
       %br
       .stream_count
         = "Streams: Calculating..."
-
-:javascript
-  $(document).ready(function(){
-    $.getScript("#{statistics_count_path(@set.pid)}");
-  });
