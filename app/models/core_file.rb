@@ -92,7 +92,10 @@ class CoreFile < ActiveFedora::Base
   def clean_xml
     # When edit form is used, make sure we clean up unicode
     if !self.mods.content.blank?
-      self.mods.content = xml_decode(self.mods.content)
+      clean_mods = xml_decode(self.mods.content)
+      # Scrub default namespaces - breaks the relationship of mods extension
+      clean_mods.gsub!(/[ ]xmlns=\"[^ ]*\"/i, '')
+      self.mods.content = clean_mods
     end
   end
 
