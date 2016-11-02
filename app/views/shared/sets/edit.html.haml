@@ -58,4 +58,7 @@
   $('.nav-tabs a').click(function (e) {
     e.preventDefault();
     $(this).tab('show');
+    if ($(this).attr('href') == "#statistics"){
+      $.getScript("#{statistics_count_path(@set.pid)}");
+    }
   });
