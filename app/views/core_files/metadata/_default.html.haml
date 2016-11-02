@@ -14,6 +14,9 @@
 - if params[:action] == "edit"
   %fieldset.row-fluid
     = render partial: 'core_files/metadata/replacement_thumbnail', locals: {:f => f}
+  - if @core_file.canonical_class == "VideoFile" || @core_file.canonical_class == "AudioFile"
+    %legend Captions
+    = render partial: "core_files/metadata/caption", locals: {:f => f}
 .row-fluid
   .span12
     %legend Basic Information
