@@ -20,6 +20,7 @@ class CoreFilesController < ApplicationController
   include HandleHelper
   include MimeHelper
   include ChecksumHelper
+  include SentinelHelper
 
   include Blacklight::Catalog
   include Blacklight::Configurable # comply with BL 3.7
@@ -663,16 +664,24 @@ class CoreFilesController < ApplicationController
         end
 
         file = params[:caption]
-        caption_path = move_file_to_tmp(file)
+        captions_path = move_file_to_tmp(file)
         mime = extract_mime_type(captions_path)
         type = mime.split("/").first.strip
+        sentinel = @core_file.parent.sentinel
 
         if type == "text"
           caption_object = TextFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint), core_record: @core_file)
-          File.open(caption_path) do |caption_contents|
-            poster_object.add_file(caption_contents, 'content', "caption#{File.extname(caption_path)}")
-            poster_object.rightsMetadata.content = @core_file.rightsMetadata.content
-            poster_object.save!
+          File.open(captions_path) do |caption_contents|
+            caption_object.add_file(caption_contents, 'content', "caption#{File.extname(captions_path)}")
+            caption_object.rightsMetadata.content = @core_file.rightsMetadata.content #apply core_file permissions
+            # and sentinel permissions in case they exist
+            if sentinel && !sentinel.send(sentinel_class_to_symbol("TextFile")).blank?
+              # set content object to sentinel value
+              # convert klass to string to send to sentinel to get rights
+              caption_object.permissions = sentinel.send(sentinel_class_to_symbol("TextFile"))["permissions"]
+              caption_object.mass_permissions = sentinel.send(sentinel_class_to_symbol("TextFile"))["mass_permissions"]
+            end
+            caption_object.save!
           end
           @core_file.update_index
         else

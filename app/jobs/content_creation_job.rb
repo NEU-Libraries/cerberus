@@ -59,7 +59,14 @@ class ContentCreationJob
 
         File.open(caption_path) do |caption_contents|
           caption_object.add_file(caption_contents, 'content', "caption#{File.extname(caption_path)}")
-          caption_object.rightsMetadata.content = core_record.rightsMetadata.content
+          caption_object.rightsMetadata.content = core_record.rightsMetadata.content #apply core_record permissions
+          # and sentinel permissions in case they exist
+          if sentinel && !sentinel.send(sentinel_class_to_symbol(klass.to_s)).blank?
+            # set content object to sentinel value
+            # convert klass to string to send to sentinel to get rights
+            caption_object.permissions = sentinel.send(sentinel_class_to_symbol(klass.to_s))["permissions"]
+            caption_object.mass_permissions = sentinel.send(sentinel_class_to_symbol(klass.to_s))["mass_permissions"]
+          end
           caption_object.save!
         end
       end
