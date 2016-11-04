@@ -1,0 +1,14 @@
+.row-fluid
+  .span6
+    = f.label :description, "Thumbnail", class: "required-label"
+    %small Choose an image for the file
+  .span6
+    = f.file_field :poster, name: 'poster', required: true, accept:".jpg,.jpeg,.png"
+    %span.help-block
+      This image will be displayed on the file page.
+= render partial: "core_files/metadata/caption", locals: {:f => f}
+.row-fluid
+  .span6
+    = label_tag :stream_only, "Streaming Only"
+    = check_box_tag :stream_only
+    %small This file is for streaming only and cannot be downloaded
