@@ -4,6 +4,7 @@
   .replace_thumbs.hidden
     = render 'shared/thumbnails/full_picture'
 - type = dir = encoded = provider = pid = ''
+- caption_url = nil
 - @content_objects.each do |content|
   -if content.klass == "VideoFile" || content.klass == "AudioFile"
     - if (!current_user.nil? && (current_user.can? :read, content)) || content.public?
@@ -16,6 +17,8 @@
       - elsif content.mime_type == 'audio/mpeg'
         - type = 'MP3'
         - provider = 'sound'
+  -elsif content.klass == "TextFile"
+    - caption_url = download_url(content.pid, {datastream_id: 'content'})
 #player
   :javascript
     jwplayer.key="gi5wgpwDtAXG4xdj1uuW/NyMsECyiATOBxEO7A=="
@@ -40,7 +43,13 @@
     width: "100%",
     height: 400,
     flashplayer: "/assets/jwplayer/jwplayer.flash.swf",
-    html5player: "/assets/jwplayer/jwplayer.html5.js"
+    html5player: "/assets/jwplayer/jwplayer.html5.js",
+    tracks: [{
+      file: "#{caption_url}",
+      label: 'English',
+      kind: 'captions',
+      "default": true
+    }]
     })
     var errorMessage = function() {
       $(".alert-video").removeClass("hidden").text("There was an error playing this file. Please try on a different device, verify Flash is enabled, or download the file.")

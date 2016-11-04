@@ -4,19 +4,20 @@ class ContentCreationJob
   include SentinelHelper
 
   attr_accessor :core_file_pid, :file_path, :file_name, :delete_file, :poster_path, :small_size, :medium_size, :large_size
-  attr_accessor :core_record, :employee, :sentinel
+  attr_accessor :core_record, :employee, :sentinel, :caption_path
 
   def queue_name
     :content_creation
   end
 
-  def initialize(core_file, file_path, file_name, poster_path=nil, small_size=0, medium_size=0, large_size=0, delete_file=true)
+  def initialize(core_file, file_path, file_name, poster_path=nil, caption_path=nil, small_size=0, medium_size=0, large_size=0, delete_file=true)
     self.core_file_pid = core_file
     self.file_path     = file_path
     self.file_name     = file_name
     self.delete_file   = delete_file
 
     self.poster_path = poster_path
+    self.caption_path = caption_path
 
     self.small_size    = small_size
     self.medium_size   = medium_size
@@ -51,6 +52,23 @@ class ContentCreationJob
         end
 
         DerivativeCreator.new(poster_object.pid).generate_derivatives
+      end
+
+      if !caption_path.blank? # Video or Audio captions files
+        caption_object = TextFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint), core_record: core_record)
+
+        File.open(caption_path) do |caption_contents|
+          caption_object.add_file(caption_contents, 'content', "caption#{File.extname(caption_path)}")
+          caption_object.rightsMetadata.content = core_record.rightsMetadata.content #apply core_record permissions
+          # and sentinel permissions in case they exist
+          if sentinel && !sentinel.send(sentinel_class_to_symbol(klass.to_s)).blank?
+            # set content object to sentinel value
+            # convert klass to string to send to sentinel to get rights
+            caption_object.permissions = sentinel.send(sentinel_class_to_symbol(klass.to_s))["permissions"]
+            caption_object.mass_permissions = sentinel.send(sentinel_class_to_symbol(klass.to_s))["mass_permissions"]
+          end
+          caption_object.save!
+        end
       end
 
       # Zip files that need zippin'.  Just drop in other file types.
