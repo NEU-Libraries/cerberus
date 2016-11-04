@@ -14,7 +14,7 @@ class EmployeesController < ApplicationController
   include BlacklightAdvancedSearch::ParseBasicQ
   include BlacklightAdvancedSearch::Controller
 
-  before_filter :authenticate_user!, only: [:personal_graph, :personal_files, :my_communities, :my_loaders]
+  before_filter :authenticate_user!, only: [:my_communities, :my_loaders]
   before_filter :get_employee, only: [:show, :list_files, :communities, :loaders]
 
   rescue_from ActiveFedora::ObjectNotFoundError do |exception|
@@ -40,17 +40,27 @@ class EmployeesController < ApplicationController
     end
 
     if user_examining_self?
-      return redirect_to personal_graph_path
+      @page_title = "My DRS"
+      render :template => 'employees/personal_graph' and return
+    else
+      @page_title = "#{@employee.pretty_employee_name}"
     end
-
-    @page_title = "#{@employee.pretty_employee_name}"
 
     respond_to :html
   end
 
   def list_files
     if user_examining_self?
-      return redirect_to personal_files_path
+      fetch_employee
+
+      self.solr_search_params_logic += [:exclude_unwanted_models]
+      self.solr_search_params_logic += [:find_employees_files]
+
+      (@response, @document_list) = get_search_results
+
+      @page_title = "My Deposits"
+
+      render :template => 'employees/list_files' and return
     end
 
     self.solr_search_params_logic += [:add_access_controls_to_solr_params]
@@ -60,24 +70,6 @@ class EmployeesController < ApplicationController
     (@response, @document_list) = get_search_results
 
     @page_title = "#{@employee.pretty_employee_name}'s Files"
-  end
-
-  def personal_graph
-    fetch_employee
-    @page_title = "My DRS"
-  end
-
-  def personal_files
-    fetch_employee
-
-    self.solr_search_params_logic += [:exclude_unwanted_models]
-    self.solr_search_params_logic += [:find_employees_files]
-
-    (@response, @document_list) = get_search_results
-
-    @page_title = "My Deposits"
-
-    render :template => 'employees/list_files'
   end
 
   def attach_employee
