@@ -20,6 +20,7 @@ class CoreFilesController < ApplicationController
   include HandleHelper
   include MimeHelper
   include ChecksumHelper
+  include SentinelHelper
 
   include Blacklight::Catalog
   include Blacklight::Configurable # comply with BL 3.7
@@ -225,7 +226,20 @@ class CoreFilesController < ApplicationController
       mime = extract_mime_type(poster_path)
       type = mime.split("/").first.strip
       if type == 'image'
-        Cerberus::Application::Queue.push(ContentCreationJob.new(@core_file.pid, @core_file.tmp_path, @core_file.original_filename, poster_path))
+        if params[:caption]
+          captions_file = params[:caption]
+          captions_path = move_file_to_tmp(captions_file)
+          mime = extract_mime_type(captions_path)
+          type = mime.split("/").first.strip
+          if type == "text"
+            Cerberus::Application::Queue.push(ContentCreationJob.new(@core_file.pid, @core_file.tmp_path, @core_file.original_filename, poster_path, captions_path))
+          else
+            flash[:error] = "Error! The captions attached is not a text file."
+            redirect_to files_provide_metadata_path(@core_file.pid) and return
+          end
+        else
+          Cerberus::Application::Queue.push(ContentCreationJob.new(@core_file.pid, @core_file.tmp_path, @core_file.original_filename, poster_path))
+        end
       else
         flash[:error] = "Error! The thumbnail attached is not an image."
         redirect_to files_provide_metadata_path(@core_file.pid) and return
@@ -235,7 +249,7 @@ class CoreFilesController < ApplicationController
       m = params[:medium_image_size].to_f / max.to_f
       l = params[:large_image_size].to_f / max.to_f
 
-      Cerberus::Application::Queue.push(ContentCreationJob.new(@core_file.pid, @core_file.tmp_path, @core_file.original_filename, nil, s, m, l))
+      Cerberus::Application::Queue.push(ContentCreationJob.new(@core_file.pid, @core_file.tmp_path, @core_file.original_filename, nil, nil, s, m, l))
     else
       Cerberus::Application::Queue.push(ContentCreationJob.new(@core_file.pid, @core_file.tmp_path, @core_file.original_filename))
     end
@@ -636,6 +650,44 @@ class CoreFilesController < ApplicationController
       else
         flash[:error] = "Error! The thumbnail attached is not an image."
         redirect_to files_provide_metadata_path(@core_file.pid) and return
+      end
+    end
+
+    # process caption file
+    if params[:caption]
+      if @core_file.canonical_class == "VideoFile" || @core_file.canonical_class == "AudioFile"
+        # Destroy old caption file
+        @core_file.content_objects.each do |co|
+          if co.class == TextFile
+            co.destroy
+          end
+        end
+
+        file = params[:caption]
+        captions_path = move_file_to_tmp(file)
+        mime = extract_mime_type(captions_path)
+        type = mime.split("/").first.strip
+        sentinel = @core_file.parent.sentinel
+
+        if type == "text"
+          caption_object = TextFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint), core_record: @core_file)
+          File.open(captions_path) do |caption_contents|
+            caption_object.add_file(caption_contents, 'content', "caption#{File.extname(captions_path)}")
+            caption_object.rightsMetadata.content = @core_file.rightsMetadata.content #apply core_file permissions
+            # and sentinel permissions in case they exist
+            if sentinel && !sentinel.send(sentinel_class_to_symbol("TextFile")).blank?
+              # set content object to sentinel value
+              # convert klass to string to send to sentinel to get rights
+              caption_object.permissions = sentinel.send(sentinel_class_to_symbol("TextFile"))["permissions"]
+              caption_object.mass_permissions = sentinel.send(sentinel_class_to_symbol("TextFile"))["mass_permissions"]
+            end
+            caption_object.save!
+          end
+          @core_file.update_index
+        else
+          flash[:error] = "Error! The captions attached is not a text file."
+          redirect_to files_provide_metadata_path(@core_file.pid) and return
+        end
       end
     end
 

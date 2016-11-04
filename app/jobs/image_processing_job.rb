@@ -247,7 +247,7 @@ class ImageProcessingJob
           core_file.save!
         end
 
-        Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename, nil, s, m, l, true))
+        Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename, nil, nil, s, m, l, true))
 
         if core_file.save!
           UploadAlert.create_from_core_file(core_file, :create, "iptc")
