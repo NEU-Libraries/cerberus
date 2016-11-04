@@ -10,7 +10,7 @@ class AggregatedStatisticsJob
   def initialize(date)
     if date.nil?
       if AggregatedStatistic.count > 0
-        self.date = AggregatedStatistic.last.processed_at.+1.week
+        self.date = AggregatedStatistic.order(:processed_at).last.processed_at.+1.week
       else
         self.date = DateTime.now.end_of_week.-2.days
       end
