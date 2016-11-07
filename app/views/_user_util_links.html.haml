@@ -16,8 +16,8 @@
       %span.icon-caret-down( aria-hidden="true" )
     %ul.dropdown-menu(role="menu")
       - if !current_user.employee_id.blank?
-        %li{:class => ("active" if action_name == "personal_files")}
-          = link_to raw('<span class="icon-file" aria-hidden="true" ></span> My Deposits'), personal_files_path, "tab-index" => "-1"
+        %li{:class => ("active" if action_name == "employee_files")}
+          = link_to raw('<span class="icon-file" aria-hidden="true" ></span> My Deposits'), employee_files_path(current_user.employee_id), "tab-index" => "-1"
       - if current_user.loader?
         %li{:class => ("active" if action_name == "my_loaders")}
           %a.top_nav{href: my_loaders_path, "tab-index" => "-1"}
