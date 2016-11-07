@@ -14,7 +14,7 @@ class EmployeesController < ApplicationController
   include BlacklightAdvancedSearch::ParseBasicQ
   include BlacklightAdvancedSearch::Controller
 
-  before_filter :authenticate_user!, only: [:my_communities, :my_loaders]
+  before_filter :authenticate_user!, only: [:my_loaders]
   before_filter :get_employee, only: [:show, :list_files, :communities, :loaders]
 
   rescue_from ActiveFedora::ObjectNotFoundError do |exception|
@@ -75,21 +75,15 @@ class EmployeesController < ApplicationController
   def attach_employee
   end
 
-  def my_communities
-    fetch_employee
-    @page_title = "My Communities"
-    @communities = @employee.communities
-    @communities.sort_by!{|c| Community.find(c).title}
-    render :template => 'employees/communities'
-  end
-
   def communities
     if user_examining_self?
-      return redirect_to my_communities_path
+      @page_title = "My Communities"
+    else
+      @page_title = "#{@employee.pretty_employee_name}'s Communities"
     end
+
     @communities = @employee.communities
     @communities.sort_by!{|c| Community.find(c).title}
-    @page_title = "#{@employee.pretty_employee_name}'s Communities"
   end
 
   def my_loaders

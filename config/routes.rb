@@ -114,8 +114,6 @@ Cerberus::Application.routes.draw do
   get '/employees/:id/files' => 'employees#list_files', as: 'employee_files'
   get '/employees/:id/communities' => 'employees#communities', as: 'employee_communities'
   get '/employees/:id/loaders' => 'employees#loaders', as: 'employee_loaders'
-  get '/my_files' => 'employees#personal_files', as: 'personal_files'
-  get '/my_communities' => 'employees#my_communities', as: 'my_communities'
   get '/my_loaders' => 'employees#my_loaders', as: 'my_loaders'
 
   get '/select_account' => 'users#select_account', as: 'select_account'
