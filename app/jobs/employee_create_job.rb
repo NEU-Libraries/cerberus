@@ -73,6 +73,7 @@ class EmployeeCreateJob
         end
 
         attrs = {
+                  pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint),
                   title: title,
                   depositor: self.nuid,
                   parent: parent,
@@ -83,6 +84,9 @@ class EmployeeCreateJob
                 }
 
         personal_collection = Collection.new(attrs)
+
+        # Create a handle
+        personal_collection.identifier = make_handle("#{Rails.configuration.persistent_collection_path}#{personal_collection.pid}")
 
         saves = 0
 
