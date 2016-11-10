@@ -29,7 +29,7 @@ describe ParanoidRightsDatastream do
     end
 
     it "Does not throw an exception even when idiotic dates are entered" do
-      embargoed.embargo_release_date = "Novtober 10, 2016"
+      embargoed.embargo_release_date = "Novtober 10, 2999"
       embargoed.under_embargo?.should be true
 
       embargoed.embargo_release_date = "Julune 9, 2010"
