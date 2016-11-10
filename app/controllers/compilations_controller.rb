@@ -182,7 +182,7 @@ class CompilationsController < ApplicationController
     doc = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:entry_id]}\"").first)
     if doc.klass == "Collection"
       col_pids = []
-      doc.all_descendent_files.each do |f|
+      doc.all_descendent_pids.each do |f|
         col_pids << f.pid
       end
     end
@@ -217,7 +217,7 @@ class CompilationsController < ApplicationController
     doc = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:entry_id]}\"").first)
     if doc.klass == "Collection"
       col_pids = []
-      doc.all_descendent_files.each do |f|
+      doc.all_descendent_pids.each do |f|
         col_pids << f.pid
       end
     end
@@ -364,7 +364,7 @@ class CompilationsController < ApplicationController
       if e.klass == 'CoreFile'
         docs << e
       else
-        e.all_descendent_files.each do |f|
+        e.all_descendent_pids.each do |f|
           docs << f
         end
       end
