@@ -182,8 +182,8 @@ class CompilationsController < ApplicationController
     doc = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:entry_id]}\"").first)
     if doc.klass == "Collection"
       col_pids = []
-      doc.all_descendent_pids.each do |f|
-        col_pids << f.pid
+      doc.all_descendent_pids.each do |pid|
+        col_pids << pid
       end
     end
     respond_to do |format|
@@ -217,8 +217,8 @@ class CompilationsController < ApplicationController
     doc = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:entry_id]}\"").first)
     if doc.klass == "Collection"
       col_pids = []
-      doc.all_descendent_pids.each do |f|
-        col_pids << f.pid
+      doc.all_descendent_pids.each do |pid|
+        col_pids << pid
       end
     end
     if col_pids && !(@compilation.entry_ids & col_pids).empty?
@@ -358,20 +358,14 @@ class CompilationsController < ApplicationController
   end
 
   def total_count
-    @set = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first)
-    docs = []
-    @set.entries.each do |e|
-      if e.klass == 'CoreFile'
-        docs << e
-      else
-        e.all_descendent_pids.each do |f|
-          docs << f
-        end
-      end
-    end
-    docs.select! { |doc| (doc.public? || (!current_user.nil? && current_user.can?(:read, doc.pid))) }
-    @count = docs.count
-    return @count
+    set = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first)
+    @docs = set.entries
+    self.solr_search_params_logic += [:limit_to_compilation_scope]
+
+    (response, document_list) = get_search_results
+    pagination = paginate_params(response)
+
+    return pagination.total_count
   end
 
   private
@@ -418,6 +412,24 @@ class CompilationsController < ApplicationController
 
   def increase_facet_limit(solr_parameters, user_parameters)
     solr_parameters["facet.limit"] = "12"
+  end
+
+  def limit_to_compilation_scope(solr_parameters, user_parameters)
+    query = @docs.map do |doc|
+      pid = doc.pid
+      if doc.klass == "Collection"
+        # if collection
+        "parent_id_tesim:\"#{pid}\""
+      else
+        # else core file
+        "id:\"#{pid}\""
+      end
+    end
+
+    fq = query.join(" OR ")
+
+    solr_parameters[:fq] ||= []
+    solr_parameters[:fq] << fq
   end
 
   private
