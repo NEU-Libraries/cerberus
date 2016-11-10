@@ -92,7 +92,14 @@ module Api
 
         def limit_to_compilation_scope(solr_parameters, user_parameters)
           query = @pids.map do |pid|
-            set = "id:\"#{pid}\""
+            doc = SolrDocument.new ActiveFedora::SolrService.query("id:\"#{pid}\"").first
+            if doc.klass == "Collection"
+              # if collection
+              "parent_id_tesim:\"#{pid}\""
+            else
+              # else core file
+              "id:\"#{pid}\""
+            end
           end
 
           fq = query.join(" OR ")
