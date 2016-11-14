@@ -39,7 +39,7 @@ module Api
         # If the pid is a compilation, we need to get the pids and fake the search
         if @set.klass == "Compilation"
           comp = Compilation.find(@set.pid)
-          @pids = comp.object_ids
+          @pids = comp.entry_ids
           if @pids.count > 0
             self.solr_search_params_logic += [:limit_to_compilation_scope]
           else
