@@ -35,7 +35,19 @@ class DownloadsController < ApplicationController
   end
 
   def show
-    if asset.class == ImageThumbnailFile && (Rails.env.staging? || Rails.env.production?)
+    # 301 redirect fulltext if not logged in to try and boost google scholar
+    if current_user.nil?
+      if asset.class == PdfFile
+        doc = SolrDocument.new ActiveFedora::SolrService.query("id:\"#{asset.core_record.pid}\"").first
+        if doc.public?
+          if doc.category == "Theses and Dissertations" || doc.category == "Technical Reports" || doc.category == "Research Publications"
+            if !doc.canonical_object.first.embargo_date_in_effect?
+              redirect_to file_fulltext_path(doc.pid), :status => 301 and return
+            end
+          end
+        end
+      end
+    elsif asset.class == ImageThumbnailFile && (Rails.env.staging? || Rails.env.production?)
       response.headers['Cache-Control'] = "public"
     end
     super
