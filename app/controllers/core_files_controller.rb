@@ -85,6 +85,7 @@ class CoreFilesController < ApplicationController
     if !doc.canonical_object.first.embargo_date_in_effect?
       asset = PdfFile.find(doc.canonical_object.first.pid)
       if !asset.blank?
+        log_action('download', 'COMPLETE', asset.pid)
         file_name = "neu_#{asset.pid.split(":").last}.#{extract_extension(asset.properties.mime_type.first, File.extname(asset.original_filename || "").delete!("."))}"
         send_file asset.fedora_file_path, :filename =>  file_name, :type => asset.mime_type || extract_mime_type(asset.fedora_file_path), :disposition => 'inline'
       end
