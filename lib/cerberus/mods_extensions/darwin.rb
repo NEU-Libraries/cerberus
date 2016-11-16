@@ -159,7 +159,7 @@ module Cerberus::ModsExtensions::Darwin
           t.higherClassification(dwc "higherClassification")
           t.kingdom(dwc "kingdom")
           t.phylum(dwc "phylum")
-          t.class(dwc "class")
+          t.klass(dwc "class")
           t.order(dwc "order")
           t.family(dwc "family")
           t.genus(dwc "genus")
