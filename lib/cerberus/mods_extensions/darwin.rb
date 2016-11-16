@@ -68,7 +68,7 @@ module Cerberus::ModsExtensions::Darwin
           t.samplingProtocol(dwc "samplingProtocol")
           t.samplingEffort(dwc "samplingEffort")
           t.sampleSizeValue(dwc "sampleSizeValue")
-          t.sampleSizeUnit(dwc sampleSizeUnit
+          t.sampleSizeUnit(dwc "sampleSizeUnit")
           t.fieldNotes(dwc "fieldNotes")
           t.eventRemarks(dwc "eventRemarks")
           t.locationID(dwc "locationID")
