@@ -30,7 +30,7 @@ module Cerberus::ModsExtensions::Darwin
           t.recorded_by(dwc "recordedBy")
           t.individual_count(dwc "individualCount")
           t.organism_quantity(dwc "organismQuantity")
-          t.organism-quantityType(dwc "organismQuantityType")
+          t.organism_quantity_type(dwc "organismQuantityType")
           t.sex(dwc "sex")
           t.life_stage(dwc "lifeStage")
           t.reproductive_condition(dwc "reproductiveCondition")
