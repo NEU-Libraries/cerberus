@@ -7,11 +7,11 @@ module Cerberus::ModsExtensions::Darwin
     end
 
     def self.dwc(pth, hsh={})
-      return { path: pth, namespace_prefix: "dwc"}.merge(hsh)
+      return { path: pth, namespace_prefix: "dwc", index_as: [:stored_searchable, :facetable]}.merge(hsh)
     end
 
     def self.dcterms(pth, hsh={})
-      return { path: pth, namespace_prefix: "dcterms"}.merge(hsh)
+      return { path: pth, namespace_prefix: "dcterms", index_as: [:stored_searchable, :facetable]}.merge(hsh)
     end
 
     extend_terminology do |t|
