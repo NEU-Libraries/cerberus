@@ -10,9 +10,21 @@ module Cerberus::ModsExtensions::Darwin
       return { path: pth, namespace_prefix: "dwc"}.merge(hsh)
     end
 
+    def self.dcterms(pth, hsh={})
+      return { path: pth, namespace_prefix: "dcterms"}.merge(hsh)
+    end
+
     extend_terminology do |t|
       t.darwin_extension(path: "extension", namespace_prefix: "mods"){
         t.darwin(dwr "SimpleDarwinRecord"){
+          t.type(dcterms "type")
+          t.modified(dcterms "modified")
+          t.language(dcterms "language")
+          t.license(dcterms "license")
+          t.rights_holder(dcterms "rightsHolder")
+          t.access_rights(dcterms "accessRights")
+          t.bibliographic_citation(dcterms "bibliographicCitation")
+          t.references(dcterms "references")
           t.darwin_institution_id(dwc "institutionID")
           t.collection_id(dwc "collectionID")
           t.dataset_id(dwc "datasetID")
@@ -180,5 +192,6 @@ module Cerberus::ModsExtensions::Darwin
 
     private_class_method :dwr
     private_class_method :dwc
+    private_class_method :dcterms
   end
 end
