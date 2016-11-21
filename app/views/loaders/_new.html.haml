@@ -17,10 +17,13 @@
           2. Choose Collection
         = label_tag "parent", "Where do you want to deposit these files?", class: "required-label"
         - if @loader_short_name == 'multipage' || @loader_short_name == 'spreadsheet' || @loader_short_name == 'xml'
-          :javascript
-            var collections_for_autocomplete = #{@collections_options.to_json}
-          = text_field_tag :parent, "", id: 'collection_autocomplete', required: true
-          = hidden_field_tag :parent, "", id:"collection_parent", required: true
+          - if !current_user.nil? && ( current_user.admin_group? || current_user.admin? )
+            = text_field_tag :parent, "", id: "parent", required: true
+          -else
+            :javascript
+              var collections_for_autocomplete = #{@collections_options.to_json}
+            = text_field_tag :parent, "", id: 'collection_autocomplete', required: true
+            = hidden_field_tag :parent, "", id:"collection_parent", required: true
         - else
           = select_tag "parent", options_for_select(@collections_options), {prompt: 'Select Collection', required: true}
     %fieldset.span4
