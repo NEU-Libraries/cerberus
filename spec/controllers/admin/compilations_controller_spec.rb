@@ -51,6 +51,12 @@ describe Admin::CompilationsController do
       expect(response).to redirect_to(new_user_session_path)
     end
 
+    it "redirects for regular user" do
+      sign_in bill
+      get :update, id: compilation.pid
+      expect(response).to redirect_to(root_path)
+    end
+
     it "redirects to the show page on successful edit by autherized user" do
       sign_in admin
       attrs = {title: "Test title edit", description: "Test edit desc"}
