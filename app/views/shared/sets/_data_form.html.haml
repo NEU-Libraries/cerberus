@@ -40,10 +40,10 @@
           %p.help-block
             %ul
               %li Setting to 'public' will allow anyone accessing the site to see your collection.
-              %li Setting to 'private' will only allow users and groups explicated below to see your collection.
+              %li Setting to 'private' will only allow groups that are explicitly chosen to see your collection.
         %fieldset.span6
           %legend Permissions
-          = render partial: 'shared/sets/data_form_permissions_element', locals: {:f => f, :array_type => type, :permissions => filtered_permissions(@set) }
+          = render partial: 'shared/sets/data_form_permissions_element', locals: {:f => f, :array_type => type, :permissions => filtered_permissions(@set, (@set.class == Compilation || (current_user && current_user.admin?))) }
           %button#add_another_permission.btn.btn-success.btn-block{:type => "button"}
             %i.icon-plus-sign.icon-large
             Add Permission
