@@ -3,11 +3,15 @@ module CollectionsHelper
   # Removes the following from the permissions list
   # - The depositing user, who cannot have their edit privileges revoked through the frontend
   # - The group level permission for 'public' and 'registered' groups.
-  def filtered_permissions(collection)
+  def filtered_permissions(collection, show_repo = false)
     perms = collection.permissions
     depositor = collection.depositor
 
-    perms.select! { |coll| coll[:name] != depositor && coll[:name] != 'public' && coll[:name] != 'registered' && coll[:name] != '' && coll[:type] != 'user' && coll[:name] != 'northeastern:drs:repository:staff' }
+    if show_repo # This is for compilations or admin #1061
+      perms.select! { |coll| coll[:name] != depositor && coll[:name] != 'public' && coll[:name] != 'registered' && coll[:name] != '' && coll[:type] != 'user' }
+    else
+      perms.select! { |coll| coll[:name] != depositor && coll[:name] != 'public' && coll[:name] != 'registered' && coll[:name] != '' && coll[:type] != 'user' && coll[:name] != 'northeastern:drs:repository:staff' }
+    end
 
     return perms
   end
