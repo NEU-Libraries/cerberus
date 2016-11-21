@@ -1,0 +1,13 @@
+#deleteModal.modal.hide.fade{ "aria-hidden" => "true", "aria-labelledby" => "deleteModalLabel", role: "dialog", tabindex: "-1"}
+  .modal-header
+    %button.close{"aria-hidden" => "true", "data-dismiss" => "modal", type: "button"} x
+    %h3#deleteModalLabel
+      -if !title
+        = "Confirm deleting #{item.title}"
+      - else
+        = title
+  .modal-body
+    %p="Are you sure you want to delete \"#{item.title}\"?"
+  .modal-footer
+    %button.btn{"aria-hidden" => "true", "data-dismiss" => "modal"} Close
+    =link_to("Delete", delete_path, method: :delete, class: "btn btn-danger")

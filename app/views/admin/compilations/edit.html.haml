@@ -1,0 +1,35 @@
+%ul.breadcrumb
+  %li
+    = link_to 'Admin Panel', '/admin'
+  %li
+    = link_to 'Manage Sets', '/admin/sets'
+  %li.active
+    = link_to 'Edit ' "#{@set.title}".html_safe, {:action => "edit"}
+
+%h2.page-header= "Edit #{@set.title}".html_safe
+
+= form_for [:admin, @set] do |f|
+  %fieldset
+    .row-fluid
+      .span12
+        = f.label :title, "Title", class: "required-label", title: "Required Field", data: { toggle: "tooltip" }
+        = f.text_field :title, required: true, pattern: ".*\\S.*", class: "input-block-level", placeholder: "University Libraries", name: "compilation[title][]"
+        = f.label :description, "Description"
+        = f.text_area :description, pattern: ".*\\S.*", class: "input-block-level", rows: 5, name: "compilation[description][]"
+    .row-fluid
+      %fieldset.span6
+        %legend Mass Permissions
+        = label_tag :mass_permissions, "Choose Mass Permissions:"
+        = select_tag :mass_permissions, options_for_select(["public", "private"], @set.mass_permissions) , class: "span12", name: "compilation[mass_permissions]"
+        %p.help-block
+          %ul
+            %li Setting to 'public' will allow anyone accessing the site to see your collection.
+            %li Setting to 'private' will only allow users and groups explicated below to see your collection.
+      %fieldset.span6
+        %legend Permissions
+        = render partial: 'shared/sets/data_form_permissions_element', locals: {:f => f, :array_type => "compilation", :permissions => filtered_permissions(@set) }
+        %button#add_another_permission.btn.btn-success.btn-block{:type => "button"}
+          %i.icon-plus-sign.icon-large
+          Add Permission
+  .form-actions
+    = f.submit class: ['btn', 'btn-primary'], value: 'Submit', data: { disable_with: "Please wait..."}
