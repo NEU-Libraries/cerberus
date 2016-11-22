@@ -360,6 +360,11 @@ class CompilationsController < ApplicationController
   def total_count
     set = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first)
     @docs = set.entries
+
+    if @docs.count == 0
+      return 0
+    end
+    
     self.solr_search_params_logic += [:limit_to_compilation_scope]
 
     (response, document_list) = get_search_results
