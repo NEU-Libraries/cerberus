@@ -45,6 +45,10 @@ class Loaders::LoadsController < ApplicationController
         msg = "No collection was selected."
         session[:flash_error] = msg
         render :json => [{error: msg}].to_json and return
+      elsif !Collection.exists?(parent) && existing_files == false
+        msg = "No collection exists with the value entered."
+        session[:flash_error] = msg
+        render :json => [{error: msg}].to_json and return
       elsif (empty_file?(file))
         msg = "Error! Zero Length File!"
         session[:flash_error] = msg
