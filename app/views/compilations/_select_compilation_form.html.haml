@@ -3,6 +3,8 @@
   %h3#ajaxModalLabel Add to a #{t('drs.compilations.name').capitalize}.
 .modal-body
   =link_to( "Create New #{ t('drs.compilations.name').capitalize }", new_compilation_path(entry_id: params[:file]) , remote: true, id: "createCompilationLink", class: "btn btn-primary btn-block")
+  - if params[:file]
+    - doc = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:file]}\"").first)
   - @compilations.sort_by!{|c| c.title}
   - @compilations.each do |c|
     - object_ids = c.object_ids
@@ -13,11 +15,8 @@
       - if object_ids.include?(params[:file])
         = link_to("Remove from #{ c.title }", delete_entry_path(id: c.pid, entry_id: params[:file]), method: 'delete', remote: true, id: "remove-from-compilation-#{c.pid}", class: "btn btn-danger btn-block btn-compilation", data: { title: "#{c.title}"})
       - else
-        - doc = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:file]}\"").first)
         - if doc.klass == 'Collection'
-          - col_pids = []
-          - doc.all_descendent_files.each do |f|
-            - col_pids << f.pid
+          - col_pids = doc.all_descendent_pids
           -if col_pids && !(object_ids & col_pids).empty?
             = link_to("#{ c.title }", add_entry_path(id: c.pid, entry_id: params[:file]), method: 'post', remote: true, id: "add-to-compilation-#{c.pid}", class: "btn btn-warning btn-block btn-compilation", data: { title: "#{c.title}"})
           - else
