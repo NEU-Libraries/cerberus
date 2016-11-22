@@ -27,7 +27,7 @@
             %li Setting to 'private' will only allow users and groups explicated below to see your collection.
       %fieldset.span6
         %legend Permissions
-        = render partial: 'shared/sets/data_form_permissions_element', locals: {:f => f, :array_type => "compilation", :permissions => filtered_permissions(@set) }
+        = render partial: 'shared/sets/data_form_permissions_element', locals: {:f => f, :array_type => "compilation", :permissions => filtered_permissions(@set, (@set.class == Compilation || (current_user && current_user.admin?))) }
         %button#add_another_permission.btn.btn-success.btn-block{:type => "button"}
           %i.icon-plus-sign.icon-large
           Add Permission
