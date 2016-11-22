@@ -10,9 +10,7 @@
           = link_to("Edit", edit_admin_community_path(community),
           class: "btn btn-small btn-warning")
         %td
-          = link_to("Delete", admin_community_path(community),
-          method: :delete,
-          confirm: "This action is irreversible",
-          class: "btn btn-small btn-danger")
+          %a{ href: "#deleteModal", title: "Delete \"#{community.title}\"?", data: {toggle: 'modal'}, class:"btn btn-danger btn-small" } Delete
+          = render partial: 'admin/delete_modal', locals: { title: "Delete \"#{community.title}\"?", button_title: "Delete", delete_path: "#{admin_community_path(community)}", item: community }
 
   = render 'catalog/results_pagination'
