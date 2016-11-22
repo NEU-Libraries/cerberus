@@ -91,7 +91,7 @@ namespace :deploy do
 
   desc 'Build tmp dir'
   task :build_tmp_dir do
-    on roles(:app), :in => :sequence, :wait 5 do
+    on roles(:app), :in => :sequence, :wait => 5 do
       execute "cd #{release_path} && (mkdir tmp)"
     end
   end
