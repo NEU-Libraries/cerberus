@@ -21,13 +21,10 @@
     - caption_url = download_url(content.pid, {datastream_id: 'content'})
 #player
   :javascript
-    jwplayer.key="gi5wgpwDtAXG4xdj1uuW/NyMsECyiATOBxEO7A=="
+    jwplayer.key="6keHwedw4fQnScJOPJbFMey9UxSWktA1KWf1vIe5fGc="
   :javascript
     var provider = "#{provider}"
-    var primary = "flash"
-    if (typeof swfobject == 'undefined' || swfobject.getFlashPlayerVersion().major == 0) {
-      primary == "html5"
-    }
+    var primary = "html5";
     jwplayer("player").setup({
     sources:
     [
@@ -39,11 +36,11 @@
     provider: "#{provider}",
     fallback: "true",
     androidhls: "true",
+    hlshtml: "true",
     primary: primary,
     width: "100%",
     height: 400,
     flashplayer: "/assets/jwplayer/jwplayer.flash.swf",
-    html5player: "/assets/jwplayer/jwplayer.html5.js",
     tracks: [{
       file: "#{caption_url}",
       label: 'English',
