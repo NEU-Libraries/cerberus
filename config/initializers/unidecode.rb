@@ -1,6 +1,10 @@
 module Unidecoder
   class << self
     def decode(string)
+      string = string.force_encoding("UTF-8")
+      # Required because somehow Marcom was able to place invisible characters into filenames with Photo Mechanic
+      # which caused "\xC2" from ASCII-8BIT to UTF-8 (Encoding::UndefinedConversionError)
+      string.gsub!(/[\u002D\u00AD\u2010\u2011\u058A\u1806\u2E17\u30FB\uFE63\uFF0D\uFF65\u00B7\u1400\u2027\u2043\u2E1A\u2E31\u2E33\u2E40\u30A0]/,"-")
       # Kludge - en em and figure dash seems to be arbitrarily not being converted. Now doing manually
       string.gsub!("–", "-")
       string.gsub!("—", "-")

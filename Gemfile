@@ -1,7 +1,6 @@
 source 'https://rubygems.org'
 
-gem "sitemap_generator"
-gem "clamav"
+gem 'sitemap', :git => "https://github.com/ualbertalib/rails-sitemap.git"
 gem "colorize", "0.6.0" # https://github.com/capistrano/sshkit/issues/200
 gem "sshkit", :git => "https://github.com/cheald/sshkit.git", branch: "fix_multithread_conn_pooling" # https://github.com/capistrano/sshkit/pull/137 - staging was failing on cap deploy
 gem 'rails', '3.2.12'
@@ -73,6 +72,8 @@ gem 'will_paginate'
 gem 'damerau-levenshtein'
 gem 'axlsx', :git => 'https://github.com/randym/axlsx.git', :ref => '9e07402a26f776b6dcdc264a202d804c5d24e8b3'
 
+gem 'kataba'
+
 # Gems used only for assets and not required
 # in production environments by default.
 group :assets do
@@ -90,6 +91,10 @@ group :development do
   gem 'capistrano-bundler'
   gem 'rvm1-capistrano3', require: false
   gem 'rb-readline'
+end
+
+group :development, :staging, :secondary, :production do
+  gem "clamav"
 end
 
 group :development, :test do

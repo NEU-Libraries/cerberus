@@ -9,6 +9,8 @@
         %td
           = link_to("Edit", edit_admin_employee_path(employee), class: "btn btn-small btn-warning")
         %td
-          = link_to("Destroy", admin_employee_path(employee), method: :delete, confirm: "This action is irreversible", class: "btn btn-small btn-danger")
+          -# = link_to("Destroy", admin_employee_path(employee), method: :delete, confirm: "This action is irreversible", class: "btn btn-small btn-danger")
+          %a{ href: "#deleteModal", title: "Delete \"#{employee.employee_name}\"?", data: {toggle: 'modal'}, class:"btn btn-danger btn-small" } Delete
+          = render partial: 'admin/delete_modal', locals: { title: "Delete \"#{employee.employee_name}\"?", button_title: "Delete", delete_path: "#{admin_employee_path(employee)}", item: employee }
 
   = render 'catalog/results_pagination'

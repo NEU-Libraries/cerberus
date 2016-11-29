@@ -14,6 +14,9 @@
 - if params[:action] == "edit"
   %fieldset.row-fluid
     = render partial: 'core_files/metadata/replacement_thumbnail', locals: {:f => f}
+  - if @core_file.canonical_class == "VideoFile" || @core_file.canonical_class == "AudioFile"
+    %legend Captions
+    = render partial: "core_files/metadata/caption", locals: {:f => f}
 .row-fluid
   .span12
     %legend Basic Information
@@ -59,8 +62,8 @@
       = select_tag 'core_file[mass_permissions]', options_for_select(@core_file.valid_mass_permissions, 'public') , class: "span6"
     %p.help-block
       %ul
-        %li Setting to 'public' will allow anyone accessing the site to see your collection.
-        %li Setting to 'private' will only allow users and groups explicated below to see your collection.
+        %li Setting to 'public' will allow anyone accessing the site to see your item.
+        %li Setting to 'private' will only allow groups that are explicitly chosen to see your item.
     %legend Embargo Release Date
     = render partial: 'core_files/metadata/data_form_embargo_date', locals: {:f => f}
 

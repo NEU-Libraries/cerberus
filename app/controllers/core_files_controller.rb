@@ -20,6 +20,7 @@ class CoreFilesController < ApplicationController
   include HandleHelper
   include MimeHelper
   include ChecksumHelper
+  include SentinelHelper
 
   include Blacklight::Catalog
   include Blacklight::Configurable # comply with BL 3.7
@@ -84,6 +85,7 @@ class CoreFilesController < ApplicationController
     if !doc.canonical_object.first.embargo_date_in_effect?
       asset = PdfFile.find(doc.canonical_object.first.pid)
       if !asset.blank?
+        log_action('download', 'COMPLETE', asset.pid)
         file_name = "neu_#{asset.pid.split(":").last}.#{extract_extension(asset.properties.mime_type.first, File.extname(asset.original_filename || "").delete!("."))}"
         send_file asset.fedora_file_path, :filename =>  file_name, :type => asset.mime_type || extract_mime_type(asset.fedora_file_path), :disposition => 'inline'
       end
@@ -225,7 +227,20 @@ class CoreFilesController < ApplicationController
       mime = extract_mime_type(poster_path)
       type = mime.split("/").first.strip
       if type == 'image'
-        Cerberus::Application::Queue.push(ContentCreationJob.new(@core_file.pid, @core_file.tmp_path, @core_file.original_filename, poster_path))
+        if params[:caption]
+          captions_file = params[:caption]
+          captions_path = move_file_to_tmp(captions_file)
+          mime = extract_mime_type(captions_path)
+          type = mime.split("/").first.strip
+          if type == "text"
+            Cerberus::Application::Queue.push(ContentCreationJob.new(@core_file.pid, @core_file.tmp_path, @core_file.original_filename, poster_path, captions_path))
+          else
+            flash[:error] = "Error! The captions attached is not a text file."
+            redirect_to files_provide_metadata_path(@core_file.pid) and return
+          end
+        else
+          Cerberus::Application::Queue.push(ContentCreationJob.new(@core_file.pid, @core_file.tmp_path, @core_file.original_filename, poster_path))
+        end
       else
         flash[:error] = "Error! The thumbnail attached is not an image."
         redirect_to files_provide_metadata_path(@core_file.pid) and return
@@ -235,7 +250,7 @@ class CoreFilesController < ApplicationController
       m = params[:medium_image_size].to_f / max.to_f
       l = params[:large_image_size].to_f / max.to_f
 
-      Cerberus::Application::Queue.push(ContentCreationJob.new(@core_file.pid, @core_file.tmp_path, @core_file.original_filename, nil, s, m, l))
+      Cerberus::Application::Queue.push(ContentCreationJob.new(@core_file.pid, @core_file.tmp_path, @core_file.original_filename, nil, nil, s, m, l))
     else
       Cerberus::Application::Queue.push(ContentCreationJob.new(@core_file.pid, @core_file.tmp_path, @core_file.original_filename))
     end
@@ -639,6 +654,44 @@ class CoreFilesController < ApplicationController
       end
     end
 
+    # process caption file
+    if params[:caption]
+      if @core_file.canonical_class == "VideoFile" || @core_file.canonical_class == "AudioFile"
+        # Destroy old caption file
+        @core_file.content_objects.each do |co|
+          if co.class == TextFile
+            co.destroy
+          end
+        end
+
+        file = params[:caption]
+        captions_path = move_file_to_tmp(file)
+        mime = extract_mime_type(captions_path)
+        type = mime.split("/").first.strip
+        sentinel = @core_file.parent.sentinel
+
+        if type == "text"
+          caption_object = TextFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint), core_record: @core_file)
+          File.open(captions_path) do |caption_contents|
+            caption_object.add_file(caption_contents, 'content', "caption#{File.extname(captions_path)}")
+            caption_object.rightsMetadata.content = @core_file.rightsMetadata.content #apply core_file permissions
+            # and sentinel permissions in case they exist
+            if sentinel && !sentinel.send(sentinel_class_to_symbol("TextFile")).blank?
+              # set content object to sentinel value
+              # convert klass to string to send to sentinel to get rights
+              caption_object.permissions = sentinel.send(sentinel_class_to_symbol("TextFile"))["permissions"]
+              caption_object.mass_permissions = sentinel.send(sentinel_class_to_symbol("TextFile"))["mass_permissions"]
+            end
+            caption_object.save!
+          end
+          @core_file.update_index
+        else
+          flash[:error] = "Error! The captions attached is not a text file."
+          redirect_to files_provide_metadata_path(@core_file.pid) and return
+        end
+      end
+    end
+
     # only update metadata if there is a core_file object which is not the case for version updates
     update_metadata if params[:core_file]
 
@@ -729,7 +782,7 @@ class CoreFilesController < ApplicationController
     respond_to do |format|
       format.js {
         if @response.response['numFound'] == 0
-          render :nothing => true
+          render js: "$('#associated_files').html('No associated files were found.');"
         else
           render "associated_files"
         end
@@ -914,7 +967,7 @@ class CoreFilesController < ApplicationController
 
       core_file.tmp_path = tmp_path
       core_file.original_filename = file.original_filename
-      core_file.label = file.original_filename
+      # core_file.label = file.original_filename
 
       core_file.instantiate_appropriate_content_object(tmp_path)
 
@@ -1031,7 +1084,7 @@ class CoreFilesController < ApplicationController
         full_self_id = RSolr.escape("info:fedora/#{@core_file.pid}")
         query << "(#{Solrizer.solr_name("has_model", :symbol)}:\"info:fedora/afmodel:PageFile\" AND #{Solrizer.solr_name("is_part_of", :symbol)}:\"#{full_self_id}\")"
         solr_parameters[:sort] = "ordinal_value_isi asc, title_ssi asc"
-        solr_parameters[:fq] << query
+        solr_parameters[:fq] << query.join(" OR ")
       end
 
       def filter_by_all_associated_child_files(solr_parameters, user_parameters)

@@ -158,7 +158,13 @@ class ProcessXmlZipJob
               existing_files = set_existing_files(row_results)
               multipage = set_multipage(header_row)
             end
-            if !row_results.blank? #not a blank row
+            values = row_results.values
+            values.reject! { |c| c.blank? }
+            if values.blank?
+              # do nothing - the whole row is blank
+              count=count-1
+              next
+            else
               row_num = row_results["sequence"].to_i #int 0..n for multipage, 0 for non-multipage
               existing_file = false
               old_mods = nil
@@ -188,7 +194,7 @@ class ProcessXmlZipJob
 
                     core_file.rightsMetadata.permissions({person: "#{depositor}"}, 'edit')
                     core_file.original_filename = row_results["file_name"]
-                    core_file.label = row_results["file_name"]
+                    # core_file.label = row_results["file_name"]
                     if !multipage
                       core_file.instantiate_appropriate_content_object(new_file)
                     end
@@ -266,7 +272,7 @@ class ProcessXmlZipJob
 
                 if !(row_num == seq_num + 1)
                   if !core_file.blank?
-                    load_report.item_reports.create_failure("Row is out of order - row num #{row_num} seq_num #{seq_num}", "", row_results["file_name"])
+                    load_report.item_reports.create_failure("Row is out of order - row num #{row_num} seq_num #{seq_num}", "", Unidecoder.decode(row_results["file_name"]))
                     if this_row == end_row && (load_report.success_count + load_report.fail_count + load_report.modified_count == load_report.number_of_files)
                       load_report.completed = true
                       core_file.destroy

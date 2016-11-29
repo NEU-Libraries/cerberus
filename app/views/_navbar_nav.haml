@@ -1,9 +1,0 @@
- %ul.nav.pull-left(role="menu")
-  %li{:class => ("active" if action_name == "personal_graph")}
-    %a.top_nav{href: personal_graph_path} My Repository
-  %li{:class => ("active" if controller_name == "compilations" && action_name == "index")}
-    %a.top_nav{href: compilations_path}
-      = t('drs.compilations.name').capitalize + 's'
-  %li{:class => ("active" if (controller_name == "communities" || controller_name == "collections") && action_name == "show")}
-    %a.top_nav{href: catalog_communities_path} Browse
-/ /.nav /.pull-right

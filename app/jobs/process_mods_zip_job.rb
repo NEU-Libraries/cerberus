@@ -6,19 +6,18 @@ class ProcessModsZipJob
   include HandleHelper
   include Cerberus::TempFileStorage
 
-  attr_accessor :loader_name, :spreadsheet_file_path, :parent, :copyright, :current_user, :permissions, :preview, :depositor, :client, :report_id, :existing_files
+  attr_accessor :loader_name, :spreadsheet_file_path, :parent, :copyright, :current_user, :preview, :depositor, :client, :report_id, :existing_files
 
   def queue_name
     :mods_process_zip
   end
 
-  def initialize(loader_name, spreadsheet_file_path, parent, copyright, current_user, permissions, report_id, existing_files, depositor, preview=nil, client=nil)
+  def initialize(loader_name, spreadsheet_file_path, parent, copyright, current_user, report_id, existing_files, depositor, preview=nil, client=nil)
     self.loader_name = loader_name
     self.spreadsheet_file_path = spreadsheet_file_path
     self.parent = parent
     self.copyright = copyright
     self.current_user = current_user
-    self.permissions = permissions
     self.preview = preview
     self.client = client
     self.report_id = report_id
@@ -130,8 +129,13 @@ class ProcessModsZipJob
             if x == start
               existing_files = set_existing_files(row_results)
             end
-            if row_results.blank?
-              # do nothing
+            values = row_results.values
+            values.reject! { |c| c.blank? }
+            if values.blank?
+              # do nothing - the whole row is blank
+              load_report.number_of_files = load_report.number_of_files-1
+              load_report.save!
+              next
             else
               existing_file = false
               old_mods = nil
@@ -160,7 +164,7 @@ class ProcessModsZipJob
 
                     core_file.rightsMetadata.permissions({person: "#{depositor}"}, 'edit')
                     core_file.original_filename = row_results["file_name"]
-                    core_file.label = row_results["file_name"]
+                    # core_file.label = row_results["file_name"]
                     core_file.instantiate_appropriate_content_object(new_file)
                     sc_type = collection.smart_collection_type
                     if !sc_type.nil? && sc_type != ""
@@ -281,6 +285,23 @@ class ProcessModsZipJob
   end
 
   def assign_a_row(row_results, core_file)
+    identifiers = row_results.select { |key, value| key.to_s.match(/^identifier_\d+$/) if !value.blank? }
+    if identifiers.count > 0
+      ident_array = [core_file.mods.identifier[0]] #saves the blank handle spot in the template
+      type_hash = {core_file.mods.identifier[0]=>core_file.mods.identifier(0).type[0]}
+      identifiers.each do |key, id|
+        if !id.blank?
+          i = key.split("_").last
+          ident_array << id
+          type_hash[id] = row_results["identifier_#{i}_type"] unless row_results["identifier_#{i}_type"].blank?
+        end
+      end
+      core_file.mods.identifier_generic = ident_array
+      core_file.mods.identifier_generic.each.with_index(0) do |id, i|
+        core_file.mods.identifier_generic(i).type = type_hash[id] if !type_hash[id].blank?
+      end
+    end
+
     core_file.mods.title = row_results["title"]
     core_file.mods.title_info.sub_title = row_results["subtitle"] unless row_results["subtitle"].blank?
     core_file.mods.title_info.non_sort = row_results["title_initial_article"] unless row_results["title_initial_article"].blank?
@@ -311,7 +332,7 @@ class ProcessModsZipJob
       personal_creators = []
       creator_nums.each do |n|
         if !row_results["creator_#{n}_name"].blank?
-          name_type = row_results["creator_#{n}_name_type"]
+          name_type = row_results["creator_#{n}_name_type"].downcase
           if name_type == 'corporate'
             creator_hash['corporate_names'] << row_results["creator_#{n}_name"].split("|")[0].strip
           elsif name_type == 'personal'
@@ -324,16 +345,16 @@ class ProcessModsZipJob
       core_file.creators = creator_hash
       core_file.mods.personal_creators = personal_creators
       # assign primary
-      if row_results["creator_1_name_type"] == "personal"
+      if row_results["creator_1_name_type"].downcase == "personal"
         core_file.mods.corporate_name(0).usage = nil
         core_file.mods.personal_name(0).usage = "primary"
-      elsif row_results["creator_1_name_type"] == "corporate"
+      elsif row_results["creator_1_name_type"].downcase == "corporate"
         core_file.mods.corporate_name(0).usage = "primary"
         core_file.mods.personal_name(0).usage = nil
       end
       creator_nums.each do |n|
         if !row_results["creator_#{n}_name"].blank?
-          name_type = row_results["creator_#{n}_name_type"]
+          name_type = row_results["creator_#{n}_name_type"].downcase
           role = row_results["creator_#{n}_role"].split("|")[0]
           role_uri = row_results["creator_#{n}_role"].split("|")[1]
           affiliation = row_results["creator_#{n}_affiliation"]
@@ -520,9 +541,9 @@ class ProcessModsZipJob
     name_headings.each_with_index do |name, i|
       if !name[1].blank?
         i = i + 1 #spreadsheet index starts with 1 not 0
-        if row_results["subject_name_#{i}_type"] == "personal"
+        if row_results["subject_name_#{i}_type"].downcase == "personal"
           name_subjects[i] = {:personal => name[1].strip}
-        elsif row_results["subject_name_#{i}_type"] == "corporate"
+        elsif row_results["subject_name_#{i}_type"].downcase == "corporate"
           name_subjects[i] = {:corporate => name[1].split("|")[0].strip}
         end
       end
@@ -533,7 +554,7 @@ class ProcessModsZipJob
     core_file.mods.subject.each_with_index do |sub, i|
       if !core_file.mods.subject(i).name.blank?
         n = i - subj_count + 1
-        name_type = row_results["subject_name_#{n}_type"]
+        name_type = row_results["subject_name_#{n}_type"].downcase
         affiliation = row_results["subject_name_#{n}_affiliation"]
         authority = row_results["subject_name_#{n}_authority"].split("|")[0]
         authority_uri = row_results["subject_name_#{n}_authority"].split("|")[1]
@@ -731,7 +752,7 @@ class ProcessModsZipJob
     # for related items
     related_items = {}
     # original item
-    if !row_results["original_title"].blank? || !row_results["physical_location"].blank? || !row_results["identifier"].blank?
+    if !row_results["original_title"].blank? || !row_results["physical_location"].blank? || !row_results["original_identifier"].blank?
       related_items["original"] = {}
       if !row_results["original_title"].blank?
         related_items["original"][:title] = row_results["original_title"]
@@ -739,8 +760,8 @@ class ProcessModsZipJob
       if !row_results["physical_location"].blank?
         related_items["original"][:physical_location] = row_results["physical_location"]
       end
-      if !row_results["identifier"].blank?
-        related_items["original"][:identifier] = row_results["identifier"]
+      if !row_results["original_identifier"].blank?
+        related_items["original"][:identifier] = row_results["original_identifier"]
       end
     end
     # host aka collection
@@ -784,6 +805,11 @@ class ProcessModsZipJob
     results["pid"]                              = find_in_row(header_row, row_value, 'What is the PID for the digitized object?')
     results["file_name"]                        = find_in_row(header_row, row_value, 'File Name')
     results["poster_path"]                      = find_in_row(header_row, row_value, 'File Name - Poster')
+    identifiers = header_row.select{|x| x[/(?i)^Identifier \d+[ \f\t\v]*/] if !x.blank?}
+    identifiers.each.with_index(1) do |y, i|
+      results["identifier_#{i}"]                = find_in_row(header_row, row_value, "Identifier #{i}")
+      results["identifier_#{i}_type"]           = find_in_row(header_row, row_value, "Identifier Type #{i}")
+    end
     results["archives_identifier"]              = find_in_row(header_row, row_value, 'Archives Identifier')
     results["supplied_title"]                   = find_in_row(header_row, row_value, 'Is this a supplied title?')
     results["title_initial_article"]            = find_in_row(header_row, row_value, 'Title Initial Article')
@@ -863,7 +889,7 @@ class ProcessModsZipJob
     end
     results["original_title"]                               = find_in_row(header_row, row_value, 'Original Title')
     results["physical_location"]                            = find_in_row(header_row, row_value, 'What is the physical location for this object?')
-    results["identifier"]                                   = find_in_row(header_row, row_value, 'What is the identifier for this object?')
+    results["original_identifier"]                                   = find_in_row(header_row, row_value, 'What is the original identifier?')
     results["collection_title"]                             = find_in_row(header_row, row_value, 'Collection Title')
     results["series_title"]                                 = find_in_row(header_row, row_value, 'Series Title')
 

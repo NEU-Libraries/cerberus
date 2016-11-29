@@ -2,7 +2,6 @@ class Loaders::LoadsController < ApplicationController
   include Cerberus::Controller
   include MimeHelper
   include ZipHelper
-  include Cerberus::TempFileStorage
 
   before_filter :authenticate_user!
 
@@ -31,7 +30,7 @@ class Loaders::LoadsController < ApplicationController
     render 'loaders/new', locals: { collections_options: @collections_options}
   end
 
-  def process_create(permissions, short_name, controller_name, existing_files=false, derivatives=false)
+  def process_create(short_name, controller_name, existing_files=false, derivatives=false)
     @copyright = t('loaders.'+short_name+'.copyright')
     begin
       # check error condition No files
@@ -46,6 +45,10 @@ class Loaders::LoadsController < ApplicationController
         msg = "No collection was selected."
         session[:flash_error] = msg
         render :json => [{error: msg}].to_json and return
+      elsif existing_files == false && (!parent.start_with?("neu:") || !Collection.exists?(parent))
+        msg = "No collection exists with the value entered."
+        session[:flash_error] = msg
+        render :json => [{error: msg}].to_json and return
       elsif (empty_file?(file))
         msg = "Error! Zero Length File!"
         session[:flash_error] = msg
@@ -55,7 +58,7 @@ class Loaders::LoadsController < ApplicationController
         session[:flash_error] = msg
         render :json => [{error: msg}].to_json and return
       else
-        process_file(file, parent, @copyright, permissions, short_name, existing_files, derivatives)
+        process_file(file, parent, @copyright, short_name, existing_files, derivatives)
       end
     rescue => exception
       logger.error controller_name+"::create rescued #{exception.class}\n\t#{exception.to_s}\n #{exception.backtrace.join("\n")}\n\n"
@@ -102,11 +105,15 @@ class Loaders::LoadsController < ApplicationController
   end
 
   protected
-    def process_file(file, parent, copyright, permissions, short_name, existing_files, derivatives=false)
+    def process_file(file, parent, copyright, short_name, existing_files, derivatives=false)
       @loader_name = t('loaders.'+short_name+'.long_name')
       if virus_check(file) == 0
-        new_file = move_file_to_tmp(file.tempfile)
-        new_path = File.join( File.dirname(new_file), File.basename(new_file)+"_files" )
+        tempdir = Pathname.new("#{Rails.application.config.tmp_path}/")
+        uniq_hsh = Digest::MD5.hexdigest("#{file.original_filename}")[0,2]
+        file_name = "#{Time.now.to_f.to_s.gsub!('.','-')}-#{uniq_hsh}"
+        new_path = tempdir.join(file_name).to_s
+        new_file = "#{new_path}.zip"
+        FileUtils.mv(file.tempfile.path, new_file)
         #if zip
         if extract_mime_type(new_file) == 'application/zip'
           begin
@@ -115,7 +122,7 @@ class Loaders::LoadsController < ApplicationController
               #mods spreadsheet job
               spreadsheet_file_path = unzip(new_file, new_path)
               @report_id = Loaders::LoadReport.create_from_strings(current_user, @loader_name, parent)
-              ProcessModsZipJob.new(@loader_name, spreadsheet_file_path, parent, copyright, current_user, permissions, @report_id, existing_files, nil, true).run
+              ProcessModsZipJob.new(@loader_name, spreadsheet_file_path, parent, copyright, current_user, @report_id, existing_files, nil, true).run
               load_report = Loaders::LoadReport.find(@report_id)
               session[:flash_success] = "Your file has been submitted and is now being processed. You will receive an email when the load is complete."
               if !load_report.comparison_file_pid.blank?
@@ -137,7 +144,7 @@ class Loaders::LoadsController < ApplicationController
             else
               # send to iptc job
               @report_id = Loaders::LoadReport.create_from_strings(current_user, @loader_name, parent)
-              Cerberus::Application::Queue.push(ProcessIptcZipJob.new(@loader_name, new_file.to_s, parent, copyright, current_user, permissions, @report_id,  derivatives))
+              Cerberus::Application::Queue.push(ProcessIptcZipJob.new(@loader_name, new_file.to_s, parent, copyright, current_user, @report_id,  derivatives))
               session[:flash_success] = "Your file has been submitted and is now being processed. You will receive an email when the load is complete."
               render :json => {report_id: @report_id}.to_json and return
             end
