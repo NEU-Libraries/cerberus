@@ -1,19 +1,18 @@
 %h2 Administrative Panel
 %br
 
-= link_to("Manage Communities", admin_communities_path, class: "btn btn-lg btn-primary")
-%br
-%br
-= link_to("Manage Collections", admin_collections_path, class: "btn btn-lg btn-primary")
-%br
-%br
-= link_to("Manage Files", admin_files_path, class: "btn btn-lg btn-primary")
-%br
-%br
-= link_to("Manage Employees", admin_employees_path, class: "btn btn-lg btn-primary")
-%br
-%br
-= link_to("Manage Users", admin_users_path, class: "btn btn-lg btn-primary")
-%br
-%br
-= link_to("Statistics", '/admin/statistics', class: "btn btn-lg btn-info")
+%div.row
+  %div.span3
+    = link_to("Manage Collections", admin_collections_path, class: "btn btn-block btn-primary")
+    %br
+    = link_to("Manage Communities", admin_communities_path, class: "btn btn-block btn-primary")
+    %br
+    = link_to("Manage Employees", admin_employees_path, class: "btn btn-block btn-primary")
+    %br
+    = link_to("Manage Files", admin_files_path, class: "btn btn-block btn-primary")
+    %br
+    = link_to("Manage Sets", admin_compilations_path, class: "btn btn-block btn-primary")
+    %br
+    = link_to("Manage Users", admin_users_path, class: "btn btn-block btn-primary")
+    %br
+    = link_to("Statistics", '/admin/statistics', class: "btn btn-block btn-info")

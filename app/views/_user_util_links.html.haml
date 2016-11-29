@@ -23,7 +23,7 @@
           %a.top_nav{href: my_loaders_path, "tab-index" => "-1"}
             %span.icon-upload-alt( aria-hidden="true")
             My Loaders
-      %li{:class => ("active" if (controller_name == "compilations" && action_name == "index"))}
+      %li
         %a.top_nav{href: compilations_path,  "tab-index" => "-1"}
           =render partial: 'shared/icon', locals: { class_string: t('drs.compilations.icon') }
           =t('drs.compilations.name').capitalize + 's'
