@@ -16,6 +16,11 @@ describe ProcessModsZipJob do
 
   shared_examples_for "successful mods" do
     it "assigns mods values" do
+      cf.mods.identifier(0).type.should == ["hdl"]
+      cf.mods.identifier_generic(1).should == ["M130.B01.F003.001"]
+      cf.mods.identifier_generic(1).type.should == ["archives"]
+      cf.mods.identifier_generic(2).should == ["garble"]
+      cf.mods.identifier_generic(2).type.should == []
       cf.title.should == "Annual report of the Citywide Educational Coalition, 1981-1982."
       cf.mods.title_info.non_sort.should == ["The"]
       cf.mods.corporate_name(0).usage.should == ["primary"]
@@ -177,7 +182,7 @@ describe ProcessModsZipJob do
       @lr.number_of_files = 4
       @lr.save!
       new_file = "#{Rails.application.config.tmp_path}/demo_mods_new_file/manifest.xlsx"
-      ProcessModsZipJob.new(@loader_name, new_file, @parent, copyright, @user, @report_id, false, @user.nuid, nil).run
+      ProcessModsZipJob.new(@loader_name, new_file, @parent, copyright, @user, @report_id, false, @user.nuid, nil, @client).run
     end
 
     it "should set depositor to current user" do
@@ -200,6 +205,13 @@ describe ProcessModsZipJob do
         @lr.reload
         CoreFile.find(@lr.item_reports[0].pid)
        }
+    end
+
+    it "should have a handle" do
+      @lr.reload
+      cf = CoreFile.find(@lr.item_reports[0].pid)
+      cf.mods.identifier.should == ["http://hdl.handle.net/2047/D10000001"]
+      cf.identifier.should == "http://hdl.handle.net/2047/D10000001"
     end
 
     it "should fail if no title" do
