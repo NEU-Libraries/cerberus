@@ -287,6 +287,7 @@ class CoreFilesController < ApplicationController
   def show
     @core_file = fetch_solr_document
     @mods = fetch_mods
+    @darwin = fetch_darwin
 
     begin
       @parent = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{@core_file.parent}\"").first)
@@ -906,6 +907,30 @@ class CoreFilesController < ApplicationController
     def fetch_mods
       Rails.cache.fetch("/mods/#{@core_file.pid}-#{@core_file.updated_at}", :expires_in => 12.hours) do
         Sanitize.clean(Kramdown::Document.new(render_mods_display(CoreFile.find(@core_file.pid))).to_html, :elements => ['sup', 'sub', 'dt', 'dd', 'br', 'a'], :attributes => {'a' => ['href']}).html_safe
+      end
+    end
+
+    def fetch_darwin
+      Rails.cache.fetch("/darwin/#{@core_file.pid}-#{@core_file.updated_at}", :expires_in => 12.hours) do
+        cf = CoreFile.find(@core_file.pid)
+        xml = Nokogiri::XML(cf.mods.content)
+
+        output = "<dl>"
+
+        xml.xpath("//dwc:*").each do |n|
+          begin
+            # <dt title="Title">Title:</dt>
+            label = I18n.t("darwin.#{n.name}", :raise => true)
+            val = n.child.content
+            output << "<dt title=\"#{label}\">#{label}:</dt><dd>#{val}</dd>"
+          rescue I18n::MissingTranslationData
+            # No mapping - do nothing
+          end
+        end
+
+        output << "</dl>"
+
+        Sanitize.clean(Kramdown::Document.new(output).to_html, :elements => ['sup', 'sub', 'dt', 'dd', 'br', 'a'], :attributes => {'a' => ['href']}).html_safe
       end
     end
 

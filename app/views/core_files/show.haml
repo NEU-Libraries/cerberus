@@ -65,6 +65,8 @@
 
           .drs-item-add-details
             = @mods
+          .drs-item-add-details
+            = @darwin
           - if @content_objects
             %section.drs-item-derivatives
               = render partial: 'show_derivatives', locals: {contents: @content_objects}
