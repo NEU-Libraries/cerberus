@@ -24,10 +24,13 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   # Forward the Jasmine interface on this port
   config.vm.network :forwarded_port, guest: 8888, host: 8888
+  config.vm.network :forwarded_port, guest: 80, host: 8080
 
   # If true, then any SSH connections made will enable agent forwarding.
   # Default value: false
   config.ssh.forward_agent = true
+  config.ssh.insert_key = false
+  # config.ssh.private_key_path = "~/.vagrant.d/insecure_private_key"
 
   # Optimizations for vmware_fusion machines
   config.vm.provider "vmware_fusion" do |vm|
@@ -47,11 +50,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   end
 
   config.vm.provision "shell", path: "script/vagrant_provisioning.sh", privileged: false
+  config.vm.provision 'ansible' do |ansible|
+    ansible.extra_vars = { ansible_ssh_user: 'vagrant'}
+    ansible.playbook = 'script/playbook.yml'
+  end
 
   # Share the current directory to /vagrant on the virtual machine
   config.vm.synced_folder "." , "/home/vagrant/cerberus", nfs: true
   config.vm.network "private_network", ip: "192.168.50.4"
-
-  config.ssh.private_key_path = "~/.vagrant.d/insecure_private_key"
-  config.ssh.insert_key = false
 end
