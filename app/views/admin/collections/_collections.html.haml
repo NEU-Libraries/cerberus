@@ -12,9 +12,7 @@
           %td
             = link_to("Revive", admin_revive_collection_path(collection), class: "btn btn-small btn-warning")
         %td
-          = link_to("Delete", admin_delete_collection_path(collection),
-          method: :delete,
-          confirm: "This action is irreversible",
-          class: "btn btn-small btn-danger")
+          %a{ href: "#deleteModal", title: "Delete \"#{collection.title}\"?", data: {toggle: 'modal'}, class:"btn btn-danger btn-small" } Delete
+          = render partial: 'admin/delete_modal', locals: { title: "Delete \"#{collection.title}\"?", button_title: "Delete", delete_path: "#{admin_delete_collection_path(collection)}", item: collection }
 
   = render 'catalog/results_pagination'

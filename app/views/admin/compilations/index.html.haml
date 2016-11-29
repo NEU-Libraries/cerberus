@@ -1,0 +1,39 @@
+%ul.breadcrumb
+  %li
+    = link_to 'Admin Panel', '/admin'
+  %li.active
+    = link_to 'Manage Sets', admin_compilations_path
+
+%h2.page-header
+  = "All " + t('drs.compilations.name').capitalize + "s"
+
+= render 'catalog/results_pagination'
+
+%table.table.table-striped
+  -if @sets.count > 0
+    %tr
+      %th Title
+      %th Depositor
+      %th
+      %th
+    - @sets.each do |set|
+      %tr
+        %td
+          %span.large= link_to(set.title.html_safe, compilation_path(set))
+          %span.small= " (#{set.pid})"
+        %td
+          - depo = User.find_by_nuid(set.depositor)
+          - if depo
+            = depo.name + " (" + set.depositor + ")"
+          - else
+            = set.depositor
+        %td
+          = link_to("Edit", edit_admin_compilation_path(set),
+          class: "btn btn-small btn-warning")
+        %td
+          %a{ href: "#deleteModal", title: "Delete \"#{set.title}\"?", data: {toggle: 'modal'}, class:"btn btn-danger btn-small" } Delete
+          = render partial: 'admin/delete_modal', locals: { title: "Delete \"#{set.title}\"?", button_title: "Delete", delete_path: "#{admin_compilation_path(set)}", item: set }
+  - else
+    There are no currently no sets in the system.
+
+= render 'catalog/results_pagination'

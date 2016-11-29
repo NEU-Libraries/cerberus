@@ -87,6 +87,8 @@ class EmployeeCreateJob
 
         # Create a handle
         personal_collection.identifier = make_handle("#{Rails.configuration.persistent_collection_path}#{personal_collection.pid}")
+        # Add drs staff to permissions for #1063
+        personal_collection.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, "edit")
 
         saves = 0
 
