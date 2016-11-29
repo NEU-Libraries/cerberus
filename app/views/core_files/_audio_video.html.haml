@@ -4,6 +4,7 @@
   .replace_thumbs.hidden
     = render 'shared/thumbnails/full_picture'
 - type = dir = encoded = provider = pid = ''
+- caption_url = nil
 - @content_objects.each do |content|
   -if content.klass == "VideoFile" || content.klass == "AudioFile"
     - if (!current_user.nil? && (current_user.can? :read, content)) || content.public?
@@ -16,31 +17,35 @@
       - elsif content.mime_type == 'audio/mpeg'
         - type = 'MP3'
         - provider = 'sound'
+  -elsif content.klass == "TextFile"
+    - caption_url = download_url(content.pid, {datastream_id: 'content'})
 #player
   :javascript
-    jwplayer.key="gi5wgpwDtAXG4xdj1uuW/NyMsECyiATOBxEO7A=="
+    jwplayer.key="6keHwedw4fQnScJOPJbFMey9UxSWktA1KWf1vIe5fGc="
   :javascript
     var provider = "#{provider}"
-    var primary = "flash"
-    if (typeof swfobject == 'undefined' || swfobject.getFlashPlayerVersion().major == 0) {
-      primary == "html5"
-    }
+    var primary = "html5";
     jwplayer("player").setup({
-    sources:
-    [
-    { file: "rtmp://libwowza.neu.edu:1935/vod/_definst_/#{type}:datastreamStore/cerberusData/newfedoradata/datastreamStore/#{dir}/info%3Afedora%2F#{encoded}%2Fcontent%2Fcontent.0"},
-    { file: "http://libwowza.neu.edu:1935/vod/_definst_/datastreamStore/cerberusData/newfedoradata/datastreamStore/#{dir}/#{type}:" + encodeURIComponent("info%3Afedora%2F#{encoded}%2Fcontent%2Fcontent.0") + "/playlist.m3u8", type:"#{type}"},
-    { file: "http://libwowza.neu.edu/datastreamStore/cerberusData/newfedoradata/datastreamStore/#{dir}/" + encodeURIComponent("info%3Afedora%2F#{encoded}%2Fcontent%2Fcontent.0"), type:"#{type}"},
-    ],
     image: "#{poster}",
     provider: "#{provider}",
-    fallback: "true",
     androidhls: "true",
+    hlshtml: "true",
     primary: primary,
     width: "100%",
     height: 400,
     flashplayer: "/assets/jwplayer/jwplayer.flash.swf",
-    html5player: "/assets/jwplayer/jwplayer.html5.js"
+    sources:
+    [
+    { file: "rtmp://libwowza.neu.edu:1935/vod/_definst_/#{type}:datastreamStore/cerberusData/newfedoradata/datastreamStore/#{dir}/info%3Afedora%2F#{encoded}%2Fcontent%2Fcontent.0"},
+    { file: "http://libwowza.neu.edu:1935/vod/_definst_/datastreamStore/cerberusData/newfedoradata/datastreamStore/#{dir}/#{type}:" + encodeURIComponent("info%3Afedora%2F#{encoded}%2Fcontent%2Fcontent.0") + "/playlist.m3u8"},
+    { file: "http://libwowza.neu.edu/datastreamStore/cerberusData/newfedoradata/datastreamStore/#{dir}/" + encodeURIComponent("info%3Afedora%2F#{encoded}%2Fcontent%2Fcontent.0"), type:"#{type.downcase}"},
+    ],
+    tracks: [{
+      file: "#{caption_url}",
+      label: 'English',
+      kind: 'captions',
+      "default": true
+    }]
     })
     var errorMessage = function() {
       $(".alert-video").removeClass("hidden").text("There was an error playing this file. Please try on a different device, verify Flash is enabled, or download the file.")

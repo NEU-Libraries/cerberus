@@ -28,6 +28,10 @@ every 1.day, at: '4:00am'  do
   rake "sitemap:generate"
 end
 
+every 1.day, at: '8:00am'  do
+  rake "sitemap:ping"
+end
+
 every :sunday, :at => '4:00am' do
   runner "AggregatedStatisticsJob.new(nil).run"
 end

@@ -1,5 +1,5 @@
 class ImageProcessingJob
-  attr_accessor :file, :file_name, :parent, :copyright, :report_id, :permissions, :client, :derivatives
+  attr_accessor :file, :file_name, :parent, :copyright, :report_id, :client, :derivatives, :user
   include MimeHelper
   include HandleHelper
   include ApplicationHelper
@@ -8,15 +8,15 @@ class ImageProcessingJob
     :loader_image_processing
   end
 
-  def initialize(file, file_name, parent, copyright, report_id, permissions=[], derivatives=false, client=nil)
+  def initialize(file, file_name, parent, copyright, report_id, user, derivatives=false, client=nil)
     self.file = file
     self.file_name = file_name
     self.parent = parent
     self.copyright = copyright
     self.report_id = report_id
-    self.permissions = permissions
     self.client = client
     self.derivatives = derivatives
+    self.user = user
   end
 
   def run
@@ -37,12 +37,12 @@ class ImageProcessingJob
       core_file.properties.parent_id = core_file.parent.pid
       core_file.tag_as_in_progress
       core_file.tmp_path = file
-      core_file.properties.original_filename = File.basename(file_name)
-      core_file.label = File.basename(file_name)
+      core_file.original_filename = File.basename(file_name)
+      # core_file.label = File.basename(file_name)
 
       core_file.instantiate_appropriate_content_object(file)
       if core_file.canonical_class != "ImageMasterFile" or extract_mime_type(file) != 'image/jpeg'
-        report = load_report.item_reports.create_failure("File is not a JPG image", "", core_file.label)
+        report = load_report.item_reports.create_failure("File is not a JPG image", "", core_file.original_filename)
         core_file.destroy
         FileUtils.rm(file)
       else
@@ -232,20 +232,22 @@ class ImageProcessingJob
           s = 0.to_f
         end
 
-        permissions['CoreFile'].each do |perm, vals|
-          vals.each do |group|
-            if group.include? "northeastern"  #its a grouper group
-              core_file.rightsMetadata.permissions({group: group}, "#{perm}")
-            elsif group == "public"
-              core_file.mass_permissions = "public"
-            elsif group == "private"
-              core_file.mass_permissions = "private"
-            else #its an nuid for a user
-              core_file.rightsMetadata.permissions({person: group}, "#{perm}")
-            end
-          end
+        # Does the collection have a sentinel?
+        collection = Collection.find(core_file.parent.pid)
+        sentinel = collection.sentinel
+
+        if sentinel && !sentinel.core_file.blank?
+          core_file.permissions = sentinel.core_file["permissions"]
+          core_file.mass_permissions = sentinel.core_file["mass_permissions"]
+          core_file.depositor = user.nuid
+          core_file.save!
+        else
+          core_file.rightsMetadata.content = collection.rightsMetadata.content
+          core_file.depositor = user.nuid
+          core_file.save!
         end
-        Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename, nil, s, m, l, true, permissions))
+
+        Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename, nil, nil, s, m, l, true))
 
         if core_file.save!
           UploadAlert.create_from_core_file(core_file, :create, "iptc")
@@ -264,7 +266,7 @@ class ImageProcessingJob
       errors_for_pid.warn "#{Time.now} - #{$!}"
       errors_for_pid.warn "#{Time.now} - #{$@}"
       iptc = "" if iptc.empty?
-      report = load_report.item_reports.create_failure(error.message, iptc, File.basename(file_name))
+      report = load_report.item_reports.create_failure(error.message, iptc, Unidecoder.decode(File.basename(file_name)))
       FileUtils.rm(file)
       core_file.destroy
       raise error
@@ -272,7 +274,7 @@ class ImageProcessingJob
   end
 
   def create_special_error(error_message, iptc, core_file, load_report)
-    report = load_report.item_reports.create_failure(error_message, iptc, core_file.label)
+    report = load_report.item_reports.create_failure(error_message, iptc, core_file.original_filename)
     core_file.destroy
     FileUtils.rm(file)
     return report

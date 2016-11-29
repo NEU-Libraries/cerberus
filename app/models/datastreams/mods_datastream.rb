@@ -162,19 +162,32 @@ class ModsDatastream < ActiveFedora::OmDatastream
       t.authority(path: {attribute: 'authority'})
       t.authority_uri(path: {attribute: 'authorityURI'})
       t.value_uri(path: {attribute: 'valueURI'})
-      t.cartographics(path: 'cartographics', namespace_prefix: 'mods'){
-        t.scale(path: 'scale', namespace_prefix: 'mods')
-        t.projection(path: 'projection', namespace_prefix: 'mods')
-        t.coordinates(path: 'coordinates', namespace_prefix: 'mods')
+      t.hierarchical_geographic(path: 'hierarchicalGeographic', namespace_prefix: 'mods'){
+        t.continent(path: 'continent', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable])
+        t.country(path: 'country', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable])
+        t.region(path: 'region', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable])
+        t.state(path: 'state', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable])
+        t.territory(path: 'territory', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable])
+        t.county(path: 'county', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable])
+        t.city(path: 'city', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable])
+        t.city_section(path: 'citySection', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable])
+        t.island(path: 'island', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable])
+        t.area(path: 'area', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable])
+        t.extraterrestrial_area(path: 'extraterrestrialArea', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable])
       }
-      t.geographic(path: 'geographic', namespace_prefix: 'mods')
+      t.cartographics(path: 'cartographics', namespace_prefix: 'mods'){
+        t.scale(path: 'scale', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable])
+        t.projection(path: 'projection', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable])
+        t.coordinates(path: 'coordinates', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable])
+      }
+      t.geographic(path: 'geographic', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable])
       t.topic(path: 'topic', namespace_prefix: 'mods', index_as: [:stored_searchable]){
         t.authority(path: { attribute: 'authority' })
       }
       t.scoped_topic(path: 'topic', namespace_prefix: 'mods', attributes: { authority: :any })
-      t.name(path: 'name', namespace_prefix: 'mods', index_as: [:stored_searchable]){
+      t.name(path: 'name', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable]){
         t.type(path: {attribute: 'type'})
-        t.name_part(path: 'namePart', namespace_prefix: 'mods', attributes: { type: :none })
+        t.name_part(path: 'namePart', namespace_prefix: 'mods', attributes: { type: :none }, index_as: [:stored_searchable, :facetable])
         t.name_part_given(path: 'namePart', namespace_prefix: 'mods', attributes: { type: 'given' })
         t.name_part_family(path: 'namePart', namespace_prefix: 'mods', attributes: { type: 'family' })
         t.name_part_date(path: 'namePart', namespace_prefix: 'mods', attributes: {type: 'date'})
@@ -190,16 +203,16 @@ class ModsDatastream < ActiveFedora::OmDatastream
       }
       t.title_info(path: 'titleInfo', namespace_prefix: 'mods'){
         t.type(path: {attribute: 'type'})
-        t.title(path: 'title', namespace_prefix: 'mods')
+        t.title(path: 'title', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable])
         t.non_sort(path: 'nonSort', namespace_prefix: 'mods')
-        t.sub_title(path: 'subTitle', namespace_prefix: 'mods')
+        t.sub_title(path: 'subTitle', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable])
       }
       t.geographic_code(path: 'geographicCode', namespace_prefix: 'mods'){
         t.authority(path: {attribute: 'authority'})
         t.authority_uri(path: {attribute: 'authorityURI'})
         t.value_uri(path: {attribute: 'valueURI'})
       }
-      t.genre(path: 'genre', namespace_prefix: 'mods'){
+      t.genre(path: 'genre', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable]){
         t.authority(path: {attribute: 'authority'})
         t.authority_uri(path: {attribute: 'authorityURI'})
         t.value_uri(path: {attribute: 'valueURI'})
@@ -207,6 +220,11 @@ class ModsDatastream < ActiveFedora::OmDatastream
     }
 
     t.identifier(path: 'identifier', namespace_prefix: 'mods', index_as: [:stored_searchable], attributes: { type: 'hdl' }){
+      t.type(path: { attribute: 'type'})
+      t.display_label(path: {attribute: 'displayLabel'})
+    }
+
+    t.identifier_generic(path: 'identifier', namespace_prefix: 'mods', index_as: [:stored_searchable, :facetable]){
       t.type(path: { attribute: 'type'})
       t.display_label(path: {attribute: 'displayLabel'})
     }
@@ -299,6 +317,28 @@ class ModsDatastream < ActiveFedora::OmDatastream
   def to_solr(solr_doc = Hash.new())
     super(solr_doc) # Run the default solrization behavior
 
+    # Toolkit additions
+    if !self.key_date.blank?
+      kd = self.key_date.first
+      kd.gsub!("-", "/")
+      # If we have Year and Month, but no Day
+      if kd.split("/").count == 2
+        kd = kd + "/01"
+      # If we have Year and no Month or Day
+      elsif kd.split("/").count == 1
+        kd = kd + "/01/01"
+      end
+
+      solr_doc["key_date_ssi"] = kd
+      if !self.key_date.qualifier.blank?
+        solr_doc["key_date_qualifier_ssi"] = self.key_date.qualifier.first
+      end
+    end
+
+    if !self.subject.cartographics.coordinates.blank?
+      solr_doc["coordinates_ssi"] = self.subject.cartographics.coordinates.first
+    end
+
     # Solrize extension information.
     solr_doc["drs_category_ssim"] = self.category.first if !self.category.first.blank?
     solr_doc["drs_department_ssim"] = self.department.first if !self.department.first.blank?
@@ -346,8 +386,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
 
     # Kramdown parse for search purposes - #439
     # title_ssi will only be used for sorting - #766
-    # solr_doc["title_ssi"] = kramdown_parse(self.title_info.title.first).downcase
-    solr_doc["title_ssi"] = kramdown_parse(t).downcase
+    solr_doc["title_ssi"] = kramdown_parse(t).downcase.gsub(/[^0-9a-z ]/i, '').gsub(/^a /i, '').gsub(/^an /i, '').gsub(/^the /i, '')
 
     # Make sure all titles and non_sorts end up in title_tesim
     total_title_array = self.all_titles.non_sort.concat self.all_titles.title
@@ -379,7 +418,14 @@ class ModsDatastream < ActiveFedora::OmDatastream
       end
     end
 
-    solr_doc["subject_sim"] = authorized_keywords
+    # Fix for #1011
+    (0..self.subject.length).each do |i|
+      if self.subject(i).authority.any?
+        authorized_keywords << self.subject(i).topic.first
+      end
+    end
+
+    solr_doc["subject_sim"] = authorized_keywords.uniq
 
     #Extract and solrize names divided into first/last parts
     full_names = []
@@ -529,7 +575,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
     if self.title_info[0].nil?
       self.insert_new_node(:title_info)
     end
-    
+
     self.title_info.non_sort = non_sort
   end
 

@@ -5,7 +5,12 @@ module Cerberus
         # Coming from the create/edit metadata form...
         if params.has_key?("identity") && params.has_key?("permission_type") && !params.has_key?("identity_type")
           # delete groups excepting mass permissions
-          existing_groups = self.rightsMetadata.groups.keys - ["public", "northeastern:drs:repository:staff"]
+          if self.class != Compilation
+            existing_groups = self.rightsMetadata.groups.keys - ["public", "northeastern:drs:repository:staff"]
+          else
+            existing_groups = self.rightsMetadata.groups.keys - ["public"]
+          end
+
           form_groups = params["identity"]
           groups_to_delete = existing_groups - form_groups
 
@@ -15,8 +20,10 @@ module Cerberus
 
           # sort so that edit goes last, being the stronger permission over read
           zipped_groups = params["identity"].zip(params["permission_type"]).delete_if {|x| x[0].blank?}
-          # Add in repo staff if not already there
-          zipped_groups.unshift(["northeastern:drs:repository:staff", "edit"])
+          # Add in repo staff if not already there - If not compilation! #1061
+          if self.class != Compilation
+            zipped_groups.unshift(["northeastern:drs:repository:staff", "edit"])
+          end
 
           sorted_groups = zipped_groups.sort_by{|k,v| v == "read" ? 0 : 1}.uniq
 

@@ -16,11 +16,20 @@
           = f.label :title, "Title", class: "required-label", title: "Required Field", data: { toggle: "tooltip" }
           = f.text_field :title, required: true, pattern: ".*\\S.*", class: "input-block-level", placeholder: "University Libraries", name: "#{type}[title][]"
         - if "#{@set.class}" != "Compilation"
-          .span4
-            = f.label :thumbnail, "Upload thumbnail"
-            = f.file_field :thumbnail, name: 'thumbnail', accept:".jpg,.jpeg,.png"
-            %span.help-block
-              Will be displayed on collection pages. (150px by 150px)
+          - if @set.thumbnail_list.blank?
+            .span4
+              = f.label :thumbnail, "Upload thumbnail"
+              = f.file_field :thumbnail, name: 'thumbnail', accept:".jpg,.jpeg,.png"
+              %span.help-block
+                Will be displayed on collection pages. (150px by 150px)
+          - else
+            .span4
+              = f.label :remove_thumbnail, "Existing thumbnail"
+              %img{id: "set_thumbnail", src: @set.thumbnail_list.first, title: @set.title, alt: "", class: ['well-padded-thumb']}(aria-labeledby="#{@set.pid}-title" role="presentation")
+              %br
+              %br
+              Remove existing thumbnail?
+              = check_box_tag :remove_thumbnail
       = f.label :description, "Description"
       = f.text_area :description, pattern: ".*\\S.*", class: "input-block-level", rows: 5, name: "#{type}[description][]"
       .row-fluid
@@ -31,10 +40,10 @@
           %p.help-block
             %ul
               %li Setting to 'public' will allow anyone accessing the site to see your collection.
-              %li Setting to 'private' will only allow users and groups explicated below to see your collection.
+              %li Setting to 'private' will only allow groups that are explicitly chosen to see your collection.
         %fieldset.span6
           %legend Permissions
-          = render partial: 'shared/sets/data_form_permissions_element', locals: {:f => f, :array_type => type, :permissions => filtered_permissions(@set) }
+          = render partial: 'shared/sets/data_form_permissions_element', locals: {:f => f, :array_type => type, :permissions => filtered_permissions(@set, (@set.class == Compilation || (current_user && current_user.admin?))) }
           %button#add_another_permission.btn.btn-success.btn-block{:type => "button"}
             %i.icon-plus-sign.icon-large
             Add Permission
@@ -54,3 +63,13 @@
       %button.btn{"data-dismiss" => "modal"} Close
 
 = render partial: 'shared/cancel_edit_modal', locals: { item: @set }
+
+:javascript
+  $("#remove_thumbnail").change(function() {
+    if(this.checked) {
+      $( "#set_thumbnail" ).fadeTo( "fast" , 0.5 )
+    }
+    else{
+      $( "#set_thumbnail" ).fadeTo( "fast" , 1 )
+    }
+  });

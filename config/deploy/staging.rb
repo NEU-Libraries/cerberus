@@ -89,6 +89,13 @@ namespace :deploy do
     end
   end
 
+  desc 'Build tmp dir'
+  task :build_tmp_dir do
+    on roles(:app), :in => :sequence, :wait => 5 do
+      execute "cd #{release_path} && (mkdir tmp)"
+    end
+  end
+
 end
 
 # Load the rvm environment before executing the refresh data hook.
@@ -112,5 +119,6 @@ after 'deploy:updating', 'deploy:migrate'
 after 'deploy:updating', 'deploy:whenever'
 after 'deploy:updating', 'deploy:flush_redis'
 
+after 'deploy:finished', 'deploy:build_tmp_dir'
 after 'deploy:finished', 'deploy:restart_workers'
 after 'deploy:finished', 'deploy:start_httpd'
