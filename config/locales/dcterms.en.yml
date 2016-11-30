@@ -1,0 +1,10 @@
+en:
+  dcterms:
+    type: "Type"
+    modified: "Modified"
+    language: "Language"
+    license: "License"
+    rightsHolder: "Rights Holder"
+    accessRights: "Access Rights"
+    bibliographicCitation: "Bibliographic Citation"
+    references: "References"

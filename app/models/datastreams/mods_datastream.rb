@@ -13,7 +13,10 @@ class ModsDatastream < ActiveFedora::OmDatastream
            'xmlns:mods' => 'http://www.loc.gov/mods/v3',
            'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
            'xsi:schemaLocation' => 'http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd',
-           'xmlns:niec' => 'http://repository.neu.edu/schema/niec')
+           'xmlns:niec' => 'http://repository.neu.edu/schema/niec',
+           'xmlns:dcterms' => "http://purl.org/dc/terms/",
+           'xmlns:dwc' => "http://rs.tdwg.org/dwc/terms/",
+           'xmlns:dwr' => "http://rs.tdwg.org/dwc/xsd/simpledarwincore/")
 
     t.key_date(path: '*', namespace_prefix: 'mods', attributes: { keyDate: "yes" }){
       t.qualifier(path: { attribute: "qualifier" })
@@ -308,6 +311,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
   end
 
   include Cerberus::ModsExtensions::NIEC
+  include Cerberus::ModsExtensions::Darwin
 
   # We override to_solr here to add
   # 1. A creation_year field.
@@ -494,7 +498,10 @@ class ModsDatastream < ActiveFedora::OmDatastream
     builder = Nokogiri::XML::Builder.new(:encoding => 'UTF-8') do |xml|
       xml.mods('xmlns:drs' => 'https://repository.neu.edu/spec/v1', 'xmlns:mods' => 'http://www.loc.gov/mods/v3', 'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
                 'xsi:schemaLocation' => 'http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd',
-                'xmlns:niec' => 'http://repository.neu.edu/schema/niec'){
+                'xmlns:niec' => 'http://repository.neu.edu/schema/niec',
+                'xmlns:dcterms' => 'http://purl.org/dc/terms/',
+                'xmlns:dwc' => 'http://rs.tdwg.org/dwc/terms/',
+                'xmlns:dwr' => 'http://rs.tdwg.org/dwc/xsd/simpledarwincore/'){
         xml.parent.namespace = xml.parent.namespace_definitions.find { |ns| ns.prefix=="mods" }
         xml.titleInfo("usage" => "primary") {
           xml.title
@@ -553,6 +560,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
         }
         xml["mods"].extension{
           xml["niec"].niec
+          xml["dwr"].SimpleDarwinRecord
         }
       }
     end
