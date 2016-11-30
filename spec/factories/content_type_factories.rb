@@ -38,6 +38,26 @@ include ChecksumHelper
     end
   end
 
+  trait :has_tif do
+    before :create do |imf|
+      path = "#{Rails.root}/spec/fixtures/files/image.tif"
+      file = File.open(path)
+
+      imf.add_file(file, "content", "image.tif")
+      imf.core_record.instantiate_appropriate_content_object(path)
+    end
+  end
+
+  trait :has_16bit_tif do
+    before :create do |imf|
+      path = "#{Rails.root}/spec/fixtures/files/16bit.tif"
+      file = File.open(path)
+
+      imf.add_file(file, "content", "16bit.tif")
+      imf.core_record.instantiate_appropriate_content_object(path)
+    end
+  end
+
   trait :has_different_jpeg do
     before :create do |imf|
       path = "#{Rails.root}/spec/fixtures/files/test_pic_two.jpeg"
@@ -95,6 +115,18 @@ include ChecksumHelper
       title "test_docx.docx"
       original_filename "test_docx.docx"
       has_docx
+    end
+
+    factory :tif_master_file, class: ImageMasterFile do
+      title "image.tif"
+      original_filename "image.tif"
+      has_tif
+    end
+
+    factory :tif_16bit_master_file, class: ImageMasterFile do
+      title "16bit.tif"
+      original_filename "16bit.tif"
+      has_16bit_tif
     end
   end
 
