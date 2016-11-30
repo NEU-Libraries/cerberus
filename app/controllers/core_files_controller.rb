@@ -922,7 +922,6 @@ class CoreFilesController < ApplicationController
 
           xml.xpath("//dwc:*").each do |n|
             begin
-              # <dt title="Title">Title:</dt>
               label = I18n.t("darwin.#{n.name}", :raise => true)
               vals = n.child.content.split(delimiter)
               output << "<dt title=\"#{label}\">#{label}:</dt>"
@@ -931,6 +930,19 @@ class CoreFilesController < ApplicationController
               end
             rescue I18n::MissingTranslationData
               # No mapping - do nothing
+            end
+          end
+
+          xml.xpath("//dcterms:*").each do |n|
+            begin
+              label = I18n.t("dcterms.#{n.name}", :raise => true)
+              vals = n.child.content.split(delimiter)
+              output << "<dt title=\"#{label}\">#{label}:</dt>"
+              vals.each do |val|
+                output << "<dd>#{val}</dd>"
+              end
+            rescue I18n::MissingTranslationData
+              # No mapping at all - move on
             end
           end
 
