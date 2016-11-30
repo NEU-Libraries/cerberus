@@ -287,6 +287,7 @@ class CoreFilesController < ApplicationController
   def show
     @core_file = fetch_solr_document
     @mods = fetch_mods
+    @darwin = fetch_darwin
 
     begin
       @parent = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{@core_file.parent}\"").first)
@@ -561,6 +562,7 @@ class CoreFilesController < ApplicationController
 
         # Invalidate cache
         Rails.cache.delete_matched("/mods/#{@core_file.pid}*")
+        Rails.cache.delete_matched("/darwin/#{@core_file.pid}*")
 
         # Email the metadata changes
         new_doc = Nokogiri::XML(raw_xml)
@@ -588,6 +590,7 @@ class CoreFilesController < ApplicationController
 
     # Invalidate cache
     Rails.cache.delete_matched("/mods/#{@core_file.pid}*")
+    Rails.cache.delete_matched("/darwin/#{@core_file.pid}*")
 
     # if no title or keyword, send them back. Only God knows what they did to the form...
     # fix for #671
@@ -906,6 +909,51 @@ class CoreFilesController < ApplicationController
     def fetch_mods
       Rails.cache.fetch("/mods/#{@core_file.pid}-#{@core_file.updated_at}", :expires_in => 12.hours) do
         Sanitize.clean(Kramdown::Document.new(render_mods_display(CoreFile.find(@core_file.pid))).to_html, :elements => ['sup', 'sub', 'dt', 'dd', 'br', 'a'], :attributes => {'a' => ['href']}).html_safe
+      end
+    end
+
+    def fetch_darwin
+      Rails.cache.fetch("/darwin/#{@core_file.pid}-#{@core_file.updated_at}", :expires_in => 12.hours) do
+        cf = CoreFile.find(@core_file.pid)
+        xml = Nokogiri::XML(cf.mods.content)
+
+        delimiter = "|"
+
+        begin
+          output = "<dl>"
+
+          xml.xpath("//dwc:*").each do |n|
+            begin
+              label = I18n.t("darwin.#{n.name}", :raise => true)
+              vals = n.child.content.split(delimiter)
+              output << "<dt title=\"#{label}\">#{label}:</dt>"
+              vals.each do |val|
+                output << "<dd>#{val}</dd>"
+              end
+            rescue I18n::MissingTranslationData
+              # No mapping - do nothing
+            end
+          end
+
+          xml.xpath("//dcterms:*").each do |n|
+            begin
+              label = I18n.t("dcterms.#{n.name}", :raise => true)
+              vals = n.child.content.split(delimiter)
+              output << "<dt title=\"#{label}\">#{label}:</dt>"
+              vals.each do |val|
+                output << "<dd>#{val}</dd>"
+              end
+            rescue I18n::MissingTranslationData
+              # No mapping at all - move on
+            end
+          end
+
+          output << "</dl>"
+
+          Sanitize.clean(Kramdown::Document.new(output).to_html, :elements => ['sup', 'sub', 'dt', 'dd', 'br', 'a'], :attributes => {'a' => ['href']}).html_safe
+        rescue Nokogiri::XML::XPath::SyntaxError
+          # This will be thrown if the namespace isn't defined - i.e. on an older file. In which case, we move on
+        end
       end
     end
 
