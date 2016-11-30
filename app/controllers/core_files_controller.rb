@@ -562,6 +562,7 @@ class CoreFilesController < ApplicationController
 
         # Invalidate cache
         Rails.cache.delete_matched("/mods/#{@core_file.pid}*")
+        Rails.cache.delete_matched("/darwin/#{@core_file.pid}*")
 
         # Email the metadata changes
         new_doc = Nokogiri::XML(raw_xml)
@@ -589,6 +590,7 @@ class CoreFilesController < ApplicationController
 
     # Invalidate cache
     Rails.cache.delete_matched("/mods/#{@core_file.pid}*")
+    Rails.cache.delete_matched("/darwin/#{@core_file.pid}*")
 
     # if no title or keyword, send them back. Only God knows what they did to the form...
     # fix for #671
