@@ -40,7 +40,6 @@ sudo yum install libtool gcc gettext-devel expat-devel curl-devel zlib-devel ope
 sudo yum install wget --assumeyes
 sudo yum install clamav clamav-devel --assumeyes
 sudo yum install libxml-devel libxslt-devel --assumeyes
-sudo yum install gitflow --assumeyes
 sudo yum install poppler-utils --assumeyes
 sudo yum install gitflow --assumeyes
 
