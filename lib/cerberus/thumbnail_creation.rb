@@ -46,12 +46,6 @@ module Cerberus::ThumbnailCreation
           end_img.interlace = Magick::PlaneInterlace
           extension = "jpeg"
         end
-        
-        # if img.format == "TIFF" && img.depth > 8
-          # TODO - make img 8bit depth instead
-          # convert 16bit.tif -depth 8 8bit.tif
-          # perhaps something like image.write('result.png') { self.depth = image.depth }
-        # end
 
         item.add_file(end_img.to_blob, dsid, "#{dsid}.#{extension}")
         item.save!
