@@ -915,22 +915,26 @@ class CoreFilesController < ApplicationController
         cf = CoreFile.find(@core_file.pid)
         xml = Nokogiri::XML(cf.mods.content)
 
-        output = "<dl>"
+        begin
+          output = "<dl>"
 
-        xml.xpath("//dwc:*").each do |n|
-          begin
-            # <dt title="Title">Title:</dt>
-            label = I18n.t("darwin.#{n.name}", :raise => true)
-            val = n.child.content
-            output << "<dt title=\"#{label}\">#{label}:</dt><dd>#{val}</dd>"
-          rescue I18n::MissingTranslationData
-            # No mapping - do nothing
+          xml.xpath("//dwc:*").each do |n|
+            begin
+              # <dt title="Title">Title:</dt>
+              label = I18n.t("darwin.#{n.name}", :raise => true)
+              val = n.child.content
+              output << "<dt title=\"#{label}\">#{label}:</dt><dd>#{val}</dd>"
+            rescue I18n::MissingTranslationData
+              # No mapping - do nothing
+            end
           end
+
+          output << "</dl>"
+
+          Sanitize.clean(Kramdown::Document.new(output).to_html, :elements => ['sup', 'sub', 'dt', 'dd', 'br', 'a'], :attributes => {'a' => ['href']}).html_safe
+        rescue Nokogiri::XML::XPath::SyntaxError
+          # This will be thrown if the namespace isn't defined - i.e. on an older file. In which case, we move on
         end
-
-        output << "</dl>"
-
-        Sanitize.clean(Kramdown::Document.new(output).to_html, :elements => ['sup', 'sub', 'dt', 'dd', 'br', 'a'], :attributes => {'a' => ['href']}).html_safe
       end
     end
 
