@@ -3,6 +3,10 @@
     %li.active
       %a(href="#metadata" data-toggle="tab")
         Metadata
+    - if !@darwin.blank?
+      %li
+        %a(href="#darwin" data-toggle="tab")
+          Darwin Core
     - if !@core_file.supplemental_materials.blank? || !@core_file.supplemental_material_for.blank? || !@core_file.instructional_materials.blank? || !@core_file.instructional_material_for.blank? || @core_file.page_objects.length > 1
       %li
         %a(href="#supplemental-files" data-toggle="tab" data-pid="#{@core_file.pid}")
