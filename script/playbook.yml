@@ -37,16 +37,16 @@
         - configobj
 
     - name: download kakadu
-      get_url: url=http://kakadusoftware.com/wp-content/uploads/2014/06/KDU77_Demo_Apps_for_Linux-x86-64_150710.zip dest=/opt/
+      get_url: url=http://kakadusoftware.com/wp-content/uploads/2014/06/KDU78_Demo_Apps_for_Linux-x86-64_160226.zip dest=/opt/
 
     - name: unzip kakadu
-      unarchive: copy=no src=/opt/KDU77_Demo_Apps_for_Linux-x86-64_150710.zip dest=/opt
+      unarchive: copy=no src=/opt/KDU78_Demo_Apps_for_Linux-x86-64_160226.zip dest=/opt
 
     - name: ensures /opt/kdu directory
       file: path=/opt/kdu state=directory
 
     - name: copy kakadu to /opt/kdu
-      shell: cp /opt/KDU77_Demo_Apps_for_Linux-x86-64_150710/* /opt/kdu/.
+      shell: cp /opt/KDU78_Demo_Apps_for_Linux-x86-64_160226/* /opt/kdu/.
 
     - name: ensure /etc/ld.so.conf.d/kdu.conf
       file: path=/etc/ld.so.conf.d/kdu.conf state=touch
@@ -73,7 +73,7 @@
       copy: src=loris2.conf dest=/opt/loris/etc/loris2.conf
 
     - name: install loris
-      shell: cd /opt/loris && python setup.py install --kdu-expand /opt/kdu/kdu_expand --libkdu /opt/kdu
+      shell: cd /opt/loris && sudo ./setup.py install --kdu-expand /opt/kdu/kdu_expand --libkdu /opt/kdu
 
     - name: configure apache for loris
       copy: src=httpd_loris.conf dest=/etc/httpd/conf.d/loris.conf
