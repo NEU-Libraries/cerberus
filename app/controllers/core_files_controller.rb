@@ -915,6 +915,8 @@ class CoreFilesController < ApplicationController
         cf = CoreFile.find(@core_file.pid)
         xml = Nokogiri::XML(cf.mods.content)
 
+        delimiter = "|"
+
         begin
           output = "<dl>"
 
@@ -922,8 +924,11 @@ class CoreFilesController < ApplicationController
             begin
               # <dt title="Title">Title:</dt>
               label = I18n.t("darwin.#{n.name}", :raise => true)
-              val = n.child.content
-              output << "<dt title=\"#{label}\">#{label}:</dt><dd>#{val}</dd>"
+              vals = n.child.content.split(delimiter)
+              output << "<dt title=\"#{label}\">#{label}:</dt>"
+              vals.each do |val|
+                output << "<dd>#{val}</dd>"
+              end
             rescue I18n::MissingTranslationData
               # No mapping - do nothing
             end
