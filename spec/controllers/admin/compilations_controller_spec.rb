@@ -59,7 +59,7 @@ describe Admin::CompilationsController do
 
     it "redirects to the show page on successful edit by autherized user" do
       sign_in admin
-      attrs = {title: "Test title edit", description: "Test edit desc", permissions: Hash.new}
+      attrs = {title: "Test title edit", description: "Test edit desc"}
       put :update, {id: compilation.pid, compilation: attrs}
       expect(response).to redirect_to admin_compilations_path
 
