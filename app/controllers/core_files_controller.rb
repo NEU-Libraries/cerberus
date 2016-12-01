@@ -983,6 +983,7 @@ class CoreFilesController < ApplicationController
 
     def update_metadata
       begin
+        params[:core_file][:permissions].merge!(nuid: current_user.nuid)
         if @core_file.update_attributes(params[:core_file])
           flash[:notice] =  "#{@core_file.title} was updated successfully."
         end

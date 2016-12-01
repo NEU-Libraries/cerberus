@@ -26,6 +26,7 @@ class Admin::CompilationsController < AdminController
   def update
     @compilation.mass_permissions = params[:mass_permissions]
 
+    params[:compilation][:permissions].merge!(nuid: current_user.nuid)
     if @compilation.update_attributes(params[:compilation])
       flash[:notice] = "#{t('drs.compilations.name').capitalize} successfully updated."
       redirect_to admin_compilations_path
