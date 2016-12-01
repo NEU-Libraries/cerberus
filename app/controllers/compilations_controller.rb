@@ -133,7 +133,7 @@ class CompilationsController < ApplicationController
 
   def update
     @compilation.mass_permissions = params[:mass_permissions]
-
+    params[:compilation][:permissions].merge!(nuid: current_user.nuid)
     if @compilation.update_attributes(params[:compilation])
       flash[:notice] = "#{t('drs.compilations.name').capitalize} successfully updated."
       redirect_to @compilation
@@ -364,7 +364,7 @@ class CompilationsController < ApplicationController
     if @docs.count == 0
       return 0
     end
-    
+
     self.solr_search_params_logic += [:limit_to_compilation_scope]
 
     (response, document_list) = get_search_results
