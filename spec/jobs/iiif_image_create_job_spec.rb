@@ -61,6 +61,10 @@ describe IiifImageCreateJob do
       @tif_16.core_record.iiif_object.permissions.should =~ @tif_16.core_record.canonical_object.permissions << {:type=>"group", :access=>"edit", :name=>"northeastern:drs:repository:staff"}
     end
 
+    it "should have 8bit channel depth" do
+      Magick::Image::read(@tif_16.core_record.iiif_object.fedora_file_path).first.channel_depth.should == 8
+    end
+
     after(:all) do
       ImageLargeFile.destroy_all
     end
