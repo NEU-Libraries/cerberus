@@ -69,7 +69,7 @@
 
   %fieldset.span6
     %legend Permissions
-    = render partial: 'shared/sets/data_form_permissions_element', locals: {:f => f, :array_type => "core_file", :permissions => filtered_permissions(@core_file) }
+    = render partial: 'shared/sets/data_form_permissions_element', locals: {:f => f, :array_type => "core_file", :permissions => filtered_permissions(@core_file, (current_user && current_user.admin?)) }
     %button#add_another_permission.btn.btn-success.btn-block{:type => "button"}
       %i.icon-plus-sign.icon-large
       Add Permission
