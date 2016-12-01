@@ -13,12 +13,18 @@ class Loaders::XmlLoadsController < Loaders::LoadsController
     @loader_name = t('loaders.'+t('loaders.xml.short_name')+'.long_name')
     @loader_short_name = t('loaders.xml.short_name')
     @page_title = @loader_name + " Loader"
-    u_groups = current_user.groups
-    groups = u_groups.map! { |g| "\"#{g}\""}.join(" OR ")
-    query_result = solr_query("(depositor_tesim:\"#{current_user.nuid}\" OR edit_access_group_ssim:(#{groups})) AND has_model_ssim:\"#{ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:Collection"}\"")
-    @collections_options = Array.new()
-    query_result.each do |c|
-      @collections_options << {'label' => "#{c['id']} - #{c['title_info_title_tesim'][0]}", 'value' => c['id']}
+    if !current_user.admin? && !current_user.admin_group?
+      u_groups = current_user.groups
+      groups = u_groups.map! { |g| "\"#{g}\""}.join(" OR ")
+      query_result = solr_query("(depositor_tesim:\"#{current_user.nuid}\" OR edit_access_group_ssim:(#{groups})) AND has_model_ssim:\"#{ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:Collection"}\"")
+      @collections_options = Array.new()
+      if query_result.length > 0
+        query_result.each do |c|
+          @collections_options << {'label' => "#{c['id']} - #{c['title_info_title_tesim'][0]}", 'value' => c['id']}
+        end
+      end
+    else
+      $collection_options = []
     end
     @new = "true"
     @new_form = render_to_string(:partial=>'/loaders/new', locals: {collections_options: @collections_options, new: @new})
