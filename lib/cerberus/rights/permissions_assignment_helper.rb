@@ -2,13 +2,22 @@ module Cerberus
   module Rights
     module PermissionsAssignmentHelper
       def permissions=(params)
+
+        admin = false
+        if params.has_key?("nuid")
+          user = User.find_by_nuid(params["nuid"])
+          if !user.blank?
+            admin = user.admin?
+          end
+        end
+
         # Coming from the create/edit metadata form...
         if params.has_key?("identity") && params.has_key?("permission_type") && !params.has_key?("identity_type")
           # delete groups excepting mass permissions
-          if self.class != Compilation
-            existing_groups = self.rightsMetadata.groups.keys - ["public", "northeastern:drs:repository:staff"]
-          else
+          if admin || self.class == Compilation
             existing_groups = self.rightsMetadata.groups.keys - ["public"]
+          else
+            existing_groups = self.rightsMetadata.groups.keys - ["public", "northeastern:drs:repository:staff"]
           end
 
           form_groups = params["identity"]
@@ -21,7 +30,7 @@ module Cerberus
           # sort so that edit goes last, being the stronger permission over read
           zipped_groups = params["identity"].zip(params["permission_type"]).delete_if {|x| x[0].blank?}
           # Add in repo staff if not already there - If not compilation! #1061
-          if self.class != Compilation
+          if self.class != Compilation && !admin
             zipped_groups.unshift(["northeastern:drs:repository:staff", "edit"])
           end
 
