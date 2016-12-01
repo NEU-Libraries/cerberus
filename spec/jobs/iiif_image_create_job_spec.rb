@@ -80,5 +80,7 @@ describe IiifImageCreateJob do
 
   after(:all) do
     ActiveFedora::Base.destroy_all
+    User.destroy_all
+    Sentinel.destroy_all
   end
 end
