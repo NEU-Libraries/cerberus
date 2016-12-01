@@ -222,7 +222,10 @@ class CollectionsController < ApplicationController
       end
     end
 
-    params[:set][:permissions].merge!(nuid: current_user.nuid)
+    if !params[:set][:permissions].blank?
+      params[:set][:permissions].merge!(nuid: current_user.nuid)
+    end
+    
     if @set.update_attributes(params[:set])
       UploadAlert.create_from_collection(@set, :update, current_user)
       redirect_to(@set, notice: "Collection #{@set.title} was updated successfully." )

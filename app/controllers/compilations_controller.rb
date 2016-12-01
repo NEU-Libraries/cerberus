@@ -133,7 +133,11 @@ class CompilationsController < ApplicationController
 
   def update
     @compilation.mass_permissions = params[:mass_permissions]
-    params[:compilation][:permissions].merge!(nuid: current_user.nuid)
+
+    if !params[:compilation][:permissions].blank?
+      params[:compilation][:permissions].merge!(nuid: current_user.nuid)
+    end
+
     if @compilation.update_attributes(params[:compilation])
       flash[:notice] = "#{t('drs.compilations.name').capitalize} successfully updated."
       redirect_to @compilation
