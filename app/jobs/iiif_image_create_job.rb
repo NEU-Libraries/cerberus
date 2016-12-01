@@ -6,6 +6,7 @@ class IiifImageCreateJob
   require 'RMagick'
   include Magick
   include Cerberus::TempFileStorage
+  include SentinelHelper
 
   attr_accessor :collection_pid
 
@@ -34,17 +35,26 @@ class IiifImageCreateJob
               content_object.original_filename = child.canonical_object.original_filename
               content_object.depositor = child.depositor
               content_object.save!
+              # note that this loads the file into memory - if we start running this on large files, it's likely to need to the large_upload functionality from the content_creation_job
               File.open(new_path) do |file_contents|
                 content_object.add_file(file_contents, 'content', content_object.original_filename)
                 content_object.save!
               end
               content_object.reload
+              content_object.proxy_uploader = child.proxy_uploader
+              sentinel = child.parent.sentinel
+              if sentinel && !sentinel.send(sentinel_class_to_symbol("ImageLargeFile")).blank?
+                # set content object to sentinel value
+                content_object.permissions = sentinel.send(sentinel_class_to_symbol("ImageLargeFile"))["permissions"]
+                content_object.mass_permissions = sentinel.send(sentinel_class_to_symbol("ImageLargeFile"))["mass_permissions"]
+                content_object.save!
+              else
+                content_object.rightsMetadata.content = child.canonical_object.rightsMetadata.content
+              end
+              content_object.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, "edit") #verify repo staff rights
               content_object.core_record = child
               content_object.title = content_object.original_filename
               content_object.identifier = content_object.pid
-              # content_object.permissions = # check for sentinel or inherit from master file?
-              content_object.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, "edit")
-              content_object.mass_permissions = child.canonical_object.mass_permissions
               content_object.properties.mime_type = extract_mime_type(new_path)
               content_object.properties.iiif = "true"
               content_object.save!
