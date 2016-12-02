@@ -330,6 +330,18 @@ class CoreFile < ActiveFedora::Base
     ActiveFedora::Base.find(doc.pid, cast: true)
   end
 
+  # Find the IIIF object if there is one
+  def iiif_object
+    full_self_id = RSolr.escape("info:fedora/#{self.pid}")
+    c = ActiveFedora::SolrService.query("iiif_tesim:true AND is_part_of_ssim:#{full_self_id}").first
+    if c.nil?
+      return false
+    end
+
+    doc = SolrDocument.new(c)
+    ActiveFedora::Base.find(doc.pid, cast: true)
+  end
+
   # Find the ImageThumbnail for this object
   # Raise a warning if more than one exists.
   def thumbnail
