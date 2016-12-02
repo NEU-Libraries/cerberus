@@ -50,12 +50,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
   end
 
-  config.vm.provision "shell", path: "script/vagrant_provisioning.sh", privileged: false
-  config.vm.provision 'ansible' do |ansible|
-    ansible.extra_vars = { ansible_ssh_user: 'vagrant'}
-    ansible.playbook = 'script/playbook.yml'
-  end
-
   # Share the current directory to /vagrant on the virtual machine
   config.vm.synced_folder "." , "/home/vagrant/cerberus", nfs: true
   config.vm.network "private_network", ip: "192.168.50.4"
