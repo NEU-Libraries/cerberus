@@ -1,0 +1,94 @@
+---
+- hosts: all
+  sudo: true
+  tasks:
+    - name: ensure epel-release
+      yum: pkg=epel-release state=present
+
+    - name: ensure packages are installed
+      yum: pkg={{item}} state=present
+      with_items:
+        - python-devel
+        - httpd
+        - httpd-devel
+        - libjpeg-turbo
+        - libjpeg-turbo-devel
+        - freetype
+        - freetype-devel
+        - zlib-devel
+        - libtiff-devel
+        - git
+        - unzip
+        - python-pip
+        - mod_wsgi
+        - libselinux-python
+
+    - name: update pip
+      shell: pip install --upgrade pip
+
+    - name: python version
+      shell: python --version
+
+    - name: install pip dependencies
+      pip: name={{item}}
+      with_items:
+        - Werkzeug
+        - Pillow
+        - configobj
+
+    - name: download kakadu
+      get_url: url=http://kakadusoftware.com/wp-content/uploads/2014/06/KDU78_Demo_Apps_for_Linux-x86-64_160226.zip dest=/opt/
+
+    - name: unzip kakadu
+      unarchive: copy=no src=/opt/KDU78_Demo_Apps_for_Linux-x86-64_160226.zip dest=/opt
+
+    - name: ensures /opt/kdu directory
+      file: path=/opt/kdu state=directory
+
+    - name: copy kakadu to /opt/kdu
+      shell: cp /opt/KDU78_Demo_Apps_for_Linux-x86-64_160226/* /opt/kdu/.
+
+    - name: ensure /etc/ld.so.conf.d/kdu.conf
+      file: path=/etc/ld.so.conf.d/kdu.conf state=touch
+
+    - name: ensure /opt/kdu is linked
+      lineinfile: dest=/etc/ld.so.conf.d/kdu.conf line="/opt/kdu"
+
+    - name: ensure /etc/profile.d/kdu.sh
+      file: path=/etc/profile.d/kdu.sh state=touch
+
+    - name: ensure kakadu command line tools are in path
+      lineinfile: dest=/etc/profile.d/kdu.sh line="PATH=$PATH:/opt/kdu"
+
+    - name: add loris user
+      user: name=loris home=/var/www/loris shell=/sbin/false
+
+    - name: git clone loris
+      git: repo=https://github.com/pulibrary/loris.git dest=/opt/loris
+
+    - name: remove default loris conf
+      shell: rm /opt/loris/etc/loris2.conf
+
+    - name: copy local loris conf
+      copy: src=loris2.conf dest=/opt/loris/etc/loris2.conf
+
+    - name: install loris
+      shell: cd /opt/loris && sudo ./setup.py install --kdu-expand /opt/kdu/kdu_expand --libkdu /opt/kdu
+
+    - name: configure apache for loris
+      copy: src=httpd_loris.conf dest=/etc/httpd/conf.d/loris.conf
+
+    - name: ensure restart httpd
+      service: name=httpd state=restarted
+
+    - name: ensure httpd enabled
+      service: name=httpd enabled=yes
+
+    - name: turn off selinux to work around mkfifo permissions issue
+      selinux: state=disabled
+
+    - name: ensure /usr/local/share/images
+      file: path=/usr/local/share/images state=directory
+
+    - name: ensure /usr/local/share/images/loris
+      file: path=/usr/local/share/images/loris state=directory mode=0777

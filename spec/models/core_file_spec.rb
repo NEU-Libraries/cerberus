@@ -191,6 +191,24 @@ describe CoreFile do
     end
   end
 
+  describe "iiif object lookup" do
+    let(:core) { CoreFile.create(depositor: "dummy@example.com") }
+    after(:all) { ActiveFedora::Base.destroy_all }
+
+    it "returns false for objects with no iiif object" do
+      core.iiif_object.should be false
+    end
+
+    it "returns the object for core objects with a canonical object" do
+      @img = ImageMasterFile.new(title: "Img", core_record: core)
+      @img.properties.iiif = "true"
+      @img.save!
+      core.reload
+
+      core.iiif_object.should == @img
+    end
+  end
+
   describe "Thumbnail lookup" do
     let(:core) { CoreFile.create(depositor: "dummy@example.com") }
     after(:all)  { ActiveFedora::Base.destroy_all }
