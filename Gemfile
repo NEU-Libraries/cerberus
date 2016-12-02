@@ -1,5 +1,8 @@
 source 'https://rubygems.org'
 
+# Hydra Gems
+gem 'hydra-head', '10.3.4'
+gem 'blacklight', '6.7.2'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '4.2.7.1'
@@ -44,4 +47,3 @@ group :development do
   # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
   gem 'spring'
 end
-
