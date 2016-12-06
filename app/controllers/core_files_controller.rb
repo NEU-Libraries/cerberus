@@ -89,6 +89,8 @@ class CoreFilesController < ApplicationController
         file_name = "neu_#{asset.pid.split(":").last}.#{extract_extension(asset.properties.mime_type.first, File.extname(asset.original_filename || "").delete!("."))}"
         send_file asset.fedora_file_path, :filename =>  file_name, :type => asset.mime_type || extract_mime_type(asset.fedora_file_path), :disposition => 'inline'
       end
+    else
+      render_403 and return
     end
   end
 
@@ -986,7 +988,7 @@ class CoreFilesController < ApplicationController
         if !params[:core_file][:permissions].blank?
           params[:core_file][:permissions].merge!(nuid: current_user.nuid)
         end
-        
+
         if @core_file.update_attributes(params[:core_file])
           flash[:notice] =  "#{@core_file.title} was updated successfully."
         end

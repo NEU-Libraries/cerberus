@@ -10,7 +10,7 @@
     ="<meta content=\"#{@core_file.google_title}\" name=\"citation_title\">".html_safe
     - if !@core_file.google_scholar_date.blank?
       ="<meta content=\"#{@core_file.google_scholar_date}\" name=\"citation_publication_date\">".html_safe
-    - if !@core_file.canonical_object.first.blank?
+    - if !@core_file.canonical_object.first.blank? && !@core_file.embargo_date_in_effect?
       ="<meta content=\"#{file_fulltext_path(@core_file.pid, :only_path => false)}\" name=\"citation_pdf_url\">".html_safe
     - if !@core_file.author.blank?
       ="<meta content=\"#{@core_file.author}\" name=\"citation_author\">".html_safe
