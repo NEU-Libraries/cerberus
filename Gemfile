@@ -4,6 +4,7 @@ source 'https://rubygems.org'
 gem 'hydra-head', '10.3.4'
 gem 'blacklight', '6.7.2'
 gem 'hydra-works', '0.15.0'
+gem 'bootswatch-rails', '3.3.5'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '4.2.7.1'
