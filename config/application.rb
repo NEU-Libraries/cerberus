@@ -8,7 +8,7 @@ Bundler.require(*Rails.groups)
 
 module Cerberus
   class Application < Rails::Application
-    
+
     config.generators do |g|
       g.test_framework :rspec, :spec => true
     end
@@ -28,5 +28,7 @@ module Cerberus
 
     # Do not swallow errors in after_commit/after_rollback callbacks.
     config.active_record.raise_in_transactional_callbacks = true
+
+    config.application_name = "Digital Repository Service"
   end
 end
