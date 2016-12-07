@@ -31,5 +31,10 @@ $link-hover-color:      $link-color !default;
 //** Link hover decoration.
 $link-hover-decoration: underline !default;
 
-// Navbar
-// $logo-image: false; - ASSHATS
+.navbar-header {
+  a {
+    padding-top: 19.5px;
+    padding-bottom: 19.5px;
+    float: left;
+  }
+}
