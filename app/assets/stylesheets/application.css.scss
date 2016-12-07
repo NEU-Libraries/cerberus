@@ -14,9 +14,10 @@
  *= require_self
  */
 
+@import "variables";
 @import "bootstrap-sprockets";
-@import "cerberus";
-@import "bootswatch/flatly/variables";
 @import "bootstrap";
+@import "bootswatch/flatly/variables";
 @import "bootswatch/flatly/bootswatch";
-@import 'blacklight/blacklight'
+@import "blacklight/blacklight";
+@import "cerberus"
