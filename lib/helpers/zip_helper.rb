@@ -25,16 +25,17 @@ module ZipHelper
       Zip::File.open(zip_file_path) do |zipfile|
         zipfile.each do |f|
           if !f.directory? && File.basename(f.name)[0] != "." # Don't extract directories or mac specific files
-
-            if squash
+            if squash == true
               # Legacy zip construction for certain loaders forces us to flatten internal
               # structure, so to do this we give each file a unique name to avoid collision
               uniq_hsh = Digest::MD5.hexdigest("#{f.name}")[0,2]
               uniq_filename = "#{Time.now.to_f.to_s.gsub!('.','-')}-#{uniq_hsh}"
               fpath = File.join(output_dir, uniq_filename) # Names file time and hash string
-
               new_names << fpath
               original_names << f.name
+            elsif f.name.to_s.include?("/") #this does the work if the files are nested within a directory
+              fpath = File.join(output_dir, File.basename(f.name))
+              zipfile.extract(f, fpath) unless File.exists?(fpath)
             else
               fpath = File.join(output_dir, f.name)
             end
@@ -60,8 +61,11 @@ module ZipHelper
     dir_list = Dir.glob("#{output_dir}/*")
 
     # Loop through and remove directories
-    dir_list.delete_if do |item|
-      File.directory?(item)
+    dir_list.each do |item|
+      if File.directory?(item)
+        logger.info "its a directory"
+        FileUtils.rm_rf(item)
+      end
     end
 
     if squash
