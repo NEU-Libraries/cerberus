@@ -1,12 +1,12 @@
 %h1.page-header
-  Edit
+  Manage
   %i
     = @set.title
 %ul.nav.nav-tabs
   %li.active
     %a{ href: "#edit",  data: {toggle: "tab"} }
       %i.icon-pencil
-      Edit
+      Manage
   - if ("#{@set.class}" == "Collection" && !@set.is_smart_collection?) || (@set.is_smart_collection? && @set.smart_collection_type == "miscellany")
     %li
       %a{ href: "#move", data: {toggle: "tab"}}

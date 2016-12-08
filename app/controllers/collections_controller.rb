@@ -187,7 +187,7 @@ class CollectionsController < ApplicationController
     # Does a sentinel exist for this collection?
     @sentinel = @set.sentinel
 
-    @page_title = "Edit #{@set.title}"
+    @page_title = "Manage #{@set.title}"
     render :template => 'shared/sets/edit'
   end
 
