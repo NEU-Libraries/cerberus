@@ -47,6 +47,12 @@
         %li.pull-left
           %b Total File Count:
           %span.compilation_count Calculating...
+        - if !@set.depositor.blank?
+          %br
+          - user = User.find_by_nuid(@set.depositor)
+          - if user
+            %b Owner:
+            %span= user.name
       -else
         - if @set.pid != "neu:1" && ((@response && @response.response['numFound'] > 0) || @files && @files.count > 0 || @smart_collections && @smart_collections.count > 0)
           -# && @core_file_children
