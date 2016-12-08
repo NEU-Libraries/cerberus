@@ -126,7 +126,7 @@ class CompilationsController < ApplicationController
   end
 
   def edit
-    @page_title = "Edit #{@compilation.title}"
+    @page_title = "Manage #{@compilation.title}"
     @set = @compilation
     render :template => 'shared/sets/edit'
   end

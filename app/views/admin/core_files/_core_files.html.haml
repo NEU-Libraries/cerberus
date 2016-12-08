@@ -12,6 +12,7 @@
       %th
         %input{:type=>"checkbox", :class=>"select_all"}
       %th= "Core File Title"
+      %th= "PID"
       -if @type.to_s != "tombstoned"
         %th= "Depositor Name"
         %th= "Depositor Email"
@@ -32,6 +33,8 @@
             -if !core_file.non_sort.blank?
               = "#{core_file.non_sort} "
             = core_file.title
+        %td
+          = core_file.pid
         -if @type.to_s == "tombstoned"
           %td
             = link_to("View", admin_view_file_path(core_file), class: "btn btn-small btn-info")
