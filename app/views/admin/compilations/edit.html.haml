@@ -4,9 +4,9 @@
   %li
     = link_to 'Manage Sets', '/admin/sets'
   %li.active
-    = link_to 'Edit ' "#{@set.title}".html_safe, {:action => "edit"}
+    = link_to 'Manage ' "#{@set.title}".html_safe, {:action => "edit"}
 
-%h2.page-header= "Edit #{@set.title}".html_safe
+%h2.page-header= "Manage #{@set.title}".html_safe
 
 = form_for [:admin, @set] do |f|
   %fieldset
