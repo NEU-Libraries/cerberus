@@ -5,7 +5,8 @@
     - @communities.each do |community|
       %tr
         %td
-          .large= community.title.html_safe
+          .large
+            = link_to(community.title.html_safe, community_path(community))
         %td
           = link_to("Edit", edit_admin_community_path(community),
           class: "btn btn-small btn-warning")
