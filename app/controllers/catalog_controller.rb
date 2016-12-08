@@ -5,7 +5,9 @@ class CatalogController < ApplicationController
 
   include Hydra::Catalog
   # This filter applies the hydra access controls
-  before_action :enforce_show_permissions, only: :show
+  # before_action :enforce_show_permissions, only: :show
+  # This applies appropriate access controls to all solr queries
+  Hydra::SearchBuilder.default_processor_chain -= [:add_access_controls_to_solr_params]
 
   configure_blacklight do |config|
     ## Class for sending and receiving requests from a search index
