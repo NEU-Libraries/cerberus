@@ -6,6 +6,7 @@ gem 'blacklight', '6.7.2'
 gem 'hydra-works', '0.15.0'
 gem 'bootswatch-rails', '3.3.5'
 gem 'active_fedora-noid', '2.0.0'
+gem 'active_fedora-datastreams', '0.1.0'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '4.2.7.1'

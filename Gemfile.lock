@@ -33,6 +33,11 @@ GEM
       activesupport (>= 3.0.0)
       rdf (~> 2.0, >= 2.0.2)
       rdf-vocab
+    active_fedora-datastreams (0.1.0)
+      active-fedora (>= 11.0.0.pre, < 12)
+      nom-xml (>= 0.5.1)
+      om (~> 3.1)
+      rdf-rdfxml (~> 2.0)
     active_fedora-noid (2.0.0)
       active-fedora (>= 9.7, < 12)
       noid (~> 0.9)
@@ -112,8 +117,11 @@ GEM
       ruby-progressbar
     globalid (0.3.7)
       activesupport (>= 4.1.0)
+    haml (4.0.7)
+      tilt
     hamster (3.0.0)
       concurrent-ruby (~> 1.0)
+    htmlentities (4.3.4)
     http_logger (0.5.1)
     hydra-access-controls (10.3.4)
       active-fedora (>= 10.0.0, < 12)
@@ -186,6 +194,10 @@ GEM
     noid (0.9.0)
     nokogiri (1.6.8.1)
       mini_portile2 (~> 2.1.0)
+    nom-xml (0.6.0)
+      activesupport (>= 3.2.18)
+      i18n
+      nokogiri
     om (3.1.1)
       activemodel
       activesupport
@@ -223,13 +235,28 @@ GEM
     rdf (2.1.0)
       hamster (~> 3.0)
       link_header (~> 0.0, >= 0.0.8)
+    rdf-aggregate-repo (2.0.0)
+      rdf (~> 2.0)
     rdf-isomorphic (2.0.0)
       rdf (~> 2.0)
+    rdf-rdfa (2.0.1)
+      haml (~> 4.0)
+      htmlentities (~> 4.3)
+      rdf (~> 2.0)
+      rdf-aggregate-repo (~> 2.0)
+      rdf-xsd (~> 2.0)
+    rdf-rdfxml (2.0.0)
+      htmlentities (~> 4.3)
+      rdf (~> 2.0)
+      rdf-rdfa (~> 2.0)
+      rdf-xsd (~> 2.0)
     rdf-turtle (2.0.0)
       ebnf (~> 1.0, >= 1.0.1)
       rdf (~> 2.0)
     rdf-vocab (2.1.0)
       rdf (~> 2.1)
+    rdf-xsd (2.0.0)
+      rdf (~> 2.0)
     rdoc (4.3.0)
     responders (2.3.0)
       railties (>= 4.2.0, < 5.1)
@@ -315,6 +342,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  active_fedora-datastreams (= 0.1.0)
   active_fedora-noid (= 2.0.0)
   blacklight (= 6.7.2)
   bootswatch-rails (= 3.3.5)
