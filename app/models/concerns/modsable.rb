@@ -2,8 +2,6 @@ module Modsable
   extend ActiveSupport::Concern
   extend Forwardable
 
-  # include ModsHelper
-
   def_delegators :descMetadata, *ModsMetadata.terminology.terms.keys.concat(ModsMetadata.terminology.terms.keys.map{|x| (x.to_s + "=").to_sym})
 
   included do
