@@ -1,1 +1,1 @@
-Hydra::Works::Work.include Modsable
+Hydra::Works::Work.include Mods

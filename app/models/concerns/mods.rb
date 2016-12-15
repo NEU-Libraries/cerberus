@@ -1,4 +1,4 @@
-module Modsable
+module Mods
   extend ActiveSupport::Concern
   extend Forwardable
 
@@ -6,10 +6,6 @@ module Modsable
 
   included do
     has_subresource 'descMetadata', class_name: 'ModsMetadata'
-  end
-
-  def prefix(name)
-    "#{name.underscore}__"
   end
 
   # Inserts a new contributor (mods:name) into the mods document
@@ -26,7 +22,7 @@ module Modsable
       node = Hydra::ModsArticleDatastream.conference_template
       nodeset = find_by_terms(:conference)
     else
-      ActiveFedora.logger.warn("#{type} is not a valid argument for Hydra::ModsArticleDatastream.insert_contributor")
+      ActiveFedora.logger.warn("#{type} is not a valid argument for insert_contributor")
       node = nil
       index = nil
     end
@@ -39,7 +35,6 @@ module Modsable
         nodeset.after(node)
         index = nodeset.length
       end
-      self.dirty = true
     end
 
     [node, index]
@@ -48,7 +43,6 @@ module Modsable
   # Remove the contributor entry identified by @contributor_type and @index
   def remove_contributor(contributor_type, index)
     find_by_terms(contributor_type.to_sym => index.to_i).first.remove
-    self.dirty = true
   end
 
 end
