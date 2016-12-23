@@ -337,10 +337,6 @@ class ProcessXmlZipJob
                   core_file.mods.content = old_mods
                   core_file.save!
                   next
-                elsif core_file.keywords.length < 1
-                  populate_error_report(load_report, existing_file, "Must have at least one keyword", row_results, core_file, old_mods, header_row, row)
-                elsif core_file.title.blank?
-                  populate_error_report(load_report, existing_file, "Must have a title", row_results, core_file, old_mods, header_row, row)
                 elsif core_file.identifier.blank?
                   populate_error_report(load_report, existing_file, "Must have a handle", row_results, core_file, old_mods, header_row, row)
                 else
@@ -471,17 +467,13 @@ class ProcessXmlZipJob
         return "pid #{pid} is not a CoreFile object"
       else
         doc = SolrDocument.new(cf.to_solr)
-        if (cf.mods.title.blank? || cf.mods.subject.length < 1) || (doc.title.blank? || doc['subject_topic_tesim'].nil?)
-          return "No title and/or keyword found for #{pid}"
+        if !cf.healthy?
+          return "Core file is not healthy"
         else
-          if !cf.healthy?
-            return "Core file is not healthy"
+          if cf.tombstoned? || cf.in_progress? || cf.incomplete?
+            return "Core file has non-active state: tombstoned, incomplete, or in_progress"
           else
-            if cf.tombstoned? || cf.in_progress? || cf.incomplete?
-              return "Core file has non-active state: tombstoned, incomplete, or in_progress"
-            else
-              return true
-            end
+            return true
           end
         end
       end
