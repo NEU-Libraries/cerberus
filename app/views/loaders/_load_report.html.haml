@@ -1,3 +1,10 @@
+= form_tag(url_for(params), id: "select_per_page", method: "GET") do
+  = label_tag :per_page do
+    %strong= "Show"
+    = select_tag( :per_page, options_for_select([10, 25, 50, 100, 'All'], params[:per_page] ? params[:per_page] : 50), class:"input-small" )
+    ="per page"
+    = submit_tag "Apply", class: 'btn btn-primary btn-small'
+= will_paginate @images
 %table.table.table-striped#report
   %th File Name
   %th Core File Title
