@@ -72,7 +72,13 @@ class Loaders::LoadsController < ApplicationController
 
   def show
     @report = Loaders::LoadReport.find(params[:id])
-    @images = Loaders::ItemReport.where(load_report_id:"#{@report.id}").find_all
+    image_count = Loaders::ItemReport.where(load_report_id:"#{@report.id}").count
+    if params[:per_page]
+      per_page = params[:per_page] == "All" ? image_count : params[:per_page]
+    else
+      per_page = 50
+    end
+    @images = Loaders::ItemReport.where(load_report_id:"#{@report.id}").paginate(:page => params[:page], :per_page => per_page)
     @user = User.find_by_nuid(@report.nuid)
     if @report.collection
       @page_title = @report.loader_name + " Load into " + Collection.find(@report.collection).title

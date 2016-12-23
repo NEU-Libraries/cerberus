@@ -120,42 +120,45 @@ Cerberus::Application.routes.draw do
   get '/switch_user' => 'users#switch_user', as: 'switch_user'
   get '/set_preferred_user' => 'users#set_preferred_user', as: 'set_preferred_user'
 
+
+  get "/loaders/marcom/report/:id" => 'loaders/marcom_loads#show', as: 'loaders_marcom_report'
+  get "/loaders/coe/report/:id" => 'loaders/coe_loads#show', as: 'loaders_coe_report'
+  get "/loaders/engineering/report/:id" => 'loaders/coe_loads#show', as: 'loaders_coe_report'
+  get "/loaders/cps/report/:id" => 'loaders/cps_loads#show', as: 'loaders_cps_report'
+  get "/loaders/emsa/report/:id" => 'loaders/emsa_loads#show', as: 'loaders_emsa_report'
+  get "/loaders/multipage/report/:id" => 'loaders/multipage_loads#show', as: 'loaders_multipage_report'
+  get "/loaders/bouve/report/:id" => 'loaders/bouve_loads#show', as: 'loaders_bouve_report'
+  get "/loaders/damore/report/:id" => 'loaders/damore_loads#show', as: 'loaders_damore_report'
+  get "/loaders/aaia/report/:id" => 'loaders/aaia_loads#show', as: 'loaders_aaia_report'
+  get "/loaders/spreadsheet/report/:id" => 'loaders/spreadsheet_loads#show', as: 'loaders_spreadsheet_report'
+  get "/loaders/xml/report/:id" => 'loaders/xml_loads#show', as: 'loaders_xml_report'
+
+
   scope :module => Loaders do
    resources :marcom_loads, only: [:new, :create, :show], :path => "loaders/marcom"
-   get "/loaders/marcom/report/:id" => 'marcom_loads#show', as: 'loaders_marcom_report'
    get "/loaders/marcom/file/:id" => 'marcom_loads#show_iptc', as: 'loaders_marcom_iptc'
    resources :coe_loads, only: [:new, :create, :show], :path => "loaders/engineering"
    resources :coe_loads, only: [:new, :create, :show], :path => "loaders/coe"
-   get "/loaders/coe/report/:id" => 'coe_loads#show', as: 'loaders_coe_report'
    get "/loaders/coe/file/:id" => 'coe_loads#show_iptc', as: 'loaders_coe_iptc'
-   get "/loaders/engineering/report/:id" => 'coe_loads#show', as: 'loaders_coe_report'
    get "/loaders/engineering/file/:id" => 'coe_loads#show_iptc', as: 'loaders_coe_iptc'
    resources :cps_loads, only: [:new, :create, :show], :path => "loaders/cps"
-   get "/loaders/cps/report/:id" => 'cps_loads#show', as: 'loaders_cps_report'
    get "/loaders/cps/file/:id" => 'cps_loads#show_iptc', as: 'loaders_cps_iptc'
    resources :emsa_loads, only: [:new, :create, :show], :path => "loaders/emsa"
-   get "/loaders/emsa/report/:id" => 'emsa_loads#show', as: 'loaders_emsa_report'
    get "/loaders/emsa/file/:id" => 'emsa_loads#show_iptc', as: 'loaders_emsa_iptc'
    resources :multipage_loads, only: [:new, :create, :show], :path => "loaders/multipage"
-   get "/loaders/multipage/report/:id" => 'multipage_loads#show', as: 'loaders_multipage_report'
    resources :bouve_loads, only: [:new, :create, :show], :path => "loaders/bouve"
-   get "/loaders/bouve/report/:id" => 'bouve_loads#show', as: 'loaders_bouve_report'
    get "/loaders/bouve/file/:id" => 'bouve_loads#show_iptc', as: 'loaders_bouve_iptc'
    resources :damore_loads, only: [:new, :create, :show], :path => "loaders/damore"
-   get "/loaders/damore/report/:id" => 'damore_loads#show', as: 'loaders_damore_report'
    get "/loaders/damore/file/:id" => 'damore_loads#show_iptc', as: 'loaders_damore_iptc'
    resources :aaia_loads, only: [:new, :create, :show], :path => "loaders/aaia"
-   get "/loaders/aaia/report/:id" => 'aaia_loads#show', as: 'loaders_aaia_report'
    get "/loaders/aaia/file/:id" => 'aaia_loads#show_iptc', as: 'loaders_aaia_iptc'
    resources :spreadsheet_loads, only: [:new, :create, :preview, :preview_compare], :path => "loaders/spreadsheet"
-   get "/loaders/spreadsheet/report/:id" => 'spreadsheet_loads#show', as: 'loaders_spreadsheet_report'
    get "/loaders/spreadsheet/preview/:id" => 'spreadsheet_loads#preview',  as: 'loaders_spreadsheet_preview'
    get "/loaders/spreadsheet/preview_compare/:id" => 'spreadsheet_loads#preview_compare', as: 'loaders_spreadsheet_preview_compare'
    get "/loaders/spreadsheet/file/:id" => 'spreadsheet_loads#show_mods', as: 'loaders_spreadsheet_mods'
    get "/loaders/spreadsheet/:id/cancel_load" => "spreadsheet_loads#cancel_load", as: "loaders_spreadsheet_cancel_load"
    get "/loaders/spreadsheet/:id/proceed_load" => "spreadsheet_loads#proceed_load", as: "loaders_spreadsheet_proceed_load"
    resources :xml_loads, only: [:new, :create, :preview, :preview_compare], :path => "loaders/xml"
-   get "/loaders/xml/report/:id" => 'xml_loads#show', as: 'loaders_xml_report'
    get "/loaders/xml/preview/:id" => 'xml_loads#preview',  as: 'loaders_xml_preview'
    get "/loaders/xml/preview_compare/:id" => 'xml_loads#preview_compare', as: 'loaders_xml_preview_compare'
    get "/loaders/xml/file/:id" => 'xml_loads#show_mods', as: 'loaders_xml_mods'
