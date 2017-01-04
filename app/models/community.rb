@@ -1,4 +1,6 @@
 class Community < ActiveFedora::Base
+  include Hydra::AccessControls::Permissions
+  
   has_many :collections
 
   property :title, predicate: ::RDF::Vocab::DC.title, multiple: false do |index|
