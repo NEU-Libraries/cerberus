@@ -1,17 +1,21 @@
-- collection = Collection.find(@report.collection)
-
 %ul.breadcrumb
   %li
     = link_to 'My Loaders', '/my_loaders'
   %li.active
     = "#{@report.loader_name} Load into "
-    %em
-      = link_to(collection.title, collection_path(@report.collection))
+    - if @collection
+      %em
+        = link_to(@collection.title, collection_path(@report.collection))
+    - else
+      = "N/A"
 
 %h2.page-header
   = "#{@report.loader_name} Load into "
-  %em
-    = link_to(collection.title, collection_path(@report.collection))
+  - if @collection
+    %em
+      = link_to(@collection.title, collection_path(@report.collection))
+  - else
+    = "N/A"
 %h4
   Created at:
   = @report.created_at.strftime("%m-%d-%Y %T")
