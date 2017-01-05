@@ -81,9 +81,11 @@ class Loaders::LoadsController < ApplicationController
     @images = Loaders::ItemReport.where(load_report_id:"#{@report.id}").paginate(:page => params[:page], :per_page => per_page)
     @user = User.find_by_nuid(@report.nuid)
     if @report.collection
-      @page_title = @report.loader_name + " Load into " + Collection.find(@report.collection).title
+      @collection = Collection.find(@report.collection)
+      @page_title = @report.loader_name + " Load into " + @collection.title
     else
       @page_title = @report.loader_name + " Load"
+      @collection = @collection_link = nil
     end
     if session[:flash_error]
       flash[:error] = session[:flash_error]
