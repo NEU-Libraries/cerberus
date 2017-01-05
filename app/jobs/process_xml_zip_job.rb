@@ -260,7 +260,14 @@ class ProcessXmlZipJob
                   core_file.mods.content = ModsDatastream.xml_template.to_xml
                   assign_a_row(row_results, core_file, dir_path, new_file)
                 else
-                  populate_error_report(load_report, existing_file, core_file_checks(row_results["pid"]), row_results, core_file, old_mods, header_row, row)
+                  checks = core_file_checks(row_results["pid"])
+                  if checks[:core_file]
+                    core_file = CoreFile.find(row_results["pid"])
+                    old_mods = core_file.mods.content
+                  else
+                    core_file = nil
+                  end
+                  populate_error_report(load_report, existing_file, checks[:error_msg], row_results, core_file, old_mods, header_row, row)
                   core_file = nil
                   seq_num = -1
                   zip_files = []
@@ -460,18 +467,18 @@ class ProcessXmlZipJob
 
   def core_file_checks(pid)
     if !ActiveFedora::Base.exists?(pid)
-      return "Core file #{pid} does not exist"
+      return {:error_msg => "Core file #{pid} does not exist"}
     else
       cf = ActiveFedora::Base.find(pid, :cast=>true)
       if cf.class != CoreFile
-        return "pid #{pid} is not a CoreFile object"
+        return {:error_msg => "pid #{pid} is not a CoreFile object"}
       else
         doc = SolrDocument.new(cf.to_solr)
         if !cf.healthy?
-          return "Core file is not healthy"
+          return {:error_msg => "Core file is not healthy", :core_file => cf}
         else
           if cf.tombstoned? || cf.in_progress? || cf.incomplete?
-            return "Core file has non-active state: tombstoned, incomplete, or in_progress"
+            return {:error_msg => "Core file has non-active state: tombstoned, incomplete, or in_progress", :core_file => cf}
           else
             return true
           end
