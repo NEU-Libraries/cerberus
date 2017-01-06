@@ -244,7 +244,7 @@ class ProcessModsZipJob
                   if row_results["poster_path"].blank?
                     populate_error_report(load_report, existing_file, "Audio or Video File must have poster file", row_results, core_file, old_mods, header_row, row)
                   else
-                    poster_path = File.dirname(dir_path) + "/" + row_results["poster_path"]
+                    poster_path = dir_path + "/" + row_results["poster_path"]
                     Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename, poster_path))
                     load_report.item_reports.create_success(core_file, "", :create)
                     UploadAlert.create_from_core_file(core_file, :create, "spreadsheet")
