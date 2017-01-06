@@ -107,7 +107,7 @@ class ProcessXmlZipJob
         rescue Exception => error
           xml_file_path = dir_path + "/" + row_results["xml_file_path"]
           mime = extract_mime_type(xml_file_path)
-          if mime.match(/[a-zA-Z]*\/xml$/).nil?
+          if !xml_file_path.blank? && File.exists?(xml_file_path) && mime.match(/[a-zA-Z]*\/xml$/).nil?
             doc = Nokogiri(xml_file_path)
             if doc.encoding != "UTF-8"
               raise Exceptions::XmlEncodingError.new.to_s
@@ -413,7 +413,7 @@ class ProcessXmlZipJob
       xml_file_path = new_file
     end
     mime = extract_mime_type(xml_file_path)
-    if mime.match(/[a-zA-Z]*\/xml$/).nil?
+    if !xml_file_path.blank? && File.exists?(xml_file_path) && mime.match(/[a-zA-Z]*\/xml$/).nil?
       doc = Nokogiri(xml_file_path)
       if doc.encoding != "UTF-8"
         raise Exceptions::XmlEncodingError.new.to_s
