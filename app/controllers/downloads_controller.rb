@@ -37,7 +37,8 @@ class DownloadsController < ApplicationController
   def show
     # 301 redirect fulltext if not logged in to try and boost google scholar
     if current_user.nil?
-      if asset.class == PdfFile
+      # Tombstoned files will return a nil core_record
+      if asset.class == PdfFile && !asset.core_record.blank?
         doc = SolrDocument.new ActiveFedora::SolrService.query("id:\"#{asset.core_record.pid}\"").first
         if doc.public?
           if doc.category == "Theses and Dissertations" || doc.category == "Technical Reports" || doc.category == "Research Publications"
