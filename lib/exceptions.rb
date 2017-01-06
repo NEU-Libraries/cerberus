@@ -172,7 +172,7 @@ module Exceptions
 
   class XmlEncodingError < StandardError
     def initialize
-      super "This object requires a prolog with UTF-8 encoding."
+      super "DRS XML requires a prolog with UTF-8 encoding."
     end
   end
 end

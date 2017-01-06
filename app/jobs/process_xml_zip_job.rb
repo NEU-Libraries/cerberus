@@ -107,7 +107,13 @@ class ProcessXmlZipJob
         rescue Exception => error
           xml_file_path = dir_path + "/" + row_results["xml_file_path"]
           mime = extract_mime_type(xml_file_path)
-          if !xml_file_path.blank? && File.exists?(xml_file_path) && !mime.match(/[a-zA-Z]*\/xml$/).nil?
+          if mime.match(/[a-zA-Z]*\/xml$/).nil?
+            doc = Nokogiri(xml_file_path)
+            if doc.encoding != "UTF-8"
+              raise Exceptions::XmlEncodingError.new.to_s
+            end
+          end
+          if !xml_file_path.blank? && File.exists?(xml_file_path)
             raw_xml = xml_decode(File.open(xml_file_path, "r").read)
           else
             rax_xml = ""
@@ -407,7 +413,13 @@ class ProcessXmlZipJob
       xml_file_path = new_file
     end
     mime = extract_mime_type(xml_file_path)
-    if !xml_file_path.blank? && File.exists?(xml_file_path) && !mime.match(/[a-zA-Z]*\/xml$/).nil?
+    if mime.match(/[a-zA-Z]*\/xml$/).nil?
+      doc = Nokogiri(xml_file_path)
+      if doc.encoding != "UTF-8"
+        raise Exceptions::XmlEncodingError.new.to_s
+      end
+    end
+    if !xml_file_path.blank? && File.exists?(xml_file_path)
       raw_xml = xml_decode(File.open(xml_file_path, "r").read)
       self.mods_content = raw_xml
       # Validate
