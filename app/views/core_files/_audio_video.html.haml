@@ -25,6 +25,9 @@
   :javascript
     var provider = "#{provider}"
     var primary = "html5";
+    var is_chrome = navigator.userAgent.indexOf('Chrome') > -1;
+    var is_safari = navigator.userAgent.indexOf("Safari") > -1;
+    if ((is_chrome)&&(is_safari)) {is_safari=false;}
     jwplayer("player").setup({
     image: "#{poster}",
     provider: "#{provider}",
@@ -36,9 +39,9 @@
     flashplayer: "/assets/jwplayer/jwplayer.flash.swf",
     sources:
     [
+    { file: "http://libwowza.neu.edu/datastreamStore/cerberusData/newfedoradata/datastreamStore/#{dir}/" + encodeURIComponent("info%3Afedora%2F#{encoded}%2Fcontent%2Fcontent.0"), type:"#{type.downcase}"},
     { file: "rtmp://libwowza.neu.edu:1935/vod/_definst_/#{type}:datastreamStore/cerberusData/newfedoradata/datastreamStore/#{dir}/info%3Afedora%2F#{encoded}%2Fcontent%2Fcontent.0"},
     { file: "http://libwowza.neu.edu:1935/vod/_definst_/datastreamStore/cerberusData/newfedoradata/datastreamStore/#{dir}/#{type}:" + encodeURIComponent("info%3Afedora%2F#{encoded}%2Fcontent%2Fcontent.0") + "/playlist.m3u8"},
-    { file: "http://libwowza.neu.edu/datastreamStore/cerberusData/newfedoradata/datastreamStore/#{dir}/" + encodeURIComponent("info%3Afedora%2F#{encoded}%2Fcontent%2Fcontent.0"), type:"#{type.downcase}"},
     ],
     tracks: [{
       file: "#{caption_url}",
@@ -46,34 +49,35 @@
       kind: 'captions',
       "default": true
     }]
-    })
-    var errorMessage = function() {
+    });
+    function errorMessage() {
       $(".alert-video").removeClass("hidden").text("There was an error playing this file. Please try on a different device, verify Flash is enabled, or download the file.")
       $(".replace_thumbs").removeClass("hidden")
       $("#player, #player_wrapper").hide()
     }
-    jwplayer().onError(errorMessage);
-    jwplayer().onSetupError(errorMessage);
-    jwplayer().onBuffer(function() {
+    jwplayer().on('error', function(){
+      errorMessage();
+     });
+    jwplayer().on('setupError', function(){
+      errorMessage();
+    });
+    jwplayer().on('buffer', function() {
       theTimeout = setTimeout(function() {
         $(".alert-video").removeClass("hidden").text("This video is taking longer than expected to play. You may need to download the file to view it.");
       }, 5000)
     })
-    var renderingMode
-    jwplayer().onReady(function() {
-      renderingMode = jwplayer().getRenderingMode()
-    })
-    jwplayer().onPlay(function(){
-      clearTimeout(theTimeout);
-      if (provider == 'sound' && renderingMode == 'flash') {
-        jwplayer().resize('100%', 50);
-        $(".replace_thumbs").removeClass("hidden")
+    jwplayer().on('ready', function() {
+      if (is_safari){
+        //defaulting to m3u8 stream for safari since it functions better
+        jwplayer().load([{image: "#{poster}", sources:[{ file: "http://libwowza.neu.edu:1935/vod/_definst_/datastreamStore/cerberusData/newfedoradata/datastreamStore/#{dir}/#{type}:" + encodeURIComponent("info%3Afedora%2F#{encoded}%2Fcontent%2Fcontent.0") + "/playlist.m3u8"}]}]);
+        // Set poster image for video element to avoid black background for audio-only programs.
+        $("#player video").attr("poster", "#{poster}");
       }
+    })
+    jwplayer().on('play', function() {
+      clearTimeout(theTimeout);
       $.ajax("/files/#{pid}/log_stream");
     })
-    $(".replace_thumbs").click(function() {
-      jwplayer().play()
-    })
-    jwplayer().onComplete(function() {
+    jwplayer().on('complete', function() {
       window.location = window.location.href
-    })
+    });
