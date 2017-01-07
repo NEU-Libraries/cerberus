@@ -494,6 +494,8 @@ $(document).ready ->
       drsApp.addToComplationMultiLink $('.multi-compilation')
       drsApp.addToCompilationProceed $('.btn-proceed')
       drsApp.newCompilationForm()
+      if (klass == "modal-compilation")
+        $modal.find(".pagination a").attr("data-remote", "true");
       return
 
 
