@@ -6,6 +6,7 @@
   - if params[:file]
     - doc = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:file]}\"").first)
   - @compilations.sort_by!{|c| c.title}
+  = render "catalog/results_pagination"
   - @compilations.each do |c|
     - object_ids = c.object_ids
     - if params[:files]
@@ -23,6 +24,7 @@
             = link_to("#{c.title}", add_entry_path(id: c.pid, entry_id: params[:file]), method: 'post', remote: true, id: "add-to-compilation-#{c.pid}", class: "btn btn-success btn-block btn-compilation", data: { title: "#{c.title}"} )
         - else
           = link_to("#{c.title}", add_entry_path(id: c.pid, entry_id: params[:file]), method: 'post', remote: true, id: "add-to-compilation-#{c.pid}", class: "btn btn-success btn-block btn-compilation", data: { title: "#{c.title}"} )
+  = render "catalog/results_pagination"
 
 .modal-footer
   %button.btn{"data-dismiss" => "modal"} Close
