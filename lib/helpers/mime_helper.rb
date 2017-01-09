@@ -1,6 +1,6 @@
 module MimeHelper
 
-  def extract_mime_type(file_location)
+  def extract_mime_type(file_location, original_filename="")
     # given a files location at the system level
     # use file to extract it's mime type - to be used in
     # assign_type, but we may have more use for this
@@ -9,7 +9,7 @@ module MimeHelper
     result.strip!
     mime_type = result.slice(result.index(":")+1..-1).strip
 
-    if mime_type == "application/octet-stream"
+    if !original_filename.blank? && mime_type == "application/octet-stream"
       # Odds are that it's a poor encoding, and the system is correct in giving a generic
       # mime type. Due to the complexity of the issue however, we're going to punt this
       # down the river and see if JWPlayer can survive whatever the issue may be, and
