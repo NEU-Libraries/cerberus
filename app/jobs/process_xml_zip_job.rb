@@ -202,7 +202,7 @@ class ProcessXmlZipJob
                     core_file.original_filename = row_results["file_name"]
                     # core_file.label = row_results["file_name"]
                     if !multipage
-                      core_file.instantiate_appropriate_content_object(new_file)
+                      core_file.instantiate_appropriate_content_object(new_file, core_file.original_filename)
                     end
                     sc_type = collection.smart_collection_type
                     if !sc_type.nil? && sc_type != ""
