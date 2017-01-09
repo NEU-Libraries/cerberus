@@ -4,9 +4,9 @@ module Cerberus
       include MimeHelper
       include TempFileStorage
 
-      def instantiate_appropriate_content_object(file_path)
+      def instantiate_appropriate_content_object(file_path, original_filename="")
 
-        mime_type = extract_mime_type(file_path)
+        mime_type = extract_mime_type(file_path, original_filename)
         ext = extract_extension(mime_type)
         result = hash_mime_type(mime_type)
 
