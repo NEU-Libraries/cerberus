@@ -40,7 +40,7 @@ class ImageProcessingJob
       core_file.original_filename = File.basename(file_name)
       # core_file.label = File.basename(file_name)
 
-      core_file.instantiate_appropriate_content_object(file)
+      core_file.instantiate_appropriate_content_object(file, core_file.original_filename)
       if core_file.canonical_class != "ImageMasterFile" or extract_mime_type(file) != 'image/jpeg'
         report = load_report.item_reports.create_failure("File is not a JPG image", "", core_file.original_filename)
         core_file.destroy
