@@ -14,7 +14,7 @@ module MimeHelper
       # mime type. Due to the complexity of the issue however, we're going to punt this
       # down the river and see if JWPlayer can survive whatever the issue may be, and
       # give the extension the benefit of the doubt.
-      extension = File.extname(file_location)
+      extension = File.extname(original_filename)
 
       if !extension.blank?
         return Rack::Mime.mime_type(extension)
