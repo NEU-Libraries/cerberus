@@ -8,6 +8,19 @@ module MimeHelper
     #removing newlines and whitespace
     result.strip!
     mime_type = result.slice(result.index(":")+1..-1).strip
+
+    if mime_type == "application/octet-stream"
+      # Odds are that it's a poor encoding, and the system is correct in giving a generic
+      # mime type. Due to the complexity of the issue however, we're going to punt this
+      # down the river and see if JWPlayer can survive whatever the issue may be, and
+      # give the extension the benefit of the doubt.
+      extension = File.extname(file_location)
+
+      if !extension.blank?
+        return Rack::Mime.mime_type(extension)
+      end
+    end
+
     return mime_type
   end
 
