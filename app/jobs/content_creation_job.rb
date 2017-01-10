@@ -102,7 +102,6 @@ class ContentCreationJob
         else
           File.open(file_path) do |file_contents|
             content_object.add_file(file_contents, 'content', file_name)
-            content_object.properties.mime_type = extract_mime_type(file_path, core_record.original_filename)
             content_object.save!
           end
         end
@@ -131,6 +130,8 @@ class ContentCreationJob
       # content_object.characterize
       # content_object.properties.mime_type = extract_mime_type(file_path)
       # content_object.properties.md5_checksum = new_checksum(file_path)
+
+      content_object.properties.mime_type = extract_mime_type(file_path, core_record.original_filename)
 
       content_object.save! ? content_object : false
 
