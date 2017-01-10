@@ -17,6 +17,7 @@ class CompilationsController < ApplicationController
 
   before_filter :can_edit?, only: [:edit, :update, :destroy, :add_entry, :delete_entry, :add_multiple_entries, :delete_multiple_entries]
   before_filter :can_read?, only: [:show, :show_download, :download]
+
   self.solr_search_params_logic += [:add_access_controls_to_solr_params]
 
   load_resource
@@ -50,10 +51,10 @@ class CompilationsController < ApplicationController
   end
 
   def editable_compilations
-    # use this for the popup when adding to sets
-    u_groups = current_user.groups
-    groups = u_groups.map! { |g| "\"#{g}\""}.join(" OR ")
-    @compilations = solr_query("(depositor_tesim:\"#{current_user.nuid}\" OR edit_access_group_ssim:(#{groups})) AND has_model_ssim:\"#{ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:Compilation"}\"")
+    self.solr_search_params_logic += [:exclude_unwanted_models]
+
+    (@response, @compilations) = get_search_results
+
     if params[:class] == 'Collection'
       doc = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:file]}\"").first)
     end
@@ -71,7 +72,7 @@ class CompilationsController < ApplicationController
 
   def collaborative_compilations
     self.solr_search_params_logic += [:exclude_unwanted_models]
-    self.solr_search_params_logic += [:get_compilations_with_permissions]
+    self.solr_search_params_logic += [:exclude_user_compilations]
 
     @forced_view = "drs-items-list"
 
@@ -406,17 +407,14 @@ class CompilationsController < ApplicationController
     solr_parameters[:fq] << "#{Solrizer.solr_name("depositor", :stored_searchable)}:\"#{current_user.nuid}\""
   end
 
+  def exclude_user_compilations(solr_parameters, user_parameters)
+    solr_parameters[:fq] ||= []
+    solr_parameters[:fq] << "-#{Solrizer.solr_name("depositor", :stored_searchable)}:\"#{current_user.nuid}\""
+  end
+
   def exclude_unwanted_models(solr_parameters, user_parameters)
     solr_parameters[:fq] ||= []
     solr_parameters[:fq] << "#{Solrizer.solr_name("has_model", :symbol)}:\"info:fedora/afmodel:Compilation\""
-  end
-
-  def get_compilations_with_permissions(solr_parameters, user_parameters)
-    solr_parameters[:fq] ||= []
-    solr_parameters[:fq] << "!#{Solrizer.solr_name("depositor", :stored_searchable)}:\"#{current_user.nuid}\""
-    u_groups = current_user.groups
-    query = u_groups.map! { |g| "\"#{g}\""}.join(" OR ")
-    solr_parameters[:fq] << "edit_access_group_ssim:(#{query})"
   end
 
   def increase_facet_limit(solr_parameters, user_parameters)
