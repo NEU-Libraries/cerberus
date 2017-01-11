@@ -24,7 +24,7 @@ module ZipHelper
 
     dir_list = Dir.glob("#{output_dir}/*")
 
-    Find.find(output_dir) do |path|
+    Dir.glob("#{output_dir}/**/*").each do |path|
       if squash
         if !File.directory?(path) && File.basename(path)[0] != "."
           uniq_hsh = Digest::MD5.hexdigest("#{path}")[0,2]
