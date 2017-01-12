@@ -1,7 +1,7 @@
 set :stage, :staging
 set :whenever_environment, 'staging'
 
-set :deploy_to, '/home/drs/cerberus/'
+set :deploy_to, '/opt/cerberus/'
 
 # parses out the current branch you're on. See: http://www.harukizaemon.com/2008/05/deploying-branches-with-capistrano.html
 current_branch = `git branch`.match(/\* (\S+)\s/m)[1]
@@ -46,17 +46,17 @@ namespace :deploy do
   desc "Restarting the resque workers"
   task :restart_workers do
     on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec kill -TERM $(cat /home/drs/config/resque-pool.pid))", raise_on_non_zero_exit: false
+      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec kill -TERM $(cat /etc/cerberus/resque-pool.pid))", raise_on_non_zero_exit: false
       execute "kill $(ps aux | grep -i resque | awk '{print $2}')", raise_on_non_zero_exit: false
-      execute "rm -f /home/drs/config/resque-pool.pid", raise_on_non_zero_exit: false
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec resque-pool --daemon -p /home/drs/config/resque-pool.pid)"
+      execute "rm -f /etc/cerberus/resque-pool.pid", raise_on_non_zero_exit: false
+      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec resque-pool --daemon -p /etc/cerberus/resque-pool.pid)"
     end
   end
 
   desc "Copy Figaro YAML"
   task :copy_yml_file do
     on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cp /home/drs/config/application.yml #{release_path}/config/"
+      execute "cp /etc/cerberus/application.yml #{release_path}/config/"
     end
   end
 
