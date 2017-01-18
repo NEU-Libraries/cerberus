@@ -12,6 +12,8 @@ set :branch, ENV['branch'] || current_branch || "develop" # you can use the 'bra
 set :user, 'drs'
 set :rails_env, :staging
 
+set :rvm1_ruby_version, "2.0"
+
 server 'drs@cerberus.library.northeastern.edu', user: 'drs', roles: %w{web app db}
 
 namespace :deploy do
