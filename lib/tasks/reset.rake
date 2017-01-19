@@ -27,6 +27,7 @@ end
 
 def create_container(klass, parent_str, title_str, description = "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Recusandae, minima, cum sit iste at mollitia voluptatem error perspiciatis excepturi ut voluptatibus placeat esse architecto ea voluptate assumenda repudiandae quod commodi.")
   con = klass.new(parent: ActiveFedora::Base.find(parent_str), title: title_str, description: description)
+  # con = klass.new(title: title_str, description: description)
 
   con.permissions_attributes = [{ name: "public", access: "read", type: "group" }]
   con.save!

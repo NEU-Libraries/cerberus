@@ -1,0 +1,19 @@
+module Parentable
+
+  def parent=(parent_obj)
+    if self.class == Community || (self.class == Collection && parent_obj.class == Community)
+      self.community = parent_obj
+    else
+      self.member_of_collections = [parent_obj]
+    end
+  end
+
+  def parent
+    if self.class == Collection
+      !self.member_of_collection_ids.first.nil? ? self.member_of_collection_ids.first : self.community
+    elsif self.class == Community
+      self.community
+    end
+  end
+
+end

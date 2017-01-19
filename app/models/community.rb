@@ -1,7 +1,9 @@
 class Community < ActiveFedora::Base
   include Hydra::AccessControls::Permissions
+  include Hydra::PCDM::ObjectBehavior
+  include Parentable
 
-  belongs_to :parent, :class_name => "Community", predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf
+  belongs_to :community, :class_name => "Community", predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf
 
   has_many :collections
   has_many :communities
