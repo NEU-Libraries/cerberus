@@ -38,7 +38,7 @@ GEM
       nom-xml (>= 0.5.1)
       om (~> 3.1)
       rdf-rdfxml (~> 2.0)
-    active_fedora-noid (2.0.0)
+    active_fedora-noid (2.0.1)
       active-fedora (>= 9.7, < 12)
       noid (~> 0.9)
       rails (>= 4.2.7.1, < 6)
@@ -341,7 +341,7 @@ PLATFORMS
 
 DEPENDENCIES
   active_fedora-datastreams (= 0.1.0)
-  active_fedora-noid (= 2.0.0)
+  active_fedora-noid (= 2.0.1)
   blacklight (= 6.7.2)
   bootswatch-rails (= 3.3.5)
   byebug

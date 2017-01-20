@@ -10,7 +10,7 @@ module Parentable
 
   def parent
     if self.class == Collection
-      !self.member_of_collection_ids.first.nil? ? self.member_of_collection_ids.first : self.community
+      !self.member_of_collection_ids.first.nil? ? Collection.find(self.member_of_collection_ids.first) : self.community
     elsif self.class == Community
       self.community
     end

@@ -1,4 +1,4 @@
-class ActiveFedora::Base
+module Noidable
   def assign_id
     noid_service.mint
   end

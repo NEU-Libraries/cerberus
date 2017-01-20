@@ -3,6 +3,7 @@ class Collection < ActiveFedora::Base
   include Hydra::PCDM::ObjectBehavior
   include Hydra::AccessControls::Permissions
   include Parentable
+  include Noidable
 
   belongs_to :community, class_name: 'Community', predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf
 
