@@ -408,7 +408,6 @@ class ProcessModsZipJob
         end
       end
     end
-
     core_file.mods.type_of_resource = row_results["type_of_resource"] unless row_results["type_of_resource"].blank?
     genres = row_results.select { |key, value| key.to_s.match(/^genre_\d+$/) if !value.blank? }
     if genres.count > 0 && !genres.values.blank?
@@ -487,7 +486,6 @@ class ProcessModsZipJob
     if !access_conditions.blank?
       core_file.mods.access_conditions = access_conditions
     end
-
     notes = []
     note_results = row_results.select { |key, value| key.to_s.match(/^notes_\d+$/) if !value.blank? }
     i = 1
@@ -515,7 +513,7 @@ class ProcessModsZipJob
       value_uri = ""
       if subject.include? "|"
         subject = subject.split("|")
-        value_uri = subject[1].strip unless subject[1].strip.blank?
+        value_uri = subject[1].strip unless subject[1].blank?
         subject = subject[0].strip
       end
       if subject.include? "--"
@@ -747,7 +745,6 @@ class ProcessModsZipJob
         end
       end
     end
-
 
     # for related items
     related_items = {}
