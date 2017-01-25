@@ -127,7 +127,7 @@ class Loaders::LoadsController < ApplicationController
         new_file = "#{new_path}.zip"
         FileUtils.mv(file.tempfile.path, new_file)
         #if zip
-        if extract_mime_type(new_file) == 'application/zip'
+        if (extract_mime_type(new_file) == 'application/zip') || (extract_mime_type(new_file) == 'application/x-tar')
           begin
             @report_id = nil
             if short_name == "spreadsheet"
