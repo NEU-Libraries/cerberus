@@ -81,7 +81,7 @@ namespace :deploy do
   desc "Copy rvmrc"
   task :copy_rvmrc_file do
     on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cp /home/drs/.drsrvmrc #{release_path}/.rvmrc"
+      execute "cp /export/home/drs/.drsrvmrc #{release_path}/.rvmrc"
     end
   end
 
