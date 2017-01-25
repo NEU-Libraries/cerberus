@@ -57,7 +57,7 @@ class Loaders::LoadsController < ApplicationController
         msg = "You must accept the terms of service!"
         session[:flash_error] = msg
         render :json => [{error: msg}].to_json and return
-      elsif (File.extname(file.tempfile.path) == ".zip") && (File.size(file.tempfile).to_f / 1024000).round(2) > 4000) #4000 is 4000MB
+      elsif (File.extname(file.tempfile.path) == ".zip") && ((File.size(file.tempfile).to_f / 1024000).round(2) > 4000) #4000 is 4000MB
         msg = "The file you chose is larger than 4000MB. Please contact DRS staff for help uploading files larger than 4000MB."
         session[:flash_error] = msg
         render :json => [{error: msg}].to_json and return
