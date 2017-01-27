@@ -1,4 +1,3 @@
-# encoding: UTF-8
 # This file is auto-generated from the current state of the database. Instead
 # of editing this file, please use the migrations feature of Active Record to
 # incrementally modify your database, and then regenerate this schema definition.
@@ -21,10 +20,9 @@ ActiveRecord::Schema.define(version: 20161208185548) do
     t.binary   "title"
     t.datetime "created_at",    null: false
     t.datetime "updated_at",    null: false
+    t.index ["document_id"], name: "index_bookmarks_on_document_id"
+    t.index ["user_id"], name: "index_bookmarks_on_user_id"
   end
-
-  add_index "bookmarks", ["document_id"], name: "index_bookmarks_on_document_id"
-  add_index "bookmarks", ["user_id"], name: "index_bookmarks_on_user_id"
 
   create_table "minter_states", force: :cascade do |t|
     t.string   "namespace",            default: "default", null: false
@@ -34,9 +32,8 @@ ActiveRecord::Schema.define(version: 20161208185548) do
     t.binary   "rand"
     t.datetime "created_at",                               null: false
     t.datetime "updated_at",                               null: false
+    t.index ["namespace"], name: "index_minter_states_on_namespace", unique: true
   end
-
-  add_index "minter_states", ["namespace"], name: "index_minter_states_on_namespace", unique: true
 
   create_table "searches", force: :cascade do |t|
     t.binary   "query_params"
@@ -44,9 +41,8 @@ ActiveRecord::Schema.define(version: 20161208185548) do
     t.string   "user_type"
     t.datetime "created_at",   null: false
     t.datetime "updated_at",   null: false
+    t.index ["user_id"], name: "index_searches_on_user_id"
   end
-
-  add_index "searches", ["user_id"], name: "index_searches_on_user_id"
 
   create_table "users", force: :cascade do |t|
     t.string   "email",                  default: "",    null: false
@@ -62,9 +58,8 @@ ActiveRecord::Schema.define(version: 20161208185548) do
     t.datetime "created_at",                             null: false
     t.datetime "updated_at",                             null: false
     t.boolean  "guest",                  default: false
+    t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
-
-  add_index "users", ["email"], name: "index_users_on_email", unique: true
-  add_index "users", ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
 
 end
