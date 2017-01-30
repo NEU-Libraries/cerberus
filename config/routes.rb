@@ -1,5 +1,5 @@
 Rails.application.routes.draw do
-  
+
   mount Blacklight::Engine => '/'
   root to: "catalog#index"
     concern :searchable, Blacklight::Routes::Searchable.new
@@ -22,6 +22,8 @@ Rails.application.routes.draw do
       delete 'clear'
     end
   end
+
+  resources :works
 
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".

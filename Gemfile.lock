@@ -373,6 +373,7 @@ DEPENDENCIES
   devise
   devise-guests
   fcrepo_wrapper
+  haml
   hydra (= 11.0.0.rc1)
   hydra-works
   jbuilder

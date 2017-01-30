@@ -11,6 +11,7 @@ gem 'active_fedora-datastreams'
 gem 'rsolr'
 gem 'devise'
 gem 'devise-guests'
+gem 'haml'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 # Use sqlite3 as the database for Active Record

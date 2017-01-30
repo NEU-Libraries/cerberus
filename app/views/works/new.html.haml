@@ -1,0 +1,3 @@
+= form_tag("/works", method: "post", multipart: true, id: "singleFileUploadForm") do
+  = file_field_tag 'file'
+  = submit_tag
