@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 
 # Hydra Gems
-gem 'hydra', '11.0.0.rc1'
+gem 'hydra', '11.0.0'
 
 # Track these gems for updates
 gem 'hydra-works'
@@ -12,6 +12,8 @@ gem 'rsolr'
 gem 'devise'
 gem 'devise-guests'
 gem 'haml'
+gem 'resque'
+gem 'resque-web', require: 'resque_web'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 # Use sqlite3 as the database for Active Record

@@ -23,6 +23,8 @@ Rails.application.routes.draw do
     end
   end
 
+  mount ResqueWeb::Engine => "/resque"
+
   resources :works
 
   # The priority is based upon order of creation: first created -> highest priority.

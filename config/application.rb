@@ -29,5 +29,7 @@ module Cerberus
     config.active_record.raise_in_transactional_callbacks = true
 
     config.application_name = "Digital Repository Service"
+
+    config.active_job.queue_adapter = :resque
   end
 end

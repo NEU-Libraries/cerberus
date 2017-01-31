@@ -22,6 +22,7 @@ class WorksController < ActionController::Base
     work.permissions_attributes = [{ name: "public", access: "read", type: "group" }]
     work.save!
 
-    file_set.create_derivatives
+    # file_set.create_derivatives
+    GenerateDerivativesJob.perform_later(file_set.id)
   end
 end
