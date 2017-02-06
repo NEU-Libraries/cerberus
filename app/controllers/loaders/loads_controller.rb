@@ -122,9 +122,9 @@ class Loaders::LoadsController < ApplicationController
       if virus_check(file) == 0
         tempdir = Pathname.new("#{Rails.application.config.tmp_path}/")
         uniq_hsh = Digest::MD5.hexdigest("#{file.original_filename}")[0,2]
-        file_name = "#{Time.now.to_f.to_s.gsub!('.','-')}-#{uniq_hsh}#{File.extname(file.original_filename)}"
-        new_file = tempdir.join(file_name).to_s
-        # new_file = "#{new_path}"
+        file_name = "#{Time.now.to_f.to_s.gsub!('.','-')}-#{uniq_hsh}"
+        new_path = tempdir.join(file_name).to_s
+        new_file = "#{new_path}#{File.extname(file.original_filename)}"
         FileUtils.mv(file.tempfile.path, new_file)
         #if zip
         if (extract_mime_type(new_file) == 'application/zip') || (extract_mime_type(new_file) == 'application/x-tar')
