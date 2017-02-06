@@ -35,7 +35,12 @@
       - if @loader_short_name == 'spreadsheet' || @loader_short_name == 'xml'
         = hidden_field_tag :new, @new
       = label_tag "file", "File to upload", class: "required-label"
-      = file_field_tag 'file', required: true, "aria-required" => true, "accept"=>".zip"
+      = file_field_tag 'file', required: true, "aria-required" => true, "accept"=>".zip,.tar"
+      %p
+        %small
+          Please
+          %a{:href => "mailto:Library-Repository-Team@neu.edu"} contact the DRS staff
+          for help uploading zip files larger than 4000MB.
   .progress.progress-striped
     .bar{style: "width:0%"}
   .form-actions

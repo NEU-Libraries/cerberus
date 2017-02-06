@@ -57,6 +57,10 @@ class Loaders::LoadsController < ApplicationController
         msg = "You must accept the terms of service!"
         session[:flash_error] = msg
         render :json => [{error: msg}].to_json and return
+      elsif (File.extname(file.tempfile.path) == ".zip") && ((File.size(file.tempfile).to_f / 1024000).round(2) > 4000) #4000 is 4000MB
+        msg = "The file you chose is larger than 4000MB. Please contact DRS staff for help uploading files larger than 4000MB."
+        session[:flash_error] = msg
+        render :json => [{error: msg}].to_json and return
       else
         process_file(file, parent, @copyright, short_name, existing_files, derivatives)
       end
@@ -120,10 +124,10 @@ class Loaders::LoadsController < ApplicationController
         uniq_hsh = Digest::MD5.hexdigest("#{file.original_filename}")[0,2]
         file_name = "#{Time.now.to_f.to_s.gsub!('.','-')}-#{uniq_hsh}"
         new_path = tempdir.join(file_name).to_s
-        new_file = "#{new_path}.zip"
+        new_file = "#{new_path}#{File.extname(file.original_filename)}"
         FileUtils.mv(file.tempfile.path, new_file)
         #if zip
-        if extract_mime_type(new_file) == 'application/zip'
+        if (extract_mime_type(new_file) == 'application/zip') || (extract_mime_type(new_file) == 'application/x-tar')
           begin
             @report_id = nil
             if short_name == "spreadsheet"
