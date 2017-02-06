@@ -37,7 +37,7 @@ class Compilation < ActiveFedora::Base
       else
         # raise error - only collections and works can be added to compilations
       end
-      
+
       new_list = a.id_list.merge h
       a.id_list = new_list
       a.save!
@@ -45,20 +45,71 @@ class Compilation < ActiveFedora::Base
   end
 
   def remove(object_id)
-    # if collection
-    # if work
+    h = {}
+    a = self.assembly
+    old_list = a.id_list
+
+    new_list = old_list.delete(object_id)
+    a.id_list = new_list
+    a.save!
   end
 
-  def contains?(id)
-    # find parent if work
-    # compare with assembly collections
-    # if work compare with assembly works
+  def contains?(object_id)
+    parent = SolrDocument.new(ActiveFedora::SolrService.query("id:#{object_id}").first).id
+    a = self.assembly
+    ids = a.id_list.keys
+
+    if ids.include?(object_id) || ids.include?(parent)
+      return true
+    end
+
     return false
   end
 
-  def intersects?(id_list)
-    # find collections in list
-    # find collections in assembly
-    # make sets and compare
+  def intersects?(new_hash)
+    a = self.assembly
+    full_old_list = []
+    id_list = a.id_list
+
+    work_ids = []
+    collection_ids = []
+
+    id_list.each do |entry|
+       entry[1] == "collection" ? collection_ids << entry[0] : work_ids << entry[0]
+     end
+
+    # add non-collection ids from assembly
+    full_old_list << work_ids
+
+    # iterate through collections to get full list of ids
+    collection_ids.each do |collection_id|
+      ActiveFedora::SolrService.query("member_of_collection_ids_ssim:#{collection_id}", :fl => "id").each do |result|
+        full_old_list << result.values
+      end
+    end
+
+    # ----
+
+    full_new_list = []
+
+    work_ids = []
+    collection_ids = []
+
+    new_hash.each do |entry|
+      entry[1] == "collection" ? collection_ids << entry[0] : work_ids << entry[0]
+    end
+
+    # add non-collection ids from new hash
+    full_new_list << work_ids
+
+    # iterate through collections to get full list of ids
+    collection_ids.each do |collection_id|
+      ActiveFedora::SolrService.query("member_of_collection_ids_ssim:#{collection_id}", :fl => "id").each do |result|
+        full_new_list << result.values
+      end
+    end
+
+    # compare
+    return !(full_old_list & full_new_list).blank?
   end
 end
