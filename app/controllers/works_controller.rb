@@ -1,4 +1,4 @@
-class WorksController < ActionController::Base
+class WorksController < ApplicationController
   def new
   end
 

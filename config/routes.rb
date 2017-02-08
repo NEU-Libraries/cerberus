@@ -25,7 +25,7 @@ Rails.application.routes.draw do
 
   mount ResqueWeb::Engine => "/resque"
 
-  resources :works
+  resources :communities, :collections, :works
 
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
