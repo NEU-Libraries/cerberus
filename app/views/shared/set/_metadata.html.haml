@@ -1,8 +1,8 @@
-= form_for @set, url: {action: "create"}, html: {class: "nifty_form"} do |f|
+= form_for @set, url: {action: "create"} do |f|
   .form-group
     %label Title
-    = f.text_field :title
+    = f.text_field :title, :class => "form-control"
   .form-group
     %label Description
-    = f.text_area :description
+    = f.text_area :description, :class => "form-control"
   %button.btn.btn-default{:type => "submit"} Submit
