@@ -38,4 +38,5 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   # Share the current directory to /vagrant on the virtual machine
   config.vm.synced_folder "." , "/home/vagrant/cerberus", nfs: true
+  config.vm.network "private_network", ip: "192.168.50.4"
 end
