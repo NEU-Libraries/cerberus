@@ -32,6 +32,8 @@ Cerberus::Application.configure do
 
   # Compress assets
   config.assets.compress = true
+  # cache busting for production javascript
+  config.assets.digest = true
 
   # Serve static assets
   # config.serve_static_assets = true
