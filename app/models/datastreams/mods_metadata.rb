@@ -372,4 +372,8 @@ class ModsMetadata < ActiveFedora::OmDatastream
     builder.doc
   end
 
+  def prefix(path)
+    ""
+  end
+
 end

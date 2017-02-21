@@ -18,6 +18,10 @@
 
     <%= render :partial=>'/flash_msg', layout: 'shared/flash_messages' %>
 
+    <% if !@document.blank? && @document.respond_to?(:parent) %>
+      <%= render 'shared/breadcrumbs' %>
+    <% end %>
+
     <div class="row">
       <%= yield %>
     </div>
