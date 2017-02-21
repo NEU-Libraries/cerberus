@@ -17,6 +17,7 @@ gem 'resque-web', require: 'resque_web'
 gem 'unidecoder'
 gem 'kramdown'
 gem 'sanitize'
+gem 'jquery-fileupload-rails'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 # Use sqlite3 as the database for Active Record
