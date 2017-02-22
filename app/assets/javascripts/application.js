@@ -16,6 +16,6 @@
 // Required by Blacklight
 //= require blacklight/blacklight
 
-//= require jquery-fileupload
+//= require jquery-fileupload/basic
 
 //= require_tree .
