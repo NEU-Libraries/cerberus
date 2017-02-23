@@ -1,5 +1,6 @@
 class Compilation < ActiveFedora::Base
   include Hydra::AccessControls::Permissions
+  include ApplicationHelper
   include Noidable
 
   # Fedora object which is a thin wrapper around assemblies
