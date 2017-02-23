@@ -19,7 +19,7 @@ tmp
 # Ignore jetty because it's broken if you don't generate it on your own machine.
 jetty
 
-# Ignore the redis dumpfile.
+# Ignore the redis dumpfile.  Change one line.
 dump.rdb
 
 # Mac OSX Finder Junk
