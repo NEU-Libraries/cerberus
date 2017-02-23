@@ -30,9 +30,9 @@ class Compilation < ActiveFedora::Base
     old_list = a.id_list
 
     if !self.contains? object_id
-      if ActiveFedora::SolrService.query("id:#{object_id}").first['has_model_ssim'] == ["Collection"]
+      if solr_query("id:#{object_id}").first['has_model_ssim'] == ["Collection"]
         h[object_id] = "collection"
-      elsif ActiveFedora::SolrService.query("id:#{object_id}").first['has_model_ssim'] == ["Hydra::Works::Work"]
+      elsif solr_query("id:#{object_id}").first['has_model_ssim'] == ["Hydra::Works::Work"]
         h[object_id] = "work"
       else
         # raise error - only collections and works can be added to compilations
@@ -55,7 +55,7 @@ class Compilation < ActiveFedora::Base
   end
 
   def contains?(object_id)
-    parent = SolrDocument.new(ActiveFedora::SolrService.query("id:#{object_id}").first).id
+    parent = solr_query("id:#{object_id}").first.id
     a = self.assembly
     ids = a.id_list.keys
 
@@ -83,7 +83,7 @@ class Compilation < ActiveFedora::Base
 
     # iterate through collections to get full list of ids
     collection_ids.each do |collection_id|
-      ActiveFedora::SolrService.query("member_of_collection_ids_ssim:#{collection_id}", :fl => "id").each do |result|
+      solr_query("member_of_collection_ids_ssim:#{collection_id}", true).each do |result|
         full_old_list << result.values
       end
     end
@@ -104,7 +104,7 @@ class Compilation < ActiveFedora::Base
 
     # iterate through collections to get full list of ids
     collection_ids.each do |collection_id|
-      ActiveFedora::SolrService.query("member_of_collection_ids_ssim:#{collection_id}", :fl => "id").each do |result|
+      solr_query("member_of_collection_ids_ssim:#{collection_id}", true).each do |result|
         full_new_list << result.values
       end
     end

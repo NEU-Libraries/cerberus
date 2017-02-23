@@ -1,4 +1,18 @@
 module ApplicationHelper
+  def solr_query(query_string, pid_only = false)
+    # By default, SolrService.query only returns 10 rows
+    # You can specify more rows than you need, but not just to return all results
+    # This is a small helper method that combines SolrService's count and query to
+    # get back all results, without guessing at an upper limit
+    row_count = ActiveFedora::SolrService.count(query_string)
+    if pid_only
+      query_result = ActiveFedora::SolrService.query(query_string, :rows => row_count, :fl => "id")
+    else
+      query_result = ActiveFedora::SolrService.query(query_string, :rows => row_count)
+    end
+    return query_result.map { |x| SolrDocument.new(x) }
+  end
+
   def kramdown_parse(input_str)
     return "" unless input_str
     input_str = input_str.gsub("--", "&#45;&#45;")
@@ -16,9 +30,9 @@ module ApplicationHelper
       return breadcrumb.reverse
     else
       if obj.parent.is_a?(String)
-        parent = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{obj.parent}\"").first)
+        parent = solr_query("id:\"#{obj.parent}\"").first
       else
-        parent = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{obj.parent.pid}\"").first)
+        parent = solr_query("id:\"#{obj.parent.pid}\"").first
       end
       breadcrumb << content_tag(:li, link_to(kramdown_parse(parent.title).html_safe, polymorphic_path(parent)))
       breadcrumb_to_root(parent, breadcrumb)
