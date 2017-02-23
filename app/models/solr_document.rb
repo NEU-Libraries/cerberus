@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 class SolrDocument
   include Blacklight::Solr::Document
+  include Solr::DocumentBehavior
 
   # self.unique_key = 'id'
 
@@ -20,30 +21,4 @@ class SolrDocument
   # Do content negotiation for AF models.
 
   use_extension( Hydra::ContentNegotiation )
-
-  def parent
-    # member_of_collection_ids_ssim
-    parent = self[Solrizer.solr_name("member_of_collection_ids", :symbol)]
-
-    if parent.blank?
-      # isPartOf_ssim
-      parent = self[Solrizer.solr_name("isPartOf", :symbol)]
-    end
-
-    if parent.blank?
-      return nil
-    else
-      return parent.first
-    end
-  end
-
-  def title
-    title = self[Solrizer.solr_name("title", :stored_searchable)]
-
-    if title.blank?
-      return ""
-    else
-      return title.first
-    end
-  end
 end
