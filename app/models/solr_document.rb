@@ -2,6 +2,7 @@
 class SolrDocument
   include Blacklight::Solr::Document
   include Solr::DocumentBehavior
+  include Solr::Queries
 
   # self.unique_key = 'id'
 
