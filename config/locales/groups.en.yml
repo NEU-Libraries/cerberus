@@ -10,8 +10,12 @@ en:
       name: "Board of Trustees"
     northeastern:drs:bouve:deans_office:media:
       name: "Bouvé College of Health Sciences - Dean's Office Media Group"
+    northeastern:drs:camd:boston_womens_march_posters:
+      name: "Boston Women's March Posters Project Team"
     northeastern:drs:camd:department_of_art_and_design:art_and_design_gallery:
       name: "CAMD - Art and Design Group"
+    northeastern:drs:camd:school_of_architecture:administration:
+      name: "CAMD - School of Architecture Staff"
     northeastern:drs:college_of_computer_information_science:ccis_technical_reports:
       name: "CCIS Technical Reports Staff"
     northeastern:drs:college_of_engineering:deans_office:
@@ -26,14 +30,16 @@ en:
       name: "Marine Science Center Staff"
     northeastern:drs:college_of_science:social_interaction_lab:
       name: "College of Science - Social Interaction Lab Staff"
-    northeastern:drs:college_of_social_sciences_humanities:early_black_boston_digital_almanac:
-      name: "CSSH - Early Black Boston Digital Almanac Team"
-    northeastern:drs:college_of_social_sciences_humanities:early_caribbean_digital_archive:
-      name: "CCSH - Early Caribbean Digital Archive Project Team"
     northeastern:drs:college_of_social_sciences_humanities:dominican_prayer_book:
       name: "CSSH - Dominican Prayer Book Project Team"
     northeastern:drs:college_of_social_sciences_humanities:dudley_square_project:
       name: "CSSH - Dudley Square Project Team"
+    northeastern:drs:college_of_social_sciences_humanities:early_black_boston_digital_almanac:
+      name: "CSSH - Early Black Boston Digital Almanac Team"
+    northeastern:drs:college_of_social_sciences_humanities:early_caribbean_digital_archive:
+      name: "CCSH - Early Caribbean Digital Archive Project Team"
+    northeastern:drs:college_of_social_sciences_humanities:eliterature:
+      name: "CSSH - E-literature Project Team"
     northeastern:drs:college_of_social_sciences_humanities:thoreau_drawings:
       name: "CSSH - Thoreau Project Team"
     northeastern:drs:college_of_social_sciences_humanities:holocaust_awareness_committee:
@@ -50,6 +56,8 @@ en:
       name: "EMSA Staff"
     northeastern:drs:facilities:archive_staff:
       name: "Facilities Division - Archive Staff"
+    northeastern:drs:faculty_senate:staff:
+      name: "Faculty Senate Staff"
     northeastern:drs:jdoaai:archive_staff:
       name: "John D. O'Bryant African American Institute Archives Staff"
     northeastern:drs:library:archives:
@@ -60,6 +68,8 @@ en:
       name: "University Library - DMC Studios Staff"
     northeastern:drs:library:dsg:
       name: "University Library - Digital Scholarship Group Staff"
+    northeastern:drs:library:dsg_students:
+      name: "University Library - Digital Scholarship Group Students"
     northeastern:drs:library:admin:
       name: "University Library - Administration Staff"
     northeastern:drs:library:scholarly_communications:
@@ -68,6 +78,8 @@ en:
       name: "Office of Marketing and Communications - Photography Staff"
     northeastern:drs:marketing_and_communications:art_staff:
       name: "Office of Marketing and Communications - Art Staff"
+    northeastern:drs:marketing_and_communications:photo_archive_temp:
+      name: "Office of Marketing and Communications - Temporary Access"
     northeastern:drs:provost_office:center_research_innovation:center_for_research_innovation_staff:
       name: "Center for Research Innovation Staff"
     northeastern:drs:repository:admin:
