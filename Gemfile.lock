@@ -436,6 +436,7 @@ DEPENDENCIES
   solr_wrapper
   sqlite3
   turbolinks
+  twitter-bootstrap-rails (= 3.2.2)
   uglifier
   unidecoder
   web-console

@@ -19,6 +19,9 @@ gem 'kramdown'
 gem 'sanitize'
 gem 'jquery-fileupload-rails'
 
+# Pinned to prevent update breaks
+gem 'twitter-bootstrap-rails', '3.2.2'
+
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 # Use sqlite3 as the database for Active Record
 gem 'sqlite3'
