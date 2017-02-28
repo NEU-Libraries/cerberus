@@ -1,4 +1,6 @@
 class CommunitiesController < ApplicationController
+  include ApplicationHelper
+
   def new
     @set = Community.new
   end
@@ -10,6 +12,10 @@ class CommunitiesController < ApplicationController
     else
       flash.now.error = "Error occured creating community."
     end
+  end
+
+  def show
+    @document = solr_query("id:#{params[:id]}").first
   end
 
   private
