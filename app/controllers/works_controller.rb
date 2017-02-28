@@ -1,4 +1,6 @@
 class WorksController < ApplicationController
+  include ModsDisplay::ControllerExtension
+
   def new
   end
 
@@ -25,5 +27,10 @@ class WorksController < ApplicationController
 
     # file_set.create_derivatives
     GenerateDerivativesJob.perform_later(file_set.id)
+  end
+
+  def show
+    @work = Work.find(params[:id])
+    @mods = render_mods_display(@work).to_html.html_safe
   end
 end

@@ -1,4 +1,4 @@
-module Mods
+module Cerberus::Mods
   extend ActiveSupport::Concern
   extend Forwardable
 
