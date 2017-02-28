@@ -33,7 +33,7 @@ class Compilation < ActiveFedora::Base
     if !self.contains? object_id
       if solr_query("id:#{object_id}").first['has_model_ssim'] == ["Collection"]
         h[object_id] = "collection"
-      elsif solr_query("id:#{object_id}").first['has_model_ssim'] == ["Hydra::Works::Work"]
+      elsif solr_query("id:#{object_id}").first['has_model_ssim'] == ["Work"]
         h[object_id] = "work"
       else
         # raise error - only collections and works can be added to compilations

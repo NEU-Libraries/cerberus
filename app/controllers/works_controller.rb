@@ -10,7 +10,7 @@ class WorksController < ApplicationController
       file.write(upload.read)
     end
 
-    work = Hydra::Works::Work.create
+    work = Work.create
     file_set = Hydra::Works::FileSet.create
 
     file = File.new(upload_path)
