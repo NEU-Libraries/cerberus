@@ -1,5 +1,10 @@
-class WorksController < ApplicationController
+class WorksController < CatalogController
+  include Blacklight::Configurable
+  include Blacklight::SearchHelper
+  include Blacklight::TokenBasedUser
   include ModsDisplay::ControllerExtension
+
+  copy_blacklight_config_from(CatalogController)
 
   def new
   end

@@ -1,5 +1,9 @@
-class CommunitiesController < ApplicationController
-  include ApplicationHelper
+class CommunitiesController < CatalogController
+  include Blacklight::Configurable
+  include Blacklight::SearchHelper
+  include Blacklight::TokenBasedUser
+
+  copy_blacklight_config_from(CatalogController)
 
   def new
     @set = Community.new
@@ -15,7 +19,8 @@ class CommunitiesController < ApplicationController
   end
 
   def show
-    @document = solr_query("id:#{params[:id]}").first
+    # @document = solr_query("id:#{params[:id]}").first
+    @response, @document = fetch(params[:id])
   end
 
   private

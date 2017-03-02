@@ -1,6 +1,10 @@
-class CollectionsController < ApplicationController
-  include ApplicationHelper
-  
+class CollectionsController < CatalogController
+  include Blacklight::Configurable
+  include Blacklight::SearchHelper
+  include Blacklight::TokenBasedUser
+
+  copy_blacklight_config_from(CatalogController)
+
   def new
     @set = Collection.new
   end
@@ -15,7 +19,8 @@ class CollectionsController < ApplicationController
   end
 
   def show
-    @document = solr_query("id:#{params[:id]}").first
+    # @document = solr_query("id:#{params[:id]}").first
+    @response, @document = fetch(params[:id])
   end
 
   private
