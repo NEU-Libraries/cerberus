@@ -13,7 +13,7 @@ module Parentable
       !self.member_of_collection_ids.first.nil? ? Collection.find(self.member_of_collection_ids.first) : self.community
     elsif self.class == Community
       self.community
-    elsif self.class == Work
+    else
       ActiveFedora::Base.find(self.member_of_collections.first.id)
     end
   end

@@ -13,4 +13,8 @@ module Solr::DocumentBehavior
   def title
     first(Solrizer.solr_name("title", :stored_searchable))
   end
+
+  def klass
+    first(Solrizer.solr_name("has_model", :symbol))
+  end
 end

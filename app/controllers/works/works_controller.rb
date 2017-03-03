@@ -1,4 +1,4 @@
-class WorksController < CatalogController
+class Works::WorksController < CatalogController
   include Blacklight::Configurable
   include Blacklight::SearchHelper
   include Blacklight::TokenBasedUser
@@ -17,7 +17,7 @@ class WorksController < CatalogController
       file.write(upload.read)
     end
 
-    work = Work.create
+    work = Works::Work.create
     file_set = Hydra::Works::FileSet.create
 
     file = File.new(upload_path)
@@ -35,7 +35,7 @@ class WorksController < CatalogController
   end
 
   def show
-    @work = Work.find(params[:id])
+    @work = Works::Work.find(params[:id])
     @mods = render_mods_display(@work).to_html.html_safe
   end
 end
