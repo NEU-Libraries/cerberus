@@ -1,4 +1,5 @@
 class Works::WorksController < CatalogController
+  include ApplicationHelper
   include Blacklight::Configurable
   include Blacklight::SearchHelper
   include Blacklight::TokenBasedUser
@@ -7,6 +8,7 @@ class Works::WorksController < CatalogController
   copy_blacklight_config_from(CatalogController)
 
   def new
+    render 'shared/works/new'
   end
 
   def create
@@ -35,7 +37,8 @@ class Works::WorksController < CatalogController
   end
 
   def show
-    @work = Works::Work.find(params[:id])
-    @mods = render_mods_display(@work).to_html.html_safe
+    @document = solr_query("id:#{params[:id]}").first
+    @mods = render_mods_display(@document).to_html.html_safe
+    render 'shared/works/show'
   end
 end
