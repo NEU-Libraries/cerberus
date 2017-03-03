@@ -6,11 +6,11 @@ module Solr::Queries
   end
 
   def sets
-    solr_query("member_of_collection_ids_ssim:#{self.id} OR isPartOf_ssim:#{self.id} AND (has_model_ssim:Community OR has_model_ssim:Collection)")
+    solr_query("member_of_collection_ids_ssim:#{self.id} OR isPartOf_ssim:#{self.id} AND (generic_type_ssim:Set)")
   end
 
   def works
-    solr_query("member_of_collection_ids_ssim:#{self.id} OR isPartOf_ssim:#{self.id} NOT (has_model_ssim:Community OR has_model_ssim:Collection)")
+    solr_query("member_of_collection_ids_ssim:#{self.id} OR isPartOf_ssim:#{self.id} NOT (generic_type_ssim:Set)")
   end
 
   def each_depth_first
