@@ -16,7 +16,7 @@
       %th Depositor
       %th
       %th
-    - @sets.each do |set|
+    - @sets.each_with_index do |set, i|
       %tr
         %td
           %span.large= link_to(set.title.html_safe, compilation_path(set))
@@ -31,8 +31,8 @@
           = link_to("Edit", edit_admin_compilation_path(set),
           class: "btn btn-small btn-warning")
         %td
-          %a{ href: "#deleteModal", title: "Delete \"#{set.title}\"?", data: {toggle: 'modal'}, class:"btn btn-danger btn-small" } Delete
-          = render partial: 'admin/delete_modal', locals: { title: "Delete \"#{set.title}\"?", button_title: "Delete", delete_path: "#{admin_compilation_path(set)}", item: set }
+          %a{ href: "#deleteModal_deleteModalset_#{i}", title: "Delete \"#{set.title}\"?", data: {toggle: 'modal'}, class:"btn btn-danger btn-small" } Delete
+          = render partial: 'admin/delete_modal', locals: { title: "Delete \"#{set.title}\"?", button_title: "Delete", delete_path: "#{admin_compilation_path(set)}", item: set, index: "set_#{i}" }
   - else
     There are no currently no sets in the system.
 
