@@ -2,7 +2,7 @@
   = render 'catalog/results_pagination'
 
   %table.table.table-striped
-    - @collections.each do |collection|
+    - @collections.each_with_index do |collection, i|
       %tr
         %td
           .large= collection.title
@@ -12,7 +12,7 @@
           %td
             = link_to("Revive", admin_revive_collection_path(collection), class: "btn btn-small btn-warning")
         %td
-          %a{ href: "#deleteModal", title: "Delete \"#{collection.title}\"?", data: {toggle: 'modal'}, class:"btn btn-danger btn-small" } Delete
-          = render partial: 'admin/delete_modal', locals: { title: "Delete \"#{collection.title}\"?", button_title: "Delete", delete_path: "#{admin_delete_collection_path(collection)}", item: collection }
+          %a{ href: "#deleteModal_deleteModalcollection_#{i}", title: "Delete \"#{collection.title}\"?", data: {toggle: 'modal'}, class:"btn btn-danger btn-small" } Delete
+          = render partial: 'admin/delete_modal', locals: { title: "Delete \"#{collection.title}\"?", button_title: "Delete", delete_path: "#{admin_delete_collection_path(collection)}", item: collection, index: "collection_#{i}" }
 
   = render 'catalog/results_pagination'
