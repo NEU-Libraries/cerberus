@@ -966,13 +966,26 @@ class CoreFilesController < ApplicationController
     end
 
     def no_parent_rescue(exception)
-      flash[:error] = "Parent not specified or invalid"
-      email_handled_exception(exception)
-      respond_to do |format|
-        format.json { render json: { :error=> "Error! No parent set", url: root_path } }
-        format.html{
-            redirect_to(root_path) and return
-          }
+      if !session[:previous_url].blank?
+        if session[:previous_url].include? "parent"
+          # This particular error signature seems to indicate a timeout
+          email_handled_exception(Exceptions::UploadTimeout.new())
+          respond_to do |format|
+            format.json { render json: { url: root_path } }
+            format.html{
+                redirect_to(root_path) and return
+              }
+          end
+        end
+      else
+        flash[:error] = "Parent not specified or invalid"
+        email_handled_exception(exception)
+        respond_to do |format|
+          format.json { render json: { :error=> "Error! No parent set", url: root_path } }
+          format.html{
+              redirect_to(root_path) and return
+            }
+        end
       end
 
     end

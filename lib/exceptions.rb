@@ -175,4 +175,11 @@ module Exceptions
       super "DRS XML requires a prolog with UTF-8 encoding."
     end
   end
+
+  class UploadTimeout < StandardError
+    def initialize
+      super "Upload appears to have been abandoned or timed out."
+    end
+  end
+
 end
