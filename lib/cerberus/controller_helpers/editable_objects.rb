@@ -120,6 +120,16 @@ module Cerberus
               return find_parent(v)
             end
           end
+          if !session[:previous_url].blank?
+            prev_url = session[:previous_url]
+            if prev_url.include? "parent"
+              parent_str = previous_url.split("parent=")[1]
+              if !parent_str.blank?
+                pid = CGI.unescape(parent_str)
+                return SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{pid}\"").first)
+              end
+            end
+          end
           raise Exceptions::NoParentFoundError
         end
 
