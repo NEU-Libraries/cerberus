@@ -17,7 +17,7 @@ Cerberus::Application.routes.draw do
   get 'collections/:id/recent' => 'collections#recent_deposits', as: 'collection_recent_deposits'
   get 'collections/:id/creators' => "collections#creator_list", as:"collection_creator_list"
   # get 'collections/:id/titles' => "collections#title_list", as:"collection_title_list"
-  get 'collections/:id/export_mods' => "collections#export_mods", as: "export_mods"
+  get 'collections/:id/export_mods' => "collections#export_mods", as: "export_collection_mods"
 
   resources :communities, only: [:show]
 
@@ -74,6 +74,7 @@ Cerberus::Application.routes.draw do
   match "/sets/:id/:entry_id" => 'compilations#add_entry', via: 'post', as: 'add_entry'
   get "/sets/:id/:entry_id/dups" => 'compilations#add_entry_dups', as: 'add_entry_dups'
   get "/sets/:id/check" => 'compilations#check_multiple_entries', as: 'check_multi'
+  get '/sets/:id/export_mods' => "compilations#export_mods", as: "export_compilation_mods"
 
   get "/files/:id/provide_metadata" => "core_files#provide_metadata", as: "files_provide_metadata"
   post "/files/:id/process_metadata" => "core_files#process_metadata", as: "files_process_metadata"
