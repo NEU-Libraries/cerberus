@@ -978,7 +978,7 @@ class CoreFilesController < ApplicationController
           end
         end
       end
-      
+
       flash[:error] = "Parent not specified or invalid"
       email_handled_exception(exception)
       respond_to do |format|
@@ -1131,12 +1131,15 @@ class CoreFilesController < ApplicationController
         solr_parameters[:fq] ||= []
         query = []
         str = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/#{@core_file.pid}"
-        query << "is_supplemental_material_for_ssim:\"#{str}\" || is_instructional_material_for_ssim:\"#{str}\""
+        query << "is_supplemental_material_for_ssim:\"#{str}\" || is_instructional_material_for_ssim:\"#{str}\" || is_transcription_of_ssim:\"#{str}\""
         all = []
         @core_file['is_supplemental_material_for_ssim'].to_a.each do |x|
           all << x
         end
         @core_file['is_instructional_material_for_ssim'].to_a.each do |x|
+          all << x
+        end
+        @core_file['is_transcription_of_ssim'].to_a.each do |x|
           all << x
         end
         if all.count > 0
