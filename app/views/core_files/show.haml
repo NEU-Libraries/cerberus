@@ -73,7 +73,7 @@
             .drs-item-add-details
               = @darwin
         #supplemental-files.tab-pane
-          - if !@core_file.supplemental_materials.blank? || !@core_file.supplemental_material_for.blank? || !@core_file.instructional_materials.blank? ||  !@core_file.instructional_material_for.blank? || @core_file.page_objects.length > 1
+          - if !@core_file.supplemental_materials.blank? || !@core_file.supplemental_material_for.blank? || !@core_file.instructional_materials.blank? ||  !@core_file.instructional_material_for.blank? || !@core_file.transcriptions.blank? || !@core_file.transcription_of.blank? || @core_file.page_objects.length > 1
             %div#associated_files
         - if current_user_can? :edit, @core_file
           #statistics.tab-pane

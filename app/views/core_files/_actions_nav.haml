@@ -7,7 +7,7 @@
       %li
         %a(href="#darwin" data-toggle="tab")
           Darwin Core
-    - if !@core_file.supplemental_materials.blank? || !@core_file.supplemental_material_for.blank? || !@core_file.instructional_materials.blank? || !@core_file.instructional_material_for.blank? || @core_file.page_objects.length > 1
+    - if !@core_file.supplemental_materials.blank? || !@core_file.supplemental_material_for.blank? || !@core_file.instructional_materials.blank? || !@core_file.instructional_material_for.blank? || !@core_file.transcriptions.blank? || !@core_file.transcription_of.blank? || @core_file.page_objects.length > 1
       %li
         %a(href="#supplemental-files" data-toggle="tab" data-pid="#{@core_file.pid}")
           Associated Files
