@@ -25,7 +25,7 @@ module MimeHelper
   end
 
   def extract_extension(mime_type, original_extension="")
-    result = `grep "#{mime_type}" /etc/mime.types | awk '{print $2}'`.gsub(/\n/," ").strip
+    result = `grep "#{mime_type}" /etc/mime.types | awk '{print $2}'`.gsub(/\n/," ").strip.split(" ").first
     multiple = `grep "#{mime_type}" /etc/mime.types | awk '{$1=""; print $0}'`.strip.split(" ")
 
     if !original_extension.blank?
