@@ -32,14 +32,19 @@ module MimeHelper
       if mime_type.start_with?("text") || (multiple.include? original_extension)
         return original_extension
       end
-    elsif result.blank?
+    end
+
+    if !result.blank?
+      if !result.match(/\s/).nil?
+        return result.slice(0..(result.index(' ')-1)).gsub(/[^0-9a-z ]/i, '') #strip non alphanumeric characters
+      end
+      return result
+    elsif result.blank? && !original_extension.blank?
       return original_extension
-    elsif !result.match(/\s/).nil?
-      return result.slice(0..(result.index(' ')-1)).gsub(/[^0-9a-z ]/i, '') #stip non alphanumeric characters
     end
 
     # Catch all
-    return result
+    return ""
   end
 
 end
