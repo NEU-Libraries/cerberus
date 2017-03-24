@@ -264,6 +264,7 @@ class ProcessXmlZipJob
                   core_file = CoreFile.find(row_results["pid"])
                   old_mods = core_file.mods.content
                   core_file.mods.content = ModsDatastream.xml_template.to_xml
+                  core_file.save!
                   assign_a_row(row_results, core_file, dir_path, new_file)
                 else
                   checks = core_file_checks(row_results["pid"])
@@ -435,7 +436,6 @@ class ProcessXmlZipJob
         validation_result[:errors].each do |entry|
           error_list = error_list.concat("#{entry.class.to_s}: #{entry};")
         end
-        core_file = nil
         raise error_list
       end
     else
