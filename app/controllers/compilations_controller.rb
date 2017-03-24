@@ -81,8 +81,17 @@ class CompilationsController < ApplicationController
   end
 
   def collaborative_compilations
+    if current_user.groups.blank?
+      respond_to do |format|
+        format.js {
+          render js: "$('#collaborative').replaceWith('<div class=\"alert alert-info\">You have no collaborative #{t('drs.compilations.name').capitalize.pluralize} yet. Collaborative #{t('drs.compilations.name').pluralize} are #{t('drs.compilations.name').pluralize} that are created by other users but editable by you.</div>');" and return
+        }
+      end
+    end
+
     self.solr_search_params_logic += [:exclude_unwanted_models]
     self.solr_search_params_logic += [:exclude_user_compilations]
+    self.solr_search_params_logic += [:restrict_to_grouper]
 
     @forced_view = "drs-items-list"
 
@@ -91,7 +100,7 @@ class CompilationsController < ApplicationController
     respond_to do |format|
       format.js {
         if @response.response['numFound'] < 1
-          render js: "$('#collaborative').replaceWith('<div class=\"alert alert-info\">You have no collaborative #{t('drs.compilations.name').capitalize.pluralize} yet. Collaborative #{t('drs.compilations.name').pluralize} are #{t('drs.compilations.name').pluralize} that are created by other users but editable by you.</div>');"
+          render js: "$('#collaborative').replaceWith('<div class=\"alert alert-info\">You have no collaborative #{t('drs.compilations.name').capitalize.pluralize} yet. Collaborative #{t('drs.compilations.name').pluralize} are #{t('drs.compilations.name').pluralize} that are created by other users but shared by you.</div>');"
         else
           render "collaborative"
         end
@@ -420,6 +429,12 @@ class CompilationsController < ApplicationController
   def exclude_user_compilations(solr_parameters, user_parameters)
     solr_parameters[:fq] ||= []
     solr_parameters[:fq] << "-#{Solrizer.solr_name("depositor", :stored_searchable)}:\"#{current_user.nuid}\""
+  end
+
+  def restrict_to_grouper(solr_parameters, user_parameters)
+    solr_parameters[:fq] ||= []
+    groups = current_user.groups.map! { |g| "\"#{g}\""}.join(" OR ")
+    solr_parameters[:fq] << "read_access_group_ssim:(#{groups}) OR edit_access_group_ssim:(#{groups})"
   end
 
   def exclude_unwanted_models(solr_parameters, user_parameters)
