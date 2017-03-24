@@ -100,7 +100,7 @@ class CompilationsController < ApplicationController
     respond_to do |format|
       format.js {
         if @response.response['numFound'] < 1
-          render js: "$('#collaborative').replaceWith('<div class=\"alert alert-info\">You have no collaborative #{t('drs.compilations.name').capitalize.pluralize} yet. Collaborative #{t('drs.compilations.name').pluralize} are #{t('drs.compilations.name').pluralize} that are created by other users but shared by you.</div>');"
+          render js: "$('#collaborative').replaceWith('<div class=\"alert alert-info\">You have no collaborative #{t('drs.compilations.name').capitalize.pluralize} yet. Collaborative #{t('drs.compilations.name').pluralize} are #{t('drs.compilations.name').pluralize} that are created by other users but shared with you.</div>');"
         else
           render "collaborative"
         end
