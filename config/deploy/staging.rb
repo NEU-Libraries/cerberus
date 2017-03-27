@@ -70,8 +70,12 @@ namespace :deploy do
   desc "Setting whenever environment and updating the crontable"
   task :whenever do
     on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd #{release_path} && (RAILS_ENV=staging whenever --set environment=staging -c)"
-      execute "cd #{release_path} && (RAILS_ENV=staging whenever --set environment=staging -w)"
+      within release_path do
+        execute :bundle, 'exec', 'whenever', '-c'
+        execute :bundle, 'exec', 'whenever', '-w'
+      end
+      # execute "cd #{release_path} && (RAILS_ENV=staging whenever --set environment=staging -c)"
+      # execute "cd #{release_path} && (RAILS_ENV=staging whenever --set environment=staging -w)"
     end
   end
 
@@ -127,5 +131,5 @@ after 'deploy:updating', 'deploy:whenever'
 after 'deploy:updating', 'deploy:flush_redis'
 
 after 'deploy:finished', 'deploy:build_tmp_dir'
-after 'deploy:finished', 'deploy:restart_workers'
+# after 'deploy:finished', 'deploy:restart_workers'
 after 'deploy:finished', 'deploy:start_httpd'
