@@ -7,7 +7,6 @@ gem 'rails', '3.2.12'
 gem 'redis-rails'
 gem 'mysql2' # Used in staging environment.
 gem 'retries'
-gem 'sqlite3'
 gem 'blacklight'
 gem 'blacklight_advanced_search', '~> 2.1.0'
 gem 'hydra-head'
@@ -85,6 +84,7 @@ group :assets do
 end
 
 group :development do
+  gem 'sqlite3'
   # Deployment
   gem 'capistrano',  '~> 3.0.0'
   gem 'capistrano-rails'
