@@ -2,6 +2,7 @@ set :stage, :staging
 set :whenever_environment, 'staging'
 
 set :deploy_to, '/opt/cerberus/'
+set :bundle_env_variables, { nokogiri_use_system_libraries: 1 }
 
 # parses out the current branch you're on. See: http://www.harukizaemon.com/2008/05/deploying-branches-with-capistrano.html
 current_branch = `git branch`.match(/\* (\S+)\s/m)[1]
@@ -117,8 +118,8 @@ before 'deploy:starting', 'deploy:update_clamav'
 
 # after 'deploy:updating', 'deploy:copy_rvmrc_file'
 # after 'deploy:updating', 'deploy:trust_rvmrc'
-after 'deploy:updating', 'deploy:nokogiri'
 after 'deploy:updating', 'bundler:install'
+# after 'deploy:updating', 'deploy:nokogiri'
 after 'deploy:updating', 'deploy:copy_yml_file'
 after 'deploy:updating', 'deploy:migrate'
 after 'deploy:updating', 'deploy:whenever'
