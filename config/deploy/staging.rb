@@ -12,8 +12,8 @@ set :branch, ENV['branch'] || current_branch || "develop" # you can use the 'bra
 set :user, 'drs'
 set :rails_env, :staging
 
-set :rvm1_ruby_version, "2.0.0"
-fetch(:default_env).merge!( rvm_path: "/usr/local/rvm" )
+# set :rvm1_ruby_version, "2.0.0"
+# fetch(:default_env).merge!( rvm_path: "/usr/local/rvm" )
 
 server 'drs@cerberus.library.northeastern.edu', user: 'drs', roles: %w{web app db}
 
@@ -42,17 +42,17 @@ namespace :deploy do
   desc "Tell nokogiri to use system libs"
   task :nokogiri do
     on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle config build.nokogiri --use-system-libraries)"
+      execute "cd #{release_path} && (RAILS_ENV=staging bundle config build.nokogiri --use-system-libraries)"
     end
   end
 
   desc "Restarting the resque workers"
   task :restart_workers do
     on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec kill -TERM $(cat /etc/cerberus/resque-pool.pid))", raise_on_non_zero_exit: false
+      execute "cd #{release_path} && (RAILS_ENV=staging bundle exec kill -TERM $(cat /etc/cerberus/resque-pool.pid))", raise_on_non_zero_exit: false
       execute "kill $(ps aux | grep -i resque | awk '{print $2}')", raise_on_non_zero_exit: false
       execute "rm -f /etc/cerberus/resque-pool.pid", raise_on_non_zero_exit: false
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec resque-pool --daemon -p /etc/cerberus/resque-pool.pid)"
+      execute "cd #{release_path} && (RAILS_ENV=staging bundle exec resque-pool --daemon -p /etc/cerberus/resque-pool.pid)"
     end
   end
 
@@ -66,15 +66,15 @@ namespace :deploy do
   desc "Setting whenever environment and updating the crontable"
   task :whenever do
     on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec whenever --set environment=staging -c)"
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec whenever --set environment=staging -w)"
+      execute "cd #{release_path} && (RAILS_ENV=staging bundle exec whenever --set environment=staging -c)"
+      execute "cd #{release_path} && (RAILS_ENV=staging bundle exec whenever --set environment=staging -w)"
     end
   end
 
   desc 'Flush Redis'
   task :flush_redis do
     on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . redis-cli FLUSHALL)"
+      execute "cd #{release_path} && (RAILS_ENV=staging redis-cli FLUSHALL)"
     end
   end
 
@@ -105,7 +105,7 @@ end
 # This will be necessary for any hook that needs access to ruby.
 # Note the use of the rvm-auto shell in the task definition.
 
-before 'deploy:restart_workers', 'rvm1:hook'
+# before 'deploy:restart_workers', 'rvm1:hook'
 
 # These hooks execute in the listed order after the deploy:updating task
 # occurs.  This is the task that handles refreshing the app code, so this

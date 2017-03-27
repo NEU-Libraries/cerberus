@@ -89,7 +89,8 @@ group :development do
   gem 'capistrano',  '~> 3.0.0'
   gem 'capistrano-rails'
   gem 'capistrano-bundler'
-  gem 'rvm1-capistrano3', require: false
+  # gem 'rvm1-capistrano3', require: false
+  gem 'capistrano-rvm'
   gem 'rb-readline'
 end
 
