@@ -15,6 +15,8 @@ set :rails_env, :staging
 # set :rvm1_ruby_version, "2.0.0"
 # fetch(:default_env).merge!( rvm_path: "/usr/local/rvm" )
 
+set :rvm_custom_path, "/usr/local/rvm"
+
 server 'drs@cerberus.library.northeastern.edu', user: 'drs', roles: %w{web app db}
 
 namespace :deploy do
