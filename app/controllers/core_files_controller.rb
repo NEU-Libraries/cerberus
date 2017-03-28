@@ -31,7 +31,7 @@ class CoreFilesController < ApplicationController
   include BlacklightAdvancedSearch::ParseBasicQ
   include BlacklightAdvancedSearch::Controller
 
-  before_filter :authenticate_user!, except: [:show, :get_associated_files, :get_page_file, :log_stream, :fulltext]
+  before_filter :authenticate_user!, except: [:oai_thumbnail, :show, :get_associated_files, :get_page_file, :log_stream, :fulltext]
 
   skip_before_filter :normalize_identifier
   skip_load_and_authorize_resource only: [:provide_metadata,
