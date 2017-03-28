@@ -2,6 +2,8 @@ set :stage, :production
 set :whenever_environment, 'production'
 
 set :deploy_to, '/home/drs/apps/develop/'
+set :bundle_env_variables, { nokogiri_use_system_libraries: 1 }
+set :bundle_bins, fetch(:bundle_bins, []).push('whenever')
 
 # parses out the current branch you're on. See: http://www.harukizaemon.com/2008/05/deploying-branches-with-capistrano.html
 current_branch = `git branch`.match(/\* (\S+)\s/m)[1]
@@ -25,7 +27,7 @@ namespace :deploy do
   desc "Tell nokogiri to use system libs"
   task :nokogiri do
     on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd #{release_path} && (RAILS_ENV=production /tmp/drs/rvm-auto.sh . bundle config build.nokogiri --use-system-libraries)"
+      execute "cd #{release_path} && (RAILS_ENV=production bundle config build.nokogiri --use-system-libraries)"
     end
   end
 
@@ -46,24 +48,24 @@ namespace :deploy do
   desc "Precompile"
   task :assets_kludge do
     on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd #{release_path} && (RAILS_ENV=production /tmp/drs/rvm-auto.sh . rake assets:precompile)"
+      execute "cd #{release_path} && (RAILS_ENV=production rake assets:precompile)"
     end
   end
 
   desc "Restarting the resque workers"
   task :restart_workers do
     on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd #{release_path} && (RAILS_ENV=production /tmp/drs/rvm-auto.sh . bundle exec kill -TERM $(cat /home/drs/config/resque-pool.pid))", raise_on_non_zero_exit: false
-      execute "cd #{release_path} && (RAILS_ENV=production /tmp/drs/rvm-auto.sh . kill $(ps aux | grep -i resque | awk '{print $2}'))", raise_on_non_zero_exit: false
-      execute "cd #{release_path} && (RAILS_ENV=production /tmp/drs/rvm-auto.sh . rm -f /home/drs/config/resque-pool.pid)", raise_on_non_zero_exit: false
-      execute "cd #{release_path} && (RAILS_ENV=production /tmp/drs/rvm-auto.sh . bundle exec resque-pool --daemon -p /home/drs/config/resque-pool.pid)"
+      execute "cd #{release_path} && (RAILS_ENV=production bundle exec kill -TERM $(cat /home/drs/config/resque-pool.pid))", raise_on_non_zero_exit: false
+      execute "cd #{release_path} && (RAILS_ENV=production kill $(ps aux | grep -i resque | awk '{print $2}'))", raise_on_non_zero_exit: false
+      execute "cd #{release_path} && (RAILS_ENV=production rm -f /home/drs/config/resque-pool.pid)", raise_on_non_zero_exit: false
+      execute "cd #{release_path} && (RAILS_ENV=production bundle exec resque-pool --daemon -p /home/drs/config/resque-pool.pid)"
     end
   end
 
   desc "Clearing cache"
   task :clear_cache do
     on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd #{release_path} && (RAILS_ENV=production /tmp/drs/rvm-auto.sh . rake cache:clear)"
+      execute "cd #{release_path} && (RAILS_ENV=production rake cache:clear)"
       execute "sudo htcacheclean -p /var/cache/mod_proxy -l1K -v -r"
     end
   end
@@ -78,8 +80,12 @@ namespace :deploy do
   desc "Setting whenever environment and updating the crontable"
   task :whenever do
     on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd #{release_path} && (RAILS_ENV=production /tmp/drs/rvm-auto.sh . bundle exec whenever --set environment=production -c)"
-      execute "cd #{release_path} && (RAILS_ENV=production /tmp/drs/rvm-auto.sh . bundle exec whenever --set environment=production -w)"
+      within release_path do
+        execute :bundle, 'exec', 'whenever', '-c', '--set environment=production'
+        execute :bundle, 'exec', 'whenever', '-w', '--set environment=production'
+      end
+      # execute "cd #{release_path} && (RAILS_ENV=production bundle exec whenever --set environment=production -c)"
+      # execute "cd #{release_path} && (RAILS_ENV=production bundle exec whenever --set environment=production -w)"
     end
   end
 
@@ -100,21 +106,21 @@ namespace :deploy do
   desc 'Start solrizerd'
   task :start_solrizerd do
     on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd #{release_path} && (RAILS_ENV=production /tmp/drs/rvm-auto.sh . bundle exec solrizerd restart --hydra_home #{release_path} -p 61616 -o nb4676.neu.edu -d /topic/fedora.apim.update -s http://solr.lib.neu.edu:8080/solr)"
+      execute "cd #{release_path} && (RAILS_ENV=production bundle exec solrizerd restart --hydra_home #{release_path} -p 61616 -o nb4676.neu.edu -d /topic/fedora.apim.update -s http://solr.lib.neu.edu:8080/solr)"
     end
   end
 
   desc 'Flush Redis'
   task :flush_redis do
     on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd #{release_path} && (RAILS_ENV=production /tmp/drs/rvm-auto.sh . redis-cli FLUSHALL)"
+      execute "cd #{release_path} && (RAILS_ENV=production redis-cli FLUSHALL)"
     end
   end
 
   desc 'Generate Sitemap'
   task :generate_sitemap do
     on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd #{release_path} && (RAILS_ENV=production /tmp/drs/rvm-auto.sh . rake sitemap:generate)"
+      execute "cd #{release_path} && (RAILS_ENV=production rake sitemap:generate)"
     end
   end
 
@@ -124,7 +130,7 @@ end
 # This will be necessary for any hook that needs access to ruby.
 # Note the use of the rvm-auto shell in the task definition.
 
-before 'deploy:restart_workers', 'rvm1:hook'
+# before 'deploy:restart_workers', 'rvm1:hook'
 
 before 'deploy:assets_kludge', 'deploy:clear_cache'
 
@@ -134,9 +140,9 @@ before 'deploy:assets_kludge', 'deploy:clear_cache'
 before 'deploy:starting', 'deploy:stop_httpd'
 before 'deploy:starting', 'deploy:update_clamav'
 
-after 'deploy:updating', 'deploy:copy_rvmrc_file'
-after 'deploy:updating', 'deploy:trust_rvmrc'
-after 'deploy:updating', 'deploy:nokogiri'
+# after 'deploy:updating', 'deploy:copy_rvmrc_file'
+# after 'deploy:updating', 'deploy:trust_rvmrc'
+# after 'deploy:updating', 'deploy:nokogiri'
 after 'deploy:updating', 'bundler:install'
 after 'deploy:updating', 'deploy:copy_yml_file'
 after 'deploy:updating', 'deploy:migrate'

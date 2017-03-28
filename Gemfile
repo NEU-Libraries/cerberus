@@ -6,8 +6,8 @@ gem "sshkit", :git => "https://github.com/cheald/sshkit.git", branch: "fix_multi
 gem 'rails', '3.2.12'
 gem 'redis-rails'
 gem 'mysql2' # Used in staging environment.
+gem 'sqlite3', '1.3.13'
 gem 'retries'
-gem 'sqlite3'
 gem 'blacklight'
 gem 'blacklight_advanced_search', '~> 2.1.0'
 gem 'hydra-head'
@@ -89,7 +89,8 @@ group :development do
   gem 'capistrano',  '~> 3.0.0'
   gem 'capistrano-rails'
   gem 'capistrano-bundler'
-  gem 'rvm1-capistrano3', require: false
+  # gem 'rvm1-capistrano3', require: false
+  gem 'capistrano-rvm'
   gem 'rb-readline'
 end
 

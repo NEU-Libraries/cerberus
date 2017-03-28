@@ -2,6 +2,8 @@ set :stage, :staging
 set :whenever_environment, 'staging'
 
 set :deploy_to, '/opt/cerberus/'
+set :bundle_env_variables, { nokogiri_use_system_libraries: 1 }
+set :bundle_bins, fetch(:bundle_bins, []).push('whenever', 'resque-pool')
 
 # parses out the current branch you're on. See: http://www.harukizaemon.com/2008/05/deploying-branches-with-capistrano.html
 current_branch = `git branch`.match(/\* (\S+)\s/m)[1]
@@ -12,8 +14,10 @@ set :branch, ENV['branch'] || current_branch || "develop" # you can use the 'bra
 set :user, 'drs'
 set :rails_env, :staging
 
-set :rvm1_ruby_version, "2.0.0"
-fetch(:default_env).merge!( rvm_path: "/usr/local/rvm" )
+# set :rvm1_ruby_version, "2.0.0"
+# fetch(:default_env).merge!( rvm_path: "/usr/local/rvm" )
+
+set :rvm_custom_path, "/usr/local/rvm"
 
 server 'drs@cerberus.library.northeastern.edu', user: 'drs', roles: %w{web app db}
 
@@ -42,17 +46,20 @@ namespace :deploy do
   desc "Tell nokogiri to use system libs"
   task :nokogiri do
     on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle config build.nokogiri --use-system-libraries)"
+      execute "cd #{release_path} && (RAILS_ENV=staging bundle config build.nokogiri --use-system-libraries)"
     end
   end
 
   desc "Restarting the resque workers"
   task :restart_workers do
     on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec kill -TERM $(cat /etc/cerberus/resque-pool.pid))", raise_on_non_zero_exit: false
+      execute "cd #{release_path} && (RAILS_ENV=staging kill -TERM $(cat /etc/cerberus/resque-pool.pid))", raise_on_non_zero_exit: false
       execute "kill $(ps aux | grep -i resque | awk '{print $2}')", raise_on_non_zero_exit: false
       execute "rm -f /etc/cerberus/resque-pool.pid", raise_on_non_zero_exit: false
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec resque-pool --daemon -p /etc/cerberus/resque-pool.pid)"
+      within release_path do
+        execute :bundle, 'exec', 'resque-pool', '--daemon', '-p /etc/cerberus/resque-pool.pid'
+      end
+      # execute "cd #{release_path} && (RAILS_ENV=staging resque-pool --daemon -p /etc/cerberus/resque-pool.pid)"
     end
   end
 
@@ -66,15 +73,19 @@ namespace :deploy do
   desc "Setting whenever environment and updating the crontable"
   task :whenever do
     on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec whenever --set environment=staging -c)"
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . bundle exec whenever --set environment=staging -w)"
+      within release_path do
+        execute :bundle, 'exec', 'whenever', '-c'
+        execute :bundle, 'exec', 'whenever', '-w'
+      end
+      # execute "cd #{release_path} && (RAILS_ENV=staging whenever --set environment=staging -c)"
+      # execute "cd #{release_path} && (RAILS_ENV=staging whenever --set environment=staging -w)"
     end
   end
 
   desc 'Flush Redis'
   task :flush_redis do
     on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd #{release_path} && (RAILS_ENV=staging /tmp/drs/rvm-auto.sh . redis-cli FLUSHALL)"
+      execute "cd #{release_path} && (RAILS_ENV=staging redis-cli FLUSHALL)"
     end
   end
 
@@ -105,7 +116,7 @@ end
 # This will be necessary for any hook that needs access to ruby.
 # Note the use of the rvm-auto shell in the task definition.
 
-before 'deploy:restart_workers', 'rvm1:hook'
+# before 'deploy:restart_workers', 'rvm1:hook'
 
 # These hooks execute in the listed order after the deploy:updating task
 # occurs.  This is the task that handles refreshing the app code, so this
@@ -113,10 +124,10 @@ before 'deploy:restart_workers', 'rvm1:hook'
 before 'deploy:starting', 'deploy:stop_httpd'
 before 'deploy:starting', 'deploy:update_clamav'
 
-after 'deploy:updating', 'deploy:nokogiri'
-after 'deploy:updating', 'deploy:copy_rvmrc_file'
-after 'deploy:updating', 'deploy:trust_rvmrc'
+# after 'deploy:updating', 'deploy:copy_rvmrc_file'
+# after 'deploy:updating', 'deploy:trust_rvmrc'
 after 'deploy:updating', 'bundler:install'
+# after 'deploy:updating', 'deploy:nokogiri'
 after 'deploy:updating', 'deploy:copy_yml_file'
 after 'deploy:updating', 'deploy:migrate'
 after 'deploy:updating', 'deploy:whenever'
