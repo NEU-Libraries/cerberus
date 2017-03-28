@@ -14,6 +14,13 @@ class DownloadsController < ApplicationController
     end
   end
 
+  rescue_from ArgumentError do |exception|
+    # This is error spam from scripts that haven't figured out that hitting urls
+    # like https://repository.library.northeastern.edu/downloads/neu:180772 doesn't
+    # work - do nothing
+    render :nothing => true, :status => 500, :content_type => 'text/html' and return
+  end
+
   rescue_from ActiveFedora::ObjectNotFoundError do |exception|
     @obj_type = "Object"
 
