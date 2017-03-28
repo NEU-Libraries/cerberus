@@ -134,5 +134,5 @@ after 'deploy:updating', 'deploy:whenever'
 after 'deploy:updating', 'deploy:flush_redis'
 
 after 'deploy:finished', 'deploy:build_tmp_dir'
-# after 'deploy:finished', 'deploy:restart_workers'
+after 'deploy:finished', 'deploy:restart_workers'
 after 'deploy:finished', 'deploy:start_httpd'
