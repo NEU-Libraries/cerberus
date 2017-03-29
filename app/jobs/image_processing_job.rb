@@ -141,6 +141,9 @@ class ImageProcessingJob
                   pers = {'first_names'=>[pers[1].strip], 'last_names'=>[pers[0].strip]}
                 else
                   name_array = Namae.parse val
+                  if name_array.blank?
+                    name_array = Namae.parse val.titleize
+                  end
                   name_obj = name_array[0]
                   if !name_obj.nil? && !name_obj.given.blank? && !name_obj.family.blank?
                     pers = {'first_names'=>[name_obj.given], 'last_names'=>[name_obj.family]}

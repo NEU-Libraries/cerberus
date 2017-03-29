@@ -93,6 +93,9 @@ class User < ActiveRecord::Base
 
     if !auth.info.name.blank?
       name_array = Namae.parse auth.info.name
+      if name_array.blank?
+        name_array = Namae.parse auth.info.name.titleize
+      end
       name_obj = name_array[0]
       emp_name = "#{name_obj.family}, #{name_obj.given}"
     end
@@ -160,7 +163,7 @@ class User < ActiveRecord::Base
       user.add_group("northeastern:drs:faculty")
       user.add_group("northeastern:drs:staff")
       user.save!
-      
+
       system_user = User.find_by_nuid("000000000")
       system_user.group_list = user.group_list
       system_user.save!
@@ -199,6 +202,9 @@ class User < ActiveRecord::Base
   def pretty_name
     if !self.full_name.blank?
       name_array = Namae.parse self.full_name
+      if name_array.blank?
+        name_array = Namae.parse self.full_name.titleize
+      end
       name_obj = name_array[0]
       return "#{name_obj.given} #{name_obj.family}"
     end
