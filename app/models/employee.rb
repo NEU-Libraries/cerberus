@@ -32,6 +32,9 @@ class Employee < ActiveFedora::Base
   def pretty_employee_name
     if !self.name.blank?
       name_array = Namae.parse self.name
+      if name_array.blank?
+        name_array = Namae.parse self.name.titleize
+      end
       name_obj = name_array[0]
       return "#{name_obj.given} #{name_obj.family}"
     end
@@ -43,6 +46,9 @@ class Employee < ActiveFedora::Base
   def employee_first_name
     if !self.employee_name.blank?
       name_array = Namae.parse self.employee_name
+      if name_array.blank?
+        name_array = Namae.parse self.employee_name.titleize
+      end
       name_obj = name_array[0]
       return "#{name_obj.given}"
     end
@@ -127,7 +133,7 @@ class Employee < ActiveFedora::Base
       lookup = Employee.find(id)
       if !lookup.is_building?
         return lookup
-      elsif retries < 3        
+      elsif retries < 3
         sleep 3
         safe_employee_lookup(id, retries + 1)
       else
