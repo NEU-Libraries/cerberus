@@ -48,14 +48,20 @@ namespace :deploy do
   desc "Precompile"
   task :assets_kludge do
     on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd #{release_path} && (RAILS_ENV=production rake assets:precompile)"
+      within release_path do
+        execute :bundle, 'exec', 'rake assets:precompile'
+      end
+      # execute "cd #{release_path} && (RAILS_ENV=production rake assets:precompile)"
     end
   end
 
   desc "Clearing cache"
   task :clear_cache do
     on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd #{release_path} && (RAILS_ENV=production rake cache:clear)"
+      within release_path do
+        execute :bundle, 'exec', 'rake cache:clear'
+      end
+      # execute "cd #{release_path} && (RAILS_ENV=production rake cache:clear)"
       execute "sudo htcacheclean -p /var/cache/mod_proxy -l1K -v -r"
     end
   end
