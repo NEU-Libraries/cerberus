@@ -54,7 +54,7 @@ namespace :deploy do
   desc "Restarting the resque workers"
   task :restart_workers do
     on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd #{release_path} && (RAILS_ENV=secondary bundle exec kill -TERM $(cat /home/drs/config/resque-pool.pid))", raise_on_non_zero_exit: false
+      execute "cd #{release_path} && (RAILS_ENV=secondary kill -TERM $(cat /home/drs/config/resque-pool.pid))", raise_on_non_zero_exit: false
       execute "cd #{release_path} && (RAILS_ENV=secondary kill $(ps aux | grep -i resque | awk '{print $2}'))", raise_on_non_zero_exit: false
       execute "cd #{release_path} && (RAILS_ENV=secondary rm -f /home/drs/config/resque-pool.pid)", raise_on_non_zero_exit: false
       within release_path do
