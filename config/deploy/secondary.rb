@@ -3,7 +3,7 @@ set :whenever_environment, 'secondary'
 
 set :deploy_to, '/home/drs/cerberus/'
 set :bundle_bins, fetch(:bundle_bins, []).push('whenever', 'resque-pool', 'solrizerd')
-set :rake, lambda { "#{fetch(:bundle_cmd, "bundle")} exec rake" }
+SSHKit.config.command_map[:rake] = "bundle exec rake"
 
 # parses out the current branch you're on. See: http://www.harukizaemon.com/2008/05/deploying-branches-with-capistrano.html
 current_branch = `git branch`.match(/\* (\S+)\s/m)[1]
