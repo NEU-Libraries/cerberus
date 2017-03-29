@@ -64,13 +64,6 @@ namespace :deploy do
     end
   end
 
-  desc "Clearing cache"
-  task :clear_cache do
-    on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd #{release_path} && (RAILS_ENV=secondary rake cache:clear)"
-    end
-  end
-
   desc "Copy Figaro YAML"
   task :copy_yml_file do
     on roles(:app), :in => :sequence, :wait => 5 do
@@ -131,27 +124,16 @@ end
 # This will be necessary for any hook that needs access to ruby.
 # Note the use of the rvm-auto shell in the task definition.
 
-# before 'deploy:restart_workers', 'rvm1:hook'
-
-# before 'deploy:assets_kludge', 'deploy:clear_cache'
-
 # These hooks execute in the listed order after the deploy:updating task
 # occurs.  This is the task that handles refreshing the app code, so this
 # should only fire on actual deployments.
-# before 'deploy:starting', 'deploy:stop_httpd'
-before 'deploy:starting', 'deploy:update_clamav'
 
-# after 'deploy:updating', 'deploy:nokogiri'
-# after 'deploy:updating', 'deploy:copy_rvmrc_file'
-# after 'deploy:updating', 'deploy:trust_rvmrc'
+before 'deploy:starting', 'deploy:update_clamav'
 after 'deploy:updating', 'bundler:install'
 after 'deploy:updating', 'deploy:copy_yml_file'
 after 'deploy:updating', 'deploy:migrate'
 after 'deploy:updating', 'deploy:whenever'
-# after 'deploy:updating', 'deploy:assets_kludge'
 
 after 'deploy:finished', 'deploy:start_solrizerd'
 after 'deploy:finished', 'deploy:flush_redis'
-# after 'deploy:finished', 'deploy:start_httpd'
 after 'deploy:finished', 'deploy:restart_workers'
-# after 'deploy:finished', 'deploy:generate_sitemap'
