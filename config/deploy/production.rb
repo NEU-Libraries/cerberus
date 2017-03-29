@@ -52,16 +52,6 @@ namespace :deploy do
     end
   end
 
-  desc "Restarting the resque workers"
-  task :restart_workers do
-    on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd #{release_path} && (RAILS_ENV=production bundle exec kill -TERM $(cat /home/drs/config/resque-pool.pid))", raise_on_non_zero_exit: false
-      execute "cd #{release_path} && (RAILS_ENV=production kill $(ps aux | grep -i resque | awk '{print $2}'))", raise_on_non_zero_exit: false
-      execute "cd #{release_path} && (RAILS_ENV=production rm -f /home/drs/config/resque-pool.pid)", raise_on_non_zero_exit: false
-      execute "cd #{release_path} && (RAILS_ENV=production bundle exec resque-pool --daemon -p /home/drs/config/resque-pool.pid)"
-    end
-  end
-
   desc "Clearing cache"
   task :clear_cache do
     on roles(:app), :in => :sequence, :wait => 5 do
@@ -84,8 +74,6 @@ namespace :deploy do
         execute :bundle, 'exec', 'whenever', '-c', '--set environment=production'
         execute :bundle, 'exec', 'whenever', '-w', '--set environment=production'
       end
-      # execute "cd #{release_path} && (RAILS_ENV=production bundle exec whenever --set environment=production -c)"
-      # execute "cd #{release_path} && (RAILS_ENV=production bundle exec whenever --set environment=production -w)"
     end
   end
 
@@ -103,24 +91,10 @@ namespace :deploy do
     end
   end
 
-  desc 'Start solrizerd'
-  task :start_solrizerd do
-    on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd #{release_path} && (RAILS_ENV=production bundle exec solrizerd restart --hydra_home #{release_path} -p 61616 -o nb4676.neu.edu -d /topic/fedora.apim.update -s http://solr.lib.neu.edu:8080/solr)"
-    end
-  end
-
   desc 'Flush Redis'
   task :flush_redis do
     on roles(:app), :in => :sequence, :wait => 5 do
       execute "cd #{release_path} && (RAILS_ENV=production redis-cli FLUSHALL)"
-    end
-  end
-
-  desc 'Generate Sitemap'
-  task :generate_sitemap do
-    on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd #{release_path} && (RAILS_ENV=production rake sitemap:generate)"
     end
   end
 
@@ -140,17 +114,11 @@ before 'deploy:assets_kludge', 'deploy:clear_cache'
 before 'deploy:starting', 'deploy:stop_httpd'
 before 'deploy:starting', 'deploy:update_clamav'
 
-# after 'deploy:updating', 'deploy:copy_rvmrc_file'
-# after 'deploy:updating', 'deploy:trust_rvmrc'
-# after 'deploy:updating', 'deploy:nokogiri'
 after 'deploy:updating', 'bundler:install'
 after 'deploy:updating', 'deploy:copy_yml_file'
 after 'deploy:updating', 'deploy:migrate'
 after 'deploy:updating', 'deploy:whenever'
 after 'deploy:updating', 'deploy:assets_kludge'
 
-# after 'deploy:finished', 'deploy:start_solrizerd'
 after 'deploy:finished', 'deploy:flush_redis'
 after 'deploy:finished', 'deploy:start_httpd'
-# after 'deploy:finished', 'deploy:restart_workers'
-# after 'deploy:finished', 'deploy:generate_sitemap'
