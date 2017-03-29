@@ -104,15 +104,6 @@ namespace :deploy do
     end
   end
 
-  desc "Migrate the db"
-  task :db_migrate do
-    on roles(:app), :in => :sequence, :wait => 5 do
-      within release_path do
-        execute :bundle, 'exec', 'rake db:migrate'
-      end
-    end
-  end
-
 end
 
 # Load the rvm environment before executing the refresh data hook.
@@ -121,7 +112,7 @@ end
 
 # before 'deploy:restart_workers', 'rvm1:hook'
 
-before 'deploy:assets_kludge', 'deploy:clear_cache'
+# before 'deploy:assets_kludge', 'deploy:clear_cache'
 
 # These hooks execute in the listed order after the deploy:updating task
 # occurs.  This is the task that handles refreshing the app code, so this
@@ -131,7 +122,7 @@ before 'deploy:starting', 'deploy:update_clamav'
 
 after 'deploy:updating', 'bundler:install'
 after 'deploy:updating', 'deploy:copy_yml_file'
-after 'deploy:updating', 'deploy:db_migrate'
+after 'deploy:updating', 'deploy:migrate'
 after 'deploy:updating', 'deploy:whenever'
 after 'deploy:updating', 'deploy:assets_kludge'
 
