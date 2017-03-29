@@ -58,7 +58,7 @@ namespace :deploy do
       execute "cd #{release_path} && (RAILS_ENV=secondary kill $(ps aux | grep -i resque | awk '{print $2}'))", raise_on_non_zero_exit: false
       execute "cd #{release_path} && (RAILS_ENV=secondary rm -f /home/drs/config/resque-pool.pid)", raise_on_non_zero_exit: false
       within release_path do
-        execute :bundle, 'exec', 'resque-pool', '--daemon', '-p /home/drs/config/resque-pool.pid'
+        execute :bundle, 'exec', 'resque-pool', '--daemon', '-p /home/drs/config/resque-pool.pid', '--environment secondary'
       end
       # execute "cd #{release_path} && (RAILS_ENV=secondary bundle exec resque-pool --daemon -p /home/drs/config/resque-pool.pid)"
     end
