@@ -82,15 +82,6 @@ namespace :deploy do
     end
   end
 
-  desc "Migrate the db"
-  task :db_migrate do
-    on roles(:app), :in => :sequence, :wait => 5 do
-      within release_path do
-        execute :bundle, 'exec', 'rake db:migrate'
-      end
-    end
-  end
-
   desc 'Flush Redis'
   task :flush_redis do
     on roles(:app), :in => :sequence, :wait => 5 do
@@ -138,7 +129,7 @@ before 'deploy:starting', 'deploy:update_clamav'
 after 'deploy:updating', 'bundler:install'
 # after 'deploy:updating', 'deploy:nokogiri'
 after 'deploy:updating', 'deploy:copy_yml_file'
-after 'deploy:updating', 'deploy:db_migrate'
+after 'deploy:updating', 'deploy:migrate'
 after 'deploy:updating', 'deploy:whenever'
 after 'deploy:updating', 'deploy:flush_redis'
 
