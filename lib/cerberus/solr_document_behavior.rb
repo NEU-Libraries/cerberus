@@ -169,6 +169,9 @@ module Cerberus
     def pretty_employee_name
       if !self.employee_name.blank?
         name_array = Namae.parse self.employee_name
+        if name_array.blank?
+          name_array = Namae.parse self.employee_name.titleize
+        end
         name_obj = name_array[0]
         return "#{name_obj.given} #{name_obj.family}"
       end
