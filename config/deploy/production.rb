@@ -4,7 +4,6 @@ set :whenever_environment, 'production'
 set :deploy_to, '/home/drs/apps/develop/'
 set :bundle_env_variables, { nokogiri_use_system_libraries: 1 }
 set :bundle_bins, fetch(:bundle_bins, []).push('whenever')
-SSHKit.config.command_map[:rake] = "bundle exec rake"
 
 # parses out the current branch you're on. See: http://www.harukizaemon.com/2008/05/deploying-branches-with-capistrano.html
 current_branch = `git branch`.match(/\* (\S+)\s/m)[1]
@@ -99,6 +98,15 @@ namespace :deploy do
     end
   end
 
+  desc "Migrate the db"
+  task :db_migrate do
+    on roles(:app), :in => :sequence, :wait => 5 do
+      within release_path do
+        execute :bundle, 'exec', 'rake db:migrate'
+      end
+    end
+  end
+
 end
 
 # Load the rvm environment before executing the refresh data hook.
@@ -117,7 +125,7 @@ before 'deploy:starting', 'deploy:update_clamav'
 
 after 'deploy:updating', 'bundler:install'
 after 'deploy:updating', 'deploy:copy_yml_file'
-after 'deploy:updating', 'deploy:migrate'
+after 'deploy:updating', 'deploy:db_migrate'
 after 'deploy:updating', 'deploy:whenever'
 after 'deploy:updating', 'deploy:assets_kludge'
 
