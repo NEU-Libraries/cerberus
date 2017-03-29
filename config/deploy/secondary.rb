@@ -2,7 +2,7 @@ set :stage, :secondary
 set :whenever_environment, 'secondary'
 
 set :deploy_to, '/home/drs/cerberus/'
-set :bundle_bins, fetch(:bundle_bins, []).push('whenever', 'resque-pool')
+set :bundle_bins, fetch(:bundle_bins, []).push('whenever', 'resque-pool', 'solrizerd')
 
 # parses out the current branch you're on. See: http://www.harukizaemon.com/2008/05/deploying-branches-with-capistrano.html
 current_branch = `git branch`.match(/\* (\S+)\s/m)[1]
@@ -100,7 +100,10 @@ namespace :deploy do
   desc 'Start solrizerd'
   task :start_solrizerd do
     on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd #{release_path} && (RAILS_ENV=secondary bundle exec solrizerd restart --hydra_home #{release_path} -p 61616 -o nb4676.neu.edu -d /topic/fedora.apim.update -s http://solr.lib.neu.edu:8080/solr)"
+      within release_path do
+        execute :bundle, 'exec', 'solrizerd', 'restart', "--hydra_home #{release_path}", '-p 61616', '-o nb4676.neu.edu', '-d /topic/fedora.apim.update', '-s http://solr.lib.neu.edu:8080/solr'
+      end
+      # execute "cd #{release_path} && (RAILS_ENV=secondary bundle exec solrizerd restart --hydra_home #{release_path} -p 61616 -o nb4676.neu.edu -d /topic/fedora.apim.update -s http://solr.lib.neu.edu:8080/solr)"
     end
   end
 
@@ -108,13 +111,6 @@ namespace :deploy do
   task :flush_redis do
     on roles(:app), :in => :sequence, :wait => 5 do
       execute "cd #{release_path} && (RAILS_ENV=secondary redis-cli -h nb4404.neu.edu FLUSHALL)"
-    end
-  end
-
-  desc 'Generate Sitemap'
-  task :generate_sitemap do
-    on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd #{release_path} && (RAILS_ENV=secondary rake sitemap:generate)"
     end
   end
 
