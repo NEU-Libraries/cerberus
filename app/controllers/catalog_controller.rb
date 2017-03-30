@@ -197,7 +197,7 @@ class CatalogController < ApplicationController
       },
       :document => {
         :timestamp => 'timestamp',
-        :limit => 25
+        :limit => 100
       }
     }
 
@@ -496,7 +496,16 @@ class CatalogController < ApplicationController
   end
 
   def oai_set_filter(solr_parameters, user_parameters)
-    comp = Compilation.find("neu:#{params[:set]}")
+
+    if !params[:set].blank?
+      comp = Compilation.find("neu:#{params[:set]}")
+    else
+      # pid should be in resumptionToken
+      token = params[:resumptionToken]
+      pid = token[/mods\.s\((.*?)\)/m, 1]
+      comp = Compilation.find("neu:#{pid}")
+    end
+
     pids = comp.entry_ids
 
     query = pids.map do |pid|
