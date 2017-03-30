@@ -73,6 +73,7 @@ gem 'damerau-levenshtein'
 gem 'axlsx', :git => 'https://github.com/randym/axlsx.git', :ref => '9e07402a26f776b6dcdc264a202d804c5d24e8b3'
 
 gem 'kataba'
+gem 'passenger'
 
 # Gems used only for assets and not required
 # in production environments by default.
