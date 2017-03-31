@@ -197,7 +197,7 @@ class CatalogController < ApplicationController
       },
       :document => {
         :timestamp => 'timestamp',
-        :limit => 100
+        :limit => 25
       }
     }
 
