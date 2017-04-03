@@ -19,6 +19,7 @@ gem 'kramdown'
 gem 'sanitize'
 gem 'jquery-fileupload-rails'
 gem 'mods_display'
+gem 'figaro'
 
 # Pinned to prevent update breaks
 gem 'twitter-bootstrap-rails', '3.2.2'
