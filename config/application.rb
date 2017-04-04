@@ -31,5 +31,11 @@ module Cerberus
     config.application_name = "Digital Repository Service"
 
     config.active_job.queue_adapter = :resque
+
+    if !Rails.env.test? && !(!ENV['TRAVIS'].nil? && ENV['TRAVIS'] == 'true')
+      config.handles_connection = Mysql2::Client.new(:reconnect => true, :host => "#{ENV["HANDLE_HOST"]}", :username => "#{ENV["HANDLE_USERNAME"]}", :password => "#{ENV["HANDLE_PASSWORD"]}", :database => "#{ENV["HANDLE_DATABASE"]}")
+    else
+      config.handles_connection = nil
+    end
   end
 end
