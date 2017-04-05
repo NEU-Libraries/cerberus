@@ -428,6 +428,34 @@ describe CoreFile do
 
       it_should_behave_like "successful tombstone"
     end
+
+    context "with associated files" do
+      before(:each) do
+        @root = Collection.create(title: "Root")
+        @child_one = Collection.create(title: "Child One", parent: @root)
+        @c1_gf = CoreFile.create(title: "Core File One", parent: @child_one, depositor: "nobody@nobody.com")
+        @c1_gf.save!
+        @c2_gf = CoreFile.create(title: "Associated File", parent: @child_one, depositor: "nobody@nobody.com")
+        @c1_gf.associate("supplemental_material_for", @c2_gf)
+        @c2_gf.save!
+        @c1_gf.reload
+        @c2_gf.reload
+        @c1_gf.tombstone
+        @c1_gf.save!
+        @c1_gf.reload
+        @c2_gf.reload
+        @solr = SolrDocument.new(@c1_gf.to_solr)
+      end
+
+      it "should not have any relationships anymore in either direction" do
+        @c1_gf.associations.should == {}
+        @c1_gf.associations_for.should == {}
+        @c2_gf.associations.should == {}
+        @c2_gf.associations_for.should == {}
+      end
+
+      it_should_behave_like "successful tombstone"
+    end
   end
 
   describe 'revive file' do
