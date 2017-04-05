@@ -145,6 +145,40 @@ class CoreFile < ActiveFedora::Base
       array << {:type=>"suppressed",:value=>reason}
       self.mods.access_conditions = array
     end
+    if !self.associations_for.blank? #is associated with other files
+      self.associations_for.each do |type, files|
+        files.each do |f|
+          if !f.associations.blank?
+            # remove the reverse direction
+            f.associations.each do |f_type, f_files|
+              z = f.send(f_type)
+              z.delete(self)
+              f.save!
+            end
+          end
+        end
+        x = self.send(type)
+        x.delete(files)
+        self.save!
+      end
+    end
+    if !self.associations.blank? #has associated files
+      self.associations.each do |type, files|
+        files.each do |f|
+          if !f.associations_for.blank?
+            # remove the reverse direction
+            f.associations_for.each do |f_type, f_files|
+              y = f.send(f_type)
+              y.delete(self)
+              f.save!
+            end
+          end
+        end
+        e = self.send(type)
+        e.delete(files)
+        self.save!
+      end
+    end
     self.save!
   end
 
@@ -419,6 +453,18 @@ class CoreFile < ActiveFedora::Base
     hash[:codebook_for] = self.codebook_for unless self.codebook_for.blank?
     hash[:dataset_for] = self.dataset_for unless self.dataset_for.blank?
     hash[:figure_for] = self.figure_for unless self.figure_for.blank?
+    return hash
+  end
+
+  def associations
+    # retrieves all of the child objects which have been associated with a particular core file
+    hash = {}
+    hash[:supplemental_materials] = self.supplemental_materials unless self.supplemental_materials.blank?
+    hash[:instructional_materials] = self.instructional_materials unless self.instructional_materials.blank?
+    hash[:transcriptions] = self.transcriptions unless self.transcriptions.blank?
+    hash[:codebooks] = self.codebooks unless self.codebooks.blank?
+    hash[:datasets] = self.datasets unless self.datasets.blank?
+    hash[:figures] = self.figures unless self.figures.blank?
     return hash
   end
 
