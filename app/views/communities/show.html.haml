@@ -1,3 +1,16 @@
-HERP DERP COMMUNITIES
-
-= render_document_index(@document.children)
+%row
+  %div.col-md-12
+    %div.well
+      %h2
+        = @document.title
+        %small
+          =icon('users')
+          ="#{@document.klass}"
+      %hr
+      %div.handle
+        =icon('link')
+        ="Permanent URL:"
+        -# =link_to TODO
+%row
+  -# insert facets TODO
+  = render_document_index(@document.children)
