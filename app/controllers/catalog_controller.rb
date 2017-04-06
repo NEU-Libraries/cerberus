@@ -49,6 +49,19 @@ class CatalogController < ApplicationController
     #
     # :show may be set to false if you don't want the facet to be drawn in the
     # facet bar
+    # COPIED FROM V1
+    config.add_facet_field solr_name('has_model', :symbol), label: 'Type' #ssim
+    config.add_facet_field solr_name("creator", :facetable), label: "Creator", limit: true #ssi
+    config.add_facet_field solr_name("creation_year", :facetable), label: "Year", limit: true
+    config.add_facet_field solr_name("drs_department", :symbol), label: "Department", limit: true
+    config.add_facet_field solr_name("drs_degree", :symbol), label: "Degree Level", limit: true
+    config.add_facet_field solr_name("drs_course_number", :symbol), label: "Course Number", limit: true
+    config.add_facet_field solr_name("drs_course_title", :symbol), label: "Course Title", limit: true
+    config.add_facet_field solr_name("subject", :facetable), label: "Subject", limit: true
+    # config.add_facet_field solr_name("type", :facetable), label: "Type", limit: true
+    config.add_facet_field solr_name("community_name", :symbol), label: "Community", limit: true
+    # END COPIED FROM V1
+
     config.add_facet_field solr_name('object_type', :facetable), label: 'Format'
     config.add_facet_field solr_name('pub_date', :facetable), label: 'Publication Year'
     config.add_facet_field solr_name('subject_topic', :facetable), label: 'Topic', limit: 20

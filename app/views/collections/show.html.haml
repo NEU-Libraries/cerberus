@@ -1,4 +1,4 @@
-%row
+%div.row
   %div.col-md-12
     %div.well
       %h2
@@ -11,6 +11,13 @@
         =icon('link')
         ="Permanent URL:"
         -# =link_to TODO
-%row
-  -# insert facets TODO
-  = render_document_index(@document.children)
+%div.row
+  %div.col-md-3.col-sm-4#sidebar
+    = render 'search_sidebar', locals: {documents: @document.children} #needs to reflect this search TODO
+  %div.col-md-9.col-sm-8#content
+    = render 'constraints'
+    = render 'search_header'
+    = render 'results_pagination', locals: {response: @response} #needs to reflect this search TODO
+    = render_document_index @document.children
+    -# = render_document_index(@document.children)
+    = render 'results_pagination'
