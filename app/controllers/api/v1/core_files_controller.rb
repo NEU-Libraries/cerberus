@@ -30,6 +30,27 @@ module Api
           render json: ({"name" => "No file sizes yet", "size" => "0"}).to_json
         end
       end
+
+      def content_objects
+        begin
+          result_hsh = Hash.new
+
+          core_doc = SolrDocument.new ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first
+
+          result_hsh["canonical_object"] = core_doc.canonical_object.map { |doc| {doc_to_url(doc) => doc.derivative_label} }.reduce(&:merge)
+          result_hsh["content_objects"] = core_doc.content_objects.map { |doc| {doc_to_url(doc) => doc.derivative_label} }.reduce(&:merge)
+
+          render json: result_hsh.to_json
+        rescue NoMethodError
+          render json: {error: "This item has no content objects."} and return
+        end
+      end
+
+      protected
+        def doc_to_url(solr_doc)
+          return download_path(solr_doc.pid, :only_path => false)
+        end
+        
     end
   end
 end
