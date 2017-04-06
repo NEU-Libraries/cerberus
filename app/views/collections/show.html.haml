@@ -13,11 +13,10 @@
         -# =link_to TODO
 %div.row
   %div.col-md-3.col-sm-4#sidebar
-    = render 'search_sidebar', locals: {documents: @document.children} #needs to reflect this search TODO
+    = render 'search_sidebar'
   %div.col-md-9.col-sm-8#content
     = render 'constraints'
     = render 'search_header'
-    = render 'results_pagination', locals: {response: @response} #needs to reflect this search TODO
-    = render_document_index @document.children
-    -# = render_document_index(@document.children)
+    = render 'results_pagination'
+    = render_document_index @documents
     = render 'results_pagination'

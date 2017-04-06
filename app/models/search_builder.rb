@@ -18,9 +18,4 @@ class SearchBuilder < Blacklight::SearchBuilder
     solr_parameters[:fq] << "-#{Solrizer.solr_name("has_model", :symbol)}:\"ActiveFedora::IndirectContainer\""
     solr_parameters[:fq] << "-#{Solrizer.solr_name("has_model", :symbol)}:\"ActiveFedora::Aggregation::Proxy\""
   end
-
-  def limit_to_collection_children(solr_parameters)
-    solr_parameters[:fq] ||= []
-    solr_parameters[:fq] << "member_of_collection_ids_ssim:\"#{blacklight_params[:item_id]}\" OR isPartOf_ssim:\"#{blacklight_params[:item_id]}\""
-  end
 end
