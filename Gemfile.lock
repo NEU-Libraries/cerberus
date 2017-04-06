@@ -238,6 +238,7 @@ GEM
     mono_logger (1.1.0)
     multi_json (1.12.1)
     multipart-post (2.0.0)
+    mysql2 (0.4.5)
     nio4r (1.2.1)
     noid (0.9.0)
     nokogiri (1.7.0.1)
@@ -441,6 +442,7 @@ DEPENDENCIES
   jquery-rails
   kramdown
   mods_display
+  mysql2
   resque
   resque-web
   rsolr
