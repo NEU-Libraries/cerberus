@@ -6,6 +6,10 @@
         %small
           =icon('users')
           ="#{@document.klass}"
+      -if @document['description_tesim']
+        -# TODO - should this be available at .description
+        %p.description
+          = @document['description_tesim'].first
       %hr
       %div.handle
         =icon('link')
