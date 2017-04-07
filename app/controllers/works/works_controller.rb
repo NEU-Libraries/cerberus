@@ -7,6 +7,11 @@ class Works::WorksController < CatalogController
 
   copy_blacklight_config_from(CatalogController)
 
+  # introduce custom logic for choosing which action the search form should use
+  def search_action_url options = {}
+    search_catalog_url(options.except(:controller, :action))
+  end
+
   def new
     render 'shared/works/new'
   end
