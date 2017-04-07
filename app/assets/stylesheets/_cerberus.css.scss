@@ -1,3 +1,5 @@
+@import "variables";
+
 #header-navbar .navbar-brand {
   overflow: inherit;
   text-indent: inherit;
@@ -9,4 +11,32 @@
 
 .search_q {
   height: auto;
+}
+
+#documents .document {
+  margin-bottom: 6px;
+  padding-bottom: 6px;
+}
+
+.documentHeader figure {
+  border: 1px solid #e3e3e3;
+  text-align: center;
+  padding: 5px;
+  border-radius: 4px;
+}
+
+.documentHeader figure .fa {
+  font-size: 35px;
+  padding: 10px;
+  color: $brand-primary;
+}
+
+.documentHeader figcaption .label {
+  background-color: darken(#f5f5f5, 10%);
+  font-size: 12px;
+  padding: 3px;
+}
+
+.documentHeader .index_title a:first-of-type {
+  font-size: 1.3em;
 }
