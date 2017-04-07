@@ -11,19 +11,4 @@
     = link_to_document document, document_show_link_field(document)
     %a.btn.btn-primary.btn-xs{ "role"=>"button", "data-toggle"=>"collapse", "href"=>"##{document.id}_collapse", "aria-expanded"=>"false", "aria-controls"=>"#{document.id}_collapse"}
       =icon('plus')
-    %div.collapse.list{id:"#{document.id}_collapse"}
-      %div.well
-        - if document['system_create_dtsi']
-          %dt= "Date Created:"
-          %dd= DateTime.parse(document["system_create_dtsi"]).strftime("%c")
-        -if document['description_tesim'] || document['abstract_tesim']
-          %dt="Description:"
-          - if document['description_tesim']
-            %dd= document['description_tesim'].first
-          - if document['abstract_tesim']
-            %dd= document['abstract_tesim'].first
-        -if document['creator_tesim']
-          %dt="Creator"
-          %dd= document['creator_tesim'].first
-
   = document_actions

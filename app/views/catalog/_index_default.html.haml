@@ -1,1 +1,14 @@
--# TESTING - this goes below the _index_header where the title is listed
+%div.collapse.list{id:"#{document.id}_collapse"}
+  %div.well
+    - if document['system_create_dtsi']
+      %dt= "Date Created:"
+      %dd= DateTime.parse(document["system_create_dtsi"]).strftime("%c")
+    -if document['description_tesim'] || document['abstract_tesim']
+      %dt="Description:"
+      - if document['description_tesim']
+        %dd= document['description_tesim'].first
+      - if document['abstract_tesim']
+        %dd= document['abstract_tesim'].first
+    -if document['creator_tesim']
+      %dt="Creator"
+      %dd= document['creator_tesim'].first
