@@ -1,4 +1,3 @@
-# module Cerberus
 class CollectionMemberSearchBuilder < ::SearchBuilder
 
   class_attribute :collection_membership_field
@@ -11,7 +10,6 @@ class CollectionMemberSearchBuilder < ::SearchBuilder
 
   # include filters into the query to only include the collection memebers
   def member_of_collection(solr_parameters)
-    puts blacklight_params
     solr_parameters[:fq] ||= []
     solr_parameters[:fq] << "#{collection_membership_field}:\"#{blacklight_params[:collection]}\""
   end

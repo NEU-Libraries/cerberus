@@ -168,7 +168,7 @@ class CatalogController < ApplicationController
     config.add_sort_field 'score desc, pub_date_dtsi desc, title_tesi asc', label: 'relevance'
     config.add_sort_field 'pub_date_dtsi desc, title_tesi asc', label: 'year'
     config.add_sort_field 'author_tesi asc, title_tesi asc', label: 'author'
-    config.add_sort_field 'title_tesi asc, pub_date_dtsi desc', label: 'title'
+    config.add_sort_field 'title_info_title_tesim asc, pub_date_dtsi desc', label: 'title'
 
     # If there are more than this many search results, no spelling ("did you
     # mean") suggestion is offered.

@@ -4,8 +4,6 @@ class CollectionsController < CatalogController
   include Blacklight::Configurable
   copy_blacklight_config_from(CatalogController)
 
-  attr_reader :item
-
   def new
     @set = Collection.new
   end
