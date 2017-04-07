@@ -18,10 +18,16 @@ class CommunitiesController < CatalogController
     end
   end
 
-  def show
-    # @document = solr_query("id:#{params[:id]}").first
-    @response, @document = fetch(params[:id])
+  def member_search_builder
+    @member_search_builder ||= CommunityMemberSearchBuilder.new(self)
   end
+
+  def show
+    @response, @document = fetch(params[:id])
+    @response = repository.search(member_search_builder.with(params.merge(community: params[:id])).query)
+    @documents = @response.documents
+  end
+
 
   private
     def community_params
