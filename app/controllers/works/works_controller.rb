@@ -7,6 +7,11 @@ class Works::WorksController < CatalogController
 
   copy_blacklight_config_from(CatalogController)
 
+  # introduce custom logic for choosing which action the search form should use
+  def search_action_url options = {}
+    search_catalog_url(options.except(:controller, :action))
+  end
+
   def new
     render 'shared/works/new'
   end
@@ -37,8 +42,9 @@ class Works::WorksController < CatalogController
   end
 
   def show
-    @document = solr_query("id:#{params[:id]}").first
-    @mods = render_mods_display(@document).to_html.html_safe
+    @work = Works::Work.find(params[:id]) #needed for mods
+    @response, @document = fetch(params[:id]) #needed for breadcrumbs, blacklight wins
+    @mods = render_mods_display(@work).to_html.html_safe
     render 'shared/works/show'
   end
 end

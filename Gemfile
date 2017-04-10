@@ -24,6 +24,7 @@ gem 'mysql2'
 
 # Pinned to prevent update breaks
 gem 'twitter-bootstrap-rails', '3.2.2'
+gem 'font-awesome-sass', '~> 4.7.0'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 # Use sqlite3 as the database for Active Record

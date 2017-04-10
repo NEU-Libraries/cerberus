@@ -1,3 +1,26 @@
-HERP DERP COMMUNITIES
-
-= render_document_index(@document.children)
+%div.row
+  %div.col-md-12
+    %div.well
+      %h2
+        = @document.title
+        %small
+          =icon('users')
+          ="#{@document.klass}"
+      -if @document['description_tesim']
+        -# TODO - should this be available at .description
+        %p.description
+          = @document['description_tesim'].first
+      %hr
+      %div.handle
+        =icon('link')
+        ="Permanent URL:"
+        -# =link_to TODO
+%div.row
+  %div.col-md-3.col-sm-4#sidebar
+    = render 'search_sidebar'
+  %div.col-md-9.col-sm-8#content
+    = render 'constraints'
+    = render 'search_header'
+    = render 'results_pagination'
+    = render_document_index @documents
+    = render 'results_pagination'

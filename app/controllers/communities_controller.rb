@@ -5,6 +5,11 @@ class CommunitiesController < CatalogController
 
   copy_blacklight_config_from(CatalogController)
 
+  # introduce custom logic for choosing which action the search form should use
+  def search_action_url options = {}
+    search_catalog_url(options.except(:controller, :action))
+  end
+
   def new
     @set = Community.new
   end
@@ -18,10 +23,16 @@ class CommunitiesController < CatalogController
     end
   end
 
-  def show
-    # @document = solr_query("id:#{params[:id]}").first
-    @response, @document = fetch(params[:id])
+  def member_search_builder
+    @member_search_builder ||= CommunityMemberSearchBuilder.new(self)
   end
+
+  def show
+    @response, @document = fetch(params[:id])
+    @response = repository.search(member_search_builder.with(params.merge(community: params[:id])).query)
+    @documents = @response.documents
+  end
+
 
   private
     def community_params

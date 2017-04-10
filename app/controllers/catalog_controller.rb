@@ -49,6 +49,19 @@ class CatalogController < ApplicationController
     #
     # :show may be set to false if you don't want the facet to be drawn in the
     # facet bar
+    # COPIED FROM V1
+    config.add_facet_field solr_name('has_model', :symbol), label: 'Type' #ssim
+    config.add_facet_field solr_name("creator", :facetable), label: "Creator", limit: true #ssi
+    config.add_facet_field solr_name("creation_year", :facetable), label: "Year", limit: true
+    config.add_facet_field solr_name("drs_department", :symbol), label: "Department", limit: true
+    config.add_facet_field solr_name("drs_degree", :symbol), label: "Degree Level", limit: true
+    config.add_facet_field solr_name("drs_course_number", :symbol), label: "Course Number", limit: true
+    config.add_facet_field solr_name("drs_course_title", :symbol), label: "Course Title", limit: true
+    config.add_facet_field solr_name("subject", :facetable), label: "Subject", limit: true
+    # config.add_facet_field solr_name("type", :facetable), label: "Type", limit: true
+    config.add_facet_field solr_name("community_name", :symbol), label: "Community", limit: true
+    # END COPIED FROM V1
+
     config.add_facet_field solr_name('object_type', :facetable), label: 'Format'
     config.add_facet_field solr_name('pub_date', :facetable), label: 'Publication Year'
     config.add_facet_field solr_name('subject_topic', :facetable), label: 'Topic', limit: 20
@@ -152,10 +165,15 @@ class CatalogController < ApplicationController
     # label in pulldown is followed by the name of the SOLR field to sort by and
     # whether the sort is ascending or descending (it must be asc or desc
     # except in the relevancy case).
-    config.add_sort_field 'score desc, pub_date_dtsi desc, title_tesi asc', label: 'relevance'
-    config.add_sort_field 'pub_date_dtsi desc, title_tesi asc', label: 'year'
-    config.add_sort_field 'author_tesi asc, title_tesi asc', label: 'author'
-    config.add_sort_field 'title_tesi asc, pub_date_dtsi desc', label: 'title'
+    # copied from V1
+    # note that title sort is not working because title_ssi is not in solr doc - probably need to do some sort of title cleanup in order to use it for sorting like in v1
+    config.add_sort_field "#{solr_name('title', :stored_sortable, type: :string)} asc", :label => "Title"
+    config.add_sort_field "#{solr_name('creator', :stored_sortable, type: :string)} asc", :label => "Creator, A-Z"
+    config.add_sort_field "#{solr_name('creator', :stored_sortable, type: :string)} desc", :label => "Creator, Z-A"
+    config.add_sort_field "#{solr_name('system_create', :stored_sortable, type: :date)} desc", :label => "Recently uploaded"
+    config.add_sort_field "#{solr_name('date', :stored_sortable, type: :string)} desc", :label => "Recently created"
+    config.add_sort_field "score desc, #{solr_name('system_create', :stored_sortable, type: :date)} desc", :label => "Relevance"
+    # end copied from v1
 
     # If there are more than this many search results, no spelling ("did you
     # mean") suggestion is offered.
