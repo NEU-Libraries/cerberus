@@ -1,5 +1,6 @@
 class Community < ActiveFedora::Base
   include Hydra::AccessControls::Permissions
+  include Cerberus::Permissions
   include Hydra::PCDM::ObjectBehavior
   include Solr::GenericType
   include Parentable

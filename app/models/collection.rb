@@ -2,6 +2,7 @@ class Collection < ActiveFedora::Base
   include Hydra::Works::CollectionBehavior
   include Hydra::PCDM::ObjectBehavior
   include Hydra::AccessControls::Permissions
+  include Cerberus::Permissions
   include Solr::GenericType
   include Parentable
   include Noidable

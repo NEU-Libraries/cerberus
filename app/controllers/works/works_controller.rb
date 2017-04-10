@@ -34,7 +34,8 @@ class Works::WorksController < CatalogController
 
     work.members << file_set
     # temporarily setting to public for now, for dev purposes
-    work.permissions_attributes = [{ name: "public", access: "read", type: "group" }]
+    # work.permissions_attributes = [{ name: "public", access: "read", type: "group" }]
+    work.publicize
     work.save!
 
     # file_set.create_derivatives
