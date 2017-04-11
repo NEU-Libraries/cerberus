@@ -5,7 +5,7 @@ namespace :reset do
     Rake::Task['reset:clean'].invoke or exit!(1)
 
     root_dept = Community.new(id: 'neu1', title: 'Northeastern University', description: "Founded in 1898, Northeastern is a global, experiential, research university built on a tradition of engagement with the world, creating a distinctive approach to education and research. The university offers a comprehensive range of undergraduate and graduate programs leading to degrees through the doctorate in nine colleges and schools, and select advanced degrees at graduate campuses in Charlotte, North Carolina, and Seattle.")
-    root_dept.permissions_attributes = [{ name: "public", access: "read", type: "group" }]
+    root_dept.publicize
     root_dept.save!
 
     engDept = create_container(Community, 'neu1', 'English Department')
@@ -28,7 +28,7 @@ end
 def create_container(klass, parent_str, title_str, description = "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Recusandae, minima, cum sit iste at mollitia voluptatem error perspiciatis excepturi ut voluptatibus placeat esse architecto ea voluptate assumenda repudiandae quod commodi.")
   con = klass.new(parent: ActiveFedora::Base.find(parent_str), title: title_str, description: description)
 
-  con.permissions_attributes = [{ name: "public", access: "read", type: "group" }]
+  con.publicize!
   con.save!
 
   return con
