@@ -40,3 +40,17 @@
 .documentHeader .index_title a:first-of-type {
   font-size: 1.3em;
 }
+
+.btn-clear {
+  border: 1px solid $brand-primary;
+}
+
+.btn-clear:hover, .btn-clear:focus {
+  background: $brand-primary;
+  color: #fff;
+}
+
+.btn-mini {
+  @extend .btn-xs !optional;
+  border-radius: 6px;
+}

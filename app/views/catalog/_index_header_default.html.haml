@@ -25,3 +25,12 @@
       =icon('plus')
 
   = document_actions
+
+  %div.pull-right.actions
+    %div.btn-group
+      -# download buttons go here
+    %div.btn-group
+      %a.btn.btn-mini.btn-clear{:href=>"", :title=>"Save for later"} Save for later
+    %div.btn-group
+      %a.btn.btn-mini.btn-clear{:href=>"http://library.northeastern.edu/get-help/tech-support/report-a-problem?resource=#{document.title} - #{document.id} (#{URI.encode(work_url(document.id))})", :title=>"Report a problem"}
+        =icon('comments')
