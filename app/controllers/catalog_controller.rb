@@ -10,6 +10,12 @@ class CatalogController < ApplicationController
   # Hydra::SearchBuilder.default_processor_chain -= [:add_access_controls_to_solr_params]
 
   configure_blacklight do |config|
+    config.view.gallery.partials = [:index_header, :index]
+    # config.view.masonry.partials = [:index]
+    # config.view.slideshow.partials = [:index]
+
+    config.show.tile_source_field = :content_metadata_image_iiif_info_ssm
+    config.show.partials.insert(1, :openseadragon)
     ## Class for sending and receiving requests from a search index
     # config.repository_class = Blacklight::Solr::Repository
     #
