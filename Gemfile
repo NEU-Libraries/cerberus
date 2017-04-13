@@ -21,6 +21,7 @@ gem 'jquery-fileupload-rails'
 gem 'mods_display'
 gem 'figaro'
 gem 'mysql2'
+gem 'blacklight-gallery'
 
 # Pinned to prevent update breaks
 gem 'twitter-bootstrap-rails', '3.2.2'
