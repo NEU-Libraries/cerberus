@@ -2,7 +2,6 @@ class Community < ActiveFedora::Base
   include Hydra::AccessControls::Permissions
   include Cerberus::Permissions
   include Hydra::PCDM::ObjectBehavior
-  include Solr::GenericType
   include Parentable
   include Noidable
 
@@ -17,4 +16,6 @@ class Community < ActiveFedora::Base
   property :description, predicate: ::RDF::Vocab::DC.description, multiple: false do |index|
     index.as :stored_searchable
   end
+
+  self.indexer = CommunityIndexer
 end

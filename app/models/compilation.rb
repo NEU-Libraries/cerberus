@@ -1,6 +1,5 @@
 class Compilation < ActiveFedora::Base
   include Hydra::AccessControls::Permissions
-  include Solr::GenericType
   include ApplicationHelper
   include Noidable
 

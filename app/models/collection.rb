@@ -3,7 +3,6 @@ class Collection < ActiveFedora::Base
   include Hydra::PCDM::ObjectBehavior
   include Hydra::AccessControls::Permissions
   include Cerberus::Permissions
-  include Solr::GenericType
   include Parentable
   include Noidable
 
@@ -15,4 +14,6 @@ class Collection < ActiveFedora::Base
   property :description, predicate: ::RDF::Vocab::DC.description, multiple: false do |index|
     index.as :stored_searchable
   end
+
+  self.indexer = CollectionIndexer
 end
