@@ -15,6 +15,7 @@ class SearchBuilder < Blacklight::SearchBuilder
 
   def exclude_unwanted_models(solr_parameters)
     solr_parameters[:fq] ||= []
+    solr_parameters[:fq] << "-#{Solrizer.solr_name("has_model", :symbol)}:\"Hydra::Works::FileSet\""
     solr_parameters[:fq] << "-#{Solrizer.solr_name("has_model", :symbol)}:\"ActiveFedora::IndirectContainer\""
     solr_parameters[:fq] << "-#{Solrizer.solr_name("has_model", :symbol)}:\"ActiveFedora::Aggregation::Proxy\""
   end
