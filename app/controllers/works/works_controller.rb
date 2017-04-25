@@ -26,6 +26,7 @@ class Works::WorksController < CatalogController
 
     work = Works::Work.create
     file_set = Hydra::Works::FileSet.create
+    file_set.publicize!
 
     file = File.new(upload_path)
 

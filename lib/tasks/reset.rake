@@ -13,6 +13,11 @@ namespace :reset do
     litCol = create_container(Collection, engDept.id, 'Literature')
     roCol = create_container(Collection, engDept.id, 'Random Objects')
     rusNovCol = create_container(Collection, litCol.id, 'Russian Novels')
+
+    # Samurai Pizza Cats
+    spc = FactoryGirl.create(:image_master_file)
+    spc.parent = roCol
+    spc.save!
   end
   task :clean => :environment do
     if Rails.env.development? || Rails.env.staging?

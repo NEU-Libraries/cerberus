@@ -2,6 +2,7 @@ FactoryGirl.define do
   factory :work, class: Works::Work do
     after(:create) do |work|
       file_set = Hydra::Works::FileSet.create
+      file_set.publicize!
       work.members << file_set
       work.save!
     end
@@ -41,7 +42,8 @@ FactoryGirl.define do
   trait :has_thumbnail do
     after :create do |work|
       file_set = work.file_sets.first
-      GenerateDerivativesJob.new.perform(file_set.id)
+      file_set.create_derivatives
+      work.update_index #not sure why this is necessary...
     end
   end
 
