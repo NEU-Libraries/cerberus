@@ -14,7 +14,11 @@ module Parentable
     elsif self.class == Community
       self.community
     else
-      ActiveFedora::Base.find(self.member_of_collections.first.id)
+      if !self.member_of_collections.first.blank? && !self.member_of_collections.first.id.blank?
+        ActiveFedora::Base.find(self.member_of_collections.first.id)
+      else
+        return nil
+      end
     end
   end
 
