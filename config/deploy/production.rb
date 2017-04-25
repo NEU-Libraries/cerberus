@@ -1,7 +1,7 @@
 set :stage, :production
 set :whenever_environment, 'production'
 
-set :deploy_to, '/home/drs/apps/develop/'
+set :deploy_to, '/opt/cerberus/'
 set :bundle_env_variables, { nokogiri_use_system_libraries: 1 }
 set :bundle_bins, fetch(:bundle_bins, []).push('whenever')
 
