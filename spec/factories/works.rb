@@ -25,7 +25,7 @@ FactoryGirl.define do
       title "test_doc.doc"
       publicized
       has_doc
-      # has_thumbnail
+      has_thumbnail
     end
 
   end
