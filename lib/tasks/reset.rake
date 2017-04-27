@@ -15,9 +15,19 @@ namespace :reset do
     rusNovCol = create_container(Collection, litCol.id, 'Russian Novels')
 
     # Samurai Pizza Cats
-    spc = FactoryGirl.create(:image_master_file)
+    spc = FactoryGirl.create(:png_master_file)
     spc.parent = roCol
     spc.save!
+
+    # Spongebob
+    sponge = FactoryGirl.create(:jpg_master_file)
+    sponge.parent = roCol
+    sponge.save!
+
+    # Lorem Ipsum
+    doc = FactoryGirl.create(:word_master_file)
+    doc.parent = roCol
+    doc.save!
   end
   task :clean => :environment do
     if Rails.env.development? || Rails.env.staging?
