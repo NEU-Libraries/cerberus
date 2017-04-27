@@ -21,11 +21,18 @@ FactoryGirl.define do
       has_thumbnail
     end
 
-    factory :word_master_file do
+    factory :docx_master_file do
+      title "test_docx.docx"
+      publicized
+      has_docx
+      has_thumbnail
+    end
+
+    factory :doc_master_file do
       title "test_doc.doc"
       publicized
       has_doc
-      # has_thumbnail
+      has_thumbnail
     end
 
   end
@@ -56,6 +63,17 @@ FactoryGirl.define do
   trait :has_jpg do
     after :create do |work|
       path = "#{Rails.root}/spec/fixtures/files/test_pic.jpeg"
+      file = File.new(path)
+      file_set = work.file_sets.first
+
+      Hydra::Works::UploadFileToFileSet.call(file_set, file)
+      file_set.save!
+    end
+  end
+
+  trait :has_docx do
+    after :create do |work|
+      path = "#{Rails.root}/spec/fixtures/files/test_docx.docx"
       file = File.new(path)
       file_set = work.file_sets.first
 

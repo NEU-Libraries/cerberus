@@ -25,7 +25,12 @@ namespace :reset do
     sponge.save!
 
     # Lorem Ipsum
-    doc = FactoryGirl.create(:word_master_file)
+    docx = FactoryGirl.create(:docx_master_file)
+    docx.parent = roCol
+    docx.save!
+
+    # Lorem Ipsum
+    doc = FactoryGirl.create(:doc_master_file)
     doc.parent = roCol
     doc.save!
   end
