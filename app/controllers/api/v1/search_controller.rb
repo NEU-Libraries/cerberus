@@ -49,6 +49,16 @@ module Api
           self.solr_search_params_logic += [:limit_to_scope]
         end
 
+        if params[:filter] == 'geo'
+          self.solr_search_params_logic += [:limit_to_has_geo]
+        elsif params[:filter] == 'date'
+          self.solr_search_params_logic += [:limit_to_has_date]
+        elsif params[:filter] == 'av'
+          self.solr_search_params_logic += [:limit_to_av]
+        else
+          # no additional filter applied
+        end
+
         (@response, @document_list) = get_search_results
         @pagination = paginate_params(@response)
 
@@ -117,6 +127,21 @@ module Api
 
         def disable_facet_limit(solr_parameters, user_parameters)
           solr_parameters["facet.limit"] = "-1"
+        end
+
+        def limit_to_has_geo(solr_parameters, user_parameters)
+          solr_parameters[:fq] ||= []
+          solr_parameters[:fq] << "subject_geographic_tesim:[* TO *] OR subject_cartographics_coordinates_tesim:[* TO *]"
+        end
+
+        def limit_to_has_date(solr_parameters, user_parameters)
+          solr_parameters[:fq] ||= []
+          solr_parameters[:fq] << "key_date_ssi:[* TO *]"
+        end
+
+        def limit_to_av(solr_parameters, user_parameters)
+          solr_parameters[:fq] ||= []
+          solr_parameters[:fq] << "canonical_class_tesim:\"AudioFile\" OR canonical_class_tesim:\"VideoFile\""
         end
 
     end
