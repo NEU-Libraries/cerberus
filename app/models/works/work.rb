@@ -12,4 +12,8 @@ class Works::Work < Hydra::Works::Work
   end
 
   self.indexer = WorkIndexer
+
+  def thumbnail_fedora_path
+    Rails.application.routes.url_helpers.download_path(fs, file: 'thumbnail')
+  end
 end

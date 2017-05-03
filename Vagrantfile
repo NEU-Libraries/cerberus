@@ -20,6 +20,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.network :forwarded_port, guest: 8983, host: 8983
   config.vm.network :forwarded_port, guest: 8984, host: 8984
 
+  # Loris
+  config.vm.network :forwarded_port, guest: 80, host: 8080
+
   # If true, then any SSH connections made will enable agent forwarding.
   # Default value: false
   config.ssh.forward_agent = true

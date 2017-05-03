@@ -6,6 +6,8 @@ module IndexesThumbnails
     self.thumbnail_path_service = ThumbnailPathService
     class_attribute :thumbnail_field
     self.thumbnail_field = 'thumbnail_path_ss'.freeze
+    class_attribute :fedora_thumbnail_field
+    self.fedora_thumbnail_field = 'fedora_thumbnail_path_ss'.freeze
   end
 
   # Adds thumbnail indexing to the solr document
@@ -19,10 +21,15 @@ module IndexesThumbnails
   # @param [Hash] solr_document the solr document to add the field to
   def index_thumbnails(solr_document)
     solr_document[thumbnail_field] = thumbnail_path
+    solr_document[fedora_thumbnail_field] = fedora_thumbnail_path
   end
 
   # Returns the value for the thumbnail path to put into the solr document
   def thumbnail_path
     self.class.thumbnail_path_service.call(object)
+  end
+
+  def fedora_thumbnail_path
+    self.class.thumbnail_path_service.call(object, true)
   end
 end
