@@ -2,7 +2,7 @@ language: ruby
 install:
   - gem uninstall bundler
   - gem install bundler --version '1.10.6'
-  - gem install rake --version '10.4.2'
+  - bundle install --retry 5
 before_install:
   - sudo apt-get update -qq
   - sudo apt-get install libclamav-dev imagemagick libmagickcore-dev libmagic-dev redis-server libreoffice-common libimage-exiftool-perl poppler-utils
