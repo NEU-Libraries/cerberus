@@ -23,7 +23,7 @@ class Loaders::SpreadsheetLoadsController < Loaders::LoadsController
         end
       end
     else
-      $collection_options = []
+      @collection_options = []
     end
     @new = "true"
     @new_form = render_to_string(:partial=>'/loaders/new', locals: {collections_options: @collections_options, new: @new})
@@ -38,7 +38,7 @@ class Loaders::SpreadsheetLoadsController < Loaders::LoadsController
     else
       existing_files = true
     end
-    process_create(t('loaders.spreadsheet.short_name'), "ModsSpreadsheetLoadsController", existing_files)
+    process_create(t('loaders.spreadsheet.short_name'), "SpreadsheetLoadsController", existing_files)
   end
 
   def preview

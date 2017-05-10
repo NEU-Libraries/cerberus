@@ -10,7 +10,7 @@
       %td
         = loader.loader_name
       %td
-        -if Collection.exists?(loader.collection)
+        -if Collection.exists?(loader.collection) && ActiveFedora::Base.find(loader.collection, cast: true).class == Collection
           = Collection.find(loader.collection).title
         - else
           N/A
