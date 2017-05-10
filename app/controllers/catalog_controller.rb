@@ -10,7 +10,7 @@ class CatalogController < ApplicationController
   # Hydra::SearchBuilder.default_processor_chain -= [:add_access_controls_to_solr_params]
 
   configure_blacklight do |config|
-    config.index.thumbnail_field = :thumbnail_path_ss
+    # config.index.thumbnail_field = :thumbnail_path_ss
 
     config.view.gallery.partials = [:index_header, :index]
     # config.view.masonry.partials = [:index]

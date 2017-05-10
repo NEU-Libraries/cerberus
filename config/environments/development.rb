@@ -3,6 +3,8 @@ Rails.application.configure do
 
   config.fedora_binary_path = Rails.root.join('tmp', 'fcrepo4-development-data/fcrepo.binary.directory').to_path
 
+  config.loris_path = "http://localhost:8080/loris/"
+
   # http://stackoverflow.com/questions/29417328/how-to-disable-cannot-render-console-from-on-rails
   # config.web_console.whitelisted_ips = '10.0.2.2'
   config.web_console.whiny_requests = false
