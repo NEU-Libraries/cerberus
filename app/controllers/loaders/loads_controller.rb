@@ -34,7 +34,11 @@ class Loaders::LoadsController < ApplicationController
     @copyright = t('loaders.'+short_name+'.copyright')
     begin
       # check error condition No files
-      return json_error("Error! No file to save") if !params.has_key?(:file)
+      if !params.has_key?(:file)
+        msg = "Error! No file to save"
+        session[:flash_error] = msg
+        render :json => [{error: msg}].to_json and return
+      end
       file = params[:file]
       parent = params[:parent]
       if !file
@@ -45,8 +49,8 @@ class Loaders::LoadsController < ApplicationController
         msg = "No collection was selected."
         session[:flash_error] = msg
         render :json => [{error: msg}].to_json and return
-      elsif existing_files == false && (!parent.start_with?("neu:") || !Collection.exists?(parent))
-        msg = "No collection exists with the value entered."
+      elsif existing_files == false && !parent.start_with?("neu:")
+        msg = "No collection exists with the value entered: \"#{parent}\"."
         session[:flash_error] = msg
         render :json => [{error: msg}].to_json and return
       elsif (empty_file?(file))
@@ -61,13 +65,22 @@ class Loaders::LoadsController < ApplicationController
         msg = "The file you chose is larger than 4000MB. Please contact DRS staff for help uploading files larger than 4000MB."
         session[:flash_error] = msg
         render :json => [{error: msg}].to_json and return
+      elsif existing_files == false && ActiveFedora::Base.find(parent, cast: true).class != Collection
+        msg = "PID \"#{parent}\" entered does not correspond to a Collection. The object returned was a #{ActiveFedora::Base.find(parent, cast: true).class}"
+        session[:flash_error] = msg
+        render :json => [{error: msg}].to_json and return
       else
+        if existing_files == false
+          collection = Collection.find(parent) #do this to catch any other health issues with the parent
+        end
         process_file(file, parent, @copyright, short_name, existing_files, derivatives)
       end
     rescue => exception
       logger.error controller_name+"::create rescued #{exception.class}\n\t#{exception.to_s}\n #{exception.backtrace.join("\n")}\n\n"
       email_handled_exception(exception)
-      json_error "Error occurred while creating file."
+      msg = "Error occurred while creating file. Error received was: #{exception.to_s}"
+      session[:flash_error] = msg
+      render :json => [{error: msg}].to_json and return
     ensure
       # remove the tempfile (only if it is a temp file)
       file.tempfile.delete if file.respond_to?(:tempfile)
