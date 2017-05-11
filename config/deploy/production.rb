@@ -69,7 +69,7 @@ namespace :deploy do
   desc "Copy Figaro YAML"
   task :copy_yml_file do
     on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cp /home/drs/config/application.yml #{release_path}/config/"
+      execute "cp /etc/cerberus/application.yml #{release_path}/config/"
     end
   end
 
@@ -80,20 +80,6 @@ namespace :deploy do
         execute :bundle, 'exec', 'whenever', '-c', '--set environment=production'
         execute :bundle, 'exec', 'whenever', '-w', '--set environment=production'
       end
-    end
-  end
-
-  desc "Copy rvmrc"
-  task :copy_rvmrc_file do
-    on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cp /home/drs/.drsrvmrc #{release_path}/.rvmrc"
-    end
-  end
-
-  desc 'Trust rvmrc file'
-  task :trust_rvmrc do
-    on roles(:app), :in => :sequence, :wait => 5 do
-      execute "/home/drs/.rvm/bin/rvm rvmrc trust #{release_path}"
     end
   end
 
