@@ -32,7 +32,12 @@ module ApplicationHelper
 
   def xml_decode(input_str)
     return "" unless input_str
-    escaped_val = input_str.gsub("&amp;", "&amp;amp;")
+    # scrub all html hex codes that arent & < or >.
+    # RADS either deliberately, or copy and pasted,
+    # smart quotes &#8220; andd #8221;
+    # up to 5 chars either side of a mid-char of # seems to be the most effective without causing issues.
+    escaped_val = input_str.gsub(/(&)(.{0,5})[#?](.{0,5})(;)/) { |m| (["&amp;","&lt;","&gt;", "&amp;amp;", "&amp;lt;", "&amp;gt;"].include? m) ? m : "" }
+    escaped_val = escaped_val.gsub("&amp;", "&amp;amp;")
     escaped_val = escaped_val.gsub("&lt;", "&amp;lt;")
     escaped_val = escaped_val.gsub("&gt;", "&amp;gt;")
     CGI.unescapeHTML(Unidecoder.decode(escaped_val))
