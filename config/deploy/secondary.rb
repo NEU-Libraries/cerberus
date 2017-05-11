@@ -55,13 +55,13 @@ namespace :deploy do
   desc "Restarting the resque workers"
   task :restart_workers do
     on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd #{release_path} && (RAILS_ENV=staging kill -TERM $(cat /etc/cerberus/resque-pool.pid))", raise_on_non_zero_exit: false
+      execute "cd #{release_path} && (RAILS_ENV=secondary kill -TERM $(cat /etc/cerberus/resque-pool.pid))", raise_on_non_zero_exit: false
       execute "kill $(ps aux | grep -i resque | awk '{print $2}')", raise_on_non_zero_exit: false
       execute "rm -f /etc/cerberus/resque-pool.pid", raise_on_non_zero_exit: false
       within release_path do
-        execute :bundle, 'exec', 'resque-pool', '--daemon', '-p /etc/cerberus/resque-pool.pid', '--environment staging'
+        execute :bundle, 'exec', 'resque-pool', '--daemon', '-p /etc/cerberus/resque-pool.pid', '--environment secondary'
       end
-      # execute "cd #{release_path} && (RAILS_ENV=staging resque-pool --daemon -p /etc/cerberus/resque-pool.pid)"
+      # execute "cd #{release_path} && (RAILS_ENV=secondary resque-pool --daemon -p /etc/cerberus/resque-pool.pid)"
     end
   end
 
