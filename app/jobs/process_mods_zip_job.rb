@@ -170,7 +170,7 @@ class ProcessModsZipJob
                     if !sc_type.nil? && sc_type != ""
                       core_file.category = sc_type
                     end
-                    # core_file.identifier = make_handle(core_file.persistent_url, client)
+                    core_file.identifier = make_handle(core_file.persistent_url, client)
                   else
                     populate_error_report(load_report, existing_file, "File triggered failure for virus check", row_results, core_file, old_mods, header_row, row)
                     next
