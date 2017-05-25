@@ -170,7 +170,7 @@ class ProcessModsZipJob
                     if !sc_type.nil? && sc_type != ""
                       core_file.category = sc_type
                     end
-                    core_file.identifier = make_handle(core_file.persistent_url, client)
+                    # core_file.identifier = make_handle(core_file.persistent_url, client)
                   else
                     populate_error_report(load_report, existing_file, "File triggered failure for virus check", row_results, core_file, old_mods, header_row, row)
                     next
@@ -325,7 +325,7 @@ class ProcessModsZipJob
     core_file.mods.title_info.supplied = "yes" if row_results["supplied_title"] == "supplied"
 
     creators = row_results.select { |key, value| key.to_s.match(/^creator_\d+_name$/) if !value.blank? }
-    creator_nums = creators.keys.map {|key| key.scan(/\d/)[0].to_i }
+    creator_nums = creators.keys.map {|key| key.scan(/\d+/)[0].to_i }
     if creators.count > 0
       creator_hash = {}
       creator_hash['corporate_names'] = []
@@ -363,7 +363,7 @@ class ProcessModsZipJob
           value_uri = row_results["creator_#{n}_name"].split("|")[1]
           if name_type == 'corporate'
             corp_creators = row_results.select { |key, value| key.to_s.match(/^creator_\d+_name_type$/) && value.to_s.match(/^corporate$/) }
-            corp_nums = corp_creators.keys.map {|key| key.scan(/\d/)[0].to_i }
+            corp_nums = corp_creators.keys.map {|key| key.scan(/\d+/)[0].to_i }
             corp_num = corp_nums.index(n) #this basically maps the row_results n number to the creator index since corp and pers are separate in the mods
             name = row_results["creator_#{n}_name"].split("|")[0].strip
             if name.include? "--"
@@ -386,7 +386,7 @@ class ProcessModsZipJob
             core_file.mods.corporate_name(corp_num).value_uri = value_uri.strip unless value_uri.blank?
           elsif name_type == 'personal'
             personal_creators = row_results.select { |key, value| key.to_s.match(/^creator_\d+_name_type$/) && value.to_s.match(/^personal$/) }
-            pers_nums = personal_creators.keys.map {|key| key.scan(/\d/)[0].to_i }
+            pers_nums = personal_creators.keys.map {|key| key.scan(/\d+/)[0].to_i }
             pers_num = pers_nums.index(n)
             address = row_results["creator_#{n}_name"].split("|")[2]
             date = row_results["creator_#{n}_name"].split("|")[3]
@@ -715,7 +715,7 @@ class ProcessModsZipJob
     end
 
     cartographic_subjects = row_results.select { |key, value| key.to_s.match(/^subject_cartographic_\d+/) if !value.blank? }
-    cartographic_nums = cartographic_subjects.keys.map {|key| key.scan(/\d/)[0].to_i }
+    cartographic_nums = cartographic_subjects.keys.map {|key| key.scan(/\d+/)[0].to_i }
     cartographic_nums = cartographic_nums.uniq
     if cartographic_nums.count > 0
       subj_count = core_file.mods.subject.count
@@ -940,7 +940,7 @@ class ProcessModsZipJob
       results["subject_genre_#{i}_authority"]                   = find_in_row(header_row, row_value, "Genre Subject Authority #{i}")
     end
     cartographic_subjects = header_row.select {|key| key.to_s.match(/(?i)^Cartographics Subject [a-zA-Z]* \d+[ \f\t\v]*/) if !key.blank?}
-    carto_nums = cartographic_subjects.map {|key| key.scan(/\d/)[0].to_i }
+    carto_nums = cartographic_subjects.map {|key| key.scan(/\d+/)[0].to_i }
     carto_nums.uniq.each.with_index(1) do |x, i|
       results["subject_cartographic_#{i}_coordinates"]          = find_in_row(header_row, row_value, "Cartographics Subject Coordinates #{i}")
       results["subject_cartographic_#{i}_scale"]                = find_in_row(header_row, row_value, "Cartographics Subject Scale #{i}")
