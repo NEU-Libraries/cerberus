@@ -239,6 +239,11 @@ class ModsDatastream < ActiveFedora::OmDatastream
     t.classification(path: 'classification', namespace_prefix: 'mods')
     t.table_of_contents(path: 'tableOfContents', namespace_prefix: 'mods')
 
+    t.loc(path: 'location', namespace_prefix: 'mods'){
+      t.physical_location(path: 'physicalLocation', namespace_prefix: 'mods')
+      t.url(path: 'url', namespace_prefix: 'mods')
+    }
+
     t.related_item(path: 'relatedItem', namespace_prefix: 'mods'){
       t.type(path: {attribute: 'type'})
       t.title_info(path: 'titleInfo', namespace_prefix: 'mods'){
@@ -284,6 +289,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
       }
       t.location(path: 'location', namespace_prefix: 'mods'){
         t.physical_location(path: 'physicalLocation', namespace_prefix: 'mods')
+        t.url(path: 'url', namespace_prefix: 'mods')
       }
     }
 
@@ -322,6 +328,13 @@ class ModsDatastream < ActiveFedora::OmDatastream
     super(solr_doc) # Run the default solrization behavior
 
     # Toolkit additions
+    # Using loc for location mapping due to reserved keyword (probably nokogiri)
+    if !self.loc.blank?
+      if !self.loc.url.blank?
+        solr_doc["drs_location_url_ssim"] = self.loc.url.first
+      end
+    end
+
     if !self.key_date.blank?
       kd = self.key_date.first
       kd.gsub!("-", "/")
