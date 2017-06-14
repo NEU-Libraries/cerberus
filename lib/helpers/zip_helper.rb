@@ -16,7 +16,7 @@ module ZipHelper
     # Make the output path if it doesn't already exist
     FileUtils.mkdir(output_dir) unless File.exists? output_dir
 
-    if File.extname(zip_file_path) == ".tar.gz" #tar
+    if File.extname(zip_file_path) == ".gz" #tar
       `tar -xzf #{zip_file_path} -C #{output_dir}`
     elsif File.extname(zip_file_path) == ".zip" #zip
       # Shell out to unzip
