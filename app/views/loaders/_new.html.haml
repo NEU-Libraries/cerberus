@@ -59,3 +59,16 @@
       $("input[type='submit']").prop("disabled", "true");
     }
   });
+
+:javascript
+  $('#file').bind('change', function() {
+    if (this.files[0].size/ 1024000 > 2000 && (this.files[0].name.endsWith(".zip"))) {
+      $(this).before('<div class="alert alert-warning">The zip you chose is larger than 2GB.</div>');
+      $("input[type='submit']").prop("disabled", "true");
+    } else {
+      $(".alert").remove();
+      if ($('#terms_of_service').is(':checked')) {
+        $("input[type='submit']").removeProp("disabled");
+      }
+    }
+  });
