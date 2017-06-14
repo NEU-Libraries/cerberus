@@ -65,6 +65,10 @@ class Loaders::LoadsController < ApplicationController
         msg = "The file you chose is larger than 4000MB. Please contact DRS staff for help uploading files larger than 4000MB."
         session[:flash_error] = msg
         render :json => [{error: msg}].to_json and return
+      elsif (File.extname(file.tempfile.path) != (".zip" || ".tar.gz"))
+        msg = "The file must be of type zip or gzip. The relevant extensions are .zip and .tar.gz respectively."
+        session[:flash_error] = msg
+        render :json => [{error: msg}].to_json and return
       elsif existing_files == false && ActiveFedora::Base.find(parent, cast: true).class != Collection
         msg = "PID \"#{parent}\" entered does not correspond to a Collection. The object returned was a #{ActiveFedora::Base.find(parent, cast: true).class}"
         session[:flash_error] = msg
