@@ -65,7 +65,7 @@ class Loaders::LoadsController < ApplicationController
         msg = "The file you chose is larger than 2GB. Please contact DRS staff for help uploading files larger than 2GB."
         session[:flash_error] = msg
         render :json => [{error: msg}].to_json and return
-      elsif (File.extname(file.tempfile.path) != (".zip" || ".gz"))
+      elsif (["zip", ".gz"].include? File.extname(file.tempfile.path))
         msg = "The file must be of type zip or gzip. The relevant extensions are .zip and .tar.gz respectively."
         session[:flash_error] = msg
         render :json => [{error: msg}].to_json and return
