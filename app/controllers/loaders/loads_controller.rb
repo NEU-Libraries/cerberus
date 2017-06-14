@@ -144,7 +144,7 @@ class Loaders::LoadsController < ApplicationController
         new_file = "#{new_path}#{File.extname(file.original_filename)}"
         FileUtils.mv(file.tempfile.path, new_file)
         #if zip
-        if (extract_mime_type(new_file) == 'application/zip') || (extract_mime_type(new_file) == 'application/x-tar')
+        if (extract_mime_type(new_file) == 'application/zip') || (extract_mime_type(new_file) == 'application/x-gzip')
           begin
             @report_id = nil
             if short_name == "spreadsheet"
@@ -190,7 +190,7 @@ class Loaders::LoadsController < ApplicationController
           end
         else
           FileUtils.rm(new_file)
-          error = "The file uploaded was not a zip file."
+          error = "The file uploaded was not a zip or gzip file according to mime type."
           session[:flash_error] = error
           json_error error
         end
