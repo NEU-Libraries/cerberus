@@ -20,7 +20,7 @@ namespace :deploy do
   desc "Updating ClamAV"
   task :update_clamav do
     on roles(:app), :in => :sequence, :wait => 5 do
-      execute "sudo freshclam"
+      execute "sudo freshclam", raise_on_non_zero_exit: false
     end
   end
 
