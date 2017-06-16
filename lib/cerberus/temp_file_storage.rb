@@ -12,7 +12,7 @@ module Cerberus::TempFileStorage
         uniq_hsh = Digest::MD5.hexdigest("#{File.basename(file.path)}")[0,2]
       end
 
-      new_path = tempdir.join("#{Time.now.to_f.to_s.gsub!('.','-')}-#{uniq_hsh}")
+      new_path = tempdir.join("#{Time.now.to_f.to_s.gsub!('.','-')}-#{uniq_hsh}.#{file.original_filename.partition('.').last}")
 
       begin
         FileUtils.mv(file.tempfile.path, new_path.to_s)
@@ -34,14 +34,14 @@ module Cerberus::TempFileStorage
         uniq_hsh = Digest::MD5.hexdigest("#{File.basename(file.path)}")[0,2]
       end
 
-      new_path = tempdir.join("#{Time.now.to_f.to_s.gsub!('.','-')}-#{uniq_hsh}")
+      new_path = tempdir.join("#{Time.now.to_f.to_s.gsub!('.','-')}-#{uniq_hsh}.#{file.original_filename.partition('.').last}")
 
       begin
         FileUtils.cp(file.tempfile.path, new_path.to_s)
       rescue NoMethodError
         FileUtils.cp(file.path, new_path.to_s)
       end
-      
+
       return new_path.to_s
     end
   end
