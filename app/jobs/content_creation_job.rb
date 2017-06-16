@@ -189,15 +189,20 @@ class ContentCreationJob
         zipfile_name = tempdir.join(z).to_s
 
         # Load our content into said zipfile.
-        Zip::File.open(zipfile_name, Zip::File::CREATE) do |zipfile|
-          zipfile.add(file_name, file_path)
-        end
+        # Zip::File.open(zipfile_name, Zip::File::CREATE) do |zipfile|
+        #   zipfile.add(file_name, file_path)
+        # end
 
+        `zip -j #{zipfile_name} #{file_path}`
+        
         # Add zipfile to the ZipFile object
-        File.open(zipfile_name) do |f|
-          content_object.add_file(f, "content", File.basename(zipfile_name))
-          content_object.save!
-        end
+        # File.open(zipfile_name) do |f|
+        #   content_object.add_file(f, "content", File.basename(zipfile_name))
+        #   content_object.save!
+        # end
+
+        large_upload(content_object, zipfile_name, 'content')
+        content_object.save!
       ensure
         FileUtils.rm(zipfile_name)
       end
