@@ -18,7 +18,7 @@ module Cerberus::TempFileStorage
         extension = ".#{File.basename(file.path).partition('.').last}"
       end
 
-      new_path = tempdir.join("#{Time.now.to_f.to_s.gsub!('.','-')}-#{uniq_hsh}#{extension}")
+      new_path = tempdir.join("#{Time.now.to_f.to_s.gsub!('.','-')}-#{uniq_hsh}#{extension.gsub(/[^a-z,A-Z,.]/, "")}")
 
       begin
         FileUtils.mv(file.tempfile.path, new_path.to_s)
@@ -46,7 +46,7 @@ module Cerberus::TempFileStorage
         extension = ".#{File.basename(file.path).partition('.').last}"
       end
 
-      new_path = tempdir.join("#{Time.now.to_f.to_s.gsub!('.','-')}-#{uniq_hsh}#{extension}")
+      new_path = tempdir.join("#{Time.now.to_f.to_s.gsub!('.','-')}-#{uniq_hsh}#{extension.gsub(/[^a-z,A-Z,.]/, "")}")
 
       begin
         FileUtils.cp(file.tempfile.path, new_path.to_s)
