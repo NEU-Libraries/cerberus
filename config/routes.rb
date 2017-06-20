@@ -79,6 +79,7 @@ Cerberus::Application.routes.draw do
   get "/files/:id/provide_metadata" => "core_files#provide_metadata", as: "files_provide_metadata"
   post "/files/:id/process_metadata" => "core_files#process_metadata", as: "files_process_metadata"
   get "/files/:id/log_stream" => "core_files#log_stream", as: "log_stream"
+  get "/files/:id/reindex" => "core_files#reindex", as: "files_reindex"
 
   get "/files/:id/new" => "core_files#new_attached_file", as: "new_attached_file"
   match "/files/:id/create" => "core_files#create_attached_file", via:"post", as: "create_attached_file"

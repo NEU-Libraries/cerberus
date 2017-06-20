@@ -12,6 +12,12 @@ class Admin::CompilationsController < AdminController
 
   load_resource
 
+  def reindex
+    # Launch job with pid list
+    doc = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first)
+    Cerberus::Application::Queue.push(IndexJob.new(doc.all_descendent_pids))
+  end
+
   def index
     self.solr_search_params_logic += [:limit_to_compilations]
     (@response, @sets) = get_search_results
@@ -29,7 +35,7 @@ class Admin::CompilationsController < AdminController
     if !params[:compilation][:permissions].blank?
       params[:compilation][:permissions].merge!(nuid: current_user.nuid)
     end
-    
+
     if @compilation.update_attributes(params[:compilation])
       flash[:notice] = "#{t('drs.compilations.name').capitalize} successfully updated."
       redirect_to admin_compilations_path
