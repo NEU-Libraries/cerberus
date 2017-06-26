@@ -179,7 +179,7 @@ Cerberus::Application.routes.draw do
     resources :employees, only: [:index, :edit, :update, :destroy]
     resources :statistics, only: [:index]
     resources :users, only: [:index, :show]
-    resources :compilations, path: "/sets"
+    resources :compilations, path: "/sets", except: [:show]
     get "/statistics/views" => 'statistics#get_views', as: 'views'
     get "/statistics/downloads" => 'statistics#get_downloads', as: 'downloads'
     get "/statistics/streams" => 'statistics#get_streams', as: 'streams'
@@ -200,6 +200,8 @@ Cerberus::Application.routes.draw do
     delete "/collections/:id/delete" => "collections#destroy", as: 'delete_collection'
     get "/communities/filter_list" => 'communities#filter_list', as: 'communities_filter_list'
     get "/employees/filter_list" => "employees#filter_list", as: 'employees_filter_list'
+    get "/sets/filter_list" => "compilations#filter_list", as: 'compilations_filter_list'
+    get "/sets/reindex/:id" => "compilations#reindex", as: 'reindex_compilation'
     get "/impersonate_user/:id" => "users#impersonate_user", as: 'impersonate_user'
   end
 

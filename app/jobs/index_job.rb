@@ -6,11 +6,11 @@ class IndexJob
   end
 
   def queue_name
-    :index
+    :reindex
   end
 
   def run
-    pid = self.pid
+    pid_list = self.pid_list
     job_id = "#{Time.now.to_i}"
 
     FileUtils.mkdir_p "#{Rails.root}/log/#{job_id}"
@@ -23,6 +23,11 @@ class IndexJob
     begin
       pid_list.each do |pid|
         obj = ActiveFedora::Base.find(pid, :cast=>true)
+
+        # Invalidate cache
+        Rails.cache.delete_matched("/mods/#{pid}*")
+        Rails.cache.delete_matched("/darwin/#{pid}*")
+        Rails.cache.delete_matched("/content_objects/#{pid}*")
 
         # Delete it's old solr record
         ActiveFedora::SolrService.instance.conn.delete_by_id("#{pid}", params: {'softCommit' => true})
