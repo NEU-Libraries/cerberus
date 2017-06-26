@@ -10,7 +10,15 @@ class Admin::CompilationsController < AdminController
   before_filter :authenticate_user!
   before_filter :verify_admin
 
-  load_resource
+  load_resource :except => [:filter_list]
+
+  def reindex
+    # Launch job with pid list
+    doc = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first)
+    Cerberus::Application::Queue.push(IndexJob.new(doc.all_descendent_pids))
+    flash[:notice] = "#{t('drs.compilations.name').capitalize} reindex has started."
+    redirect_to admin_compilations_path and return
+  end
 
   def index
     self.solr_search_params_logic += [:limit_to_compilations]
@@ -29,7 +37,7 @@ class Admin::CompilationsController < AdminController
     if !params[:compilation][:permissions].blank?
       params[:compilation][:permissions].merge!(nuid: current_user.nuid)
     end
-    
+
     if @compilation.update_attributes(params[:compilation])
       flash[:notice] = "#{t('drs.compilations.name').capitalize} successfully updated."
       redirect_to admin_compilations_path
@@ -47,12 +55,31 @@ class Admin::CompilationsController < AdminController
     end
   end
 
-  private
-  def limit_to_compilations(solr_parameters, user_parameters)
-    solr_parameters[:fq] ||= []
-    solr_parameters[:fq] << "#{Solrizer.solr_name("has_model", :symbol)}:\"info:fedora/afmodel:Compilation\""
+  def filter_list
+    params[:q] = params[:search]
+    self.solr_search_params_logic += [:title_search]
+    self.solr_search_params_logic += [:limit_to_compilations]
+    (@response, @sets) = get_search_results
+
+    respond_to do |format|
+      format.js {
+        if @response.response['numFound'] == 0
+          render js:"$('.sets').replaceWith(\"<div class='sets'>No results found.</div>\");"
+        else
+          render :filter_list
+        end
+      }
+    end
   end
 
+  private
+    def limit_to_compilations(solr_parameters, user_parameters)
+      solr_parameters[:fq] ||= []
+      solr_parameters[:fq] << "#{Solrizer.solr_name("has_model", :symbol)}:\"info:fedora/afmodel:Compilation\""
+    end
 
+    def title_search(solr_parameters, user_parameters)
+      solr_parameters[:qf] = "title_tesim"
+    end
 
 end
