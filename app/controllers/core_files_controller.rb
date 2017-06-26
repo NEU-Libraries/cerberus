@@ -52,7 +52,7 @@ class CoreFilesController < ApplicationController
 
   before_filter :verify_staff_or_beta, only: [:validate_xml, :edit_xml]
 
-  before_filter :verify_admin, only: [:create_attached_file, :new_attached_file, :provide_file_metadata, :process_file_metadata, :destroy_content_object, :associate, :disassociate]
+  before_filter :verify_admin, only: [:reindex, :create_attached_file, :new_attached_file, :provide_file_metadata, :process_file_metadata, :destroy_content_object, :associate, :disassociate]
 
   rescue_from Exceptions::NoParentFoundError, with: :no_parent_rescue
   rescue_from Exceptions::GroupPermissionsError, with: :group_permission_rescue
@@ -78,6 +78,21 @@ class CoreFilesController < ApplicationController
     abstract do
       delimiter "<br><br>"
     end
+  end
+
+  def reindex
+    pid = params[:id]
+
+    # Invalidate cache
+    Rails.cache.delete_matched("/mods/#{pid}*")
+    Rails.cache.delete_matched("/darwin/#{pid}*")
+
+    # Update solr doc
+    CoreFile.find(pid).update_index
+
+    flash[:notice] = "File reindexed."
+    redirect_to core_file_path(pid) and return
+    # render :nothing => true
   end
 
   def fulltext

@@ -79,6 +79,7 @@ Cerberus::Application.routes.draw do
   get "/files/:id/provide_metadata" => "core_files#provide_metadata", as: "files_provide_metadata"
   post "/files/:id/process_metadata" => "core_files#process_metadata", as: "files_process_metadata"
   get "/files/:id/log_stream" => "core_files#log_stream", as: "log_stream"
+  get "/files/:id/reindex" => "core_files#reindex", as: "files_reindex"
 
   get "/files/:id/new" => "core_files#new_attached_file", as: "new_attached_file"
   match "/files/:id/create" => "core_files#create_attached_file", via:"post", as: "create_attached_file"
@@ -178,7 +179,7 @@ Cerberus::Application.routes.draw do
     resources :employees, only: [:index, :edit, :update, :destroy]
     resources :statistics, only: [:index]
     resources :users, only: [:index, :show]
-    resources :compilations, path: "/sets"
+    resources :compilations, path: "/sets", except: [:show]
     get "/statistics/views" => 'statistics#get_views', as: 'views'
     get "/statistics/downloads" => 'statistics#get_downloads', as: 'downloads'
     get "/statistics/streams" => 'statistics#get_streams', as: 'streams'
@@ -199,6 +200,8 @@ Cerberus::Application.routes.draw do
     delete "/collections/:id/delete" => "collections#destroy", as: 'delete_collection'
     get "/communities/filter_list" => 'communities#filter_list', as: 'communities_filter_list'
     get "/employees/filter_list" => "employees#filter_list", as: 'employees_filter_list'
+    get "/sets/filter_list" => "compilations#filter_list", as: 'compilations_filter_list'
+    get "/sets/reindex/:id" => "compilations#reindex", as: 'reindex_compilation'
     get "/impersonate_user/:id" => "users#impersonate_user", as: 'impersonate_user'
   end
 
