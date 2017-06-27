@@ -20,7 +20,7 @@
         %a{ href: "#statistics", data: {toggle: "tab"}}
           %i.icon-bar-chart
           Statistics
-    - if current_user.admin?
+    - if !current_user.blank? && current_user.admin?
       %li
         %a{ href: files_reindex_path(@core_file), data: {event: "external"} }
           %i.icon-refresh
