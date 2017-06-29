@@ -18,12 +18,29 @@
           .span10
             = label_tag :destination_url, "Where would you like this collection to be moved?"
             = label_tag do
-              %small Please enter the URL for the destination community or collection.
-            = text_field_tag :destination_url, nil, :required => true
+              %small Please enter the URL for the destination community or collection. e.g. https://repository.library.northeastern.edu/collections/neu:12345
+            = text_field_tag :destination_url, nil, :required => true, class: "input-block-level"
         .row-fluid
           .span10
             = label_tag :reason, "Why would you like us to move this collection?"
             = text_area_tag :reason, nil, :required => true, rows: 5, class: 'input-block-level'
-            %a.btn.btn-warning{href:"#moveModal", title: "Request Move", data: {toggle: "modal"}}
+            %a.btn.btn-warning.disabled{id: "submit_btn", title: "Request Move", data: {toggle: "modal"}}
               Request
       = render partial: 'shared/sets/move_modal', locals: { move_path: request_move_collection_path }
+
+:javascript
+  var url_reg = /(https:\/\/repository.library.northeastern.edu\/)(collections|communities)(\/neu:).*/;
+  $('#destination_url').bind('change', function() {
+    if (url_reg.test($(this).val())) {
+      $(".alert").remove();
+      $("#submit_btn").removeClass("disabled");
+      $("#submit_btn").attr("href", "#moveModal")
+    }
+    else {
+      $("#submit_btn").addClass("disabled");
+      $("#submit_btn").removeAttr('href');
+      if($('.alert').length === 0){
+        $(this).before('<div class="alert alert-warning">The text must be a valid url.</div>');
+      }
+    }
+  });
