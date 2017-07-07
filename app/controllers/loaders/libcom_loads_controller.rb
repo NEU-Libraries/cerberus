@@ -2,7 +2,7 @@ class Loaders::LibcomLoadsController < Loaders::LoadsController
   before_filter :verify_group
 
   def new
-    parent = "neu:cj82n322h"
+    parent = "neu:cj82px01w"
     process_new(parent, t('loaders.libcom.short_name'))
   end
 
