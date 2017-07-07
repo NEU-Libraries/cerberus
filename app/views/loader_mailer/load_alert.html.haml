@@ -30,3 +30,5 @@
         %p= "A link to the load report can be found #{link_to 'here', loaders_damore_report_url(@load.id)}".html_safe
       - elsif @load.loader_name == t('loaders.aaia.long_name')
         %p= "A link to the load report can be found #{link_to 'here', loaders_aaia_report_url(@load.id)}".html_safe
+      - elsif @load.loader_name == t('loaders.libcom.long_name')
+        %p= "A link to the load report can be found #{link_to 'here', loaders_libcom_report_url(@load.id)}".html_safe
