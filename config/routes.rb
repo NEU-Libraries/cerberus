@@ -155,6 +155,8 @@ Cerberus::Application.routes.draw do
    get "/loaders/damore/file/:id" => 'damore_loads#show_iptc', as: 'loaders_damore_iptc'
    resources :aaia_loads, only: [:new, :create, :show], :path => "loaders/aaia"
    get "/loaders/aaia/file/:id" => 'aaia_loads#show_iptc', as: 'loaders_aaia_iptc'
+   resources :libcom_loads, only: [:new, :create, :show], :path => "loaders/libcom"
+   get "/loaders/libcom/file/:id" => 'libcom_loads#show_iptc', as: 'loaders_libcom_iptc'
    resources :spreadsheet_loads, only: [:new, :create, :preview, :preview_compare], :path => "loaders/spreadsheet"
    get "/loaders/spreadsheet/preview/:id" => 'spreadsheet_loads#preview',  as: 'loaders_spreadsheet_preview'
    get "/loaders/spreadsheet/preview_compare/:id" => 'spreadsheet_loads#preview_compare', as: 'loaders_spreadsheet_preview_compare'
