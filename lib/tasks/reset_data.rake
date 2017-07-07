@@ -218,6 +218,41 @@ task :reset_data => :environment do
   p_2.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
   p_2.save!
 
+  # Add Libcom structure for loader testing
+  # Libcom communities
+  u_lib = Community.new(mass_permissions: 'public', pid: 'neu:466', title: "University Library")
+  u_lib.parent = "neu:1"
+  u_lib.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
+  u_lib.save!
+
+  lib_depts = Community.new(mass_permissions: 'public', pid: 'neu:rx917x58w', title: "Library Departments")
+  lib_depts.parent = u_lib
+  lib_depts.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
+  lib_depts.save!
+
+  libcom_com = Community.new(mass_permissions: 'public', pid: 'neu:rx914k83n', title: "Library Communications and Events")
+  libcom_com.parent = lib_depts
+  libcom_com.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
+  libcom_com.save!
+
+  # Libcom collections
+  p_1 = Collection.create(mass_permissions: 'public', parent: libcom_com, pid: 'neu:rx913s49d', title: 'Promotional Content')
+  p_1.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
+  p_1.save!
+
+  p_2 = Collection.create(mass_permissions: 'public', parent: p_1, pid: 'neu:cj82px025', title: 'Media')
+  p_2.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
+  p_2.save!
+
+  p_3 = Collection.create(mass_permissions: 'public', parent: p_2, pid: 'neu:cj82px01w', title: 'Photographs')
+  p_3.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
+  p_3.save!
+
+  # Libcom test collections
+  p_4 = Collection.create(mass_permissions: 'public', parent: p_3, title: 'Libcom Test Collection')
+  p_4.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
+  p_4.save!
+
   root_dept.rightsMetadata.permissions({group: 'public'}, 'read')
   set_edit_permissions(root_dept)
 
