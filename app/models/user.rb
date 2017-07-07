@@ -265,6 +265,10 @@ class User < ActiveRecord::Base
     return self.groups.include? "northeastern:drs:repository:loaders:aai_archives"
   end
 
+  def libcom_loader?
+    return self.groups.include? "northeastern:drs:repository:loaders:libcom"
+  end
+
   def xml_loader?
     return self.groups.include? "northeastern:drs:repository:loaders:xml"
   end
