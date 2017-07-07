@@ -226,12 +226,12 @@ task :reset_data => :environment do
   u_lib.save!
 
   lib_depts = Community.new(mass_permissions: 'public', pid: 'neu:rx917x58w', title: "Library Departments")
-  lib_depts.parent = u_lib
+  lib_depts.parent = "neu:466"
   lib_depts.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
   lib_depts.save!
 
   libcom_com = Community.new(mass_permissions: 'public', pid: 'neu:rx914k83n', title: "Library Communications and Events")
-  libcom_com.parent = lib_depts
+  libcom_com.parent = "neu:rx917x58w"
   libcom_com.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, 'edit')
   libcom_com.save!
 
@@ -307,6 +307,9 @@ task :reset_data => :environment do
   joey.add_group("northeastern:drs:repository:loaders:marcom")
   eli.add_group("northeastern:drs:repository:loaders:marcom")
   david.add_group("northeastern:drs:repository:loaders:marcom")
+
+  sarah.add_group("northeastern:drs:repository:loaders:libcom")
+  david.add_group("northeastern:drs:repository:loaders:libcom")
 
   sarah.add_group("northeastern:drs:repository:loaders:coe")
   pat.add_group("northeastern:drs:repository:loaders:coe")
