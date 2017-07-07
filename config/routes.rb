@@ -132,6 +132,7 @@ Cerberus::Application.routes.draw do
   get "/loaders/bouve/report/:id" => 'loaders/bouve_loads#show', as: 'loaders_bouve_report'
   get "/loaders/damore/report/:id" => 'loaders/damore_loads#show', as: 'loaders_damore_report'
   get "/loaders/aaia/report/:id" => 'loaders/aaia_loads#show', as: 'loaders_aaia_report'
+  get "/loaders/libcom/report/:id" => 'loaders/libcom_loads#show', as: 'loaders_libcom_report'
   get "/loaders/spreadsheet/report/:id" => 'loaders/spreadsheet_loads#show', as: 'loaders_spreadsheet_report'
   get "/loaders/xml/report/:id" => 'loaders/xml_loads#show', as: 'loaders_xml_report'
 
