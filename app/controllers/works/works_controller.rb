@@ -43,6 +43,9 @@ class Works::WorksController < CatalogController
     GenerateDerivativesJob.perform_later(file_set.id)
   end
 
+  def provide_metadata
+  end
+
   def show
     @work = Works::Work.find(params[:id]) #needed for mods
     @response, @document = fetch(params[:id]) #needed for breadcrumbs, blacklight wins
