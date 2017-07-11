@@ -13,7 +13,6 @@ class Works::WorksController < CatalogController
   end
 
   def new
-    render 'works/new'
   end
 
   def create
@@ -41,7 +40,6 @@ class Works::WorksController < CatalogController
   end
 
   def provide_metadata
-    render 'works/provide_metadata'
   end
 
   def process_metadata
@@ -53,6 +51,5 @@ class Works::WorksController < CatalogController
     @work = Works::Work.find(params[:id]) #needed for mods
     @response, @document = fetch(params[:id]) #needed for breadcrumbs, blacklight wins
     @mods = render_mods_display(@work).to_html.html_safe
-    render 'works/show'
   end
 end
