@@ -38,12 +38,14 @@ class Works::WorksController < CatalogController
     # work.permissions_attributes = [{ name: "public", access: "read", type: "group" }]
     work.publicize
     work.save!
-
-    # file_set.create_derivatives
-    GenerateDerivativesJob.perform_later(file_set.id)
   end
 
   def provide_metadata
+  end
+
+  def process_metadata
+    # file_set.create_derivatives
+    GenerateDerivativesJob.perform_later(file_set.id)
   end
 
   def show
