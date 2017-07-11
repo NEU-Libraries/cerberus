@@ -29,6 +29,8 @@ Rails.application.routes.draw do
 
   scope module: 'works' do
     resources :works
+    get "/works/:id/provide_metadata" => "works#provide_metadata", as: "provide_metadata"
+    post "/works/:id/process_metadata" => "works#process_metadata", as: "process_metadata"
   end
 
   resources :downloads, only: [:show]
