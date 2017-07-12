@@ -1,24 +1,19 @@
 %h1.page-header
   Provide Metadata
 
-%form
-  .form-group
-    / Name field
-    %label.control-label{:for => "name"} Name
-    %input#name.form-control{:name => "name", :type => "text"}/
-  .form-group
-    / Email field
-    %label.control-label.requiredField{:for => "email"}
-      Email
-      %span.asteriskField *
-    %input#email.form-control{:name => "email", :type => "text"}/
-  .form-group
-    / Subject field
-    %label.control-label{:for => "subject"} Subject
-    %input#subject.form-control{:name => "subject", :type => "text"}/
-  .form-group
-    / Message field
-    %label.control-label{:for => "message"} Message
-    %textarea#message.form-control{:cols => "40", :name => "message", :rows => "10"}
-  .form-group
-    %button.btn.btn-primary{:name => "submit", :type => "submit"} Submit
+.container
+  .row
+    #fields.control-group
+      %label.control-label{:for => "field1"} Nice Multiple Form Fields
+      .controls
+        %form{:autocomplete => "off", :role => "form"}
+          .entry.input-group.col-xs-3
+            %input.form-control{:name => "fields[]", :placeholder => "Type something", :type => "text"}/
+            %span.input-group-btn
+              %button.btn.btn-success.btn-add{:type => "button"}
+                %span.glyphicon.glyphicon-plus
+        %br/
+        %small
+          Press
+          %span.glyphicon.glyphicon-plus.gs
+          to add another form field :)
