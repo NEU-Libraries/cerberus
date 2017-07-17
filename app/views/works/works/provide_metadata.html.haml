@@ -21,14 +21,13 @@
     / Email field
     %label.control-label.requiredField{:for => "date"} Date Created
     -# %input#date.form-control{:name => "date", :type => "text"}
-    .controls
-      .entry.input-group
-        %select#date.form-control.selectpicker{:name => "year", "data-width" => "auto"}
-          %option 1990
-        %select#month.form-control.selectpicker{:name => "month", "data-width" => "auto"}
-          %option 12
-        %select#day.form-control.selectpicker{:name => "day", "data-width" => "auto"}
-          %option 30
+    .row-fluid
+      %select#date.form-control.selectpicker{:name => "year", "data-width" => "auto"}
+        %option 1990
+      %select#month.form-control.selectpicker{:name => "month", "data-width" => "auto"}
+        %option 12
+      %select#day.form-control.selectpicker{:name => "day", "data-width" => "auto"}
+        %option 30
   .form-group
     / Email field
     %label.control-label.requiredField{:for => "embargo"} Embargo
