@@ -4,43 +4,51 @@
 %form
   .form-group
     / Name field
-    %label.control-label{:for => "name"} Name
-    %input#name.form-control{:name => "name", :type => "text"}/
-  .form-group
-    / Email field
-    %label.control-label.requiredField{:for => "email"}
-      Email
-      %span.asteriskField *
-    %input#email.form-control{:name => "email", :type => "text"}/
+    %label.control-label{:for => "title"} Title
+    %span.asteriskField *
+    %input#name.form-control{:name => "title", :type => "text"}/
   .form-group
     / Subject field
-    %label.control-label{:for => "subject"} Subject
+    %label.control-label{:for => "keyword"} Keywords
+    %span.asteriskField *
     .controls
       .entry.input-group
-        %input#subject.form-control{:name => "subject", :type => "text"}/
+        %input#keyword.form-control{:name => "keyword", :type => "text"}/
+        %span.input-group-btn
+          %button.btn.btn-success.btn-add{:type => "button"}
+            %span.glyphicon.glyphicon-plus
+  .form-group
+    / Email field
+    %label.control-label.requiredField{:for => "date"} Date Created
+    %input#date.form-control{:name => "date", :type => "text"}
+  .form-group
+    / Email field
+    %label.control-label.requiredField{:for => "embargo"} Embargo
+    %input#embargo.form-control{:name => "embargo", :type => "text"}/
+  .form-group
+    / Subject field
+    %label.control-label{:for => "creator"} Creators
+    .controls
+      .entry.input-group
+        %input#creator.form-control{:name => "creator", :type => "text"}/
+        %span.input-group-btn
+          %button.btn.btn-success.btn-add{:type => "button"}
+            %span.glyphicon.glyphicon-plus
+  .form-group
+    / Subject field
+    %label.control-label{:for => "organization"} Organizations
+    .controls
+      .entry.input-group
+        %input#organization.form-control{:name => "creator", :type => "text"}/
         %span.input-group-btn
           %button.btn.btn-success.btn-add{:type => "button"}
             %span.glyphicon.glyphicon-plus
   .form-group
     / Message field
-    %label.control-label{:for => "message"} Message
-    %textarea#message.form-control{:cols => "40", :name => "message", :rows => "10"}
+    %label.control-label{:for => "description"} Description
+    %textarea#description.form-control{:cols => "40", :name => "message", :rows => "10"}
   .form-group
     %button.btn.btn-primary{:name => "submit", :type => "submit"} Submit
-
--# .container
--#   .row
--#     #fields.control-group
--#       %label.control-label{:for => "field1"} Nice Multiple Form Fields
--#       .controls
--#         %form{:autocomplete => "off", :role => "form"}
--#           .entry.input-group.col-xs-3
--#             %input.form-control{:name => "title", :placeholder => "Title", :type => "text"}/
--#           .entry.input-group.col-xs-3
--#             %input.form-control{:name => "fields[]", :placeholder => "Creators", :type => "text"}/
--#             %span.input-group-btn
--#               %button.btn.btn-success.btn-add{:type => "button"}
--#                 %span.glyphicon.glyphicon-plus
 
 :javascript
   $(function()
