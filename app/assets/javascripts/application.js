@@ -18,4 +18,6 @@
 
 //= require jquery-fileupload/basic
 
+//= require bootstrap-select
+
 //= require_tree .
