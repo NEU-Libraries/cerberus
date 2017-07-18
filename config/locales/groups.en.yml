@@ -96,6 +96,8 @@ en:
       name: "DRS IPTC Loader - D'Amore-Mckim"
     northeastern:drs:repository:loaders:emsa_emc:
       name: "DRS IPTC Loader - EMSA EMC"
+    northeastern:drs:repository:loaders:libcom:
+      name: "DRS IPTC Loader - Library Communications Office"
     northeastern:drs:repository:loaders:marcom:
       name: "DRS IPTC Loader - Marketing"
     northeastern:drs:repository:loaders:bouve_dean:
