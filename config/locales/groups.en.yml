@@ -40,6 +40,8 @@ en:
       name: "CCSH - Early Caribbean Digital Archive Project Team"
     northeastern:drs:college_of_social_sciences_humanities:eliterature:
       name: "CSSH - E-literature Project Team"
+    northeastern:drs:college_of_social_sciences_humanities:humanities_center:neh_space_place_humanities:
+      name: "CSSH - NEH Summer Institute on Space, Place, and the Humanities Project Team"
     northeastern:drs:college_of_social_sciences_humanities:thoreau_drawings:
       name: "CSSH - Thoreau Project Team"
     northeastern:drs:college_of_social_sciences_humanities:holocaust_awareness_committee:
@@ -58,8 +60,12 @@ en:
       name: "Facilities Division - Archive Staff"
     northeastern:drs:faculty_senate:staff:
       name: "Faculty Senate Staff"
+    northeastern:drs:global_resilience_institute:gri_staff:
+      name: "Global Resilience Institute Staff"
     northeastern:drs:jdoaai:archive_staff:
       name: "John D. O'Bryant African American Institute Archives Staff"
+    northeastern:drs:library:admin:
+      name: "University Library - Administration Staff"
     northeastern:drs:library:archives:
       name: "University Archives and Special Collections Staff"
     northeastern:drs:library:communications:
@@ -70,8 +76,8 @@ en:
       name: "University Library - Digital Scholarship Group Staff"
     northeastern:drs:library:dsg_students:
       name: "University Library - Digital Scholarship Group Students"
-    northeastern:drs:library:admin:
-      name: "University Library - Administration Staff"
+    northeastern:drs:library:researchinstruction:
+      name: "University Library - Research and Instruction Staff"
     northeastern:drs:library:scholarly_communications:
       name: "University Library - Scholarly Communications Staff"
     northeastern:drs:marketing_and_communications:staff:
