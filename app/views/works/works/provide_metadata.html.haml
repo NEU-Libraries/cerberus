@@ -2,66 +2,77 @@
   Provide Metadata
 
 %form
-  .form-group
-    / Name field
-    %label.control-label{:for => "title"} Title
-    %span.asteriskField *
-    %input#name.form-control{:name => "title", :type => "text"}/
-  .form-group
-    / Subject field
-    %label.control-label{:for => "keyword"} Keywords
-    %span.asteriskField *
-    .controls
-      .entry.input-group
-        %input#keyword.form-control{:name => "keyword", :type => "text"}/
-        %span.input-group-btn
-          %button.btn.btn-success.btn-add{:type => "button"}
-            %span.glyphicon.glyphicon-plus
-  .form-group
-    / Email field
-    %label.control-label.requiredField{:for => "date"} Date Created
-    -# %input#date.form-control{:name => "date", :type => "text"}
-    .row-fluid
-      %select#date-year.form-control.selectpicker{:name => "date-year", "data-width" => "auto"}
-        %option 1990
-      %select#date-month.form-control.selectpicker{:name => "date-month", "data-width" => "auto"}
-        %option 12
-      %select#date-day.form-control.selectpicker{:name => "date-day", "data-width" => "auto"}
-        %option 30
-  .form-group
-    / Email field
-    %label.control-label.requiredField{:for => "embargo"} Embargo
-    .row-fluid
-      %select#embargo-year.form-control.selectpicker{:name => "embargo-year", "data-width" => "auto"}
-        %option 1990
-      %select#embargo-month.form-control.selectpicker{:name => "embargo-month", "data-width" => "auto"}
-        %option 12
-      %select#embargo-day.form-control.selectpicker{:name => "embargo-day", "data-width" => "auto"}
-        %option 30
-  .form-group
-    / Subject field
-    %label.control-label{:for => "creator"} Creators
-    .controls
-      .entry.input-group
-        %input#creator.form-control{:name => "creator", :type => "text"}/
-        %span.input-group-btn
-          %button.btn.btn-success.btn-add{:type => "button"}
-            %span.glyphicon.glyphicon-plus
-  .form-group
-    / Subject field
-    %label.control-label{:for => "organization"} Organizations
-    .controls
-      .entry.input-group
-        %input#organization.form-control{:name => "creator", :type => "text"}/
-        %span.input-group-btn
-          %button.btn.btn-success.btn-add{:type => "button"}
-            %span.glyphicon.glyphicon-plus
-  .form-group
-    / Message field
-    %label.control-label{:for => "description"} Description
-    %textarea#description.form-control{:cols => "40", :name => "message", :rows => "10"}
-  .form-group
-    %button.btn.btn-primary{:name => "submit", :type => "submit"} Submit
+  .row
+    .col-md-12
+      .form-group
+        %label{:for => "title"} Title
+        %span.asteriskField *
+        %input#title.form-control.required{:name => "title", :required => "true", :type => "text"}/
+  .row
+    .col-md-12
+      .form-group
+        %label{:for => "description"} Description
+        %textarea#description.form-control{:cols => "40", :name => "description", :rows => "10"}
+  .row
+    .col-md-12
+      .form-group
+        %label{:for => "keywords"} Keywords
+        %span.asteriskField *
+        .controls.input-group
+          %input#keywords.form-control.required{:name => "keywords[]", :required => "true", :type => "text"}/
+          %span.input-group-btn
+            %button.btn.btn-success.btn-add{:type => "button"}
+              %span.glyphicon.glyphicon-plus
+  .row
+    .col-md-6
+      %h4 Creators
+  .row
+    .col-md-6
+      .form-group
+        %label{:for => "creator_firstname"} First name
+        %input#creator_firstname.form-control{:name => "creator[firstname]", :required => "true", :type => "text"}/
+    .col-md-6
+      .form-group
+        %label{:for => "creator_lastname"} Last name
+        .controls.input-group
+          %input#creator_lastname.form-control{:name => "creator[lastname]", :required => "true", :type => "text"}/
+          %span.input-group-btn
+            %button.btn.btn-success.btn-add{:type => "button"}
+              %span.glyphicon.glyphicon-plus
+  .row
+    .col-md-12
+      .form-group
+        %label{:for => "creator_lastname"} Organizations
+        .controls.input-group
+          %input#organizations.form-control{:name => "organizations[]", :required => "true", :type => "text"}/
+          %span.input-group-btn
+            %button.btn.btn-success.btn-add{:type => "button"}
+              %span.glyphicon.glyphicon-plus
+  .row
+    .col-md-6
+      .form-group
+        %label Date Created
+        %br
+        %select#date-year.form-control.selectpicker{:name => "date-year", "data-width" => "auto"}
+          %option 1990
+        %select#date-month.form-control.selectpicker{:name => "date-month", "data-width" => "auto"}
+          %option 12
+        %select#date-day.form-control.selectpicker{:name => "date-day", "data-width" => "auto"}
+          %option 31
+    .col-md-6
+      .form-group
+        %label Embargo
+        %br
+        %select#embargo-year.form-control.selectpicker{:name => "embargo-year", "data-width" => "auto"}
+          %option 1990
+        %select#embargo-month.form-control.selectpicker{:name => "embargo-month", "data-width" => "auto"}
+          %option 12
+        %select#embargo-day.form-control.selectpicker{:name => "embargo-day", "data-width" => "auto"}
+          %option 31
+  .row
+    .col-md-12
+      .form-group.text-right
+        %button.btn.btn-primary{:name => "submit", :type => "submit"} Submit
 
 :javascript
   $(function()
