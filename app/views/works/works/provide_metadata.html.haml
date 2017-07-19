@@ -77,20 +77,17 @@
         %select#mass_permission.form-control.selectpicker{:name => "mass_permission"}
           %option public
           %option private
-        %br
-        %br
-        Setting to 'public' will allow anyone accessing the site to see your item.
-        %br
-        Setting to 'private' will only allow groups that are explicitly chosen to see your item.
+        .select-gap
+          Setting to 'public' will allow anyone accessing the site to see your item.
+          %br
+          Setting to 'private' will only allow groups that are explicitly chosen to see your item.
     .col-md-6
       .form-group
         %label{:for => "group_permissions"} Group Permissions
         %br
         %select#group.form-control.selectpicker{:name => "group[]"}
           %option Marketing and Communications
-        %br
-        %br
-        .controls.input-group
+        .controls.input-group.select-gap
           %select#permission.form-control.selectpicker{:name => "permission[]"}
             %option read
             %option edit
