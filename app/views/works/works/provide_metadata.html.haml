@@ -9,25 +9,35 @@
         %span.asteriskField *
         %input#title.form-control.required{:name => "title", :required => "true", :type => "text"}/
     .col-md-3
-      .form-group
-        %label Date Created
-        %br
-        %select#date_year.form-control.selectpicker{:name => "date_year", "data-width" => "auto"}
-          %option 1990
-        %select#date_month.form-control.selectpicker{:name => "date_month", "data-width" => "auto"}
-          %option 12
-        %select#date_day.form-control.selectpicker{:name => "date_day", "data-width" => "auto"}
-          %option 31
+      %label Date Created
+      .row.no-gutters
+        .col-md-4
+          .form-group
+            %select#date_year.form-control.selectpicker{:name => "date_year", "data-width" => "90%"}
+              %option 1990
+        .col-md-4
+          .form-group
+            %select#date_month.form-control.selectpicker{:name => "date_month", "data-width" => "90%"}
+              %option 12
+        .col-md-4
+          .form-group
+            %select#date_day.form-control.selectpicker{:name => "date_day", "data-width" => "90%"}
+              %option 31
     .col-md-3
-      .form-group
-        %label Embargo
-        %br
-        %select#embargo_year.form-control.selectpicker{:name => "embargo_year", "data-width" => "auto"}
-          %option 1990
-        %select#embargo_month.form-control.selectpicker{:name => "embargo_month", "data-width" => "auto"}
-          %option 12
-        %select#embargo_day.form-control.selectpicker{:name => "embargo_day", "data-width" => "auto"}
-          %option 31
+      %label Embargo
+      .row.no-gutters
+        .col-md-4
+          .form-group
+            %select#embargo_year.form-control.selectpicker{:name => "embargo_year", "data-width" => "90%"}
+              %option 1990
+        .col-md-4
+          .form-group
+            %select#embargo_month.form-control.selectpicker{:name => "embargo_month", "data-width" => "90%"}
+              %option 12
+        .col-md-4
+          .form-group
+            %select#embargo_day.form-control.selectpicker{:name => "embargo_day", "data-width" => "90%"}
+              %option 31
   .row
     .col-md-12
       .form-group
@@ -68,7 +78,6 @@
           %span.input-group-btn
             %button.btn.btn-success.btn-add{:type => "button"}
               %span.glyphicon.glyphicon-plus
-
   .row
     .col-md-6
       .form-group
