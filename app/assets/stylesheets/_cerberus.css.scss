@@ -1,5 +1,9 @@
 @import "variables";
 
+h1 small {
+  color: $gray-dark;
+}
+
 #header-navbar .navbar-brand {
   overflow: inherit;
   text-indent: inherit;
