@@ -61,7 +61,10 @@
               %span.glyphicon.glyphicon-plus
   .row
     .col-md-12
-      %h4 Creators
+      %h4
+        Creators
+        %small
+          Click + to add another creator field
   .row
     .col-md-6
       .form-group
@@ -73,7 +76,7 @@
         .controls.input-group
           %input#creator_lastname.form-control{:name => "creator[lastname]", :required => "true", :type => "text"}/
           %span.input-group-btn
-            %button.btn.btn-success.btn-add{:type => "button"}
+            %button.btn.btn-success.btn-add{:type => "button", "data-toggle"=>"tooltip", :title => "Add another creator"}
               %span.glyphicon.glyphicon-plus
   .row
     .col-md-12
@@ -118,6 +121,9 @@
         %button.btn.btn-primary{:name => "submit", :type => "submit"} Submit
 
 :javascript
+  $(function() {
+    $('[data-toggle="tooltip"]').tooltip();
+  });
   $(function()
   {
       $(document).on('click', '.btn-add', function(e)
