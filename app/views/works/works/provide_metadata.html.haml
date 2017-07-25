@@ -51,8 +51,14 @@
         %textarea#description.form-control{:cols => "40", :name => "description", :rows => "10"}
   .row
     .col-md-12
+      %h4
+        Keywords
+        %small
+          Click + to add another keyword field
+  .row
+    .col-md-12
       .form-group
-        %label{:for => "keywords"} Keywords
+        %label{:for => "keywords"} Keyword
         %span.asteriskField *
         .entry.controls.input-group
           %input#keywords.form-control.required{:name => "keywords[]", :required => "true", :type => "text"}/
@@ -132,22 +138,23 @@
       {
           e.preventDefault();
 
+          var hr = document.createElement("hr");
+
           var controlForm = $('#provideMetadataForm'),
-              currentEntry = $(this).parents('.entry:first'),
-              newEntry = $(currentEntry.clone()).appendTo(currentEntry.parent());
+              currentEntry = $(this).parents('.row:first'),
+              newEntry = $(currentEntry.clone()).insertAfter(currentEntry);
 
-          console.log();
+          $(hr).insertAfter(currentEntry);
 
-          /*newEntry.find('input').val('');*/
           newEntry.find('.btn-add:last')
               .removeClass('btn-add').addClass('btn-remove')
               .removeClass('btn-success').addClass('btn-danger')
               .html('<span class="glyphicon glyphicon-minus"></span>');
       }).on('click', '.btn-remove', function(e)
       {
-  		$(this).parents('.entry:first').remove();
-
-  		e.preventDefault();
-  		return false;
+        $(this).parents('.row').first().prev().remove();
+    		$(this).parents('.row').first().remove();
+    		e.preventDefault();
+    		return false;
   	});
   });
