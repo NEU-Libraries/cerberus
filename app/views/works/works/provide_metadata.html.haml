@@ -63,7 +63,7 @@
         .entry.controls.input-group
           %input.form-control.required{:name => "keywords[]", :required => "true", :type => "text"}/
           %span.input-group-btn
-            %button.btn.btn-success.btn-add{:type => "button"}
+            %button.btn.btn-success.btn-add{:type => "button", "data-toggle"=>"tooltip", :title => "Add another keyword"}
               %span.glyphicon.glyphicon-plus
   .row
     .col-md-12
@@ -97,7 +97,7 @@
         .entry.controls.input-group
           %input.form-control{:name => "organizations[]", :required => "true", :type => "text"}/
           %span.input-group-btn
-            %button.btn.btn-success.btn-add{:type => "button"}
+            %button.btn.btn-success.btn-add{:type => "button", "data-toggle"=>"tooltip", :title => "Add another entity"}
               %span.glyphicon.glyphicon-plus
   .row
     .col-md-12
@@ -132,7 +132,7 @@
                 %option read
                 %option edit
               %span.input-group-btn
-                %button.btn.btn-success.btn-add{:type => "button"}
+                %button.btn.btn-success.btn-add{:type => "button", "data-toggle"=>"tooltip", :title => "Add another permission"}
                   %span.glyphicon.glyphicon-plus
   .row
     .col-md-12
