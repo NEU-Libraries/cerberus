@@ -54,7 +54,7 @@
       %h4
         Keywords
         %small
-          Click + to add another keyword field
+          Click + to add another keyword
   .row
     .col-md-12
       .form-group
@@ -70,7 +70,7 @@
       %h4
         Creators
         %small
-          Click + to add another creator field
+          Click + to add another creator
   .row
     .col-md-6
       .form-group
@@ -86,8 +86,14 @@
               %span.glyphicon.glyphicon-plus
   .row
     .col-md-12
+      %h4
+        Company, institution, or other organization
+        %small
+          Click + to add another entity
+  .row
+    .col-md-12
       .form-group
-        %label{:for => "creator_lastname"} Organizations
+        %label{:for => "creator_lastname"} Entity
         .entry.controls.input-group
           %input#organizations.form-control{:name => "organizations[]", :required => "true", :type => "text"}/
           %span.input-group-btn
@@ -95,7 +101,10 @@
               %span.glyphicon.glyphicon-plus
   .row
     .col-md-12
-      %h4 Permissions
+      %h4
+        Permissions
+        %small
+          Click + to add another group permission
   .row
     .col-md-6
       .row.no-gutters
