@@ -1,5 +1,9 @@
 @import "variables";
 
+.form-control {
+  color: $gray-base;
+}
+
 #provideMetadataForm {
   hr {
     margin-top: 0;
