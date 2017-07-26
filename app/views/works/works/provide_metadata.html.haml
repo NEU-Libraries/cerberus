@@ -155,9 +155,11 @@
 
           var controlForm = $('#provideMetadataForm'),
               currentEntry = $(this).parents('.row:first'),
-              newEntry = $(currentEntry.clone()).insertAfter(currentEntry);
+              newEntry = $(currentEntry.clone().find('.dropdown-toggle, .dropdown-menu').remove().end()).insertAfter(currentEntry);
 
           $(hr).insertAfter(currentEntry);
+
+          $('.selectpicker').selectpicker({});
 
           newEntry.find('.btn-add:last')
               .removeClass('btn-add').addClass('btn-remove')
