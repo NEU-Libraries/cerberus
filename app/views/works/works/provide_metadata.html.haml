@@ -136,14 +136,26 @@
                   %span.glyphicon.glyphicon-plus
   .row
     .col-md-12
-      .form-group.text-right
-        %button.btn.btn-primary{:name => "submit", :type => "submit"} Submit
+      .form-group
+        .pull-left
+          %button.btn.btn-warning.reset Reset
+        .pull-right
+          %button.btn.btn-primary{:name => "submit", :type => "submit"} Submit
+        .clearfix
 
 :javascript
   $(function() {
     $('[data-toggle="tooltip"]').tooltip({
     container: 'body'
     });
+  });
+  $(function()
+  {
+      $(document).on('click', '.reset', function(e)
+      {
+          e.preventDefault();
+          $(':input').not(':button, :submit, :reset, :hidden').removeAttr('checked').removeAttr('selected').not('‌​:checkbox, :radio, select').val('');
+      });
   });
   $(function()
   {
