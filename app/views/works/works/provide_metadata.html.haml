@@ -98,29 +98,33 @@
       %h4 Permissions
   .row
     .col-md-6
-      .form-group
-        %label{:for => "mass_permission"} Mass Permissions
-        %br
-        %select#mass_permission.form-control.selectpicker{:name => "mass_permission"}
-          %option public
-          %option private
-        .select-gap
-          Setting to 'public' will allow anyone accessing the site to see your item.
-          %br
-          Setting to 'private' will only allow groups that are explicitly chosen to see your item.
+      .row.no-gutters
+        .col-md-12
+          .form-group
+            %label{:for => "mass_permission"} Mass Permissions
+            %br
+            %select#mass_permission.form-control.selectpicker{:name => "mass_permission"}
+              %option public
+              %option private
+            .select-gap
+              Setting to 'public' will allow anyone accessing the site to see your item.
+              %br
+              Setting to 'private' will only allow groups that are explicitly chosen to see your item.
     .col-md-6
-      .form-group
-        %label{:for => "group_permissions"} Group Permissions
-        %br
-        %select#group.form-control.selectpicker{:name => "group[]"}
-          %option Marketing and Communications
-        .entry.controls.input-group.select-gap
-          %select#permission.form-control.selectpicker{:name => "permission[]"}
-            %option read
-            %option edit
-          %span.input-group-btn
-            %button.btn.btn-success.btn-add{:type => "button"}
-              %span.glyphicon.glyphicon-plus
+      .row.no-gutters
+        .col-md-12
+          .form-group
+            %label{:for => "group_permissions"} Group Permissions
+            %br
+            %select#group.form-control.selectpicker{:name => "group[]"}
+              %option Marketing and Communications
+            .entry.controls.input-group.select-gap
+              %select#permission.form-control.selectpicker{:name => "permission[]"}
+                %option read
+                %option edit
+              %span.input-group-btn
+                %button.btn.btn-success.btn-add{:type => "button"}
+                  %span.glyphicon.glyphicon-plus
   .row
     .col-md-12
       .form-group.text-right
