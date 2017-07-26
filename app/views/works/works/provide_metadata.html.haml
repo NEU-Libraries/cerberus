@@ -156,6 +156,7 @@
           var controlForm = $('#provideMetadataForm'),
               currentEntry = $(this).parents('.row:first'),
               newEntry = $(currentEntry.clone().find('.dropdown-toggle, .dropdown-menu').remove().end()).insertAfter(currentEntry);
+              newEntry.find(':input').not(':button, :submit, :reset, :hidden').removeAttr('checked').removeAttr('selected').not('‌​:checkbox, :radio, select').val('');
 
           $(hr).insertAfter(currentEntry);
 
