@@ -4,51 +4,51 @@
     %span.glyphicon.glyphicon-pencil
     Please supply some details about your file.
 
-= form_tag("/works", method: "post", multipart: true, id: "provideMetadataForm") do
+= form_tag(process_metadata_path(@id), method: "post", multipart: true, id: "provideMetadataForm") do
   .row
     .col-md-12
       %h4 Basic Information
   .row
     .col-md-6
       .form-group
-        %label{:for => "title"} Title
+        %label Title
         %span.asteriskField *
-        %input#title.form-control.required{:name => "title", :required => "true", :type => "text"}/
+        %input.form-control.required{:name => "title", :required => "true", :type => "text"}/
     .col-md-3
       %label Date Created
       .row.no-gutters
         .col-md-4
           .form-group
-            %select#date_year.form-control.selectpicker{:name => "date_year", "data-width" => "90%"}
+            %select.form-control.selectpicker{:name => "date_year", "data-width" => "90%"}
               %option 1990
         .col-md-4
           .form-group
-            %select#date_month.form-control.selectpicker{:name => "date_month", "data-width" => "90%"}
+            %select.form-control.selectpicker{:name => "date_month", "data-width" => "90%"}
               %option 12
         .col-md-4
           .form-group
-            %select#date_day.form-control.selectpicker{:name => "date_day", "data-width" => "90%"}
+            %select.form-control.selectpicker{:name => "date_day", "data-width" => "90%"}
               %option 31
     .col-md-3
       %label Embargo
       .row.no-gutters
         .col-md-4
           .form-group
-            %select#embargo_year.form-control.selectpicker{:name => "embargo_year", "data-width" => "90%"}
+            %select.form-control.selectpicker{:name => "embargo_year", "data-width" => "90%"}
               %option 1990
         .col-md-4
           .form-group
-            %select#embargo_month.form-control.selectpicker{:name => "embargo_month", "data-width" => "90%"}
+            %select.form-control.selectpicker{:name => "embargo_month", "data-width" => "90%"}
               %option 12
         .col-md-4
           .form-group
-            %select#embargo_day.form-control.selectpicker{:name => "embargo_day", "data-width" => "90%"}
+            %select.form-control.selectpicker{:name => "embargo_day", "data-width" => "90%"}
               %option 31
   .row
     .col-md-12
       .form-group
-        %label{:for => "description"} Description
-        %textarea#description.form-control{:cols => "40", :name => "description", :rows => "10"}
+        %label Description
+        %textarea.form-control{:cols => "40", :name => "description", :rows => "10"}
   .row
     .col-md-12
       %h4
@@ -58,10 +58,10 @@
   .row
     .col-md-12
       .form-group
-        %label{:for => "keywords"} Keyword
+        %label Keyword
         %span.asteriskField *
         .entry.controls.input-group
-          %input#keywords.form-control.required{:name => "keywords[]", :required => "true", :type => "text"}/
+          %input.form-control.required{:name => "keywords[]", :required => "true", :type => "text"}/
           %span.input-group-btn
             %button.btn.btn-success.btn-add{:type => "button"}
               %span.glyphicon.glyphicon-plus
@@ -74,13 +74,13 @@
   .row
     .col-md-6
       .form-group
-        %label{:for => "creator_firstname"} First name
-        %input#creator_firstname.form-control{:name => "creator[firstname]", :required => "true", :type => "text"}/
+        %label First name
+        %input.form-control{:name => "creator[firstname][]", :required => "true", :type => "text"}/
     .col-md-6
       .form-group
-        %label{:for => "creator_lastname"} Last name
+        %label Last name
         .entry.controls.input-group
-          %input#creator_lastname.form-control{:name => "creator[lastname]", :required => "true", :type => "text"}/
+          %input.form-control{:name => "creator[lastname][]", :required => "true", :type => "text"}/
           %span.input-group-btn
             %button.btn.btn-success.btn-add{:type => "button", "data-toggle"=>"tooltip", :title => "Add another creator"}
               %span.glyphicon.glyphicon-plus
@@ -93,9 +93,9 @@
   .row
     .col-md-12
       .form-group
-        %label{:for => "creator_lastname"} Entity
+        %label Entity
         .entry.controls.input-group
-          %input#organizations.form-control{:name => "organizations[]", :required => "true", :type => "text"}/
+          %input.form-control{:name => "organizations[]", :required => "true", :type => "text"}/
           %span.input-group-btn
             %button.btn.btn-success.btn-add{:type => "button"}
               %span.glyphicon.glyphicon-plus
@@ -110,9 +110,9 @@
       .row.no-gutters
         .col-md-12
           .form-group
-            %label{:for => "mass_permission"} Mass Permissions
+            %label Mass Permissions
             %br
-            %select#mass_permission.form-control.selectpicker{:name => "mass_permission"}
+            %select.form-control.selectpicker{:name => "mass_permission"}
               %option public
               %option private
             .select-gap
@@ -123,12 +123,12 @@
       .row.no-gutters
         .col-md-12
           .form-group
-            %label{:for => "group_permissions"} Group Permissions
+            %label Group Permissions
             %br
-            %select#group.form-control.selectpicker{:name => "group[]"}
+            %select.form-control.selectpicker{:name => "group[]"}
               %option Marketing and Communications
             .entry.controls.input-group.select-gap
-              %select#permission.form-control.selectpicker{:name => "permission[]"}
+              %select.form-control.selectpicker{:name => "permission[]"}
                 %option read
                 %option edit
               %span.input-group-btn

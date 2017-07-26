@@ -40,11 +40,12 @@ class Works::WorksController < CatalogController
   end
 
   def provide_metadata
+    @id = params[:id] # Kludge for now
   end
 
   def process_metadata
-    # file_set.create_derivatives
-    GenerateDerivativesJob.perform_later(file_set.id)
+    puts params.inspect
+    # GenerateDerivativesJob.perform_later(file_set.id)
   end
 
   def show
