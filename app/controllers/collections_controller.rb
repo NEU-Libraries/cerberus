@@ -184,6 +184,12 @@ class CollectionsController < ApplicationController
   def edit
     @set = Collection.find(params[:id])
 
+    doc = fetch_solr_document
+    pub_desc = doc.public_descendents
+
+    # Prep modal warning
+
+
     # Does a sentinel exist for this collection?
     @sentinel = @set.sentinel
 
@@ -225,7 +231,7 @@ class CollectionsController < ApplicationController
     if !params[:set][:permissions].blank?
       params[:set][:permissions].merge!(nuid: current_user.nuid)
     end
-    
+
     if @set.update_attributes(params[:set])
       UploadAlert.create_from_collection(@set, :update, current_user)
       redirect_to(@set, notice: "Collection #{@set.title} was updated successfully." )

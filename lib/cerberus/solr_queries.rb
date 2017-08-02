@@ -85,6 +85,28 @@ module Cerberus
       return descendents
     end
 
+    def public_descendents
+      core_file_model = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:CoreFile"
+      result = Hash.new
+
+      docs = solr_query("is_member_of_ssim:#{self.full_self_id} AND has_model_ssim:#{core_file_model} AND read_access_group_ssim:public", true)
+      docs.each do |doc|
+        result[doc.pid] = "CoreFile"
+      end
+
+      descendents = self.combined_set_descendents
+      descendents.each do |doc|
+        if doc.public?
+          result[doc.pid] = "Collection"
+          docs = solr_query("is_member_of_ssim:#{doc.pid} AND has_model_ssim:#{core_file_model} AND read_access_group_ssim:public", true)
+          docs.each do |doc|
+            result[doc.pid] = "CoreFile"
+          end
+        end
+      end
+      return result
+    end
+
     def each_depth_first
       self.combined_set_children.each do |child|
         child.each_depth_first do |c|
