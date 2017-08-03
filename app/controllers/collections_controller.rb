@@ -187,8 +187,13 @@ class CollectionsController < ApplicationController
     doc = fetch_solr_document
     pub_desc = doc.public_descendents
 
-    # Prep modal warning
+    cols = pub_desc.select{ |k,v| v == "Collection" }
+    cfs = pub_desc.select{ |k,v| v == "CoreFile" }
 
+    if !cols.blank? || !cfs.blank?
+      # Prep modal warning
+      @msg = "Making this collection 'Private' will change #{cols.count} collection(s) and #{cfs.count} file(s) to 'Private'. Are you sure you want to proceed?"
+    end
 
     # Does a sentinel exist for this collection?
     @sentinel = @set.sentinel

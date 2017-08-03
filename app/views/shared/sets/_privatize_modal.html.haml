@@ -1,0 +1,10 @@
+#privatizeModal.modal.hide.fade{ "aria-hidden" => "true", "aria-labelledby" => "privatizeModalLabel", role: "dialog", tabindex: "-1", id: "privatizeModal#{index}"}
+  .modal-header
+    %button.close{"aria-hidden" => "true", "data-dismiss" => "modal", type: "button"} x
+    %h3#privatizeModalLabel
+      = "Confirm modifying files"
+  .modal-body
+    %p="\"#{@msg}\""
+  .modal-footer
+    %button.btn{"aria-hidden" => "true", "data-dismiss" => "modal"} Close
+    =link_to("Submit", collection_path(@set.pid), method: :post, class: "btn btn-danger")
