@@ -10,7 +10,12 @@ class PrivatizeCollectionJob
   end
 
   def run
-    col_doc = SolrDocument.new Collection.find(self.pid).to_solr
+    col = Collection.find(self.pid)
+
+    col_doc = SolrDocument.new col.to_solr
+
+    PrivatizeMailer.privatize_alert(col_doc.public_descendents).deliver!
+
     desc_pids = col_doc.all_descendent_pids
     desc_pids.each do |p|
       doc = SolrDocument.new ActiveFedora::SolrService.query("id:\"#{p}\"").first
