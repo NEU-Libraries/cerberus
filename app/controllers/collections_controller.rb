@@ -190,7 +190,7 @@ class CollectionsController < ApplicationController
     cols = pub_desc.select{ |k,v| v == "Collection" }
     cfs = pub_desc.select{ |k,v| v == "CoreFile" }
 
-    if !cols.blank? || !cfs.blank?
+    if (!cols.blank? || !cfs.blank?) && (@set.mass_permissions == "public")
       # Prep modal warning
       @msg = "Making this collection 'Private' will change #{cols.count} collection(s) and #{cfs.count} file(s) to 'Private'. Are you sure you want to proceed?"
     end
@@ -214,6 +214,13 @@ class CollectionsController < ApplicationController
 
   def update
     @set = Collection.find(params[:id])
+
+    if @set.mass_permissions == "public"
+      if params[:set][:mass_permissions] == "private"
+        # Run privatize job
+        Cerberus::Application::Queue.push(PrivatizeCollectionJob.new(@set.pid))
+      end
+    end
 
     if params[:remove_thumbnail]
       # Remove thumbnail
