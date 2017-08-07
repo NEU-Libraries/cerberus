@@ -7,8 +7,7 @@
 
     %p A public collection that contained files was made private. The pids that were altered are:
     %ul
-      %li
-        = @pids.inspect
-      -# - if !@pids.blank?
-      -#   - @pids.each do |entry|
-      -#     %li= "Type: #{@entry[1]} Pid: #{@entry[0]}"
+      - if !@pids.blank?
+        - @pids.each do |entry|
+          %li
+            = "Type: #{entry[1]} Pid: #{entry[0]}"

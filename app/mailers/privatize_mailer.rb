@@ -1,11 +1,12 @@
 class PrivatizeMailer < ActionMailer::Base
   default from: "notifier@repository.library.northeastern.edu"
 
-  def privatize_alert(pids)
-    @pids  = pids
+  def privatize_alert(col_pid, pids)
+    @col_pid = col_pid
+    @pids    = pids
 
     mail(to: pick_receiver,
-         subject: "[cerberus] Collection Privatized",
+         subject: "[cerberus] Collection Privatized - #{col_pid}",
          content_type: "text/html")
   end
 

@@ -14,7 +14,7 @@ class PrivatizeCollectionJob
 
     col_doc = SolrDocument.new col.to_solr
 
-    PrivatizeMailer.privatize_alert(col_doc.public_descendents).deliver!
+    PrivatizeMailer.privatize_alert(self.pid, col_doc.public_descendents).deliver!
 
     desc_pids = col_doc.all_descendent_pids
     desc_pids.each do |p|
