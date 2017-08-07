@@ -184,6 +184,17 @@ class CollectionsController < ApplicationController
   def edit
     @set = Collection.find(params[:id])
 
+    doc = fetch_solr_document
+    pub_desc = doc.public_descendents
+
+    cols = pub_desc.select{ |k,v| v == "Collection" }
+    cfs = pub_desc.select{ |k,v| v == "CoreFile" }
+
+    if (!cols.blank? || !cfs.blank?) && (@set.mass_permissions == "public")
+      # Prep modal warning
+      @msg = "Making this collection 'Private' will change #{cols.count} collection(s) and #{cfs.count} file(s) to 'Private'. Are you sure you want to proceed?"
+    end
+
     # Does a sentinel exist for this collection?
     @sentinel = @set.sentinel
 
@@ -203,6 +214,13 @@ class CollectionsController < ApplicationController
 
   def update
     @set = Collection.find(params[:id])
+
+    if @set.mass_permissions == "public"
+      if params[:set][:mass_permissions] == "private"
+        # Run privatize job
+        Cerberus::Application::Queue.push(PrivatizeCollectionJob.new(@set.pid))
+      end
+    end
 
     if params[:remove_thumbnail]
       # Remove thumbnail
@@ -225,7 +243,7 @@ class CollectionsController < ApplicationController
     if !params[:set][:permissions].blank?
       params[:set][:permissions].merge!(nuid: current_user.nuid)
     end
-    
+
     if @set.update_attributes(params[:set])
       UploadAlert.create_from_collection(@set, :update, current_user)
       redirect_to(@set, notice: "Collection #{@set.title} was updated successfully." )

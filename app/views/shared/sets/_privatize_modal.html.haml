@@ -1,0 +1,10 @@
+#privatizeModal.modal.hide.fade{ "aria-hidden" => "true", "aria-labelledby" => "privatizeModalLabel", role: "dialog", tabindex: "-1"}
+  .modal-header
+    %button.close{"aria-hidden" => "true", "data-dismiss" => "modal", type: "button"} x
+    %h3#privatizeModalLabel
+      = "Confirm modifying files"
+  .modal-body
+    %p="#{@msg}"
+  .modal-footer
+    %button.btn.btn-danger{"aria-hidden" => "true", "data-dismiss" => "modal"} No
+    = f.submit class: ['btn', 'btn-success'], value: 'Yes', data: { disable_with: "Please wait..."}

@@ -1,0 +1,13 @@
+!!!
+%html
+  %head
+    %meta{:content => "text/html; charset=UTF-8", "http-equiv" => "Content-Type"}/
+  %body
+    %h3 Collection Privatized Alert
+
+    %p A public collection that contained files was made private. The pids that were altered are:
+    %ul
+      - if !@pids.blank?
+        - @pids.each do |entry|
+          %li
+            = "Type: #{entry[1]} Pid: #{entry[0]}"

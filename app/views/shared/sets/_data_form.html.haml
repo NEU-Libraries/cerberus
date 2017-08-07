@@ -49,7 +49,8 @@
             Add Permission
   -if !defined?(remote)
     .form-actions
-      = f.submit class: ['btn', 'btn-primary'], value: 'Submit', data: { disable_with: "Please wait..."}
+      = render partial: 'shared/sets/privatize_modal', locals: { f: f }
+      %input{ id: "privatize_btn", :class => ["btn", "btn-primary"], type: "submit", value: "Submit" }
       - if params[:action] == "edit"
         / Only specifying collection here, because community is behind /admin and has it's own partial
         %a{ href: "#cancelEditModal", :class => ["btn", "btn-warning"], data: { toggle: "modal" } }
@@ -73,3 +74,20 @@
       $( "#set_thumbnail" ).fadeTo( "fast" , 1 )
     }
   });
+
+-if !@msg.blank?
+  :javascript
+    $("#mass_permissions").change(function() {
+      if($("#mass_permissions").val() == 'private') {
+        $( "#privatize_btn" ).attr("href", "#privatizeModal");
+        $( "#privatize_btn" ).attr("data-toggle", "modal");
+        $( "#privatize_btn" ).attr("button");
+        $( "#privatize_btn" ).removeAttr("data-disable-with");
+      }
+      else{
+        $( "#privatize_btn" ).attr("type", "submit");
+        $( "#privatize_btn" ).attr("data-disable-with", "Please wait...");
+        $( "#privatize_btn" ).removeAttr("data-toggle");
+        $( "#privatize_btn" ).removeAttr("href");
+      }
+    });
