@@ -16,11 +16,14 @@ class PrivatizeCollectionJob
 
     PrivatizeMailer.privatize_alert(self.pid, col_doc.public_descendents).deliver!
 
-    desc_pids = col_doc.all_descendent_pids
-    desc_pids.each do |p|
+    pids = []
+    pids << col_doc.combined_set_descendents.map {|doc| doc.pid}
+    pids << col_doc.all_descendent_pids
+
+    pids.each do |p|
       doc = SolrDocument.new ActiveFedora::SolrService.query("id:\"#{p}\"").first
       if !doc.blank? && doc.public?
-        x = CoreFile.find(doc.pid)
+        x = ActiveFedora::Base.find(doc.pid, cast: true)
         x.mass_permissions = "private"
         x.save!
       end
