@@ -12,8 +12,8 @@ class PrivatizeMailer < ActionMailer::Base
 
   private
     def pick_receiver
-      if ["production", "secondary"].include? Rails.env
-        "sj.sweeney@neu.edu"
+      if ["production", "secondary", "staging"].include? Rails.env
+        "sj.sweeney@northeastern.edu"
       elsif "test" == Rails.env
         "test@test.com"
       else
