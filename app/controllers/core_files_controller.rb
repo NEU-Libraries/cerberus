@@ -31,7 +31,7 @@ class CoreFilesController < ApplicationController
   include BlacklightAdvancedSearch::ParseBasicQ
   include BlacklightAdvancedSearch::Controller
 
-  before_filter :authenticate_user!, except: [:oai_thumbnail, :show, :get_associated_files, :get_page_file, :log_stream, :fulltext]
+  before_filter :authenticate_user!, except: [:oai_thumbnail, :show, :get_associated_files, :get_page_file, :log_stream, :fulltext, :audio]
 
   skip_before_filter :normalize_identifier
   skip_load_and_authorize_resource only: [:provide_metadata,
@@ -106,6 +106,18 @@ class CoreFilesController < ApplicationController
       end
     else
       render_403 and return
+    end
+  end
+
+  def audio
+    doc = fetch_solr_document
+    asset = AudioFile.find(doc.canonical_object.first.pid)
+    if doc.public? && !asset.blank?
+      log_action('download', 'COMPLETE', asset.pid)
+      file_name = "neu_#{asset.pid.split(":").last}.#{extract_extension(asset.properties.mime_type.first, File.extname(asset.original_filename || "").delete!("."))}"
+      send_file asset.fedora_file_path, :filename =>  file_name, :type => asset.mime_type || extract_mime_type(asset.fedora_file_path), :disposition => 'inline'
+    else
+      render_404(ActiveFedora::ObjectNotFoundError.new, request.fullpath) and return
     end
   end
 
