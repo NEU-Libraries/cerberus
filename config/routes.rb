@@ -108,6 +108,7 @@ Cerberus::Application.routes.draw do
   get "/files/:id/oai_thumbnail" => "core_files#oai_thumbnail", as: 'oai_thumbnail'
 
   get "/files/:id/fulltext.pdf" => "core_files#fulltext", as: 'file_fulltext'
+  get "/files/:id/audio.mp3" => "core_files#audio", as: 'file_audio'
 
   put '/item_display' => 'users#update', as: 'view_pref'
   match "/users/:id/per_page_pref" => "users#update", via: 'post', as: "per_page_pref"
