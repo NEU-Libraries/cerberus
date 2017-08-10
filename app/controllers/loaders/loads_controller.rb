@@ -65,8 +65,8 @@ class Loaders::LoadsController < ApplicationController
         msg = "The file you chose is larger than 2GB. Please contact DRS staff for help uploading files larger than 2GB."
         session[:flash_error] = msg
         render :json => [{error: msg}].to_json and return
-      elsif (["zip", ".gz"].include? File.extname(file.tempfile.path))
-        msg = "The file must be of type zip or gzip. The relevant extensions are .zip and .tar.gz respectively."
+      elsif (["zip", ".tar"].include? File.extname(file.tempfile.path))
+        msg = "The file must be of type zip or tar. The relevant extensions are .zip and .tar respectively."
         session[:flash_error] = msg
         render :json => [{error: msg}].to_json and return
       elsif existing_files == false && ActiveFedora::Base.find(parent, cast: true).class != Collection
@@ -144,7 +144,7 @@ class Loaders::LoadsController < ApplicationController
         new_file = "#{new_path}.#{file.original_filename.partition('.').last.gsub(/[^a-z,A-Z,.]/, "")}"
         FileUtils.mv(file.tempfile.path, new_file)
         #if zip
-        if (extract_mime_type(new_file) == 'application/zip') || (extract_mime_type(new_file) == 'application/x-gzip')
+        if (extract_mime_type(new_file) == 'application/zip') || (extract_mime_type(new_file) == 'application/x-tar')
           begin
             @report_id = nil
             if short_name == "spreadsheet"
@@ -190,7 +190,7 @@ class Loaders::LoadsController < ApplicationController
           end
         else
           FileUtils.rm(new_file)
-          error = "The file uploaded was not a zip or gzip file according to mime type."
+          error = "The file uploaded was not a zip or tar file according to mime type."
           session[:flash_error] = error
           json_error error
         end

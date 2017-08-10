@@ -35,10 +35,11 @@
       - if @loader_short_name == 'spreadsheet' || @loader_short_name == 'xml'
         = hidden_field_tag :new, @new
       = label_tag "file", "File to upload", class: "required-label"
-      = file_field_tag 'file', required: true, "aria-required" => true, "accept"=>".zip,.gz"
+      = file_field_tag 'file', required: true, "aria-required" => true, "accept"=>".zip,.tar"
       %p
         %small
-          Files of type .zip are restricted to 2GB. Files of type .tar.gz have no size restriction.
+          Files of type .zip are restricted to 2GB. Files of type .tar have no size restriction.
+          Compressed .tar files (.tgz, .tar.gz, .tar.bz2 etc.) are not supported.
           Please
           %a{:href => "mailto:Library-Repository-Team@neu.edu"} contact the DRS staff
           for help if you're unfamiliar with these file types.
@@ -49,13 +50,13 @@
 
 :javascript
   $('#file').bind('change', function() {
-    if ((this.files[0].name.endsWith(".zip")) || (this.files[0].name.endsWith(".tar.gz"))) {
+    if ((this.files[0].name.endsWith(".zip")) || (this.files[0].name.endsWith(".tar"))) {
       $(".alert").remove();
       if ($('#terms_of_service').is(':checked')) {
         $("input[type='submit']").removeProp("disabled");
       }
     } else {
-      $(this).before('<div class="alert alert-warning">The file you chose needs to be either .zip or .tar.gz</div>');
+      $(this).before('<div class="alert alert-warning">The file you chose needs to be either .zip or .tar</div>');
       $("input[type='submit']").prop("disabled", "true");
     }
   });
