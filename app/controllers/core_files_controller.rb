@@ -54,6 +54,8 @@ class CoreFilesController < ApplicationController
 
   before_filter :verify_admin, only: [:reindex, :create_attached_file, :new_attached_file, :provide_file_metadata, :process_file_metadata, :destroy_content_object, :associate, :disassociate]
 
+  before_filter :enforce_show_permissions, only: [:get_associated_files, :get_all_associated_child_files]
+
   rescue_from Exceptions::NoParentFoundError, with: :no_parent_rescue
   rescue_from Exceptions::GroupPermissionsError, with: :group_permission_rescue
 
