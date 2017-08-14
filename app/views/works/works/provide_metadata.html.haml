@@ -16,6 +16,7 @@
         %input.form-control.required{:name => "title", :required => "true", :type => "text"}/
     .col-md-3
       %label Date Created
+      = hidden_field_tag :date, 0, class: 'date'
       .row.no-gutters
         .col-md-4
           .form-group
@@ -28,6 +29,7 @@
             = select_day(0, {prompt: 'Day'}, {class: 'form-control selectpicker', "data-width" => "90%"})
     .col-md-3
       %label Embargo
+      = hidden_field_tag :embargo_release_date, 0, class: 'date'
       .row.no-gutters
         .col-md-4
           .form-group
