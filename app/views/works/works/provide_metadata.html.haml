@@ -19,31 +19,25 @@
       .row.no-gutters
         .col-md-4
           .form-group
-            %select.form-control.selectpicker{:name => "date_year", "data-width" => "90%"}
-              %option 1990
+            = select_year(0, {start_year: Time.zone.now.year, end_year: 1500, prompt: 'Year'}, {class: 'form-control selectpicker', "data-width" => "90%"})
         .col-md-4
           .form-group
-            %select.form-control.selectpicker{:name => "date_month", "data-width" => "90%"}
-              %option 12
+            = select_month(0, {prompt: 'Month'}, {class: 'form-control selectpicker', "data-width" => "90%"})
         .col-md-4
           .form-group
-            %select.form-control.selectpicker{:name => "date_day", "data-width" => "90%"}
-              %option 31
+            = select_day(0, {prompt: 'Day'}, {class: 'form-control selectpicker', "data-width" => "90%"})
     .col-md-3
       %label Embargo
       .row.no-gutters
         .col-md-4
           .form-group
-            %select.form-control.selectpicker{:name => "embargo_year", "data-width" => "90%"}
-              %option 1990
+            = select_year(0, {start_year: Time.zone.now.year, end_year: 2050, prompt: 'Year'}, {class: 'form-control selectpicker', "data-width" => "90%"})
         .col-md-4
           .form-group
-            %select.form-control.selectpicker{:name => "embargo_month", "data-width" => "90%"}
-              %option 12
+            = select_month(0, {prompt: 'Month'}, {class: 'form-control selectpicker', "data-width" => "90%"})
         .col-md-4
           .form-group
-            %select.form-control.selectpicker{:name => "embargo_day", "data-width" => "90%"}
-              %option 31
+            = select_day(0, {prompt: 'Day'}, {class: 'form-control selectpicker', "data-width" => "90%"})
   .row
     .col-md-12
       .form-group
