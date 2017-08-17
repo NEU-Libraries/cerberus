@@ -1,4 +1,4 @@
 .col-md-12
   .form-group
     %label Description
-    %textarea.form-control{:cols => "40", :name => "description", :rows => "10"}
+    = f.text_area :description, name: 'work[description]', class: "form-control", rows: 10, cols: 40
