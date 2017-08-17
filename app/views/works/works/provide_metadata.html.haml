@@ -9,7 +9,11 @@
     .col-md-12
       %h4 Basic Information
   .row
+    = render 'shared/metadata/title'
+    = render 'shared/metadata/date'
+    = render 'shared/metadata/embargo'
   .row
+    = render 'shared/metadata/description'
   .row
     .col-md-12
       %h4
@@ -17,6 +21,7 @@
         %small
           Click + to add another keyword
   .row
+    = render 'shared/metadata/keywords'
   .row
     .col-md-12
       %h4
@@ -24,6 +29,7 @@
         %small
           Click + to add another creator
   .row
+    = render 'shared/metadata/creators'
   .row
     .col-md-12
       %h4
@@ -31,6 +37,7 @@
         %small
           Click + to add another entity
   .row
+    = render 'shared/metadata/orgs'
   .row
     .col-md-12
       %h4
@@ -38,6 +45,8 @@
         %small
           Click + to add another group permission
   .row
+    = render 'shared/metadata/mass_permissions'
+    = render 'shared/metadata/group_permissions'
   .row
     .col-md-12
       .form-group
