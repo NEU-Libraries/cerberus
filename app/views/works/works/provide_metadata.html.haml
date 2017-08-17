@@ -4,7 +4,7 @@
     %span.glyphicon.glyphicon-pencil
     Please supply some details about your file.
 
-= form_tag(process_metadata_path(@id), method: "post", multipart: true, id: "provideMetadataForm") do
+= form_for(@work, :url => process_metadata_path(@id), method: 'post', :html => {:multipart => true}, id: "provideMetadataForm") do |f|
   .row
     .col-md-12
       %h4 Basic Information

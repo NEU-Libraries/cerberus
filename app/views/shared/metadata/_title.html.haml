@@ -2,4 +2,6 @@
   .form-group
     %label Title
     %span.asteriskField *
-    %input.form-control.required{:name => "title", :required => "true", :type => "text"}/
+    = f.hidden_field(:non_sort, :value => "#{@work.non_sort}")
+    = f.hidden_field(:title, :value => "#{@work.title}", name: 'work[title]')
+    %input.form-control.required{:name => "full_title", :required => "true", :type => "text"}/
