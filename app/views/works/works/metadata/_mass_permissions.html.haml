@@ -1,0 +1,13 @@
+.col-md-6
+  .row.no-gutters
+    .col-md-12
+      .form-group
+        %label Mass Permissions
+        %br
+        %select.form-control.selectpicker{:name => "mass_permission"}
+          %option public
+          %option private
+        .select-gap
+          Setting to 'public' will allow anyone accessing the site to see your item.
+          %br
+          Setting to 'private' will only allow groups that are explicitly chosen to see your item.

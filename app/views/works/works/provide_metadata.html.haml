@@ -9,42 +9,7 @@
     .col-md-12
       %h4 Basic Information
   .row
-    .col-md-6
-      .form-group
-        %label Title
-        %span.asteriskField *
-        %input.form-control.required{:name => "title", :required => "true", :type => "text"}/
-    .col-md-3
-      %label Date Created
-      = hidden_field_tag :date, 0, class: 'date'
-      .row.no-gutters
-        .col-md-4
-          .form-group
-            = select_year(0, {start_year: Time.zone.now.year, end_year: 1500, prompt: 'Year'}, {class: 'form-control selectpicker', "data-width" => "90%"})
-        .col-md-4
-          .form-group
-            = select_month(0, {prompt: 'Month'}, {class: 'form-control selectpicker', "data-width" => "90%"})
-        .col-md-4
-          .form-group
-            = select_day(0, {prompt: 'Day'}, {class: 'form-control selectpicker', "data-width" => "90%"})
-    .col-md-3
-      %label Embargo
-      = hidden_field_tag :embargo_release_date, 0, class: 'date'
-      .row.no-gutters
-        .col-md-4
-          .form-group
-            = select_year(0, {start_year: Time.zone.now.year, end_year: 2050, prompt: 'Year'}, {class: 'form-control selectpicker', "data-width" => "90%"})
-        .col-md-4
-          .form-group
-            = select_month(0, {prompt: 'Month'}, {class: 'form-control selectpicker', "data-width" => "90%"})
-        .col-md-4
-          .form-group
-            = select_day(0, {prompt: 'Day'}, {class: 'form-control selectpicker', "data-width" => "90%"})
   .row
-    .col-md-12
-      .form-group
-        %label Description
-        %textarea.form-control{:cols => "40", :name => "description", :rows => "10"}
   .row
     .col-md-12
       %h4
@@ -52,15 +17,6 @@
         %small
           Click + to add another keyword
   .row
-    .col-md-12
-      .form-group
-        %label Keyword
-        %span.asteriskField *
-        .entry.controls.input-group
-          %input.form-control.required{:name => "keywords[]", :required => "true", :type => "text"}/
-          %span.input-group-btn
-            %button.btn.btn-success.btn-add{:type => "button", "data-toggle"=>"tooltip", :title => "Add another keyword"}
-              %span.glyphicon.glyphicon-plus
   .row
     .col-md-12
       %h4
@@ -68,18 +24,6 @@
         %small
           Click + to add another creator
   .row
-    .col-md-6
-      .form-group
-        %label First name
-        %input.form-control{:name => "creator[firstname][]", :required => "true", :type => "text"}/
-    .col-md-6
-      .form-group
-        %label Last name
-        .entry.controls.input-group
-          %input.form-control{:name => "creator[lastname][]", :required => "true", :type => "text"}/
-          %span.input-group-btn
-            %button.btn.btn-success.btn-add{:type => "button", "data-toggle"=>"tooltip", :title => "Add another creator"}
-              %span.glyphicon.glyphicon-plus
   .row
     .col-md-12
       %h4
@@ -87,14 +31,6 @@
         %small
           Click + to add another entity
   .row
-    .col-md-12
-      .form-group
-        %label Entity
-        .entry.controls.input-group
-          %input.form-control{:name => "organizations[]", :required => "true", :type => "text"}/
-          %span.input-group-btn
-            %button.btn.btn-success.btn-add{:type => "button", "data-toggle"=>"tooltip", :title => "Add another entity"}
-              %span.glyphicon.glyphicon-plus
   .row
     .col-md-12
       %h4
@@ -102,34 +38,6 @@
         %small
           Click + to add another group permission
   .row
-    .col-md-6
-      .row.no-gutters
-        .col-md-12
-          .form-group
-            %label Mass Permissions
-            %br
-            %select.form-control.selectpicker{:name => "mass_permission"}
-              %option public
-              %option private
-            .select-gap
-              Setting to 'public' will allow anyone accessing the site to see your item.
-              %br
-              Setting to 'private' will only allow groups that are explicitly chosen to see your item.
-    .col-md-6
-      .row.no-gutters
-        .col-md-12
-          .form-group
-            %label Group Permissions
-            %br
-            %select.form-control.selectpicker{:name => "group[]"}
-              %option Marketing and Communications
-            .entry.controls.input-group.select-gap
-              %select.form-control.selectpicker{:name => "permission[]"}
-                %option read
-                %option edit
-              %span.input-group-btn
-                %button.btn.btn-success.btn-add{:type => "button", "data-toggle"=>"tooltip", :title => "Add another permission"}
-                  %span.glyphicon.glyphicon-plus
   .row
     .col-md-12
       .form-group
