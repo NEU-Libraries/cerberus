@@ -40,7 +40,7 @@ class Works::WorksController < CatalogController
   end
 
   def provide_metadata
-    @id = params[:id] # Kludge for now
+    @work = Works::Work.find params[:id]
   end
 
   def process_metadata

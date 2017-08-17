@@ -301,6 +301,7 @@ class ModsMetadata < ActiveFedora::OmDatastream
     t.degree(ref: [:extension, :scholarly_object, :degree])
     t.course_number(ref: [:extension, :scholarly_object, :course_info, :course_number])
     t.course_title(ref: [:extension, :scholarly_object, :course_info, :course_title])
+    t.description(:proxy=>[:mods, :abstract])
   end
 
   def self.xml_template
