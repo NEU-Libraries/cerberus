@@ -1,9 +1,7 @@
-.col-md-12
-  .form-group
-    %label Keyword
-    %span.asteriskField *
-    .entry.controls.input-group
-      %input.form-control.required{:name => "keywords[]", :required => "true", :type => "text"}/
-      %span.input-group-btn
-        %button.btn.btn-success.btn-add{:type => "button", "data-toggle"=>"tooltip", :title => "Add another keyword"}
-          %span.glyphicon.glyphicon-plus
+.row
+  .col-md-12
+    %h4
+      Keywords
+      %small
+        Click + to add another keyword
+= render 'shared/metadata/keyword' # need to put into a loop
