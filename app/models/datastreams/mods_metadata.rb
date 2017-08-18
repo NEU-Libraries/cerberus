@@ -301,7 +301,7 @@ class ModsMetadata < ActiveFedora::OmDatastream
     t.degree(ref: [:extension, :scholarly_object, :degree])
     t.course_number(ref: [:extension, :scholarly_object, :course_info, :course_number])
     t.course_title(ref: [:extension, :scholarly_object, :course_info, :course_title])
-    t.description(:proxy=>[:mods, :abstract])
+    t.description(:proxy=>[:abstract])
   end
 
   def self.xml_template
@@ -375,6 +375,18 @@ class ModsMetadata < ActiveFedora::OmDatastream
 
   def prefix(path)
     ""
+  end
+
+  def method_missing(name, *args, &block)
+    result = super
+
+    if result.is_a?(Array) && result.count == 1
+      return result.first
+    elsif result.is_a?(Array) && result.count == 0
+      return ""
+    end
+
+    return result
   end
 
 end
