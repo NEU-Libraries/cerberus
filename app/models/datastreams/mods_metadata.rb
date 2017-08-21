@@ -293,11 +293,10 @@ class ModsMetadata < ActiveFedora::OmDatastream
       }
     }
 
-    t.topic(proxy: [:subject, :topic])
+    t.topics(proxy: [:subject, :topic])
     t.title(proxy: [:title_info, :title])
     t.non_sort(proxy: [:title_info, :non_sort])
     t.description(:proxy=>[:abstract])
-    t.keywords(:proxy=>[:subject, :topic])
 
     t.category(ref: [:extension, :scholarly_object, :category])
     t.department(ref: [:extension, :scholarly_object, :department])
@@ -373,6 +372,14 @@ class ModsMetadata < ActiveFedora::OmDatastream
       }
     end
     builder.doc
+  end
+
+  def keywords
+    nested_node_text :subject
+  end
+
+  def nested_node_text(sym)
+    Nokogiri::XML(self.content).xpath(self.class.terminology.xpath_for(sym)).map(&:text).join(' ').split(" ")
   end
 
   def prefix(path)
