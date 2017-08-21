@@ -13,6 +13,9 @@ class Works::Work < Hydra::Works::Work
 
   self.indexer = WorkIndexer
 
+  validates :title, presence: { message: 'Your work must have a title.' }
+  validates :keywords, presence: { message: 'Your work must have at least one keyword.' }
+
   property :in_progress, predicate: ::RDF::URI.new('https://repository.library.northeastern.edu/ns#inProgress'), multiple: false do |index|
     index.as :stored_searchable
   end

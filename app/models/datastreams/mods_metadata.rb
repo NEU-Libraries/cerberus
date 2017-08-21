@@ -296,12 +296,14 @@ class ModsMetadata < ActiveFedora::OmDatastream
     t.topic(proxy: [:subject, :topic])
     t.title(proxy: [:title_info, :title])
     t.non_sort(proxy: [:title_info, :non_sort])
+    t.description(:proxy=>[:abstract])
+    t.keywords(:proxy=>[:subject, :topic])
+
     t.category(ref: [:extension, :scholarly_object, :category])
     t.department(ref: [:extension, :scholarly_object, :department])
     t.degree(ref: [:extension, :scholarly_object, :degree])
     t.course_number(ref: [:extension, :scholarly_object, :course_info, :course_number])
     t.course_title(ref: [:extension, :scholarly_object, :course_info, :course_title])
-    t.description(:proxy=>[:abstract])
   end
 
   def self.xml_template
