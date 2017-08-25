@@ -32,14 +32,13 @@
           Click + to add another entity
   .row
     = render 'shared/metadata/orgs', f: f
+  = render 'shared/metadata/citation', f: f
   .row
     .col-md-12
       %h4
         Permissions
         %small
           Click + to add another group permission
-  .row
-    = render 'shared/metadata/citation', f: f
   .row
     = render 'shared/metadata/mass_permissions', f: f
     = render 'shared/metadata/group_permissions', f: f
