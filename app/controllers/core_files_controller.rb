@@ -99,7 +99,8 @@ class CoreFilesController < ApplicationController
 
   def fulltext
     doc = fetch_solr_document
-    if !doc.canonical_object.first.embargo_date_in_effect?
+    cf = CoreFile.find(doc.pid)
+    if !(cf.under_embargo?(current_user))
       asset = PdfFile.find(doc.canonical_object.first.pid)
       if !asset.blank?
         log_action('download', 'COMPLETE', asset.pid)
