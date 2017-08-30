@@ -18,10 +18,10 @@
               = select_year(0, {start_year: Time.zone.now.year, end_year: 1500, prompt: 'Year'}, {class: 'form-control selectpicker', "data-width" => "90%"})
           .col-md-4
             .form-group
-              = select_month(0, {prompt: 'Month'}, {class: 'form-control selectpicker', "data-width" => "90%"})
+              = select_month(0, {prompt: 'Month'}, {class: 'form-control selectpicker', "data-width" => "90%", "disabled" => "true"})
           .col-md-4
             .form-group
-              = select_day(0, {prompt: 'Day'}, {class: 'form-control selectpicker', "data-width" => "90%"})
+              = select_day(0, {prompt: 'Day'}, {class: 'form-control selectpicker', "data-width" => "90%", "disabled" => "true"})
       .col-md-9
         .form-group
           %label URL
