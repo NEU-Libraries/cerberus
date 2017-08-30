@@ -1,12 +1,8 @@
-.col-md-6
-  .form-group
-    %label First name
-    %input.form-control{:name => "creator[firstname][]", :required => "true", :type => "text"}/
-.col-md-6
-  .form-group
-    %label Last name
-    .entry.controls.input-group
-      %input.form-control{:name => "creator[lastname][]", :required => "true", :type => "text"}/
-      %span.input-group-btn
-        %button.btn.btn-success.btn-add{:type => "button", "data-toggle"=>"tooltip", :title => "Add another creator"}
-          %span.glyphicon.glyphicon-plus
+.row
+  .col-md-12
+    %h4
+      Creators
+      %small
+        Click + to add another creator
+.row
+  = render 'shared/metadata/creator', f: f

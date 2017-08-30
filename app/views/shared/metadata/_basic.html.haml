@@ -1,0 +1,10 @@
+.row
+  .col-md-12
+    %h4 Basic Information
+.row
+  -# = f.inspect
+  = render 'shared/metadata/title', f: f
+  = render 'shared/metadata/date', f: f
+  = render 'shared/metadata/embargo', f: f
+.row
+  = render 'shared/metadata/description', f: f

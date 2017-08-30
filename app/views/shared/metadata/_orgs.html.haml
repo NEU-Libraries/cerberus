@@ -1,8 +1,8 @@
-.col-md-12
-  .form-group
-    %label Entity
-    .entry.controls.input-group
-      %input.form-control{:name => "organizations[]", :required => "true", :type => "text"}/
-      %span.input-group-btn
-        %button.btn.btn-success.btn-add{:type => "button", "data-toggle"=>"tooltip", :title => "Add another entity"}
-          %span.glyphicon.glyphicon-plus
+.row
+  .col-md-12
+    %h4
+      Companies, institutions, or other organizations
+      %small
+        Click + to add another entity
+.row
+  = render 'shared/metadata/org', f: f
