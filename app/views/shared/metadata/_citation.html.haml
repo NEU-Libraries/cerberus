@@ -4,16 +4,37 @@
       Citation
 .row
   .col-md-12
-    .form-group
-      %label Title
-      %input.form-control.required{:name => "citation[title]", :required => "true", :type => "text"}/
-      %label Volume
-      %input.form-control.required{:name => "citation[volume]", :required => "true", :type => "text"}/
-      %label Issue
-      %input.form-control.required{:name => "citation[issue]", :required => "true", :type => "text"}/
-      %label Page
-      %input.form-control.required{:name => "citation[page]", :required => "true", :type => "text"}/
-      %label Date
-      %input.form-control.required{:name => "citation[date]", :required => "true", :type => "text"}/
-      %label URL
-      %input.form-control.required{:name => "citation[url]", :required => "true", :type => "text"}/
+    .row.no-gutters
+      .form-group
+        %label Title
+        %input.form-control.required{:name => "citation[title]", :required => "true", :type => "text"}/
+    .row.no-gutters
+      .col-md-3
+        %label Date
+        = hidden_field_tag :citation_date, 0, class: 'date'
+        .row.no-gutters
+          .col-md-4
+            .form-group
+              = select_year(0, {start_year: Time.zone.now.year, end_year: 1500, prompt: 'Year'}, {class: 'form-control selectpicker', "data-width" => "90%"})
+          .col-md-4
+            .form-group
+              = select_month(0, {prompt: 'Month'}, {class: 'form-control selectpicker', "data-width" => "90%"})
+          .col-md-4
+            .form-group
+              = select_day(0, {prompt: 'Day'}, {class: 'form-control selectpicker', "data-width" => "90%"})
+      .col-md-9
+        .form-group
+          %label URL
+          %input.form-control.required{:name => "citation[url]", :required => "true", :type => "text"}/
+    .row.no-gutters
+      .form-group
+        %label Volume
+        %input.form-control.required{:name => "citation[volume]", :required => "true", :type => "text"}/
+    .row.no-gutters
+      .form-group
+        %label Issue
+        %input.form-control.required{:name => "citation[issue]", :required => "true", :type => "text"}/
+    .row.no-gutters
+      .form-group
+        %label Page
+        %input.form-control.required{:name => "citation[page]", :required => "true", :type => "text"}/
