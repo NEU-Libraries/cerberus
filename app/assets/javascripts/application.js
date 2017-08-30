@@ -23,4 +23,6 @@
 
 //= require bootstrap-select
 
+//= require cerberus
+
 //= require_tree .
