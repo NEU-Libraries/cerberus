@@ -1,5 +1,10 @@
 @import "variables";
 
+// bootstrap select has a low contrast color - revert to basic black
+span.filter-option {
+  color: $gray-base
+}
+
 .form-control {
   color: $gray-base;
 }
