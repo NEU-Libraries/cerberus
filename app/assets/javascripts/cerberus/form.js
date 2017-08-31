@@ -1,3 +1,4 @@
+// Reset button
 $(function()
 {
     $(document).on('click', '.reset', function(e)
@@ -7,6 +8,8 @@ $(function()
     });
 });
 
+
+// Adding and removing extra fields
 $(function()
 {
     $(document).on('click', '.btn-add', function(e)
@@ -35,4 +38,10 @@ $(function()
       e.preventDefault();
       return false;
   });
+});
+
+// Combing title and non-sort
+$(function()
+{
+
 });
