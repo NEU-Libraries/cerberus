@@ -39,8 +39,14 @@ class Works::WorksController < CatalogController
     work.save!
   end
 
+  def edit
+    @work = Works::Work.find params[:id]
+    # limit this action to works that are NOT in_progress
+  end
+
   def provide_metadata
     @work = Works::Work.find params[:id]
+    # limit this action to works that are in_progress
   end
 
   def process_metadata
