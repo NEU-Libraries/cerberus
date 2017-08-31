@@ -1,9 +1,3 @@
-$(function() {
-  $('[data-toggle="tooltip"]').tooltip({
-  container: 'body'
-  });
-});
-
 $(function()
 {
     $(document).on('click', '.reset', function(e)

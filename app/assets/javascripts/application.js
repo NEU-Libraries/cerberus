@@ -23,6 +23,7 @@
 
 //= require bootstrap-select
 
-//= require cerberus
+//= require cerberus/tooltip
+//= require cerberus/form
 
 //= require_tree .
