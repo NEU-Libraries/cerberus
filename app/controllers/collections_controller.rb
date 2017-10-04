@@ -59,7 +59,7 @@ class CollectionsController < ApplicationController
 
     self.solr_search_params_logic += [:increase_facet_limit]
 
-    if !params[:q].nil?
+    if !params[:q].nil? || params[:action] == "recent_deposits"
       # Fixes #667 - we remove single characters. They're a pretty terrible idea with a strict AND
       params[:q].gsub!(/(^| ).( |$)/, ' ')
 
