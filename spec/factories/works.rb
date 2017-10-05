@@ -1,5 +1,6 @@
 FactoryGirl.define do
   factory :work, class: Works::Work do
+
     after(:create) do |work|
       file_set = Hydra::Works::FileSet.create
       file_set.publicize!
@@ -9,6 +10,7 @@ FactoryGirl.define do
 
     factory :png_master_file do
       title "test_pic.png"
+      topics ["test", "png"]
       publicized
       has_png
       has_thumbnail
@@ -16,6 +18,7 @@ FactoryGirl.define do
 
     factory :jpg_master_file do
       title "test_pic.jpg"
+      topics ["test", "jpg"]
       publicized
       has_jpg
       has_thumbnail
@@ -23,6 +26,7 @@ FactoryGirl.define do
 
     factory :docx_master_file do
       title "test_docx.docx"
+      topics ["test", "docx"]
       publicized
       has_docx
       has_thumbnail
@@ -30,6 +34,7 @@ FactoryGirl.define do
 
     factory :doc_master_file do
       title "test_doc.doc"
+      topics ["test", "doc"]
       publicized
       has_doc
       has_thumbnail

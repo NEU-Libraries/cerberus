@@ -379,7 +379,11 @@ class ModsMetadata < ActiveFedora::OmDatastream
   end
 
   def nested_node_text(sym)
-    Nokogiri::XML(self.content).xpath(self.class.terminology.xpath_for(sym)).map(&:text).join(' ').split(" ")
+    begin
+      Nokogiri::XML(self.content).xpath(self.class.terminology.xpath_for(sym)).map(&:text).join(' ').split(" ")
+    rescue Nokogiri::XML::XPath::SyntaxError #this happens with brand new items, theres nothing for xpath to work against. Highly relevant for works validation for keyword
+      return nil
+    end
   end
 
   def prefix(path)

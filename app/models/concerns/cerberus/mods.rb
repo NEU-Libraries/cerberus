@@ -3,6 +3,7 @@ module Cerberus::Mods
   extend Forwardable
 
   def_delegators :descMetadata, *ModsMetadata.terminology.terms.keys.concat(ModsMetadata.terminology.terms.keys.map{|x| (x.to_s + "=").to_sym})
+  def_delegator :descMetadata, :keywords
 
   included do
     has_subresource :descMetadata, class_name: 'ModsMetadata'
