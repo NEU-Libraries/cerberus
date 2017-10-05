@@ -1074,12 +1074,9 @@ class ModsDatastream < ActiveFedora::OmDatastream
     end
   end
 
-  # Eliminates some whitespace that seems to get inserted into these records when they're
-  # returned.
   def corporate_creators
-    no_newlines = self.corporate_name.map { |name| name.delete("\n") }
-    trimmed = no_newlines.map { |name| name.strip }
-    return trimmed
+    # Fix for very old, very wrong code and assumptions #1145
+    self.corporate_name.name_part
   end
 
   # Formats the otherwise messy return for personal creator information
