@@ -36,7 +36,11 @@
           <%= link_to('more ' + facet_field.label.pluralize + '»', community_facet_path(:id => params[:id], :solr_field => solr_field, :params => params), :class => "more_facets_link") %>
         <% end %>
       <% elsif controller_name == "collections" %>
-        <%= link_to('more ' + facet_field.label.pluralize + '»', collection_facet_path(:id => params[:id], :solr_field => solr_field, :params => params), :class => "more_facets_link") %>
+        <% if action_name.include?("recent_deposits") %>
+          <%= link_to('more ' + facet_field.label.pluralize + '»', collection_facet_path(:id => params[:id], :solr_field => solr_field, :previous_action => action_name, :params => params), :class => "more_facets_link") %>
+        <% else %>
+          <%= link_to('more ' + facet_field.label.pluralize + '»', collection_facet_path(:id => params[:id], :solr_field => solr_field, :params => params), :class => "more_facets_link") %>
+        <% end %>
       <% elsif controller_name == "compilations" %>
         <%= link_to('more ' + facet_field.label.pluralize + '»', compilation_facet_path(:solr_field => solr_field, :params => params), :class => "more_facets_link") %>
       <% elsif action_name.include?("smart_col") %>
