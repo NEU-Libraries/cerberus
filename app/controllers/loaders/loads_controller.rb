@@ -3,6 +3,7 @@ class Loaders::LoadsController < ApplicationController
   include MimeHelper
   include ZipHelper
 
+  helper_method :sort_column, :sort_direction
   before_filter :authenticate_user!
 
   rescue_from ActiveRecord::RecordNotFound do |exception|
@@ -99,7 +100,7 @@ class Loaders::LoadsController < ApplicationController
     else
       per_page = 50
     end
-    @images = Loaders::ItemReport.where(load_report_id:"#{@report.id}").paginate(:page => params[:page], :per_page => per_page)
+    @images = Loaders::ItemReport.where(load_report_id:"#{@report.id}").paginate(:page => params[:page], :per_page => per_page).order(sort_column + " " + sort_direction)
     @user = User.find_by_nuid(@report.nuid)
     if @report.collection
       @collection = Collection.find(@report.collection)
@@ -243,5 +244,13 @@ class Loaders::LoadsController < ApplicationController
       spreadsheet_file_path = clean_path
       FileUtils.rm(file)
       return spreadsheet_file_path
+    end
+
+    def sort_column
+      Loaders::ItemReport.column_names.include?(params[:sort]) ? params[:sort] : "original_file"
+    end
+
+    def sort_direction
+      %w[asc desc].include?(params[:direction]) ? params[:direction] : "asc"
     end
 end

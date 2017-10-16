@@ -7,9 +7,12 @@
       = submit_tag "Apply", class: 'btn btn-primary btn-small'
   = will_paginate @images
   %table.table.table-striped
-    %th File Name
-    %th Core File Title
-    %th File Status
+    %th
+      = sortable "original_file", "File Name"
+    %th
+      = sortable "title", "Core File Title"
+    %th
+      = sortable "validity", "File Status"
     %th
     - @images.each do |image|
       - if image.validity == true && image.modified == false
