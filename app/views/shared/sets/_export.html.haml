@@ -1,0 +1,29 @@
+%br
+%fieldset
+  .row-fluid
+    .span10
+      Exporting a manifest will generate a zip file containing a spreadsheet manifest containing PIDs and original filenames for each item.
+  .row-fluid
+    .span10
+      - if params[:controller]=='collections'
+        %a.btn.btn-info{href:export_collection_manifest_path(@set.id), title: "Request Export"}
+          Export Manifest
+      - elsif params[:controller]=='compilations'
+        %a.btn.btn-info{href:export_compilation_manifest_path(@set.id), title: "Request Export"}
+          Export Manifest
+  %br
+  .row-fluid
+    .span10
+      Exporting MODS XML will generate a zip file containing a spreadsheet manifest, and XML files for each item.
+  .row-fluid
+    .span10
+      - if params[:controller]=='collections'
+        %a.btn.btn-info{href:export_collection_mods_path(@set.id), title: "Request Export"}
+          Export MODS
+      - elsif params[:controller]=='compilations'
+        %a.btn.btn-info{href:export_compilation_mods_path(@set.id), title: "Request Export"}
+          Export MODS
+  .row-fluid
+    .span10
+      %br
+      You'll be emailed a link to download the zip file, which will expire 24 hours after being generated.

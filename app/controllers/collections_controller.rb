@@ -23,7 +23,7 @@ class CollectionsController < ApplicationController
 
   helper_method :sort_value
 
-  before_filter :authenticate_user!, only: [:new, :edit, :create, :update, :destroy, :export_mods ]
+  before_filter :authenticate_user!, only: [:new, :edit, :create, :update, :destroy, :export_mods, :export_manifest]
 
   # We can do better by using SOLR check instead of Fedora
   before_filter :can_read?, only: [:show, :creator_list, :title_list, :recent_deposits]
@@ -210,6 +210,16 @@ class CollectionsController < ApplicationController
     if current_user.xml_loader?
       flash[:notice] = "MODS Export process started - you'll be emailed a download link when it finishes."
       Cerberus::Application::Queue.push(ExportModsJob.new(request.session_options[:id], params[:id], current_user.nuid))
+    else
+      flash[:error] = "You do not have the permissions to peform this action."
+    end
+    redirect_to collection_path(params[:id]) and return
+  end
+
+  def export_manifest
+    if current_user.xml_loader?
+      flash[:notice] = "Manifest export process started - you'll be emailed a download link when it finishes."
+      Cerberus::Application::Queue.push(ExportManifestJob.new(request.session_options[:id], params[:id], current_user.nuid))
     else
       flash[:error] = "You do not have the permissions to peform this action."
     end

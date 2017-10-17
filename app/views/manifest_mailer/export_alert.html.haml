@@ -1,0 +1,15 @@
+!!!
+%html
+  %head
+    %meta{:content => "text/html; charset=UTF-8", "http-equiv" => "Content-Type"}/
+  %body
+    %h3= "Manifest Export Alert"
+    %p
+      = "The manifest export you requested for #{@collection_title} is now available for download: "
+      %br
+      %br
+      %a{:href => @file_url}
+        = @file_url
+      %br
+      %br
+      = "The export file will be deleted #{DateTime.now.tomorrow.strftime('%D')} at #{DateTime.now.strftime('%I %p')}."

@@ -48,7 +48,7 @@
   #statistics.tab-pane
     = render partial: "shared/sets/statistics", locals:  {set: @set }
   #export.tab-pane
-    = render partial: "shared/sets/export_mods", locals:  {set: @set }
+    = render partial: "shared/sets/export", locals:  {set: @set }
   - if current_user.admin?
     #sentinel.tab-pane
       = render partial: "shared/sets/sentinel", locals:  {set: @set }

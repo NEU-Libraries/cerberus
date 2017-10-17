@@ -13,7 +13,7 @@ class CompilationsController < ApplicationController
   include BlacklightAdvancedSearch::ParseBasicQ
   include BlacklightAdvancedSearch::Controller
 
-  before_filter :authenticate_user!, except: [:show, :show_download, :download, :ping_download, :get_total_count, :total_count, :export_mods]
+  before_filter :authenticate_user!, except: [:show, :show_download, :download, :ping_download, :get_total_count, :total_count, :export_mods, :export_manifest]
 
   before_filter :can_edit?, only: [:edit, :update, :destroy, :add_entry, :delete_entry, :add_multiple_entries, :delete_multiple_entries]
   before_filter :can_read?, only: [:show, :show_download, :download]
@@ -27,6 +27,16 @@ class CompilationsController < ApplicationController
     if current_user.xml_loader?
       flash[:notice] = "MODS Export process started - you'll be emailed a download link when it finishes."
       Cerberus::Application::Queue.push(ExportModsJob.new(request.session_options[:id], params[:id], current_user.nuid))
+    else
+      flash[:error] = "You do not have the permissions to peform this action."
+    end
+    redirect_to compilation_path(params[:id]) and return
+  end
+
+  def export_manifest
+    if current_user.xml_loader?
+      flash[:notice] = "Manifest export process started - you'll be emailed a download link when it finishes."
+      Cerberus::Application::Queue.push(ExportManifestJob.new(request.session_options[:id], params[:id], current_user.nuid))
     else
       flash[:error] = "You do not have the permissions to peform this action."
     end
