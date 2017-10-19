@@ -607,6 +607,9 @@ class CoreFilesController < ApplicationController
         @core_file.match_dc_to_mods
 
         render js: "window.location = '#{core_file_path(@core_file.pid)}'" and return
+      else
+        # Catch all - fixes undefined method `html_safe' for {:errors=>[], :mods_html=>""}:Hash
+        @result = error_list = "<h4 class='xml-error'>Invalid XML provided</h4></br>"
       end
     else
       @result = @result[:mods_html]
