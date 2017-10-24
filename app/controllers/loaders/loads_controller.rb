@@ -30,10 +30,7 @@ class Loaders::LoadsController < ApplicationController
       new_path = tempdir.join(file_name).to_s
       new_file = "#{new_path}.#{file.original_filename.partition('.').last.gsub(/[^a-z,A-Z,.]/, "")}"
       FileUtils.mv(file.tempfile.path, new_file)
-      puts "DGC DEBUG"
-      puts new_file
       @results = validate_spreadsheet(new_file)
-      puts @results.inspect
       render 'loaders/validation' and return
     else
       msg = "Error! Virus detected"
