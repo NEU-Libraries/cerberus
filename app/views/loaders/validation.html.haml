@@ -1,0 +1,31 @@
+-content_for :page_header do
+  %h1.page-header
+    Spreadsheet Validation
+#validation
+  %table.table.table-striped
+    -if @results.blank? || @results.length == 0
+      %tr
+        %td.success
+          No errors or warnings found for the provided spreadsheet.
+    -else
+      %th
+        Position
+      %th
+        Status
+      %th
+        Issue
+      %th
+        Original Value
+      %th
+        Suggested Value
+      -@results.each do |result|
+        -if result[:status] == "Error"
+          %tr.error
+            -result.each do |key, value|
+              %td
+                =value
+        -elsif result[:status] == "Warning"
+          %tr.warning
+            -result.each do |key, value|
+              %td
+                =value

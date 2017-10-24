@@ -139,6 +139,8 @@ Cerberus::Application.routes.draw do
   get "/loaders/spreadsheet/report/:id" => 'loaders/spreadsheet_loads#show', as: 'loaders_spreadsheet_report'
   get "/loaders/xml/report/:id" => 'loaders/xml_loads#show', as: 'loaders_xml_report'
 
+  get "/loaders/validate_spreadsheet" => 'loaders/loads#new_spreadsheet_validation', as: 'new_spreadsheet_validation'
+  post "/loaders/process_validation" => 'loaders/loads#process_spreadsheet_validation', as: 'process_spreadsheet_validation'
 
   scope :module => Loaders do
    resources :marcom_loads, only: [:new, :create, :show], :path => "loaders/marcom"

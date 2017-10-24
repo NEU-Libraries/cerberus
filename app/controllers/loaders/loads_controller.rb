@@ -1,5 +1,6 @@
 class Loaders::LoadsController < ApplicationController
   include Cerberus::Controller
+  include SpreadsheetHelper
   include MimeHelper
   include ZipHelper
 
@@ -8,6 +9,37 @@ class Loaders::LoadsController < ApplicationController
 
   rescue_from ActiveRecord::RecordNotFound do |exception|
     render_404(ActiveRecord::RecordNotFound.new, request.fullpath) and return
+  end
+
+  def new_spreadsheet_validation
+    render 'loaders/new_spreadsheet_validation'
+  end
+
+  def process_spreadsheet_validation
+    # check error condition No files
+    if !params.has_key?(:file)
+      msg = "Error! No file to open"
+      session[:flash_error] = msg
+      render :json => [{error: msg}].to_json and return
+    end
+    file = params[:file]
+    if virus_check(file) == 0
+      tempdir = Pathname.new("#{Rails.application.config.tmp_path}/")
+      uniq_hsh = Digest::MD5.hexdigest("#{file.original_filename}")[0,2]
+      file_name = "#{Time.now.to_f.to_s.gsub!('.','-')}-#{uniq_hsh}"
+      new_path = tempdir.join(file_name).to_s
+      new_file = "#{new_path}.#{file.original_filename.partition('.').last.gsub(/[^a-z,A-Z,.]/, "")}"
+      FileUtils.mv(file.tempfile.path, new_file)
+      puts "DGC DEBUG"
+      puts new_file
+      @results = validate_spreadsheet(new_file)
+      puts @results.inspect
+      render 'loaders/validation' and return
+    else
+      msg = "Error! Virus detected"
+      session[:flash_error] = msg
+      render :json => [{error: msg}].to_json and return
+    end
   end
 
   def process_new(parent, short_name)
