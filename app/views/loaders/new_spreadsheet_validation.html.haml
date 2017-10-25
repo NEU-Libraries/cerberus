@@ -22,19 +22,19 @@
           = file_field_tag 'file', required: true, "aria-required" => true, "accept"=>".xlsx"
           %p
             %small
-              Only spreadsheets of type .xlsx are supported.
+              Only spreadsheets named manifest.xlsx are supported.
       .form-actions
         = submit_tag "Upload", disabled: "true", class: 'btn btn-large btn-primary activate-submit', data: { disable_with: "Please wait..."}, id: "loaderSubmit"
 
 :javascript
   $('#file').bind('change', function() {
-    if (this.files[0].name.endsWith(".xlsx")) {
+    if (this.files[0].name === "manifest.xlsx") {
       $(".alert").remove();
       if ($('#terms_of_service').is(':checked')) {
         $("input[type='submit']").removeProp("disabled");
       }
     } else {
-      $(this).before('<div class="alert alert-warning">The file you chose needs to be .xlsx</div>');
+      $(this).before('<div class="alert alert-warning">The file you chose needs to be named manifest.xlsx</div>');
       $("input[type='submit']").prop("disabled", "true");
     }
   });
