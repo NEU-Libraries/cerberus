@@ -14,17 +14,7 @@
       .row
         %fieldset.span4
           %legend
-            1. Terms of Service Agreement
-          %span.help-block
-            Please read and accept the
-            %a{href: "/terms"}
-              terms of use
-          %label.checkbox.required-label{ for: "terms_of_service" }
-            I have read and accept the terms of service.
-            = check_box_tag 'terms_of_service', 1, nil, data: { activate:  "activate-submit" }
-        %fieldset.span4
-          %legend
-            2. File Upload
+            File Upload
           = label_tag "file", "File to upload", class: "required-label"
           = file_field_tag 'file', required: true, "aria-required" => true, "accept"=>".xlsx"
           %p
@@ -37,9 +27,7 @@
   $('#file').bind('change', function() {
     if (this.files[0].name === "manifest.xlsx") {
       $(".alert").remove();
-      if ($('#terms_of_service').is(':checked')) {
-        $("input[type='submit']").removeProp("disabled");
-      }
+      $("input[type='submit']").removeProp("disabled");
     } else {
       $(this).before('<div class="alert alert-warning">The file you chose needs to be named manifest.xlsx</div>');
       $("input[type='submit']").prop("disabled", "true");
