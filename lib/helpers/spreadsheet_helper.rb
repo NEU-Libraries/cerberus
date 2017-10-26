@@ -114,6 +114,10 @@ module SpreadsheetHelper
     header_position = 1
     header_row = spreadsheet.row(header_position)
 
+    # Title and keyword check
+    title_found = false
+    keyword_found = false
+
     0.upto header_row.length-1 do |row_pos|
       result = nil
       column_alpha = num_to_s26(row_pos + 1)
@@ -161,8 +165,26 @@ module SpreadsheetHelper
               results << {:position=>"Column #{column_alpha}", :status=>"Warning", :issue=>"Not found in expected values", :original_value=>"#{true_val}", :suggested_value=>""}
             end
           end
+        else
+          # Match found
+          if val == "title"
+            title_found = true
+          end
+          if val.include? "subject"
+            keyword_found = true
+          end
         end
       end
+    end
+
+    if !title_found
+      # error
+      results << {:position=>"", :status=>"Error", :issue=>"No title metadata found", :original_value=>"", :suggested_value=>""}
+    end
+
+    if !keyword_found
+      # error
+      results << {:position=>"", :status=>"Error", :issue=>"No keyword metadata found", :original_value=>"", :suggested_value=>""}
     end
 
     # Presume existing_files is false until we see a pid or file name
