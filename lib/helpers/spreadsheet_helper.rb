@@ -117,6 +117,7 @@ module SpreadsheetHelper
     # Title and keyword check
     title_found = false
     keyword_found = false
+    any_found = false
 
     0.upto header_row.length-1 do |row_pos|
       result = nil
@@ -167,6 +168,8 @@ module SpreadsheetHelper
           end
         else
           # Match found
+          any_found = true
+
           if val == "title"
             title_found = true
           end
@@ -175,6 +178,11 @@ module SpreadsheetHelper
           end
         end
       end
+    end
+
+    if !any_found
+      # error
+      results << {:position=>"", :status=>"Error", :issue=>"No column headers matched any expected values", :original_value=>"", :suggested_value=>""}
     end
 
     if !title_found
