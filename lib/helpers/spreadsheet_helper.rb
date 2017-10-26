@@ -25,15 +25,7 @@ module SpreadsheetHelper
 
     results = []
 
-    header_regex = ['PIDs',
-    'MODS XML File Path',
-    'File Name - Poster',
-    'File Name',
-    'Embargoed?',
-    'Embargo Date',
-    'Sequence',
-    'Last Item',
-    'What is the handle for the digitized object?',
+    header_regex = ['What is the handle for the digitized object?',
     'What is your name?',
     'What is the PID for the digitized object?',
     'File Name',
