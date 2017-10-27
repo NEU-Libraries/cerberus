@@ -24,7 +24,7 @@
 :javascript
   $('#file').bind('change', function() {
     if (this.files[0].name === "manifest.xlsx") {
-      $(".alert").remove();F
+      $(".alert").remove();
       $("input[type='submit']").removeProp("disabled");
     } else {
       $(this).before('<div class="alert alert-warning">The file you chose needs to be named manifest.xlsx</div>');
