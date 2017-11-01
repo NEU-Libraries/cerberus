@@ -76,6 +76,8 @@ gem 'axlsx', :git => 'https://github.com/randym/axlsx.git', :ref => '9e07402a26f
 gem 'kataba'
 gem 'passenger'
 
+gem 'send_file_with_range', :git => 'https://github.com/tom-sherman/send_file_with_range', :ref => '7cee9e7344302812996a4c59bc1a45521707bb2e'
+
 # Gems used only for assets and not required
 # in production environments by default.
 group :assets do
