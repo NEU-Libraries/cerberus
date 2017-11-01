@@ -124,7 +124,7 @@ class CoreFilesController < ApplicationController
     if doc.public? && !asset.blank?
       log_action('download', 'COMPLETE', asset.pid)
       file_name = "neu_#{asset.pid.split(":").last}.#{extract_extension(asset.properties.mime_type.first, File.extname(asset.original_filename || "").delete!("."))}"
-      send_file asset.fedora_file_path, :range => true, :filename => file_name, :type => asset.mime_type || extract_mime_type(asset.fedora_file_path), :disposition => 'inline'
+      send_file asset.fedora_file_path, :filename => file_name, :type => asset.mime_type || extract_mime_type(asset.fedora_file_path), :disposition => 'inline'
     else
       render_404(ActiveFedora::ObjectNotFoundError.new, request.fullpath) and return
     end
