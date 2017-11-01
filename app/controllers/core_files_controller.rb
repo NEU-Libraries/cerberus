@@ -113,6 +113,12 @@ class CoreFilesController < ApplicationController
   end
 
   def audio
+    # Solution to #1142 as per https://stackoverflow.com/questions/6759426/rails-media-file-stream-accept-byte-range-request-through-send-data-or-send-file
+    response.headers['Cache-Control'] = 'public, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Accept-Ranges'] = 'bytes'
+    response.headers['Content-Transfer-Encoding'] = 'binary'
+
     doc = fetch_solr_document
     asset = AudioFile.find(doc.canonical_object.first.pid)
     if doc.public? && !asset.blank?
