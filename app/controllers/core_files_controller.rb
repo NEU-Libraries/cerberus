@@ -117,7 +117,11 @@ class CoreFilesController < ApplicationController
     doc = fetch_solr_document
     asset = AudioFile.find(doc.canonical_object.first.pid)
     if doc.public? && !asset.blank?
-      log_action('download', 'COMPLETE', asset.pid)
+      if request.headers["Range"].blank?
+        log_action('download', 'COMPLETE', asset.pid)
+      else
+        log_action("stream", "COMPLETE", asset.pid)
+      end
       file_name = "neu_#{asset.pid.split(":").last}.#{extract_extension(asset.properties.mime_type.first, File.extname(asset.original_filename || "").delete!("."))}"
       send_file asset.fedora_file_path, :range => true, :filename => file_name, :type => asset.mime_type || extract_mime_type(asset.fedora_file_path), :disposition => 'inline'
     else
