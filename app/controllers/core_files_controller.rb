@@ -113,18 +113,13 @@ class CoreFilesController < ApplicationController
   end
 
   def audio
-    # Solution to #1142 as per https://stackoverflow.com/questions/6759426/rails-media-file-stream-accept-byte-range-request-through-send-data-or-send-file
-    response.headers['Cache-Control'] = 'public, must-revalidate, max-age=0'
-    response.headers['Pragma'] = 'no-cache'
-    response.headers['Accept-Ranges'] = 'bytes'
-    response.headers['Content-Transfer-Encoding'] = 'binary'
-
+    # 1142 fix
     doc = fetch_solr_document
     asset = AudioFile.find(doc.canonical_object.first.pid)
     if doc.public? && !asset.blank?
       log_action('download', 'COMPLETE', asset.pid)
       file_name = "neu_#{asset.pid.split(":").last}.#{extract_extension(asset.properties.mime_type.first, File.extname(asset.original_filename || "").delete!("."))}"
-      send_file asset.fedora_file_path, :filename => file_name, :type => asset.mime_type || extract_mime_type(asset.fedora_file_path), :disposition => 'inline'
+      send_file asset.fedora_file_path, :range => true, :filename => file_name, :type => asset.mime_type || extract_mime_type(asset.fedora_file_path), :disposition => 'inline'
     else
       render_404(ActiveFedora::ObjectNotFoundError.new, request.fullpath) and return
     end
