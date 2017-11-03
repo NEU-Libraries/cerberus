@@ -1165,6 +1165,7 @@ class CoreFilesController < ApplicationController
             offset = bytes.begin
             length = bytes.end - bytes.begin
           end
+          options[:status] = status_code
           response.header["Accept-Ranges"] = "bytes"
           response.header["Content-Range"] = "bytes #{bytes.begin}-#{bytes.end}/#{size}" if bytes
 
