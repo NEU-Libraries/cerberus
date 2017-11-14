@@ -35,9 +35,9 @@
     /   =render partial: 'shared/icon', locals: { class_string: t('drs.featured_content.learning.icon') }
     /   #{ t('drs.featured_content.learning.name') }
 
-    -# %a.btn.btn-clear.btn-block{href: catalog_datasets_path, data: {toggle: "tooltip"}, title: t('drs.featured_content.datasets.description') }
-    -#   =render partial: 'shared/icon', locals: { class_string: t('drs.featured_content.datasets.icon') }
-    -#   #{ t('drs.featured_content.datasets.name') }
+    %a.btn.btn-clear.btn-block{href: catalog_datasets_path, data: {toggle: "tooltip"}, title: t('drs.featured_content.datasets.description') }
+      =render partial: 'shared/icon', locals: { class_string: t('drs.featured_content.datasets.icon') }
+      #{ t('drs.featured_content.datasets.name') }
 
     %a.btn.btn-clear.btn-block{href: catalog_technical_reports_path, data: {toggle: "tooltip"}, title: t('drs.featured_content.technical_reports.description') }
       =render partial: 'shared/icon', locals: { class_string: t('drs.featured_content.technical_reports.icon') }
