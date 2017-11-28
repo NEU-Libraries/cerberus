@@ -132,7 +132,7 @@ class Admin::CommunitiesController < AdminController
         etdDesc = I18n.t "drs.etd_description.default"
         Collection.create(title: "Theses and Dissertations",
                             description: "#{etdDesc} #{@community.title}",
-                            depositor: current_user.nuid,
+                            depositor: "000000000",
                             smart_collection_type: 'Theses and Dissertations',
                             mass_permissions: @community.mass_permissions,
                             parent: @community)
