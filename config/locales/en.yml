@@ -19,7 +19,7 @@ en:
           scoped_placeholder: "Search this collection"
           placeholder: "Search the DRS"
     provide_metadata_page:
-      image_slider_error: "Something went wrong and we are unable to process your image. Please try again. If the problem persists, please use the Library's <a href=\"http://library.northeastern.edu/get-help/tech-support/report-a-problem\" target=\"_top\">Report a Problem</a> form."
+      image_slider_error: "Something went wrong and we are unable to process your image. Please try again. If the problem persists, please use the Library's <a href=\"https://northeastern.libanswers.com/form.php?queue_id=2155\" target=\"_top\">Report a Problem</a> form."
     homepage:
       description:
         short: "The Digital Repository Service is a secure repository system, designed to store and share scholarly, administrative, and archival materials on behalf of the Northeastern University community."
