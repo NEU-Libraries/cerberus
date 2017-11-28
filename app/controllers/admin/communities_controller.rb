@@ -31,7 +31,7 @@ class Admin::CommunitiesController < AdminController
 
   def create
     @community = Community.new(params[:community].merge(pid: mint_unique_pid))
-    @community.depositor = current_user.nuid
+    @community.depositor = "000000000"
     @community.identifier = @community.pid
 
     if get_parent_mass_permissions == 'private' && @community.mass_permissions == 'public'
