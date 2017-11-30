@@ -12,12 +12,20 @@ module SpreadsheetHelper
 
   def find_in_row(header_row, row_value, column_identifier)
     0.upto header_row.length do |row_pos|
-      case header_row[row_pos]
-        when column_identifier
-          return strip_value(row_value[row_pos])
+      if !header_row[row_pos].blank?
+        # Account for case insensitivity
+        case header_row[row_pos].downcase
+        when column_identifier.downcase
+          value = row_value[row_pos].to_s || ""
+          if !value.blank? && value != ""
+            return value.strip
+          else
+            return value
+          end
+        end
       end
     end
-    return nil
+    return ""
   end
 
   def validate_spreadsheet(spreadsheet_location)
@@ -205,11 +213,12 @@ module SpreadsheetHelper
     end_row = spreadsheet.last_row.to_i
     (start..end_row).each do |x|
       row = spreadsheet.row(x)
-      if row.present? && header_row.present?
+      if !row.blank? && !header_row.blank?
         begin
           row_results = Hash.new
           row_results["file_name"] = find_in_row(header_row, row, 'File Name')
           row_results["pid"] = find_in_row(header_row, row, 'What is the PID for the digitized object?')
+          row_results["handle"] = find_in_row(header_row, row, 'What is the handle for the digitized object?')
 
           if row_results["file_name"].blank? && !row_results["pid"].blank?
             existing_files = true
@@ -222,7 +231,9 @@ module SpreadsheetHelper
           elsif !existing_files && !row_results["handle"].blank? # New files shouldn't have handles
             file_and_pid_errors << {:position=>"Row #{x}", :status=>"Error", :issue=>"New files don't have preexisting handles", :original_value=>"", :suggested_value=>""}
           end
-        rescue Exception
+
+        rescue Exception => error
+          #
         end
       end
     end
