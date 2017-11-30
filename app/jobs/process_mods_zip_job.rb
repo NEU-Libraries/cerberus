@@ -59,6 +59,9 @@ class ProcessModsZipJob
           elsif !row_results["pid"].blank? && existing_files == false
             raise "Your upload could not be processed because the submitted .zip file does not contain any files. Please update the .zip file or select the \"Metadata Only\" upload option."
             return
+          elsif existing_files && !row_results["handle"].blank? # New files shouldn't have handles
+            raise "Your upload could not be processed because new files don't have preexisting handles. Please update the .zip file or select the \"Metadata Only\" upload option."
+            return
           end
 
           if row_results["pid"].blank? && !row_results["file_name"].blank? #make new file

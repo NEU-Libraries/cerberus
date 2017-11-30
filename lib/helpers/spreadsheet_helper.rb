@@ -211,24 +211,24 @@ module SpreadsheetHelper
           row_results["file_name"] = find_in_row(header_row, row, 'File Name')
           row_results["pid"] = find_in_row(header_row, row, 'What is the PID for the digitized object?')
 
-          if !row_results["file_name"].blank? || !row_results["pid"].blank?
+          if row_results["file_name"].blank? && !row_results["pid"].blank?
             existing_files = true
           end
 
-          if row_results["file_name"].blank? && row_results["pid"].blank? # Missing file names or PIDs
+          if row_results["file_name"].blank? && row_results["pid"].blank? # Must have either file names or PIDs - new or existing
             file_and_pid_errors << {:position=>"Row #{x}", :status=>"Error", :issue=>"Missing file names or PIDs", :original_value=>"", :suggested_value=>""}
           elsif !row_results["pid"].blank? && !row_results["pid"].start_with?("neu:") # Incorrectly formatted PIDs
             file_and_pid_errors << {:position=>"Row #{x}", :status=>"Error", :issue=>"PID is incorrectly formatted", :original_value=>"", :suggested_value=>""}
+          elsif !existing_files && !row_results["handle"].blank? # New files shouldn't have handles
+            file_and_pid_errors << {:position=>"Row #{x}", :status=>"Error", :issue=>"New files don't have preexisting handles", :original_value=>"", :suggested_value=>""}
           end
         rescue Exception
         end
       end
     end
 
-    if existing_files
-      # add file and pid errors to total
-      results.merge file_and_pid_errors
-    end
+    # add file and pid errors to total
+    results.merge file_and_pid_errors
 
     return results
 
