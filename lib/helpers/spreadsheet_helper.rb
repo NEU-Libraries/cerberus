@@ -228,7 +228,7 @@ module SpreadsheetHelper
     end
 
     # add file and pid errors to total
-    results.merge file_and_pid_errors
+    results.concat file_and_pid_errors
 
     return results
 
