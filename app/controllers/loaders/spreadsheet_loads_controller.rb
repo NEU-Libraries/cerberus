@@ -28,13 +28,11 @@ class Loaders::SpreadsheetLoadsController < Loaders::LoadsController
 
     @new_form = render_to_string(:partial=>'/loaders/new', locals: {collections_options: @collections_options, new: true})
     @existing_form = render_to_string(:partial=>'/loaders/new', locals: {collections_options: [], new: false})
-    
+
     render 'loaders/load_choices', locals: { collections_options: @collections_options }
   end
 
   def create
-    puts "DGC DEBUG #{params[:new].inspect}"
-
     if params[:new] == "true"
       existing_files = false
     else
