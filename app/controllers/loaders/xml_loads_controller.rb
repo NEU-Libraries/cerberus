@@ -26,10 +26,10 @@ class Loaders::XmlLoadsController < Loaders::LoadsController
     else
       $collection_options = []
     end
-    @new = "true"
-    @new_form = render_to_string(:partial=>'/loaders/new', locals: {collections_options: @collections_options, new: @new})
-    @new = "false"
-    @existing_form = render_to_string(:partial=>'/loaders/new', locals: {collections_options: [], new: @new})
+
+    @new_form = render_to_string(:partial=>'/loaders/new', locals: {collections_options: @collections_options, new: true})
+    @existing_form = render_to_string(:partial=>'/loaders/new', locals: {collections_options: [], new: false})
+    
     render 'loaders/load_choices', locals: { collections_options: @collections_options }
   end
 
