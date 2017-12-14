@@ -34,13 +34,12 @@ class CatalogController < ApplicationController
 
   def bad_route
     params.clear
-
-    flash[:error] = "Sorry - the page you requested, #{params[:error]}, was not found in the system."
-    flash[:alert] = "If you were trying to access an item in IRis, our previous institutional repository, please perform a search to locate it in the DRS."
-    self.solr_search_params_logic += [:disable_highlighting]
-    recent
+    # flash[:error] = "Sorry - the page you requested, #{params[:error]}, was not found in the system."
+    # flash[:alert] = "If you were trying to access an item in IRis, our previous institutional repository, please perform a search to locate it in the DRS."
+    # self.solr_search_params_logic += [:disable_highlighting]
+    # recent
     respond_to do |format|
-      format.html { render :template => 'catalog/index', :status => 404 }
+      # format.html { render :template => 'catalog/index', :status => 404 }
       format.any { render_404(ActiveFedora::ObjectNotFoundError.new, request.fullpath) }
     end
   end
