@@ -89,7 +89,16 @@ module SetListsHelper
       else
         self.solr_search_params_logic += [:apply_per_page_limit]
       end
-      (@response, @document_list) = get_search_results
+
+      begin
+        (@response, @document_list) = get_search_results
+      rescue NoMethodError
+        # Due to subscriptions to old IRis RSS feeds, we get erroneous url paths like
+        # https://repository.library.northeastern.edu/aud_fin_state/recent.rss
+        # Render a 404
+        render_404(ActiveFedora::ObjectNotFoundError.new, request.fullpath) and return
+      end
+      
       respond_to do |format|
         format.html { render 'shared/smart_collections/smart_collection', locals: { smart_collection: params[:smart_col] } }
         format.rss  { render 'catalog/index', :formats => [:rss] }
@@ -111,7 +120,16 @@ module SetListsHelper
         self.solr_search_params_logic += [smart_col.to_sym]
       end
       self.solr_search_params_logic += [:disable_facet_limit]
-      (@response, @document_list) = get_search_results
+
+      begin
+        (@response, @document_list) = get_search_results
+      rescue NoMethodError
+        # Due to subscriptions to old IRis RSS feeds, we get erroneous url paths like
+        # https://repository.library.northeastern.edu/aud_fin_state/recent.rss
+        # Render a 404
+        render_404(ActiveFedora::ObjectNotFoundError.new, request.fullpath) and return
+      end
+
       solr_fname = "creator_sim"
       @display_facet = @response.facets.detect {|f| f.name == solr_fname}
       facet_count = @display_facet.items.length
