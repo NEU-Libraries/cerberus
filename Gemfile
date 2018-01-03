@@ -12,7 +12,7 @@ gem 'retries'
 gem 'blacklight'
 gem 'blacklight_advanced_search', '~> 2.1.0'
 gem 'hydra-head'
-gem 'solrizer', :git => 'https://github.com/NEU-Libraries/solrizer.git', :ref => 'aff90ea60b6190f1674e8b8bb01fa1d1b98be1d4'
+gem 'solrizer', :git => 'https://github.com/NEU-Libraries/solrizer.git', :ref => 'ad2ff3da90a14e2d8716bd9ed0aa9bb1ddbc8221'
 gem 'kaminari', :git => 'https://github.com/harai/kaminari.git', :ref => 'route_prefix_prototype'  # required to handle pagination properly in dashboard. See https://github.com/amatsuda/kaminari/pull/322
 gem 'omniauth'
 gem 'omniauth-shibboleth'
