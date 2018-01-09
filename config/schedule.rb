@@ -18,24 +18,18 @@
 # end
 
 every 1.day, at: '1:30am'  do
-  if Rails.env.production?
-    runner "MetadataMailer.daily_alert_email.deliver!"
-    runner "MetadataMailer.daily_nonfeatured_alert_email.deliver!"
-    runner "XmlMailer.daily_alert_email.deliver!"
-    runner "ImpressionProcessingJob.new().run"
-  end
+  runner "MetadataMailer.daily_alert_email.deliver!"
+  runner "MetadataMailer.daily_nonfeatured_alert_email.deliver!"
+  runner "XmlMailer.daily_alert_email.deliver!"
+  runner "ImpressionProcessingJob.new().run"
 end
 
 every 1.day, at: '4:00am'  do
-  if Rails.env.production?
-    rake "-s sitemap:refresh"
-  end
+  rake "-s sitemap:refresh"
 end
 
 every :sunday, :at => '4:00am' do
-  if Rails.env.production?
-    runner "AggregatedStatisticsJob.new(nil).run"
-  end
+  runner "AggregatedStatisticsJob.new(nil).run"
 end
 
 # Learn more: http://github.com/javan/whenever
