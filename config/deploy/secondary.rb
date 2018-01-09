@@ -1,9 +1,8 @@
 set :stage, :secondary
-set :whenever_environment, 'secondary'
 
 set :deploy_to, '/opt/cerberus/'
 set :bundle_env_variables, { nokogiri_use_system_libraries: 1 }
-set :bundle_bins, fetch(:bundle_bins, []).push('whenever', 'resque-pool', 'solrizerd')
+set :bundle_bins, fetch(:bundle_bins, []).push('resque-pool', 'solrizerd')
 
 # parses out the current branch you're on. See: http://www.harukizaemon.com/2008/05/deploying-branches-with-capistrano.html
 current_branch = `git branch`.match(/\* (\S+)\s/m)[1]
@@ -72,18 +71,6 @@ namespace :deploy do
     end
   end
 
-  desc "Setting whenever environment and updating the crontable"
-  task :whenever do
-    on roles(:app), :in => :sequence, :wait => 5 do
-      within release_path do
-        execute :bundle, 'exec', 'whenever', '-c', '--set environment=secondary'
-        execute :bundle, 'exec', 'whenever', '-w', '--set environment=secondary'
-      end
-      # execute "cd #{release_path} && (RAILS_ENV=secondary bundle exec whenever --set environment=secondary -c)"
-      # execute "cd #{release_path} && (RAILS_ENV=secondary bundle exec whenever --set environment=secondary -w)"
-    end
-  end
-
   desc 'Start solrizerd'
   task :start_solrizerd do
     on roles(:app), :in => :sequence, :wait => 5 do
@@ -115,7 +102,6 @@ before 'deploy:starting', 'deploy:update_clamav'
 after 'deploy:updating', 'bundler:install'
 after 'deploy:updating', 'deploy:copy_yml_file'
 after 'deploy:updating', 'deploy:migrate'
-after 'deploy:updating', 'deploy:whenever'
 
 after 'deploy:finished', 'deploy:start_solrizerd'
 after 'deploy:finished', 'deploy:flush_redis'
