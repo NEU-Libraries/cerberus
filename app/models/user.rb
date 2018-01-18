@@ -99,8 +99,24 @@ class User < ActiveRecord::Base
           name_array = Namae.parse auth.info.name.titleize
         end
         if name_array.blank? #Most likely bad char i.e. (nick_name)
-          # fallback
-          emp_name = auth.info.name
+          if (auth.info.name.include? "(" | auth.info.name.include? ")")
+            name_str = auth.info.name.gsub("\(", "\"").gsub("\)", "\"")
+            name_array = Namae.parse name_str
+            if !name_array.blank?
+              name_obj = name_array[0]
+              if !name_obj.nick.blank?
+                emp_name = "#{name_obj.family}, #{name_obj.nick}"
+              else
+                emp_name = "#{name_obj.family}, #{name_obj.given}"
+              end
+            else
+              # fallback
+              emp_name = auth.info.name
+            end
+          else
+            # fallback
+            emp_name = auth.info.name
+          end
         else
           name_obj = name_array[0]
           emp_name = "#{name_obj.family}, #{name_obj.given}"
