@@ -99,7 +99,7 @@ class User < ActiveRecord::Base
           name_array = Namae.parse auth.info.name.titleize
         end
         if name_array.blank? #Most likely bad char i.e. (nick_name)
-          if (auth.info.name.include? "(" | auth.info.name.include? ")")
+          if auth.info.name.include?("(") | auth.info.name.include?(")")
             name_str = auth.info.name.gsub("\(", "\"").gsub("\)", "\"")
             name_array = Namae.parse name_str
             if !name_array.blank?
