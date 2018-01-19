@@ -496,7 +496,9 @@ class ModsDatastream < ActiveFedora::OmDatastream
     solr_doc["creator_tesim"] = all_names
 
     # Creating sortable creator field
-    solr_doc["creator_ssi"] = all_names.first.titleize
+    if !all_names.first.blank?
+      solr_doc["creator_ssi"] = all_names.first.titleize
+    end
 
     solr_doc["origin_info_place_tesim"] = self.origin_info.place.place_term
 
