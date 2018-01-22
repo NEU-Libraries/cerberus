@@ -27,7 +27,7 @@ module XmlValidator
 
     # Mods namespace inclusion
     if !doc.namespaces.keys.include?("xmlns:mods")
-      results[:errors] << Exceptions::MissingMetadata.new("explicit MODS namespace - xmlns:mods")
+      results[:errors] << Exceptions::MissingMetadata.new("explicit MODS namespace (xmlns:mods)")
     end
 
     # Nokogiri schema validation
