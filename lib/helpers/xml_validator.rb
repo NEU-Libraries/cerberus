@@ -25,6 +25,11 @@ module XmlValidator
       results[:errors] << Exceptions::XmlEncodingError.new
     end
 
+    # Mods namespace inclusion
+    if !doc.namespaces.keys.include?("xmlns:mods")
+      results[:errors] << Exceptions::MissingMetadata.new("explicit MODS namespace - xmlns:mods")
+    end
+
     # Nokogiri schema validation
     begin
       schemata_by_ns = Hash[ doc.root.attributes['schemaLocation'].value.scan(/(\S+)\s+(\S+)/) ]
