@@ -114,7 +114,7 @@ FactoryGirl.define do
     end
 
     factory :nonfeatured_alert do
-      content_type ""
+      content_type "generic"
 
       factory :nonfeatured_notified_alert do
         notified

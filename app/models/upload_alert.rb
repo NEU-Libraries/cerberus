@@ -37,7 +37,7 @@ class UploadAlert < ActiveRecord::Base
   end
 
   def self.withheld_nonfeatured(ct = :create)
-    unknown_content_query("", ct)
+    unknown_content_query('generic', ct)
   end
 
   def self.withheld_collections(ct = :create)
@@ -64,10 +64,10 @@ class UploadAlert < ActiveRecord::Base
     end
 
     u.title             = core_file.title
-    if !core_file.category.blank?
+    if !core_file.category.blank? && !core_file.category.first.blank?
       u.content_type      = core_file.category.first
     else
-      u.content_type      = "core file"
+      u.content_type      = "generic"
     end
     u.pid               = core_file.pid
     u.change_type       = change_type
