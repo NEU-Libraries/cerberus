@@ -9,6 +9,12 @@
     %h3 Updated Nonfeatured Items
     = render partial: 'alert_items', locals: { alerts: @nonfeatured_update }
 
+    %h3 New Personal Items
+    = render partial: 'alert_items', locals: { alerts: @misc_new }
+
+    %h3 Updated Personal Items
+    = render partial: 'alert_items', locals: { alerts: @misc_update }
+
     %h3 New Collections
     = render partial: 'alert_items', locals: { alerts: @collections_new}
 

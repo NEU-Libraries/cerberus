@@ -76,6 +76,9 @@ class MetadataMailer < ActionMailer::Base
   end
 
   def daily_nonfeatured_alert_email
+    @misc_new               = UploadAlert.withheld_misc(:create)
+    @misc_update            = UploadAlert.withheld_misc(:update)
+
     @nonfeatured_new        = UploadAlert.withheld_nonfeatured(:create)
     @nonfeatured_update     = UploadAlert.withheld_nonfeatured(:update)
 
@@ -83,6 +86,9 @@ class MetadataMailer < ActionMailer::Base
     @collections_update     = UploadAlert.withheld_collections(:update)
 
     nonfeatured_count = 0
+
+    nonfeatured_count += @misc_new.count
+    nonfeatured_count += @misc_update.count
 
     nonfeatured_count += @nonfeatured_new.count
     nonfeatured_count += @nonfeatured_update.count

@@ -40,6 +40,10 @@ class UploadAlert < ActiveRecord::Base
     unknown_content_query('generic', ct)
   end
 
+  def self.withheld_misc(ct = :create)
+    unknown_content_query('miscellany', ct)
+  end
+
   def self.withheld_collections(ct = :create)
     unknown_content_query('collection', ct)
   end
