@@ -142,6 +142,8 @@ class MetadataMailer < ActionMailer::Base
     end
 
     def tag_as_notified_nonfeatured
+      tag_as_notified_helper @misc_new
+      tag_as_notified_helper @misc_update
       tag_as_notified_helper @nonfeatured_new
       tag_as_notified_helper @nonfeatured_update
       tag_as_notified_helper @collections_new
