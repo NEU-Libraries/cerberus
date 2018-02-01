@@ -62,9 +62,6 @@ class CollectionsController < ApplicationController
     if params[:q].nil? && params[:previous_action] != "recent_deposits"
       self.solr_search_params_logic += [:show_children_only]
     else
-      # Fixes #667 - we remove single characters. They're a pretty terrible idea with a strict AND
-      params[:q].gsub!(/(^| ).( |$)/, ' ') if params[:q]
-
       self.solr_search_params_logic += [:limit_to_scope]
 
       if params[:previous_action] == "recent_deposits"
