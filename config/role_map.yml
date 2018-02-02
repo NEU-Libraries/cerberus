@@ -21,3 +21,7 @@ test:
 
 production:
   # Add roles for users here.
+
+staging:
+  archivist:
+    - archivist1@example.com
