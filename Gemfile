@@ -22,6 +22,8 @@ gem 'mods_display'
 gem 'figaro'
 gem 'mysql2'
 gem 'blacklight-gallery'
+gem 'mina', group: :development # Use Mina for deployment
+gem 'mina-multistage', require: false
 
 # Pinned to prevent update breaks
 gem 'twitter-bootstrap-rails', '3.2.2'
