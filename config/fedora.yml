@@ -13,3 +13,8 @@ production:
   password: fedoraAdmin
   url: http://127.0.0.1:8983/fedora/rest
   base_path: /prod
+staging:
+  user: fedoraAdmin
+  password: fedoraAdmin
+  url: http://127.0.0.1:<%= ENV['FCREPO_DEVELOPMENT_PORT'] || 8080 %>/fcrepo-webapp-4.7.4/rest
+  base_path: /staging
