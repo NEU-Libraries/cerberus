@@ -12,6 +12,7 @@
       ="<meta content=\"#{@core_file.google_scholar_date}\" name=\"citation_publication_date\">".html_safe
     - if !@core_file.canonical_object.first.blank? && !@core_file.embargo_date_in_effect?
       ="<meta content=\"#{file_fulltext_path(@core_file.pid, :only_path => false)}\" name=\"citation_pdf_url\">".html_safe
+      ="<link rel=\"alternate\" type=\"application/pdf\" href=\"#{file_fulltext_path(@core_file.pid, :only_path => false)}\" title=\"#{@core_file.google_title}\">".html_safe
     - if !@core_file.author.blank?
       ="<meta content=\"#{@core_file.author}\" name=\"citation_author\">".html_safe
     - elsif !@core_file.personal_creators.blank?
