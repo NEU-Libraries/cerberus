@@ -9,11 +9,12 @@
 -if content_for?(:author)
   =yield(:author)
 -if content_for?(:google_scholar)
-  =yield(:google_scholar)  
+  =yield(:google_scholar)
 
 %title= h(title_string(@page_title))
 / application css
 = stylesheet_link_tag 'application'
+= canonical_tag
 - if content_for?(:extra_head_contet)
   = yield :extra_head_content
 = yield(:css_head)
