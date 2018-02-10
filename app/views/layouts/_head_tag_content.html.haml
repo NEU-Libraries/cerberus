@@ -14,7 +14,6 @@
 %title= h(title_string(@page_title))
 / application css
 = stylesheet_link_tag 'application'
-= canonical_tag
 - if content_for?(:extra_head_content)
   = yield :extra_head_content
 = yield(:css_head)

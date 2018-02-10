@@ -6,6 +6,8 @@
   - if !@core_file.author.blank?
     ="<meta content=\"#{@core_file.author}\" name=\"author\">".html_safe
 - if ["Theses and Dissertations", "Technical Reports", "Research Publications"].include? @core_file.category
+  - content_for(:extra_head_content) do
+    ="<link rel=\"canonical\" href=\"#{url_for(:only_path => false)}\" />".html_safe
   - content_for(:google_scholar) do
     ="<meta content=\"#{@core_file.google_title}\" name=\"citation_title\">".html_safe
     - if !@core_file.google_scholar_date.blank?

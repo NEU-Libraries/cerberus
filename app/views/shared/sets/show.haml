@@ -1,3 +1,5 @@
+- content_for(:extra_head_content) do
+  ="<link rel=\"canonical\" href=\"#{url_for(:only_path => false)}\" />".html_safe
 - content_for(:description) do
   - @set.description
 - facet_list ||= facet_field_names
@@ -75,4 +77,4 @@
         else location.hash = '#stay'
       }
     }
-  }    
+  }
