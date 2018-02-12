@@ -38,3 +38,8 @@ coverage
 
 # Ignore irrelevant system nfs files
 .nfs*
+
+/config/secrets.yml
+
+# Ignore application configuration
+/config/application.yml
