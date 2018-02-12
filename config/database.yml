@@ -25,10 +25,12 @@ production:
   database: db/production.sqlite3
 
 staging:
-  adapter: mysql2
-  encoding: utf8
-  database: cerberus
-  username: cerberus
-  password: <%= ENV["MYSQL_PASSWD"] %>
-  host: localhost
-  port: 3306
+  # adapter: mysql2
+  # encoding: utf8
+  # database: cerberus
+  # username: cerberus
+  # password: <%= ENV["MYSQL_PASSWD"] %>
+  # host: localhost
+  # port: 3306
+  <<: *default
+  database: db/development.sqlite3
