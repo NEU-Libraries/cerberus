@@ -7,7 +7,7 @@ Rails.application.configure do
 
   # http://stackoverflow.com/questions/29417328/how-to-disable-cannot-render-console-from-on-rails
   # config.web_console.whitelisted_ips = '10.0.2.2'
-  config.web_console.whiny_requests = false
+  # config.web_console.whiny_requests = false
 
   # In the development environment your application's code is reloaded on
   # every request. This slows down response time but is perfect for development
