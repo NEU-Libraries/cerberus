@@ -89,6 +89,16 @@ class CoreFile < ActiveFedora::Base
     model.mods.content
   end
 
+  def update_pdf
+    doc = SolrDocument.new self.to_solr
+    if doc.pdf? #kludge - self.pdf no longer works
+      pdfs = self.content_objects.select{|x| x.class == PdfFile}
+      pdfs.each do |pdf|
+        pdf.update_pdf_exif_metadata
+      end
+    end
+  end
+
   def clean_xml
     # When edit form is used, make sure we clean up unicode
     if !self.mods.content.blank?

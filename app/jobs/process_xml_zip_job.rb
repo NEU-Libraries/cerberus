@@ -430,7 +430,7 @@ class ProcessXmlZipJob
         core_file.mods.content = raw_xml
         core_file.save!
         core_file.match_dc_to_mods
-
+        core_file.update_pdf
       else
         error_list = ""
         validation_result[:errors].each do |entry|

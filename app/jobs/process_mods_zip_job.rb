@@ -795,6 +795,7 @@ class ProcessModsZipJob
     doc = Nokogiri::XML(xml,&:noblanks)
     core_file.mods.content = doc.to_s
     core_file.match_dc_to_mods
+    core_file.update_pdf
     core_file.save!
   end
 

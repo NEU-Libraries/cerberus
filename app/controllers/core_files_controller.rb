@@ -610,6 +610,7 @@ class CoreFilesController < ApplicationController
         @core_file.mods.content = raw_xml
         @core_file.save!
         @core_file.match_dc_to_mods
+        @core_file.update_pdf
 
         render js: "window.location = '#{core_file_path(@core_file.pid)}'" and return
       else
@@ -737,6 +738,9 @@ class CoreFilesController < ApplicationController
 
     # only update metadata if there is a core_file object which is not the case for version updates
     update_metadata if params[:core_file]
+
+    @core_file.match_dc_to_mods
+    @core_file.update_pdf
 
     #always save the file so the new version or metadata gets recorded
     if @core_file.save
