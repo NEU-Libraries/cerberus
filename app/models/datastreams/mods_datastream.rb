@@ -592,7 +592,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
       self.insert_new_node(:title_info)
     end
 
-    if !self.title_info.title.blank?
+    if !title.blank?
       self.title_info.title = title.gsub(/[\s\b\v]+/, " ")
     end
   end
