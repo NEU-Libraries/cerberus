@@ -403,7 +403,8 @@ class ModsDatastream < ActiveFedora::OmDatastream
 
     # Kramdown parse for search purposes - #439
     # title_ssi will only be used for sorting - #766
-    solr_doc["title_ssi"] = kramdown_parse(t).downcase.gsub(/[^0-9a-z ]/i, '').gsub(/^a /i, '').gsub(/^an /i, '').gsub(/^the /i, '')
+    # Left pad numbers - fixes #1159
+    solr_doc["title_ssi"] = kramdown_parse(t).downcase.gsub(/[^0-9a-z ]/i, '').gsub(/^a /i, '').gsub(/^an /i, '').gsub(/^the /i, '').gsub(/(\d+)/, '00000\1').gsub(/0*([0-9]{6,})/, '\1')
 
     # Make sure all titles and non_sorts end up in title_tesim
     total_title_array = self.all_titles.non_sort.concat self.all_titles.title
