@@ -592,7 +592,9 @@ class ModsDatastream < ActiveFedora::OmDatastream
       self.insert_new_node(:title_info)
     end
 
-    self.title_info.title = title.gsub(/[\s\b\v]+/, " ")
+    if !self.title_info.title.blank?
+      self.title_info.title = title.gsub(/[\s\b\v]+/, " ")
+    end
   end
 
   def non_sort=(non_sort)
