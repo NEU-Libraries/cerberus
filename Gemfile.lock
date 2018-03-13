@@ -458,7 +458,7 @@ GEM
     rest-client (1.6.7)
       mime-types (>= 1.16)
     retries (0.0.5)
-    rmagick (2.16.0)
+    rmagick (2.13.4)
     rsolr (1.0.9)
       builder (>= 2.1.2)
     rspec (2.14.1)
@@ -625,7 +625,7 @@ DEPENDENCIES
   resque-pool (= 0.3.0)
   resque_spec
   retries
-  rmagick
+  rmagick (~> 2.13.2)
   roo!
   roo-xls!
   rspec-rails
