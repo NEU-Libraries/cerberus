@@ -184,7 +184,7 @@ class CatalogController < ApplicationController
     # end copied from v1
 
     # Commenting out Eli's sort code for now, as it appears to be causing problems
-    config.add_sort_field 'score desc, pub_date_dtsi desc, title_tesi asc', label: 'relevance'
+    # config.add_sort_field 'score desc, pub_date_dtsi desc, title_tesi asc', label: 'relevance'
     # config.add_sort_field 'pub_date_dtsi desc, title_tesi asc', label: 'year'
     # config.add_sort_field 'author_tesi asc, title_tesi asc', label: 'author'
     # config.add_sort_field "#{solr_name('title', :stored_sortable, type: :string)} asc, pub_date_dtsi desc", label: 'title'
