@@ -175,13 +175,19 @@ class CatalogController < ApplicationController
     # except in the relevancy case).
     # copied from V1
     # note that title sort is not working because title_ssi is not in solr doc - probably need to do some sort of title cleanup in order to use it for sorting like in v1
-    config.add_sort_field "#{solr_name('title', :stored_sortable, type: :string)} asc", :label => "Title"
-    config.add_sort_field "#{solr_name('creator', :stored_sortable, type: :string)} asc", :label => "Creator, A-Z"
-    config.add_sort_field "#{solr_name('creator', :stored_sortable, type: :string)} desc", :label => "Creator, Z-A"
-    config.add_sort_field "#{solr_name('system_create', :stored_sortable, type: :date)} desc", :label => "Recently uploaded"
-    config.add_sort_field "#{solr_name('date', :stored_sortable, type: :string)} desc", :label => "Recently created"
-    config.add_sort_field "score desc, #{solr_name('system_create', :stored_sortable, type: :date)} desc", :label => "Relevance"
+    # config.add_sort_field "#{solr_name('title', :stored_sortable, type: :string)} asc", :label => "Title"
+    # config.add_sort_field "#{solr_name('creator', :stored_sortable, type: :string)} asc", :label => "Creator, A-Z"
+    # config.add_sort_field "#{solr_name('creator', :stored_sortable, type: :string)} desc", :label => "Creator, Z-A"
+    # config.add_sort_field "#{solr_name('system_create', :stored_sortable, type: :date)} desc", :label => "Recently uploaded"
+    # config.add_sort_field "#{solr_name('date', :stored_sortable, type: :string)} desc", :label => "Recently created"
+    # config.add_sort_field "score desc, #{solr_name('system_create', :stored_sortable, type: :date)} desc", :label => "Relevance"
     # end copied from v1
+
+    # Commenting out Eli's sort code for now, as it appears to be causing problems
+    config.add_sort_field 'score desc, pub_date_dtsi desc, title_tesi asc', label: 'relevance'
+    config.add_sort_field 'pub_date_dtsi desc, title_tesi asc', label: 'year'
+    config.add_sort_field 'author_tesi asc, title_tesi asc', label: 'author'
+    config.add_sort_field "#{solr_name('title', :stored_sortable, type: :string)} asc, pub_date_dtsi desc", label: 'title'
 
     # If there are more than this many search results, no spelling ("did you
     # mean") suggestion is offered.
