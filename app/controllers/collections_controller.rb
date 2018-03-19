@@ -177,6 +177,12 @@ class CollectionsController < ApplicationController
 
     (@response, @document_list) = get_search_results
 
+    if ((Time.now.utc - DateTime.parse(@set.updated_at)) / 1.hour) < 1
+      response.headers["Cache-Control"] = "no-cache, no-store, max-age=0, must-revalidate"
+      response.headers["Pragma"] = "no-cache"
+      response.headers["Expires"] = "Fri, 01 Jan 1990 00:00:00 GMT"
+    end
+
     respond_to do |format|
       format.html { render 'shared/sets/show', locals: {pretty_description: @pretty_description} }
     end
