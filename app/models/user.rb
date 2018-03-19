@@ -151,7 +151,7 @@ class User < ActiveRecord::Base
 
     if user.employee_id.blank?
       if(auth.info.employee.include?("faculty") || auth.info.employee.include?("staff"))
-        Cerberus::Application::Queue.push(EmployeeCreateJob.new(auth.info.nuid, emp_name))
+        Cerberus::Application::Queue.push(EmployeeCreateJob.new(auth.info.nuid, user.name))
       end
     end
 
