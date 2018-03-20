@@ -32,7 +32,10 @@
   - if @set.klass != "Compilation"
     = render partial: 'catalog/search_form', locals: { scope: "true", scoped_placeholder: "Search this #{@set.type_label.downcase}" }
   - if !@set.thumbnail_list.empty?
-    %img{src: @set.thumbnail_list.first, title: @set.title, alt: "", class: ['pull-left', 'well-padded-thumb']}(aria-labeledby="#{@set.pid}-title" role="presentation")
+    - if !@thumbnail_refresh.blank?
+      %img{src: @set.thumbnail_list.first + "&timestamp=#{Time.now.to_i}", title: @set.title, alt: "", class: ['pull-left', 'well-padded-thumb']}(aria-labeledby="#{@set.pid}-title" role="presentation")
+    - else
+      %img{src: @set.thumbnail_list.first, title: @set.title, alt: "", class: ['pull-left', 'well-padded-thumb']}(aria-labeledby="#{@set.pid}-title" role="presentation")
   - if !@set.description.blank?
     %p.set-description
       = @pretty_description
