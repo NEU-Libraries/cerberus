@@ -25,7 +25,7 @@
           - else
             .span4
               = f.label :remove_thumbnail, "Existing thumbnail"
-              %img{id: "set_thumbnail", src: @set.thumbnail_list.first, title: @set.title, alt: "", class: ['well-padded-thumb']}(aria-labeledby="#{@set.pid}-title" role="presentation")
+              %img{id: "set_thumbnail", src: @set.thumbnail_list.first + "&timestamp=#{Time.now.to_i}, title: @set.title, alt: "", class: ['well-padded-thumb']}(aria-labeledby="#{@set.pid}-title" role="presentation")
               %br
               %br
               Remove existing thumbnail?
