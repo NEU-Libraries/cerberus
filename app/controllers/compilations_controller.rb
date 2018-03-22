@@ -72,6 +72,7 @@ class CompilationsController < ApplicationController
 
   def editable_compilations
     self.solr_search_params_logic += [:exclude_unwanted_models]
+    self.solr_search_params_logic += [:find_user_compilations]
     self.solr_search_params_logic += [:restrict_to_grouper]
 
     (@response, @compilations) = get_search_results
