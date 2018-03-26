@@ -343,7 +343,11 @@ class ProcessXmlZipJob
                 x = x+1
                 next
               end
+
               # now finishing creation of core file if its well-formed
+              core_file.match_dc_to_mods
+              core_file.update_pdf
+
               if !core_file.blank?
                 if existing_files == true && Nokogiri::XML(old_mods,&:noblanks).to_s == Nokogiri::XML(core_file.mods.content,&:noblanks).to_s
                   load_report.item_reports.create_success(core_file, "", :update)
@@ -429,8 +433,6 @@ class ProcessXmlZipJob
       if validation_result[:errors].blank?
         core_file.mods.content = raw_xml
         core_file.save!
-        core_file.match_dc_to_mods
-        core_file.update_pdf
       else
         error_list = ""
         validation_result[:errors].each do |entry|
