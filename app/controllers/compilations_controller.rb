@@ -72,8 +72,7 @@ class CompilationsController < ApplicationController
 
   def editable_compilations
     self.solr_search_params_logic += [:exclude_unwanted_models]
-    self.solr_search_params_logic += [:find_user_compilations]
-    self.solr_search_params_logic += [:restrict_to_grouper]
+    self.solr_search_params_logic += [:restrict_to_editable]
 
     (@response, @compilations) = get_search_results
 
@@ -103,7 +102,7 @@ class CompilationsController < ApplicationController
 
     self.solr_search_params_logic += [:exclude_unwanted_models]
     self.solr_search_params_logic += [:exclude_user_compilations]
-    self.solr_search_params_logic += [:restrict_to_grouper]
+    self.solr_search_params_logic += [:restrict_to_collaborative]
 
     @forced_view = "drs-items-list"
 
@@ -443,10 +442,16 @@ class CompilationsController < ApplicationController
     solr_parameters[:fq] << "-#{Solrizer.solr_name("depositor", :stored_searchable)}:\"#{current_user.nuid}\""
   end
 
-  def restrict_to_grouper(solr_parameters, user_parameters)
+  def restrict_to_collaborative(solr_parameters, user_parameters)
     solr_parameters[:fq] ||= []
     groups = current_user.groups.map! { |g| "\"#{g}\""}.join(" OR ")
     solr_parameters[:fq] << "read_access_group_ssim:(#{groups}) OR edit_access_group_ssim:(#{groups})"
+  end
+
+  def restrict_to_editable(solr_parameters, user_parameters)
+    solr_parameters[:fq] ||= []
+    groups = current_user.groups.map! { |g| "\"#{g}\""}.join(" OR ")
+    solr_parameters[:fq] << "edit_access_group_ssim:(#{groups}) OR #{Solrizer.solr_name("depositor", :stored_searchable)}:\"#{current_user.nuid}\""
   end
 
   def exclude_unwanted_models(solr_parameters, user_parameters)
