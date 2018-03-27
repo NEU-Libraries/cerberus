@@ -178,7 +178,7 @@ class ShoppingCartsController < ApplicationController
     # And that doing so wouldn't cause them to over the 100 pid
     # limit
     def can_dl?
-      if params[:add]
+      if params[:add] && !current_user.blank?
         record = ActiveFedora::Base.find(params[:add], cast: true)
         if !record.public?
           render_403 and return unless (current_user.can? :read, record)
