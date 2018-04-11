@@ -79,12 +79,13 @@ module Cerberus
 
     #Add polyfills in the pipline so that Modernizr can pull in js polyfills
 
-    config.assets.precompile += [
-      "placeholder/js/placeholder.js",
-      "placeholder/dist/placeholder.min.js",
-      "respond/dest/respond.min.js",
-      "respond/dest/respond.src.js"
-    ]
+    # config.assets.precompile += [
+    #   "placeholder/js/placeholder.js",
+    #   "placeholder/dist/placeholder.min.js",
+    #   "respond/dest/respond.min.js",
+    #   "respond/dest/respond.src.js"
+    # ]
+    config.assets.precompile << /webshims/
 
     # Set a default root collection.
     config.root_community_id = 'neu:1'
@@ -113,7 +114,7 @@ module Cerberus
     end
 
     Kataba.configuration.offline_storage = "#{Rails.application.config.tmp_path}/xsd_files"
-    Kataba.configuration.mirror_list = File.join(Rails.root, 'config', 'mirror.yml')    
+    Kataba.configuration.mirror_list = File.join(Rails.root, 'config', 'mirror.yml')
 
     if !Rails.env.test? && !(!ENV['TRAVIS'].nil? && ENV['TRAVIS'] == 'true')
       config.handles_connection = Mysql2::Client.new(:reconnect => true, :host => "#{ENV["HANDLE_HOST"]}", :username => "#{ENV["HANDLE_USERNAME"]}", :password => "#{ENV["HANDLE_PASSWORD"]}", :database => "#{ENV["HANDLE_DATABASE"]}")
