@@ -625,7 +625,7 @@ DEPENDENCIES
   resque-pool (= 0.3.0)
   resque_spec
   retries
-  rmagick (~> 2.13.2)
+  rmagick
   roo!
   roo-xls!
   rspec-rails
