@@ -9,7 +9,7 @@ class WowzaController < ApplicationController
     encoded = doc.encode
 
     url_str = "http://libwowza.neu.edu/datastreamStore/cerberusData/newfedoradata/datastreamStore/#{dir}/" + CGI::escape("info%3Afedora%2F#{encoded}%2Fcontent%2Fcontent.0")
-    stream(url_str, doc)
+    stream(url_str, doc, doc.mime_type)
   end
 
   # def rtmp
@@ -31,16 +31,16 @@ class WowzaController < ApplicationController
     encoded = doc.encode
 
     url_str = "http://libwowza.neu.edu:1935/vod/_definst_/datastreamStore/cerberusData/newfedoradata/datastreamStore/#{dir}/#{doc_type(doc)}:" + CGI::escape("info%3Afedora%2F#{encoded}%2Fcontent%2Fcontent.0") + "/playlist.m3u8"
-    stream(url_str, doc)
+    stream(url_str, doc, "application/x-mpegURL")
   end
 
   private
 
-    def stream(url_str, doc)
+    def stream(url_str, doc, mime_type_str)
       if (!current_user.nil? && (current_user.can? :read, doc)) || doc.public?
         if doc.mime_type == 'video/mp4' || doc.mime_type == 'video/quicktime' || doc.mime_type == 'audio/mpeg'
           data = open(url_str)
-          send_data data.read
+          send_data(data.read, type: mime_type_str)
         else
           # Raise error
           render_500(StandardError.new) and return

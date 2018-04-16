@@ -8,7 +8,7 @@ Cerberus::Application.routes.draw do
   # Wowza controller paths
   get '/wowza/:id/plain' => 'wowza#plain', as: 'wowza_plain'
   # get '/wowza/:id/rtmp' => 'wowza#rtmp', as: 'wowza_rtmp'
-  get '/wowza/:id/playlist' => 'wowza#playlist', as: 'wowza_playlist'
+  get '/wowza/:id/playlist.m3u8' => 'wowza#playlist', as: 'wowza_playlist'
 
   resources :sentinels, :controller => "sentinels", except: [:index, :destroy]
 
