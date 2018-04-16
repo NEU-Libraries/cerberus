@@ -9,7 +9,7 @@ class WowzaController < ApplicationController
     encoded = doc.encode
 
     url_str = "http://libwowza.neu.edu/datastreamStore/cerberusData/newfedoradata/datastreamStore/#{dir}/" + CGI::escape("info%3Afedora%2F#{encoded}%2Fcontent%2Fcontent.0")
-    stream(url_str)
+    stream(url_str, doc)
   end
 
   # def rtmp
@@ -31,7 +31,7 @@ class WowzaController < ApplicationController
     encoded = doc.encode
 
     url_str = "http://libwowza.neu.edu:1935/vod/_definst_/datastreamStore/cerberusData/newfedoradata/datastreamStore/#{dir}/#{doc_type(doc)}:" + CGI::escape("info%3Afedora%2F#{encoded}%2Fcontent%2Fcontent.0") + "/playlist.m3u8"
-    stream(url_str)
+    stream(url_str, doc)
   end
 
   private
