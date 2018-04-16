@@ -32,6 +32,12 @@ class WowzaController < ApplicationController
     encoded = doc.encode
 
     url_str = "http://libwowza.neu.edu:1935/vod/_definst_/datastreamStore/cerberusData/newfedoradata/datastreamStore/#{dir}/#{doc_type(doc)}:" + CGI::escape("info%3Afedora%2F#{encoded}%2Fcontent%2Fcontent.0") + "/playlist.m3u8"
+
+    data = open(url_str)
+    chunk_str = data.each_line.select{ |l| l.start_with?("chunk")}.first.squish
+
+    url_str = "http://libwowza.neu.edu:1935/vod/_definst_/datastreamStore/cerberusData/newfedoradata/datastreamStore/#{dir}/#{doc_type(doc)}:" + CGI::escape("info%3Afedora%2F#{encoded}%2Fcontent%2Fcontent.0") + "/#{chunk_str}"
+
     stream(url_str, doc, "application/x-mpegURL")
   end
 
