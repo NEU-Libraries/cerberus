@@ -1,3 +1,4 @@
+include MimeHelper
 require 'open-uri'
 
 class WowzaController < ApplicationController
@@ -40,7 +41,13 @@ class WowzaController < ApplicationController
       if (!current_user.nil? && (current_user.can? :read, doc)) || doc.public?
         if doc.mime_type == 'video/mp4' || doc.mime_type == 'video/quicktime' || doc.mime_type == 'audio/mpeg'
           data = open(url_str)
-          send_data(data.read, type: mime_type_str)
+
+          if mime_type_str == "application/x-mpegURL"
+            send_data(data.read, type: mime_type_str, filename: 'playlist.m3u8')
+          else
+            send_data(data.read, type: mime_type_str, filename: "media." + "#{extract_extension(doc.mime_type)}")
+          end
+
         else
           # Raise error
           render_500(StandardError.new) and return
