@@ -5,6 +5,11 @@ Cerberus::Application.routes.draw do
   HydraHead.add_routes(self)
   # Hydra::BatchEdit.add_routes(self)
 
+  # Wowza controller paths
+  get '/wowza/:id/plain' => 'wowza#plain', as: 'wowza_plain'
+  # get '/wowza/:id/rtmp' => 'wowza#rtmp', as: 'wowza_rtmp'
+  get '/wowza/:id/playlist' => 'wowza#playlist', as: 'wowza_playlist'
+
   resources :sentinels, :controller => "sentinels", except: [:index, :destroy]
 
   get "/statistics/:id" => "statistics#all_counts", as: 'statistics_count'
