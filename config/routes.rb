@@ -9,7 +9,7 @@ Cerberus::Application.routes.draw do
   get '/wowza/:id/plain' => 'wowza#plain', as: 'wowza_plain'
   # get '/wowza/:id/rtmp' => 'wowza#rtmp', as: 'wowza_rtmp'
   get '/wowza/:id/playlist.m3u8' => 'wowza#playlist', as: 'wowza_playlist'
-  get '/wowza/:id/:ts' => 'wowza#ts', as: 'wowza_ts', constraints: { ts: /media.*\.ts/ }
+  get '/wowza/:id/:part' => 'wowza#stream', as: 'wowza_stream', constraints: { part: /media.*/ }
 
   resources :sentinels, :controller => "sentinels", except: [:index, :destroy]
 
