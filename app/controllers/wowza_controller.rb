@@ -41,6 +41,22 @@ class WowzaController < ApplicationController
     stream(url_str, doc, "application/x-mpegURL")
   end
 
+  def ts
+    # https://repository.library.northeastern.edu/wowza/neu:m039rj57d/media_w240930_0.ts
+    # "http://libwowza.neu.edu:1935/vod/_definst_/datastreamStore/cerberusData/newfedoradata/datastreamStore/5e/MP4:info%253Afedora%252Fneu%253Am039qq36h%252Fcontent%252Fcontent.0/media_w1480328487_97.ts"
+    # params[:ts]
+    # video/MP2T
+    doc = SolrDocument.new ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first
+
+    dir = doc.pid_hash[0,2]
+    encoded = doc.encode
+
+    url_str = "http://libwowza.neu.edu:1935/vod/_definst_/datastreamStore/cerberusData/newfedoradata/datastreamStore/#{dir}/#{doc_type(doc)}:" + CGI::escape("info%3Afedora%2F#{encoded}%2Fcontent%2Fcontent.0") + "/#{params[:ts]}"
+
+    data = open(url_str)
+    send_data(data.read, type: "video/MP2T", filename: params[:ts])
+  end
+
   private
 
     def stream(url_str, doc, mime_type_str)
