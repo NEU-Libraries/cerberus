@@ -41,7 +41,7 @@ class WowzaController < ApplicationController
     stream(url_str, doc, "application/x-mpegURL")
   end
 
-  def stream
+  def part
     # https://repository.library.northeastern.edu/wowza/neu:m039rj57d/media_w240930_0.ts
     # "http://libwowza.neu.edu:1935/vod/_definst_/datastreamStore/cerberusData/newfedoradata/datastreamStore/5e/MP4:info%253Afedora%252Fneu%253Am039qq36h%252Fcontent%252Fcontent.0/media_w1480328487_97.ts"
     # params[:part]
