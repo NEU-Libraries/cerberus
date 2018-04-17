@@ -7,7 +7,6 @@ Cerberus::Application.routes.draw do
 
   # Wowza controller paths
   get '/wowza/:id/plain' => 'wowza#plain', as: 'wowza_plain'
-  # get '/wowza/:id/rtmp' => 'wowza#rtmp', as: 'wowza_rtmp'
   get '/wowza/:id/playlist.m3u8' => 'wowza#playlist', as: 'wowza_playlist'
   get '/wowza/:id/:part' => 'wowza#part', as: 'wowza_part', constraints: { part: /media.*/ }
 
