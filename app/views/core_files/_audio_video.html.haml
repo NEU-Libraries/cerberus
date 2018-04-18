@@ -39,6 +39,7 @@
     flashplayer: "/assets/jwplayer/jwplayer.flash.swf",
     sources:
     [
+    { file: "#{wowza_plain_path(pid, {only_path: false})}", type:"#{type.downcase}"},
     { file: "#{wowza_playlist_path(pid, {only_path: false})}" },
     ],
     tracks: [{
