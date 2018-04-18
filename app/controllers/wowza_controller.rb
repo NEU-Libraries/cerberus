@@ -26,7 +26,7 @@ class WowzaController < ApplicationController
     doc = fetch_solr_document
 
     if (!current_user.nil? && (current_user.can? :read, doc)) || doc.public?
-      if doc.mime_type == 'video/mp4' || doc.mime_type == 'video/quicktime' || doc.mime_type == 'audio/mpeg'
+      if doc.mime_type.start_with?('video') || doc.mime_type.start_with?('audio')
         dir = doc.pid_hash[0,2]
         encoded = doc.encode
 
