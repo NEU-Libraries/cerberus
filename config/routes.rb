@@ -6,7 +6,7 @@ Cerberus::Application.routes.draw do
   # Hydra::BatchEdit.add_routes(self)
 
   # Wowza controller paths
-  get '/wowza/:id/plain' => 'wowza#plain', as: 'wowza_plain'
+  get '/wowza/:id/plain' => 'wowza#playlist', as: 'wowza_plain'
   get '/wowza/:id/playlist.m3u8' => 'wowza#playlist', as: 'wowza_playlist'
   get '/wowza/:id/:part' => 'wowza#part', as: 'wowza_part', constraints: { part: /media.*/ }
 
