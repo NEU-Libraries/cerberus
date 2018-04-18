@@ -11,10 +11,10 @@
       - pid = content.pid
       - dir = content.pid_hash[0,2]
       - encoded = content.encode
-      - if content.mime_type == 'video/mp4' || content.mime_type == 'video/quicktime'
+      - if content.mime_type.start_with?('video')
         - type = 'MP4'
         - provider = 'video'
-      - elsif content.mime_type == 'audio/mpeg'
+      - elsif content.mime_type.start_with?('audio')
         - type = 'MP3'
         - provider = 'sound'
   -elsif content.klass == "TextFile"
