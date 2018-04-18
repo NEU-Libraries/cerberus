@@ -1,7 +1,8 @@
-include MimeHelper
 require 'open-uri'
 
 class WowzaController < ApplicationController
+  include Cerberus::ControllerHelpers::ViewLogger
+  include MimeHelper
   def plain
     doc = fetch_solr_document
 
