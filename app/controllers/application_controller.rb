@@ -48,6 +48,7 @@ class ApplicationController < ActionController::Base
       options[:status] = status_code
       response.header["Accept-Ranges"] = "bytes"
       response.header["Content-Range"] = "bytes #{bytes.begin}-#{bytes.end}/#{size}" if bytes
+      response.header["Content-Length"] = (bytes.end.to_i - bytes.begin.to_i + 1).to_s if bytes
 
       send_data IO.binread(path, length, offset), options
     else
