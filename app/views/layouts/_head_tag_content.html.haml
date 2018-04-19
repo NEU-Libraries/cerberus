@@ -24,6 +24,7 @@
 = yield(:js_head)
 
 = javascript_include_tag 'application'
+= analytics_init if GoogleAnalytics.valid_tracker?
 
 :javascript
   var spinner;

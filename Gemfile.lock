@@ -244,6 +244,7 @@ GEM
       activerecord (>= 3.0.0)
     formatador (0.2.4)
     fssm (0.2.10)
+    google-analytics-rails (1.1.1)
     guard (1.8.2)
       formatador (>= 0.2.4)
       listen (>= 1.0.0)
@@ -588,6 +589,7 @@ DEPENDENCIES
   exception_notification
   factory_girl_rails
   figaro
+  google-analytics-rails (= 1.1.1)
   guard-livereload
   haml
   hashie

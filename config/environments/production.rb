@@ -85,5 +85,5 @@ Cerberus::Application.configure do
     }
 
   #Google analytics tracking code
-  #GA.tracker = "UA-4426028-12"
+  GA.tracker = "UA-4426028-6"
 end

@@ -76,6 +76,8 @@ gem 'axlsx', :git => 'https://github.com/randym/axlsx.git', :ref => '9e07402a26f
 gem 'kataba'
 gem 'passenger'
 
+gem 'google-analytics-rails', '1.1.1'
+
 # Gems used only for assets and not required
 # in production environments by default.
 group :assets do
