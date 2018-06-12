@@ -114,6 +114,15 @@ class CatalogController < ApplicationController
     super
   end
 
+  def etd_years
+    self.solr_search_params_logic += [:theses_and_dissertations_filter]
+    self.solr_search_params_logic += [:apply_per_page_limit]
+    self.solr_search_params_logic += [:key_date_filter]
+    self.solr_search_params_logic += [:limit_to_public]
+    (@response, @document_list) = get_search_results
+    render 'shared/smart_collections/smart_collection', locals: { smart_collection: 'theses_and_dissertations' }
+  end
+
   def communities
     self.solr_search_params_logic += [:communities_filter]
     self.solr_search_params_logic += [:apply_per_page_limit]
@@ -456,6 +465,12 @@ class CatalogController < ApplicationController
 
   def theses_and_dissertations_filter(solr_parameters, user_parameters)
     query = "drs_category_ssim:\"Theses and Dissertations\""
+    solr_parameters[:fq] ||= []
+    solr_parameters[:fq] << query
+  end
+
+  def key_date_filter(solr_parameters, user_parameters)
+    query = "key_date_ssi:#{params[:year]}*"
     solr_parameters[:fq] ||= []
     solr_parameters[:fq] << query
   end

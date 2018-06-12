@@ -1,0 +1,7 @@
+.years
+
+  %table.table.table-striped
+    - @years.each_with_index do |year|
+      %tr
+        %td
+          = link_to(year, catalog_etd_years_path(year))

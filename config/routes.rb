@@ -48,6 +48,10 @@ Cerberus::Application.routes.draw do
   get '/:smart_col/recent' => 'catalog#smart_col_recent_deposits', as: 'smart_col_recent'
   get '/:smart_col/creators' => 'catalog#smart_col_creator_list', as: 'smart_col_creator_list'
 
+  # Google Scholar
+  get '/theses_and_dissertations/years' => 'etds#years', as: 'etd_years'
+  get '/theses_and_dissertations/years/:year' => 'catalog#etd_years', as: 'catalog_etd_years'
+
   # Community Specific queries
   get '/communities/:id/other' => 'communities#other_publications', as: 'community_other'
   get '/communities/:id/employees' => 'communities#employees', as: 'community_employees'

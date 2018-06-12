@@ -43,7 +43,12 @@
               - href = smart_col_creator_list_path(smart_collection)
             %a.btn.btn-default{:href=>href} Creator List
 
-- if render_constraints(params) != "" || (!params[:sort].nil? && params[:action] == 'smart_col_recent_deposits')
+- if smart_collection == 'theses_and_dissertations' && !params[:year].blank? # Google Scholar ETD year filter
+  %h1.page-header
+    %i.icon-search
+    %small
+      = render_constraint_element("Year", params[:year], :classes => ["query"], :remove => catalog_theses_and_dissertations_path)
+- elsif render_constraints(params) != "" || (!params[:sort].nil? && params[:action] == 'smart_col_recent_deposits')
   %h1.page-header
     %i.icon-search
     %small
