@@ -81,6 +81,8 @@
                 = link_to("View IPTC", loaders_aaia_iptc_path(image.id), class:"btn btn-small btn-warning")
               - elsif @report.loader_name == t('loaders.libcom.long_name')
                 = link_to("View IPTC", loaders_libcom_iptc_path(image.id), class:"btn btn-small btn-warning")
+              - elsif @report.loader_name == t('loaders.ogl.long_name')
+                = link_to("View IPTC", loaders_ogl_iptc_path(image.id), class:"btn btn-small btn-warning")
               - elsif @report.loader_name == t('loaders.spreadsheet.long_name')
                 = link_to("View MODS", loaders_spreadsheet_mods_path(image.id), class:"btn btn-small btn-warning")
               - elsif @report.loader_name == t('loaders.xml.long_name')

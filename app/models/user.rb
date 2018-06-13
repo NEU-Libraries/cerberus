@@ -290,6 +290,10 @@ class User < ActiveRecord::Base
     return self.groups.include? "northeastern:drs:repository:loaders:libcom"
   end
 
+  def ogl_loader?
+    return self.groups.include? "northeastern:drs:repository:loaders:ogl"
+  end
+
   def xml_loader?
     return self.groups.include? "northeastern:drs:repository:loaders:xml"
   end

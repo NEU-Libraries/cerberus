@@ -1,5 +1,5 @@
 class ImageProcessingJob
-  attr_accessor :file, :file_name, :parent, :copyright, :report_id, :client, :derivatives, :user
+  attr_accessor :file, :file_name, :parent, :copyright, :report_id, :client, :derivatives, :user, :note
   include MimeHelper
   include HandleHelper
   include ApplicationHelper
@@ -8,7 +8,7 @@ class ImageProcessingJob
     :loader_image_processing
   end
 
-  def initialize(file, file_name, parent, copyright, report_id, user, derivatives=false, client=nil)
+  def initialize(file, file_name, parent, copyright, report_id, user, derivatives=false, client=nil, note=nil)
     self.file = file
     self.file_name = file_name
     self.parent = parent
@@ -17,6 +17,7 @@ class ImageProcessingJob
     self.client = client
     self.derivatives = derivatives
     self.user = user
+    self.note = note
   end
 
   def run
@@ -210,6 +211,11 @@ class ImageProcessingJob
 
         if !sc_type.nil? && sc_type != ""
           core_file.category = sc_type
+        end
+
+        # note
+        if !note.blank?
+          core_file.mods.note = note
         end
 
         # Create a handle

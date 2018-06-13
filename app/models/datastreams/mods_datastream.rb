@@ -537,7 +537,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
         xml.language{
           xml.languageTerm
         }
-        xml.note('type' => 'citation')
+        xml.note
         xml.subject{
           xml.topic ""
         }

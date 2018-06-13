@@ -145,6 +145,7 @@ Cerberus::Application.routes.draw do
   get "/loaders/damore/report/:id" => 'loaders/damore_loads#show', as: 'loaders_damore_report'
   get "/loaders/aaia/report/:id" => 'loaders/aaia_loads#show', as: 'loaders_aaia_report'
   get "/loaders/libcom/report/:id" => 'loaders/libcom_loads#show', as: 'loaders_libcom_report'
+  get "/loaders/ogl/report/:id" => 'loaders/ogl_loads#show', as: 'loaders_ogl_report'
   get "/loaders/spreadsheet/report/:id" => 'loaders/spreadsheet_loads#show', as: 'loaders_spreadsheet_report'
   get "/loaders/xml/report/:id" => 'loaders/xml_loads#show', as: 'loaders_xml_report'
 
@@ -171,6 +172,8 @@ Cerberus::Application.routes.draw do
    get "/loaders/aaia/file/:id" => 'aaia_loads#show_iptc', as: 'loaders_aaia_iptc'
    resources :libcom_loads, only: [:new, :create, :show], :path => "loaders/libcom"
    get "/loaders/libcom/file/:id" => 'libcom_loads#show_iptc', as: 'loaders_libcom_iptc'
+   resources :ogl_loads, only: [:new, :create, :show], :path => "loaders/ogl"
+   get "/loaders/ogl/file/:id" => 'ogl_loads#show_iptc', as: 'loaders_ogl_iptc'
    resources :spreadsheet_loads, only: [:new, :create, :preview, :preview_compare], :path => "loaders/spreadsheet"
    get "/loaders/spreadsheet/preview/:id" => 'spreadsheet_loads#preview',  as: 'loaders_spreadsheet_preview'
    get "/loaders/spreadsheet/preview_compare/:id" => 'spreadsheet_loads#preview_compare', as: 'loaders_spreadsheet_preview_compare'

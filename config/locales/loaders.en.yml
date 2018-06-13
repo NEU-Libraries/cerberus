@@ -45,3 +45,8 @@ en:
       long_name: "Library Communications and Events"
       short_name: "libcom"
       copyright: "In Copyright - Non-Commercial Use Permitted: This Item is protected by copyright and/or related rights. You are free to use this Item in any way that is permitted by the copyright and related rights legislation that applies to your use. In addition, no permission is required from the rights-holder(s) for non-commercial uses. For other uses you need to obtain permission from the rights-holder(s). (http://rightsstatements.org/page/CNE/1.0/?language=en)"
+    ogl:
+      long_name: "Ocean Genome Legacy"
+      short_name: "ogl"
+      copyright: "This work is licensed for use under a Creative Commons Attribution License (CC BY)."
+      note: "Contact the Ocean Genome Legacy Center for more information: https://www.northeastern.edu/ogl/contact/"

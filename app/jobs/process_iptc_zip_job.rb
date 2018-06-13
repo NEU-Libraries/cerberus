@@ -36,7 +36,11 @@ class ProcessIptcZipJob
     # loop through file list
     file_list.each_with_index do |fpath, i|
       # file_name = File.basename(fpath)
-      ImageProcessingJob.new(fpath, original_names[i], parent, copyright, load_report.id, current_user, derivatives, client).run
+      if (loader_name == "Ocean Genome Legacy")
+        ImageProcessingJob.new(fpath, original_names[i], parent, copyright, load_report.id, current_user, derivatives, client, I18n.t('loaders.ogl.note')).run
+      else
+        ImageProcessingJob.new(fpath, original_names[i], parent, copyright, load_report.id, current_user, derivatives, client).run
+      end
       load_report.update_counts
       count = count + 1
       load_report.save!
