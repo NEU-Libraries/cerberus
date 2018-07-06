@@ -17,6 +17,8 @@ module Cerberus
         result_hsh["canonical_object"] = @core_doc.canonical_object.map { |doc| {doc_to_url(doc) => doc.derivative_label} }.reduce(&:merge)
         result_hsh["content_objects"] = @core_doc.content_objects.map { |doc| {doc_to_url(doc) => doc.derivative_label} }.reduce(&:merge)
 
+        result_hsh["content_objects"].reject!{ |k,v| v == "Thumbnail Image" }
+
         if !result_hsh["content_objects"].blank?
           result_hsh["content_objects"].each do |k,v|
             if v == "Page"
@@ -76,7 +78,7 @@ module Cerberus
 
       protected
         def doc_to_url(solr_doc)
-          return download_path(solr_doc.pid, :only_path => false)
+          return download_path(solr_doc.pid, :only_path => false) + "?datastream_id=content"
         end
 
         def fetch_mods_json

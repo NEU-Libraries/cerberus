@@ -40,6 +40,8 @@ module Api
           result_hsh["canonical_object"] = core_doc.canonical_object.map { |doc| {doc_to_url(doc) => doc.derivative_label} }.reduce(&:merge)
           result_hsh["content_objects"] = core_doc.content_objects.map { |doc| {doc_to_url(doc) => doc.derivative_label} }.reduce(&:merge)
 
+          result_hsh["content_objects"].reject!{ |k,v| v == "Thumbnail Image" }
+
           render json: result_hsh.to_json
         rescue NoMethodError
           render json: {error: "This item has no content objects."} and return
@@ -48,9 +50,9 @@ module Api
 
       protected
         def doc_to_url(solr_doc)
-          return download_path(solr_doc.pid, :only_path => false)
+          return download_path(solr_doc.pid, :only_path => false) + "?datastream_id=content"
         end
-        
+
     end
   end
 end
