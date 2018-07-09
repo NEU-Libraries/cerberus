@@ -16,6 +16,28 @@ module Api
       include BlacklightAdvancedSearch::ParseBasicQ
       include BlacklightAdvancedSearch::Controller
 
+      def ingest
+        # Take an external form, and based on whitelisted IP deposit submission
+
+        # Required items;
+        # Binary file
+        # Title
+        # Keyword(s)
+
+        # Optional items;
+        # Subtitle
+        # Creator name(s) - first, middle, last
+        # Date created
+        # Copyright date
+        # Date published
+        # Publisher name
+        # Place of publication
+        # Language(s)
+        # Description(s)
+        # Note(s)
+        # Use and reproduction - dropdown
+      end
+
     end
   end
 end
