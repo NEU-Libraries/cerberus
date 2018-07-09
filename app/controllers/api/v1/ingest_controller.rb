@@ -21,21 +21,35 @@ module Api
 
         # Required items;
         # Binary file
+        file = params[:file]
         # Title
+        title = params[:core_file][:title]
         # Keyword(s)
+        keywords = params[:core_file][:keywords]
 
         # Optional items;
         # Subtitle
-        # Creator name(s) - first, middle, last
+        subtitle = params[:core_file][:subtitle]
         # Date created
+        date_created = params[:core_file][:date_created]
         # Copyright date
+        copyright_date = params[:core_file][:copyright_date]
         # Date published
+        date_published = params[:core_file][:date_published]
         # Publisher name
+        publisher = params[:core_file][:publisher]
         # Place of publication
+        place_of_publication = params[:core_file][:place_of_publication]
+        # Creator name(s) - first, middle, last
+
         # Language(s)
+        languages = params[:core_file][:languages]
         # Description(s)
+        descriptions = params[:core_file][:descriptions]
         # Note(s)
+        notes = params[:core_file][:notes]
         # Use and reproduction - dropdown
+        use_and_reproduction = params[:core_file][:use_and_reproduction]
       end
 
     end
