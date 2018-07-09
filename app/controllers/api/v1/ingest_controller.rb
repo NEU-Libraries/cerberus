@@ -16,8 +16,18 @@ module Api
       include BlacklightAdvancedSearch::ParseBasicQ
       include BlacklightAdvancedSearch::Controller
 
+      include Cerberus::TempFileStorage
+      include Cerberus::ThumbnailCreation
+      include HandleHelper
+      include MimeHelper
+
       def ingest
         # Take an external form, and based on whitelisted IP deposit submission
+        # core_file.instantiate_appropriate_content_object(tmp_path, core_file.original_filename)
+        # Cerberus::Application::Queue.push(ContentCreationJob.new(@core_file.pid, @core_file.tmp_path, @core_file.original_filename))
+        # core_file.identifier = make_handle(core_file.persistent_url)
+
+        core_file = CoreFile.new
 
         # Required items;
         # Binary file
