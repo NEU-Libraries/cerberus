@@ -33,33 +33,34 @@ module Api
         # Binary file
         file = params[:file]
         # Title
-        title = params[:core_file][:title]
+        core_file.title = params[:core_file][:title]
         # Keyword(s)
-        keywords = params[:core_file][:keywords]
+        core_file.keywords = params[:core_file][:keywords]
 
         # Optional items;
         # Subtitle
-        subtitle = params[:core_file][:subtitle]
+        core_file.mods.title_info.sub_title = params[:core_file][:subtitle]
         # Date created
-        date_created = params[:core_file][:date_created]
+        core_file.date_created = params[:core_file][:date_created]
         # Copyright date
-        copyright_date = params[:core_file][:copyright_date]
-        # Date published
-        date_published = params[:core_file][:date_published]
+        core_file.mods.origin_info.copyright = params[:core_file][:copyright_date]
+        # Date published - dateIssued
+        core_file.mods.origin_info.date_issued = params[:core_file][:date_published]
         # Publisher name
-        publisher = params[:core_file][:publisher]
+        core_file.mods.origin_info.publisher = params[:core_file][:publisher]
         # Place of publication
-        place_of_publication = params[:core_file][:place_of_publication]
+        core_file.mods.origin_info.place = params[:core_file][:place_of_publication]
         # Creator name(s) - first, middle, last
 
         # Language(s)
-        languages = params[:core_file][:languages]
+        core_file.languages = params[:core_file][:languages]
         # Description(s)
-        descriptions = params[:core_file][:descriptions]
+        core_file.mods.abstracts = params[:core_file][:descriptions]
         # Note(s)
-        notes = params[:core_file][:notes]
+        core_file.mods.notes = params[:core_file][:notes]
         # Use and reproduction - dropdown
-        use_and_reproduction = params[:core_file][:use_and_reproduction]
+        core_file.mods.access_condition = params[:core_file][:use_and_reproduction]
+        core_file.mods.access_condition.type = "use and reproduction"
       end
 
     end
