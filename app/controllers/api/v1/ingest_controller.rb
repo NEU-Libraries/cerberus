@@ -61,6 +61,14 @@ module Api
         # Use and reproduction - dropdown
         core_file.mods.access_condition = params[:core_file][:use_and_reproduction]
         core_file.mods.access_condition.type = "use and reproduction"
+
+        new_path = move_file_to_tmp(file)
+        core_file.original_filename = file.original_filename
+        core_file.instantiate_appropriate_content_object(new_path, core_file.original_filename)
+
+        core_file.identifier = make_handle(core_file.persistent_url)
+
+        Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename))
       end
 
     end
