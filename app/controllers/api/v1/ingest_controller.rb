@@ -23,9 +23,14 @@ module Api
 
       def ingest
         # Take an external form, and based on whitelisted IP deposit submission
-        # core_file.instantiate_appropriate_content_object(tmp_path, core_file.original_filename)
-        # Cerberus::Application::Queue.push(ContentCreationJob.new(@core_file.pid, @core_file.tmp_path, @core_file.original_filename))
-        # core_file.identifier = make_handle(core_file.persistent_url)
+
+        if params.blank? || params[:core_file].blank? || params[:file].blank?
+          # raise submission empty error
+        elsif params[:core_file][:title].blank?
+          # raise title required error
+        elsif params[:core_file][:keywords].blank?
+          # raises keywords required error
+        end
 
         core_file = CoreFile.new
 
