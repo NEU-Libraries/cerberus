@@ -26,10 +26,13 @@ module Api
 
         if params.blank? || params[:core_file].blank? || params[:file].blank?
           # raise submission empty error
+          format.json { render :json => { :error => "Incomplete form submission. File and/or metadata are not available.", status: :bad_request}
         elsif params[:core_file][:title].blank?
           # raise title required error
+          format.json { render :json => { :error => "Incomplete form submission. Title missing.", status: :bad_request}
         elsif params[:core_file][:keywords].blank?
           # raises keywords required error
+          format.json { render :json => { :error => "Incomplete form submission. Keyword(s) missing.", status: :bad_request}
         end
 
         core_file = CoreFile.new
