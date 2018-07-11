@@ -23,6 +23,7 @@ module Api
 
       def ingest
         # Take an external form, and based on whitelisted IP deposit submission
+        ip = request.remote_ip
 
         if params.blank? || params[:core_file].blank? || params[:file].blank?
           # raise submission empty error
