@@ -11,7 +11,11 @@ module Api
         # Take an external form, and based on whitelisted IP deposit submission
         ip = request.remote_ip
 
-        I18n.t "ingest.#{ip.gsub(".", "-")}", raise: true # We replace periods for YML, and raise error if IP not on whitelist
+        begin
+          I18n.t "ingest.#{ip.gsub(".", "-")}", raise: true # We replace periods for YML, and raise error if IP not on whitelist
+        rescue I18n::MissingTranslationData
+          format.json { render :json => { :error => "IP address not on whitelist. DRS administrators have been notified of this attempt.", status: :forbidden}
+        end
 
         if params.blank? || params[:core_file].blank? || params[:file].blank?
           # raise submission empty error
