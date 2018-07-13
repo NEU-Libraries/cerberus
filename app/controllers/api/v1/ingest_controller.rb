@@ -39,6 +39,8 @@ module Api
         end
 
         core_file = CoreFile.new
+        core_file.depositor = "000000000"
+        core_file.properties.api_ingested = 'true'
 
         # Required items;
         # Binary file
