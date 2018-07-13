@@ -1,20 +1,6 @@
-require 'blacklight/catalog'
-require 'blacklight_advanced_search'
-require 'parslet'
-require 'parsing_nesting/tree'
-
 module Api
   module V1
     class IngestController < ApplicationController
-
-      include Blacklight::Catalog
-      include Blacklight::CatalogHelperBehavior
-      include Blacklight::Configurable # comply with BL 3.7
-      include ActionView::Helpers::DateHelper
-      # This is needed as of BL 3.7
-      self.copy_blacklight_config_from(CatalogController)
-      include BlacklightAdvancedSearch::ParseBasicQ
-      include BlacklightAdvancedSearch::Controller
 
       include Cerberus::TempFileStorage
       include Cerberus::ThumbnailCreation
@@ -64,7 +50,9 @@ module Api
         # Place of publication
         core_file.mods.origin_info.place = params[:core_file][:place_of_publication]
         # Creator name(s) - first, middle, last
-
+        first_names = params[:core_file][:creators][:first_names]
+        last_names = params[:core_file][:creators][:first_names]
+        core_file.creators = {'first_names' => first_names, 'last_names'  => last_names}
         # Language(s)
         core_file.languages = params[:core_file][:languages]
         # Description(s)
@@ -75,11 +63,15 @@ module Api
         core_file.mods.access_condition = params[:core_file][:use_and_reproduction]
         core_file.mods.access_condition.type = "use and reproduction"
 
+        core_file.save!
+
         new_path = move_file_to_tmp(file)
         core_file.original_filename = file.original_filename
         core_file.instantiate_appropriate_content_object(new_path, core_file.original_filename)
 
         core_file.identifier = make_handle(core_file.persistent_url)
+
+        core_file.save!
 
         Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename))
       end
