@@ -240,6 +240,8 @@ Cerberus::Application.routes.draw do
       get "/file_sizes" => "core_files#file_sizes", as: "file_sizes"
       # content objects
       get "/files/:id/content_objects" => "core_files#content_objects", as: "content_objects"
+      # ingest
+      post "/ingest" => "ingest#ingest", as: "ingest"
     end
   end
 
