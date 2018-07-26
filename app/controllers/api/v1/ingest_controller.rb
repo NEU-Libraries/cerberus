@@ -14,18 +14,18 @@ module Api
         begin
           I18n.t "ingest.#{ip.gsub(".", "-")}", raise: true # We replace periods for YML, and raise error if IP not on whitelist
         rescue I18n::MissingTranslationData
-          format.json { render :json => { :error => "IP address not on whitelist. DRS administrators have been notified of this attempt.", status: :forbidden}
+          format.json { render :json => { :error => "IP address not on whitelist. DRS administrators have been notified of this attempt.", status: :forbidden } }
         end
 
         if params.blank? || params[:core_file].blank? || params[:file].blank?
           # raise submission empty error
-          format.json { render :json => { :error => "Incomplete form submission. File and/or metadata are not available.", status: :bad_request}
+          format.json { render :json => { :error => "Incomplete form submission. File and/or metadata are not available.", status: :bad_request }  }
         elsif params[:core_file][:title].blank?
           # raise title required error
-          format.json { render :json => { :error => "Incomplete form submission. Title missing.", status: :bad_request}
+          format.json { render :json => { :error => "Incomplete form submission. Title missing.", status: :bad_request }  }
         elsif params[:core_file][:keywords].blank?
           # raises keywords required error
-          format.json { render :json => { :error => "Incomplete form submission. Keyword(s) missing.", status: :bad_request}
+          format.json { render :json => { :error => "Incomplete form submission. Keyword(s) missing.", status: :bad_request } }
         end
 
         core_file = CoreFile.new
@@ -44,7 +44,7 @@ module Api
         # Subtitle
         core_file.mods.title_info.sub_title = params[:core_file][:subtitle]
         # Date created
-        core_file.date_created = params[:core_file][:date_created]
+        core_file.date = params[:core_file][:date_created]
         # Copyright date
         core_file.mods.origin_info.copyright = params[:core_file][:copyright_date]
         # Date published - dateIssued
@@ -54,11 +54,11 @@ module Api
         # Place of publication
         core_file.mods.origin_info.place = params[:core_file][:place_of_publication]
         # Creator name(s) - first, last
-        first_names = params[:core_file][:creators][:first_names]
-        last_names = params[:core_file][:creators][:last_names]
-        core_file.creators = {'first_names' => first_names, 'last_names'  => last_names}
+        # first_names = params[:core_file][:creators][:first_names]
+        # last_names = params[:core_file][:creators][:last_names]
+        # core_file.creators = {'first_names' => first_names, 'last_names'  => last_names}
         # Language(s)
-        core_file.languages = params[:core_file][:languages]
+        core_file.mods.languages = params[:core_file][:languages]
         # Description(s)
         core_file.mods.abstracts = params[:core_file][:descriptions]
         # Note(s)
@@ -78,6 +78,10 @@ module Api
         core_file.save!
 
         Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename))
+
+        respond_to do |format|
+          format.json { render :json => { :response=>"File uploaded"}, status: :ok }
+        end
       end
 
     end
