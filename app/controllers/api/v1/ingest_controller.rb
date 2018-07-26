@@ -53,9 +53,9 @@ module Api
         core_file.mods.origin_info.publisher = params[:core_file][:publisher]
         # Place of publication
         core_file.mods.origin_info.place = params[:core_file][:place_of_publication]
-        # Creator name(s) - first, middle, last
+        # Creator name(s) - first, last
         first_names = params[:core_file][:creators][:first_names]
-        last_names = params[:core_file][:creators][:first_names]
+        last_names = params[:core_file][:creators][:last_names]
         core_file.creators = {'first_names' => first_names, 'last_names'  => last_names}
         # Language(s)
         core_file.languages = params[:core_file][:languages]

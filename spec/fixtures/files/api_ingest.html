@@ -4,30 +4,64 @@
 
   <body>
     <form target="" method="post" enctype="multipart/form-data">
-    <br><label for="file">File:</label>
+    <br><label for="file">File: *</label>
     <input name="file" type="file">
     <br>
 
-    <br><label for="title">Title:</label>
-    <input name="title" type="text">
+    <!-- core_file[creators][corporate_names][] -->
 
-    <br><label for="subtitle">Subtitle:</label>
-    <input name="subtitle" type="text">
+    <br><label for="core_file[title]">Title: *</label>
+    <input name="core_file[title]" type="text">
 
-    <br><label for="date_created">Date Created:</label>
-    <input name="date_created" type="date">
+    <br><label for="core_file[keywords][]">Keywords: *</label>
+    <input name="core_file[keywords][]" type="text">
+    <input name="core_file[keywords][]" type="text">
+    <input name="core_file[keywords][]" type="text">
+    <input name="core_file[keywords][]" type="text">
 
-    <br><label for="copyright_date">Copyright Date:</label>
-    <input name="copyright_date" type="date">
+    <br>
 
-    <br><label for="date_published">Date Published:</label>
-    <input name="date_published" type="date">
+    <br><label for="core_file[subtitle]">Subtitle:</label>
+    <input name="core_file[subtitle]" type="text">
 
-    <br><label for="publisher">Publisher:</label>
-    <input name="publisher" type="text">
+    <br><label for="core_file[date_created]">Date Created:</label>
+    <input name="core_file[date_created]" type="date">
 
-    <br><label for="place_of_publication">Place of Publication:</label>
-    <input name="place_of_publication" type="text">
+    <br><label for="core_file[copyright_date]">Copyright Date:</label>
+    <input name="core_file[copyright_date]" type="date">
+
+    <br><label for="core_file[date_published]">Date Published:</label>
+    <input name="core_file[date_published]" type="date">
+
+    <br><label for="core_file[publisher]">Publisher:</label>
+    <input name="core_file[publisher]" type="text">
+
+    <br><label for="core_file[place_of_publication]">Place of Publication:</label>
+    <input name="core_file[place_of_publication]" type="text">
+
+    <br><label for="core_file[languages][]">Languages:</label>
+    <input name="core_file[languages][]" type="text">
+    <input name="core_file[languages][]" type="text">
+    <input name="core_file[languages][]" type="text">
+    <input name="core_file[languages][]" type="text">
+
+    <br><label for="core_file[descriptions][]">Descriptions:</label>
+    <input name="core_file[descriptions][]" type="text">
+    <input name="core_file[descriptions][]" type="text">
+    <input name="core_file[descriptions][]" type="text">
+    <input name="core_file[descriptions][]" type="text">
+
+    <br><label for="core_file[notes][]">Notes:</label>
+    <input name="core_file[notes][]" type="text">
+    <input name="core_file[notes][]" type="text">
+    <input name="core_file[notes][]" type="text">
+    <input name="core_file[notes][]" type="text">
+
+    <br><br><label for="core_file[use_and_reproduction]">Copyright and reproduction:</label>
+    <select name="core_file[use_and_reproduction]">
+      <option value="copyright">copyright</option>
+      <option value="free for all">free for all</option>
+    </select>
 
     <br><br><input type="submit" value="Upload Now">
     </form>
