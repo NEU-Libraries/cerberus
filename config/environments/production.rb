@@ -81,7 +81,8 @@ Cerberus::Application.configure do
     :email => {
       :email_prefix => "[DRS Production] ",
       :sender_address => %{"notifier" <notifier@repository.library.northeastern.edu>},
-      :exception_recipients => ["d.cliff@neu.edu", "e.zoller@neu.edu"]
+      :exception_recipients => ["dgcliff@northeastern.edu"],
+      :email_format => :html
     }
 
   #Google analytics tracking code
