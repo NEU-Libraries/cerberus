@@ -109,6 +109,7 @@ module Api
         core_file.save!
 
         new_path = move_file_to_tmp(file)
+        core_file.tmp_path = new_path
         core_file.original_filename = file.original_filename
         core_file.instantiate_appropriate_content_object(new_path, core_file.original_filename)
 
