@@ -12,23 +12,48 @@ module Api
         ip = request.remote_ip
 
         begin
-          I18n.t "ingest.#{ip.gsub(".", "-")}", raise: true # We replace periods for YML, and raise error if IP not on whitelist
+          collections = I18n.t "ingest.#{ip.gsub(".", "-")}", raise: true # We replace periods for YML, and raise error if IP not on whitelist
         rescue I18n::MissingTranslationData
-          format.json { render :json => { :error => "IP address not on whitelist. DRS administrators have been notified of this attempt.", status: :forbidden } }
+          respond_to do |format|
+            format.json { render :json => { :error => "IP address not on whitelist. DRS administrators have been notified of this attempt.", status: :forbidden } }
+          end
         end
 
         if params.blank? || params[:core_file].blank? || params[:file].blank?
           # raise submission empty error
-          format.json { render :json => { :error => "Incomplete form submission. File and/or metadata are not available.", status: :bad_request }  }
+          respond_to do |format|
+            format.json { render :json => { :error => "Incomplete form submission. File and/or metadata are not available.", status: :bad_request }  }
+          end
         elsif params[:core_file][:title].blank?
           # raise title required error
-          format.json { render :json => { :error => "Incomplete form submission. Title missing.", status: :bad_request }  }
+          respond_to do |format|
+            format.json { render :json => { :error => "Incomplete form submission. Title missing.", status: :bad_request }  }
+          end
         elsif params[:core_file][:keywords].blank?
           # raises keywords required error
-          format.json { render :json => { :error => "Incomplete form submission. Keyword(s) missing.", status: :bad_request } }
+          respond_to do |format|
+            format.json { render :json => { :error => "Incomplete form submission. Keyword(s) missing.", status: :bad_request } }
+          end
         end
 
+        user_submittied_col_pid = params[:collection]
+
+        if !user_submittied_col_pid.blank? && (!collections.contain? user_submittied_col_pid)
+          # raises invalid data error
+          respond_to do |format|
+            format.json { render :json => { :error => "Invalid collection pid.", status: :bad_request } }
+          end
+        end
+
+        if user_submittied_col_pid.blank?
+          # Use default yml first value
+          user_submittied_col_pid = collections.first
+        end
+
+        user_submittied_collection = Collection.find(user_submittied_col_pid)
+
         core_file = CoreFile.new
+        core_file.parent = user_submittied_collection
         core_file.depositor = "000000000"
         core_file.properties.api_ingested = 'true'
 
