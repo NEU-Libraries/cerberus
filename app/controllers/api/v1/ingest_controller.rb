@@ -54,8 +54,22 @@ module Api
 
         core_file = CoreFile.new
         core_file.parent = user_submittied_collection
+        core_file.properties.parent_id = user_submittied_collection.pid
         core_file.depositor = "000000000"
         core_file.properties.api_ingested = 'true'
+
+        core_file.save!
+
+        sentinel = core_file.parent.sentinel
+
+        if sentinel && !sentinel.core_file.blank?
+          core_file.permissions = sentinel.core_file["permissions"]
+          core_file.mass_permissions = sentinel.core_file["mass_permissions"]
+          core_file.save!
+        else
+          core_file.rightsMetadata.permissions({person: "000000000"}, 'edit')
+          core_file.save!
+        end
 
         # Required items;
         # Binary file
