@@ -12,8 +12,9 @@ module Api
         ip = request.remote_ip
 
         begin
-          collections = I18n.t "ingest.#{ip.gsub(".", "-")}", raise: true # We replace periods for YML, and raise error if IP not on whitelist
+          collections = I18n.t "ingest.#{Rails.env}.#{ip.gsub(".", "-")}", raise: true # We replace periods for YML, and raise error if IP not on whitelist
         rescue I18n::MissingTranslationData
+          email_handled_exception(Exceptions::SecurityEscalationError.new())
           respond_to do |format|
             format.json { render :json => { :error => "IP address not on whitelist. DRS administrators have been notified of this attempt.", status: :forbidden } }
           end
