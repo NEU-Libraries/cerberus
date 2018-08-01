@@ -17,24 +17,24 @@ module Api
           email_handled_exception(Exceptions::SecurityEscalationError.new())
           respond_to do |format|
             format.json { render :json => { :error => "IP address not on whitelist. DRS administrators have been notified of this attempt.", status: :forbidden } }
-          end
+          end and return
         end
 
         if params.blank? || params[:core_file].blank? || params[:file].blank?
           # raise submission empty error
           respond_to do |format|
             format.json { render :json => { :error => "Incomplete form submission. File and/or metadata are not available.", status: :bad_request }  }
-          end
+          end and return
         elsif params[:core_file][:title].blank?
           # raise title required error
           respond_to do |format|
             format.json { render :json => { :error => "Incomplete form submission. Title missing.", status: :bad_request }  }
-          end
+          end and return
         elsif params[:core_file][:keywords].blank?
           # raises keywords required error
           respond_to do |format|
             format.json { render :json => { :error => "Incomplete form submission. Keyword(s) missing.", status: :bad_request } }
-          end
+          end and return
         end
 
         user_submittied_col_pid = params[:collection]
@@ -43,7 +43,7 @@ module Api
           # raises invalid data error
           respond_to do |format|
             format.json { render :json => { :error => "Invalid collection pid.", status: :bad_request } }
-          end
+          end and return
         end
 
         if user_submittied_col_pid.blank?
@@ -59,18 +59,16 @@ module Api
         core_file.depositor = "000000000"
         core_file.properties.api_ingested = 'true'
 
-        core_file.save!
-
         sentinel = core_file.parent.sentinel
 
         if sentinel && !sentinel.core_file.blank?
           core_file.permissions = sentinel.core_file["permissions"]
           core_file.mass_permissions = sentinel.core_file["mass_permissions"]
-          core_file.save!
-        else
-          core_file.rightsMetadata.permissions({person: "000000000"}, 'edit')
-          core_file.save!
         end
+
+        core_file.rightsMetadata.permissions({person: "000000000"}, 'edit')
+        core_file.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, "edit")
+        core_file.save!
 
         # Required items;
         # Binary file
@@ -94,15 +92,27 @@ module Api
         # Place of publication
         core_file.mods.origin_info.place = params[:core_file][:place_of_publication]
         # Creator name(s) - first, last
-        # first_names = params[:core_file][:creators][:first_names]
-        # last_names = params[:core_file][:creators][:last_names]
-        # core_file.creators = {'first_names' => first_names, 'last_names'  => last_names}
+        first_names = params[:core_file][:creators][:first_names]
+        last_names = params[:core_file][:creators][:last_names]
+        core_file.creators = {'first_names' => first_names, 'last_names'  => last_names}
         # Language(s)
         core_file.mods.languages = params[:core_file][:languages]
         # Description(s)
         core_file.mods.abstracts = params[:core_file][:descriptions]
-        # Note(s)
-        core_file.mods.notes = params[:core_file][:notes]
+
+        # Note(s) - array_of_hashes
+        # hash[:note] = note
+        # hash[:type] = row_results["notes_#{i}_type"]
+        raw_notes = params[:core_file][:notes]
+        composed_notes = Array.new
+        raw_notes.each do |n|
+          notes_hash = Hash.new
+          notes_hash[:note] = n
+          notes_hash[:type] = ""
+          composed_notes << notes_hash
+        end
+        core_file.mods.notes = composed_notes
+
         # Use and reproduction - dropdown
         core_file.mods.access_condition = params[:core_file][:use_and_reproduction]
         core_file.mods.access_condition.type = "use and reproduction"
@@ -121,8 +131,8 @@ module Api
         Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename))
 
         respond_to do |format|
-          format.json { render :json => { :response=>"File uploaded"}, status: :ok }
-        end
+          format.json { render :json => { :response=>"File uploaded", :pid => core_file.pid, :url => core_file.persistent_url }, status: :ok }
+        end and return
       end
 
     end

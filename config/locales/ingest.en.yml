@@ -12,3 +12,6 @@ en:
     test:
       10-0-2-2:
         - neu:6240
+    development:
+      10-0-2-2:
+        - neu:6240
