@@ -54,6 +54,7 @@ module Api
         user_submittied_collection = Collection.find(user_submittied_col_pid)
 
         core_file = CoreFile.new
+        core_file.tag_as_in_progress
         core_file.parent = user_submittied_collection
         core_file.properties.parent_id = user_submittied_collection.pid
         core_file.depositor = "000000000"
@@ -70,53 +71,62 @@ module Api
         core_file.rightsMetadata.permissions({group: "northeastern:drs:repository:staff"}, "edit")
         core_file.save!
 
-        # Required items;
-        # Binary file
-        file = params[:file]
-        # Title
-        core_file.title = params[:core_file][:title]
-        # Keyword(s)
-        core_file.keywords = params[:core_file][:keywords]
+        # rescue block - JSON dump error and email dev
+        begin
+          # Required items;
+          # Binary file
+          file = params[:file]
+          # Title
+          core_file.title = params[:core_file][:title]
+          # Keyword(s)
+          core_file.keywords = params[:core_file][:keywords].reject { |x| x.empty? }
 
-        # Optional items;
-        # Subtitle
-        core_file.mods.title_info.sub_title = params[:core_file][:subtitle]
-        # Date created
-        core_file.date = params[:core_file][:date_created]
-        # Copyright date
-        core_file.mods.origin_info.copyright = params[:core_file][:copyright_date]
-        # Date published - dateIssued
-        core_file.mods.origin_info.date_issued = params[:core_file][:date_published]
-        # Publisher name
-        core_file.mods.origin_info.publisher = params[:core_file][:publisher]
-        # Place of publication
-        core_file.mods.origin_info.place = params[:core_file][:place_of_publication]
-        # Creator name(s) - first, last
-        first_names = params[:core_file][:creators][:first_names]
-        last_names = params[:core_file][:creators][:last_names]
-        core_file.creators = {'first_names' => first_names, 'last_names'  => last_names}
-        # Language(s)
-        core_file.mods.languages = params[:core_file][:languages]
-        # Description(s)
-        core_file.mods.abstracts = params[:core_file][:descriptions]
+          # Optional items;
+          # Subtitle
+          core_file.mods.title_info.sub_title = params[:core_file][:subtitle]
+          # Date created
+          core_file.date = params[:core_file][:date_created]
+          # Copyright date
+          core_file.mods.origin_info.copyright = params[:core_file][:copyright_date]
+          # Date published - dateIssued
+          core_file.mods.origin_info.date_issued = params[:core_file][:date_published]
+          # Publisher name
+          core_file.mods.origin_info.publisher = params[:core_file][:publisher]
+          # Place of publication
+          core_file.mods.origin_info.place = params[:core_file][:place_of_publication]
+          # Creator name(s) - first, last
+          first_names = params[:core_file][:creators][:first_names].reject { |x| x.empty? }
+          last_names = params[:core_file][:creators][:last_names].reject { |x| x.empty? }
+          core_file.creators = {'first_names' => first_names, 'last_names'  => last_names}
+          # Language(s)
+          core_file.mods.languages = params[:core_file][:languages].reject { |x| x.empty? }
+          # Description(s)
+          core_file.mods.abstracts = params[:core_file][:descriptions].reject { |x| x.empty? }
 
-        # Note(s) - array_of_hashes
-        # hash[:note] = note
-        # hash[:type] = row_results["notes_#{i}_type"]
-        raw_notes = params[:core_file][:notes]
-        composed_notes = Array.new
-        raw_notes.each do |n|
-          notes_hash = Hash.new
-          notes_hash[:note] = n
-          notes_hash[:type] = ""
-          composed_notes << notes_hash
+          # Note(s) - array_of_hashes
+          # hash[:note] = note
+          # hash[:type] = row_results["notes_#{i}_type"]
+          raw_notes = params[:core_file][:notes].reject { |x| x.empty? }
+          composed_notes = Array.new
+          raw_notes.each do |n|
+            notes_hash = Hash.new
+            notes_hash[:note] = n
+            notes_hash[:type] = ""
+            composed_notes << notes_hash
+          end
+          core_file.mods.notes = composed_notes
+
+          # Use and reproduction - dropdown
+          core_file.mods.access_condition = params[:core_file][:use_and_reproduction]
+          core_file.mods.access_condition.type = "use and reproduction"
+        rescue Exception => error
+          email_handled_exception(error)
+          respond_to do |format|
+            format.json { render :json => { :error => error.to_s, status: :bad_request }  }
+          end and return
         end
-        core_file.mods.notes = composed_notes
 
-        # Use and reproduction - dropdown
-        core_file.mods.access_condition = params[:core_file][:use_and_reproduction]
-        core_file.mods.access_condition.type = "use and reproduction"
-
+        core_file.tag_as_completed
         core_file.save!
 
         new_path = move_file_to_tmp(file)
