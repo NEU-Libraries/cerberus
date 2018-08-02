@@ -83,30 +83,30 @@ module Api
 
           # Optional items;
           # Subtitle
-          core_file.mods.title_info.sub_title = params[:core_file][:subtitle]
+          core_file.mods.title_info.sub_title = params.fetch(:core_file, {}).fetch(:subtitle, {})
           # Date created
-          core_file.date = params[:core_file][:date_created]
+          core_file.date = params.fetch(:core_file, {}).fetch(:date_created, {})
           # Copyright date
-          core_file.mods.origin_info.copyright = params[:core_file][:copyright_date]
+          core_file.mods.origin_info.copyright = params.fetch(:core_file, {}).fetch(:copyright_date, {})
           # Date published - dateIssued
-          core_file.mods.origin_info.date_issued = params[:core_file][:date_published]
+          core_file.mods.origin_info.date_issued = params.fetch(:core_file, {}).fetch(:date_published, {})
           # Publisher name
-          core_file.mods.origin_info.publisher = params[:core_file][:publisher]
+          core_file.mods.origin_info.publisher = params.fetch(:core_file, {}).fetch(:publisher, {})
           # Place of publication
-          core_file.mods.origin_info.place = params[:core_file][:place_of_publication]
+          core_file.mods.origin_info.place.place_term = params.fetch(:core_file, {}).fetch(:place_of_publication, {})
           # Creator name(s) - first, last
-          first_names = params[:core_file][:creators][:first_names].reject { |x| x.empty? }
-          last_names = params[:core_file][:creators][:last_names].reject { |x| x.empty? }
+          first_names = params.fetch(:core_file, {}).fetch(:creators, {}).fetch(:first_names, {}).reject { |x| x.empty? }
+          last_names = params.fetch(:core_file, {}).fetch(:creators, {}).fetch(:last_names, {}).reject { |x| x.empty? }
           core_file.creators = {'first_names' => first_names, 'last_names'  => last_names}
           # Language(s)
-          core_file.mods.languages = params[:core_file][:languages].reject { |x| x.empty? }
+          core_file.mods.languages = params.fetch(:core_file, {}).fetch(:languages, {}).reject { |x| x.empty? }
           # Description(s)
-          core_file.mods.abstracts = params[:core_file][:descriptions].reject { |x| x.empty? }
+          core_file.mods.abstracts = params.fetch(:core_file, {}).fetch(:descriptions, {}).reject { |x| x.empty? }
 
           # Note(s) - array_of_hashes
           # hash[:note] = note
           # hash[:type] = row_results["notes_#{i}_type"]
-          raw_notes = params[:core_file][:notes].reject { |x| x.empty? }
+          raw_notes = params.fetch(:core_file, {}).fetch(:notes, {}).reject { |x| x.empty? }
           composed_notes = Array.new
           raw_notes.each do |n|
             notes_hash = Hash.new
@@ -117,7 +117,7 @@ module Api
           core_file.mods.notes = composed_notes
 
           # Use and reproduction - dropdown
-          core_file.mods.access_condition = params[:core_file][:use_and_reproduction]
+          core_file.mods.access_condition = params.fetch(:core_file, {}).fetch(:use_and_reproduction, {})
           core_file.mods.access_condition.type = "use and reproduction"
         rescue Exception => error
           email_handled_exception(error)
