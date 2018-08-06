@@ -132,8 +132,13 @@ class Loaders::LoadsController < ApplicationController
     @images = Loaders::ItemReport.where(load_report_id:"#{@report.id}").paginate(:page => params[:page], :per_page => per_page).order(sort_column + " " + sort_direction)
     @user = User.find_by_nuid(@report.nuid)
     if @report.collection
-      @collection = Collection.find(@report.collection)
-      @page_title = @report.loader_name + " Load into " + @collection.title
+      begin
+        @collection = Collection.find(@report.collection)
+        @page_title = @report.loader_name + " Load into " + @collection.title
+      rescue ActiveFedora::ObjectNotFoundError
+        @page_title = @report.loader_name + " Load"
+        @collection = @collection_link = nil
+      end
     else
       @page_title = @report.loader_name + " Load"
       @collection = @collection_link = nil
