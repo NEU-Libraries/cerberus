@@ -22,8 +22,8 @@ module Cerberus
         if !result_hsh["content_objects"].blank?
           result_hsh["content_objects"].each do |k,v|
             if v == "Page"
-              k.gsub!("?datastream_id=content", "")
-              page_objects["#{k}?datastream_id=thumbnail_5"] = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{k.split("/").last}\"").first).ordinal_value
+              key = k.gsub("?datastream_id=content", "")
+              page_objects["#{key}?datastream_id=thumbnail_5"] = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{key.split("/").last}\"").first).ordinal_value
             end
           end
         end
