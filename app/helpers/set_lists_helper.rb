@@ -98,7 +98,7 @@ module SetListsHelper
         # Render a 404
         render_404(ActiveFedora::ObjectNotFoundError.new, request.fullpath) and return
       end
-      
+
       respond_to do |format|
         format.html { render 'shared/smart_collections/smart_collection', locals: { smart_collection: params[:smart_col] } }
         format.rss  { render 'catalog/index', :formats => [:rss] }
@@ -198,6 +198,6 @@ module SetListsHelper
     solr_parameters[:fq] ||= []
     solr_parameters[:fq] << "read_access_group_ssim:\"public\""
     solr_parameters[:fq] << "-in_progress_tesim:true OR -incomplete_tesim:true"
-    solr_parameters[:fq] << "-embargo_release_date_dtsi:[* TO *]"
+    solr_parameters[:fq] << "-(-embargo_release_date_dtsi:[* TO NOW] OR embargo_release_date_dtsi:[* TO *])"
   end
 end
