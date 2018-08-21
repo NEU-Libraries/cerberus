@@ -83,14 +83,41 @@ class ScaledImageCreator
         img = Magick::Image.from_blob(master.content.content).first
         img.format = "JPEG"
         img.interlace = Magick::PlaneInterlace
-        scaled_img = img.resize(size)
+        img.resize!(size)
 
         fname = master.original_filename
         fname = "#{fname.chomp(File.extname(fname))}.jpg"
 
-        target.add_file(scaled_img.to_blob, 'content', fname)
+        # target.add_file(scaled_img.to_blob, 'content', fname)
+
+        file_name = Time.now.to_f.to_s.gsub!('.','-') + "-resize.jpg"
+        tempdir = Pathname.new("#{Rails.application.config.tmp_path}/")
+        file_path = tempdir.join(file_name).to_s
+
+        # write img to tmp dir
+        img.write(file_path)
+
         target.original_filename = fname
         target.save!
+
+        large_upload(target, file_path, 'content')
       end
+    ensure
+      img && img.destroy!
     end
+
+    private
+
+      def large_upload(content_object, file_path, dsid)
+        url = URI("#{ActiveFedora.config.credentials[:url]}")
+        req = Net::HTTP::Post.new("#{ActiveFedora.config.credentials[:url]}/objects/#{content_object.pid}/datastreams/#{dsid}?controlGroup=M&dsLocation=file://#{file_path}")
+        req.basic_auth("#{ActiveFedora.config.credentials[:user]}", "#{ActiveFedora.config.credentials[:password]}")
+        req.add_field("Content-Type", "#{extract_mime_type(file_path)}")
+        req.add_field("Transfer-Encoding", "chunked")
+        res = Net::HTTP.start(url.host, url.port) {|http|
+          http.read_timeout = 600
+          http.request(req)
+        }
+        return res
+      end
 end
