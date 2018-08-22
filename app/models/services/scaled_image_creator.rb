@@ -2,6 +2,7 @@ require 'RMagick'
 include Magick
 include SentinelHelper
 include MimeHelper
+include ChecksumHelper
 
 class ScaledImageCreator
 
@@ -102,6 +103,11 @@ class ScaledImageCreator
         target.save!
 
         large_upload(target, file_path, 'content')
+
+        target.properties.mime_type = extract_mime_type(file_path)
+        target.properties.md5_checksum = new_checksum(file_path)
+        target.properties.file_size = File.size(file_path).to_s
+        target.save!
       end
     ensure
       img && img.destroy!
