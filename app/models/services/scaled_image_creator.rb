@@ -1,6 +1,7 @@
 require 'RMagick'
 include Magick
 include SentinelHelper
+include MimeHelper
 
 class ScaledImageCreator
 
