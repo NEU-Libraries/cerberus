@@ -111,7 +111,9 @@ class ScaledImageCreator
       end
     ensure
       img && img.destroy!
-      File.file?(file_path) && FileUtils.rm(file_path)
+      if !file_path.blank? && File.file?(file_path)
+        FileUtils.rm(file_path)
+      end
     end
 
     private
