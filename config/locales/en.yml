@@ -197,6 +197,10 @@ en:
         name: Zip File
         short: Zip
         download: zipped
+      EpubFile:
+        name: EPUB
+        short: EPUB
+        download: epub
       Community:
         name: Community
         short: Community

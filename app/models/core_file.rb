@@ -402,26 +402,28 @@ class CoreFile < ActiveFedora::Base
     # so we can propogate MODS direct changes to DC via
     # MetadataAssignment logic that already exists
 
-    begin
-      # newer style with XSLT transformation
-      mods = Nokogiri::XML(self.mods.content)
-      xslt = Nokogiri::XSLT(File.read("#{Rails.root}/app/assets/xsl/MODS3-5_DC_XSLT1-0.xsl"))
-      dc = xslt.transform(mods).to_xml
-      self.DC.content = dc
-      self.save!
-    rescue Exception => error
-      # older style as backup
-      self.DC.nu_title = self.mods.title.first
-      self.DC.date = self.mods.date
-      # Kludge to avoid nested array quirk
-      self.DC.subject = nil
-      self.DC.subject = self.mods.subject.topic
-      fns = self.personal_creators.map{ |item| item[:first] }
-      lns = self.personal_creators.map{ |item| item[:last] }
-      cns = self.corporate_creators
-      self.DC.creator = nil
-      self.DC.assign_creators(fns, lns, cns)
-      self.save!
+    if !self.mods.content.blank? && !self.DC.content.blank?
+      begin
+        # newer style with XSLT transformation
+        mods = Nokogiri::XML(self.mods.content)
+        xslt = Nokogiri::XSLT(File.read("#{Rails.root}/app/assets/xsl/MODS3-5_DC_XSLT1-0.xsl"))
+        dc = xslt.transform(mods).to_xml
+        self.DC.content = dc
+        self.save!
+      rescue Exception => error
+        # older style as backup
+        self.DC.nu_title = self.mods.title.first
+        self.DC.date = self.mods.date
+        # Kludge to avoid nested array quirk
+        self.DC.subject = nil
+        self.DC.subject = self.mods.subject.topic
+        fns = self.personal_creators.map{ |item| item[:first] }
+        lns = self.personal_creators.map{ |item| item[:last] }
+        cns = self.corporate_creators
+        self.DC.creator = nil
+        self.DC.assign_creators(fns, lns, cns)
+        self.save!
+      end
     end
   end
 

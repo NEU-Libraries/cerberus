@@ -12,6 +12,8 @@ module Cerberus
 
         if is_image?(result)
           self.canonical_class = "ImageMasterFile"
+        elsif is_epub?(result)
+          self.canonical_class = "EpubFile"
         elsif is_pdf?(result)
           self.canonical_class = "PdfFile"
         elsif is_audio?(result)
@@ -41,6 +43,8 @@ module Cerberus
 
         if is_image?(result)
           canonical_class = "ImageMasterFile"
+        elsif is_epub?(result)
+          self.canonical_class = "EpubFile"
         elsif is_pdf?(result)
           canonical_class = "PdfFile"
         elsif is_audio?(result)
@@ -72,7 +76,7 @@ module Cerberus
           elsif self.canonical_class.constantize == ImageMasterFile
             self.dc_type = "Image"
             self.mods_type = "still image"
-          elsif [TextFile, PdfFile, MswordFile].include? self.canonical_class.constantize
+          elsif [TextFile, PdfFile, MswordFile, EpubFile].include? self.canonical_class.constantize
             self.dc_type = "Text"
             self.mods_type = "text"
           elsif self.canonical_class.constantize == AudioFile
@@ -99,6 +103,10 @@ module Cerberus
           result[:raw_type] = mime_type.split("/").first.strip
           result[:sub_type] = mime_type.split("/").last.strip
           return result
+        end
+
+        def is_epub?(fm_hash)
+          return fm_hash[:sub_type].include?("epub")
         end
 
         def is_image?(fm_hash)

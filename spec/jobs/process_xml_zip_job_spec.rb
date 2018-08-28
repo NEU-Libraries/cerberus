@@ -7,6 +7,10 @@ describe ProcessXmlZipJob do
     @client = Mysql2::Client.new(:host => "#{ENV["HANDLE_TEST_HOST"]}", :username => "#{ENV["HANDLE_TEST_USERNAME"]}", :password => "#{ENV["HANDLE_TEST_PASSWORD"]}", :database => "#{ENV["HANDLE_TEST_DATABASE"]}")
     @loader_name = "XML"
     @user = FactoryGirl.create(:admin)
+    Loaders::LoadReport.destroy_all
+    Loaders::ItemReport.destroy_all
+    ActiveFedora::Base.destroy_all
+    UploadAlert.destroy_all
   end
 
   after(:all) do
@@ -15,6 +19,7 @@ describe ProcessXmlZipJob do
     Loaders::LoadReport.destroy_all
     Loaders::ItemReport.destroy_all
     ActiveFedora::Base.destroy_all
+    UploadAlert.destroy_all
   end
 
   context "preview file" do
@@ -48,6 +53,7 @@ describe ProcessXmlZipJob do
       Loaders::LoadReport.destroy_all
       Loaders::ItemReport.destroy_all
       ActiveFedora::Base.destroy_all
+      UploadAlert.destroy_all
       FileUtils.rm_rf(Pathname.new("#{Rails.application.config.tmp_path}/")+"xml_loader_preview")
     end
   end
@@ -108,6 +114,7 @@ describe ProcessXmlZipJob do
       Loaders::LoadReport.destroy_all
       Loaders::ItemReport.destroy_all
       ActiveFedora::Base.destroy_all
+      UploadAlert.destroy_all
       FileUtils.rm_rf(Pathname.new("#{Rails.application.config.tmp_path}/")+"xml_loader_existing")
     end
   end
@@ -123,9 +130,9 @@ describe ProcessXmlZipJob do
       FileUtils.cp_r(dir_name, new_path)
       new_file = new_path +"/manifest.xlsx"
       @report_id = Loaders::LoadReport.create_from_strings(@user, @loader_name, @parent.pid)
-      @lr = Loaders::LoadReport.find("#{@report_id}")
       depositor = @user.nuid
       ProcessXmlZipJob.new(@loader_name, new_file, @parent, copyright, @user, @report_id, false, depositor, nil, @client).run
+      @lr = Loaders::LoadReport.find("#{@report_id}")
     end
 
     it "should create new file if new file spreadsheet" do
@@ -182,6 +189,7 @@ describe ProcessXmlZipJob do
       Loaders::LoadReport.destroy_all
       Loaders::ItemReport.destroy_all
       ActiveFedora::Base.destroy_all
+      UploadAlert.destroy_all
       FileUtils.rm_rf(Pathname.new("#{Rails.application.config.tmp_path}/")+"xml_loader_new")
     end
   end
@@ -390,6 +398,7 @@ describe ProcessXmlZipJob do
         Loaders::LoadReport.destroy_all
         Loaders::ItemReport.destroy_all
         ActiveFedora::Base.destroy_all
+        UploadAlert.destroy_all
       end
     end
 
@@ -429,6 +438,7 @@ describe ProcessXmlZipJob do
         Loaders::LoadReport.destroy_all
         Loaders::ItemReport.destroy_all
         ActiveFedora::Base.destroy_all
+        UploadAlert.destroy_all
       end
     end
 
@@ -468,6 +478,7 @@ describe ProcessXmlZipJob do
         Loaders::LoadReport.destroy_all
         Loaders::ItemReport.destroy_all
         ActiveFedora::Base.destroy_all
+        UploadAlert.destroy_all
       end
     end
 
@@ -500,13 +511,14 @@ describe ProcessXmlZipJob do
       it 'creates image report' do
         Loaders::ItemReport.all.length.should == 1
         rep = Loaders::ItemReport.first
-        rep.exception.should == "Row is out of order - row num 3 seq_num 1"
+        rep.exception.should == "Row is out of order - row num 3 seq_num 0"
       end
 
       after :all do
         Loaders::LoadReport.destroy_all
         Loaders::ItemReport.destroy_all
         ActiveFedora::Base.destroy_all
+        UploadAlert.destroy_all
       end
     end
   end

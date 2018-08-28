@@ -6,6 +6,7 @@ class ProcessXmlZipJob
   include HandleHelper
   include MimeHelper
   include Cerberus::TempFileStorage
+  include Cerberus::CoreFile::AssignType
 
   attr_accessor :loader_name, :spreadsheet_file_path, :parent, :copyright, :current_user, :client, :report_id, :preview, :existing_files, :depositor, :mods_content
 
@@ -149,6 +150,10 @@ class ProcessXmlZipJob
       multipage = false
       x = 0
       core_file = nil
+      master_file = nil
+      master_available = false
+      master_klass = nil
+      master_original_filename = nil
       zip_files = []
       seq_num = -1
       start = header_position + 1
@@ -174,7 +179,19 @@ class ProcessXmlZipJob
               row_num = row_results["sequence"].to_i #int 0..n for multipage, 0 for non-multipage
               existing_file = false
               old_mods = nil
-              if !existing_files && row_num == 0 #make new non-multipage file or first of multipage file
+              if row_results["sequence"].downcase == "MASTER".downcase
+                master_available = true
+                master_file_path = dir_path + "/" + row_results["file_name"]
+                if File.exists? master_file_path
+                  master_klass = canonical_class_from_file(tmp_master_path)
+                  if !master_klass.blank? && master_klass != "ZipFile"
+                    master_file = master_klass.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
+                    master_file.save!
+                  else
+                    # Error - Can't nest zips, or something worse happened
+                  end
+                end
+              elsif !existing_files && (row_results["sequence"] == "0" || row_results["sequence"].blank?) #make new non-multipage file or first of multipage file
                 new_file_path = dir_path + "/" + row_results["file_name"]
                 if File.exists? new_file_path
                   new_file = move_file_to_tmp(File.new(new_file_path))
@@ -199,11 +216,23 @@ class ProcessXmlZipJob
                     end
 
                     core_file.rightsMetadata.permissions({person: "#{depositor}"}, 'edit')
-                    core_file.original_filename = row_results["file_name"]
+
+                    if master_original_filename.blank?
+                      core_file.original_filename = row_results["file_name"]
+                    else
+                      core_file.original_filename = master_original_filename
+                    end
                     # core_file.label = row_results["file_name"]
+
                     if !multipage
                       core_file.instantiate_appropriate_content_object(new_file, core_file.original_filename)
+                    elsif master_available
+                      core_file.instantiate_appropriate_content_object(master_file, core_file.original_filename)
+                      # make master's parent core_file
+                      master_file.core_record = core_file
+                      master_file.save!
                     end
+
                     sc_type = collection.smart_collection_type
                     if !sc_type.nil? && sc_type != ""
                       core_file.category = sc_type
@@ -344,11 +373,11 @@ class ProcessXmlZipJob
                 next
               end
 
-              # now finishing creation of core file if its well-formed
-              core_file.match_dc_to_mods
-              core_file.update_pdf
-
               if !core_file.blank?
+                # now finishing creation of core file if its well-formed
+                core_file.match_dc_to_mods
+                core_file.update_pdf
+
                 if existing_files == true && Nokogiri::XML(old_mods,&:noblanks).to_s == Nokogiri::XML(core_file.mods.content,&:noblanks).to_s
                   load_report.item_reports.create_success(core_file, "", :update)
                   x = x+1
