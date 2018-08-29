@@ -35,8 +35,8 @@ module Cerberus
         assign_obj_type
       end
 
-      def canonical_class_from_file(file_path)
-        file_path = copy_file_to_tmp(file_path)
+      def canonical_class_from_file(file)
+        file_path = copy_file_to_tmp(file)
         mime_type = extract_mime_type(file_path)
         ext = extract_extension(mime_type)
         result = hash_mime_type(mime_type)
@@ -44,7 +44,7 @@ module Cerberus
         if is_image?(result)
           canonical_class = "ImageMasterFile"
         elsif is_epub?(result)
-          self.canonical_class = "EpubFile"
+          canonical_class = "EpubFile"
         elsif is_pdf?(result)
           canonical_class = "PdfFile"
         elsif is_audio?(result)

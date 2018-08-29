@@ -154,6 +154,7 @@ class ProcessXmlZipJob
       master_available = false
       master_klass = nil
       master_original_filename = nil
+      master_file_path = nil
       zip_files = []
       seq_num = -1
       start = header_position + 1
@@ -183,9 +184,11 @@ class ProcessXmlZipJob
                 master_available = true
                 master_file_path = dir_path + "/" + row_results["file_name"]
                 if File.exists? master_file_path
-                  master_klass = canonical_class_from_file(tmp_master_path)
+                  File.open(master_file_path) do |mf|
+                    master_klass = canonical_class_from_file(mf)
+                  end
                   if !master_klass.blank? && master_klass != "ZipFile"
-                    master_file = master_klass.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
+                    master_file = master_klass.constantize.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
                     master_file.save!
                   else
                     # Error - Can't nest zips, or something worse happened
@@ -227,11 +230,13 @@ class ProcessXmlZipJob
                     if !multipage
                       core_file.instantiate_appropriate_content_object(new_file, core_file.original_filename)
                     elsif master_available
-                      core_file.instantiate_appropriate_content_object(master_file, core_file.original_filename)
+                      core_file.instantiate_appropriate_content_object(master_file_path, core_file.original_filename)
                       # make master's parent core_file
                       master_file.core_record = core_file
                       master_file.save!
                     end
+
+                    core_file.save!
 
                     sc_type = collection.smart_collection_type
                     if !sc_type.nil? && sc_type != ""
