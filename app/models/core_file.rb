@@ -345,7 +345,7 @@ class CoreFile < ActiveFedora::Base
     all_possible_models = [ "ImageSmallFile", "ImageMediumFile", "ImageLargeFile",
                             "ImageMasterFile", "ImageThumbnailFile", "MsexcelFile",
                             "MspowerpointFile", "MswordFile", "PdfFile", "TextFile",
-                            "ZipFile", "AudioFile", "VideoFile", "PageFile", "VideoMasterFile", "AudioMasterFile" ]
+                            "ZipFile", "AudioFile", "VideoFile", "PageFile", "VideoMasterFile", "AudioMasterFile", "EpubFile" ]
 
     models_stringified = all_possible_models.inject { |base, str| base + " or #{str}" }
     models_query = RSolr.escape(models_stringified)

@@ -125,7 +125,7 @@ module Cerberus
       all_possible_models = [ "ImageSmallFile", "ImageMediumFile", "ImageLargeFile",
                               "ImageMasterFile", "ImageThumbnailFile", "MsexcelFile",
                               "MspowerpointFile", "MswordFile", "PdfFile", "TextFile",
-                              "ZipFile", "AudioFile", "VideoFile", "PageFile", "AudioMasterFile", "VideoMasterFile" ]
+                              "ZipFile", "AudioFile", "VideoFile", "PageFile", "AudioMasterFile", "VideoMasterFile", "EpubFile" ]
       models_stringified = all_possible_models.inject { |base, str| base + " or #{str}" }
       models_query = ActiveFedora::SolrService.escape_uri_for_query models_stringified
 
