@@ -1,17 +1,20 @@
 en:
   ingest:
     production:
-      # TODO
+      sj-sweeney@northeastern-edu:
+        - neu:cj82r303t
+      d-cliff@northeastern-edu:
+        - neu:cj82r303t
+      john-hamman@gmail-com:
+        - neu:cj82r303t
     staging:
-      10-15-178-234:
+      sj-sweeney@neu-edu:
         - neu:6240
-      155.33.131.23:
-        - neu:6240
-      129-10-251-125:
+      d-cliff@neu-edu:
         - neu:6240
     test:
-      10-0-2-2:
+      d-cliff@neu-edu:
         - neu:6240
     development:
-      10-0-2-2:
+      d-cliff@neu-edu:
         - neu:6240

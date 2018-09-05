@@ -242,6 +242,8 @@ Cerberus::Application.routes.draw do
       get "/files/:id/content_objects" => "core_files#content_objects", as: "content_objects"
       # ingest
       post "/ingest" => "ingest#ingest", as: "ingest"
+      # auth
+      post '/auth_user' => 'authentication#authenticate_user'
     end
   end
 

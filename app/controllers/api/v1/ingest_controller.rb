@@ -7,16 +7,17 @@ module Api
       include HandleHelper
       include MimeHelper
 
+      before_filter :authenticate_request!
+
       def ingest
-        # Take an external form, and based on whitelisted IP deposit submission
-        ip = request.remote_ip
+        api_user_email = current_user.email
 
         begin
-          collections = I18n.t "ingest.#{Rails.env}.#{ip.gsub(".", "-")}", raise: true # We replace periods for YML, and raise error if IP not on whitelist
+          collections = I18n.t "ingest.#{Rails.env}.#{api_user_email.gsub(".", "-")}", raise: true # We replace periods for YML, and raise error if IP not on whitelist
         rescue I18n::MissingTranslationData
           email_handled_exception(Exceptions::SecurityEscalationError.new())
           respond_to do |format|
-            format.json { render :json => { :error => "IP address not on whitelist. DRS administrators have been notified of this attempt.", status: :forbidden } }
+            format.json { render :json => { :error => "User's email address is not on whitelist. DRS administrators have been notified of this attempt.", status: :forbidden } }
           end and return
         end
 

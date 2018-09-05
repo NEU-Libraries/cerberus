@@ -22,6 +22,8 @@ class ApplicationController < ActionController::Base
   before_filter :store_location
   after_filter :redirect_blacklight_overrun
 
+  attr_reader :current_user
+
   # around_filter :profile
 
   # def send_file(path, options = {})
@@ -202,4 +204,30 @@ class ApplicationController < ActionController::Base
     solr_parameters[:rows] = drs_per_page
     user_parameters[:rows] = drs_per_page
   end
+
+  protected
+    def authenticate_request!
+      unless user_id_in_token?
+        render json: { errors: ['Not Authenticated'] }, status: :unauthorized
+        return
+      end
+      @current_user = User.find(auth_token[:user_id])
+    rescue JWT::VerificationError, JWT::DecodeError
+      render json: { errors: ['Not Authenticated'] }, status: :unauthorized
+    end
+
+  private
+    def http_token
+        @http_token ||= if request.headers['Authorization'].present?
+          request.headers['Authorization'].split(' ').last
+        end
+    end
+
+    def auth_token
+      @auth_token ||= JsonWebToken.decode(http_token)
+    end
+
+    def user_id_in_token?
+      http_token && auth_token && auth_token[:user_id].to_i
+    end
 end

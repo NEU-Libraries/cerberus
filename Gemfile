@@ -78,6 +78,8 @@ gem 'passenger'
 
 gem 'google-analytics-rails', '1.1.1'
 
+gem 'jwt', '1.5.6'
+
 # Gems used only for assets and not required
 # in production environments by default.
 group :assets do
