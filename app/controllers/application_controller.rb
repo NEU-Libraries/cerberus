@@ -216,12 +216,12 @@ class ApplicationController < ActionController::Base
 
   private
     def http_token
-        # @http_token ||= if request.headers['Authorization'].present?
-        #   request.headers['Authorization'].split(' ').last
-        # end
-        @http_token ||= if params[:token].present?
-          return params[:token]
-        end
+      # @http_token ||= if request.headers['Authorization'].present?
+      #   request.headers['Authorization'].split(' ').last
+      # end
+      @http_token ||= if params[:token].present?
+        params[:token]
+      end
     end
 
     def auth_token
