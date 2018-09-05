@@ -120,5 +120,12 @@ module Cerberus
     else
       config.handles_connection = nil
     end
+
+    config.middleware.insert_before 0, "Rack::Cors" do
+      allow do
+        origins '*'
+        resource '/api/v1/*', headers: :any, methods: [:post, :options]
+      end
+    end
   end
 end
