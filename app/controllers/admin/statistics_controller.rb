@@ -82,18 +82,18 @@ class Admin::StatisticsController < ApplicationController
 
     def get_count_for_public_files
       model_type = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:CoreFile"
-      return ActiveFedora::SolrService.count("has_model_ssim:\"#{model_type}\" AND read_access_group_ssim:(public)")
+      return ActiveFedora::SolrService.count("has_model_ssim:\"#{model_type}\" AND read_access_group_ssim:(public) AND canonical_class_tesim:[* TO *]")
     end
 
     def get_count_for_private_files
       model_type = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:CoreFile"
-      return ActiveFedora::SolrService.count("has_model_ssim:\"#{model_type}\" AND -read_access_group_ssim:(public)")
+      return ActiveFedora::SolrService.count("has_model_ssim:\"#{model_type}\" AND -read_access_group_ssim:(public) AND canonical_class_tesim:[* TO *]")
       return query_result.length
     end
 
     def get_count_for_core_files
       model_type = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:CoreFile"
-      return ActiveFedora::SolrService.count("has_model_ssim:\"#{model_type}\"")
+      return ActiveFedora::SolrService.count("has_model_ssim:\"#{model_type}\" AND canonical_class_tesim:[* TO *]")
       return query_result.length
     end
 
