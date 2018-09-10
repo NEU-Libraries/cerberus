@@ -318,6 +318,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
 
   include Cerberus::ModsExtensions::NIEC
   include Cerberus::ModsExtensions::Darwin
+  include Cerberus::ModsExtensions::ETD
 
   # We override to_solr here to add
   # 1. A creation_year field.
@@ -334,6 +335,58 @@ class ModsDatastream < ActiveFedora::OmDatastream
         solr_doc["drs_location_url_ssim"] = self.loc.url.first
       end
     end
+    # ETD name composing
+    # Advisor
+    advisor_names = []
+
+    (0..self.advisor_name_part.length).each do |i|
+      fn = self.advisor_given(i)
+      ln = self.advisor_family(i)
+      full_name = self.advisor_name_part(i)
+
+      if fn.any? && ln.any?
+        # Kramdown parse for search purposes - #439
+        advisor_names << kramdown_parse("#{ln.first}, #{fn.first}")
+      elsif full_name.any?
+        name_array = Namae.parse full_name.first
+        name_obj = name_array[0]
+        if !name_obj.nil? && !name_obj.given.blank? && !name_obj.family.blank?
+          advisor_names << kramdown_parse("#{name_obj.family}, #{name_obj.given}")
+        end
+      end
+    end
+    # Committee Members
+    committee_member_names = []
+
+    (0..self.committee_member_name_part.length).each do |i|
+      fn = self.committee_member_given(i)
+      ln = self.committee_member_family(i)
+      full_name = self.committee_member_name_part(i)
+
+      if fn.any? && ln.any?
+        # Kramdown parse for search purposes - #439
+        committee_member_names << kramdown_parse("#{ln.first}, #{fn.first}")
+      elsif full_name.any?
+        name_array = Namae.parse full_name.first
+        name_obj = name_array[0]
+        if !name_obj.nil? && !name_obj.given.blank? && !name_obj.family.blank?
+          committee_member_names << kramdown_parse("#{name_obj.family}, #{name_obj.given}")
+        end
+      end
+    end
+
+    if !self.date_awarded.blank?
+      # Year Awarded
+      ya = self.date_awarded.date_issued.first.split("-").first
+      # ETD specifc faceting
+      if !ya.blank?
+        solr_doc["etd_year_awarded_ssim"] = ya
+      end
+    end
+    solr_doc["etd_advisor_ssim"] = advisor_names
+    solr_doc["etd_committee_member_ssim"] = committee_member_names
+
+    # --------------------------------------------------------------------------------------
 
     if !self.key_date.blank?
       kd = self.key_date.first

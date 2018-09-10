@@ -6,7 +6,7 @@
       <a id="drop1" href="#" role="button" class="dropdown-toggle" data-toggle="dropdown"><h4>Limit your search<b class="caret"></b></h4></a>
       <ul class="dropdown-menu" role="menu" aria-labelledby="drop1">
         <!-- Don't display NIEC facets! - for #574 -->
-        <%= render_facet_partials (facet_field_names.map{|v| v if !v.downcase.starts_with?("niec")}).compact, :partial => 'catalog/facet_limit', :layout => 'catalog/facet_layout' %>
+        <%= render_facet_partials (facet_field_names.map{|v| v if (!v.downcase.starts_with?("niec") && !v.downcase.starts_with?("etd")) }).compact, :partial => 'catalog/facet_limit', :layout => 'catalog/facet_layout' %>
       </ul>
     </li>
   </ul>

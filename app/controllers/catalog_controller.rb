@@ -239,6 +239,11 @@ class CatalogController < ApplicationController
     config.add_facet_field solr_name("type", :facetable), label: "Type", limit: true
     config.add_facet_field solr_name("community_name", :symbol), label: "Community", limit: true
 
+    # ETD
+    config.add_facet_field solr_name("etd_year_awarded", :symbol), label: "Year Awarded", limit: true
+    config.add_facet_field solr_name("etd_advisor", :symbol), label: "Advisor", limit: true
+    config.add_facet_field solr_name("etd_committee_member", :symbol), label: "Committee Member", limit: true
+
     # NIEC
     # Speaker Gender = niec_gender_ssim
     config.add_facet_field solr_name("niec_gender", :symbol), label: "Speaker Gender", limit: true
