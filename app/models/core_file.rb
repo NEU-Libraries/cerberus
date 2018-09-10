@@ -424,6 +424,13 @@ class CoreFile < ActiveFedora::Base
         self.DC.assign_creators(fns, lns, cns)
         self.save!
       end
+
+      # add back dc type classic for facets - inject into first position for solr
+      hsh = self.dcmi_type
+      vals = self.DC.nu_type
+      vals.unshift(hsh[:dc]).reject { |x| x.empty? }
+      self.DC.nu_type = vals
+      self.save!
     end
   end
 
