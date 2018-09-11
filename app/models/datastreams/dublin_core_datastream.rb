@@ -17,8 +17,6 @@ class DublinCoreDatastream < ActiveFedora::OmDatastream
   def to_solr(solr_doc = Hash.new)
     super(solr_doc)
 
-    accepted_list = ["Collection", "Dataset", "Event", "Image", "InteractiveResource", "MovingImage", "PhysicalObject", "Service", "Software", "Sound", "StillImage", "Text"]
-
     solr_doc["type_sim"] = self.nu_type.first unless self.nu_type.first.blank?
 
     return solr_doc
