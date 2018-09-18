@@ -13,7 +13,7 @@ class AggregatedStatisticsBackFillJob
     require 'fileutils'
 
     #queue off back fill from given date until the beginning of time
-    if (date > (DateTime.now.-2.years))
+    if (date > (Impression.order('created_at asc').limit(1).first.created_at))
       AggregatedStatisticsJob.new(date).run #run the week being kicked off
       prior_week = date.-1.week
       AggregatedStatisticsBackFillJob.new(prior_week).run #run this job again for the week before

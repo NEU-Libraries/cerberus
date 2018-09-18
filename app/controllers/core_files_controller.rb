@@ -797,6 +797,7 @@ class CoreFilesController < ApplicationController
     if current_user.admin?
       collection_pid = params[:collection_pid]
       if Collection.exists?(collection_pid)
+        Cerberus::Application::Queue.push(AggregatedStatisticsMoveJob.new(core_file.pid, collection_pid))
         core_file.set_parent(Collection.find(collection_pid), current_user)
         # Reconcile compilations
         Cerberus::Application::Queue.push(ReconcileCompilationsJob.new(params[:id]))

@@ -27,6 +27,7 @@ class CoreFile < ActiveFedora::Base
   attr_accessible :title, :non_sort, :identifier, :description, :date
   attr_accessible :keywords, :creators, :depositor, :type
 
+  before_destroy :update_aggregated_statistics
   before_destroy :purge_content_bearing_objects
 
   belongs_to :parent, :property => :is_member_of, :class_name => 'Collection'
@@ -500,6 +501,10 @@ class CoreFile < ActiveFedora::Base
   end
 
   private
+
+    def update_aggregated_statistics
+      Cerberus::Application::Queue.push(AggregatedStatisticsDeleteJob.new(self.pid))
+    end
 
     def purge_content_bearing_objects
       self.content_objects.each do |e|

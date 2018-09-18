@@ -2,6 +2,31 @@ module Cerberus
   module SolrQueries
     include ApplicationHelper
 
+    def common_ancestor(comparison_pid)
+      comp_doc = SolrDocument.new ActiveFedora::SolrService.query("id:\"#{comparison_pid}\"").first
+      # walk up the graph for both pids and find the intersection
+      my_ancestors = self.ancestors
+      comp_ancestors = comp_doc.ancestors
+
+      return (my_ancestors & comp_ancestors).first
+    end
+
+    def ancestors(pids = [])
+      # recursive walk up graph and return ordered array of pids - last is neu:1
+      if pids.blank? #self
+        pids << self.parent
+        ancestors(pids)
+      elsif pids.last == "neu:1"
+        # done
+        return pids
+      else
+        # iterate
+        doc = SolrDocument.new ActiveFedora::SolrService.query("id:\"#{pids.last}\"").first
+        pids << doc.parent
+        ancestors(pids)
+      end
+    end
+
     def all_descendent_files
       result = []
       each_depth_first do |child|
