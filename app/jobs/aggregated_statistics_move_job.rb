@@ -54,6 +54,10 @@ class AggregatedStatisticsMoveJob
 
           z = AggregatedStatistic.where(pid: z_pid, processed_at: d) #if none, make one TODO
 
+          if z.blank?
+            z = AggregatedStatistic.new(:pid=>z_pid, :object_type=>"collection")
+          end
+
           z.views += x.views
           z.downloads += x.downloads
           z.streams += x.streams
