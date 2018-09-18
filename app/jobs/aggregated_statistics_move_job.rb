@@ -52,7 +52,7 @@ class AggregatedStatisticsMoveJob
 
         add_stats_to.each do |z_pid|
 
-          z = AggregatedStatistic.where(pid: z_pid, processed_at: d) #if none, make one
+          z = AggregatedStatistic.where(pid: z_pid, processed_at: d) #if none, make one TODO
 
           z.views += x.views
           z.downloads += x.downloads
