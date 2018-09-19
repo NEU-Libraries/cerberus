@@ -4,7 +4,7 @@ module Cerberus
 
       include ApplicationHelper
 
-      def to_hash
+      def to_hash(public_only = false)
         page_objects = Hash.new
 
         @core_doc = SolrDocument.new(self.to_solr)
@@ -15,7 +15,12 @@ module Cerberus
         result_hsh["parent"] = @core_doc.parent
         result_hsh["thumbnails"] = @core_doc.thumbnail_list.map { |url_string| "#{root_path(:only_path => false)}#{url_string.sub!(/^\//, '')}"}
         result_hsh["canonical_object"] = @core_doc.canonical_object.map { |doc| {doc_to_url(doc) => doc.derivative_label} }.reduce(&:merge)
-        result_hsh["content_objects"] = @core_doc.content_objects.map { |doc| {doc_to_url(doc) => doc.derivative_label} }.reduce(&:merge)
+
+        if public_only
+          result_hsh["content_objects"] = @core_doc.content_objects.reject{|doc| !doc.public?}.map { |doc| {doc_to_url(doc) => doc.derivative_label} }.reduce(&:merge)
+        else
+          result_hsh["content_objects"] = @core_doc.content_objects.map { |doc| {doc_to_url(doc) => doc.derivative_label} }.reduce(&:merge)
+        end
 
         result_hsh["content_objects"].reject!{ |k,v| v == "Thumbnail Image" }
 
