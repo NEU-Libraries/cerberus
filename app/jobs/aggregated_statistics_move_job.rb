@@ -26,7 +26,7 @@ class AggregatedStatisticsMoveJob
 
     deduct_stop = ancestors.index(common_ancestor) - 1
 
-    if deduct_stop > 0
+    if deduct_stop >= 0
       deduct_stats_from = ancestors[0..deduct_stop]
     else
       deduct_stats_from = []
@@ -34,7 +34,7 @@ class AggregatedStatisticsMoveJob
 
     add_stop = new_ancestors.index(common_ancestor) - 1
 
-    if add_stop > 0
+    if add_stop >= 0
       add_stats_to = new_ancestors[0..add_stop]
     else
       add_stats_to = []
