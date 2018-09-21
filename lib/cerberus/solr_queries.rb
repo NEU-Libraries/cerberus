@@ -16,9 +16,9 @@ module Cerberus
       if pids.blank? #self
         pids << self.parent
         ancestors(pids)
-      elsif pids.last == "neu:1"
+      elsif (pids.last.blank? || pids.last == "neu:1")
         # done
-        return pids
+        return pids.reject { |c| c.blank? }
       else
         # iterate
         doc = SolrDocument.new ActiveFedora::SolrService.query("id:\"#{pids.last}\"").first
