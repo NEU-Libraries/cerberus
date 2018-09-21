@@ -40,12 +40,12 @@ class AggregatedStatisticsMoveJob
       add_stats_to = []
     end
 
-    dates.each do |d|
+    dates = AggregatedStatistic.where(pid: self.pid).map{ |x| x.processed_at }
 
+    dates.each do |d|
       x = AggregatedStatistic.where(pid: self.pid, processed_at: d)
 
       deduct_stats_from.each do |y_pid|
-
         y = AggregatedStatistic.where(pid: y_pid, processed_at: d)
 
         y.views -= x.views
@@ -60,30 +60,29 @@ class AggregatedStatisticsMoveJob
         y.xml_load_edits -= x.xml_load_edits
 
         y.save!
-
-        add_stats_to.each do |z_pid|
-
-          z = AggregatedStatistic.where(pid: z_pid, processed_at: d) #if none, make one TODO
-
-          if z.blank?
-            z = AggregatedStatistic.new(:pid=>z_pid, :object_type=>"collection")
-          end
-
-          z.views += x.views
-          z.downloads += x.downloads
-          z.streams += x.streams
-          z.loader_uploads += x.loader_uploads
-          z.user_uploads += x.user_uploads
-          z.form_edits += x.form_edits
-          z.xml_edits += x.xml_edits
-          z.size_increase += x.size_increase
-          z.spreadsheet_load_edits += x.spreadsheet_load_edits
-          z.xml_load_edits += x.xml_load_edits
-
-          z.save!
-
-        end
       end
+
+      add_stats_to.each do |z_pid|
+        z = AggregatedStatistic.where(pid: z_pid, processed_at: d)
+
+        if z.blank? #if none, make one
+          z = AggregatedStatistic.new(:pid=>z_pid, :object_type=>"collection")
+        end
+
+        z.views += x.views
+        z.downloads += x.downloads
+        z.streams += x.streams
+        z.loader_uploads += x.loader_uploads
+        z.user_uploads += x.user_uploads
+        z.form_edits += x.form_edits
+        z.xml_edits += x.xml_edits
+        z.size_increase += x.size_increase
+        z.spreadsheet_load_edits += x.spreadsheet_load_edits
+        z.xml_load_edits += x.xml_load_edits
+
+        z.save!
+      end
+
     end
 
   end

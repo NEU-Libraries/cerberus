@@ -16,7 +16,7 @@ class AggregatedStatisticsDeleteJob
 
     ancestors = doc.ancestors
 
-    dates = AggregatedStatistic.select(:processed_at).where(pid: self.pid)
+    dates = AggregatedStatistic.where(pid: self.pid).map{ |x| x.processed_at }
 
     dates.each do |d|
       x = AggregatedStatistic.where(pid: self.pid, processed_at: d)
