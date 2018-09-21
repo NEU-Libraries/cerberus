@@ -15,6 +15,7 @@ class AggregatedStatisticsMoveJob
     destination_doc = SolrDocument.new destination.to_solr
 
     new_ancestors = destination_doc.ancestors
+    new_ancestors.unshift(new_parent)
 
     obj = ActiveFedora::Base.find(pid, cast: true)
     doc = SolrDocument.new obj.to_solr
@@ -24,10 +25,20 @@ class AggregatedStatisticsMoveJob
     common_ancestor = doc.common_ancestor(new_parent)
 
     deduct_stop = ancestors.index(common_ancestor) - 1
-    deduct_stats_from = ancestors[0..deduct_stop]
+
+    if deduct_stop > 0
+      deduct_stats_from = ancestors[0..deduct_stop]
+    else
+      deduct_stats_from = []
+    end
 
     add_stop = new_ancestors.index(common_ancestor) - 1
-    add_stats_to = new_ancestors[0..add_stop]
+
+    if add_stop > 0
+      add_stats_to = new_ancestors[0..add_stop]
+    else
+      add_stats_to = []
+    end
 
     dates.each do |d|
 
