@@ -538,6 +538,8 @@ class ModsDatastream < ActiveFedora::OmDatastream
 
     solr_doc["author_tesi"] = author_full_name
 
+    solr_doc["etd_author_ssim"] = author_full_name
+
     solr_doc["personal_creators_tesim"] = full_names
     solr_doc["personal_creators_sim"] = full_names
 
