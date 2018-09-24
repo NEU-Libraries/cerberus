@@ -94,6 +94,8 @@ module Cerberus
 
     config.fits_path = "/opt/fits-0.6.2/fits.sh"
 
+    config.zipnote_path = "/opt/zip31c/zipnote"
+
     if !ENV['TRAVIS'].nil? && ENV['TRAVIS'] == 'true'
       config.file_path = "file"
       config.minitool_path = "/usr/bin/exiftool"

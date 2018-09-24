@@ -9,5 +9,12 @@ class EtdsController < ApplicationController
     results.map!{ |d| d.split("/").first }
 
     @years = results.uniq.sort_by(&:to_i)
+
+    results.each do |hsh|
+      pid = hsh["id"]
+      x = CoreFile.find(pid)
+      tmp_file_name = x.tmp_path.split("/").last
+      co = x.canonical_object
+      `printf "@ #{tmp_file_name}\n@=#{x.original_filename}\n" | /opt/zip31c/zipnote -w #{co.fedora_file_path}`
   end
 end
