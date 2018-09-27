@@ -145,10 +145,17 @@ module Api
         core_file.save!
 
         Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename))
+        response_hash = { :response=>"File uploaded", :pid => core_file.pid, :url => core_file.persistent_url }
 
-        respond_to do |format|
-          format.json { render :json => { :response=>"File uploaded", :pid => core_file.pid, :url => core_file.persistent_url }, status: :ok }
-        end and return
+        if !params[:redirect].blank?
+          url = URI.decode(params[:redirect])
+          # send user to request supplied URL with response as URL arguments
+          redirect_to "#{url}?#{response_hash.to_query}"
+        else
+          respond_to do |format|
+            format.json { render :json => response_hash, status: :ok }
+          end and return
+        end
       end
 
     end
