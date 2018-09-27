@@ -19,11 +19,11 @@ class AggregatedStatisticsDeleteJob
     dates = AggregatedStatistic.where(pid: self.pid).map{ |x| x.processed_at }
 
     dates.each do |d|
-      x = AggregatedStatistic.where(pid: self.pid, processed_at: d)
+      x = AggregatedStatistic.where(pid: self.pid, processed_at: d).first
 
       ancestors.each do |pid|
 
-        y = AggregatedStatistic.where(pid: pid, processed_at: d)
+        y = AggregatedStatistic.where(pid: pid, processed_at: d).first
 
         y.views -= x.views
         y.downloads -= x.downloads

@@ -43,10 +43,10 @@ class AggregatedStatisticsMoveJob
     dates = AggregatedStatistic.where(pid: self.pid).map{ |x| x.processed_at }
 
     dates.each do |d|
-      x = AggregatedStatistic.where(pid: self.pid, processed_at: d)
+      x = AggregatedStatistic.where(pid: self.pid, processed_at: d).first
 
       deduct_stats_from.each do |y_pid|
-        y = AggregatedStatistic.where(pid: y_pid, processed_at: d)
+        y = AggregatedStatistic.where(pid: y_pid, processed_at: d).first
 
         y.views -= x.views
         y.downloads -= x.downloads
@@ -63,7 +63,7 @@ class AggregatedStatisticsMoveJob
       end
 
       add_stats_to.each do |z_pid|
-        z = AggregatedStatistic.where(pid: z_pid, processed_at: d)
+        z = AggregatedStatistic.where(pid: z_pid, processed_at: d).first
 
         if z.blank? #if none, make one
           z = AggregatedStatistic.new(:pid=>z_pid, :object_type=>"collection")
