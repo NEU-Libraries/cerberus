@@ -503,7 +503,7 @@ class CoreFile < ActiveFedora::Base
   private
 
     def update_aggregated_statistics
-      Cerberus::Application::Queue.push(AggregatedStatisticsDeleteJob.new(self.pid))
+      AggregatedStatisticsDeleteJob.new(self.pid).run
     end
 
     def purge_content_bearing_objects
