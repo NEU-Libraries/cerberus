@@ -234,6 +234,8 @@ class ProcessXmlZipJob
                       # make master's parent core_file
                       master_file.core_record = core_file
                       master_file.save!
+
+                      Cerberus::Application::Queue.push(ContentObjectCreationJob.new(core_file.pid, master_file_path, master_file.pid, master_original_filename))
                     end
 
                     core_file.save!

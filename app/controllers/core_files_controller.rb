@@ -174,9 +174,7 @@ class CoreFilesController < ApplicationController
   end
 
   def destroy_content_object
-    @content_object = fetch_solr_document({:id=>params[:content_object_id]})
-    klass = @content_object.klass.constantize
-    @content_object = klass.find(params[:content_object_id])
+    @content_object = ActiveFedora::Base.find(params[:content_object_id], cast: true)
     if File.exists?(@content_object.tmp_path)
       FileUtils.rm(@content_object.tmp_path)
     end
@@ -205,8 +203,7 @@ class CoreFilesController < ApplicationController
 
   def provide_file_metadata
     @core_file = CoreFile.find(params[:id])
-    klass = class_for_attached_file(@core_file)
-    @content_object = klass.find(params[:content_object_id])
+    @content_object = ActiveFedora::Base.find(params[:content_object_id], cast: true)
     @page_title = "Provide File Metadata"
     if session[:flash_error]
       flash[:error] = session[:flash_error]
@@ -312,8 +309,7 @@ class CoreFilesController < ApplicationController
 
   def process_file_metadata
     @core_file = CoreFile.find(params[:id])
-    klass = class_for_attached_file(@core_file)
-    @content_object = klass.find(params[:content_object_id])
+    @content_object = ActiveFedora::Base.find(params[:content_object_id], cast: true)
     Cerberus::Application::Queue.push(ContentObjectCreationJob.new(@core_file.pid, @content_object.tmp_path, @content_object.pid, @content_object.original_filename, params[:content_object][:permissions], params[:content_object][:mass_permissions]))
     UploadAlert.create_from_core_file(@core_file, :update, "content object", current_user)
     flash[:notice] = "Your file is being processed. The file's checksum is #{@content_object.properties.md5_checksum.first}"
