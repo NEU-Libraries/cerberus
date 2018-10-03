@@ -53,6 +53,11 @@ class MultipageCreateZipJob
         end
       end
 
+      # Remove temp txt file
+      Zip::File.open(zipfile_name) do |zipfile|
+        zipfile.remove(temp_txt)
+      end
+
       # Add zip to core_file
       zf = ZipFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
       zf.depositor              = core_file.depositor
