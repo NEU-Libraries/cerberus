@@ -190,6 +190,7 @@ class ProcessXmlZipJob
                   end
                   if !master_klass.blank? && master_klass != "ZipFile"
                     master_file = master_klass.constantize.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
+                    master_file.original_filename = master_original_filename
                     master_file.save!
                   else
                     # Error - Can't nest zips, or something worse happened
