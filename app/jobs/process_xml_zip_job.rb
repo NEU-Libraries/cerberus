@@ -183,6 +183,7 @@ class ProcessXmlZipJob
               if row_results["sequence"].downcase == "MASTER".downcase
                 master_available = true
                 master_file_path = dir_path + "/" + row_results["file_name"]
+                master_original_filename = row_results["file_name"]
                 if File.exists? master_file_path
                   File.open(master_file_path) do |mf|
                     master_klass = canonical_class_from_file(mf)
