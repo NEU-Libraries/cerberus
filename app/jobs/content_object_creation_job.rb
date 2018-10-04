@@ -3,19 +3,20 @@ class ContentObjectCreationJob
   include ChecksumHelper
 
   attr_accessor :core_file_pid, :file_path, :permissions, :content_object_pid, :file_name, :mass_permissions
-  attr_accessor :core_record, :content_object, :sentinel
+  attr_accessor :core_record, :content_object, :sentinel, :ensure_delete
 
   def queue_name
     :content_object_creation
   end
 
-  def initialize(core_file, file_path, content_object, file_name, permissions = nil, mass_permissions = nil)
+  def initialize(core_file, file_path, content_object, file_name, permissions = nil, mass_permissions = nil, ensure_delete = true)
     self.core_file_pid = core_file
     self.file_path     = file_path
     self.file_name     = file_name
     self.content_object_pid = content_object
     self.mass_permissions = mass_permissions
     self.permissions   = permissions
+    self.ensure_delete = ensure_delete
   end
 
   def run
@@ -74,7 +75,7 @@ class ContentObjectCreationJob
       Rails.cache.delete_matched("/content_objects/#{core_record.pid}*")
       return content_object
     ensure
-      if File.exists?(file_path)
+      if File.exists?(file_path) && ensure_delete
         FileUtils.rm(file_path)
       end
     end
