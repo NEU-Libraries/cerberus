@@ -48,18 +48,20 @@ class AggregatedStatisticsMoveJob
       deduct_stats_from.each do |y_pid|
         y = AggregatedStatistic.where(pid: y_pid, processed_at: d).first
 
-        y.views -= x.views
-        y.downloads -= x.downloads
-        y.streams -= x.streams
-        y.loader_uploads -= x.loader_uploads
-        y.user_uploads -= x.user_uploads
-        y.form_edits -= x.form_edits
-        y.xml_edits -= x.xml_edits
-        y.size_increase -= x.size_increase
-        y.spreadsheet_load_edits -= x.spreadsheet_load_edits
-        y.xml_load_edits -= x.xml_load_edits
+        if !x.blank? && !y.blank?
+          y.views -= x.views
+          y.downloads -= x.downloads
+          y.streams -= x.streams
+          y.loader_uploads -= x.loader_uploads
+          y.user_uploads -= x.user_uploads
+          y.form_edits -= x.form_edits
+          y.xml_edits -= x.xml_edits
+          y.size_increase -= x.size_increase
+          y.spreadsheet_load_edits -= x.spreadsheet_load_edits
+          y.xml_load_edits -= x.xml_load_edits
+          y.save!
+        end
 
-        y.save!
       end
 
       add_stats_to.each do |z_pid|
@@ -69,18 +71,20 @@ class AggregatedStatisticsMoveJob
           z = AggregatedStatistic.new(:pid=>z_pid, :object_type=>"collection")
         end
 
-        z.views += x.views
-        z.downloads += x.downloads
-        z.streams += x.streams
-        z.loader_uploads += x.loader_uploads
-        z.user_uploads += x.user_uploads
-        z.form_edits += x.form_edits
-        z.xml_edits += x.xml_edits
-        z.size_increase += x.size_increase
-        z.spreadsheet_load_edits += x.spreadsheet_load_edits
-        z.xml_load_edits += x.xml_load_edits
+        if !x.blank? && !z.blank?
+          z.views += x.views
+          z.downloads += x.downloads
+          z.streams += x.streams
+          z.loader_uploads += x.loader_uploads
+          z.user_uploads += x.user_uploads
+          z.form_edits += x.form_edits
+          z.xml_edits += x.xml_edits
+          z.size_increase += x.size_increase
+          z.spreadsheet_load_edits += x.spreadsheet_load_edits
+          z.xml_load_edits += x.xml_load_edits
+          z.save!
+        end
 
-        z.save!
       end
 
     end

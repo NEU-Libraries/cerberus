@@ -306,7 +306,7 @@ class CollectionsController < ApplicationController
       destination_pid = params[:destination_pid]
       if Community.exists?(destination_pid) || Collection.exists?(destination_pid)
         # run job for agg stats
-        Cerberus::Application::Queue.push(AggregatedStatisticsMoveJob.new(self.pid, destination_pid))
+        Cerberus::Application::Queue.push(AggregatedStatisticsMoveJob.new(params[:id], destination_pid))
         collection.parent = destination_pid
         collection.save!
         flash[:notice] = "This collection has been moved."
