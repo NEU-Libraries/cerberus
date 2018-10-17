@@ -16,6 +16,16 @@ module Api
       include BlacklightAdvancedSearch::ParseBasicQ
       include BlacklightAdvancedSearch::Controller
 
+      before_filter :enforce_show_permissions, :only=>:search
+      before_filter :authenticate_request!
+      after_filter :clear_user
+
+      self.solr_search_params_logic += [:add_access_controls_to_solr_params]
+
+      def clear_user
+        sign_out(current_user)
+      end
+
       def search
 
         begin
@@ -29,11 +39,12 @@ module Api
         end
 
         # Starting obj must be public
-        if !@set.public?
-          render json: {error: "ID must be for a public item"} and return
-        end
+        # if !@set.public?
+        #   render json: {error: "ID must be for a public item"} and return
+        # end
 
-        self.solr_search_params_logic += [:limit_to_public]
+        # self.solr_search_params_logic += [:limit_to_public]
+        self.solr_search_params_logic += [:no_in_progress_or_embargo]
         self.solr_search_params_logic += [:disable_facet_limit]
 
         # If the pid is a compilation, we need to get the pids and fake the search
@@ -118,9 +129,13 @@ module Api
           solr_parameters[:fq] << fq
         end
 
-        def limit_to_public(solr_parameters, user_parameters)
+        # def limit_to_public(solr_parameters, user_parameters)
+        #   solr_parameters[:fq] ||= []
+        #   solr_parameters[:fq] << "read_access_group_ssim:\"public\""
+        # end
+
+        def no_in_progress_or_embargo
           solr_parameters[:fq] ||= []
-          solr_parameters[:fq] << "read_access_group_ssim:\"public\""
           solr_parameters[:fq] << "-in_progress_tesim:true OR -incomplete_tesim:true"
           solr_parameters[:fq] << "-(-embargo_release_date_dtsi:[* TO NOW] OR embargo_release_date_dtsi:[* TO *])"
         end

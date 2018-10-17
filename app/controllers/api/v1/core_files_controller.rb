@@ -2,6 +2,13 @@ module Api
   module V1
     class CoreFilesController < ApplicationController
 
+      before_filter :authenticate_request!
+      after_filter :clear_user
+
+      def clear_user
+        sign_out(current_user)
+      end
+
       def show
         begin
           @core_doc = SolrDocument.new ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first
@@ -9,10 +16,10 @@ module Api
           render json: {error: "An id is required for this action."} and return
         end
 
-        if @core_doc.blank?         ||
-            !@core_doc.public?      ||
-            @core_doc.in_progress?  ||
-            @core_doc.incomplete?   ||
+        if @core_doc.blank? ||
+            (!@core_doc.public? || (!current_user.blank? && current_user.can? :read, record)) ||
+            @core_doc.in_progress? ||
+            @core_doc.incomplete? ||
             @core_doc.embargo_date_in_effect?
           render json: {error: "The item you've requested is unavailable."} and return
         end
