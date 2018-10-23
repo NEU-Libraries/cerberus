@@ -181,6 +181,7 @@ class ProcessXmlZipJob
               existing_file = false
               old_mods = nil
               if row_results["sequence"].downcase == "MASTER".downcase
+                count = count - 1 # remove count for master item of same sequence
                 master_available = true
                 master_file_path = dir_path + "/" + row_results["file_name"]
                 master_original_filename = row_results["file_name"]
