@@ -82,6 +82,7 @@ class AggregatedStatisticsMoveJob
           z.size_increase += x.size_increase
           z.spreadsheet_load_edits += x.spreadsheet_load_edits
           z.xml_load_edits += x.xml_load_edits
+          z.processed_at = d
           z.save!
         end
 
