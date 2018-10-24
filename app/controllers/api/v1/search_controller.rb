@@ -134,7 +134,7 @@ module Api
         #   solr_parameters[:fq] << "read_access_group_ssim:\"public\""
         # end
 
-        def no_in_progress_or_embargo
+        def no_in_progress_or_embargo(solr_parameters, user_parameters)
           solr_parameters[:fq] ||= []
           solr_parameters[:fq] << "-in_progress_tesim:true OR -incomplete_tesim:true"
           solr_parameters[:fq] << "-(-embargo_release_date_dtsi:[* TO NOW] OR embargo_release_date_dtsi:[* TO *])"

@@ -15,6 +15,10 @@ module Api
       end
 
       def ingest
+        if current_user.blank?
+          render json: { errors: ['Not Authenticated'] }, status: :unauthorized
+        end and return
+
         api_user_email = current_user.email
 
         begin

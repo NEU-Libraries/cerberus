@@ -17,7 +17,7 @@ module Api
         end
 
         if @core_doc.blank? ||
-            (!@core_doc.public? || (!current_user.blank? && current_user.can?(:read, @core_doc))) ||
+            !(@core_doc.public? || (!current_user.blank? && current_user.can?(:read, @core_doc))) ||
             @core_doc.in_progress? ||
             @core_doc.incomplete? ||
             @core_doc.embargo_date_in_effect?
