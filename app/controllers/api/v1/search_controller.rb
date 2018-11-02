@@ -18,13 +18,9 @@ module Api
 
       before_filter :enforce_show_permissions, :only=>:search
       before_filter :authenticate_request!
-      after_filter :clear_user
+      after_filter :clear_api_user
 
       self.solr_search_params_logic += [:add_access_controls_to_solr_params]
-
-      def clear_user
-        sign_out(current_user)
-      end
 
       def search
 

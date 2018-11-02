@@ -8,11 +8,7 @@ module Api
       include MimeHelper
 
       before_filter :authenticate_request!
-      after_filter :clear_user
-
-      def clear_user
-        sign_out(current_user)
-      end
+      after_filter :clear_api_user
 
       def ingest
         if current_user.blank?

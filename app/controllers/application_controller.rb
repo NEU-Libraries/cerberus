@@ -216,6 +216,14 @@ class ApplicationController < ActionController::Base
       render json: { errors: ['Not Authenticated'] }, status: :unauthorized
     end
 
+    def clear_api_user
+      if user_id_in_token?
+        if !current_user.blank?
+          sign_out(current_user)
+        end
+      end
+    end
+
   private
     def http_token
       # @http_token ||= if request.headers['Authorization'].present?

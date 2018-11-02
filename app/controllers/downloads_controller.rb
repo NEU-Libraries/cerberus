@@ -3,6 +3,7 @@ class DownloadsController < ApplicationController
   include Cerberus::ControllerHelpers::ViewLogger
 
   before_filter :ensure_not_embargoed, :only => :show
+  before_filter :authenticate_request!
 
   # Ensure that only downloads of content datastreams are triggering this.
   # Without this check displaying thumbnails and video poster images will also
@@ -13,6 +14,8 @@ class DownloadsController < ApplicationController
       c.log_action('download', 'COMPLETE')
     end
   end
+
+  after_filter :clear_api_user
 
   rescue_from ArgumentError do |exception|
     # This is error spam from scripts that haven't figured out that hitting urls
