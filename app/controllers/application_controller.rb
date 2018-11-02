@@ -97,7 +97,7 @@ class ApplicationController < ActionController::Base
         if !Rails.cache.exist?("/api/#{@core_doc.pid}-#{@core_doc.updated_at}")
           result_hsh = Rails.cache.fetch("/api/#{@core_doc.pid}-#{@core_doc.updated_at}", :expires_in => 12.hours) do
             @core_file = ActiveFedora::Base.find(pid, cast: true)
-            @core_file.to_hash(true) # True is public_only flag - making it adaptable if we move forward with private API access. Feasible now we have auth tokens
+            @core_file.to_hash
           end
         else
           result_hsh = Rails.cache.fetch("/api/#{@core_doc.pid}-#{@core_doc.updated_at}")
