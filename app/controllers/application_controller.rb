@@ -22,6 +22,8 @@ class ApplicationController < ActionController::Base
   before_filter :store_location
   after_filter :redirect_blacklight_overrun
 
+  attr_reader :current_api_user
+
   # around_filter :profile
 
   # def send_file(path, options = {})
@@ -210,7 +212,7 @@ class ApplicationController < ActionController::Base
       #   return
       # end
       if user_id_in_token?
-        sign_in(User.find(auth_token[:user_id]))
+        @current_api_user = User.find(auth_token[:user_id])
       end
     rescue JWT::VerificationError, JWT::DecodeError
       render json: { errors: ['Not Authenticated'] }, status: :unauthorized
@@ -219,7 +221,7 @@ class ApplicationController < ActionController::Base
     def clear_api_user
       if user_id_in_token?
         if !current_user.blank?
-          sign_out(current_user)
+          @current_api_user = nil
         end
       end
     end

@@ -11,7 +11,11 @@ module Cerberus::Controller
   end
 
   def current_ability
-    user_signed_in? ? current_user.ability : super
+    if !current_api_user.blank?
+      current_api_user.ability
+    else
+      user_signed_in? ? current_user.ability : super
+    end
   end
 
   def groups
