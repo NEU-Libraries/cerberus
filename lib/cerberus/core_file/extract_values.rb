@@ -4,7 +4,7 @@ module Cerberus
 
       include ApplicationHelper
 
-      def to_hash
+      def to_hash(user_ability = nil)
         page_objects = Hash.new
 
         @core_doc = SolrDocument.new(self.to_solr)
@@ -16,15 +16,14 @@ module Cerberus
         result_hsh["thumbnails"] = @core_doc.thumbnail_list.map { |url_string| "#{root_path(:only_path => false)}#{url_string.sub!(/^\//, '')}"}
         result_hsh["canonical_object"] = @core_doc.canonical_object.map { |doc| {doc_to_url(doc) => doc.derivative_label} }.reduce(&:merge)
 
-        if !current_user.blank?
-          result_hsh["content_objects"] = @core_doc.content_objects.reject{|doc| !current_user.can?(:read, doc)}.map { |doc| {doc_to_url(doc) => doc.derivative_label} }.reduce(&:merge)
+        if !user_ability.blank?
+          result_hsh["content_objects"] = @core_doc.content_objects.reject{|doc| !user_ability.can?(:read, doc)}.map { |doc| {doc_to_url(doc) => doc.derivative_label} }.reduce(&:merge)
         else
           result_hsh["content_objects"] = @core_doc.content_objects.reject{|doc| !doc.public?}.map { |doc| {doc_to_url(doc) => doc.derivative_label} }.reduce(&:merge)
         end
 
-        result_hsh["content_objects"].reject!{ |k,v| v == "Thumbnail Image" }
-
         if !result_hsh["content_objects"].blank?
+          result_hsh["content_objects"].reject!{ |k,v| v == "Thumbnail Image" }
           result_hsh["content_objects"].each do |k,v|
             if v == "Page"
               key = k.gsub("?datastream_id=content", "")
