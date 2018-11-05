@@ -16,8 +16,8 @@ module Api
       include BlacklightAdvancedSearch::ParseBasicQ
       include BlacklightAdvancedSearch::Controller
 
+      prepend_before_filter :authenticate_request!
       before_filter :enforce_show_permissions, :only=>:search
-      before_filter :authenticate_request!
       after_filter :clear_api_user
 
       self.solr_search_params_logic += [:add_access_controls_to_solr_params]
