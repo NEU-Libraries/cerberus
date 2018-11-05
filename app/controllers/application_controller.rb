@@ -219,11 +219,7 @@ class ApplicationController < ActionController::Base
     end
 
     def clear_api_user
-      if user_id_in_token?
-        if !current_user.blank?
-          @current_api_user = nil
-        end
-      end
+      @current_api_user = nil
     end
 
   private
