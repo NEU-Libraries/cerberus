@@ -2,8 +2,8 @@ class DownloadsController < ApplicationController
   include Cerberus::DownloadsControllerBehavior
   include Cerberus::ControllerHelpers::ViewLogger
 
+  prepend_before_filter :authenticate_request!
   before_filter :ensure_not_embargoed, :only => :show
-  before_filter :authenticate_request!
 
   # Ensure that only downloads of content datastreams are triggering this.
   # Without this check displaying thumbnails and video poster images will also

@@ -18,10 +18,10 @@ module Cerberus
       # Collections and others can have non-standard thumbnails - inlcuding a check to see if it's a "true" content type
       if asset.class == ZipFile
         file_name = "neu_#{asset.pid.split(":").last}.zip"
-        send_file asset.fedora_file_path, :filename =>  file_name, :type => "application/zip", :disposition => 'inline'
+        send_file asset.fedora_file_path, :filename =>  file_name, :type => "application/zip", :disposition => 'attachment'
       elsif !(asset.class == ImageThumbnailFile || asset.class == PageFile) && (asset.datastreams.keys.include? "content")
         file_name = "neu_#{asset.pid.split(":").last}.#{extract_extension(asset.properties.mime_type.first, File.extname(asset.original_filename || "").delete!("."))}"
-        send_file asset.fedora_file_path, :filename =>  file_name, :type => asset.mime_type || extract_mime_type(asset.fedora_file_path), :disposition => 'inline'
+        send_file asset.fedora_file_path, :filename =>  file_name, :type => asset.mime_type || extract_mime_type(asset.fedora_file_path), :disposition => 'attachment'
       else
         super
       end
