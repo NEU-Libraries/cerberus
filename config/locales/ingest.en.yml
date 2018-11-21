@@ -2,11 +2,11 @@ en:
   ingest:
     production:
       sj-sweeney@northeastern-edu:
-        - neu:cj82r303t
+        - neu:cj82sw989
       d-cliff@northeastern-edu:
-        - neu:cj82r303t
-      john-hamman@gmail-com:
-        - neu:cj82r303t
+        - neu:cj82sw989
+      gri_tk@neu-edu:
+        - neu:cj82sw989
     staging:
       sj-sweeney@neu-edu:
         - neu:6240
