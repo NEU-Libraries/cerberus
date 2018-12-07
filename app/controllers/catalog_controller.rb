@@ -232,6 +232,7 @@ class CatalogController < ApplicationController
     config.add_facet_field solr_name("creator", :facetable), label: "Creator", limit: true
     config.add_facet_field solr_name("creation_year", :facetable), label: "Year", limit: true
     config.add_facet_field solr_name("drs_department", :symbol), label: "Department", limit: true
+    config.add_facet_field solr_name("drs_college", :symbol), label: "College", limit: true
     config.add_facet_field solr_name("drs_degree", :symbol), label: "Degree Level", limit: true
     config.add_facet_field solr_name("drs_course_number", :symbol), label: "Course Number", limit: true
     config.add_facet_field solr_name("drs_course_title", :symbol), label: "Course Title", limit: true

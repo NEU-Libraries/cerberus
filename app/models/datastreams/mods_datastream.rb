@@ -299,6 +299,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
         t.category(namespace_prefix: nil)
         t.department(namespace_prefix: nil)
         t.degree(namespace_prefix: nil)
+        t.college(namespace_prefix: nil)
         t.course_info(namespace_prefix: nil){
           t.course_number(namespace_prefix: nil)
           t.course_title(namespace_prefix: nil)
@@ -312,6 +313,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
     t.category(ref: [:extension, :scholarly_object, :category])
     t.department(ref: [:extension, :scholarly_object, :department])
     t.degree(ref: [:extension, :scholarly_object, :degree])
+    t.college(ref: [:extension, :scholarly_object, :college])
     t.course_number(ref: [:extension, :scholarly_object, :course_info, :course_number])
     t.course_title(ref: [:extension, :scholarly_object, :course_info, :course_title])
   end
@@ -413,6 +415,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
     solr_doc["drs_category_ssim"] = self.category.first if !self.category.first.blank?
     solr_doc["drs_department_ssim"] = self.department.first if !self.department.first.blank?
     solr_doc["drs_degree_ssim"] = self.degree.first if !self.degree.first.blank?
+    solr_doc["drs_college_ssim"] = self.college.first if !self.college.first.blank?
     solr_doc["drs_course_number_ssim"] = self.course_number.first if !self.course_number.first.blank?
     solr_doc["drs_course_title_ssim"] = self.course_title.first if !self.course_title.first.blank?
 
@@ -621,6 +624,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
             xml.category{ xml.parent.namespace = nil }
             xml.department{ xml.parent.namespace = nil }
             xml.degree{ xml.parent.namespace = nil }
+            xml.college{ xml.parent.namespace = nil }
 
             xml.course_info{
               xml.parent.namespace = nil
