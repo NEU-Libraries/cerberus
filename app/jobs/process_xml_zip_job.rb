@@ -156,6 +156,7 @@ class ProcessXmlZipJob
       master_original_filename = nil
       master_file_path = nil
       zip_files = []
+      derivative_files = []
       seq_num = -1
       start = header_position + 1
       end_row = spreadsheet.last_row.to_i
@@ -195,6 +196,24 @@ class ProcessXmlZipJob
                     master_file.original_filename = master_original_filename
                     master_file.canonize
                     master_file.save!
+                  else
+                    # Error - Can't nest zips, or something worse happened
+                  end
+                end
+              elsif row_results["sequence"].downcase == "DERIVATIVE".downcase
+                count = count - 1 # remove count for derivative item of same sequence
+                derivative_klass = ""
+                derivative_file_path = dir_path + "/" + row_results["file_name"]
+                derivative_original_filename = row_results["file_name"]
+                if File.exists? derivative_file_path
+                  File.open(derivative_file_path) do |df|
+                    derivative_klass = canonical_class_from_file(df)
+                  end
+                  if !derivative_klass.blank? && derivative_klass != "ZipFile"
+                    derivative_file = derivative_klass.constantize.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
+                    derivative_file.original_filename = derivative_original_filename
+                    derivative_file.save!
+                    derivative_files << derivative_file.pid
                   else
                     # Error - Can't nest zips, or something worse happened
                   end
@@ -244,6 +263,14 @@ class ProcessXmlZipJob
                     end
 
                     core_file.save!
+
+                    if !derivative_files.blank?
+                      derivative_files.each do |pid|
+                        df = ActiveFedora::Base.find(pid, cast: true)
+                        df.core_record = core_file
+                        df.save!
+                      end
+                    end
 
                     sc_type = collection.smart_collection_type
                     if !sc_type.nil? && sc_type != ""
