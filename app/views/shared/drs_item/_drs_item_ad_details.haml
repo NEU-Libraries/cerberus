@@ -61,6 +61,10 @@
           Downloads
           %i.icon-caret-down
         = render partial: 'core_files/derivative_btn_group', locals: {contents: @content_objects, grid_view: true, item: item}
+    - elsif item.klass == "Collection"
+      - if current_user
+        .btn-group
+          =link_to("Save for later", sets_editable_path(file: item.pid, class:"#{item.klass}"), remote: true, title:  "Add to " + t('drs.compilations.name'), data: {toggle: "tooltip"}, class: "btn btn-mini btn-clear")
     .btn-group
       - icon = render partial: 'shared/icon',  locals: { class_string: "icon-comments-alt", alt_text: "Add to " + t('drs.compilations.name')}
       =link_to icon.html_safe , "https://northeastern.libanswers.com/form.php?queue_id=2155&resource=#{CGI::escape(request.original_url)}", :target => "_blank", title:  "Report a problem", data: {toggle: "tooltip"}, class: 'btn btn-mini btn-clear'
