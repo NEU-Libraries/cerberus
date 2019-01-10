@@ -212,6 +212,7 @@ class ProcessXmlZipJob
                   if !derivative_klass.blank? && derivative_klass != "ZipFile"
                     derivative_file = derivative_klass.constantize.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
                     derivative_file.original_filename = derivative_original_filename
+                    derivative_file.tmp_path = derivative_file_path
                     derivative_file.save!
                     derivative_files << derivative_file.pid
                   else
@@ -253,24 +254,28 @@ class ProcessXmlZipJob
 
                     if !multipage
                       core_file.instantiate_appropriate_content_object(new_file, core_file.original_filename)
-                    elsif master_available
-                      core_file.instantiate_appropriate_content_object(master_file_path, core_file.original_filename)
-                      # make master's parent core_file
-                      master_file.core_record = core_file
-                      master_file.save!
+                    else
+                      if master_available
+                        core_file.instantiate_appropriate_content_object(master_file_path, core_file.original_filename)
+                        # make master's parent core_file
+                        master_file.core_record = core_file
+                        master_file.save!
 
-                      Cerberus::Application::Queue.push(ContentObjectCreationJob.new(core_file.pid, master_file_path, master_file.pid, master_original_filename, nil, nil, false))
+                        Cerberus::Application::Queue.push(ContentObjectCreationJob.new(core_file.pid, master_file_path, master_file.pid, master_original_filename, nil, nil, false))
+                      end
+
+                      if !derivative_files.blank?
+                        derivative_files.each do |pid|
+                          df = ActiveFedora::Base.find(pid, cast: true)
+                          df.core_record = core_file
+                          df.save!
+
+                          Cerberus::Application::Queue.push(ContentObjectCreationJob.new(core_file.pid, df.tmp_path, df.pid, df.original_filename, nil, nil, false))
+                        end
+                      end
                     end
 
                     core_file.save!
-
-                    if !derivative_files.blank?
-                      derivative_files.each do |pid|
-                        df = ActiveFedora::Base.find(pid, cast: true)
-                        df.core_record = core_file
-                        df.save!
-                      end
-                    end
 
                     sc_type = collection.smart_collection_type
                     if !sc_type.nil? && sc_type != ""
