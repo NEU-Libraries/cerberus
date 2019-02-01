@@ -14,7 +14,7 @@ module Cerberus
 
     # overriding hydra-head 6.3.3
     def send_content(asset)
-      if !(asset.class == ImageThumbnailFile || asset.class == PageFile)
+      if !(asset.class == ImageThumbnailFile || asset.class == PageFile) && (asset.datastreams.keys.include? "content")
         cf_doc = (SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{asset.pid}\"").first)).get_core_record
         if cf_doc.tombstoned?
           render_410(Exceptions::TombstonedObject.new) and return
