@@ -6,7 +6,7 @@ class WowzaController < ApplicationController
   def plain
     doc = fetch_solr_document
 
-    if (!current_user.nil? && (current_user.can? :read, doc)) || doc.public?
+    if (!doc.get_core_record.tombstoned?) && ((!current_user.nil? && (current_user.can? :read, doc)) || doc.public?)
       asset = ActiveFedora::Base.find(doc.pid, cast: true)
       if request.headers["Range"].blank?
         log_action('download', 'COMPLETE', asset.pid)
@@ -25,7 +25,7 @@ class WowzaController < ApplicationController
   def playlist
     doc = fetch_solr_document
 
-    if (!current_user.nil? && (current_user.can? :read, doc)) || doc.public?
+    if (!doc.get_core_record.tombstoned?) && ((!current_user.nil? && (current_user.can? :read, doc)) || doc.public?)
       if doc.mime_type.start_with?('video') || doc.mime_type.start_with?('audio')
         dir = doc.pid_hash[0,2]
         encoded = doc.encode
