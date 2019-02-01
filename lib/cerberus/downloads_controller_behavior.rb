@@ -14,9 +14,11 @@ module Cerberus
 
     # overriding hydra-head 6.3.3
     def send_content(asset)
-      cf_doc = (SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{asset.pid}\"").first)).get_core_record
-      if cf_doc.tombstoned?
-        render_403 and return
+      if !(asset.class == ImageThumbnailFile || asset.class == PageFile)
+        cf_doc = (SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{asset.pid}\"").first)).get_core_record
+        if cf_doc.tombstoned?
+          render_410(Exceptions::TombstonedObject.new) and return
+        end
       end
       # Fuzzy thumbnails with send_file for some reason...small kludge. Everything else, don't use Hydra
       # Collections and others can have non-standard thumbnails - inlcuding a check to see if it's a "true" content type
