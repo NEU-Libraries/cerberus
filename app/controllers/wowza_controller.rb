@@ -6,7 +6,7 @@ class WowzaController < ApplicationController
   def plain
     doc = fetch_solr_document
 
-    if !doc.get_core_record.tombstoned?
+    if doc.get_core_record.tombstoned?
       render_410(Exceptions::TombstonedObject.new) and return
     end
 
@@ -29,7 +29,7 @@ class WowzaController < ApplicationController
   def playlist
     doc = fetch_solr_document
 
-    if !doc.get_core_record.tombstoned?
+    if doc.get_core_record.tombstoned?
       render_410(Exceptions::TombstonedObject.new) and return
     end
 

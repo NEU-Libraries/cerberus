@@ -100,7 +100,7 @@ class CoreFilesController < ApplicationController
   def fulltext
     doc = fetch_solr_document
     cf = CoreFile.find(doc.pid)
-    if !doc.tombstoned?
+    if doc.tombstoned?
       render_410(Exceptions::TombstonedObject.new) and return
     end
     if !(cf.under_embargo?(current_user))
@@ -119,7 +119,7 @@ class CoreFilesController < ApplicationController
     # 1142 fix
     doc = fetch_solr_document
     asset = AudioFile.find(doc.canonical_object.first.pid)
-    if !doc.tombstoned?
+    if doc.tombstoned?
       render_410(Exceptions::TombstonedObject.new) and return
     end
     if doc.public? && !asset.blank?
