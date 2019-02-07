@@ -19,6 +19,9 @@ module Cerberus
         if cf_doc.tombstoned?
           render_410(Exceptions::TombstonedObject.new) and return
         end
+        if cf_doc.stream_only?
+          render_403 and return
+        end
       end
       # Fuzzy thumbnails with send_file for some reason...small kludge. Everything else, don't use Hydra
       # Collections and others can have non-standard thumbnails - inlcuding a check to see if it's a "true" content type

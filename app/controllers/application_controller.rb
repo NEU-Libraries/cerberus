@@ -148,6 +148,7 @@ class ApplicationController < ActionController::Base
         request.path != "/users/auth/shibboleth" &&
         request.path != "/users/auth/shibboleth/callback" &&
         !(request.path.include? "/downloads/") &&
+        !(request.path.include? "/wowza/") &&
         !request.xhr?) # don't store ajax calls
       session[:previous_url] = request.fullpath
     end
