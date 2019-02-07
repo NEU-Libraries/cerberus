@@ -10,7 +10,7 @@ class WowzaController < ApplicationController
       render_410(Exceptions::TombstonedObject.new) and return
     end
 
-    if doc.get_core_record.stream_only? && doc.klass == "VideoFile"
+    if doc.get_core_record.stream_only? && doc.klass == "VideoFile" && !request.xhr?
       render_403 and return
     end
 
