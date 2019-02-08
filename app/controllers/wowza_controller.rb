@@ -10,13 +10,12 @@ class WowzaController < ApplicationController
       render_410(Exceptions::TombstonedObject.new) and return
     end
 
-    if doc.get_core_record.stream_only? && doc.klass == "VideoFile" && !request.xhr?
-      render_403 and return
-    end
-
     if (!current_user.nil? && (current_user.can? :read, doc)) || doc.public?
       asset = ActiveFedora::Base.find(doc.pid, cast: true)
       if request.headers["Range"].blank?
+        if doc.get_core_record.stream_only? && doc.klass == "VideoFile" && !request.xhr?
+          render_403 and return
+        end
         log_action('download', 'COMPLETE', asset.pid)
       else
         log_action("stream", "COMPLETE", asset.pid)
