@@ -75,27 +75,29 @@ module Cerberus
       def dcmi_type
         hsh = Hash.new
 
-        if self.canonical_class.constantize == VideoFile
-          hsh[:dc] = "Moving Image"
-          hsh[:mods] = "moving image"
-        elsif self.canonical_class.constantize == ImageMasterFile
-          hsh[:dc] = "Image"
-          hsh[:mods] = "still image"
-        elsif [TextFile, PdfFile, MswordFile, EpubFile].include? self.canonical_class.constantize
-          hsh[:dc] = "Text"
-          hsh[:mods] = "text"
-        elsif self.canonical_class.constantize == AudioFile
-          hsh[:dc] = "Audio"
-          hsh[:mods] = "sound recording"
-        elsif self.canonical_class.constantize == MsexcelFile
-          hsh[:dc] = "Dataset"
-          hsh[:mods] = "software, multimedia"
-        elsif self.canonical_class.constantize == MspowerpointFile
-          hsh[:dc] = "Interactive Resource"
-          hsh[:mods] = "software, multimedia"
-        elsif self.canonical_class.constantize == ZipFile
-          hsh[:dc] = "Collection"
-          hsh[:mods] = "software, multimedia"
+        if !self.canonical_class.blank?
+          if self.canonical_class.constantize == VideoFile
+            hsh[:dc] = "Moving Image"
+            hsh[:mods] = "moving image"
+          elsif self.canonical_class.constantize == ImageMasterFile
+            hsh[:dc] = "Image"
+            hsh[:mods] = "still image"
+          elsif [TextFile, PdfFile, MswordFile, EpubFile].include? self.canonical_class.constantize
+            hsh[:dc] = "Text"
+            hsh[:mods] = "text"
+          elsif self.canonical_class.constantize == AudioFile
+            hsh[:dc] = "Audio"
+            hsh[:mods] = "sound recording"
+          elsif self.canonical_class.constantize == MsexcelFile
+            hsh[:dc] = "Dataset"
+            hsh[:mods] = "software, multimedia"
+          elsif self.canonical_class.constantize == MspowerpointFile
+            hsh[:dc] = "Interactive Resource"
+            hsh[:mods] = "software, multimedia"
+          elsif self.canonical_class.constantize == ZipFile
+            hsh[:dc] = "Collection"
+            hsh[:mods] = "software, multimedia"
+          end
         end
 
         return hsh

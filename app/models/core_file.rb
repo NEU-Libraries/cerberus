@@ -429,10 +429,12 @@ class CoreFile < ActiveFedora::Base
       # add back dc type classic for facets - inject into first position for solr
       self.reload
       hsh = self.dcmi_type
-      vals = self.DC.nu_type
-      combined = vals.unshift(hsh[:dc]).reject { |x| x.empty? }
-      self.DC.nu_type = combined.uniq
-      self.save!
+      if !hsh.blank?
+        vals = self.DC.nu_type
+        combined = vals.unshift(hsh[:dc]).reject { |x| x.empty? }
+        self.DC.nu_type = combined.uniq
+        self.save!
+      end
     end
   end
 
