@@ -52,16 +52,17 @@
       =render partial: 'shared/icon', locals: { class_string: t('drs.featured_content.employees.icon') }
       #{ t('drs.featured_content.employees.name') }
   .span9
-    %h3 Recently Added Items
-    - if @recent_documents.length > 0
-      %section{class: ["drs-items-grid", "drs-items", "front-page-dropdown"] }
-        - @recent_documents.sample(3).each do |f|
-          - @thumbs = f.thumbnail_list
-          =render partial: "shared/drs_item/drs_item", locals: { item: f }
-    - else
-      .alert.alert-info
-        %button.close{"data-dismiss" => "alert", type: "button", "aria-hidden" => true }
-          &times;
-        %strong
-          No recent documents found.
-        Please check back soon.
+    - if !request.user_agent.blank?
+      - if @recent_documents.length > 0
+        %h3 Recently Added Items
+        %section{class: ["drs-items-grid", "drs-items", "front-page-dropdown"] }
+          - @recent_documents.sample(3).each do |f|
+            - @thumbs = f.thumbnail_list
+            =render partial: "shared/drs_item/drs_item", locals: { item: f }
+      - else
+        .alert.alert-info
+          %button.close{"data-dismiss" => "alert", type: "button", "aria-hidden" => true }
+            &times;
+          %strong
+            No recent documents found.
+          Please check back soon.
