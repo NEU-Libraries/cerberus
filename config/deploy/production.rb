@@ -14,7 +14,7 @@ set :branch, ENV['branch'] || current_branch || "master" # you can use the 'bran
 set :user, 'drs'
 set :rails_env, :production
 
-server 'drs@repository.library.northeastern.edu', user: 'drs', roles: %w{web app db}
+server 'drs@nb4404.neu.edu', user: 'drs', roles: %w{web app db}
 
 namespace :deploy do
   desc "Updating ClamAV"
