@@ -10,6 +10,8 @@ en:
       name: "Board of Trustees"
     northeastern:drs:bouve:deans_office:media:
       name: "Bouvé College of Health Sciences - Dean's Office Media Group"
+    northeastern:drs:bouve:school_of_pharmacy:staff:
+      name: "Bouvé College of Health Sciences - School of Pharmacy Staff"
     northeastern:drs:camd:boston_womens_march_posters:
       name: "Boston Women's March Posters Project Team"
     northeastern:drs:camd:department_of_art_and_design:art_and_design_gallery:
@@ -24,16 +26,28 @@ en:
       name: "College of Engineering - BSPIRAL Team"
     northeastern:drs:college_of_engineering:electrical_and_computer_engineering:cognitive_systems_laboratory:
       name: "College of Engineering - Cognitive Systems Laboratory Team"
+    northeastern:drs:college_of_engineering:electrical_and_computer_engineering:csl:csl_owners:
+      name: "College of Engineering - Cognitive Systems Laboratory Owners"
+    northeastern:drs:college_of_engineering:electrical_and_computer_engineering:grants:nsf_eeg_1812588:
+      name: "College of Engineering - NSF_EEG_1812588"
+    northeastern:drs:college_of_engineering:mechanical_and_industrial_engineering:combustion_air_pollution_lab:
+      name: "College of Engineering - Combustion and Air Pollution Lab"
     northeastern:drs:college_of_professional_studies:media:
       name: "College of Professional Studies - Media Group"
+    northeastern:drs:college_of_science:linguistics_program:honors_projects:
+      name: "College of Science - Honors Projects in Linguistics"
     northeastern:drs:college_of_science:marine_science_center:msc_staff:
       name: "Marine Science Center Staff"
+    northeastern:drs:college_of_science:marine_science_center:ogl_staff:
+      name: "College of Science - Ocean Genome Legacy Staff"
     northeastern:drs:college_of_science:social_interaction_lab:
       name: "College of Science - Social Interaction Lab Staff"
     northeastern:drs:college_of_social_sciences_humanities:dominican_prayer_book:
       name: "CSSH - Dominican Prayer Book Project Team"
     northeastern:drs:college_of_social_sciences_humanities:dudley_square_project:
       name: "CSSH - Dudley Square Project Team"
+    northeastern:drs:college_of_social_sciences_humanities:deans_office:
+      name: "CSSH - Dean's Office Staff"
     northeastern:drs:college_of_social_sciences_humanities:early_black_boston_digital_almanac:
       name: "CSSH - Early Black Boston Digital Almanac Team"
     northeastern:drs:college_of_social_sciences_humanities:early_caribbean_digital_archive:
@@ -42,10 +56,30 @@ en:
       name: "CSSH - E-literature Project Team"
     northeastern:drs:college_of_social_sciences_humanities:humanities_center:neh_space_place_humanities:
       name: "CSSH - NEH Summer Institute on Space, Place, and the Humanities Project Team"
+    northeastern:drs:college_of_social_sciences_humanities:margaret_fuller:
+      name: "CSSH - Margaret Fuller Project"
     northeastern:drs:college_of_social_sciences_humanities:thoreau_drawings:
       name: "CSSH - Thoreau Project Team"
     northeastern:drs:college_of_social_sciences_humanities:holocaust_awareness_committee:
       name: "Holocaust Awareness Committee"
+    northeastern:drs:courses:cltr1240_sec01:
+      name: "Academic Course - CLTR1240_SEC01"
+    northeastern:drs:courses:cltr3725_sec01:
+      name: "Academic Course - CLTR3725_SEC01"
+    northeastern:drs:courses:engl_2740:
+      name: "Academic Course - ENGL_2740"
+    northeastern:drs:courses:hist7320:
+      name: "Academic Course - HIST7320"
+    northeastern:drs:courses:frnh102:
+      name: "Academic Course - FRNH102"
+    northeastern:drs:courses:larc2340:
+      name: "Academic Course - LARC2340"
+    northeastern:drs:courses:ling4654:
+      name: "Academic Course - LING4654"
+    northeastern:drs:courses:rms6260_sec01:
+      name: "Academic Course - RMS6260_SEC01"
+    northeastern:drs:courses:socl_2450:
+      name: "Academic Course - SOCL_2450"
     northeastern:drs:damore_mckim:marcom:
       name: "D'Amore-McKim - Marketing Group"
     northeastern:drs:drspt:arader_gallery:
@@ -70,6 +104,8 @@ en:
       name: "University Archives and Special Collections Staff"
     northeastern:drs:library:communications:
       name: "University Library - Communications Office Staff"
+    northeastern:drs:library:designfordiversity:
+      name: "University Library - Design for Diversity"
     northeastern:drs:library:dmc_studios:
       name: "University Library - DMC Studios Staff"
     northeastern:drs:library:dsg:
@@ -80,6 +116,10 @@ en:
       name: "University Library - Research and Instruction Staff"
     northeastern:drs:library:scholarly_communications:
       name: "University Library - Scholarly Communications Staff"
+    northeastern:drs:library:streaming_reserves:
+      name: "University Library - Streaming Reserves Team"
+    northeastern:drs:library:podcast_whatsnew:
+      name: "University Library - What's New Podcast Team"
     northeastern:drs:marketing_and_communications:staff:
       name: "Office of Marketing and Communications - Photography Staff"
     northeastern:drs:marketing_and_communications:art_staff:
@@ -92,6 +132,8 @@ en:
       name: "DRS Advanced Users"
     northeastern:drs:repository:beta_users:
       name: "DRS Beta Users"
+    northeastern:drs:repository:grouper_management:
+      name: "DRS Grouper Management Team"
     northeastern:drs:repository:loaders:aai_archives:
       name: "DRS IPTC Loader - AAI"
     northeastern:drs:repository:loaders:coe:
@@ -104,6 +146,8 @@ en:
       name: "DRS IPTC Loader - EMSA EMC"
     northeastern:drs:repository:loaders:libcom:
       name: "DRS IPTC Loader - Library Communications Office"
+    northeastern:drs:repository:loaders:ogl:
+      name: "DRS IPTC Loader - OGL"
     northeastern:drs:repository:loaders:marcom:
       name: "DRS IPTC Loader - Marketing"
     northeastern:drs:repository:loaders:bouve_dean:
