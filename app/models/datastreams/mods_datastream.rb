@@ -341,10 +341,10 @@ class ModsDatastream < ActiveFedora::OmDatastream
     # Advisor
     advisor_names = []
 
-    (0..self.advisor_name_part.length).each do |i|
-      fn = self.advisor_given(i)
-      ln = self.advisor_family(i)
-      full_name = self.advisor_name_part(i)
+    (0..(self.advisor.length - 1)).each do |i|
+      fn = self.advisor(i).name_part_given
+      ln = self.advisor(i).name_part_family
+      full_name = self.advisor(i).name_part
 
       if fn.any? && ln.any?
         # Kramdown parse for search purposes - #439
@@ -360,10 +360,10 @@ class ModsDatastream < ActiveFedora::OmDatastream
     # Committee Members
     committee_member_names = []
 
-    (0..self.committee_member_name_part.length).each do |i|
-      fn = self.committee_member_given(i)
-      ln = self.committee_member_family(i)
-      full_name = self.committee_member_name_part(i)
+    (0..(self.committee_member.length - 1)).each do |i|
+      fn = self.committee_member(i).name_part_given
+      ln = self.committee_member(i).name_part_family
+      full_name = self.committee_member(i).name_part
 
       if fn.any? && ln.any?
         # Kramdown parse for search purposes - #439
