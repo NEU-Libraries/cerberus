@@ -11,7 +11,7 @@ en:
     marcom:
       long_name: "Marketing and Communications"
       short_name: "marcom"
-      copyright: 'Marketing and Communications images are for use only within the context of Northeastern University. Appropriate uses include: Northeastern University-related websites, Northeastern University-based print/web publications and for speaking appearances when acting as a representative of Northeastern University. Images should be credited: "Photographer Name/Northeastern University.” Images are not to be used for self-promotional purposes outside of Northeastern University such as LinkedIn, Facebook or in commercial/external publications such as advertisements, books or magazines without written permission from Northeastern Marketing and Communications. For more information, please contact the senior staff photographer in the office of Marketing and Communications at 617.373.6767'
+      copyright: 'The Northeastern External Affairs division manages the rights and usage of Marketing and Communications images. All rights are reserved, and no usage or reproduction of any type may be made of said images without the express permission of the Communications or Marketing departments. Please contact brand@northeastern.edu if you are interested in using one of these images. If appropriate, you will receive written approval for explicit use and will be provided the high resolution image. Images cannot be manipulated or altered in any way from the original. Image should be credited: “Photographer Name/Northeastern University.”'
       parent: "neu:6240"
       derivatives:
         small:
