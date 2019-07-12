@@ -14,29 +14,34 @@ module Cerberus
         result_hsh["breadcrumbs"] = breadcrumb_to_root(SolrDocument.new(self.to_solr))
         result_hsh["parent"] = @core_doc.parent
         result_hsh["thumbnails"] = @core_doc.thumbnail_list.map { |url_string| "#{root_path(:only_path => false)}#{url_string.sub!(/^\//, '')}"}
-        result_hsh["canonical_object"] = @core_doc.canonical_object.map { |doc| {doc_to_url(doc) => doc.derivative_label} }.reduce(&:merge)
 
-        if !user_ability.blank?
-          result_hsh["content_objects"] = @core_doc.content_objects.reject{|doc| !user_ability.can?(:read, doc)}.map { |doc| {doc_to_url(doc) => doc.derivative_label} }.reduce(&:merge)
-        else
-          result_hsh["content_objects"] = @core_doc.content_objects.reject{|doc| !doc.public?}.map { |doc| {doc_to_url(doc) => doc.derivative_label} }.reduce(&:merge)
-        end
+        if !@core_doc.embargo_date_in_effect?
 
-        if !result_hsh["content_objects"].blank?
-          result_hsh["content_objects"].reject!{ |k,v| v == "Thumbnail Image" }
-          result_hsh["content_objects"].each do |k,v|
-            if v == "Page"
-              key = k.gsub("?datastream_id=content", "")
-              page_objects["#{key}?datastream_id=thumbnail_5"] = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{key.split("/").last}\"").first).ordinal_value
+          result_hsh["canonical_object"] = @core_doc.canonical_object.map { |doc| {doc_to_url(doc) => doc.derivative_label} }.reduce(&:merge)
+
+          if !user_ability.blank?
+            result_hsh["content_objects"] = @core_doc.content_objects.reject{|doc| !user_ability.can?(:read, doc)}.map { |doc| {doc_to_url(doc) => doc.derivative_label} }.reduce(&:merge)
+          else
+            result_hsh["content_objects"] = @core_doc.content_objects.reject{|doc| !doc.public?}.map { |doc| {doc_to_url(doc) => doc.derivative_label} }.reduce(&:merge)
+          end
+
+          if !result_hsh["content_objects"].blank?
+            result_hsh["content_objects"].reject!{ |k,v| v == "Thumbnail Image" }
+            result_hsh["content_objects"].each do |k,v|
+              if v == "Page"
+                key = k.gsub("?datastream_id=content", "")
+                page_objects["#{key}?datastream_id=thumbnail_5"] = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{key.split("/").last}\"").first).ordinal_value
+              end
             end
           end
-        end
 
-        if page_objects.length > 0
-          page_objects.each do |k,v|
-            result_hsh["content_objects"].delete("#{k.split("?").first}")
+          if page_objects.length > 0
+            page_objects.each do |k,v|
+              result_hsh["content_objects"].delete("#{k.split("?").first}")
+            end
+            result_hsh["page_objects"] = Hash[page_objects.sort_by {|_key, value| value}]
           end
-          result_hsh["page_objects"] = Hash[page_objects.sort_by {|_key, value| value}]
+
         end
 
         result_hsh["mods"] = JSON.parse(mods_json)

@@ -40,7 +40,8 @@ module Api
         # end
 
         # self.solr_search_params_logic += [:limit_to_public]
-        self.solr_search_params_logic += [:no_in_progress_or_embargo]
+        # self.solr_search_params_logic += [:no_in_progress_or_embargo]
+        self.solr_search_params_logic += [:no_in_progress]
         self.solr_search_params_logic += [:disable_facet_limit]
 
         # If the pid is a compilation, we need to get the pids and fake the search
@@ -130,10 +131,10 @@ module Api
         #   solr_parameters[:fq] << "read_access_group_ssim:\"public\""
         # end
 
-        def no_in_progress_or_embargo(solr_parameters, user_parameters)
+        def no_in_progress(solr_parameters, user_parameters)
           solr_parameters[:fq] ||= []
           solr_parameters[:fq] << "-in_progress_tesim:true OR -incomplete_tesim:true"
-          solr_parameters[:fq] << "-(-embargo_release_date_dtsi:[* TO NOW] OR embargo_release_date_dtsi:[* TO *])"
+          # solr_parameters[:fq] << "-(-embargo_release_date_dtsi:[* TO NOW] OR embargo_release_date_dtsi:[* TO *])"
         end
 
         def disable_facet_limit(solr_parameters, user_parameters)

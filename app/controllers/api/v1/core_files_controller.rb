@@ -15,8 +15,7 @@ module Api
         if @core_doc.blank? ||
             !(@core_doc.public? || (current_ability.can?(:read, @core_doc))) ||
             @core_doc.in_progress? ||
-            @core_doc.incomplete? ||
-            @core_doc.embargo_date_in_effect?
+            @core_doc.incomplete?
           render json: {error: "The item you've requested is unavailable."} and return
         end
 
