@@ -42,6 +42,8 @@ module Cerberus
             result_hsh["page_objects"] = Hash[page_objects.sort_by {|_key, value| value}]
           end
 
+        else
+          result_hsh["embargoed"] = "true"
         end
 
         result_hsh["mods"] = JSON.parse(mods_json)
