@@ -43,7 +43,7 @@ module Cerberus
           end
 
         else
-          result_hsh["embargoed"] = "true"
+          result_hsh["embargo_release_date"] = @core_doc.embargo_release_date
         end
 
         result_hsh["mods"] = JSON.parse(mods_json)
