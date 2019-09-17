@@ -30,7 +30,6 @@ class AggregatedStatisticsJob
     failed_pids_log = Logger.new("#{Rails.root}/log/#{job_id}/aggregated-statistics-job-failed-pids.log")
 
     progress_logger = Logger.new("#{Rails.root}/log/#{job_id}/aggregated-statistics-job.log")
-    progress_logger.info "#{Time.now} - Processing #{Impression.count(:ip_address, :distinct => true)} impressions."
 
     # Get the complete, public impressions (views, downloads, streams) and aggregate up to parent collection(s) and community(ies)
     Impression.where("public = ? AND status = ? AND (created_at BETWEEN ? AND ?)", true, "COMPLETE", (date-6.days).beginning_of_day, date.end_of_day).find_each do |imp|
