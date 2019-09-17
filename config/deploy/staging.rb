@@ -70,17 +70,15 @@ namespace :deploy do
     end
   end
 
-  desc "Setting whenever environment and updating the crontable"
-  task :whenever do
-    on roles(:app), :in => :sequence, :wait => 5 do
-      within release_path do
-        execute :bundle, 'exec', 'whenever', '-c'
-        execute :bundle, 'exec', 'whenever', '-w'
-      end
-      # execute "cd #{release_path} && (RAILS_ENV=staging whenever --set environment=staging -c)"
-      # execute "cd #{release_path} && (RAILS_ENV=staging whenever --set environment=staging -w)"
-    end
-  end
+  # desc "Setting whenever environment and updating the crontable"
+  # task :whenever do
+  #   on roles(:app), :in => :sequence, :wait => 5 do
+  #     within release_path do
+  #       execute :bundle, 'exec', 'whenever', '-c'
+  #       execute :bundle, 'exec', 'whenever', '-w'
+  #     end
+  #   end
+  # end
 
   desc 'Flush Redis'
   task :flush_redis do
@@ -130,7 +128,7 @@ after 'deploy:updating', 'bundler:install'
 # after 'deploy:updating', 'deploy:nokogiri'
 after 'deploy:updating', 'deploy:copy_yml_file'
 after 'deploy:updating', 'deploy:migrate'
-after 'deploy:updating', 'deploy:whenever'
+# after 'deploy:updating', 'deploy:whenever'
 after 'deploy:updating', 'deploy:flush_redis'
 
 after 'deploy:finished', 'deploy:build_tmp_dir'
