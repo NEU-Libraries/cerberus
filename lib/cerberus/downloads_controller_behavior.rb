@@ -19,7 +19,7 @@ module Cerberus
         if cf_doc.tombstoned?
           render_410(Exceptions::TombstonedObject.new) and return
         end
-        if cf_doc.stream_only?
+        if (asset.class == VideoFile || asset.class == AudioFile || asset.class == AudioMasterFile || asset.class == VideoMasterFile) && cf_doc.stream_only?
           render_403 and return
         end
       end
