@@ -23,6 +23,11 @@ module Cerberus
         # iterate
         doc = SolrDocument.new ActiveFedora::SolrService.query("id:\"#{pids.last}\"").first
         pids << doc.parent
+        # unique check
+        if pids.uniq.length == pids.length
+          # uh oh, we're our own ancestor - bail out and raise error
+          raise Exceptions::AncestorError.new(pids)
+        end
         ancestors(pids)
       end
     end

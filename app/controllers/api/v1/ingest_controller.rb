@@ -45,7 +45,7 @@ module Api
 
         user_submittied_col_pid = params[:collection]
 
-        if !user_submittied_col_pid.blank? && (!collections.contain? user_submittied_col_pid)
+        if !user_submittied_col_pid.blank? && (!collections.include? user_submittied_col_pid)
           # raises invalid data error
           respond_to do |format|
             format.json { render :json => { :error => "Invalid collection pid.", status: :bad_request } }

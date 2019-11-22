@@ -299,7 +299,6 @@ class CollectionsController < ApplicationController
 
   def request_move
     collection = Collection.find(params[:id])
-    title = collection.title
     user = current_user
 
     if current_user.admin?
@@ -307,6 +306,16 @@ class CollectionsController < ApplicationController
       if Community.exists?(destination_pid) || Collection.exists?(destination_pid)
         # run job for agg stats
         Cerberus::Application::Queue.push(AggregatedStatisticsMoveJob.new(params[:id], destination_pid))
+
+        # Ancestor health check
+        destination_doc = SolrDocument.new ActiveFedora::SolrService.query("id:\"#{destination_pid}\"").first
+        destination_ancestors = destination_doc.ancestors
+        if destination_ancestors.include? params[:id]
+          flash[:error] = "Invalid move"
+          email_handled_exception(Exceptions::AncestorError.new(destination_ancestors))
+          redirect_to collection and return
+        end
+
         collection.parent = destination_pid
         collection.save!
         flash[:notice] = "This collection has been moved."

@@ -1,5 +1,13 @@
 module Exceptions
 
+  class AncestorError < StandardError
+    attr_accessor :pids
+    def initialize(pids)
+      self.nuid = pids
+      super("Ancestor list has duplicates - #{pids.inspect}")
+    end
+  end
+
   class SecurityEscalationError < StandardError
     def initialize
       super "Attempted impersonation of an admin user"
