@@ -3,7 +3,7 @@ module Exceptions
   class AncestorError < StandardError
     attr_accessor :pids
     def initialize(pids)
-      self.nuid = pids
+      self.pids = pids
       super("Ancestor list has duplicates - #{pids.inspect}")
     end
   end
