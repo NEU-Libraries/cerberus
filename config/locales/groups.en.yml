@@ -20,6 +20,8 @@ en:
       name: "CAMD - School of Architecture Staff"
     northeastern:drs:college_of_computer_information_science:ccis_technical_reports:
       name: "CCIS Technical Reports Staff"
+    northeastern:drs:college_of_engineering:civil_and_environmental_engineering:hajjar_lab:
+      name: "Hajjar Lab Team"
     northeastern:drs:college_of_engineering:deans_office:
       name: "College of Engineering - Dean's Office Staff"
     northeastern:drs:college_of_engineering:electrical_and_computer_engineering:bspiral:
@@ -28,6 +30,10 @@ en:
       name: "College of Engineering - Cognitive Systems Laboratory Team"
     northeastern:drs:college_of_engineering:electrical_and_computer_engineering:csl:csl_owners:
       name: "College of Engineering - Cognitive Systems Laboratory Owners"
+    northeastern:drs:college_of_engineering:electrical_and_computer_engineering:dnal:
+      name: "Data, Networks, and Algorithms Laboratory Team"
+    northeastern:drs:college_of_engineering:electrical_and_computer_engineering:genesys:
+      name: "GENESYS Lab Team"
     northeastern:drs:college_of_engineering:electrical_and_computer_engineering:grants:nsf_eeg_1812588:
       name: "College of Engineering - NSF_EEG_1812588"
     northeastern:drs:college_of_engineering:mechanical_and_industrial_engineering:combustion_air_pollution_lab:
@@ -54,20 +60,24 @@ en:
       name: "CCSH - Early Caribbean Digital Archive Project Team"
     northeastern:drs:college_of_social_sciences_humanities:eliterature:
       name: "CSSH - E-literature Project Team"
+    northeastern:drs:college_of_social_sciences_humanities:holocaust_awareness_committee:
+      name: "Holocaust Awareness Committee"
     northeastern:drs:college_of_social_sciences_humanities:humanities_center:neh_space_place_humanities:
       name: "CSSH - NEH Summer Institute on Space, Place, and the Humanities Project Team"
     northeastern:drs:college_of_social_sciences_humanities:margaret_fuller:
       name: "CSSH - Margaret Fuller Project"
     northeastern:drs:college_of_social_sciences_humanities:thoreau_drawings:
       name: "CSSH - Thoreau Project Team"
-    northeastern:drs:college_of_social_sciences_humanities:holocaust_awareness_committee:
-      name: "Holocaust Awareness Committee"
+    northeastern:drs:college_of_social_sciences_humanities:writing_program:
+      name: "CSSH - Writing Program Team"
     northeastern:drs:courses:cltr1240_sec01:
       name: "Academic Course - CLTR1240_SEC01"
     northeastern:drs:courses:cltr3725_sec01:
       name: "Academic Course - CLTR3725_SEC01"
     northeastern:drs:courses:engl_2740:
       name: "Academic Course - ENGL_2740"
+    northeastern:drs:courses:HIST1215:
+      name: "Academic Course - HIST1215"
     northeastern:drs:courses:hist7320:
       name: "Academic Course - HIST7320"
     northeastern:drs:courses:frnh102:
@@ -102,6 +112,8 @@ en:
       name: "University Library - Administration Staff"
     northeastern:drs:library:archives:
       name: "University Archives and Special Collections Staff"
+    northeastern:drs:library:boston_research_center:
+      name: "Boston Research Center"
     northeastern:drs:library:communications:
       name: "University Library - Communications Office Staff"
     northeastern:drs:library:designfordiversity:
@@ -130,6 +142,8 @@ en:
       name: "Center for Research Innovation Staff"
     northeastern:drs:repository:admin:
       name: "DRS Advanced Users"
+    northeastern:drs:repository:AWD:
+      name: "CSSH - Advanced Writing in the Disciplines"
     northeastern:drs:repository:beta_users:
       name: "DRS Beta Users"
     northeastern:drs:repository:grouper_management:
@@ -162,6 +176,8 @@ en:
       name: "DRS Proxy Staff"
     northeastern:drs:repository:staff:
       name: "DRS Repository Staff"
+    northeastern:drs:sail:staff:
+      name: " SAIL Staff"
     northeastern:drs:school_of_law:crrj:staff:
       name: "Civil Rights and Restorative Justice Project Team"
     northeastern:drs:school_of_law:law_library:staff:
