@@ -294,6 +294,10 @@ class User < ActiveRecord::Base
     return self.groups.include? "northeastern:drs:repository:loaders:ogl"
   end
 
+  def camd_loader?
+    return self.groups.include? "northeastern:drs:repository:loaders:camd"
+  end
+
   def xml_loader?
     return self.groups.include? "northeastern:drs:repository:loaders:xml"
   end

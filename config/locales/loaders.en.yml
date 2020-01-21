@@ -50,3 +50,7 @@ en:
       short_name: "ogl"
       copyright: "This work is licensed for use under a Creative Commons Attribution License (CC BY)."
       note: "Contact the Ocean Genome Legacy Center for more information: https://www.northeastern.edu/ogl/contact/"
+    camd:
+      long_name: "College of Arts, Media and Design"
+      short_name: "camd"
+      copyright: "The College of Arts, Media and Design manages the rights and usage of CAMD Marketing and Communications images. All rights are reserved, and no usage or reproduction of any type may be made of said images without the express permission of the CAMD Communications or Marketing departments. Please contact camdcommunications@gmail.com if you are interested in using one of these images. If appropriate, you will receive written approval for explicit use and will be provided the high-resolution image. Images cannot be manipulated or altered in any way from the original. Image should be credited: \"Photographer Name/Northeastern University.\""
