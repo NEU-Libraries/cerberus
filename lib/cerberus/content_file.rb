@@ -45,16 +45,17 @@ module Cerberus
     end
 
     def self.virus_check(file)
-      if defined? ClamAV
-        cav = ClamAV.instance
-        cav.loaddb
-        stat = cav.scanfile(file.path)
-        logger.warn "Virus checking did not pass for #{file.inspect} status = #{stat}" unless stat == 0
-        stat
-      else
-        logger.warn "Virus checking disabled for #{file.inspect}"
-        0
-      end
+      # if defined? ClamAV
+      #   cav = ClamAV.instance
+      #   cav.loaddb
+      #   stat = cav.scanfile(file.path)
+      #   logger.warn "Virus checking did not pass for #{file.inspect} status = #{stat}" unless stat == 0
+      #   stat
+      # else
+      #   logger.warn "Virus checking disabled for #{file.inspect}"
+      #   0
+      # end
+      0
     end
   end
 end
