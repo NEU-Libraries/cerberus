@@ -75,9 +75,9 @@ namespace :deploy do
   task :start_solrizerd do
     on roles(:app), :in => :sequence, :wait => 5 do
       within release_path do
-        execute :bundle, 'exec', 'solrizerd', 'restart', "--hydra_home #{release_path}", '-p 61616', '-o nb4676.neu.edu', '-d /topic/fedora.apim.update', '-s http://solr.lib.neu.edu:8080/solr', '-l /var/log/solrizer.log'
+        execute :bundle, 'exec', 'solrizerd', 'restart', "--hydra_home #{release_path}", '-p 61616', '-o nb4676.neu.edu', '-d /topic/fedora.apim.update', '-s http://nb9477.neu.edu:8080/solr', '-l /var/log/solrizer.log'
       end
-      # execute "cd #{release_path} && (RAILS_ENV=secondary bundle exec solrizerd restart --hydra_home #{release_path} -p 61616 -o nb4676.neu.edu -d /topic/fedora.apim.update -s http://solr.lib.neu.edu:8080/solr)"
+      # execute "cd #{release_path} && (RAILS_ENV=secondary bundle exec solrizerd restart --hydra_home #{release_path} -p 61616 -o nb4676.neu.edu -d /topic/fedora.apim.update -s http://nb9477.neu.edu:8080/solr)"
     end
   end
 

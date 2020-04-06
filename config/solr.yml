@@ -9,6 +9,6 @@ test: &TEST
 cucumber:
   <<: *TEST
 production:
-  url: http://solr.lib.neu.edu:8080/solr/development
+  url: http://nb9477.neu.edu:8080/solr/development
 secondary:
-  url: http://solr.lib.neu.edu:8080/solr/development
+  url: http://nb9477.neu.edu:8080/solr/development
