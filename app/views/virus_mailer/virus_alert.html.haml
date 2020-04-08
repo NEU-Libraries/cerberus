@@ -1,0 +1,11 @@
+!!!
+%html
+  %head
+    %meta{:content => "text/html; charset=UTF-8", "http-equiv" => "Content-Type"}/
+  %body
+    %h3= "Virus Alert"
+    %p
+      = "A virus was detected for this core file: #{@core_file.pid} #{@core_file.title}"
+      %br
+      %br
+      = "It has been tombstoned for safety"

@@ -32,6 +32,9 @@ class ContentCreationJob
       return
     end
 
+    # Fire off a backgrounded virus check
+    Cerberus::Application::Queue.push(VirusCheckJob.new(file_path, core_file_pid))
+
     begin
       self.core_record = CoreFile.find(core_file_pid)
       self.sentinel = core_record.parent.sentinel
