@@ -32,9 +32,6 @@ class ContentCreationJob
       return
     end
 
-    # Fire off a backgrounded virus check
-    Cerberus::Application::Queue.push(VirusCheckJob.new(file_path, core_file_pid))
-
     begin
       self.core_record = CoreFile.find(core_file_pid)
       self.sentinel = core_record.parent.sentinel
@@ -158,6 +155,10 @@ class ContentCreationJob
       core_record.reload
       core_record.tag_as_completed
       core_record.save!
+
+      # Fire off a backgrounded virus check
+      Cerberus::Application::Queue.push(VirusCheckJob.new(content_object.fedora_file_path, core_file_pid))
+
       return content_object
     ensure
       if delete_file
