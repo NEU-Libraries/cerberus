@@ -14,12 +14,13 @@ class ImpressionProcessingJob
     offenders = count_hsh.select{ |k,v| (v["view"].present? && v["view"] > 150) || (v["download"].present? && v["download"] > 150) }
     bot_ip_list = offenders.map {|k,v| k}
 
+    botlist = I18n.t("bots").map(&:downcase)
+
     # Only process what hasn't been done already
     Impression.where(processed: false).find_each do |imp|
       ua = imp.user_agent.downcase
-      botlist = I18n.t("bots").map(&:downcase)
 
-      if !botlist.any?{|s| ua.include?(s)} || !bot_ip_list.include?(imp.ip_address)
+      if !botlist.any?{|s| ua.include?(s)} && !bot_ip_list.include?(imp.ip_address)
         imp.public = true
       end
 
