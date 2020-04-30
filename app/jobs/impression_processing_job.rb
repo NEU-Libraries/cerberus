@@ -14,6 +14,10 @@ class ImpressionProcessingJob
     offenders = count_hsh.select{ |k,v| (v["view"].present? && v["view"] > 150) || (v["download"].present? && v["download"] > 150) }
     bot_ip_list = offenders.map {|k,v| k}
 
+    # Load Balancer - VPN'd traffic seems to take on this IP
+    # We'd like to keep these as they're fairly safe, and helpful
+    bot_ip_list = bot_ip_list - ["155.33.16.26"]
+
     botlist = I18n.t("bots").map(&:downcase)
 
     # Only process what hasn't been done already
