@@ -14,10 +14,9 @@ class VirusCheckJob
 
   def run
     if defined? ClamAV
-      cav = ClamAV.instance
-      cav.loaddb
-      stat = cav.scanfile(file_path)
-      if stat != 0
+      output = `clamdscan --fdpass --no-summary --stdout #{file_path}`
+      stat = output.split(":", 2).trim
+      if !stat.eql?("OK")
         core_file = CoreFile.find(core_file_pid)
         core_file.tombstone("Suspicious binary " + DateTime.now.strftime("%F"))
         logger.warn "Virus checking did not pass for #{core_file_pid} - #{file_path}"
