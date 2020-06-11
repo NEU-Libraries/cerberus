@@ -15,7 +15,7 @@ class VirusCheckJob
   def run
     if defined? ClamAV
       output = `clamdscan --fdpass --no-summary --stdout #{file_path}`
-      stat = output.split(":", 2).trim
+      stat = output.split(":", 2)[1].trim
       if !stat.eql?("OK")
         core_file = CoreFile.find(core_file_pid)
         core_file.tombstone("Suspicious binary " + DateTime.now.strftime("%F"))
