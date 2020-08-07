@@ -210,7 +210,8 @@ GEM
       activerecord
       kaminari-core (= 1.0.1)
     kaminari-core (1.0.1)
-    kramdown (1.13.2)
+    kramdown (2.3.0)
+      rexml
     ldp (0.6.3)
       deprecation
       faraday
@@ -339,6 +340,7 @@ GEM
       resque
       sass-rails
       twitter-bootstrap-rails
+    rexml (3.2.4)
     rsolr (1.1.2)
       builder (>= 2.1.2)
     rspec-core (3.5.4)
