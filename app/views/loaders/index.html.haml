@@ -11,7 +11,7 @@
         = loader.loader_name
       %td
         - col_doc = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{loader.collection}\"").first)
-        = !col_doc.blank? col_doc.title : "N/A"
+        = !col_doc.blank? ? col_doc.title : "N/A"
       %td
         = loader.created_at.strftime("%m-%d-%Y %T")
       %td
