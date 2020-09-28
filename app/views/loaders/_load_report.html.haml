@@ -15,7 +15,6 @@
       = sortable "validity", "File Status"
     %th
     - @images.each do |image|
-      - image_doc = SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{image.pid}\"").first)
       - if image.validity == true && image.modified == false
         %tr.success
           %td
@@ -24,7 +23,7 @@
             = image.title
           %td Success
           %td
-            -if !image_doc.blank?
+            -if !image.pid.blank? && !ActiveFedora::SolrService.query("id:\"#{image.pid}\"").blank?
               = link_to("View", core_file_path(image.pid), class:"btn btn-small btn-success")
             -else
               File no longer exists
@@ -37,7 +36,7 @@
           %td
             = "Modified - #{image.exception}"
           %td
-            -if !image_doc.blank?
+            -if !image.pid.blank? && !ActiveFedora::SolrService.query("id:\"#{image.pid}\"").blank?
               = link_to("View", core_file_path(image.pid), class:"btn btn-small btn-success")
             -else
               File no longer exists
