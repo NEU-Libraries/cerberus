@@ -16,6 +16,10 @@ en:
       name: "Boston Women's March Posters Project Team"
     northeastern:drs:camd:department_of_art_and_design:art_and_design_gallery:
       name: "CAMD - Art and Design Group"
+    northeastern:drs:camd:photo_archive:staff:
+      name: "CAMD Photo Archive Staff"
+    northeastern:drs:camd:photo_archive:users:
+      name: "CAMD Photo Archive Users"
     northeastern:drs:camd:school_of_architecture:administration:
       name: "CAMD - School of Architecture Staff"
     northeastern:drs:college_of_computer_information_science:ccis_technical_reports:
@@ -38,8 +42,16 @@ en:
       name: "College of Engineering - NSF_EEG_1812588"
     northeastern:drs:college_of_engineering:mechanical_and_industrial_engineering:combustion_air_pollution_lab:
       name: "College of Engineering - Combustion and Air Pollution Lab"
+    northeastern:drs:college_of_engineering:river_lab:
+      name: "RIVeR Lab Team"
+    northeastern:drs:college_of_engineering:wiot:
+      name: "Institute for the Wireless Internet of Things Team"
     northeastern:drs:college_of_professional_studies:media:
       name: "College of Professional Studies - Media Group"
+    northeastern:drs:college_of_science:biology:monaghan_lab:
+      name: "Monaghan Lab Team"
+    northeastern:drs:college_of_science:biology:undergraduate_programs:
+      name: "College of Science - Undergraduate Biology Programs"
     northeastern:drs:college_of_science:linguistics_program:honors_projects:
       name: "College of Science - Honors Projects in Linguistics"
     northeastern:drs:college_of_science:marine_science_center:msc_staff:
@@ -48,6 +60,12 @@ en:
       name: "College of Science - Ocean Genome Legacy Staff"
     northeastern:drs:college_of_science:social_interaction_lab:
       name: "College of Science - Social Interaction Lab Staff"
+    northeastern:drs:college_of_social_sciences_humanities:bari:
+      name: "CSSH - BARI"
+    northeastern:drs:college_of_social_sciences_humanities:breaking_history:
+      name: "CSSH - Breaking History Podcast Team"
+    northeastern:drs:college_of_social_sciences_humanities:department_of_history:digital_public_history:
+      name: "CSSH - Digital Public History"
     northeastern:drs:college_of_social_sciences_humanities:dominican_prayer_book:
       name: "CSSH - Dominican Prayer Book Project Team"
     northeastern:drs:college_of_social_sciences_humanities:dudley_square_project:
@@ -108,8 +126,12 @@ en:
       name: "Global Resilience Institute Staff"
     northeastern:drs:jdoaai:archive_staff:
       name: "John D. O'Bryant African American Institute Archives Staff"
+    northeastern:drs:library:3d_printing:
+      name: "University Library - 3D Printing Staff"
     northeastern:drs:library:admin:
       name: "University Library - Administration Staff"
+    northeastern:drs:library:advancement:
+      name: "University Library - Advancement Staff"
     northeastern:drs:library:archives:
       name: "University Archives and Special Collections Staff"
     northeastern:drs:library:boston_research_center:
@@ -124,10 +146,24 @@ en:
       name: "University Library - Digital Scholarship Group Staff"
     northeastern:drs:library:dsg_students:
       name: "University Library - Digital Scholarship Group Students"
+    northeastern:drs:library:ideas:
+      name: "University Library - IDEAS Staff"
+    northeastern:drs:library:library_all:
+      name: "University Library - All Staff"
+    northeastern:drs:library:library_technology_services:
+      name: "University Library - LTS Staff"
+    northeastern:drs:library:office_of_the_dean:
+      name: "University Library - Office of the Dean Staff"
+    northeastern:drs:library:rads:
+      name: "University Library - RADS Staff"
+    northeastern:drs:library:research_data_services:
+      name: "University Library - Research Data Services Staff"
     northeastern:drs:library:researchinstruction:
       name: "University Library - Research and Instruction Staff"
     northeastern:drs:library:scholarly_communications:
       name: "University Library - Scholarly Communications Staff"
+    northeastern:drs:library:scholarly_resources:
+      name: "University Library - Scholarly Resources Staff"
     northeastern:drs:library:streaming_reserves:
       name: "University Library - Streaming Reserves Team"
     northeastern:drs:library:podcast_whatsnew:
@@ -150,6 +186,8 @@ en:
       name: "DRS Grouper Management Team"
     northeastern:drs:repository:loaders:aai_archives:
       name: "DRS IPTC Loader - AAI"
+    northeastern:drs:repository:loaders:camd:
+      name: "DRS IPTC Loader - CAMD"
     northeastern:drs:repository:loaders:coe:
       name: "DRS IPTC Loader - COE"
     northeastern:drs:repository:loaders:cps:
@@ -180,6 +218,8 @@ en:
       name: "SAIL Staff"
     northeastern:drs:school_of_law:crrj:staff:
       name: "Civil Rights and Restorative Justice Project Team"
+    northeastern:drs:school_of_law:dvi:dvi_legal_clinic:
+      name: "School of Law - DVI Legal Clinic"
     northeastern:drs:school_of_law:law_library:staff:
       name: "School of Law - Law Library Staff"
     northeastern:drs:spectrum:staff:
