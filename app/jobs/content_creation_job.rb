@@ -175,6 +175,7 @@ class ContentCreationJob
       res = ''
       uri = URI("#{ActiveFedora.config.credentials[:url]}/objects/#{content_object.pid}/datastreams/#{dsid}?controlGroup=M&dsLocation=file://#{file_path}")
       Net::HTTP.start(uri.host, uri.port) do |http|
+        http.read_timeout = 60000
         request = Net::HTTP::Post.new uri
         request.basic_auth("#{ActiveFedora.config.credentials[:user]}", "#{ActiveFedora.config.credentials[:password]}")
         res = http.request request # Net::HTTPResponse object
