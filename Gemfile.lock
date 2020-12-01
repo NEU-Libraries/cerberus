@@ -338,7 +338,7 @@ GEM
       nom-xml
     multi_json (1.7.9)
     multipart-post (2.0.0)
-    mysql2 (0.3.10)
+    mysql2 (0.5.3)
     namae (0.8.7)
     nest (1.1.2)
       redis
@@ -613,7 +613,7 @@ DEPENDENCIES
   mods (= 2.0.1)
   mods_display!
   multi_json (~> 1.7.9)
-  mysql2 (= 0.3.10)
+  mysql2 (= 0.5.3)
   namae
   nest (~> 1.1.1)
   noid (~> 0.6.6)
