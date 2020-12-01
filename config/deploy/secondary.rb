@@ -13,7 +13,7 @@ set :branch, ENV['branch'] || current_branch || "master" # you can use the 'bran
 set :user, 'drs'
 set :rails_env, :secondary
 
-server 'drs@nb4401.neu.edu', user: 'drs', roles: %w{web app db}
+server 'drs@nb9476.neu.edu', user: 'drs', roles: %w{web app db}
 
 namespace :deploy do
   desc "Updating ClamAV"
@@ -101,8 +101,8 @@ end
 before 'deploy:starting', 'deploy:update_clamav'
 after 'deploy:updating', 'bundler:install'
 after 'deploy:updating', 'deploy:copy_yml_file'
-after 'deploy:updating', 'deploy:migrate'
+#after 'deploy:updating', 'deploy:migrate'
 
-after 'deploy:finished', 'deploy:start_solrizerd'
-after 'deploy:finished', 'deploy:flush_redis'
-after 'deploy:finished', 'deploy:restart_workers'
+#after 'deploy:finished', 'deploy:start_solrizerd'
+#after 'deploy:finished', 'deploy:flush_redis'
+#after 'deploy:finished', 'deploy:restart_workers'

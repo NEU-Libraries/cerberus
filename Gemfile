@@ -8,7 +8,7 @@ gem "sshkit", :git => "https://github.com/cheald/sshkit.git", branch: "fix_multi
 gem 'rails', '3.2.12'
 gem 'redis-rails'
 gem 'mysql2' # Used in staging environment.
-gem 'activerecord-mysql2-adapter'
+#gem 'activerecord-mysql2-adapter'
 gem 'sqlite3', '1.3.13'
 gem 'retries'
 gem 'blacklight'
