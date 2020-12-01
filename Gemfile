@@ -1,3 +1,4 @@
+source 'file:///opt/repo'
 source 'https://rubygems.org'
 
 # gem 'sitemap', :git => "https://github.com/ualbertalib/rails-sitemap.git"
@@ -7,6 +8,7 @@ gem "sshkit", :git => "https://github.com/cheald/sshkit.git", branch: "fix_multi
 gem 'rails', '3.2.12'
 gem 'redis-rails'
 gem 'mysql2' # Used in staging environment.
+gem 'activerecord-mysql2-adapter'
 gem 'sqlite3', '1.3.13'
 gem 'retries'
 gem 'blacklight'
@@ -46,8 +48,8 @@ gem "whenever", :require => false
 gem 'resque', :require => 'resque/server'
 # This is global because it's needed for some fixture generation.
 gem "factory_girl_rails", :require => false
-gem 'mods', '2.0.2'
-gem 'mods_display', :git => 'https://github.com/NEU-Libraries/mods_display.git', :ref => '009e2cd427166e97d422281d35653c6f2af870fe'
+gem 'mods', '2.0.1'
+gem 'mods_display', :git => 'https://github.com/NEU-Libraries/mods_display.git', :ref => 'c69f5ded547f26568f5773cf35967babec91fbac'
 gem 'parseconfig'
 gem 'nokogiri', '~> 1.6.2.1'
 gem 'nokogiri-diff'
@@ -103,7 +105,7 @@ group :development do
 end
 
 group :development, :staging, :secondary, :production do
-  gem "clamav"
+  #gem "clamav"
 end
 
 group :development, :test do
