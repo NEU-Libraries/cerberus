@@ -20,6 +20,10 @@ set :log_level, :debug
 # set :linked_dirs, %w{bin log tmp/pids tmp/cache tmp/sockets vendor/bundle public/system}
 
 # set :default_env, { path: "/opt/ruby/bin:$PATH" }
+set :default_env, {
+  'https_proxy' => 'http://proxy.neu.edu:3128',
+  'http_proxy' => 'http://proxy.neu.edu:3128'
+}
 set :keep_releases, 5
 
 set :ssh_options, {
