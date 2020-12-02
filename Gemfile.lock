@@ -122,8 +122,6 @@ GEM
       activesupport (= 3.2.12)
       arel (~> 3.0.2)
       tzinfo (~> 0.3.29)
-    activerecord-mysql2-adapter (0.0.3)
-      mysql2
     activeresource (3.2.12)
       activemodel (= 3.2.12)
       activesupport (= 3.2.12)
@@ -338,7 +336,7 @@ GEM
       nom-xml
     multi_json (1.7.9)
     multipart-post (2.0.0)
-    mysql2 (0.5.3)
+    mysql2 (0.3.10)
     namae (0.8.7)
     nest (1.1.2)
       redis
@@ -567,7 +565,6 @@ PLATFORMS
 
 DEPENDENCIES
   ace-rails-ap
-  activerecord-mysql2-adapter
   axlsx!
   blacklight
   blacklight_advanced_search (~> 2.1.0)
@@ -613,7 +610,7 @@ DEPENDENCIES
   mods (= 2.0.1)
   mods_display!
   multi_json (~> 1.7.9)
-  mysql2 (= 0.5.3)
+  mysql2 (= 0.3.10)
   namae
   nest (~> 1.1.1)
   noid (~> 0.6.6)
