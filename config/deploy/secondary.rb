@@ -1,7 +1,11 @@
 set :stage, :secondary
 
 set :deploy_to, '/opt/cerberus/'
-set :bundle_env_variables, { nokogiri_use_system_libraries: 1 }
+set :bundle_env_variables, {
+  nokogiri_use_system_libraries: 1,
+  http_proxy: "http://proxy.neu.edu:3128",
+  https_proxy: "http://proxy.neu.edu:3128"
+ }
 set :bundle_bins, fetch(:bundle_bins, []).push('resque-pool', 'solrizerd')
 
 # parses out the current branch you're on. See: http://www.harukizaemon.com/2008/05/deploying-branches-with-capistrano.html
