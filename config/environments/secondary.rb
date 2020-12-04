@@ -53,17 +53,6 @@ Cerberus::Application.configure do
 
   config.cache_store = :redis_store, 'redis://nb4404.neu.edu:6379/0/cache', { expires_in: 12.hours }
 
-  # Mailer configuration
-  ActionMailer::Base.smtp_settings = {
-    address: ENV["MAILER_ADDRESS"],
-    port: ENV["MAILER_PORT"],
-    domain: ENV["MAILER_DOMAIN"],
-    user_name: ENV["MAILER_USERNAME"],
-    password: ENV["MAILER_PASSWORD"],
-    authentication: ENV["MAILER_AUTHENTICATION"],
-    enable_starttls_auto: true
-  }
-
   config.lograge.enabled = true
   config.log_level = :warn
 
@@ -76,7 +65,7 @@ Cerberus::Application.configure do
     :email => {
       :email_prefix => "[DRS Production] ",
       :sender_address => %{"notifier" <notifier@repository.library.northeastern.edu>},
-      :exception_recipients => ["d.cliff@neu.edu", "e.zoller@neu.edu"]
+      :exception_recipients => ["d.cliff@northeastern.edu"]
     }
 
   #Google analytics tracking code

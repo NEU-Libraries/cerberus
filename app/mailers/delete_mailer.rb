@@ -30,7 +30,7 @@ class DeleteMailer < ActionMailer::Base
       if ["production", "secondary"].include? Rails.env
         "sj.sweeney@neu.edu"
       elsif ["staging"].include? Rails.env
-        "e.zoller@neu.edu"
+        "d.cliff@northeastern.edu"
       elsif "test" == Rails.env
         "test@test.com"
       else

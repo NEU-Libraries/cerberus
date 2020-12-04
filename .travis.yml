@@ -18,7 +18,6 @@ notifications:
   slack: neu-lts:urFXFxLoFDSvKEFdBMYDpy6v
   email:
     - d.cliff@neu.edu
-    - e.zoller@neu.edu
 # whitelist
 branches:
   only:
