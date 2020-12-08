@@ -70,7 +70,9 @@ namespace :deploy do
       # within release_path do
       #   execute :bundle, 'exec', 'resque-pool', '--daemon', '-p /etc/cerberus/resque-pool.pid', '--environment secondary', :pty => true
       # end
-      execute "nohup sh -c 'cd #{release_path} && RAILS_ENV=secondary bundle exec bundle exec resque-pool -p /etc/cerberus/resque-pool.pid --environment secondary &' > /dev/null 2>&1", :pty => true
+      within release_path do
+        execute "RAILS_ENV=secondary  bundle exec resque-pool -p /etc/cerberus/resque-pool.pid --environment secondary > /dev/null 2>&1 &"
+      end
     end
   end
 
