@@ -67,9 +67,10 @@ namespace :deploy do
   desc "Start workers"
   task :start_workers do
     on roles(:app), :in => :sequence, :wait => 10 do
-      within release_path do
-        execute :bundle, 'exec', 'resque-pool', '--daemon', '-p /etc/cerberus/resque-pool.pid', '--environment secondary', :pty => true
-      end
+      # within release_path do
+      #   execute :bundle, 'exec', 'resque-pool', '--daemon', '-p /etc/cerberus/resque-pool.pid', '--environment secondary', :pty => true
+      # end
+      execute "nohup sh -c 'cd #{release_path} && RAILS_ENV=secondary bundle exec bundle exec resque-pool -p /etc/cerberus/resque-pool.pid --environment secondary &' > /dev/null 2>&1", :pty => true
     end
   end
 
