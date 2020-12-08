@@ -57,7 +57,7 @@ namespace :deploy do
 
   desc "Restarting the resque workers"
   task :restart_workers do
-    on roles(:app), :in => :sequence, :wait => 5 do
+    on roles(:app), :in => :sequence, :wait => 10 do
       execute "cd #{release_path} && (RAILS_ENV=secondary kill -TERM $(cat /etc/cerberus/resque-pool.pid))", raise_on_non_zero_exit: false
       execute "kill $(ps aux | grep -i resque | awk '{print $2}')", raise_on_non_zero_exit: false
       execute "rm -f /etc/cerberus/resque-pool.pid", raise_on_non_zero_exit: false
@@ -87,7 +87,7 @@ namespace :deploy do
 
   desc 'Flush Redis'
   task :flush_redis do
-    on roles(:app), :in => :sequence, :wait => 5 do
+    on roles(:app), :in => :sequence, :wait => 10 do
       execute "cd #{release_path} && (RAILS_ENV=secondary redis-cli -h nb4404.neu.edu FLUSHALL)"
     end
   end
@@ -107,6 +107,6 @@ after 'deploy:updating', 'bundler:install'
 after 'deploy:updating', 'deploy:copy_yml_file'
 #after 'deploy:updating', 'deploy:migrate'
 
-# after 'deploy:finished', 'deploy:flush_redis'
-# after 'deploy:finished', 'deploy:restart_workers'
 after 'deploy:finished', 'deploy:start_solrizerd'
+# after 'deploy:finished', 'deploy:flush_redis'
+after 'deploy:finished', 'deploy:restart_workers'
