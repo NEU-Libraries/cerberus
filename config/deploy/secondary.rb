@@ -64,7 +64,8 @@ namespace :deploy do
       # within release_path do
       #   execute :bundle, 'exec', 'resque-pool', '--daemon', '-p /etc/cerberus/resque-pool.pid', '--environment secondary'
       # end
-      execute "cd #{release_path} && (RAILS_ENV=secondary bundle exec resque-pool --daemon -p /etc/cerberus/resque-pool.pid --environment secondary)"
+      # execute "cd #{release_path} && (RAILS_ENV=secondary bundle exec resque-pool --daemon -p /etc/cerberus/resque-pool.pid --environment secondary)"
+      execute "/etc/cerberus/rp.sh"
     end
   end
 
