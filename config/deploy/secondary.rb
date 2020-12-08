@@ -70,6 +70,7 @@ namespace :deploy do
       within release_path do
         execute :bundle, 'exec', 'resque-pool', '--daemon', '-p /etc/cerberus/resque-pool.pid', '--environment secondary'
       end
+    end
   end
 
   desc "Copy Figaro YAML"
