@@ -55,18 +55,21 @@ namespace :deploy do
     end
   end
 
-  desc "Restarting the resque workers"
-  task :restart_workers do
+  desc "Stop the resque workers"
+  task :stop_workers do
     on roles(:app), :in => :sequence, :wait => 10 do
       execute "cd #{release_path} && (RAILS_ENV=secondary kill -TERM $(cat /etc/cerberus/resque-pool.pid))", raise_on_non_zero_exit: false
       execute "kill $(ps aux | grep -i resque | awk '{print $2}')", raise_on_non_zero_exit: false
       execute "rm -f /etc/cerberus/resque-pool.pid", raise_on_non_zero_exit: false
-      # within release_path do
-      #   execute :bundle, 'exec', 'resque-pool', '--daemon', '-p /etc/cerberus/resque-pool.pid', '--environment secondary'
-      # end
-      # execute "cd #{release_path} && (RAILS_ENV=secondary bundle exec resque-pool --daemon -p /etc/cerberus/resque-pool.pid --environment secondary)"
-      execute "/etc/cerberus/rp.sh"
     end
+  end
+
+  desc "Start workers"
+  task :start_workers do
+    on roles(:app), :in => :sequence, :wait => 10 do
+      within release_path do
+        execute :bundle, 'exec', 'resque-pool', '--daemon', '-p /etc/cerberus/resque-pool.pid', '--environment secondary'
+      end
   end
 
   desc "Copy Figaro YAML"
@@ -110,4 +113,5 @@ after 'deploy:updating', 'deploy:copy_yml_file'
 
 after 'deploy:finished', 'deploy:start_solrizerd'
 after 'deploy:finished', 'deploy:flush_redis'
-after 'deploy:finished', 'deploy:restart_workers'
+after 'deploy:finished', 'deploy:stop_workers'
+after 'deploy:finished', 'deploy:start_workers'
