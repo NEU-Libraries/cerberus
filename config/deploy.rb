@@ -13,7 +13,7 @@ set :rvm_ruby_string,  ENV['GEM_HOME'].gsub(/.*\//,"")
 set :deploy_via, :copy
 
 # set :format, :pretty
-set :log_level, :debug
+set :log_level, :info
 # set :pty, true
 
 # set :linked_files, %w{config/database.yml}
