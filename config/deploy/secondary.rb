@@ -61,10 +61,10 @@ namespace :deploy do
       execute "cd #{release_path} && (RAILS_ENV=secondary kill -TERM $(cat /etc/cerberus/resque-pool.pid))", raise_on_non_zero_exit: false
       execute "kill $(ps aux | grep -i resque | awk '{print $2}')", raise_on_non_zero_exit: false
       execute "rm -f /etc/cerberus/resque-pool.pid", raise_on_non_zero_exit: false
-      within release_path do
-        execute :bundle, 'exec', 'resque-pool', '--daemon', '-p /etc/cerberus/resque-pool.pid', '--environment secondary'
-      end
-      # execute "cd #{release_path} && (RAILS_ENV=secondary resque-pool --daemon -p /etc/cerberus/resque-pool.pid)"
+      # within release_path do
+      #   execute :bundle, 'exec', 'resque-pool', '--daemon', '-p /etc/cerberus/resque-pool.pid', '--environment secondary'
+      # end
+      execute "cd #{release_path} && (RAILS_ENV=secondary bundle exec resque-pool --daemon -p /etc/cerberus/resque-pool.pid --environment secondary)"
     end
   end
 
@@ -108,5 +108,5 @@ after 'deploy:updating', 'deploy:copy_yml_file'
 #after 'deploy:updating', 'deploy:migrate'
 
 after 'deploy:finished', 'deploy:start_solrizerd'
-# after 'deploy:finished', 'deploy:flush_redis'
+after 'deploy:finished', 'deploy:flush_redis'
 after 'deploy:finished', 'deploy:restart_workers'
