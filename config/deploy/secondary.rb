@@ -68,7 +68,7 @@ namespace :deploy do
   task :start_workers do
     on roles(:app), :in => :sequence, :wait => 10 do
       within release_path do
-        execute :bundle, 'exec', 'resque-pool', '-p /etc/cerberus/resque-pool.pid', '--environment secondary', '&'
+        execute :bundle, 'exec', 'resque-pool', '--daemon', '-p /etc/cerberus/resque-pool.pid', '--environment secondary', :pty => true
       end
     end
   end
