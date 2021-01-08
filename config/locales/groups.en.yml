@@ -64,6 +64,8 @@ en:
       name: "CSSH - BARI"
     northeastern:drs:college_of_social_sciences_humanities:breaking_history:
       name: "CSSH - Breaking History Podcast Team"
+    northeastern:drs:college_of_social_sciences_humanities:department_of_history:dh_jews_of_boston:
+      name: "DH Jews of Boston Project Team"
     northeastern:drs:college_of_social_sciences_humanities:department_of_history:digital_public_history:
       name: "CSSH - Digital Public History"
     northeastern:drs:college_of_social_sciences_humanities:dominican_prayer_book:
@@ -79,7 +81,7 @@ en:
     northeastern:drs:college_of_social_sciences_humanities:eliterature:
       name: "CSSH - E-literature Project Team"
     northeastern:drs:college_of_social_sciences_humanities:holocaust_awareness_committee:
-      name: "Holocaust Awareness Committee"
+      name: "Holocaust and Genocide Awareness Committee"
     northeastern:drs:college_of_social_sciences_humanities:humanities_center:neh_space_place_humanities:
       name: "CSSH - NEH Summer Institute on Space, Place, and the Humanities Project Team"
     northeastern:drs:college_of_social_sciences_humanities:margaret_fuller:
@@ -134,6 +136,8 @@ en:
       name: "University Library - Advancement Staff"
     northeastern:drs:library:archives:
       name: "University Archives and Special Collections Staff"
+    northeastern:drs:library:bite_sized_webinars_team:
+      name: "Bite Sized Webinars Project Team"
     northeastern:drs:library:boston_research_center:
       name: "Boston Research Center"
     northeastern:drs:library:communications:
@@ -222,6 +226,8 @@ en:
       name: "School of Law - DVI Legal Clinic"
     northeastern:drs:school_of_law:law_library:staff:
       name: "School of Law - Law Library Staff"
+    northeastern:drs:school_of_law:phrge:
+      name: "Program on Human Rights and the Global Economy Staff"
     northeastern:drs:spectrum:staff:
       name: "Spectrum Literary Arts Magazine Staff"
     northeastern:drs:undergrad_research_office:staff:
