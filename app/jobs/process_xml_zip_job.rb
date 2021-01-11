@@ -117,11 +117,13 @@ class ProcessXmlZipJob
           if !xml_file_path.blank? && File.exists?(xml_file_path)
             raw_xml = xml_decode(File.open(xml_file_path, "r").read)
           else
-            rax_xml = ""
+            raw_xml = ""
           end
-          if !preview_file.mods.content.blank?
-            item_report_info = row_results
-            item_report_info["mods"] = preview_file.mods.content
+          if !preview_file.blank?
+            if !preview_file.mods.content.blank?
+              item_report_info = row_results
+              item_report_info["mods"] = preview_file.mods.content
+            end
           elsif !raw_xml.blank?
             item_report_info = row_results
             item_report_info["mods"] = raw_xml
@@ -538,7 +540,7 @@ class ProcessXmlZipJob
     0.upto header_row.length do |row_pos|
       if !header_row[row_pos].blank?
         # Account for case insensitivity
-        case header_row[row_pos].downcase
+        case header_row[row_pos].downcase.strip
         when column_identifier.downcase
           value = row_value[row_pos].to_s || ""
           if !value.blank? && value != ""
