@@ -108,7 +108,7 @@ before 'deploy:starting', 'deploy:update_clamav'
 
 after 'deploy:updating', 'bundler:install'
 after 'deploy:updating', 'deploy:copy_yml_file'
-after 'deploy:updating', 'deploy:migrate'
+# after 'deploy:updating', 'deploy:migrate'
 after 'deploy:updating', 'deploy:whenever'
 after 'deploy:updating', 'deploy:assets_kludge'
 
