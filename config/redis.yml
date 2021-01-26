@@ -8,8 +8,8 @@ test:
   host: localhost
   port: 6379
 production:
-  host: localhost
+  host: nb9478.neu.edu
   port: 6379
 secondary:
-  host: nb4404.neu.edu
+  host: nb9478.neu.edu
   port: 6379
