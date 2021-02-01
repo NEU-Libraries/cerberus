@@ -62,7 +62,7 @@ namespace :deploy do
         execute :bundle, 'exec', 'rake cache:clear', raise_on_non_zero_exit: false
       end
       # execute "cd #{release_path} && (RAILS_ENV=production rake cache:clear)"
-      execute "sudo htcacheclean -p /var/cache/mod_proxy -l1K -v -r"
+      execute "sudo htcacheclean -p /mnt/libraries/cerberusdata/mod_cache -l1K -v -r"
     end
   end
 
