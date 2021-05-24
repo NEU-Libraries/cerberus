@@ -201,6 +201,10 @@ en:
         name: EPUB
         short: EPUB
         download: epub
+      DatasetFile:
+        name: Dataset
+        short: Dataset
+        download: dataset
       Community:
         name: Community
         short: Community

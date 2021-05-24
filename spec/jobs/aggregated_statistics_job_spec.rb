@@ -388,7 +388,7 @@ describe "aggregated statistics job" do
       all_possible_models = [ "ImageSmallFile", "ImageMediumFile", "ImageLargeFile",
                               "ImageMasterFile", "ImageThumbnailFile", "MsexcelFile",
                               "MspowerpointFile", "MswordFile", "PdfFile", "TextFile",
-                              "ZipFile", "AudioFile", "VideoFile", "PageFile", "AudioMasterFile", "VideoMasterFile", "EpubFile" ]
+                              "ZipFile", "AudioFile", "VideoFile", "PageFile", "AudioMasterFile", "VideoMasterFile", "EpubFile", "DatasetFile" ]
       models_stringified = all_possible_models.inject { |base, str| base + " or #{str}" }
       models_query = ActiveFedora::SolrService.escape_uri_for_query models_stringified
       content_objects = solr_query_file_size("active_fedora_model_ssi:(#{models_stringified}) AND is_part_of_ssim:#{full_pid(pid)}")

@@ -7,7 +7,7 @@ module SentinelHelper
                   "ImageSmallFile"=>"image_small", "MspowerpointFile"=>"mspowerpoint",
                   "MsexcelFile"=>"msexcel", "MswordFile"=>"msword",
                   "PageFile"=>"page", "PdfFile"=>"pdf", "TextFile"=>"text", "VideoMasterFile"=>"video_master",
-                  "VideoFile"=>"video", "ZipFile"=>"zip", "EpubFile"=>"epub"}
+                  "VideoFile"=>"video", "ZipFile"=>"zip", "EpubFile"=>"epub", "DatasetFile"=>"dataset"}
 
     if !model_hsh[class_string].blank?
       return model_hsh[class_string].to_sym
