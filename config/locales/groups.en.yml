@@ -46,6 +46,8 @@ en:
       name: "RIVeR Lab Team"
     northeastern:drs:college_of_engineering:wiot:
       name: "Institute for the Wireless Internet of Things Team"
+    northeastern:drs:college_of_professional_studies:facultypodcast:
+      name: "College of Professional Studies - Faculty Podcast"
     northeastern:drs:college_of_professional_studies:media:
       name: "College of Professional Studies - Media Group"
     northeastern:drs:college_of_science:biology:monaghan_lab:
@@ -64,6 +66,8 @@ en:
       name: "CSSH - BARI"
     northeastern:drs:college_of_social_sciences_humanities:breaking_history:
       name: "CSSH - Breaking History Podcast Team"
+    northeastern:drs:college_of_social_sciences_humanities:dailp:dailp_staff:
+      name: "Digital Archive of American Indian Languages Preservation and Perseverance"
     northeastern:drs:college_of_social_sciences_humanities:department_of_history:dh_jews_of_boston:
       name: "DH Jews of Boston Project Team"
     northeastern:drs:college_of_social_sciences_humanities:department_of_history:digital_public_history:
@@ -145,7 +149,7 @@ en:
     northeastern:drs:library:designfordiversity:
       name: "University Library - Design for Diversity"
     northeastern:drs:library:dmc_studios:
-      name: "University Library - DMC Studios Staff"
+      name: "University Library - Recording Studios Staff"
     northeastern:drs:library:dsg:
       name: "University Library - Digital Scholarship Group Staff"
     northeastern:drs:library:dsg_students:
@@ -158,6 +162,8 @@ en:
       name: "University Library - LTS Staff"
     northeastern:drs:library:office_of_the_dean:
       name: "University Library - Office of the Dean Staff"
+    northeastern:drs:library:podcast_whatsnew:
+      name: "University Library - What's New Podcast Team"
     northeastern:drs:library:rads:
       name: "University Library - RADS Staff"
     northeastern:drs:library:research_data_services:
@@ -170,8 +176,8 @@ en:
       name: "University Library - Scholarly Resources Staff"
     northeastern:drs:library:streaming_reserves:
       name: "University Library - Streaming Reserves Team"
-    northeastern:drs:library:podcast_whatsnew:
-      name: "University Library - What's New Podcast Team"
+    northeastern:drs:library:teaching:
+    name: "University Library - Teaching"
     northeastern:drs:marketing_and_communications:staff:
       name: "Office of Marketing and Communications - Photography Staff"
     northeastern:drs:marketing_and_communications:art_staff:
@@ -222,6 +228,8 @@ en:
       name: "SAIL Staff"
     northeastern:drs:school_of_law:crrj:staff:
       name: "Civil Rights and Restorative Justice Project Team"
+    northeastern:drs:school_of_law:crrj:temp_staff:
+    name: "Civil Rights and Restorative Justice Temporary Staff"
     northeastern:drs:school_of_law:dvi:dvi_legal_clinic:
       name: "School of Law - DVI Legal Clinic"
     northeastern:drs:school_of_law:law_library:staff:
