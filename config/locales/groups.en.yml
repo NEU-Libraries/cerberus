@@ -177,7 +177,7 @@ en:
     northeastern:drs:library:streaming_reserves:
       name: "University Library - Streaming Reserves Team"
     northeastern:drs:library:teaching:
-    name: "University Library - Teaching"
+      name: "University Library - Teaching"
     northeastern:drs:marketing_and_communications:staff:
       name: "Office of Marketing and Communications - Photography Staff"
     northeastern:drs:marketing_and_communications:art_staff:
@@ -229,7 +229,7 @@ en:
     northeastern:drs:school_of_law:crrj:staff:
       name: "Civil Rights and Restorative Justice Project Team"
     northeastern:drs:school_of_law:crrj:temp_staff:
-    name: "Civil Rights and Restorative Justice Temporary Staff"
+      name: "Civil Rights and Restorative Justice Temporary Staff"
     northeastern:drs:school_of_law:dvi:dvi_legal_clinic:
       name: "School of Law - DVI Legal Clinic"
     northeastern:drs:school_of_law:law_library:staff:
