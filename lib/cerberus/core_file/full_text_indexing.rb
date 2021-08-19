@@ -14,8 +14,8 @@ module Cerberus
           FileUtils.mkdir(extracted_path) unless File.exists? extracted_path
           extracted_file = "#{extracted_path}/extracted_text.txt"
 
-          `pdftotext -q "#{self.fedora_file_path}" "#{extracted_file}"`
-          
+          `pdftotext -q "#{self.fedora_file_path}" "#{extracted_file.shellescape}"`
+
           if File.exists?(extracted_file)
             File.open(extracted_file) do |extracted_text|
               self.full_text.content = extracted_text if extracted_text.present?

@@ -196,7 +196,7 @@ class ContentCreationJob
         #   zipfile.add(file_name, file_path)
         # end
 
-        `zip -j #{zipfile_name} #{file_path}`
+        `zip -j #{zipfile_name} #{file_path.shellescape}`
         `printf "@ #{file_path}\n@=#{content_object.original_filename}\n" | #{Cerberus::Application.config.zipnote_path} -w #{zipfile_name}`
 
         # Add zipfile to the ZipFile object

@@ -17,10 +17,10 @@ module ZipHelper
     FileUtils.mkdir(output_dir) unless File.exists? output_dir
 
     if File.extname(zip_file_path) == ".tar" #tar
-      `tar -xf #{zip_file_path} -C #{output_dir}`
+      `tar -xf #{zip_file_path.shellescape} -C #{output_dir}`
     elsif File.extname(zip_file_path) == ".zip" #zip
       # Shell out to unzip
-      `unzip #{zip_file_path} -d #{output_dir}`
+      `unzip #{zip_file_path.shellescape} -d #{output_dir}`
     end
 
     # Ensure all files have ok permissions

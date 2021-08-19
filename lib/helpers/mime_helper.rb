@@ -4,7 +4,7 @@ module MimeHelper
     # given a files location at the system level
     # use file to extract it's mime type - to be used in
     # assign_type, but we may have more use for this
-    result = `#{Cerberus::Application.config.file_path} --mime-type #{file_location}`
+    result = `#{Cerberus::Application.config.file_path} --mime-type #{file_location.shellescape}`
     #removing newlines and whitespace
     result.strip!
     mime_type = result.slice(result.index(":")+1..-1).strip
