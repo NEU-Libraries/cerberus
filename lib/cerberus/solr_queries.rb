@@ -390,5 +390,7 @@ module Cerberus
     #   query_result = ActiveFedora::SolrService.query(fq, :fl=>id)
     #   return query_result.length > 0
     # end
+
+    alias_method :other, :other_publications
   end
 end
