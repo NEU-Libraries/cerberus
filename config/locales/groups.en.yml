@@ -16,6 +16,8 @@ en:
       name: "Boston Women's March Posters Project Team"
     northeastern:drs:camd:department_of_art_and_design:art_and_design_gallery:
       name: "CAMD - Art and Design Group"
+    northeastern:drs:camd:out_and_about:
+      name: "Out and About Project Team"
     northeastern:drs:camd:photo_archive:staff:
       name: "CAMD Photo Archive Staff"
     northeastern:drs:camd:photo_archive:users:
@@ -40,6 +42,8 @@ en:
       name: "GENESYS Lab Team"
     northeastern:drs:college_of_engineering:electrical_and_computer_engineering:grants:nsf_eeg_1812588:
       name: "College of Engineering - NSF_EEG_1812588"
+    northeastern:drs:college_of_engineering:electrical_and_computer_engineering:un_lab:
+      name: "Ultra-Broadband Nanonetworking (Un) Laboratory Staff"
     northeastern:drs:college_of_engineering:mechanical_and_industrial_engineering:combustion_air_pollution_lab:
       name: "College of Engineering - Combustion and Air Pollution Lab"
     northeastern:drs:college_of_engineering:river_lab:
@@ -200,6 +204,8 @@ en:
       name: "DRS IPTC Loader - CAMD"
     northeastern:drs:repository:loaders:coe:
       name: "DRS IPTC Loader - COE"
+    northeastern:drs:repository:loaders:cos_media:
+      name: "DRS IPTC Loader - COS"
     northeastern:drs:repository:loaders:cps:
       name: "DRS IPTC Loader - CPS"
     northeastern:drs:repository:loaders:damore_mckim:
