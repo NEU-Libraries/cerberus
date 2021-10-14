@@ -188,8 +188,12 @@ en:
       name: "Office of Marketing and Communications - Art Staff"
     northeastern:drs:marketing_and_communications:photo_archive_temp:
       name: "Office of Marketing and Communications - Temporary Access"
+    northeastern:drs:network_science_institute:social_design_lab_staff:
+      name: "Social Design Lab Staff"
     northeastern:drs:provost_office:center_research_innovation:center_for_research_innovation_staff:
       name: "Center for Research Innovation Staff"
+    northeastern:provost_office:icils:icils_staff:
+      name: "CILS Staff"
     northeastern:drs:repository:admin:
       name: "DRS Advanced Users"
     northeastern:drs:repository:AWD:
