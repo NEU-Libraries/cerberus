@@ -36,3 +36,5 @@
         %p= "A link to the load report can be found #{link_to 'here', loaders_camd_report_url(@load.id)}".html_safe
       - elsif @load.loader_name == t('loaders.ogl.long_name')
         %p= "A link to the load report can be found #{link_to 'here', loaders_ogl_report_url(@load.id)}".html_safe
+      - elsif @load.loader_name == t('loaders.cos_media.long_name')
+        %p= "A link to the load report can be found #{link_to 'here', loaders_cos_media_report_url(@load.id)}".html_safe

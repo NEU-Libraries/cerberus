@@ -147,6 +147,7 @@ Cerberus::Application.routes.draw do
   get "/loaders/libcom/report/:id" => 'loaders/libcom_loads#show', as: 'loaders_libcom_report'
   get "/loaders/camd/report/:id" => 'loaders/camd_loads#show', as: 'loaders_camd_report'
   get "/loaders/ogl/report/:id" => 'loaders/ogl_loads#show', as: 'loaders_ogl_report'
+  get "/loaders/cos_media/report/:id" => 'loaders/cos_media#show', as: 'loaders_cos_media_report'
   get "/loaders/spreadsheet/report/:id" => 'loaders/spreadsheet_loads#show', as: 'loaders_spreadsheet_report'
   get "/loaders/xml/report/:id" => 'loaders/xml_loads#show', as: 'loaders_xml_report'
 
@@ -177,6 +178,8 @@ Cerberus::Application.routes.draw do
    get "/loaders/ogl/file/:id" => 'ogl_loads#show_iptc', as: 'loaders_ogl_iptc'
    resources :camd_loads, only: [:new, :create, :show], :path => "loaders/camd"
    get "/loaders/camd/file/:id" => 'camd_loads#show_iptc', as: 'loaders_camd_iptc'
+   resources :cos_media_loads, only: [:new, :create, :show], :path => "loaders/cos_media"
+   get "/loaders/cos_media/file/:id" => 'cos_media_loads#show_iptc', as: 'loaders_cos_media_iptc'
    resources :spreadsheet_loads, only: [:new, :create, :preview, :preview_compare], :path => "loaders/spreadsheet"
    get "/loaders/spreadsheet/preview/:id" => 'spreadsheet_loads#preview',  as: 'loaders_spreadsheet_preview'
    get "/loaders/spreadsheet/preview_compare/:id" => 'spreadsheet_loads#preview_compare', as: 'loaders_spreadsheet_preview_compare'

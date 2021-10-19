@@ -254,6 +254,10 @@ class User < ActiveRecord::Base
     return self.groups.include? "northeastern:drs:repository:loaders:marcom"
   end
 
+  def cos_media_loader?
+    return self.groups.include? "northeastern:drs:repository:loaders:cos_media"
+  end
+
   def coe_loader?
     return self.groups.include? "northeastern:drs:repository:loaders:coe"
   end
