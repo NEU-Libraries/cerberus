@@ -1,5 +1,5 @@
 %div
-  -if !current_user.nil? && current_user.admin?
+  -if !current_user.nil? && ( current_user.admin_group? || current_user.admin? )
     = form_tag( request_move_file_path ) do
       %fieldset
         .row-fluid
