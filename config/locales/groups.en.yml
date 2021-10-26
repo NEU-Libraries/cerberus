@@ -17,7 +17,7 @@ en:
     northeastern:drs:camd:department_of_art_and_design:art_and_design_gallery:
       name: "CAMD - Art and Design Group"
     northeastern:drs:camd:out_and_about:
-      name: "Out and About Project Team"
+      name: "CAMD - Out and About Project Team"
     northeastern:drs:camd:photo_archive:staff:
       name: "CAMD Photo Archive Staff"
     northeastern:drs:camd:photo_archive:users:
@@ -58,10 +58,12 @@ en:
       name: "Monaghan Lab Team"
     northeastern:drs:college_of_science:biology:undergraduate_programs:
       name: "College of Science - Undergraduate Biology Programs"
+    northeastern:drs:college_of_science:deans_office:media:
+      name: "College of Science - Dean's Office Media Team"
     northeastern:drs:college_of_science:linguistics_program:honors_projects:
       name: "College of Science - Honors Projects in Linguistics"
     northeastern:drs:college_of_science:marine_science_center:msc_staff:
-      name: "Marine Science Center Staff"
+      name: "College of Science - Marine Science Center Staff"
     northeastern:drs:college_of_science:marine_science_center:ogl_staff:
       name: "College of Science - Ocean Genome Legacy Staff"
     northeastern:drs:college_of_science:social_interaction_lab:
@@ -192,7 +194,7 @@ en:
       name: "Social Design Lab Staff"
     northeastern:drs:provost_office:center_research_innovation:center_for_research_innovation_staff:
       name: "Center for Research Innovation Staff"
-    northeastern:provost_office:icils:icils_staff:
+    northeastern:drs:provost_office:icils:icils_staff:
       name: "CILS Staff"
     northeastern:drs:repository:admin:
       name: "DRS Advanced Users"
