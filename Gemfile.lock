@@ -384,6 +384,8 @@ GEM
       method_source (~> 0.8)
       slop (~> 3.4)
     rack (1.4.5)
+    rack-attack (5.2.0)
+      rack
     rack-cache (1.2)
       rack (>= 0.4)
     rack-protection (1.5.0)
@@ -621,6 +623,7 @@ DEPENDENCIES
   parseconfig
   passenger
   picturefill
+  rack-attack
   rails (= 3.2.12)
   rb-readline
   redis-rails

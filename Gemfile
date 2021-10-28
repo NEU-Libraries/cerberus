@@ -2,6 +2,7 @@ source 'file:///opt/repo'
 source 'https://rubygems.org'
 
 # gem 'sitemap', :git => "https://github.com/ualbertalib/rails-sitemap.git"
+gem 'rack-attack'
 gem 'sitemap_generator'
 gem "colorize", "0.6.0" # https://github.com/capistrano/sshkit/issues/200
 gem "sshkit", :git => "https://github.com/cheald/sshkit.git", branch: "fix_multithread_conn_pooling" # https://github.com/capistrano/sshkit/pull/137 - staging was failing on cap deploy

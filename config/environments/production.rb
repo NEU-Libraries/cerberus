@@ -87,4 +87,6 @@ Cerberus::Application.configure do
 
   #Google analytics tracking code
   GA.tracker = "UA-4426028-6"
+
+  config.middleware.use Rack::Attack
 end
