@@ -52,3 +52,13 @@ end
 Rack::Attack.blocklist("block IP") do |req|
   Rails.cache.read("block #{req.remote_ip}")
 end
+
+LOGGER = Logger.new("log/rack-attack.log")
+ActiveSupport::Notifications.subscribe('rack.attack') do |name, start, finish, request_id, req|
+  msg = [req.env['rack.attack.match_type'], req.remote_ip, req.request_method, req.fullpath, ('"' + req.user_agent.to_s + '"')].join(' ')
+  if [:throttle, :blocklist].include? req.env['rack.attack.match_type']
+    LOGGER.error(msg)
+  else
+    LOGGER.info(msg)
+  end
+end
