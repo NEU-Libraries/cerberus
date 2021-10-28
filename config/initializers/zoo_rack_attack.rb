@@ -33,7 +33,7 @@ Rack::Attack.safelist("10 range") do |request|
 end
 
 Rack::Attack.safelist("mark any authenticated access safe") do |request|
-  request.env["HTTP_COOKIE"].include?("shibsession")
+  !request.env["HTTP_COOKIE"].blank? && request.env["HTTP_COOKIE"].include?("shibsession")
 end
 
 Rack::Attack.throttle("requests by region", limit: 5, period: 2) do |request|
