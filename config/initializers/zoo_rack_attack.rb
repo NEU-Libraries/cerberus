@@ -1,4 +1,5 @@
 require 'ipaddr'
+require 'resolv'
 
 module Rack
   class Attack
@@ -39,6 +40,10 @@ end
 Rack::Attack.throttle("requests by region", limit: 5, period: 2) do |request|
   # request.ip
   `geoiplookup #{request.remote_ip} | awk -F', ' '{print $2}'`.strip == "China"
+end
+
+Rack::Attack.blocklist("Amazon") do |req|
+  Resolv.getname(req.remote_ip).include?("amazon")
 end
 
 # Block attacks from IPs in cache
