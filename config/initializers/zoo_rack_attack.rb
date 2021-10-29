@@ -1,5 +1,4 @@
 require 'ipaddr'
-require 'resolv'
 
 module Rack
   class Attack
@@ -43,7 +42,7 @@ Rack::Attack.throttle("requests by region", limit: 5, period: 2) do |request|
 end
 
 Rack::Attack.blocklist("Amazon") do |req|
-  !req.remote_ip.blank? && Resolv.getname(req.remote_ip).include?("amazon")
+  !req.remote_ip.blank? && `host #{req.remote_ip}`.include?("amazon")
 end
 
 # Block attacks from IPs in cache
