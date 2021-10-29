@@ -43,11 +43,7 @@ Rack::Attack.throttle("requests by region", limit: 5, period: 2) do |request|
 end
 
 Rack::Attack.blocklist("Amazon") do |req|
-  begin
-    return Resolv.getname(req.remote_ip).include?("amazon")
-  rescue Resolv::ResolvError
-    return false
-  end
+  !req.remote_ip.blank? && Resolv.getname(req.remote_ip).include?("amazon")
 end
 
 # Block attacks from IPs in cache
