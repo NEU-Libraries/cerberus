@@ -634,6 +634,7 @@ class CoreFilesController < ApplicationController
     # Invalidate cache
     Rails.cache.delete_matched("/mods/#{@core_file.pid}*")
     Rails.cache.delete_matched("/darwin/#{@core_file.pid}*")
+    Rails.cache.delete_matched("/content_objects/#{@core_file.pid}*")
 
     # if no title or keyword, send them back. Only God knows what they did to the form...
     # fix for #671
@@ -757,6 +758,11 @@ class CoreFilesController < ApplicationController
         q.push(PropagateCoreMetadataChangeJob.new(@core_file.pid))
       end
     end
+
+    # Invalidate cache
+    Rails.cache.delete_matched("/mods/#{@core_file.pid}*")
+    Rails.cache.delete_matched("/darwin/#{@core_file.pid}*")
+    Rails.cache.delete_matched("/content_objects/#{@core_file.pid}*")
 
     redirect_to(@core_file)
   end
