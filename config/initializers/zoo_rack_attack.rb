@@ -57,7 +57,5 @@ ActiveSupport::Notifications.subscribe('rack.attack') do |name, start, finish, r
   msg = [req.env['rack.attack.match_type'], req.remote_ip, req.request_method, req.fullpath, ('"' + req.user_agent.to_s + '"')].join(' ')
   if [:throttle, :blocklist].include? req.env['rack.attack.match_type']
     LOGGER.error(msg)
-  else
-    LOGGER.info(msg)
   end
 end
