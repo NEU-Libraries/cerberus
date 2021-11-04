@@ -88,6 +88,7 @@ class CoreFilesController < ApplicationController
     # Invalidate cache
     Rails.cache.delete_matched("/mods/#{pid}*")
     Rails.cache.delete_matched("/darwin/#{pid}*")
+    Rails.cache.delete_matched("/content_objects/#{pid}*")
 
     # Update solr doc
     CoreFile.find(pid).update_index
