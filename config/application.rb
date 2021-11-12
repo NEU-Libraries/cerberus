@@ -109,7 +109,7 @@ module Cerberus
     config.temp_file_base = nil
 
     if Rails.env.production? || Rails.env.secondary?
-      config.tmp_path = "/tmp/DRStmp"
+      config.tmp_path = "/mnt/libraries/DRStmp"
     else
       config.tmp_path = "#{Rails.root}/tmp"
     end

@@ -9,5 +9,5 @@ Cerberus::Application.initialize!
 Haml::Template.options[:ugly] = true
 
 if Rails.env.production? || Rails.env.secondary?
-  ENV['TMPDIR'] = "/tmp/DRStmp"
+  ENV['TMPDIR'] = "/mnt/libraries/DRStmp"
 end
