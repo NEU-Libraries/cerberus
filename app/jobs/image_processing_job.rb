@@ -60,14 +60,7 @@ class ImageProcessingJob
             elsif val.kind_of?(Integer) or val.kind_of?(Float) or val.kind_of?(Rational) or val.kind_of?(TrueClass) or val.kind_of?(FalseClass)
               val = String(val)
             elsif val.kind_of?(Array)
-              val.map! do |i|
-                if i.kind_of?(String) or i.kind_of?(Integer) or val.kind_of?(Float) or val.kind_of?(Time) or val.kind_of?(Rational) or val.kind_of?(TrueClass)
-                  i = String(i)
-                else
-                  create_special_error("#{tag} contains #{val.class.name} data", iptc, core_file, load_report)
-                  return
-                end
-              end
+              val = val.map(&:to_s).compact.reject(&:blank?)
             else
               create_special_error("#{tag} contains #{val.class.name} data", iptc, core_file, load_report)
               return
