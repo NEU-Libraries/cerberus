@@ -55,8 +55,10 @@ class CartDownloadJob
     end
 
     # Remove temp txt file
-    Zip::File.open(temp_path) do |zipfile|
-      zipfile.remove(temp_txt)
+    if File.exists?(temp_path)
+      Zip::File.open(temp_path) do |zipfile|
+        zipfile.remove(temp_txt)
+      end
     end
 
     if self.large
