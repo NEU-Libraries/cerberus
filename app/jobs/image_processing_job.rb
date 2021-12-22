@@ -186,7 +186,7 @@ class ImageProcessingJob
           core_file.mods.physical_description.form.authority = "marcform"
           core_file.mods.physical_description.digital_origin = "born digital"
           core_file.mods.physical_description.extent = "1 photograph"
-          core_file.mods.access_condition = copyright
+          core_file.mods.access_condition = copyright # Works with both string and array
           core_file.mods.access_condition.type = "use and reproduction"
         end
 

@@ -20,7 +20,9 @@ en:
     cos_media:
       long_name: "College of Science Media Group"
       short_name: "cos_media"
-      copyright: 'The Northeastern College of Science Marketing and Communications team manages the rights and usage of Marketing and Communications images. All rights are reserved. College of Science faculty and staff may use these images for college-related purposes only. Please contact cosmarcom@northeastern.edu if you have any questions. Images cannot be manipulated or altered in any way from the original. Image should be credited: "Photographer Name/Northeastern University."'
+      copyright:
+        - 'The Northeastern College of Science Marketing and Communications team manages the rights and usage of Marketing and Communications images. All rights are reserved. College of Science faculty and staff may use these images for college-related purposes only. Please contact cosmarcom@northeastern.edu if you have any questions. Images cannot be manipulated or altered in any way from the original. Image should be credited: "Photographer Name/Northeastern University."'
+        - 'In Copyright: This Item is protected by copyright and/or related rights. You are free to use this Item in any way that is permitted by the copyright and related rights legislation that applies to your use. For other uses you need to obtain permission from the rights-holder(s). (http://rightsstatements.org/page/InC/1.0/?language=en)'
       parent: "neu:ww72bs269"
     coe:
       long_name: "College of Engineering"
