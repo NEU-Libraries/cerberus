@@ -147,7 +147,7 @@ Cerberus::Application.routes.draw do
   get "/loaders/libcom/report/:id" => 'loaders/libcom_loads#show', as: 'loaders_libcom_report'
   get "/loaders/camd/report/:id" => 'loaders/camd_loads#show', as: 'loaders_camd_report'
   get "/loaders/ogl/report/:id" => 'loaders/ogl_loads#show', as: 'loaders_ogl_report'
-  get "/loaders/cos_media/report/:id" => 'loaders/cos_media#show', as: 'loaders_cos_media_report'
+  get "/loaders/cos_media/report/:id" => 'loaders/cos_media_loads#show', as: 'loaders_cos_media_report'
   get "/loaders/spreadsheet/report/:id" => 'loaders/spreadsheet_loads#show', as: 'loaders_spreadsheet_report'
   get "/loaders/xml/report/:id" => 'loaders/xml_loads#show', as: 'loaders_xml_report'
 
