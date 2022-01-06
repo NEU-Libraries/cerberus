@@ -45,6 +45,22 @@ Rack::Attack.blocklist("Amazon") do |req|
   !req.remote_ip.blank? && `host #{req.remote_ip}`.include?("amazon")
 end
 
+Rack::Attack.blocklist('Siteimprove') do |req|
+  req.user_agent.downcase.include?("Siteimprove".downcase)
+end
+
+Rack::Attack.blocklist('MegaIndex') do |req|
+  req.user_agent.downcase.include?("MegaIndex".downcase)
+end
+
+Rack::Attack.blocklist('Python') do |req|
+  req.user_agent.downcase.include?("Python".downcase)
+end
+
+Rack::Attack.blocklist('sqlmap') do |req|
+  req.user_agent.downcase.include?("sqlmap".downcase)
+end
+
 # Block attacks from IPs in cache
 # To add an IP: Rails.cache.write("block 1.2.3.4", true, expires_in: 2.days)
 # To remove an IP: Rails.cache.delete("block 1.2.3.4")
