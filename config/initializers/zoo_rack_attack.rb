@@ -46,19 +46,19 @@ Rack::Attack.blocklist("Amazon") do |req|
 end
 
 Rack::Attack.blocklist('Siteimprove') do |req|
-  req.user_agent.downcase.include?("Siteimprove".downcase)
+  !req.user_agent.blank? && req.user_agent.downcase.include?("Siteimprove".downcase)
 end
 
 Rack::Attack.blocklist('MegaIndex') do |req|
-  req.user_agent.downcase.include?("MegaIndex".downcase)
+  !req.user_agent.blank? && req.user_agent.downcase.include?("MegaIndex".downcase)
 end
 
 Rack::Attack.blocklist('Python') do |req|
-  req.user_agent.downcase.include?("Python".downcase)
+  !req.user_agent.blank? && req.user_agent.downcase.include?("Python".downcase)
 end
 
 Rack::Attack.blocklist('sqlmap') do |req|
-  req.user_agent.downcase.include?("sqlmap".downcase)
+  !req.user_agent.blank? && req.user_agent.downcase.include?("sqlmap".downcase)
 end
 
 # Block attacks from IPs in cache
