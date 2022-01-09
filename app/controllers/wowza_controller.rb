@@ -43,15 +43,19 @@ class WowzaController < ApplicationController
 
         url_str = "http://nb9479.neu.edu:1935/vod/_definst_/datastreamStore/cerberusData/newfedoradata/datastreamStore/#{dir}/#{doc_type(doc)}:" + CGI::escape("info%3Afedora%2F#{encoded}%2Fcontent%2Fcontent.0") + "/playlist.m3u8"
 
-        data = open(url_str)
-        chunk_str = data.each_line.select{ |l| l.start_with?("chunk")}.first.squish
+        begin
+          data = open(url_str)
+          chunk_str = data.each_line.select{ |l| l.start_with?("chunk")}.first.squish
 
-        url_str = "http://nb9479.neu.edu:1935/vod/_definst_/datastreamStore/cerberusData/newfedoradata/datastreamStore/#{dir}/#{doc_type(doc)}:" + CGI::escape("info%3Afedora%2F#{encoded}%2Fcontent%2Fcontent.0") + "/#{chunk_str}"
+          url_str = "http://nb9479.neu.edu:1935/vod/_definst_/datastreamStore/cerberusData/newfedoradata/datastreamStore/#{dir}/#{doc_type(doc)}:" + CGI::escape("info%3Afedora%2F#{encoded}%2Fcontent%2Fcontent.0") + "/#{chunk_str}"
 
-        data = open(url_str)
+          data = open(url_str)
 
-        log_action("stream", "COMPLETE", params[:id])
-        send_data(data.read, type: "application/x-mpegURL", filename: 'playlist.m3u8')
+          log_action("stream", "COMPLETE", params[:id])
+          send_data(data.read, type: "application/x-mpegURL", filename: 'playlist.m3u8')
+        rescue OpenURI::HTTPError => error
+          render_404(error, url_str)
+        end
       else
         # Raise error
         render_500(StandardError.new) and return
