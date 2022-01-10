@@ -96,6 +96,8 @@ en:
       name: "CSSH - NEH Summer Institute on Space, Place, and the Humanities Project Team"
     northeastern:drs:college_of_social_sciences_humanities:margaret_fuller:
       name: "CSSH - Margaret Fuller Project"
+    northeastern:drs:college_of_social_sciences_humanities:nulab:nulab_staff:
+      name: "CSSH - NULab"
     northeastern:drs:college_of_social_sciences_humanities:thoreau_drawings:
       name: "CSSH - Thoreau Project Team"
     northeastern:drs:college_of_social_sciences_humanities:writing_program:
@@ -120,6 +122,8 @@ en:
       name: "Academic Course - RMS6260_SEC01"
     northeastern:drs:courses:socl_2450:
       name: "Academic Course - SOCL_2450"
+    northeastern:drs:damore_mckim:community_resources:
+      name: "D'Amore-McKim - Community Resources Project Team "
     northeastern:drs:damore_mckim:marcom:
       name: "D'Amore-McKim - Marketing Group"
     northeastern:drs:drspt:arader_gallery:
@@ -154,6 +158,8 @@ en:
       name: "University Library - Communications Office Staff"
     northeastern:drs:library:designfordiversity:
       name: "University Library - Design for Diversity"
+    northeastern:drs:library:digital_production_services:
+      name: "University Library - Digital Production Services"
     northeastern:drs:library:dmc_studios:
       name: "University Library - Recording Studios Staff"
     northeastern:drs:library:dsg:
