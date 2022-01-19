@@ -233,6 +233,8 @@ Cerberus::Application.routes.draw do
 
   namespace :api, defaults: {format: 'json'} do
     namespace :v1 do
+      # tag
+      get "/tag/:id" => "tags#search", as: "tag_search"
       # handles
       get "/handles/get_handle/*url" => "handles#get_handle", as: "get_handle", :url => /.*/
       post "/handles/create_handle/*url" => "handles#create_handle", as: "create_handle", :url => /.*/
