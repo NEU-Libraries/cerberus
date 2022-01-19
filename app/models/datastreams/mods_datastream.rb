@@ -14,6 +14,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
            'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
            'xsi:schemaLocation' => 'http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd',
            'xmlns:niec' => 'http://repository.neu.edu/schema/niec',
+           'xmlns:projects' => 'http://repository.neu.edu/schema/projects',
            'xmlns:dcterms' => "http://purl.org/dc/terms/",
            'xmlns:dwc' => "http://rs.tdwg.org/dwc/terms/",
            'xmlns:dwr' => "http://rs.tdwg.org/dwc/xsd/simpledarwincore/")
@@ -307,6 +308,17 @@ class ModsDatastream < ActiveFedora::OmDatastream
       }
     }
 
+    #custom extension for handling CERES content.
+    t.extension(path: 'extension', namespace_prefix: 'mods'){
+      t.projects(namespace_prefix: nil){
+        t.project(namespace_prefix: nil){
+          t.id(namespace_prefix: nil)
+          t.title(namespace_prefix: nil)
+          t.url(namespace_prefix: nil)
+        }
+      }
+    }
+
     t.topic(proxy: [:subject, :topic])
     t.title(proxy: [:title_info, :title])
     t.non_sort(proxy: [:title_info, :non_sort])
@@ -564,6 +576,15 @@ class ModsDatastream < ActiveFedora::OmDatastream
     solr_doc = self.generate_niec_solr_hash(solr_doc)
 
     #TODO:  Extract dateBegin/dateEnd information ]
+
+    tags = []
+
+    (0..self.extension.projects.length).each do |i|
+      tags << self.extension.projects.project(i).id
+    end
+
+    solr_doc["tag_tesim"] = tags
+
     return solr_doc
   end
 
@@ -636,6 +657,19 @@ class ModsDatastream < ActiveFedora::OmDatastream
         xml["mods"].extension{
           xml["niec"].niec
           xml["dwr"].SimpleDarwinRecord
+        }
+        xml.extension{
+          xml.projects{
+            xml.parent.namespace = nil
+
+            xml.project{
+              xml.parent.namespace = nil
+
+              xml.id{ xml.parent.namespace = nil }
+              xml.title{ xml.parent.namespace = nil }
+              xml.url{ xml.parent.namespace = nil }
+            }
+          }
         }
       }
     end
