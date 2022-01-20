@@ -309,7 +309,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
     }
 
     #custom extension for handling CERES content.
-    t.extension(path: 'extension', namespace_prefix: 'mods'){
+    t.projects_extension(path: 'extension', namespace_prefix: 'mods', attributes: { displayLabel: 'projects'}){
       t.projects(namespace_prefix: nil){
         t.project(namespace_prefix: nil){
           t.id(namespace_prefix: nil)
@@ -579,8 +579,8 @@ class ModsDatastream < ActiveFedora::OmDatastream
 
     tags = []
 
-    (0..self.extension.projects.length).each do |i|
-      tags << self.extension.projects.project(i).id
+    (0..self.projects_extension.projects.length).each do |i|
+      tags << self.projects_extension.projects.project(i).id
     end
 
     solr_doc["tag_tesim"] = tags
@@ -658,7 +658,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
           xml["niec"].niec
           xml["dwr"].SimpleDarwinRecord
         }
-        xml.extension{
+        xml.extension('displayLabel' => 'projects'){
           xml.projects{
             xml.parent.namespace = nil
 
