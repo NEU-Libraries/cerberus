@@ -580,10 +580,10 @@ class ModsDatastream < ActiveFedora::OmDatastream
     tags = []
 
     (0..self.projects_extension.projects.length).each do |i|
-      tags << self.projects_extension.projects.project(i).id
+      tags << self.projects_extension.projects.project(i).id.first
     end
 
-    solr_doc["tag_tesim"] = tags
+    solr_doc["tag_tesim"] = tags.reject { |x| x.blank? }
 
     return solr_doc
   end
@@ -657,19 +657,6 @@ class ModsDatastream < ActiveFedora::OmDatastream
         xml["mods"].extension{
           xml["niec"].niec
           xml["dwr"].SimpleDarwinRecord
-        }
-        xml.extension('displayLabel' => 'projects'){
-          xml.projects{
-            xml.parent.namespace = nil
-
-            xml.project{
-              xml.parent.namespace = nil
-
-              xml.id{ xml.parent.namespace = nil }
-              xml.title{ xml.parent.namespace = nil }
-              xml.url{ xml.parent.namespace = nil }
-            }
-          }
         }
       }
     end
