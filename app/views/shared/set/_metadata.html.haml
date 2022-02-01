@@ -1,8 +1,0 @@
-= form_for @set, url: {action: "create"} do |f|
-  .form-group
-    %label Title
-    = f.text_field :title, :class => "form-control"
-  .form-group
-    %label Description
-    = f.text_area :description, :class => "form-control"
-  %button.btn.btn-default{:type => "submit"} Submit
