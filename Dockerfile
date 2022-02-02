@@ -1,4 +1,4 @@
-FROM ruby:3.0
+FROM ruby:3
 # Interactive for nvm and node
 SHELL ["/bin/bash", "--login", "-i", "-c"]
 RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.2/install.sh | bash
@@ -20,5 +20,6 @@ RUN mkdir -p /home/cerberus/web
 WORKDIR /home/cerberus/web
 
 COPY --chown=cerberus:cerberus . /home/cerberus/web
+RUN bundle update --bundler
 RUN bundle install
 RUN yarn install

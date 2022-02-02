@@ -1,0 +1,25 @@
+# Use postgres/example user/password credentials
+version: '3.7'
+volumes:
+  solr:
+  db:
+  storage:
+  redis:
+services:
+  db:
+    image: postgres
+    volumes:
+      - db:/var/lib/postgresql/data/pgdata
+    restart: always
+    environment:
+      PGDATA: /var/lib/postgresql/data/pgdata
+      POSTGRES_PASSWORD: example
+    ports:
+      - 5432:5432
+  web:
+    build: .
+    volumes:
+      - ./:/home/cerberus/web
+    entrypoint: /home/cerberus/web/docker-entrypoint.sh
+    ports:
+      - 3000:3000
