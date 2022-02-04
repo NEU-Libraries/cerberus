@@ -3,8 +3,6 @@ version: '3.7'
 volumes:
   solr:
   db:
-  storage:
-  redis:
 services:
   db:
     image: postgres
@@ -23,3 +21,19 @@ services:
     entrypoint: /home/cerberus/web/docker-entrypoint.sh
     ports:
       - 3000:3000
+  solr:
+    image: nakatomi/charon_solr
+    ports:
+    - 8983:8983
+    volumes:
+    - solr:/opt/solr/server/solr/mycores/blacklight-core/data
+    healthcheck:
+      test:
+      - CMD
+      - wget
+      - "-O"
+      - "/dev/null"
+      - http://localhost:8983/solr/
+      interval: 30s
+      timeout: 5s
+      retries: 3

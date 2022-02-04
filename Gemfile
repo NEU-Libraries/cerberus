@@ -76,3 +76,10 @@ group :test do
   gem "selenium-webdriver"
   gem "webdrivers"
 end
+
+group :development, :test do
+  gem "solr_wrapper", ">= 0.3"
+end
+gem "rsolr", ">= 1.0", "< 3"
+gem "bootstrap", "~> 5.1"
+gem "sassc-rails", "~> 2.1"
