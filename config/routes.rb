@@ -244,6 +244,8 @@ Cerberus::Application.routes.draw do
       get "/search/:filter/:id" => "search#search"
       # files
       get "/files/:id" => "core_files#show", as: "file_display"
+      # file mods
+      get "/files/:id/mods" => "core_files#mods", as: "file_mods"
       # file sizes
       get "/file_sizes" => "core_files#file_sizes", as: "file_sizes"
       # content objects

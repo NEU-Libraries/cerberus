@@ -24,6 +24,35 @@ module Api
         render json: result_hsh.to_json
       end
 
+      def file_mods
+        begin
+          @core_doc = SolrDocument.new ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first
+        rescue NoMethodError
+          render json: {error: "An id is required for this action."} and return
+        end
+
+        if @core_doc.blank? ||
+            !(@core_doc.public? || (current_ability.can?(:read, @core_doc))) ||
+            @core_doc.in_progress? ||
+            @core_doc.incomplete?
+          render json: {error: "The item you've requested is unavailable."} and return
+        end
+
+        # Safe to proceed
+
+        # params[:id]
+        pid = params[:id]
+        # Get MODS fedora file path
+        config_path = Rails.application.config.fedora_home
+        datastream_str = "info:fedora/#{pid}/mods/mods.0"
+        escaped_datastream = Rack::Utils.escape(datastream_str)
+        md5_str = Digest::MD5.hexdigest(datastream_str)
+        dir_name = md5_str[0,2]
+        file_path = config_path + dir_name + "/" + escaped_datastream
+        # send file
+        send_file file_path, :filename =>  "neu-#{pid.split(":").last}-MODS.xml", :type => "application/xml", :disposition => 'inline'
+      end
+
       def file_sizes
         begin
           # render json: Zlib::Inflate.inflate(Base64.decode64(FileSizeGraph.last.json_values))

@@ -39,15 +39,23 @@ class ExportModsJob
             item = ActiveFedora::Base.find(pid, cast: true)
 
             # Make temp XML file
-            File.write("#{path}/#{pid.split(":").last}-MODS.xml", item.mods.content)
+            # File.write("#{path}/#{pid.split(":").last}-MODS.xml", item.mods.content)
+
+            # Get MODS fedora file path
+            config_path = Rails.application.config.fedora_home
+            datastream_str = "info:fedora/#{pid}/mods/mods.0"
+            escaped_datastream = Rack::Utils.escape(datastream_str)
+            md5_str = Digest::MD5.hexdigest(datastream_str)
+            dir_name = md5_str[0,2]
+            file_path = config_path + dir_name + "/" + escaped_datastream
 
             Zip::File.open(temp_path) do |zipfile|
-              zipfile.add("neu-#{pid.split(":").last}-MODS.xml", "#{path}/#{pid.split(":").last}-MODS.xml")
+              zipfile.add("neu-#{pid.split(":").last}-MODS.xml", file_path)
             end
 
             sheet.add_row ["#{pid}", "#{item.original_filename}", "neu-#{pid.split(":").last}-MODS.xml"]
 
-            FileUtils.rm("#{path}/#{pid.split(":").last}-MODS.xml")
+            # FileUtils.rm("#{path}/#{pid.split(":").last}-MODS.xml")
           end
         end
 
