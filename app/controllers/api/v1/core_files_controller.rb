@@ -44,13 +44,27 @@ module Api
         pid = params[:id]
         # Get MODS fedora file path
         config_path = Rails.application.config.fedora_home
-        datastream_str = "info:fedora/#{pid}/mods/mods.0"
-        escaped_datastream = Rack::Utils.escape(datastream_str)
-        md5_str = Digest::MD5.hexdigest(datastream_str)
-        dir_name = md5_str[0,2]
-        file_path = config_path + dir_name + "/" + escaped_datastream
+
+        latest_version = ""
+        version = 0
+
+        loop do
+          datastream_str = "info:fedora/#{pid}/mods/mods.#{version}"
+          escaped_datastream = Rack::Utils.escape(datastream_str)
+          md5_str = Digest::MD5.hexdigest(datastream_str)
+          dir_name = md5_str[0,2]
+          file_path = config_path + dir_name + "/" + escaped_datastream
+
+          if File.exist?(file_path)
+            latest_version = file_path
+            version += 1
+          else
+            break
+          end
+        end
+
         # send file
-        send_file file_path, :filename =>  "neu-#{pid.split(":").last}-MODS.xml", :type => "application/xml", :disposition => 'inline'
+        send_file latest_version, :filename =>  "neu-#{pid.split(":").last}-MODS.xml", :type => "application/xml", :disposition => 'inline'
       end
 
       def file_sizes
