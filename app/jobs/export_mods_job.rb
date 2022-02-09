@@ -35,40 +35,14 @@ class ExportModsJob
         sheet.add_row ["PIDs", "Original Filenames", "MODS XML File Path"]
 
         pids.each do |pid|
-          if ActiveFedora::Base.exists?(pid)
-            item = ActiveFedora::Base.find(pid, cast: true)
-
-            # Make temp XML file
-            # File.write("#{path}/#{pid.split(":").last}-MODS.xml", item.mods.content)
-
-            # Get MODS fedora file path
-            config_path = Rails.application.config.fedora_home
-
-            latest_version = ""
-            version = 0
-
-            loop do
-              datastream_str = "info:fedora/#{pid}/mods/mods.0"
-              escaped_datastream = Rack::Utils.escape(datastream_str)
-              md5_str = Digest::MD5.hexdigest(datastream_str)
-              dir_name = md5_str[0,2]
-              file_path = config_path + dir_name + "/" + escaped_datastream
-
-              if File.exist?(file_path)
-                latest_version = file_path
-                version += 1
-              else
-                break
-              end
-            end
+          if !ActiveFedora::SolrService.query("id:\"#{pid}\"").blank?
+            mods_on_disk = fedora_versioned_path(pid, "mods")
 
             Zip::File.open(temp_path) do |zipfile|
-              zipfile.add("neu-#{pid.split(":").last}-MODS.xml", latest_version)
+              zipfile.add("neu-#{pid.split(":").last}-MODS.xml", mods_on_disk)
             end
 
-            sheet.add_row ["#{pid}", "#{item.original_filename}", "neu-#{pid.split(":").last}-MODS.xml"]
-
-            # FileUtils.rm("#{path}/#{pid.split(":").last}-MODS.xml")
+            sheet.add_row ["#{pid}", "#{disk_original_filename(pid)}", "neu-#{pid.split(":").last}-MODS.xml"]
           end
         end
 
@@ -90,5 +64,35 @@ class ExportModsJob
 
     # Email user their download link
     ModsMailer.export_alert(self.pid ,self.nuid, self.sess_id).deliver!
+  end
+
+  def fedora_versioned_path(pid, datastream_type)
+    # Get MODS fedora file path
+    config_path = Rails.application.config.fedora_home
+
+    latest_version = ""
+    version = 0
+
+    loop do
+      datastream_str = "info:fedora/#{pid}/#{datastream_type}/#{datastream_type}.#{version}"
+      escaped_datastream = Rack::Utils.escape(datastream_str)
+      md5_str = Digest::MD5.hexdigest(datastream_str)
+      dir_name = md5_str[0,2]
+      file_path = config_path + dir_name + "/" + escaped_datastream
+
+      if File.exist?(file_path)
+        latest_version = file_path
+        version += 1
+      else
+        return latest_version
+      end
+    end
+  end
+
+  def disk_original_filename(pid)
+    properties_path = fedora_versioned_path(pid, "properties")
+    x = CoreFile.new
+    x.properties.content = File.read(properties_path).to_s
+    return x.original_filename
   end
 end
