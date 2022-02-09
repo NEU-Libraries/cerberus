@@ -35,9 +35,8 @@ class ExportManifestJob
         sheet.add_row ["PIDs", "Original Filenames"]
 
         pids.each do |pid|
-          if ActiveFedora::Base.exists?(pid)
-            item = ActiveFedora::Base.find(pid, cast: true)
-            sheet.add_row ["#{pid}", "#{item.original_filename}"]
+          if !ActiveFedora::SolrService.query("id:\"#{pid}\"").blank?
+            sheet.add_row ["#{pid}", "#{disk_original_filename(pid)}"]
           end
         end
 
@@ -59,5 +58,34 @@ class ExportManifestJob
 
     # Email user their download link
     ManifestMailer.export_alert(self.pid ,self.nuid, self.sess_id).deliver!
+  end
+
+  def fedora_versioned_path(pid, datastream_type)
+    config_path = Rails.application.config.fedora_home
+
+    latest_version = ""
+    version = 0
+
+    loop do
+      datastream_str = "info:fedora/#{pid}/#{datastream_type}/#{datastream_type}.#{version}"
+      escaped_datastream = Rack::Utils.escape(datastream_str)
+      md5_str = Digest::MD5.hexdigest(datastream_str)
+      dir_name = md5_str[0,2]
+      file_path = config_path + dir_name + "/" + escaped_datastream
+
+      if File.exist?(file_path)
+        latest_version = file_path
+        version += 1
+      else
+        return latest_version
+      end
+    end
+  end
+
+  def disk_original_filename(pid)
+    properties_path = fedora_versioned_path(pid, "properties")
+    x = CoreFile.new
+    x.properties.content = File.read(properties_path).to_s
+    return x.original_filename
   end
 end

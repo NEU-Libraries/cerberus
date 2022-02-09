@@ -67,7 +67,6 @@ class ExportModsJob
   end
 
   def fedora_versioned_path(pid, datastream_type)
-    # Get MODS fedora file path
     config_path = Rails.application.config.fedora_home
 
     latest_version = ""
