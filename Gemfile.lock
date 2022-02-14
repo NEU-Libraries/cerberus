@@ -398,7 +398,6 @@ DEPENDENCIES
   pg (~> 1.1)
   puma (~> 5.6)
   rails (= 7.0.1)
-  reform-rails
   rsolr (>= 1.0, < 3)
   sassc-rails (~> 2.1)
   selenium-webdriver
