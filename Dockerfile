@@ -1,4 +1,4 @@
-FROM ruby:3
+FROM ruby:3.0
 # Interactive for nvm and node
 SHELL ["/bin/bash", "--login", "-i", "-c"]
 RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.2/install.sh | bash
