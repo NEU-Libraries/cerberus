@@ -22,7 +22,7 @@ services:
     ports:
       - 3000:3000
   solr:
-    image: nakatomi/charon_solr
+    image: nakatomi/cerberus_solr
     ports:
     - 8983:8983
     volumes:
