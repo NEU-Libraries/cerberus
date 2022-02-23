@@ -53,7 +53,7 @@ gem "bootsnap", require: false
 
 # NEU Gems
 gem "blacklight", :git => "https://github.com/projectblacklight/blacklight.git", :ref => "fbd80201a373bfa3a554a016ce9717785909dbc2"
-gem "valkyrie"
+gem "valkyrie", :git => "https://github.com/samvera/valkyrie.git"
 gem "mods"
 gem "attr_json"
 
