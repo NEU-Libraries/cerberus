@@ -54,6 +54,8 @@ gem "bootsnap", require: false
 # NEU Gems
 gem "blacklight", :git => "https://github.com/projectblacklight/blacklight.git", :ref => "fbd80201a373bfa3a554a016ce9717785909dbc2"
 gem "valkyrie"
+gem "mods"
+gem "attr_json"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
