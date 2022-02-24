@@ -1,4 +1,4 @@
-class ModsMetadata < ActiveRecord::Base
+class Metadata::Mods < ActiveRecord::Base
   include AttrJson::Record
 
   # titles
@@ -13,7 +13,7 @@ class ModsMetadata < ActiveRecord::Base
   attr_json :abstract, :string
   attr_json :description, :string
   attr_json :languages, :string, array: true
-  attr_json :publication_information
+  attr_json :publication_information, :string
 
   # dates
   attr_json :date_issued, :datetime
@@ -23,7 +23,7 @@ class ModsMetadata < ActiveRecord::Base
   attr_json :resource_type, :string
   attr_json :genres, :string, array: true
   attr_json :format, :string
-  attr_json :digital_origin
+  attr_json :digital_origin, :string
   attr_json :extent, :string
   attr_json :notes, :string, array: true
   attr_json :map_data, :string
@@ -48,5 +48,6 @@ class ModsMetadata < ActiveRecord::Base
   attr_json :access_condition, :string
   attr_json :use_and_reproduction, :string
   attr_json :restriction_on_access, :string
+
 
 end
