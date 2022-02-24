@@ -1,5 +1,6 @@
 class Metadata::Mods < ActiveRecord::Base
   include AttrJson::Record
+  include Identifiable
 
   # titles
   attr_json :title, :string
