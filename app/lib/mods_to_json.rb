@@ -5,11 +5,11 @@ module ModsToJson
     mods_obj = Mods::Record.new.from_str(raw_xml)
     record = Metadata::Mods.find(mods_record_id)
 
-    record.title = { nonSort: mods_obj.title_info.nonSort.text,
-                     subtitle: mods_obj.title_info.subTitle,
-                     title: mods_obj.title_info.title.text,
-                     partName: mods_obj.title_info.partName.text,
-                     partNumber: mods_obj.title_info.partNumber.text }
+    record.title = { nonSort: mods_obj.title_info.nonSort.text.squish,
+                     subtitle: mods_obj.title_info.subTitle.text.squish,
+                     title: mods_obj.title_info.title.text.squish,
+                     partName: mods_obj.title_info.partName.text.squish,
+                     partNumber: mods_obj.title_info.partNumber.text.squish }
 
     # Creator/Contributor
     names = []
@@ -56,13 +56,13 @@ module ModsToJson
     # Related item
     record.related_series = []
     mods_obj.related_item.each do |ri|
-      record.related_series << ri.titleInfo.title.text if ri.type_at == 'series'
+      record.related_series << ri.titleInfo.title.text.squish if ri.type_at == 'series'
     end
 
     # Subjects and keywords
     record.topical_subjects = []
     mods_obj.subject.topic.each do |t|
-      record.topical_subjects << t.text
+      record.topical_subjects << t.text.squish
     end
 
     # Permanent URL
