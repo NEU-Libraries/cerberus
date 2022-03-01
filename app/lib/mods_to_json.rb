@@ -5,16 +5,22 @@ module ModsToJson
     mods_obj = Mods::Record.new.from_str(raw_xml)
     record = Metadata::Mods.find(mods_record_id)
 
-    record.title = mods_obj.title_info.full_title
+    # Munged - these should all probably be their own fields
+    # and comined at the decorator
+    record.title = [mods_obj.title_info.nonSort.text,
+                    mods_obj.title_info.title.text,
+                    mods_obj.title_info.partName.text,
+                    mods_obj.title_info.partNumber.text].join(' ').strip
 
     # Creator/Contributor
     # need to convert to nestod json objects - string
     # isn't quite right
-    record.names = []
+    names = []
     mods_obj.plain_name.each do |pn|
-      record.names << { name: pn.display_value_w_date,
-                        role: pn.role.value.first }.to_json
+      names << { name: pn.display_value_w_date,
+                 role: pn.role.value.first }
     end
+    record.names = names
 
     # Language
     record.languages = mods_obj.languages

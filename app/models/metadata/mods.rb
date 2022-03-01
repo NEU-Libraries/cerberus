@@ -13,7 +13,7 @@ module Metadata
     attr_json :translated_title, :string
 
     attr_json :edition, :string
-    attr_json :names, :string, array: true
+    attr_json :names, Metadata::Fields::Name.to_type, array: true
     attr_json :abstract, :string
     attr_json :description, :string
     attr_json :languages, :string, array: true
