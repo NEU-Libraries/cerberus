@@ -6,7 +6,7 @@ module Metadata
     include Identifiable
 
     # titles
-    attr_json :title, :string
+    attr_json :title, Metadata::Fields::TitleInfo.to_type
     attr_json :uniform_title, :string
     attr_json :abbreviated_title, :string
     attr_json :alternative_title, :string
