@@ -57,6 +57,7 @@ gem 'bootsnap', require: false
 gem 'attr_json'
 gem 'blacklight', git: 'https://github.com/projectblacklight/blacklight.git', ref: 'fbd80201a373bfa3a554a016ce9717785909dbc2'
 gem 'mods'
+gem 'noid-rails', git: 'https://github.com/dgcliff/noid-rails.git', branch: 'rails-7-trial'
 gem 'valkyrie', git: 'https://github.com/samvera/valkyrie.git'
 
 # QA gems

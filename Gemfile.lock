@@ -1,4 +1,13 @@
 GIT
+  remote: https://github.com/dgcliff/noid-rails.git
+  revision: 4627eae2f7676b893dd345bc330914c0fabc52a6
+  branch: rails-7-trial
+  specs:
+    noid-rails (3.0.3)
+      actionpack (= 7.0.1)
+      noid (~> 0.9)
+
+GIT
   remote: https://github.com/projectblacklight/blacklight.git
   revision: fbd80201a373bfa3a554a016ce9717785909dbc2
   ref: fbd80201a373bfa3a554a016ce9717785909dbc2
@@ -259,6 +268,7 @@ GEM
       net-protocol
       timeout
     nio4r (2.5.8)
+    noid (0.9.0)
     nokogiri (1.13.1-x86_64-linux)
       racc (~> 1.4)
     nom-xml (1.2.0)
@@ -427,6 +437,7 @@ DEPENDENCIES
   jbuilder
   jsbundling-rails
   mods
+  noid-rails!
   pg (~> 1.1)
   puma (~> 5.6)
   rails (= 7.0.1)
