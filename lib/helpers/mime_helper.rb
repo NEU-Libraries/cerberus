@@ -9,7 +9,7 @@ module MimeHelper
     result.strip!
     mime_type = result.slice(result.index(":")+1..-1).strip
 
-    if !original_filename.blank? && mime_type == "application/octet-stream"
+    if !original_filename.blank?
       # Odds are that it's a poor encoding, and the system is correct in giving a generic
       # mime type. Due to the complexity of the issue however, we're going to punt this
       # down the river and see if JWPlayer can survive whatever the issue may be, and
@@ -17,7 +17,11 @@ module MimeHelper
       extension = File.extname(original_filename)
 
       if !extension.blank?
-        return Rack::Mime.mime_type(extension)
+        extension_based_mime_type = Rack::Mime.mime_type(extension)
+
+        if mime_type == "application/octet-stream" || (mime_type.split("/").first.strip != extension_based_mime_type.split("/").first.strip)
+          return extension_based_mime_type
+        end
       end
     end
 
