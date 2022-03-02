@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_02_24_172332) do
+ActiveRecord::Schema.define(version: 2022_03_02_203316) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -32,6 +32,17 @@ ActiveRecord::Schema.define(version: 2022_02_24_172332) do
     t.jsonb "json_attributes"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+  end
+
+  create_table "minter_states", id: :serial, force: :cascade do |t|
+    t.string "namespace", default: "default", null: false
+    t.string "template", null: false
+    t.text "counters"
+    t.bigint "seq", default: 0
+    t.binary "rand"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["namespace"], name: "index_minter_states_on_namespace", unique: true
   end
 
   create_table "orm_resources", id: :uuid, default: -> { "uuid_generate_v4()" }, force: :cascade do |t|
