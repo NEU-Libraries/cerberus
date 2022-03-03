@@ -27,4 +27,8 @@ class Resource < Valkyrie::Resource
   def reload
     Resource.find(id)
   end
+
+  def decorate
+    ActiveDecorator::Decorator.instance.decorate(self)
+  end
 end
