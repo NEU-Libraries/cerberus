@@ -5,7 +5,7 @@ module ModsToJson
     mods_obj = Mods::Record.new.from_str(raw_xml)
     record = Metadata::Mods.find(mods_record_id)
 
-    record.title = { nonSort: mods_obj.title_info.nonSort.text.squish,
+    record.main_title = { nonSort: mods_obj.title_info.nonSort.text.squish,
                      subtitle: mods_obj.title_info.subTitle.text.squish,
                      title: mods_obj.title_info.title.text.squish,
                      partName: mods_obj.title_info.partName.text.squish,

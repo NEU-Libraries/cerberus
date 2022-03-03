@@ -5,7 +5,7 @@ module Metadata
     include AttrJson::Record
 
     # titles
-    attr_json :title, Metadata::Fields::TitleInfo.to_type
+    attr_json :main_title, Metadata::Fields::TitleInfo.to_type
     attr_json :uniform_title, :string
     attr_json :abbreviated_title, :string
     attr_json :alternative_title, :string

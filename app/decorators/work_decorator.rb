@@ -7,10 +7,10 @@ module WorkDecorator
 
   def title
     tag.dt('Title') +
-      tag.dd("#{mods&.title&.nonSort} \
-        #{mods&.title&.title}: \
-        #{mods&.title&.subtitle} \
-        #{mods&.title&.partName} \
-        #{mods&.title&.partNumber}")
+      tag.dd("#{mods&.main_title&.nonSort} \
+        #{mods&.main_title&.title}: \
+        #{mods&.main_title&.subtitle} \
+        #{mods&.main_title&.partName} \
+        #{mods&.main_title&.partNumber}")
   end
 end
