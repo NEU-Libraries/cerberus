@@ -2,6 +2,6 @@
 
 class WorksController < ApplicationController
   def show
-    @metadata = Work.find(params[:id])
+    @work = Work.find(params[:id])
   end
 end

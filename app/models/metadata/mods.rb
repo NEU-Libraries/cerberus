@@ -3,7 +3,6 @@
 module Metadata
   class Mods < ApplicationRecord
     include AttrJson::Record
-    include Identifiable
 
     # titles
     attr_json :title, Metadata::Fields::TitleInfo.to_type
