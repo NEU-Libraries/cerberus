@@ -4,8 +4,15 @@ Metrics/ClassLength:
 Metrics/AbcSize:
   Max: 20
   Exclude:
+    - 'app/decorators/*'
     # Constrained by gem expectations
     - 'app/models/breadcrumb_trail.rb'
+Metrics/CyclomaticComplexity:
+  Exclude:
+    - 'app/decorators/*'
+Metrics/PerceivedComplexity:
+  Exclude:
+    - 'app/decorators/*'
 Lint/AmbiguousBlockAssociation:
   Enabled: false
 Rails/FindEach:

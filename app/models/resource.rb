@@ -28,10 +28,6 @@ class Resource < Valkyrie::Resource
     Resource.find(id)
   end
 
-  def decorate
-    ActiveDecorator::Decorator.instance.decorate(self)
-  end
-
   def mods
     Metadata::Mods.find_by(valkyrie_id: noid)
   end

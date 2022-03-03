@@ -1,2 +1,5 @@
-= @work.mods.inspect
-= @work.link
+%dl
+  = @work.title
+
+%pre
+  = JSON.pretty_generate(JSON.parse(@work.mods.to_json))
