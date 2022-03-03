@@ -7,4 +7,24 @@ class Resource < Valkyrie::Resource
             }
 
   enable_optimistic_locking
+
+  def self.find(id)
+    # expect noid
+    Valkyrie.config.metadata_adapter.query_service.find_by_alternate_identifier(alternate_identifier: id)
+  rescue Valkyrie::Persistence::ObjectNotFoundError
+    # try standard valkyrie
+    Valkyrie.config.metadata_adapter.query_service.find_by(id: id)
+  end
+
+  def noid
+    alternate_ids.first.to_s
+  end
+
+  def to_param
+    noid
+  end
+
+  def reload
+    Resource.find(id)
+  end
 end

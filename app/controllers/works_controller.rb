@@ -2,7 +2,6 @@
 
 class WorksController < ApplicationController
   def show
-    # lookup Metadata::Mods object with noid
-    x = Metadata::Mods.find(5)
+    @metadata = Work.find(params[:id])
   end
 end
