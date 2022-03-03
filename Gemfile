@@ -54,6 +54,7 @@ gem 'bootsnap', require: false
 # gem "image_processing", "~> 1.2"
 
 # NEU Gems
+gem 'active_decorator'
 gem 'attr_json'
 gem 'blacklight', git: 'https://github.com/projectblacklight/blacklight.git', ref: 'fbd80201a373bfa3a554a016ce9717785909dbc2'
 gem 'mods'
