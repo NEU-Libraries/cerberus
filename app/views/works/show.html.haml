@@ -1,5 +1,14 @@
 %dl
   = @work.title
+  = @work.languages
+  = @work.date_created
+  = @work.resource_type
+  = @work.genres
+  = @work.digital_origin
+  = @work.abstract
+  = @work.related_series
+  = @work.identifiers
+  = @work.access_condition
 
 %pre
   = JSON.pretty_generate(JSON.parse(@work.mods.to_json))

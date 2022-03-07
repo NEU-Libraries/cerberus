@@ -41,8 +41,8 @@ ActiveRecord::Schema.define(version: 2022_03_03_192606) do
     t.text "counters"
     t.bigint "seq", default: 0
     t.binary "rand"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
     t.index ["namespace"], name: "index_minter_states_on_namespace", unique: true
   end
 

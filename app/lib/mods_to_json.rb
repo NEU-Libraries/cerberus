@@ -6,10 +6,10 @@ module ModsToJson
     record = Metadata::Mods.find(mods_record_id)
 
     record.main_title = { nonSort: mods_obj.title_info.nonSort.text.squish,
-                     subtitle: mods_obj.title_info.subTitle.text.squish,
-                     title: mods_obj.title_info.title.text.squish,
-                     partName: mods_obj.title_info.partName.text.squish,
-                     partNumber: mods_obj.title_info.partNumber.text.squish }
+                          subtitle: mods_obj.title_info.subTitle.text.squish,
+                          title: mods_obj.title_info.title.text.squish,
+                          partName: mods_obj.title_info.partName.text.squish,
+                          partNumber: mods_obj.title_info.partNumber.text.squish }
 
     # Creator/Contributor
     names = []
