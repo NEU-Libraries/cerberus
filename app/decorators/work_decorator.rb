@@ -10,6 +10,12 @@ module WorkDecorator
         prefix_field(', ', mods.main_title.partNumber))
   end
 
+  def names
+    mods.plain_name.each do |n|
+      # role based title and value
+    end
+  end
+
   def languages
     loop_field('Languages', mods.languages)
   end
@@ -42,8 +48,13 @@ module WorkDecorator
     loop_field('Related Items', mods.related_series)
   end
 
-  def identifiers
-    loop_field('Permanent URL', mods.identifiers, false) # Use link_to?
+  def subjects
+    loop_field('Subjects and keywords', mods.topical_subjects)
+  end
+
+  def permanent_url
+    tag.dt('Permanent URL') +
+      tag.dd(link_to mods.identifiers.first)
   end
 
   def access_condition
@@ -59,14 +70,10 @@ module WorkDecorator
       ''
     end
 
-    def loop_field(title, fields, titleize = true)
+    def loop_field(title, fields)
       result = tag.dt(title)
       fields.each do |f|
-        result += if titleize
-                    tag.dd(f.titleize)
-                  else
-                    tag.dd(f)
-                  end
+        result += tag.dd(f)
       end
       result
     end
