@@ -12,9 +12,9 @@ module WorkDecorator
 
   def names
     hsh = {}
-    result = ""
+    result = ''
     mods.names.each do |pn|
-      values = hsh[pn.role] ||= [ ]
+      values = hsh[pn.role] ||= []
       values << pn.name
     end
     hsh.each do |k, v|
@@ -61,7 +61,7 @@ module WorkDecorator
 
   def permanent_url
     tag.dt('Permanent URL') +
-      tag.dd(link_to mods.identifiers.first)
+      tag.dd(link_to(mods.identifiers.first))
   end
 
   def access_condition
