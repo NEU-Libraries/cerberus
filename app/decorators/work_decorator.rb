@@ -11,9 +11,16 @@ module WorkDecorator
   end
 
   def names
-    mods.plain_name.each do |n|
-      # role based title and value
+    hsh = {}
+    result = ""
+    mods.names.each do |pn|
+      values = hsh[pn.role] ||= [ ]
+      values << pn.name
     end
+    hsh.each do |k, v|
+      result += loop_field(k, v)
+    end
+    result.html_safe
   end
 
   def languages
