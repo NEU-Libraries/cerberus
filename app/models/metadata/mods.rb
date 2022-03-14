@@ -6,9 +6,9 @@ module Metadata
 
     # make new initialize method that looks up via
     # valkyrie id and tries to use mods binary
-    def initialize(args={})
+    def initialize(args = {})
       super
-      puts "DGC DEBUG - " + args.inspect
+      Rails.logger.debug { "DGC DEBUG - #{args.inspect}" }
       #  DGC DEBUG - {:valkyrie_id=>"51c5bgp"}
     end
 
