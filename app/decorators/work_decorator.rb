@@ -65,7 +65,7 @@ module WorkDecorator
 
   def permanent_url
     tag.dt('Permanent URL') +
-      tag.dd(link_to(mods.identifiers.first))
+      tag.dd(link_to(mods.identifiers&.first))
   end
 
   def access_condition
@@ -82,6 +82,7 @@ module WorkDecorator
     end
 
     def loop_field(title, fields)
+      return '' unless fields.present?
       result = tag.dt(title)
       fields.each do |f|
         result += tag.dd(f)

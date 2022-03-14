@@ -4,6 +4,13 @@ module Metadata
   class Mods < ApplicationRecord
     include AttrJson::Record
 
+    # make new initialize method that looks up via
+    # valkyrie id and tries to use mods binary
+    def initialize(args={})
+      super
+      puts "DGC DEBUG - " + args.inspect
+    end
+
     # titles
     attr_json :main_title, Metadata::Fields::TitleInfo.to_type
     attr_json :uniform_title, :string
