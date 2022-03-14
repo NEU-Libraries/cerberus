@@ -29,6 +29,6 @@ class Resource < Valkyrie::Resource
   end
 
   def mods
-    Metadata::Mods.find_by(valkyrie_id: noid)
+    Metadata::Mods.find_or_create_by(valkyrie_id: noid)
   end
 end

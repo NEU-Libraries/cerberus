@@ -7,9 +7,9 @@ module Metadata
 
       attr_json :title, :string
       attr_json :subtitle, :string
-      attr_json :partNumber, :string
-      attr_json :partName, :string
-      attr_json :nonSort, :string
+      attr_json :part_number, :string
+      attr_json :part_name, :string
+      attr_json :non_sort, :string
     end
   end
 end
