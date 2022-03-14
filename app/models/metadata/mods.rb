@@ -9,6 +9,7 @@ module Metadata
     def initialize(args={})
       super
       puts "DGC DEBUG - " + args.inspect
+      #  DGC DEBUG - {:valkyrie_id=>"51c5bgp"}
     end
 
     # titles
