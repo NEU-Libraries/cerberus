@@ -8,4 +8,10 @@ class WorksController < ApplicationController
   def new
     @work = Work.new
   end
+
+  def create
+    puts "DGC DEBUG UPLOAD"
+    puts params.permit(:binary, :authenticity_token, :commit).inspect
+    redirect_to root_path
+  end
 end

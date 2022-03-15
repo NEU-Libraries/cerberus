@@ -1,8 +1,8 @@
 %h2.py-2
   Upload File
 
-= form_tag('/posts') do |f|
+= form_tag('/works', multipart: true) do |f|
   .mb-3
-    %label.form-label{:for => "formFile"} Default file input example
-    %input#formFile.form-control{:type => "file"}/
+    %label.form-label{:for => "binary"} Default file input example
+    %input#binary.form-control{:name => "binary", :type => "file"}/
   = submit_tag "Upload", class: 'btn btn-primary'
