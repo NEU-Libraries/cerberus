@@ -22,7 +22,7 @@ Rails.application.config.to_prepare do
 
   Valkyrie::StorageAdapter.register(
     Valkyrie::Storage::Disk.new(
-      base_path: '/home/charon/storage/valkyrie',
+      base_path: '/home/cerberus/storage/valkyrie',
       file_mover: FileUtils.method(:cp)
     ),
     :disk

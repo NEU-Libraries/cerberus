@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Metadata
-  class Mods < ApplicationRecord
+  class MODS < ApplicationRecord
     include AttrJson::Record
 
     # make new initialize method that looks up via
