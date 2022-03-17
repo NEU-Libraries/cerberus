@@ -1,15 +1,18 @@
 # frozen_string_literal: true
 
 module Metadata
+  include MODSToJson
+
   class MODS < ApplicationRecord
     include AttrJson::Record
 
-    # make new initialize method that looks up via
-    # valkyrie id and tries to use mods binary
-    def initialize(args = {})
-      super
-      Rails.logger.debug { "DGC DEBUG - #{args.inspect}" }
-      #  DGC DEBUG - {:valkyrie_id=>"51c5bgp"}
+    after_initialize :read_xml
+
+    def read_xml
+      return if json_attributes.present?
+
+      raw_xml = File.read(Resource.find(valkyrie_id).mods_xml_path)
+      convert_xml_to_json(raw_xml, self)
     end
 
     # titles

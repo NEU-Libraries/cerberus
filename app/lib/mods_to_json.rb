@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
-module ModsToJson
-  def convert_xml_to_json(raw_xml, mods_record_id)
+module MODSToJson
+  def convert_xml_to_json(raw_xml, record)
     mods_obj = Mods::Record.new.from_str(raw_xml)
-    record = Metadata::MODS.find(mods_record_id)
+    # record = Metadata::MODS.find(mods_record_id)
+    # record = Metadata::MODS.new
 
     record.main_title = { non_sort: mods_obj.title_info.nonSort.text.squish,
                           subtitle: mods_obj.title_info.subTitle.text.squish,

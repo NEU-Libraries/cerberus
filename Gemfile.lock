@@ -177,6 +177,10 @@ GEM
       dry-logic (~> 1.0, >= 1.0.2)
     edtf (3.0.8)
       activesupport (>= 3.0, < 8.0)
+    enumerations (2.5.3)
+      activerecord
+      activesupport
+      i18n
     erubi (1.10.0)
     execjs (2.8.1)
     faraday (0.17.4)
@@ -442,6 +446,7 @@ DEPENDENCIES
   capybara
   cssbundling-rails
   debug
+  enumerations
   hamlit
   jbuilder
   jsbundling-rails
