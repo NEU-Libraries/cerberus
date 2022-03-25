@@ -3,31 +3,28 @@
 source 'https://rubygems.org'
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
-ruby '~> 3.0'
+ruby '3.0.3'
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
-gem 'rails', '7.0.1'
+gem 'rails', '~> 7.0.1'
 
 # The original asset pipeline for Rails [https://github.com/rails/sprockets-rails]
 gem 'sprockets-rails'
 
-# Use postgresql as the database for Active Record
-gem 'pg', '~> 1.1'
+# Use sqlite3 as the database for Active Record
+gem 'sqlite3', '~> 1.4'
 
 # Use the Puma web server [https://github.com/puma/puma]
-gem 'puma', '~> 5.6'
+gem 'puma', '~> 5.0'
 
-# Bundle and transpile JavaScript [https://github.com/rails/jsbundling-rails]
-gem 'jsbundling-rails'
+# Use JavaScript with ESM import maps [https://github.com/rails/importmap-rails]
+gem 'importmap-rails'
 
 # Hotwire's SPA-like page accelerator [https://turbo.hotwired.dev]
 gem 'turbo-rails'
 
 # Hotwire's modest JavaScript framework [https://stimulus.hotwired.dev]
 gem 'stimulus-rails'
-
-# Bundle and process CSS [https://github.com/rails/cssbundling-rails]
-gem 'cssbundling-rails'
 
 # Build JSON APIs with ease [https://github.com/rails/jbuilder]
 gem 'jbuilder'
@@ -56,11 +53,15 @@ gem 'bootsnap', require: false
 # NEU Gems
 gem 'active_decorator'
 gem 'attr_json'
-gem 'blacklight', git: 'https://github.com/projectblacklight/blacklight.git', ref: 'fbd80201a373bfa3a554a016ce9717785909dbc2'
+gem 'blacklight', git: 'https://github.com/projectblacklight/blacklight.git', ref: '98a071c22cba4654f774a347caaa8d9401c5bc80'
+gem 'bootstrap', '~> 5.1'
 gem 'enumerations'
 gem 'hamlit'
 gem 'mods'
 gem 'noid-rails', git: 'https://github.com/dgcliff/noid-rails.git', branch: 'rails-7-trial'
+gem 'pg'
+gem 'rsolr', '>= 1.0', '< 3'
+gem 'sassc-rails', '~> 2.1'
 gem 'valkyrie', git: 'https://github.com/samvera/valkyrie.git'
 
 # QA gems
@@ -95,6 +96,3 @@ end
 group :development, :test do
   gem 'solr_wrapper', '>= 0.3'
 end
-gem 'bootstrap', '~> 5.1'
-gem 'rsolr', '>= 1.0', '< 3'
-gem 'sassc-rails', '~> 2.1'
