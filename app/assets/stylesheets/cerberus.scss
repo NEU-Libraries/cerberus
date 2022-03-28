@@ -1,0 +1,21 @@
+@import 'colors';
+
+body {
+  background-color: $gray-100;
+}
+
+a:not(.btn) {
+  color: $link-blue;
+
+  &:link {
+    text-decoration: none;
+  }
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.navbar-search .search-query-form{
+  width: 100%;
+}

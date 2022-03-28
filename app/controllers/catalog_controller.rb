@@ -5,6 +5,8 @@ class CatalogController < ApplicationController
 
   configure_blacklight do |config|
     config.track_search_session = false
+    config.autocomplete_enabled = false
+    config.autocomplete_path = nil
     ## Class for sending and receiving requests from a search index
     # config.repository_class = Blacklight::Solr::Repository
     #
@@ -155,34 +157,34 @@ class CatalogController < ApplicationController
     # case for a BL "search field", which is really a dismax aggregate
     # of Solr search fields.
 
-    config.add_search_field('title') do |field|
-      # solr_parameters hash are sent to Solr as ordinary url query params.
-      field.solr_parameters = {
-        'spellcheck.dictionary': 'title',
-        qf: '${title_qf}',
-        pf: '${title_pf}'
-      }
-    end
+    # config.add_search_field('title') do |field|
+    #   # solr_parameters hash are sent to Solr as ordinary url query params.
+    #   field.solr_parameters = {
+    #     'spellcheck.dictionary': 'title',
+    #     qf: '${title_qf}',
+    #     pf: '${title_pf}'
+    #   }
+    # end
 
-    config.add_search_field('author') do |field|
-      field.solr_parameters = {
-        'spellcheck.dictionary': 'author',
-        qf: '${author_qf}',
-        pf: '${author_pf}'
-      }
-    end
+    # config.add_search_field('author') do |field|
+    #   field.solr_parameters = {
+    #     'spellcheck.dictionary': 'author',
+    #     qf: '${author_qf}',
+    #     pf: '${author_pf}'
+    #   }
+    # end
 
     # Specifying a :qt only to show it's possible, and so our internal automated
     # tests can test it. In this case it's the same as
     # config[:default_solr_parameters][:qt], so isn't actually neccesary.
-    config.add_search_field('subject') do |field|
-      field.qt = 'search'
-      field.solr_parameters = {
-        'spellcheck.dictionary': 'subject',
-        qf: '${subject_qf}',
-        pf: '${subject_pf}'
-      }
-    end
+    # config.add_search_field('subject') do |field|
+    #   field.qt = 'search'
+    #   field.solr_parameters = {
+    #     'spellcheck.dictionary': 'subject',
+    #     qf: '${subject_qf}',
+    #     pf: '${subject_pf}'
+    #   }
+    # end
 
     # "sort results by" select (pulldown)
     # label in pulldown is followed by the name of the Solr field to sort by and
@@ -199,8 +201,8 @@ class CatalogController < ApplicationController
     config.spell_max = 5
 
     # Configuration for autocomplete suggester
-    config.autocomplete_enabled = true
-    config.autocomplete_path = 'suggest'
+    # config.autocomplete_enabled = true
+    # config.autocomplete_path = 'suggest'
     # if the name of the solr.SuggestComponent provided in your solrconfig.xml is not the
     # default 'mySuggester', uncomment and provide it below
     # config.autocomplete_suggester = 'mySuggester'
