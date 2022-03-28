@@ -22,4 +22,4 @@ WORKDIR /home/cerberus/web
 COPY --chown=cerberus:cerberus . /home/cerberus/web
 RUN bundle update --bundler
 RUN bundle install
-RUN yarn install
+# RUN yarn install
