@@ -6,7 +6,7 @@
     </a>
   </h3>
 
-  <%= form_tag('/', method: :get, class: 'search-query-form container-fluid me-0 pe-0') do -%>
+  <%= form_tag('/catalog', method: :get, class: 'search-query-form container-fluid me-0 pe-0') do -%>
     <div class="input-group">
       <input type="text" class="form-control" placeholder="Search..." id="q" name="q" value="<%= params[:q] %>">
       <button class="btn btn-primary" type="submit">

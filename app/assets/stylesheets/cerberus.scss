@@ -23,3 +23,54 @@ a:not(.btn) {
 .catalog_startOverLink {
   display: none;
 }
+
+.footer {
+  padding-bottom: 21px;
+  padding-top: 16px;
+
+  background-color: #385775;
+  color: $light;
+
+  .logo {
+    width: 175px;
+  }
+
+  a {
+    color: $light;
+  }
+
+  li.list-inline-item:before {
+    content: "\20\00b7";
+    margin-right: 8px;
+  }
+  li.list-inline-item:first-child:before{
+    content: "";
+    margin-right: auto;
+  }
+  .nu-social{
+    li{
+      float: right;
+      display: block;
+      a {
+        -webkit-transition: opacity 0.5s;
+        -moz-transition: opacity 0.5s;
+        -o-transition: opacity 0.5s;
+        transition: opacity 0.5s;
+        padding: 0.25em;
+        font-size: 1.3em;
+        opacity: 0.5;
+      }
+      a:hover {
+        -webkit-transition: opacity 0.5s;
+        -moz-transition: opacity 0.5s;
+        -o-transition: opacity 0.5s;
+        transition: opacity 0.5s;
+        text-decoration: none;
+        opacity: 1;
+      }
+    }
+    li:after {
+      content: "";
+    }
+  }
+}
