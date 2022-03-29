@@ -1,9 +1,17 @@
-<%= form_tag('/', method: :get, class: 'search-query-form') do -%>
-  <div class="input-group">
-    <input type="text" class="form-control" placeholder="Search..." id="q" name="q" value="<%= params[:q] %>">
-    <button class="btn btn-primary" type="submit">
-      <i class="fa-solid fa-magnifying-glass"></i>
-      Search
-    </button>
-  </div>
-<% end -%>
+
+  <h3>
+    <i class="fa-solid fa-box-archive"></i>
+    <a class="navbar-brand" href="/">
+      DRS Digital Repository Service
+    </a>
+  </h3>
+
+  <%= form_tag('/', method: :get, class: 'search-query-form container-fluid me-0 pe-0') do -%>
+    <div class="input-group">
+      <input type="text" class="form-control" placeholder="Search..." id="q" name="q" value="<%= params[:q] %>">
+      <button class="btn btn-primary" type="submit">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        Search
+      </button>
+    </div>
+  <% end -%>
