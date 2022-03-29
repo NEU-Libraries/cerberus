@@ -1,9 +1,9 @@
-%footer.footer.mt-3
+%footer.footer.mt-auto.py-3
   .container-lg
     .row
       .col-sm-3.ps-0.pb-3
         = image_tag "NU_Wordmark_Wh.svg", width: "200px", style: "object-fit: cover; height: 20px;"
-      .col-sm-6.small
+      .col-sm-6.small.pt-1
         %ul.list-inline
           %li.list-inline-item
             %a{:href => "http://myneu.neu.edu/cp/home/displaylogin"} MyNEU
@@ -26,15 +26,15 @@
           %li
             %a.twitter{:href => "http://twitter.com/northeastern", :target => "_blank"}
               %span.sr-only Northern University on Twitter
-              %span.fa.fa-twitter
+              %span.fa-brands.fa-twitter
           %li
             %a.facebook{:href => "http://www.facebook.com/northeastern", :target => "_blank"}
               %span.sr-only Northeastern on Facebook
-              %span.fa.fa-facebook
+              %span.fa-brands.fa-facebook
           %li
             %a.youtube{:href => "https://www.youtube.com/northeastern", :target => "_blank"}
               %span.sr-only Northern University on YouTube
-              %span.fa.fa-youtube
+              %span.fa-brands.fa-youtube
         %br
         .pull-right.small
           = ""

@@ -2,6 +2,10 @@
 
 body {
   background-color: $gray-100;
+  height:100vh;
+  margin:0;
+  display:flex;
+  flex-direction:column;
 }
 
 a:not(.btn) {
@@ -25,9 +29,6 @@ a:not(.btn) {
 }
 
 .footer {
-  padding-bottom: 21px;
-  padding-top: 16px;
-
   background-color: #385775;
   color: $light;
 
