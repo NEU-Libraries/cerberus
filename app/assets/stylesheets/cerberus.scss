@@ -8,6 +8,10 @@ body {
   flex-direction:column;
 }
 
+.bg-well {
+  background-color: #e9ecef;
+}
+
 a:not(.btn) {
   color: $link-blue;
 
