@@ -151,6 +151,8 @@ GEM
       railties (>= 4.1.0)
       responders
       warden (~> 1.2.3)
+    devise-i18n (1.10.2)
+      devise (>= 4.8.0)
     digest (3.1.0)
     disposable (0.6.2)
       declarative (>= 0.0.9, < 1.0.0)
@@ -459,6 +461,7 @@ DEPENDENCIES
   capybara
   debug
   devise
+  devise-i18n
   enumerations
   hamlit
   importmap-rails
