@@ -22,8 +22,8 @@ ActiveRecord::Schema.define(version: 2022_03_30_141228) do
     t.string "document_id"
     t.string "document_type"
     t.binary "title"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.index ["document_id"], name: "index_bookmarks_on_document_id"
     t.index ["user_id"], name: "index_bookmarks_on_user_id"
   end
@@ -41,15 +41,15 @@ ActiveRecord::Schema.define(version: 2022_03_30_141228) do
     t.text "counters"
     t.bigint "seq", default: 0
     t.binary "rand"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.index ["namespace"], name: "index_minter_states_on_namespace", unique: true
   end
 
   create_table "orm_resources", id: :uuid, default: -> { "uuid_generate_v4()" }, force: :cascade do |t|
     t.jsonb "metadata", default: {}, null: false
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.string "internal_resource"
     t.integer "lock_version"
     t.index ["internal_resource"], name: "index_orm_resources_on_internal_resource"
@@ -62,8 +62,8 @@ ActiveRecord::Schema.define(version: 2022_03_30_141228) do
     t.binary "query_params"
     t.integer "user_id"
     t.string "user_type"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_searches_on_user_id"
   end
 
