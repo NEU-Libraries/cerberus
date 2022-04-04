@@ -28,7 +28,7 @@ development:
   <<: *default
   database: cerberus_development
 
-development:
+staging:
   <<: *default
   database: cerberus_staging
 
