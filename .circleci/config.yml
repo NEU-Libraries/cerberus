@@ -63,13 +63,13 @@ jobs:
           environment:
             DOCKERIZE_VERSION: v0.6.1
       - run:
+          name: Wait for web
+          command: dockerize -wait http://localhost:3000 -timeout 1m
+      - run:
           name: Create database and migrate
           command: |
             docker-compose exec web bundle exec rake db:create
             docker-compose exec web bundle exec rake db:migrate
-      - run:
-          name: Wait for web
-          command: dockerize -wait http://localhost:3000 -timeout 1m
       - run:
           name: Run Specs
           command: |
