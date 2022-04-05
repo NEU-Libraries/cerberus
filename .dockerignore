@@ -6,3 +6,12 @@ Changelog.md
 Makefile
 docker-compose.yml
 docs
+
+# Ignore all logfiles and tempfiles.
+/log/*
+/tmp/*
+!/log/.keep
+!/tmp/.keep
+
+.git
+.gitignore
