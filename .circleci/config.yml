@@ -1,0 +1,86 @@
+version: 2
+jobs:
+  build:
+    machine: true
+    working_directory: ~/cerberus
+    branches:
+      only:
+        - master
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: |
+            sudo apt-get update -qq
+            sudo apt-get install -y apt-utils build-essential libpq-dev httpie
+      - run:
+          name: Install Docker Compose
+          command: |
+            curl -L https://github.com/docker/compose/releases/download/1.23.2/docker-compose-`uname -s`-`uname -m` > ~/docker-compose
+            chmod +x ~/docker-compose
+            sudo mv ~/docker-compose /usr/local/bin/docker-compose
+      - restore_cache:
+          keys:
+            - v1-{{ .Branch }}
+          paths:
+            - ~/caches/cerberus.tar
+      - run:
+          name: Load Docker image layer cache
+          command: |
+            set +o pipefail
+            docker load -i ~/caches/cerberus.tar | true
+      - run:
+          name: Set CERBERUS_VERSION and Define Environment Variable at Runtime
+          command: |
+            echo 'export CERBERUS_VERSION=$(cat .version)' >> $BASH_ENV
+            source $BASH_ENV
+      - run:
+          name: Check CERBERUS_VERSION doesn't already exist in docker tags
+          command: |
+            scripts/tag_check.sh $CERBERUS_VERSION
+      - run:
+          name: Build application Docker image
+          command: |
+            docker build --cache-from=nakatomi/cerberus_web:latest -t nakatomi/cerberus_web .
+      - run:
+          name: Save Docker image layer cache
+          command: |
+            mkdir -p ~/caches
+            docker save -o ~/caches/cerberus.tar nakatomi/cerberus_web
+      - save_cache:
+          key: v1-{{ .Branch }}-{{ epoch }}
+          paths:
+            - ~/caches/cerberus.tar
+      - run:
+          name: Start container
+          command: |
+            set -x
+            docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d
+      - run:
+          name: install dockerize
+          command: wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && sudo tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
+          environment:
+            DOCKERIZE_VERSION: v0.6.1
+      - run:
+          name: Create database and migrate
+          command: |
+            docker-compose exec web bundle exec rake db:create
+            docker-compose exec web bundle exec rake db:migrate
+      - run:
+          name: Wait for web
+          command: dockerize -wait http://localhost:3000 -timeout 1m
+      - run:
+          name: Run Specs
+          command: |
+            docker-compose exec web bundle exec rspec --profile
+      - run:
+          name: Publish Docker Image to Docker Hub
+          command: |
+            echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+            docker push nakatomi/cerberus_web:latest
+            docker tag nakatomi/cerberus_web:latest nakatomi/cerberus_web:$CERBERUS_VERSION
+            docker push nakatomi/cerberus_web:$CERBERUS_VERSION
+      - run:
+          name: Deploy
+          command: |
+            http PUT cerberusv2.library.northeastern.edu/deploy token=$CERBERUS_TOKEN version=$CERBERUS_VERSION
