@@ -15,9 +15,6 @@ services:
     ports:
       - 5432:5432
   web:
-    build: .
-    volumes:
-      - ./:/home/cerberus/web
     entrypoint: /home/cerberus/web/docker-entrypoint.sh
     ports:
       - 3000:3000
