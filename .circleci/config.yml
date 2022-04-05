@@ -72,7 +72,7 @@ jobs:
       - run:
           name: Run Specs
           command: |
-            docker-compose exec web bundle exec rspec --profile
+            docker-compose exec web bundle exec rake
       - run:
           name: Publish Docker Image to Docker Hub
           command: |
