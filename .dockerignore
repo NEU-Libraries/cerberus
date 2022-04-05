@@ -15,3 +15,30 @@ docs
 
 .git
 .gitignore
+
+# Ignore bundler config.
+.bundle
+
+# Byebug history
+.byebug_history
+
+# Ignore master key for decrypting credentials and more.
+config/master.key
+
+# Node modules, yarn etc.
+public/packs
+public/packs-test
+node_modules
+yarn-error.log
+yarn-debug.log*
+.yarn-integrity
+
+# Ignore environment files
+*.env
+
+# Ignore database dumps
+*.dump
+
+# Misc files
+.dockerignore
+.cache
