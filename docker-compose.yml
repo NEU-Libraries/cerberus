@@ -15,7 +15,7 @@ services:
     ports:
       - 5432:5432
   web:
-    image: nakatomi/charon_web
+    image: nakatomi/cerberus_web
     entrypoint: /home/cerberus/web/docker-entrypoint.sh
     ports:
       - 3000:3000
