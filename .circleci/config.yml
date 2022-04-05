@@ -5,7 +5,7 @@ jobs:
     working_directory: ~/cerberus
     branches:
       only:
-        - master
+        - main
     steps:
       - checkout
       - run:
