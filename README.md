@@ -1,24 +1,5 @@
-# README
+# Cerberus
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+Cerberus is the Ruby on Rails codebase for Northeastern's Digital Repository Service.
 
-Things you may want to cover:
-
-* Ruby version
-
-* System dependencies
-
-* Configuration
-
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+The code base utilizes Valkyrie, Blacklight, Solr and PostgreSQL
