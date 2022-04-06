@@ -1,6 +1,4 @@
-[![Test Coverage](https://api.codeclimate.com/v1/badges/319fb72eb18232337a83/test_coverage)](https://codeclimate.com/github/NEU-Libraries/cerberus/test_coverage)
-
-[![Maintainability](https://api.codeclimate.com/v1/badges/319fb72eb18232337a83/maintainability)](https://codeclimate.com/github/NEU-Libraries/cerberus/maintainability)
+[![Maintainability](https://api.codeclimate.com/v1/badges/319fb72eb18232337a83/maintainability)](https://codeclimate.com/github/NEU-Libraries/cerberus/maintainability) [![Test Coverage](https://api.codeclimate.com/v1/badges/319fb72eb18232337a83/test_coverage)](https://codeclimate.com/github/NEU-Libraries/cerberus/test_coverage)
 
 # Cerberus
 
