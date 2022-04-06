@@ -70,7 +70,6 @@ gem 'valkyrie', git: 'https://github.com/samvera/valkyrie.git'
 gem 'rubocop', require: false
 gem 'rubocop-rails', require: false
 gem 'simplecov', require: false
-gem 'simplecov-shields-badge', require: false
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
