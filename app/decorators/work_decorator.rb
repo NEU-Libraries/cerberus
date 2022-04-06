@@ -24,7 +24,7 @@ module WorkDecorator
     hsh.each do |k, v|
       result += loop_field(k, v)
     end
-    result.html_safe
+    safe_join(result)
   end
 
   def languages

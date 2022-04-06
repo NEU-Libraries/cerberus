@@ -7,6 +7,8 @@ Metrics/AbcSize:
     - 'app/decorators/*'
     # Constrained by gem expectations
     - 'app/models/breadcrumb_trail.rb'
+    # Nature of object conversion, lots of assignment
+    - 'app/lib/mods_to_json.rb'
 Metrics/CyclomaticComplexity:
   Exclude:
     - 'app/decorators/*'
@@ -24,7 +26,8 @@ Layout/LineLength:
   Include:
     - 'app/**/*'
 Metrics/MethodLength:
-  IgnoredMethods: ['role_permissions']
+  Max: 15
+  IgnoredMethods: ['role_permissions', 'convert_xml_to_json']
 AllCops:
   NewCops: enable
   TargetRubyVersion: 2.5

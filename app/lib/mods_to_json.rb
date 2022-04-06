@@ -3,44 +3,23 @@
 module MODSToJson
   def convert_xml_to_json(raw_xml, record)
     mods_obj = Mods::Record.new.from_str(raw_xml)
-    # record = Metadata::MODS.find(mods_record_id)
-    # record = Metadata::MODS.new
 
-    record.main_title = { non_sort: mods_obj.title_info.nonSort.text.squish,
-                          subtitle: mods_obj.title_info.subTitle.text.squish,
-                          title: mods_obj.title_info.title.text.squish,
-                          part_name: mods_obj.title_info.partName.text.squish,
-                          part_number: mods_obj.title_info.partNumber.text.squish }
+    record.main_title = extract_main_title(mods_obj)
 
     # Creator/Contributor
-    names = []
-    mods_obj.plain_name.each do |pn|
-      names << { name: pn.display_value_w_date,
-                 role: pn.role.value.first }
-    end
-    record.names = names
+    record.names = extract_plain_names(mods_obj)
 
     # Language
     record.languages = mods_obj.languages
 
     # Date created
-    record.date_created = DateTime.parse(
-      mods_obj
-      .origin_info
-      .as_object.first
-      .key_dates.select do |d|
-        d.name == 'dateCreated'
-      end.first.text.squish
-    )
+    record.date_created = extract_date_created(mods_obj)
 
     # Type of resource
     record.resource_type = mods_obj.typeOfResource.text.squish
 
     # Genre
-    record.genres = []
-    mods_obj.genre.each do |g|
-      record.genres << g.text.squish
-    end
+    record.genres = extract_genres(mods_obj)
 
     # Format
     record.resource_type = mods_obj.typeOfResource.first.text.squish
@@ -55,22 +34,13 @@ module MODSToJson
     record.abstract = mods_obj.abstract.text.squish
 
     # Related item
-    record.related_series = []
-    mods_obj.related_item.each do |ri|
-      record.related_series << ri.titleInfo.title.text.squish if ri.type_at == 'series'
-    end
+    record.related_series = extract_related_series(mods_obj)
 
     # Subjects and keywords
-    record.topical_subjects = []
-    mods_obj.subject.topic.each do |t|
-      record.topical_subjects << t.text.squish
-    end
+    record.topical_subjects = extract_topical_subjects(mods_obj)
 
     # Permanent URL
-    record.identifiers = []
-    mods_obj.identifier.each do |i|
-      record.identifiers << i.text.squish
-    end
+    record.identifiers = extract_identifiers(mods_obj)
 
     # Use and reproduction
     record.access_condition = mods_obj.accessCondition.text.squish
