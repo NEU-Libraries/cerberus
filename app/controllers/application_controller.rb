@@ -12,7 +12,7 @@ class ApplicationController < ActionController::Base
   # Best to ask for breadcrumbs everywhere
   # and just avoid Croutons NotImplementedError
   def breadcrumbs
-    super
+    super unless controller_name == "catalog"
   rescue NoMethodError, NotImplementedError
     # Just don't show them
     logger.info('No breadcrumbs found') && (return)
