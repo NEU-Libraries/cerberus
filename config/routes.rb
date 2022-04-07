@@ -22,5 +22,8 @@ Rails.application.routes.draw do
     end
   end
 
+  resources :communities
+  resources :collections
   resources :works
+
 end
