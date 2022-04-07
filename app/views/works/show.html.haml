@@ -1,16 +1,16 @@
-%dl
-  = @work.title
-  = @work.names
-  = @work.languages
-  = @work.date_created
-  = @work.resource_type
-  = @work.genres
-  = @work.digital_origin
-  = @work.abstract
-  = @work.related_series
-  = @work.subjects
-  = @work.permanent_url
-  = @work.access_condition
+-# %dl
+-#   = @work.title
+-#   = @work.names
+-#   = @work.languages
+-#   = @work.date_created
+-#   = @work.resource_type
+-#   = @work.genres
+-#   = @work.digital_origin
+-#   = @work.abstract
+-#   = @work.related_series
+-#   = @work.subjects
+-#   = @work.permanent_url
+-#   = @work.access_condition
 
-%pre
-  = JSON.pretty_generate(JSON.parse(@work.mods.to_json))
+-# %pre
+-#   = JSON.pretty_generate(JSON.parse(@work.mods.to_json))
