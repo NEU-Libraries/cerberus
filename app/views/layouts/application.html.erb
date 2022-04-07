@@ -2,4 +2,8 @@
   <meta name="robots" content="noindex,nofollow" />
 <% end %>
 
+<% content_for(:container_header) do %>
+  <%= breadcrumbs %>
+<% end %>
+
 <%= render template: "layouts/blacklight" %>
