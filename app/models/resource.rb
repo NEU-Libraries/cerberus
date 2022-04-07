@@ -16,6 +16,10 @@ class Resource < Valkyrie::Resource
     Valkyrie.config.metadata_adapter.query_service.find_by(id: id)
   end
 
+  def parent
+    Valkyrie.config.metadata_adapter.query_service.find_references_by(resource: self, property: :a_member_of).first
+  end
+
   def children
     result = []
     result.concat Valkyrie.config.metadata_adapter.query_service.find_inverse_references_by(
