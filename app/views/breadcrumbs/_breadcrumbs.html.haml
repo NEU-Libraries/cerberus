@@ -1,0 +1,10 @@
+-if breadcrumbs.present?
+  %nav{"aria-label" => "breadcrumb"}
+    %ol.breadcrumb
+      - breadcrumbs.each do |breadcrumb|
+        - if breadcrumb.link?
+          %li.breadcrumb-item
+            = link_to breadcrumb.label, breadcrumb.url
+        - else
+          %li.breadcrumb-item.active{"aria-current" => "page"}
+            = breadcrumb.label

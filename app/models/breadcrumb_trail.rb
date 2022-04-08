@@ -2,8 +2,8 @@
 
 class BreadcrumbTrail < Croutons::BreadcrumbTrail
   def works_show
-    # breadcrumb(objects[:work].parent.parent.title, project_path(objects[:work].parent.parent))
-    # breadcrumb(objects[:work].parent.title, collection_path(objects[:work].parent))
-    # breadcrumb(objects[:work].title)
+    breadcrumb("Hats", "http://www.google.com")
+    breadcrumb("Ducks", "http://www.google.com")
+    breadcrumb("Google", "http://www.google.com")
   end
 end
