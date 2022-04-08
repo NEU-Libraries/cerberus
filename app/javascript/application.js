@@ -15,3 +15,5 @@ import "@fortawesome/fontawesome-free"
 library.add(far, fas, fab)
 
 FontAwesome.config.mutateApproach = 'sync'
+
+import "cerberus/popover"

@@ -8,3 +8,9 @@
         - else
           %li.breadcrumb-item.active{"aria-current" => "page"}
             = breadcrumb.label
+      %li.breadcrumb-item.breadcrumb-add
+        %i.fa-regular.fa-square-plus
+        .add-label
+          Add
+      %li.breadcrumb-item.breadcrumb-add
+        %button.btn.btn-lg.btn-danger{"data-bs-content" => "And here's some amazing content. It's very engaging. Right?", "data-bs-toggle" => "popover", :title => "Popover title", :type => "button"} Click to toggle popover
