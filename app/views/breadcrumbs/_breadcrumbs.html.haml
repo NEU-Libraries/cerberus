@@ -8,9 +8,16 @@
         - else
           %li.breadcrumb-item.active{"aria-current" => "page"}
             = breadcrumb.label
-      %li.breadcrumb-item.breadcrumb-add
-        %i.fa-regular.fa-square-plus
-        .add-label
-          Add
-      %li.breadcrumb-item.breadcrumb-add
-        %button.btn.btn-lg.btn-danger{"data-bs-content" => "And here's some amazing content. It's very engaging. Right?", "data-bs-toggle" => "popover", :title => "Popover title", :type => "button"} Click to toggle popover
+      %li.breadcrumb-item
+        .dropdown.breadcrumb-add
+          %a.text-decoration-none{"aria-expanded" => "false", "data-bs-toggle" => "dropdown", :type => "button"}
+            %i.fa-regular.fa-square-plus
+            .ms-1.d-inline
+              Add
+          %ul.dropdown-menu{"aria-labelledby" => "dropdownMenuButton1"}
+            %li
+              %a.dropdown-item{:href => "#"} Action
+            %li
+              %a.dropdown-item{:href => "#"} Another action
+            %li
+              %a.dropdown-item{:href => "#"} Something else here
