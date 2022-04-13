@@ -272,7 +272,7 @@ GEM
       timeout
     nio4r (2.5.8)
     noid (0.9.0)
-    nokogiri (1.13.3-x86_64-linux)
+    nokogiri (1.13.4-x86_64-linux)
       racc (~> 1.4)
     nom-xml (1.2.0)
       i18n
