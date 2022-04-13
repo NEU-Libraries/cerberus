@@ -91,3 +91,17 @@ a:not(.btn) {
 .breadcrumb-add {
   display: inline;
 }
+
+.dropdown-menu.show{
+  background-color: $light;
+
+  a:hover {
+    &:not(.active) {
+      background-color: $light;
+    }
+  }
+
+  a:active {
+    color: $dark;
+  }
+}
