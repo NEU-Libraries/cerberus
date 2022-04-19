@@ -6,7 +6,7 @@ module Metadata
   class MODS < ApplicationRecord
     include AttrJson::Record
 
-    after_initialize :read_xml
+    # after_initialize :read_xml
 
     def read_xml
       return if json_attributes.present?

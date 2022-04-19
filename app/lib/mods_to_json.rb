@@ -47,4 +47,14 @@ module MODSToJson
 
     record.save!
   end
+
+  private
+
+  def safe_extract
+    begin
+      yield
+    rescue NoMethodError
+      return ''
+    end
+  end
 end

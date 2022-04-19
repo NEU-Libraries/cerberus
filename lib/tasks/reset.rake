@@ -6,6 +6,9 @@ namespace :reset do
     raise "Wrong env - #{Rails.env} - must be development" unless Rails.env.development? || Rails.env.staging?
 
     meta = Valkyrie.config.metadata_adapter
+    meta.persister.save(resource: Community.new())
+    meta.persister.save(resource: Collection.new())
+    meta.persister.save(resource: Work.new())
   end
 
   desc 'Clean solr and dbs'
