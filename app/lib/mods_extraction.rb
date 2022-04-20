@@ -32,7 +32,7 @@ module MODSExtraction
   def extract_genres(mods_obj)
     result = []
     mods_obj.genre.each do |g|
-      result.genres << g.text.squish
+      result << g.text.squish
     end
     result
   end
@@ -40,7 +40,7 @@ module MODSExtraction
   def extract_related_series(mods_obj)
     result = []
     mods_obj.related_item.each do |ri|
-      result.related_series << ri.titleInfo.title.text.squish if ri.type_at == 'series'
+      result << ri.titleInfo.title.text.squish if ri.type_at == 'series'
     end
     result
   end
@@ -48,14 +48,14 @@ module MODSExtraction
   def extract_topical_subjects(mods_obj)
     result = []
     mods_obj.subject.topic.each do |t|
-      result.topical_subjects << t.text.squish
+      result << t.text.squish
     end
   end
 
   def extract_identifiers(mods_obj)
     result = []
     mods_obj.identifier.each do |i|
-      record.identifiers << i.text.squish
+      result << i.text.squish
     end
     result
   end

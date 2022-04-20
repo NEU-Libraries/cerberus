@@ -5,3 +5,4 @@ services:
     build: .
     volumes:
       - ./:/home/cerberus/web
+      - storage:/home/charon/storage

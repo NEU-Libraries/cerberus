@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'database_cleaner'
 
 namespace :reset do
@@ -19,5 +21,4 @@ namespace :reset do
     DatabaseCleaner.clean
     Blacklight.default_index.connection.delete_by_query '*:*'
   end
-
 end

@@ -42,6 +42,12 @@ class Resource < Valkyrie::Resource
   end
 
   def mods
-    # Metadata::MODS.find_or_create_by(valkyrie_id: noid)
+    Metadata::MODS.find_or_create_by(valkyrie_id: noid)
+  end
+
+  def mods_xml
+    '</>'
+    # still need to open and return xml string
+    # Valkyrie.config.metadata_adapter.query_service.find_references_by(resource: self, property: :descriptive_metadata_for).first
   end
 end

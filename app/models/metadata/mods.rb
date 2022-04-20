@@ -1,17 +1,18 @@
 # frozen_string_literal: true
 
 module Metadata
-  include MODSToJson
 
   class MODS < ApplicationRecord
     include AttrJson::Record
+    include MODSToJson
 
-    # after_initialize :read_xml
+    after_initialize :read_xml
 
     def read_xml
       return if json_attributes.present?
 
-      raw_xml = File.read(Resource.find(valkyrie_id).mods_xml_path)
+      # raw_xml = File.read(Resource.find(valkyrie_id).mods_xml_path)
+      raw_xml = File.read('/home/cerberus/storage/mods.xml')
       convert_xml_to_json(raw_xml, self)
     end
 

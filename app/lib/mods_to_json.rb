@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 module MODSToJson
-  def convert_xml_to_json(raw_xml, record)
+  include MODSExtraction
+
+  def convert_xml_to_json(raw_xml, record) # remove record and return JSON to get rid of mutation
     mods_obj = Mods::Record.new.from_str(raw_xml)
 
     record.main_title = extract_main_title(mods_obj)
@@ -50,11 +52,9 @@ module MODSToJson
 
   private
 
-  def safe_extract
-    begin
+    def safe_extract
       yield
     rescue NoMethodError
-      return ''
+      ''
     end
-  end
 end

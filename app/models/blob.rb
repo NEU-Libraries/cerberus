@@ -7,6 +7,9 @@ class Blob < Resource
   attribute :use, Valkyrie::Types::Set
   attribute :label, Valkyrie::Types::String # Classification Enumeration
 
+  # fast lookup for MODS
+  attribute :descriptive_metadata_for, Valkyrie::Types::ID.optional
+
   def file_path
     file_identifier.id.split('disk://')[1]
   end
