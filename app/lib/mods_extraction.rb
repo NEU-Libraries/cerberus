@@ -50,6 +50,7 @@ module MODSExtraction
     mods_obj.subject.topic.each do |t|
       result << t.text.squish
     end
+    result
   end
 
   def extract_identifiers(mods_obj)
