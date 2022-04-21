@@ -133,6 +133,11 @@ class ImageProcessingJob
                 if val.include? ","
                   pers = val.split(",")
                   pers = {'first_names'=>[pers[1].strip], 'last_names'=>[pers[0].strip]}
+                elsif val.include? ";"
+                  pers = val.split(";")
+                  pers = {'first_names'=>[pers[1].strip], 'last_names'=>[pers[0].strip]}
+                  modified_message = "By-line parsed into Last Name, First Name format."
+                  modified = true
                 else
                   name_array = Namae.parse val
                   if name_array.blank?
