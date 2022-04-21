@@ -45,6 +45,9 @@ class DownloadsController < ApplicationController
   end
 
   def show
+    if (asset.class == ImageThumbnailFile || asset.class == PageFile) && (Rails.env.production? || Rails.env.staging?)
+      response.headers['Cache-Control'] = "public"
+    end
     # 301 redirect fulltext if not logged in to try and boost google scholar
     if current_user.nil?
       # Tombstoned files will return a nil core_record
@@ -58,8 +61,6 @@ class DownloadsController < ApplicationController
           end
         end
       end
-    elsif (asset.class == ImageThumbnailFile || asset.class == PageFile) && (Rails.env.staging? || Rails.env.production?)
-      response.headers['Cache-Control'] = "public"
     end
     super
   end
