@@ -58,7 +58,7 @@ class DownloadsController < ApplicationController
           end
         end
       end
-    elsif asset.class == ImageThumbnailFile && (Rails.env.staging? || Rails.env.production?)
+    elsif (asset.class == ImageThumbnailFile || asset.class == PageFile) && (Rails.env.staging? || Rails.env.production?)
       response.headers['Cache-Control'] = "public"
     end
     super

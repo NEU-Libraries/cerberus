@@ -29,9 +29,11 @@ module Cerberus
         file_name = "neu_#{asset.pid.split(":").last}.zip"
         send_file asset.fedora_file_path, :filename =>  file_name, :type => "application/zip", :disposition => 'attachment'
       elsif asset.datastreams.keys.include?("content")
-        file_name = "neu_#{asset.pid.split(":").last}.#{extract_extension(asset.properties.mime_type.first, File.extname(asset.original_filename || "").delete!("."))}"
-        if asset.class == PdfFile || asset.class == ImageThumbnailFile || asset.class == PageFile
+        file_name = "neu_#{asset.pid.split(":").last}.#{extract_extension(asset.mime_type || extract_mime_type(asset.fedora_file_path), File.extname(asset.original_filename || "").delete!("."))}"
+        if asset.class == PdfFile
           send_file asset.fedora_file_path, :filename =>  file_name, :type => asset.mime_type || extract_mime_type(asset.fedora_file_path), :disposition => 'inline'
+        elsif asset.class == ImageThumbnailFile || asset.class == PageFile
+          send_file asset.fedora_file_path(params[:datastream_id].split("_").last), :filename =>  file_name, :type => asset.mime_type || extract_mime_type(asset.fedora_file_path), :disposition => 'inline'
         else
           send_file asset.fedora_file_path, :filename =>  file_name, :type => asset.mime_type || extract_mime_type(asset.fedora_file_path), :disposition => 'attachment'
         end
