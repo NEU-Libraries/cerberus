@@ -17,7 +17,7 @@ module ApplicationHelper
   end
 
   def cached_content_objects(core_file)
-    Rails.cache.fetch("/content_objects/#{core_file.pid}-#{core_file.updated_at}", :expires_in => 12.hours) do
+    Rails.cache.fetch("/content_objects/#{core_file.pid}-#{core_file.updated_at}", :expires_in => 1.week) do
       core_file.content_objects_sorted
     end
   end
