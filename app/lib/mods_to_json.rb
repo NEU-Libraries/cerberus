@@ -24,7 +24,7 @@ module MODSToJson
     record.genres = extract_genres(mods_obj)
 
     # Format
-    record.resource_type = mods_obj.typeOfResource.first.text.squish
+    record.resource_type = mods_obj.typeOfResource.text.squish
     record.format = mods_obj.physical_description.form.text.squish
     record.extent = mods_obj.physical_description.extent.text.squish
 

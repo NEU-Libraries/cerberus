@@ -11,8 +11,8 @@ module Metadata
     def read_xml
       return if json_attributes.present?
 
-      # raw_xml = File.read(Resource.find(valkyrie_id).mods_xml_path)
-      raw_xml = File.read('/home/cerberus/storage/mods.xml')
+      raw_xml = Resource.find(valkyrie_id).mods_xml
+      # raw_xml = File.read('/home/cerberus/storage/mods.xml')
       convert_xml_to_json(raw_xml, self)
     end
 

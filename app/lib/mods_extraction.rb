@@ -13,12 +13,14 @@ module MODSExtraction
     names = []
     mods_obj.plain_name.each do |pn|
       names << { name: pn.display_value_w_date,
-                 role: pn.role.value.first }
+                 role: pn.role.value&.first }
     end
     names
   end
 
   def extract_date_created(mods_obj)
+    return unless mods_obj.origin_info.as_object.first.present?
+
     DateTime.parse(
       mods_obj
       .origin_info
