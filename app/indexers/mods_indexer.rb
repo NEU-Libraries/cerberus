@@ -8,10 +8,10 @@ class MODSIndexer
   end
 
   def to_solr
-    # return {} unless resource.try(:human_readable_type)
+    return {} unless resource.try(:mods)
 
-    # {
-    #   human_readable_type_ssim: resource.human_readable_type
-    # }
+    {
+      title_tsim: resource.mods.main_title&.title
+    }
   end
 end

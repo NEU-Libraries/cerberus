@@ -21,6 +21,8 @@ namespace :reset do
     mods_json.json_attributes = convert_xml_to_json(File.read(file_path))
     mods_json.save!
 
+    work = meta.persister.save(resource: work)
+
     # create file set
     fs = Valkyrie.config.metadata_adapter.persister.save(resource: FileSet.new(type: Classification.descriptive_metadata.name))
     fs.member_ids += [
