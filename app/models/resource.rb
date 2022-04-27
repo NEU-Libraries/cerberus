@@ -46,7 +46,12 @@ class Resource < Valkyrie::Resource
   end
 
   def mods_xml
-    # '<_/>'
-    File.read(Valkyrie.config.metadata_adapter.query_service.find_inverse_references_by(resource: self, property: :descriptive_metadata_for).first.file_path)
+    return '<_/>' unless mods_blob.present?
+
+    File.read(mods_blob&.file_path)
+  end
+
+  def mods_blob
+    Valkyrie.config.metadata_adapter.query_service.find_inverse_references_by(resource: self, property: :descriptive_metadata_for).first
   end
 end
