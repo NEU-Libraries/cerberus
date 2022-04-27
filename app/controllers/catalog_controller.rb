@@ -3,6 +3,8 @@
 class CatalogController < ApplicationController
   include Blacklight::Catalog
 
+  self.search_state_class = SearchState
+
   configure_blacklight do |config|
     config.track_search_session = false
     config.autocomplete_enabled = false

@@ -17,4 +17,10 @@ class SolrDocument
   # and Blacklight::Document::SemanticFields#to_semantic_values
   # Recommendation: Use field names from Dublin Core
   use_extension(Blacklight::Document::DublinCore)
+
+  attribute :klass_type, Blacklight::Types::String, 'internal_resource_tesim'
+
+  def klass
+    return klass_type.constantize if klass_type.present?
+  end
 end
