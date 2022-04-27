@@ -19,8 +19,16 @@ class SolrDocument
   use_extension(Blacklight::Document::DublinCore)
 
   attribute :klass_type, Blacklight::Types::String, 'internal_resource_tesim'
+  attribute :alternate_ids, Blacklight::Types::Array, 'alternate_ids_tesim'
 
   def klass
     return klass_type.constantize if klass_type.present?
+  end
+
+  def to_param
+    noid = alternate_ids&.first&.split('id-')&.last
+    return noid if noid.present?
+
+    super
   end
 end
