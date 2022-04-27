@@ -20,7 +20,8 @@ class WorksController < ApplicationController
     # create file set
     fs = Valkyrie.config.metadata_adapter.persister.save(resource: FileSet.new(type: Classification.descriptive_metadata.name))
     fs.member_ids += [
-      create_blob(create_file(file_path, fs).id, file_path.split('/').last, Cerberus::Vocab::PCDMUse.MetadataFile, w.id).id
+      create_blob(create_file(file_path, fs).id, file_path.split('/').last, Cerberus::Vocab::PCDMUse.MetadataFile,
+                  w.id).id
     ]
     fs.a_member_of = w.id
     Valkyrie.config.metadata_adapter.persister.save(resource: fs)

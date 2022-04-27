@@ -3,8 +3,9 @@
 module MODSToJson
   include MODSExtraction
 
-  def convert_xml_to_json(raw_xml, record) # remove record and return JSON to get rid of mutation
+  def convert_xml_to_json(raw_xml)
     mods_obj = Mods::Record.new.from_str(raw_xml)
+    record = Metadata::MODS.new
 
     record.main_title = extract_main_title(mods_obj)
 
@@ -47,7 +48,7 @@ module MODSToJson
     # Use and reproduction
     record.access_condition = mods_obj.accessCondition.text.squish
 
-    record.save!
+    record.json_attributes
   end
 
   private

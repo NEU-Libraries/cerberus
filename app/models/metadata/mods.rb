@@ -1,10 +1,8 @@
 # frozen_string_literal: true
 
 module Metadata
-
   class MODS < ApplicationRecord
     include AttrJson::Record
-    include MODSToJson
 
     # titles
     attr_json :main_title, Metadata::Fields::TitleInfo.to_type
