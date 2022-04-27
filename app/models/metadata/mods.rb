@@ -6,16 +6,6 @@ module Metadata
     include AttrJson::Record
     include MODSToJson
 
-    after_initialize :read_xml
-
-    def read_xml
-      return if json_attributes.present?
-
-      raw_xml = Resource.find(valkyrie_id).mods_xml
-      # raw_xml = File.read('/home/cerberus/storage/mods.xml')
-      convert_xml_to_json(raw_xml, self)
-    end
-
     # titles
     attr_json :main_title, Metadata::Fields::TitleInfo.to_type
     attr_json :uniform_title, :string
