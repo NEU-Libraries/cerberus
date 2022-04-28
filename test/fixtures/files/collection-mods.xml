@@ -11,12 +11,6 @@
   </mods:abstract>
   <mods:name type="personal"/>
   <mods:name type="corporate"/>
-  <mods:originInfo>
-    <mods:place>
-      <mods:placeTerm/>
-    </mods:place>
-    <mods:dateCreated keyDate="yes" encoding="w3cdtf"/>
-  </mods:originInfo>
   <mods:language>
     <mods:languageTerm/>
   </mods:language>

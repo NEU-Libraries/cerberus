@@ -14,14 +14,17 @@ namespace :reset do
     community = meta.persister.save(resource: Community.new)
     collection = meta.persister.save(resource: Collection.new(a_member_of: community.id))
 
-    file_path = '/home/cerberus/web/test/fixtures/files/mods.xml'
+    file_path = '/home/cerberus/web/test/fixtures/files/work-mods.xml'
     work = meta.persister.save(resource: Work.new(a_member_of: collection.id))
 
-    mods_json = work.mods
-    mods_json.json_attributes = convert_xml_to_json(File.read(file_path))
-    mods_json.save!
+    work.mods_xml = File.read(file_path)
+    collection.mods_xml = File.read('/home/cerberus/web/test/fixtures/files/collection-mods.xml')
+    community.mods_xml = File.read('/home/cerberus/web/test/fixtures/files/community-mods.xml')
 
     work = meta.persister.save(resource: work)
+
+    meta.persister.save(resource: collection)
+    meta.persister.save(resource: community)
 
     # create file set
     fs = Valkyrie.config.metadata_adapter.persister.save(resource: FileSet.new(type: Classification.descriptive_metadata.name))

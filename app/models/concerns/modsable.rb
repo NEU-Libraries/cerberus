@@ -15,6 +15,9 @@ module Modsable
     # TODO: allow for easy xml update - neccessary for XML Editor interface
     # Make Blobs versioned
     # Update mods_blob
+    mods_json = mods
+    mods_json.json_attributes = convert_xml_to_json(raw_xml)
+    mods_json.save!
   end
 
   def mods_blob
