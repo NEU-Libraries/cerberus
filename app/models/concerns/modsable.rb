@@ -11,6 +11,12 @@ module Modsable
     File.read(mods_blob&.file_path)
   end
 
+  def mods_xml=(raw_xml)
+    # TODO: allow for easy xml update - neccessary for XML Editor interface
+    # Make Blobs versioned
+    # Update mods_blob
+  end
+
   def mods_blob
     Valkyrie.config.metadata_adapter.query_service.find_inverse_references_by(resource: self, property: :descriptive_metadata_for).first
   end
