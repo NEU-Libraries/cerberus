@@ -25,9 +25,25 @@ namespace :reset do
     fs.a_member_of = work.id
     meta.persister.save(resource: fs)
 
+    # make blob shell
+    fs = meta.persister.save(resource: FileSet.new(type: Classification.descriptive_metadata.name))
+    fs.member_ids += [
+      meta.persister.save(resource: Blob.new(descriptive_metadata_for: collection.id)).id
+    ]
+    fs.a_member_of = collection.id
+    meta.persister.save(resource: fs)
+
+    # make blob shell
+    fs = meta.persister.save(resource: FileSet.new(type: Classification.descriptive_metadata.name))
+    fs.member_ids += [
+      meta.persister.save(resource: Blob.new(descriptive_metadata_for: community.id)).id
+    ]
+    fs.a_member_of = community.id
+    meta.persister.save(resource: fs)
+
     work.mods_xml = File.read(file_path)
-    # collection.mods_xml = File.read('/home/cerberus/web/test/fixtures/files/collection-mods.xml')
-    # community.mods_xml = File.read('/home/cerberus/web/test/fixtures/files/community-mods.xml')
+    collection.mods_xml = File.read('/home/cerberus/web/test/fixtures/files/collection-mods.xml')
+    community.mods_xml = File.read('/home/cerberus/web/test/fixtures/files/community-mods.xml')
 
     work = meta.persister.save(resource: work)
 
