@@ -40,9 +40,9 @@ module Cerberus
         self.save! ? self : Rails.logger.warn("Failed to update #{self.pid}'s dcmi type")
       end
 
-      def canonical_class_from_file(file)
+      def canonical_class_from_file(file, original_filename="")
         file_path = copy_file_to_tmp(file)
-        mime_type = extract_mime_type(file_path)
+        mime_type = extract_mime_type(file_path, original_filename)
         ext = extract_extension(mime_type)
         result = hash_mime_type(mime_type)
 

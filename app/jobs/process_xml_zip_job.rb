@@ -191,7 +191,7 @@ class ProcessXmlZipJob
                 zip_files << row_results["file_name"]
                 if File.exists? master_file_path
                   File.open(master_file_path) do |mf|
-                    master_klass = canonical_class_from_file(mf)
+                    master_klass = canonical_class_from_file(mf, master_original_filename)
                   end
                   if !master_klass.blank? && master_klass != "ZipFile"
                     master_file = master_klass.constantize.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
@@ -209,7 +209,7 @@ class ProcessXmlZipJob
                 derivative_original_filename = row_results["file_name"]
                 if File.exists? derivative_file_path
                   File.open(derivative_file_path) do |df|
-                    derivative_klass = canonical_class_from_file(df)
+                    derivative_klass = canonical_class_from_file(df, derivative_original_filename)
                   end
                   if !derivative_klass.blank? && derivative_klass != "ZipFile"
                     derivative_file = derivative_klass.constantize.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))

@@ -415,7 +415,7 @@ class CoreFilesController < ApplicationController
       elsif current_user.proxy_staff? && params[:upload_type].nil?
         session[:flash_error] = "You must select whether this is a proxy or personal upload"
         render :json => { url: session[:previous_url] }
-      elsif @core_file.canonical_class_from_file(file) != @core_file.canonical_class
+      elsif @core_file.canonical_class_from_file(file, file.original_filename) != @core_file.canonical_class
         session[:flash_error] = "You must upload an #{t("drs.display_labels.#{@core_file.canonical_class}.short")} file."
         render :json => { url: session[:previous_url] }
       elsif @core_file.has_master_object?
