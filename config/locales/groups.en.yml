@@ -46,6 +46,8 @@ en:
       name: "Ultra-Broadband Nanonetworking (Un) Laboratory Staff"
     northeastern:drs:college_of_engineering:mechanical_and_industrial_engineering:combustion_air_pollution_lab:
       name: "College of Engineering - Combustion and Air Pollution Lab"
+    northeastern:drs:college_of_engineering:mechanical_and_industrial_engineering:shefelbine_lab:
+      name: "Shefelbine Lab Team"
     northeastern:drs:college_of_engineering:river_lab:
       name: "RIVeR Lab Team"
     northeastern:drs:college_of_engineering:wiot:
@@ -98,6 +100,8 @@ en:
       name: "CSSH - Margaret Fuller Project"
     northeastern:drs:college_of_social_sciences_humanities:nulab:nulab_staff:
       name: "CSSH - NULab"
+    northeastern:drs:college_of_social_sciences_humanities:social_impact_lab:
+      name: "Social Impact Lab Team"
     northeastern:drs:college_of_social_sciences_humanities:thoreau_drawings:
       name: "CSSH - Thoreau Project Team"
     northeastern:drs:college_of_social_sciences_humanities:writing_program:
