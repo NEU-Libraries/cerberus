@@ -46,7 +46,9 @@ module Cerberus::Controller
 
   def render_500(exception)
     logger.error("Rendering 500 page due to exception: #{exception.inspect} - #{exception.backtrace if exception.respond_to? :backtrace}")
-    ExceptionNotifier.notify_exception(exception, :env => request.env)
+    if !current_user.nil?
+      ExceptionNotifier.notify_exception(exception, :env => request.env, :data => {:user => "#{current_user.name}"})
+    end
     render :template => '/error/500', :layout => "error", :formats => [:html], :status => 500
   end
 
