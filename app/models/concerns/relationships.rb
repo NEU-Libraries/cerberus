@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Relationships
   extend ActiveSupport::Concern
 
@@ -23,5 +25,4 @@ module Relationships
     result.concat Valkyrie.config.metadata_adapter.query_service.find_members(resource: self).to_a
     result.uniq
   end
-
 end

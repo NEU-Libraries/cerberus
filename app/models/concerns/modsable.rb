@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Modsable
   extend ActiveSupport::Concern
 
@@ -6,7 +8,7 @@ module Modsable
   end
 
   def mods_xml
-    return '<_/>' unless mods_blob.present?
+    return '<_/>' if mods_blob.blank?
 
     File.read(mods_blob&.file_path)
   end
@@ -15,11 +17,13 @@ module Modsable
     # TODO: allow for easy xml update - neccessary for XML Editor interface
     # Make Blobs versioned
     # Update mods_blob
-    xml_path = "/home/cerberus/storage/#{Time.now.to_f.to_s.gsub!('.','-')}.xml"
+    xml_path = "/home/cerberus/storage/#{Time.now.to_f.to_s.gsub!('.', '-')}.xml"
     File.write(xml_path, raw_xml)
     blob = mods_blob
-    parent = Valkyrie.config.metadata_adapter.query_service.find_inverse_references_by(resource: blob, property: :member_ids).first
-    blob.file_identifiers += [create_file(xml_path, parent).id] # parent doesn't work...
+    # need to amend parent method to allow for inverse if direct isn't available
+    parent = Valkyrie.config.metadata_adapter.query_service.find_inverse_references_by(resource: blob,
+                                                                                       property: :member_ids).first
+    blob.file_identifiers += [create_file(xml_path, parent).id]
     Valkyrie.config.metadata_adapter.persister.save(resource: blob)
 
     mods_json = mods
@@ -28,6 +32,8 @@ module Modsable
   end
 
   def mods_blob
-    Valkyrie.config.metadata_adapter.query_service.find_inverse_references_by(resource: self, property: :descriptive_metadata_for).first
+    # need to emulate find or create
+    Valkyrie.config.metadata_adapter.query_service.find_inverse_references_by(resource: self,
+                                                                              property: :descriptive_metadata_for).first
   end
 end

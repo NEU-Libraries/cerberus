@@ -9,7 +9,8 @@ module ValkyrieHelper
     )
   end
 
-  def create_blob(valkyrie_id, file_name, use = Valkyrie::Vocab::PCDMUse.ServiceFile, descriptive_metadata_for = nil) # pass opts instead?
+  # pass opts instead?
+  def create_blob(valkyrie_id, file_name, use = Valkyrie::Vocab::PCDMUse.ServiceFile, descriptive_metadata_for = nil)
     blob = Blob.new
     blob.original_filename = file_name
     blob.file_identifiers += [valkyrie_id]

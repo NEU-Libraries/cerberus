@@ -19,7 +19,7 @@ module MODSExtraction
   end
 
   def extract_date_created(mods_obj)
-    return unless mods_obj.origin_info.as_object.first.present?
+    return if mods_obj.origin_info.as_object.first.blank?
 
     DateTime.parse(
       mods_obj
