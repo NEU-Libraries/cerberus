@@ -1,4 +1,7 @@
 require: rubocop-rails
+Lint/MissingSuper:
+  Exclude:
+    - 'app/services/**/*'
 Metrics/ClassLength:
   Max: 120
 Metrics/AbcSize:

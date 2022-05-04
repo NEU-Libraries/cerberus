@@ -15,15 +15,18 @@ namespace :reset do
     collection = meta.persister.save(resource: Collection.new(a_member_of: community.id))
 
     file_path = '/home/cerberus/web/test/fixtures/files/work-mods.xml'
-    work = meta.persister.save(resource: Work.new(a_member_of: collection.id))
 
-    # make blob shell
-    fs = meta.persister.save(resource: FileSet.new(type: Classification.descriptive_metadata.name))
-    fs.member_ids += [
-      meta.persister.save(resource: Blob.new(descriptive_metadata_for: work.id)).id
-    ]
-    fs.a_member_of = work.id
-    meta.persister.save(resource: fs)
+    work = WorkCreator.call(parent_id: collection.id)
+
+    # work = meta.persister.save(resource: Work.new(a_member_of: collection.id))
+
+    # # make blob shell
+    # fs = meta.persister.save(resource: FileSet.new(type: Classification.descriptive_metadata.name))
+    # fs.member_ids += [
+    #   meta.persister.save(resource: Blob.new(descriptive_metadata_for: work.id)).id
+    # ]
+    # fs.a_member_of = work.id
+    # meta.persister.save(resource: fs)
 
     # make blob shell
     fs = meta.persister.save(resource: FileSet.new(type: Classification.descriptive_metadata.name))

@@ -448,7 +448,7 @@ DEPENDENCIES
   noid-rails!
   pg
   puma (~> 5.6)
-  rails (< 7.1)
+  rails (~> 7.0.1)
   rsolr (>= 1.0, < 3)
   rubocop
   rubocop-rails
