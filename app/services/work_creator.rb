@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class WorkCreator < ApplicationService
-  def initialize(parent_id: nil)
+  def initialize(parent_id:)
     @parent_id = parent_id
   end
 
