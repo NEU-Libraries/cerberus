@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
 class CollectionCreator < ApplicationService
-  def initialize(parent_id:)
+  def initialize(parent_id:, mods_xml: nil)
     @parent_id = parent_id
+    @mods_xml = mods_xml
   end
 
   def call
@@ -22,6 +23,8 @@ class CollectionCreator < ApplicationService
       ]
       fs.a_member_of = collection.id
       meta.persister.save(resource: fs)
-      return collection
+
+      collection.mods_xml = @mods_xml
+      meta.persister.save(resource: collection)
     end
 end

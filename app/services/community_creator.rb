@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
 class CommunityCreator < ApplicationService
-  def initialize(parent_id: nil)
+  def initialize(parent_id: nil, mods_xml: nil)
     @parent_id = parent_id
+    @mods_xml = mods_xml
   end
 
   def call
@@ -22,6 +23,8 @@ class CommunityCreator < ApplicationService
       ]
       fs.a_member_of = community.id
       meta.persister.save(resource: fs)
-      return community
+
+      community.mods_xml = @mods_xml
+      meta.persister.save(resource: community)
     end
 end
