@@ -104,7 +104,7 @@ class ScaledImageCreator
 
         large_upload(target, file_path, 'content')
 
-        target.properties.mime_type = extract_mime_type(file_path)
+        target.properties.mime_type = extract_mime_type(file_path, fname)
         target.properties.md5_checksum = new_checksum(file_path)
         target.properties.file_size = File.size(file_path).to_s
         target.save!
