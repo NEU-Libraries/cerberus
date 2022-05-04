@@ -33,7 +33,7 @@ module Cerberus
         if asset.class == PdfFile
           send_file asset.fedora_file_path, :filename =>  file_name, :type => asset.mime_type || extract_mime_type(asset.fedora_file_path), :disposition => 'inline'
         elsif asset.class == ImageThumbnailFile || asset.class == PageFile
-          if !params[:datastream_id].blank? && params[:datastream_id].match?(/^thumbnail_[1-5]$/)
+          if !params[:datastream_id].blank? && !params[:datastream_id].match(/^thumbnail_[1-5]$/).nil?
             send_file asset.fedora_file_path(params[:datastream_id].split("_").last), :filename =>  file_name, :type => asset.mime_type || extract_mime_type(asset.fedora_file_path), :disposition => 'inline'
           else
             render_500(StandardError.new) and return
