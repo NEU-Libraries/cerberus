@@ -26,9 +26,7 @@ module Modsable
     blob.file_identifiers += [create_file(xml_path, parent).id]
     Valkyrie.config.metadata_adapter.persister.save(resource: blob)
 
-    mods_json = mods
-    mods_json.json_attributes = convert_xml_to_json(raw_xml)
-    mods_json.save!
+    self.mods_json = raw_xml
   end
 
   def mods_blob
@@ -36,4 +34,12 @@ module Modsable
     Valkyrie.config.metadata_adapter.query_service.find_inverse_references_by(resource: self,
                                                                               property: :descriptive_metadata_for).first
   end
+
+  private
+
+    def mods_json=(raw_xml)
+      mods_json = mods
+      mods_json.json_attributes = convert_xml_to_json(raw_xml)
+      mods_json.save!
+    end
 end

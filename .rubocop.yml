@@ -8,6 +8,8 @@ Metrics/AbcSize:
   Max: 20
   Exclude:
     - 'app/decorators/*'
+    - 'app/lib/mods_decoration.rb'
+    - 'app/services/**/*'
     # Constrained by gem expectations
     - 'app/models/breadcrumb_trail.rb'
     # Nature of object conversion, lots of assignment
