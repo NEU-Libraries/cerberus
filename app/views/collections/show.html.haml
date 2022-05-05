@@ -1,4 +1,5 @@
 - content_for(:container_header) do
   = breadcrumbs
 
-= @collection.noid
+= @collection.plain_title
+= @collection.plain_description

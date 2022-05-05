@@ -10,4 +10,8 @@ module MODSDecoration
       prefix_field(' - ', mods.main_title.part_name) +
       prefix_field(', ', mods.main_title.part_number)
   end
+
+  def plain_description
+    mods.abstract
+  end
 end

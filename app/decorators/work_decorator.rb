@@ -51,7 +51,7 @@ module WorkDecorator
 
   def abstract
     tag.dt('Abstract') +
-      tag.dd(mods.abstract)
+      tag.dd(plain_description)
   end
 
   def related_series

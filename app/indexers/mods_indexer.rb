@@ -11,7 +11,8 @@ class MODSIndexer
     return {} unless decorated_resource.try(:plain_title)
 
     {
-      title_tsim: decorated_resource.plain_title
+      title_tsim: decorated_resource.plain_title,
+      description_tsim: decorated_resource.plain_description
     }
   end
 
