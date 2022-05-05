@@ -15,16 +15,15 @@ module WorkDecorator
     return '' if mods.names.blank?
 
     hsh = {}
-    result = ''
+    result = []
     mods.names.each do |pn|
       values = hsh[pn.role] ||= []
       values << pn.name
     end
     hsh.each do |k, v|
-      result += loop_field(k, v)
+      result << loop_field(k, v)
     end
-    # safe_join(result)
-    result.html_safe
+    safe_join(result)
   end
 
   def languages
