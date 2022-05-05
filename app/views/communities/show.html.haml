@@ -1,9 +1,12 @@
 - content_for(:container_header) do
   = breadcrumbs
 
-.p-4.my-3.bg-well.rounded-3
-  %h3
-    = @community.plain_title
-  = @community.plain_description
+  .p-4.my-3.bg-well.rounded-3
+    %h3
+      = @community.plain_title
+    = @community.plain_description
+
+- content_for(:sidebar) do
+  = render 'catalog/search_sidebar'
 
 = render 'catalog/search_results'
