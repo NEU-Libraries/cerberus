@@ -25,4 +25,8 @@ module Relationships
     result.concat Valkyrie.config.metadata_adapter.query_service.find_members(resource: self).to_a
     result.uniq
   end
+
+  def filtered_children
+    children.select { |c| c.is_a?(Collection) || c.is_a?(Work) }.map(&:id).map(&:to_s).to_a
+  end
 end

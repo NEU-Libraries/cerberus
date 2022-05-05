@@ -206,4 +206,8 @@ class CatalogController < ApplicationController
     # default 'mySuggester', uncomment and provide it below
     # config.autocomplete_suggester = 'mySuggester'
   end
+
+  def find_many(ids)
+    Blacklight.default_index.search({ q: "id:(#{ids.join(" OR ")})" })
+  end
 end
