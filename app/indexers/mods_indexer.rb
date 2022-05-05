@@ -8,10 +8,14 @@ class MODSIndexer
   end
 
   def to_solr
-    return {} unless resource.try(:mods)
+    return {} unless decorated_resource.try(:plain_title)
 
     {
-      title_tsim: resource.mods.main_title&.title
+      title_tsim: decorated_resource.plain_title
     }
+  end
+
+  def decorated_resource
+    @decorated_resource ||= resource.decorate
   end
 end

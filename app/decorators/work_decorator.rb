@@ -5,11 +5,15 @@ module WorkDecorator
     return '' if mods.main_title.blank?
 
     tag.dt('Title') +
-      tag.dd(mods.main_title.non_sort +
-        mods.main_title.title +
-        prefix_field(': ', mods.main_title.subtitle) +
-        prefix_field(' - ', mods.main_title.part_name) +
-        prefix_field(', ', mods.main_title.part_number))
+      tag.dd(plain_title)
+  end
+
+  def plain_title
+    mods.main_title.non_sort +
+      mods.main_title.title +
+      prefix_field(': ', mods.main_title.subtitle) +
+      prefix_field(' - ', mods.main_title.part_name) +
+      prefix_field(', ', mods.main_title.part_number)
   end
 
   def names
