@@ -9,11 +9,15 @@ module PdfMetadataHelper
         cf = CoreFile.find(self.core_record.pid)
         doc = SolrDocument.new cf.to_solr
 
-        pdf.title = "#{doc.non_sort} #{doc.title}".strip
-        pdf.author = doc.author
-        pdf.keywords = doc.keyword_list
+        updated_title = "#{doc.non_sort} #{doc.title}".strip
 
-        pdf.save!
+        if !updated_title.blank?
+          pdf.title = "#{doc.non_sort} #{doc.title}".strip
+          pdf.author = doc.author
+          pdf.keywords = doc.keyword_list
+
+          pdf.save!
+        end
       end
     rescue Exception => error
       # PDF Metadata for google search is a nicety - if we error out, move on
