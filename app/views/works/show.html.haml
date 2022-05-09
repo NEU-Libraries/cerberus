@@ -27,4 +27,7 @@
 :javascript
   window.onload = function() {
     var editor = ace.edit("editor");
+    ace.config.set("basePath", "/ace");
+    editor.setTheme("ace/theme/eclipse");
+    editor.session.setMode("ace/mode/xml");
   };
