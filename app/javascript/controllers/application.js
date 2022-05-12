@@ -1,5 +1,4 @@
 import { Application } from "@hotwired/stimulus"
-import ace from 'ace-builds'
 
 const application = Application.start()
 
