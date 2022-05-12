@@ -1,4 +1,5 @@
 #editor
+  = @raw_xml
 
 %script{:charset => "utf-8", :src => "/ace/ace.js", :type => "text/javascript"}
 
@@ -6,4 +7,3 @@
   var editor = ace.edit("editor");
   editor.setTheme("ace/theme/eclipse");
   editor.session.setMode("ace/mode/xml");
-  editor.setValue("Hello World");

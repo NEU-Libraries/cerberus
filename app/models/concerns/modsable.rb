@@ -10,7 +10,8 @@ module Modsable
   def mods_xml
     return '<_/>' if mods_blob.blank?
 
-    File.read(mods_blob&.file_path)
+    Nokogiri::XML(IO.read(mods_blob&.file_path)) { |doc| doc.noblanks }
+    # File.read(mods_blob&.file_path)
   end
 
   def mods_xml=(raw_xml)
