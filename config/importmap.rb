@@ -16,4 +16,3 @@ pin "@fortawesome/free-regular-svg-icons", to: "https://ga.jspm.io/npm:@fortawes
 pin "@fortawesome/free-solid-svg-icons", to: "https://ga.jspm.io/npm:@fortawesome/free-solid-svg-icons@6.1.1/index.es.js"
 
 pin_all_from "app/javascript/cerberus", under: "cerberus"
-pin "ace-builds" # @1.4.14

@@ -26,4 +26,7 @@ Rails.application.routes.draw do
   resources :collections
   resources :works
 
+  # xml
+  get '/xml/editor' => 'xml#editor'
+
 end
