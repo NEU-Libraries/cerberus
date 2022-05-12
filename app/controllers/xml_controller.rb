@@ -2,7 +2,8 @@
 
 class XmlController < ApplicationController
   def editor
-    @raw_xml = Work.find(params[:id]).mods_xml
+    @work = Work.find(params[:id])
+    @raw_xml = @work.mods_xml
   end
 
   def validate

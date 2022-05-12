@@ -1,5 +1,22 @@
-#editor
-  = @raw_xml
+.container
+  .row
+    .col
+      #editor
+        = @raw_xml
+    .col
+      %dl
+      = @work.title
+      = @work.names
+      = @work.languages
+      = @work.date_created
+      = @work.resource_type
+      = @work.genres
+      = @work.digital_origin
+      = @work.abstract
+      = @work.related_series
+      = @work.subjects
+      = @work.permanent_url
+      = @work.access_condition
 
 %script{:charset => "utf-8", :src => "/ace/ace.js", :type => "text/javascript"}
 
