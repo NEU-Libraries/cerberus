@@ -28,5 +28,6 @@ Rails.application.routes.draw do
 
   # xml
   get '/xml/editor/:id' => 'xml#editor'
+  put '/xml/validate' => 'xml#validate'
 
 end

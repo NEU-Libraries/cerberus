@@ -1,28 +1,29 @@
-.container
-  .row
-    .col
-      #editor
-        = @raw_xml
-    .col
-      %dl
-      = @work.title
-      = @work.names
-      = @work.languages
-      = @work.date_created
-      = @work.resource_type
-      = @work.genres
-      = @work.digital_origin
-      = @work.abstract
-      = @work.related_series
-      = @work.subjects
-      = @work.permanent_url
-      = @work.access_condition
-  .row
-    .bg-well.p-3.my-3.rounded-3
-      %input#validate_button.btn.btn-primary{:name => "commit", :type => "submit", :value => "Validate + Preview"}/
-      %input#save_button.btn.btn-success{"data-disable-with" => "Please wait...", :name => "commit", :type => "submit", :value => "Save"}/
-      %a.btn.btn-warning{"data-toggle" => "modal", :href => "#cancelEditModal"}
-        Cancel
+= form_tag xml_validate_path, :method => :put, :id => "raw_xml_form", :remote => true do
+  .container
+    .row
+      .col
+        #editor
+          = @raw_xml
+      .col
+        %dl
+        = @work.title
+        = @work.names
+        = @work.languages
+        = @work.date_created
+        = @work.resource_type
+        = @work.genres
+        = @work.digital_origin
+        = @work.abstract
+        = @work.related_series
+        = @work.subjects
+        = @work.permanent_url
+        = @work.access_condition
+    .row
+      .bg-well.p-3.my-3.rounded-3
+        %input#validate_button.btn.btn-primary{:name => "commit", :type => "submit", :value => "Validate + Preview", remote: true}/
+        %input#save_button.btn.btn-success{"data-disable-with" => "Please wait...", :name => "commit", :type => "submit", :value => "Save"}/
+        %a.btn.btn-warning{"data-toggle" => "modal", :href => "#cancelEditModal"}
+          Cancel
 
 %script{:charset => "utf-8", :src => "/ace/ace.js", :type => "text/javascript"}
 
