@@ -5,19 +5,20 @@
         #editor
           = @raw_xml
       .col
-        %dl
-        = @work.title
-        = @work.names
-        = @work.languages
-        = @work.date_created
-        = @work.resource_type
-        = @work.genres
-        = @work.digital_origin
-        = @work.abstract
-        = @work.related_series
-        = @work.subjects
-        = @work.permanent_url
-        = @work.access_condition
+        #mods
+          %dl
+            = @work.title
+            = @work.names
+            = @work.languages
+            = @work.date_created
+            = @work.resource_type
+            = @work.genres
+            = @work.digital_origin
+            = @work.abstract
+            = @work.related_series
+            = @work.subjects
+            = @work.permanent_url
+            = @work.access_condition
     .row
       .bg-well.p-3.my-3.rounded-3
         %input#validate_button.btn.btn-primary{:name => "commit", :type => "submit", :value => "Validate + Preview", remote: true}/

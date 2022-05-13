@@ -7,6 +7,11 @@ class XmlController < ApplicationController
   end
 
   def validate
+    puts "DGC DEBUG VALIDATE"
+    # $("#mods").html("<%= escape_javascript(render partial: "users/user", locals: {user: @user}) %>");
+    respond_to do |format|
+      format.turbo_stream
+   end
   end
 
   def update
