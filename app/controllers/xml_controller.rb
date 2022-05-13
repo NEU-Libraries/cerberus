@@ -7,8 +7,9 @@ class XmlController < ApplicationController
   end
 
   def validate
-    puts "DGC DEBUG VALIDATE"
-    # $("#mods").html("<%= escape_javascript(render partial: "users/user", locals: {user: @user}) %>");
+    # puts "DGC DEBUG " + params.inspect
+    @work = Work.find(params[:work_id])
+    @work.mods_json = File.read('/home/cerberus/web/test/fixtures/files/community-mods.xml')
     respond_to do |format|
       format.turbo_stream
    end

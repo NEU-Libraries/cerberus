@@ -2,6 +2,7 @@
 
 module Modsable
   extend ActiveSupport::Concern
+  include MODSToJson
 
   def mods
     Metadata::MODS.find_or_create_by(valkyrie_id: noid)
@@ -36,11 +37,11 @@ module Modsable
                                                                               property: :descriptive_metadata_for).first
   end
 
-  private
+  def mods_json=(raw_xml)
+    mods_json = mods
+    mods_json.json_attributes = convert_xml_to_json(raw_xml)
+    mods_json.save!
+  end
 
-    def mods_json=(raw_xml)
-      mods_json = mods
-      mods_json.json_attributes = convert_xml_to_json(raw_xml)
-      mods_json.save!
-    end
+  # make a mods_revert method
 end

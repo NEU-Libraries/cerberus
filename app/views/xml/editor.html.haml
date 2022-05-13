@@ -1,4 +1,5 @@
 = form_tag xml_validate_path, :method => :put, :id => "raw_xml_form", :remote => true do
+  = hidden_field_tag "work_id", @work.noid
   .container
     .row
       .col
