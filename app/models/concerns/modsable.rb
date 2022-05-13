@@ -16,9 +16,6 @@ module Modsable
   end
 
   def mods_xml=(raw_xml)
-    # TODO: allow for easy xml update - neccessary for XML Editor interface
-    # Make Blobs versioned
-    # Update mods_blob
     xml_path = "/home/cerberus/storage/#{Time.now.to_f.to_s.gsub!('.', '-')}.xml"
     File.write(xml_path, raw_xml)
     blob = mods_blob
@@ -42,6 +39,4 @@ module Modsable
     mods_json.json_attributes = convert_xml_to_json(raw_xml)
     mods_json.save!
   end
-
-  # make a mods_revert method
 end
