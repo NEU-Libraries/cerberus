@@ -8,6 +8,7 @@ class XmlController < ApplicationController
 
   def validate
     # puts "DGC DEBUG " + params.inspect
+    # @work = Work.new(alternate_ids: [current_user.id])
     @work = Work.new
     @work.mods_json = File.read('/home/cerberus/web/test/fixtures/files/community-mods.xml')
     respond_to do |format|
