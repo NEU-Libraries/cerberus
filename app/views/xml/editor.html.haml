@@ -7,20 +7,7 @@
         #editor
           = @raw_xml
       .col
-        #mods
-          %dl
-            = @work.title
-            = @work.names
-            = @work.languages
-            = @work.date_created
-            = @work.resource_type
-            = @work.genres
-            = @work.digital_origin
-            = @work.abstract
-            = @work.related_series
-            = @work.subjects
-            = @work.permanent_url
-            = @work.access_condition
+        = render partial: "shared/mods", locals: {resource: @work}
     .row
       .bg-well.p-3.my-3.rounded-3
         %input#validate_button.btn.btn-primary{:name => "commit", :type => "submit", :value => "Validate + Preview", remote: true}/
@@ -35,9 +22,7 @@
   editor.setTheme("ace/theme/eclipse");
   editor.session.setMode("ace/mode/xml");
 
-  window.onload = function() {
-    $('#raw_xml_form').submit(function() {
-        $("#raw_xml").val(editor.getSession().getValue());
-        return true;
-    });
-  };
+  document.querySelector('#editor').addEventListener('change', (event) => {
+    console.log("DGC DEBUG!");
+    $("#raw_xml").val(editor.getSession().getValue());
+  });
