@@ -23,6 +23,5 @@
   editor.session.setMode("ace/mode/xml");
 
   document.querySelector('#editor').addEventListener('change', (event) => {
-    console.log("DGC DEBUG!");
     $("#raw_xml").val(editor.getSession().getValue());
   });

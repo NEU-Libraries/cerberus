@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 class WorksController < ApplicationController
-  include ValkyrieHelper
 
   def show
     @work = Work.find(params[:id])

@@ -39,4 +39,14 @@ module Modsable
     mods_json.json_attributes = convert_xml_to_json(raw_xml)
     mods_json.save!
   end
+
+  private
+
+    def create_file(file_path, resource, original_filename = file_path.split('/').last)
+      Valkyrie.config.storage_adapter.upload(
+        file: File.open(file_path), # tei, png, txt
+        resource: resource,
+        original_filename: original_filename
+      )
+    end
 end

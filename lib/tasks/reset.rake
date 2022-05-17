@@ -5,8 +5,6 @@ require 'database_cleaner'
 namespace :reset do
   desc 'Clean database and repopulate with sample data'
   task data: [:clean] do
-    include ValkyrieHelper
-    include MODSToJson
 
     raise "Wrong env - #{Rails.env} - must be development" unless Rails.env.development? || Rails.env.staging?
 

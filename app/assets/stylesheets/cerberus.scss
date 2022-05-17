@@ -1,4 +1,5 @@
 @import 'colors';
+@import 'bootstrap';
 
 body {
   background-color: $gray-100;
@@ -116,4 +117,9 @@ a:not(.btn) {
 
 .btn {
   color: #fff;
+}
+
+.btn-close {
+  color: transparent !important;
+  @extend .float-end;
 }
