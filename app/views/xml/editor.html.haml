@@ -4,7 +4,7 @@
   .container
     .row
       .col
-        #editor
+        #editor<
           = @raw_xml
       .col
         = render partial: "shared/mods", locals: {resource: @work}
@@ -15,6 +15,8 @@
         %a.btn.btn-warning{"data-toggle" => "modal", :href => "#cancelEditModal"}
           Cancel
 
+= @raw_xml.inspect
+
 %script{:charset => "utf-8", :src => "/ace/ace.js", :type => "text/javascript"}
 
 :javascript
@@ -23,5 +25,5 @@
   editor.session.setMode("ace/mode/xml");
 
   document.querySelector('#editor').addEventListener('change', (event) => {
-    $("#raw_xml").val(editor.getSession().getValue());
+    $("#raw_xml").val(editor.getSession().getValue().trim());
   });
