@@ -9,7 +9,7 @@
       .col
         = render partial: "shared/mods", locals: {resource: @work}
     .row
-      .bg-well.p-3.my-3.rounded-3
+      .well.p-3.my-3.rounded-3
         %input#validate_button.btn.btn-primary{:name => "commit", :type => "submit", :value => "Validate + Preview", remote: true}/
         %input#save_button.btn.btn-success{"data-disable-with" => "Please wait...", :name => "commit", :type => "submit", :value => "Save"}/
         %a.btn.btn-warning{"data-toggle" => "modal", :href => "#cancelEditModal"}

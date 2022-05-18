@@ -9,8 +9,8 @@ body {
   flex-direction:column;
 }
 
-.bg-well {
-  background-color: #e9ecef;
+.well {
+  background-color: #f0f0f0;
 }
 
 a:not(.btn) {
@@ -122,4 +122,10 @@ a:not(.btn) {
 .btn-close {
   color: transparent !important;
   @extend .float-end;
+}
+
+ol.breadcrumb {
+  @extend .well;
+  @extend .rounded-3;
+  @extend .p-3;
 }
