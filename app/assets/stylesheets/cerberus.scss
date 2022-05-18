@@ -13,15 +13,11 @@ body {
   background-color: #ecf0f1;
 }
 
-a:not(.btn) {
+a:not(.btn, .dropdown-item) {
   color: $link-blue;
 
   &:link {
     text-decoration: none;
-  }
-
-  &:hover {
-    text-decoration: underline;
   }
 }
 
@@ -105,6 +101,10 @@ a:not(.btn) {
   a:active {
     color: $dark;
   }
+}
+
+.dropdown-item.active, .dropdown-item:active {
+  background-color: $secondary;
 }
 
 .document-counter {
