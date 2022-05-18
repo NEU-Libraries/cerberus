@@ -115,10 +115,6 @@ a:not(.btn) {
   height: 952px;
 }
 
-.btn {
-  color: #fff;
-}
-
 .btn-close {
   color: transparent !important;
   @extend .float-end;
@@ -128,4 +124,8 @@ ol.breadcrumb {
   @extend .well;
   @extend .rounded-3;
   @extend .p-3;
+}
+
+.breadcrumb a {
+  color: #2c3e50;
 }
