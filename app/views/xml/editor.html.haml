@@ -6,7 +6,7 @@
       .col
         #editor<
           = @raw_xml
-      .col
+      .col#content
         = render partial: "shared/mods", locals: {resource: @work}
     .row
       .well.p-3.my-3.rounded-3
@@ -25,3 +25,7 @@
   document.querySelector('#editor').addEventListener('change', (event) => {
     $("#raw_xml").val(editor.getSession().getValue().trim());
   });
+
+  document.getElementById('validate_button').onclick = function(){
+    window.scroll({top: 0, left: 0, behavior: 'smooth'});
+  };
