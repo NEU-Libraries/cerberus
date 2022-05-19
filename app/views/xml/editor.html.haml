@@ -1,3 +1,7 @@
+%h3.py-3
+  Edit raw XML for
+  = @work.plain_title
+
 = form_tag xml_validate_path, :method => :put, :id => "raw_xml_form", :remote => true do
   = hidden_field_tag "work_id", @work.noid
   = hidden_field_tag "raw_xml"

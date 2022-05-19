@@ -11,7 +11,7 @@
   </div>
 </nav>
 
-<%= content_tag :div, class: 'navbar-search navbar navbar-light bg-light', role: 'navigation', aria: { label: t('blacklight.search.header') } do %>
+<%= content_tag :div, class: 'navbar-search navbar navbar-expand-md navbar-light bg-light', role: 'navigation', aria: { label: t('blacklight.search.header') } do %>
   <div class="<%= container_classes %>">
     <%= render_search_bar  %>
   </div>
