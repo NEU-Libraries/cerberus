@@ -63,6 +63,7 @@ gem 'noid-rails', git: 'https://github.com/dgcliff/noid-rails.git', branch: 'rai
 gem 'pg'
 gem 'rsolr', '>= 1.0', '< 3'
 gem 'sassc-rails', '~> 2.1'
+gem 'simple_form'
 gem 'valkyrie', git: 'https://github.com/samvera/valkyrie.git'
 
 # QA gems
