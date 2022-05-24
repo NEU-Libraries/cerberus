@@ -23,15 +23,16 @@ class BreadcrumbTrail < Croutons::BreadcrumbTrail
   end
 
   private
+
     def breadcrumb_to_root(resource)
       trail = [resource]
       parent = resource.parent
       loop do
-        if !parent.nil?
+        if parent.nil?
+          return trail.reverse
+        else
           trail << parent
           parent = parent.parent
-        else
-          return trail.reverse
         end
       end
     end

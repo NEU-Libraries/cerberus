@@ -5,7 +5,6 @@ require 'database_cleaner'
 namespace :reset do
   desc 'Clean database and repopulate with sample data'
   task data: [:clean] do
-
     raise "Wrong env - #{Rails.env} - must be development" unless Rails.env.development? || Rails.env.staging?
 
     community = CommunityCreator.call(mods_xml: File.read('/home/cerberus/web/test/fixtures/files/community-mods.xml'))
