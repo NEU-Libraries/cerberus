@@ -21,7 +21,7 @@ module MODSExtraction
   def extract_date_created(mods_obj)
     return if mods_obj.origin_info.as_object.first.blank?
 
-    DateTime.parse(
+    safe_date_parse(
       mods_obj
       .origin_info
       .as_object.first
@@ -62,4 +62,14 @@ module MODSExtraction
     end
     result
   end
+
+  private
+
+    def safe_date_parse(str)
+      begin
+        return DateTime.parse(str)
+      rescue Date::Error
+        return ''
+      end
+    end
 end
