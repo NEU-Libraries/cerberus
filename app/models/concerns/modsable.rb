@@ -2,6 +2,7 @@
 
 module Modsable
   extend ActiveSupport::Concern
+  include MODSAssignment
   include MODSToJson
 
   def mods
