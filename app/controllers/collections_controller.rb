@@ -9,4 +9,8 @@ class CollectionsController < CatalogController
   def new
     @resource = CollectionChangeSet.new(Collection.new)
   end
+
+  def edit
+    @resource = CollectionChangeSet.new(Collection.find(params[:id]))
+  end
 end

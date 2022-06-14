@@ -10,6 +10,10 @@ class CommunitiesController < CatalogController
     @resource = CommunityChangeSet.new(Community.new)
   end
 
+  def edit
+    @resource = CommunityChangeSet.new(Community.find(params[:id]))
+  end
+
   def create
     puts params.inspect
     # c = Community.new
