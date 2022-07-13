@@ -18,11 +18,6 @@ SitemapGenerator::Sitemap.create do
         #   add core_file_path(doc.pid), :lastmod => doc.updated_at
         # end
 
-        # warm cache
-        Rails.cache.fetch("/mods/#{doc.pid}-#{doc.updated_at}", :expires_in => 1.week) do
-          Sanitize.clean(Kramdown::Document.new(CoreFilesController.new.render_mods_display(CoreFile.find(doc.pid))).to_html, :elements => ['sup', 'sub', 'dt', 'dd', 'br', 'a'], :attributes => {'a' => ['href']}).html_safe
-        end
-
         add core_file_path(doc.pid), :lastmod => doc.updated_at
       end
     rescue Exception => error
