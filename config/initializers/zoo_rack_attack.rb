@@ -18,7 +18,7 @@ class Rack::Attack::Request < ::Rack::Request
   end
 end
 
-Rack::Attack.cache.store = ActiveSupport::Cache::RedisStore.new(:host => 'nb9478.neu.edu', :port => 6379)
+Rack::Attack.cache.store = ActiveSupport::Cache::RedisStore.new(:host => 'nb9478.neu.edu', :port => 6379, :timeout => 10)
 
 Rack::Attack.safelist("129 range") do |request|
   IPAddr.new("129.10.0.0/16").include?(request.remote_ip)
