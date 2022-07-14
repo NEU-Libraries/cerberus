@@ -10,7 +10,7 @@ Cerberus::Application.config.session_store :redis_store, {
   servers: [
     { url: "redis://nb9478.neu.edu:6379/0/session", timeout: 10.0, reconnect_attempts: 10, tcp_keepalive: 300 },
   ],
-  key: '_some_session_key'
+  key: '_cerberus_app_session'
 }
 
 # Use the database for sessions instead of the cookie-based default,
