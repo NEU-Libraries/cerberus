@@ -36,7 +36,7 @@ Cerberus::Application.configure do
   # config.serve_static_assets = true
   # config.static_cache_control = "public, max-age=315360000"
 
-  config.cache_store = :redis_store, 'redis://localhost:6379/0/cache', { expires_in: 1.week }
+  config.cache_store = :redis_store, 'redis://localhost:6379/0/cache', { expires_in: 1.week, timeout: 10.0, reconnect_attempts: 10, tcp_keepalive: 300 }
 
   # Expands the lines which load the assets
   config.assets.debug = false
