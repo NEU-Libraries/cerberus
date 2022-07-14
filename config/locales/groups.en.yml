@@ -10,6 +10,8 @@ en:
       name: "Board of Trustees"
     northeastern:drs:bouve:deans_office:media:
       name: "Bouvé College of Health Sciences - Dean's Office Media Group"
+    northeastern:drs:bouve:rural_health:
+      name: "Rural Health Project Team"
     northeastern:drs:bouve:school_of_pharmacy:staff:
       name: "Bouvé College of Health Sciences - School of Pharmacy Staff"
     northeastern:drs:camd:boston_womens_march_posters:
@@ -176,6 +178,8 @@ en:
       name: "University Library - All Staff"
     northeastern:drs:library:library_technology_services:
       name: "University Library - LTS Staff"
+    northeastern:drs:library:licensed_resources:l2:
+      name: "L2 Dataset Users"
     northeastern:drs:library:office_of_the_dean:
       name: "University Library - Office of the Dean Staff"
     northeastern:drs:library:podcast_whatsnew:
