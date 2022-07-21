@@ -12,8 +12,8 @@ module HandleHelper
       with_retries(:max_tries => 10, :handler => handler) do
         uts                      = Time.now.to_i
         caldate                  = Date.today.strftime("%Y-%m-%d")
-        handleInt                = client.query("SELECT max(right(handle,8)) + 1 FROM handles").first.first[1].to_i
-        handleForDB              = "2047/D#{handleInt}"
+        handleInt                = client.query("SELECT handle from handles ORDER BY handle DESC LIMIT 1").first.first[1].partition('2047/D').last.to_i
+        handleForDB              = "2047/D#{handleInt + 1}"
         handleForUser            = "http://hdl.handle.net/#{handleForDB}"
 
         client.query("START TRANSACTION;")
