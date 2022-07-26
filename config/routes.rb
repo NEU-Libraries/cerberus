@@ -238,6 +238,7 @@ Cerberus::Application.routes.draw do
       # handles
       get "/handles/get_handle/*url" => "handles#get_handle", as: "get_handle", :url => /.*/
       post "/handles/create_handle/*url" => "handles#create_handle", as: "create_handle", :url => /.*/
+      post "/handles/change_handle" => "handles#change_handle", as: "change_handle"
       # search
       get "/search/:id" => "search#search", as: "search"
       # search with filters

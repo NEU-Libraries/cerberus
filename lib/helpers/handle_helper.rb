@@ -58,4 +58,20 @@ module HandleHelper
     end
   end
 
+  def update_handle(handle, url)
+    client = Rails.application.config.handles_connection
+    if client != nil
+      # Search to see if handle exists first
+      query = "SELECT handle FROM handles WHERE handle = '#{handle}'"
+      mysql_response = client.query(query)
+      # if it does, update it
+      if mysql_response.count > 0
+        client.query("UPDATE handles SET data = '#{url}' WHERE handle = '#{handle}' AND type = 'url';")
+        return "http://hdl.handle.net/#{handle}"
+      else
+        return nil
+      end
+    end
+  end
+
 end
