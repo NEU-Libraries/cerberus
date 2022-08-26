@@ -103,7 +103,9 @@ class CommunitiesController < ApplicationController
     self.solr_search_params_logic += [:apply_per_page_limit]
     (@response, @document_list) = get_search_results
 
-    @smart_collections = @set.smart_collections
+    @smart_collections = Rails.cache.fetch("/smart_collections/#{@set.pid}-#{@set.find_employees.count}}", :expires_in => 1.day) do
+      @set.smart_collections # super slow query
+    end
 
     respond_to do |format|
       format.html { render 'shared/sets/show', locals: {pretty_description: @pretty_description} }
