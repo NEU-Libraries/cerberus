@@ -1,6 +1,6 @@
 class AggregatedStatisticsMoveJob
   def queue_name
-    :aggregated_statistics_move
+    :statistics_move
   end
 
   attr_accessor :pid, :new_parent
