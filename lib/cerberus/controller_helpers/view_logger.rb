@@ -21,7 +21,9 @@ module Cerberus::ControllerHelpers::ViewLogger
 
     u_a = request.user_agent
 
-    Impression.create(pid: id, session_id: session, action: action, ip_address: ip,
-                          referrer: ref, user_agent: u_a, status: status)
+    # Impression.create(pid: id, session_id: session, action: action, ip_address: ip,
+    #                       referrer: ref, user_agent: u_a, status: status)
+
+    Cerberus::Application::Queue.push(ImpressionCreateJob.new(pid: id, session_id: session, action: action, ip_address: ip, referrer: ref, user_agent: u_a, status: status))
   end
 end
