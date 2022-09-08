@@ -36,14 +36,14 @@ Rack::Attack.safelist("mark any authenticated access safe") do |request|
   !request.env["HTTP_COOKIE"].blank? && request.env["HTTP_COOKIE"].include?("shibsession")
 end
 
-Rack::Attack.throttle("requests by region", limit: 5, period: 2) do |request|
-  # request.ip
-  `geoiplookup #{request.remote_ip} | awk -F', ' '{print $2}'`.strip == "China"
-end
+# Rack::Attack.throttle("requests by region", limit: 5, period: 2) do |request|
+#   # request.ip
+#   `geoiplookup #{request.remote_ip} | awk -F', ' '{print $2}'`.strip == "China"
+# end
 
-Rack::Attack.blocklist("Amazon") do |req|
-  !req.remote_ip.blank? && `host #{req.remote_ip}`.include?("amazon")
-end
+# Rack::Attack.blocklist("Amazon") do |req|
+#   !req.remote_ip.blank? && `host #{req.remote_ip}`.include?("amazon")
+# end
 
 Rack::Attack.blocklist('Siteimprove') do |req|
   !req.user_agent.blank? && req.user_agent.downcase.include?("Siteimprove".downcase)
