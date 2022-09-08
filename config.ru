@@ -2,13 +2,6 @@
 
 require ::File.expand_path('../config/environment',  __FILE__)
 
-if defined?(PhusionPassenger)
-  PhusionPassenger.require_passenger_lib 'rack/out_of_band_gc'
-
-  # Trigger out-of-band GC every 50 requests.
-  use PhusionPassenger::Rack::OutOfBandGc, 50
-end
-
 run Cerberus::Application
 
 # require 'rack/cors'
