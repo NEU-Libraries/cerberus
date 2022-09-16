@@ -11,6 +11,7 @@ class CollectionsController < CatalogController
   end
 
   def edit
+    # TODO: need to do permissions check
     @resource = CollectionChangeSet.new(Collection.find(params[:id]))
   end
 end

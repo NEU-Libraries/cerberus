@@ -11,6 +11,7 @@ class CommunitiesController < CatalogController
   end
 
   def edit
+    # TODO: need to do admin check
     @resource = CommunityChangeSet.new(Community.find(params[:id]))
   end
 

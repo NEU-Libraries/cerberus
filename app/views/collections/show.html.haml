@@ -5,6 +5,12 @@
     %h3
       = @collection.plain_title
     = @collection.plain_description
+    .clearfix.pt-3
+      .float-end
+        = link_to "Edit", edit_collection_path(@collection), class: "px-3"
+        = link_to "Delete", "#", class: "px-3"
+    -# edit button
+    -# delete (tombstone) button
 
 - content_for(:sidebar) do
   = render 'catalog/search_sidebar'
