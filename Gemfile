@@ -65,6 +65,7 @@ gem 'rsolr', '>= 1.0', '< 3'
 gem 'sassc-rails', '~> 2.1'
 gem 'simple_form'
 gem 'valkyrie', git: 'https://github.com/samvera/valkyrie.git'
+gem 'valkyrie-shrine'
 
 # QA gems
 gem 'rubocop', require: false
