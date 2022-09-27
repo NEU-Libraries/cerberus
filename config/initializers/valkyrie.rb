@@ -1,6 +1,11 @@
 # frozen_string_literal: true
 
 require 'valkyrie'
+require 'shrine/storage/s3'
+require 'shrine/storage/file_system'
+require 'valkyrie/storage/shrine/checksum/s3'
+require 'valkyrie/storage/shrine/checksum/file_system'
+
 Rails.application.config.to_prepare do
   Valkyrie::MetadataAdapter.register(
     Valkyrie::Persistence::Postgres::MetadataAdapter.new,
