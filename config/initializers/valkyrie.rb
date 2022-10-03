@@ -7,6 +7,19 @@ require 'valkyrie/shrine/checksum/s3'
 require 'valkyrie/shrine/checksum/file_system'
 
 Rails.application.config.to_prepare do
+  Shrine.storages = {
+    s3: Shrine::Storage::S3.new(
+      bucket: "drs-access", # required 
+      region: "us-east-1", # required 
+      access_key_id: Rails.application.credentials.dig(:aws, :access_key_id),
+      secret_access_key: Rails.application.credentials.dig(:aws, :secret_access_key),
+    )
+  }
+
+  Valkyrie::StorageAdapter.register(
+    Valkyrie::Storage::Shrine.new(Shrine.storages[:s3]), :s3
+  )
+
   Valkyrie::MetadataAdapter.register(
     Valkyrie::Persistence::Postgres::MetadataAdapter.new,
     :postgres
