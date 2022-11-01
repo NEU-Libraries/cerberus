@@ -70,12 +70,16 @@ en:
       name: "College of Science - Marine Science Center Staff"
     northeastern:drs:college_of_science:marine_science_center:ogl_staff:
       name: "College of Science - Ocean Genome Legacy Staff"
+    northeastern:drs:college_of_science:psychology:psylink:
+      name: "PsyLink Team"
     northeastern:drs:college_of_science:social_interaction_lab:
       name: "College of Science - Social Interaction Lab Staff"
     northeastern:drs:college_of_social_sciences_humanities:bari:
       name: "CSSH - BARI"
     northeastern:drs:college_of_social_sciences_humanities:breaking_history:
       name: "CSSH - Breaking History Podcast Team"
+    northeastern:drs:college_of_social_sciences_humanities:catskills_institute:
+      name: "The Catskills Institute"
     northeastern:drs:college_of_social_sciences_humanities:dailp:dailp_staff:
       name: "Digital Archive of American Indian Languages Preservation and Perseverance"
     northeastern:drs:college_of_social_sciences_humanities:department_of_history:dh_jews_of_boston:
@@ -180,6 +184,8 @@ en:
       name: "University Library - LTS Staff"
     northeastern:drs:library:licensed_resources:l2:
       name: "L2 Dataset Users"
+    northeastern:drs:library:mills_college:
+      name: "Olin Library Staff"
     northeastern:drs:library:office_of_the_dean:
       name: "University Library - Office of the Dean Staff"
     northeastern:drs:library:podcast_whatsnew:
@@ -250,6 +256,8 @@ en:
       name: "DRS Proxy Staff"
     northeastern:drs:repository:staff:
       name: "DRS Repository Staff"
+    northeastern:drs:repository:temp:
+      name: "DRS Temporary Access Group"
     northeastern:drs:sail:staff:
       name: "SAIL Staff"
     northeastern:drs:school_of_law:crrj:staff:
