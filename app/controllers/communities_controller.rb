@@ -16,7 +16,7 @@ class CommunitiesController < CatalogController
   end
 
   def create
-    puts params.inspect
+    # puts params.inspect
     # c = Community.new
     # change_set = ProjectChangeSet.new(Project.new(user_registry_id: user_registry.id))
     # if change_set.validate(params[:project])

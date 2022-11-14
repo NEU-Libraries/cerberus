@@ -66,10 +66,8 @@ module MODSExtraction
   private
 
     def safe_date_parse(str)
-      begin
-        return DateTime.parse(str)
-      rescue Date::Error
-        return ''
-      end
+      DateTime.parse(str)
+    rescue Date::Error
+      ''
     end
 end
