@@ -28,12 +28,10 @@ class BreadcrumbTrail < Croutons::BreadcrumbTrail
       trail = [resource]
       parent = resource.parent
       loop do
-        if parent.nil?
-          return trail.reverse
-        else
-          trail << parent
-          parent = parent.parent
-        end
+        return trail.reverse if parent.nil?
+
+        trail << parent
+        parent = parent.parent
       end
     end
 end
