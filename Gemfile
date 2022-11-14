@@ -52,7 +52,7 @@ gem 'bootsnap', require: false
 gem 'active_decorator'
 gem 'attr_json'
 gem 'blacklight', git: 'https://github.com/projectblacklight/blacklight.git', ref: '98a071c22cba4654f774a347caaa8d9401c5bc80'
-gem 'bootstrap', '~> 5.1'
+gem 'bootstrap', '< 5.2'
 gem 'croutons'
 gem 'devise'
 gem 'devise-i18n'
