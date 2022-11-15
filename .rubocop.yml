@@ -24,6 +24,8 @@ Lint/AmbiguousBlockAssociation:
   Enabled: false
 Rails/FindEach:
   Enabled: false
+Rails/I18nLocaleTexts:
+  Enabled: false
 Style/Documentation:
   Enabled: false
 Layout/LineLength:
