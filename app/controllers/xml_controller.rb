@@ -12,7 +12,6 @@ class XmlController < ApplicationController
   end
 
   def update
-    puts "DGC DEBUG: " + params.inspect
     work = Work.find(params[:work_id])
     work.mods_xml = params[:raw_xml]
     flash[:success] = 'XML updated'
