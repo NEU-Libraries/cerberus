@@ -95,6 +95,7 @@ a:not(.btn, .dropdown-item) {
   a:hover {
     &:not(.active) {
       background-color: $light;
+      color: $cyan;
     }
   }
 
@@ -104,7 +105,9 @@ a:not(.btn, .dropdown-item) {
 }
 
 .dropdown-item.active, .dropdown-item:active {
-  background-color: $secondary;
+  background-color: $light;
+  color: $dark;
+  font-weight: bold;
 }
 
 .document-counter {
