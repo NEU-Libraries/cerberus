@@ -2,7 +2,7 @@
   Edit raw XML for
   = @work.plain_title
 
-= form_tag xml_validate_path, :method => :put, :id => "raw_xml_form", :remote => true do
+= form_tag xml_validate_path, :method => :put, :id => "raw_xml_form" do
   = hidden_field_tag "work_id", @work.noid
   = hidden_field_tag "raw_xml"
   .container
@@ -15,7 +15,7 @@
     .row
       .well.p-3.my-3.rounded-3
         %input#validate_button.btn.btn-primary{:name => "commit", :type => "submit", :value => "Validate + Preview", remote: true}/
-        %input#save_button.btn.btn-success{"data-disable-with" => "Please wait...", :name => "commit", :type => "submit", :value => "Save"}/
+        %input#save_button.btn.btn-success{"data-disable-with" => "Please wait...", :name => "commit", :type => "submit", :value => "Save", :formaction => xml_update_path}/
         %a.btn.btn-warning{"data-toggle" => "modal", :href => "#cancelEditModal"}
           Cancel
 
@@ -31,6 +31,5 @@
   });
 
   document.getElementById('validate_button').onclick = function(){
-    window.scroll({top: 0, left: 0, behavior: 'smooth'});
-    $("#content").fadeOut(300).fadeIn(300);
+    $("#content").animate({ opacity: 0 });
   };

@@ -7,19 +7,15 @@ class XmlController < ApplicationController
   end
 
   def validate
-    if params[:commit].present? && params[:commit] == 'Save'
-      work = Work.find(params[:work_id])
-      work.mods_xml = params[:raw_xml]
-      flash[:success] = 'XML updated'
-      redirect_to work
-    else # preview
-      @work = Work.new(alternate_ids: [Time.now.to_f.to_s.gsub!('.', '').to_s])
-      @work.mods_json = params[:raw_xml]
-    end
-    respond_to do |format|
-      format.turbo_stream
-    end
+    @work = Work.new(alternate_ids: [Time.now.to_f.to_s.gsub!('.', '').to_s])
+    @work.mods_json = params[:raw_xml]
   end
 
-  def update; end
+  def update
+    puts "DGC DEBUG: " + params.inspect
+    work = Work.find(params[:work_id])
+    work.mods_xml = params[:raw_xml]
+    flash[:success] = 'XML updated'
+    redirect_to work
+  end
 end
