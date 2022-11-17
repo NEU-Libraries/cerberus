@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mods:mods xmlns:drs="https://repository.neu.edu/spec/v1" xmlns:mods="http://www.loc.gov/mods/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:niec="http://repository.neu.edu/schema/niec" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dwc="http://rs.tdwg.org/dwc/terms/" xmlns:dwr="http://rs.tdwg.org/dwc/xsd/simpledarwincore/" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd">
+  <mods:titleInfo usage="primary">
+    <mods:title>Test Collection</mods:title>
+  <mods:nonSort/></mods:titleInfo>
+  <mods:titleInfo type="alternative">
+    <mods:title/>
+  </mods:titleInfo>
+  <mods:abstract>
+    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+  </mods:abstract>
+  <mods:name type="personal"/>
+  <mods:name type="corporate"/>
+  <mods:language>
+    <mods:languageTerm/>
+  </mods:language>
+  <mods:note/>
+  <mods:subject>
+    <mods:topic>test</mods:topic>
+  </mods:subject>
+  <mods:typeOfResource>text</mods:typeOfResource>
+  <mods:recordInfo>
+    <mods:recordContentSource/>
+    <mods:recordOrigin/>
+    <mods:descriptionStandard/>
+    <mods:languageOfCataloging>
+      <mods:languageTerm/>
+    </mods:languageOfCataloging>
+  </mods:recordInfo>
+  <mods:physicalDescription>
+    <mods:form/>
+  </mods:physicalDescription>
+  <mods:extension displayLabel="scholarly_object">
+    <scholarly_object>
+      <category/>
+      <department/>
+      <degree/>
+      <college/>
+      <course_info>
+        <course_number/>
+        <course_title/>
+      </course_info>
+    </scholarly_object>
+  </mods:extension>
+  <mods:extension>
+    <niec:niec/>
+    <dwr:SimpleDarwinRecord/>
+  </mods:extension>
+  <mods:extension displayLabel="projects">
+    <projects>
+      <project>
+        <id>shoes</id>
+        <title/>
+        <url/>
+      </project>
+      <project>
+        <id>hats</id>
+        <title/>
+        <url/>
+      </project>
+    </projects>
+  </mods:extension>
+</mods:mods>
