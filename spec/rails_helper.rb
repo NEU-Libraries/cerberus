@@ -6,6 +6,7 @@ SimpleCov.start 'rails' do
   add_filter 'spec'
   add_filter 'vendor'
   add_filter 'app/channels'
+  add_filter 'lib/cerberus/vocab'
   # minimum_coverage 95
 end
 
