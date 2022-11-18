@@ -11,7 +11,16 @@ describe CollectionsController do
     it 'renders the edit partial' do
       get :edit, params: { id: collection.noid }
       expect(response).to render_template('collections/edit')
-      expect(CGI.unescapeHTML(response.body)).to include(collection.plain_title)
+      expect(CGI.unescapeHTML(response.body)).to include(collection.decorate.plain_title)
+    end
+  end
+
+  describe 'show' do
+    render_views
+    it 'renders the show partial' do
+      get :show, params: { id: collection.noid }
+      expect(response).to render_template('collections/show')
+      expect(CGI.unescapeHTML(response.body)).to include(collection.decorate.plain_title)
     end
   end
 end

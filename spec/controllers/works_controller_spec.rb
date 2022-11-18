@@ -12,7 +12,7 @@ describe WorksController do
     it 'renders the show partial' do
       get :show, params: { id: work.noid }
       expect(response).to render_template('works/show')
-      expect(CGI.unescapeHTML(response.body)).to include(collection.plain_title)
+      expect(CGI.unescapeHTML(response.body)).to include(work.plain_title)
     end
   end
 end

@@ -12,7 +12,7 @@ class CommunitiesController < CatalogController
 
   def edit
     # TODO: need to do admin check
-    @resource = CommunityChangeSet.new(Community.find(params[:id]))
+    @resource = CommunityChangeSet.new(Community.find(params[:id]).decorate)
   end
 
   def create
