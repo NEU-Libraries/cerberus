@@ -3,6 +3,7 @@
 module Modsable
   extend ActiveSupport::Concern
   include MODSAssignment
+  include MODSBuilder
   include MODSToJson
 
   def mods
@@ -10,7 +11,7 @@ module Modsable
   end
 
   def mods_xml
-    return '<_/>' if mods_blob.blank?
+    return mods_template if mods_blob.blank?
 
     Nokogiri::XML(File.read(mods_blob&.file_path), &:noblanks).to_s
     # File.read(mods_blob&.file_path)
