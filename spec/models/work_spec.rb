@@ -12,4 +12,10 @@ RSpec.describe Work do
   it 'has default XML' do
     expect(work.mods_xml).not_to be(nil)
   end
+
+  # it 'allows for plain title assignment' do
+  # end
+
+  # it 'allows for plain description assignment' do
+  # end
 end
