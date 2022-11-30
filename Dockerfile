@@ -11,6 +11,8 @@ RUN chmod +x /usr/local/bin/cc-test-reporter
 RUN useradd -ms /bin/bash cerberus
 USER cerberus
 
+RUN mkdir -p /home/cerberus/storage
+
 COPY --chown=cerberus:cerberus Gemfile* /tmp/
 WORKDIR /tmp
 RUN bundle install -j8
