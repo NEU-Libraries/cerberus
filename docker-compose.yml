@@ -21,7 +21,7 @@ services:
     ports:
       - 3000:3000
   solr:
-    image: nakatomi/cerberus_solr
+    image: nakatomi/blacklight-solr
     ports:
     - 8983:8983
     volumes:
