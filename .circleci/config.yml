@@ -4,9 +4,6 @@ jobs:
     machine:
       image: ubuntu-2004:202201-02
     working_directory: ~/cerberus
-    branches:
-      only:
-        - main
     steps:
       - checkout
       - run:
@@ -52,6 +49,16 @@ jobs:
           key: v1-{{ .Branch }}-{{ epoch }}
           paths:
             - ~/caches/cerberus.tar
+  test:
+    machine:
+      image: ubuntu-2004:202201-02
+    working_directory: ~/cerberus
+    steps:
+      - run:
+          name: Load Docker image layer cache
+          command: |
+            set +o pipefail
+            docker load -i ~/caches/cerberus.tar | true
       - run:
           name: Start container
           command: |
@@ -76,6 +83,16 @@ jobs:
             docker-compose exec web cc-test-reporter before-build
             docker-compose exec web bundle exec rake
             docker-compose exec web cc-test-reporter after-build --coverage-input-type simplecov --exit-code $?
+  deploy:
+    machine:
+      image: ubuntu-2004:202201-02
+    working_directory: ~/cerberus
+    steps:
+      - run:
+          name: Load Docker image layer cache
+          command: |
+            set +o pipefail
+            docker load -i ~/caches/cerberus.tar | true
       - run:
           name: Publish Docker Image to Docker Hub
           command: |
@@ -87,3 +104,24 @@ jobs:
           name: Deploy
           command: |
             http PUT cerberusv2.library.northeastern.edu/deploy token=$CERBERUS_TOKEN version=$CERBERUS_VERSION
+workflows:
+  version: 2
+  build-and-test:
+    jobs:
+      - build
+      - test:
+          requires:
+            - build
+  build-test-and-deploy:
+    jobs:
+      - build
+      - test:
+          requires:
+            - build
+      - deploy:
+          requires:
+            - test
+          filters:
+            branches:
+              only:
+                - main
