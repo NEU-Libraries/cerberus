@@ -28,15 +28,6 @@ jobs:
             set +o pipefail
             docker load -i ~/caches/cerberus.tar | true
       - run:
-          name: Set CERBERUS_VERSION and Define Environment Variable at Runtime
-          command: |
-            echo 'export CERBERUS_VERSION=$(cat .version)' >> $BASH_ENV
-            source $BASH_ENV
-      - run:
-          name: Check CERBERUS_VERSION doesn't already exist in docker tags
-          command: |
-            scripts/tag_check.sh $CERBERUS_VERSION
-      - run:
           name: Build application Docker image
           command: |
             docker build --cache-from=nakatomi/cerberus_web:latest -t nakatomi/cerberus_web .
@@ -54,6 +45,7 @@ jobs:
       image: ubuntu-2004:202201-02
     working_directory: ~/cerberus
     steps:
+      - checkout
       - run:
           name: Load Docker image layer cache
           command: |
@@ -88,6 +80,16 @@ jobs:
       image: ubuntu-2004:202201-02
     working_directory: ~/cerberus
     steps:
+      - checkout
+      - run:
+          name: Set CERBERUS_VERSION and Define Environment Variable at Runtime
+          command: |
+            echo 'export CERBERUS_VERSION=$(cat .version)' >> $BASH_ENV
+            source $BASH_ENV
+      - run:
+          name: Check CERBERUS_VERSION doesn't already exist in docker tags
+          command: |
+            scripts/tag_check.sh $CERBERUS_VERSION
       - run:
           name: Load Docker image layer cache
           command: |
@@ -106,12 +108,6 @@ jobs:
             http PUT cerberusv2.library.northeastern.edu/deploy token=$CERBERUS_TOKEN version=$CERBERUS_VERSION
 workflows:
   version: 2
-  build-and-test:
-    jobs:
-      - build
-      - test:
-          requires:
-            - build
   build-test-and-deploy:
     jobs:
       - build
