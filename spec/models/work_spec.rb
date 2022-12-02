@@ -13,9 +13,13 @@ RSpec.describe Work do
     expect(work.mods_xml).not_to be(nil)
   end
 
-  # it 'allows for plain title assignment' do
-  # end
+  it 'allows for plain title assignment' do
+    work.plain_title = 'Foo'
+    expect(work.decorate.plain_title).to eq('Foo')
+  end
 
-  # it 'allows for plain description assignment' do
-  # end
+  it 'allows for plain description assignment' do
+    work.plain_description = 'Bar'
+    expect(work.decorate.plain_description).to eq('Bar')
+  end
 end

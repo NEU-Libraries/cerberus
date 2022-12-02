@@ -11,15 +11,17 @@ module Modsable
   end
 
   def mods_xml
-    return mods_template if mods_blob.blank?
+    return mods_template if (mods_blob.blank? || mods_blob&.file_path)
 
     Nokogiri::XML(File.read(mods_blob&.file_path), &:noblanks).to_s
     # File.read(mods_blob&.file_path)
   end
 
   def mods_xml=(raw_xml)
+    # switch this to use env dependent shrine
     xml_path = "/home/cerberus/storage/#{Time.now.to_f.to_s.gsub!('.', '-')}.xml"
     File.write(xml_path, raw_xml)
+
     blob = mods_blob
     # need to amend parent method to allow for inverse if direct isn't available
     parent = Valkyrie.config.metadata_adapter.query_service.find_inverse_references_by(resource: blob,
@@ -31,9 +33,11 @@ module Modsable
   end
 
   def mods_blob
-    # need to emulate find or create
+    # TODO: need to emulate find or create
     Valkyrie.config.metadata_adapter.query_service.find_inverse_references_by(resource: self,
                                                                               property: :descriptive_metadata_for).first
+  rescue ArgumentError
+    nil
   end
 
   def mods_json=(raw_xml)
