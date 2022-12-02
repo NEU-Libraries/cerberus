@@ -40,17 +40,24 @@ jobs:
           key: v1-{{ .Branch }}-{{ epoch }}
           paths:
             - ~/caches/cerberus.tar
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - caches
   test:
     machine:
       image: ubuntu-2004:202201-02
     working_directory: ~/cerberus
     steps:
       - checkout
+      - attach_workspace:
+          # Must be absolute path or relative path from working_directory
+          at: /tmp/workspace
       - run:
           name: Load Docker image layer cache
           command: |
             set +o pipefail
-            docker load -i ~/caches/cerberus.tar | true
+            docker load -i /tmp/workspace/caches/cerberus.tar | true
       - run:
           name: Start container
           command: |
@@ -81,6 +88,14 @@ jobs:
     working_directory: ~/cerberus
     steps:
       - checkout
+      - attach_workspace:
+          # Must be absolute path or relative path from working_directory
+          at: /tmp/workspace
+      - run:
+          name: Load Docker image layer cache
+          command: |
+            set +o pipefail
+            docker load -i /tmp/workspace/caches/cerberus.tar | true
       - run:
           name: Set CERBERUS_VERSION and Define Environment Variable at Runtime
           command: |
