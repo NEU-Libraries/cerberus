@@ -10,7 +10,7 @@ jobs:
           name: Install dependencies
           command: |
             sudo apt-get update -qq
-            sudo apt-get install -y apt-utils build-essential libpq-dev httpie
+            sudo apt-get install -y apt-utils build-essential libpq-dev
       - run:
           name: Install Docker Compose
           command: |
@@ -91,6 +91,11 @@ jobs:
       - attach_workspace:
           # Must be absolute path or relative path from working_directory
           at: /tmp/workspace
+      - run:
+          name: Install dependencies
+          command: |
+            sudo apt-get update -qq
+            sudo apt-get install -y httpie
       - run:
           name: Load Docker image layer cache
           command: |
