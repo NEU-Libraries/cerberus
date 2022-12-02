@@ -111,11 +111,6 @@ jobs:
           command: |
             scripts/tag_check.sh $CERBERUS_VERSION
       - run:
-          name: Load Docker image layer cache
-          command: |
-            set +o pipefail
-            docker load -i ~/caches/cerberus.tar | true
-      - run:
           name: Publish Docker Image to Docker Hub
           command: |
             echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
