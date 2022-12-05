@@ -14,7 +14,6 @@ module Modsable
     return mods_template if mods_blob.blank? || mods_blob&.file_path
 
     Nokogiri::XML(File.read(mods_blob&.file_path), &:noblanks).to_s
-    # File.read(mods_blob&.file_path)
   end
 
   def mods_xml=(raw_xml)
@@ -29,7 +28,6 @@ module Modsable
   end
 
   def mods_blob
-    # TODO: need to emulate find or create
     Valkyrie.config.metadata_adapter.query_service.find_inverse_references_by(resource: self,
                                                                               property: :descriptive_metadata_for).first
   rescue ArgumentError
