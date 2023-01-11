@@ -8,17 +8,12 @@ on:
 
 jobs:
 
-  build:
+  build_and_test:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
     - name: Build the Docker image
       run: docker build . --file Dockerfile --tag nakatomi/cerberus_web:$(cat .version)
-
-  test:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
     - name: Setup dockerize
       uses: zcong1993/setup-dockerize@v2.0.0
     - name: Start server
