@@ -1,4 +1,4 @@
-name: Build and Test
+name: Build, Test and Publish
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
 
 jobs:
 
-  build_and_test:
+  build_test_publish:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -28,4 +28,12 @@ jobs:
       run: dockerize -wait http://localhost:3000 -timeout 1m
     - name: Run tests
       run: |
+        docker-compose exec web cc-test-reporter before-build
         docker-compose exec -T web bundle exec rake
+        docker-compose exec web cc-test-reporter after-build --coverage-input-type simplecov --exit-code $?
+    -  name: Publish
+       run: |
+            echo "${{ secrets.DOCKERHUB_PASS }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+            docker push nakatomi/cerberus_web:latest
+            docker tag nakatomi/cerberus_web:latest nakatomi/cerberus_web:$(cat .version)
+            docker push nakatomi/cerberus_web:$(cat .version)
