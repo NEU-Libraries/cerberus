@@ -1,0 +1,41 @@
+name: Build, Test and Publish
+
+on:
+  push:
+    branches: [ "develop" ]
+  pull_request:
+    branches: [ "develop" ]
+
+jobs:
+
+  build_test_publish:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Check version is not already published
+      run: scripts/tag_check.sh $(cat .version)
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --tag nakatomi/cerberus_web:latest --tag nakatomi/cerberus_web:$(cat .version)
+    - name: Setup dockerize
+      uses: zcong1993/setup-dockerize@v2.0.0
+    - name: Start server
+      run: |
+        set -x
+        docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d
+    - name: Create database and migrate
+      run: |
+        docker-compose exec -T web bundle exec rake db:create
+        docker-compose exec -T web bundle exec rake db:migrate
+    - name: Wait until available
+      run: dockerize -wait http://localhost:3000 -timeout 1m
+    - name: Run tests
+      run: |
+        docker-compose exec -T web cc-test-reporter before-build
+        docker-compose exec -T web bundle exec rake
+        docker-compose exec -T web cc-test-reporter after-build --coverage-input-type simplecov --exit-code $?
+    -  name: Publish
+       run: |
+            echo "${{ secrets.DOCKERHUB_PASS }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+            docker push nakatomi/cerberus_web:latest
+            docker tag nakatomi/cerberus_web:latest nakatomi/cerberus_web:$(cat .version)
+            docker push nakatomi/cerberus_web:$(cat .version)
