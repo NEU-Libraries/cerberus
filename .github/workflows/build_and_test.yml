@@ -13,7 +13,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag nakatomi/cerberus_web:$(cat .version)
+      run: docker build . --file Dockerfile --tag nakatomi/cerberus_web:latest --tag nakatomi/cerberus_web:$(cat .version)
     - name: Setup dockerize
       uses: zcong1993/setup-dockerize@v2.0.0
     - name: Start server
@@ -28,9 +28,9 @@ jobs:
       run: dockerize -wait http://localhost:3000 -timeout 1m
     - name: Run tests
       run: |
-        docker-compose exec web cc-test-reporter before-build
+        docker-compose exec -T web cc-test-reporter before-build
         docker-compose exec -T web bundle exec rake
-        docker-compose exec web cc-test-reporter after-build --coverage-input-type simplecov --exit-code $?
+        docker-compose exec -T web cc-test-reporter after-build --coverage-input-type simplecov --exit-code $?
     -  name: Publish
        run: |
             echo "${{ secrets.DOCKERHUB_PASS }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
