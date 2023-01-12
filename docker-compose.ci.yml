@@ -1,13 +1,7 @@
 # Use postgres/example user/password credentials
 version: '3.7'
 services:
-  db:
-    volumes:
-      - /home/circleci/db:/var/lib/postgresql/data/pgdata
   web:
     environment:
       - CC_TEST_REPORTER_ID=309c134506bb9c325d157d2f2a2e5fd21f732ca3233566e1ed28ceba026ac896
       - RAILS_MASTER_KEY=${RAILS_MASTER_KEY}
-    build: /home/circleci/cerberus
-    volumes:
-      - /home/circleci/cerberus/.git:/home/cerberus/web/.git

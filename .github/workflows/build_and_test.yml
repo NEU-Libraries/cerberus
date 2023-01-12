@@ -19,7 +19,7 @@ jobs:
     - name: Start server
       run: |
         set -x
-        docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+        docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d
     - name: Create database and migrate
       run: |
         docker-compose exec -T web bundle exec rake db:create
