@@ -12,6 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
+    - name: Check version is not already published
+      run: scripts/tag_check.sh $(cat .version)
     - name: Build the Docker image
       run: docker build . --file Dockerfile --tag nakatomi/cerberus_web:latest --tag nakatomi/cerberus_web:$(cat .version)
     - name: Setup dockerize
