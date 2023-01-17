@@ -20,4 +20,6 @@ RUN bundle install -j8
 RUN mkdir -p /home/cerberus/web
 WORKDIR /home/cerberus/web
 
+RUN echo "IRB.conf[:USE_AUTOCOMPLETE] = false" > /home/cerberus/.irbrc
+
 COPY --chown=cerberus:cerberus . /home/cerberus/web
