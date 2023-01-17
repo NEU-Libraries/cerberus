@@ -25,7 +25,7 @@ jobs:
         set +o pipefail
         docker load -i ~/caches/cerberus.tar | true
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag nakatomi/cerberus_web:latest --tag nakatomi/cerberus_web:$(cat .version)
+      run: docker build --cache-from=nakatomi/cerberus_web:latest . --file Dockerfile --tag nakatomi/cerberus_web:latest --tag nakatomi/cerberus_web:$(cat .version)
     - name: Save Docker image
       run: |
         mkdir -p ~/caches
