@@ -11,7 +11,6 @@ class WorksController < ApplicationController
   end
 
   def create
-    puts params.inspect
     # TODO: create blob for params[:binary]
     w = WorkCreator.call(parent_id: Collection.find(params[:collection_id]).id)
     w.plain_title = params[:binary].original_filename
