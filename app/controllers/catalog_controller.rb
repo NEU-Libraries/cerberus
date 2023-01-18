@@ -208,6 +208,6 @@ class CatalogController < ApplicationController
   end
 
   def find_many(ids)
-    Blacklight.default_index.search({ q: "id:(#{ids.join(' OR ')})" })
+    Blacklight.default_index.search({ fq: "id:(#{ids.join(' OR ')})" })
   end
 end

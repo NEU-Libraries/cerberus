@@ -7,14 +7,15 @@ class WorksController < ApplicationController
 
   def new
     @work = Work.new
+    @collection_id = params[:collection_id]
   end
 
   def create
     puts params.inspect
     # TODO: create blob for params[:binary]
-    # TODO: Assign the file name to the works title
-    # TODO: Associate the work with the collection
-    w = Valkyrie.config.metadata_adapter.persister.save(resource: Work.new)
+    w = WorkCreator.call(parent_id: Collection.find(params[:collection_id]).id)
+    w.plain_title = params[:binary].original_filename
+    w = Valkyrie.config.metadata_adapter.persister.save(resource: w)
     redirect_to w
   end
 end

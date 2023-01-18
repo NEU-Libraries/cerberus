@@ -2,6 +2,8 @@
   Upload File
 
 = form_tag('/works', multipart: true) do |f|
+  %input{type: "hidden", value: @collection_id, name: "collection_id"}/
+  -# = @collection_id
   .mb-3
     %label.form-label{:for => "binary"} Default file input example
     %input#binary.form-control{:name => "binary", :type => "file"}/
