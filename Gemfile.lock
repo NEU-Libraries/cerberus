@@ -409,6 +409,7 @@ GEM
       activesupport (>= 4.2.0)
       rack (>= 1.1)
       rubocop (>= 1.33.0, < 2.0)
+    ruby-filemagic (0.7.3)
     ruby-progressbar (1.11.0)
     ruby2_keywords (0.0.5)
     rubyzip (2.3.2)
@@ -514,6 +515,7 @@ DEPENDENCIES
   rspec-rails
   rubocop
   rubocop-rails
+  ruby-filemagic
   sassc-rails (~> 2.1)
   selenium-webdriver
   simple_form
