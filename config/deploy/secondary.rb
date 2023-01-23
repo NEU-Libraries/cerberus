@@ -44,7 +44,7 @@ namespace :deploy do
   desc "Restart workers"
   task :restart_workers do
     on roles(:app), :in => :sequence, :wait => 10 do
-      sudo "service resque start"
+      sudo "service resque restart"
     end
   end
 
@@ -58,7 +58,7 @@ namespace :deploy do
   desc 'Restart solrizerd'
   task :restart_solrizerd do
     on roles(:app), :in => :sequence, :wait => 5 do
-      sudo "service solrizer start"
+      sudo "service solrizer restart"
     end
   end
 
