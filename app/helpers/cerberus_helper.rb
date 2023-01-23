@@ -50,8 +50,8 @@ module CerberusHelper
     if !options[:extended_list].blank?
       return (render_facet_count(item.hits)+ " " + link_to_unless(options[:suppress_link], facet_display_value(facet_solr_field, item), path, :class=>"facet_select")).html_safe
     end
-    
-    return (link_to_unless(options[:suppress_link], facet_display_value(facet_solr_field, item), path, :class=>"facet_select") + " " + render_facet_count(item.hits)).html_safe
+
+    return (link_to_unless(options[:suppress_link], facet_display_value(facet_solr_field, item), path, :rel => "nofollow", :class=>"facet_select") + " " + render_facet_count(item.hits)).html_safe
   end
 
   def render_constraints_query(localized_params = params)

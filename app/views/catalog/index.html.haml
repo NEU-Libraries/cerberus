@@ -4,6 +4,8 @@
   - content_for :page_header do
     = render 'home'
 - else
+  - content_for(:extra_head_content) do
+    <meta name="robots" content="noindex">
   - # Better search results here
   - html_constraints = render_constraints( params )
   - safe_constraints = params[:q] ? strip_tags( params[:q].sub( "</span>" , ""  ) ) : ''
