@@ -13,5 +13,5 @@ class Classification < Enumerations::Base
   value :archive,               name: 'Archive'
   value :musical_notation,      name: 'Musical Notation'
   value :descriptive_metadata,  name: 'Descriptive Metadata'
-  value :work,                  name: 'Work'
+  value :generic,               name: 'File'
 end
