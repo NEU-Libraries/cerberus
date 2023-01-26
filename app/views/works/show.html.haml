@@ -5,3 +5,10 @@
 
 %pre
   = JSON.pretty_generate(JSON.parse(@work.mods.to_json))
+
+%pre
+  - @work.children.each do |c|
+    = c.type
+    = " - "
+    = c.children.count
+    %br

@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class BlobCreator < ApplicationService
+  include FileHelper
+
   def initialize(work_id:, path:)
     @work_id = work_id
     @path = path
@@ -15,7 +17,7 @@ class BlobCreator < ApplicationService
     def create_blob
       # TODO: determine classification from mime type + extension
       fs = FileSetCreator.call(work_id: @work_id, classification: Classification.generic)
-      b = Valkyrie.config.metadata_adapter.persister.save(resource: Blob.new).id
+      b = Valkyrie.config.metadata_adapter.persister.save(resource: Blob.new)
       b.file_identifiers += [create_file(@path, fs).id]
     end
 end
