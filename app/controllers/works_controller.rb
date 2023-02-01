@@ -14,11 +14,11 @@ class WorksController < ApplicationController
 
   def create
     file = params[:binary]
-    w = Work.create(
+    @work = Work.create(
       collection_id: Collection.find(params[:collection_id]).id,
       title: file.original_filename
     )
-    BlobCreator.call(work_id: w.id, path: (file.tempfile.path.presence || file.path))
-    redirect_to w
+    BlobCreator.call(work_id: @work.id, path: (file.tempfile.path.presence || file.path))
+    redirect_to @work
   end
 end
