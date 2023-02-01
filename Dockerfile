@@ -23,3 +23,4 @@ WORKDIR /home/cerberus/web
 RUN echo "IRB.conf[:USE_AUTOCOMPLETE] = false" > /home/cerberus/.irbrc
 
 COPY --chown=cerberus:cerberus . /home/cerberus/web
+RUN git config --global --add safe.directory /home/cerberus/web
