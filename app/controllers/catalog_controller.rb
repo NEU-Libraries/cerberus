@@ -208,6 +208,8 @@ class CatalogController < ApplicationController
   end
 
   def find_many(ids)
-    Blacklight.default_index.search({ q: "id:(#{ids.join(' OR ')})" })
+    return Blacklight::Solr::Response.new({}, {}) if ids.blank?
+
+    Blacklight.default_index.search({ fq: "id:(#{ids.join(' OR ')})" })
   end
 end

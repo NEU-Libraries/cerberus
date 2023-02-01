@@ -3,5 +3,11 @@
 
 = render partial: "shared/mods", locals: {resource: @work}
 
+- @work.children.each do |c|
+  = "#{c.type} - #{c.children.count}"
+  %br
+
+%br
+
 %pre
   = JSON.pretty_generate(JSON.parse(@work.mods.to_json))

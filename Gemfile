@@ -62,9 +62,10 @@ gem 'mods'
 gem 'noid-rails', git: 'https://github.com/dgcliff/noid-rails.git', branch: 'rails-7-trial'
 gem 'pg'
 gem 'rsolr', '>= 1.0', '< 3'
+gem 'ruby-filemagic'
 gem 'sassc-rails', '~> 2.1'
 gem 'simple_form'
-gem 'valkyrie', git: 'https://github.com/samvera/valkyrie.git'
+gem 'valkyrie'
 gem 'valkyrie-shrine'
 
 group :development, :test do

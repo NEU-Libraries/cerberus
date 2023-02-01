@@ -2,7 +2,7 @@ FROM ruby:3.0-slim
 # update the repository sources list
 # and install dependencies
 RUN apt-get update \
-    && apt-get install -y nodejs curl git build-essential libpq-dev \
+    && apt-get install -y nodejs curl git build-essential libpq-dev libmagic-dev \
     && apt-get -y autoclean
 
 RUN curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > /usr/local/bin/cc-test-reporter
@@ -23,3 +23,4 @@ WORKDIR /home/cerberus/web
 RUN echo "IRB.conf[:USE_AUTOCOMPLETE] = false" > /home/cerberus/.irbrc
 
 COPY --chown=cerberus:cerberus . /home/cerberus/web
+RUN git config --global --add safe.directory /home/cerberus/web
