@@ -11,7 +11,7 @@ class FileSet < Resource
 
   def original_file?
     files.each do |f|
-      return true if f.use.include? Valkyrie::Vocab::PCDMUse.OriginalFile
+      return true if f.use&.include? Valkyrie::Vocab::PCDMUse.OriginalFile
     end
     false
   end

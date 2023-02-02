@@ -12,4 +12,8 @@ RSpec.describe FileSet do
   it 'returns files associated with the object' do
     expect(file_set.files).to include(Blob.find(file_set.member_ids.first))
   end
+
+  it 'responds to original_file?' do
+    expect(file_set.original_file?).to eq false # dummy set
+  end
 end
