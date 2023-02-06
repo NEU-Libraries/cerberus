@@ -134,6 +134,7 @@ GEM
       xpath (~> 3.2)
     childprocess (4.1.0)
     concurrent-ruby (1.2.0)
+    connection_pool (2.3.0)
     content_disposition (1.0.0)
     crass (1.0.6)
     croutons (0.0.2)
@@ -332,6 +333,8 @@ GEM
       link_header (~> 0.0, >= 0.0.8)
     rdf-vocab (3.2.3)
       rdf (~> 3.2, >= 3.2.4)
+    redis-client (0.12.1)
+      connection_pool
     reform (2.6.2)
       disposable (>= 0.5.0, < 1.0.0)
       representable (>= 3.1.1, < 4)
@@ -410,6 +413,11 @@ GEM
     shrine (3.4.0)
       content_disposition (~> 1.0)
       down (~> 5.1)
+    sidekiq (7.0.3)
+      concurrent-ruby (< 2)
+      connection_pool (>= 2.3.0)
+      rack (>= 2.2.4)
+      redis-client (>= 0.11.0)
     simple_form (5.1.0)
       actionpack (>= 5.2)
       activemodel (>= 5.2)
@@ -513,6 +521,7 @@ DEPENDENCIES
   ruby-filemagic
   sassc-rails (~> 2.1)
   selenium-webdriver
+  sidekiq
   simple_form
   simplecov
   simplecov_json_formatter (= 0.1.3)
