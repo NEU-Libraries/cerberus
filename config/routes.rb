@@ -1,7 +1,12 @@
+# frozen_string_literal: true
+
+require 'sidekiq/web'
+
 Rails.application.routes.draw do
   devise_for :users
   mount Blacklight::Engine => '/catalog'
-  root to: "pages#home"
+  mount Sidekiq::Web => '/sidekiq'
+  root to: 'pages#home'
   concern :searchable, Blacklight::Routes::Searchable.new
 
   resource :catalog, only: [:index], as: 'catalog', path: '/catalog', controller: 'catalog' do
