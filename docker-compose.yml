@@ -20,6 +20,9 @@ services:
     entrypoint: /home/cerberus/web/docker-entrypoint.sh
     ports:
       - 3000:3000
+  jobs:
+    image: nakatomi/cerberus_web
+    entrypoint: /home/cerberus/web/jobs-entrypoint.sh
   solr:
     image: nakatomi/blacklight-solr
     ports:
