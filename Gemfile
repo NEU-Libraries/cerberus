@@ -105,7 +105,7 @@ group :development do
 end
 
 group :secondary do
-  gem "clamav"
+  gem "clamby"
 end
 
 group :development, :test do
