@@ -104,8 +104,8 @@ group :development do
   gem 'rb-readline'
 end
 
-group :development, :staging, :secondary, :production do
-  #gem "clamav"
+group :secondary do
+  gem "clamav"
 end
 
 group :development, :test do
