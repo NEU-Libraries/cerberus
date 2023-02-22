@@ -427,7 +427,7 @@ GEM
       rdf (>= 0.3.4)
     rdoc (3.12.2)
       json (~> 1.4)
-    redis (3.0.4)
+    redis (3.0.7)
     redis-actionpack (3.2.4)
       actionpack (~> 3.2.0)
       redis-rack (~> 1.4.4)
@@ -628,6 +628,7 @@ DEPENDENCIES
   rack-attack
   rails (= 3.2.12)
   rb-readline
+  redis (= 3.0.7)
   redis-rails
   resque
   resque-pool (= 0.3.0)
