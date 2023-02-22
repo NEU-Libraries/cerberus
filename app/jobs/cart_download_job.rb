@@ -24,9 +24,13 @@ class CartDownloadJob
     self.path = "#{Rails.application.config.tmp_path}/carts/#{sess_id}"
 
     FileUtils.mkdir_p path
+
     temp_path = "#{path}/in_progress.zip"
     full_path = "#{path}/drs_queue.zip"
+    files_path = "#{path}/downloads"
     temp_txt = "#{sess_id}.txt"
+
+    FileUtils.mkdir_p files_path
 
     # Kludge to avoid putting all zip items into memory
     Zip::File.open(temp_path, Zip::File::CREATE) do |zipfile|
@@ -39,9 +43,12 @@ class CartDownloadJob
           item = ActiveFedora::Base.find(pid, cast: true)
           download_label = I18n.t("drs.display_labels.#{item.klass}.download")
           if item.public? || user.can?(:read, item)
-            Zip::File.open(temp_path) do |zipfile|
-              zipfile.add("downloads/neu_#{pid.split(":").last}-#{download_label}.#{extract_extension(item.properties.mime_type.first, File.extname(item.original_filename || "").delete!("."))}", item.fedora_file_path)
-            end
+
+            tmp_file_name = "neu_#{pid.split(":").last}-#{download_label}.#{extract_extension(item.properties.mime_type.first, File.extname(item.original_filename || "").delete!("."))}"
+            relative_path = "./downloads/#{tmp_file_name}"
+            `cd #{path} && ln -s #{item.fedora_file_path} #{relative_path}`
+            `cd #{path} && zip -ur #{temp_path} #{relative_path}`
+            File.unlink(files_path + "/" + tmp_file_name) # explicitly stating that we're removing a symlink to avoid confusion
 
             # Record the download
             opts = "pid = ? AND session_id = ? AND status = 'INCOMPLETE' AND action = 'download'"
