@@ -1,11 +1,13 @@
 class CacheWarmJob
+  include ApplicationHelper
+
   def queue_name
     :cache_warm
   end
 
   def run
     # expire cache
-    Rails.cache.delete_matched("/smart_collections/*")
+    invalidate_cache("/smart_collections/*")
     # solr query all communities
     model_type = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/afmodel:Community"
     query = "has_model_ssim:\"#{model_type}\""
