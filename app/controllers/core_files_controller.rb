@@ -86,9 +86,7 @@ class CoreFilesController < ApplicationController
     pid = params[:id]
 
     # Invalidate cache
-    Rails.cache.delete_matched("/mods/#{pid}*")
-    Rails.cache.delete_matched("/darwin/#{pid}*")
-    Rails.cache.delete_matched("/content_objects/#{pid}*")
+    invalidate_pid(pid)
 
     # Update solr doc
     CoreFile.find(pid).update_index
@@ -601,8 +599,7 @@ class CoreFilesController < ApplicationController
         @core_file = CoreFile.find(params[:id])
 
         # Invalidate cache
-        Rails.cache.delete_matched("/mods/#{@core_file.pid}*")
-        Rails.cache.delete_matched("/darwin/#{@core_file.pid}*")
+        invalidate_pid(@core_file.pid)
 
         # Email the metadata changes
         new_doc = Nokogiri::XML(raw_xml)
@@ -633,9 +630,7 @@ class CoreFilesController < ApplicationController
     @core_file = CoreFile.find(params[:id])
 
     # Invalidate cache
-    Rails.cache.delete_matched("/mods/#{@core_file.pid}*")
-    Rails.cache.delete_matched("/darwin/#{@core_file.pid}*")
-    Rails.cache.delete_matched("/content_objects/#{@core_file.pid}*")
+    invalidate_pid(@core_file.pid)
 
     # if no title or keyword, send them back. Only God knows what they did to the form...
     # fix for #671
@@ -761,9 +756,7 @@ class CoreFilesController < ApplicationController
     end
 
     # Invalidate cache
-    Rails.cache.delete_matched("/mods/#{@core_file.pid}*")
-    Rails.cache.delete_matched("/darwin/#{@core_file.pid}*")
-    Rails.cache.delete_matched("/content_objects/#{@core_file.pid}*")
+    invalidate_pid(@core_file.pid)
 
     redirect_to(@core_file)
   end

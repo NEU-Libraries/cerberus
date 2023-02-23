@@ -2,6 +2,21 @@ module ApplicationHelper
 
   # Only things with theoretically near universal potential use should go here.
 
+  def invalidate_cache(pattern)
+    cursor = "0"
+    batch_size = 1000
+    begin
+      cursor, keys = $redis.scan(cursor, match: pattern, count: batch_size)
+      $redis.del(*keys) unless keys.empty?
+    end until cursor == "0"
+  end
+
+  def invalidate_pid(pid)
+    invalidate_cache("/mods/#{pid}*")
+    invalidate_cache("/darwin/#{pid}*")
+    invalidate_cache("/content_objects/#{pid}*")
+  end
+
   def solr_query(query_string, pid_only = false)
     # By default, SolrService.query only returns 10 rows
     # You can specify more rows than you need, but not just to return all results

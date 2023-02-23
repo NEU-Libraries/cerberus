@@ -1,4 +1,6 @@
 class IndexJob
+  include ApplicationHelper
+
   attr_accessor :pid_list
 
   def initialize(pid_list)
@@ -25,9 +27,7 @@ class IndexJob
         obj = ActiveFedora::Base.find(pid, :cast=>true)
 
         # Invalidate cache
-        Rails.cache.delete_matched("/mods/#{pid}*")
-        Rails.cache.delete_matched("/darwin/#{pid}*")
-        Rails.cache.delete_matched("/content_objects/#{pid}*")
+        invalidate_pid(pid)
 
         # Delete it's old solr record
         ActiveFedora::SolrService.instance.conn.delete_by_id("#{pid}", params: {'softCommit' => true})

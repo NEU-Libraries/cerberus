@@ -1,4 +1,5 @@
 class ContentObjectCreationJob
+  include ApplicationHelper
   include MimeHelper
   include ChecksumHelper
 
@@ -72,7 +73,8 @@ class ContentObjectCreationJob
       #   content_object.extract_content
       # end
 
-      Rails.cache.delete_matched("/content_objects/#{core_record.pid}*")
+      invalidate_pid(core_record.pid)
+
       return content_object
     ensure
       if File.exists?(file_path) && ensure_delete
