@@ -28,14 +28,8 @@ class CartDownloadJob
     temp_path = "#{path}/in_progress.zip"
     full_path = "#{path}/drs_queue.zip"
     files_path = "#{path}/downloads"
-    temp_txt = "#{sess_id}.txt"
 
     FileUtils.mkdir_p files_path
-
-    # Kludge to avoid putting all zip items into memory
-    Zip::File.open(temp_path, Zip::File::CREATE) do |zipfile|
-      zipfile.get_output_stream(temp_txt) { |f| f.puts "" }
-    end
 
     pids.each do |pid|
       begin
@@ -58,13 +52,6 @@ class CartDownloadJob
       rescue Exception => error
         # Any number of things could be wrong with the core file - malformed due to error
         # or migration failure. Emails aren't currently working out of jobs. A TODO for later
-      end
-    end
-
-    # Remove temp txt file
-    if File.exists?(temp_path)
-      Zip::File.open(temp_path) do |zipfile|
-        zipfile.remove(temp_txt)
       end
     end
 
