@@ -5,7 +5,7 @@ module Derivatives
     include Sidekiq::Job
 
     def perform(*args)
-      # Do something
+      # Make PDF from Word binary
     end
   end
 end

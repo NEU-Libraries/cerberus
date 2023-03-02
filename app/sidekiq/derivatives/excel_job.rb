@@ -5,7 +5,7 @@ module Derivatives
     include Sidekiq::Job
 
     def perform(*args)
-      # Do something
+      # Make CSV from Excel binary
     end
   end
 end

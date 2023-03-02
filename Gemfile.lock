@@ -249,6 +249,7 @@ GEM
       activerecord
       kaminari-core (= 1.2.2)
     kaminari-core (1.2.2)
+    libreconv (0.9.5)
     link_header (0.0.8)
     loofah (2.19.1)
       crass (~> 1.0.2)
@@ -507,6 +508,7 @@ DEPENDENCIES
   hamlit
   importmap-rails
   jbuilder
+  libreconv
   mods
   noid-rails!
   pg
