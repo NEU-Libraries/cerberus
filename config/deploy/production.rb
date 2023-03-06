@@ -112,5 +112,5 @@ after 'deploy:updating', 'deploy:copy_yml_file'
 after 'deploy:updating', 'deploy:whenever'
 after 'deploy:updating', 'deploy:assets_kludge'
 
-after 'deploy:finished', 'deploy:flush_redis'
+# after 'deploy:finished', 'deploy:flush_redis'
 after 'deploy:finished', 'deploy:start_httpd'
