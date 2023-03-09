@@ -4,6 +4,7 @@ volumes:
   solr:
   db:
   storage:
+  jobs:
 services:
   db:
     image: postgres:14
