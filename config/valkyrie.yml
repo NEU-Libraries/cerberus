@@ -4,7 +4,7 @@ development:
 
 staging:
   metadata_adapter: composite_persister
-  storage_adapter: disk
+  storage_adapter: s3
 
 test:
   metadata_adapter: composite_persister

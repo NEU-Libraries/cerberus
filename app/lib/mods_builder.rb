@@ -11,10 +11,10 @@ module MODSBuilder
                'xmlns:dwr' => 'http://rs.tdwg.org/dwc/xsd/simpledarwincore/') do
         xml.parent.namespace = xml.parent.namespace_definitions.find { |ns| ns.prefix == 'mods' }
         xml.titleInfo('usage' => 'primary') do
-          xml.title
+          xml.title ''
         end
         xml.titleInfo('type' => 'alternative') do
-          xml.title
+          xml.title ''
         end
         xml.abstract
         xml.name('type' => 'personal')

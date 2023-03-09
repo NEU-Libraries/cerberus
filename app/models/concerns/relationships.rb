@@ -9,7 +9,11 @@ module Relationships
       Valkyrie.config.metadata_adapter.query_service.find_by_alternate_identifier(alternate_identifier: id)
     rescue Valkyrie::Persistence::ObjectNotFoundError
       # try standard valkyrie
-      Valkyrie.config.metadata_adapter.query_service.find_by(id: id)
+      begin
+        Valkyrie.config.metadata_adapter.query_service.find_by(id: id)
+      rescue Valkyrie::Persistence::ObjectNotFoundError
+        nil
+      end
     end
   end
 

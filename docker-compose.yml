@@ -20,6 +20,17 @@ services:
     entrypoint: /home/cerberus/web/docker-entrypoint.sh
     ports:
       - 3000:3000
+  jobs:
+    image: nakatomi/cerberus_web
+    entrypoint: /home/cerberus/web/jobs-entrypoint.sh
+  redis:
+    image: redis:alpine
+    restart: always
+    ports:
+      - '6379:6379'
+    command: redis-server
+    volumes:
+      - jobs:/data
   solr:
     image: nakatomi/blacklight-solr
     ports:
