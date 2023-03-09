@@ -19,10 +19,7 @@ module Modsable
 
   def mods_xml=(raw_xml)
     blob = mods_blob
-    # need to amend parent method to allow for inverse if direct isn't available
-    parent = Valkyrie.config.metadata_adapter.query_service.find_inverse_references_by(resource: blob,
-                                                                                       property: :member_ids).first
-    blob.file_identifiers += [create_file(write_tmp_xml(raw_xml), parent).id]
+    blob.file_identifiers += [create_file(write_tmp_xml(raw_xml), blob).id]
     Valkyrie.config.metadata_adapter.persister.save(resource: blob)
 
     self.mods_json = raw_xml
