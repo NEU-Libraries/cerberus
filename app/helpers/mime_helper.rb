@@ -7,10 +7,21 @@ module MimeHelper
 
     classification = sub_type_check(mime_type[:sub_type])
     classification = raw_type_check(mime_type[:raw_type]) if classification.blank?
-    classification = ext_check(File.extname(file_path).sub!('.', '')) if classification.blank?
+    classification = ext_check(file_path) if classification.blank?
     return Classification.generic if classification.blank?
 
     classification
+  end
+
+  def ext_check(file_path)
+    ext = File.extname(file_path).sub!('.', '')
+    if %w[docx doc].include?(ext)
+      Classification.text
+    elsif %w[xls xlsx xlw].include?(ext)
+      Classification.spreadsheet
+    elsif %w[ppt pptx pps ppsx].include?(ext)
+      Classification.presentation
+    end
   end
 
   private
@@ -34,16 +45,6 @@ module MimeHelper
         Classification.audio
       when 'text'
         Classification.text
-      end
-    end
-
-    def ext_check(ext)
-      if %w[docx doc].include?(ext)
-        Classification.text
-      elsif %w[xls xlsx xlw].include?(ext)
-        Classification.spreadsheet
-      elsif %w[ppt pptx pps ppsx].include?(ext)
-        Classification.presentation
       end
     end
 
