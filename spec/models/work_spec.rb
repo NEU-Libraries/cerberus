@@ -4,6 +4,8 @@
 require 'rails_helper'
 require 'valkyrie/specs/shared_specs'
 
+include MODSBuilder
+
 RSpec.describe Work do
   let(:resource_klass) { described_class }
   let(:work) { FactoryBot.create_for_repository(:work) }
@@ -11,6 +13,10 @@ RSpec.describe Work do
 
   it 'has default XML' do
     expect(work.mods_xml).not_to be(nil)
+  end
+
+  it 'doesn\'t have an xml binary by default' do
+    expect(work.mods_blob.file).to be(nil)
   end
 
   it 'allows for plain title assignment' do

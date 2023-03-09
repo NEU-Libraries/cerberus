@@ -10,8 +10,14 @@ class Blob < Resource
   # fast lookup for MODS
   attribute :descriptive_metadata_for, Valkyrie::Types::ID.optional
 
-  def file_path
-    file_identifiers.last.id.split('disk://')[1]
+  def latest_revision
+    return nil if file_identifiers.blank?
+    file_identifiers.last.id
+  end
+
+  def file
+    return nil if latest_revision.blank?
+    Valkyrie.config.storage_adapter.find_by(id: latest_revision)
   end
 
   def extension

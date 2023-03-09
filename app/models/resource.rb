@@ -25,4 +25,8 @@ class Resource < Valkyrie::Resource
   def decorate
     ActiveDecorator::Decorator.instance.decorate(self)
   end
+
+  def to_solr
+    SolrDocument.find(id.to_s)
+  end
 end

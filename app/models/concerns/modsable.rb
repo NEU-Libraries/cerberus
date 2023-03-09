@@ -5,15 +5,16 @@ module Modsable
   include MODSAssignment
   include MODSBuilder
   include MODSToJson
+  include FileHelper
 
   def mods
     Metadata::MODS.find_or_create_by(valkyrie_id: noid)
   end
 
   def mods_xml
-    return mods_template if mods_blob.blank? || mods_blob&.file_path
+    return mods_template if mods_blob.file.blank?
 
-    Nokogiri::XML(File.read(mods_blob&.file_path), &:noblanks).to_s
+    Nokogiri::XML(mods_blob.file.read, &:noblanks).to_s
   end
 
   def mods_xml=(raw_xml)
@@ -41,14 +42,6 @@ module Modsable
   end
 
   private
-
-    def create_file(file_path, resource, original_filename = file_path.split('/').last)
-      Valkyrie.config.storage_adapter.upload(
-        file: File.open(file_path), # tei, png, txt
-        resource: resource,
-        original_filename: original_filename
-      )
-    end
 
     def write_tmp_xml(raw_xml)
       xml_path = Rails.root.join('tmp', "#{Time.now.to_f.to_s.gsub!('.', '-')}.xml").to_s
