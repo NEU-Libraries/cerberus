@@ -17,8 +17,12 @@ module Derivatives
         Libreconv.convert(new_file.path, derivative_path)
 
         fs = FileSetCreator.call(work_id: work_id, classification: Classification.derivative)
-        b = Blob.new
-        b.file_identifiers += [create_file(derivative_path, fs).id]
+        b = Valkyrie.config.metadata_adapter.persister.save(resource: Blob.new)
+
+        fs.member_ids += [b.id]
+        Valkyrie.config.metadata_adapter.persister.save(resource: fs)
+
+        b.file_identifiers += [create_file(derivative_path, b).id]
         Valkyrie.config.metadata_adapter.persister.save(resource: b)
       end
     end

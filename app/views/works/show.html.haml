@@ -5,6 +5,10 @@
 
 - @work.children.each do |c|
   = "#{c.type} - #{c.children.count}"
+  %ul
+    - c.children.each do |b|
+      %li
+        = b.file_identifiers.inspect
   %br
 
 %br
