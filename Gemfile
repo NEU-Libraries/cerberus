@@ -54,7 +54,7 @@ gem 'mods_display', :git => 'https://github.com/NEU-Libraries/mods_display.git',
 gem 'parseconfig'
 gem 'nokogiri', '~> 1.6.2.1'
 gem 'nokogiri-diff'
-gem 'namae'
+gem 'namae', '1.1.1'
 # Monitoring
 gem 'lograge'
 gem 'exception_notification'
