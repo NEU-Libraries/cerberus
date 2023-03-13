@@ -144,6 +144,8 @@ en:
       name: "EMSA - EMC General Staff"
     northeastern:drs:enrollment_management:emsa:
       name: "EMSA Staff"
+    northeastern:drs:extended_reality:xr-staff:
+      name: "Extended Reality Project Team"
     northeastern:drs:facilities:archive_staff:
       name: "Facilities Division - Archive Staff"
     northeastern:drs:faculty_senate:staff:
