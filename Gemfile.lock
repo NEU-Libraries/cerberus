@@ -338,7 +338,7 @@ GEM
     multi_json (1.7.9)
     multipart-post (2.0.0)
     mysql2 (0.3.14)
-    namae (1.1.1)
+    namae (0.8.7)
     nest (1.1.2)
       redis
     net-scp (1.2.1)
@@ -615,7 +615,7 @@ DEPENDENCIES
   mods_display!
   multi_json (~> 1.7.9)
   mysql2 (= 0.3.14)
-  namae (= 1.1.1)
+  namae (= 0.8.7)
   nest (~> 1.1.1)
   noid (~> 0.6.6)
   nokogiri (~> 1.6.2.1)
