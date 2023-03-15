@@ -20,7 +20,7 @@ class DerivativeCreator < ApplicationService
       # if FileSet is text && is a word document, kick off PDF derivative job
       if (classification == Classification.text) && (ext_check(@file_path) == Classification.text)
         # Run job
-        Derivatives::PdfJob.perform_async(file_id, @work_id)
+        Derivatives::PdfJob.perform_async(@file_id, @work_id)
       end
     end
 end

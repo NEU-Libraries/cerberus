@@ -8,7 +8,7 @@ SimpleCov.start 'rails' do
   add_filter 'app/channels'
   add_filter 'lib/cerberus/vocab'
   add_filter 'app/indexers'
-  minimum_coverage 90
+  minimum_coverage 95
 end
 
 # This file is copied to spec/ when you run 'rails generate rspec:install'
@@ -43,6 +43,11 @@ rescue ActiveRecord::PendingMigrationError => e
   abort e.to_s.strip
 end
 RSpec.configure do |config|
+
+  config.before(:suite) do
+    Valkyrie.config.metadata_adapter.persister.wipe!
+  end
+
   config.include Devise::Test::ControllerHelpers, type: :controller
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
   config.fixture_path = "#{::Rails.root}/spec/fixtures"
