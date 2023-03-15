@@ -13,6 +13,7 @@ FactoryBot.define do
     end
 
     trait :metadata do
+      type { Classification.descriptive_metadata.name }
       member_ids { FactoryBot.create_for_repository(:blob, descriptive_metadata_for: work.id).id }
     end
 
@@ -21,11 +22,18 @@ FactoryBot.define do
     end
 
     trait :pdf do
+      type { Classification.text.name }
       member_ids { FactoryBot.create_for_repository(:blob, :pdf).id }
     end
 
     trait :png do
+      type { Classification.image.name }
       member_ids { FactoryBot.create_for_repository(:blob, :png).id }
+    end
+
+    trait :word do
+      type { Classification.text.name }
+      member_ids { FactoryBot.create_for_repository(:blob, :word).id }
     end
   end
 end
