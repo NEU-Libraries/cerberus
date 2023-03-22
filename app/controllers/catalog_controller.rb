@@ -6,7 +6,8 @@ class CatalogController < ApplicationController
   self.search_state_class = SearchState
 
   configure_blacklight do |config|
-    config.track_search_session = false
+    # config.track_search_session = false
+    config.track_search_session.storage = false
     config.autocomplete_enabled = false
     config.autocomplete_path = nil
     ## Class for sending and receiving requests from a search index

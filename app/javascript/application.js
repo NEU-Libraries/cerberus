@@ -3,9 +3,8 @@ import "@hotwired/turbo-rails"
 import "controllers"
 import $ from "jquery"
 import bootstrap from "bootstrap"
-window.bootstrap = bootstrap // Required for Blacklight 7 so it can manage the modals
-window.$ = $ // required as long as blacklight requires jquery
-import "blacklight"
+import githubAutoCompleteElement from "@github/auto-complete-element"
+import Blacklight from "blacklight"
 
 import {far} from "@fortawesome/free-regular-svg-icons"
 import {fas} from "@fortawesome/free-solid-svg-icons"

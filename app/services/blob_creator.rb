@@ -28,11 +28,7 @@ class BlobCreator < ApplicationService
       b.file_identifiers += [file_id]
       Valkyrie.config.metadata_adapter.persister.save(resource: b)
 
-      # TODO: make a derivative handler that just takes a path and runs all the logic
-      # if FileSet is text && is a word document, kick off PDF derivative job
-      if (classification == Classification.text) && (ext_check(@path) == Classification.text)
-        # Run job
-        Derivatives::PdfJob.perform_async(file_id, @work_id)
-      end
+      # Hand-off to the derivative service
+      DerivativeCreator.call(work_id: @work_id, file_id: file_id, file_path: @path)
     end
 end
