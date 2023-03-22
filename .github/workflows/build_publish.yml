@@ -1,4 +1,4 @@
-name: Build-Test-Publish
+name: Build-Publish
 
 on:
   workflow_run:
@@ -9,7 +9,7 @@ on:
 
 jobs:
 
-  build_test_publish:
+  build_and_publish:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -27,27 +27,6 @@ jobs:
         docker load -i ~/caches/cerberus.tar | true
     - name: Build the Docker image
       run: docker build --cache-from=nakatomi/cerberus_web:latest . --file Dockerfile --tag nakatomi/cerberus_web:latest --tag nakatomi/cerberus_web:$(cat .version)
-    - name: Save Docker image
-      run: |
-        mkdir -p ~/caches
-        docker save -o ~/caches/cerberus.tar nakatomi/cerberus_web
-    - name: Setup dockerize
-      uses: zcong1993/setup-dockerize@v2.0.0
-    - name: Start server
-      run: |
-        set -x
-        docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d
-    - name: Create database and migrate
-      run: |
-        docker-compose exec -T web bundle exec rake db:create
-        docker-compose exec -T web bundle exec rake db:migrate
-    - name: Wait until available
-      run: dockerize -wait http://localhost:3000 -timeout 1m
-    - name: Run tests
-      run: |
-        docker-compose exec -T web cc-test-reporter before-build
-        docker-compose exec -T web bundle exec rake
-        docker-compose exec -T web cc-test-reporter after-build --coverage-input-type simplecov --exit-code $?
     -  name: Publish
        run: |
             echo "${{ secrets.DOCKERHUB_PASS }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
