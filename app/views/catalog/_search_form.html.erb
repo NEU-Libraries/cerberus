@@ -7,7 +7,7 @@
   </h5>
 
   <%= form_tag('/catalog', method: :get, class: 'search-query-form container-fluid me-0 pe-0') do -%>
-    <%= render Blacklight::HiddenSearchStateComponent.new(params: Blacklight::SearchState.normalize_params(params)) %>
+    <%= render Blacklight::HiddenSearchStateComponent.new(params: params) %>
     <div class="input-group">
       <input type="text" class="form-control" placeholder="Search..." id="q" name="q" value="<%= params[:q] %>">
       <button class="btn btn-primary" type="submit">
