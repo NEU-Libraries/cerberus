@@ -1,4 +1,4 @@
-name: Build, Test and Publish
+name: Build-Test
 
 on:
   push:
@@ -8,12 +8,10 @@ on:
 
 jobs:
 
-  build_test_publish:
+  build_and_test:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - name: Check version is not already published
-      run: scripts/tag_check.sh $(cat .version)
     - name: Github Action cache
       uses: actions/cache@v3
       with:
@@ -47,9 +45,3 @@ jobs:
         docker-compose exec -T web cc-test-reporter before-build
         docker-compose exec -T web bundle exec rake
         docker-compose exec -T web cc-test-reporter after-build --coverage-input-type simplecov --exit-code $?
-    -  name: Publish
-       run: |
-            echo "${{ secrets.DOCKERHUB_PASS }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
-            docker push nakatomi/cerberus_web:latest
-            docker tag nakatomi/cerberus_web:latest nakatomi/cerberus_web:$(cat .version)
-            docker push nakatomi/cerberus_web:$(cat .version)

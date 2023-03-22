@@ -1,0 +1,35 @@
+name: Build-Publish
+
+on:
+  workflow_run:
+    workflows:
+      - Build-Test
+    types:
+      - completed
+
+jobs:
+
+  build_and_publish:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Check version is not already published
+      run: scripts/tag_check.sh $(cat .version)
+    - name: Github Action cache
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/caches
+        key: ${{ runner.os }}-${{ hashFiles('Gemfile.lock') }}
+    - name: Load Docker image
+      run: |
+        set +o pipefail
+        docker load -i ~/caches/cerberus.tar | true
+    - name: Build the Docker image
+      run: docker build --cache-from=nakatomi/cerberus_web:latest . --file Dockerfile --tag nakatomi/cerberus_web:latest --tag nakatomi/cerberus_web:$(cat .version)
+    -  name: Publish
+       run: |
+            echo "${{ secrets.DOCKERHUB_PASS }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+            docker push nakatomi/cerberus_web:latest
+            docker tag nakatomi/cerberus_web:latest nakatomi/cerberus_web:$(cat .version)
+            docker push nakatomi/cerberus_web:$(cat .version)
