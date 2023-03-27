@@ -24,6 +24,7 @@ Cerberus::Application.routes.draw do
   # get 'collections/:id/titles' => "collections#title_list", as:"collection_title_list"
   get 'collections/:id/export_mods' => "collections#export_mods", as: "export_collection_mods"
   get 'collections/:id/export_manifest' => "collections#export_manifest", as: "export_collection_manifest"
+  get 'collections/:id/pids' => "collections#pids", as: "collection_pids"
 
   resources :communities, only: [:show]
 
@@ -86,6 +87,7 @@ Cerberus::Application.routes.draw do
   get "/sets/:id/check" => 'compilations#check_multiple_entries', as: 'check_multi'
   get '/sets/:id/export_mods' => "compilations#export_mods", as: "export_compilation_mods"
   get '/sets/:id/export_manifest' => "compilations#export_manifest", as: "export_compilation_manifest"
+  get '/sets/:id/pids' => "compilations#pids", as: "compilation_pids"
 
   get "/files/:id/provide_metadata" => "core_files#provide_metadata", as: "files_provide_metadata"
   post "/files/:id/process_metadata" => "core_files#process_metadata", as: "files_process_metadata"

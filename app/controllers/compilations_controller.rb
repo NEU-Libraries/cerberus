@@ -13,7 +13,7 @@ class CompilationsController < ApplicationController
   include BlacklightAdvancedSearch::ParseBasicQ
   include BlacklightAdvancedSearch::Controller
 
-  before_filter :authenticate_user!, except: [:show, :show_download, :download, :ping_download, :get_total_count, :total_count, :export_mods, :export_manifest]
+  before_filter :authenticate_user!, except: [:show, :show_download, :download, :ping_download, :get_total_count, :total_count, :export_mods, :export_manifest, :pids]
 
   before_filter :can_edit?, only: [:edit, :update, :destroy, :add_entry, :delete_entry, :add_multiple_entries, :delete_multiple_entries]
   before_filter :can_read?, only: [:show, :show_download, :download]
@@ -41,6 +41,17 @@ class CompilationsController < ApplicationController
       flash[:error] = "You do not have the permissions to peform this action."
     end
     redirect_to compilation_path(params[:id]) and return
+  end
+
+  def pids
+    if current_user.xml_loader?
+      pids = SolrDocument.new(ActiveFedora::Base.find(params[:id], cast: true).to_solr).all_descendent_pids
+      pid_string = pids.join("\n")
+      send_data(pid_string, :type => 'text/plain', :disposition => 'inline')
+    else
+      flash[:error] = "You do not have the permissions to peform this action."
+      redirect_to collection_path(params[:id]) and return
+    end
   end
 
   def index

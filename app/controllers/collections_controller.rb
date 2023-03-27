@@ -23,7 +23,7 @@ class CollectionsController < ApplicationController
 
   helper_method :sort_value
 
-  before_filter :authenticate_user!, only: [:new, :edit, :create, :update, :destroy, :export_mods, :export_manifest]
+  before_filter :authenticate_user!, only: [:new, :edit, :create, :update, :destroy, :export_mods, :export_manifest, :pids]
 
   # We can do better by using SOLR check instead of Fedora
   before_filter :can_read?, only: [:show, :creator_list, :title_list, :recent_deposits]
@@ -228,6 +228,17 @@ class CollectionsController < ApplicationController
       flash[:error] = "You do not have the permissions to peform this action."
     end
     redirect_to collection_path(params[:id]) and return
+  end
+
+  def pids
+    if current_user.xml_loader?
+      pids = SolrDocument.new(ActiveFedora::Base.find(params[:id], cast: true).to_solr).all_descendent_pids
+      pid_string = pids.join("\n")
+      send_data(pid_string, :type => 'text/plain', :disposition => 'inline')
+    else
+      flash[:error] = "You do not have the permissions to peform this action."
+      redirect_to collection_path(params[:id]) and return
+    end
   end
 
   def update
