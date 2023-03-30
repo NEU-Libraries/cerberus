@@ -52,7 +52,10 @@ class PrivatizeCollectionJob
         x = ActiveFedora::Base.find(doc.pid, cast: true)
         x.mass_permissions = "private"
         x.save!
-        x.propagate_metadata_changes!
+        if x.class == CoreFile
+          # Core File only method - need to check x class
+          x.propagate_metadata_changes!
+        end
       end
     end
 
