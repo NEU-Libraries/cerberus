@@ -93,7 +93,7 @@ class EmployeesController < ApplicationController
     else
       flash[:error] = "You do not have the permissions to peform this action."
     end
-    redirect_to compilation_path(params[:id]) and return
+    redirect_to root_path and return
   end
 
   def my_loaders
