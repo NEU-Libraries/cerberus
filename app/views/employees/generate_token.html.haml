@@ -1,0 +1,15 @@
+-content_for :page_header do
+  %h1.page-header
+    API Token
+
+%ul.breadcrumb
+  %li
+    = link_to 'My Loaders', '/my_loaders'
+  %li.active
+    = "API Token"
+
+.row
+  .span12
+    = @token
+    .small
+      "This token will expire at #{@time}"

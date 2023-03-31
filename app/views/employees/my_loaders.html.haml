@@ -25,6 +25,12 @@
 
 %section.row
   %article.span4
+    - if !current_user.nil? && current_user.xml_loader?
+      %h3 API
+      =link_to("Generate Token", generate_token_path, class: "btn btn-lg btn-primary")
+      %br
+      %br
+
     - if !current_user.nil? && current_user.spreadsheet_loader?
       %h3 Validate
       =link_to("Spreadsheet", new_spreadsheet_validation_path, class: "btn btn-lg btn-primary")

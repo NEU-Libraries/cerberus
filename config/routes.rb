@@ -131,6 +131,7 @@ Cerberus::Application.routes.draw do
   get '/employees/:id/communities' => 'employees#communities', as: 'employee_communities'
   get '/employees/:id/loaders' => 'employees#loaders', as: 'employee_loaders'
   get '/my_loaders' => 'employees#my_loaders', as: 'my_loaders'
+  get '/employees/:id/generate_token' => 'employees#generate_token', as: 'generate_token'
 
   get '/select_account' => 'users#select_account', as: 'select_account'
   get '/switch_user' => 'users#switch_user', as: 'switch_user'

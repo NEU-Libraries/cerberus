@@ -86,6 +86,16 @@ class EmployeesController < ApplicationController
     @communities.sort_by!{|c| Community.find(c).title}
   end
 
+  def generate_token
+    if current_user.xml_loader?
+      @time = Time.now + 6.hour
+      @token = JsonWebToken.encode({user_id: user.id, exp: @time.to_i})
+    else
+      flash[:error] = "You do not have the permissions to peform this action."
+    end
+    redirect_to compilation_path(params[:id]) and return
+  end
+
   def my_loaders
     if Employee.exists?(current_user.employee_id)
       fetch_employee
