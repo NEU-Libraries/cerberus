@@ -10,6 +10,7 @@
 
 .row
   .span12
-    = @token
-    .small
-      "This token will expire at #{@time}"
+    %p
+      = @token
+    %small
+      = "This token will expire at #{@time}"
