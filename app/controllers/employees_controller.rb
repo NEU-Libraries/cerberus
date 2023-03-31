@@ -89,11 +89,11 @@ class EmployeesController < ApplicationController
   def generate_token
     if current_user.xml_loader?
       @time = Time.now + 6.hour
-      @token = JsonWebToken.encode({user_id: user.id, exp: @time.to_i})
+      @token = JsonWebToken.encode({user_id: current_user.id, exp: @time.to_i})
     else
       flash[:error] = "You do not have the permissions to peform this action."
+      redirect_to root_path and return
     end
-    redirect_to root_path and return
   end
 
   def my_loaders
