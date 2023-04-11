@@ -50,7 +50,7 @@
   -if !defined?(remote)
     .form-actions
       = render partial: 'shared/sets/privatize_modal', locals: { f: f }
-      %input{ id: "privatize_btn", :class => ["btn", "btn-primary"], type: "submit", value: "Submit" }
+      %input{ id: "privatize_btn", :class => ["btn", "btn-primary"], type: "submit", value: "Submit", data: { disable_with: "Please wait..."} }
       - if params[:action] == "edit"
         / Only specifying collection here, because community is behind /admin and has it's own partial
         %a{ href: "#cancelEditModal", :class => ["btn", "btn-warning"], data: { toggle: "modal" } }
@@ -82,11 +82,9 @@
         $( "#privatize_btn" ).attr("href", "#privatizeModal");
         $( "#privatize_btn" ).attr("data-toggle", "modal");
         $( "#privatize_btn" ).attr("button");
-        $( "#privatize_btn" ).removeAttr("data-disable-with");
       }
       else{
         $( "#privatize_btn" ).attr("type", "submit");
-        $( "#privatize_btn" ).attr("data-disable-with", "Please wait...");
         $( "#privatize_btn" ).removeAttr("data-toggle");
         $( "#privatize_btn" ).removeAttr("href");
       }
