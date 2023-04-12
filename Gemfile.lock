@@ -270,7 +270,7 @@ GEM
       net-protocol
     nio4r (2.5.8)
     noid (0.9.0)
-    nokogiri (1.14.0-x86_64-linux)
+    nokogiri (1.14.3-x86_64-linux)
       racc (~> 1.4)
     nom-xml (1.2.0)
       i18n
