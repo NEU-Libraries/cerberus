@@ -6,10 +6,14 @@ module HandleHelper
     if client != nil
       handler = Proc.new do |exception, attempt_number, total_delay|
         logger.warn "Handler saw a #{exception.class}; retry attempt #{attempt_number}; #{total_delay} seconds have passed."
-        client.query("ROLLBACK;")
+        begin # ROLLBACK can throw Duplicate entry for key 'PRIMARY'
+          client.query("ROLLBACK;")
+        rescue Exception => error
+          #
+        end
       end
 
-      with_retries(:max_tries => 10, :handler => handler) do
+      with_retries(:max_tries => 20, :handler => handler) do
         uts                      = Time.now.to_i
         caldate                  = Date.today.strftime("%Y-%m-%d")
         handleInt                = client.query("SELECT handle from handles ORDER BY handle DESC LIMIT 1").first.first[1].partition('2047/D').last.to_i
