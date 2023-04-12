@@ -7,6 +7,7 @@ module HandleHelper
       handler = Proc.new do |exception, attempt_number, total_delay|
         logger.warn "Handler saw a #{exception.class}; retry attempt #{attempt_number}; #{total_delay} seconds have passed."
         begin # ROLLBACK can throw Duplicate entry for key 'PRIMARY'
+          sleep 1
           client.query("ROLLBACK;")
         rescue Exception => error
           #
