@@ -50,9 +50,9 @@ class CoreFilesController < ApplicationController
 
   before_filter :valid_form_permissions?, only: [:process_metadata, :update]
 
-  before_filter :verify_staff_or_beta, only: [:validate_xml, :edit_xml]
+  before_filter :verify_staff_or_beta, only: [:validate_xml, :edit_xml, :associate, :disassociate]
 
-  before_filter :verify_admin, only: [:reindex, :create_attached_file, :new_attached_file, :provide_file_metadata, :process_file_metadata, :destroy_content_object, :associate, :disassociate]
+  before_filter :verify_admin, only: [:reindex, :create_attached_file, :new_attached_file, :provide_file_metadata, :process_file_metadata, :destroy_content_object]
 
   self.solr_search_params_logic += [:add_access_controls_to_solr_params]
 
