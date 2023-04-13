@@ -276,7 +276,7 @@ class ImageProcessingJob
       report = load_report.item_reports.create_failure(error.message, iptc, Unidecoder.decode(File.basename(file_name)))
       FileUtils.rm(file)
       core_file.destroy
-      raise error
+      # raise error
     end
   end
 
