@@ -1,0 +1,3 @@
+Clamby.configure({
+  :daemonize => true
+})
