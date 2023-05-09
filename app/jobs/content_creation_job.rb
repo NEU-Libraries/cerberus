@@ -140,10 +140,6 @@ class ContentCreationJob
         content_object.extract_content
       end
 
-      if (content_object.instance_of? ImageMasterFile)
-         ScaledImageCreator.new(small_size, medium_size, large_size, content_object.pid).create_scaled_images
-      end
-
       # Derivative creator loads into memory, we're skipping for large files
       if File.size(file_path) / 1024000 < 500
         DerivativeCreator.new(content_object.pid).generate_derivatives
@@ -153,8 +149,15 @@ class ContentCreationJob
       # overriden if we save this open copy of the core record without
       # reloading it first
       core_record.reload
-      core_record.tag_as_completed
       core_record.save!
+
+      if (content_object.instance_of? ImageMasterFile)
+        #  ScaledImageCreator.new(small_size, medium_size, large_size, content_object.pid).create_scaled_images
+        Cerberus::Application::Queue.push(ScaledImageJob.new(small_size, medium_size, large_size, content_object.pid, core_file_pid))
+      else
+        core_record.tag_as_completed
+        core_record.save!
+      end
 
       # Fire off a backgrounded virus check
       Cerberus::Application::Queue.push(VirusCheckJob.new(content_object.fedora_file_path, core_file_pid))
