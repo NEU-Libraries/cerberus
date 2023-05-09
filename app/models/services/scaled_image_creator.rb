@@ -82,7 +82,8 @@ class ScaledImageCreator
           end
         end
 
-        img = Magick::Image.from_blob(master.content.content).first
+        # img = Magick::Image.from_blob(master.content.content).first
+        img = Magick::Image.read(master.fedora_file_path).first
         img.format = "JPEG"
         img.interlace = Magick::PlaneInterlace
         img.resize!(size)
