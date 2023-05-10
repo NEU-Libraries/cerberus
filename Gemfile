@@ -83,6 +83,8 @@ gem 'google-analytics-rails', '1.1.1'
 
 gem 'jwt', '1.5.6'
 
+gem "clamby"
+
 # gem 'rack-cors', require: false
 
 # Gems used only for assets and not required
@@ -105,9 +107,9 @@ group :development do
   gem 'rb-readline'
 end
 
-group :secondary do
-  gem "clamby"
-end
+# group :secondary do
+#   gem "clamby"
+# end
 
 group :development, :test do
   gem 'guard-livereload'
