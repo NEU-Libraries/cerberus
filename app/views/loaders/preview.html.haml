@@ -58,7 +58,7 @@
         = select_tag "depositor", options_for_select(@depositor_options)
         %br
         = link_to("Cancel Load", send("loaders_#{@loader_short_name}_cancel_load_path", @report.id), class: "btn btn-danger")
-        = submit_tag "Proceed with Load", :class => "btn btn-success pull-right"
+        = submit_tag "Proceed with Load", :class => "btn btn-success pull-right", data: { disable_with: "Please wait..."}
 
 :javascript
   $(document).ready(function() {
