@@ -103,7 +103,7 @@ end
 # These hooks execute in the listed order after the deploy:updating task
 # occurs.  This is the task that handles refreshing the app code, so this
 # should only fire on actual deployments.
-before 'deploy:starting', 'deploy:stop_httpd'
+# before 'deploy:starting', 'deploy:stop_httpd'
 before 'deploy:starting', 'deploy:update_clamav'
 
 after 'deploy:updating', 'bundler:install'
@@ -113,4 +113,5 @@ after 'deploy:updating', 'deploy:whenever'
 after 'deploy:updating', 'deploy:assets_kludge'
 
 # after 'deploy:finished', 'deploy:flush_redis'
+before 'deploy:publishing', 'deploy:stop_httpd'
 after 'deploy:finished', 'deploy:start_httpd'
