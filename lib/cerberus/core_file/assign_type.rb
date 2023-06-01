@@ -95,8 +95,13 @@ module Cerberus
             hsh[:dc] = "Interactive Resource"
             hsh[:mods] = "software, multimedia"
           elsif self.canonical_class.constantize == ZipFile
-            hsh[:dc] = "Collection"
-            hsh[:mods] = "software, multimedia"
+            if self.page_objects.length > 1
+              hsh[:dc] = "Image"
+              hsh[:mods] = "still image"
+            else
+              hsh[:dc] = "Collection"
+              hsh[:mods] = "software, multimedia"
+            end
           end
         end
 
