@@ -13,7 +13,7 @@ RSpec.describe WorkCreator do
       expect(work.children.count).to eq(2)
       expect(work.children.map { |fs| fs.type }.sort).to eq([Classification.descriptive_metadata.name, Classification.text.name].sort)
 
-      DerivativeCreator.call(work_id: work.id, file_id: file_set.files.first.file_identifiers.first, file_path: 'example.docx')
+      DerivativeCreator.call(work_id: work.id, file_id: file_set.files.first.file_identifiers.first.to_s, file_path: 'example.docx')
       expect(work.reload.children.count).to eq(3)
       expect(work.children.map { |fs| fs.type }.sort).to eq([Classification.descriptive_metadata.name, Classification.text.name, Classification.derivative.name].sort)
 
