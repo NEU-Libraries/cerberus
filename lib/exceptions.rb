@@ -142,6 +142,12 @@ module Exceptions
     end
   end
 
+  class MissingCreator < StandardError
+    def initialize
+      super "Creator name could not be parsed. Please check the formatting of the photographer name in the IPTC creator field."
+    end
+  end
+
   class MissingMetadata < StandardError
     def initialize(required_data)
       super "No valid #{required_data} in xml"

@@ -149,8 +149,10 @@ class ImageProcessingJob
                     modified_message = "By-line parsed into Last Name, First Name format."
                     modified = true
                   else
-                    create_special_error("Incorrectly formatted By-line", iptc, core_file, load_report)
-                    return
+                    pers = {} # setting to blank and allowing DPS to fix in post
+                    ExceptionNotifier.notify_exception(Exceptions::MissingCreator.new(), :data => {:pid => "#{core_file.pid}"})
+                    # create_special_error("Incorrectly formatted By-line", iptc, core_file, load_report)
+                    # return
                   end
                 end
                 core_file.creators = pers
