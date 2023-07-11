@@ -150,9 +150,10 @@ class ImageProcessingJob
                     modified = true
                   else
                     pers = {} # setting to blank and allowing DPS to fix in post
-                    ExceptionNotifier.notify_exception(Exceptions::MissingCreator.new(), :data => {:pid => "#{core_file.pid}"})
-                    # create_special_error("Incorrectly formatted By-line", iptc, core_file, load_report)
-                    # return
+                    # ExceptionNotifier.notify_exception(Exceptions::MissingCreator.new(), :data => {:pid => "#{core_file.pid}"})
+                    IptcMailer.iptc_alert(core_file.pid).deliver!
+                    modified_message = "Byline could not be parsed. Please format the photographer name as 'Lastname, Firstname'."
+                    modified = true
                   end
                 end
                 core_file.creators = pers
