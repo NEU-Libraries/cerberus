@@ -184,6 +184,8 @@ Cerberus::Application.routes.draw do
    get "/loaders/camd/file/:id" => 'camd_loads#show_iptc', as: 'loaders_camd_iptc'
    resources :cos_media_loads, only: [:new, :create, :show], :path => "loaders/cos_media"
    get "/loaders/cos_media/file/:id" => 'cos_media_loads#show_iptc', as: 'loaders_cos_media_iptc'
+   resources :wiot_loads, only: [:new, :create, :show], :path => "loaders/wiot"
+   get "/loaders/wiot/file/:id" => 'wiot_loads#show_iptc', as: 'loaders_wiot_iptc'
    resources :spreadsheet_loads, only: [:new, :create, :preview, :preview_compare], :path => "loaders/spreadsheet"
    get "/loaders/spreadsheet/preview/:id" => 'spreadsheet_loads#preview',  as: 'loaders_spreadsheet_preview'
    get "/loaders/spreadsheet/preview_compare/:id" => 'spreadsheet_loads#preview_compare', as: 'loaders_spreadsheet_preview_compare'
