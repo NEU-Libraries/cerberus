@@ -3,7 +3,7 @@ module Cerberus
     extend ActiveSupport::Concern
 
     included do
-      def self.save(*)
+      def save(*)
 
         retries = 0
         max_retries = 3
