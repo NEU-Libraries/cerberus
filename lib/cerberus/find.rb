@@ -14,7 +14,7 @@ module Cerberus
         rescue SystemCallError => e
           if retries <= max_retries
             retries += 1
-            max_sleep_seconds = Float(2 ** retries)
+            max_sleep_seconds = Float(2 ** retries) / 5
             sleep rand(0..max_sleep_seconds)
             retry
           else
