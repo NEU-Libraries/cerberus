@@ -5,6 +5,7 @@ class Compilation < ActiveFedora::Base
   include ActiveModel::MassAssignmentSecurity
   include Cerberus::MetadataAssignment
   include Cerberus::Find
+  include Cerberus::Persist
   include Cerberus::Rights::MassPermissions
   include Cerberus::Rights::PermissionsAssignmentHelper
 

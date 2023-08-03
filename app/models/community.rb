@@ -8,6 +8,7 @@ class Community < ActiveFedora::Base
   include Cerberus::MetadataAssignment
   include Cerberus::Relationships
   include Cerberus::Find
+  include Cerberus::Persist
 
   has_metadata name: 'DC', type: DublinCoreDatastream
   has_metadata name: 'mods', type: ModsDatastream
@@ -18,7 +19,7 @@ class Community < ActiveFedora::Base
   has_file_datastream "thumbnail_2", type: FileContentDatastream
   has_file_datastream "thumbnail_3", type: FileContentDatastream
 
-  attr_accessible :title, :description, :parent  
+  attr_accessible :title, :description, :parent
   attr_protected :identifier
 
   has_many :employees, property: :has_affiliation, class_name: "Employee"

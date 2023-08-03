@@ -9,6 +9,7 @@ class Collection < ActiveFedora::Base
   include Cerberus::MetadataAssignment
   include Cerberus::Relationships
   include Cerberus::Find
+  include Cerberus::Persist
 
   validate :belong_check, on: :update
 

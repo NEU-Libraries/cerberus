@@ -3,6 +3,7 @@ class Employee < ActiveFedora::Base
   include ActiveModel::Validations
   include Cerberus::Employee::SmartCollections
   include Cerberus::Find
+  include Cerberus::Persist
   include Cerberus::Rights::MassPermissions
   include ApplicationHelper
 
