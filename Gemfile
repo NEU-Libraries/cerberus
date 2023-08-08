@@ -79,7 +79,7 @@ gem 'axlsx', :git => 'https://github.com/randym/axlsx.git', :ref => '9e07402a26f
 gem 'kataba'
 gem 'passenger'
 
-gem 'google-analytics-rails', '1.1.1'
+# gem 'google-analytics-rails', '1.1.1'
 
 gem 'jwt', '1.5.6'
 

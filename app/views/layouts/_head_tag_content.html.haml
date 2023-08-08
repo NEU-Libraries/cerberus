@@ -24,8 +24,15 @@
 = yield(:js_head)
 
 = javascript_include_tag 'application'
-= analytics_init if GoogleAnalytics.valid_tracker?
+-# = analytics_init if GoogleAnalytics.valid_tracker?
 
 :javascript
   var spinner;
   function enable_spinner (div) { var target = document.getElementById(div); var spinner = new Spinner({}).spin(target); return spinner;};
+
+%script{async: "", src: "https://www.googletagmanager.com/gtag/js?id=G-S3HPS0WE10"}
+:javascript
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-S3HPS0WE10');
