@@ -151,7 +151,6 @@ class ImageProcessingJob
                   else
                     pers = {} # setting to blank and allowing DPS to fix in post
                     # ExceptionNotifier.notify_exception(Exceptions::MissingCreator.new(), :data => {:pid => "#{core_file.pid}"})
-                    IptcMailer.iptc_alert(core_file.pid).deliver!
                     modified_message = "Byline could not be parsed. Please format the photographer name as 'Lastname, Firstname'."
                     modified = true
                   end
@@ -180,6 +179,12 @@ class ImageProcessingJob
               else
                 core_file.mods.origin_info.place.place_term = val
               end
+            elsif tag == 'Subject' && core_file.keywords.first.blank? #backup process for Alyssa missing keyword tag
+              if val.kind_of?(Array)
+                core_file.keywords = val.map #(&:to_s)
+              else
+                core_file.keywords = ["#{val}"]
+              end
             elsif tag == 'State'
               if !core_file.mods.origin_info.place.place_term.blank?
                 core_file.mods.origin_info.place.place_term = "#{core_file.mods.origin_info.place.place_term.first} #{val}"
@@ -205,6 +210,9 @@ class ImageProcessingJob
         if core_file.keywords.first.blank?
           create_special_error("Missing keyword(s)", iptc, core_file, load_report)
           return
+        end
+        if core_file.creators.blank?
+          IptcMailer.iptc_alert(core_file.pid).deliver!
         end
 
         # Featured Content tagging
