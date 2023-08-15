@@ -97,7 +97,7 @@ class ApplicationController < ActionController::Base
         result_hsh = @core_doc
       else
         if !Rails.cache.exist?("/api/#{@core_doc.pid}-#{@core_doc.updated_at}")
-          result_hsh = Rails.cache.fetch("/api/#{@core_doc.pid}-#{@core_doc.updated_at}", :expires_in => 1.week) do
+          result_hsh = Rails.cache.fetch("/api/#{@core_doc.pid}-#{@core_doc.updated_at}", :expires_in => 5.days) do
             @core_file = ActiveFedora::Base.find(pid, cast: true)
             @core_file.to_hash(current_ability)
           end

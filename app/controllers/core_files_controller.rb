@@ -956,13 +956,13 @@ class CoreFilesController < ApplicationController
     end
 
     def fetch_mods
-      Rails.cache.fetch("/mods/#{@core_file.pid}-#{@core_file.updated_at}", :expires_in => 1.week) do
+      Rails.cache.fetch("/mods/#{@core_file.pid}-#{@core_file.updated_at}", :expires_in => 5.days) do
         Sanitize.clean(Kramdown::Document.new(render_mods_display(CoreFile.find(@core_file.pid))).to_html, :elements => ['sup', 'sub', 'dt', 'dd', 'br', 'a'], :attributes => {'a' => ['href']}).html_safe
       end
     end
 
     def fetch_darwin
-      Rails.cache.fetch("/darwin/#{@core_file.pid}-#{@core_file.updated_at}", :expires_in => 1.week) do
+      Rails.cache.fetch("/darwin/#{@core_file.pid}-#{@core_file.updated_at}", :expires_in => 5.days) do
         cf = CoreFile.find(@core_file.pid)
         xml = Nokogiri::XML(cf.mods.content)
 

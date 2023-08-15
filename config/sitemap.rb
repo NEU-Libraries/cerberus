@@ -19,7 +19,7 @@ SitemapGenerator::Sitemap.create do
         # end
 
         # warm cache
-        Rails.cache.fetch("/mods/#{doc.pid}-#{doc.updated_at}", :expires_in => 1.week) do
+        Rails.cache.fetch("/mods/#{doc.pid}-#{doc.updated_at}", :expires_in => 5.days) do
           Sanitize.clean(Kramdown::Document.new(CoreFilesController.new.render_mods_display(CoreFile.find(doc.pid))).to_html, :elements => ['sup', 'sub', 'dt', 'dd', 'br', 'a'], :attributes => {'a' => ['href']}).html_safe
         end
 
