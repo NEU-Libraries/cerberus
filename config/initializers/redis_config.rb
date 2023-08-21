@@ -8,13 +8,13 @@ if defined?(PhusionPassenger)
 
       # The important two lines
       $redis.client.disconnect if $redis
-      $redis = Redis.new(host: config[:host], port: config[:port], thread_safe: true, expires_in: 1.week, timeout: 10.0, reconnect_attempts: 10, tcp_keepalive: 300) rescue nil
+      $redis = Redis.new(host: config[:host], port: config[:port], thread_safe: true, expires_in: 1.month, timeout: 10.0, reconnect_attempts: 10, tcp_keepalive: 300) rescue nil
       Resque.redis.client.reconnect if Resque.redis
     end
   end
 else
   config = YAML::load(ERB.new(IO.read(File.join(Rails.root, 'config', 'redis.yml'))).result)[Rails.env].with_indifferent_access
-  $redis = Redis.new(host: config[:host], port: config[:port], thread_safe: true, expires_in: 1.week, timeout: 10.0, reconnect_attempts: 10, tcp_keepalive: 300) rescue nil
+  $redis = Redis.new(host: config[:host], port: config[:port], thread_safe: true, expires_in: 1.month, timeout: 10.0, reconnect_attempts: 10, tcp_keepalive: 300) rescue nil
 end
 
 Resque.redis = $redis
