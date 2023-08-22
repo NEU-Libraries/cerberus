@@ -17,7 +17,7 @@ else
   $redis = Redis.new(host: config[:host], port: config[:port], thread_safe: true, expires_in: 1.month, timeout: 10.0, reconnect_attempts: 10, tcp_keepalive: 300) rescue nil
 end
 
-Resque.redis = Redis.new(host: config[:host], port: config[:port], thread_safe: true, timeout: 10.0, reconnect_attempts: 10, tcp_keepalive: 300) rescue nil
+Resque.redis = $redis
 
 # Code borrowed from Obie's Redis patterns talk at RailsConf'12
 Nest.class_eval do
