@@ -12,7 +12,7 @@ module Cerberus::ThumbnailCreation
   end
 
   private
-    def create_scaled_progressive_jpeg(item_pid, file_path, size, dsid, canonical_class)
+    def create_scaled_progressive_jpeg(item_pid, file_path, size, dsid, canonical_class=nil)
       # Wrap in rescue block - some pdf's we're supplied with are broken
       # or ghostscript can't handle them
       begin
