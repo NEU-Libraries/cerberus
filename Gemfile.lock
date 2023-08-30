@@ -550,8 +550,6 @@ GEM
       rack (>= 1.0.0)
     warden (1.2.3)
       rack (>= 1.0)
-    webshims-rails (1.16.0)
-      rails (> 3.1.0)
     websocket (1.0.7)
     whenever (0.8.4)
       activesupport (>= 2.3.4)
@@ -647,7 +645,6 @@ DEPENDENCIES
   timecop
   uglifier (>= 1.0.3)
   unidecode
-  webshims-rails (~> 1.16.0)
   whenever
   will_paginate
 

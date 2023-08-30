@@ -5,8 +5,6 @@
 
 # global $:false
 
-# global Modernizr
-
 # global ui
 
 #global picturefill
@@ -18,7 +16,6 @@ $(document).ready ->
         $drsBootstrapSelect: $('select.bs-select')
         $addToSetLink: $('*[data-add-to-set]')
         breadCrumbMenuContent: $('#addToSetLinks, #addToCoreLinks').html()
-        fitTextTarget: $('.fit-text')
         removeFormFields:
           listener : false
 
@@ -31,7 +28,6 @@ $(document).ready ->
     setup = ->
       CollectionsPage()
       breadCrumbMenu()
-      handleFitText()
       tooltipSetup()
       handleRequiredInputs()
       ellipsisExpand()
@@ -496,21 +492,6 @@ $(document).ready ->
       drsApp.newCompilationForm()
       if (klass == "modal-compilation")
         $modal.find(".pagination a").attr("data-remote", "true");
-      return
-
-
-    ###
-    Checks the dom to see if the plugin target is there and then loads it with Modernizr
-    ###
-    handleFitText = ->
-      if drsApp.config.fitTextTarget.length > 0 and window.Modernizr
-        Modernizr.load
-          load: '//cdnjs.cloudflare.com/ajax/libs/FitText.js/1.1/jquery.fittext.min.js'
-          complete: ->
-            Modernizr.load '/assets/polyfills/FitText-js/jquery.fittext.js'  unless $.fitText
-            drsApp.config.fitTextTarget.fitText()
-            return
-
       return
 
 

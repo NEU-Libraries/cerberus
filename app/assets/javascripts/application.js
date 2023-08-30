@@ -12,9 +12,6 @@
 
 //= require jquery
 //= require jquery_ujs
-//= require modernizr/modernizr
-//= require webshims/polyfiller
-//= require polyfills
 //= require bootstrap-slider
 
 //= require blacklight/blacklight

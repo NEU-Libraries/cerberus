@@ -30,7 +30,6 @@ gem 'kramdown'
 gem 'sanitize'
 # See Bower Front-End Package Management http://bower.io Documentation
 gem "bower-rails", "~> 0.5.0"
-gem 'webshims-rails', '~> 1.16.0'
 gem 'rmagick'
 gem 'rubyzip'
 # gem 'hydra-derivatives', '~> 0.0.5'

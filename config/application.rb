@@ -77,15 +77,6 @@ module Cerberus
     # Namespace is now neu
     config.id_namespace = 'neu'
 
-    #Add polyfills in the pipline so that Modernizr can pull in js polyfills
-
-    config.assets.precompile += [
-      "placeholder/js/placeholder.js",
-      "placeholder/dist/placeholder.min.js",
-      "respond/dest/respond.min.js",
-      "respond/dest/respond.src.js"
-    ]
-
     # Set a default root collection.
     config.root_community_id = 'neu:1'
 
