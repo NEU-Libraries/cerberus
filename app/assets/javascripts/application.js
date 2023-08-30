@@ -33,11 +33,6 @@
 
 //= require dateSelectBoxes.pack.js
 
-//= require ace/ace
-//= require ace/worker-html
-//= require ace/theme-eclipse
-//= require ace/mode-xml
-
 //= require spin.js
 
 //= require jwplayer/jwplayer.js

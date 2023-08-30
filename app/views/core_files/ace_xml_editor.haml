@@ -32,6 +32,8 @@
 
 = render partial: "shared/cancel_edit_modal", locals: { item: @core_file }
 
+%script{charset: "utf-8", src: "ace/ace.js", type: "text/javascript"}
+
 :javascript
   // This is a hack, need to trim to due haml pretty printing
   str = $("#editor").text();

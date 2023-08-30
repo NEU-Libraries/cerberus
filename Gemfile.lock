@@ -90,7 +90,6 @@ GEM
   remote: file:/opt/repo/
   remote: https://rubygems.org/
   specs:
-    ace-rails-ap (3.0.2)
     actionmailer (3.2.12)
       actionpack (= 3.2.12)
       mail (~> 2.4.4)
@@ -566,7 +565,6 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  ace-rails-ap
   axlsx!
   blacklight
   blacklight_advanced_search (~> 2.1.0)

@@ -26,7 +26,7 @@ gem 'bootstrap-slider-rails'
 gem 'haml'
 gem 'date_time_precision'
 gem 'kramdown'
-gem 'ace-rails-ap'
+# gem 'ace-rails-ap'
 gem 'sanitize'
 # See Bower Front-End Package Management http://bower.io Documentation
 gem "bower-rails", "~> 0.5.0"

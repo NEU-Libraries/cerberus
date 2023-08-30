@@ -40,6 +40,8 @@
     %a.btn.btn-primary{data: { disable_with: "Please wait..."}, :href => edit_core_file_xml_path(id: @core_file.pid, version: params[:page].to_i - 1)}
       Insert XML
 
+%script{charset: "utf-8", src: "ace/ace.js", type: "text/javascript"}
+
 :javascript
   // This is a hack, need to trim to due haml pretty printing
   str = $("#editor").text();

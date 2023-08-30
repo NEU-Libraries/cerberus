@@ -60,6 +60,8 @@
         = link_to("Cancel Load", send("loaders_#{@loader_short_name}_cancel_load_path", @report.id), class: "btn btn-danger")
         = submit_tag "Proceed with Load", :class => "btn btn-success pull-right", data: { disable_with: "Please wait..."}
 
+%script{charset: "utf-8", src: "ace/ace.js", type: "text/javascript"}
+
 :javascript
   $(document).ready(function() {
     // This is a hack, need to trim to due haml pretty printing
