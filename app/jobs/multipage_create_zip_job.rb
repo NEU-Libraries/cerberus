@@ -80,8 +80,9 @@ class MultipageCreateZipJob
 
       large_upload(zf, zipfile_name, 'content')
 
+      core_file = CoreFile.find(self.core_file_pid) || nil
       if !core_file.blank?
-        core_file.reload
+        # core_file.reload
         core_file.match_dc_to_mods
         core_file.tag_as_completed
         core_file.save!

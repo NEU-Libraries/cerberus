@@ -93,9 +93,9 @@ class MultipageProcessingJob
       if self.zip_files.length > 1
         if core_file.canonical_class.blank?
           core_file.canonical_class = "ZipFile"
+          core_file.save!
         end
         Cerberus::Application::Queue.push(MultipageCreateZipJob.new(self.dir_path, core_file.pid, self.zip_files))
-        core_file.save!
       end
     end
 
