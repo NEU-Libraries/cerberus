@@ -52,6 +52,14 @@ Rack::Attack.blocklist('sqlmap') do |req|
   !req.user_agent.blank? && req.user_agent.downcase.include?("sqlmap".downcase)
 end
 
+Rack::Attack.blocklist('turnitinbot') do |req|
+  !req.user_agent.blank? && req.user_agent.downcase.include?("turnitinbot".downcase)
+end
+
+Rack::Attack.blocklist('Amazonbot') do |req|
+  !req.user_agent.blank? && req.user_agent.downcase.include?("Amazonbot".downcase)
+end
+
 # Block attacks from IPs in cache
 # To add an IP: Rails.cache.write("block 1.2.3.4", true, expires_in: 2.days)
 # To remove an IP: Rails.cache.delete("block 1.2.3.4")
