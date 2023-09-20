@@ -21,7 +21,7 @@ set :log_level, :info
 
 # set :default_env, { path: "/opt/ruby/bin:$PATH" }
 
-set :keep_releases, 5
+set :keep_releases, 2
 
 set :ssh_options, {
   #  forward_agent: true,
