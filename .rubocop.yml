@@ -1,0 +1,4 @@
+# .rubocop.yml
+
+AllCops:
+  DisabledByDefault: true
