@@ -8,10 +8,10 @@
 
 Cerberus::Application.config.session_store :redis_store, {
   servers: [
-    { url: "redis://nb9478.neu.edu:6379/0/session", expires_in: 1.week, timeout: 10.0, reconnect_attempts: 10, tcp_keepalive: 300 },
+    { url: "redis://nb9478.neu.edu:6379/0/session", expires_in: 1.month, timeout: 10.0, reconnect_attempts: 10, tcp_keepalive: 300 },
   ],
   key: '_cerberus_app_session',
-  expire_after: 1.week
+  expire_after: 1.month
 }
 
 # Use the database for sessions instead of the cookie-based default,
