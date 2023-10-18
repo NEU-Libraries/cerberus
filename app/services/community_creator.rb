@@ -13,12 +13,6 @@ class CommunityCreator < ApplicationService
   private
 
     def create_community
-      meta = Valkyrie.config.metadata_adapter
-      community = meta.persister.save(resource: Community.new(a_member_of: @parent_id))
-
-      FileSetCreator.call(work_id: community.id, classification: Classification.descriptive_metadata)
-
-      community.mods_xml = @mods_xml
-      meta.persister.save(resource: community)
+      # TODO: Atlas create
     end
 end
