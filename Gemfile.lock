@@ -1,4 +1,12 @@
 GIT
+  remote: git@github.com:NEU-Libraries/atlas_rb.git
+  revision: 05a4d1d1f1466c5336a035a5a00f50381abcd65c
+  specs:
+    atlas_rb (0.1.0)
+      faraday (~> 2.7)
+      faraday-multipart (~> 1)
+
+GIT
   remote: https://github.com/dgcliff/noid-rails.git
   revision: 4627eae2f7676b893dd345bc330914c0fabc52a6
   branch: rails-7-trial
@@ -483,6 +491,7 @@ PLATFORMS
 
 DEPENDENCIES
   active_decorator
+  atlas_rb!
   attr_json
   blacklight (= 8.0)
   bootsnap
