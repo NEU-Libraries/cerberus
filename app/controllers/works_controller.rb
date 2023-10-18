@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 class WorksController < ApplicationController
-  include FileHelper
-
   def show
     @work = Work.find(params[:id])
   end

@@ -3,7 +3,6 @@
 module Derivatives
   class PdfJob
     include Sidekiq::Job
-    include FileHelper
 
     def perform(file_id, work_id)
       # TODO: Atlas create

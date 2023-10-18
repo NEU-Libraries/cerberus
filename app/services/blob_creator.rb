@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 class BlobCreator < ApplicationService
-  include FileHelper
-  include MimeHelper
 
   def initialize(work_id:, path:)
     @work_id = work_id
