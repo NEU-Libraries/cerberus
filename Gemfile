@@ -68,8 +68,6 @@ gem 'ruby-filemagic'
 gem 'sassc-rails', '~> 2.1'
 gem 'sidekiq'
 gem 'simple_form'
-gem 'valkyrie'
-gem 'valkyrie-shrine'
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
