@@ -3,11 +3,11 @@
 
   .p-4.my-3.well.rounded-3
     %h3
-      = @collection.plain_title
-    = @collection.plain_description
+      = @collection["title"]
+    = @collection["description"]
     .clearfix.pt-3
       .float-end
-        = link_to "Edit", edit_collection_path(@collection), class: "px-3"
+        = link_to "Edit", edit_collection_path(@collection["id"]), class: "px-3"
         = link_to "Delete", "#", class: "px-3"
     -# edit button
     -# delete (tombstone) button

@@ -1,6 +1,7 @@
 GIT
   remote: git@github.com:NEU-Libraries/atlas_rb.git
-  revision: 05a4d1d1f1466c5336a035a5a00f50381abcd65c
+  revision: 10350348a24c4f84aa3a065e557a6e1a1549894b
+  ref: 1035034
   specs:
     atlas_rb (0.1.0)
       faraday (~> 2.7)
@@ -92,6 +93,7 @@ GEM
       activerecord (>= 5.0.0, < 7.1)
     autoprefixer-rails (10.4.7.0)
       execjs (~> 2)
+    base64 (0.1.1)
     bcrypt (3.1.18)
     blacklight (8.0.0)
       globalid
@@ -157,7 +159,8 @@ GEM
       railties (>= 5.0.0)
     faker (3.0.0)
       i18n (>= 1.8.11, < 2)
-    faraday (2.7.4)
+    faraday (2.7.11)
+      base64
       faraday-net_http (>= 2.0, < 3.1)
       ruby2_keywords (>= 0.0.4)
     faraday-multipart (1.0.4)
