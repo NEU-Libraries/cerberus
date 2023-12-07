@@ -50,7 +50,7 @@ gem 'bootsnap', require: false
 
 # NEU Gems
 gem 'active_decorator'
-gem 'atlas_rb', git: 'git@github.com:NEU-Libraries/atlas_rb.git', :ref => '1035034'
+gem 'atlas_rb'
 gem 'attr_json'
 gem 'blacklight', '8.0'
 gem 'bootstrap', '< 5.2'

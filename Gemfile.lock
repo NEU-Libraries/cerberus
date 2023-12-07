@@ -1,13 +1,4 @@
 GIT
-  remote: git@github.com:NEU-Libraries/atlas_rb.git
-  revision: 10350348a24c4f84aa3a065e557a6e1a1549894b
-  ref: 1035034
-  specs:
-    atlas_rb (0.1.0)
-      faraday (~> 2.7)
-      faraday-multipart (~> 1)
-
-GIT
   remote: https://github.com/dgcliff/noid-rails.git
   revision: 4627eae2f7676b893dd345bc330914c0fabc52a6
   branch: rails-7-trial
@@ -89,11 +80,14 @@ GEM
     addressable (2.8.1)
       public_suffix (>= 2.0.2, < 6.0)
     ast (2.4.2)
+    atlas_rb (0.0.27)
+      faraday (~> 2.7)
+      faraday-multipart (~> 1)
     attr_json (1.4.0)
       activerecord (>= 5.0.0, < 7.1)
     autoprefixer-rails (10.4.7.0)
       execjs (~> 2)
-    base64 (0.1.1)
+    base64 (0.2.0)
     bcrypt (3.1.18)
     blacklight (8.0.0)
       globalid
@@ -159,7 +153,7 @@ GEM
       railties (>= 5.0.0)
     faker (3.0.0)
       i18n (>= 1.8.11, < 2)
-    faraday (2.7.11)
+    faraday (2.7.12)
       base64
       faraday-net_http (>= 2.0, < 3.1)
       ruby2_keywords (>= 0.0.4)
@@ -401,7 +395,7 @@ PLATFORMS
 
 DEPENDENCIES
   active_decorator
-  atlas_rb!
+  atlas_rb
   attr_json
   blacklight (= 8.0)
   bootsnap
