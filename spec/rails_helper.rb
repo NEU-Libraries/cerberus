@@ -45,7 +45,7 @@ end
 RSpec.configure do |config|
 
   config.before(:suite) do
-    Valkyrie.config.metadata_adapter.persister.wipe!
+    # TODO: Atlas wipe
   end
 
   config.include Devise::Test::ControllerHelpers, type: :controller

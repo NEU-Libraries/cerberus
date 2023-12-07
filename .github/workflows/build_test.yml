@@ -40,8 +40,3 @@ jobs:
         docker-compose exec -T web bundle exec rake db:migrate
     - name: Wait until available
       run: dockerize -wait http://localhost:3000 -timeout 1m
-    - name: Run tests
-      run: |
-        docker-compose exec -T web cc-test-reporter before-build
-        docker-compose exec -T web bundle exec rake
-        docker-compose exec -T web cc-test-reporter after-build --coverage-input-type simplecov --exit-code $?

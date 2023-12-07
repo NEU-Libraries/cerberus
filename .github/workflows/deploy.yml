@@ -13,4 +13,4 @@ jobs:
     - name: Install HTTPie
       run: sudo apt-get install httpie
     - name: Deploy
-      run: http --check-status --ignore-stdin PUT cerberusv2.library.northeastern.edu/deploy token=${{ secrets.CERBERUS_TOKEN }} version=$(cat .version)
+      run: http --check-status --ignore-stdin PUT cerberusv2.library.northeastern.edu/deploy token=${{ secrets.CERBERUS_TOKEN }} cerberus_version=$(cat .version) atlas_version=$(cat .atlas)

@@ -15,6 +15,7 @@ RUN mkdir -p /home/cerberus/storage
 
 COPY --chown=cerberus:cerberus Gemfile* /tmp/
 WORKDIR /tmp
+RUN git config --global url."https://github.com/".insteadOf 'git@github.com:'
 RUN bundle install -j8
 
 RUN mkdir -p /home/cerberus/web

@@ -4,6 +4,9 @@ services:
   jobs:
     volumes:
       - storage:/home/cerberus/storage
+  atlas:
+    volumes:
+    - storage:/home/atlas/storage
   web:
     build: .
     volumes:

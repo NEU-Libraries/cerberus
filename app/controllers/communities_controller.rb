@@ -2,17 +2,20 @@
 
 class CommunitiesController < CatalogController
   def show
-    @community = Community.find(params[:id])
-    @response = find_many(@community.filtered_children)
+    # @community = Community.find(params[:id])
+    # @response = find_many(@community.filtered_children)
+
+    @community = AtlasRb::Community.find(params[:id])
+    @response = find_many(AtlasRb::Community.children(params[:id]))
   end
 
   def new
-    @resource = CommunityChangeSet.new(Community.new)
+    # @resource = CommunityChangeSet.new(Community.new)
   end
 
   def edit
     # TODO: need to do admin check
-    @resource = CommunityChangeSet.new(Community.find(params[:id]).decorate)
+    # @resource = CommunityChangeSet.new(Community.find(params[:id]).decorate)
   end
 
   def create

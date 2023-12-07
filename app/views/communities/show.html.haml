@@ -3,8 +3,8 @@
 
   .p-4.my-3.well.rounded-3
     %h3
-      = @community.plain_title
-    = @community.plain_description
+      = @community["title"]
+    = @community["description"]
 
 - content_for(:sidebar) do
   = render 'catalog/search_sidebar'
