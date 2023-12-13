@@ -24,7 +24,7 @@ services:
     ports:
       - 3000:3000
   atlas:
-    image: nakatomi/atlas_web
+    image: nakatomi/atlas_web:${ATLAS}
     entrypoint: /home/atlas/web/docker-entrypoint.sh
     ports:
       - 3001:3000
