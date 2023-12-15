@@ -2,36 +2,23 @@
 
 class BreadcrumbTrail < Croutons::BreadcrumbTrail
   def works_show
-    breadcrumb_to_root(objects[:work]).each do |r|
-      r.decorate
-      breadcrumb(r.plain_title, polymorphic_path(r))
+    objects[:work]['ancestors'].each do |r|
+      breadcrumb(AtlasRb.const_get(r[1]).find(r[0])['title'], public_send("#{r[1].downcase}_path", r[0]))
     end
+    breadcrumb(objects[:work]['title'])
   end
 
   def collections_show
-    breadcrumb_to_root(objects[:collection]).each do |r|
-      r.decorate
-      breadcrumb(r.plain_title, polymorphic_path(r))
+    objects[:collection]['ancestors'].each do |r|
+      breadcrumb(AtlasRb.const_get(r[1]).find(r[0])['title'], public_send("#{r[1].downcase}_path", r[0]))
     end
+    breadcrumb(objects[:collection]['title'])
   end
 
   def communities_show
-    breadcrumb_to_root(objects[:community]).each do |r|
-      r.decorate
-      breadcrumb(r.plain_title, polymorphic_path(r))
+    objects[:community]['ancestors'].each do |r|
+      breadcrumb(AtlasRb.const_get(r[1]).find(r[0])['title'], public_send("#{r[1].downcase}_path", r[0]))
     end
+    breadcrumb(objects[:community]['title'])
   end
-
-  private
-
-    def breadcrumb_to_root(resource)
-      trail = [resource]
-      parent = resource.parent
-      loop do
-        return trail.reverse if parent.nil?
-
-        trail << parent
-        parent = parent.parent
-      end
-    end
 end
