@@ -108,6 +108,8 @@ class CoreFilesController < ApplicationController
         log_action('download', 'COMPLETE', asset.pid)
         file_name = "neu_#{asset.pid.split(":").last}.#{extract_extension(asset.properties.mime_type.first, File.extname(asset.original_filename || "").delete!("."))}"
         send_file asset.fedora_file_path, :filename =>  file_name, :type => asset.mime_type || extract_mime_type(asset.fedora_file_path), :disposition => 'inline'
+      else
+        render_403 and return
       end
     else
       render_403 and return
