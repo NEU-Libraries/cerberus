@@ -1,17 +1,18 @@
 - content_for(:container_header) do
   = breadcrumbs
 
-= render partial: "shared/mods", locals: {resource: @work}
+-# = render partial: "shared/mods", locals: {resource: @work}
+= @mods.html_safe
 
-- @work.children.each do |c|
-  = "#{c.type} - #{c.children.count}"
-  %ul
-    - c.children.each do |b|
-      %li
-        = b.file_identifiers.inspect
-  %br
+-# - @work.children.each do |c|
+-#   = "#{c.type} - #{c.children.count}"
+-#   %ul
+-#     - c.children.each do |b|
+-#       %li
+-#         = b.file_identifiers.inspect
+-#   %br
 
-%br
+-# %br
 
-%pre
-  = JSON.pretty_generate(JSON.parse(@work.mods.to_json))
+-# %pre
+-#   = JSON.pretty_generate(JSON.parse(@work.mods.to_json))

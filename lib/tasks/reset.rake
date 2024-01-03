@@ -17,8 +17,8 @@ namespace :reset do
     collection = AtlasRb::Collection.create(community['id'])['collection']
     AtlasRb::Community.update(collection['id'], '/home/cerberus/web/spec/fixtures/files/collection-mods.xml')
 
-    # work = AtlasRb::Work.create(collection['id'])['work']
-    # AtlasRb::Community.update(work['id'], '/home/cerberus/web/spec/fixtures/files/work-mods.xml')
+    work = AtlasRb::Work.create(collection['id'])['work']
+    AtlasRb::Community.update(work['id'], '/home/cerberus/web/spec/fixtures/files/work-mods.xml')
   end
 
   desc 'Clean solr and dbs'
