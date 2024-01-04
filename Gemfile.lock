@@ -80,7 +80,7 @@ GEM
     addressable (2.8.1)
       public_suffix (>= 2.0.2, < 6.0)
     ast (2.4.2)
-    atlas_rb (0.0.27)
+    atlas_rb (0.0.32)
       faraday (~> 2.7)
       faraday-multipart (~> 1)
     attr_json (1.4.0)
@@ -153,7 +153,7 @@ GEM
       railties (>= 5.0.0)
     faker (3.0.0)
       i18n (>= 1.8.11, < 2)
-    faraday (2.7.12)
+    faraday (2.8.1)
       base64
       faraday-net_http (>= 2.0, < 3.1)
       ruby2_keywords (>= 0.0.4)

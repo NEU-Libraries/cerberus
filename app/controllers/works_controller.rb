@@ -2,7 +2,9 @@
 
 class WorksController < ApplicationController
   def show
-    @work = Work.find(params[:id])
+    # @work = Work.find(params[:id])
+    @work = AtlasRb::Work.find(params[:id])
+    @mods = AtlasRb::Work.mods(params[:id])
   end
 
   def new
