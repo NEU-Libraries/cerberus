@@ -16,7 +16,7 @@ class CommunitiesController < CatalogController
   def edit
     # TODO: need to do admin check
     # @resource = CommunityChangeSet.new(Community.find(params[:id]).decorate)
-    @resource = CommunityForm.new(OpenStruct.new(AtlasRb::Community.find(params[:id])))
+    @resource = Forms::Community.new(OpenStruct.new(AtlasRb::Community.find(params[:id])))
   end
 
   def create
