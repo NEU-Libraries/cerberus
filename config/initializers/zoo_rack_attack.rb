@@ -32,7 +32,7 @@ Rack::Attack.safelist("10 range") do |request|
   IPAddr.new("10.0.0.0/8").include?(request.remote_ip)
 end
 
-Rack::Attack.blocklist('Huawei datacenter') do |req|
+Rack::Attack.blocklist('Huawei datacenter') do |request|
   IPAddr.new("101.44.0.0/16").include?(request.remote_ip)
 end
 
