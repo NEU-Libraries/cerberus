@@ -1,2 +1,8 @@
 %h3 Edit Community
-= render 'form'
+
+= bootstrap_form_tag url: community_path(params[:id]), method: :patch do |f|
+  = f.hidden_field :id, value: params[:id]
+  = bootstrap_fields_for :community do |c|
+    = c.text_field :title, value: @community['title']
+    = c.text_area :description, rows: 10, value: @community['description']
+  = f.button :submit, class: "btn btn-primary my-3"
