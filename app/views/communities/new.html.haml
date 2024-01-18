@@ -1,2 +1,8 @@
 %h3 Create new Community
-= render 'form'
+
+= bootstrap_form_tag url: '/communities' do |f|
+  = f.hidden_field :parent_id, value: params[:parent_id]
+  = bootstrap_fields_for :community do |c|
+    = c.text_field :title
+    = c.text_area :description, rows: 10
+  = f.button :submit, class: "btn btn-primary my-3"

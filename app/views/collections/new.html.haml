@@ -1,2 +1,9 @@
-%h3 Create new Collection
-= render 'form'
+%h3 Create a new Collection
+
+= bootstrap_form_tag url: '/collections' do |f|
+  = f.hidden_field :parent_id, value: params[:parent_id]
+  = bootstrap_fields_for :collection do |c|
+    = c.text_field :title
+    = c.text_area :description, rows: 10
+  = f.button :submit, class: "btn btn-primary my-3"
+

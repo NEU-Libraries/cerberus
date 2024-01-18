@@ -2,30 +2,30 @@
 
 class CommunitiesController < CatalogController
   def show
-    # @community = Community.find(params[:id])
-    # @response = find_many(@community.filtered_children)
-
     @community = AtlasRb::Community.find(params[:id])
     @response = find_many(AtlasRb::Community.children(params[:id]))
   end
 
   def new
-    # @resource = CommunityChangeSet.new(Community.new)
+    @community = OpenStruct.new
   end
 
   def edit
     # TODO: need to do admin check
-    # @resource = CommunityChangeSet.new(Community.find(params[:id]).decorate)
-    @resource = Forms::Community.new(OpenStruct.new(AtlasRb::Community.find(params[:id])))
+    @community = AtlasRb::Community.find(params[:id])
   end
 
   def create
-    # puts params.inspect
-    # c = Community.new
-    # change_set = ProjectChangeSet.new(Project.new(user_registry_id: user_registry.id))
-    # if change_set.validate(params[:project])
-    #   change_set.sync
-    #   @project = metadata_adapter.persister.save(resource: change_set.resource)
-    # end
+    permitted = params.require(:community).permit(:title, :description).to_h
+
+    c = AtlasRb::Community.create(params[:parent_id])
+    AtlasRb::Community.metadata(c['id'], permitted)
+    redirect_to community_path(c['id'])
+  end
+
+  def update
+    permitted = params.require(:community).permit(:title, :description).to_h
+    AtlasRb::Community.metadata(params[:id], permitted)
+    redirect_to community_path(params[:id])
   end
 end
