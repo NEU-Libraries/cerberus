@@ -1,5 +1,5 @@
 :javascript
-  var communities_for_employee_autocomplete = #{solr_query("active_fedora_model_ssi:\"Community\"").map{|doc|  Hash[*["label", doc.title, "value", doc.pid]]}.to_json}
+  var communities_for_employee_autocomplete = #{solr_query("active_fedora_model_ssi:\"Community\"").map{|doc| Hash[*["label", doc.title, "value", doc.pid]]}.to_json}
 
 = form_tag admin_employee_path, :method => :put, :id => 'modify_employee', :remote => true do
   %input{:type=>"hidden", :id => "admin_community", :name => "admin[community]"}
