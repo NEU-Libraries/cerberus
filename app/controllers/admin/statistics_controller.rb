@@ -11,7 +11,7 @@ class Admin::StatisticsController < ApplicationController
     @public_core_file_count = get_count_for_public_files
     @private_core_file_count = get_count_for_private_files
     @core_file_count = get_count_for_core_files
-    @user_count = User.find(:all).length
+    @user_count = User.count
 
     @content_type_counts = sort_content_type_counts
   end

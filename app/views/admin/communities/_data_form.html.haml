@@ -1,5 +1,5 @@
 :javascript
-  var communities_for_autocomplete = #{Community.find(:all).map{|c| {'label' => c.title, 'value' => c.id}}.to_json}
+  var communities_for_autocomplete = #{solr_query("active_fedora_model_ssi:\"Community\"").map{|doc|  Hash[*["label", doc.title, "value", doc.pid]]}.to_json}
 
 = form_for [:admin, @community] do |f|
   - if params[:action].eql?('new')

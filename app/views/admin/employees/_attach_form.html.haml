@@ -1,5 +1,5 @@
 :javascript
-  var communities_for_employee_autocomplete = #{Community.find(:all).map{|c| {'label' => c.title, 'value' => c.id}}.to_json}
+  var communities_for_employee_autocomplete = #{solr_query("active_fedora_model_ssi:\"Community\"").map{|doc|  Hash[*["label", doc.title, "value", doc.pid]]}.to_json}
 
 = form_tag admin_employee_path, :method => :put, :id => 'modify_employee', :remote => true do
   %input{:type=>"hidden", :id => "admin_community", :name => "admin[community]"}
@@ -8,7 +8,7 @@
     %legend Attach to another Community
     .row-fluid
       .span8
-        = label_tag "admin_community_autocomplete", "Community"        
+        = label_tag "admin_community_autocomplete", "Community"
         %input{:id => "admin_community_autocomplete", :type => "text", :required => "yes", :placeholder => "Eg. English Department"}
   .form-actions
     = submit_tag "Submit", :class => ['btn', 'btn-primary', 'btn-large'], :id => "submit_button"
