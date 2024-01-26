@@ -20,13 +20,7 @@
 
   #employee.tab-pane
     :javascript
-      var employees_for_autocomplete = #{Employee.all.map do |e|
-          {
-            'label' => e.name,
-            'value' => e.id,
-            'name'  => e.name
-          }
-        end.to_json}
+      var employees_for_autocomplete = #{solr_query("active_fedora_model_ssi:\"Employee\"").map{|doc| Hash[*["label", doc.title, "value", doc.pid, "name", doc.title]]}.to_json}
       $('#admin_employee_autocomplete').autocomplete({
         source: employees_for_autocomplete
       });
