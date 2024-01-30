@@ -1,9 +1,9 @@
 %h3.py-3
   Edit raw XML for
-  = @work.plain_title
+  = @resource['title']
 
 = form_tag xml_validate_path, :method => :put, :id => "raw_xml_form" do
-  = hidden_field_tag "work_id", @work.noid
+  = hidden_field_tag "resource_id", @resource['id']
   = hidden_field_tag "raw_xml"
   .container
     .row
@@ -11,7 +11,7 @@
         #editor<
           = @raw_xml
       .col#content
-        = render partial: "shared/mods", locals: {resource: @work}
+        = @mods.html_safe
     .row
       .well.p-3.my-3.rounded-3
         %input#validate_button.btn.btn-primary{:name => "commit", :type => "submit", :value => "Validate + Preview", remote: true}/
