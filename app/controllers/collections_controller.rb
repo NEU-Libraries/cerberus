@@ -2,19 +2,33 @@
 
 class CollectionsController < CatalogController
   def show
-    # @collection = Collection.find(params[:id])
-    # @response = find_many(@collection.filtered_children)
-
     @collection = AtlasRb::Collection.find(params[:id])
     @response = find_many(AtlasRb::Collection.children(params[:id]))
   end
 
   def new
-    # @resource = CollectionChangeSet.new(Collection.new)
+    @collection = OpenStruct.new
   end
 
   def edit
+    @collection = AtlasRb::Collection.find(params[:id])
+  end
+
+  def create
+    puts "DGC DEBUG - DEBUG DGC"
+    puts params.inspect
+    permitted = params.require(:collection).permit(:title, :description).to_h
+    puts permitted.inspect
+
+    c = AtlasRb::Collection.create(params[:parent_id])
+    AtlasRb::Collection.metadata(c['id'], permitted)
+    redirect_to collection_path(c['id'])
+  end
+
+  def update
     # TODO: need to do permissions check
-    # @resource = CollectionChangeSet.new(Collection.find(params[:id]).decorate)
+    permitted = params.require(:collection).permit(:title, :description).to_h
+    AtlasRb::Collection.metadata(params[:id], permitted)
+    redirect_to collection_path(params[:id])
   end
 end

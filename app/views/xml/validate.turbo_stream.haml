@@ -1,6 +1,6 @@
 = turbo_stream.replace "mods" do
-  = render partial: "shared/mods", locals: {resource: @work}
+  = @mods.html_safe
 
   :javascript
     window.scrollTo(0,0);
-    $("#content").animate({ opacity: 100 });
+    //$("#content").animate({ opacity: 100 });
