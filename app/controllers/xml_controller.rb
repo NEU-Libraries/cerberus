@@ -8,22 +8,13 @@ class XmlController < ApplicationController
   end
 
   def validate
-    # Need to ask Atlas to convert raw xml to mods html for preview
-    # curl -F 'binary=@work-mods.xml' http://atlas:3000/resources/xml.html
-    # AtlasRb::Resource.preview('/home/cerberus/web/spec/fixtures/files/work-mods.xml')
     item = AtlasRb::Resource.find(params[:resource_id])
     @resource = item['resource']
 
-    tmp_path = "#{Rails.root}/tmp/#{Time.now.to_f.to_s.gsub!('.', '').to_s}.xml"
-
-    File.open(tmp_path, "w+") do |f|
-      f.write(params[:raw_xml])
-    end
+    tmp_path = Rails.root.join("/tmp/#{Time.now.to_f.to_s.gsub!('.', '')}.xml")
+    File.write(tmp_path, params[:raw_xml])
 
     @mods = AtlasRb::Resource.preview(tmp_path)
-
-    # @work = Work.new(alternate_ids: [Time.now.to_f.to_s.gsub!('.', '').to_s])
-    # @work.mods_json = params[:raw_xml]
   end
 
   def update
