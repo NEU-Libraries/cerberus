@@ -27,9 +27,10 @@
   editor.session.setMode("ace/mode/xml");
 
   document.querySelector('#editor').addEventListener('change', (event) => {
-    $("#raw_xml").val(editor.getSession().getValue().trim());
+    //$("#raw_xml").val(editor.getSession().getValue().trim());
+    document.getElementById("raw_xml").value = editor.getSession().getValue().trim();
   });
 
   document.getElementById('validate_button').onclick = function(){
-    $("#content").animate({ opacity: 0 });
+    //$("#content").animate({ opacity: 0 });
   };
