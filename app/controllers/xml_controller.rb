@@ -11,17 +11,15 @@ class XmlController < ApplicationController
     item = AtlasRb::Resource.find(params[:resource_id])
     @resource = item['resource']
 
-    tmp_path = Rails.root.join("/tmp/#{Time.now.to_f.to_s.gsub!('.', '')}.xml")
-    File.write(tmp_path, params[:raw_xml])
-
-    @mods = AtlasRb::Resource.preview(tmp_path)
+    @mods = AtlasRb::Resource.preview(create_temp_xml)
   end
 
   def update
-    # work = Work.find(params[:work_id])
-    # work.mods_xml = params[:raw_xml]
-    # flash[:success] = 'XML updated'
-    # redirect_to work
+    item = AtlasRb::Resource.find(params[:resource_id])
+    klass = item['klass']
+
+    AtlasRb.const_get(klass).update(params[:resource_id], create_temp_xml)
+    redirect_to public_send("#{klass.downcase}_path", params[:resource_id])
   end
 
   private
@@ -29,5 +27,11 @@ class XmlController < ApplicationController
     def resource_mods(klass)
       @mods = AtlasRb.const_get(klass).mods(params[:id], 'html')
       @raw_xml = AtlasRb.const_get(klass).mods(params[:id], 'xml')
+    end
+
+    def create_temp_xml
+      tmp_path = Rails.root.join("/tmp/#{Time.now.to_f.to_s.gsub!('.', '')}.xml")
+      File.write(tmp_path, params[:raw_xml])
+      return tmp_path
     end
 end
