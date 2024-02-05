@@ -32,7 +32,7 @@ Rails.application.routes.draw do
   resources :works
 
   # xml
-  get '/xml/editor/:id' => 'xml#editor'
+  get '/xml/editor/:id' => 'xml#editor', as: 'xml_editor'
   put '/xml/validate' => 'xml#validate'
   put '/xml/update' => 'xml#update'
 
