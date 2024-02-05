@@ -2,6 +2,14 @@
   Edit raw XML for
   = @resource['title']
 
+%ul.nav.nav-tabs
+  %li.nav-item
+    %a.nav-link{"aria-current" => "page", href: "#"} Metadata
+  %li.nav-item
+    %a.nav-link.active{href: "#"} XML
+
+%br
+
 = form_tag xml_validate_path, :method => :put, :id => "raw_xml_form" do
   = hidden_field_tag "resource_id", @resource['id']
   = hidden_field_tag "raw_xml"

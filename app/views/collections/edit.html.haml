@@ -1,5 +1,11 @@
 %h3 Edit Collection
 
+%ul.nav.nav-tabs
+  %li.nav-item
+    %a.nav-link.active{"aria-current" => "page", href: "#"} Metadata
+  %li.nav-item
+    %a.nav-link{href:  xml_editor_path(params[:id])} XML
+
 = bootstrap_form_tag url: collection_path(params[:id]), method: :patch do |f|
   = bootstrap_fields_for :collection do |c|
     = c.text_field :title, value: @collection['title']
