@@ -7,7 +7,8 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 gem 'rails', '~> 7.0.1'
 
 # The original asset pipeline for Rails [https://github.com/rails/sprockets-rails]
-gem 'sprockets-rails'
+# gem 'sprockets-rails'
+gem 'dartsass-sprockets'
 
 # Use sqlite3 as the database for Active Record
 gem 'sqlite3', '~> 1.4'
@@ -42,9 +43,6 @@ gem 'tzinfo-data', platforms: %i[mingw mswin x64_mingw jruby]
 # Reduces boot times through caching; required in config/boot.rb
 gem 'bootsnap', require: false
 
-# Use Sass to process CSS
-# gem "sassc-rails"
-
 # Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
 # gem "image_processing", "~> 1.2"
 
@@ -53,7 +51,7 @@ gem 'active_decorator'
 gem 'atlas_rb'
 gem 'attr_json'
 gem 'blacklight', '8.0'
-gem 'bootstrap', '< 5.2'
+gem 'bootstrap'
 gem 'bootstrap_form'
 gem 'croutons'
 gem 'devise'
@@ -66,7 +64,6 @@ gem 'noid-rails', git: 'https://github.com/dgcliff/noid-rails.git', branch: 'rai
 gem 'pg'
 gem 'rsolr', '>= 1.0', '< 3'
 gem 'ruby-filemagic'
-gem 'sassc-rails', '~> 2.1'
 gem 'sidekiq'
 
 group :development, :test do
