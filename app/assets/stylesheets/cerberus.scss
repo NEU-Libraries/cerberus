@@ -13,7 +13,7 @@ body {
   background-color: #ecf0f1;
 }
 
-a:not(.btn, .dropdown-item) {
+a:not(.btn, .dropdown-item, .navbar-brand, .nav-link) {
   color: $link-blue;
 
   &:link {
