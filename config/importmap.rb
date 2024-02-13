@@ -14,6 +14,6 @@ pin "@fortawesome/free-solid-svg-icons", to: "https://ga.jspm.io/npm:@fortawesom
 
 pin "@github/auto-complete-element", to: "https://cdn.skypack.dev/@github/auto-complete-element"
 pin "@popperjs/core", to: "https://ga.jspm.io/npm:@popperjs/core@2.11.6/dist/umd/popper.min.js"
-pin "bootstrap", to: "https://ga.jspm.io/npm:bootstrap@5.1.3/dist/js/bootstrap.js"
+pin "bootstrap", to: "https://ga.jspm.io/npm:bootstrap@5.3.2/dist/js/bootstrap.js"
 
 pin_all_from "app/javascript/cerberus", under: "cerberus"
