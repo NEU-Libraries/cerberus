@@ -15,3 +15,6 @@ library.add(far, fas, fab)
 
 FontAwesome.config.mutateApproach = 'sync'
 Turbo.setProgressBarDelay(750)
+
+window.$ = $
+window.jQuery = $

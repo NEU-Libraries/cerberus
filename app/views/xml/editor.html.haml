@@ -1,3 +1,5 @@
+%script{:charset => "utf-8", :src => "/ace/ace.js", :type => "text/javascript"}
+
 %h3.py-3
   Edit raw XML for
   = @resource['title']
@@ -27,8 +29,6 @@
         %a.btn.btn-warning{"data-toggle" => "modal", :href => "#cancelEditModal"}
           Cancel
 
-%script{:charset => "utf-8", :src => "/ace/ace.js", :type => "text/javascript"}
-
 :javascript
   var editor = ace.edit("editor");
   editor.setTheme("ace/theme/eclipse");
@@ -40,5 +40,5 @@
   });
 
   document.getElementById('validate_button').onclick = function(){
-    //$("#content").animate({ opacity: 0 });
+    $("#content").css({visibility:"visible", opacity: 100}).animate({opacity: 0}, 500);
   };
