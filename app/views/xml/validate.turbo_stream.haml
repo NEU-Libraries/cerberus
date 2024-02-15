@@ -2,5 +2,7 @@
   = @mods.html_safe
 
   :javascript
-    $("#content").css({visibility:"visible", opacity: 0.0}).animate({opacity: 1.0}, 500);
+    $(".loading-state").animate({opacity: 0.0}, 500, function(){
+      $(".loading-state").css("visibility","hidden");
+    });
     window.scrollTo(0,0);
