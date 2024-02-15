@@ -30,15 +30,17 @@
           Cancel
 
 :javascript
-  var editor = ace.edit("editor");
-  editor.setTheme("ace/theme/eclipse");
-  editor.session.setMode("ace/mode/xml");
+  document.addEventListener("DOMContentLoaded", function(){
+    var editor = ace.edit("editor");
+    editor.setTheme("ace/theme/eclipse");
+    editor.session.setMode("ace/mode/xml");
 
-  document.querySelector('#editor').addEventListener('change', (event) => {
-    //$("#raw_xml").val(editor.getSession().getValue().trim());
-    document.getElementById("raw_xml").value = editor.getSession().getValue().trim();
+    document.querySelector('#editor').addEventListener('change', (event) => {
+      //$("#raw_xml").val(editor.getSession().getValue().trim());
+      document.getElementById("raw_xml").value = editor.getSession().getValue().trim();
+    });
+
+    document.getElementById('validate_button').onclick = function(){
+      $("#content").css({visibility:"visible", opacity: 100}).animate({opacity: 0}, 500);
+    };
   });
-
-  document.getElementById('validate_button').onclick = function(){
-    $("#content").css({visibility:"visible", opacity: 100}).animate({opacity: 0}, 500);
-  };
