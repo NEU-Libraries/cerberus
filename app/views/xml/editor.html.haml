@@ -1,3 +1,6 @@
+- content_for :head do
+  = javascript_import_module_tag "preview_application"
+
 %h3.py-3
   Edit raw XML for
   = @resource['title']
@@ -18,7 +21,7 @@
       .col
         #editor<
           = @raw_xml
-      .col#content
+      .col#content{"data-controller" => "preview"}
         = @mods.html_safe
     .row
       .well.p-3.my-3.rounded-3
@@ -26,19 +29,3 @@
         %input#save_button.btn.btn-success{"data-disable-with" => "Please wait...", :name => "commit", :type => "submit", :value => "Save", :formaction => xml_update_path}/
         %a.btn.btn-warning{"data-toggle" => "modal", :href => "#cancelEditModal"}
           Cancel
-
-%script{:charset => "utf-8", :src => "/ace/ace.js", :type => "text/javascript"}
-
-:javascript
-  var editor = ace.edit("editor");
-  editor.setTheme("ace/theme/eclipse");
-  editor.session.setMode("ace/mode/xml");
-
-  document.querySelector('#editor').addEventListener('change', (event) => {
-    //$("#raw_xml").val(editor.getSession().getValue().trim());
-    document.getElementById("raw_xml").value = editor.getSession().getValue().trim();
-  });
-
-  document.getElementById('validate_button').onclick = function(){
-    //$("#content").animate({ opacity: 0 });
-  };
