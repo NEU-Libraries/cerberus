@@ -15,7 +15,7 @@ export default class extends Controller {
     });
 
     document.getElementById('validate_button').onclick = function(){
-      $("#content").css({visibility:"visible", opacity: 100}).animate({opacity: 0}, 500);
+      $(".loading-state").css({visibility:"visible", opacity: 0.0}).animate({opacity: 1.0}, 500);
     };
   }
 }
