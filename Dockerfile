@@ -1,4 +1,4 @@
-FROM ruby:3.0-slim
+FROM ruby:3.2-slim
 # update the repository sources list
 # and install dependencies
 RUN apt-get update \

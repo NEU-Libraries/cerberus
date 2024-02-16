@@ -174,7 +174,7 @@ GEM
       net-http
     globalid (1.2.1)
       activesupport (>= 6.1)
-    google-protobuf (3.25.2-x86_64-linux)
+    google-protobuf (3.25.3-x86_64-linux)
     hamlit (3.0.3)
       temple (>= 0.8.2)
       thor
@@ -252,7 +252,7 @@ GEM
     parser (3.3.0.5)
       ast (~> 2.4.1)
       racc
-    pg (1.5.4)
+    pg (1.5.5)
     popper_js (2.11.8)
     propshaft (0.8.0)
       actionpack (>= 7.0.0)
@@ -358,9 +358,8 @@ GEM
     ruby-filemagic (0.7.3)
     ruby-progressbar (1.13.0)
     rubyzip (2.3.2)
-    sass-embedded (1.69.5)
-      google-protobuf (~> 3.23)
-      rake (>= 13.0.0)
+    sass-embedded (1.71.0-x86_64-linux-gnu)
+      google-protobuf (~> 3.25)
     selenium-webdriver (4.10.0)
       rexml (~> 3.2, >= 3.2.5)
       rubyzip (>= 1.2.2, < 3.0)
@@ -459,4 +458,4 @@ DEPENDENCIES
   webdrivers
 
 BUNDLED WITH
-   2.2.33
+   2.4.10
