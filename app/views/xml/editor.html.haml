@@ -7,7 +7,7 @@
 
 %ul.nav.nav-tabs
   %li.nav-item
-    %a.nav-link{"aria-current" => "page", href: "#"} Metadata
+    %a.nav-link{"aria-current" => "page", href: public_send("edit_#{@klass.downcase}_path", @resource['id'])} Metadata
   %li.nav-item
     %a.nav-link.active{href: "#"} XML
 
@@ -27,5 +27,5 @@
       .well.p-3.my-3.rounded-3
         %input#validate_button.btn.btn-primary{:name => "commit", :type => "submit", :value => "Validate + Preview", remote: true}/
         %input#save_button.btn.btn-success{"data-disable-with" => "Please wait...", :name => "commit", :type => "submit", :value => "Save", :formaction => xml_update_path}/
-        %a.btn.btn-warning{"data-toggle" => "modal", :href => "#cancelEditModal"}
+        %a.btn.btn-warning{"data-toggle" => "modal", :href => public_send("#{@klass.downcase}_path", @resource['id'])}
           Cancel

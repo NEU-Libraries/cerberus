@@ -4,6 +4,7 @@ class XmlController < ApplicationController
   def editor
     item = AtlasRb::Resource.find(params[:id])
     @resource = item['resource']
+    @klass = item['klass']
     resource_mods(item['klass'])
   end
 

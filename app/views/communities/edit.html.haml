@@ -1,8 +1,16 @@
-%h3 Edit Community
+%h3.py-3 Edit Community
+
+%ul.nav.nav-tabs
+  %li.nav-item
+    %a.nav-link.active{"aria-current" => "page", href: "#"} Metadata
+  %li.nav-item
+    %a.nav-link{href:  xml_editor_path(params[:id])} XML
 
 = bootstrap_form_tag url: community_path(params[:id]), method: :patch do |f|
   = f.hidden_field :id, value: params[:id]
   = bootstrap_fields_for :community do |c|
     = c.text_field :title, value: @community['title']
     = c.text_area :description, rows: 10, value: @community['description']
-  = f.button :submit, class: "btn btn-primary my-3"
+  .well.p-3.my-3.rounded-3
+    = f.button :submit, class: "btn btn-success"
+    = link_to "Cancel", community_path(params[:id]), class: "btn btn-warning"
