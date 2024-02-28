@@ -2,8 +2,12 @@
   = breadcrumbs
 
   .p-4.my-3.well.rounded-3
-    %h3
+    %h3.d-inline
       = @collection["title"]
+    %h5.d-inline.text-black-50
+      %span.fa-solid.fa-folder-open.ps-2.pe-1
+      Collection
+    .clearfix.pt-3
     = @collection["description"]
     .clearfix.pt-3
       .float-end
