@@ -1131,6 +1131,26 @@ class ModsDatastream < ActiveFedora::OmDatastream
   # Takes an array and turns it into correctly formatted mods_corporate_name nodes.
   def assign_corporate_names(cns)
 
+    # We need a safety guard, like personal name
+    # to compare cns input against existing values
+    # and bail out if there's no cosmetic difference
+    # to prevent errant edit form submission changes
+    # see #1145 and #779
+
+    # Check if names have changed - if not, we do nothing to avoid muddling hand-made MODS XML
+    existing_names = self.corporate_creators
+    changed = false
+
+    # Naive check with length and intersection
+    if !(cns.length == existing_names.length) || !(cns & existing_names == cns)
+      changed = true
+    end
+
+    if !changed
+      # No changes, so let's not unnecessarily muddle hand made MODS
+      return
+    end
+
     cns.select! { |name| !name.blank? }
 
     if cns.length < self.corporate_name.length
@@ -1161,7 +1181,14 @@ class ModsDatastream < ActiveFedora::OmDatastream
 
   def corporate_creators
     # Fix for very old, very wrong code and assumptions #1145
-    self.corporate_name.name_part
+    # This doesn't work for names with multiple name parts
+    # self.corporate_name.name_part
+
+    result = []
+    for i in (0..(self.corporate_name.length - 1))
+      result << self.corporate_name(i).name_part.first
+    end
+    return result
   end
 
   # Formats the otherwise messy return for personal creator information
@@ -1172,8 +1199,8 @@ class ModsDatastream < ActiveFedora::OmDatastream
     last_names = []
 
     for i in (0..(self.personal_name.length - 1))
-      fn = self.personal_name(i).name_part_given
-      ln = self.personal_name(i).name_part_family
+      fn = self.personal_name(i).name_part_given.first
+      ln = self.personal_name(i).name_part_family.first
       full_name = self.personal_name(i).name_part
 
       if !full_name.blank? && full_name.first.length > 0 && fn.blank? && ln.blank?
@@ -1183,13 +1210,11 @@ class ModsDatastream < ActiveFedora::OmDatastream
           first_names << name_obj.given
           last_names << name_obj.family
         end
+      elsif !fn.blank? && !ln.blank?
+        first_names << fn
+        last_names << ln
       end
     end
-
-    result_array = []
-
-    first_names.concat self.personal_name.name_part_given
-    last_names.concat self.personal_name.name_part_family
 
     names = first_names.zip(last_names)
 
