@@ -1188,7 +1188,7 @@ class ModsDatastream < ActiveFedora::OmDatastream
     for i in (0..(self.corporate_name.length - 1))
       result << self.corporate_name(i).name_part.first
     end
-    return result
+    return result.compact
   end
 
   # Formats the otherwise messy return for personal creator information
