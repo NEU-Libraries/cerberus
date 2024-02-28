@@ -11,7 +11,7 @@
     = @community["description"]
     .clearfix.pt-3
       .float-end
-        = link_to "Edit", edit_collection_path(@community["id"]), class: "px-3"
+        = link_to "Edit", edit_community_path(@community["id"]), class: "px-3"
         = link_to "Delete", "#", class: "px-3"
 
 - content_for(:sidebar) do
