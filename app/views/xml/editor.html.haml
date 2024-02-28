@@ -27,5 +27,5 @@
       .well.p-3.my-3.rounded-3
         %input#validate_button.btn.btn-primary{:name => "commit", :type => "submit", :value => "Validate + Preview", remote: true}/
         %input#save_button.btn.btn-success{"data-disable-with" => "Please wait...", :name => "commit", :type => "submit", :value => "Save", :formaction => xml_update_path}/
-        %a.btn.btn-warning{"data-toggle" => "modal", :href => "#cancelEditModal"}
+        %a.btn.btn-warning{"data-toggle" => "modal", :href => public_send("#{@klass.downcase}_path", @resource['id'])}
           Cancel

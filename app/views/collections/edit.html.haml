@@ -10,5 +10,7 @@
   = bootstrap_fields_for :collection do |c|
     = c.text_field :title, value: @collection['title']
     = c.text_area :description, rows: 10, value: @collection['description']
-  = f.button :submit, class: "btn btn-primary my-3"
+  .well.p-3.my-3.rounded-3
+    = f.button :submit, class: "btn btn-success"
+    = link_to "Cancel", collection_path(params[:id]), class: "btn btn-warning"
 
