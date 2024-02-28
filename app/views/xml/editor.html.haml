@@ -7,7 +7,7 @@
 
 %ul.nav.nav-tabs
   %li.nav-item
-    %a.nav-link{"aria-current" => "page", href: "#"} Metadata
+    %a.nav-link{"aria-current" => "page", href: public_send("edit_#{@klass.downcase}_path", @resource['id'])} Metadata
   %li.nav-item
     %a.nav-link.active{href: "#"} XML
 
