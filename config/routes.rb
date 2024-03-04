@@ -300,10 +300,11 @@ Cerberus::Application.routes.draw do
   match 'notifications/delete_all' => 'mailbox#delete_all', as: :mailbox_delete_all, via: [:get, :post]
   match 'notifications/:uid/delete' => 'mailbox#delete', as: :mailbox_delete, via: [:get, :post]
 
-  get ':action' => 'static#:action', constraints: { action: /help|iris|terms/ }, as: :static
+  get ':action' => 'static#:action', constraints: { action: /help|iris|upload|terms/ }, as: :static
   get "/downloads/:id/mods/:session_id" => "static#mods_download", as: 'mods_download'
   get "/downloads/:id/manifest/:session_id" => "static#manifest_download", as: 'manifest_download'
   get "/downloads/large/:session_id/:time" => "static#large_download", as: 'large_download'
+  match "/staged/create" => "static#process_staged_upload", via:"post", as: "staged_upload"
 
   # Catch-all (for routing errors)
   unless Rails.env.development?
