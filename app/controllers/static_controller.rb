@@ -1,4 +1,5 @@
 class StaticController < ApplicationController
+  include Cerberus::TempFileStorage
   include ZipHelper
   rescue_from AbstractController::ActionNotFound, with: :render_404
 
