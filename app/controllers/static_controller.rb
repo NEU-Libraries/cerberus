@@ -44,8 +44,8 @@ class StaticController < ApplicationController
       end
 
       file_list = safe_unzip(new_path, dir_path)
-      flash[:notice] = "Zip file updated."
-      redirect_to root_path and return
+      flash[:notice] = "#{params[:box_number]} zip file uploaded and extracted."
+      redirect_to "/upload" and return
     else
       render_403 and return
     end
