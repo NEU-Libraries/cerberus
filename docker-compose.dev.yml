@@ -4,8 +4,12 @@ services:
   atlas:
     volumes:
     - storage:/home/atlas/storage
+  iiif:
+    volumes:
+      - iiif:/imageroot
   web:
     build: .
     volumes:
       - ./:/home/cerberus/web
+      - iiif:/home/cerberus/images
       - storage:/home/cerberus/storage

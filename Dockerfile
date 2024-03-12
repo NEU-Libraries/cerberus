@@ -12,6 +12,7 @@ RUN useradd -ms /bin/bash cerberus
 USER cerberus
 
 RUN mkdir -p /home/cerberus/storage
+RUN mkdir -p /home/cerberus/images
 
 COPY --chown=cerberus:cerberus Gemfile* /tmp/
 WORKDIR /tmp
