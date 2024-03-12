@@ -1,9 +1,6 @@
 # Use postgres/example user/password credentials
 version: '3.7'
 services:
-  jobs:
-    volumes:
-      - storage:/home/cerberus/storage
   atlas:
     volumes:
     - storage:/home/atlas/storage

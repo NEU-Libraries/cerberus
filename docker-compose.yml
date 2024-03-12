@@ -4,7 +4,6 @@ volumes:
   solr:
   db:
   storage:
-  jobs:
 services:
   db:
     image: postgres:14
@@ -28,17 +27,10 @@ services:
     entrypoint: /home/atlas/web/docker-entrypoint.sh
     ports:
       - 3001:3000
-  jobs:
-    image: nakatomi/cerberus_web
-    entrypoint: /home/cerberus/web/jobs-entrypoint.sh
-  redis:
-    image: redis:alpine
-    restart: always
+  iiif:
+    image: uclalibrary/cantaloupe:5.0.6-2
     ports:
-      - '6379:6379'
-    command: redis-server
-    volumes:
-      - jobs:/data
+      - 8182:8182
   solr:
     image: nakatomi/blacklight-solr
     ports:
