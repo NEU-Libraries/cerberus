@@ -44,7 +44,7 @@ services:
     ports:
     - 8983:8983
     volumes:
-    - solr:/opt/solr/server/solr/mycores/blacklight-core/data
+    - solr:/var/solr/data
     healthcheck:
       test:
       - CMD
