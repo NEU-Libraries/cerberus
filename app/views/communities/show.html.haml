@@ -1,18 +1,23 @@
 - content_for(:container_header) do
   = breadcrumbs
 
-  .p-4.my-3.well.rounded-3
-    %h3.d-inline
-      = @community["title"]
-    %h5.d-inline.text-black-50
-      %span.fa-solid.fa-users.ps-2.pe-1
-      Community
-    .clearfix.pt-3
-    = @community["description"]
-    .clearfix.pt-3
-      .float-end
-        = link_to "Edit", edit_community_path(@community["id"]), class: "px-3"
-        = link_to "Delete", "#", class: "px-3"
+  .container.p-4.my-3.well.rounded-3
+    .row
+      .col-md-auto
+        .thumbnail{style: "background-color: white; border: 1px solid rgba(0,0,0,0.2); width: 85px; height: 85px; margin-top: 7px; position: relative; overflow: hidden;"}
+          %img{loading: "lazy", src: "#{@community["thumbnail"]}/full/!85,85/0/default.jpg", style: "position: absolute; margin: auto; top: 0; left: 0; right: 0; bottom: 0;"}/
+      .col
+        %h3.d-inline
+          = @community["title"]
+        %h5.d-inline.text-black-50
+          %span.fa-solid.fa-users.ps-2.pe-1
+          Community
+        .clearfix.pt-3
+        = @community["description"]
+        .clearfix.pt-3
+          .float-end
+            = link_to "Edit", edit_community_path(@community["id"]), class: "px-3"
+            = link_to "Delete", "#", class: "px-3"
 
 - content_for(:sidebar) do
   = render 'catalog/search_sidebar'

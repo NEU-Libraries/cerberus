@@ -32,12 +32,16 @@ services:
     image: uclalibrary/cantaloupe:5.0.6-2
     ports:
       - 8182:8182
+    environment:
+      CANTALOUPE_PROCESSOR_MANUALSELECTIONSTRATEGY_JP2: 'OpenJpegProcessor'
+      CANTALOUPE_PROCESSOR_SELECTION_STRATEGY: 'ManualSelectionStrategy'
+      CANTALOUPE_CACHE_CLIENT_ENABLED: 'true'
   solr:
     image: nakatomi/blacklight-solr
     ports:
     - 8983:8983
     volumes:
-    - solr:/opt/solr/server/solr/mycores/blacklight-core/data
+    - solr:/var/solr/data/blacklight-core/data
     healthcheck:
       test:
       - CMD

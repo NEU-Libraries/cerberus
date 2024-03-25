@@ -24,7 +24,15 @@ class CommunitiesController < CatalogController
   end
 
   def update
+    # allow for thumbnail
+    file = params[:thumbnail]
+    img = Vips::Image.new_from_file(file.tempfile.path.presence || file.path)
+    # convert to jp2 and write to shared volume with iiif container
+    uuid = Time.now.to_f.to_s.gsub!('.', '')
+    img.jp2ksave("/home/cerberus/images/#{uuid}.jp2")
     permitted = params.require(:community).permit(:title, :description).to_h
+    # write thumbnail URL to Atlas
+    permitted[:thumbnail] = "http://#{request.host}:8182/iiif/3/#{uuid}.jp2"
     AtlasRb::Community.metadata(params[:id], permitted)
     redirect_to community_path(params[:id])
   end

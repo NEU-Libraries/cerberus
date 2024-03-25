@@ -70,6 +70,7 @@ gem 'noid-rails', git: 'https://github.com/dgcliff/noid-rails.git', branch: 'rai
 gem 'pg'
 gem 'rsolr', '>= 1.0', '< 3'
 gem 'ruby-filemagic'
+gem 'ruby-vips'
 gem 'sidekiq'
 
 group :development, :test do

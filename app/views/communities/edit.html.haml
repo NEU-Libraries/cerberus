@@ -6,8 +6,10 @@
   %li.nav-item
     %a.nav-link{href:  xml_editor_path(params[:id])} XML
 
-= bootstrap_form_tag url: community_path(params[:id]), method: :patch do |f|
+= bootstrap_form_tag(url: community_path(params[:id]), method: :patch, multipart: true) do |f|
   = f.hidden_field :id, value: params[:id]
+  %label.form-label{:for => "thumbnail"} Thumbnail
+  %input#thumbnail.form-control.mb-3{:name => "thumbnail", :type => "file"}/
   = bootstrap_fields_for :community do |c|
     = c.text_field :title, value: @community['title']
     = c.text_area :description, rows: 10, value: @community['description']

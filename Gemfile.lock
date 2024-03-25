@@ -172,6 +172,7 @@ GEM
       multipart-post (~> 2)
     faraday-net_http (3.1.0)
       net-http
+    ffi (1.16.3)
     globalid (1.2.1)
       activesupport (>= 6.1)
     google-protobuf (3.25.3-x86_64-linux)
@@ -357,6 +358,8 @@ GEM
       rubocop-ast (>= 1.30.0, < 2.0)
     ruby-filemagic (0.7.3)
     ruby-progressbar (1.13.0)
+    ruby-vips (2.2.1)
+      ffi (~> 1.12)
     rubyzip (2.3.2)
     sass-embedded (1.71.0-x86_64-linux-gnu)
       google-protobuf (~> 3.25)
@@ -447,6 +450,7 @@ DEPENDENCIES
   rubocop
   rubocop-rails
   ruby-filemagic
+  ruby-vips
   selenium-webdriver
   sidekiq
   simplecov
