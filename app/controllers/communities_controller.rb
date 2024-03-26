@@ -32,7 +32,7 @@ class CommunitiesController < CatalogController
     img.jp2ksave("/home/cerberus/images/#{uuid}.jp2")
     permitted = params.require(:community).permit(:title, :description).to_h
     # write thumbnail URL to Atlas
-    permitted[:thumbnail] = "http://#{request.host}:8182/iiif/3/#{uuid}.jp2"
+    permitted[:thumbnail] = uuid
     AtlasRb::Community.metadata(params[:id], permitted)
     redirect_to community_path(params[:id])
   end

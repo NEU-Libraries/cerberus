@@ -5,7 +5,7 @@
     .row
       .col-md-auto
         .thumbnail{style: "background-color: white; border: 1px solid rgba(0,0,0,0.2); width: 85px; height: 85px; margin-top: 7px; position: relative; overflow: hidden;"}
-          %img{loading: "lazy", src: "#{@community["thumbnail"]}/full/!85,85/0/default.jpg", style: "position: absolute; margin: auto; top: 0; left: 0; right: 0; bottom: 0;"}/
+          %img{loading: "lazy", src: "#{iiif_url(@community["thumbnail"])}/full/!85,85/0/default.jpg", style: "position: absolute; margin: auto; top: 0; left: 0; right: 0; bottom: 0;"}/
       .col
         %h3.d-inline
           = @community["title"]
