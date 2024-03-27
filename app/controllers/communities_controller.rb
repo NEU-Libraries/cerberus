@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class CommunitiesController < CatalogController
+  include Thumbable
+
   def show
     @community = AtlasRb::Community.find(params[:id])
     @response = find_many(AtlasRb::Community.children(params[:id]))
@@ -29,15 +31,4 @@ class CommunitiesController < CatalogController
     AtlasRb::Community.metadata(params[:id], permitted)
     redirect_to community_path(params[:id])
   end
-
-  private
-
-    def add_thumbnail(permitted_params)
-      file = params[:thumbnail]
-      return if file.blank?
-
-      permitted_params[:thumbnail] = ThumbnailCreator.call(
-        path: file.tempfile.path.presence || file.path
-      ) # UUID
-    end
 end

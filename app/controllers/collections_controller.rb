@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class CollectionsController < CatalogController
+  include Thumbable
+
   def show
     @collection = AtlasRb::Collection.find(params[:id])
     @response = find_many(AtlasRb::Collection.children(params[:id]))
