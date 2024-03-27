@@ -1,8 +1,14 @@
 - content_for(:container_header) do
   = breadcrumbs
 
--# = render partial: "shared/mods", locals: {resource: @work}
-= @mods.html_safe
+.container
+  .clearfix.pt-1
+  .row
+    .col-6
+      .thumbnail{style: "background-color: white; border: 1px solid rgba(0,0,0,0.2); width: 500px; min-height: 300px; margin-top: 7px; position: relative; overflow: hidden;"}
+        %span.fa-regular.fa-image.fa-2xl{style: "position: absolute; margin: auto; top: 0; left: 0; right: 0; bottom: 0;"}
+    .col-6
+      = @mods.html_safe
 
 -# - @work.children.each do |c|
 -#   = "#{c.type} - #{c.children.count}"
