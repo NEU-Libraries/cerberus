@@ -18,7 +18,7 @@ class WorksController < ApplicationController
       collection_id: Collection.find(params[:collection_id]).id,
       title: file.original_filename
     )
-    BlobCreator.call(work_id: @work.id, path: (file.tempfile.path.presence || file.path))
+    BlobCreator.call(work_id: @work.id, path: file.tempfile.path.presence || file.path)
     redirect_to @work
   end
 end

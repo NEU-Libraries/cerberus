@@ -15,11 +15,7 @@ class CollectionsController < CatalogController
   end
 
   def create
-    puts "DGC DEBUG - DEBUG DGC"
-    puts params.inspect
     permitted = params.require(:collection).permit(:title, :description).to_h
-    puts permitted.inspect
-
     c = AtlasRb::Collection.create(params[:parent_id])
     AtlasRb::Collection.metadata(c['id'], permitted)
     redirect_to collection_path(c['id'])
