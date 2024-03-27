@@ -26,6 +26,7 @@ class CollectionsController < CatalogController
   def update
     # TODO: need to do permissions check
     permitted = params.require(:collection).permit(:title, :description).to_h
+    add_thumbnail(permitted)
     AtlasRb::Collection.metadata(params[:id], permitted)
     redirect_to collection_path(params[:id])
   end
