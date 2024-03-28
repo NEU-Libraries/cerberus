@@ -7,8 +7,9 @@ module ApplicationHelper
 
   def iiif_url(uuid)
     # Supports staging, production etc.
+    # cantaloupe
     if Rails.application.config.iiif_host.present?
-      "http://#{Rails.application.config.iiif_host}:8182/iiif/3/#{uuid}.jp2"
+      "#{Rails.application.config.iiif_host}/iiif/3/#{uuid}.jp2"
     else
       "http://#{request.host}:8182/iiif/3/#{uuid}.jp2"
     end
