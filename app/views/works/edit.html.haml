@@ -1,0 +1,18 @@
+%h3.py-3 Edit Work
+
+%ul.nav.nav-tabs
+  %li.nav-item
+    %a.nav-link.active{"aria-current" => "page", href: "#"} Metadata
+  %li.nav-item
+    %a.nav-link{href:  xml_editor_path(params[:id])} XML
+
+= bootstrap_form_tag(url: work_path(params[:id]), method: :patch, multipart: true) do |f|
+  = f.hidden_field :id, value: params[:id]
+  %label.form-label{:for => "thumbnail"} Thumbnail
+  %input#thumbnail.form-control.mb-3{:name => "thumbnail", :type => "file"}/
+  = bootstrap_fields_for :work do |c|
+    = c.text_field :title, value: @work['title']
+    = c.text_area :description, rows: 10, value: @work['description']
+  .well.p-3.my-3.rounded-3
+    = f.button :submit, class: "btn btn-success"
+    = link_to "Cancel", work_path(params[:id]), class: "btn btn-warning"
