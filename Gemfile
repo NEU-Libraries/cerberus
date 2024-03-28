@@ -56,7 +56,7 @@ gem 'active_decorator'
 gem 'atlas_rb'
 gem 'attr_json'
 gem 'blacklight'
-gem 'bootstrap', git: 'https://github.com/twbs/bootstrap-rubygem.git', :ref => '90467dee09b0c6e52e7d58de867148fda0dd9f49'
+gem 'bootstrap', git: 'https://github.com/twbs/bootstrap-rubygem.git', ref: '90467dee09b0c6e52e7d58de867148fda0dd9f49'
 gem 'bootstrap_form'
 gem 'croutons'
 gem 'dartsass-rails'
@@ -70,6 +70,7 @@ gem 'noid-rails', git: 'https://github.com/dgcliff/noid-rails.git', branch: 'rai
 gem 'pg'
 gem 'rsolr', '>= 1.0', '< 3'
 gem 'ruby-filemagic'
+gem 'ruby-vips'
 gem 'sidekiq'
 
 group :development, :test do

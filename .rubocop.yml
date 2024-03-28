@@ -2,6 +2,8 @@ require: rubocop-rails
 Lint/MissingSuper:
   Exclude:
     - 'app/services/**/*'
+    # BL Code
+    - 'app/components/blacklight/**/*'
 Metrics/ClassLength:
   Max: 120
 Metrics/AbcSize:
@@ -20,6 +22,8 @@ Metrics/CyclomaticComplexity:
 Metrics/PerceivedComplexity:
   Exclude:
     - 'app/decorators/*'
+Style/OpenStructUse:
+  Enabled: false
 Lint/AmbiguousBlockAssociation:
   Enabled: false
 Rails/FindEach:

@@ -1,0 +1,4 @@
+- if !@work["thumbnail"].blank?
+  = render partial: "image", locals: {uuid: @work["thumbnail"]}
+- else
+  = render partial: "icon"
