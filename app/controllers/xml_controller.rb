@@ -33,6 +33,6 @@ class XmlController < ApplicationController
     def create_temp_xml
       tmp_path = Rails.root.join("/tmp/#{Time.now.to_f.to_s.gsub!('.', '')}.xml")
       File.write(tmp_path, params[:raw_xml])
-      return tmp_path
+      tmp_path
     end
 end

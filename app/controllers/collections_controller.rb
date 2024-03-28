@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class CollectionsController < CatalogController
+  include Thumbable
+
   def show
     @collection = AtlasRb::Collection.find(params[:id])
     @response = find_many(AtlasRb::Collection.children(params[:id]))
@@ -15,11 +17,7 @@ class CollectionsController < CatalogController
   end
 
   def create
-    puts "DGC DEBUG - DEBUG DGC"
-    puts params.inspect
     permitted = params.require(:collection).permit(:title, :description).to_h
-    puts permitted.inspect
-
     c = AtlasRb::Collection.create(params[:parent_id])
     AtlasRb::Collection.metadata(c['id'], permitted)
     redirect_to collection_path(c['id'])
@@ -28,6 +26,7 @@ class CollectionsController < CatalogController
   def update
     # TODO: need to do permissions check
     permitted = params.require(:collection).permit(:title, :description).to_h
+    add_thumbnail(permitted)
     AtlasRb::Collection.metadata(params[:id], permitted)
     redirect_to collection_path(params[:id])
   end

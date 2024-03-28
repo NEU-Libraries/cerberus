@@ -1,8 +1,15 @@
 - content_for(:container_header) do
   = breadcrumbs
 
--# = render partial: "shared/mods", locals: {resource: @work}
-= @mods.html_safe
+.container
+  .clearfix.pt-1
+  .row
+    .col-6
+      = render partial: "thumbnail"
+    .col-6
+      = @mods.html_safe
+
+.clearfix.mb-4
 
 -# - @work.children.each do |c|
 -#   = "#{c.type} - #{c.children.count}"
