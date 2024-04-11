@@ -32,7 +32,8 @@
         Full Text Match
       %dd.well.drs-item-highlight
         = "... "
-        = @response['highlighting'][item.pid]['all_text_timv'].first.html_safe
+        -# = @response['highlighting'][item.pid]['all_text_timv'].first.html_safe
+        = Unidecoder.decode(Sanitize.clean(Kramdown::Document.new(@response['highlighting'][item.pid]['all_text_timv'].first).to_html, :elements => ['em'])).strip.html_safe
         = "... "
   - elsif item.description.blank?
     .list-view-spacer
