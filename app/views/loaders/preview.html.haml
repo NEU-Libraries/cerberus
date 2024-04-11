@@ -50,7 +50,7 @@
       -# = link_to("Cancel Load", loaders_cancel_load_path(:id => @report.id), class: "btn btn-danger")
       -# = link_to("Proceed with Load", loaders_proceed_load_path(:id => @report.id), class: "btn btn-success pull-right")
       = link_to("Cancel Load", send("loaders_#{@loader_short_name}_cancel_load_path", @report.id), class: "btn btn-danger")
-      = link_to("Proceed with Load", send("loaders_#{@loader_short_name}_proceed_load_path", @report.id), class: "btn btn-success pull-right")
+      = link_to("Proceed with Load", send("loaders_#{@loader_short_name}_proceed_load_path", @report.id), class: "btn btn-success pull-right"), data: { disable_with: "Please wait..."}
     -else
       = form_tag send("loaders_#{@loader_short_name}_proceed_load_path", @report.id), :method => 'get' do
         = hidden_field_tag :id, @report.id
