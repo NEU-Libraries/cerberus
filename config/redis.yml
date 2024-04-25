@@ -1,15 +1,20 @@
 development:
   host: localhost
   port: 6379
+  password:
 staging:
   host: localhost
   port: 6379
+  password:
 test:
   host: localhost
   port: 6379
+  password:
 production:
   host: nb9478.neu.edu
   port: 6379
+  password: <%= ENV["REDIS_PASSWD"] %>
 secondary:
   host: nb9478.neu.edu
   port: 6379
+  password: <%= ENV["REDIS_PASSWD"] %>
