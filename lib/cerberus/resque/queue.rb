@@ -12,9 +12,7 @@ module Cerberus
       def push(job)
         queue = job.respond_to?(:queue_name) ? job.queue_name : default_queue_name
         begin
-          config = YAML::load(ERB.new(IO.read(File.join(Rails.root, 'config', 'redis.yml'))).result)[Rails.env].with_indifferent_access
-          Resque.redis = Redis.new(password: ENV["REDIS_PASSWD"], host: config[:host], port: config[:port], thread_safe: true, expires_in: 1.month, timeout: 10.0, reconnect_attempts: 10, tcp_keepalive: 300) rescue nil
-          Resque.enqueue_to(queue, MarshaledJob, Base64.encode64(Marshal.dump(job)))
+          ::Resque.enqueue_to(queue, MarshaledJob, Base64.encode64(Marshal.dump(job)))
         rescue Redis::CannotConnectError
           logger.error "Redis is down!"
         end
