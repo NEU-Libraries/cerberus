@@ -56,7 +56,7 @@ Cerberus::Application.configure do
 
   # config.force_ssl = true
 
-  config.cache_store = :redis_store, 'redis://nb9478.neu.edu:6379/0/cache', { expires_in: 1.week, timeout: 10.0, reconnect_attempts: 10, tcp_keepalive: 300 }
+  config.cache_store = :redis_store, 'redis://nb9478.neu.edu:6379/0/cache', { password: ENV["REDIS_PASSWD"], expires_in: 1.week, timeout: 10.0, reconnect_attempts: 10, tcp_keepalive: 300 }
 
   # Mailer configuration
   ActionMailer::Base.smtp_settings = {
