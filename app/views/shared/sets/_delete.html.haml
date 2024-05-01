@@ -1,5 +1,5 @@
 %div
-  -if !current_user.nil? && current_user.admin? && "#{@set.class}" != 'Compilation'
+  -if !current_user.nil? && (current_user.admin_group? || current_user.admin?) && "#{@set.class}" != 'Compilation'
     = form_tag( tombstone_collection_path ) do
       %fieldset
         .row-fluid

@@ -277,19 +277,22 @@ class CollectionsController < ApplicationController
   end
 
   def tombstone
-    collection = Collection.find(params[:id])
-    title = collection.title
-    parent = collection.parent
-    reason = params[:reason]
-    if reason != ""
-      collection.tombstone(reason + " " + DateTime.now.strftime("%F"))
-    else
-      collection.tombstone
-    end
-    if current_user.admin?
+    if !current_user.nil? && (current_user.admin_group? || current_user.admin?)
+      collection = Collection.find(params[:id])
+      title = collection.title
+      parent = collection.parent
+      reason = params[:reason]
+      if reason != ""
+        collection.tombstone(reason + " " + DateTime.now.strftime("%F"))
+      else
+        collection.tombstone
+      end
+
       redirect_to collection_path(id: parent), notice: "The collection '#{title}' has been tombstoned"
     else
-      redirect_to collection_path(id: parent), notice: "The collection '#{title}' has been tombstoned"
+      # permissions error
+      flash[:error] = "You do not have the permissions to peform this action."
+      render_403 and return
     end
   end
 
@@ -307,7 +310,7 @@ class CollectionsController < ApplicationController
     collection = Collection.find(params[:id])
     user = current_user
 
-    if current_user.admin?
+    if current_user.admin_group? || current_user.admin?
       destination_pid = params[:destination_pid]
       if Community.exists?(destination_pid) || Collection.exists?(destination_pid)
         # run job for agg stats
