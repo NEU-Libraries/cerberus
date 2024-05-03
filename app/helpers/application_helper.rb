@@ -6,6 +6,7 @@ module ApplicationHelper
     cursor = "0"
     batch_size = 1000
     begin
+      $redis.auth(ENV["REDIS_PASSWD"])
       cursor, keys = $redis.scan(cursor, match: pattern, count: batch_size)
       $redis.del(*keys) unless keys.empty?
     end until cursor == "0"
