@@ -12,7 +12,7 @@ module Cerberus
       def push(job)
         queue = job.respond_to?(:queue_name) ? job.queue_name : default_queue_name
         begin
-          # Resque.redis.auth(ENV["REDIS_PASSWD"])
+          ::Resque.redis.auth(ENV["REDIS_PASSWD"])
           ::Resque.enqueue_to(queue, MarshaledJob, Base64.encode64(Marshal.dump(job)))
         rescue Redis::CannotConnectError
           logger.error "Redis is down!"
