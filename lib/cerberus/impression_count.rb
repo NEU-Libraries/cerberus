@@ -8,7 +8,12 @@ module Cerberus::ImpressionCount
     # * Unique as determined by viewing session_id
     def impression_views
       if self.klass != "Collection"
-        Impression.where("pid IN (?) AND action = ? AND public = ? AND status = 'COMPLETE'", self.all_descendent_pids, 'view', true).count
+        # Switch to query per pid and combine values for better use of pid column index in sql
+        total = 0
+        self.all_descendent_pids.each do |pid|
+          total += Impression.where("pid = ? AND action = ? AND public = ? AND status = 'COMPLETE'", pid, 'view', true).count
+        end
+        return total
       else
         AggregatedStatistic.where(pid: self.pid).sum(:views)
       end
@@ -17,7 +22,12 @@ module Cerberus::ImpressionCount
     # Same as above, but with recorded download actions
     def impression_downloads
       if self.klass != "Collection"
-        Impression.where("pid IN (?) AND action = ? AND public = ? AND status = 'COMPLETE'", self.all_descendent_content_object_pids, 'download', true).count
+        # Switch to query per pid and combine values for better use of pid column index in sql
+        total = 0
+        self.all_descendent_content_object_pids.each do |pid|
+          total += Impression.where("pid = ? AND action = ? AND public = ? AND status = 'COMPLETE'", pid, 'download', true).count
+        end
+        return total
       else
         AggregatedStatistic.where(pid: self.pid).sum(:downloads)
       end
@@ -26,7 +36,12 @@ module Cerberus::ImpressionCount
     # Same as above, but with recorded download actions
     def impression_streams
       if self.klass != "Collection"
-        Impression.where("pid IN (?) AND action = ? AND public = ? AND status = 'COMPLETE'", self.all_descendent_content_object_pids, 'stream', true).count
+        # Switch to query per pid and combine values for better use of pid column index in sql
+        total = 0
+        self.all_descendent_content_object_pids.each do |pid|
+          total += Impression.where("pid = ? AND action = ? AND public = ? AND status = 'COMPLETE'", pid, 'stream', true).count
+        end
+        return total
       else
         AggregatedStatistic.where(pid: self.pid).sum(:streams)
       end
