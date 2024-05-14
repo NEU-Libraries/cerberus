@@ -551,8 +551,46 @@ class CoreFilesController < ApplicationController
 
     mods_b = Nokogiri::XML(@core_file.mods.versions[params[:page].to_i - 1].content).to_s
 
-    @diff = mods_diff(mods_a, mods_b)
+    @diff = xml_diff(mods_a, mods_b)
     @diff_css = Diffy::CSS
+  end
+
+  def rights_history
+    @core_file = CoreFile.find(params[:id])
+    @rights_pages = @core_file.rightsMetadata.versions.paginate(:page => params[:page], :per_page => 1)
+
+    if params[:page].to_i != @core_file.rightsMetadata.versions.length
+      rights_a = Nokogiri::XML(@core_file.rightsMetadata.versions[params[:page].to_i].content).to_s
+    else
+      rights_a = ""
+    end
+
+    rights_b = Nokogiri::XML(@core_file.rightsMetadata.versions[params[:page].to_i - 1].content).to_s
+
+    @diff = xml_diff(rights_a, rights_b)
+    @diff_css = Diffy::CSS
+  end
+
+  def rights_history_list
+    @core_file = CoreFile.find(params[:id])
+    @rights_changes = Hash.new
+
+    @core_file.rightsMetadata.versions.each_with_index do |v, i|
+      date = v.createDate.localtime.to_s
+
+      a = v.content
+
+      if !@core_file.rightsMetadata.versions[i + 1].blank?
+        b = @core_file.rightsMetadata.versions[i + 1].content
+      else
+        b = ""
+      end
+
+      distance = DamerauLevenshtein.distance(a, b, 1, 10000)
+
+      @rights_changes[date] = distance.to_s
+    end
+
   end
 
   def edit_xml
@@ -945,8 +983,8 @@ class CoreFilesController < ApplicationController
 
   protected
 
-    def mods_diff(mods_a, mods_b)
-      return Diffy::Diff.new(mods_a, mods_b, :include_plus_and_minus_in_html => true, :context => 1).to_s(:html).html_safe
+    def xml_diff(xml_a, xml_b)
+      return Diffy::Diff.new(xml_a, xml_b, :include_plus_and_minus_in_html => true, :context => 1).to_s(:html).html_safe
     end
 
     def complete?

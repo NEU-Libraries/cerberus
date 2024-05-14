@@ -1,0 +1,25 @@
+%ul.breadcrumb
+  %li
+    = link_to "Manage #{@core_file.title}", edit_core_file_path(id: @core_file.pid)
+  %li.active
+    Rights History List
+
+%header
+  %h1.page-header
+    Rights History List for
+    %i
+      = "#{@core_file.non_sort} "
+      = kramdown_parse(@core_file.title)
+
+%table.table.table-striped
+  - @rights_changes.each_with_index do |(k, v), i|
+    %tr
+      %td
+        .large
+          %a{href: core_file_rights_history_path(id: @core_file.pid, page: i + 1)}
+            = k
+      %td
+        .large
+          = "Changes: #{v}"
+
+* Changes are measured by Damerau–Levenshtein distance
