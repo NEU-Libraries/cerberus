@@ -165,8 +165,13 @@ class ImageProcessingJob
             elsif tag == 'Source'
               core_file.mods.origin_info.publisher = val
             elsif tag == "DateTimeOriginal"
-              core_file.mods.origin_info.copyright = val.strftime("%F")
-              core_file.date = val.strftime("%F")
+              if val.kind_of?(Time)
+                core_file.mods.origin_info.copyright = val.strftime("%F")
+                core_file.date = val.strftime("%F")
+              else
+                # Need to work out how to make cumulative metadata parse errors that can be mailed daily, to avoid
+                # the deluge of a malformed batch load. For now, we just avoid crashing.
+              end
             elsif tag == 'Keywords'
               if val.kind_of?(Array)
                 core_file.keywords = val.map #(&:to_s)
