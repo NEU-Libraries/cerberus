@@ -82,8 +82,9 @@ class ImageProcessingJob
               # val = CGI.unescapeHTML(Unidecoder.decode(raw_val))
               val = xml_decode(raw_val)
               if val != raw_val
-                modified_message = "#{tag} contained Unicode general punctuation. This has been replaced with the ASCII equivalent."
-                modified = true
+                # We're just not going to notify anymore, in favor of parse errors for the IPTC mailer
+                # modified_message = "#{tag} contained Unicode general punctuation. This has been replaced with the ASCII equivalent."
+                # modified = true
               end
             end
 
@@ -136,8 +137,8 @@ class ImageProcessingJob
                 elsif val.include? ";"
                   pers = val.split(";")
                   pers = {'first_names'=>[pers[1].strip], 'last_names'=>[pers[0].strip]}
-                  modified_message = "By-line parsed into Last Name, First Name format."
-                  modified = true
+                  # modified_message = "By-line parsed into Last Name, First Name format."
+                  # modified = true
                 else
                   name_array = Namae.parse val
                   if name_array.blank?
@@ -146,12 +147,12 @@ class ImageProcessingJob
                   name_obj = name_array[0]
                   if !name_obj.nil? && !name_obj.given.blank? && !name_obj.family.blank?
                     pers = {'first_names'=>[name_obj.given], 'last_names'=>[name_obj.family]}
-                    modified_message = "By-line parsed into Last Name, First Name format."
-                    modified = true
+                    # modified_message = "By-line parsed into Last Name, First Name format."
+                    # modified = true
                   else
                     pers = {} # setting to blank and allowing DPS to fix in post
                     # ExceptionNotifier.notify_exception(Exceptions::MissingCreator.new(), :data => {:pid => "#{core_file.pid}"})
-                    modified_message = "Byline could not be parsed. Please format the photographer name as 'Lastname, Firstname'."
+                    modified_message = "By-line could not be parsed. Please format the photographer name as 'Lastname, Firstname'."
                     modified = true
                   end
                 end
@@ -169,8 +170,8 @@ class ImageProcessingJob
                 core_file.mods.origin_info.copyright = val.strftime("%F")
                 core_file.date = val.strftime("%F")
               else
-                # Need to work out how to make cumulative metadata parse errors that can be mailed daily, to avoid
-                # the deluge of a malformed batch load. For now, we just avoid crashing.
+                modified_message = "DateTimeOriginal of value #{val} was not a valid date time string - failed to parse correctly."
+                modified = true
               end
             elsif tag == 'Keywords'
               if val.kind_of?(Array)
