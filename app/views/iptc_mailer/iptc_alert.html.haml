@@ -4,5 +4,14 @@
     %meta{:content => "text/html; charset=UTF-8", "http-equiv" => "Content-Type"}/
   %body
     %h3= "IPTC Alert"
-    %p
-      = "Creator name could not be parsed. Please check the formatting of the photographer name in the IPTC creator field - #{@pid}"
+    - @item_reports.each do |ir|
+      Load Report:
+      = link_to("#{ir.load_report.id}", loaders_marcom_report_path(ir.load_report.id, only_path: false))
+      %br
+      Item PID:
+      = link_to("#{ir.pid}", core_file_path(ir.pid, only_path: false))
+      %br
+      Issue:
+      = "#{ir.exception}"
+      %br
+      %br
