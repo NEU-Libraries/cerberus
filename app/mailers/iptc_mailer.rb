@@ -2,7 +2,7 @@ class IptcMailer < ActionMailer::Base
   default from: "notifier@repository.library.northeastern.edu"
 
   def iptc_alert
-    @item_reports = Loaders::ItemReport.where('validity = TRUE AND modified = TRUE AND created_at > ?', DateTime.yesterday.end_of_day)
+    @item_reports = Loaders::ItemReport.where('validity = TRUE AND modified = TRUE AND created_at > ?', DateTime.yesterday.beginning_of_day)
 
     count = 0
 
