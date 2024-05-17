@@ -218,7 +218,8 @@ class ImageProcessingJob
           return
         end
         if core_file.creators.blank?
-          IptcMailer.iptc_alert(core_file.pid).deliver!
+          # Removing per item delivery in favor of digest approach
+          # IptcMailer.iptc_alert(core_file.pid).deliver!
         end
 
         # Featured Content tagging

@@ -21,6 +21,7 @@ every 1.day, at: '1:30am'  do
   runner "MetadataMailer.daily_alert_email.deliver!"
   runner "MetadataMailer.daily_nonfeatured_alert_email.deliver!"
   runner "XmlMailer.daily_alert_email.deliver!"
+  runner "IptcMailer.iptc_alert.deliver!"
   runner "ImpressionProcessingJob.new().run"
   runner "CacheWarmJob.new().run"
 end
