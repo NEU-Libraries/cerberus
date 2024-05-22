@@ -21,7 +21,7 @@ every 1.day, at: '1:30am'  do
   runner "MetadataMailer.daily_alert_email.deliver!"
   runner "MetadataMailer.daily_nonfeatured_alert_email.deliver!"
   runner "XmlMailer.daily_alert_email.deliver!"
-  runner "IptcMailer.iptc_alert.deliver!"
+  runner "(Loaders::ItemReport.where('validity = TRUE AND modified = TRUE AND created_at > ?', DateTime.yesterday.beginning_of_day).count > 0) ? IptcMailer.iptc_alert.deliver! : nil"
   runner "ImpressionProcessingJob.new().run"
   runner "CacheWarmJob.new().run"
 end
