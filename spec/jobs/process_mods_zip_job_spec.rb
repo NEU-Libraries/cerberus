@@ -210,8 +210,8 @@ describe ProcessModsZipJob do
     it "should have a handle" do
       @lr.reload
       cf = CoreFile.find(@lr.item_reports[0].pid)
-      cf.mods.identifier.should == ["http://hdl.handle.net/2047/D10000001"]
-      cf.identifier.should == "http://hdl.handle.net/2047/D10000001"
+      cf.mods.identifier.should == ["https://hdl.handle.net/2047/D10000001"]
+      cf.identifier.should == "https://hdl.handle.net/2047/D10000001"
     end
 
     it "should fail if no title" do

@@ -137,7 +137,7 @@
         <mods:identifier type="issn">0021-8979</mods:identifier>
     </mods:relatedItem>
 
-    <mods:identifier type="hdl">http://hdl.handle.net/2047/d20002293</mods:identifier>
+    <mods:identifier type="hdl">https://hdl.handle.net/2047/d20002293</mods:identifier>
 
 </mods:mods>
 
