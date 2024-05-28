@@ -19,7 +19,7 @@ module HandleHelper
         caldate                  = Date.today.strftime("%Y-%m-%d")
         handleInt                = client.query("SELECT handle from handles ORDER BY handle DESC LIMIT 1").first.first[1].partition('2047/D').last.to_i
         handleForDB              = "2047/D#{handleInt + 1}"
-        handleForUser            = "http://hdl.handle.net/#{handleForDB}"
+        handleForUser            = "https://hdl.handle.net/#{handleForDB}"
 
         client.query("START TRANSACTION;")
 
@@ -56,7 +56,7 @@ module HandleHelper
         query = "SELECT handle FROM handles WHERE type=\"URL\" and data=\"#{url}\";"
         mysql_response = client.query(query)
         handle = mysql_response.first["handle"]
-        return "http://hdl.handle.net/#{handle}"
+        return "https://hdl.handle.net/#{handle}"
       else
         return nil
       end
@@ -72,7 +72,7 @@ module HandleHelper
       # if it does, update it
       if mysql_response.count > 0
         client.query("UPDATE handles SET data = '#{url}' WHERE handle = '#{handle}' AND type = 'url';")
-        return "http://hdl.handle.net/#{handle}"
+        return "https://hdl.handle.net/#{handle}"
       else
         return nil
       end
