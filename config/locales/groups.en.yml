@@ -4,6 +4,8 @@ en:
       name: "National Interpreter Education Center Staff"
     northeastern:drs:aslp:series:
       name: "National Interpreter Education Center - Series (Test Group)"
+    northeastern:drs:athletics:athletics_department:
+      name: "Department of Athletics"
     northeastern:drs:athletics:hall_of_fame:
       name: "Department of Athletics - Hall of Fame Staff"
     northeastern:drs:board_of_trustees:board_members:
@@ -18,6 +20,8 @@ en:
       name: "Boston Women's March Posters Project Team"
     northeastern:drs:camd:department_of_art_and_design:art_and_design_gallery:
       name: "CAMD - Art and Design Group"
+    northeastern:drs:camd:department_of_art_and_design:ghostlab:
+      name: "CAMD - Ghostlab Research Team"
     northeastern:drs:camd:out_and_about:
       name: "CAMD - Out and About Project Team"
     northeastern:drs:camd:photo_archive:staff:
@@ -53,7 +57,9 @@ en:
     northeastern:drs:college_of_engineering:river_lab:
       name: "RIVeR Lab Team"
     northeastern:drs:college_of_engineering:wiot:
-      name: "Institute for the Wireless Internet of Things Team"
+      name: "Institute for the Wireless Internet of Things Research Team"
+    northeastern:drs:college_of_engineering:wiot-staff:
+      name: "Institute for the Wireless Internet of Things Staff"  
     northeastern:drs:college_of_professional_studies:facultypodcast:
       name: "College of Professional Studies - Faculty Podcast"
     northeastern:drs:college_of_professional_studies:media:
@@ -104,6 +110,8 @@ en:
       name: "CSSH - NEH Summer Institute on Space, Place, and the Humanities Project Team"
     northeastern:drs:college_of_social_sciences_humanities:margaret_fuller:
       name: "CSSH - Margaret Fuller Project"
+    northeastern:drs:college_of_social_sciences_humanities:nulab:nulab_ai:
+      name: "NULab AI Research Team"   
     northeastern:drs:college_of_social_sciences_humanities:nulab:nulab_staff:
       name: "CSSH - NULab"
     northeastern:drs:college_of_social_sciences_humanities:social_impact_lab:
@@ -214,6 +222,10 @@ en:
       name: "Office of Marketing and Communications - Temporary Access"
     northeastern:drs:network_science_institute:social_design_lab_staff:
       name: "Social Design Lab Staff"
+    northeastern:drs:nupd:media:
+      name: "NUPD Media Group" 
+    northeastern:drs:nupd:staff:
+      name: "NUPD Staff"    
     northeastern:drs:provost_office:center_research_innovation:center_for_research_innovation_staff:
       name: "Center for Research Innovation Staff"
     northeastern:drs:provost_office:icils:icils_staff:
@@ -228,6 +240,8 @@ en:
       name: "DRS Grouper Management Team"
     northeastern:drs:repository:loaders:aai_archives:
       name: "DRS IPTC Loader - AAI"
+    northeastern:drs:repository:loaders:bouve_dean:
+      name: "DRS IPTC Loader - Bouve"
     northeastern:drs:repository:loaders:camd:
       name: "DRS IPTC Loader - CAMD"
     northeastern:drs:repository:loaders:coe:
@@ -242,16 +256,18 @@ en:
       name: "DRS IPTC Loader - EMSA EMC"
     northeastern:drs:repository:loaders:libcom:
       name: "DRS IPTC Loader - Library Communications Office"
-    northeastern:drs:repository:loaders:ogl:
-      name: "DRS IPTC Loader - OGL"
     northeastern:drs:repository:loaders:marcom:
       name: "DRS IPTC Loader - Marketing"
-    northeastern:drs:repository:loaders:bouve_dean:
-      name: "DRS IPTC Loader - Bouve"
+    northeastern:drs:repository:loaders:mills_institute:
+      name: "DRS IPTC Loader - Mills Institute"   
+    northeastern:drs:repository:loaders:ogl:
+      name: "DRS IPTC Loader - OGL"
     northeastern:drs:repository:loaders:multipage:
       name: "DRS Multipage Loader"
     northeastern:drs:repository:loaders:spreadsheet:
       name: "DRS Spreadsheet Loader"
+    northeastern:drs:repository:loaders:wiot:
+      name: "DRS IPTC Loader - Institute for the Wireless Internet of Things"   
     northeastern:drs:repository:loaders:xml:
       name: "DRS XML Loader"
     northeastern:drs:repository:proxystaff:
