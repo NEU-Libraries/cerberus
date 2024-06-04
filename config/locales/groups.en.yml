@@ -111,7 +111,7 @@ en:
     northeastern:drs:college_of_social_sciences_humanities:margaret_fuller:
       name: "CSSH - Margaret Fuller Project"
     northeastern:drs:college_of_social_sciences_humanities:nulab:nulab_ai:
-      name: "NULab AI Research Team"   
+      name: "CSSH - NULab AI Research Team"   
     northeastern:drs:college_of_social_sciences_humanities:nulab:nulab_staff:
       name: "CSSH - NULab"
     northeastern:drs:college_of_social_sciences_humanities:social_impact_lab:
@@ -220,6 +220,8 @@ en:
       name: "Office of Marketing and Communications - Art Staff"
     northeastern:drs:marketing_and_communications:photo_archive_temp:
       name: "Office of Marketing and Communications - Temporary Access"
+    northeastern:drs:mills:mills_institute:mills_institute_media:
+      name: "The Mills Institute - Media Team"
     northeastern:drs:network_science_institute:social_design_lab_staff:
       name: "Social Design Lab Staff"
     northeastern:drs:nupd:media:
