@@ -258,6 +258,10 @@ class User < ActiveRecord::Base
     return self.groups.include? "northeastern:drs:repository:loaders:cos_media"
   end
 
+  def mills_loader?
+    return self.groups.include? "northeastern:drs:repository:loaders:mills_institute"
+  end
+
   def wiot_loader?
     return self.groups.include? "northeastern:drs:repository:loaders:wiot"
   end

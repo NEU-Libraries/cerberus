@@ -17,6 +17,11 @@ en:
         small:
         medium:
         large:
+    mills:
+      long_name: "The Mills Institute"
+      short_name: "mills"
+      copyright: ""
+      parent: "neu:h989ss38v"
     cos_media:
       long_name: "College of Science Media Group"
       short_name: "cos_media"

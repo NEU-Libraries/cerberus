@@ -26,6 +26,8 @@
       - path = loaders_cos_media_report_path(@load.id)
     - elsif @load.loader_name == t('loaders.wiot.long_name')
       - path = loaders_wiot_report_path(@load.id)
+    - elsif @load.loader_name == t('loaders.mills.long_name')
+      - path = loaders_mills_report_path(@load.id)
     - elsif @load.loader_name == t('loaders.spreadsheet.long_name')
       - path = loaders_spreadsheet_report_path(@load.id)
     = link_to "#{@load.loader_name} Load into #{collection.title}", path

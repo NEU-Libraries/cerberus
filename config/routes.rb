@@ -155,6 +155,7 @@ Cerberus::Application.routes.draw do
   get "/loaders/ogl/report/:id" => 'loaders/ogl_loads#show', as: 'loaders_ogl_report'
   get "/loaders/cos_media/report/:id" => 'loaders/cos_media_loads#show', as: 'loaders_cos_media_report'
   get "/loaders/wiot/report/:id" => 'loaders/wiot_loads#show', as: 'loaders_wiot_report'
+  get "/loaders/mills/report/:id" => 'loaders/mills_loads#show', as: 'loaders_mills_report'
   get "/loaders/spreadsheet/report/:id" => 'loaders/spreadsheet_loads#show', as: 'loaders_spreadsheet_report'
   get "/loaders/xml/report/:id" => 'loaders/xml_loads#show', as: 'loaders_xml_report'
 
@@ -189,6 +190,8 @@ Cerberus::Application.routes.draw do
    get "/loaders/cos_media/file/:id" => 'cos_media_loads#show_iptc', as: 'loaders_cos_media_iptc'
    resources :wiot_loads, only: [:new, :create, :show], :path => "loaders/wiot"
    get "/loaders/wiot/file/:id" => 'wiot_loads#show_iptc', as: 'loaders_wiot_iptc'
+   resources :mills_loads, only: [:new, :create, :show], :path => "loaders/mills"
+   get "/loaders/mills/file/:id" => 'mills_loads#show_iptc', as: 'loaders_mills_iptc'
    resources :spreadsheet_loads, only: [:new, :create, :preview, :preview_compare], :path => "loaders/spreadsheet"
    get "/loaders/spreadsheet/preview/:id" => 'spreadsheet_loads#preview',  as: 'loaders_spreadsheet_preview'
    get "/loaders/spreadsheet/preview_compare/:id" => 'spreadsheet_loads#preview_compare', as: 'loaders_spreadsheet_preview_compare'
