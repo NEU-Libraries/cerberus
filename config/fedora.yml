@@ -13,10 +13,10 @@ staging:
 production:
   user: fedoraAdmin
   password: <%= ENV["FEDORA_PASSWD"] %>
-  url: http://nb9475.neu.edu:8080/fedora
+  url: http://nb9664.neu.edu:8080/fedora
 secondary:
   user: fedoraAdmin
   password: <%= ENV["FEDORA_PASSWD"] %>
-  url: http://nb9475.neu.edu:8080/fedora
+  url: http://nb9664.neu.edu:8080/fedora
 cucumber:
   <<: *TEST
