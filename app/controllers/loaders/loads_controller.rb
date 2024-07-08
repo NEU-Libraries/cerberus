@@ -42,18 +42,23 @@ class Loaders::LoadsController < ApplicationController
   def process_new(parent, short_name)
     @parent = ActiveFedora::Base.find("#{parent}", cast: true)
     @collections_options = Array.new
-    cols = @parent.child_collections.sort_by{|c| c.title}
-    cols.each do |child|
-      @collections_options.push([child.title, child.pid])
-      children = child.child_collections.sort_by{|c| c.title}
-      children.each do |c|
-        @collections_options.push([" - #{c.title}", c.pid])
-        children_next = c.child_collections.sort_by{|c| c.title}
-        children_next.each do |c|
-          @collections_options.push(["  -- #{c.title}", c.pid])
+
+    temp = [[@parent.child_collections, 0]]
+
+    while !temp.empty?
+      parent, depth = temp.pop
+      parent.sort_by{|c| c.title}.each do |child|
+        prefix = "-" * depth
+        if depth == 0
+          @collections_options.push([child.title, child.pid])
+          temp.push([child.child_collections, depth + 1])
+        else
+          @collections_options.push([prefix + " " + child.title, child.pid])
+          temp.push([child.child_collections, depth + 1])
         end
       end
     end
+
     @loader_name = t('loaders.'+short_name+'.long_name')
     @loader_short_name = short_name
     @page_title = @loader_name + " Loader"
