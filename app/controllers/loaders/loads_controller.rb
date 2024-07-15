@@ -39,11 +39,11 @@ class Loaders::LoadsController < ApplicationController
     end
   end
 
-  def process_new(parent, short_name)
-    @parent = ActiveFedora::Base.find("#{parent}", cast: true)
+  def process_new(parent_pid, short_name)
+    doc = SolrDocument.new ActiveFedora::SolrService.query("id:\"#{parent_pid}\"").first
     @collections_options = Array.new
 
-    temp = [[@parent.child_collections, 0]]
+    temp = [[doc.child_collections, 0]]
 
     while !temp.empty?
       parent, depth = temp.pop
