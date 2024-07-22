@@ -267,6 +267,10 @@ Cerberus::Application.routes.draw do
       post "/ingest" => "ingest#ingest", as: "ingest"
       # auth
       post '/auth_user' => 'authentication#authenticate_user'
+      # stats
+      get "/statistics/:id/views" => "statistics#views", as: "stats_views"
+      get "/statistics/:id/downloads" => "statistics#downloads", as: "stats_downloads"
+      get "/statistics/:id/streams" => "statistics#streams", as: "stats_streams"
     end
   end
 
