@@ -7,11 +7,11 @@ module Api
       end
 
       def downloads
-        render json: AggregatedStatistic.where(pid: pid).map{ |x| {"time" => x.processed_at.to_s, "downloads" => x.views.to_s} }.to_json
+        render json: AggregatedStatistic.where(pid: pid).map{ |x| {"time" => x.processed_at.to_s, "count" => x.downloads.to_s} }.to_json
       end
 
       def streams
-        render json: AggregatedStatistic.where(pid: pid).map{ |x| {"time" => x.processed_at.to_s, "streams" => x.views.to_s} }.to_json
+        render json: AggregatedStatistic.where(pid: pid).map{ |x| {"time" => x.processed_at.to_s, "count" => x.streams.to_s} }.to_json
       end
     end
   end
