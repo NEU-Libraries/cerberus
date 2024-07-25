@@ -15,21 +15,24 @@
 %h4 Statistics
 
 = "Views: #{@core_file.impression_views}"
-%br
-%div#views
+- if @core_file.impression_views > 10
+  %br
+  %div#views
 
 - if !@core_file.stream_only?
   %br
   = "Downloads: #{@core_file.impression_downloads}"
-  %br
-  %br
-  %div#downloads
+  - if @core_file.impression_downloads > 10
+    %br
+    %br
+    %div#downloads
 
 - if @core_file.canonical_class == "AudioFile" || @core_file.canonical_class == "VideoFile"
   %br
   = "Streams: #{@core_file.impression_streams}"
-  %br
-  %div#streams
+  - if @core_file.impression_streams > 10
+    %br
+    %div#streams
 
 :javascript
   $(document).ready(function() {
