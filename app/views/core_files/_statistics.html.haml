@@ -16,7 +16,7 @@
 
 = "Views: #{@core_file.impression_views}"
 %br
-%div#Views
+%div#views
 
 - if !@core_file.stream_only?
   %br
@@ -32,9 +32,9 @@
 
 :javascript
   $(document).ready(function() {
-      getDataAndChart("https://repository.library.northeastern.edu/api/v1/statistics/neu:rx917b33h/views", "#views", "");
-      getDataAndChart("https://repository.library.northeastern.edu/api/v1/statistics/neu:rx917b33h/downloads", "#downloads", "");
-      getDataAndChart("https://repository.library.northeastern.edu/api/v1/statistics/neu:rx917b33h/streams", "#streams", "");
+      getDataAndChart("https://repository.library.northeastern.edu/api/v1/statistics/#{@core_file.pid}/views", "#views", "");
+      getDataAndChart("https://repository.library.northeastern.edu/api/v1/statistics/#{@core_file.pid}/downloads", "#downloads", "");
+      getDataAndChart("https://repository.library.northeastern.edu/api/v1/statistics/#{@core_file.pid}/streams", "#streams", "");
   });
   // Function to create svg
   function createSVG(containerId, margin, width, height) {
@@ -72,7 +72,7 @@
     data = preprocessData(data);
 
     // Dimensions
-    const margin = {top: 20, right: 40, bottom: 80, left: 60};
+    const margin = {top: 20, right: 20, bottom: 20, left: 20};
     const width = 500 - margin.left - margin.right;
     const height = 300 - margin.top - margin.bottom;
 
