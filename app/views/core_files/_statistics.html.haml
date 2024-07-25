@@ -1,20 +1,183 @@
+- content_for(:extra_head_content) do
+  :css
+    .tooltip-container {
+        position: absolute;
+        padding: 5px;
+        background: white;
+        border: 1px solid black;
+        border-radius: 5px;
+        font-size: 12px;
+        color: black;
+    }
+
+%script{:src => "https://cdn.jsdelivr.net/npm/d3@7"}
+
 %h4 Statistics
 
 = "Views: #{@core_file.impression_views}"
+%br
+%div#Views
 
 - if !@core_file.stream_only?
-  - download_count = 0
-  - @content_objects.each do |doc|
-    - download_count += doc.impression_downloads
-
   %br
-  = "Downloads: #{download_count}"
+  = "Downloads: #{@core_file.impression_downloads}"
+  %br
+  %div#downloads
 
 - if @core_file.canonical_class == "AudioFile" || @core_file.canonical_class == "VideoFile"
-
-  - stream_count = 0
-  - @content_objects.each do |doc|
-    - stream_count += doc.impression_streams
-    
   %br
-  = "Streams: #{stream_count}"
+  = "Streams: #{@core_file.impression_streams}"
+  %br
+  %div#streams
+
+:javascript
+  $(document).ready(function() {
+      getDataAndChart("https://repository.library.northeastern.edu/api/v1/statistics/neu:rx917b33h/views", "#views", "");
+      getDataAndChart("https://repository.library.northeastern.edu/api/v1/statistics/neu:rx917b33h/downloads", "#downloads", "");
+      getDataAndChart("https://repository.library.northeastern.edu/api/v1/statistics/neu:rx917b33h/streams", "#streams", "");
+  });
+  // Function to create svg
+  function createSVG(containerId, margin, width, height) {
+      return d3.select(containerId)
+          .append("svg")
+          .attr("width", width + margin.left + margin.right)
+          .attr("height", height + margin.top + margin.bottom)
+          .append("g")
+          .attr("transform", `translate(${margin.left},${margin.top})`);
+  }
+
+  // Function to trim earliest unpopulated/0-count data and sort based on time
+  function preprocessData(data) {
+      data.forEach(d => {
+          d.time = new Date(d.time);
+      });
+      data.sort((a, b) => a.time - b.time);
+      let start = 0;
+      while (start < data.length && data[start].count === 0) start++;
+      return data.slice(start);
+  }
+
+  // Function to add a title to the SVG
+  function addTitle(svg, width, titleText) {
+      svg.append("text")
+          .attr("x", width / 2)
+          .attr("y", 1)
+          .attr("text-anchor", "middle")
+          .style("font-size", "16px")
+          .text(titleText);
+  }
+
+  function createHistogram(data, containerID, titleText) {
+    // Data Preprocessing
+    data = preprocessData(data);
+
+    // Dimensions
+    const margin = {top: 20, right: 40, bottom: 80, left: 60};
+    const width = 500 - margin.left - margin.right;
+    const height = 300 - margin.top - margin.bottom;
+
+    // Select the container and create SVG
+    const svg = createSVG(containerID, margin, width, height);
+
+    // X Scale Definition
+    const x = d3.scaleTime()
+      .domain(d3.extent(data, d => d.time))
+      .range([0, width]);
+
+    // Y Scale Definition
+    const y = d3.scaleLinear()
+      .domain([0, d3.max(data, d => d.count)])
+      .nice()
+      .range([height, 0]);
+
+    // Add bars
+    svg.selectAll(".bar")
+      .data(data)
+      .enter().append("rect")
+      .attr("class", "bar")
+      .attr("x", d => x(d.time))
+      .attr("width", Math.max(1, width / data.length))
+      .attr("y", d => y(d.count))
+      .attr("height", d => height - y(d.count))
+      .style("fill", "#1f77b4");
+
+    // Tooltip
+    const tooltip = d3.select(containerID)
+      .append("div")
+      .attr("id", "tooltip")
+      .attr('style', 'position: absolute; opacity: 0;');
+
+    // Add overlay for capturing mouse
+    svg.append("rect")
+      .attr("width", width)
+      .attr("height", height)
+      .style("fill", "none")
+      .style("pointer-events", "all")
+      .on("mousemove", showTooltip)
+      .on("mouseout", hideTooltip);
+
+    function showTooltip(event) {
+      const mouseX = d3.pointer(event)[0];
+      const invertedX = x.invert(mouseX);
+
+      // Finds data point on same vertical
+      const bisect = d3.bisector(d => d.time).left;
+      const i = bisect(data, invertedX, 1);
+      const d = data[i];
+
+      // Show the tooltip
+      tooltip.transition()
+        .duration(200)
+        .style("opacity", 0.9);
+      tooltip.html(`<strong>Date:</strong> ${d3.timeFormat("%Y-%m-%d")(d.time)}<br><strong>Count:</strong> ${d.count}`)
+        .attr("class", "tooltip-container")
+        .style("left", (event.pageX - 50) + "px")
+        .style("top", (event.pageY - 150) + "px");
+
+      // Remove previous line
+      d3.select("#tooltipLine").remove();
+
+      // Append line from tooltip to the point on the graph
+      svg.append("line")
+        .attr("id", "tooltipLine")
+        .attr("x1", x(d.time) + (width / (data.length * 2)))
+        .attr("y1", height)
+        .attr("x2", x(d.time) + (width / (data.length * 2)))
+        .attr("y2", y(d.count))
+        .attr("stroke", "orange")
+        .attr("stroke-width", width / data.length)
+    }
+
+    function hideTooltip() {
+      tooltip.transition()
+        .duration(500)
+        .style("opacity", 0);
+
+      d3.select("#tooltipLine").remove();
+    }
+
+    // Add x-axis and labeling
+    svg.append("g")
+      .attr("transform", `translate(0,${height})`)
+      .call(d3.axisBottom(x).tickFormat(d3.timeFormat("%Y")));
+
+    // Add y-axis
+    svg.append("g")
+      .call(d3.axisLeft(y));
+
+    // Add title
+    addTitle(svg, width, titleText);
+
+    // Returns chart svg
+    return svg;
+  }
+
+
+  // Function to parse JSON data, and create the chart
+  function getDataAndChart(jsonData, containerID, titleText) {
+    d3.json(jsonData).then(function (data) {
+      createHistogram(data, containerID, titleText);
+    }).catch(function (error) {
+      console.log("Error fetching or parsing data:", error);
+    });
+  }
