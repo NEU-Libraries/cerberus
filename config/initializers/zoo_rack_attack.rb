@@ -65,7 +65,7 @@ Rack::Attack.blocklist('Amazonbot') do |req|
 end
 
 Rack::Attack.blocklist("Amazon") do |req|
-  Resolv.getname(req.remote_ip).include?("amazon")
+  !req.remote_ip.blank? && `host #{req.remote_ip}`.include?("amazon")
 end
 
 # Block attacks from IPs in cache
