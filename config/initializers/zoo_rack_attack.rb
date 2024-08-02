@@ -113,3 +113,8 @@ Rack::Attack.throttle('load shedding', limit: 1, period: 10) do |req|
     end
   end
 end
+
+Rack::Attack.throttled_response = lambda do |env|
+  html = ActionView::Base.new.render(file: 'public/429.html')
+  [503, {'Content-Type' => 'text/html'}, [html]]
+end
