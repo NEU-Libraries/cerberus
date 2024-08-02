@@ -74,3 +74,42 @@ end
 Rack::Attack.blocklist("block IP") do |req|
   Rails.cache.read("block #{req.remote_ip}")
 end
+
+# Throttle login attempts for a given octet to 1 reqs/10 seconds
+Rack::Attack.throttle('load shedding', limit: 1, period: 10) do |req|
+  raw_usage = `cut -d ' ' -f2 /proc/loadavg`
+  if !raw_usage.blank?
+    begin
+      usage = raw_usage.strip.to_f
+    rescue => exception
+      # Uh oh
+      return nil
+    end
+    # if cpu usage is approaching 4 on the 5 min avg...
+    if (usage.kind_of? Float) && (usage > 3.5)
+      # Google bot is the only one we're happy with approaching high load
+      if req.remote_ip.start_with?("66.249")
+        return nil
+      end
+      # if url isnt frontpage, login related, assets, thumbs, API, throttle static response, or wowza...
+      if (req.path != "/" &&
+          !(req.path.include? "/users/") &&
+          !(req.path.include? "/assets/") &&
+          !(req.path.include? "thumbnail_") &&
+          !(req.path.include? "/wowza/") &&
+          !(req.path.include? "/429") &&
+          !(req.path.include? "/api/"))
+
+        if !req.remote_ip.blank?
+          # ip address first octect discriminator
+          octet = req.remote_ip.split(".").first
+
+          # log to file
+          File.write("#{Rails.root}/log/load_shedding.log", "#{req.remote_ip} - #{req.path} - #{Time.now}" + "\n", mode: 'a')
+
+          return octet
+        end
+      end
+    end
+  end
+end
