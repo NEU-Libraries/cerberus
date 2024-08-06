@@ -68,7 +68,7 @@ Rack::Attack.blocklist("Amazon") do |req|
   !req.remote_ip.blank? && `host #{req.remote_ip}`.include?("amazon")
 end
 
-Rack::Attack.blocklist("CN Scrapers") do |req|
+Rack::Attack.blocklist("CN Scrapers") do |request|
   result = false
   if !request.env["HTTP_ACCEPT_LANGUAGE"].blank?
     raw_langs = request.env["HTTP_ACCEPT_LANGUAGE"]
