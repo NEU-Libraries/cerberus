@@ -68,6 +68,23 @@ Rack::Attack.blocklist("Amazon") do |req|
   !req.remote_ip.blank? && `host #{req.remote_ip}`.include?("amazon")
 end
 
+Rack::Attack.blocklist("CN Scrapers") do |req|
+  result = false
+  if !request.env["HTTP_ACCEPT_LANGUAGE"].blank?
+    raw_langs = request.env["HTTP_ACCEPT_LANGUAGE"]
+    langs = raw_langs.to_s.split(",").map do |lang|
+      l, q = lang.split(";q=")
+      [l, (q || '1').to_f]
+    end
+    langs.each do |l|
+      if l[0] == "zh-CN"
+        result = true
+        end
+      end
+    end
+  result
+end
+
 # Block attacks from IPs in cache
 # To add an IP: Rails.cache.write("block 1.2.3.4", true, expires_in: 2.days)
 # To remove an IP: Rails.cache.delete("block 1.2.3.4")
@@ -75,10 +92,10 @@ Rack::Attack.blocklist("block IP") do |req|
   Rails.cache.read("block #{req.remote_ip}")
 end
 
-# Throttle login attempts for a given octet to 1 reqs/10 seconds
+# Throttle attempts for a given octet to 1 reqs/10 seconds
 Rack::Attack.throttle('load shedding', limit: 1, period: 10) do |req|
   # if cpu usage is approaching 4 on the 5 min avg...
-  if `cut -d ' ' -f2 /proc/loadavg`.strip.to_f > 3.5
+  if `cut -d ' ' -f2 /proc/loadavg`.strip.to_f > 3
     # Google bot is the only one we're happy with approaching high load
     if !req.remote_ip.blank? && !req.remote_ip.start_with?("66.249")
       # if url isnt frontpage, login related, assets, thumbs, API, throttle static response, or wowza...
