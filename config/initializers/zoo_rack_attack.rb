@@ -77,7 +77,7 @@ Rack::Attack.blocklist("CN Scrapers") do |req|
       [l, (q || '1').to_f]
     end
     langs.each do |l|
-      if l[0] == "zh-CN"
+      if l[0].downcase == "zh-cn"
         result = true
         end
       end
