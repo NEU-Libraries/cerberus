@@ -92,6 +92,11 @@ Rack::Attack.blocklist("block IP") do |req|
   Rails.cache.read("block #{req.remote_ip}")
 end
 
+# Bring back region throttle
+Rack::Attack.throttle("requests by region", limit: 1, period: 10) do |request|
+  `geoiplookup #{request.remote_ip} | awk -F', ' '{print $2}'`.strip == "China"
+end
+
 # Throttle attempts for a given octet to 1 reqs/10 seconds
 Rack::Attack.throttle('load shedding', limit: 1, period: 10) do |req|
   # if cpu usage is approaching 4 on the 5 min avg...
