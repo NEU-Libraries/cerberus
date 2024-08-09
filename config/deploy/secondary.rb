@@ -1,7 +1,6 @@
 set :stage, :secondary
 
 set :deploy_to, '/opt/cerberus/'
-set :ssh_options, {:forward_agent => true}
 set :bundle_env_variables, {
   nokogiri_use_system_libraries: 1
  }
