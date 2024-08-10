@@ -60,16 +60,6 @@ GIT
       activesupport (>= 3.0.0)
 
 GIT
-  remote: https://github.com/randym/axlsx.git
-  revision: 9e07402a26f776b6dcdc264a202d804c5d24e8b3
-  ref: 9e07402a26f776b6dcdc264a202d804c5d24e8b3
-  specs:
-    axlsx (2.0.1)
-      htmlentities (~> 4.3.1)
-      nokogiri (>= 1.4.1)
-      rubyzip (~> 1.1.0)
-
-GIT
   remote: https://github.com/roo-rb/roo
   revision: dc3786bb47319f8d86e659797fa7474d881cfe28
   specs:
@@ -129,6 +119,10 @@ GEM
       multi_json (~> 1.0)
     addressable (2.3.5)
     arel (3.0.3)
+    axlsx (1.3.6)
+      htmlentities (~> 4.3.1)
+      nokogiri (>= 1.4.1)
+      rubyzip (>= 0.9.5)
     backports (3.6.0)
     bcrypt-ruby (3.1.1)
     blacklight (4.3.0)
@@ -492,7 +486,7 @@ GEM
       mime-types
       nokogiri
       rest-client
-    rubyzip (1.1.7)
+    rubyzip (1.2.0)
     sanitize (2.1.0)
       nokogiri (>= 1.4.4)
     sass (3.2.10)
@@ -563,7 +557,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  axlsx!
+  axlsx
   blacklight
   blacklight_advanced_search (~> 2.1.0)
   blacklight_oai_provider!
@@ -634,7 +628,7 @@ DEPENDENCIES
   rspec-rails
   ruby-filemagic (~> 0.4.2)
   ruby-prof
-  rubyzip
+  rubyzip (= 1.2.0)
   sanitize
   sass-rails (~> 3.2.3)
   scut

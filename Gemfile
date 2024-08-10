@@ -31,7 +31,7 @@ gem 'sanitize'
 # See Bower Front-End Package Management http://bower.io Documentation
 gem "bower-rails", "~> 0.5.0"
 gem 'rmagick'
-gem 'rubyzip'
+gem 'rubyzip', '1.2.0'
 # gem 'hydra-derivatives', '~> 0.0.5'
 gem 'hydra-derivatives', :git => 'https://github.com/NEU-Libraries/hydra-derivatives.git', :ref => 'd95f3e880a74713867f7c88b77429251cbb0b9b1'
 gem 'resque-pool', '0.3.0'
@@ -73,7 +73,7 @@ gem 'mini_exiftool'
 gem 'will_paginate'
 
 gem 'damerau-levenshtein'
-gem 'axlsx', :git => 'https://github.com/randym/axlsx.git', :ref => '9e07402a26f776b6dcdc264a202d804c5d24e8b3'
+gem 'axlsx'
 
 gem 'kataba'
 gem 'passenger'
