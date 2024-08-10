@@ -78,6 +78,8 @@ gem 'axlsx'
 gem 'kataba'
 gem 'passenger'
 
+gem 'zip-zip'
+
 # gem 'google-analytics-rails', '1.1.1'
 
 gem 'jwt', '1.5.6'
