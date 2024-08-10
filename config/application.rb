@@ -93,7 +93,8 @@ module Cerberus
     else
       # config.file_path = "/usr/local/bin/file"
       config.file_path = "/usr/bin/file"
-      config.minitool_path = "/opt/exiftool/exiftool"
+      # config.minitool_path = "/opt/exiftool/exiftool"
+      config.minitool_path = "/usr/bin/exiftool"
     end
 
     config.ffmpeg_path = 'ffmpeg'
