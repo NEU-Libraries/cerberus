@@ -91,7 +91,8 @@ module Cerberus
       config.file_path = "file"
       config.minitool_path = "/usr/bin/exiftool"
     else
-      config.file_path = "/usr/local/bin/file"
+      # config.file_path = "/usr/local/bin/file"
+      config.file_path = "/usr/bin/file"
       config.minitool_path = "/opt/exiftool/exiftool"
     end
 
