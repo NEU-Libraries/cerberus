@@ -89,8 +89,8 @@
       .range([0, width]);
 
     // Y Scale Definition
-    const y = d3.scaleLinear()
-      .domain([0, d3.max(data, d => d.count)])
+    const y = d3.scaleLog()
+      .domain([1, Math.max(...data.map(week => week.count))])
       .nice()
       .range([height, 0]);
 
