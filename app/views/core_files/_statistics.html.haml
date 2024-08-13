@@ -89,10 +89,11 @@
       .range([0, width]);
 
     // Y Scale Definition
-    const y = d3.scaleLog()
+    const y = d3.scaleSymlog()
       .domain([1, Math.max(...data.map(week => week.count))])
-      .nice()
-      .range([height, 0]);
+      .range([height, 0])
+      .constant(10)
+      .nice();
 
     // Add bars
     svg.selectAll(".bar")
