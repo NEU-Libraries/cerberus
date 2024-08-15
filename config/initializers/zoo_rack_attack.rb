@@ -36,6 +36,10 @@ Rack::Attack.safelist("mark any authenticated access safe") do |request|
   !request.env["HTTP_COOKIE"].blank? && request.env["HTTP_COOKIE"].include?("shibsession")
 end
 
+Rack::Attack.safelist("mark any devise user safe") do |request|
+  !request.session["warden.user.user.key"].blank?
+end
+
 Rack::Attack.blocklist("Huawei datacenter") do |req|
   !req.remote_ip.blank? && `host #{req.remote_ip}`.include?("compute.hwclouds")
 end
