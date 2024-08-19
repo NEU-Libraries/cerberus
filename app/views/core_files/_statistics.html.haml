@@ -57,7 +57,7 @@
       });
       data.sort((a, b) => a.time - b.time);
       let start = 0;
-      while (start < data.length && data[start].count === 0) start++;
+      while (start < data.length && data[start].count === '0') start++;
       return data.slice(start);
   }
 
@@ -85,23 +85,26 @@
 
     // X Scale Definition
     const x = d3.scaleTime()
-      .domain(d3.extent(data, d => d.time))
+      .domain([d3.timeDay.offset(d3.min(data, d => d.time), -7), d3.max(data, d => d.time)])
       .range([0, width]);
 
     // Y Scale Definition
     const y = d3.scaleSymlog()
-      .domain([1, Math.max(...data.map(week => week.count))])
+      .domain([0, Math.max(...data.map(week => week.count))])
       .range([height, 0])
       .constant(10)
       .nice();
+
+    // Calculating the week count between the beginning and end of the graph
+    let timeInWeeks = d3.timeWeek.count(d3.timeDay.offset(d3.min(data, d => d.time), -7), d3.max(data, d => d.time))
 
     // Add bars
     svg.selectAll(".bar")
       .data(data)
       .enter().append("rect")
       .attr("class", "bar")
-      .attr("x", d => x(d.time))
-      .attr("width", Math.max(1, width / data.length))
+      .attr("x", d => x(d.time) - (width / timeInWeeks))
+      .attr("width", width / timeInWeeks)
       .attr("y", d => y(d.count))
       .attr("height", d => height - y(d.count))
       .style("fill", "#1f77b4");
@@ -126,7 +129,7 @@
       const invertedX = x.invert(mouseX);
 
       // Finds data point on same vertical
-      const bisect = d3.bisector(d => d.time).left;
+      const bisect = d3.bisector(d => d.time).right;
       const i = bisect(data, invertedX, 1);
       const d = data[i];
 
@@ -145,12 +148,13 @@
       // Append line from tooltip to the point on the graph
       svg.append("line")
         .attr("id", "tooltipLine")
-        .attr("x1", x(d.time) + (width / (data.length * 2)))
+        .attr("x1", x(d.time) - (width / timeInWeeks) / 2)
         .attr("y1", height)
-        .attr("x2", x(d.time) + (width / (data.length * 2)))
+        .attr("x2", x(d.time) - (width / timeInWeeks) / 2)
         .attr("y2", y(d.count))
         .attr("stroke", "orange")
-        .attr("stroke-width", width / data.length)
+        .attr("stroke-width", width / timeInWeeks)
+        .style("pointer-events", "none");
     }
 
     function hideTooltip() {
@@ -164,11 +168,13 @@
     // Add x-axis and labeling
     svg.append("g")
       .attr("transform", `translate(0,${height})`)
-      .call(d3.axisBottom(x).tickFormat(d3.timeFormat("%Y")));
+      .call(d3.axisBottom(x)
+          .tickFormat(d3.timeFormat("%Y"))
+          .ticks(d3.timeYear.every(1)));
 
     // Add y-axis
     svg.append("g")
-      .call(d3.axisLeft(y));
+      .call(d3.axisLeft(y).ticks(5));
 
     // Add title
     addTitle(svg, width, titleText);
