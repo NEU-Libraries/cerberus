@@ -75,7 +75,7 @@
     data = preprocessData(data);
 
     // Dimensions
-    const margin = {top: 30, right: 30, bottom: 30, left: 30};
+    const margin = {top: 30, right: 30, bottom: 30, left: 40};
     const width = 500 - margin.left - margin.right;
     const height = 300 - margin.top - margin.bottom;
 
@@ -129,7 +129,7 @@
 
       // Finds data point on same vertical
       const bisect = d3.bisector(d => d.time).right;
-      const i = bisect(data, invertedX, 1);
+      const i = bisect(data, invertedX);
       const d = data[i];
 
       // Show the tooltip
