@@ -115,11 +115,15 @@ Rack::Attack.throttle('load shedding', limit: 1, period: 10) do |req|
           !(req.path.include? "/429") &&
           !(req.path.include? "/api/"))
 
-        # log to file
-        File.write("#{Rails.root}/log/load_shedding.log", "#{req.remote_ip} - #{req.path} - #{Time.now}" + "\n", mode: 'a')
+        host_result = `host #{req.remote_ip}`
 
-        # ip address first octect discriminator
-        req.remote_ip.split(".").first
+        if !(["rcncustomer", "comcast", "fios.verizon"].any? { |x| host_result.include? x })
+          # log to file
+          File.write("#{Rails.root}/log/load_shedding.log", "#{req.remote_ip} - #{req.path} - #{Time.now}" + "\n", mode: 'a')
+
+          # ip address first octect discriminator
+          req.remote_ip.split(".").first
+        end
       end
     end
   end
