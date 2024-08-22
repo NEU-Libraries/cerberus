@@ -105,8 +105,7 @@ end
 Rack::Attack.throttle('load shedding', limit: 1, period: 10) do |req|
   # if cpu usage is approaching 4 on the 5 min avg...
   if `cut -d ' ' -f2 /proc/loadavg`.strip.to_f > 3
-    # Google bot is the only one we're happy with approaching high load
-    if !req.remote_ip.blank? && !req.remote_ip.start_with?("66.249")
+    if !req.remote_ip.blank?
       # if url isnt frontpage, login related, assets, thumbs, API, throttle static response, or wowza...
       if (req.path != "/" &&
           !(req.path.include? "/users/") &&
