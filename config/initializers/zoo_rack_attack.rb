@@ -101,8 +101,8 @@ Rack::Attack.throttle("requests by region", limit: 1, period: 10) do |request|
   `geoiplookup #{request.remote_ip} | awk -F', ' '{print $2}'`.strip == "China"
 end
 
-# Throttle attempts for a given octet to 1 reqs/10 seconds
-Rack::Attack.throttle('load shedding', limit: 1, period: 10) do |req|
+# Throttle attempts for a given octet to 3 reqs/10 seconds
+Rack::Attack.throttle('load shedding', limit: 3, period: 10) do |req|
   # if cpu usage is approaching 4 on the 5 min avg...
   if `cut -d ' ' -f2 /proc/loadavg`.strip.to_f > 3
     if !req.remote_ip.blank?
