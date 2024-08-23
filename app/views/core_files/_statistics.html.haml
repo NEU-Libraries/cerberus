@@ -14,24 +14,28 @@
 
 %h4 Statistics
 
-= "Views: #{@core_file.impression_views}"
+= "Views: #{number_with_delimiter(@core_file.impression_views)}"
 - if @core_file.impression_views > 10
   %br
   %div#views
 
 - if !@core_file.stream_only?
   %br
-  = "Downloads: #{@core_file.impression_downloads}"
+  = "Downloads: #{number_with_delimiter(@core_file.impression_downloads)}"
   - if @core_file.impression_downloads > 10
     %br
     %div#downloads
 
 - if @core_file.canonical_class == "AudioFile" || @core_file.canonical_class == "VideoFile"
   %br
-  = "Streams: #{@core_file.impression_streams}"
+  = "Streams: #{number_with_delimiter(@core_file.impression_streams)}"
   - if @core_file.impression_streams > 10
     %br
     %div#streams
+
+%div{style: "padding: 10px;"}
+  %small
+    Usage statistics are updated weekly. A graph visualizing interactions with a file will display when a file has 10 or more views, downloads, or streams.  Please visit the %a{href: "https://subjectguides.lib.neu.edu/drs/statistics"} DRS subject guide for more information about DRS statistics.
 
 :javascript
   $(document).ready(function() {
