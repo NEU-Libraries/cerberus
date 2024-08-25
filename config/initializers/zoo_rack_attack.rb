@@ -106,23 +106,31 @@ Rack::Attack.throttle('load shedding', limit: 3, period: 10) do |req|
   # if cpu usage is approaching 4 on the 5 min avg...
   if `cut -d ' ' -f2 /proc/loadavg`.strip.to_f > 3
     if !req.remote_ip.blank?
-      # if url isnt frontpage, login related, assets, thumbs, API, throttle static response, or wowza...
-      if (req.path != "/" &&
-          !(req.path.include? "/users/") &&
-          !(req.path.include? "/assets/") &&
-          !(req.path.include? "thumbnail_") &&
-          !(req.path.include? "/wowza/") &&
-          !(req.path.include? "/429") &&
-          !(req.path.include? "/api/"))
+      if `cut -d ' ' -f2 /proc/loadavg`.strip.to_f > 3.75
+        # everyone out of the boat, no exceptions
+        # log to file
+        File.write("#{Rails.root}/log/heavy_load_shedding.log", "#{req.remote_ip} - #{req.path} - #{Time.now}" + "\n", mode: 'a')
+        # ip address first octect discriminator
+        req.remote_ip.split(".").first
+      else
+        # if url isnt frontpage, login related, assets, thumbs, API, throttle static response, or wowza...
+        if (req.path != "/" &&
+            !(req.path.include? "/users/") &&
+            !(req.path.include? "/assets/") &&
+            !(req.path.include? "thumbnail_") &&
+            !(req.path.include? "/wowza/") &&
+            !(req.path.include? "/429") &&
+            !(req.path.include? "/api/"))
 
-        host_result = `host #{req.remote_ip}`
+          host_result = `host #{req.remote_ip}`
 
-        if !(["rcncustomer", "comcast", "fios.verizon"].any? { |x| host_result.include? x })
-          # log to file
-          File.write("#{Rails.root}/log/load_shedding.log", "#{req.remote_ip} - #{req.path} - #{Time.now}" + "\n", mode: 'a')
+          if !(["lightspeed", "res.spectrum", "rcncustomer", "comcast", "fios.verizon"].any? { |x| host_result.include? x })
+            # log to file
+            File.write("#{Rails.root}/log/load_shedding.log", "#{req.remote_ip} - #{host_result} - #{req.path} - #{Time.now}" + "\n", mode: 'a')
 
-          # ip address first octect discriminator
-          req.remote_ip.split(".").first
+            # ip address first octect discriminator
+            req.remote_ip.split(".").first
+          end
         end
       end
     end
