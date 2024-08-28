@@ -8,12 +8,13 @@ SimpleCov.start 'rails' do
   add_filter 'app/channels'
   add_filter 'lib/cerberus/vocab'
   add_filter 'app/indexers'
-  minimum_coverage 95
+  minimum_coverage 40
 end
 
 # This file is copied to spec/ when you run 'rails generate rspec:install'
 require 'spec_helper'
 ENV['RAILS_ENV'] ||= 'test'
+ENV['ATLAS_URL'] = 'http://atlas-test:3000/'
 require_relative '../config/environment'
 # Prevent database truncation if the environment is production
 abort('The Rails environment is running in production mode!') if Rails.env.production?

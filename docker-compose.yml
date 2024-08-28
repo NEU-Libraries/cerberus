@@ -28,6 +28,13 @@ services:
     entrypoint: /home/atlas/web/docker-entrypoint.sh
     ports:
       - 3001:3000
+  atlas-test:
+    image: nakatomi/atlas_web:${ATLAS}
+    entrypoint: /home/atlas/web/docker-entrypoint.sh
+    environment:
+      RAILS_ENV: 'test'
+    ports:
+      - 3002:3000
   iiif:
     image: uclalibrary/cantaloupe:5.0.6-2
     ports:
