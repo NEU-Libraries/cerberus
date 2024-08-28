@@ -71,6 +71,7 @@ gem 'pg'
 gem 'rsolr', '>= 1.0', '< 3'
 gem 'ruby-filemagic'
 gem 'ruby-vips'
+gem 'sass-embedded', '1.77.5' # temp fix for https://github.com/twbs/bootstrap/issues/40621
 gem 'sidekiq'
 
 group :development, :test do

@@ -24,4 +24,11 @@ describe WorksController do
       expect(subject).to redirect_to action: :show, id: assigns(:work)['id']
     end
   end
+
+  describe 'new' do
+    it 'presents the interface to upload a file' do
+      get :new
+      expect(response).to render_template('works/new')
+    end
+  end
 end
