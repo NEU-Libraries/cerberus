@@ -64,7 +64,10 @@ module Cerberus::Controller
 
   # This repeats has_search_parameters? method from Blacklight::CatalogHelperBehavior
   def has_search_parameters?
-    !params[:q].blank? or !params[:f].blank? or !params[:search_field].blank? or !(params[:q] == "*" && current_user.nil?)
+    if (params[:q] == "*" && current_user.blank?)
+      return false
+    end
+    !params[:q].blank? or !params[:f].blank? or !params[:search_field].blank?
   end
 
 end
