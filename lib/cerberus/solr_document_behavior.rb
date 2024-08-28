@@ -209,12 +209,16 @@ module Cerberus
     end
 
     def path
-      # url_for and polymorphic_path are slow given we know the class and pid
-      if self.klass == 'PageFile'
-        core = self.get_core_record
-        send("#{self.klass.underscore}_path", core.pid, self.ordinal_value)
-      else
-        send("#{self.klass.underscore}_path", self.pid)
+      begin
+        # url_for and polymorphic_path are slow given we know the class and pid
+        if self.klass == 'PageFile'
+          core = self.get_core_record
+          send("#{self.klass.underscore}_path", core.pid, self.ordinal_value)
+        else
+          send("#{self.klass.underscore}_path", self.pid)
+        end
+      rescue => error
+        #
       end
     end
 
