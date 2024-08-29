@@ -45,7 +45,7 @@ class CatalogController < ApplicationController
   end
 
   def index
-    if !has_search_parameters?
+    if !has_search_parameters? || ((CGI::unescape(params[:q]) == "*") && (current_user.blank? || current_user.nuid.blank?))
       self.solr_search_params_logic += [:disable_highlighting]
       recent
 
