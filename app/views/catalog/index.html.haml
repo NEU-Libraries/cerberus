@@ -1,6 +1,6 @@
 - facet_list ||= facet_field_names
 
-- if !has_search_parameters?
+- if !has_search_parameters? || ((CGI::unescape(params[:q]) == "*") && (current_user.blank? || current_user.nuid.blank?))
   - content_for :page_header do
     = render 'home'
 - else
