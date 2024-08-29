@@ -45,7 +45,7 @@ class CatalogController < ApplicationController
   end
 
   def index
-    if ((CGI::unescape(params[:q]) == "*") && (current_user.blank? || current_user.nuid.blank?))
+    if ((!params[:q].blank?) && (CGI::unescape(params[:q]) == "*") && (current_user.blank? || current_user.nuid.blank?))
       render :template => '/error/500', :layout => false, :formats => [:html], :status => 500
     elsif !has_search_parameters?
       self.solr_search_params_logic += [:disable_highlighting]
