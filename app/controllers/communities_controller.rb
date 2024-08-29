@@ -209,12 +209,15 @@ class CommunitiesController < ApplicationController
     end
 
     def safe_get_smart_docs(pids)
-      @ids = pids
-      if !pids.blank? # if pids are blank, don't get everything
+      # if pids are blank, don't get everything
+      if pids.blank?
+        (@response, @document_list) = get_search_results(:q =>'tjQwiForcKzwUACic8nK') #unique string to return no results
+      else
+        @ids = pids
         self.solr_search_params_logic += [:limit_to_pids]
+        self.solr_search_params_logic += [:apply_per_page_limit]
+        (@response, @document_list) = get_search_results
       end
-      self.solr_search_params_logic += [:apply_per_page_limit]
-      (@response, @document_list) = get_search_results
     end
 
     def disable_highlighting(solr_parameters, user_parameters)
