@@ -44,3 +44,10 @@ jobs:
         docker compose exec -T web cc-test-reporter before-build
         docker compose exec -T web bundle exec rake
         docker compose exec -T web cc-test-reporter after-build --coverage-input-type simplecov --exit-code $?
+    - name: Retrieve coverage results
+      run: docker compose cp web:/app/coverage ./coverage
+    - name: Upload coverage files
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-report
+        path: coverage
