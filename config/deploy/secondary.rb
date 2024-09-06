@@ -1,9 +1,9 @@
 set :stage, :secondary
 
 set :deploy_to, '/opt/cerberus/'
-set :bundle_env_variables, {
-  nokogiri_use_system_libraries: 1
- }
+# set :bundle_env_variables, {
+#   nokogiri_use_system_libraries: 1
+#  }
 set :bundle_bins, fetch(:bundle_bins, []).push('resque-pool', 'solrizerd')
 
 # parses out the current branch you're on. See: http://www.harukizaemon.com/2008/05/deploying-branches-with-capistrano.html
@@ -25,12 +25,12 @@ namespace :deploy do
     end
   end
 
-  desc "Tell nokogiri to use system libs"
-  task :nokogiri do
-    on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd #{release_path} && (RAILS_ENV=secondary bundle config build.nokogiri --use-system-libraries)"
-    end
-  end
+  # desc "Tell nokogiri to use system libs"
+  # task :nokogiri do
+  #   on roles(:app), :in => :sequence, :wait => 5 do
+  #     execute "cd #{release_path} && (RAILS_ENV=secondary bundle config build.nokogiri --use-system-libraries --with-xml2-dir=/opt/xml2 --with-xslt-dir=/opt/xslt)"
+  #   end
+  # end
 
   desc "Precompile"
   task :assets_kludge do
