@@ -68,6 +68,10 @@ Rack::Attack.blocklist('Amazonbot') do |req|
   !req.user_agent.blank? && req.user_agent.downcase.include?("Amazonbot".downcase)
 end
 
+Rack::Attack.blocklist('AsyncHttpClient') do |req|
+  !req.user_agent.blank? && req.user_agent.downcase.include?("Custom-AsyncHttpClient".downcase)
+end
+
 Rack::Attack.blocklist("Amazon") do |req|
   !req.remote_ip.blank? && `host #{req.remote_ip}`.include?("amazon")
 end
