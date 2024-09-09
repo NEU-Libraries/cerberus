@@ -63,6 +63,7 @@ gem 'dartsass-rails'
 gem 'devise'
 gem 'devise-i18n'
 gem 'enumerations'
+gem 'good_job'
 gem 'hamlit'
 gem 'libreconv'
 gem 'mods'
@@ -72,7 +73,6 @@ gem 'rsolr', '>= 1.0', '< 3'
 gem 'ruby-filemagic'
 gem 'ruby-vips'
 gem 'sass-embedded', '1.77.5' # temp fix for https://github.com/twbs/bootstrap/issues/40621
-gem 'sidekiq'
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
