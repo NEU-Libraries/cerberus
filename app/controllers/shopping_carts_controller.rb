@@ -132,10 +132,14 @@ class ShoppingCartsController < ApplicationController
     def check_availability
       deleted = []
       session[:ids].each do |pid|
-        if !ActiveFedora::Base.exists?(pid)
+        result = ActiveFedora::SolrService.query("id:\"#{pid}\"")
+        if result.blank?
           deleted << pid
-        elsif ActiveFedora::Base.find(pid, cast: true).core_record == nil
-          deleted << pid
+        else
+          doc = SolrDocument.new(result.first)
+          if doc.get_core_record == nil
+            deleted << pid
+          end
         end
       end
 
@@ -182,11 +186,6 @@ class ShoppingCartsController < ApplicationController
         record = ActiveFedora::Base.find(params[:add], cast: true)
         if !record.public?
           render_403 and return unless (current_user.can? :read, record)
-        end
-
-        if session[:ids].length >= 100
-          flash.now[:error] = "Can't have more than 100 items in your cart"
-          return
         end
       end
     end

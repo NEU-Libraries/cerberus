@@ -445,8 +445,13 @@ module Cerberus
     end
 
     def get_core_record
-      id = Array(self["is_part_of_ssim"]).first.split("/").last
-      return SolrDocument.new ActiveFedora::SolrService.query("id:\"#{id}\"").first
+      # nil safety on split
+      result = Array(self["is_part_of_ssim"]).first
+      if !result.nil?
+        id = result.split("/").last
+        return SolrDocument.new ActiveFedora::SolrService.query("id:\"#{id}\"").first
+      end
+      return nil
     end
 
     # Check if the current file is in progress
