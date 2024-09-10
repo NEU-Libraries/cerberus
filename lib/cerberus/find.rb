@@ -22,10 +22,6 @@ module Cerberus
           end
         end
 
-        if !obj.instance_of?(self.class)
-          raise Exceptions::SearchResultTypeError.new(neu_id, obj.class, self.class)
-        end
-
         return obj
       end
     end
