@@ -2,7 +2,7 @@ set :stage, :production
 set :whenever_environment, 'production'
 
 set :deploy_to, '/opt/cerberus/'
-set :bundle_env_variables, { nokogiri_use_system_libraries: 1 }
+# set :bundle_env_variables, { nokogiri_use_system_libraries: 1 }
 set :bundle_bins, fetch(:bundle_bins, []).push('whenever')
 
 # parses out the current branch you're on. See: http://www.harukizaemon.com/2008/05/deploying-branches-with-capistrano.html
@@ -24,12 +24,12 @@ namespace :deploy do
     end
   end
 
-  desc "Tell nokogiri to use system libs"
-  task :nokogiri do
-    on roles(:app), :in => :sequence, :wait => 5 do
-      execute "cd #{release_path} && (RAILS_ENV=production bundle config build.nokogiri --use-system-libraries)"
-    end
-  end
+  # desc "Tell nokogiri to use system libs"
+  # task :nokogiri do
+  #   on roles(:app), :in => :sequence, :wait => 5 do
+  #     execute "cd #{release_path} && (RAILS_ENV=production bundle config build.nokogiri --use-system-libraries)"
+  #   end
+  # end
 
   desc "Restarting application"
   task :start_httpd do
