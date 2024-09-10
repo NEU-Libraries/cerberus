@@ -7,7 +7,7 @@ module Cerberus
         return self.all if neu_id == :all
 
         retries = 0
-        max_retries = 3
+        max_retries = 5
 
         begin
           obj = ActiveFedora::Base.find(neu_id, :cast => true)
@@ -22,8 +22,8 @@ module Cerberus
           end
         end
 
-        if !obj.instance_of?(super.class)
-          raise Exceptions::SearchResultTypeError.new(neu_id, obj.class, super.class)
+        if !obj.instance_of?(self.class)
+          raise Exceptions::SearchResultTypeError.new(neu_id, obj.class, self.class)
         end
 
         return obj
