@@ -272,7 +272,7 @@ class ImageProcessingJob
           core_file.save!
         end
 
-        Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename, nil, nil, s, m, l, true))
+        Cerberus::Application::Queue.push(ContentCreationJob.new(core_file.pid, core_file.tmp_path, core_file.original_filename, nil, nil, s, m, l, false))
 
         if core_file.save!
           UploadAlert.create_from_core_file(core_file, :create, "iptc")
@@ -292,7 +292,7 @@ class ImageProcessingJob
       errors_for_pid.warn "#{Time.now} - #{$@}"
       iptc = "" if iptc.empty?
       report = load_report.item_reports.create_failure(error.message, iptc, Unidecoder.decode(File.basename(file_name)))
-      FileUtils.rm(file)
+      # FileUtils.rm(file)
       core_file.destroy
       # raise error
     end
@@ -301,7 +301,7 @@ class ImageProcessingJob
   def create_special_error(error_message, iptc, core_file, load_report)
     report = load_report.item_reports.create_failure(error_message, iptc, core_file.original_filename)
     core_file.destroy
-    FileUtils.rm(file)
+    # FileUtils.rm(file)
     return report
   end
 end

@@ -55,6 +55,7 @@ class ProcessIptcZipJob
     end
     load_report.save!
 
-    FileUtils.rm(file)
+    # FileUtils.rm(file) # Don't delete marcom ingest zips for safety - sweep will get them
+    FileUtils.mv(file, File.dirname(file) + "/#{report_id}.zip") # mv and tag with report id to resume upon issue, by hand
   end
 end
