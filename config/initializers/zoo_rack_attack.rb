@@ -126,7 +126,7 @@ Rack::Attack.throttle('load shedding', limit: 3, period: 10) do |req|
             !(req.path.include? "/429") &&
             !(req.path.include? "/api/"))
 
-          host_result = `host #{req.remote_ip}`
+          host_result = `host #{req.remote_ip}`.strip
 
           if !(["lightspeed", "res.spectrum", "rcncustomer", "comcast", "fios.verizon"].any? { |x| host_result.include? x })
             # log to file
