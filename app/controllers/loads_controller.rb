@@ -51,12 +51,12 @@ class LoadsController < ApplicationController
           ingest = Ingest.create_from_spreadsheet_row(row)
           xml_content = xml_entry.get_input_stream.read
           UpdateMetadataJob.perform_later(pid, xml_content, ingest.id)
-          redirect_to loads_path, notice: 'ZIP file processed successfully.'
         else
           redirect_to loads_path, alert: 'XML file not found in ZIP.'
         end
       end
     end
+    redirect_to loads_path, notice: 'ZIP file processed successfully.'
   rescue StandardError => e
     redirect_to loads_path, alert: "Error processing spreadsheet: #{e.message}"
   end
