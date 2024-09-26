@@ -52,7 +52,7 @@ class LoadsController < ApplicationController
           xml_content = xml_entry.get_input_stream.read
           UpdateMetadataJob.perform_later(pid, xml_content, ingest.id)
         else
-          redirect_to loads_path, alert: 'XML file not found in ZIP.'
+          redirect_to loads_path, alert: "#{file_name} file not found in ZIP: "; return
         end
       end
     end
