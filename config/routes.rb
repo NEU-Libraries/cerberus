@@ -34,4 +34,5 @@ Rails.application.routes.draw do
   put '/xml/validate' => 'xml#validate'
   put '/xml/update' => 'xml#update'
 
+  resources :loads, only: [:index, :create]
 end
