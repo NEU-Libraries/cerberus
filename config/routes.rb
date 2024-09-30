@@ -1,11 +1,9 @@
 # frozen_string_literal: true
 
-require 'sidekiq/web'
-
 Rails.application.routes.draw do
   devise_for :users
   mount Blacklight::Engine => '/catalog'
-  mount Sidekiq::Web => '/sidekiq'
+  mount GoodJob::Engine => 'good_job'
   root to: 'pages#home'
   concern :searchable, Blacklight::Routes::Searchable.new
 
@@ -36,4 +34,5 @@ Rails.application.routes.draw do
   put '/xml/validate' => 'xml#validate'
   put '/xml/update' => 'xml#update'
 
+  resources :loads, only: [:index, :create]
 end

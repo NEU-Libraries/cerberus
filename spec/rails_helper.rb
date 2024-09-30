@@ -21,6 +21,11 @@ abort('The Rails environment is running in production mode!') if Rails.env.produ
 require 'rspec/rails'
 # Add additional requires below this line. Rails is not loaded until this point!
 
+# Requires ViewComponent test methods
+require "view_component/test_helpers"
+require "view_component/system_test_helpers"
+require "capybara/rspec"
+
 # Requires supporting ruby files with custom matchers and macros, etc, in
 # spec/support/ and its subdirectories. Files matching `spec/**/*_spec.rb` are
 # run as spec files by default. This means that files in spec/support that end
@@ -45,12 +50,22 @@ rescue ActiveRecord::PendingMigrationError => e
 end
 RSpec.configure do |config|
   config.before(:suite) do
-    # TODO: Atlas wipe
+    # TODO: Atlas wipe <- fixed! with below
+    DatabaseCleaner[:active_record, db: :atlas_test].strategy = :deletion
+    DatabaseCleaner[:active_record, db: :atlas_test].clean
+    c = RSolr.connect(:url => 'http://solr:8983/solr/blacklight-test')
+    c.delete_by_query '*:*'
+    c.commit
   end
 
   config.include Devise::Test::ControllerHelpers, type: :controller
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
   config.fixture_path = Rails.root.join('spec/fixtures').to_s
+
+  # Adding config includes for ViewComponent Test Helpers
+  config.include ViewComponent::TestHelpers, type: :component
+  config.include ViewComponent::SystemTestHelpers, type: :component
+  config.include Capybara::RSpecMatchers, type: :component
 
   # If you're not using ActiveRecord, or you'd prefer not to run each of your
   # examples within a transaction, remove the following line or assign false

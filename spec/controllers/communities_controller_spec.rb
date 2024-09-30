@@ -22,4 +22,16 @@ describe CommunitiesController do
       expect(CGI.unescapeHTML(response.body)).to include(community['title'])
     end
   end
+
+  describe 'new' do
+    it 'assigns a open struct to collection' do
+      get :new
+      expect(assigns(:community)).to be_a(OpenStruct)
+    end
+
+    it 'renders the new partial' do
+      get :new
+      expect(response).to render_template('communities/new')
+    end
+  end
 end

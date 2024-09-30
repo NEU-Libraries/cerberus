@@ -13,10 +13,10 @@ gem 'rails'
 gem 'propshaft'
 
 # Use sqlite3 as the database for Active Record
-gem 'sqlite3', '~> 1.4'
+gem 'sqlite3'
 
 # Use the Puma web server [https://github.com/puma/puma]
-gem 'puma', '~> 5.6'
+gem 'puma'
 
 # Use JavaScript with ESM import maps [https://github.com/rails/importmap-rails]
 gem 'importmap-rails'
@@ -63,6 +63,7 @@ gem 'dartsass-rails'
 gem 'devise'
 gem 'devise-i18n'
 gem 'enumerations'
+gem 'good_job'
 gem 'hamlit'
 gem 'libreconv'
 gem 'mods'
@@ -71,7 +72,8 @@ gem 'pg'
 gem 'rsolr', '>= 1.0', '< 3'
 gem 'ruby-filemagic'
 gem 'ruby-vips'
-gem 'sidekiq'
+gem 'sass-embedded', '1.77.5' # temp fix for https://github.com/twbs/bootstrap/issues/40621
+gem 'roo'
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem

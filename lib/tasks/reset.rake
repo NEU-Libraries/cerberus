@@ -12,8 +12,13 @@ namespace :reset do
     # WorkCreator.call(parent_id: collection.id, mods_xml: File.read('/home/cerberus/web/spec/fixtures/files/work-mods.xml'))
 
     community = AtlasRb::Community.create(nil, '/home/cerberus/web/spec/fixtures/files/community-mods.xml')
+    AtlasRb::Community.metadata(community['id'], { 'thumbnail' => ThumbnailCreator.call(path: '/home/cerberus/web/spec/fixtures/files/boat.jpg') })
+
     collection = AtlasRb::Collection.create(community['id'], '/home/cerberus/web/spec/fixtures/files/collection-mods.xml')
-    AtlasRb::Work.create(collection['id'], '/home/cerberus/web/spec/fixtures/files/work-mods.xml')
+    AtlasRb::Community.metadata(collection['id'], { 'thumbnail' => ThumbnailCreator.call(path: '/home/cerberus/web/spec/fixtures/files/spongebob.png') })
+
+    work = AtlasRb::Work.create(collection['id'], '/home/cerberus/web/spec/fixtures/files/work-mods.xml')
+    AtlasRb::Community.metadata(work['id'], { 'thumbnail' => ThumbnailCreator.call(path: '/home/cerberus/web/spec/fixtures/files/rainbow.jpg') })
   end
 
   desc 'Clean solr and dbs'

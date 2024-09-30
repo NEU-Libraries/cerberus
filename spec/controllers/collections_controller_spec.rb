@@ -23,4 +23,16 @@ describe CollectionsController do
       expect(CGI.unescapeHTML(response.body)).to include(collection['title'])
     end
   end
+
+  describe 'new' do
+    it 'assigns a open struct to collection' do
+      get :new
+      expect(assigns(:collection)).to be_a(OpenStruct)
+    end
+
+    it 'renders the new partial' do
+      get :new
+      expect(response).to render_template('collections/new')
+    end
+  end
 end
