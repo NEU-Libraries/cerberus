@@ -13,6 +13,14 @@ describe LoadsController do
       # and patch them in to test objects for the xml update testing
       AtlasRb::Community.metadata(work['id'], { 'noid' => '123' })
       expect(AtlasRb::Work.find('123')).to be_present
+
+      # PIDs in metadata_existing_files.zip
+
+      # 8j2RtvbFW
+      # 2fCuGC0E5
+      # 4GaFRGnrr
+      # hHtP31089
+      # 089wXVbXf
     end
   end
 end
