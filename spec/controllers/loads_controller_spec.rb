@@ -6,21 +6,21 @@ describe LoadsController do
   let(:community) { AtlasRb::Community.create(nil, '/home/cerberus/web/spec/fixtures/files/community-mods.xml') }
   let(:collection) { AtlasRb::Collection.create(community['id'], '/home/cerberus/web/spec/fixtures/files/collection-mods.xml') }
   let(:work) { AtlasRb::Work.create(collection['id'], '/home/cerberus/web/spec/fixtures/files/work-mods.xml') }
+  let(:zip) { fixture_file_upload('/home/cerberus/web/spec/fixtures/files/metadata_existing_files.zip', 'application/zip') }
 
   describe 'noid test' do
     it 'lets spec set the noid' do
-      # not for keeping, just iterating - this lets us hard code pids in the xml zip fixture file
-      # and patch them in to test objects for the xml update testing
       AtlasRb::Community.metadata(work['id'], { 'noid' => '123' })
       expect(AtlasRb::Work.find('123')).to be_present
+    end
+  end
 
-      # PIDs in metadata_existing_files.zip
-
-      # 8j2RtvbFW
-      # 2fCuGC0E5
-      # 4GaFRGnrr
-      # hHtP31089
-      # 089wXVbXf
+  describe 'create popups' do
+    it 'processes the zip file successfully' do
+      post :create, params: { file: zip }
+      expect(response).to redirect_to(loads_path)
+      # expect(flash[:notice]).to eq("ZIP file processed successfully.")
+      expect(flash[:alert]).to be_nil
     end
   end
 end
