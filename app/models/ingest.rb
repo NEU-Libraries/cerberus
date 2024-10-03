@@ -14,7 +14,7 @@ class Ingest < ApplicationRecord
       pid: row[0],
       xml_filename: row[1],
       status: :pending,
-      load_report: LoadReport.find(load_report_id),
+      load_report: LoadReport.find(load_report_id)
     )
   end
 end

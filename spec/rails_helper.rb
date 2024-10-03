@@ -49,12 +49,7 @@ rescue ActiveRecord::PendingMigrationError => e
 end
 RSpec.configure do |config|
   config.before(:suite) do
-    # TODO: Atlas wipe <- fixed! with below
-    DatabaseCleaner[:active_record, db: :atlas_test].strategy = :deletion
-    DatabaseCleaner[:active_record, db: :atlas_test].clean
-    c = RSolr.connect(:url => 'http://solr:8983/solr/blacklight-test')
-    c.delete_by_query '*:*'
-    c.commit
+    AtlasRb::Reset.clean
   end
 
   config.include Devise::Test::ControllerHelpers, type: :controller
