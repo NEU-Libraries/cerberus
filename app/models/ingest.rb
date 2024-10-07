@@ -3,7 +3,7 @@
 class Ingest < ApplicationRecord
   belongs_to :load_report
 
-  enum status: { pending: 0, completed: 1, failed: 2 }
+  enum :status, { pending: 0, completed: 1, failed: 2 }
 
   validates :pid, presence: true
   validates :xml_filename, presence: true

@@ -3,7 +3,7 @@
 class LoadReport < ApplicationRecord
   has_many :ingests
 
-  enum status: { in_progress: 0, completed: 1, failed: 2 }
+  enum :status, { in_progress: 0, completed: 1, failed: 2 }
 
   validates :status, presence: true
 

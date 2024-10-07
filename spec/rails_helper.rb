@@ -54,7 +54,7 @@ RSpec.configure do |config|
 
   config.include Devise::Test::ControllerHelpers, type: :controller
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
-  config.fixture_path = Rails.root.join('spec/fixtures').to_s
+  config.fixture_paths = [Rails.root.join('spec/fixtures').to_s]
 
   # Adding config includes for ViewComponent Test Helpers
   config.include ViewComponent::TestHelpers, type: :component
