@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2024_09_09_175347) do
+ActiveRecord::Schema[7.2].define(version: 2024_10_03_164742) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
   enable_extension "uuid-ossp"
@@ -115,6 +115,24 @@ ActiveRecord::Schema[7.2].define(version: 2024_09_09_175347) do
     t.index ["scheduled_at"], name: "index_good_jobs_on_scheduled_at", where: "(finished_at IS NULL)"
   end
 
+  create_table "ingests", force: :cascade do |t|
+    t.string "pid", null: false
+    t.string "xml_filename", null: false
+    t.integer "status", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "load_report_id", null: false
+    t.index ["load_report_id"], name: "index_ingests_on_load_report_id"
+  end
+
+  create_table "load_reports", force: :cascade do |t|
+    t.integer "status", default: 0, null: false
+    t.datetime "started_at"
+    t.datetime "finished_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "metadata_mods", force: :cascade do |t|
     t.jsonb "json_attributes"
     t.datetime "created_at", null: false
@@ -165,4 +183,6 @@ ActiveRecord::Schema[7.2].define(version: 2024_09_09_175347) do
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
+
+  add_foreign_key "ingests", "load_reports"
 end

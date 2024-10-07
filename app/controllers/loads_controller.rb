@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-require 'zip'
-require 'roo'
-
 # There needs to be work done on ingests and whether or not they go into load_report
 # as of right now as long as the files seem valid they make it into ingest and then attempt to load
 # but that makes the success rate of load_report 100% pretty much always (not always correct).
