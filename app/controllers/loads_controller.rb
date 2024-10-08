@@ -57,25 +57,37 @@ class LoadsController < ApplicationController
     load_report = LoadReport.create!(status: :in_progress)
     load_report.start_load
 
-    spreadsheet.each_with_index do |row, index|
-      next if index.zero?
-      pid = row[0]
-      file_name = row[1]
-      if pid && file_name
-        xml_entry = zip_file.find_entry(file_name)
-        if xml_entry
-          ingest = Ingest.create_from_spreadsheet_row(row, load_report.id)
-          xml_content = xml_entry.get_input_stream.read
-          UpdateMetadataJob.perform_later(pid, xml_content, ingest.id)
-        else
-          failures << "#{file_name} file not found in ZIP"
-        end
-      else
-        failures << "Missing PID or filename in row #{index + 1}"
-      end
+    header_row = spreadsheet.row(1)
+    header_hash = {}
+    header_row.each_with_index do |cell, index|
+      header_hash[cell] = index
     end
+    if header_hash.key?("PIDs") && header_hash.key?("MODS XML File Path")
+      pid_column = header_hash["PIDs"]
+      file_path_column = header_hash["MODS XML File Path"]
+      spreadsheet.each_with_index do |row, index|
+        next if index.zero?
+        pid = row[pid_column]
+        file_name = row[file_path_column]
+        if pid && file_name
+          xml_entry = zip_file.find_entry(file_name)
+          if xml_entry
+            ingest = Ingest.create_from_spreadsheet_row(pid, file_name, load_report.id)
+            xml_content = xml_entry.get_input_stream.read
+            UpdateMetadataJob.perform_later(pid, xml_content, ingest.id)
+          else
+            failures << "#{file_name} file not found in ZIP"
+          end
+        else
+          failures << "Missing PID or filename in row #{index + 1}"
+        end
+      end
 
-    load_report
+      load_report
+    else
+      failures << "Cannot find header labels"
+      load_report
+    end
   rescue StandardError => e
     failures << "Error processing spreadsheet: #{e.message}"
     load_report

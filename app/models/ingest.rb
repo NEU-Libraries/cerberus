@@ -9,10 +9,10 @@ class Ingest < ApplicationRecord
   validates :xml_filename, presence: true
   validates :status, presence: true
 
-  def self.create_from_spreadsheet_row(row, load_report_id)
+  def self.create_from_spreadsheet_row(pid, file_name, load_report_id)
     create!(
-      pid: row[0],
-      xml_filename: row[1],
+      pid: pid,
+      xml_filename: file_name,
       status: :pending,
       load_report: LoadReport.find(load_report_id)
     )
