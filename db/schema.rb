@@ -12,7 +12,9 @@
 
 ActiveRecord::Schema[7.2].define(version: 2024_09_26_172306) do
   # These are extensions that must be enabled in order to support this database
+  enable_extension "pgcrypto"
   enable_extension "plpgsql"
+  enable_extension "uuid-ossp"
 
   create_table "bookmarks", id: :serial, force: :cascade do |t|
     t.datetime "created_at", precision: nil, null: false
