@@ -27,12 +27,11 @@ Rails.application.routes.draw do
 
   resources :communities
   resources :collections
+  resources :loads
   resources :works
 
   # xml
   get '/xml/editor/:id' => 'xml#editor', as: 'xml_editor'
   put '/xml/validate' => 'xml#validate'
   put '/xml/update' => 'xml#update'
-
-  resources :loads, only: [:index, :create]
 end
