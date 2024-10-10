@@ -6,7 +6,11 @@
 # Also with some things it will look like it failed but all valid jobs haven't
 class LoadsController < ApplicationController
   def index
-    @load_reports = LoadReport.order(created_at: :desc).includes(:ingests)
+    @load_reports = LoadReport.order(created_at: :desc)
+  end
+
+  def show
+    @load_report = LoadReport.find(params[:id])
   end
 
   def create
