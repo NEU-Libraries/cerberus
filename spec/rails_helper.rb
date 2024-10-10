@@ -14,7 +14,6 @@ end
 # This file is copied to spec/ when you run 'rails generate rspec:install'
 require 'spec_helper'
 ENV['RAILS_ENV'] ||= 'test'
-ENV['ATLAS_URL'] = 'http://atlas-test:3000/'
 require_relative '../config/environment'
 # Prevent database truncation if the environment is production
 abort('The Rails environment is running in production mode!') if Rails.env.production?
@@ -50,17 +49,12 @@ rescue ActiveRecord::PendingMigrationError => e
 end
 RSpec.configure do |config|
   config.before(:suite) do
-    # TODO: Atlas wipe <- fixed! with below
-    DatabaseCleaner[:active_record, db: :atlas_test].strategy = :deletion
-    DatabaseCleaner[:active_record, db: :atlas_test].clean
-    c = RSolr.connect(:url => 'http://solr:8983/solr/blacklight-test')
-    c.delete_by_query '*:*'
-    c.commit
+    AtlasRb::Reset.clean
   end
 
   config.include Devise::Test::ControllerHelpers, type: :controller
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
-  config.fixture_path = Rails.root.join('spec/fixtures').to_s
+  config.fixture_paths = [Rails.root.join('spec/fixtures').to_s]
 
   # Adding config includes for ViewComponent Test Helpers
   config.include ViewComponent::TestHelpers, type: :component

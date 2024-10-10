@@ -24,7 +24,7 @@ describe CommunitiesController do
   end
 
   describe 'new' do
-    it 'assigns a open struct to collection' do
+    it 'assigns a open struct to community' do
       get :new
       expect(assigns(:community)).to be_a(OpenStruct)
     end

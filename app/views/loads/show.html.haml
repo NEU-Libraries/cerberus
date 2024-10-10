@@ -1,0 +1,17 @@
+%h2.py-3
+  Load Report
+%table.table
+  %thead
+    %tr
+      %th PID
+      %th XML Filename
+      %th Status
+      %th Created At
+  %tbody
+    - @load_report.ingests.each do |ingest|
+      %tr
+        %td= ingest.pid
+        %td= ingest.xml_filename
+        %td= ingest.status
+        %td= ingest.created_at
+
