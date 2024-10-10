@@ -111,6 +111,14 @@ describe LoadsController do
       expect(response).to redirect_to(loads_path)
       expect(flash[:alert]).to include("Error processing spreadsheet: Invalid spreadsheet format")
     end
+
+    it 'handles missing headers in spreadsheet' do
+      zip_with_missing_headers = fixture_file_upload('/home/cerberus/web/spec/fixtures/files/no_header.zip', 'application/zip')
+
+      post :create, params: { file: zip_with_missing_headers }
+      expect(response).to redirect_to(loads_path)
+      expect(flash[:alert]).to include("Cannot find header labels")
+    end
   end
 
   describe "index" do
