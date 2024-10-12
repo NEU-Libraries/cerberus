@@ -41,7 +41,7 @@ Rack::Attack.safelist("mark any devise user safe") do |request|
 end
 
 Rack::Attack.blocklist("Huawei datacenter") do |req|
-  !req.remote_ip.blank? && `host #{req.remote_ip}`.include?("compute.hwclouds")
+  !req.remote_ip.blank? && `timeout -s 9 -k 1 6 host #{req.remote_ip}`.include?("compute.hwclouds")
 end
 
 Rack::Attack.blocklist('Siteimprove') do |req|
@@ -73,7 +73,7 @@ Rack::Attack.blocklist('AsyncHttpClient') do |req|
 end
 
 Rack::Attack.blocklist("Amazon") do |req|
-  !req.remote_ip.blank? && `host #{req.remote_ip}`.include?("amazon")
+  !req.remote_ip.blank? && `timeout -s 9 -k 1 6 host #{req.remote_ip}`.include?("amazon")
 end
 
 Rack::Attack.throttle("CN Scrapers", limit: 1, period: 10) do |request|
@@ -126,7 +126,7 @@ Rack::Attack.throttle('load shedding', limit: 3, period: 10) do |req|
             !(req.path.include? "/429") &&
             !(req.path.include? "/api/"))
 
-          host_result = `host #{req.remote_ip}`.strip
+          host_result = `timeout -s 9 -k 1 6 host #{req.remote_ip}`.strip
 
           if !(["lightspeed", "res.spectrum", "rcncustomer", "comcast", "fios.verizon"].any? { |x| host_result.include? x })
             # log to file
