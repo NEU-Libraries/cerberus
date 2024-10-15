@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2024_10_15_191620) do
+ActiveRecord::Schema[7.2].define(version: 2024_10_15_192832) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -125,6 +125,13 @@ ActiveRecord::Schema[7.2].define(version: 2024_10_15_191620) do
     t.integer "status", default: 0, null: false
     t.datetime "updated_at", null: false
     t.index ["load_report_id"], name: "index_ingests_on_load_report_id"
+  end
+
+  create_table "iptc_ingests", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "image_filename", null: false
+    t.string "metadata", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "load_reports", force: :cascade do |t|
