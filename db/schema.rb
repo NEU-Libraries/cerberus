@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2024_09_26_172306) do
+ActiveRecord::Schema[7.2].define(version: 2024_10_15_191620) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -118,11 +118,12 @@ ActiveRecord::Schema[7.2].define(version: 2024_09_26_172306) do
 
   create_table "ingests", force: :cascade do |t|
     t.datetime "created_at", null: false
+    t.bigint "ingestible_id"
+    t.string "ingestible_type"
     t.bigint "load_report_id", null: false
     t.string "pid", null: false
     t.integer "status", default: 0, null: false
     t.datetime "updated_at", null: false
-    t.string "xml_filename", null: false
     t.index ["load_report_id"], name: "index_ingests_on_load_report_id"
   end
 
@@ -153,6 +154,12 @@ ActiveRecord::Schema[7.2].define(version: 2024_09_26_172306) do
     t.datetime "updated_at", null: false
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
+  end
+
+  create_table "xml_ingests", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "xml_filename", null: false
   end
 
   add_foreign_key "ingests", "load_reports"

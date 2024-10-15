@@ -37,7 +37,7 @@ describe LoadsController do
     it 'creates Ingests' do
       expect {
         post :create, params: { file: zip }
-      }.to change(Ingest, :count).by(5)
+      }.to change(XmlIngest, :count).by(5)
     end
   end
 
@@ -139,4 +139,3 @@ describe LoadsController do
     expect(response).to render_template("loads/index")
   end
 end
-

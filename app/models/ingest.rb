@@ -5,16 +5,8 @@ class Ingest < ApplicationRecord
 
   enum :status, { pending: 0, completed: 1, failed: 2 }
 
-  validates :pid, presence: true
-  validates :xml_filename, presence: true
-  validates :status, presence: true
+  delegated_type :ingestible, types: %w[ XmlIngest IptcIngest ]
 
-  def self.create_from_spreadsheet_row(pid, file_name, load_report_id)
-    create!(
-      pid: pid,
-      xml_filename: file_name,
-      status: :pending,
-      load_report: LoadReport.find(load_report_id)
-    )
-  end
+  validates :pid, presence: true
+  validates :status, presence: true
 end

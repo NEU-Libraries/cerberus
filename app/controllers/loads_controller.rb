@@ -76,7 +76,7 @@ class LoadsController < ApplicationController
         if pid && file_name
           xml_entry = zip_file.find_entry(file_name)
           if xml_entry
-            ingest = Ingest.create_from_spreadsheet_row(pid, file_name, load_report.id)
+            ingest = XmlIngest.create_from_spreadsheet_row(pid, file_name, load_report.id)
             xml_content = xml_entry.get_input_stream.read
             UpdateMetadataJob.perform_later(pid, xml_content, ingest.id)
           else
