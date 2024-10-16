@@ -11,3 +11,4 @@ vendor/* linguist-vendored
 *.jpg binary
 *.pdf binary
 *.pptx binary
+*.zip binary
