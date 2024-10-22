@@ -245,6 +245,9 @@ Cerberus::Application.routes.draw do
 
   namespace :api, defaults: {format: 'json'} do
     namespace :v1 do
+      # admin
+      get "/admin/:id/properties" => "admin#properties", as: "admin_properties"
+      get "/admin/:id/rights" => "admin#rights", as: "admin_rights"
       # tag
       get "/tag/:tag" => "tags#search", as: "tag_search"
       # handles
