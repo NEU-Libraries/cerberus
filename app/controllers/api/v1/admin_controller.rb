@@ -6,10 +6,8 @@ module Api
       after_filter :clear_api_user
 
       def properties
-        if current_ability.blank? || current_ability.current_user.blank?
-          if !current_ability.current_user.admin_group?
-            render json: { errors: ['Not Authenticated'] }, status: :unauthorized
-          end
+        if current_ability.blank? || current_ability.current_user.blank? || !current_ability.current_user.admin_group?
+          render json: { errors: ['Not Authenticated'] }, status: :unauthorized
         end and return
 
         begin
@@ -22,10 +20,8 @@ module Api
       end
 
       def rights
-        if current_ability.blank? || current_ability.current_user.blank?
-          if !current_ability.current_user.admin_group?
-            render json: { errors: ['Not Authenticated'] }, status: :unauthorized
-          end
+        if current_ability.blank? || current_ability.current_user.blank? || !current_ability.current_user.admin_group?
+          render json: { errors: ['Not Authenticated'] }, status: :unauthorized
         end and return
 
         begin
