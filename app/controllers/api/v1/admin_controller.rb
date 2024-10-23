@@ -16,7 +16,9 @@ module Api
           render json: {error: "An id is required for this action."} and return
         end
 
-        render json: {properties: item.properties.content} and return
+        respond_to do |format|
+          format.xml { render :xml => item.properties.content }
+        end
       end
 
       def rights
@@ -30,7 +32,9 @@ module Api
           render json: {error: "An id is required for this action."} and return
         end
 
-        render json: {rights: item.rightsMetadata.content} and return
+        respond_to do |format|
+          format.xml { render :xml => item.rightsMetadata.content }
+        end
       end
     end
   end
