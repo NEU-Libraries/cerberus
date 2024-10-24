@@ -117,7 +117,7 @@ describe LoadsController do
 
       post :create, params: { file: zip_with_missing_headers }
       expect(response).to redirect_to(loads_path)
-      expect(flash[:alert]).to include("Cannot find header labels")
+      expect(flash[:alert]).to include("Failed to process header columns: unexpected format")
     end
   end
 

@@ -3,15 +3,38 @@
 %table.table
   %thead
     %tr
-      %th PID
-      %th XML Filename
+      - if @load_report.ingests.first&.ingestible_type == "XmlIngest"
+        %th PID
+        %th XML Filename
+      - else
+        %th PID
+        %th Image Filename
+        %th.w-50 IPTC Metadata
       %th Status
       %th Created At
   %tbody
     - @load_report.ingests.each do |ingest|
       %tr
-        %td= ingest.pid
-        %td= ingest.xml_filename
+        - if ingest.ingestible_type == "XmlIngest"
+          %td= ingest.pid
+          %td= ingest.ingestible.xml_filename
+        - else
+          %td= ingest.pid
+          %td= ingest.ingestible.image_filename
+          %td
+            %pre.small.metadata-display
+              = JSON.pretty_generate(JSON.parse(ingest.ingestible.metadata), indent: '  ')
         %td= ingest.status
         %td= ingest.created_at
 
+:css
+  .metadata-display {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    max-height: 300px;
+    overflow-y: auto;
+    background: #f8f9fa;
+    padding: 0.5rem;
+    margin: 0;
+    border-radius: 4px;
+  }

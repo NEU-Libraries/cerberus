@@ -240,6 +240,7 @@ GEM
     marcel (1.0.4)
     matrix (0.4.2)
     method_source (1.1.0)
+    mini_exiftool (2.11.0)
     mini_mime (1.1.5)
     minitest (5.25.1)
     mods (3.0.5)
@@ -468,6 +469,7 @@ DEPENDENCIES
   importmap-rails
   jbuilder
   libreconv
+  mini_exiftool
   mods
   noid-rails
   pg
