@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class LoadsController < ApplicationController
-  # Easy to toggle feature flag
+  # Toggle for now, will add auth features later
   def self.use_iptc_processing?
     true # Toggle this to switch between XML (false) and IPTC (true) processing
   end
@@ -139,7 +139,7 @@ class LoadsController < ApplicationController
       'Description' => raw_data['Description'],
       'Creator' => raw_data['Creator'],
       'SupplementalCategories' => raw_data['SupplementalCategories']
-    }.compact # Remove any nil values
+    }.compact
 
     if relevant_fields.empty?
       {'Error' => 'No IPTC metadata found'}
