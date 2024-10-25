@@ -36,8 +36,8 @@ class Admin::CoreFilesController < AdminController
     mime_type = extract_mime_type(file_path, file_name)
     extension = extract_extension(mime_type, File.extname(file_name))
 
-    if old_content_object.properties.mime_type != mime_type
-      flash[:error] = "Mime type must be #{old_content_object.properties.mime_type} not #{mime_type}"
+    if old_content_object.mime_type != mime_type
+      flash[:error] = "Mime type must be #{old_content_object.mime_type} not #{mime_type}"
       redirect_to root_path and return
     end
 
