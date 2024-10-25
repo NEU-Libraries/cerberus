@@ -1,0 +1,78 @@
+%h1.page-header
+  Replace File for
+  %i
+    = @content_object.pid
+
+%p= @content_object.properties.mime_type + " and " + File.extname(@content_object.original_filename)
+
+= form_tag(create_replacement_file_path, method: "post", multipart: true, id: "FileUploadForm") do
+  = hidden_field_tag(:old_id, @content_object.pid)
+  .row
+    %fieldset.span4
+      %legend
+        1. Terms of Service Agreement
+      %span.help-block
+        Please read and accept the
+        %a{href: "/terms"}
+          terms of use
+      %label.checkbox.required-label{ for: "terms_of_service" }
+        I have read and accept the terms of service.
+        = check_box_tag 'terms_of_service', 1, nil, data: { activate:  "activate-submit" }
+    %fieldset.span4
+      %legend
+        2. File Upload
+      = label_tag "file", "File to upload", class: "required-label"
+      = file_field_tag 'file', required: true, "aria-required" => true
+
+  .progress.progress-striped
+    .bar{style: "width:0%"}
+  .form-actions
+    = submit_tag "Upload", disabled: "true", class: 'btn btn-large btn-primary activate-submit', data: { disable_with: "Please wait..."}, id: "fileSubmit"
+:javascript
+  $(function () {
+    $(".progress").hide();
+    var file_list = [];
+    $('#FileUploadForm').fileupload({
+        dataType: 'html',
+        replaceFileInput: false,
+        autoUpload: false,
+        add: function (e, data) {
+            data.context = $("#fileSubmit")
+                .click(function (e) {
+                  e.preventDefault();
+                  $(this).attr("disabled", true);
+                  $(this).val("Please wait...");
+                });
+          $(".progress").show();
+          file_list = [data.files[0]]; //this guarantees that the files being uploaded is only the most recently added one
+        },
+        progressall: function (e, data) {
+            var progress = parseInt(data.loaded / data.total * 100, 10);
+            $('.progress .bar').css(
+                'width',
+                progress + '%'
+            );
+            if (progress == 100) {
+              $(".progress").after("<div class='alert alert-success'>Your file has been uploaded and is now being processed.</div>");
+              spinner = enable_spinner('main-content');
+            }
+        },
+        done: function (e, data) {
+          console.log(data);
+           url = JSON.parse(data.result);
+           url = url.url;
+           window.location = url;
+        }
+    });
+    $('#fileSubmit').click(function(e){
+      e.preventDefault();
+      $('#FileUploadForm').fileupload('send', {files:file_list});
+    })
+  });
+
+- if current_user.admin_group? || current_user.admin? || current_user.repo_staff?
+  :javascript
+    $('#file').bind('change', function() {
+      $(".alert").remove();
+      $("input[type='submit']").removeProp("disabled");
+    });
