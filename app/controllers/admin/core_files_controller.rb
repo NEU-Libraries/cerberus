@@ -23,6 +23,7 @@ class Admin::CoreFilesController < AdminController
   def new_replacement_file
     flash[:alert] = "This process is not reversible. Replaced items are deleted."
     @content_object = ActiveFedora::Base.find(params[:id], cast: true)
+    render 'core_files/new_replacement_file'
   end
 
   def create_replacement_file
