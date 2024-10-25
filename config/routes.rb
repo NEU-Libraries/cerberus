@@ -218,6 +218,8 @@ Cerberus::Application.routes.draw do
     resources :statistics, only: [:index]
     resources :users, only: [:index, :show]
     resources :compilations, path: "/sets", except: [:show]
+    get "/new_replacement_file/:id" => "core_files#new_replacement_file", as: 'new_replacement_file'
+    post "/create_replacement_file" => "core_files#create_replacement_file", as: 'create_replacement_file'
     get "/statistics/views" => 'statistics#get_views', as: 'views'
     get "/statistics/downloads" => 'statistics#get_downloads', as: 'downloads'
     get "/statistics/streams" => 'statistics#get_streams', as: 'streams'
