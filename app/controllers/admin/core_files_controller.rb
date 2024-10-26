@@ -14,6 +14,7 @@ class Admin::CoreFilesController < AdminController
   include BlacklightAdvancedSearch::ParseBasicQ
   include BlacklightAdvancedSearch::Controller
   include ModsDisplay::ControllerExtension
+  include Cerberus::TempFileStorage
   include MimeHelper
   include ChecksumHelper
 
@@ -75,6 +76,9 @@ class Admin::CoreFilesController < AdminController
 
     old_content_object.destroy
     invalidate_pid(core_record.pid)
+
+    flash[:success] = "File was replaced successfully."
+    redirect_to root_path and return
   end
 
   def index
