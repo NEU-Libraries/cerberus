@@ -38,12 +38,12 @@ class Admin::CoreFilesController < AdminController
     extension = extract_extension(mime_type, File.extname(file_name))
 
     if old_content_object.mime_type != mime_type
-      flash[:error] = "Mime type must be #{old_content_object.mime_type} not #{mime_type}"
+      session[:flash_error] = "Mime type must be #{old_content_object.mime_type} not #{mime_type}"
       render :json => { url: admin_panel_path } and return
     end
 
     if File.extname(old_content_object.original_filename) != ("." + extension)
-      flash[:error] = "Extension must be #{File.extname(old_content_object.original_filename)} not #{extension}"
+      session[:flash_error] = "Extension must be #{File.extname(old_content_object.original_filename)} not #{extension}"
       render :json => { url: admin_panel_path } and return
     end
 
@@ -78,7 +78,7 @@ class Admin::CoreFilesController < AdminController
     old_content_object.destroy
     invalidate_pid(core_record.pid)
 
-    flash[:notice] = "File was replaced successfully."
+    session[:flash_success] = "File was replaced successfully."
     render :json => { url: admin_panel_path } and return
   end
 
