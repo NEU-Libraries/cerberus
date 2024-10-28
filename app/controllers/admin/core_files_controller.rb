@@ -78,7 +78,7 @@ class Admin::CoreFilesController < AdminController
     invalidate_pid(core_record.pid)
 
     flash[:success] = "File was replaced successfully."
-    redirect_to root_path and return
+    render :json => { url: root_path }
   end
 
   def index
