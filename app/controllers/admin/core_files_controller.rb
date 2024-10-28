@@ -49,6 +49,7 @@ class Admin::CoreFilesController < AdminController
 
     core_record = CoreFile.find(old_content_object.core_record.pid)
     content_object = old_content_object.class.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
+    content_object.save!
 
     uri = URI("#{ActiveFedora.config.credentials[:url]}/objects/#{content_object.pid}/datastreams/content?controlGroup=M&dsLocation=file://#{file_path}")
     Net::HTTP.start(uri.host, uri.port) do |http|
