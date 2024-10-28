@@ -39,12 +39,12 @@ class Admin::CoreFilesController < AdminController
 
     if old_content_object.mime_type != mime_type
       flash[:error] = "Mime type must be #{old_content_object.mime_type} not #{mime_type}"
-      render :json => { url: root_path } and return
+      render :json => { url: admin_panel_path } and return
     end
 
     if File.extname(old_content_object.original_filename) != ("." + extension)
       flash[:error] = "Extension must be #{File.extname(old_content_object.original_filename)} not #{extension}"
-      render :json => { url: root_path } and return
+      render :json => { url: admin_panel_path } and return
     end
 
     core_record = CoreFile.find(old_content_object.core_record.pid)
@@ -78,8 +78,8 @@ class Admin::CoreFilesController < AdminController
     old_content_object.destroy
     invalidate_pid(core_record.pid)
 
-    flash[:success] = "File was replaced successfully."
-    render :json => { url: root_path } and return
+    flash[:notice] = "File was replaced successfully."
+    render :json => { url: admin_panel_path } and return
   end
 
   def index
