@@ -135,6 +135,8 @@ Cerberus::Application.routes.draw do
   get '/employees/:id/loaders' => 'employees#loaders', as: 'employee_loaders'
   get '/my_loaders' => 'employees#my_loaders', as: 'my_loaders'
   get '/generate_token' => 'employees#generate_token', as: 'generate_token'
+  post "/replacement_file" => "core_files#new_replacement_file", as: 'new_replacement_file'
+  post "/create_replacement_file" => "core_files#create_replacement_file", as: 'create_replacement_file'
 
   get '/select_account' => 'users#select_account', as: 'select_account'
   get '/switch_user' => 'users#switch_user', as: 'switch_user'
@@ -218,8 +220,6 @@ Cerberus::Application.routes.draw do
     resources :statistics, only: [:index]
     resources :users, only: [:index, :show]
     resources :compilations, path: "/sets", except: [:show]
-    get "/replacement_file/:id" => "core_files#new_replacement_file", as: 'new_replacement_file'
-    post "/create_replacement_file" => "core_files#create_replacement_file", as: 'create_replacement_file'
     get "/statistics/views" => 'statistics#get_views', as: 'views'
     get "/statistics/downloads" => 'statistics#get_downloads', as: 'downloads'
     get "/statistics/streams" => 'statistics#get_streams', as: 'streams'

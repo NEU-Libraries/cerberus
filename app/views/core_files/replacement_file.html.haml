@@ -1,0 +1,10 @@
+%h2.page-header Binary Replacement
+
+= form_tag(new_replacement_file_path, method: "post", multipart: true) do
+  %fieldset
+    .row-fluid
+      .span12
+        = label_tag :content_object_id, "Enter the PID for the binary"
+        = text_field_tag :content_object_id, nil, :required => true
+  .form-actions
+    = submit_tag "Fetch details", :class => ['btn', 'btn-success'], :id => "upload_button", data: { disable_with: "Please wait..."}

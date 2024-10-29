@@ -21,67 +21,6 @@ class Admin::CoreFilesController < AdminController
   before_filter :authenticate_user!
   before_filter :verify_admin
 
-  def new_replacement_file
-    flash[:alert] = "This process is not reversible. Replaced items are deleted."
-    @content_object = ActiveFedora::Base.find(params[:id], cast: true)
-    render 'core_files/new_replacement_file'
-  end
-
-  def create_replacement_file
-    file = params[:file]
-    file_name = file.original_filename
-    file_path = move_file_to_tmp(file)
-
-    old_content_object = ActiveFedora::Base.find(params[:old_id], cast: true)
-
-    mime_type = extract_mime_type(file_path, file_name)
-    extension = extract_extension(mime_type, File.extname(file_name))
-
-    if old_content_object.mime_type != mime_type
-      session[:flash_error] = "Mime type must be #{old_content_object.mime_type} not #{mime_type}"
-      render :json => { url: admin_panel_path } and return
-    end
-
-    if File.extname(old_content_object.original_filename) != ("." + extension)
-      session[:flash_error] = "Extension must be #{File.extname(old_content_object.original_filename)} not #{extension}"
-      render :json => { url: admin_panel_path } and return
-    end
-
-    core_record = CoreFile.find(old_content_object.core_record.pid)
-    content_object = old_content_object.class.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
-    content_object.save!
-
-    uri = URI("#{ActiveFedora.config.credentials[:url]}/objects/#{content_object.pid}/datastreams/content?controlGroup=M&dsLocation=file://#{file_path}")
-    Net::HTTP.start(uri.host, uri.port) do |http|
-      http.read_timeout = 60000
-      request = Net::HTTP::Post.new uri
-      request.basic_auth("#{ActiveFedora.config.credentials[:user]}", "#{ActiveFedora.config.credentials[:password]}")
-      res = http.request request # Net::HTTPResponse object
-    end
-
-    content_object.reload
-    content_object.rightsMetadata.content = old_content_object.rightsMetadata.content
-    content_object.core_record = core_record
-    content_object.save!
-
-    content_object.original_filename = file_name
-    content_object.properties.mime_type = mime_type
-    content_object.properties.md5_checksum = new_checksum(file_path)
-    content_object.properties.file_size = File.size(file_path).to_s
-
-    if old_content_object.canonical?
-      content_object.canonize
-    end
-
-    content_object.save!
-
-    old_content_object.destroy
-    invalidate_pid(core_record.pid)
-
-    session[:flash_success] = "File was replaced successfully."
-    render :json => { url: admin_panel_path } and return
-  end
-
   def index
     @page_title = "Administer Core Files"
   end

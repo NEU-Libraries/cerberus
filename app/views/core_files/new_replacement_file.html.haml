@@ -5,7 +5,7 @@
 
 %p= "Must be " + @content_object.mime_type + " and " + File.extname(@content_object.original_filename)
 
-= form_tag(admin_create_replacement_file_path, method: "post", multipart: true, id: "FileUploadForm") do
+= form_tag(create_replacement_file_path, method: "post", multipart: true, id: "FileUploadForm") do
   = hidden_field_tag(:old_id, @content_object.pid)
   .row
     %fieldset.span4

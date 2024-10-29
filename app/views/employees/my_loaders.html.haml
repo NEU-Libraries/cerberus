@@ -26,6 +26,11 @@
 %section.row
   %article.span4
     - if !current_user.blank? && (current_user.admin? || current_user.admin_group?)
+      %h3 Remediation
+      =link_to("Replace Binary", "#TODO", class: "btn btn-lg btn-primary")
+      %br
+      %br
+
       %h3 Staged Upload
       =link_to("Boston Globe", "/upload", class: "btn btn-lg btn-primary")
       %br
