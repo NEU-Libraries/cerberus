@@ -6,14 +6,6 @@ class AdminController < ApplicationController
 
   def index
     @page_title = "Admin Home"
-    if session[:flash_error]
-      flash[:error] = session[:flash_error]
-      session[:flash_error] = nil
-    end
-    if session[:flash_success]
-      flash[:notice] = session[:flash_success]
-      session[:flash_success] = nil
-    end
   end
 
   private

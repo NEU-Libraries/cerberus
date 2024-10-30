@@ -13,6 +13,9 @@ class EmployeesController < ApplicationController
 
   include BlacklightAdvancedSearch::ParseBasicQ
   include BlacklightAdvancedSearch::Controller
+  include Cerberus::TempFileStorage
+  include MimeHelper
+  include ChecksumHelper
 
   before_filter :authenticate_user!, only: [:my_loaders]
   before_filter :get_employee, only: [:show, :list_files, :communities, :loaders]

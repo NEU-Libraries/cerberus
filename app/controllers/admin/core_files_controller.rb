@@ -14,9 +14,6 @@ class Admin::CoreFilesController < AdminController
   include BlacklightAdvancedSearch::ParseBasicQ
   include BlacklightAdvancedSearch::Controller
   include ModsDisplay::ControllerExtension
-  include Cerberus::TempFileStorage
-  include MimeHelper
-  include ChecksumHelper
 
   before_filter :authenticate_user!
   before_filter :verify_admin
