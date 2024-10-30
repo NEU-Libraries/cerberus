@@ -135,7 +135,7 @@ Cerberus::Application.routes.draw do
   get '/employees/:id/loaders' => 'employees#loaders', as: 'employee_loaders'
   get '/my_loaders' => 'employees#my_loaders', as: 'my_loaders'
   get '/generate_token' => 'employees#generate_token', as: 'generate_token'
-  post "/replacement_file" => "employees#replacement_file", as: 'replacement_file'
+  get "/replacement_file" => "employees#replacement_file", as: 'replacement_file'
   post "/new_replacement_file" => "employees#new_replacement_file", as: 'new_replacement_file'
   post "/create_replacement_file" => "employees#create_replacement_file", as: 'create_replacement_file'
 
