@@ -9,6 +9,15 @@ module MimeHelper
     result.strip!
     mime_type = result.slice(result.index(":")+1..-1).strip
 
+    if mime_type == "application/zip" && !original_filename.blank?
+      # Double check against extension
+      extension = File.extname(original_filename).split(".").last
+      result = `grep "#{extension}" /etc/mime.types | awk '{print $1}'`.gsub(/\n/," ").strip.split(" ").first
+      if result.include?("office")
+        return result
+      end
+    end
+
     if !original_filename.blank?
       # Odds are that it's a poor encoding, and the system is correct in giving a generic
       # mime type. Due to the complexity of the issue however, we're going to punt this
