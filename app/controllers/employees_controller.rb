@@ -42,7 +42,7 @@ class EmployeesController < ApplicationController
 
       if !@content_object.respond_to?(:fedora_file_path)
         session[:flash_error] = "Class may not be of type #{@content_object.class.to_s}"
-        render :json => { url: my_loaders_path } and return
+        redirect_to my_loaders_path and return
       end
 
       flash[:alert] = "This process is not reversible. Replaced items are deleted."
