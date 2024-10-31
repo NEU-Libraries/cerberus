@@ -38,9 +38,14 @@ class EmployeesController < ApplicationController
 
   def new_replacement_file
     if !current_user.blank? && (current_user.admin? || current_user.admin_group?)
-      flash[:alert] = "This process is not reversible. Replaced items are deleted."
-      # TODO - check is binary not core file for safety
       @content_object = ActiveFedora::Base.find(params[:content_object_id], cast: true)
+
+      if !@content_object.respond_to?(:fedora_file_path)
+        session[:flash_error] = "Class may not be of type #{@content_object.class.to_s}"
+        render :json => { url: my_loaders_path } and return
+      end
+
+      flash[:alert] = "This process is not reversible. Replaced items are deleted."
       render 'core_files/new_replacement_file'
     else
       render_403 and return
