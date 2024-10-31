@@ -5,6 +5,8 @@
 
 %p= "Must be " + @content_object.mime_type + " and " + File.extname(@content_object.original_filename)
 
+%p= "This binary belongs to #{@core_file.pid} with a title of #{@core_file.title}"
+
 = form_tag(create_replacement_file_path, method: "post", multipart: true, id: "FileUploadForm") do
   = hidden_field_tag(:old_id, @content_object.pid)
   .row

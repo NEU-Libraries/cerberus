@@ -45,7 +45,9 @@ class EmployeesController < ApplicationController
         redirect_to my_loaders_path and return
       end
 
-      flash[:alert] = "This process is not reversible. Replaced items are deleted."
+      @core_file = CoreFile.find(@content_object.core_record.pid)
+
+      flash[:error] = "This process is not reversible. Replaced items are deleted. It's strongly recommended that the existing file is backed up before proceeding."
       render 'core_files/new_replacement_file'
     else
       render_403 and return
