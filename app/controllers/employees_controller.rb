@@ -39,6 +39,7 @@ class EmployeesController < ApplicationController
   def new_replacement_file
     if !current_user.blank? && (current_user.admin? || current_user.admin_group?)
       flash[:alert] = "This process is not reversible. Replaced items are deleted."
+      # TODO - check is binary not core file for safety
       @content_object = ActiveFedora::Base.find(params[:content_object_id], cast: true)
       render 'core_files/new_replacement_file'
     else
