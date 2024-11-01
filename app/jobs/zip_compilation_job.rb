@@ -105,6 +105,9 @@ class ZipCompilationJob
 
     def zip_core_file(doc, user, temp_zipfile_name)
       begin
+        self.path = "#{Rails.application.config.tmp_path}/sets/#{sess_id}"
+        FileUtils.mkdir_p path
+
         id = doc.pid
         if CoreFile.exists?(id)
           cf = CoreFile.find(id)
@@ -113,9 +116,16 @@ class ZipCompilationJob
             if !user.nil? ? user.can?(:read, content) : content.public?
               if content.content.content && content.class != ImageThumbnailFile
                 download_label = I18n.t("drs.display_labels.#{content.klass}.download")
-                Zip::File.open(temp_zipfile_name) do |zipfile|
-                  zipfile.add("#{self.title}/neu_#{id.split(":").last}-#{download_label}.#{extract_extension(content.properties.mime_type.first, File.extname(content.original_filename || "").delete!("."))}", content.fedora_file_path)
-                end
+
+                # Zip::File.open(temp_zipfile_name) do |zipfile|
+                  # zipfile.add("#{self.title}/neu_#{id.split(":").last}-#{download_label}.#{extract_extension(content.properties.mime_type.first, File.extname(content.original_filename || "").delete!("."))}", content.fedora_file_path)
+                # end
+
+                tmp_file_name = "#{self.title}/neu_#{id.split(":").last}-#{download_label}.#{extract_extension(content.properties.mime_type.first, File.extname(content.original_filename || "").delete!("."))}"
+                relative_path = "./downloads/#{tmp_file_name}"
+                `cd #{path} && ln -s #{item.fedora_file_path} #{relative_path}`
+                `cd #{path} && zip -ur #{temp_zipfile_name} #{relative_path}`
+                File.unlink(files_path + "/" + tmp_file_name) # explicitly stating that we're removing a symlink to avoid confusion
               end
             end
           end
