@@ -105,7 +105,7 @@ class ZipCompilationJob
 
     def zip_core_file(doc, user, temp_zipfile_name)
       begin
-        self.path = "#{Rails.application.config.tmp_path}/sets/#{sess_id}/#{self.comp_pid.gsub(":", "_")}"
+        self.path = "#{Rails.application.config.tmp_path}/sets/#{self.comp_pid.gsub(":", "_")}"
         FileUtils.mkdir_p path
 
         files_path = "#{path}/downloads"
