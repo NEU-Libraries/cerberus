@@ -136,9 +136,6 @@ class ZipCompilationJob
       rescue Exception => error
         # Any number of things could be wrong with the core file - malformed due to error
         # or migration failure. Emails aren't currently working out of jobs. A TODO for later
-        tempdir = Pathname.new("#{Rails.application.config.tmp_path}/")
-        dir = tempdir.join(self.comp_pid.gsub(":", "_"))
-        File.write("#{dir.to_s}/error.log", error.to_s)
       end
     end
 
