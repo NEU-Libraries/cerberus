@@ -6,15 +6,15 @@ class IptcIngest < ApplicationRecord
   validates :image_filename, presence: true
   validates :metadata, presence: true # Raw IPTC parsed metadata
 
-  def self.create_from_image_binary(filename, metadata, load_report_id)
-    # Generate a temporary PID/work ID
+  def self.create_from_image_binary(filename, image_file, metadata, load_report_id)
+    # TODO Update To Actually Take in the PID?
     temp_pid = "work:#{SecureRandom.uuid}"
-    metadata_string = metadata.to_json
 
     Ingest.create!(
       ingestible: IptcIngest.new(
         image_filename: filename,
-        metadata: metadata_string
+        image_file: image_file,
+        metadata: metadata.to_json
       ),
       pid: temp_pid,
       status: :pending,

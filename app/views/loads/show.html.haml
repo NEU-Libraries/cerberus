@@ -23,7 +23,7 @@
           %td= ingest.ingestible.image_filename
           %td
             %pre.small.metadata-display
-              = JSON.pretty_generate(JSON.parse(ingest.ingestible.metadata), indent: '  ')
+              = JSON.pretty_generate(ingest.ingestible.metadata)
         %td= ingest.status
         %td= ingest.created_at
 

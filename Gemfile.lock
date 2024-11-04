@@ -251,6 +251,8 @@ GEM
       nom-xml (~> 1.0)
     msgpack (1.7.2)
     multipart-post (2.4.1)
+    namae (1.2.0)
+      racc (~> 1.7)
     net-http (0.4.1)
       uri
     net-imap (0.4.16)
@@ -471,6 +473,7 @@ DEPENDENCIES
   libreconv
   mini_exiftool
   mods
+  namae
   noid-rails
   pg
   propshaft

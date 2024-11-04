@@ -3,17 +3,21 @@
 class UpdateMetadataJob < ApplicationJob
   queue_as :default
 
-  def perform(pid, xml_content, ingest_id)
+  def perform(ingest_id)
     ingest = Ingest.find(ingest_id)
+
     begin
       Tempfile.create(['update', '.xml'], binmode: true) do |temp_file|
-        temp_file.write(xml_content)
+        temp_file.write(ingest.ingestible.xml_content)
         temp_file.flush
-        AtlasRb::Work.update(pid, temp_file.path)
+        AtlasRb::Work.update(ingest.pid, temp_file.path)
       end
-      ingest.update(status: :completed)
+
+      ingest.update!(status: :completed)
     rescue StandardError => e
-      ingest.update(status: :failed)
+      Rails.logger.error("Update metadata failed for ingest #{ingest_id}: #{e.message}")
+      ingest.update!(status: :failed)
+      raise e
     end
   end
 end
