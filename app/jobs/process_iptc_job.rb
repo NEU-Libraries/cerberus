@@ -3,12 +3,16 @@
 class ProcessIptcJob < ApplicationJob
   queue_as :default
 
+  def self.default_collection_id
+    'tmpg6t2'
+  end
+
   def perform(ingest_id)
     ingest = Ingest.find(ingest_id)
 
     begin
       xml_content = generate_xml_from_iptc(JSON.parse(ingest.ingestible.metadata))
-      work = AtlasRb::Work.create('tmpg6t2')
+      work = AtlasRb::Work.create(self.class.default_collection_id)
 
       Tempfile.create(['mods', '.xml'], binmode: true) do |temp_file|
         temp_file.write(xml_content)
@@ -24,12 +28,9 @@ class ProcessIptcJob < ApplicationJob
         AtlasRb::Community.metadata(work['id'], {'thumbnail' => ThumbnailCreator.call(path: temp_image.path) })
       end
 
-
-
       ingest.update!(status: :completed)
     rescue StandardError => e
       Rails.logger.error("Processing failed for ingest #{ingest_id}: #{e.message}")
-      Rails.logger.error(e.backtrace.join("\n"))
       ingest.update!(status: :failed)
       raise e
     end
