@@ -137,7 +137,6 @@ class LoadsController < ApplicationController
       pid = row[pid_column]
       file_name = row[file_path_column]
 
-      # Rails.logger.info "HERE GEORGE #{file_name} #{pid}"
 
       if pid.blank? || file_name.blank?
         failures << "Missing PID or filename in row #{index + 1}"
