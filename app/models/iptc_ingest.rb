@@ -7,8 +7,7 @@ class IptcIngest < ApplicationRecord
   validates :metadata, presence: true # Raw IPTC parsed metadata
 
   def self.create_from_image_binary(filename, image_file, metadata, load_report_id)
-    # TODO Update To Actually Take in the PID?
-    temp_pid = "work:#{SecureRandom.uuid}"
+    temp_pid = "Temporary PID"
 
     Ingest.create!(
       ingestible: IptcIngest.new(
@@ -20,5 +19,15 @@ class IptcIngest < ApplicationRecord
       status: :pending,
       load_report_id: load_report_id
     )
+  end
+
+  def update_pid(new_pid)
+    return false if new_pid.blank?
+
+    ingest.update!(pid: new_pid)
+    true
+  rescue ActiveRecord::RecordInvalid => e
+    Rails.logger.error("Failed to update PID: #{e.message}")
+    false
   end
 end

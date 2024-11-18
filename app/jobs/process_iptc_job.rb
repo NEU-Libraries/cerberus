@@ -13,6 +13,7 @@ class ProcessIptcJob < ApplicationJob
     begin
       xml_content = generate_xml_from_iptc(JSON.parse(ingest.ingestible.metadata))
       work = AtlasRb::Work.create(self.class.default_collection_id)
+      ingest.ingestible.update_pid(work['id'])
 
       Tempfile.create(['mods', '.xml'], binmode: true) do |temp_file|
         temp_file.write(xml_content)
@@ -25,7 +26,7 @@ class ProcessIptcJob < ApplicationJob
         temp_image.flush
 
         AtlasRb::Blob.create(work['id'], temp_image.path)
-        AtlasRb::Community.metadata(work['id'], {'thumbnail' => ThumbnailCreator.call(path: temp_image.path) })
+        AtlasRb::Community.metadata(work['id'], { 'thumbnail' => ThumbnailCreator.call(path: temp_image.path) })
       end
 
       ingest.update!(status: :completed)
@@ -37,134 +38,140 @@ class ProcessIptcJob < ApplicationJob
   end
 
   private
-
-  # TODO Organize this bit a little
   def generate_xml_from_iptc(raw_iptc)
     Nokogiri::XML::Builder.new(encoding: 'UTF-8') do |xml|
-      xml['mods'].mods('xmlns:drs' => 'https://repository.neu.edu/spec/v1',
-                       'xmlns:mods' => 'http://www.loc.gov/mods/v3',
-                       'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
-                       'xmlns:niec' => 'http://repository.neu.edu/schema/niec',
-                       'xsi:schemaLocation' => 'http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd') do
-
-
-        xml['mods'].titleInfo('usage' => 'primary') do
-          xml['mods'].title raw_iptc['Headline']
-        end
-
-        xml['mods'].titleInfo('type' => 'alternative') do
-          xml['mods'].title
-        end
-
-
-        xml['mods'].abstract raw_iptc['Description'] if raw_iptc['Description'].present?
-
-
-        if raw_iptc['By-line'].present?
-          xml['mods'].name('type' => 'personal', 'usage' => 'primary') do
-            name_parts = process_byline(raw_iptc['By-line'])
-            xml['mods'].namePart(name_parts[:first], 'type' => 'given') if name_parts[:first]
-            xml['mods'].namePart(name_parts[:last], 'type' => 'family') if name_parts[:last]
-            xml['mods'].namePart
-            xml['mods'].role do
-              xml['mods'].roleTerm(raw_iptc['By-lineTitle'] || 'University Photographer', 'type' => 'text')
-            end
-          end
-        end
-
-        xml['mods'].name('type' => 'corporate')
-
-
-        xml['mods'].originInfo do
-          xml['mods'].place do
-            xml['mods'].placeTerm
-            if raw_iptc['City'].present? || raw_iptc['State'].present?
-              xml['mods'].placeTerm([raw_iptc['City'], raw_iptc['State']].compact.join(' '), 'type' => 'text')
-            end
-          end
-
-          # May need tweaks
-          if raw_iptc['DateTimeOriginal'].present?
-            xml['mods'].dateCreated(raw_iptc['DateTimeOriginal'], 'keyDate' => 'yes', 'encoding' => 'w3cdtf')
-            xml['mods'].copyrightDate(raw_iptc['DateTimeOriginal'], 'encoding' => 'w3cdtf')
-          end
-          xml['mods'].publisher 'Northeastern University'
-        end
-
-
-        xml['mods'].language do
-          xml['mods'].languageTerm
-        end
-
-        xml['mods'].note('type' => 'citation')
-
-
-        if raw_iptc['Keywords']
-          Array(raw_iptc['Keywords']).each do |keyword|
-            next if keyword.blank?
-            xml['mods'].subject do
-              xml['mods'].topic keyword.to_s.downcase
-            end
-          end
-        end
-
-        xml['mods'].typeOfResource 'still image'
-
-
-        xml['mods'].recordInfo do
-          xml['mods'].recordContentSource
-          xml['mods'].recordOrigin
-          xml['mods'].descriptionStandard
-          xml['mods'].languageOfCataloging do
-            xml['mods'].languageTerm
-          end
-        end
-
-
-        xml['mods'].physicalDescription do
-          xml['mods'].form('electronic', 'authority' => 'marcform')
-          xml['mods'].digitalOrigin 'born digital'
-          xml['mods'].extent '1 photograph'
-        end
-
-
-        xml['mods'].identifier('http://testhandle', 'type' => 'hdl', 'displayLabel' => 'Permanent URL')
-
-
-        xml['mods'].extension('displayLabel' => 'scholarly_object') do
-          xml.scholarly_object do
-            xml.category
-            xml.department
-            xml.degree
-            xml.course_info do
-              xml.course_number
-              xml.course_title
-            end
-          end
-        end
-
-        xml['mods'].extension do
-          xml['niec'].niec
-        end
-
-        xml['mods'].genre('photographs', 'authority' => 'aat')
-
-
-        xml['mods'].accessCondition(
-          'Marketing and Communications images are for use only within the context of Northeastern University...',
-          'type' => 'use and reproduction'
-        )
-
-
-        if raw_iptc['Category'].present?
-          classification = process_category(raw_iptc['Category'])
-          if raw_iptc['SupplementalCategories'].present?
-            classification += process_supplemental_categories(raw_iptc['SupplementalCategories'])
-          end
-          xml['mods'].classification classification
-        end
+      xml['mods'].mods(mods_namespaces) do
+        build_title_section(xml, raw_iptc)
+        build_abstract_section(xml, raw_iptc)
+        build_creator_section(xml, raw_iptc)
+        build_origin_info_section(xml, raw_iptc)
+        build_subject_section(xml, raw_iptc)
+        build_resource_type_section(xml)
+        build_physical_description_section(xml)
+        build_identifiers_section(xml)
+        build_genre_section(xml)
+        build_access_condition_section(xml)
+        build_classification_section(xml, raw_iptc)
       end
     end.to_xml
+  end
+
+  def mods_namespaces
+    {
+      'xmlns:mods' => 'http://www.loc.gov/mods/v3',
+      'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
+      'xmlns:drs' => 'https://repository.neu.edu/spec/v1',
+      'xmlns:niec' => 'http://repository.neu.edu/schema/niec',
+      'xmlns:dcterms' => 'http://purl.org/dc/terms/',
+      'xmlns:dwc' => 'http://rs.tdwg.org/dwc/terms/',
+      'xmlns:dwr' => 'http://rs.tdwg.org/dwc/xsd/simpledarwincore/',
+      'xsi:schemaLocation' => 'http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd'
+    }
+  end
+
+  def build_title_section(xml, raw_iptc)
+    xml['mods'].titleInfo('usage' => 'primary') do
+      xml['mods'].title raw_iptc['Headline']
+    end
+  end
+
+  def build_abstract_section(xml, raw_iptc)
+    xml['mods'].abstract raw_iptc['Description'] if raw_iptc['Description'].present?
+  end
+
+  def build_creator_section(xml, raw_iptc)
+    if raw_iptc['By-line'].present?
+      xml['mods'].name('type' => 'personal', 'usage' => 'primary') do
+        name_parts = process_byline(raw_iptc['By-line'])
+        xml['mods'].namePart(name_parts[:first], 'type' => 'given') if name_parts[:first]
+        xml['mods'].namePart(name_parts[:last], 'type' => 'family') if name_parts[:last]
+        xml['mods'].namePart
+
+        if raw_iptc['By-lineTitle'].present?
+          xml['mods'].role do
+            xml['mods'].roleTerm(raw_iptc['By-lineTitle'], 'type' => 'text')
+          end
+        end
+      end
+    end
+  end
+
+  def build_origin_info_section(xml, raw_iptc)
+    xml['mods'].originInfo do
+      build_place_info(xml, raw_iptc)
+      build_date_info(xml, raw_iptc)
+      xml['mods'].publisher(raw_iptc['Source'])
+    end
+  end
+
+  def build_place_info(xml, raw_iptc)
+    xml['mods'].place do
+      xml['mods'].placeTerm
+      if raw_iptc['City'].present? || raw_iptc['State'].present?
+        xml['mods'].placeTerm([raw_iptc['City'], raw_iptc['State']].compact.join(' '), 'type' => 'text')
+      end
+    end
+  end
+
+  def build_date_info(xml, raw_iptc)
+    return unless raw_iptc['DateTimeOriginal'].present?
+
+    xml['mods'].dateCreated(raw_iptc['DateTimeOriginal'], 'keyDate' => 'yes', 'encoding' => 'w3cdtf')
+    xml['mods'].copyrightDate(raw_iptc['DateTimeOriginal'], 'encoding' => 'w3cdtf')
+  end
+
+  def build_subject_section(xml, raw_iptc)
+    return unless raw_iptc['Keywords']
+
+    Array(raw_iptc['Keywords']).each do |keyword|
+      next if keyword.blank?
+      xml['mods'].subject do
+        xml['mods'].topic keyword.to_s
+      end
+    end
+  end
+
+  def build_resource_type_section(xml)
+    xml['mods'].typeOfResource 'still image'
+  end
+
+  def build_physical_description_section(xml)
+    xml['mods'].physicalDescription do
+      xml['mods'].form('electronic', 'authority' => 'marcform')
+      xml['mods'].digitalOrigin 'born digital'
+      xml['mods'].extent '1 photograph'
+    end
+  end
+
+  def build_identifiers_section(xml)
+    xml['mods'].identifier('http://testhandle', 'type' => 'hdl', 'displayLabel' => 'Permanent URL')
+  end
+
+  def build_genre_section(xml)
+    xml['mods'].genre('photographs', 'authority' => 'aat')
+  end
+
+  def build_access_condition_section(xml)
+    xml['mods'].accessCondition.type 'use and reproduction'
+  end
+
+  def build_classification_section(xml, raw_iptc)
+    classification = ''
+
+    if raw_iptc['Category'].present?
+      classification = process_category(raw_iptc['Category'])
+    end
+
+    if raw_iptc['SupplementalCategories'].present?
+      supplemental = process_supplemental_categories(raw_iptc['SupplementalCategories'])
+      classification = if classification.present?
+                         "#{classification}#{supplemental}"
+                       else
+                         supplemental
+                       end
+    end
+
+    xml['mods'].classification classification if classification.present?
   end
 
   def process_category(val)
@@ -185,9 +192,13 @@ class ProcessIptcJob < ApplicationJob
 
   def process_supplemental_categories(val)
     if val.kind_of?(Array)
-      val.map { |i| " -- #{i.downcase}" }.join.gsub("_", " ")
+      val.map do |i|
+        if i.kind_of?(String)
+          " -- " + i.downcase
+        end
+      end.compact.join.gsub("_", " ")
     else
-      " -- #{val.downcase}"
+      " -- #{val}"
     end
   end
 

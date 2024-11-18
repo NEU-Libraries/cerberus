@@ -33,6 +33,7 @@ describe LoadsController do
     # Slightly worried about the below expect (May need a wait/loop on it)
     expect(ingest.ingest.status).to eq('completed')
     children = AtlasRb::Collection.children(collection['id'])
+    expect(children.first).to eq(ingest.ingest.pid)
     expect(children.count).to eq(1)
     expect(AtlasRb::Work.mods(children.first)).to include("Bouve Dean's Seminar Series")
   end
@@ -99,8 +100,4 @@ describe LoadsController do
       expect(flash[:alert]).to include("Failed to read IPTC data")
     end
   end
-
-
-
-
 end
