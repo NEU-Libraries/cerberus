@@ -4,14 +4,11 @@
   text-shadow: none;
   background-color: transparent;
   border: 0;
-  background-image: image-url('nu-lib-lockup/NU_Library_MonoNU_02_BB_NP.svg');
+  background-image: image-url('nu-lib-lockup/Library_Wordmark_K_2.png');
   background-repeat: no-repeat;
   background-position: left top;
   background-size: contain;
   height: 40px;
   display: block;
   max-width: 100%;
-  .no-svg &{
-    background-image: image-url('nu-lib-lockup/NU_Library_MonoNU_02_BB_NP.png');
-  }
 }
