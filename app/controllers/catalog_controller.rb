@@ -105,7 +105,7 @@ class CatalogController < ApplicationController
     # Due to errors or poor metadata in Fedora, we need to check for title
     self.solr_search_params_logic += [:well_formed_items]
 
-    (_, @recent_documents) = get_search_results(:q =>'', :sort=>"#{Solrizer.solr_name('system_create', :stored_sortable, type: :date)} desc", :rows=>999)
+    (_, @recent_documents) = get_search_results(:q =>'', :sort=>"#{Solrizer.solr_name('system_create', :stored_sortable, type: :date)} desc", :rows=>9)
   end
 
   def oai
