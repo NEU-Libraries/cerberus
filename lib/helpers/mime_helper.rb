@@ -12,7 +12,7 @@ module MimeHelper
     if mime_type == "application/zip" && !original_filename.blank?
       # Double check against extension
       extension = File.extname(original_filename).split(".").last
-      result = `grep "#{extension}" /etc/mime.types | awk '{print $1}'`.gsub(/\n/," ").strip.split(" ").first
+      result = `grep -v "^#" /etc/mime.types | grep "#{extension}" | awk '{print $1}'`.gsub(/\n/," ").strip.split(" ").first
       if result.include?("office")
         return result
       end
@@ -38,8 +38,8 @@ module MimeHelper
   end
 
   def extract_extension(mime_type, original_extension="")
-    result = `grep "#{mime_type}" /etc/mime.types | awk '{print $2}'`.gsub(/\n/," ").strip.split(" ").first
-    multiple = `grep "#{mime_type}" /etc/mime.types | awk '{$1=""; print $0}'`.strip.split(" ")
+    result = `grep -v "^#" /etc/mime.types | grep "#{mime_type}" | awk '{print $2}'`.gsub(/\n/," ").strip.split(" ").first
+    multiple = `grep -v "^#" /etc/mime.types | grep "#{mime_type}" | awk '{$1=""; print $0}'`.strip.split(" ")
 
     if !original_extension.blank?
       if mime_type == "application/octet-stream" || mime_type.start_with?("text") || (multiple.include? original_extension)
