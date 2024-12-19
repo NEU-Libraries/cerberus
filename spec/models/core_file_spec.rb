@@ -296,18 +296,6 @@ describe CoreFile do
       @three.codebook_ids.should =~ [@one.pid, @two.pid]
     end
 
-    it "can assign and find datasets" do
-      @one.dataset_for = [@three]
-      @two.dataset_for = [@three]
-
-      save_all
-
-      @one.dataset_for.should =~ [@three]
-      @one.rels_ext.content.should include ("<drs:isDatasetFor")
-
-      @three.dataset_ids.should =~ [@one.pid, @two.pid]
-    end
-
     it "can assign and find figures" do
       @one.figure_for = [@three]
       @two.figure_for = [@three]

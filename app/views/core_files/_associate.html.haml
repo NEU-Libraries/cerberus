@@ -10,7 +10,7 @@
       %br
       %fieldset
         = label_tag :association_type, "How is the selected file associated with this file?"
-        = select_tag :association_type, options_for_select({"Is Codebook For"=>"codebook_for", "Is Dataset For"=>"dataset_for", "Is Figure For"=>"figure_for", "Is Instructional Material For"=>"instructional_material_for", "Is Supplemental Material For"=>"supplemental_material_for", "Is Transcription of"=>"transcription_of"}, "supplemental_material_for"), :required => true
+        = select_tag :association_type, options_for_select({"Is Codebook For"=>"codebook_for", "Is Figure For"=>"figure_for", "Is Instructional Material For"=>"instructional_material_for", "Is Supplemental Material For"=>"supplemental_material_for", "Is Transcription of"=>"transcription_of"}, "supplemental_material_for"), :required => true
       %br
       = submit_tag "Associate", :name => nil, :class => "btn btn-info", :id => "submit_associate"
 

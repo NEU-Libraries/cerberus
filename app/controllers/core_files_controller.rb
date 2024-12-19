@@ -1244,7 +1244,7 @@ class CoreFilesController < ApplicationController
         solr_parameters[:fq] ||= []
         query = []
         str = ActiveFedora::SolrService.escape_uri_for_query "info:fedora/#{@core_file.pid}"
-        query << "is_supplemental_material_for_ssim:\"#{str}\" || is_instructional_material_for_ssim:\"#{str}\" || is_codebook_for_ssim:\"#{str}\" || is_dataset_for_ssim:\"#{str}\" || is_figure_for_ssim:\"#{str}\" || is_transcription_of_ssim:\"#{str}\""
+        query << "is_supplemental_material_for_ssim:\"#{str}\" || is_instructional_material_for_ssim:\"#{str}\" || is_codebook_for_ssim:\"#{str}\" || is_figure_for_ssim:\"#{str}\" || is_transcription_of_ssim:\"#{str}\""
         solr_parameters[:sort] = "title_ssi asc"
         solr_parameters[:fq] << query
       end

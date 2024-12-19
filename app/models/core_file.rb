@@ -43,9 +43,6 @@ class CoreFile < ActiveFedora::Base
   has_many :codebooks,
             :property => :is_codebook_for,
             :class_name => 'CoreFile'
-  has_many :datasets,
-            :property => :is_dataset_for,
-            :class_name => 'CoreFile'
   has_many :figures,
             :property => :is_figure_for,
             :class_name => 'CoreFile'
@@ -64,9 +61,6 @@ class CoreFile < ActiveFedora::Base
                             :class_name => 'Collection'
   has_and_belongs_to_many :codebook_for,
                             :property => :is_codebook_for,
-                            :class_name => 'CoreFile'
-  has_and_belongs_to_many :dataset_for,
-                            :property => :is_dataset_for,
                             :class_name => 'CoreFile'
   has_and_belongs_to_many :figure_for,
                             :property => :is_figure_for,
@@ -486,7 +480,6 @@ class CoreFile < ActiveFedora::Base
     hash[:instructional_material_for] = self.instructional_material_for unless self.instructional_material_for.blank?
     hash[:transcription_of] = self.transcription_of unless self.transcription_of.blank?
     hash[:codebook_for] = self.codebook_for unless self.codebook_for.blank?
-    hash[:dataset_for] = self.dataset_for unless self.dataset_for.blank?
     hash[:figure_for] = self.figure_for unless self.figure_for.blank?
     return hash
   end
@@ -498,7 +491,6 @@ class CoreFile < ActiveFedora::Base
     hash[:instructional_materials] = self.instructional_materials unless self.instructional_materials.blank?
     hash[:transcriptions] = self.transcriptions unless self.transcriptions.blank?
     hash[:codebooks] = self.codebooks unless self.codebooks.blank?
-    hash[:datasets] = self.datasets unless self.datasets.blank?
     hash[:figures] = self.figures unless self.figures.blank?
     return hash
   end

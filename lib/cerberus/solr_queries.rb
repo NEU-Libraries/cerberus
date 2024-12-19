@@ -340,10 +340,6 @@ module Cerberus
       return associated_files_by_type("is_codebook_for_ssim")
     end
 
-    def datasets
-      return associated_files_by_type("is_dataset_for_ssim")
-    end
-
     def figures
       return associated_files_by_type("is_figure_for_ssim")
     end

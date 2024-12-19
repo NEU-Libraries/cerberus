@@ -345,10 +345,6 @@ module Cerberus
       is_material_for_helper("is_codebook_for_ssim")
     end
 
-    def dataset_for
-      is_material_for_helper("is_dataset_for_ssim")
-    end
-
     def figure_for
       is_material_for_helper("is_figure_for_ssim")
     end
@@ -376,7 +372,6 @@ module Cerberus
       hash[:instructional_material_for] = self.instructional_material_for unless self.instructional_material_for.blank?
       hash[:transcription_of] = self.transcription_of unless self.transcription_of.blank?
       hash[:codebook_for] = self.codebook_for unless self.codebook_for.blank?
-      hash[:dataset_for] = self.dataset_for unless self.dataset_for.blank?
       hash[:figure_for] = self.figure_for unless self.figure_for.blank?
       return hash
     end

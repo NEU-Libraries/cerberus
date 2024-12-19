@@ -55,7 +55,6 @@
     :has_affiliation: hasAffiliation
     :is_also_member_of: isAlsoMemberOf
     :is_codebook_for: isCodebookFor
-    :is_dataset_for: isDatasetFor
     :is_figure_for: isFigureFor
     :is_instructional_material_for: isInstructionalMaterialFor
     :is_supplemental_material_for: isSupplementalMaterialFor
