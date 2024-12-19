@@ -76,6 +76,10 @@ Rack::Attack.blocklist("Amazon") do |req|
   !req.remote_ip.blank? && `timeout -s 9 -k 1 6 host #{req.remote_ip}`.include?("amazon")
 end
 
+Rack::Attack.blocklist("Hetzner") do |req|
+  !req.remote_ip.blank? && `timeout -s 9 -k 1 6 host #{req.remote_ip}`.include?("clients.your-server.de")
+end
+
 Rack::Attack.throttle("CN Scrapers", limit: 1, period: 10) do |request|
   result = false
   if !request.env["HTTP_ACCEPT_LANGUAGE"].blank?
