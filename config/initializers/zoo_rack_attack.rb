@@ -97,14 +97,12 @@ Rack::Attack.throttle("CN Scrapers", limit: 1, period: 10) do |request|
   result
 end
 
-Rack::Attack.blocklist("DDOS") do |request|
-  result = false
-  if request.env["HTTP_ACCEPT_LANGUAGE"].blank?
-    if `cut -d ' ' -f2 /proc/loadavg`.strip.to_f > 4
-      result = true
+Rack::Attack.throttle("DDOS", limit: 1, period: 60) do |request|
+  if `cut -d ' ' -f2 /proc/loadavg`.strip.to_f > 3.75
+    if request.env["HTTP_ACCEPT_LANGUAGE"].blank?
+      request.env["HTTP_ACCEPT_LANGUAGE"]
     end
   end
-  result
 end
 
 # Block attacks from IPs in cache
