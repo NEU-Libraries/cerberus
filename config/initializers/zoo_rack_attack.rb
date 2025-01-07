@@ -97,6 +97,15 @@ Rack::Attack.throttle("CN Scrapers", limit: 1, period: 10) do |request|
   result
 end
 
+Rack::Attack.blocklist("DDOS") do |request|
+  result = false
+  if request.env["HTTP_ACCEPT_LANGUAGE"].blank?
+    if `cut -d ' ' -f2 /proc/loadavg`.strip.to_f > 4
+      result = true
+    end
+  result
+end
+
 # Block attacks from IPs in cache
 # To add an IP: Rails.cache.write("block 1.2.3.4", true, expires_in: 2.days)
 # To remove an IP: Rails.cache.delete("block 1.2.3.4")
