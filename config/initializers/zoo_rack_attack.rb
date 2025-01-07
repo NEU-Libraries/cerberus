@@ -91,9 +91,9 @@ Rack::Attack.throttle("CN Scrapers", limit: 1, period: 10) do |request|
     langs.each do |l|
       if l[0].downcase == "zh-cn"
         result = true
-        end
       end
     end
+  end
   result
 end
 
@@ -103,6 +103,7 @@ Rack::Attack.blocklist("DDOS") do |request|
     if `cut -d ' ' -f2 /proc/loadavg`.strip.to_f > 4
       result = true
     end
+  end
   result
 end
 
