@@ -106,13 +106,19 @@ Rack::Attack.throttle("DDOS", limit: 1, period: 60) do |request|
 end
 
 Rack::Attack.throttle("facet scrape", limit: 3, period: 10) do |request|
-  if request.path.include?('?f')
+  if URI.decode(request.path).include?('?f')
     true
   end
 end
 
 Rack::Attack.throttle("creators scrape", limit: 1, period: 60) do |request|
-  if request.path.include?('creators')
+  if URI.decode(request.path).include?('creators')
+    true
+  end
+end
+
+Rack::Attack.throttle("rss scrape", limit: 1, period: 60) do |request|
+  if URI.decode(request.path).include?('rss')
     true
   end
 end
