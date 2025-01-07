@@ -106,19 +106,19 @@ Rack::Attack.throttle("DDOS", limit: 1, period: 60) do |request|
 end
 
 Rack::Attack.throttle("facet scrape", limit: 3, period: 10) do |request|
-  if URI.decode(request.path).include?('?f')
+  if URI.decode(request.fullpath).include?('?f')
     true
   end
 end
 
 Rack::Attack.throttle("creators scrape", limit: 1, period: 60) do |request|
-  if URI.decode(request.path).include?('creators')
+  if URI.decode(request.fullpath).include?('creators')
     true
   end
 end
 
 Rack::Attack.throttle("rss scrape", limit: 1, period: 60) do |request|
-  if URI.decode(request.path).include?('rss')
+  if URI.decode(request.fullpath).include?('rss')
     true
   end
 end
@@ -149,12 +149,12 @@ Rack::Attack.throttle('load shedding', limit: 1, period: 10) do |req|
       else
         # if url isnt frontpage, login related, assets, thumbs, API, throttle static response, or wowza...
         if (req.path != "/" &&
-            !(req.path.include? "/users/") &&
-            !(req.path.include? "/assets/") &&
-            !(req.path.include? "thumbnail_") &&
-            !(req.path.include? "/wowza/") &&
-            !(req.path.include? "/429") &&
-            !(req.path.include? "/api/"))
+            !(req.fullpath.include? "/users/") &&
+            !(req.fullpath.include? "/assets/") &&
+            !(req.fullpath.include? "thumbnail_") &&
+            !(req.fullpath.include? "/wowza/") &&
+            !(req.fullpath.include? "/429") &&
+            !(req.fullpath.include? "/api/"))
 
           host_result = `timeout -s 9 -k 1 6 host #{req.remote_ip}`.strip
 
