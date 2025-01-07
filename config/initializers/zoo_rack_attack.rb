@@ -99,16 +99,21 @@ end
 
 Rack::Attack.throttle("DDOS", limit: 1, period: 60) do |request|
   if `cut -d ' ' -f2 /proc/loadavg`.strip.to_f > 3.75
-    if request.env["HTTP_ACCEPT_LANGUAGE"].blank?
-      request.env["HTTP_ACCEPT_LANGUAGE"]
+    if !request.env["HTTP_ACCEPT_LANGUAGE"].blank? && (request.env["HTTP_ACCEPT_LANGUAGE"].length < 2)
+      true
     end
   end
 end
 
 Rack::Attack.throttle("facet scrape", limit: 3, period: 10) do |request|
   if request.path.include?('?f')
-    fingerprint = request.headers["HTTP_ACCEPT"] + request.headers["HTTP_ACCEPT_ENCODING"] + request.headers["HTTP_ACCEPT_LANGUAGE"]
-    Digest::SHA256.hexdigest(fingerprint)
+    true
+  end
+end
+
+Rack::Attack.throttle("creators scrape", limit: 1, period: 60) do |request|
+  if request.path.include?('creators')
+    true
   end
 end
 
