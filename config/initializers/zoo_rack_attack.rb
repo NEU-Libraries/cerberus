@@ -105,6 +105,13 @@ Rack::Attack.throttle("DDOS", limit: 1, period: 60) do |request|
   end
 end
 
+Rack::Attack.throttle("facet scrape", limit: 3, period: 10) do |request|
+  if request.path.include?('?f')
+    fingerprint = request.headers["HTTP_ACCEPT"] + request.headers["HTTP_ACCEPT_ENCODING"] + request.headers["HTTP_ACCEPT_LANGUAGE"]
+    Digest::SHA256.hexdigest(fingerprint)
+  end
+end
+
 # Block attacks from IPs in cache
 # To add an IP: Rails.cache.write("block 1.2.3.4", true, expires_in: 2.days)
 # To remove an IP: Rails.cache.delete("block 1.2.3.4")
