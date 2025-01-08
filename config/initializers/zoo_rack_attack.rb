@@ -18,7 +18,7 @@ class Rack::Attack::Request < ::Rack::Request
   end
 
   def fingerprint
-    result = "#{env["HTTP_ACCEPT"]} | #{env["HTTP_ACCEPT_ENCODING"]} | #{env["HTTP_ACCEPT_LANGUAGE"]} | #{request.env["HTTP_COOKIE"]}"
+    result = "#{env["HTTP_ACCEPT"]} | #{env["HTTP_ACCEPT_ENCODING"]} | #{env["HTTP_USER_AGENT"]} | #{env["HTTP_ACCEPT_LANGUAGE"]} | #{request.env["HTTP_COOKIE"]}"
     Base64.strict_encode64(result)
   end
 end
