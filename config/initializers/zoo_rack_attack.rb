@@ -16,6 +16,11 @@ class Rack::Attack::Request < ::Rack::Request
   def remote_ip
     @remote_ip ||= (env['action_dispatch.remote_ip'] || env['HTTP_X_FORWARDED_FOR'] || ip).to_s
   end
+
+  def fingerprint
+    result = "#{env["HTTP_ACCEPT"]} | #{env["HTTP_ACCEPT_ENCODING"]} | #{env["HTTP_ACCEPT_LANGUAGE"]}"
+    Base64.strict_encode64(result)
+  end
 end
 
 Rack::Attack.cache.store = ActiveSupport::Cache::RedisStore.new(:password => ENV["REDIS_PASSWD"], :host => 'nb9478.neu.edu', :port => 6379, :timeout => 10)
@@ -113,6 +118,8 @@ end
 
 Rack::Attack.throttle("creators scrape", limit: 1, period: 60) do |request|
   if URI.decode(request.fullpath).include?('creators')
+    # log to file
+    File.write("#{Rails.root}/log/fingerprint.log", "#{request.remote_ip} - #{request.fingerprint} - #{Time.now}" + "\n", mode: 'a')
     true
   end
 end
