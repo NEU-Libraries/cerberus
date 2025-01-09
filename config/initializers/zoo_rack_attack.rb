@@ -134,8 +134,8 @@ Rack::Attack.throttle('load shedding', limit: 1, period: 10) do |req|
         # everyone out of the boat, no exceptions
         # log to file
         File.write("#{Rails.root}/log/heavy_load_shedding.log", "#{req.remote_ip} - #{req.fingerprint} - #{req.path} - #{Time.now}" + "\n", mode: 'a')
-        # ip address first octect discriminator
-        req.remote_ip.split(".").first
+        # switching to fingerprint for better effectiveness on deep IP pools at the higher cpu usage
+        req.fingerprint
       else
         # if url isnt frontpage, login related, assets, thumbs, API, throttle static response, or wowza...
         if (req.path != "/" &&
