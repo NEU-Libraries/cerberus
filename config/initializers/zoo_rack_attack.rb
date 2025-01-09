@@ -18,7 +18,7 @@ class Rack::Attack::Request < ::Rack::Request
   end
 
   def fingerprint
-    result = "#{env["HTTP_ACCEPT"]} | #{env["HTTP_ACCEPT_ENCODING"]} | #{env["HTTP_USER_AGENT"]} | #{env["HTTP_ACCEPT_LANGUAGE"]} | #{env["HTTP_COOKIE"]}"
+    result = "#{env["HTTP_ACCEPT"]} | #{env["HTTP_ACCEPT_ENCODING"]} | #{env["HTTP_ACCEPT_LANGUAGE"]} | #{env["HTTP_COOKIE"]}"
     Base64.strict_encode64(result)
   end
 end
@@ -47,6 +47,10 @@ end
 
 Rack::Attack.blocklist("Huawei datacenter") do |req|
   !req.remote_ip.blank? && `timeout -s 9 -k 1 6 host #{req.remote_ip}`.include?("compute.hwclouds")
+end
+
+Rack::Attack.blocklist("Agent Liers") do |request|
+  request.env["HTTP_ACCEPT"].blank? && request.env["HTTP_ACCEPT_LANGUAGE"].blank? && request.env["HTTP_COOKIE"].blank? && !request.user_agent.downcase.include?("bot".downcase)
 end
 
 Rack::Attack.blocklist('Siteimprove') do |req|
@@ -102,39 +106,18 @@ Rack::Attack.throttle("CN Scrapers", limit: 1, period: 10) do |request|
   result
 end
 
-Rack::Attack.throttle("DDOS", limit: 1, period: 60) do |request|
-  if `cut -d ' ' -f2 /proc/loadavg`.strip.to_f > 3.75
-    if !request.env["HTTP_ACCEPT_LANGUAGE"].blank? && (request.env["HTTP_ACCEPT_LANGUAGE"].length < 2)
-      true
-    end
-  end
-end
-
-Rack::Attack.throttle("facet scrape", limit: 3, period: 10) do |request|
-  if URI.decode(request.fullpath).include?('?f')
-    true
-  end
-end
-
-Rack::Attack.throttle("creators scrape", limit: 1, period: 60) do |request|
-  if URI.decode(request.fullpath).include?('creators')
-    # log to file
-    File.write("#{Rails.root}/log/fingerprint.log", "#{request.remote_ip} - #{request.fingerprint} - #{Time.now}" + "\n", mode: 'a')
-    true
-  end
-end
-
-Rack::Attack.throttle("rss scrape", limit: 1, period: 60) do |request|
-  if URI.decode(request.fullpath).include?('rss')
-    true
-  end
-end
-
 # Block attacks from IPs in cache
 # To add an IP: Rails.cache.write("block 1.2.3.4", true, expires_in: 2.days)
 # To remove an IP: Rails.cache.delete("block 1.2.3.4")
 Rack::Attack.blocklist("block IP") do |req|
   Rails.cache.read("block #{req.remote_ip}")
+end
+
+# Block by fingerprint in cache
+# To add an IP: Rails.cache.write("block ZZwgZ3ppcCB8ICB8IA==", true, expires_in: 2.days)
+# To remove an IP: Rails.cache.delete("block fingerprint ZZwgZ3ppcCB8ICB8IA==")
+Rack::Attack.blocklist("block fingerprint") do |req|
+  Rails.cache.read("block fingerprint #{req.fingerprint}")
 end
 
 # Bring back region throttle
@@ -150,7 +133,7 @@ Rack::Attack.throttle('load shedding', limit: 1, period: 10) do |req|
       if `cut -d ' ' -f2 /proc/loadavg`.strip.to_f > 3.75
         # everyone out of the boat, no exceptions
         # log to file
-        File.write("#{Rails.root}/log/heavy_load_shedding.log", "#{req.remote_ip} - #{req.path} - #{Time.now}" + "\n", mode: 'a')
+        File.write("#{Rails.root}/log/heavy_load_shedding.log", "#{req.remote_ip} - #{req.fingerprint} - #{req.path} - #{Time.now}" + "\n", mode: 'a')
         # ip address first octect discriminator
         req.remote_ip.split(".").first
       else
@@ -167,7 +150,7 @@ Rack::Attack.throttle('load shedding', limit: 1, period: 10) do |req|
 
           if !(["lightspeed", "res.spectrum", "rcncustomer", "comcast", "fios.verizon"].any? { |x| host_result.include? x })
             # log to file
-            File.write("#{Rails.root}/log/load_shedding.log", "#{req.remote_ip} - #{host_result} - #{req.path} - #{Time.now}" + "\n", mode: 'a')
+            File.write("#{Rails.root}/log/load_shedding.log", "#{req.remote_ip} - #{req.fingerprint} - #{host_result} - #{req.path} - #{Time.now}" + "\n", mode: 'a')
 
             # ip address first octect discriminator
             req.remote_ip.split(".").first
