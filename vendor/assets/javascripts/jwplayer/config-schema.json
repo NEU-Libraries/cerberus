@@ -1,0 +1,3679 @@
+{
+  "$id": "api/input/setup/config_schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "JW Player setup config options",
+  "description": "Options supported by the jwplayer().setup(options) method.",
+  "type": "object",
+  "definitions": {
+    "advertising": {
+      "definitions": {
+        "any": {
+          "ad": {
+            "type": "object",
+            "dependencies": {
+              "tag": {
+                "not": {
+                  "required": [
+                    "pod"
+                  ]
+                }
+              },
+              "pod": {
+                "not": {
+                  "required": [
+                    "tag"
+                  ]
+                }
+              }
+            },
+            "additionalProperties": false,
+            "properties": {
+              "custParams": {
+                "type": "object"
+              },
+              "offset": {
+                "$ref": "#/definitions/advertising/definitions/any/offset"
+              },
+              "skipoffset": {
+                "$ref": "#/definitions/advertising/definitions/any/skipoffset"
+              },
+              "tag": {
+                "$ref": "#/definitions/advertising/definitions/any/tag"
+              },
+              "pod": {
+                "$ref": "#/definitions/advertising/definitions/vast/pod"
+              },
+              "type": {
+                "type": "string",
+                "$comment": "In freewheel 'overlay' is used to return a different type of ad. A different property should have been used for this.",
+                "enum": [
+                  "linear",
+                  "nonlinear"
+                ]
+              },
+              "vpaidmode": {
+                "$ref": "#/definitions/advertising/definitions/googima/vpaidmode"
+              }
+            }
+          },
+          "adRetry": {
+            "type": "object",
+            "internal": true,
+            "description": "adRetry should only be used with Strategy Rules/Placement Embeds.",
+            "default": null,
+            "properties": {
+              "interval": {
+                "type": "number",
+                "description": "Time in ms to wait before retrying ad request."
+              },
+              "cap": {
+                "type": "number",
+                "description": "Max amount of retries allowed per ad break."
+              }
+            }
+          },
+          "adscheduleid": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9]{8}$"
+          },
+          "autoplayadsmuted": {
+            "type": "boolean",
+            "default": false
+          },
+          "bids": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "client": {
+                "$ref": "#/definitions/client"
+              },
+              "settings": {
+                "type": "object",
+                "properties": {
+                  "buckets": {
+                    "type": "array",
+                    "minItems": 1,
+                    "uniqueItems": true,
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "min": {
+                          "type": "number"
+                        },
+                        "max": {
+                          "type": "number"
+                        },
+                        "increment": {
+                          "type": "number"
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  },
+                  "mediationLayerAdServer": {
+                    "type": "string",
+                    "enum": [
+                      "jwp",
+                      "jwpdfp",
+                      "dfp",
+                      "jwpspotx"
+                    ]
+                  },
+                  "floorPriceCents": {
+                    "type": "integer"
+                  },
+                  "floorPriceCurrency": {
+                    "type": "string"
+                  },
+                  "bidTimeout": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "bidders": {
+                "type": "array",
+                "minItems": 1,
+                "uniqueItems": true,
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "pattern": "^(EMX|emx|IndexExchange|MediaGrid|PubMatic|PubmatiC|SpotX|Telaria|teLaRia|SynacorMedia|DistrictM)$"
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "pubid": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "OpenRTB"
+                      ]
+                    },
+                    "netBidPct": {
+                      "type": "number",
+                      "description": "[ONLY RELEVANT FOR MEDIAGRID] Reflect the pct of the bid the publisher is receiving vs. JW. Used to adjust bid price to reflect the net CPM the publisher receives"
+                    },
+                    "optionalParams": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "placement": {
+                          "type": "integer",
+                          "enum": [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                          ]
+                        },
+                        "hide_skin": {
+                          "type": "boolean",
+                          "default": true
+                        },
+                        "no_vpaid_ads": {
+                          "type": "boolean",
+                          "default": false
+                        }
+                      }
+                    }
+                  },
+                  "oneOf": [
+                    {
+                      "properties": {
+                        "name": {
+                          "enum": [
+                            "IndexExchange",
+                            "SpotX"
+                          ]
+                        },
+                        "pubid": {
+                          "not": {}
+                        },
+                        "type": {
+                          "not": {}
+                        }
+                      }
+                    },
+                    {
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "pattern": "^(EMX|emx|MediaGrid|PubMatic|PubmatiC|Telaria|teLaRia)$"
+                        }
+                      },
+                      "required": [
+                        "pubid",
+                        "type"
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "pattern": "^(SynacorMedia|DistrictM)$"
+                        }
+                      },
+                      "required": [
+                        "pubid",
+                        "id"
+                      ]
+                    }
+                  ]
+                }
+              },
+              "bidOnBreaks": {
+                "type": "number"
+              }
+            }
+          },
+          "clearAdsOnComplete": {
+            "type": "boolean",
+            "default": false
+          },
+          "companiondiv": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "height": {
+                "type": [
+                  "number",
+                  "string"
+                ],
+                "pattern": "^[0-9]+%?$",
+                "minimum": 0
+              },
+              "width": {
+                "type": [
+                  "number",
+                  "string"
+                ],
+                "pattern": "^[0-9]+%?$",
+                "minimum": 0
+              }
+            }
+          },
+          "debug": {
+            "type": "boolean"
+          },
+          "dismissible": {
+            "type": "boolean",
+            "default": false
+          },
+          "enablePPS": {
+            "type": "boolean",
+            "description": "Enables native PPS logging",
+            "default": false
+          },
+          "endstate": {
+            "type": "string",
+            "default": "suspended",
+            "enum": [
+              "close",
+              "suspended"
+            ]
+          },
+          "extensions": {
+            "type": "object",
+            "description": "Pass callback functions to modify ad object using ad extensions tags from xml",
+            "default": {}
+          },
+          "ignorePlaylistSchedules": {
+            "type": "boolean",
+            "description": "If true the ad plugin will ignore any playlist-item defined adschedules",
+            "default": false
+          },
+          "loadVideoTimeout": {
+            "type": "integer",
+            "default": 15000,
+            "minimum": -1
+          },
+          "offset": {
+            "oneOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "pre",
+                  "post"
+                ]
+              },
+              {
+                "type": "string",
+                "pattern": "^[0-9]+\\%$"
+              },
+              {
+                "type": "string",
+                "pattern": "^[0-9]+$"
+              },
+              {
+                "type": "number",
+                "minimum": 0
+              }
+            ],
+            "default": "pre"
+          },
+          "omidSupport": {
+            "type": "string",
+            "enum": [
+              "auto",
+              "enabled",
+              "disabled"
+            ]
+          },
+          "outstream": {
+            "type": "boolean",
+            "default": false
+          },
+          "placement": {
+            "type": "string"
+          },
+          "preloadAds": {
+            "type": "boolean",
+            "default": false
+          },
+          "requestTimeout": {
+            "type": "number"
+          },
+          "rules": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "frequency": {
+                "type": "integer"
+              },
+              "startOn": {
+                "type": "integer"
+              }
+            }
+          },
+          "schedule": {
+            "oneOf": [
+              {
+                "type": "string",
+                "format": "uri-reference",
+                "minLength": 1
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "oneOf": [
+                    {
+                      "$ref": "#/definitions/advertising/definitions/any/ad"
+                    },
+                    {
+                      "type": "object",
+                      "required": [
+                        "ad"
+                      ],
+                      "not": {
+                        "required": [
+                          "tag"
+                        ]
+                      },
+                      "additionalProperties": false,
+                      "properties": {
+                        "ad": {
+                          "$ref": "#/definitions/advertising/definitions/any/ad"
+                        },
+                        "custParams": {
+                          "$ref": "#/definitions/advertising/definitions/any/ad/properties/custParams"
+                        },
+                        "offset": {
+                          "$ref": "#/definitions/advertising/definitions/any/offset"
+                        },
+                        "skipoffset": {
+                          "$ref": "#/definitions/advertising/definitions/any/skipoffset"
+                        },
+                        "tag": {
+                          "$ref": "#/definitions/advertising/definitions/any/tag"
+                        },
+                        "type": {
+                          "$ref": "#/definitions/advertising/definitions/any/ad/properties/type"
+                        },
+                        "vpaidmode": {
+                          "$ref": "#/definitions/advertising/definitions/googima/vpaidmode"
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "$comment": "When `advertising.schedule` is an object, each property must be an ad object. `advertising` properties should not be used as keys for ads.",
+                "not": {
+                  "required": [
+                    "skipoffset",
+                    "offset",
+                    "tag",
+                    "type",
+                    "vpaidmode"
+                  ]
+                },
+                "patternProperties": {
+                  "^[a-zA-Z_\\$][a-zA-Z0-9_\\-\\$]+$": {
+                    "oneOf": [
+                      {
+                        "$ref": "#/definitions/advertising/definitions/any/ad"
+                      },
+                      {
+                        "type": "object",
+                        "required": [
+                          "ad"
+                        ],
+                        "not": {
+                          "required": [
+                            "tag"
+                          ]
+                        },
+                        "additionalProperties": false,
+                        "properties": {
+                          "ad": {
+                            "$ref": "#/definitions/advertising/definitions/any/ad"
+                          },
+                          "custParams": {
+                            "$ref": "#/definitions/advertising/definitions/any/ad/properties/custParams"
+                          },
+                          "offset": {
+                            "$ref": "#/definitions/advertising/definitions/any/offset"
+                          },
+                          "skipoffset": {
+                            "$ref": "#/definitions/advertising/definitions/any/skipoffset"
+                          },
+                          "tag": {
+                            "$ref": "#/definitions/advertising/definitions/any/tag"
+                          },
+                          "type": {
+                            "$ref": "#/definitions/advertising/definitions/any/ad/properties/type"
+                          },
+                          "vpaidmode": {
+                            "$ref": "#/definitions/advertising/definitions/googima/vpaidmode"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          "showCountdown": {
+            "type": "boolean",
+            "default": false
+          },
+          "skipoffset": {
+            "type": [
+              "number",
+              "string"
+            ],
+            "pattern": "^(-?[0-9]+|^[0-9]+\\%)$",
+            "description": "... string values are converted to numbers (seconds) in view/adskipbutton.js",
+            "default": -1
+          },
+          "tag": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "minItems": 1,
+                "description": "Waterfall tag arrays are only supported in vast.",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ]
+          },
+          "vpaidcontrols": {
+            "type": "boolean",
+            "default": false
+          },
+          "withCredentials": {
+            "type": "boolean",
+            "default": true
+          },
+          "vastxml": {
+            "type": "string"
+          },
+          "targeting": {
+            "type": "object",
+            "additionalProperties": true,
+            "definitions": {
+              "metricTargeting": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "sendMax": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Includes only the targeting segment representing the highest metric value"
+                  },
+                  "sendIsIncluded": {
+                    "$ref": "#/definitions/advertising/definitions/any/targeting/definitions/sendIsIncluded"
+                  }
+                }
+              },
+              "qualitativeTargeting": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "sendIsIncluded": {
+                    "$ref": "#/definitions/advertising/definitions/any/targeting/definitions/sendIsIncluded"
+                  }
+                }
+              },
+              "sendIsIncluded": {
+                "type": "boolean",
+                "default": false,
+                "description": "Includes only a segment indicating that the targeting is included"
+              }
+            },
+            "properties": {
+              "hb_jwvb": {
+                "$ref": "#/definitions/advertising/definitions/any/targeting/definitions/metricTargeting"
+              },
+              "hb_jwcr": {
+                "$ref": "#/definitions/advertising/definitions/any/targeting/definitions/metricTargeting"
+              },
+              "hb_jwiab": {
+                "$ref": "#/definitions/advertising/definitions/any/targeting/definitions/qualitativeTargeting"
+              },
+              "hb_jwbs": {
+                "$ref": "#/definitions/advertising/definitions/any/targeting/definitions/qualitativeTargeting"
+              }
+            }
+          }
+        },
+        "dai": {
+          "adTagParameters": {
+            "type": "object"
+          },
+          "apiKey": {
+            "type": "string"
+          },
+          "assetKey": {
+            "type": "string"
+          },
+          "assetFormat": {
+            "type": "string"
+          },
+          "cmsID": {
+            "type": "string"
+          },
+          "daiSetting": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "adTagParameters": {
+                "$ref": "#/definitions/advertising/definitions/dai/adTagParameters"
+              },
+              "apiKey": {
+                "$ref": "#/definitions/advertising/definitions/dai/apiKey"
+              },
+              "assetKey": {
+                "$ref": "#/definitions/advertising/definitions/dai/assetKey"
+              },
+              "assetFormat": {
+                "$ref": "#/definitions/advertising/definitions/dai/assetFormat"
+              },
+              "cmsID": {
+                "$ref": "#/definitions/advertising/definitions/dai/cmsID"
+              },
+              "videoID": {
+                "$ref": "#/definitions/advertising/definitions/dai/videoID"
+              }
+            }
+          },
+          "videoID": {
+            "type": "string"
+          }
+        },
+        "freewheel": {
+          "customadunitname": {
+            "type": "string"
+          },
+          "freewheel": {
+            "type": "object",
+            "properties": {
+              "networkid": {
+                "type": "integer"
+              },
+              "serverid": {
+                "type": "string"
+              },
+              "profileid": {
+                "type": "string"
+              },
+              "sectionid": {
+                "type": "string"
+              }
+            }
+          },
+          "freewheelAd": {
+            "type": "object",
+            "required": [
+              "tag"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "offset": {
+                "$ref": "#/definitions/advertising/definitions/any/offset"
+              },
+              "skipoffset": {
+                "$ref": "#/definitions/advertising/definitions/any/skipoffset"
+              },
+              "tag": {
+                "$ref": "#/definitions/advertising/definitions/any/tag"
+              },
+              "type": {
+                "$ref": "#/definitions/advertising/definitions/freewheel/freewheelAdType"
+              }
+            }
+          },
+          "freewheelAdType": {
+            "type": "string",
+            "enum": [
+              "overlay"
+            ],
+            "$comment": "freewheel.ad.type does not match the spec for vast and googima."
+          },
+          "schedule": {
+            "oneOf": [
+              {
+                "type": "string",
+                "format": "uri-reference",
+                "minLength": 1
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "oneOf": [
+                    {
+                      "$ref": "#/definitions/advertising/definitions/freewheel/freewheelAd"
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "ad": {
+                          "$ref": "#/definitions/advertising/definitions/freewheel/freewheelAd"
+                        },
+                        "customadunitname": {
+                          "$ref": "#/definitions/advertising/definitions/freewheel/customadunitname"
+                        },
+                        "offset": {
+                          "$ref": "#/definitions/advertising/definitions/any/offset"
+                        },
+                        "skipoffset": {
+                          "$ref": "#/definitions/advertising/definitions/any/skipoffset"
+                        },
+                        "tag": {
+                          "$ref": "#/definitions/advertising/definitions/any/tag"
+                        },
+                        "type": {
+                          "$ref": "#/definitions/advertising/definitions/freewheel/freewheelAdType"
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "$comment": "When `advertising.schedule` is an object, each property must be an ad object. `advertising` properties should not be used as keys for ads.",
+                "not": {
+                  "required": [
+                    "skipoffset",
+                    "offset",
+                    "tag",
+                    "type"
+                  ]
+                },
+                "patternProperties": {
+                  "^[a-zA-Z_\\$][a-zA-Z0-9_\\-\\$]+$": {
+                    "oneOf": [
+                      {
+                        "$ref": "#/definitions/advertising/definitions/freewheel/freewheelAd"
+                      },
+                      {
+                        "type": "object",
+                        "required": [
+                          "ad"
+                        ],
+                        "not": {
+                          "required": [
+                            "tag"
+                          ]
+                        },
+                        "additionalProperties": false,
+                        "properties": {
+                          "ad": {
+                            "$ref": "#/definitions/advertising/definitions/freewheel/freewheelAd"
+                          },
+                          "customadunitname": {
+                            "$ref": "#/definitions/advertising/definitions/freewheel/customadunitname"
+                          },
+                          "offset": {
+                            "$ref": "#/definitions/advertising/definitions/any/offset"
+                          },
+                          "skipoffset": {
+                            "$ref": "#/definitions/advertising/definitions/any/skipoffset"
+                          },
+                          "tag": {
+                            "$ref": "#/definitions/advertising/definitions/any/tag"
+                          },
+                          "type": {
+                            "$ref": "#/definitions/advertising/definitions/freewheel/freewheelAdType"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "googima": {
+          "truncateMacros": {
+            "type": "boolean"
+          },
+          "enablePreloading": {
+            "type": "boolean"
+          },
+          "forceNonLinearFullSlot": {
+            "type": "boolean"
+          },
+          "locale": {
+            "type": "string",
+            "default": "",
+            "description": "The locale for the IMA SDK that specifies the language in which to display UI elements. Can be any two-letter ISO 639-1 code",
+            "enum": [
+              "ab",
+              "aa",
+              "af",
+              "ak",
+              "sq",
+              "am",
+              "ar",
+              "an",
+              "hy",
+              "as",
+              "av",
+              "ae",
+              "ay",
+              "az",
+              "bm",
+              "ba",
+              "eu",
+              "be",
+              "bn",
+              "bh",
+              "bi",
+              "bs",
+              "br",
+              "bg",
+              "my",
+              "ca",
+              "km",
+              "ch",
+              "ce",
+              "ny",
+              "zh",
+              "cu",
+              "cv",
+              "kw",
+              "co",
+              "cr",
+              "hr",
+              "cs",
+              "da",
+              "dv",
+              "nl",
+              "dz",
+              "en",
+              "eo",
+              "et",
+              "ee",
+              "fo",
+              "fj",
+              "fi",
+              "fr",
+              "ff",
+              "gd",
+              "gl",
+              "lg",
+              "ka",
+              "de",
+              "ki",
+              "el",
+              "kl",
+              "gn",
+              "gu",
+              "ht",
+              "ha",
+              "he",
+              "hz",
+              "hi",
+              "ho",
+              "hu",
+              "is",
+              "io",
+              "ig",
+              "id",
+              "ia",
+              "ie",
+              "iu",
+              "ik",
+              "ga",
+              "it",
+              "ja",
+              "jv",
+              "kn",
+              "kr",
+              "ks",
+              "kk",
+              "rw",
+              "kv",
+              "kg",
+              "ko",
+              "kj",
+              "ku",
+              "ky",
+              "lo",
+              "la",
+              "lv",
+              "lb",
+              "li",
+              "ln",
+              "lt",
+              "lu",
+              "mk",
+              "mg",
+              "ms",
+              "ml",
+              "mt",
+              "gv",
+              "mi",
+              "mr",
+              "mh",
+              "ro",
+              "mn",
+              "na",
+              "nv",
+              "nd",
+              "ng",
+              "ne",
+              "se",
+              "no",
+              "nb",
+              "nn",
+              "ii",
+              "oc",
+              "oj",
+              "or",
+              "om",
+              "os",
+              "pi",
+              "pa",
+              "ps",
+              "fa",
+              "pl",
+              "pt",
+              "qu",
+              "rm",
+              "rn",
+              "ru",
+              "sm",
+              "sg",
+              "sa",
+              "sc",
+              "sr",
+              "sn",
+              "sd",
+              "si",
+              "sk",
+              "sl",
+              "so",
+              "st",
+              "nr",
+              "es",
+              "su",
+              "sw",
+              "ss",
+              "sv",
+              "tl",
+              "ty",
+              "tg",
+              "ta",
+              "tt",
+              "te",
+              "th",
+              "bo",
+              "ti",
+              "to",
+              "ts",
+              "tn",
+              "tr",
+              "tk",
+              "tw",
+              "ug",
+              "uk",
+              "ur",
+              "uz",
+              "ve",
+              "vi",
+              "vo",
+              "wa",
+              "cy",
+              "fy",
+              "wo",
+              "xh",
+              "yi",
+              "yo",
+              "za",
+              "zu"
+            ]
+          },
+          "maxRedirects": {
+            "type": "integer",
+            "default": -1,
+            "minimum": -1
+          },
+          "omidAccessModeRules": {
+            "type": "object",
+            "properties": {
+              "full": {
+                "type": "array"
+              },
+              "limited": {
+                "type": "array"
+              },
+              "domain": {
+                "type": "array"
+              }
+            }
+          },
+          "ppid": {
+            "type": "string"
+          },
+          "premiumAds": {
+            "type": "boolean",
+            "default": false
+          },
+          "vastLoadTimeout": {
+            "type": "integer",
+            "default": 10000,
+            "minimum": 0
+          },
+          "vpaidmode": {
+            "type": "string",
+            "enum": [
+              "enabled",
+              "disabled",
+              "insecure",
+              "secure"
+            ]
+          }
+        },
+        "vast": {
+          "allowedOmidVendors": {
+            "type": "array",
+            "default": [],
+            "$comment": "Supported only in the vast plugin"
+          },
+          "conditionaladoptout": {
+            "type": "boolean",
+            "default": false,
+            "$comment": "Supported only in the vast plugin"
+          },
+          "creativeTimeout": {
+            "type": "integer",
+            "default": 15000,
+            "minimum": -1
+          },
+          "omidAccessMode": {
+            "type": "string",
+            "enum": [
+              "full",
+              "domain",
+              "limited"
+            ]
+          }
+        }
+      },
+      "type": "object",
+      "required": [
+        "client"
+      ],
+      "not": {
+        "required": [
+          "ad",
+          "adschedule",
+          "schedule",
+          "tag"
+        ]
+      },
+      "dependencies": {
+        "ad": {
+          "not": {
+            "required": [
+              "adschedule",
+              "schedule",
+              "tag"
+            ]
+          }
+        },
+        "adschedule": {
+          "not": {
+            "required": [
+              "ad",
+              "schedule",
+              "offset",
+              "tag",
+              "type"
+            ]
+          }
+        },
+        "schedule": {
+          "not": {
+            "required": [
+              "ad",
+              "adschedule",
+              "offset",
+              "tag",
+              "type"
+            ]
+          }
+        },
+        "tag": {
+          "not": {
+            "required": [
+              "ad",
+              "adschedule",
+              "schedule"
+            ]
+          }
+        }
+      },
+      "oneOf": [
+        {
+          "$id": "#ad/client/googima",
+          "additionalProperties": false,
+          "properties": {
+            "ad": {
+              "$ref": "#/definitions/advertising/definitions/any/ad"
+            },
+            "admessage": {
+              "$ref": "#/definitions/advertising/definitions/any/admessage"
+            },
+            "adschedule": {
+              "$ref": "#/definitions/advertising/definitions/any/schedule"
+            },
+            "adscheduleid": {
+              "$ref": "#/definitions/advertising/definitions/any/adscheduleid"
+            },
+            "autoplayadsmuted": {
+              "$ref": "#/definitions/advertising/definitions/any/autoplayadsmuted"
+            },
+            "bids": {
+              "$ref": "#/definitions/advertising/definitions/any/bids"
+            },
+            "clearAdsOnComplete": {
+              "$ref": "#/definitions/advertising/definitions/any/clearAdsOnComplete"
+            },
+            "client": {
+              "type": "string",
+              "pattern": "^(?:https?:)?\\/?(?:\\/?[^\\/]+\\/)*googima(\\.js)?$"
+            },
+            "companiondiv": {
+              "$ref": "#/definitions/advertising/definitions/any/companiondiv"
+            },
+            "cuetext": {
+              "$ref": "#/definitions/advertising/definitions/any/cuetext"
+            },
+            "debug": {
+              "$ref": "#/definitions/advertising/definitions/any/debug"
+            },
+            "dismissible": {
+              "$ref": "#/definitions/advertising/definitions/any/dismissible"
+            },
+            "enablePPS": {
+              "$ref": "#/definitions/advertising/definitions/any/enablePPS"
+            },
+            "endstate": {
+              "$ref": "#/definitions/advertising/definitions/any/endstate"
+            },
+            "truncateMacros": {
+              "$ref": "#/definitions/advertising/definitions/googima/truncateMacros"
+            },
+            "enablePreloading": {
+              "$ref": "#/definitions/advertising/definitions/googima/enablePreloading"
+            },
+            "forceNonLinearFullSlot": {
+              "$ref": "#/definitions/advertising/definitions/googima/forceNonLinearFullSlot"
+            },
+            "loadVideoTimeout": {
+              "$ref": "#/definitions/advertising/definitions/any/loadVideoTimeout"
+            },
+            "locale": {
+              "$ref": "#/definitions/advertising/definitions/googima/locale"
+            },
+            "maxRedirects": {
+              "$ref": "#/definitions/advertising/definitions/googima/maxRedirects"
+            },
+            "offset": {
+              "$ref": "#/definitions/advertising/definitions/any/offset"
+            },
+            "omidAccessModeRules": {
+              "$ref": "#/definitions/advertising/definitions/googima/omidAccessModeRules"
+            },
+            "omidSupport": {
+              "$ref": "#/definitions/advertising/definitions/any/omidSupport"
+            },
+            "outstream": {
+              "$ref": "#/definitions/advertising/definitions/any/outstream"
+            },
+            "placement": {
+              "$ref": "#/definitions/advertising/definitions/any/placement"
+            },
+            "podmessage": {
+              "$ref": "#/definitions/advertising/definitions/any/podmessage"
+            },
+            "ppid": {
+              "$ref": "#/definitions/advertising/definitions/googima/ppid"
+            },
+            "preloadAds": {
+              "$ref": "#/definitions/advertising/definitions/any/preloadAds"
+            },
+            "premiumAds": {
+              "$ref": "#/definitions/advertising/definitions/googima/premiumAds"
+            },
+            "requestTimeout": {
+              "$ref": "#/definitions/advertising/definitions/any/requestTimeout"
+            },
+            "rules": {
+              "$ref": "#/definitions/advertising/definitions/any/rules"
+            },
+            "schedule": {
+              "$ref": "#/definitions/advertising/definitions/any/schedule"
+            },
+            "showCountdown": {
+              "$ref": "#/definitions/advertising/definitions/any/showCountdown"
+            },
+            "skipoffset": {
+              "$comment": "skipoffset is not supported in googima",
+              "not": true
+            },
+            "tag": {
+              "$ref": "#/definitions/advertising/definitions/any/tag"
+            },
+            "type": {
+              "$ref": "#/definitions/advertising/definitions/any/ad/properties/type"
+            },
+            "vastLoadTimeout": {
+              "$ref": "#/definitions/advertising/definitions/googima/vastLoadTimeout"
+            },
+            "vastxml": {
+              "$ref": "#/definitions/advertising/definitions/any/vastxml"
+            },
+            "vpaidcontrols": {
+              "$ref": "#/definitions/advertising/definitions/any/vpaidcontrols"
+            },
+            "vpaidmode": {
+              "$ref": "#/definitions/advertising/definitions/googima/vpaidmode"
+            },
+            "withCredentials": {
+              "$ref": "#/definitions/advertising/definitions/any/withCredentials"
+            }
+          }
+        },
+        {
+          "$id": "#ad/client/vast",
+          "additionalProperties": false,
+          "properties": {
+            "ad": {
+              "$ref": "#/definitions/advertising/definitions/any/ad"
+            },
+            "admessage": {
+              "$ref": "#/definitions/advertising/definitions/any/admessage"
+            },
+            "adschedule": {
+              "$ref": "#/definitions/advertising/definitions/any/schedule"
+            },
+            "adscheduleid": {
+              "$ref": "#/definitions/advertising/definitions/any/adscheduleid"
+            },
+            "allowedOmidVendors": {
+              "$ref": "#/definitions/advertising/definitions/vast/allowedOmidVendors"
+            },
+            "autoplayadsmuted": {
+              "$ref": "#/definitions/advertising/definitions/any/autoplayadsmuted"
+            },
+            "bids": {
+              "$ref": "#/definitions/advertising/definitions/any/bids"
+            },
+            "clearAdsOnComplete": {
+              "$ref": "#/definitions/advertising/definitions/any/clearAdsOnComplete"
+            },
+            "client": {
+              "type": "string",
+              "pattern": "^(?:https?:)?\\/?(?:\\/?[^\\/]+\\/)*vast(\\.js)?$"
+            },
+            "companiondiv": {
+              "$ref": "#/definitions/advertising/definitions/any/companiondiv"
+            },
+            "conditionaladoptout": {
+              "$ref": "#/definitions/advertising/definitions/vast/conditionaladoptout"
+            },
+            "cuetext": {
+              "$ref": "#/definitions/advertising/definitions/any/cuetext"
+            },
+            "debug": {
+              "$ref": "#/definitions/advertising/definitions/any/debug"
+            },
+            "dismissible": {
+              "$ref": "#/definitions/advertising/definitions/any/dismissible"
+            },
+            "enablePPS": {
+              "$ref": "#/definitions/advertising/definitions/any/enablePPS"
+            },
+            "endstate": {
+              "$ref": "#/definitions/advertising/definitions/any/endstate"
+            },
+            "extensions": {
+              "$ref": "#/definitions/advertising/definitions/any/extensions"
+            },
+            "offset": {
+              "$ref": "#/definitions/advertising/definitions/any/offset"
+            },
+            "omidAccessMode": {
+              "$ref": "#/definitions/advertising/definitions/vast/omidAccessMode"
+            },
+            "omidSupport": {
+              "$ref": "#/definitions/advertising/definitions/any/omidSupport"
+            },
+            "outstream": {
+              "$ref": "#/definitions/advertising/definitions/any/outstream"
+            },
+            "placement": {
+              "$ref": "#/definitions/advertising/definitions/any/placement"
+            },
+            "podmessage": {
+              "$ref": "#/definitions/advertising/definitions/any/podmessage"
+            },
+            "preloadAds": {
+              "$ref": "#/definitions/advertising/definitions/any/preloadAds"
+            },
+            "requestTimeout": {
+              "$ref": "#/definitions/advertising/definitions/any/requestTimeout"
+            },
+            "creativeTimeout": {
+              "$ref": "#/definitions/advertising/definitions/vast/creativeTimeout"
+            },
+            "rules": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "deferAds": {
+                  "type": "object",
+                  "description": "Ad rule to not play ads when page is inactive (VAST/IMA)",
+                  "additionalProperties": false,
+                  "properties": {
+                    "resumeOn": {
+                      "type": "string",
+                      "enum": [
+                        "active"
+                      ]
+                    },
+                    "resumeAds": {
+                      "type": "string",
+                      "enum": [
+                        "last"
+                      ]
+                    }
+                  }
+                },
+                "frequency": {
+                  "type": "integer"
+                },
+                "startOn": {
+                  "type": "integer"
+                },
+                "startOnSeek": {
+                  "type": "string",
+                  "enum": [
+                    "none",
+                    "pre"
+                  ]
+                },
+                "timeBetweenAds": {
+                  "type": "integer"
+                }
+              }
+            },
+            "schedule": {
+              "$ref": "#/definitions/advertising/definitions/any/schedule"
+            },
+            "showCountdown": {
+              "$ref": "#/definitions/advertising/definitions/any/showCountdown"
+            },
+            "skipmessage": {
+              "$ref": "#/definitions/advertising/definitions/any/skipmessage"
+            },
+            "skipoffset": {
+              "$ref": "#/definitions/advertising/definitions/any/skipoffset"
+            },
+            "skiptext": {
+              "$ref": "#/definitions/advertising/definitions/any/skiptext"
+            },
+            "tag": {
+              "$ref": "#/definitions/advertising/definitions/any/tag"
+            },
+            "pod": {
+              "$ref": "#/definitions/advertising/definitions/vast/pod"
+            },
+            "trackFn": {
+              "$ref": "#/definitions/utils/javascript/function"
+            },
+            "type": {
+              "$ref": "#/definitions/advertising/definitions/any/ad/properties/type"
+            },
+            "vastxml": {
+              "$ref": "#/definitions/advertising/definitions/any/vastxml"
+            },
+            "vpaidcontrols": {
+              "$ref": "#/definitions/advertising/definitions/any/vpaidcontrols"
+            },
+            "vpaidmode": {
+              "$comment": "vpaidmode is not supported in vast",
+              "not": true
+            },
+            "withCredentials": {
+              "$ref": "#/definitions/advertising/definitions/any/withCredentials"
+            }
+          }
+        },
+        {
+          "$id": "#ad/client/freewheel",
+          "additionalProperties": false,
+          "properties": {
+            "ad": {
+              "$ref": "#/definitions/advertising/definitions/any/ad"
+            },
+            "admessage": {
+              "$ref": "#/definitions/advertising/definitions/any/admessage"
+            },
+            "adschedule": {
+              "$ref": "#/definitions/advertising/definitions/freewheel/schedule"
+            },
+            "adscheduleid": {
+              "$ref": "#/definitions/advertising/definitions/any/adscheduleid"
+            },
+            "autoplayadsmuted": {
+              "$ref": "#/definitions/advertising/definitions/any/autoplayadsmuted"
+            },
+            "clearAdsOnComplete": {
+              "$ref": "#/definitions/advertising/definitions/any/clearAdsOnComplete"
+            },
+            "client": {
+              "type": "string",
+              "pattern": "^(?:https?:)?\\/?(?:\\/?[^\\/]+\\/)*freewheel(\\.js)?$"
+            },
+            "companiondiv": {
+              "$ref": "#/definitions/advertising/definitions/any/companiondiv"
+            },
+            "cuetext": {
+              "$ref": "#/definitions/advertising/definitions/any/cuetext"
+            },
+            "debug": {
+              "$ref": "#/definitions/advertising/definitions/any/debug"
+            },
+            "dismissible": {
+              "$ref": "#/definitions/advertising/definitions/any/dismissible"
+            },
+            "endstate": {
+              "$ref": "#/definitions/advertising/definitions/any/endstate"
+            },
+            "freewheel": {
+              "$ref": "#/definitions/advertising/definitions/freewheel/freewheel"
+            },
+            "loadVideoTimeout": {
+              "$ref": "#/definitions/advertising/definitions/any/loadVideoTimeout"
+            },
+            "offset": {
+              "$ref": "#/definitions/advertising/definitions/any/offset"
+            },
+            "outstream": {
+              "$ref": "#/definitions/advertising/definitions/any/outstream"
+            },
+            "podmessage": {
+              "$ref": "#/definitions/advertising/definitions/any/podmessage"
+            },
+            "requestTimeout": {
+              "$ref": "#/definitions/advertising/definitions/any/requestTimeout"
+            },
+            "rules": {
+              "$ref": "#/definitions/advertising/definitions/any/rules"
+            },
+            "schedule": {
+              "$ref": "#/definitions/advertising/definitions/freewheel/schedule"
+            },
+            "showCountdown": {
+              "$ref": "#/definitions/advertising/definitions/any/showCountdown"
+            },
+            "skipmessage": {
+              "$ref": "#/definitions/advertising/definitions/any/skipmessage"
+            },
+            "skipoffset": {
+              "$ref": "#/definitions/advertising/definitions/any/skipoffset"
+            },
+            "skiptext": {
+              "$ref": "#/definitions/advertising/definitions/any/skiptext"
+            },
+            "tag": {
+              "$ref": "#/definitions/advertising/definitions/any/tag"
+            },
+            "type": {
+              "type": "string",
+              "enum": [
+                "overlay"
+              ],
+              "$comment": "freewheel.ad.type does not match the spec for vast and googima."
+            }
+          }
+        },
+        {
+          "$id": "#ad/client/dai",
+          "additionalProperties": false,
+          "properties": {
+            "adTagParameters": {
+              "$ref": "#/definitions/advertising/definitions/dai/adTagParameters"
+            },
+            "apiKey": {
+              "$ref": "#/definitions/advertising/definitions/dai/apiKey"
+            },
+            "assetKey": {
+              "$ref": "#/definitions/advertising/definitions/dai/assetKey"
+            },
+            "admessage": {
+              "$ref": "#/definitions/advertising/definitions/any/admessage"
+            },
+            "autoplayadsmuted": {
+              "$ref": "#/definitions/advertising/definitions/any/autoplayadsmuted"
+            },
+            "clearAdsOnComplete": {
+              "$ref": "#/definitions/advertising/definitions/any/clearAdsOnComplete"
+            },
+            "client": {
+              "type": "string",
+              "pattern": "^(?:https?:)?\\/?(?:\\/?[^\\/]+\\/)*dai(\\.js)?$"
+            },
+            "cmsID": {
+              "$ref": "#/definitions/advertising/definitions/dai/cmsID"
+            },
+            "cuetext": {
+              "$ref": "#/definitions/advertising/definitions/any/cuetext"
+            },
+            "debug": {
+              "$ref": "#/definitions/advertising/definitions/any/debug"
+            },
+            "podmessage": {
+              "$ref": "#/definitions/advertising/definitions/any/podmessage"
+            },
+            "requestTimeout": {
+              "$ref": "#/definitions/advertising/definitions/any/requestTimeout"
+            },
+            "showCountdown": {
+              "$ref": "#/definitions/advertising/definitions/any/showCountdown"
+            },
+            "videoID": {
+              "$ref": "#/definitions/advertising/definitions/dai/videoID"
+            },
+            "assetFormat": {
+              "$ref": "#/definitions/advertising/definitions/dai/assetFormat"
+            }
+          }
+        }
+      ]
+    },
+    "client": {
+      "type": "string"
+    },
+    "cmcd": {
+      "properties": {
+        "sessionId": {
+          "type": "string"
+        },
+        "contentId": {
+          "type": "string"
+        },
+        "useHeaders": {
+          "type": "boolean"
+        }
+      }
+    },
+    "feed": {
+      "type": "object",
+      "required": [
+        "playlist"
+      ],
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "feed_instance_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "feedid": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9]{8}$"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "FEED"
+          ]
+        },
+        "pin_slot_1": {
+          "type": "string"
+        },
+        "links": {
+          "type": "object",
+          "properties": {
+            "next": {
+              "type": "string"
+            },
+            "last": {
+              "type": "string"
+            },
+            "first": {
+              "type": "string"
+            }
+          }
+        },
+        "playlist": {
+          "$ref": "#/definitions/playlist"
+        },
+        "title": {
+          "type": "string"
+        }
+      }
+    },
+    "localization": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "abouttext": {
+          "type": "string"
+        },
+        "advertising": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "admessage": {
+              "type": "string",
+              "default": "This ad will end in xx"
+            },
+            "cuetext": {
+              "type": "string",
+              "default": "Advertisement"
+            },
+            "countdownMessage": {
+              "type": "string",
+              "default": "Ad in xx"
+            },
+            "displayHeading": {
+              "type": "string",
+              "default": "Advertisement"
+            },
+            "loadingAd": {
+              "type": "string",
+              "default": "Loading ad"
+            },
+            "podmessage": {
+              "type": "string",
+              "default": "Ad xx of yy"
+            },
+            "skipmessage": {
+              "type": "string",
+              "default": "Skip ad in xx"
+            },
+            "skiptext": {
+              "type": "string",
+              "default": "Skip"
+            }
+          }
+        },
+        "airplay": {
+          "type": "string",
+          "default": "AirPlay"
+        },
+        "audioTracks": {
+          "type": "string",
+          "default": "Audio Tracks"
+        },
+        "auto": {
+          "type": "string",
+          "default": "Auto"
+        },
+        "buffer": {
+          "type": "string",
+          "default": "Loading"
+        },
+        "cast": {
+          "type": "string",
+          "default": "Chromecast"
+        },
+        "cc": {
+          "type": "string",
+          "default": "Closed Captions"
+        },
+        "close": {
+          "type": "string",
+          "default": "Close"
+        },
+        "copied": {
+          "type": "string",
+          "default": "Copied"
+        },
+        "errors": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "badConnection": {
+              "type": "string",
+              "default": "This video cannot be played because of a problem with your internet connection."
+            },
+            "cantLoadPlayer": {
+              "type": "string",
+              "default": "Sorry, the video player failed to load."
+            },
+            "cantPlayInBrowser": {
+              "type": "string",
+              "default": "The video cannot be played in this browser."
+            },
+            "cantPlayVideo": {
+              "type": "string",
+              "default": "This video file cannot be played."
+            },
+            "errorCode": {
+              "type": "string",
+              "default": "Error Code"
+            },
+            "liveStreamDown": {
+              "type": "string",
+              "default": "The live stream is either down or has ended."
+            },
+            "protectedContent": {
+              "type": "string",
+              "default": "There was a problem providing access to protected content."
+            },
+            "technicalError": {
+              "type": "string",
+              "default": "This video cannot be played because of a technical error."
+            }
+          }
+        },
+        "exitFullscreen": {
+          "type": "string",
+          "default": "Exit Fullscreen"
+        },
+        "fullscreen": {
+          "type": "string",
+          "default": "Fullscreen"
+        },
+        "hd": {
+          "type": "string",
+          "default": "Quality"
+        },
+        "liveBroadcast": {
+          "type": "string",
+          "default": "Live"
+        },
+        "loadingAd": {
+          "type": "string",
+          "default": "Loading ad"
+        },
+        "logo": {
+          "type": "string",
+          "default": "Logo"
+        },
+        "more": {
+          "type": "string",
+          "default": "More"
+        },
+        "mute": {
+          "type": "string",
+          "default": "Mute"
+        },
+        "next": {
+          "type": "string",
+          "default": "Next"
+        },
+        "nextUp": {
+          "type": "string",
+          "default": "Next Up"
+        },
+        "nextUpClose": {
+          "type": "string",
+          "default": "Next Up Close"
+        },
+        "notLive": {
+          "type": "string",
+          "default": "Not Live"
+        },
+        "off": {
+          "type": "string",
+          "default": "Off"
+        },
+        "pause": {
+          "type": "string",
+          "default": "Pause"
+        },
+        "player": {
+          "type": "string",
+          "default": "Video Player"
+        },
+        "play": {
+          "type": "string",
+          "default": "Play"
+        },
+        "playback": {
+          "type": "string",
+          "default": "Play"
+        },
+        "playbackRates": {
+          "type": "string",
+          "default": "Playback Rates"
+        },
+        "playlist": {
+          "type": "string",
+          "default": "Playlist"
+        },
+        "poweredBy": {
+          "type": "string",
+          "default": "Powered by"
+        },
+        "prev": {
+          "type": "string",
+          "default": "Previous"
+        },
+        "related": {
+          "oneOf": [
+            {
+              "type": "string",
+              "default": "More Videos"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "autoplaymessage": {
+                  "type": "string",
+                  "default": "Next up in xx"
+                },
+                "heading": {
+                  "type": "string",
+                  "default": "More Videos"
+                }
+              }
+            }
+          ]
+        },
+        "replay": {
+          "type": "string",
+          "default": "Replay"
+        },
+        "rewind": {
+          "type": "string",
+          "default": "Rewind 10 Seconds"
+        },
+        "sharing": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "copied": {
+              "type": "string",
+              "default": "Copied"
+            },
+            "email": {
+              "type": "string",
+              "default": "Email"
+            },
+            "embed": {
+              "type": "string",
+              "default": "Embed"
+            },
+            "heading": {
+              "type": "string",
+              "default": "Share"
+            },
+            "link": {
+              "type": "string",
+              "default": "Link"
+            },
+            "share": {
+              "type": "string",
+              "default": "Share"
+            }
+          }
+        },
+        "shortcuts": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "captionsToggle": {
+              "type": "string",
+              "default": "Captions On/Off"
+            },
+            "decreaseVolume": {
+              "type": "string",
+              "default": "Decrease Volume"
+            },
+            "fullscreenToggle": {
+              "type": "string",
+              "default": "Fullscreen/Exit Fullscreen"
+            },
+            "increaseVolume": {
+              "type": "string",
+              "default": "Increase Volume"
+            },
+            "keyboardShortcuts": {
+              "type": "string",
+              "default": "Keyboard Shortcuts"
+            },
+            "playPause": {
+              "type": "string",
+              "default": "Play/Pause"
+            },
+            "seekBackward": {
+              "type": "string",
+              "default": "Seek Backward"
+            },
+            "seekForward": {
+              "type": "string",
+              "default": "Seek Forward"
+            },
+            "seekPercent": {
+              "type": "string",
+              "default": "Seek %"
+            },
+            "shortcutsToggle": {
+              "type": "string",
+              "default": "Shortcuts Open/Close"
+            },
+            "spacebar": {
+              "type": "string",
+              "default": "SPACE"
+            },
+            "volumeToggle": {
+              "type": "string",
+              "default": "Mute/Unmute"
+            }
+          }
+        },
+        "settings": {
+          "type": "string",
+          "default": "Settings"
+        },
+        "slider": {
+          "type": "string",
+          "default": "Seek Slider"
+        },
+        "stop": {
+          "type": "string",
+          "default": "Stop"
+        },
+        "unmute": {
+          "type": "string",
+          "default": "Unmute"
+        },
+        "videoInfo": {
+          "type": "string",
+          "default": "About This Video"
+        },
+        "volume": {
+          "type": "string",
+          "default": "Volume"
+        },
+        "volumeSlider": {
+          "type": "string",
+          "default": "Volume Slider"
+        }
+      }
+    },
+    "outstream": {
+      "properties": {
+        "advertising": {
+          "required": [
+            "outstream"
+          ]
+        }
+      },
+      "required": [
+        "advertising"
+      ]
+    },
+    "playlist": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "anyOf": [
+          {
+            "required": [
+              "file"
+            ]
+          },
+          {
+            "required": [
+              "sources"
+            ]
+          }
+        ],
+        "properties": {
+          "adschedule": {
+            "$ref": "#/definitions/advertising/definitions/any/schedule"
+          },
+          "aestoken": {
+            "$ref": "#/definitions/playlist/items/properties/sources/items/properties/aestoken"
+          },
+          "chapters": {
+            "type": "object",
+            "description": "A simple 2-level chapter store",
+            "required": [
+              "defaultLanguage",
+              "timestamps"
+            ],
+            "properties": {
+              "defaultLanguage": {
+                "type": "string",
+                "description": "The default language to use if the Navigator.language is not present in the list of languages."
+              },
+              "timestamps": {
+                "type": "array",
+                "description": "An array of timestamp objects.",
+                "items": {
+                  "type": "object",
+                  "description": "A timestamp object.",
+                  "required": [
+                    "title",
+                    "time"
+                  ],
+                  "properties": {
+                    "title": {
+                      "type": "object",
+                      "description": "A collection of localized chapter titles.",
+                      "patternProperties": {
+                        "^[a-zA-Z]{1,3}(-[a-zA-Z]{1,3})?$": {
+                          "description": "Localized chapter title string.",
+                          "type": "string"
+                        }
+                      },
+                      "minProperties": 1,
+                      "additionalProperties": false
+                    },
+                    "group": {
+                      "type": "string",
+                      "description": "The name of the group that this chapter belongs to. Facilitates a 2-level structure to chapters."
+                    },
+                    "image": {
+                      "type": "string",
+                      "description": "An image url for the chapter that is separate from the media's thumbnails."
+                    },
+                    "time": {
+                      "type": "number",
+                      "description": "The point in time from the start of the stream where the chapter begins.",
+                      "minimum": 0
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "description": {
+            "type": "string"
+          },
+          "daiSetting": {
+            "$ref": "#/definitions/advertising/definitions/dai/daiSetting"
+          },
+          "drm": {
+            "$ref": "#/definitions/playlist/items/properties/sources/items/properties/drm"
+          },
+          "duration": {
+            "type": "number",
+            "minimum": 0
+          },
+          "dvrSeekLimit": {
+            "type": "number",
+            "minimum": 5,
+            "default": 25
+          },
+          "externalId": {
+            "type": "string"
+          },
+          "feedid": {
+            "$ref": "#/definitions/feed/properties/feedid"
+          },
+          "file": {
+            "$ref": "#/definitions/playlist/items/properties/sources/items/properties/file"
+          },
+          "fwassetid": {
+            "type": "string",
+            "$comment": "Supported only in the freewheel plugin"
+          },
+          "height": {
+            "$ref": "#/definitions/playlist/items/properties/sources/items/properties/height"
+          },
+          "image": {
+            "type": "string",
+            "format": "uri-reference"
+          },
+          "images": {
+            "$ref": "#/definitions/images"
+          },
+          "link": {
+            "type": "string",
+            "format": "uri"
+          },
+          "mediaid": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9]{8}$"
+          },
+          "mimeType": {
+            "$ref": "#/definitions/playlist/items/properties/sources/items/properties/mimeType"
+          },
+          "minDvrWindow": {
+            "type": "number",
+            "minimum": 0,
+            "default": 120
+          },
+          "pin_set_id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9]{8}$"
+          },
+          "preload": {
+            "type": "string",
+            "description": "Indicates what data should be preloaded, if any.",
+            "default": "metadata",
+            "enum": [
+              "none",
+              "metadata",
+              "auto"
+            ]
+          },
+          "pubdate": {
+            "type": "integer"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "recommendations": {
+            "$ref": "#/definitions/related/properties/recommendations"
+          },
+          "sources": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": [
+                "file"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "aestoken": {
+                  "type": "string"
+                },
+                "androidhls": {
+                  "type": "boolean"
+                },
+                "default": {
+                  "type": "boolean",
+                  "description": "Used to set html5 provider quality selection (multiple mp4 source) `levels[i].default`",
+                  "default": false
+                },
+                "drm": {
+                  "type": "object",
+                  "properties": {
+                    "clearkey": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "key": {
+                          "type": "string"
+                        },
+                        "keyId": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "fairplay": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "certificateUrl": {
+                          "type": "string",
+                          "default": ""
+                        },
+                        "extractContentId": {
+                          "$ref": "#/definitions/utils/javascript/function"
+                        },
+                        "extractKey": {
+                          "$ref": "#/definitions/utils/javascript/function"
+                        },
+                        "licenseRequestFilter": {
+                          "$ref": "#/definitions/utils/javascript/function"
+                        },
+                        "licenseRequestHeaders": {
+                          "type": "array",
+                          "default": []
+                        },
+                        "licenseRequestMessage": {
+                          "$ref": "#/definitions/utils/javascript/function"
+                        },
+                        "licenseResponseFilter": {
+                          "$ref": "#/definitions/utils/javascript/function"
+                        },
+                        "licenseResponseType": {
+                          "type": "string",
+                          "default": "arraybuffer",
+                          "enum": [
+                            "arraybuffer",
+                            "blob",
+                            "document",
+                            "json",
+                            "text"
+                          ]
+                        },
+                        "processSpcUrl": {
+                          "type": "string",
+                          "default": ""
+                        }
+                      }
+                    },
+                    "playready": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "headers": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "name": {
+                                "type": "string"
+                              },
+                              "value": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "licenseRequestFilter": {
+                          "$ref": "#/definitions/utils/javascript/function"
+                        },
+                        "licenseRequestHeaders": {
+                          "type": "array",
+                          "default": []
+                        },
+                        "licenseResponseFilter": {
+                          "$ref": "#/definitions/utils/javascript/function"
+                        },
+                        "url": {
+                          "type": "string",
+                          "default": ""
+                        }
+                      }
+                    },
+                    "widevine": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "headers": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "name": {
+                                "type": "string"
+                              },
+                              "value": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "licenseRequestFilter": {
+                          "$ref": "#/definitions/utils/javascript/function"
+                        },
+                        "licenseRequestHeaders": {
+                          "type": "array",
+                          "default": []
+                        },
+                        "licenseResponseFilter": {
+                          "$ref": "#/definitions/utils/javascript/function"
+                        },
+                        "serverCertificateUrl": {
+                          "type": "string",
+                          "format": "uri-reference"
+                        },
+                        "url": {
+                          "type": "string",
+                          "default": ""
+                        }
+                      }
+                    }
+                  }
+                },
+                "file": {
+                  "type": "string",
+                  "format": "uri-reference",
+                  "minLength": 1,
+                  "description": "The URL of a media resource to use."
+                },
+                "height": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "hlsjsdefault": {
+                  "type": "boolean"
+                },
+                "label": {
+                  "type": "string"
+                },
+                "liveSyncDuration": {
+                  "type": "number",
+                  "description": "Edge of live delay, expressed in seconds (JW Player Defaults this to 25)"
+                },
+                "mediaTypes": {
+                  "type": "array"
+                },
+                "mimeType": {
+                  "type": "string"
+                },
+                "onXhrOpen": {
+                  "$ref": "#/definitions/utils/javascript/function"
+                },
+                "safarihlsjs": {
+                  "type": "boolean"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "width": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "withCredentials": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "starttime": {
+            "type": "number",
+            "default": 0
+          },
+          "stereomode": {
+            "type": "string",
+            "enum": [
+              "monoscopic",
+              "stereoscopicTopBottom",
+              "stereoscopicLeftRight"
+            ]
+          },
+          "streamtype": {
+            "type": "string",
+            "enum": [
+              "live"
+            ],
+            "$comment": "Supported only in the freewheel plugin"
+          },
+          "tags": {
+            "type": "string"
+          },
+          "thumbnailUrl": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "tracks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "file"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "default": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "file": {
+                  "type": "string",
+                  "format": "uri-reference"
+                },
+                "includedInManifest": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "kind": {
+                  "type": "string",
+                  "default": "captions",
+                  "enum": [
+                    "captions",
+                    "chapters",
+                    "metadata",
+                    "thumbnails"
+                  ]
+                },
+                "label": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "type": {
+            "$ref": "#/definitions/playlist/items/properties/sources/items/properties/type"
+          },
+          "variations": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "images": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "id",
+                    "image",
+                    "weight"
+                  ],
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[a-zA-Z0-9]{8}$"
+                    },
+                    "image": {
+                      "type": "string",
+                      "format": "uri-reference"
+                    },
+                    "weight": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1,
+                      "exclusiveMinimum": 0
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "width": {
+            "$ref": "#/definitions/playlist/items/properties/sources/items/properties/width"
+          },
+          "withCredentials": {
+            "$ref": "#/definitions/playlist/items/properties/sources/items/properties/withCredentials"
+          }
+        }
+      }
+    },
+    "related": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "autoplaytimer": {
+          "type": "integer",
+          "default": 0
+        },
+        "client": {
+          "$ref": "#/definitions/client"
+        },
+        "debug": {
+          "type": "boolean",
+          "$comment": "There is no debug option in related",
+          "not": true
+        },
+        "displayMode": {
+          "type": "string",
+          "enum": [
+            "overlay",
+            "shelf",
+            "shelfWidget",
+            "none"
+          ]
+        },
+        "file": {
+          "type": "string",
+          "format": "uri-reference"
+        },
+        "onclick": {
+          "type": "string",
+          "enum": [
+            "play",
+            "link"
+          ]
+        },
+        "oncomplete": {
+          "type": [
+            "boolean",
+            "string"
+          ],
+          "default": "none",
+          "enum": [
+            "autoplay",
+            "hide",
+            "show",
+            "none",
+            true,
+            false
+          ]
+        },
+        "requestOptions": {
+          "type": "object"
+        },
+        "selector": {
+          "type": "string"
+        },
+        "showButton": {
+          "type": "boolean",
+          "description": "Hide the controlbar button that opens the playlist overlay (not the related overlay)."
+        }
+      }
+    },
+    "sdks": {
+      "sdkplatform": {
+        "type": "integer",
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          999
+        ]
+      },
+      "iossdkversion": {
+        "type": "string",
+        "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(\\+[0-9]+)?$"
+      }
+    },
+    "utils": {
+      "cssColor": {
+        "pattern": "^([a-zA-Z]+)|(#[0-9a-fA-F]{3}|#(?:[0-9a-fA-F]{2}){2,4}|(rgb|hsl)a?\\((-?\\d+%?[,\\s]+){2,3}\\s*[\\d\\.]+%?\\))$"
+      },
+      "javascript": {
+        "function": {
+          "javaScriptType": "function",
+          "$comment": "This property expects a JavaScript function"
+        }
+      },
+      "offset": {
+        "oneOf": [
+          {
+            "type": "null"
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "string",
+            "pattern": "^[-+]?[0-9]*\\.?[0-9]+[hms]?$"
+          },
+          {
+            "type": "string",
+            "pattern": "^(?:[-+]?[0-9]*\\.?[0-9]+:)+[-+]?[0-9]*\\.?[0-9]+$"
+          },
+          {
+            "type": "string",
+            "pattern": "^[-+]?[0-9*\\.?[0-9]+\\%+$"
+          }
+        ]
+      },
+      "serialized": {
+        "boolean": {
+          "type": [
+            "boolean",
+            "string"
+          ],
+          "enum": [
+            true,
+            false,
+            "true",
+            "false"
+          ]
+        }
+      }
+    },
+    "images": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "src",
+          "type",
+          "width"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "src": {
+            "type": "string",
+            "format": "uri-reference"
+          },
+          "type": {
+            "type": "string"
+          },
+          "width": {
+            "type": [
+              "number",
+              "string"
+            ],
+            "pattern": "^[0-9]+%?$",
+            "minimum": 0,
+            "description": "Image or video thumbnail width described in pixels or percentage.",
+            "default": 640
+          }
+        }
+      }
+    }
+  },
+  "additionalProperties": false,
+  "oneOf": [
+    {
+      "required": [
+        "file"
+      ],
+      "not": {
+        "required": [
+          "playlist",
+          "sources"
+        ]
+      }
+    },
+    {
+      "required": [
+        "sources"
+      ],
+      "not": {
+        "required": [
+          "file",
+          "playlist"
+        ]
+      }
+    },
+    {
+      "required": [
+        "playlist"
+      ],
+      "not": {
+        "required": [
+          "description",
+          "duration",
+          "file",
+          "fwassetid",
+          "image",
+          "mediaid",
+          "sources",
+          "streamtype",
+          "title"
+        ]
+      }
+    },
+    {
+      "allOf": [
+        {
+          "$ref": "#/definitions/outstream"
+        },
+        {
+          "not": {
+            "required": [
+              "description",
+              "duration",
+              "file",
+              "fwassetid",
+              "image",
+              "mediaid",
+              "playlist",
+              "sources",
+              "streamtype",
+              "title"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "properties": {
+    "advertising": {
+      "$ref": "#/definitions/advertising"
+    },
+    "aboutlink": {
+      "type": "string",
+      "format": "uri"
+    },
+    "allowFullscreen": {
+      "$ref": "#/definitions/utils/serialized/boolean",
+      "description": "Specifies whether or not to enable fullscreen capability/UI",
+      "default": true
+    },
+    "analytics": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "client": {
+          "$ref": "#/definitions/client"
+        },
+        "debug": {
+          "type": "boolean"
+        },
+        "onping": {
+          "$ref": "#/definitions/utils/javascript/function",
+          "description": "The ping debug callback function"
+        },
+        "sdkplatform": {
+          "$ref": "#/definitions/sdks/sdkplatform",
+          "description": "Support is implemented in analytics plugin and commercial controller that copies this value to the top level config."
+        },
+        "iossdkversion": {
+          "$ref": "#/definitions/sdks/iossdkversion"
+        },
+        "placement": {
+          "type": "object",
+          "properties": {
+            "strategyId": {
+              "type": "string",
+              "description": "An identifier referencing a specific predetermined outcome from a strategy"
+            },
+            "evaluationId": {
+              "type": "string",
+              "description": "Client side unique hash that is generated each time a strategy outcome is determined"
+            },
+            "placementId": {
+              "type": "string",
+              "description": "A property level unique identifier which is used to reference a location on the webpage."
+            },
+            "embedId": {
+              "type": "string",
+              "dscription": "Client side unique hash that is generated for each Embed of a placement location"
+            }
+          }
+        }
+      }
+    },
+    "aspectratio": {
+      "type": "string",
+      "description": "When width is a percentage, use this aspect ratio to calculate player height."
+    },
+    "autoPause": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "viewability": {
+          "type": "boolean",
+          "description": "Autopause playback when the player is not viewable, and resume once the player is viewable again.",
+          "default": "true"
+        },
+        "pauseAds": {
+          "type": "boolean",
+          "description": "Augments 'viewability' option by making ads also pause when not viewable.",
+          "default": "false"
+        }
+      }
+    },
+    "autostart": {
+      "type": [
+        "boolean",
+        "string"
+      ],
+      "enum": [
+        "viewable",
+        true,
+        false,
+        "true",
+        "false"
+      ],
+      "description": "Autostart playback once the first playlist item is ready or once the player is viewable.",
+      "default": false
+    },
+    "base": {
+      "type": "string",
+      "format": "uri-reference"
+    },
+    "captions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "back": {
+          "type": "boolean",
+          "default": true
+        },
+        "backgroundColor": {
+          "type": "string",
+          "default": "#000000"
+        },
+        "backgroundOpacity": {
+          "type": "number",
+          "default": 50,
+          "minimum": 0,
+          "maximum": 100
+        },
+        "color": {
+          "type": "string",
+          "default": "#ffffff"
+        },
+        "edgeStyle": {
+          "type": "string",
+          "default": null,
+          "enum": [
+            "depressed",
+            "dropshadow",
+            "raised",
+            "uniform"
+          ]
+        },
+        "fontFamily": {
+          "type": "string"
+        },
+        "fontOpacity": {
+          "type": "number",
+          "default": 100,
+          "minimum": 0,
+          "maximum": 100
+        },
+        "fontScale": {
+          "type": "number",
+          "default": 0.05,
+          "minimum": 0,
+          "maximum": 1
+        },
+        "fontSize": {
+          "type": "number",
+          "default": 14
+        },
+        "fontStyle": {
+          "type": "string"
+        },
+        "fontWeight": {
+          "type": "number"
+        },
+        "preprocessor": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "textDecoration": {
+          "type": "string"
+        },
+        "windowOpacity": {
+          "type": "number",
+          "default": 0,
+          "minimum": 0,
+          "maximum": 100
+        }
+      }
+    },
+    "cast": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "appid": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9]{8}$"
+        },
+        "customAppId": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9]{8}$"
+        },
+        "interceptCast": {
+          "type": "boolean"
+        }
+      }
+    },
+    "cmcd": {
+      "$ref": "#/definitions/cmcd",
+      "description": "Set to enable CMCD reporting in media requests with HLS.js and Shaka."
+    },
+    "controls": {
+      "$ref": "#/definitions/utils/serialized/boolean",
+      "description": "Load and display the player controls.",
+      "default": true
+    },
+    "defaultBandwidthEstimate": {
+      "type": "number"
+    },
+    "displaydescription": {
+      "$ref": "#/definitions/utils/serialized/boolean",
+      "description": "Display the playlist item description when the player is idle and paused.",
+      "default": true
+    },
+    "displayHeading": {
+      "type": "boolean",
+      "description": "Display heading on top of the player.",
+      "default": false
+    },
+    "displayPlaybackLabel": {
+      "$ref": "#/definitions/utils/serialized/boolean",
+      "description": "Display localization for playback when the player is idle.",
+      "default": false
+    },
+    "displaytitle": {
+      "$ref": "#/definitions/utils/serialized/boolean",
+      "description": "Display the playlist item title when the player is idle and paused.",
+      "default": true
+    },
+    "doNotTrack": {
+      "type": "boolean"
+    },
+    "doNotTrackCookies": {
+      "type": "boolean"
+    },
+    "enableAdLoadingUI": {
+      "type": "boolean",
+      "default": true
+    },
+    "enableDefaultCaptions": {
+      "type": "boolean",
+      "description": "Display first available captions by default if player is muted when autostarted",
+      "default": false
+    },
+    "events": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "adBidRequest": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "adBidResponse": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "adBlock": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "adBreakEnd": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "adBreakStart": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "adClick": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "adCompanions": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "adComplete": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "adError": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "adImpression": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "adLoaded": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "adManager": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "adsManager": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "adMeta": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "adPause": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "adPlay": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "adRequest": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "adRequestedContentResume": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "adSchedule": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "adSkipped": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "adStarted": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "adTime": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "adViewableImpression": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "adWarning": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "audioTrackChanged": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "audioTracks": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "autostartNotAllowed": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "beforeComplete": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "beforePlay": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "breakpoint": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "buffer": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "bufferChange": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "bufferFull": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "captionsChanged": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "captionsList": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "cast": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "castAvailable": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "castIntercepted": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "click": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "complete": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "containerViewable": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "controls": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "destroyPlugin": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "displayClick": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "error": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "firstFrame": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "fullscreen": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "fullscreenchange": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "idle": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "levels": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "levelsChanged": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "logoClick": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "mediaError": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "mediaType": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "meta": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "metadataCueParsed": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "mute": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "nextAutoAdvance": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "nextClick": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "nextShown": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "pause": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "play": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "playAttempt": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "playAttemptFailed": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "playbackRateChanged": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "playlist": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "playlistComplete": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "playlistItem": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "providerChanged": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "providerFirstFrame": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "ready": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "remove": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "resize": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "seek": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "seeked": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "setupError": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "subtitlesTrackChanged": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "subtitlesTracks": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "time": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "userActive": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "userInactive": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "viewable": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "visualQuality": {
+          "$ref": "#/definitions/utils/javascript/function"
+        },
+        "volume": {
+          "$ref": "#/definitions/utils/javascript/function"
+        }
+      }
+    },
+    "floating": {
+      "type": "object",
+      "description": "Transform the player to a floating player if it is not visible.",
+      "properties": {
+        "dismissible": {
+          "type": "boolean",
+          "description": "Display close button for floating player",
+          "default": true
+        },
+        "disabled": {
+          "type": "boolean",
+          "description": "Disables all floating player functionality",
+          "default": false
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "notVisible",
+            "always",
+            "never"
+          ]
+        },
+        "showTitle": {
+          "type": "boolean",
+          "description": "Shows video title when player is floating",
+          "default": false
+        }
+      }
+    },
+    "fullscreenOrientationLock": {
+      "type": "string",
+      "description": "Configure fullscreen orientation behavior on Android",
+      "default": "landscape",
+      "enum": [
+        "portrait",
+        "none",
+        "landscape"
+      ]
+    },
+    "ga": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "client": {
+          "$ref": "#/definitions/client"
+        },
+        "debug": {
+          "type": "boolean",
+          "default": "false",
+          "description": "Set debug to true to enable the `onGaTrack` callback. See `onGaTrack` for more info."
+        },
+        "gtag": {
+          "type": [
+            "string"
+          ],
+          "javaScriptType": "function",
+          "$comment": "This property expects a string or a function.",
+          "default": "gtag",
+          "description": "The name or reference to the gtag.js tracking global."
+        },
+        "label": {
+          "type": "string",
+          "default": "file",
+          "description": "The playlist item property to use as the tracking event's `label`. Defaults to 'file` which sends the video url as the label for each event."
+        },
+        "onGaTrack": {
+          "$ref": "#/definitions/utils/javascript/function",
+          "description": "A debug callback envoked directly after each GA tracking call which is passed an object with the tracking arguments `type`, `category`, `action`, `label`, and `nonInteraction`."
+        },
+        "universalga": {
+          "type": "string",
+          "default": "ga",
+          "description": "The name of the univeral GA global function. Defaults to `ga` when using Google's analytics.js."
+        },
+        "useUniversalAnalytics": {
+          "type": "boolean",
+          "default": false,
+          "description": "Use UA plugin instead of GA4 plugin."
+        },
+        "sendEnhancedEvents": {
+          "type": "boolean",
+          "default": false,
+          "description": "Toggle to send GA data in UA format rather than GA4 format. NOTE: UA will be deprecated by 7/1/2023."
+        }
+      }
+    },
+    "generateSEOMetadata": {
+      "type": "boolean",
+      "description": "Whether or not the player should add ld+json seo information to the head of the page",
+      "default": "false"
+    },
+    "height": {
+      "type": [
+        "number",
+        "string"
+      ],
+      "pattern": "^[0-9]+%?$",
+      "minimum": 0,
+      "description": "Player height described in pixels or percentage.",
+      "default": 360
+    },
+    "hlsjsConfig": {
+      "type": "object",
+      "description": "Specify config options for hls.js",
+      "properties": {
+        "liveSyncDuration": {
+          "$ref": "#/definitions/playlist/items/properties/sources/items/properties/liveSyncDuration"
+        },
+        "liveMaxLatencyDuration": {
+          "type": "number",
+          "description": "Seconds from the edge that the player will seek back to whenever the next fragment to be loaded is older than N-10"
+        },
+        "liveSyncDurationCount": {
+          "type": "number",
+          "description": "Edge of live delay, expressed in multiple of EXT-X-TARGETDURATION"
+        },
+        "liveMaxLatencyDurationCount": {
+          "type": "number",
+          "description": "Multiple of EXT-X-TARGETDURATION that the player will seek back to whenever the next fragment to be loaded is older than N-10 (Defaults to Infinity. The player will not catch up if it falls behind)"
+        },
+        "debug": {
+          "type": "boolean",
+          "description": "Enable or disable hls.js logging"
+        }
+      }
+    },
+    "horizontalVolumeSlider": {
+      "type": "boolean",
+      "description": "Display a horizontal volume slider. If false, the default vertical one will be displayed except for controlbar-only audio players.",
+      "default": false
+    },
+    "interactive": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "client": {
+          "$ref": "#/definitions/client"
+        },
+        "project": {
+          "type": "object"
+        },
+        "projectUri": {
+          "type": "string",
+          "format": "uri"
+        },
+        "requestDashboardProjects": {
+          "type": "boolean",
+          "default": true
+        },
+        "deliveryApiHost": {
+          "type": "string",
+          "default": "https://content.jwplatform.com/v2/interactivity_manifest.json"
+        },
+        "debug": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "intl": {
+      "type": "object",
+      "description": "Contains the localization options for each for language codes",
+      "additionalProperties": true,
+      "patternProperties": {
+        "^[a-z]{0,3}[(-|_)][A-Z]{0,2}": {
+          "$ref": "#/definitions/localization"
+        }
+      }
+    },
+    "key": {
+      "type": "string",
+      "description": "Player license key. When decoded contains the account token, player edition, and key expiration date."
+    },
+    "liveTimeout": {
+      "oneOf": [
+        {
+          "type": "number",
+          "const": 0,
+          "description": "Set to 0 to disable live streams from timing out"
+        },
+        {
+          "type": "number",
+          "minimum": 30,
+          "description": "Time out live streams once the buffer is empty, and 30 seconds of network inactivity"
+        }
+      ],
+      "default": null,
+      "description": "Time out live streams once the buffer is empty, and a period of network inactivity has passed as determined by the player"
+    },
+    "logo": {
+      "type": "object",
+      "properties": {
+        "file": {
+          "type": "string"
+        },
+        "link": {
+          "type": "string"
+        }
+      }
+    },
+    "mute": {
+      "type": "boolean",
+      "description": "Mute playback sound.",
+      "default": false
+    },
+    "nextUpDisplay": {
+      "type": "boolean",
+      "default": true
+    },
+    "nextupoffset": {
+      "$ref": "#/definitions/utils/offset",
+      "description": "The offset from the start of the video at which the Next Up card is displayed. If `nextupoffset` is a negative number, the offset is from the end of the video.",
+      "default": -10
+    },
+    "pad": {
+      "type": "string",
+      "description": "A string written to the player config by platform A/B testing"
+    },
+    "ph": {
+      "type": "integer",
+      "description": "Platform Hosted Endpoint enum. Describes the type of endpoint used to embed the player. 0: Self Hosted, 1: Cloud Player, 2: WordPress Plugin, 3: Singleline Embed, 4: Showcase (self-hosted), 5: Showcase (hosted), 6: Sharing Page, 7: Sharing Page (with Password).",
+      "enum": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    "pid": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9]{8}$",
+      "description": "An explanation about the purpose of this instance."
+    },
+    "pipIcon": {
+      "type": "string",
+      "default": "enabled",
+      "enum": [
+        "enabled",
+        "disabled"
+      ]
+    },
+    "playbackRateControls": {
+      "type": [
+        "boolean",
+        "array"
+      ],
+      "description": "Replaces playbackRates when set to an array.",
+      "default": false
+    },
+    "playbackRates": {
+      "type": "array",
+      "minItems": 2,
+      "default": [
+        0.5,
+        1,
+        1.25,
+        1.5,
+        2
+      ],
+      "items": {
+        "type": "number"
+      }
+    },
+    "playlist": {
+      "description": "The playlist to use.",
+      "oneOf": [
+        {
+          "$ref": "#/definitions/feed"
+        },
+        {
+          "$ref": "#/definitions/playlist"
+        },
+        {
+          "$ref": "#/definitions/playlist/items"
+        },
+        {
+          "type": "string",
+          "format": "uri-reference",
+          "minLength": 1
+        }
+      ]
+    },
+    "playlistIndex": {
+      "type": "number",
+      "description": "Override default playlist item index of `0`."
+    },
+    "keepWatching": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "client": {
+          "$ref": "#/definitions/client"
+        },
+        "countdownStartTime": {
+          "type": "number",
+          "default": 20,
+          "minimum": 1
+        },
+        "countdownDuration": {
+          "type": "number",
+          "default": 10,
+          "minimum": 1
+        }
+      }
+    },
+    "plugins": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {
+        "^(?:https?:)?\\/?(?:\\/?[a-zA-Z0-9._\\-~]+)+\\.js": {
+          "type": "object"
+        }
+      }
+    },
+    "preload": {
+      "$ref": "#/definitions/playlist/items/properties/preload"
+    },
+    "qualityLabels": {
+      "type": "object",
+      "patternProperties": {
+        "^[0-9]+$": {
+          "type": "string"
+        }
+      }
+    },
+    "related": {
+      "$ref": "#/definitions/related"
+    },
+    "renderCaptionsNatively": {
+      "type": "boolean",
+      "default": false
+    },
+    "repeat": {
+      "$ref": "#/definitions/utils/serialized/boolean",
+      "description": "Loop playlist playback.",
+      "default": false
+    },
+    "sdkplatform": {
+      "$ref": "#/definitions/sdks/sdkplatform"
+    },
+    "selectedBitrate": {
+      "type": "number",
+      "description": "Used to disable adaptive bitrate mode and select the nearest quality level."
+    },
+    "setTimeEvents": {
+      "type": "boolean",
+      "default": false
+    },
+    "skin": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "active": {
+          "$ref": "#/definitions/utils/cssColor"
+        },
+        "inactive": {
+          "$ref": "#/definitions/utils/cssColor"
+        },
+        "background": {
+          "$ref": "#/definitions/utils/cssColor"
+        },
+        "controlbar": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "icons": {
+              "$ref": "#/definitions/utils/cssColor"
+            },
+            "iconsActive": {
+              "$ref": "#/definitions/utils/cssColor"
+            },
+            "text": {
+              "$ref": "#/definitions/utils/cssColor"
+            },
+            "background": {
+              "$ref": "#/definitions/utils/cssColor"
+            }
+          }
+        },
+        "menus": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "text": {
+              "$ref": "#/definitions/utils/cssColor"
+            },
+            "textActive": {
+              "$ref": "#/definitions/utils/cssColor"
+            },
+            "background": {
+              "$ref": "#/definitions/utils/cssColor"
+            }
+          }
+        },
+        "name": {
+          "type": "string"
+        },
+        "timeslider": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "progress": {
+              "$ref": "#/definitions/utils/cssColor"
+            },
+            "ads": {
+              "$ref": "#/definitions/utils/cssColor"
+            },
+            "buffer": {
+              "$ref": "#/definitions/utils/cssColor"
+            },
+            "knob": {
+              "$ref": "#/definitions/utils/cssColor"
+            },
+            "rail": {
+              "$ref": "#/definitions/utils/cssColor"
+            }
+          }
+        },
+        "tooltips": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "text": {
+              "$ref": "#/definitions/utils/cssColor"
+            },
+            "background": {
+              "$ref": "#/definitions/utils/cssColor"
+            }
+          }
+        },
+        "url": {
+          "type": "string",
+          "format": "uri-reference"
+        }
+      }
+    },
+    "sharing": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "client": {
+          "$ref": "#/definitions/client"
+        },
+        "code": {
+          "type": "string",
+          "default": ""
+        },
+        "link": {
+          "type": "string",
+          "format": "uri"
+        },
+        "sites": {
+          "type": "array",
+          "default": [
+            "facebook",
+            "twitter",
+            "email"
+          ],
+          "items": {
+            "oneOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "facebook",
+                  "email",
+                  "linkedin",
+                  "pinterest",
+                  "reddit",
+                  "tumblr",
+                  "twitter"
+                ]
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "icon": {
+                    "type": "string",
+                    "format": "uri-reference"
+                  },
+                  "src": {
+                    "type": "string",
+                    "format": "uri-reference"
+                  },
+                  "label": {
+                    "type": "string"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    "showUIWhen": {
+      "type": "string",
+      "enum": [
+        "onReady",
+        "onContent"
+      ],
+      "description": "Use onContent to hide the player UI until content/ads can be rendered.",
+      "default": "onReady"
+    },
+    "stretching": {
+      "type": "string",
+      "description": "How video is stretched to fit inside the player.",
+      "default": "uniform",
+      "enum": [
+        "exactfit",
+        "fill",
+        "none",
+        "uniform"
+      ]
+    },
+    "timeSlider": {
+      "type": "object",
+      "description": "Enables the new timeslider and allows for toggling the thumb or knob",
+      "default": {
+        "legacy": true,
+        "preferChapterImages": false,
+        "showKnob": true,
+        "showAdMarkers": false
+      },
+      "properties": {
+        "legacy": {
+          "type": "boolean",
+          "description": "Enables the legacy time slider",
+          "default": false
+        },
+        "preferChapterImages": {
+          "type": "boolean",
+          "description": "Chapter images override thumbnail images in tooltip display",
+          "default": false
+        },
+        "showKnob": {
+          "type": "boolean",
+          "description": "Toggles the thumb/knob",
+          "default": false
+        },
+        "showAdMarkers": {
+          "type": "boolean",
+          "description": "Shows Ad Markers",
+          "default": false
+        }
+      }
+    },
+    "volume": {
+      "type": "number",
+      "default": 90,
+      "minimum": 0,
+      "maximum": 100
+    },
+    "width": {
+      "type": [
+        "number",
+        "string"
+      ],
+      "pattern": "^[0-9]+%?$",
+      "minimum": 0,
+      "description": "Player width described in pixels or percentage.",
+      "default": 640
+    }
+  }
+}

@@ -21,62 +21,46 @@
     - caption_url = download_url(content.pid, {datastream_id: 'content'})
 #player
   :javascript
-    jwplayer.key="6keHwedw4fQnScJOPJbFMey9UxSWktA1KWf1vIe5fGc="
+    jwplayer.key="8DXGvJavA+g/E1cIJAuq5Bd9llzu7FvT/XEslQ6MvuY="
   :javascript
-    var provider = "#{provider}"
-    var primary = "html5";
-    var is_chrome = navigator.userAgent.indexOf('Chrome') > -1;
-    var is_safari = navigator.userAgent.indexOf("Safari") > -1;
-    if ((is_chrome)&&(is_safari)) {is_safari=false;}
     jwplayer("player").setup({
-    image: "#{poster}",
-    provider: "#{provider}",
-    androidhls: "true",
-    hlshtml: "true",
-    primary: primary,
-    width: "100%",
-    height: 400,
-    flashplayer: "/assets/jwplayer/jwplayer.flash.swf",
-    sources:
-    [
-    { file: "#{wowza_plain_path(pid, {only_path: false})}", type:"#{type.downcase}"},
-    { file: "#{wowza_playlist_path(pid, {only_path: false})}" },
-    ],
-    tracks: [{
-      file: "#{caption_url}",
-      label: 'English',
-      kind: 'captions',
-      "default": true
-    }]
+      width: "100%",
+      height: 400,
+      playlist:  [{
+        image:  "#{poster}",
+        sources:
+        [
+          { file: "#{wowza_plain_path(pid, {only_path: false})}", type:"#{provider}/#{type.downcase}"},
+          { file: "#{wowza_playlist_path(pid, {only_path: false})}" }
+        ]
+      }],
+      tracks: [{
+        file: "#{caption_url}",
+        label: 'English',
+        kind: 'captions',
+        "default": true
+      }]
     });
     function errorMessage() {
-      $(".alert-video").removeClass("hidden").text("There was an error playing this file. Please try on a different device, verify Flash is enabled, or download the file.")
+      $(".alert-video").removeClass("hidden").text("There was an error playing this file. Please try on a different device, or download the file.")
       $(".replace_thumbs").removeClass("hidden")
       $("#player, #player_wrapper").hide()
     }
-    jwplayer().on('error', function(){
+    jwplayer("player").on('error', function(){
       errorMessage();
      });
-    jwplayer().on('setupError', function(){
+    jwplayer("player").on('setupError', function(){
       errorMessage();
     });
-    jwplayer().on('buffer', function() {
+    jwplayer("player").on('buffer', function() {
       theTimeout = setTimeout(function() {
         $(".alert-video").removeClass("hidden").text("This video is taking longer than expected to play. You may need to download the file to view it.");
       }, 5000)
     })
-    jwplayer().on('ready', function() {
-      if (is_safari){
-        //defaulting to m3u8 stream for safari since it functions better
-        jwplayer().load([{image: "#{poster}", sources:[{ file: "#{wowza_playlist_path(pid, {only_path: false})}"}]}]);
-        // Set poster image for video element to avoid black background for audio-only programs.
-        $("#player video").attr("poster", "#{poster}");
-      }
-    })
-    jwplayer().on('play', function() {
+    jwplayer("player").on('play', function() {
       clearTimeout(theTimeout);
       $.ajax("/files/#{pid}/log_stream");
     })
-    jwplayer().on('complete', function() {
+    jwplayer("player").on('complete', function() {
       window.location = window.location.href
     });
