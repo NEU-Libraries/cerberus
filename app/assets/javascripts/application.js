@@ -32,6 +32,4 @@
 
 //= require spin.js
 
-//= require jwplayer/jwplayer.js
-
 //= require picturefill.all.js
