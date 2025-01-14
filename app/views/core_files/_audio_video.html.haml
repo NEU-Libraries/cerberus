@@ -32,7 +32,8 @@
         image:  "#{poster}",
         sources:
         [
-          { file: "#{wowza_plain_path(pid, {only_path: false})}", type:"#{provider}/#{type.downcase}"}
+          { file: "#{wowza_plain_path(pid, {only_path: false})}", type:"#{provider}/#{type.downcase}"},
+          { file: "#{wowza_playlist_path(pid, {only_path: false})}" }
         ]
       }],
       tracks: [{
