@@ -31,4 +31,13 @@ describe WorksController do
       expect(response).to render_template('works/new')
     end
   end
-end
+
+  describe 'edit' do
+    render_views
+      it 'renders the edit partial' do
+        get :edit, params: { id: work['id'] }
+        expect(response).to render_template('works/edit')
+        expect(CGI.unescapeHTML(response.body)).to include(work['title'])
+      end
+    end
+  end
