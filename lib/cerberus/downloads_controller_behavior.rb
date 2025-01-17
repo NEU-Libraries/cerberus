@@ -38,6 +38,10 @@ module Cerberus
           else
             render_500(Exceptions::DatastreamNotFoundError.new(params[:datastream_id], asset.class, asset)) and return
           end
+        elsif asset.class == TextFile
+          # setting cors for newer JWPlayer VTT error
+          response.headers['Access-Control-Allow-Origin'] = "*"
+          send_file asset.fedora_file_path, :filename =>  file_name, :type => asset.mime_type || extract_mime_type(asset.fedora_file_path), :disposition => 'attachment'
         else
           send_file asset.fedora_file_path, :filename =>  file_name, :type => asset.mime_type || extract_mime_type(asset.fedora_file_path), :disposition => 'attachment'
         end
