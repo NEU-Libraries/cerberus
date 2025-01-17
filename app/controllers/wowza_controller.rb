@@ -22,7 +22,6 @@ class WowzaController < ApplicationController
       end
 
       file_name = "neu_#{asset.pid.split(":").last}.#{extract_extension(asset.properties.mime_type.first, File.extname(asset.original_filename || "").delete!("."))}"
-      response.headers['Access-Control-Allow-Origin'] = "*"
       send_file asset.fedora_file_path, :range => true, :filename => file_name, :type => asset.mime_type || extract_mime_type(asset.fedora_file_path), :disposition => 'inline'
     else
       # Raise 403
@@ -53,7 +52,6 @@ class WowzaController < ApplicationController
           data = open(url_str)
 
           log_action("stream", "COMPLETE", params[:id])
-          response.headers['Access-Control-Allow-Origin'] = "*"
           send_data(data.read, type: "application/x-mpegURL", filename: 'playlist.m3u8')
         rescue OpenURI::HTTPError => error
           render_404(error, url_str)
@@ -78,7 +76,6 @@ class WowzaController < ApplicationController
 
     data = open(url_str)
 
-    response.headers['Access-Control-Allow-Origin'] = "*"
     send_data(data.read, filename: params[:part])
   end
 
