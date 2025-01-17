@@ -48,16 +48,13 @@
       $(".replace_thumbs").removeClass("hidden")
       $("#player, #player_wrapper").hide()
     }
-    jwplayer("player").on('error', function(){
-      errorMessage();
-     });
     jwplayer("player").on('setupError', function(){
       errorMessage();
     });
     jwplayer("player").on('buffer', function() {
       theTimeout = setTimeout(function() {
         $(".alert-video").removeClass("hidden").text("This video is taking longer than expected to play. You may need to download the file to view it.");
-      }, 5000)
+      }, 10000)
     })
     jwplayer("player").on('play', function() {
       clearTimeout(theTimeout);

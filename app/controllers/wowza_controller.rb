@@ -69,31 +69,17 @@ class WowzaController < ApplicationController
   end
 
   def part
-    retries = 0
-    max_retries = 5
+    doc = fetch_solr_document
 
-    begin
-      doc = fetch_solr_document
+    dir = doc.pid_hash[0,2]
+    encoded = doc.encode
 
-      dir = doc.pid_hash[0,2]
-      encoded = doc.encode
+    url_str = "http://nb9479.neu.edu:1935/vod/_definst_/datastreamStore/cerberusData/newfedoradata/datastreamStore/#{dir}/#{doc_type(doc)}:" + CGI::escape("info%3Afedora%2F#{encoded}%2Fcontent%2Fcontent.0") + "/#{params[:part]}"
 
-      url_str = "http://nb9479.neu.edu:1935/vod/_definst_/datastreamStore/cerberusData/newfedoradata/datastreamStore/#{dir}/#{doc_type(doc)}:" + CGI::escape("info%3Afedora%2F#{encoded}%2Fcontent%2Fcontent.0") + "/#{params[:part]}"
+    data = open(url_str)
 
-      data = open(url_str)
-
-      response.headers['Access-Control-Allow-Origin'] = "*"
-      send_data(data.read, filename: params[:part])
-    rescue Exception => e
-      if retries <= max_retries
-        retries += 1
-        max_sleep_seconds = Float(2 ** retries) / 5
-        sleep rand(0..max_sleep_seconds)
-        retry
-      else
-        raise "Giving up on the server after #{retries} retries. Got error: #{e.message}"
-      end
-    end
+    response.headers['Access-Control-Allow-Origin'] = "*"
+    send_data(data.read, filename: params[:part])
   end
 
   private
