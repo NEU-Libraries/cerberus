@@ -18,7 +18,7 @@
         - provider = 'video'
       - elsif content.mime_type.start_with?('audio')
         - type = 'MP3'
-        - provider = 'sound'
+        - provider = 'audio'
   -elsif content.klass == "TextFile"
     - caption_url = download_url(content.pid, {datastream_id: 'content'})
 #player
