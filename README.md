@@ -15,14 +15,19 @@ Get a copy of the codebase
 git clone git@github.com:NEU-Libraries/cerberus.git
 ```
 
+Make an .env file from .env.example, change as needed (i.e. ARCH to arm64)
+```
+cp .env.example .env
+```
+
 Use docker compose to pull down the containers and build Cerberus
 ```
-ATLAS=0.0.157 docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
 ```
 
 Once running, use another console/tab to go inside the container.
 ```
-docker exec -ti cerberus-web-1 /bin/sh
+docker exec -ti cerberus-web-1 /bin/bash
 ```
 
 Once inside, generate some test objects

@@ -12,6 +12,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
+    - name: Make env file
+      run: |
+        cp .env.example .env
+    - name: Dotenv Action
+      uses: falti/dotenv-action@v1.1.4
     - name: Github Action cache
       uses: actions/cache@v3
       with:
@@ -33,7 +38,7 @@ jobs:
     - name: Start server
       run: |
         set -x
-        ATLAS=$(cat .atlas) docker compose -f docker-compose.yml -f docker-compose.ci.yml up -d
+        docker compose -f docker-compose.yml -f docker-compose.ci.yml up -d
     # - name: Create database and migrate
     #   run: |
     #     docker compose exec -T web bundle exec rake db:migrate

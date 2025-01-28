@@ -1,5 +1,4 @@
 # Use postgres/example user/password credentials
-version: '3.7'
 volumes:
   solr:
   db:
@@ -44,7 +43,7 @@ services:
       CANTALOUPE_PROCESSOR_SELECTION_STRATEGY: 'ManualSelectionStrategy'
       CANTALOUPE_CACHE_CLIENT_ENABLED: 'true'
   solr:
-    image: nakatomi/blacklight-solr
+    image: nakatomi/blacklight-solr:${ARCH}
     ports:
     - 8983:8983
     volumes:
