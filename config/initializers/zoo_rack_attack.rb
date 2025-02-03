@@ -21,6 +21,18 @@ class Rack::Attack::Request < ::Rack::Request
     result = "#{env["HTTP_ACCEPT"]} | #{env["HTTP_ACCEPT_ENCODING"]} | #{env["HTTP_ACCEPT_LANGUAGE"]} | #{env["HTTP_COOKIE"]}"
     Base64.strict_encode64(result)
   end
+
+  def reverse_ip
+    if !remote_ip.blank?
+      IPAddr.new(remote_ip).send("_reverse")
+    end
+  end
+
+  def asn
+    if !reverse_ip.blank?
+      `timeout -s 9 -k 1 6 dig +short #{reverse_ip}.origin.asn.cymru.com TXT | head -n 1 | tr -d \\" | awk '{print $1;}'`.strip
+    end
+  end
 end
 
 Rack::Attack.cache.store = ActiveSupport::Cache::RedisStore.new(:password => ENV["REDIS_PASSWD"], :host => 'nb9478.neu.edu', :port => 6379, :timeout => 10)
@@ -43,6 +55,10 @@ end
 
 Rack::Attack.safelist("mark any devise user safe") do |request|
   !request.session["warden.user.user.key"].blank?
+end
+
+Rack::Attack.blocklist("Alibaba datacenter") do |req|
+  !req.asn.blank? && req.asn == "45102"
 end
 
 Rack::Attack.blocklist("Huawei datacenter") do |req|
@@ -113,8 +129,15 @@ Rack::Attack.blocklist("block IP") do |req|
   Rails.cache.read("block #{req.remote_ip}")
 end
 
+# Block by ASN in cache
+# To add an IP: Rails.cache.write("block asn 45102", true, expires_in: 2.days)
+# To remove an IP: Rails.cache.delete("block asn 45102")
+Rack::Attack.blocklist("block asn") do |req|
+  Rails.cache.read("block asn #{req.asn}")
+end
+
 # Block by fingerprint in cache
-# To add an IP: Rails.cache.write("block ZZwgZ3ppcCB8ICB8IA==", true, expires_in: 2.days)
+# To add an IP: Rails.cache.write("block fingerprint ZZwgZ3ppcCB8ICB8IA==", true, expires_in: 2.days)
 # To remove an IP: Rails.cache.delete("block fingerprint ZZwgZ3ppcCB8ICB8IA==")
 Rack::Attack.blocklist("block fingerprint") do |req|
   Rails.cache.read("block fingerprint #{req.fingerprint}")
