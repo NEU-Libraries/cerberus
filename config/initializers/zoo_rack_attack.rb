@@ -61,12 +61,20 @@ Rack::Attack.blocklist("Alibaba datacenter") do |req|
   !req.asn.blank? && req.asn == "45102"
 end
 
+Rack::Attack.blocklist("Google Cloud") do |req|
+  !req.asn.blank? && req.asn == "396982"
+end
+
 Rack::Attack.blocklist("Huawei datacenter") do |req|
   !req.remote_ip.blank? && `timeout -s 9 -k 1 6 host #{req.remote_ip}`.include?("compute.hwclouds")
 end
 
 Rack::Attack.blocklist("Agent Liers") do |request|
   request.env["HTTP_ACCEPT"].blank? && request.env["HTTP_ACCEPT_LANGUAGE"].blank? && request.env["HTTP_COOKIE"].blank? && (request.user_agent.blank? || !request.user_agent.downcase.include?("bot".downcase))
+end
+
+Rack::Attack.blocklist('ImagesiftBot') do |req|
+  !req.user_agent.blank? && req.user_agent.downcase.include?("ImagesiftBot".downcase)
 end
 
 Rack::Attack.blocklist('Siteimprove') do |req|
