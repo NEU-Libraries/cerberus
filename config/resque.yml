@@ -1,5 +1,5 @@
 development: localhost:6379
 test: localhost:6379
 staging: localhost:6379
-secondary: nb9667.neu.edu:6379
-production: nb9667.neu.edu:6379
+secondary: nb9478.neu.edu:6379
+production: nb9478.neu.edu:6379

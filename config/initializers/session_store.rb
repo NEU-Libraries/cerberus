@@ -8,7 +8,7 @@
 
 Cerberus::Application.config.session_store :redis_store, {
   servers: [
-    { url: "redis://nb9667.neu.edu:6379/0/session", password: ENV["REDIS_PASSWD"], expires_in: 1.month, timeout: 10.0, reconnect_attempts: 10, tcp_keepalive: 300 },
+    { url: "redis://nb9478.neu.edu:6379/0/session", password: ENV["REDIS_PASSWD"], expires_in: 1.month, timeout: 10.0, reconnect_attempts: 10, tcp_keepalive: 300 },
   ],
   key: '_cerberus_app_session',
   expires_in: 1.month
