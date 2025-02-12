@@ -33,7 +33,7 @@ production:
   username: drs
   password: <%= ENV["MYSQL_PASSWD"] %>
   pool: 20
-  host: nb9478.neu.edu
+  host: nb9667.neu.edu
 
 secondary:
   adapter: mysql2
@@ -42,4 +42,4 @@ secondary:
   username: drs
   password: <%= ENV["MYSQL_PASSWD"] %>
   pool: 20
-  host: nb9478.neu.edu
+  host: nb9667.neu.edu
