@@ -16,3 +16,4 @@ en:
     - wget
     - index
     - linkcheck
+    - inspectiontool
