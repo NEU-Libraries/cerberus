@@ -68,6 +68,11 @@ class CatalogController < ApplicationController
     else
       begin
         if params[:format] == "rss"
+          if !not_a_bot?
+            # bots lost in the facet sauce
+            # give them a blank 410 to lower resource usage
+            render :nothing => true, :status => 410, :content_type => 'text/html' and return
+          end
           params[:per_page] = 10
           self.solr_search_params_logic += [:limit_to_public]
         else
