@@ -46,6 +46,12 @@ class CommunitiesController < ApplicationController
   end
 
   def facet
+    if !not_a_bot?
+      # bots lost in the facet sauce
+      # give them a blank 410 to lower resource usage
+      render :nothing => true, :status => 410, :content_type => 'text/html' and return
+    end
+
     @set = fetch_solr_document
     self.solr_search_params_logic += [:increase_facet_limit]
 

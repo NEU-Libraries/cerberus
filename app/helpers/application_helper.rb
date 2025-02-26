@@ -2,6 +2,19 @@ module ApplicationHelper
 
   # Only things with theoretically near universal potential use should go here.
 
+  def not_a_bot?
+    # basic method to try and prevent bots getting lost in facet infinite space
+    if !request.blank?
+      ua = request.user_agent
+      botlist = I18n.t("bots").map(&:downcase)
+      if !botlist.any?{|s| ua.include?(s)}
+        return false
+      end
+    end
+
+    return true
+  end
+
   def invalidate_cache(pattern)
     cursor = "0"
     batch_size = 1000

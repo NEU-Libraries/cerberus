@@ -48,6 +48,12 @@ class CatalogController < ApplicationController
     if ((!params[:q].blank?) && (CGI::unescape(params[:q]) == "*") && (current_user.blank? || current_user.nuid.blank?))
       render :template => '/error/500', :layout => false, :formats => [:html], :status => 500
     elsif !has_search_parameters?
+      if !not_a_bot? && !params[:f].nil?
+        # bots lost in the facet sauce
+        # give them a blank 410 to lower resource usage
+        render :nothing => true, :status => 410, :content_type => 'text/html' and return
+      end
+
       self.solr_search_params_logic += [:disable_highlighting]
       recent
 
