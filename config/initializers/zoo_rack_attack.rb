@@ -169,7 +169,7 @@ Rack::Attack.throttle('load shedding', limit: 1, period: 10) do |req|
         req.fingerprint
       else
         # if url isnt frontpage, login related, assets, thumbs, API, throttle static response, or wowza...
-        if (req.path != "/" &&
+        if (req.fullpath != "/" &&
             !(req.fullpath.include? "/users/") &&
             !(req.fullpath.include? "/assets/") &&
             !(req.fullpath.include? "thumbnail_") &&
