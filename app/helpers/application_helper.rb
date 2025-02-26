@@ -7,7 +7,7 @@ module ApplicationHelper
     if !request.blank?
       ua = request.user_agent
       botlist = I18n.t("bots").map(&:downcase)
-      if !botlist.any?{|s| ua.include?(s)}
+      if botlist.any?{|s| ua.include?(s)}
         return false
       end
     end
