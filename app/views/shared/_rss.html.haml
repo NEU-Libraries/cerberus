@@ -1,4 +1,4 @@
--if @document_list.length > 0 && !(params[:controller]=='communities' && params[:id]=="neu:1") && not_a_bot?
+-if @document_list.length > 0 && !(params[:controller]=='communities' && params[:id]=="neu:1") && @not_a_bot
   -if params[:action] == "index" #search
     %a.btn.btn-clear.btn-mini{:href => url_for(params.merge(:format=>"rss"))}
       %span.icon-rss( aria-hidden="true")
