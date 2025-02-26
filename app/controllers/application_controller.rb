@@ -20,6 +20,7 @@ class ApplicationController < ActionController::Base
   protect_from_forgery
   before_filter :impersonate_warning
   before_filter :store_location
+  before_filter :bot_check
   after_filter :redirect_blacklight_overrun
 
   attr_reader :current_api_user
@@ -136,6 +137,10 @@ class ApplicationController < ActionController::Base
     if !session[:impersonate].blank?
       flash[:error] = "#{session[:impersonate]}"
     end
+  end
+
+  def bot_check
+    @not_a_bot = not_a_bot?
   end
 
   def store_location
