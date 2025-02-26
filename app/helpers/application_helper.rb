@@ -12,7 +12,7 @@ module ApplicationHelper
       end
     end
 
-    return true # this is likely auto happening on _facets.html.erb - need a better solution
+    return true
   end
 
   def invalidate_cache(pattern)
