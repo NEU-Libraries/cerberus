@@ -14,7 +14,7 @@ set :branch, ENV['branch'] || current_branch || "master" # you can use the 'bran
 set :user, 'drs'
 set :rails_env, :production
 
-server 'drs@nb9478.neu.edu', user: 'drs', roles: %w{web app db}
+server 'drs@nb9667.neu.edu', user: 'drs', roles: %w{web app db}
 
 namespace :deploy do
   desc "Updating ClamAV"
@@ -62,7 +62,7 @@ namespace :deploy do
         execute :bundle, 'exec', 'rake cache:clear', raise_on_non_zero_exit: false
       end
       # execute "cd #{release_path} && (RAILS_ENV=production rake cache:clear)"
-      execute "sudo htcacheclean -p /space/mod_cache/ -l1K -v -r"
+      execute "sudo htcacheclean -p /opt/space/mod_cache/ -l1K -v -r"
     end
   end
 

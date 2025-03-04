@@ -4,8 +4,6 @@ Cerberus::Application.configure do
 
   config.fedora_home = "/mnt/libraries/cerberusdata/newfedoradata/datastreamStore/"
 
-  config.file_path = "/usr/local/bin/file"
-
   # In the development environment your application's code is reloaded on
   # every request. This slows down response time but is perfect for development
   # since you don't have to restart the web server when you make code changes.
@@ -58,7 +56,7 @@ Cerberus::Application.configure do
 
   # config.force_ssl = true
 
-  config.cache_store = :redis_store, 'redis://nb9478.neu.edu:6379/0/cache', { password: ENV["REDIS_PASSWD"], expires_in: 1.week, timeout: 10.0, reconnect_attempts: 10, tcp_keepalive: 300 }
+  config.cache_store = :redis_store, 'redis://nb9667.neu.edu:6379/0/cache', { password: ENV["REDIS_PASSWD"], expires_in: 1.week, timeout: 10.0, reconnect_attempts: 10, tcp_keepalive: 300 }
 
   # Mailer configuration
   ActionMailer::Base.smtp_settings = {
