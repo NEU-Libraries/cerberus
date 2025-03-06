@@ -21,6 +21,7 @@ module Api
 
         result_hsh = fetch_core_hash
 
+        expires_in 1.hours, :public => true
         render json: result_hsh.to_json
       end
 
@@ -87,6 +88,7 @@ module Api
 
           result_hsh["content_objects"].reject!{ |k,v| v == "Thumbnail Image" }
 
+          expires_in 1.hours, :public => true
           render json: result_hsh.to_json
         rescue NoMethodError
           render json: {error: "This item has no content objects."} and return
