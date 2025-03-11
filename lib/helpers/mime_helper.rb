@@ -7,31 +7,35 @@ module MimeHelper
     result = `#{Cerberus::Application.config.file_path} --mime-type #{file_location.shellescape}`
     #removing newlines and whitespace
     result.strip!
-    mime_type = result.slice(result.index(":")+1..-1).strip
-
-    if mime_type == "application/zip" && !original_filename.blank?
-      # Double check against extension
-      extension = File.extname(original_filename).split(".").last
-      result = `grep -v "^#" /etc/mime.types | grep "#{extension}" | awk '{print $1}'`.gsub(/\n/," ").strip.split(" ").first
-      if result.include?("office")
-        return result
-      end
-    end
+    mime_type = result.slice(result.index(":")+1..-1).strip # magic byte
+    raw_type = mime_type.split("/").first.strip
 
     if !original_filename.blank?
-      # Odds are that it's a poor encoding, and the system is correct in giving a generic
-      # mime type. Due to the complexity of the issue however, we're going to punt this
-      # down the river and see if JWPlayer can survive whatever the issue may be, and
-      # give the extension the benefit of the doubt.
-      extension = File.extname(original_filename)
+      # Double check against extension
+      extension = File.extname(original_filename).split(".").last
+      alternate_mime_type = `grep -v "^#" /etc/mime.types | grep "#{extension}" | awk '{print $1}'`.gsub(/\n/," ").strip.split(" ").first
 
-      if !extension.blank?
-        extension_based_mime_type = Rack::Mime.mime_type(extension)
-
-        if mime_type == "application/octet-stream" || (mime_type.split("/").first.strip != extension_based_mime_type.split("/").first.strip)
-          return extension_based_mime_type
+      # if app/zip lets make sure it's not an office file
+      if mime_type == "application/zip"
+        if alternate_mime_type.include?("office") || alternate_mime_type.include?(".ms-") || alternate_mime_type.include?("/ms")
+          return alternate_mime_type
         end
       end
+
+      # m4a audio vs video issue - check raw type disagreement
+      rack_based_mime_type = Rack::Mime.mime_type(".#{extension}") # needs . to work effectively
+
+      alternate_raw = alternate_mime_type.split("/").first.strip
+      rack_raw = rack_based_mime_type.split("/").first.strip
+
+      if (!alternate_raw.start_with?("application")) && (raw_type != alternate_raw)
+        return alternate_mime_type
+      end
+
+      if (!rack_raw.start_with?("application")) && (raw_type != rack_raw)
+        return rack_based_mime_type
+      end
+
     end
 
     return mime_type
