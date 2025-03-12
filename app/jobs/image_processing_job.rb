@@ -34,6 +34,10 @@ class ImageProcessingJob
     begin
       core_file = ::CoreFile.new
       core_file.depositor = "000000000"
+
+      # Skip the entire class of __DO_NOT_USE__ errors
+      core_file.save!
+
       core_file.parent = Collection.find(parent)
       core_file.properties.parent_id = core_file.parent.pid
       core_file.tag_as_in_progress
