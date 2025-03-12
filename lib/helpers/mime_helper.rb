@@ -12,8 +12,8 @@ module MimeHelper
 
     if !original_filename.blank?
       # Double check against extension
-      extension = File.extname(original_filename).split(".").last
-      alternate_mime_type = `grep -v "^#" /etc/mime.types | grep "#{extension}" | awk '{print $1}'`.gsub(/\n/," ").strip.split(" ").first
+      extension = File.extname(original_filename).split(".").last.downcase
+      alternate_mime_type = `grep -v "^#" /etc/mime.types | grep "#{extension}\s" | awk '{print $1}'`.gsub(/\n/," ").strip.split(" ").first
 
       # if app/zip lets make sure it's not an office file
       if mime_type == "application/zip"
@@ -25,15 +25,18 @@ module MimeHelper
       # m4a audio vs video issue - check raw type disagreement
       rack_based_mime_type = Rack::Mime.mime_type(".#{extension}") # needs . to work effectively
 
-      alternate_raw = alternate_mime_type.split("/").first.strip
-      rack_raw = rack_based_mime_type.split("/").first.strip
-
-      if (!alternate_raw.start_with?("application")) && (raw_type != alternate_raw)
-        return alternate_mime_type
+      if !alternate_mime_type.blank?
+        alternate_raw = alternate_mime_type.split("/").first.strip
+        if (!alternate_raw.start_with?("application")) && (raw_type != alternate_raw)
+          return alternate_mime_type
+        end
       end
 
-      if (!rack_raw.start_with?("application")) && (raw_type != rack_raw)
-        return rack_based_mime_type
+      if !rack_based_mime_type.blank?
+        rack_raw = rack_based_mime_type.split("/").first.strip
+        if (!rack_raw.start_with?("application")) && (raw_type != rack_raw)
+          return rack_based_mime_type
+        end
       end
 
     end
