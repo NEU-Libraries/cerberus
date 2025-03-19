@@ -168,7 +168,7 @@ Rack::Attack.throttle("requests for pdf", limit: 2, period: 1) do |request|
   if `cut -d ' ' -f1 /proc/loadavg`.strip.to_f > 2
     if request.user_agent.blank? || !request.user_agent.downcase.include?("bot".downcase)
       if request.fullpath.include?("fulltext.pdf")
-        if request.headers["Range"].blank?
+        if request.env["HTTP_RANGE"].blank?
           request.fingerprint
         end
       end
