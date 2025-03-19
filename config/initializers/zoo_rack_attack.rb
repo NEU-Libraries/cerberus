@@ -156,6 +156,18 @@ Rack::Attack.throttle("requests by region", limit: 1, period: 10) do |request|
   `geoiplookup #{request.remote_ip} | awk -F', ' '{print $2}'`.strip == "China"
 end
 
+Rack::Attack.throttle("requests for pdf", limit: 2, period: 1) do |request|
+  if `cut -d ' ' -f1 /proc/loadavg`.strip.to_f > 2
+    if request.user_agent.blank? || !request.user_agent.downcase.include?("bot".downcase)
+      if request.fullpath.include?("fulltext.pdf")
+        if request.headers["Range"].blank?
+          request.fingerprint
+        end
+      end
+    end
+  end
+end
+
 # Throttle attempts for a given octet to 1 reqs/10 seconds
 Rack::Attack.throttle('load shedding', limit: 1, period: 10) do |req|
   # if cpu usage is approaching 4 on the 5 min avg...
