@@ -65,6 +65,14 @@ Rack::Attack.blocklist("Google Cloud") do |req|
   !req.asn.blank? && req.asn == "396982"
 end
 
+Rack::Attack.blocklist("Digital Ocean") do |req|
+  !req.asn.blank? && req.asn == "14061"
+end
+
+Rack::Attack.blocklist("PDF Bots") do |req|
+  !req.asn.blank? && ["207990", "263740", "52393", "9009", "36352", "401152", "203020", "20473"].include? req.asn
+end
+
 Rack::Attack.blocklist("Huawei datacenter") do |req|
   !req.remote_ip.blank? && `timeout -s 9 -k 1 6 host #{req.remote_ip}`.include?("compute.hwclouds")
 end
