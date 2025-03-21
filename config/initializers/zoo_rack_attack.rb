@@ -13,25 +13,24 @@ module Rack
 end
 
 class Rack::Attack::Request < ::Rack::Request
+  def host_lookup
+    @host_lookup ||= `timeout -s 9 -k 1 6 host #{remote_ip}`
+  end
+
   def remote_ip
     @remote_ip ||= (env['action_dispatch.remote_ip'] || env['HTTP_X_FORWARDED_FOR'] || ip).to_s
   end
 
   def fingerprint
-    result = "#{env["HTTP_ACCEPT"]} | #{env["HTTP_ACCEPT_ENCODING"]} | #{env["HTTP_ACCEPT_LANGUAGE"]} | #{env["HTTP_COOKIE"]}"
-    Base64.strict_encode64(result)
+    @fingerprint ||= Base64.strict_encode64("#{env["HTTP_ACCEPT"]} | #{env["HTTP_ACCEPT_ENCODING"]} | #{env["HTTP_ACCEPT_LANGUAGE"]} | #{env["HTTP_COOKIE"]}")
   end
 
   def reverse_ip
-    if !remote_ip.blank?
-      IPAddr.new(remote_ip).send("_reverse")
-    end
+    @reverse_ip ||= IPAddr.new(remote_ip).send("_reverse")
   end
 
   def asn
-    if !reverse_ip.blank?
-      `timeout -s 9 -k 1 6 dig +short #{reverse_ip}.origin.asn.cymru.com TXT | head -n 1 | tr -d \\" | awk '{print $1;}'`.strip
-    end
+    @asn ||= `timeout -s 9 -k 1 6 dig +short #{reverse_ip}.origin.asn.cymru.com TXT | head -n 1 | tr -d \\" | awk '{print $1;}'`.strip
   end
 end
 
@@ -69,12 +68,16 @@ Rack::Attack.blocklist("Digital Ocean") do |req|
   !req.asn.blank? && req.asn == "14061"
 end
 
+Rack::Attack.blocklist("Oracle") do |req|
+  !req.asn.blank? && req.asn == "31898"
+end
+
 Rack::Attack.blocklist("PDF Bots") do |req|
   !req.asn.blank? && ["207990", "263740", "52393", "9009", "36352", "401152", "203020", "20473"].include?(req.asn)
 end
 
 Rack::Attack.blocklist("Huawei datacenter") do |req|
-  !req.remote_ip.blank? && `timeout -s 9 -k 1 6 host #{req.remote_ip}`.include?("compute.hwclouds")
+  req.host_lookup.include?("compute.hwclouds")
 end
 
 Rack::Attack.blocklist("Agent Liers") do |request|
@@ -114,11 +117,11 @@ Rack::Attack.blocklist('AsyncHttpClient') do |req|
 end
 
 Rack::Attack.blocklist("Amazon") do |req|
-  !req.remote_ip.blank? && `timeout -s 9 -k 1 6 host #{req.remote_ip}`.include?("amazon")
+  req.host_lookup.include?("amazon")
 end
 
 Rack::Attack.blocklist("Hetzner") do |req|
-  !req.remote_ip.blank? && `timeout -s 9 -k 1 6 host #{req.remote_ip}`.include?("clients.your-server.de")
+  req.host_lookup.include?("clients.your-server.de")
 end
 
 Rack::Attack.throttle("CN Scrapers", limit: 1, period: 10) do |request|
@@ -179,9 +182,9 @@ end
 # Throttle attempts for a given octet to 1 reqs/10 seconds
 Rack::Attack.throttle('load shedding', limit: 1, period: 10) do |req|
   # if cpu usage is approaching 4 on the 5 min avg...
-  if `cut -d ' ' -f2 /proc/loadavg`.strip.to_f > 3
+  if `cut -d ' ' -f2 /proc/loadavg`.strip.to_f > 2.75
     if !req.remote_ip.blank?
-      if `cut -d ' ' -f2 /proc/loadavg`.strip.to_f > 3.75
+      if `cut -d ' ' -f2 /proc/loadavg`.strip.to_f > 3.5
         # everyone out of the boat, no exceptions
         # log to file
         File.write("#{Rails.root}/log/heavy_load_shedding.log", "#{req.remote_ip} - #{req.fingerprint} - #{req.path} - #{Time.now}" + "\n", mode: 'a')
@@ -197,15 +200,11 @@ Rack::Attack.throttle('load shedding', limit: 1, period: 10) do |req|
             !(req.fullpath.include? "/429") &&
             !(req.fullpath.include? "/api/"))
 
-          host_result = `timeout -s 9 -k 1 6 host #{req.remote_ip}`.strip
+          # log to file
+          File.write("#{Rails.root}/log/load_shedding.log", "#{req.remote_ip} - #{req.fingerprint} - #{req.path} - #{Time.now}" + "\n", mode: 'a')
 
-          if !(["lightspeed", "res.spectrum", "rcncustomer", "comcast", "fios.verizon"].any? { |x| host_result.include? x })
-            # log to file
-            File.write("#{Rails.root}/log/load_shedding.log", "#{req.remote_ip} - #{req.fingerprint} - #{host_result} - #{req.path} - #{Time.now}" + "\n", mode: 'a')
-
-            # ip address first octect discriminator
-            req.remote_ip.split(".").first
-          end
+          # ip address first octect discriminator
+          req.remote_ip.split(".").first
         end
       end
     end
