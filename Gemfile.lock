@@ -272,7 +272,7 @@ GEM
     noid-rails (3.2.0)
       actionpack (>= 5.0.0, < 8)
       noid (~> 0.9)
-    nokogiri (1.18.3-x86_64-linux-gnu)
+    nokogiri (1.18.4-x86_64-linux-gnu)
       racc (~> 1.4)
     nom-xml (1.2.0)
       i18n
