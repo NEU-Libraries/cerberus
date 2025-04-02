@@ -13,12 +13,14 @@ module MimeHelper
     if !original_filename.blank?
       # Double check against extension
       extension = File.extname(original_filename).split(".").last.downcase
-      alternate_mime_type = `grep -v "^#" /etc/mime.types | grep "#{extension}\s" | awk '{print $1}'`.gsub(/\n/," ").strip.split(" ").first
+      alternate_mime_type = `grep -v "^#" /etc/mime.types | grep "\\s#{extension}" | awk '{print $1}'`.gsub(/\n/," ").strip.split(" ").first
 
       # if app/zip lets make sure it's not an office file
       if mime_type == "application/zip"
-        if alternate_mime_type.include?("office") || alternate_mime_type.include?(".ms-") || alternate_mime_type.include?("/ms")
-          return alternate_mime_type
+        if !alternate_mime_type.blank?
+          if alternate_mime_type.include?("office") || alternate_mime_type.include?(".ms-") || alternate_mime_type.include?("/ms")
+            return alternate_mime_type
+          end
         end
       end
 
