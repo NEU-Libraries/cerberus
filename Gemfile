@@ -88,6 +88,9 @@ group :development, :test do
   gem 'rubocop-rails', require: false
   gem 'simplecov', require: false
   gem 'simplecov_json_formatter', '0.1.3' # Version 0.1.4 seems to break codeclimate
+
+  # Gem age tool
+  gem 'next_rails'
 end
 
 group :test do
