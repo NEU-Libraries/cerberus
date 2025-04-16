@@ -13,7 +13,7 @@ class ApplicationController < ActionController::Base
   # and just avoid Croutons NotImplementedError
   def breadcrumbs
     super
-  rescue NoMethodError, NotImplementedError
+  rescue NoMethodError, NotImplementedError, ActionView::MissingTemplate
     # Just don't show them
     logger.info('No breadcrumbs found') && (return)
   end
