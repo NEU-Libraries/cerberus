@@ -56,6 +56,18 @@ Rack::Attack.safelist("mark any devise user safe") do |request|
   !request.session["warden.user.user.key"].blank?
 end
 
+Rack::Attack.safelist("Wake Forest") do |req|
+  !req.asn.blank? && req.asn == "40245"
+end
+
+Rack::Attack.safelist("Bielefeld University Library") do |req|
+  !req.asn.blank? && req.asn == "680"
+end
+
+Rack::Attack.safelist("BPL") do |req|
+  !req.asn.blank? && req.asn == "21949"
+end
+
 Rack::Attack.blocklist("Alibaba datacenter") do |req|
   !req.asn.blank? && req.asn == "45102"
 end
