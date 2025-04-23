@@ -105,7 +105,7 @@ Rack::Attack.blocklist("Agent Liers") do |request|
 end
 
 Rack::Attack.blocklist('One hit wonders') do |req|
-  req.referrer.blank? && req.env["HTTP_COOKIE"].blank? && (req.env["HTTP_ACCEPT_LANGUAGE"] == "en") && req.region != "United States"
+  req.referrer.blank? && req.env["HTTP_COOKIE"].blank? && (req.env["HTTP_ACCEPT_LANGUAGE"] == "en") && (req.region != "United States")
 end
 
 Rack::Attack.blocklist('ImagesiftBot') do |req|
