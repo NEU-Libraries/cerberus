@@ -100,6 +100,10 @@ Rack::Attack.blocklist("Agent Liers") do |request|
   request.env["HTTP_ACCEPT"].blank? && request.env["HTTP_ACCEPT_LANGUAGE"].blank? && request.env["HTTP_COOKIE"].blank? && (request.user_agent.blank? || !request.user_agent.downcase.include?("bot".downcase))
 end
 
+Rack::Attack.blocklist('One hit wonders') do |req|
+  req.referrer.blank? && req.env["HTTP_COOKIE"].blank? && (req.env["HTTP_ACCEPT_LANGUAGE"] == "en")
+end
+
 Rack::Attack.blocklist('ImagesiftBot') do |req|
   !req.user_agent.blank? && req.user_agent.downcase.include?("ImagesiftBot".downcase)
 end
