@@ -38,3 +38,7 @@ coverage
 
 # Ignore irrelevant system nfs files
 .nfs*
+
+# v2 artifacts
+.env
+/app/assets/builds/
