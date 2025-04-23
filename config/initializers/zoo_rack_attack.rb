@@ -32,6 +32,10 @@ class Rack::Attack::Request < ::Rack::Request
   def asn
     @asn ||= `timeout -s 9 -k 1 6 dig +short #{reverse_ip}.origin.asn.cymru.com TXT | head -n 1 | tr -d \\" | awk '{print $1;}'`.strip
   end
+
+  def region
+    @region || = `geoiplookup #{remote_ip} | awk -F', ' '{print $2}'`.strip
+  end
 end
 
 Rack::Attack.cache.store = ActiveSupport::Cache::RedisStore.new(:password => ENV["REDIS_PASSWD"], :host => 'nb9667.neu.edu', :port => 6379, :timeout => 10)
@@ -101,7 +105,7 @@ Rack::Attack.blocklist("Agent Liers") do |request|
 end
 
 Rack::Attack.blocklist('One hit wonders') do |req|
-  req.referrer.blank? && req.env["HTTP_COOKIE"].blank? && (req.env["HTTP_ACCEPT_LANGUAGE"] == "en")
+  req.referrer.blank? && req.env["HTTP_COOKIE"].blank? && (req.env["HTTP_ACCEPT_LANGUAGE"] == "en") && req.region != "United States"
 end
 
 Rack::Attack.blocklist('ImagesiftBot') do |req|
@@ -184,7 +188,7 @@ end
 
 # Bring back region throttle
 Rack::Attack.throttle("requests by region", limit: 1, period: 10) do |request|
-  `geoiplookup #{request.remote_ip} | awk -F', ' '{print $2}'`.strip == "China"
+  request.region == "China"
 end
 
 Rack::Attack.throttle("requests for pdf", limit: 2, period: 1) do |request|
