@@ -72,8 +72,12 @@ Rack::Attack.safelist("BPL") do |req|
   !req.asn.blank? && req.asn == "21949"
 end
 
-Rack::Attack.blocklist("Large Wave") do |req|
+Rack::Attack.blocklist("Large Wave I") do |req|
   req.fingerprint == "Ki8qIHwgZ3ppcCwgZGVmbGF0ZSB8ICB8IA=="
+end
+
+Rack::Attack.blocklist("Large Wave II") do |req|
+  req.fingerprint == "Ki8qIHwgZ3ppcCwgZGVmbGF0ZSwgYnIgfCBlbi1VUyxlbjtxPTAuNSB8IA=="
 end
 
 Rack::Attack.blocklist("Alibaba datacenter") do |req|
