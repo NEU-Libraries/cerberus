@@ -204,7 +204,7 @@ Rack::Attack.throttle("requests for pdf", limit: 2, period: 1) do |request|
 end
 
 Rack::Attack.throttle("likely bot", limit: 1, period: 10) do |req|
-  if req.env["HTTP_ACCEPT_LANGUAGE"].blank? && !request.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase)
+  if req.env["HTTP_ACCEPT_LANGUAGE"].blank? && !req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase)
     if !(req.fullpath.include? "/api/") && !(req.fullpath.include? "/oai")
       # log to file
       File.write("#{Rails.root}/log/likely_bot.log", "#{req.remote_ip} - #{req.fingerprint} - #{req.user_agent} - #{Time.now}" + "\n", mode: 'a')
