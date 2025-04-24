@@ -34,7 +34,7 @@ class Rack::Attack::Request < ::Rack::Request
   end
 
   def region
-    @region || = `geoiplookup #{remote_ip} | awk -F', ' '{print $2}'`.strip
+    @region ||= `geoiplookup #{remote_ip} | awk -F', ' '{print $2}'`.strip
   end
 end
 
