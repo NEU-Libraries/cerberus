@@ -72,12 +72,8 @@ Rack::Attack.safelist("BPL") do |req|
   !req.asn.blank? && req.asn == "21949"
 end
 
-Rack::Attack.blocklist("Large Wave I") do |req|
-  req.fingerprint == "Ki8qIHwgZ3ppcCwgZGVmbGF0ZSB8ICB8IA=="
-end
-
-Rack::Attack.blocklist("Large Wave II") do |req|
-  req.fingerprint == "Ki8qIHwgZ3ppcCwgZGVmbGF0ZSwgYnIgfCBlbi1VUyxlbjtxPTAuNSB8IA=="
+Rack::Attack.blocklist("Bot Wave") do |req|
+  req.referrer.blank? && req.env["HTTP_COOKIE"].blank? && request.env["HTTP_ACCEPT"].strip == "*/*" && (req.user_agent.blank? || !req.user_agent.downcase.include?("bot".downcase))
 end
 
 Rack::Attack.blocklist("Alibaba datacenter") do |req|
