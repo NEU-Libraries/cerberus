@@ -73,7 +73,7 @@ Rack::Attack.safelist("BPL") do |req|
 end
 
 Rack::Attack.blocklist("Bot Wave") do |req|
-  req.referrer.blank? && req.env["HTTP_COOKIE"].blank? && request.env["HTTP_ACCEPT"].strip == "*/*" && (req.user_agent.blank? || !req.user_agent.downcase.include?("bot".downcase))
+  req.referrer.blank? && req.env["HTTP_COOKIE"].blank? && (req.env["HTTP_ACCEPT"].strip == "*/*") && (req.user_agent.blank? || !req.user_agent.downcase.include?("bot".downcase))
 end
 
 Rack::Attack.blocklist("Alibaba datacenter") do |req|
