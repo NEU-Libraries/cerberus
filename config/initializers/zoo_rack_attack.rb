@@ -186,6 +186,11 @@ Rack::Attack.blocklist("block fingerprint") do |req|
   Rails.cache.read("block fingerprint #{req.fingerprint}")
 end
 
+# MS Throttle
+Rack::Attack.throttle("Azure", limit: 3, period: 10) do |request|
+  !req.asn.blank? && req.asn == "8075"
+end
+
 # Bring back region throttle
 Rack::Attack.throttle("requests by region", limit: 1, period: 10) do |request|
   request.region == "China"
