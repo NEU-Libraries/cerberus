@@ -188,7 +188,11 @@ end
 
 # MS Throttle
 Rack::Attack.throttle("Azure", limit: 3, period: 10) do |req|
-  !req.asn.blank? && req.asn == "8075"
+  if `cut -d ' ' -f1 /proc/loadavg`.strip.to_f > 1
+    if !req.asn.blank? && req.asn == "8075"
+      req.fingerprint
+    end
+  end
 end
 
 # Bring back region throttle
