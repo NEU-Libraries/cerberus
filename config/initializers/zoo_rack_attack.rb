@@ -92,6 +92,10 @@ Rack::Attack.blocklist("Oracle") do |req|
   !req.asn.blank? && req.asn == "31898"
 end
 
+Rack::Attack.blocklist("Azure") do |req|
+  !req.asn.blank? && req.asn == "8075"
+end
+
 Rack::Attack.blocklist("PDF Bots") do |req|
   !req.asn.blank? && ["207990", "263740", "52393", "9009", "36352", "401152", "203020", "20473"].include?(req.asn)
 end
@@ -184,15 +188,6 @@ end
 # To remove an IP: Rails.cache.delete("block fingerprint ZZwgZ3ppcCB8ICB8IA==")
 Rack::Attack.blocklist("block fingerprint") do |req|
   Rails.cache.read("block fingerprint #{req.fingerprint}")
-end
-
-# MS Throttle
-Rack::Attack.throttle("Azure", limit: 3, period: 10) do |req|
-  if `cut -d ' ' -f1 /proc/loadavg`.strip.to_f > 1
-    if !req.asn.blank? && req.asn == "8075"
-      req.fingerprint
-    end
-  end
 end
 
 # Bring back region throttle
