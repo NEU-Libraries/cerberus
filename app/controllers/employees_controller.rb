@@ -75,7 +75,7 @@ class EmployeesController < ApplicationController
       render :json => { url: my_loaders_path } and return
     end
 
-    if File.extname(old_content_object.original_filename) != ("." + extension)
+    if File.extname(old_content_object.original_filename).downcase != ("." + extension).downcase
       session[:flash_error] = "Extension must be #{File.extname(old_content_object.original_filename)} not #{extension}"
       render :json => { url: my_loaders_path } and return
     end
