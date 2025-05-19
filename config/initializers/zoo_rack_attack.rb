@@ -270,3 +270,16 @@ THROTTLE_HTML = ActionView::Base.new.render(file: 'public/429.html')
 Rack::Attack.throttled_response = lambda do |env|
   [503, {'Content-Type' => 'text/html'}, [THROTTLE_HTML]]
 end
+
+
+# Track requests from a special user agent.
+Rack::Attack.track("not_declared_bot") do |req|
+  !req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase)
+end
+
+# Track it using ActiveSupport::Notification
+ActiveSupport::Notifications.subscribe("rack.attack") do |name, start, finish, request_id, req|
+  if req.env['rack.attack.matched'] == "not_declared_bot" && req.env['rack.attack.match_type'] == :track
+    File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-fingerprints.log", "#{req.remote_ip} | #{req.fingerprint}" + "\n", mode: 'a')
+  end
+end
