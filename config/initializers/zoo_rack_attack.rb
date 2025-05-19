@@ -96,6 +96,10 @@ Rack::Attack.blocklist("Azure") do |req|
   !req.asn.blank? && req.asn == "8075"
 end
 
+Rack::Attack.blocklist("BytePlus") do |req|
+  !req.asn.blank? && req.asn == "150436"
+end
+
 Rack::Attack.blocklist("PDF Bots") do |req|
   !req.asn.blank? && ["207990", "263740", "52393", "9009", "36352", "401152", "203020", "20473"].include?(req.asn)
 end
@@ -150,6 +154,17 @@ end
 
 Rack::Attack.blocklist("Hetzner") do |req|
   req.host_lookup.include?("clients.your-server.de")
+end
+
+Rack::Attack.blocklist("CN Block") do |req|
+  result = false
+  if !req.env["HTTP_ACCEPT_LANGUAGE"].blank?
+    if req.env["HTTP_ACCEPT_LANGUAGE"].strip == "zh-CN"
+      if (req.fullpath.include?("creator") || req.fullpath.include?("rss"))
+        result = true
+    end
+  end
+  result
 end
 
 Rack::Attack.throttle("CN Scrapers", limit: 1, period: 10) do |request|
