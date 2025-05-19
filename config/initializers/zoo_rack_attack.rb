@@ -160,7 +160,7 @@ Rack::Attack.blocklist("CN Block") do |req|
   result = false
   if !req.env["HTTP_ACCEPT_LANGUAGE"].blank?
     if req.env["HTTP_ACCEPT_LANGUAGE"].strip == "zh-CN"
-      if (req.fullpath.include?("creat") || req.fullpath.include?("rss"))
+      if (req.fullpath.include?("?f") || req.fullpath.include?("creat") || req.fullpath.include?("rss"))
         result = true
     end
   end
