@@ -275,7 +275,14 @@ end
 
 # Track requests from a special user agent.
 Rack::Attack.track("not_declared_bot") do |req|
-  !req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase)
+  !req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase) &&
+            (req.fullpath != "/" &&
+            !(req.fullpath.include? "/users/") &&
+            !(req.fullpath.include? "/assets/") &&
+            !(req.fullpath.include? "thumbnail_") &&
+            !(req.fullpath.include? "/wowza/") &&
+            !(req.fullpath.include? "/429") &&
+            !(req.fullpath.include? "/api/"))
 end
 
 # Track it using ActiveSupport::Notification
