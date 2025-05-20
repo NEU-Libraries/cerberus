@@ -275,7 +275,7 @@ end
 
 # Track requests from a special user agent.
 Rack::Attack.track("not_declared_bot") do |req|
-  !req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase) &&
+  req.env["HTTP_COOKIE"].blank? && !req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase) &&
             (req.fullpath != "/" &&
             !(req.fullpath.include? "/users/") &&
             !(req.fullpath.include? "/assets/") &&
@@ -288,6 +288,6 @@ end
 # Track it using ActiveSupport::Notification
 ActiveSupport::Notifications.subscribe("rack.attack") do |name, start, finish, request_id, req|
   if req.env['rack.attack.matched'] == "not_declared_bot" && req.env['rack.attack.match_type'] == :track
-    File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-fingerprints.log", "#{req.remote_ip} | #{req.fingerprint}" + "\n", mode: 'a')
+    File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-fingerprints.log", "#{req.env['HTTP_X_FORWARDED_FOR']} - #{req.remote_ip} | #{req.fingerprint}" + "\n", mode: 'a')
   end
 end
