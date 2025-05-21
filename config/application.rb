@@ -22,5 +22,7 @@ module Cerberus
 
     # Using GoodJob as
     config.active_job.queue_adapter = :good_job
+
+    config.active_support.to_time_preserves_timezone = :zone
   end
 end
