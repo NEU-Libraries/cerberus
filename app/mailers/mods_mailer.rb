@@ -1,5 +1,5 @@
 class ModsMailer < ActionMailer::Base
-  default from: "notifier@repository.library.northeastern.edu"
+  default from: "digitalrepositoryservice@northeastern.edu"
 
   def export_alert(pid, nuid, session_id)
     user = !nuid.blank? ? User.find_by_nuid(nuid) : nil

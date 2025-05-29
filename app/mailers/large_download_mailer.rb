@@ -1,5 +1,5 @@
 class LargeDownloadMailer < ActionMailer::Base
-  default from: "notifier@repository.library.northeastern.edu"
+  default from: "digitalrepositoryservice@northeastern.edu"
 
   def download_alert(time, nuid, session_id)
     user = !nuid.blank? ? User.find_by_nuid(nuid) : nil

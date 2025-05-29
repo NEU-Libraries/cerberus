@@ -64,7 +64,7 @@ Cerberus::Application.configure do
     :ignore_crawlers => %w{Googlebot bingbot},
     :email => {
       :email_prefix => "[DRS Production] ",
-      :sender_address => %{"notifier" <notifier@repository.library.northeastern.edu>},
+      :sender_address => %{"notifier" <digitalrepositoryservice@northeastern.edu>},
       :exception_recipients => ["d.cliff@northeastern.edu"]
     }
 

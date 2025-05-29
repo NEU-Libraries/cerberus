@@ -1,5 +1,5 @@
 class LoaderMailer < ActionMailer::Base
-  default from: "notifier@repository.library.northeastern.edu"
+  default from: "digitalrepositoryservice@northeastern.edu"
 
   def load_alert(load, user)
     @load = load

@@ -1,5 +1,5 @@
 class MoveMailer < ActionMailer::Base
-  default from: "notifier@repository.library.northeastern.edu"
+  default from: "digitalrepositoryservice@northeastern.edu"
 
   def move_alert(object, reason, collection_url, user)
     @title = object.title || "No title set.  Uh oh!"

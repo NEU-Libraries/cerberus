@@ -1,7 +1,7 @@
 class MetadataMailer < ActionMailer::Base
   include AbstractController::Callbacks
 
-  default from: "notifier@repository.library.northeastern.edu"
+  default from: "digitalrepositoryservice@northeastern.edu"
   after_filter :tag_as_notified, only:[:daily_alert_email]
   after_filter :tag_as_notified_nonfeatured, only:[:daily_nonfeatured_alert_email]
 

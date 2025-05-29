@@ -1,5 +1,5 @@
 class IptcMailer < ActionMailer::Base
-  default from: "notifier@repository.library.northeastern.edu"
+  default from: "digitalrepositoryservice@northeastern.edu"
 
   def iptc_alert
     @item_reports = Loaders::ItemReport.where('validity = TRUE AND modified = TRUE AND created_at > ?', DateTime.yesterday.beginning_of_day)

@@ -1,5 +1,5 @@
 class DeleteMailer < ActionMailer::Base
-  default from: "notifier@repository.library.northeastern.edu"
+  default from: "digitalrepositoryservice@northeastern.edu"
 
   def delete_alert(object, reason, user)
     @title = object.title || "No title set.  Uh oh!"

@@ -51,23 +51,14 @@ Cerberus::Application.configure do
   # Tell Mailer to use repositorydev as the default host
   config.action_mailer.default_url_options = { :host => "repository.library.northeastern.edu" }
 
+  config.action_mailer.default_options = { :X-PM-Message-Stream => "drsfe" }
+
   Rails.application.routes.default_url_options[:host] = "repository.library.northeastern.edu"
   Rails.application.routes.default_url_options[:protocol] = "https"
 
   # config.force_ssl = true
 
   config.cache_store = :redis_store, 'redis://nb9667.neu.edu:6379/0/cache', { password: ENV["REDIS_PASSWD"], expires_in: 1.week, timeout: 10.0, reconnect_attempts: 10, tcp_keepalive: 300 }
-
-  # Mailer configuration
-  ActionMailer::Base.smtp_settings = {
-    address: ENV["MAILER_ADDRESS"],
-    port: ENV["MAILER_PORT"],
-    domain: ENV["MAILER_DOMAIN"],
-    user_name: ENV["MAILER_USERNAME"],
-    password: ENV["MAILER_PASSWORD"],
-    authentication: ENV["MAILER_AUTHENTICATION"],
-    enable_starttls_auto: true
-  }
 
   config.lograge.enabled = true
   config.log_level = :warn
@@ -80,8 +71,8 @@ Cerberus::Application.configure do
     :ignore_crawlers => %w{Googlebot LinkCheck MegaIndex Python-urllib sqlmap Applebot bingbot Yahoo!\ Slurp},
     :email => {
       :email_prefix => "[DRS Production] ",
-      :sender_address => %{"notifier" <notifier@repository.library.northeastern.edu>},
-      :exception_recipients => ["dgcliff@northeastern.edu"],
+      :sender_address => %{"notifier" <digitalrepositoryservice@northeastern.edu>},
+      :exception_recipients => ["d.cliff@northeastern.edu"],
       :email_format => :html
     }
 

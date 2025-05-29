@@ -1,5 +1,5 @@
 class PrivatizeMailer < ActionMailer::Base
-  default from: "notifier@repository.library.northeastern.edu"
+  default from: "digitalrepositoryservice@northeastern.edu"
 
   def privatize_alert(col_pid, pids)
     @col_pid = col_pid

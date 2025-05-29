@@ -67,8 +67,8 @@ Cerberus::Application.configure do
   config.middleware.use ExceptionNotification::Rack,
     :email => {
       :email_prefix => "[DRS Staging] ",
-      :sender_address => %{"notifier" <notifier@repository.library.northeastern.edu>},
-      :exception_recipients => ["dgcliff@northeastern.edu"],
+      :sender_address => %{"notifier" <digitalrepositoryservice@northeastern.edu>},
+      :exception_recipients => ["d.cliff@northeastern.edu"],
       :email_format => :html
     }
 
