@@ -51,7 +51,7 @@ Cerberus::Application.configure do
   # Tell Mailer to use repositorydev as the default host
   config.action_mailer.default_url_options = { :host => "repository.library.northeastern.edu" }
 
-  config.action_mailer.default_options = { :X-PM-Message-Stream => "drsfe" }
+  config.action_mailer.default_options = { "X-PM-Message-Stream" => "drsfe" }
 
   Rails.application.routes.default_url_options[:host] = "repository.library.northeastern.edu"
   Rails.application.routes.default_url_options[:protocol] = "https"
