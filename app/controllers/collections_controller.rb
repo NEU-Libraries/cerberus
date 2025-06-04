@@ -6,6 +6,7 @@ class CollectionsController < CatalogController
   def show
     @collection = AtlasRb::Collection.find(params[:id])
     @response = find_many(AtlasRb::Collection.children(params[:id]))
+    breadcrumbs(params[:id])
   end
 
   def new

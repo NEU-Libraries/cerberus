@@ -4,9 +4,9 @@ class WorksController < ApplicationController
   include Thumbable
 
   def show
-    # @work = Work.find(params[:id])
     @work = AtlasRb::Work.find(params[:id])
     @mods = AtlasRb::Work.mods(params[:id], 'html')
+    breadcrumbs(params[:id])
   end
 
   def new
