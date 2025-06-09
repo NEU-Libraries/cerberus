@@ -215,6 +215,11 @@ Rack::Attack.throttle("requests by region", limit: 1, period: 10) do |request|
   request.region == "China"
 end
 
+# HTTP_SEC_FETCH_USER
+Rack::Attack.throttle("unlikely to be browser", limit: 1, period: 10) do |req|
+  req.env["HTTP_SEC_FETCH_USER"].blank? && req.env["HTTP_COOKIE"].blank? && (req.user_agent.blank? || !req.user_agent.downcase.include?("bot".downcase))
+end
+
 Rack::Attack.throttle("requests for pdf", limit: 2, period: 1) do |request|
   if `cut -d ' ' -f1 /proc/loadavg`.strip.to_f > 2
     if request.user_agent.blank? || !request.user_agent.downcase.include?("bot".downcase)
