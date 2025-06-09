@@ -76,6 +76,10 @@ Rack::Attack.blocklist("Bot Wave") do |req|
   req.referrer.blank? && req.env["HTTP_COOKIE"].blank? && (req.env["HTTP_ACCEPT"] == "*/*") && (req.user_agent.blank? || !req.user_agent.downcase.include?("bot".downcase))
 end
 
+Rack::Attack.blocklist("Peerdist") do |req|
+  !req.env["HTTP_ACCEPT_ENCODING"].blank? && req.env["HTTP_ACCEPT_ENCODING"].downcase.include?("peerdist")
+end
+
 Rack::Attack.blocklist("Alibaba datacenter") do |req|
   !req.asn.blank? && req.asn == "45102"
 end
