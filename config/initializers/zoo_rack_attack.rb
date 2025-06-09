@@ -72,6 +72,11 @@ Rack::Attack.safelist("BPL") do |req|
   !req.asn.blank? && req.asn == "21949"
 end
 
+# NIEC
+Rack::Attack.safelist("NIEC") do |req|
+  !req.remote_ip.blank? && (req.remote_ip.strip == "162.215.121.62")
+end
+
 Rack::Attack.blocklist("Bot Wave") do |req|
   req.referrer.blank? && req.env["HTTP_COOKIE"].blank? && (req.env["HTTP_ACCEPT"] == "*/*") && (req.user_agent.blank? || !req.user_agent.downcase.include?("bot".downcase))
 end
