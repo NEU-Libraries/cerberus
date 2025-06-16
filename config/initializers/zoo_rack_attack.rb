@@ -287,11 +287,11 @@ end
 THROTTLE_HTML = ActionView::Base.new.render(file: 'public/429.html')
 
 Rack::Attack.throttled_response = lambda do |env|
-  [503, {'Content-Type' => 'text/html', 'Cache-Control' => 'no-cache, no-store, max-age=0, must-revalidate', 'Pragma' => 'no-cache'}, [THROTTLE_HTML]]
+  [503, {'Set-Cookie' => 'cerberus_throttled=true', 'Content-Type' => 'text/html', 'Cache-Control' => 'no-cache, no-store, max-age=0, must-revalidate', 'Pragma' => 'no-cache'}, [THROTTLE_HTML]]
 end
 
 Rack::Attack.blocklisted_response = lambda do |env|
-  [403, {'Content-Type' => 'text/plain', 'Cache-Control' => 'no-cache, no-store, max-age=0, must-revalidate', 'Pragma' => 'no-cache'}, ["Forbidden\n"]]
+  [403, {'Set-Cookie' => 'cerberus_blocked=true', 'Content-Type' => 'text/plain', 'Cache-Control' => 'no-cache, no-store, max-age=0, must-revalidate', 'Pragma' => 'no-cache'}, ["Forbidden\n"]]
 end
 
 # Track requests from a special user agent.
