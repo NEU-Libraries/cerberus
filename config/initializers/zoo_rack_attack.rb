@@ -311,4 +311,8 @@ ActiveSupport::Notifications.subscribe("rack.attack") do |name, start, finish, r
   if req.env['rack.attack.matched'] == "not_declared_bot" && req.env['rack.attack.match_type'] == :track
     File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-fingerprints.log", "#{req.env['HTTP_X_FORWARDED_FOR']} - #{req.ip} | #{req.fingerprint}" + "\n", mode: 'a')
   end
+
+  if (req.env['rack.attack.match_type'] == :blocklist) && !req.env["HTTP_COOKIE"].blank?
+    File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-cookies-and-blocked.log", "#{req.env['rack.attack.matched']} - #{req.ip} | #{req.fingerprint}" + "\n", mode: 'a')
+  end
 end
