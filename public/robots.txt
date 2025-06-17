@@ -5,6 +5,8 @@
 # Disallow: /
 User-agent: *
 Disallow: /
+User-agent: Siteimprove
+Disallow: /
 User-agent: Amazonbot
 Disallow: /
 User-agent: TurnitinBot
