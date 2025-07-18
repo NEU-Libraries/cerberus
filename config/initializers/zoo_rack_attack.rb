@@ -170,9 +170,17 @@ Rack::Attack.blocklist("Hetzner") do |req|
 end
 
 Rack::Attack.blocklist("throttle cookie wave") do |req|
-  if `cut -d ' ' -f2 /proc/loadavg`.strip.to_f > 1.5
+  if `cut -d ' ' -f2 /proc/loadavg`.strip.to_f > 1
     !req.env["HTTP_COOKIE"].blank? && req.env["HTTP_COOKIE"].include?("cerberus_throttled")
   end
+end
+
+Rack::Attack.blocklist("block cookie wave") do |req|
+  !req.env["HTTP_COOKIE"].blank? && req.env["HTTP_COOKIE"].include?("cerberus_throttled") && (req.fullpath.include?("?f") || req.fullpath.include?("creat") || req.fullpath.include?("rss"))
+end
+
+Rack::Attack.blocklist("block shared banned cookie") do |req|
+  !req.env["HTTP_COOKIE"].blank? && req.env["HTTP_COOKIE"].include?("cerberus_blocked")
 end
 
 Rack::Attack.blocklist("CN Block") do |req|
