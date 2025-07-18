@@ -169,6 +169,12 @@ Rack::Attack.blocklist("Hetzner") do |req|
   req.host_lookup.include?("clients.your-server.de")
 end
 
+Rack::Attack.blocklist("throttle cookie wave") do |req|
+  if `cut -d ' ' -f2 /proc/loadavg`.strip.to_f > 1.5
+    !req.env["HTTP_COOKIE"].blank? && req.env["HTTP_COOKIE"].include?("cerberus_throttled")
+  end
+end
+
 Rack::Attack.blocklist("CN Block") do |req|
   result = false
   if !req.env["HTTP_ACCEPT_LANGUAGE"].blank?
