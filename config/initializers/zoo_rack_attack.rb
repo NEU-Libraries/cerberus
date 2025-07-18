@@ -176,7 +176,7 @@ Rack::Attack.blocklist("throttle cookie wave") do |req|
 end
 
 Rack::Attack.blocklist("block cookie wave") do |req|
-  !req.env["HTTP_COOKIE"].blank? && req.env["HTTP_COOKIE"].include?("cerberus_throttled") && (req.fullpath.include?("?f") || req.fullpath.include?("creat") || req.fullpath.include?("rss"))
+  !req.env["HTTP_COOKIE"].blank? && req.env["HTTP_COOKIE"].include?("cerberus_throttled") && (req.fullpath.include?("&f") || req.fullpath.include?("?f") || req.fullpath.include?("creat") || req.fullpath.include?("rss"))
 end
 
 Rack::Attack.blocklist("block shared banned cookie") do |req|
@@ -187,7 +187,7 @@ Rack::Attack.blocklist("CN Block") do |req|
   result = false
   if !req.env["HTTP_ACCEPT_LANGUAGE"].blank?
     if req.env["HTTP_ACCEPT_LANGUAGE"].strip == "zh-CN"
-      if (req.fullpath.include?("?f") || req.fullpath.include?("creat") || req.fullpath.include?("rss"))
+      if (req.fullpath.include?("&f") || req.fullpath.include?("?f") || req.fullpath.include?("creat") || req.fullpath.include?("rss"))
         result = true
       end
     end
