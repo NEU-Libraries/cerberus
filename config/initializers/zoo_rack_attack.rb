@@ -101,9 +101,9 @@ Rack::Attack.blocklist("Oracle") do |req|
   !req.asn.blank? && req.asn == "31898"
 end
 
-Rack::Attack.blocklist("Azure") do |req|
-  !req.asn.blank? && req.asn == "8075"
-end
+# Rack::Attack.blocklist("Azure") do |req|
+#   !req.asn.blank? && req.asn == "8075"
+# end
 
 Rack::Attack.blocklist("BytePlus") do |req|
   !req.asn.blank? && req.asn == "150436"
@@ -252,8 +252,7 @@ Rack::Attack.throttle("likely bot", limit: 1, period: 10) do |req|
   end
 end
 
-# Throttle attempts for a given octet to 1 reqs/10 seconds
-Rack::Attack.throttle('load shedding', limit: 1, period: 20) do |req|
+Rack::Attack.throttle('blacklight limit', limit: 1, period: 20) do |req|
   # if cpu usage is approaching 4 on the 5 min avg...
   if `cut -d ' ' -f2 /proc/loadavg`.strip.to_f > 2.75
     if (req.fullpath.include?("?f") || req.fullpath.include?("creat") || req.fullpath.include?("rss"))
