@@ -269,7 +269,7 @@ end
 Rack::Attack.throttle('blacklight limit', limit: 1, period: 20) do |req|
   # if cpu usage is approaching 4 on the 5 min avg...
   if `cut -d ' ' -f2 /proc/loadavg`.strip.to_f > 2.75
-    if (req.fullpath.include?("?f") || req.fullpath.include?("creat") || req.fullpath.include?("rss"))
+    if (req.fullpath.include?("&f") || req.fullpath.include?("?f") || req.fullpath.include?("creat") || req.fullpath.include?("rss"))
       true
     end
   end
