@@ -248,7 +248,7 @@ end
 
 # HTTP_SEC_FETCH_USER
 Rack::Attack.throttle("unlikely to be browser", limit: 1, period: 10) do |req|
-  req.env["HTTP_SEC_FETCH_USER"].blank? && (req.user_agent.blank? || !req.user_agent.downcase.include?("bot".downcase))
+  req.env["HTTP_SEC_FETCH_USER"].blank? && (!req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase))
   File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-sec_fetch_user.log", "#{req.ip} | #{req.fingerprint}" + "\n", mode: 'a')
 end
 
