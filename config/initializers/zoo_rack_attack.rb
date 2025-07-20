@@ -246,11 +246,6 @@ Rack::Attack.throttle("requests by region", limit: 1, period: 10) do |request|
   request.region == "China"
 end
 
-# HTTP_SEC_FETCH_USER
-Rack::Attack.throttle("unlikely to be browser", limit: 1, period: 10) do |req|
-  req.env["HTTP_SEC_FETCH_USER"].blank? && (!req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase))
-end
-
 Rack::Attack.throttle("requests for pdf", limit: 2, period: 1) do |request|
   if `cut -d ' ' -f1 /proc/loadavg`.strip.to_f > 2
     if request.user_agent.blank? || !request.user_agent.downcase.include?("bot".downcase)
@@ -344,9 +339,5 @@ ActiveSupport::Notifications.subscribe("rack.attack") do |name, start, finish, r
 
   if (req.env['rack.attack.match_type'] == :blocklist) && !req.env["HTTP_COOKIE"].blank?
     File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-cookies-and-blocked.log", "#{req.env['rack.attack.matched']} - #{req.ip} | #{req.fingerprint}" + "\n", mode: 'a')
-  end
-
-  if req.env['rack.attack.matched'] == "unlikely to be browser"
-    File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-sec_fetch_user.log", "#{req.ip} | #{req.fingerprint}" + "\n", mode: 'a')
   end
 end
