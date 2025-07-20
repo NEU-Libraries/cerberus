@@ -169,14 +169,22 @@ Rack::Attack.blocklist("Hetzner") do |req|
   req.host_lookup.include?("clients.your-server.de")
 end
 
+Rack::Attack.blocklist('openai') do |req|
+  !req.user_agent.blank? && req.user_agent.downcase.include?("openai".downcase)
+end
+
 Rack::Attack.blocklist("throttle cookie wave") do |req|
-  if `cut -d ' ' -f2 /proc/loadavg`.strip.to_f > 1
-    !req.env["HTTP_COOKIE"].blank? && req.env["HTTP_COOKIE"].include?("cerberus_throttled")
+  if (!req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase))
+    if `cut -d ' ' -f2 /proc/loadavg`.strip.to_f > 1
+      !req.env["HTTP_COOKIE"].blank? && req.env["HTTP_COOKIE"].include?("cerberus_throttled")
+    end
   end
 end
 
 Rack::Attack.blocklist("block cookie wave") do |req|
-  !req.env["HTTP_COOKIE"].blank? && req.env["HTTP_COOKIE"].include?("cerberus_throttled") && (req.fullpath.include?("&f") || req.fullpath.include?("?f") || req.fullpath.include?("creat") || req.fullpath.include?("rss"))
+  if (!req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase))
+    !req.env["HTTP_COOKIE"].blank? && req.env["HTTP_COOKIE"].include?("cerberus_throttled") && (req.fullpath.include?("&f") || req.fullpath.include?("?f") || req.fullpath.include?("creat") || req.fullpath.include?("rss"))
+  end
 end
 
 Rack::Attack.blocklist("block shared banned cookie") do |req|
@@ -240,7 +248,8 @@ end
 
 # HTTP_SEC_FETCH_USER
 Rack::Attack.throttle("unlikely to be browser", limit: 1, period: 10) do |req|
-  req.env["HTTP_SEC_FETCH_USER"].blank? && req.env["HTTP_COOKIE"].blank? && (req.user_agent.blank? || !req.user_agent.downcase.include?("bot".downcase))
+  req.env["HTTP_SEC_FETCH_USER"].blank? && (req.user_agent.blank? || !req.user_agent.downcase.include?("bot".downcase))
+  File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-sec_fetch_user.log", "#{req.ip} | #{req.fingerprint}" + "\n", mode: 'a')
 end
 
 Rack::Attack.throttle("requests for pdf", limit: 2, period: 1) do |request|
@@ -267,8 +276,7 @@ Rack::Attack.throttle("likely bot", limit: 1, period: 10) do |req|
 end
 
 Rack::Attack.throttle('blacklight limit', limit: 1, period: 20) do |req|
-  # if cpu usage is approaching 4 on the 5 min avg...
-  if `cut -d ' ' -f2 /proc/loadavg`.strip.to_f > 2.75
+  if (`cut -d ' ' -f2 /proc/loadavg`.strip.to_f > 1) && (req.region != "United States")
     if (req.fullpath.include?("&f") || req.fullpath.include?("?f") || req.fullpath.include?("creat") || req.fullpath.include?("rss"))
       true
     end
