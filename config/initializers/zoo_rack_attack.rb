@@ -198,7 +198,9 @@ Rack::Attack.blocklist("CN Block") do |req|
 end
 
 Rack::Attack.blocklist("blacklight") do |req|
-  req.env["HTTP_SEC_FETCH_USER"].blank? && (req.fullpath.include?("&f") || req.fullpath.include?("?f") || req.fullpath.include?("creat") || req.fullpath.include?("rss"))
+  if (!req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase))
+    req.env["HTTP_SEC_FETCH_USER"].blank? && (req.fullpath.include?("&f") || req.fullpath.include?("?f") || req.fullpath.include?("creat") || req.fullpath.include?("rss"))
+  end
 end
 
 Rack::Attack.throttle("CN Scrapers", limit: 1, period: 10) do |request|
