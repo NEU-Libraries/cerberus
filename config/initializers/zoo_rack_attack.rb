@@ -105,6 +105,10 @@ end
 #   !req.asn.blank? && req.asn == "8075"
 # end
 
+Rack::Attack.blocklist("Yandex") do |req|
+  !req.asn.blank? && req.asn == "13238"
+end
+
 Rack::Attack.blocklist("BytePlus") do |req|
   !req.asn.blank? && req.asn == "150436"
 end
@@ -127,6 +131,10 @@ end
 
 Rack::Attack.blocklist('One hit wonders') do |req|
   req.referrer.blank? && req.env["HTTP_COOKIE"].blank? && (req.env["HTTP_ACCEPT_LANGUAGE"] == "en") && ((req.fullpath.include? "f%5B") || (req.region != "United States"))
+end
+
+Rack::Attack.blocklist('Yandex UA') do |req|
+  !req.user_agent.blank? && req.user_agent.downcase.include?("Yandex".downcase)
 end
 
 Rack::Attack.blocklist('ImagesiftBot') do |req|
