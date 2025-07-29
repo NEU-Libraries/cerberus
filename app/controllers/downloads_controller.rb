@@ -45,7 +45,7 @@ class DownloadsController < ApplicationController
   end
 
   def show
-    if (asset.class == ImageThumbnailFile || asset.class == PageFile) && (Rails.env.production? || Rails.env.staging?)
+    if (asset.public?) && (asset.class == ImageThumbnailFile || asset.class == PageFile) && (Rails.env.production? || Rails.env.staging?)
       response.headers['Cache-Control'] = "public"
     end
     # 301 redirect fulltext if not logged in to try and boost google scholar
