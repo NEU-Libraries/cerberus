@@ -80,7 +80,7 @@ class DerivativeCreator
       object.proxy_uploader         = self.core.proxy_uploader
       object.core_record            = self.core
 
-      if klass != ImageThumbnailFile && sentinel && !sentinel.send(sentinel_class_to_symbol(klass.to_s)).blank?
+      if sentinel && !sentinel.send(sentinel_class_to_symbol(klass.to_s)).blank?
         # set content object to sentinel value
         # convert klass to string to send to sentinel to get rights
         object.permissions = sentinel.send(sentinel_class_to_symbol(klass.to_s))["permissions"]
