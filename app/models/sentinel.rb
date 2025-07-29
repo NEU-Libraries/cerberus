@@ -2,7 +2,7 @@ class Sentinel < ActiveRecord::Base
   attr_accessible :set_pid, :permanent, :email, :audio_master, :audio, :image_master,
                   :image_large, :image_medium, :image_small, :mspowerpoint, :msexcel,
                   :msword, :page, :pdf, :text, :video_master, :video, :zip, :pid_list,
-                  :epub, :dataset, :core_file
+                  :epub, :dataset, :image_thumbnail, :core_file
 
   serialize :core_file, Hash
 
@@ -23,6 +23,7 @@ class Sentinel < ActiveRecord::Base
   serialize :zip, Hash
   serialize :epub, Hash
   serialize :dataset, Hash
+  serialize :image_thumbnail, Hash
 
   serialize :pid_list, Array
 end
