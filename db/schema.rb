@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20160817194158) do
+ActiveRecord::Schema.define(:version => 20250730194803) do
 
   create_table "aggregated_statistics", :force => true do |t|
     t.string   "object_type"
@@ -194,8 +194,8 @@ ActiveRecord::Schema.define(:version => 20160817194158) do
   add_index "searches", ["user_id"], :name => "index_searches_on_user_id"
 
   create_table "sentinels", :force => true do |t|
-    t.datetime "created_at",   :null => false
-    t.datetime "updated_at",   :null => false
+    t.datetime "created_at",      :null => false
+    t.datetime "updated_at",      :null => false
     t.text     "audio"
     t.text     "audio_master"
     t.text     "image_large"
@@ -216,6 +216,9 @@ ActiveRecord::Schema.define(:version => 20160817194158) do
     t.boolean  "permanent"
     t.string   "email"
     t.text     "core_file"
+    t.text     "epub"
+    t.text     "dataset"
+    t.text     "image_thumbnail"
   end
 
   create_table "single_use_links", :force => true do |t|
