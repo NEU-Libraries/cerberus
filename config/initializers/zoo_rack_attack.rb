@@ -133,6 +133,12 @@ Rack::Attack.blocklist('One hit wonders') do |req|
   req.referrer.blank? && req.env["HTTP_COOKIE"].blank? && (req.env["HTTP_ACCEPT_LANGUAGE"] == "en") && ((req.fullpath.include? "f%5B") || (req.region != "United States"))
 end
 
+Rack::Attack.blocklist('sec fetch extended') do |req|
+  if (!req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase))
+    req.env["HTTP_SEC_FETCH_USER"].blank? && req.referrer.blank? && (req.region != "United States")
+  end
+end
+
 Rack::Attack.blocklist('Yandex UA') do |req|
   !req.user_agent.blank? && req.user_agent.downcase.include?("Yandex".downcase)
 end
@@ -211,6 +217,11 @@ Rack::Attack.blocklist("blacklight") do |req|
   end
 end
 
+# Vietnam
+Rack::Attack.throttle("requests by region - vietnam", limit: 1, period: 10) do |request|
+  request.region == "Vietnam"
+end
+
 Rack::Attack.throttle("CN Scrapers", limit: 1, period: 10) do |request|
   result = false
   if !request.env["HTTP_ACCEPT_LANGUAGE"].blank?
@@ -250,7 +261,7 @@ Rack::Attack.blocklist("block fingerprint") do |req|
 end
 
 # Bring back region throttle
-Rack::Attack.throttle("requests by region", limit: 1, period: 10) do |request|
+Rack::Attack.throttle("requests by region - china", limit: 1, period: 10) do |request|
   request.region == "China"
 end
 
