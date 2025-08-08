@@ -30,7 +30,8 @@ class PrivatizeCollectionJob
                     ["Text", "text"],
                     ["Video Master", "video_master"],
                     ["Video", "video"],
-                    ["Zip", "zip"]]
+                    ["Zip", "zip"],
+                    ["Thumbnail", "image_thumbnail"]]
 
     sentinel = col.sentinel
 

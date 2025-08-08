@@ -62,6 +62,8 @@ class SentinelJob
     content_docs = doc.content_objects
     # content_models = content_docs.map{|doc| doc.klass}
 
+    # TODO - add thumbnail class to below list
+
     if !sentinel.nil?
       content_docs.each do |content_doc|
         content_object = ActiveFedora::Base.find(content_doc.pid, cast: true)

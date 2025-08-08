@@ -14,7 +14,8 @@ class SentinelsController < ApplicationController
                     ["Text", "text"],
                     ["Video Master", "video_master"],
                     ["Video", "video"],
-                    ["Zip", "zip"]]
+                    ["Zip", "zip"],
+                    ["Thumbnail", "image_thumbnail"]]
 
     @set = ActiveFedora::Base.find(params[:parent], cast: true)
 
@@ -66,7 +67,8 @@ class SentinelsController < ApplicationController
                     ["Text", "text"],
                     ["Video Master", "video_master"],
                     ["Video", "video"],
-                    ["Zip", "zip"]]
+                    ["Zip", "zip"],
+                    ["Thumbnail", "image_thumbnail"]]
 
     @sentinel = Sentinel.find(params[:id])
     @set = ActiveFedora::Base.find(@sentinel.set_pid, cast: true)
