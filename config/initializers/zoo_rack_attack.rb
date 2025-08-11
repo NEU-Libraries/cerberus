@@ -68,6 +68,10 @@ Rack::Attack.safelist("Bielefeld University Library") do |req|
   !req.asn.blank? && req.asn == "680"
 end
 
+Rack::Attack.safelist("University of Cape Town") do |req|
+  !req.asn.blank? && req.asn == "36982"
+end
+
 Rack::Attack.safelist("BPL") do |req|
   !req.asn.blank? && req.asn == "21949"
 end
@@ -75,6 +79,10 @@ end
 # NIEC
 Rack::Attack.safelist("NIEC") do |req|
   !req.remote_ip.blank? && (req.remote_ip.strip == "162.215.121.62")
+end
+
+Rack::Attack.safelist("robots txt") do |req|
+  req.fullpath.end_with?("robots.txt")
 end
 
 Rack::Attack.blocklist("Bot Wave") do |req|
