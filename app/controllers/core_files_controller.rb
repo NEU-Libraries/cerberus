@@ -665,6 +665,7 @@ class CoreFilesController < ApplicationController
 
   def update
     @core_file = CoreFile.find(params[:id])
+    sentinel = @core_file.parent.sentinel
 
     # Invalidate cache
     invalidate_pid(@core_file.pid)
@@ -711,7 +712,16 @@ class CoreFilesController < ApplicationController
 
           thumb.depositor              = @core_file.depositor
           thumb.core_record            = @core_file
-          thumb.rightsMetadata.content = @core_file.rightsMetadata.content
+
+          if sentinel && !sentinel.send(sentinel_class_to_symbol("ImageThumbnailFile")).blank?
+            # set content object to sentinel value
+            thumb.permissions = sentinel.send(sentinel_class_to_symbol("ImageThumbnailFile"))["permissions"]
+            thumb.mass_permissions = sentinel.send(sentinel_class_to_symbol("ImageThumbnailFile"))["mass_permissions"]
+            thumb.save!
+          else
+            thumb.rightsMetadata.content = @core_file.rightsMetadata.content
+          end
+
           thumb.save!
 
           create_all_thumbnail_sizes(thumb_path, thumb.pid)
@@ -748,7 +758,7 @@ class CoreFilesController < ApplicationController
         captions_path = move_file_to_tmp(file)
         mime = extract_mime_type(captions_path)
         type = mime.split("/").first.strip
-        sentinel = @core_file.parent.sentinel
+        # sentinel = @core_file.parent.sentinel
 
         if type == "text"
           caption_object = TextFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint), core_record: @core_file)
