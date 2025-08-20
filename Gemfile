@@ -86,6 +86,8 @@ gem 'jwt', '1.5.6'
 
 gem "clamby"
 
+gem 'useragent'
+
 # gem 'rack-cors', require: false
 
 # Gems used only for assets and not required
