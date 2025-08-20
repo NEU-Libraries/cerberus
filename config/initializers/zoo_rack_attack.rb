@@ -147,7 +147,7 @@ end
 
 Rack::Attack.blocklist('sec fetch extended') do |req|
   if (!req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase))
-    if (UserAgent.parse(req.user_agent) != "Safari")
+    if (UserAgent.parse(req.user_agent).browser != "Safari")
       req.env["HTTP_SEC_FETCH_USER"].blank? && req.referrer.blank? && (req.region != "United States")
     end
   end
@@ -229,7 +229,7 @@ end
 
 Rack::Attack.blocklist("blacklight") do |req|
   if (!req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase))
-    if (UserAgent.parse(req.user_agent) != "Safari")
+    if (UserAgent.parse(req.user_agent).browser != "Safari")
       req.env["HTTP_SEC_FETCH_USER"].blank? && (req.fullpath.include?("&f") || req.fullpath.include?("?f") || req.fullpath.include?("creat") || req.fullpath.include?("rss"))
     end
   end
