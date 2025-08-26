@@ -1,12 +1,6 @@
 -if !@thumbs.nil? && @thumbs.length > 0
-  %span{"data-alt" => "", "data-picture" => ""}
-    %span.thumbnail-s1{"data-src" => @thumbs[0] , "data-media" => "(min-width: 0)" }
-      /Fallback content for non-JS browsers. Same img src as the initial, unqualified source element.
-    %noscript
-      %img{alt: " ", src: @thumbs[0]}
-    - if @thumbs.length > 1
-      %span.thumbnail-s2{"data-src" => @thumbs[1] , "data-media" => "(min-width: 980px)" }
-        %img{src: "data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACwAAAAAAQABAAACAkQBADs=", loading: "lazy", width: "170", height: "170"}
-    - if @thumbs.length > 2
-      %span.thumbnail-s3{"data-src" => @thumbs[2], "data-media" => "(min-width: 980px) and (min-device-pixel-ratio: 2.0), (min-width: 981px) and (-webkit-min-device-pixel-ratio: 2.0)" }
-
+  %picture
+    %source{media: "(max-width: 980px)", srcset: "#{@thumbs[0]}", width: "85px"}
+    %source{media: "(min-width: 981px) and (max-width: 1199px)", srcset: "#{@thumbs[1]}, #{@thumbs[2]} 2x", width: "135px"}
+    %source{media: "(min-width: 1200px)", srcset: "#{@thumbs[1]}, #{@thumbs[2]} 2x", width: "170px"}
+    %img{src: "data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACwAAAAAAQABAAACAkQBADs=", loading: "lazy", width: "170", height: "170"}/
