@@ -82,6 +82,17 @@ class CoreFilesController < ApplicationController
     end
   end
 
+  def button_group
+    @core_file = fetch_solr_document
+    @noid = (@core_file.pid).split(":").last
+    @content_objects = cached_content_objects(@core_file)
+    respond_to do |format|
+      format.js {
+        render "button_group"
+      }
+    end
+  end
+
   def reindex
     pid = params[:id]
 
