@@ -57,11 +57,15 @@
   -# Indicate item is embargoed otherwise.
   %menu.btn-toolbar(type="toolbar")
     - if !item.under_embargo?(current_user) && item.klass == "CoreFile"
-      .btn-group
+      .btn-group{id: "dbg-#{noid}"}
         %a.btn.btn-mini.btn-clear{id: "viewItemDownloads-#{noid}"}(data-pid="#{noid}" href="#" data-toggle="dropdown")
           Downloads
           %i.icon-caret-down
-        = render partial: 'core_files/derivative_btn_group', locals: {contents: @content_objects, grid_view: true, item: item}
+        -#= render partial: 'core_files/derivative_btn_group', locals: {contents: @content_objects, grid_view: true, item: item} # this could be an XHR call...
+        :javascript
+          $(document).ready(function() {
+            $("#dbg-#{noid}").append("<%= escape_javascript(render(partial: 'core_files/derivative_btn_group', locals: {contents: @content_objects, grid_view: true, item: item})) %>");
+          });
     - elsif item.klass == "Collection"
       - if current_user
         .btn-group
