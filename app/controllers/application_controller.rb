@@ -25,7 +25,7 @@ class ApplicationController < ActionController::Base
 
   attr_reader :current_api_user
 
-  # around_filter :profile
+  around_filter :profile
 
   # def send_file(path, options = {})
   #   if options[:range]
@@ -60,7 +60,7 @@ class ApplicationController < ActionController::Base
   # end
 
   def profile
-    if params[:profile] && result = RubyProf.profile { yield }
+    if params[:profile] && current_user.admin? && result = RubyProf.profile { yield }
 
       out = StringIO.new
       RubyProf::GraphHtmlPrinter.new(result).print out, :min_percent => 0
