@@ -61,11 +61,7 @@
         %a.btn.btn-mini.btn-clear{id: "viewItemDownloads-#{noid}"}(data-pid="#{noid}" href="#" data-toggle="dropdown")
           Downloads
           %i.icon-caret-down
-        -#= render partial: 'core_files/derivative_btn_group', locals: {contents: @content_objects, grid_view: true, item: item} # this could be an XHR call...
-        :javascript
-          $(window).load(function() {
-            $.getScript("/files/#{item.pid}/button_group");
-          });
+        = render partial: 'core_files/derivative_btn_group', locals: {contents: @content_objects, grid_view: true, item: item}
     - elsif item.klass == "Collection"
       - if current_user
         .btn-group
