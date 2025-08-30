@@ -1,1 +1,1 @@
-$("#dbg-#{@noid}").append("<%= escape_javascript(render(partial: 'core_files/derivative_btn_group', locals: {contents: @content_objects, grid_view: true, item: @core_file})) %>");
+$("#dbg-" + "<%= @noid %>").append("<%= escape_javascript(render(partial: 'core_files/derivative_btn_group', locals: {contents: @content_objects, grid_view: true, item: @core_file})) %>");
