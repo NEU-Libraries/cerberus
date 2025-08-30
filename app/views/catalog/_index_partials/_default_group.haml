@@ -7,4 +7,5 @@
   - if !docs.nil?
     - docs.each_with_index do |document,counter|
       - @thumbs = document.thumbnail_list
-      = render partial: 'shared/drs_item/drs_item' , locals: { item: document }
+      - cache("#{(current_user.nil? ? "0" : Digest::MD5.hexdigest(current_user.groups.to_s))}-#{Digest::MD5.hexdigest(document.updated_at)}") do
+        = render partial: 'shared/drs_item/drs_item' , locals: { item: document }
