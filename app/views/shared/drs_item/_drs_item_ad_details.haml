@@ -63,7 +63,7 @@
           %i.icon-caret-down
         -#= render partial: 'core_files/derivative_btn_group', locals: {contents: @content_objects, grid_view: true, item: item} # this could be an XHR call...
         :javascript
-          $(document).ready(function() {
+          $(window).load(function() {
             $.getScript("/files/#{item.pid}/button_group");
           });
     - elsif item.klass == "Collection"
