@@ -31,6 +31,10 @@ class User < ActiveRecord::Base
     return !self.group_list.blank? ? self.group_list : []
   end
 
+  def groups_sum
+    @sum ||= Digest::MD5.hexdigest(self.groups.to_s)
+  end
+
   def pretty_groups
     if !self.group_list.blank?
       pretty_groups = {}
