@@ -329,6 +329,7 @@ GEM
       iso-639
       nokogiri
       nom-xml
+    multi_fetch_fragments (0.0.17)
     multi_json (1.7.9)
     multipart-post (2.0.0)
     mysql2 (0.3.14)
@@ -606,6 +607,7 @@ DEPENDENCIES
   mini_exiftool
   mods (= 2.0.1)
   mods_display!
+  multi_fetch_fragments
   multi_json (~> 1.7.9)
   mysql2 (= 0.3.14)
   namae (= 0.8.7)

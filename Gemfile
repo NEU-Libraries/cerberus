@@ -87,6 +87,7 @@ gem 'jwt', '1.5.6'
 gem "clamby"
 
 gem 'useragent'
+gem 'multi_fetch_fragments'
 
 # gem 'rack-cors', require: false
 
