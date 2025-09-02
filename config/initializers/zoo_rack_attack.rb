@@ -147,9 +147,7 @@ end
 
 Rack::Attack.blocklist('sec fetch extended') do |req|
   if (!req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase))
-    if (UserAgent.parse(req.user_agent).browser != "Safari")
-      req.env["HTTP_SEC_FETCH_USER"].blank? && req.referrer.blank? && (req.region != "United States")
-    end
+    req.env["HTTP_SEC_FETCH_SITE"].blank? && req.referrer.blank? && (req.region != "United States")
   end
 end
 
@@ -229,9 +227,7 @@ end
 
 Rack::Attack.blocklist("blacklight") do |req|
   if (!req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase))
-    if (UserAgent.parse(req.user_agent).browser != "Safari")
-      req.env["HTTP_SEC_FETCH_USER"].blank? && (req.fullpath.include?("&f") || req.fullpath.include?("?f") || req.fullpath.include?("creat") || req.fullpath.include?("rss"))
-    end
+    req.env["HTTP_SEC_FETCH_SITE"].blank? && (req.fullpath.include?("&f") || req.fullpath.include?("?f") || req.fullpath.include?("creat") || req.fullpath.include?("rss"))
   end
 end
 
@@ -371,6 +367,6 @@ ActiveSupport::Notifications.subscribe("rack.attack") do |name, start, finish, r
   end
 
   if req.env['rack.attack.matched'] == "blacklight"
-    File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-sec_fetch_user.log", "#{req.ip} | #{req.fingerprint}" + "\n", mode: 'a')
+    File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-sec_fetch_site.log", "#{req.ip} | #{req.fingerprint}" + "\n", mode: 'a')
   end
 end
