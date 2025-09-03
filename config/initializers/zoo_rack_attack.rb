@@ -149,6 +149,10 @@ Rack::Attack.blocklist("Argentina wave") do |req|
   (req.env["HTTP_ACCEPT_LANGUAGE"].blank?) && (req.region == "Argentina")
 end
 
+Rack::Attack.blocklist("Mexico wave") do |req|
+  (req.env["HTTP_ACCEPT_LANGUAGE"].blank?) && (req.region == "Mexico")
+end
+
 Rack::Attack.blocklist("Agent Liers") do |request|
   request.env["HTTP_ACCEPT"].blank? && request.env["HTTP_ACCEPT_LANGUAGE"].blank? && request.env["HTTP_COOKIE"].blank? && (request.user_agent.blank? || !request.user_agent.downcase.include?("bot".downcase))
 end
