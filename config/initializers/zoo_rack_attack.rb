@@ -141,6 +141,14 @@ Rack::Attack.blocklist("Brazil wave") do |req|
   (req.env["HTTP_ACCEPT_LANGUAGE"].blank?) && (req.region == "Brazil")
 end
 
+Rack::Attack.blocklist("Vietnam wave") do |req|
+  (req.env["HTTP_ACCEPT_LANGUAGE"].blank?) && (req.region == "Vietnam")
+end
+
+Rack::Attack.blocklist("Argentina wave") do |req|
+  (req.env["HTTP_ACCEPT_LANGUAGE"].blank?) && (req.region == "Argentina")
+end
+
 Rack::Attack.blocklist("Agent Liers") do |request|
   request.env["HTTP_ACCEPT"].blank? && request.env["HTTP_ACCEPT_LANGUAGE"].blank? && request.env["HTTP_COOKIE"].blank? && (request.user_agent.blank? || !request.user_agent.downcase.include?("bot".downcase))
 end
@@ -233,11 +241,6 @@ Rack::Attack.blocklist("blacklight") do |req|
   if (!req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase))
     req.env["HTTP_SEC_FETCH_SITE"].blank? && (req.fullpath.include?("&f") || req.fullpath.include?("?f") || req.fullpath.include?("creat") || req.fullpath.include?("rss"))
   end
-end
-
-# Vietnam
-Rack::Attack.throttle("requests by region - vietnam", limit: 1, period: 10) do |request|
-  request.region == "Vietnam"
 end
 
 Rack::Attack.throttle("CN Scrapers", limit: 1, period: 10) do |request|
