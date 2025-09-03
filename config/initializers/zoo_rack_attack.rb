@@ -228,17 +228,11 @@ end
 # end
 
 Rack::Attack.blocklist("CN Block") do |req|
-  result = false
   if !req.env["HTTP_ACCEPT_LANGUAGE"].blank?
     if (req.region != "United States")
-      if req.env["HTTP_ACCEPT_LANGUAGE"].include?("zh-CN")
-        if (req.fullpath.include?("&f") || req.fullpath.include?("?f") || req.fullpath.include?("creat") || req.fullpath.include?("rss"))
-          result = true
-        end
-      end
+      req.env["HTTP_ACCEPT_LANGUAGE"].include?("zh-CN")
     end
   end
-  result
 end
 
 Rack::Attack.blocklist("blacklight") do |req|
