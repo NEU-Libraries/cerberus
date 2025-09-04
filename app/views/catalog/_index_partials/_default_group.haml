@@ -5,4 +5,7 @@
     - @smart_collections.each do |smart_collection|
       =render :partial => 'shared/drs_item/drs_item_smart_collection', locals: { smart_collection: smart_collection.parameterize.underscore }
   - if !docs.nil?
-    = render partial: 'shared/drs_item/drs_item', collection: docs, :as => :item, cache: Proc.new{|item| [item, "drs_item_bl-#{item.pid}-#{(current_user.nil? ? "0" : current_user.groups_sum)}"]}
+    - if !current_user.nil?
+      = render partial: 'shared/drs_item/drs_item', collection: docs, :as => :item, cache: Proc.new{|item| [item, "drs_item_bl-#{item.pid}-#{current_user.groups_sum}"]}
+    - else
+      = render partial: 'shared/drs_item/drs_item', collection: docs, :as => :item
