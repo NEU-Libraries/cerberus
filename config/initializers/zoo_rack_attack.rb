@@ -76,6 +76,10 @@ Rack::Attack.safelist("BPL") do |req|
   !req.asn.blank? && req.asn == "21949"
 end
 
+Rack::Attack.safelist("zh-CN head bot") do |req|
+  !req.asn.blank? && req.asn == "18004"
+end
+
 # NIEC
 Rack::Attack.safelist("NIEC") do |req|
   !req.remote_ip.blank? && (req.remote_ip.strip == "162.215.121.62")
