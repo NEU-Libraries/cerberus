@@ -285,7 +285,7 @@ end
 # end
 
 Rack::Attack.blocklist("china region block") do |req|
-  request.region == "China"
+  req.region == "China"
 end
 
 Rack::Attack.throttle("requests for pdf", limit: 2, period: 1) do |request|
