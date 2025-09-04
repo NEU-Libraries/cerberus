@@ -134,7 +134,7 @@ Rack::Attack.blocklist("Huawei ASN") do |req|
 end
 
 Rack::Attack.blocklist("zh-CN head bot") do |req|
-  !req.asn.blank? && req.asn == "18004"
+  !req.asn.blank? && ["54994", "18004"].include?(req.asn)
 end
 
 Rack::Attack.blocklist("PDF Bots") do |req|
