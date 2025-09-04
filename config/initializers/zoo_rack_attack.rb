@@ -141,6 +141,10 @@ Rack::Attack.blocklist("Huawei datacenter") do |req|
   req.host_lookup.include?("compute.hwclouds")
 end
 
+Rack::Attack.blocklist("qwant") do |req|
+  req.host_lookup.include?("qwant")
+end
+
 Rack::Attack.blocklist("Brazil wave") do |req|
   (req.env["HTTP_ACCEPT_LANGUAGE"].blank?) && (req.region == "Brazil" || req.region.blank?)
 end
