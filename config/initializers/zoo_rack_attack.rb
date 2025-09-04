@@ -138,19 +138,19 @@ Rack::Attack.blocklist("Huawei datacenter") do |req|
 end
 
 Rack::Attack.blocklist("Brazil wave") do |req|
-  (req.env["HTTP_ACCEPT_LANGUAGE"].blank?) && (req.region == "Brazil")
+  (req.env["HTTP_ACCEPT_LANGUAGE"].blank?) && (req.region == "Brazil" || req.region.blank?)
 end
 
 Rack::Attack.blocklist("Vietnam wave") do |req|
-  (req.env["HTTP_ACCEPT_LANGUAGE"].blank?) && (req.region == "Vietnam")
+  (req.env["HTTP_ACCEPT_LANGUAGE"].blank?) && (req.region == "Vietnam" || req.region.blank?)
 end
 
 Rack::Attack.blocklist("Argentina wave") do |req|
-  (req.env["HTTP_ACCEPT_LANGUAGE"].blank?) && (req.region == "Argentina")
+  (req.env["HTTP_ACCEPT_LANGUAGE"].blank?) && (req.region == "Argentina" || req.region.blank?)
 end
 
 Rack::Attack.blocklist("Mexico wave") do |req|
-  (req.env["HTTP_ACCEPT_LANGUAGE"].blank?) && (req.region == "Mexico")
+  (req.env["HTTP_ACCEPT_LANGUAGE"].blank?) && (req.region == "Mexico" || req.region.blank?)
 end
 
 Rack::Attack.blocklist("Agent Liers") do |request|
