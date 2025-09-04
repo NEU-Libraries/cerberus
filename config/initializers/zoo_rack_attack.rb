@@ -246,9 +246,11 @@ end
 # end
 
 Rack::Attack.blocklist("CN Block") do |req|
-  if !req.env["HTTP_ACCEPT_LANGUAGE"].blank?
-    if (req.region != "United States")
-      req.env["HTTP_ACCEPT_LANGUAGE"].include?("zh-CN")
+  if `cut -d ' ' -f1 /proc/loadavg`.strip.to_f > 1
+    if !req.env["HTTP_ACCEPT_LANGUAGE"].blank?
+      if (req.region != "United States")
+        req.env["HTTP_ACCEPT_LANGUAGE"].include?("zh-CN")
+      end
     end
   end
 end
@@ -298,12 +300,16 @@ Rack::Attack.blocklist("block fingerprint") do |req|
 end
 
 # Bring back region throttle
-# Rack::Attack.throttle("requests by region - china", limit: 1, period: 10) do |request|
-#   request.region == "China"
-# end
+Rack::Attack.throttle("requests by region - china", limit: 1, period: 10) do |request|
+  if `cut -d ' ' -f1 /proc/loadavg`.strip.to_f > 1
+    request.region == "China"
+  end
+end
 
 Rack::Attack.blocklist("china region block") do |req|
-  req.region == "China"
+  if `cut -d ' ' -f1 /proc/loadavg`.strip.to_f > 2
+    req.region == "China"
+  end
 end
 
 Rack::Attack.throttle("requests for pdf", limit: 2, period: 1) do |request|
