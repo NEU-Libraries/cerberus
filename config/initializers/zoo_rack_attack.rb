@@ -280,7 +280,11 @@ Rack::Attack.blocklist("block fingerprint") do |req|
 end
 
 # Bring back region throttle
-Rack::Attack.throttle("requests by region - china", limit: 1, period: 10) do |request|
+# Rack::Attack.throttle("requests by region - china", limit: 1, period: 10) do |request|
+#   request.region == "China"
+# end
+
+Rack::Attack.blocklist("china region block") do |req|
   request.region == "China"
 end
 
