@@ -133,6 +133,10 @@ Rack::Attack.blocklist("Viet") do |req|
   !req.asn.blank? && req.asn == "45899"
 end
 
+Rack::Attack.blocklist("Huawei ASN") do |req|
+  !req.asn.blank? && ["136907", "55990", "151610"].include?(req.asn)
+end
+
 Rack::Attack.blocklist("PDF Bots") do |req|
   !req.asn.blank? && ["207990", "263740", "52393", "9009", "36352", "401152", "203020", "20473"].include?(req.asn)
 end
