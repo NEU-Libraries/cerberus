@@ -141,6 +141,10 @@ Rack::Attack.blocklist("PDF Bots") do |req|
   !req.asn.blank? && ["207990", "263740", "52393", "9009", "36352", "401152", "203020", "20473"].include?(req.asn)
 end
 
+Rack::Attack.blocklist("Chiron") do |req|
+  !req.asn.blank? && req.asn == "22773"
+end
+
 Rack::Attack.blocklist("Huawei datacenter") do |req|
   req.host_lookup.include?("compute.hwclouds")
 end
