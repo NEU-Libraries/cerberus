@@ -253,6 +253,14 @@ end
 #   !req.env["HTTP_COOKIE"].blank? && req.env["HTTP_COOKIE"].include?("cerberus_blocked")
 # end
 
+Rack::Attack.blocklist("CN Azure") do |req|
+  if !req.asn.blank? && (req.asn == "8075")
+    if !req.env["HTTP_ACCEPT_LANGUAGE"].blank?
+      req.env["HTTP_ACCEPT_LANGUAGE"].include?("zh-CN")
+    end
+  end
+end
+
 Rack::Attack.blocklist("CN Block") do |req|
   if `cut -d ' ' -f1 /proc/loadavg`.strip.to_f > 1
     if !req.env["HTTP_ACCEPT_LANGUAGE"].blank?
