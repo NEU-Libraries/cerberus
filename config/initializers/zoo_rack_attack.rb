@@ -177,12 +177,6 @@ Rack::Attack.blocklist("lang print") do |req|
   (req.env["HTTP_ACCEPT_LANGUAGE"].blank?) && (req.fingerprint == "Ki8qIHwgZ3ppcCwgZGVmbGF0ZSwgYnIgfCAgfCA=")
 end
 
-Rack::Attack.blocklist("head bots") do |req|
-  if (req.user_agent.blank?) || (!req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase))
-    req.head?
-  end
-end
-
 Rack::Attack.blocklist('One hit wonders') do |req|
   req.referrer.blank? && req.env["HTTP_COOKIE"].blank? && (req.env["HTTP_ACCEPT_LANGUAGE"] == "en") && ((req.fullpath.include? "f%5B") || (req.region != "United States"))
 end
