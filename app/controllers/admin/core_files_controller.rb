@@ -25,6 +25,30 @@ class Admin::CoreFilesController < AdminController
   def large_upload
   end
 
+  def process_large_upload
+    @core_file = ::CoreFile.new
+
+    # collection id for new file
+    collection = Collection.find(params[:collection_id])
+
+    # uid for tus upload, convert to isilon path
+    uid = params[:url].split("/").last
+    tmp_path = "/mnt/libraries/large-uploads/#{uid}"
+    @core_file.tmp_path = tmp_path
+
+    # set original filename from post
+    @core_file.original_filename = params[:original_filename]
+    @core_file.save!
+
+    @core_file.instantiate_appropriate_content_object(tmp_path, @core_file.original_filename)
+
+    @core_file.set_parent(collection, current_user)
+    @core_file.save!
+
+    # send user to metadata page
+    redirect_to files_provide_metadata_path(@core_file.pid) and return
+  end
+
   # routed to /admin/files/:id
   def show
     @core_file = SolrDocument.new ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first
