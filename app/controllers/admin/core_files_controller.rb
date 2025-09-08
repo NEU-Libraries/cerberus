@@ -38,7 +38,9 @@ class Admin::CoreFilesController < AdminController
 
     # set original filename from post
     @core_file.original_filename = params[:original_filename]
+    @core_file.depositor = current_user.nuid
     @core_file.save!
+    @core_file.reload
 
     @core_file.instantiate_appropriate_content_object(tmp_path, @core_file.original_filename)
 
