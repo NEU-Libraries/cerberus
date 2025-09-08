@@ -22,6 +22,9 @@ class Admin::CoreFilesController < AdminController
     @page_title = "Administer Core Files"
   end
 
+  def large_upload
+  end
+
   # routed to /admin/files/:id
   def show
     @core_file = SolrDocument.new ActiveFedora::SolrService.query("id:\"#{params[:id]}\"").first

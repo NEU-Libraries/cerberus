@@ -1,0 +1,81 @@
+%script{src: "./tus.min.js"}
+
+.row
+  %fieldset.span4
+    %legend
+      1. Terms of Service Agreement
+    %span.help-block
+      Please read and accept the
+      %a{href: "/terms"}
+        terms of use
+    %label.checkbox.required-label{ for: "terms_of_service" }
+      I have read and accept the terms of service.
+      = check_box_tag 'terms_of_service', 1, nil, data: { activate:  "activate-submit" }
+  %fieldset.span4
+    %legend
+      2. Choose Collection
+    = label_tag "parent", "Where do you want to deposit these files?", class: "required-label"
+    = text_field_tag :parent, "", id: "parent", required: true
+  %fieldset.span4
+    %legend
+      3. File Upload
+    = label_tag "file", "File to upload", class: "required-label"
+    = file_field_tag 'file', required: true, "aria-required" => true
+    %p
+      %small
+        The large file upload is a beta feature that utilizes the tus protocol.
+        Please
+        %a{:href => "mailto:d.cliff@northeastern.edu"} contact David Cliff
+        if you encounter any errors.
+.progress.progress-striped
+  .bar{style: "width:0%"}
+.form-actions
+  = button_tag "Upload", disabled: "true", class: 'btn btn-large btn-primary activate-submit', data: { disable_with: "Please wait..."}, id: "large-upload-btn"
+
+:javascript
+  const input = document.querySelector('input[type=file]')
+  const upload_button = document.querySelector('#large-upload-btn')
+
+  upload_button.addEventListener("click", function() {
+    // Get the selected file from the input element
+    var file = input.files[0]
+  
+    // Create a new tus upload
+    var upload = new tus.Upload(file, {
+      endpoint: 'https://repository.library.northeastern.edu/tus/',
+      retryDelays: [0, 3000, 5000, 10000, 20000],
+      metadata: {
+        filename: file.name,
+        filetype: file.type,
+      },
+      onError: function (error) {
+        console.log('Failed because: ' + error)
+      },
+      onProgress: function (bytesUploaded, bytesTotal) {
+        var percentage = ((bytesUploaded / bytesTotal) * 100).toFixed(2)
+        console.log(bytesUploaded, bytesTotal, percentage + '%')
+        $('.progress .bar').css(
+            'width',
+            percentage + '%'
+        );
+        if (percentage == 100) {
+          $(".progress").after("<div class='alert alert-success'>Your file has been uploaded and is now being processed.</div>");
+          spinner = enable_spinner('main-content');
+        }
+      },
+      onSuccess: function () {
+        console.log('Download %s from %s', upload.file.name, upload.url)
+      },
+    })
+  
+    // Check if there are any previous uploads to continue.
+    upload.findPreviousUploads().then(function (previousUploads) {
+      // Found previous uploads so we select the first one.
+      if (previousUploads.length) {
+        upload.resumeFromPreviousUpload(previousUploads[0])
+      }
+  
+      // Start the upload
+      upload.start()
+    })
+  })
