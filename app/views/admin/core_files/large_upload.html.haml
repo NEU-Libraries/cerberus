@@ -37,6 +37,9 @@
   const upload_button = document.querySelector('#large-upload-btn')
 
   upload_button.addEventListener("click", function() {
+    $('#large-upload-btn').prop('disabled', true);
+    $('#large-upload-btn').text("Please wait...");
+
     // Get the selected file from the input element
     var file = input.files[0]
   
@@ -58,13 +61,11 @@
             'width',
             percentage + '%'
         );
-        if (percentage == 100) {
-          $(".progress").after("<div class='alert alert-success'>Your file has been uploaded and is now being processed.</div>");
-          spinner = enable_spinner('main-content');
-        }
       },
       onSuccess: function () {
-        console.log('Download %s from %s', upload.file.name, upload.url)
+        console.log('Download %s from %s', upload.file.name, upload.url);
+        $(".progress").after("<div class='alert alert-success'>Your file has been uploaded and is now being processed.</div>");
+        spinner = enable_spinner('main-content');
       },
     })
   
