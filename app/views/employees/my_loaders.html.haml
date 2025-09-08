@@ -27,7 +27,7 @@
   %article.span4
     - if !current_user.blank? && (current_user.admin? || current_user.admin_group?)
       %h3 Ingest
-      =link_to("Large Upload", large_upload_path, class: "btn btn-lg btn-primary")
+      =link_to("Large Upload", admin_large_upload_path, class: "btn btn-lg btn-primary")
       %br
       %br
 
