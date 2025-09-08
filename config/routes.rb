@@ -223,7 +223,7 @@ Cerberus::Application.routes.draw do
     resources :users, only: [:index, :show]
     resources :compilations, path: "/sets", except: [:show]
     get "/files/large_upload" => 'core_files#large_upload', as: 'large_upload'
-    get "/files/process_large_upload" => 'core_files#process_large_upload', as: 'process_large_upload'
+    post "/files/process_large_upload" => 'core_files#process_large_upload', as: 'process_large_upload'
     get "/statistics/views" => 'statistics#get_views', as: 'views'
     get "/statistics/downloads" => 'statistics#get_downloads', as: 'downloads'
     get "/statistics/streams" => 'statistics#get_streams', as: 'streams'
