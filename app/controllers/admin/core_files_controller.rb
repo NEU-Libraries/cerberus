@@ -39,6 +39,7 @@ class Admin::CoreFilesController < AdminController
     # set original filename from post
     @core_file.original_filename = params[:original_filename]
     @core_file.depositor = current_user.nuid
+    @core_file.tag_as_in_progress
     @core_file.save!
     @core_file.reload
 
@@ -47,8 +48,10 @@ class Admin::CoreFilesController < AdminController
     @core_file.set_parent(collection, current_user)
     @core_file.save!
 
-    # send user to metadata page
-    redirect_to files_provide_metadata_path(@core_file.pid) and return
+    # send user metadata page url, and have javascript send them on
+    respond_to do |format|
+      format.json { render json: { url: files_provide_metadata_path(@core_file.pid) } }
+    end
   end
 
   # routed to /admin/files/:id

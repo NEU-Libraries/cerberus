@@ -66,7 +66,7 @@
         console.log('Download %s from %s', upload.file.name, upload.url);
         $(".progress").after("<div class='alert alert-success'>Your file has been uploaded and is now being processed.</div>");
         spinner = enable_spinner('main-content');
-        $.post( "#{admin_process_large_upload_path}", { collection_id: $('#parent').val(), url: upload.url, original_filename: upload.file.name } );
+        $.post( "#{admin_process_large_upload_path}", { collection_id: $('#parent').val(), url: upload.url, original_filename: upload.file.name }, function(data) {var response = jQuery.parseJSON(data); window.location = response.url;} );
       },
     })
   
