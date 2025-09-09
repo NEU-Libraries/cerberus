@@ -14,6 +14,7 @@ class Admin::CoreFilesController < AdminController
   include BlacklightAdvancedSearch::ParseBasicQ
   include BlacklightAdvancedSearch::Controller
   include ModsDisplay::ControllerExtension
+  include HandleHelper
 
   before_filter :authenticate_user!
   before_filter :verify_admin
@@ -53,8 +54,11 @@ class Admin::CoreFilesController < AdminController
     @core_file.reload
 
     @core_file.instantiate_appropriate_content_object(tmp_path, @core_file.original_filename)
-
     @core_file.set_parent(collection, current_user)
+    @core_file.reload
+
+    # Create a handle
+    @core_file.identifier = make_handle(@core_file.persistent_url)
     @core_file.save!
 
     # send user metadata page url, and have javascript send them on
