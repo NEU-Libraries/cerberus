@@ -31,13 +31,22 @@ class Admin::CoreFilesController < AdminController
     # collection id for new file
     collection = Collection.find(params[:collection_id])
 
+    og_filename = params[:original_filename]
+    extension = File.extname(og_filename).split(".").last.downcase
+
     # uid for tus upload, convert to isilon path
     uid = params[:url].split("/").last
-    tmp_path = "/mnt/libraries/large-uploads/#{uid}"
+    default_path = "/mnt/libraries/large-uploads/#{uid}"
+    tmp_path = default_path + ".#{extension}"
+
+    # need to mv file to new filename with correct extension
+    FileUtils.mv(default_path, tmp_path)
+
     @core_file.tmp_path = tmp_path
+    @core_file.title = og_filename.split(".")[0]
 
     # set original filename from post
-    @core_file.original_filename = params[:original_filename]
+    @core_file.original_filename = og_filename
     @core_file.depositor = current_user.nuid
     @core_file.tag_as_in_progress
     @core_file.save!
