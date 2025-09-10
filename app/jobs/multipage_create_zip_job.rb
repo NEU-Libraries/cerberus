@@ -15,15 +15,18 @@ class MultipageCreateZipJob
   end
 
   def large_upload(content_object, file_path, dsid)
-    res = ''
-    uri = URI("#{ActiveFedora.config.credentials[:url]}/objects/#{content_object.pid}/datastreams/#{dsid}?controlGroup=M&dsLocation=file://#{file_path}")
-    Net::HTTP.start(uri.host, uri.port) do |http|
-      http.read_timeout = 60000
-      request = Net::HTTP::Post.new uri
-      request.basic_auth("#{ActiveFedora.config.credentials[:user]}", "#{ActiveFedora.config.credentials[:password]}")
-      res = http.request request # Net::HTTPResponse object
-    end
-    return res
+    # res = ''
+    # uri = URI("#{ActiveFedora.config.credentials[:url]}/objects/#{content_object.pid}/datastreams/#{dsid}?controlGroup=M&dsLocation=file://#{file_path}")
+    # Net::HTTP.start(uri.host, uri.port) do |http|
+    #   http.read_timeout = 60000
+    #   request = Net::HTTP::Post.new uri
+    #   request.basic_auth("#{ActiveFedora.config.credentials[:user]}", "#{ActiveFedora.config.credentials[:password]}")
+    #   res = http.request request # Net::HTTPResponse object
+    # end
+    # return res
+
+    # This only works because we share an NFS Mount - This kludge is specifically due to slow NFS on Azure
+    FileUtils.cp(file_path, content_object.fedora_file_path)
   end
 
   def run
