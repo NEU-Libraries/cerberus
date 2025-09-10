@@ -92,9 +92,6 @@ class EmployeesController < ApplicationController
     #   res = http.request request # Net::HTTPResponse object
     # end
 
-    # This only works because we share an NFS Mount - This kludge is specifically due to slow NFS on Azure
-    FileUtils.cp(file_path, content_object.fedora_file_path)
-
     content_object.reload
     content_object.rightsMetadata.content = old_content_object.rightsMetadata.content
     content_object.core_record = core_record
@@ -110,6 +107,9 @@ class EmployeesController < ApplicationController
     end
 
     content_object.save!
+
+    # This only works because we share an NFS Mount - This kludge is specifically due to slow NFS on Azure
+    FileUtils.mv(file_path, content_object.fedora_file_path)
 
     old_content_object.destroy
     invalidate_pid(core_record.pid)
