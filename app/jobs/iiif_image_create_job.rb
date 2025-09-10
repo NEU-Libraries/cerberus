@@ -41,7 +41,7 @@ class IiifImageCreateJob
                 content_object = ImageLargeFile.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
                 content_object.tmp_path = new_img_path
                 checksum = new_checksum(new_img_path)
-                content_object.properties.md5_checksum = checksum
+                # content_object.properties.md5_checksum = checksum
                 content_object.original_filename = child.canonical_object.original_filename
                 content_object.depositor = child.depositor
                 content_object.save!

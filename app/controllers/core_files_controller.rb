@@ -435,11 +435,11 @@ class CoreFilesController < ApplicationController
           klass = class_for_attached_file(@core_file)
           content_object = klass.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
           content_object.tmp_path = new_path
-          checksum = new_checksum(new_path)
-          if !params[:checksum].blank? && params[:checksum] != checksum
-            session[:flash_error] = "The submitted MD5 hash value does not match the MD5 generated during ingest."
-          end
-          content_object.properties.md5_checksum = checksum
+          # checksum = new_checksum(new_path)
+          # if !params[:checksum].blank? && params[:checksum] != checksum
+          #   session[:flash_error] = "The submitted MD5 hash value does not match the MD5 generated during ingest."
+          # end
+          # content_object.properties.md5_checksum = checksum
           content_object.original_filename = file.original_filename
           if current_user.proxy_staff? && params[:upload_type] == "proxy"
             content_object.depositor = @core_file.depositor

@@ -32,7 +32,7 @@ class ContentObjectCreationJob
       if File.size(file_path) / 1024000 > 50
         large_upload(content_object, file_path, 'content')
         content_object.properties.mime_type = extract_mime_type(file_path, file_name)
-        content_object.properties.md5_checksum = new_checksum(file_path)
+        # content_object.properties.md5_checksum = new_checksum(file_path)
         content_object.properties.file_size = File.size(file_path).to_s
         content_object.save!
       else

@@ -64,7 +64,7 @@ class MultipageCreateZipJob
       zf.rightsMetadata.content = core_file.rightsMetadata.content
 
       zf.properties.mime_type = extract_mime_type(zipfile_name)
-      zf.properties.md5_checksum = new_checksum(zipfile_name)
+      # zf.properties.md5_checksum = new_checksum(zipfile_name)
       zf.properties.file_size = File.size(zipfile_name).to_s
 
       if core_file.canonical_class == "ZipFile"

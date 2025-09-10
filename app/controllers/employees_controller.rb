@@ -99,7 +99,7 @@ class EmployeesController < ApplicationController
 
     content_object.original_filename = file_name
     content_object.properties.mime_type = mime_type
-    content_object.properties.md5_checksum = new_checksum(file_path)
+    # content_object.properties.md5_checksum = new_checksum(file_path)
     content_object.properties.file_size = File.size(file_path).to_s
 
     if old_content_object.canonical?
