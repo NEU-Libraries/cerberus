@@ -26,7 +26,7 @@ class MultipageCreateZipJob
     # return res
 
     # This only works because we share an NFS Mount - This kludge is specifically due to slow NFS on Azure
-    FileUtils.cp(file_path, content_object.fedora_file_path)
+    FileUtils.mv(file_path, content_object.fedora_file_path)
   end
 
   def run
@@ -92,7 +92,9 @@ class MultipageCreateZipJob
       end
 
       # Cleanup
-      FileUtils.rm_rf zipfile_name
+      if File.exists?(zipfile_name)
+        FileUtils.rm_rf zipfile_name
+      end
     end
   end
 end
