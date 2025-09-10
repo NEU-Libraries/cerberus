@@ -79,11 +79,11 @@ class ContentCreationJob
         if File.extname(file_path) == ".zip"
           # if file is large, we http kludge it in to avoid loading into memory
           if File.size(file_path) / 1024000 > 10
-            large_upload(content_object, file_path, 'content')
             content_object.properties.mime_type = extract_mime_type(file_path, file_name)
             # content_object.properties.md5_checksum = new_checksum(file_path)
             content_object.properties.file_size = File.size(file_path).to_s
             content_object.save!
+            large_upload(content_object, file_path, 'content')
           else
             File.open(file_path) do |file_contents|
               content_object.add_file(file_contents, 'content', file_name)
@@ -96,11 +96,11 @@ class ContentCreationJob
       else
         # if file is large, we http kludge it in to avoid loading into memory
         if File.size(file_path) / 1024000 > 10
-          large_upload(content_object, file_path, 'content')
           content_object.properties.mime_type = extract_mime_type(file_path, core_record.original_filename)
           # content_object.properties.md5_checksum = new_checksum(file_path)
           content_object.properties.file_size = File.size(file_path).to_s
           content_object.save!
+          large_upload(content_object, file_path, 'content')
         else
           File.open(file_path) do |file_contents|
             content_object.add_file(file_contents, 'content', file_name)
