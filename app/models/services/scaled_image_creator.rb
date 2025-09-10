@@ -103,16 +103,16 @@ class ScaledImageCreator
         target.original_filename = fname
         target.save!
 
-        large_upload(target, file_path, 'content')
-
         target.properties.mime_type = extract_mime_type(file_path, fname)
         # target.properties.md5_checksum = new_checksum(file_path)
         target.properties.file_size = File.size(file_path).to_s
         target.save!
+
+        large_upload(target, file_path, 'content')
       end
     ensure
       img && img.destroy!
-      if !file_path.blank? && File.file?(file_path)
+      if !file_path.blank? && File.exists?(file_path)
         FileUtils.rm(file_path)
       end
     end
@@ -131,6 +131,6 @@ class ScaledImageCreator
         # return res
 
         # This only works because we share an NFS Mount - This kludge is specifically due to slow NFS on Azure
-        FileUtils.cp(file_path, content_object.fedora_file_path)
+        FileUtils.mv(file_path, content_object.fedora_file_path)
       end
 end
