@@ -28,21 +28,6 @@ class ContentObjectCreationJob
       self.sentinel = core_record.parent.sentinel
       klass = core_record.canonical_class.constantize
 
-      # if file is large, we http kludge it in to avoid loading into memory
-      if File.size(file_path) / 1024000 > 10
-        large_upload(content_object, file_path, 'content')
-        content_object.properties.mime_type = extract_mime_type(file_path, file_name)
-        # content_object.properties.md5_checksum = new_checksum(file_path)
-        content_object.properties.file_size = File.size(file_path).to_s
-        content_object.save!
-      else
-        File.open(file_path) do |file_contents|
-          content_object.add_file(file_contents, 'content', file_name)
-          content_object.save!
-        end
-      end
-      content_object.reload
-
       # Assign relevant metadata
       content_object.core_record    = core_record
       content_object.title          = file_name
@@ -73,6 +58,21 @@ class ContentObjectCreationJob
       #   content_object.extract_content
       # end
 
+      # if file is large, we http kludge it in to avoid loading into memory
+      if File.size(file_path) / 1024000 > 10
+        large_upload(content_object, file_path, 'content')
+        content_object.properties.mime_type = extract_mime_type(file_path, file_name)
+        # content_object.properties.md5_checksum = new_checksum(file_path)
+        content_object.properties.file_size = File.size(file_path).to_s
+        content_object.save!
+      else
+        File.open(file_path) do |file_contents|
+          content_object.add_file(file_contents, 'content', file_name)
+          content_object.save!
+        end
+      end
+      content_object.reload
+
       invalidate_pid(core_record.pid)
 
       return content_object
@@ -97,6 +97,6 @@ class ContentObjectCreationJob
       # return res
 
       # This only works because we share an NFS Mount - This kludge is specifically due to slow NFS on Azure
-      FileUtils.cp(file_path, content_object.fedora_file_path)
+      FileUtils.mv(file_path, content_object.fedora_file_path)
     end
 end
