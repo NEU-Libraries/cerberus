@@ -29,7 +29,7 @@ class ContentObjectCreationJob
       klass = core_record.canonical_class.constantize
 
       # if file is large, we http kludge it in to avoid loading into memory
-      if File.size(file_path) / 1024000 > 50
+      if File.size(file_path) / 1024000 > 10
         large_upload(content_object, file_path, 'content')
         content_object.properties.mime_type = extract_mime_type(file_path, file_name)
         # content_object.properties.md5_checksum = new_checksum(file_path)
