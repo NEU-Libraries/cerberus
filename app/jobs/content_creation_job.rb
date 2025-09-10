@@ -71,6 +71,8 @@ class ContentCreationJob
         end
       end
 
+      content_object.properties.mime_type = extract_mime_type(file_path, core_record.original_filename)
+
       # Zip files that need zippin'.  Just drop in other file types.
       if content_object.instance_of? ZipFile
         # Is it literally a zipfile? or did it just fail to be the other types...
@@ -131,8 +133,6 @@ class ContentCreationJob
       # content_object.properties.mime_type = extract_mime_type(file_path)
       # content_object.properties.md5_checksum = new_checksum(file_path)
 
-      content_object.properties.mime_type = extract_mime_type(file_path, core_record.original_filename)
-
       content_object.save! ? content_object : false
 
       # If the file is of type with text, see if we can get solr to do a full text index
@@ -141,7 +141,7 @@ class ContentCreationJob
       end
 
       # Derivative creator loads into memory, we're skipping for large files
-      if File.size(file_path) / 1024000 < 500
+      if File.size(content_object.fedora_file_path) / 1024000 < 500
         DerivativeCreator.new(content_object.pid).generate_derivatives
       end
 
@@ -186,7 +186,7 @@ class ContentCreationJob
       # return res
 
       # This only works because we share an NFS Mount - This kludge is specifically due to slow NFS on Azure
-      FileUtils.cp(file_path, content_object.fedora_file_path)
+      FileUtils.mv(file_path, content_object.fedora_file_path)
     end
 
     def zip_content(content_object)
@@ -214,7 +214,9 @@ class ContentCreationJob
         large_upload(content_object, zipfile_name, 'content')
         content_object.save!
       ensure
-        FileUtils.rm(zipfile_name)
+        if File.exists?(zipfile_name)
+          FileUtils.rm(zipfile_name)
+        end
       end
     end
 end
