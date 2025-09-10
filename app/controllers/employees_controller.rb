@@ -84,13 +84,16 @@ class EmployeesController < ApplicationController
     content_object = old_content_object.class.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
     content_object.save!
 
-    uri = URI("#{ActiveFedora.config.credentials[:url]}/objects/#{content_object.pid}/datastreams/content?controlGroup=M&dsLocation=file://#{file_path}")
-    Net::HTTP.start(uri.host, uri.port) do |http|
-      http.read_timeout = 60000
-      request = Net::HTTP::Post.new uri
-      request.basic_auth("#{ActiveFedora.config.credentials[:user]}", "#{ActiveFedora.config.credentials[:password]}")
-      res = http.request request # Net::HTTPResponse object
-    end
+    # uri = URI("#{ActiveFedora.config.credentials[:url]}/objects/#{content_object.pid}/datastreams/content?controlGroup=M&dsLocation=file://#{file_path}")
+    # Net::HTTP.start(uri.host, uri.port) do |http|
+    #   http.read_timeout = 60000
+    #   request = Net::HTTP::Post.new uri
+    #   request.basic_auth("#{ActiveFedora.config.credentials[:user]}", "#{ActiveFedora.config.credentials[:password]}")
+    #   res = http.request request # Net::HTTPResponse object
+    # end
+
+    # This only works because we share an NFS Mount - This kludge is specifically due to slow NFS on Azure
+    FileUtils.cp(file_path, content_object.fedora_file_path)
 
     content_object.reload
     content_object.rightsMetadata.content = old_content_object.rightsMetadata.content

@@ -26,9 +26,10 @@ module ApplicationHelper
   end
 
   def invalidate_pid(pid)
-    invalidate_cache("/mods/#{pid}*")
-    invalidate_cache("/darwin/#{pid}*")
-    invalidate_cache("/content_objects/#{pid}*")
+    # invalidate_cache("/mods/#{pid}*")
+    # invalidate_cache("/darwin/#{pid}*")
+    # invalidate_cache("/content_objects/#{pid}*")
+    invalidate_cache("*#{pid}*")
   end
 
   def solr_query(query_string, pid_only = false)
