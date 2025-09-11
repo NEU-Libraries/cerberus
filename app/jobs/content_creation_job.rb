@@ -162,6 +162,8 @@ class ContentCreationJob
       # Fire off a backgrounded virus check
       Cerberus::Application::Queue.push(VirusCheckJob.new(content_object.fedora_file_path, core_file_pid))
 
+      new_checksum(content_object.pid)
+
       return content_object
     ensure
       if delete_file

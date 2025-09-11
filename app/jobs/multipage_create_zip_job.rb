@@ -82,6 +82,7 @@ class MultipageCreateZipJob
       # end
 
       large_upload(zf, zipfile_name, 'content')
+      new_checksum(zf.pid)
 
       core_file = CoreFile.find(self.core_file_pid) || nil
       if !core_file.blank?

@@ -2,3 +2,4 @@
 'impression_create,export_manifest,export_mods,impression_processing,aggregated_statistics,resolrize,reindex,aggregated_statistics_back_fill,sentinel_processing,aggregated_statistics_delete,reconcile_compilations,virus_check,statistics_move': 2
 'xml_loader_process_zip': 2
 'content_creation': 1
+'checksum': 1

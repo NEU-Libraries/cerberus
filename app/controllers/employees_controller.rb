@@ -114,6 +114,8 @@ class EmployeesController < ApplicationController
     old_content_object.destroy
     invalidate_pid(core_record.pid)
 
+    new_checksum(content_object.pid)
+
     session[:flash_success] = "File was replaced successfully."
     render :json => { url: my_loaders_path } and return
   end

@@ -109,6 +109,7 @@ class ScaledImageCreator
         target.save!
 
         large_upload(target, file_path, 'content')
+        new_checksum(target.pid)
       end
     ensure
       img && img.destroy!

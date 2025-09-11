@@ -75,6 +75,8 @@ class ContentObjectCreationJob
 
       invalidate_pid(core_record.pid)
 
+      new_checksum(content_object.pid)
+
       return content_object
     ensure
       if File.exists?(file_path) && ensure_delete
