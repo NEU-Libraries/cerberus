@@ -21,10 +21,10 @@ class ChecksumJob
         content_object.properties.md5_checksum = cs
         content_object.save!
       else
-        logger.warn "#{content_object.pid} too large to checksum"
+        logger.warn "#{content_pid} too large to checksum"
       end
     else
-      logger.warn "#{content_object.pid} fedora file path empty"
+      logger.warn "#{content_pid} fedora file path empty"
     end
   end
 end
