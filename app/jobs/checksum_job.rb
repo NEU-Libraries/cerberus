@@ -16,11 +16,16 @@ class ChecksumJob
       if (File.size(disk_path).to_f / 1024000).round(2) < 2000
         cs = `md5sum #{disk_path.shellescape}`.split(" ").first
 
-        # fetch content object
-        content_object = ActiveFedora::Base.find(content_pid, cast: true)
+        begin
+          retries ||= 0
 
-        content_object.properties.md5_checksum = cs
-        content_object.save!
+          # fetch content object
+          content_object = ActiveFedora::Base.find(content_pid, cast: true)
+          content_object.properties.md5_checksum = cs
+          content_object.save!
+        rescue Exception => error
+          retry if (retries += 1) < 3
+        end
       else
         logger.warn "#{content_pid} too large to checksum"
       end
