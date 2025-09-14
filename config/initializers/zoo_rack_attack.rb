@@ -40,7 +40,7 @@ end
 
 Rack::Attack.cache.store = ActiveSupport::Cache::RedisStore.new(:password => ENV["REDIS_PASSWD"], :host => 'nb9667.neu.edu', :port => 6379, :timeout => 10)
 
-Rack::Attack.safelist("passenger localhost prestart") do |!req|
+Rack::Attack.safelist("passenger localhost prestart") do |req|
   !req.remote_ip.blank? && (req.remote_ip.strip == "127.0.0.1")
 end
 
