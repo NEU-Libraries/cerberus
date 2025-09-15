@@ -7,6 +7,13 @@ class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
 
       if @user.persisted?
         sign_in @user, :event => :authentication #this will throw if @user is not activated
+        begin
+          # Attempt to clear cerberus_throttled if they have it
+          cookies.delete :cerberus_throttled
+        rescue Exception => error
+          logger.info "Cookie error - #{auth.inspect} #{@user.inspect}"
+          logger.info "Exception caught - #{error.to_s}"
+        end
         redirect_to (session[:previous_url] || root_path) and return
       end
     rescue Exception => error
