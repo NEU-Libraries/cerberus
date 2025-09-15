@@ -33,6 +33,9 @@ class ProcessModsZipJob
     process_spreadsheet(dir_path, spreadsheet_file_path, load_report, preview, client)
   end
 
+  def unzip
+  end
+
   def process_spreadsheet(dir_path, spreadsheet_file_path, load_report, preview, client)
     spreadsheet = load_spreadsheet(spreadsheet_file_path)
     if spreadsheet.first_row.nil?

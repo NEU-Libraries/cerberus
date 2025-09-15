@@ -36,6 +36,9 @@ class ProcessXmlZipJob
     process_spreadsheet(dir_path, spreadsheet_file_path, load_report, preview, client)
   end
 
+  def unzip
+  end
+
   def process_spreadsheet(dir_path, spreadsheet_file_path, load_report, preview, client)
     sentinel = nil
 
