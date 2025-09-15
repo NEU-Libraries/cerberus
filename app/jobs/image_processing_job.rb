@@ -43,6 +43,7 @@ class ImageProcessingJob
       core_file.tag_as_in_progress
       core_file.tmp_path = file
       core_file.original_filename = File.basename(file_name)
+      core_file.save!
       # core_file.label = File.basename(file_name)
 
       core_file.instantiate_appropriate_content_object(file, core_file.original_filename)
