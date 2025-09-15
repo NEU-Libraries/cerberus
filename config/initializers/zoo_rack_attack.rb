@@ -89,6 +89,10 @@ Rack::Attack.safelist("robots txt") do |req|
   req.fullpath.end_with?("robots.txt")
 end
 
+Rack::Attack.safelist("logging in") do |req|
+  req.fullpath.include?("/users/")
+end
+
 Rack::Attack.blocklist("Bot Wave") do |req|
   req.referrer.blank? && req.env["HTTP_COOKIE"].blank? && (req.env["HTTP_ACCEPT"] == "*/*") && (req.user_agent.blank? || !req.user_agent.downcase.include?("bot".downcase))
 end
@@ -290,6 +294,13 @@ Rack::Attack.throttle("CN Scrapers", limit: 1, period: 10) do |request|
     end
   end
   result
+end
+
+# Safelist from IPs in cache
+# To add an IP: Rails.cache.write("safelist 1.2.3.4", true, expires_in: 2.days)
+# To remove an IP: Rails.cache.delete("safelist 1.2.3.4")
+Rack::Attack.safelist("safelist IP") do |req|
+  Rails.cache.read("safelist #{req.remote_ip}")
 end
 
 # Block attacks from IPs in cache
