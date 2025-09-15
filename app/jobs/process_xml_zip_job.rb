@@ -42,7 +42,7 @@ class ProcessXmlZipJob
     tempdir = Pathname.new("#{Rails.application.config.tmp_path}/")
     uniq_hsh = Digest::MD5.hexdigest("#{file.original_filename}")[0,2]
     file_name = "#{Time.now.to_f.to_s.gsub!('.','-')}-#{uniq_hsh}"
-    new_path = tempdir.join(file_name).to_s
+    dir_path = tempdir.join(file_name).to_s
 
     spreadsheet_file_path = ""
     FileUtils.mkdir(dir_path) unless File.exists? dir_path
