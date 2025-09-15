@@ -244,7 +244,7 @@ Rack::Attack.blocklist('openai') do |req|
 end
 
 Rack::Attack.blocklist("progressive throttle to block") do |req|
-  if (!req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase))
+  if (!req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase) && req.env["HTTP_SEC_FETCH_SITE"].blank?)
     if `cut -d ' ' -f2 /proc/loadavg`.strip.to_f > 1
       !req.env["HTTP_COOKIE"].blank? && req.env["HTTP_COOKIE"].include?("cerberus_throttled")
     end
