@@ -179,8 +179,10 @@ class Loaders::LoadsController < ApplicationController
       if virus_check(file) == 0
         tempdir = Pathname.new("#{Rails.application.config.tmp_path}/")
         uniq_hsh = Digest::MD5.hexdigest("#{file.original_filename}")[0,2]
+
         file_name = "#{Time.now.to_f.to_s.gsub!('.','-')}-#{uniq_hsh}"
         new_path = tempdir.join(file_name).to_s
+
         new_file = "#{new_path}.#{file.original_filename.partition('.').last.gsub(/[^a-z,A-Z,.]/, "")}"
         FileUtils.mv(file.tempfile.path, new_file)
         #if zip
@@ -189,9 +191,9 @@ class Loaders::LoadsController < ApplicationController
             @report_id = nil
             if short_name == "spreadsheet"
               #mods spreadsheet job
-              spreadsheet_file_path = unzip(new_file, new_path)
+              # spreadsheet_file_path = unzip(new_file, new_path)
               @report_id = Loaders::LoadReport.create_from_strings(current_user, @loader_name, parent)
-              ProcessModsZipJob.new(@loader_name, spreadsheet_file_path, parent, copyright, current_user, @report_id, existing_files, nil, true).run
+              ProcessModsZipJob.new(@loader_name, new_file, parent, copyright, current_user, @report_id, existing_files, nil, true).run
               load_report = Loaders::LoadReport.find(@report_id)
               session[:flash_success] = "Your file has been submitted and is now being processed. You will receive an email when the load is complete."
               if !load_report.comparison_file_pid.blank?
@@ -200,9 +202,9 @@ class Loaders::LoadsController < ApplicationController
                 render :json => {report_id: @report_id, preview_file_pid: load_report.preview_file_pid}.to_json and return
               end
             elsif short_name == "xml"
-              spreadsheet_file_path = unzip(new_file, new_path)
+              # spreadsheet_file_path = unzip(new_file, new_path)
               @report_id = Loaders::LoadReport.create_from_strings(current_user, @loader_name, parent)
-              ProcessXmlZipJob.new(@loader_name, spreadsheet_file_path, parent, copyright, current_user, @report_id, existing_files, nil, true).run
+              ProcessXmlZipJob.new(@loader_name, new_file, parent, copyright, current_user, @report_id, existing_files, nil, true).run
               load_report = Loaders::LoadReport.find(@report_id)
               session[:flash_success] = "Your file has been submitted and is now being processed. You will receive an email when the load is complete."
               if !load_report.comparison_file_pid.blank?
@@ -259,30 +261,6 @@ class Loaders::LoadsController < ApplicationController
       stat = Cerberus::ContentFile.virus_check(file)
       flash[:error] = "Virus checking did not pass for #{File.basename(file.path)} status = #{stat}" unless stat == 0
       stat
-    end
-
-    def unzip(file, dir_path)
-      spreadsheet_file_path = ""
-      FileUtils.mkdir(dir_path) unless File.exists? dir_path
-
-      # Extract load zip
-      file_list = safe_unzip(file, dir_path)
-
-      # Find the spreadsheet
-      xlsx_array = Dir.glob("#{dir_path}/manifest.xlsx")
-
-      if xlsx_array.length > 1
-        raise Exceptions::MultipleSpreadsheetError
-      elsif xlsx_array.length == 0
-        raise Exceptions::NoSpreadsheetError
-      end
-
-      uniq_hsh = Digest::MD5.hexdigest("#{File.basename(xlsx_array.first)}")[0,2]
-      clean_path = dir_path+"/#{Time.now.to_f.to_s.gsub!('.','-')}-#{uniq_hsh}.xlsx"
-      FileUtils.mv(xlsx_array.first, clean_path)
-      spreadsheet_file_path = clean_path
-      FileUtils.rm(file)
-      return spreadsheet_file_path
     end
 
     def sort_column

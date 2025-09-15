@@ -6,15 +6,16 @@ class ProcessModsZipJob
   include HandleHelper
   include Cerberus::TempFileStorage
 
-  attr_accessor :loader_name, :spreadsheet_file_path, :parent, :copyright, :current_user, :preview, :depositor, :client, :report_id, :existing_files
+  attr_accessor :loader_name, :zip_path, :spreadsheet_file_path, :parent, :copyright, :current_user, :preview, :depositor, :client, :report_id, :existing_files
 
   def queue_name
     :mods_process_zip
   end
 
-  def initialize(loader_name, spreadsheet_file_path, parent, copyright, current_user, report_id, existing_files, depositor, preview=nil, client=nil)
+  def initialize(loader_name, zip_path, parent, copyright, current_user, report_id, existing_files, depositor, preview=nil, client=nil)
     self.loader_name = loader_name
-    self.spreadsheet_file_path = spreadsheet_file_path
+    # self.spreadsheet_file_path = spreadsheet_file_path
+    self.zip_path = zip_path
     self.parent = parent
     self.copyright = copyright
     self.current_user = current_user
