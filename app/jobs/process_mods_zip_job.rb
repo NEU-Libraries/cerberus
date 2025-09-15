@@ -29,12 +29,39 @@ class ProcessModsZipJob
   def run
     load_report = Loaders::LoadReport.find(report_id)
 
+    spreadsheet_file_path = unzip(zip_path)
     dir_path = File.dirname(spreadsheet_file_path)
 
     process_spreadsheet(dir_path, spreadsheet_file_path, load_report, preview, client)
   end
 
-  def unzip
+  def unzip(file)
+    tempdir = Pathname.new("#{Rails.application.config.tmp_path}/")
+    uniq_hsh = Digest::MD5.hexdigest("#{file.original_filename}")[0,2]
+    file_name = "#{Time.now.to_f.to_s.gsub!('.','-')}-#{uniq_hsh}"
+    new_path = tempdir.join(file_name).to_s
+
+    spreadsheet_file_path = ""
+    FileUtils.mkdir(dir_path) unless File.exists? dir_path
+
+    # Extract load zip
+    file_list = safe_unzip(file, dir_path)
+
+    # Find the spreadsheet
+    xlsx_array = Dir.glob("#{dir_path}/manifest.xlsx")
+
+    if xlsx_array.length > 1
+      raise Exceptions::MultipleSpreadsheetError
+    elsif xlsx_array.length == 0
+      raise Exceptions::NoSpreadsheetError
+    end
+
+    uniq_hsh = Digest::MD5.hexdigest("#{File.basename(xlsx_array.first)}")[0,2]
+    clean_path = dir_path+"/#{Time.now.to_f.to_s.gsub!('.','-')}-#{uniq_hsh}.xlsx"
+    FileUtils.mv(xlsx_array.first, clean_path)
+    spreadsheet_file_path = clean_path
+    FileUtils.rm(file)
+    return spreadsheet_file_path
   end
 
   def process_spreadsheet(dir_path, spreadsheet_file_path, load_report, preview, client)
