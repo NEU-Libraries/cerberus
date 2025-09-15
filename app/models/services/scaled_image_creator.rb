@@ -88,6 +88,7 @@ class ScaledImageCreator
         img.interlace = Magick::PlaneInterlace
         img.resize!(size)
 
+        master.reload
         fname = master.original_filename
         fname = "#{fname.chomp(File.extname(fname))}.jpg"
 
