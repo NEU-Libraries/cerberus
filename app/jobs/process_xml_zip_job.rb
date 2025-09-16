@@ -56,7 +56,7 @@ class ProcessXmlZipJob
     file_path = tempdir.join(file_name).to_s
 
     if File.extname(path) == ".tar" #tar
-      `tar -xf #{path} manifest.xlsx -C #{tempdir.to_s}`
+      `cd #{tempdir.to_s} && tar -xf #{path} manifest.xlsx`
       FileUtils.mv("#{tempdir.to_s}/manifest.xlsx", file_path)
     elsif File.extname(path) == ".zip" #zip
       `unzip -p #{path} manifest.xlsx >#{file_path}`
@@ -122,7 +122,7 @@ class ProcessXmlZipJob
 
           # TODO - zip/tar if/else
           if File.extname(zip_path) == ".tar" #tar
-            `tar -xf #{zip_path} #{row_results["xml_file_path"]} -C #{dir_path}`
+            `cd #{dir_path} && tar -xf #{zip_path} #{row_results["xml_file_path"]}`
           elsif File.extname(zip_path) == ".zip" #zip
             # getting the first xml file out for preview without unzipping the whole zip
             `unzip -p #{zip_path} #{row_results["xml_file_path"]} >#{dir_path}/#{row_results["xml_file_path"]}`
