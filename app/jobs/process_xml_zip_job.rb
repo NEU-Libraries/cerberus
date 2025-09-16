@@ -213,7 +213,7 @@ class ProcessXmlZipJob
           load_report.completed = true
           load_report.fail_count = 1
           load_report.save!
-          FileUtils.rm(spreadsheet_file_path) if File.exists? spreadsheet_file_path
+          # FileUtils.rm(spreadsheet_file_path) if File.exists? spreadsheet_file_path
           if CoreFile.exists?(load_report.preview_file_pid)
             CoreFile.find(load_report.preview_file_pid).destroy
           end
@@ -447,7 +447,7 @@ class ProcessXmlZipJob
                       end
                       LoaderMailer.load_alert(load_report, User.find_by_nuid(load_report.nuid)).deliver!
                       # cleaning up
-                      FileUtils.rm(spreadsheet_file_path) if File.exists? spreadsheet_file_path
+                      # FileUtils.rm(spreadsheet_file_path) if File.exists? spreadsheet_file_path
                     else
                       seq_num = -1
                       core_file.destroy
@@ -470,7 +470,7 @@ class ProcessXmlZipJob
                       end
                       LoaderMailer.load_alert(load_report, User.find_by_nuid(load_report.nuid)).deliver!
                       # cleaning up
-                      FileUtils.rm(spreadsheet_file_path) if File.exists? spreadsheet_file_path
+                      # FileUtils.rm(spreadsheet_file_path) if File.exists? spreadsheet_file_path
                     else
                       # reset for next paged item
                       seq_num = -1
@@ -559,7 +559,7 @@ class ProcessXmlZipJob
       end
       LoaderMailer.load_alert(load_report, User.find_by_nuid(load_report.nuid)).deliver!
       # cleaning up
-      FileUtils.rm(spreadsheet_file_path) if File.exists? spreadsheet_file_path
+      # FileUtils.rm(spreadsheet_file_path) if File.exists? spreadsheet_file_path
     end
   end
 
