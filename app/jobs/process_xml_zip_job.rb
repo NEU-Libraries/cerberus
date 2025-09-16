@@ -32,21 +32,33 @@ class ProcessXmlZipJob
   def run
     load_report = Loaders::LoadReport.find(report_id)
 
-    if !load_report.preview_file_pid.blank?
+    if !zip_path.blank?
+      spreadsheet_file_path = extract_spreadsheet(zip_path)
+    elsif !load_report.preview_file_pid.blank?
       cf = CoreFile.find(load_report.preview_file_pid)
-      spreadsheet_file_path = cf.tmp_path
+      spreadsheet_file_path = unzip(cf.tmp_path)
     elsif !load_report.comparison_file_pid.blank?
       cf = CoreFile.find(load_report.comparison_file_pid)
-      spreadsheet_file_path = cf.tmp_path
-    end
-
-    if !zip_path.blank?
-      spreadsheet_file_path = unzip(zip_path)
+      spreadsheet_file_path = unzip(cf.tmp_path)
     end
 
     dir_path = File.dirname(spreadsheet_file_path)
 
     process_spreadsheet(dir_path, spreadsheet_file_path, load_report, preview, client)
+  end
+
+  def extract_spreadsheet(path)
+    file_name = Time.now.to_f.to_s.gsub!('.','-') + ".xlsx"
+    tempdir = Pathname.new("#{Rails.application.config.tmp_path}/")
+    file_path = tempdir.join(file_name).to_s
+
+    `unzip -p #{path} manifest.xlsx >#{file_path}`
+
+    if File.exists?(file_path)
+      return file_path
+    else
+      raise Exceptions::NoSpreadsheetError
+    end
   end
 
   def unzip(file)
@@ -133,7 +145,7 @@ class ProcessXmlZipJob
             load_report.save!
           end
 
-          preview_file.tmp_path = spreadsheet_file_path
+          preview_file.tmp_path = zip_path
           preview_file.save!
 
           load_report.save!
