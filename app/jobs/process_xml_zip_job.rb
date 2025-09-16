@@ -56,8 +56,7 @@ class ProcessXmlZipJob
     file_path = tempdir.join(file_name).to_s
 
     if File.extname(path) == ".tar" #tar
-      `cd #{tempdir.to_s} && tar -xf #{path} manifest.xlsx`
-      FileUtils.mv("#{tempdir.to_s}/manifest.xlsx", file_path)
+      `cd #{tempdir.to_s} && tar -xf #{path} manifest.xlsx && mv #{tempdir.to_s}/manifest.xlsx #{file_path}`
     elsif File.extname(path) == ".zip" #zip
       `unzip -p #{path} manifest.xlsx >#{file_path}`
     end
