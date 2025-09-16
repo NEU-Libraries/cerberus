@@ -29,7 +29,18 @@ class ProcessModsZipJob
   def run
     load_report = Loaders::LoadReport.find(report_id)
 
-    spreadsheet_file_path = unzip(zip_path)
+    if !load_report.preview_file_pid.blank?
+      cf = CoreFile.find(load_report.preview_file_pid)
+      spreadsheet_file_path = cf.tmp_path
+    elsif !load_report.comparison_file_pid.blank?
+      cf = CoreFile.find(load_report.comparison_file_pid)
+      spreadsheet_file_path = cf.tmp_path
+    end
+
+    if !zip_path.blank?
+      spreadsheet_file_path = unzip(zip_path)
+    end
+
     dir_path = File.dirname(spreadsheet_file_path)
 
     process_spreadsheet(dir_path, spreadsheet_file_path, load_report, preview, client)

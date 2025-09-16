@@ -98,13 +98,6 @@ class Loaders::SpreadsheetLoadsController < Loaders::LoadsController
   def proceed_load
     @report = Loaders::LoadReport.find(params[:id])
     @loader_name = t('loaders.spreadsheet.long_name')
-    if !@report.preview_file_pid.blank?
-      cf = CoreFile.find(@report.preview_file_pid)
-      spreadsheet_file_path = cf.tmp_path
-    elsif !@report.comparison_file_pid.blank?
-      cf = CoreFile.find(@report.comparison_file_pid)
-      spreadsheet_file_path = cf.tmp_path
-    end
     copyright = t('loaders.spreadsheet.copyright')
     if params[:depositor]
       depositor = params[:depositor]
@@ -113,7 +106,7 @@ class Loaders::SpreadsheetLoadsController < Loaders::LoadsController
       depositor = nil
       existing_files = true
     end
-    Cerberus::Application::Queue.push(ProcessModsZipJob.new(@loader_name, spreadsheet_file_path, @report.collection, copyright, current_user, @report.id, existing_files, depositor, nil))
+    Cerberus::Application::Queue.push(ProcessModsZipJob.new(@loader_name, nil, @report.collection, copyright, current_user, @report.id, existing_files, depositor, nil))
     flash[:notice] = "Your spreadsheet is being processed. The information on this page will be updated periodically until the processing is completed."
     redirect_to "/loaders/spreadsheet/report/#{@report.id}"
   end
