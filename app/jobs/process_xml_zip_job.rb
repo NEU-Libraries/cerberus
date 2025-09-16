@@ -40,7 +40,7 @@ class ProcessXmlZipJob
 
   def unzip(file)
     tempdir = Pathname.new("#{Rails.application.config.tmp_path}/")
-    uniq_hsh = Digest::MD5.hexdigest("#{file.original_filename}")[0,2]
+    uniq_hsh = Digest::MD5.hexdigest("#{file.split("/").last}")[0,2]
     file_name = "#{Time.now.to_f.to_s.gsub!('.','-')}-#{uniq_hsh}"
     dir_path = tempdir.join(file_name).to_s
 
