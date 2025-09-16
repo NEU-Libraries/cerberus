@@ -34,12 +34,14 @@ class ProcessXmlZipJob
 
     if !zip_path.blank?
       spreadsheet_file_path = extract_spreadsheet(zip_path)
-    elsif !load_report.preview_file_pid.blank?
-      cf = CoreFile.find(load_report.preview_file_pid)
-      spreadsheet_file_path = unzip(cf.tmp_path)
-    elsif !load_report.comparison_file_pid.blank?
-      cf = CoreFile.find(load_report.comparison_file_pid)
-      spreadsheet_file_path = unzip(cf.tmp_path)
+    else
+      if !load_report.preview_file_pid.blank?
+        cf = CoreFile.find(load_report.preview_file_pid)
+        spreadsheet_file_path = unzip(cf.tmp_path)
+      elsif !load_report.comparison_file_pid.blank?
+        cf = CoreFile.find(load_report.comparison_file_pid)
+        spreadsheet_file_path = unzip(cf.tmp_path)
+      end
     end
 
     dir_path = File.dirname(spreadsheet_file_path)
