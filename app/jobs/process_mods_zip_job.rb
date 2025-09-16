@@ -52,7 +52,12 @@ class ProcessModsZipJob
     FileUtils.mkdir(tempdir.to_s) unless File.exists? tempdir.to_s
     file_path = tempdir.join(file_name).to_s
 
-    `unzip -p #{path} manifest.xlsx >#{file_path}`
+    if File.extname(path) == ".tar" #tar
+      `tar -xf #{path} manifest.xlsx -C #{tempdir.to_s}`
+      FileUtils.mv("#{tempdir.to_s}/manifest.xlsx", file_path)
+    elsif File.extname(path) == ".zip" #zip
+      `unzip -p #{path} manifest.xlsx >#{file_path}`
+    end
 
     if File.exists?(file_path)
       return file_path

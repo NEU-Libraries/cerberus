@@ -55,7 +55,12 @@ class ProcessXmlZipJob
     FileUtils.mkdir(tempdir.to_s) unless File.exists? tempdir.to_s
     file_path = tempdir.join(file_name).to_s
 
-    `unzip -p #{path} manifest.xlsx >#{file_path}`
+    if File.extname(path) == ".tar" #tar
+      `tar -xf #{path} manifest.xlsx -C #{tempdir.to_s}`
+      FileUtils.mv("#{tempdir.to_s}/manifest.xlsx", file_path)
+    elsif File.extname(path) == ".zip" #zip
+      `unzip -p #{path} manifest.xlsx >#{file_path}`
+    end
 
     if File.exists?(file_path)
       return file_path
@@ -115,8 +120,13 @@ class ProcessXmlZipJob
           # Process first row
           row_results = process_a_row(header_row, row)
 
-          # getting the first xml file out for preview without unzipping the whole zip
-          `unzip -p #{zip_path} #{row_results["xml_file_path"]} >#{dir_path}/#{row_results["xml_file_path"]}`
+          # TODO - zip/tar if/else
+          if File.extname(zip_path) == ".tar" #tar
+            `tar -xf #{zip_path} #{row_results["xml_file_path"]} -C #{dir_path}`
+          elsif File.extname(zip_path) == ".zip" #zip
+            # getting the first xml file out for preview without unzipping the whole zip
+            `unzip -p #{zip_path} #{row_results["xml_file_path"]} >#{dir_path}/#{row_results["xml_file_path"]}`
+          end
 
           if row_results["file_name"].blank? && row_results["pid"].blank?
             raise "Your upload could not be processed because the spreadsheet is missing file names or PIDs. Please update the spreadsheet and try again."
