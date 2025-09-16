@@ -51,7 +51,8 @@ class ProcessXmlZipJob
 
   def extract_spreadsheet(path)
     file_name = Time.now.to_f.to_s.gsub!('.','-') + ".xlsx"
-    tempdir = Pathname.new("#{Rails.application.config.tmp_path}/")
+    tempdir = Pathname.new("#{Rails.application.config.tmp_path}/#{Time.now.to_f.to_s.gsub!('.','-')}")
+    FileUtils.mkdir(tempdir.to_s) unless File.exists? tempdir.to_s
     file_path = tempdir.join(file_name).to_s
 
     `unzip -p #{path} manifest.xlsx >#{file_path}`
@@ -113,6 +114,10 @@ class ProcessXmlZipJob
         begin
           # Process first row
           row_results = process_a_row(header_row, row)
+
+          # getting the first xml file out for preview without unzipping the whole zip
+          `unzip -p #{zip_path} #{row_results["xml_file_path"]} >#{dir_path}/#{row_results["xml_file_path"]}`
+
           if row_results["file_name"].blank? && row_results["pid"].blank?
             raise "Your upload could not be processed because the spreadsheet is missing file names or PIDs. Please update the spreadsheet and try again."
             return

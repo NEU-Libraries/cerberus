@@ -48,7 +48,8 @@ class ProcessModsZipJob
 
   def extract_spreadsheet(path)
     file_name = Time.now.to_f.to_s.gsub!('.','-') + ".xlsx"
-    tempdir = Pathname.new("#{Rails.application.config.tmp_path}/")
+    tempdir = Pathname.new("#{Rails.application.config.tmp_path}/#{Time.now.to_f.to_s.gsub!('.','-')}")
+    FileUtils.mkdir(tempdir.to_s) unless File.exists? tempdir.to_s
     file_path = tempdir.join(file_name).to_s
 
     `unzip -p #{path} manifest.xlsx >#{file_path}`
