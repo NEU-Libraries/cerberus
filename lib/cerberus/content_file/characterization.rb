@@ -24,7 +24,7 @@ module Cerberus
                                         :markup_language, :duration, :bit_depth,
                                         :sample_rate, :channels, :data_format, :offset]
 
-        around_save :characterize_if_changed
+        # around_save :characterize_if_changed
       end
 
       ## Extract the metadata from the content datastream and record it in the characterization datastream
@@ -39,16 +39,16 @@ module Cerberus
       private
 
         def characterize_if_changed
-          content_changed = self.content.changed?
-          yield
-          if content_changed
+          # content_changed = self.content.changed?
+          # yield
+          # if content_changed
             # Cerberus::Application::Queue.push(AtomisticCharacterizationJob.new(self.pid))
-            self.properties.mime_type = extract_mime_type(self.fedora_file_path, self.original_filename)
+            # self.properties.mime_type = extract_mime_type(self.fedora_file_path, self.original_filename)
             # self.properties.md5_checksum = new_checksum(self.fedora_file_path)
-            new_checksum(self.pid)
-            self.properties.file_size = File.size(self.fedora_file_path).to_s
-            self.save!
-          end
+            # new_checksum(self.pid)
+            # self.properties.file_size = File.size(self.fedora_file_path).to_s
+            # self.save!
+          # end
         end
     end
   end
