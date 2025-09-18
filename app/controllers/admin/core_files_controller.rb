@@ -46,15 +46,18 @@ class Admin::CoreFilesController < AdminController
     @core_file.tmp_path = tmp_path
     @core_file.title = og_filename.split(".")[0]
 
+    # Find system user
+    u = User.find_by_nuid("000000000")
+
     # set original filename from post
     @core_file.original_filename = og_filename
-    @core_file.depositor = current_user.nuid
+    @core_file.depositor = u.nuid
     @core_file.tag_as_in_progress
     @core_file.save!
     @core_file.reload
 
     @core_file.instantiate_appropriate_content_object(tmp_path, @core_file.original_filename)
-    @core_file.set_parent(collection, current_user)
+    @core_file.set_parent(collection, u)
     @core_file.reload
 
     # Create a handle
