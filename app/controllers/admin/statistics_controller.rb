@@ -77,7 +77,13 @@ class Admin::StatisticsController < ApplicationController
   private
 
     def verify_admin
-      redirect_to root_path unless current_user.admin?
+      if current_user.nil?
+        flash[:error] = "You do not have privileges to use that feature"
+        render_403
+      elsif !(current_user.admin? || current_user.admin_group?)
+        flash[:error] = "You do not have privileges to use that feature"
+        render_403
+      end
     end
 
     def get_count_for_public_files
