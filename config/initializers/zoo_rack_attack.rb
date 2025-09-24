@@ -182,7 +182,9 @@ Rack::Attack.blocklist("Agent Liers") do |request|
 end
 
 Rack::Attack.blocklist("lang print") do |req|
-  (req.env["HTTP_ACCEPT_LANGUAGE"].blank?) && (req.fingerprint == "Ki8qIHwgZ3ppcCwgZGVmbGF0ZSwgYnIgfCAgfCA=")
+  if (!req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase))
+    (req.env["HTTP_ACCEPT_LANGUAGE"].blank?) && (req.fingerprint == "Ki8qIHwgZ3ppcCwgZGVmbGF0ZSwgYnIgfCAgfCA=")
+  end
 end
 
 Rack::Attack.blocklist('One hit wonders') do |req|
