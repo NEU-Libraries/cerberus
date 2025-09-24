@@ -434,4 +434,9 @@ ActiveSupport::Notifications.subscribe("rack.attack") do |name, start, finish, r
   if (req.env['rack.attack.match_type'] == :blocklist) && req.host_lookup.include?("googlebot")
     File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-google-bot.log", "#{req.env['rack.attack.matched']} - #{req.ip} | #{req.user_agent} | #{req.fingerprint}" + "\n", mode: 'a')
   end
+
+  # log head requests
+  if req.method.downcase == "head"
+    File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-head-reqs.log", "#{req.ip} | #{req.user_agent} | #{req.env["HTTP_SEC_FETCH_SITE"]} | #{req.fingerprint}" + "\n", mode: 'a')
+  end
 end
