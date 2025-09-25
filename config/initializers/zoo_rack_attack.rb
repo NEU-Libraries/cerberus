@@ -436,7 +436,8 @@ ActiveSupport::Notifications.subscribe("rack.attack") do |name, start, finish, r
   end
 
   # log head requests
-  # if req.method.downcase == "head"
-  #   File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-head-reqs.log", "#{req.ip} | #{req.user_agent} | #{req.env["HTTP_SEC_FETCH_SITE"]} | #{req.fingerprint}" + "\n", mode: 'a')
-  # end
+  m = req.env["rack.methodoverride.original_method"] || req.env['REQUEST_METHOD']
+  if !m.blank? && (m.downcase == "head")
+    File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-head-reqs.log", "#{req.ip} | #{req.user_agent} | #{req.env["HTTP_SEC_FETCH_SITE"]} | #{req.fingerprint}" + "\n", mode: 'a')
+  end
 end
