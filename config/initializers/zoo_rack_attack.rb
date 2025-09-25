@@ -420,6 +420,14 @@ Rack::Attack.track("not_declared_bot") do |req|
             !(req.fullpath.include? "/api/"))
 end
 
+Rack::Attack.track("head sec fetch site none print") do |req|
+  if (!req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase))
+    if (req.original_method.downcase == "head") && (!req.env["HTTP_SEC_FETCH_SITE"].blank? && req.env["HTTP_SEC_FETCH_SITE"] == "none") && (req.fingerprint == "dGV4dC9odG1sLGFwcGxpY2F0aW9uL3hodG1sK3htbCxhcHBsaWNhdGlvbi94bWw7cT0wLjksKi8qO3E9MC44IHwgZ3ppcCwgZGVmbGF0ZSwgYnIgfCBlbi1VUyxlbjtxPTAuOSB8IA==")
+      Rails.cache.write("block #{req.remote_ip}", true)
+    end
+  end
+end
+
 # Track it using ActiveSupport::Notification
 ActiveSupport::Notifications.subscribe("rack.attack") do |name, start, finish, request_id, req|
   if req.env['rack.attack.matched'] == "not_declared_bot" && req.env['rack.attack.match_type'] == :track
