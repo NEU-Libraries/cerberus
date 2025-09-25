@@ -110,7 +110,9 @@ Rack::Attack.blocklist("Alibaba datacenter") do |req|
 end
 
 Rack::Attack.blocklist("Google Cloud") do |req|
-  !req.asn.blank? && req.asn == "396982"
+  if (!req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase))
+    !req.asn.blank? && req.asn == "396982"
+  end
 end
 
 Rack::Attack.blocklist("Digital Ocean") do |req|
