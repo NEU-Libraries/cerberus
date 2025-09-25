@@ -36,6 +36,10 @@ class Rack::Attack::Request < ::Rack::Request
   def region
     @region ||= `geoiplookup #{remote_ip} | awk -F', ' '{print $2}'`.strip
   end
+
+  def original_method
+    @original_method ||= env["rack.methodoverride.original_method"] || env['REQUEST_METHOD']
+  end
 end
 
 Rack::Attack.cache.store = ActiveSupport::Cache::RedisStore.new(:password => ENV["REDIS_PASSWD"], :host => 'nb9667.neu.edu', :port => 6379, :timeout => 10)
@@ -436,8 +440,7 @@ ActiveSupport::Notifications.subscribe("rack.attack") do |name, start, finish, r
   end
 
   # log head requests
-  m = req.env["rack.methodoverride.original_method"] || req.env['REQUEST_METHOD']
-  if !m.blank? && (m.downcase == "head")
+  if (req.env['rack.attack.match_type'] != :blocklist) && !req.original_method.blank? && (req.original_method.downcase == "head")
     File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-head-reqs.log", "#{req.ip} | #{req.user_agent} | #{req.env["HTTP_SEC_FETCH_SITE"]} | #{req.fingerprint}" + "\n", mode: 'a')
   end
 end
