@@ -168,19 +168,27 @@ Rack::Attack.blocklist("qwant") do |req|
 end
 
 Rack::Attack.blocklist("Brazil wave") do |req|
-  (req.env["HTTP_ACCEPT_LANGUAGE"].blank?) && (req.region == "Brazil" || req.region.blank?)
+  if (req.user_agent.blank?) || (!req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase))
+    (req.env["HTTP_ACCEPT_LANGUAGE"].blank?) && (req.region == "Brazil" || req.region.blank?)
+  end
 end
 
 Rack::Attack.blocklist("Vietnam wave") do |req|
-  (req.env["HTTP_ACCEPT_LANGUAGE"].blank?) && (req.region == "Vietnam" || req.region.blank?)
+  if (req.user_agent.blank?) || (!req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase))
+    (req.env["HTTP_ACCEPT_LANGUAGE"].blank?) && (req.region == "Vietnam" || req.region.blank?)
+  end
 end
 
 Rack::Attack.blocklist("Argentina wave") do |req|
-  (req.env["HTTP_ACCEPT_LANGUAGE"].blank?) && (req.region == "Argentina" || req.region.blank?)
+  if (req.user_agent.blank?) || (!req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase))
+    (req.env["HTTP_ACCEPT_LANGUAGE"].blank?) && (req.region == "Argentina" || req.region.blank?)
+  if (req.user_agent.blank?) || (!req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase))
 end
 
 Rack::Attack.blocklist("Mexico wave") do |req|
-  (req.env["HTTP_ACCEPT_LANGUAGE"].blank?) && (req.region == "Mexico" || req.region.blank?)
+  if (req.user_agent.blank?) || (!req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase))
+    (req.env["HTTP_ACCEPT_LANGUAGE"].blank?) && (req.region == "Mexico" || req.region.blank?)
+  end
 end
 
 Rack::Attack.blocklist("Agent Liers") do |request|
@@ -432,7 +440,7 @@ end
 
 # Track it using ActiveSupport::Notification
 ActiveSupport::Notifications.subscribe("rack.attack") do |name, start, finish, request_id, req|
-  if req.env['rack.attack.matched'] == "not_declared_bot" && req.env['rack.attack.match_type'] == :track
+  if (req.env['rack.attack.match_type'] != :blocklist) && req.env['rack.attack.matched'] == "not_declared_bot" && req.env['rack.attack.match_type'] == :track
     File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-fingerprints.log", "#{req.env['HTTP_X_FORWARDED_FOR']} - #{req.ip} | #{req.fingerprint}" + "\n", mode: 'a')
   end
 
@@ -440,9 +448,9 @@ ActiveSupport::Notifications.subscribe("rack.attack") do |name, start, finish, r
     File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-cookies-and-blocked.log", "#{req.env['rack.attack.matched']} - #{req.ip} | #{req.fingerprint}" + "\n", mode: 'a')
   end
 
-  if req.env['rack.attack.matched'] == "blacklight"
-    File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-sec_fetch_site.log", "#{req.ip} | #{req.fingerprint}" + "\n", mode: 'a')
-  end
+  # if req.env['rack.attack.matched'] == "blacklight"
+  #   File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-sec_fetch_site.log", "#{req.ip} | #{req.fingerprint}" + "\n", mode: 'a')
+  # end
 
   # googlebot
   if (req.env['rack.attack.match_type'] == :blocklist) && req.host_lookup.include?("googlebot")
