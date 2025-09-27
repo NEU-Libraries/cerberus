@@ -182,7 +182,7 @@ end
 Rack::Attack.blocklist("Argentina wave") do |req|
   if (req.user_agent.blank?) || (!req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase))
     (req.env["HTTP_ACCEPT_LANGUAGE"].blank?) && (req.region == "Argentina" || req.region.blank?)
-  if (req.user_agent.blank?) || (!req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase))
+  end
 end
 
 Rack::Attack.blocklist("Mexico wave") do |req|
