@@ -72,7 +72,7 @@
         console.log('Download %s from %s', upload.file.name, upload.url);
         $(".progress").after("<div class='alert alert-success'>Your file has been uploaded and is now being processed.</div>");
         spinner = enable_spinner('main-content');
-        $.post( "/loaders/#{@loader_short_name}", { parent: $('#parent').val(), url: upload.url, original_filename: upload.file.name }, function(data) {
+        $.post( "/loaders/#{@loader_short_name}", { terms_of_service: "1", parent: $('#parent').val(), url: upload.url, original_filename: upload.file.name }, function(data) {
             console.log("DGC DEBUG");
             console.log(data);
             if (data.comparison_file_pid != undefined) {
