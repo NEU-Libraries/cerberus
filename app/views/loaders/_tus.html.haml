@@ -73,6 +73,8 @@
         $(".progress").after("<div class='alert alert-success'>Your file has been uploaded and is now being processed.</div>");
         spinner = enable_spinner('main-content');
         $.post( "/loaders/#{@loader_short_name}", { parent: $('#parent').val(), url: upload.url, original_filename: upload.file.name }, function(data) {
+            console.log("DGC DEBUG");
+            console.log(data);
             if (data.comparison_file_pid != undefined) {
               window.location = "/loaders/#{@loader_short_name}/preview_compare/"+data.report_id;
             } else if (data.preview_file_pid != undefined) {

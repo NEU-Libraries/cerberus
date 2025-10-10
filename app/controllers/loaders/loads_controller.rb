@@ -67,6 +67,8 @@ class Loaders::LoadsController < ApplicationController
 
   def process_create(short_name, controller_name, existing_files=false, derivatives=false)
     @copyright = t('loaders.'+short_name+'.copyright')
+    logger.info("DGC DEBUG process_create")
+    logger.info(params.inspect)
     begin
       # check error condition No files
       if !params.has_key?(:file)
