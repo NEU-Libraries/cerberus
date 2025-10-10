@@ -118,7 +118,7 @@ class Loaders::LoadsController < ApplicationController
       render :json => [{error: msg}].to_json and return
     ensure
       # remove the tempfile (only if it is a temp file)
-      file.tempfile.delete if file.respond_to?(:tempfile)
+      # file.tempfile.delete if file.respond_to?(:tempfile)
     end
   end
 
