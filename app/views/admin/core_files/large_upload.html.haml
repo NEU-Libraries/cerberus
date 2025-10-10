@@ -37,6 +37,7 @@
   const upload_button = document.querySelector('#large-upload-btn')
 
   upload_button.addEventListener("click", function() {
+    $(".progress").show();
     $('#large-upload-btn').prop('disabled', true);
     $('#large-upload-btn').text("Please wait...");
 
