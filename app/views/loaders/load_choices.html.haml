@@ -17,7 +17,8 @@
 %br
 .row
   .span12.upload_form
-= render partial: '/loaders/new_js'
+- if (!current_user.nil? && ( current_user.admin_group? || current_user.admin? ))
+  = render partial: '/loaders/new_js'
 :javascript
   $(document).ready(function(){
     $(".new-files").click(function(e){

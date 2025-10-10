@@ -8,7 +8,6 @@ class Loaders::XmlLoadsController < Loaders::LoadsController
     end
   end
 
-
   def new
     @loader_name = t('loaders.'+t('loaders.xml.short_name')+'.long_name')
     @loader_short_name = t('loaders.xml.short_name')
@@ -23,17 +22,38 @@ class Loaders::XmlLoadsController < Loaders::LoadsController
           @collections_options << {'label' => "#{c['id']} - #{c['title_info_title_tesim'][0]}", 'value' => c['id']}
         end
       end
-    else
-      $collection_options = []
-    end
 
-    @new_form = render_to_string(:partial=>'/loaders/new', locals: {collections_options: @collections_options, new: true})
-    @existing_form = render_to_string(:partial=>'/loaders/new', locals: {collections_options: [], new: false})
+      @new_form = render_to_string(:partial=>'/loaders/new', locals: {collections_options: @collections_options, new: true})
+      @existing_form = render_to_string(:partial=>'/loaders/new', locals: {collections_options: [], new: false})
+    else
+      @collection_options = []
+
+      # Using tus form for admin group for large uploads
+      @new_form = render_to_string(:partial=>'/loaders/tus', locals: {new: true})
+      @existing_form = render_to_string(:partial=>'/loaders/tus', locals: {new: false})
+    end
 
     render 'loaders/load_choices', locals: { collections_options: @collections_options }
   end
 
   def create
+    if params[:original_filename]
+      # tus
+      og_filename = params[:original_filename]
+      extension = File.extname(og_filename).split(".").last.downcase
+
+      # uid for tus upload, convert to isilon path
+      uid = params[:url].split("/").last
+      default_path = "/mnt/libraries/large-uploads/#{uid}"
+      tmp_path = default_path + ".#{extension}"
+
+      # need to mv file to new filename with correct extension
+      FileUtils.mv(default_path, tmp_path)
+
+      hsh = {:filename => og_filename, :tempfile => File.open(tmp_path)}
+      params[:file] = ActionDispatch::Http::UploadedFile.new(hsh)
+    end
+
     if params[:new] == "true"
       existing_files = false
     else
