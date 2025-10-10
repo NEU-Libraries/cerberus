@@ -275,6 +275,7 @@ class CollectionsController < ApplicationController
     end
 
     if @set.update_attributes(params[:set])
+      invalidate_pid(@set.pid)
       UploadAlert.create_from_collection(@set, :update, current_user)
       redirect_to(@set, notice: "Collection #{@set.title} was updated successfully." )
     else

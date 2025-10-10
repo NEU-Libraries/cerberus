@@ -26,12 +26,13 @@ module Cerberus::Controller
     if current_user.nil?
       redirect_to new_user_session_path
     else
+      logger.error("Rendering 403 page to #{path if path != ""} for #{current_user.nuid} - groups: #{current_user.groups.join(', ')}")
       render :template => '/error/403', :layout => "error", :formats => [:html], :status => 403
     end
   end
 
   def render_404(exception, path="")
-    logger.error("Rendering 404 page for #{path if path != ""} due to exception: #{exception.inspect} - #{exception.backtrace if exception.respond_to? :backtrace}")
+    # logger.error("Rendering 404 page for #{path if path != ""} due to exception: #{exception.inspect} - #{exception.backtrace if exception.respond_to? :backtrace}")
     render :template => '/error/404', :layout => "error", :formats => [:html], :status => 404
   end
 
