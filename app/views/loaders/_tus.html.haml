@@ -26,7 +26,7 @@
     - if @loader_short_name == 'spreadsheet' || @loader_short_name == 'xml'
       = hidden_field_tag :new, new
     = label_tag "file", "File to upload", class: "required-label"
-    = file_field_tag 'file', required: true, "aria-required" => true
+    = file_field_tag 'file', required: true, "aria-required" => true, "accept"=>".zip,.tar"
     %p
       %small
         The large file upload is a beta feature that utilizes the tus protocol.
@@ -72,7 +72,7 @@
         console.log('Download %s from %s', upload.file.name, upload.url);
         $(".progress").after("<div class='alert alert-success'>Your file has been uploaded and is now being processed.</div>");
         spinner = enable_spinner('main-content');
-        $.post( "/loaders/#{@loader_short_name}", { terms_of_service: "1", parent: $('#parent').val(), url: upload.url, original_filename: upload.file.name }, function(data) {
+        $.post( "/loaders/#{@loader_short_name}", { new: $("#new").val();,terms_of_service: "1", parent: $('#parent').val(), url: upload.url, original_filename: upload.file.name }, function(data) {
             console.log("DGC DEBUG");
             console.log(data);
             if (data.comparison_file_pid != undefined) {
@@ -82,7 +82,7 @@
             } else if (data.report_id != undefined){
               window.location = "/loaders/#{@loader_short_name}/report/"+data.report_id;
             } else {
-              if (data.error != undefined){
+              if (data[0].error != undefined){
                 window.location = "/my_loaders";
               }
             }
