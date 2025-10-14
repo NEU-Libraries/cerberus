@@ -67,8 +67,26 @@ class Loaders::LoadsController < ApplicationController
 
   def process_create(short_name, controller_name, existing_files=false, derivatives=false)
     @copyright = t('loaders.'+short_name+'.copyright')
+
     logger.info("DGC DEBUG process_create")
     logger.info(params.inspect)
+
+    # TODO - switch to TUS
+    # tus
+    og_filename = params[:original_filename]
+    extension = File.extname(og_filename).split(".").last.downcase
+
+    # uid for tus upload, convert to isilon path
+    uid = params[:url].split("/").last
+    default_path = "/mnt/libraries/large-uploads/#{uid}"
+    tmp_path = default_path + ".#{extension}"
+
+    # need to mv file to new filename with correct extension
+    FileUtils.mv(default_path, tmp_path)
+
+    hsh = {:filename => og_filename, :tempfile => File.open(tmp_path)}
+    params[:file] = ActionDispatch::Http::UploadedFile.new(hsh)
+
     begin
       # check error condition No files
       if !params.has_key?(:file)

@@ -23,8 +23,8 @@ class Loaders::XmlLoadsController < Loaders::LoadsController
         end
       end
 
-      @new_form = render_to_string(:partial=>'/loaders/new', locals: {collections_options: @collections_options, new: true})
-      @existing_form = render_to_string(:partial=>'/loaders/new', locals: {collections_options: [], new: false})
+      @new_form = render_to_string(:partial=>'/loaders/tus', locals: {collections_options: @collections_options, new: true})
+      @existing_form = render_to_string(:partial=>'/loaders/tus', locals: {collections_options: [], new: false})
     else
       @collection_options = []
 
@@ -37,23 +37,6 @@ class Loaders::XmlLoadsController < Loaders::LoadsController
   end
 
   def create
-    if params[:original_filename]
-      # tus
-      og_filename = params[:original_filename]
-      extension = File.extname(og_filename).split(".").last.downcase
-
-      # uid for tus upload, convert to isilon path
-      uid = params[:url].split("/").last
-      default_path = "/mnt/libraries/large-uploads/#{uid}"
-      tmp_path = default_path + ".#{extension}"
-
-      # need to mv file to new filename with correct extension
-      FileUtils.mv(default_path, tmp_path)
-
-      hsh = {:filename => og_filename, :tempfile => File.open(tmp_path)}
-      params[:file] = ActionDispatch::Http::UploadedFile.new(hsh)
-    end
-
     if params[:new] == "true"
       existing_files = false
     else
