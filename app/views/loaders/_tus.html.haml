@@ -35,10 +35,11 @@
     = file_field_tag 'file', required: true, "aria-required" => true, "accept"=>".zip,.tar"
     %p
       %small
-        The large file upload is a beta feature that utilizes the tus protocol.
+        Files of type .zip are restricted to 2GB. Files of type .tar have no size restriction.
+        Compressed .tar files (.tgz, .tar.gz, .tar.bz2 etc.) are not supported.
         Please
-        %a{:href => "mailto:d.cliff@northeastern.edu"} contact David Cliff
-        if you encounter any errors.
+        %a{:href => "mailto:Library-Repository-Team@neu.edu"} contact the DRS staff
+        for help if you're unfamiliar with these file types.
 .progress.progress-striped
   .bar{style: "width:0%"}
 .form-actions
