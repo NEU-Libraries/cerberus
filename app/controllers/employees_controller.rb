@@ -61,9 +61,18 @@ class EmployeesController < ApplicationController
       render_403 and return
     end
 
-    file = params[:file]
-    file_name = file.original_filename
-    file_path = move_file_to_tmp(file)
+    # file = params[:file]
+    # file_name = file.original_filename
+    # file_path = move_file_to_tmp(file)
+
+    file_name = params[:original_filename]
+    # uid for tus upload, convert to isilon path
+    uid = params[:url].split("/").last
+    default_path = "/mnt/libraries/large-uploads/#{uid}"
+    file_path = default_path + ".#{extension}"
+
+    # need to mv file to new filename with correct extension
+    FileUtils.mv(default_path, file_path)
 
     old_content_object = ActiveFedora::Base.find(params[:old_id], cast: true)
 

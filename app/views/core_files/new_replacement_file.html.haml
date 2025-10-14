@@ -7,74 +7,83 @@
 
 %p= "This binary belongs to #{@core_file.pid} with a title of #{@core_file.title}"
 
-= form_tag(create_replacement_file_path, method: "post", multipart: true, id: "FileUploadForm") do
-  = hidden_field_tag(:old_id, @content_object.pid)
-  .row
-    %fieldset.span4
-      %legend
-        1. Terms of Service Agreement
-      %span.help-block
-        Please read and accept the
-        %a{href: "/terms"}
-          terms of use
-      %label.checkbox.required-label{ for: "terms_of_service" }
-        I have read and accept the terms of service.
-        = check_box_tag 'terms_of_service', 1, nil, data: { activate:  "activate-submit" }
-    %fieldset.span4
-      %legend
-        2. File Upload
-      = label_tag "file", "File to upload", class: "required-label"
-      = file_field_tag 'file', required: true, "aria-required" => true
+%script{src: "/tus-js/tus.min.js", type: "text/javascript"}
 
-  .progress.progress-striped
-    .bar{style: "width:0%"}
-  .form-actions
-    = submit_tag "Upload", disabled: "true", class: 'btn btn-large btn-primary activate-submit', data: { disable_with: "Please wait..."}, id: "fileSubmit"
+.row
+  %fieldset.span4
+    %legend
+      1. Terms of Service Agreement
+    %span.help-block
+      Please read and accept the
+      %a{href: "/terms"}
+        terms of use
+    %label.checkbox.required-label{ for: "terms_of_service" }
+      I have read and accept the terms of service.
+      = check_box_tag 'terms_of_service', 1, nil, data: { activate:  "activate-submit" }
+  %fieldset.span4
+    %legend
+      2. File Upload
+    = label_tag "file", "File to upload", class: "required-label"
+    = file_field_tag 'file', required: true, "aria-required" => true
+    %p
+      %small
+        The large file upload is a beta feature that utilizes the tus protocol.
+        Please
+        %a{:href => "mailto:d.cliff@northeastern.edu"} contact David Cliff
+        if you encounter any errors.
+.progress.progress-striped
+  .bar{style: "width:0%"}
+.form-actions
+  = button_tag "Upload", disabled: "true", class: 'btn btn-large btn-primary activate-submit', data: { disable_with: "Please wait..."}, id: "large-upload-btn"
+
 :javascript
-  $(function () {
-    $(".progress").hide();
-    var file_list = [];
-    $('#FileUploadForm').fileupload({
-        dataType: 'html',
-        replaceFileInput: false,
-        autoUpload: false,
-        add: function (e, data) {
-            data.context = $("#fileSubmit")
-                .click(function (e) {
-                  e.preventDefault();
-                  $(this).attr("disabled", true);
-                  $(this).val("Please wait...");
-                });
-          $(".progress").show();
-          file_list = [data.files[0]]; //this guarantees that the files being uploaded is only the most recently added one
-        },
-        progressall: function (e, data) {
-            var progress = parseInt(data.loaded / data.total * 100, 10);
-            $('.progress .bar').css(
-                'width',
-                progress + '%'
-            );
-            if (progress == 100) {
-              $(".progress").after("<div class='alert alert-success'>Your file has been uploaded and is now being processed.</div>");
-              spinner = enable_spinner('main-content');
-            }
-        },
-        done: function (e, data) {
-          console.log(data);
-           url = JSON.parse(data.result);
-           url = url.url;
-           window.location = url;
-        }
-    });
-    $('#fileSubmit').click(function(e){
-      e.preventDefault();
-      $('#FileUploadForm').fileupload('send', {files:file_list});
-    })
-  });
+  const input = document.querySelector('input[type=file]')
+  const upload_button = document.querySelector('#large-upload-btn')
 
-- if current_user.admin_group? || current_user.admin? || current_user.repo_staff?
-  :javascript
-    $('#file').bind('change', function() {
-      $(".alert").remove();
-      $("input[type='submit']").removeProp("disabled");
-    });
+  upload_button.addEventListener("click", function() {
+    $(".progress").show();
+    $('#large-upload-btn').prop('disabled', true);
+    $('#large-upload-btn').text("Please wait...");
+
+    // Get the selected file from the input element
+    var file = input.files[0]
+  
+    // Create a new tus upload
+    var upload = new tus.Upload(file, {
+      endpoint: 'https://repository.library.northeastern.edu/tus/',
+      retryDelays: [0, 3000, 5000, 10000, 20000],
+      metadata: {
+        filename: file.name,
+        filetype: file.type,
+      },
+      onError: function (error) {
+        console.log('Failed because: ' + error)
+      },
+      onProgress: function (bytesUploaded, bytesTotal) {
+        var percentage = ((bytesUploaded / bytesTotal) * 100).toFixed(2)
+        console.log(bytesUploaded, bytesTotal, percentage + '%')
+        $('.progress .bar').css(
+            'width',
+            percentage + '%'
+        );
+      },
+      onSuccess: function () {
+        console.log('Download %s from %s', upload.file.name, upload.url);
+        $(".progress").after("<div class='alert alert-success'>Your file has been uploaded and is now being processed.</div>");
+        spinner = enable_spinner('main-content');
+        $.post( "#{create_replacement_file_path}", { old_id: "#{@content_object.pid}", url: upload.url, original_filename: upload.file.name }, function(data) {window.location = data.url;}, "json" );
+      },
+    })
+  
+    // Check if there are any previous uploads to continue.
+    upload.findPreviousUploads().then(function (previousUploads) {
+      // Found previous uploads so we select the first one.
+      if (previousUploads.length) {
+        upload.resumeFromPreviousUpload(previousUploads[0])
+      }
+  
+      // Start the upload
+      upload.start()
+    })
+  })
+
