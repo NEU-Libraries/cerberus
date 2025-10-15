@@ -25,10 +25,10 @@
         = hidden_field_tag :parent, "", id:"collection_parent", required: true
   %fieldset.span4
     %legend
-      - if new
-        3. File Upload
-      - else
+      - if !new.blank? && (new == false)
         2. File Upload
+      - else
+        3. File Upload
     - if @loader_short_name == 'spreadsheet' || @loader_short_name == 'xml'
       = hidden_field_tag :new, new
     = label_tag "file", "File to upload", class: "required-label"
