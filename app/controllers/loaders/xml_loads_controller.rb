@@ -23,21 +23,21 @@ class Loaders::XmlLoadsController < Loaders::LoadsController
         end
       end
 
-      @new_form = render_to_string(:partial=>'/loaders/tus', locals: {collections_options: @collections_options, new: true})
-      @existing_form = render_to_string(:partial=>'/loaders/tus', locals: {collections_options: [], new: false})
+      @new_form = render_to_string(:partial=>'/loaders/tus', locals: {collections_options: @collections_options})
+      @existing_form = render_to_string(:partial=>'/loaders/tus', locals: {collections_options: [], new_files: false})
     else
       @collection_options = []
 
       # Using tus form for admin group for large uploads
-      @new_form = render_to_string(:partial=>'/loaders/tus', locals: {new: true})
-      @existing_form = render_to_string(:partial=>'/loaders/tus', locals: {new: false})
+      @new_form = render_to_string(:partial=>'/loaders/tus')
+      @existing_form = render_to_string(:partial=>'/loaders/tus', locals: {new_files: false})
     end
 
     render 'loaders/load_choices', locals: { collections_options: @collections_options }
   end
 
   def create
-    if params[:new] == "true"
+    if params[:new_files] == "true"
       existing_files = false
     else
       existing_files = true

@@ -11,7 +11,7 @@
     %label.checkbox.required-label{ for: "terms_of_service" }
       I have read and accept the terms of service.
       = check_box_tag 'terms_of_service', 1, nil, data: { activate:  "activate-submit" }
-  - if (@loader_short_name != 'spreadsheet' && @loader_short_name != 'xml') || ((@loader_short_name == 'spreadsheet' || @loader_short_name == 'xml') && new)
+  - if (@loader_short_name != 'spreadsheet' && @loader_short_name != 'xml') || ((@loader_short_name == 'spreadsheet' || @loader_short_name == 'xml') && !(new_files == false))
     %fieldset.span4
       %legend
         2. Choose Collection
@@ -25,12 +25,12 @@
         = hidden_field_tag :parent, "", id:"collection_parent", required: true
   %fieldset.span4
     %legend
-      - if !new.blank? && (new == false)
+      - if !new_files.blank? && (new_files == false)
         2. File Upload
       - else
         3. File Upload
     - if @loader_short_name == 'spreadsheet' || @loader_short_name == 'xml'
-      = hidden_field_tag :new, new
+      = hidden_field_tag :new_files, new_files
     = label_tag "file", "File to upload", class: "required-label"
     = file_field_tag 'file', required: true, "aria-required" => true, "accept"=>".zip,.tar"
     %p
