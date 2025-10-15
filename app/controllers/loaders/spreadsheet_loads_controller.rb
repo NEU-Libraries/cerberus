@@ -26,7 +26,7 @@ class Loaders::SpreadsheetLoadsController < Loaders::LoadsController
       @collection_options = []
     end
 
-    @new_form = render_to_string(:partial=>'/loaders/tus', locals: {collections_options: @collections_options})
+    @new_form = render_to_string(:partial=>'/loaders/tus', locals: {collections_options: @collections_options, new_files: true})
     @existing_form = render_to_string(:partial=>'/loaders/tus', locals: {collections_options: [], new_files: false})
 
     render 'loaders/load_choices', locals: { collections_options: @collections_options }

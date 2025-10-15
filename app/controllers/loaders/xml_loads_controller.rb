@@ -22,16 +22,12 @@ class Loaders::XmlLoadsController < Loaders::LoadsController
           @collections_options << {'label' => "#{c['id']} - #{c['title_info_title_tesim'][0]}", 'value' => c['id']}
         end
       end
-
-      @new_form = render_to_string(:partial=>'/loaders/tus', locals: {collections_options: @collections_options})
-      @existing_form = render_to_string(:partial=>'/loaders/tus', locals: {collections_options: [], new_files: false})
     else
       @collection_options = []
-
-      # Using tus form for admin group for large uploads
-      @new_form = render_to_string(:partial=>'/loaders/tus')
-      @existing_form = render_to_string(:partial=>'/loaders/tus', locals: {new_files: false})
     end
+
+    @new_form = render_to_string(:partial=>'/loaders/tus', locals: {collections_options: @collections_options, new_files: true})
+    @existing_form = render_to_string(:partial=>'/loaders/tus', locals: {collections_options: [], new_files: false})
 
     render 'loaders/load_choices', locals: { collections_options: @collections_options }
   end
