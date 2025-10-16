@@ -22,11 +22,11 @@
     = label_tag "file", "File to upload", class: "required-label"
     = file_field_tag 'file', required: true, "aria-required" => true
   %fieldset.span4
-      %legend
-        3. MD5 Hash Value
-      %span.help-block
-        Enter MD5 for hash validation
-      = text_field_tag :checksum
+    %legend
+      3. MD5 Hash Value
+    %span.help-block
+      Enter MD5 for hash validation
+    = text_field_tag :checksum
 - if current_user.proxy_staff?
   .row
     %fieldset.span4
