@@ -330,7 +330,7 @@ class CoreFilesController < ApplicationController
     @content_object = ActiveFedora::Base.find(params[:content_object_id], cast: true)
     Cerberus::Application::Queue.push(ContentObjectCreationJob.new(@core_file.pid, @content_object.tmp_path, @content_object.pid, @content_object.original_filename, params[:content_object][:permissions], params[:content_object][:mass_permissions]))
     UploadAlert.create_from_core_file(@core_file, :update, "content object", current_user)
-    flash[:notice] = "Your file is being processed. The file's checksum is #{@content_object.properties.md5_checksum.first}"
+    flash[:notice] = "Your file is being processed."
     redirect_to core_file_path(@core_file.pid) + '#no-back'
   end
 
@@ -407,6 +407,22 @@ class CoreFilesController < ApplicationController
   def create_attached_file
     begin
       @core_file = CoreFile.find(params[:id])
+
+      # tus
+      og_filename = params[:original_filename]
+      extension = File.extname(og_filename).split(".").last.downcase
+
+      # uid for tus upload, convert to isilon path
+      uid = params[:url].split("/").last
+      default_path = "/mnt/libraries/large-uploads/#{uid}"
+      new_path = default_path + ".#{extension}"
+
+      # need to mv file to new filename with correct extension
+      FileUtils.mv(default_path, new_path)
+
+      hsh = {:filename => og_filename, :tempfile => File.open(new_path)}
+      params[:file] = ActionDispatch::Http::UploadedFile.new(hsh)
+
       # check error condition No files
       return json_error("Error! No file to save") if !params.has_key?(:file)
 
@@ -431,7 +447,7 @@ class CoreFilesController < ApplicationController
         render :json => { url: session[:previous_url] }
       else
         if virus_check(file) == 0
-          new_path = move_file_to_tmp(file)
+          # new_path = move_file_to_tmp(file)
           klass = class_for_attached_file(@core_file)
           content_object = klass.new(pid: Cerberus::Noid.namespaceize(Cerberus::IdService.mint))
           content_object.tmp_path = new_path
@@ -439,7 +455,9 @@ class CoreFilesController < ApplicationController
           # if !params[:checksum].blank? && params[:checksum] != checksum
           #   session[:flash_error] = "The submitted MD5 hash value does not match the MD5 generated during ingest."
           # end
-          # content_object.properties.md5_checksum = checksum
+          if !params[:checksum].blank?
+            content_object.properties.md5_checksum = params[:checksum]
+          end
           content_object.original_filename = file.original_filename
           if current_user.proxy_staff? && params[:upload_type] == "proxy"
             content_object.depositor = @core_file.depositor
