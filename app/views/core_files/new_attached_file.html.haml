@@ -77,7 +77,7 @@
         console.log('Download %s from %s', upload.file.name, upload.url);
         $(".progress").after("<div class='alert alert-success'>Your file has been uploaded and is now being processed.</div>");
         spinner = enable_spinner('main-content');
-        $.post( "#{create_attached_file_path}", { id: "#{params[:id]}", upload_type: $('input[name="upload_type"]').val(), checksum: $('#checksum').val(), url: upload.url, original_filename: upload.file.name }, function(data) {window.location = data.url;}, "json" );
+        $.post( "#{create_attached_file_path}", { id: "#{params[:id]}", terms_of_service: "1", upload_type: $('input[name="upload_type"]').val(), checksum: $('#checksum').val(), url: upload.url, original_filename: upload.file.name }, function(data) {window.location = data.url;}, "json" );
       },
     })
   
