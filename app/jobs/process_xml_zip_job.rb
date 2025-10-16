@@ -119,12 +119,11 @@ class ProcessXmlZipJob
           # Process first row
           row_results = process_a_row(header_row, row)
 
-          # TODO - zip/tar if/else
           if File.extname(zip_path) == ".tar" #tar
-            `cd #{dir_path} && tar --no-anchored -xf #{zip_path} #{row_results["xml_file_path"]}`
+            `cd #{dir_path} && tar --no-anchored -xf #{zip_path} #{row_results["xml_file_path"].shellescape}`
           elsif File.extname(zip_path) == ".zip" #zip
             # getting the first xml file out for preview without unzipping the whole zip
-            `unzip -p #{zip_path} #{row_results["xml_file_path"]} >#{dir_path}/#{row_results["xml_file_path"]}`
+            `unzip -p #{zip_path} #{row_results["xml_file_path"].shellescape} >#{dir_path}/#{row_results["xml_file_path"].shellescape}`
           end
 
           if row_results["file_name"].blank? && row_results["pid"].blank?
