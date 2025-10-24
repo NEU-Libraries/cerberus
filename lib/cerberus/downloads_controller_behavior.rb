@@ -14,6 +14,9 @@ module Cerberus
 
     # overriding hydra-head 6.3.3
     def send_content(asset)
+      # encourage more range requests - hopefully less stressful on Azure NFS
+      response.header["Accept-Ranges"] = "bytes"
+
       if !(asset.class == ImageThumbnailFile || asset.class == PageFile) && (asset.datastreams.keys.include? "content")
         cf_doc = (SolrDocument.new(ActiveFedora::SolrService.query("id:\"#{asset.pid}\"").first)).get_core_record
         if cf_doc.tombstoned?
@@ -49,6 +52,7 @@ module Cerberus
     # overriding hydra-head 6.3.3
     # render an HTTP HEAD response
     def content_head
+      response.header["Accept-Ranges"] = "bytes"
       response.headers['Content-Length'] = datastream.dsSize
       # mimeType gets from Fedora, which fails when you've incorrectly
       # given the mime type - Migration from IRis had some tiffs as jpegs
