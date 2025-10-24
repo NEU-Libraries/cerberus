@@ -4,6 +4,8 @@ class WowzaController < ApplicationController
   include Cerberus::ControllerHelpers::ViewLogger
   include MimeHelper
   def plain
+    response.header["Accept-Ranges"] = "bytes"
+
     doc = fetch_solr_document
 
     if doc.get_core_record.tombstoned?
