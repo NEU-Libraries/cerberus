@@ -430,6 +430,15 @@ Rack::Attack.blocklisted_response = lambda do |env|
   [403, {'Set-Cookie' => "_cerberus_app_session=#{Date.today.to_time.to_i}", 'Set-Cookie' => 'cerberus_blocked=true', 'Content-Type' => 'text/plain', 'Cache-Control' => 'no-cache, no-store, max-age=0, must-revalidate', 'Pragma' => 'no-cache'}, ["Forbidden\n"]]
 end
 
+# Track range fraud
+Rack::Attack.track("range_fraud") do |request|
+  if request.user_agent.blank? || !request.user_agent.downcase.include?("bot".downcase)
+    if request.fullpath.include?("fulltext.pdf")
+      !request.env["HTTP_RANGE"].blank?
+    end
+  end
+end
+
 # Track requests from a special user agent.
 Rack::Attack.track("not_declared_bot") do |req|
   req.env["HTTP_COOKIE"].blank? && !req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase) &&
@@ -454,6 +463,10 @@ end
 ActiveSupport::Notifications.subscribe("rack.attack") do |name, start, finish, request_id, req|
   if (req.env['rack.attack.match_type'] != :blocklist) && req.env['rack.attack.matched'] == "not_declared_bot" && req.env['rack.attack.match_type'] == :track
     File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-fingerprints.log", "#{req.env['HTTP_X_FORWARDED_FOR']} - #{req.ip} | #{req.fingerprint}" + "\n", mode: 'a')
+  end
+
+  if (req.env['rack.attack.match_type'] != :blocklist) && req.env['rack.attack.matched'] == "range_fraud" && req.env['rack.attack.match_type'] == :track
+    File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-range-requests.log", "#{req.ip} | #{req.fullpath} | #{req.env["HTTP_SEC_FETCH_SITE"]} | #{req.fingerprint}" + "\n", mode: 'a')
   end
 
   if (req.env['rack.attack.match_type'] == :blocklist) && !req.env["HTTP_COOKIE"].blank?
