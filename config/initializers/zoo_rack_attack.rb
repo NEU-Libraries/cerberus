@@ -295,6 +295,18 @@ Rack::Attack.blocklist("blacklight") do |req|
   end
 end
 
+Rack::Attack.throttle("pdf scraper mini wave", limit: 1, period: 10) do |request|
+  if request.referrer.blank? && request.env["HTTP_COOKIE"].blank?
+    if request.user_agent.blank? || !request.user_agent.downcase.include?("bot".downcase)
+      if request.fullpath.include?("fulltext.pdf")
+        if request.env["HTTP_RANGE"].blank?
+          "#{request.fullpath} #{request.fingerprint}"
+        end
+      end
+    end
+  end
+end
+
 Rack::Attack.throttle("CN Scrapers", limit: 1, period: 10) do |request|
   result = false
   if !request.env["HTTP_ACCEPT_LANGUAGE"].blank?
@@ -451,6 +463,10 @@ ActiveSupport::Notifications.subscribe("rack.attack") do |name, start, finish, r
   # if req.env['rack.attack.matched'] == "blacklight"
   #   File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-sec_fetch_site.log", "#{req.ip} | #{req.fingerprint}" + "\n", mode: 'a')
   # end
+
+  if req.env['rack.attack.matched'] == "pdf scraper mini wave"
+    File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-pdf_mini_wave.log", "#{req.ip} | #{req.fingerprint}" + "\n", mode: 'a')
+  end
 
   # googlebot
   if (req.env['rack.attack.match_type'] == :blocklist) && req.host_lookup.include?("googlebot")
