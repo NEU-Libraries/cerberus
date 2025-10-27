@@ -295,12 +295,12 @@ Rack::Attack.blocklist("blacklight") do |req|
   end
 end
 
-Rack::Attack.throttle("pdf scraper mini wave", limit: 1, period: 10) do |request|
+Rack::Attack.throttle("pdf scraper mini wave", limit: 1, period: 3) do |request|
   if request.referrer.blank? && request.env["HTTP_COOKIE"].blank?
     if request.user_agent.blank? || !request.user_agent.downcase.include?("bot".downcase)
       if request.fullpath.include?("fulltext.pdf")
         if request.env["HTTP_RANGE"].blank?
-          "#{request.fullpath} #{request.fingerprint}"
+          request.fullpath
         end
       end
     end
