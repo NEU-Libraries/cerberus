@@ -295,6 +295,14 @@ Rack::Attack.blocklist("blacklight") do |req|
   end
 end
 
+Rack::Attack.blocklist("range fraud") do |request|
+  if request.user_agent.blank? || !request.user_agent.downcase.include?("bot".downcase)
+    if request.fullpath.include?("fulltext.pdf")
+      !request.env["HTTP_RANGE"].blank? && request.env["HTTP_SEC_FETCH_SITE"].blank? && request.region != "United States"
+    end
+  end
+end
+
 Rack::Attack.throttle("pdf scraper mini wave", limit: 1, period: 3) do |request|
   if request.referrer.blank? && request.env["HTTP_COOKIE"].blank?
     if request.user_agent.blank? || !request.user_agent.downcase.include?("bot".downcase)
@@ -430,15 +438,6 @@ Rack::Attack.blocklisted_response = lambda do |env|
   [403, {'Set-Cookie' => "_cerberus_app_session=#{Date.today.to_time.to_i}", 'Set-Cookie' => 'cerberus_blocked=true', 'Content-Type' => 'text/plain', 'Cache-Control' => 'no-cache, no-store, max-age=0, must-revalidate', 'Pragma' => 'no-cache'}, ["Forbidden\n"]]
 end
 
-# Track range fraud
-Rack::Attack.track("range_fraud") do |request|
-  if request.user_agent.blank? || !request.user_agent.downcase.include?("bot".downcase)
-    if request.fullpath.include?("fulltext.pdf")
-      !request.env["HTTP_RANGE"].blank?
-    end
-  end
-end
-
 # Track requests from a special user agent.
 Rack::Attack.track("not_declared_bot") do |req|
   req.env["HTTP_COOKIE"].blank? && !req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase) &&
@@ -465,17 +464,9 @@ ActiveSupport::Notifications.subscribe("rack.attack") do |name, start, finish, r
     File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-fingerprints.log", "#{req.env['HTTP_X_FORWARDED_FOR']} - #{req.ip} | #{req.fingerprint}" + "\n", mode: 'a')
   end
 
-  if (req.env['rack.attack.match_type'] != :blocklist) && req.env['rack.attack.matched'] == "range_fraud" && req.env['rack.attack.match_type'] == :track
-    File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-range-requests.log", "#{req.ip} | #{req.fullpath} | #{req.env["HTTP_SEC_FETCH_SITE"]} | #{req.fingerprint}" + "\n", mode: 'a')
-  end
-
   if (req.env['rack.attack.match_type'] == :blocklist) && !req.env["HTTP_COOKIE"].blank?
     File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-cookies-and-blocked.log", "#{req.env['rack.attack.matched']} - #{req.ip} | #{req.fingerprint}" + "\n", mode: 'a')
   end
-
-  # if req.env['rack.attack.matched'] == "blacklight"
-  #   File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-sec_fetch_site.log", "#{req.ip} | #{req.fingerprint}" + "\n", mode: 'a')
-  # end
 
   if req.env['rack.attack.matched'] == "pdf scraper mini wave"
     File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-pdf_mini_wave.log", "#{req.ip} | #{req.fingerprint}" + "\n", mode: 'a')
