@@ -315,6 +315,18 @@ Rack::Attack.throttle("pdf scraper mini wave", limit: 1, period: 3) do |request|
   end
 end
 
+Rack::Attack.throttle("content scraper mini wave", limit: 1, period: 5) do |request|
+  if request.env["HTTP_COOKIE"].blank?
+    if request.user_agent.blank? || !request.user_agent.downcase.include?("bot".downcase)
+      if request.fullpath.include?("datastream_id=content")
+        if request.env["HTTP_RANGE"].blank?
+          "#{request.fullpath} #{request.fingerprint}"
+        end
+      end
+    end
+  end
+end
+
 Rack::Attack.throttle("CN Scrapers", limit: 1, period: 10) do |request|
   result = false
   if !request.env["HTTP_ACCEPT_LANGUAGE"].blank?
@@ -399,9 +411,9 @@ end
 # Throttle attempts for a given octet to 1 reqs/10 seconds
 Rack::Attack.throttle('load shedding', limit: 1, period: 10) do |req|
   # if cpu usage is approaching 4 on the 5 min avg...
-  if `cut -d ' ' -f2 /proc/loadavg`.strip.to_f > 2.75
+  if `cut -d ' ' -f2 /proc/loadavg`.strip.to_f > 3.25
     if !req.remote_ip.blank?
-      if `cut -d ' ' -f2 /proc/loadavg`.strip.to_f > 3.5
+      if `cut -d ' ' -f2 /proc/loadavg`.strip.to_f > 3.85
         # everyone out of the boat, no exceptions
         # log to file
         File.write("#{Rails.root}/log/heavy_load_shedding.log", "#{req.remote_ip} - #{req.fingerprint} - #{req.path} - #{Time.now}" + "\n", mode: 'a')
@@ -417,11 +429,15 @@ Rack::Attack.throttle('load shedding', limit: 1, period: 10) do |req|
             !(req.fullpath.include? "/429") &&
             !(req.fullpath.include? "/api/"))
 
-          # log to file
-          File.write("#{Rails.root}/log/load_shedding.log", "#{req.remote_ip} - #{req.fingerprint} - #{req.path} - #{Time.now}" + "\n", mode: 'a')
+          host_result = req.host_lookup
 
-          # ip address first octect discriminator
-          req.remote_ip.split(".").first
+          if !(["lightspeed", "res.spectrum", "rcncustomer", "comcast", "fios.verizon"].any? { |x| host_result.include? x })
+            # log to file
+            File.write("#{Rails.root}/log/load_shedding.log", "#{req.remote_ip} - #{req.fingerprint} - #{req.path} - #{Time.now}" + "\n", mode: 'a')
+
+            # ip address first octect discriminator
+            req.remote_ip.split(".").first
+          end
         end
       end
     end
