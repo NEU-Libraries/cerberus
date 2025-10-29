@@ -318,7 +318,7 @@ end
 Rack::Attack.throttle("content scraper mini wave", limit: 1, period: 5) do |request|
   if request.env["HTTP_COOKIE"].blank?
     if request.user_agent.blank? || !request.user_agent.downcase.include?("bot".downcase)
-      if request.fullpath.include?("datastream_id=content")
+      if request.fullpath.end_with?("datastream_id=content")
         if request.env["HTTP_RANGE"].blank?
           "#{request.fullpath} #{request.fingerprint}"
         end
