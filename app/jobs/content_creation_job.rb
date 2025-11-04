@@ -142,7 +142,8 @@ class ContentCreationJob
 
       # Derivative creator loads into memory, we're skipping for large files
       if File.size(content_object.fedora_file_path) / 1024000 < 500
-        DerivativeCreator.new(content_object.pid).generate_derivatives
+        # DerivativeCreator.new(content_object.pid).generate_derivatives
+        Cerberus::Application::Queue.push(LargeThumbnailJob.new(content_object.pid))
       end
 
       # Derivative creator modifies the core record and these changes are
