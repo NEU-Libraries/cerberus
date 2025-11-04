@@ -46,9 +46,7 @@ jobs:
       run: dockerize -wait http://localhost:3000 -timeout 1m
     - name: Run tests
       run: |
-        docker compose exec -T web cc-test-reporter before-build
         docker compose exec -T web bundle exec rake
-        docker compose exec -T web cc-test-reporter after-build --coverage-input-type simplecov --exit-code $?
     - name: Retrieve coverage results
       run: docker compose cp web:/home/cerberus/web/coverage ./coverage
     - name: Upload coverage files
