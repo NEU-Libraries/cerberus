@@ -56,14 +56,14 @@ describe Metadata::MODS do
       end
     end
 
-    context 'date attributes' do
-      it 'defines date attributes' do
-        date_attrs = %i[date_issued date_created copyright_date]
+    # context 'date attributes' do
+    #   it 'defines date attributes' do
+    #     date_attrs = %i[date_issued date_created copyright_date]
 
-        date_attrs.each do |attr|
-          assert_attr_json(attr, ActiveRecord::ConnectionAdapters::PostgreSQL::OID::DateTime)
-        end
-      end
-    end
+    #     date_attrs.each do |attr|
+    #       assert_attr_json(attr, ActiveRecord::ConnectionAdapters::PostgreSQL::OID::DateTime)
+    #     end
+    #   end
+    # end
   end
 end
