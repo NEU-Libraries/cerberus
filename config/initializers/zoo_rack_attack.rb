@@ -98,7 +98,7 @@ Rack::Attack.safelist("logging in") do |req|
 end
 
 Rack::Attack.safelist("Google Lighthouse") do |req|
-  req.host_lookup.include?("googlebot") && (req.user_agent.blank? || !req.user_agent.downcase.include?("Chrome-Lighthouse".downcase))
+  req.host_lookup.include?("google") && (req.user_agent.blank? || !req.user_agent.downcase.include?("Chrome-Lighthouse".downcase))
 end
 
 Rack::Attack.blocklist("Bot Wave") do |req|
