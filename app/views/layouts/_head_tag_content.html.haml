@@ -29,7 +29,7 @@
 - if @not_a_bot
   = javascript_include_tag 'application'
 - else
-  = javascript_include_tag 'application', defer: true
+  = javascript_include_tag 'application', defer: true, async: true
 -# = analytics_init if GoogleAnalytics.valid_tracker?
 
 :javascript
