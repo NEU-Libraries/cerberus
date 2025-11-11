@@ -32,6 +32,10 @@
   = javascript_include_tag 'application', defer: true, async: true
 -# = analytics_init if GoogleAnalytics.valid_tracker?
 
+%link{as: "style", href: "https://fonts.googleapis.com/css?family=Open+Sans:300,400,800,700,300&display=swap", onload: "this.onload=null;this.rel='stylesheet'", rel: "preload"}/
+%noscript
+  %link{href: "https://fonts.googleapis.com/css?family=Open+Sans:300,400,800,700,300&display=swap", rel: "stylesheet", type: "text/css"}/
+
 :javascript
   var spinner;
   function enable_spinner (div) { var target = document.getElementById(div); var spinner = new Spinner({}).spin(target); return spinner;};
