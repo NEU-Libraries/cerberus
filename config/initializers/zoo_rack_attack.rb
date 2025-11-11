@@ -97,6 +97,10 @@ Rack::Attack.safelist("logging in") do |req|
   req.fullpath.include?("/users/")
 end
 
+Rack::Attack.safelist("Google Lighthouse") do |req|
+  req.host_lookup.include?("googlebot") && (req.user_agent.blank? || !req.user_agent.downcase.include?("Chrome-Lighthouse".downcase))
+end
+
 Rack::Attack.blocklist("Bot Wave") do |req|
   req.referrer.blank? && req.env["HTTP_COOKIE"].blank? && (req.env["HTTP_ACCEPT"] == "*/*") && (req.user_agent.blank? || !req.user_agent.downcase.include?("bot".downcase))
 end

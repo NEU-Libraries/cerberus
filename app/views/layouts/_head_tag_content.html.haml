@@ -26,14 +26,17 @@
 
 = yield(:js_head)
 
-= javascript_include_tag 'application'
+- if @not_a_bot
+  = javascript_include_tag 'application'
+- else
+  = javascript_include_tag 'application', defer: true
 -# = analytics_init if GoogleAnalytics.valid_tracker?
 
 :javascript
   var spinner;
   function enable_spinner (div) { var target = document.getElementById(div); var spinner = new Spinner({}).spin(target); return spinner;};
 
-%script{defer: "", src: "https://www.googletagmanager.com/gtag/js?id=G-S3HPS0WE10"}
+%script{defer: true, src: "https://www.googletagmanager.com/gtag/js?id=G-S3HPS0WE10"}
 :javascript
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
