@@ -21,8 +21,6 @@
 / [if IE 7]
   = stylesheet_link_tag 'ie7'
 
-%link{href: "https://maxcdn.bootstrapcdn.com", rel: "preconnect"}/
-
 %link{href: "/apple-touch-icon.png", rel: "apple-touch-icon"}/
 %link{href: "/favicon.png", rel: "icon"}/
 
@@ -33,10 +31,6 @@
 - else
   = javascript_include_tag 'application', defer: true, async: true
 -# = analytics_init if GoogleAnalytics.valid_tracker?
-
-%link{as: "style", href: "https://fonts.googleapis.com/css?family=Open+Sans:300,400,800,700,300&display=swap", onload: "this.onload=null;this.rel='stylesheet'", rel: "preload"}/
-%noscript
-  %link{href: "https://fonts.googleapis.com/css?family=Open+Sans:300,400,800,700,300&display=swap", rel: "stylesheet", type: "text/css"}/
 
 :javascript
   var spinner;
