@@ -3,7 +3,7 @@
     %span.thumbnail-s1{"data-src" => @thumbs[0] , "data-media" => "(min-width: 0)" }
       /Fallback content for non-JS browsers. Same img src as the initial, unqualified source element.
     %noscript
-      %img{alt: " ", src: @thumbs[0]}
+      %img{alt: " ", src: @thumbs[0], fetchpriority: "high"}
     - if @thumbs.length > 1
       %span.thumbnail-s2{"data-src" => @thumbs[1], "data-media" => "(min-width: 200px)" }
     - if @thumbs.length > 2
