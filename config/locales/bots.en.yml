@@ -17,3 +17,4 @@ en:
     - index
     - linkcheck
     - inspectiontool
+    - lighthouse
