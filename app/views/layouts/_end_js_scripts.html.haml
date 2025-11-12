@@ -1,9 +1,13 @@
 :javascript
   $('.selectpicker').selectpicker();
 
-%script{async: true, defer: true, src: "https://www.googletagmanager.com/gtag/js?id=G-S3HPS0WE10"}
 :javascript
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-S3HPS0WE10');
+  document.onreadystatechange = () => {
+    if (document.readyState === "complete") {
+      $.getScript("https://www.googletagmanager.com/gtag/js?id=G-S3HPS0WE10");
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-S3HPS0WE10');
+    }
+  };
