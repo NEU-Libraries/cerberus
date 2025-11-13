@@ -168,6 +168,8 @@ class ContentCreationJob
 
       return content_object
     ensure
+      invalidate_pid(core_record.pid)
+
       if delete_file
         if File.exists?(file_path)
           FileUtils.rm(file_path)

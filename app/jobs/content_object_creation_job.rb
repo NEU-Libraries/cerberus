@@ -73,12 +73,12 @@ class ContentObjectCreationJob
       end
       content_object.reload
 
-      invalidate_pid(core_record.pid)
-
       new_checksum(content_object.pid)
 
       return content_object
     ensure
+      invalidate_pid(core_record.pid)
+
       if File.exists?(file_path) && ensure_delete
         FileUtils.rm(file_path)
       end
