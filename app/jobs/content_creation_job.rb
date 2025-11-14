@@ -1,4 +1,5 @@
 class ContentCreationJob
+  include ApplicationHelper
   include MimeHelper
   include ChecksumHelper
   include SentinelHelper
