@@ -101,6 +101,11 @@ Rack::Attack.safelist("Google Lighthouse") do |req|
   req.host_lookup.include?("google") && (!req.user_agent.blank? && req.user_agent.downcase.include?("Chrome-Lighthouse".downcase))
 end
 
+# LevelAccess
+Rack::Attack.safelist("LevelAccess") do |req|
+  !req.remote_ip.blank? && (["3.18.149.121", "3.139.228.222", "13.59.58.104", "3.128.157.239", "3.133.26.95", "3.139.225.14", "52.188.49.109", "20.63.69.102"].include?(req.remote_ip.strip))
+end
+
 Rack::Attack.blocklist("Bot Wave") do |req|
   req.referrer.blank? && req.env["HTTP_COOKIE"].blank? && (req.env["HTTP_ACCEPT"] == "*/*") && (req.user_agent.blank? || !req.user_agent.downcase.include?("bot".downcase))
 end
