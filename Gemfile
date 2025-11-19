@@ -53,7 +53,7 @@ gem 'bootsnap', require: false
 
 # NEU Gems
 gem 'active_decorator'
-gem 'atlas_rb'
+gem 'atlas_rb', '0.0.72'
 gem 'attr_json'
 gem 'blacklight'
 gem 'bootstrap'
