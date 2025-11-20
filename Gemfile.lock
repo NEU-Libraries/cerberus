@@ -249,8 +249,8 @@ GEM
       nom-xml (~> 1.0)
     msgpack (1.8.0)
     multipart-post (2.4.1)
-    net-http (0.8.0)
-      uri (>= 0.11.1)
+    net-http (0.7.0)
+      uri
     net-imap (0.5.12)
       date
       net-protocol
@@ -482,6 +482,7 @@ DEPENDENCIES
   libreconv
   loaf
   mods
+  net-http (< 0.8.0)
   next_rails
   pg
   propshaft
