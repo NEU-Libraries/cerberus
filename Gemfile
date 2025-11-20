@@ -67,13 +67,16 @@ gem 'good_job'
 gem 'hamlit'
 gem 'libreconv'
 gem 'mods'
-gem 'net-http', '< 0.8.0'
 gem 'pg'
 gem 'rsolr', '>= 1.0', '< 3'
 gem 'ruby-filemagic'
 gem 'ruby-vips'
-gem 'sass-embedded', '1.77.5' # temp fix for https://github.com/twbs/bootstrap/issues/40621
+gem 'sass-embedded'
 gem 'roo'
+
+# NEU gem remedies
+gem 'faraday-net_http', '3.4.1'
+gem 'net-http', '< 0.8.0'
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
