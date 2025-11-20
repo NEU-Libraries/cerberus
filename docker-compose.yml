@@ -25,6 +25,8 @@ services:
   atlas:
     image: nakatomi/atlas_web:${ATLAS}
     entrypoint: /home/atlas/web/docker-entrypoint.sh
+    environment:
+      RAILS_MASTER_KEY: ${ATLAS_MASTER_KEY}
     ports:
       - 3001:3000
   atlas-test:
@@ -32,6 +34,7 @@ services:
     entrypoint: /home/atlas/web/docker-entrypoint.sh
     environment:
       RAILS_ENV: 'test'
+      RAILS_MASTER_KEY: ${ATLAS_MASTER_KEY}
     ports:
       - 3002:3000
   iiif:
