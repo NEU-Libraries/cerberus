@@ -20,6 +20,7 @@ services:
     entrypoint: /home/cerberus/web/docker-entrypoint.sh
     environment:
       ATLAS_URL: 'http://atlas:3000/'
+      ATLAS_TOKEN: ${ATLAS_TOKEN}
     ports:
       - 3000:3000
   atlas:
