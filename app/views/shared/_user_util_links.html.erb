@@ -15,7 +15,9 @@
     <% end %>
     <% else %>
     <li class="nav-item">
-      <%= link_to t('blacklight.header_links.login'), new_user_session_path, class: 'nav-link' %>
+      <%# switch to dedicated atlas login page? %>
+      <%= link_to "Login", atlas_login_path, class: 'nav-link' %>
+      <%# <%= link_to t('blacklight.header_links.login'), new_user_session_path, class: 'nav-link' %>
     </li>
     <% end %>
   <% end %>

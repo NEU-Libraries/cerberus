@@ -30,6 +30,9 @@ module Devise
       # authentication_hash is provided by the base class and includes all the
       # fields included in the login form.
       def credentials_valid?
+        # add nuid to devise params
+        # take nuid send it to atlas
+        # merge atlas values into authentication hash?
         authentication_hash[:email] == "test@email.com" && authentication_hash[:password] == "password"
       end
 

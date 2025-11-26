@@ -34,4 +34,8 @@ Rails.application.routes.draw do
   get '/xml/editor/:id' => 'xml#editor', as: 'xml_editor'
   put '/xml/validate' => 'xml#validate'
   put '/xml/update' => 'xml#update'
+
+  # atlas
+  get '/atlas/login' => 'atlas#login'
+  put '/atlas/process_login' => 'atlas#process_login'
 end
