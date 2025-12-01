@@ -8,7 +8,19 @@ class User < ApplicationRecord
 
   define_model_callbacks :validation
 
-  attr_accessor :email, :password
+  attr_accessor :email, :password, :nuid, :name, :groups
 
-  devise :custom_authenticatable, authentication_keys: [:email, :password]
+  devise :custom_authenticatable, authentication_keys: [:email, :password, :nuid, :name, :groups]
+
+  def pretty_name
+    names = Namae.parse(name)[0]
+    if !names.blank?
+      return "#{names.given} #{names.family}"
+    end
+    ""
+  end
+
+  def to_s
+    pretty_name
+  end
 end

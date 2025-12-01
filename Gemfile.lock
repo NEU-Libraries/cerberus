@@ -249,6 +249,8 @@ GEM
       nom-xml (~> 1.0)
     msgpack (1.8.0)
     multipart-post (2.4.1)
+    namae (1.2.0)
+      racc (~> 1.7)
     net-http (0.8.0)
       uri (>= 0.11.1)
     net-imap (0.5.12)
@@ -482,6 +484,7 @@ DEPENDENCIES
   libreconv
   loaf
   mods
+  namae
   next_rails
   pg
   propshaft

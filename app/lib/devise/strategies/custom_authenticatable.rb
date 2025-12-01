@@ -33,13 +33,15 @@ module Devise
         # add nuid to devise params
         # take nuid send it to atlas
         # merge atlas values into authentication hash?
-        authentication_hash[:email] == "test@email.com" && authentication_hash[:password] == "password"
+        # authentication_hash[:email] == "test@email.com" && authentication_hash[:password] == "password"
+        true
       end
 
       def validated_user
         # mapping.to is a reference to the model class that Devise is configured
         # to use that represents user accounts. In this case, it's the User class.
         mapping.to.new(
+          nuid: authentication_hash[:nuid],
           email: authentication_hash[:email],
           password: authentication_hash[:password]
         )

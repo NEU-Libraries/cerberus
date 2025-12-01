@@ -10,14 +10,20 @@ module Devise
         #
         # It takes as many params as elements in the array returned in
         # serialize_into_session.
-        def serialize_from_session(email)
-          new(email:)
+        def serialize_from_session(email, nuid, name, groups)
+          # new(email:)
+          resource = self.new
+          resource.email = email
+          resource.nuid = nuid
+          resource.name = name
+          resource.groups = groups
+          resource
         end
 
         # Returns an array with the data from the user that needs to be
         # serialized into the session.
         def serialize_into_session(user)
-          [user.email]
+          [user.email, user.nuid, user.name, user.groups]
         end
       end
     end

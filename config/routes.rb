@@ -37,5 +37,6 @@ Rails.application.routes.draw do
 
   # atlas
   get '/atlas/login' => 'atlas#login'
-  put '/atlas/process_login' => 'atlas#process_login'
+  post '/atlas/process_login' => 'atlas#process_login'
+  get '/atlas/user' => 'atlas#user'
 end

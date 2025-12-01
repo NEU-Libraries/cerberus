@@ -1,11 +1,7 @@
 %h1.py-3= t('.sign_in')
 
-= bootstrap_form_tag url: '' do |f|
+= bootstrap_form_tag url: atlas_process_login_path do |f|
   = bootstrap_fields_for :user do |u|
     = u.text_field :nuid
-    = u.email_field :email
-    = u.text_field :name
-    = u.text_area :groups, rows: 5
   .well.p-3.my-3.rounded-3
-    = f.primary "Atlas"
-    = f.submit "Login", class: "btn btn-success"
+    = f.submit "Atlas Login", class: "btn btn-success"
