@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class User < ApplicationRecord
+class User
   include ActiveModel::API
   include ActiveModel::Validations
   extend ActiveModel::Callbacks
