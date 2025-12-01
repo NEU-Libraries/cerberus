@@ -4,8 +4,16 @@ class AtlasController < ApplicationController
   def login; end
 
   def process_login
-    # Use atlas_rb to take nuid value and retrieve user details
-    sign_in(User.new(email: "dgcliff@northeastern.edu", nuid: "123123123", name: "Cliff, David", groups: ["group1", "group2"]))
+    user_values = AtlasRb::Authentication.login(params[:user][:nuid])
+
+    user = User.new(
+      email: user_values["email"],
+      nuid: user_values["nuid"],
+      name: user_values["name"],
+      groups: user_values["groups"]
+    )
+
+    sign_in(user)
     redirect_to atlas_user_path
   end
 
