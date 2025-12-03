@@ -84,7 +84,7 @@ class EmployeesController < ApplicationController
 
     # redoing extension to hew to traditional process for compatability
     mime_type = extract_mime_type(file_path, file_name)
-    extension = extract_extension(mime_type, File.extname(file_name))
+    extension = extract_extension(mime_type, File.extname(file_name)).delete!(".") # Fix for .csv csv comparison bug
 
     if old_content_object.mime_type != mime_type
       session[:flash_error] = "Mime type must be #{old_content_object.mime_type} not #{mime_type}"
