@@ -38,12 +38,14 @@ class EmployeesController < ApplicationController
 
   def new_replacement_file
     if !current_user.blank? && (current_user.admin? || current_user.admin_group?)
-      begin
-        @content_object = ActiveFedora::Base.find(params[:content_object_id], cast: true)
-      rescue ActiveFedora::ObjectNotFoundError
-        session[:flash_error] = "Item not found for #{params[:content_object_id}"
-        redirect_to my_loaders_path and return
-      end
+      # begin
+      #   @content_object = ActiveFedora::Base.find(params[:content_object_id], cast: true)
+      # rescue ActiveFedora::ObjectNotFoundError
+      #   session[:flash_error] = "Item not found for #{params[:content_object_id}"
+      #   redirect_to my_loaders_path and return
+      # end
+
+      @content_object = ActiveFedora::Base.find(params[:content_object_id], cast: true)
 
       if !@content_object.respond_to?(:fedora_file_path)
         session[:flash_error] = "Class may not be of type #{@content_object.class.to_s}"
