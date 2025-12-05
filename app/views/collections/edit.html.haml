@@ -24,7 +24,7 @@
     .py-2.px-1
       = bootstrap_form_tag(url: collection_path(params[:id]), method: :patch, multipart: true) do |f|
         .row
-          .col
+          .col-sm
             %h5.pb-2
               Mass Permissions
             %select.form-select.form-select-sm#mass{"aria-label" => "Default select example"}
@@ -33,7 +33,7 @@
             %ul.small.pt-2
               %li Setting to 'public' will allow anyone accessing the site to see your item.
               %li Setting to 'private' will only allow groups that are explicitly chosen to see your item.
-          .col
+          .col-sm
             %h5.pb-2 Embargo Release Date
             %input.form-select.form-select-sm#embargo{name: "embargo", type: "date", value: ""}/
             %label.small.py-3{for: "embargo"} If this item is embargoed, please enter the release date.
@@ -41,21 +41,21 @@
           %h5.pb-2
             Permissions
           .row.py-1
-            .col
+            .col-sm
               %select.form-select.form-select-sm#groups{"aria-label" => "Default select example"}
                 %option{selected: "selected"} Select Group
                 %option{value: "1"} Group 1
                 %option{value: "1"} Group 2
-            .col-2
+            .col-sm-2
               %select.form-select.form-select-sm#ability{"aria-label" => "Default select example"}
                 %option{selected: "selected"} Ability
                 %option{value: "1"} Read
                 %option{value: "2"} Edit
-            .col-2
+            .col-sm-2
               %button.btn.btn-danger.form-control.btn-sm{type: "button"}
                 %i.fa.fa-times{"aria-hidden" => "true"}
           .row.py-2
-            .col-2
+            .col-sm-2
               %button.btn.btn-success.btn-sm.form-control{type: "button"}
                 %i.fa.fa-plus.small{"aria-hidden" => "true"}
                 Add Group
