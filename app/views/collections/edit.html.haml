@@ -40,7 +40,7 @@
         .row
           %h5.pb-2
             Permissions
-          .row
+          .row.py-1
             .col
               %select.form-select.form-select-sm#groups{"aria-label" => "Default select example"}
                 %option{selected: "selected"} Select Group
@@ -52,5 +52,10 @@
                 %option{value: "1"} Read
                 %option{value: "2"} Edit
             .col-2
-              %button.btn.btn-success.form-control.btn-sm{type: "button"}
-                %i.fa.fa-plus{"aria-hidden" => "true"}
+              %button.btn.btn-danger.form-control.btn-sm{type: "button"}
+                %i.fa.fa-times{"aria-hidden" => "true"}
+          .row.py-2
+            .col-2
+              %button.btn.btn-success.btn-sm.form-control{type: "button"}
+                %i.fa.fa-plus.small{"aria-hidden" => "true"}
+                Add Group
