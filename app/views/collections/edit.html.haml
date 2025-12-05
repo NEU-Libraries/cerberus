@@ -54,8 +54,12 @@
             .col-sm-2
               %button.btn.btn-danger.form-control.btn-sm{type: "button"}
                 %i.fa.fa-times{"aria-hidden" => "true"}
-          .row.py-2
+          .row.py-3.justify-content-center
             .col-sm-2
               %button.btn.btn-success.btn-sm.form-control{type: "button"}
                 %i.fa.fa-plus.small{"aria-hidden" => "true"}
                 Add Group
+          %div
+            .well.p-3.my-3.rounded-3
+              = f.button :submit, class: "btn btn-success"
+              = link_to "Cancel", collection_path(params[:id]), class: "btn btn-warning"
