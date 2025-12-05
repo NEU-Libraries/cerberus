@@ -23,16 +23,20 @@
   #permissions.tab-pane{"aria-labelledby" => "permissions-tab", role: "tabpanel"}
     .py-2.px-1
       = bootstrap_form_tag(url: collection_path(params[:id]), method: :patch, multipart: true) do |f|
-        %h5.pb-2
-          Mass Permissions
-        %select.form-select.form-select-sm#mass{"aria-label" => "Default select example"}
-          %option{selected: "selected"} Public
-          %option{value: "1"} Private
-        %ul.small.pt-2
-          %li Setting to 'public' will allow anyone accessing the site to see your item.
-          %li Setting to 'private' will only allow groups that are explicitly chosen to see your item.
-        %h5.pb-1 Embargo Release Date
-        %label.small{for: "embargo"} If this item is embargoed, please enter the release date.
-        %input.form-select.form-select-sm#embargo{name: "embargo", type: "date", value: "#{Date.today.strftime("%F")}"}/
-        %h5.py-2
-          Permissions
+        .row
+          .col
+            %h5.pb-2
+              Mass Permissions
+            %select.form-select.form-select-sm#mass{"aria-label" => "Default select example"}
+              %option{selected: "selected"} Public
+              %option{value: "1"} Private
+            %ul.small.pt-2
+              %li Setting to 'public' will allow anyone accessing the site to see your item.
+              %li Setting to 'private' will only allow groups that are explicitly chosen to see your item.
+          .col
+            %h5.pb-2 Embargo Release Date
+            %input.form-select.form-select-sm#embargo{name: "embargo", type: "date", value: "#{Date.today.strftime("%F")}"}/
+            %label.small.py-3{for: "embargo"} If this item is embargoed, please enter the release date.
+        .row
+          %h5.pb-2
+            Permissions
