@@ -22,15 +22,21 @@
           = link_to "Cancel", collection_path(params[:id]), class: "btn btn-warning"
   #permissions.tab-pane{"aria-labelledby" => "permissions-tab", role: "tabpanel"}
     .py-2.px-1
-      %h5.pb-2
-        Mass Permissions
-      %select.form-select.form-select-sm{"aria-label" => "Default select example"}
-        %option{selected: "selected"} Public
-        %option{value: "1"} Private
-      %ul.small.pt-2
-        %li Setting to 'public' will allow anyone accessing the site to see your item.
-        %li Setting to 'private' will only allow groups that are explicitly chosen to see your item.
-      %h5.pb-2
-        Permissions
-      %h5.pb-2
-        Embargo Release Date
+      = bootstrap_form_tag(url: collection_path(params[:id]), method: :patch, multipart: true) do |f|
+        %h5.pb-2
+          Mass Permissions
+        %select.form-select.form-select-sm#mass{"aria-label" => "Default select example"}
+          %option{selected: "selected"} Public
+          %option{value: "1"} Private
+        %ul.small.pt-2
+          %li Setting to 'public' will allow anyone accessing the site to see your item.
+          %li Setting to 'private' will only allow groups that are explicitly chosen to see your item.
+        %h5.pb-1 Embargo Release Date
+        .small.pb-2 If this item is embargoed, please enter the release date.
+        = f.hidden_field :embargo_release_date, {class: 'date'}
+        .input-group
+          = select_year(0, {start_year: Time.zone.now.year, end_year: 2050, prompt: 'Year'}, {class: 'form-select form-select-sm'})
+          = select_month(0, {prompt: 'Month'}, {class: 'form-select form-select-sm px-2'})
+          = select_day(0, {prompt: 'Day'}, {class: 'form-select form-select-sm'})
+        %h5.py-2
+          Permissions
