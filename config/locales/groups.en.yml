@@ -4,6 +4,8 @@ en:
       name: "National Interpreter Education Center Staff"
     northeastern:drs:aslp:series:
       name: "National Interpreter Education Center - Series (Test Group)"
+    northeastern:drs:aslp:aslp-staff:
+      name: "CSSH - American Sign Language Program Staff"
     northeastern:drs:athletics:athletics_department:
       name: "Department of Athletics"
     northeastern:drs:athletics:hall_of_fame:
@@ -22,6 +24,8 @@ en:
       name: "CAMD - Art and Design Group"
     northeastern:drs:camd:department_of_art_and_design:ghostlab:
       name: "CAMD - Ghostlab Research Team"
+    northeastern:drs:camd:department_of_art_and_design:grafica-latina:
+      name: "CAMD - Grafica Latina Project Team"
     northeastern:drs:camd:out_and_about:
       name: "CAMD - Out and About Project Team"
     northeastern:drs:camd:photo_archive:staff:
@@ -34,6 +38,8 @@ en:
       name: "CCIS Technical Reports Staff"
     northeastern:drs:college_of_engineering:civil_and_environmental_engineering:hajjar_lab:
       name: "Hajjar Lab Team"
+    northeastern:drs:college_of_engineering:coe_marcom:coe-photograph-access:
+      name: "College of Engineering - Photo Archive Users"
     northeastern:drs:college_of_engineering:deans_office:
       name: "College of Engineering - Dean's Office Staff"
     northeastern:drs:college_of_engineering:electrical_and_computer_engineering:bspiral:
@@ -54,6 +60,8 @@ en:
       name: "College of Engineering - Combustion and Air Pollution Lab"
     northeastern:drs:college_of_engineering:mechanical_and_industrial_engineering:shefelbine_lab:
       name: "Shefelbine Lab Team"
+    northeastern:drs:college_of_engineering:mechanical_and_industrial_engineering:shepherd_lab:
+      name: "Shepherd Lab Team"
     northeastern:drs:college_of_engineering:river_lab:
       name: "RIVeR Lab Team"
     northeastern:drs:college_of_engineering:wiot:
@@ -64,6 +72,10 @@ en:
       name: "College of Professional Studies - Faculty Podcast"
     northeastern:drs:college_of_professional_studies:media:
       name: "College of Professional Studies - Media Group"
+    northeastern:drs:college_of_professional_studies:regulatory-affairs-chronicle_staff:
+      name: "Regulatory Affairs Chronicle - Staff"
+    northeastern:drs:college_of_science:behavioral_neuroscience:undergraduate_programs:
+      name: "College of Science - Department of Behavioral Neuroscience Staff"
     northeastern:drs:college_of_science:biology:monaghan_lab:
       name: "Monaghan Lab Team"
     northeastern:drs:college_of_science:biology:undergraduate_programs:
@@ -98,10 +110,14 @@ en:
       name: "CSSH - Dudley Square Project Team"
     northeastern:drs:college_of_social_sciences_humanities:deans_office:
       name: "CSSH - Dean's Office Staff"
+    northeastern:drs:college_of_social_sciences_humanities:department_of_sociology_anthropology:projects:
+      name: "CSSH - Department_of Sociology and Anthropology Program Staff"
+    northeastern:drs:college_of_social_sciences_humanities:dta:
+      name: "Digital Transgender Archive Project Team"
     northeastern:drs:college_of_social_sciences_humanities:early_black_boston_digital_almanac:
       name: "CSSH - Early Black Boston Digital Almanac Team"
     northeastern:drs:college_of_social_sciences_humanities:early_caribbean_digital_archive:
-      name: "CCSH - Early Caribbean Digital Archive Project Team"
+      name: "CSSH - Early Caribbean Digital Archive Project Team"
     northeastern:drs:college_of_social_sciences_humanities:eliterature:
       name: "CSSH - E-literature Project Team"
     northeastern:drs:college_of_social_sciences_humanities:holocaust_awareness_committee:
@@ -232,6 +248,8 @@ en:
       name: "Center for Research Innovation Staff"
     northeastern:drs:provost_office:icils:icils_staff:
       name: "CILS Staff"
+    northeastern:drs:registrar:
+      name: "Office of the University Registrar Staff"
     northeastern:drs:repository:admin:
       name: "DRS Advanced Users"
     northeastern:drs:repository:AWD:
