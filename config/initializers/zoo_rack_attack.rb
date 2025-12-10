@@ -14,7 +14,7 @@ end
 
 class Rack::Attack::Request < ::Rack::Request
   def host_lookup
-    @host_lookup ||= `timeout -s 9 -k 1 6 host -p 5053 #{remote_ip} 127.0.0.1 | tail -n1`
+    @host_lookup ||= `timeout -s 9 -k 1 6 host -p 5053 #{remote_ip} 127.0.0.1 | tail -n1`.strip
   end
 
   def remote_ip
