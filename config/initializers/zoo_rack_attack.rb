@@ -507,7 +507,7 @@ end
 # Track it using ActiveSupport::Notification
 ActiveSupport::Notifications.subscribe("rack.attack") do |name, start, finish, request_id, req|
   if (req.env['rack.attack.match_type'] != :blocklist) && req.env['rack.attack.matched'] == "not_declared_bot" && req.env['rack.attack.match_type'] == :track
-    File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-fingerprints.log", "#{req.env['HTTP_X_FORWARDED_FOR']} - #{req.ip} | #{req.fingerprint}" + "\n", mode: 'a')
+    File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-fingerprints.log", "#{req.env['HTTP_X_FORWARDED_FOR']} - #{req.ip} | #{req.host_lookup} | #{req.fingerprint}" + "\n", mode: 'a')
   end
 
   if (req.env['rack.attack.match_type'] == :blocklist) && !req.env["HTTP_COOKIE"].blank?
