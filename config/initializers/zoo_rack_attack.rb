@@ -312,6 +312,23 @@ Rack::Attack.blocklist("range fraud") do |request|
   end
 end
 
+# dl throttle by signature and blanks
+Rack::Attack.throttle("download scraper blank wave", limit: 1, period: 10) do |request|
+  if `cut -d ' ' -f1 /proc/loadavg`.strip.to_f > 1
+    if request.referrer.blank? && request.env["HTTP_COOKIE"].blank?
+      if request.user_agent.blank? || !request.user_agent.downcase.include?("bot".downcase)
+        if request.fullpath.include?("fulltext.pdf") || request.fullpath.include?("datastream_id=content")
+          if request.session_options[:id].blank? && request.env["HTTP_RANGE"].blank?
+            File.write("#{Rails.root}/log/download_blanks.log", "#{request.remote_ip} - #{request.fingerprint} - #{request.path} - #{Time.now}" + "\n", mode: 'a')
+
+            request.fingerprint
+          end
+        end
+      end
+    end
+  end
+end
+
 Rack::Attack.throttle("pdf scraper mini wave", limit: 1, period: 3) do |request|
   if request.referrer.blank? && request.env["HTTP_COOKIE"].blank?
     if request.user_agent.blank? || !request.user_agent.downcase.include?("bot".downcase)
@@ -493,17 +510,8 @@ ActiveSupport::Notifications.subscribe("rack.attack") do |name, start, finish, r
     File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-cookies-and-blocked.log", "#{req.env['rack.attack.matched']} - #{req.ip} | #{req.fingerprint}" + "\n", mode: 'a')
   end
 
-  if req.env['rack.attack.matched'] == "pdf scraper mini wave"
-    File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-pdf_mini_wave.log", "#{req.ip} | #{req.fingerprint}" + "\n", mode: 'a')
-  end
-
   # googlebot
   if (req.env['rack.attack.match_type'] == :blocklist) && req.host_lookup.include?("googlebot")
     File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-google-bot.log", "#{req.env['rack.attack.matched']} - #{req.ip} | #{req.user_agent} | #{req.fingerprint}" + "\n", mode: 'a')
-  end
-
-  # log head requests
-  if (req.env['rack.attack.match_type'] != :blocklist) && !req.original_method.blank? && (req.original_method.downcase == "head")
-    File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-head-reqs.log", "#{req.ip} | #{req.user_agent} | #{req.env["HTTP_SEC_FETCH_SITE"]} | #{req.fingerprint}" + "\n", mode: 'a')
   end
 end
