@@ -304,7 +304,9 @@ end
 
 Rack::Attack.blocklist("blacklight") do |req|
   if (!req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase))
-    req.env["HTTP_SEC_FETCH_SITE"].blank? && (req.fullpath.include?("&f") || req.fullpath.include?("?f") || req.fullpath.include?("creat") || req.fullpath.include?("rss"))
+    if req.session_options[:id].blank? || req.env["HTTP_SEC_FETCH_SITE"].blank?
+      (req.fullpath.include?("&f") || req.fullpath.include?("?f") || req.fullpath.include?("creat") || req.fullpath.include?("rss"))
+    end
   end
 end
 
