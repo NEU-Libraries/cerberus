@@ -26,7 +26,7 @@
         .row
           .col-sm
             %h5.pb-2
-              Mass Permissions
+              General Permissions
             %select.form-select.form-select-sm#mass{"aria-label" => "Default select example"}
               %option{selected: "selected"} Public
               %option{value: "1"} Private
@@ -38,8 +38,8 @@
             %input.form-select.form-select-sm#embargo{name: "embargo", type: "date", value: ""}/
             %label.small.py-3{for: "embargo"} If this item is embargoed, please enter the release date.        
         %h5.pb-2
-          Permissions
-        .row.py-1
+          Group Permissions
+        .row.py-1#group-list
           .col-sm
             %select.form-select.form-select-sm#groups{"aria-label" => "Default select example"}
               %option{selected: "selected"} Select Group
@@ -48,17 +48,14 @@
           .col-sm-2
             %select.form-select.form-select-sm#ability{"aria-label" => "Default select example"}
               %option{selected: "selected"} Ability
-              %option{value: "1"} Read
-              %option{value: "2"} Edit
+              %option{value: "1"} View
+              %option{value: "2"} Manage
           .col-sm-2
-            %button.btn.btn-danger.form-control.btn-sm{type: "button"}
-              %i.fa.fa-times{"aria-hidden" => "true"}
-        .row.py-3.justify-content-center
-          .col-sm-2
-            %button.btn.btn-success.btn-sm.form-control{type: "button"}
-              %i.fa.fa-plus.small{"aria-hidden" => "true"}
+            %button.btn.btn-success.btn-sm.form-control#add-group{type: "button"}
               Add Group
-          %div
-            .well.p-3.my-3.rounded-3
-              = f.button :submit, class: "btn btn-success"
-              = link_to "Cancel", collection_path(params[:id]), class: "btn btn-warning"
+            %button.btn.btn-danger.form-control.btn-sm.d-none#delete-group{type: "button"}
+              %i.fa.fa-times{"aria-hidden" => "true"}
+        %div
+          .well.p-3.my-3.rounded-3
+            = f.button :submit, class: "btn btn-success"
+            = link_to "Cancel", collection_path(params[:id]), class: "btn btn-warning"
