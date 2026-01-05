@@ -36,7 +36,7 @@
           .col-sm
             %h5.pb-2 Embargo Release Date
             %input.form-select.form-select-sm#embargo{name: "embargo", type: "date", value: ""}/
-            %label.small.py-3{for: "embargo"} If this item is embargoed, please enter the release date.        
+            %label.small.py-3{for: "embargo"} If this item is embargoed, please enter the release date.
         %h5.pb-2
           Group Permissions
         .row.py-1#group-list
@@ -59,3 +59,19 @@
           .well.p-3.my-3.rounded-3
             = f.button :submit, class: "btn btn-success"
             = link_to "Cancel", collection_path(params[:id]), class: "btn btn-warning"
+
+:javascript
+  var add_btn = document.getElementById('add-group');
+
+  add_btn.addEventListener('click', function(e){
+    // Count how many elements with IDs starting with "group-list" exist
+    let count = $('[id^="group-list"]').length;
+    console.log(count);
+
+    // Clone and set new ID
+    let $clone = $('#group-list').clone();
+    $clone.attr('id', 'group-list_' + count);
+
+    // Insert last in stack
+    $clone.insertAfter($('[id^="group-list"]').last());
+  });
