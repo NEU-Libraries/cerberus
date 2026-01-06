@@ -72,6 +72,16 @@
     let $clone = $('#group-list').clone();
     $clone.attr('id', 'group-list_' + count);
 
+    $clone.find('#add-group').addClass('d-none');
+
+    // delete button
+     $clone.find('#delete-group').removeClass('d-none');
+
+    // add delete code
+    $clone.find('#delete-group').click(function() {
+      $(this).parent().parent().remove();
+    });
+
     // Insert last in stack
     $clone.insertAfter($('[id^="group-list"]').last());
   });
