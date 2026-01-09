@@ -15,6 +15,8 @@ class CollectionsController < CatalogController
 
   def edit
     @collection = AtlasRb::Collection.find(params[:id])
+    # @permissions = AtlasRb::Resource.permissions(params[:id])
+    @permissions = [OpenStruct.new(id: 0, name: 'developers'), OpenStruct.new(id: 1, name: 'admin')]
   end
 
   def create
