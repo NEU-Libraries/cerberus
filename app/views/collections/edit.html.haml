@@ -40,26 +40,35 @@
         %h5.pb-2
           Group Permissions
         - @permissions.each_with_index do |group, index|
-          .row.py-1{id: "group-list#{index > 0 ? "_#{index}" : ""}"}
+          .row.py-1{id: "group-list_#{index}"}
+            .col-sm-auto.form-text
+              Group
             .col-sm
               %select.form-select.form-select-sm.groups{"aria-label" => "Default select example", name: "groups[#{index}][group_id]"}
                 %option{value: group[0], selected: "selected"} #{group[0]}
+            .col-sm-auto.form-text
+              Ability
             .col-sm-2
               %select.form-select.form-select-sm.ability{"aria-label" => "Default select example", name: "groups[#{index}][ability]"}
-                %option{value: group[1], selected: "selected"} #{group[1]}
+                %option{value: "View", selected: group[1] == "View"} View
+                %option{value: "Manage", selected: group[1] == "Manage"} Manage
             .col-sm-2
               %button.btn.btn-danger.form-control.btn-sm{type: "button", name: "delete-group", onclick: "$(this).parent().parent().remove();"}
                 %i.fa.fa-times{"aria-hidden" => "true"}
 
-        .row.py-1#group-list
+        .row.py-1#group-list{style: "display: none;"}
+          .col-sm-auto.form-text
+            Group
           .col-sm
             %select.form-select.form-select-sm#groups{"aria-label" => "Default select example"}
-              %option{selected: "selected"} Select Group
+              %option{value: ""}
               %option{value: "1"} Group 1
               %option{value: "2"} Group 2
+          .col-sm-auto.form-text
+            Ability
           .col-sm-2
             %select.form-select.form-select-sm#ability{"aria-label" => "Default select example"}
-              %option{selected: "selected"} Ability
+              %option{value: ""}
               %option{value: "1"} View
               %option{value: "2"} Manage
           .col-sm-2
@@ -86,4 +95,7 @@
 
     // Insert last in stack
     $clone.insertAfter($('[id^="group-list"]').last());
+
+    // Show element
+    $clone.show();
   });
