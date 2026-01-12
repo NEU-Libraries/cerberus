@@ -43,12 +43,10 @@
           .row.py-1{id: "group-list#{index > 0 ? "_#{index}" : ""}"}
             .col-sm
               %select.form-select.form-select-sm.groups{"aria-label" => "Default select example", name: "groups[#{index}][group_id]"}
-                %option{value: group.id, selected: "selected"} #{group.name}
+                %option{value: group[0], selected: "selected"} #{group[0]}
             .col-sm-2
               %select.form-select.form-select-sm.ability{"aria-label" => "Default select example", name: "groups[#{index}][ability]"}
-                %option{selected: "selected", value: ""} Ability
-                %option{value: "view"} View
-                %option{value: "manage"} Manage
+                %option{value: group[1], selected: "selected"} #{group[1]}
             .col-sm-2
               %button.btn.btn-danger.form-control.btn-sm{type: "button", name: "delete-group", onclick: "$(this).parent().parent().remove();"}
                 %i.fa.fa-times{"aria-hidden" => "true"}
