@@ -46,6 +46,8 @@
             .col-sm
               %select.form-select.form-select-sm.groups{"aria-label" => "Default select example", name: "groups[#{index}][group_id]"}
                 %option{value: group[0], selected: "selected"} #{group[0]}
+                - @groups.each do |user_group|
+                  %option{value: user_group} #{user_group}
             .col-sm-auto.form-text
               Ability
             .col-sm-2

@@ -23,4 +23,8 @@ class User
   def to_s
     pretty_name
   end
+
+  def pretty_groups
+    # TODO: Lookup self.groups against Group model objs to find cosmetic strings paired against grouper values
+  end
 end

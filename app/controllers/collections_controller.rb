@@ -15,6 +15,7 @@ class CollectionsController < CatalogController
 
   def edit
     @collection = AtlasRb::Collection.find(params[:id])
+    @groups = current_user.groups
     @permissions = AtlasRb::Resource.permissions(params[:id]).slice(
       'read', 'edit'
     ).flat_map do |key, values|
