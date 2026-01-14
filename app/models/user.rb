@@ -25,6 +25,8 @@ class User
   end
 
   def pretty_groups
-    # TODO: Lookup self.groups against Group model objs to find cosmetic strings paired against grouper values
+    return [] if groups.blank?
+
+    groups.map { |g| Group.find_by(raw: g)&.cosmetic }
   end
 end
