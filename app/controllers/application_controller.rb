@@ -17,4 +17,8 @@ class ApplicationController < ActionController::Base
     end
     breadcrumb(item['title'], public_send("#{klass}_path", item['id']))
   end
+
+  def pretty_group(raw_group)
+    Group.find_by(raw: raw_group)&.cosmetic || raw_group
+  end
 end
