@@ -320,15 +320,13 @@ end
 
 # dl throttle by signature and blanks
 Rack::Attack.throttle("download scraper blank wave", limit: 1, period: 10) do |request|
-  if `cut -d ' ' -f1 /proc/loadavg`.strip.to_f > 1
-    if request.referrer.blank? && request.env["HTTP_COOKIE"].blank?
-      if request.user_agent.blank? || !request.user_agent.downcase.include?("bot".downcase)
-        if request.fullpath.include?("fulltext.pdf") || request.fullpath.include?("datastream_id=content")
-          if request.session_options[:id].blank? && request.env["HTTP_RANGE"].blank?
-            File.write("#{Rails.root}/log/download_blanks.log", "#{request.remote_ip} - #{request.fingerprint} - #{request.path} - #{Time.now}" + "\n", mode: 'a')
+  if request.referrer.blank? && request.env["HTTP_COOKIE"].blank?
+    if request.user_agent.blank? || !request.user_agent.downcase.include?("bot".downcase)
+      if request.fullpath.include?("fulltext.pdf") || request.fullpath.include?("datastream_id=content")
+        if request.session_options[:id].blank? && request.env["HTTP_RANGE"].blank?
+          File.write("#{Rails.root}/log/download_blanks.log", "#{request.remote_ip} - #{request.fingerprint} - #{request.path} - #{Time.now}" + "\n", mode: 'a')
 
-            request.fingerprint
-          end
+          request.fingerprint
         end
       end
     end
