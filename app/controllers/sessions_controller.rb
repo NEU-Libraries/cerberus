@@ -12,7 +12,7 @@ class SessionsController < Devise::SessionsController
 
     def delete_all_app_cookies
       # Iterate over all cookies sent by the browser to your app's current path/domain
-      cookies.each_key do |cookie_name|
+      cookies.each do |cookie_name, val|
         # Delete each cookie individually, using default options
         cookies.delete(cookie_name.to_sym)
 
