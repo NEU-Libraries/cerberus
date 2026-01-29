@@ -45,6 +45,8 @@ class CatalogController < ApplicationController
   end
 
   def index
+    flash[:alert] = "The DRS may have intermittent service due to planned maintenance on 1/29/26."
+
     if ((!params[:q].blank?) && (CGI::unescape(params[:q]) == "*") && (current_user.blank? || current_user.nuid.blank?))
       render :template => '/error/500', :layout => false, :formats => [:html], :status => 500
     elsif params[:q].blank? && !params[:f].blank? && !not_a_bot?
