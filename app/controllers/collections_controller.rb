@@ -2,6 +2,7 @@
 
 class CollectionsController < CatalogController
   include Thumbable
+  include Transformable
 
   def show
     @collection = AtlasRb::Collection.find(params[:id])
@@ -15,13 +16,8 @@ class CollectionsController < CatalogController
 
   def edit
     @collection = AtlasRb::Collection.find(params[:id])
-    @groups = current_user.groups.map { |value| [value, pretty_group(value)] }
-    @permissions = AtlasRb::Resource.permissions(params[:id]).slice(
-      'read', 'edit'
-    ).flat_map do |key, values|
-      permission = key == 'read' ? 'View' : 'Manage'
-      values.map { |value| [value, pretty_group(value), permission] }
-    end
+    @groups = pretty_user_permissions(current_user.groups)
+    @permissions = pretty_resource_permissions(AtlasRb::Resource.permissions(params[:id]))
   end
 
   def create
@@ -38,7 +34,11 @@ class CollectionsController < CatalogController
     # AtlasRb::Collection.metadata(params[:id], permitted)
     # redirect_to collection_path(params[:id])
     puts "DGC INSPECT params[:groups]"
-    puts params[:groups].inspect
+    # puts params[:groups].inspect
+
+    # form_group_permissions(params[:groups])
+
+    puts form_group_permissions(params[:groups]).inspect
 
     # @collection.permissions = params[:metadata]['permissions'] if params[:metadata]['permissions'].present?
   end
