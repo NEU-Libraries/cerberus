@@ -23,10 +23,4 @@ class User
   def to_s
     pretty_name
   end
-
-  def pretty_groups
-    return [] if groups.blank?
-
-    groups.map { |g| Group.find_by(raw: g)&.cosmetic || g }
-  end
 end

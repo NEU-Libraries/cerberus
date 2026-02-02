@@ -28,8 +28,8 @@
             %h5.pb-2
               General Permissions
             %select.form-select.form-select-sm#mass{"aria-label" => "Default select example"}
-              %option{selected: "selected"} Public
-              %option{value: "1"} Private
+              %option{value: "public", selected: "selected"} Public
+              %option{value: "private"} Private
             %ul.small.pt-2
               %li Setting to 'public' will allow anyone accessing the site to see your item.
               %li Setting to 'private' will only allow groups that are explicitly chosen to see your item.
@@ -45,16 +45,16 @@
               Group
             .col-sm
               %select.form-select.form-select-sm.groups{"aria-label" => "Default select example", name: "groups[#{index}][group_id]"}
-                %option{value: group[0], selected: "selected"} #{group[0]}
+                %option{value: group[0], selected: "selected"} #{group[1]}
                 - @groups.each do |user_group|
-                  - if !(user_group == group[0])
-                    %option{value: user_group} #{user_group}
+                  - if !(user_group[0] == group[0])
+                    %option{value: user_group[0]} #{user_group[1]}
             .col-sm-auto.form-text
               Ability
             .col-sm-2
               %select.form-select.form-select-sm.ability{"aria-label" => "Default select example", name: "groups[#{index}][ability]"}
-                %option{value: "View", selected: group[1] == "View"} View
-                %option{value: "Manage", selected: group[1] == "Manage"} Manage
+                %option{value: "read", selected: group[1] == "View"} View
+                %option{value: "edit", selected: group[1] == "Manage"} Manage
             .col-sm-2
               %button.btn.btn-danger.form-control.btn-sm{type: "button", name: "delete-group", onclick: "$(this).parent().parent().remove();"}
                 %i.fa.fa-times{"aria-hidden" => "true"}
