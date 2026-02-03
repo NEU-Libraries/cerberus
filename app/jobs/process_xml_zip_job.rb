@@ -14,9 +14,9 @@ class ProcessXmlZipJob
     :xml_loader_process_zip
   end
 
-  def initialize(loader_name, zip_path, parent, copyright, current_user, report_id, existing_files, depositor, preview=nil, client=nil)
+  def initialize(loader_name, zip_path, parent, copyright, current_user, report_id, existing_files, depositor, preview=nil, client=nil, spreadsheet_file_path=nil)
     self.loader_name = loader_name
-    # self.spreadsheet_file_path = spreadsheet_file_path
+    self.spreadsheet_file_path = spreadsheet_file_path
     self.zip_path = zip_path
     self.parent = parent
     self.copyright = copyright
@@ -32,15 +32,17 @@ class ProcessXmlZipJob
   def run
     load_report = Loaders::LoadReport.find(report_id)
 
-    if !zip_path.blank?
-      spreadsheet_file_path = extract_spreadsheet(zip_path)
-    else
-      if !load_report.preview_file_pid.blank?
-        cf = CoreFile.find(load_report.preview_file_pid)
-        spreadsheet_file_path = unzip(cf.tmp_path)
-      elsif !load_report.comparison_file_pid.blank?
-        cf = CoreFile.find(load_report.comparison_file_pid)
-        spreadsheet_file_path = unzip(cf.tmp_path)
+    if spreadsheet_file_path.blank?
+      if !zip_path.blank?
+        spreadsheet_file_path = extract_spreadsheet(zip_path)
+      else
+        if !load_report.preview_file_pid.blank?
+          cf = CoreFile.find(load_report.preview_file_pid)
+          spreadsheet_file_path = unzip(cf.tmp_path)
+        elsif !load_report.comparison_file_pid.blank?
+          cf = CoreFile.find(load_report.comparison_file_pid)
+          spreadsheet_file_path = unzip(cf.tmp_path)
+        end
       end
     end
 
