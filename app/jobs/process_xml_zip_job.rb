@@ -43,13 +43,16 @@ class ProcessXmlZipJob
     else
       if !zip_path.blank?
         spreadsheet_file_path = extract_spreadsheet(zip_path)
+        logger.info("assignment 1: #{dir_path} | #{spreadsheet_file_path}")
       else
         if !load_report.preview_file_pid.blank?
           cf = CoreFile.find(load_report.preview_file_pid)
           spreadsheet_file_path = unzip(cf.tmp_path)
+          logger.info("assignment 2: #{dir_path} | #{spreadsheet_file_path}")
         elsif !load_report.comparison_file_pid.blank?
           cf = CoreFile.find(load_report.comparison_file_pid)
           spreadsheet_file_path = unzip(cf.tmp_path)
+          logger.info("assignment 3: #{dir_path} | #{spreadsheet_file_path}")
         end
       end
       dir_path = File.dirname(spreadsheet_file_path)
