@@ -32,7 +32,9 @@ class ProcessXmlZipJob
   def run
     load_report = Loaders::LoadReport.find(report_id)
 
-    if spreadsheet_file_path.blank?
+    if !spreadsheet_file_path.blank?
+      dir_path = File.dirname(spreadsheet_file_path)
+    else
       if !zip_path.blank?
         spreadsheet_file_path = extract_spreadsheet(zip_path)
       else
@@ -44,9 +46,8 @@ class ProcessXmlZipJob
           spreadsheet_file_path = unzip(cf.tmp_path)
         end
       end
+      dir_path = File.dirname(spreadsheet_file_path)
     end
-
-    dir_path = File.dirname(spreadsheet_file_path)
 
     process_spreadsheet(dir_path, spreadsheet_file_path, load_report, preview, client)
   end
