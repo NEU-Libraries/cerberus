@@ -40,6 +40,8 @@ class ProcessXmlZipJob
       dir_path = File.dirname(spreadsheet_file_path)
       logger.info("Inside first branch")
       logger.info("first branch info: #{dir_path} | #{spreadsheet_file_path}")
+      logger.info("right before processing 1: #{dir_path} | #{spreadsheet_file_path}")
+      process_spreadsheet(dir_path, spreadsheet_file_path, load_report, preview, client)
     else
       if !zip_path.blank?
         spreadsheet_file_path = extract_spreadsheet(zip_path)
@@ -59,7 +61,7 @@ class ProcessXmlZipJob
       logger.info("default branch info: #{dir_path} | #{spreadsheet_file_path}")
     end
 
-    logger.info("right before processing: #{dir_path} | #{spreadsheet_file_path}")
+    logger.info("right before processing 2: #{dir_path} | #{spreadsheet_file_path}")
     process_spreadsheet(dir_path, spreadsheet_file_path, load_report, preview, client)
   end
 
