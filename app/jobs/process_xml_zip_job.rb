@@ -59,10 +59,9 @@ class ProcessXmlZipJob
       end
       dir_path = File.dirname(spreadsheet_file_path)
       logger.info("default branch info: #{dir_path} | #{spreadsheet_file_path}")
+      logger.info("right before processing 2: #{dir_path} | #{spreadsheet_file_path}")
+      process_spreadsheet(dir_path, spreadsheet_file_path, load_report, preview, client)
     end
-
-    logger.info("right before processing 2: #{dir_path} | #{spreadsheet_file_path}")
-    process_spreadsheet(dir_path, spreadsheet_file_path, load_report, preview, client)
   end
 
   def extract_spreadsheet(path)
