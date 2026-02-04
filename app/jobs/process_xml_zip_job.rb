@@ -56,6 +56,7 @@ class ProcessXmlZipJob
       logger.info("default branch info: #{dir_path} | #{spreadsheet_file_path}")
     end
 
+    logger.info("right before processing: #{dir_path} | #{spreadsheet_file_path}")
     process_spreadsheet(dir_path, spreadsheet_file_path, load_report, preview, client)
   end
 
