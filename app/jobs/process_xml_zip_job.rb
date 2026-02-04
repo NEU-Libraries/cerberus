@@ -49,6 +49,11 @@ class ProcessXmlZipJob
       dir_path = File.dirname(spreadsheet_file_path)
     end
 
+    log_dir = "#{Rails.root}/log/#{Time.now.to_i}-xzj"
+    FileUtils.mkdir_p log_dir
+    logger = Logger.new(log_dir + "/job.log")
+    logger.info("#{dir_path} | #{spreadsheet_file_path}")
+
     process_spreadsheet(dir_path, spreadsheet_file_path, load_report, preview, client)
   end
 
