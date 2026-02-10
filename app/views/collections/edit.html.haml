@@ -53,8 +53,8 @@
               Ability
             .col-sm-2
               %select.form-select.form-select-sm.ability{"aria-label" => "Default select example", name: "groups[#{index}][ability]"}
-                %option{value: "read", selected: group[1] == "View"} View
-                %option{value: "edit", selected: group[1] == "Manage"} Manage
+                %option{value: "read", selected: group[2] == "View"} View
+                %option{value: "edit", selected: group[2] == "Manage"} Manage
             .col-sm-2
               %button.btn.btn-danger.form-control.btn-sm{type: "button", name: "delete-group", onclick: "$(this).parent().parent().remove();"}
                 %i.fa.fa-times{"aria-hidden" => "true"}

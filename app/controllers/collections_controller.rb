@@ -29,17 +29,16 @@ class CollectionsController < CatalogController
 
   def update
     # TODO: need to do permissions check
-    # permitted = params.require(:collection).permit(:title, :description).to_h
-    # add_thumbnail(permitted)
-    # AtlasRb::Collection.metadata(params[:id], permitted)
-    # redirect_to collection_path(params[:id])
-    puts "DGC INSPECT params[:groups]"
-    # puts params[:groups].inspect
+    permitted = {}
+    add_thumbnail(permitted)
 
-    # form_group_permissions(params[:groups])
+    if !params[:groups].blank?
+      permitted["permissions"] = form_group_permissions(params[:groups])
+    else
+      permitted = params.require(:collection).permit(:title, :description).to_h
+    end
 
-    puts form_group_permissions(params[:groups]).inspect
-
-    # @collection.permissions = params[:metadata]['permissions'] if params[:metadata]['permissions'].present?
+    AtlasRb::Collection.metadata(params[:id], permitted)
+    redirect_to collection_path(params[:id])
   end
 end
