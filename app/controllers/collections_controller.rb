@@ -29,9 +29,20 @@ class CollectionsController < CatalogController
 
   def update
     # TODO: need to do permissions check
-    permitted = params.expect(collection: [:title, :description, :groups]).to_h
+    permitted = params.expect(collection:
+    [
+      :title,
+      :description,
+      permissions: [:group_id, :ability]
+    ])
+
+    # transform ugly form values into Atlas ready versions
+    if params[:collection][:permissions]
+      permitted[:permissions] = form_group_permissions(params[:collection][:permissions])
+    end
+
     add_thumbnail(permitted)
-    AtlasRb::Collection.metadata(params[:id], permitted)
+    AtlasRb::Collection.metadata(params[:id], permitted.to_h)
     redirect_to collection_path(params[:id])
   end
 end

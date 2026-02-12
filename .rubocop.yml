@@ -34,6 +34,8 @@ Style/Documentation:
   Enabled: false
 Style/SymbolArray:
   Enabled: false
+Style/HashAsLastArrayItem:
+  Enabled: false
 Layout/LineLength:
   Max: 120
   Include:
