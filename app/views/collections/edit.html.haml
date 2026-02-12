@@ -44,7 +44,7 @@
             .col-sm-auto.form-text
               Group
             .col-sm
-              %select.form-select.form-select-sm.groups{"aria-label" => "Default select example", name: "groups[#{index}][group_id]"}
+              %select.form-select.form-select-sm.groups{"aria-label" => "Default select example", name: "collection[groups][#{index}][group_id]"}
                 %option{value: group[0], selected: "selected"} #{group[1]}
                 - @groups.each do |user_group|
                   - if !(user_group[0] == group[0])
@@ -52,7 +52,7 @@
             .col-sm-auto.form-text
               Ability
             .col-sm-2
-              %select.form-select.form-select-sm.ability{"aria-label" => "Default select example", name: "groups[#{index}][ability]"}
+              %select.form-select.form-select-sm.ability{"aria-label" => "Default select example", name: "collection[groups][#{index}][ability]"}
                 %option{value: "read", selected: group[2] == "View"} View
                 %option{value: "edit", selected: group[2] == "Manage"} Manage
             .col-sm-2
