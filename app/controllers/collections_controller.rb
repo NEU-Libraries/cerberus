@@ -34,7 +34,7 @@ class CollectionsController < CatalogController
       :title,
       :description,
       permissions: [:group_id, :ability]
-    ])
+    ]).to_h
 
     # transform ugly form values into Atlas ready versions
     if params[:collection][:permissions]
@@ -42,7 +42,7 @@ class CollectionsController < CatalogController
     end
 
     add_thumbnail(permitted)
-    AtlasRb::Collection.metadata(params[:id], permitted.to_h)
+    AtlasRb::Collection.metadata(params[:id], permitted)
     redirect_to collection_path(params[:id])
   end
 end
