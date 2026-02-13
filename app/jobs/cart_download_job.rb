@@ -38,7 +38,7 @@ class CartDownloadJob
           download_label = I18n.t("drs.display_labels.#{item.klass}.download")
           if item.public? || user.can?(:read, item)
 
-            tmp_file_name = "neu_#{pid.split(":").last}-#{download_label}.#{extract_extension(item.properties.mime_type.first, File.extname(item.original_filename || "").delete!("."))}"
+            tmp_file_name = "neu_#{pid.split(":").last}-#{download_label}.#{extract_extension(item.properties.mime_type.first, File.extname(item.original_filename || "").delete("."))}"
             relative_path = "./downloads/#{tmp_file_name}"
             `cd #{path} && ln -s #{item.fedora_file_path} #{relative_path}`
             `cd #{path} && zip -ur #{temp_path} #{relative_path}`

@@ -121,10 +121,10 @@ class ZipCompilationJob
                 download_label = I18n.t("drs.display_labels.#{content.klass}.download")
 
                 # Zip::File.open(temp_zipfile_name) do |zipfile|
-                  # zipfile.add("#{self.title}/neu_#{id.split(":").last}-#{download_label}.#{extract_extension(content.properties.mime_type.first, File.extname(content.original_filename || "").delete!("."))}", content.fedora_file_path)
+                  # zipfile.add("#{self.title}/neu_#{id.split(":").last}-#{download_label}.#{extract_extension(content.properties.mime_type.first, File.extname(content.original_filename || "").delete("."))}", content.fedora_file_path)
                 # end
 
-                tmp_file_name = "neu_#{id.split(":").last}-#{download_label}.#{extract_extension(content.properties.mime_type.first, File.extname(content.original_filename || "").delete!("."))}"
+                tmp_file_name = "neu_#{id.split(":").last}-#{download_label}.#{extract_extension(content.properties.mime_type.first, File.extname(content.original_filename || "").delete("."))}"
                 relative_path = "./downloads/#{tmp_file_name}"
                 `cd #{path} && ln -s #{content.fedora_file_path} #{relative_path}`
                 `cd #{path} && zip -ur #{temp_zipfile_name} #{relative_path}`

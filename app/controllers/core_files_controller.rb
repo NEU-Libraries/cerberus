@@ -117,7 +117,7 @@ class CoreFilesController < ApplicationController
       asset = PdfFile.find(doc.canonical_object.first.pid)
       if !asset.blank? && (!current_user.nil? ? current_user.can?(:read, asset) : asset.public?)
         log_action('download', 'COMPLETE', asset.pid)
-        file_name = "neu_#{asset.pid.split(":").last}.#{extract_extension(asset.properties.mime_type.first, File.extname(asset.original_filename || "").delete!("."))}"
+        file_name = "neu_#{asset.pid.split(":").last}.#{extract_extension(asset.properties.mime_type.first, File.extname(asset.original_filename || "").delete("."))}"
         send_file asset.fedora_file_path, :filename =>  file_name, :type => asset.mime_type || extract_mime_type(asset.fedora_file_path), :disposition => 'inline'
       else
         render_403 and return
@@ -140,7 +140,7 @@ class CoreFilesController < ApplicationController
       else
         log_action("stream", "COMPLETE", asset.pid)
       end
-      file_name = "neu_#{asset.pid.split(":").last}.#{extract_extension(asset.properties.mime_type.first, File.extname(asset.original_filename || "").delete!("."))}"
+      file_name = "neu_#{asset.pid.split(":").last}.#{extract_extension(asset.properties.mime_type.first, File.extname(asset.original_filename || "").delete("."))}"
       send_file asset.fedora_file_path, :range => true, :filename => file_name, :type => asset.mime_type || extract_mime_type(asset.fedora_file_path), :disposition => 'inline'
     else
       render_404(ActiveFedora::ObjectNotFoundError.new, request.fullpath) and return
