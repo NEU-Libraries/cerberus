@@ -58,6 +58,7 @@
     var upload = new tus.Upload(file, {
       endpoint: 'https://repository.library.northeastern.edu/tus/',
       retryDelays: [0, 3000, 5000, 10000, 20000],
+      chunkSize: 10 * 1024 * 1024,
       metadata: {
         filename: file.name,
         filetype: file.type,
