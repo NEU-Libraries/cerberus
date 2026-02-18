@@ -324,7 +324,7 @@ Rack::Attack.throttle("download scraper blank wave", limit: 1, period: 10) do |r
     if request.user_agent.blank? || !request.user_agent.downcase.include?("bot".downcase)
       if request.fullpath.include?("fulltext.pdf") || request.fullpath.include?("datastream_id=content")
         if request.session_options[:id].blank? && request.env["HTTP_RANGE"].blank?
-          File.write("#{Rails.root}/log/download_blanks.log", "#{request.remote_ip} - #{request.fingerprint} - #{request.path} - #{Time.now}" + "\n", mode: 'a')
+          # File.write("#{Rails.root}/log/download_blanks.log", "#{request.remote_ip} - #{request.fingerprint} - #{request.path} - #{Time.now}" + "\n", mode: 'a')
 
           request.fingerprint
         end
@@ -431,7 +431,7 @@ Rack::Attack.throttle("likely bot", limit: 1, period: 10) do |req|
   if req.env["HTTP_ACCEPT_LANGUAGE"].blank? && !req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase)
     if !(req.fullpath.include? "/api/") && !(req.fullpath.include? "/oai")
       # log to file
-      File.write("#{Rails.root}/log/likely_bot.log", "#{req.remote_ip} - #{req.fingerprint} - #{req.user_agent} - #{Time.now}" + "\n", mode: 'a')
+      # File.write("#{Rails.root}/log/likely_bot.log", "#{req.remote_ip} - #{req.fingerprint} - #{req.user_agent} - #{Time.now}" + "\n", mode: 'a')
 
       req.fingerprint
     end
@@ -485,37 +485,37 @@ Rack::Attack.blocklisted_response = lambda do |env|
 end
 
 # Track requests from a special user agent.
-Rack::Attack.track("not_declared_bot") do |req|
-  req.env["HTTP_COOKIE"].blank? && !req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase) &&
-            (req.fullpath != "/" &&
-            !(req.fullpath.include? "/users/") &&
-            !(req.fullpath.include? "/assets/") &&
-            !(req.fullpath.include? "thumbnail_") &&
-            !(req.fullpath.include? "/wowza/") &&
-            !(req.fullpath.include? "/429") &&
-            !(req.fullpath.include? "/api/"))
-end
+# Rack::Attack.track("not_declared_bot") do |req|
+#   req.env["HTTP_COOKIE"].blank? && !req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase) &&
+#             (req.fullpath != "/" &&
+#             !(req.fullpath.include? "/users/") &&
+#             !(req.fullpath.include? "/assets/") &&
+#             !(req.fullpath.include? "thumbnail_") &&
+#             !(req.fullpath.include? "/wowza/") &&
+#             !(req.fullpath.include? "/429") &&
+#             !(req.fullpath.include? "/api/"))
+# end
 
-Rack::Attack.track("head sec fetch site none print") do |req|
-  if (!req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase))
-    if (req.original_method.downcase == "head") && (!req.env["HTTP_SEC_FETCH_SITE"].blank? && req.env["HTTP_SEC_FETCH_SITE"] == "none") && (req.fingerprint == "dGV4dC9odG1sLGFwcGxpY2F0aW9uL3hodG1sK3htbCxhcHBsaWNhdGlvbi94bWw7cT0wLjksKi8qO3E9MC44IHwgZ3ppcCwgZGVmbGF0ZSwgYnIgfCBlbi1VUyxlbjtxPTAuOSB8IA==")
-      Rails.cache.write("block #{req.remote_ip}", true)
-    end
-  end
-end
+# Rack::Attack.track("head sec fetch site none print") do |req|
+#   if (!req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase))
+#     if (req.original_method.downcase == "head") && (!req.env["HTTP_SEC_FETCH_SITE"].blank? && req.env["HTTP_SEC_FETCH_SITE"] == "none") && (req.fingerprint == "dGV4dC9odG1sLGFwcGxpY2F0aW9uL3hodG1sK3htbCxhcHBsaWNhdGlvbi94bWw7cT0wLjksKi8qO3E9MC44IHwgZ3ppcCwgZGVmbGF0ZSwgYnIgfCBlbi1VUyxlbjtxPTAuOSB8IA==")
+#       Rails.cache.write("block #{req.remote_ip}", true)
+#     end
+#   end
+# end
 
 # Track it using ActiveSupport::Notification
-ActiveSupport::Notifications.subscribe("rack.attack") do |name, start, finish, request_id, req|
-  if (req.env['rack.attack.match_type'] != :blocklist) && req.env['rack.attack.matched'] == "not_declared_bot" && req.env['rack.attack.match_type'] == :track
-    File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-fingerprints.log", "#{req.env['HTTP_X_FORWARDED_FOR']} - #{req.ip} | #{req.host_lookup} | #{req.fingerprint}" + "\n", mode: 'a')
-  end
+# ActiveSupport::Notifications.subscribe("rack.attack") do |name, start, finish, request_id, req|
+#   if (req.env['rack.attack.match_type'] != :blocklist) && req.env['rack.attack.matched'] == "not_declared_bot" && req.env['rack.attack.match_type'] == :track
+#     File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-fingerprints.log", "#{req.env['HTTP_X_FORWARDED_FOR']} - #{req.ip} | #{req.host_lookup} | #{req.fingerprint}" + "\n", mode: 'a')
+#   end
 
-  if (req.env['rack.attack.match_type'] == :blocklist) && !req.env["HTTP_COOKIE"].blank?
-    File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-cookies-and-blocked.log", "#{req.env['rack.attack.matched']} - #{req.ip} | #{req.fingerprint}" + "\n", mode: 'a')
-  end
+#   if (req.env['rack.attack.match_type'] == :blocklist) && !req.env["HTTP_COOKIE"].blank?
+#     File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-cookies-and-blocked.log", "#{req.env['rack.attack.matched']} - #{req.ip} | #{req.fingerprint}" + "\n", mode: 'a')
+#   end
 
-  # googlebot
-  if (req.env['rack.attack.match_type'] == :blocklist) && req.host_lookup.include?("googlebot")
-    File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-google-bot.log", "#{req.env['rack.attack.matched']} - #{req.ip} | #{req.user_agent} | #{req.fingerprint}" + "\n", mode: 'a')
-  end
-end
+#   # googlebot
+#   if (req.env['rack.attack.match_type'] == :blocklist) && req.host_lookup.include?("googlebot")
+#     File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-google-bot.log", "#{req.env['rack.attack.matched']} - #{req.ip} | #{req.user_agent} | #{req.fingerprint}" + "\n", mode: 'a')
+#   end
+# end
