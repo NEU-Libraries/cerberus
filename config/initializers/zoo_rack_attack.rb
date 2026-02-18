@@ -30,7 +30,7 @@ class Rack::Attack::Request < ::Rack::Request
   end
 
   def asn
-    @asn ||= `timeout -s 9 -k 1 6 dig +short #{reverse_ip}.origin.asn.cymru.com TXT | head -n 1 | tr -d \\" | awk '{print $1;}'`.strip
+    @asn ||= `timeout -s 9 -k 1 6 dig @127.0.0.1 -p 5053 +short #{reverse_ip}.origin.asn.cymru.com TXT | head -n 1 | tr -d \\" | awk '{print $1;}'`.strip
   end
 
   def region
