@@ -144,9 +144,11 @@ Rack::Attack.blocklist("Oracle") do |req|
   !req.asn.blank? && req.asn == "31898"
 end
 
-# Rack::Attack.blocklist("Azure") do |req|
-#   !req.asn.blank? && req.asn == "8075"
-# end
+Rack::Attack.blocklist("Azure") do |req|
+  if (req.user_agent.blank?) || (!req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase))
+    !req.asn.blank? && req.asn == "8075"
+  end
+end
 
 Rack::Attack.blocklist("Yandex") do |req|
   !req.asn.blank? && req.asn == "13238"
