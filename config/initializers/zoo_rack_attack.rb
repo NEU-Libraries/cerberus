@@ -122,6 +122,14 @@ Rack::Attack.blocklist("Bite Lietuva") do |req|
   !req.asn.blank? && req.asn == "210906"
 end
 
+Rack::Attack.blocklist("GTT") do |req|
+  !req.asn.blank? && ["3257", "212238"].include?(req.asn)
+end
+
+Rack::Attack.blocklist("Assorted Scrapers") do |req|
+  !req.asn.blank? && ["132817", "396356", "7979", "62874", "134351"].include?(req.asn)
+end
+
 Rack::Attack.blocklist("Google Cloud") do |req|
   if (req.user_agent.blank?) || (!req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase))
     !req.asn.blank? && req.asn == "396982"
