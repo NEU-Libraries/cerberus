@@ -6,6 +6,7 @@ module Transformable
   # Helper methods for pretty group transformation
 
   def pretty_resource_permissions(perms)
+    perms['read']&.delete('public')
     perms.slice(
       'read', 'edit'
     ).flat_map do |key, values|

@@ -27,9 +27,9 @@
           .col-sm
             %h5.pb-2
               General Permissions
-            %select.form-select.form-select-sm#mass{"aria-label" => "Default select example"}
-              %option{value: "public", selected: "selected"} Public
-              %option{value: "private"} Private
+            %select.form-select.form-select-sm#mass{name: "mass", "aria-label" => "Default select example"}
+              %option{value: "public", selected: @public ? "selected" : nil} Public
+              %option{value: "private", selected: @public ? nil : "selected"} Private
             %ul.small.pt-2
               %li Setting to 'public' will allow anyone accessing the site to see your item.
               %li Setting to 'private' will only allow groups that are explicitly chosen to see your item.
