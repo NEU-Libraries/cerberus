@@ -21,10 +21,12 @@ module Transformable
 
   def form_group_permissions(perms)
     perms.values.each_with_object({}) do |entry, acc|
-      ability = entry['ability'].to_sym
-      group_id = entry['group_id']
-      acc[ability] ||= []
-      acc[ability] << group_id
+      if !entry['group_id'].blank? && !entry['ability'].blank?
+        ability = entry['ability']&.to_sym
+        group_id = entry['group_id']
+        acc[ability] ||= []
+        acc[ability] << group_id
+      end
     end
   end
 

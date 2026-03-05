@@ -19,6 +19,7 @@ class CollectionsController < CatalogController
     raw_permissions = AtlasRb::Resource.permissions(params[:id])
     @groups = pretty_user_permissions(current_user.groups)
     @public = raw_permissions['read']&.include?('public')
+    @embargo = raw_permissions['embargo']&.split('T')&.first
     @permissions = pretty_resource_permissions(raw_permissions)
   end
 
@@ -30,6 +31,7 @@ class CollectionsController < CatalogController
   end
 
   def update
+    # params["embargo"] == "2026-03-01"
     # TODO: need to do user permissions check
     AtlasRb::Collection.metadata(params[:id], collection_params)
     redirect_to collection_path(params[:id])
@@ -42,7 +44,7 @@ class CollectionsController < CatalogController
       [
         :title,
         :description,
-        :mass,
+        :embargo,
         permissions: [:group_id, :ability]
       ]).to_h
 
@@ -59,6 +61,10 @@ class CollectionsController < CatalogController
       return unless params[:collection][:permissions]
 
       permitted[:permissions] = form_group_permissions(params[:collection][:permissions])
+
+      if params[:collection][:permissions][:embargo].present?
+        permitted[:permissions][:embargo] = params[:collection][:permissions][:embargo]
+      end
     end
 
     def mass_permissions(permitted)
