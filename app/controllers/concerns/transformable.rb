@@ -46,7 +46,7 @@ module Transformable
       permissions: [:group_id, :ability]
     ]).to_h
     transform_permissions(permitted, resource_key)
-    mass_permissions(permitted, resource_key)
+    mass_permissions(permitted)
     add_thumbnail(permitted)
     permitted
   end
