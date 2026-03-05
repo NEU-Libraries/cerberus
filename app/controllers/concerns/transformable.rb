@@ -38,7 +38,8 @@ module Transformable
   end
 
   def resource_params(resource_key)
-    permitted = params.expect("#{resource_key}": [
+    permitted = params.expect("#{resource_key}":
+    [
       :title,
       :description,
       :embargo,
@@ -52,14 +53,16 @@ module Transformable
 
   def transform_permissions(permitted, resource_key)
     return unless params[resource_key][:permissions]
+
     permitted[:permissions] = form_group_permissions(params[resource_key][:permissions])
     if params[resource_key][:permissions][:embargo].present?
       permitted[:permissions][:embargo] = params[resource_key][:permissions][:embargo]
     end
   end
 
-  def mass_permissions(permitted, resource_key)
+  def mass_permissions(permitted)
     return unless params[:mass]
+
     if params[:mass] == 'public'
       permitted[:permissions][:read] |= ['public']
     elsif permitted[:permissions][:read]
