@@ -3,13 +3,9 @@
 module Transformable
   extend ActiveSupport::Concern
 
-  # Helper methods for pretty group transformation
-
   def pretty_resource_permissions(perms)
     perms['read']&.delete('public')
-    perms.slice(
-      'read', 'edit'
-    ).flat_map do |key, values|
+    perms.slice('read', 'edit').flat_map do |key, values|
       permission = key == 'read' ? 'View' : 'Manage'
       values.map { |value| [value, pretty_group(value), permission] }
     end
@@ -30,4 +26,44 @@ module Transformable
     end
   end
 
+  def form_preparation(raw_permissions)
+    @groups = pretty_user_permissions(current_user.groups)
+    @public = raw_permissions['read']&.include?('public')
+    @embargo = begin
+      Date.parse(raw_permissions['embargo']).to_s
+    rescue Date::Error
+      ''
+    end
+    @permissions = pretty_resource_permissions(raw_permissions)
+  end
+
+  def resource_params(resource_key)
+    permitted = params.expect("#{resource_key}": [
+      :title,
+      :description,
+      :embargo,
+      permissions: [:group_id, :ability]
+    ]).to_h
+    transform_permissions(permitted, resource_key)
+    mass_permissions(permitted, resource_key)
+    add_thumbnail(permitted)
+    permitted
+  end
+
+  def transform_permissions(permitted, resource_key)
+    return unless params[resource_key][:permissions]
+    permitted[:permissions] = form_group_permissions(params[resource_key][:permissions])
+    if params[resource_key][:permissions][:embargo].present?
+      permitted[:permissions][:embargo] = params[resource_key][:permissions][:embargo]
+    end
+  end
+
+  def mass_permissions(permitted, resource_key)
+    return unless params[:mass]
+    if params[:mass] == 'public'
+      permitted[:permissions][:read] |= ['public']
+    elsif permitted[:permissions][:read]
+      permitted[:permissions][:read].delete('public')
+    end
+  end
 end
