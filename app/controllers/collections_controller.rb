@@ -16,15 +16,7 @@ class CollectionsController < CatalogController
 
   def edit
     @collection = AtlasRb::Collection.find(params[:id])
-    raw_permissions = AtlasRb::Resource.permissions(params[:id])
-    @groups = pretty_user_permissions(current_user.groups)
-    @public = raw_permissions['read']&.include?('public')
-    @embargo = begin
-      Date.parse(raw_permissions['embargo'])&.to_s
-    rescue Date::Error
-      ''
-    end
-    @permissions = pretty_resource_permissions(raw_permissions)
+    form_preparation(AtlasRb::Resource.permissions(params[:id]))
   end
 
   def create
@@ -35,13 +27,23 @@ class CollectionsController < CatalogController
   end
 
   def update
-    # params["embargo"] == "2026-03-01"
     # TODO: need to do user permissions check
     AtlasRb::Collection.metadata(params[:id], collection_params)
     redirect_to collection_path(params[:id])
   end
 
   private
+
+    def form_preparation(raw_permissions)
+      @groups = pretty_user_permissions(current_user.groups)
+      @public = raw_permissions['read']&.include?('public')
+      @embargo = begin
+        Date.parse(raw_permissions['embargo'])&.to_s
+      rescue Date::Error
+        ''
+      end
+      @permissions = pretty_resource_permissions(raw_permissions)
+    end
 
     def collection_params
       permitted = params.expect(collection:
