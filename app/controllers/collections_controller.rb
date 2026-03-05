@@ -19,7 +19,11 @@ class CollectionsController < CatalogController
     raw_permissions = AtlasRb::Resource.permissions(params[:id])
     @groups = pretty_user_permissions(current_user.groups)
     @public = raw_permissions['read']&.include?('public')
-    @embargo = raw_permissions['embargo']&.split('T')&.first
+    @embargo = begin
+      Date.parse(raw_permissions['embargo'])&.to_s
+    rescue Date::Error
+      ''
+    end
     @permissions = pretty_resource_permissions(raw_permissions)
   end
 
