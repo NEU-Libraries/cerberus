@@ -31,7 +31,7 @@ module Transformable
     @public = raw_permissions['read']&.include?('public')
     @embargo = begin
       Date.parse(raw_permissions['embargo']).to_s
-    rescue Date::Error
+    rescue Date::Error, TypeError
       ''
     end
     @permissions = pretty_resource_permissions(raw_permissions)

@@ -2,6 +2,7 @@
 
 class WorksController < ApplicationController
   include Thumbable
+  include Transformable
 
   def show
     @work = AtlasRb::Work.find(params[:id])
@@ -16,6 +17,7 @@ class WorksController < ApplicationController
 
   def edit
     @work = AtlasRb::Work.find(params[:id])
+    form_preparation(AtlasRb::Resource.permissions(params[:id]))
   end
 
   def create
@@ -41,4 +43,10 @@ class WorksController < ApplicationController
     AtlasRb::Work.metadata(params[:id], permitted)
     redirect_to work_path(params[:id])
   end
+
+  private
+
+    def work_params
+      resource_params(:work)
+    end
 end
