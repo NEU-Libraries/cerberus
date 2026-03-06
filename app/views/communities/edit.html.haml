@@ -60,14 +60,14 @@
           .col-sm-auto.form-text
             Group
           .col-sm
-            %select.form-select.form-select-sm#groups{"aria-label" => "Default select example"}
+            %select.form-select.form-select-sm.groups{"aria-label" => "Default select example"}
               %option{value: ""}
               - @groups.each do |user_group|
                 %option{value: user_group[0]} #{user_group[1]}
           .col-sm-auto.form-text
             Ability
           .col-sm-2
-            %select.form-select.form-select-sm#ability{"aria-label" => "Default select example"}
+            %select.form-select.form-select-sm.ability{"aria-label" => "Default select example"}
               %option{value: ""}
               %option{value: "1"} View
               %option{value: "2"} Manage
