@@ -2,17 +2,100 @@
 
 %ul.nav.nav-tabs
   %li.nav-item
-    %a.nav-link.active{"aria-current" => "page", href: "#"} Metadata
+    %button#metadata-tab.nav-link.active{"aria-controls" => "metadata", "aria-selected" => "true", "data-bs-target" => "#metadata", "data-bs-toggle" => "tab", role: "tab", type: "button"} Metadata
   %li.nav-item
-    %a.nav-link{href:  xml_editor_path(params[:id])} XML
+    %button#permissions-tab.nav-link{"aria-controls" => "permissions", "aria-selected" => "false", "data-bs-target" => "#permissions", "data-bs-toggle" => "tab", role: "tab", type: "button"} Permissions
+  %li.nav-item
+    %a.nav-link{href: xml_editor_path(params[:id])} XML
 
-= bootstrap_form_tag(url: community_path(params[:id]), method: :patch, multipart: true) do |f|
-  = f.hidden_field :id, value: params[:id]
-  %label.form-label{:for => "thumbnail"} Thumbnail
-  %input#thumbnail.form-control.mb-3{:name => "thumbnail", :type => "file"}/
-  = bootstrap_fields_for :community do |c|
-    = c.text_field :title, value: @community['title']
-    = c.text_area :description, rows: 10, value: @community['description']
-  .well.p-3.my-3.rounded-3
-    = f.button :submit, class: "btn btn-success"
-    = link_to "Cancel", community_path(params[:id]), class: "btn btn-warning"
+.tab-content
+  #metadata.tab-pane.active{"aria-labelledby" => "metadata-tab", role: "tabpanel"}
+    .py-2.px-1
+      = bootstrap_form_tag(url: community_path(params[:id]), method: :patch, multipart: true) do |f|
+        = f.hidden_field :id, value: params[:id]
+        %label.form-label{:for => "thumbnail"} Thumbnail
+        %input#thumbnail.form-control.mb-3{:name => "thumbnail", :type => "file"}/
+        = bootstrap_fields_for :community do |c|
+          = c.text_field :title, value: @community['title']
+          = c.text_area :description, rows: 10, value: @community['description']
+        .well.p-3.my-3.rounded-3
+          = f.button :submit, class: "btn btn-success"
+          = link_to "Cancel", community_path(params[:id]), class: "btn btn-warning"
+  #permissions.tab-pane{"aria-labelledby" => "permissions-tab", role: "tabpanel"}
+    .py-2.px-1
+      = bootstrap_form_tag(url: collection_path(params[:id]), method: :patch, multipart: true) do |f|
+        .row
+          .col-sm
+            %h5.pb-2
+              General Permissions
+            %select.form-select.form-select-sm#mass{name: "mass", "aria-label" => "Default select example"}
+              %option{value: "public", selected: @public ? "selected" : nil} Public
+              %option{value: "private", selected: @public ? nil : "selected"} Private
+            %ul.small.pt-2
+              %li Setting to 'public' will allow anyone accessing the site to see your item.
+              %li Setting to 'private' will only allow groups that are explicitly chosen to see your item.
+        %h5.pb-2
+          Group Permissions
+        - @permissions.each_with_index do |group, index|
+          .row.py-1{id: "group-list_#{index}"}
+            .col-sm-auto.form-text
+              Group
+            .col-sm
+              %select.form-select.form-select-sm.groups{"aria-label" => "Default select example", name: "collection[permissions][#{index}][group_id]"}
+                %option{value: group[0], selected: "selected"} #{group[1]}
+                - @groups.each do |user_group|
+                  - if !(user_group[0] == group[0])
+                    %option{value: user_group[0]} #{user_group[1]}
+            .col-sm-auto.form-text
+              Ability
+            .col-sm-2
+              %select.form-select.form-select-sm.ability{"aria-label" => "Default select example", name: "collection[permissions][#{index}][ability]"}
+                %option{value: "read", selected: group[2] == "View"} View
+                %option{value: "edit", selected: group[2] == "Manage"} Manage
+            .col-sm-2
+              %button.btn.btn-danger.form-control.btn-sm{type: "button", name: "delete-group", onclick: "$(this).parent().parent().remove();"}
+                %i.fa.fa-times{"aria-hidden" => "true"}
+
+        .row.py-1#group-list{style: "display: none;"}
+          .col-sm-auto.form-text
+            Group
+          .col-sm
+            %select.form-select.form-select-sm#groups{"aria-label" => "Default select example"}
+              %option{value: ""}
+              - @groups.each do |user_group|
+                %option{value: user_group[0]} #{user_group[1]}
+          .col-sm-auto.form-text
+            Ability
+          .col-sm-2
+            %select.form-select.form-select-sm#ability{"aria-label" => "Default select example"}
+              %option{value: ""}
+              %option{value: "1"} View
+              %option{value: "2"} Manage
+          .col-sm-2
+            %button.btn.btn-danger.form-control.btn-sm{type: "button", name: "delete-group", onclick: "$(this).parent().parent().remove();"}
+              %i.fa.fa-times{"aria-hidden" => "true"}
+        %div
+          .well.p-3.my-3.rounded-3
+            = f.button :submit, class: "btn btn-success"
+            = link_to "Cancel", collection_path(params[:id]), class: "btn btn-warning"
+            %button.btn.btn-info.float-end#add-group{type: "button"}
+              Add Group
+
+:javascript
+
+  var add_btn = document.getElementById('add-group');
+
+  add_btn.addEventListener('click', function(e){
+    // Count how many elements with IDs starting with "group-list" exist
+    let count = $('[id^="group-list"]').length;
+
+    // Clone and set new ID
+    let $clone = $('#group-list').clone();
+    $clone.attr('id', 'group-list_' + count);
+
+    // Insert last in stack
+    $clone.insertAfter($('[id^="group-list"]').last());
+
+    // Show element
+    $clone.show();
+  });

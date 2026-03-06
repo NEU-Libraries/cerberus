@@ -33,10 +33,6 @@
             %ul.small.pt-2
               %li Setting to 'public' will allow anyone accessing the site to see your item.
               %li Setting to 'private' will only allow groups that are explicitly chosen to see your item.
-          .col-sm
-            %h5.pb-2 Embargo Release Date
-            %input.form-select.form-select-sm#embargo{name: "collection[permissions][embargo]", type: "date", value: @embargo}/
-            %label.small.py-3{for: "embargo"} If this item is embargoed, please enter the release date.
         %h5.pb-2
           Group Permissions
         - @permissions.each_with_index do |group, index|
