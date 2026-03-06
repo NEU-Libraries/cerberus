@@ -98,3 +98,9 @@
     // Show element
     $clone.show();
   });
+
+- if @permissions.empty?
+  :javascript
+    window.onload = function() {
+      add_btn.click();
+    };
