@@ -17,12 +17,12 @@ module Transformable
 
   def form_group_permissions(perms)
     perms.values.each_with_object({}) do |entry, acc|
-      if !entry['group_id'].blank? && !entry['ability'].blank?
-        ability = entry['ability']&.to_sym
-        group_id = entry['group_id']
-        acc[ability] ||= []
-        acc[ability] << group_id
-      end
+      next unless entry['group_id'].present? && entry['ability'].present?
+
+      ability = entry['ability']&.to_sym
+      group_id = entry['group_id']
+      acc[ability] ||= []
+      acc[ability] << group_id
     end
   end
 
@@ -55,7 +55,7 @@ module Transformable
     return unless params[resource_key][:permissions]
 
     permitted[:permissions] = form_group_permissions(params[resource_key][:permissions])
-    if params[resource_key][:permissions][:embargo].present?
+    if !params[resource_key][:permissions][:embargo].nil?
       permitted[:permissions][:embargo] = params[resource_key][:permissions][:embargo]
     end
   end
