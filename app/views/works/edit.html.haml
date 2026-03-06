@@ -23,7 +23,7 @@
           = link_to "Cancel", work_path(params[:id]), class: "btn btn-warning"
   #permissions.tab-pane{"aria-labelledby" => "permissions-tab", role: "tabpanel"}
     .py-2.px-1
-      = bootstrap_form_tag(url: collection_path(params[:id]), method: :patch, multipart: true) do |f|
+      = bootstrap_form_tag(url: work_path(params[:id]), method: :patch, multipart: true) do |f|
         .row
           .col-sm
             %h5.pb-2
@@ -36,16 +36,16 @@
               %li Setting to 'private' will only allow groups that are explicitly chosen to see your item.
           .col-sm
             %h5.pb-2 Embargo Release Date
-            %input.form-select.form-select-sm#embargo{name: "collection[permissions][embargo]", type: "date", value: @embargo}/
+            %input.form-select.form-select-sm#embargo{name: "work[permissions][embargo]", type: "date", value: @embargo}/
             %label.small.py-3{for: "embargo"} If this item is embargoed, please enter the release date.
         %h5.pb-2
           Group Permissions
-        - @permissions.each_with_index do |group, index|
+        - @permissions.each.with_index(1) do |group, index|
           .row.py-1{id: "group-list_#{index}"}
             .col-sm-auto.form-text
               Group
             .col-sm
-              %select.form-select.form-select-sm.groups{"aria-label" => "Default select example", name: "collection[permissions][#{index}][group_id]"}
+              %select.form-select.form-select-sm.groups{"aria-label" => "Default select example", name: "work[permissions][#{index}][group_id]"}
                 %option{value: group[0], selected: "selected"} #{group[1]}
                 - @groups.each do |user_group|
                   - if !(user_group[0] == group[0])
@@ -53,7 +53,7 @@
             .col-sm-auto.form-text
               Ability
             .col-sm-2
-              %select.form-select.form-select-sm.ability{"aria-label" => "Default select example", name: "collection[permissions][#{index}][ability]"}
+              %select.form-select.form-select-sm.ability{"aria-label" => "Default select example", name: "work[permissions][#{index}][ability]"}
                 %option{value: "read", selected: group[2] == "View"} View
                 %option{value: "edit", selected: group[2] == "Manage"} Manage
             .col-sm-2
@@ -64,14 +64,14 @@
           .col-sm-auto.form-text
             Group
           .col-sm
-            %select.form-select.form-select-sm#groups{"aria-label" => "Default select example"}
+            %select.form-select.form-select-sm.groups{"aria-label" => "Default select example"}
               %option{value: ""}
               - @groups.each do |user_group|
                 %option{value: user_group[0]} #{user_group[1]}
           .col-sm-auto.form-text
             Ability
           .col-sm-2
-            %select.form-select.form-select-sm#ability{"aria-label" => "Default select example"}
+            %select.form-select.form-select-sm.ability{"aria-label" => "Default select example"}
               %option{value: ""}
               %option{value: "1"} View
               %option{value: "2"} Manage
@@ -81,7 +81,7 @@
         %div
           .well.p-3.my-3.rounded-3
             = f.button :submit, class: "btn btn-success"
-            = link_to "Cancel", collection_path(params[:id]), class: "btn btn-warning"
+            = link_to "Cancel", work_path(params[:id]), class: "btn btn-warning"
             %button.btn.btn-info.float-end#add-group{type: "button"}
               Add Group
 
@@ -96,6 +96,10 @@
     // Clone and set new ID
     let $clone = $('#group-list').clone();
     $clone.attr('id', 'group-list_' + count);
+
+    // Set name attributes to match the @permissions loop output
+    $clone.find('select.groups').attr('name', `work[permissions][${count}][group_id]`);
+    $clone.find('select.ability').attr('name', `work[permissions][${count}][ability]`);
 
     // Insert last in stack
     $clone.insertAfter($('[id^="group-list"]').last());

@@ -35,7 +35,7 @@
               %li Setting to 'private' will only allow groups that are explicitly chosen to see your item.
         %h5.pb-2
           Group Permissions
-        - @permissions.each_with_index do |group, index|
+        - @permissions.each.with_index(1) do |group, index|
           .row.py-1{id: "group-list_#{index}"}
             .col-sm-auto.form-text
               Group
@@ -91,6 +91,10 @@
     // Clone and set new ID
     let $clone = $('#group-list').clone();
     $clone.attr('id', 'group-list_' + count);
+
+    // Set name attributes to match the @permissions loop output
+    $clone.find('select.groups').attr('name', `collection[permissions][${count}][group_id]`);
+    $clone.find('select.ability').attr('name', `collection[permissions][${count}][ability]`);
 
     // Insert last in stack
     $clone.insertAfter($('[id^="group-list"]').last());

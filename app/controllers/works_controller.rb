@@ -37,10 +37,7 @@ class WorksController < ApplicationController
   end
 
   def update
-    # TODO: add permissions to form, and test they work as intended
-    permitted = params.require(:work).permit(:title, :description).to_h
-    add_thumbnail(permitted)
-    AtlasRb::Work.metadata(params[:id], permitted)
+    AtlasRb::Work.metadata(params[:id], work_params)
     redirect_to work_path(params[:id])
   end
 

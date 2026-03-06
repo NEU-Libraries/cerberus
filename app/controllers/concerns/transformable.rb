@@ -38,13 +38,12 @@ module Transformable
   end
 
   def resource_params(resource_key)
-    permitted = params.expect("#{resource_key}":
-    [
+    permitted = params.require(resource_key).permit(
       :title,
       :description,
       :embargo,
       permissions: [:group_id, :ability]
-    ]).to_h
+    ).to_h
     transform_permissions(permitted, resource_key)
     mass_permissions(permitted)
     add_thumbnail(permitted)
