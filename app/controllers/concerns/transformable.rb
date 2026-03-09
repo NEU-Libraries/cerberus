@@ -63,7 +63,7 @@ module Transformable
     return unless params[:mass]
 
     if params[:mass] == 'public'
-      permitted[:permissions][:read] |= ['public']
+      permitted[:permissions][:read] = ['public']
     elsif permitted[:permissions][:read]
       permitted[:permissions][:read].delete('public')
     end
