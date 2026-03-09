@@ -36,7 +36,7 @@ Devise.setup do |config|
   # Load and configure the ORM. Supports :active_record (default) and
   # :mongoid (bson_ext recommended) by default. Other ORMs may be
   # available as additional gems.
-  require 'devise/orm/active_record'
+  # require 'devise/orm/active_record'
 
   # ==> Configuration for any authentication mechanism
   # Configure which keys are used when authenticating a user. The default is
@@ -281,6 +281,13 @@ Devise.setup do |config|
   #   manager.intercept_401 = false
   #   manager.default_strategies(scope: :user).unshift :some_external_strategy
   # end
+
+  config.warden do |manager|
+    manager.strategies.add(:custom, Devise::Strategies::CustomAuthenticatable)
+    manager.default_strategies(scope: :user).unshift(:custom)
+  end
+
+  Devise.add_module :custom_authenticatable, controller: :sessions, route: :session, strategy: :custom
 
   # ==> Mountable engine configurations
   # When using Devise inside an engine, let's call it `MyEngine`, and this engine

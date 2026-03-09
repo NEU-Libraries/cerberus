@@ -6,6 +6,10 @@ require "rails/all"
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
 
+if defined?(Rails::Server) && Rails.env.development?
+  require "debug/open_nonstop"
+end
+
 module Cerberus
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.
@@ -22,5 +26,7 @@ module Cerberus
 
     # Using GoodJob as
     config.active_job.queue_adapter = :good_job
+
+    # config.active_support.to_time_preserves_timezone = :zone
   end
 end

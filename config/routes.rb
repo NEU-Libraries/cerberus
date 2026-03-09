@@ -7,7 +7,7 @@ Rails.application.routes.draw do
   root to: 'pages#home'
   concern :searchable, Blacklight::Routes::Searchable.new
 
-  resource :catalog, only: [:index], as: 'catalog', path: '/catalog', controller: 'catalog' do
+  resource :catalog, only: [], as: 'catalog', path: '/catalog', controller: 'catalog' do
     concerns :searchable
   end
 
@@ -34,4 +34,9 @@ Rails.application.routes.draw do
   get '/xml/editor/:id' => 'xml#editor', as: 'xml_editor'
   put '/xml/validate' => 'xml#validate'
   put '/xml/update' => 'xml#update'
+
+  # atlas
+  get '/atlas/login' => 'atlas#login'
+  post '/atlas/process_login' => 'atlas#process_login'
+  get '/atlas/user' => 'atlas#user'
 end

@@ -2,10 +2,12 @@
 
 class CommunitiesController < CatalogController
   include Thumbable
+  include Transformable
 
   def show
     @community = AtlasRb::Community.find(params[:id])
     @response = find_many(AtlasRb::Community.children(params[:id]))
+    breadcrumbs(params[:id])
   end
 
   def new
@@ -15,6 +17,7 @@ class CommunitiesController < CatalogController
   def edit
     # TODO: need to do admin check
     @community = AtlasRb::Community.find(params[:id])
+    form_preparation(AtlasRb::Resource.permissions(params[:id]))
   end
 
   def create
@@ -31,4 +34,10 @@ class CommunitiesController < CatalogController
     AtlasRb::Community.metadata(params[:id], permitted)
     redirect_to community_path(params[:id])
   end
+
+  private
+
+    def community_params
+      resource_params(:community)
+    end
 end

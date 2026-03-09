@@ -1,8 +1,26 @@
 # frozen_string_literal: true
 
-class User < ApplicationRecord
-  # Include default devise modules. Others available are:
-  # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
-  devise :database_authenticatable, :registerable,
-         :recoverable, :rememberable, :validatable
+class User
+  include ActiveModel::API
+  include ActiveModel::Validations
+  extend ActiveModel::Callbacks
+  extend Devise::Models
+
+  define_model_callbacks :validation
+
+  attr_accessor :email, :password, :nuid, :name, :groups
+
+  devise :custom_authenticatable, authentication_keys: [:email, :password, :nuid, :name, :groups]
+
+  def pretty_name
+    names = Namae.parse(name)[0]
+    if !names.blank?
+      return "#{names.given} #{names.family}"
+    end
+    ""
+  end
+
+  def to_s
+    pretty_name
+  end
 end

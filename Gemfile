@@ -4,7 +4,7 @@ source 'https://rubygems.org'
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
-gem 'rails'
+gem 'rails', '> 8.0', '< 9.0'
 
 # The original asset pipeline for Rails [https://github.com/rails/sprockets-rails]
 # gem 'sprockets-rails'
@@ -56,9 +56,8 @@ gem 'active_decorator'
 gem 'atlas_rb'
 gem 'attr_json'
 gem 'blacklight'
-gem 'bootstrap', git: 'https://github.com/twbs/bootstrap-rubygem.git', ref: '90467dee09b0c6e52e7d58de867148fda0dd9f49'
+gem 'bootstrap'
 gem 'bootstrap_form'
-gem 'croutons'
 gem 'dartsass-rails'
 gem 'devise'
 gem 'devise-i18n'
@@ -66,14 +65,15 @@ gem 'enumerations'
 gem 'good_job'
 gem 'hamlit'
 gem 'libreconv'
+gem 'loaf'
 gem 'mods'
-gem 'noid-rails'
+gem 'namae'
 gem 'pg'
+gem 'roo'
 gem 'rsolr', '>= 1.0', '< 3'
 gem 'ruby-filemagic'
 gem 'ruby-vips'
 gem 'sass-embedded', '1.77.5' # temp fix for https://github.com/twbs/bootstrap/issues/40621
-gem 'roo'
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
@@ -88,6 +88,9 @@ group :development, :test do
   gem 'rubocop-rails', require: false
   gem 'simplecov', require: false
   gem 'simplecov_json_formatter', '0.1.3' # Version 0.1.4 seems to break codeclimate
+
+  # Gem age tool
+  gem 'next_rails'
 end
 
 group :test do

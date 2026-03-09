@@ -1,0 +1,7 @@
+%h1.py-3= User
+
+= bootstrap_fields_for :user do |u|
+  = u.text_field :nuid
+  = u.email_field :email
+  = u.text_field :name
+  = u.text_area :groups, rows: 5

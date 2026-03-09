@@ -10,10 +10,10 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2024_09_26_172306) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_13_184319) do
   # These are extensions that must be enabled in order to support this database
+  enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
-  enable_extension "plpgsql"
   enable_extension "uuid-ossp"
 
   create_table "bookmarks", id: :serial, force: :cascade do |t|
@@ -116,6 +116,13 @@ ActiveRecord::Schema[7.2].define(version: 2024_09_26_172306) do
     t.index ["scheduled_at"], name: "index_good_jobs_on_scheduled_at", where: "(finished_at IS NULL)"
   end
 
+  create_table "groups", force: :cascade do |t|
+    t.string "cosmetic"
+    t.datetime "created_at", null: false
+    t.string "raw"
+    t.datetime "updated_at", null: false
+  end
+
   create_table "ingests", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.bigint "load_report_id", null: false
@@ -141,18 +148,6 @@ ActiveRecord::Schema[7.2].define(version: 2024_09_26_172306) do
     t.integer "user_id"
     t.string "user_type"
     t.index ["user_id"], name: "index_searches_on_user_id"
-  end
-
-  create_table "users", force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.string "email", default: "", null: false
-    t.string "encrypted_password", default: "", null: false
-    t.datetime "remember_created_at"
-    t.datetime "reset_password_sent_at"
-    t.string "reset_password_token"
-    t.datetime "updated_at", null: false
-    t.index ["email"], name: "index_users_on_email", unique: true
-    t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
   add_foreign_key "ingests", "load_reports"
