@@ -2,6 +2,7 @@
 
 class CollectionsController < CatalogController
   include Thumbable
+  include Transformable
 
   def show
     @collection = AtlasRb::Collection.find(params[:id])
@@ -15,20 +16,24 @@ class CollectionsController < CatalogController
 
   def edit
     @collection = AtlasRb::Collection.find(params[:id])
+    form_preparation(AtlasRb::Resource.permissions(params[:id]))
   end
 
   def create
-    permitted = params.require(:collection).permit(:title, :description).to_h
+    permitted = params.expect(collection: [:title, :description]).to_h
     c = AtlasRb::Collection.create(params[:parent_id])
     AtlasRb::Collection.metadata(c['id'], permitted)
     redirect_to collection_path(c['id'])
   end
 
   def update
-    # TODO: need to do permissions check
-    permitted = params.require(:collection).permit(:title, :description).to_h
-    add_thumbnail(permitted)
-    AtlasRb::Collection.metadata(params[:id], permitted)
+    AtlasRb::Collection.metadata(params[:id], collection_params)
     redirect_to collection_path(params[:id])
   end
+
+  private
+
+    def collection_params
+      resource_params(:collection)
+    end
 end
