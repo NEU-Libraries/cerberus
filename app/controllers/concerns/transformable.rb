@@ -12,6 +12,8 @@ module Transformable
   end
 
   def pretty_user_permissions(groups)
+    return [] unless groups.present?
+
     groups.map { |value| [value, pretty_group(value)] }
   end
 
@@ -27,7 +29,7 @@ module Transformable
   end
 
   def form_preparation(raw_permissions)
-    @groups = pretty_user_permissions(current_user.groups)
+    @groups = pretty_user_permissions(current_user&.groups)
     @public = raw_permissions['read']&.include?('public')
     @embargo = begin
       Date.parse(raw_permissions['embargo']).to_s
