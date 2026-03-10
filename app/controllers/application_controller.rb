@@ -8,6 +8,8 @@ class ApplicationController < ActionController::Base
     I18n.locale = :en
   end
 
+  before_action :store_preferred_view
+
   def breadcrumbs(id)
     result = AtlasRb::Resource.find(id)
     klass = result['klass']&.downcase
@@ -20,5 +22,9 @@ class ApplicationController < ActionController::Base
 
   def pretty_group(raw_group)
     Group.find_by(raw: raw_group)&.cosmetic || raw_group
+  end
+
+  def store_preferred_view
+    session[:preferred_view] = params[:view] if params[:view]
   end
 end
