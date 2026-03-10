@@ -221,12 +221,7 @@ class CatalogController < ApplicationController
     Blacklight.default_index.search({ fq: "alternate_ids_tsi:(#{ids.map { |id| "\"id-#{id}\"" }.join(' OR ')})" })
   end
 
-  def iiif_thumbnail(document, *args)
-    # view_context.send(thumbnail_method, document, image_options) is how
-    # this is called by https://github.com/projectblacklight/blacklight/blob/main/app/presenters/blacklight/thumbnail_presenter.rb#L52
-    # TODO: call document.iiif_uuid and pass it to the view context
-    # to make an image tag with the use of iiif_url
-    # using this tempate "#{iiif_url(uuid)}/full/!85,85/0/default.jpg"
+  def iiif_thumbnail(document, *_args)
     view_context.image_tag("#{helpers.iiif_url(document.uuid)}/full/!85,85/0/default.jpg")
   end
 
