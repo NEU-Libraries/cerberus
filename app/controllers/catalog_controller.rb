@@ -41,7 +41,8 @@ class CatalogController < ApplicationController
     # solr field configuration for search results/index views
     config.index.title_field = 'title_tsim'
     # config.index.display_type_field = 'format'
-    config.index.thumbnail_field = 'thumbnail_path_ss'
+    # config.index.thumbnail_field = 'thumbnail_path_ss'
+    config.index.thumbnail_method = :iiif_thumbnail
 
     # config.add_results_document_tool(:bookmark, partial: 'bookmark_control', if: :render_bookmarks_control?)
     config.index.document_actions.delete(:bookmark)
@@ -219,4 +220,15 @@ class CatalogController < ApplicationController
 
     Blacklight.default_index.search({ fq: "alternate_ids_tsi:(#{ids.map { |id| "\"id-#{id}\"" }.join(' OR ')})" })
   end
+
+  def iiif_thumbnail(document, *args)
+    # view_context.send(thumbnail_method, document, image_options) is how
+    # this is called by https://github.com/projectblacklight/blacklight/blob/main/app/presenters/blacklight/thumbnail_presenter.rb#L52
+    # TODO: call document.iiif_uuid and pass it to the view context
+    # to make an image tag with the use of iiif_url
+    # using this tempate "#{iiif_url(uuid)}/full/!85,85/0/default.jpg"
+    view_context.image_tag("#{helpers.iiif_url(document.uuid)}/full/!85,85/0/default.jpg")
+  end
+
+  helper_method :iiif_thumbnail if respond_to? :helper_method
 end
