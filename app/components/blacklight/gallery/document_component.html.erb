@@ -1,0 +1,16 @@
+<% component = Blacklight::VERSION > '8' ?
+  Blacklight::DocumentComponent.new(classes: 'col', component: :div, document: @presenter, counter: @counter) :
+  Blacklight::DocumentComponent.new(classes: 'col', component: :div, document: @document, presenter: @presenter, counter: @counter)
+%>
+<%= render(component) do |component| %>
+  <% component.with_body do %>
+    <div class="card h-100">
+      <div class="card-img-top d-flex justify-content-center align-items-center p-2">
+        <%= thumbnail %>
+      </div>
+      <div class="card-body">
+        <%= render Blacklight::Gallery::DocumentTitleComponent.new(presenter: @presenter, counter: @counter) %>
+      </div>
+    </div>
+  <% end %>
+<% end %>

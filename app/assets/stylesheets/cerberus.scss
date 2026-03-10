@@ -176,3 +176,22 @@ ol.breadcrumb {
 .navbar-search {
   margin-bottom: 5px;
 }
+
+/* Blacklight Gallery Title */
+.gallery-title {
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.document-thumbnail img {
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  padding: 4px;
+}
+
+/* Blacklight UX */
+.documents-list .document-thumbnail {
+  padding-left: 0;
+  margin-right: 3rem;
+}

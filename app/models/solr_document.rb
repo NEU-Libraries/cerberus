@@ -20,6 +20,7 @@ class SolrDocument
 
   attribute :klass_type, Blacklight::Types::String, 'internal_resource_tesim'
   attribute :alternate_ids, Blacklight::Types::Array, 'alternate_ids_tesim'
+  attribute :uuid, Blacklight::Types::String, 'thumbnail_tesim'
 
   def klass
     klass_type.constantize if klass_type.present?

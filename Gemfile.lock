@@ -98,6 +98,9 @@ GEM
       rails (>= 6.1, < 9)
       view_component (>= 2.74, < 5)
       zeitwerk
+    blacklight-gallery (5.0.0)
+      blacklight (>= 7.17, < 9)
+      rails (>= 6.1, < 9)
     bootsnap (1.19.0)
       msgpack (~> 1.2)
     bootstrap (5.3.5)
@@ -464,6 +467,7 @@ DEPENDENCIES
   atlas_rb
   attr_json
   blacklight
+  blacklight-gallery
   bootsnap
   bootstrap
   bootstrap_form
