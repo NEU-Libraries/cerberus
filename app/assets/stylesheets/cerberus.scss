@@ -176,3 +176,11 @@ ol.breadcrumb {
 .navbar-search {
   margin-bottom: 5px;
 }
+
+/* Blacklight Gallery Title */
+h5.index_title {
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

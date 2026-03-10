@@ -9,7 +9,7 @@
         <%= thumbnail %>
       </div>
       <div class="card-body">
-        <%= title %>
+        <%= render Blacklight::Gallery::DocumentTitleComponent.new(presenter: @presenter, counter: @counter) %>
         <%= content %>
         <%= metadata %>
         <% metadata_sections.each do |section| %>
