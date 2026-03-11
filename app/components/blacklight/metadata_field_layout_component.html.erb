@@ -1,4 +1,12 @@
 <dt class="blacklight-<%= @key %> <%= @label_class %>"><%= label %></dt>
 <% values.each do |v| %>
-  <%= v %>
+  <dd class="d-flex <%= @value_class %> blacklight-<%= @key %>" data-controller="metadata-section-clamp">
+    <span data-metadata-section-clamp-target="container" class="metadata-section-clamped"><%= v %></span>
+    <button class="btn btn-link btn-sm p-0 ms-1" data-action="click->metadata-section-clamp#expand" data-metadata-section-clamp-target="expandBtn" aria-label="Show full value">
+      <i class="fa-regular fa-square-plus fa-xs"></i>
+    </button>
+    <button class="btn btn-link btn-sm p-0 ms-1 d-none" data-action="click->metadata-section-clamp#collapse" data-metadata-section-clamp-target="collapseBtn" aria-label="Collapse value">
+      <i class="fa-regular fa-square-minus fa-xs"></i>
+    </button>
+  </dd>
 <% end %>

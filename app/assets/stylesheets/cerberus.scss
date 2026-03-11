@@ -185,6 +185,14 @@ ol.breadcrumb {
   text-overflow: ellipsis;
 }
 
+/* Metadata section value line clamp */
+.metadata-section-clamped {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
 .document-thumbnail img {
   border: 1px solid rgba(0, 0, 0, 0.2);
   padding: 4px;
