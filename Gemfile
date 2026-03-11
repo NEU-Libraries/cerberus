@@ -55,7 +55,7 @@ gem 'bootsnap', require: false
 gem 'active_decorator'
 gem 'atlas_rb'
 gem 'attr_json'
-gem 'blacklight'
+gem 'blacklight', '>= 8.0', '< 9.0'
 gem 'blacklight-gallery'
 gem 'bootstrap'
 gem 'bootstrap_form'
