@@ -223,7 +223,7 @@ class CatalogController < ApplicationController
   end
 
   def iiif_thumbnail(document, *_args)
-    view_context.image_tag("#{helpers.iiif_url(document.uuid)}/full/!85,85/0/default.jpg")
+    view_context.image_tag("#{helpers.iiif_url(document.uuid)}/full/!170,170/0/default.jpg")
   end
 
   helper_method :iiif_thumbnail if respond_to? :helper_method
