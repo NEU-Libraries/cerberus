@@ -199,6 +199,12 @@ ol.breadcrumb {
   position: relative;
   overflow: hidden;
   flex-shrink: 0;
+  width: 85px;
+  height: 85px;
+}
+
+.col-md-auto .document-thumbnail {
+  margin-top: 7px;
 }
 
 .document-thumbnail img {
@@ -210,12 +216,7 @@ ol.breadcrumb {
   bottom: 0;
   max-width: 100%;
   max-height: 100%;
-}
-
-/* Blacklight UX */
-.document-thumbnail {
-  width: 85px;
-  height: 85px;
+  padding: 2px;
 }
 
 .documents-list .document-thumbnail {
