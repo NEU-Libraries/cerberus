@@ -42,3 +42,4 @@
 .env
 
 CLAUDE.md
+/.playwright-mcp/
