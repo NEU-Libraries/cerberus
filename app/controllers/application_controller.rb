@@ -3,6 +3,7 @@
 class ApplicationController < ActionController::Base
   # Adds a few additional behaviors into the application controller
   include Blacklight::Controller
+  include Authorizable
 
   before_action do
     I18n.locale = :en
@@ -31,4 +32,5 @@ class ApplicationController < ActionController::Base
   def store_preferred_view
     session[:preferred_view] = params[:view] if params[:view]
   end
+
 end

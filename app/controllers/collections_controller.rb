@@ -4,6 +4,9 @@ class CollectionsController < CatalogController
   include Thumbable
   include Transformable
 
+  before_action :authorize_show!, only: [:show]
+  before_action :authorize_edit!, only: [:edit]
+
   def show
     @collection = AtlasRb::Collection.find(params[:id])
     @response = find_many(AtlasRb::Collection.children(params[:id]))
@@ -16,7 +19,7 @@ class CollectionsController < CatalogController
 
   def edit
     @collection = AtlasRb::Collection.find(params[:id])
-    form_preparation(AtlasRb::Resource.permissions(params[:id]))
+    form_preparation(@permissions)
   end
 
   def create

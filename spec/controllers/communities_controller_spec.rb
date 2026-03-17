@@ -7,6 +7,14 @@ describe CommunitiesController do
 
   describe 'edit' do
     render_views
+
+    let(:user) { User.new(email: 'test@example.com', password: 'password', groups: ['editors']) }
+
+    before do
+      AtlasRb::Community.metadata(community['id'], { 'permissions' => { 'edit' => ['editors'] } })
+      sign_in user
+    end
+
     it 'renders the edit partial' do
       get :edit, params: { id: community['id'] }
       expect(response).to render_template('communities/edit')
@@ -16,6 +24,11 @@ describe CommunitiesController do
 
   describe 'show' do
     render_views
+
+    before do
+      AtlasRb::Community.metadata(community['id'], { 'permissions' => { 'read' => ['public'] } })
+    end
+
     it 'renders the show partial' do
       get :show, params: { id: community['id'] }
       expect(response).to render_template('communities/show')

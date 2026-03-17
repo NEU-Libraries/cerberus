@@ -4,6 +4,9 @@ class CommunitiesController < CatalogController
   include Thumbable
   include Transformable
 
+  before_action :authorize_show!, only: [:show]
+  before_action :authorize_edit!, only: [:edit]
+
   def show
     @community = AtlasRb::Community.find(params[:id])
     @response = find_many(AtlasRb::Community.children(params[:id]))
@@ -15,9 +18,8 @@ class CommunitiesController < CatalogController
   end
 
   def edit
-    # TODO: need to do admin check
     @community = AtlasRb::Community.find(params[:id])
-    form_preparation(AtlasRb::Resource.permissions(params[:id]))
+    form_preparation(@permissions)
   end
 
   def create

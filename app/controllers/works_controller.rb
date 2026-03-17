@@ -4,6 +4,9 @@ class WorksController < ApplicationController
   include Thumbable
   include Transformable
 
+  before_action :authorize_show!, only: [:show]
+  before_action :authorize_edit!, only: [:edit]
+
   def show
     @work = AtlasRb::Work.find(params[:id])
     @mods = AtlasRb::Work.mods(params[:id], 'html')
@@ -17,7 +20,7 @@ class WorksController < ApplicationController
 
   def edit
     @work = AtlasRb::Work.find(params[:id])
-    form_preparation(AtlasRb::Resource.permissions(params[:id]))
+    form_preparation(@permissions)
   end
 
   def create

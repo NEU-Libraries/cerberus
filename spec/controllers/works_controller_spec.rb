@@ -9,6 +9,11 @@ describe WorksController do
 
   describe 'show' do
     render_views
+
+    before do
+      AtlasRb::Work.metadata(work['id'], { 'permissions' => { 'read' => ['public'] } })
+    end
+
     it 'renders the show partial' do
       expect(work['title']).to eq("What's New - How We Respond to Disaster, Episode 1")
 
@@ -34,10 +39,18 @@ describe WorksController do
 
   describe 'edit' do
     render_views
-      it 'renders the edit partial' do
-        get :edit, params: { id: work['id'] }
-        expect(response).to render_template('works/edit')
-        expect(CGI.unescapeHTML(response.body)).to include(work['title'])
-      end
+
+    let(:user) { User.new(email: 'test@example.com', password: 'password', groups: ['editors']) }
+
+    before do
+      AtlasRb::Work.metadata(work['id'], { 'permissions' => { 'edit' => ['editors'] } })
+      sign_in user
+    end
+
+    it 'renders the edit partial' do
+      get :edit, params: { id: work['id'] }
+      expect(response).to render_template('works/edit')
+      expect(CGI.unescapeHTML(response.body)).to include(work['title'])
     end
   end
+end
