@@ -241,6 +241,8 @@ ol.breadcrumb {
 }
 
 .documents-gallery {
+  row-gap: var(--bs-gutter-x);
+
   .document-thumbnail {
     width: 170px;
     height: 170px;
