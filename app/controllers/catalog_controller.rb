@@ -6,6 +6,7 @@ class CatalogController < ApplicationController
   self.search_state_class = SearchState
 
   configure_blacklight do |config|
+    config.search_service_class = GatedSearchService
     config.view.gallery(document_component: Blacklight::Gallery::DocumentComponent, icon: Blacklight::Gallery::Icons::GalleryComponent)
 
     # config.track_search_session = false

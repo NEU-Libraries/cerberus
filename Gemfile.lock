@@ -109,6 +109,7 @@ GEM
       actionpack (>= 7.2)
       activemodel (>= 7.2)
     builder (3.3.0)
+    cancancan (3.6.1)
     capybara (3.40.0)
       addressable
       matrix
@@ -480,6 +481,7 @@ DEPENDENCIES
   bootsnap
   bootstrap
   bootstrap_form
+  cancancan
   capybara
   dartsass-rails
   database_cleaner

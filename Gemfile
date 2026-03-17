@@ -53,6 +53,7 @@ gem 'bootsnap', require: false
 
 # NEU Gems
 gem 'active_decorator'
+gem 'cancancan'
 gem 'atlas_rb'
 gem 'attr_json'
 gem 'blacklight', '>= 8.0', '< 9.0'
