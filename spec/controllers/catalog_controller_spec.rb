@@ -8,6 +8,7 @@ describe CatalogController do
   describe 'index' do
     render_views
     it 'renders the index partial' do
+      AtlasRb::Community.metadata(community['id'], { 'permissions' => { 'read' => ['public'] } })
       expect(community['title']).to eq('Northeastern University')
       get :index
       expect(response).to render_template('catalog/index')

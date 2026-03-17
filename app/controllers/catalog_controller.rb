@@ -6,6 +6,7 @@ class CatalogController < ApplicationController
   self.search_state_class = SearchState
 
   configure_blacklight do |config|
+    config.search_service_class = GatedSearchService
     config.view.gallery(document_component: Blacklight::Gallery::DocumentComponent, icon: Blacklight::Gallery::Icons::GalleryComponent)
 
     # config.track_search_session = false
@@ -219,7 +220,15 @@ class CatalogController < ApplicationController
   def find_many(ids)
     return Blacklight::Solr::Response.new({}, {}) if ids.blank?
 
-    Blacklight.default_index.search({ fq: "alternate_ids_tsi:(#{ids.map { |id| "\"id-#{id}\"" }.join(' OR ')})" })
+    permissions = (['public'] + Array(current_user&.groups)).uniq
+    gating_filter = "{!terms f=read_access_group_ssim}#{permissions.join(',')}"
+
+    Blacklight.default_index.search({
+      fq: [
+        "alternate_ids_tsi:(#{ids.map { |id| "\"id-#{id}\"" }.join(' OR ')})",
+        gating_filter
+      ]
+    })
   end
 
   def iiif_thumbnail(document, *_args)

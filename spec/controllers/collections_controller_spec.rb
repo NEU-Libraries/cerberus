@@ -8,6 +8,14 @@ describe CollectionsController do
 
   describe 'edit' do
     render_views
+
+    let(:user) { User.new(email: 'test@example.com', password: 'password', groups: ['editors']) }
+
+    before do
+      AtlasRb::Collection.metadata(collection['id'], { 'permissions' => { 'edit' => ['editors'] } })
+      sign_in user
+    end
+
     it 'renders the edit partial' do
       get :edit, params: { id: collection['id'] }
       expect(response).to render_template('collections/edit')
@@ -17,6 +25,11 @@ describe CollectionsController do
 
   describe 'show' do
     render_views
+
+    before do
+      AtlasRb::Collection.metadata(collection['id'], { 'permissions' => { 'read' => ['public'] } })
+    end
+
     it 'renders the show partial' do
       get :show, params: { id: collection['id'] }
       expect(response).to render_template('collections/show')
