@@ -5,6 +5,14 @@ module ApplicationHelper
     VERSION
   end
 
+  def document_type_icon(klass_type)
+    case klass_type
+    when 'Community'  then 'fa-users'
+    when 'Collection' then 'fa-folder-open'
+    else 'fa-file'
+    end
+  end
+
   def iiif_url(uuid)
     # Supports staging, production etc.
     # cantaloupe

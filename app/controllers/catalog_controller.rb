@@ -223,7 +223,20 @@ class CatalogController < ApplicationController
   end
 
   def iiif_thumbnail(document, *_args)
-    view_context.image_tag("#{helpers.iiif_url(document.uuid)}/full/!170,170/0/default.jpg")
+    icon_class = helpers.document_type_icon(document.klass_type)
+    icon_html  = view_context.content_tag(:i, '', class: "fa-regular #{icon_class} fa-2xl text-black-50")
+
+    if document.uuid.present?
+      fallback = view_context.content_tag(:span, icon_html,
+                   class: 'thumbnail-fallback d-none')
+      img = view_context.image_tag(
+        "#{helpers.iiif_url(document.uuid)}/full/!170,170/0/default.jpg",
+        onerror: "this.classList.add('d-none'); this.nextElementSibling.classList.remove('d-none');"
+      )
+      view_context.content_tag(:span, img + fallback, class: 'thumbnail-wrapper')
+    else
+      view_context.content_tag(:span, icon_html, class: 'thumbnail-fallback')
+    end
   end
 
   helper_method :iiif_thumbnail if respond_to? :helper_method
