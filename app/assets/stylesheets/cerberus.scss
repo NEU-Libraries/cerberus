@@ -246,9 +246,14 @@ ol.breadcrumb {
   .document-thumbnail {
     width: 170px;
     height: 170px;
+    border: 1px solid rgba(0, 0, 0, 0.2);
   }
 
   .thumbnail-fallback svg {
     font-size: 4em;
+  }
+
+  .document-thumbnail:has(.thumbnail-fallback:not(.d-none)) {
+    border: 1px solid rgba(0, 0, 0, 0.2);
   }
 }
