@@ -3,7 +3,6 @@
 Rails.application.routes.draw do
   devise_for :users
   mount Blacklight::Engine => '/catalog'
-  mount GoodJob::Engine => 'good_job'
   root to: 'pages#home'
   concern :searchable, Blacklight::Routes::Searchable.new
 
@@ -27,7 +26,6 @@ Rails.application.routes.draw do
 
   resources :communities
   resources :collections
-  resources :loads
   resources :works
 
   # xml
