@@ -27,6 +27,7 @@ Rails.application.routes.draw do
   resources :communities
   resources :collections
   resources :works
+  resources :loads, only: [:index, :show, :new, :create, :destroy]
 
   # xml
   get '/xml/editor/:id' => 'xml#editor', as: 'xml_editor'
