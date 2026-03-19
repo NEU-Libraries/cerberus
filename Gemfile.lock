@@ -186,7 +186,7 @@ GEM
     google-protobuf (4.34.0-x86_64-linux-gnu)
       bigdecimal
       rake (~> 13.3)
-    hamlit (4.0.0)
+    haml (7.2.0)
       temple (>= 0.8.2)
       thor
       tilt
@@ -492,7 +492,7 @@ DEPENDENCIES
   factory_bot_rails
   faker
   fix-db-schema-conflicts
-  hamlit
+  haml
   importmap-rails
   jbuilder
   libreconv
