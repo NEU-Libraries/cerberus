@@ -24,18 +24,14 @@ class WorksController < ApplicationController
   end
 
   def create
-    # check if file is of type image, and if so, make thumbnail
     # TODO: add support for pdf/word thumbnails
-    # Refactor to Atlas
     file = params[:binary]
-    @work = AtlasRb::Work.create(AtlasRb::Collection.find(params[:collection_id])['id'])
-    # set the title?
-    # @work = Work.create(
-    #   collection_id: AtlasRb::Collection.find(params[:collection_id])['id'],
-    #   title: file.original_filename
-    # )
-    # BlobCreator.call(work_id: @work.id, path: file.tempfile.path.presence || file.path)
+    @work = AtlasRb::Work.create(AtlasRb::Collection.find(params[:parent_id])['id'])
+
+    AtlasRb::Work.metadata(@work['id'], title: file.original_filename)
+    AtlasRb::Work.metadata(@work['id'], 'thumbnail' => ThumbnailCreator.call(path: file.tempfile.path)) if file.content_type.start_with?('image/')
     AtlasRb::Blob.create(@work['id'], file.tempfile.path.presence || file.path)
+
     redirect_to work_path(@work['id'])
   end
 
