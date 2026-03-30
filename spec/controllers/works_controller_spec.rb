@@ -25,7 +25,7 @@ describe WorksController do
 
   describe 'create' do
     it 'uploads a binary and makes a Work' do
-      post :create, params: { binary: fixture_file_upload('image.png', 'image/png'), collection_id: collection['id'] }
+      post :create, params: { binary: fixture_file_upload('image.png', 'image/png'), parent_id: collection['id'] }
       expect(subject).to redirect_to action: :show, id: assigns(:work)['id']
     end
   end
