@@ -34,5 +34,6 @@ namespace :reset do
     DatabaseCleaner.clean
     Blacklight.default_index.connection.delete_by_query '*:*'
     Blacklight.default_index.connection.commit
+    AtlasRb::Reset.clean
   end
 end

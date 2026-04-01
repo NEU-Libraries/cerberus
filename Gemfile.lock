@@ -80,7 +80,7 @@ GEM
     addressable (2.8.9)
       public_suffix (>= 2.0.2, < 8.0)
     ast (2.4.3)
-    atlas_rb (0.0.75)
+    atlas_rb (0.0.79)
       faraday (~> 2.7)
       faraday-follow_redirects (~> 0.3.0)
       faraday-multipart (~> 1)

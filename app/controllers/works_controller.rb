@@ -30,7 +30,7 @@ class WorksController < ApplicationController
 
     AtlasRb::Work.metadata(@work['id'], title: file.original_filename)
     AtlasRb::Work.metadata(@work['id'], 'thumbnail' => ThumbnailCreator.call(path: file.tempfile.path)) if file.content_type.start_with?('image/')
-    AtlasRb::Blob.create(@work['id'], file.tempfile.path.presence || file.path)
+    AtlasRb::Blob.create(@work['id'], file.tempfile.path.presence || file.path) # BlobCreator will make a fileset to contain the blob
 
     redirect_to work_path(@work['id'])
   end
