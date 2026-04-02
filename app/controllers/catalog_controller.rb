@@ -97,6 +97,9 @@ class CatalogController < ApplicationController
     config.add_facet_field 'subject_geo_ssim', label: 'Region'
     config.add_facet_field 'subject_era_ssim', label: 'Era'
 
+    # Cerberus defined facets
+    config.add_facet_field 'type_ssim', label: 'Type'
+
     config.add_facet_field 'example_pivot_field', label: 'Pivot Field', pivot: %w[format language_ssim],
                                                   collapsing: true
 
