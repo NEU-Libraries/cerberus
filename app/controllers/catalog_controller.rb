@@ -224,11 +224,11 @@ class CatalogController < ApplicationController
     gating_filter = "{!terms f=read_access_group_ssim}#{permissions.join(',')}"
 
     Blacklight.default_index.search({
-      fq: [
-        "alternate_ids_tsi:(#{ids.map { |id| "\"id-#{id}\"" }.join(' OR ')})",
-        gating_filter
-      ]
-    })
+                                      fq: [
+                                        "alternate_ids_tsi:(#{ids.map { |id| "\"id-#{id}\"" }.join(' OR ')})",
+                                        gating_filter
+                                      ]
+                                    })
   end
 
   def iiif_thumbnail(document, *_args)
@@ -237,7 +237,7 @@ class CatalogController < ApplicationController
 
     if document.uuid.present?
       fallback = view_context.content_tag(:span, icon_html,
-                   class: 'thumbnail-fallback d-none')
+                                          class: 'thumbnail-fallback d-none')
       img = view_context.image_tag(
         "#{helpers.iiif_url(document.uuid)}/full/!170,170/0/default.jpg",
         onerror: "this.classList.add('d-none'); this.nextElementSibling.classList.remove('d-none');"

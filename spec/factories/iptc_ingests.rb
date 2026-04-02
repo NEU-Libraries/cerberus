@@ -5,6 +5,6 @@ FactoryBot.define do
     association :load_report
     status { :pending }
     work_pid { nil }
-    source_filename { "image_001.jpg" }
+    source_filename { 'image_001.jpg' }
   end
 end

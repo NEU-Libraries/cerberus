@@ -23,11 +23,12 @@ class SolrDocument
   attribute :uuid, Blacklight::Types::String, 'thumbnail_tesim'
 
   def klass
-    klass_type.constantize if klass_type.present?
+    klass_type.presence&.constantize
   end
 
   def to_param
-    noid = alternate_ids&.first&.split('id-')&.last
+    raw = alternate_ids&.first
+    noid = raw.split('id-').last if raw.present?
     return noid if noid.present?
 
     super

@@ -7,8 +7,7 @@ class LoadsController < ApplicationController
     @load_reports = LoadReport.order(created_at: :desc)
   end
 
-  def show
-  end
+  def show; end
 
   def new
     @load_report = LoadReport.new
@@ -26,7 +25,7 @@ class LoadsController < ApplicationController
 
   private
 
-  def set_load_report
-    @load_report = LoadReport.find(params[:id])
-  end
+    def set_load_report
+      @load_report = LoadReport.find(params[:id])
+    end
 end

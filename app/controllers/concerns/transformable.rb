@@ -12,7 +12,7 @@ module Transformable
   end
 
   def pretty_user_permissions(groups)
-    return [] unless groups.present?
+    return [] if groups.blank?
 
     groups.map { |value| [value, pretty_group(value)] }
   end
@@ -56,9 +56,9 @@ module Transformable
     return unless params[resource_key][:permissions]
 
     permitted[:permissions] = form_group_permissions(params[resource_key][:permissions])
-    if !params[resource_key][:permissions][:embargo].nil?
-      permitted[:permissions][:embargo] = params[resource_key][:permissions][:embargo]
-    end
+    return if params[resource_key][:permissions][:embargo].nil?
+
+    permitted[:permissions][:embargo] = params[resource_key][:permissions][:embargo]
   end
 
   def mass_permissions(permitted)

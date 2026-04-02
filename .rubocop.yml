@@ -1,4 +1,4 @@
-require: rubocop-rails
+plugins: rubocop-rails
 Lint/MissingSuper:
   Exclude:
     - 'app/services/**/*'
@@ -59,6 +59,8 @@ Metrics/BlockLength:
     - 'app/controllers/catalog_controller.rb'
     - 'spec/**/*'
     - 'lib/tasks/*'
+Rails/StrongParametersExpect:
+  Enabled: false
 Rails/UnknownEnv:
   Environments:
     - production

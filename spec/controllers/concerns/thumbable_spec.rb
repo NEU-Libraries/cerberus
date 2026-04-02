@@ -6,6 +6,7 @@ describe Thumbable do
   let(:mock_thumbable_class) do
     Class.new do
       include Thumbable
+
       attr_accessor :params
 
       def initialize(params)

@@ -29,8 +29,7 @@ class WorksController < ApplicationController
     @work = AtlasRb::Work.create(AtlasRb::Collection.find(params[:parent_id])['id'])
 
     AtlasRb::Work.metadata(@work['id'], title: file.original_filename)
-    AtlasRb::Work.metadata(@work['id'], 'thumbnail' => ThumbnailCreator.call(path: file.tempfile.path)) if file.content_type.start_with?('image/')
-    AtlasRb::Blob.create(@work['id'], file.tempfile.path.presence || file.path) # BlobCreator will make a fileset to contain the blob
+    process_blob(file)
 
     redirect_to work_path(@work['id'])
   end
@@ -44,5 +43,15 @@ class WorksController < ApplicationController
 
     def work_params
       resource_params(:work)
+    end
+
+    def process_blob(file)
+      if file.content_type.start_with?('image/')
+        AtlasRb::Work.metadata(@work['id'],
+                               'thumbnail' => ThumbnailCreator.call(path: file.tempfile.path))
+      end
+
+      # BlobCreator will make a fileset to contain the blob
+      AtlasRb::Blob.create(@work['id'], file.tempfile.path.presence || file.path)
     end
 end

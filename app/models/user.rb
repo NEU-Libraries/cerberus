@@ -14,10 +14,9 @@ class User
 
   def pretty_name
     names = Namae.parse(name)[0]
-    if !names.blank?
-      return "#{names.given} #{names.family}"
-    end
-    ""
+    return "#{names.given} #{names.family}" if names.present?
+
+    ''
   end
 
   def to_s
