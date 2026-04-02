@@ -240,6 +240,10 @@ ol.breadcrumb {
   margin-right: 3rem;
 }
 
+.facet-limit .btn {
+  @extend .px-3;
+}
+
 .documents-gallery {
   row-gap: var(--bs-gutter-x);
 
