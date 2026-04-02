@@ -9,7 +9,7 @@ class CommunitiesController < CatalogController
 
   def show
     @community = AtlasRb::Community.find(params[:id])
-    @response = find_many(AtlasRb::Community.children(params[:id]))
+    @response = find_children(@community['valkyrie_id'])
     breadcrumbs(params[:id])
   end
 

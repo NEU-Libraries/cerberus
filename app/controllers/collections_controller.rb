@@ -9,7 +9,7 @@ class CollectionsController < CatalogController
 
   def show
     @collection = AtlasRb::Collection.find(params[:id])
-    @response = find_many(AtlasRb::Collection.children(params[:id]))
+    @response = find_children(@collection['valkyrie_id'])
     breadcrumbs(params[:id])
   end
 
