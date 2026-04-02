@@ -223,15 +223,10 @@ class CatalogController < ApplicationController
   def find_many(ids)
     return Blacklight::Solr::Response.new({}, {}) if ids.blank?
 
-    permissions = (['public'] + Array(current_user&.groups)).uniq
-    gating_filter = "{!terms f=read_access_group_ssim}#{permissions.join(',')}"
+    id_query = ids.map { |id| "\"id-#{id}\"" }.join(' OR ')
+    builder = search_service.search_builder.with({}).merge(fq: ["alternate_ids_tsi:(#{id_query})"])
 
-    Blacklight.default_index.search({
-                                      fq: [
-                                        "alternate_ids_tsi:(#{ids.map { |id| "\"id-#{id}\"" }.join(' OR ')})",
-                                        gating_filter
-                                      ]
-                                    })
+    Blacklight.default_index.search(builder)
   end
 
   def iiif_thumbnail(document, *_args)
