@@ -38,6 +38,8 @@ en:
       name: "CCIS Technical Reports Staff"
     northeastern:drs:college_of_engineering:civil_and_environmental_engineering:hajjar_lab:
       name: "Hajjar Lab Team"
+    northeastern:drs:college_of_engineering:coe_marcom:coe-marcom-staff:
+      name: "College of Engineering - Marketing Group"
     northeastern:drs:college_of_engineering:coe_marcom:coe-photograph-access:
       name: "College of Engineering - Photo Archive Users"
     northeastern:drs:college_of_engineering:deans_office:
@@ -62,14 +64,18 @@ en:
       name: "Shefelbine Lab Team"
     northeastern:drs:college_of_engineering:mechanical_and_industrial_engineering:shepherd_lab:
       name: "Shepherd Lab Team"
+    northeastern:drs:college_of_engineering:nanu-otic:
+      name: "College of Engineering - NANU OTIC"
     northeastern:drs:college_of_engineering:river_lab:
       name: "RIVeR Lab Team"
     northeastern:drs:college_of_engineering:wiot:
-      name: "Institute for the Wireless Internet of Things Research Team"
+      name: "Institute for Intelligent Networked Systems Research Team"
     northeastern:drs:college_of_engineering:wiot-staff:
-      name: "Institute for the Wireless Internet of Things Staff"  
+      name: "Institute for Intelligent Networked Systems Staff"  
     northeastern:drs:college_of_professional_studies:facultypodcast:
       name: "College of Professional Studies - Faculty Podcast"
+    northeastern:drs:college_of_professional_studies:global-symposium-on-leadership-and-project-management:
+      name: "College of Professional Studies - Global Symposium on Leadership and Project Management Team"
     northeastern:drs:college_of_professional_studies:media:
       name: "College of Professional Studies - Media Group"
     northeastern:drs:college_of_professional_studies:regulatory-affairs-chronicle_staff:
@@ -192,6 +198,8 @@ en:
       name: "Boston Research Center"
     northeastern:drs:library:communications:
       name: "University Library - Communications Office Staff"
+    northeastern:drs:library:critical-making-lab:
+      name: "University Library - Critical Making Lab"
     northeastern:drs:library:designfordiversity:
       name: "University Library - Design for Diversity"
     northeastern:drs:library:digital_production_services:
