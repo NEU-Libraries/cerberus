@@ -52,6 +52,6 @@ class WorksController < ApplicationController
       end
 
       # BlobCreator will make a fileset to contain the blob
-      AtlasRb::Blob.create(@work['id'], file.tempfile.path.presence || file.path)
+      AtlasRb::Blob.create(@work['id'], file.tempfile.path.presence || file.path, file.original_filename)
     end
 end
