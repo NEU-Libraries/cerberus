@@ -77,7 +77,7 @@ GEM
       securerandom (>= 0.3)
       tzinfo (~> 2.0, >= 2.0.5)
       uri (>= 0.13.1)
-    addressable (2.8.9)
+    addressable (2.9.0)
       public_suffix (>= 2.0.2, < 8.0)
     ast (2.4.3)
     atlas_rb (0.0.80)
@@ -88,7 +88,7 @@ GEM
       activerecord (>= 6.0.0, < 8.2)
     base64 (0.3.0)
     bcrypt (3.1.22)
-    bigdecimal (4.1.0)
+    bigdecimal (4.1.1)
     blacklight (8.12.3)
       globalid
       i18n (>= 1.7.0)
@@ -238,7 +238,7 @@ GEM
     marcel (1.1.0)
     matrix (0.4.3)
     mini_mime (1.1.5)
-    minitest (6.0.2)
+    minitest (6.0.3)
       drb (~> 2.0)
       prism (~> 1.5)
     mods (3.0.5)
@@ -262,7 +262,7 @@ GEM
       timeout
     net-smtp (0.5.1)
       net-protocol
-    next_rails (1.4.8)
+    next_rails (1.5.0)
       rainbow (>= 3)
     nio4r (2.7.5)
     nokogiri (1.19.2-x86_64-linux-gnu)
@@ -272,7 +272,7 @@ GEM
       nokogiri
     orm_adapter (0.5.0)
     ostruct (0.6.3)
-    parallel (1.27.0)
+    parallel (1.28.0)
     parser (3.3.11.1)
       ast (~> 2.4.1)
       racc
@@ -294,8 +294,8 @@ GEM
       nio4r (~> 2.0)
     raabro (1.4.0)
     racc (1.8.1)
-    rack (3.2.5)
-    rack-session (2.1.1)
+    rack (3.2.6)
+    rack-session (2.1.2)
       base64 (>= 0.1.0)
       rack (>= 3.0.0)
     rack-test (2.2.0)
@@ -345,7 +345,7 @@ GEM
       erb
       psych (>= 4.0.0)
       tsort
-    regexp_parser (2.11.3)
+    regexp_parser (2.12.0)
     reline (0.6.3)
       io-console (~> 0.5)
     responders (3.2.0)
