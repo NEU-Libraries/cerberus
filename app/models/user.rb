@@ -153,7 +153,7 @@ class User < ActiveRecord::Base
 
     user.reload
 
-    if user.employee_id.blank?
+    if user.employee_id.blank? && !auth.info.employee.blank?
       if(auth.info.employee.include?("faculty") || auth.info.employee.include?("staff"))
         Cerberus::Application::Queue.push(EmployeeCreateJob.new(auth.info.nuid, user.name))
       end
@@ -165,11 +165,13 @@ class User < ActiveRecord::Base
       user.save!
     end
 
-    if auth.info.employee.include?("faculty")
-      user.add_group("northeastern:drs:faculty")
-    end
-    if auth.info.employee.include?("staff")
-      user.add_group("northeastern:drs:staff")
+    if !auth.info.employee.blank?
+      if auth.info.employee.include?("faculty")
+        user.add_group("northeastern:drs:faculty")
+      end
+      if auth.info.employee.include?("staff")
+        user.add_group("northeastern:drs:staff")
+      end
     end
 
     user.add_group("northeastern:drs:all")
