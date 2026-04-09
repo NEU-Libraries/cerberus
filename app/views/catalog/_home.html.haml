@@ -47,10 +47,10 @@
       =render partial: 'shared/icon', locals: { class_string: t('drs.featured_content.communities.icon') }
       #{ t('drs.featured_content.communities.name') }
 
-    -# Need to find a canned query for this
-    %a.btn.btn-clear.btn-block{href: catalog_faculty_and_staff_path, data: {toggle: "tooltip"}, title: t('drs.featured_content.employees.description') }
-      =render partial: 'shared/icon', locals: { class_string: t('drs.featured_content.employees.icon') }
-      #{ t('drs.featured_content.employees.name') }
+    - if @not_a_bot
+      %a.btn.btn-clear.btn-block{href: catalog_faculty_and_staff_path, data: {toggle: "tooltip"}, title: t('drs.featured_content.employees.description') }
+        =render partial: 'shared/icon', locals: { class_string: t('drs.featured_content.employees.icon') }
+        #{ t('drs.featured_content.employees.name') }
   .span9
     - if !request.user_agent.blank?
       - if @recent_documents.length > 0

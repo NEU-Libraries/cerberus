@@ -12,6 +12,10 @@ module ApplicationHelper
       end
     end
 
+    if request.env['HTTP_ACCEPT_LANGUAGE'].blank?
+      return false
+    end
+
     return true
   end
 

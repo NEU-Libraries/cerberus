@@ -429,6 +429,13 @@ Rack::Attack.blocklist("china region block") do |req|
   end
 end
 
+# faculty_and_staff
+Rack::Attack.blocklist("fac staff protection") do |req|
+  if req.env["HTTP_ACCEPT_LANGUAGE"].blank? || req.env["HTTP_COOKIE"].blank?
+    req.fullpath.include?("/faculty_and_staff")
+  end
+end
+
 Rack::Attack.throttle("requests for pdf", limit: 2, period: 1) do |request|
   if `cut -d ' ' -f1 /proc/loadavg`.strip.to_f > 2
     if request.user_agent.blank? || !request.user_agent.downcase.include?("bot".downcase)
