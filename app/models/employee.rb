@@ -27,6 +27,7 @@ class Employee < ActiveFedora::Base
     solr_doc["#{Solrizer.solr_name("title_info_title", :stored_sortable)}"] = kramdown_parse(self.name)
     solr_doc["#{Solrizer.solr_name("title", :stored_sortable)}"] = kramdown_parse(self.name).downcase
     solr_doc["type_sim"] = I18n.t("drs.display_labels.#{self.class}.name")
+    solr_doc["#{Solrizer.solr_name("has_published", :stored_searchable)}"] = (ActiveFedora::SolrService.count("depositor_tesim:\"#{self.nuid}\"", :fq => "active_fedora_model_ssi:\"CoreFile\"") != 0).to_s
     return solr_doc
   end
 

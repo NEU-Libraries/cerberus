@@ -1147,6 +1147,13 @@ class CoreFilesController < ApplicationController
       core_file.save!
       core_file.reload
 
+      # Do defensive Employee lookup and reindex to populate has_published solr value
+      begin
+        Employee.find_by_nuid(current_user.nuid).update_index
+      rescue Exception => error
+        # We want to be able to safely navigate this lower order operation
+      end
+
       # Context derived attributes
       if file.original_filename.include? "."
         core_file.title = file.original_filename.split(".")[0]

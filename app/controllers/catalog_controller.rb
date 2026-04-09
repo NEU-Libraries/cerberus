@@ -476,7 +476,7 @@ class CatalogController < ApplicationController
   end
 
   def faculty_and_staff_filter(solr_parameters, user_parameters)
-    query = "active_fedora_model_ssi:\"Employee\""
+    query = "active_fedora_model_ssi:\"Employee\" AND has_published_tesim:\"true\""
     solr_parameters[:fq] ||= []
     solr_parameters[:fq] << query
   end
