@@ -1149,7 +1149,7 @@ class CoreFilesController < ApplicationController
 
       # Do defensive Employee lookup and reindex to populate has_published solr value
       begin
-        Employee.find_by_nuid(current_user.nuid).update_index
+        Employee.find_by_nuid(core_file.depositor).update_index
       rescue Exception => error
         # We want to be able to safely navigate this lower order operation
       end
