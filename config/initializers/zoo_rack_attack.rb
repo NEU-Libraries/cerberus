@@ -495,10 +495,36 @@ Rack::Attack.throttle('load shedding', limit: 1, period: 10) do |req|
   end
 end
 
+Rack::Attack.throttle("challenged", limit: 0, period: 60) do |req|
+  if req.user_agent.blank? || req.user_agent.downcase.include?("bot".downcase)
+    if req.env["HTTP_COOKIE"].blank? && req.fullpath.include?("fulltext.pdf")
+      if !(["lightspeed", "res.spectrum", "rcncustomer", "comcast", "fios.verizon"].any? { |x| req.host_lookup.include? x })
+        $redis.auth(ENV["REDIS_PASSWD"])
+        seen = $redis.zscore("rack_attack:unique_ips", req.ip)
+
+        # Always record the visit
+        now = Time.now
+        $redis.zadd("rack_attack:unique_ips", now.to_f, req.ip)
+        $redis.zremrangebyscore("rack_attack:unique_ips", "-inf", (now - 86_400).to_f)
+
+        # Challenge only if never seen
+        req.ip unless seen
+      end
+    end
+  end
+end
+
 THROTTLE_HTML = ActionView::Base.new.render(file: 'public/429.html')
 
 Rack::Attack.throttled_response = lambda do |env|
-  [503, {'Set-Cookie' => "_cerberus_app_session=#{Date.today.to_time.to_i}", 'Set-Cookie' => 'cerberus_throttled=true', 'Content-Type' => 'text/html', 'Cache-Control' => 'no-cache, no-store, max-age=0, must-revalidate', 'Pragma' => 'no-cache'}, [THROTTLE_HTML]]
+  view = ActionView::Base.new(ActionController::Base.view_paths, {})
+  view.assign(redirect_url: "#{Rails.application.routes.url_helpers.root_url.chomp('/')}#{env["ORIGINAL_FULLPATH"]}")
+
+  if req.env['rack.attack.matched'] == "challenged"
+    [418, {'Content-Type' => 'text/html', 'Cache-Control' => 'no-cache, no-store, max-age=0, must-revalidate', 'Pragma' => 'no-cache'}, [view.render(file: 'public/challenge.html.erb')]]
+  else
+    [503, {'Set-Cookie' => "_cerberus_app_session=#{Date.today.to_time.to_i}", 'Set-Cookie' => 'cerberus_throttled=true', 'Content-Type' => 'text/html', 'Cache-Control' => 'no-cache, no-store, max-age=0, must-revalidate', 'Pragma' => 'no-cache'}, [THROTTLE_HTML]]
+  end
 end
 
 Rack::Attack.blocklisted_response = lambda do |env|

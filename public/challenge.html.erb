@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head><title>Challenge Page</title></head>
+<body>
+<h1>Challenge Page</h1>
+<div class="container">
+<p>Please wait while we redirect your request to the resource.</p>
+<p>Please <a href="http://repository.library.northeastern.edu/users/auth/shibboleth">sign in</a> with your myNortheastern username and password if you're able.</p>
+<p>We apologize for any interruption to service. If you believe you are seeing this message in error, please contact <a href="mailto:Library-Repository-Team@neu.edu">DRS Staff</a>
+</p>
+</div>
+<script>
+  window.addEventListener("load", function() {
+    setTimeout(function() {
+      window.location.href = "<%= j @redirect_url %>";
+    }, 3000);
+  });
+</script>
+</body>
+</html>
