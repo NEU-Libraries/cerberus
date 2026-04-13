@@ -520,7 +520,7 @@ Rack::Attack.throttled_response = lambda do |env|
   view = ActionView::Base.new(ActionController::Base.view_paths, {})
   view.assign(redirect_url: "#{Rails.application.routes.url_helpers.root_url.chomp('/')}#{env["ORIGINAL_FULLPATH"]}")
 
-  if req.env['rack.attack.matched'] == "challenged"
+  if env['rack.attack.matched'] == "challenged"
     [418, {'Content-Type' => 'text/html', 'Cache-Control' => 'no-cache, no-store, max-age=0, must-revalidate', 'Pragma' => 'no-cache'}, [view.render(file: 'public/challenge.html.erb')]]
   else
     [503, {'Set-Cookie' => "_cerberus_app_session=#{Date.today.to_time.to_i}", 'Set-Cookie' => 'cerberus_throttled=true', 'Content-Type' => 'text/html', 'Cache-Control' => 'no-cache, no-store, max-age=0, must-revalidate', 'Pragma' => 'no-cache'}, [THROTTLE_HTML]]
