@@ -496,7 +496,7 @@ Rack::Attack.throttle('load shedding', limit: 1, period: 10) do |req|
 end
 
 Rack::Attack.throttle("challenged", limit: 0, period: 60) do |req|
-  if req.user_agent.blank? || req.user_agent.downcase.include?("bot".downcase)
+  if req.user_agent.blank? || !req.user_agent.downcase.include?("bot".downcase)
     if req.env["HTTP_COOKIE"].blank? && req.fullpath.include?("fulltext.pdf")
       if !(["lightspeed", "res.spectrum", "rcncustomer", "comcast", "fios.verizon"].any? { |x| req.host_lookup.include? x })
         $redis.auth(ENV["REDIS_PASSWD"])
