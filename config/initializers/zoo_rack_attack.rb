@@ -499,16 +499,18 @@ Rack::Attack.throttle("challenged", limit: 0, period: 60) do |req|
   if req.user_agent.blank? || !req.user_agent.downcase.include?("bot".downcase)
     if req.env["HTTP_COOKIE"].blank? && req.fullpath.include?("fulltext.pdf")
       if !(["lightspeed", "res.spectrum", "rcncustomer", "comcast", "fios.verizon"].any? { |x| req.host_lookup.include? x })
-        $redis.auth(ENV["REDIS_PASSWD"])
-        seen = $redis.zscore("rack_attack:unique_ips", req.ip)
+        if (req.asn != "22773") # Cox
+          $redis.auth(ENV["REDIS_PASSWD"])
+          seen = $redis.zscore("rack_attack:unique_ips", req.ip)
 
-        # Always record the visit
-        now = Time.now
-        $redis.zadd("rack_attack:unique_ips", now.to_f, req.ip)
-        $redis.zremrangebyscore("rack_attack:unique_ips", "-inf", (now - 86_400).to_f)
+          # Always record the visit
+          now = Time.now
+          $redis.zadd("rack_attack:unique_ips", now.to_f, req.ip)
+          $redis.zremrangebyscore("rack_attack:unique_ips", "-inf", (now - 86_400).to_f)
 
-        # Challenge only if never seen
-        req.ip unless seen
+          # Challenge only if never seen
+          req.ip unless seen
+        end
       end
     end
   end
