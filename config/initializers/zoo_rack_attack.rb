@@ -499,7 +499,7 @@ Rack::Attack.throttle("challenged", limit: 0, period: 60) do |req|
   if req.user_agent.blank? || !req.user_agent.downcase.include?("bot".downcase)
     if req.env["HTTP_COOKIE"].blank? && req.fullpath.include?("fulltext.pdf")
       if !(["lightspeed", "res.spectrum", "rcncustomer", "comcast", "fios.verizon"].any? { |x| req.host_lookup.include? x })
-        if (req.asn != "22773") # Cox
+        if !["22773", "7922", "701", "6079", "7843", "7018"].include?(req.asn) # Cox, Comcast, Fios, RCN, Charter, ATT
           $redis.auth(ENV["REDIS_PASSWD"])
           seen = $redis.zscore("rack_attack:unique_ips", req.ip)
 
