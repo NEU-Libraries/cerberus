@@ -1,20 +1,71 @@
 <!DOCTYPE html>
-<html>
-<head><title>Challenge Page</title></head>
-<body>
-<h1>Challenge Page</h1>
-<div class="container">
-<p>Please wait while we redirect your request to the resource.</p>
-<p>Please <a href="http://repository.library.northeastern.edu/users/auth/shibboleth">sign in</a> with your myNortheastern username and password if you're able.</p>
-<p>We apologize for any interruption to service. If you believe you are seeing this message in error, please contact <a href="mailto:Library-Repository-Team@neu.edu">DRS Staff</a>
-</p>
-</div>
-<script>
-  window.addEventListener("load", function() {
-    setTimeout(function() {
-      window.location.href = "<%= j @redirect_url %>";
-    }, 3000);
-  });
-</script>
-</body>
-</html>
+  <html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Challenge Page</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f5f5f5;
+        color: #333;
+        line-height: 1.6;
+      }
+      .container {
+        max-width: 528px;
+        margin: 1rem;
+        padding: 2.5rem 2rem;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        text-align: center;
+      }
+      h1 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: #222;
+      }
+      p { margin-bottom: 1rem; color: #555; }
+      p:last-of-type { margin-bottom: 0; }
+      a {
+        color: #c8102e;
+        text-decoration: none;
+        font-weight: 500;
+      }
+      a:hover { text-decoration: underline; }
+      .spinner {
+        width: 28px; height: 28px;
+        margin: 0 auto 1.25rem;
+        border: 3px solid #e0e0e0;
+        border-top-color: #c8102e;
+        border-radius: 50%;
+        animation: spin .8s linear infinite;
+      }
+      @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="spinner"></div>
+      <h1>Redirecting&hellip;</h1>
+      <br/><p>Please wait while we redirect your request to the resource.</p><br/>
+      <div style="text-align: left;">
+        <p>Please <a href="http://repository.library.northeastern.edu/users/auth/shibboleth">sign in</a> with your myNortheastern username and password if you're able.</p>
+        <p>We apologize for any interruption to service. If you believe you are seeing this message in error, please contact <a href="mailto:Library-Repository-Team@neu.edu">DRS Staff</a>.</p>
+      </div>
+    </div>
+    <script>
+      window.addEventListener("load", function() {
+        setTimeout(function() {
+          window.location.href = "<%= j @redirect_url %>";
+        }, 3000);
+      });
+    </script>
+  </body>
+  </html>
