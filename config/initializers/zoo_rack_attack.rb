@@ -33,6 +33,22 @@ class Rack::Attack::Request < ::Rack::Request
     @asn ||= `timeout -s 9 -k 1 6 dig @127.0.0.1 -p 5053 +short #{reverse_ip}.origin.asn.cymru.com TXT | head -n 1 | tr -d \\" | awk '{print $1;}'`.strip
   end
 
+  def dig
+    @dig ||= `timeout -s 9 -k 1 6 dig @127.0.0.1 -p 5053 +short #{reverse_ip}.origin.asn.cymru.com TXT | head -n 1 | tr -d \\"`.strip
+  end
+
+  def asn
+    if !dig.blank?
+      @asn ||= dig.split("|").first.to_s.strip
+    end
+  end
+
+  def rir
+    if !dig.blank?
+      @rir ||= dig.split("|")[3].to_s.strip
+    end
+  end
+
   def region
     @region ||= `geoiplookup #{remote_ip} | awk -F', ' '{print $2}'`.strip
   end
@@ -104,6 +120,13 @@ end
 # LevelAccess
 Rack::Attack.safelist("LevelAccess") do |req|
   !req.remote_ip.blank? && (["3.18.149.121", "3.139.228.222", "13.59.58.104", "3.128.157.239", "3.133.26.95", "3.139.225.14", "52.188.49.109", "20.63.69.102"].include?(req.remote_ip.strip))
+end
+
+Rack::Attack.blocklist("afrinic") do |req|
+  if req.rir == "afrinic"
+    File.write("#{Rails.root}/log/rir_block.log", "#{req.remote_ip} - #{req.fingerprint} - #{req.path} - #{Time.now}" + "\n", mode: 'a')
+  end
+  req.rir == "afrinic"
 end
 
 Rack::Attack.blocklist("Bot Wave") do |req|
@@ -495,22 +518,20 @@ Rack::Attack.throttle('load shedding', limit: 1, period: 10) do |req|
   end
 end
 
-Rack::Attack.throttle("challenged", limit: 0, period: 60) do |req|
+Rack::Attack.throttle("challenged", limit: 1, period: 10) do |req|
   if req.user_agent.blank? || !req.user_agent.downcase.include?("bot".downcase)
     if req.env["HTTP_COOKIE"].blank? && req.fullpath.include?("fulltext.pdf")
       if !(["lightspeed", "res.spectrum", "rcncustomer", "comcast", "fios.verizon"].any? { |x| req.host_lookup.include? x })
-        if !["22773", "7922", "701", "6079", "7843", "7018"].include?(req.asn) # Cox, Comcast, Fios, RCN, Charter, ATT
-          $redis.auth(ENV["REDIS_PASSWD"])
-          seen = $redis.zscore("rack_attack:unique_ips", req.ip)
+        $redis.auth(ENV["REDIS_PASSWD"])
+        seen = $redis.zscore("rack_attack:unique_ips", req.ip)
 
-          # Always record the visit
-          now = Time.now
-          $redis.zadd("rack_attack:unique_ips", now.to_f, req.ip)
-          $redis.zremrangebyscore("rack_attack:unique_ips", "-inf", (now - 86_400).to_f)
+        # Always record the visit
+        now = Time.now
+        $redis.zadd("rack_attack:unique_ips", now.to_f, req.ip)
+        $redis.zremrangebyscore("rack_attack:unique_ips", "-inf", (now - 86_400).to_f)
 
-          # Challenge only if never seen
-          req.ip unless seen
-        end
+        # Challenge only if never seen
+        req.ip unless seen
       end
     end
   end
