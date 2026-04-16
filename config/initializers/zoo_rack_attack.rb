@@ -519,17 +519,17 @@ Rack::Attack.throttle('load shedding', limit: 1, period: 10) do |req|
 end
 
 Rack::Attack.throttle("challenged", limit: 1, period: 10) do |req|
+  $redis.auth(ENV["REDIS_PASSWD"])
+  seen = $redis.zscore("rack_attack:unique_ips", req.ip)
+
+  # Always record the visit
+  now = Time.now
+  $redis.zadd("rack_attack:unique_ips", now.to_f, req.ip)
+  $redis.zremrangebyscore("rack_attack:unique_ips", "-inf", (now - 86_400).to_f) ; nil # avoid return contamination
+
   if req.user_agent.blank? || !req.user_agent.downcase.include?("bot".downcase)
     if req.env["HTTP_COOKIE"].blank? && req.fullpath.include?("fulltext.pdf")
       if !(["lightspeed", "res.spectrum", "rcncustomer", "comcast", "fios.verizon"].any? { |x| req.host_lookup.include? x })
-        $redis.auth(ENV["REDIS_PASSWD"])
-        seen = $redis.zscore("rack_attack:unique_ips", req.ip)
-
-        # Always record the visit
-        now = Time.now
-        $redis.zadd("rack_attack:unique_ips", now.to_f, req.ip)
-        $redis.zremrangebyscore("rack_attack:unique_ips", "-inf", (now - 86_400).to_f)
-
         # Challenge only if never seen
         request.fullpath unless seen
       end
