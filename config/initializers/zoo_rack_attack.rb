@@ -531,7 +531,7 @@ Rack::Attack.throttle("challenged", limit: 1, period: 10) do |req|
         $redis.zremrangebyscore("rack_attack:unique_ips", "-inf", (now - 86_400).to_f)
 
         # Challenge only if never seen
-        req.ip unless seen
+        request.fullpath unless seen
       end
     end
   end
