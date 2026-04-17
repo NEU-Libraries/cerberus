@@ -54,16 +54,12 @@ class Rack::Attack::Request < ::Rack::Request
   end
 
   def asn_org
-    @asn_org ||= AsnLookup.org(remote_ip).to_s
-  end
-
-  def asn_number
-    @asn_number ||= AsnLookup.asn(remote_ip).to_s
+    @asn_org ||= AsnLookup.org(asn).to_s
   end
 
   def suspect_org?
     return @suspect_org unless @suspect_org.nil?
-    @suspect_org = AsnLookup.suspect_org?(remote_ip)
+    @suspect_org = AsnLookup.suspect_asn?(asn)
   end
 end
 
@@ -71,7 +67,7 @@ Rack::Attack.cache.store = ActiveSupport::Cache::RedisStore.new(:password => ENV
 
 Rack::Attack.blocklist("suspect hosting/proxy ASN orgs") do |req|
   if req.suspect_org?
-    File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-suspect_org.log", "#{req.remote_ip} - #{req.asn_number} - #{req.asn_org} - #{req.path} - #{Time.now}" + "\n", mode: 'a')
+    File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-suspect_org.log", "#{req.remote_ip} - #{req.asn} - #{req.asn_org} - #{req.path} - #{Time.now}" + "\n", mode: 'a')
   end
   req.suspect_org?
 end

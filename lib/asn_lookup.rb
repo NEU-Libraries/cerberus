@@ -1,5 +1,5 @@
 require 'csv'
-require 'ipaddr'
+require 'set'
 
 class AsnLookup
   DEFAULT_PATH = File.join('/etc/cerberus/', 'GeoLite2-ASN-Blocks-IPv4.csv').freeze
@@ -23,90 +23,48 @@ class AsnLookup
   class << self
     def load!(path = DEFAULT_PATH)
       unless File.exist?(path)
-        Rails.logger.warn("[AsnLookup] file not found at #{path}; lookups will return [nil, nil]")
-        @blocks = []
-        @starts = []
-        return
+        Rails.logger.warn("[AsnLookup] file not found at #{path}; lookups will return nil/false")
+        @asn_to_org = nil
+        @suspect_asns = nil
+        return false
       end
 
-      rows = []
+      asn_to_org = {}
       CSV.foreach(path, :headers => true) do |r|
-        net = IPAddr.new(r['network'])
-        rows << [
-          net.to_range.first.to_i,
-          net.to_range.last.to_i,
-          r['autonomous_system_number'].to_s,
-          r['autonomous_system_organization'].to_s
-        ]
+        asn = r['autonomous_system_number'].to_s
+        next if asn.empty? || asn_to_org.key?(asn)
+        asn_to_org[asn] = r['autonomous_system_organization'].to_s
       end
-      rows.sort_by! { |row| row[0] }
-      @blocks = rows
-      @starts = rows.map { |row| row[0] }
-      Rails.logger.info("[AsnLookup] loaded #{@blocks.length} ASN blocks from #{path}")
+
+      suspect_asns = Set.new
+      asn_to_org.each do |asn, org|
+        lc = org.downcase
+        suspect_asns << asn if SUSPECT_ORG_PATTERNS.any? { |pat| lc.include?(pat) }
+      end
+
+      @asn_to_org = asn_to_org.freeze
+      @suspect_asns = suspect_asns.freeze
+      Rails.logger.info("[AsnLookup] loaded #{@asn_to_org.size} ASN->org entries (#{@suspect_asns.size} suspect) from #{path}")
       true
     rescue => e
       Rails.logger.error("[AsnLookup] load failed: #{e.class} #{e.message}")
-      @blocks = []
-      @starts = []
+      @asn_to_org = nil
+      @suspect_asns = nil
       false
     end
 
     def loaded?
-      !@blocks.nil?
+      !@asn_to_org.nil?
     end
 
-    def lookup(ip)
-      return [nil, nil] if ip.nil? || ip.to_s.empty?
-      return [nil, nil] unless loaded? && !@blocks.empty?
-
-      n = ip_to_int(ip)
-      return [nil, nil] if n.nil?
-
-      i = bsearch_index(n)
-      return [nil, nil] if i.nil?
-
-      row = @blocks[i]
-      return [nil, nil] unless n >= row[0] && n <= row[1]
-      [row[2], row[3]]
+    def org(asn)
+      return nil unless loaded?
+      @asn_to_org[asn.to_s]
     end
 
-    def asn(ip)
-      lookup(ip)[0]
-    end
-
-    def org(ip)
-      lookup(ip)[1]
-    end
-
-    def suspect_org?(ip)
-      o = org(ip)
-      return false if o.nil? || o.empty?
-      lc = o.downcase
-      SUSPECT_ORG_PATTERNS.any? { |pat| lc.include?(pat) }
-    end
-
-    private
-
-    def ip_to_int(ip)
-      IPAddr.new(ip.to_s).to_i
-    rescue IPAddr::Error, ArgumentError
-      nil
-    end
-
-    def bsearch_index(n)
-      lo = 0
-      hi = @starts.length - 1
-      result = nil
-      while lo <= hi
-        mid = (lo + hi) / 2
-        if @starts[mid] <= n
-          result = mid
-          lo = mid + 1
-        else
-          hi = mid - 1
-        end
-      end
-      result
+    def suspect_asn?(asn)
+      return false unless loaded?
+      @suspect_asns.include?(asn.to_s)
     end
   end
 end
