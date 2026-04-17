@@ -29,10 +29,6 @@ class Rack::Attack::Request < ::Rack::Request
     @reverse_ip ||= IPAddr.new(remote_ip).send("_reverse")
   end
 
-  def asn
-    @asn ||= `timeout -s 9 -k 1 6 dig @127.0.0.1 -p 5053 +short #{reverse_ip}.origin.asn.cymru.com TXT | head -n 1 | tr -d \\" | awk '{print $1;}'`.strip
-  end
-
   def dig
     @dig ||= `timeout -s 9 -k 1 6 dig @127.0.0.1 -p 5053 +short #{reverse_ip}.origin.asn.cymru.com TXT | head -n 1 | tr -d \\"`.strip
   end
@@ -56,9 +52,26 @@ class Rack::Attack::Request < ::Rack::Request
   def original_method
     @original_method ||= env["rack.methodoverride.original_method"] || env['REQUEST_METHOD']
   end
+
+  def asn_org
+    @asn_org ||= AsnLookup.org(remote_ip).to_s
+  end
+
+  def asn_number
+    @asn_number ||= AsnLookup.asn(remote_ip).to_s
+  end
+
+  def suspect_org?
+    return @suspect_org unless @suspect_org.nil?
+    @suspect_org = AsnLookup.suspect_org?(remote_ip)
+  end
 end
 
 Rack::Attack.cache.store = ActiveSupport::Cache::RedisStore.new(:password => ENV["REDIS_PASSWD"], :host => 'nb9667.neu.edu', :port => 6379, :timeout => 10)
+
+Rack::Attack.blocklist("suspect hosting/proxy ASN orgs") do |req|
+  req.suspect_org?
+end
 
 Rack::Attack.safelist("passenger localhost prestart") do |req|
   !req.remote_ip.blank? && (req.remote_ip.strip == "127.0.0.1")
@@ -331,10 +344,8 @@ end
 
 Rack::Attack.blocklist("CN Block") do |req|
   if `cut -d ' ' -f1 /proc/loadavg`.strip.to_f > 1
-    if !req.env["HTTP_ACCEPT_LANGUAGE"].blank?
-      if (req.region != "United States")
-        req.env["HTTP_ACCEPT_LANGUAGE"].include?("zh-CN")
-      end
+    if (req.region != "United States")
+      req.env["HTTP_ACCEPT_LANGUAGE"].include?("zh-CN")
     end
   end
 end
