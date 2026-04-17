@@ -70,6 +70,9 @@ end
 Rack::Attack.cache.store = ActiveSupport::Cache::RedisStore.new(:password => ENV["REDIS_PASSWD"], :host => 'nb9667.neu.edu', :port => 6379, :timeout => 10)
 
 Rack::Attack.blocklist("suspect hosting/proxy ASN orgs") do |req|
+  if req.suspect_org?
+    File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-suspect_org.log", "#{req.remote_ip} - #{req.asn_number} - #{req.asn_org} - #{req.path} - #{Time.now}" + "\n", mode: 'a')
+  end
   req.suspect_org?
 end
 
@@ -137,7 +140,7 @@ end
 
 Rack::Attack.blocklist("afrinic") do |req|
   if req.rir == "afrinic"
-    File.write("#{Rails.root}/log/rir_block.log", "#{req.remote_ip} - #{req.fingerprint} - #{req.path} - #{Time.now}" + "\n", mode: 'a')
+    File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-rir_block.log", "#{req.remote_ip} - #{req.asn} - #{req.fingerprint} - #{req.path} - #{Time.now}" + "\n", mode: 'a')
   end
   req.rir == "afrinic"
 end
@@ -540,10 +543,8 @@ Rack::Attack.throttle("challenged", limit: 1, period: 10) do |req|
 
   if req.user_agent.blank? || !req.user_agent.downcase.include?("bot".downcase)
     if req.env["HTTP_COOKIE"].blank? && req.fullpath.include?("fulltext.pdf")
-      if !(["lightspeed", "res.spectrum", "rcncustomer", "comcast", "fios.verizon"].any? { |x| req.host_lookup.include? x })
-        # Challenge only if never seen
-        req.fullpath unless seen
-      end
+      # Challenge only if never seen
+      req.fullpath unless seen
     end
   end
 end
