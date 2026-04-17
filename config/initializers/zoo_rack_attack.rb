@@ -531,7 +531,7 @@ Rack::Attack.throttle("challenged", limit: 1, period: 10) do |req|
     if req.env["HTTP_COOKIE"].blank? && req.fullpath.include?("fulltext.pdf")
       if !(["lightspeed", "res.spectrum", "rcncustomer", "comcast", "fios.verizon"].any? { |x| req.host_lookup.include? x })
         # Challenge only if never seen
-        request.fullpath unless seen
+        req.fullpath unless seen
       end
     end
   end
