@@ -2,7 +2,7 @@ require 'csv'
 require 'ipaddr'
 
 class AsnLookup
-  DEFAULT_PATH = File.join(Rails.root, 'db', 'GeoLite2-ASN-Blocks-IPv4.csv').freeze
+  DEFAULT_PATH = File.join('/etc/cerberus/', 'GeoLite2-ASN-Blocks-IPv4.csv').freeze
 
   SUSPECT_ORG_PATTERNS = %w[
     hosting colocation datacenter
