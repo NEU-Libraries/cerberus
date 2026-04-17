@@ -499,9 +499,9 @@ end
 # Throttle attempts for a given octet to 1 reqs/10 seconds
 Rack::Attack.throttle('load shedding', limit: 1, period: 10) do |req|
   # if cpu usage is approaching 4 on the 5 min avg...
-  if `cut -d ' ' -f2 /proc/loadavg`.strip.to_f > 3.25
+  if `cut -d ' ' -f2 /proc/loadavg`.strip.to_f > 2
     if !req.remote_ip.blank?
-      if `cut -d ' ' -f2 /proc/loadavg`.strip.to_f > 3.85
+      if `cut -d ' ' -f2 /proc/loadavg`.strip.to_f > 3
         # everyone out of the boat, no exceptions
         # log to file
         File.write("#{Rails.root}/log/heavy_load_shedding.log", "#{req.remote_ip} - #{req.fingerprint} - #{req.path} - #{Time.now}" + "\n", mode: 'a')
