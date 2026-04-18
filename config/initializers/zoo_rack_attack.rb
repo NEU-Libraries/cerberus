@@ -528,7 +528,7 @@ Rack::Attack.throttle('load shedding', limit: 1, period: 10) do |req|
   end
 end
 
-Rack::Attack.throttle("challenged", limit: 1, period: 10) do |req|
+Rack::Attack.throttle("challenged", limit: 0, period: 60) do |req|
   $redis.auth(ENV["REDIS_PASSWD"])
   seen = $redis.zscore("rack_attack:unique_ips", req.ip)
 
@@ -540,7 +540,7 @@ Rack::Attack.throttle("challenged", limit: 1, period: 10) do |req|
   if req.user_agent.blank? || !req.user_agent.downcase.include?("bot".downcase)
     if req.env["HTTP_COOKIE"].blank? && req.fullpath.include?("fulltext.pdf")
       # Challenge only if never seen
-      req.fullpath unless seen
+      req.remote_ip unless seen
     end
   end
 end
