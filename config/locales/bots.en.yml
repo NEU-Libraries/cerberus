@@ -18,3 +18,5 @@ en:
     - linkcheck
     - inspectiontool
     - lighthouse
+    - levelaccess
+    - auto
