@@ -72,6 +72,10 @@ Rack::Attack.blocklist("suspect hosting/proxy ASN orgs") do |req|
   req.suspect_org?
 end
 
+Rack::Attack.blocklist("asn mismatch") do |req|
+  req.asn == "22773" && !req.asn_org.include?("Cox")
+end
+
 Rack::Attack.safelist("passenger localhost prestart") do |req|
   !req.remote_ip.blank? && (req.remote_ip.strip == "127.0.0.1")
 end
@@ -495,9 +499,9 @@ end
 # Throttle attempts for a given octet to 1 reqs/10 seconds
 Rack::Attack.throttle('load shedding', limit: 1, period: 10) do |req|
   # if cpu usage is approaching 4 on the 5 min avg...
-  if `cut -d ' ' -f2 /proc/loadavg`.strip.to_f > 2
+  if `cut -d ' ' -f2 /proc/loadavg`.strip.to_f > 3
     if !req.remote_ip.blank?
-      if `cut -d ' ' -f2 /proc/loadavg`.strip.to_f > 3
+      if `cut -d ' ' -f2 /proc/loadavg`.strip.to_f > 3.5
         # everyone out of the boat, no exceptions
         # log to file
         File.write("#{Rails.root}/log/heavy_load_shedding.log", "#{req.remote_ip} - #{req.fingerprint} - #{req.path} - #{Time.now}" + "\n", mode: 'a')
@@ -539,10 +543,20 @@ Rack::Attack.throttle("challenged", limit: 0, period: 60) do |req|
 
   if req.user_agent.blank? || !req.user_agent.downcase.include?("bot".downcase)
     if req.env["HTTP_COOKIE"].blank? && req.fullpath.include?("fulltext.pdf")
-      # Challenge only if never seen
-      req.remote_ip unless seen
+      if !seen
+        File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-challenge.log", "#{req.remote_ip} - #{req.asn} - #{req.asn_org} - #{req.path} - #{req.fingerprint} - #{Time.now}" + "\n", mode: 'a')
+      end
     end
   end
+
+  nil # Turning off the challenge page for now
+
+  # if req.user_agent.blank? || !req.user_agent.downcase.include?("bot".downcase)
+  #   if req.env["HTTP_COOKIE"].blank? && req.fullpath.include?("fulltext.pdf")
+  #     # Challenge only if never seen
+  #     req.remote_ip unless seen
+  #   end
+  # end
 end
 
 THROTTLE_HTML = ActionView::Base.new.render(file: 'public/429.html')

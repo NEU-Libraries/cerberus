@@ -5,7 +5,7 @@ class AsnLookup
   DEFAULT_PATH = File.join('/etc/cerberus/', 'GeoLite2-ASN-Blocks-IPv4.csv').freeze
 
   SUSPECT_ORG_PATTERNS = %w[
-    hosting colocation datacenter
+    hosting colocation datacenter chiron
     onecable zenlayer psychz contabo leaseweb hetzner vultr
     digitalocean linode scaleway netcup hostwinds m247 choopa quadranet
     hostroyale servermania server\ mania vividhosting vivid-hosting
