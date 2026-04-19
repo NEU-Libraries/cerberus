@@ -1,6 +1,8 @@
 Cerberus::Application.routes.draw do
   root :to => "catalog#index"
 
+  post '/challenge/verify' => 'challenge#verify', as: :challenge_verify
+
   Blacklight.add_routes(self)
   HydraHead.add_routes(self)
   # Hydra::BatchEdit.add_routes(self)

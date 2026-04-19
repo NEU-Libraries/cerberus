@@ -80,6 +80,10 @@ Rack::Attack.safelist("passenger localhost prestart") do |req|
   !req.remote_ip.blank? && (req.remote_ip.strip == "127.0.0.1")
 end
 
+Rack::Attack.safelist("challenge verify endpoint") do |req|
+  req.path == "/challenge/verify"
+end
+
 Rack::Attack.safelist("129 range") do |request|
   IPAddr.new("129.10.0.0/16").include?(request.remote_ip)
 end
@@ -549,7 +553,8 @@ Rack::Attack.throttle("challenged", limit: 0, period: 60) do |req|
     end
   end
 
-  nil # Turning off the challenge page for now
+  # nil # Turning off the challenge page for now
+  req.remote_ip if req.params["force_challenge"] == "rxJHCzX5"
 
   # if req.user_agent.blank? || !req.user_agent.downcase.include?("bot".downcase)
   #   if req.env["HTTP_COOKIE"].blank? && req.fullpath.include?("fulltext.pdf")
@@ -569,7 +574,7 @@ Rack::Attack.throttled_response = lambda do |env|
     uri.query = URI.encode_www_form(params)
 
     view = ActionView::Base.new(ActionController::Base.view_paths, {})
-    view.assign(redirect_url: uri.to_s)
+    view.assign(redirect_url: uri.to_s, site_key: ENV["TURNSTILE_SITE_KEY"])
 
     [418, {'Content-Type' => 'text/html', 'Cache-Control' => 'no-cache, no-store, max-age=0, must-revalidate', 'Pragma' => 'no-cache'}, [view.render(file: 'public/challenge.html.erb')]]
   else
