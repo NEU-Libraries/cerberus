@@ -1,8 +1,8 @@
-require 'csv'
+require 'json'
 require 'set'
 
 class AsnLookup
-  DEFAULT_PATH = File.join('/etc/cerberus/', 'GeoLite2-ASN-Blocks-IPv4.csv').freeze
+  DEFAULT_PATH = File.join('/etc/cerberus/', 'GeoLite2-ASN-Blocks-IPv4.json').freeze
 
   SUSPECT_ORG_PATTERNS = %w[
     hosting colocation datacenter chiron
@@ -29,12 +29,7 @@ class AsnLookup
         return false
       end
 
-      asn_to_org = {}
-      CSV.foreach(path, :headers => true) do |r|
-        asn = r['autonomous_system_number'].to_s
-        next if asn.empty? || asn_to_org.key?(asn)
-        asn_to_org[asn] = r['autonomous_system_organization'].to_s
-      end
+      asn_to_org = JSON.parse(File.binread(path))
 
       suspect_asns = Set.new
       asn_to_org.each do |asn, org|

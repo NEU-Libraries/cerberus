@@ -3,7 +3,7 @@ class ChallengeController < ApplicationController
   layout false
 
   def verify
-    token  = params[:cf_turnstile_response].to_s
+    token  = params["cf-turnstile-response"].to_s
     target = sanitize_target(params[:redirect_url].to_s)
 
     if token.empty?
