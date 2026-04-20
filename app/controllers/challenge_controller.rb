@@ -18,7 +18,7 @@ class ChallengeController < ApplicationController
     result = Cerberus::TurnstileVerifier.verify(token, request.remote_ip)
 
     if result.success?
-      Rails.logger.info("[turnstile] pass ip=#{request.remote_ip} target=#{target}")
+      Rails.logger.warn("[turnstile] pass ip=#{request.remote_ip} target=#{target}")
       redirect_to(target, status: 302)
     else
       Rails.logger.warn("[turnstile] fail ip=#{request.remote_ip} codes=#{result.error_codes.inspect} soft_fail=#{result.soft_fail}")

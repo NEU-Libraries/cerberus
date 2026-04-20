@@ -39,7 +39,7 @@ class AsnLookup
 
       @asn_to_org = asn_to_org.freeze
       @suspect_asns = suspect_asns.freeze
-      Rails.logger.info("[AsnLookup] loaded #{@asn_to_org.size} ASN->org entries (#{@suspect_asns.size} suspect) from #{path}")
+      Rails.logger.warn("[AsnLookup] loaded #{@asn_to_org.size} ASN->org entries (#{@suspect_asns.size} suspect) from #{path}")
       true
     rescue => e
       Rails.logger.error("[AsnLookup] load failed: #{e.class} #{e.message}")

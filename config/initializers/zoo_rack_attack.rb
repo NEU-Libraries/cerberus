@@ -550,18 +550,11 @@ Rack::Attack.throttle("challenged", limit: 0, period: 60) do |req|
       if !seen
         File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-challenge.log", "#{req.remote_ip} - #{req.asn} - #{req.asn_org} - #{req.path} - #{req.fingerprint} - #{Time.now}" + "\n", mode: 'a')
       end
+
+      # Challenge only if never seen
+      req.remote_ip unless seen
     end
   end
-
-  # nil # Turning off the challenge page for now
-  req.remote_ip if req.params["force_challenge"] == "rxJHCzX5"
-
-  # if req.user_agent.blank? || !req.user_agent.downcase.include?("bot".downcase)
-  #   if req.env["HTTP_COOKIE"].blank? && req.fullpath.include?("fulltext.pdf")
-  #     # Challenge only if never seen
-  #     req.remote_ip unless seen
-  #   end
-  # end
 end
 
 THROTTLE_HTML = ActionView::Base.new.render(file: 'public/429.html')
