@@ -570,8 +570,7 @@ Rack::Attack.throttled_response = lambda do |env|
   if env['rack.attack.matched'] == "challenged"
     u = "#{Rails.application.routes.url_helpers.root_url.chomp('/')}#{env["ORIGINAL_FULLPATH"]}"
     uri = URI(u)
-    params = URI.decode_www_form(uri.query || "") << ["redirect", "js"]
-    uri.query = URI.encode_www_form(params)
+    uri.query = "challenged=true"
 
     view = ActionView::Base.new(ActionController::Base.view_paths, {})
     view.assign(redirect_url: uri.to_s, site_key: ENV["TURNSTILE_SITE_KEY"])
