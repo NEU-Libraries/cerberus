@@ -24,6 +24,7 @@ namespace :reset do
                              'thumbnail' => ThumbnailCreator.call(path: '/home/cerberus/web/spec/fixtures/files/rainbow.jpg'),
                              'permissions' => { 'read' => ['public'] }
                            })
+    AtlasRb::Blob.create(work['id'], '/home/cerberus/web/spec/fixtures/files/rainbow.jpg', 'rainbow.jpg')
   end
 
   desc 'Clean solr and dbs'
