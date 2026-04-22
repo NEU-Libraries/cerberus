@@ -1,6 +1,10 @@
 - content_for(:container_header) do
-  = render 'shared/breadcrumbs'
-  -# = breadcrumbs
+  = render 'shared/breadcrumbs' do
+    - if @files.present?
+      %li.ms-auto.d-flex.align-items-center
+        = link_to '#downloads', class: 'btn btn-sm btn-outline-dark' do
+          = "Downloads (#{@files.size})"
+          %span.fa-solid.fa-arrow-down.ms-1{'aria-hidden' => true}
 
 .container
   .clearfix.pt-1
@@ -12,15 +16,7 @@
 
 .clearfix.mb-4
 
--# - @work.children.each do |c|
--#   = "#{c.type} - #{c.children.count}"
--#   %ul
--#     - c.children.each do |b|
--#       %li
--#         = b.file_identifiers.inspect
--#   %br
-
--# %br
-
--# %pre
--#   = JSON.pretty_generate(JSON.parse(@work.mods.to_json))
+.container
+  .row
+    .col-md-12
+      = render partial: 'downloads', locals: { files: @files }
