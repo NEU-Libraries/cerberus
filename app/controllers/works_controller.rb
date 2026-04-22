@@ -10,6 +10,7 @@ class WorksController < ApplicationController
   def show
     @work = AtlasRb::Work.find(params[:id])
     @mods = AtlasRb::Work.mods(params[:id], 'html')
+    @files = AtlasRb::Work.files(params[:id])
     breadcrumbs(params[:id])
   end
 
