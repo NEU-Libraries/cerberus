@@ -29,6 +29,8 @@ Rails.application.routes.draw do
   resources :works
   resources :loads, only: [:index, :show, :new, :create, :destroy]
 
+  get '/downloads/:id', to: 'downloads#show', as: :download
+
   # xml
   get '/xml/editor/:id' => 'xml#editor', as: 'xml_editor'
   put '/xml/validate' => 'xml#validate'
