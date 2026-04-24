@@ -8,12 +8,9 @@
       %li.list-group-item.d-flex.align-items-center
         %span.fa-regular{class: file_type_icon(file['mime_type']), 'aria-hidden' => true}
         .ms-3.flex-grow-1
-          .fw-semibold= file['original_filename']
-          %small.text-muted
-            = file['label']
-            - if file['size']
-              &middot;
-              = number_to_human_size(file['size'])
-        = link_to '#', class: 'btn btn-outline-primary btn-sm ms-3', 'aria-label' => "Download #{file['original_filename']}" do
+          .fw-semibold= file['label']
+          - if file['size']
+            %small.text-muted= number_to_human_size(file['size'])
+        = link_to download_path(file['noid']), class: 'btn btn-outline-primary btn-sm ms-3', 'aria-label' => "Download #{file['label']}" do
           %span.fa-solid.fa-download{'aria-hidden' => true}
           %span.ms-1 Download
