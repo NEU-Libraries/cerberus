@@ -11,6 +11,6 @@
           .fw-semibold= file['label']
           - if file['size']
             %small.text-muted= number_to_human_size(file['size'])
-        = link_to download_path(file['noid']), class: 'btn btn-outline-primary btn-sm ms-3', 'aria-label' => "Download #{file['label']}" do
+        = link_to download_path(file['noid']), class: 'btn btn-outline-primary btn-sm ms-3', 'aria-label' => "Download #{file['label']}", data: { turbo: false } do
           %span.fa-solid.fa-download{'aria-hidden' => true}
           %span.ms-1 Download
