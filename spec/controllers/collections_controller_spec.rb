@@ -4,7 +4,7 @@ require 'rails_helper'
 
 describe CollectionsController do
   let(:community) { AtlasRb::Community.create(nil, '/home/cerberus/web/spec/fixtures/files/community-mods.xml') }
-  let(:collection) { AtlasRb::Collection.create(community['id'], '/home/cerberus/web/spec/fixtures/files/collection-mods.xml') }
+  let(:collection) { AtlasRb::Collection.create(community.id, '/home/cerberus/web/spec/fixtures/files/collection-mods.xml') }
 
   describe 'edit' do
     render_views
@@ -12,14 +12,14 @@ describe CollectionsController do
     let(:user) { User.new(email: 'test@example.com', password: 'password', groups: ['editors']) }
 
     before do
-      AtlasRb::Collection.metadata(collection['id'], { 'permissions' => { 'edit' => ['editors'] } })
+      AtlasRb::Collection.metadata(collection.id, { 'permissions' => { 'edit' => ['editors'] } })
       sign_in user
     end
 
     it 'renders the edit partial' do
-      get :edit, params: { id: collection['id'] }
+      get :edit, params: { id: collection.id }
       expect(response).to render_template('collections/edit')
-      expect(CGI.unescapeHTML(response.body)).to include(collection['title'])
+      expect(CGI.unescapeHTML(response.body)).to include(collection.title)
     end
   end
 
@@ -27,13 +27,13 @@ describe CollectionsController do
     render_views
 
     before do
-      AtlasRb::Collection.metadata(collection['id'], { 'permissions' => { 'read' => ['public'] } })
+      AtlasRb::Collection.metadata(collection.id, { 'permissions' => { 'read' => ['public'] } })
     end
 
     it 'renders the show partial' do
-      get :show, params: { id: collection['id'] }
+      get :show, params: { id: collection.id }
       expect(response).to render_template('collections/show')
-      expect(CGI.unescapeHTML(response.body)).to include(collection['title'])
+      expect(CGI.unescapeHTML(response.body)).to include(collection.title)
     end
   end
 

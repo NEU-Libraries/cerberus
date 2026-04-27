@@ -4,29 +4,29 @@ require 'rails_helper'
 
 describe WorksController do
   let(:community) { AtlasRb::Community.create(nil, '/home/cerberus/web/spec/fixtures/files/community-mods.xml') }
-  let(:collection) { AtlasRb::Collection.create(community['id'], '/home/cerberus/web/spec/fixtures/files/collection-mods.xml') }
-  let(:work) { AtlasRb::Work.create(collection['id'], '/home/cerberus/web/spec/fixtures/files/work-mods.xml') }
+  let(:collection) { AtlasRb::Collection.create(community.id, '/home/cerberus/web/spec/fixtures/files/collection-mods.xml') }
+  let(:work) { AtlasRb::Work.create(collection.id, '/home/cerberus/web/spec/fixtures/files/work-mods.xml') }
 
   describe 'show' do
     render_views
 
     before do
-      AtlasRb::Work.metadata(work['id'], { 'permissions' => { 'read' => ['public'] } })
+      AtlasRb::Work.metadata(work.id, { 'permissions' => { 'read' => ['public'] } })
     end
 
     it 'renders the show partial' do
-      expect(work['title']).to eq("What's New - How We Respond to Disaster, Episode 1")
+      expect(work.title).to eq("What's New - How We Respond to Disaster, Episode 1")
 
-      get :show, params: { id: work['id'] }
+      get :show, params: { id: work.id }
       expect(response).to render_template('works/show')
-      expect(CGI.unescapeHTML(response.body)).to include(work['title'])
+      expect(CGI.unescapeHTML(response.body)).to include(work.title)
     end
   end
 
   describe 'create' do
     it 'uploads a binary and makes a Work' do
-      post :create, params: { binary: fixture_file_upload('image.png', 'image/png'), parent_id: collection['id'] }
-      expect(subject).to redirect_to action: :show, id: assigns(:work)['id']
+      post :create, params: { binary: fixture_file_upload('image.png', 'image/png'), parent_id: collection.id }
+      expect(subject).to redirect_to action: :show, id: assigns(:work).id
     end
   end
 
@@ -43,14 +43,14 @@ describe WorksController do
     let(:user) { User.new(email: 'test@example.com', password: 'password', groups: ['editors']) }
 
     before do
-      AtlasRb::Work.metadata(work['id'], { 'permissions' => { 'edit' => ['editors'] } })
+      AtlasRb::Work.metadata(work.id, { 'permissions' => { 'edit' => ['editors'] } })
       sign_in user
     end
 
     it 'renders the edit partial' do
-      get :edit, params: { id: work['id'] }
+      get :edit, params: { id: work.id }
       expect(response).to render_template('works/edit')
-      expect(CGI.unescapeHTML(response.body)).to include(work['title'])
+      expect(CGI.unescapeHTML(response.body)).to include(work.title)
     end
   end
 end
