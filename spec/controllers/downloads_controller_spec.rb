@@ -16,7 +16,7 @@ describe DownloadsController do
     context 'with public read permission' do
       before do
         allow(AtlasRb::Resource).to receive(:permissions).with(noid).and_return(
-          'embargo' => '', 'depositor' => [], 'read' => ['public'], 'edit' => []
+          AtlasRb::Mash.new('embargo' => '', 'depositor' => [], 'read' => ['public'], 'edit' => [])
         )
       end
 
@@ -35,7 +35,7 @@ describe DownloadsController do
     context 'without read permission' do
       before do
         allow(AtlasRb::Resource).to receive(:permissions).with(noid).and_return(
-          'embargo' => '', 'depositor' => [], 'read' => ['private-group'], 'edit' => []
+          AtlasRb::Mash.new('embargo' => '', 'depositor' => [], 'read' => ['private-group'], 'edit' => [])
         )
       end
 

@@ -9,7 +9,7 @@ class CollectionsController < CatalogController
 
   def show
     @collection = AtlasRb::Collection.find(params[:id])
-    @response = find_children(@collection['valkyrie_id'])
+    @response = find_children(@collection.valkyrie_id)
     breadcrumbs(params[:id])
   end
 
@@ -25,8 +25,8 @@ class CollectionsController < CatalogController
   def create
     permitted = params.expect(collection: [:title, :description]).to_h
     c = AtlasRb::Collection.create(params[:parent_id])
-    AtlasRb::Collection.metadata(c['id'], permitted)
-    redirect_to collection_path(c['id'])
+    AtlasRb::Collection.metadata(c.id, permitted)
+    redirect_to collection_path(c.id)
   end
 
   def update

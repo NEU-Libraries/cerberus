@@ -4,18 +4,18 @@
 
   .container.p-4.my-3.well.rounded-3
     .row
-      = render partial: "shared/thumbnail", locals: {uuid: @collection["thumbnail"]} if !@collection["thumbnail"].blank?
+      = render partial: "shared/thumbnail", locals: {uuid: @collection.thumbnail} if !@collection.thumbnail.blank?
       .col
         %h3.d-inline
-          = @collection["title"]
+          = @collection.title
         %h5.d-inline.text-black-50
           %span.fa-solid.fa-folder-open.ps-2.pe-1
           Collection
         .clearfix.pt-3
-        = @collection["description"]
+        = @collection.description
         .clearfix.pt-3
           .float-end
-            = link_to "Edit", edit_collection_path(@collection["id"]), class: "px-3"
+            = link_to "Edit", edit_collection_path(@collection.id), class: "px-3"
             = link_to "Delete", "#", class: "px-3"
 
 - content_for(:sidebar) do

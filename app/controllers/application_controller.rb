@@ -17,11 +17,11 @@ class ApplicationController < ActionController::Base
 
   def breadcrumbs(id)
     result = AtlasRb::Resource.find(id)
-    item = result['resource']
-    item['ancestors'].each do |ancestor_id, ancestor_klass|
+    item = result.resource
+    item.ancestors.each do |ancestor_id, ancestor_klass|
       add_breadcrumb_for(ancestor_id, ancestor_klass)
     end
-    add_breadcrumb_for(item['id'], result['klass'])
+    add_breadcrumb_for(item.id, result.klass)
   end
 
   def pretty_group(raw_group)
@@ -35,7 +35,7 @@ class ApplicationController < ActionController::Base
   private # ---------------------------------------------------------
 
     def add_breadcrumb_for(resource_id, klass)
-      title = AtlasRb.const_get(klass).find(resource_id)['title']
+      title = AtlasRb.const_get(klass).find(resource_id).title
       path  = public_send("#{klass.downcase}_path", resource_id)
       breadcrumb(title, path)
     end

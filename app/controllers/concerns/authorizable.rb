@@ -24,8 +24,8 @@ module Authorizable
 
     def solr_doc_from_permissions(permissions)
       SolrDocument.new(
-        'read_access_group_ssim' => permissions['read'],
-        'edit_access_group_ssim' => permissions['edit']
+        'read_access_group_ssim' => permissions.read,
+        'edit_access_group_ssim' => permissions.edit
       )
     end
 end

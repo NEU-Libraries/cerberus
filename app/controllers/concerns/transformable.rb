@@ -4,7 +4,7 @@ module Transformable
   extend ActiveSupport::Concern
 
   def pretty_resource_permissions(perms)
-    perms['read']&.delete('public')
+    perms.read&.delete('public')
     perms.slice('read', 'edit').flat_map do |key, values|
       permission = key == 'read' ? 'View' : 'Manage'
       values.map { |value| [value, pretty_group(value), permission] }
@@ -30,9 +30,9 @@ module Transformable
 
   def form_preparation(raw_permissions)
     @groups = pretty_user_permissions(current_user&.groups)
-    @public = raw_permissions['read']&.include?('public')
+    @public = raw_permissions.read&.include?('public')
     @embargo = begin
-      Date.parse(raw_permissions['embargo']).to_s
+      Date.parse(raw_permissions.embargo).to_s
     rescue Date::Error, TypeError
       ''
     end

@@ -3,21 +3,21 @@
 class XmlController < ApplicationController
   def editor
     item = AtlasRb::Resource.find(params[:id])
-    @resource = item['resource']
-    @klass = item['klass']
-    resource_mods(item['klass'])
+    @resource = item.resource
+    @klass = item.klass
+    resource_mods(item.klass)
   end
 
   def validate
     item = AtlasRb::Resource.find(params[:resource_id])
-    @resource = item['resource']
+    @resource = item.resource
 
     @mods = AtlasRb::Resource.preview(create_temp_xml)
   end
 
   def update
     item = AtlasRb::Resource.find(params[:resource_id])
-    klass = item['klass']
+    klass = item.klass
 
     AtlasRb.const_get(klass).update(params[:resource_id], create_temp_xml)
     redirect_to public_send("#{klass.downcase}_path", params[:resource_id])

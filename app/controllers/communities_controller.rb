@@ -9,7 +9,7 @@ class CommunitiesController < CatalogController
 
   def show
     @community = AtlasRb::Community.find(params[:id])
-    @response = find_children(@community['valkyrie_id'])
+    @response = find_children(@community.valkyrie_id)
     breadcrumbs(params[:id])
   end
 
@@ -26,8 +26,8 @@ class CommunitiesController < CatalogController
     permitted = params.require(:community).permit(:title, :description).to_h
 
     c = AtlasRb::Community.create(params[:parent_id])
-    AtlasRb::Community.metadata(c['id'], permitted)
-    redirect_to community_path(c['id'])
+    AtlasRb::Community.metadata(c.id, permitted)
+    redirect_to community_path(c.id)
   end
 
   def update

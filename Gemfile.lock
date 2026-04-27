@@ -80,10 +80,11 @@ GEM
     addressable (2.9.0)
       public_suffix (>= 2.0.2, < 8.0)
     ast (2.4.3)
-    atlas_rb (0.0.84)
+    atlas_rb (0.0.86)
       faraday (~> 2.7)
       faraday-follow_redirects (~> 0.3.0)
       faraday-multipart (~> 1)
+      hashie (~> 5.0)
     attr_json (2.6.0)
       activerecord (>= 6.0.0, < 8.2)
     base64 (0.3.0)
@@ -190,6 +191,8 @@ GEM
       temple (>= 0.8.2)
       thor
       tilt
+    hashie (5.1.0)
+      logger
     i18n (1.14.8)
       concurrent-ruby (~> 1.0)
     importmap-rails (2.2.3)
