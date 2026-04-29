@@ -4,9 +4,8 @@ module Authorizable
   extend ActiveSupport::Concern
 
   included do
-    rescue_from CanCan::AccessDenied do |exception|
-      # TODO: make this a proper view with template
-      render plain: exception.message, status: :forbidden
+    rescue_from CanCan::AccessDenied do
+      render template: 'errors/forbidden', status: :forbidden
     end
   end
 
