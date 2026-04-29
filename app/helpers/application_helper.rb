@@ -13,20 +13,22 @@ module ApplicationHelper
     end
   end
 
+  FILE_TYPE_ICONS = {
+    %r{\Aimage/} => 'fa-file-image',
+    %r{\Aaudio/} => 'fa-file-audio',
+    %r{\Avideo/} => 'fa-file-video',
+    %r{\Aapplication/pdf\z} => 'fa-file-pdf',
+    %r{\Atext/} => 'fa-file-lines',
+    /word|officedocument\.wordprocessingml/ => 'fa-file-word',
+    /excel|spreadsheetml/ => 'fa-file-excel',
+    /powerpoint|presentationml/ => 'fa-file-powerpoint',
+    /zip|tar|gzip|compressed/ => 'fa-file-zipper',
+    /json|xml|javascript|ruby|python|sh\z/ => 'fa-file-code'
+  }.freeze
+
   def file_type_icon(mime_type)
-    case mime_type.to_s
-    when %r{\Aimage/}              then 'fa-file-image'
-    when %r{\Aaudio/}              then 'fa-file-audio'
-    when %r{\Avideo/}              then 'fa-file-video'
-    when 'application/pdf'         then 'fa-file-pdf'
-    when %r{\Atext/}               then 'fa-file-lines'
-    when /word|officedocument\.wordprocessingml/ then 'fa-file-word'
-    when /excel|spreadsheetml/     then 'fa-file-excel'
-    when /powerpoint|presentationml/ then 'fa-file-powerpoint'
-    when /zip|tar|gzip|compressed/ then 'fa-file-zipper'
-    when /json|xml|javascript|ruby|python|sh\z/ then 'fa-file-code'
-    else 'fa-file'
-    end
+    mime = mime_type.to_s
+    FILE_TYPE_ICONS.find { |pattern, _| pattern.match?(mime) }&.last || 'fa-file'
   end
 
   def iiif_url(uuid)
