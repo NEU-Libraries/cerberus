@@ -1,0 +1,24 @@
+- record     = local_assigns.fetch(:record, nil)
+- title      = record.try(:title) || params[:id]
+- reason     = record.try(:tombstone_reason)
+- staff_link = link_to "contact the DRS staff", "mailto:Library-Repository-Team@neu.edu"
+.container.p-4.my-3.well.rounded-3
+  %h3.d-inline
+    - if reason.present?
+      = "\"#{title}\" was #{reason[0, 1].downcase + reason[1..]}."
+    - else
+      = "\"#{title}\" has been removed."
+  %h5.d-inline.text-black-50
+    %span.fa-solid.fa-trash-can.ps-2.pe-1
+    410
+  .clearfix.pt-3
+  - if record.try(:identifier).present?
+    %dl
+      %dt Title:
+      %dd= title
+      %dt Permanent URL:
+      %dd= link_to record.identifier, record.identifier
+  %p.mb-0
+    If you believe this item was removed in error, please #{staff_link}.
+  .clearfix.pt-3
+    = link_to "DRS Home", root_path, class: "btn btn-primary"

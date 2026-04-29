@@ -25,6 +25,11 @@ module Cerberus
     config.iiif_host = ''
     config.active_job.queue_adapter = :solid_queue
 
+    # Route exceptions through ErrorsController so error pages share the
+    # application layout (header, footer, search bar). Rails dispatches
+    # by status-code path (/404, /500, etc.) when set to self.routes.
+    config.exceptions_app = ->(env) { Rails.application.routes.call(env) }
+
     # config.active_support.to_time_preserves_timezone = :zone
   end
 end

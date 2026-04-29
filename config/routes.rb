@@ -40,4 +40,10 @@ Rails.application.routes.draw do
   get '/atlas/login' => 'atlas#login'
   post '/atlas/process_login' => 'atlas#process_login'
   get '/atlas/user' => 'atlas#user'
+
+  # error pages — also targeted by config.exceptions_app
+  match '/403', to: 'errors#forbidden',             via: :all
+  match '/404', to: 'errors#not_found',             via: :all
+  match '/410', to: 'errors#gone',                  via: :all
+  match '/500', to: 'errors#internal_server_error', via: :all
 end
