@@ -55,9 +55,14 @@ cmd_apply() {
 
   mkdir -p "$PATCH_DIR"
   local patch="$PATCH_DIR/${branch//\//_}.patch"
-  git -C "$REPO_ROOT" diff "HEAD..$branch" > "$patch"
+  local base
+  base=$(git -C "$REPO_ROOT" merge-base HEAD "$branch") \
+    || { echo "No common ancestor with '$branch'." >&2; exit 1; }
+  # Diff from the merge-base (not HEAD) so commits made on the current
+  # branch after forking aren't inverted by the patch.
+  git -C "$REPO_ROOT" diff "$base..$branch" > "$patch"
   if [[ ! -s "$patch" ]]; then
-    echo "No diff between HEAD and '$branch'. Nothing to preview."
+    echo "'$branch' has no commits beyond the merge-base. Nothing to preview."
     rm -f "$patch"; exit 0
   fi
 
