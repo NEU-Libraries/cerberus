@@ -1,16 +1,16 @@
 - staff_link  = link_to "contacting the DRS staff", "mailto:Library-Repository-Team@neu.edu"
 - report_link = link_to "reporting the problem", "https://northeastern.libanswers.com/form?queue_id=5581&resource=#{CGI::escape(request.original_url)}", target: "_blank"
 .d-flex.align-items-center{ style: "min-height: 60vh;" }
-  .container.p-4.my-3.well.rounded-3
+  .container.p-4.text-center
     %h3.d-inline
       Sorry, you encountered a system error.
     %h5.d-inline.text-black-50
       %span.fa-solid.fa-triangle-exclamation.ps-2.pe-1
       500
-    .clearfix.pt-3
+    .pt-3
     %p
       The DRS tried to process your request but encountered an error. We apologize for the inconvenience and will resolve the error soon.
     %p.mb-0
       You might be interested in #{staff_link}, or #{report_link}.
-    .clearfix.pt-3
+    .pt-3
       = link_to "DRS Home", root_path, class: "btn btn-primary"
