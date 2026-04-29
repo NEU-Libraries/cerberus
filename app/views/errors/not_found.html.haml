@@ -1,15 +1,16 @@
 - obj_type    = local_assigns.fetch(:obj_type, 'page')
 - staff_link  = link_to "contacting the DRS staff", "mailto:Library-Repository-Team@neu.edu"
 - report_link = link_to "reporting the problem", "https://northeastern.libanswers.com/form?queue_id=5581&resource=#{CGI::escape(request.original_url)}", target: "_blank"
-.container.p-4.my-3.well.rounded-3
-  %h3.d-inline
-    Sorry, the #{obj_type} you requested was not found in the system.
-  %h5.d-inline.text-black-50
-    %span.fa-solid.fa-circle-question.ps-2.pe-1
-    404
-  .clearfix.pt-3
-  %p It either never existed or has been deleted.
-  %p.mb-0
-    You might be interested in #{staff_link}, or #{report_link}.
-  .clearfix.pt-3
-    = link_to "DRS Home", root_path, class: "btn btn-primary"
+.d-flex.align-items-center{ style: "min-height: 60vh;" }
+  .container.p-4.my-3.well.rounded-3
+    %h3.d-inline
+      Sorry, the #{obj_type} you requested was not found in the system.
+    %h5.d-inline.text-black-50
+      %span.fa-solid.fa-circle-question.ps-2.pe-1
+      404
+    .clearfix.pt-3
+    %p It either never existed or has been deleted.
+    %p.mb-0
+      You might be interested in #{staff_link}, or #{report_link}.
+    .clearfix.pt-3
+      = link_to "DRS Home", root_path, class: "btn btn-primary"

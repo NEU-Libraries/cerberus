@@ -1,15 +1,16 @@
 - staff_link  = link_to "contacting the DRS staff", "mailto:Library-Repository-Team@neu.edu"
 - report_link = link_to "reporting the problem", "https://northeastern.libanswers.com/form?queue_id=5581&resource=#{CGI::escape(request.original_url)}", target: "_blank"
-.container.p-4.my-3.well.rounded-3
-  %h3.d-inline
-    Sorry, you don't have permission to access this page.
-  %h5.d-inline.text-black-50
-    %span.fa-solid.fa-lock.ps-2.pe-1
-    403
-  .clearfix.pt-3
-  - if user_signed_in?
-    %p.mb-0
-      You might be interested in #{staff_link}, or #{report_link}.
-  - else
-    %p.mb-0
-      Try #{link_to "logging in", new_user_session_path} to gain access.
+.d-flex.align-items-center{ style: "min-height: 60vh;" }
+  .container.p-4.my-3.well.rounded-3
+    %h3.d-inline
+      Sorry, you don't have permission to access this page.
+    %h5.d-inline.text-black-50
+      %span.fa-solid.fa-lock.ps-2.pe-1
+      403
+    .clearfix.pt-3
+    - if user_signed_in?
+      %p.mb-0
+        You might be interested in #{staff_link}, or #{report_link}.
+    - else
+      %p.mb-0
+        Try #{link_to "logging in", new_user_session_path} to gain access.
