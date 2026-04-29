@@ -3,11 +3,11 @@
 - report_link = link_to "reporting the problem", "https://northeastern.libanswers.com/form?queue_id=5581&resource=#{CGI::escape(request.original_url)}", target: "_blank"
 .d-flex.align-items-center{ style: "min-height: 60vh;" }
   .container.p-4.text-center
-    %h3.d-inline
-      Sorry, the #{obj_type} you requested was not found in the system.
-    %h5.d-inline.text-black-50
-      %span.fa-solid.fa-circle-question.ps-2.pe-1
+    %h4.text-black-50.mb-2
+      %span.fa-solid.fa-circle-question.pe-2
       404
+    %h3
+      Sorry, the #{obj_type} you requested was not found in the system.
     .pt-3
     %p It either never existed or has been deleted.
     %p.mb-0

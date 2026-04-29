@@ -2,11 +2,11 @@
 - report_link = link_to "reporting the problem", "https://northeastern.libanswers.com/form?queue_id=5581&resource=#{CGI::escape(request.original_url)}", target: "_blank"
 .d-flex.align-items-center{ style: "min-height: 60vh;" }
   .container.p-4.text-center
-    %h3.d-inline
-      Sorry, you encountered a system error.
-    %h5.d-inline.text-black-50
-      %span.fa-solid.fa-triangle-exclamation.ps-2.pe-1
+    %h4.text-black-50.mb-2
+      %span.fa-solid.fa-triangle-exclamation.pe-2
       500
+    %h3
+      Sorry, you encountered a system error.
     .pt-3
     %p
       The DRS tried to process your request but encountered an error. We apologize for the inconvenience and will resolve the error soon.
