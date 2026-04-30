@@ -508,7 +508,7 @@ Rack::Attack.throttle('load shedding', limit: 1, period: 10) do |req|
       if `cut -d ' ' -f2 /proc/loadavg`.strip.to_f > 3.5
         # everyone out of the boat, no exceptions
         # log to file
-        File.write("#{Rails.root}/log/heavy_load_shedding.log", "#{req.remote_ip} - #{req.fingerprint} - #{req.path} - #{Time.now}" + "\n", mode: 'a')
+        # File.write("#{Rails.root}/log/heavy_load_shedding.log", "#{req.remote_ip} - #{req.fingerprint} - #{req.path} - #{Time.now}" + "\n", mode: 'a')
         # switching to fingerprint for better effectiveness on deep IP pools at the higher cpu usage
         req.fingerprint
       else
@@ -562,7 +562,7 @@ THROTTLED_RESPONSE = [503, {'Set-Cookie' => 'cerberus_throttled=true', 'Content-
 BLOCKED_RESPONSE = [403, {'Content-Type' => 'text/plain', 'Cache-Control' => 'no-cache, no-store, max-age=0, must-revalidate', 'Pragma' => 'no-cache'}, ["Forbidden\n"]].freeze
 
 Rack::Attack.throttled_response = lambda do |env|
-  if (`cut -d ' ' -f2 /proc/loadavg`.strip.to_f < 10) && (env['rack.attack.matched'] == "challenged")
+  if (`cut -d ' ' -f2 /proc/loadavg`.strip.to_f < 5) && (env['rack.attack.matched'] == "challenged")
     u = "#{Rails.application.routes.url_helpers.root_url.chomp('/')}#{env["ORIGINAL_FULLPATH"]}"
     uri = URI(u)
     uri.query = "challenged=true"
