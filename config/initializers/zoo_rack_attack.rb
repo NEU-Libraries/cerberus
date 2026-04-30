@@ -14,7 +14,7 @@ end
 
 class Rack::Attack::Request < ::Rack::Request
   def host_lookup
-    @host_lookup ||= `timeout -s 9 -k 1 6 host -p 5053 #{remote_ip} 127.0.0.1 | tail -n1`.strip
+    @host_lookup ||= `timeout -s 9 -k 1 2 host -p 5053 #{remote_ip} 127.0.0.1 | tail -n1`.strip
   end
 
   def remote_ip
@@ -30,7 +30,7 @@ class Rack::Attack::Request < ::Rack::Request
   end
 
   def dig
-    @dig ||= `timeout -s 9 -k 1 6 dig @127.0.0.1 -p 5053 +short #{reverse_ip}.origin.asn.cymru.com TXT | head -n 1 | tr -d \\"`.strip
+    @dig ||= `timeout -s 9 -k 1 2 dig @127.0.0.1 -p 5053 +short #{reverse_ip}.origin.asn.cymru.com TXT | head -n 1 | tr -d \\"`.strip
   end
 
   def asn
