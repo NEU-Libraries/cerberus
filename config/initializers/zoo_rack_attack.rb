@@ -66,9 +66,6 @@ end
 Rack::Attack.cache.store = ActiveSupport::Cache::RedisStore.new(:password => ENV["REDIS_PASSWD"], :host => 'nb9667.neu.edu', :port => 6379, :timeout => 10)
 
 Rack::Attack.blocklist("suspect hosting/proxy ASN orgs") do |req|
-  if req.suspect_org?
-    File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-suspect_org.log", "#{req.remote_ip} - #{req.asn} - #{req.asn_org} - #{req.path} - #{Time.now}" + "\n", mode: 'a')
-  end
   req.suspect_org?
 end
 
@@ -143,9 +140,6 @@ Rack::Attack.safelist("LevelAccess") do |req|
 end
 
 Rack::Attack.blocklist("afrinic") do |req|
-  if req.rir == "afrinic"
-    File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-rir_block.log", "#{req.remote_ip} - #{req.asn} - #{req.fingerprint} - #{req.path} - #{Time.now}" + "\n", mode: 'a')
-  end
   req.rir == "afrinic"
 end
 
