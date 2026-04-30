@@ -557,7 +557,7 @@ Rack::Attack.throttle("challenged", limit: 0, period: 60) do |req|
   end
 end
 
-THROTTLE_HTML = ActionView::Base.new.render(file: 'public/429.html')
+THROTTLE_HTML = ActionView::Base.new.render(file: 'public/429.html').freeze
 
 Rack::Attack.throttled_response = lambda do |env|
   if (`cut -d ' ' -f2 /proc/loadavg`.strip.to_f < 10) && (env['rack.attack.matched'] == "challenged")
