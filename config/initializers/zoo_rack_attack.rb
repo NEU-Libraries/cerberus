@@ -558,6 +558,8 @@ Rack::Attack.throttle("challenged", limit: 0, period: 60) do |req|
 end
 
 THROTTLE_HTML = ActionView::Base.new.render(file: 'public/429.html').freeze
+THROTTLED_RESPONSE = [503, {'Set-Cookie' => 'cerberus_throttled=true', 'Content-Type' => 'text/html', 'Cache-Control' => 'no-cache, no-store, max-age=0, must-revalidate', 'Pragma' => 'no-cache'}, [THROTTLE_HTML]].freeze
+BLOCKED_RESPONSE = [403, {'Content-Type' => 'text/plain', 'Cache-Control' => 'no-cache, no-store, max-age=0, must-revalidate', 'Pragma' => 'no-cache'}, ["Forbidden\n"]].freeze
 
 Rack::Attack.throttled_response = lambda do |env|
   if (`cut -d ' ' -f2 /proc/loadavg`.strip.to_f < 10) && (env['rack.attack.matched'] == "challenged")
@@ -570,12 +572,12 @@ Rack::Attack.throttled_response = lambda do |env|
 
     [418, {'Content-Type' => 'text/html', 'Cache-Control' => 'no-cache, no-store, max-age=0, must-revalidate', 'Pragma' => 'no-cache'}, [view.render(file: 'public/challenge.html.erb')]]
   else
-    [503, {'Set-Cookie' => "_cerberus_app_session=#{Date.today.to_time.to_i}", 'Set-Cookie' => 'cerberus_throttled=true', 'Content-Type' => 'text/html', 'Cache-Control' => 'no-cache, no-store, max-age=0, must-revalidate', 'Pragma' => 'no-cache'}, [THROTTLE_HTML]]
+    THROTTLED_RESPONSE
   end
 end
 
 Rack::Attack.blocklisted_response = lambda do |env|
-  [403, {'Content-Type' => 'text/plain', 'Cache-Control' => 'no-cache, no-store, max-age=0, must-revalidate', 'Pragma' => 'no-cache'}, ["Forbidden\n"]]
+  BLOCKED_RESPONSE
 end
 
 # Track requests from a special user agent.
