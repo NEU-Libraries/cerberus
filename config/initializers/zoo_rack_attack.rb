@@ -560,7 +560,7 @@ end
 THROTTLE_HTML = ActionView::Base.new.render(file: 'public/429.html')
 
 Rack::Attack.throttled_response = lambda do |env|
-  if env['rack.attack.matched'] == "challenged"
+  if (`cut -d ' ' -f2 /proc/loadavg`.strip.to_f < 10) && (env['rack.attack.matched'] == "challenged")
     u = "#{Rails.application.routes.url_helpers.root_url.chomp('/')}#{env["ORIGINAL_FULLPATH"]}"
     uri = URI(u)
     uri.query = "challenged=true"
