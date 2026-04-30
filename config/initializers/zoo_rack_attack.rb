@@ -219,6 +219,12 @@ Rack::Attack.blocklist("AllStream") do |req|
   req.host_lookup.include?("datacenter")
 end
 
+Rack::Attack.blocklist("proxy host") do |req|
+  if !req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase)
+    req.host_lookup.include?("proxy")
+  end
+end
+
 Rack::Attack.blocklist("PDF Bots") do |req|
   !req.asn.blank? && ["207990", "263740", "52393", "9009", "36352", "401152", "203020", "20473"].include?(req.asn)
 end
