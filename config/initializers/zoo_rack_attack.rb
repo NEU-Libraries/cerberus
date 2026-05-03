@@ -65,14 +65,6 @@ end
 
 Rack::Attack.cache.store = ActiveSupport::Cache::RedisStore.new(:password => ENV["REDIS_PASSWD"], :host => 'nb9667.neu.edu', :port => 6379, :timeout => 10)
 
-Rack::Attack.blocklist("suspect hosting/proxy ASN orgs") do |req|
-  req.suspect_org?
-end
-
-Rack::Attack.blocklist("asn mismatch") do |req|
-  req.asn == "22773" && !req.asn_org.include?("Cox")
-end
-
 Rack::Attack.safelist("passenger localhost prestart") do |req|
   !req.remote_ip.blank? && (req.remote_ip.strip == "127.0.0.1")
 end
@@ -139,8 +131,11 @@ Rack::Attack.safelist("LevelAccess") do |req|
   !req.remote_ip.blank? && (["3.18.149.121", "3.139.228.222", "13.59.58.104", "3.128.157.239", "3.133.26.95", "3.139.225.14", "52.188.49.109", "20.63.69.102"].include?(req.remote_ip.strip))
 end
 
-Rack::Attack.blocklist("afrinic") do |req|
-  req.rir == "afrinic"
+# Safelist from IPs in cache
+# To add an IP: Rails.cache.write("safelist 1.2.3.4", true, expires_in: 2.days)
+# To remove an IP: Rails.cache.delete("safelist 1.2.3.4")
+Rack::Attack.safelist("safelist IP") do |req|
+  Rails.cache.read("safelist #{req.remote_ip}")
 end
 
 Rack::Attack.blocklist("Bot Wave") do |req|
@@ -149,6 +144,157 @@ end
 
 Rack::Attack.blocklist("Peerdist") do |req|
   !req.env["HTTP_ACCEPT_ENCODING"].blank? && req.env["HTTP_ACCEPT_ENCODING"].downcase.include?("peerdist")
+end
+
+Rack::Attack.blocklist("Brazil wave") do |req|
+  if (req.user_agent.blank?) || (!req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase))
+    (req.env["HTTP_ACCEPT_LANGUAGE"].blank?) && (req.region == "Brazil" || req.region.blank?)
+  end
+end
+
+Rack::Attack.blocklist("Vietnam wave") do |req|
+  if (req.user_agent.blank?) || (!req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase))
+    (req.env["HTTP_ACCEPT_LANGUAGE"].blank?) && (req.region == "Vietnam" || req.region.blank?)
+  end
+end
+
+Rack::Attack.blocklist("Argentina wave") do |req|
+  if (req.user_agent.blank?) || (!req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase))
+    (req.env["HTTP_ACCEPT_LANGUAGE"].blank?) && (req.region == "Argentina" || req.region.blank?)
+  end
+end
+
+Rack::Attack.blocklist("Mexico wave") do |req|
+  if (req.user_agent.blank?) || (!req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase))
+    (req.env["HTTP_ACCEPT_LANGUAGE"].blank?) && (req.region == "Mexico" || req.region.blank?)
+  end
+end
+
+Rack::Attack.blocklist("Agent Liers") do |request|
+  request.env["HTTP_ACCEPT"].blank? && request.env["HTTP_ACCEPT_LANGUAGE"].blank? && request.env["HTTP_COOKIE"].blank? && (request.user_agent.blank? || !request.user_agent.downcase.include?("bot".downcase))
+end
+
+Rack::Attack.blocklist("lang print") do |req|
+  if (!req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase))
+    (req.env["HTTP_ACCEPT_LANGUAGE"].blank?) && (req.fingerprint == "Ki8qIHwgZ3ppcCwgZGVmbGF0ZSwgYnIgfCAgfCA=")
+  end
+end
+
+Rack::Attack.blocklist('One hit wonders') do |req|
+  req.referrer.blank? && req.env["HTTP_COOKIE"].blank? && (req.env["HTTP_ACCEPT_LANGUAGE"] == "en") && ((req.fullpath.include? "f%5B") || (req.region != "United States"))
+end
+
+Rack::Attack.blocklist('sec fetch extended') do |req|
+  if (!req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase))
+    req.env["HTTP_SEC_FETCH_SITE"].blank? && req.referrer.blank? && (req.region != "United States")
+  end
+end
+
+Rack::Attack.blocklist('Yandex UA') do |req|
+  !req.user_agent.blank? && req.user_agent.downcase.include?("Yandex".downcase)
+end
+
+Rack::Attack.blocklist('ImagesiftBot') do |req|
+  !req.user_agent.blank? && req.user_agent.downcase.include?("ImagesiftBot".downcase)
+end
+
+Rack::Attack.blocklist('Siteimprove') do |req|
+  !req.user_agent.blank? && req.user_agent.downcase.include?("Siteimprove".downcase)
+end
+
+Rack::Attack.blocklist('MegaIndex') do |req|
+  !req.user_agent.blank? && req.user_agent.downcase.include?("MegaIndex".downcase)
+end
+
+Rack::Attack.blocklist('Python') do |req|
+  !req.user_agent.blank? && req.user_agent.downcase.include?("Python".downcase)
+end
+
+Rack::Attack.blocklist('sqlmap') do |req|
+  !req.user_agent.blank? && req.user_agent.downcase.include?("sqlmap".downcase)
+end
+
+Rack::Attack.blocklist('turnitinbot') do |req|
+  !req.user_agent.blank? && req.user_agent.downcase.include?("turnitinbot".downcase)
+end
+
+Rack::Attack.blocklist('Amazonbot') do |req|
+  !req.user_agent.blank? && req.user_agent.downcase.include?("Amazonbot".downcase)
+end
+
+Rack::Attack.blocklist('AsyncHttpClient') do |req|
+  !req.user_agent.blank? && req.user_agent.downcase.include?("Custom-AsyncHttpClient".downcase)
+end
+
+Rack::Attack.blocklist('openai') do |req|
+  !req.user_agent.blank? && req.user_agent.downcase.include?("openai".downcase)
+end
+
+Rack::Attack.blocklist("progressive throttle to block") do |req|
+  if (!req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase) && req.env["HTTP_SEC_FETCH_SITE"].blank?)
+    if `cut -d ' ' -f2 /proc/loadavg`.strip.to_f > 1
+      !req.env["HTTP_COOKIE"].blank? && req.env["HTTP_COOKIE"].include?("cerberus_throttled")
+    end
+  end
+end
+
+# Rack::Attack.blocklist("block shared banned cookie") do |req|
+#   !req.env["HTTP_COOKIE"].blank? && req.env["HTTP_COOKIE"].include?("cerberus_blocked")
+# end
+
+Rack::Attack.blocklist("CN Block") do |req|
+  if `cut -d ' ' -f1 /proc/loadavg`.strip.to_f > 2
+    if !req.env["HTTP_ACCEPT_LANGUAGE"].blank?
+      req.env["HTTP_ACCEPT_LANGUAGE"].include?("zh-CN")
+    end
+  end
+end
+
+Rack::Attack.blocklist("blacklight") do |req|
+  if (!req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase))
+    if (req.session_options[:id].blank? && req.referrer.blank? && req.env["HTTP_COOKIE"].blank?) || req.env["HTTP_SEC_FETCH_SITE"].blank? || req.region == "China"
+      (req.fullpath.include?("&f") || req.fullpath.include?("?f") || req.fullpath.include?("creator") || req.fullpath.include?("rss"))
+    end
+  end
+end
+
+Rack::Attack.blocklist("range fraud") do |request|
+  if request.user_agent.blank? || !request.user_agent.downcase.include?("bot".downcase)
+    if request.fullpath.include?("fulltext.pdf")
+      !request.env["HTTP_RANGE"].blank? && request.env["HTTP_SEC_FETCH_SITE"].blank? && request.region != "United States"
+    end
+  end
+end
+
+Rack::Attack.blocklist("china region block") do |req|
+  if `cut -d ' ' -f1 /proc/loadavg`.strip.to_f > 2
+    req.region == "China"
+  end
+end
+
+# faculty_and_staff
+Rack::Attack.blocklist("fac staff protection") do |req|
+  if req.env["HTTP_ACCEPT_LANGUAGE"].blank? || req.env["HTTP_COOKIE"].blank?
+    req.fullpath.include?("/faculty_and_staff")
+  end
+end
+
+# Block attacks from IPs in cache
+# To add an IP: Rails.cache.write("block 1.2.3.4", true, expires_in: 2.days)
+# To remove an IP: Rails.cache.delete("block 1.2.3.4")
+Rack::Attack.blocklist("block IP") do |req|
+  Rails.cache.read("block #{req.remote_ip}")
+end
+
+# Block by fingerprint in cache
+# To add an IP: Rails.cache.write("block fingerprint ZZwgZ3ppcCB8ICB8IA==", true, expires_in: 2.days)
+# To remove an IP: Rails.cache.delete("block fingerprint ZZwgZ3ppcCB8ICB8IA==")
+Rack::Attack.blocklist("block fingerprint") do |req|
+  Rails.cache.read("block fingerprint #{req.fingerprint}")
+end
+
+Rack::Attack.blocklist("asn mismatch") do |req|
+  req.asn == "22773" && !req.asn_org.include?("Cox")
 end
 
 Rack::Attack.blocklist("Alibaba datacenter") do |req|
@@ -237,86 +383,6 @@ Rack::Attack.blocklist("qwant") do |req|
   req.host_lookup.include?("qwant")
 end
 
-Rack::Attack.blocklist("Brazil wave") do |req|
-  if (req.user_agent.blank?) || (!req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase))
-    (req.env["HTTP_ACCEPT_LANGUAGE"].blank?) && (req.region == "Brazil" || req.region.blank?)
-  end
-end
-
-Rack::Attack.blocklist("Vietnam wave") do |req|
-  if (req.user_agent.blank?) || (!req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase))
-    (req.env["HTTP_ACCEPT_LANGUAGE"].blank?) && (req.region == "Vietnam" || req.region.blank?)
-  end
-end
-
-Rack::Attack.blocklist("Argentina wave") do |req|
-  if (req.user_agent.blank?) || (!req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase))
-    (req.env["HTTP_ACCEPT_LANGUAGE"].blank?) && (req.region == "Argentina" || req.region.blank?)
-  end
-end
-
-Rack::Attack.blocklist("Mexico wave") do |req|
-  if (req.user_agent.blank?) || (!req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase))
-    (req.env["HTTP_ACCEPT_LANGUAGE"].blank?) && (req.region == "Mexico" || req.region.blank?)
-  end
-end
-
-Rack::Attack.blocklist("Agent Liers") do |request|
-  request.env["HTTP_ACCEPT"].blank? && request.env["HTTP_ACCEPT_LANGUAGE"].blank? && request.env["HTTP_COOKIE"].blank? && (request.user_agent.blank? || !request.user_agent.downcase.include?("bot".downcase))
-end
-
-Rack::Attack.blocklist("lang print") do |req|
-  if (!req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase))
-    (req.env["HTTP_ACCEPT_LANGUAGE"].blank?) && (req.fingerprint == "Ki8qIHwgZ3ppcCwgZGVmbGF0ZSwgYnIgfCAgfCA=")
-  end
-end
-
-Rack::Attack.blocklist('One hit wonders') do |req|
-  req.referrer.blank? && req.env["HTTP_COOKIE"].blank? && (req.env["HTTP_ACCEPT_LANGUAGE"] == "en") && ((req.fullpath.include? "f%5B") || (req.region != "United States"))
-end
-
-Rack::Attack.blocklist('sec fetch extended') do |req|
-  if (!req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase))
-    req.env["HTTP_SEC_FETCH_SITE"].blank? && req.referrer.blank? && (req.region != "United States")
-  end
-end
-
-Rack::Attack.blocklist('Yandex UA') do |req|
-  !req.user_agent.blank? && req.user_agent.downcase.include?("Yandex".downcase)
-end
-
-Rack::Attack.blocklist('ImagesiftBot') do |req|
-  !req.user_agent.blank? && req.user_agent.downcase.include?("ImagesiftBot".downcase)
-end
-
-Rack::Attack.blocklist('Siteimprove') do |req|
-  !req.user_agent.blank? && req.user_agent.downcase.include?("Siteimprove".downcase)
-end
-
-Rack::Attack.blocklist('MegaIndex') do |req|
-  !req.user_agent.blank? && req.user_agent.downcase.include?("MegaIndex".downcase)
-end
-
-Rack::Attack.blocklist('Python') do |req|
-  !req.user_agent.blank? && req.user_agent.downcase.include?("Python".downcase)
-end
-
-Rack::Attack.blocklist('sqlmap') do |req|
-  !req.user_agent.blank? && req.user_agent.downcase.include?("sqlmap".downcase)
-end
-
-Rack::Attack.blocklist('turnitinbot') do |req|
-  !req.user_agent.blank? && req.user_agent.downcase.include?("turnitinbot".downcase)
-end
-
-Rack::Attack.blocklist('Amazonbot') do |req|
-  !req.user_agent.blank? && req.user_agent.downcase.include?("Amazonbot".downcase)
-end
-
-Rack::Attack.blocklist('AsyncHttpClient') do |req|
-  !req.user_agent.blank? && req.user_agent.downcase.include?("Custom-AsyncHttpClient".downcase)
-end
-
 Rack::Attack.blocklist("Amazon") do |req|
   req.host_lookup.include?("amazon")
 end
@@ -324,22 +390,6 @@ end
 Rack::Attack.blocklist("Hetzner") do |req|
   req.host_lookup.include?("clients.your-server.de")
 end
-
-Rack::Attack.blocklist('openai') do |req|
-  !req.user_agent.blank? && req.user_agent.downcase.include?("openai".downcase)
-end
-
-Rack::Attack.blocklist("progressive throttle to block") do |req|
-  if (!req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase) && req.env["HTTP_SEC_FETCH_SITE"].blank?)
-    if `cut -d ' ' -f2 /proc/loadavg`.strip.to_f > 1
-      !req.env["HTTP_COOKIE"].blank? && req.env["HTTP_COOKIE"].include?("cerberus_throttled")
-    end
-  end
-end
-
-# Rack::Attack.blocklist("block shared banned cookie") do |req|
-#   !req.env["HTTP_COOKIE"].blank? && req.env["HTTP_COOKIE"].include?("cerberus_blocked")
-# end
 
 Rack::Attack.blocklist("CN Azure") do |req|
   if !req.asn.blank? && (req.asn == "8075")
@@ -349,28 +399,19 @@ Rack::Attack.blocklist("CN Azure") do |req|
   end
 end
 
-Rack::Attack.blocklist("CN Block") do |req|
-  if `cut -d ' ' -f1 /proc/loadavg`.strip.to_f > 2
-    if !req.env["HTTP_ACCEPT_LANGUAGE"].blank?
-      req.env["HTTP_ACCEPT_LANGUAGE"].include?("zh-CN")
-    end
-  end
+Rack::Attack.blocklist("afrinic") do |req|
+  req.rir == "afrinic"
 end
 
-Rack::Attack.blocklist("blacklight") do |req|
-  if (!req.user_agent.blank? && !req.user_agent.downcase.include?("bot".downcase))
-    if (req.session_options[:id].blank? && req.referrer.blank? && req.env["HTTP_COOKIE"].blank?) || req.env["HTTP_SEC_FETCH_SITE"].blank? || req.region == "China"
-      (req.fullpath.include?("&f") || req.fullpath.include?("?f") || req.fullpath.include?("creator") || req.fullpath.include?("rss"))
-    end
-  end
+Rack::Attack.blocklist("suspect hosting/proxy ASN orgs") do |req|
+  req.suspect_org?
 end
 
-Rack::Attack.blocklist("range fraud") do |request|
-  if request.user_agent.blank? || !request.user_agent.downcase.include?("bot".downcase)
-    if request.fullpath.include?("fulltext.pdf")
-      !request.env["HTTP_RANGE"].blank? && request.env["HTTP_SEC_FETCH_SITE"].blank? && request.region != "United States"
-    end
-  end
+# Block by ASN in cache
+# To add an IP: Rails.cache.write("block asn 45102", true, expires_in: 2.days)
+# To remove an IP: Rails.cache.delete("block asn 45102")
+Rack::Attack.blocklist("block asn") do |req|
+  Rails.cache.read("block asn #{req.asn}")
 end
 
 # dl throttle by signature and blanks
@@ -429,51 +470,10 @@ Rack::Attack.throttle("CN Scrapers", limit: 1, period: 10) do |request|
   result
 end
 
-# Safelist from IPs in cache
-# To add an IP: Rails.cache.write("safelist 1.2.3.4", true, expires_in: 2.days)
-# To remove an IP: Rails.cache.delete("safelist 1.2.3.4")
-Rack::Attack.safelist("safelist IP") do |req|
-  Rails.cache.read("safelist #{req.remote_ip}")
-end
-
-# Block attacks from IPs in cache
-# To add an IP: Rails.cache.write("block 1.2.3.4", true, expires_in: 2.days)
-# To remove an IP: Rails.cache.delete("block 1.2.3.4")
-Rack::Attack.blocklist("block IP") do |req|
-  Rails.cache.read("block #{req.remote_ip}")
-end
-
-# Block by ASN in cache
-# To add an IP: Rails.cache.write("block asn 45102", true, expires_in: 2.days)
-# To remove an IP: Rails.cache.delete("block asn 45102")
-Rack::Attack.blocklist("block asn") do |req|
-  Rails.cache.read("block asn #{req.asn}")
-end
-
-# Block by fingerprint in cache
-# To add an IP: Rails.cache.write("block fingerprint ZZwgZ3ppcCB8ICB8IA==", true, expires_in: 2.days)
-# To remove an IP: Rails.cache.delete("block fingerprint ZZwgZ3ppcCB8ICB8IA==")
-Rack::Attack.blocklist("block fingerprint") do |req|
-  Rails.cache.read("block fingerprint #{req.fingerprint}")
-end
-
 # Bring back region throttle
 Rack::Attack.throttle("requests by region - china", limit: 1, period: 10) do |request|
   if `cut -d ' ' -f1 /proc/loadavg`.strip.to_f > 1
     request.region == "China"
-  end
-end
-
-Rack::Attack.blocklist("china region block") do |req|
-  if `cut -d ' ' -f1 /proc/loadavg`.strip.to_f > 2
-    req.region == "China"
-  end
-end
-
-# faculty_and_staff
-Rack::Attack.blocklist("fac staff protection") do |req|
-  if req.env["HTTP_ACCEPT_LANGUAGE"].blank? || req.env["HTTP_COOKIE"].blank?
-    req.fullpath.include?("/faculty_and_staff")
   end
 end
 
