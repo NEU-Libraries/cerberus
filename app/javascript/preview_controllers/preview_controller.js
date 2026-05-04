@@ -4,7 +4,7 @@ import { Controller } from '@hotwired/stimulus'
 
 export default class extends Controller {
   connect() {
-    ace.config.set('basePath', 'https://cdn.jsdelivr.net/npm/ace-builds@1.16.0/src-noconflict/');
+    ace.config.set('basePath', '/ace/');
     var editor = ace.edit("editor");
     editor.setTheme("ace/theme/eclipse");
     editor.session.setMode("ace/mode/xml");

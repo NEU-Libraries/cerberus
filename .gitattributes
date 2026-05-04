@@ -11,3 +11,8 @@ vendor/* linguist-vendored
 *.jpg binary
 *.pdf binary
 *.pptx binary
+*.woff2 binary
+*.woff binary
+*.ttf binary
+*.eot binary
+*.otf binary
