@@ -8,7 +8,12 @@ import Blacklight from "blacklight"
 
 Turbo.setProgressBarDelay(750)
 
+let turboVisitActive = false
+document.addEventListener('turbo:before-visit', () => { turboVisitActive = true })
+document.addEventListener('turbo:load', () => { turboVisitActive = false })
+
 document.addEventListener('turbo:before-fetch-response', async (event) => {
+  if (!turboVisitActive) return
   const { fetchResponse } = event.detail
   if (!fetchResponse.succeeded) {
     event.preventDefault()
