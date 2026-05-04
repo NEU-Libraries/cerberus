@@ -5,7 +5,11 @@
   .clearfix.pt-1
   .row
     .col-12
-      %h1.work-show-title= @work.title
+      .d-flex.justify-content-between.align-items-end
+        %h1.work-show-title= @work.title
+        .text-end.small.pb-2
+          = link_to "Edit", edit_work_path(@work.id), class: "px-2"
+          = link_to "Delete", "#"
       %hr.work-show-divider
       .d-flex.justify-content-between.align-items-center.mb-3.small
         %span
