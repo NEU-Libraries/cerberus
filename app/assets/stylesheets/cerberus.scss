@@ -244,6 +244,25 @@ ol.breadcrumb {
   @extend .px-3;
 }
 
+.work-show-title {
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  font-size: 1.875rem;
+  font-weight: 400;
+  color: $gray-900;
+  letter-spacing: -0.015em;
+  line-height: 1.25;
+  margin-bottom: 0.75rem;
+}
+
+.work-show-divider {
+  border: 0;
+  height: 2px;
+  background: linear-gradient(to right, $blue, transparent);
+  opacity: 1;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+}
+
 .documents-gallery {
   row-gap: var(--bs-gutter-x);
 
