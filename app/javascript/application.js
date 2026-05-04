@@ -16,5 +16,13 @@ library.add(far, fas, fab)
 FontAwesome.config.mutateApproach = 'sync'
 Turbo.setProgressBarDelay(750)
 
+document.addEventListener('turbo:before-fetch-response', async (event) => {
+  const { fetchResponse } = event.detail
+  if (!fetchResponse.succeeded) {
+    event.preventDefault()
+    window.location.href = fetchResponse.response.url
+  }
+})
+
 window.$ = $
 window.jQuery = $

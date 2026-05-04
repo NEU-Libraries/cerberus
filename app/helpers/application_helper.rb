@@ -31,6 +31,14 @@ module ApplicationHelper
     FILE_TYPE_ICONS.find { |pattern, _| pattern.match?(mime) }&.last || 'fa-file'
   end
 
+  def javascript_inline_importmap_tag(importmap_json = Rails.application.importmap.to_json(resolver: self))
+    tag.script importmap_json.html_safe,
+      type: "importmap",
+      "data-turbo-track": "reload",
+      "data-turbo-eval": "false",
+      nonce: request&.content_security_policy_nonce
+  end
+
   def iiif_url(uuid)
     # Supports staging, production etc.
     # cantaloupe

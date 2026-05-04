@@ -1,3 +1,4 @@
+- content_for(:head) { tag.meta(name: "turbo-cache-control", content: "no-cache") }
 - obj_type    = local_assigns.fetch(:obj_type, 'page')
 - staff_link  = link_to "contacting the DRS staff", "mailto:Library-Repository-Team@neu.edu"
 - report_link = link_to "reporting the problem", "https://northeastern.libanswers.com/form?queue_id=5581&resource=#{CGI::escape(request.original_url)}", target: "_blank"

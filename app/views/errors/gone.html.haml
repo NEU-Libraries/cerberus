@@ -1,3 +1,4 @@
+- content_for(:head) { tag.meta(name: "turbo-cache-control", content: "no-cache") }
 - record     = local_assigns.fetch(:record, nil)
 - title      = record.try(:title) || params[:id]
 - reason     = record.try(:tombstone_reason)
