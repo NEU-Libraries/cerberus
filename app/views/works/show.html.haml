@@ -6,7 +6,7 @@
   .row
     .col-12
       .d-flex.justify-content-between.align-items-end
-        %h1.work-show-title= @work.title
+        %h3= @work.title
         .text-end.small.pb-2
           = link_to "Edit", edit_work_path(@work.id), class: "px-2"
           = link_to "Delete", "#"

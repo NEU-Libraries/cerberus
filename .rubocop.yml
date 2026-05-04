@@ -67,6 +67,9 @@ Rails/UnknownEnv:
     - development
     - test
     - staging
+Rails/OutputSafety:
+  Exclude:
+    - 'app/helpers/application_helper.rb'
 Rails/DynamicFindBy:
   Whitelist:
     - find_by_alternate_identifier
