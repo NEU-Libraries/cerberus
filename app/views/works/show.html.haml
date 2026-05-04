@@ -14,7 +14,7 @@
           = link_to '#', '#', class: 'ms-1'
         - if @files.present?
           = link_to '#downloads' do
-            = "Downloads (#{@files.size})"
+            %span.text-muted= "Downloads (#{@files.size})"
             %i.fa-solid.fa-arrow-down.ms-1{'aria-hidden' => 'true'}
   .row
     .col-md-6.order-md-1.order-2
