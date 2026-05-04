@@ -8,6 +8,7 @@ pin_all_from "app/javascript/controllers", under: "controllers"
 pin "jquery", to: "jquery.js"
 
 pin "@github/auto-complete-element", to: "@github--auto-complete-element.js"
+pin "@github/combobox-nav", to: "@github--combobox-nav.js"
 pin "@popperjs/core", to: "@popperjs--core.js"
 pin "bootstrap", to: "bootstrap.js"
 pin "ace-builds", to: "ace-builds.js"
