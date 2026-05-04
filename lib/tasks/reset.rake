@@ -9,22 +9,22 @@ namespace :reset do
 
     community = AtlasRb::Community.create(nil, '/home/cerberus/web/spec/fixtures/files/community-mods.xml')
     AtlasRb::Community.metadata(community['id'], {
-                                  'thumbnail' => ThumbnailCreator.call(path: '/home/cerberus/web/spec/fixtures/files/boat.jpg'),
+                                  'thumbnail' => ThumbnailCreator.call(path: '/home/cerberus/web/spec/fixtures/files/river.jpg'),
                                   'permissions' => { 'read' => ['public'] }
                                 })
 
     collection = AtlasRb::Collection.create(community['id'], '/home/cerberus/web/spec/fixtures/files/collection-mods.xml')
     AtlasRb::Collection.metadata(collection['id'], {
-                                   'thumbnail' => ThumbnailCreator.call(path: '/home/cerberus/web/spec/fixtures/files/spongebob.png'),
+                                   'thumbnail' => ThumbnailCreator.call(path: '/home/cerberus/web/spec/fixtures/files/field.jpg'),
                                    'permissions' => { 'read' => ['public'] }
                                  })
 
     work = AtlasRb::Work.create(collection['id'], '/home/cerberus/web/spec/fixtures/files/work-mods.xml')
     AtlasRb::Work.metadata(work['id'], {
-                             'thumbnail' => ThumbnailCreator.call(path: '/home/cerberus/web/spec/fixtures/files/rainbow.jpg'),
+                             'thumbnail' => ThumbnailCreator.call(path: '/home/cerberus/web/spec/fixtures/files/flower.jpg'),
                              'permissions' => { 'read' => ['public'] }
                            })
-    AtlasRb::Blob.create(work['id'], '/home/cerberus/web/spec/fixtures/files/rainbow.jpg', 'rainbow.jpg')
+    AtlasRb::Blob.create(work['id'], '/home/cerberus/web/spec/fixtures/files/flower.jpg', 'flower.jpg')
   end
 
   desc 'Clean solr and dbs'
