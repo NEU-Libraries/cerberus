@@ -17,7 +17,7 @@
         %span
           %i.fa-solid.fa-link.text-muted{'aria-hidden' => 'true'}
           %span.text-muted.ms-1 Permanent URL:
-          = link_to '#', '#', class: 'ms-1'
+          = link_to @work.permanent_url, @work.permanent_url, class: 'ms-1'
         - if @files.present?
           = link_to '#downloads' do
             %span.text-muted= "Downloads (#{@files.size})"
