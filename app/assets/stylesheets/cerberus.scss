@@ -11,6 +11,12 @@ body {
 
 #mods {
   font-size: calc(0.8rem + 0.1vw);
+  dt {
+    margin-bottom: 0.2rem;
+  }
+  dd p {
+    margin-bottom: 0.5rem;
+  }
 }
 
 .well {

@@ -8,13 +8,17 @@ import Blacklight from "blacklight"
 
 Turbo.setProgressBarDelay(750)
 
-let turboVisitActive = false
-document.addEventListener('turbo:before-visit', () => { turboVisitActive = true })
-document.addEventListener('turbo:load', () => { turboVisitActive = false })
+// Track the URL of the active Turbo visit so we only intercept the response
+// for that visit — not unrelated fetches (e.g. link-hover prefetches) that
+// can land while the visit is still in flight.
+let activeVisitUrl = null
+document.addEventListener('turbo:before-visit', (event) => { activeVisitUrl = event.detail.url })
+document.addEventListener('turbo:load', () => { activeVisitUrl = null })
 
-document.addEventListener('turbo:before-fetch-response', async (event) => {
-  if (!turboVisitActive) return
+document.addEventListener('turbo:before-fetch-response', (event) => {
+  if (!activeVisitUrl) return
   const { fetchResponse } = event.detail
+  if (fetchResponse.response.url !== activeVisitUrl) return
   if (!fetchResponse.succeeded) {
     event.preventDefault()
     window.location.href = fetchResponse.response.url
