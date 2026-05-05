@@ -1,9 +1,9 @@
 import { Controller } from "@hotwired/stimulus"
-import { Tooltip } from "bootstrap"
+import bootstrap from "bootstrap"
 
 export default class extends Controller {
   connect() {
-    this.tooltip = Tooltip.getOrCreateInstance(this.element)
+    this.tooltip = bootstrap.Tooltip.getOrCreateInstance(this.element)
   }
 
   disconnect() {
