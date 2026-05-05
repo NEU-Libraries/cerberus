@@ -16,11 +16,9 @@
                     class="btn btn-sm btn-link p-0 me-2"
                     data-bs-toggle="modal"
                     data-bs-target="#downloadsModal"
-                    data-downloads-url="<%= downloads_work_path(@document) %>"
-                    data-controller="tooltip"
-                    data-bs-title="Downloads">
-              <span class="visually-hidden">Downloads</span>
-              <i class="fa-solid fa-download" aria-hidden="true"></i>
+                    data-downloads-url="<%= downloads_work_path(@document) %>">
+              Downloads
+              <i class="fa-solid fa-download ms-1" aria-hidden="true"></i>
             </button>
           <% end %>
           <%= link_to helpers.report_a_problem_url(@document),
