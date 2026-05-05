@@ -26,7 +26,11 @@ Rails.application.routes.draw do
 
   resources :communities
   resources :collections
-  resources :works
+  resources :works do
+    member do
+      get :downloads
+    end
+  end
   resources :loads, only: [:index, :show, :new, :create, :destroy]
 
   get '/downloads/:id', to: 'downloads#show', as: :download
