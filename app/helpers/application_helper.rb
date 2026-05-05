@@ -39,9 +39,18 @@ module ApplicationHelper
                nonce: request&.content_security_policy_nonce
   end
 
-  def report_a_problem_url(resource_url)
-    query = { queue_id: 5581, resource: resource_url }.to_query
+  def report_a_problem_url(document)
+    query = { queue_id: 5581, resource: document_url(document) }.to_query
     "https://northeastern.libanswers.com/form?#{query}"
+  end
+
+  def document_url(document)
+    if document.respond_to?(:klass) && document.klass.present?
+      model_str = ActiveModel::Naming.singular_route_key(document.klass)
+      send("#{model_str}_url", document)
+    else
+      polymorphic_url(document)
+    end
   end
 
   def iiif_url(uuid)
