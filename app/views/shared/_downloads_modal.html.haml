@@ -1,0 +1,11 @@
+.modal.fade#downloadsModal{tabindex: '-1', 'aria-labelledby' => 'downloadsModalLabel', 'aria-hidden' => 'true', data: { controller: 'downloads-modal' }}
+  .modal-dialog.modal-dialog-centered.modal-lg
+    .modal-content
+      .modal-header
+        %h2.modal-title.h5#downloadsModalLabel Downloads
+        %button.btn-close{type: 'button', 'data-bs-dismiss' => 'modal', 'aria-label' => 'Close'}
+      .modal-body.p-0
+        %turbo-frame#downloads-modal-frame{data: { 'downloads-modal-target' => 'frame' }}
+          .p-4.text-center
+            .spinner-border{role: 'status'}
+              %span.visually-hidden Loading…

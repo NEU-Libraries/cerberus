@@ -4,7 +4,7 @@ class WorksController < ApplicationController
   include Thumbable
   include Transformable
 
-  before_action :authorize_show!, only: [:show]
+  before_action :authorize_show!, only: [:show, :downloads]
   before_action :authorize_edit!, only: [:edit]
 
   def show
@@ -12,6 +12,11 @@ class WorksController < ApplicationController
     @mods = AtlasRb::Work.mods(params[:id], 'html')
     @files = AtlasRb::Work.files(params[:id])
     breadcrumbs(params[:id])
+  end
+
+  def downloads
+    @files = AtlasRb::Work.files(params[:id])
+    render layout: false
   end
 
   def new

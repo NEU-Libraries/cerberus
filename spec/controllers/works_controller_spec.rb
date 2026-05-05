@@ -23,6 +23,21 @@ describe WorksController do
     end
   end
 
+  describe 'downloads' do
+    render_views
+
+    before do
+      AtlasRb::Work.metadata(work.id, { 'permissions' => { 'read' => ['public'] } })
+    end
+
+    it 'renders the downloads turbo-frame without the layout' do
+      get :downloads, params: { id: work.id }
+      expect(response).to render_template('works/downloads')
+      expect(response).not_to render_template(layout: 'application')
+      expect(response.body).to include('downloads-modal-frame')
+    end
+  end
+
   describe 'create' do
     it 'uploads a binary and makes a Work' do
       post :create, params: { binary: fixture_file_upload('image.png', 'image/png'), parent_id: collection.id }

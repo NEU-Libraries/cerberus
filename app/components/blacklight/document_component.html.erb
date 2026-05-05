@@ -25,6 +25,16 @@
       <% end %>
 
       <div class="text-end">
+        <% if @document.klass == Work %>
+          <button type="button"
+                  class="btn btn-sm btn-link text-decoration-none p-0 me-2"
+                  data-bs-toggle="modal"
+                  data-bs-target="#downloadsModal"
+                  data-downloads-url="<%= downloads_work_path(@document) %>">
+            Downloads
+            <i class="fa-solid fa-download ms-1" aria-hidden="true"></i>
+          </button>
+        <% end %>
         <%= link_to helpers.report_a_problem_url(@document),
                     class: 'btn btn-sm btn-link p-0',
                     target: '_blank',
