@@ -29,8 +29,7 @@
                     class: 'btn btn-sm btn-link p-0',
                     target: '_blank',
                     rel: 'noopener',
-                    title: 'Report a problem',
-                    data: { 'bs-toggle': 'tooltip' } do %>
+                    data: { controller: 'tooltip', 'bs-title': 'Report a problem' } do %>
           <span class="visually-hidden">Report a problem</span>
           <i class="fa-regular fa-comment-dots" aria-hidden="true"></i>
         <% end %>
