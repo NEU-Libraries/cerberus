@@ -39,6 +39,11 @@ module ApplicationHelper
                nonce: request&.content_security_policy_nonce
   end
 
+  def report_a_problem_url(resource_url)
+    query = { queue_id: 5581, resource: resource_url }.to_query
+    "https://northeastern.libanswers.com/form?#{query}"
+  end
+
   def iiif_url(uuid)
     # Supports staging, production etc.
     # cantaloupe
