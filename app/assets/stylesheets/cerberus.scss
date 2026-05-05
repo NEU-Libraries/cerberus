@@ -250,6 +250,10 @@ ol.breadcrumb {
   @extend .px-3;
 }
 
+dl.document-metadata.row {
+  margin-bottom: 0.5rem;
+}
+
 .work-show-divider {
   border: 0;
   border-top: 1px solid $gray-300;
