@@ -544,7 +544,7 @@ Rack::Attack.throttle("challenged", limit: 0, period: 60) do |req|
   $redis.zremrangebyscore("rack_attack:unique_ips", "-inf", (now - 86_400).to_f) ; nil # avoid return contamination
 
   if req.user_agent.blank? || !req.user_agent.downcase.include?("bot".downcase)
-    if req.env["HTTP_COOKIE"].blank? && req.fullpath.include?("files/") # switching to files to catch views and downloads
+    if req.env["HTTP_COOKIE"].blank? && (req.fullpath.include?("files/") || req.fullpath.include?("datastream_id=content"))
       if !seen
         File.write("#{Rails.root}/log/#{DateTime.now.strftime("%F")}-challenge.log", "#{req.remote_ip} - #{req.asn} - #{req.asn_org} - #{req.path} - #{req.fingerprint} - #{Time.now}" + "\n", mode: 'a')
       end
