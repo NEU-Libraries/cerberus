@@ -47,10 +47,11 @@ class WorksController < ApplicationController
 
   def metadata
     @work = AtlasRb::Work.find(params[:id])
+    form_preparation(@permissions)
   end
 
   def update_metadata
-    AtlasRb::Work.metadata(params[:id], metadata_params)
+    AtlasRb::Work.metadata(params[:id], work_params)
     redirect_to work_path(params[:id])
   end
 
@@ -58,10 +59,6 @@ class WorksController < ApplicationController
 
     def work_params
       resource_params(:work)
-    end
-
-    def metadata_params
-      params.require(:work).permit(:title, :description).to_h
     end
 
     def process_blob(file)

@@ -79,10 +79,14 @@ describe WorksController do
       sign_in user
     end
 
-    it 'renders the metadata form prefilled with the title' do
+    it 'renders the metadata form prefilled with the title and the permissions section' do
       get :metadata, params: { id: work.id }
       expect(response).to render_template('works/metadata')
-      expect(CGI.unescapeHTML(response.body)).to include(work.title)
+      body = CGI.unescapeHTML(response.body)
+      expect(body).to include(work.title)
+      expect(body).to include('General Permissions')
+      expect(body).to include('Group Permissions')
+      expect(body).to include('id="add-group"')
     end
   end
 
