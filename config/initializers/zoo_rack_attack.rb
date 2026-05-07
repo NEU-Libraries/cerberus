@@ -563,7 +563,7 @@ Rack::Attack.throttled_response = lambda do |env|
   if (`cut -d ' ' -f2 /proc/loadavg`.strip.to_f < 5) && (env['rack.attack.matched'] == "challenged")
     u = "#{Rails.application.routes.url_helpers.root_url.chomp('/')}#{env["ORIGINAL_FULLPATH"]}"
     uri = URI(u)
-    uri.query = "challenged=true"
+    # uri.query = "challenged=true" # dropping this addition due to the inclusion of datastream_id
 
     view = ActionView::Base.new(ActionController::Base.view_paths, {})
     view.assign(redirect_url: uri.to_s, site_key: ENV["TURNSTILE_SITE_KEY"])
