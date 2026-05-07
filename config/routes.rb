@@ -45,6 +45,8 @@ Rails.application.routes.draw do
   # atlas
   get '/atlas/login' => 'atlas#login'
   post '/atlas/process_login' => 'atlas#process_login'
+  get '/atlas/find_or_create' => 'atlas#find_or_create'
+  post '/atlas/process_find_or_create' => 'atlas#process_find_or_create'
   get '/atlas/user' => 'atlas#user'
 
   # error pages — also targeted by config.exceptions_app
