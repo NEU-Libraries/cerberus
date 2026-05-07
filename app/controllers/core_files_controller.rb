@@ -547,13 +547,15 @@ class CoreFilesController < ApplicationController
     @core_file = CoreFile.find(params[:id])
     @mods_changes = Hash.new
 
-    @core_file.mods.versions.each_with_index do |v, i|
+    template_free = @core_file.mods.versions.select { |x| Nokogiri::XML(x.content,&:noblanks).to_s != Nokogiri::XML(ModsDatastream.xml_template.to_s,&:noblanks).to_s}
+
+    template_free.each_with_index do |v, i|
       date = v.createDate.localtime.to_s
 
       a = v.content
 
-      if !@core_file.mods.versions[i + 1].blank?
-        b = @core_file.mods.versions[i + 1].content
+      if !template_free[i + 1].blank?
+        b = template_free[i + 1].content
       else
         b = ""
       end
@@ -567,15 +569,16 @@ class CoreFilesController < ApplicationController
 
   def mods_history
     @core_file = CoreFile.find(params[:id])
-    @mods_pages = @core_file.mods.versions.paginate(:page => params[:page], :per_page => 1)
+    template_free = @core_file.mods.versions.select { |x| Nokogiri::XML(x.content,&:noblanks).to_s != Nokogiri::XML(ModsDatastream.xml_template.to_s,&:noblanks).to_s}
+    @mods_pages = template_free.paginate(:page => params[:page], :per_page => 1)
 
-    if params[:page].to_i != @core_file.mods.versions.length
-      mods_a = Nokogiri::XML(@core_file.mods.versions[params[:page].to_i].content).to_s
+    if params[:page].to_i != template_free.length
+      mods_a = Nokogiri::XML(template_free[params[:page].to_i].content).to_s
     else
       mods_a = ""
     end
 
-    mods_b = Nokogiri::XML(@core_file.mods.versions[params[:page].to_i - 1].content).to_s
+    mods_b = Nokogiri::XML(template_free[params[:page].to_i - 1].content).to_s
 
     @diff = xml_diff(mods_a, mods_b)
     @diff_css = Diffy::CSS
