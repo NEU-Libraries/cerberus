@@ -9,4 +9,7 @@
     = c.text_area :description, rows: 8, value: @work.description, label: 'Abstract', help: 'A short summary describing the work.'
   .well.p-3.my-3.rounded-3
     = f.button :submit, class: 'btn btn-success'
+    -# TODO: Cancel here means "cancel the upload entirely" — not "don't save
+    -# metadata". When the Tombstone feature lands, point this at it so the
+    -# half-formed Work is properly torn down rather than left orphaned.
     = link_to 'Cancel', work_path(params[:id]), class: 'btn btn-warning'
