@@ -8,5 +8,5 @@
     = c.text_field :title, value: @work.title, label: 'Title', help: 'A descriptive title for this work.'
     = c.text_area :description, rows: 8, value: @work.description, label: 'Abstract', help: 'A short summary describing the work.'
   .well.p-3.my-3.rounded-3
-    = f.button :submit, 'Save', class: 'btn btn-success'
+    = f.button :submit, class: 'btn btn-success'
     = link_to 'Cancel', work_path(params[:id]), class: 'btn btn-warning'

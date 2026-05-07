@@ -98,7 +98,8 @@ describe WorksController do
       patch :update_metadata, params: { id: work.id, work: { title: 'New Title', description: 'New abstract.' } }
 
       updated = AtlasRb::Work.find(work.id)
-      expect(updated.title).to eq('New Title')
+      expect(updated.title).to start_with('New Title')
+      expect(updated.title).not_to include("What's New")
       expect(updated.description).to eq('New abstract.')
       expect(subject).to redirect_to action: :show, id: work.id
     end

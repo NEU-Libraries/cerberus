@@ -61,7 +61,7 @@ class WorksController < ApplicationController
     end
 
     def metadata_params
-      params.require(:work).permit(:title, :description)
+      params.require(:work).permit(:title, :description).to_h
     end
 
     def process_blob(file)
