@@ -5,7 +5,7 @@ class WorksController < ApplicationController
   include Transformable
 
   before_action :authorize_show!, only: [:show, :downloads]
-  before_action :authorize_edit!, only: [:edit]
+  before_action :authorize_edit!, only: [:edit, :metadata, :update_metadata]
 
   def show
     @work = AtlasRb::Work.find(params[:id])
@@ -37,10 +37,20 @@ class WorksController < ApplicationController
     AtlasRb::Work.metadata(@work.id, title: file.original_filename)
     process_blob(file)
 
-    redirect_to work_path(@work.id)
+    redirect_to metadata_work_path(@work.id), notice: 'File uploaded — please review the metadata.'
   end
 
   def update
+    AtlasRb::Work.metadata(params[:id], work_params)
+    redirect_to work_path(params[:id])
+  end
+
+  def metadata
+    @work = AtlasRb::Work.find(params[:id])
+    form_preparation(@permissions)
+  end
+
+  def update_metadata
     AtlasRb::Work.metadata(params[:id], work_params)
     redirect_to work_path(params[:id])
   end

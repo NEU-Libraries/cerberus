@@ -29,6 +29,8 @@ Rails.application.routes.draw do
   resources :works do
     member do
       get :downloads
+      get :metadata
+      patch :metadata, action: :update_metadata
     end
   end
   resources :loads, only: [:index, :show, :new, :create, :destroy]
