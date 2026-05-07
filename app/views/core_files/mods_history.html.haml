@@ -8,7 +8,7 @@
   %li
     = link_to 'MODS History List', core_file_mods_history_list_path(id: @core_file.pid)
   %li.active
-    = @core_file.mods.versions[params[:page].to_i - 1].createDate.localtime.to_s
+    = @template_free[params[:page].to_i - 1].createDate.localtime.to_s
 
 %header
   %h1.page-header
@@ -22,12 +22,12 @@
 .span6
   %h3
     XML as of
-    = @core_file.mods.versions[params[:page].to_i - 1].createDate.localtime.to_s
+    = @template_free[params[:page].to_i - 1].createDate.localtime.to_s
   %label.text-right
     %input#toggle_word_wrap{"type"=>"checkbox"}
     ="Toggle Word Wrap"
   #editor.well
-    = @core_file.mods.versions[params[:page].to_i - 1].content
+    = @template_free[params[:page].to_i - 1].content
 
 .span5
   %h3 MODS Changes from previous version
