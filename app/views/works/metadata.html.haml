@@ -1,0 +1,12 @@
+%h3.py-3 Work Metadata
+
+%p.text-muted
+  Your file was uploaded successfully. Please review and update the metadata below.
+
+= bootstrap_form_tag(url: metadata_work_path(params[:id]), method: :patch) do |f|
+  = bootstrap_fields_for :work do |c|
+    = c.text_field :title, value: @work.title, label: 'Title', help: 'A descriptive title for this work.'
+    = c.text_area :description, rows: 8, value: @work.description, label: 'Abstract', help: 'A short summary describing the work.'
+  .well.p-3.my-3.rounded-3
+    = f.button :submit, 'Save', class: 'btn btn-success'
+    = link_to 'Cancel', work_path(params[:id]), class: 'btn btn-warning'

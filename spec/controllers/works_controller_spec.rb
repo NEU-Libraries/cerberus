@@ -39,9 +39,9 @@ describe WorksController do
   end
 
   describe 'create' do
-    it 'uploads a binary and makes a Work' do
+    it 'uploads a binary and redirects to the metadata page' do
       post :create, params: { binary: fixture_file_upload('image.png', 'image/png'), parent_id: collection.id }
-      expect(subject).to redirect_to action: :show, id: assigns(:work).id
+      expect(subject).to redirect_to action: :metadata, id: assigns(:work).id
     end
   end
 
@@ -66,6 +66,41 @@ describe WorksController do
       get :edit, params: { id: work.id }
       expect(response).to render_template('works/edit')
       expect(CGI.unescapeHTML(response.body)).to include(work.title)
+    end
+  end
+
+  describe 'metadata' do
+    render_views
+
+    let(:user) { User.new(email: 'test@example.com', password: 'password', groups: ['editors']) }
+
+    before do
+      AtlasRb::Work.metadata(work.id, { 'permissions' => { 'edit' => ['editors'] } })
+      sign_in user
+    end
+
+    it 'renders the metadata form prefilled with the title' do
+      get :metadata, params: { id: work.id }
+      expect(response).to render_template('works/metadata')
+      expect(CGI.unescapeHTML(response.body)).to include(work.title)
+    end
+  end
+
+  describe 'update_metadata' do
+    let(:user) { User.new(email: 'test@example.com', password: 'password', groups: ['editors']) }
+
+    before do
+      AtlasRb::Work.metadata(work.id, { 'permissions' => { 'edit' => ['editors'] } })
+      sign_in user
+    end
+
+    it 'updates the title and description and redirects to show' do
+      patch :update_metadata, params: { id: work.id, work: { title: 'New Title', description: 'New abstract.' } }
+
+      updated = AtlasRb::Work.find(work.id)
+      expect(updated.title).to eq('New Title')
+      expect(updated.description).to eq('New abstract.')
+      expect(subject).to redirect_to action: :show, id: work.id
     end
   end
 end
