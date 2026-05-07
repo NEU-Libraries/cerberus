@@ -626,7 +626,8 @@ class CoreFilesController < ApplicationController
     @core_file = CoreFile.find(params[:id])
 
     if params[:version]
-      @mods = @core_file.mods.versions[params[:version].to_i].content
+      template_free = @core_file.mods.versions.select { |x| Nokogiri::XML(x.content,&:noblanks).to_s != Nokogiri::XML(ModsDatastream.xml_template.to_s,&:noblanks).to_s}
+      @mods = template_free[params[:version].to_i].content
       flash[:notice] =  "XML Editor has been populated with MODS from #{@core_file.mods.versions[params[:version].to_i].createDate.localtime.to_s}"
     else
       # Purge bad keyword template mapping
