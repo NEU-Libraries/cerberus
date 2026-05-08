@@ -23,45 +23,7 @@
       %input.form-select.form-select-sm#embargo{name: "work[permissions][embargo]", type: "date", value: @embargo}/
       %label.small.py-3{for: "embargo"} If this item is embargoed, please enter the release date.
 
-  %h5.pt-3.pb-2 Group Permissions
-  - @permissions.each.with_index(1) do |group, index|
-    .row.py-1{id: "group-list_#{index}"}
-      .col-sm-auto.form-text
-        Group
-      .col-sm
-        %select.form-select.form-select-sm.groups{"aria-label" => "Group", name: "work[permissions][#{index}][group_id]"}
-          %option{value: group[0], selected: "selected"} #{group[1]}
-          - @groups.each do |user_group|
-            - if !(user_group[0] == group[0])
-              %option{value: user_group[0]} #{user_group[1]}
-      .col-sm-auto.form-text
-        Ability
-      .col-sm-2
-        %select.form-select.form-select-sm.ability{"aria-label" => "Ability", name: "work[permissions][#{index}][ability]"}
-          %option{value: "read", selected: group[2] == "View"} View
-          %option{value: "edit", selected: group[2] == "Manage"} Manage
-      .col-sm-2
-        %button.btn.btn-danger.form-control.btn-sm{type: "button", name: "delete-group", onclick: "$(this).parent().parent().remove();"}
-          %i.fa.fa-times{"aria-hidden" => "true"}
-
-  .row.py-1#group-list{style: "display: none;"}
-    .col-sm-auto.form-text
-      Group
-    .col-sm
-      %select.form-select.form-select-sm.groups{"aria-label" => "Group"}
-        %option{value: ""}
-        - @groups.each do |user_group|
-          %option{value: user_group[0]} #{user_group[1]}
-    .col-sm-auto.form-text
-      Ability
-    .col-sm-2
-      %select.form-select.form-select-sm.ability{"aria-label" => "Ability"}
-        %option{value: ""}
-        %option{value: "1"} View
-        %option{value: "2"} Manage
-    .col-sm-2
-      %button.btn.btn-danger.form-control.btn-sm{type: "button", name: "delete-group", onclick: "$(this).parent().parent().remove();"}
-        %i.fa.fa-times{"aria-hidden" => "true"}
+  = render 'shared/group_permissions', resource: 'work'
 
   .well.p-3.my-3.rounded-3
     = f.button :submit, class: 'btn btn-success'
@@ -69,26 +31,3 @@
     -# metadata". When the Tombstone feature lands, point this at it so the
     -# half-formed Work is properly torn down rather than left orphaned.
     = link_to 'Cancel', work_path(params[:id]), class: 'btn btn-warning'
-    %button.btn.btn-info.float-end#add-group{type: "button"}
-      Add Group
-
-:javascript
-  var add_btn = document.getElementById('add-group');
-
-  add_btn.addEventListener('click', function(e){
-    let count = $('[id^="group-list"]').length;
-
-    let $clone = $('#group-list').clone();
-    $clone.attr('id', 'group-list_' + count);
-
-    $clone.find('select.groups').attr('name', `work[permissions][${count}][group_id]`);
-    $clone.find('select.ability').attr('name', `work[permissions][${count}][ability]`);
-
-    $clone.insertAfter($('[id^="group-list"]').last());
-
-    $clone.show();
-  });
-
-- if @permissions.empty?
-  :javascript
-    document.addEventListener('turbo:load', function() { add_btn.click(); }, { once: true });
