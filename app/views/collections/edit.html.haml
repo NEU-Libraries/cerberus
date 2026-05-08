@@ -105,4 +105,4 @@
 
 - if @permissions.empty?
   :javascript
-    add_btn.click();
+    document.addEventListener('turbo:load', function() { add_btn.click(); }, { once: true });
