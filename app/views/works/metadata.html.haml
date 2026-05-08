@@ -32,7 +32,4 @@
       -# metadata". When the Tombstone feature lands, point this at it so the
       -# half-formed Work is properly torn down rather than left orphaned.
       = link_to 'Cancel', work_path(params[:id]), class: 'btn btn-warning'
-      %button.btn.btn-info.float-end#add-group{ type: "button",
-                                               data: { "group-permissions-target": "addButton",
-                                                       action: "click->group-permissions#add" } }
-        Add Group
+      = render 'shared/add_group_button'
