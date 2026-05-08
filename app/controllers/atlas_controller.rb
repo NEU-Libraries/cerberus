@@ -21,9 +21,11 @@ class AtlasController < ApplicationController
 
   def process_find_or_create
     nuid = params[:user][:nuid]
+    name = params[:user][:name].presence
+    email = params[:user][:email].presence
     groups = params[:user][:groups].to_s.split("\n").map(&:strip).reject(&:blank?)
 
-    AtlasRb::User.find_or_create(nuid: nuid, groups: groups)
+    AtlasRb::User.find_or_create(nuid: nuid, groups: groups, name: name, email: email)
 
     user_values = AtlasRb::Authentication.login(nuid)
     user = User.new(

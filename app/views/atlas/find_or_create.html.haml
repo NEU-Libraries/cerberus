@@ -7,6 +7,8 @@
 = bootstrap_form_tag url: atlas_process_find_or_create_path do |f|
   = bootstrap_fields_for :user do |u|
     = u.text_field :nuid
+    = u.text_field :name
+    = u.email_field :email
     = u.text_area :groups, rows: 6, help: 'One group identifier per line.'
   .well.p-3.my-3.rounded-3
     = f.submit 'Find or Create + Sign In', class: 'btn btn-success'
