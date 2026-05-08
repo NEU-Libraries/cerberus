@@ -22,7 +22,7 @@
           = f.button :submit, class: "btn btn-success"
           = link_to "Cancel", community_path(params[:id]), class: "btn btn-warning"
   #permissions.tab-pane{"aria-labelledby" => "permissions-tab", role: "tabpanel"}
-    .py-2.px-1
+    .py-2.px-1{ data: { controller: "group-permissions", "group-permissions-resource-value": "community" } }
       = bootstrap_form_tag(url: community_path(params[:id]), method: :patch, multipart: true) do |f|
         .row
           .col-sm
@@ -39,3 +39,7 @@
           .well.p-3.my-3.rounded-3
             = f.button :submit, class: "btn btn-success"
             = link_to "Cancel", community_path(params[:id]), class: "btn btn-warning"
+            %button.btn.btn-info.float-end#add-group{ type: "button",
+                                                     data: { "group-permissions-target": "addButton",
+                                                             action: "click->group-permissions#add" } }
+              Add Group
