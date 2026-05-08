@@ -3,10 +3,13 @@
 module Transformable
   extend ActiveSupport::Concern
 
+  STAFF_EDIT_GROUP = 'northeastern:drs:repository:staff'
+
   def pretty_resource_permissions(perms)
     return [] if perms.blank?
 
     perms.read&.delete('public')
+    perms.edit&.delete(STAFF_EDIT_GROUP)
     perms.slice('read', 'edit').flat_map do |key, values|
       permission = key == 'read' ? 'View' : 'Manage'
       Array(values).map { |value| [value, pretty_group(value), permission] }
