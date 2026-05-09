@@ -120,11 +120,9 @@ describe WorksController do
     end
 
     it 'calls AtlasRb::Work.tombstone with the acting user nuid and redirects' do
-      without_partial_double_verification do
-        allow(AtlasRb::Work).to receive(:tombstone)
-        post :tombstone, params: { id: work.id }
-        expect(AtlasRb::Work).to have_received(:tombstone).with(work.id, nuid: '000000002')
-      end
+      allow(AtlasRb::Work).to receive(:tombstone)
+      post :tombstone, params: { id: work.id }
+      expect(AtlasRb::Work).to have_received(:tombstone).with(work.id, nuid: '000000002')
       expect(subject).to redirect_to(root_path)
     end
   end

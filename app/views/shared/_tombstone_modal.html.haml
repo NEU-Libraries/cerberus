@@ -10,20 +10,20 @@
 %button.btn.btn-link.px-3.text-danger.p-0.align-baseline{type: 'button',
                                                          data: { 'bs-toggle': 'modal',
                                                                  'bs-target': "##{modal_id}" }}
-  Withdraw
+  Delete
 
 .modal.fade{id: modal_id, tabindex: '-1', 'aria-labelledby': label_id, 'aria-hidden': 'true'}
   .modal-dialog.modal-dialog-centered
     .modal-content
       .modal-header
-        %h5.modal-title{id: label_id} Confirm withdrawal
+        %h5.modal-title{id: label_id} Confirm deletion
         %button.btn-close{type: 'button', 'aria-label': 'Close', data: { 'bs-dismiss': 'modal' }}
       .modal-body
         %p
-          Are you sure you want to withdraw this
+          Are you sure you want to delete this
           = "#{kind}?"
         %p.small.text-muted.mb-0
-          The record will be hidden from public discovery and replaced by a withdrawn stub. Restoration is operator-only.
+          The record will be removed from public discovery and replaced by a deletion stub. Restoration is operator-only.
       .modal-footer
         %button.btn.btn-secondary{type: 'button', data: { 'bs-dismiss': 'modal' }} Cancel
-        = button_to 'Withdraw', path, method: :post, class: 'btn btn-danger', form: { class: 'd-inline' }
+        = button_to 'Delete', path, method: :post, class: 'btn btn-danger', form: { class: 'd-inline' }

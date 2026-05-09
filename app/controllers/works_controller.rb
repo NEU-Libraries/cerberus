@@ -22,7 +22,7 @@ class WorksController < ApplicationController
 
   def tombstone
     AtlasRb::Work.tombstone(params[:id], nuid: current_user.nuid)
-    redirect_to root_path, notice: 'Work withdrawn.'
+    redirect_to root_path, notice: 'Work deleted.'
   end
 
   def downloads

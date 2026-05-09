@@ -60,11 +60,9 @@ describe CollectionsController do
     end
 
     it 'calls AtlasRb::Collection.tombstone with the acting user nuid and redirects' do
-      without_partial_double_verification do
-        allow(AtlasRb::Collection).to receive(:tombstone)
-        post :tombstone, params: { id: collection.id }
-        expect(AtlasRb::Collection).to have_received(:tombstone).with(collection.id, nuid: '000000002')
-      end
+      allow(AtlasRb::Collection).to receive(:tombstone)
+      post :tombstone, params: { id: collection.id }
+      expect(AtlasRb::Collection).to have_received(:tombstone).with(collection.id, nuid: '000000002')
       expect(subject).to redirect_to(root_path)
     end
   end
