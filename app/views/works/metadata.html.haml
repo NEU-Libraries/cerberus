@@ -28,10 +28,12 @@
 
     .well.p-3.my-3.rounded-3
       = f.button :submit, class: 'btn btn-success'
-      = button_to 'Cancel',
-                  tombstone_work_path(params[:id]),
-                  method: :post,
-                  class: 'btn btn-warning',
-                  form: { class: 'd-inline' },
-                  data: { turbo_confirm: 'Cancel this upload? The Work will be withdrawn.' }
+      -# Plain link (not button_to) — `button_to` emits a nested <form>,
+      -# which the browser silently strips inside the metadata form. Turbo
+      -# intercepts the click and POSTs to the tombstone route.
+      = link_to 'Cancel',
+                tombstone_work_path(params[:id]),
+                class: 'btn btn-warning',
+                data: { turbo_method: :post,
+                        turbo_confirm: 'Cancel this upload? The Work will be withdrawn.' }
       = render 'shared/add_group_button'
