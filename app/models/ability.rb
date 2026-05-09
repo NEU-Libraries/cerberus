@@ -11,6 +11,9 @@ class Ability
       can :edit, SolrDocument do |doc|
         groups_can_edit?(doc, user)
       end
+      can :tombstone, SolrDocument do |doc|
+        groups_can_edit?(doc, user) || depositor_for_work?(doc, user)
+      end
     else
       can :read, SolrDocument, &method(:public_document?)
     end
@@ -28,5 +31,12 @@ class Ability
 
     def groups_can_edit?(doc, user)
       (Array(doc['edit_access_group_ssim']) & Array(user.groups)).any?
+    end
+
+    def depositor_for_work?(doc, user)
+      return false unless doc['internal_resource_tesim'].to_s == 'Work'
+      return false if user.nuid.blank?
+
+      doc['depositor_ssi'].present? && doc['depositor_ssi'] == user.nuid
     end
 end

@@ -9,4 +9,18 @@ describe SolrDocument do
     subject { no_noid_doc.to_param }
     it { is_expected.to eq no_noid_doc.id }
   end
+
+  describe '#tombstoned?' do
+    it 'is true when tombstoned_bsi is true' do
+      expect(SolrDocument.new('tombstoned_bsi' => true).tombstoned?).to be true
+    end
+
+    it 'is false when tombstoned_bsi is missing' do
+      expect(SolrDocument.new.tombstoned?).to be false
+    end
+
+    it 'is false when tombstoned_bsi is false' do
+      expect(SolrDocument.new('tombstoned_bsi' => false).tombstoned?).to be false
+    end
+  end
 end
