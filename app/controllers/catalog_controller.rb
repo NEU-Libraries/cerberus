@@ -29,7 +29,8 @@ class CatalogController < ApplicationController
     config.default_solr_params = {
       rows: 10,
       fq: ['-internal_resource_tesim:FileSet',
-           '-internal_resource_tesim:Blob']
+           '-internal_resource_tesim:Blob',
+           '-tombstoned_bsi:true']
     }
 
     # solr path which will be added to solr base url before the other solr params.
@@ -227,7 +228,8 @@ class CatalogController < ApplicationController
       fq: [
         "a_member_of_tesim:\"id-#{id}\"",
         '-internal_resource_tesim:FileSet',
-        '-internal_resource_tesim:Blob'
+        '-internal_resource_tesim:Blob',
+        '-tombstoned_bsi:true'
       ]
     )
 

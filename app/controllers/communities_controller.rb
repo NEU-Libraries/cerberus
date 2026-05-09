@@ -4,13 +4,23 @@ class CommunitiesController < CatalogController
   include Thumbable
   include Transformable
 
-  before_action :authorize_show!, only: [:show]
   before_action :authorize_edit!, only: [:edit]
+  before_action :authorize_tombstone!, only: [:tombstone]
 
   def show
     @community = AtlasRb::Community.find(params[:id])
+    return render_gone(@community) if @community.tombstoned
+
+    authorize_show!
     @response = find_children(@community.valkyrie_id)
+    @can_tombstone = current_ability.can?(:tombstone,
+                                          solr_doc_from_permissions(@permissions, klass: 'Community'))
     breadcrumbs(params[:id])
+  end
+
+  def tombstone
+    AtlasRb::Community.tombstone(params[:id], nuid: current_user.nuid)
+    redirect_to root_path, notice: 'Community withdrawn.'
   end
 
   def new

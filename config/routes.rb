@@ -24,13 +24,22 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :communities
-  resources :collections
+  resources :communities do
+    member do
+      post :tombstone
+    end
+  end
+  resources :collections do
+    member do
+      post :tombstone
+    end
+  end
   resources :works do
     member do
       get :downloads
       get :metadata
       patch :metadata, action: :update_metadata
+      post :tombstone
     end
   end
   resources :loads, only: [:index, :show, :new, :create, :destroy]

@@ -4,14 +4,25 @@ class WorksController < ApplicationController
   include Thumbable
   include Transformable
 
-  before_action :authorize_show!, only: [:show, :downloads]
+  before_action :authorize_show!, only: [:downloads]
   before_action :authorize_edit!, only: [:edit, :metadata, :update_metadata]
+  before_action :authorize_tombstone!, only: [:tombstone]
 
   def show
     @work = AtlasRb::Work.find(params[:id])
+    return render_gone(@work) if @work.tombstoned
+
+    authorize_show!
     @mods = AtlasRb::Work.mods(params[:id], 'html')
     @files = AtlasRb::Work.files(params[:id])
+    @can_tombstone = current_ability.can?(:tombstone,
+                                          solr_doc_from_permissions(@permissions, klass: 'Work'))
     breadcrumbs(params[:id])
+  end
+
+  def tombstone
+    AtlasRb::Work.tombstone(params[:id], nuid: current_user.nuid)
+    redirect_to root_path, notice: 'Work withdrawn.'
   end
 
   def downloads

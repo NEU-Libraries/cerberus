@@ -2,6 +2,7 @@
 - record     = local_assigns.fetch(:record, nil)
 - title      = record.try(:title) || params[:id]
 - reason     = record.try(:tombstone_reason)
+- url        = record.try(:identifier) || record.try(:permanent_url)
 - staff_link = link_to "contact the DRS staff", "mailto:Library-Repository-Team@neu.edu"
 .d-flex.align-items-center{ style: "min-height: 60vh;" }
   .container.p-4.text-center
@@ -14,13 +15,13 @@
       - else
         = "\"#{title}\" has been removed."
     .pt-3
-    - if record.try(:identifier).present?
+    - if url.present?
       %p.mb-0
         %strong Title:
         = title
       %p.mb-0
         %strong Permanent URL:
-        = link_to record.identifier, record.identifier
+        = link_to url, url
       .pt-2
     %p.mb-0
       If you believe this item was removed in error, please #{staff_link}.

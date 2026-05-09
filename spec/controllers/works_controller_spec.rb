@@ -108,4 +108,41 @@ describe WorksController do
       expect(subject).to redirect_to action: :show, id: work.id
     end
   end
+
+  describe 'tombstone' do
+    let(:user) { User.new(email: 'staff@example.com', nuid: '000000002',
+                          groups: [Transformable::STAFF_EDIT_GROUP]) }
+
+    before do
+      AtlasRb::Work.metadata(work.id,
+                             { 'permissions' => { 'edit' => [Transformable::STAFF_EDIT_GROUP] } })
+      sign_in user
+    end
+
+    it 'calls AtlasRb::Work.tombstone with the acting user nuid and redirects' do
+      without_partial_double_verification do
+        allow(AtlasRb::Work).to receive(:tombstone)
+        post :tombstone, params: { id: work.id }
+        expect(AtlasRb::Work).to have_received(:tombstone).with(work.id, nuid: '000000002')
+      end
+      expect(subject).to redirect_to(root_path)
+    end
+  end
+
+  describe 'show on a tombstoned work' do
+    render_views
+
+    before do
+      AtlasRb::Work.metadata(work.id, { 'permissions' => { 'read' => ['public'] } })
+      tombstoned = AtlasRb::Work.find(work.id)
+      tombstoned['tombstoned'] = true
+      allow(AtlasRb::Work).to receive(:find).with(work.id).and_return(tombstoned)
+    end
+
+    it 'renders the gone template with status 410' do
+      get :show, params: { id: work.id }
+      expect(response).to render_template('errors/gone')
+      expect(response).to have_http_status(:gone)
+    end
+  end
 end

@@ -48,4 +48,24 @@ describe CollectionsController do
       expect(response).to render_template('collections/new')
     end
   end
+
+  describe 'tombstone' do
+    let(:user) { User.new(email: 'staff@example.com', nuid: '000000002',
+                          groups: [Transformable::STAFF_EDIT_GROUP]) }
+
+    before do
+      AtlasRb::Collection.metadata(collection.id,
+                                   { 'permissions' => { 'edit' => [Transformable::STAFF_EDIT_GROUP] } })
+      sign_in user
+    end
+
+    it 'calls AtlasRb::Collection.tombstone with the acting user nuid and redirects' do
+      without_partial_double_verification do
+        allow(AtlasRb::Collection).to receive(:tombstone)
+        post :tombstone, params: { id: collection.id }
+        expect(AtlasRb::Collection).to have_received(:tombstone).with(collection.id, nuid: '000000002')
+      end
+      expect(subject).to redirect_to(root_path)
+    end
+  end
 end
