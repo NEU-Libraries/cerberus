@@ -14,7 +14,9 @@
 
 .modal.fade{id: modal_id, tabindex: '-1', 'aria-labelledby': label_id, 'aria-hidden': 'true'}
   .modal-dialog.modal-dialog-centered
-    .modal-content
+    -# `text-start` here defends against `.text-end` ancestors on the
+    -# host page (e.g. works/show) bleeding into the modal contents.
+    .modal-content.text-start
       .modal-header
         %h5.modal-title{id: label_id} Confirm deletion
         %button.btn-close{type: 'button', 'aria-label': 'Close', data: { 'bs-dismiss': 'modal' }}
