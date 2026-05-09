@@ -1,16 +1,16 @@
 -# Tombstone confirm modal — used on community/collection/work show pages.
 -#
 -# Locals:
--#   id   — the resource ID, used to scope modal/label DOM ids
--#   kind — human noun ("community", "collection", "work")
--#   path — POST route that performs the tombstone
+-#   id            — the resource ID, used to scope modal/label DOM ids
+-#   kind          — human noun ("community", "collection", "work")
+-#   path          — POST route that performs the tombstone
+-#   trigger_class — class string for the trigger link (matches the
+-#                   sibling Edit link on the host page).
 - modal_id = "tombstone-modal-#{id}"
 - label_id = "tombstone-label-#{id}"
+- trigger_class = local_assigns.fetch(:trigger_class, 'px-3')
 
-%button.btn.btn-link.px-3.text-danger.p-0.align-baseline{type: 'button',
-                                                         data: { 'bs-toggle': 'modal',
-                                                                 'bs-target': "##{modal_id}" }}
-  Delete
+= link_to 'Delete', "##{modal_id}", class: trigger_class, data: { 'bs-toggle': 'modal' }
 
 .modal.fade{id: modal_id, tabindex: '-1', 'aria-labelledby': label_id, 'aria-hidden': 'true'}
   .modal-dialog.modal-dialog-centered
