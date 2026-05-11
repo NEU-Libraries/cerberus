@@ -84,6 +84,16 @@ describe WorksController do
       expect(response).to render_template('works/edit')
       expect(CGI.unescapeHTML(response.body)).to include(work.title)
     end
+
+    it 'renders the cosmetic group name in the permissions dropdown, not the raw identifier' do
+      Group.create!(raw: 'editors', cosmetic: 'Course Editors')
+
+      get :edit, params: { id: work.id }
+      body = CGI.unescapeHTML(response.body)
+
+      expect(body).to match(%r{<option[^>]*>\s*Course Editors\s*</option>})
+      expect(body).not_to match(%r{<option[^>]*>\s*editors\s*</option>})
+    end
   end
 
   describe 'metadata' do
