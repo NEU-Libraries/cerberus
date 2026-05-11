@@ -13,6 +13,7 @@ USER cerberus
 
 RUN mkdir -p /home/cerberus/storage
 RUN mkdir -p /home/cerberus/images
+RUN mkdir -p /home/cerberus/uploads
 
 COPY --chown=cerberus:cerberus Gemfile* /tmp/
 WORKDIR /tmp
