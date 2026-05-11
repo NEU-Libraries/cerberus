@@ -25,8 +25,13 @@ default: &default
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
 
 development:
-  <<: *default
-  database: cerberus_development
+  primary:
+    <<: *default
+    database: cerberus_development
+  queue:
+    <<: *default
+    database: cerberus_queue_development
+    migrations_paths: db/queue_migrate
 
 staging:
   <<: *default
@@ -63,8 +68,13 @@ staging:
 # re-generated from your development database when you run "rake".
 # Do not set this db to the same as development or production.
 test:
-  <<: *default
-  database: cerberus_test
+  primary:
+    <<: *default
+    database: cerberus_test
+  queue:
+    <<: *default
+    database: cerberus_queue_test
+    migrations_paths: db/queue_migrate
 
 atlas_test:
   <<: *default

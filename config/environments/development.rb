@@ -5,6 +5,11 @@ Rails.application.configure do
 
   config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
 
+  # Solid Queue tables live in their own DB; mirrors production so
+  # `bin/rails db:prepare` provisions the queue connection from
+  # db/queue_schema.rb without manual steps.
+  config.solid_queue.connects_to = { database: { writing: :queue } }
+
   # In the development environment your application's code is reloaded any time
   # it changes. This slows down response time but is perfect for development
   # since you don't have to restart the web server when you make code changes.
