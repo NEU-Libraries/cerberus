@@ -14,3 +14,4 @@ services:
       - ./:/home/cerberus/web
       - iiif:/home/cerberus/images
       - storage:/home/cerberus/storage
+      - uploads:/home/cerberus/uploads
