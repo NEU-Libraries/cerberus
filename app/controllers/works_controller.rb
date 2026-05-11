@@ -4,6 +4,8 @@ class WorksController < ApplicationController
   include Thumbable
   include Transformable
 
+  UPLOADS_ROOT = '/home/cerberus/uploads'
+
   before_action :authorize_show!, only: [:downloads]
   before_action :authorize_edit!, only: [:edit, :metadata, :update_metadata]
   before_action :authorize_tombstone!, only: [:tombstone]
@@ -46,7 +48,10 @@ class WorksController < ApplicationController
     @work = AtlasRb::Work.create(AtlasRb::Collection.find(params[:parent_id]).id)
 
     AtlasRb::Work.metadata(@work.id, title: file.original_filename)
-    process_blob(file)
+
+    staged_path = stage_upload(file, @work.id)
+    ThumbnailCreationJob.perform_later(@work.id, staged_path) if file.content_type.to_s.start_with?('image/')
+    ContentCreationJob.perform_later(@work.id, staged_path, file.original_filename)
 
     redirect_to metadata_work_path(@work.id), notice: 'File uploaded — please review the metadata.'
   end
@@ -72,13 +77,11 @@ class WorksController < ApplicationController
       resource_params(:work)
     end
 
-    def process_blob(file)
-      if file.content_type.start_with?('image/')
-        AtlasRb::Work.metadata(@work.id,
-                               'thumbnail' => ThumbnailCreator.call(path: file.tempfile.path))
-      end
-
-      # BlobCreator will make a fileset to contain the blob
-      AtlasRb::Blob.create(@work.id, file.tempfile.path.presence || file.path, file.original_filename)
+    def stage_upload(file, work_id)
+      dir = File.join(UPLOADS_ROOT, work_id.to_s)
+      FileUtils.mkdir_p(dir)
+      dest = File.join(dir, file.original_filename)
+      FileUtils.cp(file.tempfile.path.presence || file.path, dest)
+      dest
     end
 end

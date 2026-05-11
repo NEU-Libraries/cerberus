@@ -2,6 +2,8 @@
 
 require 'rails_helper'
 
+RSpec::Matchers.define_negated_matcher :not_have_enqueued_job, :have_enqueued_job
+
 describe WorksController do
   let(:community) { AtlasRb::Community.create(nil, '/home/cerberus/web/spec/fixtures/files/community-mods.xml') }
   let(:collection) { AtlasRb::Collection.create(community.id, '/home/cerberus/web/spec/fixtures/files/collection-mods.xml') }
@@ -39,9 +41,24 @@ describe WorksController do
   end
 
   describe 'create' do
-    it 'uploads a binary and redirects to the metadata page' do
-      post :create, params: { binary: fixture_file_upload('image.png', 'image/png'), parent_id: collection.id }
+    include ActiveJob::TestHelper
+
+    it 'enqueues both jobs and redirects to the metadata page' do
+      expect {
+        post :create, params: { binary: fixture_file_upload('image.png', 'image/png'),
+                                parent_id: collection.id }
+      }.to have_enqueued_job(ThumbnailCreationJob)
+       .and have_enqueued_job(ContentCreationJob)
+
       expect(subject).to redirect_to action: :metadata, id: assigns(:work).id
+    end
+
+    it 'does not enqueue the thumbnail job for non-image uploads' do
+      expect {
+        post :create, params: { binary: fixture_file_upload('plain.txt', 'text/plain'),
+                                parent_id: collection.id }
+      }.to have_enqueued_job(ContentCreationJob)
+       .and not_have_enqueued_job(ThumbnailCreationJob)
     end
   end
 
