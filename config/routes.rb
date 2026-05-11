@@ -3,7 +3,7 @@
 Rails.application.routes.draw do
   devise_for :users
 
-  authenticate :user, ->(u) { u.groups&.include?(Transformable::STAFF_EDIT_GROUP) } do
+  authenticate :user, ->(u) { u.groups&.include?(Permissions::STAFF_EDIT_GROUP) } do
     mount MissionControl::Jobs::Engine, at: '/jobs'
   end
 

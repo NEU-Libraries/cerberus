@@ -51,11 +51,11 @@ describe CollectionsController do
 
   describe 'tombstone' do
     let(:user) { User.new(email: 'staff@example.com', nuid: '000000002',
-                          groups: [Transformable::STAFF_EDIT_GROUP]) }
+                          groups: [Permissions::STAFF_EDIT_GROUP]) }
 
     before do
       AtlasRb::Collection.metadata(collection.id,
-                                   { 'permissions' => { 'edit' => [Transformable::STAFF_EDIT_GROUP] } })
+                                   { 'permissions' => { 'edit' => [Permissions::STAFF_EDIT_GROUP] } })
       sign_in user
     end
 
