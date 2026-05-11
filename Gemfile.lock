@@ -244,6 +244,16 @@ GEM
     minitest (6.0.6)
       drb (~> 2.0)
       prism (~> 1.5)
+    mission_control-jobs (1.1.0)
+      actioncable (>= 7.1)
+      actionpack (>= 7.1)
+      activejob (>= 7.1)
+      activerecord (>= 7.1)
+      importmap-rails (>= 1.2.1)
+      irb (~> 1.13)
+      railties (>= 7.1)
+      stimulus-rails
+      turbo-rails
     mods (3.0.5)
       csv (~> 3.3)
       edtf (~> 3.0)
@@ -493,6 +503,7 @@ DEPENDENCIES
   jbuilder
   libreconv
   loaf
+  mission_control-jobs
   mods
   namae
   next_rails

@@ -2,6 +2,11 @@
 
 Rails.application.routes.draw do
   devise_for :users
+
+  authenticate :user, ->(u) { u.groups&.include?(Transformable::STAFF_EDIT_GROUP) } do
+    mount MissionControl::Jobs::Engine, at: '/jobs'
+  end
+
   mount Blacklight::Engine => '/catalog'
   root to: 'pages#home'
   concern :searchable, Blacklight::Routes::Searchable.new
