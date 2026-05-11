@@ -34,7 +34,6 @@ class WorksController < ApplicationController
 
   def new
     @work = Work.new
-    @collection_id = params[:collection_id]
   end
 
   def edit
