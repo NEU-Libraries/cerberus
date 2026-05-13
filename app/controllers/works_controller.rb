@@ -50,7 +50,7 @@ class WorksController < ApplicationController
 
     staged_path = stage_upload(file, @work.id)
     ThumbnailCreationJob.perform_later(@work.id, staged_path) if file.content_type.to_s.start_with?('image/')
-    ContentCreationJob.perform_later(@work.id, staged_path, file.original_filename)
+    ContentCreationJob.perform_later(@work.id, staged_path, file.original_filename, SecureRandom.uuid)
 
     redirect_to metadata_work_path(@work.id), notice: 'File uploaded — please review the metadata.'
   end

@@ -43,12 +43,15 @@ describe WorksController do
   describe 'create' do
     include ActiveJob::TestHelper
 
+    let(:uuid_re) { /\A\h{8}-\h{4}-\h{4}-\h{4}-\h{12}\z/ }
+
     it 'enqueues both jobs and redirects to the metadata page' do
       expect {
         post :create, params: { binary: fixture_file_upload('image.png', 'image/png'),
                                 parent_id: collection.id }
       }.to have_enqueued_job(ThumbnailCreationJob)
        .and have_enqueued_job(ContentCreationJob)
+              .with(anything, anything, 'image.png', a_string_matching(uuid_re))
 
       expect(subject).to redirect_to action: :metadata, id: assigns(:work).id
     end
@@ -58,6 +61,7 @@ describe WorksController do
         post :create, params: { binary: fixture_file_upload('plain.txt', 'text/plain'),
                                 parent_id: collection.id }
       }.to have_enqueued_job(ContentCreationJob)
+              .with(anything, anything, 'plain.txt', a_string_matching(uuid_re))
        .and not_have_enqueued_job(ThumbnailCreationJob)
     end
   end
