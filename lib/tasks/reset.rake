@@ -25,6 +25,7 @@ namespace :reset do
                              'permissions' => { 'read' => ['public'] }
                            })
     AtlasRb::Blob.create(work['id'], '/home/cerberus/web/spec/fixtures/files/flower.jpg', 'flower.jpg')
+    AtlasRb::Work.complete(work['id'])
   end
 
   desc 'Clean solr and dbs'
