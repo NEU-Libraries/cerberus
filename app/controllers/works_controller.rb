@@ -6,15 +6,19 @@ class WorksController < ApplicationController
 
   UPLOADS_ROOT = '/home/cerberus/uploads'
 
+  IN_PROGRESS_NOTICE = 'This work is still being processed and cannot be edited yet.'
+
   before_action :authorize_show!, only: [:downloads]
   before_action :authorize_edit!, only: [:edit, :metadata, :update_metadata]
   before_action :authorize_tombstone!, only: [:tombstone]
+  before_action :reject_if_in_progress, only: [:edit]
 
   def show
     @work = AtlasRb::Work.find(params[:id])
     return render_gone(@work) if @work.tombstoned
 
     authorize_show!
+    flash.now[:alert] = IN_PROGRESS_NOTICE if @work.in_progress
     @mods = AtlasRb::Work.mods(params[:id], 'html')
     @files = AtlasRb::Work.files(params[:id])
     @can_tombstone = current_ability.can?(:tombstone,
@@ -74,6 +78,12 @@ class WorksController < ApplicationController
 
     def work_params
       resource_params(:work)
+    end
+
+    def reject_if_in_progress
+      return unless AtlasRb::Work.find(params[:id]).in_progress
+
+      redirect_to work_path(params[:id]), alert: IN_PROGRESS_NOTICE
     end
 
     def stage_upload(file, work_id)

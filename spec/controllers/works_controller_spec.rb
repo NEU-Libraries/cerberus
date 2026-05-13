@@ -7,7 +7,17 @@ RSpec::Matchers.define_negated_matcher :not_have_enqueued_job, :have_enqueued_jo
 describe WorksController do
   let(:community) { AtlasRb::Community.create(nil, '/home/cerberus/web/spec/fixtures/files/community-mods.xml') }
   let(:collection) { AtlasRb::Collection.create(community.id, '/home/cerberus/web/spec/fixtures/files/collection-mods.xml') }
-  let(:work) { AtlasRb::Work.create(collection.id, '/home/cerberus/web/spec/fixtures/files/work-mods.xml') }
+  let(:work) do
+    created = AtlasRb::Work.create(collection.id, '/home/cerberus/web/spec/fixtures/files/work-mods.xml')
+    AtlasRb::Work.complete(created.id)
+    AtlasRb::Work.find(created.id)
+  end
+
+  def stub_work_in_progress(w)
+    in_progress = AtlasRb::Work.find(w.id)
+    in_progress['in_progress'] = true
+    allow(AtlasRb::Work).to receive(:find).with(w.id).and_return(in_progress)
+  end
 
   describe 'show' do
     render_views
@@ -22,6 +32,18 @@ describe WorksController do
       get :show, params: { id: work.id }
       expect(response).to render_template('works/show')
       expect(CGI.unescapeHTML(response.body)).to include(work.title)
+    end
+
+    context 'when the work is still in_progress' do
+      render_views
+
+      before { stub_work_in_progress(work) }
+
+      it 'flashes the in-progress notice and hides the Edit link' do
+        get :show, params: { id: work.id }
+        expect(flash.now[:alert]).to eq(WorksController::IN_PROGRESS_NOTICE)
+        expect(response.body).not_to match(%r{>\s*Edit\s*</a>})
+      end
     end
   end
 
@@ -97,6 +119,16 @@ describe WorksController do
 
       expect(body).to match(%r{<option[^>]*>\s*Course Editors\s*</option>})
       expect(body).not_to match(%r{<option[^>]*>\s*editors\s*</option>})
+    end
+
+    context 'when the work is still in_progress' do
+      before { stub_work_in_progress(work) }
+
+      it 'redirects to show with the in-progress alert' do
+        get :edit, params: { id: work.id }
+        expect(response).to redirect_to(work_path(work.id))
+        expect(flash[:alert]).to eq(WorksController::IN_PROGRESS_NOTICE)
+      end
     end
   end
 
