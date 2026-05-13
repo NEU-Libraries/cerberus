@@ -10,10 +10,13 @@ public/ace/** linguist-vendored
 * text eol=lf
 *.png binary
 *.jpg binary
+*.jpeg binary
 *.pdf binary
 *.pptx binary
+*.tar binary
 *.woff2 binary
 *.woff binary
 *.ttf binary
 *.eot binary
 *.otf binary
+*.zip binary
