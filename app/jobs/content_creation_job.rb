@@ -3,10 +3,9 @@
 class ContentCreationJob < ApplicationJob
   queue_as :default
 
-  def perform(work_id, source_path, original_filename)
-    return if AtlasRb::Work.files(work_id).any? { |f| f.original_filename == original_filename }
+  def perform(work_id, source_path, original_filename, idempotency_key)
     return unless File.exist?(source_path)
 
-    AtlasRb::Blob.create(work_id, source_path, original_filename)
+    AtlasRb::Blob.create(work_id, source_path, original_filename, idempotency_key: idempotency_key)
   end
 end
