@@ -8,22 +8,19 @@ namespace :reset do
     raise "Wrong env - #{Rails.env} - must be development" unless Rails.env.development? || Rails.env.staging?
 
     community = AtlasRb::Community.create(nil, '/home/cerberus/web/spec/fixtures/files/community-mods.xml')
-    AtlasRb::Community.metadata(community['id'], {
-                                  'thumbnail' => ThumbnailCreator.call(path: '/home/cerberus/web/spec/fixtures/files/river.jpg'),
-                                  'permissions' => { 'read' => ['public'] }
-                                })
+    AtlasRb::Community.metadata(community['id'],
+                                ThumbnailCreator.call(path: '/home/cerberus/web/spec/fixtures/files/river.jpg')
+                                  .merge('permissions' => { 'read' => ['public'] }))
 
     collection = AtlasRb::Collection.create(community['id'], '/home/cerberus/web/spec/fixtures/files/collection-mods.xml')
-    AtlasRb::Collection.metadata(collection['id'], {
-                                   'thumbnail' => ThumbnailCreator.call(path: '/home/cerberus/web/spec/fixtures/files/field.jpg'),
-                                   'permissions' => { 'read' => ['public'] }
-                                 })
+    AtlasRb::Collection.metadata(collection['id'],
+                                 ThumbnailCreator.call(path: '/home/cerberus/web/spec/fixtures/files/field.jpg')
+                                   .merge('permissions' => { 'read' => ['public'] }))
 
     work = AtlasRb::Work.create(collection['id'], '/home/cerberus/web/spec/fixtures/files/work-mods.xml')
-    AtlasRb::Work.metadata(work['id'], {
-                             'thumbnail' => ThumbnailCreator.call(path: '/home/cerberus/web/spec/fixtures/files/flower.jpg'),
-                             'permissions' => { 'read' => ['public'] }
-                           })
+    AtlasRb::Work.metadata(work['id'],
+                           ThumbnailCreator.call(path: '/home/cerberus/web/spec/fixtures/files/flower.jpg')
+                             .merge('permissions' => { 'read' => ['public'] }))
     AtlasRb::Blob.create(work['id'], '/home/cerberus/web/spec/fixtures/files/flower.jpg', 'flower.jpg')
     AtlasRb::Work.complete(work['id'])
   end

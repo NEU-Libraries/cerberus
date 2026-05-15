@@ -1,5 +1,7 @@
-- thumb = "#{base}/full/!85,85/0/default.jpg"
-- thumb_2x = "#{base}/full/!170,170/0/default.jpg"
+- src_2x ||= nil
 .col-md-auto
   .document-thumbnail
-    %img{loading: "lazy", src: thumb, srcset: "#{thumb} 1x, #{thumb_2x} 2x"}/
+    - if src_2x.present?
+      %img{loading: "lazy", src: src, srcset: "#{src} 1x, #{src_2x} 2x"}/
+    - else
+      %img{loading: "lazy", src: src}/

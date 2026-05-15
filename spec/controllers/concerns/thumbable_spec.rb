@@ -27,13 +27,16 @@ describe Thumbable do
       expect(permitted_params).to be_empty
     end
 
-    it 'calls ThumbnailCreator' do
+    it 'merges the ThumbnailCreator URLs into the permitted params' do
       mock_thumbable = mock_thumbable_class.new(params_with_file)
-      allow(ThumbnailCreator).to receive(:call)
-        .with(path: '/temp/path')
-        .and_return('http://example.com/iiif/3/123456789.jp2')
+      urls = {
+        'thumbnail'    => 'http://example.com/thumb',
+        'thumbnail_2x' => 'http://example.com/thumb2x',
+        'preview'      => 'http://example.com/preview'
+      }
+      allow(ThumbnailCreator).to receive(:call).with(path: '/temp/path').and_return(urls)
       mock_thumbable.add_thumbnail(permitted_params)
-      expect(permitted_params[:thumbnail]).to eq('http://example.com/iiif/3/123456789.jp2')
+      expect(permitted_params).to eq(urls)
     end
   end
 end

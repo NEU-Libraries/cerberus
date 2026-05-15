@@ -6,12 +6,16 @@ describe ThumbnailCreator do
   let(:image_path) { '/test/image.jpg' }
 
   describe 'call' do
-    it 'creates a JP2 file and returns its full IIIF URL' do
+    it 'creates a JP2 file and returns the sized IIIF URLs keyed by thumbnail-family role' do
       allow(Vips::Image).to receive(:new_from_file).and_return(double('Vips::Image', jp2ksave: nil))
       allow(Time).to receive_message_chain(:now, :to_f, :to_s, :gsub!).and_return('123456789')
       allow(Rails.application.config).to receive(:iiif_host).and_return('http://example.com')
       result = ThumbnailCreator.call(path: image_path)
-      expect(result).to eq('http://example.com/iiif/3/123456789.jp2')
+      expect(result).to eq(
+        'thumbnail'    => 'http://example.com/iiif/3/123456789.jp2/full/!85,85/0/default.jpg',
+        'thumbnail_2x' => 'http://example.com/iiif/3/123456789.jp2/full/!170,170/0/default.jpg',
+        'preview'      => 'http://example.com/iiif/3/123456789.jp2/full/500,/0/default.jpg'
+      )
     end
   end
 
