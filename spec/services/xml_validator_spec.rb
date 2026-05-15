@@ -69,6 +69,39 @@ describe XmlValidator do
       expect(errors).to include(schema_error)
     end
 
+    it 'surfaces a friendly error when the schema service returns an HTTP error' do
+      allow(Kataba).to receive(:fetch_schema).with(schema_uri)
+        .and_raise(OpenURI::HTTPError.new('503 Service Unavailable', nil))
+      errors = XmlValidator.call(xml: valid_mods)
+      expect(errors).to include(a_string_matching(/Could not fetch schema.*503/))
+    end
+
+    it 'surfaces a friendly error when the schema service is unreachable' do
+      allow(Kataba).to receive(:fetch_schema).with(schema_uri)
+        .and_raise(SocketError.new('getaddrinfo: Name or service not known'))
+      errors = XmlValidator.call(xml: valid_mods)
+      expect(errors).to include(a_string_matching(/Could not fetch schema.*SocketError/))
+    end
+
+    it 'continues fetching other schemas when one URI fails' do
+      other_uri = 'http://example.com/other.xsd'
+      xml = <<~XML
+        <?xml version="1.0" encoding="UTF-8"?>
+        <mods:mods xmlns:mods="http://www.loc.gov/mods/v3"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.loc.gov/mods/v3 #{schema_uri} http://example.com #{other_uri}">
+          <mods:titleInfo><mods:title>Test</mods:title></mods:titleInfo>
+        </mods:mods>
+      XML
+      allow(Kataba).to receive(:fetch_schema).with(schema_uri)
+        .and_raise(OpenURI::HTTPError.new('503 Service Unavailable', nil))
+      allow(Kataba).to receive(:fetch_schema).with(other_uri).and_return(passing_schema)
+
+      errors = XmlValidator.call(xml: xml)
+      expect(errors).to include(a_string_matching(/Could not fetch schema #{Regexp.escape(schema_uri)}/))
+      expect(Kataba).to have_received(:fetch_schema).with(other_uri)
+    end
+
     it 'fetches one schema per distinct namespace in schemaLocation' do
       other_uri = 'http://example.com/other.xsd'
       xml = <<~XML

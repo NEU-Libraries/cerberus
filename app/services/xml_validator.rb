@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'open-uri'
+
 # Phased MODS XML validation.
 #
 # Runs syntactic checks first; if the document is unparseable, schema
@@ -36,7 +38,17 @@ class XmlValidator < ApplicationService
       errors << "Document root must declare a schemaLocation"
     else
       schemas.each_value do |xsd_uri|
-        errors.concat(Kataba.fetch_schema(xsd_uri).validate(@doc))
+        begin
+          schema = Kataba.fetch_schema(xsd_uri)
+        rescue OpenURI::HTTPError, SocketError, SystemCallError => e
+          # Schema service unreachable or returned non-200. Surface as a
+          # validator error rather than letting it bubble to a 500.
+          # SystemCallError catches Errno::ETIMEDOUT, Errno::ECONNREFUSED,
+          # and friends in one branch.
+          errors << "Could not fetch schema #{xsd_uri} (#{e.class}: #{e.message})"
+          next
+        end
+        errors.concat(schema.validate(@doc))
       end
     end
 
