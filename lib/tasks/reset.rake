@@ -29,7 +29,12 @@ namespace :reset do
   task clean: :environment do
     raise "Wrong env - #{Rails.env} - must be development" unless Rails.env.development? || Rails.env.staging?
 
-    DatabaseCleaner.strategy = :deletion
+    # Reference the cleaner explicitly so it gets registered. DC 2.x's
+    # DatabaseCleaner.strategy= and .clean iterate registered cleaners;
+    # if nothing has registered one (rspec auto-registers, rake tasks do
+    # not), both calls silently no-op and every reset:data run appends
+    # another full seed pass on top of the previous one.
+    DatabaseCleaner[:active_record].strategy = :deletion
     DatabaseCleaner.clean
     Blacklight.default_index.connection.delete_by_query '*:*'
     Blacklight.default_index.connection.commit
