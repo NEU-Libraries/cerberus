@@ -47,6 +47,14 @@ class XmlValidator < ApplicationService
           # and friends in one branch.
           errors << "Could not fetch schema #{xsd_uri} (#{e.class}: #{e.message})"
           next
+        rescue RuntimeError => e
+          # open-uri raises a plain RuntimeError ("redirection forbidden:
+          # https → http") when a server tries to downgrade the scheme on
+          # redirect. Catch only that specific case so we don't swallow
+          # unrelated runtime errors from inside Kataba or Nokogiri.
+          raise unless e.message.start_with?('redirection forbidden')
+          errors << "Could not fetch schema #{xsd_uri} (#{e.message})"
+          next
         end
         errors.concat(schema.validate(@doc))
       end

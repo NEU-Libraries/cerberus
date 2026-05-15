@@ -83,6 +83,19 @@ describe XmlValidator do
       expect(errors).to include(a_string_matching(/Could not fetch schema.*SocketError/))
     end
 
+    it 'surfaces a friendly error when open-uri refuses a HTTPS→HTTP redirect' do
+      allow(Kataba).to receive(:fetch_schema).with(schema_uri)
+        .and_raise(RuntimeError.new('redirection forbidden: https://example.com -> http://example.com'))
+      errors = XmlValidator.call(xml: valid_mods)
+      expect(errors).to include(a_string_matching(/redirection forbidden/))
+    end
+
+    it 're-raises RuntimeErrors that are not open-uri redirect refusals' do
+      allow(Kataba).to receive(:fetch_schema).with(schema_uri)
+        .and_raise(RuntimeError.new('some unrelated bug'))
+      expect { XmlValidator.call(xml: valid_mods) }.to raise_error(RuntimeError, 'some unrelated bug')
+    end
+
     it 'continues fetching other schemas when one URI fails' do
       other_uri = 'http://example.com/other.xsd'
       xml = <<~XML

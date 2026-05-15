@@ -13,4 +13,8 @@
 "http://www.loc.gov/standards/mods/v3/mods-3-7.xsd": "https://www.loc.gov/standards/mods/v3/mods-3-7.xsd"
 "http://www.loc.gov/standards/mods/v3/mods-3-8.xsd": "https://www.loc.gov/standards/mods/v3/mods-3-8.xsd"
 "http://www.loc.gov/standards/xlink/xlink.xsd":      "https://www.loc.gov/standards/xlink/xlink.xsd"
-"http://www.loc.gov/mods/xml.xsd":                   "https://www.loc.gov/mods/xml.xsd"
+# /mods/xml.xsd is a vanity URL on LoC: HTTPS returns 301 with an HTTP
+# Location header (their server downgrades the scheme on its own redirect),
+# which open-uri refuses to follow. Point straight at the canonical URL
+# the redirect was trying to reach.
+"http://www.loc.gov/mods/xml.xsd":                   "https://www.loc.gov/standards/mods/xml.xsd"
