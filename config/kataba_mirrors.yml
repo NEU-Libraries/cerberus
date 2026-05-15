@@ -1,0 +1,16 @@
+---
+# Kataba mirror list: map a canonical XSD URI to an alternate URI to fetch
+# from. Used for `http://www.loc.gov/...` schemas whose plain-HTTP variants
+# get 503'd by LoC's Cloudflare front while the HTTPS variants serve 200.
+# MODS records authored over the last 20 years declare `schemaLocation`
+# with HTTP URLs; rewriting at fetch time keeps the records as-is and only
+# affects how we resolve them server-side.
+#
+# Add new entries here as librarians introduce schemas whose canonical
+# URLs need redirection. Schemas not listed here are fetched as-declared.
+"http://www.loc.gov/standards/mods/v3/mods-3-5.xsd": "https://www.loc.gov/standards/mods/v3/mods-3-5.xsd"
+"http://www.loc.gov/standards/mods/v3/mods-3-6.xsd": "https://www.loc.gov/standards/mods/v3/mods-3-6.xsd"
+"http://www.loc.gov/standards/mods/v3/mods-3-7.xsd": "https://www.loc.gov/standards/mods/v3/mods-3-7.xsd"
+"http://www.loc.gov/standards/mods/v3/mods-3-8.xsd": "https://www.loc.gov/standards/mods/v3/mods-3-8.xsd"
+"http://www.loc.gov/standards/xlink/xlink.xsd":      "https://www.loc.gov/standards/xlink/xlink.xsd"
+"http://www.loc.gov/mods/xml.xsd":                   "https://www.loc.gov/mods/xml.xsd"
