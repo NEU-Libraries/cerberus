@@ -251,16 +251,13 @@ class CatalogController < ApplicationController
     icon_class = helpers.document_type_icon(document.klass_type)
     icon_html  = view_context.content_tag(:i, '', class: "fa-regular #{icon_class} fa-2xl text-black-50")
 
-    src    = document.thumbnail_ssi
-    src_2x = document.thumbnail_2x_ssi
+    src = document.thumbnail_2x_ssi.presence || document.thumbnail_ssi
     if src.present?
       fallback = view_context.content_tag(:span, icon_html,
                                           class: 'thumbnail-fallback d-none')
-      img_options = {
+      img = view_context.image_tag(src,
         onerror: "this.classList.add('d-none'); this.nextElementSibling.classList.remove('d-none');"
-      }
-      img_options[:srcset] = "#{src} 1x, #{src_2x} 2x" if src_2x.present?
-      img = view_context.image_tag(src, img_options)
+      )
       view_context.content_tag(:span, img + fallback, class: 'thumbnail-wrapper')
     else
       view_context.content_tag(:span, icon_html, class: 'thumbnail-fallback')
