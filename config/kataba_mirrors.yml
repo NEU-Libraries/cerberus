@@ -12,7 +12,10 @@
 "http://www.loc.gov/standards/mods/v3/mods-3-6.xsd": "https://www.loc.gov/standards/mods/v3/mods-3-6.xsd"
 "http://www.loc.gov/standards/mods/v3/mods-3-7.xsd": "https://www.loc.gov/standards/mods/v3/mods-3-7.xsd"
 "http://www.loc.gov/standards/mods/v3/mods-3-8.xsd": "https://www.loc.gov/standards/mods/v3/mods-3-8.xsd"
-"http://www.loc.gov/standards/xlink/xlink.xsd":      "https://www.loc.gov/standards/xlink/xlink.xsd"
+# xlink is the inverse of the mods-3-X situation: LoC publishes it ONLY at
+# http://, and https://www.loc.gov/standards/xlink/xlink.xsd returns 404.
+# No mirror entry means Kataba fetches the canonical URL as-declared,
+# which is what we want here. Don't blanket-upgrade.
 # /mods/xml.xsd is a vanity URL on LoC: HTTPS returns 301 with an HTTP
 # Location header (their server downgrades the scheme on its own redirect),
 # which open-uri refuses to follow. Point straight at the canonical URL
