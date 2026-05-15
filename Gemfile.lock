@@ -223,6 +223,8 @@ GEM
       activerecord
       kaminari-core (= 1.2.2)
     kaminari-core (1.2.2)
+    kataba (1.0.3)
+      nokogiri (>= 1.19)
     language_server-protocol (3.17.0.5)
     libreconv (0.9.5)
     lint_roller (1.1.0)
@@ -501,6 +503,7 @@ DEPENDENCIES
   haml
   importmap-rails
   jbuilder
+  kataba (>= 1.0.3)
   libreconv
   loaf
   mission_control-jobs
