@@ -5,6 +5,8 @@ Rails.application.configure do
 
   config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
 
+  config.iiif_host = 'http://localhost:8182'
+
   # Solid Queue tables live in their own DB; mirrors production so
   # `bin/rails db:prepare` provisions the queue connection from
   # db/queue_schema.rb without manual steps.
