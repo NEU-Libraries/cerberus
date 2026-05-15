@@ -9,8 +9,11 @@ export default class extends Controller {
     editor.setTheme("ace/theme/eclipse");
     editor.session.setMode("ace/mode/xml");
 
-    document.querySelector('#editor').addEventListener('change', (event) => {
-      //$("#raw_xml").val(editor.getSession().getValue().trim());
+    // Ace doesn't fire DOM `change` events on its container div; it has its
+    // own event system. Listening on `#editor` never fires, leaving the
+    // hidden field empty and the submit ships raw_xml="" — the validator
+    // then correctly reports "Empty document."
+    editor.session.on('change', () => {
       document.getElementById("raw_xml").value = editor.getSession().getValue().trim();
     });
 
