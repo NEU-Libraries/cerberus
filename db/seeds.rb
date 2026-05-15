@@ -14,11 +14,13 @@ csv_file_path = Rails.root.join('db', 'seeds', 'groups.csv')
 # Parse the CSV and create Group objects
 # Using pipe (|) as the column separator
 CSV.foreach(csv_file_path, headers: true, col_sep: '|') do |row|
-  # Create a new Group with the raw and cosmetic values
-  group = Group.create!(
-    raw: row['raw'],
-    cosmetic: row['cosmetic']
-  )
+  # find_or_create_by! so re-running the seed (with or without a prior
+  # reset:clean) doesn't append duplicates. The unique index on groups.raw
+  # is the structural floor — this is the application-level guard so the
+  # error surface is a refresh, not a DB constraint violation.
+  group = Group.find_or_create_by!(raw: row['raw']) do |g|
+    g.cosmetic = row['cosmetic']
+  end
 
   puts "Created Group: #{group.cosmetic} (#{group.raw})"
 end
