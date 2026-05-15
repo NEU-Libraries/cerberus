@@ -20,7 +20,7 @@ class WorksController < ApplicationController
     authorize_show!
     flash.now[:alert] = IN_PROGRESS_NOTICE if @work.in_progress
     @mods = AtlasRb::Work.mods(params[:id], 'html')
-    @files = AtlasRb::Work.files(params[:id])
+    @files = AtlasRb::Work.assets(params[:id])
     @can_tombstone = current_ability.can?(:tombstone,
                                           solr_doc_from_permissions(@permissions, klass: 'Work'))
     breadcrumbs(params[:id])
@@ -32,7 +32,7 @@ class WorksController < ApplicationController
   end
 
   def downloads
-    @files = AtlasRb::Work.files(params[:id])
+    @files = AtlasRb::Work.assets(params[:id])
     render layout: false
   end
 

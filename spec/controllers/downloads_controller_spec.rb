@@ -9,7 +9,7 @@ describe DownloadsController do
 
   let(:noid) do
     AtlasRb::Blob.create(work.id, '/home/cerberus/web/spec/fixtures/files/image.png', 'image.png')
-    AtlasRb::Work.files(work.id).first.noid
+    AtlasRb::Work.assets(work.id).first.noid
   end
 
   describe 'show' do
