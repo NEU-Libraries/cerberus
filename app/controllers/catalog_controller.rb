@@ -30,6 +30,7 @@ class CatalogController < ApplicationController
       rows: 10,
       fq: ['-internal_resource_tesim:FileSet',
            '-internal_resource_tesim:Blob',
+           '-internal_resource_tesim:Delegate',
            '-tombstoned_bsi:true']
     }
 
@@ -229,6 +230,7 @@ class CatalogController < ApplicationController
         "a_member_of_tesim:\"id-#{id}\"",
         '-internal_resource_tesim:FileSet',
         '-internal_resource_tesim:Blob',
+        '-internal_resource_tesim:Delegate',
         '-tombstoned_bsi:true'
       ]
     )
