@@ -2,7 +2,7 @@
 
 namespace :reset do
   desc 'Clean database and repopulate with sample data'
-  task data: [:clean, 'db:replant'] do
+  task data: [:clean, 'db:seed:replant'] do
     raise "Wrong env - #{Rails.env} - must be development" unless Rails.env.development? || Rails.env.staging?
 
     community = AtlasRb::Community.create(nil, '/home/cerberus/web/spec/fixtures/files/community-mods.xml')
