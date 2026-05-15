@@ -12,7 +12,8 @@ class XmlController < ApplicationController
     item = AtlasRb::Resource.find(params[:resource_id])
     @resource = item.resource
 
-    @mods = AtlasRb::Resource.preview(create_temp_xml)
+    @errors = XmlValidator.call(xml: params[:raw_xml])
+    @mods = AtlasRb::Resource.preview(create_temp_xml) if @errors.empty?
   end
 
   def update

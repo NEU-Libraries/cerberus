@@ -31,12 +31,26 @@ describe XmlController do
       allow(AtlasRb::Resource).to receive(:preview).and_return(preview_result)
     end
 
-    it 'assigns the correct variables' do
-      put :validate, params: { resource_id: work.id, raw_xml: raw_xml }, xhr: true
-      expect(assigns(:resource)).to eq(work)
-      expect(assigns(:mods)).to eq(preview_result)
-      expect(assigns(:mods)).to include('Test Title')
-      expect(assigns(:mods)).to be_a(String)
+    context 'when XmlValidator passes' do
+      before { allow(XmlValidator).to receive(:call).and_return([]) }
+
+      it 'assigns @errors empty and @mods to the Atlas preview' do
+        put :validate, params: { resource_id: work.id, raw_xml: raw_xml }, xhr: true
+        expect(assigns(:resource)).to eq(work)
+        expect(assigns(:errors)).to eq([])
+        expect(assigns(:mods)).to eq(preview_result)
+      end
+    end
+
+    context 'when XmlValidator returns errors' do
+      before { allow(XmlValidator).to receive(:call).and_return(['xmlns:mods missing']) }
+
+      it 'assigns @errors and does not call Atlas preview' do
+        put :validate, params: { resource_id: work.id, raw_xml: raw_xml }, xhr: true
+        expect(assigns(:errors)).to eq(['xmlns:mods missing'])
+        expect(assigns(:mods)).to be_nil
+        expect(AtlasRb::Resource).not_to have_received(:preview)
+      end
     end
   end
 

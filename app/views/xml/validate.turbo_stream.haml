@@ -1,5 +1,12 @@
 = turbo_stream.replace "mods" do
-  = @mods.html_safe
+  - if @errors.present?
+    .alert.alert-danger.mt-3{role: "alert"}
+      %h5.alert-heading XML validation failed
+      %ul.mb-0
+        - @errors.each do |err|
+          %li= err.to_s
+  - else
+    = @mods.html_safe
 
   :javascript
     $(".loading-state").animate({opacity: 0.0}, 500, function(){
