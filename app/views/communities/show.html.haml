@@ -6,7 +6,7 @@
 
   .container.p-4.my-3.well.rounded-3
     .row
-      = render partial: "shared/thumbnail", locals: {uuid: @community.thumbnail} if !@community.thumbnail.blank?
+      = render partial: "shared/thumbnail", locals: {src: @community.thumbnail, src_2x: @community.thumbnail_2x} if !@community.thumbnail.blank?
       .col
         %h3.d-inline
           = @community.title

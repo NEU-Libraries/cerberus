@@ -29,9 +29,11 @@ describe Thumbable do
 
     it 'calls ThumbnailCreator' do
       mock_thumbable = mock_thumbable_class.new(params_with_file)
-      allow(ThumbnailCreator).to receive(:call).with(path: '/temp/path').and_return('123456789')
+      allow(ThumbnailCreator).to receive(:call)
+        .with(path: '/temp/path')
+        .and_return('http://example.com/iiif/3/123456789.jp2')
       mock_thumbable.add_thumbnail(permitted_params)
-      expect(permitted_params[:thumbnail]).to eq('123456789')
+      expect(permitted_params[:thumbnail]).to eq('http://example.com/iiif/3/123456789.jp2')
     end
   end
 end

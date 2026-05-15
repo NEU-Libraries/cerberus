@@ -6,7 +6,8 @@ class ThumbnailCreator < ApplicationService
   end
 
   def call
-    create_jp2
+    uuid = create_jp2
+    "#{Rails.application.config.iiif_host}/iiif/3/#{uuid}.jp2"
   end
 
   private

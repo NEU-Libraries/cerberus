@@ -9,6 +9,6 @@ module Thumbable
 
     permitted_params[:thumbnail] = ThumbnailCreator.call(
       path: file.tempfile.path.presence || file.path
-    ) # UUID
+    )
   end
 end

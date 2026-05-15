@@ -7,7 +7,7 @@ class ThumbnailCreationJob < ApplicationJob
     return if AtlasRb::Work.find(work_id).thumbnail.present?
     return unless File.exist?(source_path)
 
-    uuid = ThumbnailCreator.call(path: source_path)
-    AtlasRb::Work.metadata(work_id, 'thumbnail' => uuid)
+    thumbnail = ThumbnailCreator.call(path: source_path)
+    AtlasRb::Work.metadata(work_id, 'thumbnail' => thumbnail)
   end
 end

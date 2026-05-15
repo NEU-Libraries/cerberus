@@ -1,3 +1,7 @@
+- src_2x ||= nil
 .col-md-auto
   .document-thumbnail
-    %img{loading: "lazy", src: "#{iiif_url(uuid)}/full/!85,85/0/default.jpg"}/
+    - if src_2x.present?
+      %img{loading: "lazy", src: src, srcset: "#{src} 1x, #{src_2x} 2x"}/
+    - else
+      %img{loading: "lazy", src: src}/
