@@ -11,7 +11,7 @@ describe ThumbnailCreator do
       allow(Time).to receive_message_chain(:now, :to_f, :to_s, :gsub!).and_return('123456789')
       allow(Rails.application.config).to receive(:iiif_host).and_return('http://example.com')
       result = ThumbnailCreator.call(path: image_path)
-      expect(result).to eq('http://example.com/iiif/3/123456789.jp2/full/!85,85/0/default.jpg')
+      expect(result).to eq('http://example.com/iiif/3/123456789.jp2')
     end
   end
 

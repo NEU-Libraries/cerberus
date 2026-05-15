@@ -1,4 +1,5 @@
-- if !@work.preview.blank?
-  = render partial: "image", locals: {src: @work.preview}
+- src = @work.preview.presence || (@work.thumbnail.presence && "#{@work.thumbnail}/full/500,/0/default.jpg")
+- if src.present?
+  = render partial: "image", locals: {src: src}
 - else
   = render partial: "icon"

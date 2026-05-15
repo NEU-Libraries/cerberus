@@ -7,7 +7,7 @@ class ThumbnailCreator < ApplicationService
 
   def call
     uuid = create_jp2
-    "#{Rails.application.config.iiif_host}/iiif/3/#{uuid}.jp2/full/!85,85/0/default.jpg"
+    "#{Rails.application.config.iiif_host}/iiif/3/#{uuid}.jp2"
   end
 
   private

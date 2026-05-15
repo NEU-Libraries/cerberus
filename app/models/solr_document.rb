@@ -21,7 +21,6 @@ class SolrDocument
   attribute :klass_type, Blacklight::Types::String, 'internal_resource_tesim'
   attribute :alternate_ids, Blacklight::Types::Array, 'alternate_ids_tesim'
   attribute :thumbnail_ssi, Blacklight::Types::String, 'thumbnail_ssi'
-  attribute :thumbnail_2x_ssi, Blacklight::Types::String, 'thumbnail_2x_ssi'
 
   def klass
     klass_type.presence&.constantize
