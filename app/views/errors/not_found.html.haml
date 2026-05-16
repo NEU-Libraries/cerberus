@@ -1,0 +1,15 @@
+- content_for(:head) { tag.meta(name: "turbo-cache-control", content: "no-cache") }
+- obj_type    = local_assigns.fetch(:obj_type, 'page')
+- staff_link  = link_to "contacting the DRS staff", "mailto:Library-Repository-Team@neu.edu"
+- report_link = link_to "reporting the problem", "https://northeastern.libanswers.com/form?queue_id=5581&resource=#{CGI::escape(request.original_url)}", target: "_blank"
+.d-flex.align-items-center{ style: "min-height: 60vh;" }
+  .container.p-4.text-center
+    %h4.text-black-50.mb-2.pb-3
+      %span.fa-solid.fa-circle-question.pe-2
+      404
+    %h3
+      Sorry, the #{obj_type} you requested was not found in the system.
+    .pt-3
+    %p It either never existed or has been deleted.
+    %p.mb-0
+      You might be interested in #{staff_link}, or #{report_link}.

@@ -6,6 +6,9 @@ class CatalogController < ApplicationController
   self.search_state_class = SearchState
 
   configure_blacklight do |config|
+    config.search_service_class = GatedSearchService
+    config.view.gallery(document_component: Blacklight::Gallery::DocumentComponent, icon: Blacklight::Gallery::Icons::GalleryComponent)
+
     # config.track_search_session = false
     config.track_search_session.storage = false
     config.autocomplete_enabled = false
@@ -26,7 +29,9 @@ class CatalogController < ApplicationController
     config.default_solr_params = {
       rows: 10,
       fq: ['-internal_resource_tesim:FileSet',
-           '-internal_resource_tesim:Blob']
+           '-internal_resource_tesim:Blob',
+           '-internal_resource_tesim:Delegate',
+           '-tombstoned_bsi:true']
     }
 
     # solr path which will be added to solr base url before the other solr params.
@@ -40,6 +45,7 @@ class CatalogController < ApplicationController
     config.index.title_field = 'title_tsim'
     # config.index.display_type_field = 'format'
     # config.index.thumbnail_field = 'thumbnail_path_ss'
+    config.index.thumbnail_method = :iiif_thumbnail
 
     # config.add_results_document_tool(:bookmark, partial: 'bookmark_control', if: :render_bookmarks_control?)
     config.index.document_actions.delete(:bookmark)
@@ -93,6 +99,9 @@ class CatalogController < ApplicationController
     config.add_facet_field 'subject_geo_ssim', label: 'Region'
     config.add_facet_field 'subject_era_ssim', label: 'Era'
 
+    # Cerberus defined facets
+    config.add_facet_field 'type_ssim', label: 'Type', collapse: false
+
     config.add_facet_field 'example_pivot_field', label: 'Pivot Field', pivot: %w[format language_ssim],
                                                   collapsing: true
 
@@ -118,6 +127,7 @@ class CatalogController < ApplicationController
     config.add_index_field 'published_ssim', label: 'Published'
     config.add_index_field 'published_vern_ssim', label: 'Published'
     config.add_index_field 'lc_callnum_ssim', label: 'Call number'
+    config.add_index_field 'description_tsim', label: 'Description'
 
     # solr fields to be displayed in the show (single result) view
     #   The ordering of the field names is the order of the display
@@ -212,9 +222,47 @@ class CatalogController < ApplicationController
     # config.autocomplete_suggester = 'mySuggester'
   end
 
+  def find_children(id)
+    return Blacklight::Solr::Response.new({}, {}) if id.blank?
+
+    builder = search_service.search_builder.with({}).merge(
+      fq: [
+        "a_member_of_tesim:\"id-#{id}\"",
+        '-internal_resource_tesim:FileSet',
+        '-internal_resource_tesim:Blob',
+        '-internal_resource_tesim:Delegate',
+        '-tombstoned_bsi:true'
+      ]
+    )
+
+    Blacklight.default_index.search(builder)
+  end
+
   def find_many(ids)
     return Blacklight::Solr::Response.new({}, {}) if ids.blank?
 
-    Blacklight.default_index.search({ fq: "alternate_ids_tsi:(#{ids.map { |id| "\"id-#{id}\"" }.join(' OR ')})" })
+    id_query = ids.map { |id| "\"id-#{id}\"" }.join(' OR ')
+    builder = search_service.search_builder.with({}).merge(fq: ["alternate_ids_tsi:(#{id_query})"])
+
+    Blacklight.default_index.search(builder)
   end
+
+  def iiif_thumbnail(document, *_args)
+    icon_class = helpers.document_type_icon(document.klass_type)
+    icon_html  = view_context.content_tag(:i, '', class: "fa-regular #{icon_class} fa-2xl text-black-50")
+
+    src = document.thumbnail_2x_ssi.presence || document.thumbnail_ssi
+    if src.present?
+      fallback = view_context.content_tag(:span, icon_html,
+                                          class: 'thumbnail-fallback d-none')
+      img = view_context.image_tag(src,
+        onerror: "this.classList.add('d-none'); this.nextElementSibling.classList.remove('d-none');"
+      )
+      view_context.content_tag(:span, img + fallback, class: 'thumbnail-wrapper')
+    else
+      view_context.content_tag(:span, icon_html, class: 'thumbnail-fallback')
+    end
+  end
+
+  helper_method :iiif_thumbnail if respond_to? :helper_method
 end

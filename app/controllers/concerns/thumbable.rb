@@ -7,8 +7,8 @@ module Thumbable
     file = params[:thumbnail]
     return if file.blank?
 
-    permitted_params[:thumbnail] = ThumbnailCreator.call(
-      path: file.tempfile.path.presence || file.path
-    ) # UUID
+    permitted_params.merge!(
+      ThumbnailCreator.call(path: file.tempfile.path.presence || file.path)
+    )
   end
 end

@@ -1,3 +1,7 @@
+- src_2x ||= nil
 .col-md-auto
-  .thumbnail{style: "background-color: white; border: 1px solid rgba(0,0,0,0.2); width: 85px; height: 85px; margin-top: 7px; position: relative; overflow: hidden;"}
-    %img{loading: "lazy", src: "#{iiif_url(uuid)}/full/!85,85/0/default.jpg", style: "position: absolute; margin: auto; top: 0; left: 0; right: 0; bottom: 0;"}/
+  .document-thumbnail
+    - if src_2x.present?
+      %img{loading: "lazy", src: src, srcset: "#{src} 1x, #{src_2x} 2x"}/
+    - else
+      %img{loading: "lazy", src: src}/

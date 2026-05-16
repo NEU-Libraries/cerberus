@@ -1,5 +1,5 @@
 %nav{"aria-label" => "breadcrumb"}
-  %ol.breadcrumb
+  %ol.breadcrumb.align-items-center
     - breadcrumb_trail do |crumb|
       %li.breadcrumb-item{class: crumb.current? ? "active" : "" }
         = link_to_unless crumb.current?, crumb.name, crumb.url, (crumb.current? ? {"aria-current" => "page"} : {})
@@ -23,3 +23,5 @@
           - else
             %li
               %a.dropdown-item{:href => "#"} Upload File
+    - if block_given?
+      = yield

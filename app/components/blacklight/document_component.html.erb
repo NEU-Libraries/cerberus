@@ -1,0 +1,52 @@
+<%= content_tag @component,
+  id: @id,
+  data: {
+    'document-id': @document.id.to_s.parameterize,
+    'document-counter': @counter,
+  },
+  itemscope: true,
+  itemtype: @document.itemtype,
+  class: classes.flatten.join(' ') do %>
+  <%= header %>
+  <% if body.present? %>
+    <%= body %>
+  <% else %>
+    <div class="document-main-section order-2">
+      <%= title %>
+      <%= embed %>
+      <%= content %>
+      <%= metadata %>
+      <% metadata_sections.each do |section| %>
+        <%= section %>
+      <% end %>
+
+      <% partials.each do |partial| %>
+        <%= partial %>
+      <% end %>
+
+      <div class="text-end">
+        <% if @document.klass == Work %>
+          <button type="button"
+                  class="btn btn-sm btn-link text-decoration-none p-0 me-2"
+                  data-bs-toggle="modal"
+                  data-bs-target="#downloadsModal"
+                  data-downloads-url="<%= downloads_work_path(@document) %>">
+            Downloads
+            <i class="fa-solid fa-download ms-1" aria-hidden="true"></i>
+          </button>
+        <% end %>
+        <%= link_to helpers.report_a_problem_url(@document),
+                    class: 'btn btn-sm btn-link p-0',
+                    target: '_blank',
+                    rel: 'noopener',
+                    data: { controller: 'tooltip', 'bs-title': 'Report a problem' } do %>
+          <span class="visually-hidden">Report a problem</span>
+          <i class="fa-regular fa-comment-dots" aria-hidden="true"></i>
+        <% end %>
+      </div>
+    </div>
+
+    <%= thumbnail %>
+  <% end %>
+  <%= footer %>
+<% end %>

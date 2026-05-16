@@ -4,15 +4,18 @@ module Transformable
   extend ActiveSupport::Concern
 
   def pretty_resource_permissions(perms)
-    perms['read']&.delete('public')
+    return [] if perms.blank?
+
+    perms.read&.delete('public')
+    perms.edit&.delete(Permissions::STAFF_EDIT_GROUP)
     perms.slice('read', 'edit').flat_map do |key, values|
       permission = key == 'read' ? 'View' : 'Manage'
-      values.map { |value| [value, pretty_group(value), permission] }
+      Array(values).map { |value| [value, pretty_group(value), permission] }
     end
   end
 
   def pretty_user_permissions(groups)
-    return [] unless groups.present?
+    return [] if groups.blank?
 
     groups.map { |value| [value, pretty_group(value)] }
   end
@@ -30,9 +33,9 @@ module Transformable
 
   def form_preparation(raw_permissions)
     @groups = pretty_user_permissions(current_user&.groups)
-    @public = raw_permissions['read']&.include?('public')
+    @public = raw_permissions&.read&.include?('public')
     @embargo = begin
-      Date.parse(raw_permissions['embargo']).to_s
+      Date.parse(raw_permissions&.embargo.to_s).to_s
     rescue Date::Error, TypeError
       ''
     end
@@ -56,9 +59,9 @@ module Transformable
     return unless params[resource_key][:permissions]
 
     permitted[:permissions] = form_group_permissions(params[resource_key][:permissions])
-    if !params[resource_key][:permissions][:embargo].nil?
-      permitted[:permissions][:embargo] = params[resource_key][:permissions][:embargo]
-    end
+    return if params[resource_key][:permissions][:embargo].nil?
+
+    permitted[:permissions][:embargo] = params[resource_key][:permissions][:embargo]
   end
 
   def mass_permissions(permitted)

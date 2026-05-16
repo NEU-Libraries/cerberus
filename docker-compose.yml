@@ -4,6 +4,7 @@ volumes:
   db:
   storage:
   iiif:
+  uploads:
 services:
   db:
     image: postgres:14

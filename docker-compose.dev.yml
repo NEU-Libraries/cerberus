@@ -8,7 +8,10 @@ services:
       - iiif:/imageroot
   web:
     build: .
+    ports:
+      - 12345:12345
     volumes:
       - ./:/home/cerberus/web
       - iiif:/home/cerberus/images
       - storage:/home/cerberus/storage
+      - uploads:/home/cerberus/uploads

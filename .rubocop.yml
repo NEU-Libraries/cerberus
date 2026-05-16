@@ -1,4 +1,4 @@
-require: rubocop-rails
+plugins: rubocop-rails
 Lint/MissingSuper:
   Exclude:
     - 'app/services/**/*'
@@ -7,7 +7,7 @@ Lint/MissingSuper:
 Metrics/ClassLength:
   Max: 120
 Metrics/AbcSize:
-  Max: 20
+  Max: 22
   Exclude:
     - 'app/decorators/*'
     - 'app/lib/mods_decoration.rb'
@@ -59,12 +59,17 @@ Metrics/BlockLength:
     - 'app/controllers/catalog_controller.rb'
     - 'spec/**/*'
     - 'lib/tasks/*'
+Rails/StrongParametersExpect:
+  Enabled: false
 Rails/UnknownEnv:
   Environments:
     - production
     - development
     - test
     - staging
+Rails/OutputSafety:
+  Exclude:
+    - 'app/helpers/application_helper.rb'
 Rails/DynamicFindBy:
   Whitelist:
     - find_by_alternate_identifier

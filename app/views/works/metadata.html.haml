@@ -1,0 +1,39 @@
+%h3.py-3 Work Metadata
+
+%p.text-muted
+  Your file was uploaded successfully. Please review and update the metadata below.
+
+.metadata-form{ data: { controller: "group-permissions", "group-permissions-resource-value": "work" } }
+  = bootstrap_form_tag(url: metadata_work_path(params[:id]), method: :patch) do |f|
+    = bootstrap_fields_for :work do |c|
+      = c.text_field :title, value: @work.title, label: 'Title', help: 'A descriptive title for this work.'
+      = c.text_area :description, rows: 8, value: @work.description, label: 'Abstract', help: 'A short summary describing the work.'
+
+    %h4.pt-4.pb-2 Permissions
+    .row
+      .col-sm
+        %h5.pb-2 General Permissions
+        %select.form-select.form-select-sm#mass{name: "mass", "aria-label" => "General permissions"}
+          %option{value: "public", selected: @public ? "selected" : nil} Public
+          %option{value: "private", selected: @public ? nil : "selected"} Private
+        %ul.small.pt-2
+          %li Setting to 'public' will allow anyone accessing the site to see your item.
+          %li Setting to 'private' will only allow groups that are explicitly chosen to see your item.
+      .col-sm
+        %h5.pb-2 Embargo Release Date
+        %input.form-select.form-select-sm#embargo{name: "work[permissions][embargo]", type: "date", value: @embargo}/
+        %label.small.py-3{for: "embargo"} If this item is embargoed, please enter the release date.
+
+    = render 'shared/group_permissions', resource: 'work'
+
+    .well.p-3.my-3.rounded-3
+      = f.button :submit, class: 'btn btn-success'
+      -# Plain link (not button_to) — `button_to` emits a nested <form>,
+      -# which the browser silently strips inside the metadata form. Turbo
+      -# intercepts the click and POSTs to the tombstone route.
+      = link_to 'Cancel',
+                tombstone_work_path(params[:id]),
+                class: 'btn btn-warning',
+                data: { turbo_method: :post,
+                        turbo_confirm: 'Cancel this upload? The Work will be deleted.' }
+      = render 'shared/add_group_button'

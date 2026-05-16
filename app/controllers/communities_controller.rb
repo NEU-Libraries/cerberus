@@ -4,10 +4,23 @@ class CommunitiesController < CatalogController
   include Thumbable
   include Transformable
 
+  before_action :authorize_edit!, only: [:edit]
+  before_action :authorize_tombstone!, only: [:tombstone]
+
   def show
     @community = AtlasRb::Community.find(params[:id])
-    @response = find_many(AtlasRb::Community.children(params[:id]))
+    return render_gone(@community) if @community.tombstoned
+
+    authorize_show!
+    @response = find_children(@community.valkyrie_id)
+    @can_tombstone = current_ability.can?(:tombstone,
+                                          solr_doc_from_permissions(@permissions, klass: 'Community'))
     breadcrumbs(params[:id])
+  end
+
+  def tombstone
+    AtlasRb::Community.tombstone(params[:id], nuid: current_user.nuid)
+    redirect_to root_path, notice: 'Community deleted.'
   end
 
   def new
@@ -15,17 +28,16 @@ class CommunitiesController < CatalogController
   end
 
   def edit
-    # TODO: need to do admin check
     @community = AtlasRb::Community.find(params[:id])
-    form_preparation(AtlasRb::Resource.permissions(params[:id]))
+    form_preparation(@permissions)
   end
 
   def create
     permitted = params.require(:community).permit(:title, :description).to_h
 
     c = AtlasRb::Community.create(params[:parent_id])
-    AtlasRb::Community.metadata(c['id'], permitted)
-    redirect_to community_path(c['id'])
+    AtlasRb::Community.metadata(c.id, permitted)
+    redirect_to community_path(c.id)
   end
 
   def update

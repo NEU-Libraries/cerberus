@@ -40,3 +40,11 @@
 /coverage/
 
 .env
+
+CLAUDE.md
+/.playwright-mcp/
+/docs/
+
+/.claude
+/.ruby-lsp
+/.zed

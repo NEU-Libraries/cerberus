@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # app/custom_auth/devise/strategies/custom_authenticatable.rb
 # Based on https://gist.github.com/madtrick/3917079
 module Devise
@@ -23,29 +25,29 @@ module Devise
 
       private
 
-      # Returns a boolean indicating whether the provided credentials are valid.
-      # This is where you can implement any bespoke logic to do so: Read a file,
-      # call a service, validate a one-time-use token, etc.
-      #
-      # authentication_hash is provided by the base class and includes all the
-      # fields included in the login form.
-      def credentials_valid?
-        # add nuid to devise params
-        # take nuid send it to atlas
-        # merge atlas values into authentication hash?
-        # authentication_hash[:email] == "test@email.com" && authentication_hash[:password] == "password"
-        true
-      end
+        # Returns a boolean indicating whether the provided credentials are valid.
+        # This is where you can implement any bespoke logic to do so: Read a file,
+        # call a service, validate a one-time-use token, etc.
+        #
+        # authentication_hash is provided by the base class and includes all the
+        # fields included in the login form.
+        def credentials_valid?
+          # add nuid to devise params
+          # take nuid send it to atlas
+          # merge atlas values into authentication hash?
+          # authentication_hash[:email] == "test@email.com" && authentication_hash[:password] == "password"
+          true
+        end
 
-      def validated_user
-        # mapping.to is a reference to the model class that Devise is configured
-        # to use that represents user accounts. In this case, it's the User class.
-        mapping.to.new(
-          nuid: authentication_hash[:nuid],
-          email: authentication_hash[:email],
-          password: authentication_hash[:password]
-        )
-      end
+        def validated_user
+          # mapping.to is a reference to the model class that Devise is configured
+          # to use that represents user accounts. In this case, it's the User class.
+          mapping.to.new(
+            nuid: authentication_hash[:nuid],
+            email: authentication_hash[:email],
+            password: authentication_hash[:password]
+          )
+        end
     end
   end
 end

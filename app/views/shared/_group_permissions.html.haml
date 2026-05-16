@@ -1,0 +1,51 @@
+-# locals: resource (String) — e.g. 'work', 'collection', 'community'
+-#
+-# The host view is responsible for setting the Stimulus controller scope:
+-#   data-controller="group-permissions"
+-#   data-group-permissions-resource-value="<resource>"
+-# on a wrapper that also contains the Add Group button (which the host
+-# places inside its own action well, with data-action="click->group-permissions#add"
+-# and data-group-permissions-target="addButton").
+%h5.pb-2 Group Permissions
+- @permissions.each.with_index(1) do |group, index|
+  .row.py-1{ id: "group-list_#{index}",
+             data: { "group-permissions-target": "row" } }
+    .col-sm-auto.form-text
+      Group
+    .col-sm
+      %select.form-select.form-select-sm.groups{ "aria-label" => "Group", name: "#{resource}[permissions][#{index}][group_id]" }
+        %option{ value: group[0], selected: "selected" } #{group[1]}
+        - @groups.each do |user_group|
+          - unless user_group[0] == group[0]
+            %option{ value: user_group[0] } #{user_group[1]}
+    .col-sm-auto.form-text
+      Ability
+    .col-sm-2
+      %select.form-select.form-select-sm.ability{ "aria-label" => "Ability", name: "#{resource}[permissions][#{index}][ability]" }
+        %option{ value: "read", selected: group[2] == "View" } View
+        %option{ value: "edit", selected: group[2] == "Manage" } Manage
+    .col-sm-2
+      %button.btn.btn-danger.form-control.btn-sm{ type: "button", name: "delete-group",
+                                                  data: { action: "click->group-permissions#remove" } }
+        %i.fa.fa-times{ "aria-hidden" => "true" }
+
+%template{ data: { "group-permissions-target": "template" } }
+  .row.py-1
+    .col-sm-auto.form-text
+      Group
+    .col-sm
+      %select.form-select.form-select-sm.groups{ "aria-label" => "Group" }
+        %option{ value: "" }
+        - @groups.each do |user_group|
+          %option{ value: user_group[0] } #{user_group[1]}
+    .col-sm-auto.form-text
+      Ability
+    .col-sm-2
+      %select.form-select.form-select-sm.ability{ "aria-label" => "Ability" }
+        %option{ value: "" }
+        %option{ value: "1" } View
+        %option{ value: "2" } Manage
+    .col-sm-2
+      %button.btn.btn-danger.form-control.btn-sm{ type: "button", name: "delete-group",
+                                                  data: { action: "click->group-permissions#remove" } }
+        %i.fa.fa-times{ "aria-hidden" => "true" }

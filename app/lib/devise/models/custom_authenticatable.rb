@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # app/custom_auth/devise/models/custom_authenticatable.rb
 # Based on https://gist.github.com/madtrick/3916999
 module Devise
@@ -12,7 +14,7 @@ module Devise
         # serialize_into_session.
         def serialize_from_session(email, nuid, name, groups)
           # new(email:)
-          resource = self.new
+          resource = new
           resource.email = email
           resource.nuid = nuid
           resource.name = name

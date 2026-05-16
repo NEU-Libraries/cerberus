@@ -1,26 +1,32 @@
 # frozen_string_literal: true
 
 class LoadReport < ApplicationRecord
-  has_many :ingests
+  has_many :xml_ingests, dependent: :destroy
+  has_many :iptc_ingests, dependent: :destroy
 
-  enum :status, { in_progress: 0, completed: 1, failed: 2 }
-
-  validates :status, presence: true
+  enum :status, { pending: 0, processing: 1, completed: 2, failed: 3 }
 
   def start_load
-    update(status: :in_progress, started_at: Time.now)
+    update!(status: :processing, started_at: Time.current)
   end
 
   def finish_load
-    update(status: :completed, finished_at: Time.now)
+    update!(status: :completed, finished_at: Time.current)
   end
 
   def fail_load
-    update(status: :failed, finished_at: Time.now)
+    update!(status: :failed, finished_at: Time.current)
   end
 
-  def success_rate
-    return 0 if ingests.empty?
-    ((ingests.completed.count.to_f / ingests.count.to_f) * 100).round(2)
+  def total_ingests
+    xml_ingests.count + iptc_ingests.count
+  end
+
+  def completed_ingests
+    xml_ingests.completed.count + iptc_ingests.completed.count
+  end
+
+  def failed_ingests
+    xml_ingests.failed.count + iptc_ingests.failed.count
   end
 end

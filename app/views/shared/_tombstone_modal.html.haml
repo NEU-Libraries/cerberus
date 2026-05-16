@@ -1,0 +1,31 @@
+-# Tombstone confirm modal — used on community/collection/work show pages.
+-#
+-# Locals:
+-#   id            — the resource ID, used to scope modal/label DOM ids
+-#   kind          — human noun ("community", "collection", "work")
+-#   path          — POST route that performs the tombstone
+-#   trigger_class — class string for the trigger link (matches the
+-#                   sibling Edit link on the host page).
+- modal_id = "tombstone-modal-#{id}"
+- label_id = "tombstone-label-#{id}"
+- trigger_class = local_assigns.fetch(:trigger_class, 'px-3')
+
+= link_to 'Delete', "##{modal_id}", class: trigger_class, data: { 'bs-toggle': 'modal' }
+
+.modal.fade{id: modal_id, tabindex: '-1', 'aria-labelledby': label_id, 'aria-hidden': 'true'}
+  .modal-dialog.modal-dialog-centered
+    -# `text-start` here defends against `.text-end` ancestors on the
+    -# host page (e.g. works/show) bleeding into the modal contents.
+    .modal-content.text-start
+      .modal-header
+        %h5.modal-title{id: label_id} Confirm deletion
+        %button.btn-close{type: 'button', 'aria-label': 'Close', data: { 'bs-dismiss': 'modal' }}
+      .modal-body
+        %p
+          Are you sure you want to delete this
+          = "#{kind}?"
+        %p.small.text-muted.mb-0
+          This item will no longer be accessible.
+      .modal-footer
+        %button.btn.btn-secondary{type: 'button', data: { 'bs-dismiss': 'modal' }} Cancel
+        = button_to 'Delete', path, method: :post, class: 'btn btn-danger', form: { class: 'd-inline' }

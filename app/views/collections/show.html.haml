@@ -1,24 +1,31 @@
+- content_for(:page_title) do
+  = @collection.title
 - content_for(:container_header) do
   = render 'shared/breadcrumbs'
   -# = breadcrumbs
 
   .container.p-4.my-3.well.rounded-3
     .row
-      = render partial: "shared/thumbnail", locals: {uuid: @collection["thumbnail"]} if !@collection["thumbnail"].blank?
+      = render partial: "shared/thumbnail", locals: {src: @collection.thumbnail, src_2x: @collection.thumbnail_2x} if !@collection.thumbnail.blank?
       .col
         %h3.d-inline
-          = @collection["title"]
+          = @collection.title
         %h5.d-inline.text-black-50
           %span.fa-solid.fa-folder-open.ps-2.pe-1
           Collection
         .clearfix.pt-3
-        = @collection["description"]
+        = @collection.description
         .clearfix.pt-3
           .float-end
-            = link_to "Edit", edit_collection_path(@collection["id"]), class: "px-3"
-            = link_to "Delete", "#", class: "px-3"
+            = link_to "Edit", edit_collection_path(@collection.id), class: "px-3"
+            - if @can_tombstone && @response.documents.empty?
+              = render 'shared/tombstone_modal',
+                       id:   @collection.id,
+                       kind: 'collection',
+                       path: tombstone_collection_path(@collection.id)
 
 - content_for(:sidebar) do
   = render 'catalog/search_sidebar'
 
 = render 'catalog/search_results'
+= render 'shared/downloads_modal'

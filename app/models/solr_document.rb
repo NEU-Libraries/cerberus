@@ -20,13 +20,20 @@ class SolrDocument
 
   attribute :klass_type, Blacklight::Types::String, 'internal_resource_tesim'
   attribute :alternate_ids, Blacklight::Types::Array, 'alternate_ids_tesim'
+  attribute :thumbnail_ssi, Blacklight::Types::String, 'thumbnail_ssi'
+  attribute :thumbnail_2x_ssi, Blacklight::Types::String, 'thumbnail_2x_ssi'
 
   def klass
-    klass_type.constantize if klass_type.present?
+    klass_type.presence&.constantize
+  end
+
+  def tombstoned?
+    self['tombstoned_bsi'] == true
   end
 
   def to_param
-    noid = alternate_ids&.first&.split('id-')&.last
+    raw = alternate_ids&.first
+    noid = raw.split('id-').last if raw.present?
     return noid if noid.present?
 
     super
