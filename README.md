@@ -1,4 +1,4 @@
-[![Maintainability](https://api.codeclimate.com/v1/badges/319fb72eb18232337a83/maintainability)](https://codeclimate.com/github/NEU-Libraries/cerberus/maintainability) [![Test Coverage](https://api.codeclimate.com/v1/badges/319fb72eb18232337a83/test_coverage)](https://codeclimate.com/github/NEU-Libraries/cerberus/test_coverage) [![Build and Test](https://github.com/NEU-Libraries/cerberus/actions/workflows/build_test.yml/badge.svg)](https://github.com/NEU-Libraries/cerberus/actions/workflows/build_test.yml)
+[![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/dgcliff/b2d04df150116448fb76929c8c570f9c/raw/cerberus-coverage.json)](https://github.com/NEU-Libraries/cerberus/actions/workflows/build_test.yml) [![Build and Test](https://github.com/NEU-Libraries/cerberus/actions/workflows/build_test.yml/badge.svg)](https://github.com/NEU-Libraries/cerberus/actions/workflows/build_test.yml)
 
 # Cerberus
 
