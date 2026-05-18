@@ -37,4 +37,21 @@ describe Ability do
       expect(anon_ability).not_to be_able_to(:tombstone, doc)
     end
   end
+
+  describe ':read' do
+    it 'allows public documents (signed-in user)' do
+      doc = SolrDocument.new('read_access_group_ssim' => ['public'])
+      expect(ability).to be_able_to(:read, doc)
+    end
+
+    it 'allows non-public documents when the user shares a read group' do
+      doc = SolrDocument.new('read_access_group_ssim' => ['editors'])
+      expect(ability).to be_able_to(:read, doc)
+    end
+
+    it 'denies non-public documents when no read group overlaps' do
+      doc = SolrDocument.new('read_access_group_ssim' => ['curators'])
+      expect(ability).not_to be_able_to(:read, doc)
+    end
+  end
 end
