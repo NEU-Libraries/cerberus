@@ -2,6 +2,8 @@
 
 require 'rails_helper'
 
+RSpec::Matchers.define_negated_matcher :not_have_enqueued_job, :have_enqueued_job
+
 RSpec.describe IiifAssetsJob, type: :job do
   include ActiveJob::TestHelper
 
