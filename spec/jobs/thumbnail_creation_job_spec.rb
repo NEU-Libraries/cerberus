@@ -10,7 +10,7 @@ RSpec.describe ThumbnailCreationJob, type: :job do
   before { File.write(source_path, 'fake bytes') }
   after  { FileUtils.remove_entry(tmp) if File.exist?(tmp) }
 
-  it 'creates the thumbnail and writes the sized IIIF URLs to Work metadata' do
+  it 'creates the thumbnail and PATCHes the sized IIIF URIs via set_thumbnails' do
     urls = {
       'thumbnail'    => 'http://example.com/thumb',
       'thumbnail_2x' => 'http://example.com/thumb2x',
@@ -18,34 +18,39 @@ RSpec.describe ThumbnailCreationJob, type: :job do
     }
     allow(AtlasRb::Work).to receive(:find).with(work_id).and_return(AtlasRb::Mash.new(thumbnail: nil))
     allow(ThumbnailCreator).to receive(:call).with(path: source_path).and_return(urls)
-    allow(AtlasRb::Work).to receive(:metadata)
+    allow(AtlasRb::Work).to receive(:set_thumbnails)
 
     described_class.new.perform(work_id, source_path)
 
     expect(ThumbnailCreator).to have_received(:call).with(path: source_path)
-    expect(AtlasRb::Work).to have_received(:metadata).with(work_id, urls)
+    expect(AtlasRb::Work).to have_received(:set_thumbnails).with(
+      work_id,
+      thumbnail: 'http://example.com/thumb',
+      thumbnail_2x: 'http://example.com/thumb2x',
+      preview: 'http://example.com/preview'
+    )
   end
 
   it 'noops when the work already has a thumbnail' do
     allow(AtlasRb::Work).to receive(:find).with(work_id).and_return(AtlasRb::Mash.new(thumbnail: 'already'))
     allow(ThumbnailCreator).to receive(:call)
-    allow(AtlasRb::Work).to receive(:metadata)
+    allow(AtlasRb::Work).to receive(:set_thumbnails)
 
     described_class.new.perform(work_id, source_path)
 
     expect(ThumbnailCreator).not_to have_received(:call)
-    expect(AtlasRb::Work).not_to have_received(:metadata)
+    expect(AtlasRb::Work).not_to have_received(:set_thumbnails)
   end
 
   it 'noops when the staged file is missing' do
     allow(AtlasRb::Work).to receive(:find).with(work_id).and_return(AtlasRb::Mash.new(thumbnail: nil))
     allow(ThumbnailCreator).to receive(:call)
-    allow(AtlasRb::Work).to receive(:metadata)
+    allow(AtlasRb::Work).to receive(:set_thumbnails)
     File.delete(source_path)
 
     described_class.new.perform(work_id, source_path)
 
     expect(ThumbnailCreator).not_to have_received(:call)
-    expect(AtlasRb::Work).not_to have_received(:metadata)
+    expect(AtlasRb::Work).not_to have_received(:set_thumbnails)
   end
 end
