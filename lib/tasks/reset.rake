@@ -6,19 +6,20 @@ namespace :reset do
     raise "Wrong env - #{Rails.env} - must be development" unless Rails.env.development? || Rails.env.staging?
 
     community = AtlasRb::Community.create(nil, '/home/cerberus/web/spec/fixtures/files/community-mods.xml')
-    AtlasRb::Community.metadata(community['id'],
-                                ThumbnailCreator.call(path: '/home/cerberus/web/spec/fixtures/files/river.jpg')
-                                  .merge('permissions' => { 'read' => ['public'] }))
+    river_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/river.jpg')
+    AtlasRb::Community.set_thumbnails(community['id'], **ThumbnailCreator.call(base: river_base).symbolize_keys)
+    AtlasRb::Community.metadata(community['id'], 'permissions' => { 'read' => ['public'] })
 
     collection = AtlasRb::Collection.create(community['id'], '/home/cerberus/web/spec/fixtures/files/collection-mods.xml')
-    AtlasRb::Collection.metadata(collection['id'],
-                                 ThumbnailCreator.call(path: '/home/cerberus/web/spec/fixtures/files/field.jpg')
-                                   .merge('permissions' => { 'read' => ['public'] }))
+    field_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/field.jpg')
+    AtlasRb::Collection.set_thumbnails(collection['id'], **ThumbnailCreator.call(base: field_base).symbolize_keys)
+    AtlasRb::Collection.metadata(collection['id'], 'permissions' => { 'read' => ['public'] })
 
     work = AtlasRb::Work.create(collection['id'], '/home/cerberus/web/spec/fixtures/files/work-mods.xml')
-    AtlasRb::Work.metadata(work['id'],
-                           ThumbnailCreator.call(path: '/home/cerberus/web/spec/fixtures/files/flower.jpg')
-                             .merge('permissions' => { 'read' => ['public'] }))
+    flower_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/flower.jpg')
+    AtlasRb::Work.set_thumbnails(work['id'], **ThumbnailCreator.call(base: flower_base).symbolize_keys)
+    AtlasRb::Work.set_image_derivatives(work['id'], **DerivativeCreator.call(base: flower_base).symbolize_keys)
+    AtlasRb::Work.metadata(work['id'], 'permissions' => { 'read' => ['public'] })
     AtlasRb::Blob.create(work['id'], '/home/cerberus/web/spec/fixtures/files/flower.jpg', 'flower.jpg')
     AtlasRb::Work.complete(work['id'])
   end
