@@ -1,15 +1,25 @@
 # frozen_string_literal: true
 
 class DerivativeCreator < ApplicationService
-  def initialize(base:)
+  # IIIF image widths (in pixels) for each role. `nil` emits IIIF's `full`
+  # size parameter (no resize). Override with `widths:` when a caller has
+  # its own notion of small/medium/large.
+  DEFAULT_WIDTHS = { small: 800, medium: 1600, large: nil }.freeze
+
+  def initialize(base:, widths: DEFAULT_WIDTHS)
     @base = base
+    @widths = widths.transform_keys(&:to_sym)
   end
 
   def call
-    {
-      'small'  => "#{@base}/full/800,/0/default.jpg",
-      'medium' => "#{@base}/full/1600,/0/default.jpg",
-      'large'  => "#{@base}/full/full/0/default.jpg"
-    }
+    @widths.each_with_object({}) do |(role, width), hash|
+      hash[role.to_s] = "#{@base}/full/#{iiif_size(width)}/0/default.jpg"
+    end
   end
+
+  private
+
+    def iiif_size(width)
+      width.nil? ? 'full' : "#{width},"
+    end
 end
