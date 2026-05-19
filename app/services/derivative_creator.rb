@@ -6,9 +6,9 @@ class DerivativeCreator < ApplicationService
   # its own notion of small/medium/large.
   DEFAULT_WIDTHS = { small: 800, medium: 1600, large: nil }.freeze
 
-  def initialize(base:, widths: DEFAULT_WIDTHS)
+  def initialize(base:, widths: nil)
     @base = base
-    @widths = widths.transform_keys(&:to_sym)
+    @widths = (widths || DEFAULT_WIDTHS).transform_keys(&:to_sym)
   end
 
   def call

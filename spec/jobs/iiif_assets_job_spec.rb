@@ -22,9 +22,19 @@ RSpec.describe IiifAssetsJob, type: :job do
     expect do
       described_class.new.perform(work_id, source_path)
     end.to have_enqueued_job(ThumbnailCreationJob).with(work_id, base)
-       .and have_enqueued_job(DerivativeCreationJob).with(work_id, base)
+       .and have_enqueued_job(DerivativeCreationJob).with(work_id, base, widths: nil)
 
     expect(MasterJp2).to have_received(:call).with(path: source_path).once
+  end
+
+  it 'forwards derivative_widths through to DerivativeCreationJob' do
+    widths = { small: 320, medium: 640, large: 1280 }
+    allow(AtlasRb::Work).to receive(:find).with(work_id).and_return(AtlasRb::Mash.new(thumbnail: nil))
+    allow(MasterJp2).to receive(:call).with(path: source_path).and_return(base)
+
+    expect do
+      described_class.new.perform(work_id, source_path, derivative_widths: widths)
+    end.to have_enqueued_job(DerivativeCreationJob).with(work_id, base, widths: widths)
   end
 
   it 'noops when the work already has a thumbnail' do

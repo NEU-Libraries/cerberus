@@ -33,6 +33,10 @@ describe DerivativeCreator do
         'small' => "#{base}/full/100,/0/default.jpg"
       )
     end
+
+    it 'treats widths: nil as a request for DEFAULT_WIDTHS' do
+      expect(DerivativeCreator.call(base: base, widths: nil)).to eq(DerivativeCreator.call(base: base))
+    end
   end
 
   describe 'initialize' do
