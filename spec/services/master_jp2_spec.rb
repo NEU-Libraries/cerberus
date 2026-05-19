@@ -7,9 +7,8 @@ describe MasterJp2 do
 
   describe 'call' do
     it 'writes the JP2 to the shared IIIF volume and returns the IIIF base URL' do
-      vips_image = instance_double(Vips::Image)
+      vips_image = double('Vips::Image', jp2ksave: nil)
       allow(Vips::Image).to receive(:new_from_file).with(image_path).and_return(vips_image)
-      allow(vips_image).to receive(:jp2ksave)
       allow(Time).to receive_message_chain(:now, :to_f, :to_s, :gsub!).and_return('123456789')
       allow(Rails.application.config).to receive(:iiif_host).and_return('http://example.com')
 
