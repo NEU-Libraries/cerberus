@@ -27,7 +27,7 @@ class DerivativeCreator < ApplicationService
 
   def call
     @widths.each_with_object({}) do |(role, width), hash|
-      hash[role.to_s] = "#{@base}/full/#{iiif_size(width)}/0/default.jpg"
+      hash[role] = "#{@base}/full/#{iiif_size(width)}/0/default.jpg"
     end
   end
 

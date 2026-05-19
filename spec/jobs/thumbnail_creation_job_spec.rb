@@ -7,9 +7,9 @@ RSpec.describe ThumbnailCreationJob, type: :job do
   let(:base) { 'http://example.com/iiif/3/123456789.jp2' }
   let(:urls) do
     {
-      'thumbnail'    => "#{base}/full/!85,85/0/default.jpg",
-      'thumbnail_2x' => "#{base}/full/!170,170/0/default.jpg",
-      'preview'      => "#{base}/full/500,/0/default.jpg"
+      thumbnail:    "#{base}/full/!85,85/0/default.jpg",
+      thumbnail_2x: "#{base}/full/!170,170/0/default.jpg",
+      preview:      "#{base}/full/500,/0/default.jpg"
     }
   end
 
@@ -22,9 +22,9 @@ RSpec.describe ThumbnailCreationJob, type: :job do
     expect(ThumbnailCreator).to have_received(:call).with(base: base)
     expect(AtlasRb::Work).to have_received(:set_thumbnails).with(
       work_id,
-      thumbnail: urls['thumbnail'],
-      thumbnail_2x: urls['thumbnail_2x'],
-      preview: urls['preview']
+      thumbnail: urls[:thumbnail],
+      thumbnail_2x: urls[:thumbnail_2x],
+      preview: urls[:preview]
     )
   end
 end

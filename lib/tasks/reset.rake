@@ -7,18 +7,18 @@ namespace :reset do
 
     community = AtlasRb::Community.create(nil, '/home/cerberus/web/spec/fixtures/files/community-mods.xml')
     river_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/river.jpg')
-    AtlasRb::Community.set_thumbnails(community['id'], **ThumbnailCreator.call(base: river_base).symbolize_keys)
+    AtlasRb::Community.set_thumbnails(community['id'], **ThumbnailCreator.call(base: river_base))
     AtlasRb::Community.metadata(community['id'], 'permissions' => { 'read' => ['public'] })
 
     collection = AtlasRb::Collection.create(community['id'], '/home/cerberus/web/spec/fixtures/files/collection-mods.xml')
     field_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/field.jpg')
-    AtlasRb::Collection.set_thumbnails(collection['id'], **ThumbnailCreator.call(base: field_base).symbolize_keys)
+    AtlasRb::Collection.set_thumbnails(collection['id'], **ThumbnailCreator.call(base: field_base))
     AtlasRb::Collection.metadata(collection['id'], 'permissions' => { 'read' => ['public'] })
 
     work = AtlasRb::Work.create(collection['id'], '/home/cerberus/web/spec/fixtures/files/work-mods.xml')
     flower_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/flower.jpg')
-    AtlasRb::Work.set_thumbnails(work['id'], **ThumbnailCreator.call(base: flower_base).symbolize_keys)
-    AtlasRb::Work.set_image_derivatives(work['id'], **DerivativeCreator.call(base: flower_base).symbolize_keys)
+    AtlasRb::Work.set_thumbnails(work['id'], **ThumbnailCreator.call(base: flower_base))
+    AtlasRb::Work.set_image_derivatives(work['id'], **DerivativeCreator.call(base: flower_base))
     AtlasRb::Work.metadata(work['id'], 'permissions' => { 'read' => ['public'] })
     AtlasRb::Blob.create(work['id'], '/home/cerberus/web/spec/fixtures/files/flower.jpg', 'flower.jpg')
     AtlasRb::Work.complete(work['id'])
