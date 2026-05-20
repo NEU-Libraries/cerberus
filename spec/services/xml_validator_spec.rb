@@ -71,28 +71,28 @@ describe XmlValidator do
 
     it 'surfaces a friendly error when the schema service returns an HTTP error' do
       allow(Kataba).to receive(:fetch_schema).with(schema_uri)
-        .and_raise(OpenURI::HTTPError.new('503 Service Unavailable', nil))
+                                             .and_raise(OpenURI::HTTPError.new('503 Service Unavailable', nil))
       errors = XmlValidator.call(xml: valid_mods)
       expect(errors).to include(a_string_matching(/Could not fetch schema.*503/))
     end
 
     it 'surfaces a friendly error when the schema service is unreachable' do
       allow(Kataba).to receive(:fetch_schema).with(schema_uri)
-        .and_raise(SocketError.new('getaddrinfo: Name or service not known'))
+                                             .and_raise(SocketError.new('getaddrinfo: Name or service not known'))
       errors = XmlValidator.call(xml: valid_mods)
       expect(errors).to include(a_string_matching(/Could not fetch schema.*SocketError/))
     end
 
     it 'surfaces a friendly error when open-uri refuses a HTTPS→HTTP redirect' do
       allow(Kataba).to receive(:fetch_schema).with(schema_uri)
-        .and_raise(RuntimeError.new('redirection forbidden: https://example.com -> http://example.com'))
+                                             .and_raise(RuntimeError.new('redirection forbidden: https://example.com -> http://example.com'))
       errors = XmlValidator.call(xml: valid_mods)
       expect(errors).to include(a_string_matching(/redirection forbidden/))
     end
 
     it 're-raises RuntimeErrors that are not open-uri redirect refusals' do
       allow(Kataba).to receive(:fetch_schema).with(schema_uri)
-        .and_raise(RuntimeError.new('some unrelated bug'))
+                                             .and_raise(RuntimeError.new('some unrelated bug'))
       expect { XmlValidator.call(xml: valid_mods) }.to raise_error(RuntimeError, 'some unrelated bug')
     end
 
@@ -107,7 +107,7 @@ describe XmlValidator do
         </mods:mods>
       XML
       allow(Kataba).to receive(:fetch_schema).with(schema_uri)
-        .and_raise(OpenURI::HTTPError.new('503 Service Unavailable', nil))
+                                             .and_raise(OpenURI::HTTPError.new('503 Service Unavailable', nil))
       allow(Kataba).to receive(:fetch_schema).with(other_uri).and_return(passing_schema)
 
       errors = XmlValidator.call(xml: xml)

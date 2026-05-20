@@ -50,8 +50,10 @@ describe CollectionsController do
   end
 
   describe 'tombstone' do
-    let(:user) { User.new(email: 'staff@example.com', nuid: '000000002',
-                          groups: [Permissions::STAFF_EDIT_GROUP]) }
+    let(:user) do
+      User.new(email: 'staff@example.com', nuid: '000000002',
+               groups: [Permissions::STAFF_EDIT_GROUP])
+    end
 
     before do
       AtlasRb::Collection.metadata(collection.id,

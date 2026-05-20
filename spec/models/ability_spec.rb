@@ -15,19 +15,19 @@ describe Ability do
 
     it 'allows the depositor of a Work' do
       doc = SolrDocument.new('internal_resource_tesim' => 'Work',
-                             'depositor_ssi' => '000000002')
+                             'depositor_ssi'           => '000000002')
       expect(ability).to be_able_to(:tombstone, doc)
     end
 
     it 'denies a non-depositor on a Work' do
       doc = SolrDocument.new('internal_resource_tesim' => 'Work',
-                             'depositor_ssi' => '999999999')
+                             'depositor_ssi'           => '999999999')
       expect(ability).not_to be_able_to(:tombstone, doc)
     end
 
     it 'ignores depositor matches on Communities and Collections' do
       doc = SolrDocument.new('internal_resource_tesim' => 'Collection',
-                             'depositor_ssi' => '000000002')
+                             'depositor_ssi'           => '000000002')
       expect(ability).not_to be_able_to(:tombstone, doc)
     end
 

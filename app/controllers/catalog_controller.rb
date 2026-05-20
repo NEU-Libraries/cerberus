@@ -28,10 +28,10 @@ class CatalogController < ApplicationController
     ## Default parameters to send to solr for all search-like requests. See also SearchBuilder#processed_parameters
     config.default_solr_params = {
       rows: 10,
-      fq: ['-internal_resource_tesim:FileSet',
-           '-internal_resource_tesim:Blob',
-           '-internal_resource_tesim:Delegate',
-           '-tombstoned_bsi:true']
+      fq:   ['-internal_resource_tesim:FileSet',
+             '-internal_resource_tesim:Blob',
+             '-internal_resource_tesim:Delegate',
+             '-tombstoned_bsi:true']
     }
 
     # solr path which will be added to solr base url before the other solr params.
@@ -106,7 +106,7 @@ class CatalogController < ApplicationController
                                                   collapsing: true
 
     config.add_facet_field 'example_query_facet_field', label: 'Publish Date', query: {
-      years_5: { label: 'within 5 Years', fq: "pub_date_ssim:[#{Time.zone.now.year - 5} TO *]" },
+      years_5:  { label: 'within 5 Years', fq: "pub_date_ssim:[#{Time.zone.now.year - 5} TO *]" },
       years_10: { label: 'within 10 Years', fq: "pub_date_ssim:[#{Time.zone.now.year - 10} TO *]" },
       years_25: { label: 'within 25 Years', fq: "pub_date_ssim:[#{Time.zone.now.year - 25} TO *]" }
     }
@@ -256,8 +256,7 @@ class CatalogController < ApplicationController
       fallback = view_context.content_tag(:span, icon_html,
                                           class: 'thumbnail-fallback d-none')
       img = view_context.image_tag(src,
-        onerror: "this.classList.add('d-none'); this.nextElementSibling.classList.remove('d-none');"
-      )
+                                   onerror: "this.classList.add('d-none'); this.nextElementSibling.classList.remove('d-none');")
       view_context.content_tag(:span, img + fallback, class: 'thumbnail-wrapper')
     else
       view_context.content_tag(:span, icon_html, class: 'thumbnail-fallback')

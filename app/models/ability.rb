@@ -26,11 +26,11 @@ class Ability
     end
 
     def groups_can_read?(doc, user)
-      (Array(doc['read_access_group_ssim']) & Array(user.groups)).any?
+      Array(doc['read_access_group_ssim']).intersect?(Array(user.groups))
     end
 
     def groups_can_edit?(doc, user)
-      (Array(doc['edit_access_group_ssim']) & Array(user.groups)).any?
+      Array(doc['edit_access_group_ssim']).intersect?(Array(user.groups))
     end
 
     def depositor_for_work?(doc, user)

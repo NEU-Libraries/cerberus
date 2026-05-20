@@ -24,18 +24,18 @@ class XmlValidator < ApplicationService
 
   def call
     begin
-      @doc = Nokogiri::XML(@xml) { |config| config.strict }
+      @doc = Nokogiri::XML(@xml, &:strict)
     rescue Nokogiri::XML::SyntaxError => e
       return [e]
     end
 
     errors = []
-    errors << "Document encoding must be UTF-8 (got #{@doc.encoding.inspect})" unless @doc.encoding == "UTF-8"
-    errors << "Document must declare xmlns:mods" unless @doc.namespaces.key?("xmlns:mods")
+    errors << "Document encoding must be UTF-8 (got #{@doc.encoding.inspect})" unless @doc.encoding == 'UTF-8'
+    errors << 'Document must declare xmlns:mods' unless @doc.namespaces.key?('xmlns:mods')
 
     schemas = schema_locations
     if schemas.empty?
-      errors << "Document root must declare a schemaLocation"
+      errors << 'Document root must declare a schemaLocation'
     else
       schemas.each_value do |xsd_uri|
         begin
@@ -53,6 +53,7 @@ class XmlValidator < ApplicationService
           # redirect. Catch only that specific case so we don't swallow
           # unrelated runtime errors from inside Kataba or Nokogiri.
           raise unless e.message.start_with?('redirection forbidden')
+
           errors << "Could not fetch schema #{xsd_uri} (#{e.message})"
           next
         end
@@ -66,8 +67,12 @@ class XmlValidator < ApplicationService
   private
 
     def schema_locations
-      attr = @doc.root&.attributes&.[]("schemaLocation")&.value
+      root = @doc.root
+      return {} unless root
+
+      attr = root.attributes['schemaLocation']
       return {} unless attr
-      attr.scan(/(\S+)\s+(\S+)/).to_h
+
+      attr.value.scan(/(\S+)\s+(\S+)/).to_h
     end
 end

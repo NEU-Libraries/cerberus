@@ -14,16 +14,16 @@ module ApplicationHelper
   end
 
   FILE_TYPE_ICONS = {
-    %r{\Aimage/} => 'fa-file-image',
-    %r{\Aaudio/} => 'fa-file-audio',
-    %r{\Avideo/} => 'fa-file-video',
-    %r{\Aapplication/pdf\z} => 'fa-file-pdf',
-    %r{\Atext/} => 'fa-file-lines',
+    %r{\Aimage/}                            => 'fa-file-image',
+    %r{\Aaudio/}                            => 'fa-file-audio',
+    %r{\Avideo/}                            => 'fa-file-video',
+    %r{\Aapplication/pdf\z}                 => 'fa-file-pdf',
+    %r{\Atext/}                             => 'fa-file-lines',
     /word|officedocument\.wordprocessingml/ => 'fa-file-word',
-    /excel|spreadsheetml/ => 'fa-file-excel',
-    /powerpoint|presentationml/ => 'fa-file-powerpoint',
-    /zip|tar|gzip|compressed/ => 'fa-file-zipper',
-    /json|xml|javascript|ruby|python|sh\z/ => 'fa-file-code'
+    /excel|spreadsheetml/                   => 'fa-file-excel',
+    /powerpoint|presentationml/             => 'fa-file-powerpoint',
+    /zip|tar|gzip|compressed/               => 'fa-file-zipper',
+    /json|xml|javascript|ruby|python|sh\z/  => 'fa-file-code'
   }.freeze
 
   def file_type_icon(mime_type)
@@ -33,10 +33,10 @@ module ApplicationHelper
 
   def javascript_inline_importmap_tag(importmap_json = Rails.application.importmap.to_json(resolver: self))
     tag.script importmap_json.html_safe,
-               type: 'importmap',
+               type:               'importmap',
                'data-turbo-track': 'reload',
-               'data-turbo-eval': 'false',
-               nonce: request&.content_security_policy_nonce
+               'data-turbo-eval':  'false',
+               nonce:              request&.content_security_policy_nonce
   end
 
   def report_a_problem_url(document)

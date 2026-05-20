@@ -22,9 +22,9 @@ RSpec.describe ThumbnailCreationJob, type: :job do
     expect(ThumbnailCreator).to have_received(:call).with(base: base)
     expect(AtlasRb::Work).to have_received(:set_thumbnails).with(
       work_id,
-      thumbnail: urls[:thumbnail],
+      thumbnail:    urls[:thumbnail],
       thumbnail_2x: urls[:thumbnail_2x],
-      preview: urls[:preview]
+      preview:      urls[:preview]
     )
   end
 end

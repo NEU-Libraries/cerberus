@@ -13,10 +13,10 @@ describe WorksController do
     AtlasRb::Work.find(created.id)
   end
 
-  def stub_work_in_progress(w)
-    in_progress = AtlasRb::Work.find(w.id)
+  def stub_work_in_progress(work)
+    in_progress = AtlasRb::Work.find(work.id)
     in_progress['in_progress'] = true
-    allow(AtlasRb::Work).to receive(:find).with(w.id).and_return(in_progress)
+    allow(AtlasRb::Work).to receive(:find).with(work.id).and_return(in_progress)
   end
 
   describe 'show' do
@@ -68,23 +68,23 @@ describe WorksController do
     let(:uuid_re) { /\A\h{8}-\h{4}-\h{4}-\h{4}-\h{12}\z/ }
 
     it 'enqueues both jobs and redirects to the metadata page' do
-      expect {
-        post :create, params: { binary: fixture_file_upload('image.png', 'image/png'),
+      expect do
+        post :create, params: { binary:    fixture_file_upload('image.png', 'image/png'),
                                 parent_id: collection.id }
-      }.to have_enqueued_job(IiifAssetsJob)
-       .and have_enqueued_job(ContentCreationJob)
-              .with(anything, anything, 'image.png', a_string_matching(uuid_re))
+      end.to have_enqueued_job(IiifAssetsJob)
+        .and have_enqueued_job(ContentCreationJob)
+        .with(anything, anything, 'image.png', a_string_matching(uuid_re))
 
       expect(subject).to redirect_to action: :metadata, id: assigns(:work).id
     end
 
     it 'does not enqueue the IIIF-assets job for non-image uploads' do
-      expect {
-        post :create, params: { binary: fixture_file_upload('plain.txt', 'text/plain'),
+      expect do
+        post :create, params: { binary:    fixture_file_upload('plain.txt', 'text/plain'),
                                 parent_id: collection.id }
-      }.to have_enqueued_job(ContentCreationJob)
-              .with(anything, anything, 'plain.txt', a_string_matching(uuid_re))
-       .and not_have_enqueued_job(IiifAssetsJob)
+      end.to have_enqueued_job(ContentCreationJob)
+        .with(anything, anything, 'plain.txt', a_string_matching(uuid_re))
+        .and not_have_enqueued_job(IiifAssetsJob)
     end
   end
 
@@ -173,8 +173,10 @@ describe WorksController do
   end
 
   describe 'tombstone' do
-    let(:user) { User.new(email: 'staff@example.com', nuid: '000000002',
-                          groups: [Permissions::STAFF_EDIT_GROUP]) }
+    let(:user) do
+      User.new(email: 'staff@example.com', nuid: '000000002',
+               groups: [Permissions::STAFF_EDIT_GROUP])
+    end
 
     before do
       AtlasRb::Work.metadata(work.id,

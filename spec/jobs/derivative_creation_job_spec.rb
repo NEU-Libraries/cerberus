@@ -22,9 +22,9 @@ RSpec.describe DerivativeCreationJob, type: :job do
     expect(DerivativeCreator).to have_received(:call).with(base: base, widths: nil)
     expect(AtlasRb::Work).to have_received(:set_image_derivatives).with(
       work_id,
-      small: urls[:small],
+      small:  urls[:small],
       medium: urls[:medium],
-      large: urls[:large]
+      large:  urls[:large]
     )
   end
 

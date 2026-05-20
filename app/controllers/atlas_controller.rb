@@ -7,9 +7,9 @@ class AtlasController < ApplicationController
     user_values = AtlasRb::Authentication.login(params[:user][:nuid])
 
     user = User.new(
-      email: user_values.email,
-      nuid: user_values.nuid,
-      name: user_values.name,
+      email:  user_values.email,
+      nuid:   user_values.nuid,
+      name:   user_values.name,
       groups: user_values.groups
     )
 
@@ -23,15 +23,15 @@ class AtlasController < ApplicationController
     nuid = params[:user][:nuid]
     name = params[:user][:name].presence
     email = params[:user][:email].presence
-    groups = params[:user][:groups].to_s.split("\n").map(&:strip).reject(&:blank?)
+    groups = params[:user][:groups].to_s.split("\n").map(&:strip).compact_blank
 
     AtlasRb::User.find_or_create(nuid: nuid, groups: groups, name: name, email: email)
 
     user_values = AtlasRb::Authentication.login(nuid)
     user = User.new(
-      email: user_values.email,
-      nuid: user_values.nuid,
-      name: user_values.name,
+      email:  user_values.email,
+      nuid:   user_values.nuid,
+      name:   user_values.name,
       groups: user_values.groups
     )
 
