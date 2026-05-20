@@ -256,7 +256,8 @@ class CatalogController < ApplicationController
       fallback = view_context.content_tag(:span, icon_html,
                                           class: 'thumbnail-fallback d-none')
       img = view_context.image_tag(src,
-                                   onerror: "this.classList.add('d-none'); this.nextElementSibling.classList.remove('d-none');")
+                                   onerror: "this.classList.add('d-none'); \
+                                             this.nextElementSibling.classList.remove('d-none');")
       view_context.content_tag(:span, img + fallback, class: 'thumbnail-wrapper')
     else
       view_context.content_tag(:span, icon_html, class: 'thumbnail-fallback')
