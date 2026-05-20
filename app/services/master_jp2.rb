@@ -8,7 +8,7 @@ class MasterJp2 < ApplicationService
   def call
     img = Vips::Image.new_from_file(@path)
     uuid = Time.now.to_f.to_s.gsub!('.', '')
-    img.jp2ksave("/home/cerberus/images/#{uuid}.jp2")
+    img.jp2ksave(File.join(Rails.application.config.x.cerberus.derivatives_root, "#{uuid}.jp2"))
     "#{Rails.application.config.iiif_host}/iiif/3/#{uuid}.jp2"
   end
 end
