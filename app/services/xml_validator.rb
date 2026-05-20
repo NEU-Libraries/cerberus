@@ -23,51 +23,54 @@ class XmlValidator < ApplicationService
   end
 
   def call
-    begin
-      @doc = Nokogiri::XML(@xml, &:strict)
-    rescue Nokogiri::XML::SyntaxError => e
-      return [e]
-    end
+    syntax_error = parse
+    return [syntax_error] if syntax_error
 
-    errors = []
-    errors << "Document encoding must be UTF-8 (got #{@doc.encoding.inspect})" unless @doc.encoding == 'UTF-8'
-    errors << 'Document must declare xmlns:mods' unless @doc.namespaces.key?('xmlns:mods')
-
-    schemas = schema_locations
-    if schemas.empty?
-      errors << 'Document root must declare a schemaLocation'
-    else
-      schemas.each_value do |xsd_uri|
-        begin
-          schema = Kataba.fetch_schema(xsd_uri)
-        rescue OpenURI::HTTPError, SocketError, SystemCallError => e
-          # Schema service unreachable or returned non-200. Surface as a
-          # validator error rather than letting it bubble to a 500.
-          # SystemCallError catches Errno::ETIMEDOUT, Errno::ECONNREFUSED,
-          # and friends in one branch.
-          errors << "Could not fetch schema #{xsd_uri} (#{e.class}: #{e.message})"
-          next
-        rescue RuntimeError => e
-          # open-uri raises a plain RuntimeError ("redirection forbidden:
-          # https → http") when a server tries to downgrade the scheme on
-          # redirect. Catch only that specific case so we don't swallow
-          # unrelated runtime errors from inside Kataba or Nokogiri.
-          raise unless e.message.start_with?('redirection forbidden')
-
-          errors << "Could not fetch schema #{xsd_uri} (#{e.message})"
-          next
-        end
-        errors.concat(schema.validate(@doc))
-      end
-    end
-
-    errors
+    document_errors + schema_errors
   end
 
   private
 
+    attr_reader :doc
+
+    def parse
+      @doc = Nokogiri::XML(@xml, &:strict)
+      nil
+    rescue Nokogiri::XML::SyntaxError => e
+      e
+    end
+
+    def document_errors
+      errors = []
+      errors << "Document encoding must be UTF-8 (got #{doc.encoding.inspect})" unless doc.encoding == 'UTF-8'
+      errors << 'Document must declare xmlns:mods' unless doc.namespaces.key?('xmlns:mods')
+      errors
+    end
+
+    def schema_errors
+      schemas = schema_locations
+      return ['Document root must declare a schemaLocation'] if schemas.empty?
+
+      schemas.values.flat_map { |xsd_uri| validate_against(xsd_uri) }
+    end
+
+    def validate_against(xsd_uri)
+      Kataba.fetch_schema(xsd_uri).validate(doc)
+    rescue OpenURI::HTTPError, SocketError, SystemCallError => e
+      # Schema service unreachable or returned non-200. SystemCallError catches
+      # Errno::ETIMEDOUT, Errno::ECONNREFUSED, and friends in one branch.
+      ["Could not fetch schema #{xsd_uri} (#{e.class}: #{e.message})"]
+    rescue RuntimeError => e
+      # open-uri raises a plain RuntimeError ("redirection forbidden: https → http")
+      # when a server tries to downgrade the scheme on redirect. Catch only that
+      # specific case so we don't swallow unrelated runtime errors.
+      raise unless e.message.start_with?('redirection forbidden')
+
+      ["Could not fetch schema #{xsd_uri} (#{e.message})"]
+    end
+
     def schema_locations
-      root = @doc.root
+      root = doc.root
       return {} unless root
 
       attr = root.attributes['schemaLocation']
