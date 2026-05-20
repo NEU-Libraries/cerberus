@@ -19,11 +19,7 @@ class WorksController < ApplicationController
 
     authorize_show!
     flash.now[:alert] = IN_PROGRESS_NOTICE if @work.in_progress
-    @mods = AtlasRb::Work.mods(params[:id], 'html')
-    @files = AtlasRb::Work.assets(params[:id])
-    @can_tombstone = current_ability.can?(:tombstone,
-                                          solr_doc_from_permissions(@permissions, klass: 'Work'))
-    breadcrumbs(params[:id])
+    prepare_show_view
   end
 
   def tombstone
@@ -46,15 +42,12 @@ class WorksController < ApplicationController
   end
 
   def create
-    # TODO: add support for pdf/word thumbnails
     file = params[:binary]
     @work = AtlasRb::Work.create(AtlasRb::Collection.find(params[:parent_id]).id)
-
     AtlasRb::Work.metadata(@work.id, title: file.original_filename)
 
     staged_path = stage_upload(file, @work.id)
-    IiifAssetsJob.perform_later(@work.id, staged_path) if file.content_type.to_s.start_with?('image/')
-    ContentCreationJob.perform_later(@work.id, staged_path, file.original_filename, SecureRandom.uuid)
+    enqueue_ingest_jobs(file, staged_path)
 
     redirect_to metadata_work_path(@work.id), notice: 'File uploaded — please review the metadata.'
   end
@@ -78,6 +71,20 @@ class WorksController < ApplicationController
 
     def work_params
       resource_params(:work)
+    end
+
+    def prepare_show_view
+      @mods = AtlasRb::Work.mods(params[:id], 'html')
+      @files = AtlasRb::Work.assets(params[:id])
+      @can_tombstone = current_ability.can?(:tombstone,
+                                            solr_doc_from_permissions(@permissions, klass: 'Work'))
+      breadcrumbs(params[:id])
+    end
+
+    # TODO: add support for pdf/word thumbnails — only images get IIIF derivatives today.
+    def enqueue_ingest_jobs(file, staged_path)
+      IiifAssetsJob.perform_later(@work.id, staged_path) if file.content_type.to_s.start_with?('image/')
+      ContentCreationJob.perform_later(@work.id, staged_path, file.original_filename, SecureRandom.uuid)
     end
 
     def reject_if_in_progress
