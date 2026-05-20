@@ -16,8 +16,8 @@
         .clearfix.pt-3
         = @community.description
         .clearfix.pt-3
-          .float-end
-            - if user_signed_in?
+          - if user_signed_in?
+            .float-end
               = link_to "Edit", edit_community_path(@community.id), class: "px-3"
               - if @can_tombstone && @response.documents.empty?
                 = render 'shared/tombstone_modal',
