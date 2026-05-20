@@ -4,8 +4,6 @@ class WorksController < ApplicationController
   include Thumbable
   include Transformable
 
-  UPLOADS_ROOT = '/home/cerberus/uploads'
-
   IN_PROGRESS_NOTICE = 'This work is still being processed and cannot be edited yet.'
 
   before_action :authorize_show!, only: [:downloads]
@@ -94,7 +92,7 @@ class WorksController < ApplicationController
     end
 
     def stage_upload(file, work_id)
-      dir = File.join(UPLOADS_ROOT, work_id.to_s)
+      dir = File.join(Rails.application.config.x.cerberus.uploads_root, work_id.to_s)
       FileUtils.mkdir_p(dir)
       dest = File.join(dir, file.original_filename)
       FileUtils.cp(file.tempfile.path.presence || file.path, dest)
