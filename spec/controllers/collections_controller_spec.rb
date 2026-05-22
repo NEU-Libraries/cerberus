@@ -3,8 +3,8 @@
 require 'rails_helper'
 
 describe CollectionsController do
-  let(:community) { AtlasRb::Community.create(nil, '/home/cerberus/web/spec/fixtures/files/community-mods.xml') }
-  let(:collection) { AtlasRb::Collection.create(community.id, '/home/cerberus/web/spec/fixtures/files/collection-mods.xml') }
+  let(:community) { AtlasRb::Community.create(nil, '/home/cerberus/web/spec/fixtures/files/community-mods.xml', nuid: '000000004') }
+  let(:collection) { AtlasRb::Collection.create(community.id, '/home/cerberus/web/spec/fixtures/files/collection-mods.xml', nuid: '000000004') }
 
   describe 'edit' do
     render_views
@@ -12,7 +12,7 @@ describe CollectionsController do
     let(:user) { User.new(email: 'test@example.com', password: 'password', groups: ['editors']) }
 
     before do
-      AtlasRb::Collection.metadata(collection.id, { 'permissions' => { 'edit' => ['editors'] } })
+      AtlasRb::Collection.metadata(collection.id, { 'permissions' => { 'edit' => ['editors'] } }, nuid: '000000004')
       sign_in user
     end
 
@@ -27,7 +27,7 @@ describe CollectionsController do
     render_views
 
     before do
-      AtlasRb::Collection.metadata(collection.id, { 'permissions' => { 'read' => ['public'] } })
+      AtlasRb::Collection.metadata(collection.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
     end
 
     it 'renders the show partial' do
@@ -57,7 +57,7 @@ describe CollectionsController do
 
     before do
       AtlasRb::Collection.metadata(collection.id,
-                                   { 'permissions' => { 'edit' => [Permissions::STAFF_EDIT_GROUP] } })
+                                   { 'permissions' => { 'edit' => [Permissions::STAFF_EDIT_GROUP] } }, nuid: '000000004')
       sign_in user
     end
 

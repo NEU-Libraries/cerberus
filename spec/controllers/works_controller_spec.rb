@@ -5,25 +5,25 @@ require 'rails_helper'
 RSpec::Matchers.define_negated_matcher :not_have_enqueued_job, :have_enqueued_job
 
 describe WorksController do
-  let(:community) { AtlasRb::Community.create(nil, '/home/cerberus/web/spec/fixtures/files/community-mods.xml') }
-  let(:collection) { AtlasRb::Collection.create(community.id, '/home/cerberus/web/spec/fixtures/files/collection-mods.xml') }
+  let(:community) { AtlasRb::Community.create(nil, '/home/cerberus/web/spec/fixtures/files/community-mods.xml', nuid: '000000004') }
+  let(:collection) { AtlasRb::Collection.create(community.id, '/home/cerberus/web/spec/fixtures/files/collection-mods.xml', nuid: '000000004') }
   let(:work) do
-    created = AtlasRb::Work.create(collection.id, '/home/cerberus/web/spec/fixtures/files/work-mods.xml')
-    AtlasRb::Work.complete(created.id)
-    AtlasRb::Work.find(created.id)
+    created = AtlasRb::Work.create(collection.id, '/home/cerberus/web/spec/fixtures/files/work-mods.xml', nuid: '000000004')
+    AtlasRb::Work.complete(created.id, nuid: '000000004')
+    AtlasRb::Work.find(created.id, nuid: '000000004')
   end
 
   def stub_work_in_progress(work)
-    in_progress = AtlasRb::Work.find(work.id)
+    in_progress = AtlasRb::Work.find(work.id, nuid: '000000004')
     in_progress['in_progress'] = true
-    allow(AtlasRb::Work).to receive(:find).with(work.id).and_return(in_progress)
+    allow(AtlasRb::Work).to receive(:find).with(work.id, nuid: '000000001').and_return(in_progress)
   end
 
   describe 'show' do
     render_views
 
     before do
-      AtlasRb::Work.metadata(work.id, { 'permissions' => { 'read' => ['public'] } })
+      AtlasRb::Work.metadata(work.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
     end
 
     it 'renders the show partial' do
@@ -51,7 +51,7 @@ describe WorksController do
     render_views
 
     before do
-      AtlasRb::Work.metadata(work.id, { 'permissions' => { 'read' => ['public'] } })
+      AtlasRb::Work.metadata(work.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
     end
 
     it 'renders the downloads turbo-frame without the layout' do
@@ -101,7 +101,7 @@ describe WorksController do
     let(:user) { User.new(email: 'test@example.com', password: 'password', groups: ['editors']) }
 
     before do
-      AtlasRb::Work.metadata(work.id, { 'permissions' => { 'edit' => ['editors'] } })
+      AtlasRb::Work.metadata(work.id, { 'permissions' => { 'edit' => ['editors'] } }, nuid: '000000004')
       sign_in user
     end
 
@@ -138,7 +138,7 @@ describe WorksController do
     let(:user) { User.new(email: 'test@example.com', password: 'password', groups: ['editors']) }
 
     before do
-      AtlasRb::Work.metadata(work.id, { 'permissions' => { 'edit' => ['editors'] } })
+      AtlasRb::Work.metadata(work.id, { 'permissions' => { 'edit' => ['editors'] } }, nuid: '000000004')
       sign_in user
     end
 
@@ -157,14 +157,14 @@ describe WorksController do
     let(:user) { User.new(email: 'test@example.com', password: 'password', groups: ['editors']) }
 
     before do
-      AtlasRb::Work.metadata(work.id, { 'permissions' => { 'edit' => ['editors'] } })
+      AtlasRb::Work.metadata(work.id, { 'permissions' => { 'edit' => ['editors'] } }, nuid: '000000004')
       sign_in user
     end
 
     it 'updates the title and description and redirects to show' do
       patch :update_metadata, params: { id: work.id, work: { title: 'New Title', description: 'New abstract.' } }
 
-      updated = AtlasRb::Work.find(work.id)
+      updated = AtlasRb::Work.find(work.id, nuid: '000000004')
       expect(updated.title).to start_with('New Title')
       expect(updated.title).not_to include("What's New")
       expect(updated.description).to eq('New abstract.')
@@ -180,7 +180,7 @@ describe WorksController do
 
     before do
       AtlasRb::Work.metadata(work.id,
-                             { 'permissions' => { 'edit' => [Permissions::STAFF_EDIT_GROUP] } })
+                             { 'permissions' => { 'edit' => [Permissions::STAFF_EDIT_GROUP] } }, nuid: '000000004')
       sign_in user
     end
 
@@ -196,10 +196,10 @@ describe WorksController do
     render_views
 
     before do
-      AtlasRb::Work.metadata(work.id, { 'permissions' => { 'read' => ['public'] } })
-      tombstoned = AtlasRb::Work.find(work.id)
+      AtlasRb::Work.metadata(work.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
+      tombstoned = AtlasRb::Work.find(work.id, nuid: '000000004')
       tombstoned['tombstoned'] = true
-      allow(AtlasRb::Work).to receive(:find).with(work.id).and_return(tombstoned)
+      allow(AtlasRb::Work).to receive(:find).with(work.id, nuid: '000000001').and_return(tombstoned)
     end
 
     it 'renders the gone template with status 410' do

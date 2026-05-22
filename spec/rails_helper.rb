@@ -52,6 +52,16 @@ RSpec.configure do |config|
     AtlasRb::Reset.clean
   end
 
+  # Default acting-NUID for tests = admin fixture. Spec setup (let blocks
+  # creating Communities / Collections / Works directly via AtlasRb) runs
+  # outside a controller context, so the ApplicationController before_action
+  # that normally sets Current.nuid doesn't fire. Jobs and other code paths
+  # that read Current.nuid pick up this admin default during tests.
+  # Controllers under test still override Current.nuid via their before_action
+  # based on the signed-in user (or the guest fallback when no user is signed
+  # in), so the override-chain mirrors production.
+  config.before(:each) { Current.nuid = '000000004' }
+
   config.include Devise::Test::ControllerHelpers, type: :controller
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
   config.fixture_paths = [Rails.root.join('spec/fixtures').to_s]

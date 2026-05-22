@@ -19,8 +19,8 @@ RSpec.describe ContentCreationJob, type: :job do
     described_class.new.perform(work_id, source_path, original_filename, idempotency_key)
 
     expect(AtlasRb::Blob).to have_received(:create)
-      .with(work_id, source_path, original_filename, idempotency_key: idempotency_key)
-    expect(AtlasRb::Work).to have_received(:complete).with(work_id)
+      .with(work_id, source_path, original_filename, idempotency_key: idempotency_key, nuid: '000000004')
+    expect(AtlasRb::Work).to have_received(:complete).with(work_id, nuid: '000000004')
   end
 
   it 'noops when the staged file is missing' do

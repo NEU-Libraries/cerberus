@@ -3,7 +3,7 @@
 require 'rails_helper'
 
 describe CommunitiesController do
-  let(:community) { AtlasRb::Community.create(nil, '/home/cerberus/web/spec/fixtures/files/community-mods.xml') }
+  let(:community) { AtlasRb::Community.create(nil, '/home/cerberus/web/spec/fixtures/files/community-mods.xml', nuid: '000000004') }
 
   describe 'edit' do
     render_views
@@ -11,7 +11,7 @@ describe CommunitiesController do
     let(:user) { User.new(email: 'test@example.com', password: 'password', groups: ['editors']) }
 
     before do
-      AtlasRb::Community.metadata(community.id, { 'permissions' => { 'edit' => ['editors'] } })
+      AtlasRb::Community.metadata(community.id, { 'permissions' => { 'edit' => ['editors'] } }, nuid: '000000004')
       sign_in user
     end
 
@@ -26,7 +26,7 @@ describe CommunitiesController do
     render_views
 
     before do
-      AtlasRb::Community.metadata(community.id, { 'permissions' => { 'read' => ['public'] } })
+      AtlasRb::Community.metadata(community.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
     end
 
     it 'renders the show partial' do
@@ -56,7 +56,7 @@ describe CommunitiesController do
 
     before do
       AtlasRb::Community.metadata(community.id,
-                                  { 'permissions' => { 'edit' => [Permissions::STAFF_EDIT_GROUP] } })
+                                  { 'permissions' => { 'edit' => [Permissions::STAFF_EDIT_GROUP] } }, nuid: '000000004')
       sign_in user
     end
 
