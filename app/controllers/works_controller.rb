@@ -41,7 +41,8 @@ class WorksController < ApplicationController
 
   def create
     file = params[:binary]
-    @work = AtlasRb::Work.create(AtlasRb::Collection.find(params[:parent_id], nuid: Current.nuid).id, nuid: Current.nuid)
+    parent = AtlasRb::Collection.find(params[:parent_id], nuid: Current.nuid)
+    @work = AtlasRb::Work.create(parent.id, nuid: Current.nuid)
     AtlasRb::Work.metadata(@work.id, { title: file.original_filename }, nuid: Current.nuid)
 
     staged_path = stage_upload(file, @work.id)
