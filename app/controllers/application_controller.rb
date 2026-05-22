@@ -10,13 +10,14 @@ class ApplicationController < ActionController::Base
   end
 
   before_action :store_preferred_view
+  before_action :set_current_nuid
 
   def current_ability
     @current_ability ||= Ability.new(current_user)
   end
 
   def breadcrumbs(id)
-    result = AtlasRb::Resource.find(id)
+    result = AtlasRb::Resource.find(id, nuid: Current.nuid)
     item = result.resource
     item.ancestors.each do |ancestor_id, ancestor_klass|
       add_breadcrumb_for(ancestor_id, ancestor_klass)
@@ -34,8 +35,12 @@ class ApplicationController < ActionController::Base
 
   private # ---------------------------------------------------------
 
+    def set_current_nuid
+      Current.nuid = current_user&.nuid || Rails.application.config.x.cerberus.guest_nuid
+    end
+
     def add_breadcrumb_for(resource_id, klass)
-      title = AtlasRb.const_get(klass).find(resource_id).title
+      title = AtlasRb.const_get(klass).find(resource_id, nuid: Current.nuid).title
       path  = public_send("#{klass.downcase}_path", resource_id)
       breadcrumb(title, path)
     end
