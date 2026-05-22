@@ -6,7 +6,8 @@ class ContentCreationJob < ApplicationJob
   def perform(work_id, source_path, original_filename, idempotency_key)
     return unless File.exist?(source_path)
 
-    AtlasRb::Blob.create(work_id, source_path, original_filename, idempotency_key: idempotency_key)
-    AtlasRb::Work.complete(work_id)
+    AtlasRb::Blob.create(work_id, source_path, original_filename,
+                         idempotency_key: idempotency_key, nuid: Current.nuid)
+    AtlasRb::Work.complete(work_id, nuid: Current.nuid)
   end
 end
