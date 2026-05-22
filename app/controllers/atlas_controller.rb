@@ -11,6 +11,9 @@ class AtlasController < ApplicationController
 
   def process_find_or_create
     attrs = find_or_create_params
+    # AtlasRb::User.find_or_create uses bearer-only auth against Atlas's
+    # system-only provisioning endpoint (no User: header). Do not add a
+    # nuid: arg here — piece 6 will migrate this to AtlasRb::System::User.
     AtlasRb::User.find_or_create(**attrs)
     sign_in_from_atlas(attrs[:nuid])
   end

@@ -12,7 +12,7 @@ class WorksController < ApplicationController
   before_action :reject_if_in_progress, only: [:edit]
 
   def show
-    @work = AtlasRb::Work.find(params[:id])
+    @work = AtlasRb::Work.find(params[:id], nuid: Current.nuid)
     return render_gone(@work) if @work.tombstoned
 
     authorize_show!
@@ -21,12 +21,12 @@ class WorksController < ApplicationController
   end
 
   def tombstone
-    AtlasRb::Work.tombstone(params[:id], nuid: current_user.nuid)
+    AtlasRb::Work.tombstone(params[:id], nuid: Current.nuid)
     redirect_to root_path, notice: 'Work deleted.'
   end
 
   def downloads
-    @files = AtlasRb::Work.assets(params[:id])
+    @files = AtlasRb::Work.assets(params[:id], nuid: Current.nuid)
     render layout: false
   end
 
@@ -35,14 +35,14 @@ class WorksController < ApplicationController
   end
 
   def edit
-    @work = AtlasRb::Work.find(params[:id])
+    @work = AtlasRb::Work.find(params[:id], nuid: Current.nuid)
     form_preparation(@permissions)
   end
 
   def create
     file = params[:binary]
-    @work = AtlasRb::Work.create(AtlasRb::Collection.find(params[:parent_id]).id)
-    AtlasRb::Work.metadata(@work.id, title: file.original_filename)
+    @work = AtlasRb::Work.create(AtlasRb::Collection.find(params[:parent_id], nuid: Current.nuid).id, nuid: Current.nuid)
+    AtlasRb::Work.metadata(@work.id, { title: file.original_filename }, nuid: Current.nuid)
 
     staged_path = stage_upload(file, @work.id)
     enqueue_ingest_jobs(file, staged_path)
@@ -51,17 +51,17 @@ class WorksController < ApplicationController
   end
 
   def update
-    AtlasRb::Work.metadata(params[:id], work_params)
+    AtlasRb::Work.metadata(params[:id], work_params, nuid: Current.nuid)
     redirect_to work_path(params[:id])
   end
 
   def metadata
-    @work = AtlasRb::Work.find(params[:id])
+    @work = AtlasRb::Work.find(params[:id], nuid: Current.nuid)
     form_preparation(@permissions)
   end
 
   def update_metadata
-    AtlasRb::Work.metadata(params[:id], work_params)
+    AtlasRb::Work.metadata(params[:id], work_params, nuid: Current.nuid)
     redirect_to work_path(params[:id])
   end
 
@@ -72,8 +72,8 @@ class WorksController < ApplicationController
     end
 
     def prepare_show_view
-      @mods = AtlasRb::Work.mods(params[:id], 'html')
-      @files = AtlasRb::Work.assets(params[:id])
+      @mods = AtlasRb::Work.mods(params[:id], 'html', nuid: Current.nuid)
+      @files = AtlasRb::Work.assets(params[:id], nuid: Current.nuid)
       @can_tombstone = current_ability.can?(:tombstone,
                                             solr_doc_from_permissions(@permissions, klass: 'Work'))
       breadcrumbs(params[:id])
@@ -86,7 +86,7 @@ class WorksController < ApplicationController
     end
 
     def reject_if_in_progress
-      return unless AtlasRb::Work.find(params[:id]).in_progress
+      return unless AtlasRb::Work.find(params[:id], nuid: Current.nuid).in_progress
 
       redirect_to work_path(params[:id]), alert: IN_PROGRESS_NOTICE
     end
