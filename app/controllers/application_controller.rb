@@ -17,7 +17,7 @@ class ApplicationController < ActionController::Base
   end
 
   def breadcrumbs(id)
-    result = AtlasRb::Resource.find(id, nuid: Current.nuid)
+    result = AtlasRb::Resource.find(id)
     item = result.resource
     item.ancestors.each do |ancestor_id, ancestor_klass|
       add_breadcrumb_for(ancestor_id, ancestor_klass)
@@ -40,7 +40,7 @@ class ApplicationController < ActionController::Base
     end
 
     def add_breadcrumb_for(resource_id, klass)
-      title = AtlasRb.const_get(klass).find(resource_id, nuid: Current.nuid).title
+      title = AtlasRb.const_get(klass).find(resource_id).title
       path  = public_send("#{klass.downcase}_path", resource_id)
       breadcrumb(title, path)
     end

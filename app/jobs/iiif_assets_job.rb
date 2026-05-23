@@ -4,7 +4,7 @@ class IiifAssetsJob < ApplicationJob
   queue_as :default
 
   def perform(work_id, source_path, derivative_widths: nil)
-    return if AtlasRb::Work.find(work_id, nuid: Current.nuid).thumbnail.present?
+    return if AtlasRb::Work.find(work_id).thumbnail.present?
     return unless File.exist?(source_path)
 
     base = MasterJp2.call(path: source_path)

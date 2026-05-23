@@ -6,8 +6,7 @@ class DerivativeCreationJob < ApplicationJob
   def perform(work_id, base, widths: nil)
     AtlasRb::Work.set_image_derivatives(
       work_id,
-      **DerivativeCreator.call(base: base, widths: widths),
-      nuid: Current.nuid
+      **DerivativeCreator.call(base: base, widths: widths)
     )
   end
 end

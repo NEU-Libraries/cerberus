@@ -5,29 +5,31 @@ namespace :reset do
   task data: [:clean, 'db:seed:replant'] do
     raise "Wrong env - #{Rails.env} - must be development" unless Rails.env.development? || Rails.env.staging?
 
-    # Seed as the admin fixture (000000004). :system would 403 on Work
-    # creation (per Atlas's reject_system_principal); group-gated roles
-    # would hit a chicken-and-egg problem with the freshly-created,
-    # ungrouped collection. Admin's wildcard authority is the only fixture
-    # that carries the whole seed sequence without prior ACL setup.
+    # Seed as the admin fixture (000000004). :system can't author Works per
+    # Atlas's Ability layer (Q7 carve-out only covers Community / Collection);
+    # group-gated roles would hit a chicken-and-egg problem with the
+    # freshly-created, ungrouped collection. Admin's wildcard authority is
+    # the only fixture that carries the whole seed sequence without prior
+    # ACL setup. The Current.set block makes atlas_rb's configured
+    # default_nuid resolve to the admin NUID for every call inside.
     Current.set(nuid: '000000004') do
-      community = AtlasRb::Community.create(nil, '/home/cerberus/web/spec/fixtures/files/community-mods.xml', nuid: Current.nuid)
+      community = AtlasRb::Community.create(nil, '/home/cerberus/web/spec/fixtures/files/community-mods.xml')
       river_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/river.jpg')
-      AtlasRb::Community.set_thumbnails(community['id'], **ThumbnailCreator.call(base: river_base), nuid: Current.nuid)
-      AtlasRb::Community.metadata(community['id'], { 'permissions' => { 'read' => ['public'] } }, nuid: Current.nuid)
+      AtlasRb::Community.set_thumbnails(community['id'], **ThumbnailCreator.call(base: river_base))
+      AtlasRb::Community.metadata(community['id'], { 'permissions' => { 'read' => ['public'] } })
 
-      collection = AtlasRb::Collection.create(community['id'], '/home/cerberus/web/spec/fixtures/files/collection-mods.xml', nuid: Current.nuid)
+      collection = AtlasRb::Collection.create(community['id'], '/home/cerberus/web/spec/fixtures/files/collection-mods.xml')
       field_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/field.jpg')
-      AtlasRb::Collection.set_thumbnails(collection['id'], **ThumbnailCreator.call(base: field_base), nuid: Current.nuid)
-      AtlasRb::Collection.metadata(collection['id'], { 'permissions' => { 'read' => ['public'] } }, nuid: Current.nuid)
+      AtlasRb::Collection.set_thumbnails(collection['id'], **ThumbnailCreator.call(base: field_base))
+      AtlasRb::Collection.metadata(collection['id'], { 'permissions' => { 'read' => ['public'] } })
 
-      work = AtlasRb::Work.create(collection['id'], '/home/cerberus/web/spec/fixtures/files/work-mods.xml', nuid: Current.nuid)
+      work = AtlasRb::Work.create(collection['id'], '/home/cerberus/web/spec/fixtures/files/work-mods.xml')
       flower_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/flower.jpg')
-      AtlasRb::Work.set_thumbnails(work['id'], **ThumbnailCreator.call(base: flower_base), nuid: Current.nuid)
-      AtlasRb::Work.set_image_derivatives(work['id'], **DerivativeCreator.call(base: flower_base), nuid: Current.nuid)
-      AtlasRb::Work.metadata(work['id'], { 'permissions' => { 'read' => ['public'] } }, nuid: Current.nuid)
-      AtlasRb::Blob.create(work['id'], '/home/cerberus/web/spec/fixtures/files/flower.jpg', 'flower.jpg', nuid: Current.nuid)
-      AtlasRb::Work.complete(work['id'], nuid: Current.nuid)
+      AtlasRb::Work.set_thumbnails(work['id'], **ThumbnailCreator.call(base: flower_base))
+      AtlasRb::Work.set_image_derivatives(work['id'], **DerivativeCreator.call(base: flower_base))
+      AtlasRb::Work.metadata(work['id'], { 'permissions' => { 'read' => ['public'] } })
+      AtlasRb::Blob.create(work['id'], '/home/cerberus/web/spec/fixtures/files/flower.jpg', 'flower.jpg')
+      AtlasRb::Work.complete(work['id'])
     end
   end
 

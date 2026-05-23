@@ -16,17 +16,17 @@ module Authorizable
     end
 
     def authorize_show!
-      @permissions = AtlasRb::Resource.permissions(params[:id], nuid: Current.nuid)
+      @permissions = AtlasRb::Resource.permissions(params[:id])
       authorize! :read, solr_doc_from_permissions(@permissions)
     end
 
     def authorize_edit!
-      @permissions = AtlasRb::Resource.permissions(params[:id], nuid: Current.nuid)
+      @permissions = AtlasRb::Resource.permissions(params[:id])
       authorize! :edit, solr_doc_from_permissions(@permissions)
     end
 
     def authorize_tombstone!
-      @permissions = AtlasRb::Resource.permissions(params[:id], nuid: Current.nuid)
+      @permissions = AtlasRb::Resource.permissions(params[:id])
       authorize! :tombstone, solr_doc_from_permissions(@permissions, klass: tombstone_klass)
     end
 

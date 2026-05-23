@@ -8,7 +8,7 @@ class CollectionsController < CatalogController
   before_action :authorize_tombstone!, only: [:tombstone]
 
   def show
-    @collection = AtlasRb::Collection.find(params[:id], nuid: Current.nuid)
+    @collection = AtlasRb::Collection.find(params[:id])
     return render_gone(@collection) if @collection.tombstoned
 
     authorize_show!
@@ -19,7 +19,7 @@ class CollectionsController < CatalogController
   end
 
   def tombstone
-    AtlasRb::Collection.tombstone(params[:id], nuid: Current.nuid)
+    AtlasRb::Collection.tombstone(params[:id])
     redirect_to root_path, notice: 'Collection deleted.'
   end
 
@@ -28,19 +28,19 @@ class CollectionsController < CatalogController
   end
 
   def edit
-    @collection = AtlasRb::Collection.find(params[:id], nuid: Current.nuid)
+    @collection = AtlasRb::Collection.find(params[:id])
     form_preparation(@permissions)
   end
 
   def create
     permitted = params.expect(collection: [:title, :description]).to_h
-    c = AtlasRb::Collection.create(params[:parent_id], nuid: Current.nuid)
-    AtlasRb::Collection.metadata(c.id, permitted, nuid: Current.nuid)
+    c = AtlasRb::Collection.create(params[:parent_id])
+    AtlasRb::Collection.metadata(c.id, permitted)
     redirect_to collection_path(c.id)
   end
 
   def update
-    AtlasRb::Collection.metadata(params[:id], collection_params, nuid: Current.nuid)
+    AtlasRb::Collection.metadata(params[:id], collection_params)
     redirect_to collection_path(params[:id])
   end
 
