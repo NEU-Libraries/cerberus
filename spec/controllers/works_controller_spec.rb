@@ -66,6 +66,9 @@ describe WorksController do
     include ActiveJob::TestHelper
 
     let(:uuid_re) { /\A\h{8}-\h{4}-\h{4}-\h{4}-\h{12}\z/ }
+    let(:user) { User.new(email: 'depositor@example.com', nuid: '000000004', groups: ['editors']) }
+
+    before { sign_in user }
 
     it 'enqueues both jobs and redirects to the metadata page' do
       expect do
@@ -154,7 +157,7 @@ describe WorksController do
   end
 
   describe 'update_metadata' do
-    let(:user) { User.new(email: 'test@example.com', password: 'password', groups: ['editors']) }
+    let(:user) { User.new(email: 'test@example.com', password: 'password', nuid: '000000004', groups: ['editors']) }
 
     before do
       AtlasRb::Work.metadata(work.id, { 'permissions' => { 'edit' => ['editors'] } }, nuid: '000000004')
