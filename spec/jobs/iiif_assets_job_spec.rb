@@ -16,7 +16,7 @@ RSpec.describe IiifAssetsJob, type: :job do
   after  { FileUtils.rm_rf(tmp) }
 
   it 'writes the JP2 once and fans out to the thumbnail and derivative jobs' do
-    allow(AtlasRb::Work).to receive(:find).with(work_id, nuid: '000000004').and_return(AtlasRb::Mash.new(thumbnail: nil))
+    allow(AtlasRb::Work).to receive(:find).with(work_id).and_return(AtlasRb::Mash.new(thumbnail: nil))
     allow(MasterJp2).to receive(:call).with(path: source_path).and_return(base)
 
     expect do
@@ -29,7 +29,7 @@ RSpec.describe IiifAssetsJob, type: :job do
 
   it 'forwards derivative_widths through to DerivativeCreationJob' do
     widths = { small: 320, medium: 640, large: 1280 }
-    allow(AtlasRb::Work).to receive(:find).with(work_id, nuid: '000000004').and_return(AtlasRb::Mash.new(thumbnail: nil))
+    allow(AtlasRb::Work).to receive(:find).with(work_id).and_return(AtlasRb::Mash.new(thumbnail: nil))
     allow(MasterJp2).to receive(:call).with(path: source_path).and_return(base)
 
     expect do
@@ -38,7 +38,7 @@ RSpec.describe IiifAssetsJob, type: :job do
   end
 
   it 'noops when the work already has a thumbnail' do
-    allow(AtlasRb::Work).to receive(:find).with(work_id, nuid: '000000004').and_return(AtlasRb::Mash.new(thumbnail: 'already'))
+    allow(AtlasRb::Work).to receive(:find).with(work_id).and_return(AtlasRb::Mash.new(thumbnail: 'already'))
     allow(MasterJp2).to receive(:call)
 
     expect do
@@ -50,7 +50,7 @@ RSpec.describe IiifAssetsJob, type: :job do
   end
 
   it 'noops when the staged file is missing' do
-    allow(AtlasRb::Work).to receive(:find).with(work_id, nuid: '000000004').and_return(AtlasRb::Mash.new(thumbnail: nil))
+    allow(AtlasRb::Work).to receive(:find).with(work_id).and_return(AtlasRb::Mash.new(thumbnail: nil))
     allow(MasterJp2).to receive(:call)
     File.delete(source_path)
 

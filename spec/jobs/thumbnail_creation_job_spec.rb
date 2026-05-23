@@ -24,8 +24,7 @@ RSpec.describe ThumbnailCreationJob, type: :job do
       work_id,
       thumbnail:    urls[:thumbnail],
       thumbnail_2x: urls[:thumbnail_2x],
-      preview:      urls[:preview],
-      nuid:         '000000004'
+      preview:      urls[:preview]
     )
   end
 end

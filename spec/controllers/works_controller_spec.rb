@@ -16,7 +16,7 @@ describe WorksController do
   def stub_work_in_progress(work)
     in_progress = AtlasRb::Work.find(work.id, nuid: '000000004')
     in_progress['in_progress'] = true
-    allow(AtlasRb::Work).to receive(:find).with(work.id, nuid: '000000001').and_return(in_progress)
+    allow(AtlasRb::Work).to receive(:find).with(work.id).and_return(in_progress)
   end
 
   describe 'show' do
@@ -190,7 +190,7 @@ describe WorksController do
     it 'calls AtlasRb::Work.tombstone with the acting user nuid and redirects' do
       allow(AtlasRb::Work).to receive(:tombstone)
       post :tombstone, params: { id: work.id }
-      expect(AtlasRb::Work).to have_received(:tombstone).with(work.id, nuid: '000000002')
+      expect(AtlasRb::Work).to have_received(:tombstone).with(work.id)
       expect(subject).to redirect_to(root_path)
     end
   end
@@ -202,7 +202,7 @@ describe WorksController do
       AtlasRb::Work.metadata(work.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
       tombstoned = AtlasRb::Work.find(work.id, nuid: '000000004')
       tombstoned['tombstoned'] = true
-      allow(AtlasRb::Work).to receive(:find).with(work.id, nuid: '000000001').and_return(tombstoned)
+      allow(AtlasRb::Work).to receive(:find).with(work.id).and_return(tombstoned)
     end
 
     it 'renders the gone template with status 410' do

@@ -64,7 +64,7 @@ describe CollectionsController do
     it 'calls AtlasRb::Collection.tombstone with the acting user nuid and redirects' do
       allow(AtlasRb::Collection).to receive(:tombstone)
       post :tombstone, params: { id: collection.id }
-      expect(AtlasRb::Collection).to have_received(:tombstone).with(collection.id, nuid: '000000002')
+      expect(AtlasRb::Collection).to have_received(:tombstone).with(collection.id)
       expect(subject).to redirect_to(root_path)
     end
   end

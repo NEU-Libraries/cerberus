@@ -63,7 +63,7 @@ describe CommunitiesController do
     it 'calls AtlasRb::Community.tombstone with the acting user nuid and redirects' do
       allow(AtlasRb::Community).to receive(:tombstone)
       post :tombstone, params: { id: community.id }
-      expect(AtlasRb::Community).to have_received(:tombstone).with(community.id, nuid: '000000002')
+      expect(AtlasRb::Community).to have_received(:tombstone).with(community.id)
       expect(subject).to redirect_to(root_path)
     end
   end

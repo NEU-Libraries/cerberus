@@ -24,8 +24,7 @@ RSpec.describe DerivativeCreationJob, type: :job do
       work_id,
       small:  urls[:small],
       medium: urls[:medium],
-      large:  urls[:large],
-      nuid:   '000000004'
+      large:  urls[:large]
     )
   end
 
