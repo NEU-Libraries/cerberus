@@ -62,6 +62,11 @@ RSpec.configure do |config|
   # in), so the override-chain mirrors production.
   config.before(:each) { Current.nuid = '000000004' }
 
+  # Live LoC smoke tests are opt-in via RUN_LOC_SMOKE=1; default rspec runs
+  # exclude them entirely rather than dumping seven "pending" lines per run.
+  # See spec/integration/kataba_loc_regression_spec.rb for the rationale.
+  config.filter_run_excluding :loc_smoke unless ENV['RUN_LOC_SMOKE']
+
   config.include Devise::Test::ControllerHelpers, type: :controller
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
   config.fixture_paths = [Rails.root.join('spec/fixtures').to_s]
