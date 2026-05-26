@@ -1,0 +1,6 @@
+%li.audit-event.audit-event--restore
+  %strong= event['actor_nuid']
+  restored this #{event['resource_type'].to_s.downcase}
+  on #{Time.iso8601(event['occurred_at']).strftime('%Y-%m-%d %H:%M:%S UTC')}
+  - if event['on_behalf_of_nuid'].present?
+    (on behalf of #{event['on_behalf_of_nuid']})
