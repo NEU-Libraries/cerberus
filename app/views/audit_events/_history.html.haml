@@ -1,4 +1,4 @@
--# Audit-history section for Work / Collection / Community show pages.
+-# Audit-history tab body for Work / Collection / Community edit pages.
 -#
 -# Locals:
 -#   resource_id — the Atlas resource ID to fetch history for
@@ -10,18 +10,26 @@
 -# new file, not a case-statement edit.
 -#
 -# Performance trade-off (v1 admin-only, acceptable): fires an inline HTTP
--# request to Atlas every show-page render. Piece 5 broadening the audience
--# may motivate moving to a Turbo Frame so history loads asynchronously.
+-# request to Atlas on every edit-page render. Piece 5 broadening the
+-# audience may motivate moving to a Turbo Frame so history loads
+-# asynchronously and doesn't block edit-page render.
 - if can?(:read, :audit_event)
   - history = AtlasRb::Resource.history(resource_id, nuid: Current.nuid)
   - events = Array(history['events'])
-  %section.audit-history.mt-4
-    %h3 History
+  .py-2.px-1.audit-history
     - if events.empty?
-      %p.text-muted No recorded events.
+      %p.text-muted.mb-0 No recorded events.
     - else
-      %ol.audit-event-list.list-unstyled{reversed: true}
-        - events.each do |event|
-          - action_partial = "audit_events/event_#{event['action']}"
-          - resolved = lookup_context.exists?(action_partial, [], true) ? action_partial : 'audit_events/event_generic'
-          = render partial: resolved, locals: { event: event }
+      .table-responsive
+        %table.table.table-sm.table-hover.align-middle.audit-event-table.mb-0
+          %thead
+            %tr
+              %th.text-nowrap{scope: 'col'} When
+              %th{scope: 'col'} Action
+              %th{scope: 'col'} Actor
+              %th{scope: 'col'} On behalf of
+          %tbody
+            - events.each do |event|
+              - action_partial = "audit_events/event_#{event['action']}"
+              - resolved = lookup_context.exists?(action_partial, [], true) ? action_partial : 'audit_events/event_generic'
+              = render partial: resolved, locals: { event: event }

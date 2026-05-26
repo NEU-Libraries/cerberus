@@ -22,7 +22,7 @@ describe 'audit_events/_history.html.haml' do
   end
 
   context 'when the user cannot read audit events' do
-    it 'renders nothing — no heading, no atlas_rb call' do
+    it 'renders nothing — no table, no atlas_rb call' do
       allow(view).to receive(:can?).with(:read, :audit_event).and_return(false)
       expect(AtlasRb::Resource).not_to receive(:history)
       render partial: 'audit_events/history', locals: { resource_id: resource_id }
@@ -31,11 +31,10 @@ describe 'audit_events/_history.html.haml' do
   end
 
   context 'when the user can read audit events but the history is empty' do
-    it 'renders the heading and an empty-state message' do
+    it 'renders an empty-state message and no table' do
       render_with(events: [])
-      expect(rendered).to have_css('section.audit-history h3', text: 'History')
       expect(rendered).to include('No recorded events.')
-      expect(rendered).not_to have_css('ol.audit-event-list')
+      expect(rendered).not_to have_css('table.audit-event-table')
     end
   end
 
@@ -50,37 +49,50 @@ describe 'audit_events/_history.html.haml' do
 
     before { render_with(events: events) }
 
-    it 'renders the create/update/tombstone/restore copy' do
-      expect(rendered).to include('created this work')
-      expect(rendered).to include('updated this work')
-      expect(rendered).to include('tombstoned this work')
-      expect(rendered).to include('restored this work')
+    it 'renders a Bootstrap table with column headers' do
+      expect(rendered).to have_css('table.audit-event-table thead th', text: 'When')
+      expect(rendered).to have_css('table.audit-event-table thead th', text: 'Action')
+      expect(rendered).to have_css('table.audit-event-table thead th', text: 'Actor')
+      expect(rendered).to have_css('table.audit-event-table thead th', text: 'On behalf of')
     end
 
-    it 'falls back to the generic partial for unknown action types' do
-      expect(rendered).to include('did')
-      expect(rendered).to include('mystery_action')
+    it 'renders the create/update/tombstone/restore badges' do
+      expect(rendered).to have_css('span.badge.bg-success', text: 'Created')
+      expect(rendered).to have_css('span.badge.bg-primary', text: 'Updated')
+      expect(rendered).to have_css('span.badge.bg-danger', text: 'Tombstoned')
+      expect(rendered).to have_css('span.badge.bg-warning', text: 'Restored')
     end
 
-    it 'renders the actor, action class, and a formatted timestamp on each event' do
-      expect(rendered).to have_css('li.audit-event.audit-event--create')
-      expect(rendered).to have_css('li.audit-event.audit-event--update')
-      expect(rendered).to have_css('li.audit-event.audit-event--tombstone')
-      expect(rendered).to have_css('li.audit-event.audit-event--restore')
-      expect(rendered).to include('2026-05-26 12:34:56 UTC')
+    it 'falls back to the generic badge for unknown action types' do
+      expect(rendered).to have_css('span.badge.bg-secondary', text: 'mystery_action')
+    end
+
+    it 'renders the action-typed tr classes and the formatted timestamp + actor in cells' do
+      expect(rendered).to have_css('tr.audit-event.audit-event--create')
+      expect(rendered).to have_css('tr.audit-event.audit-event--update')
+      expect(rendered).to have_css('tr.audit-event.audit-event--tombstone')
+      expect(rendered).to have_css('tr.audit-event.audit-event--restore')
+      expect(rendered).to include('2026-05-26 12:34 UTC')
       expect(rendered).to include('000000002')
     end
   end
 
   context 'when on_behalf_of_nuid is present' do
-    it 'surfaces it on per-action partials' do
+    it 'surfaces it in a per-action row' do
       render_with(events: [event(action: 'create', on_behalf_of: '000000007')])
-      expect(rendered).to include('on behalf of 000000007')
+      expect(rendered).to have_css('tr.audit-event--create td', text: '000000007')
     end
 
-    it 'surfaces it on the generic partial' do
+    it 'surfaces it in the generic row' do
       render_with(events: [event(action: 'mystery_action', on_behalf_of: '000000007')])
-      expect(rendered).to include('on behalf of 000000007')
+      expect(rendered).to have_css('tr.audit-event td', text: '000000007')
+    end
+  end
+
+  context 'when on_behalf_of_nuid is nil' do
+    it 'renders an em-dash placeholder' do
+      render_with(events: [event(action: 'create')])
+      expect(rendered).to have_css('tr.audit-event--create td.text-muted', text: '—')
     end
   end
 end

@@ -45,30 +45,6 @@ describe WorksController do
         expect(response.body).not_to match(%r{>\s*Edit\s*</a>})
       end
     end
-
-    context 'audit history section' do
-      let(:history_envelope) do
-        AtlasRb::Mash.new('resource_id' => work.id, 'events' => [])
-      end
-
-      before do
-        allow(AtlasRb::Resource).to receive(:history).and_return(history_envelope)
-      end
-
-      it 'renders the History section for staff users' do
-        sign_in User.new(email: 'staff@example.com', nuid: '000000002',
-                         groups: [Permissions::STAFF_EDIT_GROUP])
-        get :show, params: { id: work.id }
-        expect(response.body).to include('History')
-        expect(response.body).to include('No recorded events.')
-      end
-
-      it 'does not render the History section for non-staff visitors' do
-        get :show, params: { id: work.id }
-        expect(response.body).not_to include('No recorded events.')
-        expect(response.body).not_to match(%r{<h3[^>]*>\s*History\s*</h3>})
-      end
-    end
   end
 
   describe 'downloads' do
@@ -155,6 +131,33 @@ describe WorksController do
         get :edit, params: { id: work.id }
         expect(response).to redirect_to(work_path(work.id))
         expect(flash[:alert]).to eq(WorksController::IN_PROGRESS_NOTICE)
+      end
+    end
+
+    context 'audit history tab' do
+      let(:history_envelope) do
+        AtlasRb::Mash.new('resource_id' => work.id, 'events' => [])
+      end
+      let(:staff_user) do
+        User.new(email: 'staff@example.com', nuid: '000000002',
+                 groups: ['editors', Permissions::STAFF_EDIT_GROUP])
+      end
+
+      before do
+        allow(AtlasRb::Resource).to receive(:history).and_return(history_envelope)
+      end
+
+      it 'renders the History tab for staff users' do
+        sign_in staff_user
+        get :edit, params: { id: work.id }
+        expect(response.body).to match(/<button[^>]*id="history-tab"/)
+        expect(response.body).to include('No recorded events.')
+      end
+
+      it 'does not render the History tab for non-staff editors' do
+        get :edit, params: { id: work.id }
+        expect(response.body).not_to match(/<button[^>]*id="history-tab"/)
+        expect(response.body).not_to include('No recorded events.')
       end
     end
   end

@@ -1,15 +1,10 @@
--# Generic fallback renderer for an audit event.
+-# Generic fallback renderer for an audit event row.
 -#
 -# Locals:
 -#   event — a single AuditEvent hash from atlas_rb
--#
--# The `on_behalf_of_nuid` line surfaces a piece-5-era field that's always
--# `nil` today — but reading it now means piece 5 doesn't need to touch
--# this partial at all.
-%li.audit-event
-  %strong= event['actor_nuid']
-  did
-  %em= event['action']
-  on #{Time.iso8601(event['occurred_at']).strftime('%Y-%m-%d %H:%M:%S UTC')}
-  - if event['on_behalf_of_nuid'].present?
-    (on behalf of #{event['on_behalf_of_nuid']})
+%tr.audit-event
+  %td.text-nowrap.small= Time.iso8601(event['occurred_at']).strftime('%Y-%m-%d %H:%M UTC')
+  %td
+    %span.badge.bg-secondary= event['action']
+  %td.small= event['actor_nuid']
+  %td.small.text-muted= event['on_behalf_of_nuid'].presence || '—'

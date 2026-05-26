@@ -20,6 +20,33 @@ describe CommunitiesController do
       expect(response).to render_template('communities/edit')
       expect(CGI.unescapeHTML(response.body)).to include(community.title)
     end
+
+    context 'audit history tab' do
+      let(:history_envelope) do
+        AtlasRb::Mash.new('resource_id' => community.id, 'events' => [])
+      end
+      let(:staff_user) do
+        User.new(email: 'staff@example.com', nuid: '000000002',
+                 groups: ['editors', Permissions::STAFF_EDIT_GROUP])
+      end
+
+      before do
+        allow(AtlasRb::Resource).to receive(:history).and_return(history_envelope)
+      end
+
+      it 'renders the History tab for staff users' do
+        sign_in staff_user
+        get :edit, params: { id: community.id }
+        expect(response.body).to match(/<button[^>]*id="history-tab"/)
+        expect(response.body).to include('No recorded events.')
+      end
+
+      it 'does not render the History tab for non-staff editors' do
+        get :edit, params: { id: community.id }
+        expect(response.body).not_to match(/<button[^>]*id="history-tab"/)
+        expect(response.body).not_to include('No recorded events.')
+      end
+    end
   end
 
   describe 'show' do
@@ -33,28 +60,6 @@ describe CommunitiesController do
       get :show, params: { id: community.id }
       expect(response).to render_template('communities/show')
       expect(CGI.unescapeHTML(response.body)).to include(community.title)
-    end
-
-    context 'audit history section' do
-      let(:history_envelope) do
-        AtlasRb::Mash.new('resource_id' => community.id, 'events' => [])
-      end
-
-      before do
-        allow(AtlasRb::Resource).to receive(:history).and_return(history_envelope)
-      end
-
-      it 'renders the History section for staff users' do
-        sign_in User.new(email: 'staff@example.com', nuid: '000000002',
-                         groups: [Permissions::STAFF_EDIT_GROUP])
-        get :show, params: { id: community.id }
-        expect(response.body).to include('No recorded events.')
-      end
-
-      it 'does not render the History section for non-staff visitors' do
-        get :show, params: { id: community.id }
-        expect(response.body).not_to include('No recorded events.')
-      end
     end
   end
 
