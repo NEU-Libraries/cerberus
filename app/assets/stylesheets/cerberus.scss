@@ -590,13 +590,21 @@ $audit-tone-generic:   #6c757d;
 // same idea as the audit-history chips, where a tinted card
 // background foregrounds a saturated label.
 // ============================================================
+// Chain .facet-limit + .facet-limit-active throughout this block so the
+// specificity outranks Blacklight's bare .facet-limit-active rules
+// (cerberus.scss is imported before blacklight/blacklight, so equal
+// specificity loses on source order). The CSS variable hook below is
+// exempt from this — custom properties resolve at usage time and don't
+// care about cascade order.
 .facet-limit-active {
   // Blacklight reads --bl-facet-active-bg as the .card-header
   // background. A 12% wash of $success on white reads as "this
   // panel is in a different state" without competing with the
   // page surface.
   --bl-facet-active-bg: #{color-mix(in srgb, $success 12%, $white)};
+}
 
+.facet-limit.facet-limit-active {
   // The 1px card border carries more saturation than the header
   // bg because thin strokes need more chroma to register. 35%
   // $success on white lands on a soft teal-gray that pairs with
