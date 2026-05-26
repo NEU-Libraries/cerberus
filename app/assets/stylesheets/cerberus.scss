@@ -626,8 +626,9 @@ $audit-tone-generic:   #6c757d;
   // hover/focus, matching the destructive-hover idiom on the
   // constraint chip. Gives the only interactive control in the
   // active card a clear "this removes the filter" cue without
-  // painting it red full-time.
-  .selected .remove {
+  // painting it red full-time. The SVG glyph fills with
+  // currentColor, so colouring the <a> propagates to the ×.
+  .facet-label .remove {
     color: $gray-500;
 
     &:hover,
