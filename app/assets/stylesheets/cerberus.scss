@@ -577,3 +577,55 @@ $audit-tone-generic:   #6c757d;
     font-size: 0.8rem;
   }
 }
+
+// ============================================================
+// Active-facet muting
+//
+// Blacklight's default .facet-limit-active treatment fills the
+// card header with a full-strength $success strip and matches
+// the border to the same green — handsome on its own, but too
+// loud against the institutional gray-100 page chrome we run
+// elsewhere on the site. Wash both surfaces back via color-mix
+// and let the body-level selected label carry the chroma — the
+// same idea as the audit-history chips, where a tinted card
+// background foregrounds a saturated label.
+// ============================================================
+.facet-limit-active {
+  // Blacklight reads --bl-facet-active-bg as the .card-header
+  // background. A 12% wash of $success on white reads as "this
+  // panel is in a different state" without competing with the
+  // page surface.
+  --bl-facet-active-bg: #{color-mix(in srgb, $success 12%, $white)};
+
+  // The 1px card border carries more saturation than the header
+  // bg because thin strokes need more chroma to register. 35%
+  // $success on white lands on a soft teal-gray that pairs with
+  // the gray-300 borders on neighbouring inactive cards instead
+  // of standing apart from them.
+  border-color: color-mix(in srgb, $success 35%, $white);
+
+  // Blacklight applies color-contrast() to the .card-header .btn
+  // (the collapse toggle around "Type"), which against the
+  // original strong-$success bg resolved to $white. With our
+  // soft tint underneath that would leave the header text and
+  // chevron invisible — force back to body color so the panel
+  // header reads as text on a tinted surface, not a hero strip.
+  .card-header .btn {
+    color: var(--bs-body-color);
+  }
+
+  // × dismiss on the selected row — neutral at rest, $danger on
+  // hover/focus, matching the destructive-hover idiom on the
+  // constraint chip. Gives the only interactive control in the
+  // active card a clear "this removes the filter" cue without
+  // painting it red full-time.
+  .selected .remove {
+    color: $gray-500;
+
+    &:hover,
+    &:focus,
+    &:focus-visible {
+      color: $danger;
+    }
+  }
+}
