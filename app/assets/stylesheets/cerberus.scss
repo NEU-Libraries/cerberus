@@ -527,6 +527,17 @@ $audit-tone-generic:   #6c757d;
 // label (non-interactive) and a destructive × control — each gets its
 // own state model.
 .applied-filter {
+  // Breathe the ❯ separator out from the facet label and value — the
+  // stock Blacklight rule only sets padding-left, leaving the glyph
+  // crammed against the value pill. Self-chain &.applied-filter to
+  // outrank Blacklight (cerberus.scss is imported before
+  // blacklight/blacklight, so equal specificity would lose on source
+  // order — same trick we use for the active-facet block below).
+  &.applied-filter .filter-name:after {
+    padding-left: 0.7em;
+    padding-right: 0.45em;
+  }
+
   // Label pill — a <span> styled as a button by Blacklight, but
   // semantically inert. Pin its colors across pseudo-states so the text
   // never washes out on hover, and quiet the cursor so it doesn't
