@@ -510,6 +510,18 @@ $audit-tone-generic:   #6c757d;
   }
 }
 
+// Applied-filter pill — paint the constraint chips with the same surface
+// treatment as the facet cards below them, so the search-results header
+// reads as a sibling to the facet boxes rather than as a floating button
+// group on the gray page background.
+.applied-filter {
+  .constraint-value.btn,
+  .remove.btn {
+    background-color: $white;
+    border-color: var(--bs-border-color-translucent);
+  }
+}
+
 // Compact responsive: on narrow viewports, tighten the timestamp font.
 @media (max-width: 575.98px) {
   .audit-event__when-date {
