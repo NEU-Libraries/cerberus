@@ -36,7 +36,8 @@ class AtlasController < ApplicationController
         email:  user_values.email,
         nuid:   user_values.nuid,
         name:   user_values.name,
-        groups: user_values.groups
+        groups: user_values.groups,
+        role:   user_values.role
       )
       sign_in(user)
       redirect_to atlas_user_path

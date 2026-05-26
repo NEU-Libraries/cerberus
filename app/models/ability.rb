@@ -3,8 +3,25 @@
 class Ability
   include CanCan::Ability
 
+  # Admin wildcard short-circuit mirrors Atlas's `can :manage, :all` for
+  # `:admin`. Honouring the role here means Atlas admins don't need every
+  # grouper group stuffed onto their record to drive admin-only UI — the
+  # role itself is the grant. See plan_atlas_ability_layer.md ("admin
+  # wildcard | Both — Atlas has `can :manage, :all`; Cerberus's Ability
+  # has the matching short-circuit").
   def initialize(user)
-    if user.present?
+    if user.blank?
+      can :read, SolrDocument, &method(:public_document?)
+    elsif user.admin?
+      can :manage, :all
+    else
+      apply_group_abilities(user)
+    end
+  end
+
+  private
+
+    def apply_group_abilities(user)
       can :read, SolrDocument do |doc|
         public_document?(doc) || groups_can_read?(doc, user)
       end
@@ -14,13 +31,7 @@ class Ability
       can :tombstone, SolrDocument do |doc|
         groups_can_edit?(doc, user) || depositor_for_work?(doc, user)
       end
-      can :read, :audit_event if Array(user.groups).include?(Permissions::STAFF_EDIT_GROUP)
-    else
-      can :read, SolrDocument, &method(:public_document?)
     end
-  end
-
-  private
 
     def public_document?(doc)
       Array(doc['read_access_group_ssim']).include?('public')
