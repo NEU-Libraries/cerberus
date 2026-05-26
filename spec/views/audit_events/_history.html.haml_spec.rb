@@ -61,11 +61,12 @@ describe 'audit_events/_history.html.haml' do
       expect(rendered).to have_css('.audit-history__subtitle', text: 'Reverse chronological')
     end
 
-    it 'renders a table with all five column headers' do
-      %w[When Type Action Actor].each do |label|
+    it 'renders a table with all four column headers (Type intentionally absent — the page is already scoped to the resource)' do
+      %w[When Action Actor].each do |label|
         expect(rendered).to have_css('table.audit-event-table thead th', text: label)
       end
       expect(rendered).to have_css('table.audit-event-table thead th', text: 'On behalf of')
+      expect(rendered).not_to have_css('table.audit-event-table thead th', text: 'Type')
     end
 
     it 'renders the create/update/tombstone/restore action labels' do
@@ -93,11 +94,6 @@ describe 'audit_events/_history.html.haml' do
       expect(rendered).to have_css('.audit-event__when-time', text: '12:34 UTC')
     end
 
-    it 'renders the resource type column with icon + label' do
-      expect(rendered).to have_css('.audit-event__type-icon.fa-file')
-      expect(rendered).to have_css('.audit-event__type-label', text: 'Work')
-    end
-
     it 'renders actor and on-behalf-of NUIDs as monospace chips' do
       expect(rendered).to have_css('.audit-event__nuid', text: '000000002')
     end
@@ -119,20 +115,6 @@ describe 'audit_events/_history.html.haml' do
     it 'renders an em-dash placeholder chip' do
       render_with(events: [event(action: 'create')])
       expect(rendered).to have_css('.audit-event--create .audit-event__nuid--empty', text: '—')
-    end
-  end
-
-  context 'when resource_type varies' do
-    it 'uses the folder-open icon for Collections' do
-      render_with(events: [event(action: 'create', resource_type: 'Collection')])
-      expect(rendered).to have_css('.audit-event__type-icon.fa-folder-open')
-      expect(rendered).to have_css('.audit-event__type-label', text: 'Collection')
-    end
-
-    it 'uses the users icon for Communities' do
-      render_with(events: [event(action: 'create', resource_type: 'Community')])
-      expect(rendered).to have_css('.audit-event__type-icon.fa-users')
-      expect(rendered).to have_css('.audit-event__type-label', text: 'Community')
     end
   end
 end

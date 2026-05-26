@@ -2,10 +2,11 @@
 
 # Shared formatting for audit-event rows. Each per-action partial
 # (`_event_create.html.haml`, etc.) renders the same supporting cells
-# (timestamp / type / actor / on-behalf-of) via these helpers and only
-# customises the central "action" cell. Adding a new action type is
-# still a new file, not a case-statement edit — these helpers are the
-# scaffolding around that variation, not the variation itself.
+# (timestamp / actor / on-behalf-of) via these helpers and varies only
+# the central "action" chip via the row's audit-event--<tone> class.
+# Adding a new action type is still a new file, not a case-statement
+# edit — these helpers are the scaffolding around that variation, not
+# the variation itself.
 module AuditEventsHelper
   # Action descriptor — colour token + Font Awesome icon + display label.
   # Used by the action cell on every event row. Unknown actions fall
@@ -39,21 +40,6 @@ module AuditEventsHelper
     end
   end
 
-  # Resource-type column — reuses ApplicationHelper#document_type_icon so
-  # the iconography matches search-result thumbnails. Empty class falls
-  # back to a neutral file icon + em-dash label.
-  def audit_event_resource_badge(event)
-    klass = event['resource_type'].to_s
-    icon  = document_type_icon(klass.presence || 'Work')
-    label = klass.presence || '—'
-    content_tag(:span, class: 'audit-event__type') do
-      safe_join([
-                  content_tag(:i, '', class: "fa-solid #{icon} audit-event__type-icon", 'aria-hidden': 'true'),
-                  content_tag(:span, label, class: 'audit-event__type-label')
-                ])
-    end
-  end
-
   # NUID chip — monospace pill that reads as an identifier rather than
   # body copy. Nil / blank renders as a muted em-dash placeholder.
   def audit_event_nuid(nuid)
@@ -64,9 +50,12 @@ module AuditEventsHelper
     end
   end
 
-  # The action cell — dot + label. The dot's colour is driven by
+  # The action chip — tinted soft-badge containing icon + label. The
+  # chip's background/border/text colours are driven by
   # `--audit-action-color`, set on the row via the audit-event--<tone>
-  # class, so per-action partials don't need to repeat the colour.
+  # class, so per-action partials don't need to repeat the colour. The
+  # chip is the row's primary chromatic signal; the left rail
+  # reinforces it for at-a-glance column scanning.
   def audit_event_action_badge(event)
     descriptor = audit_event_action(event['action'])
     content_tag(:span, class: 'audit-event__action') do

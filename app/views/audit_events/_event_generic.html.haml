@@ -4,7 +4,6 @@
 -# descriptor with the raw action humanised as the label.
 %tr.audit-event.audit-event--generic
   %td= audit_event_timestamp(event)
-  %td= audit_event_resource_badge(event)
   %td= audit_event_action_badge(event)
   %td= audit_event_nuid(event['actor_nuid'])
   %td= audit_event_nuid(event['on_behalf_of_nuid'])
