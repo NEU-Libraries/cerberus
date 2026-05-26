@@ -66,7 +66,7 @@ describe WorksController do
       it 'does not render the History section for non-staff visitors' do
         get :show, params: { id: work.id }
         expect(response.body).not_to include('No recorded events.')
-        expect(response.body).not_to match(/<h3[^>]*>\s*History\s*<\/h3>/)
+        expect(response.body).not_to match(%r{<h3[^>]*>\s*History\s*</h3>})
       end
     end
   end

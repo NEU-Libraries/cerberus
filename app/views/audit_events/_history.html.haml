@@ -22,6 +22,6 @@
     - else
       %ol.audit-event-list.list-unstyled{reversed: true}
         - events.each do |event|
-          = render partial: "audit_events/event_#{event['action']}",
-                   locals: { event: event },
-                   default: 'audit_events/event_generic'
+          - action_partial = "audit_events/event_#{event['action']}"
+          - resolved = lookup_context.exists?(action_partial, [], true) ? action_partial : 'audit_events/event_generic'
+          = render partial: resolved, locals: { event: event }
