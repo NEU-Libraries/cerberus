@@ -510,15 +510,54 @@ $audit-tone-generic:   #6c757d;
   }
 }
 
-// Applied-filter pill — paint the constraint chips with the same surface
+// Applied-filter chip — paint the constraint chips with the same surface
 // treatment as the facet cards below them, so the search-results header
 // reads as a sibling to the facet boxes rather than as a floating button
-// group on the gray page background.
+// group on the gray page background. The chip has two parts: a static
+// label (non-interactive) and a destructive × control — each gets its
+// own state model.
 .applied-filter {
-  .constraint-value.btn,
+  // Label pill — a <span> styled as a button by Blacklight, but
+  // semantically inert. Pin its colors across pseudo-states so the text
+  // never washes out on hover, and quiet the cursor so it doesn't
+  // mis-telegraph interactivity.
+  .constraint-value.btn {
+    background-color: $white;
+    border-color: var(--bs-border-color-translucent);
+    color: var(--bs-body-color);
+    cursor: default;
+
+    &:hover,
+    &:focus,
+    &:focus-visible,
+    &:active {
+      background-color: $white;
+      border-color: var(--bs-border-color-translucent);
+      color: var(--bs-body-color);
+      box-shadow: none;
+    }
+  }
+
+  // × remove — the chip's only interactive control, and the action it
+  // performs is destructive. Surface that on hover with the
+  // institutional danger tone, restoring the chromatic cue Blacklight
+  // originally provided before our white-bg override muted it.
   .remove.btn {
     background-color: $white;
     border-color: var(--bs-border-color-translucent);
+    color: var(--bs-body-color);
+    transition: background-color 120ms ease-out,
+                border-color 120ms ease-out,
+                color 120ms ease-out;
+
+    &:hover,
+    &:focus,
+    &:focus-visible,
+    &:active {
+      background-color: $danger;
+      border-color: $danger;
+      color: $white;
+    }
   }
 }
 
