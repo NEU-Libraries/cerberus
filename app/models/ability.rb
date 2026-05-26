@@ -14,6 +14,7 @@ class Ability
       can :tombstone, SolrDocument do |doc|
         groups_can_edit?(doc, user) || depositor_for_work?(doc, user)
       end
+      can :read, :audit_event if Array(user.groups).include?(Permissions::STAFF_EDIT_GROUP)
     else
       can :read, SolrDocument, &method(:public_document?)
     end
