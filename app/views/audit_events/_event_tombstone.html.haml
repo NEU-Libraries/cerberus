@@ -1,6 +1,6 @@
 %tr.audit-event.audit-event--tombstone
-  %td.text-nowrap.small= Time.iso8601(event['occurred_at']).strftime('%Y-%m-%d %H:%M UTC')
-  %td
-    %span.badge.bg-danger Tombstoned
-  %td.small= event['actor_nuid']
-  %td.small.text-muted= event['on_behalf_of_nuid'].presence || '—'
+  %td= audit_event_timestamp(event)
+  %td= audit_event_resource_badge(event)
+  %td= audit_event_action_badge(event)
+  %td= audit_event_nuid(event['actor_nuid'])
+  %td= audit_event_nuid(event['on_behalf_of_nuid'])

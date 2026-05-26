@@ -22,7 +22,7 @@ describe 'audit_events/_history.html.haml' do
   end
 
   context 'when the user cannot read audit events' do
-    it 'renders nothing — no table, no atlas_rb call' do
+    it 'renders nothing — no shell, no atlas_rb call' do
       allow(view).to receive(:can?).with(:read, :audit_event).and_return(false)
       expect(AtlasRb::Resource).not_to receive(:history)
       render partial: 'audit_events/history', locals: { resource_id: resource_id }
@@ -31,10 +31,16 @@ describe 'audit_events/_history.html.haml' do
   end
 
   context 'when the user can read audit events but the history is empty' do
-    it 'renders an empty-state message and no table' do
-      render_with(events: [])
-      expect(rendered).to include('No recorded events.')
+    before { render_with(events: []) }
+
+    it 'renders the empty-state copy without a table' do
+      expect(rendered).to include('No recorded events')
+      expect(rendered).to include('Actions taken against this resource will appear here.')
       expect(rendered).not_to have_css('table.audit-event-table')
+    end
+
+    it 'still renders the section shell + title' do
+      expect(rendered).to have_css('.audit-history .audit-history__title', text: 'Audit log')
     end
   end
 
@@ -49,50 +55,84 @@ describe 'audit_events/_history.html.haml' do
 
     before { render_with(events: events) }
 
-    it 'renders a Bootstrap table with column headers' do
-      expect(rendered).to have_css('table.audit-event-table thead th', text: 'When')
-      expect(rendered).to have_css('table.audit-event-table thead th', text: 'Action')
-      expect(rendered).to have_css('table.audit-event-table thead th', text: 'Actor')
+    it 'renders the section header with title and event count' do
+      expect(rendered).to have_css('.audit-history__title', text: 'Audit log')
+      expect(rendered).to have_css('.audit-history__count', text: '5 events')
+      expect(rendered).to have_css('.audit-history__subtitle', text: 'Reverse chronological')
+    end
+
+    it 'renders a table with all five column headers' do
+      %w[When Type Action Actor].each do |label|
+        expect(rendered).to have_css('table.audit-event-table thead th', text: label)
+      end
       expect(rendered).to have_css('table.audit-event-table thead th', text: 'On behalf of')
     end
 
-    it 'renders the create/update/tombstone/restore badges' do
-      expect(rendered).to have_css('span.badge.bg-success', text: 'Created')
-      expect(rendered).to have_css('span.badge.bg-primary', text: 'Updated')
-      expect(rendered).to have_css('span.badge.bg-danger', text: 'Tombstoned')
-      expect(rendered).to have_css('span.badge.bg-warning', text: 'Restored')
+    it 'renders the create/update/tombstone/restore action labels' do
+      expect(rendered).to have_css('.audit-event--create .audit-event__action-label', text: 'Created')
+      expect(rendered).to have_css('.audit-event--update .audit-event__action-label', text: 'Updated')
+      expect(rendered).to have_css('.audit-event--tombstone .audit-event__action-label', text: 'Tombstoned')
+      expect(rendered).to have_css('.audit-event--restore .audit-event__action-label', text: 'Restored')
     end
 
-    it 'falls back to the generic badge for unknown action types' do
-      expect(rendered).to have_css('span.badge.bg-secondary', text: 'mystery_action')
+    it 'attaches per-action FA icons that drive the row rail colour via CSS' do
+      expect(rendered).to have_css('.audit-event--create .audit-event__action-icon.fa-circle-plus')
+      expect(rendered).to have_css('.audit-event--update .audit-event__action-icon.fa-pen')
+      expect(rendered).to have_css('.audit-event--tombstone .audit-event__action-icon.fa-trash-can')
+      expect(rendered).to have_css('.audit-event--restore .audit-event__action-icon.fa-rotate-left')
     end
 
-    it 'renders the action-typed tr classes and the formatted timestamp + actor in cells' do
-      expect(rendered).to have_css('tr.audit-event.audit-event--create')
-      expect(rendered).to have_css('tr.audit-event.audit-event--update')
-      expect(rendered).to have_css('tr.audit-event.audit-event--tombstone')
-      expect(rendered).to have_css('tr.audit-event.audit-event--restore')
-      expect(rendered).to include('2026-05-26 12:34 UTC')
-      expect(rendered).to include('000000002')
+    it 'falls back to the generic partial + humanised label for unknown action types' do
+      expect(rendered).to have_css('tr.audit-event.audit-event--generic')
+      expect(rendered).to have_css('.audit-event--generic .audit-event__action-label', text: 'Mystery action')
+    end
+
+    it 'renders the timestamp split into date and time, with the full ISO in title' do
+      expect(rendered).to have_css('.audit-event__when[title="2026-05-26T12:34:56Z"]')
+      expect(rendered).to have_css('.audit-event__when-date', text: '2026-05-26')
+      expect(rendered).to have_css('.audit-event__when-time', text: '12:34 UTC')
+    end
+
+    it 'renders the resource type column with icon + label' do
+      expect(rendered).to have_css('.audit-event__type-icon.fa-file')
+      expect(rendered).to have_css('.audit-event__type-label', text: 'Work')
+    end
+
+    it 'renders actor and on-behalf-of NUIDs as monospace chips' do
+      expect(rendered).to have_css('.audit-event__nuid', text: '000000002')
     end
   end
 
   context 'when on_behalf_of_nuid is present' do
-    it 'surfaces it in a per-action row' do
+    it 'surfaces it as a NUID chip on a per-action row' do
       render_with(events: [event(action: 'create', on_behalf_of: '000000007')])
-      expect(rendered).to have_css('tr.audit-event--create td', text: '000000007')
+      expect(rendered).to have_css('.audit-event--create .audit-event__nuid', text: '000000007')
     end
 
-    it 'surfaces it in the generic row' do
+    it 'surfaces it as a NUID chip on the generic row' do
       render_with(events: [event(action: 'mystery_action', on_behalf_of: '000000007')])
-      expect(rendered).to have_css('tr.audit-event td', text: '000000007')
+      expect(rendered).to have_css('.audit-event--generic .audit-event__nuid', text: '000000007')
     end
   end
 
   context 'when on_behalf_of_nuid is nil' do
-    it 'renders an em-dash placeholder' do
+    it 'renders an em-dash placeholder chip' do
       render_with(events: [event(action: 'create')])
-      expect(rendered).to have_css('tr.audit-event--create td.text-muted', text: '—')
+      expect(rendered).to have_css('.audit-event--create .audit-event__nuid--empty', text: '—')
+    end
+  end
+
+  context 'when resource_type varies' do
+    it 'uses the folder-open icon for Collections' do
+      render_with(events: [event(action: 'create', resource_type: 'Collection')])
+      expect(rendered).to have_css('.audit-event__type-icon.fa-folder-open')
+      expect(rendered).to have_css('.audit-event__type-label', text: 'Collection')
+    end
+
+    it 'uses the users icon for Communities' do
+      render_with(events: [event(action: 'create', resource_type: 'Community')])
+      expect(rendered).to have_css('.audit-event__type-icon.fa-users')
+      expect(rendered).to have_css('.audit-event__type-label', text: 'Community')
     end
   end
 end

@@ -37,13 +37,13 @@ describe CommunitiesController do
         sign_in admin_user
         get :edit, params: { id: community.id }
         expect(response.body).to match(/<button[^>]*id="history-tab"/)
-        expect(response.body).to include('No recorded events.')
+        expect(response.body).to include('Audit log')
       end
 
       it 'does not render the History tab for non-admin editors' do
         get :edit, params: { id: community.id }
         expect(response.body).not_to match(/<button[^>]*id="history-tab"/)
-        expect(response.body).not_to include('No recorded events.')
+        expect(response.body).not_to include('Audit log')
       end
     end
   end

@@ -16,15 +16,29 @@
 - if can?(:read, :audit_event)
   - history = AtlasRb::Resource.history(resource_id, nuid: Current.nuid)
   - events = Array(history['events'])
-  .py-2.px-1.audit-history
+  .audit-history.my-3
+    %header.audit-history__head
+      %div
+        %span.audit-history__title Audit log
+        - if events.any?
+          %span.audit-history__count
+            %i.fa-solid.fa-clock-rotate-left{'aria-hidden' => 'true'}
+            = pluralize(events.size, 'event')
+      - if events.any?
+        %span.audit-history__subtitle Reverse chronological
     - if events.empty?
-      %p.text-muted.mb-0 No recorded events.
+      .audit-history__empty
+        %i.fa-solid.fa-clock-rotate-left.audit-history__empty-icon{'aria-hidden' => 'true'}
+        %p.mb-1.fw-semibold.text-body No recorded events
+        %p.mb-0.small.text-muted
+          Actions taken against this resource will appear here.
     - else
       .table-responsive
-        %table.table.table-sm.table-hover.align-middle.audit-event-table.mb-0
+        %table.table.table-borderless.audit-event-table
           %thead
             %tr
               %th.text-nowrap{scope: 'col'} When
+              %th{scope: 'col'} Type
               %th{scope: 'col'} Action
               %th{scope: 'col'} Actor
               %th{scope: 'col'} On behalf of
