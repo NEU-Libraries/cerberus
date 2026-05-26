@@ -41,3 +41,8 @@
   .row
     .col-md-12
       = render partial: 'downloads', locals: { files: @files }
+
+.container
+  .row
+    .col-md-12
+      = render partial: 'audit_events/history', locals: { resource_id: @work.id }

@@ -30,3 +30,8 @@
 
 = render 'catalog/search_results'
 = render 'shared/downloads_modal'
+
+.container
+  .row
+    .col-md-12
+      = render partial: 'audit_events/history', locals: { resource_id: @community.id }
