@@ -34,6 +34,28 @@ describe CommunitiesController do
       expect(response).to render_template('communities/show')
       expect(CGI.unescapeHTML(response.body)).to include(community.title)
     end
+
+    context 'audit history section' do
+      let(:history_envelope) do
+        AtlasRb::Mash.new('resource_id' => community.id, 'events' => [])
+      end
+
+      before do
+        allow(AtlasRb::Resource).to receive(:history).and_return(history_envelope)
+      end
+
+      it 'renders the History section for staff users' do
+        sign_in User.new(email: 'staff@example.com', nuid: '000000002',
+                         groups: [Permissions::STAFF_EDIT_GROUP])
+        get :show, params: { id: community.id }
+        expect(response.body).to include('No recorded events.')
+      end
+
+      it 'does not render the History section for non-staff visitors' do
+        get :show, params: { id: community.id }
+        expect(response.body).not_to include('No recorded events.')
+      end
+    end
   end
 
   describe 'new' do

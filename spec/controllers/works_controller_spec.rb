@@ -45,6 +45,30 @@ describe WorksController do
         expect(response.body).not_to match(%r{>\s*Edit\s*</a>})
       end
     end
+
+    context 'audit history section' do
+      let(:history_envelope) do
+        AtlasRb::Mash.new('resource_id' => work.id, 'events' => [])
+      end
+
+      before do
+        allow(AtlasRb::Resource).to receive(:history).and_return(history_envelope)
+      end
+
+      it 'renders the History section for staff users' do
+        sign_in User.new(email: 'staff@example.com', nuid: '000000002',
+                         groups: [Permissions::STAFF_EDIT_GROUP])
+        get :show, params: { id: work.id }
+        expect(response.body).to include('History')
+        expect(response.body).to include('No recorded events.')
+      end
+
+      it 'does not render the History section for non-staff visitors' do
+        get :show, params: { id: work.id }
+        expect(response.body).not_to include('No recorded events.')
+        expect(response.body).not_to match(/<h3[^>]*>\s*History\s*<\/h3>/)
+      end
+    end
   end
 
   describe 'downloads' do
