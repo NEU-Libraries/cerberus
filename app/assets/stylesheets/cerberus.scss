@@ -512,12 +512,12 @@ $audit-tone-generic:   #6c757d;
 
 // Search-results header — pixel-level baseline tuning. align-items:
 // baseline (set on the partial's flex row) gets the h1 and the constraint
-// pill's text within ~2px, but the .h4 heading's heavier line-height
-// extends descender space below its baseline, pushing it slightly low.
-// A 2px pull-up brings the two text baselines coincident — small, but
-// the kind of typographic precision the archival register asks for.
+// pill within ~2px, but the heading's font metrics seat its text slightly
+// above the pill's text baseline. A 2px push-down brings the two
+// baselines coincident — small, but the kind of typographic precision
+// the archival register asks for.
 .search-results-header__title {
-  transform: translateY(-2px);
+  transform: translateY(2px);
 }
 
 // Applied-filter chip — paint the constraint chips with the same surface
