@@ -1,0 +1,101 @@
+// Blacklight discovery surfaces — anything that styles search-result
+// documents (thumbnails, gallery view, document metadata, work-show
+// dividers). Distinct from search chrome (header, applied-filter,
+// facet cards), which lives in its own partials.
+
+/* Blacklight Gallery Title */
+.gallery-title {
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Metadata section value line clamp */
+.metadata-section-clamped {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.document-thumbnail {
+  background-color: white;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+  width: 85px;
+  height: 85px;
+}
+
+.col-md-auto .document-thumbnail {
+  margin-top: 7px;
+}
+
+.document-thumbnail:has(.thumbnail-fallback:not(.d-none)) {
+  background-color: transparent;
+  border: none;
+}
+
+.thumbnail-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.document-thumbnail img {
+  position: absolute;
+  margin: auto;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-width: 100%;
+  max-height: 100%;
+  padding: 2px;
+}
+
+.documents-list .document-thumbnail {
+  padding-left: 0;
+  margin-right: 3rem;
+}
+
+.facet-limit .btn {
+  @extend .px-3;
+}
+
+dl.document-metadata.row {
+  margin-bottom: 0.5rem;
+}
+
+.work-show-divider {
+  border: 0;
+  border-top: 1px solid $gray-300;
+  opacity: 1;
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+}
+
+.documents-gallery {
+  row-gap: var(--bs-gutter-x);
+
+  .document-thumbnail {
+    width: 170px;
+    height: 170px;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+  }
+
+  .thumbnail-fallback svg {
+    font-size: 4em;
+  }
+
+  .document-thumbnail:has(.thumbnail-fallback:not(.d-none)) {
+    border: 1px solid rgba(0, 0, 0, 0.2);
+  }
+}

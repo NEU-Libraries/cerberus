@@ -1,0 +1,236 @@
+// ---------------------------------------------------------------------
+// Audit history (Work / Collection / Community → Edit → History tab)
+//
+// "Archival ledger" aesthetic — the audit log is a forensic record, so
+// the chrome is restrained: a quiet card-shell, monospace NUID chips,
+// and a single tone-coded action chip per row with a matching left
+// rail. The chip is the primary chromatic signal for at-a-glance
+// action scanning; the rail reinforces it column-wise across hundreds
+// of rows. Tones are desaturated from the Bootstrap defaults so the
+// page reads as a librarian's spreadsheet, not a marketing card.
+// ---------------------------------------------------------------------
+
+$audit-rail-width: 4px;
+
+// Action tones — chosen to sit alongside the existing Cerberus palette
+// without competing with form-submit/danger button colours. Slightly
+// desaturated from the Bootstrap defaults; the candy-bright versions
+// felt promotional on an audit surface.
+$audit-tone-create:    #0e8a7a;
+$audit-tone-update:    #2666a6;
+$audit-tone-tombstone: #a73a31;
+$audit-tone-restore:   #c46410;
+$audit-tone-generic:   #6c757d;
+
+.audit-history {
+  background-color: #fff;
+  border: 1px solid $gray-300;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.03);
+
+  &__head {
+    background-color: #f6f8fa;
+    border-bottom: 1px solid $gray-300;
+    padding: 0.75rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  &__title {
+    font-weight: 600;
+    font-size: 1.02rem;
+    letter-spacing: 0.005em;
+    color: $gray-800;
+  }
+
+  &__count {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-left: 0.55rem;
+    padding: 0.1rem 0.55rem;
+    background-color: $gray-200;
+    color: $gray-700;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    vertical-align: middle;
+
+    i {
+      font-size: 0.85em;
+      opacity: 0.7;
+    }
+  }
+
+  &__subtitle {
+    font-size: 0.7rem;
+    color: $gray-500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+  }
+
+  &__empty {
+    padding: 3rem 1.5rem;
+    text-align: center;
+
+    &-icon {
+      display: block;
+      margin: 0 auto 0.75rem;
+      font-size: 2rem;
+      color: $gray-400;
+    }
+  }
+}
+
+.audit-event-table {
+  margin-bottom: 0;
+  font-variant-numeric: tabular-nums;
+
+  // Quiet column headers — uppercase microcopy, not large body text.
+  thead th {
+    background-color: #fafbfc;
+    color: $gray-600;
+    font-weight: 600;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-bottom: 1px solid $gray-300;
+    padding: 0.55rem 0.85rem;
+    white-space: nowrap;
+  }
+  thead th:first-child {
+    padding-left: 1.1rem;
+  }
+
+  tbody td {
+    padding: 0.55rem 0.85rem;
+    vertical-align: middle;
+    color: $gray-800;
+    border: 0;
+    border-bottom: 1px solid $gray-200;
+    background-color: transparent; // let the rail's ::before show through
+  }
+  tbody tr:last-child td {
+    border-bottom: 0;
+  }
+
+  // Left rail: every row gets a 4px coloured stripe at the left edge
+  // of its first cell, tinted by --audit-action-color (set on the
+  // <tr> via the .audit-event--<tone> class below). The rail is the
+  // row's chromatic signal; everything else stays greyscale.
+  tbody tr td:first-child {
+    position: relative;
+    padding-left: 1.1rem;
+
+    &::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: $audit-rail-width;
+      background-color: var(--audit-action-color, #{$audit-tone-generic});
+    }
+  }
+
+  // Subtle warm hover — not Bootstrap's flat gray. Reads as "I am
+  // focused on this row" without overpowering the rail.
+  tbody tr:hover td {
+    background-color: #fbf9f4;
+  }
+}
+
+// Action-type colour tokens. Same tones as the rail; the table uses
+// these for both the rail (via box-shadow) and the action-cell dot
+// (via colour). Per-action partials only need to add the right class.
+.audit-event {
+  &--create    { --audit-action-color: #{$audit-tone-create}; }
+  &--update    { --audit-action-color: #{$audit-tone-update}; }
+  &--tombstone { --audit-action-color: #{$audit-tone-tombstone}; }
+  &--restore   { --audit-action-color: #{$audit-tone-restore}; }
+  &--generic   { --audit-action-color: #{$audit-tone-generic}; }
+
+  // Timestamp — date prominent on top, time muted underneath.
+  &__when {
+    line-height: 1.15;
+  }
+  &__when-date {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: $gray-800;
+    font-variant-numeric: tabular-nums;
+  }
+  &__when-time {
+    font-size: 0.72rem;
+    color: $gray-600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  // Action chip — tinted soft-badge. The chip is the row's primary
+  // chromatic signal; its background is a pale tint of the tone, the
+  // border slightly more saturated, and the icon + label sit in the
+  // full tone. The left rail (above) reinforces the tone for column-
+  // wise at-a-glance scanning across hundreds of rows.
+  //
+  // `color-mix` lets us derive the tints from --audit-action-color
+  // without per-tone overrides — change a tone token and every chip
+  // (and rail) updates in step.
+  &__action {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 0.3rem;
+    background-color: color-mix(in srgb, var(--audit-action-color) 12%, white);
+    border: 1px solid color-mix(in srgb, var(--audit-action-color) 28%, white);
+    color: var(--audit-action-color);
+    font-weight: 600;
+    font-size: 0.82rem;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+  &__action-icon {
+    font-size: 0.88em;
+    line-height: 1;
+  }
+  &__action-label {
+    color: inherit;
+    letter-spacing: 0.005em;
+  }
+
+  // NUID chip — monospace tabular pill. NUIDs are identifiers, so they
+  // get identifier typography. The chip's quiet background lets the
+  // identifier read as a token, not a body word.
+  &__nuid {
+    display: inline-block;
+    padding: 0.1rem 0.45rem;
+    background-color: $gray-100;
+    border: 1px solid $gray-200;
+    border-radius: 0.25rem;
+    font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 0.78rem;
+    color: $gray-800;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+  }
+  &__nuid--empty {
+    background-color: transparent;
+    border-color: transparent;
+    color: $gray-400;
+    font-family: inherit;
+    padding-left: 0;
+  }
+}
+
+// Compact responsive: on narrow viewports, tighten the timestamp font.
+@media (max-width: 575.98px) {
+  .audit-event__when-date {
+    font-size: 0.8rem;
+  }
+}
