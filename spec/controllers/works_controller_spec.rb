@@ -269,4 +269,19 @@ describe WorksController do
       expect(response).to have_http_status(:gone)
     end
   end
+
+  describe 'show on a nonexistent work id' do
+    render_views
+
+    it 'renders the not_found template with status 404 instead of bubbling a Rails 500' do
+      get :show, params: { id: 'does-not-exist-1234' }
+      expect(response).to have_http_status(:not_found)
+      expect(response).to render_template('errors/not_found')
+      expect(CGI.unescapeHTML(response.body)).to include('404')
+      expect(CGI.unescapeHTML(response.body)).to include('Not Found')
+      # obj_type local picks up the controller name, so the prose is
+      # resource-aware rather than the generic "page" default.
+      expect(CGI.unescapeHTML(response.body)).to include('the work you requested was not found')
+    end
+  end
 end

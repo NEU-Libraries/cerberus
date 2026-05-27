@@ -1,15 +1,17 @@
 - content_for(:head) { tag.meta(name: "turbo-cache-control", content: "no-cache") }
 - staff_link  = link_to "contacting the DRS staff", "mailto:Library-Repository-Team@neu.edu"
 - report_link = link_to "reporting the problem", "https://northeastern.libanswers.com/form?queue_id=5581&resource=#{CGI::escape(request.original_url)}", target: "_blank"
-.d-flex.align-items-center{ style: "min-height: 60vh;" }
-  .container.p-4.text-center
-    %h4.text-black-50.mb-2.pb-3
-      %span.fa-solid.fa-triangle-exclamation.pe-2
-      500
-    %h3
-      Sorry, you encountered a system error.
-    .pt-3
-    %p
+.error-page.error-page--error
+  %header.error-page__head
+    %i.fa-solid.fa-triangle-exclamation.error-page__icon{'aria-hidden' => 'true'}
+    %span.error-page__status
+      %span.error-page__status-code 500
+      %span.error-page__status-label Server Error
+  .error-page__body
+    %h1.error-page__title Sorry, you encountered a system error.
+    %p.error-page__lede
       The DRS tried to process your request but encountered an error. We apologize for the inconvenience and will resolve the error soon.
-    %p.mb-0
-      You might be interested in #{staff_link}, or #{report_link}.
+  .error-page__actions
+    You might be interested in #{staff_link}
+    %span.sep ·
+    or #{report_link}.

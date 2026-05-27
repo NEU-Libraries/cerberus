@@ -60,6 +60,30 @@ describe CommunitiesController do
       expect(response).to render_template('communities/show')
       expect(CGI.unescapeHTML(response.body)).to include(community.title)
     end
+
+    context 'Add affordance in the breadcrumb' do
+      it 'is hidden from anonymous users (TODO: replace with Ability check)' do
+        get :show, params: { id: community.id }
+        expect(response.body).not_to include('breadcrumb-add')
+      end
+
+      it 'is rendered for signed-in users' do
+        sign_in User.new(email: 'staff@example.com', nuid: '000000002', groups: ['editors'])
+        get :show, params: { id: community.id }
+        expect(response.body).to include('breadcrumb-add')
+      end
+    end
+  end
+
+  describe 'show on a nonexistent community id' do
+    render_views
+
+    it 'renders the not_found template with status 404' do
+      get :show, params: { id: 'does-not-exist-1234' }
+      expect(response).to have_http_status(:not_found)
+      expect(response).to render_template('errors/not_found')
+      expect(CGI.unescapeHTML(response.body)).to include('the community you requested was not found')
+    end
   end
 
   describe 'new' do
