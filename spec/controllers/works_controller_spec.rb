@@ -91,23 +91,23 @@ describe WorksController do
     end
 
     context 'depositor attribution' do
-      it 'passes depositor: nil when upload_as is missing (self-deposit default)' do
+      it 'explicitly attributes to the acting user when upload_as is missing (default)' do
         allow(AtlasRb::Work).to receive(:create).and_call_original
 
         post :create, params: { binary:    fixture_file_upload('image.png', 'image/png'),
                                 parent_id: collection.id }
 
-        expect(AtlasRb::Work).to have_received(:create).with(collection.id, depositor: nil)
+        expect(AtlasRb::Work).to have_received(:create).with(collection.id, depositor: user.nuid)
       end
 
-      it 'passes depositor: nil when upload_as is "myself"' do
+      it 'explicitly attributes to the acting user when upload_as is "myself"' do
         allow(AtlasRb::Work).to receive(:create).and_call_original
 
         post :create, params: { binary:    fixture_file_upload('image.png', 'image/png'),
                                 parent_id: collection.id,
                                 upload_as: 'myself' }
 
-        expect(AtlasRb::Work).to have_received(:create).with(collection.id, depositor: nil)
+        expect(AtlasRb::Work).to have_received(:create).with(collection.id, depositor: user.nuid)
       end
 
       it 'forwards the parent collection depositor when upload_as is "proxy"' do
