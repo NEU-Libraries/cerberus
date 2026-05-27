@@ -1,0 +1,145 @@
+// ---------------------------------------------------------------------
+// Error pages — 403 / 404 / 410 / 500
+//
+// Same card-shell pattern as audit-history and the deposit form. The
+// HTTP status code is treated as identifier typography (tabular
+// monospace, mirroring the NUID chip in the audit log), not as a
+// decorative numeral. Per-status tone derives from a single
+// `--error-tone-color` custom property so all four pages share one
+// stylesheet and differ only in the modifier class on the wrapper.
+// ---------------------------------------------------------------------
+
+// Tones — desaturated, deliberately echoing the audit-history tone
+// vocabulary so the four error pages feel like leaves of the same
+// archival product, not generic Rails error templates.
+$error-tone-missing:   #6c757d;  // 404 — matches $audit-tone-generic
+$error-tone-info:      #2666a6;  // 403 — matches $audit-tone-update / $blue
+$error-tone-gone:      #a73a31;  // 410 — matches $audit-tone-tombstone
+$error-tone-warn:      #c46410;  // 500 — matches $audit-tone-restore
+
+.error-page {
+  --error-tone-color: #{$error-tone-missing};
+
+  max-width: 640px;
+  margin: 3rem auto;
+  background-color: $white;
+  border: 1px solid $gray-300;
+  border-top: 3px solid var(--error-tone-color);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.03);
+
+  &--not-found { --error-tone-color: #{$error-tone-missing}; }
+  &--forbidden { --error-tone-color: #{$error-tone-info}; }
+  &--gone      { --error-tone-color: #{$error-tone-gone}; }
+  &--error     { --error-tone-color: #{$error-tone-warn}; }
+
+  // Header strip — soft off-white, status code + textual label rendered
+  // as a single identifier-typography element with the FA glyph as the
+  // tone-coloured prefix.
+  &__head {
+    background-color: #f6f8fa;
+    border-bottom: 1px solid $gray-300;
+    padding: 0.85rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+  }
+
+  &__icon {
+    color: var(--error-tone-color);
+    font-size: 1.05rem;
+    line-height: 1;
+  }
+
+  &__status {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.55rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__status-code {
+    color: $gray-900;
+    font-weight: 700;
+    font-size: 1.02rem;
+    font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    letter-spacing: 0.02em;
+  }
+
+  &__status-label {
+    color: var(--error-tone-color);
+    font-weight: 600;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+  }
+
+  // Body — the prose explanation. Generous internal padding, restrained
+  // typography, deliberately *not* centered (centered error pages read
+  // as marketing 404s; library deposit slips justify left).
+  &__body {
+    padding: 1.5rem 1.5rem 1.25rem;
+  }
+
+  &__title {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.18rem;
+    font-weight: 600;
+    color: $gray-900;
+    line-height: 1.35;
+  }
+
+  &__lede {
+    margin: 0;
+    color: $gray-700;
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+
+  // Resource details block — used by 410 Gone to surface the tombstoned
+  // record's title + permanent URL. Mirrors the audit-history
+  // `__nuid` chip in restraint: small uppercase labels, identifier
+  // values get tabular-numeric and gentle separator.
+  &__details {
+    margin: 1.1rem 0 0 0;
+    padding-top: 1rem;
+    border-top: 1px solid $gray-200;
+    font-size: 0.88rem;
+    color: $gray-700;
+
+    dt {
+      font-weight: 600;
+      color: $gray-600;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      font-size: 0.7rem;
+      margin-bottom: 0.2rem;
+    }
+    dd {
+      margin: 0 0 0.65rem 0;
+      word-break: break-all;
+    }
+    dd:last-child { margin-bottom: 0; }
+  }
+
+  // Actions strip — slim bottom band, separated visually by the
+  // gray-200 line + a subtle background shift. Mirrors the deposit
+  // form's `__next-hint` row in tone and weight.
+  &__actions {
+    border-top: 1px solid $gray-200;
+    background-color: #fafbfc;
+    padding: 0.7rem 1.25rem;
+    font-size: 0.82rem;
+    color: $gray-600;
+
+    a { color: $blue; }
+    .sep { color: $gray-400; margin: 0 0.4rem; }
+  }
+}
+
+@media (max-width: 575.98px) {
+  .error-page {
+    margin: 1.5rem 1rem;
+  }
+}

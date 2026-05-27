@@ -1,17 +1,18 @@
 - content_for(:head) { tag.meta(name: "turbo-cache-control", content: "no-cache") }
 - staff_link  = link_to "contacting the DRS staff", "mailto:Library-Repository-Team@neu.edu"
 - report_link = link_to "reporting the problem", "https://northeastern.libanswers.com/form?queue_id=5581&resource=#{CGI::escape(request.original_url)}", target: "_blank"
-.d-flex.align-items-center{ style: "min-height: 60vh;" }
-  .container.p-4.text-center
-    %h4.text-black-50.mb-2.pb-3
-      %span.fa-solid.fa-lock.pe-2
-      403
-    %h3
-      Sorry, you don't have permission to access this page.
-    .pt-3
+.error-page.error-page--forbidden
+  %header.error-page__head
+    %i.fa-solid.fa-lock.error-page__icon{'aria-hidden' => 'true'}
+    %span.error-page__status
+      %span.error-page__status-code 403
+      %span.error-page__status-label Forbidden
+  .error-page__body
+    %h1.error-page__title Sorry, you don't have permission to access this page.
+  .error-page__actions
     - if user_signed_in?
-      %p.mb-0
-        You might be interested in #{staff_link}, or #{report_link}.
+      You might be interested in #{staff_link}
+      %span.sep ·
+      or #{report_link}.
     - else
-      %p.mb-0
-        Try #{link_to "logging in", new_user_session_path} to gain access.
+      Try #{link_to "logging in", new_user_session_path} to gain access.

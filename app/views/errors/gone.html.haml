@@ -4,24 +4,23 @@
 - reason     = record.try(:tombstone_reason)
 - url        = record.try(:identifier) || record.try(:permanent_url)
 - staff_link = link_to "contact the DRS staff", "mailto:Library-Repository-Team@neu.edu"
-.d-flex.align-items-center{ style: "min-height: 60vh;" }
-  .container.p-4.text-center
-    %h4.text-black-50.mb-2.pb-3
-      %span.fa-solid.fa-trash-can.pe-2
-      410
-    %h3
+.error-page.error-page--gone
+  %header.error-page__head
+    %i.fa-solid.fa-trash-can.error-page__icon{'aria-hidden' => 'true'}
+    %span.error-page__status
+      %span.error-page__status-code 410
+      %span.error-page__status-label Gone
+  .error-page__body
+    %h1.error-page__title
       - if reason.present?
         = "\"#{title}\" was #{reason[0, 1].downcase + reason[1..]}."
       - else
         = "\"#{title}\" has been removed."
-    .pt-3
     - if url.present?
-      %p.mb-0
-        %strong Title:
-        = title
-      %p.mb-0
-        %strong Permanent URL:
-        = link_to url, url
-      .pt-2
-    %p.mb-0
-      If you believe this item was removed in error, please #{staff_link}.
+      %dl.error-page__details
+        %dt Title
+        %dd= title
+        %dt Permanent URL
+        %dd= link_to url, url
+  .error-page__actions
+    If you believe this item was removed in error, please #{staff_link}.
