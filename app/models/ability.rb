@@ -29,7 +29,9 @@ class Ability
         groups_can_edit?(doc, user)
       end
       can :tombstone, SolrDocument do |doc|
-        groups_can_edit?(doc, user) || depositor_for_work?(doc, user)
+        groups_can_edit?(doc, user) ||
+          depositor_for_work?(doc, user) ||
+          proxy_uploader_for_work?(doc, user)
       end
     end
 
@@ -50,5 +52,14 @@ class Ability
       return false if user.nuid.blank?
 
       doc['depositor_ssi'].present? && doc['depositor_ssi'] == user.nuid
+    end
+
+    # Q6 lean: the librarian who proxied the deposit retains tombstone
+    # rights, matching v1's `true_depositor` semantics.
+    def proxy_uploader_for_work?(doc, user)
+      return false unless doc['internal_resource_tesim'].to_s == 'Work'
+      return false if user.nuid.blank?
+
+      doc['proxy_uploader_ssi'].present? && doc['proxy_uploader_ssi'] == user.nuid
     end
 end

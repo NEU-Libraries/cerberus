@@ -25,6 +25,24 @@ describe Ability do
       expect(ability).not_to be_able_to(:tombstone, doc)
     end
 
+    it 'allows the proxy_uploader of a Work (Q6 lean)' do
+      doc = SolrDocument.new('internal_resource_tesim' => 'Work',
+                             'proxy_uploader_ssi'      => '000000002')
+      expect(ability).to be_able_to(:tombstone, doc)
+    end
+
+    it 'denies a stranger when proxy_uploader_ssi belongs to someone else' do
+      doc = SolrDocument.new('internal_resource_tesim' => 'Work',
+                             'proxy_uploader_ssi'      => '999999999')
+      expect(ability).not_to be_able_to(:tombstone, doc)
+    end
+
+    it 'ignores proxy_uploader matches on Communities and Collections' do
+      doc = SolrDocument.new('internal_resource_tesim' => 'Collection',
+                             'proxy_uploader_ssi'      => '000000002')
+      expect(ability).not_to be_able_to(:tombstone, doc)
+    end
+
     it 'ignores depositor matches on Communities and Collections' do
       doc = SolrDocument.new('internal_resource_tesim' => 'Collection',
                              'depositor_ssi'           => '000000002')

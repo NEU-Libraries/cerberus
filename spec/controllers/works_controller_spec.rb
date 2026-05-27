@@ -89,6 +89,38 @@ describe WorksController do
         .with(anything, anything, 'plain.txt', a_string_matching(uuid_re))
         .and not_have_enqueued_job(IiifAssetsJob)
     end
+
+    context 'depositor attribution' do
+      it 'passes depositor: nil when upload_as is missing (self-deposit default)' do
+        allow(AtlasRb::Work).to receive(:create).and_call_original
+
+        post :create, params: { binary:    fixture_file_upload('image.png', 'image/png'),
+                                parent_id: collection.id }
+
+        expect(AtlasRb::Work).to have_received(:create).with(collection.id, depositor: nil)
+      end
+
+      it 'passes depositor: nil when upload_as is "myself"' do
+        allow(AtlasRb::Work).to receive(:create).and_call_original
+
+        post :create, params: { binary:    fixture_file_upload('image.png', 'image/png'),
+                                parent_id: collection.id,
+                                upload_as: 'myself' }
+
+        expect(AtlasRb::Work).to have_received(:create).with(collection.id, depositor: nil)
+      end
+
+      it 'forwards the parent collection depositor when upload_as is "proxy"' do
+        allow(AtlasRb::Work).to receive(:create).and_call_original
+
+        post :create, params: { binary:    fixture_file_upload('image.png', 'image/png'),
+                                parent_id: collection.id,
+                                upload_as: 'proxy' }
+
+        expect(AtlasRb::Work).to have_received(:create)
+          .with(collection.id, depositor: collection['depositor'])
+      end
+    end
   end
 
   describe 'new' do

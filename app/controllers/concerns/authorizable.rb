@@ -39,7 +39,8 @@ module Authorizable
         'read_access_group_ssim'  => permissions.read,
         'edit_access_group_ssim'  => permissions.edit,
         'internal_resource_tesim' => klass.to_s,
-        'depositor_ssi'           => permissions.try(:depositor)
+        'depositor_ssi'           => permissions.try(:depositor),
+        'proxy_uploader_ssi'      => permissions.try(:proxy_uploader)
       )
     end
 end

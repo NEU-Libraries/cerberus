@@ -42,7 +42,7 @@ class WorksController < ApplicationController
   def create
     file = params[:binary]
     parent = AtlasRb::Collection.find(params[:parent_id])
-    @work = AtlasRb::Work.create(parent.id)
+    @work = AtlasRb::Work.create(parent.id, depositor: proxy_depositor(parent))
     AtlasRb::Work.metadata(@work.id, { title: file.original_filename })
 
     staged_path = stage_upload(file, @work.id)
@@ -70,6 +70,16 @@ class WorksController < ApplicationController
 
     def work_params
       resource_params(:work)
+    end
+
+    # Resolve the depositor NUID for a new Work based on the deposit form's
+    # "upload as" radio. `"proxy"` → attribute to the collection's depositor
+    # (acting user becomes the proxy_uploader server-side); anything else →
+    # nil, which leaves Atlas to default the depositor to the acting user.
+    def proxy_depositor(parent)
+      return nil unless params[:upload_as] == 'proxy'
+
+      parent['depositor'].presence
     end
 
     def prepare_show_view
