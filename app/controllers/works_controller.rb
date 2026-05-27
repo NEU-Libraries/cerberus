@@ -32,6 +32,7 @@ class WorksController < ApplicationController
 
   def new
     @work = Work.new
+    @parent = AtlasRb::Collection.find(params[:parent_id]) if params[:parent_id].present?
   end
 
   def edit
