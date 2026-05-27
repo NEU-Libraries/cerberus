@@ -8,15 +8,31 @@ class User
 
   define_model_callbacks :validation
 
-  attr_accessor :email, :password, :nuid, :name, :groups
+  attr_accessor :email, :password, :nuid, :name, :groups, :role
 
-  devise :custom_authenticatable, authentication_keys: [:email, :password, :nuid, :name, :groups]
+  devise :custom_authenticatable, authentication_keys: [:email, :password, :nuid, :name, :groups, :role]
 
   def pretty_name
     names = Namae.parse(name)[0]
     return "#{names.given} #{names.family}" if names.present?
 
     ''
+  end
+
+  # Atlas-side role mirror. Matches the Atlas Ability layer plan's
+  # "admin wildcard short-circuit on both sides" contract — Cerberus's
+  # Ability consults this so an Atlas :admin doesn't need every grouper
+  # group stuffed onto their record to drive admin-only UI.
+  def admin?
+    role.to_s == 'admin'
+  end
+
+  # Role gate for the deposit form's proxy radio (piece 3 of the v2
+  # auth + provenance plan). Group membership still selects *which*
+  # collections the user can deposit into; this only governs whether
+  # the radio surface is rendered.
+  def privileged?
+    role.to_s == 'privileged'
   end
 
   def to_s

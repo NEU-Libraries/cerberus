@@ -16,13 +16,14 @@
         .clearfix.pt-3
         = @collection.description
         .clearfix.pt-3
-          .float-end
-            = link_to "Edit", edit_collection_path(@collection.id), class: "px-3"
-            - if @can_tombstone && @response.documents.empty?
-              = render 'shared/tombstone_modal',
-                       id:   @collection.id,
-                       kind: 'collection',
-                       path: tombstone_collection_path(@collection.id)
+          - if user_signed_in?
+            .float-end
+              = link_to "Edit", edit_collection_path(@collection.id), class: "px-3"
+              - if @can_tombstone && @response.documents.empty?
+                = render 'shared/tombstone_modal',
+                         id:   @collection.id,
+                         kind: 'collection',
+                         path: tombstone_collection_path(@collection.id)
 
 - content_for(:sidebar) do
   = render 'catalog/search_sidebar'

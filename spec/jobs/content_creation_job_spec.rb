@@ -10,7 +10,7 @@ RSpec.describe ContentCreationJob, type: :job do
   let(:source_path) { File.join(tmp, original_filename) }
 
   before { File.write(source_path, 'fake bytes') }
-  after  { FileUtils.remove_entry(tmp) if File.exist?(tmp) }
+  after  { FileUtils.rm_rf(tmp) }
 
   it 'uploads the blob with the supplied idempotency_key and marks the work complete' do
     allow(AtlasRb::Blob).to receive(:create)

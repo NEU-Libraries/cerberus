@@ -3,12 +3,12 @@
 require 'rails_helper'
 
 describe CatalogController do
-  let!(:community) { AtlasRb::Community.create(nil, '/home/cerberus/web/spec/fixtures/files/community-mods.xml') }
+  let!(:community) { AtlasRb::Community.create(nil, '/home/cerberus/web/spec/fixtures/files/community-mods.xml', nuid: '000000004') }
 
   describe 'index' do
     render_views
     it 'renders the index partial' do
-      AtlasRb::Community.metadata(community.id, { 'permissions' => { 'read' => ['public'] } })
+      AtlasRb::Community.metadata(community.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
       expect(community.title).to eq('Northeastern University')
       get :index
       expect(response).to render_template('catalog/index')

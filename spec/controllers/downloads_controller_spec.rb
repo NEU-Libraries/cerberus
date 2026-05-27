@@ -3,13 +3,13 @@
 require 'rails_helper'
 
 describe DownloadsController do
-  let(:community) { AtlasRb::Community.create(nil, '/home/cerberus/web/spec/fixtures/files/community-mods.xml') }
-  let(:collection) { AtlasRb::Collection.create(community.id, '/home/cerberus/web/spec/fixtures/files/collection-mods.xml') }
-  let(:work) { AtlasRb::Work.create(collection.id, '/home/cerberus/web/spec/fixtures/files/work-mods.xml') }
+  let(:community) { AtlasRb::Community.create(nil, '/home/cerberus/web/spec/fixtures/files/community-mods.xml', nuid: '000000004') }
+  let(:collection) { AtlasRb::Collection.create(community.id, '/home/cerberus/web/spec/fixtures/files/collection-mods.xml', nuid: '000000004') }
+  let(:work) { AtlasRb::Work.create(collection.id, '/home/cerberus/web/spec/fixtures/files/work-mods.xml', nuid: '000000004') }
 
   let(:noid) do
-    AtlasRb::Blob.create(work.id, '/home/cerberus/web/spec/fixtures/files/image.png', 'image.png')
-    AtlasRb::Work.assets(work.id).first.noid
+    AtlasRb::Blob.create(work.id, '/home/cerberus/web/spec/fixtures/files/image.png', 'image.png', nuid: '000000004')
+    AtlasRb::Work.assets(work.id, nuid: '000000004').first.noid
   end
 
   describe 'show' do
@@ -21,7 +21,7 @@ describe DownloadsController do
       end
 
       it 'streams the file with correct headers' do
-        blob = AtlasRb::Blob.find(noid)
+        blob = AtlasRb::Blob.find(noid, nuid: '000000004')
 
         get :show, params: { id: noid }
 

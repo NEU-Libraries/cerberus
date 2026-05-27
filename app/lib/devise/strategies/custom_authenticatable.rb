@@ -43,8 +43,8 @@ module Devise
           # mapping.to is a reference to the model class that Devise is configured
           # to use that represents user accounts. In this case, it's the User class.
           mapping.to.new(
-            nuid: authentication_hash[:nuid],
-            email: authentication_hash[:email],
+            nuid:     authentication_hash[:nuid],
+            email:    authentication_hash[:email],
             password: authentication_hash[:password]
           )
         end

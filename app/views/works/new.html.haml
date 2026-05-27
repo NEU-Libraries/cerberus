@@ -1,9 +1,49 @@
-%h2.py-2
-  Upload File
-
-= form_tag('/works', multipart: true) do |f|
+= form_tag('/works', multipart: true, class: 'deposit-form my-3') do |f|
   %input{type: "hidden", value: params[:parent_id], name: "parent_id"}/
-  .mb-3
-    %label.form-label{:for => "binary"} Default file input example
-    %input#binary.form-control{:name => "binary", :type => "file"}/
-  = submit_tag "Upload", class: 'btn btn-primary'
+
+  .deposit-form__panel
+    %header.deposit-form__head
+      %div
+        %span.deposit-form__eyebrow Step 1 of 2
+        %span.deposit-form__title File
+      - if @parent.present?
+        %span.deposit-form__destination
+          %i.fa-solid.fa-folder-open{'aria-hidden' => 'true'}
+          %span.deposit-form__destination-label Depositing into
+          %span.deposit-form__destination-title= @parent['title']
+
+    .deposit-form__body
+      .deposit-form__field
+        %label.deposit-form__field-label{for: 'binary'} File
+        = file_field_tag 'binary', class: 'deposit-form__file', required: true
+        %p.deposit-form__field-hint
+          One file per deposit. Descriptive metadata is captured on the next step.
+
+      - if current_user&.admin? || current_user&.privileged?
+        %fieldset.deposit-form__field
+          %legend.deposit-form__field-label
+            Attribution
+            %span.deposit-form__field-pill Privileged
+          .deposit-form__radio-grid
+            %label.deposit-form__radio{for: 'upload_as_myself'}
+              = radio_button_tag 'upload_as', 'myself', true, class: 'deposit-form__radio-input', id: 'upload_as_myself'
+              .deposit-form__radio-body
+                .deposit-form__radio-title
+                  %i.fa-solid.fa-user{'aria-hidden' => 'true'}
+                  Self-deposit
+                .deposit-form__radio-desc
+                  This file is mine. I am the depositor of record.
+            %label.deposit-form__radio{for: 'upload_as_proxy'}
+              = radio_button_tag 'upload_as', 'proxy', false, class: 'deposit-form__radio-input', id: 'upload_as_proxy'
+              .deposit-form__radio-body
+                .deposit-form__radio-title
+                  %i.fa-solid.fa-people-arrows{'aria-hidden' => 'true'}
+                  Proxy deposit
+                .deposit-form__radio-desc
+                  Uploading on behalf of the collection owner. They are the depositor of record; I am logged as proxy_uploader for the audit trail.
+
+  .deposit-form__actions
+    .deposit-form__next-hint
+      %i.fa-solid.fa-arrow-right{'aria-hidden' => 'true'}
+      After upload, you'll review and confirm the descriptive metadata.
+    = submit_tag "Upload", class: 'btn btn-primary deposit-form__submit'

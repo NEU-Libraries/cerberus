@@ -48,3 +48,7 @@ CLAUDE.md
 /.claude
 /.ruby-lsp
 /.zed
+
+# Ignore key files for decrypting credentials and more.
+/config/*.key
+

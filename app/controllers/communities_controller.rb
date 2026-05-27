@@ -19,7 +19,7 @@ class CommunitiesController < CatalogController
   end
 
   def tombstone
-    AtlasRb::Community.tombstone(params[:id], nuid: current_user.nuid)
+    AtlasRb::Community.tombstone(params[:id])
     redirect_to root_path, notice: 'Community deleted.'
   end
 

@@ -15,6 +15,8 @@ jobs:
     - name: Make env file
       run: |
         cp .env.example .env
+        echo "ATLAS_TOKEN=${{ secrets.ATLAS_TOKEN }}" >> .env
+        echo "ATLAS_MASTER_KEY=${{ secrets.ATLAS_MASTER_KEY }}" >> .env
     - name: Dotenv Action
       uses: falti/dotenv-action@v1.1.4
     - name: Github Action cache

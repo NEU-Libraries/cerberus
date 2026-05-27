@@ -5,25 +5,25 @@ require 'rails_helper'
 RSpec::Matchers.define_negated_matcher :not_have_enqueued_job, :have_enqueued_job
 
 describe WorksController do
-  let(:community) { AtlasRb::Community.create(nil, '/home/cerberus/web/spec/fixtures/files/community-mods.xml') }
-  let(:collection) { AtlasRb::Collection.create(community.id, '/home/cerberus/web/spec/fixtures/files/collection-mods.xml') }
+  let(:community) { AtlasRb::Community.create(nil, '/home/cerberus/web/spec/fixtures/files/community-mods.xml', nuid: '000000004') }
+  let(:collection) { AtlasRb::Collection.create(community.id, '/home/cerberus/web/spec/fixtures/files/collection-mods.xml', nuid: '000000004') }
   let(:work) do
-    created = AtlasRb::Work.create(collection.id, '/home/cerberus/web/spec/fixtures/files/work-mods.xml')
-    AtlasRb::Work.complete(created.id)
-    AtlasRb::Work.find(created.id)
+    created = AtlasRb::Work.create(collection.id, '/home/cerberus/web/spec/fixtures/files/work-mods.xml', nuid: '000000004')
+    AtlasRb::Work.complete(created.id, nuid: '000000004')
+    AtlasRb::Work.find(created.id, nuid: '000000004')
   end
 
-  def stub_work_in_progress(w)
-    in_progress = AtlasRb::Work.find(w.id)
+  def stub_work_in_progress(work)
+    in_progress = AtlasRb::Work.find(work.id, nuid: '000000004')
     in_progress['in_progress'] = true
-    allow(AtlasRb::Work).to receive(:find).with(w.id).and_return(in_progress)
+    allow(AtlasRb::Work).to receive(:find).with(work.id).and_return(in_progress)
   end
 
   describe 'show' do
     render_views
 
     before do
-      AtlasRb::Work.metadata(work.id, { 'permissions' => { 'read' => ['public'] } })
+      AtlasRb::Work.metadata(work.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
     end
 
     it 'renders the show partial' do
@@ -51,7 +51,7 @@ describe WorksController do
     render_views
 
     before do
-      AtlasRb::Work.metadata(work.id, { 'permissions' => { 'read' => ['public'] } })
+      AtlasRb::Work.metadata(work.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
     end
 
     it 'renders the downloads turbo-frame without the layout' do
@@ -66,25 +66,60 @@ describe WorksController do
     include ActiveJob::TestHelper
 
     let(:uuid_re) { /\A\h{8}-\h{4}-\h{4}-\h{4}-\h{12}\z/ }
+    let(:user) { User.new(email: 'depositor@example.com', nuid: '000000004', groups: ['editors']) }
+
+    before { sign_in user }
 
     it 'enqueues both jobs and redirects to the metadata page' do
-      expect {
-        post :create, params: { binary: fixture_file_upload('image.png', 'image/png'),
+      expect do
+        post :create, params: { binary:    fixture_file_upload('image.png', 'image/png'),
                                 parent_id: collection.id }
-      }.to have_enqueued_job(IiifAssetsJob)
-       .and have_enqueued_job(ContentCreationJob)
-              .with(anything, anything, 'image.png', a_string_matching(uuid_re))
+      end.to have_enqueued_job(IiifAssetsJob)
+        .and have_enqueued_job(ContentCreationJob)
+        .with(anything, anything, 'image.png', a_string_matching(uuid_re))
 
       expect(subject).to redirect_to action: :metadata, id: assigns(:work).id
     end
 
     it 'does not enqueue the IIIF-assets job for non-image uploads' do
-      expect {
-        post :create, params: { binary: fixture_file_upload('plain.txt', 'text/plain'),
+      expect do
+        post :create, params: { binary:    fixture_file_upload('plain.txt', 'text/plain'),
                                 parent_id: collection.id }
-      }.to have_enqueued_job(ContentCreationJob)
-              .with(anything, anything, 'plain.txt', a_string_matching(uuid_re))
-       .and not_have_enqueued_job(IiifAssetsJob)
+      end.to have_enqueued_job(ContentCreationJob)
+        .with(anything, anything, 'plain.txt', a_string_matching(uuid_re))
+        .and not_have_enqueued_job(IiifAssetsJob)
+    end
+
+    context 'depositor attribution' do
+      it 'explicitly attributes to the acting user when upload_as is missing (default)' do
+        allow(AtlasRb::Work).to receive(:create).and_call_original
+
+        post :create, params: { binary:    fixture_file_upload('image.png', 'image/png'),
+                                parent_id: collection.id }
+
+        expect(AtlasRb::Work).to have_received(:create).with(collection.id, depositor: user.nuid)
+      end
+
+      it 'explicitly attributes to the acting user when upload_as is "myself"' do
+        allow(AtlasRb::Work).to receive(:create).and_call_original
+
+        post :create, params: { binary:    fixture_file_upload('image.png', 'image/png'),
+                                parent_id: collection.id,
+                                upload_as: 'myself' }
+
+        expect(AtlasRb::Work).to have_received(:create).with(collection.id, depositor: user.nuid)
+      end
+
+      it 'forwards the parent collection depositor when upload_as is "proxy"' do
+        allow(AtlasRb::Work).to receive(:create).and_call_original
+
+        post :create, params: { binary:    fixture_file_upload('image.png', 'image/png'),
+                                parent_id: collection.id,
+                                upload_as: 'proxy' }
+
+        expect(AtlasRb::Work).to have_received(:create)
+          .with(collection.id, depositor: collection['depositor'])
+      end
     end
   end
 
@@ -101,7 +136,7 @@ describe WorksController do
     let(:user) { User.new(email: 'test@example.com', password: 'password', groups: ['editors']) }
 
     before do
-      AtlasRb::Work.metadata(work.id, { 'permissions' => { 'edit' => ['editors'] } })
+      AtlasRb::Work.metadata(work.id, { 'permissions' => { 'edit' => ['editors'] } }, nuid: '000000004')
       sign_in user
     end
 
@@ -130,6 +165,32 @@ describe WorksController do
         expect(flash[:alert]).to eq(WorksController::IN_PROGRESS_NOTICE)
       end
     end
+
+    context 'audit history tab' do
+      let(:history_envelope) do
+        AtlasRb::Mash.new('resource_id' => work.id, 'events' => [])
+      end
+      let(:admin_user) do
+        User.new(email: 'admin@example.com', nuid: '000000004', groups: [], role: 'admin')
+      end
+
+      before do
+        allow(AtlasRb::Resource).to receive(:history).and_return(history_envelope)
+      end
+
+      it 'renders the History tab for Atlas :admin users (no group stuffing required)' do
+        sign_in admin_user
+        get :edit, params: { id: work.id }
+        expect(response.body).to match(/<button[^>]*id="history-tab"/)
+        expect(response.body).to include('Audit log')
+      end
+
+      it 'does not render the History tab for non-admin editors' do
+        get :edit, params: { id: work.id }
+        expect(response.body).not_to match(/<button[^>]*id="history-tab"/)
+        expect(response.body).not_to include('Audit log')
+      end
+    end
   end
 
   describe 'metadata' do
@@ -138,7 +199,7 @@ describe WorksController do
     let(:user) { User.new(email: 'test@example.com', password: 'password', groups: ['editors']) }
 
     before do
-      AtlasRb::Work.metadata(work.id, { 'permissions' => { 'edit' => ['editors'] } })
+      AtlasRb::Work.metadata(work.id, { 'permissions' => { 'edit' => ['editors'] } }, nuid: '000000004')
       sign_in user
     end
 
@@ -154,17 +215,17 @@ describe WorksController do
   end
 
   describe 'update_metadata' do
-    let(:user) { User.new(email: 'test@example.com', password: 'password', groups: ['editors']) }
+    let(:user) { User.new(email: 'test@example.com', password: 'password', nuid: '000000004', groups: ['editors']) }
 
     before do
-      AtlasRb::Work.metadata(work.id, { 'permissions' => { 'edit' => ['editors'] } })
+      AtlasRb::Work.metadata(work.id, { 'permissions' => { 'edit' => ['editors'] } }, nuid: '000000004')
       sign_in user
     end
 
     it 'updates the title and description and redirects to show' do
       patch :update_metadata, params: { id: work.id, work: { title: 'New Title', description: 'New abstract.' } }
 
-      updated = AtlasRb::Work.find(work.id)
+      updated = AtlasRb::Work.find(work.id, nuid: '000000004')
       expect(updated.title).to start_with('New Title')
       expect(updated.title).not_to include("What's New")
       expect(updated.description).to eq('New abstract.')
@@ -173,19 +234,21 @@ describe WorksController do
   end
 
   describe 'tombstone' do
-    let(:user) { User.new(email: 'staff@example.com', nuid: '000000002',
-                          groups: [Permissions::STAFF_EDIT_GROUP]) }
+    let(:user) do
+      User.new(email: 'staff@example.com', nuid: '000000002',
+               groups: [Permissions::STAFF_EDIT_GROUP])
+    end
 
     before do
       AtlasRb::Work.metadata(work.id,
-                             { 'permissions' => { 'edit' => [Permissions::STAFF_EDIT_GROUP] } })
+                             { 'permissions' => { 'edit' => [Permissions::STAFF_EDIT_GROUP] } }, nuid: '000000004')
       sign_in user
     end
 
     it 'calls AtlasRb::Work.tombstone with the acting user nuid and redirects' do
       allow(AtlasRb::Work).to receive(:tombstone)
       post :tombstone, params: { id: work.id }
-      expect(AtlasRb::Work).to have_received(:tombstone).with(work.id, nuid: '000000002')
+      expect(AtlasRb::Work).to have_received(:tombstone).with(work.id)
       expect(subject).to redirect_to(root_path)
     end
   end
@@ -194,8 +257,8 @@ describe WorksController do
     render_views
 
     before do
-      AtlasRb::Work.metadata(work.id, { 'permissions' => { 'read' => ['public'] } })
-      tombstoned = AtlasRb::Work.find(work.id)
+      AtlasRb::Work.metadata(work.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
+      tombstoned = AtlasRb::Work.find(work.id, nuid: '000000004')
       tombstoned['tombstoned'] = true
       allow(AtlasRb::Work).to receive(:find).with(work.id).and_return(tombstoned)
     end

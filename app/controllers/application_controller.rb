@@ -10,6 +10,7 @@ class ApplicationController < ActionController::Base
   end
 
   before_action :store_preferred_view
+  before_action :set_current_nuid
 
   def current_ability
     @current_ability ||= Ability.new(current_user)
@@ -33,6 +34,10 @@ class ApplicationController < ActionController::Base
   end
 
   private # ---------------------------------------------------------
+
+    def set_current_nuid
+      Current.nuid = current_user&.nuid || Rails.application.config.x.cerberus.guest_nuid
+    end
 
     def add_breadcrumb_for(resource_id, klass)
       title = AtlasRb.const_get(klass).find(resource_id).title

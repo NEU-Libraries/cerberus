@@ -1,0 +1,10 @@
+<div class="search-results-header d-flex align-items-baseline flex-wrap gap-4 mt-2 mb-2">
+  <% if params[:q].present? %>
+    <h1 class="search-results-header__title h4 mb-0 text-nowrap">
+      <i class="fa-solid fa-magnifying-glass me-2" aria-hidden="true"></i><%= t('blacklight.search.search_results') %>
+    </h1>
+  <% end %>
+  <div class="search-results-header__constraints flex-grow-1">
+    <%= render blacklight_config&.view_config(document_index_view_type)&.constraints_component.new(search_state: search_state) %>
+  </div>
+</div>

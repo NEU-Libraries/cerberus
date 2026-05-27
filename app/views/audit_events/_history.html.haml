@@ -1,0 +1,48 @@
+-# Audit-history tab body for Work / Collection / Community edit pages.
+-#
+-# Locals:
+-#   resource_id — the Atlas resource ID to fetch history for
+-#
+-# Gated by `can?(:read, :audit_event)` so that broadening the audience
+-# (piece 5 — acting-as) becomes a one-line Ability change rather than a
+-# view hunt. Per-event rendering dispatches to `_event_<action>` partials
+-# with `_event_generic` as the fallback — adding a new action type is a
+-# new file, not a case-statement edit.
+-#
+-# Performance trade-off (v1 admin-only, acceptable): fires an inline HTTP
+-# request to Atlas on every edit-page render. Piece 5 broadening the
+-# audience may motivate moving to a Turbo Frame so history loads
+-# asynchronously and doesn't block edit-page render.
+- if can?(:read, :audit_event)
+  - history = AtlasRb::Resource.history(resource_id, nuid: Current.nuid)
+  - events = Array(history['events'])
+  .audit-history.my-3
+    %header.audit-history__head
+      %div
+        %span.audit-history__title Audit log
+        - if events.any?
+          %span.audit-history__count
+            %i.fa-solid.fa-clock-rotate-left{'aria-hidden' => 'true'}
+            = pluralize(events.size, 'event')
+      - if events.any?
+        %span.audit-history__subtitle Reverse chronological
+    - if events.empty?
+      .audit-history__empty
+        %i.fa-solid.fa-clock-rotate-left.audit-history__empty-icon{'aria-hidden' => 'true'}
+        %p.mb-1.fw-semibold.text-body No recorded events
+        %p.mb-0.small.text-muted
+          Actions taken against this resource will appear here.
+    - else
+      .table-responsive
+        %table.table.table-borderless.audit-event-table
+          %thead
+            %tr
+              %th.text-nowrap{scope: 'col'} When
+              %th{scope: 'col'} Action
+              %th{scope: 'col'} Actor
+              %th{scope: 'col'} On behalf of
+          %tbody
+            - events.each do |event|
+              - action_partial = "audit_events/event_#{event['action']}"
+              - resolved = lookup_context.exists?(action_partial, [], true) ? action_partial : 'audit_events/event_generic'
+              = render partial: resolved, locals: { event: event }

@@ -1,0 +1,185 @@
+// Page chrome — body, footer, navbar, breadcrumbs, dropdowns, and other
+// global structural styles that aren't tied to a specific Blacklight or
+// audit surface.
+
+body {
+  background-color: $gray-100;
+  height:100vh;
+  margin:0;
+  display:flex;
+  flex-direction:column;
+}
+
+#mods {
+  font-size: calc(0.8rem + 0.1vw);
+  dt {
+    margin-bottom: 0.2rem;
+  }
+  dd p {
+    margin-bottom: 0.5rem;
+  }
+}
+
+.well {
+  background-color: #ecf0f1;
+}
+
+a:not(.btn, .dropdown-item, .navbar-brand, .nav-link) {
+  color: $link-blue;
+
+  &:link {
+    text-decoration: none;
+  }
+}
+
+.navbar-search {
+  padding-bottom: 0;
+}
+
+.catalog_startOverLink {
+  display: none;
+}
+
+.sort-pagination {
+  padding-top: 8px;
+}
+
+.footer {
+  background-color: #385775;
+  color: $light;
+
+  .logo {
+    width: 175px;
+  }
+
+  a {
+    color: $light;
+  }
+
+  li.list-inline-item:before {
+    content: "\20\00b7";
+    margin-right: 8px;
+  }
+  li.list-inline-item:first-child:before{
+    content: "";
+    margin-right: auto;
+  }
+  .nu-social{
+    li{
+      float: right;
+      display: block;
+      a {
+        -webkit-transition: opacity 0.5s;
+        -moz-transition: opacity 0.5s;
+        -o-transition: opacity 0.5s;
+        transition: opacity 0.5s;
+        padding: 0.25em;
+        font-size: 1.3em;
+        opacity: 0.5;
+      }
+      a:hover {
+        -webkit-transition: opacity 0.5s;
+        -moz-transition: opacity 0.5s;
+        -o-transition: opacity 0.5s;
+        transition: opacity 0.5s;
+        text-decoration: none;
+        opacity: 1;
+      }
+    }
+    li:after {
+      content: "";
+    }
+  }
+}
+
+.search-widgets div:last-child {
+  margin-right: 0 !important;
+}
+
+.breadcrumb-add {
+  display: inline;
+}
+
+.dropdown-menu.show{
+  background-color: $light;
+
+  a:hover {
+    &:not(.active) {
+      background-color: $light;
+      color: $cyan;
+    }
+  }
+
+  a:active {
+    color: $dark;
+  }
+}
+
+.dropdown-item.active, .dropdown-item:active {
+  background-color: $light;
+  color: $dark;
+  font-weight: bold;
+}
+
+.document-counter {
+  display: none;
+}
+
+#editor {
+  height: 952px;
+}
+
+.btn-close {
+  color: transparent !important;
+  @extend .float-end;
+}
+
+ol.breadcrumb {
+  background-color: #f0f0f0;
+  @extend .rounded-3;
+  @extend .p-3;
+}
+
+.breadcrumb a {
+  color: $gray-800;
+}
+
+.breadcrumb-item.active {
+  font-weight: 600;
+  color: $gray-800;
+}
+
+.nav-tabs {
+  margin: 10px 0px 10px 0px;
+}
+
+.loading-state {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.3);
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  visibility: hidden;
+}
+.loading {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 10px solid #ddd;
+  border-top-color: $blue;
+  animation: loading 1s linear infinite;
+}
+@keyframes loading {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.navbar-search {
+  margin-bottom: 5px;
+}

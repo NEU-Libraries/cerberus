@@ -7,9 +7,9 @@ RSpec.describe DerivativeCreationJob, type: :job do
   let(:base) { 'http://example.com/iiif/3/123456789.jp2' }
   let(:urls) do
     {
-      'small'  => "#{base}/full/800,/0/default.jpg",
-      'medium' => "#{base}/full/1600,/0/default.jpg",
-      'large'  => "#{base}/full/full/0/default.jpg"
+      small:  "#{base}/full/pct:33/0/default.jpg",
+      medium: "#{base}/full/pct:50/0/default.jpg",
+      large:  "#{base}/full/pct:75/0/default.jpg"
     }
   end
 
@@ -22,9 +22,9 @@ RSpec.describe DerivativeCreationJob, type: :job do
     expect(DerivativeCreator).to have_received(:call).with(base: base, widths: nil)
     expect(AtlasRb::Work).to have_received(:set_image_derivatives).with(
       work_id,
-      small: urls['small'],
-      medium: urls['medium'],
-      large: urls['large']
+      small:  urls[:small],
+      medium: urls[:medium],
+      large:  urls[:large]
     )
   end
 

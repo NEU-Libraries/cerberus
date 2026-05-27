@@ -1,5 +1,6 @@
 %h3.py-3 Edit Work
 
+- show_history = can?(:read, :audit_event)
 %ul.nav.nav-tabs{"data-controller" => "tab-hash"}
   %li.nav-item
     %button#metadata-tab.nav-link.active{"aria-controls" => "metadata", "aria-selected" => "true", "data-bs-target" => "#metadata", "data-bs-toggle" => "tab", role: "tab", type: "button"} Metadata
@@ -7,6 +8,9 @@
     %button#permissions-tab.nav-link{"aria-controls" => "permissions", "aria-selected" => "false", "data-bs-target" => "#permissions", "data-bs-toggle" => "tab", role: "tab", type: "button"} Permissions
   %li.nav-item
     %a.nav-link{href: xml_editor_path(params[:id])} XML
+  - if show_history
+    %li.nav-item
+      %button#history-tab.nav-link{"aria-controls" => "history", "aria-selected" => "false", "data-bs-target" => "#history", "data-bs-toggle" => "tab", role: "tab", type: "button"} History
 
 .tab-content
   #metadata.tab-pane.active{"aria-labelledby" => "metadata-tab", role: "tabpanel"}
@@ -44,3 +48,6 @@
             = f.button :submit, class: "btn btn-success"
             = link_to "Cancel", work_path(params[:id]), class: "btn btn-warning"
             = render 'shared/add_group_button'
+  - if show_history
+    #history.tab-pane{"aria-labelledby" => "history-tab", role: "tabpanel"}
+      = render 'audit_events/history', resource_id: params[:id]

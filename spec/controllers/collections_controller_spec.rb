@@ -3,8 +3,8 @@
 require 'rails_helper'
 
 describe CollectionsController do
-  let(:community) { AtlasRb::Community.create(nil, '/home/cerberus/web/spec/fixtures/files/community-mods.xml') }
-  let(:collection) { AtlasRb::Collection.create(community.id, '/home/cerberus/web/spec/fixtures/files/collection-mods.xml') }
+  let(:community) { AtlasRb::Community.create(nil, '/home/cerberus/web/spec/fixtures/files/community-mods.xml', nuid: '000000004') }
+  let(:collection) { AtlasRb::Collection.create(community.id, '/home/cerberus/web/spec/fixtures/files/collection-mods.xml', nuid: '000000004') }
 
   describe 'edit' do
     render_views
@@ -12,7 +12,7 @@ describe CollectionsController do
     let(:user) { User.new(email: 'test@example.com', password: 'password', groups: ['editors']) }
 
     before do
-      AtlasRb::Collection.metadata(collection.id, { 'permissions' => { 'edit' => ['editors'] } })
+      AtlasRb::Collection.metadata(collection.id, { 'permissions' => { 'edit' => ['editors'] } }, nuid: '000000004')
       sign_in user
     end
 
@@ -21,13 +21,39 @@ describe CollectionsController do
       expect(response).to render_template('collections/edit')
       expect(CGI.unescapeHTML(response.body)).to include(collection.title)
     end
+
+    context 'audit history tab' do
+      let(:history_envelope) do
+        AtlasRb::Mash.new('resource_id' => collection.id, 'events' => [])
+      end
+      let(:admin_user) do
+        User.new(email: 'admin@example.com', nuid: '000000004', groups: [], role: 'admin')
+      end
+
+      before do
+        allow(AtlasRb::Resource).to receive(:history).and_return(history_envelope)
+      end
+
+      it 'renders the History tab for Atlas :admin users (no group stuffing required)' do
+        sign_in admin_user
+        get :edit, params: { id: collection.id }
+        expect(response.body).to match(/<button[^>]*id="history-tab"/)
+        expect(response.body).to include('Audit log')
+      end
+
+      it 'does not render the History tab for non-admin editors' do
+        get :edit, params: { id: collection.id }
+        expect(response.body).not_to match(/<button[^>]*id="history-tab"/)
+        expect(response.body).not_to include('Audit log')
+      end
+    end
   end
 
   describe 'show' do
     render_views
 
     before do
-      AtlasRb::Collection.metadata(collection.id, { 'permissions' => { 'read' => ['public'] } })
+      AtlasRb::Collection.metadata(collection.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
     end
 
     it 'renders the show partial' do
@@ -50,19 +76,21 @@ describe CollectionsController do
   end
 
   describe 'tombstone' do
-    let(:user) { User.new(email: 'staff@example.com', nuid: '000000002',
-                          groups: [Permissions::STAFF_EDIT_GROUP]) }
+    let(:user) do
+      User.new(email: 'staff@example.com', nuid: '000000002',
+               groups: [Permissions::STAFF_EDIT_GROUP])
+    end
 
     before do
       AtlasRb::Collection.metadata(collection.id,
-                                   { 'permissions' => { 'edit' => [Permissions::STAFF_EDIT_GROUP] } })
+                                   { 'permissions' => { 'edit' => [Permissions::STAFF_EDIT_GROUP] } }, nuid: '000000004')
       sign_in user
     end
 
     it 'calls AtlasRb::Collection.tombstone with the acting user nuid and redirects' do
       allow(AtlasRb::Collection).to receive(:tombstone)
       post :tombstone, params: { id: collection.id }
-      expect(AtlasRb::Collection).to have_received(:tombstone).with(collection.id, nuid: '000000002')
+      expect(AtlasRb::Collection).to have_received(:tombstone).with(collection.id)
       expect(subject).to redirect_to(root_path)
     end
   end

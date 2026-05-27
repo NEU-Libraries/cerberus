@@ -48,17 +48,17 @@ describe 'Kataba LoC regression', :loc_smoke do
   # editor's Validate + Preview path goes 500 again.
   {
     'http://www.loc.gov/standards/mods/v3/mods-3-5.xsd' =>
-      'mods 3.5 (plain HTTP — must upgrade to HTTPS)',
+                                                           'mods 3.5 (plain HTTP — must upgrade to HTTPS)',
     'http://www.loc.gov/standards/mods/v3/mods-3-6.xsd' =>
-      'mods 3.6 (plain HTTP — must upgrade to HTTPS)',
+                                                           'mods 3.6 (plain HTTP — must upgrade to HTTPS)',
     'http://www.loc.gov/standards/mods/v3/mods-3-7.xsd' =>
-      'mods 3.7 (plain HTTP — must upgrade to HTTPS)',
+                                                           'mods 3.7 (plain HTTP — must upgrade to HTTPS)',
     'http://www.loc.gov/standards/mods/v3/mods-3-8.xsd' =>
-      'mods 3.8 (plain HTTP — must upgrade to HTTPS)',
-    'http://www.loc.gov/mods/xml.xsd' =>
-      'xml.xsd vanity URL (HTTPS→HTTP redirect — must rewrite to /standards/mods/xml.xsd)',
-    'http://www.loc.gov/standards/xlink/xlink.xsd' =>
-      'xlink (published HTTP-only — must NOT blanket-upgrade)'
+                                                           'mods 3.8 (plain HTTP — must upgrade to HTTPS)',
+    'http://www.loc.gov/mods/xml.xsd'                   =>
+                                                           'xml.xsd vanity URL (HTTPS→HTTP redirect — must rewrite to /standards/mods/xml.xsd)',
+    'http://www.loc.gov/standards/xlink/xlink.xsd'      =>
+                                                           'xlink (published HTTP-only — must NOT blanket-upgrade)'
   }.each do |uri, label|
     it "fetches #{label}" do
       expect(Kataba.fetch_schema(uri)).to be_a(Nokogiri::XML::Schema)

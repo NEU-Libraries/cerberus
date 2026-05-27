@@ -19,7 +19,7 @@ class CollectionsController < CatalogController
   end
 
   def tombstone
-    AtlasRb::Collection.tombstone(params[:id], nuid: current_user.nuid)
+    AtlasRb::Collection.tombstone(params[:id])
     redirect_to root_path, notice: 'Collection deleted.'
   end
 

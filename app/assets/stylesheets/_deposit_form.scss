@@ -1,0 +1,278 @@
+// ---------------------------------------------------------------------
+// Deposit form (Collection child → New Work)
+//
+// Same "archival ledger" register as the audit-history tab — a quiet
+// card shell with a light header strip, restrained tone, and tabular
+// identifier typography on the parent-collection chip. The form is a
+// deposit slip: destination → file → attribution → submit. Step
+// microcopy mirrors the audit-history subtitle styling so the same
+// chrome reads across edit / audit / deposit surfaces.
+// ---------------------------------------------------------------------
+
+.deposit-form {
+  &__panel {
+    background-color: $white;
+    border: 1px solid $gray-300;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.03);
+  }
+
+  &__head {
+    background-color: #f6f8fa;
+    border-bottom: 1px solid $gray-300;
+    padding: 0.75rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  &__eyebrow {
+    font-size: 0.7rem;
+    color: $gray-500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+  }
+
+  &__title {
+    color: $gray-800;
+    font-weight: 600;
+    font-size: 1.02rem;
+    letter-spacing: 0.005em;
+    margin-left: 0.55rem;
+  }
+
+  &__destination {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.45rem;
+    font-size: 0.85rem;
+
+    i {
+      color: $blue;
+      font-size: 0.85em;
+      position: relative;
+      top: 1px;
+    }
+    &-label {
+      color: $gray-500;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+    &-title {
+      color: $gray-900;
+      font-weight: 600;
+    }
+  }
+
+  &__body {
+    padding: 1.25rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  // Field-group reset — fieldsets and divs share the same outer shape
+  // so the radio group and the file input read as siblings.
+  &__field {
+    border: 0;
+    padding: 0;
+    margin: 0;
+    min-width: 0;
+  }
+
+  &__field-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.7rem;
+    color: $gray-600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    // Reset legend's default UA padding so it aligns with the file
+    // input's label above.
+    padding: 0;
+  }
+
+  // Privileged-only marker on the Attribution legend — same color-mix
+  // pattern as the audit-history action chip, in the Cerberus blue tone.
+  &__field-pill {
+    padding: 0.05rem 0.4rem;
+    background-color: color-mix(in srgb, #{$blue} 12%, white);
+    border: 1px solid color-mix(in srgb, #{$blue} 28%, white);
+    color: $blue;
+    border-radius: 0.25rem;
+    font-size: 0.62rem;
+    letter-spacing: 0.05em;
+  }
+
+  &__field-hint {
+    margin-top: 0.5rem;
+    margin-bottom: 0;
+    font-size: 0.78rem;
+    color: $gray-600;
+  }
+
+  // Native file input, tightened. We keep the OS file-picker for
+  // accessibility and to avoid a JS controller; the styling reshapes
+  // it to read as a quiet form field instead of a marketing drop zone.
+  &__file {
+    display: block;
+    width: 100%;
+    padding: 0.45rem 0.6rem;
+    background-color: $gray-100;
+    border: 1px solid $gray-300;
+    border-radius: 0.35rem;
+    font-size: 0.9rem;
+    color: $gray-800;
+
+    &::file-selector-button {
+      margin-right: 0.85rem;
+      padding: 0.35rem 0.85rem;
+      background-color: $white;
+      border: 1px solid $gray-400;
+      border-radius: 0.25rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: $gray-800;
+      cursor: pointer;
+      transition: background-color 0.12s ease, border-color 0.12s ease;
+    }
+    &::file-selector-button:hover {
+      background-color: $gray-100;
+      border-color: $gray-500;
+    }
+    &:focus {
+      outline: none;
+      border-color: $blue;
+      box-shadow: 0 0 0 0.18rem color-mix(in srgb, #{$blue} 18%, transparent);
+    }
+  }
+
+  // Card-radio: each option is a bordered tile; the selected tile
+  // picks up a left rail in the Cerberus blue, mirroring the audit-
+  // history row rail. Hover uses the same warm tone used by the
+  // audit table.
+  &__radio-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 0.65rem;
+  }
+
+  &__radio {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.7rem;
+    padding: 0.85rem 1rem;
+    background-color: $white;
+    border: 1px solid $gray-300;
+    border-radius: 0.4rem;
+    cursor: pointer;
+    transition: border-color 0.12s ease, background-color 0.12s ease,
+                box-shadow 0.12s ease;
+    margin: 0;
+
+    &:hover {
+      border-color: $gray-500;
+      background-color: #fbf9f4;
+    }
+
+    // :has() is widely supported in evergreen browsers we target;
+    // this is the modern way to style a label by its child input's
+    // state without a JS controller.
+    &:has(.deposit-form__radio-input:checked) {
+      border-color: $blue;
+      background-color: color-mix(in srgb, #{$blue} 5%, white);
+      box-shadow: inset 4px 0 0 $blue;
+    }
+  }
+
+  &__radio-input {
+    margin-top: 0.25rem;
+    accent-color: $blue;
+    flex-shrink: 0;
+  }
+
+  &__radio-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 0;
+  }
+
+  &__radio-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-weight: 600;
+    color: $gray-900;
+    font-size: 0.92rem;
+
+    i {
+      color: $gray-600;
+      font-size: 0.92em;
+    }
+  }
+
+  &__radio-desc {
+    color: $gray-600;
+    font-size: 0.8rem;
+    line-height: 1.45;
+  }
+
+  // Bottom action strip — submit on the right, "what happens next"
+  // microcopy on the left, mirroring the audit-history subtitle
+  // placement on the header.
+  &__actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+  }
+
+  &__next-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: $gray-600;
+    font-size: 0.82rem;
+
+    i {
+      color: $gray-500;
+      font-size: 0.85em;
+    }
+  }
+
+  &__submit {
+    // .btn.btn-primary supplies sizing; tighten the focus ring so it
+    // matches the file input's focus tone.
+    &:focus {
+      box-shadow: 0 0 0 0.18rem color-mix(in srgb, #{$blue} 25%, transparent);
+    }
+  }
+}
+
+@media (max-width: 575.98px) {
+  .deposit-form {
+    &__head {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    &__actions {
+      flex-direction: column-reverse;
+      align-items: stretch;
+    }
+    &__submit {
+      width: 100%;
+    }
+  }
+}

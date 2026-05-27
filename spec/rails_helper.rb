@@ -8,7 +8,7 @@ SimpleCov.start 'rails' do
   add_filter 'app/channels'
   add_filter 'lib/cerberus/vocab'
   add_filter 'app/indexers'
-  minimum_coverage 40
+  minimum_coverage 90
 end
 
 # This file is copied to spec/ when you run 'rails generate rspec:install'
@@ -51,6 +51,21 @@ RSpec.configure do |config|
   config.before(:suite) do
     AtlasRb::Reset.clean
   end
+
+  # Default acting-NUID for tests = admin fixture. Spec setup (let blocks
+  # creating Communities / Collections / Works directly via AtlasRb) runs
+  # outside a controller context, so the ApplicationController before_action
+  # that normally sets Current.nuid doesn't fire. Jobs and other code paths
+  # that read Current.nuid pick up this admin default during tests.
+  # Controllers under test still override Current.nuid via their before_action
+  # based on the signed-in user (or the guest fallback when no user is signed
+  # in), so the override-chain mirrors production.
+  config.before(:each) { Current.nuid = '000000004' }
+
+  # Live LoC smoke tests are opt-in via RUN_LOC_SMOKE=1; default rspec runs
+  # exclude them entirely rather than dumping seven "pending" lines per run.
+  # See spec/integration/kataba_loc_regression_spec.rb for the rationale.
+  config.filter_run_excluding :loc_smoke unless ENV['RUN_LOC_SMOKE']
 
   config.include Devise::Test::ControllerHelpers, type: :controller
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures

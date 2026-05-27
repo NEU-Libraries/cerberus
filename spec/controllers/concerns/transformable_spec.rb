@@ -26,7 +26,7 @@ describe Transformable do
 
     it 'strips public/staff sentinels and maps the rest with permission labels' do
       perms = AtlasRb::Mash.new(
-        'read' => ['public', 'librarians'],
+        'read' => %w[public librarians],
         'edit' => [Permissions::STAFF_EDIT_GROUP, 'curators']
       )
 
@@ -45,7 +45,7 @@ describe Transformable do
     end
 
     it 'maps each group to [raw, pretty]' do
-      expect(host.pretty_user_permissions(['a', 'b']))
+      expect(host.pretty_user_permissions(%w[a b]))
         .to eq([['a', 'Pretty(a)'], ['b', 'Pretty(b)']])
     end
   end
@@ -61,7 +61,7 @@ describe Transformable do
       }
 
       expect(host.form_group_permissions(raw)).to eq(
-        read: ['librarians', 'curators'],
+        read: %w[librarians curators],
         edit: ['editors']
       )
     end
@@ -147,7 +147,7 @@ describe Transformable do
 
     it 'strips public from read when :mass is non-public' do
       host.params = { mass: 'private' }
-      permitted = { permissions: { read: ['public', 'librarians'] } }
+      permitted = { permissions: { read: %w[public librarians] } }
 
       host.mass_permissions(permitted)
 

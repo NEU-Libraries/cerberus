@@ -1,4 +1,13 @@
 // Sassy
-@import 'cerberus';
+//
+// Order matters: dependencies first (colors + Bootstrap variables so
+// downstream imports can reference them), then the Blacklight gem,
+// then our overrides last so equal-specificity rules win on source
+// order rather than needing per-rule specificity hacks.
+// rails_bootstrap_forms is a form-styling layer and is independent of
+// the override stack.
+@import 'colors';
+@import 'bootstrap';
 @import 'blacklight/blacklight';
+@import 'cerberus';
 @import "rails_bootstrap_forms";

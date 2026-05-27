@@ -11,21 +11,25 @@ module Devise
         # Recreates a resource from session data.
         #
         # It takes as many params as elements in the array returned in
-        # serialize_into_session.
-        def serialize_from_session(email, nuid, name, groups)
-          # new(email:)
+        # serialize_into_session. `role` defaults to nil so sessions
+        # serialized before the role attribute existed still deserialize.
+        # Stale sessions effectively treat the user as non-admin until
+        # they re-authenticate — which is the correct conservative
+        # default; admin access requires a fresh session post-deploy.
+        def serialize_from_session(email, nuid, name, groups, role = nil)
           resource = new
           resource.email = email
           resource.nuid = nuid
           resource.name = name
           resource.groups = groups
+          resource.role = role
           resource
         end
 
         # Returns an array with the data from the user that needs to be
         # serialized into the session.
         def serialize_into_session(user)
-          [user.email, user.nuid, user.name, user.groups]
+          [user.email, user.nuid, user.name, user.groups, user.role]
         end
       end
     end
