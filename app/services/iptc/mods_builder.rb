@@ -17,6 +17,11 @@ module Iptc
   # registers `MODS` as an inflector acronym in
   # config/initializers/inflections.rb — Zeitwerk maps the file
   # mods_builder.rb to Iptc::MODSBuilder.
+  # rubocop:disable Metrics/ClassLength
+  # The class is small once you discount the constants (CATEGORY_LABELS,
+  # namespace URIs) and the one-method-per-MODS-element emit_* helpers
+  # which sum to most of the line count. Each emitter is short and
+  # focused; extracting them to a sibling class wouldn't earn anything.
   class MODSBuilder < ApplicationService
     MissingRequiredField = Class.new(StandardError)
 
@@ -185,4 +190,5 @@ module Iptc
         end
       end
   end
+  # rubocop:enable Metrics/ClassLength
 end

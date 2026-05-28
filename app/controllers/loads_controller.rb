@@ -21,20 +21,13 @@ class LoadsController < ApplicationController
   def create
     archive = params.dig(:load_report, :archive)
     parent  = params.dig(:load_report, :parent_collection_id)
+    return reject_missing_archive(parent) if archive.blank?
 
-    if archive.blank?
-      flash.now[:alert] = 'Please choose an archive file.'
-      @load_report  = LoadReport.new(parent_collection_id: parent)
-      @destinations = load_destinations
-      return render :new, status: :unprocessable_content
-    end
-
-    @load_report = LoadReport.new(
+    @load_report = LoadReport.create!(
       loader:               @loader,
       source_filename:      archive.original_filename,
       parent_collection_id: parent
     )
-    @load_report.save!
     save_archive(@load_report, archive)
     UnzipJob.perform_later(@load_report.id)
 
@@ -51,6 +44,13 @@ class LoadsController < ApplicationController
   end
 
   private
+
+    def reject_missing_archive(parent_id)
+      flash.now[:alert]  = 'Please choose an archive file.'
+      @load_report       = LoadReport.new(parent_collection_id: parent_id)
+      @destinations      = load_destinations
+      render :new, status: :unprocessable_content
+    end
 
     def set_loader
       @loader = Loader.find_by(slug: params[:loader_slug])

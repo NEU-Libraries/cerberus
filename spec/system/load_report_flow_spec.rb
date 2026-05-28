@@ -126,7 +126,7 @@ RSpec.describe 'LoadReport end-to-end batch flow', type: :request do
     before do
       # Half the images have valid IPTC, half are missing Headline.
       call_count = 0
-      allow(Iptc::Extractor).to receive(:call) do |path:|
+      allow(Iptc::Extractor).to receive(:call) do |**_|
         call_count += 1
         tags = if call_count.even?
                  { Keywords: ['x'] } # no Headline → MissingRequiredField
@@ -151,7 +151,7 @@ RSpec.describe 'LoadReport end-to-end batch flow', type: :request do
 
   context 'when extraction produces warnings (non-Time DateTimeOriginal)' do
     before do
-      allow(Iptc::Extractor).to receive(:call) do |path:|
+      allow(Iptc::Extractor).to receive(:call) do |**_|
         Iptc::Extractor::Result.new(
           tags: {
             Headline:         'OK',

@@ -17,6 +17,9 @@ class UnzipJob < ApplicationJob
 
   JPEG_EXT = %w[.jpg .jpeg .JPG .JPEG].freeze
 
+  # rubocop:disable Metrics/MethodLength
+  # Linear shape mirrors the audit-trail it produces (start → extract →
+  # enqueue → rescue) so splitting it isn't a readability win.
   def perform(load_report_id)
     load_report = LoadReport.find(load_report_id)
     return unless load_report.pending?
@@ -38,6 +41,7 @@ class UnzipJob < ApplicationJob
     Rails.logger.error("UnzipJob failed for LoadReport #{load_report_id}: #{e.class} #{e.message}")
     LoadReport.find_by(id: load_report_id)&.fail_load
   end
+  # rubocop:enable Metrics/MethodLength
 
   private
 

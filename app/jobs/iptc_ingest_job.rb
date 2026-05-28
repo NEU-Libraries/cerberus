@@ -35,6 +35,11 @@ class IptcIngestJob < ApplicationJob
     ingest.load_report&.maybe_finalize!
   end
 
+  # rubocop:disable Metrics/MethodLength, Metrics/AbcSize
+  # The job orchestrates several discrete steps (state guard, file check,
+  # extract, build MODS, mint Work, stage, enqueue downstream, finalize)
+  # — splitting into smaller methods would obscure the linear flow that
+  # makes the idempotency story readable in one place.
   def perform(iptc_ingest_id)
     ingest = IptcIngest.find(iptc_ingest_id)
     return if terminal?(ingest)
@@ -59,6 +64,7 @@ class IptcIngestJob < ApplicationJob
   rescue Iptc::Extractor::UnsupportedIptcType => e
     finalize_failure(ingest, e.message)
   end
+  # rubocop:enable Metrics/MethodLength, Metrics/AbcSize
 
   private
 
