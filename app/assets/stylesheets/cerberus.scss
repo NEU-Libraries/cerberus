@@ -7,6 +7,7 @@
 //   _blacklight_discovery — search-result document styling
 //                           (thumbnails, gallery, metadata)
 //   _audit_history       — Edit → History tab (archival ledger)
+//   _admin_registry      — Admin → Loader registry (and future admin CRUD)
 //   _deposit_form        — Collection → New Work deposit slip
 //   _error_page          — 403 / 404 / 410 / 500 error pages
 //   _applied_filter      — search-results header + constraint chip
@@ -14,6 +15,7 @@
 @import 'layout';
 @import 'blacklight_discovery';
 @import 'audit_history';
+@import 'admin_registry';
 @import 'deposit_form';
 @import 'error_page';
 @import 'applied_filter';

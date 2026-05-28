@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class LoadReport < ApplicationRecord
+  belongs_to :loader, optional: true
   has_many :xml_ingests, dependent: :destroy
   has_many :iptc_ingests, dependent: :destroy
 

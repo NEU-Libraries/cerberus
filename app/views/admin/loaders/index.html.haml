@@ -1,0 +1,49 @@
+.admin-registry.my-3
+  %header.admin-registry__head
+    %span.admin-registry__title
+      %i.fa-solid.fa-layer-group{'aria-hidden' => 'true'}
+      Loader registry
+      - if @loaders.any?
+        %span.admin-registry__count= pluralize(@loaders.size, 'entry')
+    .admin-registry__head-actions
+      %span.admin-registry__subtitle
+        %i.fa-solid.fa-lock{'aria-hidden' => 'true'}
+        Admin-only
+      = link_to new_admin_loader_path, class: 'btn btn-primary btn-sm' do
+        %i.fa-solid.fa-plus.me-1{'aria-hidden' => 'true'}
+        New loader
+
+  - if @loaders.any?
+    .table-responsive
+      %table.table.table-borderless.admin-registry-table
+        %thead
+          %tr
+            %th{scope: 'col'} Slug
+            %th{scope: 'col'} Display name
+            %th{scope: 'col'} Grouper group
+            %th{scope: 'col'} Root collection
+            %th{scope: 'col'}
+        %tbody
+          - @loaders.each do |loader|
+            %tr
+              %td
+                %span.admin-registry-table__id= loader.slug
+              %td
+                .admin-registry-table__name= loader.display_name
+              %td
+                %span.admin-registry-table__id= loader.group
+              %td
+                %span.admin-registry-table__id= loader.root_collection
+              %td.text-end
+                = link_to edit_admin_loader_path(loader), class: 'admin-registry-table__edit' do
+                  %i.fa-solid.fa-pen{'aria-hidden' => 'true'}
+                  Edit
+  - else
+    .admin-registry__empty
+      %i.fa-solid.fa-layer-group.admin-registry__empty-icon{'aria-hidden' => 'true'}
+      %p.mb-1.fw-semibold.text-body No loaders registered
+      %p.mb-3.small.text-muted
+        Each loader entry binds a Grouper group to a deposit destination — a registered loader is what makes a team's upload flow visible in Cerberus.
+      = link_to new_admin_loader_path, class: 'btn btn-primary btn-sm' do
+        %i.fa-solid.fa-plus.me-1{'aria-hidden' => 'true'}
+        Register the first loader

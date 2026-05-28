@@ -1,0 +1,266 @@
+// ---------------------------------------------------------------------
+// Admin registry — list/edit chrome for the Loader (and future
+// registry-shaped admin models). Mirrors the audit-history "archival
+// ledger" register: quiet card-shell, uppercase microcopy headers,
+// monospace identifier chips, restrained palette derived from the
+// existing tokens. Where audit-history uses per-row tone chips for
+// action types, the admin registry uses neutral identifier styling
+// — configuration rows don't have action semantics, only data shape.
+// ---------------------------------------------------------------------
+
+.admin-registry {
+  background-color: #fff;
+  border: 1px solid $gray-300;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.03);
+
+  // Header strip — same pattern as .audit-history__head. Title left
+  // (with optional count chip), subtitle + actions right.
+  &__head {
+    background-color: #f6f8fa;
+    border-bottom: 1px solid $gray-300;
+    padding: 0.75rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  &__title {
+    font-weight: 600;
+    font-size: 1.02rem;
+    letter-spacing: 0.005em;
+    color: $gray-800;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+
+    .fa-solid {
+      color: $gray-500;
+      font-size: 0.95em;
+    }
+  }
+
+  &__count {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-left: 0.55rem;
+    padding: 0.1rem 0.55rem;
+    background-color: $gray-200;
+    color: $gray-700;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    vertical-align: middle;
+  }
+
+  &__subtitle {
+    font-size: 0.7rem;
+    color: $gray-500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+
+    .fa-solid {
+      font-size: 0.95em;
+    }
+  }
+
+  &__head-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  &__body {
+    padding: 1.25rem;
+  }
+
+  // Empty state — same proportions as .audit-history__empty. Includes
+  // an optional CTA, unlike audit-history (which is read-only and so
+  // has nothing actionable to surface). The CTA is a quiet primary
+  // button, not a hero — this is admin chrome, not a marketing splash.
+  &__empty {
+    padding: 3rem 1.5rem;
+    text-align: center;
+
+    &-icon {
+      display: block;
+      margin: 0 auto 0.75rem;
+      font-size: 2rem;
+      color: $gray-400;
+    }
+  }
+}
+
+.admin-registry-table {
+  margin-bottom: 0;
+
+  thead th {
+    background-color: #fafbfc;
+    color: $gray-600;
+    font-weight: 600;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-bottom: 1px solid $gray-300;
+    padding: 0.55rem 0.85rem;
+    white-space: nowrap;
+  }
+  thead th:first-child { padding-left: 1.1rem; }
+
+  tbody td {
+    padding: 0.7rem 0.85rem;
+    vertical-align: middle;
+    color: $gray-800;
+    border: 0;
+    border-bottom: 1px solid $gray-200;
+  }
+  tbody td:first-child { padding-left: 1.1rem; }
+  tbody tr:last-child td { border-bottom: 0; }
+
+  // Warm hover — matches audit-event-table. Not Bootstrap's flat gray.
+  tbody tr:hover td { background-color: #fbf9f4; }
+
+  // The display-name column reads as body text (the human-readable
+  // title of the row). Identifier columns use the chip styling below.
+  &__name {
+    font-size: 0.95rem;
+    color: $gray-800;
+  }
+
+  // Identifier chip — monospace tabular pill for slug / group / PID
+  // values. Same shape as .audit-event__nuid; same affordance ("this
+  // is a token, not a body word"). word-break: break-all keeps long
+  // grouper-paths from busting the column at narrow widths.
+  &__id {
+    display: inline-block;
+    padding: 0.1rem 0.45rem;
+    background-color: $gray-100;
+    border: 1px solid $gray-200;
+    border-radius: 0.25rem;
+    font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 0.78rem;
+    color: $gray-800;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+    word-break: break-all;
+  }
+
+  // Inline action link in the trailing column. Icon + label in a
+  // quiet pill that picks up the Cerberus blue tone on hover.
+  &__edit {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 0.3rem;
+    background-color: $gray-100;
+    border: 1px solid $gray-200;
+    color: $gray-700;
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+
+    &:hover {
+      background-color: color-mix(in srgb, $blue 8%, white);
+      border-color: color-mix(in srgb, $blue 24%, white);
+      color: $blue;
+    }
+
+    .fa-solid { font-size: 0.85em; }
+  }
+}
+
+// Form variant — used by new.html.haml + edit.html.haml via the
+// shared _form partial. Two fieldsets: Identity (cosmetic) and
+// Access (sensitive). The Access section gets a quiet admonition
+// explaining the permission consequence — not danger-red, because
+// editing it is supposed to be safe and common; just enough weight
+// to make the admin pause before reflexively changing.
+.admin-registry-form {
+  &__section {
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid $gray-200;
+    margin-bottom: 1.25rem;
+
+    &:last-of-type {
+      border-bottom: 0;
+      margin-bottom: 0.5rem;
+    }
+  }
+
+  &__section-title {
+    font-size: 0.7rem;
+    color: $gray-500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+
+    .fa-solid {
+      font-size: 0.95em;
+      opacity: 0.75;
+    }
+  }
+
+  // Cerberus-blue-tinted admonition. Same color-mix pattern as the
+  // audit-event action chips: 6% saturated background, 50%-saturated
+  // left border for a quiet ledger-stamp feel.
+  &__section-note {
+    font-size: 0.78rem;
+    color: $gray-700;
+    background-color: color-mix(in srgb, $blue 6%, white);
+    border-left: 3px solid color-mix(in srgb, $blue 50%, white);
+    padding: 0.55rem 0.75rem;
+    border-radius: 0 0.25rem 0.25rem 0;
+    margin-bottom: 1rem;
+
+    .fa-solid {
+      color: color-mix(in srgb, $blue 80%, $gray-500);
+      margin-right: 0.3rem;
+    }
+  }
+
+  &__label {
+    font-weight: 600;
+    font-size: 0.82rem;
+    color: $gray-700;
+    margin-bottom: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+
+    .fa-solid {
+      color: $gray-500;
+      font-size: 0.92em;
+    }
+  }
+
+  &__hint {
+    font-size: 0.75rem;
+    color: $gray-600;
+    margin-top: 0.25rem;
+  }
+
+  // Monospace input for identifier fields (slug, group, root_collection).
+  // The form's content is being typed into a registry, not a body-text
+  // field — the input should look like an identifier slot.
+  &__input--id {
+    font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 0.9rem;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+  }
+}

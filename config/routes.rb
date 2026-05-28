@@ -49,6 +49,10 @@ Rails.application.routes.draw do
   end
   resources :loads, only: [:index, :show, :new, :create, :destroy]
 
+  namespace :admin do
+    resources :loaders, only: [:index, :new, :create, :edit, :update], param: :slug
+  end
+
   get '/downloads/:id', to: 'downloads#show', as: :download
 
   # xml
