@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_15_200000) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_28_000003) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -38,10 +38,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_15_200000) do
 
   create_table "iptc_ingests", force: :cascade do |t|
     t.datetime "created_at", null: false
+    t.text "error_message"
+    t.string "idempotency_key"
     t.bigint "load_report_id", null: false
     t.string "source_filename"
     t.integer "status", default: 0, null: false
     t.datetime "updated_at", null: false
+    t.text "warnings", default: "[]"
     t.string "work_pid"
     t.index ["load_report_id"], name: "index_iptc_ingests_on_load_report_id"
   end
@@ -49,10 +52,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_15_200000) do
   create_table "load_reports", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "finished_at"
+    t.bigint "loader_id"
+    t.string "parent_collection_id"
     t.string "source_filename"
     t.datetime "started_at"
     t.integer "status", default: 0, null: false
     t.datetime "updated_at", null: false
+    t.index ["loader_id"], name: "index_load_reports_on_loader_id"
+  end
+
+  create_table "loaders", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "display_name", null: false
+    t.string "group", null: false
+    t.string "root_collection", null: false
+    t.string "slug", null: false
+    t.datetime "updated_at", null: false
+    t.index ["slug"], name: "index_loaders_on_slug", unique: true
   end
 
   create_table "searches", id: :serial, force: :cascade do |t|
@@ -66,14 +82,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_15_200000) do
 
   create_table "xml_ingests", force: :cascade do |t|
     t.datetime "created_at", null: false
+    t.text "error_message"
+    t.string "idempotency_key"
     t.bigint "load_report_id", null: false
     t.string "source_filename"
     t.integer "status", default: 0, null: false
     t.datetime "updated_at", null: false
+    t.text "warnings", default: "[]"
     t.string "work_pid"
     t.index ["load_report_id"], name: "index_xml_ingests_on_load_report_id"
   end
 
   add_foreign_key "iptc_ingests", "load_reports"
+  add_foreign_key "load_reports", "loaders"
   add_foreign_key "xml_ingests", "load_reports"
 end
