@@ -46,7 +46,7 @@ namespace :reset do
       # prepended by Atlas's permissions= setter; we only add marcom here.
       marcom_group = 'northeastern:drs:repository:loaders:marcom'
 
-      communications = AtlasRb::Community.create(nil, '/home/cerberus/web/spec/fixtures/files/communications-mods.xml')
+      communications = AtlasRb::Community.create(community['id'], '/home/cerberus/web/spec/fixtures/files/communications-mods.xml')
       AtlasRb::Community.set_thumbnails(communications['id'], **ThumbnailCreator.call(base: river_base))
       AtlasRb::Community.metadata(communications['id'], { 'permissions' => { 'read' => ['public'], 'edit' => [marcom_group] } })
 
