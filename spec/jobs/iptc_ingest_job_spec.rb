@@ -26,7 +26,7 @@ RSpec.describe IptcIngestJob, type: :job do
   end
 
   let(:mods_result) do
-    Iptc::ModsBuilder::Result.new(xml: '<mods/>', warnings: [])
+    Iptc::MODSBuilder::Result.new(xml: '<mods/>', warnings: [])
   end
 
   before do
@@ -35,7 +35,7 @@ RSpec.describe IptcIngestJob, type: :job do
     allow(File).to receive(:exist?).and_call_original
     allow(File).to receive(:exist?).with(extracted_path).and_return(true)
     allow(Iptc::Extractor).to receive(:call).and_return(extractor_result)
-    allow(Iptc::ModsBuilder).to receive(:call).and_return(mods_result)
+    allow(Iptc::MODSBuilder).to receive(:call).and_return(mods_result)
     allow(AtlasRb::Work).to receive(:create).and_return(double(id: 'w-456'))
     allow(FileUtils).to receive(:mkdir_p)
     allow(FileUtils).to receive(:mv)
@@ -91,9 +91,9 @@ RSpec.describe IptcIngestJob, type: :job do
     end
   end
 
-  describe 'when ModsBuilder returned warnings' do
+  describe 'when MODSBuilder returned warnings' do
     let(:mods_result) do
-      Iptc::ModsBuilder::Result.new(xml: '<mods/>', warnings: ['By-line could not be parsed.'])
+      Iptc::MODSBuilder::Result.new(xml: '<mods/>', warnings: ['By-line could not be parsed.'])
     end
 
     it 'transitions to :completed_with_warnings and persists warnings' do
@@ -106,8 +106,8 @@ RSpec.describe IptcIngestJob, type: :job do
 
   describe 'on missing required IPTC field' do
     before do
-      allow(Iptc::ModsBuilder).to receive(:call)
-        .and_raise(Iptc::ModsBuilder::MissingRequiredField, 'Headline')
+      allow(Iptc::MODSBuilder).to receive(:call)
+        .and_raise(Iptc::MODSBuilder::MissingRequiredField, 'Headline')
     end
 
     it 'transitions to :failed with a descriptive error_message' do

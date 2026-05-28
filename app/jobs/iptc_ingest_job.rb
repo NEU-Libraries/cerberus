@@ -45,7 +45,7 @@ class IptcIngestJob < ApplicationJob
     return finalize_failure(ingest, "Source file missing at #{source}") unless File.exist?(source)
 
     extracted = Iptc::Extractor.call(path: source)
-    mods = Iptc::ModsBuilder.call(iptc: extracted.tags)
+    mods = Iptc::MODSBuilder.call(iptc: extracted.tags)
 
     work_pid = ensure_work(ingest, mods.xml)
     staged_path = stage(ingest, work_pid)
@@ -54,7 +54,7 @@ class IptcIngestJob < ApplicationJob
     IiifAssetsJob.perform_later(work_pid, staged_path, derivative_widths: widths_for(extracted))
 
     finalize_success(ingest, mods.warnings)
-  rescue Iptc::ModsBuilder::MissingRequiredField => e
+  rescue Iptc::MODSBuilder::MissingRequiredField => e
     finalize_failure(ingest, "Missing required IPTC field: #{e.message}")
   rescue Iptc::Extractor::UnsupportedIptcType => e
     finalize_failure(ingest, e.message)

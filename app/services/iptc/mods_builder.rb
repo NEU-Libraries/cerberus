@@ -12,7 +12,12 @@ module Iptc
   # collect into Result#warnings for the caller to persist on
   # IptcIngest.warnings; the document still emits, just without the
   # field that couldn't be parsed.
-  class ModsBuilder < ApplicationService
+  #
+  # Class name is `MODSBuilder` (not `ModsBuilder`) because the project
+  # registers `MODS` as an inflector acronym in
+  # config/initializers/inflections.rb — Zeitwerk maps the file
+  # mods_builder.rb to Iptc::MODSBuilder.
+  class MODSBuilder < ApplicationService
     MissingRequiredField = Class.new(StandardError)
 
     Result = Struct.new(:xml, :warnings, keyword_init: true)

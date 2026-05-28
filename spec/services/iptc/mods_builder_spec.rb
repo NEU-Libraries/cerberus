@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-describe Iptc::ModsBuilder do
+describe Iptc::MODSBuilder do
   let(:minimum_iptc) { { Headline: 'A photo', Keywords: ['athletics'] } }
 
   def doc(iptc)
@@ -47,17 +47,17 @@ describe Iptc::ModsBuilder do
   describe 'required-field validation' do
     it 'raises if Headline is missing' do
       expect { described_class.call(iptc: { Keywords: ['x'] }) }
-        .to raise_error(Iptc::ModsBuilder::MissingRequiredField, /Headline/)
+        .to raise_error(Iptc::MODSBuilder::MissingRequiredField, /Headline/)
     end
 
     it 'raises if Headline is blank' do
       expect { described_class.call(iptc: { Headline: '', Keywords: ['x'] }) }
-        .to raise_error(Iptc::ModsBuilder::MissingRequiredField, /Headline/)
+        .to raise_error(Iptc::MODSBuilder::MissingRequiredField, /Headline/)
     end
 
     it 'raises if both Keywords and Subject are absent' do
       expect { described_class.call(iptc: { Headline: 'A' }) }
-        .to raise_error(Iptc::ModsBuilder::MissingRequiredField, /Keywords/)
+        .to raise_error(Iptc::MODSBuilder::MissingRequiredField, /Keywords/)
     end
 
     it 'falls back to Subject if Keywords is absent (v1 parity)' do
