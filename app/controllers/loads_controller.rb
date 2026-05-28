@@ -53,7 +53,7 @@ class LoadsController < ApplicationController
   private
 
     def set_loader
-      @loader = Loader.find_by(slug: params[:loader_id])
+      @loader = Loader.find_by(slug: params[:loader_slug])
       render template: 'errors/not_found', status: :not_found, layout: 'application' if @loader.nil?
     end
 

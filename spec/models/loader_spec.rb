@@ -62,6 +62,7 @@ describe Loader do
     end
 
     it 'can be destroyed when no load_reports reference it' do
+      loader # force the lazy let to create before the count baseline
       expect { loader.destroy }.to change(described_class, :count).by(-1)
     end
   end

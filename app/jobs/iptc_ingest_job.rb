@@ -117,11 +117,16 @@ class IptcIngestJob < ApplicationJob
 
     def widths_for(result)
       longest = result.longest_side
-      return { small: 1, large: 1 } if longest <= 0
+      return { small: 1.0, large: 1.0 } if longest <= 0
 
+      # Float (not Rational) — ActiveJob's default argument serializer
+      # rejects Rational. The DerivativeCreator handles both Float and
+      # Rational identically (Numeric ≤ 1 → pct:N), and Float coming
+      # from Rational.to_f preserves precision well enough for our
+      # IIIF percentages (3-digit rounding in DerivativeCreator).
       {
-        small: Rational([600,  longest].min, longest),
-        large: Rational([1400, longest].min, longest)
+        small: Rational([600,  longest].min, longest).to_f,
+        large: Rational([1400, longest].min, longest).to_f
       }
     end
 

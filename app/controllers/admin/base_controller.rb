@@ -6,6 +6,7 @@ module Admin
   # consistent. :admin role is the only tier that passes —
   # :privileged is staff capability, not admin.
   class BaseController < ApplicationController
+    before_action :authenticate_user!
     before_action :require_admin
 
     private

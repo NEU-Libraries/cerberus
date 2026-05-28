@@ -50,7 +50,11 @@ describe Iptc::Extractor do
   end
 
   describe 'type coercion (with stubbed MiniExiftool)' do
-    let(:photo) { instance_double(MiniExiftool) }
+    # Loose double rather than instance_double — MiniExiftool exposes
+    # tag accessors via method_missing (no defined methods to verify
+    # against), so verify_partial_doubles would reject every stub
+    # except the literal Object#[] / send methods.
+    let(:photo) { double('MiniExiftool') }
     let(:path) { '/tmp/fake.jpg' }
 
     before do

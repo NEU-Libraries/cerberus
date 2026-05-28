@@ -76,7 +76,7 @@ RSpec.describe IptcIngestJob, type: :job do
         .with(
           'w-456',
           File.join(uploads_root, 'w-456', 'marcom.jpeg'),
-          derivative_widths: { small: Rational(600, 3000), large: Rational(1400, 3000) }
+          derivative_widths: { small: (600.0 / 3000), large: (1400.0 / 3000) }
         )
     end
 
@@ -250,23 +250,23 @@ RSpec.describe IptcIngestJob, type: :job do
     end
 
     it 'pins large to 1400px on the longest side for landscape' do
-      expect(widths(3000, 2000)).to eq(small: Rational(600, 3000), large: Rational(1400, 3000))
+      expect(widths(3000, 2000)).to eq(small: 600.0 / 3000, large: 1400.0 / 3000)
     end
 
     it 'pins large to 1400px on the longest side for portrait' do
-      expect(widths(2000, 3000)).to eq(small: Rational(600, 3000), large: Rational(1400, 3000))
+      expect(widths(2000, 3000)).to eq(small: 600.0 / 3000, large: 1400.0 / 3000)
     end
 
-    it 'clamps large at 1 when the longest side is between 600 and 1400' do
-      expect(widths(1000, 800)).to eq(small: Rational(600, 1000), large: Rational(1, 1))
+    it 'clamps large at 1.0 when the longest side is between 600 and 1400' do
+      expect(widths(1000, 800)).to eq(small: 0.6, large: 1.0)
     end
 
-    it 'clamps both at 1 when the longest side is below 600' do
-      expect(widths(400, 300)).to eq(small: Rational(1, 1), large: Rational(1, 1))
+    it 'clamps both at 1.0 when the longest side is below 600' do
+      expect(widths(400, 300)).to eq(small: 1.0, large: 1.0)
     end
 
     it 'returns full-size both when dimensions are zero or negative (defensive)' do
-      expect(widths(0, 0)).to eq(small: 1, large: 1)
+      expect(widths(0, 0)).to eq(small: 1.0, large: 1.0)
     end
   end
 end
