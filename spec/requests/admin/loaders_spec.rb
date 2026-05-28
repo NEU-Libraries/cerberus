@@ -100,7 +100,7 @@ RSpec.describe 'Admin::Loaders', type: :request do
 
       it 're-renders :new with 422 on validation error' do
         post '/admin/loaders', params: { loader: valid_params[:loader].merge(slug: '') }
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(Loader.count).to eq(0)
       end
     end
@@ -127,7 +127,7 @@ RSpec.describe 'Admin::Loaders', type: :request do
       it 're-renders :edit with 422 on validation error' do
         patch "/admin/loaders/#{loader.slug}",
               params: { loader: { display_name: '' } }
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
       end
     end
   end

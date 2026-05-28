@@ -31,7 +31,9 @@ RSpec.describe LoadReport, type: :model do
 
   describe 'enum' do
     it 'defines expected status values' do
-      expect(described_class.statuses).to eq('pending' => 0, 'processing' => 1, 'completed' => 2, 'failed' => 3)
+      expect(described_class.statuses).to eq(
+        'pending' => 0, 'processing' => 1, 'completed' => 2, 'failed' => 3, 'completed_with_warnings' => 4
+      )
     end
   end
 

@@ -23,7 +23,7 @@ module Admin
       if @loader.save
         redirect_to admin_loaders_path, notice: "Loader '#{@loader.slug}' created."
       else
-        render :new, status: :unprocessable_entity
+        render :new, status: :unprocessable_content
       end
     end
 
@@ -33,7 +33,7 @@ module Admin
       if @loader.update(loader_params)
         redirect_to admin_loaders_path, notice: "Loader '#{@loader.slug}' updated."
       else
-        render :edit, status: :unprocessable_entity
+        render :edit, status: :unprocessable_content
       end
     end
 

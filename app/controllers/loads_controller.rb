@@ -26,7 +26,7 @@ class LoadsController < ApplicationController
       flash.now[:alert] = 'Please choose an archive file.'
       @load_report  = LoadReport.new(parent_collection_id: parent)
       @destinations = load_destinations
-      return render :new, status: :unprocessable_entity
+      return render :new, status: :unprocessable_content
     end
 
     @load_report = LoadReport.new(
@@ -42,7 +42,7 @@ class LoadsController < ApplicationController
                 notice: 'Upload begun — extraction is in progress.'
   rescue ActiveRecord::RecordInvalid
     @destinations = load_destinations
-    render :new, status: :unprocessable_entity
+    render :new, status: :unprocessable_content
   end
 
   def destroy

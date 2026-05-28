@@ -160,7 +160,7 @@ RSpec.describe 'Loads', type: :request do
     it 're-renders :new with 422 when archive is missing' do
       allow(AtlasRb::Collection).to receive(:children).and_return([])
       post '/loaders/marcom/loads', params: { load_report: { parent_collection_id: 'neu:c1' } }
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
       expect(LoadReport.count).to eq(0)
     end
   end
