@@ -18,6 +18,8 @@ module Admin
       @loader = Loader.new
     end
 
+    def edit; end
+
     def create
       @loader = Loader.new(loader_params)
       if @loader.save
@@ -26,8 +28,6 @@ module Admin
         render :new, status: :unprocessable_content
       end
     end
-
-    def edit; end
 
     def update
       if @loader.update(loader_params)

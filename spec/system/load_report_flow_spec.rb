@@ -43,7 +43,7 @@ RSpec.describe 'LoadReport end-to-end batch flow', type: :request do
       .with('neu:fix-comm-photos-archive')
       .and_return(['neu:c1'])
     allow(AtlasRb::Collection).to receive(:find).with('neu:c1')
-      .and_return(double(id: 'neu:c1', title: 'Campus Life (Photographs)'))
+                                                .and_return(double(id: 'neu:c1', title: 'Campus Life (Photographs)'))
 
     # Atlas Work mint — IptcIngestJob#ensure_work calls this
     allow(AtlasRb::Work).to receive(:create) { double(id: "w-#{SecureRandom.hex(4)}") }
@@ -91,7 +91,7 @@ RSpec.describe 'LoadReport end-to-end batch flow', type: :request do
 
     # UnzipJob created one IptcIngest per JPEG in the archive
     expect(lr.iptc_ingests.count).to be > 0,
-      "UnzipJob should have created IptcIngest rows for the archive's JPEGs"
+                                     "UnzipJob should have created IptcIngest rows for the archive's JPEGs"
 
     # Every IptcIngest reached :completed (mocked Extractor returns
     # valid Headline + Keywords, so ModsBuilder doesn't raise)

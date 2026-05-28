@@ -106,9 +106,9 @@ RSpec.describe 'Loads', type: :request do
       allow(AtlasRb::Collection).to receive(:children)
         .with('neu:fix-comm-photos-archive').and_return(['neu:c1', 'neu:c2'])
       allow(AtlasRb::Collection).to receive(:find).with('neu:c1')
-        .and_return(double(id: 'neu:c1', title: 'Campus Life (Photographs)'))
+                                                  .and_return(double(id: 'neu:c1', title: 'Campus Life (Photographs)'))
       allow(AtlasRb::Collection).to receive(:find).with('neu:c2')
-        .and_return(double(id: 'neu:c2', title: 'Athletics (Photographs)'))
+                                                  .and_return(double(id: 'neu:c2', title: 'Athletics (Photographs)'))
     end
 
     it 'renders the form with destinations from Atlas' do
@@ -134,10 +134,10 @@ RSpec.describe 'Loads', type: :request do
     end
 
     it 'creates a LoadReport linked to the loader' do
-      expect {
+      expect do
         post '/loaders/marcom/loads',
              params: { load_report: { archive: archive, parent_collection_id: 'neu:c1' } }
-      }.to change(LoadReport, :count).by(1)
+      end.to change(LoadReport, :count).by(1)
 
       lr = LoadReport.last
       expect(lr.loader).to eq(marcom_loader)
@@ -187,8 +187,8 @@ RSpec.describe 'Loads', type: :request do
     it 'returns 404 for a LoadReport that belongs to a different loader' do
       other_loader = Loader.create!(slug: 'other', display_name: 'Other',
                                     group: 'g', root_collection: 'c')
-      other_report = LoadReport.create!(loader: other_loader,
-                                        source_filename: 'x.zip',
+      other_report = LoadReport.create!(loader:               other_loader,
+                                        source_filename:      'x.zip',
                                         parent_collection_id: 'c')
       get "/loaders/marcom/loads/#{other_report.id}"
       expect(response).to have_http_status(:not_found)

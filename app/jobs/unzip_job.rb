@@ -45,11 +45,11 @@ class UnzipJob < ApplicationJob
 
   private
 
-    def extract_each(archive_path, dest_dir, &block)
+    def extract_each(archive_path, dest_dir, &)
       if archive_path.end_with?('.zip')
-        extract_zip(archive_path, dest_dir, &block)
+        extract_zip(archive_path, dest_dir, &)
       else
-        extract_tar(archive_path, dest_dir, &block)
+        extract_tar(archive_path, dest_dir, &)
       end
     end
 

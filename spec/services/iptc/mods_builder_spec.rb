@@ -68,40 +68,40 @@ describe Iptc::MODSBuilder do
 
   describe 'byline parsing' do
     it 'splits a comma-form byline into first/last' do
-      iptc = minimum_iptc.merge(:'By-line' => 'Doe, Jane')
+      iptc = minimum_iptc.merge('By-line': 'Doe, Jane')
       creator = doc(iptc).at_xpath('//mods/name[@type="personal"]')
       expect(creator.at_xpath('namePart[@type="given"]')&.text).to eq('Jane')
       expect(creator.at_xpath('namePart[@type="family"]')&.text).to eq('Doe')
     end
 
     it 'splits a semicolon-form byline' do
-      iptc = minimum_iptc.merge(:'By-line' => 'Smith; Bob')
+      iptc = minimum_iptc.merge('By-line': 'Smith; Bob')
       creator = doc(iptc).at_xpath('//mods/name[@type="personal"]')
       expect(creator.at_xpath('namePart[@type="given"]')&.text).to eq('Bob')
       expect(creator.at_xpath('namePart[@type="family"]')&.text).to eq('Smith')
     end
 
     it 'falls back to Namae for a bare-name byline' do
-      iptc = minimum_iptc.merge(:'By-line' => 'Jane Doe')
+      iptc = minimum_iptc.merge('By-line': 'Jane Doe')
       creator = doc(iptc).at_xpath('//mods/name[@type="personal"]')
       expect(creator.at_xpath('namePart[@type="given"]')&.text).to eq('Jane')
       expect(creator.at_xpath('namePart[@type="family"]')&.text).to eq('Doe')
     end
 
     it 'warns and omits the creator when the byline cannot be parsed' do
-      result = described_class.call(iptc: minimum_iptc.merge(:'By-line' => '????'))
+      result = described_class.call(iptc: minimum_iptc.merge('By-line': '????'))
       expect(result.warnings).to include(match(/By-line could not be parsed/))
       d = Nokogiri::XML(result.xml).remove_namespaces!
       expect(d.at_xpath('//mods/name[@type="personal"]')).to be_nil
     end
 
     it 'uses By-lineTitle as the roleTerm when present' do
-      iptc = minimum_iptc.merge(:'By-line' => 'Doe, Jane', :'By-lineTitle' => 'Photographer')
+      iptc = minimum_iptc.merge('By-line': 'Doe, Jane', 'By-lineTitle': 'Photographer')
       expect(doc(iptc).at_xpath('//mods/name/role/roleTerm')&.text).to eq('Photographer')
     end
 
     it 'defaults the roleTerm to Creator when By-lineTitle is absent' do
-      iptc = minimum_iptc.merge(:'By-line' => 'Doe, Jane')
+      iptc = minimum_iptc.merge('By-line': 'Doe, Jane')
       expect(doc(iptc).at_xpath('//mods/name/role/roleTerm')&.text).to eq('Creator')
     end
   end

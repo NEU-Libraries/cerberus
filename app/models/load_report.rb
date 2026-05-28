@@ -41,8 +41,8 @@ class LoadReport < ApplicationRecord
 
   def maybe_finalize!
     with_lock do
-      return if iptc_ingests.where(status: %i[pending processing]).exists? ||
-                xml_ingests.where(status: %i[pending processing]).exists?
+      return if iptc_ingests.exists?(status: %i[pending processing]) ||
+                xml_ingests.exists?(status: %i[pending processing])
 
       if iptc_ingests.failed.exists? || xml_ingests.failed.exists?
         fail_load

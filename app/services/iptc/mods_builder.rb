@@ -23,26 +23,27 @@ module Iptc
   # which sum to most of the line count. Each emitter is short and
   # focused; extracting them to a sibling class wouldn't earn anything.
   class MODSBuilder < ApplicationService
-    MissingRequiredField = Class.new(StandardError)
+    class MissingRequiredField < StandardError
+    end
 
     Result = Struct.new(:xml, :warnings, keyword_init: true)
 
     CATEGORY_LABELS = {
-      'ALU' => 'alumni',
-      'ATH' => 'athletics',
-      'CAM' => 'campus',
-      'CLA' => 'classroom',
-      'COM' => 'community outreach',
+      'ALU'                   => 'alumni',
+      'ATH'                   => 'athletics',
+      'CAM'                   => 'campus',
+      'CLA'                   => 'classroom',
+      'COM'                   => 'community outreach',
       'EXPERIENTIAL LEARNING' => 'experiential learning',
-      'HEA' => 'headshots',
-      'POR' => 'portraits',
-      'PRE' => 'president',
-      'RES' => 'research'
+      'HEA'                   => 'headshots',
+      'POR'                   => 'portraits',
+      'PRE'                   => 'president',
+      'RES'                   => 'research'
     }.freeze
 
     MODS_NS = 'http://www.loc.gov/mods/v3'
     XSI_NS  = 'http://www.w3.org/2001/XMLSchema-instance'
-    SCHEMA_LOCATION = "#{MODS_NS} http://www.loc.gov/standards/mods/v3/mods-3-5.xsd"
+    SCHEMA_LOCATION = "#{MODS_NS} http://www.loc.gov/standards/mods/v3/mods-3-5.xsd".freeze
 
     def initialize(iptc:)
       @iptc = iptc

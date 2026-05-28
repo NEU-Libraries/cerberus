@@ -9,7 +9,8 @@ module Iptc
   # Per-call instantiation only. Holding a MiniExiftool instance across
   # images retains its tag hash on the worker heap.
   class Extractor < ApplicationService
-    UnsupportedIptcType = Class.new(StandardError)
+    class UnsupportedIptcType < StandardError
+    end
 
     Result = Struct.new(:tags, :width, :height, keyword_init: true) do
       def longest_side
