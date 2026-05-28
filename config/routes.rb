@@ -47,7 +47,9 @@ Rails.application.routes.draw do
       post :tombstone
     end
   end
-  resources :loads, only: [:index, :show, :new, :create, :destroy]
+  resources :loaders, only: [], param: :slug do
+    resources :loads, only: [:index, :show, :new, :create, :destroy]
+  end
 
   namespace :admin do
     resources :loaders, only: [:index, :new, :create, :edit, :update], param: :slug

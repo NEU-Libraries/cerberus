@@ -1,0 +1,51 @@
+.admin-registry.my-3
+  %header.admin-registry__head
+    %span.admin-registry__title
+      %i.fa-solid.fa-file-import{'aria-hidden' => 'true'}
+      = @loader.display_name
+      - if @load_reports.any?
+        %span.admin-registry__count= pluralize(@load_reports.count, 'batch')
+    .admin-registry__head-actions
+      %span.admin-registry__subtitle
+        %i.fa-solid.fa-folder-tree{'aria-hidden' => 'true'}
+        = @loader.slug
+      = link_to new_loader_load_path(@loader), class: 'btn btn-primary btn-sm' do
+        %i.fa-solid.fa-cloud-arrow-up.me-1{'aria-hidden' => 'true'}
+        New upload
+
+  - if @load_reports.any?
+    .table-responsive
+      %table.table.table-borderless.admin-registry-table
+        %thead
+          %tr
+            %th{scope: 'col'} Status
+            %th{scope: 'col'} Archive
+            %th{scope: 'col'} Progress
+            %th{scope: 'col'} Started
+            %th{scope: 'col'} Finished
+            %th{scope: 'col'}
+        %tbody
+          - @load_reports.each do |lr|
+            %tr
+              %td
+                %span.ingest-status{class: "ingest-status--#{lr.status}"}
+                  %i.fa-solid{class: load_report_status_icon(lr.status), 'aria-hidden' => 'true'}
+                  = lr.status.humanize
+              %td
+                %span.admin-registry-table__id= lr.source_filename
+              %td.text-muted= load_report_progress_summary(lr)
+              %td= lr.started_at&.strftime('%Y-%m-%d %H:%M') || '—'
+              %td= lr.finished_at&.strftime('%Y-%m-%d %H:%M') || '—'
+              %td.text-end
+                = link_to loader_load_path(@loader, lr), class: 'admin-registry-table__edit' do
+                  %i.fa-solid.fa-arrow-right{'aria-hidden' => 'true'}
+                  Open
+  - else
+    .admin-registry__empty
+      %i.fa-solid.fa-file-import.admin-registry__empty-icon{'aria-hidden' => 'true'}
+      %p.mb-1.fw-semibold.text-body No past uploads
+      %p.mb-3.small.text-muted
+        Begin a batch upload of IPTC-tagged JPEGs to deposit into a #{@loader.display_name} collection.
+      = link_to new_loader_load_path(@loader), class: 'btn btn-primary btn-sm' do
+        %i.fa-solid.fa-cloud-arrow-up.me-1{'aria-hidden' => 'true'}
+        Begin first upload

@@ -1,0 +1,197 @@
+# frozen_string_literal: true
+
+require 'rails_helper'
+
+RSpec.describe 'Loads', type: :request do
+  include Devise::Test::IntegrationHelpers
+
+  let!(:marcom_loader) do
+    Loader.create!(
+      slug:            'marcom',
+      display_name:    'Marketing and Communications',
+      group:           'northeastern:drs:repository:loaders:marcom',
+      root_collection: 'neu:fix-comm-photos-archive'
+    )
+  end
+
+  let(:guest_user) do
+    User.new(email: 'guest@example.com', password: 'password',
+             nuid: '000000001', role: 'guest', groups: [])
+  end
+  let(:standard_user) do
+    User.new(email: 'standard@example.com', password: 'password',
+             nuid: '000000005', role: 'standard', groups: [])
+  end
+  let(:staff_user) do
+    User.new(email: 'staff@example.com', password: 'password',
+             nuid: '000000002', role: 'privileged',
+             groups: ['northeastern:drs:repository:staff'])
+  end
+  let(:marcom_user) do
+    User.new(email: 'marcom@example.com', password: 'password',
+             nuid: '000000003', role: 'loader',
+             groups: ['northeastern:drs:repository:loaders:marcom'])
+  end
+  let(:admin_user) do
+    User.new(email: 'admin@example.com', password: 'password',
+             nuid: '000000004', role: 'admin', groups: [])
+  end
+
+  describe 'authorization gate (two-tier: role + group)' do
+    context 'as :guest (below loader role tier)' do
+      before { sign_in guest_user }
+
+      it 'rejects /loaders/marcom/loads with 403' do
+        get '/loaders/marcom/loads'
+        expect(response).to have_http_status(:forbidden)
+      end
+    end
+
+    context 'as :standard (below loader role tier)' do
+      before { sign_in standard_user }
+
+      it 'rejects /loaders/marcom/loads with 403' do
+        get '/loaders/marcom/loads'
+        expect(response).to have_http_status(:forbidden)
+      end
+    end
+
+    context 'as :privileged staff (passes role gate, fails group gate)' do
+      before { sign_in staff_user }
+
+      it 'rejects /loaders/marcom/loads with 403 — primary negative sanity check' do
+        get '/loaders/marcom/loads'
+        expect(response).to have_http_status(:forbidden)
+      end
+    end
+
+    context 'as :loader in loaders:marcom group (primary positive case)' do
+      before { sign_in marcom_user }
+
+      it 'allows /loaders/marcom/loads' do
+        get '/loaders/marcom/loads'
+        expect(response).to have_http_status(:ok)
+      end
+    end
+
+    context 'as :admin (admin short-circuit on the group gate)' do
+      before { sign_in admin_user }
+
+      it 'allows /loaders/marcom/loads without per-group membership' do
+        get '/loaders/marcom/loads'
+        expect(response).to have_http_status(:ok)
+      end
+    end
+
+    context 'unauthenticated' do
+      it 'redirects /loaders/marcom/loads to sign-in' do
+        get '/loaders/marcom/loads'
+        expect(response).to redirect_to(new_user_session_path)
+      end
+    end
+  end
+
+  describe 'unknown loader slug' do
+    before { sign_in admin_user }
+
+    it 'renders 404 for a missing loader' do
+      get '/loaders/nonexistent/loads'
+      expect(response).to have_http_status(:not_found)
+    end
+  end
+
+  describe 'GET /loaders/marcom/loads/new' do
+    before do
+      sign_in marcom_user
+      allow(AtlasRb::Collection).to receive(:children)
+        .with('neu:fix-comm-photos-archive').and_return(['neu:c1', 'neu:c2'])
+      allow(AtlasRb::Collection).to receive(:find).with('neu:c1')
+        .and_return(double(id: 'neu:c1', title: 'Campus Life (Photographs)'))
+      allow(AtlasRb::Collection).to receive(:find).with('neu:c2')
+        .and_return(double(id: 'neu:c2', title: 'Athletics (Photographs)'))
+    end
+
+    it 'renders the form with destinations from Atlas' do
+      get '/loaders/marcom/loads/new'
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('Campus Life (Photographs)')
+      expect(response.body).to include('Athletics (Photographs)')
+    end
+  end
+
+  describe 'POST /loaders/marcom/loads' do
+    let(:archive) do
+      Rack::Test::UploadedFile.new(
+        Rails.root.join('spec/fixtures/files/jpgs.zip'), 'application/zip'
+      )
+    end
+
+    before do
+      sign_in marcom_user
+      allow(UnzipJob).to receive(:perform_later)
+      allow(FileUtils).to receive(:mkdir_p)
+      allow(FileUtils).to receive(:cp)
+    end
+
+    it 'creates a LoadReport linked to the loader' do
+      expect {
+        post '/loaders/marcom/loads',
+             params: { load_report: { archive: archive, parent_collection_id: 'neu:c1' } }
+      }.to change(LoadReport, :count).by(1)
+
+      lr = LoadReport.last
+      expect(lr.loader).to eq(marcom_loader)
+      expect(lr.parent_collection_id).to eq('neu:c1')
+      expect(lr.source_filename).to eq('jpgs.zip')
+    end
+
+    it 'enqueues UnzipJob with the new LoadReport id' do
+      post '/loaders/marcom/loads',
+           params: { load_report: { archive: archive, parent_collection_id: 'neu:c1' } }
+      expect(UnzipJob).to have_received(:perform_later).with(LoadReport.last.id)
+    end
+
+    it 'redirects to the LoadReport show page' do
+      post '/loaders/marcom/loads',
+           params: { load_report: { archive: archive, parent_collection_id: 'neu:c1' } }
+      expect(response).to redirect_to(loader_load_path(marcom_loader, LoadReport.last))
+    end
+
+    it 're-renders :new with 422 when archive is missing' do
+      allow(AtlasRb::Collection).to receive(:children).and_return([])
+      post '/loaders/marcom/loads', params: { load_report: { parent_collection_id: 'neu:c1' } }
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(LoadReport.count).to eq(0)
+    end
+  end
+
+  describe 'GET /loaders/marcom/loads/:id' do
+    let!(:load_report) do
+      LoadReport.create!(
+        loader:               marcom_loader,
+        source_filename:      'jpgs.zip',
+        parent_collection_id: 'neu:c1',
+        status:               :processing
+      )
+    end
+
+    before { sign_in marcom_user }
+
+    it 'renders the dashboard' do
+      get "/loaders/marcom/loads/#{load_report.id}"
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('jpgs.zip')
+      expect(response.body).to include('Processing')
+    end
+
+    it 'returns 404 for a LoadReport that belongs to a different loader' do
+      other_loader = Loader.create!(slug: 'other', display_name: 'Other',
+                                    group: 'g', root_collection: 'c')
+      other_report = LoadReport.create!(loader: other_loader,
+                                        source_filename: 'x.zip',
+                                        parent_collection_id: 'c')
+      get "/loaders/marcom/loads/#{other_report.id}"
+      expect(response).to have_http_status(:not_found)
+    end
+  end
+end

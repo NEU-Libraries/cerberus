@@ -1,0 +1,24 @@
+%tr.ingest-row{class: "ingest-row--#{ingest.status}"}
+  %td
+    %span.ingest-status{class: "ingest-status--#{ingest.status}"}
+      %i.fa-solid{class: ingest_status_icon(ingest.status), 'aria-hidden' => 'true'}
+      = ingest.status.humanize
+  %td
+    %span.admin-registry-table__id= ingest.source_filename
+  %td
+    - if ingest.failed? && ingest.error_message.present?
+      .ingest-detail.ingest-detail--failed= ingest.error_message
+    - elsif ingest.completed_with_warnings? && ingest.warnings.present?
+      .ingest-detail.ingest-detail--warnings
+        %ul
+          - Array(ingest.warnings).each do |warning|
+            %li= warning
+    - elsif ingest.completed? && ingest.work_pid.present?
+      %code.admin-registry-table__id= ingest.work_pid
+    - else
+      %span.text-muted —
+  %td.text-end
+    - if ingest.work_pid.present? && (ingest.completed? || ingest.completed_with_warnings?)
+      = link_to work_path(ingest.work_pid), class: 'admin-registry-table__edit' do
+        %i.fa-solid.fa-arrow-up-right-from-square{'aria-hidden' => 'true'}
+        Work

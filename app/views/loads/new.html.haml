@@ -1,0 +1,70 @@
+.admin-registry.my-3
+  %header.admin-registry__head
+    %span.admin-registry__title
+      %i.fa-solid.fa-cloud-arrow-up{'aria-hidden' => 'true'}
+      New upload
+      %span.text-muted.fw-normal.ms-2 to #{@loader.display_name}
+    %span.admin-registry__subtitle
+      %i.fa-solid.fa-folder-tree{'aria-hidden' => 'true'}
+      = @loader.slug
+  .admin-registry__body
+    = form_with model: [@loader, @load_report], url: loader_loads_path(@loader), local: true, html: { class: 'admin-registry-form', multipart: true } do |f|
+      - if @load_report.errors.any?
+        .alert.alert-danger
+          %p.fw-semibold.mb-1
+            %i.fa-solid.fa-circle-exclamation.me-1{'aria-hidden' => 'true'}
+            Couldn't begin this batch.
+          %ul.mb-0.small
+            - @load_report.errors.full_messages.each do |msg|
+              %li= msg
+      - if flash.now[:alert]
+        .alert.alert-warning
+          %i.fa-solid.fa-triangle-exclamation.me-1{'aria-hidden' => 'true'}
+          = flash.now[:alert]
+
+      .admin-registry-form__section
+        %h3.admin-registry-form__section-title
+          %i.fa-solid.fa-file-zipper{'aria-hidden' => 'true'}
+          Archive
+        .mb-0
+          = f.label :archive, class: 'admin-registry-form__label' do
+            %i.fa-solid.fa-file-zipper{'aria-hidden' => 'true'}
+            Archive file
+          = f.file_field :archive, class: 'form-control', accept: '.tar,.zip', required: true
+          .admin-registry-form__hint
+            Accepted formats:
+            %code.admin-registry-table__id .tar
+            or
+            %code.admin-registry-table__id .zip
+            \. Each JPEG inside must carry valid IPTC tags — Headline and Keywords are required; By-line, Description, Category, City + State are optional but recorded.
+
+      .admin-registry-form__section
+        %h3.admin-registry-form__section-title
+          %i.fa-solid.fa-folder-open{'aria-hidden' => 'true'}
+          Destination
+        .admin-registry-form__section-note
+          %i.fa-solid.fa-circle-info{'aria-hidden' => 'true'}
+          Choose where each ingested JPEG should land as a Work. The collections below are children of <strong>#{@loader.display_name}</strong>'s root collection.
+        .mb-0
+          = f.label :parent_collection_id, class: 'admin-registry-form__label' do
+            %i.fa-solid.fa-folder-open{'aria-hidden' => 'true'}
+            Destination collection
+          - if @destinations.any?
+            = f.select :parent_collection_id,
+                       options_for_select(@destinations.map { |c| [c.title, c.id] }, @load_report.parent_collection_id),
+                       { include_blank: 'Select a collection…' },
+                       class: 'form-select admin-registry-form__input--id', required: true
+            .admin-registry-form__hint
+              Each successfully-ingested image becomes a Work inside the chosen collection.
+          - else
+            .alert.alert-warning.mb-0
+              %i.fa-solid.fa-triangle-exclamation.me-1{'aria-hidden' => 'true'}
+              No destination collections found under
+              %code.admin-registry-table__id= @loader.root_collection
+              \. Ask an admin to verify the loader's root collection is configured correctly.
+
+      .d-flex.gap-2.align-items-center.mt-4
+        = f.submit 'Begin upload', class: 'btn btn-primary', disabled: @destinations.empty?
+        = link_to loader_loads_path(@loader), class: 'btn btn-outline-secondary' do
+          %i.fa-solid.fa-arrow-left.me-1{'aria-hidden' => 'true'}
+          Cancel
