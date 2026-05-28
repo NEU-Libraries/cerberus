@@ -38,17 +38,25 @@ namespace :reset do
       # sibling like "Athletics (Photographs)" appears in the dropdown without
       # any code change). Thumbnails reuse the existing JP2 bases — these
       # are dev/staging fixtures, not production imagery.
+      # Marcom Grouper group seeded onto edit_groups at every level of the
+      # community → collection tree so the loader-role test user
+      # (NUID 000000003) inherits :update rights on IPTC-deposited Works
+      # via Atlas's parent-permission inheritance (WorkCreator copies
+      # parent.permissions onto the child). The staff group is auto-
+      # prepended by Atlas's permissions= setter; we only add marcom here.
+      marcom_group = 'northeastern:drs:repository:loaders:marcom'
+
       communications = AtlasRb::Community.create(nil, '/home/cerberus/web/spec/fixtures/files/communications-mods.xml')
       AtlasRb::Community.set_thumbnails(communications['id'], **ThumbnailCreator.call(base: river_base))
-      AtlasRb::Community.metadata(communications['id'], { 'permissions' => { 'read' => ['public'] } })
+      AtlasRb::Community.metadata(communications['id'], { 'permissions' => { 'read' => ['public'], 'edit' => [marcom_group] } })
 
       photo_archive = AtlasRb::Collection.create(communications['id'], '/home/cerberus/web/spec/fixtures/files/communications-photo-archive-mods.xml')
       AtlasRb::Collection.set_thumbnails(photo_archive['id'], **ThumbnailCreator.call(base: field_base))
-      AtlasRb::Collection.metadata(photo_archive['id'], { 'permissions' => { 'read' => ['public'] } })
+      AtlasRb::Collection.metadata(photo_archive['id'], { 'permissions' => { 'read' => ['public'], 'edit' => [marcom_group] } })
 
       campus_life = AtlasRb::Collection.create(photo_archive['id'], '/home/cerberus/web/spec/fixtures/files/campus-life-photographs-mods.xml')
       AtlasRb::Collection.set_thumbnails(campus_life['id'], **ThumbnailCreator.call(base: flower_base))
-      AtlasRb::Collection.metadata(campus_life['id'], { 'permissions' => { 'read' => ['public'] } })
+      AtlasRb::Collection.metadata(campus_life['id'], { 'permissions' => { 'read' => ['public'], 'edit' => [marcom_group] } })
 
       # Cerberus-side: the Loader row binding the marcom Grouper group to the
       # photo-archive root. In prod, an admin creates this through the
@@ -56,7 +64,7 @@ namespace :reset do
       # dev/staging get it here.
       Loader.find_or_create_by!(slug: 'marcom') do |l|
         l.display_name    = 'Marketing and Communications'
-        l.group           = 'northeastern:drs:repository:loaders:marcom'
+        l.group           = marcom_group
         l.root_collection = photo_archive['id']
       end
     end
