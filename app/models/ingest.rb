@@ -5,5 +5,7 @@ class Ingest < ApplicationRecord
 
   belongs_to :load_report
 
-  enum :status, { pending: 0, processing: 1, completed: 2, failed: 3 }
+  enum :status, { pending: 0, processing: 1, completed: 2, failed: 3, completed_with_warnings: 4 }
+
+  serialize :warnings, type: Array, coder: JSON
 end
