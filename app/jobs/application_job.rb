@@ -17,12 +17,18 @@ class ApplicationJob < ActiveJob::Base
   # duration of `perform`. Child jobs enqueued mid-perform inherit the
   # value the same way, because their own `before_enqueue` runs while
   # the parent's `around_perform` has Current populated.
+  #
+  # `before_enqueue` does NOT fire on `perform_now` — when a parent job
+  # invokes a child via `perform_now` (e.g. IiifAssetsJob coordinating
+  # ThumbnailCreationJob + DerivativeCreationJob serially), the child's
+  # `current_nuid` is nil. Falling through to the caller's `Current.nuid`
+  # in `around_perform` keeps the inherited NUID instead of wiping it.
   attr_accessor :current_nuid
 
   before_enqueue { |job| job.current_nuid ||= Current.nuid }
 
   around_perform do |job, block|
-    Current.set(nuid: job.current_nuid) { block.call }
+    Current.set(nuid: job.current_nuid || Current.nuid) { block.call }
   end
 
   def serialize
