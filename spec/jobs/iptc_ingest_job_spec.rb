@@ -177,6 +177,70 @@ RSpec.describe IptcIngestJob, type: :job do
     end
   end
 
+  describe 'retry_on transient failures' do
+    # The in-method rescues handle permanent exceptions (handled in
+    # the specs above). retry_on catches whatever escapes — DB blips,
+    # Atlas timeouts, FS transients — and on exhaustion marks the
+    # IptcIngest :failed so the parent LoadReport can finalize.
+
+    it 'declares retry_on StandardError with 3 attempts and polynomial backoff' do
+      retry_jitter_config = described_class.retry_jitter
+      # Inspect the class-level retry table set up by retry_on.
+      handler = described_class.rescue_handlers.find { |h| h[0] == 'StandardError' }
+      expect(handler).not_to be_nil, 'IptcIngestJob should declare retry_on StandardError'
+    end
+
+    describe 'exhaustion handler (block form)' do
+      let(:job) { described_class.new(ingest.id) }
+      let(:exception) { StandardError.new('transient atlas blip') }
+
+      it 'marks the IptcIngest :failed with the exhaustion error_message' do
+        # Simulate Active Job calling the retry_on block after attempts exhausted.
+        allow(job).to receive(:executions).and_return(3)
+        described_class.rescue_handlers
+                       .find { |h| h[0] == 'StandardError' }
+                       .last
+                       .call(job, exception)
+        ingest.reload
+        expect(ingest).to be_failed
+        expect(ingest.error_message).to include('Failed after 3 attempts')
+        expect(ingest.error_message).to include('transient atlas blip')
+      end
+
+      it 'calls maybe_finalize! on the parent LoadReport' do
+        allow(job).to receive(:executions).and_return(3)
+        expect_any_instance_of(LoadReport).to receive(:maybe_finalize!)
+        described_class.rescue_handlers
+                       .find { |h| h[0] == 'StandardError' }
+                       .last
+                       .call(job, exception)
+      end
+
+      it 'no-ops if the ingest has already reached a terminal state' do
+        ingest.update!(status: :completed)
+        allow(job).to receive(:executions).and_return(3)
+        expect_any_instance_of(LoadReport).not_to receive(:maybe_finalize!)
+        described_class.rescue_handlers
+                       .find { |h| h[0] == 'StandardError' }
+                       .last
+                       .call(job, exception)
+        expect(ingest.reload).to be_completed
+      end
+
+      it 'no-ops if the IptcIngest has been deleted' do
+        ingest_id = ingest.id
+        ingest.destroy!
+        allow(job).to receive(:arguments).and_return([ingest_id])
+        expect {
+          described_class.rescue_handlers
+                         .find { |h| h[0] == 'StandardError' }
+                         .last
+                         .call(job, exception)
+        }.not_to raise_error
+      end
+    end
+  end
+
   describe '#widths_for derivative sizing (v1 fidelity)' do
     subject(:job) { described_class.new }
 

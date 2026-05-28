@@ -13,6 +13,28 @@
 class IptcIngestJob < ApplicationJob
   queue_as :default
 
+  # Transient-failure retry policy. The in-method rescues below catch
+  # known *permanent* exceptions (bad IPTC data, missing source file)
+  # and finalize the IptcIngest :failed inline — those never reach
+  # this retry handler. Anything else (DB blip, Atlas timeout, FS
+  # transient) escapes the method, ActiveJob/Solid Queue retries up
+  # to 3x with polynomial backoff, and on exhaustion the block below
+  # marks the row :failed so the parent LoadReport can finalize
+  # (otherwise the row would stay :processing forever and
+  # maybe_finalize! would never fire).
+  retry_on StandardError, attempts: 3, wait: :polynomially_longer do |job, exception|
+    iptc_ingest_id = job.arguments.first
+    ingest = IptcIngest.find_by(id: iptc_ingest_id)
+    next if ingest.nil?
+    next if ingest.completed? || ingest.completed_with_warnings? || ingest.failed?
+
+    ingest.update!(
+      status:        :failed,
+      error_message: "Failed after #{job.executions} attempts (#{exception.class}: #{exception.message})"
+    )
+    ingest.load_report&.maybe_finalize!
+  end
+
   def perform(iptc_ingest_id)
     ingest = IptcIngest.find(iptc_ingest_id)
     return if terminal?(ingest)
