@@ -1,47 +1,48 @@
 // _search_controls — the results-display controls (Sort / Per-page / View-type)
 // relocated from the top of the results column into the facet sidebar, beneath
-// "Limit your search". Laid out as a full-width vertical stack under a quiet
-// "Display" divider so they read as a tidy control panel in the narrow column,
-// not a cramped button row. See app/views/catalog/_search_sidebar.html.erb.
+// "Limit your search". A full-width vertical stack separated from the facets by
+// a hairline rule (no label — the controls are self-evident), so they read as a
+// tidy control panel in the narrow column. See catalog/_search_sidebar.html.erb.
 
 .sidebar-display-controls {
   margin-top: $spacer;
   padding-top: $spacer * .75;
   border-top: 1px solid $gray-300;
 
-  &__heading {
-    margin-bottom: .5rem;
-    color: $gray-600;
-    font-size: .75rem;
-    font-weight: 600;
-    letter-spacing: .06em;
-    text-transform: uppercase;
-  }
-
-  // Stack the three tools, each spanning the column.
+  // Stack the tools, each spanning the column to the same width.
   .search-widgets {
     display: flex;
     flex-direction: column;
     gap: .5rem;
-  }
 
-  // Sort + Per-page are dropdowns; make the toggle fill the column and push its
-  // caret to the trailing edge so they read like full-width select controls.
-  .dropdown {
-    width: 100%;
-
-    .dropdown-toggle {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+    // Blacklight @extends .mx-1 (a Bootstrap !important utility) onto every
+    // child for its horizontal toolbar; in a vertical stack those 4px side
+    // margins shove the controls right of the facet card and misalign the
+    // edges. Override with the same !important so every control sits flush
+    // with the card above; `gap` handles the vertical spacing.
+    > * {
       width: 100%;
-      text-align: start;
+      margin: 0 !important;
     }
   }
 
-  // View-type (list / gallery) stays a paired toggle, splitting the width.
-  .view-type,
+  // Sort + Per-page (btn-group dropdowns): fill the column width. Keep the
+  // button's default centered label — its content is multi-part
+  // ("Sort" + " by relevance" + caret), so a flex/space-between layout would
+  // scatter those pieces; a plain full-width button keeps them together.
+  .btn-group .dropdown-toggle {
+    width: 100%;
+  }
+
+  // View-type (list / gallery): the btn-group defaults to inline-flex, which
+  // won't honour width:100% reliably, so force a block-level flex that fills the
+  // column and splits its two buttons evenly — matching the dropdowns' width.
+  .view-type {
+    display: flex;
+  }
+
   .view-type .view-type-group {
+    display: flex;
     width: 100%;
   }
 

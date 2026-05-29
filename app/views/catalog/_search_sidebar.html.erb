@@ -3,8 +3,10 @@
     Renders the facet sidebar (the gem's sidebar_component, "Limit your search")
     and, beneath it, the results-display controls — Sort / Per-page / View-type —
     relocated here from the top of the results column so the result list can rise
-    level with the sidebar. Styled as a full-width vertical stack under a
-    "Display" divider in app/assets/stylesheets/_search_controls.scss.
+    level with the sidebar. Styled as a full-width vertical stack separated from
+    the facets by a hairline rule in app/assets/stylesheets/_search_controls.scss
+    (no visible label — the controls are self-evident; the section's aria-label
+    carries the accessible name).
 
     Controls only render when there are results to act on; an empty container
     suppresses the whole sidebar upstream (communities/collections show), so we
@@ -16,7 +18,6 @@
 
 <% if @response && @response.total_count.to_i.positive? %>
   <section class="sidebar-display-controls" aria-label="<%= t('blacklight.search.per_page.aria_label') %>">
-    <h2 class="sidebar-display-controls__heading">Display</h2>
     <%= render_results_collection_tools wrapping_class: "search-widgets" %>
   </section>
 <% end %>
