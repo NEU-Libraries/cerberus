@@ -184,6 +184,20 @@ RSpec.describe 'Loads', type: :request do
       expect(response.body).to include('Processing')
     end
 
+    # Regression: the report body lives in a turbo-frame, so its
+    # descendant links (per-row "Work", the loader subtitle) must break
+    # out to a full-page visit — otherwise Turbo looks for the
+    # load_report frame in the linked page, fails to find it, and renders
+    # "content missing". target="_top" on the frame is what does that.
+    it 'gives the turbo-frame target="_top" so descendant links escape the frame' do
+      get "/loaders/marcom/loads/#{load_report.id}"
+      # Single turbo-frame on the page, so asserting both attributes are
+      # present (order-independently) pins the fix without coupling to the
+      # tag helper's attribute ordering.
+      expect(response.body).to include('id="load_report"')
+      expect(response.body).to include('target="_top"')
+    end
+
     it 'returns 404 for a LoadReport that belongs to a different loader' do
       other_loader = Loader.create!(slug: 'other', display_name: 'Other',
                                     group: 'g', root_collection: 'c')

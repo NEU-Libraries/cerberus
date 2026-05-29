@@ -4,5 +4,12 @@
 / Stimulus controller (inside _report) sets the frame's src on its first
 / tick and reload()s it thereafter, replacing the body with freshly
 / rendered content until the report reaches a terminal status.
-= turbo_frame_tag 'load_report' do
+/
+/ target: '_top' makes descendant links (the per-row "Work" links, the
+/ loader subtitle link) drive a full-page visit rather than navigating
+/ inside the frame — without it Turbo looks for a matching load_report
+/ frame in the linked page, doesn't find one, and renders "content
+/ missing". The poller is unaffected: it calls reload()/src= on the frame
+/ element directly, which target does not govern.
+= turbo_frame_tag 'load_report', target: '_top' do
   = render 'report', load_report: @load_report, loader: @loader
