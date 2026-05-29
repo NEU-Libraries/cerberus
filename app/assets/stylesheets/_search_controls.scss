@@ -26,17 +26,27 @@
     }
   }
 
-  // Sort + Per-page (btn-group dropdowns): fill the column width. Keep the
-  // button's default centered label — its content is multi-part
-  // ("Sort" + " by relevance" + caret), so a flex/space-between layout would
-  // scatter those pieces; a plain full-width button keeps them together.
+  // Sort + Per-page (btn-group dropdowns): fill the column width and adopt the
+  // facet card's chrome instead of the heavier btn-outline-secondary gray —
+  // the "Type" header's near-black, medium-weight label and the card's light
+  // translucent border, with a faint gray hover. Keep the default centered
+  // label (its content is multi-part: "Sort" + " by relevance" + caret, which a
+  // flex/space-between layout would scatter).
   .btn-group .dropdown-toggle {
+    --bs-btn-color: #{$gray-900};
+    --bs-btn-border-color: var(--bs-border-color-translucent);
+    --bs-btn-hover-color: #{$gray-900};
+    --bs-btn-hover-bg: #{$gray-100};
+    --bs-btn-hover-border-color: var(--bs-border-color-translucent);
     width: 100%;
+    font-weight: 500;
   }
 
-  // View-type (list / gallery): the btn-group defaults to inline-flex, which
-  // won't honour width:100% reliably, so force a block-level flex that fills the
-  // column and splits its two buttons evenly — matching the dropdowns' width.
+  // View-type (list / gallery): a quiet segmented toggle. The btn-group defaults
+  // to inline-flex, so force a block-level flex that fills and splits evenly.
+  // Replace the stark dark "active" slab with a soft gray fill + dark icon (and
+  // the same light card border), so the selected state reads without shouting;
+  // the inactive segment is a muted icon on the page ground.
   .view-type {
     display: flex;
   }
@@ -47,6 +57,14 @@
   }
 
   .view-type .view-type-group .btn {
+    --bs-btn-color: #{$gray-600};
+    --bs-btn-border-color: var(--bs-border-color-translucent);
+    --bs-btn-hover-color: #{$gray-900};
+    --bs-btn-hover-bg: #{$gray-100};
+    --bs-btn-hover-border-color: var(--bs-border-color-translucent);
+    --bs-btn-active-color: #{$gray-900};
+    --bs-btn-active-bg: #{$gray-200};
+    --bs-btn-active-border-color: var(--bs-border-color-translucent);
     flex: 1 1 0;
   }
 }
