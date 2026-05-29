@@ -20,11 +20,12 @@ RSpec.describe IiifAssetsJob, type: :job do
     allow(AtlasRb::Work).to receive(:find).with(work_id).and_return(AtlasRb::Mash.new(thumbnail: nil))
     allow(MasterJp2).to receive(:call).with(path: source_path).and_return(base)
 
+    expect(ThumbnailCreationJob).to receive(:perform_now).with(work_id, base).ordered
+    expect(DerivativeCreationJob).to receive(:perform_now).with(work_id, base, widths: nil).ordered
+
     described_class.new.perform(work_id, source_path)
 
     expect(MasterJp2).to have_received(:call).with(path: source_path).once
-    expect(ThumbnailCreationJob).to have_received(:perform_now).with(work_id, base).ordered
-    expect(DerivativeCreationJob).to have_received(:perform_now).with(work_id, base, widths: nil).ordered
   end
 
   it 'forwards derivative_widths through to DerivativeCreationJob' do
