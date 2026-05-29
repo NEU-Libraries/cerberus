@@ -1,3 +1,14 @@
 en:
   blacklight:
     application_name: 'DRS'
+    search:
+      # "Displaying 1 to 10 of 8,065" — overrides Blacklight's terser
+      # "1 - 10 of 8065" to match the DRS-v1 results-count wording shown in
+      # the pagination bar (_results_pagination_bar). <strong> keeps the
+      # numerals emphasised against the muted label text.
+      pagination_info:
+        no_items_found: 'No %{entry_name} found'
+        single_item_found: 'Displaying <strong>1</strong> %{entry_name}'
+        pages:
+          one: 'Displaying <strong>%{start_num}</strong> to <strong>%{end_num}</strong> of <strong>%{total_num}</strong>'
+          other: 'Displaying <strong>%{start_num}</strong> to <strong>%{end_num}</strong> of <strong>%{total_num}</strong>'

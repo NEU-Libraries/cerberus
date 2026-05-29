@@ -1,0 +1,12 @@
+<%# Cerberus override of Blacklight's _sort_and_per_page (used by Catalog and
+    Bookmarks via shared partial lookup).
+
+    Upstream packed a compact "« Previous  1-10 of N  Next »" pager on the left
+    and the sort/per-page/view-type controls on the right of a single row. We
+    drop the compact pager: the count and full page links now live in the
+    mirrored _results_pagination_bar (rendered just below, and again beneath the
+    results). What's left here is the controls row on its own, right-aligned. %>
+<div id="sortAndPerPage" class="sort-pagination d-md-flex justify-content-end" role="navigation" aria-label="<%= t('blacklight.search.per_page.aria_label') %>">
+  <%= render_results_collection_tools wrapping_class: "search-widgets" %>
+</div>
+<%= render 'results_pagination_bar' %>

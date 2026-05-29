@@ -7,6 +7,33 @@
 // is pure restyle. Scoping under .paginate-section keeps these at the same
 // specificity as Bootstrap's .pagination rules, so source order (cerberus is
 // imported last) lets them win without !important.
+//
+// .results-pagination-bar is the Cerberus wrapper (app/views/catalog/
+// _results_pagination_bar) that mirrors the count + page links above and below
+// the result list: "Displaying X to Y of Z" on the left, the paginator right.
+
+.results-pagination-bar {
+  margin: $spacer * .5 0;
+  // Calm, identifier-like count text; numerals stay emphasised via <strong>.
+  column-gap: 1rem;
+  row-gap: .15rem;
+
+  .page-entries-info {
+    color: $gray-700;
+    font-variant-numeric: tabular-nums;
+
+    strong {
+      font-weight: 600;
+      color: $gray-800;
+    }
+  }
+
+  // The paginator sits inline on the bar's baseline row, so drop the standalone
+  // top margin it carries when rendered on its own.
+  .paginate-section {
+    margin-top: 0;
+  }
+}
 
 .paginate-section {
   margin-top: $spacer * .5;

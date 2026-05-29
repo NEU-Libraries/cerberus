@@ -1,0 +1,21 @@
+<%# Cerberus search-results pagination bar — the mirrored top/bottom frame
+    around the result list (DRS-v1 register, see images 4/5 in the design ask).
+
+    Layout: "Displaying X to Y of Z" on the left, the flat text-link paginator
+    on the right. Rendered identically above the results (from _sort_and_per_page,
+    below the sort/per-page/view controls row) and below them (from
+    _results_pagination), so the two ends read as natural mirrors.
+
+    - Entries info shows whenever there are results.
+    - The page links only appear when there's more than one page — a single
+      page of results gets just the count, no inert "1" sitting alone.
+    - Used by both Catalog and Bookmarks (both set @response and resolve
+      catalog partials), so guard against a missing/empty response. %>
+<% if @response && @response.total_count.to_i.positive? %>
+  <div class="results-pagination-bar d-flex flex-wrap justify-content-between align-items-baseline">
+    <span class="page-entries-info"><%= page_entries_info(@response) %></span>
+    <% if @response.total_pages > 1 %>
+      <%= render Blacklight::Response::PaginationComponent.new(response: @response) %>
+    <% end %>
+  </div>
+<% end %>
