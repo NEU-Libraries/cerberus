@@ -99,3 +99,30 @@ dl.document-metadata.row {
     border: 1px solid rgba(0, 0, 0, 0.2);
   }
 }
+
+// Calm empty state for a browsed-into (not searched) empty container —
+// Community/Collection show pages with no children. Replaces Blacklight's
+// search-oriented "no results" advice (see catalog/_zero_results). Quiet and
+// centered: a muted glyph over a restrained label, no call-to-search.
+.empty-container-state {
+  padding: $spacer * 3 $spacer;
+  text-align: center;
+  color: $gray-600;
+
+  &__icon {
+    font-size: 2.75rem;
+    color: $gray-400;
+  }
+
+  &__title {
+    margin-top: $spacer;
+    margin-bottom: .25rem;
+    color: $gray-700;
+    font-weight: 600;
+  }
+
+  &__hint {
+    margin-bottom: 0;
+    color: $gray-600;
+  }
+}
