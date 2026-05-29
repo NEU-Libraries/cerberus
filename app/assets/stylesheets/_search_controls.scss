@@ -1,0 +1,51 @@
+// _search_controls — the results-display controls (Sort / Per-page / View-type)
+// relocated from the top of the results column into the facet sidebar, beneath
+// "Limit your search". Laid out as a full-width vertical stack under a quiet
+// "Display" divider so they read as a tidy control panel in the narrow column,
+// not a cramped button row. See app/views/catalog/_search_sidebar.html.erb.
+
+.sidebar-display-controls {
+  margin-top: $spacer;
+  padding-top: $spacer * .75;
+  border-top: 1px solid $gray-300;
+
+  &__heading {
+    margin-bottom: .5rem;
+    color: $gray-600;
+    font-size: .75rem;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+  }
+
+  // Stack the three tools, each spanning the column.
+  .search-widgets {
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+  }
+
+  // Sort + Per-page are dropdowns; make the toggle fill the column and push its
+  // caret to the trailing edge so they read like full-width select controls.
+  .dropdown {
+    width: 100%;
+
+    .dropdown-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      text-align: start;
+    }
+  }
+
+  // View-type (list / gallery) stays a paired toggle, splitting the width.
+  .view-type,
+  .view-type .view-type-group {
+    width: 100%;
+  }
+
+  .view-type .view-type-group .btn {
+    flex: 1 1 0;
+  }
+}

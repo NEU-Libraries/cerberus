@@ -14,6 +14,7 @@
 //   _applied_filter      — search-results header + constraint chip
 //   _facets              — active-facet card muting
 //   _pagination          — search-results pagination as flat text links
+//   _search_controls     — sort/per-page/view controls relocated into sidebar
 @import 'layout';
 @import 'blacklight_discovery';
 @import 'audit_history';
@@ -24,3 +25,4 @@
 @import 'applied_filter';
 @import 'facets';
 @import 'pagination';
+@import 'search_controls';
