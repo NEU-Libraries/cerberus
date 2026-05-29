@@ -86,14 +86,18 @@ class EmployeesController < ApplicationController
     mime_type = extract_mime_type(file_path, file_name)
     extension = extract_extension(mime_type, File.extname(file_name)).delete(".") # Fix for .csv csv comparison bug
 
-    if old_content_object.mime_type != mime_type
-      session[:flash_error] = "Mime type must be #{old_content_object.mime_type} not #{mime_type}"
-      render :json => { url: my_loaders_path } and return
+    if !old_content_object.mime_type.blank?
+      if old_content_object.mime_type != mime_type
+        session[:flash_error] = "Mime type must be #{old_content_object.mime_type} not #{mime_type}"
+        render :json => { url: my_loaders_path } and return
+      end
     end
 
-    if File.extname(old_content_object.original_filename).downcase != ("." + extension).downcase
-      session[:flash_error] = "Extension must be #{File.extname(old_content_object.original_filename)} not #{extension}"
-      render :json => { url: my_loaders_path } and return
+    if !old_content_object.original_filename.blank?
+      if File.extname(old_content_object.original_filename).downcase != ("." + extension).downcase
+        session[:flash_error] = "Extension must be #{File.extname(old_content_object.original_filename)} not #{extension}"
+        render :json => { url: my_loaders_path } and return
+      end
     end
 
     core_record = CoreFile.find(old_content_object.core_record.pid)
