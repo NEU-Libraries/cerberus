@@ -37,6 +37,24 @@ RSpec.describe LoadReport, type: :model do
     end
   end
 
+  describe '#in_progress? / #terminal?' do
+    it 'treats pending and processing as in progress' do
+      %i[pending processing].each do |status|
+        report = build(:load_report, status: status)
+        expect(report).to be_in_progress
+        expect(report).not_to be_terminal
+      end
+    end
+
+    it 'treats completed, completed_with_warnings, and failed as terminal' do
+      %i[completed completed_with_warnings failed].each do |status|
+        report = build(:load_report, status: status)
+        expect(report).to be_terminal
+        expect(report).not_to be_in_progress
+      end
+    end
+  end
+
   describe '#start_load' do
     it 'transitions to processing and sets started_at' do
       report = create(:load_report, status: :pending)

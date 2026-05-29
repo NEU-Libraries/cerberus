@@ -7,6 +7,18 @@ class LoadReport < ApplicationRecord
 
   enum :status, { pending: 0, processing: 1, completed: 2, failed: 3, completed_with_warnings: 4 }
 
+  # Lifecycle predicates used by the show view to decide whether to keep
+  # polling (in_progress?) and which empty state to render. A report is
+  # in progress until it reaches one of the three terminal statuses
+  # (completed / completed_with_warnings / failed).
+  def in_progress?
+    pending? || processing?
+  end
+
+  def terminal?
+    !in_progress?
+  end
+
   def start_load
     update!(status: :processing, started_at: Time.current)
   end
