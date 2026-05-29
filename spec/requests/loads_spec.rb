@@ -251,5 +251,44 @@ RSpec.describe 'Loads', type: :request do
         expect(response.body).to include('data-load-poll-terminal-value="true"')
       end
     end
+
+    context 'while processing with some ingests already finished' do
+      let!(:load_report) do
+        LoadReport.create!(loader:               marcom_loader,
+                           source_filename:      'jpgs.zip',
+                           parent_collection_id: 'neu:c1',
+                           status:               :processing)
+      end
+
+      before do
+        create(:iptc_ingest, load_report: load_report, status: :completed)
+        create(:iptc_ingest, load_report: load_report, status: :pending)
+        create(:iptc_ingest, load_report: load_report, status: :processing)
+      end
+
+      it 'renders the determinate progress meter with the processed/total count' do
+        get "/loaders/marcom/loads/#{load_report.id}"
+        expect(response.body).to include('load-report-progress')
+        expect(response.body).to include('of 3')
+        expect(response.body).to include('aria-valuenow="1"')
+        expect(response.body).to include('aria-valuemax="3"')
+      end
+    end
+
+    context 'when a terminal report has ingests' do
+      let!(:load_report) do
+        LoadReport.create!(loader:               marcom_loader,
+                           source_filename:      'jpgs.zip',
+                           parent_collection_id: 'neu:c1',
+                           status:               :completed)
+      end
+
+      before { create(:iptc_ingest, load_report: load_report, status: :completed) }
+
+      it 'does not render the in-progress meter' do
+        get "/loaders/marcom/loads/#{load_report.id}"
+        expect(response.body).not_to include('load-report-progress')
+      end
+    end
   end
 end

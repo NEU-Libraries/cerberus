@@ -51,6 +51,21 @@ class LoadReport < ApplicationRecord
     xml_ingests.failed.count + iptc_ingests.failed.count
   end
 
+  # Ingests that have reached a terminal per-row state, over the total —
+  # the numerator/denominator for the in-progress determinate meter on
+  # the show page. "Processed" deliberately counts warnings and failures
+  # too: the meter tracks how much work is *finished*, not how much
+  # succeeded (the summary tiles already break that down).
+  def processed_ingests
+    completed_ingests + warning_ingests + failed_ingests
+  end
+
+  def progress_percent
+    return 0 if total_ingests.zero?
+
+    ((processed_ingests * 100.0) / total_ingests).round
+  end
+
   def maybe_finalize!
     with_lock do
       return if iptc_ingests.exists?(status: %i[pending processing]) ||

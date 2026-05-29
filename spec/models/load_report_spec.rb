@@ -110,4 +110,27 @@ RSpec.describe LoadReport, type: :model do
       expect(report.failed_ingests).to eq(2)
     end
   end
+
+  describe '#processed_ingests / #progress_percent' do
+    it 'counts every terminal per-row state (completed, warnings, failed)' do
+      report = create(:load_report)
+      create(:iptc_ingest, load_report: report, status: :completed)
+      create(:iptc_ingest, load_report: report, status: :completed_with_warnings)
+      create(:iptc_ingest, load_report: report, status: :failed)
+      create(:iptc_ingest, load_report: report, status: :pending)
+      create(:iptc_ingest, load_report: report, status: :processing)
+      expect(report.processed_ingests).to eq(3)
+    end
+
+    it 'expresses processed/total as a rounded percentage' do
+      report = create(:load_report)
+      create_list(:iptc_ingest, 3, load_report: report, status: :completed)
+      create_list(:iptc_ingest, 5, load_report: report, status: :pending)
+      expect(report.progress_percent).to eq(38) # 3/8 = 37.5 → 38
+    end
+
+    it 'is 0% when there are no ingests (no divide-by-zero)' do
+      expect(create(:load_report).progress_percent).to eq(0)
+    end
+  end
 end
