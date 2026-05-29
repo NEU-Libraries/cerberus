@@ -194,4 +194,62 @@ RSpec.describe 'Loads', type: :request do
       expect(response).to have_http_status(:not_found)
     end
   end
+
+  # Live-progress affordances: while the background batch is still
+  # running the show page must NOT show the terminal "no images" copy
+  # (the bug — a freshly-created :pending report flashed it), and the
+  # frame must be flagged non-terminal with a poll url so the load-poll
+  # Stimulus controller self-refreshes it. Once the report is terminal
+  # the copy is correct and the frame is flagged terminal so polling stops.
+  describe 'GET /loaders/marcom/loads/:id — live progress affordances' do
+    before { sign_in marcom_user }
+
+    %i[pending processing].each do |status|
+      context "while the report is #{status} with no ingests yet" do
+        let!(:load_report) do
+          LoadReport.create!(loader:               marcom_loader,
+                             source_filename:      'jpgs.zip',
+                             parent_collection_id: 'neu:c1',
+                             status:               status)
+        end
+
+        it 'shows the in-progress state, not the terminal "no images" copy' do
+          get "/loaders/marcom/loads/#{load_report.id}"
+          expect(response.body).to include('Extraction in progress')
+          expect(response.body).not_to include('No images ingested')
+        end
+
+        it 'marks the frame non-terminal and hands the poller the report url' do
+          get "/loaders/marcom/loads/#{load_report.id}"
+          expect(response.body).to include('id="load_report"')
+          expect(response.body).to include('data-controller="load-poll"')
+          expect(response.body).to include('data-load-poll-terminal-value="false"')
+          expect(response.body).to include(
+            %(data-load-poll-url-value="#{loader_load_path(marcom_loader, load_report)}")
+          )
+        end
+      end
+    end
+
+    context 'when the report has finished with no ingests' do
+      let!(:load_report) do
+        LoadReport.create!(loader:               marcom_loader,
+                           source_filename:      'empty.zip',
+                           parent_collection_id: 'neu:c1',
+                           status:               :completed)
+      end
+
+      it 'shows the terminal "no images" copy, not the in-progress state' do
+        get "/loaders/marcom/loads/#{load_report.id}"
+        expect(response.body).to include('No images ingested')
+        expect(response.body).not_to include('Extraction in progress')
+      end
+
+      it 'marks the frame terminal so the poller stops' do
+        get "/loaders/marcom/loads/#{load_report.id}"
+        expect(response.body).to include('id="load_report"')
+        expect(response.body).to include('data-load-poll-terminal-value="true"')
+      end
+    end
+  end
 end

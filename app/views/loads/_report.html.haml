@@ -1,0 +1,63 @@
+.admin-registry.my-3{data: { controller: 'load-poll', 'load-poll-terminal-value' => load_report.terminal?.to_s, 'load-poll-url-value' => loader_load_path(loader, load_report) }}
+  %header.admin-registry__head
+    %span.admin-registry__title
+      %i.fa-solid.fa-file-import{'aria-hidden' => 'true'}
+      = load_report.source_filename
+      %span.ingest-status.ms-2{class: "ingest-status--#{load_report.status}"}
+        %i.fa-solid{class: [load_report_status_icon(load_report.status), ('fa-spin' if load_report.processing?)], 'aria-hidden' => 'true'}
+        = load_report.status.humanize
+    %span.admin-registry__subtitle
+      %i.fa-solid.fa-folder-tree{'aria-hidden' => 'true'}
+      = link_to loader.display_name, loader_loads_path(loader), class: 'text-decoration-none'
+
+  .admin-registry__body
+    .load-report-overview
+      .load-report-overview__meta
+        %span.load-report-overview__label Destination
+        %span.load-report-overview__value
+          - if load_report.parent_collection_id.present?
+            %code.admin-registry-table__id= load_report.parent_collection_id
+          - else
+            —
+        %span.load-report-overview__label Started
+        %span.load-report-overview__value= load_report.started_at&.strftime('%Y-%m-%d %H:%M:%S') || '—'
+        %span.load-report-overview__label Finished
+        %span.load-report-overview__value= load_report.finished_at&.strftime('%Y-%m-%d %H:%M:%S') || '—'
+        %span.load-report-overview__label Duration
+        %span.load-report-overview__value= load_report_duration(load_report)
+
+      .ingest-summary
+        .ingest-summary__tile.ingest-summary__tile--total
+          %span.ingest-summary__count= load_report.total_ingests
+          %span.ingest-summary__label Total
+        - %i[completed pending processing completed_with_warnings failed].each do |status|
+          - count = load_report.iptc_ingests.where(status: status).count
+          .ingest-summary__tile{class: "ingest-summary__tile--#{status}"}
+            %span.ingest-summary__count= count
+            %span.ingest-summary__label= status.to_s.humanize
+
+  - if load_report.iptc_ingests.any?
+    .table-responsive
+      %table.table.table-borderless.admin-registry-table.ingest-table
+        %thead
+          %tr
+            %th{scope: 'col'} Status
+            %th{scope: 'col'} Source file
+            %th{scope: 'col'} Result
+            %th{scope: 'col'}
+        %tbody
+          = render partial: 'ingest_row',
+                   collection: load_report.iptc_ingests.order(:source_filename),
+                   as: :ingest
+  - elsif load_report.in_progress?
+    .admin-registry__empty
+      %i.fa-solid.fa-arrows-rotate.fa-spin.admin-registry__empty-icon.admin-registry__empty-icon--processing{'aria-hidden' => 'true'}
+      %p.mb-1.fw-semibold.text-body Extraction in progress
+      %p.mb-0.small.text-muted
+        The archive is being unpacked. This page updates automatically as files are processed.
+  - else
+    .admin-registry__empty
+      %i.fa-solid.fa-circle-question.admin-registry__empty-icon{'aria-hidden' => 'true'}
+      %p.mb-1.fw-semibold.text-body No images ingested
+      %p.mb-0.small.text-muted
+        This batch finished without producing any image entries. If the archive should have contained JPEGs, check that the file extensions are <code class="admin-registry-table__id">.jpg</code> or <code class="admin-registry-table__id">.jpeg</code>.
