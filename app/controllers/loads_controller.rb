@@ -31,8 +31,11 @@ class LoadsController < ApplicationController
     save_archive(@load_report, archive)
     UnzipJob.perform_later(@load_report.id)
 
-    redirect_to loader_load_path(@loader, @load_report),
-                notice: 'Upload begun — extraction is in progress.'
+    # No flash notice — the show page's in-progress state (spinner +
+    # "Extraction in progress", auto-polled) communicates that the batch
+    # has begun, so a redundant banner would only contradict the body
+    # once the live poll flips the report to a terminal status.
+    redirect_to loader_load_path(@loader, @load_report)
   rescue ActiveRecord::RecordInvalid
     @destinations = load_destinations
     render :new, status: :unprocessable_content
