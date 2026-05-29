@@ -36,8 +36,12 @@ namespace :reset do
       # middle collection is what the marcom Loader.root_collection points at;
       # the picker in LoadsController#new queries its children (so a future
       # sibling like "Athletics (Photographs)" appears in the dropdown without
-      # any code change). Thumbnails reuse the existing JP2 bases — these
-      # are dev/staging fixtures, not production imagery.
+      # any code change). Thumbnails use their own distinct placeholder
+      # bases (lake / forest / beach) so the marcom tree doesn't visually
+      # duplicate the Northeastern University / Test Collection / What's New
+      # seeds in the gallery — these are dev/staging fixtures, not
+      # production imagery (lake = public domain, forest = CC0, beach =
+      # public domain; all sourced from Wikimedia Commons).
       # Marcom Grouper group seeded onto edit_groups at every level of the
       # community → collection tree so the loader-role test user
       # (NUID 000000003) inherits :update rights on IPTC-deposited Works
@@ -46,16 +50,20 @@ namespace :reset do
       # prepended by Atlas's permissions= setter; we only add marcom here.
       marcom_group = 'northeastern:drs:repository:loaders:marcom'
 
+      lake_base   = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/lake.jpg')
+      forest_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/forest.jpg')
+      beach_base  = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/beach.jpg')
+
       communications = AtlasRb::Community.create(community['id'], '/home/cerberus/web/spec/fixtures/files/communications-mods.xml')
-      AtlasRb::Community.set_thumbnails(communications['id'], **ThumbnailCreator.call(base: river_base))
+      AtlasRb::Community.set_thumbnails(communications['id'], **ThumbnailCreator.call(base: lake_base))
       AtlasRb::Community.metadata(communications['id'], { 'permissions' => { 'read' => ['public'], 'edit' => [marcom_group] } })
 
       photo_archive = AtlasRb::Collection.create(communications['id'], '/home/cerberus/web/spec/fixtures/files/communications-photo-archive-mods.xml')
-      AtlasRb::Collection.set_thumbnails(photo_archive['id'], **ThumbnailCreator.call(base: field_base))
+      AtlasRb::Collection.set_thumbnails(photo_archive['id'], **ThumbnailCreator.call(base: forest_base))
       AtlasRb::Collection.metadata(photo_archive['id'], { 'permissions' => { 'read' => ['public'], 'edit' => [marcom_group] } })
 
       campus_life = AtlasRb::Collection.create(photo_archive['id'], '/home/cerberus/web/spec/fixtures/files/campus-life-photographs-mods.xml')
-      AtlasRb::Collection.set_thumbnails(campus_life['id'], **ThumbnailCreator.call(base: flower_base))
+      AtlasRb::Collection.set_thumbnails(campus_life['id'], **ThumbnailCreator.call(base: beach_base))
       AtlasRb::Collection.metadata(campus_life['id'], { 'permissions' => { 'read' => ['public'], 'edit' => [marcom_group] } })
 
       # Cerberus-side: the Loader row binding the marcom Grouper group to the
