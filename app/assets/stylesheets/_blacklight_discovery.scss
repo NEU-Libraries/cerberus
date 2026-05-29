@@ -126,3 +126,11 @@ dl.document-metadata.row {
     color: $gray-600;
   }
 }
+
+// Tighten the gap above the first result. Blacklight sets
+// `.documents-list .document { padding-top: 1rem }` (specificity 0,2,0), so we
+// self-chain the class (`.document.document-position-1`, also 0,2,0) to win on
+// source order — and stay container-agnostic across list/gallery views.
+.document.document-position-1 {
+  padding-top: 5px;
+}
