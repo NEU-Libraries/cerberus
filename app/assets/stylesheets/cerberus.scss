@@ -13,6 +13,7 @@
 //   _error_page          — 403 / 404 / 410 / 500 error pages
 //   _applied_filter      — search-results header + constraint chip
 //   _facets              — active-facet card muting
+//   _pagination          — search-results pagination as flat text links
 @import 'layout';
 @import 'blacklight_discovery';
 @import 'audit_history';
@@ -22,3 +23,4 @@
 @import 'error_page';
 @import 'applied_filter';
 @import 'facets';
+@import 'pagination';
