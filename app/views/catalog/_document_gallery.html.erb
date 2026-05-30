@@ -1,0 +1,16 @@
+<%# Cerberus override of blacklight-gallery's catalog/_document_gallery.
+
+    Upstream wraps #documents in a Bootstrap `.container`, whose horizontal
+    padding pushed the gallery grid ~12px to the right of the results-column
+    edge — so the first item no longer lined up with the "Displaying X to Y of Z"
+    bar above it (that bar is a plain child of the col-lg-9 results column, not
+    inside this container). The container is redundant here: the gallery already
+    sits inside the results column, and the `.row`'s own negative gutter margin
+    handles edge alignment. Dropping it lets the items sit flush with the column
+    edge — without touching the shared `.row > *` gutter rules. Inner markup is
+    otherwise verbatim from the gem (blacklight-gallery 5.0.0). %>
+<% view_config = local_assigns[:view_config] || blacklight_config&.view_config(document_index_view_type) %>
+<div id="documents" class="<%= (Array(view_config.classes || 'row-cols-2 row-cols-md-3') + ["row documents-#{view_config.key}"]).join(' ') %>">
+  <% document_presenters = Blacklight::VERSION > '8' ? documents.map { |doc| document_presenter(doc) } : documents %>
+  <%= render view_config.document_component.with_collection(document_presenters, counter_offset: @response&.start || 0) %>
+</div>
