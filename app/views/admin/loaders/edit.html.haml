@@ -1,0 +1,11 @@
+.admin-registry.my-3
+  %header.admin-registry__head
+    %span.admin-registry__title
+      %i.fa-solid.fa-pen{'aria-hidden' => 'true'}
+      Edit loader
+      %span.admin-registry-table__id.ms-2= @loader.slug
+    %span.admin-registry__subtitle
+      %i.fa-solid.fa-lock{'aria-hidden' => 'true'}
+      Admin-only
+  .admin-registry__body
+    = render 'form'

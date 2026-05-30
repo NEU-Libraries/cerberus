@@ -1,0 +1,111 @@
+// _pagination — search-results pagination, flattened from Bootstrap's
+// boxed button-group into plain inline text links (DRS-v1 register).
+//
+// Markup comes from Blacklight's Kaminari "blacklight" theme:
+//   nav.paginate-section > ul.pagination > li.page-item > a/span.page-link
+// We override only the paginator partial (sequence/order); everything below
+// is pure restyle. Scoping under .paginate-section keeps these at the same
+// specificity as Bootstrap's .pagination rules, so source order (cerberus is
+// imported last) lets them win without !important.
+//
+// .results-pagination-bar is the Cerberus wrapper (app/views/catalog/
+// _results_pagination_bar) that mirrors the count + page links above and below
+// the result list: "Displaying X to Y of Z" on the left, the paginator right.
+
+.results-pagination-bar {
+  margin-top: 17px;
+  // Calm, identifier-like count text; numerals stay emphasised via <strong>.
+  column-gap: 1rem;
+  row-gap: .15rem;
+
+  .page-entries-info {
+    color: $gray-700;
+    font-variant-numeric: tabular-nums;
+
+    strong {
+      font-weight: 600;
+      color: $gray-800;
+    }
+  }
+
+  // The paginator sits inline on the bar's baseline row, so drop the standalone
+  // top margin it carries when rendered on its own.
+  .paginate-section {
+    margin-top: 0;
+  }
+}
+
+.paginate-section {
+  margin-top: $spacer * .5;
+
+  .pagination {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    // Tight vertical, roomy horizontal — reads as spaced text, not a button row.
+    gap: .15rem 1rem;
+    margin: 0;
+    padding-left: 0;
+  }
+
+  // Strip Bootstrap's box chrome: no borders, fills, radii, or the -1px
+  // overlap that fuses buttons into a group.
+  .page-item {
+    margin: 0;
+  }
+
+  .page-link {
+    display: inline;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    color: $primary;
+    font-weight: 400;
+    line-height: 1.5;
+    text-decoration: none;
+    // Identifiers (page numbers) should line up like identifiers.
+    font-variant-numeric: tabular-nums;
+
+    &:hover,
+    &:focus {
+      color: darken($primary, 12%);
+      background: transparent;
+      text-decoration: underline;
+    }
+
+    &:focus-visible {
+      outline: 2px solid $primary;
+      outline-offset: 3px;
+      text-decoration: underline;
+    }
+  }
+
+  // Current page: anchor it as plain emphasised text, not a destination.
+  .page-item.active .page-link {
+    color: $gray-800;
+    font-weight: 700;
+    pointer-events: none;
+    cursor: default;
+
+    &:hover,
+    &:focus {
+      color: $gray-800;
+      text-decoration: none;
+    }
+  }
+
+  // Boundary links at the ends, and the "…" gap: muted and inert.
+  .page-item.disabled .page-link {
+    color: $gray-500;
+    pointer-events: none;
+
+    &:hover,
+    &:focus {
+      color: $gray-500;
+      text-decoration: none;
+    }
+  }
+}

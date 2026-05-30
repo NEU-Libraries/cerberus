@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mods:mods xmlns:drs="https://repository.neu.edu/spec/v1" xmlns:mods="http://www.loc.gov/mods/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:niec="http://repository.neu.edu/schema/niec" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dwc="http://rs.tdwg.org/dwc/terms/" xmlns:dwr="http://rs.tdwg.org/dwc/xsd/simpledarwincore/" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd">
+  <mods:titleInfo usage="primary">
+    <mods:title>Communications</mods:title>
+  <mods:nonSort/></mods:titleInfo>
+  <mods:titleInfo type="alternative">
+    <mods:title/>
+  </mods:titleInfo>
+  <mods:abstract>
+    Marketing and Communications materials originating from the Northeastern University External Affairs division — photographs, press images, and institutional communications assets deposited via the marcom loader.
+  </mods:abstract>
+  <mods:name type="personal"/>
+  <mods:name type="corporate"/>
+  <mods:language>
+    <mods:languageTerm/>
+  </mods:language>
+  <mods:note/>
+  <mods:subject>
+    <mods:topic>communications</mods:topic>
+  </mods:subject>
+  <mods:typeOfResource>text</mods:typeOfResource>
+  <mods:recordInfo>
+    <mods:recordContentSource/>
+    <mods:recordOrigin/>
+    <mods:descriptionStandard/>
+    <mods:languageOfCataloging>
+      <mods:languageTerm/>
+    </mods:languageOfCataloging>
+  </mods:recordInfo>
+  <mods:physicalDescription>
+    <mods:form/>
+  </mods:physicalDescription>
+</mods:mods>

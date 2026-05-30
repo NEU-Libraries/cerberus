@@ -77,5 +77,16 @@ RSpec.describe ApplicationJob, type: :job do
 
       expect(job.current_nuid).to eq('explicit-nuid')
     end
+
+    it 'inherits Current.nuid from the caller when invoked via perform_now' do
+      # perform_now skips before_enqueue, so the child's current_nuid is
+      # nil. The around_perform fallback must keep the caller's ambient
+      # Current.nuid instead of wiping it to nil.
+      Current.set(nuid: 'parent-nuid') do
+        CurrentNuidProbeJob.perform_now
+      end
+
+      expect(CurrentNuidProbeJob.observed_nuid).to eq('parent-nuid')
+    end
   end
 end

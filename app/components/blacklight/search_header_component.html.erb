@@ -1,0 +1,13 @@
+<%# Cerberus override of Blacklight::SearchHeaderComponent's template.
+
+    Upstream rendered: did_you_mean + sort_and_per_page (which carried the
+    sort / per-page / view-type controls AND the pagination bar at the top of
+    the results column). We've moved those controls down into the facet sidebar
+    (catalog/_search_sidebar), so the top of the results column is now just the
+    pagination bar — letting the result list rise to sit level with the
+    sidebar's "Limit your search".
+
+    Bookmarks is unaffected: it renders catalog/_sort_and_per_page directly
+    (not this component), and keeps the controls there since it has no sidebar. %>
+<%= render 'did_you_mean' %>
+<%= render 'results_pagination_bar' %>

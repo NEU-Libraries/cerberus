@@ -1,0 +1,58 @@
+= form_with model: [:admin, @loader], local: true, html: { class: 'admin-registry-form' } do |f|
+  - if @loader.errors.any?
+    .alert.alert-danger
+      %p.fw-semibold.mb-1
+        %i.fa-solid.fa-circle-exclamation.me-1{'aria-hidden' => 'true'}
+        Couldn't save this loader entry.
+      %ul.mb-0.small
+        - @loader.errors.full_messages.each do |msg|
+          %li= msg
+
+  .admin-registry-form__section
+    %h3.admin-registry-form__section-title
+      %i.fa-solid.fa-id-card{'aria-hidden' => 'true'}
+      Identity
+    .mb-3
+      = f.label :slug, class: 'admin-registry-form__label' do
+        %i.fa-solid.fa-tag{'aria-hidden' => 'true'}
+        Slug
+      = f.text_field :slug, class: 'form-control admin-registry-form__input--id', placeholder: 'marcom', autocomplete: 'off'
+      .admin-registry-form__hint
+        Lowercase identifier — letters, digits, dashes, underscores. Used in URLs (e.g. <code class="admin-registry-table__id">/loaders/marcom/loads</code>).
+    .mb-0
+      = f.label :display_name, class: 'admin-registry-form__label' do
+        %i.fa-solid.fa-id-card{'aria-hidden' => 'true'}
+        Display name
+      = f.text_field :display_name, class: 'form-control', placeholder: 'Marketing and Communications'
+      .admin-registry-form__hint
+        Human-readable team or program name as it should appear in the loader UI.
+
+  .admin-registry-form__section
+    %h3.admin-registry-form__section-title
+      %i.fa-solid.fa-shield-halved{'aria-hidden' => 'true'}
+      Access
+    .admin-registry-form__section-note
+      %i.fa-solid.fa-circle-info{'aria-hidden' => 'true'}
+      The two fields below grant access. Members of the Grouper group see this loader and can deposit into the root collection or any of its descendants. Editing these on an existing loader changes who can see it and where they deposit.
+
+    .mb-3
+      = f.label :group, 'Grouper group', class: 'admin-registry-form__label' do
+        %i.fa-solid.fa-users{'aria-hidden' => 'true'}
+        Grouper group
+      = f.text_field :group, class: 'form-control admin-registry-form__input--id', placeholder: 'northeastern:drs:repository:loaders:marcom', autocomplete: 'off'
+      .admin-registry-form__hint
+        Full Grouper group name. Members of this group will see this loader's deposit surface.
+
+    .mb-0
+      = f.label :root_collection, 'Root collection PID', class: 'admin-registry-form__label' do
+        %i.fa-solid.fa-folder-open{'aria-hidden' => 'true'}
+        Root collection PID
+      = f.text_field :root_collection, class: 'form-control admin-registry-form__input--id', placeholder: 'neu:6240', autocomplete: 'off'
+      .admin-registry-form__hint
+        Atlas Collection PID. The deposit-destination picker queries this collection's children.
+
+  .d-flex.gap-2.align-items-center.mt-4
+    = f.submit class: 'btn btn-primary'
+    = link_to admin_loaders_path, class: 'btn btn-outline-secondary' do
+      %i.fa-solid.fa-arrow-left.me-1{'aria-hidden' => 'true'}
+      Cancel

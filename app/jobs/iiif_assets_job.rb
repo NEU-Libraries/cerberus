@@ -8,7 +8,10 @@ class IiifAssetsJob < ApplicationJob
     return unless File.exist?(source_path)
 
     base = MasterJp2.call(path: source_path)
-    ThumbnailCreationJob.perform_later(work_id, base)
-    DerivativeCreationJob.perform_later(work_id, base, widths: derivative_widths)
+    # Serial, not parallel: both sub-jobs PATCH Delegates that attach to the
+    # same FileSet, and parallel execution races Atlas's optimistic-lock check
+    # on the FileSet (StaleObjectError → 500 → Delegates not persisted).
+    ThumbnailCreationJob.perform_now(work_id, base)
+    DerivativeCreationJob.perform_now(work_id, base, widths: derivative_widths)
   end
 end

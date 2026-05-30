@@ -5,6 +5,11 @@ Rails.application.configure do
 
   config.iiif_host = 'http://cerberusv2.library.northeastern.edu/cantaloupe'
 
+  # Point Solid Queue at the dedicated `queue` database (see config/database.yml).
+  # Without this, Solid Queue falls back to the primary connection, whose schema
+  # has no solid_queue_* tables (those live in db/queue_schema.rb).
+  config.solid_queue.connects_to = { database: { writing: :queue } }
+
   config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
 
   # In the development environment your application's code is reloaded any time

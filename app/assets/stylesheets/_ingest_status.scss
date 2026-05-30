@@ -1,0 +1,283 @@
+// ---------------------------------------------------------------------
+// Ingest status — chip + summary-tile + table-rail vocabulary for the
+// IptcIngest / LoadReport lifecycle (pending / processing / completed /
+// completed_with_warnings / failed). Same color-mix-from-custom-property
+// derivation as audit-history's action chips; different palette because
+// the semantics are different (lifecycle states, not action types).
+//
+// Reusable shape: any class that wants to participate sets --ingest-tone
+// via a status modifier (e.g. .ingest-status--failed). Chips, tiles,
+// and table rows all share one tone source per class.
+// ---------------------------------------------------------------------
+
+$ingest-tone-pending:    #6c757d;
+$ingest-tone-processing: #2666a6;
+$ingest-tone-completed:  #0e8a7a;
+$ingest-tone-warnings:   #c46410;
+$ingest-tone-failed:     #a73a31;
+
+// Token application — every consumer of the palette gets the same
+// suffix-to-token mapping. Keeping this in one place means a tone
+// retune is a single SCSS edit, not a sweep.
+.ingest-status,
+.ingest-summary__tile,
+.ingest-row {
+  &--pending                 { --ingest-tone: #{$ingest-tone-pending}; }
+  &--processing              { --ingest-tone: #{$ingest-tone-processing}; }
+  &--completed               { --ingest-tone: #{$ingest-tone-completed}; }
+  &--completed_with_warnings { --ingest-tone: #{$ingest-tone-warnings}; }
+  &--failed                  { --ingest-tone: #{$ingest-tone-failed}; }
+}
+
+// Soft chip — same shape as audit-event__action. Inline-flex, tinted
+// background + border + icon/label all derived from --ingest-tone.
+.ingest-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 0.3rem;
+  background-color: color-mix(in srgb, var(--ingest-tone, #{$ingest-tone-pending}) 12%, white);
+  border: 1px solid color-mix(in srgb, var(--ingest-tone, #{$ingest-tone-pending}) 28%, white);
+  color: var(--ingest-tone, #{$ingest-tone-pending});
+  font-weight: 600;
+  font-size: 0.78rem;
+  line-height: 1.2;
+  white-space: nowrap;
+
+  .fa-solid {
+    font-size: 0.85em;
+    line-height: 1;
+  }
+}
+
+// Summary strip — horizontal row of count tiles for the LoadReport
+// dashboard. Each tile is a 2-line stack: large tabular-num count
+// on top, uppercase label underneath. Lighter tint than the chip
+// (5%) because the count is a quieter readout — the chip's job is
+// "draw the eye"; the tile's job is "stand still and be readable."
+.ingest-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1rem 0 0;
+
+  &__tile {
+    flex: 1 1 8rem;
+    min-width: 7rem;
+    padding: 0.55rem 0.85rem;
+    border-radius: 0.4rem;
+    background-color: color-mix(in srgb, var(--ingest-tone, #{$gray-500}) 5%, white);
+    border: 1px solid color-mix(in srgb, var(--ingest-tone, #{$gray-300}) 22%, $gray-200);
+    border-left: 3px solid var(--ingest-tone, #{$gray-400});
+    line-height: 1.2;
+
+    &--total {
+      background-color: white;
+      border-color: $gray-300;
+      border-left-color: $gray-500;
+    }
+  }
+
+  &__count {
+    display: block;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: $gray-800;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+  }
+
+  &__label {
+    display: block;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: $gray-600;
+    font-weight: 600;
+    margin-top: 0.15rem;
+  }
+}
+
+// LoadReport meta block — two-column grid of labels + values used
+// above the ingest-summary strip on the show page. Quiet, identifier-
+// dense; the dashboard's chrome should defer to the table.
+.load-report-overview {
+  // Top row: meta grid (left) sits opposite the in-progress meter
+  // (right). The meter only renders mid-batch, so when it's absent the
+  // meta grid simply occupies the row as before. Wraps the meter beneath
+  // the meta on narrow viewports.
+  &__top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+  &__meta {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 0.4rem 0.85rem;
+    font-size: 0.85rem;
+    align-items: baseline;
+  }
+  &__label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: $gray-500;
+    font-weight: 600;
+  }
+  &__value {
+    color: $gray-800;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+// In-progress determinate meter — the top-right readout that fills the
+// otherwise-empty header space once the table has replaced the centered
+// spinner. Uppercase micro-label + tabular "N of M" count over a slim
+// processing-tone bar. Same restrained vocabulary as the meta block and
+// summary tiles; the only motion is the bar's width transition (driven
+// by the polled re-render) plus the spinning label icon.
+.load-report-progress {
+  flex: 0 1 13rem;
+  min-width: 10rem;
+
+  &__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.85rem;
+    margin-bottom: 0.35rem;
+  }
+
+  &__label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+    color: $ingest-tone-processing;
+
+    .fa-solid { font-size: 0.85em; }
+  }
+
+  &__count {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: $gray-800;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  &__total {
+    margin-left: 0.2rem;
+    font-weight: 500;
+    color: $gray-500;
+  }
+
+  &__track {
+    height: 4px;
+    border-radius: 999px;
+    background-color: color-mix(in srgb, #{$ingest-tone-processing} 12%, white);
+    overflow: hidden;
+  }
+
+  &__fill {
+    height: 100%;
+    min-width: 2px;
+    border-radius: inherit;
+    background-color: $ingest-tone-processing;
+    transition: width 0.6s ease;
+  }
+}
+
+// Ingest table — admin-registry-table chrome plus a left rail driven
+// by --ingest-tone on the tr (via .ingest-row--<status>). Same
+// affordance as audit-event-table: column-wise tone scanning across
+// hundreds of rows.
+.ingest-table {
+  tbody tr td:first-child {
+    position: relative;
+    padding-left: 1.1rem;
+
+    &::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background-color: var(--ingest-tone, #{$gray-300});
+    }
+  }
+}
+
+// Detail expansion under the result cell — error_message for :failed,
+// warnings list for :completed_with_warnings. Quiet body text tinted
+// with the row's tone so the relationship is visible without overwhelm.
+.ingest-detail {
+  margin-top: 0.3rem;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: $gray-700;
+
+  &--failed   { color: color-mix(in srgb, #{$ingest-tone-failed}   80%, $gray-700); }
+  &--warnings { color: color-mix(in srgb, #{$ingest-tone-warnings} 70%, $gray-700); }
+
+  ul {
+    list-style: disc;
+    padding-left: 1.1rem;
+    margin: 0;
+  }
+}
+
+// ---------------------------------------------------------------------
+// In-progress affordances — the LoadReport show page polls a turbo-frame
+// while the batch is still running (see load_poll_controller.js). Two
+// quiet cues mark "still working", both keyed to the processing tone so
+// they read as part of the same lifecycle vocabulary as the chips above,
+// not as a louder, separate "loading" idiom.
+// ---------------------------------------------------------------------
+
+// The frame must be a block so its content lays out normally and so the
+// refresh cue below can anchor to it.
+turbo-frame#load_report {
+  display: block;
+}
+
+// Empty-state icon while pending/processing — the spinning
+// fa-arrows-rotate stands in for the neutral question-mark used by the
+// terminal "no images" state. Dialled back from full tone so a stately
+// rotation reads as "working", not alarm.
+.admin-registry__empty-icon--processing {
+  color: color-mix(in srgb, #{$ingest-tone-processing} 70%, white);
+}
+
+// Refresh cue — a 2px tinted bar sweeps the card's top edge only while
+// the frame is fetching its next poll. Turbo sets [busy] on the frame
+// for the duration of the request, so this is pure CSS, no JS. The card
+// already clips to its rounded corners via overflow:hidden.
+turbo-frame#load_report[busy] .admin-registry {
+  position: relative;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: 2px;
+    background:
+      linear-gradient(90deg, transparent, #{$ingest-tone-processing}, transparent)
+      no-repeat;
+    background-size: 40% 100%;
+    animation: load-report-refresh-sweep 0.9s ease-in-out infinite;
+  }
+}
+
+@keyframes load-report-refresh-sweep {
+  from { background-position: -40% 0; }
+  to   { background-position: 140% 0; }
+}

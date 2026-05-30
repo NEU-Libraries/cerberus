@@ -1,0 +1,37 @@
+<%# Cerberus override of Blacklight's "blacklight"-theme Kaminari paginator.
+  - Why we override: the upstream paginator (a) never emits the First/Last
+    boundary links and (b) honours Blacklight 8's `next_button_position: :before`
+    default, which renders "« Previous  Next »  1  2" — Next ahead of the page
+    numbers. We want the clearer DRS-v1 order:
+        « First   « Previous   1 2 … N   Next »   Last »
+    so we render the boundary tags ourselves in a fixed sequence and ignore the
+    engine's next_button_position config.
+  - Boundary links are OMITTED at the edges rather than greyed out (DRS-v1
+    behaviour): on the first page we drop both « First and « Previous, on the
+    last page both Next » and Last ». A disabled link that does nothing is just
+    noise, so we don't render it at all — the page numbers anchor the position.
+  - Available locals: current_page, num_pages, per_page, remote, paginator.
+  - Sibling tag partials (_first_page, _prev_page, _page, _gap, _next_page,
+    _last_page) are NOT overridden — they fall through to the gem. We restyle
+    the .pagination/.page-item/.page-link markup into flat text links in
+    app/assets/stylesheets/_pagination.scss.
+-%>
+<%= paginator.render do -%>
+  <ul class="pagination">
+    <% unless current_page.first? -%>
+      <%= first_page_tag %>
+      <%= prev_page_tag %>
+    <% end -%>
+    <% each_relevant_page do |page| -%>
+      <% if page.left_outer? || page.right_outer? || page.inside_window? -%>
+        <%= page_tag page %>
+      <% elsif !page.was_truncated? -%>
+        <%= gap_tag %>
+      <% end -%>
+    <% end -%>
+    <% unless current_page.last? -%>
+      <%= next_page_tag %>
+      <%= last_page_tag %>
+    <% end -%>
+  </ul>
+<% end -%>

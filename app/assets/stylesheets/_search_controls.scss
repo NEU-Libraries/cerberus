@@ -1,0 +1,70 @@
+// _search_controls — the results-display controls (Sort / Per-page / View-type)
+// relocated from the top of the results column into the facet sidebar, beneath
+// "Limit your search". A full-width vertical stack separated from the facets by
+// a hairline rule (no label — the controls are self-evident), so they read as a
+// tidy control panel in the narrow column. See catalog/_search_sidebar.html.erb.
+
+.sidebar-display-controls {
+  margin-top: $spacer;
+  padding-top: $spacer * .75;
+  border-top: 1px solid $gray-300;
+
+  // Stack the tools, each spanning the column to the same width.
+  .search-widgets {
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+
+    // Blacklight @extends .mx-1 (a Bootstrap !important utility) onto every
+    // child for its horizontal toolbar; in a vertical stack those 4px side
+    // margins shove the controls right of the facet card and misalign the
+    // edges. Override with the same !important so every control sits flush
+    // with the card above; `gap` handles the vertical spacing.
+    > * {
+      width: 100%;
+      margin: 0 !important;
+    }
+  }
+
+  // Sort + Per-page (btn-group dropdowns): fill the column width and adopt the
+  // facet card's chrome instead of the heavier btn-outline-secondary gray —
+  // the "Type" header's near-black, medium-weight label and the card's light
+  // translucent border, with a faint gray hover. Keep the default centered
+  // label (its content is multi-part: "Sort" + " by relevance" + caret, which a
+  // flex/space-between layout would scatter).
+  .btn-group .dropdown-toggle {
+    --bs-btn-color: #{$gray-900};
+    --bs-btn-border-color: var(--bs-border-color-translucent);
+    --bs-btn-hover-color: #{$gray-900};
+    --bs-btn-hover-bg: #{$gray-100};
+    --bs-btn-hover-border-color: var(--bs-border-color-translucent);
+    width: 100%;
+    font-weight: 500;
+  }
+
+  // View-type (list / gallery): a quiet segmented toggle. The btn-group defaults
+  // to inline-flex, so force a block-level flex that fills and splits evenly.
+  // Replace the stark dark "active" slab with a soft gray fill + dark icon (and
+  // the same light card border), so the selected state reads without shouting;
+  // the inactive segment is a muted icon on the page ground.
+  .view-type {
+    display: flex;
+  }
+
+  .view-type .view-type-group {
+    display: flex;
+    width: 100%;
+  }
+
+  .view-type .view-type-group .btn {
+    --bs-btn-color: #{$gray-600};
+    --bs-btn-border-color: var(--bs-border-color-translucent);
+    --bs-btn-hover-color: #{$gray-900};
+    --bs-btn-hover-bg: #{$gray-100};
+    --bs-btn-hover-border-color: var(--bs-border-color-translucent);
+    --bs-btn-active-color: #{$gray-900};
+    --bs-btn-active-bg: #{$gray-200};
+    --bs-btn-active-border-color: var(--bs-border-color-translucent);
+    flex: 1 1 0;
+  }
+}

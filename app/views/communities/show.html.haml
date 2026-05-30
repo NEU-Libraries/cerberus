@@ -25,8 +25,12 @@
                          kind: 'community',
                          path: tombstone_community_path(@community.id)
 
-- content_for(:sidebar) do
-  = render 'catalog/search_sidebar'
+-# Only mount the facet sidebar when the community has children. An empty
+-# community falls through to catalog/_zero_results' calm empty state and goes
+-# full-width (no "Limit your search" / sort / per-page chrome to show).
+- if @response.documents.present?
+  - content_for(:sidebar) do
+    = render 'catalog/search_sidebar'
 
 = render 'catalog/search_results'
 = render 'shared/downloads_modal'
