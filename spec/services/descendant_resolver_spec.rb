@@ -93,8 +93,8 @@ RSpec.describe DescendantResolver do
   # (.id) and uuid (.valkyrie_id) the way a controller would.
   def resolve(anchor:, **opts)
     described_class.call(
-      anchor_noid: anchor.id,
-      anchor_uuid: anchor.valkyrie_id,
+      anchor_noid:    anchor.id,
+      anchor_uuid:    anchor.valkyrie_id,
       search_service: search_service,
       **opts
     ).documents.map(&:id)

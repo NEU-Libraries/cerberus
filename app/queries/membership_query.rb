@@ -56,15 +56,15 @@ class MembershipQuery
 
     private
 
-    # Map bare uuids to the `id-<uuid>` term form Solr indexes, comma-joined for the
-    # {!terms} parser. An empty list yields an empty term string, which matches no
-    # documents (the correct answer for "members of nothing").
-    def term_list(uuids)
-      Array(uuids).map { |uuid| "id-#{uuid}" }.join(',')
-    end
+      # Map bare uuids to the `id-<uuid>` term form Solr indexes, comma-joined for the
+      # {!terms} parser. An empty list yields an empty term string, which matches no
+      # documents (the correct answer for "members of nothing").
+      def term_list(uuids)
+        Array(uuids).map { |uuid| "id-#{uuid}" }.join(',')
+      end
 
-    def normalize_noid(noid)
-      noid.to_s.delete_prefix('id-')
-    end
+      def normalize_noid(noid)
+        noid.to_s.delete_prefix('id-')
+      end
   end
 end

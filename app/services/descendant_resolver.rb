@@ -39,16 +39,13 @@ class DescendantResolver < ApplicationService
   #   itself, not only of its descendants.
   # @param include_linked [Boolean] also match Works linked into the containers via
   #   the DAG overlay (`a_linked_member_of`).
-  # @param type_filters [Array<String>] fq fragments narrowing the member result.
   def initialize(anchor_noid:, search_service:, anchor_uuid: nil,
-                 include_self: true, include_linked: false,
-                 type_filters: DEFAULT_TYPE_FILTERS)
+                 include_self: true, include_linked: false)
     @anchor_noid = anchor_noid
     @search_service = search_service
     @anchor_uuid = anchor_uuid
     @include_self = include_self
     @include_linked = include_linked
-    @type_filters = type_filters
     super()
   end
 
@@ -62,27 +59,27 @@ class DescendantResolver < ApplicationService
 
     search(
       MembershipQuery.members_fq(container_uuids, include_linked: @include_linked),
-      *@type_filters
+      *DEFAULT_TYPE_FILTERS
     )
   end
 
   private
 
-  # Step 1: reverse-ancestry lookup → uuids of descendant Collections/Communities.
-  def descendant_container_uuids
-    response = search(
-      MembershipQuery.descendants_fq(@anchor_noid),
-      'internal_resource_tesim:(Collection OR Community)'
-    )
-    response.documents.map(&:id)
-  end
+    # Step 1: reverse-ancestry lookup → uuids of descendant Collections/Communities.
+    def descendant_container_uuids
+      response = search(
+        MembershipQuery.descendants_fq(@anchor_noid),
+        'internal_resource_tesim:(Collection OR Community)'
+      )
+      response.documents.map(&:id)
+    end
 
-  def search(*filter_queries)
-    builder = @search_service.search_builder.with({}).with_filters(*filter_queries)
-    Blacklight.default_index.search(builder)
-  end
+    def search(*filter_queries)
+      builder = @search_service.search_builder.with({}).with_filters(*filter_queries)
+      Blacklight.default_index.search(builder)
+    end
 
-  def empty_response
-    Blacklight::Solr::Response.new({}, {})
-  end
+    def empty_response
+      Blacklight::Solr::Response.new({}, {})
+    end
 end
