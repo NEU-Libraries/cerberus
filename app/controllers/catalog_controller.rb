@@ -236,15 +236,6 @@ class CatalogController < ApplicationController
     Blacklight.default_index.search(builder)
   end
 
-  def find_many(ids)
-    return Blacklight::Solr::Response.new({}, {}) if ids.blank?
-
-    id_query = ids.map { |id| "\"id-#{id}\"" }.join(' OR ')
-    builder = search_service.search_builder.with({}).merge(fq: ["alternate_ids_tsi:(#{id_query})"])
-
-    Blacklight.default_index.search(builder)
-  end
-
   def iiif_thumbnail(document, *_args)
     icon_class = helpers.document_type_icon(document.klass_type)
     icon_html  = view_context.content_tag(:i, '', class: "fa-regular #{icon_class} fa-2xl text-black-50")
