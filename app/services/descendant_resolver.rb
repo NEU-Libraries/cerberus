@@ -78,7 +78,7 @@ class DescendantResolver < ApplicationService
   end
 
   def search(*filter_queries)
-    builder = @search_service.search_builder.with({}).merge(fq: filter_queries)
+    builder = @search_service.search_builder.with({}).with_filters(*filter_queries)
     Blacklight.default_index.search(builder)
   end
 
