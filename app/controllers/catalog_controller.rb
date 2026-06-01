@@ -227,7 +227,7 @@ class CatalogController < ApplicationController
 
     builder = search_service.search_builder.with({}).merge(
       fq: [
-        "a_member_of_tesim:\"id-#{id}\"",
+        MembershipQuery.members_fq([id]),
         '-internal_resource_tesim:FileSet',
         '-internal_resource_tesim:Blob',
         '-internal_resource_tesim:Delegate',
