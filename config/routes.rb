@@ -62,8 +62,12 @@ Rails.application.routes.draw do
     get  'reparent/confirm',       to: 'reparent#confirm',       as: :reparent_confirm
     post 'reparent/move',          to: 'reparent#move',          as: :reparent_move
 
-    # Linked-members overlay lands on this entry page in follow-up work.
-    get 'linked_members', to: 'linked_members#index'
+    # Linked members — find a Work, then add/remove the Collections it is
+    # surfaced in (discovery placement only; never its structural home).
+    get    'linked_members',        to: 'linked_members#index'
+    get    'linked_members/manage', to: 'linked_members#manage',  as: :linked_members_manage
+    post   'linked_members/add',    to: 'linked_members#add',     as: :linked_members_add
+    delete 'linked_members/remove', to: 'linked_members#remove',  as: :linked_members_remove
   end
 
   get '/downloads/:id', to: 'downloads#show', as: :download

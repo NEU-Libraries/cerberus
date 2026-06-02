@@ -1,0 +1,66 @@
+.admin-registry.my-3
+  %header.admin-registry__head
+    %span.admin-registry__title
+      %i.fa-solid.fa-link{'aria-hidden' => 'true'}
+      Linked collections
+    .admin-registry__head-actions
+      %span.admin-registry__subtitle
+        %i.fa-solid.fa-lock{'aria-hidden' => 'true'}
+        Admin-only
+
+  .p-3
+    .reparent-node-summary
+      %span.reparent-node-summary__label Work
+      = finder_type_chip('Work')
+      %span.reparent-node-summary__title= @work.resource.title
+      %span.admin-registry-table__id= params[:work_id]
+
+    %h2.linked-members__subhead
+      Surfaced in
+      %span.admin-registry__count= pluralize(@linked.size, 'collection')
+    - if @linked.any?
+      %ul.linked-members__list
+        - @linked.each do |coll|
+          %li.linked-members__item
+            = finder_type_chip('Collection')
+            %span.linked-members__title= coll.title
+            %span.admin-registry-table__id= coll.noid
+            = button_to admin_linked_members_remove_path(work_id: params[:work_id], collection_id: coll.noid), method: :delete, class: 'linked-members__btn linked-members__btn--remove', form: { class: 'linked-members__btn-form' } do
+              - concat content_tag(:i, '', class: 'fa-solid fa-xmark me-1', 'aria-hidden' => 'true')
+              Remove
+    - else
+      %p.text-muted.small.mb-0
+        Not linked into any collections yet. Its structural home is unaffected by linking.
+
+    %h2.linked-members__subhead.mt-4 Add to a collection
+    = render 'admin/finder/search_form', url: admin_linked_members_manage_path, q: params[:q], hidden: { work_id: params[:work_id] }, placeholder: 'Search collections to add…'
+
+  - if @results
+    .table-responsive
+      %table.table.table-borderless.admin-registry-table
+        %thead
+          %tr
+            %th{scope: 'col'} Title
+            %th{scope: 'col'} Type
+            %th{scope: 'col'} NUID
+            %th{scope: 'col'}
+        %tbody
+          - @results.documents.each do |doc|
+            %tr
+              %td
+                .admin-registry-table__name= finder_doc_title(doc)
+              %td= finder_type_chip(doc.klass_type)
+              %td
+                %span.admin-registry-table__id= doc.to_param
+              %td.text-end
+                - if @placed_noids.include?(doc.to_param)
+                  %span.linked-members__placed Already placed
+                - else
+                  = button_to admin_linked_members_add_path(work_id: params[:work_id], collection_id: doc.to_param), method: :post, class: 'linked-members__btn linked-members__btn--add', form: { class: 'linked-members__btn-form' } do
+                    - concat content_tag(:i, '', class: 'fa-solid fa-plus me-1', 'aria-hidden' => 'true')
+                    Add
+
+  .px-3.pb-3
+    = link_to admin_linked_members_path, class: 'reparent-back' do
+      %i.fa-solid.fa-arrow-left.me-1{'aria-hidden' => 'true'}
+      Find another work

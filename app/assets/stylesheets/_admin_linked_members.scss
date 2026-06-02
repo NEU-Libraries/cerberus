@@ -1,0 +1,92 @@
+// ---------------------------------------------------------------------
+// Admin → Linked members manage panel. Reuses the admin-registry card +
+// finder chrome (.reparent-node-summary, .reparent-type, .admin-registry-table);
+// this partial only adds the "surfaced in" list and its add/remove buttons.
+//
+// Deliberate tone choice: "Remove" is a QUIET neutral pill, not danger-red —
+// unlinking a discovery placement is reversible and must read as distinct from
+// Delete / Withdraw (which own the red). "Add" carries the teal-green accent.
+// ---------------------------------------------------------------------
+
+.linked-members {
+  &__subhead {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: $gray-700;
+    margin: 1.25rem 0 0.6rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  &__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border: 1px solid $gray-300;
+    border-radius: 0.4rem;
+    overflow: hidden;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.55rem 0.8rem;
+    border-bottom: 1px solid $gray-200;
+
+    &:last-child { border-bottom: 0; }
+  }
+
+  &__title {
+    font-weight: 600;
+    color: $gray-800;
+  }
+
+  &__placed {
+    font-size: 0.78rem;
+    color: $gray-500;
+    font-style: italic;
+  }
+
+  // button_to wraps its <button> in a <form>; keep both inline.
+  &__btn-form {
+    display: inline;
+    margin: 0;
+  }
+
+  &__btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.6rem;
+    border-radius: 0.3rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    border: 1px solid $gray-200;
+    background-color: $gray-100;
+    color: $gray-700;
+    cursor: pointer;
+    white-space: nowrap;
+
+    // Quiet, neutral — reversible unlink, NOT a delete.
+    &--remove {
+      margin-left: auto; // push to the row's right edge in the flex list item
+
+      &:hover {
+        background-color: $gray-200;
+        border-color: $gray-300;
+        color: $gray-800;
+      }
+    }
+
+    // Affirmative add — teal-green accent, same family as the hub's link card.
+    &--add {
+      color: $success;
+
+      &:hover {
+        background-color: color-mix(in srgb, $success 10%, white);
+        border-color: color-mix(in srgb, $success 28%, white);
+      }
+    }
+  }
+}

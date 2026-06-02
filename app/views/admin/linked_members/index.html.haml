@@ -8,13 +8,10 @@
         %i.fa-solid.fa-lock{'aria-hidden' => 'true'}
         Admin-only
 
-  .admin-registry__empty
-    %i.fa-solid.fa-link.admin-registry__empty-icon{'aria-hidden' => 'true'}
-    %p.mb-1.fw-semibold.text-body Linking workflow coming next
-    %p.mb-0.small.text-muted
-      Find a Work, then add or remove the Collections it is surfaced in — discovery placement only, never a permission change. The Atlas linked-member endpoints and atlas_rb bindings are already in place; this surface wires the UI to them.
+  .p-3
+    %p.text-muted.small.mb-3
+      Find the Work whose collection placements you want to manage. Linking surfaces a Work in additional collections for discovery — it never moves the Work or changes its permissions.
+    = render 'admin/finder/search_form', url: admin_linked_members_path, q: params[:q], hidden: {}, placeholder: 'Search works by title…'
 
-  %p.mt-3.mb-0
-    = link_to admin_root_path, class: 'admin-registry-table__edit' do
-      %i.fa-solid.fa-arrow-left{'aria-hidden' => 'true'}
-      Back to actions
+  - if @results
+    = render 'admin/finder/results', results: @results, select_label: 'Manage', select_url: ->(doc) { admin_linked_members_manage_path(work_id: doc.to_param) }
