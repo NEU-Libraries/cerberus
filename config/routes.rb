@@ -52,7 +52,14 @@ Rails.application.routes.draw do
   end
 
   namespace :admin do
+    root to: 'dashboard#index'
     resources :loaders, only: [:index, :new, :create, :edit, :update], param: :slug
+
+    # Structure-operation surfaces reached from the admin hub. The actual
+    # workflows (the re-parent + linked-member overlays) land on these
+    # index actions in follow-up work; for now they render their entry pages.
+    get 'reparent',       to: 'reparent#index'
+    get 'linked_members', to: 'linked_members#index'
   end
 
   get '/downloads/:id', to: 'downloads#show', as: :download

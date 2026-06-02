@@ -1,0 +1,20 @@
+.admin-registry.my-3
+  %header.admin-registry__head
+    %span.admin-registry__title
+      %i.fa-solid.fa-link{'aria-hidden' => 'true'}
+      Linked members
+    .admin-registry__head-actions
+      %span.admin-registry__subtitle
+        %i.fa-solid.fa-lock{'aria-hidden' => 'true'}
+        Admin-only
+
+  .admin-registry__empty
+    %i.fa-solid.fa-link.admin-registry__empty-icon{'aria-hidden' => 'true'}
+    %p.mb-1.fw-semibold.text-body Linking workflow coming next
+    %p.mb-0.small.text-muted
+      Find a Work, then add or remove the Collections it is surfaced in — discovery placement only, never a permission change. The Atlas linked-member endpoints and atlas_rb bindings are already in place; this surface wires the UI to them.
+
+  %p.mt-3.mb-0
+    = link_to admin_root_path, class: 'admin-registry-table__edit' do
+      %i.fa-solid.fa-arrow-left{'aria-hidden' => 'true'}
+      Back to actions

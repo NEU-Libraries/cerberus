@@ -1,0 +1,32 @@
+.admin-actions.my-3
+  %header.admin-actions__head
+    %span.admin-actions__title
+      %i.fa-solid.fa-screwdriver-wrench{'aria-hidden' => 'true'}
+      Administration
+    %span.admin-actions__subtitle
+      %i.fa-solid.fa-lock{'aria-hidden' => 'true'}
+      Admin-only
+
+  %p.admin-actions__lede
+    Repository-structure operations. These actions change how objects are arranged and surfaced across the repository, so they apply repository-wide and live behind the admin gate.
+
+  .admin-actions__grid{role: 'list'}
+    = link_to admin_reparent_path, class: 'admin-action-card admin-action-card--structure', role: 'listitem' do
+      %span.admin-action-card__icon
+        %i.fa-solid.fa-sitemap{'aria-hidden' => 'true'}
+      %span.admin-action-card__title Re-parent / Move
+      %span.admin-action-card__desc
+        Move a Collection or Community to a new parent. Re-orders the structural tree and re-flows every descendant's breadcrumb and contents.
+      %span.admin-action-card__cta
+        Open
+        %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
+
+    = link_to admin_linked_members_path, class: 'admin-action-card admin-action-card--link', role: 'listitem' do
+      %span.admin-action-card__icon
+        %i.fa-solid.fa-link{'aria-hidden' => 'true'}
+      %span.admin-action-card__title Linked members
+      %span.admin-action-card__desc
+        Surface a single Work in additional Collections without duplicating it. Adds discovery placement only — it never changes the Work's permissions.
+      %span.admin-action-card__cta
+        Open
+        %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}

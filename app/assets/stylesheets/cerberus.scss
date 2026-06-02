@@ -8,6 +8,7 @@
 //                           (thumbnails, gallery, metadata)
 //   _audit_history       — Edit → History tab (archival ledger)
 //   _admin_registry      — Admin → Loader registry (and future admin CRUD)
+//   _admin_dashboard     — Admin → actions hub (/admin landing, action cards)
 //   _ingest_status       — IPTC loader status chips + dashboard tiles
 //   _deposit_form        — Collection → New Work deposit slip
 //   _error_page          — 403 / 404 / 410 / 500 error pages
@@ -20,6 +21,7 @@
 @import 'blacklight_discovery';
 @import 'audit_history';
 @import 'admin_registry';
+@import 'admin_dashboard';
 @import 'ingest_status';
 @import 'deposit_form';
 @import 'error_page';
