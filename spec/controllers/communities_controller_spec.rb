@@ -73,6 +73,20 @@ describe CommunitiesController do
         expect(response.body).to include('breadcrumb-add')
       end
     end
+
+    context 'embedded facet search stays scoped to the show page (ShowScopedSearch)' do
+      it 'builds facet/search URLs against the community show action, not the catalog index' do
+        get :show, params: { id: community.id }
+
+        url = controller.search_action_url('f' => { 'type_ssim' => ['Collection'] })
+
+        # Scoped to /communities/:id (the show page), carrying the facet —
+        # not /catalog and not the index route /communities?f[...].
+        expect(url).to include("/communities/#{community.id}")
+        expect(url).to include('type_ssim')
+        expect(url).not_to match(%r{/catalog})
+      end
+    end
   end
 
   describe 'show on a nonexistent community id' do

@@ -61,6 +61,20 @@ describe CollectionsController do
       expect(response).to render_template('collections/show')
       expect(CGI.unescapeHTML(response.body)).to include(collection.title)
     end
+
+    context 'embedded facet search stays scoped to the show page (ShowScopedSearch)' do
+      it 'builds facet/search URLs against the collection show action, not the catalog index' do
+        get :show, params: { id: collection.id }
+
+        url = controller.search_action_url('f' => { 'type_ssim' => ['Work'] })
+
+        # Scoped to /collections/:id (the show page), carrying the facet —
+        # not /catalog and not the index route /collections?f[...].
+        expect(url).to include("/collections/#{collection.id}")
+        expect(url).to include('type_ssim')
+        expect(url).not_to match(%r{/catalog})
+      end
+    end
   end
 
   describe 'new' do

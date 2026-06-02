@@ -225,7 +225,12 @@ class CatalogController < ApplicationController
   def find_children(id)
     return Blacklight::Solr::Response.new({}, {}) if id.blank?
 
-    builder = search_service.search_builder.with({}).with_filters(
+    # Seed the builder with the current search state (facets, q, sort,
+    # per_page, page) so a facet/search applied on the show page actually
+    # narrows the children, then layer the membership + exclusion filters
+    # on top. Passing `with({})` here would reset the state to empty and
+    # silently discard the user's facet selection.
+    builder = search_service.search_builder.with(search_state).with_filters(
       MembershipQuery.members_fq([id]),
       '-internal_resource_tesim:FileSet',
       '-internal_resource_tesim:Blob',

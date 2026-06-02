@@ -3,6 +3,7 @@
 class CommunitiesController < CatalogController
   include Thumbable
   include Transformable
+  include ShowScopedSearch
 
   before_action :authorize_edit!, only: [:edit]
   before_action :authorize_tombstone!, only: [:tombstone]
