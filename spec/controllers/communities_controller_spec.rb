@@ -100,6 +100,39 @@ describe CommunitiesController do
         )
       end
     end
+
+    # community ── collection ── work ("What's New"), i.e. the Work sits two
+    # tiers below the community, beneath a direct-child collection.
+    context 'deep scoped search reaches Works nested below direct children' do
+      let!(:collection) do
+        c = AtlasRb::Collection.create(community.id,
+                                       '/home/cerberus/web/spec/fixtures/files/collection-mods.xml', nuid: '000000004')
+        AtlasRb::Collection.metadata(c.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
+        c
+      end
+      let!(:work) do
+        w = AtlasRb::Work.create(collection.id,
+                                 '/home/cerberus/web/spec/fixtures/files/work-mods.xml', nuid: '000000004')
+        AtlasRb::Work.complete(w.id, nuid: '000000004')
+        AtlasRb::Work.metadata(w.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
+        w
+      end
+
+      it 'surfaces the nested Work when a keyword query is present' do
+        get :show, params: { id: community.id, q: "What's New" }
+
+        ids = assigns(:response).documents.map(&:id)
+        expect(ids).to include(work.valkyrie_id)
+      end
+
+      it 'lists only direct children — not the nested Work — when no query is present' do
+        get :show, params: { id: community.id }
+
+        ids = assigns(:response).documents.map(&:id)
+        expect(ids).to include(collection.valkyrie_id)
+        expect(ids).not_to include(work.valkyrie_id)
+      end
+    end
   end
 
   describe 'show on a nonexistent community id' do

@@ -222,23 +222,81 @@ class CatalogController < ApplicationController
     # config.autocomplete_suggester = 'mySuggester'
   end
 
-  def find_children(id)
-    return Blacklight::Solr::Response.new({}, {}) if id.blank?
+  # Non-membership types that are never listed as children of a
+  # Community/Collection (file-level resources + tombstones), layered on top
+  # of whichever membership filter is in play.
+  CHILD_TYPE_EXCLUSIONS = [
+    '-internal_resource_tesim:FileSet',
+    '-internal_resource_tesim:Blob',
+    '-internal_resource_tesim:Delegate',
+    '-tombstoned_bsi:true'
+  ].freeze
 
-    # Seed the builder with the current search state (facets, q, sort,
-    # per_page, page) so a facet/search applied on the show page actually
-    # narrows the children, then layer the membership + exclusion filters
-    # on top. Passing `with({})` here would reset the state to empty and
-    # silently discard the user's facet selection.
-    builder = search_service.search_builder.with(search_state).with_filters(
-      MembershipQuery.members_fq([id]),
-      '-internal_resource_tesim:FileSet',
-      '-internal_resource_tesim:Blob',
-      '-internal_resource_tesim:Delegate',
-      '-tombstoned_bsi:true'
-    )
+  # Children listing for a Community/Collection show page.
+  #
+  # Two modes, switched on whether a keyword query is active:
+  #
+  # * No query (plain browse, or facets only) — list the anchor's *direct*
+  #   members, so the show page is a single tier of the tree. Facets narrow
+  #   that tier; they do not deepen the scope.
+  # * Keyword query present — search the whole *subtree* beneath the anchor
+  #   (see #subtree_membership_fq), so a "Search this collection" query reaches
+  #   Works and sub-collections nested arbitrarily deep, not just direct
+  #   children.
+  #
+  # Either way the current search state (q, facets, sort, per_page, page) is
+  # seeded onto the builder before the membership + exclusion filters are
+  # layered on — passing `with({})` would silently discard the user's query.
+  #
+  # @param uuid [String] the anchor's valkyrie_id (uuid), as stored in the
+  #   structural membership field.
+  # @param noid [String] the anchor's bare noid, as stored in the descendants'
+  #   ancestor chain. Only consulted in subtree mode.
+  def find_children(uuid, noid)
+    return Blacklight::Solr::Response.new({}, {}) if uuid.blank?
+
+    membership = if params[:q].present?
+                   subtree_membership_fq(uuid, noid)
+                 else
+                   MembershipQuery.members_fq([uuid])
+                 end
+
+    builder = search_service.search_builder
+                            .with(search_state)
+                            .with_filters(membership, *CHILD_TYPE_EXCLUSIONS)
 
     Blacklight.default_index.search(builder)
+  end
+
+  # fq matching everything in the anchor's subtree: every descendant
+  # Collection/Community (so a query can hit a sub-collection by its own
+  # metadata) OR every Work that is a member of the anchor or any of its
+  # descendant containers.
+  #
+  # Uses the two-step reverse-ancestry recipe documented on
+  # {DescendantResolver} — resolve the descendant containers, then match their
+  # members — but unlike that service this returns the matching containers
+  # themselves *and* threads the live search state through (via the caller's
+  # `.with(search_state)`), which is why it can't reuse `DescendantResolver#call`.
+  def subtree_membership_fq(anchor_uuid, anchor_noid)
+    member_of    = [anchor_uuid, *descendant_container_uuids(anchor_noid)]
+    containers_q = MembershipQuery.descendants_fq(anchor_noid)
+    members_q    = MembershipQuery.members_fq(member_of)
+    %({!bool should="#{containers_q}" should="#{members_q}"})
+  end
+
+  # uuids of every descendant Collection/Community of the anchor. Deliberately
+  # query-agnostic (`with({})`): the full container set is needed to scope the
+  # Works clause, regardless of the keyword the user typed. `rows` is lifted off
+  # the default page size so a deep tree isn't silently truncated to one page,
+  # and `fl` is trimmed to the id since that's all we read.
+  def descendant_container_uuids(anchor_noid)
+    builder = search_service.search_builder.with({}).with_filters(
+      MembershipQuery.descendants_fq(anchor_noid),
+      'internal_resource_tesim:(Collection OR Community)'
+    ).merge(rows: 100_000, fl: 'id')
+
+    Blacklight.default_index.search(builder).documents.map(&:id)
   end
 
   def iiif_thumbnail(document, *_args)
