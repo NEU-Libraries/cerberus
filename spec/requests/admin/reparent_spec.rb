@@ -42,11 +42,11 @@ RSpec.describe 'Admin::Reparent', type: :request do
       it 'forbids every step (before_action halts before the body)' do
         get '/admin/reparent'
         expect(response).to have_http_status(:forbidden)
-        get '/admin/reparent/choose_parent', params: { node_id: 'neu:x' }
+        get '/admin/reparent/choose_parent', params: { node_id: 'x' }
         expect(response).to have_http_status(:forbidden)
-        get '/admin/reparent/confirm', params: { node_id: 'neu:x' }
+        get '/admin/reparent/confirm', params: { node_id: 'x' }
         expect(response).to have_http_status(:forbidden)
-        post '/admin/reparent/move', params: { node_id: 'neu:x' }
+        post '/admin/reparent/move', params: { node_id: 'x' }
         expect(response).to have_http_status(:forbidden)
       end
     end
@@ -71,48 +71,48 @@ RSpec.describe 'Admin::Reparent', type: :request do
 
       it 'lists matching containers (with their NUID) when q is present' do
         allow(ResourceSearch).to receive(:call)
-          .and_return(fake_results(container_doc(noid: 'neu:abc', title: 'Archives Collection')))
+          .and_return(fake_results(container_doc(noid: 'abc', title: 'Archives Collection')))
         get '/admin/reparent', params: { q: 'arch' }
-        expect(response.body).to include('Archives Collection', 'neu:abc')
+        expect(response.body).to include('Archives Collection', 'abc')
       end
     end
 
     describe 'GET choose_parent (step 2)' do
       it 'shows the node being moved and the destination candidates' do
-        allow(AtlasRb::Resource).to receive(:find).with('neu:node')
-                                                  .and_return(atlas_node(noid: 'neu:node', title: 'Node Collection'))
+        allow(AtlasRb::Resource).to receive(:find).with('node')
+                                                  .and_return(atlas_node(noid: 'node', title: 'Node Collection'))
         allow(ResourceSearch).to receive(:call)
-          .and_return(fake_results(container_doc(noid: 'neu:par', title: 'Parent Community', klass: 'Community')))
+          .and_return(fake_results(container_doc(noid: 'par', title: 'Parent Community', klass: 'Community')))
 
-        get '/admin/reparent/choose_parent', params: { node_id: 'neu:node', node_uuid: 'uuid-node', q: 'par' }
+        get '/admin/reparent/choose_parent', params: { node_id: 'node', node_uuid: 'uuid-node', q: 'par' }
 
         expect(response).to have_http_status(:ok)
-        expect(response.body).to include('Node Collection', 'Parent Community', 'neu:par')
+        expect(response.body).to include('Node Collection', 'Parent Community', 'par')
       end
 
       it 'offers the top-level option for a Community' do
         allow(AtlasRb::Resource).to receive(:find)
-          .and_return(atlas_node(noid: 'neu:comm', klass: 'Community', title: 'A Community'))
-        get '/admin/reparent/choose_parent', params: { node_id: 'neu:comm' }
+          .and_return(atlas_node(noid: 'comm', klass: 'Community', title: 'A Community'))
+        get '/admin/reparent/choose_parent', params: { node_id: 'comm' }
         expect(response.body).to include('Move to the top level')
       end
 
       it 'does not offer top-level for a Collection' do
         allow(AtlasRb::Resource).to receive(:find)
-          .and_return(atlas_node(noid: 'neu:coll', klass: 'Collection', title: 'A Collection'))
-        get '/admin/reparent/choose_parent', params: { node_id: 'neu:coll' }
+          .and_return(atlas_node(noid: 'coll', klass: 'Collection', title: 'A Collection'))
+        get '/admin/reparent/choose_parent', params: { node_id: 'coll' }
         expect(response.body).not_to include('Move to the top level')
       end
     end
 
     describe 'GET confirm (step 3)' do
       it 'previews the move from current location to the chosen parent' do
-        allow(AtlasRb::Resource).to receive(:find).with('neu:node')
-                                                  .and_return(atlas_node(noid: 'neu:node', title: 'Node Collection'))
-        allow(AtlasRb::Resource).to receive(:find).with('neu:par')
-                                                  .and_return(atlas_node(noid: 'neu:par', klass: 'Community', title: 'Parent Community'))
+        allow(AtlasRb::Resource).to receive(:find).with('node')
+                                                  .and_return(atlas_node(noid: 'node', title: 'Node Collection'))
+        allow(AtlasRb::Resource).to receive(:find).with('par')
+                                                  .and_return(atlas_node(noid: 'par', klass: 'Community', title: 'Parent Community'))
 
-        get '/admin/reparent/confirm', params: { node_id: 'neu:node', parent_id: 'neu:par' }
+        get '/admin/reparent/confirm', params: { node_id: 'node', parent_id: 'par' }
 
         expect(response).to have_http_status(:ok)
         expect(response.body).to include('Confirm move', 'Node Collection', 'Parent Community')
@@ -121,26 +121,26 @@ RSpec.describe 'Admin::Reparent', type: :request do
 
     describe 'POST move' do
       before do
-        allow(AtlasRb::Resource).to receive(:find).with('neu:node')
-                                                  .and_return(atlas_node(noid: 'neu:node', klass: 'Collection', title: 'Node Collection'))
-        allow(AtlasRb::Resource).to receive(:find).with('neu:par')
-                                                  .and_return(atlas_node(noid: 'neu:par', klass: 'Community', title: 'Parent Community'))
+        allow(AtlasRb::Resource).to receive(:find).with('node')
+                                                  .and_return(atlas_node(noid: 'node', klass: 'Collection', title: 'Node Collection'))
+        allow(AtlasRb::Resource).to receive(:find).with('par')
+                                                  .and_return(atlas_node(noid: 'par', klass: 'Community', title: 'Parent Community'))
       end
 
       it 'reparents via atlas_rb and redirects to the node page on success' do
-        expect(AtlasRb::Collection).to receive(:reparent).with('neu:node', 'neu:par')
-                                                         .and_return(OpenStruct.new(id: 'neu:node'))
+        expect(AtlasRb::Collection).to receive(:reparent).with('node', 'par')
+                                                         .and_return(OpenStruct.new(id: 'node'))
 
-        post '/admin/reparent/move', params: { node_id: 'neu:node', parent_id: 'neu:par' }
+        post '/admin/reparent/move', params: { node_id: 'node', parent_id: 'par' }
 
-        expect(response).to redirect_to(collection_path('neu:node'))
+        expect(response).to redirect_to(collection_path('node'))
         expect(flash[:notice]).to include('Node Collection')
       end
 
       it 're-renders confirm with a generic alert when atlas returns nil' do
         allow(AtlasRb::Collection).to receive(:reparent).and_return(nil)
 
-        post '/admin/reparent/move', params: { node_id: 'neu:node', parent_id: 'neu:par' }
+        post '/admin/reparent/move', params: { node_id: 'node', parent_id: 'par' }
 
         expect(response).to have_http_status(:unprocessable_content)
         expect(response.body).to include('Move could not be completed')

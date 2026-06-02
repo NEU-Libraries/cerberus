@@ -26,8 +26,8 @@ RSpec.describe ResourceSearch do
     it 'excludes the node itself (uuid) and its subtree (noid) when moving' do
       filters = described_class.new(scope: scope, query: 'x',
                                     exclude_node_uuid:    'uuid-1',
-                                    exclude_subtree_noid: 'neu:abc').filters
-      expect(filters).to include('-id:"uuid-1"', '-ancestor_ids_ssim:"neu:abc"')
+                                    exclude_subtree_noid: 'abc').filters
+      expect(filters).to include('-id:"uuid-1"', '-ancestor_ids_ssim:"abc"')
     end
 
     it 'omits the exclusion clauses when not moving' do
