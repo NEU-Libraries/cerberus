@@ -75,6 +75,19 @@ describe CollectionsController do
         expect(url).not_to match(%r{/catalog})
       end
     end
+
+    context 'scoped "Search this collection" box' do
+      it 'renders a keyword search form targeting the collection show page' do
+        get :show, params: { id: collection.id, q: 'anything' }
+
+        expect(response.body).to include('Search this collection')
+        # The form GETs back to /collections/:id so find_children narrows
+        # this collection's children rather than escaping to /catalog.
+        expect(response.body).to match(
+          %r{<form[^>]*action="/collections/#{collection.id}"[^>]*method="get"}
+        )
+      end
+    end
   end
 
   describe 'new' do

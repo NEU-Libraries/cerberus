@@ -87,6 +87,19 @@ describe CommunitiesController do
         expect(url).not_to match(%r{/catalog})
       end
     end
+
+    context 'scoped "Search this community" box' do
+      it 'renders a keyword search form targeting the community show page' do
+        get :show, params: { id: community.id, q: 'anything' }
+
+        expect(response.body).to include('Search this community')
+        # The form GETs back to /communities/:id so find_children narrows
+        # this community's children rather than escaping to /catalog.
+        expect(response.body).to match(
+          %r{<form[^>]*action="/communities/#{community.id}"[^>]*method="get"}
+        )
+      end
+    end
   end
 
   describe 'show on a nonexistent community id' do

@@ -15,6 +15,7 @@
 //   _facets              — active-facet card muting
 //   _pagination          — search-results pagination as flat text links
 //   _search_controls     — sort/per-page/view controls relocated into sidebar
+//   _scoped_search       — "Search this collection/community" header box
 @import 'layout';
 @import 'blacklight_discovery';
 @import 'audit_history';
@@ -26,3 +27,4 @@
 @import 'facets';
 @import 'pagination';
 @import 'search_controls';
+@import 'scoped_search';

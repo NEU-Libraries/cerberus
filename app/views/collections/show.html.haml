@@ -8,6 +8,9 @@
     .row
       = render partial: "shared/thumbnail", locals: {src: @collection.thumbnail, src_2x: @collection.thumbnail_2x} if !@collection.thumbnail.blank?
       .col
+        - if @response.documents.present? || params[:q].present?
+          .scoped-search-wrap.float-md-end.ms-md-3.mb-3.mb-md-0
+            = render 'shared/scoped_search', path: collection_path(@collection.id), label: 'Search this collection'
         %h3.d-inline
           = @collection.title
         %h5.d-inline.text-black-50
