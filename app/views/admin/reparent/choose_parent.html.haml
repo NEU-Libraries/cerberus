@@ -1,0 +1,38 @@
+.admin-registry.my-3
+  %header.admin-registry__head
+    %span.admin-registry__title
+      %i.fa-solid.fa-sitemap{'aria-hidden' => 'true'}
+      Choose a new parent
+    .admin-registry__head-actions
+      = render 'steps', step: 2
+      %span.admin-registry__subtitle
+        %i.fa-solid.fa-lock{'aria-hidden' => 'true'}
+        Admin-only
+
+  .p-3
+    .reparent-node-summary
+      %span.reparent-node-summary__label Moving
+      = reparent_type_chip(@node.klass)
+      %span.reparent-node-summary__title= @node.resource.title
+      %span.admin-registry-table__id= @node.resource.id
+
+    %p.text-muted.small.mt-3.mb-3
+      Search for the
+      = @node.klass == 'Community' ? 'Community' : 'Community or Collection'
+      to move it under. The current location and any sub-containers are excluded automatically.
+
+    = render 'search_form', url: admin_reparent_choose_parent_path, q: params[:q], hidden: { node_id: @node.resource.id, node_uuid: params[:node_uuid] }, placeholder: 'Search for the new parent…'
+
+    - if @allows_top_level
+      .reparent-top-level
+        = link_to admin_reparent_confirm_path(node_id: @node.resource.id), class: 'reparent-top-level__link' do
+          %i.fa-solid.fa-arrow-up-from-bracket.me-1{'aria-hidden' => 'true'}
+          Move to the top level (no parent)
+
+  - if @results
+    = render 'results', results: @results, select_label: 'Select', select_url: ->(doc) { admin_reparent_confirm_path(node_id: @node.resource.id, parent_id: doc.to_param) }
+
+  .px-3.pb-3
+    = link_to admin_reparent_path, class: 'reparent-back' do
+      %i.fa-solid.fa-arrow-left.me-1{'aria-hidden' => 'true'}
+      Start over

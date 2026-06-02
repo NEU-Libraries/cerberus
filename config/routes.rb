@@ -55,10 +55,14 @@ Rails.application.routes.draw do
     root to: 'dashboard#index'
     resources :loaders, only: [:index, :new, :create, :edit, :update], param: :slug
 
-    # Structure-operation surfaces reached from the admin hub. The actual
-    # workflows (the re-parent + linked-member overlays) land on these
-    # index actions in follow-up work; for now they render their entry pages.
-    get 'reparent',       to: 'reparent#index'
+    # Re-parent / Move — a self-contained finder: index (find the node) →
+    # choose_parent (pick its new parent) → confirm (preview) → move (perform).
+    get  'reparent',               to: 'reparent#index'
+    get  'reparent/choose_parent', to: 'reparent#choose_parent', as: :reparent_choose_parent
+    get  'reparent/confirm',       to: 'reparent#confirm',       as: :reparent_confirm
+    post 'reparent/move',          to: 'reparent#move',          as: :reparent_move
+
+    # Linked-members overlay lands on this entry page in follow-up work.
     get 'linked_members', to: 'linked_members#index'
   end
 

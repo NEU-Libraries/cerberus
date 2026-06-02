@@ -1,0 +1,151 @@
+// ---------------------------------------------------------------------
+// Admin → Re-parent / Move finder. Lives inside the _admin_registry card
+// shell; this partial only adds the bits that shell doesn't already cover:
+// the 3-step indicator, the container type chip, the node summary strip,
+// and the from → to confirmation preview. Same restrained register as the
+// rest of the admin surfaces — desaturated tokens, no heavy effects.
+// ---------------------------------------------------------------------
+
+// Progress trail (Find › Destination › Confirm) in the card header. Number-
+// free on purpose — each step's page already carries a descriptive heading, so
+// a numbered stepper would just restate it. This is a quiet orientation cue:
+// muted steps, the current one picked out in the Cerberus blue.
+.reparent-progress {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+
+  &__step {
+    color: $gray-500;
+
+    &.is-active { color: $blue; }
+  }
+
+  &__sep .fa-solid {
+    color: $gray-400;
+    font-size: 0.85em;
+  }
+}
+
+// Container type chip (icon + label) used in result rows + previews.
+.reparent-type {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.78rem;
+  color: $gray-700;
+  white-space: nowrap;
+
+  .fa-solid {
+    color: $gray-500;
+    font-size: 0.9em;
+  }
+}
+
+// Constrain the search box so it doesn't sprawl the full card width.
+.reparent-search {
+  max-width: 32rem;
+
+  .input-group { flex-wrap: nowrap; }
+}
+
+// "Moving X" strip atop step 2.
+.reparent-node-summary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  padding: 0.6rem 0.75rem;
+  background-color: #f6f8fa;
+  border: 1px solid $gray-300;
+  border-radius: 0.4rem;
+
+  &__label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+    color: $gray-500;
+  }
+
+  &__title {
+    font-weight: 600;
+    color: $gray-800;
+  }
+}
+
+// Top-of-tree escape hatch (Communities only).
+.reparent-top-level {
+  margin-top: 0.85rem;
+
+  &__link {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: $blue;
+    text-decoration: none;
+
+    &:hover { text-decoration: underline; }
+  }
+}
+
+.reparent-back {
+  font-size: 0.82rem;
+  color: $gray-600;
+  text-decoration: none;
+
+  &:hover { color: $blue; }
+}
+
+// From → To confirmation preview.
+.reparent-preview {
+  border: 1px solid $gray-300;
+  border-radius: 0.5rem;
+  overflow: hidden;
+
+  &__node,
+  &__endpoint {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  &__node {
+    padding: 0.7rem 0.9rem;
+    background-color: #f6f8fa;
+    border-bottom: 1px solid $gray-300;
+  }
+
+  &__flow {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.9rem;
+    flex-wrap: wrap;
+  }
+
+  &__endpoint { flex: 1 1 12rem; }
+
+  &__caption {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+    color: $gray-500;
+    margin-right: 0.15rem;
+  }
+
+  &__title {
+    font-weight: 600;
+    color: $gray-800;
+  }
+
+  &__arrow {
+    color: $gray-400;
+    font-size: 1.1rem;
+  }
+}

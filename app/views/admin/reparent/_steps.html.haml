@@ -1,0 +1,6 @@
+%nav.reparent-progress{'aria-label' => 'Progress'}
+  - [[1, 'Find'], [2, 'Destination'], [3, 'Confirm']].each_with_index do |(num, label), i|
+    - if i.positive?
+      %span.reparent-progress__sep{'aria-hidden' => 'true'}
+        %i.fa-solid.fa-angle-right
+    %span.reparent-progress__step{class: ('is-active' if num == step), 'aria-current' => (num == step ? 'step' : nil)}= label
