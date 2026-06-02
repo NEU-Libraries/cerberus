@@ -251,7 +251,7 @@ class CatalogController < ApplicationController
     membership = if params[:q].present?
                    subtree_membership_fq(uuid, noid)
                  else
-                   MembershipQuery.members_fq([uuid])
+                   MembershipQuery.members_fq([uuid], include_linked: true)
                  end
 
     builder = search_service.search_builder
@@ -263,8 +263,8 @@ class CatalogController < ApplicationController
 
   # fq matching everything in the anchor's subtree: every descendant
   # Collection/Community (so a query can hit a sub-collection by its own
-  # metadata) OR every Work that is a member of the anchor or any of its
-  # descendant containers.
+  # metadata) OR every Work that is a member of — or linked into — the anchor or
+  # any of its descendant containers.
   #
   # Uses the two-step reverse-ancestry recipe documented on
   # {DescendantResolver} — resolve the descendant containers, then match their
@@ -274,7 +274,7 @@ class CatalogController < ApplicationController
   def subtree_membership_fq(anchor_uuid, anchor_noid)
     member_of    = [anchor_uuid, *descendant_container_uuids(anchor_noid)]
     containers_q = MembershipQuery.descendants_fq(anchor_noid)
-    members_q    = MembershipQuery.members_fq(member_of)
+    members_q    = MembershipQuery.members_fq(member_of, include_linked: true)
     %({!bool should="#{containers_q}" should="#{members_q}"})
   end
 
