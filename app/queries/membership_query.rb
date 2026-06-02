@@ -46,12 +46,34 @@ class MembershipQuery
     #   via {LINKED_FIELD}.
     # @return [String] an fq fragment (for `:fq`, never `:q`).
     def members_fq(container_uuids, include_linked: false)
-      terms = term_list(container_uuids)
-      structural = "{!terms f=#{STRUCTURAL_FIELD}}#{terms}"
-      return structural unless include_linked
+      any_of(member_clauses(container_uuids, include_linked: include_linked))
+    end
 
-      linked = "{!terms f=#{LINKED_FIELD}}#{terms}"
-      %({!bool should="#{structural}" should="#{linked}"})
+    # The individual membership should-clauses (structural, plus the linked
+    # overlay when +include_linked+). Exposed so a caller that needs to OR these
+    # alongside *other* clauses — e.g. the subtree search's container clause —
+    # can splice them into a single flat {!bool} rather than nesting one bool
+    # inside another's quoted `should=`, which Solr's parser rejects.
+    #
+    # @return [Array<String>] one or two {!terms} fragments.
+    def member_clauses(container_uuids, include_linked: false)
+      terms = term_list(container_uuids)
+      clauses = ["{!terms f=#{STRUCTURAL_FIELD}}#{terms}"]
+      clauses << "{!terms f=#{LINKED_FIELD}}#{terms}" if include_linked
+      clauses
+    end
+
+    # OR a set of fq clauses into one flat {!bool}. A single clause is returned
+    # bare (no redundant wrapper); never nest the result inside another bool's
+    # quoted `should=` — build one flat {!bool} from all clauses instead.
+    #
+    # @param clauses [Array<String>] fq fragments.
+    # @return [String] a single fq fragment.
+    def any_of(clauses)
+      clauses = Array(clauses).compact
+      return clauses.first if clauses.one?
+
+      %({!bool #{clauses.map { |clause| %(should="#{clause}") }.join(' ')}})
     end
 
     private

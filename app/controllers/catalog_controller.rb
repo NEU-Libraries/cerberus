@@ -272,10 +272,14 @@ class CatalogController < ApplicationController
   # themselves *and* threads the live search state through (via the caller's
   # `.with(search_state)`), which is why it can't reuse `DescendantResolver#call`.
   def subtree_membership_fq(anchor_uuid, anchor_noid)
-    member_of    = [anchor_uuid, *descendant_container_uuids(anchor_noid)]
-    containers_q = MembershipQuery.descendants_fq(anchor_noid)
-    members_q    = MembershipQuery.members_fq(member_of, include_linked: true)
-    %({!bool should="#{containers_q}" should="#{members_q}"})
+    member_of = [anchor_uuid, *descendant_container_uuids(anchor_noid)]
+    # One FLAT {!bool}: the descendant-containers clause OR each membership
+    # clause (structural + linked). Nesting members_fq's own {!bool} inside a
+    # quoted should= breaks Solr's parser, so splice the raw clauses instead.
+    MembershipQuery.any_of(
+      [MembershipQuery.descendants_fq(anchor_noid),
+       *MembershipQuery.member_clauses(member_of, include_linked: true)]
+    )
   end
 
   # uuids of every descendant Collection/Community of the anchor. Deliberately
