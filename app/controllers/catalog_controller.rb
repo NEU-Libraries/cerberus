@@ -222,16 +222,6 @@ class CatalogController < ApplicationController
     # config.autocomplete_suggester = 'mySuggester'
   end
 
-  # Non-membership types that are never listed as children of a
-  # Community/Collection (file-level resources + tombstones), layered on top
-  # of whichever membership filter is in play.
-  CHILD_TYPE_EXCLUSIONS = [
-    '-internal_resource_tesim:FileSet',
-    '-internal_resource_tesim:Blob',
-    '-internal_resource_tesim:Delegate',
-    '-tombstoned_bsi:true'
-  ].freeze
-
   # Children listing for a Community/Collection show page.
   #
   # Two modes, switched on whether a keyword query is active:
@@ -245,8 +235,11 @@ class CatalogController < ApplicationController
   #   children.
   #
   # Either way the current search state (q, facets, sort, per_page, page) is
-  # seeded onto the builder before the membership + exclusion filters are
-  # layered on — passing `with({})` would silently discard the user's query.
+  # seeded onto the builder before the membership filter is layered on —
+  # passing `with({})` would silently discard the user's query. The file-level
+  # / tombstone type exclusions are not repeated here: they live in
+  # config.default_solr_params, which Blacklight's processor chain seeds onto
+  # the :fq of every search-like query (this one included).
   #
   # @param uuid [String] the anchor's valkyrie_id (uuid), as stored in the
   #   structural membership field.
@@ -263,7 +256,7 @@ class CatalogController < ApplicationController
 
     builder = search_service.search_builder
                             .with(search_state)
-                            .with_filters(membership, *CHILD_TYPE_EXCLUSIONS)
+                            .with_filters(membership)
 
     Blacklight.default_index.search(builder)
   end
