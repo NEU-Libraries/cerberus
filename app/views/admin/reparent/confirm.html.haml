@@ -13,7 +13,7 @@
     .reparent-preview
       .reparent-preview__node
         %span.reparent-preview__caption Moving
-        = reparent_type_chip(@node.klass)
+        = finder_type_chip(@node.klass)
         %span.reparent-preview__title= @node.resource.title
         %span.admin-registry-table__id= @node.resource.id
 
@@ -21,7 +21,7 @@
         .reparent-preview__endpoint
           %span.reparent-preview__caption From
           - if @current_parent
-            = reparent_type_chip(@current_parent.klass)
+            = finder_type_chip(@current_parent.klass)
             %span.reparent-preview__title= @current_parent.title
             %span.admin-registry-table__id= @current_parent.noid
           - else
@@ -30,7 +30,7 @@
         .reparent-preview__endpoint
           %span.reparent-preview__caption To
           - if @destination
-            = reparent_type_chip(@destination.klass)
+            = finder_type_chip(@destination.klass)
             %span.reparent-preview__title= @destination.resource.title
             %span.admin-registry-table__id= @destination.resource.id
           - else

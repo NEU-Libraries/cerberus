@@ -43,7 +43,7 @@ module Admin
       @allows_top_level = @node.klass == 'Community'
       return if params[:q].blank?
 
-      @results = ContainerSearch.call(
+      @results = ResourceSearch.call(
         scope:                self,
         query:                params[:q],
         types:                ALLOWED_PARENTS.fetch(@node.klass, []),
@@ -82,7 +82,7 @@ module Admin
       end
 
       def search_containers
-        ContainerSearch.call(scope: self, query: params[:q])
+        ResourceSearch.call(scope: self, query: params[:q])
       end
 
       def reparent(node, parent_id)

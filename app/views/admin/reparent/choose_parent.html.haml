@@ -12,7 +12,7 @@
   .p-3
     .reparent-node-summary
       %span.reparent-node-summary__label Moving
-      = reparent_type_chip(@node.klass)
+      = finder_type_chip(@node.klass)
       %span.reparent-node-summary__title= @node.resource.title
       %span.admin-registry-table__id= @node.resource.id
 
@@ -21,7 +21,7 @@
       = @node.klass == 'Community' ? 'Community' : 'Community or Collection'
       to move it under. The current location and any sub-containers are excluded automatically.
 
-    = render 'search_form', url: admin_reparent_choose_parent_path, q: params[:q], hidden: { node_id: @node.resource.id, node_uuid: params[:node_uuid] }, placeholder: 'Search for the new parent…'
+    = render 'admin/finder/search_form', url: admin_reparent_choose_parent_path, q: params[:q], hidden: { node_id: @node.resource.id, node_uuid: params[:node_uuid] }, placeholder: 'Search for the new parent…'
 
     - if @allows_top_level
       .reparent-top-level
@@ -30,7 +30,7 @@
           Move to the top level (no parent)
 
   - if @results
-    = render 'results', results: @results, select_label: 'Select', select_url: ->(doc) { admin_reparent_confirm_path(node_id: @node.resource.id, parent_id: doc.to_param) }
+    = render 'admin/finder/results', results: @results, select_label: 'Select', select_url: ->(doc) { admin_reparent_confirm_path(node_id: @node.resource.id, parent_id: doc.to_param) }
 
   .px-3.pb-3
     = link_to admin_reparent_path, class: 'reparent-back' do

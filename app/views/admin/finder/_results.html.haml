@@ -11,8 +11,8 @@
         - results.documents.each do |doc|
           %tr
             %td
-              .admin-registry-table__name= reparent_doc_title(doc)
-            %td= reparent_type_chip(doc.klass_type)
+              .admin-registry-table__name= finder_doc_title(doc)
+            %td= finder_type_chip(doc.klass_type)
             %td
               %span.admin-registry-table__id= doc.to_param
             %td.text-end

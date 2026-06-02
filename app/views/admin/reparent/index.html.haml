@@ -12,7 +12,7 @@
   .p-3
     %p.text-muted.small.mb-3
       Find the Collection or Community you want to move. Search by title — the NUID is shown beside each result so you can tell similarly-named containers apart.
-    = render 'search_form', url: admin_reparent_path, q: params[:q], hidden: {}, placeholder: 'Search collections & communities…'
+    = render 'admin/finder/search_form', url: admin_reparent_path, q: params[:q], hidden: {}, placeholder: 'Search collections & communities…'
 
   - if @results
-    = render 'results', results: @results, select_label: 'Choose', select_url: ->(doc) { admin_reparent_choose_parent_path(node_id: doc.to_param, node_uuid: doc.id) }
+    = render 'admin/finder/results', results: @results, select_label: 'Choose', select_url: ->(doc) { admin_reparent_choose_parent_path(node_id: doc.to_param, node_uuid: doc.id) }

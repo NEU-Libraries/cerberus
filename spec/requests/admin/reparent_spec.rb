@@ -70,7 +70,7 @@ RSpec.describe 'Admin::Reparent', type: :request do
       end
 
       it 'lists matching containers (with their NUID) when q is present' do
-        allow(ContainerSearch).to receive(:call)
+        allow(ResourceSearch).to receive(:call)
           .and_return(fake_results(container_doc(noid: 'neu:abc', title: 'Archives Collection')))
         get '/admin/reparent', params: { q: 'arch' }
         expect(response.body).to include('Archives Collection', 'neu:abc')
@@ -81,7 +81,7 @@ RSpec.describe 'Admin::Reparent', type: :request do
       it 'shows the node being moved and the destination candidates' do
         allow(AtlasRb::Resource).to receive(:find).with('neu:node')
                                                   .and_return(atlas_node(noid: 'neu:node', title: 'Node Collection'))
-        allow(ContainerSearch).to receive(:call)
+        allow(ResourceSearch).to receive(:call)
           .and_return(fake_results(container_doc(noid: 'neu:par', title: 'Parent Community', klass: 'Community')))
 
         get '/admin/reparent/choose_parent', params: { node_id: 'neu:node', node_uuid: 'uuid-node', q: 'par' }

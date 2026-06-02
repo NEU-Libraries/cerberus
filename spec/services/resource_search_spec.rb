@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe ContainerSearch do
+RSpec.describe ResourceSearch do
   # Plain double (see search_builder_spec): current_user isn't a verifiable
   # instance method on CatalogController.
   let(:scope) do

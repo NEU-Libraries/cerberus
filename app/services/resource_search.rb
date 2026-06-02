@@ -1,27 +1,30 @@
 # frozen_string_literal: true
 
-# Keyword search over container resources (Collections / Communities) for the
-# admin re-parent finder. Mirrors {DescendantResolver}'s
-# `Blacklight.default_index.search(builder)` idiom, but instead of resolving a
-# subtree it answers "which containers match what the admin typed?".
+# Keyword search over repository resources of given internal_resource types
+# (Works, Collections, Communities) for the admin finders — the re-parent flow
+# searches containers; the linked-members flow searches Works then Collections.
+# Mirrors {DescendantResolver}'s `Blacklight.default_index.search(builder)` idiom,
+# but instead of resolving a subtree it answers "which resources of these types
+# match what the admin typed?".
 #
 # Visibility: this runs through the normal {SearchBuilder} chain, so it inherits
-# the (now admin-aware) gated discovery — an admin sees non-public containers,
-# which is the whole point of the finder. It is only ever invoked from the
-# admin-gated re-parent controller.
+# the (now admin-aware) gated discovery — an admin sees non-public resources,
+# which is the whole point of the finders. It is only ever invoked from the
+# admin-gated controllers.
 #
-# Step 2 (choosing a destination) passes +exclude_node_uuid+ and
+# The re-parent destination step passes +exclude_node_uuid+ and
 # +exclude_subtree_noid+ so the moved node itself and every container beneath it
-# are filtered out of the candidate list — pre-empting Atlas's `cycle` /
+# are filtered out of the candidates — pre-empting Atlas's `cycle` /
 # into-own-descendant rejection before the admin can pick an invalid parent.
-class ContainerSearch < ApplicationService
+class ResourceSearch < ApplicationService
   DEFAULT_PER_PAGE = 25
 
   # @param scope [#blacklight_config, #current_user] the controller; supplies
   #   the Blacklight config (copied from CatalogController) and the acting user
   #   that gated discovery reads.
   # @param query [String, nil] the admin's keyword query. Blank => no search.
-  # @param types [Array<String>] container types to match (internal_resource).
+  # @param types [Array<String>] internal_resource types to match
+  #   (e.g. %w[Work], %w[Collection Community]).
   # @param exclude_node_uuid [String, nil] Solr `id` (uuid) of the node being
   #   moved — excluded so a node can't be its own parent.
   # @param exclude_subtree_noid [String, nil] noid of the node being moved —
