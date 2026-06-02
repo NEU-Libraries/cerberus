@@ -225,24 +225,13 @@ class CatalogController < ApplicationController
   def find_children(id)
     return Blacklight::Solr::Response.new({}, {}) if id.blank?
 
-    builder = search_service.search_builder.with({}).merge(
-      fq: [
-        "a_member_of_tesim:\"id-#{id}\"",
-        '-internal_resource_tesim:FileSet',
-        '-internal_resource_tesim:Blob',
-        '-internal_resource_tesim:Delegate',
-        '-tombstoned_bsi:true'
-      ]
+    builder = search_service.search_builder.with({}).with_filters(
+      MembershipQuery.members_fq([id]),
+      '-internal_resource_tesim:FileSet',
+      '-internal_resource_tesim:Blob',
+      '-internal_resource_tesim:Delegate',
+      '-tombstoned_bsi:true'
     )
-
-    Blacklight.default_index.search(builder)
-  end
-
-  def find_many(ids)
-    return Blacklight::Solr::Response.new({}, {}) if ids.blank?
-
-    id_query = ids.map { |id| "\"id-#{id}\"" }.join(' OR ')
-    builder = search_service.search_builder.with({}).merge(fq: ["alternate_ids_tsi:(#{id_query})"])
 
     Blacklight.default_index.search(builder)
   end

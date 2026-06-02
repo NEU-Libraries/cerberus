@@ -61,9 +61,68 @@
   padding: 2px;
 }
 
+// List-view results as discrete row cards.
+//
+// Wrapping the whole list in one panel read as a single oversized
+// slab that dwarfed the compact facet card beside it. Instead, give
+// each result its own small white card — the facet-card chrome
+// (#fff / gray-300 / matching radius) applied per row — so the
+// column reads as a stack of discrete, scannable objects rather than
+// a monolith, and rhymes with the gallery view (where each item is
+// already its own card). The per-row border replaces Blacklight's
+// dotted divider; the gap between cards does the separating. The
+// #documents id keeps this ahead of the gem's bare .documents-list
+// rules on specificity.
+#documents.documents-list .document {
+  background-color: var(--bs-body-bg); // #fff — the facet .card surface
+  border: 1px solid var(--bs-border-color); // $gray-300; also overrides the gem's dotted bottom divider
+  border-radius: var(--bs-border-radius);
+  margin-top: 0.75rem;
+  // The unbalanced gap under short cards came from the gem's 48px
+  // thumbnail bottom margin (zeroed below), not the padding — so a
+  // modest 0.5rem bottom keeps content off the lower border without
+  // reintroducing the dead band.
+  padding: 1rem 1rem 0.5rem;
+
+  // Blacklight hangs a $spacer * 3 (48px) bottom margin off the
+  // thumbnail. In a flex row that reserves dead space below short
+  // cards rather than separating anything — zero it so card height
+  // tracks the actual content. The #documents id out-specifies the
+  // gem's .documents-list .document .document-thumbnail rule.
+  .document-thumbnail {
+    margin-bottom: 0;
+  }
+
+  // Align the first card's top edge with the facet card across the
+  // gutter. The "Displaying N of M" bar above this column is shorter
+  // than the sidebar's "Limit your search" heading, leaving the first
+  // card ~7px high; the nudge re-levels the two columns' ceilings.
+  &:first-child {
+    margin-top: calc(0.75rem + 7px);
+  }
+
+  // Quiet hover affordance — the title is a link, so the whole row is
+  // effectively a target. A faint border-darken + lift, nothing showy,
+  // in keeping with the institutional register.
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+  &:hover {
+    border-color: $gray-400;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  }
+}
+
 .documents-list .document-thumbnail {
   padding-left: 0;
   margin-right: 3rem;
+}
+
+.gallery-title.document-title-heading {
+  font-size: 1.05rem;
+}
+
+.documents-list .document .document-title-heading {
+font-size: 1.05rem;
 }
 
 .facet-limit .btn {
