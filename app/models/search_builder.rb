@@ -6,6 +6,15 @@ class SearchBuilder < Blacklight::SearchBuilder
   self.default_processor_chain += [:apply_gated_discovery, :append_extra_filters]
 
   def apply_gated_discovery(solr_parameters)
+    # Admins carry the `can :manage, :all` short-circuit in Ability, but that
+    # only governs CanCanCan checks on documents already in hand — it never
+    # touches the Solr query. Mirror the short-circuit at the discovery layer
+    # so an admin (who may belong to no groups) actually *sees* every resource
+    # in search, not just public ones. Without this, admin-only surfaces that
+    # need to find non-public containers (e.g. the re-parent finder) silently
+    # return only public hits.
+    return if current_user&.admin?
+
     solr_parameters[:fq] ||= []
     solr_parameters[:fq] << "{!terms f=read_access_group_ssim}#{discovery_permissions.join(',')}"
   end
@@ -36,10 +45,13 @@ class SearchBuilder < Blacklight::SearchBuilder
 
   private
 
+    def current_user
+      scope.respond_to?(:current_user) ? scope.current_user : nil
+    end
+
     def discovery_permissions
       permissions = ['public']
-      user = scope.respond_to?(:current_user) ? scope.current_user : nil
-      permissions.concat(Array(user&.groups))
+      permissions.concat(Array(current_user&.groups))
       permissions.uniq
     end
 end
