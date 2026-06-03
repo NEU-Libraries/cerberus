@@ -10,6 +10,14 @@ module Admin
   # On-Behalf-Of header is authorized against the admin role), so this gate
   # is the Cerberus half of a two-sided guarantee, not the only one.
   class ImpersonationsController < BaseController
+    # This controller manages the impersonation session itself, so it is
+    # exempt from the view-as write guard — otherwise the banner's Exit
+    # (a DELETE) and switching modes (a POST) would trip the guard and end
+    # the session with a misleading "write attempted" message instead of
+    # doing their job. enforce_impersonation_ttl / set_impersonation_context
+    # still run.
+    skip_before_action :reject_writes_in_view_as
+
     MODES = {
       acting_as: { starter: :start_acting_as, verb: 'acting as' },
       view_as:   { starter: :start_view_as,   verb: 'viewing as' }

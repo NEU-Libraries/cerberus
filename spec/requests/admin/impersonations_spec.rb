@@ -123,5 +123,39 @@ RSpec.describe 'Admin::Impersonations', type: :request do
         expect(flash[:notice]).to match(/Impersonation ended/)
       end
     end
+
+    # The app-wide reject_writes_in_view_as guard, exercised through the real
+    # before_action chain (ApplicationController includes the concern).
+    describe 'view-as write guard' do
+      before do
+        stub_target('000000002')
+        post admin_view_as_path, params: { nuid: '000000002' }
+        expect(session[:view_as_nuid]).to eq('000000002')
+      end
+
+      it 'ends the session on a write to a guarded route, before the action runs' do
+        # PATCH /works/:id would hit Atlas in the action — the guard fires
+        # first, so no stub is needed and Atlas is never touched.
+        patch work_path('anything')
+
+        expect(session[:view_as_nuid]).to be_blank
+        expect(response).to redirect_to(root_path)
+        expect(flash[:alert]).to match(/Write attempted during View-as/)
+      end
+
+      it 'permits a GET and keeps the session' do
+        get admin_root_path # a GET that renders without touching Atlas
+        expect(response).to have_http_status(:ok)
+        expect(session[:view_as_nuid]).to eq('000000002')
+      end
+
+      it 'exempts the impersonation controller so Exit ends cleanly' do
+        delete admin_impersonation_path
+
+        expect(session[:view_as_nuid]).to be_blank
+        expect(flash[:notice]).to match(/Impersonation ended/)
+        expect(flash[:alert]).to be_blank
+      end
+    end
   end
 end
