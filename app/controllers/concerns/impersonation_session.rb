@@ -20,6 +20,10 @@
 #
 # Session state lives in the Rails session cookie with a 30-minute sliding
 # (inactivity) TTL. All termination paths funnel through #end_impersonation.
+#
+# rubocop:disable Metrics/ModuleLength -- a cohesive state machine (predicates,
+# lifecycle, TTL, context plumbing, hydration); splitting it would scatter the
+# session logic across files for no readability gain.
 module ImpersonationSession
   extend ActiveSupport::Concern
 
@@ -72,25 +76,40 @@ module ImpersonationSession
 
   def start_acting_as(target_nuid)
     end_impersonation # mutual exclusion + clean clock
+    # Fail-closed: record the session start BEFORE establishing it, so an
+    # admin can never impersonate without an audit trail. A failed emit
+    # raises (Faraday) and the session is never set; the controller rescues
+    # it into a friendly error.
+    emit_impersonation_event('impersonation_started', target_nuid, 'acting_as')
     session[:acting_as_nuid] = target_nuid
     stamp_impersonation_clock
-    # AUDIT (deferred): emit impersonation_started{mode: acting_as}.
-    # See ~/projects/gap_reports/impersonation_session_audit_gap.md.
   end
 
   def start_view_as(target_nuid)
     end_impersonation
+    emit_impersonation_event('impersonation_started', target_nuid, 'view_as')
     session[:view_as_nuid] = target_nuid
     stamp_impersonation_clock
-    # AUDIT (deferred): emit impersonation_started{mode: view_as}.
   end
 
   def end_impersonation
-    # AUDIT (deferred): emit impersonation_ended for the active mode.
+    mode   = ('acting_as' if acting_as?) || ('view_as' if view_as?)
+    target = acting_as_nuid || view_as_nuid
+
     session.delete(:acting_as_nuid)
     session.delete(:view_as_nuid)
     session.delete(:impersonation_started_at)
     session.delete(:impersonation_last_active_at)
+
+    # Best-effort: the session is already torn down above, so a failed audit
+    # emit must never trap the admin mid-impersonation. Log and move on.
+    return unless mode
+
+    begin
+      emit_impersonation_event('impersonation_ended', target, mode)
+    rescue Faraday::Error => e
+      Rails.logger.error("impersonation_ended audit emit failed: #{e.class} #{e.message}")
+    end
   end
 
   private
@@ -128,6 +147,19 @@ module ImpersonationSession
       end
     end
 
+    # Record a session-scoped AuditEvent (no resource to hang it on) via
+    # atlas_rb's emit binding. actor_nuid is passed explicitly (the admin) —
+    # the gem uses it as the User: header and the recorded principal, so the
+    # admin gate holds even on an impersonation_ended emit fired mid-teardown.
+    def emit_impersonation_event(action, target_nuid, mode)
+      AtlasRb::AuditEvent.emit(
+        action:            action,
+        actor_nuid:        current_user&.nuid,
+        on_behalf_of_nuid: target_nuid,
+        mode:              mode
+      )
+    end
+
     def stamp_impersonation_clock
       now = Time.current.iso8601
       session[:impersonation_started_at]     = now
@@ -136,10 +168,17 @@ module ImpersonationSession
 
     # No DB — User is a session-built ActiveModel. Hydrate role+groups from
     # Atlas with the same GET /user call SSO sign-in uses.
+    #
+    # Crucially this is a plain profile lookup, NOT an on-behalf-of operation,
+    # so it must not inherit the ambient Current.on_behalf_of set during an
+    # acting-as session. That call sets the `User:` header to the target
+    # (a non-admin); if the leaked On-Behalf-Of rode along, Atlas's admin-gate
+    # on the header would reject the self-lookup and the banner would show
+    # "Unknown user". Suppress on_behalf_of for the duration of the lookup.
     def hydrate_user(nuid)
       return if nuid.blank?
 
-      values = AtlasRb::Authentication.login(nuid)
+      values = Current.set(on_behalf_of: nil) { AtlasRb::Authentication.login(nuid) }
       User.new(
         email:  values.email,
         nuid:   values.nuid,
@@ -158,3 +197,4 @@ module ImpersonationSession
       @view_as_target ||= hydrate_user(view_as_nuid) || User.new(groups: [], role: 'guest')
     end
 end
+# rubocop:enable Metrics/ModuleLength

@@ -67,7 +67,13 @@ RSpec.describe 'Admin::Impersonations', type: :request do
   end
 
   describe 'as :admin' do
-    before { sign_in admin_user }
+    before do
+      sign_in admin_user
+      # Starting/ending a session emits a session-scoped AuditEvent; stub the
+      # binding so request specs don't reach Atlas. The dedicated context below
+      # overrides it to exercise the fail-closed path.
+      allow(AtlasRb::AuditEvent).to receive(:emit)
+    end
 
     describe 'POST /admin/act_as' do
       it 'starts an acting-as session and redirects with a notice' do
@@ -78,6 +84,27 @@ RSpec.describe 'Admin::Impersonations', type: :request do
         expect(session[:view_as_nuid]).to be_blank
         expect(response).to redirect_to(root_path)
         expect(flash[:notice]).to match(/acting as Jane Doe \(000000002\)/)
+      end
+
+      it 'records the session start (admin actor, target, mode)' do
+        stub_target('000000002')
+        post admin_act_as_path, params: { nuid: '000000002' }
+
+        expect(AtlasRb::AuditEvent).to have_received(:emit).with(
+          hash_including(action: 'impersonation_started', actor_nuid: admin_user.nuid,
+                         on_behalf_of_nuid: '000000002', mode: 'acting_as')
+        )
+      end
+
+      it 'is fail-closed: an audit-emit failure starts no session and warns' do
+        stub_target('000000002')
+        allow(AtlasRb::AuditEvent).to receive(:emit).and_raise(Faraday::ConnectionFailed, 'down')
+
+        post admin_act_as_path, params: { nuid: '000000002' }
+
+        expect(session[:acting_as_nuid]).to be_blank
+        expect(response).to redirect_to(admin_root_path)
+        expect(flash[:alert]).to match(/audit service is unavailable/)
       end
     end
 

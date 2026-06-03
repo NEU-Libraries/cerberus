@@ -44,14 +44,29 @@ module Admin
     private
 
       def begin_impersonation(mode)
-        target = params[:nuid].to_s.strip
-        user   = target.present? ? hydrate_user(target) : nil
+        user = resolve_target
         return redirect_to admin_root_path, alert: 'Enter a valid NUID to impersonate.' if user.nil?
 
-        send(MODES.fetch(mode)[:starter], target)
+        cfg = MODES.fetch(mode)
+        send(cfg[:starter], user.nuid)
         redirect_to root_path,
-                    notice: "Now #{MODES.fetch(mode)[:verb]} #{user.pretty_name} (#{target}). " \
-                            'Use the banner to exit.'
+                    notice: "Now #{cfg[:verb]} #{user.pretty_name} (#{user.nuid}). Use the banner to exit."
+      rescue Faraday::Error => e
+        # Fail-closed: start_* records the session-start AuditEvent before
+        # establishing the session, so a failed emit means no session was
+        # set. Don't strand the admin in a 500 — surface it and let them retry.
+        Rails.logger.error("impersonation start audit emit failed: #{e.class} #{e.message}")
+        redirect_to admin_root_path,
+                    alert: 'Could not start the session — the audit service is unavailable. Please try again.'
+      end
+
+      # Hydrate the target NUID into a User (name for the flash, nuid for the
+      # session). nil for a blank entry (no Atlas call) or a failed lookup.
+      def resolve_target
+        nuid = params[:nuid].to_s.strip
+        return if nuid.blank?
+
+        hydrate_user(nuid)
       end
   end
 end
