@@ -22,7 +22,7 @@
       </span>
 
       <span class="impersonation-banner__note">
-        <%= acting_as? ? 'Writes are attributed to this user.' : 'Read-only — a write ends this session.' %>
+        <%= acting_as? ? 'Writes are attributed to this user.' : 'Read-only — a write attempt is blocked and ends the session.' %>
       </span>
 
       <%= button_to admin_impersonation_path, method: :delete,
