@@ -68,6 +68,12 @@ Rails.application.routes.draw do
     get    'linked_members/manage', to: 'linked_members#manage',  as: :linked_members_manage
     post   'linked_members/add',    to: 'linked_members#add',     as: :linked_members_add
     delete 'linked_members/remove', to: 'linked_members#remove',  as: :linked_members_remove
+
+    # Impersonation — start acting-as (write) or view-as (read-only) for a
+    # target NUID; one termination route ends whichever mode is active.
+    post   'act_as',        to: 'impersonations#create_acting_as', as: :act_as
+    post   'view_as',       to: 'impersonations#create_view_as',   as: :view_as
+    delete 'impersonation', to: 'impersonations#destroy',          as: :impersonation
   end
 
   get '/downloads/:id', to: 'downloads#show', as: :download

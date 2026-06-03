@@ -111,7 +111,7 @@ module ImpersonationSession
       return if request.get? || request.head?
 
       end_impersonation
-      redirect_to main_app.root_path,
+      redirect_to root_path,
                   alert: 'Write attempted during View-as — the session has ended.'
     end
 
