@@ -23,6 +23,11 @@ module Admin
       view_as:   { starter: :start_view_as,   verb: 'viewing as' }
     }.freeze
 
+    # The hub action surface: renders the NUID-entry start form. Reached from
+    # the admin dashboard's Impersonation card, matching the other admin
+    # actions (Re-parent, Linked members) which open onto their own page.
+    def new; end
+
     def create_acting_as
       begin_impersonation(:acting_as)
     end

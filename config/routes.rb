@@ -69,11 +69,13 @@ Rails.application.routes.draw do
     post   'linked_members/add',    to: 'linked_members#add',     as: :linked_members_add
     delete 'linked_members/remove', to: 'linked_members#remove',  as: :linked_members_remove
 
-    # Impersonation — start acting-as (write) or view-as (read-only) for a
-    # target NUID; one termination route ends whichever mode is active.
+    # Impersonation — a hub action surface (GET) hosting the start form, then
+    # begin acting-as (write) or view-as (read-only) for a target NUID; the
+    # DELETE (reusing admin_impersonation_path) ends whichever mode is active.
+    get    'impersonation', to: 'impersonations#new',              as: :impersonation
     post   'act_as',        to: 'impersonations#create_acting_as', as: :act_as
     post   'view_as',       to: 'impersonations#create_view_as',   as: :view_as
-    delete 'impersonation', to: 'impersonations#destroy',          as: :impersonation
+    delete 'impersonation', to: 'impersonations#destroy'
   end
 
   get '/downloads/:id', to: 'downloads#show', as: :download

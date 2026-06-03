@@ -8,12 +8,12 @@
 // must never forget it, but this is an institutional repository, not a
 // klaxon — the persistent left rail + badge carry the signal; the field
 // stays quiet enough to work in front of all day.
-//   acting-as  amber  — you are WRITING as someone; caution.
-//   view-as    navy   — read-only; the repository's own primary tone.
+//   acting-as  red    — you are WRITING as someone; highest danger.
+//   view-as    amber  — read-only; caution, not alarm.
 // ---------------------------------------------------------------------
 
-$impersonation-tone-acting: #b8801f; // desaturated amber — NOT Bootstrap's punchy $warning
-$impersonation-tone-view:   #385775; // the footer navy — read, not alarm
+$impersonation-tone-acting: #a8322a; // desaturated brick red — acting-as WRITES as someone; highest danger
+$impersonation-tone-view:   #b8801f; // desaturated amber — caution, but read-only
 
 .impersonation-banner {
   --impersonation-color: #{$gray-600};

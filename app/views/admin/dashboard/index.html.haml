@@ -31,4 +31,12 @@
         Open
         %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
 
-  = render 'admin/impersonations/start'
+    = link_to admin_impersonation_path, class: 'admin-action-card admin-action-card--impersonation', role: 'listitem' do
+      %span.admin-action-card__icon
+        %i.fa-solid.fa-user-secret{'aria-hidden' => 'true'}
+      %span.admin-action-card__title Impersonation
+      %span.admin-action-card__desc
+        Act as another user (writes attributed to them) or view the repository read-only as they see it. A persistent banner marks the session.
+      %span.admin-action-card__cta
+        Open
+        %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}

@@ -41,6 +41,11 @@ RSpec.describe 'Admin::Impersonations', type: :request do
         post admin_view_as_path, params: { nuid: '000000002' }
         expect(response).to have_http_status(:forbidden)
       end
+
+      it 'rejects GET /admin/impersonation (start surface) with 403' do
+        get admin_impersonation_path
+        expect(response).to have_http_status(:forbidden)
+      end
     end
 
     context 'unauthenticated' do
@@ -48,6 +53,16 @@ RSpec.describe 'Admin::Impersonations', type: :request do
         post admin_act_as_path, params: { nuid: '000000002' }
         expect(response).to redirect_to(new_user_session_path)
       end
+    end
+  end
+
+  describe 'GET /admin/impersonation (start surface)' do
+    it 'renders the start form for an admin' do
+      sign_in admin_user
+      get admin_impersonation_path
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('Target NUID')
     end
   end
 

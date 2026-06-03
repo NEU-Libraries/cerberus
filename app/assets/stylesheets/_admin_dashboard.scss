@@ -143,7 +143,27 @@
   }
 
   // Tones — desaturated Cerberus tokens, one line per action.
-  // Navy/teal for structural moves; teal-green for discovery links.
-  &--structure { --admin-action-color: #{$blue}; }
-  &--link      { --admin-action-color: #{$success}; }
+  // Navy/teal for structural moves; teal-green for discovery links;
+  // desaturated brick-red for impersonation (the high-danger surface).
+  &--structure    { --admin-action-color: #{$blue}; }
+  &--link         { --admin-action-color: #{$success}; }
+  &--impersonation { --admin-action-color: #a8322a; }
+}
+
+// Back-link on a dedicated admin action surface (e.g. the impersonation
+// start page) returning to the hub. Quiet, left-aligned, above the card.
+.admin-actions__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: $gray-600;
+  text-decoration: none;
+
+  &:hover,
+  &:focus-visible { color: $primary; }
+
+  .fa-solid { font-size: 0.9em; }
 }
