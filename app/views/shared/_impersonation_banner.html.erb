@@ -1,0 +1,36 @@
+<%# Persistent app-wide impersonation banner. Renders only while an %>
+<%# acting-as or view-as session is live (helpers from ImpersonationSession). %>
+<%# Two tones: acting-as = amber (you are WRITING as someone), view-as = navy %>
+<%# (read-only). Mirrors the audit-history register — tinted chip + monospace %>
+<%# NUID pill — so it reads as part of the same forensic surface. %>
+<% if impersonating? %>
+  <% mode = acting_as? ? 'acting-as' : 'view-as' %>
+  <% target_nuid = acting_as? ? acting_as_nuid : view_as_nuid %>
+  <aside class="impersonation-banner impersonation-banner--<%= mode %>"
+         role="status" aria-live="polite">
+    <div class="<%= container_classes %> impersonation-banner__inner">
+      <span class="impersonation-banner__badge">
+        <i class="fa-solid <%= acting_as? ? 'fa-user-pen' : 'fa-eye' %>" aria-hidden="true"></i>
+        <%= acting_as? ? 'Acting as' : 'Viewing as' %>
+      </span>
+
+      <span class="impersonation-banner__target">
+        <span class="impersonation-banner__name">
+          <%= impersonation_target&.pretty_name.presence || 'Unknown user' %>
+        </span>
+        <span class="impersonation-banner__nuid"><%= target_nuid %></span>
+      </span>
+
+      <span class="impersonation-banner__note">
+        <%= acting_as? ? 'Writes are attributed to this user.' : 'Read-only — a write ends this session.' %>
+      </span>
+
+      <%= button_to admin_impersonation_path, method: :delete,
+                    class: 'impersonation-banner__exit',
+                    form_class: 'impersonation-banner__exit-form' do %>
+        <i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i>
+        Exit
+      <% end %>
+    </div>
+  </aside>
+<% end %>

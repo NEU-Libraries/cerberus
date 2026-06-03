@@ -1,0 +1,19 @@
+.impersonation-start.well.p-3.my-3.rounded-3
+  %header.admin-actions__head
+    %span.admin-actions__title
+      %i.fa-solid.fa-user-secret{'aria-hidden' => 'true'}
+      Impersonation
+    %span.admin-actions__subtitle
+      %i.fa-solid.fa-lock{'aria-hidden' => 'true'}
+      Admin-only
+
+  %p.impersonation-start__lede
+    Operate as another user. <strong>Act as</strong> attributes any deposits or edits to that user (you are logged as the proxy on the audit trail); <strong>View as</strong> is read-only and shows exactly what they can see. A persistent banner marks the session, which ends on a write during View-as or after 30 minutes idle.
+
+  = form_tag admin_act_as_path, method: :post, class: 'impersonation-start__form' do
+    .impersonation-start__field
+      = label_tag :nuid, 'Target NUID', class: 'impersonation-start__label'
+      = text_field_tag :nuid, nil, class: 'form-control impersonation-start__input', placeholder: 'e.g. 000000002', autocomplete: 'off', inputmode: 'numeric'
+    .impersonation-start__actions
+      = submit_tag 'Act as', name: 'mode', class: 'btn btn-warning', formaction: admin_act_as_path
+      = submit_tag 'View as', name: 'mode', class: 'btn btn-primary', formaction: admin_view_as_path

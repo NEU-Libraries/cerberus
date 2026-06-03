@@ -1,0 +1,174 @@
+// ---------------------------------------------------------------------
+// Impersonation surfaces (piece 5). A safety-critical status banner plus
+// the admin start form. Same forensic register as audit-history: a single
+// tone token drives a left rail + tinted field + chip via color-mix, so
+// the two modes (acting-as / view-as) differ by one variable.
+//
+// Design intent: UNMISTAKABLE but CALM. An admin operating as another user
+// must never forget it, but this is an institutional repository, not a
+// klaxon — the persistent left rail + badge carry the signal; the field
+// stays quiet enough to work in front of all day.
+//   acting-as  amber  — you are WRITING as someone; caution.
+//   view-as    navy   — read-only; the repository's own primary tone.
+// ---------------------------------------------------------------------
+
+$impersonation-tone-acting: #b8801f; // desaturated amber — NOT Bootstrap's punchy $warning
+$impersonation-tone-view:   #385775; // the footer navy — read, not alarm
+
+.impersonation-banner {
+  --impersonation-color: #{$gray-600};
+
+  position: sticky;
+  top: 0;
+  z-index: 1080; // above the topbar; below Bootstrap modals (1055+ sits under this on purpose)
+  border-bottom: 1px solid color-mix(in srgb, var(--impersonation-color) 35%, white);
+  border-left: 4px solid var(--impersonation-color);
+  background-color: color-mix(in srgb, var(--impersonation-color) 13%, white);
+  color: color-mix(in srgb, var(--impersonation-color) 78%, black);
+  animation: impersonation-banner-in 180ms ease-out;
+
+  &--acting-as { --impersonation-color: #{$impersonation-tone-acting}; }
+  &--view-as   { --impersonation-color: #{$impersonation-tone-view}; }
+
+  &__inner {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    flex-wrap: wrap;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  // The mode badge — full-tone solid pill, the loudest element. Mirrors
+  // the audit-event action chip's shape but inverts it (solid, not tinted)
+  // so the banner reads as a higher-urgency surface than a log row.
+  &__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.22rem 0.7rem;
+    border-radius: 0.3rem;
+    background-color: var(--impersonation-color);
+    color: $white;
+    font-weight: 700;
+    font-size: 0.8rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    white-space: nowrap;
+
+    .fa-solid { font-size: 0.9em; }
+  }
+
+  &__target {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+  }
+
+  &__name {
+    font-weight: 600;
+    color: color-mix(in srgb, var(--impersonation-color) 85%, black);
+  }
+
+  // NUID chip — identical identifier typography to the audit-history NUID
+  // pill, so an admin reads the same token shape across both surfaces.
+  &__nuid {
+    display: inline-block;
+    padding: 0.1rem 0.45rem;
+    background-color: rgba($white, 0.65);
+    border: 1px solid color-mix(in srgb, var(--impersonation-color) 30%, white);
+    border-radius: 0.25rem;
+    font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 0.78rem;
+    color: color-mix(in srgb, var(--impersonation-color) 80%, black);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+  }
+
+  &__note {
+    font-size: 0.82rem;
+    color: color-mix(in srgb, var(--impersonation-color) 65%, black);
+    margin-right: auto; // push the Exit button to the far edge
+  }
+
+  // button_to renders a form; neutralise its block layout so the button
+  // sits inline in the flex row.
+  &__exit-form { margin: 0; }
+
+  &__exit {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.28rem 0.8rem;
+    border: 1px solid var(--impersonation-color);
+    border-radius: 0.3rem;
+    background-color: transparent;
+    color: color-mix(in srgb, var(--impersonation-color) 82%, black);
+    font-weight: 600;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: background-color 120ms ease, color 120ms ease;
+
+    &:hover,
+    &:focus-visible {
+      background-color: var(--impersonation-color);
+      color: $white;
+    }
+  }
+}
+
+@keyframes impersonation-banner-in {
+  from { transform: translateY(-100%); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .impersonation-banner { animation: none; }
+}
+
+// ---------------------------------------------------------------------
+// Admin start form — a quiet card in the dashboard register (.well shell),
+// NOT a loud surface. Starting impersonation is deliberate, not urgent.
+// ---------------------------------------------------------------------
+.impersonation-start {
+  &__lede {
+    color: $gray-600;
+    font-size: 0.9rem;
+    line-height: 1.55;
+    max-width: 64ch;
+    margin-bottom: 1rem;
+  }
+
+  &__form {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  &__label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+    color: $gray-500;
+  }
+
+  &__input {
+    font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-variant-numeric: tabular-nums;
+    max-width: 16rem;
+  }
+
+  &__actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+}
