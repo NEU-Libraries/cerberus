@@ -1,0 +1,48 @@
+.admin-registry.my-3
+  %header.admin-registry__head
+    %span.admin-registry__title
+      %i.fa-solid.fa-sitemap{'aria-hidden' => 'true'}
+      Confirm move
+    .admin-registry__head-actions
+      = render 'steps', step: 3
+      %span.admin-registry__subtitle
+        %i.fa-solid.fa-lock{'aria-hidden' => 'true'}
+        Admin-only
+
+  .p-3
+    .reparent-preview
+      .reparent-preview__node
+        %span.reparent-preview__caption Moving
+        = finder_type_chip(@node.klass)
+        %span.reparent-preview__title= @node.resource.title
+        %span.admin-registry-table__id= @node.resource.id
+
+      .reparent-preview__flow
+        .reparent-preview__endpoint
+          %span.reparent-preview__caption From
+          - if @current_parent
+            = finder_type_chip(@current_parent.klass)
+            %span.reparent-preview__title= @current_parent.title
+            %span.admin-registry-table__id= @current_parent.noid
+          - else
+            %span.reparent-preview__title.text-muted Top level
+        %i.fa-solid.fa-arrow-right-long.reparent-preview__arrow{'aria-hidden' => 'true'}
+        .reparent-preview__endpoint
+          %span.reparent-preview__caption To
+          - if @destination
+            = finder_type_chip(@destination.klass)
+            %span.reparent-preview__title= @destination.resource.title
+            %span.admin-registry-table__id= @destination.resource.id
+          - else
+            %span.reparent-preview__title Top level
+
+    %p.text-muted.small.mt-3.mb-3
+      Moving re-orders the structural tree and re-flows the breadcrumb and contents of every container beneath this one. Permissions are not changed.
+
+    = form_with url: admin_reparent_move_path, method: :post, class: 'reparent-confirm-form' do
+      = hidden_field_tag :node_id, @node.resource.id
+      = hidden_field_tag :parent_id, (@destination&.resource&.id)
+      = button_tag class: 'btn btn-primary' do
+        %i.fa-solid.fa-check.me-1{'aria-hidden' => 'true'}
+        Confirm move
+      = link_to 'Cancel', admin_reparent_choose_parent_path(node_id: @node.resource.id), class: 'btn btn-link'

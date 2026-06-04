@@ -4,6 +4,7 @@ class ApplicationController < ActionController::Base
   # Adds a few additional behaviors into the application controller
   include Blacklight::Controller
   include Authorizable
+  include ImpersonationSession
 
   before_action do
     I18n.locale = :en
@@ -12,8 +13,12 @@ class ApplicationController < ActionController::Base
   before_action :store_preferred_view
   before_action :set_current_nuid
 
+  # Authorization is evaluated against the effective user, so a view-as
+  # session renders the target's access decisions (acting-as leaves this as
+  # the real admin — only writes are re-attributed). effective_user comes
+  # from ImpersonationSession and is current_user when not impersonating.
   def current_ability
-    @current_ability ||= Ability.new(current_user)
+    @current_ability ||= Ability.new(effective_user)
   end
 
   def breadcrumbs(id)

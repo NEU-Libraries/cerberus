@@ -8,6 +8,9 @@
     .row
       = render partial: "shared/thumbnail", locals: {src: @community.thumbnail, src_2x: @community.thumbnail_2x} if !@community.thumbnail.blank?
       .col
+        - if @response.documents.present? || params[:q].present?
+          .scoped-search-wrap.float-md-end.ms-md-3.mb-3.mb-md-0
+            = render 'shared/scoped_search', path: community_path(@community.id), label: 'Search this community'
         %h3.d-inline
           = @community.title
         %h5.d-inline.text-black-50

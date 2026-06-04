@@ -3,6 +3,7 @@
 class CommunitiesController < CatalogController
   include Thumbable
   include Transformable
+  include ShowScopedSearch
 
   before_action :authorize_edit!, only: [:edit]
   before_action :authorize_tombstone!, only: [:tombstone]
@@ -12,7 +13,7 @@ class CommunitiesController < CatalogController
     return render_gone(@community) if @community.tombstoned
 
     authorize_show!
-    @response = find_children(@community.valkyrie_id)
+    @response = find_children(@community.valkyrie_id, params[:id])
     @can_tombstone = current_ability.can?(:tombstone,
                                           solr_doc_from_permissions(@permissions, klass: 'Community'))
     breadcrumbs(params[:id])

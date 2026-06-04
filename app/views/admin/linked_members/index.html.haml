@@ -1,0 +1,17 @@
+.admin-registry.my-3
+  %header.admin-registry__head
+    %span.admin-registry__title
+      %i.fa-solid.fa-link{'aria-hidden' => 'true'}
+      Linked members
+    .admin-registry__head-actions
+      %span.admin-registry__subtitle
+        %i.fa-solid.fa-lock{'aria-hidden' => 'true'}
+        Admin-only
+
+  .p-3
+    %p.text-muted.small.mb-3
+      Find the Work whose collection placements you want to manage. Linking surfaces a Work in additional collections for discovery — it never moves the Work or changes its permissions.
+    = render 'admin/finder/search_form', url: admin_linked_members_path, q: params[:q], hidden: {}, placeholder: 'Search works by title…'
+
+  - if @results
+    = render 'admin/finder/results', results: @results, select_label: 'Manage', select_url: ->(doc) { admin_linked_members_manage_path(work_id: doc.to_param) }

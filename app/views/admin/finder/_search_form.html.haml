@@ -1,0 +1,8 @@
+= form_with url: url, method: :get, class: 'reparent-search' do
+  - hidden.each do |key, value|
+    = hidden_field_tag key, value
+  .input-group
+    = text_field_tag :q, q, class: 'form-control', placeholder: placeholder, 'aria-label' => placeholder
+    = button_tag class: 'btn btn-primary' do
+      %i.fa-solid.fa-magnifying-glass.me-1{'aria-hidden' => 'true'}
+      Search

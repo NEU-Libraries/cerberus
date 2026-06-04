@@ -73,14 +73,25 @@ class WorksController < ApplicationController
       resource_params(:work)
     end
 
-    # Resolve the depositor NUID for a new Work based on the deposit form's
-    # "upload as" radio. `"proxy"` → attribute to the collection's depositor
-    # (acting user becomes the proxy_uploader server-side). Any other value
+    # Resolve the depositor NUID for a new Work.
+    #
+    # During an acting-as session this is PURE IMPERSONATION: the Work is
+    # attributed wholly to the target (depositor = target; proxy_uploader is
+    # left empty server-side, so the resource reads exactly as if the target
+    # deposited it). The operating admin's hand is recorded in the AuditEvent
+    # (actor = admin, on_behalf_of = target), not stamped on the Work. The
+    # piece-3 proxy radio is hidden while acting-as (see works/new), so this
+    # branch wins unconditionally and the radio value is irrelevant.
+    #
+    # Outside acting-as, the deposit form's "upload as" radio governs:
+    # `"proxy"` → attribute to the collection's configured depositor (the
+    # acting user becomes proxy_uploader server-side); any other value
     # (including the default `"myself"`) explicitly attributes to the acting
     # user — passing nil would let Atlas fall through to the collection's
-    # configured depositor, which would silently flip "myself" into a
-    # collection-default attribution on collections that have one set.
+    # configured depositor, silently flipping "myself" into a collection-
+    # default attribution on collections that have one set.
     def deposit_attribution(parent)
+      return acting_as_nuid if acting_as?
       return parent['depositor'].presence if params[:upload_as] == 'proxy'
 
       current_user&.nuid

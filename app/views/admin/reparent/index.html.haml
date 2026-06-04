@@ -1,0 +1,18 @@
+.admin-registry.my-3
+  %header.admin-registry__head
+    %span.admin-registry__title
+      %i.fa-solid.fa-sitemap{'aria-hidden' => 'true'}
+      Re-parent / Move
+    .admin-registry__head-actions
+      = render 'steps', step: 1
+      %span.admin-registry__subtitle
+        %i.fa-solid.fa-lock{'aria-hidden' => 'true'}
+        Admin-only
+
+  .p-3
+    %p.text-muted.small.mb-3
+      Find the Collection or Community you want to move. Search by title — the NUID is shown beside each result so you can tell similarly-named containers apart.
+    = render 'admin/finder/search_form', url: admin_reparent_path, q: params[:q], hidden: {}, placeholder: 'Search collections & communities…'
+
+  - if @results
+    = render 'admin/finder/results', results: @results, select_label: 'Choose', select_url: ->(doc) { admin_reparent_choose_parent_path(node_id: doc.to_param, node_uuid: doc.id) }

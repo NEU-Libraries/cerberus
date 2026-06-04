@@ -52,7 +52,30 @@ Rails.application.routes.draw do
   end
 
   namespace :admin do
+    root to: 'dashboard#index'
     resources :loaders, only: [:index, :new, :create, :edit, :update], param: :slug
+
+    # Re-parent / Move — a self-contained finder: index (find the node) →
+    # choose_parent (pick its new parent) → confirm (preview) → move (perform).
+    get  'reparent',               to: 'reparent#index'
+    get  'reparent/choose_parent', to: 'reparent#choose_parent', as: :reparent_choose_parent
+    get  'reparent/confirm',       to: 'reparent#confirm',       as: :reparent_confirm
+    post 'reparent/move',          to: 'reparent#move',          as: :reparent_move
+
+    # Linked members — find a Work, then add/remove the Collections it is
+    # surfaced in (discovery placement only; never its structural home).
+    get    'linked_members',        to: 'linked_members#index'
+    get    'linked_members/manage', to: 'linked_members#manage',  as: :linked_members_manage
+    post   'linked_members/add',    to: 'linked_members#add',     as: :linked_members_add
+    delete 'linked_members/remove', to: 'linked_members#remove',  as: :linked_members_remove
+
+    # Impersonation — a hub action surface (GET) hosting the start form, then
+    # begin acting-as (write) or view-as (read-only) for a target NUID; the
+    # DELETE (reusing admin_impersonation_path) ends whichever mode is active.
+    get    'impersonation', to: 'impersonations#new',              as: :impersonation
+    post   'act_as',        to: 'impersonations#create_acting_as', as: :act_as
+    post   'view_as',       to: 'impersonations#create_view_as',   as: :view_as
+    delete 'impersonation', to: 'impersonations#destroy'
   end
 
   get '/downloads/:id', to: 'downloads#show', as: :download

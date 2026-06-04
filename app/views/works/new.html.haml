@@ -19,7 +19,10 @@
         %p.deposit-form__field-hint
           One file per deposit. Descriptive metadata is captured on the next step.
 
-      - if current_user&.admin? || current_user&.privileged?
+      -# Hidden during an acting-as session: impersonation already fixes the
+      -# attribution (to the target), so offering the proxy radio would be a
+      -# second, conflicting attribution mechanism. See WorksController#deposit_attribution.
+      - if (current_user&.admin? || current_user&.privileged?) && !acting_as?
         %fieldset.deposit-form__field
           %legend.deposit-form__field-label
             Attribution

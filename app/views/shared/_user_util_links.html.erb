@@ -5,6 +5,13 @@
 
   <% if has_user_authentication_provider? %>
     <% if current_user %>
+      <% if current_user.admin? %>
+        <li class="nav-item">
+          <%= link_to admin_root_path, class: 'nav-link' do %>
+            <i class="fa-solid fa-screwdriver-wrench me-1" aria-hidden="true"></i>Admin
+          <% end %>
+        </li>
+      <% end %>
       <% unless current_user.to_s.blank? -%>
         <li class="nav-item">
           <%# <%= link_to current_user, root_path, class: 'nav-link' %>

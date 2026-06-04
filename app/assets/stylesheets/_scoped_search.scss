@@ -1,0 +1,12 @@
+// Scoped "Search this collection / community" box — the keyword search
+// that sits in the top-right of a Community/Collection show-page header
+// card (shared/_scoped_search). It reuses the navbar search idiom
+// (input-group + btn-primary + magnifying glass), so the only thing the
+// stock Bootstrap group needs is a width ceiling: left unconstrained, the
+// input-group greedily fills the header column and dwarfs the title. Cap
+// it at a search-bar width on md+ and let it go full-width when it stacks
+// below the title on narrow screens.
+.scoped-search-wrap {
+  width: 22rem;
+  max-width: 100%;
+}

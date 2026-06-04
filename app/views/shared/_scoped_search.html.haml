@@ -1,0 +1,17 @@
+-# Keyword search scoped to a single Community/Collection show page.
+-# Submits :q (GET) back to the same show action; find_children seeds the
+-# Solr builder from search_state, so the query narrows this object's
+-# children in place rather than escaping to the global catalog. Any active
+-# facet / sort / per-page state is preserved via the hidden search state so
+-# a keyword search composes with the sidebar filters.
+-#
+-# Locals:
+-#   path  - the show path to submit against (e.g. collection_path(id))
+-#   label - placeholder / aria-label (e.g. "Search this collection")
+= form_tag(path, method: :get, role: 'search', class: 'scoped-search') do
+  = render Blacklight::HiddenSearchStateComponent.new(params: params.except(:q, :id, :controller, :action, :page))
+  .input-group
+    %input.form-control{ type: 'search', name: 'q', value: params[:q],
+                         placeholder: label, 'aria-label': label }
+    %button.btn.btn-primary{ type: 'submit', 'aria-label': label }
+      %i.fa-solid.fa-magnifying-glass{ 'aria-hidden': 'true' }

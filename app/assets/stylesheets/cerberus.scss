@@ -8,6 +8,9 @@
 //                           (thumbnails, gallery, metadata)
 //   _audit_history       — Edit → History tab (archival ledger)
 //   _admin_registry      — Admin → Loader registry (and future admin CRUD)
+//   _admin_dashboard     — Admin → actions hub (/admin landing, action cards)
+//   _admin_reparent      — Admin → Move finder (step indicator, from→to preview)
+//   _admin_linked_members — Admin → Linked members panel (surfaced-in list, add/remove)
 //   _ingest_status       — IPTC loader status chips + dashboard tiles
 //   _deposit_form        — Collection → New Work deposit slip
 //   _error_page          — 403 / 404 / 410 / 500 error pages
@@ -15,10 +18,15 @@
 //   _facets              — active-facet card muting
 //   _pagination          — search-results pagination as flat text links
 //   _search_controls     — sort/per-page/view controls relocated into sidebar
+//   _scoped_search       — "Search this collection/community" header box
 @import 'layout';
 @import 'blacklight_discovery';
 @import 'audit_history';
 @import 'admin_registry';
+@import 'admin_dashboard';
+@import 'admin_reparent';
+@import 'admin_linked_members';
+@import 'impersonation';
 @import 'ingest_status';
 @import 'deposit_form';
 @import 'error_page';
@@ -26,3 +34,4 @@
 @import 'facets';
 @import 'pagination';
 @import 'search_controls';
+@import 'scoped_search';

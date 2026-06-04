@@ -120,6 +120,20 @@ describe WorksController do
         expect(AtlasRb::Work).to have_received(:create)
           .with(collection.id, depositor: collection['depositor'])
       end
+
+      it 'attributes wholly to the acting-as target during an impersonation session' do
+        # Pure impersonation: even with the radio defaulting to "myself", an
+        # active acting-as session overrides — depositor is the target, never
+        # the operating admin. (proxy_uploader-empty is enforced Atlas-side.)
+        allow(AtlasRb::Work).to receive(:create).and_call_original
+
+        post :create, params:  { binary:    fixture_file_upload('image.png', 'image/png'),
+                                 parent_id: collection.id,
+                                 upload_as: 'myself' },
+                      session: { acting_as_nuid: '000000002' }
+
+        expect(AtlasRb::Work).to have_received(:create).with(collection.id, depositor: '000000002')
+      end
     end
   end
 

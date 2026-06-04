@@ -35,6 +35,35 @@ RSpec.describe MembershipQuery do
     end
   end
 
+  describe '.member_clauses' do
+    it 'returns the structural clause alone by default' do
+      expect(described_class.member_clauses(%w[aaaa]))
+        .to eq(['{!terms f=a_member_of_ssi}id-aaaa'])
+    end
+
+    it 'adds the linked-overlay clause when include_linked' do
+      expect(described_class.member_clauses(%w[aaaa], include_linked: true)).to eq(
+        ['{!terms f=a_member_of_ssi}id-aaaa', '{!terms f=a_linked_member_of_ssim}id-aaaa']
+      )
+    end
+  end
+
+  describe '.any_of' do
+    it 'returns a single clause bare (no redundant {!bool})' do
+      expect(described_class.any_of(['{!terms f=x}a'])).to eq('{!terms f=x}a')
+    end
+
+    it 'ORs multiple clauses into ONE flat {!bool} — never a nested bool' do
+      result = described_class.any_of(['{!terms f=a}1', '{!terms f=b}2', '{!terms f=c}3'])
+      expect(result).to eq(
+        '{!bool should="{!terms f=a}1" should="{!terms f=b}2" should="{!terms f=c}3"}'
+      )
+      # The crux: a single {!bool} level. Nesting {!bool inside a quoted should=
+      # is what made Solr 400 on the subtree query.
+      expect(result.scan('{!bool').size).to eq(1)
+    end
+  end
+
   # Guard for the edismax mm trap documented at the top of MembershipQuery: every
   # fragment must target the untokenized string fields, never the tokenized _tesim,
   # and must be intended for :fq (where the lucene parser, not edismax, runs them).

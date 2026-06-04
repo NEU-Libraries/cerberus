@@ -1,0 +1,25 @@
+- if results.documents.any?
+  .table-responsive
+    %table.table.table-borderless.admin-registry-table
+      %thead
+        %tr
+          %th{scope: 'col'} Title
+          %th{scope: 'col'} Type
+          %th{scope: 'col'} NUID
+          %th{scope: 'col'}
+      %tbody
+        - results.documents.each do |doc|
+          %tr
+            %td
+              .admin-registry-table__name= finder_doc_title(doc)
+            %td= finder_type_chip(doc.klass_type)
+            %td
+              %span.admin-registry-table__id= doc.to_param
+            %td.text-end
+              = link_to select_url.call(doc), class: 'admin-registry-table__edit' do
+                = select_label
+                %i.fa-solid.fa-arrow-right{'aria-hidden' => 'true'}
+- else
+  .admin-registry__empty
+    %i.fa-solid.fa-magnifying-glass.admin-registry__empty-icon{'aria-hidden' => 'true'}
+    %p.mb-0.small.text-muted No matches for that search. Try different words.

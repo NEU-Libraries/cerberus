@@ -3,6 +3,7 @@
 class CollectionsController < CatalogController
   include Thumbable
   include Transformable
+  include ShowScopedSearch
 
   before_action :authorize_edit!, only: [:edit]
   before_action :authorize_tombstone!, only: [:tombstone]
@@ -12,7 +13,7 @@ class CollectionsController < CatalogController
     return render_gone(@collection) if @collection.tombstoned
 
     authorize_show!
-    @response = find_children(@collection.valkyrie_id)
+    @response = find_children(@collection.valkyrie_id, params[:id])
     @can_tombstone = current_ability.can?(:tombstone,
                                           solr_doc_from_permissions(@permissions, klass: 'Collection'))
     breadcrumbs(params[:id])
