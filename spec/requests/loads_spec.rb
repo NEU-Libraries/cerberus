@@ -305,4 +305,83 @@ RSpec.describe 'Loads', type: :request do
       end
     end
   end
+
+  describe 'XML loader dispatch (kind: :xml)' do
+    let!(:xml_loader) do
+      Loader.create!(slug: 'xml', display_name: 'XML Metadata Loader',
+                     group: 'northeastern:drs:repository:loaders:xml',
+                     root_collection: 'neu:root', kind: :xml)
+    end
+    let(:archive) do
+      Rack::Test::UploadedFile.new(
+        Rails.root.join('spec/fixtures/files/metadata_existing_file.zip'), 'application/zip'
+      )
+    end
+
+    before do
+      sign_in admin_user
+      allow(FileUtils).to receive(:mkdir_p)
+      allow(FileUtils).to receive(:cp)
+      allow(UnzipJob).to receive(:perform_later)
+      allow(XmlUnzipJob).to receive(:perform_later)
+    end
+
+    describe 'POST .../loads' do
+      it 'stages a previewing LoadReport and enqueues no job yet' do
+        post '/loaders/xml/loads',
+             params: { load_report: { archive: archive, parent_collection_id: 'neu:c1' } }
+
+        lr = LoadReport.last
+        expect(lr.loader).to eq(xml_loader)
+        expect(lr).to be_previewing
+        expect(UnzipJob).not_to have_received(:perform_later)
+        expect(XmlUnzipJob).not_to have_received(:perform_later)
+        expect(response).to redirect_to(loader_load_path(xml_loader, lr))
+      end
+    end
+
+    describe 'GET .../loads/:id while previewing' do
+      let!(:load_report) do
+        LoadReport.create!(loader: xml_loader, source_filename: 'metadata_existing_file.zip',
+                           parent_collection_id: 'neu:c1', status: :previewing)
+      end
+      let(:preview) do
+        XmlPreview::Result.new(
+          structural_errors: [], mode: :update,
+          first_row: XmlLoader::Manifest::Row.new(identifier: 'neu:test123', xml_path: 'rec.xml'),
+          mods_xml: '<mods:mods/>', validation_errors: []
+        )
+      end
+
+      before { allow(XmlPreview).to receive(:call).and_return(preview) }
+
+      it 'renders the preview with a Confirm action, not the poll frame' do
+        get "/loaders/xml/loads/#{load_report.id}"
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include('Confirm')
+        expect(response.body).to include('Update existing')
+        expect(response.body).not_to include('data-controller="load-poll"')
+      end
+    end
+
+    describe 'PATCH .../loads/:id/confirm' do
+      let!(:load_report) do
+        LoadReport.create!(loader: xml_loader, source_filename: 'metadata_existing_file.zip',
+                           parent_collection_id: 'neu:c1', status: :previewing)
+      end
+
+      it 'flips the report to pending and enqueues XmlUnzipJob' do
+        patch confirm_loader_load_path(xml_loader, load_report)
+        expect(load_report.reload).to be_pending
+        expect(XmlUnzipJob).to have_received(:perform_later).with(load_report.id)
+        expect(response).to redirect_to(loader_load_path(xml_loader, load_report))
+      end
+
+      it 'is a no-op when the report is not previewing' do
+        load_report.update!(status: :completed)
+        patch confirm_loader_load_path(xml_loader, load_report)
+        expect(XmlUnzipJob).not_to have_received(:perform_later)
+      end
+    end
+  end
 end
