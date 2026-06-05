@@ -74,6 +74,20 @@ namespace :reset do
         l.display_name    = 'Marketing and Communications'
         l.group           = marcom_group
         l.root_collection = photo_archive['id']
+        l.kind            = :iptc
+      end
+
+      # XML loader fixture — the manifest-driven MODS loader (kind: :xml).
+      # Points at the photo-archive root so its create-mode destination
+      # picker has children (campus_life); update-mode keys off NOIDs in
+      # the manifest and ignores the picker. Gated by the loaders:xml
+      # Grouper group; dev/staging verification uses admin 000000004,
+      # which short-circuits the per-loader group gate.
+      Loader.find_or_create_by!(slug: 'xml') do |l|
+        l.display_name    = 'XML Metadata Loader'
+        l.group           = 'northeastern:drs:repository:loaders:xml'
+        l.root_collection = photo_archive['id']
+        l.kind            = :xml
       end
     end
   end
