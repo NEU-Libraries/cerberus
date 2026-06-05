@@ -69,6 +69,7 @@ gem 'kataba', '>= 1.0.3'
 gem 'libreconv'
 gem 'loaf'
 gem 'mini_exiftool'
+gem 'caxlsx' # xlsx writer — loader manifest fixtures now, spreadsheet export later (roo reads)
 gem 'mission_control-jobs'
 gem 'mods'
 gem 'namae'
