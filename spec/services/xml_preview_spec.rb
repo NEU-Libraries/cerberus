@@ -43,6 +43,12 @@ RSpec.describe XmlPreview do
       expect(result.validation_errors).to be_empty
       expect(result).to be_ok
     end
+
+    it 'returns the MODS as UTF-8 (not the raw ASCII-8BIT zip bytes) so the view can render it' do
+      # Regression: Archive#read yields ASCII-8BIT; rendering that into HAML's
+      # UTF-8 buffer raised Encoding::CompatibilityError on the preview page.
+      expect(result.mods_xml.encoding).to eq(Encoding::UTF_8)
+    end
   end
 
   context 'when the archive has no manifest' do

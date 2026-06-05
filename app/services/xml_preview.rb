@@ -43,7 +43,10 @@ class XmlPreview < ApplicationService
     return structural(['The manifest has a header row but no data rows.']) if rows.empty?
 
     first = rows.first
-    mods  = first.xml_path.present? ? archive.read(first.xml_path) : nil
+    # Archive#read returns ASCII-8BIT (raw zip/tar bytes); the MODS is UTF-8
+    # text, so re-tag it before it reaches the view's <pre> (HAML can't concat
+    # a binary string into the UTF-8 output buffer) and the validator.
+    mods = first.xml_path.present? ? archive.read(first.xml_path)&.force_encoding(Encoding::UTF_8) : nil
 
     Result.new(
       structural_errors: [],
