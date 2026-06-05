@@ -58,9 +58,22 @@
               %li= err
 
       - if preview.mods_xml.present?
-        .mt-3
-          %span.load-report-overview__label First-row MODS
-          %pre.border.border-1.rounded-3.bg-light.p-3.small.mt-1.mb-0{style: 'max-height: 24rem; overflow: auto;'}= preview.mods_xml
+        / First-row MODS, two-up: the raw document (left) beside Atlas's
+        / rendered HTML view (right) — same raw-vs-rendered pairing as the
+        / XML editor. The rendered column appears once the MODS validates.
+        .row.g-3.mt-2
+          .col-lg-6
+            %span.load-report-overview__label Raw MODS
+            %pre.border.border-1.rounded-3.bg-light.p-3.small.mt-1.mb-0{style: 'max-height: 26rem; overflow: auto;'}= preview.mods_xml
+          .col-lg-6
+            %span.load-report-overview__label Rendered
+            - if preview.decorated_html.present?
+              .border.border-1.rounded-3.bg-white.p-3.mt-1.mb-0{style: 'max-height: 26rem; overflow: auto;'}
+                = preview.decorated_html.html_safe
+            - else
+              .border.border-1.rounded-3.bg-light.p-3.mt-1.mb-0.text-muted.small
+                %i.fa-solid.fa-eye-slash.me-1{'aria-hidden' => 'true'}
+                The rendered view appears once the MODS validates.
 
     .d-flex.gap-2.align-items-center.mt-4
       - unless preview.blocked?

@@ -349,7 +349,8 @@ RSpec.describe 'Loads', type: :request do
         XmlPreview::Result.new(
           structural_errors: [], mode: :update,
           first_row: XmlLoader::Manifest::Row.new(identifier: 'neu:test123', xml_path: 'rec.xml'),
-          mods_xml: '<mods:mods/>', validation_errors: []
+          mods_xml: '<mods:mods/>', validation_errors: [],
+          decorated_html: '<dl class="mods-display">Rendered title</dl>'
         )
       end
 
@@ -361,6 +362,13 @@ RSpec.describe 'Loads', type: :request do
         expect(response.body).to include('Confirm')
         expect(response.body).to include('Update existing')
         expect(response.body).not_to include('data-controller="load-poll"')
+      end
+
+      it 'shows raw MODS beside the Atlas-rendered HTML (two-column)' do
+        get "/loaders/xml/loads/#{load_report.id}"
+        expect(response.body).to include('Raw MODS')
+        expect(response.body).to include('Rendered')
+        expect(response.body).to include('mods-display') # the decorated HTML, rendered html_safe
       end
     end
 

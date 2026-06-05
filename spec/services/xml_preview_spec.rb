@@ -20,6 +20,7 @@ RSpec.describe XmlPreview do
     FileUtils.mkdir_p(dir)
     FileUtils.cp(Rails.root.join("spec/fixtures/files/#{fixture}"), File.join(dir, fixture))
     allow(XmlValidator).to receive(:call).and_return([])
+    allow(AtlasRb::Resource).to receive(:preview).and_return('<dl class="mods-display">rendered</dl>')
   end
 
   after do
@@ -48,6 +49,11 @@ RSpec.describe XmlPreview do
       # Regression: Archive#read yields ASCII-8BIT; rendering that into HAML's
       # UTF-8 buffer raised Encoding::CompatibilityError on the preview page.
       expect(result.mods_xml.encoding).to eq(Encoding::UTF_8)
+    end
+
+    it 'renders the decorated HTML via Atlas for a valid row' do
+      expect(result.decorated_html).to include('rendered')
+      expect(AtlasRb::Resource).to have_received(:preview).with(kind_of(String))
     end
   end
 
@@ -81,6 +87,11 @@ RSpec.describe XmlPreview do
       expect(result).not_to be_blocked
       expect(result.validation_errors).to include('Document must declare xmlns:mods')
       expect(result).not_to be_ok
+    end
+
+    it 'does not attempt the decorated render for an invalid row' do
+      described_class.call(load_report: load_report)
+      expect(AtlasRb::Resource).not_to have_received(:preview)
     end
   end
 end

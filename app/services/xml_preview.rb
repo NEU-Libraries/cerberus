@@ -18,7 +18,8 @@ require 'tempfile'
 # Per-row processing of the remaining rows happens in XmlIngestJob; this pass
 # only inspects the first data row (v1's preview behaviour).
 class XmlPreview < ApplicationService
-  Result = Struct.new(:structural_errors, :mode, :first_row, :mods_xml, :validation_errors, keyword_init: true) do
+  Result = Struct.new(:structural_errors, :mode, :first_row, :mods_xml, :validation_errors,
+                      :decorated_html, keyword_init: true) do
     def blocked?
       structural_errors.any?
     end
@@ -32,6 +33,10 @@ class XmlPreview < ApplicationService
     @load_report = load_report
   end
 
+  # rubocop:disable Metrics/MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
+  # The early-return guards (no manifest / unparseable / no rows) read as one
+  # linear preview flow; extracting them would scatter the structural-error
+  # handling that is the method's whole point.
   def call
     archive = XmlLoader::Archive.new(XmlLoader::Paths.archive_path(@load_report))
 
@@ -46,16 +51,22 @@ class XmlPreview < ApplicationService
     # Archive#read returns ASCII-8BIT (raw zip/tar bytes); the MODS is UTF-8
     # text, so re-tag it before it reaches the view's <pre> (HAML can't concat
     # a binary string into the UTF-8 output buffer) and the validator.
-    mods = first.xml_path.present? ? archive.read(first.xml_path)&.force_encoding(Encoding::UTF_8) : nil
+    mods   = first.xml_path.present? ? archive.read(first.xml_path)&.force_encoding(Encoding::UTF_8) : nil
+    errors = row_errors(first, mods)
 
     Result.new(
       structural_errors: [],
       mode:              first.update? ? :update : :create,
       first_row:         first,
       mods_xml:          mods,
-      validation_errors: row_errors(first, mods)
+      validation_errors: errors,
+      # Only render the decorated view for MODS that validated — Atlas's
+      # renderer expects well-formed, schema-valid input (mirrors the XML
+      # editor, which previews only when there are no errors).
+      decorated_html:    errors.empty? && mods ? decorated(mods) : nil
     )
   end
+  # rubocop:enable Metrics/MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
   private
 
@@ -82,6 +93,21 @@ class XmlPreview < ApplicationService
     end
 
     def structural(errors)
-      Result.new(structural_errors: errors, mode: nil, first_row: nil, mods_xml: nil, validation_errors: [])
+      Result.new(structural_errors: errors, mode: nil, first_row: nil, mods_xml: nil,
+                 validation_errors: [], decorated_html: nil)
+    end
+
+    # Atlas renders the MODS to its HTML display the same way the XML editor's
+    # live preview does (POST /resources/preview). Best-effort: if Atlas is
+    # unreachable the raw column still stands on its own.
+    def decorated(mods)
+      Tempfile.create(['preview_mods', '.xml']) do |f|
+        f.write(mods)
+        f.flush
+        AtlasRb::Resource.preview(f.path)
+      end
+    rescue Faraday::Error => e
+      Rails.logger.warn("XmlPreview: decorated render unavailable (#{e.class}: #{e.message})")
+      nil
     end
 end
