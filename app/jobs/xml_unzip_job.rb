@@ -15,6 +15,10 @@
 class XmlUnzipJob < ApplicationJob
   queue_as :default
 
+  # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  # Linear shape (guard → extract → locate manifest → parse → fan out → rescue)
+  # mirrors UnzipJob and reads as one flow; splitting it would scatter the
+  # structural-failure handling.
   def perform(load_report_id)
     load_report = LoadReport.find(load_report_id)
     return unless load_report.pending?
@@ -26,7 +30,9 @@ class XmlUnzipJob < ApplicationJob
     XmlLoader::Archive.new(XmlLoader::Paths.archive_path(load_report)).extract_all(extracted)
 
     manifest_path = File.join(extracted, 'manifest.xlsx')
-    return structural_failure(load_report, 'No manifest.xlsx was found in the uploaded archive.') unless File.exist?(manifest_path)
+    unless File.exist?(manifest_path)
+      return structural_failure(load_report, 'No manifest.xlsx was found in the uploaded archive.')
+    end
 
     rows = XmlLoader::Manifest.new(manifest_path).rows
     return structural_failure(load_report, 'The manifest has a header row but no data rows.') if rows.empty?
@@ -38,6 +44,7 @@ class XmlUnzipJob < ApplicationJob
     Rails.logger.error("XmlUnzipJob failed for LoadReport #{load_report_id}: #{e.class} #{e.message}")
     LoadReport.find_by(id: load_report_id)&.fail_load
   end
+  # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 
   private
 

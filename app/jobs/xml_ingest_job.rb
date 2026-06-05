@@ -33,7 +33,7 @@ class XmlIngestJob < ApplicationJob
     ingest.load_report&.maybe_finalize!
   end
 
-  # rubocop:disable Metrics/MethodLength, Metrics/AbcSize
+  # rubocop:disable Metrics/MethodLength, Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
   # The linear flow (guard → resolve row → read+validate MODS → update/create →
   # embargo → finalize) reads as one idempotency story; splitting it would
   # scatter the per-row failure handling.
@@ -47,7 +47,9 @@ class XmlIngestJob < ApplicationJob
     xml_path   = row['xml_path'].presence
     file_name  = row['file_name'].presence
 
-    return finalize_failure(ingest, 'Row has neither an identifier (update) nor a File Name (create).') if identifier.nil? && file_name.nil?
+    if identifier.nil? && file_name.nil?
+      return finalize_failure(ingest, 'Row has neither an identifier (update) nor a File Name (create).')
+    end
     return finalize_failure(ingest, 'Row has no MODS XML File Path.') if xml_path.nil?
 
     mods = read_mods(ingest, xml_path)
@@ -64,7 +66,7 @@ class XmlIngestJob < ApplicationJob
   rescue EmbargoError => e
     finalize_failure(ingest, e.message)
   end
-  # rubocop:enable Metrics/MethodLength, Metrics/AbcSize
+  # rubocop:enable Metrics/MethodLength, Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
   private
 
@@ -134,7 +136,9 @@ class XmlIngestJob < ApplicationJob
       return unless row['embargoed'].to_s.strip.casecmp?('true')
 
       date = row['embargo_date'].to_s.strip
-      raise EmbargoError, 'Embargoed rows must include an Embargo Date of the form YYYY-MM-DD.' unless date.match?(/\A\d{4}-\d{2}-\d{2}\z/)
+      unless date.match?(/\A\d{4}-\d{2}-\d{2}\z/)
+        raise EmbargoError, 'Embargoed rows must include an Embargo Date of the form YYYY-MM-DD.'
+      end
 
       AtlasRb::Work.metadata(work_pid, { permissions: { embargo: date } })
     end
