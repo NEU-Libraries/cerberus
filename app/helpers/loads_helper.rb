@@ -11,13 +11,22 @@ module LoadsHelper
     'processing'              => 'fa-arrows-rotate',
     'completed'               => 'fa-circle-check',
     'completed_with_warnings' => 'fa-circle-exclamation',
-    'failed'                  => 'fa-circle-xmark'
+    'failed'                  => 'fa-circle-xmark',
+    'previewing'              => 'fa-eye'
   }.freeze
 
   def ingest_status_icon(status)
     STATUS_ICONS.fetch(status.to_s, 'fa-circle')
   end
   alias load_report_status_icon ingest_status_icon
+
+  # The per-row ingest relation for a report under a given loader. Each
+  # loader kind has its own ingest table (iptc_ingests / xml_ingests); the
+  # report-level counters tally both, but the row table shows the one this
+  # loader produced.
+  def report_ingests(load_report, loader)
+    loader.xml? ? load_report.xml_ingests : load_report.iptc_ingests
+  end
 
   def load_report_progress_summary(load_report)
     total = load_report.total_ingests
