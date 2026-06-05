@@ -5,7 +5,13 @@ class LoadReport < ApplicationRecord
   has_many :xml_ingests, dependent: :destroy
   has_many :iptc_ingests, dependent: :destroy
 
-  enum :status, { pending: 0, processing: 1, completed: 2, failed: 3, completed_with_warnings: 4 }
+  # `previewing` (XML loader only) is a pre-run hold: the archive is staged
+  # and the first-row preview is rendered, but nothing is enqueued until the
+  # librarian confirms (LoadsController#confirm flips it to `pending`). It is
+  # neither in-progress (no job is running) nor a final status — the show view
+  # branches on `previewing?` and renders the preview instead of the report,
+  # so it never reaches the polling path.
+  enum :status, { pending: 0, processing: 1, completed: 2, failed: 3, completed_with_warnings: 4, previewing: 5 }
 
   # Lifecycle predicates used by the show view to decide whether to keep
   # polling (in_progress?) and which empty state to render. A report is

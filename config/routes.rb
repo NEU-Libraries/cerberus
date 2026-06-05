@@ -48,7 +48,9 @@ Rails.application.routes.draw do
     end
   end
   resources :loaders, only: [], param: :slug do
-    resources :loads, only: [:index, :show, :new, :create, :destroy]
+    resources :loads, only: [:index, :show, :new, :create, :destroy] do
+      member { patch :confirm }
+    end
   end
 
   namespace :admin do

@@ -5,13 +5,17 @@ class LoadsController < ApplicationController
   before_action :set_loader
   before_action :require_loader_role
   before_action :require_loader_group
-  before_action :set_load_report, only: [:show, :destroy]
+  before_action :set_load_report, only: [:show, :destroy, :confirm]
 
   def index
     @load_reports = LoadReport.where(loader: @loader).order(created_at: :desc)
   end
 
-  def show; end
+  def show
+    # XML loads pause on a preview the librarian must confirm; build it lazily
+    # from the staged archive (no persistence) for the show view to render.
+    @preview = XmlPreview.call(load_report: @load_report) if @load_report.previewing?
+  end
 
   def new
     @load_report  = LoadReport.new
@@ -26,19 +30,31 @@ class LoadsController < ApplicationController
     @load_report = LoadReport.create!(
       loader:               @loader,
       source_filename:      archive.original_filename,
-      parent_collection_id: parent
+      parent_collection_id: parent,
+      status:               @loader.xml? ? :previewing : :pending
     )
     save_archive(@load_report, archive)
-    UnzipJob.perform_later(@load_report.id)
+    # IPTC commits straight to the run. XML stops at a preview the librarian
+    # confirms (see #confirm), so it enqueues no job yet — the show view
+    # renders the preview from the staged archive.
+    UnzipJob.perform_later(@load_report.id) if @loader.iptc?
 
-    # No flash notice — the show page's in-progress state (spinner +
-    # "Extraction in progress", auto-polled) communicates that the batch
-    # has begun, so a redundant banner would only contradict the body
-    # once the live poll flips the report to a terminal status.
+    # No flash notice — the show page's own state (in-progress spinner for
+    # IPTC, the preview card for XML) communicates what happens next, so a
+    # redundant banner would only contradict the body once the poll runs.
     redirect_to loader_load_path(@loader, @load_report)
   rescue ActiveRecord::RecordInvalid
     @destinations = load_destinations
     render :new, status: :unprocessable_content
+  end
+
+  # Librarian-approved go: flip the staged XML preview into a real run.
+  def confirm
+    return redirect_to(loader_load_path(@loader, @load_report)) unless @load_report.previewing?
+
+    @load_report.update!(status: :pending)
+    XmlUnzipJob.perform_later(@load_report.id)
+    redirect_to loader_load_path(@loader, @load_report)
   end
 
   def destroy
