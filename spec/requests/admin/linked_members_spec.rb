@@ -77,7 +77,8 @@ RSpec.describe 'Admin::LinkedMembers', type: :request do
       before do
         allow(AtlasRb::Resource).to receive(:find).with('w1').and_return(work_resource(noid: 'w1'))
         allow(AtlasRb::Work).to receive(:linked_members).with('w1').and_return(['linked'])
-        allow(AtlasRb::Collection).to receive(:find).and_return(OpenStruct.new(title: 'Linked Collection'))
+        allow(AtlasRb::Resource).to receive(:find_many)
+          .with(['linked']).and_return([OpenStruct.new(noid: 'linked', title: 'Linked Collection')])
       end
 
       it 'lists the collections the work is currently surfaced in, with a remove control' do

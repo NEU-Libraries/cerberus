@@ -54,15 +54,18 @@ module Admin
         @work = AtlasRb::Resource.find(params[:work_id]) # .resource.title + ancestors
         @home_noid = Array(@work.resource.ancestors).last&.first
         @linked_noids = Array(AtlasRb::Work.linked_members(params[:work_id]))
-        @linked = @linked_noids.map { |noid| OpenStruct.new(noid: noid, title: collection_title(noid)) }
+        @linked = linked_collections(@linked_noids)
         # Collections the Work already sits in (home + linked) can't be added again.
         @placed_noids = (@linked_noids + [@home_noid]).compact.to_set
       end
 
-      def collection_title(noid)
-        AtlasRb::Collection.find(noid).title
-      rescue StandardError
-        noid
+      # Resolve linked-collection noids to {noid, title} rows in one batched
+      # find_many, rather than a find-per-noid fan-out. find_many is unordered
+      # and may drop unresolvable ids, so index by noid and preserve the given
+      # order, falling back to the bare noid when a title is missing.
+      def linked_collections(noids)
+        by_noid = noids.empty? ? {} : AtlasRb::Resource.find_many(noids).index_by { |n| n['noid'] }
+        noids.map { |noid| OpenStruct.new(noid: noid, title: by_noid[noid]&.title.presence || noid) }
       end
   end
 end

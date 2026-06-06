@@ -94,14 +94,16 @@ class LoadsController < ApplicationController
       render template: 'errors/forbidden', status: :forbidden, layout: 'application'
     end
 
-    # Atlas's children endpoint returns child IDs only; we N+1 the
-    # individual finds to get titles for the picker. Acceptable for
-    # first cut because the marcom root has <50 children. If this
-    # grows, the right fix is an Atlas endpoint that returns
-    # id+title (or an atlas_rb helper that batches the finds).
+    # Atlas's children endpoint returns child IDs only; resolve them to
+    # id+title for the picker in a single batched find_many rather than a
+    # find-per-id fan-out. find_many is unordered and may drop unresolvable
+    # ids, so index by noid and re-impose the children order.
     def load_destinations
       ids = AtlasRb::Collection.children(@loader.root_collection)
-      ids.map { |id| AtlasRb::Collection.find(id) }
+      return [] if ids.blank?
+
+      by_noid = AtlasRb::Resource.find_many(ids).index_by { |n| n['noid'] }
+      ids.filter_map { |id| by_noid[id] }
     rescue Faraday::Error, JSON::ParserError => e
       Rails.logger.error("LoadsController#load_destinations: #{e.class} #{e.message}")
       []

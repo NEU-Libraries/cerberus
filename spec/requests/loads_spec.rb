@@ -105,10 +105,10 @@ RSpec.describe 'Loads', type: :request do
       sign_in marcom_user
       allow(AtlasRb::Collection).to receive(:children)
         .with('neu:fix-comm-photos-archive').and_return(['neu:c1', 'neu:c2'])
-      allow(AtlasRb::Collection).to receive(:find).with('neu:c1')
-                                                  .and_return(double(id: 'neu:c1', title: 'Campus Life (Photographs)'))
-      allow(AtlasRb::Collection).to receive(:find).with('neu:c2')
-                                                  .and_return(double(id: 'neu:c2', title: 'Athletics (Photographs)'))
+      allow(AtlasRb::Resource).to receive(:find_many).with(['neu:c1', 'neu:c2']).and_return(
+        [OpenStruct.new(noid: 'neu:c1', id: 'neu:c1', title: 'Campus Life (Photographs)'),
+         OpenStruct.new(noid: 'neu:c2', id: 'neu:c2', title: 'Athletics (Photographs)')]
+      )
     end
 
     it 'renders the form with destinations from Atlas' do
