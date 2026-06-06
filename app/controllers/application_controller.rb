@@ -24,10 +24,12 @@ class ApplicationController < ActionController::Base
   def breadcrumbs(id)
     result = AtlasRb::Resource.find(id)
     item = result.resource
-    item.ancestors.each do |ancestor_id, ancestor_klass|
-      add_breadcrumb_for(ancestor_id, ancestor_klass)
+    # ancestor_chain carries each ancestor's title alongside its noid/klass, so
+    # the whole trail is built from this single find — no per-ancestor round-trip.
+    Array(item.ancestor_chain).each do |node|
+      add_breadcrumb_for(node['noid'], node['klass'], node['title'])
     end
-    add_breadcrumb_for(item.id, result.klass)
+    add_breadcrumb_for(item.id, result.klass, item.title)
   end
 
   def pretty_group(raw_group)
@@ -44,9 +46,8 @@ class ApplicationController < ActionController::Base
       Current.nuid = current_user&.nuid || Rails.application.config.x.cerberus.guest_nuid
     end
 
-    def add_breadcrumb_for(resource_id, klass)
-      title = AtlasRb.const_get(klass).find(resource_id).title
-      path  = public_send("#{klass.downcase}_path", resource_id)
+    def add_breadcrumb_for(resource_id, klass, title)
+      path = public_send("#{klass.downcase}_path", resource_id)
       breadcrumb(title, path)
     end
 end
