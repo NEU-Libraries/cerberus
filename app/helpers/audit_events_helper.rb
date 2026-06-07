@@ -176,6 +176,29 @@ module AuditEventsHelper
     case event['change_type']
     when 'permissions'
       rights_history_path(resource_id, at: event['occurred_at'], anchor: audit_event_dom_id(event))
+    when 'metadata'
+      mods_history_path(resource_id, at: event['occurred_at']) if mods_document_event?(event)
+    end
+  end
+
+  # Only a full MODS-document update ({ source: 'mods' }) writes a recoverable
+  # MODS version; a title/description field-patch ({ fields: [...] }) does not,
+  # so those rows get no MODS-diff link.
+  def mods_document_event?(event)
+    payload = event['payload']
+    payload.is_a?(Hash) && payload['source'] == 'mods'
+  end
+
+  # <option>s for the MODS-history version picker: "v5 · 2026-05-26 14:02 ·
+  # 000000002", value = the opaque OCFL version id. Actor may be blank.
+  def mods_version_options(versions)
+    Array(versions).map do |version|
+      label = [
+        version['version_id'],
+        mods_version_timestamp(version['created']),
+        version['actor_nuid'].presence
+      ].compact.join(' · ')
+      [label, version['version_id']]
     end
   end
 
@@ -219,6 +242,16 @@ module AuditEventsHelper
   end
 
   private
+
+    # Compact "YYYY-MM-DD HH:MM" for a version-picker option; blank for an
+    # absent/unparseable timestamp so the option still reads cleanly.
+    def mods_version_timestamp(created)
+      return if created.blank?
+
+      Time.iso8601(created).strftime('%Y-%m-%d %H:%M')
+    rescue ArgumentError
+      nil
+    end
 
     def payload_summary_text(action, payload)
       case action

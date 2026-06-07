@@ -86,6 +86,7 @@ Rails.application.routes.draw do
   # Type-agnostic (the data layer hits Atlas's /resources/:id/* endpoints), so
   # a single flat route serves Work / Collection / Community alike.
   get '/resources/:id/rights_history', to: 'histories#rights', as: :rights_history
+  get '/resources/:id/mods_history',   to: 'histories#mods',   as: :mods_history
 
   # xml
   get '/xml/editor/:id' => 'xml#editor', as: 'xml_editor'

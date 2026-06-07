@@ -132,3 +132,70 @@
     color: $gray-400;
   }
 }
+
+// MODS version-history diff — the version picker + the line diff itself.
+.mods-diff {
+  &__picker {
+    background-color: #f6f8fa;
+    border-bottom: 1px solid $gray-300;
+  }
+  // The → between the two version selects, baseline-aligned with them.
+  &__arrow {
+    color: $gray-500;
+    padding-bottom: 0.4rem;
+  }
+  &__body {
+    overflow-x: auto;
+  }
+
+  // Diffy's HTML output, scoped + recoloured into the archival palette. The
+  // ins/del tints reuse the same teal-green (added) / mauve (removed) tokens
+  // as the ACL diff above, so "gained" vs "lost" reads consistently across
+  // both history pages. Monospace + tabular so the XML lines up.
+  &__body .diff {
+    font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 0.8rem;
+    font-variant-numeric: tabular-nums;
+
+    ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    li {
+      padding: 0.05rem 1rem;
+      white-space: pre-wrap;
+      word-break: break-word;
+      border-left: 3px solid transparent;
+
+      &.ins {
+        background-color: color-mix(in srgb, $audit-tone-create 8%, white);
+        border-left-color: color-mix(in srgb, $audit-tone-create 45%, white);
+      }
+      &.del {
+        background-color: color-mix(in srgb, $audit-tone-unlink 8%, white);
+        border-left-color: color-mix(in srgb, $audit-tone-unlink 40%, white);
+      }
+      &.unchanged {
+        color: $gray-500;
+      }
+    }
+
+    // Inline word-level highlights within a changed line.
+    ins,
+    del {
+      text-decoration: none;
+      font-weight: 600;
+      border-radius: 0.15rem;
+      padding: 0 0.05rem;
+    }
+    ins {
+      color: color-mix(in srgb, $audit-tone-create 80%, black);
+      background-color: color-mix(in srgb, $audit-tone-create 18%, white);
+    }
+    del {
+      color: color-mix(in srgb, $audit-tone-unlink 75%, black);
+      background-color: color-mix(in srgb, $audit-tone-unlink 16%, white);
+    }
+  }
+}

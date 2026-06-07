@@ -21,6 +21,18 @@ class HistoriesController < ApplicationController
     @events = Kaminari.paginate_array(events).page(page_for(events)).per(PER_PAGE)
   end
 
+  def mods
+    load_resource!
+    @versions = Array(AtlasRb::Resource.mods_versions(params[:id], nuid: Current.nuid)['versions'])
+    return if @versions.empty?
+
+    @to_id   = resolve_to
+    @from_id = resolve_from(@to_id)
+    return if @from_id.nil? # earliest version — nothing earlier to compare
+
+    @diff = ModsDiff.call(from_xml: mods_xml(@from_id), to_xml: mods_xml(@to_id))
+  end
+
   private
 
     # Same gate as the History tab. Non-admins fail here and land on the shared
@@ -53,5 +65,40 @@ class HistoriesController < ApplicationController
 
       index = events.index { |event| event['occurred_at'] == params[:at] }
       index ? (index / PER_PAGE) + 1 : 1
+    end
+
+    # Version ids newest-first, as Atlas returns them.
+    def version_ids
+      @version_ids ||= @versions.map { |version| version['version_id'] }
+    end
+
+    # The "after" side: explicit ?to, else the version a "View" deep-link
+    # points at (the one whose `created` matches ?at), else the newest.
+    def resolve_to
+      params[:to].presence || anchored_version_id || version_ids.first
+    end
+
+    # The "before" side: explicit ?from, else the version immediately preceding
+    # `to` (the next entry in the newest-first list). nil when `to` is the
+    # earliest — there's nothing earlier to diff against.
+    def resolve_from(to)
+      return params[:from].presence if params[:from].present?
+
+      index = version_ids.index(to)
+      index ? version_ids[index + 1] : nil
+    end
+
+    # Best-effort: match a "View" deep-link's event timestamp (?at) to the
+    # version created at that moment. Correlation is by timestamp, so a miss
+    # just falls back to the newest version.
+    def anchored_version_id
+      return if params[:at].blank?
+
+      match = @versions.find { |version| version['created'] == params[:at] }
+      match && match['version_id']
+    end
+
+    def mods_xml(version_id)
+      AtlasRb::Resource.mods_version(params[:id], version_id, nuid: Current.nuid)
     end
 end

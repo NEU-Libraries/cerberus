@@ -64,6 +64,7 @@ gem 'caxlsx' # xlsx writer — loader manifest fixtures now, spreadsheet export 
 gem 'dartsass-rails'
 gem 'devise'
 gem 'devise-i18n'
+gem 'diffy' # line-diff for the MODS version-history page (wraps system diff)
 gem 'enumerations'
 gem 'haml'
 gem 'kataba', '>= 1.0.3'
