@@ -45,7 +45,8 @@ class HistoriesController < ApplicationController
     # Doubles as id validation: an unknown id raises JSON::ParserError, which
     # Authorizable turns into a friendly 404.
     def load_resource!
-      found           = AtlasRb::Resource.find(params[:id])
+      @resource_id    = params[:id]
+      found           = AtlasRb::Resource.find(@resource_id)
       @resource_klass = found.klass
       @resource_title = found.resource.title
     end
