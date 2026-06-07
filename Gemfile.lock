@@ -146,6 +146,7 @@ GEM
       devise (>= 5.0.0)
       rails-i18n
     diff-lcs (1.6.2)
+    diffy (3.4.4)
     docile (1.4.1)
     drb (2.2.3)
     edtf (3.2.0)
@@ -500,6 +501,7 @@ DEPENDENCIES
   debug
   devise
   devise-i18n
+  diffy
   enumerations
   factory_bot_rails
   faker
