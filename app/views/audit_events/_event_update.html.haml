@@ -1,15 +1,11 @@
 -# The Detail column carries the change_type category ("Metadata" vs
 -# "Permissions") + a payload summary (changed fields, or the before→after ACL
--# diff), so the bare `update` verb is no longer ambiguous.
--#
--# TODO (Permission History): make the `permissions` category label (see
--# audit_event_change_type_badge) a hyperlink to a per-resource Permission
--# History view — the v2 successor to v1's "Rights History" diff page. Now
--# feasible because Atlas 0.6.40 records `payload: { before:, after: }` on every
--# permissions event. Design note:
--# ~/projects/gap_reports/atlas_audit_permission_history_view.md
+-# diff), so the bare `update` verb is no longer ambiguous. The View cell links
+-# permissions / MODS-document rows to their dedicated diff pages — the v2
+-# successor to v1's "Rights History" / "MODS History" pages.
 %tr.audit-event.audit-event--update
   %td= audit_event_timestamp(event)
   %td= audit_event_action_badge(event)
   %td.audit-event__detail-cell= audit_event_detail_cell(event)
   %td= audit_event_who(event)
+  %td.audit-event__view-cell= audit_event_view_cell(event, resource_id)

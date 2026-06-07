@@ -44,6 +44,15 @@ module AuditEventsHelper
   # AUDITED_ACL_KEYS so the before/after snapshots line up key-for-key.
   ACL_DIFF_KEYS = %w[read edit edit_users].freeze
 
+  # Human labels for the ACL slots, used by the dedicated Rights-history diff
+  # page (the expanded two-column before/after view). The audit-log one-liner
+  # uses the bare key; the full page reads better with prose labels.
+  ACL_LEVEL_LABELS = {
+    'read'       => 'Read',
+    'edit'       => 'Edit',
+    'edit_users' => 'Edit users'
+  }.freeze
+
   def audit_event_action(event_action)
     ACTION_DESCRIPTORS.fetch(event_action.to_s) do
       GENERIC_ACTION.merge(label: event_action.to_s.humanize)
@@ -136,6 +145,65 @@ module AuditEventsHelper
       safe_join(['for ', audit_event_nuid(event['on_behalf_of_nuid'])])
     end
     content_tag(:div, safe_join([actor, on_behalf]), class: 'audit-event__who')
+  end
+
+  # The per-row "View" affordance in the audit log — the bridge from the
+  # unified ledger to a dedicated diff page. On a permissions `update` row it
+  # links to the Rights-history diff page; on a MODS-document `update` row, to
+  # the MODS-history diff page — deep-linked to this event so the page lands on
+  # (and scrolls to) the right entry. Every other row returns nil, so the
+  # column renders an empty cell and stays aligned. This is the v2 successor to
+  # v1's per-object Rights / MODS History pages.
+  def audit_event_view_cell(event, resource_id)
+    path = audit_event_view_path(event, resource_id)
+    return if path.nil?
+
+    link_to(path, class: 'btn btn-sm btn-outline-secondary audit-event__view-btn') do
+      safe_join([
+                  content_tag(:i, '', class: 'fa-solid fa-magnifying-glass', 'aria-hidden': 'true'),
+                  'View'
+                ], ' ')
+    end
+  end
+
+  # Where a row's "View" button points, or nil if the row has no deep view.
+  # Keyed on `update` rows: permissions → Rights diff; metadata-from-a-MODS-
+  # document → MODS diff. (Field-patch metadata rows carry no recoverable MODS
+  # version, so they get no MODS link.)
+  def audit_event_view_path(event, resource_id)
+    return unless event['action'] == 'update'
+
+    case event['change_type']
+    when 'permissions'
+      rights_history_path(resource_id, at: event['occurred_at'], anchor: audit_event_dom_id(event))
+    end
+  end
+
+  # A DOM-id anchor for an event, derived from its (per-resource unique)
+  # timestamp — lets the "View" deep-link scroll to the exact entry via :target.
+  def audit_event_dom_id(event)
+    "evt-#{event['occurred_at'].to_s.gsub(/[^0-9]/, '')}"
+  end
+
+  # Prose label for an ACL slot on the Rights-history diff page.
+  def acl_level_label(key)
+    ACL_LEVEL_LABELS.fetch(key.to_s) { key.to_s.humanize }
+  end
+
+  # Render one ACL slot's grants as monospace identifier pills (reusing the
+  # audit-log NUID-pill register). `marked` grants get a `state` tint — used to
+  # flag the +added (after column) and −removed (before column) grants in the
+  # two-column diff. Empty slot → a muted em-dash placeholder.
+  def acl_grant_pills(grants, marked: [], state: nil)
+    grants = Array(grants)
+    return content_tag(:span, '—', class: 'rights-diff__empty', 'aria-hidden': 'true') if grants.empty?
+
+    marked = Array(marked)
+    safe_join(grants.map do |grant|
+      classes = ['rights-diff__pill']
+      classes << "rights-diff__pill--#{state}" if state.present? && marked.include?(grant)
+      content_tag(:span, grant, class: classes.join(' '))
+    end, ' ')
   end
 
   # Human one-liner derived from the event payload, by action. Returns a muted

@@ -82,6 +82,11 @@ Rails.application.routes.draw do
 
   get '/downloads/:id', to: 'downloads#show', as: :download
 
+  # history — deep diff views reached from the audit-log "View" button.
+  # Type-agnostic (the data layer hits Atlas's /resources/:id/* endpoints), so
+  # a single flat route serves Work / Collection / Community alike.
+  get '/resources/:id/rights_history', to: 'histories#rights', as: :rights_history
+
   # xml
   get '/xml/editor/:id' => 'xml#editor', as: 'xml_editor'
   put '/xml/validate' => 'xml#validate'

@@ -41,8 +41,10 @@
               %th{scope: 'col'} Action
               %th{scope: 'col'} Detail
               %th{scope: 'col'} Who
+              %th.audit-event__view-col{scope: 'col'}
+                %span.visually-hidden Details
           %tbody
             - events.each do |event|
               - action_partial = "audit_events/event_#{event['action']}"
               - resolved = lookup_context.exists?(action_partial, [], true) ? action_partial : 'audit_events/event_generic'
-              = render partial: resolved, locals: { event: event }
+              = render partial: resolved, locals: { event: event, resource_id: resource_id }
