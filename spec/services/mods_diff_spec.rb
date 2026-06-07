@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe ModsDiff do
+RSpec.describe MODSDiff do
   def mods(title)
     <<~XML
       <mods xmlns="http://www.loc.gov/mods/v3">

@@ -53,14 +53,12 @@ RSpec.describe 'Histories', type: :request do
     before { sign_in admin_user }
 
     it 'lists permission changes with a before/after diff, skipping non-permission events' do
-      allow(AtlasRb::Resource).to receive(:history).and_return(history_mash([
-                                                                              perm_event(at: '2026-05-26T12:00:00Z',
-                                                                                         before: { 'read' => ['staff'] },
-                                                                                         after: { 'read' => %w[public staff] }),
-                                                                              { 'action' => 'update', 'change_type' => 'metadata',
-                                                                                'payload' => { 'source' => 'mods' }, 'actor_nuid' => '000000004',
-                                                                                'occurred_at' => '2026-05-25T00:00:00Z', 'on_behalf_of_nuid' => nil }
-                                                                            ]))
+      events = [
+        perm_event(at: '2026-05-26T12:00:00Z', before: { 'read' => ['staff'] }, after: { 'read' => %w[public staff] }),
+        { 'action' => 'update', 'change_type' => 'metadata', 'payload' => { 'source' => 'mods' },
+          'actor_nuid' => '000000004', 'occurred_at' => '2026-05-25T00:00:00Z', 'on_behalf_of_nuid' => nil }
+      ]
+      allow(AtlasRb::Resource).to receive(:history).and_return(history_mash(events))
       get rights_history_path(resource_id)
       expect(response).to have_http_status(:ok)
       expect(response.body).to include('Access-control changes')

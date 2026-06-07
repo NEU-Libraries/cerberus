@@ -11,7 +11,7 @@ require 'diffy'
 #
 #   diff = ModsDiff.call(from_xml: old_body, to_xml: new_body) # => Diffy::Diff
 #   diff.to_s(:html)   # rendered side in the view
-class ModsDiff < ApplicationService
+class MODSDiff < ApplicationService
   def initialize(from_xml:, to_xml:)
     @from_xml = from_xml
     @to_xml   = to_xml

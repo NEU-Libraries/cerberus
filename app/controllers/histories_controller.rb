@@ -30,7 +30,7 @@ class HistoriesController < ApplicationController
     @from_id = resolve_from(@to_id)
     return if @from_id.nil? # earliest version — nothing earlier to compare
 
-    @diff = ModsDiff.call(from_xml: mods_xml(@from_id), to_xml: mods_xml(@to_id))
+    @diff = MODSDiff.call(from_xml: mods_xml(@from_id), to_xml: mods_xml(@to_id))
   end
 
   private
@@ -69,7 +69,7 @@ class HistoriesController < ApplicationController
 
     # Version ids newest-first, as Atlas returns them.
     def version_ids
-      @version_ids ||= @versions.map { |version| version['version_id'] }
+      @version_ids ||= @versions.pluck('version_id')
     end
 
     # The "after" side: explicit ?to, else the version a "View" deep-link
