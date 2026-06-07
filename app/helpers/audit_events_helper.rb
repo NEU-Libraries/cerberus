@@ -177,16 +177,13 @@ module AuditEventsHelper
     when 'permissions'
       rights_history_path(resource_id, at: event['occurred_at'], anchor: audit_event_dom_id(event))
     when 'metadata'
-      mods_history_path(resource_id, at: event['occurred_at']) if mods_document_event?(event)
+      # Every metadata update writes a new descMetadata.xml OCFL version, so all
+      # of them get a MODS-diff link: a full MODS upload via mods_xml=
+      # ({ source: 'mods' }) AND a title/description field-patch ({ fields: }),
+      # since Atlas's plain_title= / plain_description= edit the MODS document
+      # and call mods_xml= too (MODSAssignment).
+      mods_history_path(resource_id, at: event['occurred_at'])
     end
-  end
-
-  # Only a full MODS-document update ({ source: 'mods' }) writes a recoverable
-  # MODS version; a title/description field-patch ({ fields: [...] }) does not,
-  # so those rows get no MODS-diff link.
-  def mods_document_event?(event)
-    payload = event['payload']
-    payload.is_a?(Hash) && payload['source'] == 'mods'
   end
 
   # <option>s for the MODS-history version picker: "v5 · 2026-05-26 14:02 ·

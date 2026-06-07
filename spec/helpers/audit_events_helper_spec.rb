@@ -27,11 +27,11 @@ RSpec.describe AuditEventsHelper, type: :helper do
       expect(html).to include('/resources/w-1/mods_history')
     end
 
-    it 'renders nothing for a metadata field-patch (no recoverable MODS version)' do
+    it 'also links a title/description field-patch (plain_title= edits the MODS doc too)' do
       html = helper.audit_event_view_cell(
         event(action: 'update', change_type: 'metadata', payload: { 'fields' => %w[title] }), 'w-1'
       )
-      expect(html).to be_nil
+      expect(html).to include('/resources/w-1/mods_history')
     end
 
     it 'renders nothing for non-update rows' do
