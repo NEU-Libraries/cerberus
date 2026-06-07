@@ -21,6 +21,14 @@ $audit-tone-update:    #2666a6;
 $audit-tone-tombstone: #a73a31;
 $audit-tone-restore:   #c46410;
 $audit-tone-generic:   #6c757d;
+// Structural-relationship verbs. Placed in the empty arcs of the wheel so
+// they don't collide with the five above — a muted indigo for a re-parent
+// (moved within the tree), a sea-green for a link (a new association), and
+// a mauve for an unlink (a severed one). All desaturated to the same quiet
+// register; "removal" stays mauve, not red — red belongs to tombstone.
+$audit-tone-reparent:  #5d569b;
+$audit-tone-link:      #4e8a5f;
+$audit-tone-unlink:    #8f5e78;
 
 .audit-history {
   background-color: #fff;
@@ -109,8 +117,10 @@ $audit-tone-generic:   #6c757d;
   }
 
   tbody td {
-    padding: 0.55rem 0.85rem;
-    vertical-align: middle;
+    padding: 0.45rem 0.85rem;
+    // Top-align so the date, action chip, and NUID pill all pin to one shared
+    // top edge — the eye gets a horizontal guide per row instead of a zigzag.
+    vertical-align: top;
     color: $gray-800;
     border: 0;
     border-bottom: 1px solid $gray-200;
@@ -154,6 +164,9 @@ $audit-tone-generic:   #6c757d;
   &--update    { --audit-action-color: #{$audit-tone-update}; }
   &--tombstone { --audit-action-color: #{$audit-tone-tombstone}; }
   &--restore   { --audit-action-color: #{$audit-tone-restore}; }
+  &--reparent  { --audit-action-color: #{$audit-tone-reparent}; }
+  &--link      { --audit-action-color: #{$audit-tone-link}; }
+  &--unlink    { --audit-action-color: #{$audit-tone-unlink}; }
   &--generic   { --audit-action-color: #{$audit-tone-generic}; }
 
   // Timestamp — date prominent on top, time muted underneath.
@@ -204,6 +217,44 @@ $audit-tone-generic:   #6c757d;
     letter-spacing: 0.005em;
   }
 
+  // Detail column — the change_type category label + payload summary, in their
+  // own column so they left-align consistently down the table (trailing the
+  // variable-width action chip, they couldn't). The summary may run long, so
+  // the cell wraps rather than forcing the column wider.
+  &__detail-cell {
+    white-space: normal;
+  }
+  &__detail-empty {
+    color: $gray-400;
+  }
+
+  // Category — NOT a chip and NOT colour-coded. A boxed/coloured token here
+  // would compete with the action chip (the row's one box, its one colour).
+  // Instead the category is plain uniform uppercase micro-label text,
+  // subordinate to the chip by typography alone — weight + tracking mark it as
+  // a label. (The --<change_type> modifier stays as a hook for the future
+  // Permission-History link, but carries no colour of its own.)
+  &__change-type {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: $gray-600;
+  }
+  // Payload summary, right of the category label in the Detail column.
+  &__detail-summary {
+    font-size: 0.78rem;
+    color: $gray-600;
+    font-variant-numeric: tabular-nums;
+
+    // Middot separator from the category label that precedes it.
+    &::before {
+      content: "·";
+      margin: 0 0.4rem;
+      color: $gray-400;
+    }
+  }
+
   // NUID chip — monospace tabular pill. NUIDs are identifiers, so they
   // get identifier typography. The chip's quiet background lets the
   // identifier read as a token, not a body word.
@@ -225,6 +276,19 @@ $audit-tone-generic:   #6c757d;
     color: $gray-400;
     font-family: inherit;
     padding-left: 0;
+  }
+
+  // WHO cell — actor pill on top; the proxy / acting-as target (rare) stacks
+  // beneath it as a muted "for <nuid>" line, mirroring the date-over-time
+  // idiom in the When cell. Most rows are just the actor pill, no extra line.
+  &__who {
+    line-height: 1.35;
+  }
+  &__on-behalf {
+    display: block;
+    margin-top: 0.15rem;
+    font-size: 0.72rem;
+    color: $gray-500;
   }
 }
 

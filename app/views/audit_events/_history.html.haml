@@ -39,8 +39,8 @@
             %tr
               %th.text-nowrap{scope: 'col'} When
               %th{scope: 'col'} Action
-              %th{scope: 'col'} Actor
-              %th{scope: 'col'} On behalf of
+              %th{scope: 'col'} Detail
+              %th{scope: 'col'} Who
           %tbody
             - events.each do |event|
               - action_partial = "audit_events/event_#{event['action']}"
