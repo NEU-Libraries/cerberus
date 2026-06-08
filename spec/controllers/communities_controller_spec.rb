@@ -21,9 +21,12 @@ describe CommunitiesController do
       expect(CGI.unescapeHTML(response.body)).to include(community.title)
     end
 
-    it 'renders breadcrumbs (in the container header)' do
+    it 'renders breadcrumbs: an active "Edit Community" crumb, the title linking back to show, no Add affordance' do
       get :edit, params: { id: community.id }
       expect(response.body).to include('aria-label="breadcrumb"')
+      expect(response.body).to include('Edit Community') # you-are-here crumb
+      expect(response.body).to include(%(href="#{community_path(community.id)}")) # title links to show
+      expect(response.body).not_to include('breadcrumb-add') # Add dropdown suppressed on edit
     end
 
     context 'audit history tab' do

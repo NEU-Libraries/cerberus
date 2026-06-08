@@ -21,7 +21,7 @@ class ApplicationController < ActionController::Base
     @current_ability ||= Ability.new(effective_user)
   end
 
-  def breadcrumbs(id)
+  def breadcrumbs(id, editing: false)
     result = AtlasRb::Resource.find(id)
     item = result.resource
     # ancestor_chain carries each ancestor's title alongside its noid/klass, so
@@ -29,7 +29,22 @@ class ApplicationController < ActionController::Base
     Array(item.ancestor_chain).each do |node|
       add_breadcrumb_for(node['noid'], node['klass'], node['title'])
     end
-    add_breadcrumb_for(item.id, result.klass, item.title)
+
+    if editing
+      edit_breadcrumb_tail(item, result.klass)
+    else
+      add_breadcrumb_for(item.id, result.klass, item.title)
+    end
+  end
+
+  # The tail of an edit-page trail: the resource itself becomes a link back to
+  # its show page (`match: :exact` so loaf doesn't mark it current on the
+  # `/edit` sub-path — inclusive matching otherwise treats `/works/:id/edit` as
+  # "under" `/works/:id`), and a final non-link "Edit <Klass>" crumb is the
+  # you-are-here. Lets an editor back out to the resource via the trail.
+  def edit_breadcrumb_tail(item, klass)
+    breadcrumb(item.title, public_send("#{klass.downcase}_path", item.id), match: :exact)
+    breadcrumb("Edit #{klass}", public_send("edit_#{klass.downcase}_path", item.id))
   end
 
   def pretty_group(raw_group)

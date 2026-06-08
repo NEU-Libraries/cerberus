@@ -31,7 +31,7 @@ class CollectionsController < CatalogController
   def edit
     @collection = AtlasRb::Collection.find(params[:id])
     form_preparation(@permissions)
-    breadcrumbs(params[:id])
+    breadcrumbs(params[:id], editing: true)
   end
 
   def create
