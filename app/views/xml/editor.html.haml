@@ -12,6 +12,9 @@
     %a.nav-link{href: "#{public_send("edit_#{@klass.downcase}_path", @resource.id)}#permissions"} Permissions
   %li.nav-item
     %a.nav-link.active{href: "#"} XML
+  - if can?(:read, :audit_event)
+    %li.nav-item
+      %a.nav-link{href: "#{public_send("edit_#{@klass.downcase}_path", @resource.id)}#history"} History
 
 %br
 
