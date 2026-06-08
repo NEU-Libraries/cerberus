@@ -38,6 +38,7 @@ class WorksController < ApplicationController
   def edit
     @work = AtlasRb::Work.find(params[:id])
     form_preparation(@permissions)
+    breadcrumbs(params[:id])
   end
 
   def create

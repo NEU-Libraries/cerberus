@@ -31,6 +31,7 @@ class CommunitiesController < CatalogController
   def edit
     @community = AtlasRb::Community.find(params[:id])
     form_preparation(@permissions)
+    breadcrumbs(params[:id])
   end
 
   def create

@@ -21,6 +21,11 @@ describe CommunitiesController do
       expect(CGI.unescapeHTML(response.body)).to include(community.title)
     end
 
+    it 'renders breadcrumbs (in the container header)' do
+      get :edit, params: { id: community.id }
+      expect(response.body).to include('aria-label="breadcrumb"')
+    end
+
     context 'audit history tab' do
       let(:history_envelope) do
         AtlasRb::Mash.new('resource_id' => community.id, 'events' => [])
