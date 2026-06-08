@@ -27,4 +27,25 @@
 = f.text_area :description, rows: 10, value: descriptive[:abstract], label: 'Description'
 
 - if keywords
-  = f.text_area :keywords, rows: 4, value: Array(descriptive[:keywords]).join("\n"), required: true, label: 'Keywords', help: 'One keyword per line. At least one keyword is required.'
+  -# Stacked-input keyword editor (keyword-list Stimulus controller): each
+  -# committed keyword is a row with a red "−"; the final entry row's green "+"
+  -# (or Enter) promotes the typed value into a row. Every input posts as
+  -# `<resource>[keywords][]`, so a value typed-but-not-added is still saved; the
+  -# server strips/dedupes. At least one keyword is required (descriptive_valid?).
+  .mb-3{ data: { controller: 'keyword-list' } }
+    %label.form-label.mb-1 Keywords
+    - Array(descriptive[:keywords]).each do |kw|
+      .input-group.mb-2{ data: { 'keyword-list-target': 'row' } }
+        %input.form-control{ type: 'text', name: "#{f.object_name}[keywords][]", value: kw, 'aria-label': 'Keyword' }
+        %button.btn.btn-danger{ type: 'button', 'aria-label': 'Remove keyword', data: { action: 'click->keyword-list#remove' } }
+          %i.fa-solid.fa-minus{ 'aria-hidden': 'true' }
+    %template{ data: { 'keyword-list-target': 'template' } }
+      .input-group.mb-2
+        %input.form-control{ type: 'text', name: "#{f.object_name}[keywords][]", 'aria-label': 'Keyword' }
+        %button.btn.btn-danger{ type: 'button', 'aria-label': 'Remove keyword', data: { action: 'click->keyword-list#remove' } }
+          %i.fa-solid.fa-minus{ 'aria-hidden': 'true' }
+    .input-group.mb-1
+      %input.form-control{ type: 'text', name: "#{f.object_name}[keywords][]", placeholder: 'Add a keyword…', 'aria-label': 'Add a keyword', data: { 'keyword-list-target': 'entry', action: 'keydown->keyword-list#addOnEnter' } }
+      %button.btn.btn-success{ type: 'button', 'aria-label': 'Add keyword', data: { action: 'click->keyword-list#add' } }
+        %i.fa-solid.fa-plus{ 'aria-hidden': 'true' }
+    .form-text.text-muted Press + (or Enter) to add a keyword. At least one is required.

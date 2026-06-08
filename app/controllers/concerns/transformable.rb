@@ -48,11 +48,11 @@ module Transformable # rubocop:disable Metrics/ModuleLength
   # Descriptive (MODS) fields the simple Metadata form owns; symbol-keyed for
   # MODSMerge. `keywords: false` (containers) leaves keyword subjects untouched.
   def descriptive_params(resource_key, keywords: false)
-    raw = params.require(resource_key).permit(:title, :description, :keywords)
+    raw = params.require(resource_key).permit(:title, :description, keywords: [])
     {
       title:       raw[:title],
       description: raw[:description],
-      keywords:    keywords ? split_keywords(raw[:keywords]) : nil
+      keywords:    keywords ? clean_keywords(raw[:keywords]) : nil
     }
   end
 
@@ -119,8 +119,8 @@ module Transformable # rubocop:disable Metrics/ModuleLength
     @descriptive = Metadata::MODSFields.call(xml: AtlasRb.const_get(klass).mods(params[:id], 'xml'))
   end
 
-  def split_keywords(raw)
-    raw.to_s.split(/\r?\n/).map(&:strip).reject(&:empty?)
+  def clean_keywords(raw)
+    Array(raw).map { |k| k.to_s.strip }.reject(&:empty?).uniq
   end
 
   def write_tmp_xml(xml)

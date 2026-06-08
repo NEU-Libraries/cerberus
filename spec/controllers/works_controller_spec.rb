@@ -238,7 +238,7 @@ describe WorksController do
     end
 
     it 'edits the main title without flattening the structured title parts' do
-      patch :update_metadata, params: { id: work.id, work: { title: 'NewTitle', description: 'NewAbstract', keywords: "alpha\nbeta" } }
+      patch :update_metadata, params: { id: work.id, work: { title: 'NewTitle', description: 'NewAbstract', keywords: %w[alpha beta] } }
 
       updated = AtlasRb::Work.find(work.id, nuid: '000000004')
       expect(updated.title).to start_with('NewTitle') # new main title
