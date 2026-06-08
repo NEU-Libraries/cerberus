@@ -31,6 +31,7 @@ class CommunitiesController < CatalogController
   def edit
     @community = AtlasRb::Community.find(params[:id])
     form_preparation(@permissions)
+    load_descriptive!('Community')
     breadcrumbs(params[:id], editing: true)
   end
 
@@ -43,15 +44,6 @@ class CommunitiesController < CatalogController
   end
 
   def update
-    permitted = params.require(:community).permit(:title, :description).to_h
-    add_thumbnail(permitted)
-    AtlasRb::Community.metadata(params[:id], permitted)
-    redirect_to community_path(params[:id])
+    handle_metadata_update(klass: 'Community', resource_key: :community, keywords: false)
   end
-
-  private
-
-    def community_params
-      resource_params(:community)
-    end
 end

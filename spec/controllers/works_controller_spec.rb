@@ -221,7 +221,8 @@ describe WorksController do
       get :metadata, params: { id: work.id }
       expect(response).to render_template('works/metadata')
       body = CGI.unescapeHTML(response.body)
-      expect(body).to include(work.title)
+      expect(body).to include('Respond')
+      expect(body).to include('Keywords')
       expect(body).to include('General Permissions')
       expect(body).to include('Group Permissions')
       expect(body).to include('id="add-group"')
@@ -236,14 +237,22 @@ describe WorksController do
       sign_in user
     end
 
-    it 'updates the title and description and redirects to show' do
-      patch :update_metadata, params: { id: work.id, work: { title: 'New Title', description: 'New abstract.' } }
+    it 'edits the main title without flattening the structured title parts' do
+      patch :update_metadata, params: { id: work.id, work: { title: 'NewTitle', description: 'NewAbstract', keywords: "alpha\nbeta" } }
 
       updated = AtlasRb::Work.find(work.id, nuid: '000000004')
-      expect(updated.title).to start_with('New Title')
-      expect(updated.title).not_to include("What's New")
-      expect(updated.description).to eq('New abstract.')
+      expect(updated.title).to start_with('NewTitle') # new main title
+      expect(updated.title).to include('Respond')     # partName preserved
+      expect(updated.title).to include('Episode')     # partNumber preserved
+      expect(updated.description).to eq('NewAbstract')
       expect(subject).to redirect_to action: :show, id: work.id
+    end
+
+    it 'rejects a save with no keywords (keywords are mandatory)' do
+      patch :update_metadata, params: { id: work.id, work: { title: 'NewTitle', description: 'NewAbstract' } }
+
+      expect(flash[:alert]).to be_present
+      expect(AtlasRb::Work.find(work.id, nuid: '000000004').title).not_to start_with('NewTitle')
     end
   end
 

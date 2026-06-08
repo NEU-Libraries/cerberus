@@ -23,8 +23,7 @@
         %label.form-label{:for => "thumbnail"} Thumbnail
         %input#thumbnail.form-control.mb-3{:name => "thumbnail", :type => "file"}/
         = bootstrap_fields_for :work do |c|
-          = c.text_field :title, value: @work.title
-          = c.text_area :description, rows: 10, value: @work.description
+          = render 'shared/descriptive_fields', f: c, descriptive: @descriptive, keywords: true
         .well.p-3.my-3.rounded-3
           = f.button :submit, class: "btn btn-success"
           = link_to "Cancel", work_path(params[:id]), class: "btn btn-warning"

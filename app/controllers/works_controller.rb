@@ -38,6 +38,7 @@ class WorksController < ApplicationController
   def edit
     @work = AtlasRb::Work.find(params[:id])
     form_preparation(@permissions)
+    load_descriptive!('Work')
     breadcrumbs(params[:id], editing: true)
   end
 
@@ -53,26 +54,25 @@ class WorksController < ApplicationController
     redirect_to metadata_work_path(@work.id), notice: 'File uploaded — please review the metadata.'
   end
 
+  # Metadata + Permissions tabs are separate forms that both PATCH here with
+  # disjoint fields; descriptive edits are merged into the existing MODS in place
+  # (MODSMerge) so curated title structure is never flattened. Title + at least
+  # one keyword are required.
   def update
-    AtlasRb::Work.metadata(params[:id], work_params)
-    redirect_to work_path(params[:id])
+    handle_metadata_update(klass: 'Work', resource_key: :work, keywords: true)
   end
 
   def metadata
     @work = AtlasRb::Work.find(params[:id])
     form_preparation(@permissions)
+    load_descriptive!('Work')
   end
 
   def update_metadata
-    AtlasRb::Work.metadata(params[:id], work_params)
-    redirect_to work_path(params[:id])
+    handle_metadata_update(klass: 'Work', resource_key: :work, keywords: true)
   end
 
   private
-
-    def work_params
-      resource_params(:work)
-    end
 
     # Resolve the depositor NUID for a new Work.
     #

@@ -1,0 +1,26 @@
+-# locals:
+-#   f           — a bootstrap_form builder scoped to the resource (work/collection/community)
+-#   descriptive — Hash from Metadata::MODSFields (bare title, structured parts, abstract, keywords)
+-#   keywords    — Boolean: show the (mandatory) Keywords field (Works only)
+-#
+-# The Title field edits only the bare primary <mods:title>; structured parts
+-# (subtitle / part name / part number / non-sort) are shown read-only and edited
+-# via the XML editor, so saving here never flattens a curated title.
+= f.text_field :title, value: descriptive[:title], required: true, label: 'Title'
+
+- parts = { 'Subtitle' => descriptive[:subtitle], 'Part name' => descriptive[:part_name], 'Part number' => descriptive[:part_number], 'Non-sort' => descriptive[:non_sort] }.compact
+- if parts.any?
+  .well.p-2.my-2.rounded-3.small
+    .text-muted.mb-1
+      %i.fa-solid.fa-circle-info{'aria-hidden' => 'true'}
+      Additional title parts (edit via the XML tab to keep them intact):
+    %ul.mb-0
+      - parts.each do |label, value|
+        %li
+          %strong= "#{label}:"
+          %span.font-monospace= value
+
+= f.text_area :description, rows: 10, value: descriptive[:abstract], label: 'Description'
+
+- if keywords
+  = f.text_area :keywords, rows: 4, value: Array(descriptive[:keywords]).join("\n"), required: true, label: 'Keywords', help: 'One keyword per line. At least one keyword is required.'

@@ -31,6 +31,7 @@ class CollectionsController < CatalogController
   def edit
     @collection = AtlasRb::Collection.find(params[:id])
     form_preparation(@permissions)
+    load_descriptive!('Collection')
     breadcrumbs(params[:id], editing: true)
   end
 
@@ -42,13 +43,6 @@ class CollectionsController < CatalogController
   end
 
   def update
-    AtlasRb::Collection.metadata(params[:id], collection_params)
-    redirect_to collection_path(params[:id])
+    handle_metadata_update(klass: 'Collection', resource_key: :collection, keywords: false)
   end
-
-  private
-
-    def collection_params
-      resource_params(:collection)
-    end
 end
