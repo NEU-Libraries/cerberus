@@ -131,6 +131,54 @@
   &__empty {
     color: $gray-400;
   }
+
+  // Previous/Next event walker (one change per page), sitting below the card.
+  // De-chromed to plain text links matching the search paginator register
+  // (_pagination) — a quiet stepper, not a button row. The three controls
+  // cluster toward the centre (Newer · "Change X of N" · Older) rather than
+  // pinning to the corners; boundary controls render muted + inert.
+  &__nav {
+    display: flex;
+    justify-content: center;
+    align-items: baseline;
+    gap: 1.5rem;
+  }
+
+  &__nav-link {
+    color: $primary;
+    font-size: 0.85rem;
+    text-decoration: none;
+    white-space: nowrap;
+
+    i {
+      font-size: 0.85em;
+    }
+
+    &:hover,
+    &:focus {
+      color: darken($primary, 12%);
+      text-decoration: underline;
+    }
+    &:focus-visible {
+      outline: 2px solid $primary;
+      outline-offset: 3px;
+      text-decoration: underline;
+    }
+    // Boundary control (newest / oldest end): muted and inert.
+    &--disabled {
+      color: $gray-500;
+      pointer-events: none;
+    }
+  }
+
+  // Position readout, between the controls — quiet archival caption, tabular
+  // so "1 of 2" → "10 of 12" doesn't shift width.
+  &__nav-pos {
+    font-size: 0.78rem;
+    color: $gray-600;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.01em;
+  }
 }
 
 // MODS version-history diff — the version picker + the line diff itself.

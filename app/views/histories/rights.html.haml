@@ -22,10 +22,6 @@
     %header.audit-history__head
       %div
         %span.audit-history__title Access-control changes
-        - if @events.total_pages > 1
-          %span.audit-history__count
-            %i.fa-solid.fa-lock{'aria-hidden' => 'true'}
-            = "Change #{@events.current_page} of #{@events.total_count}"
       - if @events.total_pages > 1
         %span.audit-history__subtitle Reverse chronological
 
@@ -60,9 +56,23 @@
                     %td= acl_grant_pills(before[key], marked: removed, state: 'removed')
                     %td= acl_grant_pills(after[key], marked: added, state: 'added')
 
-      - if @events.total_pages > 1
-        %nav.rights-diff__nav.mt-3.d-flex.justify-content-between.align-items-center{'aria-label' => 'Permission change navigation'}
-          %div
-            = link_to_previous_page @events, '<i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Previous'.html_safe, class: 'btn btn-sm btn-outline-secondary'
-          %div
-            = link_to_next_page @events, 'Next <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>'.html_safe, class: 'btn btn-sm btn-outline-secondary'
+  -# Walker sits below the card, controls clustered toward the centre rather
+  -# than pinned to the corners. Newer (left) / Older (right) name the time
+  -# axis so the arrows agree with reverse-chronological order; boundary
+  -# controls render inert rather than vanishing, so an end-of-history state
+  -# never looks like a missing button.
+  - if @events.total_pages > 1
+    %nav.rights-diff__nav.mt-3{'aria-label' => 'Permission change navigation'}
+      - if @events.first_page?
+        %span.rights-diff__nav-link.rights-diff__nav-link--disabled{'aria-disabled' => 'true'}
+          %i.fa-solid.fa-arrow-left{'aria-hidden' => 'true'}
+          Newer
+      - else
+        = link_to_previous_page @events, '<i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Newer'.html_safe, class: 'rights-diff__nav-link'
+      %span.rights-diff__nav-pos= "Change #{@events.current_page} of #{@events.total_count}"
+      - if @events.last_page?
+        %span.rights-diff__nav-link.rights-diff__nav-link--disabled{'aria-disabled' => 'true'}
+          Older
+          %i.fa-solid.fa-arrow-right{'aria-hidden' => 'true'}
+      - else
+        = link_to_next_page @events, 'Older <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>'.html_safe, class: 'rights-diff__nav-link'
