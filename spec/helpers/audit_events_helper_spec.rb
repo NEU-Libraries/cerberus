@@ -20,6 +20,12 @@ RSpec.describe AuditEventsHelper, type: :helper do
       expect(html).to include('evt-20260526123456') # deep-link #anchor
     end
 
+    it 'links a permissions create (the initial grant) to the rights-history page' do
+      html = helper.audit_event_view_cell(event(action: 'create', change_type: 'permissions'), 'w-1')
+      expect(html).to include('View')
+      expect(html).to include('/resources/w-1/rights_history')
+    end
+
     it 'links a full MODS-document update to the mods-history page' do
       html = helper.audit_event_view_cell(
         event(action: 'update', change_type: 'metadata', payload: { 'source' => 'mods' }), 'w-1'
@@ -36,6 +42,11 @@ RSpec.describe AuditEventsHelper, type: :helper do
 
     it 'renders nothing for non-update rows' do
       expect(helper.audit_event_view_cell(event(action: 'create', change_type: 'structural'), 'w-1')).to be_nil
+    end
+
+    it 'renders nothing for a metadata create row (no prior MODS version to diff)' do
+      cell = helper.audit_event_view_cell(event(action: 'create', change_type: 'metadata', payload: { 'source' => 'mods' }), 'w-1')
+      expect(cell).to be_nil
     end
   end
 

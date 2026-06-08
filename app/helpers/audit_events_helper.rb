@@ -44,6 +44,13 @@ module AuditEventsHelper
   # AUDITED_ACL_KEYS so the before/after snapshots line up key-for-key.
   ACL_DIFF_KEYS = %w[read edit edit_users].freeze
 
+  # Permission audit actions that carry a viewable before/after ACL snapshot:
+  # the initial grant at creation (`create`, emitted by Atlas's service objects)
+  # and every later ACL change (`update`). Atlas suppresses no-op permission
+  # writes, so each is a real transition worth a Rights-diff page. Shared by the
+  # audit-log "View" link and HistoriesController#permission_events.
+  PERMISSION_VIEW_ACTIONS = %w[create update].freeze
+
   # Human labels for the ACL slots, used by the dedicated Rights-history diff
   # page (the expanded two-column before/after view). The audit-log one-liner
   # uses the bare key; the full page reads better with prose labels.
@@ -148,12 +155,13 @@ module AuditEventsHelper
   end
 
   # The per-row "View" affordance in the audit log — the bridge from the
-  # unified ledger to a dedicated diff page. On a permissions `update` row it
-  # links to the Rights-history diff page; on a MODS-document `update` row, to
-  # the MODS-history diff page — deep-linked to this event so the page lands on
-  # (and scrolls to) the right entry. Every other row returns nil, so the
-  # column renders an empty cell and stays aligned. This is the v2 successor to
-  # v1's per-object Rights / MODS History pages.
+  # unified ledger to a dedicated diff page. On a permissions row (the initial
+  # grant or a later change) it links to the Rights-history diff page; on a
+  # MODS-document `update` row, to the MODS-history diff page — deep-linked to
+  # this event so the page lands on (and scrolls to) the right entry. Every
+  # other row returns nil, so the column renders an empty cell and stays
+  # aligned. This is the v2 successor to v1's per-object Rights / MODS History
+  # pages.
   def audit_event_view_cell(event, resource_id)
     path = audit_event_view_path(event, resource_id)
     return if path.nil?
@@ -167,21 +175,26 @@ module AuditEventsHelper
   end
 
   # Where a row's "View" button points, or nil if the row has no deep view.
-  # Keyed on `update` rows: permissions → Rights diff; metadata-from-a-MODS-
-  # document → MODS diff. (Field-patch metadata rows carry no recoverable MODS
-  # version, so they get no MODS link.)
+  # Permissions → Rights diff (on `create` grant + `update` change rows);
+  # metadata-from-a-MODS-document → MODS diff (`update` rows only). Every other
+  # row returns nil.
   def audit_event_view_path(event, resource_id)
-    return unless event['action'] == 'update'
-
     case event['change_type']
     when 'permissions'
+      # The initial grant (`create`) and every later ACL change (`update`) both
+      # carry a before/after snapshot, so both link to the Rights diff.
+      return unless PERMISSION_VIEW_ACTIONS.include?(event['action'])
+
       rights_history_path(resource_id, at: event['occurred_at'], anchor: audit_event_dom_id(event))
     when 'metadata'
       # Every metadata update writes a new descMetadata.xml OCFL version, so all
       # of them get a MODS-diff link: a full MODS upload via mods_xml=
       # ({ source: 'mods' }) AND a title/description field-patch ({ fields: }),
       # since Atlas's plain_title= / plain_description= edit the MODS document
-      # and call mods_xml= too (MODSAssignment).
+      # and call mods_xml= too (MODSAssignment). The MODS document's create row
+      # has no prior version to diff, so it stays update-only.
+      return unless event['action'] == 'update'
+
       mods_history_path(resource_id, at: event['occurred_at'])
     end
   end

@@ -28,8 +28,8 @@ RSpec.describe 'Histories', type: :request do
     AtlasRb::Mash.new('resource_id' => resource_id, 'events' => events)
   end
 
-  def perm_event(at:, before:, after:)
-    { 'action' => 'update', 'change_type' => 'permissions',
+  def perm_event(at:, before:, after:, action: 'update')
+    { 'action' => action, 'change_type' => 'permissions',
       'payload' => { 'before' => before, 'after' => after },
       'actor_nuid' => '000000004', 'occurred_at' => at, 'on_behalf_of_nuid' => nil }
   end
@@ -63,6 +63,21 @@ RSpec.describe 'Histories', type: :request do
       expect(response).to have_http_status(:ok)
       expect(response.body).to include('Access-control changes')
       expect(response.body).to include('rights-diff__pill--added">public')
+    end
+
+    it 'includes the initial grant (a permissions create event), not just updates' do
+      events = [
+        perm_event(at: '2026-05-26T12:00:00Z', action: 'update',
+                   before: { 'read' => ['staff'] }, after: { 'read' => %w[public staff] }),
+        perm_event(at: '2026-05-20T09:00:00Z', action: 'create',
+                   before: {}, after: { 'read' => ['public'], 'edit' => ['grantgroup'] })
+      ]
+      allow(AtlasRb::Resource).to receive(:history).and_return(history_mash(events))
+      get rights_history_path(resource_id, at: '2026-05-20T09:00:00Z') # deep-link to the create grant
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('grantgroup')                   # the create grant's ACL rendered
+      expect(response.body).to include('Change 2 of 2')                # create + update form a 2-step walker
+      expect(response.body).to include('Permission change navigation')
     end
 
     it 'shows the empty state when there are no permission events' do

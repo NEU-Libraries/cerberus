@@ -54,10 +54,15 @@ class HistoriesController < ApplicationController
       @resource_title = found.resource.title
     end
 
+    # Permission events worth showing on the Rights page: the initial grant at
+    # creation and every later ACL change (see
+    # AuditEventsHelper::PERMISSION_VIEW_ACTIONS). Atlas suppresses no-op
+    # permission writes, so each is a real before/after transition.
     def permission_events
       history = AtlasRb::Resource.history(params[:id], nuid: Current.nuid)
       Array(history['events']).select do |event|
-        event['action'] == 'update' && event['change_type'] == 'permissions'
+        event['change_type'] == 'permissions' &&
+          AuditEventsHelper::PERMISSION_VIEW_ACTIONS.include?(event['action'])
       end
     end
 
