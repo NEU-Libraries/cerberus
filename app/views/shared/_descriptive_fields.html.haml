@@ -6,19 +6,23 @@
 -# The Title field edits only the bare primary <mods:title>; structured parts
 -# (subtitle / part name / part number / non-sort) are shown read-only and edited
 -# via the XML editor, so saving here never flattens a curated title.
-= f.text_field :title, value: descriptive[:title], required: true, label: 'Title'
-
 - parts = { 'Subtitle' => descriptive[:subtitle], 'Part name' => descriptive[:part_name], 'Part number' => descriptive[:part_number], 'Non-sort' => descriptive[:non_sort] }.compact
+- parts_note_id = 'title-parts-note' if parts.any?
+
+= f.text_field :title, value: descriptive[:title], required: true, label: 'Title', aria: ({ describedby: parts_note_id } if parts_note_id)
+
 - if parts.any?
-  .well.p-2.my-2.rounded-3.small
-    .text-muted.mb-1
-      %i.fa-solid.fa-circle-info{'aria-hidden' => 'true'}
-      Additional title parts (edit via the XML tab to keep them intact):
+  -# Quiet read-only caption (not a .well — wells are for form-section/action
+  -# blocks). Plain prose values: these are title fragments, not identifiers, so
+  -# no monospace treatment (per the institutional register).
+  .form-text.text-muted.small.mb-3{ id: parts_note_id }
+    %i.fa-solid.fa-circle-info{'aria-hidden' => 'true'}
+    Additional title parts (edit via the XML tab to keep them intact):
     %ul.mb-0
       - parts.each do |label, value|
         %li
           %strong= "#{label}:"
-          %span.font-monospace= value
+          = value
 
 = f.text_area :description, rows: 10, value: descriptive[:abstract], label: 'Description'
 
