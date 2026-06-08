@@ -17,7 +17,7 @@
   -# no monospace treatment (per the institutional register).
   .form-text.text-muted.small.mb-3{ id: parts_note_id }
     %i.fa-solid.fa-circle-info{'aria-hidden' => 'true'}
-    Additional title parts (edit via the XML tab to keep them intact):
+    Additional title parts:
     %ul.mb-0
       - parts.each do |label, value|
         %li
@@ -48,4 +48,4 @@
       %input.form-control{ type: 'text', name: "#{f.object_name}[keywords][]", placeholder: 'Add a keyword…', 'aria-label': 'Add a keyword', data: { 'keyword-list-target': 'entry', action: 'keydown->keyword-list#addOnEnter' } }
       %button.btn.btn-success{ type: 'button', 'aria-label': 'Add keyword', data: { action: 'click->keyword-list#add' } }
         %i.fa-solid.fa-plus{ 'aria-hidden': 'true' }
-    .form-text.text-muted Press + (or Enter) to add a keyword. At least one is required.
+    .form-text.text-muted Press + to add a keyword. At least one is required.
