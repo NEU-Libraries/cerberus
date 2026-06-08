@@ -28,10 +28,13 @@ RSpec.describe 'Histories', type: :request do
     AtlasRb::Mash.new('resource_id' => resource_id, 'events' => events)
   end
 
-  def perm_event(at:, before:, after:, action: 'update')
+  def perm_event(at:, before:, after:, action: 'update', **provenance)
+    payload = { 'before' => before, 'after' => after }
+    payload['source'] = provenance[:source] if provenance[:source]
     { 'action' => action, 'change_type' => 'permissions',
-      'payload' => { 'before' => before, 'after' => after },
-      'actor_nuid' => '000000004', 'occurred_at' => at, 'on_behalf_of_nuid' => nil }
+      'payload' => payload,
+      'actor_nuid' => '000000004', 'occurred_at' => at, 'on_behalf_of_nuid' => nil,
+      'note' => provenance[:note] }
   end
 
   before { allow(AtlasRb::Resource).to receive(:find).with(resource_id).and_return(found) }
@@ -78,6 +81,33 @@ RSpec.describe 'Histories', type: :request do
       expect(response.body).to include('grantgroup')                   # the create grant's ACL rendered
       expect(response.body).to include('Change 2 of 2')                # create + update form a 2-step walker
       expect(response.body).to include('Permission change navigation')
+    end
+
+    it 'captions an inherited grant with the parent NOID (from the note)' do
+      events = [perm_event(at: '2026-05-20T09:00:00Z', action: 'create', source: 'inherited',
+                           note: 'inherited from cba98765', before: {}, after: { 'read' => ['public'] })]
+      allow(AtlasRb::Resource).to receive(:history).and_return(history_mash(events))
+      get rights_history_path(resource_id)
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('Inherited from')
+      expect(response.body).to include('cba98765')                     # parent NOID surfaced
+    end
+
+    it 'captions a parentless (root) grant as "Initial grant"' do
+      events = [perm_event(at: '2026-05-20T09:00:00Z', action: 'create', source: 'initial',
+                           before: {}, after: { 'read' => ['public'] })]
+      allow(AtlasRb::Resource).to receive(:history).and_return(history_mash(events))
+      get rights_history_path(resource_id)
+      expect(response.body).to include('Initial grant')
+      expect(response.body).not_to include('Inherited from')
+    end
+
+    it 'shows no provenance caption for a manual update event' do
+      events = [perm_event(at: '2026-05-20T09:00:00Z', action: 'update',
+                           before: { 'read' => ['staff'] }, after: { 'read' => %w[public staff] })]
+      allow(AtlasRb::Resource).to receive(:history).and_return(history_mash(events))
+      get rights_history_path(resource_id)
+      expect(response.body).not_to include('rights-diff__provenance')
     end
 
     it 'shows the empty state when there are no permission events' do

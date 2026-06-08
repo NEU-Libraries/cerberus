@@ -41,6 +41,17 @@
             .rights-diff__entry-head
               = audit_event_timestamp(event)
               = audit_event_who(event)
+            -# Provenance of the create-time grant (Atlas payload `source`): how
+            -# the starting ACL arose. A quiet caption, not a chip — the parent
+            -# NOID is shown as a monospace identifier (unlinked; no structured
+            -# parent_id in the event payload yet — only embedded in `note`).
+            - case payload['source']
+            - when 'inherited'
+              %p.rights-diff__provenance
+                Inherited from
+                %span.rights-diff__provenance-id= event['note'].to_s.split.last
+            - when 'initial'
+              %p.rights-diff__provenance Initial grant
             %table.rights-diff__grid
               %thead
                 %tr

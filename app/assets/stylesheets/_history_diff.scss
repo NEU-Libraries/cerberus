@@ -63,6 +63,23 @@
     margin-bottom: 0.6rem;
   }
 
+  // Provenance caption for the create-time grant — quiet microcopy under the
+  // entry head noting how the starting ACL arose (inherited from a parent, or
+  // set on a root). Deliberately NOT a chip: a descriptor reads as caption, not
+  // as an identifier or action token. Only the parent NOID gets the monospace
+  // identifier treatment.
+  &__provenance {
+    margin: -0.35rem 0 0.6rem;
+    font-size: 0.78rem;
+    color: $gray-600;
+  }
+  &__provenance-id {
+    font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 0.95em;
+    color: $gray-700;
+    letter-spacing: 0.02em;
+  }
+
   &__grid {
     width: 100%;
     margin: 0;
