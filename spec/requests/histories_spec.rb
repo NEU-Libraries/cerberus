@@ -71,12 +71,38 @@ RSpec.describe 'Histories', type: :request do
       expect(response.body).to include('No permission changes recorded')
     end
 
-    it 'lands on the page holding the ?at deep-linked event' do
+    it 'isolates the ?at deep-linked event on its own page (one event per page)' do
       events = Array.new(25) { |i| perm_event(at: format('2026-05-%02dT00:00:00Z', i + 1), before: {}, after: { 'read' => ["g#{i}"] }) }
       allow(AtlasRb::Resource).to receive(:history).and_return(history_mash(events))
       get rights_history_path(resource_id, at: events[22]['occurred_at'])
       expect(response).to have_http_status(:ok)
-      expect(response.body).to include('g22') # only present if page 2 was computed
+      expect(response.body).to include('g22')      # the deep-linked event renders
+      expect(response.body).not_to include('g21')  # neighbours are NOT stacked alongside it
+      expect(response.body).not_to include('g23')
+    end
+
+    it 'renders a Previous/Next walker stepping between changes' do
+      events = Array.new(3) { |i| perm_event(at: format('2026-05-%02dT00:00:00Z', i + 1), before: {}, after: { 'read' => ["g#{i}"] }) }
+      allow(AtlasRb::Resource).to receive(:history).and_return(history_mash(events))
+      get rights_history_path(resource_id, at: events[1]['occurred_at']) # middle event → page 2 of 3
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('Permission change navigation') # the walker nav
+      expect(response.body).to include('Change 2 of 3')                # position indicator
+      expect(response.body).to include('Reverse chronological')        # ordering subtitle
+      expect(response.body).to include('g1')
+      expect(response.body).not_to include('g0')
+      expect(response.body).not_to include('g2')
+    end
+
+    it 'hides the list chrome (position indicator, ordering, walker) for a lone change' do
+      events = [perm_event(at: '2026-05-26T12:00:00Z', before: {}, after: { 'read' => ['public'] })]
+      allow(AtlasRb::Resource).to receive(:history).and_return(history_mash(events))
+      get rights_history_path(resource_id)
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('Access-control changes')       # title still shows
+      expect(response.body).not_to include('Reverse chronological')
+      expect(response.body).not_to include('Permission change navigation')
+      expect(response.body).not_to match(/Change \d+ of \d+/)
     end
   end
 

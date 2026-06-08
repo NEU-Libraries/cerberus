@@ -1,9 +1,12 @@
 -# Rights-history diff page — the deep view behind the audit log's "View"
--# button on permissions rows. A reverse-chronological ledger of access-control
--# changes; each entry expands the event's before/after ACL snapshot into a
--# two-column diff (grants gained tinted, grants lost struck). Archival register
--# throughout — reuses the audit-history card chrome + monospace identifier
--# pills. The deep-linked entry is highlighted via :target.
+-# button on permissions rows. One permission event per page (PER_PAGE = 1):
+-# the per-row "View" deep-link lands on that single event's before/after ACL
+-# snapshot, expanded into a two-column diff (grants gained tinted, grants lost
+-# struck). A Previous/Next walker steps to adjacent changes (reverse
+-# chronological) rather than stacking them. The list framing — position
+-# indicator + ordering subtitle — only appears when there is more than one
+-# change to walk. Archival register throughout — reuses the audit-history card
+-# chrome + monospace identifier pills.
 - back_path = send("edit_#{@resource_klass.downcase}_path", @resource_id, anchor: 'history')
 .container.my-4
   .d-flex.justify-content-between.align-items-baseline.flex-wrap.gap-2.mb-3
@@ -19,11 +22,12 @@
     %header.audit-history__head
       %div
         %span.audit-history__title Access-control changes
-        - if @events.total_count.positive?
+        - if @events.total_pages > 1
           %span.audit-history__count
             %i.fa-solid.fa-lock{'aria-hidden' => 'true'}
-            = pluralize(@events.total_count, 'change')
-      %span.audit-history__subtitle Reverse chronological
+            = "Change #{@events.current_page} of #{@events.total_count}"
+      - if @events.total_pages > 1
+        %span.audit-history__subtitle Reverse chronological
 
     - if @events.empty?
       .audit-history__empty
@@ -57,5 +61,8 @@
                     %td= acl_grant_pills(after[key], marked: added, state: 'added')
 
       - if @events.total_pages > 1
-        .mt-3
-          = paginate @events
+        %nav.rights-diff__nav.mt-3.d-flex.justify-content-between.align-items-center{'aria-label' => 'Permission change navigation'}
+          %div
+            = link_to_previous_page @events, '<i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Previous'.html_safe, class: 'btn btn-sm btn-outline-secondary'
+          %div
+            = link_to_next_page @events, 'Next <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>'.html_safe, class: 'btn btn-sm btn-outline-secondary'

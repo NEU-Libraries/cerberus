@@ -13,7 +13,10 @@
 class HistoriesController < ApplicationController
   before_action :authorize_history!
 
-  PER_PAGE = 20
+  # One permission event per page. The Rights page is reached via a per-row
+  # "View" deep-link, so it shows that single event's before/after diff; the
+  # prev/next walker steps to adjacent changes without stacking them.
+  PER_PAGE = 1
 
   def rights
     load_resource!
