@@ -112,6 +112,18 @@ RSpec.describe 'Histories', type: :request do
       expect(response.body).not_to include('g2')
     end
 
+    it 'walker links navigate by page only, never carrying the ?at deep-link param' do
+      # Regression: Kaminari omits `page` from the page-1 link, so a lingering
+      # `?at` would re-resolve back to the deep-linked page — clicking "Newer"
+      # would loop instead of stepping toward the newest. The walker strips it.
+      events = Array.new(3) { |i| perm_event(at: format('2026-05-%02dT00:00:00Z', i + 1), before: {}, after: { 'read' => ["g#{i}"] }) }
+      allow(AtlasRb::Resource).to receive(:history).and_return(history_mash(events))
+      get rights_history_path(resource_id, at: events[1]['occurred_at']) # arrive on page 2 via ?at
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to match(/href="[^"]*rights_history[^"]*"/) # walker links exist
+      expect(response.body).not_to match(/href="[^"]*rights_history\?[^"]*at=/) # but none carry ?at
+    end
+
     it 'shows an inert boundary control at an end of the walk' do
       events = Array.new(2) { |i| perm_event(at: format('2026-05-%02dT00:00:00Z', i + 1), before: {}, after: { 'read' => ["g#{i}"] }) }
       allow(AtlasRb::Resource).to receive(:history).and_return(history_mash(events))

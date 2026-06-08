@@ -61,6 +61,10 @@
   -# axis so the arrows agree with reverse-chronological order; boundary
   -# controls render inert rather than vanishing, so an end-of-history state
   -# never looks like a missing button.
+  -# The links navigate purely by page — `at` is stripped (it only seeds the
+  -# initial deep-link landing). Keeping it would trap the walk: Kaminari omits
+  -# `page` from the page-1 link, so a lingering `?at` would re-resolve back to
+  -# the deep-linked page instead of stepping to the newest.
   - if @events.total_pages > 1
     %nav.rights-diff__nav.mt-3{'aria-label' => 'Permission change navigation'}
       - if @events.first_page?
@@ -68,11 +72,11 @@
           %i.fa-solid.fa-arrow-left{'aria-hidden' => 'true'}
           Newer
       - else
-        = link_to_previous_page @events, '<i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Newer'.html_safe, class: 'rights-diff__nav-link'
+        = link_to_previous_page @events, '<i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Newer'.html_safe, params: { at: nil }, class: 'rights-diff__nav-link'
       %span.rights-diff__nav-pos= "Change #{@events.current_page} of #{@events.total_count}"
       - if @events.last_page?
         %span.rights-diff__nav-link.rights-diff__nav-link--disabled{'aria-disabled' => 'true'}
           Older
           %i.fa-solid.fa-arrow-right{'aria-hidden' => 'true'}
       - else
-        = link_to_next_page @events, 'Older <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>'.html_safe, class: 'rights-diff__nav-link'
+        = link_to_next_page @events, 'Older <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>'.html_safe, params: { at: nil }, class: 'rights-diff__nav-link'
