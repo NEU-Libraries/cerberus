@@ -46,7 +46,9 @@ class WorksController < ApplicationController
     file = params[:binary]
     parent = AtlasRb::Collection.find(params[:parent_id])
     @work = AtlasRb::Work.create(parent.id, depositor: deposit_attribution(parent))
-    AtlasRb::Work.metadata(@work.id, { title: file.original_filename })
+    # Seed the initial title via the structure-safe MODS merge (raw mods_xml=),
+    # not the flat plain_title= setter — see save_descriptive!.
+    save_descriptive!('Work', @work.id, title: file.original_filename, description: nil)
 
     staged_path = stage_upload(file, @work.id)
     enqueue_ingest_jobs(file, staged_path)

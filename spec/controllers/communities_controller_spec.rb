@@ -185,4 +185,21 @@ describe CommunitiesController do
       expect(subject).to redirect_to(root_path)
     end
   end
+
+  describe 'create' do
+    let(:user) { User.new(email: 'creator@example.com', nuid: '000000004', groups: ['editors']) }
+
+    before { sign_in user }
+
+    it 'seeds the new community title + description via the structure-safe MODS merge (not plain_title=)' do
+      post :create, params: { community: { title: 'BrandNewCommunity', description: 'CommunityAbstract' } }
+
+      created_id = response.location.split('/').last
+      created = AtlasRb::Community.find(created_id)
+      expect(created.title).to eq('BrandNewCommunity')
+      expect(created.description).to include('CommunityAbstract')
+    ensure
+      AtlasRb::Community.tombstone(created_id) if created_id
+    end
+  end
 end

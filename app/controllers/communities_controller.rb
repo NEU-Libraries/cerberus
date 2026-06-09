@@ -39,7 +39,7 @@ class CommunitiesController < CatalogController
     permitted = params.require(:community).permit(:title, :description).to_h
 
     c = AtlasRb::Community.create(params[:parent_id])
-    AtlasRb::Community.metadata(c.id, permitted)
+    save_descriptive!('Community', c.id, title: permitted['title'], description: permitted['description'])
     redirect_to community_path(c.id)
   end
 

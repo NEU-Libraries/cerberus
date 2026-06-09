@@ -90,6 +90,15 @@ describe WorksController do
         .and not_have_enqueued_job(IiifAssetsJob)
     end
 
+    it 'seeds the work title from the uploaded filename via the structure-safe MODS path' do
+      post :create, params: { binary:    fixture_file_upload('image.png', 'image/png'),
+                              parent_id: collection.id }
+      work_id = assigns(:work).id
+      expect(AtlasRb::Work.find(work_id).title).to eq('image.png')
+    ensure
+      AtlasRb::Work.tombstone(work_id) if work_id
+    end
+
     context 'depositor attribution' do
       it 'explicitly attributes to the acting user when upload_as is missing (default)' do
         allow(AtlasRb::Work).to receive(:create).and_call_original

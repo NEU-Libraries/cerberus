@@ -38,7 +38,7 @@ class CollectionsController < CatalogController
   def create
     permitted = params.expect(collection: [:title, :description]).to_h
     c = AtlasRb::Collection.create(params[:parent_id])
-    AtlasRb::Collection.metadata(c.id, permitted)
+    save_descriptive!('Collection', c.id, title: permitted['title'], description: permitted['description'])
     redirect_to collection_path(c.id)
   end
 
