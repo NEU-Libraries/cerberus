@@ -1,10 +1,3 @@
-GIT
-  remote: https://github.com/NEU-Libraries/neu-mods.git
-  revision: 3d758de2745302c05dcef66ead11716c350834ee
-  specs:
-    neu-mods (0.1.0)
-      nokogiri (>= 1.13)
-
 GEM
   remote: https://rubygems.org/
   specs:
@@ -277,6 +270,8 @@ GEM
       timeout
     net-smtp (0.5.1)
       net-protocol
+    neu-mods (0.1.0)
+      nokogiri (>= 1.13)
     next_rails (1.6.0)
     nio4r (2.7.5)
     nokogiri (1.19.3-x86_64-linux-gnu)
@@ -508,7 +503,7 @@ DEPENDENCIES
   mini_exiftool
   mission_control-jobs
   namae
-  neu-mods!
+  neu-mods
   next_rails
   pg
   propshaft
