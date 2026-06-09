@@ -39,6 +39,7 @@ class WorksController < ApplicationController
     @work = AtlasRb::Work.find(params[:id])
     form_preparation(@permissions)
     load_descriptive!('Work')
+    load_advanced!('Work')
     breadcrumbs(params[:id], editing: true)
   end
 

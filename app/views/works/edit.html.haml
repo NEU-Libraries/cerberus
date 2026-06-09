@@ -8,6 +8,8 @@
   %li.nav-item
     %button#metadata-tab.nav-link.active{"aria-controls" => "metadata", "aria-selected" => "true", "data-bs-target" => "#metadata", "data-bs-toggle" => "tab", role: "tab", type: "button"} Metadata
   %li.nav-item
+    %button#advanced-tab.nav-link{"aria-controls" => "advanced", "aria-selected" => "false", "data-bs-target" => "#advanced", "data-bs-toggle" => "tab", role: "tab", type: "button"} Advanced
+  %li.nav-item
     %button#permissions-tab.nav-link{"aria-controls" => "permissions", "aria-selected" => "false", "data-bs-target" => "#permissions", "data-bs-toggle" => "tab", role: "tab", type: "button"} Permissions
   %li.nav-item
     %a.nav-link{href: xml_editor_path(params[:id])} XML
@@ -24,6 +26,15 @@
         %input#thumbnail.form-control.mb-3{:name => "thumbnail", :type => "file"}/
         = bootstrap_fields_for :work do |c|
           = render 'shared/descriptive_fields', f: c, descriptive: @descriptive, keywords: true
+        .well.p-3.my-3.rounded-3
+          = f.button :submit, class: "btn btn-success"
+          = link_to "Cancel", work_path(params[:id]), class: "btn btn-warning"
+  #advanced.tab-pane{"aria-labelledby" => "advanced-tab", role: "tabpanel"}
+    .py-2.px-1
+      = bootstrap_form_tag(url: work_path(params[:id]), method: :patch, multipart: true) do |f|
+        = f.hidden_field :id, value: params[:id]
+        = bootstrap_fields_for :work do |c|
+          = render 'works/advanced_fields', f: c, advanced: @advanced
         .well.p-3.my-3.rounded-3
           = f.button :submit, class: "btn btn-success"
           = link_to "Cancel", work_path(params[:id]), class: "btn btn-warning"

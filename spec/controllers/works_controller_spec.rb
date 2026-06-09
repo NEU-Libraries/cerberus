@@ -169,6 +169,19 @@ describe WorksController do
       expect(CGI.unescapeHTML(response.body)).to include(work.title)
     end
 
+    it 'renders the Advanced tab: title-part fields, creator widgets, and read-only preserved names' do
+      get :edit, params: { id: work.id }
+      body = CGI.unescapeHTML(response.body)
+      expect(body).to match(/<button[^>]*id="advanced-tab"/)
+      expect(body).to include('Title parts')
+      expect(body).to include('Personal creators')
+      expect(body).to include('Corporate creators')
+      expect(body).to include('Press + to add a personal creator') # stacked-input entry row
+      expect(body).to include('Other names')                       # preserved-names panel
+      expect(body).to include('Cohen, Daniel J.')    # an authority name, read-only
+      expect(body).to include('Contributor')         # a preserved non-Creator role
+    end
+
     it 'renders the cosmetic group name in the permissions dropdown, not the raw identifier' do
       Group.create!(raw: 'editors', cosmetic: 'Course Editors')
 
@@ -263,6 +276,33 @@ describe WorksController do
 
       expect(flash[:alert]).to be_present
       expect(AtlasRb::Work.find(work.id, nuid: '000000004').title).not_to start_with('NewTitle')
+    end
+  end
+
+  describe 'update (Advanced tab)' do
+    let(:user) { User.new(email: 'test@example.com', nuid: '000000004', groups: ['editors']) }
+
+    before do
+      AtlasRb::Work.metadata(work.id, { 'permissions' => { 'edit' => ['editors'] } }, nuid: '000000004')
+      sign_in user
+    end
+
+    it 'adds a plain personal creator, preserving the authority-controlled names' do
+      patch :update, params: { id:   work.id,
+                               work: { form: 'advanced', personal_creators: [{ first: 'Jenny', last: 'Smith' }] } }
+
+      doc = NEU::MODS::Document.parse(AtlasRb::Work.mods(work.id, 'xml', nuid: '000000004'))
+      expect(doc.editable_personal_creators).to eq([{ given: 'Jenny', family: 'Smith' }])
+      expect(doc.preserved_names.size).to eq(3) # Cohen, NU, Flynn untouched
+      expect(subject).to redirect_to action: :show, id: work.id
+    end
+
+    it 'edits a structured title part (subtitle) in place, leaving the bare title' do
+      patch :update, params: { id: work.id, work: { form: 'advanced', subtitle: 'A New Subtitle' } }
+
+      doc = NEU::MODS::Document.parse(AtlasRb::Work.mods(work.id, 'xml', nuid: '000000004'))
+      expect(doc.title_parts[:subtitle]).to eq('A New Subtitle')
+      expect(doc.title_parts[:title]).to eq("What's New")
     end
   end
 

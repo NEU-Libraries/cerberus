@@ -1,0 +1,79 @@
+-#   Advanced metadata fields (Works edit > Advanced tab). The hidden marker
+-#   routes the submit to save_advanced! (transformable). Title parts are editable
+-#   here (the simple Metadata form shows them read-only); creators are repeatable
+-#   PLAIN personal/corporate names added with the role "Creator", using the same
+-#   stacked-input +/- idiom as the keyword widget. Authority-controlled /
+-#   non-Creator names are preserved and listed read-only below. Sections are
+-#   separated by the Works-show divider rather than card chrome.
+= f.hidden_field :form, value: 'advanced'
+
+%h5.mb-3
+  %i.fa-solid.fa-heading.me-2.text-secondary{ 'aria-hidden' => 'true' }
+  Title parts
+= f.text_field :subtitle, value: advanced[:subtitle], label: 'Subtitle'
+= f.text_field :part_name, value: advanced[:part_name], label: 'Part name'
+= f.text_field :part_number, value: advanced[:part_number], label: 'Part number'
+= f.text_field :non_sort, value: advanced[:non_sort], label: 'Non-sort', help: 'Leading characters ignored when sorting (e.g. "The ", "A ").'
+
+%div{ data: { controller: 'creator-list' } }
+  %hr.work-show-divider.my-3
+
+  %h5.mb-2
+    %i.fa-solid.fa-user.me-2.text-secondary{ 'aria-hidden' => 'true' }
+    Personal creators
+  - Array(advanced[:personal_creators]).each do |c|
+    .input-group.mb-2
+      %input.form-control{ type: 'text', name: "#{f.object_name}[personal_creators][][first]", value: c[:given], placeholder: 'First name', 'aria-label' => "Creator's first name" }
+      %input.form-control{ type: 'text', name: "#{f.object_name}[personal_creators][][last]", value: c[:family], placeholder: 'Last name', 'aria-label' => "Creator's last name" }
+      %button.btn.btn-danger{ type: 'button', 'aria-label' => 'Remove personal creator', data: { action: 'click->creator-list#remove' } }
+        %i.fa-solid.fa-minus{ 'aria-hidden' => 'true' }
+  %template{ data: { 'creator-list-target' => 'personalTemplate' } }
+    .input-group.mb-2
+      %input.form-control{ type: 'text', name: "#{f.object_name}[personal_creators][][first]", placeholder: 'First name', 'aria-label' => "Creator's first name" }
+      %input.form-control{ type: 'text', name: "#{f.object_name}[personal_creators][][last]", placeholder: 'Last name', 'aria-label' => "Creator's last name" }
+      %button.btn.btn-danger{ type: 'button', 'aria-label' => 'Remove personal creator', data: { action: 'click->creator-list#remove' } }
+        %i.fa-solid.fa-minus{ 'aria-hidden' => 'true' }
+  .input-group.mb-1
+    %input.form-control{ type: 'text', name: "#{f.object_name}[personal_creators][][first]", placeholder: 'First name', 'aria-label' => "Add a personal creator: first name", data: { 'creator-list-target' => 'personalFirst', action: 'keydown->creator-list#addPersonalOnEnter' } }
+    %input.form-control{ type: 'text', name: "#{f.object_name}[personal_creators][][last]", placeholder: 'Last name', 'aria-label' => "Add a personal creator: last name", data: { 'creator-list-target' => 'personalLast', action: 'keydown->creator-list#addPersonalOnEnter' } }
+    %button.btn.btn-success{ type: 'button', 'aria-label' => 'Add personal creator', data: { action: 'click->creator-list#addPersonal' } }
+      %i.fa-solid.fa-plus{ 'aria-hidden' => 'true' }
+  .form-text.text-muted Press + to add a personal creator (role "Creator").
+
+  %hr.work-show-divider.my-3
+
+  %h5.mb-2
+    %i.fa-solid.fa-building.me-2.text-secondary{ 'aria-hidden' => 'true' }
+    Corporate creators
+  - Array(advanced[:corporate_creators]).each do |c|
+    .input-group.mb-2
+      %input.form-control{ type: 'text', name: "#{f.object_name}[corporate_creators][]", value: c[:name], placeholder: 'Organization name', 'aria-label' => 'Organization name' }
+      %button.btn.btn-danger{ type: 'button', 'aria-label' => 'Remove corporate creator', data: { action: 'click->creator-list#remove' } }
+        %i.fa-solid.fa-minus{ 'aria-hidden' => 'true' }
+  %template{ data: { 'creator-list-target' => 'corporateTemplate' } }
+    .input-group.mb-2
+      %input.form-control{ type: 'text', name: "#{f.object_name}[corporate_creators][]", placeholder: 'Organization name', 'aria-label' => 'Organization name' }
+      %button.btn.btn-danger{ type: 'button', 'aria-label' => 'Remove corporate creator', data: { action: 'click->creator-list#remove' } }
+        %i.fa-solid.fa-minus{ 'aria-hidden' => 'true' }
+  .input-group.mb-1
+    %input.form-control{ type: 'text', name: "#{f.object_name}[corporate_creators][]", placeholder: 'Organization name', 'aria-label' => 'Add a corporate creator: organization name', data: { 'creator-list-target' => 'corporateEntry', action: 'keydown->creator-list#addCorporateOnEnter' } }
+    %button.btn.btn-success{ type: 'button', 'aria-label' => 'Add corporate creator', data: { action: 'click->creator-list#addCorporate' } }
+      %i.fa-solid.fa-plus{ 'aria-hidden' => 'true' }
+  .form-text.text-muted Press + to add a corporate creator (role "Creator").
+
+- if Array(advanced[:preserved_names]).any?
+  %hr.work-show-divider.my-3
+  %h5.mb-2
+    %i.fa-solid.fa-lock.me-2.text-secondary{ 'aria-hidden' => 'true' }
+    Other names
+  %p.form-text.text-muted.mt-0.mb-2
+    %i.fa-solid.fa-circle-info.me-1{ 'aria-hidden' => 'true' }
+    Authority-controlled and non-Creator names are managed elsewhere. Edit them in the
+    = succeed '.' do
+      = link_to 'XML editor', xml_editor_path(params[:id])
+  %ul.list-unstyled.mb-0
+    - advanced[:preserved_names].each do |n|
+      %li.mb-1
+        = n[:name]
+        - if n[:role].present?
+          %span.badge.text-bg-light.border.ms-1.fw-normal= n[:role]
