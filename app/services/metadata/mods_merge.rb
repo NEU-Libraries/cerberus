@@ -8,14 +8,18 @@ module Metadata
   # counterpart to Atlas's flat plain_title=/plain_description=, which clobber
   # siblings; Cerberus owns the merge, Atlas just stores the XML.
   #
+  # Node location, the MODS namespace, node-building, and whitespace
+  # canonicalisation come from the shared NEU::MODS gem; the in-place edit logic
+  # (what the simple form is allowed to change) stays here — Cerberus owns the
+  # write path.
+  #
   # A nil field means "leave it untouched"; a value (including "" or []) means
   # "set it". Whitespace-equivalent edits are skipped so a form round-trip that
   # only normalises whitespace doesn't mint a needless OCFL version.
   class MODSMerge < ApplicationService
-    include MODSHelpers
-
     def initialize(xml:, title: nil, abstract: nil, keywords: nil)
       @doc = Nokogiri::XML(xml.to_s, &:noblanks)
+      @mods = NEU::MODS::Document.new(@doc)
       @title = title
       @abstract = abstract
       @keywords = keywords
@@ -40,9 +44,9 @@ module Metadata
       def apply_title
         return if @title.nil?
 
-        node = primary_title_info(@doc)&.at_xpath('mods:title', MODS)
+        node = @mods.primary_title_info&.at_xpath('mods:title', NEU::MODS::NAMESPACE)
         if node
-          node.content = @title unless whitespace_equivalent?(node.text, @title)
+          node.content = @title unless NEU::MODS.whitespace_equivalent?(node.text, @title)
         elsif @title.present?
           create_primary_title(@title)
         end
@@ -51,11 +55,11 @@ module Metadata
       def apply_abstract
         return if @abstract.nil?
 
-        node = @doc.at_xpath('/mods:mods/mods:abstract', MODS)
+        node = @mods.abstract_nodes.first
         if node
-          node.content = @abstract unless whitespace_equivalent?(node.text, @abstract)
+          node.content = @abstract unless NEU::MODS.whitespace_equivalent?(node.text, @abstract)
         elsif @abstract.present?
-          @doc.root.add_child(build_mods_node(@doc, 'abstract', @abstract))
+          @doc.root.add_child(@mods.build_node('abstract', @abstract))
         end
       end
 
@@ -75,27 +79,27 @@ module Metadata
       end
 
       def existing_keywords
-        keyword_subjects(@doc).flat_map { |s| s.xpath('mods:topic', MODS).map { |t| t.text.strip } }
+        @mods.keyword_subjects.flat_map { |s| s.xpath('mods:topic', NEU::MODS::NAMESPACE).map { |t| t.text.strip } }
       end
 
       def replace_keyword_subjects(keywords)
-        keyword_subjects(@doc).each(&:remove)
+        @mods.keyword_subjects.each(&:remove)
         keywords.each do |kw|
-          subject = build_mods_node(@doc, 'subject')
-          subject.add_child(build_mods_node(@doc, 'topic', kw))
+          subject = @mods.build_node('subject')
+          subject.add_child(@mods.build_node('topic', kw))
           @doc.root.add_child(subject)
         end
       end
 
       def create_primary_title(title)
-        title_info = build_mods_node(@doc, 'titleInfo')
+        title_info = @mods.build_node('titleInfo')
         title_info['usage'] = 'primary'
-        title_info.add_child(build_mods_node(@doc, 'title', title))
+        title_info.add_child(@mods.build_node('title', title))
         @doc.root.prepend_child(title_info)
       end
 
       def normalize_set(arr)
-        arr.map { |s| normalize_ws(s) }.sort
+        arr.map { |s| NEU::MODS.canonical_ws(s) }.sort
       end
   end
 end
