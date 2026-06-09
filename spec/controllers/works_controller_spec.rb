@@ -225,7 +225,8 @@ describe WorksController do
       expect(body).to include('Keywords')
       expect(body).to include('General Permissions')
       expect(body).to include('Group Permissions')
-      expect(body).to include('id="add-group"')
+      expect(body).to include('Press + to add a group permission')
+      expect(body).to include('group-permissions#add')
     end
   end
 

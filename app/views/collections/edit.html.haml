@@ -44,7 +44,6 @@
           .well.p-3.my-3.rounded-3
             = f.button :submit, class: "btn btn-success"
             = link_to "Cancel", collection_path(params[:id]), class: "btn btn-warning"
-            = render 'shared/add_group_button'
   - if show_history
     #history.tab-pane{"aria-labelledby" => "history-tab", role: "tabpanel"}
       = render 'audit_events/history', resource_id: params[:id]
