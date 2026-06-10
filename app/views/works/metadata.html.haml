@@ -8,6 +8,9 @@
     = bootstrap_fields_for :work do |c|
       = render 'shared/descriptive_fields', f: c, descriptive: @descriptive, keywords: true
 
+    - if @image_probe
+      = render 'derivative_fields', longest_edge: @image_probe.longest_edge
+
     %h4.pt-4.pb-2 Permissions
     .row
       .col-sm

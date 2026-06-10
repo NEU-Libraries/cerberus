@@ -67,15 +67,47 @@ class WorksController < ApplicationController
 
   def metadata
     @work = AtlasRb::Work.find(params[:id])
+    # Gates the opt-in Image Derivatives section (nil for non-image deposits).
+    @image_probe = StagedImageProbe.call(work_id: params[:id])
     form_preparation(@permissions)
     load_descriptive!('Work')
   end
 
   def update_metadata
+    process_derivative_widths
     handle_metadata_update(klass: 'Work', resource_key: :work, keywords: true)
   end
 
   private
+
+    DERIVATIVES_SKIPPED_NO_IMAGE =
+      'Download sizes were skipped: no staged image was found for this work.'
+
+    # Server backstop for the metadata page's opt-in download sizes. The
+    # Stimulus controller is the primary enforcement, so a violation here
+    # means JS-off or tampering — in that case the metadata still saves and
+    # only the optional derivatives are skipped, with the reason flashed
+    # (never bounce the whole form over decoration). Known interplay: if
+    # descriptive validation also fails, apply_descriptive overwrites this
+    # flash (last writer wins) — acceptable; valid derivatives enqueued
+    # here are independent of the title and harmless.
+    def process_derivative_widths
+      raw = params[:derivative_widths]
+      return unless raw.is_a?(ActionController::Parameters)
+
+      probe = StagedImageProbe.call(work_id: params[:id])
+      return flash[:alert] = DERIVATIVES_SKIPPED_NO_IMAGE if probe.nil?
+
+      result = DerivativeWidths.call(raw: raw.permit(:small, :medium, :large).to_h,
+                                     longest_edge: probe.longest_edge)
+      unless result.valid?
+        return flash[:alert] = "Download sizes were not generated: #{result.error} " \
+                               'Your other changes were saved — revisit this page to configure download sizes.'
+      end
+      return if result.widths.empty?
+
+      DepositDerivativesJob.perform_later(params[:id], result.widths)
+    end
 
     # Resolve the depositor NUID for a new Work.
     #

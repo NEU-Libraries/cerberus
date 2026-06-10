@@ -250,6 +250,28 @@ describe WorksController do
       expect(body).to include('Press + to add a group permission')
       expect(body).to include('group-permissions#add')
     end
+
+    it 'renders the Image Derivatives section when a staged image is probed' do
+      allow(StagedImageProbe).to receive(:call).with(work_id: work.id)
+                                               .and_return(StagedImageProbe::Result.new(path: '/x', width: 441, height: 588))
+
+      get :metadata, params: { id: work.id }
+
+      body = CGI.unescapeHTML(response.body)
+      expect(body).to include('Image Derivatives')
+      expect(body).to include('longest edge is')
+      expect(body).to include('588')
+      expect(body).to include('derivative_widths[small]')
+      expect(body).to include('derivative-sizes')
+    end
+
+    it 'omits the Image Derivatives section for non-image deposits' do
+      allow(StagedImageProbe).to receive(:call).and_return(nil)
+
+      get :metadata, params: { id: work.id }
+
+      expect(CGI.unescapeHTML(response.body)).not_to include('Image Derivatives')
+    end
   end
 
   describe 'update_metadata' do
@@ -276,6 +298,53 @@ describe WorksController do
 
       expect(flash[:alert]).to be_present
       expect(AtlasRb::Work.find(work.id, nuid: '000000004').title).not_to start_with('NewTitle')
+    end
+
+    describe 'opt-in download sizes' do
+      include ActiveJob::TestHelper
+
+      let(:descriptive) { { title: 'Sized', description: 'D', keywords: %w[alpha] } }
+
+      before do
+        allow(StagedImageProbe).to receive(:call).with(work_id: work.id)
+                                                 .and_return(StagedImageProbe::Result.new(path: '/x', width: 441, height: 588))
+      end
+
+      it 'enqueues DepositDerivativesJob with the chosen integer widths and still saves the metadata' do
+        expect do
+          patch :update_metadata, params: { id: work.id, work: descriptive,
+                                            derivative_widths: { small: '149', large: '503' } }
+        end.to have_enqueued_job(DepositDerivativesJob).with(work.id, { small: 149, large: 503 })
+
+        expect(AtlasRb::Work.find(work.id, nuid: '000000004').title).to start_with('Sized')
+      end
+
+      it 'skips invalid sizes with a flash but saves the metadata (derivatives never bounce the form)' do
+        expect do
+          patch :update_metadata, params: { id: work.id, work: descriptive,
+                                            derivative_widths: { small: '500', large: '100' } }
+        end.not_to have_enqueued_job(DepositDerivativesJob)
+
+        expect(flash[:alert]).to include('Sizes must increase from small to medium to large.')
+        expect(AtlasRb::Work.find(work.id, nuid: '000000004').title).to start_with('Sized')
+      end
+
+      it 'does nothing when the section was not submitted' do
+        expect do
+          patch :update_metadata, params: { id: work.id, work: descriptive }
+        end.not_to have_enqueued_job(DepositDerivativesJob)
+        expect(flash[:alert]).to be_nil
+      end
+
+      it 'skips with a flash when no staged image can be probed at save time' do
+        allow(StagedImageProbe).to receive(:call).and_return(nil)
+
+        expect do
+          patch :update_metadata, params: { id: work.id, work: descriptive,
+                                            derivative_widths: { small: '149' } }
+        end.not_to have_enqueued_job(DepositDerivativesJob)
+        expect(flash[:alert]).to include('no staged image')
+      end
     end
   end
 
