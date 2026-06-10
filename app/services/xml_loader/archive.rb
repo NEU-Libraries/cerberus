@@ -34,7 +34,33 @@ module XmlLoader
       zip? ? extract_zip(dest_dir, &) : extract_tar(dest_dir, &)
     end
 
+    # Set of every relevant file entry's basename, without reading any
+    # content — zip via the central directory, tar via the header walk.
+    # Lets a preview pass run file-presence checks against a manifest
+    # without extracting multi-MB page images.
+    def basenames
+      zip? ? zip_basenames : tar_basenames
+    end
+
     private
+
+      def zip_basenames
+        Set.new.tap do |set|
+          Zip::File.open(@path) do |zip|
+            zip.each { |e| set << File.basename(e.name) if !e.directory? && relevant?(e.name) }
+          end
+        end
+      end
+
+      def tar_basenames
+        Set.new.tap do |set|
+          File.open(@path, 'rb') do |file|
+            Gem::Package::TarReader.new(file) do |tar|
+              tar.each { |e| set << File.basename(e.full_name) if e.file? && relevant?(e.full_name) }
+            end
+          end
+        end
+      end
 
       def read_zip(target)
         Zip::File.open(@path) do |zip|

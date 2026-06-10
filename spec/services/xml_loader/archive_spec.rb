@@ -34,6 +34,14 @@ RSpec.describe XmlLoader::Archive do
     end
   end
 
+  describe '#basenames' do
+    it 'lists every relevant entry basename without extracting' do
+      names = described_class.new(fixture).basenames
+      expect(names).to be_a(Set)
+      expect(names).to include('manifest.xlsx', 'sample_mods_with_handle_0.xml')
+    end
+  end
+
   describe '#zip?' do
     it 'is true for .zip and false otherwise' do
       expect(described_class.new('/tmp/x.zip')).to be_zip
