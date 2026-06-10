@@ -1,5 +1,19 @@
 # frozen_string_literal: true
 
+# Seeds a Work's IIIF assets from one staged image: JP2 into Cantaloupe's
+# volume, then Delegate URLs PATCHed to Atlas.
+#
+# Two distinct asset families, with different generation policy:
+#
+# - Thumbnails (thumbnail / thumbnail_2x / preview): UNIVERSAL. Catalog
+#   rows and show pages need them for every image-bearing Work, so they
+#   are generated whenever this job runs.
+# - Small/medium/large: DOWNLOAD RENDITIONS, generated only when the
+#   caller passes `derivative_widths:`. IPTC ingest passes per-image
+#   widths (its `widths_for` — v1-parity sizing); the single-file deposit
+#   flow will pass librarian-chosen widths once its opt-in checkbox/slider
+#   UI exists. Callers that pass nothing (deposit today, XML loader,
+#   multipage page 1) get thumbnails only.
 class IiifAssetsJob < ApplicationJob
   queue_as :default
 
@@ -12,6 +26,8 @@ class IiifAssetsJob < ApplicationJob
     # same FileSet, and parallel execution races Atlas's optimistic-lock check
     # on the FileSet (StaleObjectError → 500 → Delegates not persisted).
     ThumbnailCreationJob.perform_now(work_id, base)
+    return if derivative_widths.nil?
+
     DerivativeCreationJob.perform_now(work_id, base, widths: derivative_widths)
   end
 end
