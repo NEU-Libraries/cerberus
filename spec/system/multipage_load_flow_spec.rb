@@ -86,7 +86,7 @@ RSpec.describe 'Multipage loader end-to-end flow', type: :request do
 
   it 'blocks a bad-sequence archive at preview, and a forced confirm still mints nothing' do
     post '/loaders/postcards/loads',
-         params: { load_report: { archive: fixture_archive('multipage-bad-sequence'),
+         params: { load_report: { archive:              fixture_archive('multipage-bad-sequence'),
                                   parent_collection_id: 'neu:root' } }
     lr = LoadReport.last
 

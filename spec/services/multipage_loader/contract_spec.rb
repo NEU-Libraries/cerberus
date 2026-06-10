@@ -98,8 +98,9 @@ RSpec.describe MultipageLoader::Contract do
     end
 
     def fixture_files(dir)
-      Dir.children(Rails.root.join('spec/fixtures/files', dir))
-         .reject { |f| f.end_with?('Zone.Identifier') }.to_set
+      Rails.root.join('spec/fixtures/files', dir).children
+           .map { |f| f.basename.to_s }
+           .reject { |f| f.end_with?('Zone.Identifier') }.to_set
     end
 
     it 'accepts the good multipage fixture' do

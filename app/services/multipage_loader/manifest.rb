@@ -21,10 +21,17 @@ module MultipageLoader
       # Integer page/MODS order, or nil when the cell isn't a whole
       # non-negative number (callers treat nil as a contract violation).
       def sequence
-        case sequence_raw
-        when Integer then sequence_raw.negative? ? nil : sequence_raw
-        when Float   then sequence_raw.negative? || (sequence_raw % 1).nonzero? ? nil : sequence_raw.to_i
-        when String  then sequence_raw.strip.match?(/\A\d+(\.0+)?\z/) ? sequence_raw.strip.to_i : nil
+        value = coerce_sequence(sequence_raw)
+        value if value && value >= 0
+      end
+
+      # Typed coercion only; the sign check lives in #sequence (the String
+      # pattern already excludes negatives, the numeric types don't).
+      def coerce_sequence(raw)
+        case raw
+        when Integer then raw
+        when Float   then (raw % 1).zero? ? raw.to_i : nil
+        when String  then raw.strip.match?(/\A\d+(\.0+)?\z/) ? raw.strip.to_i : nil
         end
       end
 

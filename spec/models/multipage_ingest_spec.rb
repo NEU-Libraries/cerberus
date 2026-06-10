@@ -25,7 +25,7 @@ RSpec.describe MultipageIngest, type: :model do
 
   describe 'warnings serialization' do
     it 'round-trips an array of strings' do
-      ingest = create(:multipage_ingest, warnings: ['first', 'second'])
+      ingest = create(:multipage_ingest, warnings: %w[first second])
       expect(ingest.reload.warnings).to eq(%w[first second])
     end
 

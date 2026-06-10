@@ -95,7 +95,7 @@ class MultipageIngestJob < ApplicationJob
       return if ingest.file_set_pid.present?
 
       file_set = AtlasRb::FileSet.create(ingest.work_pid, 'image',
-                                         position: ingest.sequence,
+                                         position:        ingest.sequence,
                                          idempotency_key: ingest.idempotency_key)
       ingest.update!(file_set_pid: file_set.id)
     end

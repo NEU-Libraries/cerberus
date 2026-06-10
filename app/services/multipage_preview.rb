@@ -39,9 +39,9 @@ class MultipagePreview < ApplicationService
     @load_report = load_report
   end
 
-  # rubocop:disable Metrics/MethodLength
-  # The early-return guards read as one linear preview flow, mirroring
-  # XmlPreview#call.
+  # rubocop:disable Metrics/MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
+  # The early-return guards (no manifest / unparseable / no rows) read as
+  # one linear preview flow, mirroring XmlPreview#call.
   def call
     archive = XmlLoader::Archive.new(XmlLoader::Paths.archive_path(@load_report))
 
@@ -68,7 +68,7 @@ class MultipagePreview < ApplicationService
       decorated_html:    contract_errors.empty? && mods_errors.empty? && mods ? decorated(mods) : nil
     )
   end
-  # rubocop:enable Metrics/MethodLength
+  # rubocop:enable Metrics/MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
   private
 

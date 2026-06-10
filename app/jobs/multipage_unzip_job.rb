@@ -20,9 +20,10 @@
 class MultipageUnzipJob < ApplicationJob
   queue_as :default
 
-  # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  # rubocop:disable Metrics/AbcSize, Metrics/MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
   # Linear shape (guard → extract → validate → mint → fan out → rescue)
-  # mirrors XmlUnzipJob and reads as one flow.
+  # mirrors XmlUnzipJob and reads as one flow; the extra branches are the
+  # contract/MODS gates that must all precede the Atlas mint.
   def perform(load_report_id)
     load_report = LoadReport.find(load_report_id)
     return unless load_report.pending?
@@ -58,7 +59,7 @@ class MultipageUnzipJob < ApplicationJob
     Rails.logger.error("MultipageUnzipJob failed for LoadReport #{load_report_id}: #{e.class} #{e.message}")
     LoadReport.find_by(id: load_report_id)&.fail_load
   end
-  # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
+  # rubocop:enable Metrics/AbcSize, Metrics/MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
   private
 

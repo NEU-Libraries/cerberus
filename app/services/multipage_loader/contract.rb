@@ -95,16 +95,22 @@ module MultipageLoader
       end
 
       def file_presence_errors(rows)
-        errors = rows.select(&:page?).filter_map do |row|
+        page_file_errors(rows) + mods_file_errors(rows)
+      end
+
+      def page_file_errors(rows)
+        rows.select(&:page?).filter_map do |row|
           next if @present_files.include?(row.file_name)
 
           "Page file '#{row.file_name}' (Sequence #{row.sequence}) was not found in the archive."
         end
+      end
+
+      def mods_file_errors(rows)
         mods_row = rows.find { |row| row.mods_row? && row.xml_path.present? }
-        if mods_row && !@present_files.include?(File.basename(mods_row.xml_path))
-          errors << "MODS XML file '#{mods_row.xml_path}' was not found in the archive."
-        end
-        errors
+        return [] if mods_row.nil? || @present_files.include?(File.basename(mods_row.xml_path))
+
+        ["MODS XML file '#{mods_row.xml_path}' was not found in the archive."]
       end
   end
 end
