@@ -4,12 +4,11 @@ class DerivativeCreator < ApplicationService
   # Default size for each role, as a fraction of the source image. Override
   # with `widths:` to pass custom values per role. Each value may be:
   #
-  # - Integer       → fixed pixel width, emitted as IIIF `^N,` so a
-  #                   request that exceeds the source's width is at
-  #                   least syntactically tolerated (Cantaloupe may still
-  #                   reject if its `processor.upscale_filter` config
-  #                   disallows upscaling, in which case the caller is
-  #                   over-asking for that source).
+  # - Integer       → longest-edge pixels, emitted as IIIF `!N,N` (fit
+  #                   within an N×N box, aspect preserved). No `^`, so it
+  #                   never upscales — a pure downscale for N ≤ the
+  #                   source's longest edge, which the deposit opt-in UI
+  #                   guarantees by capping its sliders at that edge.
   # - Numeric ≤ 1   → fraction of source, emitted as IIIF `pct:N` (or
   #                   `^pct:N` for values above 1). A pure downscale
   #                   path that never trips Cantaloupe's upscale guard.
@@ -35,7 +34,7 @@ class DerivativeCreator < ApplicationService
 
     def iiif_size(width)
       return 'full' if width.nil?
-      return "^#{width}," if width.is_a?(Integer)
+      return "!#{width},#{width}" if width.is_a?(Integer)
 
       pct = (width * 100).round
       pct > 100 ? "^pct:#{pct}" : "pct:#{pct}"
