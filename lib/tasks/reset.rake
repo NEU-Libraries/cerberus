@@ -26,7 +26,6 @@ namespace :reset do
       work = AtlasRb::Work.create(collection['id'], '/home/cerberus/web/spec/fixtures/files/work-mods.xml')
       flower_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/flower.jpg')
       AtlasRb::Work.set_thumbnails(work['id'], **ThumbnailCreator.call(base: flower_base))
-      AtlasRb::Work.set_image_derivatives(work['id'], **DerivativeCreator.call(base: flower_base))
       AtlasRb::Work.metadata(work['id'], { 'permissions' => { 'read' => ['public'] } })
       AtlasRb::Blob.create(work['id'], '/home/cerberus/web/spec/fixtures/files/flower.jpg', 'flower.jpg')
       AtlasRb::Work.complete(work['id'])
