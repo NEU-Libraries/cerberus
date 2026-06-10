@@ -32,7 +32,7 @@
         Loader type
       = f.select :kind, Loader.kinds.keys.map { |k| [k.upcase, k] }, {}, class: 'form-select'
       .admin-registry-form__hint
-        <strong>IPTC</strong> ingests image archives and builds MODS from embedded IPTC tags. <strong>XML</strong> ingests a <code class="admin-registry-table__id">manifest.xlsx</code> plus per-row MODS files to update existing objects or create new ones.
+        <strong>IPTC</strong> ingests image archives and builds MODS from embedded IPTC tags. <strong>XML</strong> ingests a <code class="admin-registry-table__id">manifest.xlsx</code> plus per-row MODS files to update existing objects or create new ones. <strong>MULTIPAGE</strong> turns one archive (manifest + MODS + ordered page images) into a single Work with ordered pages.
 
   .admin-registry-form__section
     %h3.admin-registry-form__section-title
