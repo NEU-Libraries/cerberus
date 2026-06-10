@@ -1,0 +1,49 @@
+- content_for :page_title, 'Inbox'
+
+.admin-registry.my-3
+  %header.admin-registry__head
+    %span.admin-registry__title
+      %i.fa-solid.fa-envelope{'aria-hidden' => 'true'}
+      Inbox
+      - if @messages.total_count.positive?
+        %span.admin-registry__count= pluralize(@messages.total_count, 'message')
+    .admin-registry__head-actions
+      = link_to new_message_path, class: 'btn btn-primary btn-sm' do
+        %i.fa-solid.fa-pen-to-square.me-1{'aria-hidden' => 'true'}
+        New message
+
+  - if @messages.any?
+    .table-responsive
+      %table.table.table-borderless.admin-registry-table.inbox-table
+        %thead
+          %tr
+            %th{scope: 'col'} From
+            %th{scope: 'col'} Subject
+            %th{scope: 'col'} To
+            %th{scope: 'col'} Sent
+        %tbody
+          - @messages.each do |message|
+            - unread = @receipts[message.id]&.read_at.blank?
+            %tr{class: ('inbox-row--unread' if unread)}
+              %td= message_sender(message, @sender_names)
+              %td
+                = link_to message.subject, message_path(message), class: 'inbox-subject'
+                - if unread
+                  %span.visually-hidden (unread)
+              %td
+                - if message.group_addressed?
+                  = message_group_chip(message)
+                - else
+                  %span.text-muted You
+              %td.text-nowrap= message_timestamp(message.created_at)
+  - else
+    .admin-registry__empty
+      %i.fa-solid.fa-envelope-open.admin-registry__empty-icon{'aria-hidden' => 'true'}
+      %p.mb-1.fw-semibold.text-body No messages
+      %p.mb-3.small.text-muted
+        Messages from other users — and from the system, like load reports — will appear here.
+      = link_to new_message_path, class: 'btn btn-primary btn-sm' do
+        %i.fa-solid.fa-pen-to-square.me-1{'aria-hidden' => 'true'}
+        Write the first one
+
+= paginate @messages

@@ -12,6 +12,7 @@
 //   _admin_dashboard     — Admin → actions hub (/admin landing, action cards)
 //   _admin_reparent      — Admin → Move finder (step indicator, from→to preview)
 //   _admin_linked_members — Admin → Linked members panel (surfaced-in list, add/remove)
+//   _inbox               — User Inbox (correspondence ledger, navbar badge)
 //   _ingest_status       — IPTC loader status chips + dashboard tiles
 //   _deposit_form        — Collection → New Work deposit slip
 //   _error_page          — 403 / 404 / 410 / 500 error pages
@@ -29,6 +30,7 @@
 @import 'admin_reparent';
 @import 'admin_linked_members';
 @import 'impersonation';
+@import 'inbox';
 @import 'ingest_status';
 @import 'deposit_form';
 @import 'error_page';

@@ -53,6 +53,12 @@ Rails.application.routes.draw do
     end
   end
 
+  # User Inbox — in-app messaging. destroy is a per-recipient soft-dismiss,
+  # not a row delete; recipients is the compose typeahead's JSON source.
+  resources :messages, path: 'inbox', only: [:index, :show, :new, :create, :destroy] do
+    collection { get :recipients }
+  end
+
   namespace :admin do
     root to: 'dashboard#index'
     resources :loaders, only: [:index, :new, :create, :edit, :update], param: :slug

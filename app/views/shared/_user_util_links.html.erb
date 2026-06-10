@@ -12,6 +12,16 @@
           <% end %>
         </li>
       <% end %>
+      <% if current_user.messageable? %>
+        <li class="nav-item">
+          <%= link_to messages_path, class: 'nav-link inbox-nav-link', 'aria-label': inbox_aria_label do %>
+            <i class="fa-solid fa-envelope" aria-hidden="true"></i>
+            <% if unread_messages_count.positive? %>
+              <span class="inbox-nav-link__badge"><%= unread_messages_count %></span>
+            <% end %>
+          <% end %>
+        </li>
+      <% end %>
       <% unless current_user.to_s.blank? -%>
         <li class="nav-item">
           <%# <%= link_to current_user, root_path, class: 'nav-link' %>

@@ -35,6 +35,13 @@ class User
     role.to_s == 'privileged'
   end
 
+  # Inbox eligibility: guests and the anonymous tier are excluded from
+  # messaging entirely — the guest NUID is a shared fallback identity with
+  # no inbox of its own.
+  def messageable?
+    !role.to_s.in?(%w[guest anonymous])
+  end
+
   def to_s
     pretty_name
   end
