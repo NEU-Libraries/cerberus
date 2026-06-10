@@ -110,10 +110,11 @@ class WorksController < ApplicationController
     end
 
     # TODO: add support for pdf/word thumbnails — only images get IIIF derivatives today.
-    # No derivative_widths: deposits get thumbnails only. Small/medium/large are
-    # opt-in download renditions; the per-size checkbox/slider UI (v1 parity:
-    # each optional, small < medium < large, capped at the master's longest
-    # edge) will pass librarian-chosen widths here when it lands.
+    # No derivative_widths here: deposits get thumbnails only at upload time.
+    # Small/medium/large are opt-in download renditions chosen on the metadata
+    # page's checkbox/slider section, which arrives post-hoc via
+    # DepositDerivativesJob (see #process_derivative_widths) — not through
+    # this call.
     def enqueue_ingest_jobs(file, staged_path)
       IiifAssetsJob.perform_later(@work.id, staged_path) if file.content_type.to_s.start_with?('image/')
       ContentCreationJob.perform_later(@work.id, staged_path, file.original_filename, SecureRandom.uuid)

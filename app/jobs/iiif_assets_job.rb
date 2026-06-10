@@ -10,10 +10,11 @@
 #   are generated whenever this job runs.
 # - Small/medium/large: DOWNLOAD RENDITIONS, generated only when the
 #   caller passes `derivative_widths:`. IPTC ingest passes per-image
-#   widths (its `widths_for` — v1-parity sizing); the single-file deposit
-#   flow will pass librarian-chosen widths once its opt-in checkbox/slider
-#   UI exists. Callers that pass nothing (deposit today, XML loader,
-#   multipage page 1) get thumbnails only.
+#   widths (its `widths_for` — v1-parity sizing). The single-file deposit
+#   flow chooses sizes on the metadata page AFTER this job has run, via
+#   DepositDerivativesJob (which recovers the JP2 base from the thumbnail
+#   this job minted). Callers that pass nothing (deposit, XML loader,
+#   multipage page 1) get thumbnails only here.
 class IiifAssetsJob < ApplicationJob
   queue_as :default
 
