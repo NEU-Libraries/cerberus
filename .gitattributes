@@ -20,3 +20,4 @@ public/ace/** linguist-vendored
 *.eot binary
 *.otf binary
 *.zip binary
+*.tif binary
