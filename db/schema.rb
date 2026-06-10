@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_09_000003) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_10_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -96,6 +96,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_09_000003) do
     t.check_constraint "(recipient_nuid IS NULL) <> (recipient_group IS NULL)", name: "messages_exactly_one_recipient"
   end
 
+  create_table "multipage_ingests", force: :cascade do |t|
+    t.datetime "blob_attached_at"
+    t.datetime "created_at", null: false
+    t.text "error_message"
+    t.string "file_set_pid"
+    t.string "idempotency_key"
+    t.bigint "load_report_id", null: false
+    t.integer "sequence"
+    t.string "source_filename"
+    t.integer "status", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.text "warnings", default: "[]"
+    t.string "work_pid"
+    t.index ["load_report_id", "sequence"], name: "index_multipage_ingests_on_load_report_id_and_sequence", unique: true
+    t.index ["load_report_id"], name: "index_multipage_ingests_on_load_report_id"
+  end
+
   create_table "searches", id: :serial, force: :cascade do |t|
     t.datetime "created_at", precision: nil, null: false
     t.binary "query_params"
@@ -121,5 +138,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_09_000003) do
   add_foreign_key "iptc_ingests", "load_reports"
   add_foreign_key "load_reports", "loaders"
   add_foreign_key "message_receipts", "messages"
+  add_foreign_key "multipage_ingests", "load_reports"
   add_foreign_key "xml_ingests", "load_reports"
 end
