@@ -52,6 +52,20 @@ describe Loader do
     end
   end
 
+  describe 'kind' do
+    it 'defines the three pipeline kinds with stable integer values' do
+      expect(described_class.kinds).to eq('iptc' => 0, 'xml' => 1, 'multipage' => 2)
+    end
+
+    it 'defaults to iptc' do
+      expect(described_class.new(valid_attrs)).to be_iptc
+    end
+
+    it 'exposes the multipage predicate' do
+      expect(described_class.new(valid_attrs.merge(kind: :multipage))).to be_multipage
+    end
+  end
+
   describe 'load_reports association' do
     let(:loader) { described_class.create!(valid_attrs) }
 

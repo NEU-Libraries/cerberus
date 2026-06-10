@@ -11,5 +11,9 @@ FactoryBot.define do
     trait :xml do
       kind { :xml }
     end
+
+    trait :multipage do
+      kind { :multipage }
+    end
   end
 end

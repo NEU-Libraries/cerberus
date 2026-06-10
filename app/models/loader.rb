@@ -4,10 +4,12 @@ class Loader < ApplicationRecord
   has_many :load_reports, dependent: :restrict_with_error
 
   # Which ingest pipeline this loader drives. `iptc` (the default) is the
-  # image-archive loader; `xml` is the manifest-driven MODS loader. The
-  # value selects the unzip job, the per-row ingest model, and the
-  # upload/preview UX in LoadsController and the loads views.
-  enum :kind, { iptc: 0, xml: 1 }
+  # image-archive loader; `xml` is the manifest-driven MODS loader;
+  # `multipage` turns one archive (manifest + MODS + ordered page images)
+  # into a single Work with positioned page FileSets. The value selects
+  # the unzip job, the per-row ingest model, and the upload/preview UX in
+  # LoadsController and the loads views.
+  enum :kind, { iptc: 0, xml: 1, multipage: 2 }
 
   validates :slug,
             presence:   true,
