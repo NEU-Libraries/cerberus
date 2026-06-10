@@ -20,23 +20,25 @@ class DerivativeWidths < ApplicationService
   # raw: plain Hash of role => String (already permitted by the controller).
   def initialize(raw:, longest_edge:)
     @raw = raw.to_h.symbolize_keys.slice(*ROLES).transform_values { |v| v.to_s.strip }
-               .reject { |_, v| v.empty? }
+                                                .reject { |_, v| v.empty? }
     @longest_edge = longest_edge
   end
 
   def call
-    return range_error unless @raw.values.all? { |v| whole_number_in_range?(v) }
-
-    values = ROLES.filter_map { |role| @raw[role]&.to_i }
-    return ordering_error unless values.each_cons(2).all? { |a, b| a < b }
+    return range_error unless values_in_range?
+    return ordering_error unless strictly_increasing?
 
     Result.new(widths: @raw.transform_values(&:to_i), error: nil)
   end
 
   private
 
-    def whole_number_in_range?(value)
-      value.match?(/\A\d+\z/) && (1..@longest_edge).cover?(value.to_i)
+    def values_in_range?
+      @raw.values.all? { |v| v.match?(/\A\d+\z/) && (1..@longest_edge).cover?(v.to_i) }
+    end
+
+    def strictly_increasing?
+      ROLES.filter_map { |role| @raw[role]&.to_i }.each_cons(2).all? { |a, b| a < b }
     end
 
     def range_error

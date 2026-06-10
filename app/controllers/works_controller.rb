@@ -85,9 +85,6 @@ class WorksController < ApplicationController
 
   private
 
-    DERIVATIVES_SKIPPED_NO_IMAGE =
-      'Download sizes were skipped: no staged image was found for this work.'
-
     # Server backstop for the metadata page's opt-in download sizes. The
     # Stimulus controller is the primary enforcement, so a violation here
     # means JS-off or tampering — in that case the metadata still saves and
@@ -101,9 +98,13 @@ class WorksController < ApplicationController
       return unless raw.is_a?(ActionController::Parameters)
 
       probe = StagedImageProbe.call(work_id: params[:id])
-      return flash[:alert] = DERIVATIVES_SKIPPED_NO_IMAGE if probe.nil?
+      return flash[:alert] = 'Download sizes were skipped: no staged image was found for this work.' if probe.nil?
 
-      result = DerivativeWidths.call(raw: raw.permit(:small, :medium, :large).to_h,
+      enqueue_valid_widths(raw, probe)
+    end
+
+    def enqueue_valid_widths(raw, probe)
+      result = DerivativeWidths.call(raw:          raw.permit(:small, :medium, :large).to_h,
                                      longest_edge: probe.longest_edge)
       unless result.valid?
         return flash[:alert] = "Download sizes were not generated: #{result.error} " \

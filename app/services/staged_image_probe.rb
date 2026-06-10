@@ -38,7 +38,7 @@ class StagedImageProbe < ApplicationService
       return nil unless File.directory?(dir)
 
       Dir.children(dir).sort.filter_map { |name| File.join(dir, name) }
-         .find { |path| File.file?(path) && image?(path) }
+                            .find { |path| File.file?(path) && image?(path) }
     end
 
     def image?(path)
