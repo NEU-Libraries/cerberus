@@ -85,6 +85,33 @@ RSpec.describe 'Messages', type: :request do
     end
   end
 
+  describe 'GET /inbox/new (compose)' do
+    let(:grouped_user) do
+      User.new(email: 'grouped@example.com', password: 'password',
+               nuid: '000000005', role: 'standard', groups: ['test:inbox:picker'])
+    end
+
+    before do
+      Group.create!(raw: 'test:inbox:picker', cosmetic: 'Inbox Picker Testers')
+      sign_in grouped_user
+    end
+
+    it 'offers the sender\'s own groups, labeled with Group cosmetic names, to the picker' do
+      get '/inbox/new'
+
+      expect(response.body).to include('recipient-picker-groups-value')
+      expect(response.body).to include('Inbox Picker Testers')
+      expect(response.body).to include('test:inbox:picker')
+    end
+
+    it 'keeps the group options on a failed create re-render' do
+      post '/inbox', params: { message: { subject: '', recipient_group: 'test:inbox:picker' } }
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(response.body).to include('Inbox Picker Testers')
+    end
+  end
+
   describe 'POST /inbox' do
     before { sign_in staff_user }
 

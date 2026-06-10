@@ -3,7 +3,8 @@
 .well.p-3.my-3.rounded-3.inbox-compose
   %h1.h4.mb-3 New message
   = form_with model: @message, url: messages_path,
-    data: { controller: 'recipient-picker', recipient_picker_url_value: recipients_messages_path } do |f|
+    data: { controller: 'recipient-picker', recipient_picker_url_value: recipients_messages_path,
+            recipient_picker_groups_value: @composable_groups.to_json } do |f|
     - if @message.errors.any?
       .alert.alert-danger
         %ul.mb-0
@@ -30,12 +31,15 @@
       = f.hidden_field :recipient_nuid, data: { recipient_picker_target: 'nuid' }
       .list-group.inbox-typeahead{hidden: true, data: { recipient_picker_target: 'results' }}
 
-    .mb-3{data: { recipient_picker_target: 'groupPane' }, hidden: !group_mode}
-      = f.label :recipient_group, 'Group', class: 'form-label'
-      = f.text_field :recipient_group, class: 'form-control',
-        placeholder: 'e.g. northeastern:drs:repository:staff',
-        data: { recipient_picker_target: 'group' }
-      %small.form-text.text-muted Everyone in this Grouper group will see the message.
+    .mb-3.position-relative{data: { recipient_picker_target: 'groupPane' }, hidden: !group_mode}
+      %label.form-label{for: 'group_query'} Group
+      %input#group_query.form-control{type: 'text', placeholder: 'Start typing a group name…',
+        autocomplete: 'off', value: @message.recipient_group,
+        data: { recipient_picker_target: 'groupQuery', action: 'input->recipient-picker#searchGroups' }}
+      = f.hidden_field :recipient_group, data: { recipient_picker_target: 'group' }
+      .list-group.inbox-typeahead{hidden: true, data: { recipient_picker_target: 'groupResults' }}
+      %small.form-text.text-muted
+        Everyone in this Grouper group will see the message. You can address the groups you belong to.
 
     .mb-3
       = f.label :subject, class: 'form-label'
@@ -45,5 +49,5 @@
       = f.text_area :body, class: 'form-control', rows: 6
 
     .d-flex.gap-2
-      = f.submit 'Send', class: 'btn btn-primary'
-      = link_to 'Cancel', messages_path, class: 'btn btn-link'
+      = f.submit 'Send', class: 'btn btn-success'
+      = link_to 'Cancel', messages_path, class: 'btn btn-warning'

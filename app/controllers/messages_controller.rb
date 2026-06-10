@@ -23,6 +23,7 @@ class MessagesController < ApplicationController
 
   def new
     @message = Message.new
+    @composable_groups = composable_groups
   end
 
   def create
@@ -30,6 +31,7 @@ class MessagesController < ApplicationController
     if @message.save
       redirect_to messages_path, notice: 'Message sent.'
     else
+      @composable_groups = composable_groups
       render :new, status: :unprocessable_content
     end
   end
@@ -69,5 +71,13 @@ class MessagesController < ApplicationController
 
     def message_params
       params.require(:message).permit(:subject, :body, :recipient_nuid, :recipient_group)
+    end
+
+    # Mirrors the permissions widget (Transformable#form_metadata): the
+    # groups you can address are the groups on your own session, labeled
+    # via the Group table's cosmetic names. Like permissions, this is a
+    # UI constraint, not a server-side membership check.
+    def composable_groups
+      (current_user&.groups || []).map { |raw| { raw: raw, cosmetic: pretty_group(raw) } }
     end
 end
