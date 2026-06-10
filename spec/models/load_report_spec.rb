@@ -27,6 +27,13 @@ RSpec.describe LoadReport, type: :model do
       create(:iptc_ingest, load_report: report)
       expect { report.destroy }.to change(IptcIngest, :count).by(-1)
     end
+
+    it 'has many multipage_ingests and destroys them when destroyed' do
+      report = create(:load_report)
+      page = create(:multipage_ingest, load_report: report)
+      expect(report.multipage_ingests).to include(page)
+      expect { report.destroy }.to change(MultipageIngest, :count).by(-1)
+    end
   end
 
   describe 'enum' do
@@ -84,11 +91,12 @@ RSpec.describe LoadReport, type: :model do
   end
 
   describe '#total_ingests' do
-    it 'sums xml and iptc ingests' do
+    it 'sums xml, iptc, and multipage ingests' do
       report = create(:load_report)
       create_list(:xml_ingest, 2, load_report: report)
       create_list(:iptc_ingest, 3, load_report: report)
-      expect(report.total_ingests).to eq(5)
+      create(:multipage_ingest, load_report: report)
+      expect(report.total_ingests).to eq(6)
     end
   end
 
@@ -175,6 +183,47 @@ RSpec.describe LoadReport, type: :model do
 
       report.maybe_finalize!
       expect { report.maybe_finalize! }.not_to change(Message, :count)
+    end
+  end
+
+  describe '#maybe_finalize! work-completion barrier' do
+    let(:multipage_loader) { create(:loader, :multipage) }
+
+    it 'enqueues CompleteWorkJob when a multipage report settles completed' do
+      report = create(:load_report, loader: multipage_loader, status: :processing)
+      create(:multipage_ingest, load_report: report, status: :completed, work_pid: 'neu:w1')
+
+      expect { report.maybe_finalize! }.to have_enqueued_job(CompleteWorkJob).with(report.id)
+    end
+
+    it 'enqueues CompleteWorkJob when the report settles completed_with_warnings' do
+      report = create(:load_report, loader: multipage_loader, status: :processing)
+      create(:multipage_ingest, load_report: report, status: :completed_with_warnings, work_pid: 'neu:w1')
+
+      expect { report.maybe_finalize! }.to have_enqueued_job(CompleteWorkJob)
+    end
+
+    it 'never enqueues when the report settles failed' do
+      report = create(:load_report, loader: multipage_loader, status: :processing)
+      create(:multipage_ingest, load_report: report, status: :completed, work_pid: 'neu:w1', sequence: 1)
+      create(:multipage_ingest, load_report: report, status: :failed, work_pid: 'neu:w1', sequence: 2)
+
+      expect { report.maybe_finalize! }.not_to have_enqueued_job(CompleteWorkJob)
+    end
+
+    it 'never enqueues for non-multipage loaders' do
+      report = create(:load_report, loader: create(:loader, :xml), status: :processing)
+      create(:xml_ingest, load_report: report, status: :completed)
+
+      expect { report.maybe_finalize! }.not_to have_enqueued_job(CompleteWorkJob)
+    end
+
+    it 'enqueues exactly once across re-converging finalization calls' do
+      report = create(:load_report, loader: multipage_loader, status: :processing)
+      create(:multipage_ingest, load_report: report, status: :completed, work_pid: 'neu:w1')
+
+      report.maybe_finalize!
+      expect { report.maybe_finalize! }.not_to have_enqueued_job(CompleteWorkJob)
     end
   end
 end

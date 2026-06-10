@@ -4,6 +4,7 @@ class LoadReport < ApplicationRecord
   belongs_to :loader, optional: true
   has_many :xml_ingests, dependent: :destroy
   has_many :iptc_ingests, dependent: :destroy
+  has_many :multipage_ingests, dependent: :destroy
 
   # `previewing` (XML loader only) is a pre-run hold: the archive is staged
   # and the first-row preview is rendered, but nothing is enqueued until the
@@ -42,19 +43,19 @@ class LoadReport < ApplicationRecord
   end
 
   def total_ingests
-    xml_ingests.count + iptc_ingests.count
+    ingest_relations.sum(&:count)
   end
 
   def completed_ingests
-    xml_ingests.completed.count + iptc_ingests.completed.count
+    ingest_relations.sum { |rel| rel.completed.count }
   end
 
   def warning_ingests
-    xml_ingests.completed_with_warnings.count + iptc_ingests.completed_with_warnings.count
+    ingest_relations.sum { |rel| rel.completed_with_warnings.count }
   end
 
   def failed_ingests
-    xml_ingests.failed.count + iptc_ingests.failed.count
+    ingest_relations.sum { |rel| rel.failed.count }
   end
 
   # Ingests that have reached a terminal per-row state, over the total —
@@ -95,23 +96,44 @@ class LoadReport < ApplicationRecord
     # only when this call actually moved the status, so a re-trigger with
     # the same outcome (a retried row job after the report settled) stays
     # silent; a genuine correction messages again with the new status.
-    notify_creator! if status_settled
+    return unless status_settled
+
+    notify_creator!
+    enqueue_work_completion!
   end
 
   private
 
+    # The three per-kind ingest tables a report may tally. Summing the
+    # counters and finalization predicates over this list keeps
+    # maybe_finalize! itself kind-agnostic.
+    def ingest_relations
+      [iptc_ingests, xml_ingests, multipage_ingests]
+    end
+
     def rows_outstanding?
-      iptc_ingests.exists?(status: %i[pending processing]) ||
-        xml_ingests.exists?(status: %i[pending processing])
+      ingest_relations.any? { |rel| rel.exists?(status: %i[pending processing]) }
     end
 
     def rows_failed?
-      iptc_ingests.failed.exists? || xml_ingests.failed.exists?
+      ingest_relations.any? { |rel| rel.failed.exists? }
     end
 
     def rows_warned?
-      iptc_ingests.completed_with_warnings.exists? ||
-        xml_ingests.completed_with_warnings.exists?
+      ingest_relations.any? { |rel| rel.completed_with_warnings.exists? }
+    end
+
+    # Multipage completion barrier: the one Work behind a multipage report
+    # may only be completed (Atlas flips in_progress *and* builds the
+    # Work-level METS structMap — the preservation record of page order)
+    # once every page row has landed. Riding the status-settle signal gives
+    # exactly-once enqueueing; failed reports never complete their Work,
+    # leaving in_progress=true as the stuck-deposit operator flag.
+    def enqueue_work_completion!
+      return unless loader&.multipage?
+      return unless completed? || completed_with_warnings?
+
+      CompleteWorkJob.perform_later(id)
     end
 
     # First system producer for the User Inbox: tell whoever started the
