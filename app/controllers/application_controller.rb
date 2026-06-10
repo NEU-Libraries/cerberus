@@ -61,6 +61,14 @@ class ApplicationController < ActionController::Base
       Current.nuid = current_user&.nuid || Rails.application.config.x.cerberus.guest_nuid
     end
 
+    # The identity Cerberus-side writes are attributed to: the acting-as
+    # target when an acting-as session is live, otherwise the authenticated
+    # user. Matches the deposit convention — acting-as work belongs wholly
+    # to the target, so their inbox (not the admin's) gets the follow-ups.
+    def attributed_nuid
+      Current.on_behalf_of.presence || Current.nuid
+    end
+
     def add_breadcrumb_for(resource_id, klass, title)
       path = public_send("#{klass.downcase}_path", resource_id)
       breadcrumb(title, path)

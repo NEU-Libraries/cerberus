@@ -145,6 +145,13 @@ RSpec.describe 'Loads', type: :request do
       expect(lr.source_filename).to eq('jpgs.zip')
     end
 
+    it 'stamps the creator so finalization can message their inbox' do
+      post '/loaders/marcom/loads',
+           params: { load_report: { archive: archive, parent_collection_id: 'neu:c1' } }
+
+      expect(LoadReport.last.creator_nuid).to eq(marcom_user.nuid)
+    end
+
     it 'enqueues UnzipJob with the new LoadReport id' do
       post '/loaders/marcom/loads',
            params: { load_report: { archive: archive, parent_collection_id: 'neu:c1' } }

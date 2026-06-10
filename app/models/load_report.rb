@@ -74,6 +74,9 @@ class LoadReport < ApplicationRecord
 
   def maybe_finalize!
     with_lock do
+      # A retried row job can land here after the report already finalized;
+      # bail rather than re-finalize (and double-send the inbox note below).
+      return if completed? || completed_with_warnings? || failed?
       return if iptc_ingests.exists?(status: %i[pending processing]) ||
                 xml_ingests.exists?(status: %i[pending processing])
 
@@ -86,5 +89,30 @@ class LoadReport < ApplicationRecord
         finish_load
       end
     end
+    # Outside the lock — the notification is bookkeeping, not part of the
+    # finalization transaction. Early returns above skip it.
+    notify_creator!
   end
+
+  private
+
+    # First system producer for the User Inbox: tell whoever started the
+    # load that it reached a terminal state. Pre-inbox rows never recorded
+    # a creator — nothing to notify.
+    def notify_creator!
+      return if creator_nuid.blank?
+
+      SystemMessage.deliver(
+        to_nuid: creator_nuid,
+        subject: %(Load "#{source_filename}" #{status.humanize.downcase}),
+        body:    notification_body
+      )
+    end
+
+    def notification_body
+      counts = "#{completed_ingests} completed, #{warning_ingests} with warnings, #{failed_ingests} failed."
+      return counts if loader.blank?
+
+      "#{counts}\nView the report: #{Rails.application.routes.url_helpers.loader_load_path(loader, self)}"
+    end
 end

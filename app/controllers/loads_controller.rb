@@ -29,6 +29,7 @@ class LoadsController < ApplicationController
 
     @load_report = LoadReport.create!(
       loader:               @loader,
+      creator_nuid:         attributed_nuid,
       source_filename:      archive.original_filename,
       parent_collection_id: parent,
       status:               @loader.xml? ? :previewing : :pending

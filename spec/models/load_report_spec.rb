@@ -134,4 +134,47 @@ RSpec.describe LoadReport, type: :model do
       expect(create(:load_report).progress_percent).to eq(0)
     end
   end
+
+  describe '#maybe_finalize! inbox notification' do
+    let(:loader) { create(:loader) }
+
+    it 'messages the creator when the load reaches a terminal state' do
+      report = create(:load_report, loader: loader, creator_nuid: '000000003', status: :processing)
+      create(:iptc_ingest, load_report: report, status: :completed)
+      create(:iptc_ingest, load_report: report, status: :failed)
+
+      expect { report.maybe_finalize! }.to change(Message, :count).by(1)
+
+      message = Message.last
+      expect(message).to be_system
+      expect(message.recipient_nuid).to eq('000000003')
+      expect(message.subject).to eq('Load "test_archive.zip" failed')
+      expect(message.body).to include('1 completed, 0 with warnings, 1 failed.')
+      expect(message.body).to include("/loaders/#{loader.slug}/loads/#{report.id}")
+    end
+
+    it 'does not finalize or message while rows are still pending' do
+      report = create(:load_report, creator_nuid: '000000003', status: :processing)
+      create(:iptc_ingest, load_report: report, status: :pending)
+
+      expect { report.maybe_finalize! }.not_to change(Message, :count)
+      expect(report.reload).to be_processing
+    end
+
+    it 'does not message when the report has no creator (pre-inbox rows)' do
+      report = create(:load_report, status: :processing)
+      create(:iptc_ingest, load_report: report, status: :completed)
+
+      expect { report.maybe_finalize! }.not_to change(Message, :count)
+      expect(report.reload).to be_completed
+    end
+
+    it 'does not double-send when a retried row job re-triggers finalization' do
+      report = create(:load_report, creator_nuid: '000000003', status: :processing)
+      create(:iptc_ingest, load_report: report, status: :completed)
+
+      report.maybe_finalize!
+      expect { report.maybe_finalize! }.not_to change(Message, :count)
+    end
+  end
 end
