@@ -72,29 +72,47 @@ class LoadReport < ApplicationRecord
     ((processed_ingests * 100.0) / total_ingests).round
   end
 
+  # Re-finalization is deliberate: UnzipJob creates rows incrementally
+  # while streaming the archive, so an early row job can finalize before
+  # later rows exist; subsequent calls converge the status (e.g.
+  # completed → failed once a late row lands). Don't add an
+  # "already terminal" guard here — it breaks that convergence.
   def maybe_finalize!
+    status_settled = false
     with_lock do
-      # A retried row job can land here after the report already finalized;
-      # bail rather than re-finalize (and double-send the inbox note below).
-      return if completed? || completed_with_warnings? || failed?
-      return if iptc_ingests.exists?(status: %i[pending processing]) ||
-                xml_ingests.exists?(status: %i[pending processing])
+      return if rows_outstanding?
 
-      if iptc_ingests.failed.exists? || xml_ingests.failed.exists?
+      if rows_failed?
         fail_load
-      elsif iptc_ingests.completed_with_warnings.exists? ||
-            xml_ingests.completed_with_warnings.exists?
+      elsif rows_warned?
         finish_with_warnings
       else
         finish_load
       end
+      status_settled = saved_change_to_status?
     end
-    # Outside the lock — the notification is bookkeeping, not part of the
-    # finalization transaction. Early returns above skip it.
-    notify_creator!
+    # Outside the lock — bookkeeping, not part of the transaction. Fires
+    # only when this call actually moved the status, so a re-trigger with
+    # the same outcome (a retried row job after the report settled) stays
+    # silent; a genuine correction messages again with the new status.
+    notify_creator! if status_settled
   end
 
   private
+
+    def rows_outstanding?
+      iptc_ingests.exists?(status: %i[pending processing]) ||
+        xml_ingests.exists?(status: %i[pending processing])
+    end
+
+    def rows_failed?
+      iptc_ingests.failed.exists? || xml_ingests.failed.exists?
+    end
+
+    def rows_warned?
+      iptc_ingests.completed_with_warnings.exists? ||
+        xml_ingests.completed_with_warnings.exists?
+    end
 
     # First system producer for the User Inbox: tell whoever started the
     # load that it reached a terminal state. Pre-inbox rows never recorded

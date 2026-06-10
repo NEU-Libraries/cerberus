@@ -27,13 +27,7 @@ class LoadsController < ApplicationController
     parent  = params.dig(:load_report, :parent_collection_id)
     return reject_missing_archive(parent) if archive.blank?
 
-    @load_report = LoadReport.create!(
-      loader:               @loader,
-      creator_nuid:         attributed_nuid,
-      source_filename:      archive.original_filename,
-      parent_collection_id: parent,
-      status:               @loader.xml? ? :previewing : :pending
-    )
+    @load_report = create_load_report!(archive, parent)
     save_archive(@load_report, archive)
     # IPTC commits straight to the run. XML stops at a preview the librarian
     # confirms (see #confirm), so it enqueues no job yet — the show view
@@ -64,6 +58,16 @@ class LoadsController < ApplicationController
   end
 
   private
+
+    def create_load_report!(archive, parent)
+      LoadReport.create!(
+        loader:               @loader,
+        creator_nuid:         attributed_nuid,
+        source_filename:      archive.original_filename,
+        parent_collection_id: parent,
+        status:               @loader.xml? ? :previewing : :pending
+      )
+    end
 
     def reject_missing_archive(parent_id)
       flash.now[:alert]  = 'Please choose an archive file.'

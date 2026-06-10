@@ -56,7 +56,7 @@ RSpec.describe Message, type: :model do
     end
 
     it 'orders newest first' do
-      direct.update_column(:created_at, 2.days.ago)
+      direct.update!(created_at: 2.days.ago)
       expect(described_class.inbox_for(reader).to_a).to eq([group_message, direct])
     end
 
