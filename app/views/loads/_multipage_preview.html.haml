@@ -1,0 +1,101 @@
+/ Multipage loader preview-then-confirm. Renders MultipagePreview::Result —
+/ the WHOLE manifest, validated — so the librarian confirms the one Work and
+/ its page order before anything is minted. Reuses the .admin-registry /
+/ .load-report-overview / .ingest-status chrome (same register as _preview
+/ and the audit-history ledger) — no bespoke CSS.
+/
+/ Unlike the XML preview, the ordered page table renders even when blocked:
+/ the contract errors name sequences, and seeing the order the manifest
+/ actually declared is how a librarian diagnoses a bad-sequence archive.
+.admin-registry.my-3
+  %header.admin-registry__head
+    %span.admin-registry__title
+      %i.fa-solid.fa-eye{'aria-hidden' => 'true'}
+      Preview
+      %span.text-muted.fw-normal= load_report.source_filename
+    %span.admin-registry__subtitle
+      %i.fa-solid.fa-folder-tree{'aria-hidden' => 'true'}
+      = link_to loader.display_name, loader_loads_path(loader), class: 'text-decoration-none'
+
+  .admin-registry__body
+    - if preview.blocked?
+      .alert.alert-danger.d-flex.gap-2.mb-0
+        %i.fa-solid.fa-circle-exclamation.mt-1{'aria-hidden' => 'true'}
+        %div
+          %p.fw-semibold.mb-1 This archive can't be processed as a multipage Work.
+          %ul.mb-0.small
+            - preview.errors.each do |err|
+              %li= err
+    - else
+      %p.text-muted.small.mb-3
+        This archive becomes
+        %strong one Work
+        with #{pluralize(preview.pages.size, 'ordered page')}. Nothing is created until you confirm; confirming runs the whole batch.
+
+      .load-report-overview
+        .load-report-overview__meta
+          %span.load-report-overview__label Mode
+          %span.load-report-overview__value
+            %span.ingest-status{style: '--ingest-tone: #18bc9c'}
+              %i.fa-solid.fa-layer-group{'aria-hidden' => 'true'}
+              Create multipage Work
+
+          %span.load-report-overview__label MODS file
+          %span.load-report-overview__value
+            %code.admin-registry-table__id= preview.mods_row.xml_path
+
+          %span.load-report-overview__label Pages
+          %span.load-report-overview__value= preview.pages.size
+
+          - if load_report.parent_collection_id.present?
+            %span.load-report-overview__label Destination
+            %span.load-report-overview__value
+              %code.admin-registry-table__id= load_report.parent_collection_id
+
+    - if preview.pages.any?
+      .table-responsive.mt-3
+        %table.table.table-borderless.admin-registry-table.ingest-table
+          %caption.visually-hidden Pages in the order they will attach to the Work
+          %thead
+            %tr
+              %th{scope: 'col'} Seq
+              %th{scope: 'col'} Page file
+              %th{scope: 'col'} Title
+              %th{scope: 'col'} Last item
+          %tbody
+            - preview.pages.each do |page|
+              %tr
+                %td= page.sequence
+                %td
+                  %code.admin-registry-table__id= page.file_name
+                %td.small= page.title
+                %td
+                  - if page.last_item?
+                    %i.fa-solid.fa-flag-checkered.text-muted{'aria-hidden' => 'true'}
+                    %span.visually-hidden Last item
+
+    - if preview.mods_xml.present? && preview.ok?
+      / The Work's MODS, two-up: raw document beside Atlas's rendered HTML
+      / view — same raw-vs-rendered pairing as the XML editor and _preview.
+      .row.g-3.mt-2
+        .col-lg-6
+          %span.load-report-overview__label Raw MODS
+          %pre.border.border-1.rounded-3.bg-light.p-3.small.mt-1.mb-0{style: 'max-height: 26rem; overflow: auto;'}= preview.mods_xml
+        .col-lg-6
+          %span.load-report-overview__label Rendered
+          - if preview.decorated_html.present?
+            .border.border-1.rounded-3.bg-white.p-3.mt-1.mb-0{style: 'max-height: 26rem; overflow: auto;'}
+              = preview.decorated_html.html_safe
+          - else
+            .border.border-1.rounded-3.bg-light.p-3.mt-1.mb-0.text-muted.small
+              %i.fa-solid.fa-eye-slash.me-1{'aria-hidden' => 'true'}
+              The rendered view appears once the MODS validates.
+
+    .d-flex.gap-2.align-items-center.mt-4
+      - if preview.ok?
+        = button_to confirm_loader_load_path(loader, load_report), method: :patch, class: 'btn btn-primary' do
+          %i.fa-solid.fa-play.me-1{'aria-hidden' => 'true'}
+          Confirm &amp; run
+      = button_to loader_load_path(loader, load_report), method: :delete, class: 'btn btn-outline-danger', data: { turbo_confirm: 'Discard this upload? The staged archive will be removed.' } do
+        %i.fa-solid.fa-trash-can.me-1{'aria-hidden' => 'true'}
+        Discard

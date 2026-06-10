@@ -61,7 +61,7 @@
             %th{scope: 'col'}
         %tbody
           = render partial: 'ingest_row',
-                   collection: ingests.order(:source_filename),
+                   collection: ingests.order(report_ingest_order(loader)),
                    as: :ingest
   - elsif load_report.in_progress?
     .admin-registry__empty
@@ -69,6 +69,14 @@
       %p.mb-1.fw-semibold.text-body Extraction in progress
       %p.mb-0.small.text-muted
         The archive is being unpacked. This page updates automatically as files are processed.
+  - elsif loader.multipage?
+    .admin-registry__empty
+      %i.fa-solid.fa-circle-question.admin-registry__empty-icon{'aria-hidden' => 'true'}
+      %p.mb-1.fw-semibold.text-body No pages ingested
+      %p.mb-0.small.text-muted
+        This batch finished without producing any page entries. Check that the
+        %code.admin-registry-table__id manifest.xlsx
+        has a Sequence 0 MODS row and pages numbered 1 and up.
   - elsif loader.xml?
     .admin-registry__empty
       %i.fa-solid.fa-circle-question.admin-registry__empty-icon{'aria-hidden' => 'true'}

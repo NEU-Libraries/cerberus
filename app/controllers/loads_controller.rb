@@ -12,9 +12,10 @@ class LoadsController < ApplicationController
   end
 
   def show
-    # XML loads pause on a preview the librarian must confirm; build it lazily
-    # from the staged archive (no persistence) for the show view to render.
-    @preview = XmlPreview.call(load_report: @load_report) if @load_report.previewing?
+    # XML and multipage loads pause on a preview the librarian must confirm;
+    # build it lazily from the staged archive (no persistence) for the show
+    # view to render.
+    @preview = preview_service.call(load_report: @load_report) if @load_report.previewing?
   end
 
   def new
@@ -29,9 +30,9 @@ class LoadsController < ApplicationController
 
     @load_report = create_load_report!(archive, parent)
     save_archive(@load_report, archive)
-    # IPTC commits straight to the run. XML stops at a preview the librarian
-    # confirms (see #confirm), so it enqueues no job yet — the show view
-    # renders the preview from the staged archive.
+    # IPTC commits straight to the run. XML and multipage stop at a preview
+    # the librarian confirms (see #confirm), so they enqueue no job yet —
+    # the show view renders the preview from the staged archive.
     UnzipJob.perform_later(@load_report.id) if @loader.iptc?
 
     # No flash notice — the show page's own state (in-progress spinner for
@@ -43,12 +44,12 @@ class LoadsController < ApplicationController
     render :new, status: :unprocessable_content
   end
 
-  # Librarian-approved go: flip the staged XML preview into a real run.
+  # Librarian-approved go: flip the staged preview into a real run.
   def confirm
     return redirect_to(loader_load_path(@loader, @load_report)) unless @load_report.previewing?
 
     @load_report.update!(status: :pending)
-    XmlUnzipJob.perform_later(@load_report.id)
+    unzip_job.perform_later(@load_report.id)
     redirect_to loader_load_path(@loader, @load_report)
   end
 
@@ -65,8 +66,16 @@ class LoadsController < ApplicationController
         creator_nuid:         attributed_nuid,
         source_filename:      archive.original_filename,
         parent_collection_id: parent,
-        status:               @loader.xml? ? :previewing : :pending
+        status:               @loader.iptc? ? :pending : :previewing
       )
+    end
+
+    def preview_service
+      @loader.multipage? ? MultipagePreview : XmlPreview
+    end
+
+    def unzip_job
+      @loader.multipage? ? MultipageUnzipJob : XmlUnzipJob
     end
 
     def reject_missing_archive(parent_id)
