@@ -74,8 +74,13 @@ class WorksController < ApplicationController
   end
 
   def update_metadata
-    process_derivative_widths
     handle_metadata_update(klass: 'Work', resource_key: :work, keywords: true)
+    # AFTER the descriptive save, deliberately: with a live worker,
+    # DepositDerivativesJob can execute within this same request, and its
+    # Delegate PATCH bumps the Work's optimistic lock — enqueueing first
+    # raced save_descriptive! into AtlasRb::StaleResourceError (seen live;
+    # invisible to specs, whose test adapter never runs the job inline).
+    process_derivative_widths
   end
 
   private
