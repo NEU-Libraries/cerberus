@@ -1,0 +1,8 @@
+#!/bin/sh
+# Hard-timeout wrapper handed to libreconv as its soffice_command.
+# libreconv blocks on Open3.capture3 with no timeout of its own, so a hung
+# LibreOffice would wedge a Solid Queue worker forever. Targets soffice.bin
+# directly (not the /usr/bin/soffice shell shim) so TERM/KILL reach the real
+# process. Absolute paths throughout — libreconv executes with
+# unsetenv_others: true, so there is no PATH to resolve against.
+exec /usr/bin/timeout --kill-after=10s 120s /usr/lib/libreoffice/program/soffice.bin "$@"

@@ -5,6 +5,15 @@ RUN apt-get update \
     && apt-get install -y nodejs curl git build-essential libpq-dev libmagic-dev libvips-dev libyaml-dev libimage-exiftool-perl \
     && apt-get -y autoclean
 
+# Headless LibreOffice for Word/PowerPoint → PDF renditions (PdfRenditionJob
+# via libreconv). --no-install-recommends keeps GUI/Java out; fonts-liberation
+# provides metric-compatible Times/Arial/Courier substitutes so converted
+# documents don't reflow.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libreoffice-writer libreoffice-impress fonts-liberation \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get -y autoclean
+
 RUN curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > /usr/local/bin/cc-test-reporter
 RUN chmod +x /usr/local/bin/cc-test-reporter
 
