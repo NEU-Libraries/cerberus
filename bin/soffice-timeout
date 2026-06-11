@@ -5,4 +5,14 @@
 # directly (not the /usr/bin/soffice shell shim) so TERM/KILL reach the real
 # process. Absolute paths throughout — libreconv executes with
 # unsetenv_others: true, so there is no PATH to resolve against.
-exec /usr/bin/timeout --kill-after=10s 120s /usr/lib/libreoffice/program/soffice.bin "$@"
+#
+# Exit 81 = soffice.bin finished first-time profile initialization and wants
+# its caller to restart it — a job the bypassed shim normally does. libreconv
+# passes a fresh -env:UserInstallation per run, so EVERY run is "first-time";
+# without the retry, every conversion dies with exit 81 and empty output.
+/usr/bin/timeout --kill-after=10s 120s /usr/lib/libreoffice/program/soffice.bin "$@"
+ret=$?
+if [ "$ret" -eq 81 ]; then
+  exec /usr/bin/timeout --kill-after=10s 120s /usr/lib/libreoffice/program/soffice.bin "$@"
+fi
+exit "$ret"
