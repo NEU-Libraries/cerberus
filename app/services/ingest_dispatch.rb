@@ -18,9 +18,11 @@
 # thumbnails only, never S/M/L.
 #
 # Detection sniffs the staged file with Marcel rather than trusting a
-# browser-supplied content type (absent in the loader path anyway). The
-# `name:` hint is load-bearing for legacy .doc/.ppt — magic bytes alone
-# read as application/x-ole-storage.
+# browser-supplied content type (absent in the loader path anyway). Legacy
+# Office files (.doc/.ppt) need a second step: their magic bytes only say
+# "OLE container", and Marcel keeps the magic type because its hierarchy
+# roots msword/ms-powerpoint under x-tika-msoffice, not x-ole-storage — so
+# for those ambiguous container types the filename decides.
 class IngestDispatch < ApplicationService
   CONVERTIBLE_MIME_TYPES = %w[
     application/msword
@@ -28,6 +30,11 @@ class IngestDispatch < ApplicationService
     application/vnd.ms-powerpoint
     application/vnd.openxmlformats-officedocument.presentationml.presentation
     application/vnd.openxmlformats-officedocument.presentationml.slideshow
+  ].freeze
+
+  OLE_CONTAINER_TYPES = %w[
+    application/x-ole-storage
+    application/x-tika-msoffice
   ].freeze
 
   def initialize(work_id:, staged_path:, original_filename:, idempotency_key:)
@@ -49,7 +56,10 @@ class IngestDispatch < ApplicationService
   private
 
     def mime_type
-      @mime_type ||= Marcel::MimeType.for(Pathname.new(@staged_path), name: @original_filename).to_s
+      @mime_type ||= begin
+        sniffed = Marcel::MimeType.for(Pathname.new(@staged_path), name: @original_filename).to_s
+        OLE_CONTAINER_TYPES.include?(sniffed) ? Marcel::MimeType.for(name: @original_filename).to_s : sniffed
+      end
     end
 
     # Derived (uuid_v5), not minted, so the rendition Blob converges on the
