@@ -147,15 +147,15 @@ class WorksController < ApplicationController
       breadcrumbs(params[:id])
     end
 
-    # TODO: add support for pdf/word thumbnails — only images get IIIF derivatives today.
-    # No derivative_widths here: deposits get thumbnails only at upload time.
-    # Small/medium/large are opt-in download renditions chosen on the metadata
-    # page's checkbox/slider section, which arrives post-hoc via
-    # DepositDerivativesJob (see #process_derivative_widths) — not through
-    # this call.
+    # Per-type enrichment routing (thumbnails, PDF renditions) lives in
+    # IngestDispatch, shared with the XML loader. No derivative_widths from
+    # this path: small/medium/large are opt-in download renditions chosen on
+    # the metadata page's checkbox/slider section, which arrives post-hoc via
+    # DepositDerivativesJob (see #process_derivative_widths).
     def enqueue_ingest_jobs(file, staged_path)
-      IiifAssetsJob.perform_later(@work.id, staged_path) if file.content_type.to_s.start_with?('image/')
-      ContentCreationJob.perform_later(@work.id, staged_path, file.original_filename, SecureRandom.uuid)
+      IngestDispatch.call(work_id: @work.id, staged_path: staged_path,
+                          original_filename: file.original_filename,
+                          idempotency_key: SecureRandom.uuid)
     end
 
     def reject_if_in_progress

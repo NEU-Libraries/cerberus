@@ -10,8 +10,9 @@ require 'tempfile'
 #   resource id), so we replace the existing Work's MODS via Work.update.
 # - create: the row carries a File Name and no identifier, so we mint a new
 #   Work seeded with the bundled MODS, stage the content file, and hand off to
-#   ContentCreationJob (+ IiifAssetsJob for images) — the same pipeline a
-#   single-file deposit and the IPTC loader use.
+#   IngestDispatch (ContentCreationJob plus per-type enrichment: thumbnails
+#   for images/PDFs, PDF renditions for Word/PowerPoint) — the same pipeline
+#   a single-file deposit uses.
 #
 # Idempotent + retryable, mirroring IptcIngestJob: permanent problems (missing
 # MODS, invalid MODS, missing content, bad embargo) finalize the row :failed
@@ -121,12 +122,8 @@ class XmlIngestJob < ApplicationJob
     end
 
     def enqueue_content_jobs(work_pid, staged_path, file_name, idempotency_key)
-      IiifAssetsJob.perform_later(work_pid, staged_path) if image?(staged_path)
-      ContentCreationJob.perform_later(work_pid, staged_path, file_name, idempotency_key)
-    end
-
-    def image?(path)
-      Marcel::MimeType.for(Pathname.new(path)).to_s.start_with?('image/')
+      IngestDispatch.call(work_id: work_pid, staged_path: staged_path,
+                          original_filename: file_name, idempotency_key: idempotency_key)
     end
 
     # Embargo applies in either mode when the row opts in. A bad/missing date
