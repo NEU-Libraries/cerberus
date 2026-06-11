@@ -32,6 +32,7 @@ RSpec.describe XmlIngestJob, type: :job do
     allow(Marcel::MimeType).to receive(:for).and_return('image/tiff')
     allow(ContentCreationJob).to receive(:perform_later)
     allow(IiifAssetsJob).to receive(:perform_later)
+    allow(PdfRenditionJob).to receive(:perform_later)
   end
 
   describe 'update mode (row carries an identifier)' do
@@ -76,10 +77,27 @@ RSpec.describe XmlIngestJob, type: :job do
       expect(IiifAssetsJob).to have_received(:perform_later).with('w-new', File.join(uploads_root, 'w-new', 'pic.tif'))
     end
 
-    it 'skips IiifAssetsJob for non-image content' do
+    it 'routes PDF content to IiifAssetsJob for first-page thumbnails' do
       allow(Marcel::MimeType).to receive(:for).and_return('application/pdf')
       described_class.new.perform(ingest.id, create_row)
+      expect(IiifAssetsJob).to have_received(:perform_later).with('w-new', File.join(uploads_root, 'w-new', 'pic.tif'))
+      expect(ContentCreationJob).to have_received(:perform_later)
+    end
+
+    it 'routes Word content to PdfRenditionJob with a rendition key derived from the row key' do
+      allow(Marcel::MimeType).to receive(:for).and_return('application/msword')
+      rendition_key = Digest::UUID.uuid_v5(Digest::UUID::URL_NAMESPACE, 'cerberus:rendition:idem-1')
+      described_class.new.perform(ingest.id, create_row)
+      expect(PdfRenditionJob).to have_received(:perform_later)
+        .with('w-new', File.join(uploads_root, 'w-new', 'pic.tif'), rendition_key)
       expect(IiifAssetsJob).not_to have_received(:perform_later)
+    end
+
+    it 'skips enrichment jobs for unenriched content types' do
+      allow(Marcel::MimeType).to receive(:for).and_return('text/plain')
+      described_class.new.perform(ingest.id, create_row)
+      expect(IiifAssetsJob).not_to have_received(:perform_later)
+      expect(PdfRenditionJob).not_to have_received(:perform_later)
       expect(ContentCreationJob).to have_received(:perform_later)
     end
 

@@ -3,6 +3,8 @@
 require 'rails_helper'
 
 RSpec.describe IiifAssetsJob, type: :job do
+  include ActiveJob::TestHelper
+
   let(:work_id) { 'w-123' }
   let(:tmp) { Dir.mktmpdir }
   let(:source_path) { File.join(tmp, 'image.png') }
@@ -48,6 +50,19 @@ RSpec.describe IiifAssetsJob, type: :job do
     expect(MasterJp2).not_to have_received(:call)
     expect(ThumbnailCreationJob).not_to have_received(:perform_now)
     expect(DerivativeCreationJob).not_to have_received(:perform_now)
+  end
+
+  it 'discards with a warning when vips cannot read the source (broken/encrypted PDF)' do
+    allow(AtlasRb::Work).to receive(:find).with(work_id).and_return(AtlasRb::Mash.new(thumbnail: nil))
+    allow(MasterJp2).to receive(:call).and_raise(Vips::Error, 'unsupported file format')
+    allow(Rails.logger).to receive(:warn)
+
+    expect do
+      perform_enqueued_jobs { described_class.perform_later(work_id, source_path) }
+    end.not_to raise_error
+
+    expect(Rails.logger).to have_received(:warn).with(/thumbnails skipped/)
+    expect(ThumbnailCreationJob).not_to have_received(:perform_now)
   end
 
   it 'noops when the staged file is missing' do

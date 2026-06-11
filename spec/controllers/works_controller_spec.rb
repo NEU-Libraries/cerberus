@@ -81,12 +81,33 @@ describe WorksController do
       expect(subject).to redirect_to action: :metadata, id: assigns(:work).id
     end
 
-    it 'does not enqueue the IIIF-assets job for non-image uploads' do
+    it 'does not enqueue any enrichment job for unenriched uploads' do
       expect do
         post :create, params: { binary:    fixture_file_upload('plain.txt', 'text/plain'),
                                 parent_id: collection.id }
       end.to have_enqueued_job(ContentCreationJob)
         .with(anything, anything, 'plain.txt', a_string_matching(uuid_re))
+        .and not_have_enqueued_job(IiifAssetsJob)
+        .and not_have_enqueued_job(PdfRenditionJob)
+    end
+
+    it 'routes PDF uploads to IiifAssetsJob for first-page thumbnails' do
+      expect do
+        post :create, params: { binary:    fixture_file_upload('example.pdf', 'application/pdf'),
+                                parent_id: collection.id }
+      end.to have_enqueued_job(IiifAssetsJob)
+        .and have_enqueued_job(ContentCreationJob)
+        .and not_have_enqueued_job(PdfRenditionJob)
+    end
+
+    it 'routes Word uploads to PdfRenditionJob with a derived rendition key' do
+      docx_mime = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      expect do
+        post :create, params: { binary:    fixture_file_upload('example.docx', docx_mime),
+                                parent_id: collection.id }
+      end.to have_enqueued_job(PdfRenditionJob)
+        .with(anything, anything, a_string_matching(uuid_re))
+        .and have_enqueued_job(ContentCreationJob)
         .and not_have_enqueued_job(IiifAssetsJob)
     end
 
