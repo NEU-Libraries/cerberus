@@ -1,3 +1,4 @@
+- ingests = report_ingests(load_report, loader)
 .admin-registry.my-3{data: { controller: 'load-poll', 'load-poll-terminal-value' => load_report.terminal?.to_s, 'load-poll-url-value' => loader_load_path(loader, load_report) }}
   %header.admin-registry__head
     %span.admin-registry__title
@@ -44,12 +45,12 @@
           %span.ingest-summary__count= load_report.total_ingests
           %span.ingest-summary__label Total
         - %i[completed pending processing completed_with_warnings failed].each do |status|
-          - count = load_report.iptc_ingests.where(status: status).count
+          - count = ingests.where(status: status).count
           .ingest-summary__tile{class: "ingest-summary__tile--#{status}"}
             %span.ingest-summary__count= count
             %span.ingest-summary__label= status.to_s.humanize
 
-  - if load_report.iptc_ingests.any?
+  - if ingests.any?
     .table-responsive
       %table.table.table-borderless.admin-registry-table.ingest-table
         %thead
@@ -60,7 +61,7 @@
             %th{scope: 'col'}
         %tbody
           = render partial: 'ingest_row',
-                   collection: load_report.iptc_ingests.order(:source_filename),
+                   collection: ingests.order(report_ingest_order(loader)),
                    as: :ingest
   - elsif load_report.in_progress?
     .admin-registry__empty
@@ -68,6 +69,22 @@
       %p.mb-1.fw-semibold.text-body Extraction in progress
       %p.mb-0.small.text-muted
         The archive is being unpacked. This page updates automatically as files are processed.
+  - elsif loader.multipage?
+    .admin-registry__empty
+      %i.fa-solid.fa-circle-question.admin-registry__empty-icon{'aria-hidden' => 'true'}
+      %p.mb-1.fw-semibold.text-body No pages ingested
+      %p.mb-0.small.text-muted
+        This batch finished without producing any page entries. Check that the
+        %code.admin-registry-table__id manifest.xlsx
+        has a Sequence 0 MODS row and pages numbered 1 and up.
+  - elsif loader.xml?
+    .admin-registry__empty
+      %i.fa-solid.fa-circle-question.admin-registry__empty-icon{'aria-hidden' => 'true'}
+      %p.mb-1.fw-semibold.text-body No rows ingested
+      %p.mb-0.small.text-muted
+        This batch finished without producing any entries. Check that the
+        %code.admin-registry-table__id manifest.xlsx
+        lists rows with a PID/NOID (update) or a File Name (create).
   - else
     .admin-registry__empty
       %i.fa-solid.fa-circle-question.admin-registry__empty-icon{'aria-hidden' => 'true'}

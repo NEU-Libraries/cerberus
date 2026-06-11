@@ -41,6 +41,8 @@
 
 .env
 
+/docker-compose.local.yml
+
 CLAUDE.md
 /.playwright-mcp/
 /docs/

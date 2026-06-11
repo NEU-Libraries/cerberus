@@ -48,7 +48,15 @@ Rails.application.routes.draw do
     end
   end
   resources :loaders, only: [], param: :slug do
-    resources :loads, only: [:index, :show, :new, :create, :destroy]
+    resources :loads, only: [:index, :show, :new, :create, :destroy] do
+      member { patch :confirm }
+    end
+  end
+
+  # User Inbox — in-app messaging. destroy is a per-recipient soft-dismiss,
+  # not a row delete; recipients is the compose typeahead's JSON source.
+  resources :messages, path: 'inbox', only: [:index, :show, :new, :create, :destroy] do
+    collection { get :recipients }
   end
 
   namespace :admin do
@@ -79,6 +87,12 @@ Rails.application.routes.draw do
   end
 
   get '/downloads/:id', to: 'downloads#show', as: :download
+
+  # history — deep diff views reached from the audit-log "View" button.
+  # Type-agnostic (the data layer hits Atlas's /resources/:id/* endpoints), so
+  # a single flat route serves Work / Collection / Community alike.
+  get '/resources/:id/rights_history', to: 'histories#rights', as: :rights_history
+  get '/resources/:id/mods_history',   to: 'histories#mods',   as: :mods_history
 
   # xml
   get '/xml/editor/:id' => 'xml#editor', as: 'xml_editor'

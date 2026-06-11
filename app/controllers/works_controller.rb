@@ -38,13 +38,18 @@ class WorksController < ApplicationController
   def edit
     @work = AtlasRb::Work.find(params[:id])
     form_preparation(@permissions)
+    load_descriptive!('Work')
+    load_advanced!('Work')
+    breadcrumbs(params[:id], editing: true)
   end
 
   def create
     file = params[:binary]
     parent = AtlasRb::Collection.find(params[:parent_id])
     @work = AtlasRb::Work.create(parent.id, depositor: deposit_attribution(parent))
-    AtlasRb::Work.metadata(@work.id, { title: file.original_filename })
+    # Seed the initial title via the structure-safe MODS merge (raw mods_xml=),
+    # not the flat plain_title= setter — see save_descriptive!.
+    save_descriptive!('Work', @work.id, title: file.original_filename, description: nil)
 
     staged_path = stage_upload(file, @work.id)
     enqueue_ingest_jobs(file, staged_path)
@@ -52,25 +57,62 @@ class WorksController < ApplicationController
     redirect_to metadata_work_path(@work.id), notice: 'File uploaded — please review the metadata.'
   end
 
+  # Metadata + Permissions tabs are separate forms that both PATCH here with
+  # disjoint fields; descriptive edits are merged into the existing MODS in place
+  # (MODSMerge) so curated title structure is never flattened. Title + at least
+  # one keyword are required.
   def update
-    AtlasRb::Work.metadata(params[:id], work_params)
-    redirect_to work_path(params[:id])
+    handle_metadata_update(klass: 'Work', resource_key: :work, keywords: true)
   end
 
   def metadata
     @work = AtlasRb::Work.find(params[:id])
+    # Gates the opt-in Image Derivatives section (nil for non-image deposits).
+    @image_probe = StagedImageProbe.call(work_id: params[:id])
     form_preparation(@permissions)
+    load_descriptive!('Work')
   end
 
   def update_metadata
-    AtlasRb::Work.metadata(params[:id], work_params)
-    redirect_to work_path(params[:id])
+    handle_metadata_update(klass: 'Work', resource_key: :work, keywords: true)
+    # AFTER the descriptive save, deliberately: with a live worker,
+    # DepositDerivativesJob can execute within this same request, and its
+    # Delegate PATCH bumps the Work's optimistic lock — enqueueing first
+    # raced save_descriptive! into AtlasRb::StaleResourceError (seen live;
+    # invisible to specs, whose test adapter never runs the job inline).
+    process_derivative_widths
   end
 
   private
 
-    def work_params
-      resource_params(:work)
+    # Server backstop for the metadata page's opt-in download sizes. The
+    # Stimulus controller is the primary enforcement, so a violation here
+    # means JS-off or tampering — in that case the metadata still saves and
+    # only the optional derivatives are skipped, with the reason flashed
+    # (never bounce the whole form over decoration). Known interplay: if
+    # descriptive validation also fails, apply_descriptive overwrites this
+    # flash (last writer wins) — acceptable; valid derivatives enqueued
+    # here are independent of the title and harmless.
+    def process_derivative_widths
+      raw = params[:derivative_widths]
+      return unless raw.is_a?(ActionController::Parameters)
+
+      probe = StagedImageProbe.call(work_id: params[:id])
+      return flash[:alert] = 'Download sizes were skipped: no staged image was found for this work.' if probe.nil?
+
+      enqueue_valid_widths(raw, probe)
+    end
+
+    def enqueue_valid_widths(raw, probe)
+      result = DerivativeWidths.call(raw:          raw.permit(:small, :medium, :large).to_h,
+                                     longest_edge: probe.longest_edge)
+      unless result.valid?
+        return flash[:alert] = "Download sizes were not generated: #{result.error} " \
+                               'Your other changes were saved — revisit this page to configure download sizes.'
+      end
+      return if result.widths.empty?
+
+      DepositDerivativesJob.perform_later(params[:id], result.widths)
     end
 
     # Resolve the depositor NUID for a new Work.
@@ -105,10 +147,15 @@ class WorksController < ApplicationController
       breadcrumbs(params[:id])
     end
 
-    # TODO: add support for pdf/word thumbnails — only images get IIIF derivatives today.
+    # Per-type enrichment routing (thumbnails, PDF renditions) lives in
+    # IngestDispatch, shared with the XML loader. No derivative_widths from
+    # this path: small/medium/large are opt-in download renditions chosen on
+    # the metadata page's checkbox/slider section, which arrives post-hoc via
+    # DepositDerivativesJob (see #process_derivative_widths).
     def enqueue_ingest_jobs(file, staged_path)
-      IiifAssetsJob.perform_later(@work.id, staged_path) if file.content_type.to_s.start_with?('image/')
-      ContentCreationJob.perform_later(@work.id, staged_path, file.original_filename, SecureRandom.uuid)
+      IngestDispatch.call(work_id: @work.id, staged_path: staged_path,
+                          original_filename: file.original_filename,
+                          idempotency_key: SecureRandom.uuid)
     end
 
     def reject_if_in_progress

@@ -11,13 +11,30 @@ module LoadsHelper
     'processing'              => 'fa-arrows-rotate',
     'completed'               => 'fa-circle-check',
     'completed_with_warnings' => 'fa-circle-exclamation',
-    'failed'                  => 'fa-circle-xmark'
+    'failed'                  => 'fa-circle-xmark',
+    'previewing'              => 'fa-eye'
   }.freeze
 
   def ingest_status_icon(status)
     STATUS_ICONS.fetch(status.to_s, 'fa-circle')
   end
   alias load_report_status_icon ingest_status_icon
+
+  # The per-row ingest relation for a report under a given loader. Each
+  # loader kind has its own ingest table (iptc_ingests / xml_ingests /
+  # multipage_ingests); the report-level counters tally all of them, but
+  # the row table shows the one this loader produced.
+  def report_ingests(load_report, loader)
+    return load_report.multipage_ingests if loader.multipage?
+
+    loader.xml? ? load_report.xml_ingests : load_report.iptc_ingests
+  end
+
+  # Multipage rows are pages of one Work — show them in page order, not
+  # filename order (nulls-first keeps a structural-failure row on top).
+  def report_ingest_order(loader)
+    loader.multipage? ? :sequence : :source_filename
+  end
 
   def load_report_progress_summary(load_report)
     total = load_report.total_ingests

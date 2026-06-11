@@ -21,6 +21,14 @@ describe CommunitiesController do
       expect(CGI.unescapeHTML(response.body)).to include(community.title)
     end
 
+    it 'renders breadcrumbs: an active "Edit Community" crumb, the title linking back to show, no Add affordance' do
+      get :edit, params: { id: community.id }
+      expect(response.body).to include('aria-label="breadcrumb"')
+      expect(response.body).to include('Edit Community') # you-are-here crumb
+      expect(response.body).to include(%(href="#{community_path(community.id)}")) # title links to show
+      expect(response.body).not_to include('breadcrumb-add') # Add dropdown suppressed on edit
+    end
+
     context 'audit history tab' do
       let(:history_envelope) do
         AtlasRb::Mash.new('resource_id' => community.id, 'events' => [])
@@ -175,6 +183,23 @@ describe CommunitiesController do
       post :tombstone, params: { id: community.id }
       expect(AtlasRb::Community).to have_received(:tombstone).with(community.id)
       expect(subject).to redirect_to(root_path)
+    end
+  end
+
+  describe 'create' do
+    let(:user) { User.new(email: 'creator@example.com', nuid: '000000004', groups: ['editors']) }
+
+    before { sign_in user }
+
+    it 'seeds the new community title + description via the structure-safe MODS merge (not plain_title=)' do
+      post :create, params: { community: { title: 'BrandNewCommunity', description: 'CommunityAbstract' } }
+
+      created_id = response.location.split('/').last
+      created = AtlasRb::Community.find(created_id)
+      expect(created.title).to eq('BrandNewCommunity')
+      expect(created.description).to include('CommunityAbstract')
+    ensure
+      AtlasRb::Community.tombstone(created_id) if created_id
     end
   end
 end

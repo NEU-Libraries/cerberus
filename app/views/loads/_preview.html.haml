@@ -1,0 +1,85 @@
+/ XML loader preview-then-confirm. Renders XmlPreview::Result for the first
+/ manifest row so the librarian can confirm before any Work is touched.
+/ Reuses the .admin-registry / .ingest-status / .load-report-overview chrome
+/ (same register as _report and the audit-history ledger) — no bespoke CSS.
+- mode_update = preview.mode == :update
+.admin-registry.my-3
+  %header.admin-registry__head
+    %span.admin-registry__title
+      %i.fa-solid.fa-eye{'aria-hidden' => 'true'}
+      Preview
+      %span.text-muted.fw-normal= load_report.source_filename
+    %span.admin-registry__subtitle
+      %i.fa-solid.fa-folder-tree{'aria-hidden' => 'true'}
+      = link_to loader.display_name, loader_loads_path(loader), class: 'text-decoration-none'
+
+  .admin-registry__body
+    - if preview.blocked?
+      .alert.alert-danger.d-flex.gap-2.mb-0
+        %i.fa-solid.fa-circle-exclamation.mt-1{'aria-hidden' => 'true'}
+        %div
+          %p.fw-semibold.mb-1 This archive can't be processed.
+          %ul.mb-0.small
+            - preview.structural_errors.each do |err|
+              %li= err
+    - else
+      %p.text-muted.small.mb-3
+        Showing the first manifest row. Confirming runs every row; any that fail are reported per-row on the next screen.
+
+      .load-report-overview
+        .load-report-overview__meta
+          %span.load-report-overview__label Mode
+          %span.load-report-overview__value
+            / Reuse the status-chip vocabulary, toned navy for update / teal for
+            / create via the same --ingest-tone custom property the chips use.
+            %span.ingest-status{style: "--ingest-tone: #{mode_update ? '#2666a6' : '#18bc9c'}"}
+              %i.fa-solid{class: (mode_update ? 'fa-pen' : 'fa-plus'), 'aria-hidden' => 'true'}
+              = mode_update ? 'Update existing' : 'Create new'
+
+          %span.load-report-overview__label= mode_update ? 'Identifier (NOID)' : 'Content file'
+          %span.load-report-overview__value
+            %code.admin-registry-table__id= mode_update ? preview.first_row.identifier : preview.first_row.file_name
+
+          %span.load-report-overview__label MODS file
+          %span.load-report-overview__value
+            %code.admin-registry-table__id= preview.first_row.xml_path
+
+          - if preview.first_row.embargoed?
+            %span.load-report-overview__label Embargo
+            %span.load-report-overview__value= preview.first_row.embargo_date.presence || '(no release date)'
+
+      - if preview.validation_errors.any?
+        .ingest-detail.ingest-detail--failed.mt-3
+          %p.fw-semibold.mb-1
+            %i.fa-solid.fa-triangle-exclamation.me-1{'aria-hidden' => 'true'}
+            The first row's MODS has problems — this row will fail during the run:
+          %ul
+            - preview.validation_errors.each do |err|
+              %li= err
+
+      - if preview.mods_xml.present?
+        / First-row MODS, two-up: the raw document (left) beside Atlas's
+        / rendered HTML view (right) — same raw-vs-rendered pairing as the
+        / XML editor. The rendered column appears once the MODS validates.
+        .row.g-3.mt-2
+          .col-lg-6
+            %span.load-report-overview__label Raw MODS
+            %pre.border.border-1.rounded-3.bg-light.p-3.small.mt-1.mb-0{style: 'max-height: 26rem; overflow: auto;'}= preview.mods_xml
+          .col-lg-6
+            %span.load-report-overview__label Rendered
+            - if preview.decorated_html.present?
+              .border.border-1.rounded-3.bg-white.p-3.mt-1.mb-0{style: 'max-height: 26rem; overflow: auto;'}
+                = preview.decorated_html.html_safe
+            - else
+              .border.border-1.rounded-3.bg-light.p-3.mt-1.mb-0.text-muted.small
+                %i.fa-solid.fa-eye-slash.me-1{'aria-hidden' => 'true'}
+                The rendered view appears once the MODS validates.
+
+    .d-flex.gap-2.align-items-center.mt-4
+      - unless preview.blocked?
+        = button_to confirm_loader_load_path(loader, load_report), method: :patch, class: 'btn btn-primary' do
+          %i.fa-solid.fa-play.me-1{'aria-hidden' => 'true'}
+          Confirm &amp; run
+      = button_to loader_load_path(loader, load_report), method: :delete, class: 'btn btn-outline-danger', data: { turbo_confirm: 'Discard this upload? The staged archive will be removed.' } do
+        %i.fa-solid.fa-trash-can.me-1{'aria-hidden' => 'true'}
+        Discard

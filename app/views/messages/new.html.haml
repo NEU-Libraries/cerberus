@@ -1,0 +1,53 @@
+- content_for :page_title, 'New message'
+
+.well.p-3.my-3.rounded-3.inbox-compose
+  %h1.h4.mb-3 New message
+  = form_with model: @message, url: messages_path,
+    data: { controller: 'recipient-picker', recipient_picker_url_value: recipients_messages_path,
+            recipient_picker_groups_value: @composable_groups.to_json } do |f|
+    - if @message.errors.any?
+      .alert.alert-danger
+        %ul.mb-0
+          - @message.errors.full_messages.each do |error_message|
+            %li= error_message
+
+    - group_mode = @message.recipient_group.present?
+    %fieldset.mb-3
+      %legend.form-label.fs-6 To
+      .form-check.form-check-inline
+        %input#recipient_mode_person.form-check-input{type: 'radio', name: 'recipient_mode', value: 'person',
+          checked: !group_mode, data: { action: 'recipient-picker#switchMode' }}
+        %label.form-check-label{for: 'recipient_mode_person'} A person
+      .form-check.form-check-inline
+        %input#recipient_mode_group.form-check-input{type: 'radio', name: 'recipient_mode', value: 'group',
+          checked: group_mode, data: { action: 'recipient-picker#switchMode' }}
+        %label.form-check-label{for: 'recipient_mode_group'} A group
+
+    .mb-3.position-relative{data: { recipient_picker_target: 'personPane' }, hidden: group_mode}
+      %label.form-label{for: 'recipient_query'} Recipient
+      %input#recipient_query.form-control{type: 'text', placeholder: 'Start typing a name…',
+        autocomplete: 'off', value: @message.recipient_nuid,
+        data: { recipient_picker_target: 'query', action: 'input->recipient-picker#search' }}
+      = f.hidden_field :recipient_nuid, data: { recipient_picker_target: 'nuid' }
+      .list-group.inbox-typeahead{hidden: true, data: { recipient_picker_target: 'results' }}
+
+    .mb-3.position-relative{data: { recipient_picker_target: 'groupPane' }, hidden: !group_mode}
+      %label.form-label{for: 'group_query'} Group
+      %input#group_query.form-control{type: 'text', placeholder: 'Start typing a group name…',
+        autocomplete: 'off', value: @message.recipient_group,
+        data: { recipient_picker_target: 'groupQuery', action: 'input->recipient-picker#searchGroups' }}
+      = f.hidden_field :recipient_group, data: { recipient_picker_target: 'group' }
+      .list-group.inbox-typeahead{hidden: true, data: { recipient_picker_target: 'groupResults' }}
+      %small.form-text.text-muted
+        Everyone in this Grouper group will see the message. You can address the groups you belong to.
+
+    .mb-3
+      = f.label :subject, class: 'form-label'
+      = f.text_field :subject, class: 'form-control', required: true
+    .mb-3
+      = f.label :body, 'Message', class: 'form-label'
+      = f.text_area :body, class: 'form-control', rows: 6
+
+    .d-flex.gap-2
+      = f.submit 'Send', class: 'btn btn-success'
+      = link_to 'Cancel', messages_path, class: 'btn btn-warning'

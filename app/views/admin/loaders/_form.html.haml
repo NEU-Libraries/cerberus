@@ -19,13 +19,20 @@
       = f.text_field :slug, class: 'form-control admin-registry-form__input--id', placeholder: 'marcom', autocomplete: 'off'
       .admin-registry-form__hint
         Lowercase identifier — letters, digits, dashes, underscores. Used in URLs (e.g. <code class="admin-registry-table__id">/loaders/marcom/loads</code>).
-    .mb-0
+    .mb-3
       = f.label :display_name, class: 'admin-registry-form__label' do
         %i.fa-solid.fa-id-card{'aria-hidden' => 'true'}
         Display name
       = f.text_field :display_name, class: 'form-control', placeholder: 'Marketing and Communications'
       .admin-registry-form__hint
         Human-readable team or program name as it should appear in the loader UI.
+    .mb-0
+      = f.label :kind, class: 'admin-registry-form__label' do
+        %i.fa-solid.fa-diagram-project{'aria-hidden' => 'true'}
+        Loader type
+      = f.select :kind, Loader.kinds.keys.map { |k| [k.upcase, k] }, {}, class: 'form-select'
+      .admin-registry-form__hint
+        <strong>IPTC</strong> ingests image archives and builds MODS from embedded IPTC tags. <strong>XML</strong> ingests a <code class="admin-registry-table__id">manifest.xlsx</code> plus per-row MODS files to update existing objects or create new ones. <strong>MULTIPAGE</strong> turns one archive (manifest + MODS + ordered page images) into a single Work with ordered pages.
 
   .admin-registry-form__section
     %h3.admin-registry-form__section-title

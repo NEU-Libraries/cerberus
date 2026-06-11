@@ -1,25 +1,64 @@
 # frozen_string_literal: true
 
 # Shared formatting for audit-event rows. Each per-action partial
-# (`_event_create.html.haml`, etc.) renders the same supporting cells
-# (timestamp / actor / on-behalf-of) via these helpers and varies only
-# the central "action" chip via the row's audit-event--<tone> class.
+# (`_event_create.html.haml`, etc.) renders one row of three cells —
+# when / action / who — via these helpers, and varies only the row's
+# audit-event--<tone> class. The action cell carries both the tone chip
+# and (inline, right of it) the quiet change_type + payload summary.
 # Adding a new action type is still a new file, not a case-statement
 # edit — these helpers are the scaffolding around that variation, not
 # the variation itself.
+# rubocop:disable Metrics/ModuleLength
+# (Cohesive view-formatting for one component; length is mostly the rationale
+# comments that make the chip / pill / summary choices legible.)
 module AuditEventsHelper
   # Action descriptor — colour token + Font Awesome icon + display label.
   # Used by the action cell on every event row. Unknown actions fall
   # through to a neutral "generic" descriptor so a piece-5 action type
   # the helper hasn't been taught about still renders sensibly.
   ACTION_DESCRIPTORS = {
-    'create'    => { tone: 'create',    icon: 'fa-circle-plus',   label: 'Created' },
-    'update'    => { tone: 'update',    icon: 'fa-pen',           label: 'Updated' },
-    'tombstone' => { tone: 'tombstone', icon: 'fa-trash-can',     label: 'Tombstoned' },
-    'restore'   => { tone: 'restore',   icon: 'fa-rotate-left',   label: 'Restored' }
+    'create'        => { tone: 'create',    icon: 'fa-circle-plus',  label: 'Created' },
+    'update'        => { tone: 'update',    icon: 'fa-pen',          label: 'Updated' },
+    'tombstone'     => { tone: 'tombstone', icon: 'fa-trash-can',    label: 'Tombstoned' },
+    'restore'       => { tone: 'restore',   icon: 'fa-rotate-left',  label: 'Restored' },
+    'reparent'      => { tone: 'reparent',  icon: 'fa-folder-tree',  label: 'Reparented' },
+    'link_member'   => { tone: 'link',      icon: 'fa-link',         label: 'Linked' },
+    'unlink_member' => { tone: 'unlink',    icon: 'fa-link-slash',   label: 'Unlinked' }
   }.freeze
 
   GENERIC_ACTION = { tone: 'generic', icon: 'fa-circle-info', label: nil }.freeze
+
+  # change_type display labels. Surfaced as a quiet secondary qualifier on
+  # rows whose action verb is ambiguous on its own — chiefly `update`, where
+  # the same verb covers both a metadata edit and a permissions change. The
+  # action chip stays the primary signal; this rides alongside it, muted.
+  CHANGE_TYPE_LABELS = {
+    'metadata'    => 'Metadata',
+    'permissions' => 'Permissions',
+    'structural'  => 'Structural',
+    'lifecycle'   => 'Lifecycle',
+    'session'     => 'Session'
+  }.freeze
+
+  # ACL grant slots diffed for a permissions-change summary; mirrors Atlas's
+  # AUDITED_ACL_KEYS so the before/after snapshots line up key-for-key.
+  ACL_DIFF_KEYS = %w[read edit edit_users].freeze
+
+  # Permission audit actions that carry a viewable before/after ACL snapshot:
+  # the initial grant at creation (`create`, emitted by Atlas's service objects)
+  # and every later ACL change (`update`). Atlas suppresses no-op permission
+  # writes, so each is a real transition worth a Rights-diff page. Shared by the
+  # audit-log "View" link and HistoriesController#permission_events.
+  PERMISSION_VIEW_ACTIONS = %w[create update].freeze
+
+  # Human labels for the ACL slots, used by the dedicated Rights-history diff
+  # page (the expanded two-column before/after view). The audit-log one-liner
+  # uses the bare key; the full page reads better with prose labels.
+  ACL_LEVEL_LABELS = {
+    'read'       => 'Read',
+    'edit'       => 'Edit',
+    'edit_users' => 'Edit users'
+  }.freeze
 
   def audit_event_action(event_action)
     ACTION_DESCRIPTORS.fetch(event_action.to_s) do
@@ -66,4 +105,196 @@ module AuditEventsHelper
                 ])
     end
   end
+
+  # change_type category — a quiet uppercase micro-label (NOT a chip; a second
+  # box would compete with the action chip). Returns nil when change_type is
+  # blank so callers can render it unconditionally. The `--<change_type>`
+  # modifier stays as a semantic/styling hook — notably permissions, the
+  # eventual Permission-History link target (see _event_update.html.haml).
+  def audit_event_change_type_badge(change_type)
+    change_type = change_type.to_s
+    return if change_type.blank?
+
+    label = CHANGE_TYPE_LABELS.fetch(change_type) { change_type.humanize }
+    content_tag(:span, label,
+                class: "audit-event__change-type audit-event__change-type--#{change_type}")
+  end
+
+  # The DETAIL column cell: the change_type category label + payload summary,
+  # in their own column so they left-align consistently across rows (trailing
+  # a variable-width action chip, they wouldn't). A muted em-dash holds the
+  # column for the rare event that carries no change_type or payload.
+  def audit_event_detail_cell(event)
+    audit_event_detail_line(event) ||
+      content_tag(:span, '—', class: 'audit-event__detail-empty', 'aria-hidden': 'true')
+  end
+
+  # The change_type category label + a human summary of the event's payload
+  # (changed fields, an ACL diff, a move target). Returns nil when there's
+  # nothing to add.
+  def audit_event_detail_line(event)
+    badge   = audit_event_change_type_badge(event['change_type'])
+    summary = audit_event_payload_summary(event)
+    return if badge.nil? && summary.nil?
+
+    safe_join([badge, summary].compact, ' ')
+  end
+
+  # The WHO cell — actor NUID pill, and (only in the rare proxy / acting-as
+  # case) a muted "for <target>" beneath it. Merges what were two columns:
+  # on-behalf-of is null on the overwhelming majority of rows, so a dedicated
+  # column was pure horizontal tax. Actor + target are the same kind of fact.
+  def audit_event_who(event)
+    actor = audit_event_nuid(event['actor_nuid'])
+    return actor if event['on_behalf_of_nuid'].blank?
+
+    on_behalf = content_tag(:span, class: 'audit-event__on-behalf') do
+      safe_join(['for ', audit_event_nuid(event['on_behalf_of_nuid'])])
+    end
+    content_tag(:div, safe_join([actor, on_behalf]), class: 'audit-event__who')
+  end
+
+  # The per-row "View" affordance in the audit log — the bridge from the
+  # unified ledger to a dedicated diff page. On a permissions row (the initial
+  # grant or a later change) it links to the Rights-history diff page; on a
+  # MODS-document `update` row, to the MODS-history diff page — deep-linked to
+  # this event so the page lands on (and scrolls to) the right entry. Every
+  # other row returns nil, so the column renders an empty cell and stays
+  # aligned. This is the v2 successor to v1's per-object Rights / MODS History
+  # pages.
+  def audit_event_view_cell(event, resource_id)
+    path = audit_event_view_path(event, resource_id)
+    return if path.nil?
+
+    link_to(path, class: 'btn btn-sm btn-outline-secondary audit-event__view-btn') do
+      safe_join([
+                  content_tag(:i, '', class: 'fa-solid fa-magnifying-glass', 'aria-hidden': 'true'),
+                  'View'
+                ], ' ')
+    end
+  end
+
+  # Where a row's "View" button points, or nil if the row has no deep view.
+  # Permissions → Rights diff (on `create` grant + `update` change rows);
+  # metadata-from-a-MODS-document → MODS diff (`update` rows only). Every other
+  # row returns nil.
+  def audit_event_view_path(event, resource_id)
+    case event['change_type']
+    when 'permissions'
+      # The initial grant (`create`) and every later ACL change (`update`) both
+      # carry a before/after snapshot, so both link to the Rights diff.
+      return unless PERMISSION_VIEW_ACTIONS.include?(event['action'])
+
+      rights_history_path(resource_id, at: event['occurred_at'], anchor: audit_event_dom_id(event))
+    when 'metadata'
+      # Every metadata update writes a new descMetadata.xml OCFL version, so all
+      # of them get a MODS-diff link: a full MODS upload via mods_xml=
+      # ({ source: 'mods' }) AND a title/description field-patch ({ fields: }),
+      # since Atlas's plain_title= / plain_description= edit the MODS document
+      # and call mods_xml= too (MODSAssignment). The MODS document's create row
+      # has no prior version to diff, so it stays update-only.
+      return unless event['action'] == 'update'
+
+      mods_history_path(resource_id, at: event['occurred_at'])
+    end
+  end
+
+  # <option>s for the MODS-history version picker: "v5 · 2026-05-26 14:02 ·
+  # 000000002", value = the opaque OCFL version id. Actor may be blank.
+  def mods_version_options(versions)
+    Array(versions).map do |version|
+      label = [
+        version['version_id'],
+        mods_version_timestamp(version['created']),
+        version['actor_nuid'].presence
+      ].compact.join(' · ')
+      [label, version['version_id']]
+    end
+  end
+
+  # A DOM-id anchor for an event, derived from its (per-resource unique)
+  # timestamp — lets the "View" deep-link scroll to the exact entry via :target.
+  def audit_event_dom_id(event)
+    "evt-#{event['occurred_at'].to_s.gsub(/[^0-9]/, '')}"
+  end
+
+  # Prose label for an ACL slot on the Rights-history diff page.
+  def acl_level_label(key)
+    ACL_LEVEL_LABELS.fetch(key.to_s) { key.to_s.humanize }
+  end
+
+  # Render one ACL slot's grants as monospace identifier pills (reusing the
+  # audit-log NUID-pill register). `marked` grants get a `state` tint — used to
+  # flag the +added (after column) and −removed (before column) grants in the
+  # two-column diff. Empty slot → a muted em-dash placeholder.
+  def acl_grant_pills(grants, marked: [], state: nil)
+    grants = Array(grants)
+    return content_tag(:span, '—', class: 'rights-diff__empty', 'aria-hidden': 'true') if grants.empty?
+
+    marked = Array(marked)
+    safe_join(grants.map do |grant|
+      classes = ['rights-diff__pill']
+      classes << "rights-diff__pill--#{state}" if state.present? && marked.include?(grant)
+      content_tag(:span, grant, class: classes.join(' '))
+    end, ' ')
+  end
+
+  # Human one-liner derived from the event payload, by action. Returns a muted
+  # span or nil. Shapes mirror what Atlas emits: update → { fields: [...] } |
+  # { source: 'mods' } | { before:, after: } (ACL); reparent → { to: noid };
+  # link/unlink → { collection: noid }. Create / tombstone / restore carry no
+  # payload, so they render the category pill alone.
+  def audit_event_payload_summary(event)
+    text = payload_summary_text(event['action'].to_s, event['payload'] || {})
+    return if text.blank?
+
+    content_tag(:span, text, class: 'audit-event__detail-summary')
+  end
+
+  private
+
+    # Compact "YYYY-MM-DD HH:MM" for a version-picker option; blank for an
+    # absent/unparseable timestamp so the option still reads cleanly.
+    def mods_version_timestamp(created)
+      return if created.blank?
+
+      Time.iso8601(created).strftime('%Y-%m-%d %H:%M')
+    rescue ArgumentError
+      nil
+    end
+
+    def payload_summary_text(action, payload)
+      case action
+      when 'update'        then update_payload_summary(payload)
+      when 'reparent'      then targeted_summary('moved to', payload['to'])
+      when 'link_member'   then targeted_summary('to', payload['collection'])
+      when 'unlink_member' then targeted_summary('from', payload['collection'])
+      end
+    end
+
+    def targeted_summary(prefix, target)
+      "#{prefix} #{target}" if target.present?
+    end
+
+    def update_payload_summary(payload)
+      if payload['fields'].present? then payload['fields'].join(', ')
+      elsif payload['source'].present? then 'MODS document'
+      elsif payload['before'] || payload['after']
+        acl_diff_summary(payload['before'] || {}, payload['after'] || {})
+      end
+    end
+
+    # Per-grant +added / −removed summary across the audited ACL keys, e.g.
+    # "read +public · edit −staff +editors". Empty when nothing actually moved.
+    def acl_diff_summary(before, after)
+      ACL_DIFF_KEYS.filter_map do |key|
+        added   = Array(after[key]) - Array(before[key])
+        removed = Array(before[key]) - Array(after[key])
+        next if added.empty? && removed.empty?
+
+        changes = removed.map { |g| "−#{g}" } + added.map { |g| "+#{g}" }
+        "#{key.tr('_', ' ')} #{changes.join(' ')}"
+      end.join(' · ').presence
+    end
 end
+# rubocop:enable Metrics/ModuleLength

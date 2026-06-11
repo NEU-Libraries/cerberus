@@ -1,0 +1,55 @@
+-# MODS-history diff page — the deep view behind the audit log's "View" button
+-# on MODS-document rows. A version picker over the retained MODS versions plus
+-# a line-based diff of the two chosen versions (Cerberus-side, via ModsDiff).
+-# Only XML is version-recoverable (the JSON access copy is overwritten in
+-# place), so the diff is of canonicalised MODS XML. Archival register reused
+-# from the audit-history card chrome.
+- back_path = send("edit_#{@resource_klass.downcase}_path", @resource_id, anchor: 'history')
+.container.my-4
+  .d-flex.justify-content-between.align-items-baseline.flex-wrap.gap-2.mb-3
+    %div
+      %h3.mb-1 MODS history
+      - if @resource_title.present?
+        %p.text-muted.mb-0= @resource_title
+    = link_to back_path, class: 'btn btn-sm btn-outline-secondary' do
+      %i.fa-solid.fa-arrow-left{'aria-hidden' => 'true'}
+      Back to audit log
+
+  .audit-history
+    %header.audit-history__head
+      %div
+        %span.audit-history__title Descriptive-metadata versions
+        - if @versions.present?
+          %span.audit-history__count
+            %i.fa-solid.fa-clock-rotate-left{'aria-hidden' => 'true'}
+            = pluralize(@versions.size, 'version')
+      %span.audit-history__subtitle Reverse chronological
+
+    - if @versions.blank?
+      .audit-history__empty
+        %i.fa-solid.fa-clock-rotate-left.audit-history__empty-icon{'aria-hidden' => 'true'}
+        %p.mb-1.fw-semibold.text-body No descriptive-metadata versions recorded
+        %p.mb-0.small.text-muted
+          Edits to this resource's MODS document will appear here.
+    - else
+      .mods-diff__picker.p-3
+        = form_with url: mods_history_path(@resource_id), method: :get do |f|
+          .row.g-2.align-items-end
+            .col-auto
+              = f.label :from, 'Compare from', class: 'form-label small mb-1'
+              = f.select :from, mods_version_options(@versions), { selected: @from_id }, class: 'form-select form-select-sm'
+            .col-auto.mods-diff__arrow
+              %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
+            .col-auto
+              = f.label :to, 'to', class: 'form-label small mb-1'
+              = f.select :to, mods_version_options(@versions), { selected: @to_id }, class: 'form-select form-select-sm'
+            .col-auto
+              = f.submit 'Compare', class: 'btn btn-sm btn-success'
+
+      - if @diff
+        .mods-diff__body
+          = @diff.to_s(:html).html_safe
+      - else
+        .p-3.text-muted.small
+          %i.fa-solid.fa-circle-info{'aria-hidden' => 'true'}
+          This is the earliest recorded version — there is nothing earlier to compare it against.

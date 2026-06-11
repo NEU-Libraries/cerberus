@@ -1,0 +1,266 @@
+// ---------------------------------------------------------------------
+// History diff pages (audit-log "View" → Rights / MODS history)
+//
+// The deep views behind the audit log's per-row "View" button. Same
+// archival register as _audit_history: quiet card-shell, monospace
+// identifier pills, tabular numerics, desaturated tones. The add/remove
+// tints deliberately REUSE the audit tone tokens — teal-green for a grant
+// gained (the "create"/"link" family) and mauve for a grant lost (the
+// "unlink" family). Red stays reserved for tombstone, exactly as the
+// audit log treats it, so a permission change never reads as a deletion.
+// Depends on $audit-tone-* from _audit_history (imported just before this).
+// ---------------------------------------------------------------------
+
+// The audit-log "View" cell + button (the entry point, rendered into the
+// audit-event table's trailing column).
+.audit-event__view-col {
+  width: 1%; // shrink-to-fit the button column
+}
+.audit-event__view-cell {
+  text-align: right;
+  white-space: nowrap;
+}
+.audit-event__view-btn {
+  --bs-btn-padding-y: 0.12rem;
+  --bs-btn-padding-x: 0.5rem;
+  --bs-btn-font-size: 0.75rem;
+
+  i {
+    font-size: 0.85em;
+    margin-right: 0.2rem;
+  }
+}
+
+.rights-diff {
+  &__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  &__entry {
+    padding: 0.9rem 1rem;
+    border-bottom: 1px solid $gray-200;
+    scroll-margin-top: 1rem;
+
+    &:last-child {
+      border-bottom: 0;
+    }
+
+    // The deep-linked entry (arrived via the "View" #anchor) gets a quiet
+    // warm wash + a tinted left edge, matching the audit-log hover register.
+    &:target {
+      background-color: #fbf6ec;
+      box-shadow: inset 3px 0 0 $audit-tone-update;
+    }
+  }
+
+  &__entry-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    margin-bottom: 0.6rem;
+  }
+
+  // Provenance caption for the create-time grant — quiet microcopy under the
+  // entry head noting how the starting ACL arose (inherited from a parent, or
+  // set on a root). Deliberately NOT a chip: a descriptor reads as caption, not
+  // as an identifier or action token. Only the parent NOID gets the monospace
+  // identifier treatment.
+  &__provenance {
+    margin: -0.35rem 0 0.6rem;
+    font-size: 0.78rem;
+    color: $gray-600;
+  }
+  &__provenance-id {
+    font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 0.95em;
+    color: $gray-700;
+    letter-spacing: 0.02em;
+  }
+
+  &__grid {
+    width: 100%;
+    margin: 0;
+    font-variant-numeric: tabular-nums;
+
+    th,
+    td {
+      padding: 0.3rem 0.6rem;
+      vertical-align: top;
+      border-bottom: 1px solid $gray-100;
+    }
+    tr:last-child th,
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    // Column headers — uppercase microcopy, like the audit table.
+    thead th {
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: $gray-500;
+    }
+    // Row label (access level) — quiet, fixed width so the two grant columns
+    // line up across entries.
+    tbody th {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: $gray-700;
+      white-space: nowrap;
+      width: 9rem;
+    }
+  }
+
+  // A grant pill — monospace identifier token, same register as the audit
+  // NUID chip. Plain by default; tinted when it's the grant that moved.
+  &__pill {
+    display: inline-block;
+    margin: 0.1rem 0.2rem 0.1rem 0;
+    padding: 0.1rem 0.45rem;
+    background-color: $gray-100;
+    border: 1px solid $gray-200;
+    border-radius: 0.25rem;
+    font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 0.78rem;
+    color: $gray-800;
+    letter-spacing: 0.02em;
+
+    // Gained — teal-green, the "create"/"link" family.
+    &--added {
+      background-color: color-mix(in srgb, $audit-tone-create 14%, white);
+      border-color: color-mix(in srgb, $audit-tone-create 35%, white);
+      color: color-mix(in srgb, $audit-tone-create 78%, black);
+    }
+    // Lost — mauve + strikethrough, the "unlink" family (NOT red).
+    &--removed {
+      background-color: color-mix(in srgb, $audit-tone-unlink 12%, white);
+      border-color: color-mix(in srgb, $audit-tone-unlink 32%, white);
+      color: color-mix(in srgb, $audit-tone-unlink 72%, black);
+      text-decoration: line-through;
+    }
+  }
+
+  // Empty ACL slot — a muted em-dash placeholder.
+  &__empty {
+    color: $gray-400;
+  }
+
+  // Previous/Next event walker (one change per page), sitting below the card.
+  // De-chromed to plain text links matching the search paginator register
+  // (_pagination) — a quiet stepper, not a button row. The three controls
+  // cluster toward the centre (Newer · "Change X of N" · Older) rather than
+  // pinning to the corners; boundary controls render muted + inert.
+  &__nav {
+    display: flex;
+    justify-content: center;
+    align-items: baseline;
+    gap: 1.5rem;
+  }
+
+  &__nav-link {
+    color: $primary;
+    font-size: 0.85rem;
+    text-decoration: none;
+    white-space: nowrap;
+
+    i {
+      font-size: 0.85em;
+    }
+
+    &:hover,
+    &:focus {
+      color: darken($primary, 12%);
+      text-decoration: underline;
+    }
+    &:focus-visible {
+      outline: 2px solid $primary;
+      outline-offset: 3px;
+      text-decoration: underline;
+    }
+    // Boundary control (newest / oldest end): muted and inert.
+    &--disabled {
+      color: $gray-500;
+      pointer-events: none;
+    }
+  }
+
+  // Position readout, between the controls — quiet archival caption, tabular
+  // so "1 of 2" → "10 of 12" doesn't shift width.
+  &__nav-pos {
+    font-size: 0.78rem;
+    color: $gray-600;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.01em;
+  }
+}
+
+// MODS version-history diff — the version picker + the line diff itself.
+.mods-diff {
+  &__picker {
+    background-color: #f6f8fa;
+    border-bottom: 1px solid $gray-300;
+  }
+  // The → between the two version selects, baseline-aligned with them.
+  &__arrow {
+    color: $gray-500;
+    padding-bottom: 0.4rem;
+  }
+  &__body {
+    overflow-x: auto;
+  }
+
+  // Diffy's HTML output, scoped + recoloured into the archival palette. The
+  // ins/del tints reuse the same teal-green (added) / mauve (removed) tokens
+  // as the ACL diff above, so "gained" vs "lost" reads consistently across
+  // both history pages. Monospace + tabular so the XML lines up.
+  &__body .diff {
+    font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 0.8rem;
+    font-variant-numeric: tabular-nums;
+
+    ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    li {
+      padding: 0.05rem 1rem;
+      white-space: pre-wrap;
+      word-break: break-word;
+      border-left: 3px solid transparent;
+
+      &.ins {
+        background-color: color-mix(in srgb, $audit-tone-create 8%, white);
+        border-left-color: color-mix(in srgb, $audit-tone-create 45%, white);
+      }
+      &.del {
+        background-color: color-mix(in srgb, $audit-tone-unlink 8%, white);
+        border-left-color: color-mix(in srgb, $audit-tone-unlink 40%, white);
+      }
+      &.unchanged {
+        color: $gray-500;
+      }
+    }
+
+    // Inline word-level highlights within a changed line.
+    ins,
+    del {
+      text-decoration: none;
+      font-weight: 600;
+      border-radius: 0.15rem;
+      padding: 0 0.05rem;
+    }
+    ins {
+      color: color-mix(in srgb, $audit-tone-create 80%, black);
+      background-color: color-mix(in srgb, $audit-tone-create 18%, white);
+    }
+    del {
+      color: color-mix(in srgb, $audit-tone-unlink 75%, black);
+      background-color: color-mix(in srgb, $audit-tone-unlink 16%, white);
+    }
+  }
+}

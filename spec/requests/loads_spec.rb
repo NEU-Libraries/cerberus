@@ -105,10 +105,10 @@ RSpec.describe 'Loads', type: :request do
       sign_in marcom_user
       allow(AtlasRb::Collection).to receive(:children)
         .with('neu:fix-comm-photos-archive').and_return(['neu:c1', 'neu:c2'])
-      allow(AtlasRb::Collection).to receive(:find).with('neu:c1')
-                                                  .and_return(double(id: 'neu:c1', title: 'Campus Life (Photographs)'))
-      allow(AtlasRb::Collection).to receive(:find).with('neu:c2')
-                                                  .and_return(double(id: 'neu:c2', title: 'Athletics (Photographs)'))
+      allow(AtlasRb::Resource).to receive(:find_many).with(['neu:c1', 'neu:c2']).and_return(
+        [OpenStruct.new(noid: 'neu:c1', id: 'neu:c1', title: 'Campus Life (Photographs)'),
+         OpenStruct.new(noid: 'neu:c2', id: 'neu:c2', title: 'Athletics (Photographs)')]
+      )
     end
 
     it 'renders the form with destinations from Atlas' do
@@ -143,6 +143,13 @@ RSpec.describe 'Loads', type: :request do
       expect(lr.loader).to eq(marcom_loader)
       expect(lr.parent_collection_id).to eq('neu:c1')
       expect(lr.source_filename).to eq('jpgs.zip')
+    end
+
+    it 'stamps the creator so finalization can message their inbox' do
+      post '/loaders/marcom/loads',
+           params: { load_report: { archive: archive, parent_collection_id: 'neu:c1' } }
+
+      expect(LoadReport.last.creator_nuid).to eq(marcom_user.nuid)
     end
 
     it 'enqueues UnzipJob with the new LoadReport id' do
@@ -302,6 +309,93 @@ RSpec.describe 'Loads', type: :request do
       it 'does not render the in-progress meter' do
         get "/loaders/marcom/loads/#{load_report.id}"
         expect(response.body).not_to include('load-report-progress')
+      end
+    end
+  end
+
+  describe 'XML loader dispatch (kind: :xml)' do
+    let!(:xml_loader) do
+      Loader.create!(slug: 'xml', display_name: 'XML Metadata Loader',
+                     group: 'northeastern:drs:repository:loaders:xml',
+                     root_collection: 'neu:root', kind: :xml)
+    end
+    let(:archive) do
+      Rack::Test::UploadedFile.new(
+        Rails.root.join('spec/fixtures/files/metadata_existing_file.zip'), 'application/zip'
+      )
+    end
+
+    before do
+      sign_in admin_user
+      allow(FileUtils).to receive(:mkdir_p)
+      allow(FileUtils).to receive(:cp)
+      allow(UnzipJob).to receive(:perform_later)
+      allow(XmlUnzipJob).to receive(:perform_later)
+    end
+
+    describe 'POST .../loads' do
+      it 'stages a previewing LoadReport and enqueues no job yet' do
+        post '/loaders/xml/loads',
+             params: { load_report: { archive: archive, parent_collection_id: 'neu:c1' } }
+
+        lr = LoadReport.last
+        expect(lr.loader).to eq(xml_loader)
+        expect(lr).to be_previewing
+        expect(UnzipJob).not_to have_received(:perform_later)
+        expect(XmlUnzipJob).not_to have_received(:perform_later)
+        expect(response).to redirect_to(loader_load_path(xml_loader, lr))
+      end
+    end
+
+    describe 'GET .../loads/:id while previewing' do
+      let!(:load_report) do
+        LoadReport.create!(loader: xml_loader, source_filename: 'metadata_existing_file.zip',
+                           parent_collection_id: 'neu:c1', status: :previewing)
+      end
+      let(:preview) do
+        XmlPreview::Result.new(
+          structural_errors: [], mode: :update,
+          first_row: XmlLoader::Manifest::Row.new(identifier: 'neu:test123', xml_path: 'rec.xml'),
+          mods_xml: '<mods:mods/>', validation_errors: [],
+          decorated_html: '<dl class="mods-display">Rendered title</dl>'
+        )
+      end
+
+      before { allow(XmlPreview).to receive(:call).and_return(preview) }
+
+      it 'renders the preview with a Confirm action, not the poll frame' do
+        get "/loaders/xml/loads/#{load_report.id}"
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include('Confirm')
+        expect(response.body).to include('Update existing')
+        expect(response.body).not_to include('data-controller="load-poll"')
+      end
+
+      it 'shows raw MODS beside the Atlas-rendered HTML (two-column)' do
+        get "/loaders/xml/loads/#{load_report.id}"
+        expect(response.body).to include('Raw MODS')
+        expect(response.body).to include('Rendered')
+        expect(response.body).to include('mods-display') # the decorated HTML, rendered html_safe
+      end
+    end
+
+    describe 'PATCH .../loads/:id/confirm' do
+      let!(:load_report) do
+        LoadReport.create!(loader: xml_loader, source_filename: 'metadata_existing_file.zip',
+                           parent_collection_id: 'neu:c1', status: :previewing)
+      end
+
+      it 'flips the report to pending and enqueues XmlUnzipJob' do
+        patch confirm_loader_load_path(xml_loader, load_report)
+        expect(load_report.reload).to be_pending
+        expect(XmlUnzipJob).to have_received(:perform_later).with(load_report.id)
+        expect(response).to redirect_to(loader_load_path(xml_loader, load_report))
+      end
+
+      it 'is a no-op when the report is not previewing' do
+        load_report.update!(status: :completed)
+        patch confirm_loader_load_path(xml_loader, load_report)
+        expect(XmlUnzipJob).not_to have_received(:perform_later)
       end
     end
   end

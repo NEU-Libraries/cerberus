@@ -1,3 +1,6 @@
+- content_for(:container_header) do
+  = render 'shared/breadcrumbs', show_add: false
+
 %h3.py-3 Edit Collection
 
 - show_history = can?(:read, :audit_event)
@@ -19,8 +22,7 @@
         %label.form-label{:for => "thumbnail"} Thumbnail
         %input#thumbnail.form-control.mb-3{:name => "thumbnail", :type => "file"}/
         = bootstrap_fields_for :collection do |c|
-          = c.text_field :title, value: @collection.title
-          = c.text_area :description, rows: 10, value: @collection.description
+          = render 'shared/descriptive_fields', f: c, descriptive: @descriptive, keywords: false
         .well.p-3.my-3.rounded-3
           = f.button :submit, class: "btn btn-success"
           = link_to "Cancel", collection_path(params[:id]), class: "btn btn-warning"
@@ -42,7 +44,6 @@
           .well.p-3.my-3.rounded-3
             = f.button :submit, class: "btn btn-success"
             = link_to "Cancel", collection_path(params[:id]), class: "btn btn-warning"
-            = render 'shared/add_group_button'
   - if show_history
     #history.tab-pane{"aria-labelledby" => "history-tab", role: "tabpanel"}
       = render 'audit_events/history', resource_id: params[:id]

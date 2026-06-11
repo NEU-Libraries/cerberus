@@ -1,5 +1,11 @@
+-# The Detail column carries the change_type category ("Metadata" vs
+-# "Permissions") + a payload summary (changed fields, or the before→after ACL
+-# diff), so the bare `update` verb is no longer ambiguous. The View cell links
+-# permissions rows to the Rights diff page and metadata rows to the MODS diff
+-# page — the v2 successor to v1's "Rights History" / "MODS History" pages.
 %tr.audit-event.audit-event--update
   %td= audit_event_timestamp(event)
   %td= audit_event_action_badge(event)
-  %td= audit_event_nuid(event['actor_nuid'])
-  %td= audit_event_nuid(event['on_behalf_of_nuid'])
+  %td.audit-event__detail-cell= audit_event_detail_cell(event)
+  %td= audit_event_who(event)
+  %td.audit-event__view-cell= audit_event_view_cell(event, resource_id)

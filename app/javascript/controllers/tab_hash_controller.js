@@ -10,7 +10,11 @@ export default class extends Controller {
 
     this._onTabShown = (e) => {
       const paneId = e.target.getAttribute("data-bs-target")
-      if (paneId) history.replaceState(null, "", paneId)
+      // Preserve the existing state (Turbo stores its restorationIdentifier in
+      // history.state). Passing null here wipes it, so Turbo's popstate handler
+      // skips the restoration visit on Back and the previous page's DOM stays
+      // on screen — the flaky "Back does nothing" bug.
+      if (paneId) history.replaceState(history.state, "", paneId)
     }
     this.element.addEventListener("shown.bs.tab", this._onTabShown)
   }

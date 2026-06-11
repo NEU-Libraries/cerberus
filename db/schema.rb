@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_28_000003) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_10_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -51,6 +51,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_28_000003) do
 
   create_table "load_reports", force: :cascade do |t|
     t.datetime "created_at", null: false
+    t.string "creator_nuid"
     t.datetime "finished_at"
     t.bigint "loader_id"
     t.string "parent_collection_id"
@@ -65,10 +66,51 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_28_000003) do
     t.datetime "created_at", null: false
     t.string "display_name", null: false
     t.string "group", null: false
+    t.integer "kind", default: 0, null: false
     t.string "root_collection", null: false
     t.string "slug", null: false
     t.datetime "updated_at", null: false
     t.index ["slug"], name: "index_loaders_on_slug", unique: true
+  end
+
+  create_table "message_receipts", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "deleted_at"
+    t.bigint "message_id", null: false
+    t.string "nuid", null: false
+    t.datetime "read_at"
+    t.datetime "updated_at", null: false
+    t.index ["message_id", "nuid"], name: "index_message_receipts_on_message_id_and_nuid", unique: true
+  end
+
+  create_table "messages", force: :cascade do |t|
+    t.text "body"
+    t.datetime "created_at", null: false
+    t.string "recipient_group"
+    t.string "recipient_nuid"
+    t.string "sender_nuid"
+    t.string "subject", null: false
+    t.datetime "updated_at", null: false
+    t.index ["recipient_group"], name: "index_messages_on_recipient_group"
+    t.index ["recipient_nuid"], name: "index_messages_on_recipient_nuid"
+    t.check_constraint "(recipient_nuid IS NULL) <> (recipient_group IS NULL)", name: "messages_exactly_one_recipient"
+  end
+
+  create_table "multipage_ingests", force: :cascade do |t|
+    t.datetime "blob_attached_at"
+    t.datetime "created_at", null: false
+    t.text "error_message"
+    t.string "file_set_pid"
+    t.string "idempotency_key"
+    t.bigint "load_report_id", null: false
+    t.integer "sequence"
+    t.string "source_filename"
+    t.integer "status", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.text "warnings", default: "[]"
+    t.string "work_pid"
+    t.index ["load_report_id", "sequence"], name: "index_multipage_ingests_on_load_report_id_and_sequence", unique: true
+    t.index ["load_report_id"], name: "index_multipage_ingests_on_load_report_id"
   end
 
   create_table "searches", id: :serial, force: :cascade do |t|
@@ -95,5 +137,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_28_000003) do
 
   add_foreign_key "iptc_ingests", "load_reports"
   add_foreign_key "load_reports", "loaders"
+  add_foreign_key "message_receipts", "messages"
+  add_foreign_key "multipage_ingests", "load_reports"
   add_foreign_key "xml_ingests", "load_reports"
 end

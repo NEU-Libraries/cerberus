@@ -5,13 +5,18 @@ class LoadsController < ApplicationController
   before_action :set_loader
   before_action :require_loader_role
   before_action :require_loader_group
-  before_action :set_load_report, only: [:show, :destroy]
+  before_action :set_load_report, only: [:show, :destroy, :confirm]
 
   def index
     @load_reports = LoadReport.where(loader: @loader).order(created_at: :desc)
   end
 
-  def show; end
+  def show
+    # XML and multipage loads pause on a preview the librarian must confirm;
+    # build it lazily from the staged archive (no persistence) for the show
+    # view to render.
+    @preview = preview_service.call(load_report: @load_report) if @load_report.previewing?
+  end
 
   def new
     @load_report  = LoadReport.new
@@ -23,22 +28,29 @@ class LoadsController < ApplicationController
     parent  = params.dig(:load_report, :parent_collection_id)
     return reject_missing_archive(parent) if archive.blank?
 
-    @load_report = LoadReport.create!(
-      loader:               @loader,
-      source_filename:      archive.original_filename,
-      parent_collection_id: parent
-    )
+    @load_report = create_load_report!(archive, parent)
     save_archive(@load_report, archive)
-    UnzipJob.perform_later(@load_report.id)
+    # IPTC commits straight to the run. XML and multipage stop at a preview
+    # the librarian confirms (see #confirm), so they enqueue no job yet —
+    # the show view renders the preview from the staged archive.
+    UnzipJob.perform_later(@load_report.id) if @loader.iptc?
 
-    # No flash notice — the show page's in-progress state (spinner +
-    # "Extraction in progress", auto-polled) communicates that the batch
-    # has begun, so a redundant banner would only contradict the body
-    # once the live poll flips the report to a terminal status.
+    # No flash notice — the show page's own state (in-progress spinner for
+    # IPTC, the preview card for XML) communicates what happens next, so a
+    # redundant banner would only contradict the body once the poll runs.
     redirect_to loader_load_path(@loader, @load_report)
   rescue ActiveRecord::RecordInvalid
     @destinations = load_destinations
     render :new, status: :unprocessable_content
+  end
+
+  # Librarian-approved go: flip the staged preview into a real run.
+  def confirm
+    return redirect_to(loader_load_path(@loader, @load_report)) unless @load_report.previewing?
+
+    @load_report.update!(status: :pending)
+    unzip_job.perform_later(@load_report.id)
+    redirect_to loader_load_path(@loader, @load_report)
   end
 
   def destroy
@@ -47,6 +59,24 @@ class LoadsController < ApplicationController
   end
 
   private
+
+    def create_load_report!(archive, parent)
+      LoadReport.create!(
+        loader:               @loader,
+        creator_nuid:         attributed_nuid,
+        source_filename:      archive.original_filename,
+        parent_collection_id: parent,
+        status:               @loader.iptc? ? :pending : :previewing
+      )
+    end
+
+    def preview_service
+      @loader.multipage? ? MultipagePreview : XmlPreview
+    end
+
+    def unzip_job
+      @loader.multipage? ? MultipageUnzipJob : XmlUnzipJob
+    end
 
     def reject_missing_archive(parent_id)
       flash.now[:alert]  = 'Please choose an archive file.'
@@ -78,14 +108,16 @@ class LoadsController < ApplicationController
       render template: 'errors/forbidden', status: :forbidden, layout: 'application'
     end
 
-    # Atlas's children endpoint returns child IDs only; we N+1 the
-    # individual finds to get titles for the picker. Acceptable for
-    # first cut because the marcom root has <50 children. If this
-    # grows, the right fix is an Atlas endpoint that returns
-    # id+title (or an atlas_rb helper that batches the finds).
+    # Atlas's children endpoint returns child IDs only; resolve them to
+    # id+title for the picker in a single batched find_many rather than a
+    # find-per-id fan-out. find_many is unordered and may drop unresolvable
+    # ids, so index by noid and re-impose the children order.
     def load_destinations
       ids = AtlasRb::Collection.children(@loader.root_collection)
-      ids.map { |id| AtlasRb::Collection.find(id) }
+      return [] if ids.blank?
+
+      by_noid = AtlasRb::Resource.find_many(ids).index_by { |n| n['noid'] }
+      ids.filter_map { |id| by_noid[id] }
     rescue Faraday::Error, JSON::ParserError => e
       Rails.logger.error("LoadsController#load_destinations: #{e.class} #{e.message}")
       []

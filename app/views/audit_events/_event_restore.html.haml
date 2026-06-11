@@ -1,5 +1,6 @@
 %tr.audit-event.audit-event--restore
   %td= audit_event_timestamp(event)
   %td= audit_event_action_badge(event)
-  %td= audit_event_nuid(event['actor_nuid'])
-  %td= audit_event_nuid(event['on_behalf_of_nuid'])
+  %td.audit-event__detail-cell= audit_event_detail_cell(event)
+  %td= audit_event_who(event)
+  %td.audit-event__view-cell= audit_event_view_cell(event, resource_id)

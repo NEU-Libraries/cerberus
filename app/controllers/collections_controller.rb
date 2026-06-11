@@ -31,23 +31,18 @@ class CollectionsController < CatalogController
   def edit
     @collection = AtlasRb::Collection.find(params[:id])
     form_preparation(@permissions)
+    load_descriptive!('Collection')
+    breadcrumbs(params[:id], editing: true)
   end
 
   def create
     permitted = params.expect(collection: [:title, :description]).to_h
     c = AtlasRb::Collection.create(params[:parent_id])
-    AtlasRb::Collection.metadata(c.id, permitted)
+    save_descriptive!('Collection', c.id, title: permitted['title'], description: permitted['description'])
     redirect_to collection_path(c.id)
   end
 
   def update
-    AtlasRb::Collection.metadata(params[:id], collection_params)
-    redirect_to collection_path(params[:id])
+    handle_metadata_update(klass: 'Collection', resource_key: :collection, keywords: false)
   end
-
-  private
-
-    def collection_params
-      resource_params(:collection)
-    end
 end

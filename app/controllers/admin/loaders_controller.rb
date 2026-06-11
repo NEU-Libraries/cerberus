@@ -44,7 +44,7 @@ module Admin
       end
 
       def loader_params
-        params.require(:loader).permit(:slug, :display_name, :group, :root_collection)
+        params.require(:loader).permit(:slug, :display_name, :group, :root_collection, :kind)
       end
   end
 end

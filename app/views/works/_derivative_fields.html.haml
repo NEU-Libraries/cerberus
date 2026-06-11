@@ -1,0 +1,53 @@
+-# Opt-in download renditions for an image deposit (v1 parity). Each size is
+-# optional; enabled sizes must nest small < medium < large; everything is
+-# capped at the master's longest edge (no upscaling). All three sliders share
+-# one scale (1..longest_edge), so the thumb positions read as a sorted ledger
+-# of the chosen sizes. Only the number inputs carry a form name — checkboxes
+-# and sliders are UI-only, and disabled inputs never submit, so an unchecked
+-# size simply doesn't arrive at the controller (and a JS-less browser
+-# submits nothing from this section at all).
+-#
+-# Server backstop: WorksController#process_derivative_widths re-validates
+-# against a fresh StagedImageProbe before enqueueing DepositDerivativesJob.
+- defaults = { small: Rational(1, 3), medium: Rational(1, 2), large: Rational(3, 4) }
+
+%hr.work-show-divider.my-3
+
+.my-3.rounded-3{ data: { controller: 'derivative-sizes', 'derivative-sizes-max-value': longest_edge } }
+  %h4.pb-2
+    %i.fa-solid.fa-images.me-2{ 'aria-hidden' => 'true' }
+    Image Derivatives
+  %p.text-muted.small.mb-1
+    Offer sized download copies alongside the master image. Each size is optional;
+    enabled sizes must increase from small to large.
+  %p.small.mb-3
+    The master image's longest edge is
+    %strong.font-monospace= longest_edge
+    pixels — sizes are capped there (downloads are never upscaled).
+
+  - defaults.each do |role, ratio|
+    - default_px = (longest_edge * ratio).round.clamp(1, longest_edge)
+    .row.align-items-center.g-3.py-2
+      .col-12.col-lg-2
+        .form-check.mb-0
+          %input.form-check-input{ type: 'checkbox', id: "derivative_#{role}_enabled",
+                                   data: { 'derivative-sizes-target': 'toggle', role: role,
+                                           action: 'change->derivative-sizes#toggle' } }
+          %label.form-check-label{ for: "derivative_#{role}_enabled" }= "#{role.to_s.humanize} image"
+      .col
+        %input.form-range{ type: 'range', min: 1, max: longest_edge, value: default_px, disabled: true,
+                           'aria-label' => "#{role.to_s.humanize} size in pixels",
+                           data: { 'derivative-sizes-target': 'slider', role: role,
+                                   action: 'input->derivative-sizes#syncFromSlider change->derivative-sizes#commit' } }
+      .col-auto.d-flex.align-items-center.gap-1
+        %input.form-control.form-control-sm.font-monospace.text-end{ type: 'number', min: 1, max: longest_edge,
+                                                                     value: default_px, disabled: true,
+                                                                     name: "derivative_widths[#{role}]",
+                                                                     id: "derivative_#{role}_px",
+                                                                     style: 'width: 6.5rem; font-variant-numeric: tabular-nums;',
+                                                                     'aria-label' => "#{role.to_s.humanize} size in pixels",
+                                                                     data: { 'derivative-sizes-target': 'number', role: role,
+                                                                             action: 'input->derivative-sizes#syncFromNumber change->derivative-sizes#commit' } }
+        %label.small.text-muted.mb-0{ for: "derivative_#{role}_px" } px
+
+%hr.work-show-divider.mt-3.mb-0

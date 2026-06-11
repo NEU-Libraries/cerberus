@@ -26,7 +26,6 @@ namespace :reset do
       work = AtlasRb::Work.create(collection['id'], '/home/cerberus/web/spec/fixtures/files/work-mods.xml')
       flower_base = MasterJp2.call(path: '/home/cerberus/web/spec/fixtures/files/flower.jpg')
       AtlasRb::Work.set_thumbnails(work['id'], **ThumbnailCreator.call(base: flower_base))
-      AtlasRb::Work.set_image_derivatives(work['id'], **DerivativeCreator.call(base: flower_base))
       AtlasRb::Work.metadata(work['id'], { 'permissions' => { 'read' => ['public'] } })
       AtlasRb::Blob.create(work['id'], '/home/cerberus/web/spec/fixtures/files/flower.jpg', 'flower.jpg')
       AtlasRb::Work.complete(work['id'])
@@ -74,6 +73,20 @@ namespace :reset do
         l.display_name    = 'Marketing and Communications'
         l.group           = marcom_group
         l.root_collection = photo_archive['id']
+        l.kind            = :iptc
+      end
+
+      # XML loader fixture — the manifest-driven MODS loader (kind: :xml).
+      # Points at the photo-archive root so its create-mode destination
+      # picker has children (campus_life); update-mode keys off NOIDs in
+      # the manifest and ignores the picker. Gated by the loaders:xml
+      # Grouper group; dev/staging verification uses admin 000000004,
+      # which short-circuits the per-loader group gate.
+      Loader.find_or_create_by!(slug: 'xml') do |l|
+        l.display_name    = 'XML Metadata Loader'
+        l.group           = 'northeastern:drs:repository:loaders:xml'
+        l.root_collection = photo_archive['id']
+        l.kind            = :xml
       end
     end
   end

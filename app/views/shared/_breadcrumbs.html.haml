@@ -3,13 +3,15 @@
     - breadcrumb_trail do |crumb|
       %li.breadcrumb-item{class: crumb.current? ? "active" : "" }
         = link_to_unless crumb.current?, crumb.name, crumb.url, (crumb.current? ? {"aria-current" => "page"} : {})
+    -# The "Add a child here" affordance. Suppressed on edit pages via
+    -# `show_add: false` (you don't add siblings/children mid-edit).
     -# TODO: replace `user_signed_in?` with a proper Ability check
     -# (e.g. `can?(:create_child, current_resource)`) once piece 5 /
     -# acting-as ships the resource-scoped permission rules. Today we
     -# hide this dropdown from anonymous users to avoid the dead-end
     -# affordance, but a logged-in user without deposit rights still
     -# sees it.
-    - if user_signed_in?
+    - if local_assigns.fetch(:show_add, true) && user_signed_in?
       %li.breadcrumb-item
         .dropdown.breadcrumb-add
           %a.text-decoration-none{"aria-expanded" => "false", "data-bs-toggle" => "dropdown", :type => "button"}

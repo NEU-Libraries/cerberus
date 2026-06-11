@@ -1,0 +1,93 @@
+-# Rights-history diff page — the deep view behind the audit log's "View"
+-# button on permissions rows. One permission event per page (PER_PAGE = 1):
+-# the per-row "View" deep-link lands on that single event's before/after ACL
+-# snapshot, expanded into a two-column diff (grants gained tinted, grants lost
+-# struck). A Previous/Next walker steps to adjacent changes (reverse
+-# chronological) rather than stacking them. The list framing — position
+-# indicator + ordering subtitle — only appears when there is more than one
+-# change to walk. Archival register throughout — reuses the audit-history card
+-# chrome + monospace identifier pills.
+- back_path = send("edit_#{@resource_klass.downcase}_path", @resource_id, anchor: 'history')
+.container.my-4
+  .d-flex.justify-content-between.align-items-baseline.flex-wrap.gap-2.mb-3
+    %div
+      %h3.mb-1 Rights history
+      - if @resource_title.present?
+        %p.text-muted.mb-0= @resource_title
+    = link_to back_path, class: 'btn btn-sm btn-outline-secondary' do
+      %i.fa-solid.fa-arrow-left{'aria-hidden' => 'true'}
+      Back to audit log
+
+  .audit-history
+    %header.audit-history__head
+      %div
+        %span.audit-history__title Access-control changes
+      - if @events.total_pages > 1
+        %span.audit-history__subtitle Reverse chronological
+
+    - if @events.empty?
+      .audit-history__empty
+        %i.fa-solid.fa-lock.audit-history__empty-icon{'aria-hidden' => 'true'}
+        %p.mb-1.fw-semibold.text-body No permission changes recorded
+        %p.mb-0.small.text-muted
+          Changes to who can read or edit this resource will appear here.
+    - else
+      %ul.rights-diff__list
+        - @events.each do |event|
+          - payload = event['payload'] || {}
+          - before  = payload['before'] || {}
+          - after   = payload['after'] || {}
+          %li.rights-diff__entry{id: audit_event_dom_id(event)}
+            .rights-diff__entry-head
+              = audit_event_timestamp(event)
+              = audit_event_who(event)
+            -# Provenance of the create-time grant (Atlas payload `source`): how
+            -# the starting ACL arose. A quiet caption, not a chip — the parent
+            -# NOID is shown as a monospace identifier (unlinked; no structured
+            -# parent_id in the event payload yet — only embedded in `note`).
+            - case payload['source']
+            - when 'inherited'
+              %p.rights-diff__provenance
+                Inherited from
+                %span.rights-diff__provenance-id= event['note'].to_s.split.last
+            - when 'initial'
+              %p.rights-diff__provenance Initial grant
+            %table.rights-diff__grid
+              %thead
+                %tr
+                  %th{scope: 'col'} Access
+                  %th{scope: 'col'} Before
+                  %th{scope: 'col'} After
+              %tbody
+                - AuditEventsHelper::ACL_DIFF_KEYS.each do |key|
+                  - removed = Array(before[key]) - Array(after[key])
+                  - added   = Array(after[key]) - Array(before[key])
+                  %tr{class: ('rights-diff__row--changed' if removed.any? || added.any?)}
+                    %th{scope: 'row'}= acl_level_label(key)
+                    %td= acl_grant_pills(before[key], marked: removed, state: 'removed')
+                    %td= acl_grant_pills(after[key], marked: added, state: 'added')
+
+  -# Walker sits below the card, controls clustered toward the centre rather
+  -# than pinned to the corners. Newer (left) / Older (right) name the time
+  -# axis so the arrows agree with reverse-chronological order; boundary
+  -# controls render inert rather than vanishing, so an end-of-history state
+  -# never looks like a missing button.
+  -# The links navigate purely by page — `at` is stripped (it only seeds the
+  -# initial deep-link landing). Keeping it would trap the walk: Kaminari omits
+  -# `page` from the page-1 link, so a lingering `?at` would re-resolve back to
+  -# the deep-linked page instead of stepping to the newest.
+  - if @events.total_pages > 1
+    %nav.rights-diff__nav.mt-3{'aria-label' => 'Permission change navigation'}
+      - if @events.first_page?
+        %span.rights-diff__nav-link.rights-diff__nav-link--disabled{'aria-disabled' => 'true'}
+          %i.fa-solid.fa-arrow-left{'aria-hidden' => 'true'}
+          Newer
+      - else
+        = link_to_previous_page @events, '<i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Newer'.html_safe, params: { at: nil }, class: 'rights-diff__nav-link'
+      %span.rights-diff__nav-pos= "Change #{@events.current_page} of #{@events.total_count}"
+      - if @events.last_page?
+        %span.rights-diff__nav-link.rights-diff__nav-link--disabled{'aria-disabled' => 'true'}
+          Older
+          %i.fa-solid.fa-arrow-right{'aria-hidden' => 'true'}
+      - else
+        = link_to_next_page @events, 'Older <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>'.html_safe, params: { at: nil }, class: 'rights-diff__nav-link'

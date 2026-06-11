@@ -154,4 +154,22 @@ describe CollectionsController do
       expect(subject).to redirect_to(root_path)
     end
   end
+
+  describe 'create' do
+    let(:user) { User.new(email: 'creator@example.com', nuid: '000000004', groups: ['editors']) }
+
+    before { sign_in user }
+
+    it 'seeds the new collection title + description via the structure-safe MODS merge (not plain_title=)' do
+      post :create, params: { parent_id:  community.id,
+                              collection: { title: 'BrandNewCollection', description: 'CollectionAbstract' } }
+
+      created_id = response.location.split('/').last
+      created = AtlasRb::Collection.find(created_id)
+      expect(created.title).to eq('BrandNewCollection')
+      expect(created.description).to include('CollectionAbstract')
+    ensure
+      AtlasRb::Collection.tombstone(created_id) if created_id
+    end
+  end
 end

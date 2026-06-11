@@ -21,13 +21,30 @@ class ApplicationController < ActionController::Base
     @current_ability ||= Ability.new(effective_user)
   end
 
-  def breadcrumbs(id)
+  def breadcrumbs(id, editing: false)
     result = AtlasRb::Resource.find(id)
     item = result.resource
-    item.ancestors.each do |ancestor_id, ancestor_klass|
-      add_breadcrumb_for(ancestor_id, ancestor_klass)
+    # ancestor_chain carries each ancestor's title alongside its noid/klass, so
+    # the whole trail is built from this single find — no per-ancestor round-trip.
+    Array(item.ancestor_chain).each do |node|
+      add_breadcrumb_for(node['noid'], node['klass'], node['title'])
     end
-    add_breadcrumb_for(item.id, result.klass)
+
+    if editing
+      edit_breadcrumb_tail(item, result.klass)
+    else
+      add_breadcrumb_for(item.id, result.klass, item.title)
+    end
+  end
+
+  # The tail of an edit-page trail: the resource itself becomes a link back to
+  # its show page (`match: :exact` so loaf doesn't mark it current on the
+  # `/edit` sub-path — inclusive matching otherwise treats `/works/:id/edit` as
+  # "under" `/works/:id`), and a final non-link "Edit <Klass>" crumb is the
+  # you-are-here. Lets an editor back out to the resource via the trail.
+  def edit_breadcrumb_tail(item, klass)
+    breadcrumb(item.title, public_send("#{klass.downcase}_path", item.id), match: :exact)
+    breadcrumb("Edit #{klass}", public_send("edit_#{klass.downcase}_path", item.id))
   end
 
   def pretty_group(raw_group)
@@ -44,9 +61,16 @@ class ApplicationController < ActionController::Base
       Current.nuid = current_user&.nuid || Rails.application.config.x.cerberus.guest_nuid
     end
 
-    def add_breadcrumb_for(resource_id, klass)
-      title = AtlasRb.const_get(klass).find(resource_id).title
-      path  = public_send("#{klass.downcase}_path", resource_id)
+    # The identity Cerberus-side writes are attributed to: the acting-as
+    # target when an acting-as session is live, otherwise the authenticated
+    # user. Matches the deposit convention — acting-as work belongs wholly
+    # to the target, so their inbox (not the admin's) gets the follow-ups.
+    def attributed_nuid
+      Current.on_behalf_of.presence || Current.nuid
+    end
+
+    def add_breadcrumb_for(resource_id, klass, title)
+      path = public_send("#{klass.downcase}_path", resource_id)
       breadcrumb(title, path)
     end
 end

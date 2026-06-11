@@ -28,12 +28,31 @@
             %i.fa-solid.fa-file-zipper{'aria-hidden' => 'true'}
             Archive file
           = f.file_field :archive, class: 'form-control', accept: '.tar,.zip', required: true
-          .admin-registry-form__hint
-            Accepted formats:
-            %code.admin-registry-table__id .tar
-            or
-            %code.admin-registry-table__id .zip
-            \. Each JPEG inside must carry valid IPTC tags — Headline and Keywords are required; By-line, Description, Category, City + State are optional but recorded.
+          - if @loader.multipage?
+            .admin-registry-form__hint
+              Accepted formats:
+              %code.admin-registry-table__id .tar
+              or
+              %code.admin-registry-table__id .zip
+              \. Must contain a
+              %code.admin-registry-table__id manifest.xlsx
+              naming one MODS XML (Sequence 0) and the page images in order (Sequence 1 and up, Last Item on the final page). The whole archive becomes a single Work with ordered pages; you'll review the full page list before anything runs.
+          - elsif @loader.xml?
+            .admin-registry-form__hint
+              Accepted formats:
+              %code.admin-registry-table__id .tar
+              or
+              %code.admin-registry-table__id .zip
+              \. Must contain a
+              %code.admin-registry-table__id manifest.xlsx
+              plus the MODS XML files it references. Each row updates an existing object by PID/NOID, or creates a new one from a named content file. You'll preview the first row before the batch runs.
+          - else
+            .admin-registry-form__hint
+              Accepted formats:
+              %code.admin-registry-table__id .tar
+              or
+              %code.admin-registry-table__id .zip
+              \. Each JPEG inside must carry valid IPTC tags — Headline and Keywords are required; By-line, Description, Category, City + State are optional but recorded.
 
       .admin-registry-form__section
         .mb-0
@@ -45,6 +64,12 @@
                        options_for_select(@destinations.map { |c| [c.title, c.id] }, @load_report.parent_collection_id),
                        { include_blank: 'Select a collection…' },
                        class: 'form-select admin-registry-form__input--id', required: true
+            - if @loader.multipage?
+              .admin-registry-form__hint
+                Where the new multipage Work lands.
+            - elsif @loader.xml?
+              .admin-registry-form__hint
+                Where newly-created Works land. Rows that update an existing object by PID/NOID ignore this.
           - else
             .alert.alert-warning.mb-0
               %i.fa-solid.fa-triangle-exclamation.me-1{'aria-hidden' => 'true'}

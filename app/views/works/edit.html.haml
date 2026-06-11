@@ -1,9 +1,14 @@
+- content_for(:container_header) do
+  = render 'shared/breadcrumbs', show_add: false
+
 %h3.py-3 Edit Work
 
 - show_history = can?(:read, :audit_event)
 %ul.nav.nav-tabs{"data-controller" => "tab-hash"}
   %li.nav-item
     %button#metadata-tab.nav-link.active{"aria-controls" => "metadata", "aria-selected" => "true", "data-bs-target" => "#metadata", "data-bs-toggle" => "tab", role: "tab", type: "button"} Metadata
+  %li.nav-item
+    %button#advanced-tab.nav-link{"aria-controls" => "advanced", "aria-selected" => "false", "data-bs-target" => "#advanced", "data-bs-toggle" => "tab", role: "tab", type: "button"} Advanced
   %li.nav-item
     %button#permissions-tab.nav-link{"aria-controls" => "permissions", "aria-selected" => "false", "data-bs-target" => "#permissions", "data-bs-toggle" => "tab", role: "tab", type: "button"} Permissions
   %li.nav-item
@@ -20,8 +25,16 @@
         %label.form-label{:for => "thumbnail"} Thumbnail
         %input#thumbnail.form-control.mb-3{:name => "thumbnail", :type => "file"}/
         = bootstrap_fields_for :work do |c|
-          = c.text_field :title, value: @work.title
-          = c.text_area :description, rows: 10, value: @work.description
+          = render 'shared/descriptive_fields', f: c, descriptive: @descriptive, keywords: true
+        .well.p-3.my-3.rounded-3
+          = f.button :submit, class: "btn btn-success"
+          = link_to "Cancel", work_path(params[:id]), class: "btn btn-warning"
+  #advanced.tab-pane{"aria-labelledby" => "advanced-tab", role: "tabpanel"}
+    .py-2.px-1
+      = bootstrap_form_tag(url: work_path(params[:id]), method: :patch, multipart: true) do |f|
+        = f.hidden_field :id, value: params[:id]
+        = bootstrap_fields_for :work do |c|
+          = render 'works/advanced_fields', f: c, advanced: @advanced
         .well.p-3.my-3.rounded-3
           = f.button :submit, class: "btn btn-success"
           = link_to "Cancel", work_path(params[:id]), class: "btn btn-warning"
@@ -47,7 +60,6 @@
           .well.p-3.my-3.rounded-3
             = f.button :submit, class: "btn btn-success"
             = link_to "Cancel", work_path(params[:id]), class: "btn btn-warning"
-            = render 'shared/add_group_button'
   - if show_history
     #history.tab-pane{"aria-labelledby" => "history-tab", role: "tabpanel"}
       = render 'audit_events/history', resource_id: params[:id]

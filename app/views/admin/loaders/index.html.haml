@@ -20,6 +20,7 @@
           %tr
             %th{scope: 'col'} Slug
             %th{scope: 'col'} Display name
+            %th{scope: 'col'} Type
             %th{scope: 'col'} Grouper group
             %th{scope: 'col'} Root collection
             %th{scope: 'col'}
@@ -30,6 +31,8 @@
                 %span.admin-registry-table__id= loader.slug
               %td
                 .admin-registry-table__name= loader.display_name
+              %td
+                %span.badge.text-bg-light.text-uppercase= loader.kind
               %td
                 %span.admin-registry-table__id= loader.group
               %td

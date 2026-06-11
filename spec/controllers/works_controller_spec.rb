@@ -81,13 +81,43 @@ describe WorksController do
       expect(subject).to redirect_to action: :metadata, id: assigns(:work).id
     end
 
-    it 'does not enqueue the IIIF-assets job for non-image uploads' do
+    it 'does not enqueue any enrichment job for unenriched uploads' do
       expect do
         post :create, params: { binary:    fixture_file_upload('plain.txt', 'text/plain'),
                                 parent_id: collection.id }
       end.to have_enqueued_job(ContentCreationJob)
         .with(anything, anything, 'plain.txt', a_string_matching(uuid_re))
         .and not_have_enqueued_job(IiifAssetsJob)
+        .and not_have_enqueued_job(PdfRenditionJob)
+    end
+
+    it 'routes PDF uploads to IiifAssetsJob for first-page thumbnails' do
+      expect do
+        post :create, params: { binary:    fixture_file_upload('example.pdf', 'application/pdf'),
+                                parent_id: collection.id }
+      end.to have_enqueued_job(IiifAssetsJob)
+        .and have_enqueued_job(ContentCreationJob)
+        .and not_have_enqueued_job(PdfRenditionJob)
+    end
+
+    it 'routes Word uploads to PdfRenditionJob with a derived rendition key' do
+      docx_mime = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      expect do
+        post :create, params: { binary:    fixture_file_upload('example.docx', docx_mime),
+                                parent_id: collection.id }
+      end.to have_enqueued_job(PdfRenditionJob)
+        .with(anything, anything, a_string_matching(uuid_re))
+        .and have_enqueued_job(ContentCreationJob)
+        .and not_have_enqueued_job(IiifAssetsJob)
+    end
+
+    it 'seeds the work title from the uploaded filename via the structure-safe MODS path' do
+      post :create, params: { binary:    fixture_file_upload('image.png', 'image/png'),
+                              parent_id: collection.id }
+      work_id = assigns(:work).id
+      expect(AtlasRb::Work.find(work_id).title).to eq('image.png')
+    ensure
+      AtlasRb::Work.tombstone(work_id) if work_id
     end
 
     context 'depositor attribution' do
@@ -160,6 +190,19 @@ describe WorksController do
       expect(CGI.unescapeHTML(response.body)).to include(work.title)
     end
 
+    it 'renders the Advanced tab: title-part fields, creator widgets, and read-only preserved names' do
+      get :edit, params: { id: work.id }
+      body = CGI.unescapeHTML(response.body)
+      expect(body).to match(/<button[^>]*id="advanced-tab"/)
+      expect(body).to include('Title parts')
+      expect(body).to include('Personal creators')
+      expect(body).to include('Corporate creators')
+      expect(body).to include('Press + to add a personal creator') # stacked-input entry row
+      expect(body).to include('Other names')                       # preserved-names panel
+      expect(body).to include('Cohen, Daniel J.')    # an authority name, read-only
+      expect(body).to include('Contributor')         # a preserved non-Creator role
+    end
+
     it 'renders the cosmetic group name in the permissions dropdown, not the raw identifier' do
       Group.create!(raw: 'editors', cosmetic: 'Course Editors')
 
@@ -221,10 +264,34 @@ describe WorksController do
       get :metadata, params: { id: work.id }
       expect(response).to render_template('works/metadata')
       body = CGI.unescapeHTML(response.body)
-      expect(body).to include(work.title)
+      expect(body).to include('Respond')
+      expect(body).to include('Keywords')
       expect(body).to include('General Permissions')
       expect(body).to include('Group Permissions')
-      expect(body).to include('id="add-group"')
+      expect(body).to include('Press + to add a group permission')
+      expect(body).to include('group-permissions#add')
+    end
+
+    it 'renders the Image Derivatives section when a staged image is probed' do
+      allow(StagedImageProbe).to receive(:call).with(work_id: work.id)
+                                               .and_return(StagedImageProbe::Result.new(path: '/x', width: 441, height: 588))
+
+      get :metadata, params: { id: work.id }
+
+      body = CGI.unescapeHTML(response.body)
+      expect(body).to include('Image Derivatives')
+      expect(body).to include('longest edge is')
+      expect(body).to include('588')
+      expect(body).to include('derivative_widths[small]')
+      expect(body).to include('derivative-sizes')
+    end
+
+    it 'omits the Image Derivatives section for non-image deposits' do
+      allow(StagedImageProbe).to receive(:call).and_return(nil)
+
+      get :metadata, params: { id: work.id }
+
+      expect(CGI.unescapeHTML(response.body)).not_to include('Image Derivatives')
     end
   end
 
@@ -236,14 +303,96 @@ describe WorksController do
       sign_in user
     end
 
-    it 'updates the title and description and redirects to show' do
-      patch :update_metadata, params: { id: work.id, work: { title: 'New Title', description: 'New abstract.' } }
+    it 'edits the main title without flattening the structured title parts' do
+      patch :update_metadata, params: { id: work.id, work: { title: 'NewTitle', description: 'NewAbstract', keywords: %w[alpha beta] } }
 
       updated = AtlasRb::Work.find(work.id, nuid: '000000004')
-      expect(updated.title).to start_with('New Title')
-      expect(updated.title).not_to include("What's New")
-      expect(updated.description).to eq('New abstract.')
+      expect(updated.title).to start_with('NewTitle') # new main title
+      expect(updated.title).to include('Respond')     # partName preserved
+      expect(updated.title).to include('Episode')     # partNumber preserved
+      expect(updated.description).to eq('NewAbstract')
       expect(subject).to redirect_to action: :show, id: work.id
+    end
+
+    it 'rejects a save with no keywords (keywords are mandatory)' do
+      patch :update_metadata, params: { id: work.id, work: { title: 'NewTitle', description: 'NewAbstract' } }
+
+      expect(flash[:alert]).to be_present
+      expect(AtlasRb::Work.find(work.id, nuid: '000000004').title).not_to start_with('NewTitle')
+    end
+
+    describe 'opt-in download sizes' do
+      include ActiveJob::TestHelper
+
+      let(:descriptive) { { title: 'Sized', description: 'D', keywords: %w[alpha] } }
+
+      before do
+        allow(StagedImageProbe).to receive(:call).with(work_id: work.id)
+                                                 .and_return(StagedImageProbe::Result.new(path: '/x', width: 441, height: 588))
+      end
+
+      it 'enqueues DepositDerivativesJob with the chosen integer widths and still saves the metadata' do
+        expect do
+          patch :update_metadata, params: { id: work.id, work: descriptive,
+                                            derivative_widths: { small: '149', large: '503' } }
+        end.to have_enqueued_job(DepositDerivativesJob).with(work.id, { small: 149, large: 503 })
+
+        expect(AtlasRb::Work.find(work.id, nuid: '000000004').title).to start_with('Sized')
+      end
+
+      it 'skips invalid sizes with a flash but saves the metadata (derivatives never bounce the form)' do
+        expect do
+          patch :update_metadata, params: { id: work.id, work: descriptive,
+                                            derivative_widths: { small: '500', large: '100' } }
+        end.not_to have_enqueued_job(DepositDerivativesJob)
+
+        expect(flash[:alert]).to include('Sizes must increase from small to medium to large.')
+        expect(AtlasRb::Work.find(work.id, nuid: '000000004').title).to start_with('Sized')
+      end
+
+      it 'does nothing when the section was not submitted' do
+        expect do
+          patch :update_metadata, params: { id: work.id, work: descriptive }
+        end.not_to have_enqueued_job(DepositDerivativesJob)
+        expect(flash[:alert]).to be_nil
+      end
+
+      it 'skips with a flash when no staged image can be probed at save time' do
+        allow(StagedImageProbe).to receive(:call).and_return(nil)
+
+        expect do
+          patch :update_metadata, params: { id: work.id, work: descriptive,
+                                            derivative_widths: { small: '149' } }
+        end.not_to have_enqueued_job(DepositDerivativesJob)
+        expect(flash[:alert]).to include('no staged image')
+      end
+    end
+  end
+
+  describe 'update (Advanced tab)' do
+    let(:user) { User.new(email: 'test@example.com', nuid: '000000004', groups: ['editors']) }
+
+    before do
+      AtlasRb::Work.metadata(work.id, { 'permissions' => { 'edit' => ['editors'] } }, nuid: '000000004')
+      sign_in user
+    end
+
+    it 'adds a plain personal creator, preserving the authority-controlled names' do
+      patch :update, params: { id:   work.id,
+                               work: { form: 'advanced', personal_creators: [{ first: 'Jenny', last: 'Smith' }] } }
+
+      doc = NEU::MODS::Document.parse(AtlasRb::Work.mods(work.id, 'xml', nuid: '000000004'))
+      expect(doc.editable_personal_creators).to eq([{ given: 'Jenny', family: 'Smith' }])
+      expect(doc.preserved_names.size).to eq(3) # Cohen, NU, Flynn untouched
+      expect(subject).to redirect_to action: :show, id: work.id
+    end
+
+    it 'edits a structured title part (subtitle) in place, leaving the bare title' do
+      patch :update, params: { id: work.id, work: { form: 'advanced', subtitle: 'A New Subtitle' } }
+
+      doc = NEU::MODS::Document.parse(AtlasRb::Work.mods(work.id, 'xml', nuid: '000000004'))
+      expect(doc.title_parts[:subtitle]).to eq('A New Subtitle')
+      expect(doc.title_parts[:title]).to eq("What's New")
     end
   end
 

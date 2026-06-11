@@ -14,12 +14,12 @@ describe DerivativeCreator do
       )
     end
 
-    it 'treats integer widths as fixed pixel widths with the ^ prefix' do
+    it 'treats integer widths as longest-edge fits (!N,N, never upscaling)' do
       widths = { small: 320, medium: 640, large: 1280 }
       expect(DerivativeCreator.call(base: base, widths: widths)).to eq(
-        small:  "#{base}/full/^320,/0/default.jpg",
-        medium: "#{base}/full/^640,/0/default.jpg",
-        large:  "#{base}/full/^1280,/0/default.jpg"
+        small:  "#{base}/full/!320,320/0/default.jpg",
+        medium: "#{base}/full/!640,640/0/default.jpg",
+        large:  "#{base}/full/!1280,1280/0/default.jpg"
       )
     end
 
@@ -40,7 +40,7 @@ describe DerivativeCreator do
     it 'mixes value types within one widths hash' do
       widths = { small: 800, medium: 0.5, large: nil }
       expect(DerivativeCreator.call(base: base, widths: widths)).to eq(
-        small:  "#{base}/full/^800,/0/default.jpg",
+        small:  "#{base}/full/!800,800/0/default.jpg",
         medium: "#{base}/full/pct:50/0/default.jpg",
         large:  "#{base}/full/full/0/default.jpg"
       )
@@ -53,7 +53,7 @@ describe DerivativeCreator do
 
     it 'tolerates string keys (e.g. an ActiveJob-deserialized widths hash)' do
       expect(DerivativeCreator.call(base: base, widths: { 'small' => 100 })).to eq(
-        small: "#{base}/full/^100,/0/default.jpg"
+        small: "#{base}/full/!100,100/0/default.jpg"
       )
     end
 

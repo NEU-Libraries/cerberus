@@ -6,8 +6,10 @@
 .metadata-form{ data: { controller: "group-permissions", "group-permissions-resource-value": "work" } }
   = bootstrap_form_tag(url: metadata_work_path(params[:id]), method: :patch) do |f|
     = bootstrap_fields_for :work do |c|
-      = c.text_field :title, value: @work.title, label: 'Title', help: 'A descriptive title for this work.'
-      = c.text_area :description, rows: 8, value: @work.description, label: 'Abstract', help: 'A short summary describing the work.'
+      = render 'shared/descriptive_fields', f: c, descriptive: @descriptive, keywords: true
+
+    - if @image_probe
+      = render 'derivative_fields', longest_edge: @image_probe.longest_edge
 
     %h4.pt-4.pb-2 Permissions
     .row
@@ -36,4 +38,3 @@
                 class: 'btn btn-warning',
                 data: { turbo_method: :post,
                         turbo_confirm: 'Cancel this upload? The Work will be deleted.' }
-      = render 'shared/add_group_button'
