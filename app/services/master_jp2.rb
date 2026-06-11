@@ -23,6 +23,6 @@ class MasterJp2 < ApplicationService
     end
 
     def pdf?
-      Marcel::MimeType.for(Pathname.new(@path)) == 'application/pdf'
+      File.exist?(@path) && Marcel::MimeType.for(Pathname.new(@path)) == 'application/pdf'
     end
 end
