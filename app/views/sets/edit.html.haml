@@ -4,7 +4,4 @@
   %h3
     %i.fa-solid.fa-layer-group.text-primary.me-2{'aria-hidden' => 'true'}
     Edit set
-  - if flash.now[:alert]
-    .alert.alert-warning
-      %small= flash.now[:alert]
   = render 'form', url: set_path(@set['id']), method: :patch, submit_label: 'Save', cancel_path: set_path(@set['id'])

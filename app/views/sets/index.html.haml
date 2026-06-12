@@ -12,11 +12,6 @@
         %i.fa-solid.fa-plus.me-1{'aria-hidden' => 'true'}
         New set
 
-  - if flash[:notice]
-    .alert.alert-success.my-2= flash[:notice]
-  - if flash[:alert]
-    .alert.alert-warning.my-2= flash[:alert]
-
   - if @sets.any?
     .table-responsive
       %table.table.table-borderless.admin-registry-table.sets-table

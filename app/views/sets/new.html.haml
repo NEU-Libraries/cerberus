@@ -7,7 +7,4 @@
   %p.text-muted
     A set gathers works from anywhere in the repository — whole collections or individual
     works — without moving or changing them. Name it now; add things to it from their pages.
-  - if flash.now[:alert]
-    .alert.alert-warning
-      %small= flash.now[:alert]
   = render 'form', url: sets_path, method: :post, submit_label: 'Create set', cancel_path: sets_path
