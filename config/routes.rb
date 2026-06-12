@@ -42,6 +42,7 @@ Rails.application.routes.draw do
   resources :works do
     member do
       get :downloads
+      get :manifest
       get :metadata
       patch :metadata, action: :update_metadata
       post :tombstone

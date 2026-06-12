@@ -25,7 +25,9 @@ RSpec.describe MultipageIngestJob, type: :job do
     allow(FileUtils).to receive(:mv)
     allow(AtlasRb::FileSet).to receive(:create).and_return(double(id: 'fs-2'))
     allow(AtlasRb::FileSet).to receive(:update)
+    allow(AtlasRb::FileSet).to receive(:set_iiif_service)
     allow(AtlasRb::Work).to receive(:file_sets).and_return([])
+    allow(MasterJp2).to receive(:call).and_return('https://iiif.test/iiif/3/123.jp2')
     allow(IiifAssetsJob).to receive(:perform_later)
   end
 
@@ -51,6 +53,22 @@ RSpec.describe MultipageIngestJob, type: :job do
     it 'makes no Work.file_sets read on a fresh execution' do
       described_class.new.perform(ingest.id)
       expect(AtlasRb::Work).not_to have_received(:file_sets)
+    end
+
+    it 'mints the page JP2 and persists its IIIF service pointer' do
+      described_class.new.perform(ingest.id)
+
+      expect(MasterJp2).to have_received(:call).with(path: staged_path)
+      expect(AtlasRb::FileSet).to have_received(:set_iiif_service)
+        .with('fs-2', 'https://iiif.test/iiif/3/123.jp2')
+    end
+
+    it 'completes the page even when the bytes are unreadable for deep zoom' do
+      allow(MasterJp2).to receive(:call).and_raise(Vips::Error.new('bad bytes'))
+      described_class.new.perform(ingest.id)
+
+      expect(AtlasRb::FileSet).not_to have_received(:set_iiif_service)
+      expect(ingest.reload).to be_completed
     end
 
     it 'never enqueues ContentCreationJob (Work.complete belongs to the barrier)' do
@@ -95,6 +113,31 @@ RSpec.describe MultipageIngestJob, type: :job do
       expect(AtlasRb::FileSet).not_to have_received(:create)
       expect(AtlasRb::FileSet).not_to have_received(:update)
       expect(ingest.reload).to be_completed
+    end
+
+    it 'skips the JP2 re-mint on resume when the page already carries a service pointer' do
+      ingest.update!(file_set_pid: 'fs-2', blob_attached_at: 1.minute.ago)
+      allow(AtlasRb::Work).to receive(:file_sets).with('w-1').and_return(
+        [{ 'noid' => 'fs-2', 'position' => 2,
+           'assets' => [{ 'noid' => 'b-1' }, { 'uri' => 'https://iiif.test/iiif/3/old.jp2' }] }]
+      )
+
+      described_class.new.perform(ingest.id)
+
+      expect(MasterJp2).not_to have_received(:call)
+      expect(AtlasRb::FileSet).not_to have_received(:set_iiif_service)
+    end
+
+    it 're-mints and re-PATCHes on resume when no service pointer landed (Atlas upserts)' do
+      ingest.update!(file_set_pid: 'fs-2', blob_attached_at: 1.minute.ago)
+      allow(AtlasRb::Work).to receive(:file_sets).with('w-1').and_return(
+        [{ 'noid' => 'fs-2', 'position' => 2, 'assets' => [{ 'noid' => 'b-1' }] }]
+      )
+
+      described_class.new.perform(ingest.id)
+
+      expect(AtlasRb::FileSet).to have_received(:set_iiif_service)
+        .with('fs-2', 'https://iiif.test/iiif/3/123.jp2')
     end
 
     context 'when resumed past create with no attach stamp' do

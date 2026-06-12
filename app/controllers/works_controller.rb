@@ -6,7 +6,7 @@ class WorksController < ApplicationController
 
   IN_PROGRESS_NOTICE = 'This work is still being processed and cannot be edited yet.'
 
-  before_action :authorize_show!, only: [:downloads]
+  before_action :authorize_show!, only: [:downloads, :manifest]
   before_action :authorize_edit!, only: [:edit, :metadata, :update_metadata]
   before_action :authorize_tombstone!, only: [:tombstone]
   before_action :reject_if_in_progress, only: [:edit]
@@ -23,6 +23,17 @@ class WorksController < ApplicationController
   def tombstone
     AtlasRb::Work.tombstone(params[:id])
     redirect_to root_path, notice: 'Work deleted.'
+  end
+
+  # IIIF Presentation 3.0 manifest — one Canvas per page FileSet, in page
+  # order. Read-gated like every other view of the Work; the underlying
+  # Atlas reads are caller-gated too.
+  def manifest
+    work = AtlasRb::Work.find(params[:id])
+    return head :not_found if work.tombstoned
+
+    pages = AtlasRb::Work.file_sets(params[:id])
+    render json: IiifManifest.call(work: work, pages: pages, url: manifest_work_url(params[:id]))
   end
 
   def downloads
