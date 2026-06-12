@@ -9,25 +9,21 @@
 
 -# ===== Set hero =====
 .container.p-4.my-3.well.rounded-3
-  .d-flex.align-items-start
-    .flex-grow-1
-      %h3.d-inline= @set['title']
-      %h5.d-inline.text-black-50
-        %span.fa-solid.fa-layer-group.ps-2.pe-1
-        Set
-      %p.recipe-line.mb-0.mt-3
-        = set_recipe_sentence(chips_count: chips.size, added_count: added_noids.size, aside_count: aside_docs.size)
-      - if @set['description'].present?
-        .text-muted.small.mt-2= @set['description']
-    - if @owned
-      .text-end.ms-3.text-nowrap
-        = link_to edit_set_path(@set['id']), class: 'btn btn-sm btn-outline-secondary' do
-          %i.fa-solid.fa-pen.me-1{'aria-hidden' => 'true'}
-          Edit
-        = button_to set_path(@set['id']), method: :delete, class: 'btn btn-sm btn-outline-danger ms-1 d-inline',
-          form: { data: { turbo_confirm: "Delete “#{@set['title']}”?\n\nThe works and collections it references are not deleted — only this set goes away." } } do
-          %i.fa-solid.fa-trash-can.me-1{'aria-hidden' => 'true'}
-          Delete
+  %h3.d-inline= @set['title']
+  %h5.d-inline.text-black-50
+    %span.fa-solid.fa-layer-group.ps-2.pe-1
+    Set
+  %p.recipe-line.mb-0.mt-3
+    = set_recipe_sentence(chips_count: chips.size, added_count: added_noids.size, aside_count: aside_docs.size)
+  - if @set['description'].present?
+    .text-muted.small.mt-2= @set['description']
+  - if @owned
+    .clearfix.pt-3
+      .float-end
+        = link_to 'Edit', edit_set_path(@set['id']), class: 'px-3'
+        = link_to 'Delete', set_path(@set['id']), class: 'px-3',
+          data: { turbo_method: :delete,
+                  turbo_confirm: "Delete “#{@set['title']}”?\n\nThe works and collections it references are not deleted — only this set goes away." }
 
 -# ===== Set definition (recipe) =====
 .container.p-3.my-3.well.rounded-3.set-defn
@@ -36,44 +32,41 @@
     Set definition
     %span.text-muted.small.fw-normal — what's included, and the rules behind it
   #setDefn.collapse.show.mt-3
-    .row.g-4
-      .col-lg-6
-        .defn-label.mb-2
-          %i.fa-solid.fa-folder-open.me-1{'aria-hidden' => 'true'}
-          Collections in this set
-        - if chips.any?
-          - chips.each do |chip|
-            .incl-row
-              %span.ic
-                %i.fa-solid.fa-folder-open{'aria-hidden' => 'true'}
-              %span.nm= link_to set_noun_label(chip.noid, @recipe_titles), collection_path(chip.noid), class: 'text-decoration-none'
-              = set_chip_count(chip)
-              - if @owned
-                = button_to remove_collection_set_path(@set['id'], collection_id: chip.noid), method: :delete,
-                  class: 'btn btn-sm btn-outline-danger py-0 px-1', title: 'Remove this collection from the set',
-                  form: { class: 'd-inline', data: { turbo_confirm: "Remove “#{set_noun_label(chip.noid, @recipe_titles)}” from this set?\n\nThe collection and its works are not deleted — they just stop appearing here." } } do
-                  %i.fa-solid.fa-xmark{'aria-hidden' => 'true'}
-        - else
-          .text-muted.small.fst-italic No collections included.
-      .col-lg-6
-        .defn-label.mb-2
-          %i.fa-solid.fa-thumbtack.me-1{'aria-hidden' => 'true'}
-          Items added individually
-        - if added_noids.any?
-          - added_noids.each do |noid|
-            .incl-row.is-item
-              %span.ic
-                %i.fa-solid.fa-file-lines{'aria-hidden' => 'true'}
-              %span.nm
-                = link_to set_noun_label(noid, @recipe_titles), work_path(noid), class: 'text-decoration-none'
-                %span.nuid= noid
-              - if @owned
-                = button_to remove_work_set_path(@set['id'], work_id: noid), method: :delete,
-                  class: 'btn btn-sm btn-outline-danger py-0 px-1', title: 'Remove from the set',
-                  form: { class: 'd-inline' } do
-                  %i.fa-solid.fa-xmark{'aria-hidden' => 'true'}
-        - else
-          .text-muted.small.fst-italic Nothing added individually.
+    .defn-label.mb-2
+      %i.fa-solid.fa-folder-open.me-1{'aria-hidden' => 'true'}
+      Collections in this set
+    - if chips.any?
+      - chips.each do |chip|
+        .incl-row
+          %span.ic
+            %i.fa-solid.fa-folder-open{'aria-hidden' => 'true'}
+          %span.nm= link_to set_noun_label(chip.noid, @recipe_titles), collection_path(chip.noid), class: 'text-decoration-none'
+          = set_chip_count(chip)
+          - if @owned
+            = button_to remove_collection_set_path(@set['id'], collection_id: chip.noid), method: :delete,
+              class: 'btn btn-sm btn-outline-danger py-0 px-1', title: 'Remove this collection from the set',
+              form: { class: 'd-inline', data: { turbo_confirm: "Remove “#{set_noun_label(chip.noid, @recipe_titles)}” from this set?\n\nThe collection and its works are not deleted — they just stop appearing here." } } do
+              %i.fa-solid.fa-xmark{'aria-hidden' => 'true'}
+    - else
+      .text-muted.small.fst-italic No collections included.
+    .defn-label.mt-4.mb-2
+      %i.fa-solid.fa-thumbtack.me-1{'aria-hidden' => 'true'}
+      Items added individually
+    - if added_noids.any?
+      - added_noids.each do |noid|
+        .incl-row.is-item
+          %span.ic
+            %i.fa-solid.fa-file-lines{'aria-hidden' => 'true'}
+          %span.nm
+            = link_to set_noun_label(noid, @recipe_titles), work_path(noid), class: 'text-decoration-none'
+            %span.nuid= noid
+          - if @owned
+            = button_to remove_work_set_path(@set['id'], work_id: noid), method: :delete,
+              class: 'btn btn-sm btn-outline-danger py-0 px-1', title: 'Remove from the set',
+              form: { class: 'd-inline' } do
+              %i.fa-solid.fa-xmark{'aria-hidden' => 'true'}
+    - else
+      .text-muted.small.fst-italic Nothing added individually.
 
     - if @owned || aside_docs.any?
       .defn-label.mt-4.mb-2
