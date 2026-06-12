@@ -44,9 +44,10 @@
           = set_chip_count(chip)
           - if @owned
             = button_to remove_collection_set_path(@set['id'], collection_id: chip.noid), method: :delete,
-              class: 'btn btn-sm btn-outline-danger py-0 px-1', title: 'Remove this collection from the set',
-              form: { class: 'd-inline', data: { turbo_confirm: "Remove “#{set_noun_label(chip.noid, @recipe_titles)}” from this set?\n\nThe collection and its works are not deleted — they just stop appearing here." } } do
-              %i.fa-solid.fa-xmark{'aria-hidden' => 'true'}
+              class: 'btn btn-danger rm-cap', 'aria-label' => 'Remove this collection from the set',
+              title: 'Remove this collection from the set',
+              form: { class: 'rm-cap-form', data: { turbo_confirm: "Remove “#{set_noun_label(chip.noid, @recipe_titles)}” from this set?\n\nThe collection and its works are not deleted — they just stop appearing here." } } do
+              %i.fa-solid.fa-minus{'aria-hidden' => 'true'}
     - else
       .text-muted.small.fst-italic No collections included.
     - inverted = @owned ? set_inverted_chips(chips) : []
@@ -71,9 +72,9 @@
             %span.nuid= noid
           - if @owned
             = button_to remove_work_set_path(@set['id'], work_id: noid), method: :delete,
-              class: 'btn btn-sm btn-outline-danger py-0 px-1', title: 'Remove from the set',
-              form: { class: 'd-inline' } do
-              %i.fa-solid.fa-xmark{'aria-hidden' => 'true'}
+              class: 'btn btn-danger rm-cap', 'aria-label' => 'Remove from the set', title: 'Remove from the set',
+              form: { class: 'rm-cap-form' } do
+              %i.fa-solid.fa-minus{'aria-hidden' => 'true'}
     - else
       .text-muted.small.fst-italic Nothing added individually.
 

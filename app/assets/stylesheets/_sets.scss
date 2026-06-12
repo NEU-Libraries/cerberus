@@ -45,6 +45,22 @@ $sets-via-soft: #e6eef6;
     background: $white;
     margin-bottom: 0.4rem;
 
+    // Remove affordance as an end-of-input cap (the permissions/keywords
+    // idiom): a solid $danger segment flush with the row's right edge.
+    .rm-cap-form {
+      align-self: stretch;
+      display: flex;
+      margin: -0.55rem -0.7rem -0.55rem 0.15rem;
+    }
+
+    button.rm-cap {
+      display: flex;
+      align-items: center;
+      padding: 0 0.7rem;
+      font-size: 0.8rem;
+      border-radius: 0 0.4rem 0.4rem 0;
+    }
+
     .ic {
       width: 1.4rem;
       text-align: center;

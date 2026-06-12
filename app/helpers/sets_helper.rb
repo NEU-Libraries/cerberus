@@ -13,13 +13,13 @@ module SetsHelper
   # The chip tally: plain total normally; "X of Y" once set-asides have put
   # holes in this collection's contribution (the divergence is the signal).
   def set_chip_count(chip)
+    total = "#{number_with_delimiter(chip.total)} #{'Work'.pluralize(chip.total)}"
     if chip.live < chip.total
       tag.span(class: 'ct has-holes') do
-        tag.span(number_with_delimiter(chip.live), class: 'tnum') +
-          tag.span(" of #{number_with_delimiter(chip.total)}", class: 'of')
+        tag.span(number_with_delimiter(chip.live), class: 'tnum') + tag.span(" of #{total}", class: 'of')
       end
     else
-      tag.span(tag.span(number_with_delimiter(chip.total), class: 'tnum'), class: 'ct')
+      tag.span(tag.span(total, class: 'tnum'), class: 'ct')
     end
   end
 
