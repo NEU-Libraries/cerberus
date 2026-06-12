@@ -153,6 +153,10 @@ class WorksController < ApplicationController
     def prepare_show_view
       @mods = AtlasRb::Work.mods(params[:id], 'html')
       @files = AtlasRb::Work.assets(params[:id])
+      # The page-turning viewer mounts only for multipage works: two or
+      # more positioned page FileSets (the ordered listing is the signal).
+      @multipage = AtlasRb::Work.file_sets(params[:id])
+                                .count { |page| page['position'].present? } >= 2
       @can_tombstone = current_ability.can?(:tombstone,
                                             solr_doc_from_permissions(@permissions, klass: 'Work'))
       breadcrumbs(params[:id])

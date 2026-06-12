@@ -1,0 +1,26 @@
+// The multipage page-turning viewer (Tify) on Work show pages — compact
+// chrome variant. Tify ships a full workspace header (view panels: info,
+// thumbnails, TOC, fulltext, export, help); the DRS register wants page
+// turning + deep zoom only, so the panel-switching chrome is hidden and
+// the scan pane + pagination + zoom controls remain. Selectors are
+// double-classed (.iiif-viewer .tify-*) to outrank tify.css, which loads
+// after application.css on viewer pages.
+.iiif-viewer {
+  height: 72vh;
+  min-height: 420px;
+  border: 1px solid $gray-300;
+  border-radius: 0.4rem;
+  overflow: hidden;
+  margin-bottom: 1rem;
+
+  // Panel-switcher buttons and the duplicate in-viewer title: hidden.
+  // Pagination controls share the header, so the header itself stays.
+  .tify-header-title {
+    display: none;
+  }
+
+  .tify-header-button-group--views,
+  .tify-header-column--views {
+    display: none;
+  }
+}
