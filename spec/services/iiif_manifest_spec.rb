@@ -30,7 +30,7 @@ RSpec.describe IiifManifest do
     expect(manifest['@context']).to eq('http://iiif.io/api/presentation/3/context.json')
     expect(manifest['id']).to eq(url)
     expect(manifest['label']).to eq('none' => ['Field Notebook'])
-    expect(manifest['items'].map { |c| c['id'] })
+    expect(manifest['items'].pluck('id'))
       .to eq(["#{url}/canvas/p-1", "#{url}/canvas/p-3"])
   end
 
@@ -52,7 +52,7 @@ RSpec.describe IiifManifest do
       instance_double(Faraday::Response, success?: true, body: { width: 100, height: 200 }.to_json)
     )
 
-    expect(manifest['items'].map { |c| c['id'] }).to eq(["#{url}/canvas/p-3"])
+    expect(manifest['items'].pluck('id')).to eq(["#{url}/canvas/p-3"])
   end
 
   it 'renders an empty manifest for a work with no deep-zoomable pages' do
