@@ -13,10 +13,10 @@
   %h5.d-inline.text-black-50
     %span.fa-solid.fa-layer-group.ps-2.pe-1
     Set
-  %p.recipe-line.mb-0.mt-3
-    = set_recipe_sentence(chips_count: chips.size, added_count: added_noids.size, aside_count: aside_docs.size)
   - if @set['description'].present?
-    .text-muted.small.mt-2= @set['description']
+    %p.mb-0.mt-3= @set['description']
+  %p.recipe-line.small.mb-0{class: (@set['description'].present? ? 'mt-2' : 'mt-3')}
+    = set_recipe_sentence(chips_count: chips.size, added_count: added_noids.size, aside_count: aside_docs.size)
   - if @owned
     .clearfix.pt-3
       .float-end
