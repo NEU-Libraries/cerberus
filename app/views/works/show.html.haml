@@ -29,25 +29,21 @@
           = link_to '#downloads' do
             %span.text-muted= "Downloads (#{@files.size})"
             %i.fa-solid.fa-arrow-down.ms-1{'aria-hidden' => 'true'}
-  - if @multipage
-    .row
-      .col-12
+  .row
+    .col-md-6.order-md-1.order-2
+      - if @multipage
         -# Page-turning deep-zoom viewer (Tify) over the work's IIIF
-        -# manifest. Stylesheet ships separately from application.css so
-        -# single-page works never pay for it; the JS arrives via dynamic
-        -# import in iiif_viewer_controller for the same reason.
+        -# manifest, in the slot the static thumbnail occupies for
+        -# single-page works. Stylesheet ships separately from
+        -# application.css and the JS arrives via dynamic import in
+        -# iiif_viewer_controller, so other pages never pay for either.
         = stylesheet_link_tag 'tify', 'data-turbo-track': 'false'
         .iiif-viewer{data: { controller: 'iiif-viewer',
                              'iiif-viewer-url-value': manifest_work_path(@work.id) }}
-    .row
-      .col-md-12
-        = @mods.html_safe
-  - else
-    .row
-      .col-md-6.order-md-1.order-2
+      - else
         = render partial: "thumbnail"
-      .col-md-6.order-md-2.order-1
-        = @mods.html_safe
+    .col-md-6.order-md-2.order-1
+      = @mods.html_safe
 
 .clearfix.mb-4
 

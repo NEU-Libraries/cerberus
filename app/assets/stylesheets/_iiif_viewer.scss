@@ -6,8 +6,9 @@
 // double-classed (.iiif-viewer .tify-*) to outrank tify.css, which loads
 // after application.css on viewer pages.
 .iiif-viewer {
-  height: 72vh;
-  min-height: 420px;
+  // Sized for the show page's left column (the static thumbnail's slot).
+  height: 60vh;
+  min-height: 380px;
   border: 1px solid $gray-300;
   border-radius: 0.4rem;
   overflow: hidden;
