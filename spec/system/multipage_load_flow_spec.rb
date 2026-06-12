@@ -47,6 +47,10 @@ RSpec.describe 'Multipage loader end-to-end flow', type: :request do
     allow(AtlasRb::Work).to receive(:find).and_return(double(thumbnail: 'http://iiif.example/t.jpg'))
     allow(AtlasRb::FileSet).to receive(:create).and_return(double(id: 'fs-1'), double(id: 'fs-2'))
     allow(AtlasRb::FileSet).to receive(:update)
+    allow(AtlasRb::FileSet).to receive(:set_iiif_service)
+    # Same posture as the IiifAssetsJob no-op above: per-page JP2 + service
+    # persistence has its own coverage in the ingest-job spec.
+    allow(MasterJp2).to receive(:call).and_return('http://iiif.example/iiif/3/p.jp2')
   end
 
   after do
