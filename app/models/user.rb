@@ -42,6 +42,20 @@ class User
     !role.to_s.in?(%w[guest anonymous])
   end
 
+  # Sets (personal curation) share the inbox's human-role floor: guests and
+  # the anonymous tier cannot own Sets. One concept, two surfaces — if the
+  # floor ever diverges, split the predicates then.
+  def curates_sets?
+    messageable?
+  end
+
+  # The loader surface's coarse role gate (shared by LoadsController and
+  # the My Loaders page/menu). Which Loaders show inside is the per-loader
+  # Grouper group's concern — see Loader.available_to.
+  def loader_tier?
+    role.to_s.in?(%w[loader privileged admin])
+  end
+
   def to_s
     pretty_name
   end

@@ -1,0 +1,5 @@
+-# One row's resolved work tally for the My Sets index (see the Works
+-# column in index.html.haml — this fills its lazy turbo-frame).
+= turbo_frame_tag "set-works-count-#{@set['id']}" do
+  %span.tnum= number_with_delimiter(@count)
+  = 'Work'.pluralize(@count)

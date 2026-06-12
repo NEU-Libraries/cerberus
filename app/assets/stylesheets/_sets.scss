@@ -1,0 +1,307 @@
+// Sets (Compilations) — the Set show page's recipe panel, set-aside zone,
+// contents rows, and teaching toast. Register: restrained/archival, matching
+// the mockup at docs level (drs-set-page-mockup.html). Counts are numerics —
+// tabular-nums throughout. The aside zone is deliberately NEUTRAL (dashed
+// gray, not red): set aside ≠ deleted.
+
+$sets-direct: darken($green, 12%); // teal-green, legible as text on tint
+$sets-direct-soft: #e3f3ef;
+$sets-via-soft: #e6eef6;
+
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+.recipe-line {
+  color: $gray-700;
+
+  .pos {
+    color: $sets-direct;
+    font-weight: 600;
+  }
+
+  .neg {
+    color: $gray-600;
+    font-weight: 600;
+  }
+}
+
+.set-defn {
+  .defn-label {
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: $gray-600;
+    font-weight: 700;
+  }
+
+  .incl-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.55rem 0.7rem;
+    border: 1px solid $gray-300;
+    border-radius: 0.4rem;
+    background: $white;
+    margin-bottom: 0.4rem;
+
+    // Remove affordance as an end-of-input cap (the permissions/keywords
+    // idiom): a solid $danger segment flush with the row's right edge.
+    .rm-cap-form {
+      align-self: stretch;
+      display: flex;
+      margin: -0.55rem -0.7rem -0.55rem 0.15rem;
+    }
+
+    button.rm-cap {
+      display: flex;
+      align-items: center;
+      padding: 0 0.7rem;
+      font-size: 0.8rem;
+      border-radius: 0 0.4rem 0.4rem 0;
+    }
+
+    .ic {
+      width: 1.4rem;
+      text-align: center;
+      color: $blue;
+    }
+
+    &.is-item .ic {
+      color: $sets-direct;
+    }
+
+    .nm {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .ct {
+      color: $gray-600;
+      font-size: 0.85rem;
+      white-space: nowrap;
+
+      .of {
+        color: $gray-500;
+      }
+
+      // the divergence is the signal: "X of Y" only appears with holes
+      &.has-holes {
+        color: $blue;
+        font-weight: 600;
+      }
+    }
+  }
+
+  .aside-zone {
+    background: $gray-100;
+    border: 1px dashed $gray-400;
+    border-radius: 0.5rem;
+
+    .aside-item {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      padding: 0.4rem 0.2rem;
+      border-bottom: 1px solid $gray-200;
+      font-size: 0.92rem;
+
+      &:last-of-type {
+        border-bottom: 0;
+      }
+
+      .src {
+        color: $gray-600;
+        font-size: 0.82rem;
+        white-space: nowrap;
+      }
+    }
+  }
+}
+
+// provenance badges on contents rows
+.prov {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.18rem 0.5rem;
+  border-radius: 999px;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.32rem;
+
+  &.prov-via {
+    background: $sets-via-soft;
+    color: $blue;
+  }
+
+  &.prov-direct {
+    background: $sets-direct-soft;
+    color: $sets-direct;
+  }
+}
+
+.note-band {
+  background: $sets-via-soft;
+  border: 1px solid #cfe0f0;
+  border-radius: 0.4rem;
+}
+
+// contents result rows (Blacklight-adjacent, with the provenance rail)
+#set-results {
+  .result-row {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid $gray-200;
+
+    .thumb {
+      width: 74px;
+      height: 74px;
+      flex: none;
+      border: 1px solid $gray-300;
+      background: $gray-100;
+      border-radius: 0.3rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: $gray-400;
+      font-size: 1.4rem;
+      overflow: hidden;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    }
+
+    h3 {
+      font-size: 1.06rem;
+      margin: 0 0 0.15rem;
+    }
+
+    .meta {
+      color: $gray-700;
+      font-size: 0.9rem;
+    }
+  }
+}
+
+.nuid {
+  font-family: var(--bs-font-monospace);
+  font-size: 0.8rem;
+  color: $gray-600;
+}
+
+// the set-aside teaching toast
+.toast-wrap {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  z-index: 1080;
+  width: min(560px, 92vw);
+}
+
+.drs-toast {
+  background: #2b3641;
+  color: #f3f5f7;
+  border-radius: 0.5rem;
+  padding: 0.85rem 1rem;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+  display: flex;
+  gap: 0.7rem;
+  align-items: flex-start;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.25s, transform 0.25s;
+
+  &.show {
+    opacity: 1;
+    transform: none;
+  }
+
+  .fa-circle-info {
+    color: #7fb0e0;
+    margin-top: 0.15rem;
+  }
+
+  .undo {
+    color: #9fd0ff;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  b {
+    color: $white;
+  }
+}
+
+// The Add-to-set modal (Work/Collection show pages). Rows share the recipe
+// panel's bordered-row vocabulary; the addable row is a real button
+// (button_to) restyled flat, so the whole row is the click target.
+.set-picker {
+  .picker-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    width: 100%;
+    text-align: left;
+    padding: 0.55rem 0.7rem;
+    border: 1px solid $gray-300;
+    border-radius: 0.4rem;
+    background: $white;
+    margin-bottom: 0.4rem;
+    font-size: 0.9rem;
+
+    > i {
+      margin-top: 0.2rem;
+    }
+
+    .nm {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .state {
+      display: block;
+      font-size: 0.78rem;
+      color: $gray-600;
+    }
+
+    &.is-noop {
+      color: $gray-700;
+      background: $gray-100;
+    }
+  }
+
+  button.picker-row.is-add {
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+      border-color: $blue;
+      background: $sets-via-soft;
+    }
+  }
+
+  form.button_to {
+    margin: 0;
+  }
+}
+
+// Navbar user menu (split button after the user name: My Sets / Admin).
+// Flat link styling so it reads like its nav-link siblings — the caret is
+// the only hint of the menu; no outline, no fill.
+.user-menu {
+  .user-menu-link {
+    color: var(--bs-nav-link-color);
+    text-decoration: none;
+
+    &:hover,
+    &:focus-visible {
+      color: var(--bs-nav-link-hover-color);
+    }
+  }
+}

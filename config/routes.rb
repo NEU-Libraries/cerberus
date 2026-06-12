@@ -47,7 +47,9 @@ Rails.application.routes.draw do
       post :tombstone
     end
   end
-  resources :loaders, only: [], param: :slug do
+  # The bare index is the "My Loaders" interstitial (user-menu entry);
+  # everything else on a loader happens through its nested loads.
+  resources :loaders, only: [:index], param: :slug do
     resources :loads, only: [:index, :show, :new, :create, :destroy] do
       member { patch :confirm }
     end
@@ -57,6 +59,24 @@ Rails.application.routes.draw do
   # not a row delete; recipients is the compose typeahead's JSON source.
   resources :messages, path: 'inbox', only: [:index, :show, :new, :create, :destroy] do
     collection { get :recipients }
+  end
+
+  # Sets — personal curated sets over Atlas Compilations ("Set" is the only
+  # word a user ever sees; "Compilation" is the model name on the wire).
+  # Recipe mutations are member POST/DELETEs mirroring the atlas_rb binding;
+  # `aside` is the set-aside / put-back pair.
+  resources :sets do
+    # The lazy-loaded "Add to set…" menu body (Work/Collection show pages).
+    collection { get :picker }
+    member do
+      get    'works_count',                to: 'sets#works_count',       as: :works_count
+      post   'collections',                to: 'sets#add_collection',    as: :add_collection
+      delete 'collections/:collection_id', to: 'sets#remove_collection', as: :remove_collection
+      post   'works',                      to: 'sets#add_work',          as: :add_work
+      delete 'works/:work_id',             to: 'sets#remove_work',       as: :remove_work
+      post   'aside',                      to: 'sets#set_aside',         as: :set_aside
+      delete 'aside/:work_id',             to: 'sets#put_back',          as: :put_back
+    end
   end
 
   namespace :admin do

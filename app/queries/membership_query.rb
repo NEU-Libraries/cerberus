@@ -24,16 +24,37 @@ class MembershipQuery
   ANCESTOR_FIELD = 'ancestor_ids_ssim'
 
   class << self
-    # fq matching every Collection/Community whose ancestor chain includes
-    # +anchor_noid+ — i.e. all descendants of the anchor (the anchor itself excluded,
-    # since a node is not its own ancestor).
+    # fq matching every Collection/Community whose ancestor chain includes any of
+    # +anchor_noids+ — i.e. all descendants of the anchor(s) (the anchors themselves
+    # excluded, since a node is not its own ancestor).
     #
-    # @param anchor_noid [String] the anchor's bare noid as stored in
+    # @param anchor_noids [String, Array<String>] bare noid(s) as stored in
     #   {ANCESTOR_FIELD}. A leading `id-` (as carried by `alternate_ids_ssim`) is
     #   tolerated and stripped.
     # @return [String] an fq fragment (for `:fq`, never `:q`).
-    def descendants_fq(anchor_noid)
-      "{!terms f=#{ANCESTOR_FIELD}}#{normalize_noid(anchor_noid)}"
+    def descendants_fq(anchor_noids)
+      "{!terms f=#{ANCESTOR_FIELD}}#{Array(anchor_noids).map { |n| normalize_noid(n) }.join(',')}"
+    end
+
+    # fq matching documents by Solr uniqueKey (`id`, the bare uuid). Used to splice
+    # individually-named resources (a Set's directly-added Works) into a membership
+    # {!bool}, or — via {.excluding_fq} — to subtract them.
+    #
+    # @param uuids [Array<String>] bare uuids (no `id-` prefix).
+    # @return [String] an fq fragment (for `:fq`, never `:q`).
+    def identity_fq(uuids)
+      "{!terms f=id}#{Array(uuids).join(',')}"
+    end
+
+    # Wrap a clause as a subtractive fq: everything EXCEPT what +clause+ matches.
+    # A bare leading `-` cannot precede a localparams clause (`{!terms}` must open
+    # the param to be its parser), so the subtraction is a {!bool} with an explicit
+    # `must="*:*"` anchor — a must_not needs a positive base to subtract from.
+    #
+    # @param clause [String] an fq fragment to negate.
+    # @return [String] an fq fragment (for `:fq`, never `:q`).
+    def excluding_fq(clause)
+      %({!bool must="*:*" must_not="#{clause}"})
     end
 
     # fq matching docs that are members of any of +container_uuids+. Structural

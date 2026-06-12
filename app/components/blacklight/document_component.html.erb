@@ -35,6 +35,19 @@
             <i class="fa-solid fa-download ms-1" aria-hidden="true"></i>
           </button>
         <% end %>
+        <%# klass_type (string), not klass: in this template's scope a bare
+            `Collection` is ViewComponent::Collection, not the app model. %>
+        <% if helpers.current_user&.curates_sets? && %w[Work Collection].include?(@document.klass_type) %>
+          <a href="#add-to-set-<%= @document.to_param %>"
+             class="btn btn-sm btn-link p-0 me-2"
+             role="button"
+             data-bs-toggle="modal"
+             data-controller="tooltip"
+             data-bs-title="Add to Set">
+            <span class="visually-hidden">Add to set</span>
+            <i class="fa-regular fa-clone" aria-hidden="true"></i>
+          </a>
+        <% end %>
         <%= link_to helpers.report_a_problem_url(@document),
                     class: 'btn btn-sm btn-link p-0',
                     target: '_blank',
@@ -44,6 +57,11 @@
           <i class="fa-regular fa-comment-dots" aria-hidden="true"></i>
         <% end %>
       </div>
+      <% if helpers.current_user&.curates_sets? && %w[Work Collection].include?(@document.klass_type) %>
+        <%= render 'sets/picker_modal',
+                   kind: @document.klass_type.downcase,
+                   noid: @document.to_param %>
+      <% end %>
     </div>
 
     <%= thumbnail %>

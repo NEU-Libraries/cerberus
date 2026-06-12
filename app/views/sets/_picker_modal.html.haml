@@ -1,0 +1,41 @@
+-# The Add-to-set modal (triggered by the clone icon in result rows — see
+-# blacklight/document_component.html.erb). Users may own dozens or hundreds
+-# of sets, so the modal carries a typeahead filter and pagination.
+-#
+-# The filter form lives OUTSIDE the rows turbo-frame and targets it, so the
+-# input never re-renders (no focus loss while typing); the frame itself is
+-# lazy, so the host page costs no Atlas call until the modal first opens.
+-# All ids are noid-scoped: result listings mount one inert shell per row.
+-#
+-# Locals:
+-#   kind — 'work' or 'collection'
+-#   noid — the item's NOID
+- modal_id = "add-to-set-#{noid}"
+- label_id = "add-to-set-label-#{noid}"
+- frame_id = "set-picker-#{noid}"
+
+.modal.fade{id: modal_id, tabindex: '-1', 'aria-labelledby' => label_id, 'aria-hidden' => 'true'}
+  .modal-dialog.modal-dialog-centered.modal-dialog-scrollable
+    -# `text-start` defends against `.text-end` ancestors in the host row
+    -# (the icon rail) bleeding into the modal contents.
+    .modal-content.text-start.set-picker
+      .modal-header
+        %h5.modal-title{id: label_id} Add to set
+        %button.btn-close{type: 'button', 'aria-label': 'Close', data: { 'bs-dismiss': 'modal' }}
+      .modal-body
+        - if kind == 'collection'
+          %p.small.text-muted.mb-2
+            Adds everything in this collection — the set stays current as the collection changes.
+        %form.mb-2{action: picker_sets_path, method: 'get',
+                   data: { controller: 'picker-search', turbo_frame: frame_id }}
+          %input{type: 'hidden', name: "#{kind}_id", value: noid}
+          %input.form-control{type: 'search', name: 'q', placeholder: 'Filter your sets by title…',
+                              'aria-label' => 'Filter your sets by title', autocomplete: 'off',
+                              data: { action: 'input->picker-search#search' }}
+        = turbo_frame_tag frame_id, src: picker_sets_path(:"#{kind}_id" => noid), loading: :lazy do
+          .py-2.small.text-muted Loading your sets…
+      .modal-footer.justify-content-between
+        = link_to new_set_path, class: 'small text-decoration-none' do
+          %i.fa-solid.fa-plus.me-1{'aria-hidden' => 'true'}
+          New set
+        %button.btn.btn-secondary.btn-sm{type: 'button', data: { 'bs-dismiss': 'modal' }} Done

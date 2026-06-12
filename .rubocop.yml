@@ -1,4 +1,8 @@
 plugins: rubocop-rails
+Naming/AccessorMethodName:
+  Exclude:
+    # "set_" is the Sets domain noun (set_chip_count etc.), not a writer prefix
+    - 'app/helpers/sets_helper.rb'
 Lint/MissingSuper:
   Exclude:
     - 'app/services/**/*'

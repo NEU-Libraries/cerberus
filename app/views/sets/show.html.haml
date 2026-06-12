@@ -1,0 +1,149 @@
+- content_for(:page_title) do
+  = @set['title']
+
+- chips = @resolver.chips
+- added_noids = Array(@set['included_works'])
+- aside_docs = @resolver.aside_documents
+
+= render 'sets/toast', chips: chips
+
+-# ===== Set hero =====
+.container.p-4.my-3.well.rounded-3
+  %h3.d-inline= @set['title']
+  %h5.d-inline.text-black-50
+    %span.fa-solid.fa-layer-group.ps-2.pe-1
+    Set
+  - if @set['description'].present?
+    %p.mb-0.mt-3= @set['description']
+  %p.recipe-line.small.mb-0{class: (@set['description'].present? ? 'mt-2' : 'mt-3')}
+    = set_recipe_sentence(chips_count: chips.size, added_count: added_noids.size, aside_count: aside_docs.size)
+  - if @owned
+    .clearfix.pt-3
+      .float-end
+        = link_to 'Edit', edit_set_path(@set['id']), class: 'px-3'
+        = link_to 'Delete', set_path(@set['id']), class: 'px-3',
+          data: { turbo_method: :delete,
+                  turbo_confirm: "Delete “#{@set['title']}”?\n\nThe works and collections it references are not deleted — only this set goes away." }
+
+-# ===== Set definition (recipe) =====
+.container.p-3.my-3.well.rounded-3.set-defn
+  %button.btn.btn-link.p-0.text-decoration-none.fw-semibold.text-dark.d-flex.align-items-center.gap-2{type: 'button', 'data-bs-toggle' => 'collapse', 'data-bs-target' => '#setDefn', 'aria-expanded' => 'true', 'aria-controls' => 'setDefn'}
+    %i.fa-solid.fa-sliders.text-secondary{'aria-hidden' => 'true'}
+    Set definition
+    %span.text-muted.small.fw-normal — what's included, and the rules behind it
+  #setDefn.collapse.show.mt-3
+    .defn-label.mb-2
+      %i.fa-solid.fa-folder-open.me-1{'aria-hidden' => 'true'}
+      Collections in this set
+    - if chips.any?
+      - chips.each do |chip|
+        .incl-row
+          %span.ic
+            %i.fa-solid.fa-folder-open{'aria-hidden' => 'true'}
+          %span.nm= link_to set_noun_label(chip.noid, @recipe_titles), collection_path(chip.noid), class: 'text-decoration-none'
+          = set_chip_count(chip)
+          - if @owned
+            = button_to remove_collection_set_path(@set['id'], collection_id: chip.noid), method: :delete,
+              class: 'btn btn-danger rm-cap', 'aria-label' => 'Remove this collection from the set',
+              title: 'Remove this collection from the set',
+              form: { class: 'rm-cap-form', data: { turbo_confirm: "Remove “#{set_noun_label(chip.noid, @recipe_titles)}” from this set?\n\nThe collection and its works are not deleted — they just stop appearing here." } } do
+              %i.fa-solid.fa-minus{'aria-hidden' => 'true'}
+    - else
+      .text-muted.small.fst-italic No collections included.
+    - inverted = @owned ? set_inverted_chips(chips) : []
+    - if inverted.any?
+      .note-band.p-2.px-3.mt-2.small.text-secondary
+        %i.fa-solid.fa-circle-info.text-primary.me-1{'aria-hidden' => 'true'}
+        You've set aside most of
+        #{inverted.map { |chip| "“#{set_noun_label(chip.noid, @recipe_titles)}”" }.to_sentence}.
+        If you only want a handful of works, consider removing the
+        #{'collection'.pluralize(inverted.size)} and adding those works individually —
+        new deposits won't appear here unasked.
+    .defn-label.mt-4.mb-2
+      %i.fa-solid.fa-thumbtack.me-1{'aria-hidden' => 'true'}
+      Items added individually
+    - if added_noids.any?
+      - added_noids.each do |noid|
+        .incl-row.is-item
+          %span.ic
+            %i.fa-solid.fa-file-lines{'aria-hidden' => 'true'}
+          %span.nm
+            = link_to set_noun_label(noid, @recipe_titles), work_path(noid), class: 'text-decoration-none'
+            %span.nuid= noid
+          - if @owned
+            = button_to remove_work_set_path(@set['id'], work_id: noid), method: :delete,
+              class: 'btn btn-danger rm-cap', 'aria-label' => 'Remove from the set', title: 'Remove from the set',
+              form: { class: 'rm-cap-form' } do
+              %i.fa-solid.fa-minus{'aria-hidden' => 'true'}
+    - else
+      .text-muted.small.fst-italic Nothing added individually.
+
+    - if @owned || aside_docs.any?
+      .defn-label.mt-4.mb-2
+        %i.fa-solid.fa-box-archive.me-1{'aria-hidden' => 'true'}
+        Set aside
+        %span.text-lowercase.fw-normal — hidden from this set only; the collections aren't changed
+      .aside-zone.p-3
+        - if aside_docs.any?
+          - aside_docs.each do |doc|
+            - source = @resolver.provenance_for(doc)
+            .aside-item
+              %i.fa-solid.fa-file-lines.text-muted{'aria-hidden' => 'true'}
+              %span.flex-grow-1= link_to set_document_title(doc), work_path(doc.to_param), class: 'text-decoration-none'
+              %span.src
+                - if source.is_a?(String)
+                  from #{set_noun_label(source, @recipe_titles)}
+                - elsif source == :direct
+                  added directly
+              - if @owned
+                = button_to put_back_set_path(@set['id'], work_id: doc.to_param), method: :delete,
+                  class: 'btn btn-sm btn-link text-decoration-none p-0 ms-2', form: { class: 'd-inline' } do
+                  %i.fa-solid.fa-rotate-left.me-1{'aria-hidden' => 'true'}
+                  Put back
+        - else
+          .text-muted.small.fst-italic Nothing set aside.
+
+-# ===== Contents =====
+- if @response.documents.present?
+  - content_for(:sidebar) do
+    = render 'catalog/search_sidebar'
+
+- if @response.documents.present? || params[:q].present?
+  .d-flex.align-items-center.flex-wrap.gap-2.mb-2
+    .text-muted
+      = page_entries_info(@response)
+      in this set
+    .ms-auto
+      = render 'shared/scoped_search', path: set_path(@set['id']), label: 'Search this set'
+
+  #set-results
+    - @response.documents.each do |doc|
+      - provenance = @resolver.provenance_for(doc)
+      .result-row
+        .thumb
+          - if doc.thumbnail_ssi.present?
+            = image_tag doc.thumbnail_ssi, alt: '', loading: 'lazy'
+          - else
+            %i.fa-regular.fa-image{'aria-hidden' => 'true'}
+        .flex-grow-1
+          %h3
+            = link_to set_document_title(doc), work_path(doc.to_param), class: 'text-decoration-none'
+          .meta
+            %span.nuid= doc.to_param
+        .text-end.text-nowrap
+          - if provenance
+            .mb-2= set_provenance_badge(provenance, @recipe_titles)
+          - if @owned
+            = button_to set_aside_set_path(@set['id']), method: :post,
+              params: { work_id: doc.to_param, title: set_document_title(doc), chip: (provenance.is_a?(String) ? provenance : nil) },
+              class: 'btn btn-sm btn-outline-secondary', form: { class: 'd-inline' } do
+              %i.fa-solid.fa-box-archive.me-1{'aria-hidden' => 'true'}
+              Set aside
+
+  = render 'catalog/results_pagination'
+- else
+  .container.p-4.my-3.text-center.text-muted
+    %i.fa-solid.fa-layer-group.fa-2x.mb-3.opacity-50{'aria-hidden' => 'true'}
+    %p.mb-1 This set has no visible contents yet.
+    - if @owned
+      %p.small Browse to any work or collection and use “Add to set” to start filling it.
