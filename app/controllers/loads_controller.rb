@@ -96,7 +96,7 @@ class LoadsController < ApplicationController
     end
 
     def require_loader_role
-      return if current_user&.role.to_s.in?(%w[loader privileged admin])
+      return if current_user&.loader_tier?
 
       render template: 'errors/forbidden', status: :forbidden, layout: 'application'
     end

@@ -47,7 +47,9 @@ Rails.application.routes.draw do
       post :tombstone
     end
   end
-  resources :loaders, only: [], param: :slug do
+  # The bare index is the "My Loaders" interstitial (user-menu entry);
+  # everything else on a loader happens through its nested loads.
+  resources :loaders, only: [:index], param: :slug do
     resources :loads, only: [:index, :show, :new, :create, :destroy] do
       member { patch :confirm }
     end

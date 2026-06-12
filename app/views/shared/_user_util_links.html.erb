@@ -35,6 +35,16 @@
                     <% end %>
                   </li>
                 <% end %>
+                <%# Precise gate: role tier AND at least one group-unlocked
+                    Loader, so staff without loader groups get no dead end.
+                    The registry is a tiny local AR table — exists? is cheap. %>
+                <% if current_user.loader_tier? && Loader.available_to(current_user).exists? %>
+                  <li>
+                    <%= link_to loaders_path, class: 'dropdown-item' do %>
+                      <i class="fa-solid fa-truck-ramp-box me-2" aria-hidden="true"></i>My Loaders
+                    <% end %>
+                  </li>
+                <% end %>
                 <% if current_user.admin? %>
                   <li>
                     <%= link_to admin_root_path, class: 'dropdown-item' do %>

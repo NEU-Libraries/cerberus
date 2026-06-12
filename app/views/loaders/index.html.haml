@@ -1,0 +1,39 @@
+- content_for :page_title, 'My Loaders'
+
+.admin-registry.my-3
+  %header.admin-registry__head
+    %span.admin-registry__title
+      %i.fa-solid.fa-truck-ramp-box{'aria-hidden' => 'true'}
+      My Loaders
+      - if @loaders.any?
+        %span.admin-registry__count= pluralize(@loaders.size, 'loader')
+
+  - if @loaders.any?
+    .table-responsive
+      %table.table.table-borderless.admin-registry-table
+        %thead
+          %tr
+            %th{scope: 'col'} Loader
+            %th{scope: 'col'} Type
+            %th{scope: 'col'} Root collection
+            %th{scope: 'col'}
+        %tbody
+          - @loaders.each do |loader|
+            %tr
+              %td
+                .admin-registry-table__name= loader.display_name
+              %td
+                %span.badge.text-bg-light.text-uppercase= loader.kind
+              %td
+                %span.admin-registry-table__id= link_to loader.root_collection, collection_path(loader.root_collection), class: 'text-decoration-none'
+              %td.text-end.text-nowrap
+                = link_to loader_loads_path(loader), class: 'btn btn-sm btn-link text-decoration-none me-2' do
+                  %i.fa-solid.fa-clock-rotate-left.me-1{'aria-hidden' => 'true'}
+                  History
+                = link_to new_loader_load_path(loader), class: 'btn btn-primary btn-sm' do
+                  %i.fa-solid.fa-upload.me-1{'aria-hidden' => 'true'}
+                  Start ingest
+  - else
+    .text-muted.fst-italic.p-3
+      No loaders are assigned to you yet. Loader access is granted per
+      collection-area group — contact the repository team if you're expecting one.

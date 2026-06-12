@@ -19,6 +19,11 @@ class Loader < ApplicationRecord
 
   default_scope { order(:slug) }
 
+  # The Loaders this user's Grouper groups unlock (admins see the whole
+  # registry) — the fine half of the two-tier loader gate. The coarse half
+  # is User#loader_tier?; per-request enforcement stays in LoadsController.
+  scope :available_to, ->(user) { user&.admin? ? all : where(group: Array(user&.groups)) }
+
   def to_param
     slug
   end

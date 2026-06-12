@@ -49,6 +49,13 @@ class User
     messageable?
   end
 
+  # The loader surface's coarse role gate (shared by LoadsController and
+  # the My Loaders page/menu). Which Loaders show inside is the per-loader
+  # Grouper group's concern — see Loader.available_to.
+  def loader_tier?
+    role.to_s.in?(%w[loader privileged admin])
+  end
+
   def to_s
     pretty_name
   end
