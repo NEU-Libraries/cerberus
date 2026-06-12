@@ -5,13 +5,6 @@
 
   <% if has_user_authentication_provider? %>
     <% if current_user %>
-      <% if current_user.admin? %>
-        <li class="nav-item">
-          <%= link_to admin_root_path, class: 'nav-link' do %>
-            <i class="fa-solid fa-screwdriver-wrench me-1" aria-hidden="true"></i>Admin
-          <% end %>
-        </li>
-      <% end %>
       <% if current_user.messageable? %>
         <li class="nav-item">
           <%= link_to messages_path, class: 'nav-link inbox-nav-link', 'aria-label': inbox_aria_label do %>
@@ -23,10 +16,40 @@
         </li>
       <% end %>
       <% unless current_user.to_s.blank? -%>
-        <li class="nav-item">
-          <%# <%= link_to current_user, root_path, class: 'nav-link' %>
-          <%= link_to current_user, atlas_user_path, class: 'nav-link' %>
-        </li>
+        <%# The split button consolidates "things this user can do" (My Sets,
+            Admin) behind the caret; the name itself stays a profile link.
+            Users with no menu entries (guests) keep the plain name link. %>
+        <% if current_user.curates_sets? || current_user.admin? %>
+          <li class="nav-item d-flex align-items-center">
+            <div class="btn-group user-menu">
+              <%= link_to current_user, atlas_user_path, class: 'btn btn-sm btn-outline-secondary' %>
+              <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle dropdown-toggle-split"
+                      data-bs-toggle="dropdown" aria-expanded="false">
+                <span class="visually-hidden">Toggle user menu</span>
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <% if current_user.curates_sets? %>
+                  <li>
+                    <%= link_to sets_path, class: 'dropdown-item' do %>
+                      <i class="fa-solid fa-layer-group me-2" aria-hidden="true"></i>My Sets
+                    <% end %>
+                  </li>
+                <% end %>
+                <% if current_user.admin? %>
+                  <li>
+                    <%= link_to admin_root_path, class: 'dropdown-item' do %>
+                      <i class="fa-solid fa-screwdriver-wrench me-2" aria-hidden="true"></i>Admin
+                    <% end %>
+                  </li>
+                <% end %>
+              </ul>
+            </div>
+          </li>
+        <% else %>
+          <li class="nav-item">
+            <%= link_to current_user, atlas_user_path, class: 'nav-link' %>
+          </li>
+        <% end %>
         <li class="nav-item">
           <%= link_to t('blacklight.header_links.logout'), destroy_user_session_path, data: { turbo_method: :delete }, class: 'nav-link' %>
         </li>

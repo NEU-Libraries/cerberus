@@ -219,6 +219,36 @@ RSpec.describe 'Sets', type: :request do
     end
   end
 
+  describe 'navbar user menu' do
+    # The name block (and so the menu) only renders for users with a
+    # parseable name — mirror that here, unlike the other fixtures.
+    def named_user(role:, nuid:)
+      User.new(email: "#{role}@example.com", password: 'password', name: 'Dee Ps',
+               nuid: nuid, role: role, groups: ['northeastern:drs:repository:staff'])
+    end
+
+    it 'puts My Sets behind the split-button caret for a curator' do
+      sign_in named_user(role: 'privileged', nuid: '000000002')
+      get '/sets'
+      expect(response.body).to include('dropdown-toggle-split')
+        .and include('My Sets')
+    end
+
+    it 'adds Admin to the menu for admins' do
+      sign_in named_user(role: 'admin', nuid: '000000004')
+      get '/sets'
+      expect(response.body).to include('dropdown-toggle-split')
+      expect(response.body).to include(admin_root_path)
+    end
+
+    it 'keeps the plain name link for guests' do
+      sign_in User.new(email: 'guest@example.com', password: 'password', name: 'Gee Uest',
+                       nuid: '000000001', role: 'guest', groups: [])
+      get '/'
+      expect(response.body).not_to include('dropdown-toggle-split')
+    end
+  end
+
   describe 'visibility' do
     it 'serves a public set to an anonymous visitor' do
       set = make_set('Public Set')

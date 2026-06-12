@@ -49,6 +49,15 @@
               %i.fa-solid.fa-xmark{'aria-hidden' => 'true'}
     - else
       .text-muted.small.fst-italic No collections included.
+    - inverted = @owned ? set_inverted_chips(chips) : []
+    - if inverted.any?
+      .note-band.p-2.px-3.mt-2.small.text-secondary
+        %i.fa-solid.fa-circle-info.text-primary.me-1{'aria-hidden' => 'true'}
+        You've set aside most of
+        #{inverted.map { |chip| "“#{set_noun_label(chip.noid, @recipe_titles)}”" }.to_sentence}.
+        If you only want a handful of works, consider removing the
+        #{'collection'.pluralize(inverted.size)} and adding those works individually —
+        new deposits won't appear here unasked.
     .defn-label.mt-4.mb-2
       %i.fa-solid.fa-thumbtack.me-1{'aria-hidden' => 'true'}
       Items added individually

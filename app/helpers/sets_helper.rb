@@ -37,6 +37,21 @@ module SetsHelper
     sentence
   end
 
+  # Floor for the inverted-recipe nudge: small collections never nudge.
+  NUDGE_MIN_ASIDE = 5
+
+  # Chips whose recipe has inverted into mostly-subtraction — over half the
+  # collection's works set aside, past the floor. These get the "consider
+  # individual picks" hint (design doc §3, graceful degradation): at that
+  # ratio the user is expressing an extensional intent ("these works")
+  # through an intensional clause ("everything in X"), and the live
+  # semantics start working against them.
+  def set_inverted_chips(chips)
+    chips.select do |chip|
+      (chip.total - chip.live) >= NUDGE_MIN_ASIDE && chip.live * 2 < chip.total
+    end
+  end
+
   # Which affordance a picker row gets for this item: :included (already a
   # recipe line), :aside (works only — excluded here, so a re-add would stay
   # invisible), or :addable.
