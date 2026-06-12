@@ -90,8 +90,11 @@ class IiifManifest < ApplicationService
     # manifest always emits the public URI, and the cache stays keyed on it.
     def info_base(service)
       internal = Rails.application.config.x.cerberus.iiif_internal_host
-      return service if internal.blank?
+      public_host = Rails.application.config.iiif_host
+      # Both guards matter: subbing a blank public host would PREPEND the
+      # internal host to every URI (String#sub('') matches at position 0).
+      return service if internal.blank? || public_host.blank?
 
-      service.sub(Rails.application.config.iiif_host, internal)
+      service.sub(/\A#{Regexp.escape(public_host)}/, internal)
     end
 end
