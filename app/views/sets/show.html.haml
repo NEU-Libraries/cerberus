@@ -115,13 +115,6 @@
     .ms-auto
       = render 'shared/scoped_search', path: set_path(@set['id']), label: 'Search this set'
 
-  - if @owned
-    .note-band.p-2.px-3.mb-2.small.text-secondary
-      %i.fa-solid.fa-circle-info.text-primary.me-1{'aria-hidden' => 'true'}
-      Each item shows
-      %em why
-      it's in this set. Setting one aside hides it from this set only — it doesn't change the collection.
-
   #set-results
     - @response.documents.each do |doc|
       - provenance = @resolver.provenance_for(doc)
