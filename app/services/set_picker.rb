@@ -20,7 +20,8 @@ class SetPicker
   end
 
   # @return [Array(Array<Hash>, Hash)] unwrapped compilation rows + a
-  #   pagination hash in Atlas's vocabulary ('page' / 'pages' / 'total').
+  #   pagination hash in Atlas's (Pagy) vocabulary ('page' / 'pages' /
+  #   'count').
   def call
     @query.blank? ? plain_page : filtered_page
   end
@@ -37,7 +38,7 @@ class SetPicker
       pages = [(matches.size / PER_PAGE.to_f).ceil, 1].max
       page = [@page, pages].min
       slice = Array(matches.slice((page - 1) * PER_PAGE, PER_PAGE))
-      [slice, { 'page' => page, 'pages' => pages, 'total' => matches.size }]
+      [slice, { 'page' => page, 'pages' => pages, 'count' => matches.size }]
     end
 
     def owned_sets

@@ -6,7 +6,8 @@
       %i.fa-solid.fa-layer-group{'aria-hidden' => 'true'}
       My Sets
       - if @sets.any? && @pagination
-        %span.admin-registry__count= pluralize(@pagination['total'], 'set')
+        -# Atlas paginates with Pagy: the grand total is 'count' (not 'total').
+        %span.admin-registry__count= pluralize(@pagination['count'], 'set')
     .admin-registry__head-actions
       = link_to new_set_path, class: 'btn btn-primary btn-sm' do
         %i.fa-solid.fa-plus.me-1{'aria-hidden' => 'true'}
