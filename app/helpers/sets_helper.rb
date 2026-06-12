@@ -52,6 +52,12 @@ module SetsHelper
     end
   end
 
+  # Query params for a picker pagination link — keeps the item noid and any
+  # active filter alongside the requested page.
+  def set_picker_page_params(kind, noid, query, page)
+    { "#{kind}_id": noid, q: query.presence, page: page }.compact
+  end
+
   # Title off a contents/aside Solr document.
   def set_document_title(document)
     Array(document[blacklight_config.index.title_field]).first || document.to_param

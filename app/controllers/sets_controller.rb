@@ -36,17 +36,17 @@ class SetsController < CatalogController
     @recipe_titles = recipe_titles
   end
 
-  # The "Add to set…" menu body, fetched lazily by a turbo-frame when the
-  # dropdown on a Work/Collection show page first opens — host pages cost
-  # no Atlas call until then. Owner-scoped; each row carries this item's
-  # state in that set (addable / already included / set aside).
+  # The Add-to-set modal's rows, fetched lazily by a turbo-frame when the
+  # modal on a Work/Collection show page first opens — host pages cost no
+  # Atlas call until then. Owner-scoped and paginated; each row carries
+  # this item's state in that set (addable / already included / set aside).
   def picker
     @kind = params[:collection_id].present? ? 'collection' : 'work'
     @noid = params[:collection_id].presence || params[:work_id]
     return head :bad_request if @noid.blank?
 
-    page = AtlasRb::Compilation.list(per_page: 50)
-    @sets = Array(page['compilations']).pluck('compilation')
+    @q = params[:q].to_s.strip
+    @sets, @pagination = SetPicker.call(query: @q, page: params[:page])
     render layout: false
   end
 

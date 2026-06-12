@@ -1,32 +1,42 @@
--# The "Add to set…" menu body (see _add_to_set). Rendered without layout
--# into the lazy turbo-frame. One row per owned set, each carrying this
--# item's state there; "+ New set" is always the last row.
-= turbo_frame_tag 'set-picker', target: '_top' do
-  - if @kind == 'collection'
-    %h6.dropdown-header.text-wrap
-      Adds everything in this collection — the set stays current as the collection changes.
+-# Rows + pagination for the Add-to-set modal (see _add_to_set). Rendered
+-# without layout into the modal's lazy turbo-frame. Rows reuse the recipe
+-# panel's bordered-row vocabulary; the addable row is a real button. Add
+-# POSTs target _top — a successful add is a full-page redirect + flash.
+= turbo_frame_tag "set-picker-#{@noid}" do
   - if @sets.any?
-    - @sets.each do |set|
-      - case set_picker_state(set, @kind, @noid)
-      - when :included
-        %span.dropdown-item.disabled{'aria-disabled' => 'true'}
-          %i.fa-solid.fa-check.text-success.me-2{'aria-hidden' => 'true'}
-          = set['title']
-          %span.state Already in this set
-      - when :aside
-        %span.dropdown-item.disabled{'aria-disabled' => 'true'}
-          %i.fa-solid.fa-box-archive.me-2{'aria-hidden' => 'true'}
-          = set['title']
-          %span.state Set aside in this set — put it back from the set's page
-      - else
-        = button_to (@kind == 'collection' ? add_collection_set_path(set['id']) : add_work_set_path(set['id'])),
-          params: { :"#{@kind}_id" => @noid }, class: 'dropdown-item' do
-          %i.fa-solid.fa-layer-group.text-muted.me-2{'aria-hidden' => 'true'}
-          = set['title']
+    .set-picker-rows
+      - @sets.each do |set|
+        - case set_picker_state(set, @kind, @noid)
+        - when :included
+          .picker-row.is-noop
+            %i.fa-solid.fa-check.text-success{'aria-hidden' => 'true'}
+            %span.nm
+              = set['title']
+              %span.state Already in this set
+        - when :aside
+          .picker-row.is-noop
+            %i.fa-solid.fa-box-archive{'aria-hidden' => 'true'}
+            %span.nm
+              = set['title']
+              %span.state Set aside in this set — put it back from the set's page
+        - else
+          = button_to (@kind == 'collection' ? add_collection_set_path(set['id']) : add_work_set_path(set['id'])),
+            params: { :"#{@kind}_id" => @noid }, class: 'picker-row is-add',
+            form: { data: { turbo_frame: '_top' } } do
+            %i.fa-solid.fa-layer-group.text-muted{'aria-hidden' => 'true'}
+            %span.nm= set['title']
+    - if @pagination && @pagination['pages'].to_i > 1
+      - page = @pagination['page'].to_i
+      %nav.mt-2{'aria-label' => 'Sets pages'}
+        %ul.pagination.pagination-sm.justify-content-center.mb-0
+          %li.page-item{class: ('disabled' if page <= 1)}
+            = link_to 'Previous', picker_sets_path(set_picker_page_params(@kind, @noid, @q, page - 1)), class: 'page-link'
+          %li.page-item.disabled
+            %span.page-link.tnum #{page} of #{@pagination['pages']}
+          %li.page-item{class: ('disabled' if page >= @pagination['pages'].to_i)}
+            = link_to 'Next', picker_sets_path(set_picker_page_params(@kind, @noid, @q, page + 1)), class: 'page-link'
+  - elsif @q.present?
+    .py-2.small.text-muted No sets match “#{@q}”.
   - else
-    .px-3.py-2.small.text-muted
+    .py-2.small.text-muted
       No sets yet — a set gathers works from anywhere in the repository without moving them.
-  .dropdown-divider
-  = link_to new_set_path, class: 'dropdown-item' do
-    %i.fa-solid.fa-plus.text-muted.me-2{'aria-hidden' => 'true'}
-    New set

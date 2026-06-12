@@ -1,17 +1,45 @@
 -# "Add to set…" — the personal-curation affordance on Work/Collection show
--# pages. The menu body is a lazy turbo-frame, so the host page costs no
--# Atlas call until the dropdown first opens. target: '_top' makes row POSTs
--# and the New set link escape the frame (full-page redirect + flash).
+-# pages. A plain trigger link (styled like the sibling Edit link) opens a
+-# modal, since users may own dozens or hundreds of sets: the modal carries
+-# a typeahead filter and pagination.
+-#
+-# The filter form lives OUTSIDE the rows turbo-frame and targets it, so the
+-# input never re-renders (no focus loss while typing); the frame itself is
+-# lazy, so the host page costs no Atlas call until the modal first opens.
 -#
 -# Locals:
 -#   kind          — 'work' or 'collection'
 -#   noid          — the item's NOID
--#   trigger_class — class string for the toggle link (matches the sibling
+-#   trigger_class — class string for the trigger link (matches the sibling
 -#                   Edit link on the host page).
-.dropdown.d-inline-block
-  %a.dropdown-toggle{href: '#', role: 'button', class: trigger_class,
-                     'data-bs-toggle' => 'dropdown', 'aria-expanded' => 'false'}
-    Add to set
-  .dropdown-menu.dropdown-menu-end.set-picker-menu
-    = turbo_frame_tag 'set-picker', src: picker_sets_path(:"#{kind}_id" => noid), loading: :lazy, target: '_top' do
-      .px-3.py-2.small.text-muted Loading your sets…
+- modal_id = "add-to-set-#{noid}"
+- label_id = "add-to-set-label-#{noid}"
+- frame_id = "set-picker-#{noid}"
+
+= link_to 'Add to set', "##{modal_id}", class: trigger_class, data: { 'bs-toggle': 'modal' }
+
+.modal.fade{id: modal_id, tabindex: '-1', 'aria-labelledby' => label_id, 'aria-hidden' => 'true'}
+  .modal-dialog.modal-dialog-centered.modal-dialog-scrollable
+    -# `text-start` defends against `.text-end` ancestors on the host page
+    -# (the works action row) bleeding into the modal contents.
+    .modal-content.text-start.set-picker
+      .modal-header
+        %h5.modal-title{id: label_id} Add to set
+        %button.btn-close{type: 'button', 'aria-label': 'Close', data: { 'bs-dismiss': 'modal' }}
+      .modal-body
+        - if kind == 'collection'
+          %p.small.text-muted.mb-2
+            Adds everything in this collection — the set stays current as the collection changes.
+        %form.mb-2{action: picker_sets_path, method: 'get',
+                   data: { controller: 'picker-search', turbo_frame: frame_id }}
+          %input{type: 'hidden', name: "#{kind}_id", value: noid}
+          %input.form-control{type: 'search', name: 'q', placeholder: 'Filter your sets by title…',
+                              'aria-label' => 'Filter your sets by title', autocomplete: 'off',
+                              data: { action: 'input->picker-search#search' }}
+        = turbo_frame_tag frame_id, src: picker_sets_path(:"#{kind}_id" => noid), loading: :lazy do
+          .py-2.small.text-muted Loading your sets…
+      .modal-footer.justify-content-between
+        = link_to new_set_path, class: 'small text-decoration-none' do
+          %i.fa-solid.fa-plus.me-1{'aria-hidden' => 'true'}
+          New set
+        %button.btn.btn-secondary.btn-sm{type: 'button', data: { 'bs-dismiss': 'modal' }} Done

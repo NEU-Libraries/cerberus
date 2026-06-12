@@ -222,30 +222,55 @@ $sets-via-soft: #e6eef6;
   }
 }
 
-// The "Add to set…" picker menu (Work/Collection show pages). Rows are
-// dropdown-items; disabled states keep their explanatory second line.
-.set-picker-menu {
-  min-width: 19rem;
-  max-height: 21rem;
-  overflow-y: auto;
+// The Add-to-set modal (Work/Collection show pages). Rows share the recipe
+// panel's bordered-row vocabulary; the addable row is a real button
+// (button_to) restyled flat, so the whole row is the click target.
+.set-picker {
+  .picker-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    width: 100%;
+    text-align: left;
+    padding: 0.55rem 0.7rem;
+    border: 1px solid $gray-300;
+    border-radius: 0.4rem;
+    background: $white;
+    margin-bottom: 0.4rem;
+    font-size: 0.9rem;
 
-  .dropdown-header {
-    white-space: normal;
-    max-width: 19rem;
-  }
+    > i {
+      margin-top: 0.2rem;
+    }
 
-  form.button_to {
-    margin: 0;
-  }
-
-  .dropdown-item {
-    white-space: normal;
+    .nm {
+      flex: 1;
+      min-width: 0;
+    }
 
     .state {
       display: block;
       font-size: 0.78rem;
       color: $gray-600;
-      padding-left: 1.65rem; // clears the icon column
     }
+
+    &.is-noop {
+      color: $gray-700;
+      background: $gray-100;
+    }
+  }
+
+  button.picker-row.is-add {
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+      border-color: $blue;
+      background: $sets-via-soft;
+    }
+  }
+
+  form.button_to {
+    margin: 0;
   }
 }

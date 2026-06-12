@@ -157,7 +157,27 @@ RSpec.describe 'Sets', type: :request do
 
         get '/sets/picker', params: { work_id: lone_work.id }
         expect(response.body).to include("/sets/#{set['id']}/works")
-          .and include('New set')
+      end
+
+      it 'filters rows by title and reports empty matches' do
+        make_set('Findable Set')
+        make_set('Other Curation')
+
+        get '/sets/picker', params: { work_id: lone_work.id, q: 'findable' }
+        expect(response.body).to include('Findable Set')
+        expect(response.body).not_to include('Other Curation')
+
+        get '/sets/picker', params: { work_id: lone_work.id, q: 'zzz-nope' }
+        expect(response.body).to include('No sets match')
+      end
+
+      it 'paginates past one page of sets' do
+        12.times { |i| make_set(format('Bulk Set %02d', i)) }
+        get '/sets/picker', params: { work_id: lone_work.id }
+        expect(response.body).to match(/1 of \d+/)
+        get '/sets/picker', params: { work_id: lone_work.id, page: 2 }
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include('picker-row')
       end
 
       it 'rejects a picker request with neither noid param' do
@@ -165,11 +185,14 @@ RSpec.describe 'Sets', type: :request do
         expect(response).to have_http_status(:bad_request)
       end
 
-      it 'renders the affordance on work and collection show pages for a curator' do
+      it 'renders the modal affordance on work and collection show pages for a curator' do
         get "/works/#{lone_work.id}"
         expect(response.body).to include('Add to set')
+          .and include('New set')
+          .and include('Filter your sets by title')
         get "/collections/#{collection.id}"
         expect(response.body).to include('Add to set')
+          .and include('stays current as the collection changes')
       end
     end
 
