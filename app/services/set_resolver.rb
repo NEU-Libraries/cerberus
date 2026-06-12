@@ -50,6 +50,17 @@ class SetResolver
     fqs + DEFAULT_TYPE_FILTERS
   end
 
+  # Gated tally of the Set's current contents (the index page's Works
+  # column). Zero for a recipe with no positive clause.
+  #
+  # @return [Integer]
+  def contents_count
+    fqs = contents_fqs
+    return 0 if fqs.nil?
+
+    search(*fqs, rows: 0).total
+  end
+
   # @return [Array<Chip>] one per included collection the current user can
   #   discover, in recipe order.
   def chips

@@ -67,6 +67,7 @@ Rails.application.routes.draw do
     # The lazy-loaded "Add to set…" menu body (Work/Collection show pages).
     collection { get :picker }
     member do
+      get    'works_count',                to: 'sets#works_count',       as: :works_count
       post   'collections',                to: 'sets#add_collection',    as: :add_collection
       delete 'collections/:collection_id', to: 'sets#remove_collection', as: :remove_collection
       post   'works',                      to: 'sets#add_work',          as: :add_work

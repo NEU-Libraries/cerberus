@@ -67,6 +67,12 @@ RSpec.describe 'Sets', type: :request do
       expect(response.body).to include(set_path(set['id']))
     end
 
+    it 'mounts a lazy works-count frame per index row' do
+      set = make_set('Counted Set')
+      get '/sets'
+      expect(response.body).to include(works_count_set_path(set['id']))
+    end
+
     it 'creates a set and lands on its page' do
       post '/sets', params: { set: { title: 'Brand New Set', description: 'For testing' } }
       expect(response).to have_http_status(:redirect)
@@ -203,6 +209,27 @@ RSpec.describe 'Sets', type: :request do
         get "/collections/#{collection.id}", params: { view: 'gallery' }
         expect(response.body).to include('Add to Set')
           .and include("add-to-set-#{work_one.id}")
+      end
+    end
+
+    describe 'the works-count tally' do
+      def tally_text = response.body.gsub(/<[^>]+>/, ' ').squish
+
+      it 'resolves the recipe to a gated count, honoring set-asides' do
+        set = make_set('Tally Set')
+        post "/sets/#{set['id']}/collections", params: { collection_id: collection.id }
+        get "/sets/#{set['id']}/works_count"
+        expect(tally_text).to eq('2 Works')
+
+        post "/sets/#{set['id']}/aside", params: { work_id: work_one.id }
+        get "/sets/#{set['id']}/works_count"
+        expect(tally_text).to eq('1 Work')
+      end
+
+      it 'reports an empty recipe as zero' do
+        set = make_set('Empty Tally Set')
+        get "/sets/#{set['id']}/works_count"
+        expect(tally_text).to eq('0 Works')
       end
     end
 

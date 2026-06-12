@@ -36,6 +36,14 @@ class SetsController < CatalogController
     @recipe_titles = recipe_titles
   end
 
+  # One set's resolved work tally, fetched lazily by the index table's
+  # per-row turbo-frame — full recipe resolution costs several Solr
+  # round-trips, so the index never pays it inline.
+  def works_count
+    @count = SetResolver.new(compilation: @set, search_service: search_service).contents_count
+    render layout: false
+  end
+
   # The Add-to-set modal's rows, fetched lazily by a turbo-frame when the
   # modal on a Work/Collection show page first opens — host pages cost no
   # Atlas call until then. Owner-scoped and paginated; each row carries

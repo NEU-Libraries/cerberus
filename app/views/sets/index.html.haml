@@ -19,6 +19,7 @@
           %tr
             %th{scope: 'col'} Set
             %th{scope: 'col'} Recipe
+            %th{scope: 'col'} Works
             %th{scope: 'col'} Created
         %tbody
           - @sets.each do |set|
@@ -33,6 +34,11 @@
                 - parts << pluralize(Array(set['included_works']).size, 'item') if Array(set['included_works']).any?
                 - parts << "#{Array(set['excluded_works']).size} set aside" if Array(set['excluded_works']).any?
                 = parts.any? ? parts.join(' · ') : 'empty'
+              %td.small.text-muted
+                -# Resolved tally arrives lazily — recipe resolution is several
+                -# Solr round-trips per set, so the table never pays it inline.
+                = turbo_frame_tag "set-works-count-#{set['id']}", src: works_count_set_path(set['id']), loading: :lazy do
+                  %span.text-muted …
               %td.small.text-muted.tnum
                 = set['created_at'].present? ? l(Time.zone.parse(set['created_at']), format: :short) : '—'
 
