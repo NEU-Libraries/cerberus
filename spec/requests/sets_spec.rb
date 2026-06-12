@@ -198,6 +198,12 @@ RSpec.describe 'Sets', type: :request do
         expect(response.body).to include("add-to-set-#{collection.id}")
           .and include('stays current as the collection changes')
       end
+
+      it 'mounts the row affordance on gallery-view cards too' do
+        get "/collections/#{collection.id}", params: { view: 'gallery' }
+        expect(response.body).to include('Add to Set')
+          .and include("add-to-set-#{work_one.id}")
+      end
     end
 
     it 'hides the row affordance from anonymous visitors' do
