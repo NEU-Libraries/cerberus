@@ -160,7 +160,7 @@ class SetResolver
     # overlay), as bare container uuids.
     def membership_edges(document)
       refs = Array(document['a_member_of_ssi']) + Array(document['a_linked_member_of_ssim'])
-      refs.map { |ref| ref.to_s.delete_prefix('id-') }.to_set
+      refs.to_set { |ref| ref.to_s.delete_prefix('id-') }
     end
 
     # ---- per-chip tallies ---------------------------------------------------
