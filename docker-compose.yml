@@ -22,6 +22,9 @@ services:
     environment:
       ATLAS_URL: 'http://atlas:3000/'
       ATLAS_TOKEN: ${ATLAS_TOKEN}
+      # Container-internal Cantaloupe route for server-side info.json reads
+      # (IiifManifest dimensions); browsers keep using the public iiif_host.
+      CERBERUS_IIIF_INTERNAL_HOST: ${CERBERUS_IIIF_INTERNAL_HOST:-}
     ports:
       - 3000:3000
   atlas:

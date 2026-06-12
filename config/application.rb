@@ -33,6 +33,13 @@ module Cerberus
     config.x.cerberus.derivatives_root  = ENV.fetch('CERBERUS_DERIVATIVES_ROOT')  { File.join(config.x.cerberus.data_root, 'images') }
     config.x.cerberus.schema_cache_root = ENV.fetch('CERBERUS_SCHEMA_CACHE_ROOT') { File.join(config.x.cerberus.data_root, 'kataba_cache') }
 
+    # Cantaloupe as reachable FROM THE APP CONTAINER, for server-side
+    # info.json reads (IiifManifest dimensions). The public iiif_host is
+    # what browsers (and persisted Delegate URIs) use; in compose the two
+    # differ — the container reaches the sibling service by name. Blank
+    # means "same as public".
+    config.x.cerberus.iiif_internal_host = ENV.fetch('CERBERUS_IIIF_INTERNAL_HOST', nil)
+
     # Acting-NUID sentinel for unauthenticated Cerberus traffic. Atlas's
     # require_auth rejects cerberus-token requests that omit User: NUID; the
     # logged-out path threads this NUID so Atlas resolves to its seeded :guest

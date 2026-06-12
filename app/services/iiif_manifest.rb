@@ -76,11 +76,22 @@ class IiifManifest < ApplicationService
 
     def dimensions(service)
       Rails.cache.fetch(['iiif-info', service]) do
-        response = Faraday.get("#{service}/info.json")
+        response = Faraday.get("#{info_base(service)}/info.json")
         response.success? ? JSON.parse(response.body).slice('width', 'height') : nil
       end
     rescue Faraday::Error, JSON::ParserError => e
       Rails.logger.warn("IiifManifest: info.json unavailable for #{service} (#{e.message})")
       nil
+    end
+
+    # Delegate URIs carry Cantaloupe's PUBLIC host (browsers consume them);
+    # the server-side dimensions read may need the container-internal route
+    # instead (compose service name). Only the fetch is rewritten — the
+    # manifest always emits the public URI, and the cache stays keyed on it.
+    def info_base(service)
+      internal = Rails.application.config.x.cerberus.iiif_internal_host
+      return service if internal.blank?
+
+      service.sub(Rails.application.config.iiif_host, internal)
     end
 end
