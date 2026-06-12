@@ -21,8 +21,6 @@
         .clearfix.pt-3
           - if user_signed_in?
             .float-end
-              - if current_user&.curates_sets?
-                = render 'sets/add_to_set', kind: 'collection', noid: @collection.id, trigger_class: 'px-3'
               = link_to "Edit", edit_collection_path(@collection.id), class: "px-3"
               - if @can_tombstone && @response.documents.empty?
                 = render 'shared/tombstone_modal',

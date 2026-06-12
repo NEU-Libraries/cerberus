@@ -11,8 +11,6 @@
         %h3= @work.title
         - if user_signed_in?
           .text-end.small.pb-2.flex-shrink-0.text-nowrap
-            - if current_user&.curates_sets?
-              = render 'sets/add_to_set', kind: 'work', noid: @work.id, trigger_class: 'px-2'
             - unless @work.in_progress
               = link_to "Edit", edit_work_path(@work.id), class: "px-2"
             - if @can_tombstone

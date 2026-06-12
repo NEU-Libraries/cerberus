@@ -1,27 +1,23 @@
--# "Add to set…" — the personal-curation affordance on Work/Collection show
--# pages. A plain trigger link (styled like the sibling Edit link) opens a
--# modal, since users may own dozens or hundreds of sets: the modal carries
--# a typeahead filter and pagination.
+-# The Add-to-set modal (triggered by the clone icon in result rows — see
+-# blacklight/document_component.html.erb). Users may own dozens or hundreds
+-# of sets, so the modal carries a typeahead filter and pagination.
 -#
 -# The filter form lives OUTSIDE the rows turbo-frame and targets it, so the
 -# input never re-renders (no focus loss while typing); the frame itself is
 -# lazy, so the host page costs no Atlas call until the modal first opens.
+-# All ids are noid-scoped: result listings mount one inert shell per row.
 -#
 -# Locals:
--#   kind          — 'work' or 'collection'
--#   noid          — the item's NOID
--#   trigger_class — class string for the trigger link (matches the sibling
--#                   Edit link on the host page).
+-#   kind — 'work' or 'collection'
+-#   noid — the item's NOID
 - modal_id = "add-to-set-#{noid}"
 - label_id = "add-to-set-label-#{noid}"
 - frame_id = "set-picker-#{noid}"
 
-= link_to 'Add to set', "##{modal_id}", class: trigger_class, data: { 'bs-toggle': 'modal' }
-
 .modal.fade{id: modal_id, tabindex: '-1', 'aria-labelledby' => label_id, 'aria-hidden' => 'true'}
   .modal-dialog.modal-dialog-centered.modal-dialog-scrollable
-    -# `text-start` defends against `.text-end` ancestors on the host page
-    -# (the works action row) bleeding into the modal contents.
+    -# `text-start` defends against `.text-end` ancestors in the host row
+    -# (the icon rail) bleeding into the modal contents.
     .modal-content.text-start.set-picker
       .modal-header
         %h5.modal-title{id: label_id} Add to set

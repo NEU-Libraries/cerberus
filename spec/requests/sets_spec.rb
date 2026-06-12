@@ -185,21 +185,25 @@ RSpec.describe 'Sets', type: :request do
         expect(response).to have_http_status(:bad_request)
       end
 
-      it 'renders the modal affordance on work and collection show pages for a curator' do
-        get "/works/#{lone_work.id}"
-        expect(response.body).to include('Add to set')
-          .and include('New set')
-          .and include('Filter your sets by title')
+      it 'mounts the row icon and work-kind modal in a collection contents listing' do
         get "/collections/#{collection.id}"
-        expect(response.body).to include('Add to set')
+        expect(response.body).to include('Add to Set')
+          .and include("add-to-set-#{work_one.id}")
+          .and include('Filter your sets by title')
+          .and include('New set')
+      end
+
+      it 'mounts the collection-kind modal with the live-subtree hint on community rows' do
+        get "/communities/#{community.id}"
+        expect(response.body).to include("add-to-set-#{collection.id}")
           .and include('stays current as the collection changes')
       end
     end
 
-    it 'hides the picker affordance from anonymous visitors' do
+    it 'hides the row affordance from anonymous visitors' do
       sign_out curator
-      get "/works/#{lone_work.id}"
-      expect(response.body).not_to include('Add to set')
+      get "/collections/#{collection.id}"
+      expect(response.body).not_to include('add-to-set-')
     end
 
     it 'hides manage affordances from a non-owner with read access' do
