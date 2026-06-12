@@ -42,6 +42,13 @@ class User
     !role.to_s.in?(%w[guest anonymous])
   end
 
+  # Sets (personal curation) share the inbox's human-role floor: guests and
+  # the anonymous tier cannot own Sets. One concept, two surfaces — if the
+  # floor ever diverges, split the predicates then.
+  def curates_sets?
+    messageable?
+  end
+
   def to_s
     pretty_name
   end

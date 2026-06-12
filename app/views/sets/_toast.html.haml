@@ -1,0 +1,23 @@
+-# The set-aside teaching moment (flash[:aside], set by SetsController#set_aside).
+-# Raised as a dark toast over the page: names what happened, anchors it to the
+-# still-included collection with FRESH counts (the resolver has already
+-# re-tallied on this render), reassures that the collection is unchanged, and
+-# offers a one-click Undo (a plain put-back form — no client state).
+- if flash[:aside].present?
+  - aside = flash[:aside]
+  - chip = aside['chip'].presence && chips.find { |c| c.noid == aside['chip'] }
+  .toast-wrap
+    .drs-toast{'data-controller' => 'set-toast', role: 'status'}
+      %i.fa-solid.fa-circle-info{'aria-hidden' => 'true'}
+      .flex-grow-1
+        Set aside
+        %b= aside['title']
+        - if chip
+          \. It's part of
+          %b= set_noun_label(chip.noid, @recipe_titles)
+          , which is still in your set (now showing #{number_with_delimiter(chip.live)} of #{number_with_delimiter(chip.total)}). The collection itself isn't changed.
+        - else
+          (an item you'd added individually).
+      = button_to put_back_set_path(@set['id'], work_id: aside['work_id']), method: :delete,
+        class: 'btn btn-link undo p-0', form: { class: 'd-inline' } do
+        Undo

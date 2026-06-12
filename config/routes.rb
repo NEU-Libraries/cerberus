@@ -59,6 +59,21 @@ Rails.application.routes.draw do
     collection { get :recipients }
   end
 
+  # Sets — personal curated sets over Atlas Compilations ("Set" is the only
+  # word a user ever sees; "Compilation" is the model name on the wire).
+  # Recipe mutations are member POST/DELETEs mirroring the atlas_rb binding;
+  # `aside` is the set-aside / put-back pair.
+  resources :sets do
+    member do
+      post   'collections',                to: 'sets#add_collection',    as: :add_collection
+      delete 'collections/:collection_id', to: 'sets#remove_collection', as: :remove_collection
+      post   'works',                      to: 'sets#add_work',          as: :add_work
+      delete 'works/:work_id',             to: 'sets#remove_work',       as: :remove_work
+      post   'aside',                      to: 'sets#set_aside',         as: :set_aside
+      delete 'aside/:work_id',             to: 'sets#put_back',          as: :put_back
+    end
+  end
+
   namespace :admin do
     root to: 'dashboard#index'
     resources :loaders, only: [:index, :new, :create, :edit, :update], param: :slug

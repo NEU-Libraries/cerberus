@@ -1,0 +1,13 @@
+- content_for :page_title, 'New set'
+
+.container.p-4.my-3.well.rounded-3
+  %h3
+    %i.fa-solid.fa-layer-group.text-primary.me-2{'aria-hidden' => 'true'}
+    New set
+  %p.text-muted
+    A set gathers works from anywhere in the repository — whole collections or individual
+    works — without moving or changing them. Name it now; add things to it from their pages.
+  - if flash.now[:alert]
+    .alert.alert-warning
+      %small= flash.now[:alert]
+  = render 'form', url: sets_path, method: :post, submit_label: 'Create set', cancel_path: sets_path

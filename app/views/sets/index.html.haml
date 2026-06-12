@@ -1,0 +1,57 @@
+- content_for :page_title, 'My Sets'
+
+.admin-registry.my-3
+  %header.admin-registry__head
+    %span.admin-registry__title
+      %i.fa-solid.fa-layer-group{'aria-hidden' => 'true'}
+      My Sets
+      - if @sets.any? && @pagination
+        %span.admin-registry__count= pluralize(@pagination['total'], 'set')
+    .admin-registry__head-actions
+      = link_to new_set_path, class: 'btn btn-primary btn-sm' do
+        %i.fa-solid.fa-plus.me-1{'aria-hidden' => 'true'}
+        New set
+
+  - if flash[:notice]
+    .alert.alert-success.my-2= flash[:notice]
+  - if flash[:alert]
+    .alert.alert-warning.my-2= flash[:alert]
+
+  - if @sets.any?
+    .table-responsive
+      %table.table.table-borderless.admin-registry-table.sets-table
+        %thead
+          %tr
+            %th{scope: 'col'} Set
+            %th{scope: 'col'} Recipe
+            %th{scope: 'col'} Created
+        %tbody
+          - @sets.each do |set|
+            %tr
+              %td
+                = link_to set['title'], set_path(set['id']), class: 'fw-semibold'
+                - if set['description'].present?
+                  .small.text-muted= truncate(set['description'], length: 90)
+              %td.small.text-muted
+                - parts = []
+                - parts << pluralize(Array(set['included_collections']).size, 'collection') if Array(set['included_collections']).any?
+                - parts << pluralize(Array(set['included_works']).size, 'item') if Array(set['included_works']).any?
+                - parts << "#{Array(set['excluded_works']).size} set aside" if Array(set['excluded_works']).any?
+                = parts.any? ? parts.join(' · ') : 'empty'
+              %td.small.text-muted.tnum
+                = set['created_at'].present? ? l(Time.zone.parse(set['created_at']), format: :short) : '—'
+
+    - if @pagination && @pagination['pages'].to_i > 1
+      %nav{'aria-label' => 'Sets pages'}
+        %ul.pagination.pagination-sm
+          - page = @pagination['page'].to_i
+          %li.page-item{class: ('disabled' if page <= 1)}
+            = link_to 'Previous', sets_path(page: page - 1), class: 'page-link'
+          %li.page-item.disabled
+            %span.page-link.tnum #{page} of #{@pagination['pages']}
+          %li.page-item{class: ('disabled' if page >= @pagination['pages'].to_i)}
+            = link_to 'Next', sets_path(page: page + 1), class: 'page-link'
+  - else
+    .text-muted.fst-italic.p-3
+      No sets yet. A set gathers works from anywhere in the repository — whole collections or
+      individual works — without moving or changing them.
