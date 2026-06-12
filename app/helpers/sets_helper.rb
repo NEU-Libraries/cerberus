@@ -37,6 +37,21 @@ module SetsHelper
     sentence
   end
 
+  # Which affordance a picker row gets for this item: :included (already a
+  # recipe line), :aside (works only — excluded here, so a re-add would stay
+  # invisible), or :addable.
+  def set_picker_state(set, kind, noid)
+    if kind == 'collection'
+      Array(set['included_collections']).include?(noid) ? :included : :addable
+    elsif Array(set['included_works']).include?(noid)
+      :included
+    elsif Array(set['excluded_works']).include?(noid)
+      :aside
+    else
+      :addable
+    end
+  end
+
   # Title off a contents/aside Solr document.
   def set_document_title(document)
     Array(document[blacklight_config.index.title_field]).first || document.to_param

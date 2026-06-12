@@ -45,6 +45,11 @@ RSpec.describe 'Sets', type: :request do
       expect(response).to have_http_status(:forbidden)
     end
 
+    it 'redirects anonymous picker requests to sign in' do
+      get '/sets/picker', params: { work_id: 'abc1234' }
+      expect(response).to redirect_to(new_user_session_path)
+    end
+
     it '404s an unknown set id' do
       sign_in curator
       get '/sets/zzzzzzz'
@@ -136,6 +141,42 @@ RSpec.describe 'Sets', type: :request do
       post "/sets/#{set['id']}/collections", params: { collection_id: collection.id }
       get "/sets/#{set['id']}", params: { q: 'zzz-no-such-term-zzz' }
       expect(response).to have_http_status(:ok)
+    end
+
+    describe 'the Add-to-set picker' do
+      it 'marks included, set-aside, and addable states per set' do
+        set = make_set('Picker Set')
+        post "/sets/#{set['id']}/collections", params: { collection_id: collection.id }
+        post "/sets/#{set['id']}/aside",       params: { work_id: work_one.id, title: 'Work One' }
+
+        get '/sets/picker', params: { collection_id: collection.id }
+        expect(response.body).to include('Already in this set')
+
+        get '/sets/picker', params: { work_id: work_one.id }
+        expect(response.body).to include('Set aside in this set')
+
+        get '/sets/picker', params: { work_id: lone_work.id }
+        expect(response.body).to include("/sets/#{set['id']}/works")
+          .and include('New set')
+      end
+
+      it 'rejects a picker request with neither noid param' do
+        get '/sets/picker'
+        expect(response).to have_http_status(:bad_request)
+      end
+
+      it 'renders the affordance on work and collection show pages for a curator' do
+        get "/works/#{lone_work.id}"
+        expect(response.body).to include('Add to set')
+        get "/collections/#{collection.id}"
+        expect(response.body).to include('Add to set')
+      end
+    end
+
+    it 'hides the picker affordance from anonymous visitors' do
+      sign_out curator
+      get "/works/#{lone_work.id}"
+      expect(response.body).not_to include('Add to set')
     end
 
     it 'hides manage affordances from a non-owner with read access' do

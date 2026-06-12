@@ -1,0 +1,17 @@
+-# "Add to set…" — the personal-curation affordance on Work/Collection show
+-# pages. The menu body is a lazy turbo-frame, so the host page costs no
+-# Atlas call until the dropdown first opens. target: '_top' makes row POSTs
+-# and the New set link escape the frame (full-page redirect + flash).
+-#
+-# Locals:
+-#   kind          — 'work' or 'collection'
+-#   noid          — the item's NOID
+-#   trigger_class — class string for the toggle link (matches the sibling
+-#                   Edit link on the host page).
+.dropdown.d-inline-block
+  %a.dropdown-toggle{href: '#', role: 'button', class: trigger_class,
+                     'data-bs-toggle' => 'dropdown', 'aria-expanded' => 'false'}
+    Add to set
+  .dropdown-menu.dropdown-menu-end.set-picker-menu
+    = turbo_frame_tag 'set-picker', src: picker_sets_path(:"#{kind}_id" => noid), loading: :lazy, target: '_top' do
+      .px-3.py-2.small.text-muted Loading your sets…

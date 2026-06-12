@@ -64,6 +64,8 @@ Rails.application.routes.draw do
   # Recipe mutations are member POST/DELETEs mirroring the atlas_rb binding;
   # `aside` is the set-aside / put-back pair.
   resources :sets do
+    # The lazy-loaded "Add to set…" menu body (Work/Collection show pages).
+    collection { get :picker }
     member do
       post   'collections',                to: 'sets#add_collection',    as: :add_collection
       delete 'collections/:collection_id', to: 'sets#remove_collection', as: :remove_collection

@@ -1,0 +1,32 @@
+-# The "Add to set…" menu body (see _add_to_set). Rendered without layout
+-# into the lazy turbo-frame. One row per owned set, each carrying this
+-# item's state there; "+ New set" is always the last row.
+= turbo_frame_tag 'set-picker', target: '_top' do
+  - if @kind == 'collection'
+    %h6.dropdown-header.text-wrap
+      Adds everything in this collection — the set stays current as the collection changes.
+  - if @sets.any?
+    - @sets.each do |set|
+      - case set_picker_state(set, @kind, @noid)
+      - when :included
+        %span.dropdown-item.disabled{'aria-disabled' => 'true'}
+          %i.fa-solid.fa-check.text-success.me-2{'aria-hidden' => 'true'}
+          = set['title']
+          %span.state Already in this set
+      - when :aside
+        %span.dropdown-item.disabled{'aria-disabled' => 'true'}
+          %i.fa-solid.fa-box-archive.me-2{'aria-hidden' => 'true'}
+          = set['title']
+          %span.state Set aside in this set — put it back from the set's page
+      - else
+        = button_to (@kind == 'collection' ? add_collection_set_path(set['id']) : add_work_set_path(set['id'])),
+          params: { :"#{@kind}_id" => @noid }, class: 'dropdown-item' do
+          %i.fa-solid.fa-layer-group.text-muted.me-2{'aria-hidden' => 'true'}
+          = set['title']
+  - else
+    .px-3.py-2.small.text-muted
+      No sets yet — a set gathers works from anywhere in the repository without moving them.
+  .dropdown-divider
+  = link_to new_set_path, class: 'dropdown-item' do
+    %i.fa-solid.fa-plus.text-muted.me-2{'aria-hidden' => 'true'}
+    New set

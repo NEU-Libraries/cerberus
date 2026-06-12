@@ -14,7 +14,7 @@ class SetsController < CatalogController
 
   before_action :authenticate_user!, except: [:show]
   before_action :require_curator,    except: [:show]
-  before_action :load_set,           except: [:index, :new, :create]
+  before_action :load_set,           except: [:index, :new, :create, :picker]
 
   # A private Set read (or any write) the caller may not perform: Atlas says
   # 403, the user sees the standard forbidden page. Unknown ids surface as
@@ -34,6 +34,20 @@ class SetsController < CatalogController
     @resolver = SetResolver.new(compilation: @set, search_service: search_service)
     @response = contents_response
     @recipe_titles = recipe_titles
+  end
+
+  # The "Add to set…" menu body, fetched lazily by a turbo-frame when the
+  # dropdown on a Work/Collection show page first opens — host pages cost
+  # no Atlas call until then. Owner-scoped; each row carries this item's
+  # state in that set (addable / already included / set aside).
+  def picker
+    @kind = params[:collection_id].present? ? 'collection' : 'work'
+    @noid = params[:collection_id].presence || params[:work_id]
+    return head :bad_request if @noid.blank?
+
+    page = AtlasRb::Compilation.list(per_page: 50)
+    @sets = Array(page['compilations']).pluck('compilation')
+    render layout: false
   end
 
   def new
@@ -70,8 +84,10 @@ class SetsController < CatalogController
 
   def add_collection
     AtlasRb::Compilation.add_included_collection(@set['id'], params[:collection_id])
-    redirect_back_or_to(set_path(@set['id']),
-                        notice: 'Collection added to the set. It stays current as the collection changes.')
+    redirect_back_or_to(
+      set_path(@set['id']),
+      notice: "Collection added to “#{@set['title']}”. The set stays current as the collection changes."
+    )
   rescue AtlasRb::CompilationError => e
     redirect_back_or_to(set_path(@set['id']), alert: e.message)
   end
@@ -84,7 +100,7 @@ class SetsController < CatalogController
 
   def add_work
     AtlasRb::Compilation.add_included_work(@set['id'], params[:work_id])
-    redirect_back_or_to(set_path(@set['id']), notice: 'Added to the set.')
+    redirect_back_or_to(set_path(@set['id']), notice: "Added to “#{@set['title']}”.")
   rescue AtlasRb::CompilationError => e
     redirect_back_or_to(set_path(@set['id']), alert: e.message)
   end
