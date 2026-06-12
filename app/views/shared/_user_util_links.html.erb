@@ -22,8 +22,8 @@
         <% if current_user.curates_sets? || current_user.admin? %>
           <li class="nav-item d-flex align-items-center">
             <div class="btn-group user-menu">
-              <%= link_to current_user, atlas_user_path, class: 'btn btn-sm btn-link user-menu-link' %>
-              <button type="button" class="btn btn-sm btn-link user-menu-link dropdown-toggle dropdown-toggle-split"
+              <%= link_to current_user, atlas_user_path, class: 'btn btn-link user-menu-link' %>
+              <button type="button" class="btn btn-link user-menu-link dropdown-toggle dropdown-toggle-split"
                       data-bs-toggle="dropdown" aria-expanded="false">
                 <span class="visually-hidden">Toggle user menu</span>
               </button>
