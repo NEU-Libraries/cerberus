@@ -274,3 +274,18 @@ $sets-via-soft: #e6eef6;
     margin: 0;
   }
 }
+
+// Navbar user menu (split button after the user name: My Sets / Admin).
+// Flat link styling so it reads like its nav-link siblings — the caret is
+// the only hint of the menu; no outline, no fill.
+.user-menu {
+  .user-menu-link {
+    color: var(--bs-nav-link-color);
+    text-decoration: none;
+
+    &:hover,
+    &:focus-visible {
+      color: var(--bs-nav-link-hover-color);
+    }
+  }
+}
