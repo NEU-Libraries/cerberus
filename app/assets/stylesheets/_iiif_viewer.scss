@@ -13,14 +13,23 @@
   overflow: hidden;
   margin-bottom: 1rem;
 
-  // Panel-switcher buttons and the duplicate in-viewer title: hidden.
-  // Pagination controls share the header, so the header itself stays.
-  .tify-header-title {
-    display: none;
-  }
-
-  .tify-header-button-group--views,
-  .tify-header-column--views {
-    display: none;
+  // Compact chrome: hide the duplicate in-viewer title, the mobile
+  // view-toggle, and the panel switchers (Scan/Pages/Info/Export/Help) —
+  // keeping the pagination column (page select, double-page toggle,
+  // prev/next) and Fullscreen. The panel buttons' only stable hook is
+  // their aria-controls suffix (the prefix is a random instance id);
+  // the page-select dropdown's `-dropdown` suffix stays unmatched.
+  // &#{&} self-chains the wrapper class: tify.css's own button rule is
+  // (0,4,0) and loads after application.css, so these need (0,4,1)+.
+  &#{&} {
+    .tify-header-column.-title,
+    .tify-header-button-group.-toggle,
+    .tify-header button[aria-controls$='-scan'],
+    .tify-header button[aria-controls$='-thumbnails'],
+    .tify-header button[aria-controls$='-info'],
+    .tify-header button[aria-controls$='-export'],
+    .tify-header button[aria-controls$='-help'] {
+      display: none;
+    }
   }
 }
