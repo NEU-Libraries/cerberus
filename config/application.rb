@@ -46,6 +46,17 @@ module Cerberus
     # fixture and applies its read-only policy.
     config.x.cerberus.guest_nuid = ENV.fetch('CERBERUS_GUEST_NUID', '000000001')
 
+    # Cutover toggle for the signed-assertion relay (the cerberus_token
+    # replacement). OFF by default: atlas_rb keeps using the ATLAS_TOKEN +
+    # `User: NUID` relay. When ON, atlas_rb signs a short-lived ES256
+    # assertion (sub = acting NUID) per request and sends no `User:` header —
+    # Atlas verifies it with Cerberus's public key. Atlas dual-runs (accepts
+    # both), so this flips per-environment (dev → staging) and rolls back
+    # instantly. Acting-as (On-Behalf-Of) always stays on the legacy relay —
+    # the gem auto-falls-back, independent of this flag.
+    config.x.cerberus.sign_assertions =
+      ENV.fetch('CERBERUS_SIGN_ASSERTIONS', 'false') == 'true'
+
     # Route exceptions through ErrorsController so error pages share the
     # application layout (header, footer, search bar). Rails dispatches
     # by status-code path (/404, /500, etc.) when set to self.routes.

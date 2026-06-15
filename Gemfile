@@ -53,7 +53,9 @@ gem 'bootsnap', require: false
 
 # NEU Gems
 gem 'active_decorator'
-gem 'atlas_rb'
+# >= 1.3.8 ships the relay-signing transport (ES256 signed assertions that
+# replace the cerberus_token relay); the signed-assertion cutover depends on it.
+gem 'atlas_rb', '>= 1.3.8'
 gem 'attr_json'
 gem 'blacklight', '>= 8.0', '< 9.0'
 gem 'blacklight-gallery'
