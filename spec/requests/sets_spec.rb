@@ -82,7 +82,7 @@ RSpec.describe 'Sets', type: :request do
 
     it 're-renders the form with the Atlas message on a blank title' do
       post '/sets', params: { set: { title: '', description: '' } }
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
     end
 
     it 'updates title and description' do
