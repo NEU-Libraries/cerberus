@@ -40,22 +40,11 @@ module Cerberus
     # means "same as public".
     config.x.cerberus.iiif_internal_host = ENV.fetch('CERBERUS_IIIF_INTERNAL_HOST', nil)
 
-    # Acting-NUID sentinel for unauthenticated Cerberus traffic. Atlas's
-    # require_auth rejects cerberus-token requests that omit User: NUID; the
-    # logged-out path threads this NUID so Atlas resolves to its seeded :guest
-    # fixture and applies its read-only policy.
+    # Acting-NUID sentinel for unauthenticated Cerberus traffic. The
+    # logged-out path threads this NUID as the acting user, so the signed
+    # assertion Cerberus mints carries sub = guest_nuid and Atlas resolves to
+    # its seeded :guest fixture, applying its read-only policy.
     config.x.cerberus.guest_nuid = ENV.fetch('CERBERUS_GUEST_NUID', '000000001')
-
-    # Cutover toggle for the signed-assertion relay (the cerberus_token
-    # replacement). OFF by default: atlas_rb keeps using the ATLAS_TOKEN +
-    # `User: NUID` relay. When ON, atlas_rb signs a short-lived ES256
-    # assertion (sub = acting NUID) per request and sends no `User:` header —
-    # Atlas verifies it with Cerberus's public key. Atlas dual-runs (accepts
-    # both), so this flips per-environment (dev → staging) and rolls back
-    # instantly. Acting-as (On-Behalf-Of) always stays on the legacy relay —
-    # the gem auto-falls-back, independent of this flag.
-    config.x.cerberus.sign_assertions =
-      ENV.fetch('CERBERUS_SIGN_ASSERTIONS', 'false') == 'true'
 
     # Route exceptions through ErrorsController so error pages share the
     # application layout (header, footer, search bar). Rails dispatches
