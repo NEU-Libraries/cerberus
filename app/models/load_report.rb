@@ -73,29 +73,28 @@ class LoadReport < ApplicationRecord
     ((processed_ingests * 100.0) / total_ingests).round
   end
 
-  # Re-finalization is deliberate: UnzipJob creates rows incrementally
-  # while streaming the archive, so an early row job can finalize before
-  # later rows exist; subsequent calls converge the status (e.g.
-  # completed → failed once a late row lands). Don't add an
-  # "already terminal" guard here — it breaks that convergence.
+  # Finalize once no row is still pending/processing. Both unzip jobs create
+  # every row before enqueuing any job (two-phase fan-out), so the full row
+  # set always exists by the time any row job runs — there is no
+  # premature-finalize window, and the first settling call observes the true
+  # terminal status. The terminal guard therefore holds: finalization (and the
+  # creator notification) happens exactly once; a later row job that re-enters
+  # after the report settled — e.g. a retried job — is a no-op.
   def maybe_finalize!
+    return if terminal?
+
     status_settled = false
     with_lock do
       return if rows_outstanding?
 
-      if rows_failed?
-        fail_load
-      elsif rows_warned?
-        finish_with_warnings
-      else
-        finish_load
-      end
+      settle_status!
       status_settled = saved_change_to_status?
     end
-    # Outside the lock — bookkeeping, not part of the transaction. Fires
-    # only when this call actually moved the status, so a re-trigger with
-    # the same outcome (a retried row job after the report settled) stays
-    # silent; a genuine correction messages again with the new status.
+    # Outside the lock — bookkeeping, not part of the transaction. The
+    # saved_change_to_status? check is belt-and-suspenders with the terminal
+    # guard above: a concurrent second job that slips past the guard and
+    # re-runs the body writes the same terminal status, which is no change,
+    # so it stays silent. Exactly one notification per load.
     return unless status_settled
 
     notify_creator!
@@ -113,6 +112,17 @@ class LoadReport < ApplicationRecord
 
     def rows_outstanding?
       ingest_relations.any? { |rel| rel.exists?(status: %i[pending processing]) }
+    end
+
+    # Pick the terminal status from the (now complete) row set.
+    def settle_status!
+      if rows_failed?
+        fail_load
+      elsif rows_warned?
+        finish_with_warnings
+      else
+        finish_load
+      end
     end
 
     def rows_failed?

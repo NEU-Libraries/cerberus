@@ -3,9 +3,9 @@
 require 'zip'
 
 # Opens the staged archive (zip or tar) for a LoadReport, walks the
-# entries in a single forward pass, and for each JPEG: creates one
-# IptcIngest row + extracts the entry to disk + enqueues one
-# IptcIngestJob.
+# entries in a single forward pass, and for each JPEG creates one
+# IptcIngest row + extracts the entry to disk. Once every row exists it
+# enqueues one IptcIngestJob per row (two-phase fan-out — see #perform).
 #
 # Strictly streaming — entry data is copied chunk-by-chunk to disk
 # via Zip::Entry#extract or IO.copy_stream (tar). The whole-entry
@@ -29,14 +29,20 @@ class UnzipJob < ApplicationJob
     extracted_dir = extracted_dir_for(load_report)
     FileUtils.mkdir_p(extracted_dir)
 
+    # Two-phase fan-out: create every IptcIngest row (streaming each entry to
+    # disk as we walk) BEFORE enqueuing any IptcIngestJob, so a fast worker
+    # can't finalize the report before later rows exist. Only integer row IDs
+    # accumulate here — entry bytes still stream chunk-by-chunk (the batch-job
+    # memory rule); the two passes are NOT a slurp.
     archive_path = archive_path_for(load_report)
+    ingest_ids = []
     extract_each(archive_path, extracted_dir) do |basename|
-      ingest = load_report.iptc_ingests.create!(
+      ingest_ids << load_report.iptc_ingests.create!(
         source_filename: basename,
         idempotency_key: SecureRandom.uuid
-      )
-      IptcIngestJob.perform_later(ingest.id)
+      ).id
     end
+    ingest_ids.each { |id| IptcIngestJob.perform_later(id) }
   rescue StandardError => e
     Rails.logger.error("UnzipJob failed for LoadReport #{load_report_id}: #{e.class} #{e.message}")
     LoadReport.find_by(id: load_report_id)&.fail_load

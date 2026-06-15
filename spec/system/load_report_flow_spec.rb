@@ -147,6 +147,25 @@ RSpec.describe 'LoadReport end-to-end batch flow', type: :request do
       expect(lr.iptc_ingests.failed.count).to be > 0
       expect(lr.reload).to be_failed
     end
+
+    it 'sends exactly one inbox notification despite the mixed completed/failed batch' do
+      # Regression for the premature-finalize flap: with incremental row
+      # creation a fast worker finalized the report early (completed) and again
+      # on convergence (failed), emitting *two* inbox messages for one load.
+      # Two-phase fan-out closes that window — every row exists before any job
+      # runs, so finalization (and the notification) happens exactly once.
+      expect do
+        perform_enqueued_jobs do
+          post '/loaders/marcom/loads',
+               params: { load_report: { archive: archive, parent_collection_id: 'neu:c1' } }
+        end
+      end.to change(Message, :count).by(1)
+
+      expect(LoadReport.last.reload).to be_failed
+      # The single message reflects the true terminal state — we didn't merely
+      # suppress the second message and keep a premature "completed" first one.
+      expect(Message.last.subject).to end_with('failed')
+    end
   end
 
   context 'when extraction produces warnings (non-Time DateTimeOriginal)' do
