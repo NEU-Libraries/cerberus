@@ -1,16 +1,18 @@
 # frozen_string_literal: true
 
 # Resolves a Set's (Compilation's) recipe against Solr: included collections
-# (transitively, via the two-step reverse-ancestry recipe — see
-# {DescendantResolver}), plus individually-added Works, minus set-aside
-# exclusions.
+# (transitively, via a two-step reverse-ancestry recipe — find the descendant
+# containers, then their member Works), plus individually-added Works, minus
+# set-aside exclusions.
 #
 # The recipe arrives as the three noid lists off the AtlasRb::Compilation
 # response (`included_collections` / `included_works` / `excluded_works`);
 # everything else — uuid resolution, descendant lookup, the membership fq —
 # is derived here from gated Solr queries, so a restricted recipe noun is
-# silently invisible to a user who may not discover it (consistent with the
-# step-1 gating note on {DescendantResolver}).
+# silently invisible to a user who may not discover it. (Every step runs
+# through the gated SearchBuilder chain; a future surface may want step 1
+# ungated so a restricted intermediate container doesn't hide permitted Works
+# beneath it — revisit if that need arises.)
 #
 # Not an ApplicationService: there is no single #call product. The resolver
 # is instantiated once per render and read piecemeal — {#contents_fqs} for
@@ -19,8 +21,12 @@
 # provenance lookups, and aside-zone documents the Set page renders around
 # the results. Every Solr round-trip is memoized on the instance.
 class SetResolver
-  # A Set's flat contents are leaf Works (same posture as DescendantResolver).
-  DEFAULT_TYPE_FILTERS = DescendantResolver::DEFAULT_TYPE_FILTERS
+  # A Set's flat contents are leaf Works; intermediate containers are enumerated
+  # during resolution but are not themselves "contents", so they're excluded.
+  DEFAULT_TYPE_FILTERS = [
+    'internal_resource_tesim:Work',
+    '-tombstoned_bsi:true'
+  ].freeze
 
   # One included collection, with its gated contents tally.
   # +live+ is what the Set currently shows from this collection; +total+ is

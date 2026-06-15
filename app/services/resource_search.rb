@@ -3,9 +3,9 @@
 # Keyword search over repository resources of given internal_resource types
 # (Works, Collections, Communities) for the admin finders — the re-parent flow
 # searches containers; the linked-members flow searches Works then Collections.
-# Mirrors {DescendantResolver}'s `Blacklight.default_index.search(builder)` idiom,
-# but instead of resolving a subtree it answers "which resources of these types
-# match what the admin typed?".
+# Uses the same `Blacklight.default_index.search(builder)` idiom as the other
+# Solr service objects, but instead of resolving a subtree it answers "which
+# resources of these types match what the admin typed?".
 #
 # Visibility: this runs through the normal {SearchBuilder} chain, so it inherits
 # the (now admin-aware) gated discovery — an admin sees non-public resources,

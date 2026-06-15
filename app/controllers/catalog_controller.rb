@@ -266,11 +266,11 @@ class CatalogController < ApplicationController
   # metadata) OR every Work that is a member of — or linked into — the anchor or
   # any of its descendant containers.
   #
-  # Uses the two-step reverse-ancestry recipe documented on
-  # {DescendantResolver} — resolve the descendant containers, then match their
-  # members — but unlike that service this returns the matching containers
-  # themselves *and* threads the live search state through (via the caller's
-  # `.with(search_state)`), which is why it can't reuse `DescendantResolver#call`.
+  # Uses the two-step reverse-ancestry recipe — resolve the descendant
+  # containers, then match their members — but this variant returns the matching
+  # containers themselves *and* threads the live search state through (via the
+  # caller's `.with(search_state)`), which is why it's a bespoke query here
+  # rather than a shared service.
   def subtree_membership_fq(anchor_uuid, anchor_noid)
     member_of = [anchor_uuid, *descendant_container_uuids(anchor_noid)]
     # One FLAT {!bool}: the descendant-containers clause OR each membership
