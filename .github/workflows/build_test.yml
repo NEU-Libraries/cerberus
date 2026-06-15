@@ -15,8 +15,7 @@ jobs:
     - name: Make env file
       run: |
         cp .env.example .env
-        echo "ATLAS_TOKEN=${{ secrets.ATLAS_TOKEN }}" >> .env
-        echo "ATLAS_MASTER_KEY=${{ secrets.ATLAS_MASTER_KEY }}" >> .env
+        echo "ATLAS_RAILS_MASTER_KEY=${{ secrets.ATLAS_RAILS_MASTER_KEY }}" >> .env
         # Cerberus's own master key, so the web container can decrypt
         # credentials and sign Atlas assertions (config/master.key is
         # gitignored, so it's absent from the CI image). See docker-compose.ci.yml.
