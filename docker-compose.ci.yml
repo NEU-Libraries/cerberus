@@ -3,5 +3,10 @@ services:
   web:
     environment:
       - CC_TEST_REPORTER_ID=309c134506bb9c325d157d2f2a2e5fd21f732ca3233566e1ed28ceba026ac896
+      # Decrypts Cerberus credentials in CI so atlas_rb can sign Atlas
+      # assertions; sourced from the RAILS_MASTER_KEY line build_test.yml
+      # writes into .env. Kept in the CI override (not the base web service)
+      # so local dev keeps using the bind-mounted config/master.key instead.
+      - RAILS_MASTER_KEY=${RAILS_MASTER_KEY}
     volumes:
       - ./.git:/home/cerberus/web/.git

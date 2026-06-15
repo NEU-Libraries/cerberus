@@ -17,6 +17,10 @@ jobs:
         cp .env.example .env
         echo "ATLAS_TOKEN=${{ secrets.ATLAS_TOKEN }}" >> .env
         echo "ATLAS_MASTER_KEY=${{ secrets.ATLAS_MASTER_KEY }}" >> .env
+        # Cerberus's own master key, so the web container can decrypt
+        # credentials and sign Atlas assertions (config/master.key is
+        # gitignored, so it's absent from the CI image). See docker-compose.ci.yml.
+        echo "RAILS_MASTER_KEY=${{ secrets.RAILS_MASTER_KEY }}" >> .env
     - name: Dotenv Action
       uses: falti/dotenv-action@v1.1.4
     - name: Github Action cache
