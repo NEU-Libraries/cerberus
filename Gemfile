@@ -27,9 +27,6 @@ gem 'turbo-rails'
 # Hotwire's modest JavaScript framework [https://stimulus.hotwired.dev]
 gem 'stimulus-rails'
 
-# Build JSON APIs with ease [https://github.com/rails/jbuilder]
-gem 'jbuilder'
-
 # Use Redis adapter to run Action Cable in production
 # gem "redis", "~> 4.0"
 
@@ -52,11 +49,9 @@ gem 'bootsnap', require: false
 # gem "image_processing", "~> 1.2"
 
 # NEU Gems
-gem 'active_decorator'
 # >= 1.3.8 ships the relay-signing transport (ES256 signed assertions that
 # replace the cerberus_token relay); the signed-assertion cutover depends on it.
 gem 'atlas_rb', '>= 1.3.8'
-gem 'attr_json'
 gem 'blacklight', '>= 8.0', '< 9.0'
 gem 'blacklight-gallery'
 gem 'bootstrap'
@@ -67,7 +62,6 @@ gem 'dartsass-rails'
 gem 'devise'
 gem 'devise-i18n'
 gem 'diffy' # line-diff for the MODS version-history page (wraps system diff)
-gem 'enumerations'
 gem 'haml'
 gem 'kataba', '>= 1.0.3'
 gem 'libreconv'
@@ -79,7 +73,6 @@ gem 'neu-mods'
 gem 'pg'
 gem 'roo'
 gem 'rsolr', '>= 1.0', '< 3'
-gem 'ruby-filemagic'
 gem 'ruby-vips'
 gem 'sass-embedded'
 gem 'solid_queue'
