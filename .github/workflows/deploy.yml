@@ -23,4 +23,4 @@ jobs:
         echo "cerberus_version=$(cat .version)"
         echo "atlas_version=${{ steps.dotenv.outputs.atlas }}"
     - name: Deploy
-      run: http --check-status --ignore-stdin PUT cerberusv2.library.northeastern.edu/deploy token=${{ secrets.CERBERUS_TOKEN }} cerberus_version=$(cat .version) atlas_version=${{ steps.dotenv.outputs.atlas }}
+      run: http --check-status --ignore-stdin PUT cerberusv2.library.northeastern.edu/deploy token=${{ secrets.CERBERUS_DEPLOY_TOKEN }} cerberus_version=$(cat .version) atlas_version=${{ steps.dotenv.outputs.atlas }}
