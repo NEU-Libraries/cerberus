@@ -29,17 +29,17 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :communities do
+  resources :communities, except: [:destroy] do
     member do
       post :tombstone
     end
   end
-  resources :collections do
+  resources :collections, except: [:destroy] do
     member do
       post :tombstone
     end
   end
-  resources :works do
+  resources :works, except: %i[index destroy] do
     member do
       get :downloads
       get :manifest

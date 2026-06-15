@@ -27,10 +27,6 @@ class SolrDocument
     klass_type.presence&.constantize
   end
 
-  def tombstoned?
-    self['tombstoned_bsi'] == true
-  end
-
   def to_param
     raw = alternate_ids&.first
     noid = raw.split('id-').last if raw.present?
