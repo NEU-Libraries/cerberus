@@ -9,21 +9,23 @@
 
 -# ===== Set hero =====
 .container.p-4.my-3.well.rounded-3
-  %h3.d-inline= @set['title']
-  %h5.d-inline.text-black-50
-    %span.fa-solid.fa-layer-group.ps-2.pe-1
-    Set
+  - public_set = Array(@set['read_groups']).include?('public')
+  .d-flex.align-items-center.flex-wrap.gap-2
+    %h3.mb-0= @set['title']
+    %h5.text-black-50.mb-0
+      %span.fa-solid.fa-layer-group.pe-1
+      Set
+    - if public_set
+      %span.badge.bg-success-subtle.text-success-emphasis.border.border-success-subtle.mt-1.ms-1
+        %i.fa-solid.fa-globe.me-1{'aria-hidden' => 'true'}
+        Public
   - if @set['description'].present?
     %p.mb-0.mt-3= @set['description']
   %p.recipe-line.small.mb-0{class: (@set['description'].present? ? 'mt-2' : 'mt-3')}
     = set_recipe_sentence(chips_count: chips.size, added_count: added_noids.size, aside_count: aside_docs.size)
-  - public_set = Array(@set['read_groups']).include?('public')
   - if public_set || @can_edit || @owned
     .d-flex.align-items-center.flex-wrap.gap-2.pt-3
       - if public_set
-        %span.badge.bg-success-subtle.text-success-emphasis.border.border-success-subtle
-          %i.fa-solid.fa-globe.me-1{'aria-hidden' => 'true'}
-          Public
         %span{data: { controller: 'clipboard', 'clipboard-text-value': set_url(@set['id']) }}
           %button.btn.btn-outline-secondary.btn-sm{type: 'button', 'aria-label' => 'Copy link to this set', data: { action: 'clipboard#copy' }}
             %i.fa-solid.fa-link.me-1{'aria-hidden' => 'true'}
