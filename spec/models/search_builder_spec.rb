@@ -86,4 +86,42 @@ RSpec.describe SearchBuilder do
       end
     end
   end
+
+  # The REAL production scope. Blacklight 8 builds the SearchBuilder with the
+  # SearchService as scope (`search_service.search_builder` → `new(self)`),
+  # which carries the acting user only in its #context (see
+  # CatalogController#search_service_context) — it responds to neither
+  # current_user nor effective_user. This is the scope every container-contents,
+  # set-contents, and catalog-index query actually uses. The doubles above
+  # predate it and masked the gap: gated_user fell through to nil and discovery
+  # silently collapsed to public-only. instance_double verifies the real
+  # interface (context yes, current_user/effective_user no).
+  context 'when the scope is a SearchService (user only in its #context)' do
+    let(:scope) do
+      instance_double(Blacklight::SearchService,
+                      blacklight_config: CatalogController.blacklight_config,
+                      context:           { effective_user: user })
+    end
+
+    context 'and the context user is an admin' do
+      let(:user) { User.new(nuid: '000000004', role: 'admin') }
+
+      it 'short-circuits — admin discovers every resource' do
+        expect(gated_fq).to be_empty
+      end
+    end
+
+    context 'and the context user is a non-admin with groups' do
+      let(:user) do
+        User.new(nuid: '000000002', role: 'privileged',
+                 groups: ['northeastern:drs:repository:staff'])
+      end
+
+      it 'gates to public + the user groups (never public-only)' do
+        expect(gated_fq.size).to eq(1)
+        expect(gated_fq.first).to include('read_access_group_ssim', 'public',
+                                          'northeastern:drs:repository:staff')
+      end
+    end
+  end
 end

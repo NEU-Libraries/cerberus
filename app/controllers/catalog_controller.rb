@@ -222,6 +222,16 @@ class CatalogController < ApplicationController
     # config.autocomplete_suggester = 'mySuggester'
   end
 
+  # Plumb the acting user into the search service. Blacklight 8 scopes every
+  # SearchBuilder to the SearchService (not the controller), which exposes no
+  # current_user/effective_user — so without this, SearchBuilder#gated_user is
+  # nil and gated discovery silently collapses to public-only, ignoring group
+  # membership and the admin short-circuit (across container/set contents and
+  # the catalog index alike). `effective_user` honors a view-as session.
+  def search_service_context
+    { current_user: current_user, effective_user: effective_user }
+  end
+
   # Children listing for a Community/Collection show page.
   #
   # Two modes, switched on whether a keyword query is active:

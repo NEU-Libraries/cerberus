@@ -54,12 +54,21 @@ class SearchBuilder < Blacklight::SearchBuilder
     # (the view-as target during a view-as session; the real user otherwise),
     # falling back to current_user for scopes that predate impersonation
     # (e.g. bare doubles in specs).
+    #
+    # Blacklight 8 builds the SearchBuilder with the *SearchService* as scope
+    # (`search_service.search_builder` → `new(self)`), which exposes neither
+    # helper — the acting user rides in the service context instead (see
+    # CatalogController#search_service_context). Without the context branch,
+    # gated_user is nil on every search_service-built query (container/set
+    # contents, the catalog index), silently collapsing discovery to
+    # public-only — ignoring group membership and the admin short-circuit.
     def gated_user
-      if scope.respond_to?(:effective_user)
-        scope.effective_user
-      elsif scope.respond_to?(:current_user)
-        scope.current_user
-      end
+      return scope.effective_user if scope.respond_to?(:effective_user)
+      return scope.current_user   if scope.respond_to?(:current_user)
+      return unless scope.respond_to?(:context)
+
+      context = scope.context || {}
+      context[:effective_user] || context[:current_user]
     end
 
     def discovery_permissions
