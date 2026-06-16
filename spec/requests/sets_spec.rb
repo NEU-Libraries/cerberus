@@ -99,6 +99,14 @@ RSpec.describe 'Sets', type: :request do
       get "/sets/#{set['id']}"
       expect(response).to have_http_status(:not_found)
     end
+
+    it 'breadcrumbs the edit page back to the set' do
+      set = make_set('Crumbed Set')
+      get "/sets/#{set['id']}/edit"
+      expect(response.body).to include('breadcrumb')
+        .and include(set_path(set['id']))
+        .and include('Edit set')
+    end
   end
 
   describe 'recipe + show page' do

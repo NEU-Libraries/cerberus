@@ -76,6 +76,7 @@ class SetsController < CatalogController
   # Details tab is open to any editor; the Sharing tab is owner/admin-only
   # (gated in the view + on the sharing write path).
   def edit
+    edit_breadcrumbs
     prepare_sharing_form if @owned
   end
 
@@ -151,6 +152,15 @@ class SetsController < CatalogController
 
     def set_params
       params.expect(set: [:title, :description])
+    end
+
+    # Edit-page trail, mirroring ApplicationController#edit_breadcrumb_tail: the
+    # Set links back to its show page (`match: :exact` so loaf doesn't mark it
+    # current on the `/edit` sub-path), then a non-link "Edit set" you-are-here.
+    # A Set has no Atlas ancestry, so there's no tree to walk — just the tail.
+    def edit_breadcrumbs
+      breadcrumb(@set['title'], set_path(@set['id']), match: :exact)
+      breadcrumb('Edit set', edit_set_path(@set['id']))
     end
 
     # The recipe fq layered onto a state-seeded builder — find_children's
