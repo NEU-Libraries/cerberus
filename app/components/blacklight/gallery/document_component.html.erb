@@ -11,6 +11,7 @@
       <div class="card-body">
         <%= render Blacklight::Gallery::DocumentTitleComponent.new(presenter: @presenter, counter: @counter) %>
         <div class="text-center">
+          <%= helpers.document_status_icons(@document) %>
           <% if @document.klass == Work %>
             <button type="button"
                     class="btn btn-sm btn-link text-decoration-none p-0 me-2"

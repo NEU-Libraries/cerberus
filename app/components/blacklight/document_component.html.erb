@@ -25,6 +25,7 @@
       <% end %>
 
       <div class="text-end">
+        <%= helpers.document_status_icons(@document) %>
         <% if @document.klass == Work %>
           <button type="button"
                   class="btn btn-sm btn-link text-decoration-none p-0 me-2"

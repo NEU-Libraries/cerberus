@@ -91,4 +91,35 @@ describe ApplicationHelper do
       expect(helper.document_url(document)).to eq('/something/z')
     end
   end
+
+  describe '#document_status_icons' do
+    it 'renders a lock for a non-public document' do
+      html = helper.document_status_icons('read_access_group_ssim' => ['northeastern:drs:repository:staff'])
+      expect(html).to include('fa-lock').and include('Not public')
+      expect(html).not_to include('fa-link')
+    end
+
+    it 'renders nothing for a public document outside any container' do
+      expect(helper.document_status_icons('read_access_group_ssim' => ['public'])).to be_nil
+    end
+
+    it 'renders a link when the document is linked into the container being viewed' do
+      assign(:collection, double(valkyrie_id: 'uuid-here'))
+      html = helper.document_status_icons('read_access_group_ssim'  => ['public'],
+                                          'a_linked_member_of_ssim' => ['id-uuid-here'])
+      expect(html).to include('fa-link').and include('Linked here')
+      expect(html).not_to include('fa-lock')
+    end
+
+    it 'does not render a link for a member of a different container' do
+      assign(:collection, double(valkyrie_id: 'uuid-here'))
+      expect(helper.document_status_icons('read_access_group_ssim'  => ['public'],
+                                          'a_linked_member_of_ssim' => ['id-other'])).to be_nil
+    end
+
+    it 'does not render a link with no container context (catalog index)' do
+      expect(helper.document_status_icons('read_access_group_ssim'  => ['public'],
+                                          'a_linked_member_of_ssim' => ['id-uuid-here'])).to be_nil
+    end
+  end
 end
