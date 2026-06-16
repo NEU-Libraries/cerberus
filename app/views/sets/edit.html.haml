@@ -16,7 +16,7 @@
       %li.nav-item
         %button#sharing-tab.nav-link{'aria-controls' => 'sharing', 'aria-selected' => 'false', 'data-bs-target' => '#sharing', 'data-bs-toggle' => 'tab', role: 'tab', type: 'button'} Sharing
 
-  .tab-content.pt-3
+  .tab-content.pt-1
     #details.tab-pane.active{'aria-labelledby' => 'details-tab', role: 'tabpanel'}
       = render 'form', url: set_path(@set['id']), method: :patch, submit_label: 'Save', cancel_path: set_path(@set['id'])
     - if @owned
