@@ -1,17 +1,28 @@
-- content_for :page_title, 'My Sets'
+- titles = { nil => 'My Sets', 'shared' => 'Shared with me', 'editable' => 'Editable by me' }
+- content_for :page_title, titles[@scope]
 
 .admin-registry.my-3
   %header.admin-registry__head
     %span.admin-registry__title
       %i.fa-solid.fa-layer-group{'aria-hidden' => 'true'}
-      My Sets
+      = titles[@scope]
       - if @sets.any? && @pagination
         -# Atlas paginates with Pagy: the grand total is 'count' (not 'total').
         %span.admin-registry__count= pluralize(@pagination['count'], 'set')
-    .admin-registry__head-actions
-      = link_to new_set_path, class: 'btn btn-primary btn-sm' do
-        %i.fa-solid.fa-plus.me-1{'aria-hidden' => 'true'}
-        New set
+    - if @scope.nil?
+      .admin-registry__head-actions
+        = link_to new_set_path, class: 'btn btn-primary btn-sm' do
+          %i.fa-solid.fa-plus.me-1{'aria-hidden' => 'true'}
+          New set
+
+  -# My Sets (owned) · Shared with me (read+edit grants) · Editable by me (edit grants).
+  %ul.nav.nav-tabs.mb-3
+    %li.nav-item
+      = link_to 'My Sets', sets_path, class: "nav-link #{'active' if @scope.nil?}"
+    %li.nav-item
+      = link_to 'Shared with me', sets_path(scope: 'shared'), class: "nav-link #{'active' if @scope == 'shared'}"
+    %li.nav-item
+      = link_to 'Editable by me', sets_path(scope: 'editable'), class: "nav-link #{'active' if @scope == 'editable'}"
 
   - if @sets.any?
     .table-responsive
@@ -21,6 +32,8 @@
             %th{scope: 'col'} Set
             %th{scope: 'col'} Recipe
             %th{scope: 'col'} Works
+            - if @scope
+              %th{scope: 'col'} Owner
             %th{scope: 'col'} Created
         %tbody
           - @sets.each do |set|
@@ -38,8 +51,12 @@
               %td.small.text-muted
                 -# Resolved tally arrives lazily — recipe resolution is several
                 -# Solr round-trips per set, so the table never pays it inline.
+                -# (The count is gated per-viewer, so a shared set shows only
+                -# what the current user may see — never the owner's superset.)
                 = turbo_frame_tag "set-works-count-#{set['id']}", src: works_count_set_path(set['id']), loading: :lazy do
                   %span.text-muted …
+              - if @scope
+                %td.small.text-muted= @owner_names[set['depositor']] || set['depositor']
               %td.small.text-muted.tnum
                 = set['created_at'].present? ? l(Time.zone.parse(set['created_at']), format: :short) : '—'
 
@@ -48,12 +65,18 @@
         %ul.pagination.pagination-sm
           - page = @pagination['page'].to_i
           %li.page-item{class: ('disabled' if page <= 1)}
-            = link_to 'Previous', sets_path(page: page - 1), class: 'page-link'
+            = link_to 'Previous', sets_path(scope: @scope, page: page - 1), class: 'page-link'
           %li.page-item.disabled
             %span.page-link.tnum #{page} of #{@pagination['pages']}
           %li.page-item{class: ('disabled' if page >= @pagination['pages'].to_i)}
-            = link_to 'Next', sets_path(page: page + 1), class: 'page-link'
+            = link_to 'Next', sets_path(scope: @scope, page: page + 1), class: 'page-link'
   - else
     .text-muted.fst-italic.p-3
-      No sets yet. A set gathers works from anywhere in the repository — whole collections or
-      individual works — without moving or changing them.
+      - case @scope
+      - when 'shared'
+        No sets have been shared with you yet.
+      - when 'editable'
+        No one has given you edit access to a set yet.
+      - else
+        No sets yet. A set gathers works from anywhere in the repository — whole collections or
+        individual works — without moving or changing them.

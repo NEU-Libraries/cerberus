@@ -1,7 +1,21 @@
 - content_for :page_title, "Edit #{@set['title']}"
 
 .container.p-4.my-3.well.rounded-3
-  %h3
+  %h3.pb-2
     %i.fa-solid.fa-layer-group.text-primary.me-2{'aria-hidden' => 'true'}
     Edit set
-  = render 'form', url: set_path(@set['id']), method: :patch, submit_label: 'Save', cancel_path: set_path(@set['id'])
+
+  -# Details is open to any editor; Sharing (ACL) is owner/admin-only.
+  %ul.nav.nav-tabs{'data-controller' => 'tab-hash'}
+    %li.nav-item
+      %button#details-tab.nav-link.active{'aria-controls' => 'details', 'aria-selected' => 'true', 'data-bs-target' => '#details', 'data-bs-toggle' => 'tab', role: 'tab', type: 'button'} Details
+    - if @owned
+      %li.nav-item
+        %button#sharing-tab.nav-link{'aria-controls' => 'sharing', 'aria-selected' => 'false', 'data-bs-target' => '#sharing', 'data-bs-toggle' => 'tab', role: 'tab', type: 'button'} Sharing
+
+  .tab-content.pt-3
+    #details.tab-pane.active{'aria-labelledby' => 'details-tab', role: 'tabpanel'}
+      = render 'form', url: set_path(@set['id']), method: :patch, submit_label: 'Save', cancel_path: set_path(@set['id'])
+    - if @owned
+      #sharing.tab-pane{'aria-labelledby' => 'sharing-tab', role: 'tabpanel'}
+        = render 'sharing'

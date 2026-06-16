@@ -67,8 +67,12 @@ Rails.application.routes.draw do
   # Recipe mutations are member POST/DELETEs mirroring the atlas_rb binding;
   # `aside` is the set-aside / put-back pair.
   resources :sets do
-    # The lazy-loaded "Add to set…" menu body (Work/Collection show pages).
-    collection { get :picker }
+    # picker: the lazy-loaded "Add to set…" menu body (Work/Collection show
+    # pages). recipients: typeahead JSON for the Sharing tab's edit_users picker.
+    collection do
+      get :picker
+      get :recipients
+    end
     member do
       get    'works_count',                to: 'sets#works_count',       as: :works_count
       post   'collections',                to: 'sets#add_collection',    as: :add_collection

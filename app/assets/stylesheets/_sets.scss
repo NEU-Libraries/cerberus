@@ -305,3 +305,19 @@ $sets-via-soft: #e6eef6;
     }
   }
 }
+
+// Sharing tab — edit_users grant chips (a person + their NUID, removable).
+// Light bordered pill in the institutional register; the NUID rides the shared
+// .inbox-typeahead__nuid monospace/tabular treatment.
+.set-grant-chip {
+  padding: 0.2rem 0.3rem 0.2rem 0.6rem;
+  border: 1px solid $gray-300;
+  border-radius: 999px;
+  background: $gray-100;
+  font-size: 0.85rem;
+
+  .btn-close {
+    font-size: 0.6rem;
+    padding: 0.25rem;
+  }
+}

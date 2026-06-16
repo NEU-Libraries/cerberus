@@ -1,0 +1,43 @@
+-# Sharing tab (owner/admin only). Three controls map onto one
+-# Compilation.update(permissions:) write: visibility (the `public` read token),
+-# group grants (read/edit — reuses the object-permissions widget), and
+-# individual edit_users (a name typeahead → removable chips).
+= form_with scope: :set, url: set_path(@set['id']), method: :patch do |f|
+  = f.hidden_field :form, value: 'sharing'
+
+  .well.p-3.my-3.rounded-3
+    %h5.pb-2 Visibility
+    %select#mass.form-select.form-select-sm{name: 'mass', 'aria-label' => 'Visibility'}
+      %option{value: 'public', selected: @public ? 'selected' : nil} Public
+      %option{value: 'private', selected: @public ? nil : 'selected'} Private
+    %ul.small.text-muted.pt-2.mb-0
+      %li Public — anyone with the link can view this set; it may surface on public sites.
+      %li Private — only you, and the people or groups granted access below, can see it.
+
+  .well.p-3.my-3.rounded-3{data: { controller: 'group-permissions', 'group-permissions-resource-value': 'set' }}
+    = render 'shared/group_permissions', resource: 'set'
+
+  .well.p-3.my-3.rounded-3{data: { controller: 'set-user-grants', 'set-user-grants-url-value': recipients_sets_path }}
+    %h5.pb-2 People with edit access
+    .form-text.mb-2 Grant individual people permission to edit this set's contents. They can curate the recipe; only you can change sharing.
+    .position-relative
+      %input.form-control.form-control-sm{type: 'text', placeholder: 'Start typing a name…', autocomplete: 'off',
+        'aria-label' => 'Add a person', data: { 'set-user-grants-target': 'query', action: 'input->set-user-grants#search' }}
+      .list-group.inbox-typeahead{hidden: true, data: { 'set-user-grants-target': 'results' }}
+    %ul.list-unstyled.d-flex.flex-wrap.gap-2.mt-2.mb-0{data: { 'set-user-grants-target': 'chips' }}
+      - Array(@edit_user_grants).each do |grant|
+        %li.set-grant-chip.d-inline-flex.align-items-center.gap-2
+          %span= grant[:name]
+          %span.inbox-typeahead__nuid= grant[:nuid]
+          %button.btn-close.btn-sm{type: 'button', 'aria-label' => "Remove #{grant[:name]}", data: { action: 'set-user-grants#remove' }}
+          %input{type: 'hidden', name: 'set[edit_users][]', value: grant[:nuid]}
+    %template{data: { 'set-user-grants-target': 'template' }}
+      %li.set-grant-chip.d-inline-flex.align-items-center.gap-2
+        %span.js-name
+        %span.inbox-typeahead__nuid.js-nuid
+        %button.btn-close.btn-sm{type: 'button', 'aria-label' => 'Remove', data: { action: 'set-user-grants#remove' }}
+        %input.js-field{type: 'hidden', name: 'set[edit_users][]'}
+
+  .well.p-3.my-3.rounded-3
+    = f.submit 'Save sharing', class: 'btn btn-success btn-sm'
+    = link_to 'Cancel', set_path(@set['id']), class: 'btn btn-outline-secondary btn-sm ms-2'
