@@ -5,7 +5,7 @@
 = form_with scope: :set, url: set_path(@set['id']), method: :patch do |f|
   = f.hidden_field :form, value: 'sharing'
 
-  .well.p-3.my-3.rounded-3
+  %div
     %h5.pb-2 Visibility
     %select#mass.form-select.form-select-sm{name: 'mass', 'aria-label' => 'Visibility'}
       %option{value: 'public', selected: @public ? 'selected' : nil} Public
@@ -14,10 +14,14 @@
       %li Public — anyone with the link can view this set; it may surface on public sites.
       %li Private — only you, and the people or groups granted access below, can see it.
 
-  .well.p-3.my-3.rounded-3{data: { controller: 'group-permissions', 'group-permissions-resource-value': 'set' }}
+  %hr.work-show-divider.my-3
+
+  %div{data: { controller: 'group-permissions', 'group-permissions-resource-value': 'set' }}
     = render 'shared/group_permissions', resource: 'set'
 
-  .well.p-3.my-3.rounded-3{data: { controller: 'set-user-grants', 'set-user-grants-url-value': recipients_sets_path }}
+  %hr.work-show-divider.my-3
+
+  %div{data: { controller: 'set-user-grants', 'set-user-grants-url-value': recipients_sets_path }}
     %h5.pb-2 People with edit access
     .form-text.mb-2 Grant individual people permission to edit this set's contents. They can curate the recipe; only you can change sharing.
     .position-relative
@@ -40,4 +44,4 @@
 
   .well.p-3.my-3.rounded-3
     = f.submit 'Save sharing', class: 'btn btn-success btn-sm'
-    = link_to 'Cancel', set_path(@set['id']), class: 'btn btn-outline-secondary btn-sm ms-2'
+    = link_to 'Cancel', set_path(@set['id']), class: 'btn btn-warning btn-sm ms-2'

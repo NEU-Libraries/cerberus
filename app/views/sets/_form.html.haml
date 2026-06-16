@@ -9,5 +9,6 @@
     = f.label :description, 'Description', class: 'form-label'
     = f.text_area :description, value: @set['description'], class: 'form-control', rows: 3
     .form-text Optional — a note to your future self about what this set gathers.
-  = f.submit submit_label, class: 'btn btn-primary btn-sm'
-  = link_to 'Cancel', cancel_path, class: 'btn btn-outline-secondary btn-sm ms-2'
+  .well.p-3.my-3.rounded-3
+    = f.submit submit_label, class: 'btn btn-primary btn-sm'
+    = link_to 'Cancel', cancel_path, class: 'btn btn-warning btn-sm ms-2'
