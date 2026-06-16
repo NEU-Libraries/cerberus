@@ -153,5 +153,25 @@ describe Transformable do
 
       expect(permitted[:permissions][:read]).to eq(['librarians'])
     end
+
+    it 'sets read to [] for private with no group grants (the silent-stays-public fix)' do
+      host.params = { mass: 'private' }
+      permitted = { permissions: {} }
+
+      host.mass_permissions(permitted)
+
+      # Definitive empty read tells Atlas to make it private — rather than
+      # omitting :read and leaving the item public.
+      expect(permitted[:permissions][:read]).to eq([])
+    end
+
+    it 'sets read to [] for private even when permissions is absent entirely' do
+      host.params = { mass: 'private' }
+      permitted = {}
+
+      host.mass_permissions(permitted)
+
+      expect(permitted[:permissions][:read]).to eq([])
+    end
   end
 end
