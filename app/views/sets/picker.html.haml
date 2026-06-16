@@ -6,13 +6,19 @@
   - if @sets.any?
     .set-picker-rows
       - @sets.each do |set|
-        - case set_picker_state(set, @kind, @noid)
+        - case set_picker_state(set, @kind, @noid, @covering)
         - when :included
           .picker-row.is-noop
             %i.fa-solid.fa-check.text-success{'aria-hidden' => 'true'}
             %span.nm
               = set['title']
               %span.state Already in this set
+        - when :covered
+          .picker-row.is-noop
+            %i.fa-solid.fa-folder-open.text-success{'aria-hidden' => 'true'}
+            %span.nm
+              = set['title']
+              %span.state Already in this set — via a collection it contains
         - when :aside
           .picker-row.is-noop
             %i.fa-solid.fa-box-archive{'aria-hidden' => 'true'}

@@ -173,6 +173,17 @@ RSpec.describe 'Sets', type: :request do
         expect(response.body).to include("/sets/#{set['id']}/works")
       end
 
+      it 'marks a work already covered by an included collection as :covered, not addable' do
+        set = make_set('Coverage Set')
+        post "/sets/#{set['id']}/collections", params: { collection_id: collection.id }
+
+        # work_two lives under `collection` (now in the set) but was never added
+        # individually — it should read as already-included, with no add button.
+        get '/sets/picker', params: { work_id: work_two.id }
+        expect(response.body).to include('via a collection it contains')
+        expect(response.body).not_to include("/sets/#{set['id']}/works")
+      end
+
       it 'filters rows by title and reports empty matches' do
         make_set('Findable Set')
         make_set('Other Curation')

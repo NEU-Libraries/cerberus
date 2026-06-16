@@ -41,5 +41,15 @@ RSpec.describe SetsHelper do
       expect(helper.set_picker_state(set, 'work', 'wrk2222')).to eq(:aside)
       expect(helper.set_picker_state(set, 'work', 'wrk9999')).to eq(:addable)
     end
+
+    it 'marks a work :covered when its covering containers include one of the set collections' do
+      # wrk9999 is not a direct member, but it lives under col1234 (in the set).
+      expect(helper.set_picker_state(set, 'work', 'wrk9999', ['col1234'])).to eq(:covered)
+      # covering that misses the set's collections stays addable
+      expect(helper.set_picker_state(set, 'work', 'wrk9999', ['colZZZZ'])).to eq(:addable)
+      # a direct add or set-aside still wins over coverage
+      expect(helper.set_picker_state(set, 'work', 'wrk1111', ['col1234'])).to eq(:included)
+      expect(helper.set_picker_state(set, 'work', 'wrk2222', ['col1234'])).to eq(:aside)
+    end
   end
 end

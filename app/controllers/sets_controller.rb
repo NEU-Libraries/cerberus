@@ -57,8 +57,9 @@ class SetsController < CatalogController
 
   # The Add-to-set modal's rows, fetched lazily by a turbo-frame when the
   # modal on a Work/Collection show page first opens — host pages cost no
-  # Atlas call until then. Owner-scoped and paginated; each row carries
-  # this item's state in that set (addable / already included / set aside).
+  # Atlas call until then. Owner-scoped and paginated; each row carries this
+  # item's state in that set (addable / already included / covered-by-a-
+  # collection / set aside).
   def picker
     @kind = params[:collection_id].present? ? 'collection' : 'work'
     @noid = params[:collection_id].presence || params[:work_id]
@@ -66,6 +67,7 @@ class SetsController < CatalogController
 
     @q = params[:q].to_s.strip
     @sets, @pagination = SetPicker.call(query: @q, page: params[:page])
+    @covering = picker_covering
     render layout: false
   end
 
@@ -152,6 +154,15 @@ class SetsController < CatalogController
 
     def set_params
       params.expect(set: [:title, :description])
+    end
+
+    # A Work already resolved into a set via an included collection should read
+    # as included, not addable — so compute its covering container noids once
+    # (empty for collection rows, which only need direct membership).
+    def picker_covering
+      return Set.new unless @kind == 'work'
+
+      SetItemCoverage.call(noid: @noid, search_service: search_service)
     end
 
     # Edit-page trail, mirroring ApplicationController#edit_breadcrumb_tail: the

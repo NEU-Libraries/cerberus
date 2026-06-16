@@ -53,15 +53,19 @@ module SetsHelper
   end
 
   # Which affordance a picker row gets for this item: :included (already a
-  # recipe line), :aside (works only — excluded here, so a re-add would stay
-  # invisible), or :addable.
-  def set_picker_state(set, kind, noid)
+  # recipe line), :covered (a Work already resolved in via one of the set's
+  # included collections — see +covering+), :aside (works only — excluded here,
+  # so a re-add would stay invisible), or :addable. +covering+ is the Work's
+  # covering container noids (see SetItemCoverage); empty for collection rows.
+  def set_picker_state(set, kind, noid, covering = [])
     if kind == 'collection'
       Array(set['included_collections']).include?(noid) ? :included : :addable
     elsif Array(set['included_works']).include?(noid)
       :included
     elsif Array(set['excluded_works']).include?(noid)
       :aside
+    elsif Array(set['included_collections']).intersect?(Array(covering))
+      :covered
     else
       :addable
     end
