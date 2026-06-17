@@ -100,6 +100,11 @@ class CatalogController < ApplicationController
     config.add_facet_field 'subject_era_ssim', label: 'Era'
 
     # Cerberus defined facets
+    # Content type (Image/Video/Text/Map/…) projected onto the Work from its
+    # FileSets' Classification by Atlas's ClassificationIndexer. Multivalued —
+    # a mixed-media Work surfaces under each of its formats; values are
+    # display-ready Classification#name strings (no i18n mapping needed).
+    config.add_facet_field 'classification_ssim', label: 'Content'
     config.add_facet_field 'type_ssim', label: 'Type', collapse: false
 
     config.add_facet_field 'example_pivot_field', label: 'Pivot Field', pivot: %w[format language_ssim],
