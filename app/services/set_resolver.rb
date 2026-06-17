@@ -78,8 +78,8 @@ class SetResolver
   # discover — per-member permission gating comes free, exactly as on the
   # page. No-ops (no yield) when the recipe has no positive clause.
   #
-  # `fl` is trimmed to what SetZipPacker needs (noid via alternate_ids, title
-  # for the per-work folder). Paged rather than one giant fetch; capped at
+  # `fl` is trimmed to what SetZipPacker needs (just the noid, via
+  # alternate_ids). Paged rather than one giant fetch; capped at
   # {MAX_EXPORT_ROWS} as a coarse runaway guard until the deferred cumulative
   # size cap + job fallback lands (see the bulk-set-download plan).
   #
@@ -93,7 +93,7 @@ class SetResolver
     start = 0
     loop do
       docs = search(*fqs, rows: batch, start: start,
-                    fl: 'id,alternate_ids_ssim,title_tsim').documents
+                    fl: 'id,alternate_ids_ssim').documents
       break if docs.empty?
 
       yield docs

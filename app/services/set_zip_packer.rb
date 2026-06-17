@@ -11,8 +11,8 @@
 #   - {#content_blob?} drops Delegate-backed derivatives (the downloadable
 #     S/M/L trio), which carry a `uri` rather than held bytes.
 #
-# Naming is the labeled, consumer-facing scheme: a per-work folder
-# (`<title-slug>-<noid>/`) plus the labeled `<prefix><noid>.<ext>` filename.
+# Naming is the labeled, consumer-facing scheme: a per-work folder named by
+# the work `<noid>/` plus the labeled `<prefix><noid>.<ext>` filename.
 # `original_filename` is deliberately NEVER surfaced — deposited names are
 # preservation/curation data, often confusing or offputting; the cases where
 # filenames carry meaning (e.g. inter-referencing science datasets) are
@@ -35,7 +35,7 @@ class SetZipPacker
         noid = noid_of(doc)
         next if noid.blank?
 
-        pack_work(zip, doc, noid, manifest, errors)
+        pack_work(zip, noid, manifest, errors)
       end
     end
 
@@ -48,13 +48,14 @@ class SetZipPacker
 
   private
 
-    def pack_work(zip, doc, noid, manifest, errors)
-      folder = work_folder(doc, noid)
-
+    def pack_work(zip, noid, manifest, errors)
+      # Per-work folder keyed on the noid alone — short, unique, stable.
+      # (A title slug was tried but ran absurdly long, e.g.
+      # "what-s-new-how-we-respond-to-disaster-episode-1-<noid>/".)
       AtlasRb::Work.assets(noid, nuid: @nuid).each do |asset|
         next unless content_blob?(asset)
 
-        entry = "#{folder}/#{entry_filename(asset)}"
+        entry = "#{noid}/#{entry_filename(asset)}"
         # STORE, not deflate: DRS payloads (JP2/PDF/images/curated zips) are
         # already compressed, so deflating burns CPU for ~0 gain and slows the
         # stream. Do NOT switch this to write_file/write_deflated_file.
@@ -63,7 +64,7 @@ class SetZipPacker
         end
         manifest << entry
       rescue Faraday::Error, JSON::ParserError => e
-        errors << "#{folder}: #{asset.noid} failed — #{e.class}: #{e.message}"
+        errors << "#{noid}: #{asset.noid} failed — #{e.class}: #{e.message}"
       end
     end
 
@@ -86,11 +87,6 @@ class SetZipPacker
       from_name = asset[:original_filename].to_s[/\.([^.]+)\z/, 1]
       from_mime = Rack::Mime::MIME_TYPES.key(asset[:mime_type].to_s)&.delete_prefix('.')
       from_name.presence || from_mime.presence || 'bin'
-    end
-
-    def work_folder(doc, noid)
-      slug = Array(doc['title_tsim']).first.to_s.parameterize.presence || 'work'
-      "#{slug}-#{noid}"
     end
 
     # Solr stores the noid in `alternate_ids_ssim` as `id-<noid>`.
