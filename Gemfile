@@ -18,6 +18,10 @@ gem 'sqlite3'
 # Use the Puma web server [https://github.com/puma/puma]
 gem 'puma'
 
+# DB-backed session store (ActiveRecord::SessionStore) — lifts the ~4KB cookie
+# limit app-wide; required by the download queue's growing session payload.
+gem 'activerecord-session_store'
+
 # Use JavaScript with ESM import maps [https://github.com/rails/importmap-rails]
 gem 'importmap-rails'
 
