@@ -74,6 +74,7 @@ Rails.application.routes.draw do
       get :recipients
     end
     member do
+      get    'download',                   to: 'set_downloads#show',     as: :download
       get    'works_count',                to: 'sets#works_count',       as: :works_count
       post   'collections',                to: 'sets#add_collection',    as: :add_collection
       delete 'collections/:collection_id', to: 'sets#remove_collection', as: :remove_collection

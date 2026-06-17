@@ -30,6 +30,10 @@
           %button.btn.btn-outline-secondary.btn-sm{type: 'button', 'aria-label' => 'Copy link to this set', data: { action: 'clipboard#copy' }}
             %i.fa-solid.fa-link.me-1{'aria-hidden' => 'true'}
             %span{data: { 'clipboard-target': 'label' }} Copy link
+      - if @response.total.positive?
+        = link_to download_set_path(@set['id']), class: 'btn btn-outline-primary btn-sm', 'aria-label' => "Download #{@set['title']} as a zip", data: { turbo: false } do
+          %i.fa-solid.fa-file-zipper.me-1{'aria-hidden' => 'true'}
+          Download
       - if @can_edit || @owned
         .ms-auto
           - if @can_edit
