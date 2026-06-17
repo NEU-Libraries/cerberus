@@ -49,6 +49,27 @@
   bottom: 0;
 }
 
+// Resource-type pill overlaid on result thumbnails (list + grid). Keeps the
+// type legible when a custom thumbnail hides the default type icon (v1 parity).
+// Semi-transparent so it reads over any image; centered along the bottom of
+// .document-thumbnail — the positioning context the img/fallback already use.
+.thumb-type-pill {
+  position: absolute;
+  bottom: 0.4rem; // floats just above the bottom edge, not flush
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+  padding: 0.05rem 0.4rem;
+  font-size: 0.7rem;
+  font-weight: 500;
+  line-height: 1.45;
+  color: $white;
+  background-color: rgba(154, 159, 162, 0.6);
+  border-radius: 0.2rem;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
 .document-thumbnail img {
   position: absolute;
   margin: auto;

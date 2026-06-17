@@ -14,5 +14,11 @@ describe CatalogController do
       expect(response).to render_template('catalog/index')
       expect(CGI.unescapeHTML(response.body)).to include(community.title)
     end
+
+    it 'overlays a resource-type pill on each result thumbnail' do
+      AtlasRb::Community.metadata(community.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
+      get :index
+      expect(response.body).to include('class="thumb-type-pill">Community')
+    end
   end
 end

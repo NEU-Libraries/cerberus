@@ -306,21 +306,30 @@ class CatalogController < ApplicationController
     Blacklight.default_index.search(builder).documents.map(&:id)
   end
 
+  # Type pill overlay — keeps the resource type legible even when a custom
+  # thumbnail replaces the default type icon (mirrors v1). The pill is a sibling
+  # of the thumbnail media (both inside .document-thumbnail, the positioning
+  # context), so the media's img→fallback nextElementSibling onerror swap is
+  # unaffected.
   def iiif_thumbnail(document, *_args)
+    pill = view_context.content_tag(:span, document.klass_type, class: 'thumb-type-pill')
+    view_context.safe_join([thumbnail_media(document), pill])
+  end
+
+  # The thumbnail image (with a hidden type-icon fallback for broken/missing
+  # images) or, when there's no custom thumbnail, the type icon itself.
+  def thumbnail_media(document)
     icon_class = helpers.document_type_icon(document.klass_type)
     icon_html  = view_context.content_tag(:i, '', class: "fa-regular #{icon_class} fa-2xl text-black-50")
 
     src = document.thumbnail_2x_ssi.presence || document.thumbnail_ssi
-    if src.present?
-      fallback = view_context.content_tag(:span, icon_html,
-                                          class: 'thumbnail-fallback d-none')
-      img = view_context.image_tag(src,
-                                   onerror: "this.classList.add('d-none'); \
-                                             this.nextElementSibling.classList.remove('d-none');")
-      view_context.content_tag(:span, img + fallback, class: 'thumbnail-wrapper')
-    else
-      view_context.content_tag(:span, icon_html, class: 'thumbnail-fallback')
-    end
+    return view_context.content_tag(:span, icon_html, class: 'thumbnail-fallback') if src.blank?
+
+    fallback = view_context.content_tag(:span, icon_html, class: 'thumbnail-fallback d-none')
+    img = view_context.image_tag(src,
+                                 onerror: "this.classList.add('d-none'); \
+                                           this.nextElementSibling.classList.remove('d-none');")
+    view_context.content_tag(:span, img + fallback, class: 'thumbnail-wrapper')
   end
 
   helper_method :iiif_thumbnail if respond_to? :helper_method
