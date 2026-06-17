@@ -76,6 +76,7 @@ gem 'rsolr', '>= 1.0', '< 3'
 gem 'ruby-vips'
 gem 'sass-embedded'
 gem 'solid_queue'
+gem 'zip_kit' # streaming ZIP for bulk set download (no temp file / no whole-archive buffering)
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
