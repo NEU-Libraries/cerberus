@@ -80,7 +80,7 @@ RSpec.describe 'Set downloads', type: :request do
   def make_public(set)
     AtlasRb::Compilation.update(set['id'],
                                 permissions: { read: ['public'], edit: [], edit_users: [] },
-                                nuid: nuid)
+                                nuid:        nuid)
   end
 
   def sign_out_all = sign_out(curator)

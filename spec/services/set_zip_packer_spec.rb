@@ -46,7 +46,7 @@ RSpec.describe SetZipPacker do
 
   it 'streams a content Blob into a per-work folder under its labeled filename' do
     allow(AtlasRb::Work).to receive(:assets).with('bc1234', nuid: '000000002')
-      .and_return([blob(noid: 'blob1', filename: 'pdf_blob1.pdf', mime_type: 'application/pdf')])
+                                            .and_return([blob(noid: 'blob1', filename: 'pdf_blob1.pdf', mime_type: 'application/pdf')])
     allow(AtlasRb::Blob).to receive(:content).with('blob1').and_yield('PDFBYTES')
 
     packer.pack(zip)
@@ -58,8 +58,8 @@ RSpec.describe SetZipPacker do
 
   it 'excludes Delegate-backed derivatives (they carry a uri)' do
     allow(AtlasRb::Work).to receive(:assets).with('bc1234', nuid: '000000002')
-      .and_return([blob(noid: 'blob1', filename: 'pdf_blob1.pdf'),
-                   delegate(noid: 'del1', uri: 'https://iiif.example/large')])
+                                            .and_return([blob(noid: 'blob1', filename: 'pdf_blob1.pdf'),
+                                                         delegate(noid: 'del1', uri: 'https://iiif.example/large')])
     allow(AtlasRb::Blob).to receive(:content).with('blob1').and_yield('x')
 
     packer.pack(zip)
@@ -71,7 +71,7 @@ RSpec.describe SetZipPacker do
 
   it 'falls back to a neutral <noid>.<ext> when the labeled filename is absent, never the original_filename' do
     allow(AtlasRb::Work).to receive(:assets).with('bc1234', nuid: '000000002')
-      .and_return([blob(noid: 'blob2', filename: nil, original_filename: 'UNHINGED name!!.tiff', mime_type: 'image/tiff')])
+                                            .and_return([blob(noid: 'blob2', filename: nil, original_filename: 'UNHINGED name!!.tiff', mime_type: 'image/tiff')])
     allow(AtlasRb::Blob).to receive(:content).with('blob2').and_yield('x')
 
     packer.pack(zip)
@@ -82,7 +82,7 @@ RSpec.describe SetZipPacker do
 
   it 'writes a trailing MANIFEST.txt listing the packed entries' do
     allow(AtlasRb::Work).to receive(:assets).with('bc1234', nuid: '000000002')
-      .and_return([blob(noid: 'blob1', filename: 'pdf_blob1.pdf')])
+                                            .and_return([blob(noid: 'blob1', filename: 'pdf_blob1.pdf')])
     allow(AtlasRb::Blob).to receive(:content).with('blob1').and_yield('x')
 
     packer.pack(zip)
@@ -95,7 +95,7 @@ RSpec.describe SetZipPacker do
 
   it 'records a mid-stream fetch failure in ERRORS.txt rather than aborting the archive' do
     allow(AtlasRb::Work).to receive(:assets).with('bc1234', nuid: '000000002')
-      .and_return([blob(noid: 'blob1', filename: 'pdf_blob1.pdf')])
+                                            .and_return([blob(noid: 'blob1', filename: 'pdf_blob1.pdf')])
     allow(AtlasRb::Blob).to receive(:content).with('blob1').and_raise(Faraday::TimeoutError)
 
     packer.pack(zip)
