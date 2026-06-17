@@ -62,6 +62,15 @@ Rails.application.routes.draw do
     collection { get :recipients }
   end
 
+  # Download Queue — a per-session basket of individual files, downloaded later
+  # as one streamed ZIP (reuses the bulk-download streaming tech). Anon-capable.
+  # The zip stream lives on its own controller (ActionController::Live).
+  get    'download_queue',          to: 'download_queue#show',      as: :download_queue
+  post   'download_queue/items',    to: 'download_queue#create',    as: :download_queue_items
+  delete 'download_queue/items',    to: 'download_queue#destroy',   as: :download_queue_item
+  delete 'download_queue',          to: 'download_queue#destroy_all'
+  get    'download_queue/archive',  to: 'queue_downloads#show',     as: :download_queue_archive
+
   # Sets — personal curated sets over Atlas Compilations ("Set" is the only
   # word a user ever sees; "Compilation" is the model name on the wire).
   # Recipe mutations are member POST/DELETEs mirroring the atlas_rb binding;
