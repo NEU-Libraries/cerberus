@@ -1,0 +1,9 @@
+<%# Navbar Download Queue badge — anon-capable (shown whenever the queue is
+    non-empty, unlike the auth-gated inbox). Lives in a stable #download-queue-nav
+    container so the add action's turbo_stream can re-render it live. %>
+<% if download_queue_count.positive? %>
+  <%= link_to download_queue_path, class: 'nav-link inbox-nav-link', 'aria-label': download_queue_aria_label do %>
+    <i class="fa-solid fa-download" aria-hidden="true"></i>
+    <span class="inbox-nav-link__badge"><%= download_queue_count %></span>
+  <% end %>
+<% end %>

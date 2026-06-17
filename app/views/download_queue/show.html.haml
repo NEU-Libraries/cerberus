@@ -1,0 +1,43 @@
+- content_for :page_title, 'Download Queue'
+
+.admin-registry.my-3
+  %header.admin-registry__head
+    %span.admin-registry__title
+      %i.fa-solid.fa-download{'aria-hidden' => 'true'}
+      Download Queue
+      - if @queue.count.positive?
+        %span.admin-registry__count.tnum= pluralize(@queue.count, 'file')
+    - if @queue.count.positive?
+      .admin-registry__head-actions
+        = link_to download_queue_archive_path, class: 'btn btn-primary btn-sm', data: { turbo: false } do
+          %i.fa-solid.fa-file-zipper.me-1{'aria-hidden' => 'true'}
+          Download all
+        = button_to download_queue_path, method: :delete, class: 'btn btn-outline-secondary btn-sm ms-2',
+            form: { class: 'd-inline' }, data: { turbo_confirm: 'Clear all files from your download queue?' } do
+          %i.fa-solid.fa-trash-can.me-1{'aria-hidden' => 'true'}
+          Clear queue
+
+  - if @queue.count.positive?
+    -# Grouped by parent work, mirroring the zip's per-work folders.
+    - @queue.items.group_by { |item| item['w'] }.each do |work_noid, entries|
+      .well.p-3.my-3.rounded-3
+        %h2.h6.mb-2.d-flex.align-items-baseline.gap-2
+          %i.fa-solid.fa-box-archive.text-secondary{'aria-hidden' => 'true'}
+          = link_to(@titles.dig(work_noid, 'title').presence || 'Untitled work', work_path(work_noid), class: 'fw-semibold')
+          %span.text-muted.small.font-monospace= work_noid
+        %ul.list-group.list-group-flush
+          - entries.each do |entry|
+            %li.list-group-item.d-flex.align-items-center.px-0
+              %i.fa-regular.fa-file.text-secondary.me-3{'aria-hidden' => 'true'}
+              %span.flex-grow-1= @labels.dig(work_noid, entry['b']).presence || 'File'
+              %span.text-muted.small.font-monospace.me-3= entry['b']
+              = button_to download_queue_item_path(work_noid: work_noid, blob_noid: entry['b']), method: :delete,
+                  class: 'btn btn-outline-danger btn-sm', form: { class: 'd-inline' },
+                  'aria-label' => "Remove #{@labels.dig(work_noid, entry['b']).presence || 'file'} from the queue" do
+                %i.fa-solid.fa-xmark{'aria-hidden' => 'true'}
+  - else
+    .admin-registry__empty
+      %i.fa-solid.fa-download.mb-2{'aria-hidden' => 'true', style: 'font-size:1.5rem;opacity:.4;'}
+      %p.mb-1.fw-semibold Your download queue is empty.
+      %p.text-muted.small.mb-0
+        Browse to any work and use “Add to queue” on a file to gather it here, then download everything at once.

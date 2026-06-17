@@ -1,0 +1,19 @@
+-# One downloadable-asset row, shared by the work-show Downloads card
+-# (_downloads) and the Downloads modal frame (downloads). `work_noid` is the
+-# parent work; Blob rows (no uri) also get an "Add to queue" control.
+- display_label = file.label.presence || file[:use]
+%li.list-group-item.d-flex.align-items-center
+  %span.fa-regular{class: file_type_icon(file.mime_type), 'aria-hidden' => true}
+  .ms-3.flex-grow-1
+    .fw-semibold= display_label
+    - if file[:size]
+      %small.text-muted= number_to_human_size(file[:size])
+  - if file[:uri].present?
+    = link_to file.uri, class: 'btn btn-outline-primary btn-sm ms-3', 'aria-label' => "Download #{display_label}", target: '_blank', rel: 'noopener', download: '' do
+      %span.fa-solid.fa-download{'aria-hidden' => true}
+      %span.ms-1 Download
+  - else
+    = link_to download_path(file.noid), class: 'btn btn-outline-primary btn-sm ms-3', 'aria-label' => "Download #{display_label}", data: { turbo: false } do
+      %span.fa-solid.fa-download{'aria-hidden' => true}
+      %span.ms-1 Download
+    = render 'works/queue_button', work_noid: work_noid, blob_noid: file.noid, label: display_label
