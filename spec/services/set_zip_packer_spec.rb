@@ -6,23 +6,7 @@ require 'rails_helper'
 # resolver and Atlas reads stubbed. (The gated enumeration is specced against
 # real Solr in set_resolver_spec; the HTTP/auth surface in the request spec.)
 RSpec.describe SetZipPacker do
-  # Minimal stand-in for zip_kit's writer: records each stored entry's name and
-  # the bytes pushed into its sink. Only responds to write_stored_file, so a
-  # regression to write_file/write_deflated_file (i.e. losing STORE) would fail
-  # loudly here rather than silently re-compress.
-  class FakeZip
-    Entry = Struct.new(:name, :body)
-    attr_reader :entries
-
-    def initialize = @entries = []
-
-    def write_stored_file(name)
-      sink = +''
-      yield sink
-      entries << Entry.new(name, sink)
-    end
-  end
-
+  # FakeZip lives in spec/support/fake_zip.rb (shared with queue_zip_packer_spec).
   let(:zip) { FakeZip.new }
   let(:resolver) { instance_double(SetResolver) }
   let(:packer) { described_class.new(resolver: resolver, nuid: '000000002') }
