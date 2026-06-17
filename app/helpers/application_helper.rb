@@ -87,9 +87,9 @@ module ApplicationHelper
   # rubocop:enable Rails/HelperInstanceVariable
 
   def result_status_icon(icon_class, title)
-    content_tag(:span, class: 'text-body-tertiary me-2', tabindex: '0',
+    content_tag(:span, class: 'text-body-tertiary align-middle me-2', tabindex: '0',
                        data: { controller: 'tooltip', 'bs-title': title }) do
-      content_tag(:i, '', class: "fa-solid #{icon_class}", 'aria-hidden': 'true') +
+      content_tag(:i, '', class: "fa-solid #{icon_class} fa-sm", 'aria-hidden': 'true') +
         content_tag(:span, title, class: 'visually-hidden')
     end
   end

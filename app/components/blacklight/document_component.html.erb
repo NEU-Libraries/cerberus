@@ -25,7 +25,6 @@
       <% end %>
 
       <div class="text-end">
-        <%= helpers.document_status_icons(@document) %>
         <% if @document.klass == Work %>
           <button type="button"
                   class="btn btn-sm btn-link text-decoration-none p-0 me-2"
@@ -50,13 +49,14 @@
           </a>
         <% end %>
         <%= link_to helpers.report_a_problem_url(@document),
-                    class: 'btn btn-sm btn-link p-0',
+                    class: 'btn btn-sm btn-link p-0 pe-1',
                     target: '_blank',
                     rel: 'noopener',
                     data: { controller: 'tooltip', 'bs-title': 'Report a problem' } do %>
           <span class="visually-hidden">Report a problem</span>
           <i class="fa-regular fa-comment-dots" aria-hidden="true"></i>
         <% end %>
+        <%= helpers.document_status_icons(@document) %>
       </div>
       <% if helpers.current_user&.curates_sets? && %w[Work Collection].include?(@document.klass_type) %>
         <%= render 'sets/picker_modal',
