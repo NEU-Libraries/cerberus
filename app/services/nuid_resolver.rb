@@ -34,21 +34,48 @@ class NuidResolver
     [parsed.given, parsed.family].compact.join(' ').presence || name
   end
 
+  # Two-tier resolution: a librarian-curated Person display_name is
+  # authoritative and wins; NUIDs without a curated Person fall back to the
+  # SSO users directory. Each source fails independently, so a Person-endpoint
+  # hiccup degrades to SSO names rather than breaking name rendering.
   def self.fetch_names(nuids)
     return {} if nuids.empty?
 
-    found = AtlasRb::User.resolve(nuids, nuid: Current.nuid)
-                         .to_h { |user| [user['nuid'], prettify(user['name'])] }
+    found = resolve_people(nuids)
+    missing = nuids - found.keys
+    found.merge!(resolve_users(missing)) if missing.any?
+
     found.each { |nuid, name| Rails.cache.write(cache_key(nuid), name, expires_in: CACHE_TTL) }
     # Atlas silently drops unresolvables — backfill so every key resolves.
-    # Misses are deliberately not cached: a user provisioned a minute later
-    # should resolve without waiting out the TTL.
+    # Misses are deliberately not cached: a person/user provisioned a minute
+    # later should resolve without waiting out the TTL. (A curator's name edit
+    # likewise takes up to CACHE_TTL to propagate.)
     nuids.index_with { |nuid| found[nuid] || nuid }
-  rescue Faraday::Error, JSON::ParserError => e
-    Rails.logger.error("NuidResolver: #{e.class} #{e.message}")
-    nuids.index_with { |nuid| nuid }
   end
   private_class_method :fetch_names
+
+  # Authoritative, librarian-curated names. Used verbatim — a curator set the
+  # display_name to render exactly so, so no Namae prettification.
+  def self.resolve_people(nuids)
+    AtlasRb::Person.resolve(nuids, nuid: Current.nuid).each_with_object({}) do |person, names|
+      names[person['nuid']] = person['display_name'] if person['display_name'].present?
+    end
+  rescue Faraday::Error, JSON::ParserError => e
+    Rails.logger.error("NuidResolver(person): #{e.class} #{e.message}")
+    {}
+  end
+  private_class_method :resolve_people
+
+  # SSO directory fallback for NUIDs without a curated Person name. Atlas
+  # stores names as "Family, Given"; presentation (Namae) is Cerberus's job.
+  def self.resolve_users(nuids)
+    AtlasRb::User.resolve(nuids, nuid: Current.nuid)
+                 .to_h { |user| [user['nuid'], prettify(user['name'])] }
+  rescue Faraday::Error, JSON::ParserError => e
+    Rails.logger.error("NuidResolver(user): #{e.class} #{e.message}")
+    {}
+  end
+  private_class_method :resolve_users
 
   def self.cache_key(nuid)
     "nuid_resolver/#{nuid}"
