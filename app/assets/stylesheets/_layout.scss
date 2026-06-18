@@ -36,6 +36,29 @@ a:not(.btn, .dropdown-item, .navbar-brand, .nav-link) {
   padding-bottom: 0;
 }
 
+// Navbar icon link carrying an optional count badge (the inbox envelope, the
+// download-queue icon). Generic chrome — the anchor is relatively positioned
+// so the absolute count pill sits on its top-right corner.
+.nav-count-link {
+  position: relative;
+
+  &__badge {
+    position: absolute;
+    top: 0.15rem;
+    right: -0.2rem;
+    min-width: 1.05rem;
+    padding: 0 0.28rem;
+    border-radius: 999px;
+    background: $danger;
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 700;
+    line-height: 1.05rem;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
 .catalog_startOverLink {
   display: none;
 }

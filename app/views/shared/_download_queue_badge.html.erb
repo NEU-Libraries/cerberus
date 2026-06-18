@@ -2,9 +2,9 @@
     entry point to the queue page, like the inbox envelope); only the count
     badge is conditional. Lives in a stable #download-queue-nav container so the
     add action's turbo_stream can re-render it live. %>
-<%= link_to download_queue_path, class: 'nav-link inbox-nav-link', 'aria-label': download_queue_aria_label, data: { controller: 'tooltip', 'bs-title': 'Download Queue' } do %>
+<%= link_to download_queue_path, class: 'nav-link nav-count-link', 'aria-label': download_queue_aria_label, data: { controller: 'tooltip', 'bs-title': 'Download Queue' } do %>
   <i class="fa-solid fa-download" aria-hidden="true"></i>
   <% if download_queue_count.positive? %>
-    <span class="inbox-nav-link__badge"><%= download_queue_count %></span>
+    <span class="nav-count-link__badge"><%= download_queue_count %></span>
   <% end %>
 <% end %>
