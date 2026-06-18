@@ -34,11 +34,6 @@
   margin-top: 7px;
 }
 
-.document-thumbnail:has(.thumbnail-fallback:not(.d-none)) {
-  background-color: transparent;
-  border: none;
-}
-
 .thumbnail-fallback {
   display: flex;
   align-items: center;
@@ -174,10 +169,6 @@ dl.document-metadata.row {
 
   .thumbnail-fallback svg {
     font-size: 4em;
-  }
-
-  .document-thumbnail:has(.thumbnail-fallback:not(.d-none)) {
-    border: 1px solid rgba(0, 0, 0, 0.2);
   }
 }
 
