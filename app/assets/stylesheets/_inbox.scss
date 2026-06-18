@@ -1,27 +1,8 @@
 // User Inbox — the correspondence ledger. Sibling register to the audit
 // ledger: identifiers as chips, tabular numerics, one quiet chromatic cue
-// (the unread rail). Navbar envelope badge, inbox registry rows, message
-// page, compose typeahead.
-
-.inbox-nav-link {
-  position: relative;
-
-  &__badge {
-    position: absolute;
-    top: 0.15rem;
-    right: -0.2rem;
-    min-width: 1.05rem;
-    padding: 0 0.28rem;
-    border-radius: 999px;
-    background: $danger;
-    color: #fff;
-    font-size: 0.65rem;
-    font-weight: 700;
-    line-height: 1.05rem;
-    text-align: center;
-    font-variant-numeric: tabular-nums;
-  }
-}
+// (the unread rail). Inbox registry rows, message page, compose typeahead.
+// (The navbar envelope's count badge uses the shared .nav-count-link in
+// _layout.scss — it's generic navbar chrome, not inbox-specific.)
 
 .inbox-table {
   td {
