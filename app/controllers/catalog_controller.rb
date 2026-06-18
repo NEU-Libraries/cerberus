@@ -102,6 +102,12 @@ class CatalogController < ApplicationController
     # a mixed-media Work surfaces under each of its formats; values are
     # display-ready Classification#name strings (no i18n mapping needed).
     config.add_facet_field 'classification_ssim', label: 'Content'
+    # Genre / scholarly category (Research Publications, Presentations, Datasets,
+    # Technical Reports, Monographs, Theses & Dissertations, …) projected onto the
+    # Work from MODS <genre> by Atlas's GenreIndexer. Multivalued; values are the
+    # genre strings as authored (no i18n mapping needed). Works only — empty for
+    # Collections/Communities and for Works without a genre.
+    config.add_facet_field 'genre_ssim', label: 'Genre'
 
     config.add_facet_field 'format', label: 'Format'
     config.add_facet_field 'pub_date_ssim', label: 'Publication Year', single: true
