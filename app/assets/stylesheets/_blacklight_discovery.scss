@@ -1,7 +1,7 @@
 // Blacklight discovery surfaces — anything that styles search-result
-// documents (thumbnails, gallery view, document metadata, work-show
-// dividers). Distinct from search chrome (header, applied-filter,
-// facet cards), which lives in its own partials.
+// documents (thumbnails, gallery view, document metadata). Distinct from
+// search chrome (header, applied-filter, facet cards), which lives in its
+// own partials.
 
 /* Blacklight Gallery Title */
 .gallery-title {
@@ -152,14 +152,6 @@ font-size: 1.05rem;
 }
 
 dl.document-metadata.row {
-  margin-bottom: 0.5rem;
-}
-
-.work-show-divider {
-  border: 0;
-  border-top: 1px solid $gray-300;
-  opacity: 1;
-  margin-top: 0;
   margin-bottom: 0.5rem;
 }
 

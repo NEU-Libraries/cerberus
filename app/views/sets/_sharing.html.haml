@@ -14,12 +14,12 @@
       %li Public — anyone with the link can view this set; it may surface on public sites.
       %li Private — only you, and the people or groups granted access below, can see it.
 
-  %hr.work-show-divider.my-3
+  %hr.section-divider.my-3
 
   %div{data: { controller: 'group-permissions', 'group-permissions-resource-value': 'set' }}
     = render 'shared/group_permissions', resource: 'set'
 
-  %hr.work-show-divider.my-3
+  %hr.section-divider.my-3
 
   %div{data: { controller: 'set-user-grants', 'set-user-grants-url-value': recipients_sets_path }}
     %h5.pb-2 People with edit access

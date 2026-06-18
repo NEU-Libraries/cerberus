@@ -16,7 +16,7 @@
 = f.text_field :non_sort, value: advanced[:non_sort], label: 'Non-sort', help: 'Leading characters ignored when sorting (e.g. "The ", "A ").'
 
 %div{ data: { controller: 'creator-list' } }
-  %hr.work-show-divider.my-3
+  %hr.section-divider.my-3
 
   %h5.mb-2
     %i.fa-solid.fa-user.me-2.text-secondary{ 'aria-hidden' => 'true' }
@@ -40,7 +40,7 @@
       %i.fa-solid.fa-plus{ 'aria-hidden' => 'true' }
   .form-text.text-muted Press + to add a personal creator (role "Creator").
 
-  %hr.work-show-divider.my-3
+  %hr.section-divider.my-3
 
   %h5.mb-2
     %i.fa-solid.fa-building.me-2.text-secondary{ 'aria-hidden' => 'true' }
@@ -62,7 +62,7 @@
   .form-text.text-muted Press + to add a corporate creator (role "Creator").
 
 - if Array(advanced[:preserved_names]).any?
-  %hr.work-show-divider.my-3
+  %hr.section-divider.my-3
   %h5.mb-2
     %i.fa-solid.fa-lock.me-2.text-secondary{ 'aria-hidden' => 'true' }
     Other names

@@ -59,6 +59,17 @@ a:not(.btn, .dropdown-item, .navbar-brand, .nav-link) {
   }
 }
 
+// Hairline divider between content sections — a quiet 1px rule on an <hr>,
+// used across form sections and show pages (works edit, set sharing, …).
+// Generic chrome; pair with Bootstrap margin utilities (e.g. .my-3).
+.section-divider {
+  border: 0;
+  border-top: 1px solid $gray-300;
+  opacity: 1;
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+}
+
 .catalog_startOverLink {
   display: none;
 }
