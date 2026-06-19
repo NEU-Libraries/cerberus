@@ -27,4 +27,22 @@ describe SolrDocument do
       expect(doc.nav_url).to eq('/communities/jm640df/people')
     end
   end
+
+  describe '#featured?' do
+    # Atlas projects a showcase Collection's flag onto featured_bsi; drives the
+    # "Featured" thumbnail pill. Solr returns a JSON boolean, but coerce
+    # defensively for string-typed responses too.
+    it 'is true for a JSON-boolean featured_bsi' do
+      expect(SolrDocument.new(id: '1', featured_bsi: true).featured?).to be(true)
+    end
+
+    it 'is true for a string "true"' do
+      expect(SolrDocument.new(id: '1', featured_bsi: 'true').featured?).to be(true)
+    end
+
+    it 'is false when absent or falsey' do
+      expect(SolrDocument.new(id: '1').featured?).to be(false)
+      expect(SolrDocument.new(id: '1', featured_bsi: false).featured?).to be(false)
+    end
+  end
 end

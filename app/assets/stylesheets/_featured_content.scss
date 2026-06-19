@@ -1,0 +1,60 @@
+// Homepage "Featured Content" gateways — a grid of curated category entries
+// (the resurrected v1 scholarly vocabulary) plus the Faculty & Staff directory.
+// Each tile reads as a discrete, clickable white card against the page — the
+// same #fff / gray-300 / rounded chrome as the result-row cards — so the section
+// is scannable wayfinding, not decorative hero chrome. Boldness is spent on the
+// hover promotion (navy border + lift); the resting state stays quiet.
+//
+// Selector carries the `a` so it ties the global `a:not(.btn, …)` link-color
+// rule on specificity and, imported after `_layout`, wins on source order —
+// keeping the label in body color rather than link blue.
+a.featured-gateway {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  height: 100%;
+  padding: 1.25rem 0.75rem;
+  text-align: center;
+  background-color: var(--bs-body-bg);
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius);
+  color: var(--bs-body-color);
+  text-decoration: none;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out, transform 0.15s ease-in-out;
+
+  i {
+    font-size: 1.6rem;
+    color: $primary;
+  }
+
+  .featured-gateway__label {
+    font-weight: 500;
+    line-height: 1.3;
+  }
+
+  &:hover,
+  &:focus-visible {
+    color: var(--bs-body-color);
+    border-color: $primary;
+    box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+  }
+
+  &:focus-visible {
+    outline: 2px solid $primary;
+    outline-offset: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  a.featured-gateway {
+    transition: none;
+
+    &:hover,
+    &:focus-visible {
+      transform: none;
+    }
+  }
+}

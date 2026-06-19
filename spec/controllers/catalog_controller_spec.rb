@@ -20,6 +20,14 @@ describe CatalogController do
       get :index
       expect(response.body).to include('class="thumb-type-pill">Community')
     end
+
+    it 'badges a featured showcase Collection with a "Featured" pill' do
+      collection = AtlasRb::Collection.create(community.id, '/home/cerberus/web/spec/fixtures/files/collection-mods.xml',
+                                              featured: true, nuid: '000000004')
+      AtlasRb::Collection.metadata(collection.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
+      get :index
+      expect(response.body).to include('class="thumb-type-pill thumb-type-pill--featured">Featured')
+    end
   end
 
   describe 'facets' do

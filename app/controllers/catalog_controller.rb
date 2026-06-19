@@ -327,7 +327,10 @@ class CatalogController < ApplicationController
   # context), so the media's img→fallback nextElementSibling onerror swap is
   # unaffected.
   def iiif_thumbnail(document, *_args)
-    pill = view_context.content_tag(:span, document.klass_type, class: 'thumb-type-pill')
+    featured = document.respond_to?(:featured?) && document.featured?
+    label    = featured ? 'Featured' : document.klass_type
+    classes  = featured ? 'thumb-type-pill thumb-type-pill--featured' : 'thumb-type-pill'
+    pill     = view_context.content_tag(:span, label, class: classes)
     view_context.safe_join([thumbnail_media(document), pill])
   end
 

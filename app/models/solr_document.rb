@@ -30,6 +30,15 @@ class SolrDocument
     klass_type.presence&.constantize
   end
 
+  # A genre-showcase ("Featured") Collection — Atlas projects the resource's
+  # showcase flag onto featured_bsi. Drives the "Featured" thumbnail pill that
+  # distinguishes curated showcases from ordinary child collections (v1 parity).
+  # Solr returns a JSON boolean; coerce defensively for string-typed responses.
+  def featured?
+    value = self['featured_bsi']
+    value == true || value.to_s == 'true'
+  end
+
   def to_param
     raw = alternate_ids&.first
     noid = raw.split('id-').last if raw.present?

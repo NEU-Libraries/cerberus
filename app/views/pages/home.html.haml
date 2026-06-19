@@ -9,3 +9,13 @@
     Anyone is welcome to use the DRS to discover publicly available content. Members of the Northeastern community are encouraged to sign in to access additional content that may not be publicly available. For more information about the DRS, or for help getting started, visit the Digital Scholarship Group's
     = succeed "." do
       %a{:href => "https://dsg.neu.edu/services/drs/", :target => "_blank"} DRS resource page
+
+%section.my-4{ aria: { labelledby: 'featured-content-heading' } }
+  %h2#featured-content-heading.h4.mb-1 Featured Content
+  %p.text-secondary.mb-3 Browse the repository by scholarly category, or explore the faculty and staff behind the work.
+  .row.row-cols-2.row-cols-md-4.g-3
+    - featured_gateways.each do |label, icon, href|
+      .col
+        = link_to href, class: 'featured-gateway' do
+          %i.fa-solid.fa-fw{ class: icon, aria: { hidden: 'true' } }
+          %span.featured-gateway__label= label
