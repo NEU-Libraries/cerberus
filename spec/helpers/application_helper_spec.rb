@@ -19,6 +19,10 @@ describe ApplicationHelper do
       expect(helper.document_type_icon('Collection')).to eq('fa-folder-open')
     end
 
+    it 'maps Person to fa-user' do
+      expect(helper.document_type_icon('Person')).to eq('fa-user')
+    end
+
     it 'falls back to fa-file for anything else' do
       expect(helper.document_type_icon('CoreFile')).to eq('fa-file')
     end
