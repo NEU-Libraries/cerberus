@@ -9,6 +9,7 @@ module ApplicationHelper
     case klass_type
     when 'Community'  then 'fa-users'
     when 'Collection' then 'fa-folder-open'
+    when 'Person'     then 'fa-user'
     else 'fa-file'
     end
   end
