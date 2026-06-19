@@ -1,0 +1,30 @@
+.well.p-4.my-3.rounded-3
+  %h3.mb-1
+    %i.fa-solid.fa-users.text-primary.me-2{ 'aria-hidden' => 'true' }
+    People
+  .text-muted.mb-0 Browse people with works in the repository.
+
+- if @people.any?
+  .list-group.my-3
+    - @people.each do |person|
+      = link_to person_path(person['id']), class: 'list-group-item list-group-item-action d-flex justify-content-between align-items-center' do
+        %span
+          %i.fa-solid.fa-user.text-secondary.me-2{ 'aria-hidden' => 'true' }
+          = person['display_name']
+          - if person['title'].present?
+            %span.text-muted.small.ms-2= person['title']
+        %i.fa-solid.fa-chevron-right.text-muted.small{ 'aria-hidden' => 'true' }
+
+  %nav.d-flex.justify-content-between.align-items-center{ 'aria-label' => 'People pages' }
+    - if @page > 1
+      = link_to people_path(page: @page - 1), class: 'btn btn-outline-secondary btn-sm' do
+        %i.fa-solid.fa-chevron-left.me-1{ 'aria-hidden' => 'true' }
+        Previous
+    - else
+      %span
+    - if @has_next_page
+      = link_to people_path(page: @page + 1), class: 'btn btn-outline-secondary btn-sm' do
+        Next
+        %i.fa-solid.fa-chevron-right.ms-1{ 'aria-hidden' => 'true' }
+- else
+  %p.text-muted.fst-italic.my-3 No people to show yet.

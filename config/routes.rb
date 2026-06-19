@@ -48,6 +48,12 @@ Rails.application.routes.draw do
       post :tombstone
     end
   end
+  # People / profile pages. :id is the Person's NOID (opaque, public-safe — the
+  # NUID is never in the URL); ShowScopedSearch scopes the profile's embedded
+  # faceted search by params[:id]. /people lists curated people via Person.list;
+  # /people/:id is a curated profile over a gated depositor_ssi search.
+  resources :people, only: %i[index show]
+
   # The bare index is the "My Loaders" interstitial (user-menu entry);
   # everything else on a loader happens through its nested loads.
   resources :loaders, only: [:index], param: :slug do

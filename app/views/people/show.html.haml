@@ -1,0 +1,29 @@
+%nav{ 'aria-label' => 'breadcrumb' }
+  %ol.breadcrumb.align-items-center
+    %li.breadcrumb-item= link_to 'People', people_path
+    %li.breadcrumb-item.active{ 'aria-current' => 'page' }= @display_name
+
+.well.p-4.my-3.rounded-3
+  - if @person['title'].present?
+    .text-muted.text-uppercase.fw-semibold.small.mb-1{ style: 'letter-spacing:.08em' }= @person['title']
+  %h3.mb-0
+    %i.fa-solid.fa-user.text-primary.me-2{ 'aria-hidden' => 'true' }
+    = @display_name
+  - if @person['bio'].present?
+    %p.text-body-secondary.mt-3.mb-0{ style: 'max-width:62ch' }= @person['bio']
+  - if @person['orcid'].present?
+    .mt-3
+      = link_to "https://orcid.org/#{@person['orcid']}", target: '_blank', rel: 'noopener',
+        class: 'd-inline-flex align-items-center gap-1 text-decoration-none small font-monospace' do
+        %i.fa-brands.fa-orcid{ 'aria-hidden' => 'true', style: 'color:#a6ce39' }
+        = @person['orcid']
+
+%hr.section-divider.my-4
+
+%h3.h5.mb-3 Works
+
+- if @response.documents.present?
+  - content_for(:sidebar) do
+    = render 'catalog/search_sidebar'
+
+= render 'catalog/search_results'
