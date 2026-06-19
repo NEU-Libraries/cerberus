@@ -1,12 +1,13 @@
 - content_for(:page_title) do
   = @community ? 'Faculty & Staff' : 'People'
 
+- if @community
+  %nav{ 'aria-label' => 'breadcrumb' }
+    %ol.breadcrumb.align-items-center
+      %li.breadcrumb-item= link_to @community.title, community_path(params[:community_id])
+      %li.breadcrumb-item.active{ 'aria-current' => 'page' } Faculty & Staff
+
 .well.p-4.my-3.rounded-3
-  - if @community
-    %nav{ 'aria-label' => 'breadcrumb' }
-      %ol.breadcrumb.align-items-center.mb-2
-        %li.breadcrumb-item= link_to @community.title, community_path(params[:community_id])
-        %li.breadcrumb-item.active{ 'aria-current' => 'page' } Faculty & Staff
   .d-flex.align-items-start
     .flex-grow-1
       %h3.mb-1

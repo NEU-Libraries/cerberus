@@ -22,6 +22,9 @@ class SolrDocument
   attribute :alternate_ids, Blacklight::Types::Array, 'alternate_ids_tesim'
   attribute :thumbnail_ssi, Blacklight::Types::String, 'thumbnail_ssi'
   attribute :thumbnail_2x_ssi, Blacklight::Types::String, 'thumbnail_2x_ssi'
+  # Destination for a synthetic navigation row (e.g. a community's "Faculty &
+  # Staff" entry), which has no per-type show route. url_for_document honours it.
+  attribute :nav_url, Blacklight::Types::String, 'nav_url_ssi'
 
   def klass
     klass_type.presence&.constantize
