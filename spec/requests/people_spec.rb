@@ -2,12 +2,13 @@
 
 require 'rails_helper'
 
-# The People surfaces are public, read-only, and NOID-addressed. The AtlasRb::Person
-# boundary is mocked here (People depend on a freshly-shipped Atlas amendment that
-# atlas-test may not yet carry); real end-to-end integration is verified in the
-# browser against dev Atlas. The load-bearing assertions are: profiles render from
-# the curated Person, an unknown NOID is a clean 404, and **no NUID is ever surfaced**
-# (URLs are NOID-keyed; the page never prints the nuid).
+# People are public, read-only, NOID-addressed Blacklight content. The index is a
+# gated Blacklight search over Person docs (global at /people, community-scoped at
+# /communities/:id/people); the profile show fetches the curated Person via AtlasRb
+# (mocked here) over a depositor_ssi works search. Index render is smoke-tested
+# (the search runs against test Solr, which may hold no Person docs); the live
+# "search returns a clickable Person" path is verified in the browser. Load-bearing
+# assertions: surfaces render, an unknown NOID 404s, and **no NUID is ever surfaced**.
 RSpec.describe 'People', type: :request do
   let(:person) do
     { 'id' => 'pp11aa22', 'nuid' => '000000777', 'display_name' => 'Stephen Flynn',
@@ -17,31 +18,23 @@ RSpec.describe 'People', type: :request do
   end
 
   describe 'GET /people (index)' do
-    it 'lists curated people by name, links to the NOID-keyed profile, surfaces no NUID' do
-      allow(AtlasRb::Person).to receive(:list).and_return([person])
-
+    it 'renders the People browse (Blacklight search over Person docs)' do
       get '/people'
 
       expect(response).to have_http_status(:ok)
-      expect(response.body).to include('Stephen Flynn')
-      expect(response.body).to include(person_path('pp11aa22'))
-      expect(response.body).not_to include('000000777')
+      expect(response.body).to include('People')
     end
+  end
 
-    it 'offers a Next link only when the page is full' do
-      allow(AtlasRb::Person).to receive(:list).and_return(Array.new(PeopleController::PER_PAGE) { person })
+  describe 'GET /communities/:community_id/people (Faculty & Staff)' do
+    it 'renders a community-scoped browse with the community in the breadcrumb' do
+      allow(AtlasRb::Community).to receive(:find).and_return(OpenStruct.new(title: 'Communications'))
 
-      get '/people'
+      get '/communities/jm640df/people'
 
-      expect(response.body).to include(people_path(page: 2))
-    end
-
-    it 'renders an empty state when no one has a profile yet' do
-      allow(AtlasRb::Person).to receive(:list).and_return([])
-
-      get '/people'
-
-      expect(response.body).to include('No people to show yet')
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('Faculty')
+      expect(response.body).to include('Communications')
     end
   end
 

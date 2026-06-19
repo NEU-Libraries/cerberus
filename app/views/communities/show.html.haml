@@ -19,6 +19,9 @@
         .clearfix.pt-3
         = @community.description
         .clearfix.pt-3
+          = link_to community_people_path(@community.id), class: 'btn btn-sm btn-outline-secondary' do
+            %span.fa-solid.fa-users.me-1{ 'aria-hidden' => 'true' }
+            Faculty &amp; Staff
           - if user_signed_in?
             .float-end
               = link_to "Edit", edit_community_path(@community.id), class: "px-3"

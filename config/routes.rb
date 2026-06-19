@@ -49,10 +49,12 @@ Rails.application.routes.draw do
     end
   end
   # People / profile pages. :id is the Person's NOID (opaque, public-safe — the
-  # NUID is never in the URL); ShowScopedSearch scopes the profile's embedded
-  # faceted search by params[:id]. /people lists curated people via Person.list;
-  # /people/:id is a curated profile over a gated depositor_ssi search.
+  # NUID is never in the URL). /people is a Blacklight browse of Person docs;
+  # /people/:id is a curated profile over a gated depositor_ssi search;
+  # /communities/:community_id/people is the community-scoped Faculty & Staff
+  # browse (Person docs filtered by affiliated_community_ids_ssim).
   resources :people, only: %i[index show]
+  get 'communities/:community_id/people', to: 'people#index', as: :community_people
 
   # The bare index is the "My Loaders" interstitial (user-menu entry);
   # everything else on a loader happens through its nested loads.
