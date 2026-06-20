@@ -20,14 +20,19 @@
 # the People surface (/people, /communities/:id/people, or /people/:id) rather
 # than escaping to the global catalog (CatalogController#index).
 class PeopleController < CatalogController
+  # Default the Type facet to Person BEFORE Blacklight memoizes search_state
+  # (a later mutation in the action body is snapshotted away — search_state dups
+  # params at construction). Scoping to People via the `type_ssim` *facet* (not a
+  # hidden fq) means the active filter renders as a constraint chip ("Type ›
+  # Person") and reads as applied in the Type facet — parity with the genre
+  # landings. type_ssim:Person selects exactly Person docs (same set the old
+  # internal_resource_tesim fq did).
+  prepend_before_action :scope_to_people, only: :index
+
   def index
-    filters = ['internal_resource_tesim:Person']
-    if params[:community_id].present?
-      @community = find_community(params[:community_id])
-      filters << %(affiliated_community_ids_ssim:"#{solr_phrase(params[:community_id])}")
-      build_faculty_staff_breadcrumbs(params[:community_id])
-    end
-    builder = search_service.search_builder.with(search_state).with_filters(*filters)
+    scope_to_community if params[:community_id].present?
+    builder = search_service.search_builder.with(search_state)
+    builder = builder.with_filters(@community_filter) if @community_filter
     @response = Blacklight.default_index.search(builder)
   end
 
@@ -57,6 +62,24 @@ class PeopleController < CatalogController
   end
 
   private
+
+    # Default the Type facet to Person so the People surface is scoped *and* the
+    # scope is visible as a constraint chip. Idempotent — a user-supplied
+    # type_ssim is left alone (though only Person docs ever match this surface).
+    def scope_to_people
+      current = params[:f].respond_to?(:to_unsafe_h) ? params[:f].to_unsafe_h : (params[:f] || {})
+      return if current['type_ssim'].present?
+
+      params[:f] = current.merge('type_ssim' => ['Person'])
+    end
+
+    # Faculty & Staff: scope to a community's affiliated People (an fq), set the
+    # header's @community, and build the ancestor breadcrumb trail.
+    def scope_to_community
+      @community = find_community(params[:community_id])
+      build_faculty_staff_breadcrumbs(params[:community_id])
+      @community_filter = %(affiliated_community_ids_ssim:"#{solr_phrase(params[:community_id])}")
+    end
 
     # Profile breadcrumb trail. Lead it through the person's (first) affiliated
     # community and that community's ancestors — e.g. Northeastern University /

@@ -24,6 +24,15 @@ RSpec.describe 'People', type: :request do
       expect(response).to have_http_status(:ok)
       expect(response.body).to include('People')
     end
+
+    it 'scopes to People as an applied Type facet so the constraint chip renders' do
+      get '/people'
+
+      # The scope rides f[type_ssim]=Person, so the constraints region renders
+      # the "Type › Person" chip — parity with the genre landings.
+      expect(response.body).to include('search-results-header__constraints')
+      expect(response.body).to include('Person')
+    end
   end
 
   describe 'GET /communities/:community_id/people (Faculty & Staff)' do

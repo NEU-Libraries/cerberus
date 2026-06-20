@@ -1,0 +1,24 @@
+- title = @genre.presence || 'Browse by category'
+- content_for(:page_title) do
+  = title
+-# Heading well rides :container_header so it spans the full main width above the
+-# sidebar/results row, matching the People landing. The gem's search_results
+-# partial appends the constraint chip ("Genre › …") to :container_header just
+-# below this well, so the active category reads as an applied filter.
+- content_for(:container_header) do
+  .container.p-4.my-3.well.rounded-3
+    %h3.mb-1
+      %i.fa-solid.fa-bookmark.text-primary.me-2{ 'aria-hidden' => 'true' }
+      = title
+    .text-muted.mb-0
+      - if @genre.present?
+        Featured content in #{@genre}.
+      - else
+        Browse the repository by scholarly category.
+
+- if @response.documents.present?
+  - content_for(:sidebar) do
+    = render 'catalog/search_sidebar'
+
+= render 'catalog/search_results'
+= render 'shared/downloads_modal'

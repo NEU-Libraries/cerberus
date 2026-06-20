@@ -30,6 +30,7 @@
   <% kind, icon = case controller_name
                   when 'collections' then ['collection', 'fa-folder-open']
                   when 'communities' then ['community',  'fa-users']
+                  when 'genres'      then ['category',   'fa-bookmark']
                   else [nil, 'fa-box-open']
                   end %>
   <div id="documents" class="empty-container-state">

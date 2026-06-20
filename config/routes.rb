@@ -56,6 +56,12 @@ Rails.application.routes.draw do
   resources :people, only: %i[index show]
   get 'communities/:community_id/people', to: 'people#index', as: :community_people
 
+  # Genre / category landing — a Featured-Content gateway (homepage) into a single
+  # scholarly category. The genre rides the standard `f[genre_ssim][]` facet param
+  # (so the active filter shows as a constraint chip); this surface just wraps the
+  # gated Blacklight browse in a heading well, matching the People landing.
+  get 'genres', to: 'genres#show', as: :genre
+
   # The bare index is the "My Loaders" interstitial (user-menu entry);
   # everything else on a loader happens through its nested loads.
   resources :loaders, only: [:index], param: :slug do
