@@ -1,28 +1,31 @@
 - content_for(:page_title) do
   = @community ? 'Faculty & Staff' : 'People'
+-# Breadcrumb + heading well ride :container_header so they span the full main
+-# width above the sidebar/results row, matching the community/collection/work
+-# show pages (anything outside :container_header lands in the results column).
+- content_for(:container_header) do
+  - if @community
+    %nav{ 'aria-label' => 'breadcrumb' }
+      %ol.breadcrumb.align-items-center
+        %li.breadcrumb-item= link_to @community.title, community_path(params[:community_id])
+        %li.breadcrumb-item.active{ 'aria-current' => 'page' } Faculty & Staff
 
-- if @community
-  %nav{ 'aria-label' => 'breadcrumb' }
-    %ol.breadcrumb.align-items-center
-      %li.breadcrumb-item= link_to @community.title, community_path(params[:community_id])
-      %li.breadcrumb-item.active{ 'aria-current' => 'page' } Faculty & Staff
-
-.well.p-4.my-3.rounded-3
-  .d-flex.align-items-start
-    .flex-grow-1
-      %h3.mb-1
-        %i.fa-solid.fa-users.text-primary.me-2{ 'aria-hidden' => 'true' }
-        = @community ? 'Faculty & Staff' : 'People'
-      .text-muted.mb-0
-        - if @community
-          Browse the people affiliated with #{@community.title}.
-        - else
-          Browse people in the repository.
-    - if @response.documents.present? || params[:q].present?
-      .ms-md-3
-        = render 'shared/scoped_search',
-          path: (@community ? community_people_path(params[:community_id]) : people_path),
-          label: (@community ? 'Search faculty & staff' : 'Search people')
+  .container.p-4.my-3.well.rounded-3
+    .d-flex.align-items-start
+      .flex-grow-1
+        %h3.mb-1
+          %i.fa-solid.fa-users.text-primary.me-2{ 'aria-hidden' => 'true' }
+          = @community ? 'Faculty & Staff' : 'People'
+        .text-muted.mb-0
+          - if @community
+            Browse the people affiliated with #{@community.title}.
+          - else
+            Browse people in the repository.
+      - if @response.documents.present? || params[:q].present?
+        .ms-md-3
+          = render 'shared/scoped_search',
+            path: (@community ? community_people_path(params[:community_id]) : people_path),
+            label: (@community ? 'Search faculty & staff' : 'Search people')
 
 - if @response.documents.present?
   - content_for(:sidebar) do
