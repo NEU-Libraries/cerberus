@@ -4,11 +4,12 @@
 -# width above the sidebar/results row, matching the community/collection/work
 -# show pages (anything outside :container_header lands in the results column).
 - content_for(:container_header) do
+  -# Community-scoped browse only: the trail (built in the controller) leads
+  -# through the community and its ancestors. The global /people index has no
+  -# parent, so it shows no breadcrumb. show_add suppresses the "add a child"
+  -# affordance (a Faculty & Staff browse isn't a container parent).
   - if @community
-    %nav{ 'aria-label' => 'breadcrumb' }
-      %ol.breadcrumb.align-items-center
-        %li.breadcrumb-item= link_to @community.title, community_path(params[:community_id])
-        %li.breadcrumb-item.active{ 'aria-current' => 'page' } Faculty & Staff
+    = render 'shared/breadcrumbs', show_add: false
 
   .container.p-4.my-3.well.rounded-3
     .d-flex.align-items-start

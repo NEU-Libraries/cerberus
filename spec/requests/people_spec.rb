@@ -27,14 +27,30 @@ RSpec.describe 'People', type: :request do
   end
 
   describe 'GET /communities/:community_id/people (Faculty & Staff)' do
-    it 'renders a community-scoped browse with the community in the breadcrumb' do
+    it 'trails the breadcrumb through the community and its ancestors' do
       allow(AtlasRb::Community).to receive(:find).and_return(OpenStruct.new(title: 'Communications'))
+      # #breadcrumbs walks the community's ancestor_chain off a single find.
+      community = OpenStruct.new(
+        klass:    'Community',
+        resource: OpenStruct.new(
+          id: 'jm640df', title: 'Communications',
+          ancestor_chain: [{ 'noid' => '9zw3s1h', 'klass' => 'Community', 'title' => 'Northeastern University' }]
+        )
+      )
+      allow(AtlasRb::Resource).to receive(:find).with('jm640df').and_return(community)
 
       get '/communities/jm640df/people'
 
       expect(response).to have_http_status(:ok)
-      expect(response.body).to include('Faculty')
+      # Northeastern University / Communications / Faculty & Staff
+      expect(response.body).to include('Northeastern University')
       expect(response.body).to include('Communications')
+      expect(response.body).to include('Faculty')
+      # Both ancestors are links: the parent community's path is a *prefix* of the
+      # current URL, so it must use :exact matching to stay a link rather than be
+      # mis-marked as the current crumb.
+      expect(response.body).to include(%(href="#{community_path('9zw3s1h')}"))
+      expect(response.body).to include(%(href="#{community_path('jm640df')}"))
     end
   end
 

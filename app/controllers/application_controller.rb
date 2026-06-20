@@ -21,19 +21,25 @@ class ApplicationController < ActionController::Base
     @current_ability ||= Ability.new(effective_user)
   end
 
-  def breadcrumbs(id, editing: false)
+  # `match:` is forwarded to loaf so callers can opt into exact path matching.
+  # The default (:inclusive) is loaf's own default, preserved for existing
+  # callers. Cross-resource trails (e.g. a person under their community) pass
+  # :exact so an ancestor whose path is a *prefix* of the current URL
+  # (/communities/:id vs /communities/:id/people) stays a link instead of being
+  # mis-marked as the current crumb.
+  def breadcrumbs(id, editing: false, match: :inclusive)
     result = AtlasRb::Resource.find(id)
     item = result.resource
     # ancestor_chain carries each ancestor's title alongside its noid/klass, so
     # the whole trail is built from this single find — no per-ancestor round-trip.
     Array(item.ancestor_chain).each do |node|
-      add_breadcrumb_for(node['noid'], node['klass'], node['title'])
+      add_breadcrumb_for(node['noid'], node['klass'], node['title'], match: match)
     end
 
     if editing
       edit_breadcrumb_tail(item, result.klass)
     else
-      add_breadcrumb_for(item.id, result.klass, item.title)
+      add_breadcrumb_for(item.id, result.klass, item.title, match: match)
     end
   end
 
@@ -69,8 +75,8 @@ class ApplicationController < ActionController::Base
       Current.on_behalf_of.presence || Current.nuid
     end
 
-    def add_breadcrumb_for(resource_id, klass, title)
+    def add_breadcrumb_for(resource_id, klass, title, match: :inclusive)
       path = public_send("#{klass.downcase}_path", resource_id)
-      breadcrumb(title, path)
+      breadcrumb(title, path, match: match)
     end
 end

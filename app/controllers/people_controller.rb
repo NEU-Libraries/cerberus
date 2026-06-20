@@ -25,6 +25,7 @@ class PeopleController < CatalogController
     if params[:community_id].present?
       @community = find_community(params[:community_id])
       filters << %(affiliated_community_ids_ssim:"#{solr_phrase(params[:community_id])}")
+      build_faculty_staff_breadcrumbs(params[:community_id])
     end
     builder = search_service.search_builder.with(search_state).with_filters(*filters)
     @response = Blacklight.default_index.search(builder)
@@ -71,7 +72,7 @@ class PeopleController < CatalogController
     def build_profile_breadcrumbs
       community_noid = Array(@person['affiliated_community_ids']).first.presence
       if community_noid
-        breadcrumbs(community_noid)
+        breadcrumbs(community_noid, match: :exact)
         breadcrumb('Faculty & Staff', community_people_path(community_noid))
       else
         breadcrumb('People', people_path)
@@ -80,6 +81,19 @@ class PeopleController < CatalogController
     rescue Faraday::Error, JSON::ParserError
       breadcrumb('People', people_path)
       breadcrumb(@display_name, person_path(params[:id]))
+    end
+
+    # Faculty & Staff browse breadcrumb: the community's ancestor trail (e.g.
+    # Northeastern University / Communications, each linked to its show page) then
+    # a "Faculty & Staff" you-are-here crumb. Mirrors the profile trail so the two
+    # surfaces share the same lineage. Degrades to a flat "Faculty & Staff" crumb
+    # if the community lookup fails (the #breadcrumbs find runs first, so a failure
+    # leaves the trail empty before any crumb is added).
+    def build_faculty_staff_breadcrumbs(community_noid)
+      breadcrumbs(community_noid, match: :exact)
+      breadcrumb('Faculty & Staff', community_people_path(community_noid))
+    rescue Faraday::Error, JSON::ParserError
+      breadcrumb('Faculty & Staff', community_people_path(community_noid))
     end
 
     # Gated, faceted, paginated works deposited by this NUID. `.with(search_state)`
