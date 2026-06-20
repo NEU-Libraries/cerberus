@@ -1,0 +1,37 @@
+.admin-registry.my-3
+  %header.admin-registry__head
+    %span.admin-registry__title
+      %i.fa-solid.fa-user-plus{'aria-hidden' => 'true'}
+      Register a person
+    %span.admin-registry__subtitle
+      %i.fa-solid.fa-lock{'aria-hidden' => 'true'}
+      Admin-only
+  .admin-registry__body
+    - pv = params[:person] || {}
+    = form_with scope: :person, url: admin_people_path, method: :post, class: 'admin-registry-form' do |f|
+      .admin-registry-form__section
+        %h3.admin-registry-form__section-title
+          %i.fa-solid.fa-id-card{'aria-hidden' => 'true'}
+          Identity
+        .admin-registry-form__section-note
+          %i.fa-solid.fa-circle-info{'aria-hidden' => 'true'}
+          The NUID is the correlation key — one Person per NUID. It's stored server-side and never appears in a public URL.
+        .mb-3
+          = f.label :nuid, class: 'admin-registry-form__label' do
+            %i.fa-solid.fa-hashtag{'aria-hidden' => 'true'}
+            NUID
+          = f.text_field :nuid, value: pv['nuid'], class: 'form-control admin-registry-form__input--id', placeholder: '000000000', autocomplete: 'off', required: true
+        .mb-3
+          = f.label :display_name, class: 'admin-registry-form__label' do
+            %i.fa-solid.fa-signature{'aria-hidden' => 'true'}
+            Display name
+          = f.text_field :display_name, value: pv['display_name'], class: 'form-control', autocomplete: 'off', required: true
+          .admin-registry-form__hint Authoritative, librarian-curated — overrides the SSO-synced name everywhere it renders.
+
+      = render 'profile_fields', f: f, pv: pv
+
+      .d-flex.gap-2.align-items-center.mt-4
+        = f.submit 'Create person', class: 'btn btn-primary'
+        = link_to admin_people_path, class: 'btn btn-outline-secondary' do
+          %i.fa-solid.fa-arrow-left.me-1{'aria-hidden' => 'true'}
+          Cancel

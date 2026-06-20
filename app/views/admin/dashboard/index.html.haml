@@ -31,6 +31,16 @@
         Open
         %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
 
+    = link_to admin_people_path, class: 'admin-action-card admin-action-card--people', role: 'listitem' do
+      %span.admin-action-card__icon
+        %i.fa-solid.fa-users{'aria-hidden' => 'true'}
+      %span.admin-action-card__title Manage people
+      %span.admin-action-card__desc
+        Create Person records by NUID, curate the authoritative display name / title / bio / ORCID, and manage the community affiliations that drive the Faculty & Staff browse.
+      %span.admin-action-card__cta
+        Open
+        %i.fa-solid.fa-arrow-right-long{'aria-hidden' => 'true'}
+
     = link_to admin_impersonation_path, class: 'admin-action-card admin-action-card--impersonation', role: 'listitem' do
       %span.admin-action-card__icon
         %i.fa-solid.fa-user-secret{'aria-hidden' => 'true'}

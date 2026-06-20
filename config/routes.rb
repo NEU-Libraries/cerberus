@@ -77,7 +77,7 @@ Rails.application.routes.draw do
   post   'download_queue/items',    to: 'download_queue#create',    as: :download_queue_items
   delete 'download_queue/items',    to: 'download_queue#destroy',   as: :download_queue_item
   delete 'download_queue',          to: 'download_queue#destroy_all'
-  get    'download_queue/archive',  to: 'queue_downloads#show',     as: :download_queue_archive
+  get    'download_queue/archive',  to: 'queue_downloads#show', as: :download_queue_archive
 
   # Sets — personal curated sets over Atlas Compilations ("Set" is the only
   # word a user ever sees; "Compilation" is the model name on the wire).
@@ -119,6 +119,17 @@ Rails.application.routes.draw do
     get    'linked_members/manage', to: 'linked_members#manage',  as: :linked_members_manage
     post   'linked_members/add',    to: 'linked_members#add',     as: :linked_members_add
     delete 'linked_members/remove', to: 'linked_members#remove',  as: :linked_members_remove
+
+    # People — the curatorial Person registry: create a Person by NUID, edit the
+    # authoritative display_name / title / bio / orcid, and manage community
+    # affiliations (the edges that drive the Faculty & Staff browse). Keyed by
+    # NOID (the NUID is staff-facing and stays out of URLs).
+    resources :people, only: %i[index new create edit update], param: :noid do
+      member do
+        post   'affiliations', to: 'people#add_affiliation', as: :add_affiliation
+        delete 'affiliations/:community_id', to: 'people#remove_affiliation', as: :remove_affiliation
+      end
+    end
 
     # Impersonation — a hub action surface (GET) hosting the start form, then
     # begin acting-as (write) or view-as (read-only) for a target NUID; the

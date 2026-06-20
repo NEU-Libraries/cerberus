@@ -1,0 +1,46 @@
+.admin-registry.my-3
+  %header.admin-registry__head
+    %span.admin-registry__title
+      %i.fa-solid.fa-users{'aria-hidden' => 'true'}
+      People registry
+      - if @people.any?
+        %span.admin-registry__count= pluralize(@people.size, 'person')
+    .admin-registry__head-actions
+      %span.admin-registry__subtitle
+        %i.fa-solid.fa-lock{'aria-hidden' => 'true'}
+        Admin-only
+      = link_to new_admin_person_path, class: 'btn btn-primary btn-sm' do
+        %i.fa-solid.fa-user-plus.me-1{'aria-hidden' => 'true'}
+        New person
+
+  - if @people.any?
+    .table-responsive
+      %table.table.table-borderless.admin-registry-table
+        %thead
+          %tr
+            %th{scope: 'col'} Display name
+            %th{scope: 'col'} Title
+            %th{scope: 'col'} NUID
+            %th{scope: 'col'}
+        %tbody
+          - @people.each do |person|
+            %tr
+              %td.admin-registry-table__name
+                %i.fa-solid.fa-user.text-primary.me-2{'aria-hidden' => 'true'}
+                = person['display_name'].presence || '(no name)'
+              %td= person['title']
+              %td
+                %span.admin-registry-table__id= person['nuid']
+              %td.text-end
+                = link_to edit_admin_person_path(person['id']), class: 'admin-registry-table__edit' do
+                  Manage
+                  %i.fa-solid.fa-arrow-right{'aria-hidden' => 'true'}
+  - else
+    .admin-registry__empty
+      %i.fa-solid.fa-users.admin-registry__empty-icon{'aria-hidden' => 'true'}
+      %p.mb-1.fw-semibold.text-body No people registered
+      %p.mb-3.small.text-muted
+        Create a Person record to curate a display name and community affiliations.
+      = link_to new_admin_person_path, class: 'btn btn-primary btn-sm' do
+        %i.fa-solid.fa-user-plus.me-1{'aria-hidden' => 'true'}
+        New person
