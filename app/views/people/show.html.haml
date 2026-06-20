@@ -1,11 +1,10 @@
 -# Breadcrumb + name-plate well ride :container_header so they span the full
 -# main width above the sidebar/results row, matching the People index and the
--# community/collection/work show pages. The divider closes the header band.
+-# community/collection/work show pages. The trail (built in the controller)
+-# leads through the person's affiliated community and its ancestors; show_add
+-# suppresses the "add a child" affordance (a person isn't a container parent).
 - content_for(:container_header) do
-  %nav{ 'aria-label' => 'breadcrumb' }
-    %ol.breadcrumb.align-items-center
-      %li.breadcrumb-item= link_to 'People', people_path
-      %li.breadcrumb-item.active{ 'aria-current' => 'page' }= @display_name
+  = render 'shared/breadcrumbs', show_add: false
 
   .container.p-4.my-3.well.rounded-3
     - if @person['title'].present?

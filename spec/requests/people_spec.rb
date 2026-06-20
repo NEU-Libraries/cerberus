@@ -51,6 +51,40 @@ RSpec.describe 'People', type: :request do
       expect(response.body).not_to include('000000777') # the NUID is not
     end
 
+    it 'trails the breadcrumb through the affiliated community and its ancestors' do
+      affiliated = person.merge('affiliated_community_ids' => ['jm640df'])
+      allow(AtlasRb::Person).to receive(:find).and_return(affiliated)
+      # #breadcrumbs walks the community's ancestor_chain off a single find.
+      community = OpenStruct.new(
+        klass:    'Community',
+        resource: OpenStruct.new(
+          id: 'jm640df', title: 'Communications',
+          ancestor_chain: [{ 'noid' => '9zw3s1h', 'klass' => 'Community', 'title' => 'Northeastern University' }]
+        )
+      )
+      allow(AtlasRb::Resource).to receive(:find).with('jm640df').and_return(community)
+
+      get '/people/pp11aa22'
+
+      expect(response).to have_http_status(:ok)
+      # Northeastern University / Communications / Faculty & Staff / <name>
+      expect(response.body).to include('Northeastern University')
+      expect(response.body).to include('Communications')
+      expect(response.body).to include('Faculty &amp; Staff')
+      expect(response.body).to include(community_path('jm640df'))
+      expect(response.body).to include(community_people_path('jm640df'))
+    end
+
+    it 'falls back to the flat People trail when the person has no affiliation' do
+      allow(AtlasRb::Person).to receive(:find).and_return(person) # no affiliated_community_ids
+
+      get '/people/pp11aa22'
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('Stephen Flynn')
+      expect(response.body).to include(people_path)
+    end
+
     it '404s a NOID with no curated Person record' do
       allow(AtlasRb::Person).to receive(:find).and_raise(JSON::ParserError.new('unexpected end of input'))
 

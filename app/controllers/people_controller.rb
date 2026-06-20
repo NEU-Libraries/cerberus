@@ -34,6 +34,7 @@ class PeopleController < CatalogController
     @person = AtlasRb::Person.find(params[:id], nuid: Current.nuid)
     @display_name = @person['display_name']
     @response = deposited_works(@person['nuid'])
+    build_profile_breadcrumbs
   rescue JSON::ParserError
     # Atlas returns an empty 404 body → JSON.parse raises. A public profile
     # exists only for a curated Person, so an unknown id is a clean 404.
@@ -55,6 +56,31 @@ class PeopleController < CatalogController
   end
 
   private
+
+    # Profile breadcrumb trail. Lead it through the person's (first) affiliated
+    # community and that community's ancestors — e.g. Northeastern University /
+    # Communications / Faculty & Staff / <name> — so the trail leads back through
+    # the community the person belongs to, not just the flat People index. The
+    # shared #breadcrumbs walks the community's ancestor_chain (each crumb linked
+    # to its show page); "Faculty & Staff" links the community-scoped browse, and
+    # the person is the you-are-here tail. Falls back to the flat People trail
+    # when the person has no affiliation or the community lookup fails (a stale
+    # affiliation noid shouldn't break the profile). The AtlasRb::Resource.find
+    # inside #breadcrumbs runs first, so a failure leaves the trail empty before
+    # any crumb is added — the rescue rebuilds cleanly.
+    def build_profile_breadcrumbs
+      community_noid = Array(@person['affiliated_community_ids']).first.presence
+      if community_noid
+        breadcrumbs(community_noid)
+        breadcrumb('Faculty & Staff', community_people_path(community_noid))
+      else
+        breadcrumb('People', people_path)
+      end
+      breadcrumb(@display_name, person_path(params[:id]))
+    rescue Faraday::Error, JSON::ParserError
+      breadcrumb('People', people_path)
+      breadcrumb(@display_name, person_path(params[:id]))
+    end
 
     # Gated, faceted, paginated works deposited by this NUID. `.with(search_state)`
     # threads live q / facets / sort / page so the profile is browsable. The NUID
