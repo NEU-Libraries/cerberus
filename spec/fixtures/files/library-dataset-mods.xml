@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mods:mods xmlns:drs="https://repository.neu.edu/spec/v1" xmlns:mods="http://www.loc.gov/mods/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:niec="http://repository.neu.edu/schema/niec" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd">
+    <mods:titleInfo usage="primary">
+        <mods:title>Coastal Resilience Survey Dataset, 2024–2026</mods:title>
+        <mods:nonSort/></mods:titleInfo>
+    <mods:abstract>Field measurements and shoreline-change observations from a three-year study of coastal resilience along the Massachusetts shore. Published to the Library's Datasets showcase.</mods:abstract>
+    <mods:name type="personal" usage="primary">
+        <mods:namePart type="given">Jane</mods:namePart>
+        <mods:namePart type="family">Doe</mods:namePart>
+        <mods:role>
+            <mods:roleTerm authority="marcrelator" type="text">Creator</mods:roleTerm>
+        </mods:role>
+    </mods:name>
+    <mods:subject>
+        <mods:topic>coastal resilience</mods:topic>
+    </mods:subject>
+    <mods:typeOfResource>mixed material</mods:typeOfResource>
+    <mods:physicalDescription>
+        <mods:form/>
+    </mods:physicalDescription>
+</mods:mods>

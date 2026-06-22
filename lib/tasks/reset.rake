@@ -117,7 +117,9 @@ namespace :reset do
       # homepage Featured Content, and populates Jane's My DRS "Published" space.
       datasets = showcases['Datasets']
       if datasets && jane['personal_root_id'].present?
-        jane_work = AtlasRb::Work.create(jane['personal_root_id'], depositor: jane['nuid'])
+        jane_work = AtlasRb::Work.create(jane['personal_root_id'],
+                                         '/home/cerberus/web/spec/fixtures/files/library-dataset-mods.xml',
+                                         depositor: jane['nuid'])
         AtlasRb::Work.set_thumbnails(jane_work['id'], **ThumbnailCreator.call(base: field_base))
         AtlasRb::Work.metadata(jane_work['id'], { 'permissions' => { 'read' => ['public'] } })
         AtlasRb::Blob.create(jane_work['id'], '/home/cerberus/web/spec/fixtures/files/field.jpg', 'coastal-survey.jpg')
