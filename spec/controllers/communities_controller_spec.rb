@@ -192,9 +192,9 @@ describe CommunitiesController do
     before { sign_in user }
 
     it 'seeds the new community title + description via the structure-safe MODS merge (not plain_title=)' do
-      # Showcase provisioning is asserted separately; skip it here so this test
-      # doesn't mint seven real showcase collections per run.
-      allow_any_instance_of(described_class).to receive(:provision_showcases)
+      # Provisioning is the ShowcaseProvisioner's job (asserted below); stub it
+      # here so this test doesn't mint real showcase collections per run.
+      allow(ShowcaseProvisioner).to receive(:call)
 
       post :create, params: { community: { title: 'BrandNewCommunity', description: 'CommunityAbstract' } }
 
@@ -206,15 +206,14 @@ describe CommunitiesController do
       AtlasRb::Community.tombstone(created_id) if created_id
     end
 
-    it 'provisions one featured showcase collection per genre under the new community' do
+    it 'provisions the new community with genre showcases' do
       allow(AtlasRb::Community).to receive(:create).and_return(AtlasRb::Mash.new('id' => 'newcomm'))
-      allow(AtlasRb::Collection).to receive(:create).and_return(AtlasRb::Mash.new('id' => 'sc'))
       allow_any_instance_of(described_class).to receive(:save_descriptive!) # no MODS writes
+      allow(ShowcaseProvisioner).to receive(:call)
 
       post :create, params: { community: { title: 'X', description: 'Y' } }
 
-      expect(AtlasRb::Collection).to have_received(:create)
-        .with('newcomm', featured: true).exactly(FeaturedContent::GENRES.size).times
+      expect(ShowcaseProvisioner).to have_received(:call).with(community_id: 'newcomm')
       expect(response).to redirect_to(community_path('newcomm'))
     end
   end

@@ -88,6 +88,42 @@ namespace :reset do
         l.root_collection = photo_archive['id']
         l.kind            = :xml
       end
+
+      # Curated-content demo (the People/showcase conduit): a Library community
+      # under the root, provisioned with its genre showcases, plus a curated
+      # Person (Jane Doe) affiliated to it with one work she's published into the
+      # Datasets showcase. Gives the deposit fork (publish branch), My DRS,
+      # Featured Content, and the Faculty & Staff browse live data to demo.
+      library = AtlasRb::Community.create(community['id'], '/home/cerberus/web/spec/fixtures/files/library-mods.xml')
+      AtlasRb::Community.set_thumbnails(library['id'], **ThumbnailCreator.call(base: river_base))
+      AtlasRb::Community.metadata(library['id'], { 'permissions' => { 'read' => ['public'] } })
+      showcases = ShowcaseProvisioner.call(community_id: library['id'])
+
+      # Jane Doe — a curated Person for the staff fixture user (NUID 000000002,
+      # seeded by Atlas as "Doe, Jane"). 000000002 is the right subject: it's a
+      # seeded, loginable user at the staff/depositor tier (privileged, non-admin),
+      # so a demoer can exercise the publish fork as a regular depositor.
+      # Person.create mints her personal-root Collection (personal_root_id), the
+      # structural home for works she publishes; the affiliation makes the Library
+      # her publish target.
+      jane = AtlasRb::Person.create(nuid: '000000002', display_name: 'Jane Doe',
+                                    title: 'Professor of Marine and Environmental Sciences',
+                                    bio: 'Researches coastal resilience and marine ecosystems.')
+      AtlasRb::Person.add_affiliation(jane['id'], library['id'])
+
+      # One published work: homed in Jane's personal root, surfaced into the
+      # Datasets showcase via the linked-member edge (the conduit). This flips
+      # that showcase from hidden-empty to visible in the Library browse and the
+      # homepage Featured Content, and populates Jane's My DRS "Published" space.
+      datasets = showcases['Datasets']
+      if datasets && jane['personal_root_id'].present?
+        jane_work = AtlasRb::Work.create(jane['personal_root_id'], depositor: jane['nuid'])
+        AtlasRb::Work.set_thumbnails(jane_work['id'], **ThumbnailCreator.call(base: field_base))
+        AtlasRb::Work.metadata(jane_work['id'], { 'permissions' => { 'read' => ['public'] } })
+        AtlasRb::Blob.create(jane_work['id'], '/home/cerberus/web/spec/fixtures/files/field.jpg', 'coastal-survey.jpg')
+        AtlasRb::Work.complete(jane_work['id'])
+        AtlasRb::Work.add_linked_member(jane_work['id'], datasets['id'])
+      end
     end
   end
 

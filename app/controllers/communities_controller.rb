@@ -46,7 +46,7 @@ class CommunitiesController < CatalogController
 
     c = AtlasRb::Community.create(params[:parent_id])
     save_descriptive!('Community', c.id, title: permitted['title'], description: permitted['description'])
-    provision_showcases(c.id)
+    ShowcaseProvisioner.call(community_id: c.id)
     redirect_to community_path(c.id)
   end
 
@@ -55,26 +55,6 @@ class CommunitiesController < CatalogController
   end
 
   private
-
-    # Provision the genre "showcase" Collections a community publishes into.
-    # Each is an ordinary Collection flagged `featured` (so it carries the
-    # Featured pill and is a valid target for the deposit fork's publish edge),
-    # titled after the shared scholarly vocabulary. Runs once, right after the
-    # community is created — mirroring CollectionsController#create's single
-    # create + save_descriptive! idiom, looped. A per-showcase failure is logged
-    # and skipped rather than aborting: the community already exists by this
-    # point, and a missing showcase can be re-created later, but a raised error
-    # here would 500 an otherwise-successful create. Empty showcases stay hidden
-    # from the browse until populated (see #hide_empty_showcases).
-    def provision_showcases(community_id)
-      FeaturedContent.genre_labels.each do |label|
-        showcase = AtlasRb::Collection.create(community_id, featured: true)
-        save_descriptive!('Collection', showcase.id, title:       label,
-                                                     description: "Featured #{label.downcase} for this community.")
-      rescue Faraday::Error, JSON::ParserError => e
-        Rails.logger.warn("[showcase provisioning] #{label} under #{community_id} failed: #{e.message}")
-      end
-    end
 
     # v1-faithful: only show Featured Collections that have content. Provisioning
     # seeds every community with the full genre showcase set, so without this the
