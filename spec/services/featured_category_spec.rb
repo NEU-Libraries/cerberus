@@ -42,6 +42,6 @@ RSpec.describe FeaturedCategory do
 
     result = described_class.call(scope: scope, label: 'Datasets')
 
-    expect(result.documents.map { |d| d['id'] }).to eq(['w1'])
+    expect(result.documents.pluck('id')).to eq(['w1'])
   end
 end

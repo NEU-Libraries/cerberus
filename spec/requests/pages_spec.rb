@@ -15,12 +15,11 @@ RSpec.describe 'Pages', type: :request do
       expect(response.body).to include('featured-gateway')
     end
 
-    it 'links each scholarly category into its genre landing' do
-      # Canned, v1-faithful wayfinding: a genre gateway opens the genre landing
-      # (a heading-welled browse) with genre_ssim as a constraint.
-      expect(response.body).to include(CGI.escapeHTML(
-                                         genre_path(f: { genre_ssim: ['Research Publications'] })
-                                       ))
+    it 'links each scholarly category into its Featured-Content landing' do
+      # Canned, v1-faithful wayfinding: a genre gateway opens the category's
+      # Featured-Content landing (works curated into its showcases), via the
+      # `category` param — not the raw genre_ssim facet.
+      expect(response.body).to include(CGI.escapeHTML(genre_path(category: 'Research Publications')))
     end
 
     it 'offers a Faculty & Staff gateway into the People directory' do

@@ -14,7 +14,7 @@ RSpec.describe 'Genres', type: :request do
       get genre_path(category: 'Datasets')
 
       expect(response).to have_http_status(:ok)
-      expect(response.body).to include('Datasets')                 # heading well title
+      expect(response.body).to include('Datasets') # heading well title
       expect(response.body).to include('Featured content in Datasets.')
     end
 
