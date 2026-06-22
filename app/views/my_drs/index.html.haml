@@ -22,12 +22,17 @@
   -# strip, gray border, subtle shadow.
   .col-lg-6
     .bg-white.border.rounded-3.h-100.overflow-hidden.shadow-sm
-      .p-3.bg-body-secondary.border-bottom
-        %h5.mb-1
-          %i.fa-solid.fa-box-archive.me-2{ 'aria-hidden' => 'true' }
-          My workspace
-        %p.small.text-muted.mb-0
-          Personal collections — discoverable by their own visibility, never promoted.
+      .p-3.bg-body-secondary.border-bottom.d-flex.align-items-start
+        .flex-grow-1
+          %h5.mb-1
+            %i.fa-solid.fa-box-archive.me-2{ 'aria-hidden' => 'true' }
+            My workspace
+          %p.small.text-muted.mb-0
+            Personal collections — discoverable by their own visibility, never promoted.
+        - if @personal_root_id.present?
+          = link_to new_collection_path(parent_id: @personal_root_id), class: 'btn btn-sm btn-outline-secondary ms-2 flex-shrink-0' do
+            %i.fa-solid.fa-plus.me-1{ 'aria-hidden' => 'true' }
+            New collection
       .p-3
         - if @workspace_collections.present?
           %ul.list-unstyled.mb-0

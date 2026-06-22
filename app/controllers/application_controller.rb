@@ -27,8 +27,10 @@ class ApplicationController < ActionController::Base
   # :exact so an ancestor whose path is a *prefix* of the current URL
   # (/communities/:id vs /communities/:id/people) stays a link instead of being
   # mis-marked as the current crumb.
-  def breadcrumbs(id, editing: false, match: :inclusive)
-    result = AtlasRb::Resource.find(id)
+  # +result+ lets a caller that already fetched the resource (e.g. to branch on
+  # its ancestry) hand it in, avoiding a second AtlasRb::Resource.find.
+  def breadcrumbs(id, editing: false, match: :inclusive, result: nil)
+    result ||= AtlasRb::Resource.find(id)
     item = result.resource
     # ancestor_chain carries each ancestor's title alongside its noid/klass, so
     # the whole trail is built from this single find — no per-ancestor round-trip.

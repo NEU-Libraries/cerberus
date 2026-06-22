@@ -18,6 +18,9 @@ class MyDrsController < CatalogController
 
     @workspace_collections = workspace_collections
     @published = published_by_category
+    # Drives the "New collection" affordance — present only for a depositor with
+    # a personal root to create the collection under.
+    @personal_root_id = deposit_person&.[]('personal_root_id').presence
   end
 
   private

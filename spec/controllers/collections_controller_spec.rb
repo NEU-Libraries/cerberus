@@ -172,4 +172,36 @@ describe CollectionsController do
       AtlasRb::Collection.tombstone(created_id) if created_id
     end
   end
+
+  # The personal-workspace trail is isolated on the private seam (the show stack
+  # makes many Atlas calls; here we stub the resolve + find and assert the crumbs).
+  describe '#collection_breadcrumbs (private)' do
+    def stub_collection(parent_noid:)
+      item = OpenStruct.new(id: 'cnoid', title: 'Working Files',
+                            ancestor_chain: [{ 'noid' => 'people', 'klass' => 'Community', 'title' => 'People' },
+                                             { 'noid' => parent_noid, 'klass' => 'Collection', 'title' => 'Personal Root' }])
+      allow(AtlasRb::Resource).to receive(:find).with('cnoid').and_return(OpenStruct.new(resource: item, klass: 'Collection'))
+    end
+
+    it 'trails "My DRS" for a collection under the viewer\'s own personal root' do
+      stub_collection(parent_noid: 'janeroot')
+      allow(controller).to receive(:deposit_person).and_return(AtlasRb::Mash.new('personal_root_id' => 'janeroot'))
+
+      expect(controller).to receive(:breadcrumb).with('My DRS', my_drs_path)
+      expect(controller).to receive(:add_breadcrumb_for).with('cnoid', 'Collection', 'Working Files')
+      expect(controller).not_to receive(:breadcrumbs)
+
+      controller.send(:collection_breadcrumbs, 'cnoid')
+    end
+
+    it 'falls back to the structural trail for a collection outside the viewer root' do
+      stub_collection(parent_noid: 'someones-root')
+      allow(controller).to receive(:deposit_person).and_return(AtlasRb::Mash.new('personal_root_id' => 'janeroot'))
+
+      expect(controller).to receive(:breadcrumbs).with('cnoid', result: anything)
+      expect(controller).not_to receive(:breadcrumb).with('My DRS', anything)
+
+      controller.send(:collection_breadcrumbs, 'cnoid')
+    end
+  end
 end
