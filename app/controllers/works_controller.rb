@@ -3,6 +3,7 @@
 class WorksController < ApplicationController
   include Thumbable
   include Transformable
+  include DepositorContext
   # The weighted deposit fork's context queries (the depositor's own workspace
   # Collections, a community's publish showcases via ShowcaseFinder) run through
   # the Blacklight SearchBuilder, so this controller needs the catalog config —
@@ -221,34 +222,6 @@ class WorksController < ApplicationController
       return nil if showcase_id.blank?
 
       { root_id: root_id, showcase_id: showcase_id }
-    end
-
-    # The depositor's curated Person (authoritative display name + affiliations +
-    # personal root), resolved from their NUID. nil for anyone without a Person
-    # (most depositors) — which simply means no publish branch. Resolution
-    # failures degrade to nil rather than blocking a workspace deposit.
-    def deposit_person
-      return nil unless current_user&.nuid
-
-      AtlasRb::Person.resolve([current_user.nuid]).first
-    rescue Faraday::Error, JSON::ParserError
-      nil
-    end
-
-    # The depositor's own Collections — the workspace branch's destinations.
-    # Deliberately UNGATED: a depositor must see every collection they own,
-    # public or private, to deposit into it (gated discovery would hide their
-    # own private collections). Featured showcases are excluded — those are
-    # publish targets, reached via the publish branch, not workspace homes.
-    def workspace_collections
-      return [] unless current_user&.nuid
-
-      Blacklight.default_index.search(
-        q: '*:*', rows: 100, sort: 'system_create_dtsi desc',
-        fq: ['internal_resource_tesim:Collection',
-             %(depositor_ssi:"#{current_user.nuid.to_s.gsub(/["\\]/, '')}"),
-             '-featured_bsi:true', '-tombstoned_bsi:true']
-      ).documents
     end
 
     # Publish destinations for the deposit fork, keyed by community NOID:

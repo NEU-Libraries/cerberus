@@ -62,6 +62,11 @@ Rails.application.routes.draw do
   # gated Blacklight browse in a heading well, matching the People landing.
   get 'genres', to: 'genres#show', as: :genre
 
+  # My DRS — the depositor's two-space home (workspace vs published). The deposit
+  # fork's destinations, read back: their own collections on one side, their
+  # community-published works on the other.
+  get 'my_drs', to: 'my_drs#index', as: :my_drs
+
   # The bare index is the "My Loaders" interstitial (user-menu entry);
   # everything else on a loader happens through its nested loads.
   resources :loaders, only: [:index], param: :slug do

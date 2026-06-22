@@ -32,6 +32,15 @@
                 <span class="visually-hidden">Toggle user menu</span>
               </button>
               <ul class="dropdown-menu dropdown-menu-end">
+                <%# My DRS — the depositor's two-space home; same human-role
+                    floor as Sets (guests/anonymous have no personal space). %>
+                <% if current_user.messageable? %>
+                  <li>
+                    <%= link_to my_drs_path, class: 'dropdown-item' do %>
+                      <i class="fa-solid fa-folder-tree me-2" aria-hidden="true"></i>My DRS
+                    <% end %>
+                  </li>
+                <% end %>
                 <% if current_user.curates_sets? %>
                   <li>
                     <%= link_to sets_path, class: 'dropdown-item' do %>

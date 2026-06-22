@@ -1,0 +1,61 @@
+- content_for(:page_title) { 'My DRS' }
+
+-# Heading well rides :container_header so it spans the full main width above the
+-# two-space row, matching the community / collection / People show pages.
+- content_for(:container_header) do
+  .container.p-4.my-3.well.rounded-3
+    .d-flex.align-items-start
+      .flex-grow-1
+        %h3.mb-1
+          %i.fa-solid.fa-folder-tree.text-primary.me-2{ 'aria-hidden' => 'true' }
+          My DRS
+        %p.text-muted.mb-0
+          Your personal workspace and what you've published to your community.
+      .ms-md-3
+        = link_to new_work_path, class: 'btn btn-primary' do
+          %i.fa-solid.fa-plus.me-1{ 'aria-hidden' => 'true' }
+          Deposit
+
+.row.g-4
+  -# Workspace — the depositor's own collections (v1's "User Created Collections").
+  .col-lg-6
+    .well.rounded-3.h-100.overflow-hidden
+      .p-3.bg-body-secondary.border-bottom
+        %h5.mb-1
+          %i.fa-solid.fa-box-archive.me-2{ 'aria-hidden' => 'true' }
+          My workspace
+        %p.small.text-muted.mb-0
+          Personal collections — discoverable by their own visibility, never promoted.
+      .p-3
+        - if @workspace_collections.present?
+          %ul.list-unstyled.mb-0
+            - @workspace_collections.each do |coll|
+              %li.py-2.border-bottom.d-flex.align-items-center
+                %i.fa-regular.fa-folder-open.text-muted.me-2{ 'aria-hidden' => 'true' }
+                = link_to Array(coll['title_tsim']).first.presence || '(untitled)', collection_path(coll)
+        - else
+          %p.text-muted.mb-0
+            No collections yet. Deposit a file to start your workspace.
+
+  -# Published — works promoted into community genre showcases, grouped by category.
+  .col-lg-6
+    .well.rounded-3.h-100.overflow-hidden
+      .p-3.bg-success-subtle.border-bottom.border-success-subtle
+        %h5.mb-1.text-success-emphasis
+          %i.fa-solid.fa-graduation-cap.me-2{ 'aria-hidden' => 'true' }
+          Published to my community
+        %p.small.mb-0.text-success-emphasis
+          Promoted into your community's featured showcases, grouped by category.
+      .p-3
+        - if @published.present?
+          - @published.each do |label, works|
+            %section.mb-3
+              %h6.text-uppercase.small.text-muted.mb-2= label
+              %ul.list-unstyled.mb-0
+                - works.each do |work|
+                  %li.py-2.border-bottom.d-flex.align-items-center
+                    %i.fa-regular.fa-file.text-muted.me-2{ 'aria-hidden' => 'true' }
+                    = link_to Array(work['title_tsim']).first.presence || '(untitled)', work_path(work)
+        - else
+          %p.text-muted.mb-0
+            Nothing published yet. Choose “Publish to my community” when you deposit a file.
