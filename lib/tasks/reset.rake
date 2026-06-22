@@ -111,6 +111,15 @@ namespace :reset do
                                     bio: 'Researches coastal resilience and marine ecosystems.')
       AtlasRb::Person.add_affiliation(jane['id'], library['id'])
 
+      # A personal workspace collection under Jane's root — what My DRS "My
+      # workspace" lists (the workspace is scoped to the personal-root subtree,
+      # so institutional collections a person created don't bleed in).
+      if jane['personal_root_id'].present?
+        working_files = AtlasRb::Collection.create(jane['personal_root_id'],
+                                                   '/home/cerberus/web/spec/fixtures/files/jane-working-files-mods.xml')
+        AtlasRb::Collection.metadata(working_files['id'], { 'permissions' => { 'read' => ['public'] } })
+      end
+
       # One published work: homed in Jane's personal root, surfaced into the
       # Datasets showcase via the linked-member edge (the conduit). This flips
       # that showcase from hidden-empty to visible in the Library browse and the
