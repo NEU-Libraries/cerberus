@@ -2,9 +2,9 @@
 - content_for(:page_title) do
   = title
 -# Heading well rides :container_header so it spans the full main width above the
--# sidebar/results row, matching the People landing. The gem's search_results
--# partial appends the constraint chip ("Genre › …") to :container_header just
--# below this well, so the active category reads as an applied filter.
+-# sidebar/results row, matching the People landing. The category is named here;
+-# the page shows the works curated into that category's showcases (see
+-# FeaturedCategory), not a genre-facet browse.
 - content_for(:container_header) do
   .container.p-4.my-3.well.rounded-3
     %h3.mb-1
