@@ -518,4 +518,46 @@ describe WorksController do
       expect(CGI.unescapeHTML(response.body)).to include('the work you requested was not found')
     end
   end
+
+  # The personal-root trail is isolated on the private seam (the show stack makes
+  # many Atlas calls; here we stub the two reads work_breadcrumbs makes and assert
+  # which crumbs it builds).
+  describe '#work_breadcrumbs (private)' do
+    def work_result(parent_noid:, chain:)
+      item = OpenStruct.new(id: 'wnoid', title: 'Coastal Survey', ancestor_chain: chain)
+      allow(AtlasRb::Resource).to receive(:find).with('wnoid').and_return(OpenStruct.new(resource: item, klass: 'Work'))
+      controller.instance_variable_set(:@work, AtlasRb::Mash.new('depositor' => '000000007'))
+      parent_noid # documents intent; the chain's last node carries it
+    end
+
+    it 'trails community / Person / work for a work homed in the depositor Person root' do
+      work_result(parent_noid: 'jane-root',
+                  chain:       [{ 'noid' => 'people', 'klass' => 'Community', 'title' => 'People' },
+                                { 'noid' => 'jane-root', 'klass' => 'Collection', 'title' => 'Personal Root' }])
+      person = AtlasRb::Mash.new('id' => 'janenoid', 'display_name' => 'Jane Doe',
+                                 'personal_root_id' => 'jane-root', 'affiliated_community_ids' => ['libnoid'])
+      allow(AtlasRb::Person).to receive(:resolve).with(['000000007']).and_return([person])
+
+      expect(controller).to receive(:breadcrumbs).with('libnoid', match: :exact)
+      expect(controller).to receive(:breadcrumb).with('Jane Doe', person_path('janenoid'))
+      expect(controller).to receive(:add_breadcrumb_for).with('wnoid', 'Work', 'Coastal Survey')
+
+      controller.send(:work_breadcrumbs, 'wnoid')
+    end
+
+    it 'keeps the plain structural trail for a workspace work (not in a personal root)' do
+      work_result(parent_noid: 'col',
+                  chain:       [{ 'noid' => 'col', 'klass' => 'Collection', 'title' => 'My Collection' }])
+      # Depositor has a Person, but its root is not this work's parent.
+      person = AtlasRb::Mash.new('id' => 'janenoid', 'personal_root_id' => 'jane-root',
+                                 'affiliated_community_ids' => ['libnoid'])
+      allow(AtlasRb::Person).to receive(:resolve).and_return([person])
+
+      expect(controller).not_to receive(:breadcrumbs)
+      expect(controller).to receive(:add_breadcrumb_for).with('col', 'Collection', 'My Collection')
+      expect(controller).to receive(:add_breadcrumb_for).with('wnoid', 'Work', 'Coastal Survey')
+
+      controller.send(:work_breadcrumbs, 'wnoid')
+    end
+  end
 end

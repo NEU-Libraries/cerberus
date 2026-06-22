@@ -5,6 +5,7 @@ class WorksController < ApplicationController
   include Transformable
   include DepositorContext
   include WorkDeposit
+  include WorkBreadcrumbs
   # The weighted deposit fork's context queries (the depositor's own workspace
   # Collections, a community's publish showcases via ShowcaseFinder) run through
   # the Blacklight SearchBuilder, so this controller needs the catalog config —
@@ -180,7 +181,7 @@ class WorksController < ApplicationController
                                 .count { |page| page['position'].present? } >= 2
       @can_tombstone = current_ability.can?(:tombstone,
                                             solr_doc_from_permissions(@permissions, klass: 'Work'))
-      breadcrumbs(params[:id])
+      work_breadcrumbs(params[:id])
     end
 
     # Per-type enrichment routing (thumbnails, PDF renditions) lives in
