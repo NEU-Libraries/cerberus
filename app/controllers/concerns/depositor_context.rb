@@ -23,18 +23,22 @@ module DepositorContext
       @deposit_person = nil
     end
 
-    # The depositor's own Collections — the workspace. Deliberately UNGATED: a
-    # depositor must see every collection they own, public or private, to work
-    # with it (gated discovery would hide their own private collections).
-    # Featured showcases are excluded — those are publish targets, not workspace
-    # homes.
+    # The depositor's workspace Collections — those under their Person personal
+    # root, NOT every collection they happen to have deposited into. Scoping to
+    # the root subtree (ancestor_ids_ssim, bare noids) keeps institutional
+    # containers a staff member created out of their personal workspace — without
+    # this, an admin who seeds the whole tree "owns" all of it. nil root (no
+    # curated Person) ⇒ no personal workspace. Featured showcases are excluded;
+    # ungated (own private collections must stay visible). The root subtree is
+    # inherently the person's own, so depositor scoping is unnecessary here.
     def workspace_collections(rows: 200)
-      return [] unless current_user&.nuid
+      root = deposit_person&.[]('personal_root_id').presence
+      return [] unless root
 
       Blacklight.default_index.search(
         q: '*:*', rows: rows, sort: 'system_create_dtsi desc',
         fq: ['internal_resource_tesim:Collection',
-             %(depositor_ssi:"#{depositor_phrase}"),
+             %(ancestor_ids_ssim:"#{root.to_s.gsub(/["\\]/, '')}"),
              '-featured_bsi:true', '-tombstoned_bsi:true']
       ).documents
     end

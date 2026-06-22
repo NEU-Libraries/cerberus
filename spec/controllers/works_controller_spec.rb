@@ -561,4 +561,25 @@ describe WorksController do
       controller.send(:work_breadcrumbs, 'wnoid')
     end
   end
+
+  describe '#workspace_collections (private)' do
+    it "scopes to the depositor Person's personal-root subtree, not all owned collections" do
+      allow(controller).to receive(:deposit_person).and_return(AtlasRb::Mash.new('personal_root_id' => 'janeroot'))
+      response = instance_double(Blacklight::Solr::Response, documents: [SolrDocument.new('id' => 'c1')])
+      index = instance_double(Blacklight::Solr::Repository)
+      allow(Blacklight).to receive(:default_index).and_return(index)
+      expect(index).to receive(:search)
+        .with(hash_including(fq: array_including('ancestor_ids_ssim:"janeroot"',
+                                                 'internal_resource_tesim:Collection',
+                                                 '-featured_bsi:true')))
+        .and_return(response)
+
+      expect(controller.send(:workspace_collections).pluck('id')).to eq(['c1'])
+    end
+
+    it 'returns [] when the depositor has no personal root' do
+      allow(controller).to receive(:deposit_person).and_return(nil)
+      expect(controller.send(:workspace_collections)).to eq([])
+    end
+  end
 end
