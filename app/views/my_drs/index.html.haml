@@ -18,8 +18,10 @@
 
 .row.g-4
   -# Workspace — the depositor's own collections (v1's "User Created Collections").
+  -# Card-shell matches the audit-history register: white body, neutral header
+  -# strip, gray border, subtle shadow.
   .col-lg-6
-    .well.rounded-3.h-100.overflow-hidden
+    .bg-white.border.rounded-3.h-100.overflow-hidden.shadow-sm
       .p-3.bg-body-secondary.border-bottom
         %h5.mb-1
           %i.fa-solid.fa-box-archive.me-2{ 'aria-hidden' => 'true' }
@@ -38,8 +40,10 @@
             No collections yet. Deposit a file to start your workspace.
 
   -# Published — works promoted into community genre showcases, grouped by category.
+  -# Same white card-shell; the teal header strip is the one accent carrying the
+  -# curation-tier signal (workspace vs published).
   .col-lg-6
-    .well.rounded-3.h-100.overflow-hidden
+    .bg-white.border.rounded-3.h-100.overflow-hidden.shadow-sm
       .p-3.bg-success-subtle.border-bottom.border-success-subtle
         %h5.mb-1.text-success-emphasis
           %i.fa-solid.fa-graduation-cap.me-2{ 'aria-hidden' => 'true' }
