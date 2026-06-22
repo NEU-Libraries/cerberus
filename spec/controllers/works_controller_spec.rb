@@ -539,6 +539,7 @@ describe WorksController do
       allow(AtlasRb::Person).to receive(:resolve).with(['000000007']).and_return([person])
 
       expect(controller).to receive(:breadcrumbs).with('libnoid', match: :exact)
+      expect(controller).to receive(:breadcrumb).with('Faculty & Staff', community_people_path('libnoid'))
       expect(controller).to receive(:breadcrumb).with('Jane Doe', person_path('janenoid'))
       expect(controller).to receive(:add_breadcrumb_for).with('wnoid', 'Work', 'Coastal Survey')
 

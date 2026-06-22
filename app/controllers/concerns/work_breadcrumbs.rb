@@ -45,11 +45,15 @@ module WorkBreadcrumbs
       nil
     end
 
-    # NEU / … / <affiliated community> / <Person → /people/:noid> / <work>.
+    # NEU / … / <affiliated community> / Faculty & Staff / <Person → /people/:noid>
+    # / <work>. The community→Person hops mirror PeopleController's profile trail
+    # exactly (so a work extends its depositor's profile breadcrumb), then add the
+    # work tail.
     def build_personal_work_breadcrumbs(item, klass, person)
       community_noid = Array(person['affiliated_community_ids']).first.presence
       if community_noid
         breadcrumbs(community_noid, match: :exact)
+        breadcrumb('Faculty & Staff', community_people_path(community_noid))
       else
         breadcrumb('People', people_path)
       end
