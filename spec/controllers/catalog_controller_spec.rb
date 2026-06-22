@@ -21,12 +21,13 @@ describe CatalogController do
       expect(response.body).to include('class="thumb-type-pill">Community')
     end
 
-    it 'badges a featured showcase Collection with a "Featured" pill' do
+    it 'labels a featured showcase Collection "Featured" in the standard pill (no special styling)' do
       collection = AtlasRb::Collection.create(community.id, '/home/cerberus/web/spec/fixtures/files/collection-mods.xml',
                                               featured: true, nuid: '000000004')
       AtlasRb::Collection.metadata(collection.id, { 'permissions' => { 'read' => ['public'] } }, nuid: '000000004')
       get :index
-      expect(response.body).to include('class="thumb-type-pill thumb-type-pill--featured">Featured')
+      expect(response.body).to include('class="thumb-type-pill">Featured')
+      expect(response.body).not_to include('thumb-type-pill--featured')
     end
   end
 

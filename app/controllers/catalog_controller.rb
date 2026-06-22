@@ -329,8 +329,9 @@ class CatalogController < ApplicationController
   def iiif_thumbnail(document, *_args)
     featured = document.respond_to?(:featured?) && document.featured?
     label    = featured ? 'Featured' : document.klass_type
-    classes  = featured ? 'thumb-type-pill thumb-type-pill--featured' : 'thumb-type-pill'
-    pill     = view_context.content_tag(:span, label, class: classes)
+    # A showcase's pill reads "Featured" but uses the same restrained, translucent
+    # type-pill styling as every other tile — not a loud branded chip.
+    pill     = view_context.content_tag(:span, label, class: 'thumb-type-pill')
     view_context.safe_join([thumbnail_media(document), pill])
   end
 

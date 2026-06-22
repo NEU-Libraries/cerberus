@@ -66,15 +66,6 @@
   pointer-events: none;
 }
 
-// A genre-showcase ("Featured") Collection reads as curated rather than an
-// ordinary child container: the neutral gray pill gives way to the brand navy
-// ($primary), so the showcase is legible at a glance in a community browse.
-// Solid (not semi-transparent) — a deliberate promotion marker, not chrome.
-.thumb-type-pill--featured {
-  background-color: $primary;
-  color: $white;
-}
-
 .document-thumbnail img {
   position: absolute;
   margin: auto;
