@@ -165,12 +165,83 @@ describe WorksController do
         expect(AtlasRb::Work).to have_received(:create).with(collection.id, depositor: '000000002')
       end
     end
+
+    context 'weighted deposit fork' do
+      it 'workspace branch deposits into the picked collection' do
+        allow(AtlasRb::Work).to receive(:create).and_call_original
+
+        post :create, params: { binary: fixture_file_upload('image.png', 'image/png'),
+                                deposit_to: 'workspace', workspace_collection_id: collection.id }
+
+        expect(AtlasRb::Work).to have_received(:create).with(collection.id, depositor: user.nuid)
+      ensure
+        AtlasRb::Work.tombstone(assigns(:work).id) if assigns(:work)
+      end
+
+      it 'publish branch homes the work in the personal root and links it into the showcase' do
+        person = AtlasRb::Mash.new('nuid' => user.nuid, 'personal_root_id' => collection.id,
+                                   'affiliated_community_ids' => ['comm1'])
+        allow(AtlasRb::Person).to receive(:resolve).and_return([person])
+        allow(ShowcaseFinder).to receive(:call).and_return('showcasenoid')
+        allow(AtlasRb::Work).to receive(:add_linked_member)
+        allow(AtlasRb::Work).to receive(:create).and_call_original
+
+        post :create, params: { binary: fixture_file_upload('image.png', 'image/png'),
+                                deposit_to: 'publish', publish_community_id: 'comm1',
+                                publish_genre: 'Datasets' }
+
+        expect(AtlasRb::Work).to have_received(:create).with(collection.id, depositor: user.nuid)
+        expect(AtlasRb::Work).to have_received(:add_linked_member).with(assigns(:work).id, 'showcasenoid')
+        expect(response).to redirect_to(metadata_work_path(assigns(:work).id))
+      ensure
+        AtlasRb::Work.tombstone(assigns(:work).id) if assigns(:work)
+      end
+
+      it 'publish branch degrades to the form when no personal root is available (Atlas gap)' do
+        allow(AtlasRb::Person).to receive(:resolve).and_return([]) # no Person → no root
+        allow(AtlasRb::Work).to receive(:create).and_call_original
+
+        post :create, params: { binary: fixture_file_upload('image.png', 'image/png'),
+                                deposit_to: 'publish', publish_community_id: 'comm1',
+                                publish_genre: 'Datasets' }
+
+        expect(AtlasRb::Work).not_to have_received(:create)
+        expect(response).to redirect_to(new_work_path)
+        expect(flash[:alert]).to be_present
+      end
+    end
   end
 
   describe 'new' do
     it 'presents the interface to upload a file' do
       get :new
       expect(response).to render_template('works/new')
+    end
+
+    context 'with publish targets' do
+      render_views
+
+      let(:user) { User.new(email: 'dep@example.com', nuid: '000000004', role: 'standard', groups: []) }
+
+      before { sign_in user }
+
+      it 'renders the publish card with the community picker and its showcase genres' do
+        person = AtlasRb::Mash.new('nuid' => '000000004', 'personal_root_id' => 'root1',
+                                   'affiliated_community_ids' => %w[comm1 comm2])
+        allow(AtlasRb::Person).to receive(:resolve).and_return([person])
+        allow(ShowcaseFinder).to receive(:call).and_return('Datasets' => 'dsnoid')
+        allow(AtlasRb::Community).to receive(:find).with('comm1')
+                                                   .and_return(AtlasRb::Mash.new('title' => 'My Community'))
+        allow(AtlasRb::Community).to receive(:find).with('comm2')
+                                                   .and_return(AtlasRb::Mash.new('title' => 'Other Community'))
+
+        get :new
+
+        expect(response.body).to include('Publish to my community')
+        expect(response.body).to include('My Community') # community picker (size > 1)
+        expect(response.body).to include('Other Community')
+        expect(response.body).to include('Datasets') # showcase genre option
+      end
     end
   end
 

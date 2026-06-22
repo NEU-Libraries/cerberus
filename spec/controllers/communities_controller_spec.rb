@@ -192,6 +192,10 @@ describe CommunitiesController do
     before { sign_in user }
 
     it 'seeds the new community title + description via the structure-safe MODS merge (not plain_title=)' do
+      # Showcase provisioning is asserted separately; skip it here so this test
+      # doesn't mint seven real showcase collections per run.
+      allow_any_instance_of(described_class).to receive(:provision_showcases)
+
       post :create, params: { community: { title: 'BrandNewCommunity', description: 'CommunityAbstract' } }
 
       created_id = response.location.split('/').last
@@ -200,6 +204,70 @@ describe CommunitiesController do
       expect(created.description).to include('CommunityAbstract')
     ensure
       AtlasRb::Community.tombstone(created_id) if created_id
+    end
+
+    it 'provisions one featured showcase collection per genre under the new community' do
+      allow(AtlasRb::Community).to receive(:create).and_return(AtlasRb::Mash.new('id' => 'newcomm'))
+      allow(AtlasRb::Collection).to receive(:create).and_return(AtlasRb::Mash.new('id' => 'sc'))
+      allow_any_instance_of(described_class).to receive(:save_descriptive!) # no MODS writes
+
+      post :create, params: { community: { title: 'X', description: 'Y' } }
+
+      expect(AtlasRb::Collection).to have_received(:create)
+        .with('newcomm', featured: true).exactly(FeaturedContent::GENRES.size).times
+      expect(response).to redirect_to(community_path('newcomm'))
+    end
+  end
+
+  # The v1-faithful hide-if-empty gate, unit-tested on the private seam (the full
+  # show stack is exercised elsewhere; here we isolate the filtering + facet read).
+  describe '#hide_empty_showcases (private)' do
+    def doc(id, featured:, title: 'X')
+      SolrDocument.new('id' => id, 'featured_bsi' => featured, 'title_tsim' => [title])
+    end
+
+    it 'drops empty featured showcases, keeping populated ones and ordinary collections' do
+      empty = doc('uuid-empty', featured: true, title: 'Datasets')
+      full  = doc('uuid-full',  featured: true, title: 'Presentations')
+      plain = doc('uuid-plain', featured: false)
+      documents = [empty, full, plain]
+      response_double = instance_double(Blacklight::Solr::Response, documents: documents, total: 3,
+                                                                    response: { 'numFound' => 3 })
+      controller.instance_variable_set(:@response, response_double)
+      allow(controller).to receive(:populated_showcase_ids).and_return(Set['uuid-full'])
+
+      controller.send(:hide_empty_showcases)
+
+      expect(documents).to contain_exactly(full, plain)
+    end
+
+    it 'is a no-op when the browse has no featured showcases' do
+      plain = doc('uuid-plain', featured: false)
+      response_double = instance_double(Blacklight::Solr::Response, documents: [plain])
+      controller.instance_variable_set(:@response, response_double)
+
+      expect { controller.send(:hide_empty_showcases) }.not_to raise_error
+    end
+  end
+
+  describe '#populated_showcase_ids (private)' do
+    it 'returns the showcase uuids whose member facet count is positive' do
+      facet = { MembershipQuery::STRUCTURAL_FIELD => [],
+                MembershipQuery::LINKED_FIELD     => ['id-uuid-full', 3, 'id-uuid-empty', 0] }
+      search_response = instance_double(Blacklight::Solr::Response)
+      allow(search_response).to receive(:dig).with('facet_counts', 'facet_fields').and_return(facet)
+      index = instance_double(Blacklight::Solr::Repository, search: search_response)
+      allow(Blacklight).to receive(:default_index).and_return(index)
+
+      builder = double('builder')
+      allow(builder).to receive(:with).and_return(builder)
+      allow(builder).to receive(:with_filters).and_return(builder)
+      allow(builder).to receive(:merge).and_return(builder)
+      allow(controller).to receive(:search_service).and_return(double(search_builder: builder))
+
+      result = controller.send(:populated_showcase_ids, %w[uuid-full uuid-empty])
+
+      expect(result).to eq(Set['uuid-full'])
     end
   end
 end

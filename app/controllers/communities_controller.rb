@@ -8,6 +8,10 @@ class CommunitiesController < CatalogController
   before_action :authorize_edit!, only: [:edit]
   before_action :authorize_tombstone!, only: [:tombstone]
 
+  # Solr membership fields faceted to decide whether a showcase has content
+  # (structural children + linked-member edges). See #populated_showcase_ids.
+  MEMBERSHIP_FIELDS = [MembershipQuery::STRUCTURAL_FIELD, MembershipQuery::LINKED_FIELD].freeze
+
   def show
     @community = AtlasRb::Community.find(params[:id])
     return render_gone(@community) if @community.tombstoned
@@ -63,11 +67,10 @@ class CommunitiesController < CatalogController
     # here would 500 an otherwise-successful create. Empty showcases stay hidden
     # from the browse until populated (see #hide_empty_showcases).
     def provision_showcases(community_id)
-      FeaturedContent::GENRES.each do |label, _icon|
+      FeaturedContent.genre_labels.each do |label|
         showcase = AtlasRb::Collection.create(community_id, featured: true)
-        save_descriptive!('Collection', showcase.id,
-                          title: label,
-                          description: "Featured #{label.downcase} for this community.")
+        save_descriptive!('Collection', showcase.id, title:       label,
+                                                     description: "Featured #{label.downcase} for this community.")
       rescue Faraday::Error, JSON::ParserError => e
         Rails.logger.warn("[showcase provisioning] #{label} under #{community_id} failed: #{e.message}")
       end
@@ -82,15 +85,24 @@ class CommunitiesController < CatalogController
     # this gate is scoped to `featured?` showcases, pairing with the Faculty &
     # Staff node so both curated affordances appear only when populated.
     def hide_empty_showcases
-      showcases = @response.documents.select { |doc| doc.respond_to?(:featured?) && doc.featured? }
+      showcases = @response.documents.select { |doc| showcase?(doc) }
       return if showcases.empty?
 
       populated = populated_showcase_ids(showcases.map(&:id))
       empties   = showcases.reject { |doc| populated.include?(doc.id) }
-      return if empties.empty?
+      drop_documents(empties) if empties.any?
+    end
 
-      @response.documents.delete_if { |doc| empties.include?(doc) }
-      @response.response['numFound'] = [@response.total - empties.size, 0].max
+    def showcase?(doc)
+      doc.respond_to?(:featured?) && doc.featured?
+    end
+
+    # Remove +docs+ from the rendered response and keep "Displaying N" honest by
+    # discounting them from numFound (a synthetic count adjustment, since the
+    # docs are real Solr hits we're choosing to suppress).
+    def drop_documents(docs)
+      @response.documents.delete_if { |doc| docs.include?(doc) }
+      @response.response['numFound'] = [@response.total - docs.size, 0].max
     end
 
     # The subset of +showcase_uuids+ (Solr uniqueKeys) that have >=1 member,
@@ -101,18 +113,23 @@ class CommunitiesController < CatalogController
     def populated_showcase_ids(showcase_uuids)
       return Set.new if showcase_uuids.empty?
 
-      fields  = [MembershipQuery::STRUCTURAL_FIELD, MembershipQuery::LINKED_FIELD]
+      counts = showcase_member_counts(showcase_uuids)
+      MEMBERSHIP_FIELDS.each_with_object(Set.new) do |field, ids|
+        each_positive_facet(counts[field]) { |value| ids << value.delete_prefix('id-') }
+      end
+    end
+
+    def showcase_member_counts(showcase_uuids)
       members = MembershipQuery.members_fq(showcase_uuids, include_linked: true)
       builder = search_service.search_builder.with({}).with_filters(members)
-                              .merge(rows: 0, facet: true, 'facet.mincount': 1, 'facet.field': fields)
-      response = Blacklight.default_index.search(builder)
-      counts   = response.dig('facet_counts', 'facet_fields') || {}
+                              .merge(rows: 0, facet: true, 'facet.mincount': 1, 'facet.field': MEMBERSHIP_FIELDS)
+      Blacklight.default_index.search(builder).dig('facet_counts', 'facet_fields') || {}
+    end
 
-      fields.each_with_object(Set.new) do |field, ids|
-        Array(counts[field]).each_slice(2) do |value, hits|
-          ids << value.to_s.delete_prefix('id-') if hits.to_i.positive?
-        end
-      end
+    # Yield each Solr facet value (an `id-<uuid>` string) with a positive count
+    # from a flat [value, hits, value, hits, ...] facet_fields array.
+    def each_positive_facet(pairs)
+      Array(pairs).each_slice(2) { |value, hits| yield value.to_s if hits.to_i.positive? }
     end
 
     # Surface a synthetic "Faculty & Staff" row as the first entry of a community's
